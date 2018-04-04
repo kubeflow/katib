@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/datastore"
 	"github.com/labstack/echo"
-	"github.com/osrg/dlk/dlkmanager/datastore"
 	lgr "github.com/sirupsen/logrus"
 )
 

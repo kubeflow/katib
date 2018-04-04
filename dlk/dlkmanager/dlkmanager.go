@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/labstack/echo" // Web server framework for REST API
-	"github.com/osrg/dlk/dlkmanager/configs"
+	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/configs"
+	"github.com/labstack/echo"       // Web server framework for REST API
 	lgr "github.com/sirupsen/logrus" // logging framework
 	"github.com/spf13/cobra"
 )

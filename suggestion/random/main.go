@@ -1,8 +1,8 @@
 package main
 
 import (
-	pb "github.com/mlkube/katib/api"
-	"github.com/mlkube/katib/suggestion"
+	pb "github.com/kubeflow/hp-tuning/api"
+	"github.com/kubeflow/hp-tuning/suggestion"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"log"

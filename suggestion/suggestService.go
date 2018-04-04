@@ -2,7 +2,7 @@ package suggestion
 
 import (
 	"context"
-	"github.com/mlkube/katib/api"
+	"github.com/kubeflow/hp-tuning/api"
 	"log"
 	"math/rand"
 	"strconv"

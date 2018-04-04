@@ -20,22 +20,23 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"sort"
 
-	"github.com/osrg/dlk/dlkmanager/datastore"
+	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/datastore"
 
-	"github.com/osrg/dlk/dlkctl/utils"
+	"github.com/kubeflow/hp-tuning/dlk/dlkctl/utils"
 	"github.com/spf13/cobra"
 )
 
 //NewCommandGetLearningTasks generate run cmd
-func NewCommandGetLearningTasks() *cobra.Command {
+func NewCommandGetLearningTask() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "learningtasks",
-		Args:    cobra.NoArgs,
-		Short:   "Display LearningTasks List",
-		Long:    `Display list of learningTasks`,
-		Aliases: []string{"lts"},
-		Run:     getLearningTasks,
+		Use:     "learningtask",
+		Args:    cobra.ExactArgs(1),
+		Short:   "Display LearningTask Info",
+		Long:    `Display Information of a specified learningTask`,
+		Aliases: []string{"lt"},
+		Run:     getLearningTask,
 	}
 
 	//set local flag
@@ -47,17 +48,17 @@ func NewCommandGetLearningTasks() *cobra.Command {
 }
 
 //exec parameter
-type getLearningTasksConfig struct {
+type getLearningTaskConfig struct {
 	params utils.Params
 	pf     *PersistentFlags
 }
 
 //Main Proceduer of get learningTasks command
-func getLearningTasks(cmd *cobra.Command, args []string) {
+func getLearningTask(cmd *cobra.Command, args []string) {
 
 	//parameter check
 	fmt.Println("*** CHECK PARAMS ***")
-	gec := getLearningTasksConfig{}
+	gec := getLearningTaskConfig{}
 	err := gec.checkParams(cmd, args)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -70,20 +71,25 @@ func getLearningTasks(cmd *cobra.Command, args []string) {
 
 	//send Request GET /learningTasks results is stored in array of datastore.LearningTaskInfo
 	fmt.Println("*** send Request ***")
-	rs, err := gec.sendGetRequest()
+	rs, err := gec.sendGetRequest(args[0])
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
+	fmt.Println("completed")
 
 	//show result
 	fmt.Println("*** result ***")
-	displayGetLearningTasksResult(rs)
+	if rs.Name == "" {
+		fmt.Printf("learningTask %s does not exist\n", args[0])
+		return
+	}
+	displayGetLearningTaskResult(rs)
 
 }
 
 //checkParams check and get exec parameter
-func (gec *getLearningTasksConfig) checkParams(cmd *cobra.Command, args []string) error {
+func (gec *getLearningTaskConfig) checkParams(cmd *cobra.Command, args []string) error {
 	var err error
 
 	//check and get persistent flag volume
@@ -108,9 +114,9 @@ func (gec *getLearningTasksConfig) checkParams(cmd *cobra.Command, args []string
 }
 
 //sendGetRequest send get learningTask request and return request results
-func (gec *getLearningTasksConfig) sendGetRequest() ([]datastore.LearningTaskInfo, error) {
+func (gec *getLearningTaskConfig) sendGetRequest(lt string) (*datastore.LearningTaskInfo, error) {
 	//set url
-	url := fmt.Sprintf("http://%s/learningTasks/%s", gec.pf.endpoint, gec.params.Ns)
+	url := fmt.Sprintf("http://%s/learningTask/%s/%s", gec.pf.endpoint, gec.params.Ns, lt)
 
 	//send REST API Request
 	resp, err := http.Get(url)
@@ -121,9 +127,9 @@ func (gec *getLearningTasksConfig) sendGetRequest() ([]datastore.LearningTaskInf
 	defer resp.Body.Close()
 
 	// get and decode response(json)
-	rs := []datastore.LearningTaskInfo{}
+	rs := &datastore.LearningTaskInfo{}
 	body, err := ioutil.ReadAll(resp.Body)
-	err = json.Unmarshal(body, &rs)
+	err = json.Unmarshal(body, rs)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -132,36 +138,39 @@ func (gec *getLearningTasksConfig) sendGetRequest() ([]datastore.LearningTaskInf
 }
 
 //displayParams display Result of the command
-func displayGetLearningTasksResult(rs []datastore.LearningTaskInfo) {
-
-	//print header
-	fmt.Printf("%-40s", "learningTask name")
-	fmt.Printf("%-10s", "namespace")
-	fmt.Printf("%-5s", "gpu")
-	fmt.Printf("%-5s", "NrPS")
-	fmt.Printf("%-10s", "NrWorker")
-	fmt.Printf("%-25s", "created")
-	fmt.Printf("%-10s", "priority")
-	fmt.Printf("%-15s", "status")
-	fmt.Printf("%-20s\n", "ExecTime")
-
+func displayGetLearningTaskResult(rs *datastore.LearningTaskInfo) {
 	//print body
 	format := "2006-01-02 15:04 MST"
-	for _, i := range rs {
-		fmt.Printf("%-40s", i.Name)
-		fmt.Printf("%-10s", i.Ns)
-		fmt.Printf("%-5d", i.Gpu)
-		fmt.Printf("%-5d", i.NrPS)
-		fmt.Printf("%-10d", i.NrWorker)
-		fmt.Printf("%-25s", i.Created.Format(format))
-		fmt.Printf("%-10d", i.Priority)
-		fmt.Printf("%-15s", i.State)
-		fmt.Printf("%-20s\n", i.ExecTime)
+	fmt.Printf("| %-30s : %s\n", "learningTask", rs.Name)
+	fmt.Printf("| %-30s : %s\n", "NameSpace", rs.Ns)
+	fmt.Printf("| %-30s : %d\n", "GPU", rs.Gpu)
+	fmt.Printf("| %-30s : %d\n", "NrPS", rs.NrPS)
+	fmt.Printf("| %-30s : %d\n", "NrWorker", rs.NrWorker)
+	fmt.Printf("| %-30s : %s\n", "Created", rs.Created.Format(format))
+	fmt.Printf("| %-30s : %s\n", "Status", rs.State)
+	fmt.Printf("| %-30s : %s\n", "PsImage", rs.PsImage)
+	fmt.Printf("| %-30s : %s\n", "WorkerImage", rs.WorkerImage)
+	fmt.Printf("| %-30s : %s\n", "Scheduler", rs.Scheduler)
+	fmt.Printf("| %-30s : %d\n", "Timeout", rs.Timeout)
+	fmt.Printf("| %-30s : %s\n", "PVC", rs.Pvc)
+	fmt.Printf("| %-30s : %d\n", "Priority", rs.Priority)
+	fmt.Printf("| %-30s : %s\n", "ExecTime", rs.ExecTime)
+
+	//pod state
+	var keys []string
+	for key := range rs.PodState {
+		keys = append(keys, key)
 	}
+	sort.Strings(keys)
+	fmt.Printf("| %-30s :\n", "PodState")
+	for _, key := range keys {
+		fmt.Printf("|  %-40s: %s\n", key, rs.PodState[key])
+	}
+
 }
 
 //displayParams display parameters used for sending get learningTask request
-func (gec *getLearningTasksConfig) displayParams() {
+func (gec *getLearningTaskConfig) displayParams() {
 	fmt.Printf("| %-30s : %s\n", "Search Namespace", gec.params.Ns)
 	fmt.Printf("| %-30s : %s\n", "dlkmanager endpoint", gec.pf.endpoint)
 

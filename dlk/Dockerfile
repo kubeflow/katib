@@ -43,9 +43,9 @@ go get github.com/labstack/echo && \
 go get github.com/sirupsen/logrus && \
 :
 
-ADD . /root/go-workspace/src/github.com/osrg/dlk
-RUN mkdir /root/go-workspace/src/github.com/osrg/dlk/bin
-WORKDIR /root/go-workspace/src/github.com/osrg/dlk
+ADD dlk /root/go-workspace/src/github.com/kubeflow/hp-tuning/dlk
+RUN mkdir -p /root/go-workspace/src/github.com/kubeflow/hp-tuning/dlk/bin
+WORKDIR /root/go-workspace/src/github.com/kubeflow/hp-tuning/dlk
 RUN go build -o bin/dlkmanager ./dlkmanager
 RUN go build -o bin/dlkctl ./dlkctl
-ENV PATH $PATH:/root/go-workspace/src/github.com/osrg/dlk/bin
+ENV PATH $PATH:/root/go-workspace/src/github.com/kubeflow/hp-tuning/dlk/bin

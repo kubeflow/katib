@@ -19,7 +19,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/osrg/dlk/dlkctl/utils"
+	"github.com/kubeflow/hp-tuning/dlk/dlkctl/utils"
 	"github.com/spf13/cobra"
 )
 

@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/mlkube/katib/api"
+	"github.com/kubeflow/hp-tuning/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"log"

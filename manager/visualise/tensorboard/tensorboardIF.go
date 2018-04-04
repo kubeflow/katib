@@ -3,8 +3,8 @@ package tensorboard
 import (
 	"bytes"
 	"fmt"
-	"github.com/mlkube/katib/api"
-	vdb "github.com/mlkube/katib/db"
+	"github.com/kubeflow/hp-tuning/api"
+	vdb "github.com/kubeflow/hp-tuning/db"
 	"io/ioutil"
 	apiv1 "k8s.io/api/core/v1"
 	exbeatav1 "k8s.io/api/extensions/v1beta1"
