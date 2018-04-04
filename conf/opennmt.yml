@@ -1,0 +1,90 @@
+name: opennmt-en-vi
+owner: root
+optimizationtype: 1
+suggestalgorithm: random
+autostopalgorithm: median
+objectivevaluename: Validation_perplexity
+image: yujioshima/opennmt-py
+suggestionparameters:
+    -
+      name: SuggestionNum
+      value: 10
+    -
+      name: MaxParallel
+      value: 3
+mount:
+    pvc: nfs
+    path: /nfs-mnt
+gpu: 1
+command:
+    - bash
+    - run_iwslt15_en_vi.sh
+    - -gpuid=0
+    - -data=/nfs-mnt/learndatas/iwslt15_en_vi/
+    - -save_model=/nfs-mnt/logs/{{STUDY_ID}}_{{TRIAL_ID}}/en-vi
+metrics:
+    - Train_perplexity
+    - Validation_accuracy
+    - BLEU
+parameterconfigs:
+    configs:
+      -
+        name: -layers
+        parametertype: 2
+        feasible:
+            min: 3
+            max: 7
+      -
+        name: -rnn_size
+        parametertype: 2
+        feasible:
+            min: 512
+            max: 512
+      -
+        name: -word_vec_size
+        parametertype: 2
+        feasible:
+            min: 200
+            max: 600
+      -
+        name: -epochs
+        parametertype: 2
+        feasible:
+            min: 1
+            max: 3
+      -
+        name: -dropout
+        parametertype: 1
+        feasible:
+            min: 0.01
+            max: 0.3
+      -
+        name: -warmup_steps
+        parametertype: 2
+        feasible:
+            min: 5000
+            max: 15000
+      -
+        name: -learning_rate
+        parametertype: 1
+        feasible:
+            min: 0.01
+            max: 0.4
+      -
+        name: -adam_beta2
+        parametertype: 1
+        feasible:
+            min: 0.5
+            max: 0.99
+      -
+        name: -batch_size
+        parametertype: 2
+        feasible:
+            min: 80
+            max: 80
+      -
+        name: -start_decay_at
+        parametertype: 2
+        feasible:
+            min: 5
+            max: 45

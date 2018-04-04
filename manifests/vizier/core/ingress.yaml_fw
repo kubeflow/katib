@@ -1,0 +1,17 @@
+# It is not avalable until nginx ingress controller support grpc
+# apiVersion: extensions/v1beta1
+# kind: Ingress
+# metadata:
+#   name: vizier-core
+#   namespace: katib
+#   annotations:
+#     ingress.kubernetes.io/ssl-passthrough: "true"
+# spec:
+#   rules:
+#   - host: router.velvet.test
+#     http:
+#       paths:
+#       - path: /
+#         backend:
+#          serviceName: vizier-core
+#          servicePort: 6789

@@ -1,0 +1,57 @@
+name: cifar10-hyb
+owner: root
+optimizationtype: 2
+suggestalgorithm: hyperband
+autostopalgorithm: median
+image: mxnet/python:gpu
+gpu: 1
+suggestionparameters:
+    -
+      name: Eta
+      value: 3
+    -
+      name: R
+      value: 20
+    -
+      name: ResourceName
+      value: --num-epochs
+objectivevaluename: Validation-accuracy
+metrics:
+    - accuracy
+command:
+    - python
+    - /mxnet/example/image-classification/train_cifar10.py
+    - --batch-size=512
+    - --gpus=0
+parameterconfigs:
+    configs:
+      -
+        name: --lr
+        parametertype: 1
+        feasible:
+            min: 0.03
+            max: 0.07
+      -
+        name: --lr-factor
+        parametertype: 1
+        feasible:
+            min: 0.05
+            max: 0.2
+      -
+        name: --max-random-h
+        parametertype: 2
+        feasible:
+            min: 26
+            max: 46
+      -
+        name: --max-random-l
+        parametertype: 2
+        feasible:
+            min: 25
+            max: 75
+      -
+        name: --num-epochs
+        parametertype: 2
+        feasible:
+            min: 3
+            max: 3
