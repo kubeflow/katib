@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	api "github.com/mlkube/katib/api"
+	api "github.com/kubeflow/hp-tuning/api"
 
 	_ "github.com/go-sql-driver/mysql"
 )

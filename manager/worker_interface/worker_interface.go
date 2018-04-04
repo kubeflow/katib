@@ -1,7 +1,7 @@
 package worker_interface
 
 import (
-	"github.com/mlkube/katib/api"
+	"github.com/kubeflow/hp-tuning/api"
 )
 
 type WorkerInterface interface {

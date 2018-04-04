@@ -2,7 +2,7 @@ package earlystopping
 
 import (
 	//	"fmt"
-	"github.com/mlkube/katib/api"
+	"github.com/kubeflow/hp-tuning/api"
 	"sort"
 	//	"strconv"
 )

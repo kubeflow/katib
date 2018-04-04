@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/mlkube/katib/db"
+	"github.com/kubeflow/hp-tuning/db"
 	"os"
 )
 

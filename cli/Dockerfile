@@ -16,7 +16,7 @@ RUN : && \
     go get google.golang.org/grpc && \
     go get gopkg.in/yaml.v2 && \
     :
-ADD api $GOPATH/src/github.com/mlkube/katib/api
-ADD cli $GOPATH/src/github.com/mlkube/katib/cli
-WORKDIR $GOPATH/src/github.com/mlkube/katib/cli
+ADD api $GOPATH/src/github.com/kubeflow/hp-tuning/api
+ADD cli $GOPATH/src/github.com/kubeflow/hp-tuning/cli
+WORKDIR $GOPATH/src/github.com/kubeflow/hp-tuning/cli
 RUN go build -o katib-cli

@@ -21,13 +21,13 @@ RUN : && \
     :
 RUN apt update && apt install -y python python-pip
 RUN pip install modeldb
-ADD api $GOPATH/src/github.com/mlkube/katib/api
-ADD db $GOPATH/src/github.com/mlkube/katib/db
-ADD manager $GOPATH/src/github.com/mlkube/katib/manager
-ADD vendor $GOPATH/src/github.com/mlkube/katib/vendor
-ADD earlystopping $GOPATH/src/github.com/mlkube/katib/earlystopping
+ADD api $GOPATH/src/github.com/kubeflow/hp-tuning/api
+ADD db $GOPATH/src/github.com/kubeflow/hp-tuning/db
+ADD manager $GOPATH/src/github.com/kubeflow/hp-tuning/manager
+ADD vendor $GOPATH/src/github.com/kubeflow/hp-tuning/vendor
+ADD earlystopping $GOPATH/src/github.com/kubeflow/hp-tuning/earlystopping
 ADD conf /conf
 ADD manager/wrap.sh /wrap.sh
 RUN chmod 755 /wrap.sh
-WORKDIR $GOPATH/src/github.com/mlkube/katib/manager
+WORKDIR $GOPATH/src/github.com/kubeflow/hp-tuning/manager
 RUN go build -o vizier-manager

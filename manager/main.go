@@ -11,24 +11,24 @@ import (
 	"os"
 	"time"
 
-	"github.com/mlkube/katib/manager/worker_interface"
-	dlkwif "github.com/mlkube/katib/manager/worker_interface/dlk"
-	k8swif "github.com/mlkube/katib/manager/worker_interface/kubernetes"
-	nvdwif "github.com/mlkube/katib/manager/worker_interface/nvdocker"
+	"github.com/kubeflow/hp-tuning/manager/worker_interface"
+	dlkwif "github.com/kubeflow/hp-tuning/manager/worker_interface/dlk"
+	k8swif "github.com/kubeflow/hp-tuning/manager/worker_interface/kubernetes"
+	nvdwif "github.com/kubeflow/hp-tuning/manager/worker_interface/nvdocker"
 
-	tbif "github.com/mlkube/katib/manager/visualise/tensorboard"
+	tbif "github.com/kubeflow/hp-tuning/manager/visualise/tensorboard"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	vdb "github.com/mlkube/katib/db"
+	vdb "github.com/kubeflow/hp-tuning/db"
 	batchv1 "k8s.io/api/batch/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	pb "github.com/mlkube/katib/api"
+	pb "github.com/kubeflow/hp-tuning/api"
 )
 
 const (
