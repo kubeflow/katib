@@ -1,0 +1,58 @@
+name: cifer10-pv-test
+owner: root
+optimizationtype: 2
+suggestalgorithm: random
+autostopalgorithm: median
+objectivevaluename: Validation-accuracy
+scheduler: default-scheduler
+image: mxnet/python:gpu
+mount:
+    pvc: nfs
+    path: /nfs-mnt
+gpu: 2
+suggestionparameters:
+    -
+      name: SuggestionNum
+      value: 2
+    -
+      name: MaxParallel
+      value: 2
+command:
+        - python
+        - /mxnet/example/image-classification/train_cifar10.py
+        - --batch-size=512
+        - --gpus=0,1
+metrics:
+    - accuracy
+parameterconfigs:
+    configs:
+      -
+        name: --lr
+        parametertype: 1
+        feasible:
+            min: 0.03
+            max: 0.07
+      -
+        name: --lr-factor
+        parametertype: 1
+        feasible:
+            min: 0.05
+            max: 0.2
+      -
+        name: --max-random-h
+        parametertype: 2
+        feasible:
+            min: 26
+            max: 46
+      -
+        name: --max-random-l
+        parametertype: 2
+        feasible:
+            min: 25
+            max: 75
+      -
+        name: --num-epochs
+        parametertype: 2
+        feasible:
+            min: 3
+            max: 3

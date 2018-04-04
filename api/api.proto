@@ -1,0 +1,245 @@
+syntax = "proto3";
+
+package api;
+
+service Manager {
+	rpc CreateStudy(CreateStudyRequest) returns (CreateStudyReply);
+	rpc StopStudy(StopStudyRequest) returns (StopStudyReply);
+	rpc GetStudys(GetStudysRequest) returns (GetStudysReply);
+	rpc SuggestTrials(SuggestTrialsRequest) returns (SuggestTrialsReply);
+	rpc CompleteTrial(CompleteTrialRequest) returns (CompleteTrialReply);
+	rpc ShouldTrialStop(ShouldTrialStopRequest) returns (ShouldTrialStopReply);
+	rpc GetObjectValue(GetObjectValueRequest) returns (GetObjectValueReply);
+	rpc AddMeasurementToTrials(AddMeasurementToTrialsRequest) returns (AddMeasurementToTrialsReply);
+    rpc InitializeSuggestService(InitializeSuggestServiceRequest) returns(InitializeSuggestServiceReply);
+}
+
+service Suggestion {
+	rpc GenerateTrials(GenerateTrialsRequest) returns (GenerateTrialsReply);
+    rpc SetSuggestionParameters(SetSuggestionParametersRequest) returns (SetSuggestionParametersReply);
+    rpc StopSuggestion(StopSuggestionRequest) returns (StopSuggestionReply);
+}
+
+service AutoStopping {
+}
+
+enum ParameterType {
+	// Not used
+	UNKNOWN_TYPE = 0;
+
+	DOUBLE = 1;
+	INT = 2;
+	DISCRETE = 3;
+	CATEGORICAL = 4;
+}
+
+enum OptimizationType {
+	// Not used
+	UNKNOWN_OPTIMIZATION = 0;
+
+	MINIMIZE = 1;
+	MAXIMIZE = 2;
+}
+
+message FeasibleSpace {
+    string max = 1;
+    string min = 2;
+    repeated string list = 3;
+}
+
+message ParameterConfig {
+	string name = 1;
+	ParameterType parameter_type = 2;
+	// The following values defines a feasible parameter space.
+    FeasibleSpace feasible = 3;
+}
+
+message Parameter {
+	string name = 1;
+	ParameterType parameter_type = 2;
+	string value = 3;
+}
+
+// This value is stored as TINYINT in MySQL.
+enum TrialState {
+    PENDING = 0;
+    RUNNING = 1;
+    COMPLETED = 2;
+    KILLED = 3;
+    ERROR = 120;
+}
+
+message Metrics {
+    string name = 1;
+    string value = 2;
+}
+
+message EvaluationLog {
+    string time = 1;
+    repeated Metrics metrics = 2;
+}
+
+message SuggestionParameter {
+    string name = 1;
+    string value = 2;
+}
+
+message Tag {
+    string name = 1;
+    string value = 2;
+}
+
+message MountConf {
+   string pvc = 1;
+   string path = 2;
+}
+
+message Trial {
+	string trial_id = 1;
+	string study_id = 2;
+	repeated Parameter parameter_set = 3;
+    TrialState status = 4;
+    repeated EvaluationLog eval_logs = 5;
+    string objective_value = 6;
+    repeated Tag tags = 7;
+}
+
+message StudyConfig {
+    message ParameterConfigs {
+        repeated ParameterConfig configs = 1;
+    }
+	string name = 1;
+	string owner = 2;
+	OptimizationType optimization_type = 3;
+	double optimization_goal = 4;
+	ParameterConfigs parameter_configs = 5;
+	repeated string access_permissions = 6;
+	string suggest_algorithm = 7;
+	string autostop_algorithm = 8;
+	string study_task_name = 9;
+    repeated SuggestionParameter suggestion_parameters =10;
+    repeated Tag tags = 11;
+    string objective_value_name = 12;
+    repeated string metrics = 13;
+    string image = 14;
+    repeated string command = 15;
+    int32 gpu = 16;
+    string scheduler = 17;
+    MountConf mount = 18;
+    string pull_secret = 19;
+	//string log_collector = 10; // XXX
+}
+
+message CreateStudyRequest {
+    StudyConfig study_config = 1;
+}
+
+message CreateStudyReply {
+	string study_id = 1;
+}
+
+message StopStudyRequest {
+	string study_id = 1;
+}
+
+message StopStudyReply {
+}
+
+message GetStudysRequest {
+}
+
+message StudyInfo {
+	string study_id = 1;
+    string name = 2;
+    string owner = 3;
+    int32 running_trial_num = 4;
+    int32 completed_trial_num = 5;
+}
+
+message GetStudysReply {
+    repeated StudyInfo study_infos= 1;
+}
+
+message SuggestTrialsRequest {
+	string study_id = 1;
+	string suggest_algorithm = 2;
+	StudyConfig configs = 3;
+}
+
+message SuggestTrialsReply {
+	repeated Trial trials = 1;
+    bool completed = 2;
+}
+
+message CompleteTrialRequest {
+	string worker_id = 1;
+	bool is_complete = 2;
+}
+
+message CompleteTrialReply {
+}
+
+message ShouldTrialStopRequest {
+	string study_id = 1;
+	string autostop_algorithm = 2;
+}
+
+message ShouldTrialStopReply {
+	repeated Trial trials = 1;
+	repeated string worker_ids = 2;
+}
+
+message GetObjectValueRequest {
+	string worker_id = 1;
+}
+
+message	GetObjectValueReply {
+	repeated Trial trials = 1;
+}
+
+message AddMeasurementToTrialsRequest {
+	string study_id = 1;
+	// metrics can be a json string
+	string metrics = 2;
+}
+
+message AddMeasurementToTrialsReply {
+}
+
+message InitializeSuggestServiceRequest {
+    string study_id = 1;
+    string suggest_algorithm = 2;
+    repeated SuggestionParameter suggestion_parameters = 3;
+	StudyConfig configs = 4;
+}
+
+message InitializeSuggestServiceReply {
+}
+
+message GenerateTrialsRequest {
+	string study_id = 1;
+	StudyConfig configs = 2;
+    repeated Trial completed_trials = 3;
+    repeated Trial running_trials = 4;
+}
+
+message GenerateTrialsReply {
+	repeated Trial trials = 1;
+    bool completed = 2;
+}
+
+message SetSuggestionParametersRequest {
+	string study_id = 1;
+    repeated SuggestionParameter suggestion_parameters =2;
+	StudyConfig configs = 3;
+}
+
+message SetSuggestionParametersReply {
+}
+
+message StopSuggestionRequest {
+	string study_id = 1;
+}
+
+message StopSuggestionReply {
+}

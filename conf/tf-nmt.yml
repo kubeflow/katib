@@ -1,0 +1,105 @@
+name: tf-nmt
+owner: root
+optimizationtype: 1
+suggestalgorithm: random
+autostopalgorithm: median
+objectivevaluename: test_ppl
+metrics:
+    - ppl
+    - bleu_dev
+    - bleu_test
+image: yujioshima/tf-nmt:latest-gpu
+scheduler: default-scheduler
+mount:
+    pvc: nfs
+    path: /nfs-mnt
+suggestionparameters:
+    -
+      name: SuggestionNum
+      value: 10
+    -
+      name: MaxParallel
+      value: 6
+gpu: 1
+command:
+    - python
+    - -m
+    - nmt.nmt
+    - --src=vi
+    - --tgt=en
+    - --out_dir=/nfs-mnt/logs/{{STUDY_ID}}_{{TRIAL_ID}}
+    - --vocab_prefix=/nfs-mnt/learndatas/iwslt15_en_vi/vocab
+    - --train_prefix=/nfs-mnt/learndatas/iwslt15_en_vi/train
+    - --dev_prefix=/nfs-mnt/learndatas/iwslt15_en_vi/tst2012
+    - --test_prefix=/nfs-mnt/learndatas/iwslt15_en_vi/tst2013
+    - --attention_architecture=standard
+    - --attention=normed_bahdanau
+    - --batch_size=128
+    - --colocate_gradients_with_ops=true
+    - --eos=</s>
+    - --forget_bias=1.0
+    - --init_weight=0.1
+    - --learning_rate=1.0
+    - --max_gradient_norm=5.0
+    - --metrics=bleu
+    - --share_vocab=false
+    - --num_buckets=5
+    - --optimizer=sgd
+    - --sos=<s>
+    - --steps_per_stats=100
+    - --time_major=true
+    - --unit_type=lstm
+    - --src_max_len=50
+    - --tgt_max_len=50
+    - --infer_batch_size=32
+parameterconfigs:
+    configs:
+      -
+        name: --num_train_steps
+        parametertype: 2
+        feasible:
+            min: 1000
+            max: 1000
+      -
+        name: --dropout
+        parametertype: 1
+        feasible:
+            min: 0.1
+            max: 0.3
+      -
+        name: --beam_width
+        parametertype: 2
+        feasible:
+            min: 5
+            max: 15
+      -
+        name: --num_units
+        parametertype: 2
+        feasible:
+            min: 256
+            max: 1026
+      -
+        name: --attention
+        parametertype: 4
+        feasible:
+            list:
+                - luong
+                - scaled_luong
+                - bahdanau
+                - normed_bahdanau
+      -
+        name: --decay_scheme
+        parametertype: 4
+        feasible:
+            list:
+                - luong234
+                - luong5
+                - luong10
+      -
+        name: --encoder_type
+        parametertype: 4
+        feasible:
+            list:
+                - bi
+                - uni
+

@@ -1,0 +1,46 @@
+name: cifer10-grid
+owner: root
+optimizationtype: 2
+suggestalgorithm: grid
+autostopalgorithm: median
+objectivevaluename: Validation-accuracy
+image: mxnet/python:gpu
+suggestionparameters:
+    -
+      name: DefaultGrid
+      value: 3
+    -
+      name: MaxParrallel
+      value: 6
+    -
+      name: --lr
+      value: 2
+gpu: 1
+command:
+    - python
+    - /mxnet/example/image-classification/train_cifar10.py
+    - --batch-size=512
+    - --num-epochs=20
+    - --gpus=0
+metrics:
+    - accuracy
+parameterconfigs:
+    configs:
+      -
+        name: --lr
+        parametertype: 1
+        feasible:
+            min: 0.03
+            max: 0.07
+      -
+        name: --lr-factor
+        parametertype: 1
+        feasible:
+            min: 0.05
+            max: 0.2
+      -
+        name: --max-random-h
+        parametertype: 2
+        feasible:
+            min: 26
+            max: 46
