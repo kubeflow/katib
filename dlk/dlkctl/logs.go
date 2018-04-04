@@ -23,8 +23,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/osrg/dlk/dlkctl/utils"
-	"github.com/osrg/dlk/dlkmanager/datastore"
+	"github.com/kubeflow/hp-tuning/dlk/dlkctl/utils"
+	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/datastore"
 	"github.com/spf13/cobra"
 )
 

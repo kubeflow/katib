@@ -24,7 +24,7 @@ RUN pip install modeldb
 ADD api $GOPATH/src/github.com/kubeflow/hp-tuning/api
 ADD db $GOPATH/src/github.com/kubeflow/hp-tuning/db
 ADD manager $GOPATH/src/github.com/kubeflow/hp-tuning/manager
-ADD vendor $GOPATH/src/github.com/kubeflow/hp-tuning/vendor
+ADD dlk $GOPATH/src/github.com/kubeflow/hp-tuning/dlk
 ADD earlystopping $GOPATH/src/github.com/kubeflow/hp-tuning/earlystopping
 ADD conf /conf
 ADD manager/wrap.sh /wrap.sh
