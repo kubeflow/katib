@@ -1,36 +1,31 @@
 # Katib
 
 Hyperparameter Tuning on Kubernetes.
-This project is [Google vizier](https://static.googleusercontent.com/media/research.google.com/ja//pubs/archive/bcb15507f4b52991a0783013df4222240e942381.pdf) inspired.
-Katib is a scalable and flexible hyperparameter tuning framework and  tightly integrate with kubernetes.
-And it does not depend on a specific DL framework.
-There are examples of three frameworks ( tensorflow, mxnet, and  pytorch).
+This project is inspired by [Google vizier](https://static.googleusercontent.com/media/research.google.com/ja//pubs/archive/bcb15507f4b52991a0783013df4222240e942381.pdf).
+Katib is a scalable and flexible hyperparameter tuning framework and is tightly integrated with kubernetes.
+Also it does not depend on a specific Deep Learning framework e.g. TensorFlow, mxnet, and  pytorch).
 
 ## Name
 
-Katib stands for `secretary` in Arabic.
-As Vizier stands for high official or prime minister in Arabic, I named this project Katib in honor of Vizier.
+Katib stands for `secretary` in Arabic. As `Vizier` stands for a high official or a prime minister in Arabic, this project Katib is named in the honor of Vizier.
 
 ## Concepts in Google Vizier
 
-Katib has Study, Trial and Suggestion that are defined in Google vizier.
+As in Google Vizier, Katib also has the concepts of Study, Trial and Suggestion.
 
 ### Study
 
-Represents a single optimization run over a feasible space.
-Each Study contains a configuration describing the feasible space, as well as a set of Trials.
-It is assumed that objective function f(x) does not change in the course of a Study.
+Represents a single optimization run over a feasible space. Each Study contains a configuration describing the feasible space, as well as a set of Trials. It is assumed that objective function f(x) does not change in the course of a Study.
 
 ### Trial
 
-A  list of parameter values, x, that will lead to a single evaluation of f(x).
+A Trial is a list of parameter values, x, that will lead to a single evaluation of f(x).
 A trial can be “Completed”, which means that it has been evaluated and the objective value f(x) has been assigned to it, otherwise it is “Pending”.
-One trial corresponding to one k8s Job.
+One trial corresponds to one k8s Job.
 
 ### Suggestion
 
-An algorithm to make parameter set.
-Currently Katib supports many parameter exploration algorithms:
+A Suggestion is an algorithm to construct a parameter set. Currently Katib supports the following exploration algorithms:
 
 * random
 * grid
@@ -38,7 +33,7 @@ Currently Katib supports many parameter exploration algorithms:
 
 ## Components in Katib
 
-Katib consists of several components as below.
+Katib consists of several components as shown below:
 Each component is running on k8s as a deployment.
 And each component communicates with GRPC, the API is defined at `API/api.proto`.
 
@@ -61,8 +56,8 @@ Please see [getting-start.md](./docs/getting-start.md) for more details.
 
 ## StudyConfig
 
-In Study config file, you define the feasible space of parameters and configuration of kubernetes job.
-Examples of Study config are in `conf` directory.
+In the Study config file, we define the feasible space of parameters and configuration of a kubernetes job.
+Examples of such Study configs are in the `conf` directory.
 The configuration items are as follows.
 
 - name: Study name
@@ -97,14 +92,14 @@ The configuration items are as follows.
 
 ## Web UI
 
-Katib provide Web UI based on ModelDB( https://github.com/mitdbg/modeldb ).
+Katib provides a Web UI based on ModelDB( https://github.com/mitdbg/modeldb ).
 The ingress setting is defined in [`manifests/modeldb/frontend/ingress.yaml`](manifests/modeldb/frontend/ingress.yaml)
 
 ## TensorBoard Integration
 
-Not only TensorFlow but also several DL frameworks (e.g. PyTorch, MXNet) support TnsorBoard format logging.
-Katib can integrate TensorBoard easily.
-To use TensorBoard from Katib, you should define persistent volume claim and set mount config for the Study.
+In addition to TensorFlow, other deep learning frameworks (e.g. PyTorch, MXNet) support TnsorBoard format logging.
+Katib integrates with TensorBoard easily.
+To use TensorBoard from Katib, we define a persistent volume claim and set mount config for the Study.
 Katib search each trial log in `{pvc mount path}/logs/{Study ID}/{Trial ID}`.
 `{{STUDY_ID}}` and  `{{TRIAL_ID}}` in the Studyconfig file are replaced the corresponding value when creating each job.
 See example `conf/tf-nmt.yml` that is a config for parameter tuning of [tensorflow/nmt](https://github.com/tensorflow/nmt).
@@ -116,13 +111,13 @@ See example `conf/tf-nmt.yml` that is a config for parameter tuning of [tensorfl
 2018/04/03 05:52:11 req Createstudy
 2018/04/03 05:52:11 CreateStudy: study_id:"n5c80f4af709a70d"
 ```
-Make TensorBoard deployments, services, and ingress automatically and you can access from Web UI.
+Then we perform TensorBoard deployments, services, and ingress automatically and we can the access from Web UI.
 
 ![katib-demo](https://user-images.githubusercontent.com/10014831/38241910-64fb0646-376e-11e8-8b98-c26e577f3935.gif)
 
 ## CONTRIBUTING
 
-Feel free to hack on the system! [developer-guide.md](./docs/developer-guide.md) will help you to get involved into the development.
+Please feel free to test the system! [developer-guide.md](./docs/developer-guide.md) is a good starting point of development.
 
 ## TODOs
 
