@@ -3,7 +3,7 @@
 Hyperparameter Tuning on Kubernetes.
 This project is inspired by [Google vizier](https://static.googleusercontent.com/media/research.google.com/ja//pubs/archive/bcb15507f4b52991a0783013df4222240e942381.pdf).
 Katib is a scalable and flexible hyperparameter tuning framework and is tightly integrated with kubernetes.
-Also it does not depend on a specific Deep Learning framework e.g. TensorFlow, mxnet, and  pytorch).
+Also it does not depend on a specific Deep Learning framework e.g. TensorFlow, MXNet, and PyTorch).
 
 ## Name
 
@@ -111,16 +111,16 @@ See example `conf/tf-nmt.yml` that is a config for parameter tuning of [tensorfl
 2018/04/03 05:52:11 req Createstudy
 2018/04/03 05:52:11 CreateStudy: study_id:"n5c80f4af709a70d"
 ```
-Then we perform TensorBoard deployments, services, and ingress automatically and we can the access from Web UI.
+Then we perform TensorBoard deployments, services, and ingress automatically, and we can the access from Web UI.
 
 ![katib-demo](https://user-images.githubusercontent.com/10014831/38241910-64fb0646-376e-11e8-8b98-c26e577f3935.gif)
 
 ## CONTRIBUTING
 
-Please feel free to test the system! [developer-guide.md](./docs/developer-guide.md) is a good starting point of development.
+Please feel free to test the system! [developer-guide.md](./docs/developer-guide.md) is a good starting point for  developers.
 
 ## TODOs
 
-* Integrate KubeFlow (TensorFlow, Caffe2 and PyTorch operator)
+* Integrate KubeFlow (TensorFlow, Caffe2 and PyTorch operators)
 * Support Early Stopping
 * Enrich the GUI
