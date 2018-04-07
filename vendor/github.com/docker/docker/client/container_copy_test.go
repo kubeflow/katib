@@ -1,4 +1,4 @@
-package client // import "github.com/docker/docker/client"
+package client
 
 import (
 	"bytes"
@@ -22,16 +22,6 @@ func TestContainerStatPathError(t *testing.T) {
 	_, err := client.ContainerStatPath(context.Background(), "container_id", "path")
 	if err == nil || err.Error() != "Error response from daemon: Server error" {
 		t.Fatalf("expected a Server error, got %v", err)
-	}
-}
-
-func TestContainerStatPathNotFoundError(t *testing.T) {
-	client := &Client{
-		client: newMockClient(errorMock(http.StatusNotFound, "Not found")),
-	}
-	_, err := client.ContainerStatPath(context.Background(), "container_id", "path")
-	if !IsErrNotFound(err) {
-		t.Fatalf("expected a not found error, got %v", err)
 	}
 }
 
@@ -105,16 +95,6 @@ func TestCopyToContainerError(t *testing.T) {
 	}
 }
 
-func TestCopyToContainerNotFoundError(t *testing.T) {
-	client := &Client{
-		client: newMockClient(errorMock(http.StatusNotFound, "Not found")),
-	}
-	err := client.CopyToContainer(context.Background(), "container_id", "path/to/file", bytes.NewReader([]byte("")), types.CopyToContainerOptions{})
-	if !IsErrNotFound(err) {
-		t.Fatalf("expected a not found error, got %v", err)
-	}
-}
-
 func TestCopyToContainerNotStatusOKError(t *testing.T) {
 	client := &Client{
 		client: newMockClient(errorMock(http.StatusNoContent, "No content")),
@@ -181,16 +161,6 @@ func TestCopyFromContainerError(t *testing.T) {
 	}
 }
 
-func TestCopyFromContainerNotFoundError(t *testing.T) {
-	client := &Client{
-		client: newMockClient(errorMock(http.StatusNotFound, "Not found")),
-	}
-	_, _, err := client.CopyFromContainer(context.Background(), "container_id", "path/to/file")
-	if !IsErrNotFound(err) {
-		t.Fatalf("expected a not found error, got %v", err)
-	}
-}
-
 func TestCopyFromContainerNotStatusOKError(t *testing.T) {
 	client := &Client{
 		client: newMockClient(errorMock(http.StatusNoContent, "No content")),
@@ -225,7 +195,7 @@ func TestCopyFromContainer(t *testing.T) {
 				return nil, fmt.Errorf("Expected URL '%s', got '%s'", expectedURL, req.URL)
 			}
 			if req.Method != "GET" {
-				return nil, fmt.Errorf("expected GET method, got %s", req.Method)
+				return nil, fmt.Errorf("expected PUT method, got %s", req.Method)
 			}
 			query := req.URL.Query()
 			path := query.Get("path")

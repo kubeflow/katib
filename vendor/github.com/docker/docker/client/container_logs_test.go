@@ -1,4 +1,4 @@
-package client // import "github.com/docker/docker/client"
+package client
 
 import (
 	"bytes"
@@ -13,20 +13,9 @@ import (
 	"time"
 
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/internal/testutil"
 
 	"golang.org/x/net/context"
 )
-
-func TestContainerLogsNotFoundError(t *testing.T) {
-	client := &Client{
-		client: newMockClient(errorMock(http.StatusNotFound, "Not found")),
-	}
-	_, err := client.ContainerLogs(context.Background(), "container_id", types.ContainerLogsOptions{})
-	if !IsErrNotFound(err) {
-		t.Fatalf("expected a not found error, got %v", err)
-	}
-}
 
 func TestContainerLogsError(t *testing.T) {
 	client := &Client{
@@ -39,11 +28,9 @@ func TestContainerLogsError(t *testing.T) {
 	_, err = client.ContainerLogs(context.Background(), "container_id", types.ContainerLogsOptions{
 		Since: "2006-01-02TZ",
 	})
-	testutil.ErrorContains(t, err, `parsing time "2006-01-02TZ"`)
-	_, err = client.ContainerLogs(context.Background(), "container_id", types.ContainerLogsOptions{
-		Until: "2006-01-02TZ",
-	})
-	testutil.ErrorContains(t, err, `parsing time "2006-01-02TZ"`)
+	if err == nil || !strings.Contains(err.Error(), `parsing time "2006-01-02TZ"`) {
+		t.Fatalf("expected a 'parsing time' error, got %v", err)
+	}
 }
 
 func TestContainerLogs(t *testing.T) {
@@ -91,17 +78,6 @@ func TestContainerLogs(t *testing.T) {
 			expectedQueryParams: map[string]string{
 				"tail":  "",
 				"since": "invalid but valid",
-			},
-		},
-		{
-			options: types.ContainerLogsOptions{
-				// An complete invalid date, timestamp or go duration will be
-				// passed as is
-				Until: "invalid but valid",
-			},
-			expectedQueryParams: map[string]string{
-				"tail":  "",
-				"until": "invalid but valid",
 			},
 		},
 	}

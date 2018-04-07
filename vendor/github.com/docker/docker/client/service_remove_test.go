@@ -1,4 +1,4 @@
-package client // import "github.com/docker/docker/client"
+package client
 
 import (
 	"bytes"
@@ -8,8 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gotestyourself/gotestyourself/assert"
-	is "github.com/gotestyourself/gotestyourself/assert/cmp"
 	"golang.org/x/net/context"
 )
 
@@ -19,17 +17,9 @@ func TestServiceRemoveError(t *testing.T) {
 	}
 
 	err := client.ServiceRemove(context.Background(), "service_id")
-	assert.Check(t, is.Error(err, "Error response from daemon: Server error"))
-}
-
-func TestServiceRemoveNotFoundError(t *testing.T) {
-	client := &Client{
-		client: newMockClient(errorMock(http.StatusNotFound, "missing")),
+	if err == nil || err.Error() != "Error response from daemon: Server error" {
+		t.Fatalf("expected a Server Error, got %v", err)
 	}
-
-	err := client.ServiceRemove(context.Background(), "service_id")
-	assert.Check(t, is.Error(err, "Error: No such service: service_id"))
-	assert.Check(t, IsErrNotFound(err))
 }
 
 func TestServiceRemove(t *testing.T) {

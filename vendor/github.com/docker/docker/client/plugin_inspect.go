@@ -1,9 +1,10 @@
-package client // import "github.com/docker/docker/client"
+package client
 
 import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
 
 	"github.com/docker/docker/api/types"
 	"golang.org/x/net/context"
@@ -11,12 +12,12 @@ import (
 
 // PluginInspectWithRaw inspects an existing plugin
 func (cli *Client) PluginInspectWithRaw(ctx context.Context, name string) (*types.Plugin, []byte, error) {
-	if name == "" {
-		return nil, nil, objectNotFoundError{object: "plugin", id: name}
-	}
 	resp, err := cli.get(ctx, "/plugins/"+name+"/json", nil, nil)
 	if err != nil {
-		return nil, nil, wrapResponseError(err, resp, "plugin", name)
+		if resp.statusCode == http.StatusNotFound {
+			return nil, nil, pluginNotFoundError{name}
+		}
+		return nil, nil, err
 	}
 
 	defer ensureReaderClosed(resp)

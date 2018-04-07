@@ -1,4 +1,4 @@
-package client // import "github.com/docker/docker/client"
+package client
 
 import (
 	"bytes"
@@ -85,10 +85,6 @@ func TestNetworkConnect(t *testing.T) {
 
 			if connect.Container != "container_id" {
 				return nil, fmt.Errorf("expected 'container_id', got %s", connect.Container)
-			}
-
-			if connect.EndpointConfig == nil {
-				return nil, fmt.Errorf("expected connect.EndpointConfig to be not nil, got %v", connect.EndpointConfig)
 			}
 
 			if connect.EndpointConfig.NetworkID != "NetworkID" {

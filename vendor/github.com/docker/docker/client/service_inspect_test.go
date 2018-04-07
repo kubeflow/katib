@@ -1,4 +1,4 @@
-package client // import "github.com/docker/docker/client"
+package client
 
 import (
 	"bytes"
@@ -9,9 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/swarm"
-	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
@@ -20,7 +18,7 @@ func TestServiceInspectError(t *testing.T) {
 		client: newMockClient(errorMock(http.StatusInternalServerError, "Server error")),
 	}
 
-	_, _, err := client.ServiceInspectWithRaw(context.Background(), "nothing", types.ServiceInspectOptions{})
+	_, _, err := client.ServiceInspectWithRaw(context.Background(), "nothing")
 	if err == nil || err.Error() != "Error response from daemon: Server error" {
 		t.Fatalf("expected a Server Error, got %v", err)
 	}
@@ -31,21 +29,9 @@ func TestServiceInspectServiceNotFound(t *testing.T) {
 		client: newMockClient(errorMock(http.StatusNotFound, "Server error")),
 	}
 
-	_, _, err := client.ServiceInspectWithRaw(context.Background(), "unknown", types.ServiceInspectOptions{})
-	if err == nil || !IsErrNotFound(err) {
-		t.Fatalf("expected a serviceNotFoundError error, got %v", err)
-	}
-}
-
-func TestServiceInspectWithEmptyID(t *testing.T) {
-	client := &Client{
-		client: newMockClient(func(req *http.Request) (*http.Response, error) {
-			return nil, errors.New("should not make request")
-		}),
-	}
-	_, _, err := client.ServiceInspectWithRaw(context.Background(), "", types.ServiceInspectOptions{})
-	if !IsErrNotFound(err) {
-		t.Fatalf("Expected NotFoundError, got %v", err)
+	_, _, err := client.ServiceInspectWithRaw(context.Background(), "unknown")
+	if err == nil || !IsErrServiceNotFound(err) {
+		t.Fatalf("expected an serviceNotFoundError error, got %v", err)
 	}
 }
 
@@ -69,7 +55,7 @@ func TestServiceInspect(t *testing.T) {
 		}),
 	}
 
-	serviceInspect, _, err := client.ServiceInspectWithRaw(context.Background(), "service_id", types.ServiceInspectOptions{})
+	serviceInspect, _, err := client.ServiceInspectWithRaw(context.Background(), "service_id")
 	if err != nil {
 		t.Fatal(err)
 	}

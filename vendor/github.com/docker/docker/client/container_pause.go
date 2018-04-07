@@ -1,4 +1,4 @@
-package client // import "github.com/docker/docker/client"
+package client
 
 import "golang.org/x/net/context"
 
