@@ -2,22 +2,19 @@ package suggestion
 
 import (
 	"context"
-	"github.com/kubeflow/hp-tuning/api"
 	"log"
 	"math/rand"
 	"strconv"
 	"time"
-)
 
-type SuggestService interface {
-	SetSuggestionParameters(ctx context.Context, in *api.SetSuggestionParametersRequest) (*api.SetSuggestionParametersReply, error)
-	GenerateTrials(ctx context.Context, in *api.GenerateTrialsRequest) (*api.GenerateTrialsReply, error)
-}
+	"github.com/kubeflow/hp-tuning/api"
+)
 
 type RandomSuggestParameters struct {
 	SuggestionNum int
 	MaxParallel   int
 }
+
 type RandomSuggestService struct {
 	parameters map[string]*RandomSuggestParameters
 }
