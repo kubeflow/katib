@@ -1,4 +1,4 @@
-package client // import "github.com/docker/docker/client"
+package client
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types"
 	"golang.org/x/net/context"
 )
 
@@ -30,7 +30,7 @@ func TestImageHistory(t *testing.T) {
 			if !strings.HasPrefix(r.URL.Path, expectedURL) {
 				return nil, fmt.Errorf("Expected URL '%s', got '%s'", expectedURL, r.URL)
 			}
-			b, err := json.Marshal([]image.HistoryResponseItem{
+			b, err := json.Marshal([]types.ImageHistory{
 				{
 					ID:   "image_id1",
 					Tags: []string{"tag1", "tag2"},

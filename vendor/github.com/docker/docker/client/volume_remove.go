@@ -1,4 +1,4 @@
-package client // import "github.com/docker/docker/client"
+package client
 
 import (
 	"net/url"
@@ -17,5 +17,5 @@ func (cli *Client) VolumeRemove(ctx context.Context, volumeID string, force bool
 	}
 	resp, err := cli.delete(ctx, "/volumes/"+volumeID, query, nil)
 	ensureReaderClosed(resp)
-	return wrapResponseError(err, resp, "volume", volumeID)
+	return err
 }

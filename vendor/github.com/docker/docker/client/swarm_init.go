@@ -1,4 +1,4 @@
-package client // import "github.com/docker/docker/client"
+package client
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-// SwarmInit initializes the swarm.
+// SwarmInit initializes the Swarm.
 func (cli *Client) SwarmInit(ctx context.Context, req swarm.InitRequest) (string, error) {
 	serverResp, err := cli.post(ctx, "/swarm/init", nil, req, nil)
 	if err != nil {

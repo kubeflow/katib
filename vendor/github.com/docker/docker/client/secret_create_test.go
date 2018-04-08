@@ -1,4 +1,4 @@
-package client // import "github.com/docker/docker/client"
+package client
 
 import (
 	"bytes"
@@ -11,24 +11,12 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/swarm"
-	"github.com/gotestyourself/gotestyourself/assert"
-	is "github.com/gotestyourself/gotestyourself/assert/cmp"
 	"golang.org/x/net/context"
 )
 
-func TestSecretCreateUnsupported(t *testing.T) {
-	client := &Client{
-		version: "1.24",
-		client:  &http.Client{},
-	}
-	_, err := client.SecretCreate(context.Background(), swarm.SecretSpec{})
-	assert.Check(t, is.Error(err, `"secret create" requires API version 1.25, but the Docker daemon API version is 1.24`))
-}
-
 func TestSecretCreateError(t *testing.T) {
 	client := &Client{
-		version: "1.25",
-		client:  newMockClient(errorMock(http.StatusInternalServerError, "Server error")),
+		client: newMockClient(errorMock(http.StatusInternalServerError, "Server error")),
 	}
 	_, err := client.SecretCreate(context.Background(), swarm.SecretSpec{})
 	if err == nil || err.Error() != "Error response from daemon: Server error" {
@@ -37,9 +25,8 @@ func TestSecretCreateError(t *testing.T) {
 }
 
 func TestSecretCreate(t *testing.T) {
-	expectedURL := "/v1.25/secrets/create"
+	expectedURL := "/secrets/create"
 	client := &Client{
-		version: "1.25",
 		client: newMockClient(func(req *http.Request) (*http.Response, error) {
 			if !strings.HasPrefix(req.URL.Path, expectedURL) {
 				return nil, fmt.Errorf("Expected URL '%s', got '%s'", expectedURL, req.URL)

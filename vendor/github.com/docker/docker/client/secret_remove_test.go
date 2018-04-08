@@ -1,4 +1,4 @@
-package client // import "github.com/docker/docker/client"
+package client
 
 import (
 	"bytes"
@@ -8,24 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gotestyourself/gotestyourself/assert"
-	is "github.com/gotestyourself/gotestyourself/assert/cmp"
 	"golang.org/x/net/context"
 )
 
-func TestSecretRemoveUnsupported(t *testing.T) {
-	client := &Client{
-		version: "1.24",
-		client:  &http.Client{},
-	}
-	err := client.SecretRemove(context.Background(), "secret_id")
-	assert.Check(t, is.Error(err, `"secret remove" requires API version 1.25, but the Docker daemon API version is 1.24`))
-}
-
 func TestSecretRemoveError(t *testing.T) {
 	client := &Client{
-		version: "1.25",
-		client:  newMockClient(errorMock(http.StatusInternalServerError, "Server error")),
+		client: newMockClient(errorMock(http.StatusInternalServerError, "Server error")),
 	}
 
 	err := client.SecretRemove(context.Background(), "secret_id")
@@ -35,10 +23,9 @@ func TestSecretRemoveError(t *testing.T) {
 }
 
 func TestSecretRemove(t *testing.T) {
-	expectedURL := "/v1.25/secrets/secret_id"
+	expectedURL := "/secrets/secret_id"
 
 	client := &Client{
-		version: "1.25",
 		client: newMockClient(func(req *http.Request) (*http.Response, error) {
 			if !strings.HasPrefix(req.URL.Path, expectedURL) {
 				return nil, fmt.Errorf("Expected URL '%s', got '%s'", expectedURL, req.URL)

@@ -1,11 +1,8 @@
-package filters // import "github.com/docker/docker/api/types/filters"
+package filters
 
 import (
-	"errors"
+	"fmt"
 	"testing"
-
-	"github.com/gotestyourself/gotestyourself/assert"
-	is "github.com/gotestyourself/gotestyourself/assert/cmp"
 )
 
 func TestParseArgs(t *testing.T) {
@@ -19,18 +16,23 @@ func TestParseArgs(t *testing.T) {
 		args = NewArgs()
 		err  error
 	)
-
 	for i := range flagArgs {
 		args, err = ParseFlag(flagArgs[i], args)
-		assert.NilError(t, err)
+		if err != nil {
+			t.Errorf("failed to parse %s: %s", flagArgs[i], err)
+		}
 	}
-	assert.Check(t, is.Len(args.Get("created"), 1))
-	assert.Check(t, is.Len(args.Get("image.name"), 2))
+	if len(args.Get("created")) != 1 {
+		t.Errorf("failed to set this arg")
+	}
+	if len(args.Get("image.name")) != 2 {
+		t.Errorf("the args should have collapsed")
+	}
 }
 
 func TestParseArgsEdgeCase(t *testing.T) {
-	var args Args
-	args, err := ParseFlag("", args)
+	var filters Args
+	args, err := ParseFlag("", filters)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,14 +44,14 @@ func TestParseArgsEdgeCase(t *testing.T) {
 	}
 }
 
-func TestToJSON(t *testing.T) {
+func TestToParam(t *testing.T) {
 	fields := map[string]map[string]bool{
 		"created":    {"today": true},
 		"image.name": {"ubuntu*": true, "*untu": true},
 	}
 	a := Args{fields: fields}
 
-	_, err := ToJSON(a)
+	_, err := ToParam(a)
 	if err != nil {
 		t.Errorf("failed to marshal the filters: %s", err)
 	}
@@ -80,7 +82,7 @@ func TestToParamWithVersion(t *testing.T) {
 	}
 }
 
-func TestFromJSON(t *testing.T) {
+func TestFromParam(t *testing.T) {
 	invalids := []string{
 		"anything",
 		"['a','list']",
@@ -88,29 +90,29 @@ func TestFromJSON(t *testing.T) {
 		`{"key": "value"}`,
 	}
 	valid := map[*Args][]string{
-		{fields: map[string]map[string]bool{"key": {"value": true}}}: {
+		&Args{fields: map[string]map[string]bool{"key": {"value": true}}}: {
 			`{"key": ["value"]}`,
 			`{"key": {"value": true}}`,
 		},
-		{fields: map[string]map[string]bool{"key": {"value1": true, "value2": true}}}: {
+		&Args{fields: map[string]map[string]bool{"key": {"value1": true, "value2": true}}}: {
 			`{"key": ["value1", "value2"]}`,
 			`{"key": {"value1": true, "value2": true}}`,
 		},
-		{fields: map[string]map[string]bool{"key1": {"value1": true}, "key2": {"value2": true}}}: {
+		&Args{fields: map[string]map[string]bool{"key1": {"value1": true}, "key2": {"value2": true}}}: {
 			`{"key1": ["value1"], "key2": ["value2"]}`,
 			`{"key1": {"value1": true}, "key2": {"value2": true}}`,
 		},
 	}
 
 	for _, invalid := range invalids {
-		if _, err := FromJSON(invalid); err == nil {
+		if _, err := FromParam(invalid); err == nil {
 			t.Fatalf("Expected an error with %v, got nothing", invalid)
 		}
 	}
 
 	for expectedArgs, matchers := range valid {
 		for _, json := range matchers {
-			args, err := FromJSON(json)
+			args, err := FromParam(json)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -136,16 +138,16 @@ func TestFromJSON(t *testing.T) {
 
 func TestEmpty(t *testing.T) {
 	a := Args{}
-	v, err := ToJSON(a)
+	v, err := ToParam(a)
 	if err != nil {
 		t.Errorf("failed to marshal the filters: %s", err)
 	}
-	v1, err := FromJSON(v)
+	v1, err := FromParam(v)
 	if err != nil {
 		t.Errorf("%s", err)
 	}
 	if a.Len() != v1.Len() {
-		t.Error("these should both be empty sets")
+		t.Errorf("these should both be empty sets")
 	}
 }
 
@@ -170,39 +172,39 @@ func TestArgsMatchKVList(t *testing.T) {
 	}
 
 	matches := map[*Args]string{
-		{}: "field",
-		{map[string]map[string]bool{
-			"created": {"today": true},
-			"labels":  {"key1": true}},
+		&Args{}: "field",
+		&Args{map[string]map[string]bool{
+			"created": map[string]bool{"today": true},
+			"labels":  map[string]bool{"key1": true}},
 		}: "labels",
-		{map[string]map[string]bool{
-			"created": {"today": true},
-			"labels":  {"key1=value1": true}},
+		&Args{map[string]map[string]bool{
+			"created": map[string]bool{"today": true},
+			"labels":  map[string]bool{"key1=value1": true}},
 		}: "labels",
 	}
 
 	for args, field := range matches {
-		if !args.MatchKVList(field, sources) {
+		if args.MatchKVList(field, sources) != true {
 			t.Fatalf("Expected true for %v on %v, got false", sources, args)
 		}
 	}
 
 	differs := map[*Args]string{
-		{map[string]map[string]bool{
-			"created": {"today": true}},
+		&Args{map[string]map[string]bool{
+			"created": map[string]bool{"today": true}},
 		}: "created",
-		{map[string]map[string]bool{
-			"created": {"today": true},
-			"labels":  {"key4": true}},
+		&Args{map[string]map[string]bool{
+			"created": map[string]bool{"today": true},
+			"labels":  map[string]bool{"key4": true}},
 		}: "labels",
-		{map[string]map[string]bool{
-			"created": {"today": true},
-			"labels":  {"key1=value3": true}},
+		&Args{map[string]map[string]bool{
+			"created": map[string]bool{"today": true},
+			"labels":  map[string]bool{"key1=value3": true}},
 		}: "labels",
 	}
 
 	for args, field := range differs {
-		if args.MatchKVList(field, sources) {
+		if args.MatchKVList(field, sources) != false {
 			t.Fatalf("Expected false for %v on %v, got true", sources, args)
 		}
 	}
@@ -212,50 +214,53 @@ func TestArgsMatch(t *testing.T) {
 	source := "today"
 
 	matches := map[*Args]string{
-		{}: "field",
-		{map[string]map[string]bool{
-			"created": {"today": true}},
+		&Args{}: "field",
+		&Args{map[string]map[string]bool{
+			"created": map[string]bool{"today": true}},
 		}: "today",
-		{map[string]map[string]bool{
-			"created": {"to*": true}},
+		&Args{map[string]map[string]bool{
+			"created": map[string]bool{"to*": true}},
 		}: "created",
-		{map[string]map[string]bool{
-			"created": {"to(.*)": true}},
+		&Args{map[string]map[string]bool{
+			"created": map[string]bool{"to(.*)": true}},
 		}: "created",
-		{map[string]map[string]bool{
-			"created": {"tod": true}},
+		&Args{map[string]map[string]bool{
+			"created": map[string]bool{"tod": true}},
 		}: "created",
-		{map[string]map[string]bool{
-			"created": {"anything": true, "to*": true}},
+		&Args{map[string]map[string]bool{
+			"created": map[string]bool{"anyting": true, "to*": true}},
 		}: "created",
 	}
 
 	for args, field := range matches {
-		assert.Check(t, args.Match(field, source),
-			"Expected field %s to match %s", field, source)
+		if args.Match(field, source) != true {
+			t.Fatalf("Expected true for %v on %v, got false", source, args)
+		}
 	}
 
 	differs := map[*Args]string{
-		{map[string]map[string]bool{
-			"created": {"tomorrow": true}},
+		&Args{map[string]map[string]bool{
+			"created": map[string]bool{"tomorrow": true}},
 		}: "created",
-		{map[string]map[string]bool{
-			"created": {"to(day": true}},
+		&Args{map[string]map[string]bool{
+			"created": map[string]bool{"to(day": true}},
 		}: "created",
-		{map[string]map[string]bool{
-			"created": {"tom(.*)": true}},
+		&Args{map[string]map[string]bool{
+			"created": map[string]bool{"tom(.*)": true}},
 		}: "created",
-		{map[string]map[string]bool{
-			"created": {"tom": true}},
+		&Args{map[string]map[string]bool{
+			"created": map[string]bool{"tom": true}},
 		}: "created",
-		{map[string]map[string]bool{
-			"created": {"today1": true},
-			"labels":  {"today": true}},
+		&Args{map[string]map[string]bool{
+			"created": map[string]bool{"today1": true},
+			"labels":  map[string]bool{"today": true}},
 		}: "created",
 	}
 
 	for args, field := range differs {
-		assert.Check(t, !args.Match(field, source), "Expected field %s to not match %s", field, source)
+		if args.Match(field, source) != false {
+			t.Fatalf("Expected false for %v on %v, got true", source, args)
+		}
 	}
 }
 
@@ -279,18 +284,18 @@ func TestDel(t *testing.T) {
 	f.Del("status", "running")
 	v := f.fields["status"]
 	if v["running"] {
-		t.Fatal("Expected to not include a running status filter, got true")
+		t.Fatalf("Expected to not include a running status filter, got true")
 	}
 }
 
 func TestLen(t *testing.T) {
 	f := NewArgs()
 	if f.Len() != 0 {
-		t.Fatal("Expected to not include any field")
+		t.Fatalf("Expected to not include any field")
 	}
 	f.Add("status", "running")
 	if f.Len() != 1 {
-		t.Fatal("Expected to include one field")
+		t.Fatalf("Expected to include one field")
 	}
 }
 
@@ -298,18 +303,18 @@ func TestExactMatch(t *testing.T) {
 	f := NewArgs()
 
 	if !f.ExactMatch("status", "running") {
-		t.Fatal("Expected to match `running` when there are no filters, got false")
+		t.Fatalf("Expected to match `running` when there are no filters, got false")
 	}
 
 	f.Add("status", "running")
 	f.Add("status", "pause*")
 
 	if !f.ExactMatch("status", "running") {
-		t.Fatal("Expected to match `running` with one of the filters, got false")
+		t.Fatalf("Expected to match `running` with one of the filters, got false")
 	}
 
 	if f.ExactMatch("status", "paused") {
-		t.Fatal("Expected to not match `paused` with one of the filters, got true")
+		t.Fatalf("Expected to not match `paused` with one of the filters, got true")
 	}
 }
 
@@ -317,44 +322,33 @@ func TestOnlyOneExactMatch(t *testing.T) {
 	f := NewArgs()
 
 	if !f.UniqueExactMatch("status", "running") {
-		t.Fatal("Expected to match `running` when there are no filters, got false")
+		t.Fatalf("Expected to match `running` when there are no filters, got false")
 	}
 
 	f.Add("status", "running")
 
 	if !f.UniqueExactMatch("status", "running") {
-		t.Fatal("Expected to match `running` with one of the filters, got false")
+		t.Fatalf("Expected to match `running` with one of the filters, got false")
 	}
 
 	if f.UniqueExactMatch("status", "paused") {
-		t.Fatal("Expected to not match `paused` with one of the filters, got true")
+		t.Fatalf("Expected to not match `paused` with one of the filters, got true")
 	}
 
 	f.Add("status", "pause")
 	if f.UniqueExactMatch("status", "running") {
-		t.Fatal("Expected to not match only `running` with two filters, got true")
-	}
-}
-
-func TestContains(t *testing.T) {
-	f := NewArgs()
-	if f.Contains("status") {
-		t.Fatal("Expected to not contain a status key, got true")
-	}
-	f.Add("status", "running")
-	if !f.Contains("status") {
-		t.Fatal("Expected to contain a status key, got false")
+		t.Fatalf("Expected to not match only `running` with two filters, got true")
 	}
 }
 
 func TestInclude(t *testing.T) {
 	f := NewArgs()
 	if f.Include("status") {
-		t.Fatal("Expected to not include a status key, got true")
+		t.Fatalf("Expected to not include a status key, got true")
 	}
 	f.Add("status", "running")
 	if !f.Include("status") {
-		t.Fatal("Expected to include a status key, got false")
+		t.Fatalf("Expected to include a status key, got false")
 	}
 }
 
@@ -373,7 +367,7 @@ func TestValidate(t *testing.T) {
 
 	f.Add("bogus", "running")
 	if err := f.Validate(valid); err == nil {
-		t.Fatal("Expected to return an error, got nil")
+		t.Fatalf("Expected to return an error, got nil")
 	}
 }
 
@@ -390,14 +384,14 @@ func TestWalkValues(t *testing.T) {
 	})
 
 	err := f.WalkValues("status", func(value string) error {
-		return errors.New("return")
+		return fmt.Errorf("return")
 	})
 	if err == nil {
-		t.Fatal("Expected to get an error, got nil")
+		t.Fatalf("Expected to get an error, got nil")
 	}
 
 	err = f.WalkValues("foo", func(value string) error {
-		return errors.New("return")
+		return fmt.Errorf("return")
 	})
 	if err != nil {
 		t.Fatalf("Expected to not iterate when the field doesn't exist, got %v", err)

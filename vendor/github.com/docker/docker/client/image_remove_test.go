@@ -1,4 +1,4 @@
-package client // import "github.com/docker/docker/client"
+package client
 
 import (
 	"bytes"
@@ -10,8 +10,6 @@ import (
 	"testing"
 
 	"github.com/docker/docker/api/types"
-	"github.com/gotestyourself/gotestyourself/assert"
-	is "github.com/gotestyourself/gotestyourself/assert/cmp"
 	"golang.org/x/net/context"
 )
 
@@ -21,17 +19,9 @@ func TestImageRemoveError(t *testing.T) {
 	}
 
 	_, err := client.ImageRemove(context.Background(), "image_id", types.ImageRemoveOptions{})
-	assert.Check(t, is.Error(err, "Error response from daemon: Server error"))
-}
-
-func TestImageRemoveImageNotFound(t *testing.T) {
-	client := &Client{
-		client: newMockClient(errorMock(http.StatusNotFound, "missing")),
+	if err == nil || err.Error() != "Error response from daemon: Server error" {
+		t.Fatalf("expected a Server Error, got %v", err)
 	}
-
-	_, err := client.ImageRemove(context.Background(), "unknown", types.ImageRemoveOptions{})
-	assert.Check(t, is.Error(err, "Error: No such image: unknown"))
-	assert.Check(t, IsErrNotFound(err))
 }
 
 func TestImageRemove(t *testing.T) {
@@ -73,7 +63,7 @@ func TestImageRemove(t *testing.T) {
 						return nil, fmt.Errorf("%s not set in URL query properly. Expected '%s', got %s", key, expected, actual)
 					}
 				}
-				b, err := json.Marshal([]types.ImageDeleteResponseItem{
+				b, err := json.Marshal([]types.ImageDelete{
 					{
 						Untagged: "image_id1",
 					},
