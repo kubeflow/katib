@@ -1,5 +1,9 @@
 # Developer Guide
 
+## Requirements
+
+- Docker (17.05 or later.)
+
 ## Build from source code
 
 You can build all images from source.

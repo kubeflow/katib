@@ -18,8 +18,6 @@ spec:
       containers:
       - name: vizier-suggestion-hyperband
         image: katib/suggestion-hyperband
-        args:
-          - './hyperband'
         ports:
         - name: api
           containerPort: 6789
