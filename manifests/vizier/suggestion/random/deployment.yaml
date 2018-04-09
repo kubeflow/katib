@@ -18,8 +18,6 @@ spec:
       containers:
       - name: vizier-suggestion-random
         image: katib/suggestion-random
-        args:
-          - './random'
         ports:
         - name: api
           containerPort: 6789
