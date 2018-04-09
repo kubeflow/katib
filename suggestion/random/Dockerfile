@@ -7,4 +7,4 @@ RUN go build -o random
 FROM alpine:3.7
 WORKDIR /app
 COPY --from=build-env /go/src/github.com/kubeflow/hp-tuning/suggestion/random /app/
-ENTRYPOINT ./random
+ENTRYPOINT ["./random"]
