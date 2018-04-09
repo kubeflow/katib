@@ -3,4 +3,4 @@
 workflows:
   - app_dir: kubeflow/hp-tuning/test/workflows
     component: workflows
-name: e2e
+    name: e2e
