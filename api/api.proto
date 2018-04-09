@@ -5,7 +5,7 @@ package api;
 service Manager {
 	rpc CreateStudy(CreateStudyRequest) returns (CreateStudyReply);
 	rpc StopStudy(StopStudyRequest) returns (StopStudyReply);
-	rpc GetStudys(GetStudysRequest) returns (GetStudysReply);
+	rpc GetStudies(GetStudiesRequest) returns (GetStudiesReply);
 	rpc SuggestTrials(SuggestTrialsRequest) returns (SuggestTrialsReply);
 	rpc CompleteTrial(CompleteTrialRequest) returns (CompleteTrialReply);
 	rpc ShouldTrialStop(ShouldTrialStopRequest) returns (ShouldTrialStopReply);
@@ -145,7 +145,7 @@ message StopStudyRequest {
 message StopStudyReply {
 }
 
-message GetStudysRequest {
+message GetStudiesRequest {
 }
 
 message StudyInfo {
@@ -156,7 +156,7 @@ message StudyInfo {
     int32 completed_trial_num = 5;
 }
 
-message GetStudysReply {
+message GetStudiesReply {
     repeated StudyInfo study_infos= 1;
 }
 

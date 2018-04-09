@@ -48,8 +48,8 @@ func (m *ManagerAPI) Stopstudy(conn *grpc.ClientConn, args []string) {
 
 func (m *ManagerAPI) Getstudies(conn *grpc.ClientConn, args []string) {
 	c := pb.NewManagerClient(conn)
-	req := &pb.GetStudysRequest{}
-	r, err := c.GetStudys(context.Background(), req)
+	req := &pb.GetStudiesRequest{}
+	r, err := c.GetStudies(context.Background(), req)
 	if err != nil {
 		log.Fatalf("GetStudy failed: %v", err)
 	}

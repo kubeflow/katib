@@ -98,43 +98,45 @@ func (s *server) trialIteration(conf *pb.StudyConfig, study_id string, sCh study
 	for {
 		select {
 		case <-tm.C:
-			err := s.wIF.CheckRunningTrials(study_id, conf.ObjectiveValueName, conf.Metrics)
-			if err != nil {
-				return err
-			}
-			r, err := s.SuggestTrials(context.Background(), &pb.SuggestTrialsRequest{StudyId: study_id, SuggestAlgorithm: conf.SuggestAlgorithm, Configs: conf})
-			if err != nil {
-				log.Printf("SuggestTrials failed %v", err)
-				return err
-			}
-			if r.Completed {
-				log.Printf("Study %v completed.", study_id)
-				//s.saveResult(study_id)
-				return nil
-			} else if len(r.Trials) > 0 {
-				for _, trial := range r.Trials {
-					trial.Status = pb.TrialState_PENDING
-					trial.StudyId = study_id
-					err = dbIf.CreateTrial(trial)
-					if err != nil {
-						log.Printf("CreateTrial failed %v", err)
-						return err
-					}
-				}
-				err = s.wIF.SpawnWorkers(r.Trials, study_id)
+			if conf.SuggestAlgorithm != "" {
+				err := s.wIF.CheckRunningTrials(study_id, conf.ObjectiveValueName, conf.Metrics)
 				if err != nil {
-					log.Printf("SpawnWorkers failed %v", err)
 					return err
 				}
-				for _, t := range r.Trials {
-					err = tbif.SpawnTensorBoard(study_id, t.TrialId, k8s_namespace, conf.Mount)
+				r, err := s.SuggestTrials(context.Background(), &pb.SuggestTrialsRequest{StudyId: study_id, SuggestAlgorithm: conf.SuggestAlgorithm, Configs: conf})
+				if err != nil {
+					log.Printf("SuggestTrials failed %v", err)
+					return err
+				}
+				if r.Completed {
+					log.Printf("Study %v completed.", study_id)
+					//s.saveResult(study_id)
+					return nil
+				} else if len(r.Trials) > 0 {
+					for _, trial := range r.Trials {
+						trial.Status = pb.TrialState_PENDING
+						trial.StudyId = study_id
+						err = dbIf.CreateTrial(trial)
+						if err != nil {
+							log.Printf("CreateTrial failed %v", err)
+							return err
+						}
+					}
+					err = s.wIF.SpawnWorkers(r.Trials, study_id)
 					if err != nil {
-						log.Printf("SpawnTB failed %v", err)
+						log.Printf("SpawnWorkers failed %v", err)
 						return err
 					}
+					for _, t := range r.Trials {
+						err = tbif.SpawnTensorBoard(study_id, t.TrialId, k8s_namespace, conf.Mount)
+						if err != nil {
+							log.Printf("SpawnTB failed %v", err)
+							return err
+						}
+					}
 				}
+				tm.Reset(1 * time.Second)
 			}
-			tm.Reset(1 * time.Second)
 		case <-sCh.stopCh:
 			log.Printf("Study %v is stopped.", study_id)
 			for _, t := range s.wIF.GetRunningTrials(study_id) {
@@ -154,18 +156,21 @@ func (s *server) CreateStudy(ctx context.Context, in *pb.CreateStudyRequest) (*p
 	}
 
 	study_id, err := dbIf.CreateStudy(in.StudyConfig)
-
-	_, err = s.InitializeSuggestService(
-		ctx,
-		&pb.InitializeSuggestServiceRequest{
-			StudyId:              study_id,
-			SuggestAlgorithm:     in.StudyConfig.SuggestAlgorithm,
-			SuggestionParameters: in.StudyConfig.SuggestionParameters,
-			Configs:              in.StudyConfig,
-		},
-	)
-	if err != nil {
-		return &pb.CreateStudyReply{}, err
+	if in.StudyConfig.SuggestAlgorithm != "" {
+		_, err = s.InitializeSuggestService(
+			ctx,
+			&pb.InitializeSuggestServiceRequest{
+				StudyId:              study_id,
+				SuggestAlgorithm:     in.StudyConfig.SuggestAlgorithm,
+				SuggestionParameters: in.StudyConfig.SuggestionParameters,
+				Configs:              in.StudyConfig,
+			},
+		)
+		if err != nil {
+			return &pb.CreateStudyReply{}, err
+		}
+	} else {
+		log.Printf("Suggestion Algorithm is not set.")
 	}
 	sCh := studyCh{stopCh: make(chan bool), addMetricsCh: make(chan string)}
 	go s.trialIteration(in.StudyConfig, study_id, sCh)
@@ -206,7 +211,7 @@ func spawn_worker(study_task string, params string) error {
 	return err
 }
 
-func (s *server) GetStudys(ctx context.Context, in *pb.GetStudysRequest) (*pb.GetStudysReply, error) {
+func (s *server) GetStudies(ctx context.Context, in *pb.GetStudiesRequest) (*pb.GetStudiesReply, error) {
 	ss := make([]*pb.StudyInfo, len(s.StudyChList))
 	i := 0
 	for sid := range s.StudyChList {
@@ -220,7 +225,7 @@ func (s *server) GetStudys(ctx context.Context, in *pb.GetStudysRequest) (*pb.Ge
 		}
 		i++
 	}
-	return &pb.GetStudysReply{StudyInfos: ss}, nil
+	return &pb.GetStudiesReply{StudyInfos: ss}, nil
 }
 
 func (s *server) InitializeSuggestService(ctx context.Context, in *pb.InitializeSuggestServiceRequest) (*pb.InitializeSuggestServiceReply, error) {

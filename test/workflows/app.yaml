@@ -1,0 +1,24 @@
+apiVersion: 0.1.0
+environments:
+  releasing:
+    destination:
+      namespace: kubeflow-releasing
+      server: https://35.226.49.107
+    k8sVersion: v1.7.0
+    path: releasing
+  test:
+    destination:
+      namespace: kubeflow-test-infra
+      server: https://35.196.185.88
+    k8sVersion: v1.7.0
+    path: test
+kind: ksonnet.io/app
+name: worfklows-app
+registries:
+  incubator:
+    gitVersion:
+      commitSha: 422d521c05aa905df949868143b26445f5e4eda5
+      refSpec: master
+    protocol: github
+    uri: github.com/ksonnet/parts/tree/master/incubator
+version: 0.0.1
