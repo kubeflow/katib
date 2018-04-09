@@ -1,20 +1,18 @@
 package main
 
 import (
-	pb "github.com/kubeflow/hp-tuning/api"
-	"github.com/kubeflow/hp-tuning/suggestion"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
-)
 
-const (
-	port = "0.0.0.0:6789"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+
+	pb "github.com/kubeflow/hp-tuning/api"
+	"github.com/kubeflow/hp-tuning/suggestion"
 )
 
 func main() {
-	listener, err := net.Listen("tcp", port)
+	listener, err := net.Listen("tcp", suggestion.DefaultPort)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
@@ -22,7 +20,7 @@ func main() {
 	s := grpc.NewServer(grpc.MaxRecvMsgSize(size), grpc.MaxSendMsgSize(size))
 	pb.RegisterSuggestionServer(s, suggestion.NewRandomSuggestService())
 	reflection.Register(s)
-	log.Printf("Random Suggestion Service\n")
+	log.Println("Random Suggestion Service")
 	if err = s.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}

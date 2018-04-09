@@ -1,15 +1,15 @@
-package main
+package suggestion
 
 import (
 	"context"
 	"crypto/rand"
 	"fmt"
-	"github.com/kubeflow/hp-tuning/api"
-	"github.com/kubeflow/hp-tuning/suggestion"
 	"log"
 	"math"
 	"sort"
 	"strconv"
+
+	"github.com/kubeflow/hp-tuning/api"
 )
 
 type Bracket []*api.Trial
@@ -41,7 +41,7 @@ type HyperBandParameters struct {
 	ResourceName  string
 }
 type HyperBandSuggestService struct {
-	suggestion.RandomSuggestService
+	RandomSuggestService
 	parameters map[string]*HyperBandParameters
 }
 
