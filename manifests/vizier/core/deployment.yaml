@@ -20,7 +20,6 @@ spec:
       - name: vizier-core
         image: katib/vizier-core
         args:
-          - './vizier-manager'
           - "-w"
           - "dlk"
         ports:

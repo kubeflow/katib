@@ -11,5 +11,5 @@ docker build -t ${PREFIX}katib-frontend -f manager/modeldb/Dockerfile .
 docker build -t ${PREFIX}katib-cli -f cli/Dockerfile .
 mkdir -p bin
 docker run --name katib-cli -itd ${PREFIX}katib-cli sh
-docker cp katib-cli:/go/src/github.com/kubeflow/hp-tuning/cli/katib-cli bin/katib-cli 
+docker cp katib-cli:/go/src/github.com/kubeflow/hp-tuning/cli/katib-cli bin/katib-cli
 docker rm -f katib-cli

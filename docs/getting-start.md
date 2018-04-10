@@ -13,7 +13,7 @@ First, Copy CLI tool.
 ```bash
 docker pull katib/katib-cli
 docker run --name katib-cli -itd katib/katib-cli sh
-docker cp katib-cli:/go/src/github.com/kubeflow/hp-tuning/cli/katib-cli bin/katib-cli
+docker cp katib-cli:/app/katib-cli bin/katib-cli
 docker rm -f katib-cli
 ```
 
