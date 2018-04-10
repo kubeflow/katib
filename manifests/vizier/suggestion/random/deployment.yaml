@@ -21,8 +21,6 @@ spec:
         ports:
         - name: api
           containerPort: 6789
-      imagePullSecrets:
-          - name: gitlabregcred
 #        resources:
 #          requests:
 #            cpu: 500m

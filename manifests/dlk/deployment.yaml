@@ -20,10 +20,6 @@ spec:
       - name: dlk-manager
         image: katib/dlk-manager
         imagePullPolicy: Always
-        args:
-          - 'dlkmanager'
-          - '--scheduler'
-          - 'dlk'
         ports:
         - name: webapi
           containerPort: 1323
