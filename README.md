@@ -54,7 +54,7 @@ Please see [getting-start.md](./docs/getting-start.md) for more details.
 
 ## StudyConfig
 
-In the Study config file, we define the feasible space of parameters and configuration of a kubernetes job.Examples of such Study configs are in the `conf` directory. The configuration items are as follows.
+In the Study config file, we define the feasible space of parameters and configuration of a kubernetes job. Examples of such Study configs are in the `conf` directory. The configuration items are as follows:
 
 - name: Study name
 - owner: Owner
@@ -88,7 +88,7 @@ In the Study config file, we define the feasible space of parameters and configu
 
 ## Web UI
 
-Katib provides a Web UI based on ModelDB(https://github.com/mitdbg/modeldb).The ingress setting is defined in [`manifests/modeldb/frontend/ingress.yaml`](manifests/modeldb/frontend/ingress.yaml)
+Katib provides a Web UI based on ModelDB(https://github.com/mitdbg/modeldb). The ingress setting is defined in [`manifests/modeldb/frontend/ingress.yaml`](manifests/modeldb/frontend/ingress.yaml).
 
 ## TensorBoard Integration
 
