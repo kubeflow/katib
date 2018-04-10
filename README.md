@@ -3,9 +3,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/kubeflow/hp-tuning)](https://goreportcard.com/report/github.com/kubeflow/hp-tuning)
 
 Hyperparameter Tuning on Kubernetes.
-This project is inspired by [Google vizier](https://static.googleusercontent.com/media/research.google.com/ja//pubs/archive/bcb15507f4b52991a0783013df4222240e942381.pdf).
-Katib is a scalable and flexible hyperparameter tuning framework and is tightly integrated with kubernetes.
-Also it does not depend on a specific Deep Learning framework e.g. TensorFlow, MXNet, and PyTorch).
+This project is inspired by [Google vizier](https://static.googleusercontent.com/media/research.google.com/ja//pubs/archive/bcb15507f4b52991a0783013df4222240e942381.pdf). Katib is a scalable and flexible hyperparameter tuning framework and is tightly integrated with kubernetes. Also it does not depend on a specific Deep Learning framework e.g. TensorFlow, MXNet, and PyTorch).
 
 ## Name
 
@@ -21,8 +19,7 @@ Represents a single optimization run over a feasible space. Each Study contains 
 
 ### Trial
 
-A Trial is a list of parameter values, x, that will lead to a single evaluation of f(x).
-A trial can be “Completed”, which means that it has been evaluated and the objective value f(x) has been assigned to it, otherwise it is “Pending”.
+A Trial is a list of parameter values, x, that will lead to a single evaluation of f(x). A Trial can be “Completed”, which means that it has been evaluated and the objective value f(x) has been assigned to it, otherwise it is “Pending”.
 One trial corresponds to one k8s Job.
 
 ### Suggestion
@@ -35,9 +32,8 @@ A Suggestion is an algorithm to construct a parameter set. Currently Katib suppo
 
 ## Components in Katib
 
-Katib consists of several components as shown below:
-Each component is running on k8s as a deployment.
-And each component communicates with GRPC, the API is defined at `API/api.proto`.
+Katib consists of several components as shown below. Each component is running on k8s as a deployment.
+Each component communicates with others via GRPC and the API is defined at `api/api.proto`.
 
 - vizier: main components.
     - vizier-core : API server of vizier.
@@ -52,15 +48,13 @@ And each component communicates with GRPC, the API is defined at `API/api.proto`
     - modeldb-backend
     - modeldb-db
 
-## Getting Start
+## Getting Started
 
 Please see [getting-start.md](./docs/getting-start.md) for more details.
 
 ## StudyConfig
 
-In the Study config file, we define the feasible space of parameters and configuration of a kubernetes job.
-Examples of such Study configs are in the `conf` directory.
-The configuration items are as follows.
+In the Study config file, we define the feasible space of parameters and configuration of a kubernetes job.Examples of such Study configs are in the `conf` directory. The configuration items are as follows.
 
 - name: Study name
 - owner: Owner
@@ -94,17 +88,14 @@ The configuration items are as follows.
 
 ## Web UI
 
-Katib provides a Web UI based on ModelDB( https://github.com/mitdbg/modeldb ).
-The ingress setting is defined in [`manifests/modeldb/frontend/ingress.yaml`](manifests/modeldb/frontend/ingress.yaml)
+Katib provides a Web UI based on ModelDB(https://github.com/mitdbg/modeldb).The ingress setting is defined in [`manifests/modeldb/frontend/ingress.yaml`](manifests/modeldb/frontend/ingress.yaml)
 
 ## TensorBoard Integration
 
-In addition to TensorFlow, other deep learning frameworks (e.g. PyTorch, MXNet) support TnsorBoard format logging.
-Katib integrates with TensorBoard easily.
-To use TensorBoard from Katib, we define a persistent volume claim and set mount config for the Study.
-Katib search each trial log in `{pvc mount path}/logs/{Study ID}/{Trial ID}`.
+In addition to TensorFlow, other deep learning frameworks (e.g. PyTorch, MXNet) support TensorBoard format logging.
+Katib integrates with TensorBoard easily. To use TensorBoard from Katib, we define a persistent volume claim and set the mount config for the Study. Katib searches each trial log in `{pvc mount path}/logs/{Study ID}/{Trial ID}`.
 `{{STUDY_ID}}` and  `{{TRIAL_ID}}` in the Studyconfig file are replaced the corresponding value when creating each job.
-See example `conf/tf-nmt.yml` that is a config for parameter tuning of [tensorflow/nmt](https://github.com/tensorflow/nmt).
+See example `conf/tf-nmt.yml` which is a config for parameter tuning of [tensorflow/nmt](https://github.com/tensorflow/nmt).
 
 ```bash
 ./katib-cli -s gpu-node2:30678 -f ../conf/tf-nmt.yml Createstudy
