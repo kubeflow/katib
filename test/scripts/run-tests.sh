@@ -41,6 +41,7 @@ gcloud --project ${PROJECT} container clusters get-credentials ${CLUSTER_NAME} \
 # Create serviceaccount to overcome the RBAC issue in GKE.
 # Please see https://github.com/coreos/prometheus-operator/pull/360/files?short_path=a141d34#diff-a141d34d5164b9b18482d4e57c88ec97
 echo "Create clusterrolebining"
+kubectl apply -f manifests/0-namespace.yaml
 kubectl create serviceaccount katib -n katib
 kubectl create clusterrolebinding katib-cluster-admin-binding --clusterrole=cluster-admin --serviceaccount=katib:katib
 
