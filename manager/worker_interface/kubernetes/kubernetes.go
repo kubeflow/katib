@@ -101,23 +101,23 @@ func (d *KubernetesWorkerInterface) PollingShouldStop(ess earlystopping.EarlySto
 			select {
 			case <-tm.C:
 				tm.Reset(60 * time.Second)
-				d.mux.Lock()
-				st := ess.ShouldStoppingTrial(d.RunningTrialList[studyId], d.CompletedTrialList[studyId], 10)
-				jcl := d.clientset.BatchV1().Jobs(apiv1.NamespaceDefault)
-				pcl := d.clientset.CoreV1().Pods(apiv1.NamespaceDefault)
-				for _, t := range st {
-					jcl.Delete(t.TrialId, &metav1.DeleteOptions{})
-					pl, _ := pcl.List(metav1.ListOptions{LabelSelector: "job-name=" + t.TrialId})
-					pcl.Delete(pl.Items[0].ObjectMeta.Name, &metav1.DeleteOptions{})
-					log.Printf("Trial %v is Killed.", t.TrialId)
-					for i := range d.RunningTrialList[studyId] {
-						if d.RunningTrialList[studyId][i].TrialId == t.TrialId {
-							d.RunningTrialList[studyId][i].Status = api.TrialState_KILLED
-							break
-						}
-					}
-				}
-				d.mux.Unlock()
+				//				d.mux.Lock()
+				//				st := ess.ShouldTrialStop(d.RunningTrialList[studyId], d.CompletedTrialList[studyId], 10)
+				//				jcl := d.clientset.BatchV1().Jobs(apiv1.NamespaceDefault)
+				//				pcl := d.clientset.CoreV1().Pods(apiv1.NamespaceDefault)
+				//				for _, t := range st {
+				//					jcl.Delete(t.TrialId, &metav1.DeleteOptions{})
+				//					pl, _ := pcl.List(metav1.ListOptions{LabelSelector: "job-name=" + t.TrialId})
+				//					pcl.Delete(pl.Items[0].ObjectMeta.Name, &metav1.DeleteOptions{})
+				//					log.Printf("Trial %v is Killed.", t.TrialId)
+				//					for i := range d.RunningTrialList[studyId] {
+				//						if d.RunningTrialList[studyId][i].TrialId == t.TrialId {
+				//							d.RunningTrialList[studyId][i].Status = api.TrialState_KILLED
+				//							break
+				//						}
+				//					}
+				//				}
+				//				d.mux.Unlock()
 			case <-stop:
 				return
 			}
@@ -250,5 +250,13 @@ func (d *KubernetesWorkerInterface) CleanWorkers(studyId string) error {
 	}
 	delete(d.RunningTrialList, studyId)
 	delete(d.CompletedTrialList, studyId)
+	return nil
+}
+func (d *KubernetesWorkerInterface) CompleteTrial(studyId string, tID string, iscomplete bool) error {
+	jcl := d.clientset.BatchV1().Jobs(apiv1.NamespaceDefault)
+	pcl := d.clientset.CoreV1().Pods(apiv1.NamespaceDefault)
+	jcl.Delete(tID, &metav1.DeleteOptions{})
+	pl, _ := pcl.List(metav1.ListOptions{LabelSelector: "job-name=" + tID})
+	pcl.Delete(pl.Items[0].ObjectMeta.Name, &metav1.DeleteOptions{})
 	return nil
 }

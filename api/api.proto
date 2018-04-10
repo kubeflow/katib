@@ -8,7 +8,7 @@ service Manager {
 	rpc GetStudies(GetStudiesRequest) returns (GetStudiesReply);
 	rpc SuggestTrials(SuggestTrialsRequest) returns (SuggestTrialsReply);
 	rpc CompleteTrial(CompleteTrialRequest) returns (CompleteTrialReply);
-	rpc ShouldTrialStop(ShouldTrialStopRequest) returns (ShouldTrialStopReply);
+	rpc EarlyStopping(EarlyStoppingRequest) returns (EarlyStoppingReply);
 	rpc GetObjectValue(GetObjectValueRequest) returns (GetObjectValueReply);
 	rpc AddMeasurementToTrials(AddMeasurementToTrialsRequest) returns (AddMeasurementToTrialsReply);
     rpc InitializeSuggestService(InitializeSuggestServiceRequest) returns(InitializeSuggestServiceReply);
@@ -20,7 +20,9 @@ service Suggestion {
     rpc StopSuggestion(StopSuggestionRequest) returns (StopSuggestionReply);
 }
 
-service AutoStopping {
+service EarlyStopping {
+    rpc ShouldTrialStop(ShouldTrialStopRequest) returns (ShouldTrialStopReply);
+    rpc SetEarlyStoppingParameter(SetEarlyStoppingParameterRequest) returns (SetEarlyStoppingParameterReply);
 }
 
 enum ParameterType {
@@ -84,6 +86,11 @@ message SuggestionParameter {
     string value = 2;
 }
 
+message EarlyStoppingParameter {
+    string name = 1;
+    string value = 2;
+}
+
 message Tag {
     string name = 1;
     string value = 2;
@@ -115,18 +122,19 @@ message StudyConfig {
 	ParameterConfigs parameter_configs = 5;
 	repeated string access_permissions = 6;
 	string suggest_algorithm = 7;
-	string autostop_algorithm = 8;
+	string early_stopping_algorithm = 8;
 	string study_task_name = 9;
-    repeated SuggestionParameter suggestion_parameters =10;
-    repeated Tag tags = 11;
-    string objective_value_name = 12;
-    repeated string metrics = 13;
-    string image = 14;
-    repeated string command = 15;
-    int32 gpu = 16;
-    string scheduler = 17;
-    MountConf mount = 18;
-    string pull_secret = 19;
+    repeated SuggestionParameter suggestion_parameters = 10;
+    repeated EarlyStoppingParameter early_stopping_parameters= 11;
+    repeated Tag tags = 12;
+    string objective_value_name = 13;
+    repeated string metrics = 14;
+    string image = 15;
+    repeated string command = 16;
+    int32 gpu = 17;
+    string scheduler = 18;
+    MountConf mount = 19;
+    string pull_secret = 20;
 	//string log_collector = 10; // XXX
 }
 
@@ -172,21 +180,21 @@ message SuggestTrialsReply {
 }
 
 message CompleteTrialRequest {
-	string worker_id = 1;
-	bool is_complete = 2;
+	string study_id = 1;
+	string trial_id = 2;
+	bool is_complete = 3;
 }
 
 message CompleteTrialReply {
 }
 
-message ShouldTrialStopRequest {
+message EarlyStoppingRequest {
 	string study_id = 1;
-	string autostop_algorithm = 2;
+	string early_stopping_algorithm = 2;
 }
 
-message ShouldTrialStopReply {
+message EarlyStoppingReply {
 	repeated Trial trials = 1;
-	repeated string worker_ids = 2;
 }
 
 message GetObjectValueRequest {
@@ -242,4 +250,20 @@ message StopSuggestionRequest {
 }
 
 message StopSuggestionReply {
+}
+
+message ShouldTrialStopRequest {
+	string study_id = 1;
+}
+
+message ShouldTrialStopReply {
+	repeated Trial trials = 1;
+}
+
+message SetEarlyStoppingParameterRequest {
+	string study_id = 1;
+    repeated EarlyStoppingParameter early_stopping_parameters =2;
+}
+
+message SetEarlyStoppingParameterReply {
 }
