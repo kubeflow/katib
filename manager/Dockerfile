@@ -7,5 +7,6 @@ RUN go build -o vizier-manager
 FROM alpine:3.7
 WORKDIR /app
 COPY --from=build-env /go/src/github.com/kubeflow/hp-tuning/manager/vizier-manager /app/
+COPY --from=build-env /go/src/github.com/kubeflow/hp-tuning/manager/visualise /
 ENTRYPOINT ["./vizier-manager"]
 CMD ["-w", "dlk"]

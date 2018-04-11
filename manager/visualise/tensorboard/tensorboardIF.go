@@ -2,9 +2,7 @@ package tensorboard
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/kubeflow/hp-tuning/api"
-	vdb "github.com/kubeflow/hp-tuning/db"
 	"io/ioutil"
 	apiv1 "k8s.io/api/core/v1"
 	exbeatav1 "k8s.io/api/extensions/v1beta1"
@@ -31,34 +29,27 @@ func SpawnTensorBoard(sid string, tid string, namespace string, mount *api.Mount
 	BUFSIZE := 1024
 	var tFile []byte
 	var err error
-	var dbIf vdb.VizierDBInterface
-	dbIf = vdb.New()
-	sc, err := dbIf.GetStudyConfig(sid)
-	if err != nil {
-		return err
-	}
 
 	dep := exbeatav1.Deployment{}
-	tFile, err = ioutil.ReadFile("visualise/tensorboard/manifest_template/deployment.yaml")
+	tFile, err = ioutil.ReadFile("/tensorboard/manifest_template/deployment.yaml")
 	if err != nil {
 		return err
 	}
 	k8syaml.NewYAMLOrJSONDecoder(bytes.NewReader(tFile), BUFSIZE).Decode(&dep)
 
 	ing := exbeatav1.Ingress{}
-	tFile, err = ioutil.ReadFile("visualise/tensorboard/manifest_template/ingress.yaml")
+	tFile, err = ioutil.ReadFile("/tensorboard/manifest_template/ingress.yaml")
 	if err != nil {
 		return err
 	}
 	k8syaml.NewYAMLOrJSONDecoder(bytes.NewReader(tFile), BUFSIZE).Decode(&ing)
 
 	svc := apiv1.Service{}
-	tFile, err = ioutil.ReadFile("visualise/tensorboard/manifest_template/service.yaml")
+	tFile, err = ioutil.ReadFile("/tensorboard/manifest_template/service.yaml")
 	if err != nil {
 		return err
 	}
 	k8syaml.NewYAMLOrJSONDecoder(bytes.NewReader(tFile), BUFSIZE).Decode(&svc)
-	fmt.Printf("sc conf in TB %v\n", sc)
 
 	tname := "tensorboard-" + sid + "-" + tid
 
