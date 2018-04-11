@@ -3,13 +3,13 @@ package dlk
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/kubeflow/hp-tuning/api"
 	"github.com/kubeflow/hp-tuning/db"
 	dlkapi "github.com/kubeflow/hp-tuning/dlk/dlkmanager/api"
 	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/datastore"
 	"github.com/kubeflow/hp-tuning/manager/modeldb"
+	wIF "github.com/kubeflow/hp-tuning/manager/worker_interface"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -95,60 +95,35 @@ func (d *DlkWorkerInterface) IsTrialComplete(studyId string, tID string) (bool, 
 	return false, nil
 }
 
-func (d *DlkWorkerInterface) GetTrialObjValue(studyId string, tID string, objname string) (string, error) {
+func (d *DlkWorkerInterface) storeTrialLog(tID string) error {
+	var unformatted_logs []string
 	ltlogs, _ := d.getLtLogs(tID, "")
 	for _, pl := range ltlogs.PodLogs {
-		for i := len(pl.Logs) - 1; i >= 0; i-- {
-			ls := strings.Fields(pl.Logs[i].Value)
-			for _, l := range ls {
-				v := strings.Split(l, "=")
-				if v[0] == objname {
-					if len(v) > 1 {
-						return v[1], nil
-					}
-				}
-			}
-		}
-	}
-	return "", errors.New(fmt.Sprintf("No Objective Value Name %v  is found in log", objname))
-}
-func (d *DlkWorkerInterface) GetTrialEvLogs(studyId string, tID string, metrics []string, sinceTime string) ([]*api.EvaluationLog, error) {
-	var ret []*api.EvaluationLog
-	ltlogs, err := d.getLtLogs(tID, sinceTime)
-	if err != nil {
-		return nil, err
-	} else if ltlogs == nil {
-		return ret, nil
-	}
-	for _, pl := range ltlogs.PodLogs {
 		for _, l := range pl.Logs {
-			if l.Value != "" {
-				lsf := strings.Fields(l.Value)
-				e := &api.EvaluationLog{Time: l.Time}
-				for _, l := range lsf {
-					v := strings.Split(l, "=")
-					for _, m := range metrics {
-						if v[0] == m && len(v) > 1 {
-							e.Metrics = append(e.Metrics, &api.Metrics{Name: m, Value: v[1]})
-						}
-					}
-				}
-				if len(e.Metrics) > 0 {
-					ret = append(ret, e)
-				}
-			}
+			unformatted_logs = append(unformatted_logs,
+				l.Time+" "+l.Value)
 		}
 	}
-	return ret, nil
+	err := d.dbIf.StoreTrialLogs(tID, unformatted_logs)
+	return err
 }
 
-func (d *DlkWorkerInterface) CheckRunningTrials(studyId string, objname string, metrics []string) error {
+func (d *DlkWorkerInterface) GetTrialObjValue(studyId string, tID string, objname string) (string, error) {
+	return wIF.GetTrialObjValue(d.dbIf, studyId, tID, objname)
+}
+
+func (d *DlkWorkerInterface) GetTrialEvLogs(studyId string, tID string, metrics []string, sinceTime string) ([]*api.EvaluationLog, error) {
+	return wIF.GetTrialEvLogs(d.dbIf, studyId, tID, metrics, sinceTime)
+}
+
+func (d *DlkWorkerInterface) CheckRunningTrials(studyId string, objname string) error {
 	d.mux.Lock()
 	defer d.mux.Unlock()
 	if len(d.RunningTrialList[studyId]) == 0 {
 		return nil
 	}
 	sc, _ := d.dbIf.GetStudyConfig(studyId)
+	metrics := sc.Metrics
 	for _, t := range d.RunningTrialList[studyId] {
 		status, err := d.dbIf.GetTrialStatus(t.TrialId)
 		if err != nil {
@@ -157,6 +132,10 @@ func (d *DlkWorkerInterface) CheckRunningTrials(studyId string, objname string, 
 		}
 		if status == api.TrialState_RUNNING {
 			c, _ := d.IsTrialComplete(studyId, t.TrialId)
+			err = d.storeTrialLog(t.TrialId)
+			if err != nil {
+				log.Printf("Error storing trial log of %s: %v", t.TrialId, err)
+			}
 			var es []*api.EvaluationLog
 			if len(t.EvalLogs) == 0 {
 				es, err = d.GetTrialEvLogs(studyId, t.TrialId, metrics, "")

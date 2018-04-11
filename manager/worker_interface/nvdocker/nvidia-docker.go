@@ -11,6 +11,7 @@ import (
 	"github.com/kubeflow/hp-tuning/api"
 	"github.com/kubeflow/hp-tuning/db"
 	"github.com/kubeflow/hp-tuning/manager/modeldb"
+	wIF "github.com/kubeflow/hp-tuning/manager/worker_interface"
 	"io"
 	"io/ioutil"
 	"log"
@@ -200,62 +201,39 @@ func (n *NvDockerWorkerInterface) IsTrialComplete(studyId string, tID string) (b
 	return false, nil
 }
 
-func (n *NvDockerWorkerInterface) GetTrialObjValue(studyId string, tID string, objname string) (string, error) {
-	cl, err := n.getConLog(tID, "")
+func (n *NvDockerWorkerInterface) storeTrialLog(tID string) error {
+	mt, err := n.dbIf.GetTrialTimestamp(tID)
 	if err != nil {
-		return "", err
+		return err
 	}
-	for i := len(cl) - 1; i >= 0; i-- {
-		ls := strings.Fields(cl[i])
-		for _, l := range ls {
-			v := strings.Split(l, "=")
-			if v[0] == objname {
-				return v[1], nil
-			}
-		}
+	sincetime := ""
+	if mt != nil {
+		sincetime = mt.Format(time.RFC3339Nano)
 	}
-	return "", errors.New(fmt.Sprintf("No Objective Value Name %v  is found in log", objname))
+	cl, err := n.getConLog(tID, sincetime)
+	if err != nil {
+		return err
+	}
+	err = n.dbIf.StoreTrialLogs(tID, cl)
+	return err
+}
+
+func (n *NvDockerWorkerInterface) GetTrialObjValue(studyId string, tID string, objname string) (string, error) {
+	return wIF.GetTrialObjValue(n.dbIf, studyId, tID, objname)
 }
 
 func (n *NvDockerWorkerInterface) GetTrialEvLogs(studyId string, tID string, metrics []string, sinceTime string) ([]*api.EvaluationLog, error) {
-	var ret []*api.EvaluationLog
-	clog, err := n.getConLog(tID, sinceTime)
-	if err != nil {
-		return nil, err
-	} else if clog == nil {
-		return ret, nil
-	}
-	for _, ls := range clog {
-		lsf := strings.Fields(ls)
-		if len(lsf) == 0 {
-			break
-		}
-		if lsf[0][8:] == sinceTime {
-			continue
-		}
-		e := &api.EvaluationLog{Time: lsf[0][8:]}
-		for _, l := range lsf[0:] {
-			v := strings.Split(l, "=")
-			for _, m := range metrics {
-				if v[0] == m {
-					e.Metrics = append(e.Metrics, &api.Metrics{Name: m, Value: v[1]})
-				}
-			}
-		}
-		if len(e.Metrics) > 0 {
-			ret = append(ret, e)
-		}
-	}
-	return ret, nil
+	return wIF.GetTrialEvLogs(n.dbIf, studyId, tID, metrics, sinceTime)
 }
 
-func (n *NvDockerWorkerInterface) CheckRunningTrials(studyId string, objname string, metrics []string) error {
+func (n *NvDockerWorkerInterface) CheckRunningTrials(studyId string, objname string) error {
 	n.mux.Lock()
 	defer n.mux.Unlock()
 	if len(n.RunningTrialList[studyId]) == 0 {
 		return nil
 	}
 	sc, _ := n.dbIf.GetStudyConfig(studyId)
+	metrics := sc.Metrics
 	for _, t := range n.RunningTrialList[studyId] {
 		status, err := n.dbIf.GetTrialStatus(t.TrialId)
 		if err != nil {
@@ -264,6 +242,10 @@ func (n *NvDockerWorkerInterface) CheckRunningTrials(studyId string, objname str
 		}
 		if status == api.TrialState_RUNNING {
 			c, _ := n.IsTrialComplete(studyId, t.TrialId)
+			err = n.storeTrialLog(t.TrialId)
+			if err != nil {
+				log.Printf("Error storing trial log of %s: %v", t.TrialId, err)
+			}
 			var es []*api.EvaluationLog
 			if len(t.EvalLogs) == 0 {
 				es, err = n.GetTrialEvLogs(studyId, t.TrialId, metrics, "")

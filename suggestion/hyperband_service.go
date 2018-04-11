@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"github.com/kubeflow/hp-tuning/db"
 	"log"
 	"math"
 	"sort"
@@ -43,10 +44,11 @@ type HyperBandParameters struct {
 type HyperBandSuggestService struct {
 	RandomSuggestService
 	parameters map[string]*HyperBandParameters
+	dbIf       db.VizierDBInterface
 }
 
 func NewHyperBandSuggestService() *HyperBandSuggestService {
-	return &HyperBandSuggestService{parameters: make(map[string]*HyperBandParameters)}
+	return &HyperBandSuggestService{parameters: make(map[string]*HyperBandParameters), dbIf: db.New()}
 }
 
 func (h *HyperBandSuggestService) generate_randid() string {
@@ -135,7 +137,6 @@ func (h *HyperBandSuggestService) getHyperParameter(studyId string, sconf *api.S
 			s_t[i].Tags = append(s_t[i].Tags, t)
 		}
 	}
-
 	return Bracket(s_t)
 }
 func (h *HyperBandSuggestService) hbLoopParamUpdate(studyId string) {
@@ -165,6 +166,14 @@ func (h *HyperBandSuggestService) GenerateTrials(ctx context.Context, in *api.Ge
 		var bid string
 		for _, c := range in.CompletedTrials {
 			schec = 0
+			value, _ := h.dbIf.GetTrialLogs(c.TrialId,
+				&db.GetTrialLogOpts{Objective: true, Descending: true, Limit: 1})
+			if len(value) != 1 {
+				log.Printf("objective value for %s not found",
+					c.TrialId)
+				continue
+			}
+			c.ObjectiveValue = value[0].Value
 			for _, t := range c.Tags {
 				if t.Name == "HyperBand_shi" && t.Value == strconv.Itoa(h.parameters[in.StudyId].shloopitr) {
 					schec++

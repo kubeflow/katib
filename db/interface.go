@@ -24,10 +24,16 @@ const (
 )
 
 type GetTrialLogOpts struct {
+	Name       string
+	SinceTime  *time.Time
+	Descending bool
+	Limit      int32
+	Objective  bool
 }
 
 type TrialLog struct {
-	Time  string
+	Time  time.Time
+	Name  string
 	Value string
 }
 
@@ -215,6 +221,16 @@ func (d *db_conn) CreateStudy(in *api.StudyConfig) (string, error) {
 		}
 	}
 
+	var isin bool = false
+	for _, m := range in.Metrics {
+		if m == in.ObjectiveValueName {
+			isin = true
+		}
+	}
+	if !isin {
+		in.Metrics = append(in.Metrics, in.ObjectiveValueName)
+	}
+
 	var study_id string
 	i := 3
 	for true {
@@ -397,8 +413,31 @@ func (d *db_conn) UpdateTrial(id string, newstatus api.TrialState) error {
 }
 
 func (d *db_conn) GetTrialLogs(id string, opts *GetTrialLogOpts) ([]*TrialLog, error) {
-	// TODO: opts not implemented
-	rows, err := d.db.Query("SELECT (time, value) FROM trial_logs WHERE trial_id = ? ORDER BY time", id)
+	qstr := ""
+	qfield := []interface{}{id}
+	order := ""
+	if opts != nil {
+		if opts.SinceTime != nil {
+			qstr += " AND time >= ?"
+			qfield = append(qfield, opts.SinceTime)
+		}
+		if opts.Name != "" {
+			qstr += " AND name = ?"
+			qfield = append(qfield, opts.Name)
+		}
+		if opts.Objective {
+			qstr += " AND is_objective = 1"
+		}
+		if opts.Descending {
+			order = " DESC"
+		}
+		if opts.Limit > 0 {
+			order += fmt.Sprintf(" LIMIT %d", opts.Limit)
+		}
+	}
+
+	rows, err := d.db.Query("SELECT time, name, value FROM trial_metrics WHERE trial_id = ?"+
+		qstr+" ORDER BY time"+order, qfield...)
 	if err != nil {
 		return nil, err
 	}
@@ -406,10 +445,16 @@ func (d *db_conn) GetTrialLogs(id string, opts *GetTrialLogOpts) ([]*TrialLog, e
 	var result []*TrialLog
 	for rows.Next() {
 		log1 := new(TrialLog)
+		var time_str string
 
-		err := rows.Scan(&((*log1).Time), &((*log1).Value))
+		err := rows.Scan(&time_str, &((*log1).Name), &((*log1).Value))
 		if err != nil {
 			log.Printf("Error scanning log: %v", err)
+			continue
+		}
+		log1.Time, err = time.Parse(mysql_time_fmt, time_str)
+		if err != nil {
+			log.Printf("Error parsing time %s: %v", time_str, err)
 			continue
 		}
 		result = append(result, log1)
@@ -417,11 +462,18 @@ func (d *db_conn) GetTrialLogs(id string, opts *GetTrialLogOpts) ([]*TrialLog, e
 	return result, nil
 }
 
-func (d *db_conn) GetTrialTimestamp(id string) (*time.Time, error) {
+func (d *db_conn) getTrialLastlog(id string, value *string) (*time.Time, error) {
 	var last_timestamp string
+	var err error
 
-	row := d.db.QueryRow("SELECT time FROM trial_logs WHERE trial_id = ? ORDER BY time DESC LIMIT 1", id)
-	err := row.Scan(&last_timestamp)
+	if value != nil {
+		row := d.db.QueryRow("SELECT time, value FROM trial_lastlogs WHERE trial_id = ?", id)
+		err = row.Scan(&last_timestamp, value)
+	} else {
+		row := d.db.QueryRow("SELECT time FROM trial_lastlogs WHERE trial_id = ?", id)
+		err = row.Scan(&last_timestamp)
+	}
+
 	switch {
 	case err == sql.ErrNoRows:
 		return nil, nil
@@ -438,14 +490,71 @@ func (d *db_conn) GetTrialTimestamp(id string) (*time.Time, error) {
 	}
 }
 
+func (d *db_conn) GetTrialTimestamp(id string) (*time.Time, error) {
+	return d.getTrialLastlog(id, nil)
+}
+
+func (d *db_conn) storeTrialLog(trial_id string, time string, line string,
+	objective_value_name string, metrics []string) error {
+	kvpairs := strings.Fields(line)
+	for _, kv := range kvpairs {
+		v := strings.Split(kv, "=")
+		if len(v) > 2 {
+			log.Printf("Ignoring trailing garbage: %s", kv)
+		}
+		if len(v) == 1 {
+			continue
+		}
+		is_objective := 0
+	search_keyword:
+		switch {
+		case v[0] == objective_value_name:
+			is_objective = 1
+		default:
+			for _, m := range metrics {
+				if v[0] == m {
+					break search_keyword
+				}
+			}
+			continue
+		}
+		_, err := d.db.Exec("INSERT INTO trial_metrics (trial_id, time, name, value, is_objective) VALUES (?, ?, ?, ?, ?)",
+			trial_id, time, v[0], v[1], is_objective)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (d *db_conn) StoreTrialLogs(trial_id string, logs []string) error {
 	var lasterr error
+	var last_value string
+	var stored_logs []*string
 
+	db_t, err := d.getTrialLastlog(trial_id, &last_value)
+	if err != nil {
+		log.Printf("Error getting last log timestamp: %v", err)
+	}
+
+	row := d.db.QueryRow("SELECT objective_value_name, metrics FROM trials "+
+		"JOIN (studies) ON (trials.study_id = studies.id) WHERE "+
+		"trials.id = ?", trial_id)
+	var objective_value_name, metrics_str string
+	err = row.Scan(&objective_value_name, &metrics_str)
+	if err != nil {
+		log.Printf("Cannot get objective_value_name or metrics: %v", err)
+		return err
+	}
+	metrics := strings.Split(metrics_str, ",\n")
+
+	var formatted_time string
+	var ls []string
 	for _, logline := range logs {
 		if logline == "" {
 			continue
 		}
-		ls := strings.SplitN(logline, " ", 2)
+		ls = strings.SplitN(logline, " ", 2)
 		if len(ls) != 2 {
 			log.Printf("Error parsing log: %s", logline)
 			lasterr = errors.New("Error parsing log")
@@ -457,15 +566,71 @@ func (d *db_conn) StoreTrialLogs(trial_id string, logs []string) error {
 			lasterr = err
 			continue
 		}
+		if db_t != nil && t.Before(*db_t) {
+			// db_t is from mysql and has microsec precision.
+			// This code assumes nanosec fractions are rounded down.
+			continue
+		}
 		// use UTC as mysql DATETIME lacks timezone
-		_, err = d.db.Exec("INSERT INTO trial_logs VALUES (?, ?, ?)",
-			trial_id, t.UTC().Format("2006-01-02 15:04:05.999999"), ls[1])
+		formatted_time = t.UTC().Format(mysql_time_fmt)
+		if db_t != nil {
+			// Parse again to get rounding effect
+			reparsed_time, err := time.Parse(mysql_time_fmt, formatted_time)
+			if reparsed_time == *db_t {
+				if ls[1] == last_value {
+					// stored_logs are already in DB
+					// This assignment ensures the remaining
+					// logs will be stored in DB.
+					db_t = nil
+					continue
+				}
+				// We don't know this is necessary or not yet.
+				stored_logs = append(stored_logs, &ls[1])
+				continue
+			}
+			// (reparsed_time > *db_t) can be assumed
+			for _, value := range stored_logs {
+				err = d.storeTrialLog(trial_id,
+					db_t.UTC().Format(mysql_time_fmt), *value,
+					objective_value_name, metrics)
+				if err != nil {
+					log.Printf("Error storing log %s: %v", *value, err)
+					lasterr = err
+				}
+			}
+			db_t = nil
+		}
+
+		err = d.storeTrialLog(trial_id,
+			formatted_time, ls[1],
+			objective_value_name, metrics)
 		if err != nil {
 			log.Printf("Error storing log %s: %v", logline, err)
 			lasterr = err
 		}
 	}
-	return lasterr
+	if db_t != nil && len(stored_logs) > 0 {
+		// No duplicate log found. So they are valid.
+		for _, value := range stored_logs {
+			err = d.storeTrialLog(trial_id,
+				db_t.UTC().Format(mysql_time_fmt), *value,
+				objective_value_name, metrics)
+			if err != nil {
+				log.Printf("Error storing log %s: %v", *value, err)
+				lasterr = err
+			}
+		}
+	}
+	if lasterr != nil {
+		// If lastlog were updated, logs that couldn't be saved
+		// would be lost.
+		return lasterr
+	}
+	if len(ls) == 2 {
+		_, err = d.db.Exec("REPLACE INTO trial_lastlogs VALUES (?, ?, ?)",
+			trial_id, formatted_time, ls[1])
+	}
+	return err
 }
 
 func (d *db_conn) DeleteTrial(id string) error {

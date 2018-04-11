@@ -50,14 +50,23 @@ func (d *db_conn) DB_Init() {
 		log.Fatalf("Error creating trials table: %v", err)
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS trial_logs" +
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS trial_metrics" +
 		"(trial_id CHAR(16) NOT NULL, " +
+		"id INT AUTO_INCREMENT PRIMARY KEY, " +
 		"time DATETIME(6), " +
+		"name VARCHAR(255), " +
 		"value TEXT, " +
-		"PRIMARY KEY (trial_id, time))")
-	// We can have "id INT AUTO_INCREMENT PRIMARY KEY" instead.
+		"is_objective TINYINT)")
 	if err != nil {
-		log.Fatalf("Error creating trial_logs table: %v", err)
+		log.Fatalf("Error creating trial_metrics table: %v", err)
+	}
+
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS trial_lastlogs" +
+		"(trial_id CHAR(16) PRIMARY KEY, " +
+		"time DATETIME(6), " +
+		"value TEXT)")
+	if err != nil {
+		log.Fatalf("Error creating trial_lastlogs table: %v", err)
 	}
 
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS workers" +

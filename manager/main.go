@@ -99,7 +99,7 @@ func (s *server) trialIteration(conf *pb.StudyConfig, study_id string, sCh study
 		select {
 		case <-tm.C:
 			if conf.SuggestAlgorithm != "" {
-				err := s.wIF.CheckRunningTrials(study_id, conf.ObjectiveValueName, conf.Metrics)
+				err := s.wIF.CheckRunningTrials(study_id, conf.ObjectiveValueName)
 				if err != nil {
 					return err
 				}
