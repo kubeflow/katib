@@ -482,3 +482,13 @@ func (n *NvDockerWorkerInterface) CleanWorkers(studyId string) error {
 	delete(n.RunningTrialList, studyId)
 	return nil
 }
+func (n *NvDockerWorkerInterface) CompleteTrial(studyId string, tID string, iscomplete bool) error {
+	cid := n.tidToCid[tID]
+	err := n.dcli.ContainerRemove(context.Background(), cid, types.ContainerRemoveOptions{Force: true})
+	if err != nil {
+		return err
+	}
+	delete(n.tidToCid, tID)
+	n.ngm.ReleaseGPU(tID)
+	return nil
+}

@@ -56,8 +56,28 @@ func TestGetStudyConfig(t *testing.T) {
 	}
 	//	mock.ExpectExec("SELECT * FROM studies WHERE id").WithArgs(id).WillReturnRows(sqlmock.NewRows())
 	mock.ExpectQuery("SELECT").WillReturnRows(
-		sqlmock.NewRows([]string{"id", "name", "owner", "optimization_type", "optimization_goal", "parameter_configs", "suggest_algo", "autostop_algo", "study_task_name", "suggestion_parameters", "tags", "objective_value_name", "metrics", "image", "command", "gpu", "scheduler", "mount", "pull_secret"}).
-			AddRow("abc", "test", "admin", 1, 0.99, "{}", "random", "test", "", "", "", "", "", "", "", 1, "", "", ""))
+		sqlmock.NewRows([]string{"id",
+			"name",
+			"owner",
+			"optimization_type",
+			"optimization_goal",
+			"parameter_configs",
+			"suggest_algo",
+			"early_stop_algo",
+			"study_task_name",
+			"suggestion_parameters",
+			"early_stopping_parameters",
+			"tags",
+			"objective_value_name",
+			"metrics",
+			"image",
+			"command",
+			"gpu",
+			"scheduler",
+			"mount",
+			"pull_secret",
+		}).
+			AddRow("abc", "test", "admin", 1, 0.99, "{}", "random", "test", "", "", "", "", "", "", "", "", 1, "", "", ""))
 	study, err := db_interface.GetStudyConfig(id)
 	if err != nil {
 		t.Errorf("GetStudyConfig failed: %v", err)

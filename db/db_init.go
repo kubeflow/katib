@@ -14,9 +14,10 @@ func (d *db_conn) DB_Init() {
 		"optimization_goal DOUBLE, " +
 		"parameter_configs TEXT, " +
 		"suggest_algo VARCHAR(255), " +
-		"autostop_algo VARCHAR(255), " +
+		"early_stop_algo VARCHAR(255), " +
 		"study_task_name VARCHAR(255), " +
 		"suggestion_parameters TEXT, " +
+		"early_stopping_parameters TEXT, " +
 		"tags TEXT, " +
 		"objective_value_name VARCHAR(255), " +
 		"metrics TEXT, " +

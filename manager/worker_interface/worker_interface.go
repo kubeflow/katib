@@ -17,6 +17,7 @@ type WorkerInterface interface {
 	GetRunningTrials(studyId string) []*api.Trial
 	GetCompletedTrials(studyId string) []*api.Trial
 	CleanWorkers(studyId string) error
+	CompleteTrial(studyId string, tID string, iscomplete bool) error
 }
 
 // Those functions can go after EvalLog transition to DB is complete.
