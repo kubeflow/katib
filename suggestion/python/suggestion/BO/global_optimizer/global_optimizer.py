@@ -20,7 +20,7 @@ class RectPack:
         k = (division_num - j) / dim
         self.d = np.sqrt(j * np.power(3, float(-2 * (k + 1))) + (dim - j) * np.power(3, float(-2 * k))) / 2
         self.division_num = division_num
-        self.fc, _, _ = aq_func.get_expected_improvement(scaler.inverse_transform(self.center))
+        self.fc, _, _ = aq_func.compute(scaler.inverse_transform(self.center))
         self.fc = -self.fc
 
 
@@ -69,7 +69,8 @@ class DimPack:
 class GlobalOptimizer:
     """ class for the global optimizer """
 
-    def __init__(self, N, l, u, scaler, X_train, y_train, current_optimal):
+    def __init__(self, N, l, u, scaler, X_train, y_train, current_optimal, mode, trade_off, length_scale,
+                 noise, nu, kernel_type):
         self.N = N
         self.l = l
         self.u = u
@@ -77,10 +78,15 @@ class GlobalOptimizer:
         self.buckets = []
         self.dim = None
         self.aq_func = AcquisitionFunc(
-            # X_test=scaler.inverse_transform(self.center),
             X_train=X_train,
             y_train=y_train,
             current_optimal=current_optimal,
+            mode=mode,
+            trade_off=trade_off,
+            length_scale=length_scale,
+            noise=noise,
+            nu=nu,
+            kernel_type=kernel_type,
         )
 
     def potential_opt(self, f_min):
@@ -171,44 +177,35 @@ class GlobalOptimizer:
                     self.scaler
                 )
                 for bucket in self.buckets:
-                    #                 print(bucket)
                     if bucket.diff_exist(opt.point.d):
-                        #                     print(bucket.array)
-                        # print(opt.a)
                         bucket.delete()
                         if not bucket.array:
                             index = self.buckets.index(bucket)
-                            #                         print(index)
                             del self.buckets[index]
 
             ei_min.append(f_min)
-        # plt.plot(ei_min)
-        # plt.show()
         return f_min, x_next
 
     def divide_rect(self, opt_rect, f_min, x_next, aq_func, scaler):
         """ divide the rectangular into smaller ones """
         rect = copy.deepcopy(opt_rect)
         division_num = rect.division_num
-        #     print(division_num)
         j = np.mod(division_num, self.dim)
         k = (division_num - j) / self.dim
         max_side_len = np.power(3, float(-k))
-        #     print(max_side_len)
         delta = max_side_len / 3
         dim_set = []
         for i in range(self.dim):
             if abs(max_side_len - (rect.u[0, i] - rect.l[0, i])) < 0.0000001:
                 dim_set.append(i)
-                #     assert(len(dim_set) == dim-j)
 
         dim_list = []
         for i in dim_set:
             e = np.zeros((1, self.dim))
             e[0, i] = 1
             function_value = min(
-                aq_func.get_expected_improvement(scaler.inverse_transform(rect.center + delta * e)),
-                aq_func.get_expected_improvement(scaler.inverse_transform(rect.center - delta * e))
+                aq_func.compute(scaler.inverse_transform(rect.center + delta * e)),
+                aq_func.compute(scaler.inverse_transform(rect.center - delta * e))
             )
             dim_list.append(DimPack(i, function_value))
         dim_list.sort(key=lambda x: x.fc)
@@ -217,8 +214,6 @@ class GlobalOptimizer:
             division_num = division_num + 1
             temp = np.zeros((1, self.dim))
             temp[0, dim_list[i].dim] = delta
-            #         print(temp)
-            #         d = compute_d(division_num, dim)
             left_rect = RectPack(
                 rect.l,
                 rect.u - 2 * temp,

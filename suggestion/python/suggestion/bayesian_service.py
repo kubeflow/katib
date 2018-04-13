@@ -1,10 +1,8 @@
-from concurrent import futures
 import random
 import string
-import time
+
 import grpc
 import numpy as np
-import sys
 
 from api import api_pb2
 from api import api_pb2_grpc
@@ -60,11 +58,18 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
         # print("upperbound", upperbound)
         alg = BOAlgorithm(
             dim=algo_manager.dim,
-            N=self.service_params[request.study_id]["N"],
+            N=int(self.service_params[request.study_id]["N"]),
             lowerbound=lowerbound,
             upperbound=upperbound,
             X_train=algo_manager.X_train,
             y_train=algo_manager.y_train,
+            mode=self.service_params[request.study_id]["mode"],
+            trade_off=self.service_params[request.study_id]["trade_off"],
+            # todo: support length_scale with array type
+            length_scale=self.service_params[request.study_id]["length_scale"],
+            noise=self.service_params[request.study_id]["noise"],
+            nu=self.service_params[request.study_id]["nu"],
+            kernel_type=self.service_params[request.study_id]["kernel_type"]
         )
         x_next = alg.get_suggestion().squeeze()
 
@@ -101,12 +106,36 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
 
     def SetSuggestionParameters(self, request, context):
         if request.study_id not in self.service_params.keys():
-            self.service_params[request.study_id] = {}
+            self.service_params[request.study_id] = {
+                "N": None,
+                "length_scale": None,
+                "noise": None,
+                "nu": None,
+                "kernel_type": None,
+                "mode": None,
+                "trade_off": None
+            }
         for param in request.suggestion_parameters:
-            if param.name != "N":
-                print("unknown parameter name")
-                sys.exit(1)
-            self.service_params[request.study_id][param.name] = int(param.value)
+            if param.name not in self.service_params[request.study_id].keys():
+                context.set_code(grpc.StatusCode.UNKNOWN)
+                context.set_details("unknown suggestion parameter: "+param.name)
+                return api_pb2.SetSuggestionParametersReply()
+            if param.name == "length_scale" or param.name == "noise" or param.name == "nu" or param.name == "trade_off":
+                self.service_params[request.study_id][param.name] = float(param.value)
+            elif param.name == "N":
+                self.service_params[request.study_id][param.name] = int(param.value)
+            elif param.name == "kernel_type":
+                if param.value != "rbf" and param.value != "matern":
+                    context.set_code(grpc.StatusCode.UNKNOWN)
+                    context.set_details("unknown kernel type: " + param.value)
+                self.service_params[request.study_id][param.name] = param.value
+            elif param.name == "mode":
+                if param.value != "lcb" and param.value != "ei" and param.value != "pi":
+                    context.set_code(grpc.StatusCode.UNKNOWN)
+                    context.set_details("unknown acquisition mode: " + param.name)
+                self.service_params[request.study_id][param.name] = param.value
+
+        print(self.service_params)
         return api_pb2.SetSuggestionParametersReply()
 
     def StopSuggestion(self, request, context):

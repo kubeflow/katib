@@ -14,13 +14,25 @@ def run():
             api_pb2.SuggestionParameter(
                 name="N",
                 value="100",
+            ),
+            api_pb2.SuggestionParameter(
+                name="kernel_type",
+                value="matern",
+            ),
+            api_pb2.SuggestionParameter(
+                name="mode",
+                value="ei",
+            ),
+            api_pb2.SuggestionParameter(
+                name="trade_off",
+                value="0.01",
             )
         ]
     ))
     completed_trials = []
     maximum = -1
     iter = 0
-    for i in range(20):
+    for i in range(30):
         response = stub.GenerateTrials(api_pb2.GenerateTrialsRequest(
             study_id="1",
             configs=api_pb2.StudyConfig(

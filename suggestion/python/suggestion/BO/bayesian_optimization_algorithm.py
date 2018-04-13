@@ -7,10 +7,11 @@ from suggestion.BO.global_optimizer.global_optimizer import GlobalOptimizer
 
 class BOAlgorithm:
     """ class for bayesian optimization """
-    def __init__(self, dim, N, lowerbound, upperbound, X_train, y_train):
+    def __init__(self, dim, N, lowerbound, upperbound, X_train, y_train, mode, trade_off,
+                 length_scale, noise, nu, kernel_type):
         # np.random.seed(0)
         self.dim = dim
-        self.N = N
+        self.N = N or 100
         self.l = np.zeros((1, dim))
         self.u = np.ones((1, dim))
         self.lowerbound = lowerbound.reshape(1, dim)
@@ -36,7 +37,13 @@ class BOAlgorithm:
             self.scaler,
             self.X_train,
             self.y_train,
-            self.current_optimal
+            self.current_optimal,
+            mode=mode,
+            trade_off=trade_off,
+            length_scale=length_scale,
+            noise=noise,
+            nu=nu,
+            kernel_type=kernel_type,
         )
 
     def get_suggestion(self):
