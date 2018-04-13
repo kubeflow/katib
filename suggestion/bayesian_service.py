@@ -4,10 +4,10 @@ import string
 import grpc
 import numpy as np
 
-from api import api_pb2
-from api import api_pb2_grpc
-from suggestion.BO.bayesian_optimization_algorithm import BOAlgorithm
-from suggestion.algorithm_manager import AlgorithmManager
+from api.python import api_pb2
+from api.python import api_pb2_grpc
+from suggestion.bayesianoptimization.src.bayesian_optimization_algorithm import BOAlgorithm
+from suggestion.bayesianoptimization.src.algorithm_manager import AlgorithmManager
 
 
 class BayesianService(api_pb2_grpc.SuggestionServicer):
@@ -135,7 +135,6 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
                     context.set_details("unknown acquisition mode: " + param.name)
                 self.service_params[request.study_id][param.name] = param.value
 
-        print(self.service_params)
         return api_pb2.SetSuggestionParametersReply()
 
     def StopSuggestion(self, request, context):

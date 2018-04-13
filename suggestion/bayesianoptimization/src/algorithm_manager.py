@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from api import api_pb2
+from api.python import api_pb2
 
 
 def deal_with_discrete(feasible_values, current_value):
@@ -186,7 +186,6 @@ class AlgorithmManager:
                         counter = counter + param["number"]
                         break
             elif self._types[i] == api_pb2.DOUBLE:
-                print(counter)
                 result.append(x_next[counter])
                 counter = counter + 1
         return result

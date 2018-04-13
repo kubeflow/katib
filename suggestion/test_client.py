@@ -1,12 +1,13 @@
 import grpc
 
-from api import api_pb2
-from api import api_pb2_grpc
+from api.python import api_pb2
+from api.python import api_pb2_grpc
 from suggestion.test_func import func
+from suggestion.types import DEFAULT_PORT
 
 
 def run():
-    channel = grpc.insecure_channel('localhost:50052')
+    channel = grpc.insecure_channel(DEFAULT_PORT)
     stub = api_pb2_grpc.SuggestionStub(channel)
     set_param_response = stub.SetSuggestionParameters(api_pb2.SetSuggestionParametersRequest(
         study_id="1",

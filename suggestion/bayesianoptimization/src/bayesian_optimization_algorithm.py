@@ -2,7 +2,7 @@
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
-from suggestion.BO.global_optimizer.global_optimizer import GlobalOptimizer
+from suggestion.bayesianoptimization.src.global_optimizer.global_optimizer import GlobalOptimizer
 
 
 class BOAlgorithm:

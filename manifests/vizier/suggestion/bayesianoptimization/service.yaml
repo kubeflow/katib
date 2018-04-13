@@ -1,0 +1,17 @@
+aliVersion: v1
+kind: Service
+metadata:
+  name: vizier-suggestion-bayesianoptimization
+  namespace: katib
+  labels:
+    app: vizier
+    component: suggestion-bayesianoptimization
+spec:
+  type: ClusterIP
+  prots:
+    - port: 6789
+      protocol: TCP
+      name: api
+  selector:
+    app: vizier
+    component: suggestion-bayesianoptimization

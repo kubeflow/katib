@@ -6,7 +6,6 @@ python suggestion/bayesian/main.py
 
 - start the testing client
 
-
 ```
 python suggestion/test_client.py
 ```

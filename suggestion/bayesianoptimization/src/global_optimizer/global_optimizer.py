@@ -4,7 +4,7 @@ DIRECT algorithm is used in this case
 import copy
 import numpy as np
 
-from suggestion.BO.acquisition_func.acquisition_func import AcquisitionFunc
+from suggestion.bayesianoptimization.src.acquisition_func.acquisition_func import AcquisitionFunc
 
 
 class RectPack:

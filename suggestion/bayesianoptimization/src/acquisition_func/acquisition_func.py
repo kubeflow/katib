@@ -2,7 +2,7 @@
 import numpy as np
 from scipy.stats import norm
 
-from suggestion.BO.model.Model import Model
+from suggestion.bayesianoptimization.src.model.Model import Model
 
 
 class AcquisitionFunc:
