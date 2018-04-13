@@ -311,3 +311,38 @@ func (d *DlkWorkerInterface) CleanWorkers(studyId string) error {
 	}
 	return nil
 }
+func (d *DlkWorkerInterface) CompleteTrial(studyId string, tID string, iscomplete bool) error {
+	url := fmt.Sprintf("%s/learningTasks/%s/", d.dlkmanager, d.namespace)
+	d.mux.Lock()
+	defer d.mux.Unlock()
+	if iscomplete {
+		log.Printf("Trial %s completed", tID)
+	} else {
+		log.Printf("Trial %s has been killed", tID)
+	}
+	req, err := http.NewRequest("DELETE", url+tID, nil)
+	if err != nil {
+		log.Printf("failed to create DELETE request: %s\n", err)
+		return err
+	}
+	//send REST API Request
+	_, err = http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	for i, t := range d.RunningTrialList[studyId] {
+		if t.TrialId == tID {
+			d.RunningTrialList[studyId] = append(d.RunningTrialList[studyId][:i], d.RunningTrialList[studyId][i+1:]...)
+			if iscomplete {
+				t.Status = api.TrialState_COMPLETED
+				d.dbIf.UpdateTrial(t.TrialId, api.TrialState_COMPLETED)
+			} else {
+				t.Status = api.TrialState_KILLED
+				d.dbIf.UpdateTrial(t.TrialId, api.TrialState_KILLED)
+			}
+			d.CompletedTrialList[studyId] = append(d.CompletedTrialList[studyId], t)
+		}
+	}
+	return nil
+}

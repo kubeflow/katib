@@ -32,17 +32,23 @@ GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
 
 echo "Activating service-account"
 gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+
 echo "Configuring kubectl"
 gcloud --project ${PROJECT} container clusters get-credentials ${CLUSTER_NAME} \
     --zone ${ZONE}
 
+kubectl config set-credentials temp-admin --username=admin --password=$(gcloud container clusters describe ${CLUSTER_NAME} --format="value(masterAuth.password)" --zone=${ZONE})
+kubectl config set-context temp-context --cluster=$(kubectl config get-clusters | grep ${CLUSTER_NAME}) --user=temp-admin
+kubectl config use-context temp-context
+
 echo "Install Katib "
-sed -i -e "s/image: katib\/vizier-core/image: ${REGISTRY}\/${REPO_NAME}\/vizier-core:${VERSION}/" manifests/vizier/core/deployment.yaml
-sed -i -e "s/image: katib\/suggestion-random/image: ${REGISTRY}\/${REPO_NAME}\/suggestion-random:${VERSION}/" manifests/suggestion/random/deployment.yaml
-sed -i -e "s/image: katib\/suggestion-grid/image: ${REGISTRY}\/${REPO_NAME}\/suggestion-grid:${VERSION}/" manifests/suggestion/grid/deployment.yaml
-sed -i -e "s/image: katib\/suggestion-hyperband/image: ${REGISTRY}\/${REPO_NAME}\/suggestion-hyperband:${VERSION}/" manifests/suggestion/hyperband/deployment.yaml
-sed -i -e "s/image: katib\/dlk-manager/image: ${REGISTRY}\/${REPO_NAME}\/dlk-manager:${VERSION}/" manifests/dlk/deployment.yaml
-sed -i -e "s/image: katib\/katib-frontend/image: ${REGISTRY}\/${REPO_NAME}\/katib-frontend:${VERSION}/" manifests/modeldb/frontend/deployment.yaml
+sed -i -e "s@image: katib\/vizier-core@image: ${REGISTRY}\/${REPO_NAME}\/vizier-core:${VERSION}@" manifests/vizier/core/deployment.yaml
+sed -i -e "s@image: katib\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-random:${VERSION}@" manifests/vizier/suggestion/random/deployment.yaml
+sed -i -e "s@image: katib\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-grid:${VERSION}@" manifests/vizier/suggestion/grid/deployment.yaml
+sed -i -e "s@image: katib\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-hyperband:${VERSION}@" manifests/vizier/suggestion/hyperband/deployment.yaml
+sed -i -e "s@image: katib\/earlystopping-medianstopping@image: ${REGISTRY}\/${REPO_NAME}\/earlystopping-medianstopping:${VERSION}@" manifests/vizier/earlystopping/medianstopping/deployment.yaml
+sed -i -e "s@image: katib\/dlk-manager@image: ${REGISTRY}\/${REPO_NAME}\/dlk-manager:${VERSION}@" manifests/dlk/deployment.yaml
+sed -i -e "s@image: katib\/katib-frontend@image: ${REGISTRY}\/${REPO_NAME}\/katib-frontend:${VERSION}@" manifests/modeldb/frontend/deployment.yaml
 cd ${GO_DIR}
 ./deploy.sh
 

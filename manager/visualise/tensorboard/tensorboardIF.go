@@ -10,7 +10,6 @@ import (
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
-	//	"log"
 )
 
 func initk8sCl() (*kubernetes.Clientset, error) {
@@ -52,7 +51,6 @@ func SpawnTensorBoard(sid string, tid string, namespace string, mount *api.Mount
 	k8syaml.NewYAMLOrJSONDecoder(bytes.NewReader(tFile), BUFSIZE).Decode(&svc)
 
 	tname := "tensorboard-" + sid + "-" + tid
-
 	dep.ObjectMeta.Name = tname
 	dep.ObjectMeta.Labels["TrialID"] = tid
 	dep.ObjectMeta.Labels["StudyID"] = sid
