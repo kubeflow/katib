@@ -105,7 +105,6 @@ func (m *MedianStoppingRule) getMedianRunningAverage(completedTrialslogs [][]*vd
 	if len(r) == 0 {
 		return 0
 	} else {
-		log.Printf("running avg list %v", r)
 		sort.Float64s(r)
 		return r[len(r)/2]
 	}
