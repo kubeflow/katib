@@ -37,13 +37,9 @@ echo "Configuring kubectl"
 gcloud --project ${PROJECT} container clusters get-credentials ${CLUSTER_NAME} \
     --zone ${ZONE}
 
-
-# Create serviceaccount to overcome the RBAC issue in GKE.
-# Please see https://github.com/coreos/prometheus-operator/pull/360/files?short_path=a141d34#diff-a141d34d5164b9b18482d4e57c88ec97
-echo "Create clusterrolebining"
-kubectl apply -f manifests/0-namespace.yaml
-kubectl create serviceaccount katib -n katib
-kubectl create clusterrolebinding katib-cluster-admin-binding --clusterrole=cluster-admin --serviceaccount=katib:katib
+kubectl config set-credentials temp-admin --username=admin --password=$(gcloud container clusters describe ${CLUSTER_NAME} --format="value(masterAuth.password)" --zone=${ZONE})
+kubectl config set-context temp-context --cluster=$(kubectl config get-clusters | grep ${CLUSTER_NAME}) --user=temp-admin
+kubectl config use-context temp-context
 
 echo "Install Katib "
 sed -i -e "s@image: katib\/vizier-core@image: ${REGISTRY}\/${REPO_NAME}\/vizier-core:${VERSION}@" manifests/vizier/core/deployment.yaml
