@@ -1,4 +1,4 @@
-apiVersion: extensions/vibeta1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: vizier-suggestion-bayesianoptimization
@@ -6,18 +6,18 @@ metadata:
   labels:
     app: vizier
     component: suggestion-bayesianoptimization
-  spec:
-    replicas: 1
-    template:
-      metadata:
-        name: vizier-suggestion-bayesianoptimization
-        labels:
-          app: vizier
-          component: suggestion-bayesianoptimization
-      spec:
-        containers:
-        - name: vizier-suggestion-bayesianoptimization
-          image: katib/suggestion-bayesianoptimization
-          ports:
-          - name: api
-            containerPort: 6789
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: vizier-suggestion-bayesianoptimization
+      labels:
+        app: vizier
+        component: suggestion-bayesianoptimization
+    spec:
+      containers:
+      - name: vizier-suggestion-bayesianoptimization
+        image: katib/suggestion-bayesianoptimization
+        ports:
+        - name: api
+          containerPort: 6789

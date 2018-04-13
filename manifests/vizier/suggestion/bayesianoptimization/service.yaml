@@ -1,4 +1,4 @@
-aliVersion: v1
+apiVersion: v1
 kind: Service
 metadata:
   name: vizier-suggestion-bayesianoptimization
@@ -8,7 +8,7 @@ metadata:
     component: suggestion-bayesianoptimization
 spec:
   type: ClusterIP
-  prots:
+  ports:
     - port: 6789
       protocol: TCP
       name: api
