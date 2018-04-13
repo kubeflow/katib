@@ -39,6 +39,7 @@ go build -o bin/dlkmanager github.com/kubeflow/hp-tuning//dlk/dlkmanager
 go build -o bin/katib-suggestion-grid github.com/kubeflow/hp-tuning/suggestion/grid
 go build -o bin/katib-suggestion-hyperband github.com/kubeflow/hp-tuning/suggestion/hyperband
 go build -o bin/katib-suggestion-random github.com/kubeflow/hp-tuning/suggestion/random
+go build -o bin/katib-earlystopping-medianstopping github.com/kubeflow/hp-tuning/earlystopping/medianstopping
 go build -o bin/katib github.com/kubeflow/hp-tuning/cli
 #echo "building container in gcloud"
 #gcloud version
@@ -51,6 +52,8 @@ cp suggestion/grid/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-grid:${VERSION} --project=${PROJECT}
 cp suggestion/hyperband/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-hyperband:${VERSION} --project=${PROJECT}
+cp earlystopping/medianstopping/Dockerfile .
+gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/earlystopping-medianstopping:${VERSION} --project=${PROJECT}
 cp dlk/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/dlk-manager:${VERSION} --project=${PROJECT}
 cp manager/modeldb//Dockerfile .
