@@ -52,6 +52,8 @@ cp suggestion/grid/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-grid:${VERSION} --project=${PROJECT}
 cp suggestion/hyperband/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-hyperband:${VERSION} --project=${PROJECT}
+cp suggestion/bayesianoptimization/Dockerfile .
+gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-bayesianoptimization:${VERSION} --project=${PROJECT}
 cp earlystopping/medianstopping/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/earlystopping-medianstopping:${VERSION} --project=${PROJECT}
 cp dlk/Dockerfile .

@@ -1,3 +1,7 @@
+# python ignore files
+__pycache__/
+.idea/
+
 # Project specific ignore files
 *.swp
 bin
