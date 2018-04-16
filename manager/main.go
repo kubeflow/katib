@@ -4,11 +4,8 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
-	"os"
 	"strconv"
 	"time"
 
@@ -19,17 +16,18 @@ import (
 
 	tbif "github.com/kubeflow/hp-tuning/manager/visualise/tensorboard"
 
+	"github.com/kubeflow/hp-tuning/manager/modelstore_interface"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
+	pb "github.com/kubeflow/hp-tuning/api"
 	vdb "github.com/kubeflow/hp-tuning/db"
 	batchv1 "k8s.io/api/batch/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-
-	pb "github.com/kubeflow/hp-tuning/api"
 )
 
 const (
@@ -48,47 +46,8 @@ type studyCh struct {
 }
 type server struct {
 	wIF         worker_interface.WorkerInterface
+	msIf        modelstore_interface.ModelStoreInterface
 	StudyChList map[string]studyCh
-}
-
-func (s *server) saveResult(study_id string) error {
-	var result string
-	c := s.wIF.GetCompletedTrials(study_id)
-	if len(c) == 0 {
-		log.Printf("Study %v has no completed Trials", study_id)
-		return nil
-	}
-	result += "TrialID"
-	for _, p := range c[0].ParameterSet {
-		result += fmt.Sprintf("\t%v", p.Name)
-	}
-	result += "\tObjectiveValue"
-	if len(c) > 0 {
-		if len(c[0].EvalLogs) > 0 {
-			for _, m := range c[0].EvalLogs[len(c[0].EvalLogs)-1].Metrics {
-				result += fmt.Sprintf("\t%v", m.Name)
-			}
-		}
-	}
-	result += "\tTiem_cost"
-	result += "\n"
-
-	for _, ct := range c {
-		result += fmt.Sprintf("%v", ct.TrialId)
-		for _, p := range ct.ParameterSet {
-			result += fmt.Sprintf("\t%v", p.Value)
-		}
-		result += fmt.Sprintf("\t%v", ct.ObjectiveValue)
-		for _, m := range ct.EvalLogs[len(ct.EvalLogs)-1].Metrics {
-			result += fmt.Sprintf("\t%v", m.Value)
-		}
-		st, _ := time.Parse(time.RFC3339, ct.EvalLogs[0].Time)
-		et, _ := time.Parse(time.RFC3339, ct.EvalLogs[len(ct.EvalLogs)-1].Time)
-		result += fmt.Sprintf("\t%v", et.Sub(st))
-		result += "\n"
-	}
-	ioutil.WriteFile("/conf/result", []byte(result), os.ModePerm)
-	return nil
 }
 
 func (s *server) trialIteration(conf *pb.StudyConfig, study_id string, sCh studyCh) error {
@@ -109,6 +68,7 @@ func (s *server) trialIteration(conf *pb.StudyConfig, study_id string, sCh study
 		ei = defaultEarlyStopInterval
 	}
 	estm := time.NewTimer(time.Duration(ei) * time.Second)
+	strtm := time.NewTimer(time.Duration(30) * time.Second)
 	log.Printf("Study %v start.", study_id)
 	log.Printf("Study conf %v", conf)
 	for {
@@ -126,7 +86,6 @@ func (s *server) trialIteration(conf *pb.StudyConfig, study_id string, sCh study
 				}
 				if r.Completed {
 					log.Printf("Study %v completed.", study_id)
-					//s.saveResult(study_id)
 					return nil
 				} else if len(r.Trials) > 0 {
 					for _, trial := range r.Trials {
@@ -153,6 +112,50 @@ func (s *server) trialIteration(conf *pb.StudyConfig, study_id string, sCh study
 				}
 				tm.Reset(1 * time.Second)
 			}
+		case <-strtm.C:
+			ret, err := s.GetStoredModels(context.Background(), &pb.GetStoredModelsRequest{StudyName: conf.Name})
+			if err != nil {
+				log.Printf("GetStoredModels Err %v", err)
+			}
+			ts, err := dbIf.GetTrialList(study_id)
+			if err != nil {
+				log.Printf("GetTrials Err %v", err)
+			}
+			for _, t := range ts {
+				tid := t.TrialId
+				tst, err := dbIf.GetTrialStatus(tid)
+				if err != nil {
+					log.Printf("GetTrialStatus Err %v", err)
+					continue
+				}
+				if tst == pb.TrialState_COMPLETED {
+					isin := false
+					for _, m := range ret.Models {
+						if m.TrialId == tid {
+							isin = true
+						}
+					}
+					met := make([]*pb.Metrics, len(conf.Metrics))
+					for i, mn := range conf.Metrics {
+						l, _ := dbIf.GetTrialLogs(tid, &vdb.GetTrialLogOpts{Name: mn})
+						met[i] = &pb.Metrics{Name: mn, Value: l[len(l)-1].Value}
+					}
+					if !isin {
+						t, _ := dbIf.GetTrial(tid)
+						s.StoreModel(context.Background(), &pb.StoreModelRequest{
+							Model: &pb.ModelInfo{
+								StudyName:  conf.Name,
+								TrialId:    tid,
+								Parameters: t.ParameterSet,
+								Metrics:    met,
+							},
+						})
+
+					}
+				}
+			}
+			strtm.Reset(30 * time.Second)
+
 		case <-estm.C:
 			ret, err := s.EarlyStopping(context.Background(), &pb.EarlyStoppingRequest{StudyId: study_id, EarlyStoppingAlgorithm: conf.EarlyStoppingAlgorithm})
 			if err != nil {
@@ -224,6 +227,10 @@ func (s *server) CreateStudy(ctx context.Context, in *pb.CreateStudyRequest) (*p
 		}
 	}
 	sCh := studyCh{stopCh: make(chan bool), addMetricsCh: make(chan string)}
+	_, err = s.StoreStudy(ctx, &pb.StoreStudyRequest{StudyName: in.StudyConfig.Name})
+	if err != nil {
+		return &pb.CreateStudyReply{}, err
+	}
 	go s.trialIteration(in.StudyConfig, study_id, sCh)
 	s.StudyChList[study_id] = sCh
 	return &pb.CreateStudyReply{StudyId: study_id}, nil
@@ -392,14 +399,14 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		pb.RegisterManagerServer(s, &server{wIF: k8swif.NewKubernetesWorkerInterface(clientset, dbIf), StudyChList: make(map[string]studyCh)})
+		pb.RegisterManagerServer(s, &server{wIF: k8swif.NewKubernetesWorkerInterface(clientset, dbIf), msIf: modelstore_interface.NewModelDBInterface("modeldb-backend", "6543"), StudyChList: make(map[string]studyCh)})
 		// XXX Is this useful?
 	case "dlk":
 		log.Printf("Worker: dlk\n")
-		pb.RegisterManagerServer(s, &server{wIF: dlkwif.NewDlkWorkerInterface("http://dlk-manager:1323", k8s_namespace), StudyChList: make(map[string]studyCh)})
+		pb.RegisterManagerServer(s, &server{wIF: dlkwif.NewDlkWorkerInterface("http://dlk-manager:1323", k8s_namespace), msIf: modelstore_interface.NewModelDBInterface("modeldb-backend", "6543"), StudyChList: make(map[string]studyCh)})
 	case "nv-docker":
 		log.Printf("Worker: nv-docker\n")
-		pb.RegisterManagerServer(s, &server{wIF: nvdwif.NewNvDockerWorkerInterface(), StudyChList: make(map[string]studyCh)})
+		pb.RegisterManagerServer(s, &server{wIF: nvdwif.NewNvDockerWorkerInterface(), msIf: modelstore_interface.NewModelDBInterface("modeldb-backend", "6543"), StudyChList: make(map[string]studyCh)})
 	default:
 		log.Fatalf("Unknown worker")
 	}
@@ -408,4 +415,25 @@ func main() {
 		log.Fatalf("Failed to serve: %v", err)
 	}
 	//	}
+}
+
+func (s *server) StoreStudy(ctx context.Context, in *pb.StoreStudyRequest) (*pb.StoreStudyReply, error) {
+	err := s.msIf.StoreStudy(in)
+	return &pb.StoreStudyReply{}, err
+}
+func (s *server) StoreModel(ctx context.Context, in *pb.StoreModelRequest) (*pb.StoreModelReply, error) {
+	err := s.msIf.StoreModel(in)
+	return &pb.StoreModelReply{}, err
+}
+func (s *server) GetStoredStudies(ctx context.Context, in *pb.GetStoredStudiesRequest) (*pb.GetStoredStudiesReply, error) {
+	ret, err := s.msIf.GetStoredStudies()
+	return &pb.GetStoredStudiesReply{Studies: ret}, err
+}
+func (s *server) GetStoredModels(ctx context.Context, in *pb.GetStoredModelsRequest) (*pb.GetStoredModelsReply, error) {
+	ret, err := s.msIf.GetStoredModels(in)
+	return &pb.GetStoredModelsReply{Models: ret}, err
+}
+func (s *server) GetStoredModel(ctx context.Context, in *pb.GetStoredModelRequest) (*pb.GetStoredModelReply, error) {
+	ret, err := s.msIf.GetStoredModel(in)
+	return &pb.GetStoredModelReply{Model: ret}, err
 }
