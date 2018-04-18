@@ -4,7 +4,7 @@ import (
 	"github.com/kubeflow/hp-tuning/api"
 )
 
-type ModelSave interface {
+type ModelStore interface {
 	SaveStudy(*api.SaveStudyRequest) error
 	SaveModel(*api.SaveModelRequest) error
 	GetSavedStudies() ([]*api.StudyOverview, error)
