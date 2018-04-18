@@ -12,6 +12,11 @@ service Manager {
 	rpc GetObjectValue(GetObjectValueRequest) returns (GetObjectValueReply);
 	rpc AddMeasurementToTrials(AddMeasurementToTrialsRequest) returns (AddMeasurementToTrialsReply);
     rpc InitializeSuggestService(InitializeSuggestServiceRequest) returns(InitializeSuggestServiceReply);
+    rpc StoreStudy(StoreStudyRequest) returns(StoreStudyReply);
+    rpc StoreModel(StoreModelRequest) returns(StoreModelReply);
+    rpc GetStoredStudies(GetStoredStudiesRequest) returns(GetStoredStudiesReply);
+    rpc GetStoredModels(GetStoredModelsRequest) returns(GetStoredModelsReply);
+    rpc GetStoredModel(GetStoredModelRequest) returns(GetStoredModelReply);
 }
 
 service Suggestion {
@@ -212,6 +217,65 @@ message AddMeasurementToTrialsRequest {
 }
 
 message AddMeasurementToTrialsReply {
+}
+
+message StudyOverView {
+	string name = 1;
+	string author  = 2;
+	string description = 3;
+}
+
+message ModelInfo {
+	string study_name = 1;  
+	string trial_id = 2; 
+	repeated Parameter parameters = 3; 
+	repeated Metrics metrics = 4;
+	string model_path = 5; 
+}
+
+message DataSetInfo {
+	string Name = 1;
+	string Path = 2;
+}
+
+message StoreStudyRequest {
+    string study_name = 1;
+    string author = 2;
+}
+
+message StoreStudyReply {
+}
+
+message StoreModelRequest {
+    ModelInfo model = 1;
+    DataSetInfo data_set = 2;
+}
+
+message StoreModelReply {
+}
+
+message GetStoredStudiesRequest {
+}
+
+message GetStoredStudiesReply {
+    repeated StudyOverView studies = 1;
+}
+
+message GetStoredModelsRequest {
+    string study_name = 1;
+}
+
+message GetStoredModelsReply {
+    repeated ModelInfo models = 1;
+}
+
+message GetStoredModelRequest {
+    string study_name = 1;
+    string trial_id = 2;
+}
+
+message GetStoredModelReply {
+    ModelInfo model = 1;
 }
 
 message InitializeSuggestServiceRequest {

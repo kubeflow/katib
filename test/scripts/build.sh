@@ -58,5 +58,5 @@ cp earlystopping/medianstopping/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/earlystopping-medianstopping:${VERSION} --project=${PROJECT}
 cp dlk/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/dlk-manager:${VERSION} --project=${PROJECT}
-cp manager/modeldb//Dockerfile .
+cp modeldb//Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/katib-frontend:${VERSION} --project=${PROJECT}
