@@ -67,7 +67,7 @@ func (s *server) trialIteration(conf *pb.StudyConfig, study_id string, sCh study
 		ei = defaultEarlyStopInterval
 	}
 	estm := time.NewTimer(time.Duration(ei) * time.Second)
-	strtm := time.NewTimer(time.Duration(defaultStoreInterval) * time.Second)
+	strtm := time.NewTimer(defaultStoreInterval * time.Second)
 	log.Printf("Study %v start.", study_id)
 	log.Printf("Study conf %v", conf)
 	for {
@@ -153,7 +153,7 @@ func (s *server) trialIteration(conf *pb.StudyConfig, study_id string, sCh study
 					}
 				}
 			}
-			strtm.Reset(time.Duration(defaultStoreInterval) * time.Second)
+			strtm.Reset(defaultStoreInterval * time.Second)
 
 		case <-estm.C:
 			ret, err := s.EarlyStopping(context.Background(), &pb.EarlyStoppingRequest{StudyId: study_id, EarlyStoppingAlgorithm: conf.EarlyStoppingAlgorithm})
