@@ -123,6 +123,9 @@ func (m *ModelDB) SaveModel(in *api.SaveModelRequest) error {
 	}
 	md.ID = fres.ModelId
 	for _, met := range in.Model.Metrics {
+		if met == nil {
+			continue
+		}
 		mv, err := strconv.ParseFloat(met.Value, 64)
 		if err != nil {
 			continue

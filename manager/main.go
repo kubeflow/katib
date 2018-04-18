@@ -79,7 +79,9 @@ func (s *server) saveCompletedModels(studyId string, conf *pb.StudyConfig) error
 				met := make([]*pb.Metrics, len(conf.Metrics))
 				for i, mn := range conf.Metrics {
 					l, _ := dbIf.GetTrialLogs(tid, &kdb.GetTrialLogOpts{Name: mn})
-					met[i] = &pb.Metrics{Name: mn, Value: l[len(l)-1].Value}
+					if len(l) > 0 {
+						met[i] = &pb.Metrics{Name: mn, Value: l[len(l)-1].Value}
+					}
 				}
 				t, _ := dbIf.GetTrial(tid)
 				s.SaveModel(context.Background(), &pb.SaveModelRequest{
