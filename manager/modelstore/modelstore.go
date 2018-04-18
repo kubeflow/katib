@@ -5,9 +5,9 @@ import (
 )
 
 type ModelStore interface {
-	StoreStudy(*api.StoreStudyRequest) error
-	StoreModel(*api.StoreModelRequest) error
-	GetStoredStudies() ([]*api.StudyOverView, error)
-	GetStoredModels(*api.GetStoredModelsRequest) ([]*api.ModelInfo, error)
-	GetStoredModel(*api.GetStoredModelRequest) (*api.ModelInfo, error)
+	SaveStudy(*api.SaveStudyRequest) error
+	SaveModel(*api.SaveModelRequest) error
+	GetSavedStudies() ([]*api.StudyOverview, error)
+	GetSavedModels(*api.GetSavedModelsRequest) ([]*api.ModelInfo, error)
+	GetSavedModel(*api.GetSavedModelRequest) (*api.ModelInfo, error)
 }

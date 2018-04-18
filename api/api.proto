@@ -12,11 +12,11 @@ service Manager {
 	rpc GetObjectValue(GetObjectValueRequest) returns (GetObjectValueReply);
 	rpc AddMeasurementToTrials(AddMeasurementToTrialsRequest) returns (AddMeasurementToTrialsReply);
     rpc InitializeSuggestService(InitializeSuggestServiceRequest) returns(InitializeSuggestServiceReply);
-    rpc StoreStudy(StoreStudyRequest) returns(StoreStudyReply);
-    rpc StoreModel(StoreModelRequest) returns(StoreModelReply);
-    rpc GetStoredStudies(GetStoredStudiesRequest) returns(GetStoredStudiesReply);
-    rpc GetStoredModels(GetStoredModelsRequest) returns(GetStoredModelsReply);
-    rpc GetStoredModel(GetStoredModelRequest) returns(GetStoredModelReply);
+    rpc SaveStudy(SaveStudyRequest) returns(SaveStudyReply);
+    rpc SaveModel(SaveModelRequest) returns(SaveModelReply);
+    rpc GetSavedStudies(GetSavedStudiesRequest) returns(GetSavedStudiesReply);
+    rpc GetSavedModels(GetSavedModelsRequest) returns(GetSavedModelsReply);
+    rpc GetSavedModel(GetSavedModelRequest) returns(GetSavedModelReply);
 }
 
 service Suggestion {
@@ -219,9 +219,9 @@ message AddMeasurementToTrialsRequest {
 message AddMeasurementToTrialsReply {
 }
 
-message StudyOverView {
+message StudyOverview {
 	string name = 1;
-	string author  = 2;
+	string owner  = 2;
 	string description = 3;
 }
 
@@ -234,47 +234,47 @@ message ModelInfo {
 }
 
 message DataSetInfo {
-	string Name = 1;
-	string Path = 2;
+	string name = 1;
+	string path = 2;
 }
 
-message StoreStudyRequest {
+message SaveStudyRequest {
     string study_name = 1;
     string author = 2;
 }
 
-message StoreStudyReply {
+message SaveStudyReply {
 }
 
-message StoreModelRequest {
+message SaveModelRequest {
     ModelInfo model = 1;
     DataSetInfo data_set = 2;
 }
 
-message StoreModelReply {
+message SaveModelReply {
 }
 
-message GetStoredStudiesRequest {
+message GetSavedStudiesRequest {
 }
 
-message GetStoredStudiesReply {
-    repeated StudyOverView studies = 1;
+message GetSavedStudiesReply {
+    repeated StudyOverview studies = 1;
 }
 
-message GetStoredModelsRequest {
+message GetSavedModelsRequest {
     string study_name = 1;
 }
 
-message GetStoredModelsReply {
+message GetSavedModelsReply {
     repeated ModelInfo models = 1;
 }
 
-message GetStoredModelRequest {
+message GetSavedModelRequest {
     string study_name = 1;
     string trial_id = 2;
 }
 
-message GetStoredModelReply {
+message GetSavedModelReply {
     ModelInfo model = 1;
 }
 
