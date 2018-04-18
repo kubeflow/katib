@@ -1,10 +1,10 @@
-package modelstore_interface
+package modelstore
 
 import (
 	"github.com/kubeflow/hp-tuning/api"
 )
 
-type ModelStoreInterface interface {
+type ModelStore interface {
 	StoreStudy(*api.StoreStudyRequest) error
 	StoreModel(*api.StoreModelRequest) error
 	GetStoredStudies() ([]*api.StudyOverView, error)

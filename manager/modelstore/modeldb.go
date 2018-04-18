@@ -1,27 +1,27 @@
-package modelstore_interface
+package modelstore
 
 import (
 	"context"
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/kubeflow/hp-tuning/api"
-	"github.com/kubeflow/hp-tuning/manager/modelstore_interface/modeldb"
+	"github.com/kubeflow/hp-tuning/manager/modelstore/modeldb"
 	"log"
 	"net"
 	"strconv"
 	"strings"
 )
 
-type ModelDBInterface struct {
+type ModelDB struct {
 	host string
 	port string
 }
 
-func NewModelDBInterface(host string, port string) *ModelDBInterface {
-	return &ModelDBInterface{host: host, port: port}
+func NewModelDB(host string, port string) *ModelDB {
+	return &ModelDB{host: host, port: port}
 }
 
-func (m *ModelDBInterface) createSocket() (thrift.TTransport, *modeldb.ModelDBServiceClient, error) {
+func (m *ModelDB) createSocket() (thrift.TTransport, *modeldb.ModelDBServiceClient, error) {
 	var trans thrift.TTransport
 	var err error
 	trans, err = thrift.NewTSocket(net.JoinHostPort(m.host, m.port))
@@ -39,7 +39,7 @@ func (m *ModelDBInterface) createSocket() (thrift.TTransport, *modeldb.ModelDBSe
 
 }
 
-func (m *ModelDBInterface) StoreModel(in *api.StoreModelRequest) error {
+func (m *ModelDB) StoreModel(in *api.StoreModelRequest) error {
 	trans, client, err := m.createSocket()
 	if err != nil {
 		return err
@@ -142,7 +142,7 @@ func (m *ModelDBInterface) StoreModel(in *api.StoreModelRequest) error {
 	return nil
 }
 
-func (m *ModelDBInterface) GetStoredStudies() ([]*api.StudyOverView, error) {
+func (m *ModelDB) GetStoredStudies() ([]*api.StudyOverView, error) {
 	trans, client, err := m.createSocket()
 	if err != nil {
 		return nil, err
@@ -166,7 +166,7 @@ func (m *ModelDBInterface) GetStoredStudies() ([]*api.StudyOverView, error) {
 	}
 	return ret, nil
 }
-func (m *ModelDBInterface) convertmdModelToModelInfo(mdm *modeldb.ModelResponse) *api.ModelInfo {
+func (m *ModelDB) convertmdModelToModelInfo(mdm *modeldb.ModelResponse) *api.ModelInfo {
 	t := strings.Split(mdm.Specification.Tag, ":")
 	var sn, mn string
 
@@ -203,7 +203,7 @@ func (m *ModelDBInterface) convertmdModelToModelInfo(mdm *modeldb.ModelResponse)
 	}
 }
 
-func (m *ModelDBInterface) getProjectModelList(client *modeldb.ModelDBServiceClient, studyName string) ([]*modeldb.ModelResponse, error) {
+func (m *ModelDB) getProjectModelList(client *modeldb.ModelDBServiceClient, studyName string) ([]*modeldb.ModelResponse, error) {
 	pids, err := client.GetProjectIds(context.Background(), map[string]string{"Name": studyName})
 	if err != nil {
 		log.Printf("Error get Project IDs %v ", err)
@@ -228,7 +228,7 @@ func (m *ModelDBInterface) getProjectModelList(client *modeldb.ModelDBServiceCli
 	return ret, nil
 }
 
-func (m *ModelDBInterface) GetStoredModels(in *api.GetStoredModelsRequest) ([]*api.ModelInfo, error) {
+func (m *ModelDB) GetStoredModels(in *api.GetStoredModelsRequest) ([]*api.ModelInfo, error) {
 	trans, client, err := m.createSocket()
 	if err != nil {
 		return nil, err
@@ -249,8 +249,7 @@ func (m *ModelDBInterface) GetStoredModels(in *api.GetStoredModelsRequest) ([]*a
 	return ret, err
 }
 
-func (m *ModelDBInterface) GetStoredModel(in *api.GetStoredModelRequest) (*api.ModelInfo, error) {
-
+func (m *ModelDB) GetStoredModel(in *api.GetStoredModelRequest) (*api.ModelInfo, error) {
 	trans, client, err := m.createSocket()
 	if err != nil {
 		return nil, err
@@ -272,7 +271,7 @@ func (m *ModelDBInterface) GetStoredModel(in *api.GetStoredModelRequest) (*api.M
 	return nil, nil
 }
 
-func (m *ModelDBInterface) createErun(client *modeldb.ModelDBServiceClient, pid int32) (int32, error) {
+func (m *ModelDB) createErun(client *modeldb.ModelDBServiceClient, pid int32) (int32, error) {
 	exe := modeldb.NewExperimentEvent()
 	exe.Experiment = modeldb.NewExperiment()
 	exe.Experiment.ProjectId = pid
@@ -293,7 +292,7 @@ func (m *ModelDBInterface) createErun(client *modeldb.ModelDBServiceClient, pid 
 	return exrres.ExperimentRunId, nil
 }
 
-func (m *ModelDBInterface) StoreStudy(in *api.StoreStudyRequest) error {
+func (m *ModelDB) StoreStudy(in *api.StoreStudyRequest) error {
 	trans, client, err := m.createSocket()
 	if err != nil {
 		return err
@@ -329,60 +328,3 @@ func (m *ModelDBInterface) StoreStudy(in *api.StoreStudyRequest) error {
 	}
 	return nil
 }
-
-//func main() {
-//	var err error
-//	mIf := NewModelDBInterface("10.76.255.248", "6543")
-//	sname := "testStudy1"
-//	plis, err := mIf.GetStudyList()
-//	if err != nil {
-//		log.Printf("GetStudyList Err %v\n", err)
-//	}
-//	for _, p := range plis {
-//		log.Printf("Study List %v, %v, %v\n", p.Name, p.Author, p.Description)
-//	}
-//	err = mIf.UploadStudy(sname, "auther1")
-//	if err != nil {
-//		log.Printf("UploadStudy Err %v\n", err)
-//	}
-//	model := &ModelInfo{
-//		StudyName: sname,
-//		TrialID:   "aaaatest",
-//		Parameters: []*ParameterInfo{
-//			&ParameterInfo{
-//				Name:  "hp1",
-//				Value: "100",
-//			},
-//			&ParameterInfo{
-//				Name:  "hp2",
-//				Value: "0.8",
-//			},
-//		},
-//		Metrics: []*MetricsInfo{
-//			&MetricsInfo{
-//				Name:  "acc",
-//				Value: 0.9,
-//			},
-//			&MetricsInfo{
-//				Name:  "blue",
-//				Value: 20,
-//			},
-//		},
-//	}
-//	ds := &DataSet{
-//		Name: "cifar10",
-//		Path: "/test/test",
-//	}
-//
-//	err = mIf.UploadModel(model, ds)
-//	if err != nil {
-//		log.Printf("UploadModel Err %v\n", err)
-//	}
-//	mds, err := mIf.GetModels(sname)
-//	if err != nil {
-//		log.Printf("GetModel Err %v\n", err)
-//	}
-//	for _, md := range mds {
-//		log.Printf("GetModels %v\n", *md)
-//	}
-//}
