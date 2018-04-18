@@ -45,7 +45,7 @@ type studyCh struct {
 }
 type server struct {
 	wIF         worker_interface.WorkerInterface
-	msIf        modelstore.ModelStore
+	msIf        modelstore.ModelSave
 	StudyChList map[string]studyCh
 }
 
