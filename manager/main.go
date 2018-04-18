@@ -32,7 +32,7 @@ const (
 	k8s_namespace            = "katib"
 	port                     = "0.0.0.0:6789"
 	defaultEarlyStopInterval = 60
-	defaultStoreInterval     = 30
+	defaultSaveInterval      = 30
 )
 
 var init_db = flag.Bool("init", false, "Initialize DB")
@@ -45,7 +45,7 @@ type studyCh struct {
 }
 type server struct {
 	wIF         worker_interface.WorkerInterface
-	msIf        modelstore.ModelStore
+	msIf        modelstore.ModelSave
 	StudyChList map[string]studyCh
 }
 
@@ -67,7 +67,7 @@ func (s *server) trialIteration(conf *pb.StudyConfig, study_id string, sCh study
 		ei = defaultEarlyStopInterval
 	}
 	estm := time.NewTimer(time.Duration(ei) * time.Second)
-	strtm := time.NewTimer(defaultStoreInterval * time.Second)
+	strtm := time.NewTimer(defaultSaveInterval * time.Second)
 	log.Printf("Study %v start.", study_id)
 	log.Printf("Study conf %v", conf)
 	for {
@@ -112,9 +112,9 @@ func (s *server) trialIteration(conf *pb.StudyConfig, study_id string, sCh study
 				tm.Reset(1 * time.Second)
 			}
 		case <-strtm.C:
-			ret, err := s.GetStoredModels(context.Background(), &pb.GetStoredModelsRequest{StudyName: conf.Name})
+			ret, err := s.GetSavedModels(context.Background(), &pb.GetSavedModelsRequest{StudyName: conf.Name})
 			if err != nil {
-				log.Printf("GetStoredModels Err %v", err)
+				log.Printf("GetSavedModels Err %v", err)
 			}
 			ts, err := dbIf.GetTrialList(study_id)
 			if err != nil {
@@ -128,32 +128,28 @@ func (s *server) trialIteration(conf *pb.StudyConfig, study_id string, sCh study
 					continue
 				}
 				if tst == pb.TrialState_COMPLETED {
-					isin := false
 					for _, m := range ret.Models {
 						if m.TrialId == tid {
-							isin = true
+							met := make([]*pb.Metrics, len(conf.Metrics))
+							for i, mn := range conf.Metrics {
+								l, _ := dbIf.GetTrialLogs(tid, &kdb.GetTrialLogOpts{Name: mn})
+								met[i] = &pb.Metrics{Name: mn, Value: l[len(l)-1].Value}
+							}
+							t, _ := dbIf.GetTrial(tid)
+							s.SaveModel(context.Background(), &pb.SaveModelRequest{
+								Model: &pb.ModelInfo{
+									StudyName:  conf.Name,
+									TrialId:    tid,
+									Parameters: t.ParameterSet,
+									Metrics:    met,
+								},
+							})
+							break
 						}
-					}
-					met := make([]*pb.Metrics, len(conf.Metrics))
-					for i, mn := range conf.Metrics {
-						l, _ := dbIf.GetTrialLogs(tid, &kdb.GetTrialLogOpts{Name: mn})
-						met[i] = &pb.Metrics{Name: mn, Value: l[len(l)-1].Value}
-					}
-					if !isin {
-						t, _ := dbIf.GetTrial(tid)
-						s.StoreModel(context.Background(), &pb.StoreModelRequest{
-							Model: &pb.ModelInfo{
-								StudyName:  conf.Name,
-								TrialId:    tid,
-								Parameters: t.ParameterSet,
-								Metrics:    met,
-							},
-						})
-
 					}
 				}
 			}
-			strtm.Reset(defaultStoreInterval * time.Second)
+			strtm.Reset(defaultSaveInterval * time.Second)
 
 		case <-estm.C:
 			ret, err := s.EarlyStopping(context.Background(), &pb.EarlyStoppingRequest{StudyId: study_id, EarlyStoppingAlgorithm: conf.EarlyStoppingAlgorithm})
@@ -226,7 +222,7 @@ func (s *server) CreateStudy(ctx context.Context, in *pb.CreateStudyRequest) (*p
 		}
 	}
 	sCh := studyCh{stopCh: make(chan bool), addMetricsCh: make(chan string)}
-	_, err = s.StoreStudy(ctx, &pb.StoreStudyRequest{StudyName: in.StudyConfig.Name})
+	_, err = s.SaveStudy(ctx, &pb.SaveStudyRequest{StudyName: in.StudyConfig.Name})
 	if err != nil {
 		return &pb.CreateStudyReply{}, err
 	}
@@ -372,29 +368,29 @@ func (s *server) AddMeasurementToTrials(context.Context, *pb.AddMeasurementToTri
 	return &pb.AddMeasurementToTrialsReply{}, nil
 }
 
-func (s *server) StoreStudy(ctx context.Context, in *pb.StoreStudyRequest) (*pb.StoreStudyReply, error) {
-	err := s.msIf.StoreStudy(in)
-	return &pb.StoreStudyReply{}, err
+func (s *server) SaveStudy(ctx context.Context, in *pb.SaveStudyRequest) (*pb.SaveStudyReply, error) {
+	err := s.msIf.SaveStudy(in)
+	return &pb.SaveStudyReply{}, err
 }
 
-func (s *server) StoreModel(ctx context.Context, in *pb.StoreModelRequest) (*pb.StoreModelReply, error) {
-	err := s.msIf.StoreModel(in)
-	return &pb.StoreModelReply{}, err
+func (s *server) SaveModel(ctx context.Context, in *pb.SaveModelRequest) (*pb.SaveModelReply, error) {
+	err := s.msIf.SaveModel(in)
+	return &pb.SaveModelReply{}, err
 }
 
-func (s *server) GetStoredStudies(ctx context.Context, in *pb.GetStoredStudiesRequest) (*pb.GetStoredStudiesReply, error) {
-	ret, err := s.msIf.GetStoredStudies()
-	return &pb.GetStoredStudiesReply{Studies: ret}, err
+func (s *server) GetSavedStudies(ctx context.Context, in *pb.GetSavedStudiesRequest) (*pb.GetSavedStudiesReply, error) {
+	ret, err := s.msIf.GetSavedStudies()
+	return &pb.GetSavedStudiesReply{Studies: ret}, err
 }
 
-func (s *server) GetStoredModels(ctx context.Context, in *pb.GetStoredModelsRequest) (*pb.GetStoredModelsReply, error) {
-	ret, err := s.msIf.GetStoredModels(in)
-	return &pb.GetStoredModelsReply{Models: ret}, err
+func (s *server) GetSavedModels(ctx context.Context, in *pb.GetSavedModelsRequest) (*pb.GetSavedModelsReply, error) {
+	ret, err := s.msIf.GetSavedModels(in)
+	return &pb.GetSavedModelsReply{Models: ret}, err
 }
 
-func (s *server) GetStoredModel(ctx context.Context, in *pb.GetStoredModelRequest) (*pb.GetStoredModelReply, error) {
-	ret, err := s.msIf.GetStoredModel(in)
-	return &pb.GetStoredModelReply{Model: ret}, err
+func (s *server) GetSavedModel(ctx context.Context, in *pb.GetSavedModelRequest) (*pb.GetSavedModelReply, error) {
+	ret, err := s.msIf.GetSavedModel(in)
+	return &pb.GetSavedModelReply{Model: ret}, err
 }
 
 func main() {

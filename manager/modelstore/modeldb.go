@@ -17,6 +17,7 @@ type ModelDB struct {
 	port string
 }
 
+//NewModelDB: Create ModelDB instance.
 func NewModelDB(host string, port string) *ModelDB {
 	return &ModelDB{host: host, port: port}
 }
@@ -39,7 +40,8 @@ func (m *ModelDB) createSocket() (thrift.TTransport, *modeldb.ModelDBServiceClie
 
 }
 
-func (m *ModelDB) StoreModel(in *api.StoreModelRequest) error {
+//SaveModel: Upload model info to ModelDB. You should create project by SaveStudy first. This func will create ExperimentalRun, Model, and Metric in ModelDB.
+func (m *ModelDB) SaveModel(in *api.SaveModelRequest) error {
 	trans, client, err := m.createSocket()
 	if err != nil {
 		return err
@@ -142,7 +144,8 @@ func (m *ModelDB) StoreModel(in *api.StoreModelRequest) error {
 	return nil
 }
 
-func (m *ModelDB) GetStoredStudies() ([]*api.StudyOverView, error) {
+//GetSavedStudies: Get studies info from ModelDB.
+func (m *ModelDB) GetSavedStudies() ([]*api.StudyOverview, error) {
 	trans, client, err := m.createSocket()
 	if err != nil {
 		return nil, err
@@ -157,11 +160,11 @@ func (m *ModelDB) GetStoredStudies() ([]*api.StudyOverView, error) {
 		return nil, err
 	}
 
-	ret := make([]*api.StudyOverView, len(pov))
+	ret := make([]*api.StudyOverview, len(pov))
 	for i := range pov {
-		ret[i] = &api.StudyOverView{}
+		ret[i] = &api.StudyOverview{}
 		ret[i].Name = pov[i].Project.Name
-		ret[i].Author = pov[i].Project.Author
+		ret[i].Owner = pov[i].Project.Author
 		ret[i].Description = pov[i].Project.Description
 	}
 	return ret, nil
@@ -228,7 +231,8 @@ func (m *ModelDB) getProjectModelList(client *modeldb.ModelDBServiceClient, stud
 	return ret, nil
 }
 
-func (m *ModelDB) GetStoredModels(in *api.GetStoredModelsRequest) ([]*api.ModelInfo, error) {
+//GetSavedModels: Get Models info from ModelDB
+func (m *ModelDB) GetSavedModels(in *api.GetSavedModelsRequest) ([]*api.ModelInfo, error) {
 	trans, client, err := m.createSocket()
 	if err != nil {
 		return nil, err
@@ -249,7 +253,8 @@ func (m *ModelDB) GetStoredModels(in *api.GetStoredModelsRequest) ([]*api.ModelI
 	return ret, err
 }
 
-func (m *ModelDB) GetStoredModel(in *api.GetStoredModelRequest) (*api.ModelInfo, error) {
+//GetSavedModels: Get a Model info from ModelDB.
+func (m *ModelDB) GetSavedModel(in *api.GetSavedModelRequest) (*api.ModelInfo, error) {
 	trans, client, err := m.createSocket()
 	if err != nil {
 		return nil, err
@@ -277,7 +282,7 @@ func (m *ModelDB) createErun(client *modeldb.ModelDBServiceClient, pid int32) (i
 	exe.Experiment.ProjectId = pid
 	eres, err := client.StoreExperimentEvent(context.Background(), exe)
 	if err != nil {
-		log.Printf("StoreExperimentEvent err %v", err)
+		log.Printf("SaveExperimentEvent err %v", err)
 		return -1, err
 	}
 
@@ -286,13 +291,14 @@ func (m *ModelDB) createErun(client *modeldb.ModelDBServiceClient, pid int32) (i
 	exre.ExperimentRun.ExperimentId = eres.ExperimentId
 	exrres, err := client.StoreExperimentRunEvent(context.Background(), exre)
 	if err != nil {
-		log.Printf("StoreExperimentRunEvent err %v", err)
+		log.Printf("SaveExperimentRunEvent err %v", err)
 		return -1, err
 	}
 	return exrres.ExperimentRunId, nil
 }
 
-func (m *ModelDB) StoreStudy(in *api.StoreStudyRequest) error {
+//SaveStudy: Upload a study info to ModelDB. This func will create Project, Experiment, and a dummy ExperimentRun in ModelDB.
+func (m *ModelDB) SaveStudy(in *api.SaveStudyRequest) error {
 	trans, client, err := m.createSocket()
 	if err != nil {
 		return err
@@ -318,7 +324,7 @@ func (m *ModelDB) StoreStudy(in *api.StoreStudyRequest) error {
 		pje.Project.Author = in.Author
 		pres, err := client.StoreProjectEvent(context.Background(), pje)
 		if err != nil {
-			log.Printf("StoreProjectEvent err %v", err)
+			log.Printf("SaveProjectEvent err %v", err)
 			return err
 		}
 		_, err = m.createErun(client, pres.ProjectId)
