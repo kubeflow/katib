@@ -307,12 +307,12 @@ func (lt *learningTask) run() {
 			}
 
 		case <-time.After(1 * time.Second):
-			lt.pollJobs()
 			err := lt.checkPodStatus(podState)
 			if err != nil {
 				fmt.Println(err.Error())
 				os.Exit(1)
 			}
+			lt.pollJobs()
 
 			if lt.nrCompletedWorkers == lt.ltc.NrWorker {
 				state = ltStateCompleted
