@@ -8,6 +8,7 @@ import (
 
 	api "github.com/kubeflow/hp-tuning/api"
 	mockdb "github.com/kubeflow/hp-tuning/mock/db"
+	mockmodelstore "github.com/kubeflow/hp-tuning/mock/modelstore"
 	mockworker "github.com/kubeflow/hp-tuning/mock/worker"
 )
 
@@ -16,6 +17,7 @@ func TestCreateStudy(t *testing.T) {
 	defer ctrl.Finish()
 	mockDB := mockdb.NewMockVizierDBInterface(ctrl)
 	mockWif := mockworker.NewMockWorkerInterface(ctrl)
+	mockModelStore := mockmodelstore.NewMockModelStore(ctrl)
 	sid := "teststudy"
 	sc := &api.StudyConfig{
 		Name:               "test",
@@ -28,9 +30,14 @@ func TestCreateStudy(t *testing.T) {
 	mockDB.EXPECT().CreateStudy(
 		sc,
 	).Return(sid, nil)
+	ssr := &api.SaveStudyRequest{
+		StudyName: "test",
+	}
+	mockModelStore.EXPECT().SaveStudy(ssr).Return(nil)
 
 	s := &server{
 		wIF:         mockWif,
+		msIf:        mockModelStore,
 		StudyChList: make(map[string]studyCh),
 	}
 	req := &api.CreateStudyRequest{StudyConfig: sc}
@@ -55,8 +62,16 @@ func TestGetStudies(t *testing.T) {
 	defer ctrl.Finish()
 	mockDB := mockdb.NewMockVizierDBInterface(ctrl)
 	mockWif := mockworker.NewMockWorkerInterface(ctrl)
+	mockModelStore := mockmodelstore.NewMockModelStore(ctrl)
 	sid := []string{"teststudy1", "teststudy2"}
-	s := &server{wIF: mockWif, StudyChList: map[string]studyCh{sid[0]: studyCh{}, sid[1]: studyCh{}}}
+	s := &server{
+		wIF:  mockWif,
+		msIf: mockModelStore,
+		StudyChList: map[string]studyCh{
+			sid[0]: studyCh{},
+			sid[1]: studyCh{},
+		},
+	}
 	dbIf = mockDB
 
 	sc := []*api.StudyConfig{
