@@ -207,12 +207,14 @@
                     template: "build",
                   },
                   {
-                    name: "unit-test",
-                    template: "unit-test",
-                  },
-                  {
                     name: "create-pr-symlink",
                     template: "create-pr-symlink",
+                  },
+                ],
+                [
+                  {
+                    name: "unit-test",
+                    template: "unit-test",
                   },
                 ],
                 [  // Setup cluster needs to run after build because we depend on the chart
