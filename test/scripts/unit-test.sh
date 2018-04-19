@@ -30,6 +30,10 @@ VERSION=$(git describe --tags --always --dirty)
 echo "Activating service-account"
 gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
 
+echo "Create symlink to GOPATH"
+mkdir -p ${GOPATH}/src/github.com/${REPO_OWNER}
+ln -s ${PWD} ${GO_DIR}
+
 echo "Run unit test cases"
 cd ${GO_DIR}
 go test ./...
