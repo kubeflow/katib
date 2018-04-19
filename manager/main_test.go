@@ -2,19 +2,20 @@ package main
 
 import (
 	"context"
-	"github.com/golang/mock/gomock"
-	api "github.com/kubeflow/hp-tuning/api"
-	//"github.com/kubeflow/hp-tuning/mock/mock_api"
-	"github.com/kubeflow/hp-tuning/mock/mock_db"
-	"github.com/kubeflow/hp-tuning/mock/mock_worker_interface"
 	"testing"
+
+	"github.com/golang/mock/gomock"
+
+	api "github.com/kubeflow/hp-tuning/api"
+	mockdb "github.com/kubeflow/hp-tuning/mock/db"
+	mockworker "github.com/kubeflow/hp-tuning/mock/worker"
 )
 
 func TestCreateStudy(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockDB := mock_db.NewMockVizierDBInterface(ctrl)
-	mockWif := mock_worker_interface.NewMockWorkerInterface(ctrl)
+	mockDB := mockdb.NewMockVizierDBInterface(ctrl)
+	mockWif := mockworker.NewMockWorkerInterface(ctrl)
 	sid := "teststudy"
 	sc := &api.StudyConfig{
 		Name:               "test",
@@ -27,7 +28,11 @@ func TestCreateStudy(t *testing.T) {
 	mockDB.EXPECT().CreateStudy(
 		sc,
 	).Return(sid, nil)
-	s := &server{wIF: mockWif, StudyChList: make(map[string]studyCh)}
+
+	s := &server{
+		wIF:         mockWif,
+		StudyChList: make(map[string]studyCh),
+	}
 	req := &api.CreateStudyRequest{StudyConfig: sc}
 	ret, err := s.CreateStudy(context.Background(), req)
 	if err != nil {
@@ -48,8 +53,8 @@ func TestCreateStudy(t *testing.T) {
 func TestGetStudies(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockDB := mock_db.NewMockVizierDBInterface(ctrl)
-	mockWif := mock_worker_interface.NewMockWorkerInterface(ctrl)
+	mockDB := mockdb.NewMockVizierDBInterface(ctrl)
+	mockWif := mockworker.NewMockWorkerInterface(ctrl)
 	sid := []string{"teststudy1", "teststudy2"}
 	s := &server{wIF: mockWif, StudyChList: map[string]studyCh{sid[0]: studyCh{}, sid[1]: studyCh{}}}
 	dbIf = mockDB
