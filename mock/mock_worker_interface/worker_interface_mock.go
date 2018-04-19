@@ -5,9 +5,10 @@
 package mock_worker_interface
 
 import (
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	api "github.com/kubeflow/hp-tuning/api"
-	reflect "reflect"
 )
 
 // MockWorkerInterface is a mock of WorkerInterface interface
@@ -34,15 +35,27 @@ func (m *MockWorkerInterface) EXPECT() *MockWorkerInterfaceMockRecorder {
 }
 
 // CheckRunningTrials mocks base method
-func (m *MockWorkerInterface) CheckRunningTrials(arg0, arg1 string, arg2 []string) error {
-	ret := m.ctrl.Call(m, "CheckRunningTrials", arg0, arg1, arg2)
+func (m *MockWorkerInterface) CheckRunningTrials(arg0, arg1 string) error {
+	ret := m.ctrl.Call(m, "CheckRunningTrials", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CheckRunningTrials indicates an expected call of CheckRunningTrials
-func (mr *MockWorkerInterfaceMockRecorder) CheckRunningTrials(arg0, arg1, arg2 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckRunningTrials", reflect.TypeOf((*MockWorkerInterface)(nil).CheckRunningTrials), arg0, arg1, arg2)
+func (mr *MockWorkerInterfaceMockRecorder) CheckRunningTrials(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckRunningTrials", reflect.TypeOf((*MockWorkerInterface)(nil).CheckRunningTrials), arg0, arg1)
+}
+
+// CompleteTrial mocks base method
+func (m *MockWorkerInterface) CompleteTrial(arg0, arg1 string, arg2 bool) error {
+	ret := m.ctrl.Call(m, "CompleteTrial", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CompleteTrial indicates an expected call of CompleteTrial
+func (mr *MockWorkerInterfaceMockRecorder) CompleteTrial(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CompleteTrial", reflect.TypeOf((*MockWorkerInterface)(nil).CompleteTrial), arg0, arg1, arg2)
 }
 
 // CleanWorkers mocks base method
