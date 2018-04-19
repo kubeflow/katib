@@ -82,6 +82,11 @@ func (m *ModelDB) SaveModel(in *api.SaveModelRequest) error {
 	hs := make([]*modeldb.HyperParameter, len(in.Model.Parameters))
 	for i := range in.Model.Parameters {
 		hs[i] = &modeldb.HyperParameter{Name: in.Model.Parameters[i].Name, Value: in.Model.Parameters[i].Value}
+		if in.Model.Parameters[i].ParameterType == api.ParameterType_CATEGORICAL {
+			hs[i].Type = "String"
+		} else {
+			hs[i].Type = "Number"
+		}
 	}
 
 	dpath := "Unset"

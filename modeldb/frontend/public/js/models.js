@@ -1250,153 +1250,274 @@ $(function() {
   };
 
   function drawParallelCood() {
-    var legendWidth = 0;
-    var margin = {top: 30, right: 10, bottom: 10, left: 20};
-    var width = $('.container').width() - margin.left - margin.right;
-    var height = width / 2.73333;
+	var margin = {top: 50, right: 80, bottom: 10, left: 80},
+		width = $('.container').width() - margin.left - margin.right,
+		height = width / 2.73333,
+		innerHeight = height - 2;
 
-    
-    var x = d3.scale.ordinal().rangePoints([0, width], 1),
-        y = {},
-        dragging = {};
-    
-    var line = d3.svg.line(),
-        axis = d3.svg.axis().orient("left"),
-        background,
-        foreground;
-    
-    //var svg = d3.select("body").append("parameter-explore-svg")
-    var svg = d3.select("body").select("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    
-    
-      // Extract the list of dimensions and create a scale for each.
-      x.domain(dimensions = metricKeys.concat(hyperparamKeys));
-      var modelmap = []
-      for (var i = 0; i < models.length; i++){
-          var minf ={}
-          minf["name"] = models[i]["md.NAME"]
-          for (var j = 0; j < models[i].metrics.length; j++){
-              minf[models[i].metrics[j].key] = models[i].metrics[j].val
-          }
-          for (var j = 0; j < models[i].hyperparams.length; j++){
-              minf[models[i].hyperparams[j].name] = models[i].hyperparams[j].value
-          }
-          modelmap[i] = minf
-      }
-   
-      x.domain(dimensions = d3.keys(modelmap[0]).filter(function(d) {
-              if(d === "name" || d == "StudyID" || d == "TrialID") return false;
-              if(typeof modelmap[0][d] == "string") {
-                      y[d] = d3.scale.ordinal()
-                        .domain(modelmap.map(function(p) { return p[d]; }))
-                        .rangePoints([height, 0]);
+	var devicePixelRatio = window.devicePixelRatio || 1;
 
-              } else {
-                      y[d] = d3.scale.linear()
-                        .domain(d3.extent(modelmap, function(p) { return +p[d]; }))
-                        .range([height, 0]);
-              }
-              return true;
-      }));
+	var color = d3.scaleOrdinal()
+	  .range(['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd','#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']);
 
-      // Add grey background lines for context.
-      background = svg.append("g")
-          .attr("class", "background")
-        .selectAll("path")
-          .data(modelmap)
-        .enter().append("path")
-          .attr("d", path);
-    
-      // Add blue foreground lines for focus.
-      foreground = svg.append("g")
-          .attr("class", "foreground")
-        .selectAll("path")
-          .data(modelmap)
-        .enter().append("path")
-          .attr("d", path);
-    
-      // Add a group element for each dimension.
-      var g = svg.selectAll(".dimension")
-          .data(dimensions)
-        .enter().append("g")
-          .attr("class", "dimension")
-          .attr("transform", function(d) { return "translate(" + x(d) + ")"; })
-          .call(d3.behavior.drag()
-            .origin(function(d) { return {x: x(d)}; })
-            .on("dragstart", function(d) {
-              dragging[d] = x(d);
-              background.attr("visibility", "hidden");
-            })
-            .on("drag", function(d) {
-              dragging[d] = Math.min(width, Math.max(0, d3.event.x));
-              foreground.attr("d", path);
-              dimensions.sort(function(a, b) { return position(a) - position(b); });
-              x.domain(dimensions);
-              g.attr("transform", function(d) { return "translate(" + position(d) + ")"; })
-            })
-            .on("dragend", function(d) {
-              delete dragging[d];
-              transition(d3.select(this)).attr("transform", "translate(" + x(d) + ")");
-              transition(foreground).attr("d", path);
-              background
-                  .attr("d", path)
-                .transition()
-                  .delay(500)
-                  .duration(0)
-                  .attr("visibility", null);
-            }));
-    
-      // Add an axis and title.
-      g.append("g")
-          .attr("class", "axis")
-          .each(function(d) { d3.select(this).call(axis.scale(y[d])); })
-        .append("text")
-          .style("text-anchor", "middle")
-          .attr("y", -9)
-          .text(function(d) { return d; });
-    
-      // Add and store a brush for each axis.
-      g.append("g")
-          .attr("class", "brush")
-          .each(function(d) {
-            d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d]).on("brushstart", brushstart).on("brush", brush));
-          })
-        .selectAll("rect")
-          .attr("x", -8)
-          .attr("width", 16);
-    
-    function position(d) {
-      var v = dragging[d];
-      return v == null ? x(d) : v;
+	var types = {
+	  "Number": {
+		key: "Number",
+		coerce: function(d) { return +d; },
+		extent: d3.extent,
+		within: function(d, extent, dim) { return extent[0] <= dim.scale(d) && dim.scale(d) <= extent[1]; },
+		defaultScale: d3.scaleLinear().range([innerHeight, 0])
+	  },
+	  "String": {
+		key: "String",
+		coerce: String,
+		extent: function (data) { return data.sort(); },
+		within: function(d, extent, dim) { return extent[0] <= dim.scale(d) && dim.scale(d) <= extent[1]; },
+		defaultScale: d3.scalePoint().range([0, innerHeight])
+	  }
+	};
+
+    data=[]
+    dimensions=[]
+    for (var i = 0; i < models.length; i++){
+  	  var d={}
+  	  d["name"]=models[i]["Spec Tag"].split(":")[1].slice(0,7)
+  
+  	  for (var j = 0; j < models[i].metrics.length; j++){
+  		d[models[i].metrics[j].key] = models[i].metrics[j].val
+  	  }
+  	  for (var j = 0; j < models[i].hyperparams.length; j++){
+  		d[models[i].hyperparams[j].name.replace(/-/g,"")] = models[i].hyperparams[j].value
+  	  }
+  	  data[i]=d
     }
     
-    function transition(g) {
-      return g.transition().duration(500);
-    }
-    
-    // Returns the path for a given data point.
-    function path(d) {
-      return line(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
-    }
-    
-    function brushstart() {
-      d3.event.sourceEvent.stopPropagation();
-    }
-    
-    // Handles a brush event, toggling the display of foreground lines.
-    function brush() {
-      var actives = dimensions.filter(function(p) { return !y[p].brush.empty(); }),
-          extents = actives.map(function(p) { return y[p].brush.extent(); });
-      foreground.style("display", function(d) {
-        return actives.every(function(p, i) {
-          return extents[i][0] <= d[p] && d[p] <= extents[i][1];
-        }) ? null : "none";
-      });
-    }
+    var dimensions = [
+  	{
+  	  key: "name",
+  	  description: "Trial ID",
+  	  type: types["String"],
+  	  axis: d3.axisLeft()
+  		.tickFormat(function(d,i) {
+  		  return d;
+  		})
+  	}
+    ];
+	if (models.length > 0){
+		for (var i = 0; i < models[0].metrics.length; i++){
+		  dimensions[i+1]={
+			key: models[0].metrics[i].key,
+			type: types["Number"],
+			scale: d3.scaleSqrt().range([innerHeight, 0])
+		  }
+		}
+		for (var i = 0; i < models[0].hyperparams.length; i++){
+			if (models[0].hyperparams[i].type == "String"){
+				dimensions[i+models[0].metrics.length]={
+					key: models[0].hyperparams[i].name.replace(/-/g,""),
+					type: types[models[0].hyperparams[i].type],
+					axis: d3.axisLeft()
+						.tickFormat(function(d,i) {
+							return d;
+						})
+				}
+			}else{
+				dimensions[i+models[0].metrics.length]={
+					key: models[0].hyperparams[i].name.replace(/-/g,""),
+					type: types[models[0].hyperparams[i].type],
+					scale: d3.scaleSqrt().range([innerHeight, 0])}
+			}
+		}
+	}
+
+	var xscale = d3.scalePoint()
+		.domain(d3.range(dimensions.length))
+		.range([0, width]);
+
+	var yAxis = d3.axisLeft();
+
+	var container = d3.select("body").select(".ExpPara").append("div")
+		.attr("class", "parcoords")
+		.style("width", width + margin.left + margin.right  + "px")
+		.style("height", height + margin.top + margin.bottom  + "px");
+
+	var svg = container.append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+	  	.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	var canvas = container.append("canvas")
+		.attr("width", width * devicePixelRatio)
+		.attr("height", height * devicePixelRatio)
+		.style("width", width + "px")
+		.style("height", height + "px")
+		.style("margin-top", margin.top + "px")
+		.style("margin-left", margin.left + "px");
+
+	var ctx = canvas.node().getContext("2d");
+	ctx.globalCompositeOperation = 'darken';
+	ctx.globalAlpha = 0.15;
+	ctx.lineWidth = 1.5;
+	ctx.scale(devicePixelRatio, devicePixelRatio);
+
+	var output = d3.select("body").select(".ExpPara").append("pre");
+
+	var axes = svg.selectAll(".axis")
+		.data(dimensions)
+	  .enter().append("g")
+		.attr("class", function(d) { return "axis " + d.key.replace(/ /g, "_"); })
+		.attr("transform", function(d,i) { return "translate(" + xscale(i) + ")"; });
+
+	  data.forEach(function(d) {
+		dimensions.forEach(function(p) {
+		  d[p.key] = !d[p.key] ? null : p.type.coerce(d[p.key]);
+		});
+
+		// truncate long text strings to fit in data table
+		for (var key in d) {
+		  if (d[key] && d[key].length > 35) d[key] = d[key].slice(0,36);
+		}
+	  });
+
+	  // type/dimension default setting happens here
+	  dimensions.forEach(function(dim) {
+		if (!("domain" in dim)) {
+		  // detect domain using dimension type's extent function
+		  dim.domain = d3_functor(dim.type.extent)(data.map(function(d) { return d[dim.key]; }));
+		}
+		if (!("scale" in dim)) {
+		  // use type's default scale for dimension
+		  dim.scale = dim.type.defaultScale.copy();
+		}
+		dim.scale.domain(dim.domain);
+	  });
+
+	  var render = renderQueue(draw).rate(50);
+
+	  ctx.clearRect(0,0,width,height);
+	  ctx.globalAlpha = d3.min([0.85/Math.pow(data.length,0.3),1]);
+	  render(data);
+
+	  axes.append("g")
+		  .each(function(d) {
+			var renderAxis = "axis" in d
+			  ? d.axis.scale(d.scale)  // custom axis
+			  : yAxis.scale(d.scale);  // default axis
+			d3.select(this).call(renderAxis);
+		  })
+		.append("text")
+		  .attr("class", "title")
+		  .attr("text-anchor", "start")
+		  .text(function(d) { return "description" in d ? d.description : d.key; });
+
+	  // Add and store a brush for each axis.
+	  axes.append("g")
+		  .attr("class", "brush")
+		  .each(function(d) {
+			d3.select(this).call(d.brush = d3.brushY()
+			  .extent([[-10,0], [10,height]])
+			  .on("start", brushstart)
+			  .on("brush", brush)
+			  .on("end", brush)
+			)
+		  })
+		.selectAll("rect")
+		  .attr("x", -8)
+		  .attr("width", 16);
+
+	  d3.selectAll(".axis.name .tick text")
+		.style("fill", color);
+		
+	  output.text(d3.tsvFormat(data));
+
+	  function project(d) {
+		return dimensions.map(function(p,i) {
+		  // check if data element has property and contains a value
+		  if (
+			!(p.key in d) ||
+			d[p.key] === null
+		  ) return null;
+
+		  return [xscale(i),p.scale(d[p.key])];
+		});
+	  };
+
+	  function draw(d) {
+		ctx.strokeStyle = color(d.name);
+		ctx.beginPath();
+		var coords = project(d);
+		coords.forEach(function(p,i) {
+		  // this tricky bit avoids rendering null values as 0
+		  if (p === null) {
+			// this bit renders horizontal lines on the previous/next
+			// dimensions, so that sandwiched null values are visible
+			if (i > 0) {
+			  var prev = coords[i-1];
+			  if (prev !== null) {
+				ctx.moveTo(prev[0],prev[1]);
+				ctx.lineTo(prev[0]+6,prev[1]);
+			  }
+			}
+			if (i < coords.length-1) {
+			  var next = coords[i+1];
+			  if (next !== null) {
+				ctx.moveTo(next[0]-6,next[1]);
+			  }
+			}
+			return;
+		  }
+		  
+		  if (i == 0) {
+			ctx.moveTo(p[0],p[1]);
+			return;
+		  }
+
+		  ctx.lineTo(p[0],p[1]);
+		});
+		ctx.stroke();
+	  }
+
+	  function brushstart() {
+		d3.event.sourceEvent.stopPropagation();
+	  }
+
+	  // Handles a brush event, toggling the display of foreground lines.
+	  function brush() {
+		render.invalidate();
+
+		var actives = [];
+		svg.selectAll(".axis .brush")
+		  .filter(function(d) {
+			return d3.brushSelection(this);
+		  })
+		  .each(function(d) {
+			actives.push({
+			  dimension: d,
+			  extent: d3.brushSelection(this)
+			});
+		  });
+
+		var selected = data.filter(function(d) {
+		  if (actives.every(function(active) {
+			  var dim = active.dimension;
+			  // test if point is within extents for each active brush
+			  return dim.type.within(d[dim.key], active.extent, dim);
+			})) {
+			return true;
+		  }
+		});
+
+		ctx.clearRect(0,0,width,height);
+		ctx.globalAlpha = d3.min([0.85/Math.pow(selected.length,0.3),1]);
+		render(selected);
+
+		output.text(d3.tsvFormat(selected));
+	  };
+
+	function d3_functor(v) {
+	  return typeof v === "function" ? v : function() { return v; };
+	};
   };
 
   function vegaUpdate() {
