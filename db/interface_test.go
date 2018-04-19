@@ -6,15 +6,15 @@ package db
 
 import (
 	"fmt"
-	"github.com/golang/protobuf/jsonpb"
 	"math/rand"
 	"os"
 	"testing"
 
-	api "github.com/kubeflow/hp-tuning/api"
-
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang/protobuf/jsonpb"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
+
+	api "github.com/kubeflow/hp-tuning/api"
 )
 
 var db_interface VizierDBInterface
@@ -33,7 +33,8 @@ func TestMain(m *testing.M) {
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS studies").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS study_permissions").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS trials").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
-	mock.ExpectExec("CREATE TABLE IF NOT EXISTS trial_logs").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec("CREATE TABLE IF NOT EXISTS trial_metrics").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec("CREATE TABLE IF NOT EXISTS trial_lastlogs").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS workers").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	db_interface.DB_Init()
 

@@ -191,7 +191,7 @@
               },
             },
           ],  // volumes
-          // onExit specifies the template that should always run when the workflow completes.          
+          // onExit specifies the template that should always run when the workflow completes.
           onExit: "exit-handler",
           templates: [
             {
@@ -209,6 +209,12 @@
                   {
                     name: "create-pr-symlink",
                     template: "create-pr-symlink",
+                  },
+                ],
+                [
+                  {
+                    name: "unit-test",
+                    template: "unit-test",
                   },
                 ],
                 [  // Setup cluster needs to run after build because we depend on the chart
@@ -288,6 +294,9 @@
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build", testWorkerImage, [
               "test/scripts/build.sh",
             ]),  // build
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("unit-test", testWorkerImage, [
+              "test/scripts/unit-test.sh",
+            ]),  // unit test
           ],  // templates
         },
       },  // e2e
