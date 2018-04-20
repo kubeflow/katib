@@ -42,7 +42,7 @@ go build -o bin/katib-suggestion-grid github.com/kubeflow/katib/suggestion/grid
 go build -o bin/katib-suggestion-hyperband github.com/kubeflow/katib/suggestion/hyperband
 go build -o bin/katib-suggestion-random github.com/kubeflow/katib/suggestion/random
 go build -o bin/katib-earlystopping-medianstopping github.com/kubeflow/katib/earlystopping/medianstopping
-go build -o bin/katib github.com/kubeflow/katib/cli
+go build -o bin/katib github.com/kubeflow/katib/cmd/cli
 #echo "building container in gcloud"
 #gcloud version
 # gcloud components update -q
