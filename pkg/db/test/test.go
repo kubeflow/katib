@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/kubeflow/katib/db"
+	"github.com/kubeflow/katib/pkg/db"
 	"os"
 )
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/kubeflow/katib/api"
-	"github.com/kubeflow/katib/manager/modelstore/modeldb"
+	"github.com/kubeflow/katib/pkg/manager/modelstore/modeldb"
 	"log"
 	"net"
 	"strconv"

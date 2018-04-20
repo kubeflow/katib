@@ -36,8 +36,8 @@ ln -s ${PWD} ${GO_DIR}
 cd ${GO_DIR}
 echo "Build operator binary"
 mkdir bin
-go build -o bin/katib-core github.com/kubeflow/katib/manager
-go build -o bin/dlkmanager github.com/kubeflow/katib//dlk/dlkmanager
+go build -o bin/katib-core github.com/kubeflow/katib/cmd/manager
+go build -o bin/dlkmanager github.com/kubeflow/katib/dlk/dlkmanager
 go build -o bin/katib-suggestion-grid github.com/kubeflow/katib/suggestion/grid
 go build -o bin/katib-suggestion-hyperband github.com/kubeflow/katib/suggestion/hyperband
 go build -o bin/katib-suggestion-random github.com/kubeflow/katib/suggestion/random

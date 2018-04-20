@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
-	"github.com/kubeflow/katib/db"
+	"github.com/kubeflow/katib/pkg/db"
 	"log"
 	"math"
 	"sort"

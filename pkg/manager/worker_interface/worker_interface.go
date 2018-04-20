@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/kubeflow/katib/api"
-	"github.com/kubeflow/katib/db"
+	"github.com/kubeflow/katib/pkg/db"
 	"time"
 )
 

@@ -24,7 +24,7 @@ CMD_PREFIX="cmd"
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
 
 cd ${SCRIPT_ROOT}
-docker build -t ${PREFIX}/vizier-core -f manager/Dockerfile .
+docker build -t ${PREFIX}/vizier-core -f ${CMD_PREFIX}/manager/Dockerfile .
 docker build -t ${PREFIX}/suggestion-random -f suggestion/random/Dockerfile .
 docker build -t ${PREFIX}/suggestion-grid -f suggestion/grid/Dockerfile .
 docker build -t ${PREFIX}/suggestion-hyperband -f suggestion/hyperband/Dockerfile .

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/kubeflow/katib/api"
-	vdb "github.com/kubeflow/katib/db"
+	vdb "github.com/kubeflow/katib/pkg/db"
 	"log"
 	"sort"
 	"strconv"
