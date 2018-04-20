@@ -22,13 +22,13 @@ SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
 
 cd ${SCRIPT_ROOT}
 echo "Generating ManagerClient..."
-mockgen -package mock -destination mock/api/manager.go github.com/kubeflow/katib/api ManagerClient
+mockgen -package mock -destination pkg/mock/api/manager.go github.com/kubeflow/katib/api ManagerClient
 echo "Generating SuggestionClient..."
-mockgen -package mock -destination mock/api/suggestion.go github.com/kubeflow/katib/api SuggestionClient
+mockgen -package mock -destination pkg/mock/api/suggestion.go github.com/kubeflow/katib/api SuggestionClient
 echo "Generating VizierDBInterface..."
-mockgen -package mock -destination mock/db/db.go github.com/kubeflow/katib/pkg/db VizierDBInterface
+mockgen -package mock -destination pkg/mock/db/db.go github.com/kubeflow/katib/pkg/db VizierDBInterface
 echo "Generating WorkerInterface..."
-mockgen -package mock -destination mock/worker/worker.go  github.com/kubeflow/katib/pkg/manager/worker_interface WorkerInterface
+mockgen -package mock -destination pkg/mock/worker/worker.go  github.com/kubeflow/katib/pkg/manager/worker_interface WorkerInterface
 echo "Generating ModelStore..."
-mockgen -package mock -destination mock/modelstore/modelstore.go  github.com/kubeflow/katib/pkg/manager/modelstore ModelStore
+mockgen -package mock -destination pkg/mock/modelstore/modelstore.go  github.com/kubeflow/katib/pkg/manager/modelstore ModelStore
 cd - > /dev/null
