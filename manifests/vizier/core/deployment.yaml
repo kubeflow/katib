@@ -22,6 +22,8 @@ spec:
         args:
           - "-w"
           - "dlk"
+          - "-i"
+          - "k-cluster.example.net"
         ports:
         - name: api
           containerPort: 6789
