@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from api.python import api_pb2
+from pkg.api.python import api_pb2
 
 
 def deal_with_discrete(feasible_values, current_value):

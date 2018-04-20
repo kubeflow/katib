@@ -2,7 +2,7 @@ package tensorboard
 
 import (
 	"bytes"
-	"github.com/kubeflow/katib/api"
+	"github.com/kubeflow/katib/pkg/api"
 	"io/ioutil"
 	apiv1 "k8s.io/api/core/v1"
 	exbeatav1 "k8s.io/api/extensions/v1beta1"

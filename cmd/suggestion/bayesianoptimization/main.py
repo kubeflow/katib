@@ -3,7 +3,7 @@ from concurrent import futures
 
 import time
 
-from api.python import api_pb2_grpc
+from pkg.api.python import api_pb2_grpc
 from pkg.suggestion.bayesian_service import BayesianService
 from pkg.suggestion.types import DEFAULT_PORT
 

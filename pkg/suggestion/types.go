@@ -3,7 +3,7 @@ package suggestion
 import (
 	"context"
 
-	"github.com/kubeflow/katib/api"
+	"github.com/kubeflow/katib/pkg/api"
 )
 
 const (

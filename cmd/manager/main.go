@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	pb "github.com/kubeflow/katib/api"
+	pb "github.com/kubeflow/katib/pkg/api"
 	kdb "github.com/kubeflow/katib/pkg/db"
 	"github.com/kubeflow/katib/pkg/manager/modelstore"
 	tbif "github.com/kubeflow/katib/pkg/manager/visualise/tensorboard"

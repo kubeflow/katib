@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/kubeflow/katib/api"
+	"github.com/kubeflow/katib/pkg/api"
 )
 
 type Bracket []*api.Trial

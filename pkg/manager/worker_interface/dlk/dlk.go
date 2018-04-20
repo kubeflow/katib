@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/kubeflow/katib/api"
+	"github.com/kubeflow/katib/pkg/api"
 	"github.com/kubeflow/katib/pkg/db"
 	dlkapi "github.com/kubeflow/katib/dlk/dlkmanager/api"
 	"github.com/kubeflow/katib/dlk/dlkmanager/datastore"

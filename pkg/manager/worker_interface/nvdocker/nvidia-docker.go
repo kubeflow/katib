@@ -8,7 +8,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	dclient "github.com/docker/docker/client"
-	"github.com/kubeflow/katib/api"
+	"github.com/kubeflow/katib/pkg/api"
 	"github.com/kubeflow/katib/pkg/db"
 	wIF "github.com/kubeflow/katib/pkg/manager/worker_interface"
 	"io"

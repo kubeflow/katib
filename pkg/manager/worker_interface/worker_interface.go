@@ -3,7 +3,7 @@ package worker_interface
 import (
 	"errors"
 	"fmt"
-	"github.com/kubeflow/katib/api"
+	"github.com/kubeflow/katib/pkg/api"
 	"github.com/kubeflow/katib/pkg/db"
 	"time"
 )

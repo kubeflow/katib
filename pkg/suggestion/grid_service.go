@@ -6,7 +6,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/kubeflow/katib/api"
+	"github.com/kubeflow/katib/pkg/api"
 )
 
 type GridSuggestParameters struct {

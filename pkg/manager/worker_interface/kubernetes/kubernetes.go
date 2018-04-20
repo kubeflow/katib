@@ -16,7 +16,7 @@ import (
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/kubeflow/katib/api"
+	"github.com/kubeflow/katib/pkg/api"
 	"github.com/kubeflow/katib/pkg/db"
 	"github.com/kubeflow/katib/pkg/earlystopping"
 	wIF "github.com/kubeflow/katib/pkg/manager/worker_interface"

@@ -3,7 +3,7 @@ package earlystopping
 import (
 	"context"
 	"errors"
-	"github.com/kubeflow/katib/api"
+	"github.com/kubeflow/katib/pkg/api"
 	vdb "github.com/kubeflow/katib/pkg/db"
 	"log"
 	"sort"

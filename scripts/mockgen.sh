@@ -22,9 +22,9 @@ SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
 
 cd ${SCRIPT_ROOT}
 echo "Generating ManagerClient..."
-mockgen -package mock -destination pkg/mock/api/manager.go github.com/kubeflow/katib/api ManagerClient
+mockgen -package mock -destination pkg/mock/api/manager.go github.com/kubeflow/katib/pkg/api ManagerClient
 echo "Generating SuggestionClient..."
-mockgen -package mock -destination pkg/mock/api/suggestion.go github.com/kubeflow/katib/api SuggestionClient
+mockgen -package mock -destination pkg/mock/api/suggestion.go github.com/kubeflow/katib/pkg/api SuggestionClient
 echo "Generating VizierDBInterface..."
 mockgen -package mock -destination pkg/mock/db/db.go github.com/kubeflow/katib/pkg/db VizierDBInterface
 echo "Generating WorkerInterface..."
