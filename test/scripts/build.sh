@@ -46,7 +46,7 @@ go build -o bin/katib github.com/kubeflow/katib/cmd/cli
 #echo "building container in gcloud"
 #gcloud version
 # gcloud components update -q
-cp manager/Dockerfile .
+cp cmd/manager/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/vizier-core:${VERSION} --project=${PROJECT}
 cp suggestion/random/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-random:${VERSION} --project=${PROJECT}
@@ -56,9 +56,9 @@ cp suggestion/hyperband/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-hyperband:${VERSION} --project=${PROJECT}
 cp suggestion/bayesianoptimization/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-bayesianoptimization:${VERSION} --project=${PROJECT}
-cp earlystopping/medianstopping/Dockerfile .
+cp cmd/earlystopping/medianstopping/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/earlystopping-medianstopping:${VERSION} --project=${PROJECT}
 cp dlk/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/dlk-manager:${VERSION} --project=${PROJECT}
-cp modeldb//Dockerfile .
+cp modeldb/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/katib-frontend:${VERSION} --project=${PROJECT}
