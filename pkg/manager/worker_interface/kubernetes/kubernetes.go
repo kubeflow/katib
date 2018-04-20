@@ -211,6 +211,7 @@ func (d *KubernetesWorkerInterface) CheckRunningTrials(studyId string, objname s
 }
 
 func (d *KubernetesWorkerInterface) SpawnWorkers(trials []*api.Trial, studyId string) error {
+	// Notice: Missing in the repo.
 	tFile, _ := ioutil.ReadFile("/conf/template.yml")
 	jobs := d.convertTrialToManifest(trials, tFile, studyId)
 	jcl := d.clientset.BatchV1().Jobs(apiv1.NamespaceDefault)

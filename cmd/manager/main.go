@@ -394,6 +394,7 @@ func main() {
 	switch *workerType {
 	case "kubernetes":
 		log.Printf("Worker: kubernetes\n")
+		// Notice: Missing in the repo.
 		kc, err := clientcmd.BuildConfigFromFlags("", "/conf/kubeconfig")
 		if err != nil {
 			log.Fatal(err)
