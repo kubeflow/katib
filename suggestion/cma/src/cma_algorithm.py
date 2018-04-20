@@ -1,0 +1,142 @@
+import numpy as np
+from scipy.special import gamma
+from sklearn.preprocessing import MinMaxScaler
+
+
+def sum_of_sign(array, sign):
+    if sign == "positive":
+        flag = (array >= 0).astype("int32")
+    else:
+        flag = (array < 0).astype("int32")
+    return np.sum((array * flag))
+
+
+class CMAES:
+    def __init__(self, dim, lowerbound, upperbound):
+        self.dim = dim
+        self.scaler = MinMaxScaler()
+        lowerbound = lowerbound.reshape(1, dim)
+        upperbound = upperbound.reshape(1, dim)
+        self.scaler.fit(np.append(lowerbound, upperbound, axis=0))
+
+        # 1. set parameters
+        self.popsize = 4 + int(3 * np.log(self.dim))
+        self.select_size = int(self.popsize / 2)
+        weights_dash = self.cal_weights_dash()
+        self.mu_eff = np.sum(weights_dash[:self.select_size]) ** 2 / np.sum(weights_dash[:self.select_size] ** 2)
+        mu_eff_bar = np.sum(weights_dash[self.select_size:]) ** 2 / np.sum(weights_dash[self.select_size:] ** 2)
+
+        # 1.1 parameters for covariance matrix adaptation
+        self.c1 = 2 / ((self.popsize + 1.3) ** 2 + self.mu_eff)
+        self.cc = (4 + self.mu_eff / self.popsize) / (self.popsize + 4 + 2 * self.mu_eff / self.popsize)
+        self.c_mu = min(1 - self.c1, 2 * (self.mu_eff - 2 + 1 / self.mu_eff) / ((self.popsize + 2) ** 2 + self.mu_eff))
+
+        # 1.2 parameters for step size control
+        self.c_sigma = (self.mu_eff + 2) / (self.popsize + self.mu_eff + 5)
+        self.d_sigma = 1 + 2 * max(0, np.sqrt((self.mu_eff - 1) / (self.popsize + 1)) - 1) + self.c_sigma
+
+        # 1.3 parameters for selection and recombination
+        self.weights = self.cal_weights(self.c1, self.c_mu, mu_eff_bar, weights_dash)
+        self.cm = 1
+
+        # 2. init parameters
+        self.path_sigma = np.zeros((self.dim, 1))
+        self.path_c = np.zeros((self.dim, 1))
+        self.C = np.eye(self.dim)
+        self.l = np.zeros((self.dim, 1))
+        self.u = np.ones((self.dim, 1))
+        self.sigma = 0.3 * (self.u[0] - self.l[0])
+        self.mean = np.random.uniform(self.l, self.u, size=(self.dim, 1))
+
+        self.objective_values = []
+
+    def get_suggestion(self):
+        # sample new population of search points
+
+        y = np.random.multivariate_normal(
+            mean=np.zeros((self.dim,)),
+            cov=self.C,
+            size=self.popsize
+        )
+        x = self.mean.T + self.sigma * y
+
+        # selection and recombination
+        self.objective_values = []
+        suggestions = []
+        for i in range(y.shape[0]):
+            # todo: this can lead flat fitness, should be improved
+            if np.sum(np.less(x[i, :], self.l)) > 0 or np.sum(np.greater(x[i, :], self.u)) > 0:
+                self.objective_values.append(dict(
+                    x=y[i, ],
+                    y=float("inf"),
+                ))
+            else:
+                # suggestions.append(x[i, ])
+                suggestions.append(np.squeeze(self.scaler.inverse_transform(x[i:i+1], )))
+        return np.array(suggestions)
+
+    def report_metric(self, objective_dict):
+        for i in range(len(objective_dict)):
+            objective_dict[i]["x"] = np.squeeze(self.scaler.transform(objective_dict[i]["x"].reshape(1, self.dim)))
+            objective_dict[i]["x"] = (objective_dict[i]["x"]-self.mean.T)/self.sigma
+            objective_dict[i]["x"] = np.squeeze(objective_dict[i]["x"])
+        objective_values = self.objective_values + objective_dict
+        objective_values = sorted(objective_values, key=lambda k: k["y"])
+        sorted_y = []
+        for i in range(self.popsize):
+            sorted_y.append(objective_values[i]["x"])
+        sorted_y = np.array(sorted_y)
+
+        y_w = np.sum(self.weights[:self.select_size, ] * sorted_y[:self.select_size, ], axis=0)
+        y_w = y_w.reshape((y_w.shape[0], 1))
+        self.mean = self.mean + self.cm * self.sigma * y_w
+        # print(self.mean)
+
+        eigenvalue, B = np.linalg.eig(self.C)
+        D_inverse = np.diag(1 / np.sqrt(eigenvalue))
+
+        # step size control
+        self.path_sigma = (1 - self.c_sigma) * self.path_sigma + np.sqrt(self.c_sigma * (2 - self.c_sigma) * self.mu_eff) * np.dot(
+            np.dot(np.dot(B, D_inverse), B.T), y_w)
+        expectation = np.sqrt(2) * gamma((self.dim + 1) / 2) / gamma(self.dim / 2)
+        self.sigma = self.sigma * np.exp(self.c_sigma / self.d_sigma * (np.sqrt(np.sum(self.path_sigma ** 2)) / expectation - 1))
+
+        # covariance matrix adaptation
+        self.path_c = (1 - self.cc) * self.path_c + np.sqrt(self.cc * (2 - self.cc) / self.mu_eff) * y_w
+        weight_node = []
+        for i in range(self.popsize):
+            if self.weights[i] >= 0:
+                weight_node.append(self.weights[i])
+            else:
+                temp = np.dot(np.dot(np.dot(B, D_inverse), B.T), sorted_y[i,].reshape(sorted_y[i, ].shape[0], 1))
+                norm = self.dim / np.sum(temp ** 2)
+                weight_node.append(norm * self.weights[i])
+        weight_sum = np.zeros((self.dim, self.dim))
+        for i in range(self.popsize):
+            vec = sorted_y[i, :].reshape(sorted_y[i, :].shape[0], 1)
+            weight_sum = weight_sum + weight_node[i] * np.dot(vec, vec.T)
+        self.C = (1 - self.c1 - self.c_mu * np.sum(self.weights)) * self.C + self.c1 * np.dot(self.path_c, self.path_c.T) + self.c_mu * weight_sum
+
+        # print(objective_values[0]["y"])
+
+    def cal_weights_dash(self):
+        weights_dash = []
+        for i in range(self.popsize):
+            weights_dash.append(np.log((self.popsize + 1) / 2) - np.log(i + 1))
+        return np.array(weights_dash)
+
+    def cal_weights(self, c1, c_mu, mu_eff_bar, weights_dash):
+        temp_mu = 1 + c1 / c_mu
+        temp_mu_eff = 1 + 2 * mu_eff_bar / (self.mu_eff + 2)
+        temp_posdef = (1 - c1 - c_mu) / (self.popsize * c_mu)
+
+        positive_sum = sum_of_sign(weights_dash, "positive")
+        negative_sum = sum_of_sign(weights_dash, "negative")
+        weights = []
+        for i in range(self.popsize):
+            if weights_dash[i] >= 0:
+                weights.append(weights_dash[i] / positive_sum)
+            else:
+                weights.append(min(temp_mu, temp_mu_eff, temp_posdef) * weights_dash[i] / negative_sum)
+
+        return np.array(weights).reshape((self.popsize, 1))
