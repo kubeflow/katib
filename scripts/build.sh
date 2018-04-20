@@ -24,11 +24,11 @@ CMD_PREFIX="cmd"
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
 
 cd ${SCRIPT_ROOT}
-docker build -t ${PREFIX}/vizier-core -f ${CMD_PREFIX}/manager/Dockerfile .
-docker build -t ${PREFIX}/suggestion-random -f suggestion/random/Dockerfile .
-docker build -t ${PREFIX}/suggestion-grid -f suggestion/grid/Dockerfile .
-docker build -t ${PREFIX}/suggestion-hyperband -f suggestion/hyperband/Dockerfile .
-docker build -t ${PREFIX}/earlystopping-medianstopping -f earlystopping/medianstopping/Dockerfile .
+# docker build -t ${PREFIX}/vizier-core -f ${CMD_PREFIX}/manager/Dockerfile .
+# docker build -t ${PREFIX}/suggestion-random -f suggestion/random/Dockerfile .
+# docker build -t ${PREFIX}/suggestion-grid -f suggestion/grid/Dockerfile .
+# docker build -t ${PREFIX}/suggestion-hyperband -f suggestion/hyperband/Dockerfile .
+docker build -t ${PREFIX}/earlystopping-medianstopping -f ${CMD_PREFIX}/earlystopping/medianstopping/Dockerfile .
 docker build -t ${PREFIX}/dlk-manager -f dlk/Dockerfile .
 docker build -t ${PREFIX}/katib-frontend -f modeldb/Dockerfile .
 docker build -t ${PREFIX}/katib-cli -f ${CMD_PREFIX}/cli/Dockerfile .

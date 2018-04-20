@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	pb "github.com/kubeflow/katib/api"
-	"github.com/kubeflow/katib/earlystopping"
+	"github.com/kubeflow/katib/pkg/earlystopping"
 )
 
 func main() {
