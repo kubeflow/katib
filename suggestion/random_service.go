@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kubeflow/hp-tuning/api"
+	"github.com/kubeflow/katib/api"
 )
 
 type RandomSuggestParameters struct {

@@ -22,13 +22,13 @@ SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
 
 cd ${SCRIPT_ROOT}
 echo "Generating ManagerClient..."
-mockgen -package mock -destination mock/api/manager.go github.com/kubeflow/hp-tuning/api ManagerClient
+mockgen -package mock -destination mock/api/manager.go github.com/kubeflow/katib/api ManagerClient
 echo "Generating SuggestionClient..."
-mockgen -package mock -destination mock/api/suggestion.go github.com/kubeflow/hp-tuning/api SuggestionClient
+mockgen -package mock -destination mock/api/suggestion.go github.com/kubeflow/katib/api SuggestionClient
 echo "Generating VizierDBInterface..."
-mockgen -package mock -destination mock/db/db.go github.com/kubeflow/hp-tuning/db VizierDBInterface
+mockgen -package mock -destination mock/db/db.go github.com/kubeflow/katib/db VizierDBInterface
 echo "Generating WorkerInterface..."
-mockgen -package mock -destination mock/worker/worker.go  github.com/kubeflow/hp-tuning/manager/worker_interface WorkerInterface
+mockgen -package mock -destination mock/worker/worker.go  github.com/kubeflow/katib/manager/worker_interface WorkerInterface
 echo "Generating ModelStore..."
-mockgen -package mock -destination mock/modelstore/modelstore.go  github.com/kubeflow/hp-tuning/manager/modelstore ModelStore
+mockgen -package mock -destination mock/modelstore/modelstore.go  github.com/kubeflow/katib/manager/modelstore ModelStore
 cd - > /dev/null

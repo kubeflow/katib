@@ -6,10 +6,10 @@ import (
 
 	"github.com/golang/mock/gomock"
 
-	api "github.com/kubeflow/hp-tuning/api"
-	mockdb "github.com/kubeflow/hp-tuning/mock/db"
-	mockmodelstore "github.com/kubeflow/hp-tuning/mock/modelstore"
-	mockworker "github.com/kubeflow/hp-tuning/mock/worker"
+	api "github.com/kubeflow/katib/api"
+	mockdb "github.com/kubeflow/katib/mock/db"
+	mockmodelstore "github.com/kubeflow/katib/mock/modelstore"
+	mockworker "github.com/kubeflow/katib/mock/worker"
 )
 
 func TestCreateStudy(t *testing.T) {

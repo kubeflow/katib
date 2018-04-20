@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/configs"
+	"github.com/kubeflow/katib/dlk/dlkmanager/configs"
 	"github.com/labstack/echo"       // Web server framework for REST API
 	lgr "github.com/sirupsen/logrus" // logging framework
 	"github.com/spf13/cobra"

@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/configs"
+	"github.com/kubeflow/katib/dlk/dlkmanager/configs"
 
-	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/api"
-	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/datastore"
+	"github.com/kubeflow/katib/dlk/dlkmanager/api"
+	"github.com/kubeflow/katib/dlk/dlkmanager/datastore"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"

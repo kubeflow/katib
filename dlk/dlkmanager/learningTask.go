@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/api"
-	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/datastore"
+	"github.com/kubeflow/katib/dlk/dlkmanager/api"
+	"github.com/kubeflow/katib/dlk/dlkmanager/datastore"
 
 	lgr "github.com/sirupsen/logrus"
 	batchv1 "k8s.io/api/batch/v1"

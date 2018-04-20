@@ -8,7 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
-	"github.com/kubeflow/hp-tuning/manager/modelstore/modeldb"
+	"github.com/kubeflow/katib/manager/modelstore/modeldb"
 	"math"
 	"net"
 	"net/url"

@@ -14,7 +14,7 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
-	api "github.com/kubeflow/hp-tuning/api"
+	api "github.com/kubeflow/katib/api"
 )
 
 var db_interface VizierDBInterface

@@ -1,7 +1,7 @@
 package modelstore
 
 import (
-	"github.com/kubeflow/hp-tuning/api"
+	"github.com/kubeflow/katib/api"
 )
 
 type ModelStore interface {
