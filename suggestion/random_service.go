@@ -83,6 +83,7 @@ func (s *RandomSuggestService) GenerateTrials(ctx context.Context, in *api.Gener
 		s_t[i].EvalLogs = make([]*api.EvaluationLog, 0)
 		for j, pc := range in.Configs.ParameterConfigs.Configs {
 			s_t[i].ParameterSet[j] = &api.Parameter{Name: pc.Name}
+			s_t[i].ParameterSet[j].ParameterType = pc.ParameterType
 			switch pc.ParameterType {
 			case api.ParameterType_INT:
 				imin, _ := strconv.Atoi(pc.Feasible.Min)

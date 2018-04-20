@@ -33,6 +33,7 @@ const (
 )
 
 var workerType = flag.String("w", "kubernetes", "Worker Type")
+var ingressHost = flag.String("i", "kube-cluster.example.net", "Ingress host for TensorBoard visualize")
 var dbIf kdb.VizierDBInterface
 
 type studyCh struct {
@@ -148,7 +149,7 @@ func (s *server) trialIteration(conf *pb.StudyConfig, studyID string, sCh studyC
 						return err
 					}
 					for _, t := range r.Trials {
-						err = tbif.SpawnTensorBoard(studyID, t.TrialId, namespace, conf.Mount)
+						err = tbif.SpawnTensorBoard(studyID, t.TrialId, conf.Name, namespace, conf.Mount, ingressHost)
 						if err != nil {
 							log.Printf("SpawnTB failed %v", err)
 							return err

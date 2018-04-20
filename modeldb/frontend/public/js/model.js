@@ -16,8 +16,8 @@ $(function() {
         projectId.append($('<div class="kv">Project ID: ' + model["Project ID"] + '</div>'));
         $('.model-section.model-ids').append(projectId);
 
-        var tfblink = $('<a href="/tensorboard/' + model["Study ID"] + '/'+ model["Trial ID"] + '/" target="_blank"></a>');
-        tfblink.append($('<div class="kv">Trial ID: ' + model["Trial ID"] + '</div>'));
+        var tfblink = $('<a href="/tensorboard/' + model["Spec Tag"].split(":")[0] + '/'+ model["Spec Tag"].split(":")[1] + '/" target="_blank"></a>');
+        tfblink.append($('<div class="kv">Trial ID: ' + model["Spec Tag"].split(":")[1] + '</div>'));
         $('.model-section.model-ids').append(tfblink);
 
         // update link in breadcrumb to point to project models
