@@ -12,7 +12,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	pb "github.com/kubeflow/hp-tuning/api"
+	pb "github.com/kubeflow/katib/api"
 )
 
 var server = flag.String("s", "127.0.0.1:6789", "server address")

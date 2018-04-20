@@ -4,20 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/kubeflow/hp-tuning/api"
-	"github.com/kubeflow/hp-tuning/db"
-	dlkapi "github.com/kubeflow/hp-tuning/dlk/dlkmanager/api"
-	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/datastore"
-	"github.com/kubeflow/hp-tuning/manager/modeldb"
-	wIF "github.com/kubeflow/hp-tuning/manager/worker_interface"
+	"github.com/kubeflow/katib/api"
+	"github.com/kubeflow/katib/db"
+	dlkapi "github.com/kubeflow/katib/dlk/dlkmanager/api"
+	"github.com/kubeflow/katib/dlk/dlkmanager/datastore"
+	wIF "github.com/kubeflow/katib/manager/worker_interface"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"sync"
-	"time"
 )
 
 type DlkWorkerInterface struct {
@@ -154,50 +151,6 @@ func (d *DlkWorkerInterface) CheckRunningTrials(studyId string, objname string) 
 				t.ObjectiveValue = o
 				t.Status = api.TrialState_COMPLETED
 				d.dbIf.UpdateTrial(t.TrialId, api.TrialState_COMPLETED)
-				mif := modeldb.ModelDbIF{}
-				mr := &modeldb.ModelDbReq{
-					Owner:          sc.Owner,
-					Study:          sc.Name,
-					Train:          t.TrialId,
-					ModelPath:      "path/model",
-					HyperParameter: make(map[string]string),
-					Metrics:        make(map[string]float64),
-				}
-				of, err := strconv.ParseFloat(o, 64)
-				if err != nil {
-					log.Printf("ParseFloat err on %v: %v", objname, err)
-					of = 0
-					//					return err
-				}
-				for _, p := range t.ParameterSet {
-					mr.HyperParameter[strings.Replace(p.Name, "-", "", -1)] = p.Value
-				}
-				mr.HyperParameter["StudyID"] = studyId
-				mr.HyperParameter["TrialID"] = t.TrialId
-				mr.Metrics[sc.ObjectiveValueName] = of
-				for _, m := range sc.Metrics {
-				MET_LABEL:
-					for i := range t.EvalLogs {
-						for _, em := range t.EvalLogs[len(t.EvalLogs)-1-i].Metrics {
-							if em.Name == m {
-								emv, err := strconv.ParseFloat(em.Value, 64)
-								if err != nil {
-									log.Printf("ParseFloat err on %v: %v", em.Name, err)
-									emv = 0
-									//									return err
-								}
-								mr.Metrics[m] = emv
-								break MET_LABEL
-							}
-						}
-					}
-				}
-				if len(t.EvalLogs) > 0 {
-					st, _ := time.Parse(time.RFC3339, t.EvalLogs[0].Time)
-					et, _ := time.Parse(time.RFC3339, t.EvalLogs[len(t.EvalLogs)-1].Time)
-					mr.Metrics["time-cost-Min"] = et.Sub(st).Minutes()
-				}
-				mif.SendReq(mr)
 				log.Printf("Trial %v is completed.", t.TrialId)
 				log.Printf("Objective Value: %v", t.ObjectiveValue)
 				d.CompletedTrialList[studyId] = append(d.CompletedTrialList[studyId], t)

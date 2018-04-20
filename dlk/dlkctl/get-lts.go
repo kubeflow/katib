@@ -21,9 +21,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/datastore"
+	"github.com/kubeflow/katib/dlk/dlkmanager/datastore"
 
-	"github.com/kubeflow/hp-tuning/dlk/dlkctl/utils"
+	"github.com/kubeflow/katib/dlk/dlkctl/utils"
 	"github.com/spf13/cobra"
 )
 

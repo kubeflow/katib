@@ -12,6 +12,11 @@ service Manager {
 	rpc GetObjectValue(GetObjectValueRequest) returns (GetObjectValueReply);
 	rpc AddMeasurementToTrials(AddMeasurementToTrialsRequest) returns (AddMeasurementToTrialsReply);
     rpc InitializeSuggestService(InitializeSuggestServiceRequest) returns(InitializeSuggestServiceReply);
+    rpc SaveStudy(SaveStudyRequest) returns(SaveStudyReply);
+    rpc SaveModel(SaveModelRequest) returns(SaveModelReply);
+    rpc GetSavedStudies(GetSavedStudiesRequest) returns(GetSavedStudiesReply);
+    rpc GetSavedModels(GetSavedModelsRequest) returns(GetSavedModelsReply);
+    rpc GetSavedModel(GetSavedModelRequest) returns(GetSavedModelReply);
 }
 
 service Suggestion {
@@ -212,6 +217,65 @@ message AddMeasurementToTrialsRequest {
 }
 
 message AddMeasurementToTrialsReply {
+}
+
+message StudyOverview {
+	string name = 1;
+	string owner  = 2;
+	string description = 3;
+}
+
+message ModelInfo {
+	string study_name = 1;  
+	string trial_id = 2; 
+	repeated Parameter parameters = 3; 
+	repeated Metrics metrics = 4;
+	string model_path = 5; 
+}
+
+message DataSetInfo {
+	string name = 1;
+	string path = 2;
+}
+
+message SaveStudyRequest {
+    string study_name = 1;
+    string author = 2;
+}
+
+message SaveStudyReply {
+}
+
+message SaveModelRequest {
+    ModelInfo model = 1;
+    DataSetInfo data_set = 2;
+}
+
+message SaveModelReply {
+}
+
+message GetSavedStudiesRequest {
+}
+
+message GetSavedStudiesReply {
+    repeated StudyOverview studies = 1;
+}
+
+message GetSavedModelsRequest {
+    string study_name = 1;
+}
+
+message GetSavedModelsReply {
+    repeated ModelInfo models = 1;
+}
+
+message GetSavedModelRequest {
+    string study_name = 1;
+    string trial_id = 2;
+}
+
+message GetSavedModelReply {
+    ModelInfo model = 1;
 }
 
 message InitializeSuggestServiceRequest {

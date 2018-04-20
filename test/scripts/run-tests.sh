@@ -54,11 +54,13 @@ cd ${GO_DIR}
 ./deploy.sh
 
 TIMEOUT=60
-until kubectl get pods -n katib | grep 1/1 | [[ $(wc -l) -eq 7 ]]; do
+PODNUM=$(kubectl get pods -n katib | grep -v NAME | wc -l)
+until kubectl get pods -n katib | grep 1/1 | [[ $(wc -l) -eq $PODNUM ]]; do
     sleep 10
     TIMEOUT=$(( TIMEOUT - 1 ))
     if [[ $TIMEOUT -eq 0 ]];then
         echo "NG"
+        kubectl get pods -n katib
         exit 1
     fi
 done

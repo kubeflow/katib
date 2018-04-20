@@ -19,8 +19,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kubeflow/hp-tuning/dlk/dlkctl/utils"
-	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/api"
+	"github.com/kubeflow/katib/dlk/dlkctl/utils"
+	"github.com/kubeflow/katib/dlk/dlkmanager/api"
 
 	"github.com/spf13/cobra"
 )

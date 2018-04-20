@@ -2,7 +2,7 @@ package tensorboard
 
 import (
 	"bytes"
-	"github.com/kubeflow/hp-tuning/api"
+	"github.com/kubeflow/katib/api"
 	"io/ioutil"
 	apiv1 "k8s.io/api/core/v1"
 	exbeatav1 "k8s.io/api/extensions/v1beta1"
@@ -21,7 +21,7 @@ func initk8sCl() (*kubernetes.Clientset, error) {
 	return kubernetes.NewForConfig(config)
 }
 
-func SpawnTensorBoard(sid string, tid string, namespace string, mount *api.MountConf) error {
+func SpawnTensorBoard(sid string, tid string, studyname string, namespace string, mount *api.MountConf, inhost *string) error {
 	if mount == nil {
 		return nil
 	}
@@ -57,7 +57,7 @@ func SpawnTensorBoard(sid string, tid string, namespace string, mount *api.Mount
 	dep.Spec.Template.ObjectMeta.Labels["TrialID"] = tid
 	dep.Spec.Template.ObjectMeta.Labels["StudyID"] = sid
 	dep.Spec.Template.Spec.Containers[0].Args = append(dep.Spec.Template.Spec.Containers[0].Args, "--logdir="+mount.Path+"/logs/"+sid+"_"+tid)
-	dep.Spec.Template.Spec.Containers[0].Args = append(dep.Spec.Template.Spec.Containers[0].Args, "--path_prefix=/tensorboard/"+sid+"/"+tid)
+	dep.Spec.Template.Spec.Containers[0].Args = append(dep.Spec.Template.Spec.Containers[0].Args, "--path_prefix=/tensorboard/"+studyname+"/"+tid)
 	dep.Spec.Template.Spec.Volumes = append(dep.Spec.Template.Spec.Volumes, apiv1.Volume{
 		Name: "pvc-mount-point",
 		VolumeSource: apiv1.VolumeSource{
@@ -80,7 +80,8 @@ func SpawnTensorBoard(sid string, tid string, namespace string, mount *api.Mount
 	svc.Spec.Selector["StudyID"] = sid
 
 	ing.ObjectMeta.Name = tname
-	ing.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0].Path = "/tensorboard/" + sid + "/" + tid
+	ing.Spec.Rules[0].Host = *inhost
+	ing.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0].Path = "/tensorboard/" + studyname + "/" + tid
 	ing.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0].Backend.ServiceName = tname
 
 	kcl, _ := initk8sCl()

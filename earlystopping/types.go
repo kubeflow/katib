@@ -3,7 +3,7 @@ package earlystopping
 import (
 	"context"
 
-	"github.com/kubeflow/hp-tuning/api"
+	"github.com/kubeflow/katib/api"
 )
 
 const (

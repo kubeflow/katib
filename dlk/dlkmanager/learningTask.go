@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/api"
-	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/datastore"
+	"github.com/kubeflow/katib/dlk/dlkmanager/api"
+	"github.com/kubeflow/katib/dlk/dlkmanager/datastore"
 
 	lgr "github.com/sirupsen/logrus"
 	batchv1 "k8s.io/api/batch/v1"
@@ -307,12 +307,12 @@ func (lt *learningTask) run() {
 			}
 
 		case <-time.After(1 * time.Second):
-			lt.pollJobs()
 			err := lt.checkPodStatus(podState)
 			if err != nil {
 				fmt.Println(err.Error())
 				os.Exit(1)
 			}
+			lt.pollJobs()
 
 			if lt.nrCompletedWorkers == lt.ltc.NrWorker {
 				state = ltStateCompleted

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	api "github.com/kubeflow/hp-tuning/api"
+	api "github.com/kubeflow/katib/api"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -329,7 +329,32 @@ func (d *db_conn) getTrials(trial_id string, study_id string) ([]*api.Trial, err
 		if err != nil {
 			return nil, err
 		}
-		// XXX need to unmarshall parameters & tags
+		params := strings.Split(parameters, ",\n")
+		p := make([]*api.Parameter, len(params))
+		for i, pstr := range params {
+			if pstr == "" {
+				continue
+			}
+			p[i] = &api.Parameter{}
+			err := jsonpb.UnmarshalString(pstr, p[i])
+			if err != nil {
+				return nil, err
+			}
+		}
+		trial.ParameterSet = p
+		taglist := strings.Split(tags, ",\n")
+		t := make([]*api.Tag, len(taglist))
+		for i, tstr := range taglist {
+			if tstr == "" {
+				continue
+			}
+			t[i] = &api.Tag{}
+			err := jsonpb.UnmarshalString(tstr, t[i])
+			if err != nil {
+				return nil, err
+			}
+		}
+		trial.Tags = t
 		result = append(result, trial)
 	}
 

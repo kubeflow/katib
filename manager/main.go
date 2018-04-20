@@ -4,43 +4,37 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
-	"os"
 	"strconv"
 	"time"
 
-	"github.com/kubeflow/hp-tuning/manager/worker_interface"
-	dlkwif "github.com/kubeflow/hp-tuning/manager/worker_interface/dlk"
-	k8swif "github.com/kubeflow/hp-tuning/manager/worker_interface/kubernetes"
-	nvdwif "github.com/kubeflow/hp-tuning/manager/worker_interface/nvdocker"
-
-	tbif "github.com/kubeflow/hp-tuning/manager/visualise/tensorboard"
+	pb "github.com/kubeflow/katib/api"
+	kdb "github.com/kubeflow/katib/db"
+	"github.com/kubeflow/katib/manager/modelstore"
+	tbif "github.com/kubeflow/katib/manager/visualise/tensorboard"
+	"github.com/kubeflow/katib/manager/worker_interface"
+	dlkwif "github.com/kubeflow/katib/manager/worker_interface/dlk"
+	k8swif "github.com/kubeflow/katib/manager/worker_interface/kubernetes"
+	nvdwif "github.com/kubeflow/katib/manager/worker_interface/nvdocker"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	vdb "github.com/kubeflow/hp-tuning/db"
-	batchv1 "k8s.io/api/batch/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-
-	pb "github.com/kubeflow/hp-tuning/api"
 )
 
 const (
-	k8s_namespace            = "katib"
+	namespace                = "katib"
 	port                     = "0.0.0.0:6789"
 	defaultEarlyStopInterval = 60
+	defaultSaveInterval      = 30
 )
 
-var init_db = flag.Bool("init", false, "Initialize DB")
-var worker = flag.String("w", "kubernetes", "Worker Typw")
-var dbIf vdb.VizierDBInterface
+var workerType = flag.String("w", "kubernetes", "Worker Type")
+var ingressHost = flag.String("i", "kube-cluster.example.net", "Ingress host for TensorBoard visualize")
+var dbIf kdb.VizierDBInterface
 
 type studyCh struct {
 	stopCh       chan bool
@@ -48,52 +42,63 @@ type studyCh struct {
 }
 type server struct {
 	wIF         worker_interface.WorkerInterface
+	msIf        modelstore.ModelStore
 	StudyChList map[string]studyCh
 }
 
-func (s *server) saveResult(study_id string) error {
-	var result string
-	c := s.wIF.GetCompletedTrials(study_id)
-	if len(c) == 0 {
-		log.Printf("Study %v has no completed Trials", study_id)
-		return nil
+func (s *server) saveCompletedModels(studyID string, conf *pb.StudyConfig) error {
+	ret, err := s.GetSavedModels(context.Background(), &pb.GetSavedModelsRequest{StudyName: conf.Name})
+	if err != nil {
+		log.Printf("GetSavedModels Err %v", err)
+		return err
 	}
-	result += "TrialID"
-	for _, p := range c[0].ParameterSet {
-		result += fmt.Sprintf("\t%v", p.Name)
+	ts, err := dbIf.GetTrialList(studyID)
+	if err != nil {
+		log.Printf("GetTrials Err %v", err)
+		return err
 	}
-	result += "\tObjectiveValue"
-	if len(c) > 0 {
-		if len(c[0].EvalLogs) > 0 {
-			for _, m := range c[0].EvalLogs[len(c[0].EvalLogs)-1].Metrics {
-				result += fmt.Sprintf("\t%v", m.Name)
+	for _, t := range ts {
+		tid := t.TrialId
+		tst, err := dbIf.GetTrialStatus(tid)
+		if err != nil {
+			log.Printf("GetTrialStatus Err %v", err)
+			continue
+		}
+		isin := false
+		if tst == pb.TrialState_COMPLETED {
+			for _, m := range ret.Models {
+				if m.TrialId == tid {
+					isin = true
+					break
+				}
+			}
+			if !isin {
+				met := make([]*pb.Metrics, len(conf.Metrics))
+				for i, mn := range conf.Metrics {
+					l, _ := dbIf.GetTrialLogs(tid, &kdb.GetTrialLogOpts{Name: mn})
+					if len(l) > 0 {
+						met[i] = &pb.Metrics{Name: mn, Value: l[len(l)-1].Value}
+					}
+				}
+				t, _ := dbIf.GetTrial(tid)
+				s.SaveModel(context.Background(), &pb.SaveModelRequest{
+					Model: &pb.ModelInfo{
+						StudyName:  conf.Name,
+						TrialId:    tid,
+						Parameters: t.ParameterSet,
+						Metrics:    met,
+					},
+				})
+				log.Printf("Trial %v in Study %v is saved", tid, conf.Name)
 			}
 		}
 	}
-	result += "\tTiem_cost"
-	result += "\n"
-
-	for _, ct := range c {
-		result += fmt.Sprintf("%v", ct.TrialId)
-		for _, p := range ct.ParameterSet {
-			result += fmt.Sprintf("\t%v", p.Value)
-		}
-		result += fmt.Sprintf("\t%v", ct.ObjectiveValue)
-		for _, m := range ct.EvalLogs[len(ct.EvalLogs)-1].Metrics {
-			result += fmt.Sprintf("\t%v", m.Value)
-		}
-		st, _ := time.Parse(time.RFC3339, ct.EvalLogs[0].Time)
-		et, _ := time.Parse(time.RFC3339, ct.EvalLogs[len(ct.EvalLogs)-1].Time)
-		result += fmt.Sprintf("\t%v", et.Sub(st))
-		result += "\n"
-	}
-	ioutil.WriteFile("/conf/result", []byte(result), os.ModePerm)
 	return nil
 }
 
-func (s *server) trialIteration(conf *pb.StudyConfig, study_id string, sCh studyCh) error {
-	defer delete(s.StudyChList, study_id)
-	defer s.wIF.CleanWorkers(study_id)
+func (s *server) trialIteration(conf *pb.StudyConfig, studyID string, sCh studyCh) error {
+	defer delete(s.StudyChList, studyID)
+	defer s.wIF.CleanWorkers(studyID)
 	tm := time.NewTimer(1 * time.Second)
 	ei := 0
 	var err error
@@ -109,42 +114,42 @@ func (s *server) trialIteration(conf *pb.StudyConfig, study_id string, sCh study
 		ei = defaultEarlyStopInterval
 	}
 	estm := time.NewTimer(time.Duration(ei) * time.Second)
-	log.Printf("Study %v start.", study_id)
+	strtm := time.NewTimer(defaultSaveInterval * time.Second)
+	log.Printf("Study %v start.", studyID)
 	log.Printf("Study conf %v", conf)
 	for {
 		select {
 		case <-tm.C:
 			if conf.SuggestAlgorithm != "" {
-				err := s.wIF.CheckRunningTrials(study_id, conf.ObjectiveValueName)
+				err := s.wIF.CheckRunningTrials(studyID, conf.ObjectiveValueName)
 				if err != nil {
 					return err
 				}
-				r, err := s.SuggestTrials(context.Background(), &pb.SuggestTrialsRequest{StudyId: study_id, SuggestAlgorithm: conf.SuggestAlgorithm, Configs: conf})
+				r, err := s.SuggestTrials(context.Background(), &pb.SuggestTrialsRequest{StudyId: studyID, SuggestAlgorithm: conf.SuggestAlgorithm, Configs: conf})
 				if err != nil {
 					log.Printf("SuggestTrials failed %v", err)
 					return err
 				}
 				if r.Completed {
-					log.Printf("Study %v completed.", study_id)
-					//s.saveResult(study_id)
-					return nil
+					log.Printf("Study %v completed.", studyID)
+					return s.saveCompletedModels(studyID, conf)
 				} else if len(r.Trials) > 0 {
 					for _, trial := range r.Trials {
 						trial.Status = pb.TrialState_PENDING
-						trial.StudyId = study_id
+						trial.StudyId = studyID
 						err = dbIf.CreateTrial(trial)
 						if err != nil {
 							log.Printf("CreateTrial failed %v", err)
 							return err
 						}
 					}
-					err = s.wIF.SpawnWorkers(r.Trials, study_id)
+					err = s.wIF.SpawnWorkers(r.Trials, studyID)
 					if err != nil {
 						log.Printf("SpawnWorkers failed %v", err)
 						return err
 					}
 					for _, t := range r.Trials {
-						err = tbif.SpawnTensorBoard(study_id, t.TrialId, k8s_namespace, conf.Mount)
+						err = tbif.SpawnTensorBoard(studyID, t.TrialId, conf.Name, namespace, conf.Mount, ingressHost)
 						if err != nil {
 							log.Printf("SpawnTB failed %v", err)
 							return err
@@ -153,24 +158,28 @@ func (s *server) trialIteration(conf *pb.StudyConfig, study_id string, sCh study
 				}
 				tm.Reset(1 * time.Second)
 			}
+		case <-strtm.C:
+			s.saveCompletedModels(studyID, conf)
+			strtm.Reset(defaultSaveInterval * time.Second)
+
 		case <-estm.C:
-			ret, err := s.EarlyStopping(context.Background(), &pb.EarlyStoppingRequest{StudyId: study_id, EarlyStoppingAlgorithm: conf.EarlyStoppingAlgorithm})
+			ret, err := s.EarlyStopping(context.Background(), &pb.EarlyStoppingRequest{StudyId: studyID, EarlyStoppingAlgorithm: conf.EarlyStoppingAlgorithm})
 			if err != nil {
 				log.Printf("Early Stopping Error: %v", err)
 			} else {
 				if len(ret.Trials) > 0 {
 					for _, t := range ret.Trials {
-						s.CompleteTrial(context.Background(), &pb.CompleteTrialRequest{StudyId: study_id, TrialId: t.TrialId, IsComplete: false})
+						s.CompleteTrial(context.Background(), &pb.CompleteTrialRequest{StudyId: studyID, TrialId: t.TrialId, IsComplete: false})
 					}
 				}
 			}
 			estm.Reset(time.Duration(ei) * time.Second)
 		case <-sCh.stopCh:
-			log.Printf("Study %v is stopped.", study_id)
-			for _, t := range s.wIF.GetRunningTrials(study_id) {
+			log.Printf("Study %v is stopped.", studyID)
+			for _, t := range s.wIF.GetRunningTrials(studyID) {
 				t.Status = pb.TrialState_KILLED
 			}
-			return nil
+			return s.saveCompletedModels(studyID, conf)
 		case m := <-sCh.addMetricsCh:
 			conf.Metrics = append(conf.Metrics, m)
 		}
@@ -187,12 +196,12 @@ func (s *server) CreateStudy(ctx context.Context, in *pb.CreateStudyRequest) (*p
 		return &pb.CreateStudyReply{}, errors.New("Objective_Value_Name is required.")
 	}
 
-	study_id, err := dbIf.CreateStudy(in.StudyConfig)
+	studyID, err := dbIf.CreateStudy(in.StudyConfig)
 	if in.StudyConfig.SuggestAlgorithm != "" {
 		_, err = s.InitializeSuggestService(
 			ctx,
 			&pb.InitializeSuggestServiceRequest{
-				StudyId:              study_id,
+				StudyId:              studyID,
 				SuggestAlgorithm:     in.StudyConfig.SuggestAlgorithm,
 				SuggestionParameters: in.StudyConfig.SuggestionParameters,
 				Configs:              in.StudyConfig,
@@ -215,7 +224,7 @@ func (s *server) CreateStudy(ctx context.Context, in *pb.CreateStudyRequest) (*p
 		_, err = c.SetEarlyStoppingParameter(
 			context.Background(),
 			&pb.SetEarlyStoppingParameterRequest{
-				StudyId:                 study_id,
+				StudyId:                 studyID,
 				EarlyStoppingParameters: in.StudyConfig.EarlyStoppingParameters,
 			},
 		)
@@ -224,9 +233,13 @@ func (s *server) CreateStudy(ctx context.Context, in *pb.CreateStudyRequest) (*p
 		}
 	}
 	sCh := studyCh{stopCh: make(chan bool), addMetricsCh: make(chan string)}
-	go s.trialIteration(in.StudyConfig, study_id, sCh)
-	s.StudyChList[study_id] = sCh
-	return &pb.CreateStudyReply{StudyId: study_id}, nil
+	_, err = s.SaveStudy(ctx, &pb.SaveStudyRequest{StudyName: in.StudyConfig.Name})
+	if err != nil {
+		return &pb.CreateStudyReply{}, err
+	}
+	go s.trialIteration(in.StudyConfig, studyID, sCh)
+	s.StudyChList[studyID] = sCh
+	return &pb.CreateStudyReply{StudyId: studyID}, nil
 }
 
 func (s *server) StopStudy(ctx context.Context, in *pb.StopStudyRequest) (*pb.StopStudyReply, error) {
@@ -236,30 +249,6 @@ func (s *server) StopStudy(ctx context.Context, in *pb.StopStudyRequest) (*pb.St
 	}
 	sc.stopCh <- false
 	return &pb.StopStudyReply{}, nil
-}
-
-func spawn_worker(study_task string, params string) error {
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		return err
-	}
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return err
-	}
-	template, err := clientset.CoreV1().PodTemplates(k8s_namespace).Get(study_task, metav1.GetOptions{})
-	if err != nil {
-		return err
-	}
-
-	_, err = clientset.BatchV1().Jobs(k8s_namespace).Create(&batchv1.Job{
-		Spec: batchv1.JobSpec{
-			Template: template.Template,
-		},
-	})
-
-	// TODO: Update worker status
-	return err
 }
 
 func (s *server) GetStudies(ctx context.Context, in *pb.GetStudiesRequest) (*pb.GetStudiesReply, error) {
@@ -296,7 +285,7 @@ func (s *server) InitializeSuggestService(ctx context.Context, in *pb.Initialize
 }
 
 func (s *server) SuggestTrials(ctx context.Context, in *pb.SuggestTrialsRequest) (*pb.SuggestTrialsReply, error) {
-	var suggest_algo string
+	var suggestAlgorithm string
 
 	// TODO: only a few columns are needed but GetStudyConfig does a full retrieval
 	study, err := dbIf.GetStudyConfig(in.StudyId)
@@ -305,14 +294,14 @@ func (s *server) SuggestTrials(ctx context.Context, in *pb.SuggestTrialsRequest)
 	}
 
 	if in.SuggestAlgorithm != "" {
-		suggest_algo = in.SuggestAlgorithm
+		suggestAlgorithm = in.SuggestAlgorithm
 	} else if study.SuggestAlgorithm != "" {
-		suggest_algo = study.SuggestAlgorithm
+		suggestAlgorithm = study.SuggestAlgorithm
 	} else {
 		return &pb.SuggestTrialsReply{Completed: false}, errors.New("No suggest algorithm specified")
 	}
 
-	conn, err := grpc.Dial("vizier-suggestion-"+suggest_algo+":6789", grpc.WithInsecure())
+	conn, err := grpc.Dial("vizier-suggestion-"+suggestAlgorithm+":6789", grpc.WithInsecure())
 	if err != nil {
 		return &pb.SuggestTrialsReply{Completed: false}, err
 	}
@@ -366,22 +355,43 @@ func (s *server) AddMeasurementToTrials(context.Context, *pb.AddMeasurementToTri
 	return &pb.AddMeasurementToTrialsReply{}, nil
 }
 
+func (s *server) SaveStudy(ctx context.Context, in *pb.SaveStudyRequest) (*pb.SaveStudyReply, error) {
+	err := s.msIf.SaveStudy(in)
+	return &pb.SaveStudyReply{}, err
+}
+
+func (s *server) SaveModel(ctx context.Context, in *pb.SaveModelRequest) (*pb.SaveModelReply, error) {
+	err := s.msIf.SaveModel(in)
+	return &pb.SaveModelReply{}, err
+}
+
+func (s *server) GetSavedStudies(ctx context.Context, in *pb.GetSavedStudiesRequest) (*pb.GetSavedStudiesReply, error) {
+	ret, err := s.msIf.GetSavedStudies()
+	return &pb.GetSavedStudiesReply{Studies: ret}, err
+}
+
+func (s *server) GetSavedModels(ctx context.Context, in *pb.GetSavedModelsRequest) (*pb.GetSavedModelsReply, error) {
+	ret, err := s.msIf.GetSavedModels(in)
+	return &pb.GetSavedModelsReply{Models: ret}, err
+}
+
+func (s *server) GetSavedModel(ctx context.Context, in *pb.GetSavedModelRequest) (*pb.GetSavedModelReply, error) {
+	ret, err := s.msIf.GetSavedModel(in)
+	return &pb.GetSavedModelReply{Model: ret}, err
+}
+
 func main() {
 	flag.Parse()
-
-	//	if *init_db {
 	var err error
-	dbIf = vdb.New()
-
+	dbIf = kdb.New()
 	dbIf.DB_Init()
-	//	} else {
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 	size := 1<<31 - 1
 	s := grpc.NewServer(grpc.MaxRecvMsgSize(size), grpc.MaxSendMsgSize(size))
-	switch *worker {
+	switch *workerType {
 	case "kubernetes":
 		log.Printf("Worker: kubernetes\n")
 		kc, err := clientcmd.BuildConfigFromFlags("", "/conf/kubeconfig")
@@ -392,14 +402,13 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		pb.RegisterManagerServer(s, &server{wIF: k8swif.NewKubernetesWorkerInterface(clientset, dbIf), StudyChList: make(map[string]studyCh)})
-		// XXX Is this useful?
+		pb.RegisterManagerServer(s, &server{wIF: k8swif.NewKubernetesWorkerInterface(clientset, dbIf), msIf: modelstore.NewModelDB("modeldb-backend", "6543"), StudyChList: make(map[string]studyCh)})
 	case "dlk":
 		log.Printf("Worker: dlk\n")
-		pb.RegisterManagerServer(s, &server{wIF: dlkwif.NewDlkWorkerInterface("http://dlk-manager:1323", k8s_namespace), StudyChList: make(map[string]studyCh)})
+		pb.RegisterManagerServer(s, &server{wIF: dlkwif.NewDlkWorkerInterface("http://dlk-manager:1323", namespace), msIf: modelstore.NewModelDB("modeldb-backend", "6543"), StudyChList: make(map[string]studyCh)})
 	case "nv-docker":
 		log.Printf("Worker: nv-docker\n")
-		pb.RegisterManagerServer(s, &server{wIF: nvdwif.NewNvDockerWorkerInterface(), StudyChList: make(map[string]studyCh)})
+		pb.RegisterManagerServer(s, &server{wIF: nvdwif.NewNvDockerWorkerInterface(), msIf: modelstore.NewModelDB("modeldb-backend", "6543"), StudyChList: make(map[string]studyCh)})
 	default:
 		log.Fatalf("Unknown worker")
 	}
@@ -407,5 +416,4 @@ func main() {
 	if err = s.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
-	//	}
 }

@@ -1,8 +1,8 @@
 FROM python:3
 
-ADD . /usr/src/app/github.com/kubeflow/hp-tuning
-WORKDIR /usr/src/app/github.com/kubeflow/hp-tuning/suggestion/bayesianoptimization
+ADD . /usr/src/app/github.com/kubeflow/katib
+WORKDIR /usr/src/app/github.com/kubeflow/katib/suggestion/bayesianoptimization
 RUN pip install --no-cache-dir -r requirements.txt
-ENV PYTHONPATH /usr/src/app/github.com/kubeflow/hp-tuning
+ENV PYTHONPATH /usr/src/app/github.com/kubeflow/katib
 
 ENTRYPOINT ["python", "main.py"]

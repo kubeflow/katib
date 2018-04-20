@@ -3,8 +3,8 @@ package earlystopping
 import (
 	"context"
 	"errors"
-	"github.com/kubeflow/hp-tuning/api"
-	vdb "github.com/kubeflow/hp-tuning/db"
+	"github.com/kubeflow/katib/api"
+	vdb "github.com/kubeflow/katib/db"
 	"log"
 	"sort"
 	"strconv"

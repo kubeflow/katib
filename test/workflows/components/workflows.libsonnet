@@ -52,8 +52,8 @@
       local goDir = testDir + "/go";
       // Source directory where all repos should be checked out
       local srcRootDir = testDir + "/src";
-      // The directory containing the kubeflow/hp-tuning repo
-      local srcDir = srcRootDir + "/kubeflow/hp-tuning";
+      // The directory containing the kubeflow/katib repo
+      local srcDir = srcRootDir + "/kubeflow/katib";
       local testWorkerImage = "gcr.io/mlkube-testing/test-worker";
       local golangImage = "golang:1.9.4-stretch";
       // TODO(jose5918) Build our own helm image
@@ -89,7 +89,7 @@
           name;
       local zone = params.zone;
       local registry = params.registry;
-      local chart = srcDir + "/hp-tuning-chart";
+      local chart = srcDir + "/katib-chart";
       {
         // Build an Argo template to execute a particular command.
         // step_name: Name for the template
@@ -191,7 +191,7 @@
               },
             },
           ],  // volumes
-          // onExit specifies the template that should always run when the workflow completes.          
+          // onExit specifies the template that should always run when the workflow completes.
           onExit: "exit-handler",
           templates: [
             {
@@ -209,6 +209,12 @@
                   {
                     name: "create-pr-symlink",
                     template: "create-pr-symlink",
+                  },
+                ],
+                [
+                  {
+                    name: "unit-test",
+                    template: "unit-test",
                   },
                 ],
                 [  // Setup cluster needs to run after build because we depend on the chart
@@ -288,6 +294,9 @@
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build", testWorkerImage, [
               "test/scripts/build.sh",
             ]),  // build
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("unit-test", testWorkerImage, [
+              "test/scripts/unit-test.sh",
+            ]),  // unit test
           ],  // templates
         },
       },  // e2e

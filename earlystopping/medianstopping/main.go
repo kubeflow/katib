@@ -7,8 +7,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	pb "github.com/kubeflow/hp-tuning/api"
-	"github.com/kubeflow/hp-tuning/earlystopping"
+	pb "github.com/kubeflow/katib/api"
+	"github.com/kubeflow/katib/earlystopping"
 )
 
 func main() {

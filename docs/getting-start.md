@@ -11,7 +11,7 @@
 First, Copy CLI tool.
 
 ```bash
-$ curl -Lo katib-cli https://github.com/kubeflow/hp-tuning/releases/download/v0.1.0-alpha/katib-cli-linux-amd64 && chmod +x katib-cli && sudo mv katib-cli /usr/local/bin/
+$ curl -Lo katib-cli https://github.com/kubeflow/katib/releases/download/v0.1.0-alpha/katib-cli-linux-amd64 && chmod +x katib-cli && sudo mv katib-cli /usr/local/bin/
 ```
 
 The cli tool will be put `/usr/local/bin/` directory.

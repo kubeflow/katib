@@ -4,13 +4,13 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
-	"github.com/kubeflow/hp-tuning/db"
+	"github.com/kubeflow/katib/db"
 	"log"
 	"math"
 	"sort"
 	"strconv"
 
-	"github.com/kubeflow/hp-tuning/api"
+	"github.com/kubeflow/katib/api"
 )
 
 type Bracket []*api.Trial
@@ -69,6 +69,7 @@ func (h *HyperBandSuggestService) makeMasterBracket(sconf *api.StudyConfig, n in
 		s_t[i].ParameterSet = make([]*api.Parameter, len(sconf.ParameterConfigs.Configs))
 		for j, pc := range sconf.ParameterConfigs.Configs {
 			s_t[i].ParameterSet[j] = &api.Parameter{Name: pc.Name}
+			s_t[i].ParameterSet[j].ParameterType = pc.ParameterType
 			switch pc.ParameterType {
 			case api.ParameterType_INT:
 				imin, _ := strconv.Atoi(pc.Feasible.Min)
