@@ -6,7 +6,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/kubeflow/hp-tuning/api"
+	"github.com/kubeflow/katib/api"
 )
 
 type GridSuggestParameters struct {

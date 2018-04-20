@@ -36,13 +36,13 @@ ln -s ${PWD} ${GO_DIR}
 cd ${GO_DIR}
 echo "Build operator binary"
 mkdir bin
-go build -o bin/katib-core github.com/kubeflow/hp-tuning/manager
-go build -o bin/dlkmanager github.com/kubeflow/hp-tuning//dlk/dlkmanager
-go build -o bin/katib-suggestion-grid github.com/kubeflow/hp-tuning/suggestion/grid
-go build -o bin/katib-suggestion-hyperband github.com/kubeflow/hp-tuning/suggestion/hyperband
-go build -o bin/katib-suggestion-random github.com/kubeflow/hp-tuning/suggestion/random
-go build -o bin/katib-earlystopping-medianstopping github.com/kubeflow/hp-tuning/earlystopping/medianstopping
-go build -o bin/katib github.com/kubeflow/hp-tuning/cli
+go build -o bin/katib-core github.com/kubeflow/katib/manager
+go build -o bin/dlkmanager github.com/kubeflow/katib//dlk/dlkmanager
+go build -o bin/katib-suggestion-grid github.com/kubeflow/katib/suggestion/grid
+go build -o bin/katib-suggestion-hyperband github.com/kubeflow/katib/suggestion/hyperband
+go build -o bin/katib-suggestion-random github.com/kubeflow/katib/suggestion/random
+go build -o bin/katib-earlystopping-medianstopping github.com/kubeflow/katib/earlystopping/medianstopping
+go build -o bin/katib github.com/kubeflow/katib/cli
 #echo "building container in gcloud"
 #gcloud version
 # gcloud components update -q

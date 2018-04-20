@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kubeflow/hp-tuning/dlk/dlkmanager/datastore"
+	"github.com/kubeflow/katib/dlk/dlkmanager/datastore"
 	"github.com/labstack/echo"
 	lgr "github.com/sirupsen/logrus"
 )

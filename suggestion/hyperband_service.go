@@ -4,13 +4,13 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
-	"github.com/kubeflow/hp-tuning/db"
+	"github.com/kubeflow/katib/db"
 	"log"
 	"math"
 	"sort"
 	"strconv"
 
-	"github.com/kubeflow/hp-tuning/api"
+	"github.com/kubeflow/katib/api"
 )
 
 type Bracket []*api.Trial

@@ -3,8 +3,8 @@ package worker_interface
 import (
 	"errors"
 	"fmt"
-	"github.com/kubeflow/hp-tuning/api"
-	"github.com/kubeflow/hp-tuning/db"
+	"github.com/kubeflow/katib/api"
+	"github.com/kubeflow/katib/db"
 	"time"
 )
 
