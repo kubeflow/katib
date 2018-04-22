@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"strings"
 	"time"
 
 	pb "github.com/kubeflow/katib/pkg/api"
@@ -87,7 +88,9 @@ func (s *server) saveCompletedModels(studyID string, conf *pb.StudyConfig) error
 						TrialId:    tid,
 						Parameters: t.ParameterSet,
 						Metrics:    met,
+						ModelPath:  conf.Mount.Pvc + ":" + "/logs/" + conf.Mount.Path + "/" + studyID + "-" + tid,
 					},
+					TensorBoard: true,
 				})
 				log.Printf("Trial %v in Study %v is saved", tid, conf.Name)
 			}
@@ -147,13 +150,6 @@ func (s *server) trialIteration(conf *pb.StudyConfig, studyID string, sCh studyC
 					if err != nil {
 						log.Printf("SpawnWorkers failed %v", err)
 						return err
-					}
-					for _, t := range r.Trials {
-						err = tbif.SpawnTensorBoard(studyID, t.TrialId, conf.Name, namespace, conf.Mount, ingressHost)
-						if err != nil {
-							log.Printf("SpawnTB failed %v", err)
-							return err
-						}
 					}
 				}
 				tm.Reset(1 * time.Second)
@@ -233,7 +229,7 @@ func (s *server) CreateStudy(ctx context.Context, in *pb.CreateStudyRequest) (*p
 		}
 	}
 	sCh := studyCh{stopCh: make(chan bool), addMetricsCh: make(chan string)}
-	_, err = s.SaveStudy(ctx, &pb.SaveStudyRequest{StudyName: in.StudyConfig.Name})
+	_, err = s.SaveStudy(ctx, &pb.SaveStudyRequest{StudyName: in.StudyConfig.Name, Owner: in.StudyConfig.Owner})
 	if err != nil {
 		return &pb.CreateStudyReply{}, err
 	}
@@ -361,8 +357,35 @@ func (s *server) SaveStudy(ctx context.Context, in *pb.SaveStudyRequest) (*pb.Sa
 }
 
 func (s *server) SaveModel(ctx context.Context, in *pb.SaveModelRequest) (*pb.SaveModelReply, error) {
+	if in.TensorBoard {
+		ret, err := s.GetSavedModel(ctx, &pb.GetSavedModelRequest{
+			StudyName: in.Model.StudyName,
+			TrialId:   in.Model.TrialId,
+		})
+		if err != nil {
+			log.Printf("Save Model failed %v", err)
+			return &pb.SaveModelReply{}, err
+		}
+		//Model is not Saved
+		if ret.Model == nil {
+			mountconf := strings.SplitN(in.Model.ModelPath, ":", 2)
+			if len(mountconf) != 2 {
+				log.Printf("Invalid ModelPath %v", mountconf)
+				return &pb.SaveModelReply{}, errors.New("Invalid ModelPath " + in.Model.ModelPath)
+			}
+			err = tbif.SpawnTensorBoard(in.Model.TrialId, in.Model.StudyName, namespace, ingressHost, mountconf[0], mountconf[1])
+			if err != nil {
+				log.Printf("SpawnTB failed %v", err)
+				return &pb.SaveModelReply{}, err
+			}
+		}
+	}
 	err := s.msIf.SaveModel(in)
-	return &pb.SaveModelReply{}, err
+	if err != nil {
+		log.Printf("Save Model failed %v", err)
+		return &pb.SaveModelReply{}, err
+	}
+	return &pb.SaveModelReply{}, nil
 }
 
 func (s *server) GetSavedStudies(ctx context.Context, in *pb.GetSavedStudiesRequest) (*pb.GetSavedStudiesReply, error) {
