@@ -21,7 +21,7 @@ Kubernetes manifests are in `manifests` directory.
 Set the environment of your cluster(Ingress, Persistent Volumes).
 
 ```bash
-$ ./deploy.sh
+$ ./scripts/deploy.sh
 ```
 
 ## Use CLI
