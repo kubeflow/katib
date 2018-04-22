@@ -36,29 +36,29 @@ ln -s ${PWD} ${GO_DIR}
 cd ${GO_DIR}
 echo "Build operator binary"
 mkdir bin
-go build -o bin/katib-core github.com/kubeflow/katib/manager
-go build -o bin/dlkmanager github.com/kubeflow/katib//dlk/dlkmanager
-go build -o bin/katib-suggestion-grid github.com/kubeflow/katib/suggestion/grid
-go build -o bin/katib-suggestion-hyperband github.com/kubeflow/katib/suggestion/hyperband
-go build -o bin/katib-suggestion-random github.com/kubeflow/katib/suggestion/random
-go build -o bin/katib-earlystopping-medianstopping github.com/kubeflow/katib/earlystopping/medianstopping
-go build -o bin/katib github.com/kubeflow/katib/cli
+go build -o bin/katib-core github.com/kubeflow/katib/cmd/manager
+go build -o bin/dlkmanager github.com/kubeflow/katib/dlk/dlkmanager
+go build -o bin/katib-suggestion-grid github.com/kubeflow/katib/cmd/suggestion/grid
+go build -o bin/katib-suggestion-hyperband github.com/kubeflow/katib/cmd/suggestion/hyperband
+go build -o bin/katib-suggestion-random github.com/kubeflow/katib/cmd/suggestion/random
+go build -o bin/katib-earlystopping-medianstopping github.com/kubeflow/katib/cmd/earlystopping/medianstopping
+go build -o bin/katib github.com/kubeflow/katib/cmd/cli
 #echo "building container in gcloud"
 #gcloud version
 # gcloud components update -q
-cp manager/Dockerfile .
+cp cmd/manager/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/vizier-core:${VERSION} --project=${PROJECT}
-cp suggestion/random/Dockerfile .
+cp cmd/suggestion/random/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-random:${VERSION} --project=${PROJECT}
-cp suggestion/grid/Dockerfile .
+cp cmd/suggestion/grid/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-grid:${VERSION} --project=${PROJECT}
-cp suggestion/hyperband/Dockerfile .
+cp cmd/suggestion/hyperband/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-hyperband:${VERSION} --project=${PROJECT}
-cp suggestion/bayesianoptimization/Dockerfile .
+cp cmd/suggestion/bayesianoptimization/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-bayesianoptimization:${VERSION} --project=${PROJECT}
-cp earlystopping/medianstopping/Dockerfile .
+cp cmd/earlystopping/medianstopping/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/earlystopping-medianstopping:${VERSION} --project=${PROJECT}
 cp dlk/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/dlk-manager:${VERSION} --project=${PROJECT}
-cp modeldb//Dockerfile .
+cp modeldb/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/katib-frontend:${VERSION} --project=${PROJECT}
