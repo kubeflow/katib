@@ -3,9 +3,9 @@ from concurrent import futures
 
 import time
 
-from api.python import api_pb2_grpc
-from suggestion.cma_service import CMAService
-from suggestion.types import DEFAULT_PORT
+from pkg.api.python import api_pb2_grpc
+from pkg.suggestion.cma_service import CMAService
+from pkg.suggestion.types import DEFAULT_PORT
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 

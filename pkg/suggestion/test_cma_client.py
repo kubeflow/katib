@@ -1,9 +1,9 @@
 import grpc
 
-from api.python import api_pb2
-from api.python import api_pb2_grpc
-from suggestion.test_func import func
-from suggestion.types import DEFAULT_PORT
+from pkg.api.python import api_pb2
+from pkg.api.python import api_pb2_grpc
+from pkg.suggestion.test_func import func
+from pkg.suggestion.types import DEFAULT_PORT
 
 
 def run():

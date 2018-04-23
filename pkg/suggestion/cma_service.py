@@ -4,10 +4,10 @@ import string
 import grpc
 import numpy as np
 
-from api.python import api_pb2
-from api.python import api_pb2_grpc
-from suggestion.cma.src.algorithm_manager import AlgorithmManager
-from suggestion.cma.src.cma_algorithm import CMAES
+from pkg.api.python import api_pb2
+from pkg.api.python import api_pb2_grpc
+from pkg.suggestion.cma.src.algorithm_manager import AlgorithmManager
+from pkg.suggestion.cma.src.cma_algorithm import CMAES
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
