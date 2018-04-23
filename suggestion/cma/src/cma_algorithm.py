@@ -40,47 +40,48 @@ class CMAES:
         self.cm = 1
 
         # 2. init parameters
-        self.path_sigma = np.zeros((self.dim, 1))
-        self.path_c = np.zeros((self.dim, 1))
-        self.C = np.eye(self.dim)
         self.l = np.zeros((self.dim, 1))
         self.u = np.ones((self.dim, 1))
-        self.sigma = 0.3 * (self.u[0] - self.l[0])
-        self.mean = np.random.uniform(self.l, self.u, size=(self.dim, 1))
 
-        self.objective_values = []
+    def init_params(self):
+        path_sigma = np.zeros((self.dim, 1))
+        path_c = np.zeros((self.dim, 1))
+        C = np.eye(self.dim)
+        sigma = 0.3 * (self.u[0] - self.l[0])
+        mean = np.random.uniform(self.l, self.u, size=(self.dim, 1))
 
-    def get_suggestion(self):
+        return path_sigma, path_c, C, sigma, mean
+
+    def get_suggestion(self, mean, sigma, C):
         # sample new population of search points
 
         y = np.random.multivariate_normal(
             mean=np.zeros((self.dim,)),
-            cov=self.C,
+            cov=C,
             size=self.popsize
         )
-        x = self.mean.T + self.sigma * y
+        x = mean.T + sigma * y
 
         # selection and recombination
-        self.objective_values = []
+        objective_values = []
         suggestions = []
         for i in range(y.shape[0]):
             # todo: this can lead flat fitness, should be improved
             if np.sum(np.less(x[i, :], self.l)) > 0 or np.sum(np.greater(x[i, :], self.u)) > 0:
-                self.objective_values.append(dict(
-                    x=y[i, ],
+                objective_values.append(dict(
+                    x=y[i,],
                     y=float("inf"),
                 ))
             else:
-                # suggestions.append(x[i, ])
-                suggestions.append(np.squeeze(self.scaler.inverse_transform(x[i:i+1], )))
-        return np.array(suggestions)
+                suggestions.append(np.squeeze(self.scaler.inverse_transform(x[i:i + 1], )))
+        return np.array(suggestions), objective_values
 
-    def report_metric(self, objective_dict):
+    def report_metric(self, objective_dict, infeasible_trials, mean, sigma, C, path_sigma, path_c):
         for i in range(len(objective_dict)):
             objective_dict[i]["x"] = np.squeeze(self.scaler.transform(objective_dict[i]["x"].reshape(1, self.dim)))
-            objective_dict[i]["x"] = (objective_dict[i]["x"]-self.mean.T)/self.sigma
+            objective_dict[i]["x"] = (objective_dict[i]["x"] - mean.T) / sigma
             objective_dict[i]["x"] = np.squeeze(objective_dict[i]["x"])
-        objective_values = self.objective_values + objective_dict
+        objective_values = infeasible_trials + objective_dict
         objective_values = sorted(objective_values, key=lambda k: k["y"])
         sorted_y = []
         for i in range(self.popsize):
@@ -89,35 +90,36 @@ class CMAES:
 
         y_w = np.sum(self.weights[:self.select_size, ] * sorted_y[:self.select_size, ], axis=0)
         y_w = y_w.reshape((y_w.shape[0], 1))
-        self.mean = self.mean + self.cm * self.sigma * y_w
-        # print(self.mean)
+        next_mean = mean + self.cm * sigma * y_w
 
-        eigenvalue, B = np.linalg.eig(self.C)
+        eigenvalue, B = np.linalg.eig(C)
         D_inverse = np.diag(1 / np.sqrt(eigenvalue))
 
         # step size control
-        self.path_sigma = (1 - self.c_sigma) * self.path_sigma + np.sqrt(self.c_sigma * (2 - self.c_sigma) * self.mu_eff) * np.dot(
+        next_path_sigma = (1 - self.c_sigma) * path_sigma + np.sqrt(
+            self.c_sigma * (2 - self.c_sigma) * self.mu_eff) * np.dot(
             np.dot(np.dot(B, D_inverse), B.T), y_w)
         expectation = np.sqrt(2) * gamma((self.dim + 1) / 2) / gamma(self.dim / 2)
-        self.sigma = self.sigma * np.exp(self.c_sigma / self.d_sigma * (np.sqrt(np.sum(self.path_sigma ** 2)) / expectation - 1))
+        next_sigma = sigma * np.exp(self.c_sigma / self.d_sigma * (np.sqrt(np.sum(next_path_sigma ** 2)) / expectation - 1))
 
         # covariance matrix adaptation
-        self.path_c = (1 - self.cc) * self.path_c + np.sqrt(self.cc * (2 - self.cc) / self.mu_eff) * y_w
+        next_path_c = (1 - self.cc) * path_c + np.sqrt(self.cc * (2 - self.cc) / self.mu_eff) * y_w
         weight_node = []
         for i in range(self.popsize):
             if self.weights[i] >= 0:
                 weight_node.append(self.weights[i])
             else:
-                temp = np.dot(np.dot(np.dot(B, D_inverse), B.T), sorted_y[i,].reshape(sorted_y[i, ].shape[0], 1))
+                temp = np.dot(np.dot(np.dot(B, D_inverse), B.T), sorted_y[i,].reshape(sorted_y[i,].shape[0], 1))
                 norm = self.dim / np.sum(temp ** 2)
                 weight_node.append(norm * self.weights[i])
         weight_sum = np.zeros((self.dim, self.dim))
         for i in range(self.popsize):
             vec = sorted_y[i, :].reshape(sorted_y[i, :].shape[0], 1)
             weight_sum = weight_sum + weight_node[i] * np.dot(vec, vec.T)
-        self.C = (1 - self.c1 - self.c_mu * np.sum(self.weights)) * self.C + self.c1 * np.dot(self.path_c, self.path_c.T) + self.c_mu * weight_sum
+        next_C = (1 - self.c1 - self.c_mu * np.sum(self.weights)) * C + self.c1 * np.dot(next_path_c,
+                                                                                    next_path_c.T) + self.c_mu * weight_sum
 
-        # print(objective_values[0]["y"])
+        return next_path_sigma, next_path_c, next_C, next_sigma, next_mean
 
     def cal_weights_dash(self):
         weights_dash = []

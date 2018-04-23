@@ -3,9 +3,6 @@ import string
 
 import grpc
 import numpy as np
-from concurrent import futures
-
-import time
 
 from api.python import api_pb2
 from api.python import api_pb2_grpc
@@ -17,18 +14,33 @@ _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 class CMAService(api_pb2_grpc.SuggestionServicer):
     def __init__(self):
-        # {
-        #     study_id:{
-        #         cma:
-        #         population:[
-        #         {
-        #             trial_id:
-        #             metric:
-        #             parameters: []
-        #         }
-        #         ]
-        #     }
-        # }
+        """
+        format for self.population:
+        {
+            study_id:{
+                internal_params:{
+                    path_sigma:
+                    path_c
+                    C
+                    sigma
+                    mean
+                }
+                infeasible_trials:[
+                    {
+                         x:
+                         y:
+                    }
+                ]
+                population:[
+                {
+                    trial_id:
+                    metric:
+                    parameters: []
+                }
+                ]
+            }
+        }
+        """
         self.population = {}
 
     def GenerateTrials(self, request, context):
@@ -41,22 +53,26 @@ class CMAService(api_pb2_grpc.SuggestionServicer):
             X_train=X_train,
             y_train=y_train,
         )
+        lowerbound = np.array(algo_manager.lower_bound)
+        upperbound = np.array(algo_manager.upper_bound)
 
+        cma = CMAES(
+            dim=algo_manager.dim,
+            upperbound=upperbound,
+            lowerbound=lowerbound,
+        )
         # get suggestion for this study for the first time
         if request.study_id not in self.population.keys():
             self.population[request.study_id] = {}
-            self.population[request.study_id]["cma"] = None
             self.population[request.study_id]["population"] = []
+            self.population[request.study_id]["internal_params"] = {}
 
-            lowerbound = np.array(algo_manager.lower_bound)
-            upperbound = np.array(algo_manager.upper_bound)
-
-            cma = CMAES(
-                dim=algo_manager.dim,
-                upperbound=upperbound,
-                lowerbound=lowerbound,
-            )
-            self.population[request.study_id]["cma"] = cma
+            path_sigma, path_c, C, sigma, mean = cma.init_params()
+            self.population[request.study_id]["internal_params"]["path_sigma"] = path_sigma
+            self.population[request.study_id]["internal_params"]["path_c"] = path_c
+            self.population[request.study_id]["internal_params"]["C"] = C
+            self.population[request.study_id]["internal_params"]["sigma"] = sigma
+            self.population[request.study_id]["internal_params"]["mean"] = mean
 
         # this study already have a population to try
         else:
@@ -83,9 +99,27 @@ class CMAService(api_pb2_grpc.SuggestionServicer):
                     x=p["parameters"],
                     y=p["metric"],
                 ))
-            self.population[request.study_id]["cma"].report_metric(metrics)
+            next_path_sigma, next_path_c, next_C, next_sigma, next_mean = cma.report_metric(
+                objective_dict=metrics,
+                infeasible_trials=self.population[request.study_id]["infeasible_trials"],
+                mean=self.population[request.study_id]["internal_params"]["mean"],
+                sigma=self.population[request.study_id]["internal_params"]["sigma"],
+                C=self.population[request.study_id]["internal_params"]["C"],
+                path_sigma=self.population[request.study_id]["internal_params"]["path_sigma"],
+                path_c=self.population[request.study_id]["internal_params"]["path_c"],
+            )
+            self.population[request.study_id]["internal_params"]["path_sigma"] = next_path_sigma
+            self.population[request.study_id]["internal_params"]["path_c"] = next_path_c
+            self.population[request.study_id]["internal_params"]["C"] = next_C
+            self.population[request.study_id]["internal_params"]["sigma"] = next_sigma
+            self.population[request.study_id]["internal_params"]["mean"] = next_mean
 
-        raw_suggestions = self.population[request.study_id]["cma"].get_suggestion()
+        raw_suggestions, infeasible_trials = cma.get_suggestion(
+            mean=self.population[request.study_id]["internal_params"]["mean"],
+            sigma=self.population[request.study_id]["internal_params"]["sigma"],
+            C=self.population[request.study_id]["internal_params"]["C"],
+        )
+        self.population[request.study_id]["infeasible_trials"] = infeasible_trials
 
         for i in range(raw_suggestions.shape[0]):
             # record the intermediate step
@@ -126,21 +160,3 @@ class CMAService(api_pb2_grpc.SuggestionServicer):
 
     def SetSuggestionParameters(self, request, context):
         return api_pb2.SetSuggestionParametersReply()
-
-#
-# def serve():
-#     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-#     api_pb2_grpc.add_SuggestionServicer_to_server(CMAService(), server)
-#     server.add_insecure_port("{}:{}".format(
-#         "localhost",
-#         "50052",
-#     ))
-#     server.start()
-#     try:
-#         while True:
-#             time.sleep(_ONE_DAY_IN_SECONDS)
-#     except KeyboardInterrupt:
-#         server.stop(0)
-#
-# if __name__ == "__main__":
-#     serve()

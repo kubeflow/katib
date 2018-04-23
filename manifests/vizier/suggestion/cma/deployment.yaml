@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: vizier-suggestion-cma
+  namespace: katib
+  labels:
+    app: vizier
+    component: suggestion-cma
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: vizier-suggestion-cma
+      labels:
+        app: vizier
+        component: suggestion-cma
+    spec:
+      containers:
+      - name: vizier-suggestion-cma
+        image: katib/suggestion-cma
+        ports:
+        - name: api
+          containerPort: 6789
