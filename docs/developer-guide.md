@@ -9,7 +9,7 @@
 You can build all images from source.
 
 ```bash
-./build.sh
+./scripts/build.sh
 ```
 
 ## Implement new suggestion algorithm

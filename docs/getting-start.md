@@ -21,7 +21,7 @@ Kubernetes manifests are in `manifests` directory.
 Set the environment of your cluster(Ingress, Persistent Volumes).
 
 ```bash
-$ ./deploy.sh
+$ ./scripts/deploy.sh
 ```
 
 ## Use CLI
@@ -50,7 +50,7 @@ StudyID                 Name    Owner   RunningTrial    CompletedTrial
 Try Createstudy. Study will be created and start hyperparameter search.
 
 ```bash
-$ katib-cli -s gpu-node2:30678 -f ../conf/random.yml Createstudy
+$ katib-cli -s gpu-node2:30678 -f ../examples/random.yml Createstudy
 2018/04/03 05:16:37 connecting gpu-node2:30678
 2018/04/03 05:16:37 study conf{cifer10 root MAXIMIZE 0 configs:<name:"--lr" parameter_type:DOUBLE feasible:<max:"0.07" min:"0.03" > > configs:<name:"--lr-factor" parameter_type:DOUBLE feasible:<max:"0.2" min:"0.05" > > configs:<name:"--max-random-h" parameter_type:INT feasible:<max:"46" min:"26" > > configs:<name:"--max-random-l" parameter_type:INT feasible:<max:"75" min:"25" > > configs:<name:"--num-epochs" parameter_type:INT feasible:<max:"3" min:"3" > >  [] random median  [name:"SuggestionNum" value:"2"  name:"MaxParallel" value:"2" ] [] Validation-accuracy [accuracy] mxnet/python:gpu [python /mxnet/example/image-classification/train_cifar10.py --batch-size=512 --gpus=0,1] 2 default-scheduler <nil> }
 2018/04/03 05:16:37 req Createstudy
@@ -215,7 +215,7 @@ parameterconfigs:
 ```
 
 ```bash
-$ katib-cli -s gpu-node2:30678 -f ../conf/random-pv.yml Createstudy
+$ katib-cli -s gpu-node2:30678 -f ../examples/random-pv.yml Createstudy
 2018/04/03 05:49:47 connecting gpu-node2:30678
 2018/04/03 05:49:47 study conf{cifer10-pv-test root MAXIMIZE 0 configs:<name:"--lr" parameter_type:DOUBLE feasible:<max:"0.07" min:"0.03" > > configs:<name:"--lr-factor" parameter_type:DOUBLE feasible:<max:"0.2" min:"0.05" > > configs:<name:"--max-random-h" parameter_type:INT feasible:<max:"46" min:"26" > > configs:<name:"--max-random-l" parameter_type:INT feasible:<max:"75" min:"25" > > configs:<name:"--num-epochs" parameter_type:INT feasible:<max:"3" min:"3" > >  [] random median  [name:"SuggestionNum" value:"2"  name:"MaxParallel" value:"2" ] [] Validation-accuracy [accuracy] mxnet/python:gpu [python /mxnet/example/image-classification/train_cifar10.py --batch-size=512 --gpus=0,1] 2 default-scheduler pvc:"nfs" path:"/nfs-mnt"  }
 2018/04/03 05:49:47 req Createstudy

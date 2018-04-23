@@ -51,7 +51,7 @@ sed -i -e "s@image: katib\/earlystopping-medianstopping@image: ${REGISTRY}\/${RE
 sed -i -e "s@image: katib\/dlk-manager@image: ${REGISTRY}\/${REPO_NAME}\/dlk-manager:${VERSION}@" manifests/dlk/deployment.yaml
 sed -i -e "s@image: katib\/katib-frontend@image: ${REGISTRY}\/${REPO_NAME}\/katib-frontend:${VERSION}@" manifests/modeldb/frontend/deployment.yaml
 cd ${GO_DIR}
-./deploy.sh
+./scripts/deploy.sh
 
 TIMEOUT=60
 PODNUM=$(kubectl get pods -n katib | grep -v NAME | wc -l)
