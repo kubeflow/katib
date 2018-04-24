@@ -17,7 +17,7 @@ type createStudyOpt struct {
 	args []string
 }
 
-//NewCommandGetStudy generate create study cmd
+//NewCommandCreateStudy generate create study cmd
 func NewCommandCreateStudy() *cobra.Command {
 	var opt createStudyOpt
 	cmd := &cobra.Command{
