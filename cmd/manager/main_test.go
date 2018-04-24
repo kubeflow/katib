@@ -32,6 +32,7 @@ func TestCreateStudy(t *testing.T) {
 	).Return(sid, nil)
 	ssr := &api.SaveStudyRequest{
 		StudyName: "test",
+		Owner:     "admin",
 	}
 	mockModelStore.EXPECT().SaveStudy(ssr).Return(nil)
 

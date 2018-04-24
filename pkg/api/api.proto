@@ -240,7 +240,8 @@ message DataSetInfo {
 
 message SaveStudyRequest {
     string study_name = 1;
-    string author = 2;
+    string owner = 2;
+    string description = 3;
 }
 
 message SaveStudyReply {
@@ -249,6 +250,7 @@ message SaveStudyReply {
 message SaveModelRequest {
     ModelInfo model = 1;
     DataSetInfo data_set = 2;
+    bool tensor_board = 3;
 }
 
 message SaveModelReply {

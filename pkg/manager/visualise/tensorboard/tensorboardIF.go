@@ -2,8 +2,8 @@ package tensorboard
 
 import (
 	"bytes"
-	"github.com/kubeflow/katib/pkg/api"
 	"io/ioutil"
+
 	apiv1 "k8s.io/api/core/v1"
 	exbeatav1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,10 +21,7 @@ func initk8sCl() (*kubernetes.Clientset, error) {
 	return kubernetes.NewForConfig(config)
 }
 
-func SpawnTensorBoard(sid string, tid string, studyname string, namespace string, mount *api.MountConf, inhost *string) error {
-	if mount == nil {
-		return nil
-	}
+func SpawnTensorBoard(tid string, studyname string, namespace string, inhost *string, pvc string, modelpath string) error {
 	BUFSIZE := 1024
 	var tFile []byte
 	var err error
@@ -50,34 +47,31 @@ func SpawnTensorBoard(sid string, tid string, studyname string, namespace string
 	}
 	k8syaml.NewYAMLOrJSONDecoder(bytes.NewReader(tFile), BUFSIZE).Decode(&svc)
 
-	tname := "tensorboard-" + sid + "-" + tid
+	tname := "tensorboard-" + tid
+
 	dep.ObjectMeta.Name = tname
 	dep.ObjectMeta.Labels["TrialID"] = tid
-	dep.ObjectMeta.Labels["StudyID"] = sid
 	dep.Spec.Template.ObjectMeta.Labels["TrialID"] = tid
-	dep.Spec.Template.ObjectMeta.Labels["StudyID"] = sid
-	dep.Spec.Template.Spec.Containers[0].Args = append(dep.Spec.Template.Spec.Containers[0].Args, "--logdir="+mount.Path+"/logs/"+sid+"_"+tid)
+	dep.Spec.Template.Spec.Containers[0].Args = append(dep.Spec.Template.Spec.Containers[0].Args, "--logdir="+modelpath)
 	dep.Spec.Template.Spec.Containers[0].Args = append(dep.Spec.Template.Spec.Containers[0].Args, "--path_prefix=/tensorboard/"+studyname+"/"+tid)
 	dep.Spec.Template.Spec.Volumes = append(dep.Spec.Template.Spec.Volumes, apiv1.Volume{
 		Name: "pvc-mount-point",
 		VolumeSource: apiv1.VolumeSource{
 			PersistentVolumeClaim: &apiv1.PersistentVolumeClaimVolumeSource{
-				ClaimName: mount.Pvc,
+				ClaimName: pvc,
 			},
 		},
 	},
 	)
 	dep.Spec.Template.Spec.Containers[0].VolumeMounts = append(dep.Spec.Template.Spec.Containers[0].VolumeMounts, apiv1.VolumeMount{
 		Name:      "pvc-mount-point",
-		MountPath: mount.Path,
+		MountPath: pvc,
 	},
 	)
 
 	svc.ObjectMeta.Name = tname
 	svc.ObjectMeta.Labels["TrialID"] = tid
-	svc.ObjectMeta.Labels["StudyID"] = sid
 	svc.Spec.Selector["TrialID"] = tid
-	svc.Spec.Selector["StudyID"] = sid
 
 	ing.ObjectMeta.Name = tname
 	ing.Spec.Rules[0].Host = *inhost
@@ -100,8 +94,8 @@ func SpawnTensorBoard(sid string, tid string, studyname string, namespace string
 	return nil
 }
 
-func DeleteTensorBoard(sid string, tid string, namespace string) error {
-	tname := "tensorboard-" + sid + "-" + tid
+func DeleteTensorBoard(tid string, namespace string) error {
+	tname := "tensorboard-" + tid
 	kcl, _ := initk8sCl()
 	var err error
 	err = kcl.ExtensionsV1beta1().Deployments(namespace).Delete(tname, &metav1.DeleteOptions{})
