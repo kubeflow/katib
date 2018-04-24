@@ -18,7 +18,7 @@ type pushModelOpt struct {
 	args []string
 }
 
-//NewCommandGetStudy generate run cmd
+//NewCommandPushModel generate push model cmd
 func NewCommandPushModel() *cobra.Command {
 	var opt pushModelOpt
 	cmd := &cobra.Command{

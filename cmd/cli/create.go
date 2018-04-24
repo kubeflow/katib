@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//NewCommandGet generate run cmd
+//NewCommandCreate generate create cmd
 func NewCommandCreate() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",

@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//NewCommandGet generate run cmd
+//NewCommandGet generate get cmd
 func NewCommandGet() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
@@ -15,9 +15,7 @@ func NewCommandGet() *cobra.Command {
 	//set local flag
 
 	//add subcommand
-	cmd.AddCommand(NewCommandGetStudies())
 	cmd.AddCommand(NewCommandGetStudy())
-	//	cmd.AddCommand(NewCommandGetTrials())
 	//	cmd.AddCommand(NewCommandGetTrial())
 	cmd.AddCommand(NewCommandGetModel())
 

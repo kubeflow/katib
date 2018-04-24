@@ -28,11 +28,10 @@ Use "katibcli [command] --help" for more information about a command.
 #### SubCommands
 - `get`
 ```
-list of resorces comannd can display includes: studies, study, model
+list of resorces comannd can display includes: study, model
 
 Available Commands:
   model       Display Model Info
-  studies     Display Study list
   study       Display Study Info
 ```
 

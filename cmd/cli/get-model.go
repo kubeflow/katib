@@ -19,7 +19,7 @@ type getModelOpt struct {
 	args   []string
 }
 
-//NewCommandGetTrials generate run cmd
+//NewCommandGetModel generate get model cmd
 func NewCommandGetModel() *cobra.Command {
 	var opt getModelOpt
 	cmd := &cobra.Command{
@@ -54,7 +54,9 @@ func getModel(cmd *cobra.Command, opt *getModelOpt) {
 	defer conn.Close()
 	var soverviews []*api.StudyOverview
 	c := api.NewManagerClient(conn)
+	// Search study if Study ID or name is set
 	if len(opt.args) > 0 {
+		// Search specified study in running studies
 		req := &api.GetStudiesRequest{}
 		r, err := c.GetStudies(context.Background(), req)
 		if err != nil {
@@ -62,7 +64,6 @@ func getModel(cmd *cobra.Command, opt *getModelOpt) {
 			return
 		}
 		if len(r.StudyInfos) > 0 {
-			var sInfo []*api.StudyInfo
 			for _, si := range r.StudyInfos {
 				if len(opt.args) > 0 {
 					if utf8.RuneCountInString(opt.args[0]) >= 7 {
@@ -88,13 +89,10 @@ func getModel(cmd *cobra.Command, opt *getModelOpt) {
 					})
 				}
 			}
-			if len(sInfo) == 0 {
-				log.Fatalf("No Study %v is not saved.", opt.args[0])
-				return
-			}
 		}
 	}
 	if len(soverviews) == 0 {
+		// Search specified study from ModelDB
 		sreq := &api.GetSavedStudiesRequest{}
 		sr, err := c.GetSavedStudies(context.Background(), sreq)
 		if err != nil {
@@ -106,10 +104,17 @@ func getModel(cmd *cobra.Command, opt *getModelOpt) {
 			return
 		}
 		for _, s := range sr.Studies {
-			soverviews = append(soverviews, s)
+			if len(opt.args) > 0 {
+				if opt.args[0] == s.Name {
+					soverviews = append(soverviews, s)
+				}
+			} else {
+				soverviews = append(soverviews, s)
+			}
 		}
 	}
 	for _, si := range soverviews {
+		// Search Models from ModelDB
 		mreq := &api.GetSavedModelsRequest{StudyName: si.Name}
 		mr, err := c.GetSavedModels(context.Background(), mreq)
 		if err != nil {

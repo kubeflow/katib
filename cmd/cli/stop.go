@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//NewCommandGet generate run cmd
+//NewCommandStop genereate stop cmd
 func NewCommandStop() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "stop",

@@ -20,7 +20,7 @@ type pushStudyOpt struct {
 	args  []string
 }
 
-//NewCommandGetStudy generate run cmd
+//NewCommandPushStudy generate push study cmd
 func NewCommandPushStudy() *cobra.Command {
 	var opt pushStudyOpt
 	cmd := &cobra.Command{

@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
+	"text/tabwriter"
 	"unicode/utf8"
 
 	"github.com/kubeflow/katib/pkg/api"
@@ -12,13 +14,13 @@ import (
 	"google.golang.org/grpc"
 )
 
-//NewCommandGetStudy generate run cmd
+//NewCommandGetStudy generate get studies cmd
 func NewCommandGetStudy() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "study",
-		Args:    cobra.ExactArgs(1),
-		Short:   "Display Study Info",
-		Long:    `Display Information of a study`,
+		Use:     "studies",
+		Args:    cobra.MaximumNArgs(1),
+		Short:   "Display Study lnfo",
+		Long:    `Display Information of a studies`,
 		Aliases: []string{"st"},
 		Run:     getStudy,
 	}
@@ -48,26 +50,34 @@ func getStudy(cmd *cobra.Command, args []string) {
 		log.Fatalf("GetStudy failed: %v", err)
 		return
 	}
-	var sInfo *api.StudyInfo
-	for _, si := range r.StudyInfos {
-		if utf8.RuneCountInString(args[0]) >= 7 {
-			if strings.HasPrefix(si.StudyId, args[0]) {
-				sInfo = si
+	var sis []*api.StudyInfo
+	// Search study if Study ID or name is set
+	if len(args) > 0 {
+		for _, si := range r.StudyInfos {
+			if utf8.RuneCountInString(args[0]) >= 7 {
+				if strings.HasPrefix(si.StudyId, args[0]) {
+					sis = append(sis, si)
+					break
+				}
+			}
+			if si.Name == args[0] {
+				sis = append(sis, si)
 				break
 			}
 		}
-		if si.Name == args[0] {
-			sInfo = si
-			break
-		}
+	} else {
+		sis = r.StudyInfos
 	}
-	if sInfo == nil {
-		log.Fatalf("Study %s is not found.", args[0])
-		return
+	w := new(tabwriter.Writer)
+	w.Init(os.Stdout, 0, 8, 0, '\t', tabwriter.TabIndent)
+	fmt.Fprintln(w, "StudyID\tName\tOwner\tRunning\tCompleted")
+	for _, si := range sis {
+		fmt.Fprintf(w, "%s\t%s\t%s\t%d\t%d\n",
+			string([]rune(si.StudyId)[:7]),
+			si.Name,
+			si.Owner,
+			si.RunningTrialNum,
+			si.CompletedTrialNum)
 	}
-	fmt.Printf("Study ID:       %s\n", sInfo.StudyId)
-	fmt.Printf("Study Name:     %s\n", sInfo.Name)
-	fmt.Printf("Study Owner:    %s\n", sInfo.Owner)
-	fmt.Printf("Runinng Trial:  %d\n", sInfo.RunningTrialNum)
-	fmt.Printf("Complete Trial: %d\n", sInfo.CompletedTrialNum)
+	w.Flush()
 }

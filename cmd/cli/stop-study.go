@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-//NewCommandGetStudy generate run cmd
+//NewCommandStopStudy generate stop study cmd
 func NewCommandStopStudy() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "study",
