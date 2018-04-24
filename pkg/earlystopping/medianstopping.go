@@ -190,7 +190,7 @@ func (m *MedianStoppingRule) ShouldTrialStop(ctx context.Context, in *api.Should
 		om := m.getMedianRunningAverage(ctl, len(tl), m.confList[in.StudyId].BurnIn)
 		log.Printf("Trial %s, In step %d Current value: %v Median value: %v\n", t.TrialId, len(tl), v, om)
 		if (v < (om-m.confList[in.StudyId].Margin) && sc.OptimizationType == api.OptimizationType_MAXIMIZE) || v > (om+m.confList[in.StudyId].Margin) && sc.OptimizationType == api.OptimizationType_MINIMIZE {
-			log.Print("Trial %s shuold be stopped", t.TrialId)
+			log.Printf("Trial %s shuold be stopped", t.TrialId)
 			s_t = append(s_t, t)
 		}
 	}
