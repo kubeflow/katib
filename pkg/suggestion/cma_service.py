@@ -154,7 +154,6 @@ class CMAService(api_pb2_grpc.SuggestionServicer):
 
     def StopSuggestion(self, request, context):
         if request.study_id in self.population.keys():
-            # del self.service_params[request.study_id]
             del self.population[request.study_id]
         return api_pb2.StopStudyReply()
 
