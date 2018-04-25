@@ -329,7 +329,8 @@ func (m *ModelDB) SaveStudy(in *api.SaveStudyRequest) error {
 		pje.Project = modeldb.NewProject()
 		pje.Project.ID = -1
 		pje.Project.Name = in.StudyName
-		pje.Project.Author = in.Author
+		pje.Project.Author = in.Owner
+		pje.Project.Description = in.Description
 		pres, err := client.StoreProjectEvent(context.Background(), pje)
 		if err != nil {
 			log.Printf("SaveProjectEvent err %v", err)
