@@ -8,7 +8,7 @@ import (
 	"github.com/kubeflow/katib/pkg/db"
 	dlkapi "github.com/kubeflow/katib/dlk/dlkmanager/api"
 	"github.com/kubeflow/katib/dlk/dlkmanager/datastore"
-	wIF "github.com/kubeflow/katib/pkg/manager/worker_interface"
+	wIF "github.com/kubeflow/katib/pkg/manager/worker"
 	"io/ioutil"
 	"log"
 	"net/http"
