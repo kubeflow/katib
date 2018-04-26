@@ -1,14 +1,15 @@
-package worker_interface
+package worker
 
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/kubeflow/katib/pkg/api"
 	"github.com/kubeflow/katib/pkg/db"
-	"time"
 )
 
-type WorkerInterface interface {
+type Interface interface {
 	IsTrialComplete(studyId string, tID string) (bool, error)
 	GetTrialObjValue(studyId string, tID string, objname string) (string, error)
 	GetTrialEvLogs(studyId string, tID string, metrics []string, sinceTime string) ([]*api.EvaluationLog, error)
