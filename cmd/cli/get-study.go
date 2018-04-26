@@ -44,40 +44,39 @@ func getStudy(cmd *cobra.Command, args []string) {
 	defer conn.Close()
 
 	c := api.NewManagerClient(conn)
-	req := &api.GetStudiesRequest{}
-	r, err := c.GetStudies(context.Background(), req)
+	req := &api.GetStudyListRequest{}
+	r, err := c.GetStudyList(context.Background(), req)
 	if err != nil {
 		log.Fatalf("GetStudy failed: %v", err)
 		return
 	}
-	var sis []*api.StudyInfo
+	result = []*api.StudyOverviews{}
 	// Search study if Study ID or name is set
 	if len(args) > 0 {
-		for _, si := range r.StudyInfos {
+		for _, si := range r.StudyOverviews {
 			if utf8.RuneCountInString(args[0]) >= 7 {
 				if strings.HasPrefix(si.StudyId, args[0]) {
-					sis = append(sis, si)
+					result = append(result, si)
 					break
 				}
 			}
 			if si.Name == args[0] {
-				sis = append(sis, si)
+				result = append(result, si)
 				break
 			}
 		}
 	} else {
-		sis = r.StudyInfos
+		result = r.StudyOverviews
 	}
 	w := new(tabwriter.Writer)
 	w.Init(os.Stdout, 0, 8, 0, '\t', tabwriter.TabIndent)
-	fmt.Fprintln(w, "StudyID\tName\tOwner\tRunning\tCompleted")
-	for _, si := range sis {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%d\t%d\n",
+	fmt.Fprintln(w, "StudyID\tName\tOwner")
+	for _, si := range result {
+		fmt.Fprintf(w, "%s\t%s\t%sn",
 			string([]rune(si.StudyId)[:7]),
 			si.Name,
 			si.Owner,
-			si.RunningTrialNum,
-			si.CompletedTrialNum)
+		)
 	}
 	w.Flush()
 }

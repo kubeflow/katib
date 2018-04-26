@@ -9,4 +9,4 @@ WORKDIR /app
 COPY --from=build-env /go/src/github.com/kubeflow/katib/cmd/manager/vizier-manager /app/
 COPY --from=build-env /go/src/github.com/kubeflow/katib/pkg/manager/visualise /
 ENTRYPOINT ["./vizier-manager"]
-CMD ["-w", "dlk"]
+CMD ["-w", "kubernetes"]

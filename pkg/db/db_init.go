@@ -15,18 +15,9 @@ func (d *db_conn) DB_Init() {
 		"parameter_configs TEXT, " +
 		"suggest_algo VARCHAR(255), " +
 		"early_stop_algo VARCHAR(255), " +
-		"study_task_name VARCHAR(255), " +
-		"suggestion_parameters TEXT, " +
-		"early_stopping_parameters TEXT, " +
 		"tags TEXT, " +
 		"objective_value_name VARCHAR(255), " +
-		"metrics TEXT, " +
-		"image VARCHAR(255), " +
-		"command TEXT, " +
-		"gpu INT, " +
-		"scheduler VARCHAR(255), " +
-		"mount TEXT, " +
-		"pull_secret TEXT)")
+		"metrics TEXT)")
 	if err != nil {
 		log.Fatalf("Error creating studies table: %v", err)
 	}
@@ -51,31 +42,53 @@ func (d *db_conn) DB_Init() {
 		log.Fatalf("Error creating trials table: %v", err)
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS trial_metrics" +
-		"(trial_id CHAR(16) NOT NULL, " +
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS workers" +
+		"(id CHAR(16) PRIMARY KEY, " +
+		"study_id CHAR(16), " +
+		"trial_id CHAR(16), " +
+		"runtime VARCHAR(255), " +
+		"status TINYINT, " +
+		"config TEXT, " +
+		"tags TEXT, " +
+		"FOREIGN KEY(study_id) REFERENCES studies(id))")
+	if err != nil {
+		log.Fatalf("Error creating workers table: %v", err)
+	}
+
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS worker_metrics" +
+		"(worker_id CHAR(16) NOT NULL, " +
 		"id INT AUTO_INCREMENT PRIMARY KEY, " +
 		"time DATETIME(6), " +
 		"name VARCHAR(255), " +
 		"value TEXT, " +
 		"is_objective TINYINT)")
 	if err != nil {
-		log.Fatalf("Error creating trial_metrics table: %v", err)
+		log.Fatalf("Error creating worker_metrics table: %v", err)
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS trial_lastlogs" +
-		"(trial_id CHAR(16) PRIMARY KEY, " +
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS worker_lastlogs" +
+		"(worker_id CHAR(16) PRIMARY KEY, " +
 		"time DATETIME(6), " +
 		"value TEXT)")
 	if err != nil {
-		log.Fatalf("Error creating trial_lastlogs table: %v", err)
+		log.Fatalf("Error creating worker_lastlogs table: %v", err)
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS workers" +
-		"(id CHAR(16) PRIMARY KEY, " +
-		"trial_id CHAR(16), " +
-		"status TINYINT, " +
-		"FOREIGN KEY(trial_id) REFERENCES trials(id))")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS suggestion_param" +
+		"(id CHAR(16) PRIMARY KEY," +
+		"suggestion_algo TEXT, " +
+		"study_id CHAR(16), " +
+		"parameters TEXT)")
 	if err != nil {
-		log.Fatalf("Error creating workers table: %v", err)
+		log.Fatalf("Error creating suggestion_param table: %v", err)
+	}
+
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS earlystop_param" +
+		"(id CHAR(16) PRIMARY KEY, " +
+		"earlystop_argo TEXT, " +
+		"study_id CHAR(16), " +
+		"parameters TEXT)")
+	if err != nil {
+		log.Fatalf("Error creating earlystop_param table: %v", err)
 	}
 }

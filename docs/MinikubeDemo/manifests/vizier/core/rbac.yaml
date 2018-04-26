@@ -23,11 +23,11 @@ rules:
   - apiGroups: ["batch"] 
     resources: ["jobs", "jobs/status"] 
     verbs: ["*"]
-  - apiGroups: ["extensions"] 
-    verbs: ["*"]
+  - verbs: ["*"]
+    apiGroups: ["extensions"] 
     resources: ["ingresses","ingresses/status","deployments","deployments/status"] 
-  - apiGroups: [""] 
-    verbs: ["*"]
+  - verbs: ["*"]
+    apiGroups: [""] 
     resources: ["services"] 
 ---
 apiVersion: v1
