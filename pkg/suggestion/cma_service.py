@@ -25,17 +25,12 @@ class CMAService(api_pb2_grpc.SuggestionServicer):
                     sigma
                     mean
                 }
-                infeasible_trials:[
-                    {
-                         x:
-                         y:
-                    }
-                ]
                 population:[
                 {
                     trial_id:
                     metric:
                     parameters: []
+                    penalty:
                 }
                 ]
             }
@@ -84,7 +79,16 @@ class CMAService(api_pb2_grpc.SuggestionServicer):
                             p["metric"] = -float(trial.objective_value)
                         else:
                             p["metric"] = float(trial.objective_value)
-
+            """
+            metrics
+            [
+                {
+                    "x": [],
+                    "y": ,
+                    "penalty":
+                }
+            ]
+            """
             # the algorithm cannot continue without all trials in the population are evaluated
             metrics = []
             for p in self.population[request.study_id]["population"]:
@@ -98,10 +102,10 @@ class CMAService(api_pb2_grpc.SuggestionServicer):
                 metrics.append(dict(
                     x=p["parameters"],
                     y=p["metric"],
+                    penalty=p["penalty"],
                 ))
             next_path_sigma, next_path_c, next_C, next_sigma, next_mean = cma.report_metric(
                 objective_dict=metrics,
-                infeasible_trials=self.population[request.study_id]["infeasible_trials"],
                 mean=self.population[request.study_id]["internal_params"]["mean"],
                 sigma=self.population[request.study_id]["internal_params"]["sigma"],
                 C=self.population[request.study_id]["internal_params"]["C"],
@@ -114,24 +118,33 @@ class CMAService(api_pb2_grpc.SuggestionServicer):
             self.population[request.study_id]["internal_params"]["sigma"] = next_sigma
             self.population[request.study_id]["internal_params"]["mean"] = next_mean
 
-        raw_suggestions, infeasible_trials = cma.get_suggestion(
+        """
+        raw_suggestions:
+        [
+            {
+                "suggestion":[]
+                "penalty":
+            }
+        ]
+        """
+        raw_suggestions = cma.get_suggestion(
             mean=self.population[request.study_id]["internal_params"]["mean"],
             sigma=self.population[request.study_id]["internal_params"]["sigma"],
             C=self.population[request.study_id]["internal_params"]["C"],
         )
-        self.population[request.study_id]["infeasible_trials"] = infeasible_trials
 
-        for i in range(raw_suggestions.shape[0]):
+        for raw_suggestion in raw_suggestions:
             # record the intermediate step
             trial_id = ''.join(random.sample(string.ascii_letters + string.digits, 12))
             self.population[request.study_id]["population"].append(dict(
                 trial_id=trial_id,
                 metric=None,
-                parameters=raw_suggestions[i, ]
+                parameters=raw_suggestion["suggestion"],
+                penalty=raw_suggestion["penalty"],
             ))
 
             # parse the raw suggestions to desired format
-            trial = algo_manager.parse_x_next(raw_suggestions[i, ])
+            trial = algo_manager.parse_x_next(raw_suggestion["suggestion"])
             trial = algo_manager.convert_to_dict(trial)
             trials.append(api_pb2.Trial(
                 trial_id=trial_id,

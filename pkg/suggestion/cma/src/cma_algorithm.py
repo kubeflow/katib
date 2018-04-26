@@ -2,6 +2,8 @@ import numpy as np
 from scipy.special import gamma
 from sklearn.preprocessing import MinMaxScaler
 
+from pkg.suggestion.cma.src.handle_boundary import cal_boundary_param, cal_penalty
+
 
 def sum_of_sign(array, sign):
     if sign == "positive":
@@ -43,6 +45,8 @@ class CMAES:
         self.l = np.zeros((self.dim, 1))
         self.u = np.ones((self.dim, 1))
 
+        self.boundary_w = np.zeros((self.dim, 1))
+
     def init_params(self):
         path_sigma = np.zeros((self.dim, 1))
         path_c = np.zeros((self.dim, 1))
@@ -62,27 +66,51 @@ class CMAES:
         )
         x = mean.T + sigma * y
 
+        # if the mean is out of bounds, set the boundary weights
+        if np.sum(np.less(mean, self.l)) > 0 or np.sum(np.greater(mean, self.u)) > 0:
+            self.boundary_w = set_boundary_weights(sigma, C)
+
+        # increase the boundary weights if the mean transcend the boundary too much
+        threshold = 3 * sigma * np.diag(C) * max(1, np.sqrt(self.dim) / self.mu_eff)
+        lower = np.greater(self.l - mean, threshold)
+        upper = np.greater(mean - self.u, threshold)
+        merge = np.logical_or(lower, upper)
+        self.boundary_w = self.boundary_w * (1.1 ** (max(1, self.mu_eff / (10 * self.dim)) * merge))
+
         # selection and recombination
-        objective_values = []
         suggestions = []
         for i in range(y.shape[0]):
-            # todo: this can lead flat fitness, should be improved
-            if np.sum(np.less(x[i, :], self.l)) > 0 or np.sum(np.greater(x[i, :], self.u)) > 0:
-                objective_values.append(dict(
-                    x=y[i,],
-                    y=float("inf"),
+            x_temp = x[i, :].reshape(x[i, :].shape[0], 1)
+            lower_violate = np.less(x_temp, self.l)
+            upper_violate = np.greater(x_temp, self.u)
+            if np.sum(lower_violate) > 0 or np.sum(upper_violate) > 0:
+                boundary_param = cal_boundary_param(C)
+                # get the closest feasible suggestion
+                x_feasible = x_temp + lower_violate*(self.l-x_temp)
+                x_feasible = x_feasible - upper_violate*(x_feasible-self.u)
+
+                # calculate penalty term
+                penalty = cal_penalty(x_temp, x_feasible, self.boundary_w, boundary_param)
+
+                suggestions.append(dict(
+                    suggestion=np.squeeze(self.scaler.inverse_transform(x_feasible.T)),
+                    penalty=penalty,
                 ))
             else:
-                suggestions.append(np.squeeze(self.scaler.inverse_transform(x[i:i + 1], )))
-        return np.array(suggestions), objective_values
+                suggestions.append(dict(
+                    suggestion=np.squeeze(self.scaler.inverse_transform(x[i:i + 1], )),
+                    penalty=0,
+                ))
+        return suggestions
 
-    def report_metric(self, objective_dict, infeasible_trials, mean, sigma, C, path_sigma, path_c):
+    def report_metric(self, objective_dict, mean, sigma, C, path_sigma, path_c):
         for i in range(len(objective_dict)):
             objective_dict[i]["x"] = np.squeeze(self.scaler.transform(objective_dict[i]["x"].reshape(1, self.dim)))
             objective_dict[i]["x"] = (objective_dict[i]["x"] - mean.T) / sigma
             objective_dict[i]["x"] = np.squeeze(objective_dict[i]["x"])
-        objective_values = infeasible_trials + objective_dict
-        objective_values = sorted(objective_values, key=lambda k: k["y"])
+
+            objective_dict[i]["y"] += objective_dict[i]["penalty"]
+        objective_values = sorted(objective_dict, key=lambda k: k["y"])
         sorted_y = []
         for i in range(self.popsize):
             sorted_y.append(objective_values[i]["x"])
