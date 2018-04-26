@@ -14,10 +14,10 @@ import (
 	kdb "github.com/kubeflow/katib/pkg/db"
 	"github.com/kubeflow/katib/pkg/manager/modelstore"
 	tbif "github.com/kubeflow/katib/pkg/manager/visualise/tensorboard"
-	"github.com/kubeflow/katib/pkg/manager/worker_interface"
-	dlkwif "github.com/kubeflow/katib/pkg/manager/worker_interface/dlk"
-	k8swif "github.com/kubeflow/katib/pkg/manager/worker_interface/kubernetes"
-	nvdwif "github.com/kubeflow/katib/pkg/manager/worker_interface/nvdocker"
+	"github.com/kubeflow/katib/pkg/manager/worker"
+	dlkwif "github.com/kubeflow/katib/pkg/manager/worker/dlk"
+	k8swif "github.com/kubeflow/katib/pkg/manager/worker/kubernetes"
+	nvdwif "github.com/kubeflow/katib/pkg/manager/worker/nvdocker"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -42,7 +42,7 @@ type studyCh struct {
 	addMetricsCh chan string
 }
 type server struct {
-	wIF         worker_interface.WorkerInterface
+	wIF         worker.Interface
 	msIf        modelstore.ModelStore
 	StudyChList map[string]studyCh
 }

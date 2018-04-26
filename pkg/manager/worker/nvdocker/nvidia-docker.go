@@ -10,7 +10,7 @@ import (
 	dclient "github.com/docker/docker/client"
 	"github.com/kubeflow/katib/pkg/api"
 	"github.com/kubeflow/katib/pkg/db"
-	wIF "github.com/kubeflow/katib/pkg/manager/worker_interface"
+	wIF "github.com/kubeflow/katib/pkg/manager/worker"
 	"io"
 	"io/ioutil"
 	"log"

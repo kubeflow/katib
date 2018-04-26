@@ -16,7 +16,7 @@ func TestCreateStudy(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockDB := mockdb.NewMockVizierDBInterface(ctrl)
-	mockWif := mockworker.NewMockWorkerInterface(ctrl)
+	mockWif := mockworker.NewMockInterface(ctrl)
 	mockModelStore := mockmodelstore.NewMockModelStore(ctrl)
 	sid := "teststudy"
 	sc := &api.StudyConfig{
@@ -62,7 +62,7 @@ func TestGetStudies(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockDB := mockdb.NewMockVizierDBInterface(ctrl)
-	mockWif := mockworker.NewMockWorkerInterface(ctrl)
+	mockWif := mockworker.NewMockInterface(ctrl)
 	mockModelStore := mockmodelstore.NewMockModelStore(ctrl)
 	sid := []string{"teststudy1", "teststudy2"}
 	s := &server{
