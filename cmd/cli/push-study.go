@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -13,31 +14,25 @@ import (
 )
 
 type pushStudyOpt struct {
-	conf  string
-	name  string
-	owner string
-	desc  string
-	args  []string
+	file string
+	args []string
 }
 
-//NewCommandPushStudy generate push study cmd
+//NewCommandPushStudy generate push model cmd
 func NewCommandPushStudy() *cobra.Command {
 	var opt pushStudyOpt
 	cmd := &cobra.Command{
-		Use:     "study",
-		Args:    cobra.NoArgs,
-		Short:   "Push a study Info from a file or from option",
-		Long:    "YAML or JSON formats are accepted.",
+		Use:     "model",
+		Args:    cobra.MaximumNArgs(1),
+		Short:   "Push a Study Info and its Models from a file or from stdin",
+		Long:    "Push a Study Info and its Models from a file or from stdin\nYAML formats are accepted.",
 		Aliases: []string{"st"},
 		Run: func(cmd *cobra.Command, args []string) {
 			opt.args = args
 			pushStudy(cmd, &opt)
 		},
 	}
-	cmd.Flags().StringVarP(&opt.conf, "config", "f", "", "File path of study config")
-	cmd.Flags().StringVarP(&opt.name, "name", "n", "", "Study name")
-	cmd.Flags().StringVarP(&opt.owner, "owner", "o", "Anonymous", "Study owner name")
-	cmd.Flags().StringVarP(&opt.desc, "description", "d", "Anonymous", "Description of Study")
+	cmd.Flags().StringVarP(&opt.file, "file", "f", "", "File path of model config file")
 	return cmd
 }
 
@@ -49,22 +44,21 @@ func pushStudy(cmd *cobra.Command, opt *pushStudyOpt) {
 		log.Fatalf("Fail to Check Flags: %v", err)
 		return
 	}
-	var so api.SaveStudyRequest
-	if opt.conf != "" {
-		var sc api.StudyConfig
-		buf, _ := ioutil.ReadFile(opt.conf)
-		err = yaml.Unmarshal(buf, &sc)
+	var in StudyData
+
+	if opt.file != "" {
+		buf, _ := ioutil.ReadFile(opt.file)
+		err = yaml.Unmarshal(buf, &in)
 		if err != nil {
 			log.Fatalf("Fail to Purse config: %v", err)
 			return
 		}
-		so.StudyName = sc.Name
-		so.Owner = sc.Owner
-		so.Description = opt.desc
-	} else if opt.name != "" {
-		so.StudyName = opt.name
-		so.Owner = opt.owner
-		so.Description = opt.desc
+	} else if len(opt.args) > 0 {
+		err := json.Unmarshal(([]byte)(opt.args[0]), &in)
+		if err != nil {
+			log.Fatalf("Fail to Purse input: %v", err)
+			return
+		}
 	} else {
 		log.Fatalf("You shoud specify study config from a file or options: %v", err)
 		return
@@ -77,9 +71,23 @@ func pushStudy(cmd *cobra.Command, opt *pushStudyOpt) {
 	}
 	defer conn.Close()
 	c := api.NewManagerClient(conn)
-	_, err = c.SaveStudy(context.Background(), &so)
-	if err != nil {
-		log.Fatalf("PushStudy failed: %v", err)
+	sreq := &api.CreateStudyRequest{
+		StudyConfig: in.StudyConf,
 	}
-	fmt.Printf("Study %v is Pushed.\n", so.StudyName)
+	sr, err := c.CreateStudy(context.Background(), sreq)
+	if err != nil {
+		log.Fatalf("CreateStudy failed: %v", err)
+	}
+
+	for _, m := range in.Models {
+		req := &api.SaveModelRequest{
+			Model: m,
+		}
+		_, err = c.SaveModel(context.Background(), req)
+		if err != nil {
+			log.Fatalf("PushModel failed: %v", err)
+		}
+		fmt.Printf("Model %v is Pushed.\n", m.WorkerId)
+	}
+	fmt.Printf("Study %s is Pushd. ID: %s", in.StudyConf.Name, sr.StudyId)
 }

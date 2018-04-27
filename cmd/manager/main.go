@@ -72,9 +72,11 @@ func (s *server) GetStudyList(ctx context.Context, in *pb.GetStudyListRequest) (
 		if err != nil {
 			return &pb.GetStudyListReply{}, err
 		}
-		result[i].Name = sc.Name
-		result[i].Owner = sc.Owner
-		result[i].Id = id
+		result[i] = &pb.StudyOverview{
+			Name:  sc.Name,
+			Owner: sc.Owner,
+			Id:    id,
+		}
 	}
 	return &pb.GetStudyListReply{StudyOverviews: result}, err
 }

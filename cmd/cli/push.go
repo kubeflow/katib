@@ -13,7 +13,6 @@ func NewCommandPush() *cobra.Command {
 	}
 
 	cmd.AddCommand(NewCommandPushStudy())
-	cmd.AddCommand(NewCommandPushModel())
 
 	return cmd
 }

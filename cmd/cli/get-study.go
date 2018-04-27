@@ -50,12 +50,12 @@ func getStudy(cmd *cobra.Command, args []string) {
 		log.Fatalf("GetStudy failed: %v", err)
 		return
 	}
-	result = []*api.StudyOverviews{}
+	result := []*api.StudyOverview{}
 	// Search study if Study ID or name is set
 	if len(args) > 0 {
 		for _, si := range r.StudyOverviews {
 			if utf8.RuneCountInString(args[0]) >= 7 {
-				if strings.HasPrefix(si.StudyId, args[0]) {
+				if strings.HasPrefix(si.Id, args[0]) {
 					result = append(result, si)
 					break
 				}
@@ -72,8 +72,8 @@ func getStudy(cmd *cobra.Command, args []string) {
 	w.Init(os.Stdout, 0, 8, 0, '\t', tabwriter.TabIndent)
 	fmt.Fprintln(w, "StudyID\tName\tOwner")
 	for _, si := range result {
-		fmt.Fprintf(w, "%s\t%s\t%sn",
-			string([]rune(si.StudyId)[:7]),
+		fmt.Fprintf(w, "%s\t%s\t%s\n",
+			string([]rune(si.Id)[:7]),
 			si.Name,
 			si.Owner,
 		)

@@ -14,7 +14,7 @@ import (
 )
 
 type pushModelOpt struct {
-	conf string
+	file string
 	args []string
 }
 
@@ -26,13 +26,13 @@ func NewCommandPushModel() *cobra.Command {
 		Args:    cobra.MaximumNArgs(1),
 		Short:   "Push a model Info from a file or from stdin",
 		Long:    "YAML or JSON formats are accepted.",
-		Aliases: []string{"st"},
+		Aliases: []string{"md"},
 		Run: func(cmd *cobra.Command, args []string) {
 			opt.args = args
 			pushModel(cmd, &opt)
 		},
 	}
-	cmd.Flags().StringVarP(&opt.conf, "config", "f", "", "File path of study config")
+	cmd.Flags().StringVarP(&opt.file, "file", "f", "", "File path of model config file")
 	return cmd
 }
 
@@ -44,9 +44,9 @@ func pushModel(cmd *cobra.Command, opt *pushModelOpt) {
 		log.Fatalf("Fail to Check Flags: %v", err)
 		return
 	}
-	var req api.SaveModelRequest
-	if opt.conf != "" {
-		buf, _ := ioutil.ReadFile(opt.conf)
+	var req []*api.SaveModelRequest
+	if opt.file != "" {
+		buf, _ := ioutil.ReadFile(opt.file)
 		err = yaml.Unmarshal(buf, &req)
 		if err != nil {
 			log.Fatalf("Fail to Purse config: %v", err)
@@ -70,9 +70,11 @@ func pushModel(cmd *cobra.Command, opt *pushModelOpt) {
 	}
 	defer conn.Close()
 	c := api.NewManagerClient(conn)
-	_, err = c.SaveModel(context.Background(), &req)
-	if err != nil {
-		log.Fatalf("PushModel failed: %v", err)
+	for _, m := range req {
+		_, err = c.SaveModel(context.Background(), m)
+		if err != nil {
+			log.Fatalf("PushModel failed: %v", err)
+		}
+		fmt.Printf("Model %v is Pushed.\n", m.Model.WorkerId)
 	}
-	fmt.Printf("Model %v is Pushed.\n", req.Model.TrialId)
 }
