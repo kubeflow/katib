@@ -30,7 +30,7 @@ var studyConfig = api.StudyConfig{
 				Name:          "--lr",
 				ParameterType: api.ParameterType_DOUBLE,
 				Feasible: &api.FeasibleSpace{
-					Min: "0,03",
+					Min: "0.03",
 					Max: "0.07",
 				},
 			},

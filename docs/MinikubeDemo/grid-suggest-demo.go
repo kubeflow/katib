@@ -30,7 +30,7 @@ var studyConfig = api.StudyConfig{
 				Name:          "--lr",
 				ParameterType: api.ParameterType_DOUBLE,
 				Feasible: &api.FeasibleSpace{
-					Min: "0,03",
+					Min: "0.03",
 					Max: "0.07",
 				},
 			},
@@ -113,11 +113,12 @@ func main() {
 	workerIds := make([]string, len(getGridSuggestReply.Trials))
 	workerParameter := make(map[string][]*api.Parameter)
 	for i, t := range getGridSuggestReply.Trials {
+		wc := workerConfig
 		rtr := &api.RunTrialRequest{
 			StudyId:      studyId,
 			TrialId:      t.TrialId,
 			Runtime:      "kubernetes",
-			WorkerConfig: &workerConfig,
+			WorkerConfig: &wc,
 		}
 		for _, p := range t.ParameterSet {
 			rtr.WorkerConfig.Command = append(rtr.WorkerConfig.Command, p.Name)
