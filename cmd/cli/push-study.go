@@ -22,7 +22,7 @@ type pushStudyOpt struct {
 func NewCommandPushStudy() *cobra.Command {
 	var opt pushStudyOpt
 	cmd := &cobra.Command{
-		Use:     "model",
+		Use:     "study",
 		Args:    cobra.MaximumNArgs(1),
 		Short:   "Push a Study Info and its Models from a file or from stdin",
 		Long:    "Push a Study Info and its Models from a file or from stdin\nYAML formats are accepted.",

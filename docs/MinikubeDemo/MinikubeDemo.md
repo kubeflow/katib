@@ -28,7 +28,7 @@ Logs
 ```
 
 ### Grid Demo
-Same as random.
+Almost same as random suggestion.
 ```
 go run grid/grid-suggest-demo.go
 ```
@@ -38,3 +38,48 @@ In this demo, make 4 grids Min 0.03 and Max 0.07.
 You can check your Model with Web UI.
 Acsess to `http://192.168.99.100:30080/`
 The Results will be saved automatically.
+
+## ModelManagement
+You can export model data to yaml file with CLI.
+```
+katib-cli -s {{server-cli}} pull study {{study ID or name}}  -o {{filename}}
+```
+
+And you can push your existing models to Katib with CLI.
+`mnist-models.yaml` is traind 22 models using random suggestion with this Parameter Config.
+
+```
+configs:
+    - name: --lr
+      parametertype: 1
+      feasible:
+        max: "0.07"
+        min: "0.03"
+        list: []
+    - name: --lr-factor
+      parametertype: 1
+      feasible:
+        max: "0.05"
+        min: "0.005"
+        list: []
+    - name: --lr-step
+      parametertype: 2
+      feasible:
+        max: "20"
+        min: "5"
+        list: []
+    - name: --optimizer
+      parametertype: 4
+      feasible:
+        max: ""
+        min: ""
+        list:
+        - sgd
+        - adam
+        - ftrl
+```
+You can easy to explore the model on ModelDB.
+
+```
+katib-cli -s 192.168.99.100:30678 push md -f mnist-models.yaml
+```
