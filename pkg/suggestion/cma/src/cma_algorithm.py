@@ -2,7 +2,7 @@ import numpy as np
 from scipy.special import gamma
 from sklearn.preprocessing import MinMaxScaler
 
-from pkg.suggestion.cma.src.handle_boundary import cal_boundary_param, cal_penalty
+from pkg.suggestion.cma.src.handle_boundary import cal_boundary_param, cal_penalty, set_boundary_weights
 
 
 def sum_of_sign(array, sign):
