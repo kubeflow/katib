@@ -15,7 +15,7 @@ Wait until all components are Running status.
 ### Random Suggestion Demo
 You can run rundom suggesiton demo.
 ```
-go run radom-suggest-demo.go
+go run random/radom-suggest-demo.go
 ```
 In this demo, 2 random learning rate parameters generated randomly between Min 0.03 and Max 0.07.
 Logs
@@ -30,7 +30,7 @@ Logs
 ### Grid Demo
 Same as random.
 ```
-go run grid-suggest-demo.go
+go run grid/grid-suggest-demo.go
 ```
 In this demo, make 4 grids Min 0.03 and Max 0.07.
 

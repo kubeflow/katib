@@ -30,14 +30,9 @@ var workerType = flag.String("w", "kubernetes", "Worker Type")
 var ingressHost = flag.String("i", "kube-cluster.example.net", "Ingress host for TensorBoard visualize")
 var dbIf kdb.VizierDBInterface
 
-type studyCh struct {
-	stopCh       chan bool
-	addMetricsCh chan string
-}
 type server struct {
-	wIF         worker.Interface
-	msIf        modelstore.ModelStore
-	StudyChList map[string]studyCh
+	wIF  worker.Interface
+	msIf modelstore.ModelStore
 }
 
 func (s *server) CreateStudy(ctx context.Context, in *pb.CreateStudyRequest) (*pb.CreateStudyReply, error) {
@@ -316,7 +311,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("Failed to Create Kubernetes Worker: %v", err)
 		}
-		pb.RegisterManagerServer(s, &server{wIF: kw, msIf: modelstore.NewModelDB("modeldb-backend", "6543"), StudyChList: make(map[string]studyCh)})
+		pb.RegisterManagerServer(s, &server{wIF: kw, msIf: modelstore.NewModelDB("modeldb-backend", "6543")})
 	default:
 		log.Fatalf("Unknown worker")
 	}

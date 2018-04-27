@@ -14,11 +14,11 @@ const (
 )
 
 var studyConfig = api.StudyConfig{
-	Name:                          "random-demo",
+	Name:                          "grid-demo",
 	Owner:                         "katib",
 	OptimizationType:              api.OptimizationType_MAXIMIZE,
 	OptimizationGoal:              0.99,
-	DefaultSuggestionAlgorithm:    "random",
+	DefaultSuggestionAlgorithm:    "grid",
 	DefaultEarlyStoppingAlgorithm: "medianstopping",
 	ObjectiveValueName:            "Validation-accuracy",
 	Metrics: []string{
