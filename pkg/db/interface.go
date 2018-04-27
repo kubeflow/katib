@@ -780,7 +780,7 @@ func (d *db_conn) SetSuggestionParam(algorithm string, studyId string, params []
 	}
 	var paramId string
 	for true {
-		paramId := generate_randid()
+		paramId = generate_randid()
 		_, err = d.db.Exec("INSERT INTO suggestion_param VALUES (?, ?, ?, ?)",
 			paramId, algorithm, studyId, strings.Join(ps, ",\n"))
 		if err == nil {

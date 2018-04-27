@@ -173,7 +173,6 @@ func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.
 		mNames = in.MetricsNames
 	} else {
 		sc, err := dbIf.GetStudyConfig(in.StudyId)
-		log.Printf("dbIf.GetStudyConfig(in.StudyId) %v", err)
 		if err != nil {
 			return &pb.GetMetricsReply{}, err
 		}
@@ -182,7 +181,6 @@ func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.
 	err := s.wIF.UpdateWorkerStatus(in.StudyId)
 	if err != nil {
 		return &pb.GetMetricsReply{}, err
-		log.Printf("s.wIF.UpdateWorkerStatus(in.StudyId)%v", err)
 	}
 	mls := make([]*pb.MetricsLogSet, len(in.WorkerIds))
 	for i, w := range in.WorkerIds {
@@ -192,7 +190,6 @@ func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.
 		}
 		for j, m := range mNames {
 			ls, err := dbIf.GetWorkerLogs(w, &kdb.GetWorkerLogOpts{Name: m})
-			log.Printf("dbIf.GetWorkerLogs(w, &kdb.GetWorkerLogOpts{Name: m}) %v", err)
 			if err != nil {
 				return &pb.GetMetricsReply{}, err
 			}

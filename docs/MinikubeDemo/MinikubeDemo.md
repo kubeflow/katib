@@ -12,9 +12,12 @@ You don't worry if the `vizier-core` get an error. It will be recovered after DB
 Wait until all components are Running status.
 
 ## Create Study
+### Random Suggestion Demo
+You can run rundom suggesiton demo.
 ```
 go run radom-suggest-demo.go
 ```
+In this demo, 2 random learning rate parameters generated randomly between Min 0.03 and Max 0.07.
 Logs
 ```
 2018/04/26 17:43:26 Study ID n9debe3de9ef67c8
@@ -23,6 +26,13 @@ Logs
 2018/04/26 17:43:26 WorkerID p4482bfb5cdc17ee start
 2018/04/26 17:43:26 WorkerID c19ca08ca4e6aab1 start
 ```
+
+### Grid Demo
+Same as random.
+```
+go run grid-suggest-demo.go
+```
+In this demo, make 4 grids Min 0.03 and Max 0.07.
 
 ## UI
 You can check your Model with Web UI.

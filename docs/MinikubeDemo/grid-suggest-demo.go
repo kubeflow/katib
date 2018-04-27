@@ -14,11 +14,11 @@ const (
 )
 
 var studyConfig = api.StudyConfig{
-	Name:                          "random-demo",
+	Name:                          "grid-demo",
 	Owner:                         "katib",
 	OptimizationType:              api.OptimizationType_MAXIMIZE,
 	OptimizationGoal:              0.99,
-	DefaultSuggestionAlgorithm:    "random",
+	DefaultSuggestionAlgorithm:    "grid",
 	DefaultEarlyStoppingAlgorithm: "medianstopping",
 	ObjectiveValueName:            "Validation-accuracy",
 	Metrics: []string{
@@ -38,17 +38,40 @@ var studyConfig = api.StudyConfig{
 	},
 }
 
+var workerConfig = api.WorkerConfig{
+	Image: "mxnet/python",
+	Command: []string{
+		"python",
+		"/mxnet/example/image-classification/train_mnist.py",
+		"--batch-size=64",
+	},
+	Gpu:       0,
+	Scheduler: "default-scheduler",
+}
+
+var gridConfig = []*api.SuggestionParameter{
+	&api.SuggestionParameter{
+		Name:  "DefaultGrid",
+		Value: "2",
+	},
+	&api.SuggestionParameter{
+		Name:  "--lr",
+		Value: "4",
+	},
+}
+
 func main() {
 	conn, err := grpc.Dial(manager, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("could not connect: %v", err)
 	}
 	defer conn.Close()
+	ctx := context.Background()
 	c := api.NewManagerClient(conn)
 	createStudyreq := &api.CreateStudyRequest{
 		StudyConfig: &studyConfig,
 	}
-	createStudyreply, err := c.CreateStudy(context.Background(), createStudyreq)
+	createStudyreply, err := c.CreateStudy(ctx, createStudyreq)
 	if err != nil {
 		log.Fatalf("StudyConfig Error %v", err)
 	}
@@ -57,44 +80,50 @@ func main() {
 	getStudyreq := &api.GetStudyRequest{
 		StudyId: studyId,
 	}
-	getStudyReply, err := c.GetStudy(context.Background(), getStudyreq)
+	getStudyReply, err := c.GetStudy(ctx, getStudyreq)
 	if err != nil {
 		log.Fatalf("GetConfig Error %v", err)
 	}
 	log.Printf("Study ID %s StudyConf%v", studyId, getStudyReply.StudyConfig)
-	getRandomSuggestRequest := &api.GetSuggestionsRequest{
-		StudyId:             studyId,
-		SuggestionAlgorithm: "random",
-		RequestNumber:       2,
+	setSuggesitonParameterRequest := &api.SetSuggestionParametersRequest{
+		StudyId:              studyId,
+		SuggestionAlgorithm:  "grid",
+		SuggestionParameters: gridConfig,
 	}
-	getRandomSuggestReply, err := c.GetSuggestions(context.Background(), getRandomSuggestRequest)
+	setSuggesitonParameterReply, err := c.SetSuggestionParameters(ctx, setSuggesitonParameterRequest)
+	if err != nil {
+		log.Fatalf("SetConfig Error %v", err)
+	}
+	log.Printf("Grid Prameter ID %s", setSuggesitonParameterReply.ParamId)
+	getGridSuggestRequest := &api.GetSuggestionsRequest{
+		StudyId:             studyId,
+		SuggestionAlgorithm: "grid",
+		RequestNumber:       0,
+		//RequestNumber=0 means get all grids.
+		ParamId: setSuggesitonParameterReply.ParamId,
+	}
+	getGridSuggestReply, err := c.GetSuggestions(ctx, getGridSuggestRequest)
 	if err != nil {
 		log.Fatalf("GetSuggestion Error %v", err)
 	}
-	log.Printf("Get Random Suggestions %v", getRandomSuggestReply.Trials)
-	workerIds := make([]string, len(getRandomSuggestReply.Trials))
+	log.Println("Get Grid Suggestions:")
+	for _, t := range getGridSuggestReply.Trials {
+		log.Printf("%v", t)
+	}
+	workerIds := make([]string, len(getGridSuggestReply.Trials))
 	workerParameter := make(map[string][]*api.Parameter)
-	for i, t := range getRandomSuggestReply.Trials {
+	for i, t := range getGridSuggestReply.Trials {
 		rtr := &api.RunTrialRequest{
-			StudyId: studyId,
-			TrialId: t.TrialId,
-			Runtime: "kubernetes",
-			WorkerConfig: &api.WorkerConfig{
-				Image: "mxnet/python",
-				Command: []string{
-					"python",
-					"/mxnet/example/image-classification/train_mnist.py",
-					"--batch-size=64",
-				},
-				Gpu:       0,
-				Scheduler: "default-scheduler",
-			},
+			StudyId:      studyId,
+			TrialId:      t.TrialId,
+			Runtime:      "kubernetes",
+			WorkerConfig: &workerConfig,
 		}
 		for _, p := range t.ParameterSet {
 			rtr.WorkerConfig.Command = append(rtr.WorkerConfig.Command, p.Name)
 			rtr.WorkerConfig.Command = append(rtr.WorkerConfig.Command, p.Value)
 		}
-		workerReply, err := c.RunTrial(context.Background(), rtr)
+		workerReply, err := c.RunTrial(ctx, rtr)
 		if err != nil {
 			log.Fatalf("RunTrial Error %v", err)
 		}
@@ -113,7 +142,7 @@ func main() {
 				Path: "/path/to/data",
 			},
 		}
-		_, err = c.SaveModel(context.Background(), saveModelRequest)
+		_, err = c.SaveModel(ctx, saveModelRequest)
 		if err != nil {
 			log.Fatalf("SaveModel Error %v", err)
 		}
@@ -125,7 +154,7 @@ func main() {
 			StudyId:   studyId,
 			WorkerIds: workerIds,
 		}
-		getMetricsReply, err := c.GetMetrics(context.Background(), getMetricsRequest)
+		getMetricsReply, err := c.GetMetrics(ctx, getMetricsRequest)
 		if err != nil {
 			log.Printf("GetMetErr %v", err)
 			continue
@@ -147,14 +176,14 @@ func main() {
 						saveModelRequest.Model.Metrics = append(saveModelRequest.Model.Metrics, &api.Metrics{Name: ml.Name, Value: ml.Values[len(ml.Values)-1]})
 					}
 				}
-				_, err = c.SaveModel(context.Background(), saveModelRequest)
+				_, err = c.SaveModel(ctx, saveModelRequest)
 				if err != nil {
 					log.Fatalf("SaveModel Error %v", err)
 				}
 			}
 		}
 		getWorkerRequest := &api.GetWorkersRequest{StudyId: studyId}
-		getWorkerReply, err := c.GetWorkers(context.Background(), getWorkerRequest)
+		getWorkerReply, err := c.GetWorkers(ctx, getWorkerRequest)
 		if err != nil {
 			log.Fatalf("GetWorker Error %v", err)
 		}

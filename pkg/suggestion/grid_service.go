@@ -164,9 +164,11 @@ func (s *GridSuggestService) GetSuggestions(ctx context.Context, in *api.GetSugg
 	}
 	trials := make([]*api.Trial, reqnum)
 	for i := 0; i < int(reqnum); i++ {
-		trials[i] = &api.Trial{}
-		trials[i].Status = api.State_PENDING
-		trials[i].ParameterSet = grids[i]
+		trials[i] = &api.Trial{
+			StudyId:      in.StudyId,
+			Status:       api.State_PENDING,
+			ParameterSet: grids[i],
+		}
 	}
 	return &api.GetSuggestionsReply{Trials: trials}, nil
 }
