@@ -6,10 +6,13 @@ You can deploy katib components and try a simple mnist demo on your laptop!
 * kubectl
 ## deploy
 Only type command `./deploy`.
+
 A Minikube cluster and Katib components will be deployed!
+
 You can check them with `kubectl get -n katib get pods`.
-You don't worry if the `vizier-core` get an error. It will be recovered after DB will be prepared.
-Wait until all components are Running status.
+Don't worry if the `vizier-core` get an error. 
+It will be recovered after DB will be prepared.
+Wait until all components will be Running status.
 
 ## Create Study
 ### Random Suggestion Demo
