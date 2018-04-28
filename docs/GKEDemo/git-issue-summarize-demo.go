@@ -2,15 +2,12 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"time"
 
 	"github.com/kubeflow/katib/pkg/api"
 	"google.golang.org/grpc"
-)
-
-const (
-	manager = "35.194.127.138:30678"
 )
 
 var studyConfig = api.StudyConfig{
@@ -43,12 +40,14 @@ var workerConfig = api.WorkerConfig{
 	Command: []string{
 		"python",
 		"/workdir/train.py",
-		"--input_data_gcs_bucket",
-		"katib-gi-example",
-		"--input_data_gcs_path",
-		"github-issue-summarization-data/github-issues.zip",
-		"--output_model_gcs_bucket",
-		"katib-gi-example",
+		"--sample_size",
+		"20000",
+		//		"--input_data_gcs_bucket",
+		//		"katib-gi-example",
+		//		"--input_data_gcs_path",
+		//		"github-issue-summarization-data/github-issues.zip",
+		//		"--output_model_gcs_bucket",
+		//		"katib-gi-example",
 	},
 	Gpu:       0,
 	Scheduler: "default-scheduler",
@@ -57,16 +56,19 @@ var workerConfig = api.WorkerConfig{
 var gridConfig = []*api.SuggestionParameter{
 	&api.SuggestionParameter{
 		Name:  "DefaultGrid",
-		Value: "2",
+		Value: "4",
 	},
 	&api.SuggestionParameter{
 		Name:  "--learning_rate",
-		Value: "4",
+		Value: "2",
 	},
 }
 
+var managerAddr = flag.String("s", "127.0.0.1:6789", "Endpoint of manager default 127.0.0.1:6789")
+
 func main() {
-	conn, err := grpc.Dial(manager, grpc.WithInsecure())
+	flag.Parse()
+	conn, err := grpc.Dial(*managerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("could not connect: %v", err)
 	}
