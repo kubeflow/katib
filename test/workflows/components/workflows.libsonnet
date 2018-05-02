@@ -54,7 +54,7 @@
       local srcRootDir = testDir + "/src";
       // The directory containing the kubeflow/katib repo
       local srcDir = srcRootDir + "/kubeflow/katib";
-      local testWorkerImage = "gcr.io/mlkube-testing/test-worker";
+      local testWorkerImage = "gcr.io/kubeflow-ci/test-worker";
       local golangImage = "golang:1.9.4-stretch";
       // TODO(jose5918) Build our own helm image
       local helmImage = "volumecontroller/golang:1.9.2";
