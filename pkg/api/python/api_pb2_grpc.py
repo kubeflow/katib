@@ -24,40 +24,110 @@ class ManagerStub(object):
         request_serializer=api__pb2.StopStudyRequest.SerializeToString,
         response_deserializer=api__pb2.StopStudyReply.FromString,
         )
-    self.GetStudies = channel.unary_unary(
-        '/api.Manager/GetStudies',
-        request_serializer=api__pb2.GetStudiesRequest.SerializeToString,
-        response_deserializer=api__pb2.GetStudiesReply.FromString,
+    self.GetStudy = channel.unary_unary(
+        '/api.Manager/GetStudy',
+        request_serializer=api__pb2.GetStudyRequest.SerializeToString,
+        response_deserializer=api__pb2.GetStudyReply.FromString,
         )
-    self.SuggestTrials = channel.unary_unary(
-        '/api.Manager/SuggestTrials',
-        request_serializer=api__pb2.SuggestTrialsRequest.SerializeToString,
-        response_deserializer=api__pb2.SuggestTrialsReply.FromString,
+    self.GetStudyList = channel.unary_unary(
+        '/api.Manager/GetStudyList',
+        request_serializer=api__pb2.GetStudyListRequest.SerializeToString,
+        response_deserializer=api__pb2.GetStudyListReply.FromString,
         )
-    self.CompleteTrial = channel.unary_unary(
-        '/api.Manager/CompleteTrial',
-        request_serializer=api__pb2.CompleteTrialRequest.SerializeToString,
-        response_deserializer=api__pb2.CompleteTrialReply.FromString,
+    self.GetTrials = channel.unary_unary(
+        '/api.Manager/GetTrials',
+        request_serializer=api__pb2.GetTrialsRequest.SerializeToString,
+        response_deserializer=api__pb2.GetTrialsReply.FromString,
         )
-    self.ShouldTrialStop = channel.unary_unary(
-        '/api.Manager/ShouldTrialStop',
-        request_serializer=api__pb2.ShouldTrialStopRequest.SerializeToString,
-        response_deserializer=api__pb2.ShouldTrialStopReply.FromString,
+    self.GetTrial = channel.unary_unary(
+        '/api.Manager/GetTrial',
+        request_serializer=api__pb2.GetTrialRequest.SerializeToString,
+        response_deserializer=api__pb2.GetTrialReply.FromString,
         )
-    self.GetObjectValue = channel.unary_unary(
-        '/api.Manager/GetObjectValue',
-        request_serializer=api__pb2.GetObjectValueRequest.SerializeToString,
-        response_deserializer=api__pb2.GetObjectValueReply.FromString,
+    self.CreateTrial = channel.unary_unary(
+        '/api.Manager/CreateTrial',
+        request_serializer=api__pb2.CreateTrialRequest.SerializeToString,
+        response_deserializer=api__pb2.CreateTrialReply.FromString,
         )
-    self.AddMeasurementToTrials = channel.unary_unary(
-        '/api.Manager/AddMeasurementToTrials',
-        request_serializer=api__pb2.AddMeasurementToTrialsRequest.SerializeToString,
-        response_deserializer=api__pb2.AddMeasurementToTrialsReply.FromString,
+    self.UpdateTrial = channel.unary_unary(
+        '/api.Manager/UpdateTrial',
+        request_serializer=api__pb2.UpdateTrialRequest.SerializeToString,
+        response_deserializer=api__pb2.UpdateTrialReply.FromString,
         )
-    self.InitializeSuggestService = channel.unary_unary(
-        '/api.Manager/InitializeSuggestService',
-        request_serializer=api__pb2.InitializeSuggestServiceRequest.SerializeToString,
-        response_deserializer=api__pb2.InitializeSuggestServiceReply.FromString,
+    self.RunTrial = channel.unary_unary(
+        '/api.Manager/RunTrial',
+        request_serializer=api__pb2.RunTrialRequest.SerializeToString,
+        response_deserializer=api__pb2.RunTrialReply.FromString,
+        )
+    self.StopWorkers = channel.unary_unary(
+        '/api.Manager/StopWorkers',
+        request_serializer=api__pb2.StopWorkersRequest.SerializeToString,
+        response_deserializer=api__pb2.StopWorkersReply.FromString,
+        )
+    self.GetWorkers = channel.unary_unary(
+        '/api.Manager/GetWorkers',
+        request_serializer=api__pb2.GetWorkersRequest.SerializeToString,
+        response_deserializer=api__pb2.GetWorkersReply.FromString,
+        )
+    self.GetSuggestions = channel.unary_unary(
+        '/api.Manager/GetSuggestions',
+        request_serializer=api__pb2.GetSuggestionsRequest.SerializeToString,
+        response_deserializer=api__pb2.GetSuggestionsReply.FromString,
+        )
+    self.GetShouldStopWorkers = channel.unary_unary(
+        '/api.Manager/GetShouldStopWorkers',
+        request_serializer=api__pb2.GetShouldStopWorkersRequest.SerializeToString,
+        response_deserializer=api__pb2.GetShouldStopWorkersReply.FromString,
+        )
+    self.GetMetrics = channel.unary_unary(
+        '/api.Manager/GetMetrics',
+        request_serializer=api__pb2.GetMetricsRequest.SerializeToString,
+        response_deserializer=api__pb2.GetMetricsReply.FromString,
+        )
+    self.SetSuggestionParameters = channel.unary_unary(
+        '/api.Manager/SetSuggestionParameters',
+        request_serializer=api__pb2.SetSuggestionParametersRequest.SerializeToString,
+        response_deserializer=api__pb2.SetSuggestionParametersReply.FromString,
+        )
+    self.GetSuggestionParameters = channel.unary_unary(
+        '/api.Manager/GetSuggestionParameters',
+        request_serializer=api__pb2.GetSuggestionParametersRequest.SerializeToString,
+        response_deserializer=api__pb2.GetSuggestionParametersReply.FromString,
+        )
+    self.GetSuggestionParameterList = channel.unary_unary(
+        '/api.Manager/GetSuggestionParameterList',
+        request_serializer=api__pb2.GetSuggestionParameterListRequest.SerializeToString,
+        response_deserializer=api__pb2.GetSuggestionParameterListReply.FromString,
+        )
+    self.SetEarlyStoppingParameters = channel.unary_unary(
+        '/api.Manager/SetEarlyStoppingParameters',
+        request_serializer=api__pb2.SetEarlyStoppingParametersRequest.SerializeToString,
+        response_deserializer=api__pb2.SetEarlyStoppingParametersReply.FromString,
+        )
+    self.GetEarlyStoppingParameters = channel.unary_unary(
+        '/api.Manager/GetEarlyStoppingParameters',
+        request_serializer=api__pb2.GetEarlyStoppingParametersRequest.SerializeToString,
+        response_deserializer=api__pb2.GetEarlyStoppingParametersReply.FromString,
+        )
+    self.SaveStudy = channel.unary_unary(
+        '/api.Manager/SaveStudy',
+        request_serializer=api__pb2.SaveStudyRequest.SerializeToString,
+        response_deserializer=api__pb2.SaveStudyReply.FromString,
+        )
+    self.SaveModel = channel.unary_unary(
+        '/api.Manager/SaveModel',
+        request_serializer=api__pb2.SaveModelRequest.SerializeToString,
+        response_deserializer=api__pb2.SaveModelReply.FromString,
+        )
+    self.GetSavedStudies = channel.unary_unary(
+        '/api.Manager/GetSavedStudies',
+        request_serializer=api__pb2.GetSavedStudiesRequest.SerializeToString,
+        response_deserializer=api__pb2.GetSavedStudiesReply.FromString,
+        )
+    self.GetSavedModels = channel.unary_unary(
+        '/api.Manager/GetSavedModels',
+        request_serializer=api__pb2.GetSavedModelsRequest.SerializeToString,
+        response_deserializer=api__pb2.GetSavedModelsReply.FromString,
         )
 
 
@@ -79,49 +149,147 @@ class ManagerServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def GetStudies(self, request, context):
+  def GetStudy(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def SuggestTrials(self, request, context):
+  def GetStudyList(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def CompleteTrial(self, request, context):
+  def GetTrials(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def ShouldTrialStop(self, request, context):
+  def GetTrial(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def GetObjectValue(self, request, context):
+  def CreateTrial(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def AddMeasurementToTrials(self, request, context):
+  def UpdateTrial(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def InitializeSuggestService(self, request, context):
+  def RunTrial(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def StopWorkers(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetWorkers(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetSuggestions(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetShouldStopWorkers(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetMetrics(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def SetSuggestionParameters(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetSuggestionParameters(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetSuggestionParameterList(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def SetEarlyStoppingParameters(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetEarlyStoppingParameters(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def SaveStudy(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def SaveModel(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetSavedStudies(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetSavedModels(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -141,40 +309,110 @@ def add_ManagerServicer_to_server(servicer, server):
           request_deserializer=api__pb2.StopStudyRequest.FromString,
           response_serializer=api__pb2.StopStudyReply.SerializeToString,
       ),
-      'GetStudies': grpc.unary_unary_rpc_method_handler(
-          servicer.GetStudies,
-          request_deserializer=api__pb2.GetStudiesRequest.FromString,
-          response_serializer=api__pb2.GetStudiesReply.SerializeToString,
+      'GetStudy': grpc.unary_unary_rpc_method_handler(
+          servicer.GetStudy,
+          request_deserializer=api__pb2.GetStudyRequest.FromString,
+          response_serializer=api__pb2.GetStudyReply.SerializeToString,
       ),
-      'SuggestTrials': grpc.unary_unary_rpc_method_handler(
-          servicer.SuggestTrials,
-          request_deserializer=api__pb2.SuggestTrialsRequest.FromString,
-          response_serializer=api__pb2.SuggestTrialsReply.SerializeToString,
+      'GetStudyList': grpc.unary_unary_rpc_method_handler(
+          servicer.GetStudyList,
+          request_deserializer=api__pb2.GetStudyListRequest.FromString,
+          response_serializer=api__pb2.GetStudyListReply.SerializeToString,
       ),
-      'CompleteTrial': grpc.unary_unary_rpc_method_handler(
-          servicer.CompleteTrial,
-          request_deserializer=api__pb2.CompleteTrialRequest.FromString,
-          response_serializer=api__pb2.CompleteTrialReply.SerializeToString,
+      'GetTrials': grpc.unary_unary_rpc_method_handler(
+          servicer.GetTrials,
+          request_deserializer=api__pb2.GetTrialsRequest.FromString,
+          response_serializer=api__pb2.GetTrialsReply.SerializeToString,
       ),
-      'ShouldTrialStop': grpc.unary_unary_rpc_method_handler(
-          servicer.ShouldTrialStop,
-          request_deserializer=api__pb2.ShouldTrialStopRequest.FromString,
-          response_serializer=api__pb2.ShouldTrialStopReply.SerializeToString,
+      'GetTrial': grpc.unary_unary_rpc_method_handler(
+          servicer.GetTrial,
+          request_deserializer=api__pb2.GetTrialRequest.FromString,
+          response_serializer=api__pb2.GetTrialReply.SerializeToString,
       ),
-      'GetObjectValue': grpc.unary_unary_rpc_method_handler(
-          servicer.GetObjectValue,
-          request_deserializer=api__pb2.GetObjectValueRequest.FromString,
-          response_serializer=api__pb2.GetObjectValueReply.SerializeToString,
+      'CreateTrial': grpc.unary_unary_rpc_method_handler(
+          servicer.CreateTrial,
+          request_deserializer=api__pb2.CreateTrialRequest.FromString,
+          response_serializer=api__pb2.CreateTrialReply.SerializeToString,
       ),
-      'AddMeasurementToTrials': grpc.unary_unary_rpc_method_handler(
-          servicer.AddMeasurementToTrials,
-          request_deserializer=api__pb2.AddMeasurementToTrialsRequest.FromString,
-          response_serializer=api__pb2.AddMeasurementToTrialsReply.SerializeToString,
+      'UpdateTrial': grpc.unary_unary_rpc_method_handler(
+          servicer.UpdateTrial,
+          request_deserializer=api__pb2.UpdateTrialRequest.FromString,
+          response_serializer=api__pb2.UpdateTrialReply.SerializeToString,
       ),
-      'InitializeSuggestService': grpc.unary_unary_rpc_method_handler(
-          servicer.InitializeSuggestService,
-          request_deserializer=api__pb2.InitializeSuggestServiceRequest.FromString,
-          response_serializer=api__pb2.InitializeSuggestServiceReply.SerializeToString,
+      'RunTrial': grpc.unary_unary_rpc_method_handler(
+          servicer.RunTrial,
+          request_deserializer=api__pb2.RunTrialRequest.FromString,
+          response_serializer=api__pb2.RunTrialReply.SerializeToString,
+      ),
+      'StopWorkers': grpc.unary_unary_rpc_method_handler(
+          servicer.StopWorkers,
+          request_deserializer=api__pb2.StopWorkersRequest.FromString,
+          response_serializer=api__pb2.StopWorkersReply.SerializeToString,
+      ),
+      'GetWorkers': grpc.unary_unary_rpc_method_handler(
+          servicer.GetWorkers,
+          request_deserializer=api__pb2.GetWorkersRequest.FromString,
+          response_serializer=api__pb2.GetWorkersReply.SerializeToString,
+      ),
+      'GetSuggestions': grpc.unary_unary_rpc_method_handler(
+          servicer.GetSuggestions,
+          request_deserializer=api__pb2.GetSuggestionsRequest.FromString,
+          response_serializer=api__pb2.GetSuggestionsReply.SerializeToString,
+      ),
+      'GetShouldStopWorkers': grpc.unary_unary_rpc_method_handler(
+          servicer.GetShouldStopWorkers,
+          request_deserializer=api__pb2.GetShouldStopWorkersRequest.FromString,
+          response_serializer=api__pb2.GetShouldStopWorkersReply.SerializeToString,
+      ),
+      'GetMetrics': grpc.unary_unary_rpc_method_handler(
+          servicer.GetMetrics,
+          request_deserializer=api__pb2.GetMetricsRequest.FromString,
+          response_serializer=api__pb2.GetMetricsReply.SerializeToString,
+      ),
+      'SetSuggestionParameters': grpc.unary_unary_rpc_method_handler(
+          servicer.SetSuggestionParameters,
+          request_deserializer=api__pb2.SetSuggestionParametersRequest.FromString,
+          response_serializer=api__pb2.SetSuggestionParametersReply.SerializeToString,
+      ),
+      'GetSuggestionParameters': grpc.unary_unary_rpc_method_handler(
+          servicer.GetSuggestionParameters,
+          request_deserializer=api__pb2.GetSuggestionParametersRequest.FromString,
+          response_serializer=api__pb2.GetSuggestionParametersReply.SerializeToString,
+      ),
+      'GetSuggestionParameterList': grpc.unary_unary_rpc_method_handler(
+          servicer.GetSuggestionParameterList,
+          request_deserializer=api__pb2.GetSuggestionParameterListRequest.FromString,
+          response_serializer=api__pb2.GetSuggestionParameterListReply.SerializeToString,
+      ),
+      'SetEarlyStoppingParameters': grpc.unary_unary_rpc_method_handler(
+          servicer.SetEarlyStoppingParameters,
+          request_deserializer=api__pb2.SetEarlyStoppingParametersRequest.FromString,
+          response_serializer=api__pb2.SetEarlyStoppingParametersReply.SerializeToString,
+      ),
+      'GetEarlyStoppingParameters': grpc.unary_unary_rpc_method_handler(
+          servicer.GetEarlyStoppingParameters,
+          request_deserializer=api__pb2.GetEarlyStoppingParametersRequest.FromString,
+          response_serializer=api__pb2.GetEarlyStoppingParametersReply.SerializeToString,
+      ),
+      'SaveStudy': grpc.unary_unary_rpc_method_handler(
+          servicer.SaveStudy,
+          request_deserializer=api__pb2.SaveStudyRequest.FromString,
+          response_serializer=api__pb2.SaveStudyReply.SerializeToString,
+      ),
+      'SaveModel': grpc.unary_unary_rpc_method_handler(
+          servicer.SaveModel,
+          request_deserializer=api__pb2.SaveModelRequest.FromString,
+          response_serializer=api__pb2.SaveModelReply.SerializeToString,
+      ),
+      'GetSavedStudies': grpc.unary_unary_rpc_method_handler(
+          servicer.GetSavedStudies,
+          request_deserializer=api__pb2.GetSavedStudiesRequest.FromString,
+          response_serializer=api__pb2.GetSavedStudiesReply.SerializeToString,
+      ),
+      'GetSavedModels': grpc.unary_unary_rpc_method_handler(
+          servicer.GetSavedModels,
+          request_deserializer=api__pb2.GetSavedModelsRequest.FromString,
+          response_serializer=api__pb2.GetSavedModelsReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
@@ -192,20 +430,10 @@ class SuggestionStub(object):
     Args:
       channel: A grpc.Channel.
     """
-    self.GenerateTrials = channel.unary_unary(
-        '/api.Suggestion/GenerateTrials',
-        request_serializer=api__pb2.GenerateTrialsRequest.SerializeToString,
-        response_deserializer=api__pb2.GenerateTrialsReply.FromString,
-        )
-    self.SetSuggestionParameters = channel.unary_unary(
-        '/api.Suggestion/SetSuggestionParameters',
-        request_serializer=api__pb2.SetSuggestionParametersRequest.SerializeToString,
-        response_deserializer=api__pb2.SetSuggestionParametersReply.FromString,
-        )
-    self.StopSuggestion = channel.unary_unary(
-        '/api.Suggestion/StopSuggestion',
-        request_serializer=api__pb2.StopSuggestionRequest.SerializeToString,
-        response_deserializer=api__pb2.StopSuggestionReply.FromString,
+    self.GetSuggestions = channel.unary_unary(
+        '/api.Suggestion/GetSuggestions',
+        request_serializer=api__pb2.GetSuggestionsRequest.SerializeToString,
+        response_deserializer=api__pb2.GetSuggestionsReply.FromString,
         )
 
 
@@ -213,21 +441,7 @@ class SuggestionServicer(object):
   # missing associated documentation comment in .proto file
   pass
 
-  def GenerateTrials(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def SetSuggestionParameters(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def StopSuggestion(self, request, context):
+  def GetSuggestions(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -237,20 +451,10 @@ class SuggestionServicer(object):
 
 def add_SuggestionServicer_to_server(servicer, server):
   rpc_method_handlers = {
-      'GenerateTrials': grpc.unary_unary_rpc_method_handler(
-          servicer.GenerateTrials,
-          request_deserializer=api__pb2.GenerateTrialsRequest.FromString,
-          response_serializer=api__pb2.GenerateTrialsReply.SerializeToString,
-      ),
-      'SetSuggestionParameters': grpc.unary_unary_rpc_method_handler(
-          servicer.SetSuggestionParameters,
-          request_deserializer=api__pb2.SetSuggestionParametersRequest.FromString,
-          response_serializer=api__pb2.SetSuggestionParametersReply.SerializeToString,
-      ),
-      'StopSuggestion': grpc.unary_unary_rpc_method_handler(
-          servicer.StopSuggestion,
-          request_deserializer=api__pb2.StopSuggestionRequest.FromString,
-          response_serializer=api__pb2.StopSuggestionReply.SerializeToString,
+      'GetSuggestions': grpc.unary_unary_rpc_method_handler(
+          servicer.GetSuggestions,
+          request_deserializer=api__pb2.GetSuggestionsRequest.FromString,
+          response_serializer=api__pb2.GetSuggestionsReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
@@ -258,7 +462,7 @@ def add_SuggestionServicer_to_server(servicer, server):
   server.add_generic_rpc_handlers((generic_handler,))
 
 
-class AutoStoppingStub(object):
+class EarlyStoppingStub(object):
   # missing associated documentation comment in .proto file
   pass
 
@@ -268,16 +472,33 @@ class AutoStoppingStub(object):
     Args:
       channel: A grpc.Channel.
     """
+    self.GetShouldStopWorkers = channel.unary_unary(
+        '/api.EarlyStopping/GetShouldStopWorkers',
+        request_serializer=api__pb2.GetShouldStopWorkersRequest.SerializeToString,
+        response_deserializer=api__pb2.GetShouldStopWorkersReply.FromString,
+        )
 
 
-class AutoStoppingServicer(object):
+class EarlyStoppingServicer(object):
   # missing associated documentation comment in .proto file
   pass
 
+  def GetShouldStopWorkers(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
 
-def add_AutoStoppingServicer_to_server(servicer, server):
+
+def add_EarlyStoppingServicer_to_server(servicer, server):
   rpc_method_handlers = {
+      'GetShouldStopWorkers': grpc.unary_unary_rpc_method_handler(
+          servicer.GetShouldStopWorkers,
+          request_deserializer=api__pb2.GetShouldStopWorkersRequest.FromString,
+          response_serializer=api__pb2.GetShouldStopWorkersReply.SerializeToString,
+      ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
-      'api.AutoStopping', rpc_method_handlers)
+      'api.EarlyStopping', rpc_method_handlers)
   server.add_generic_rpc_handlers((generic_handler,))

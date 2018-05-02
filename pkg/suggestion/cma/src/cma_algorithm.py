@@ -104,6 +104,9 @@ class CMAES:
         return suggestions
 
     def report_metric(self, objective_dict, mean, sigma, C, path_sigma, path_c):
+        if not objective_dict:
+            return path_sigma, path_c, C, sigma, mean
+
         for i in range(len(objective_dict)):
             objective_dict[i]["x"] = np.squeeze(self.scaler.transform(objective_dict[i]["x"].reshape(1, self.dim)))
             objective_dict[i]["x"] = (objective_dict[i]["x"] - mean.T) / sigma
