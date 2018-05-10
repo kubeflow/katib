@@ -7,13 +7,14 @@ from pkg.api.python import api_pb2
 from pkg.api.python import api_pb2_grpc
 from pkg.suggestion.cma.src.algorithm_manager import AlgorithmManager
 from pkg.suggestion.cma.src.cma_algorithm import CMAES
+from pkg.suggestion.types import MANAGER
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 
 class CMAService(api_pb2_grpc.SuggestionServicer):
     def __init__(self):
-        channel = grpc.insecure_channel("localhost:50051")
+        channel = grpc.insecure_channel(MANAGER)
         self.stub = api_pb2_grpc.ManagerStub(channel)
 
     def GetSuggestions(self, request, context):

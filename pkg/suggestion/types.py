@@ -1,1 +1,2 @@
 DEFAULT_PORT = "0.0.0.0:6789"
+MANAGER = "vizier-core:6789"
