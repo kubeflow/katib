@@ -27,7 +27,15 @@ def run():
             api_pb2.SuggestionParameter(
                 name="trade_off",
                 value="0.01",
-            )
+            ),
+            api_pb2.SuggestionParameter(
+                name="model_type",
+                value="gp",
+            ),
+            api_pb2.SuggestionParameter(
+                name="n_estimators",
+                value="50",
+            ),
         ]
     ))
     completed_trials = []
