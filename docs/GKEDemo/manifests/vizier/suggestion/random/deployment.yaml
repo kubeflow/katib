@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: vizier-suggestion-random
-        image: yujioshima/suggestion-random
+        image: katib/suggestion-random
         ports:
         - name: api
           containerPort: 6789

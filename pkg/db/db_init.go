@@ -50,7 +50,8 @@ func (d *db_conn) DB_Init() {
 		"status TINYINT, " +
 		"config TEXT, " +
 		"tags TEXT, " +
-		"FOREIGN KEY(study_id) REFERENCES studies(id))")
+		"FOREIGN KEY(study_id) REFERENCES studies(id), " +
+		"FOREIGN KEY(trial_id) REFERENCES trials(id))")
 	if err != nil {
 		log.Fatalf("Error creating workers table: %v", err)
 	}
@@ -78,7 +79,8 @@ func (d *db_conn) DB_Init() {
 		"(id CHAR(16) PRIMARY KEY," +
 		"suggestion_algo TEXT, " +
 		"study_id CHAR(16), " +
-		"parameters TEXT)")
+		"parameters TEXT, " +
+		"FOREIGN KEY(study_id) REFERENCES studies(id))")
 	if err != nil {
 		log.Fatalf("Error creating suggestion_param table: %v", err)
 	}
@@ -87,7 +89,8 @@ func (d *db_conn) DB_Init() {
 		"(id CHAR(16) PRIMARY KEY, " +
 		"earlystop_argo TEXT, " +
 		"study_id CHAR(16), " +
-		"parameters TEXT)")
+		"parameters TEXT, " +
+		"FOREIGN KEY(study_id) REFERENCES studies(id))")
 	if err != nil {
 		log.Fatalf("Error creating earlystop_param table: %v", err)
 	}

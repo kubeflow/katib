@@ -75,10 +75,17 @@ func (s *server) GetStudyList(ctx context.Context, in *pb.GetStudyListRequest) (
 	}
 	return &pb.GetStudyListReply{StudyOverviews: result}, err
 }
+
+func (s *server) CreateTrial(ctx context.Context, in *pb.CreateTrialRequest) (*pb.CreateTrialReply, error) {
+	err := dbIf.CreateTrial(in.Trial)
+	return &pb.CreateTrialReply{TrialId: in.Trial.TrialId}, err
+}
+
 func (s *server) GetTrials(ctx context.Context, in *pb.GetTrialsRequest) (*pb.GetTrialsReply, error) {
 	tl, err := dbIf.GetTrialList(in.StudyId)
 	return &pb.GetTrialsReply{Trials: tl}, err
 }
+
 func (s *server) GetSuggestions(ctx context.Context, in *pb.GetSuggestionsRequest) (*pb.GetSuggestionsReply, error) {
 	suggestAlgorithm := ""
 	if in.SuggestionAlgorithm != "" {
@@ -105,12 +112,6 @@ func (s *server) GetSuggestions(ctx context.Context, in *pb.GetSuggestionsReques
 	if err != nil {
 		return &pb.GetSuggestionsReply{Trials: []*pb.Trial{}}, err
 	}
-	for i := range r.Trials {
-		err = dbIf.CreateTrial(r.Trials[i])
-		if err != nil {
-			return &pb.GetSuggestionsReply{Trials: []*pb.Trial{}}, err
-		}
-	}
 	return r, nil
 }
 
@@ -135,7 +136,15 @@ func (s *server) StopWorkers(ctx context.Context, in *pb.StopWorkersRequest) (*p
 }
 
 func (s *server) GetWorkers(ctx context.Context, in *pb.GetWorkersRequest) (*pb.GetWorkersReply, error) {
-	ws, err := dbIf.GetWorkerList(in.StudyId)
+	var ws []*pb.Worker
+	var err error
+	if in.WorkerId == "" {
+		ws, err = dbIf.GetWorkerList(in.StudyId, in.TrialId)
+	} else {
+		var w *pb.Worker
+		w, err = dbIf.GetWorker(in.WorkerId)
+		ws = append(ws, w)
+	}
 	return &pb.GetWorkersReply{Workers: ws}, err
 }
 
@@ -229,9 +238,19 @@ func (s *server) GetSuggestionParameters(ctx context.Context, in *pb.GetSuggesti
 	return &pb.GetSuggestionParametersReply{SuggestionParameters: ps}, err
 }
 
+func (s *server) GetSuggestionParameterList(ctx context.Context, in *pb.GetSuggestionParameterListRequest) (*pb.GetSuggestionParameterListReply, error) {
+	pss, err := dbIf.GetSuggestionParamList(in.StudyId)
+	return &pb.GetSuggestionParameterListReply{SuggestionParameterSets: pss}, err
+}
+
 func (s *server) GetEarlyStoppingParameters(ctx context.Context, in *pb.GetEarlyStoppingParametersRequest) (*pb.GetEarlyStoppingParametersReply, error) {
 	ps, err := dbIf.GetEarlyStopParam(in.ParamId)
 	return &pb.GetEarlyStoppingParametersReply{EarlyStoppingParameters: ps}, err
+}
+
+func (s *server) GetEarlyStoppingParameterList(ctx context.Context, in *pb.GetEarlyStoppingParameterListRequest) (*pb.GetEarlyStoppingParameterListReply, error) {
+	pss, err := dbIf.GetEarlyStopParamList(in.StudyId)
+	return &pb.GetEarlyStoppingParameterListReply{EarlyStoppingParameterSets: pss}, err
 }
 
 func (s *server) StopStudy(ctx context.Context, in *pb.StopStudyRequest) (*pb.StopStudyReply, error) {

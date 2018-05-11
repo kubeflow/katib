@@ -7,6 +7,7 @@ service Manager {
 	rpc StopStudy(StopStudyRequest) returns (StopStudyReply);
 	rpc GetStudy(GetStudyRequest) returns (GetStudyReply);
 	rpc GetStudyList(GetStudyListRequest) returns (GetStudyListReply);
+    rpc CreateTrial(CreateTrialRequest) returns (CreateTrialReply);
     rpc GetTrials(GetTrialsRequest) returns (GetTrialsReply);
     rpc RunTrial(RunTrialRequest) returns (RunTrialReply);
     rpc StopWorkers(StopWorkersRequest) returns (StopWorkersReply);
@@ -16,8 +17,10 @@ service Manager {
     rpc GetMetrics(GetMetricsRequest) returns (GetMetricsReply);
     rpc SetSuggestionParameters(SetSuggestionParametersRequest) returns (SetSuggestionParametersReply);
     rpc GetSuggestionParameters(GetSuggestionParametersRequest) returns (GetSuggestionParametersReply);
+    rpc GetSuggestionParameterList(GetSuggestionParameterListRequest) returns (GetSuggestionParameterListReply);
     rpc SetEarlyStoppingParameters(SetEarlyStoppingParametersRequest) returns (SetEarlyStoppingParametersReply);
     rpc GetEarlyStoppingParameters(GetEarlyStoppingParametersRequest) returns (GetEarlyStoppingParametersReply);
+    rpc GetEarlyStoppingParameterList(GetEarlyStoppingParameterListRequest) returns (GetEarlyStoppingParameterListReply);
     rpc SaveStudy(SaveStudyRequest) returns(SaveStudyReply);
     rpc SaveModel(SaveModelRequest) returns(SaveModelReply);
     rpc GetSavedStudies(GetSavedStudiesRequest) returns(GetSavedStudiesReply);
@@ -195,6 +198,14 @@ message GetStudyListReply {
     repeated StudyOverview study_overviews = 1;
 }
 
+message CreateTrialRequest {
+    Trial trial = 1;
+}
+
+message CreateTrialReply {
+    string trial_id = 1;
+}
+
 message GetTrialsRequest {
     string study_id = 1;
 }
@@ -225,6 +236,8 @@ message StopWorkersReply {
 
 message GetWorkersRequest {
     string study_id = 1;
+    string trial_id = 2;
+    string worker_id = 3;
 }
 
 message GetWorkersReply {
@@ -337,6 +350,21 @@ message GetSuggestionParametersReply {
     repeated SuggestionParameter suggestion_parameters = 1;
 }
 
+message GetSuggestionParameterListRequest {
+    string study_id = 1;
+}
+
+message SuggestionParameterSet {
+    string param_id = 1;
+    string suggestion_algorithm = 2;
+    repeated SuggestionParameter suggestion_parameters = 3;
+}
+
+message GetSuggestionParameterListReply {
+
+    repeated SuggestionParameterSet suggestion_parameter_sets = 1;
+}
+
 message StopSuggestionRequest {
 	string study_id = 1;
 }
@@ -361,4 +389,18 @@ message GetEarlyStoppingParametersRequest {
 
 message GetEarlyStoppingParametersReply {
     repeated EarlyStoppingParameter early_stopping_parameters = 1;
+}
+
+message GetEarlyStoppingParameterListRequest {
+    string study_id = 1;
+}
+
+message EarlyStoppingParameterSet {
+    string param_id = 1;
+    string early_stopping_algorithm = 2;
+    repeated EarlyStoppingParameter early_stopping_parameters = 3;
+}
+
+message GetEarlyStoppingParameterListReply {
+    repeated EarlyStoppingParameterSet early_stopping_parameter_sets = 1;
 }

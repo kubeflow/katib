@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: vizier-suggestion-grid
-        image: yujioshima/suggestion-grid
+        image: katib/suggestion-grid
         ports:
         - name: api
           containerPort: 6789

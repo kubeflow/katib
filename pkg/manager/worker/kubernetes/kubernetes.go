@@ -165,7 +165,7 @@ func (d *KubernetesWorkerInterface) IsWorkerComplete(wID string) (bool, error) {
 }
 
 func (d *KubernetesWorkerInterface) UpdateWorkerStatus(studyId string) error {
-	ws, err := d.db.GetWorkerList(studyId)
+	ws, err := d.db.GetWorkerList(studyId, "")
 	if err != nil {
 		return err
 	}
@@ -214,7 +214,7 @@ func (d *KubernetesWorkerInterface) SpawnWorker(wid string, workerConf *api.Work
 func (d *KubernetesWorkerInterface) CleanWorkers(studyId string) error {
 	jcl := d.clientset.BatchV1().Jobs(kubeNamespace)
 	pcl := d.clientset.CoreV1().Pods(kubeNamespace)
-	ws, err := d.db.GetWorkerList(studyId)
+	ws, err := d.db.GetWorkerList(studyId, "")
 	if err != nil {
 		return err
 	}
@@ -233,7 +233,7 @@ func (d *KubernetesWorkerInterface) CleanWorkers(studyId string) error {
 }
 
 func (d *KubernetesWorkerInterface) StopWorkers(studyId string, wIDs []string, iscomplete bool) error {
-	ws, err := d.db.GetWorkerList(studyId)
+	ws, err := d.db.GetWorkerList(studyId, "")
 	if err != nil {
 		return err
 	}

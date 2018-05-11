@@ -53,7 +53,7 @@ type VizierDBInterface interface {
 
 	GetWorker(string) (*api.Worker, error)
 	GetWorkerStatus(string) (*api.State, error)
-	GetWorkerList(string) ([]*api.Worker, error)
+	GetWorkerList(string, string) ([]*api.Worker, error)
 	GetWorkerLogs(string, *GetWorkerLogOpts) ([]*WorkerLog, error)
 	GetWorkerTimestamp(string) (*time.Time, error)
 	StoreWorkerLogs(string, []string) error
@@ -64,9 +64,11 @@ type VizierDBInterface interface {
 	SetSuggestionParam(string, string, []*api.SuggestionParameter) (string, error)
 	UpdateSuggestionParam(string, []*api.SuggestionParameter) error
 	GetSuggestionParam(string) ([]*api.SuggestionParameter, error)
+	GetSuggestionParamList(string) ([]*api.SuggestionParameterSet, error)
 	SetEarlyStopParam(string, string, []*api.EarlyStoppingParameter) (string, error)
 	UpdateEarlyStopParam(string, []*api.EarlyStoppingParameter) error
 	GetEarlyStopParam(string) ([]*api.EarlyStoppingParameter, error)
+	GetEarlyStopParamList(string) ([]*api.EarlyStoppingParameterSet, error)
 }
 
 type db_conn struct {
@@ -709,8 +711,8 @@ func (d *db_conn) GetWorkerStatus(id string) (*api.State, error) {
 	return &status, nil
 }
 
-func (d *db_conn) GetWorkerList(id string) ([]*api.Worker, error) {
-	workers, err := d.getWorkers("", "", id)
+func (d *db_conn) GetWorkerList(sid string, tid string) ([]*api.Worker, error) {
+	workers, err := d.getWorkers("", tid, sid)
 	return workers, err
 }
 
@@ -831,6 +833,47 @@ func (d *db_conn) GetSuggestionParam(paramId string) ([]*api.SuggestionParameter
 	return ret, nil
 }
 
+func (d *db_conn) GetSuggestionParamList(studyId string) ([]*api.SuggestionParameterSet, error) {
+	var rows *sql.Rows
+	var err error
+	rows, err = d.db.Query("SELECT * FROM suggestion_param WHERE study_id = ?", studyId)
+	if err != nil {
+		return nil, err
+	}
+	var result []*api.SuggestionParameterSet
+	for rows.Next() {
+		var id string
+		var algorithm string
+		var params string
+		err := rows.Scan(&id, &algorithm, &params)
+		if err != nil {
+			return nil, err
+		}
+		var p_array []string
+		if len(params) > 0 {
+			p_array = strings.Split(params, ",\n")
+		} else {
+			return nil, nil
+		}
+		suggestparams := make([]*api.SuggestionParameter, len(p_array))
+		for i, j := range p_array {
+			p := new(api.SuggestionParameter)
+			err = jsonpb.UnmarshalString(j, p)
+			if err != nil {
+				log.Printf("err unmarshal %s", j)
+				return nil, err
+			}
+			suggestparams[i] = p
+		}
+		result = append(result, &api.SuggestionParameterSet{
+			ParamId:              id,
+			SuggestionAlgorithm:  algorithm,
+			SuggestionParameters: suggestparams,
+		})
+	}
+	return result, nil
+}
+
 func (d *db_conn) SetEarlyStopParam(algorithm string, studyId string, params []*api.EarlyStoppingParameter) (string, error) {
 	ps := make([]string, len(params))
 	var err error
@@ -891,7 +934,46 @@ func (d *db_conn) GetEarlyStopParam(paramId string) ([]*api.EarlyStoppingParamet
 		}
 		ret[i] = p
 	}
-
 	return ret, nil
+}
 
+func (d *db_conn) GetEarlyStopParamList(studyId string) ([]*api.EarlyStoppingParameterSet, error) {
+	var rows *sql.Rows
+	var err error
+	rows, err = d.db.Query("SELECT * FROM earlystopping_param WHERE study_id = ?", studyId)
+	if err != nil {
+		return nil, err
+	}
+	var result []*api.EarlyStoppingParameterSet
+	for rows.Next() {
+		var id string
+		var algorithm string
+		var params string
+		err := rows.Scan(&id, &algorithm, &params)
+		if err != nil {
+			return nil, err
+		}
+		var p_array []string
+		if len(params) > 0 {
+			p_array = strings.Split(params, ",\n")
+		} else {
+			return nil, nil
+		}
+		esparams := make([]*api.EarlyStoppingParameter, len(p_array))
+		for i, j := range p_array {
+			p := new(api.EarlyStoppingParameter)
+			err = jsonpb.UnmarshalString(j, p)
+			if err != nil {
+				log.Printf("err unmarshal %s", j)
+				return nil, err
+			}
+			esparams[i] = p
+		}
+		result = append(result, &api.EarlyStoppingParameterSet{
+			ParamId:                 id,
+			EarlyStoppingAlgorithm:  algorithm,
+			EarlyStoppingParameters: esparams,
+		})
+	}
+	return result, nil
 }

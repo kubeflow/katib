@@ -170,5 +170,15 @@ func (s *GridSuggestService) GetSuggestions(ctx context.Context, in *api.GetSugg
 			ParameterSet: grids[i],
 		}
 	}
+	for i, t := range trials {
+		req := &api.CreateTrialRequest{
+			Trial: t,
+		}
+		ret, err := c.CreateTrial(ctx, req)
+		if err != nil {
+			return &api.GetSuggestionsReply{Trials: []*api.Trial{}}, err
+		}
+		trials[i].TrialId = ret.TrialId
+	}
 	return &api.GetSuggestionsReply{Trials: trials}, nil
 }

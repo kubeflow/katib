@@ -70,6 +70,14 @@ func (s *RandomSuggestService) GetSuggestions(ctx context.Context, in *api.GetSu
 				s_t[i].ParameterSet[j].Value = pc.Feasible.List[s.IntRandom(0, len(pc.Feasible.List)-1)]
 			}
 		}
+		ctreq := &api.CreateTrialRequest{
+			Trial: s_t[i],
+		}
+		ctret, err := c.CreateTrial(ctx, ctreq)
+		if err != nil {
+			return &api.GetSuggestionsReply{Trials: []*api.Trial{}}, err
+		}
+		s_t[i].TrialId = ctret.TrialId
 	}
 	return &api.GetSuggestionsReply{Trials: s_t}, nil
 }

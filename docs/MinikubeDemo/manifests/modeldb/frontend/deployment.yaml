@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: modeldb-frontend
-        image: yujioshima/katib-frontend
+        image: katib/katib-frontend
         imagePullPolicy: Always
         args:
           - 'modeldb-backend'

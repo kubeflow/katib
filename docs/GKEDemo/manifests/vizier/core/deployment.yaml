@@ -18,7 +18,7 @@ spec:
       serviceAccountName: vizier-core
       containers:
       - name: vizier-core
-        image: yujioshima/vizier-core
+        image: katib/vizier-core
         command:
           - './vizier-manager'
           - "-w"

@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: vizier-earlystopping-medianstopping
-        image: yujioshima/earlystopping-medianstopping
+        image: katib/earlystopping-medianstopping
         ports:
         - name: api
           containerPort: 6789

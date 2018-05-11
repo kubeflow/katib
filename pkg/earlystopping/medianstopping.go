@@ -133,7 +133,7 @@ func (m *MedianStoppingRule) getBestValue(sid string, sc *api.StudyConfig, logs 
 	return ret, nil
 }
 func (m *MedianStoppingRule) GetShouldStopWorkers(ctx context.Context, in *api.GetShouldStopWorkersRequest) (*api.GetShouldStopWorkersReply, error) {
-	wl, err := m.dbIf.GetWorkerList(in.StudyId)
+	wl, err := m.dbIf.GetWorkerList(in.StudyId, "")
 	if err != nil {
 		return &api.GetShouldStopWorkersReply{}, err
 	}
