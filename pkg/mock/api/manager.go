@@ -53,6 +53,42 @@ func (mr *MockManagerClientMockRecorder) CreateStudy(arg0, arg1 interface{}, arg
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateStudy", reflect.TypeOf((*MockManagerClient)(nil).CreateStudy), varargs...)
 }
 
+// CreateTrial mocks base method
+func (m *MockManagerClient) CreateTrial(arg0 context.Context, arg1 *api.CreateTrialRequest, arg2 ...grpc.CallOption) (*api.CreateTrialReply, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateTrial", varargs...)
+	ret0, _ := ret[0].(*api.CreateTrialReply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateTrial indicates an expected call of CreateTrial
+func (mr *MockManagerClientMockRecorder) CreateTrial(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTrial", reflect.TypeOf((*MockManagerClient)(nil).CreateTrial), varargs...)
+}
+
+// GetEarlyStoppingParameterList mocks base method
+func (m *MockManagerClient) GetEarlyStoppingParameterList(arg0 context.Context, arg1 *api.GetEarlyStoppingParameterListRequest, arg2 ...grpc.CallOption) (*api.GetEarlyStoppingParameterListReply, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetEarlyStoppingParameterList", varargs...)
+	ret0, _ := ret[0].(*api.GetEarlyStoppingParameterListReply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetEarlyStoppingParameterList indicates an expected call of GetEarlyStoppingParameterList
+func (mr *MockManagerClientMockRecorder) GetEarlyStoppingParameterList(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEarlyStoppingParameterList", reflect.TypeOf((*MockManagerClient)(nil).GetEarlyStoppingParameterList), varargs...)
+}
+
 // GetEarlyStoppingParameters mocks base method
 func (m *MockManagerClient) GetEarlyStoppingParameters(arg0 context.Context, arg1 *api.GetEarlyStoppingParametersRequest, arg2 ...grpc.CallOption) (*api.GetEarlyStoppingParametersReply, error) {
 	varargs := []interface{}{arg0, arg1}
@@ -177,6 +213,24 @@ func (m *MockManagerClient) GetStudyList(arg0 context.Context, arg1 *api.GetStud
 func (mr *MockManagerClientMockRecorder) GetStudyList(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudyList", reflect.TypeOf((*MockManagerClient)(nil).GetStudyList), varargs...)
+}
+
+// GetSuggestionParameterList mocks base method
+func (m *MockManagerClient) GetSuggestionParameterList(arg0 context.Context, arg1 *api.GetSuggestionParameterListRequest, arg2 ...grpc.CallOption) (*api.GetSuggestionParameterListReply, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetSuggestionParameterList", varargs...)
+	ret0, _ := ret[0].(*api.GetSuggestionParameterListReply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSuggestionParameterList indicates an expected call of GetSuggestionParameterList
+func (mr *MockManagerClientMockRecorder) GetSuggestionParameterList(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestionParameterList", reflect.TypeOf((*MockManagerClient)(nil).GetSuggestionParameterList), varargs...)
 }
 
 // GetSuggestionParameters mocks base method
