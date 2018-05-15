@@ -41,35 +41,34 @@ func stopStudy(cmd *cobra.Command, args []string) {
 	}
 	defer conn.Close()
 	c := api.NewManagerClient(conn)
-	req := &api.GetStudiesRequest{}
-	r, err := c.GetStudies(context.Background(), req)
+	req := &api.GetStudyListRequest{}
+	r, err := c.GetStudyList(context.Background(), req)
 	if err != nil {
 		log.Fatalf("StopStudy failed: %v", err)
 		return
 	}
-	var sInfo *api.StudyInfo
-	for _, si := range r.StudyInfos {
+	var sov *api.StudyOverview
+	for _, si := range r.StudyOverviews {
 		if utf8.RuneCountInString(args[0]) >= 7 {
-			if strings.HasPrefix(si.StudyId, args[0]) {
-				sInfo = si
+			if strings.HasPrefix(si.Id, args[0]) {
+				sov = si
 				break
 			}
 		}
 		if si.Name == args[0] {
-			sInfo = si
+			sov = si
 			break
 		}
 	}
-	if sInfo == nil {
+	if sov == nil {
 		log.Fatalf("Study %s is not found.", args[0])
 		return
 	}
-
-	sreq := &api.StopStudyRequest{StudyId: sInfo.StudyId}
+	sreq := &api.StopStudyRequest{StudyId: sov.Id}
 	_, err = c.StopStudy(context.Background(), sreq)
 	if err != nil {
 		log.Fatalf("StopStudy failed: %v", err)
 	}
 
-	fmt.Printf("Study %v has been stopped.\n", sInfo.StudyId)
+	fmt.Printf("Study %v has been stopped.\n", sov.Id)
 }

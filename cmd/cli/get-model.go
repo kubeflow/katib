@@ -52,68 +52,28 @@ func getModel(cmd *cobra.Command, opt *getModelOpt) {
 		return
 	}
 	defer conn.Close()
-	var soverviews []*api.StudyOverview
 	c := api.NewManagerClient(conn)
 	// Search study if Study ID or name is set
-	if len(opt.args) > 0 {
-		// Search specified study in running studies
-		req := &api.GetStudiesRequest{}
-		r, err := c.GetStudies(context.Background(), req)
-		if err != nil {
-			log.Fatalf("GetStudy failed: %v", err)
-			return
-		}
-		if len(r.StudyInfos) > 0 {
-			for _, si := range r.StudyInfos {
-				if len(opt.args) > 0 {
-					if utf8.RuneCountInString(opt.args[0]) >= 7 {
-						if strings.HasPrefix(si.StudyId, opt.args[0]) {
-							soverviews = append(soverviews, &api.StudyOverview{
-								Name:  si.Name,
-								Owner: si.Owner,
-							})
-							break
-						}
-					}
-					if si.Name == opt.args[0] {
-						soverviews = append(soverviews, &api.StudyOverview{
-							Name:  si.Name,
-							Owner: si.Owner,
-						})
-						break
-					}
-				} else {
-					soverviews = append(soverviews, &api.StudyOverview{
-						Name:  si.Name,
-						Owner: si.Owner,
-					})
+	req := &api.GetStudyListRequest{}
+	r, err := c.GetStudyList(context.Background(), req)
+	if err != nil {
+		log.Fatalf("GetModels failed: %v", err)
+	}
+	if len(r.StudyOverviews) == 0 {
+		log.Println("No Study fond")
+		return
+	}
+	for _, si := range r.StudyOverviews {
+		if len(opt.args) > 0 {
+			if utf8.RuneCountInString(opt.args[0]) >= 7 {
+				if !strings.HasPrefix(si.Id, opt.args[0]) {
+					break
 				}
 			}
-		}
-	}
-	if len(soverviews) == 0 {
-		// Search specified study from ModelDB
-		sreq := &api.GetSavedStudiesRequest{}
-		sr, err := c.GetSavedStudies(context.Background(), sreq)
-		if err != nil {
-			log.Fatalf("GetStudy failed: %v", err)
-			return
-		}
-		if len(sr.Studies) == 0 {
-			log.Fatalf("No Studies are saved.")
-			return
-		}
-		for _, s := range sr.Studies {
-			if len(opt.args) > 0 {
-				if opt.args[0] == s.Name {
-					soverviews = append(soverviews, s)
-				}
-			} else {
-				soverviews = append(soverviews, s)
+			if si.Name != opt.args[0] {
+				break
 			}
 		}
-	}
-	for _, si := range soverviews {
 		// Search Models from ModelDB
 		mreq := &api.GetSavedModelsRequest{StudyName: si.Name}
 		mr, err := c.GetSavedModels(context.Background(), mreq)
@@ -127,11 +87,11 @@ func getModel(cmd *cobra.Command, opt *getModelOpt) {
 		if opt.detail {
 			for _, m := range mr.Models {
 				if len(opt.args) > 1 {
-					if !strings.HasPrefix(m.TrialId, opt.args[1]) {
+					if !strings.HasPrefix(m.WorkerId, opt.args[1]) {
 						continue
 					}
 				}
-				fmt.Printf("TrialID :%v\n", m.TrialId)
+				fmt.Printf("WorkerID :%v\n", m.WorkerId)
 				fmt.Printf("Model Path: %s\n", m.ModelPath)
 				fmt.Println("Parameters:")
 				for _, p := range m.Parameters {
@@ -148,12 +108,12 @@ func getModel(cmd *cobra.Command, opt *getModelOpt) {
 			fmt.Fprintln(w, "TrialID\tParamNum\tMetricsNum")
 			for _, m := range mr.Models {
 				if len(opt.args) > 1 {
-					if !strings.HasPrefix(m.TrialId, opt.args[1]) {
+					if !strings.HasPrefix(m.WorkerId, opt.args[1]) {
 						continue
 					}
 				}
 				fmt.Fprintf(w, "%s\t%d\t%d\n",
-					string([]rune(m.TrialId)[:7]),
+					string([]rune(m.WorkerId)[:7]),
 					len(m.Parameters),
 					len(m.Metrics),
 				)

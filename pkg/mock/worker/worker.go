@@ -33,18 +33,6 @@ func (m *MockInterface) EXPECT() *MockInterfaceMockRecorder {
 	return m.recorder
 }
 
-// CheckRunningTrials mocks base method
-func (m *MockInterface) CheckRunningTrials(arg0, arg1 string) error {
-	ret := m.ctrl.Call(m, "CheckRunningTrials", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CheckRunningTrials indicates an expected call of CheckRunningTrials
-func (mr *MockInterfaceMockRecorder) CheckRunningTrials(arg0, arg1 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckRunningTrials", reflect.TypeOf((*MockInterface)(nil).CheckRunningTrials), arg0, arg1)
-}
-
 // CleanWorkers mocks base method
 func (m *MockInterface) CleanWorkers(arg0 string) error {
 	ret := m.ctrl.Call(m, "CleanWorkers", arg0)
@@ -57,89 +45,63 @@ func (mr *MockInterfaceMockRecorder) CleanWorkers(arg0 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CleanWorkers", reflect.TypeOf((*MockInterface)(nil).CleanWorkers), arg0)
 }
 
-// CompleteTrial mocks base method
-func (m *MockInterface) CompleteTrial(arg0, arg1 string, arg2 bool) error {
-	ret := m.ctrl.Call(m, "CompleteTrial", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CompleteTrial indicates an expected call of CompleteTrial
-func (mr *MockInterfaceMockRecorder) CompleteTrial(arg0, arg1, arg2 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CompleteTrial", reflect.TypeOf((*MockInterface)(nil).CompleteTrial), arg0, arg1, arg2)
-}
-
-// GetCompletedTrials mocks base method
-func (m *MockInterface) GetCompletedTrials(arg0 string) []*api.Trial {
-	ret := m.ctrl.Call(m, "GetCompletedTrials", arg0)
-	ret0, _ := ret[0].([]*api.Trial)
-	return ret0
-}
-
-// GetCompletedTrials indicates an expected call of GetCompletedTrials
-func (mr *MockInterfaceMockRecorder) GetCompletedTrials(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCompletedTrials", reflect.TypeOf((*MockInterface)(nil).GetCompletedTrials), arg0)
-}
-
-// GetRunningTrials mocks base method
-func (m *MockInterface) GetRunningTrials(arg0 string) []*api.Trial {
-	ret := m.ctrl.Call(m, "GetRunningTrials", arg0)
-	ret0, _ := ret[0].([]*api.Trial)
-	return ret0
-}
-
-// GetRunningTrials indicates an expected call of GetRunningTrials
-func (mr *MockInterfaceMockRecorder) GetRunningTrials(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRunningTrials", reflect.TypeOf((*MockInterface)(nil).GetRunningTrials), arg0)
-}
-
-// GetTrialEvLogs mocks base method
-func (m *MockInterface) GetTrialEvLogs(arg0, arg1 string, arg2 []string, arg3 string) ([]*api.EvaluationLog, error) {
-	ret := m.ctrl.Call(m, "GetTrialEvLogs", arg0, arg1, arg2, arg3)
-	ret0, _ := ret[0].([]*api.EvaluationLog)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTrialEvLogs indicates an expected call of GetTrialEvLogs
-func (mr *MockInterfaceMockRecorder) GetTrialEvLogs(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialEvLogs", reflect.TypeOf((*MockInterface)(nil).GetTrialEvLogs), arg0, arg1, arg2, arg3)
-}
-
-// GetTrialObjValue mocks base method
-func (m *MockInterface) GetTrialObjValue(arg0, arg1, arg2 string) (string, error) {
-	ret := m.ctrl.Call(m, "GetTrialObjValue", arg0, arg1, arg2)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTrialObjValue indicates an expected call of GetTrialObjValue
-func (mr *MockInterfaceMockRecorder) GetTrialObjValue(arg0, arg1, arg2 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialObjValue", reflect.TypeOf((*MockInterface)(nil).GetTrialObjValue), arg0, arg1, arg2)
-}
-
-// IsTrialComplete mocks base method
-func (m *MockInterface) IsTrialComplete(arg0, arg1 string) (bool, error) {
-	ret := m.ctrl.Call(m, "IsTrialComplete", arg0, arg1)
+// IsWorkerComplete mocks base method
+func (m *MockInterface) IsWorkerComplete(arg0 string) (bool, error) {
+	ret := m.ctrl.Call(m, "IsWorkerComplete", arg0)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// IsTrialComplete indicates an expected call of IsTrialComplete
-func (mr *MockInterfaceMockRecorder) IsTrialComplete(arg0, arg1 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsTrialComplete", reflect.TypeOf((*MockInterface)(nil).IsTrialComplete), arg0, arg1)
+// IsWorkerComplete indicates an expected call of IsWorkerComplete
+func (mr *MockInterfaceMockRecorder) IsWorkerComplete(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsWorkerComplete", reflect.TypeOf((*MockInterface)(nil).IsWorkerComplete), arg0)
 }
 
-// SpawnWorkers mocks base method
-func (m *MockInterface) SpawnWorkers(arg0 []*api.Trial, arg1 string) error {
-	ret := m.ctrl.Call(m, "SpawnWorkers", arg0, arg1)
+// SpawnWorker mocks base method
+func (m *MockInterface) SpawnWorker(arg0 string, arg1 *api.WorkerConfig) error {
+	ret := m.ctrl.Call(m, "SpawnWorker", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// SpawnWorkers indicates an expected call of SpawnWorkers
-func (mr *MockInterfaceMockRecorder) SpawnWorkers(arg0, arg1 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SpawnWorkers", reflect.TypeOf((*MockInterface)(nil).SpawnWorkers), arg0, arg1)
+// SpawnWorker indicates an expected call of SpawnWorker
+func (mr *MockInterfaceMockRecorder) SpawnWorker(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SpawnWorker", reflect.TypeOf((*MockInterface)(nil).SpawnWorker), arg0, arg1)
+}
+
+// StopWorkers mocks base method
+func (m *MockInterface) StopWorkers(arg0 string, arg1 []string, arg2 bool) error {
+	ret := m.ctrl.Call(m, "StopWorkers", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// StopWorkers indicates an expected call of StopWorkers
+func (mr *MockInterfaceMockRecorder) StopWorkers(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StopWorkers", reflect.TypeOf((*MockInterface)(nil).StopWorkers), arg0, arg1, arg2)
+}
+
+// StoreWorkerLog mocks base method
+func (m *MockInterface) StoreWorkerLog(arg0 string) error {
+	ret := m.ctrl.Call(m, "StoreWorkerLog", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// StoreWorkerLog indicates an expected call of StoreWorkerLog
+func (mr *MockInterfaceMockRecorder) StoreWorkerLog(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreWorkerLog", reflect.TypeOf((*MockInterface)(nil).StoreWorkerLog), arg0)
+}
+
+// UpdateWorkerStatus mocks base method
+func (m *MockInterface) UpdateWorkerStatus(arg0 string) error {
+	ret := m.ctrl.Call(m, "UpdateWorkerStatus", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateWorkerStatus indicates an expected call of UpdateWorkerStatus
+func (mr *MockInterfaceMockRecorder) UpdateWorkerStatus(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateWorkerStatus", reflect.TypeOf((*MockInterface)(nil).UpdateWorkerStatus), arg0)
 }

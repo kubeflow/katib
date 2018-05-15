@@ -31,18 +31,15 @@ docker build -t ${PREFIX}/vizier-core -f ${CMD_PREFIX}/manager/Dockerfile .
 echo "Building suggestion images..."
 docker build -t ${PREFIX}/suggestion-random -f ${CMD_PREFIX}/suggestion/random/Dockerfile .
 docker build -t ${PREFIX}/suggestion-grid -f ${CMD_PREFIX}/suggestion/grid/Dockerfile .
-docker build -t ${PREFIX}/suggestion-hyperband -f ${CMD_PREFIX}/suggestion/hyperband/Dockerfile .
-docker build -t ${PREFIX}/suggestion-bayesianoptimization -f ${CMD_PREFIX}/suggestion/bayesianoptimization/Dockerfile .
+#docker build -t ${PREFIX}/suggestion-hyperband -f ${CMD_PREFIX}/suggestion/hyperband/Dockerfile .
+#docker build -t ${PREFIX}/suggestion-bayesianoptimization -f ${CMD_PREFIX}/suggestion/bayesianoptimization/Dockerfile .
 
 echo "Building earlystopping images..."
 docker build -t ${PREFIX}/earlystopping-medianstopping -f ${CMD_PREFIX}/earlystopping/medianstopping/Dockerfile .
 
-echo "Building dlk manager image..."
-docker build -t ${PREFIX}/dlk-manager -f dlk/Dockerfile .
-
 echo "Building UI image..."
 docker build -t ${PREFIX}/katib-frontend -f modeldb/Dockerfile .
 
-echo "Building CLI image..."
-docker build -t ${PREFIX}/katib-cli -f ${CMD_PREFIX}/cli/Dockerfile .
+#echo "Building CLI image..."
+#docker build -t ${PREFIX}/katib-cli -f ${CMD_PREFIX}/cli/Dockerfile .
 cd - > /dev/null

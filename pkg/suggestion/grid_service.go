@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/kubeflow/katib/pkg/api"
+	"google.golang.org/grpc"
 )
 
 type GridSuggestParameters struct {
@@ -16,29 +17,10 @@ type GridSuggestParameters struct {
 }
 
 type GridSuggestService struct {
-	parameters  map[string]*GridSuggestParameters
-	grids       map[string][][]*api.Parameter
-	gridPointer map[string]int
 }
 
 func NewGridSuggestService() *GridSuggestService {
-	return &GridSuggestService{parameters: make(map[string]*GridSuggestParameters), grids: make(map[string][][]*api.Parameter), gridPointer: make(map[string]int)}
-}
-
-func (s *GridSuggestService) SetSuggestionParameters(ctx context.Context, in *api.SetSuggestionParametersRequest) (*api.SetSuggestionParametersReply, error) {
-	p := &GridSuggestParameters{gridConfig: make(map[string]int)}
-	for _, sp := range in.SuggestionParameters {
-		switch sp.Name {
-		case "DefaultGrid":
-			p.defaultGridNum, _ = strconv.Atoi(sp.Value)
-		case "MaxParallel":
-			p.MaxParallel, _ = strconv.Atoi(sp.Value)
-		default:
-			p.gridConfig[sp.Name], _ = strconv.Atoi(sp.Value)
-		}
-	}
-	s.parameters[in.StudyId] = p
-	return &api.SetSuggestionParametersReply{}, nil
+	return &GridSuggestService{}
 }
 
 func (s *GridSuggestService) allocInt(min int, max int, reqnum int) []string {
@@ -104,14 +86,30 @@ func (s *GridSuggestService) setP(gci int, p [][]*api.Parameter, pg [][]string, 
 	}
 }
 
-func (s *GridSuggestService) genGrids(studyId string, pcs []*api.ParameterConfig) [][]*api.Parameter {
+func (s *GridSuggestService) purseSuggestParam(suggestParam []*api.SuggestionParameter) (int, map[string]int) {
+	ret := make(map[string]int)
+	defaultGrid := 0
+	for _, sp := range suggestParam {
+		switch sp.Name {
+		case "DefaultGrid":
+			defaultGrid, _ = strconv.Atoi(sp.Value)
+		default:
+			ret[sp.Name], _ = strconv.Atoi(sp.Value)
+		}
+	}
+	if defaultGrid == 0 {
+		defaultGrid = 1
+	}
+	return defaultGrid, ret
+}
+func (s *GridSuggestService) genGrids(studyId string, pcs []*api.ParameterConfig, df int, glist map[string]int) [][]*api.Parameter {
 	var pg [][]string
 	var holenum = 1
 	gcl := make([]int, len(pcs))
 	for i, pc := range pcs {
-		gc, ok := s.parameters[studyId].gridConfig[pc.Name]
+		gc, ok := glist[pc.Name]
 		if !ok {
-			gc = s.parameters[studyId].defaultGridNum
+			gc = df
 		}
 		holenum *= gc
 		gcl[i] = gc
@@ -134,41 +132,53 @@ func (s *GridSuggestService) genGrids(studyId string, pcs []*api.ParameterConfig
 	return ret
 }
 
-func (s *GridSuggestService) GenerateTrials(ctx context.Context, in *api.GenerateTrialsRequest) (*api.GenerateTrialsReply, error) {
-	if _, ok := s.grids[in.StudyId]; !ok {
-		s.grids[in.StudyId] = s.genGrids(in.StudyId, in.Configs.ParameterConfigs.Configs)
-		s.gridPointer[in.StudyId] = 0
+func (s *GridSuggestService) GetSuggestions(ctx context.Context, in *api.GetSuggestionsRequest) (*api.GetSuggestionsReply, error) {
+	conn, err := grpc.Dial(manager, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("could not connect: %v", err)
+		return &api.GetSuggestionsReply{}, err
 	}
-	if s.gridPointer[in.StudyId] >= len(s.grids[in.StudyId]) {
-		if len(in.RunningTrials) == 0 {
-			s.StopSuggestion(ctx, &api.StopSuggestionRequest{StudyId: in.StudyId})
-			return &api.GenerateTrialsReply{Completed: true}, nil
-		} else {
-			return &api.GenerateTrialsReply{Completed: false}, nil
-		}
+	defer conn.Close()
+	c := api.NewManagerClient(conn)
+	screq := &api.GetStudyRequest{
+		StudyId: in.StudyId,
 	}
-	var reqnum = 0
-	if s.parameters[in.StudyId].MaxParallel <= 0 {
-		reqnum = len(s.grids[in.StudyId])
-	} else if len(s.grids[in.StudyId])-s.gridPointer[in.StudyId] < s.parameters[in.StudyId].MaxParallel-len(in.RunningTrials) {
-		reqnum = len(s.grids[in.StudyId]) - s.gridPointer[in.StudyId]
-	} else if len(in.RunningTrials) < s.parameters[in.StudyId].MaxParallel {
-		reqnum = s.parameters[in.StudyId].MaxParallel - len(in.RunningTrials)
+	scr, err := c.GetStudy(ctx, screq)
+	if err != nil {
+		log.Fatalf("GetStudyConf failed: %v", err)
+		return &api.GetSuggestionsReply{}, err
+	}
+	spreq := &api.GetSuggestionParametersRequest{
+		ParamId: in.ParamId,
+	}
+	spr, err := c.GetSuggestionParameters(ctx, spreq)
+	if err != nil {
+		log.Fatalf("GetParameter failed: %v", err)
+		return &api.GetSuggestionsReply{}, err
+	}
+	df, glist := s.purseSuggestParam(spr.SuggestionParameters)
+	grids := s.genGrids(in.StudyId, scr.StudyConfig.ParameterConfigs.Configs, df, glist)
+	var reqnum = int(in.RequestNumber)
+	if reqnum == 0 {
+		reqnum = len(grids)
 	}
 	trials := make([]*api.Trial, reqnum)
 	for i := 0; i < int(reqnum); i++ {
-		trials[i] = &api.Trial{}
-		trials[i].Status = api.TrialState_PENDING
-		trials[i].EvalLogs = make([]*api.EvaluationLog, 0)
-		trials[i].ParameterSet = s.grids[in.StudyId][s.gridPointer[in.StudyId]+i]
+		trials[i] = &api.Trial{
+			StudyId:      in.StudyId,
+			Status:       api.State_PENDING,
+			ParameterSet: grids[i],
+		}
 	}
-	s.gridPointer[in.StudyId] += reqnum
-	return &api.GenerateTrialsReply{Trials: trials, Completed: false}, nil
-}
-
-func (s *GridSuggestService) StopSuggestion(ctx context.Context, in *api.StopSuggestionRequest) (*api.StopSuggestionReply, error) {
-	delete(s.gridPointer, in.StudyId)
-	delete(s.grids, in.StudyId)
-	delete(s.parameters, in.StudyId)
-	return &api.StopSuggestionReply{}, nil
+	for i, t := range trials {
+		req := &api.CreateTrialRequest{
+			Trial: t,
+		}
+		ret, err := c.CreateTrial(ctx, req)
+		if err != nil {
+			return &api.GetSuggestionsReply{Trials: []*api.Trial{}}, err
+		}
+		trials[i].TrialId = ret.TrialId
+	}
+	return &api.GetSuggestionsReply{Trials: trials}, nil
 }

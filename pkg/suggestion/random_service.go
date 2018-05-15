@@ -8,19 +8,14 @@ import (
 	"time"
 
 	"github.com/kubeflow/katib/pkg/api"
+	"google.golang.org/grpc"
 )
 
-type RandomSuggestParameters struct {
-	SuggestionNum int
-	MaxParallel   int
-}
-
 type RandomSuggestService struct {
-	parameters map[string]*RandomSuggestParameters
 }
 
 func NewRandomSuggestService() *RandomSuggestService {
-	return &RandomSuggestService{parameters: make(map[string]*RandomSuggestParameters)}
+	return &RandomSuggestService{}
 }
 
 func (s *RandomSuggestService) DoubelRandom(min, max float64) float64 {
@@ -36,52 +31,30 @@ func (s *RandomSuggestService) IntRandom(min, max int) int {
 	return rand.Intn(max-min+1) + min
 }
 
-func (s *RandomSuggestService) SetSuggestionParameters(ctx context.Context, in *api.SetSuggestionParametersRequest) (*api.SetSuggestionParametersReply, error) {
-	p := &RandomSuggestParameters{}
-	for _, sp := range in.SuggestionParameters {
-		switch sp.Name {
-		case "SuggestionNum":
-			p.SuggestionNum, _ = strconv.Atoi(sp.Value)
-		case "MaxParallel":
-			p.MaxParallel, _ = strconv.Atoi(sp.Value)
-		default:
-			log.Printf("Unknown Suggestion Parameter %v", sp.Name)
-		}
+func (s *RandomSuggestService) GetSuggestions(ctx context.Context, in *api.GetSuggestionsRequest) (*api.GetSuggestionsReply, error) {
+	conn, err := grpc.Dial(manager, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("could not connect: %v", err)
+		return &api.GetSuggestionsReply{}, err
 	}
-	s.parameters[in.StudyId] = p
-	return &api.SetSuggestionParametersReply{}, nil
-}
-
-func (s *RandomSuggestService) GenerateTrials(ctx context.Context, in *api.GenerateTrialsRequest) (*api.GenerateTrialsReply, error) {
-	if len(in.CompletedTrials) >= s.parameters[in.StudyId].SuggestionNum {
-		s.StopSuggestion(ctx, &api.StopSuggestionRequest{StudyId: in.StudyId})
-		return &api.GenerateTrialsReply{Completed: true}, nil
+	defer conn.Close()
+	c := api.NewManagerClient(conn)
+	screq := &api.GetStudyRequest{
+		StudyId: in.StudyId,
 	}
-	if s.parameters[in.StudyId].MaxParallel < 1 && len(in.RunningTrials) > 0 {
-		return &api.GenerateTrialsReply{Completed: false}, nil
-	} else {
-		if len(in.RunningTrials) >= s.parameters[in.StudyId].MaxParallel {
-			return &api.GenerateTrialsReply{Completed: false}, nil
-		}
-		if s.parameters[in.StudyId].SuggestionNum-len(in.CompletedTrials)-len(in.RunningTrials) <= 0 {
-			return &api.GenerateTrialsReply{Completed: false}, nil
-		}
+	scr, err := c.GetStudy(ctx, screq)
+	if err != nil {
+		log.Fatalf("GetStudyConf failed: %v", err)
+		return &api.GetSuggestionsReply{}, err
 	}
-	var reqnum int = 0
-	if s.parameters[in.StudyId].MaxParallel < 1 {
-		reqnum = s.parameters[in.StudyId].SuggestionNum
-	} else if s.parameters[in.StudyId].SuggestionNum-len(in.CompletedTrials) <= s.parameters[in.StudyId].MaxParallel {
-		reqnum = s.parameters[in.StudyId].SuggestionNum - len(in.CompletedTrials) - len(in.RunningTrials)
-	} else {
-		reqnum = s.parameters[in.StudyId].MaxParallel - len(in.RunningTrials)
-	}
+	reqnum := int(in.RequestNumber)
 	s_t := make([]*api.Trial, reqnum)
 	for i := 0; i < reqnum; i++ {
 		s_t[i] = &api.Trial{}
-		s_t[i].ParameterSet = make([]*api.Parameter, len(in.Configs.ParameterConfigs.Configs))
-		s_t[i].Status = api.TrialState_PENDING
-		s_t[i].EvalLogs = make([]*api.EvaluationLog, 0)
-		for j, pc := range in.Configs.ParameterConfigs.Configs {
+		s_t[i].StudyId = in.StudyId
+		s_t[i].ParameterSet = make([]*api.Parameter, len(scr.StudyConfig.ParameterConfigs.Configs))
+		s_t[i].Status = api.State_PENDING
+		for j, pc := range scr.StudyConfig.ParameterConfigs.Configs {
 			s_t[i].ParameterSet[j] = &api.Parameter{Name: pc.Name}
 			s_t[i].ParameterSet[j].ParameterType = pc.ParameterType
 			switch pc.ParameterType {
@@ -97,11 +70,14 @@ func (s *RandomSuggestService) GenerateTrials(ctx context.Context, in *api.Gener
 				s_t[i].ParameterSet[j].Value = pc.Feasible.List[s.IntRandom(0, len(pc.Feasible.List)-1)]
 			}
 		}
+		ctreq := &api.CreateTrialRequest{
+			Trial: s_t[i],
+		}
+		ctret, err := c.CreateTrial(ctx, ctreq)
+		if err != nil {
+			return &api.GetSuggestionsReply{Trials: []*api.Trial{}}, err
+		}
+		s_t[i].TrialId = ctret.TrialId
 	}
-	return &api.GenerateTrialsReply{Trials: s_t, Completed: false}, nil
-}
-
-func (s *RandomSuggestService) StopSuggestion(ctx context.Context, in *api.StopSuggestionRequest) (*api.StopSuggestionReply, error) {
-	delete(s.parameters, in.StudyId)
-	return &api.StopSuggestionReply{}, nil
+	return &api.GetSuggestionsReply{Trials: s_t}, nil
 }

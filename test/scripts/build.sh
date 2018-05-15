@@ -54,10 +54,10 @@ gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-grid:
 pids+=($!)
 sleep 30 # wait for copy code to gcloud
 
-cp cmd/suggestion/hyperband/Dockerfile .
-gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-hyperband:${VERSION} --project=${PROJECT} &
-pids+=($!)
-sleep 30 # wait for copy code to gcloud
+#cp cmd/suggestion/hyperband/Dockerfile .
+#gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-hyperband:${VERSION} --project=${PROJECT} &
+#pids+=($!)
+#sleep 30 # wait for copy code to gcloud
 
 cp cmd/suggestion/bayesianoptimization/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-bayesianoptimization:${VERSION} --project=${PROJECT} &
@@ -66,11 +66,6 @@ sleep 30 # wait for copy code to gcloud
 
 cp cmd/earlystopping/medianstopping/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/earlystopping-medianstopping:${VERSION} --project=${PROJECT} &
-pids+=($!)
-sleep 30 # wait for copy code to gcloud
-
-cp dlk/Dockerfile .
-gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/dlk-manager:${VERSION} --project=${PROJECT} &
 pids+=($!)
 sleep 30 # wait for copy code to gcloud
 
