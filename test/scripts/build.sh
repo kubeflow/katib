@@ -37,11 +37,6 @@ cd ${GO_DIR}
 #echo "building container in gcloud"
 #gcloud version
 # gcloud components update -q
-components=(
-vizier-core
-suggestion-random
-suggestion-grid
-suggestion-hyperband
 
 pids=()
 cp cmd/manager/Dockerfile .
