@@ -50,7 +50,6 @@ pids+=($!)
 sleep 30 # wait for copy code to gcloud
 
 cp cmd/suggestion/grid/Dockerfile .
-<<<<<<< HEAD
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-grid:${VERSION} --project=${PROJECT} &
 pids+=($!)
 sleep 30 # wait for copy code to gcloud
