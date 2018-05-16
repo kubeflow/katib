@@ -66,8 +66,8 @@ func (m *ModelDB) SaveModel(in *api.SaveModelRequest) error {
 	var mid int32 = -1
 	var msid int32 = -1
 	for _, md := range pml {
-		if md.Specification.Tag == in.Model.StudyName+":"+in.Model.TrialId {
-			log.Printf("Study %s: Trial %s is already exist. Metrics will be updated.\n", in.Model.StudyName, in.Model.TrialId)
+		if md.Specification.Tag == in.Model.StudyName+":"+in.Model.WorkerId {
+			log.Printf("Study %s: Trial %s is already exist. Metrics will be updated.\n", in.Model.StudyName, in.Model.WorkerId)
 			did = md.TrainingDataFrame.ID
 			mid = md.ID
 			msid = md.Specification.ID
@@ -117,7 +117,7 @@ func (m *ModelDB) SaveModel(in *api.SaveModelRequest) error {
 			ID:              msid,
 			TransformerType: "NN",
 			Hyperparameters: hs,
-			Tag:             in.Model.StudyName + ":" + in.Model.TrialId,
+			Tag:             in.Model.StudyName + ":" + in.Model.WorkerId,
 		},
 		ExperimentRunId: exrId,
 		FeatureColumns:  []string{},
@@ -207,7 +207,7 @@ func (m *ModelDB) convertmdModelToModelInfo(mdm *modeldb.ModelResponse) *api.Mod
 	}
 	return &api.ModelInfo{
 		StudyName:  sn,
-		TrialId:    mn,
+		WorkerId:   mn,
 		Parameters: param,
 		Metrics:    met,
 		ModelPath:  *mdm.Metadata,
@@ -277,7 +277,7 @@ func (m *ModelDB) GetSavedModel(in *api.GetSavedModelRequest) (*api.ModelInfo, e
 		return nil, err
 	}
 	for _, md := range pml {
-		if md.Specification.Tag == in.StudyName+":"+in.TrialId {
+		if md.Specification.Tag == in.StudyName+":"+in.WorkerId {
 			return m.convertmdModelToModelInfo(md), nil
 		}
 	}

@@ -39,7 +39,6 @@ Each component communicates with others via GRPC and the API is defined at `api/
 - vizier: main components.
     - vizier-core : API server of vizier.
     - vizier-db
-- dlk-manager : a interface of kubernetes.
 - suggestion : implementation of each exploration algorithm.
     - vizier-suggestion-random
     - vizier-suggestion-grid

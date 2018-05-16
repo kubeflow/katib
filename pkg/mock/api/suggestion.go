@@ -35,56 +35,20 @@ func (m *MockSuggestionClient) EXPECT() *MockSuggestionClientMockRecorder {
 	return m.recorder
 }
 
-// GenerateTrials mocks base method
-func (m *MockSuggestionClient) GenerateTrials(arg0 context.Context, arg1 *api.GenerateTrialsRequest, arg2 ...grpc.CallOption) (*api.GenerateTrialsReply, error) {
+// GetSuggestions mocks base method
+func (m *MockSuggestionClient) GetSuggestions(arg0 context.Context, arg1 *api.GetSuggestionsRequest, arg2 ...grpc.CallOption) (*api.GetSuggestionsReply, error) {
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "GenerateTrials", varargs...)
-	ret0, _ := ret[0].(*api.GenerateTrialsReply)
+	ret := m.ctrl.Call(m, "GetSuggestions", varargs...)
+	ret0, _ := ret[0].(*api.GetSuggestionsReply)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GenerateTrials indicates an expected call of GenerateTrials
-func (mr *MockSuggestionClientMockRecorder) GenerateTrials(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+// GetSuggestions indicates an expected call of GetSuggestions
+func (mr *MockSuggestionClientMockRecorder) GetSuggestions(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateTrials", reflect.TypeOf((*MockSuggestionClient)(nil).GenerateTrials), varargs...)
-}
-
-// SetSuggestionParameters mocks base method
-func (m *MockSuggestionClient) SetSuggestionParameters(arg0 context.Context, arg1 *api.SetSuggestionParametersRequest, arg2 ...grpc.CallOption) (*api.SetSuggestionParametersReply, error) {
-	varargs := []interface{}{arg0, arg1}
-	for _, a := range arg2 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "SetSuggestionParameters", varargs...)
-	ret0, _ := ret[0].(*api.SetSuggestionParametersReply)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SetSuggestionParameters indicates an expected call of SetSuggestionParameters
-func (mr *MockSuggestionClientMockRecorder) SetSuggestionParameters(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
-	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetSuggestionParameters", reflect.TypeOf((*MockSuggestionClient)(nil).SetSuggestionParameters), varargs...)
-}
-
-// StopSuggestion mocks base method
-func (m *MockSuggestionClient) StopSuggestion(arg0 context.Context, arg1 *api.StopSuggestionRequest, arg2 ...grpc.CallOption) (*api.StopSuggestionReply, error) {
-	varargs := []interface{}{arg0, arg1}
-	for _, a := range arg2 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "StopSuggestion", varargs...)
-	ret0, _ := ret[0].(*api.StopSuggestionReply)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// StopSuggestion indicates an expected call of StopSuggestion
-func (mr *MockSuggestionClientMockRecorder) StopSuggestion(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
-	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StopSuggestion", reflect.TypeOf((*MockSuggestionClient)(nil).StopSuggestion), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestions", reflect.TypeOf((*MockSuggestionClient)(nil).GetSuggestions), varargs...)
 }
