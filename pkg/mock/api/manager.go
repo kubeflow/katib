@@ -197,6 +197,24 @@ func (mr *MockManagerClientMockRecorder) GetStudy(arg0, arg1 interface{}, arg2 .
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudy", reflect.TypeOf((*MockManagerClient)(nil).GetStudy), varargs...)
 }
 
+// GetStudyController mocks base method
+func (m *MockManagerClient) GetStudyController(arg0 context.Context, arg1 *api.GetStudyControllerRequest, arg2 ...grpc.CallOption) (*api.GetStudyControllerReply, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetStudyController", varargs...)
+	ret0, _ := ret[0].(*api.GetStudyControllerReply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStudyController indicates an expected call of GetStudyController
+func (mr *MockManagerClientMockRecorder) GetStudyController(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudyController", reflect.TypeOf((*MockManagerClient)(nil).GetStudyController), varargs...)
+}
+
 // GetStudyList mocks base method
 func (m *MockManagerClient) GetStudyList(arg0 context.Context, arg1 *api.GetStudyListRequest, arg2 ...grpc.CallOption) (*api.GetStudyListReply, error) {
 	varargs := []interface{}{arg0, arg1}
@@ -303,6 +321,24 @@ func (m *MockManagerClient) GetWorkers(arg0 context.Context, arg1 *api.GetWorker
 func (mr *MockManagerClientMockRecorder) GetWorkers(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkers", reflect.TypeOf((*MockManagerClient)(nil).GetWorkers), varargs...)
+}
+
+// RunStudy mocks base method
+func (m *MockManagerClient) RunStudy(arg0 context.Context, arg1 *api.RunStudyRequest, arg2 ...grpc.CallOption) (*api.RunStudyReply, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RunStudy", varargs...)
+	ret0, _ := ret[0].(*api.RunStudyReply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RunStudy indicates an expected call of RunStudy
+func (mr *MockManagerClientMockRecorder) RunStudy(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunStudy", reflect.TypeOf((*MockManagerClient)(nil).RunStudy), varargs...)
 }
 
 // RunTrial mocks base method

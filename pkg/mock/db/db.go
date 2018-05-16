@@ -48,6 +48,19 @@ func (mr *MockVizierDBInterfaceMockRecorder) CreateStudy(arg0 interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateStudy", reflect.TypeOf((*MockVizierDBInterface)(nil).CreateStudy), arg0)
 }
 
+// CreateStudyController mocks base method
+func (m *MockVizierDBInterface) CreateStudyController(arg0 *api.StudyController) (string, error) {
+	ret := m.ctrl.Call(m, "CreateStudyController", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateStudyController indicates an expected call of CreateStudyController
+func (mr *MockVizierDBInterfaceMockRecorder) CreateStudyController(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateStudyController", reflect.TypeOf((*MockVizierDBInterface)(nil).CreateStudyController), arg0)
+}
+
 // CreateTrial mocks base method
 func (m *MockVizierDBInterface) CreateTrial(arg0 *api.Trial) error {
 	ret := m.ctrl.Call(m, "CreateTrial", arg0)
@@ -156,6 +169,19 @@ func (m *MockVizierDBInterface) GetStudyConfig(arg0 string) (*api.StudyConfig, e
 // GetStudyConfig indicates an expected call of GetStudyConfig
 func (mr *MockVizierDBInterfaceMockRecorder) GetStudyConfig(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudyConfig", reflect.TypeOf((*MockVizierDBInterface)(nil).GetStudyConfig), arg0)
+}
+
+// GetStudyController mocks base method
+func (m *MockVizierDBInterface) GetStudyController(arg0 string) (*api.StudyController, error) {
+	ret := m.ctrl.Call(m, "GetStudyController", arg0)
+	ret0, _ := ret[0].(*api.StudyController)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStudyController indicates an expected call of GetStudyController
+func (mr *MockVizierDBInterfaceMockRecorder) GetStudyController(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudyController", reflect.TypeOf((*MockVizierDBInterface)(nil).GetStudyController), arg0)
 }
 
 // GetStudyList mocks base method
@@ -349,6 +375,18 @@ func (m *MockVizierDBInterface) UpdateEarlyStopParam(arg0 string, arg1 []*api.Ea
 // UpdateEarlyStopParam indicates an expected call of UpdateEarlyStopParam
 func (mr *MockVizierDBInterfaceMockRecorder) UpdateEarlyStopParam(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateEarlyStopParam", reflect.TypeOf((*MockVizierDBInterface)(nil).UpdateEarlyStopParam), arg0, arg1)
+}
+
+// UpdateStudyControllerState mocks base method
+func (m *MockVizierDBInterface) UpdateStudyControllerState(arg0 string, arg1 api.State, arg2 string) error {
+	ret := m.ctrl.Call(m, "UpdateStudyControllerState", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateStudyControllerState indicates an expected call of UpdateStudyControllerState
+func (mr *MockVizierDBInterfaceMockRecorder) UpdateStudyControllerState(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateStudyControllerState", reflect.TypeOf((*MockVizierDBInterface)(nil).UpdateStudyControllerState), arg0, arg1, arg2)
 }
 
 // UpdateSuggestionParam mocks base method
