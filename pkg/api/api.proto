@@ -7,6 +7,8 @@ service Manager {
 	rpc StopStudy(StopStudyRequest) returns (StopStudyReply);
 	rpc GetStudy(GetStudyRequest) returns (GetStudyReply);
 	rpc GetStudyList(GetStudyListRequest) returns (GetStudyListReply);
+    rpc RunStudy(RunStudyRequest) returns(RunStudyReply);
+    rpc GetStudyController(GetStudyControllerRequest) returns (GetStudyControllerReply);
     rpc CreateTrial(CreateTrialRequest) returns (CreateTrialReply);
     rpc GetTrials(GetTrialsRequest) returns (GetTrialsReply);
     rpc RunTrial(RunTrialRequest) returns (RunTrialReply);
@@ -197,6 +199,46 @@ message GetStudyListRequest {
 message GetStudyListReply {
     repeated StudyOverview study_overviews = 1;
 }
+
+message RunStudyRequest {
+    StudyConfig study_config = 1;
+    WorkerConfig worker_config = 2;
+    repeated SuggestionParameter default_suggestion_parameters = 3;
+    repeated EarlyStoppingParameter default_early_stopping_parameters = 4;
+    int32 update_interval = 5;
+    int32 max_parallel = 6;
+    int32 request_suggestion_num = 7;
+    int32 earlystopping_interval = 8;
+}
+
+message RunStudyReply {
+    string study_controller_id = 1;
+}
+
+message StudyController {
+    string study_controller_id = 1;
+    string study_id = 2;
+    string suggestion_algorithm = 3;
+    string suggestion_param_id = 4;
+    string earlystopping_algorithm = 5;
+    string earlystopping_param_id = 6;
+    int32 update_interval = 7;
+    int32 max_parallel = 8;
+    int32 request_suggestion_num = 9;
+    int32 earlystopping_interval = 10;
+    WorkerConfig worker_config = 11;
+    State status = 12;
+    string status_message = 13;
+}
+
+message GetStudyControllerRequest {
+    string study_controller_id = 1;
+}
+
+message GetStudyControllerReply {
+    StudyController study_controller = 1;
+}
+
 
 message CreateTrialRequest {
     Trial trial = 1;

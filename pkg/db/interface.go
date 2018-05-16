@@ -69,6 +69,9 @@ type VizierDBInterface interface {
 	UpdateEarlyStopParam(string, []*api.EarlyStoppingParameter) error
 	GetEarlyStopParam(string) ([]*api.EarlyStoppingParameter, error)
 	GetEarlyStopParamList(string) ([]*api.EarlyStoppingParameterSet, error)
+	CreateStudyController(*api.StudyController) (string, error)
+	GetStudyController(string) (*api.StudyController, error)
+	UpdateStudyControllerState(string, api.State, string) error
 }
 
 type db_conn struct {
@@ -976,4 +979,80 @@ func (d *db_conn) GetEarlyStopParamList(studyId string) ([]*api.EarlyStoppingPar
 		})
 	}
 	return result, nil
+}
+
+func (d *db_conn) CreateStudyController(sctl *api.StudyController) (string, error) {
+	log.Println("Call CreateStudyController")
+	sctl.Status = api.State_PENDING
+	sctl.StatusMessage = ""
+	wconfig, err := (&jsonpb.Marshaler{}).MarshalToString(sctl.WorkerConfig)
+	if err != nil {
+		log.Fatalf("Error marshaling configs: %v", err)
+		return "", err
+	}
+
+	for true {
+		sctl.StudyControllerId = generate_randid()
+		log.Println("db exec")
+		_, err = d.db.Exec("INSERT INTO study_controller VALUES (? ,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			&sctl.StudyControllerId,
+			&sctl.StudyId,
+			&sctl.SuggestionAlgorithm,
+			&sctl.SuggestionParamId,
+			&sctl.EarlystoppingAlgorithm,
+			&sctl.EarlystoppingParamId,
+			&sctl.UpdateInterval,
+			&sctl.MaxParallel,
+			&sctl.RequestSuggestionNum,
+			&sctl.EarlystoppingInterval,
+			&wconfig,
+			&sctl.Status,
+			&sctl.StatusMessage,
+		)
+		if err == nil {
+			break
+		} else {
+			log.Printf("Failed to INSERT %v", err)
+			return "", err
+		}
+	}
+	return sctl.StudyControllerId, nil
+}
+
+func (d *db_conn) GetStudyController(id string) (*api.StudyController, error) {
+	log.Println("GetStudyController")
+	sctl := &api.StudyController{}
+	var wconf string
+	row := d.db.QueryRow("SELECT * FROM study_controller WHERE id = ?", id)
+	err := row.Scan(
+		&sctl.StudyControllerId,
+		&sctl.StudyId,
+		&sctl.SuggestionAlgorithm,
+		&sctl.SuggestionParamId,
+		&sctl.EarlystoppingAlgorithm,
+		&sctl.EarlystoppingParamId,
+		&sctl.UpdateInterval,
+		&sctl.MaxParallel,
+		&sctl.RequestSuggestionNum,
+		&sctl.EarlystoppingInterval,
+		&wconf,
+		&sctl.Status,
+		&sctl.StatusMessage,
+	)
+	if err != nil {
+		return nil, err
+	}
+	wf := &api.WorkerConfig{}
+	err = jsonpb.UnmarshalString(wconf, wf)
+	sctl.WorkerConfig = wf
+	if err != nil {
+		return nil, err
+	}
+	return sctl, nil
+}
+
+func (d *db_conn) UpdateStudyControllerState(id string, newstatus api.State, statusMessage string) error {
+	log.Println("UpdateStudyControllerState")
+	_, err := d.db.Exec("UPDATE study_controller SET status = ?, status_message = ? WHERE id = ?", newstatus, statusMessage, id)
+	return err
 }
