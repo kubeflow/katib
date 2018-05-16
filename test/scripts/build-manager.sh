@@ -38,9 +38,9 @@ cp -r modeldb ${GO_DIR}/modeldb
 
 cd ${GO_DIR}
 cp cmd/manager/Dockerfile .
-gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/vizier-core:${VERSION} --project=${PROJECT} &
+gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/vizier-core:${VERSION} --project=${PROJECT}
 
 cp modeldb/Dockerfile .
-gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/katib-frontend:${VERSION} --project=${PROJECT} &
+gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/katib-frontend:${VERSION} --project=${PROJECT} 
 
 go build -o bin/katib github.com/kubeflow/katib/cmd/cli

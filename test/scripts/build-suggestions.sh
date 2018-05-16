@@ -38,13 +38,13 @@ cp -r vendor ${GO_DIR}/vendor
 cd ${GO_DIR}
 
 cp cmd/suggestion/random/Dockerfile .
-gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-random:${VERSION} --project=${PROJECT} &
+gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-random:${VERSION} --project=${PROJECT}
 
 cp cmd/suggestion/grid/Dockerfile .
-gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-grid:${VERSION} --project=${PROJECT} &
+gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-grid:${VERSION} --project=${PROJECT}
 
 #cp cmd/suggestion/hyperband/Dockerfile .
-#gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-hyperband:${VERSION} --project=${PROJECT} &
+#gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-hyperband:${VERSION} --project=${PROJECT}
 
 cp cmd/suggestion/bayesianoptimization/Dockerfile .
-gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-bayesianoptimization:${VERSION} --project=${PROJECT} &
+gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-bayesianoptimization:${VERSION} --project=${PROJECT}
