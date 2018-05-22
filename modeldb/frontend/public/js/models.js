@@ -1313,7 +1313,7 @@ $(function() {
 		}
 		for (var i = 0; i < models[0].hyperparams.length; i++){
 			if (models[0].hyperparams[i].type == "String"){
-				dimensions[i+models[0].metrics.length]={
+				dimensions[i+models[0].metrics.length+1]={
 					key: models[0].hyperparams[i].name.replace(/-/g,""),
 					type: types[models[0].hyperparams[i].type],
 					axis: d3.axisLeft()
@@ -1322,7 +1322,7 @@ $(function() {
 						})
 				}
 			}else{
-				dimensions[i+models[0].metrics.length]={
+				dimensions[i+models[0].metrics.length+1]={
 					key: models[0].hyperparams[i].name.replace(/-/g,""),
 					type: types[models[0].hyperparams[i].type],
 					scale: d3.scaleSqrt().range([innerHeight, 0])}
@@ -1373,11 +1373,6 @@ $(function() {
 		dimensions.forEach(function(p) {
 		  d[p.key] = !d[p.key] ? null : p.type.coerce(d[p.key]);
 		});
-
-		// truncate long text strings to fit in data table
-		for (var key in d) {
-		  if (d[key] && d[key].length > 35) d[key] = d[key].slice(0,36);
-		}
 	  });
 
 	  // type/dimension default setting happens here
