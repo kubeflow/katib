@@ -70,7 +70,7 @@ class GlobalOptimizer:
     """ class for the global optimizer """
 
     def __init__(self, N, l, u, scaler, X_train, y_train, current_optimal, mode, trade_off, length_scale,
-                 noise, nu, kernel_type):
+                 noise, nu, kernel_type, n_estimators, max_features, model_type):
         self.N = N
         self.l = l
         self.u = u
@@ -87,6 +87,9 @@ class GlobalOptimizer:
             noise=noise,
             nu=nu,
             kernel_type=kernel_type,
+            n_estimators=n_estimators,
+            max_features=max_features,
+            model_type=model_type,
         )
 
     def potential_opt(self, f_min):

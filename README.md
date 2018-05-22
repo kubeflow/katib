@@ -29,6 +29,7 @@ A Suggestion is an algorithm to construct a parameter set. Currently Katib suppo
 * random
 * grid
 * [hyperband](https://arxiv.org/pdf/1603.06560.pdf)
+* [bayesian optimization](https://arxiv.org/pdf/1012.2599.pdf)
 
 ## Components in Katib
 
@@ -42,6 +43,7 @@ Each component communicates with others via GRPC and the API is defined at `api/
     - vizier-suggestion-random
     - vizier-suggestion-grid
     - vizier-suggestion-hyperband
+    - vizier-suggestion-bayesianoptimization
 - modeldb : WebUI
     - modeldb-frontend
     - modeldb-backend

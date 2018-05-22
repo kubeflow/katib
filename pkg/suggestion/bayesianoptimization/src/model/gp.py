@@ -3,7 +3,7 @@ from sklearn.gaussian_process.kernels import RBF, Matern
 from sklearn.gaussian_process import GaussianProcessRegressor
 
 
-class Model:
+class GaussianProcessModel:
     """ use the gaussian process as a prior """
     def __init__(self, length_scale, noise, nu, kernel_type):
         """
