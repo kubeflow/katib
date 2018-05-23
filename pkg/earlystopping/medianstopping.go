@@ -24,24 +24,18 @@ type MedianStoppingParam struct {
 }
 
 type MedianStoppingRule struct {
-	confList map[string]*MedianStoppingParam
-	dbIf     vdb.VizierDBInterface
+	dbIf vdb.VizierDBInterface
 }
 
 func NewMedianStoppingRule() *MedianStoppingRule {
 	m := &MedianStoppingRule{}
-	m.confList = make(map[string]*MedianStoppingParam)
 	m.dbIf = vdb.New()
 	return m
 }
 
-func (m *MedianStoppingRule) SetEarlyStoppingParameter(ctx context.Context, in *api.SetEarlyStoppingParameterRequest) (*api.SetEarlyStoppingParameterReply, error) {
-	sc, err := m.dbIf.GetStudyConfig(in.StudyId)
-	if err != nil {
-		return &api.SetEarlyStoppingParameterReply{}, err
-	}
+func (m *MedianStoppingRule) purseEarlyStoppingParameters(sc *api.StudyConfig, eps []*api.EarlyStoppingParameter) (*MedianStoppingParam, error) {
 	p := &MedianStoppingParam{LeastStep: defaultLeastStep, Margin: defaultMargin, EvalMetric: sc.ObjectiveValueName, BurnIn: defaultBurnIn}
-	for _, ep := range in.EarlyStoppingParameters {
+	for _, ep := range eps {
 		switch ep.Name {
 		case "LeastStep":
 			l, err := strconv.Atoi(ep.Value)
@@ -70,27 +64,26 @@ func (m *MedianStoppingRule) SetEarlyStoppingParameter(ctx context.Context, in *
 			log.Printf("Unknown EarlyStopping Parameter %v", ep.Name)
 		}
 	}
-	m.confList[in.StudyId] = p
-	log.Printf("Parameter for Study %s : LeastStep %d, Margin %v, EvalMetric %s, BurnInPeriod %d", in.StudyId, p.LeastStep, p.Margin, p.EvalMetric, p.BurnIn)
-	return &api.SetEarlyStoppingParameterReply{}, nil
+	log.Printf("Parameter: LeastStep %d, Margin %v, EvalMetric %s, BurnInPeriod %d", p.LeastStep, p.Margin, p.EvalMetric, p.BurnIn)
+	return p, nil
 }
 
-func (m *MedianStoppingRule) getMedianRunningAverage(completedTrialslogs [][]*vdb.TrialLog, step int, burnin int) float64 {
+func (m *MedianStoppingRule) getMedianRunningAverage(completedWorkerslogs [][]*vdb.WorkerLog, step int, burnin int) float64 {
 	r := []float64{}
 	var ra float64
-	for _, ctl := range completedTrialslogs {
+	for _, cwl := range completedWorkerslogs {
 		ra = 0
 		var st int
 		var errParce bool = false
-		if step > len(ctl) {
-			st = len(ctl)
+		if step > len(cwl) {
+			st = len(cwl)
 		} else {
 			st = step
 		}
 		for s := burnin; s < st; s++ {
-			v, err := strconv.ParseFloat(ctl[s].Value, 64)
+			v, err := strconv.ParseFloat(cwl[s].Value, 64)
 			if err != nil {
-				log.Printf("Fail to Parse %s : %s", ctl[s].Name, ctl[s].Value)
+				log.Printf("Fail to Parse %s : %s", cwl[s].Name, cwl[s].Value)
 				errParce = true
 				break
 			}
@@ -110,7 +103,7 @@ func (m *MedianStoppingRule) getMedianRunningAverage(completedTrialslogs [][]*vd
 	}
 }
 
-func (m *MedianStoppingRule) getBestValue(sid string, sc *api.StudyConfig, logs []*vdb.TrialLog) (float64, error) {
+func (m *MedianStoppingRule) getBestValue(sid string, sc *api.StudyConfig, logs []*vdb.WorkerLog) (float64, error) {
 	if len(logs) == 0 {
 		return 0, errors.New("Evaluation Log is missing")
 	}
@@ -139,60 +132,66 @@ func (m *MedianStoppingRule) getBestValue(sid string, sc *api.StudyConfig, logs 
 	}
 	return ret, nil
 }
-func (m *MedianStoppingRule) ShouldTrialStop(ctx context.Context, in *api.ShouldTrialStopRequest) (*api.ShouldTrialStopReply, error) {
-	if _, ok := m.confList[in.StudyId]; !ok {
-		return &api.ShouldTrialStopReply{}, errors.New("EarlyStopping config is not set.")
-	}
-	tl, err := m.dbIf.GetTrialList(in.StudyId)
+func (m *MedianStoppingRule) GetShouldStopWorkers(ctx context.Context, in *api.GetShouldStopWorkersRequest) (*api.GetShouldStopWorkersReply, error) {
+	wl, err := m.dbIf.GetWorkerList(in.StudyId, "")
 	if err != nil {
-		return &api.ShouldTrialStopReply{}, err
+		return &api.GetShouldStopWorkersReply{}, err
 	}
 	sc, err := m.dbIf.GetStudyConfig(in.StudyId)
 	if err != nil {
-		return &api.ShouldTrialStopReply{}, err
+		return &api.GetShouldStopWorkersReply{}, err
 	}
-	rtl := []*api.Trial{}
-	ctl := make([][]*vdb.TrialLog, 0, len(tl))
-	s_t := []*api.Trial{}
-	for _, t := range tl {
-		switch t.Status {
-		case api.TrialState_RUNNING:
-			rtl = append(rtl, t)
-		case api.TrialState_COMPLETED:
-			tl, err := m.dbIf.GetTrialLogs(t.TrialId, &vdb.GetTrialLogOpts{Name: m.confList[in.StudyId].EvalMetric})
+	eparam, err := m.dbIf.GetEarlyStopParam(in.ParamId)
+	if err != nil {
+		return &api.GetShouldStopWorkersReply{}, err
+	}
+	p, err := m.purseEarlyStoppingParameters(sc, eparam)
+	if err != nil {
+		return &api.GetShouldStopWorkersReply{}, err
+	}
+
+	rwids := []string{}
+	cwl := make([][]*vdb.WorkerLog, 0, len(wl))
+	s_w := []string{}
+	for _, w := range wl {
+		switch w.Status {
+		case api.State_RUNNING:
+			rwids = append(rwids, w.WorkerId)
+		case api.State_COMPLETED:
+			wl, err := m.dbIf.GetWorkerLogs(w.WorkerId, &vdb.GetWorkerLogOpts{Name: p.EvalMetric})
 			if err != nil {
-				log.Printf("Fail to get trial %v logs", t.TrialId)
+				log.Printf("Fail to get worker %v logs", w.WorkerId)
 				continue
 			}
-			if len(tl) > m.confList[in.StudyId].BurnIn {
-				ctl = append(ctl, tl)
+			if len(wl) > p.BurnIn {
+				cwl = append(cwl, wl)
 			}
 		default:
 		}
 	}
-	if len(ctl) == 0 {
-		return &api.ShouldTrialStopReply{}, nil
+	if len(cwl) == 0 {
+		return &api.GetShouldStopWorkersReply{}, err
 	}
-	for _, t := range rtl {
-		tl, err := m.dbIf.GetTrialLogs(t.TrialId, &vdb.GetTrialLogOpts{Name: m.confList[in.StudyId].EvalMetric})
+	for _, w := range rwids {
+		wl, err := m.dbIf.GetWorkerLogs(w, &vdb.GetWorkerLogOpts{Name: p.EvalMetric})
 		if err != nil {
-			log.Printf("Fail to get trial %v logs", t.TrialId)
+			log.Printf("Fail to get worker %v logs", w)
 			continue
 		}
-		if len(tl) < m.confList[in.StudyId].LeastStep || len(tl) <= m.confList[in.StudyId].BurnIn {
+		if len(wl) < p.LeastStep || len(wl) <= p.BurnIn {
 			continue
 		}
-		v, err := m.getBestValue(in.StudyId, sc, tl)
+		v, err := m.getBestValue(in.StudyId, sc, wl)
 		if err != nil {
-			log.Printf("Fail to Get Best Value at %s: %v Log:%v", t.TrialId, err, tl)
+			log.Printf("Fail to Get Best Value at %s: %v Log:%v", w, err, wl)
 			continue
 		}
-		om := m.getMedianRunningAverage(ctl, len(tl), m.confList[in.StudyId].BurnIn)
-		log.Printf("Trial %s, In step %d Current value: %v Median value: %v\n", t.TrialId, len(tl), v, om)
-		if (v < (om-m.confList[in.StudyId].Margin) && sc.OptimizationType == api.OptimizationType_MAXIMIZE) || v > (om+m.confList[in.StudyId].Margin) && sc.OptimizationType == api.OptimizationType_MINIMIZE {
-			log.Printf("Trial %s shuold be stopped", t.TrialId)
-			s_t = append(s_t, t)
+		om := m.getMedianRunningAverage(cwl, len(wl), p.BurnIn)
+		log.Printf("Worker %s, In step %d Current value: %v Median value: %v\n", w, len(wl), v, om)
+		if (v < (om-p.Margin) && sc.OptimizationType == api.OptimizationType_MAXIMIZE) || v > (om+p.Margin) && sc.OptimizationType == api.OptimizationType_MINIMIZE {
+			log.Printf("Worker %s shuold be stopped", w)
+			s_w = append(s_w, w)
 		}
 	}
-	return &api.ShouldTrialStopReply{Trials: s_t}, nil
+	return &api.GetShouldStopWorkersReply{ShouldStopWorkerIds: s_w}, nil
 }

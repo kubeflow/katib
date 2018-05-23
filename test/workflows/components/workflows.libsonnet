@@ -203,8 +203,16 @@
                 }],
                 [
                   {
-                    name: "build",
-                    template: "build",
+                    name: "build-manager",
+                    template: "build-manager",
+                  },
+                  {
+                    name: "build-suggestions",
+                    template: "build-suggestions",
+                  },
+                  {
+                    name: "build-earlystoppings",
+                    template: "build-earlystoppings",
                   },
                   {
                     name: "create-pr-symlink",
@@ -291,9 +299,15 @@
               "copy_artifacts",
               "--bucket=" + bucket,
             ]),  // copy-artifacts
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build", testWorkerImage, [
-              "test/scripts/build.sh",
-            ]),  // build
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
+              "test/scripts/build-manager.sh",
+            ]),  // build-manager
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-suggestions", testWorkerImage, [
+              "test/scripts/build-suggestions.sh",
+            ]),  // build-suggestions
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-earlystoppings", testWorkerImage, [
+              "test/scripts/build-earlystoppings.sh",
+            ]),  // build-earlystoppings
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("unit-test", testWorkerImage, [
               "test/scripts/unit-test.sh",
             ]),  // unit test

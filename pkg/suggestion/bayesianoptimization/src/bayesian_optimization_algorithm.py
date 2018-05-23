@@ -8,7 +8,7 @@ from pkg.suggestion.bayesianoptimization.src.global_optimizer.global_optimizer i
 class BOAlgorithm:
     """ class for bayesian optimization """
     def __init__(self, dim, N, lowerbound, upperbound, X_train, y_train, mode, trade_off,
-                 length_scale, noise, nu, kernel_type):
+                 length_scale, noise, nu, kernel_type, n_estimators, max_features, model_type):
         # np.random.seed(0)
         self.dim = dim
         self.N = N or 100
@@ -44,6 +44,9 @@ class BOAlgorithm:
             noise=noise,
             nu=nu,
             kernel_type=kernel_type,
+            n_estimators=n_estimators,
+            max_features=max_features,
+            model_type=model_type,
         )
 
     def get_suggestion(self):

@@ -69,7 +69,10 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
             length_scale=self.service_params[request.study_id]["length_scale"],
             noise=self.service_params[request.study_id]["noise"],
             nu=self.service_params[request.study_id]["nu"],
-            kernel_type=self.service_params[request.study_id]["kernel_type"]
+            kernel_type=self.service_params[request.study_id]["kernel_type"],
+            n_estimators=self.service_params[request.study_id]["n_estimators"],
+            max_features=self.service_params[request.study_id]["max_features"],
+            model_type=self.service_params[request.study_id]["model_type"],
         )
         x_next = alg.get_suggestion().squeeze()
 
@@ -113,7 +116,10 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
                 "nu": None,
                 "kernel_type": None,
                 "mode": None,
-                "trade_off": None
+                "trade_off": None,
+                "n_estimators": None,
+                "max_features": None,
+                "model_type": None,
             }
         for param in request.suggestion_parameters:
             if param.name not in self.service_params[request.study_id].keys():
@@ -122,7 +128,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
                 return api_pb2.SetSuggestionParametersReply()
             if param.name == "length_scale" or param.name == "noise" or param.name == "nu" or param.name == "trade_off":
                 self.service_params[request.study_id][param.name] = float(param.value)
-            elif param.name == "N":
+            elif param.name == "N" or param.name == "n_estimators":
                 self.service_params[request.study_id][param.name] = int(param.value)
             elif param.name == "kernel_type":
                 if param.value != "rbf" and param.value != "matern":
@@ -134,6 +140,10 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
                     context.set_code(grpc.StatusCode.UNKNOWN)
                     context.set_details("unknown acquisition mode: " + param.name)
                 self.service_params[request.study_id][param.name] = param.value
+            elif param.name == "model_type":
+                if param.value != "rf" and param.value != "gp":
+                    context.set_code(grpc.StatusCode.UNKNOWN)
+                    context.set_details("unknown model_type: " + param.name)
 
         return api_pb2.SetSuggestionParametersReply()
 

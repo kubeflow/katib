@@ -17,11 +17,17 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: vizier-core
 rules:
-  - verbs: ["*"]
-    apiGroups: ["extensions"] 
+  - apiGroups: [""] 
+    resources: ["pods", "nodes", "nodes/*", "pods/log", "pods/status", "services", "persistentvolumes", "persistentvolumes/status","persistentvolumeclaims","persistentvolumeclaims/status"] 
+    verbs: ["*"]
+  - apiGroups: ["batch"] 
+    resources: ["jobs", "jobs/status"] 
+    verbs: ["*"]
+  - apiGroups: ["extensions"] 
+    verbs: ["*"]
     resources: ["ingresses","ingresses/status","deployments","deployments/status"] 
-  - verbs: ["*"]
-    apiGroups: [""] 
+  - apiGroups: [""] 
+    verbs: ["*"]
     resources: ["services"] 
 ---
 apiVersion: v1
