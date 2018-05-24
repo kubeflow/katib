@@ -26,7 +26,7 @@ $ ./scripts/deploy.sh
 
 ## Use CLI
 
-Vizier-core is a service of type nodeport, with port 30678.
+vizier-core is a service of type NodePort, with port 30678.
 
 Check which node the vizier-core was deployed.
 Then access vizier API.
@@ -47,7 +47,7 @@ $ katib-cli -s gpu-node2:30678 get studies
 StudyID                 Name    Owner   RunningTrial    CompletedTrial
 ```
 
-If your DNS cannot resolve the node name, connect it via ip. Get node's ip by
+If your DNS cannot resolve the node name, connect it via IP. Get node's IP by
 
 ```
 kubectl get -n katib node YOUR_NODE -o wide
