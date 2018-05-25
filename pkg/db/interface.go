@@ -845,9 +845,13 @@ func (d *db_conn) GetSuggestionParamList(studyId string) ([]*api.SuggestionParam
 		var id string
 		var algorithm string
 		var params string
-		err := rows.Scan(&id, &algorithm, &params)
+		var sID string
+		err := rows.Scan(&id, &sID, &algorithm, &params)
 		if err != nil {
 			return nil, err
+		}
+		if studyId != sID {
+			continue
 		}
 		var p_array []string
 		if len(params) > 0 {
@@ -949,9 +953,13 @@ func (d *db_conn) GetEarlyStopParamList(studyId string) ([]*api.EarlyStoppingPar
 		var id string
 		var algorithm string
 		var params string
-		err := rows.Scan(&id, &algorithm, &params)
+		var sID string
+		err := rows.Scan(&id, &sID, &algorithm, &params)
 		if err != nil {
 			return nil, err
+		}
+		if studyId != sID {
+			continue
 		}
 		var p_array []string
 		if len(params) > 0 {
