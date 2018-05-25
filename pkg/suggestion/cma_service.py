@@ -63,54 +63,72 @@ class CMAService(api_pb2_grpc.SuggestionServicer):
         metrics = []
 
         path_sigma, path_c, C, sigma, mean = cma.init_params()
-        for param in ret.suggestion_parameter_set:
-            if param.param_name == "path_sigma":
-                path_sigma = np.array(json.loads(param.suggestion_parameters[0].value))
-                param_info["path_sigma"]["id"] = param.param_id
-
-            elif param.param_name == "path_c":
-                path_c = np.array(json.loads(param.suggestion_parameters[0].value))
-                param_info["path_c"]["id"] = param.param_id
-
-            elif param.param_name == "C":
-                C = np.array(json.loads(param.suggestion_parameters[0].value))
-                param_info["C"]["id"] = param.param_id
-
-            elif param.param_name == "sigma":
-                sigma = np.array(json.loads(param.suggestion_parameters[0].value))
-                param_info["sigma"]["id"] = param.param_id
-
-            elif param.param_name == "mean":
-                mean = np.array(json.loads(param.suggestion_parameters[0].value))
-                param_info["mean"]["id"] = param.param_id
-
-            elif param.param_name == "population":
-                param_info["population"]["id"] = param.param_id
-                for p in param.suggestion_parameters:
-                    value = json.loads(p.value)
+        for param in ret.suggestion_parameter_sets:
+            new_param = []
+            for suggestion_param in param.suggestion_parameters:
+                param_info[suggestion_param.name]["id"] = param.param_id
+                if suggestion_param.name == "path_sigma":
+                    path_sigma = np.array(json.loads(suggestion_param.value))
+                elif suggestion_param.name == "path_c":
+                    path_c = np.array(json.loads(suggestion_param.value))
+                elif suggestion_param.name == "C":
+                    C = np.array(json.loads(suggestion_param.value))
+                elif suggestion_param.name == "sigma":
+                    sigma = np.array(json.loads(suggestion_param.value))
+                elif suggestion_param.name == "mean":
+                    mean = np.array(json.loads(suggestion_param.value))
+                elif suggestion_param.name == "population":
+                    value = json.loads(suggestion_param.value)
                     if value["y"] == "":
-                        ret = self.stub.GetTrial(api_pb2.GetTrialRequest(
+                        ret = self.stub.GetWorkers(api_pb2.GetWorkersRequest(
+                            study_id=request.study_id,
                             trial_id=value["trial_id"],
+                        ))
+                        worker_ids = []
+                        for worker in ret.workers:
+                            worker_ids.append(worker.worker_id)
+                        ret = self.stub.GetMetrics(api_pb2.GetMetricsRequest(
+                            study_id=request.study_id,
+                            worker_ids=worker_ids,
                         ))
 
                         # the algorithm cannot continue without all trials in the population are evaluated
-                        if ret.trial.objective_value == "":
+                        if len(ret.metrics_log_sets) == 0:
                             context.set_code(grpc.StatusCode.UNKNOWN)
                             context.set_details("all trials in the population should be evaluated")
                             return api_pb2.GetSuggestionsReply(
                                 trials=[],
                             )
 
+                        objective_value = 0
+                        for metrics_log_set in ret.metrics_log_sets:
+                            objective_value += float(metrics_log_set.metrics_logs[-1].values[-1])
+                        objective_value /= len(ret.metrics_log_sets)
+                        value["y"] = objective_value
+
                         # the algorithm is originally for minimization
                         if algo_manager.goal == api_pb2.MAXIMIZE:
-                            y = -float(ret.trial.objective_value)
+                            y = -float(objective_value)
                         else:
-                            y = float(ret.trial.objective_value)
+                            y = float(objective_value)
                         metrics.append(dict(
                             x=np.array(json.loads(value["x"])),
                             y=y,
                             penalty=value["penalty"],
                         ))
+
+                    new_param.append(api_pb2.SuggestionParameter(
+                        name="population",
+                        value=json.dumps(value)
+                    ))
+
+            if len(new_param) > 0:
+                ret = self.stub.SetSuggestionParameters(api_pb2.SetSuggestionParametersRequest(
+                    study_id=request.study_id,
+                    suggestion_algorithm=request.suggestion_algorithm,
+                    param_id=param.param_id,
+                    suggestion_parameters=new_param,
+                ))
 
         param_info["path_sigma"]["value"], param_info["path_c"]["value"], param_info["C"]["value"], \
         param_info["sigma"]["value"], param_info["mean"]["value"] = cma.report_metric(

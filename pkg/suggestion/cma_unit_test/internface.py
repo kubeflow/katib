@@ -1,6 +1,9 @@
+import json
 import random
 import string
+import time
 
+import datetime
 from google.protobuf.json_format import MessageToJson, Parse
 
 from pkg.api.python import api_pb2
@@ -83,13 +86,13 @@ def set_suggestion_param(cnx, algorithm, study_id, params):
     add_param = ("INSERT INTO suggestion_param "
                  "VALUES (%(id)s,"
                  " %(suggestion_algo)s,"
-                 " %(parameters)s,"
-                 " %(study_id)s)")
+                 " %(study_id)s,"
+                 " %(parameters)s)")
     data_param = {
         "id": param_id,
         'suggestion_algo': algorithm,
-        'parameters': "&\n".join(suggestion_params),
         'study_id': study_id,
+        'parameters': "&\n".join(suggestion_params),
     }
     cursor.execute(add_param, data_param)
     cnx.commit()
@@ -105,7 +108,8 @@ def update_suggestion_param(cnx, param_id, params):
 
     cursor = cnx.cursor()
     cursor.execute(
-        "UPDATE suggestion_param SET parameters = '%s' WHERE id = '%s'" % ('&\n'.join(suggestion_params).replace("\\", "\\\\"), param_id))
+        "UPDATE suggestion_param SET parameters = '%s' WHERE id = '%s'" % (
+            '&\n'.join(suggestion_params).replace("\\", "\\\\"), param_id))
     cnx.commit()
     cursor.close()
 
@@ -130,17 +134,17 @@ def get_suggestion_param_list(cnx, study_id):
     cursor = cnx.cursor()
     cursor.execute("SELECT * FROM suggestion_param WHERE study_id = '%s'" % study_id)
     parameter_set = []
-    for (id, suggestion_algo, parameters, study_id) in cursor:
+    for (id, suggestion_algo, study_id, parameters) in cursor:
         params = []
         parameters = parameters.split("&\n")
-        param_name = ""
+        # param_name = ""
         for param in parameters:
             temp = api_pb2.SuggestionParameter()
             params.append(Parse(param, temp))
-            param_name = temp.name
-        parameter_set.append(api_pb2.GetSuggestionParameterListReply.SuggestionParameterSet(
+            # param_name = temp.name
+        parameter_set.append(api_pb2.SuggestionParameterSet(
             param_id=id,
-            param_name=param_name,
+            suggestion_algorithm=suggestion_algo,
             suggestion_parameters=params
         ))
 
@@ -215,15 +219,119 @@ def create_trial(cnx, trial):
     return trial_id
 
 
-def update_trial_status(cnx, trial_id, status):
+def get_workers(cnx, worker_id, trial_id, study_id):
     cursor = cnx.cursor()
-    cursor.execute("UPDATE trials SET status = '%s' WHERE id = '%s'" % (status, trial_id))
+
+    if worker_id:
+        cursor.execute("SELECT * FROM workers WHERE id = '%s'" % worker_id)
+    elif trial_id:
+        cursor.execute("SELECT * FROM workers WHERE trial_id = '%s'" % trial_id)
+    elif study_id:
+        cursor.execute("SELECT * FROM workers WHERE study_id = '%s'" % study_id)
+    else:
+        print("worker_id, trial_id or study_id must be set")
+        return
+
+    workers = []
+    for (id, study_id, trial_id, runtime, status, config, tags) in cursor:
+        worker_config = api_pb2.WorkerConfig()
+        Parse(config, worker_config)
+
+        tags = tags.split("&\n")
+        tag_list = []
+        for tag in tags:
+            if tag != "":
+                temp = api_pb2.Tag()
+                tag_list.append(Parse(tag, temp))
+
+        workers.append(api_pb2.Worker(
+            worker_id=id,
+            study_id=study_id,
+            trial_id=trial_id,
+            runtime=runtime,
+            status=status,
+            config=worker_config,
+            tags=tag_list,
+        ))
+
+    cursor.close()
+    return workers
+
+
+def get_worker_list(cnx, study_id, trial_id):
+    workers = get_workers(cnx, "", trial_id, study_id)
+    return workers
+
+
+def get_worker(cnx, worker_id):
+    workers = get_workers(cnx, worker_id, "", "")
+    if len(workers) == 0:
+        return
+    else:
+        return workers[0]
+
+
+def get_worker_logs(cnx, worker_id, name):
+    cursor = cnx.cursor()
+    cursor.execute(
+        "SELECT time, name, value FROM worker_metrics WHERE worker_id = '%s' AND name = '%s' ORDER BY time" % (
+            worker_id, name))
+    worker_logs = []
+    for (time, name, value) in cursor:
+        worker_logs.append(dict(
+            time=time,
+            name=name,
+            value=value,
+        ))
+    return worker_logs
+
+
+def create_worker(cnx, worker):
+    cursor = cnx.cursor()
+    worker_config = MessageToJson(worker.config)
+    worker_id = generate_randid()
+    add_worker = ("INSERT INTO workers "
+                  "VALUES (%(worker_id)s,"
+                  " %(study_id)s,"
+                  " %(trial_id)s,"
+                  " %(runtime)s, "
+                  " %(status)s,"
+                  " %(config)s,"
+                  " %(tag)s)")
+    data_worker = {
+        'worker_id': worker_id,
+        'study_id': worker.study_id,
+        'trial_id': worker.trial_id,
+        'runtime': worker.runtime,
+        'status': api_pb2.PENDING,
+        'config': worker_config,
+        'tag': "",
+    }
+    cursor.execute(add_worker, data_worker)
     cnx.commit()
     cursor.close()
 
+    return worker_id
 
-def update_trial_value(cnx, trial_id, objective_value):
+
+def store_worker_logs(cnx, worker_id, name, value):
     cursor = cnx.cursor()
-    cursor.execute("UPDATE trials SET objective_value = '%s' WHERE id = '%s'" % (objective_value, trial_id))
+    add_worker_metric = ("INSERT INTO worker_metrics (worker_id, time, name, value, is_objective)"
+                         "VALUES (%(worker_id)s,"
+                         " %(time)s,"
+                         " %(name)s,"
+                         " %(value)s, "
+                         " %(is_objective)s)")
+    ts = time.time()
+    st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    data_metric = {
+        'worker_id': worker_id,
+        'time': st,
+        'name': name,
+        'value': str(value[0]),
+        'is_objective': 1,
+    }
+    # print(data_metric)
+    cursor.execute(add_worker_metric, data_metric)
     cnx.commit()
     cursor.close()

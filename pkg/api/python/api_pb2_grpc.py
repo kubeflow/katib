@@ -34,25 +34,15 @@ class ManagerStub(object):
         request_serializer=api__pb2.GetStudyListRequest.SerializeToString,
         response_deserializer=api__pb2.GetStudyListReply.FromString,
         )
-    self.GetTrials = channel.unary_unary(
-        '/api.Manager/GetTrials',
-        request_serializer=api__pb2.GetTrialsRequest.SerializeToString,
-        response_deserializer=api__pb2.GetTrialsReply.FromString,
-        )
-    self.GetTrial = channel.unary_unary(
-        '/api.Manager/GetTrial',
-        request_serializer=api__pb2.GetTrialRequest.SerializeToString,
-        response_deserializer=api__pb2.GetTrialReply.FromString,
-        )
     self.CreateTrial = channel.unary_unary(
         '/api.Manager/CreateTrial',
         request_serializer=api__pb2.CreateTrialRequest.SerializeToString,
         response_deserializer=api__pb2.CreateTrialReply.FromString,
         )
-    self.UpdateTrial = channel.unary_unary(
-        '/api.Manager/UpdateTrial',
-        request_serializer=api__pb2.UpdateTrialRequest.SerializeToString,
-        response_deserializer=api__pb2.UpdateTrialReply.FromString,
+    self.GetTrials = channel.unary_unary(
+        '/api.Manager/GetTrials',
+        request_serializer=api__pb2.GetTrialsRequest.SerializeToString,
+        response_deserializer=api__pb2.GetTrialsReply.FromString,
         )
     self.RunTrial = channel.unary_unary(
         '/api.Manager/RunTrial',
@@ -109,6 +99,11 @@ class ManagerStub(object):
         request_serializer=api__pb2.GetEarlyStoppingParametersRequest.SerializeToString,
         response_deserializer=api__pb2.GetEarlyStoppingParametersReply.FromString,
         )
+    self.GetEarlyStoppingParameterList = channel.unary_unary(
+        '/api.Manager/GetEarlyStoppingParameterList',
+        request_serializer=api__pb2.GetEarlyStoppingParameterListRequest.SerializeToString,
+        response_deserializer=api__pb2.GetEarlyStoppingParameterListReply.FromString,
+        )
     self.SaveStudy = channel.unary_unary(
         '/api.Manager/SaveStudy',
         request_serializer=api__pb2.SaveStudyRequest.SerializeToString,
@@ -163,20 +158,6 @@ class ManagerServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def GetTrials(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def GetTrial(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
   def CreateTrial(self, request, context):
     # missing associated documentation comment in .proto file
     pass
@@ -184,7 +165,7 @@ class ManagerServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def UpdateTrial(self, request, context):
+  def GetTrials(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -268,6 +249,13 @@ class ManagerServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def GetEarlyStoppingParameterList(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def SaveStudy(self, request, context):
     # missing associated documentation comment in .proto file
     pass
@@ -319,25 +307,15 @@ def add_ManagerServicer_to_server(servicer, server):
           request_deserializer=api__pb2.GetStudyListRequest.FromString,
           response_serializer=api__pb2.GetStudyListReply.SerializeToString,
       ),
-      'GetTrials': grpc.unary_unary_rpc_method_handler(
-          servicer.GetTrials,
-          request_deserializer=api__pb2.GetTrialsRequest.FromString,
-          response_serializer=api__pb2.GetTrialsReply.SerializeToString,
-      ),
-      'GetTrial': grpc.unary_unary_rpc_method_handler(
-          servicer.GetTrial,
-          request_deserializer=api__pb2.GetTrialRequest.FromString,
-          response_serializer=api__pb2.GetTrialReply.SerializeToString,
-      ),
       'CreateTrial': grpc.unary_unary_rpc_method_handler(
           servicer.CreateTrial,
           request_deserializer=api__pb2.CreateTrialRequest.FromString,
           response_serializer=api__pb2.CreateTrialReply.SerializeToString,
       ),
-      'UpdateTrial': grpc.unary_unary_rpc_method_handler(
-          servicer.UpdateTrial,
-          request_deserializer=api__pb2.UpdateTrialRequest.FromString,
-          response_serializer=api__pb2.UpdateTrialReply.SerializeToString,
+      'GetTrials': grpc.unary_unary_rpc_method_handler(
+          servicer.GetTrials,
+          request_deserializer=api__pb2.GetTrialsRequest.FromString,
+          response_serializer=api__pb2.GetTrialsReply.SerializeToString,
       ),
       'RunTrial': grpc.unary_unary_rpc_method_handler(
           servicer.RunTrial,
@@ -393,6 +371,11 @@ def add_ManagerServicer_to_server(servicer, server):
           servicer.GetEarlyStoppingParameters,
           request_deserializer=api__pb2.GetEarlyStoppingParametersRequest.FromString,
           response_serializer=api__pb2.GetEarlyStoppingParametersReply.SerializeToString,
+      ),
+      'GetEarlyStoppingParameterList': grpc.unary_unary_rpc_method_handler(
+          servicer.GetEarlyStoppingParameterList,
+          request_deserializer=api__pb2.GetEarlyStoppingParameterListRequest.FromString,
+          response_serializer=api__pb2.GetEarlyStoppingParameterListReply.SerializeToString,
       ),
       'SaveStudy': grpc.unary_unary_rpc_method_handler(
           servicer.SaveStudy,

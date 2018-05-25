@@ -3,6 +3,7 @@ import numpy as np
 
 from pkg.api.python import api_pb2
 from pkg.api.python import api_pb2_grpc
+from pkg.suggestion.types import MANAGER
 
 
 def func(x1, x2):
@@ -13,7 +14,7 @@ def func(x1, x2):
 
 
 def run():
-    channel = grpc.insecure_channel("localhost:50051")
+    channel = grpc.insecure_channel(MANAGER)
     stub = api_pb2_grpc.ManagerStub(channel)
     study_configs = api_pb2.StudyConfig(
         name="test_study",
@@ -39,7 +40,7 @@ def run():
         default_early_stopping_algorithm="",
         tags=[],
         objective_value_name="precision",
-        metrics=[],
+        metrics=["precision"],
     )
     create_study_response = stub.CreateStudy(api_pb2.CreateStudyRequest(
         study_config=study_configs,
@@ -51,24 +52,29 @@ def run():
     maximum = -1
     iter = 0
     for i in range(20):
+        print(i)
         get_suggestion_response = stub.GetSuggestions(api_pb2.GetSuggestionsRequest(
             study_id=study_id,
             suggestion_algorithm="cma",
         ))
         for trial in get_suggestion_response.trials:
-            x1 = trial.parameter_set[0].value
-            x2 = trial.parameter_set[1].value
-
-            objective_value = func(float(x1), float(x2))
-            if objective_value > maximum:
-                maximum = objective_value
-                iter = i
-            stub.UpdateTrial(api_pb2.UpdateTrialRequest(
+            stub.RunTrial(api_pb2.RunTrialRequest(
+                study_id=study_id,
                 trial_id=trial.trial_id,
-                objective_value=str(objective_value),
-                status=api_pb2.COMPLETED,
             ))
-    print("find max {} in {} iteration".format(maximum, iter))
+            # x1 = trial.parameter_set[0].value
+            # x2 = trial.parameter_set[1].value
+            #
+            # objective_value = func(float(x1), float(x2))
+            # if objective_value > maximum:
+            #     maximum = objective_value
+            #     iter = i
+            # stub.UpdateTrial(api_pb2.UpdateTrialRequest(
+            #     trial_id=trial.trial_id,
+            #     objective_value=str(objective_value),
+            #     status=api_pb2.COMPLETED,
+            # ))
+    # print("find max {} in {} iteration".format(maximum, iter))
 
 
 if __name__ == "__main__":

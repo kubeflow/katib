@@ -38,9 +38,9 @@ TABLES['suggestion_param'] = (
 
 def connect_db():
     cnx = mysql.connector.connect(
-        user="katib",
-        password="katib123",
-        database="katib",
+        user="root",
+        password="zhangyingbo",
+        database="vizier",
         host="localhost",
         port=3306,
     )
@@ -48,18 +48,18 @@ def connect_db():
     return cnx
 
 
-def DB_Init(cnx):
-    cursor = cnx.cursor()
-    for name, ddl in TABLES.items():
-        cursor.execute(ddl)
-
-    cursor.close()
-    cnx.close()
+# def DB_Init(cnx):
+#     cursor = cnx.cursor()
+#     for name, ddl in TABLES.items():
+#         cursor.execute(ddl)
+#
+#     cursor.close()
+#     cnx.close()
 
 
 def run():
     cnx = connect_db()
-    DB_Init(cnx)
+    # DB_Init(cnx)
 
 
 # if __name__ == "__main__":
