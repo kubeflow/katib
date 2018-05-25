@@ -48,3 +48,6 @@ gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-grid:
 
 cp cmd/suggestion/bayesianoptimization/Dockerfile .
 gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-bayesianoptimization:${VERSION} --project=${PROJECT}
+
+cp cmd/suggestion/cma/Dockerfile .
+gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-cma:${VERSION} --project=${PROJECT}
