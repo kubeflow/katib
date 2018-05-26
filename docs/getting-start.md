@@ -10,8 +10,14 @@
 
 First, Copy CLI tool.
 
+For Linux
 ```bash
 $ curl -Lo katib-cli https://github.com/kubeflow/katib/releases/download/v0.1.1-alpha/katib-cli-linux-amd64 && chmod +x katib-cli && sudo mv katib-cli /usr/local/bin/
+```
+
+For Mac
+```bash
+$ curl -Lo katib-cli https://github.com/kubeflow/katib/releases/download/v0.1.1-alpha/katib-cli-darwin-amd64 && chmod +x katib-cli && sudo mv katib-cli /usr/local/bin/
 ```
 
 The cli tool will be put `/usr/local/bin/` directory.
