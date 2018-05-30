@@ -75,14 +75,6 @@ func (d *db_conn) DB_Init() {
 		log.Fatalf("Error creating worker_metrics table: %v", err)
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS worker_lastlogs" +
-		"(worker_id CHAR(16) PRIMARY KEY, " +
-		"time DATETIME(6), " +
-		"value TEXT)")
-	if err != nil {
-		log.Fatalf("Error creating worker_lastlogs table: %v", err)
-	}
-
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS suggestion_param" +
 		"(id CHAR(16) PRIMARY KEY," +
 		"suggestion_algo TEXT, " +
