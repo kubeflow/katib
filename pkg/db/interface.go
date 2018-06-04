@@ -621,7 +621,7 @@ func (d *db_conn) StoreWorkerLogs(worker_id string, logs []string) error {
 		return lasterr
 	}
 	if len(ls) == 2 {
-		_, err = d.db.Exec("REPLACE INTO trial_lastlogs VALUES (?, ?, ?)",
+		_, err = d.db.Exec("REPLACE INTO worker_lastlogs VALUES (?, ?, ?)",
 			worker_id, formatted_time, ls[1])
 	}
 	return err

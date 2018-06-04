@@ -171,8 +171,11 @@ func (d *KubernetesWorkerInterface) UpdateWorkerStatus(studyId string) error {
 	}
 	for _, w := range ws {
 		if w.Status == api.State_RUNNING {
-			d.StoreWorkerLog(w.WorkerId)
 			c, err := d.IsWorkerComplete(w.WorkerId)
+			if err != nil {
+				return err
+			}
+			err = d.StoreWorkerLog(w.WorkerId)
 			if err != nil {
 				return err
 			}
