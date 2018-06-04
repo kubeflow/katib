@@ -32,6 +32,8 @@ $ ./scripts/deploy.sh
 
 ## Use CLI
 
+vizier-core is a service of type NodePort, with port 30678.
+
 Check which node the vizier-core was deployed.
 Then access vizier API.
 
@@ -46,9 +48,21 @@ vizier-core-864dd6fdd4-r55qv                1/1       Running   0          11m  
 vizier-db-7b6f8c59bc-mjhh4                  1/1       Running   0          11m       10.36.0.4   node1
 vizier-suggestion-random-5895dc79b4-pbqkc   1/1       Running   0          11m       10.47.0.5   gpu-node3
 
-$ katib-cli -s gpu-node2:30678 Getstudies
+$ katib-cli -s gpu-node2:30678 get studies
 2018/04/03 05:14:49 connecting gpu-node2:30678
 StudyID                 Name    Owner   RunningTrial    CompletedTrial
+```
+
+If your DNS cannot resolve the node name, connect it via IP. Get node's IP by
+
+```
+kubectl get -n katib node YOUR_NODE -o wide
+```
+
+If you are using GKE, create a firewall rule to allow traffic on port 30678.
+
+```
+gcloud compute firewall-rules create katibservice --allow tcp:30678
 ```
 
 ## Create Example Study
@@ -56,7 +70,7 @@ StudyID                 Name    Owner   RunningTrial    CompletedTrial
 Try Createstudy. Study will be created and start hyperparameter search.
 
 ```bash
-$ katib-cli -s gpu-node2:30678 -f ../examples/random.yml Createstudy
+$ katib-cli -s gpu-node2:30678 -f ../examples/random.yml create study
 2018/04/03 05:16:37 connecting gpu-node2:30678
 2018/04/03 05:16:37 study conf{cifer10 root MAXIMIZE 0 configs:<name:"--lr" parameter_type:DOUBLE feasible:<max:"0.07" min:"0.03" > > configs:<name:"--lr-factor" parameter_type:DOUBLE feasible:<max:"0.2" min:"0.05" > > configs:<name:"--max-random-h" parameter_type:INT feasible:<max:"46" min:"26" > > configs:<name:"--max-random-l" parameter_type:INT feasible:<max:"75" min:"25" > > configs:<name:"--num-epochs" parameter_type:INT feasible:<max:"3" min:"3" > >  [] random median  [name:"SuggestionNum" value:"2"  name:"MaxParallel" value:"2" ] [] Validation-accuracy [accuracy] mxnet/python:gpu [python /mxnet/example/image-classification/train_cifar10.py --batch-size=512 --gpus=0,1] 2 default-scheduler <nil> }
 2018/04/03 05:16:37 req Createstudy
@@ -66,7 +80,7 @@ $ katib-cli -s gpu-node2:30678 -f ../examples/random.yml Createstudy
 You can check the job is running with `kubectl` command.
 
 ```bash
-$ katib-cli -s gpu-node2:30678 Getstudies
+$ katib-cli -s gpu-node2:30678 get studies
 2018/04/03 05:19:49 connecting gpu-node2:30678
 StudyID                 Name    Owner   RunningTrial    CompletedTrial
 fef3711aa343fae6        cifer10 root    2       0
@@ -80,7 +94,7 @@ wbe8aabd6ad4f50e-worker-0   1         0            1m
 Check the status of jobs with `katib-cli` command.
 
 ```bash
-$ katib-cli -s gpu-node2:30678 Getstudies
+$ katib-cli -s gpu-node2:30678 get studies
 2018/04/03 05:26:20 connecting gpu-node2:30678
 StudyID                 Name    Owner   RunningTrial    CompletedTrial
 fef3711aa343fae6        cifer10 root    1       1
@@ -221,7 +235,7 @@ parameterconfigs:
 ```
 
 ```bash
-$ katib-cli -s gpu-node2:30678 -f ../examples/random-pv.yml Createstudy
+$ katib-cli -s gpu-node2:30678 -f ../examples/random-pv.yml create study
 2018/04/03 05:49:47 connecting gpu-node2:30678
 2018/04/03 05:49:47 study conf{cifer10-pv-test root MAXIMIZE 0 configs:<name:"--lr" parameter_type:DOUBLE feasible:<max:"0.07" min:"0.03" > > configs:<name:"--lr-factor" parameter_type:DOUBLE feasible:<max:"0.2" min:"0.05" > > configs:<name:"--max-random-h" parameter_type:INT feasible:<max:"46" min:"26" > > configs:<name:"--max-random-l" parameter_type:INT feasible:<max:"75" min:"25" > > configs:<name:"--num-epochs" parameter_type:INT feasible:<max:"3" min:"3" > >  [] random median  [name:"SuggestionNum" value:"2"  name:"MaxParallel" value:"2" ] [] Validation-accuracy [accuracy] mxnet/python:gpu [python /mxnet/example/image-classification/train_cifar10.py --batch-size=512 --gpus=0,1] 2 default-scheduler pvc:"nfs" path:"/nfs-mnt"  }
 2018/04/03 05:49:47 req Createstudy
