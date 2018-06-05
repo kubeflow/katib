@@ -1,0 +1,29 @@
+name: mnist-demo
+owner: katib
+optimizationtype: 2
+optimizationgoal: 0.99
+parameterconfigs:
+  configs:
+  - name: --lr
+    parametertype: 1
+    feasible:
+      min: "0.03"
+      max: "0.07"
+  - name: --num-layers
+    parametertype: 2
+    feasible:
+      min: "2"
+      max: "5"
+  - name: --optimizer
+    parametertype: 4
+    feasible:
+      list:
+      - sgd
+      - adam
+      - ftrl
+defaultsuggestionalgorithm: random
+defaultearlystoppingalgorithm: medianstopping
+objectivevaluename: Validation-accuracy
+metrics:
+- accuracy
+

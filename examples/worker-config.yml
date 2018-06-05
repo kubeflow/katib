@@ -1,0 +1,6 @@
+image: "mxnet/python"
+command: 
+    - "python"
+    - "/mxnet/example/image-classification/train_mnist.py"
+    - "--batch-size=64"
+gpu: 0

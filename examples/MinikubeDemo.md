@@ -1,9 +1,11 @@
 # Simple Minikube Demo
 You can deploy katib components and try a simple mnist demo on your laptop!
+
 ## Requirement
 * VirtualBox
 * Minikube
 * kubectl
+
 ## deploy
 Only type command `./deploy`.
 
@@ -14,13 +16,26 @@ Don't worry if the `vizier-core` get an error.
 It will be recovered after DB will be prepared.
 Wait until all components will be Running status.
 
+You need a katib client.
+It will call API of Katib to create study, get suggestions, run trial, and get metrics.
+The details of the system flow for the client and katib components is [here](https://docs.google.com/presentation/d/1Dk4XxKfVncb2v2CUDAd3OhM7XLyG3B9jEuuVmMiCIMg/edit#slide=id.g3b424a8f63_2_146).
+
+The [client example](./client-example.go) will read three config files.
+* study-config.yml: Define study property and feasible space of parameters.
+* suggesiton-config.yml: Define suggesiton parameter for each study and suggestion service. In this file, the config is for grid suggestion service.
+* worker-config.yml: Define config for evaluation worker.
+
 ## Create Study
 ### Random Suggestion Demo
 You can run rundom suggesiton demo.
 ```
-go run random/radom-suggest-demo.go
+go run client-example.go -s 192.168.99.100:30678 -a random
 ```
-In this demo, 2 random learning rate parameters generated randomly between Min 0.03 and Max 0.07.
+In this demo, 2 random parameters in
+* Learning Rate (--lr) - type: double
+* Number of NN Layer (--num-layers) - type: int
+* optimizer (--optimizer) - type: categorical
+
 Logs
 ```
 2018/04/26 17:43:26 Study ID n9debe3de9ef67c8
@@ -33,9 +48,9 @@ Logs
 ### Grid Demo
 Almost same as random suggestion.
 ```
-go run grid/grid-suggest-demo.go
+go run client-example.go -s 192.168.99.100:30678 -a grid
 ```
-In this demo, make 4 grids Min 0.03 and Max 0.07.
+In this demo, make 4 grids for learning rate (--lr) Min 0.03 and Max 0.07.
 
 ## UI
 You can check your Model with Web UI.
