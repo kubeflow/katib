@@ -16,9 +16,9 @@ type PersistentFlags struct {
 func NewRootCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
-		Use:   "katibcli",
+		Use:   "katib-cli",
 		Short: "katib cli",
-		Long:  `this is katib cli client using cobra framework`,
+		Long:  `This is katib cli client using cobra framework`,
 	}
 
 	//initialize config
