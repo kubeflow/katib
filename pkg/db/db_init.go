@@ -94,4 +94,21 @@ func (d *db_conn) DB_Init() {
 	if err != nil {
 		log.Fatalf("Error creating earlystop_param table: %v", err)
 	}
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS study_controller" +
+		"(id CHAR(16) PRIMARY KEY, " +
+		"study_id CHAR(16), " +
+		"suggestion_algorithm TEXT, " +
+		"suggestion_param_id CHAR(16), " +
+		"earlystopping_algorithm TEXT, " +
+		"earlystopping_param_id CHAR(16), " +
+		"update_interval INT, " +
+		"max_parallel INT, " +
+		"request_suggest_num INT, " +
+		"earlystopping_interval INT, " +
+		"worker_config TEXT, " +
+		"status TINYINT, " +
+		"status_message TEXT)")
+	if err != nil {
+		log.Fatalf("Error creating study_controller table: %v", err)
+	}
 }

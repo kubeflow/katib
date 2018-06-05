@@ -38,6 +38,7 @@ func TestMain(m *testing.M) {
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS worker_lastlogs").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS suggestion_param").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS earlystop_param").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec("CREATE TABLE IF NOT EXISTS study_controller").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	db_interface.DB_Init()
 
 	os.Exit(m.Run())

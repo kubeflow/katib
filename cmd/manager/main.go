@@ -11,6 +11,7 @@ import (
 	pb "github.com/kubeflow/katib/pkg/api"
 	kdb "github.com/kubeflow/katib/pkg/db"
 	"github.com/kubeflow/katib/pkg/manager/modelstore"
+	"github.com/kubeflow/katib/pkg/manager/studycontroller"
 	tbif "github.com/kubeflow/katib/pkg/manager/visualise/tensorboard"
 	"github.com/kubeflow/katib/pkg/manager/worker"
 	k8swif "github.com/kubeflow/katib/pkg/manager/worker/kubernetes"
@@ -79,6 +80,80 @@ func (s *server) GetStudyList(ctx context.Context, in *pb.GetStudyListRequest) (
 func (s *server) CreateTrial(ctx context.Context, in *pb.CreateTrialRequest) (*pb.CreateTrialReply, error) {
 	err := dbIf.CreateTrial(in.Trial)
 	return &pb.CreateTrialReply{TrialId: in.Trial.TrialId}, err
+}
+
+func (s *server) RunStudy(ctx context.Context, in *pb.RunStudyRequest) (*pb.RunStudyReply, error) {
+	log.Println("Call RunStudy")
+	if in.WorkerConfig == nil {
+		return &pb.RunStudyReply{}, errors.New("WorkerConfig must be set")
+	}
+	csr, err := s.CreateStudy(ctx, &pb.CreateStudyRequest{
+		StudyConfig: in.StudyConfig,
+	})
+	if err != nil {
+		return &pb.RunStudyReply{}, err
+	}
+	log.Println("Call CreateStudy")
+	var spId, epId string
+	if in.DefaultSuggestionParameters != nil {
+		spr, err := s.SetSuggestionParameters(ctx, &pb.SetSuggestionParametersRequest{
+			StudyId:              csr.StudyId,
+			SuggestionAlgorithm:  in.StudyConfig.DefaultSuggestionAlgorithm,
+			SuggestionParameters: in.DefaultSuggestionParameters,
+		})
+		if err != nil {
+			return &pb.RunStudyReply{}, err
+		}
+		spId = spr.ParamId
+	}
+	log.Println("Call SetSuggestionParameters")
+	if in.DefaultEarlyStoppingParameters != nil {
+		epr, err := s.SetEarlyStoppingParameters(ctx, &pb.SetEarlyStoppingParametersRequest{
+			StudyId:                 csr.StudyId,
+			EarlyStoppingAlgorithm:  in.StudyConfig.DefaultEarlyStoppingAlgorithm,
+			EarlyStoppingParameters: in.DefaultEarlyStoppingParameters,
+		})
+		if err != nil {
+			return &pb.RunStudyReply{}, err
+		}
+		epId = epr.ParamId
+	}
+	log.Println("Call SetEarlyStoppingParameters")
+	scId, err := dbIf.CreateStudyController(&pb.StudyController{
+		StudyId:                csr.StudyId,
+		SuggestionAlgorithm:    in.StudyConfig.DefaultSuggestionAlgorithm,
+		SuggestionParamId:      spId,
+		EarlystoppingAlgorithm: in.StudyConfig.DefaultEarlyStoppingAlgorithm,
+		EarlystoppingParamId:   epId,
+		UpdateInterval:         in.UpdateInterval,
+		MaxParallel:            in.MaxParallel,
+		RequestSuggestionNum:   in.RequestSuggestionNum,
+		EarlystoppingInterval:  in.EarlystoppingInterval,
+		WorkerConfig:           in.WorkerConfig,
+	})
+	if err != nil {
+		return &pb.RunStudyReply{}, err
+	}
+	log.Println("Call CreateStudyController")
+	sctl := studycontroller.NewStudyControllerDefault()
+	err = sctl.Run("localhost:6789", scId)
+	if err != nil {
+		return &pb.RunStudyReply{}, err
+	}
+	log.Println("Call NewStudyControllerDefault")
+	return &pb.RunStudyReply{
+		StudyControllerId: scId,
+	}, nil
+}
+
+func (s *server) GetStudyController(ctx context.Context, in *pb.GetStudyControllerRequest) (*pb.GetStudyControllerReply, error) {
+	sctl, err := dbIf.GetStudyController(in.StudyControllerId)
+	if err != nil {
+		return &pb.GetStudyControllerReply{}, err
+	}
+	return &pb.GetStudyControllerReply{
+		StudyController: sctl,
+	}, nil
 }
 
 func (s *server) GetTrials(ctx context.Context, in *pb.GetTrialsRequest) (*pb.GetTrialsReply, error) {
