@@ -51,7 +51,7 @@ Each component communicates with others via GRPC and the API is defined at `api/
 
 ## Getting Started
 
-Please see [getting-start.md](./docs/getting-start.md) for more details.
+Please see [MinikubeDemo.md](./examples/MinikubeDemo.md) for more details.
 
 ## StudyConfig
 
@@ -90,22 +90,6 @@ In the Study config file, we define the feasible space of parameters and configu
 ## Web UI
 
 Katib provides a Web UI based on ModelDB(https://github.com/mitdbg/modeldb). The ingress setting is defined in [`manifests/modeldb/frontend/ingress.yaml`](manifests/modeldb/frontend/ingress.yaml).
-
-## TensorBoard Integration
-
-In addition to TensorFlow, other deep learning frameworks (e.g. PyTorch, MXNet) support TensorBoard format logging.
-Katib integrates with TensorBoard easily. To use TensorBoard from Katib, we define a persistent volume claim and set the mount config for the Study. Katib searches each trial log in `{pvc mount path}/logs/{Study ID}/{Trial ID}`.
-`{{STUDY_ID}}` and  `{{TRIAL_ID}}` in the Studyconfig file are replaced the corresponding value when creating each job.
-See example `examples/tf-nmt.yml` which is a config for parameter tuning of [tensorflow/nmt](https://github.com/tensorflow/nmt).
-
-```bash
-./katib-cli -s gpu-node2:30678 -f ../examples/tf-nmt.yml Createstudy
-2018/04/03 05:52:11 connecting gpu-node2:30678
-2018/04/03 05:52:11 study conf{tf-nmt root MINIMIZE 0 configs:<name:"--num_train_steps" parameter_type:INT feasible:<max:"1000" min:"1000" > > configs:<name:"--dropout" parameter_type:DOUBLE feasible:<max:"0.3" min:"0.1" > > configs:<name:"--beam_width" parameter_type:INT feasible:<max:"15" min:"5" > > configs:<name:"--num_units" parameter_type:INT feasible:<max:"1026" min:"256" > > configs:<name:"--attention" parameter_type:CATEGORICAL feasible:<list:"luong" list:"scaled_luong" list:"bahdanau" list:"normed_bahdanau" > > configs:<name:"--decay_scheme" parameter_type:CATEGORICAL feasible:<list:"luong234" list:"luong5" list:"luong10" > > configs:<name:"--encoder_type" parameter_type:CATEGORICAL feasible:<list:"bi" list:"uni" > >  [] random median  [name:"SuggestionNum" value:"10"  name:"MaxParallel" value:"6" ] [] test_ppl [ppl bleu_dev bleu_test] yujioshima/tf-nmt:latest-gpu [python -m nmt.nmt --src=vi --tgt=en --out_dir=/nfs-mnt/logs/{{STUDY_ID}}_{{TRIAL_ID}} --vocab_prefix=/nfs-mnt/learndatas/wmt15_en_vi/vocab --train_prefix=/nfs-mnt/learndatas/wmt15_en_vi/train --dev_prefix=/nfs-mnt/learndatas/wmt15_en_vi/tst2012 --test_prefix=/nfs-mnt/learndatas/wmt15_en_vi/tst2013 --attention_architecture=standard --attention=normed_bahdanau --batch_size=128 --colocate_gradients_with_ops=true --eos=</s> --forget_bias=1.0 --init_weight=0.1 --learning_rate=1.0 --max_gradient_norm=5.0 --metrics=bleu --share_vocab=false --num_buckets=5 --optimizer=sgd --sos=<s> --steps_per_stats=100 --time_major=true --unit_type=lstm --src_max_len=50 --tgt_max_len=50 --infer_batch_size=32] 1 default-scheduler pvc:"nfs" path:"/nfs-mnt"  }
-2018/04/03 05:52:11 req Createstudy
-2018/04/03 05:52:11 CreateStudy: study_id:"n5c80f4af709a70d"
-```
-Then we perform TensorBoard deployments, services, and ingress automatically, and we can the access from Web UI.
 
 ![katib-demo](https://user-images.githubusercontent.com/10014831/38241910-64fb0646-376e-11e8-8b98-c26e577f3935.gif)
 
