@@ -22,6 +22,7 @@ SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
 
 cd ${SCRIPT_ROOT}
 kubectl apply -f manifests/0-namespace.yaml
+kubectl apply -f manifests/dlk
 kubectl apply -f manifests/modeldb/db
 kubectl apply -f manifests/modeldb/backend
 kubectl apply -f manifests/modeldb/frontend
