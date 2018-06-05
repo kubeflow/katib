@@ -5,6 +5,7 @@ __pycache__/
 # Project specific ignore files
 *.swp
 bin
+/katib-cli
 
 # Go ignore files
 ## Binaries for programs and plugins

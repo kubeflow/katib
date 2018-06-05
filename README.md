@@ -93,9 +93,13 @@ Katib provides a Web UI based on ModelDB(https://github.com/mitdbg/modeldb). The
 
 ![katib-demo](https://user-images.githubusercontent.com/10014831/38241910-64fb0646-376e-11e8-8b98-c26e577f3935.gif)
 
+## CLI Documentation
+
+Please refer to [katib-cli.md](./docs/CLI/katib-cli.md).
+
 ## CONTRIBUTING
 
-Please feel free to test the system! [developer-guide.md](./docs/developer-guide.md) is a good starting point for  developers.
+Please feel free to test the system! [developer-guide.md](./docs/developer-guide.md) is a good starting point for developers.
 
 ## TODOs
 
