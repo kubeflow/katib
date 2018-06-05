@@ -6,23 +6,24 @@
 
 ```
 ./katib-cli [options] [arguments]
-this is katib cli client using cobra framework
+This is katib cli client using cobra framework
 
 Usage:
-  katibcli [command]
+  katib-cli [command]
 
 Available Commands:
   create      Create a resource from a file
   get         Display one or many resources
   help        Help about any command
+  pull        Pull a resource from a file or from stdin.
   push        Push a resource from a file or from stdin.
   stop        Stop a resource
 
 Flags:
-  -h, --help            help for katibcli
+  -h, --help            help for katib-cli
   -s, --server string   katib manager API endpoint (default "localhost:6789")
 
-Use "katibcli [command] --help" for more information about a command.
+Use "katib-cli [command] --help" for more information about a command.
 ```
 
 #### SubCommands
@@ -70,4 +71,3 @@ Usage:
 push study -n [StudyName] -o [OwnerName] -d [StudyDescription]
 push model -f [Path to model config]
 ```
-
