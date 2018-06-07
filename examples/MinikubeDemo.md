@@ -11,7 +11,7 @@ Only type command `./deploy`.
 
 A Minikube cluster and Katib components will be deployed!
 
-You can check them with `kubectl get -n katib get pods`.
+You can check them with `kubectl -n katib get pods`.
 Don't worry if the `vizier-core` get an error. 
 It will be recovered after DB will be prepared.
 Wait until all components will be Running status.
