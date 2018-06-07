@@ -188,9 +188,14 @@ func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.
 	}
 	mls := make([]*pb.MetricsLogSet, len(in.WorkerIds))
 	for i, w := range in.WorkerIds {
+		wr, err := s.GetWorkers(ctx, &pb.GetWorkersRequest{WorkerId: w})
+		if err != nil {
+			return &pb.GetMetricsReply{}, err
+		}
 		mls[i] = &pb.MetricsLogSet{
-			WorkerId:    w,
-			MetricsLogs: make([]*pb.MetricsLog, len(mNames)),
+			WorkerId:     w,
+			MetricsLogs:  make([]*pb.MetricsLog, len(mNames)),
+			WorkerStatus: wr.Workers[0].Status,
 		}
 		for j, m := range mNames {
 			ls, err := dbIf.GetWorkerLogs(w, &kdb.GetWorkerLogOpts{Name: m})

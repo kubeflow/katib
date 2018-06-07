@@ -84,6 +84,7 @@ enum State {
 message MetricsLogSet {
     string worker_id = 1;
     repeated MetricsLog metrics_logs= 2;
+    State worker_status = 3;
 }
 
 message Metrics {
