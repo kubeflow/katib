@@ -166,7 +166,6 @@ func (s *GridSuggestService) GetSuggestions(ctx context.Context, in *api.GetSugg
 	for i := 0; i < int(reqnum); i++ {
 		trials[i] = &api.Trial{
 			StudyId:      in.StudyId,
-			Status:       api.State_PENDING,
 			ParameterSet: grids[i],
 		}
 	}

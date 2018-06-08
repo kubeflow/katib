@@ -128,9 +128,8 @@ message Trial {
 	string trial_id = 1;
 	string study_id = 2;
 	repeated Parameter parameter_set = 3;
-    State status = 4;
-    string objective_value = 5;
-    repeated Tag tags = 8;
+    string objective_value = 4;
+    repeated Tag tags = 5;
 }
 
 message WorkerConfig {
@@ -162,11 +161,9 @@ message StudyConfig {
 	double optimization_goal = 4;
 	ParameterConfigs parameter_configs = 5;
 	repeated string access_permissions = 6;
-	string default_suggestion_algorithm = 7;
-	string default_early_stopping_algorithm = 8;
-    repeated Tag tags = 9;
-    string objective_value_name = 10;
-    repeated string metrics = 11;
+    repeated Tag tags = 7;
+    string objective_value_name = 8;
+    repeated string metrics = 9;
 }
 
 message CreateStudyRequest {

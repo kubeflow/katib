@@ -39,7 +39,7 @@ func main() {
 	//RunTrials
 	workerIds := runTrials(c, studyId, getSuggestReply)
 
-	for !isCompletedAllWorker(c, studyId) {
+	for true {
 		time.Sleep(10 * time.Second)
 		getMetricsRequest := &api.GetMetricsRequest{
 			StudyId:   studyId,
@@ -52,6 +52,9 @@ func main() {
 		}
 		//Save or Update model on ModelDB
 		SaveOrUpdateModel(c, getMetricsReply)
+		if isCompletedAllWorker(c, getMetricsReply.MetricsLogSets) {
+			break
+		}
 	}
 }
 
@@ -217,15 +220,15 @@ func SaveOrUpdateModel(c api.ManagerClient, getMetricsReply *api.GetMetricsReply
 	}
 }
 
-func isCompletedAllWorker(c api.ManagerClient, studyId string) bool {
-	ctx := context.Background()
-	getWorkerRequest := &api.GetWorkersRequest{StudyId: studyId}
-	getWorkerReply, err := c.GetWorkers(ctx, getWorkerRequest)
-	if err != nil {
-		log.Fatalf("GetWorker Error %v", err)
-	}
-	for _, w := range getWorkerReply.Workers {
-		if w.Status != api.State_COMPLETED {
+func isCompletedAllWorker(c api.ManagerClient, ms []*api.MetricsLogSet) bool {
+	//	ctx := context.Background()
+	//	getWorkerRequest := &api.GetWorkersRequest{StudyId: studyId}
+	//	getWorkerReply, err := c.GetWorkers(ctx, getWorkerRequest)
+	//	if err != nil {
+	//		log.Fatalf("GetWorker Error %v", err)
+	//	}
+	for _, mls := range ms {
+		if mls.WorkerStatus != api.State_COMPLETED {
 			return false
 		}
 	}
