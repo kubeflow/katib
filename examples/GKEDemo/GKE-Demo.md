@@ -30,12 +30,17 @@ kubectl apply -f manifests/vizier/core
 kubectl apply -f manifests/vizier/suggestion/random
 kubectl apply -f manifests/vizier/suggestion/grid
 kubectl apply -f manifests/vizier/earlystopping/medianstopping
-gcloud compute firewall-rules create katibservice --allow tcp:30080,tcp:30678
 ```
 
-In this demo, katib components export using NodePort.
+In this demo, katib components does not export the port of services.
+You need to start port-forward for katib services `6789 -> manager` and `3000 -> UI`.
 
-So you should set firewall to allow the ports.
+```
+$ kubectl -n katib port-forward svc/vizier-core 6789:6789 &
+$ kubectl -n katib port-forward svc/modeldb-frontend 3000:3000 &
+```
+
+If you don't want to port forward, you should set firewall to allow the ports or set up Ingress.
 
 ### Push data to GCS
 If you want to pull input data and push logs to google cloud storage, You need to confidurate GCP service account.
@@ -58,7 +63,7 @@ The training logic is `docker-image/train.py`
 ## UI
 You can check your Model with Web UI.
 
-Acsess to `http://{{node address}}:30080/`
+Acsess to `http://127.0.0.1:3000/`
 
 The Results will be saved automatically.
 

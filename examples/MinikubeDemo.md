@@ -7,8 +7,7 @@ You can deploy katib components and try a simple mnist demo on your laptop!
 * kubectl
 
 ## deploy
-Only type command `./deploy`.
-
+Start Katib on Minikube with [deploy.sh](./MinikubeDemo/deploy.sh).
 A Minikube cluster and Katib components will be deployed!
 
 You can check them with `kubectl -n katib get pods`.
@@ -16,11 +15,19 @@ Don't worry if the `vizier-core` get an error.
 It will be recovered after DB will be prepared.
 Wait until all components will be Running status.
 
-You need a katib client.
+Then, start port-forward for katib services `6789 -> manager` and `3000 -> UI`.
+
+```
+$ kubectl -n katib port-forward svc/vizier-core 6789:6789 &
+$ kubectl -n katib port-forward svc/modeldb-frontend 3000:3000 &
+```
+
+To start HyperParameter Tuning, you need a katib client.
 It will call API of Katib to create study, get suggestions, run trial, and get metrics.
 The details of the system flow for the client and katib components is [here](https://docs.google.com/presentation/d/1Dk4XxKfVncb2v2CUDAd3OhM7XLyG3B9jEuuVmMiCIMg/edit#slide=id.g3b424a8f63_2_146).
 
-The [client example](./client-example.go) will read three config files.
+An example of client is [here](./client-example.go).
+The client will read three config files.
 * study-config.yml: Define study property and feasible space of parameters.
 * suggesiton-config.yml: Define suggesiton parameter for each study and suggestion service. In this file, the config is for grid suggestion service.
 * worker-config.yml: Define config for evaluation worker.
@@ -29,7 +36,7 @@ The [client example](./client-example.go) will read three config files.
 ### Random Suggestion Demo
 You can run rundom suggesiton demo.
 ```
-go run client-example.go -s 192.168.99.100:30678 -a random
+go run client-example.go -a random
 ```
 In this demo, 2 random parameters in
 * Learning Rate (--lr) - type: double
@@ -48,13 +55,13 @@ Logs
 ### Grid Demo
 Almost same as random suggestion.
 ```
-go run client-example.go -s 192.168.99.100:30678 -a grid
+go run client-example.go -a grid
 ```
 In this demo, make 4 grids for learning rate (--lr) Min 0.03 and Max 0.07.
 
 ## UI
 You can check your Model with Web UI.
-Acsess to `http://192.168.99.100:30080/`
+Acsess to `http://127.0.0.1:3000/`
 The Results will be saved automatically.
 
 ## ModelManagement
@@ -99,5 +106,9 @@ configs:
 You can easy to explore the model on ModelDB.
 
 ```
-katib-cli -s 192.168.99.100:30678 push md -f mnist-models.yaml
+katib-cli push md -f mnist-models.yaml
 ```
+
+## Clean
+Clean up with `./destroy.sh` script.
+It will stop port-forward process and delete minikube cluster.
