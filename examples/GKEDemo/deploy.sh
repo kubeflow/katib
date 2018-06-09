@@ -15,5 +15,5 @@ kubectl apply -f manifests/vizier/core
 kubectl apply -f manifests/vizier/suggestion/random
 kubectl apply -f manifests/vizier/suggestion/grid
 kubectl apply -f manifests/vizier/earlystopping/medianstopping
-gcloud compute firewall-rules create katibservice --allow tcp:30080,tcp:30678
+#gcloud compute firewall-rules create katibservice --allow tcp:30080,tcp:30678
 gcloud compute instances list

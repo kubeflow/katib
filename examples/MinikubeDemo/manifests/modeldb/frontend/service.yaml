@@ -7,11 +7,10 @@ metadata:
     app: modeldb
     component: frontend
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 3000
       protocol: TCP
-      nodePort: 30080
       name: ui
   selector:
     app: modeldb
