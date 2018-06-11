@@ -207,6 +207,10 @@
                     template: "build-manager",
                   },
                   {
+                    name: "build-cli",
+                    template: "build-cli",
+                  },
+                  {
                     name: "build-suggestion-random",
                     template: "build-suggestion-random",
                   },
@@ -314,6 +318,9 @@
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
               "test/scripts/build-manager.sh",
             ]),  // build-manager
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-cli", testWorkerImage, [
+              "test/scripts/build-cli.sh",
+            ]),  // build-cli
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-suggestion-random", testWorkerImage, [
               "test/scripts/build-suggestion-random.sh",
             ]),  // build-suggestion-random
