@@ -62,9 +62,10 @@ until kubectl get pods -n katib | grep 1/1 | [[ $(wc -l) -eq $PODNUM ]]; do
         exit 1
     fi
 done
-echo "OK"
+echo "All Katib components are running."
 
 kubectl -n katib port-forward svc/vizier-core 6789:6789 &
-cd ${GO_DIR}/test/e2e
+echo "kubectl port-forward start"
+cd test/e2e
 go run test-client.go -a random
 go run test-client.go -a grid
