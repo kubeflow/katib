@@ -54,6 +54,7 @@ sed -i -e "s@image: katib\/katib-frontend@image: ${REGISTRY}\/${REPO_NAME}\/kati
 TIMEOUT=120
 PODNUM=$(kubectl get pods -n katib | grep -v NAME | wc -l)
 until kubectl get pods -n katib | grep 1/1 | [[ $(wc -l) -eq $PODNUM ]]; do
+    echo Pod Status $(kubectl get pods -n katib | grep 1/1 | wc -l)/$PODNUM
     sleep 10
     TIMEOUT=$(( TIMEOUT - 1 ))
     if [[ $TIMEOUT -eq 0 ]];then
