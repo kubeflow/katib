@@ -43,6 +43,7 @@ kubectl config use-context temp-context
 
 echo "Install Katib "
 sed -i -e "s@image: katib\/vizier-core@image: ${REGISTRY}\/${REPO_NAME}\/vizier-core:${VERSION}@" manifests/vizier/core/deployment.yaml
+sed -i -e "s@type: NodePort@type: ClusterIP@" -e "/nodePort: 30678/d" manifests/vizier/core/service.yaml
 sed -i -e "s@image: katib\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-random:${VERSION}@" manifests/vizier/suggestion/random/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-grid:${VERSION}@" manifests/vizier/suggestion/grid/deployment.yaml
 #sed -i -e "s@image: katib\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-hyperband:${VERSION}@" manifests/vizier/suggestion/hyperband/deployment.yaml
@@ -53,8 +54,8 @@ sed -i -e "s@image: katib\/katib-frontend@image: ${REGISTRY}\/${REPO_NAME}\/kati
 
 TIMEOUT=120
 PODNUM=$(kubectl get pods -n katib | grep -v NAME | wc -l)
-until kubectl get pods -n katib | grep 1/1 | [[ $(wc -l) -eq $PODNUM ]]; do
-    echo Pod Status $(kubectl get pods -n katib | grep 1/1 | wc -l)/$PODNUM
+until kubectl get pods -n katib | grep Running | [[ $(wc -l) -eq $PODNUM ]]; do
+    echo Pod Status $(kubectl get pods -n katib | Running | wc -l)/$PODNUM
     sleep 10
     TIMEOUT=$(( TIMEOUT - 1 ))
     if [[ $TIMEOUT -eq 0 ]];then
@@ -64,7 +65,9 @@ until kubectl get pods -n katib | grep 1/1 | [[ $(wc -l) -eq $PODNUM ]]; do
     fi
 done
 echo "All Katib components are running."
+echo "Katib deployments"
 kubectl -n katib get deploy
+echo "Katib services"
 kubectl -n katib get svc
 kubectl -n katib port-forward deploy/vizier-core 6789:6789 &
 echo "kubectl port-forward start"
