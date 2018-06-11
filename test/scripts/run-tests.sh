@@ -64,7 +64,8 @@ until kubectl get pods -n katib | grep 1/1 | [[ $(wc -l) -eq $PODNUM ]]; do
     fi
 done
 echo "All Katib components are running."
-
+kubectl -n katib get deploy
+kubectl -n katib get svc
 kubectl -n katib port-forward deploy/vizier-core 6789:6789 &
 echo "kubectl port-forward start"
 cp -r test ${GO_DIR}/test
