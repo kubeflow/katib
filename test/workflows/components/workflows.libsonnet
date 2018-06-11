@@ -319,16 +319,16 @@
             ]),  // build-suggestion-random
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-suggestion-grid", testWorkerImage, [
               "test/scripts/build-suggestion-grid.sh",
-            ]),  // build-suggestions
+            ]),  // build-suggestion-grid
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-suggestion-bo", testWorkerImage, [
               "test/scripts/build-suggestion-bo.sh",
-            ]),  // build-suggestions
+            ]),  // build-suggestion-bo
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-earlystopping-median", testWorkerImage, [
               "test/scripts/build-earlystopping-median.sh",
-            ]),  // build-earlystoppings
+            ]),  // build-earlystopping-median
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-modeldb", testWorkerImage, [
               "test/scripts/build-modeldb.sh",
-            ]),  // build-manager
+            ]),  // build-modeldb
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("unit-test", testWorkerImage, [
               "test/scripts/unit-test.sh",
             ]),  // unit test
