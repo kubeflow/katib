@@ -51,7 +51,7 @@ sed -i -e "s@image: katib\/earlystopping-medianstopping@image: ${REGISTRY}\/${RE
 sed -i -e "s@image: katib\/katib-frontend@image: ${REGISTRY}\/${REPO_NAME}\/katib-frontend:${VERSION}@" manifests/modeldb/frontend/deployment.yaml
 ./scripts/deploy.sh
 
-TIMEOUT=60
+TIMEOUT=120
 PODNUM=$(kubectl get pods -n katib | grep -v NAME | wc -l)
 until kubectl get pods -n katib | grep 1/1 | [[ $(wc -l) -eq $PODNUM ]]; do
     sleep 10
@@ -64,6 +64,7 @@ until kubectl get pods -n katib | grep 1/1 | [[ $(wc -l) -eq $PODNUM ]]; do
 done
 echo "OK"
 
-#echo "Run go tests"
-#cd ${GO_DIR}
-#go run ./test/e2e/main.go --namespace=${NAMESPACE}
+kubectl -n katib port-forward svc/vizier-core 6789:6789 &
+cd ${GO_DIR}/test/e2e
+go run test-client.go -a random
+go run test-client.go -a grid
