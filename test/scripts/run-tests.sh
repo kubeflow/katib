@@ -76,6 +76,11 @@ kubectl -n katib get pod
 
 kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep vizier-core | sed -e "s@pods\/@@") 6789:6789 &
 echo "kubectl port-forward start"
+TIMEOUT=120
+until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
+    sleep 5
+    TIMEOUT=$(( TIMEOUT - 1 ))
+done 
 cp -r test ${GO_DIR}/test
 cd ${GO_DIR}/test/e2e
 go run test-client.go -a random
