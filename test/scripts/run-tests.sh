@@ -55,7 +55,7 @@ sed -i -e "s@image: katib\/katib-frontend@image: ${REGISTRY}\/${REPO_NAME}\/kati
 TIMEOUT=120
 PODNUM=$(kubectl get pods -n katib | grep -v NAME | wc -l)
 until kubectl get pods -n katib | grep Running | [[ $(wc -l) -eq $PODNUM ]]; do
-    echo Pod Status $(kubectl get pods -n katib | Running | wc -l)/$PODNUM
+    echo Pod Status $(kubectl get pods -n katib | grep Running | wc -l)/$PODNUM
     sleep 10
     TIMEOUT=$(( TIMEOUT - 1 ))
     if [[ $TIMEOUT -eq 0 ]];then
@@ -69,7 +69,10 @@ echo "Katib deployments"
 kubectl -n katib get deploy
 echo "Katib services"
 kubectl -n katib get svc
-kubectl -n katib port-forward deploy/vizier-core 6789:6789 &
+echo "Katib pods"
+kubectl -n katib get pod
+
+kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep vizier-core | sed -e "s@pod\/@@") 6789:6789 &
 echo "kubectl port-forward start"
 cp -r test ${GO_DIR}/test
 cd ${GO_DIR}/test/e2e
