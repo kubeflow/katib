@@ -118,7 +118,7 @@ func CreateStudy(c api.ManagerClient) string {
 	if err != nil {
 		log.Fatalf("GetConfig Error %v", err)
 	}
-	log.Printf("Study ID %s StudyConf%v", studyId, getStudyReply.StudyConfig)
+	log.Printf("Study ID %s StudyConf %v", studyId, getStudyReply.StudyConfig)
 	return studyId
 }
 
@@ -140,7 +140,7 @@ func getSuggestion(c api.ManagerClient, studyId string) *api.GetSuggestionsReply
 		if err != nil {
 			log.Fatalf("SetConfig Error %v", err)
 		}
-		log.Printf("Grid Suggestion Prameter ID %s", setSuggesitonParameterReply.ParamId)
+		log.Printf("Grid suggestion prameter ID %s", setSuggesitonParameterReply.ParamId)
 		getSuggestRequest = &api.GetSuggestionsRequest{
 			StudyId:             studyId,
 			SuggestionAlgorithm: "grid",
@@ -154,7 +154,7 @@ func getSuggestion(c api.ManagerClient, studyId string) *api.GetSuggestionsReply
 	if err != nil {
 		log.Fatalf("GetSuggestion Error %v", err)
 	}
-	log.Println("Get Grid Suggestions:")
+	log.Println("Get " + *suggestArgo + " Suggestions:")
 	for _, t := range getSuggestReply.Trials {
 		log.Printf("%v", t)
 	}
