@@ -87,21 +87,10 @@ func (s *server) GetTrials(ctx context.Context, in *pb.GetTrialsRequest) (*pb.Ge
 }
 
 func (s *server) GetSuggestions(ctx context.Context, in *pb.GetSuggestionsRequest) (*pb.GetSuggestionsReply, error) {
-	suggestAlgorithm := ""
-	if in.SuggestionAlgorithm != "" {
-		suggestAlgorithm = in.SuggestionAlgorithm
-	} else {
-		sc, err := dbIf.GetStudyConfig(in.StudyId)
-		if err != nil {
-			return &pb.GetSuggestionsReply{Trials: []*pb.Trial{}}, err
-		}
-		suggestAlgorithm = sc.DefaultSuggestionAlgorithm
-	}
-	if suggestAlgorithm == "" {
+	if in.SuggestionAlgorithm == "" {
 		return &pb.GetSuggestionsReply{Trials: []*pb.Trial{}}, errors.New("No suggest algorithm specified")
 	}
-
-	conn, err := grpc.Dial("vizier-suggestion-"+suggestAlgorithm+":6789", grpc.WithInsecure())
+	conn, err := grpc.Dial("vizier-suggestion-"+in.SuggestionAlgorithm+":6789", grpc.WithInsecure())
 	if err != nil {
 		return &pb.GetSuggestionsReply{Trials: []*pb.Trial{}}, err
 	}
@@ -149,20 +138,10 @@ func (s *server) GetWorkers(ctx context.Context, in *pb.GetWorkersRequest) (*pb.
 }
 
 func (s *server) GetShouldStopWorkers(ctx context.Context, in *pb.GetShouldStopWorkersRequest) (*pb.GetShouldStopWorkersReply, error) {
-	EarlyStoppingAlgorithm := ""
-	if in.EarlyStoppingAlgorithm != "" {
-		EarlyStoppingAlgorithm = in.EarlyStoppingAlgorithm
-	} else {
-		sc, err := dbIf.GetStudyConfig(in.StudyId)
-		if err != nil {
-			return &pb.GetShouldStopWorkersReply{}, err
-		}
-		EarlyStoppingAlgorithm = sc.DefaultEarlyStoppingAlgorithm
-	}
-	if EarlyStoppingAlgorithm == "" {
+	if in.EarlyStoppingAlgorithm == "" {
 		return &pb.GetShouldStopWorkersReply{}, errors.New("No EarlyStopping Algorithm specified")
 	}
-	conn, err := grpc.Dial("vizier-earlystopping-"+EarlyStoppingAlgorithm+":6789", grpc.WithInsecure())
+	conn, err := grpc.Dial("vizier-earlystopping-"+in.EarlyStoppingAlgorithm+":6789", grpc.WithInsecure())
 	if err != nil {
 		return &pb.GetShouldStopWorkersReply{}, err
 	}
@@ -188,9 +167,14 @@ func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.
 	}
 	mls := make([]*pb.MetricsLogSet, len(in.WorkerIds))
 	for i, w := range in.WorkerIds {
+		wr, err := s.GetWorkers(ctx, &pb.GetWorkersRequest{WorkerId: w})
+		if err != nil {
+			return &pb.GetMetricsReply{}, err
+		}
 		mls[i] = &pb.MetricsLogSet{
-			WorkerId:    w,
-			MetricsLogs: make([]*pb.MetricsLog, len(mNames)),
+			WorkerId:     w,
+			MetricsLogs:  make([]*pb.MetricsLog, len(mNames)),
+			WorkerStatus: wr.Workers[0].Status,
 		}
 		for j, m := range mNames {
 			ls, err := dbIf.GetWorkerLogs(w, &kdb.GetWorkerLogOpts{Name: m})

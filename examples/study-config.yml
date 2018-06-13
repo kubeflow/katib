@@ -7,8 +7,8 @@ parameterconfigs:
   - name: --lr
     parametertype: 1
     feasible:
-      min: "0.03"
-      max: "0.07"
+      min: "0.01"
+      max: "0.03"
   - name: --num-layers
     parametertype: 2
     feasible:
@@ -21,8 +21,6 @@ parameterconfigs:
       - sgd
       - adam
       - ftrl
-defaultsuggestionalgorithm: random
-defaultearlystoppingalgorithm: medianstopping
 objectivevaluename: Validation-accuracy
 metrics:
 - accuracy

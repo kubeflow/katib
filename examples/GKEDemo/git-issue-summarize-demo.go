@@ -11,13 +11,11 @@ import (
 )
 
 var studyConfig = api.StudyConfig{
-	Name:                          "grid-demo",
-	Owner:                         "katib",
-	OptimizationType:              api.OptimizationType_MAXIMIZE,
-	OptimizationGoal:              0.99,
-	DefaultSuggestionAlgorithm:    "grid",
-	DefaultEarlyStoppingAlgorithm: "medianstopping",
-	ObjectiveValueName:            "Validation-accuracy",
+	Name:               "grid-demo",
+	Owner:              "katib",
+	OptimizationType:   api.OptimizationType_MAXIMIZE,
+	OptimizationGoal:   0.99,
+	ObjectiveValueName: "Validation-accuracy",
 	Metrics: []string{
 		"accuracy",
 	},
