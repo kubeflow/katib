@@ -23,7 +23,7 @@ set -o pipefail
 export PATH=${GOPATH}/bin:/usr/local/go/bin:${PATH}
 REGISTRY="${GCP_REGISTRY}"
 PROJECT="${GCP_PROJECT}"
-GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-manager
+GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
 VERSION=$(git describe --tags --always --dirty)
 
 echo "Activating service-account"
@@ -37,5 +37,4 @@ cp -r vendor ${GO_DIR}/vendor
 cp -r modeldb ${GO_DIR}/modeldb
 
 cd ${GO_DIR}
-cp cmd/manager/Dockerfile .
-gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/vizier-core:${VERSION} --project=${PROJECT}
+go build -o bin/katib github.com/kubeflow/katib/cmd/cli

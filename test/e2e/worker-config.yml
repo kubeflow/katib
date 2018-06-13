@@ -1,0 +1,4 @@
+image: "alpine"
+command: 
+    - "echo"
+gpu: 0

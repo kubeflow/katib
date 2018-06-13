@@ -43,6 +43,7 @@ kubectl config use-context temp-context
 
 echo "Install Katib "
 sed -i -e "s@image: katib\/vizier-core@image: ${REGISTRY}\/${REPO_NAME}\/vizier-core:${VERSION}@" manifests/vizier/core/deployment.yaml
+sed -i -e "s@type: NodePort@type: ClusterIP@" -e "/nodePort: 30678/d" manifests/vizier/core/service.yaml
 sed -i -e "s@image: katib\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-random:${VERSION}@" manifests/vizier/suggestion/random/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-grid:${VERSION}@" manifests/vizier/suggestion/grid/deployment.yaml
 #sed -i -e "s@image: katib\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-hyperband:${VERSION}@" manifests/vizier/suggestion/hyperband/deployment.yaml
@@ -51,9 +52,10 @@ sed -i -e "s@image: katib\/earlystopping-medianstopping@image: ${REGISTRY}\/${RE
 sed -i -e "s@image: katib\/katib-frontend@image: ${REGISTRY}\/${REPO_NAME}\/katib-frontend:${VERSION}@" manifests/modeldb/frontend/deployment.yaml
 ./scripts/deploy.sh
 
-TIMEOUT=60
-PODNUM=$(kubectl get pods -n katib | grep -v NAME | wc -l)
-until kubectl get pods -n katib | grep 1/1 | [[ $(wc -l) -eq $PODNUM ]]; do
+TIMEOUT=120
+PODNUM=$(kubectl get deploy -n katib | grep -v NAME | wc -l)
+until kubectl get pods -n katib | grep Running | [[ $(wc -l) -eq $PODNUM ]]; do
+    echo Pod Status $(kubectl get pods -n katib | grep Running | wc -l)/$PODNUM
     sleep 10
     TIMEOUT=$(( TIMEOUT - 1 ))
     if [[ $TIMEOUT -eq 0 ]];then
@@ -62,8 +64,24 @@ until kubectl get pods -n katib | grep 1/1 | [[ $(wc -l) -eq $PODNUM ]]; do
         exit 1
     fi
 done
-echo "OK"
 
-#echo "Run go tests"
-#cd ${GO_DIR}
-#go run ./test/e2e/main.go --namespace=${NAMESPACE}
+echo "All Katib components are running."
+kubectl version
+echo "Katib deployments"
+kubectl -n katib get deploy
+echo "Katib services"
+kubectl -n katib get svc
+echo "Katib pods"
+kubectl -n katib get pod
+
+kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep vizier-core | sed -e "s@pods\/@@") 6789:6789 &
+echo "kubectl port-forward start"
+TIMEOUT=120
+until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
+    sleep 5
+    TIMEOUT=$(( TIMEOUT - 1 ))
+done 
+cp -r test ${GO_DIR}/test
+cd ${GO_DIR}/test/e2e
+go run test-client.go -a random
+go run test-client.go -a grid
