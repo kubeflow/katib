@@ -92,16 +92,15 @@ class CMAService(api_pb2_grpc.SuggestionServicer):
                             worker_ids=worker_ids,
                         ))
 
-                        # the algorithm cannot continue without all trials in the population are evaluated
-                        if len(ret.metrics_log_sets) == 0:
-                            context.set_code(grpc.StatusCode.UNKNOWN)
-                            context.set_details("all trials in the population should be evaluated")
-                            return api_pb2.GetSuggestionsReply(
-                                trials=[],
-                            )
-
                         objective_value = 0
                         for metrics_log_set in ret.metrics_log_sets:
+                            # the algorithm cannot continue without all trials in the population are evaluated
+                            if metrics_log_set.worker_status != api_pb2.COMPLETED:
+                                context.set_code(grpc.StatusCode.UNKNOWN)
+                                context.set_details("all trials in the population should be evaluated")
+                                return api_pb2.GetSuggestionsReply(
+                                    trials=[],
+                                )
                             objective_value += float(metrics_log_set.metrics_logs[-1].values[-1])
                         objective_value /= len(ret.metrics_log_sets)
                         value["y"] = objective_value
