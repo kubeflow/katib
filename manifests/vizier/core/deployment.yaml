@@ -19,9 +19,11 @@ spec:
       containers:
       - name: vizier-core
         image: katib/vizier-core
+        command:
+          - './vizier-manager'
         args:
           - "-w"
-          - "dlk"
+          - "kubernetes"
           - "-i"
           - "k-cluster.example.net"
         ports:

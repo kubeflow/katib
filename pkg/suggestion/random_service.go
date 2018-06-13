@@ -53,7 +53,6 @@ func (s *RandomSuggestService) GetSuggestions(ctx context.Context, in *api.GetSu
 		s_t[i] = &api.Trial{}
 		s_t[i].StudyId = in.StudyId
 		s_t[i].ParameterSet = make([]*api.Parameter, len(scr.StudyConfig.ParameterConfigs.Configs))
-		s_t[i].Status = api.State_PENDING
 		for j, pc := range scr.StudyConfig.ParameterConfigs.Configs {
 			s_t[i].ParameterSet[j] = &api.Parameter{Name: pc.Name}
 			s_t[i].ParameterSet[j].ParameterType = pc.ParameterType

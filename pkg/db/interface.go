@@ -45,10 +45,8 @@ type VizierDBInterface interface {
 	DeleteStudy(string) error
 
 	GetTrial(string) (*api.Trial, error)
-	GetTrialStatus(string) (api.State, error)
 	GetTrialList(string) ([]*api.Trial, error)
 	CreateTrial(*api.Trial) error
-	UpdateTrial(string, api.State) error
 	DeleteTrial(string) error
 
 	GetWorker(string) (*api.Worker, error)
@@ -121,8 +119,6 @@ func (d *db_conn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 		&study.OptimizationType,
 		&study.OptimizationGoal,
 		&configs,
-		&study.DefaultSuggestionAlgorithm,
-		&study.DefaultEarlyStoppingAlgorithm,
 		&tags,
 		&study.ObjectiveValueName,
 		&metrics,
@@ -208,15 +204,13 @@ func (d *db_conn) CreateStudy(in *api.StudyConfig) (string, error) {
 	for true {
 		study_id = generate_randid()
 		_, err := d.db.Exec(
-			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			study_id,
 			in.Name,
 			in.Owner,
 			in.OptimizationType,
 			in.OptimizationGoal,
 			configs,
-			in.DefaultSuggestionAlgorithm,
-			in.DefaultEarlyStoppingAlgorithm,
 			strings.Join(tags, ",\n"),
 			in.ObjectiveValueName,
 			strings.Join(in.Metrics, ",\n"),
@@ -277,7 +271,6 @@ func (d *db_conn) getTrials(trial_id string, study_id string) ([]*api.Trial, err
 		err := rows.Scan(&trial.TrialId,
 			&trial.StudyId,
 			&parameters,
-			&trial.Status,
 			&trial.ObjectiveValue,
 			&tags,
 		)
@@ -331,17 +324,6 @@ func (d *db_conn) GetTrial(id string) (*api.Trial, error) {
 	return trials[0], nil
 }
 
-func (d *db_conn) GetTrialStatus(id string) (api.State, error) {
-	status := api.State_ERROR
-
-	row := d.db.QueryRow("SELECT status FROM trials WHERE id = ?", id)
-	err := row.Scan(&status)
-	if err != nil {
-		return status, err
-	}
-	return status, nil
-}
-
 func (d *db_conn) GetTrialList(id string) ([]*api.Trial, error) {
 	trials, err := d.getTrials("", id)
 
@@ -376,9 +358,9 @@ func (d *db_conn) CreateTrial(trial *api.Trial) error {
 	i := 3
 	for true {
 		trial_id = generate_randid()
-		_, err = d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?, ?)",
+		_, err = d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?)",
 			trial_id, trial.StudyId, strings.Join(params, ",\n"),
-			trial.Status, trial.ObjectiveValue, strings.Join(tags, ",\n"))
+			trial.ObjectiveValue, strings.Join(tags, ",\n"))
 		if err == nil {
 			trial.TrialId = trial_id
 			break
@@ -394,11 +376,6 @@ func (d *db_conn) CreateTrial(trial *api.Trial) error {
 		return err
 	}
 	return lastErr
-}
-
-func (d *db_conn) UpdateTrial(id string, newstatus api.State) error {
-	_, err := d.db.Exec("UPDATE trials SET status = ? WHERE id = ?", newstatus, id)
-	return err
 }
 
 func (d *db_conn) DeleteTrial(id string) error {
@@ -621,7 +598,7 @@ func (d *db_conn) StoreWorkerLogs(worker_id string, logs []string) error {
 		return lasterr
 	}
 	if len(ls) == 2 {
-		_, err = d.db.Exec("REPLACE INTO trial_lastlogs VALUES (?, ?, ?)",
+		_, err = d.db.Exec("REPLACE INTO worker_lastlogs VALUES (?, ?, ?)",
 			worker_id, formatted_time, ls[1])
 	}
 	return err
