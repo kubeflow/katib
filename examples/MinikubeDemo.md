@@ -17,14 +17,21 @@ Wait until all components will be Running status.
 
 Then, start port-forward for katib services `6789 -> manager` and `3000 -> UI`.
 
+kubectl v1.10~
 ```
 $ kubectl -n katib port-forward svc/vizier-core 6789:6789 &
 $ kubectl -n katib port-forward svc/modeldb-frontend 3000:3000 &
 ```
 
+kubectl ~v1.9
+```
+& kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep vizier-core | sed -e "s@pods\/@@") 6789:6789 &
+& kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep modeldb-frontend | sed -e "s@pods\/@@") 3000:3000 &
+```
+
 To start HyperParameter Tuning, you need a katib client.
 It will call API of Katib to create study, get suggestions, run trial, and get metrics.
-The details of the system flow for the client and katib components is [here](https://docs.google.com/presentation/d/1Dk4XxKfVncb2v2CUDAd3OhM7XLyG3B9jEuuVmMiCIMg/edit#slide=id.g3b424a8f63_2_146).
+The details of the system flow for the client and katib components is [here](../docs/images/SystemFlow.png).
 
 An example of client is [here](./client-example.go).
 The client will read three config files.
