@@ -96,7 +96,7 @@ class CMAService(api_pb2_grpc.SuggestionServicer):
                         for metrics_log_set in ret.metrics_log_sets:
                             # the algorithm cannot continue without all trials in the population are evaluated
                             if metrics_log_set.worker_status != api_pb2.COMPLETED:
-                                context.set_code(grpc.StatusCode.UNKNOWN)
+                                context.set_code(grpc.StatusCode.FAILED_PRECONDITION)
                                 context.set_details("all trials in the population should be evaluated")
                                 return api_pb2.GetSuggestionsReply(
                                     trials=[],
