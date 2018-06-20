@@ -21,9 +21,15 @@ parameterconfigs:
       - sgd
       - adam
       - ftrl
+  - name: epoch-num
+    parametertype: 2
+    feasible:
+      min: "10"
+      max: "10"
 defaultsuggestionalgorithm: random
 defaultearlystoppingalgorithm: medianstopping
 objectivevaluename: learning-rate
 metrics:
 - num-layers
 - optimizer
+- epoch-num

@@ -84,4 +84,5 @@ done
 cp -r test ${GO_DIR}/test
 cd ${GO_DIR}/test/e2e
 go run test-client.go -a random
-go run test-client.go -a grid
+go run test-client.go -a grid -c suggestion-config-grid.yml
+go run test-client.go -a hyperband -c suggestion-config-hyb.yml
