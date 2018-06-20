@@ -21,6 +21,11 @@ parameterconfigs:
       - sgd
       - adam
       - ftrl
+  - name: --num-epochs
+    parametertype: 2
+    feasible:
+      min: "20"
+      max: "20"
 objectivevaluename: Validation-accuracy
 metrics:
 - accuracy

@@ -29,4 +29,5 @@ kubectl apply -f manifests/vizier/db
 kubectl apply -f manifests/vizier/core
 kubectl apply -f manifests/vizier/suggestion/random
 kubectl apply -f manifests/vizier/suggestion/grid
+kubectl apply -f manifests/vizier/suggestion/hyperband
 cd - > /dev/null
