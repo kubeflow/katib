@@ -66,13 +66,11 @@ func TestGetStudyConfig(t *testing.T) {
 			"optimization_type",
 			"optimization_goal",
 			"parameter_configs",
-			"suggest_algo",
-			"early_stop_algo",
 			"tags",
 			"objective_value_name",
 			"metrics",
 		}).
-			AddRow("abc", "test", "admin", 1, 0.99, "{}", "random", "medianstopping", "", "", ""))
+			AddRow("abc", "test", "admin", 1, 0.99, "{}", "", "", ""))
 	study, err := db_interface.GetStudyConfig(id)
 	if err != nil {
 		t.Errorf("GetStudyConfig failed: %v", err)

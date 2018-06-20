@@ -3,10 +3,10 @@ syntax = "proto3";
 package api;
 
 service Manager {
-	rpc CreateStudy(CreateStudyRequest) returns (CreateStudyReply);
-	rpc StopStudy(StopStudyRequest) returns (StopStudyReply);
-	rpc GetStudy(GetStudyRequest) returns (GetStudyReply);
-	rpc GetStudyList(GetStudyListRequest) returns (GetStudyListReply);
+    rpc CreateStudy(CreateStudyRequest) returns (CreateStudyReply);
+    rpc StopStudy(StopStudyRequest) returns (StopStudyReply);
+    rpc GetStudy(GetStudyRequest) returns (GetStudyReply);
+    rpc GetStudyList(GetStudyListRequest) returns (GetStudyListReply);
     rpc CreateTrial(CreateTrialRequest) returns (CreateTrialReply);
     rpc GetTrials(GetTrialsRequest) returns (GetTrialsReply);
     rpc RunTrial(RunTrialRequest) returns (RunTrialReply);
@@ -36,21 +36,21 @@ service EarlyStopping {
 }
 
 enum ParameterType {
-	// Not used
-	UNKNOWN_TYPE = 0;
+    // Not used
+    UNKNOWN_TYPE = 0;
 
-	DOUBLE = 1;
-	INT = 2;
-	DISCRETE = 3;
-	CATEGORICAL = 4;
+    DOUBLE = 1;
+    INT = 2;
+    DISCRETE = 3;
+    CATEGORICAL = 4;
 }
 
 enum OptimizationType {
-	// Not used
-	UNKNOWN_OPTIMIZATION = 0;
+    // Not used
+    UNKNOWN_OPTIMIZATION = 0;
 
-	MINIMIZE = 1;
-	MAXIMIZE = 2;
+    MINIMIZE = 1;
+    MAXIMIZE = 2;
 }
 
 message FeasibleSpace {
@@ -60,16 +60,16 @@ message FeasibleSpace {
 }
 
 message ParameterConfig {
-	string name = 1;
-	ParameterType parameter_type = 2;
-	// The following values defines a feasible parameter space.
+    string name = 1;
+    ParameterType parameter_type = 2;
+    // The following values defines a feasible parameter space.
     FeasibleSpace feasible = 3;
 }
 
 message Parameter {
-	string name = 1;
-	ParameterType parameter_type = 2;
-	string value = 3;
+    string name = 1;
+    ParameterType parameter_type = 2;
+    string value = 3;
 }
 
 // This value is stored as TINYINT in MySQL.
@@ -84,6 +84,7 @@ enum State {
 message MetricsLogSet {
     string worker_id = 1;
     repeated MetricsLog metrics_logs= 2;
+    State worker_status = 3;
 }
 
 message Metrics {
@@ -117,19 +118,18 @@ message MountConf {
 }
 
 message StudyOverview {
-	string name = 1;
-	string owner  = 2;
+    string name = 1;
+    string owner  = 2;
     string id = 3;
-	string description = 4;
+    string description = 4;
 }
 
 message Trial {
-	string trial_id = 1;
-	string study_id = 2;
-	repeated Parameter parameter_set = 3;
-    State status = 4;
-    string objective_value = 5;
-    repeated Tag tags = 8;
+    string trial_id = 1;
+    string study_id = 2;
+    repeated Parameter parameter_set = 3;
+    string objective_value = 4;
+    repeated Tag tags = 5;
 }
 
 message WorkerConfig {
@@ -143,8 +143,8 @@ message WorkerConfig {
 
 message Worker {
     string worker_id = 1;
-	string study_id = 2;
-	string trial_id = 3;
+    string study_id = 2;
+    string trial_id = 3;
     string runtime = 4; 
     State status = 5;
     WorkerConfig config = 6;
@@ -155,17 +155,15 @@ message StudyConfig {
     message ParameterConfigs {
         repeated ParameterConfig configs = 1;
     }
-	string name = 1;
-	string owner = 2;
-	OptimizationType optimization_type = 3;
-	double optimization_goal = 4;
-	ParameterConfigs parameter_configs = 5;
-	repeated string access_permissions = 6;
-	string default_suggestion_algorithm = 7;
-	string default_early_stopping_algorithm = 8;
-    repeated Tag tags = 9;
-    string objective_value_name = 10;
-    repeated string metrics = 11;
+    string name = 1;
+    string owner = 2;
+    OptimizationType optimization_type = 3;
+    double optimization_goal = 4;
+    ParameterConfigs parameter_configs = 5;
+    repeated string access_permissions = 6;
+    repeated Tag tags = 7;
+    string objective_value_name = 8;
+    repeated string metrics = 9;
 }
 
 message CreateStudyRequest {
@@ -173,11 +171,11 @@ message CreateStudyRequest {
 }
 
 message CreateStudyReply {
-	string study_id = 1;
+    string study_id = 1;
 }
 
 message StopStudyRequest {
-	string study_id = 1;
+    string study_id = 1;
 }
 
 message StopStudyReply {
@@ -277,16 +275,16 @@ message GetMetricsReply {
 }
 
 message ModelInfo {
-	string study_name = 1;  
-	string worker_id = 2; 
-	repeated Parameter parameters = 3; 
-	repeated Metrics metrics = 4;
-	string model_path = 5; 
+    string study_name = 1;  
+    string worker_id = 2; 
+    repeated Parameter parameters = 3; 
+    repeated Metrics metrics = 4;
+    string model_path = 5; 
 }
 
 message DataSetInfo {
-	string name = 1;
-	string path = 2;
+    string name = 1;
+    string path = 2;
 }
 
 message SaveStudyRequest {
@@ -332,7 +330,7 @@ message GetSavedModelReply {
 }
 
 message SetSuggestionParametersRequest {
-	string study_id = 1;
+    string study_id = 1;
     string suggestion_algorithm = 2;
     string param_id = 3;
     repeated SuggestionParameter suggestion_parameters = 4;
@@ -366,14 +364,14 @@ message GetSuggestionParameterListReply {
 }
 
 message StopSuggestionRequest {
-	string study_id = 1;
+    string study_id = 1;
 }
 
 message StopSuggestionReply {
 }
 
 message SetEarlyStoppingParametersRequest {
-	string study_id = 1;
+    string study_id = 1;
     string early_stopping_algorithm = 2;
     string param_id = 3;
     repeated EarlyStoppingParameter early_stopping_parameters = 4;

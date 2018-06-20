@@ -23,7 +23,7 @@ set -o pipefail
 export PATH=${GOPATH}/bin:/usr/local/go/bin:${PATH}
 REGISTRY="${GCP_REGISTRY}"
 PROJECT="${GCP_PROJECT}"
-GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}_earlystoppings
+GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-suggestion-random
 VERSION=$(git describe --tags --always --dirty)
 
 echo "Activating service-account"
@@ -37,5 +37,5 @@ cp -r vendor ${GO_DIR}/vendor
 
 cd ${GO_DIR}
 
-cp cmd/earlystopping/medianstopping/Dockerfile .
-gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/earlystopping-medianstopping:${VERSION} --project=${PROJECT}
+cp cmd/suggestion/random/Dockerfile .
+gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-random:${VERSION} --project=${PROJECT}

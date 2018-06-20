@@ -13,8 +13,6 @@ func (d *db_conn) DB_Init() {
 		"optimization_type TINYINT, " +
 		"optimization_goal DOUBLE, " +
 		"parameter_configs TEXT, " +
-		"suggest_algo VARCHAR(255), " +
-		"early_stop_algo VARCHAR(255), " +
 		"tags TEXT, " +
 		"objective_value_name VARCHAR(255), " +
 		"metrics TEXT)")
@@ -34,7 +32,6 @@ func (d *db_conn) DB_Init() {
 		"(id CHAR(16) PRIMARY KEY, " +
 		"study_id CHAR(16), " +
 		"parameters TEXT, " +
-		"status TINYINT, " +
 		"objective_value VARCHAR(255), " +
 		"tags TEXT, " +
 		"FOREIGN KEY(study_id) REFERENCES studies(id))")

@@ -207,12 +207,28 @@
                     template: "build-manager",
                   },
                   {
-                    name: "build-suggestions",
-                    template: "build-suggestions",
+                    name: "build-cli",
+                    template: "build-cli",
                   },
                   {
-                    name: "build-earlystoppings",
-                    template: "build-earlystoppings",
+                    name: "build-suggestion-random",
+                    template: "build-suggestion-random",
+                  },
+                  {
+                    name: "build-suggestion-grid",
+                    template: "build-suggestion-grid",
+                  },
+                  {
+                    name: "build-suggestion-bo",
+                    template: "build-suggestion-bo",
+                  },
+                  {
+                    name: "build-earlystopping-median",
+                    template: "build-earlystopping-median",
+                  },
+                  {
+                    name: "build-modeldb",
+                    template: "build-modeldb",
                   },
                   {
                     name: "create-pr-symlink",
@@ -302,12 +318,24 @@
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
               "test/scripts/build-manager.sh",
             ]),  // build-manager
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-suggestions", testWorkerImage, [
-              "test/scripts/build-suggestions.sh",
-            ]),  // build-suggestions
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-earlystoppings", testWorkerImage, [
-              "test/scripts/build-earlystoppings.sh",
-            ]),  // build-earlystoppings
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-cli", testWorkerImage, [
+              "test/scripts/build-cli.sh",
+            ]),  // build-cli
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-suggestion-random", testWorkerImage, [
+              "test/scripts/build-suggestion-random.sh",
+            ]),  // build-suggestion-random
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-suggestion-grid", testWorkerImage, [
+              "test/scripts/build-suggestion-grid.sh",
+            ]),  // build-suggestion-grid
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-suggestion-bo", testWorkerImage, [
+              "test/scripts/build-suggestion-bo.sh",
+            ]),  // build-suggestion-bo
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-earlystopping-median", testWorkerImage, [
+              "test/scripts/build-earlystopping-median.sh",
+            ]),  // build-earlystopping-median
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-modeldb", testWorkerImage, [
+              "test/scripts/build-modeldb.sh",
+            ]),  // build-modeldb
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("unit-test", testWorkerImage, [
               "test/scripts/unit-test.sh",
             ]),  // unit test

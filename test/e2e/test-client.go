@@ -20,6 +20,10 @@ var studyConfig = api.StudyConfig{}
 var workerConfig = api.WorkerConfig{}
 var suggestionConfig = api.SetSuggestionParametersRequest{}
 
+const TimeOut = 600
+
+var trials = map[string]*api.Trial{}
+
 func main() {
 	readConfigs()
 	conn, err := grpc.Dial(*managerAddr, grpc.WithInsecure())
@@ -36,11 +40,18 @@ func main() {
 	//GetSuggestion
 	getSuggestReply := getSuggestion(c, studyId)
 
+	checkSuggestions(getSuggestReply)
+
 	//RunTrials
 	workerIds := runTrials(c, studyId, getSuggestReply)
 
-	for true {
-		time.Sleep(10 * time.Second)
+	iter := 0
+
+	for !isCompletedAllWorker(c, studyId) {
+		if iter > TimeOut {
+			log.Fatal("GetMetrics Timeout.")
+		}
+		time.Sleep(1 * time.Second)
 		getMetricsRequest := &api.GetMetricsRequest{
 			StudyId:   studyId,
 			WorkerIds: workerIds,
@@ -52,10 +63,11 @@ func main() {
 		}
 		//Save or Update model on ModelDB
 		SaveOrUpdateModel(c, getMetricsReply)
-		if isCompletedAllWorker(c, getMetricsReply.MetricsLogSets) {
-			break
-		}
+		iter++
 	}
+	checkWorkersResult(c, studyId)
+	conn.Close()
+	log.Println("E2E test OK!")
 }
 
 func readConfigs() {
@@ -106,7 +118,7 @@ func CreateStudy(c api.ManagerClient) string {
 	if err != nil {
 		log.Fatalf("GetConfig Error %v", err)
 	}
-	log.Printf("Study ID %s StudyConf%v", studyId, getStudyReply.StudyConfig)
+	log.Printf("Study ID %s StudyConf %v", studyId, getStudyReply.StudyConfig)
 	return studyId
 }
 
@@ -128,7 +140,7 @@ func getSuggestion(c api.ManagerClient, studyId string) *api.GetSuggestionsReply
 		if err != nil {
 			log.Fatalf("SetConfig Error %v", err)
 		}
-		log.Printf("Grid Suggestion Prameter ID %s", setSuggesitonParameterReply.ParamId)
+		log.Printf("Grid suggestion prameter ID %s", setSuggesitonParameterReply.ParamId)
 		getSuggestRequest = &api.GetSuggestionsRequest{
 			StudyId:             studyId,
 			SuggestionAlgorithm: "grid",
@@ -142,11 +154,26 @@ func getSuggestion(c api.ManagerClient, studyId string) *api.GetSuggestionsReply
 	if err != nil {
 		log.Fatalf("GetSuggestion Error %v", err)
 	}
-	log.Println("Get Grid Suggestions:")
+	log.Println("Get " + *suggestArgo + " Suggestions:")
 	for _, t := range getSuggestReply.Trials {
 		log.Printf("%v", t)
 	}
 	return getSuggestReply
+}
+
+func checkSuggestions(getSuggestReply *api.GetSuggestionsReply) bool {
+	switch *suggestArgo {
+	case "random":
+		if len(getSuggestReply.Trials) != *requestnum {
+			log.Fatalf("Number of Random suggestion incrrect. Expected %d Got %d", *requestnum, len(getSuggestReply.Trials))
+		}
+	case "grid":
+		if len(getSuggestReply.Trials) != 4 {
+			log.Fatalf("Number of Grid suggestion incrrect. Expected %d Got %d", 4, len(getSuggestReply.Trials))
+		}
+	}
+	log.Println("Check suggestion passed!")
+	return true
 }
 
 func runTrials(c api.ManagerClient, studyId string, getSuggestReply *api.GetSuggestionsReply) []string {
@@ -162,8 +189,7 @@ func runTrials(c api.ManagerClient, studyId string, getSuggestReply *api.GetSugg
 			WorkerConfig: &wc,
 		}
 		for _, p := range t.ParameterSet {
-			rtr.WorkerConfig.Command = append(rtr.WorkerConfig.Command, p.Name)
-			rtr.WorkerConfig.Command = append(rtr.WorkerConfig.Command, p.Value)
+			rtr.WorkerConfig.Command = append(rtr.WorkerConfig.Command, p.Name+"="+p.Value)
 		}
 		workerReply, err := c.RunTrial(ctx, rtr)
 		if err != nil {
@@ -189,6 +215,7 @@ func runTrials(c api.ManagerClient, studyId string, getSuggestReply *api.GetSugg
 			log.Fatalf("SaveModel Error %v", err)
 		}
 		log.Printf("WorkerID %s start\n", workerReply.WorkerId)
+		trials[workerReply.WorkerId] = t
 	}
 	return workerIds
 }
@@ -220,17 +247,45 @@ func SaveOrUpdateModel(c api.ManagerClient, getMetricsReply *api.GetMetricsReply
 	}
 }
 
-func isCompletedAllWorker(c api.ManagerClient, ms []*api.MetricsLogSet) bool {
-	//	ctx := context.Background()
-	//	getWorkerRequest := &api.GetWorkersRequest{StudyId: studyId}
-	//	getWorkerReply, err := c.GetWorkers(ctx, getWorkerRequest)
-	//	if err != nil {
-	//		log.Fatalf("GetWorker Error %v", err)
-	//	}
-	for _, mls := range ms {
-		if mls.WorkerStatus != api.State_COMPLETED {
+func isCompletedAllWorker(c api.ManagerClient, studyId string) bool {
+	ctx := context.Background()
+	getWorkerRequest := &api.GetWorkersRequest{StudyId: studyId}
+	getWorkerReply, err := c.GetWorkers(ctx, getWorkerRequest)
+	if err != nil {
+		log.Fatalf("GetWorker Error %v", err)
+	}
+	for _, w := range getWorkerReply.Workers {
+		if w.Status != api.State_COMPLETED {
 			return false
 		}
 	}
+	log.Println("All Worker Completed")
+	return true
+}
+
+func checkWorkersResult(c api.ManagerClient, studyId string) bool {
+	ctx := context.Background()
+	getMetricsRequest := &api.GetMetricsRequest{
+		StudyId: studyId,
+	}
+	//GetMetrics
+	getMetricsReply, err := c.GetMetrics(ctx, getMetricsRequest)
+	if err != nil {
+		log.Fatalf("Fataled to Get Metrics")
+	}
+
+	for _, mls := range getMetricsReply.MetricsLogSets {
+		for _, p := range trials[mls.WorkerId].ParameterSet {
+			for _, ml := range mls.MetricsLogs {
+				if p.Name == ml.Name {
+					if p.Value != ml.Values[len(ml.Values)-1] {
+						log.Fatalf("Output %s is mismuched to Input %s", ml.Values[len(ml.Values)-1], p.Value)
+						return false
+					}
+				}
+			}
+		}
+	}
+	log.Println("Input Output check passed")
 	return true
 }

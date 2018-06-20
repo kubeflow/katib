@@ -75,7 +75,7 @@ func getModel(cmd *cobra.Command, opt *getModelOpt) {
 		log.Fatalf("GetModels failed: %v", err)
 	}
 	if len(r.StudyOverviews) == 0 {
-		log.Println("No Study fond")
+		log.Println("No Study found")
 		return
 	}
 	for _, si := range r.StudyOverviews {
