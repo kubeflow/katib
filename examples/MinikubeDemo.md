@@ -59,6 +59,14 @@ go run client-example.go -a grid
 ```
 In this demo, make 4 grids for learning rate (--lr) Min 0.03 and Max 0.07.
 
+### Hyperband Demo
+As the Hyperband suggestion is so different from random and grid, use special client example.
+```
+go run hyperband-example-client.go
+```
+The parametes of Hyperband are defined [suggestion-config-hyb.yml](./suggestion-config-hyb.yml).
+In this demo, the eta is 3 and the R is 9.
+
 ## UI
 You can check your Model with Web UI.
 Acsess to `http://127.0.0.1:3000/`

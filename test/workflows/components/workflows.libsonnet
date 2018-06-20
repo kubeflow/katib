@@ -219,6 +219,10 @@
                     template: "build-suggestion-grid",
                   },
                   {
+                    name: "build-suggestion-hyperband",
+                    template: "build-suggestion-hyperband",
+                  },
+                  {
                     name: "build-suggestion-bo",
                     template: "build-suggestion-bo",
                   },
@@ -327,6 +331,9 @@
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-suggestion-grid", testWorkerImage, [
               "test/scripts/build-suggestion-grid.sh",
             ]),  // build-suggestion-grid
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperband", testWorkerImage, [
+              "test/scripts/build-suggestion-hyperband.sh",
+            ]),  // build-suggestion-hyperband
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-suggestion-bo", testWorkerImage, [
               "test/scripts/build-suggestion-bo.sh",
             ]),  // build-suggestion-bo
