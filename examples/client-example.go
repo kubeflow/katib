@@ -222,13 +222,13 @@ func SaveOrUpdateModel(c api.ManagerClient, getMetricsReply *api.GetMetricsReply
 
 func isCompletedAllWorker(c api.ManagerClient, studyId string) bool {
 	ctx := context.Background()
- 	getWorkerRequest := &api.GetWorkersRequest{StudyId: studyId}
- 	getWorkerReply, err := c.GetWorkers(ctx, getWorkerRequest)
- 	if err != nil {
- 		log.Fatalf("GetWorker Error %v", err)
- 	}
- 	for _, w := range getWorkerReply.Workers {
- 		if w.Status != api.State_COMPLETED {
+	getWorkerRequest := &api.GetWorkersRequest{StudyId: studyId}
+	getWorkerReply, err := c.GetWorkers(ctx, getWorkerRequest)
+	if err != nil {
+		log.Fatalf("GetWorker Error %v", err)
+	}
+	for _, w := range getWorkerReply.Workers {
+		if w.Status != api.State_COMPLETED {
 			return false
 		}
 	}
