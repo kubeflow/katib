@@ -220,7 +220,7 @@ func SaveOrUpdateModel(c api.ManagerClient, getMetricsReply *api.GetMetricsReply
 	}
 }
 
-func isCompletedAllWorker(c api.ManagerClient, ms []*api.MetricsLogSet) bool {
+func isCompletedAllWorker(c api.ManagerClient, studyId string) bool {
 	ctx := context.Background()
  	getWorkerRequest := &api.GetWorkersRequest{StudyId: studyId}
  	getWorkerReply, err := c.GetWorkers(ctx, getWorkerRequest)
