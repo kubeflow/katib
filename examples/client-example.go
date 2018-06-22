@@ -52,7 +52,7 @@ func main() {
 		}
 		//Save or Update model on ModelDB
 		SaveOrUpdateModel(c, getMetricsReply)
-		if isCompletedAllWorker(c, getMetricsReply.MetricsLogSets) {
+		if isCompletedAllWorker(c, studyId) {
 			break
 		}
 	}
@@ -221,14 +221,14 @@ func SaveOrUpdateModel(c api.ManagerClient, getMetricsReply *api.GetMetricsReply
 }
 
 func isCompletedAllWorker(c api.ManagerClient, ms []*api.MetricsLogSet) bool {
-	//	ctx := context.Background()
-	//	getWorkerRequest := &api.GetWorkersRequest{StudyId: studyId}
-	//	getWorkerReply, err := c.GetWorkers(ctx, getWorkerRequest)
-	//	if err != nil {
-	//		log.Fatalf("GetWorker Error %v", err)
-	//	}
-	for _, mls := range ms {
-		if mls.WorkerStatus != api.State_COMPLETED {
+	ctx := context.Background()
+ 	getWorkerRequest := &api.GetWorkersRequest{StudyId: studyId}
+ 	getWorkerReply, err := c.GetWorkers(ctx, getWorkerRequest)
+ 	if err != nil {
+ 		log.Fatalf("GetWorker Error %v", err)
+ 	}
+ 	for _, w := range getWorkerReply.Workers {
+ 		if w.Status != api.State_COMPLETED {
 			return false
 		}
 	}

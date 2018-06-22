@@ -22,6 +22,4 @@ parameterconfigs:
       - adam
       - ftrl
 objectivevaluename: Validation-accuracy
-metrics:
-- accuracy
 
