@@ -13,7 +13,7 @@ import (
 )
 
 var managerAddr = flag.String("s", "127.0.0.1:6789", "Endpoint of manager default 127.0.0.1:6789")
-var suggestArgo = flag.String("a", "random", "Suggestion Algorithm (random, grid)")
+var suggestArgo = flag.String("a", "random", "Suggestion Algorithm (random, grid, hyperband)")
 var requestnum = flag.Int("r", 2, "Request number for random Suggestions (default: 2)")
 var suggestionConfFile = flag.String("c", "", "File path to suggestion config.")
 
@@ -53,6 +53,10 @@ func main() {
 			//RunTrials
 			workerIds := runTrials(c, studyId, getSuggestReply)
 
+			//GetWorkersCheck
+			getWorker(c, studyId, getSuggestReply, workerIds)
+			log.Println("GetWorkers checked!")
+
 			iter := 0
 
 			for !isCompletedAllWorker(c, studyId) {
@@ -83,8 +87,11 @@ func main() {
 		//RunTrials
 		workerIds := runTrials(c, studyId, getSuggestReply)
 
-		iter := 0
+		//GetWorkersCheck
+		getWorker(c, studyId, getSuggestReply, workerIds)
+		log.Println("GetWorkers checked!")
 
+		iter := 0
 		for !isCompletedAllWorker(c, studyId) {
 			if iter > TimeOut {
 				log.Fatal("GetMetrics Timeout.")
@@ -286,6 +293,44 @@ func runTrials(c api.ManagerClient, studyId string, getSuggestReply *api.GetSugg
 		trials[workerReply.WorkerId] = t
 	}
 	return workerIds
+}
+
+func getWorker(c api.ManagerClient, studyId string, getSuggestReply *api.GetSuggestionsReply, workerIds []string) {
+	ctx := context.Background()
+	getByTID := []*api.Worker{}
+	getByWID := []*api.Worker{}
+	gwr := &api.GetWorkersRequest{
+		StudyId: studyId,
+	}
+	_, err := c.GetWorkers(ctx, gwr)
+	if err != nil {
+		log.Fatalf("GwtWorker by Study ID Error %v", err)
+	}
+	for _, t := range getSuggestReply.Trials {
+		gwr := &api.GetWorkersRequest{
+			StudyId: studyId,
+			TrialId: t.TrialId,
+		}
+		gwrep, err := c.GetWorkers(ctx, gwr)
+		if err != nil {
+			log.Fatalf("GwtWorker by Trial ID Error %v", err)
+		}
+		getByTID = append(getByTID, gwrep.Workers...)
+	}
+	for _, w := range workerIds {
+		gwr = &api.GetWorkersRequest{
+			StudyId:  studyId,
+			WorkerId: w,
+		}
+		gwrep, err := c.GetWorkers(ctx, gwr)
+		if err != nil {
+			log.Fatalf("GwtWorker by Worker ID Error %v", err)
+		}
+		getByWID = append(getByWID, gwrep.Workers...)
+	}
+	if len(getByTID) != len(getByWID) {
+		log.Fatalf("GwtWorker by Worker ID is mismatch with GwtWorker by Trial ID \n by Trial ID %v \n by Worker ID %v", getByTID, getByWID)
+	}
 }
 
 func SaveOrUpdateModel(c api.ManagerClient, getMetricsReply *api.GetMetricsReply) {
