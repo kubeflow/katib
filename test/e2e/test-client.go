@@ -227,7 +227,7 @@ func getSuggestion(c api.ManagerClient, studyId string, paramId string) *api.Get
 
 	getSuggestReply, err := c.GetSuggestions(ctx, getSuggestRequest)
 	if err != nil {
-		log.Fatalf("GetSuggestion Error %v", err)
+		log.Fatalf("GetSuggestion Error %v \nRequest %v", err, getSuggestRequest)
 	}
 	log.Println("Get " + *suggestArgo + " Suggestions:")
 	for _, t := range getSuggestReply.Trials {

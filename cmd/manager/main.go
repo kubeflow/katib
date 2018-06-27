@@ -130,7 +130,7 @@ func (s *server) GetWorkers(ctx context.Context, in *pb.GetWorkersRequest) (*pb.
 	if in.StudyId == "" {
 		return &pb.GetWorkersReply{Workers: ws}, errors.New("StudyId should be set")
 	}
-	err := s.wIF.UpdateWorkerStatus(in.StudyId)
+	err = s.wIF.UpdateWorkerStatus(in.StudyId)
 	if err != nil {
 		return &pb.GetWorkersReply{Workers: ws}, err
 	}
@@ -177,7 +177,10 @@ func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.
 	}
 	mls := make([]*pb.MetricsLogSet, len(in.WorkerIds))
 	for i, w := range in.WorkerIds {
-		wr, err := s.GetWorkers(ctx, &pb.GetWorkersRequest{WorkerId: w})
+		wr, err := s.GetWorkers(ctx, &pb.GetWorkersRequest{
+			StudyId:  in.StudyId,
+			WorkerId: w,
+		})
 		if err != nil {
 			return &pb.GetMetricsReply{}, err
 		}

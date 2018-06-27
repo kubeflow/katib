@@ -337,10 +337,12 @@ func (h *HyperBandSuggestService) evalWorkers(ctx context.Context, c api.Manager
 	bracket := Bracket{}
 	for _, tid := range hbparam.evaluatingTrials {
 		gwreq := &api.GetWorkersRequest{
+			StudyId: studyId,
 			TrialId: tid,
 		}
 		gwrep, err := c.GetWorkers(ctx, gwreq)
 		if err != nil {
+			log.Printf("GetWorkers error %v", err)
 			return err, nil
 		}
 		wl := make([]string, len(gwrep.Workers))

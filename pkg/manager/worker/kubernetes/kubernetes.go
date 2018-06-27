@@ -170,7 +170,16 @@ func (d *KubernetesWorkerInterface) UpdateWorkerStatus(studyId string) error {
 		return err
 	}
 	for _, w := range ws {
-		if w.Status == api.State_RUNNING {
+		if w.Status == api.State_PENDING {
+			err = d.StoreWorkerLog(w.WorkerId)
+			if err == nil {
+				err = d.db.UpdateWorker(w.WorkerId, api.State_RUNNING)
+				if err != nil {
+					log.Printf("Error updating status for %s: %v", w.WorkerId, err)
+					return err
+				}
+			}
+		} else if w.Status == api.State_RUNNING {
 			c, err := d.IsWorkerComplete(w.WorkerId)
 			if err != nil {
 				return err
@@ -203,11 +212,6 @@ func (d *KubernetesWorkerInterface) SpawnWorker(wid string, workerConf *api.Work
 	jcl := d.clientset.BatchV1().Jobs(kubeNamespace)
 	result, err := jcl.Create(job)
 	if err != nil {
-		return err
-	}
-	err = d.db.UpdateWorker(wid, api.State_RUNNING)
-	if err != nil {
-		log.Printf("Error updating status for %s: %v", job.ObjectMeta.Name, err)
 		return err
 	}
 	log.Printf("Created Job %q.", result.GetObjectMeta().GetName())
