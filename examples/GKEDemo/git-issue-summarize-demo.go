@@ -33,24 +33,6 @@ var studyConfig = api.StudyConfig{
 	},
 }
 
-var workerConfig = api.WorkerConfig{
-	Image: "yujioshima/tf-job-issue-summarization:latest",
-	Command: []string{
-		"python",
-		"/workdir/train.py",
-		"--sample_size",
-		"20000",
-		//		"--input_data_gcs_bucket",
-		//		"katib-gi-example",
-		//		"--input_data_gcs_path",
-		//		"github-issue-summarization-data/github-issues.zip",
-		//		"--output_model_gcs_bucket",
-		//		"katib-gi-example",
-	},
-	Gpu:       0,
-	Scheduler: "default-scheduler",
-}
-
 var gridConfig = []*api.SuggestionParameter{
 	&api.SuggestionParameter{
 		Name:  "DefaultGrid",
@@ -62,7 +44,8 @@ var gridConfig = []*api.SuggestionParameter{
 	},
 }
 
-var managerAddr = flag.String("s", "127.0.0.1:6789", "Endpoint of manager default 127.0.0.1:6789")
+var managerAddr = flag.String("katib_endpoint", "127.0.0.1:6789", "Endpoint of manager default 127.0.0.1:6789")
+var trainerImage = flag.String("trainer_image", "gcr.io/kubeflow-dev/tf-job-issue-summarization:v20180425-e79f888", "The docker image containing the training code")
 
 func main() {
 	flag.Parse()
@@ -70,6 +53,25 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not connect: %v", err)
 	}
+
+	workerConfig := api.WorkerConfig{
+		Image: *trainerImage,
+		Command: []string{
+			"python",
+			"/workdir/train.py",
+			"--sample_size",
+			"20000",
+			//		"--input_data_gcs_bucket",
+			//		"katib-gi-example",
+			//		"--input_data_gcs_path",
+			//		"github-issue-summarization-data/github-issues.zip",
+			//		"--output_model_gcs_bucket",
+			//		"katib-gi-example",
+		},
+		Gpu:       0,
+		Scheduler: "default-scheduler",
+	}
+
 	defer conn.Close()
 	ctx := context.Background()
 	c := api.NewManagerClient(conn)
