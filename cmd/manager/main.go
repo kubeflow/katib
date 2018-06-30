@@ -127,6 +127,13 @@ func (s *server) StopWorkers(ctx context.Context, in *pb.StopWorkersRequest) (*p
 func (s *server) GetWorkers(ctx context.Context, in *pb.GetWorkersRequest) (*pb.GetWorkersReply, error) {
 	var ws []*pb.Worker
 	var err error
+	if in.StudyId == "" {
+		return &pb.GetWorkersReply{Workers: ws}, errors.New("StudyId should be set")
+	}
+	err = s.wIF.UpdateWorkerStatus(in.StudyId)
+	if err != nil {
+		return &pb.GetWorkersReply{Workers: ws}, err
+	}
 	if in.WorkerId == "" {
 		ws, err = dbIf.GetWorkerList(in.StudyId, in.TrialId)
 	} else {
@@ -152,6 +159,9 @@ func (s *server) GetShouldStopWorkers(ctx context.Context, in *pb.GetShouldStopW
 
 func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.GetMetricsReply, error) {
 	var mNames []string
+	if in.StudyId == "" {
+		return &pb.GetMetricsReply{}, errors.New("StudyId should be set")
+	}
 	if len(in.MetricsNames) > 0 {
 		mNames = in.MetricsNames
 	} else {
@@ -167,7 +177,10 @@ func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.
 	}
 	mls := make([]*pb.MetricsLogSet, len(in.WorkerIds))
 	for i, w := range in.WorkerIds {
-		wr, err := s.GetWorkers(ctx, &pb.GetWorkersRequest{WorkerId: w})
+		wr, err := s.GetWorkers(ctx, &pb.GetWorkersRequest{
+			StudyId:  in.StudyId,
+			WorkerId: w,
+		})
 		if err != nil {
 			return &pb.GetMetricsReply{}, err
 		}
