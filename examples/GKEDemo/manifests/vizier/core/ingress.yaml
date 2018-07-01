@@ -1,9 +1,0 @@
- apiVersion: extensions/v1beta1
- kind: Ingress
- metadata:
-   name: vizier-core
-   namespace: katib
- spec:
-   backend:
-      serviceName: vizier-core
-      servicePort: 6789
