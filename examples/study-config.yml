@@ -27,6 +27,4 @@ parameterconfigs:
       min: "20"
       max: "20"
 objectivevaluename: Validation-accuracy
-metrics:
-- accuracy
 
