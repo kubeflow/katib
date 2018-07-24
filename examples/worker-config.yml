@@ -1,4 +1,4 @@
-image: "mxnet/python"
+image: "mxnet/python:1.2.0_cpu"
 command: 
     - "python"
     - "/mxnet/example/image-classification/train_mnist.py"
