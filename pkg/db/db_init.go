@@ -43,7 +43,7 @@ func (d *db_conn) DB_Init() {
 		"(id CHAR(16) PRIMARY KEY, " +
 		"study_id CHAR(16), " +
 		"trial_id CHAR(16), " +
-		"runtime VARCHAR(255), " +
+		"type VARCHAR(255), " +
 		"status TINYINT, " +
 		"config TEXT, " +
 		"tags TEXT, " +
