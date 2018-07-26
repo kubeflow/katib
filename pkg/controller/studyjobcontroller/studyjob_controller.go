@@ -110,7 +110,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
-	if instance.Status.State == katibv1alpha1.StateRunning || instance.Status.State == katibv1alpha1.StateCompleted || instance.Status.State == katibv1alpha1.StateFailed {
+	if instance.Status.Condition == katibv1alpha1.ConditionRunning || instance.Status.Condition == katibv1alpha1.ConditionCompleted || instance.Status.Condition == katibv1alpha1.ConditionFailed {
 		return reconcile.Result{}, nil
 	}
 	go r.controllerloop(instance)
@@ -201,14 +201,14 @@ func (r *ReconcileStudyJobController) controllerloop(instance *katibv1alpha1.Stu
 	}
 	defer conn.Close()
 	if instance.Spec.StudySpec == nil || instance.Spec.SuggestionSpec == nil {
-		instance.Status.State = katibv1alpha1.StateFailed
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		r.Update(context.TODO(), instance)
 		return
 	}
 	if instance.Spec.SuggestionSpec.SuggestionAlgorithm == "" {
 		instance.Spec.SuggestionSpec.SuggestionAlgorithm = "random"
 	}
-	instance.Status.State = katibv1alpha1.StateRunning
+	instance.Status.Condition = katibv1alpha1.ConditionRunning
 	if err := r.Update(context.TODO(), instance); err != nil {
 		return
 	}
@@ -284,9 +284,9 @@ func (r *ReconcileStudyJobController) controllerloop(instance *katibv1alpha1.Stu
 			break
 		}
 	}
-	instance.Status.State = katibv1alpha1.StateCompleted
+	instance.Status.Condition = katibv1alpha1.ConditionCompleted
 	if err := r.Update(context.TODO(), instance); err != nil {
-		log.Printf("Study: %s State Update error %v", studyId, err)
+		log.Printf("Study: %s Condition Update error %v", studyId, err)
 		return
 	}
 }

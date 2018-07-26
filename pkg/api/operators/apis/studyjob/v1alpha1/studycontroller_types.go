@@ -49,9 +49,9 @@ type StudyJobStatus struct {
 	// It is represented in RFC3339 form and is in UTC.
 	LastReconcileTime *metav1.Time `json:"lastReconcileTime,omitempty"`
 
-	State   State      `json:"state,omitempty"`
-	StudyId string     `json:"studyid,omitempty"`
-	Trials  []TrialSet `json:"trials,omitempty"`
+	Condition Condition  `json:"conditon,omitempty"`
+	StudyId   string     `json:"studyid,omitempty"`
+	Trials    []TrialSet `json:"trials,omitempty"`
 }
 
 type TrialSet struct {
@@ -136,13 +136,14 @@ const (
 	ParameterEmbeddingEnvironmentValue ParameterEmbedding = "env"
 )
 
-type State string
+type Condition string
 
 const (
-	StateUnknown   State = "Unknown"
-	StateRunning   State = "Running"
-	StateCompleted State = "Completed"
-	StateFailed    State = "Failed"
+	ConditionUnknown   Condition = "Unknown"
+	ConditionCreated   Condition = "Created"
+	ConditionRunning   Condition = "Running"
+	ConditionCompleted Condition = "Completed"
+	ConditionFailed    Condition = "Failed"
 )
 
 // +genclient
