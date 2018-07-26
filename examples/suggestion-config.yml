@@ -1,9 +1,0 @@
-suggetionalgorithm: "grid"
-suggestionparameters:
-    - 
-        name: "DefaultGrid"
-        value: "1"
-    - 
-        name: "--lr"
-        value: "4"
-

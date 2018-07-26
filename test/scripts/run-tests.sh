@@ -41,15 +41,25 @@ kubectl config set-credentials temp-admin --username=admin --password=$(gcloud c
 kubectl config set-context temp-context --cluster=$(kubectl config get-clusters | grep ${CLUSTER_NAME}) --user=temp-admin
 kubectl config use-context temp-context
 
+#This is required. But I don't know why.
+VERSION=${VERSION/%?/}
+
 echo "Install Katib "
+echo "REGISTRY ${REGISTRY}"
+echo "REPO_NAME ${REPO_NAME}"
+echo "VERSION ${VERSION}"
+
 sed -i -e "s@image: katib\/vizier-core@image: ${REGISTRY}\/${REPO_NAME}\/vizier-core:${VERSION}@" manifests/vizier/core/deployment.yaml
 sed -i -e "s@type: NodePort@type: ClusterIP@" -e "/nodePort: 30678/d" manifests/vizier/core/service.yaml
+sed -i -e "s@image: katib\/studyjob-controller@image: ${REGISTRY}\/${REPO_NAME}\/studyjob-controller:${VERSION}@" manifests/studyjobcontroller/studyjobcontroller.yaml
 sed -i -e "s@image: katib\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-random:${VERSION}@" manifests/vizier/suggestion/random/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-grid:${VERSION}@" manifests/vizier/suggestion/grid/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-hyperband:${VERSION}@" manifests/vizier/suggestion/hyperband/deployment.yaml
 #sed -i -e "s@image: katib\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-bayesianoptimization:${VERSION}@" manifests/vizier/suggestion/bayesianoptimization/deployment.yaml
 sed -i -e "s@image: katib\/earlystopping-medianstopping@image: ${REGISTRY}\/${REPO_NAME}\/earlystopping-medianstopping:${VERSION}@" manifests/vizier/earlystopping/medianstopping/deployment.yaml
 sed -i -e "s@image: katib\/katib-frontend@image: ${REGISTRY}\/${REPO_NAME}\/katib-frontend:${VERSION}@" manifests/modeldb/frontend/deployment.yaml
+
+cat manifests/vizier/core/deployment.yaml
 ./scripts/deploy.sh
 
 TIMEOUT=120
@@ -85,4 +95,4 @@ cp -r test ${GO_DIR}/test
 cd ${GO_DIR}/test/e2e
 go run test-client.go -a random
 go run test-client.go -a grid -c suggestion-config-grid.yml
-go run test-client.go -a hyperband -c suggestion-config-hyb.yml
+#go run test-client.go -a hyperband -c suggestion-config-hyb.yml

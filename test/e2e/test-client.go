@@ -5,7 +5,7 @@ import (
 	"flag"
 	"io/ioutil"
 	"log"
-	"time"
+	//	"time"
 
 	"github.com/kubeflow/katib/pkg/api"
 	"google.golang.org/grpc"
@@ -32,7 +32,6 @@ func main() {
 		log.Fatalf("could not connect: %v", err)
 	}
 	defer conn.Close()
-	ctx := context.Background()
 	c := api.NewManagerClient(conn)
 
 	//CreateStudy
@@ -51,33 +50,33 @@ func main() {
 				break
 			}
 			//RunTrials
-			workerIds := runTrials(c, studyId, getSuggestReply)
+			//workerIds := runTrials(c, studyId, getSuggestReply)
 
-			//GetWorkersCheck
-			getWorker(c, studyId, getSuggestReply, workerIds)
-			log.Println("GetWorkers checked!")
+			////GetWorkersCheck
+			//getWorker(c, studyId, getSuggestReply, workerIds)
+			//log.Println("GetWorkers checked!")
 
-			iter := 0
+			//iter := 0
 
-			for !isCompletedAllWorker(c, studyId) {
-				if iter > TimeOut {
-					log.Fatal("GetMetrics Timeout.")
-				}
-				time.Sleep(1 * time.Second)
-				getMetricsRequest := &api.GetMetricsRequest{
-					StudyId:   studyId,
-					WorkerIds: workerIds,
-				}
-				//GetMetrics
-				getMetricsReply, err := c.GetMetrics(ctx, getMetricsRequest)
-				if err != nil {
-					continue
-				}
-				//Save or Update model on ModelDB
-				SaveOrUpdateModel(c, getMetricsReply)
-				iter++
-			}
-			checkWorkersResult(c, studyId)
+			//for !isCompletedAllWorker(c, studyId) {
+			//	if iter > TimeOut {
+			//		log.Fatal("GetMetrics Timeout.")
+			//	}
+			//	time.Sleep(1 * time.Second)
+			//	getMetricsRequest := &api.GetMetricsRequest{
+			//		StudyId:   studyId,
+			//		WorkerIds: workerIds,
+			//	}
+			//	//GetMetrics
+			//	getMetricsReply, err := c.GetMetrics(ctx, getMetricsRequest)
+			//	if err != nil {
+			//		continue
+			//	}
+			//	//Save or Update model on ModelDB
+			//	SaveOrUpdateModel(c, getMetricsReply)
+			//	iter++
+			//}
+			//checkWorkersResult(c, studyId)
 
 		}
 	} else {
@@ -85,32 +84,32 @@ func main() {
 		checkSuggestions(getSuggestReply)
 
 		//RunTrials
-		workerIds := runTrials(c, studyId, getSuggestReply)
+		//workerIds := runTrials(c, studyId, getSuggestReply)
 
-		//GetWorkersCheck
-		getWorker(c, studyId, getSuggestReply, workerIds)
-		log.Println("GetWorkers checked!")
+		////GetWorkersCheck
+		//getWorker(c, studyId, getSuggestReply, workerIds)
+		//log.Println("GetWorkers checked!")
 
-		iter := 0
-		for !isCompletedAllWorker(c, studyId) {
-			if iter > TimeOut {
-				log.Fatal("GetMetrics Timeout.")
-			}
-			time.Sleep(1 * time.Second)
-			getMetricsRequest := &api.GetMetricsRequest{
-				StudyId:   studyId,
-				WorkerIds: workerIds,
-			}
-			//GetMetrics
-			getMetricsReply, err := c.GetMetrics(ctx, getMetricsRequest)
-			if err != nil {
-				continue
-			}
-			//Save or Update model on ModelDB
-			SaveOrUpdateModel(c, getMetricsReply)
-			iter++
-		}
-		checkWorkersResult(c, studyId)
+		//iter := 0
+		//for !isCompletedAllWorker(c, studyId) {
+		//	if iter > TimeOut {
+		//		log.Fatal("GetMetrics Timeout.")
+		//	}
+		//	time.Sleep(1 * time.Second)
+		//	getMetricsRequest := &api.GetMetricsRequest{
+		//		StudyId:   studyId,
+		//		WorkerIds: workerIds,
+		//	}
+		//	//GetMetrics
+		//	getMetricsReply, err := c.GetMetrics(ctx, getMetricsRequest)
+		//	if err != nil {
+		//		continue
+		//	}
+		//	//Save or Update model on ModelDB
+		//	SaveOrUpdateModel(c, getMetricsReply)
+		//	iter++
+		//}
+		//checkWorkersResult(c, studyId)
 	}
 	conn.Close()
 	log.Println("E2E test OK!")
@@ -126,6 +125,7 @@ func readConfigs() {
 	if err != nil {
 		log.Fatalf("fail to Unmarshal yaml")
 	}
+	studyConfig.Name += *suggestArgo
 
 	buf, err = ioutil.ReadFile("worker-config.yml")
 	if err != nil {
@@ -251,114 +251,114 @@ func checkSuggestions(getSuggestReply *api.GetSuggestionsReply) bool {
 	return true
 }
 
-func runTrials(c api.ManagerClient, studyId string, getSuggestReply *api.GetSuggestionsReply) []string {
-	ctx := context.Background()
-	workerIds := make([]string, len(getSuggestReply.Trials))
-	workerParameter := make(map[string][]*api.Parameter)
-	for i, t := range getSuggestReply.Trials {
-		wc := workerConfig
-		rtr := &api.RunTrialRequest{
-			StudyId:      studyId,
-			TrialId:      t.TrialId,
-			Runtime:      "kubernetes",
-			WorkerConfig: &wc,
-		}
-		for _, p := range t.ParameterSet {
-			rtr.WorkerConfig.Command = append(rtr.WorkerConfig.Command, p.Name+"="+p.Value)
-		}
-		workerReply, err := c.RunTrial(ctx, rtr)
-		if err != nil {
-			log.Fatalf("RunTrial Error %v", err)
-		}
-		workerIds[i] = workerReply.WorkerId
-		workerParameter[workerReply.WorkerId] = t.ParameterSet
-		saveModelRequest := &api.SaveModelRequest{
-			Model: &api.ModelInfo{
-				StudyName:  studyConfig.Name,
-				WorkerId:   workerReply.WorkerId,
-				Parameters: t.ParameterSet,
-				Metrics:    []*api.Metrics{},
-				ModelPath:  "pvc:/Path/to/Model",
-			},
-			DataSet: &api.DataSetInfo{
-				Name: "Mnist",
-				Path: "/path/to/data",
-			},
-		}
-		_, err = c.SaveModel(ctx, saveModelRequest)
-		if err != nil {
-			log.Fatalf("SaveModel Error %v", err)
-		}
-		log.Printf("WorkerID %s start\n", workerReply.WorkerId)
-		trials[workerReply.WorkerId] = t
-	}
-	return workerIds
-}
+//func runTrials(c api.ManagerClient, studyId string, getSuggestReply *api.GetSuggestionsReply) []string {
+//	ctx := context.Background()
+//	workerIds := make([]string, len(getSuggestReply.Trials))
+//	workerParameter := make(map[string][]*api.Parameter)
+//	for i, t := range getSuggestReply.Trials {
+//		wc := workerConfig
+//		rtr := &api.RunTrialRequest{
+//			StudyId:      studyId,
+//			TrialId:      t.TrialId,
+//			Runtime:      "kubernetes",
+//			WorkerConfig: &wc,
+//		}
+//		for _, p := range t.ParameterSet {
+//			rtr.WorkerConfig.Command = append(rtr.WorkerConfig.Command, p.Name+"="+p.Value)
+//		}
+//		workerReply, err := c.RunTrial(ctx, rtr)
+//		if err != nil {
+//			log.Fatalf("RunTrial Error %v", err)
+//		}
+//		workerIds[i] = workerReply.WorkerId
+//		workerParameter[workerReply.WorkerId] = t.ParameterSet
+//		saveModelRequest := &api.SaveModelRequest{
+//			Model: &api.ModelInfo{
+//				StudyName:  studyConfig.Name,
+//				WorkerId:   workerReply.WorkerId,
+//				Parameters: t.ParameterSet,
+//				Metrics:    []*api.Metrics{},
+//				ModelPath:  "pvc:/Path/to/Model",
+//			},
+//			DataSet: &api.DataSetInfo{
+//				Name: "Mnist",
+//				Path: "/path/to/data",
+//			},
+//		}
+//		_, err = c.SaveModel(ctx, saveModelRequest)
+//		if err != nil {
+//			log.Fatalf("SaveModel Error %v", err)
+//		}
+//		log.Printf("WorkerID %s start\n", workerReply.WorkerId)
+//		trials[workerReply.WorkerId] = t
+//	}
+//	return workerIds
+//}
+//
+//func getWorker(c api.ManagerClient, studyId string, getSuggestReply *api.GetSuggestionsReply, workerIds []string) {
+//	ctx := context.Background()
+//	getByTID := []*api.Worker{}
+//	getByWID := []*api.Worker{}
+//	gwr := &api.GetWorkersRequest{
+//		StudyId: studyId,
+//	}
+//	_, err := c.GetWorkers(ctx, gwr)
+//	if err != nil {
+//		log.Fatalf("GwtWorker by Study ID Error %v", err)
+//	}
+//	for _, t := range getSuggestReply.Trials {
+//		gwr := &api.GetWorkersRequest{
+//			StudyId: studyId,
+//			TrialId: t.TrialId,
+//		}
+//		gwrep, err := c.GetWorkers(ctx, gwr)
+//		if err != nil {
+//			log.Fatalf("GwtWorker by Trial ID Error %v", err)
+//		}
+//		getByTID = append(getByTID, gwrep.Workers...)
+//	}
+//	for _, w := range workerIds {
+//		gwr = &api.GetWorkersRequest{
+//			StudyId:  studyId,
+//			WorkerId: w,
+//		}
+//		gwrep, err := c.GetWorkers(ctx, gwr)
+//		if err != nil {
+//			log.Fatalf("GwtWorker by Worker ID Error %v", err)
+//		}
+//		getByWID = append(getByWID, gwrep.Workers...)
+//	}
+//	if len(getByTID) != len(getByWID) {
+//		log.Fatalf("GwtWorker by Worker ID is mismatch with GwtWorker by Trial ID \n by Trial ID %v \n by Worker ID %v", getByTID, getByWID)
+//	}
+//}
 
-func getWorker(c api.ManagerClient, studyId string, getSuggestReply *api.GetSuggestionsReply, workerIds []string) {
-	ctx := context.Background()
-	getByTID := []*api.Worker{}
-	getByWID := []*api.Worker{}
-	gwr := &api.GetWorkersRequest{
-		StudyId: studyId,
-	}
-	_, err := c.GetWorkers(ctx, gwr)
-	if err != nil {
-		log.Fatalf("GwtWorker by Study ID Error %v", err)
-	}
-	for _, t := range getSuggestReply.Trials {
-		gwr := &api.GetWorkersRequest{
-			StudyId: studyId,
-			TrialId: t.TrialId,
-		}
-		gwrep, err := c.GetWorkers(ctx, gwr)
-		if err != nil {
-			log.Fatalf("GwtWorker by Trial ID Error %v", err)
-		}
-		getByTID = append(getByTID, gwrep.Workers...)
-	}
-	for _, w := range workerIds {
-		gwr = &api.GetWorkersRequest{
-			StudyId:  studyId,
-			WorkerId: w,
-		}
-		gwrep, err := c.GetWorkers(ctx, gwr)
-		if err != nil {
-			log.Fatalf("GwtWorker by Worker ID Error %v", err)
-		}
-		getByWID = append(getByWID, gwrep.Workers...)
-	}
-	if len(getByTID) != len(getByWID) {
-		log.Fatalf("GwtWorker by Worker ID is mismatch with GwtWorker by Trial ID \n by Trial ID %v \n by Worker ID %v", getByTID, getByWID)
-	}
-}
-
-func SaveOrUpdateModel(c api.ManagerClient, getMetricsReply *api.GetMetricsReply) {
-	ctx := context.Background()
-	for _, mls := range getMetricsReply.MetricsLogSets {
-		if len(mls.MetricsLogs) > 0 {
-			log.Printf("WorkerID %s :", mls.WorkerId)
-			//Only Metrics can be updated.
-			saveModelRequest := &api.SaveModelRequest{
-				Model: &api.ModelInfo{
-					StudyName: studyConfig.Name,
-					WorkerId:  mls.WorkerId,
-					Metrics:   []*api.Metrics{},
-				},
-			}
-			for _, ml := range mls.MetricsLogs {
-				if len(ml.Values) > 0 {
-					log.Printf("\t Metrics Name %s Value %v", ml.Name, ml.Values[len(ml.Values)-1])
-					saveModelRequest.Model.Metrics = append(saveModelRequest.Model.Metrics, &api.Metrics{Name: ml.Name, Value: ml.Values[len(ml.Values)-1]})
-				}
-			}
-			_, err := c.SaveModel(ctx, saveModelRequest)
-			if err != nil {
-				log.Fatalf("SaveModel Error %v", err)
-			}
-		}
-	}
-}
+//func SaveOrUpdateModel(c api.ManagerClient, getMetricsReply *api.GetMetricsReply) {
+//	ctx := context.Background()
+//	for _, mls := range getMetricsReply.MetricsLogSets {
+//		if len(mls.MetricsLogs) > 0 {
+//			log.Printf("WorkerID %s :", mls.WorkerId)
+//			//Only Metrics can be updated.
+//			saveModelRequest := &api.SaveModelRequest{
+//				Model: &api.ModelInfo{
+//					StudyName: studyConfig.Name,
+//					WorkerId:  mls.WorkerId,
+//					Metrics:   []*api.Metrics{},
+//				},
+//			}
+//			for _, ml := range mls.MetricsLogs {
+//				if len(ml.Values) > 0 {
+//					log.Printf("\t Metrics Name %s Value %v", ml.Name, ml.Values[len(ml.Values)-1])
+//					saveModelRequest.Model.Metrics = append(saveModelRequest.Model.Metrics, &api.Metrics{Name: ml.Name, Value: ml.Values[len(ml.Values)-1]})
+//				}
+//			}
+//			_, err := c.SaveModel(ctx, saveModelRequest)
+//			if err != nil {
+//				log.Fatalf("SaveModel Error %v", err)
+//			}
+//		}
+//	}
+//}
 
 func isCompletedAllWorker(c api.ManagerClient, studyId string) bool {
 	ctx := context.Background()
@@ -391,7 +391,7 @@ func checkWorkersResult(c api.ManagerClient, studyId string) bool {
 		for _, p := range trials[mls.WorkerId].ParameterSet {
 			for _, ml := range mls.MetricsLogs {
 				if p.Name == ml.Name {
-					if p.Value != ml.Values[len(ml.Values)-1] {
+					if p.Value != ml.Values[len(ml.Values)-1].Value {
 						log.Fatalf("Output %s is mismuched to Input %s", ml.Values[len(ml.Values)-1], p.Value)
 						return false
 					}
