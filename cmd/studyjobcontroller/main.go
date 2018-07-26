@@ -18,13 +18,12 @@ package main
 import (
 	"log"
 
-	"github.com/kubeflow/katib/pkg/apis"
+	"github.com/kubeflow/katib/pkg/api/operators/apis"
 	"github.com/kubeflow/katib/pkg/controller"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
-	//studycontroller "github.com/kubeflow/katib/pkg/controller/studycontroller"
 )
 
 func main() {

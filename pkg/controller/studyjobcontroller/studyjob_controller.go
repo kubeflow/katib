@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package studycontroller
+package studyjobcontroller
 
 import (
 	"context"
@@ -24,7 +24,7 @@ import (
 
 	"github.com/kubeflow/katib/pkg"
 	katibapi "github.com/kubeflow/katib/pkg/api"
-	katibv1alpha1 "github.com/kubeflow/katib/pkg/apis/studycontroller/v1alpha1"
+	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 
 	"google.golang.org/grpc"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -42,40 +42,38 @@ import (
 * business logic.  Delete these comments after modifying this file.*
  */
 
-// Add creates a new StudyController Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
+// Add creates a new StudyJobController Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
-// USER ACTION REQUIRED: update cmd/manager/main.go to call this studycontroller.Add(mgr) to install this Controller
+// USER ACTION REQUIRED: update cmd/manager/main.go to call this studyjobcontroller.Add(mgr) to install this Controller
 func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr))
 }
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileStudyController{Client: mgr.GetClient(), scheme: mgr.GetScheme()}
+	return &ReconcileStudyJobController{Client: mgr.GetClient(), scheme: mgr.GetScheme()}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
-	log.Println("controller.New")
-	c, err := controller.New("studycontroller-controller", mgr, controller.Options{Reconciler: r})
+	c, err := controller.New("studyjob-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}
 
-	// Watch for changes to StudyController
-	log.Println("c.Watch(&source.Kind{Type: &katibv1alpha1.StudyController{}}, &handler.EnqueueRequestForObject{})")
-	err = c.Watch(&source.Kind{Type: &katibv1alpha1.StudyController{}}, &handler.EnqueueRequestForObject{})
+	// Watch for changes to StudyJobController
+	err = c.Watch(&source.Kind{Type: &katibv1alpha1.StudyJob{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
 
 	// TODO(user): Modify this to be the types you create
-	// Uncomment watch a Deployment created by StudyController - change this for objects you create
-	log.Println("c.Watch(&source.Kind{Type: &katibv1alpha1.StudyController{}}, &handler.EnqueueRequestForOwner{")
-	err = c.Watch(&source.Kind{Type: &katibv1alpha1.StudyController{}}, &handler.EnqueueRequestForOwner{
+	// Uncomment watch a Deployment created by StudyJobController - change this for objects you create
+	log.Println("c.Watch(&source.Kind{Type: &katibv1alpha1.StudyJobController{}}, &handler.EnqueueRequestForOwner{")
+	err = c.Watch(&source.Kind{Type: &katibv1alpha1.StudyJob{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &katibv1alpha1.StudyController{},
+		OwnerType:    &katibv1alpha1.StudyJob{},
 	})
 	if err != nil {
 		return err
@@ -85,23 +83,23 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileStudyController{}
+var _ reconcile.Reconciler = &ReconcileStudyJobController{}
 
-// ReconcileStudyController reconciles a StudyController object
-type ReconcileStudyController struct {
+// ReconcileStudyJobController reconciles a StudyJob object
+type ReconcileStudyJobController struct {
 	client.Client
 	scheme *runtime.Scheme
 }
 
-// Reconcile reads that state of the cluster for a StudyController object and makes changes based on the state read
-// and what is in the StudyController.Spec
+// Reconcile reads that state of the cluster for a StudyJob object and makes changes based on the state read
+// and what is in the StudyJob.Spec
 // a Deployment as an example
 // Automatically generate RBAC rules to allow the Controller to read and write Deployments
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=studycontrollers.kubeflow.org,resources=studycontrollers,verbs=get;list;watch;create;update;patch;delete
-func (r *ReconcileStudyController) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	// Fetch the StudyController instance
-	instance := &katibv1alpha1.StudyController{}
+// +kubebuilder:rbac:groups=studyjob.kubeflow.org,resources=studyjob,verbs=get;list;watch;create;update;patch;delete
+func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+	// Fetch the StudyJob instance
+	instance := &katibv1alpha1.StudyJob{}
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -119,7 +117,7 @@ func (r *ReconcileStudyController) Reconcile(request reconcile.Request) (reconci
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileStudyController) getStudyConf(instance *katibv1alpha1.StudyController) (*katibapi.StudyConfig, error) {
+func (r *ReconcileStudyJobController) getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
 
 	sconf := &katibapi.StudyConfig{
 		Metrics: []string{},
@@ -174,7 +172,7 @@ func (r *ReconcileStudyController) getStudyConf(instance *katibv1alpha1.StudyCon
 	return sconf, nil
 }
 
-func (r *ReconcileStudyController) checkGoal(instance *katibv1alpha1.StudyController, sconf *katibapi.StudyConfig, mr *katibapi.GetMetricsReply) bool {
+func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob, sconf *katibapi.StudyConfig, mr *katibapi.GetMetricsReply) bool {
 	if instance.Spec.StudySpec.OptimizationGoal == nil {
 		return false
 	}
@@ -195,7 +193,7 @@ func (r *ReconcileStudyController) checkGoal(instance *katibv1alpha1.StudyContro
 	return false
 }
 
-func (r *ReconcileStudyController) controllerloop(instance *katibv1alpha1.StudyController) {
+func (r *ReconcileStudyJobController) controllerloop(instance *katibv1alpha1.StudyJob) {
 	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Connect katib manager error %v", err)
@@ -293,7 +291,7 @@ func (r *ReconcileStudyController) controllerloop(instance *katibv1alpha1.StudyC
 	}
 }
 
-func (r *ReconcileStudyController) createStudy(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig) (string, error) {
+func (r *ReconcileStudyJobController) createStudy(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig) (string, error) {
 	ctx := context.Background()
 	createStudyreq := &katibapi.CreateStudyRequest{
 		StudyConfig: studyConfig,
@@ -317,7 +315,7 @@ func (r *ReconcileStudyController) createStudy(c katibapi.ManagerClient, studyCo
 	return studyId, nil
 }
 
-func (r *ReconcileStudyController) getWorkerConf(wSpec *katibv1alpha1.WorkerSpec) (*katibapi.WorkerConfig, error) {
+func (r *ReconcileStudyJobController) getWorkerConf(wSpec *katibv1alpha1.WorkerSpec) (*katibapi.WorkerConfig, error) {
 	w := &katibapi.WorkerConfig{
 		Command: []string{},
 		Mount:   &katibapi.MountConf{},
@@ -338,7 +336,7 @@ func (r *ReconcileStudyController) getWorkerConf(wSpec *katibv1alpha1.WorkerSpec
 	return w, nil
 }
 
-func (r *ReconcileStudyController) setSuggestionParam(c katibapi.ManagerClient, studyId string, suggestionSpec *katibv1alpha1.SuggestionSpec) (string, error) {
+func (r *ReconcileStudyJobController) setSuggestionParam(c katibapi.ManagerClient, studyId string, suggestionSpec *katibv1alpha1.SuggestionSpec) (string, error) {
 	ctx := context.Background()
 	pid := ""
 	if suggestionSpec.SuggestionParameters != nil {
@@ -366,7 +364,7 @@ func (r *ReconcileStudyController) setSuggestionParam(c katibapi.ManagerClient, 
 	return pid, nil
 }
 
-func (r *ReconcileStudyController) getSuggestion(c katibapi.ManagerClient, studyId string, suggestionSpec *katibv1alpha1.SuggestionSpec, sParamID string) (*katibapi.GetSuggestionsReply, error) {
+func (r *ReconcileStudyJobController) getSuggestion(c katibapi.ManagerClient, studyId string, suggestionSpec *katibv1alpha1.SuggestionSpec, sParamID string) (*katibapi.GetSuggestionsReply, error) {
 	ctx := context.Background()
 	getSuggestRequest := &katibapi.GetSuggestionsRequest{
 		StudyId:             studyId,
@@ -387,7 +385,7 @@ func (r *ReconcileStudyController) getSuggestion(c katibapi.ManagerClient, study
 	return getSuggestReply, nil
 }
 
-func (r *ReconcileStudyController) runTrial(c katibapi.ManagerClient, studyId string, tl []*katibapi.Trial, studyConfig *katibapi.StudyConfig, wSpec *katibv1alpha1.WorkerSpec) ([]string, []katibv1alpha1.TrialSet, error) {
+func (r *ReconcileStudyJobController) runTrial(c katibapi.ManagerClient, studyId string, tl []*katibapi.Trial, studyConfig *katibapi.StudyConfig, wSpec *katibv1alpha1.WorkerSpec) ([]string, []katibv1alpha1.TrialSet, error) {
 	ctx := context.Background()
 	workerParameter := make(map[string][]*katibapi.Parameter)
 	workerConfig, err := r.getWorkerConf(wSpec)
@@ -441,7 +439,7 @@ func (r *ReconcileStudyController) runTrial(c katibapi.ManagerClient, studyId st
 	return wl, ts, nil
 }
 
-func (r *ReconcileStudyController) saveOrUpdateModel(c katibapi.ManagerClient, getMetricsReply *katibapi.GetMetricsReply, studyConfig *katibapi.StudyConfig, studyId string) error {
+func (r *ReconcileStudyJobController) saveOrUpdateModel(c katibapi.ManagerClient, getMetricsReply *katibapi.GetMetricsReply, studyConfig *katibapi.StudyConfig, studyId string) error {
 	ctx := context.Background()
 	for _, mls := range getMetricsReply.MetricsLogSets {
 		if len(mls.MetricsLogs) > 0 {
@@ -470,7 +468,7 @@ func (r *ReconcileStudyController) saveOrUpdateModel(c katibapi.ManagerClient, g
 	return nil
 }
 
-func (r *ReconcileStudyController) isCompletedAllWorker(c katibapi.ManagerClient, ms []*katibapi.MetricsLogSet) bool {
+func (r *ReconcileStudyJobController) isCompletedAllWorker(c katibapi.ManagerClient, ms []*katibapi.MetricsLogSet) bool {
 	for _, mls := range ms {
 		if mls.WorkerStatus != katibapi.State_COMPLETED {
 			return false

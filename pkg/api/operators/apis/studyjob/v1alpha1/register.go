@@ -15,12 +15,12 @@ limitations under the License.
 
 // NOTE: Boilerplate only.  Ignore this file.
 
-// Package v1alpha1 contains API Schema definitions for the studycontroller v1alpha1 API group
+// Package v1alpha1 contains API Schema definitions for the studyjob v1alpha1 API group
 // +k8s:openapi-gen=true
 // +k8s:deepcopy-gen=package,register
-// +k8s:conversion-gen=github.com/kubeflow/katib/pkg/apis/studycontroller
+// +k8s:conversion-gen=github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1
 // +k8s:defaulter-gen=TypeMeta
-// +groupName=studycontroller.kubeflow.org
+// +groupName=studyjob.kubeflow.org
 package v1alpha1
 
 import (

@@ -1,5 +1,5 @@
 apiVersion: "kubeflow.org/v1alpha1"
-kind: StudyController
+kind: StudyJob
 metadata:
   namespace: katib
   labels:
@@ -9,7 +9,7 @@ spec:
   studySpec:
       name: hypb-example
       owner: crd
-      optimizationtype: minimize
+      optimizationtype: maximize
       objectivevaluename: Validation-accuracy
       metricsnames:
         - accuracy

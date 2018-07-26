@@ -24,16 +24,16 @@ import (
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// StudyControllerSpec defines the desired state of StudyController
-type StudyControllerSpec struct {
+// StudyJobSpec defines the desired state of StudyJob
+type StudyJobSpec struct {
 	StudySpec         *StudySpec         `json:"studySpec,omitempty"`
 	WorkerSpec        *WorkerSpec        `json:"workerSpec,omitempty"`
 	SuggestionSpec    *SuggestionSpec    `json:"suggestionSpec,omitempty"`
 	EarlyStoppingSpec *EarlyStoppingSpec `json:"earlyStoppingSpec,omitempty"`
 }
 
-// StudyControllerStatus defines the observed state of StudyController
-type StudyControllerStatus struct {
+// StudyJobStatus defines the observed state of StudyJob
+type StudyJobStatus struct {
 	// Represents time when the TFJob was acknowledged by the TFJob controller.
 	// It is not guaranteed to be set in happens-before order across separate operations.
 	// It is represented in RFC3339 form and is in UTC.
@@ -148,25 +148,25 @@ const (
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// StudyController is the Schema for the studycontrollers API
+// StudyJob is the Schema for the studyjob API
 // +k8s:openapi-gen=true
-type StudyController struct {
+type StudyJob struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   StudyControllerSpec   `json:"spec,omitempty"`
-	Status StudyControllerStatus `json:"status,omitempty"`
+	Spec   StudyJobSpec   `json:"spec,omitempty"`
+	Status StudyJobStatus `json:"status,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// StudyControllerList contains a list of StudyController
-type StudyControllerList struct {
+// StudyJobList contains a list of StudyJob
+type StudyJobList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []StudyController `json:"items"`
+	Items           []StudyJob `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&StudyController{}, &StudyControllerList{})
+	SchemeBuilder.Register(&StudyJob{}, &StudyJobList{})
 }

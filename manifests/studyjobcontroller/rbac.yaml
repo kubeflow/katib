@@ -1,7 +1,7 @@
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: study-controller
+  name: studyjob-controller
 rules:
 - apiGroups:
   - ""
@@ -23,26 +23,26 @@ rules:
 - apiGroups:
   - kubeflow.org
   resources:
-  - studycontroller
+  - studyjobs
   verbs:
   - "*"
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: study-controller
+  name: studyjob-controller
   namespace: katib
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: study-controller
+  name: studyjob-controller
   namespace: katib
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: study-controller
+  name: studyjob-controller
 subjects:
 - kind: ServiceAccount
-  name: study-controller
+  name: studyjob-controller
   namespace: katib
