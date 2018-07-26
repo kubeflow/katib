@@ -16,8 +16,6 @@ spec:
         app: study-controller
     spec:
       serviceAccountName: study-controller
-      imagePullSecrets:
-        - name: gitlabregcred
       containers:
       - name: study-controller
         image: katib/study-controller
