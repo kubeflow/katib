@@ -193,6 +193,9 @@ func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob
 	return false
 }
 
+//Main loop of StudyJob Controller.
+//This loop is for each StudyJob Object.
+//Create Study, set Suggesiton Parameters, GetSuggestion and RunTrials. Then polling the workers.
 func (r *ReconcileStudyJobController) controllerloop(instance *katibv1alpha1.StudyJob) {
 	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
@@ -327,7 +330,7 @@ func (r *ReconcileStudyJobController) getWorkerConf(wSpec *katibv1alpha1.WorkerS
 				w.Command = append(w.Command, c)
 			}
 		}
-		w.Gpu = int32(wSpec.Gpu)
+		w.Gpu = int32(wSpec.GPU)
 		w.Scheduler = wSpec.Scheduler
 		w.Mount.Pvc = wSpec.MountConf.Pvc
 		w.Mount.Path = wSpec.MountConf.Path

@@ -102,7 +102,7 @@ const (
 type WorkerSpec struct {
 	Image      string    `json:"image,omitempty"`
 	Command    []string  `json:"command,omitempty"`
-	Gpu        int       `json:"gpu,omitempty"`
+	GPU        int       `json:"gpu,omitempty"`
 	Scheduler  string    `json:"scheduler,omitempty"`
 	MountConf  MountConf `json:"mountconf,omitempty"`
 	PullSecret string    `json:"pullsecret,omitempty"`
