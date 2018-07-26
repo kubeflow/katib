@@ -12,3 +12,6 @@ kubectl apply -f manifests/vizier/suggestion/random
 kubectl apply -f manifests/vizier/suggestion/grid
 kubectl apply -f manifests/vizier/suggestion/hyperband
 kubectl apply -f manifests/vizier/earlystopping/medianstopping
+kubectl apply -f manifests/studycontroller/crd.yaml
+kubectl apply -f manifests/studycontroller/rbac.yaml
+kubectl apply -f manifests/studycontroller/studycontroller.yaml

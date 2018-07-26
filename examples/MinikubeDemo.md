@@ -43,35 +43,109 @@ The client will read three config files.
 ### Random Suggestion Demo
 You can run rundom suggesiton demo.
 ```
-go run client-example.go -a random
+kubectl -n katib -f random-example.yaml
 ```
 In this demo, 2 random parameters in
 * Learning Rate (--lr) - type: double
 * Number of NN Layer (--num-layers) - type: int
 * optimizer (--optimizer) - type: categorical
 
-Logs
+Check the study status.
+
 ```
-2018/04/26 17:43:26 Study ID n9debe3de9ef67c8
-2018/04/26 17:43:26 Study ID n9debe3de9ef67c8 StudyConfname:"random-demo" owner:"katib" optimization_type:MAXIMIZE optimization_goal:0.99 parameter_configs:<configs:<name:"--lr" parameter_type:DOUBLE feasible:<max:"0,03" min:"0.07" > > > default_suggestion_algorithm:"random" default_early_stopping_algorithm:"medianstopping" objective_value_name:"Validation-accuracy" metrics:"accuracy" metrics:"Validation-accuracy"
-2018/04/26 17:43:26 Get Random Suggestions [trial_id:"i988add515f1ca4c" study_id:"n9debe3de9ef67c8" parameter_set:<name:"--lr" parameter_type:DOUBLE value:"0.0611" >  trial_id:"g7afad58be7da888" study_id:"n9debe3de9ef67c8" parameter_set:<name:"--lr" parameter_type:DOUBLE value:"0.0444" > ]
-2018/04/26 17:43:26 WorkerID p4482bfb5cdc17ee start
-2018/04/26 17:43:26 WorkerID c19ca08ca4e6aab1 start
+$ kubectl -n katib describe studycontroller random-example.yml
+
+Name:         random-example
+Namespace:    katib
+Labels:       controller-tools.k8s.io=1.0
+Annotations:  kubectl.kubernetes.io/last-applied-configuration={"apiVersion":"kubeflow.org/v1alpha1","kind":"StudyController","metadata":{"annotations":{},"labels":{"controller-tools.k8s.io":"1.0"},"name":"random-e...
+API Version:  kubeflow.org/v1alpha1
+Kind:         StudyController
+Metadata:
+  Cluster Name:
+  Creation Timestamp:  2018-07-26T06:49:28Z
+  Generation:          0
+  Resource Version:    1525952
+  Self Link:           /apis/kubeflow.org/v1alpha1/namespaces/katib/studycontroller/random-example
+  UID:                 0aafaab4-90a0-11e8-9e34-42010a9200a6
+Spec:
+  Study Spec:
+    Metricsnames:
+      accuracy
+    Name:                random-example
+    Objectivevaluename:  Validation-accuracy
+    Optimizationgoal:    0.9
+    Optimizationtype:    minimize
+    Owner:               crd
+    Parameterconfigs:
+      Feasible:
+        Max:          0.03
+        Min:          0.01
+      Name:           --lr
+      Parametertype:  double
+      Feasible:
+        Max:          5
+        Min:          2
+      Name:           --num-layers
+      Parametertype:  int
+      Feasible:
+        List:
+          sgd
+          adam
+          ftrl
+      Name:           --optimizer
+      Parametertype:  categorical
+  Suggestion Spec:
+    Request Number:         5
+    Suggestion Algorithm:   random
+    Suggestion Parameters:  <nil>
+  Worker Spec:
+    Command:
+      python
+      /mxnet/example/image-classification/train_mnist.py
+      --batch-size=64
+    Image:  katib/mxnet-mnist-example
+    Mountconf:
+Status:
+  State:    Running
+  Studyid:  n984151233cc1704
+  Trials:
+    Trialid:  cf3bef0501b70d6e
+    Workeridlist:
+      j793a3cb65fa4b91
+    Trialid:  b6e96ed8292a2f06
+    Workeridlist:
+      scdd2c2f3fa5a629
+    Trialid:  t6dad623908e78dd
+    Workeridlist:
+      f25346fa32918a1c
+    Trialid:  z181aeda027d37c5
+    Workeridlist:
+      l928f9f25a8dd3c6
+    Trialid:  n31cd72d1afb3649
+    Workeridlist:
+      z7b200a60bb59448
+Events:  <none>
 ```
+
+When the Spec.Status.State become `Completed`, the study is completed.
+You can look the result on `http://127.0.0.1:3000`.
 
 ### Grid Demo
 Almost same as random suggestion.
+
 ```
-go run client-example.go -a grid
+kubectl -n katib describe studycontroller grid-example.yml
 ```
+
 In this demo, make 4 grids for learning rate (--lr) Min 0.03 and Max 0.07.
 
 ### Hyperband Demo
-As the Hyperband suggestion is so different from random and grid, use special client example.
+Almost same as random suggestion.
+
 ```
-go run hyperband-example-client.go
+kubectl -n katib describe studycontroller hypb-example.yml
 ```
-The parametes of Hyperband are defined [suggestion-config-hyb.yml](./suggestion-config-hyb.yml).
 In this demo, the eta is 3 and the R is 9.
 
 ## UI
