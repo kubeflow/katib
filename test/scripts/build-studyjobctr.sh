@@ -23,7 +23,7 @@ set -o pipefail
 export PATH=${GOPATH}/bin:/usr/local/go/bin:${PATH}
 REGISTRY="${GCP_REGISTRY}"
 PROJECT="${GCP_PROJECT}"
-GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-manager
+GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-studyjob-controller
 VERSION=$(git describe --tags --always --dirty)
 
 echo "Activating service-account"
