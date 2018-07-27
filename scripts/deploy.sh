@@ -30,4 +30,7 @@ kubectl apply -f manifests/vizier/core
 kubectl apply -f manifests/vizier/suggestion/random
 kubectl apply -f manifests/vizier/suggestion/grid
 kubectl apply -f manifests/vizier/suggestion/hyperband
+kubectl apply -f manifests/vizier/crd.yml
+kubectl apply -f manifests/vizier/rbac.yml
+kubectl apply -f manifests/vizier/studyjobcontroller.yml
 cd - > /dev/null
