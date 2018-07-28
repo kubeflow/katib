@@ -41,6 +41,9 @@ kubectl config set-credentials temp-admin --username=admin --password=$(gcloud c
 kubectl config set-context temp-context --cluster=$(kubectl config get-clusters | grep ${CLUSTER_NAME}) --user=temp-admin
 kubectl config use-context temp-context
 
+#This is required. But I don't know why.
+VERSION=${VERSION/%?/}
+
 echo "Install Katib "
 echo "REGISTRY ${REGISTRY}"
 echo "REPO_NAME ${REPO_NAME}"
