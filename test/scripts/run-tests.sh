@@ -42,6 +42,10 @@ kubectl config set-context temp-context --cluster=$(kubectl config get-clusters 
 kubectl config use-context temp-context
 
 echo "Install Katib "
+echo "REGISTRY ${REGISTRY}"
+echo "REPO_NAME ${REPO_NAME}"
+echo "VERSION ${VERSION}"
+
 sed -i -e "s@image: katib\/vizier-core@image: ${REGISTRY}\/${REPO_NAME}\/vizier-core:${VERSION}@" manifests/vizier/core/deployment.yaml
 sed -i -e "s@type: NodePort@type: ClusterIP@" -e "/nodePort: 30678/d" manifests/vizier/core/service.yaml
 sed -i -e "s@image: katib\/studyjobcontroller@image: ${REGISTRY}\/${REPO_NAME}\/studyjobcontroller:${VERSION}@" manifests/studyjobcontroller/studyjobcontroller.yaml
