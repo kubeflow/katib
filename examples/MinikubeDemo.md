@@ -51,31 +51,29 @@ In this demo, 2 random parameters in
 * optimizer (--optimizer) - type: categorical
 
 Check the study status.
-
 ```
-$ kubectl -n katib describe studycontroller random-example.yml
-
+$ kubectl -n katib describe studyjobs random-example
 Name:         random-example
 Namespace:    katib
 Labels:       controller-tools.k8s.io=1.0
-Annotations:  kubectl.kubernetes.io/last-applied-configuration={"apiVersion":"kubeflow.org/v1alpha1","kind":"StudyController","metadata":{"annotations":{},"labels":{"controller-tools.k8s.io":"1.0"},"name":"random-e...
+Annotations:  kubectl.kubernetes.io/last-applied-configuration={"apiVersion":"kubeflow.org/v1alpha1","kind":"StudyJob","metadata":{"annotations":{},"labels":{"controller-tools.k8s.io":"1.0"},"name":"random-example"...
 API Version:  kubeflow.org/v1alpha1
-Kind:         StudyController
+Kind:         StudyJob
 Metadata:
   Cluster Name:
-  Creation Timestamp:  2018-07-26T06:49:28Z
+  Creation Timestamp:  2018-07-31T06:01:33Z
   Generation:          0
-  Resource Version:    1525952
-  Self Link:           /apis/kubeflow.org/v1alpha1/namespaces/katib/studycontroller/random-example
-  UID:                 0aafaab4-90a0-11e8-9e34-42010a9200a6
+  Resource Version:    2105851
+  Self Link:           /apis/kubeflow.org/v1alpha1/namespaces/katib/studyjobs/random-example
+  UID:                 2d2979d9-9487-11e8-9e34-42010a9200a6
 Spec:
   Study Spec:
     Metricsnames:
       accuracy
     Name:                random-example
     Objectivevaluename:  Validation-accuracy
-    Optimizationgoal:    0.9
-    Optimizationtype:    minimize
+    Optimizationgoal:    0.99
+    Optimizationtype:    maximize
     Owner:               crd
     Parameterconfigs:
       Feasible:
@@ -108,26 +106,25 @@ Spec:
     Mountconf:
 Status:
   State:    Running
-  Studyid:  n984151233cc1704
+  Studyid:  h52473c20520ce8b
   Trials:
-    Trialid:  cf3bef0501b70d6e
+    Trialid:  v90be640b4ac3aa2
     Workeridlist:
-      j793a3cb65fa4b91
-    Trialid:  b6e96ed8292a2f06
+      u01344a450f5f2c2
+    Trialid:  w5fc56fdfdb39322
     Workeridlist:
-      scdd2c2f3fa5a629
-    Trialid:  t6dad623908e78dd
+      f391d7200e4c631e
+    Trialid:  jdd0a57d44090984
     Workeridlist:
-      f25346fa32918a1c
-    Trialid:  z181aeda027d37c5
+      yef518cad8fa5aec
+    Trialid:  i39c63a7aef16f13
     Workeridlist:
-      l928f9f25a8dd3c6
-    Trialid:  n31cd72d1afb3649
+      f08b781bcfb1505c
+    Trialid:  x7a7f8bd9db02db7
     Workeridlist:
-      z7b200a60bb59448
+      d530be392563c354
 Events:  <none>
 ```
-
 When the Spec.Status.State become `Completed`, the study is completed.
 You can look the result on `http://127.0.0.1:3000`.
 
@@ -138,6 +135,80 @@ Almost same as random suggestion.
 kubectl -n katib describe studycontroller grid-example.yml
 ```
 
+```
+$ kubectl -n katib describe studyjobs grid-example
+Name:         grid-example
+Namespace:    katib
+Labels:       controller-tools.k8s.io=1.0
+Annotations:  kubectl.kubernetes.io/last-applied-configuration={"apiVersion":"kubeflow.org/v1alpha1","kind":"StudyJob","metadata":{"annotations":{},"labels":{"controller-tools.k8s.io":"1.0"},"name":"grid-example","...
+API Version:  kubeflow.org/v1alpha1
+Kind:         StudyJob
+Metadata:
+  Cluster Name:
+  Creation Timestamp:  2018-07-26T14:36:13Z
+  Generation:          0
+  Resource Version:    1564376
+  Self Link:           /apis/kubeflow.org/v1alpha1/namespaces/katib/studyjobs/grid-example
+  UID:                 3f2a9dc4-90e1-11e8-9e34-42010a9200a6
+Spec:
+  Study Spec:
+    Metricsnames:
+      accuracy
+    Name:                grid-example
+    Objectivevaluename:  Validation-accuracy
+    Optimizationgoal:    0.99
+    Optimizationtype:    maximize
+    Owner:               crd
+    Parameterconfigs:
+      Feasible:
+        Max:          0.03
+        Min:          0.01
+      Name:           --lr
+      Parametertype:  double
+      Feasible:
+        Max:          5
+        Min:          2
+      Name:           --num-layers
+      Parametertype:  int
+      Feasible:
+        List:
+          sgd
+          adam
+          ftrl
+      Name:           --optimizer
+      Parametertype:  categorical
+  Suggestion Spec:
+    Suggestion Algorithm:  grid
+    Suggestion Parameters:
+      Name:   DefaultGrid
+      Value:  1
+      Name:   --lr
+      Value:  4
+  Worker Spec:
+    Command:
+      python
+      /mxnet/example/image-classification/train_mnist.py
+      --batch-size=64
+    Image:  katib/mxnet-mnist-example
+    Mountconf:
+Status:
+  State:    Completed
+  Studyid:  bdf1eeb5cc8c2895
+  Trials:
+    Trialid:  h082169809c716bf
+    Workeridlist:
+      b693d6a0ef3ee82b
+    Trialid:  x02b8580838c8d87
+    Workeridlist:
+      rdfeec2aace25331
+    Trialid:  icee5229503a7c07
+    Workeridlist:
+      x599b4a3a6c4617f
+    Trialid:  l3b02e51229332fb
+    Workeridlist:
+      dce5418974b944be
+Events:  <none>
+```
 In this demo, make 4 grids for learning rate (--lr) Min 0.03 and Max 0.07.
 
 ### Hyperband Demo
