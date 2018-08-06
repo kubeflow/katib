@@ -37,3 +37,7 @@
 [[constraint]]
   name = "k8s.io/client-go"
   version = "7.0.0"
+
+[[constraint]]
+  name = "github.com/grpc-ecosystem/grpc-gateway"
+  version = "1.4.1"
