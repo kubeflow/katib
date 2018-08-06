@@ -2,37 +2,148 @@ syntax = "proto3";
 
 package api;
 
+import "google/api/annotations.proto";
+
 service Manager {
-    rpc CreateStudy(CreateStudyRequest) returns (CreateStudyReply);
-    rpc StopStudy(StopStudyRequest) returns (StopStudyReply);
-    rpc GetStudy(GetStudyRequest) returns (GetStudyReply);
-    rpc GetStudyList(GetStudyListRequest) returns (GetStudyListReply);
-    rpc CreateTrial(CreateTrialRequest) returns (CreateTrialReply);
-    rpc GetTrials(GetTrialsRequest) returns (GetTrialsReply);
-    rpc RunTrial(RunTrialRequest) returns (RunTrialReply);
-    rpc StopWorkers(StopWorkersRequest) returns (StopWorkersReply);
-    rpc GetWorkers(GetWorkersRequest) returns (GetWorkersReply);
-    rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply);
-    rpc GetShouldStopWorkers(GetShouldStopWorkersRequest) returns (GetShouldStopWorkersReply);
-    rpc GetMetrics(GetMetricsRequest) returns (GetMetricsReply);
-    rpc SetSuggestionParameters(SetSuggestionParametersRequest) returns (SetSuggestionParametersReply);
-    rpc GetSuggestionParameters(GetSuggestionParametersRequest) returns (GetSuggestionParametersReply);
-    rpc GetSuggestionParameterList(GetSuggestionParameterListRequest) returns (GetSuggestionParameterListReply);
-    rpc SetEarlyStoppingParameters(SetEarlyStoppingParametersRequest) returns (SetEarlyStoppingParametersReply);
-    rpc GetEarlyStoppingParameters(GetEarlyStoppingParametersRequest) returns (GetEarlyStoppingParametersReply);
-    rpc GetEarlyStoppingParameterList(GetEarlyStoppingParameterListRequest) returns (GetEarlyStoppingParameterListReply);
-    rpc SaveStudy(SaveStudyRequest) returns(SaveStudyReply);
-    rpc SaveModel(SaveModelRequest) returns(SaveModelReply);
-    rpc GetSavedStudies(GetSavedStudiesRequest) returns(GetSavedStudiesReply);
-    rpc GetSavedModels(GetSavedModelsRequest) returns(GetSavedModelsReply);
+    rpc CreateStudy(CreateStudyRequest) returns (CreateStudyReply){
+        option (google.api.http) = {
+            post: "/api/Manager/CreateStudy"
+            body: "study_config"
+        };
+    };
+    rpc StopStudy(StopStudyRequest) returns (StopStudyReply){
+        option (google.api.http) = {
+            get: "/api/Manager/StopStudy/{study_id}"
+        };
+    };
+    rpc GetStudy(GetStudyRequest) returns (GetStudyReply){
+        option (google.api.http) = {
+            get: "/api/Manager/GetStudy/{study_id}"
+        };
+    };
+    rpc GetStudyList(GetStudyListRequest) returns (GetStudyListReply){
+        option (google.api.http) = {
+            get: "/api/Manager/GetStudyList"
+        };
+    };
+    rpc CreateTrial(CreateTrialRequest) returns (CreateTrialReply){
+        option (google.api.http) = {
+            post: "/api/Manager/CreateTrial"
+            body: "trial"
+        };
+    };
+    rpc GetTrials(GetTrialsRequest) returns (GetTrialsReply){
+        option (google.api.http) = {
+            get: "/api/Manager/GetTrials/{study_id}"
+        };
+    };
+    rpc RunTrial(RunTrialRequest) returns (RunTrialReply){
+        option (google.api.http) = {
+            post: "/api/Manager/RunTrial"
+            body: "*"
+        };
+    };
+    rpc StopWorkers(StopWorkersRequest) returns (StopWorkersReply){
+        option (google.api.http) = {
+            post: "/api/Manager/StopWorkers"
+            body: "*"
+        };
+    };
+    rpc GetWorkers(GetWorkersRequest) returns (GetWorkersReply){
+        option (google.api.http) = {
+            get: "/api/Manager/GetWorkers"
+        };
+    };
+    rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply){
+        option (google.api.http) = {
+            post: "/api/Manager/GetSuggestions"
+            body: "*"
+        };
+    };
+    rpc GetShouldStopWorkers(GetShouldStopWorkersRequest) returns (GetShouldStopWorkersReply){
+        option (google.api.http) = {
+            post: "/api/Manager/GetTrials/GetShouldStopWorkers"
+            body: "*"
+        };
+    };
+    rpc GetMetrics(GetMetricsRequest) returns (GetMetricsReply){
+        option (google.api.http) = {
+            post: "/api/Manager/GetMetrics"
+            body: "*"
+        };
+    };
+    rpc SetSuggestionParameters(SetSuggestionParametersRequest) returns (SetSuggestionParametersReply){
+        option (google.api.http) = {
+            post: "/api/Manager/SetSuggestionParameters"
+            body: "*"
+        };
+    };
+    rpc GetSuggestionParameters(GetSuggestionParametersRequest) returns (GetSuggestionParametersReply){
+        option (google.api.http) = {
+            get: "/api/Manager/GetSuggestionParameters/{param_id}"
+        };
+    };
+    rpc GetSuggestionParameterList(GetSuggestionParameterListRequest) returns (GetSuggestionParameterListReply){
+        option (google.api.http) = {
+            get: "/api/Manager/GetSuggestionParameterList/{study_id}"
+        };
+    };
+    rpc SetEarlyStoppingParameters(SetEarlyStoppingParametersRequest) returns (SetEarlyStoppingParametersReply){
+        option (google.api.http) = {
+            post: "/api/Manager/SetEarlyStoppingParameters"
+            body: "*"
+        };
+    };
+    rpc GetEarlyStoppingParameters(GetEarlyStoppingParametersRequest) returns (GetEarlyStoppingParametersReply){
+        option (google.api.http) = {
+            get: "/api/Manager/GetEarlyStoppingParameters/{param_id}"
+        };
+    };
+    rpc GetEarlyStoppingParameterList(GetEarlyStoppingParameterListRequest) returns (GetEarlyStoppingParameterListReply){
+        option (google.api.http) = {
+            get: "/api/Manager/GetEarlyStoppingParameterList/{study_id}"
+        };
+    };
+    rpc SaveStudy(SaveStudyRequest) returns(SaveStudyReply){
+        option (google.api.http) = {
+            post: "/api/Manager/SaveStudyReply"
+            body: "*"
+        };
+    };
+    rpc SaveModel(SaveModelRequest) returns(SaveModelReply){
+        option (google.api.http) = {
+            post: "/api/Manager/SaveModel"
+            body: "*"
+        };
+    };
+    rpc GetSavedStudies(GetSavedStudiesRequest) returns(GetSavedStudiesReply){
+        option (google.api.http) = {
+            get: "/api/Manager/GetSavedStudies"
+        };
+    };
+    rpc GetSavedModels(GetSavedModelsRequest) returns(GetSavedModelsReply){
+        option (google.api.http) = {
+            get: "/api/Manager/GetSavedModels"
+        };
+    };
 }
 
 service Suggestion {
-    rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply);
+    rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply){
+        option (google.api.http) = {
+            post: "/api/Suggestion/GetSuggestions"
+            body: "*"
+        };
+    };
 }
 
 service EarlyStopping {
-    rpc GetShouldStopWorkers(GetShouldStopWorkersRequest) returns (GetShouldStopWorkersReply);
+    rpc GetShouldStopWorkers(GetShouldStopWorkersRequest) returns (GetShouldStopWorkersReply){
+        option (google.api.http) = {
+            post: "/api/Manager/GetTrials/GetShouldStopWorkers"
+            body: "*"
+        };
+    };
 }
 
 enum ParameterType {
