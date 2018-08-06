@@ -13,7 +13,7 @@ import (
 )
 
 var (
-  echoEndpoint = flag.String("echo_endpoint", "vizier-core:6789", "endpoint of YourService")
+  vizierCoreEndpoint = flag.String("echo_endpoint", "vizier-core:6789", "vizier-core endpoint")
 )
 
 func run() error {
@@ -23,7 +23,7 @@ func run() error {
 
   mux := runtime.NewServeMux()
   opts := []grpc.DialOption{grpc.WithInsecure()}
-  err := gw.RegisterManagerHandlerFromEndpoint(ctx, mux, *echoEndpoint, opts)
+  err := gw.RegisterManagerHandlerFromEndpoint(ctx, mux, *vizierCoreEndpoint, opts)
   if err != nil {
     return err
   }
