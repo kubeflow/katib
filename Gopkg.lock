@@ -57,19 +57,15 @@
   packages = [
     "jsonpb",
     "proto",
-    "protoc-gen-go",
     "protoc-gen-go/descriptor",
-    "protoc-gen-go/generator",
-    "protoc-gen-go/grpc",
-    "protoc-gen-go/plugin",
     "ptypes",
     "ptypes/any",
     "ptypes/duration",
     "ptypes/struct",
     "ptypes/timestamp"
   ]
-  revision = "925541529c1fa6821df4e44ce2723319eb2be768"
-  version = "v1.0.0"
+  revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
+  version = "v1.1.0"
 
 [[projects]]
   branch = "master"
@@ -450,6 +446,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e32e0c52d7c2735f8a72696291117f3b83db5553faa7d6a7c8fe1b19de26ecf3"
+  inputs-digest = "cebe58856ab0d287877f26f1d2e05b5baa23f0e046da6ffcdd245056a3b217ac"
   solver-name = "gps-cdcl"
   solver-version = 1
