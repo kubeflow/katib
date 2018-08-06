@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: vizier-core-rest
+  namespace: katib
+  labels:
+    app: vizier
+    component: core-rest
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: vizier-core-rest
+      labels:
+        app: vizier
+        component: core-rest
+    spec:
+      serviceAccountName: vizier-core-rest
+      containers:
+      - name: vizier-core-rest
+        image: katib/vizier-core-rest
+        command:
+          - './vizier-manager-rest'
+        ports:
+        - name: api
+          containerPort: 80
+#        resources:
+#          requests:
+#            cpu: 500m
+#            memory: 500M
+#          limits:
+#            cpu: 500m
+#            memory: 500M

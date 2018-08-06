@@ -1,0 +1,37 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: vizier-core-rest
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: vizier-core-rest
+subjects:
+- kind: ServiceAccount
+  name: vizier-core-rest
+  namespace: katib
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: vizier-core-rest
+rules:
+  - apiGroups: [""] 
+    resources: ["pods", "nodes", "nodes/*", "pods/log", "pods/status", "services", "persistentvolumes", "persistentvolumes/status","persistentvolumeclaims","persistentvolumeclaims/status"] 
+    verbs: ["*"]
+  - apiGroups: ["batch"] 
+    resources: ["jobs", "jobs/status"] 
+    verbs: ["*"]
+  - apiGroups: ["extensions"] 
+    verbs: ["*"]
+    resources: ["ingresses","ingresses/status","deployments","deployments/status"] 
+  - apiGroups: [""] 
+    verbs: ["*"]
+    resources: ["services"] 
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vizier-core-rest
+  namespace: katib
