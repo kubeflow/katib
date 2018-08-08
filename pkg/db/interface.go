@@ -54,7 +54,7 @@ type VizierDBInterface interface {
 	GetWorkerList(string, string) ([]*api.Worker, error)
 	GetWorkerLogs(string, *GetWorkerLogOpts) ([]*WorkerLog, error)
 	GetWorkerTimestamp(string) (*time.Time, error)
-	StoreWorkerLogs(string, []string) error
+	StoreWorkerLogs(string, []*api.MetricsLog) error
 	CreateWorker(*api.Worker) (string, error)
 	UpdateWorker(string, api.State) error
 	DeleteWorker(string) error
@@ -465,130 +465,90 @@ func (d *db_conn) GetWorkerTimestamp(id string) (*time.Time, error) {
 	return d.getWorkerLastlog(id, nil)
 }
 
-func (d *db_conn) storeWorkerLog(worker_id string, time string, line string,
-	objective_value_name string, metrics []string) error {
-	kvpairs := strings.Fields(line)
-	for _, kv := range kvpairs {
-		v := strings.Split(kv, "=")
-		if len(v) > 2 {
-			log.Printf("Ignoring trailing garbage: %s", kv)
-		}
-		if len(v) == 1 {
-			continue
-		}
-		is_objective := 0
-	search_keyword:
-		switch {
-		case v[0] == objective_value_name:
-			is_objective = 1
-		default:
-			for _, m := range metrics {
-				if v[0] == m {
-					break search_keyword
-				}
-			}
-			continue
-		}
-		_, err := d.db.Exec("INSERT INTO worker_metrics (worker_id, time, name, value, is_objective) VALUES (?, ?, ?, ?, ?)",
-			worker_id, time, v[0], v[1], is_objective)
-		if err != nil {
-			return err
-		}
+func (d *db_conn) storeWorkerLog(worker_id string, time string, metrics_name string, metrics_value string, objective_value_name string) error {
+	is_objective := 0
+	if metrics_name == objective_value_name {
+		is_objective = 1
+	}
+	_, err := d.db.Exec("INSERT INTO worker_metrics (worker_id, time, name, value, is_objective) VALUES (?, ?, ?, ?, ?)",
+		worker_id, time, metrics_name, metrics_value, is_objective)
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
-func (d *db_conn) StoreWorkerLogs(worker_id string, logs []string) error {
+func (d *db_conn) StoreWorkerLogs(worker_id string, logs []*api.MetricsLog) error {
 	var lasterr error
 	var last_value string
-	var stored_logs []*string
 
 	db_t, err := d.getWorkerLastlog(worker_id, &last_value)
 	if err != nil {
 		log.Printf("Error getting last log timestamp: %v", err)
 	}
 
-	row := d.db.QueryRow("SELECT objective_value_name, metrics FROM workers "+
+	row := d.db.QueryRow("SELECT objective_value_name FROM workers "+
 		"JOIN (studies) ON (workers.study_id = studies.id) WHERE "+
 		"workers.id = ?", worker_id)
-	var objective_value_name, metrics_str string
-	err = row.Scan(&objective_value_name, &metrics_str)
+	var objective_value_name string
+	err = row.Scan(&objective_value_name)
 	if err != nil {
 		log.Printf("Cannot get objective_value_name or metrics: %v", err)
 		return err
 	}
-	metrics := strings.Split(metrics_str, ",\n")
 
 	var formatted_time string
 	var ls []string
-	for _, logline := range logs {
-		if logline == "" {
-			continue
-		}
-		ls = strings.SplitN(logline, " ", 2)
-		if len(ls) != 2 {
-			log.Printf("Error parsing log: %s", logline)
-			lasterr = errors.New("Error parsing log")
-			continue
-		}
-		t, err := time.Parse(time.RFC3339Nano, ls[0])
-		if err != nil {
-			log.Printf("Error parsing time %s: %v", ls[0], err)
-			lasterr = err
-			continue
-		}
-		if db_t != nil && !t.After(*db_t) {
-			// db_t is from mysql and has microsec precision.
-			// This code assumes nanosec fractions are rounded down.
-			continue
-		}
-		// use UTC as mysql DATETIME lacks timezone
-		formatted_time = t.UTC().Format(mysql_time_fmt)
-		if db_t != nil {
-			// Parse again to get rounding effect
-			reparsed_time, err := time.Parse(mysql_time_fmt, formatted_time)
-			if reparsed_time == *db_t {
-				if ls[1] == last_value {
-					// stored_logs are already in DB
-					// This assignment ensures the remaining
-					// logs will be stored in DB.
-					db_t = nil
-					continue
-				}
-				// We don't know this is necessary or not yet.
-				stored_logs = append(stored_logs, &ls[1])
+	for _, mlog := range logs {
+		metrics_name := mlog.Name
+		for _, mv := range mlog.Values {
+			t, err := time.Parse(time.RFC3339Nano, mv.Time)
+			if err != nil {
+				log.Printf("Error parsing time %s: %v", mv.Time, err)
+				lasterr = err
 				continue
 			}
-			// (reparsed_time > *db_t) can be assumed
-			for _, value := range stored_logs {
+			if db_t != nil && !t.After(*db_t) {
+				// db_t is from mysql and has microsec precision.
+				// This code assumes nanosec fractions are rounded down.
+				continue
+			}
+			// use UTC as mysql DATETIME lacks timezone
+			formatted_time = t.UTC().Format(mysql_time_fmt)
+			if db_t != nil {
+				// Parse again to get rounding effect
+				//reparsed_time, err := time.Parse(mysql_time_fmt, formatted_time)
+				//if reparsed_time == *db_t {
+				//	if mv.Value == last_value {
+				//	 stored_logs are already in DB
+				//	 This assignment ensures the remaining
+				//	 logs will be stored in DB.
+				//		db_t = nil
+				//		continue
+				//	}
+				//	// We don't know this is necessary or not yet.
+				//	stored_logs = append(stored_logs, &mv.Value)
+				//	continue
+				//}
+				// (reparsed_time > *db_t) can be assumed
 				err = d.storeWorkerLog(worker_id,
-					db_t.UTC().Format(mysql_time_fmt), *value,
-					objective_value_name, metrics)
+					db_t.UTC().Format(mysql_time_fmt),
+					metrics_name, mv.Value,
+					objective_value_name)
 				if err != nil {
-					log.Printf("Error storing log %s: %v", *value, err)
+					log.Printf("Error storing log %s: %v", mv.Value, err)
 					lasterr = err
 				}
-			}
-			db_t = nil
-		}
-
-		err = d.storeWorkerLog(worker_id,
-			formatted_time, ls[1],
-			objective_value_name, metrics)
-		if err != nil {
-			log.Printf("Error storing log %s: %v", logline, err)
-			lasterr = err
-		}
-	}
-	if db_t != nil && len(stored_logs) > 0 {
-		// No duplicate log found. So they are valid.
-		for _, value := range stored_logs {
-			err = d.storeWorkerLog(worker_id,
-				db_t.UTC().Format(mysql_time_fmt), *value,
-				objective_value_name, metrics)
-			if err != nil {
-				log.Printf("Error storing log %s: %v", *value, err)
-				lasterr = err
+				db_t = nil
+			} else {
+				err = d.storeWorkerLog(worker_id,
+					formatted_time,
+					metrics_name, mv.Value,
+					objective_value_name)
+				if err != nil {
+					log.Printf("Error storing log %s: %v", mv.Value, err)
+					lasterr = err
+				}
 			}
 		}
 	}

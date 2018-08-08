@@ -179,7 +179,7 @@ func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob
 	for _, mls := range mr.MetricsLogSets {
 		for _, ml := range mls.MetricsLogs {
 			if ml.Name == sconf.ObjectiveValueName {
-				curValue, _ := strconv.ParseFloat(ml.Values[len(ml.Values)-1], 32)
+				curValue, _ := strconv.ParseFloat(ml.Values[len(ml.Values)-1].Value, 32)
 				if sconf.OptimizationType == katibapi.OptimizationType_MINIMIZE && curValue < sconf.OptimizationGoal {
 					return true
 				} else if sconf.OptimizationType == katibapi.OptimizationType_MAXIMIZE && curValue > sconf.OptimizationGoal {
@@ -458,7 +458,7 @@ func (r *ReconcileStudyJobController) saveOrUpdateModel(c katibapi.ManagerClient
 			for _, ml := range mls.MetricsLogs {
 				if len(ml.Values) > 0 {
 					log.Printf("\t Metrics Name %s Value %v", ml.Name, ml.Values[len(ml.Values)-1])
-					saveModelRequest.Model.Metrics = append(saveModelRequest.Model.Metrics, &katibapi.Metrics{Name: ml.Name, Value: ml.Values[len(ml.Values)-1]})
+					saveModelRequest.Model.Metrics = append(saveModelRequest.Model.Metrics, &katibapi.Metrics{Name: ml.Name, Value: ml.Values[len(ml.Values)-1].Value})
 				}
 			}
 			_, err := c.SaveModel(ctx, saveModelRequest)

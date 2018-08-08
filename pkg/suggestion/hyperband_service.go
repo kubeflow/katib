@@ -365,7 +365,7 @@ func (h *HyperBandSuggestService) evalWorkers(ctx context.Context, c api.Manager
 			if ml.WorkerStatus != api.State_COMPLETED {
 				return nil, nil
 			}
-			v, _ := strconv.ParseFloat(ml.MetricsLogs[0].Values[len(ml.MetricsLogs[0].Values)-1], 64)
+			v, _ := strconv.ParseFloat(ml.MetricsLogs[0].Values[len(ml.MetricsLogs[0].Values)-1].Value, 64)
 			vs += v
 		}
 		if len(gwrep.Workers) > 0 {

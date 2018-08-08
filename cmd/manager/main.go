@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"time"
 
 	pb "github.com/kubeflow/katib/pkg/api"
 	kdb "github.com/kubeflow/katib/pkg/db"
@@ -130,7 +131,11 @@ func (s *server) GetWorkers(ctx context.Context, in *pb.GetWorkersRequest) (*pb.
 	if in.StudyId == "" {
 		return &pb.GetWorkersReply{Workers: ws}, errors.New("StudyId should be set")
 	}
-	err = s.wIF.UpdateWorkerStatus(in.StudyId)
+	sc, err := dbIf.GetStudyConfig(in.StudyId)
+	if err != nil {
+		return &pb.GetWorkersReply{}, err
+	}
+	err = s.wIF.UpdateWorkerStatus(in.StudyId, sc.ObjectiveValueName, sc.Metrics)
 	if err != nil {
 		return &pb.GetWorkersReply{Workers: ws}, err
 	}
@@ -162,16 +167,16 @@ func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.
 	if in.StudyId == "" {
 		return &pb.GetMetricsReply{}, errors.New("StudyId should be set")
 	}
+	sc, err := dbIf.GetStudyConfig(in.StudyId)
+	if err != nil {
+		return &pb.GetMetricsReply{}, err
+	}
+	err = s.wIF.UpdateWorkerStatus(in.StudyId, sc.ObjectiveValueName, sc.Metrics)
 	if len(in.MetricsNames) > 0 {
 		mNames = in.MetricsNames
 	} else {
-		sc, err := dbIf.GetStudyConfig(in.StudyId)
-		if err != nil {
-			return &pb.GetMetricsReply{}, err
-		}
 		mNames = sc.Metrics
 	}
-	err := s.wIF.UpdateWorkerStatus(in.StudyId)
 	if err != nil {
 		return &pb.GetMetricsReply{}, err
 	}
@@ -196,14 +201,26 @@ func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.
 			}
 			mls[i].MetricsLogs[j] = &pb.MetricsLog{
 				Name:   m,
-				Values: make([]string, len(ls)),
+				Values: make([]*pb.MetricsValueTime, len(ls)),
 			}
 			for k, l := range ls {
-				mls[i].MetricsLogs[j].Values[k] = l.Value
+				mls[i].MetricsLogs[j].Values[k].Value = l.Value
+				mls[i].MetricsLogs[j].Values[k].Time = l.Time.UTC().Format(time.RFC3339Nano)
 			}
 		}
 	}
 	return &pb.GetMetricsReply{MetricsLogSets: mls}, nil
+}
+
+func (s *server) ReportMetrics(ctx context.Context, in *pb.ReportMetricsRequest) (*pb.ReportMetricsReply, error) {
+	for _, mls := range in.MetricsLogSets {
+		err := dbIf.StoreWorkerLogs(mls.WorkerId, mls.MetricsLogs)
+		if err != nil {
+			return &pb.ReportMetricsReply{}, err
+		}
+	}
+	return &pb.ReportMetricsReply{}, nil
+
 }
 
 func (s *server) SetSuggestionParameters(ctx context.Context, in *pb.SetSuggestionParametersRequest) (*pb.SetSuggestionParametersReply, error) {

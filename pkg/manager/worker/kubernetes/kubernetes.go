@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	batchv1 "k8s.io/api/batch/v1"
 	apiv1 "k8s.io/api/core/v1"
@@ -119,7 +120,7 @@ func (d *KubernetesWorkerInterface) genJobManifest(wid string, conf *api.WorkerC
 	return template, nil
 }
 
-func (d *KubernetesWorkerInterface) StoreWorkerLog(wID string) error {
+func (d *KubernetesWorkerInterface) StoreWorkerLog(wID string, objectiveValueName string, metrics []string) error {
 	pl, _ := d.clientset.CoreV1().Pods(kubeNamespace).List(metav1.ListOptions{LabelSelector: "job-name=" + wID})
 	if len(pl.Items) == 0 {
 		return errors.New(fmt.Sprintf("No Pods are found in Job %v", wID))
@@ -141,8 +142,77 @@ func (d *KubernetesWorkerInterface) StoreWorkerLog(wID string) error {
 	if len(logs) == 0 {
 		return nil
 	}
-	err = d.db.StoreWorkerLogs(wID, strings.Split(string(logs), "\n"))
+	d.purseLogs(wID, strings.Split(string(logs), "\n"), objectiveValueName, metrics)
 	return err
+}
+
+func (d *KubernetesWorkerInterface) purseLogs(wId string, logs []string, objectiveValueName string, metrics []string) (*api.MetricsLogSet, error) {
+	var lasterr error
+	ret := &api.MetricsLogSet{
+		WorkerId: wId,
+	}
+	mlogs := make(map[string]*api.MetricsLog)
+	mlogs[objectiveValueName] = &api.MetricsLog{
+		Name: objectiveValueName,
+	}
+	for _, m := range metrics {
+		if m != objectiveValueName {
+			mlogs[m] = &api.MetricsLog{
+				Name: m,
+			}
+		}
+	}
+	for _, logline := range logs {
+		if logline == "" {
+			continue
+		}
+		ls := strings.SplitN(logline, " ", 2)
+		if len(ls) != 2 {
+			log.Printf("Error parsing log: %s", logline)
+			lasterr = errors.New("Error parsing log")
+			continue
+		}
+		_, err := time.Parse(time.RFC3339Nano, ls[0])
+		if err != nil {
+			log.Printf("Error parsing time %s: %v", ls[0], err)
+			lasterr = err
+			continue
+		}
+		kvpairs := strings.Fields(ls[1])
+		for _, kv := range kvpairs {
+			v := strings.Split(kv, "=")
+			if len(v) > 2 {
+				log.Printf("Ignoring trailing garbage: %s", kv)
+			}
+			if len(v) == 1 {
+				continue
+			}
+			metrics_name := ""
+			if v[0] == objectiveValueName {
+				metrics_name = v[0]
+			} else {
+				for _, m := range metrics {
+					if v[0] == m {
+						metrics_name = v[0]
+					}
+				}
+				if metrics_name == "" {
+					continue
+				}
+				mlogs[metrics_name].Values = append(mlogs[metrics_name].Values, &api.MetricsValueTime{
+					Time:  ls[0],
+					Value: v[1],
+				})
+			}
+		}
+	}
+	for _, ml := range mlogs {
+		ret.MetricsLogs = append(ret.MetricsLogs, ml)
+	}
+	if lasterr != nil {
+		return ret, lasterr
+	}
+	return ret, nil
 }
 
 func (d *KubernetesWorkerInterface) IsWorkerComplete(wID string) (bool, error) {
@@ -164,14 +234,14 @@ func (d *KubernetesWorkerInterface) IsWorkerComplete(wID string) (bool, error) {
 	return false, nil
 }
 
-func (d *KubernetesWorkerInterface) UpdateWorkerStatus(studyId string) error {
+func (d *KubernetesWorkerInterface) UpdateWorkerStatus(studyId string, objectiveValueName string, metrics []string) error {
 	ws, err := d.db.GetWorkerList(studyId, "")
 	if err != nil {
 		return err
 	}
 	for _, w := range ws {
 		if w.Status == api.State_PENDING {
-			err = d.StoreWorkerLog(w.WorkerId)
+			err = d.StoreWorkerLog(w.WorkerId, objectiveValueName, metrics)
 			if err == nil {
 				err = d.db.UpdateWorker(w.WorkerId, api.State_RUNNING)
 				if err != nil {
@@ -184,7 +254,7 @@ func (d *KubernetesWorkerInterface) UpdateWorkerStatus(studyId string) error {
 			if err != nil {
 				return err
 			}
-			err = d.StoreWorkerLog(w.WorkerId)
+			err = d.StoreWorkerLog(w.WorkerId, objectiveValueName, metrics)
 			if err != nil {
 				return err
 			}
