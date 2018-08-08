@@ -4,6 +4,9 @@ package api;
 
 import "google/api/annotations.proto";
 
+/* For each RPC service, we define mapping to HTTP REST API method.
+ * The mapping includes the URL path, query parameters and request body.
+ * https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http */
 service Manager {
     rpc CreateStudy(CreateStudyRequest) returns (CreateStudyReply){
         option (google.api.http) = {

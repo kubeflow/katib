@@ -23,11 +23,13 @@ func run() error {
 
   mux := runtime.NewServeMux()
   opts := []grpc.DialOption{grpc.WithInsecure()}
+  // register handlers for the HTTP endpoints
   err := gw.RegisterManagerHandlerFromEndpoint(ctx, mux, *vizierCoreEndpoint, opts)
   if err != nil {
     return err
   }
 
+  // proxy server listens on port 80
   return http.ListenAndServe(":80", mux)
 }
 
