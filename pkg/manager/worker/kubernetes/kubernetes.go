@@ -120,15 +120,15 @@ func (d *KubernetesWorkerInterface) genJobManifest(wid string, conf *api.WorkerC
 	return template, nil
 }
 
-func (d *KubernetesWorkerInterface) StoreWorkerLog(wID string, objectiveValueName string, metrics []string) error {
+func (d *KubernetesWorkerInterface) CollectWorkerLog(wID string, objectiveValueName string, metrics []string) (*api.MetricsLogSet, error) {
 	pl, _ := d.clientset.CoreV1().Pods(kubeNamespace).List(metav1.ListOptions{LabelSelector: "job-name=" + wID})
 	if len(pl.Items) == 0 {
-		return errors.New(fmt.Sprintf("No Pods are found in Job %v", wID))
+		return nil, errors.New(fmt.Sprintf("No Pods are found in Job %v", wID))
 	}
 
 	mt, err := d.db.GetWorkerTimestamp(wID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	logopt := apiv1.PodLogOptions{Timestamps: true}
 	if mt != nil {
@@ -137,16 +137,16 @@ func (d *KubernetesWorkerInterface) StoreWorkerLog(wID string, objectiveValueNam
 
 	logs, err := d.clientset.CoreV1().Pods(kubeNamespace).GetLogs(pl.Items[0].ObjectMeta.Name, &logopt).Do().Raw()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if len(logs) == 0 {
-		return nil
+		return &api.MetricsLogSet{}, nil
 	}
-	d.purseLogs(wID, strings.Split(string(logs), "\n"), objectiveValueName, metrics)
-	return err
+	mls, err := d.parseLogs(wID, strings.Split(string(logs), "\n"), objectiveValueName, metrics)
+	return mls, err
 }
 
-func (d *KubernetesWorkerInterface) purseLogs(wId string, logs []string, objectiveValueName string, metrics []string) (*api.MetricsLogSet, error) {
+func (d *KubernetesWorkerInterface) parseLogs(wId string, logs []string, objectiveValueName string, metrics []string) (*api.MetricsLogSet, error) {
 	var lasterr error
 	ret := &api.MetricsLogSet{
 		WorkerId: wId,
@@ -241,8 +241,13 @@ func (d *KubernetesWorkerInterface) UpdateWorkerStatus(studyId string, objective
 	}
 	for _, w := range ws {
 		if w.Status == api.State_PENDING {
-			err = d.StoreWorkerLog(w.WorkerId, objectiveValueName, metrics)
-			if err == nil {
+			mls, err := d.CollectWorkerLog(w.WorkerId, objectiveValueName, metrics)
+			if err == nil && mls != nil {
+				err = d.db.StoreWorkerLogs(w.WorkerId, mls.MetricsLogs)
+				if err != nil {
+					log.Printf("Error store status for %s: %v", w.WorkerId, err)
+					return err
+				}
 				err = d.db.UpdateWorker(w.WorkerId, api.State_RUNNING)
 				if err != nil {
 					log.Printf("Error updating status for %s: %v", w.WorkerId, err)
@@ -254,9 +259,16 @@ func (d *KubernetesWorkerInterface) UpdateWorkerStatus(studyId string, objective
 			if err != nil {
 				return err
 			}
-			err = d.StoreWorkerLog(w.WorkerId, objectiveValueName, metrics)
+			mls, err := d.CollectWorkerLog(w.WorkerId, objectiveValueName, metrics)
 			if err != nil {
 				return err
+			}
+			if mls != nil {
+				err = d.db.StoreWorkerLogs(w.WorkerId, mls.MetricsLogs)
+				if err != nil {
+					log.Printf("Error store status for %s: %v", w.WorkerId, err)
+					return err
+				}
 			}
 			if c {
 				err := d.db.UpdateWorker(w.WorkerId, api.State_COMPLETED)

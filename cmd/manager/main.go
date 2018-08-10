@@ -204,8 +204,10 @@ func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.
 				Values: make([]*pb.MetricsValueTime, len(ls)),
 			}
 			for k, l := range ls {
-				mls[i].MetricsLogs[j].Values[k].Value = l.Value
-				mls[i].MetricsLogs[j].Values[k].Time = l.Time.UTC().Format(time.RFC3339Nano)
+				mls[i].MetricsLogs[j].Values[k] = &pb.MetricsValueTime{
+					Value: l.Value,
+					Time:  l.Time.UTC().Format(time.RFC3339Nano),
+				}
 			}
 		}
 	}

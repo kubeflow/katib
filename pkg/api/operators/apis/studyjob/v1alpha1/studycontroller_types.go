@@ -26,10 +26,11 @@ import (
 
 // StudyJobSpec defines the desired state of StudyJob
 type StudyJobSpec struct {
-	StudySpec         *StudySpec         `json:"studySpec,omitempty"`
-	WorkerSpec        *WorkerSpec        `json:"workerSpec,omitempty"`
-	SuggestionSpec    *SuggestionSpec    `json:"suggestionSpec,omitempty"`
-	EarlyStoppingSpec *EarlyStoppingSpec `json:"earlyStoppingSpec,omitempty"`
+	StudySpec                    *StudySpec         `json:"studySpec,omitempty"`
+	WorkerSpec                   *WorkerSpec        `json:"workerSpec,omitempty"`
+	SuggestionSpec               *SuggestionSpec    `json:"suggestionSpec,omitempty"`
+	EarlyStoppingSpec            *EarlyStoppingSpec `json:"earlyStoppingSpec,omitempty"`
+	MetricsCollectorTemplatePath string             `json:"metricsCollectorTemplatePath,omitempty"`
 }
 
 // StudyJobStatus defines the observed state of StudyJob
@@ -52,6 +53,7 @@ type StudyJobStatus struct {
 	Condition Condition  `json:"conditon,omitempty"`
 	StudyId   string     `json:"studyid,omitempty"`
 	Trials    []TrialSet `json:"trials,omitempty"`
+	//DefaultWorkers   []batchv1.Job     `json:"workers,omitempty"`
 }
 
 type TrialSet struct {
@@ -99,18 +101,24 @@ const (
 	OptimizationTypeMaximize OptimizationType = "maximize"
 )
 
-type WorkerSpec struct {
-	Image      string    `json:"image,omitempty"`
-	Command    []string  `json:"command,omitempty"`
-	GPU        int       `json:"gpu,omitempty"`
-	Scheduler  string    `json:"scheduler,omitempty"`
-	MountConf  MountConf `json:"mountconf,omitempty"`
-	PullSecret string    `json:"pullsecret,omitempty"`
+type WorkerParameter struct {
+	Key   string `json:"key,omitempty"`
+	Value string `json:"value,omitempty"`
 }
 
-type MountConf struct {
-	Pvc  string `json:"pvc,omitempty"`
-	Path string `json:"path,omitempty"`
+type WorkerSpec struct {
+	WorkerTemplatePath string            `json:"workerTemplatePath,omitempty"`
+	WorkerType         string            `json:"workerType,omitempty"`
+	Image              string            `json:"image,omitempty"`
+	Command            []string          `json:"command,omitempty"`
+	VolumeConfigs      []VolumeConfig    `json:"volumeConfigs,omitempty"`
+	WorkerParameters   []WorkerParameter `json:"workerParameters,omitempty"`
+}
+
+type VolumeConfig struct {
+	Name      string `json:"name,omitempty"`
+	PvcName   string `json:"pvcName,omitempty"`
+	MountPath string `json:"mountPath,omitempty"`
 }
 
 type ServiceParameter struct {

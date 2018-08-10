@@ -6,7 +6,7 @@ import (
 
 type Interface interface {
 	SpawnWorker(wid string, workerConf *api.WorkerConfig) error
-	StoreWorkerLog(wID string, objectiveValueName string, metrics []string) error
+	CollectWorkerLog(wID string, objectiveValueName string, metrics []string) (*api.MetricsLogSet, error)
 	IsWorkerComplete(wID string) (bool, error)
 	UpdateWorkerStatus(studyId string, objectiveValueName string, metrics []string) error
 	StopWorkers(studyId string, wIDs []string, iscomplete bool) error
