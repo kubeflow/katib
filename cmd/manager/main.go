@@ -110,14 +110,19 @@ func (s *server) RunTrial(ctx context.Context, in *pb.RunTrialRequest) (*pb.RunT
 		&pb.Worker{
 			StudyId: in.StudyId,
 			TrialId: in.TrialId,
-			Runtime: in.Runtime,
-			Config:  in.WorkerConfig,
+			//Runtime: in.Runtime,
+			Config: in.WorkerConfig,
 		})
 	if err != nil {
 		return &pb.RunTrialReply{WorkerId: wid}, err
 	}
 	err = s.wIF.SpawnWorker(wid, in.WorkerConfig)
 	return &pb.RunTrialReply{WorkerId: wid}, err
+}
+
+func (s *server) CreateWorker(ctx context.Context, in *pb.CreateWorkerReauest) (*pb.CreateWorkerReply, error) {
+	wid, err := dbIf.CreateWorker(in.Worker)
+	return &pb.CreateWorkerReply{WorkerId: wid}, err
 }
 
 func (s *server) StopWorkers(ctx context.Context, in *pb.StopWorkersRequest) (*pb.StopWorkersReply, error) {
@@ -215,10 +220,50 @@ func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.
 }
 
 func (s *server) ReportMetrics(ctx context.Context, in *pb.ReportMetricsRequest) (*pb.ReportMetricsReply, error) {
+	sc, err := dbIf.GetStudyConfig(in.StudyId)
+	if err != nil {
+		return &pb.ReportMetricsReply{}, err
+	}
 	for _, mls := range in.MetricsLogSets {
-		err := dbIf.StoreWorkerLogs(mls.WorkerId, mls.MetricsLogs)
+		w, err := dbIf.GetWorker(mls.WorkerId)
 		if err != nil {
 			return &pb.ReportMetricsReply{}, err
+		}
+		trial, err := dbIf.GetTrial(w.TrialId)
+		if err != nil {
+			return &pb.ReportMetricsReply{}, err
+		}
+		err = dbIf.StoreWorkerLogs(mls.WorkerId, mls.MetricsLogs)
+		if err != nil {
+			return &pb.ReportMetricsReply{}, err
+		}
+		mets := []*pb.Metrics{}
+		for _, ml := range mls.MetricsLogs {
+			if ml != nil {
+				if len(ml.Values) > 0 {
+					mets = append(mets, &pb.Metrics{
+						Name:  ml.Name,
+						Value: ml.Values[len(ml.Values)-1].Value,
+					})
+				}
+			}
+		}
+		if len(mets) > 0 {
+			mi := &pb.ModelInfo{
+				StudyName:  sc.Name,
+				WorkerId:   mls.WorkerId,
+				Parameters: trial.ParameterSet,
+				Metrics:    mets,
+			}
+			smr := &pb.SaveModelRequest{
+				Model:   mi,
+				DataSet: &pb.DataSetInfo{},
+			}
+			_, err = s.SaveModel(ctx, smr)
+			if err != nil {
+				return &pb.ReportMetricsReply{}, err
+			}
+			err = dbIf.UpdateWorker(mls.WorkerId, mls.WorkerStatus)
 		}
 	}
 	return &pb.ReportMetricsReply{}, nil

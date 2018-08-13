@@ -591,7 +591,7 @@ func (d *db_conn) getWorkers(worker_id string, trial_id string, study_id string)
 			&worker.WorkerId,
 			&worker.StudyId,
 			&worker.TrialId,
-			&worker.Runtime,
+			&worker.Type,
 			&worker.Status,
 			&config,
 			&tags,
@@ -677,7 +677,7 @@ func (d *db_conn) CreateWorker(worker *api.Worker) (string, error) {
 	for true {
 		worker_id = generate_randid()
 		_, err = d.db.Exec("INSERT INTO workers VALUES (?, ?, ?, ?, ?, ?, ?)",
-			worker_id, worker.StudyId, worker.TrialId, worker.Runtime,
+			worker_id, worker.StudyId, worker.TrialId, worker.Type,
 			api.State_PENDING, config, strings.Join(tags, ",\n"))
 		if err == nil {
 			worker.WorkerId = worker_id

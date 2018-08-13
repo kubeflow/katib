@@ -10,12 +10,12 @@ service Manager {
     rpc CreateTrial(CreateTrialRequest) returns (CreateTrialReply);
     rpc GetTrials(GetTrialsRequest) returns (GetTrialsReply);
     rpc RunTrial(RunTrialRequest) returns (RunTrialReply);
+    rpc CreateWorker(CreateWorkerReauest) returns (CreateWorkerReply);
     rpc StopWorkers(StopWorkersRequest) returns (StopWorkersReply);
     rpc GetWorkers(GetWorkersRequest) returns (GetWorkersReply);
     rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply);
     rpc GetShouldStopWorkers(GetShouldStopWorkersRequest) returns (GetShouldStopWorkersReply);
     rpc GetMetrics(GetMetricsRequest) returns (GetMetricsReply);
-    rpc ReportMetrics(ReportMetricsRequest) returns (ReportMetricsReply);
     rpc SetSuggestionParameters(SetSuggestionParametersRequest) returns (SetSuggestionParametersReply);
     rpc GetSuggestionParameters(GetSuggestionParametersRequest) returns (GetSuggestionParametersReply);
     rpc GetSuggestionParameterList(GetSuggestionParameterListRequest) returns (GetSuggestionParameterListReply);
@@ -24,6 +24,7 @@ service Manager {
     rpc GetEarlyStoppingParameterList(GetEarlyStoppingParameterListRequest) returns (GetEarlyStoppingParameterListReply);
     rpc SaveStudy(SaveStudyRequest) returns(SaveStudyReply);
     rpc SaveModel(SaveModelRequest) returns(SaveModelReply);
+    rpc ReportMetrics(ReportMetricsRequest) returns (ReportMetricsReply);
     rpc GetSavedStudies(GetSavedStudiesRequest) returns(GetSavedStudiesReply);
     rpc GetSavedModels(GetSavedModelsRequest) returns(GetSavedModelsReply);
 }
@@ -118,11 +119,6 @@ message Tag {
     string value = 2;
 }
 
-message MountConf {
-   string pvc = 1;
-   string path = 2;
-}
-
 message StudyOverview {
     string name = 1;
     string owner  = 2;
@@ -138,20 +134,23 @@ message Trial {
     repeated Tag tags = 5;
 }
 
+message VolumeConf {
+   string name = 1;
+   string pvc_name = 2;
+   string mount_path = 3;
+}
+
 message WorkerConfig {
     string image = 1;
     repeated string command =  2;
-    int32 gpu = 3;
-    string scheduler = 4;
-    MountConf mount = 5;
-    string pull_secret = 6;
+    repeated VolumeConf volumes = 3;
 }
 
 message Worker {
     string worker_id = 1;
     string study_id = 2;
     string trial_id = 3;
-    string runtime = 4; 
+    string Type = 4; 
     State status = 5;
     WorkerConfig config = 6;
     repeated Tag tags = 7;
@@ -229,6 +228,14 @@ message RunTrialReply {
     string worker_id = 1;
 }
 
+message CreateWorkerReauest {
+    Worker worker = 1;
+}
+
+message CreateWorkerReply {
+    string worker_id = 1;
+}
+
 message StopWorkersRequest {
     string study_id = 1;
     repeated string worker_ids = 2;
@@ -282,7 +289,7 @@ message GetMetricsReply {
 
 message ReportMetricsRequest {
     string study_id = 1;
-    repeated MetricsLogSet metrics_log_sets = 2;
+    repeated MetricsLogSet metrics_log_sets = 3;
 }
 
 message ReportMetricsReply {

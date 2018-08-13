@@ -26,11 +26,11 @@ import (
 
 // StudyJobSpec defines the desired state of StudyJob
 type StudyJobSpec struct {
-	StudySpec                    *StudySpec         `json:"studySpec,omitempty"`
-	WorkerSpec                   *WorkerSpec        `json:"workerSpec,omitempty"`
-	SuggestionSpec               *SuggestionSpec    `json:"suggestionSpec,omitempty"`
-	EarlyStoppingSpec            *EarlyStoppingSpec `json:"earlyStoppingSpec,omitempty"`
-	MetricsCollectorTemplatePath string             `json:"metricsCollectorTemplatePath,omitempty"`
+	StudySpec            *StudySpec            `json:"studySpec,omitempty"`
+	WorkerSpec           *WorkerSpec           `json:"workerSpec,omitempty"`
+	SuggestionSpec       *SuggestionSpec       `json:"suggestionSpec,omitempty"`
+	EarlyStoppingSpec    *EarlyStoppingSpec    `json:"earlyStoppingSpec,omitempty"`
+	MetricsCollectorSpec *MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
 }
 
 // StudyJobStatus defines the observed state of StudyJob
@@ -50,15 +50,21 @@ type StudyJobStatus struct {
 	// It is represented in RFC3339 form and is in UTC.
 	LastReconcileTime *metav1.Time `json:"lastReconcileTime,omitempty"`
 
-	Condition Condition  `json:"conditon,omitempty"`
-	StudyId   string     `json:"studyid,omitempty"`
-	Trials    []TrialSet `json:"trials,omitempty"`
-	//DefaultWorkers   []batchv1.Job     `json:"workers,omitempty"`
+	Condition                Condition  `json:"conditon,omitempty"`
+	StudyId                  string     `json:"studyid,omitempty"`
+	SuggestionParameterId    string     `json:"suggestionParameterId"`
+	EarlyStoppingParameterId string     `json:"earlyStoppingParameterId"`
+	Trials                   []TrialSet `json:"trials,omitempty"`
+}
+
+type WorkerCondition struct {
+	WorkerId  string    `json:"workerid,omitempty"`
+	Condition Condition `json:"conditon,omitempty"`
 }
 
 type TrialSet struct {
-	TrialId      string   `json:"trialid,omitempty"`
-	WorkerIdList []string `json:"workeridlist,omitempty"`
+	TrialId    string            `json:"trialid,omitempty"`
+	WorkerList []WorkerCondition `json:"workeridlist,omitempty"`
 }
 
 type StudySpec struct {
@@ -101,24 +107,24 @@ const (
 	OptimizationTypeMaximize OptimizationType = "maximize"
 )
 
-type WorkerParameter struct {
-	Key   string `json:"key,omitempty"`
-	Value string `json:"value,omitempty"`
-}
-
 type WorkerSpec struct {
 	WorkerTemplatePath string            `json:"workerTemplatePath,omitempty"`
 	WorkerType         string            `json:"workerType,omitempty"`
 	Image              string            `json:"image,omitempty"`
 	Command            []string          `json:"command,omitempty"`
 	VolumeConfigs      []VolumeConfig    `json:"volumeConfigs,omitempty"`
-	WorkerParameters   []WorkerParameter `json:"workerParameters,omitempty"`
+	WorkerParameters   map[string]string `json:"workerParameters,omitempty"`
 }
 
 type VolumeConfig struct {
 	Name      string `json:"name,omitempty"`
 	PvcName   string `json:"pvcName,omitempty"`
 	MountPath string `json:"mountPath,omitempty"`
+}
+
+type MetricsCollectorSpec struct {
+	MetricsCollectorTemplatePath string `json:"metricsCollectorTemplatePath,omitempty"`
+	ServiceAccount               string `json"serviceAccount,omitempty"`
 }
 
 type ServiceParameter struct {

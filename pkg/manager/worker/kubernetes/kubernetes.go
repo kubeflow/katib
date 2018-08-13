@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strconv"
+	//"strconv"
 	"strings"
 	"time"
 
 	batchv1 "k8s.io/api/batch/v1"
 	apiv1 "k8s.io/api/core/v1"
-	resource "k8s.io/apimachinery/pkg/api/resource"
+	//resource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -66,7 +66,7 @@ func (d *KubernetesWorkerInterface) genJobManifest(wid string, conf *api.WorkerC
 					},
 				},
 				Spec: apiv1.PodSpec{
-					SchedulerName: conf.Scheduler,
+					//SchedulerName: conf.Scheduler,
 					Containers: []apiv1.Container{
 						{
 							Image:           conf.Image,
@@ -75,11 +75,11 @@ func (d *KubernetesWorkerInterface) genJobManifest(wid string, conf *api.WorkerC
 							ImagePullPolicy: apiv1.PullAlways,
 						},
 					},
-					RestartPolicy: apiv1.RestartPolicyOnFailure,
+					RestartPolicy:    apiv1.RestartPolicyOnFailure,
 					ImagePullSecrets: []apiv1.LocalObjectReference{
-						apiv1.LocalObjectReference{
-							Name: conf.PullSecret,
-						},
+						//apiv1.LocalObjectReference{
+						//	Name: conf.PullSecret,
+						//},
 					},
 				},
 			},
@@ -87,36 +87,36 @@ func (d *KubernetesWorkerInterface) genJobManifest(wid string, conf *api.WorkerC
 	}
 
 	// Specified pvc is mounted to both PS and Worker Pods
-	if conf.Mount != nil {
-		if conf.Mount.Pvc != "" && conf.Mount.Path != "" {
-			template.Spec.Template.Spec.Volumes = []apiv1.Volume{
-				apiv1.Volume{
-					Name: "pvc-mount-point",
-					VolumeSource: apiv1.VolumeSource{
-						PersistentVolumeClaim: &apiv1.PersistentVolumeClaimVolumeSource{
-							ClaimName: conf.Mount.Pvc,
-						},
-					},
-				},
-			}
-			template.Spec.Template.Spec.Containers[0].VolumeMounts = []apiv1.VolumeMount{
-				apiv1.VolumeMount{
-					Name:      "pvc-mount-point",
-					MountPath: conf.Mount.Path,
-				},
-			}
-		}
-	}
-	if conf.Gpu > 0 {
-		gpuReq, err := resource.ParseQuantity(strconv.Itoa(int(conf.Gpu)))
-		if err != nil {
-			return nil, err
-		}
-		template.Spec.Template.Spec.Containers[0].Resources =
-			apiv1.ResourceRequirements{
-				Limits: apiv1.ResourceList{"nvidia.com/gpu": gpuReq},
-			}
-	}
+	//if conf.Mount != nil {
+	//	if conf.Mount.Pvc != "" && conf.Mount.Path != "" {
+	//		template.Spec.Template.Spec.Volumes = []apiv1.Volume{
+	//			apiv1.Volume{
+	//				Name: "pvc-mount-point",
+	//				VolumeSource: apiv1.VolumeSource{
+	//					PersistentVolumeClaim: &apiv1.PersistentVolumeClaimVolumeSource{
+	//						ClaimName: conf.Mount.Pvc,
+	//					},
+	//				},
+	//			},
+	//		}
+	//		template.Spec.Template.Spec.Containers[0].VolumeMounts = []apiv1.VolumeMount{
+	//			apiv1.VolumeMount{
+	//				Name:      "pvc-mount-point",
+	//				MountPath: conf.Mount.Path,
+	//			},
+	//		}
+	//	}
+	//}
+	//if conf.Gpu > 0 {
+	//	gpuReq, err := resource.ParseQuantity(strconv.Itoa(int(conf.Gpu)))
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	template.Spec.Template.Spec.Containers[0].Resources =
+	//		apiv1.ResourceRequirements{
+	//			Limits: apiv1.ResourceList{"nvidia.com/gpu": gpuReq},
+	//		}
+	//}
 	return template, nil
 }
 
