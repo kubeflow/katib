@@ -10,5 +10,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o studyjobcontroller
 # Copy the controller-manager into a thin image
 FROM alpine:3.7
 WORKDIR /app
+COPY --from=build-env /go/src/github.com/kubeflow/katib/pkg/controller/studyjobcontroller/defaultWorkerTemplate.yaml .
+COPY --from=build-env /go/src/github.com/kubeflow/katib/pkg/controller/studyjobcontroller/defaultMetricsCollectorTemplate.yaml .
 COPY --from=build-env /go/src/github.com/kubeflow/katib/cmd/studyjobcontroller/studyjobcontroller .
 ENTRYPOINT ["./studyjobcontroller"]

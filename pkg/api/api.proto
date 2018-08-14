@@ -4,14 +4,11 @@ package api;
 
 service Manager {
     rpc CreateStudy(CreateStudyRequest) returns (CreateStudyReply);
-    rpc StopStudy(StopStudyRequest) returns (StopStudyReply);
     rpc GetStudy(GetStudyRequest) returns (GetStudyReply);
     rpc GetStudyList(GetStudyListRequest) returns (GetStudyListReply);
     rpc CreateTrial(CreateTrialRequest) returns (CreateTrialReply);
     rpc GetTrials(GetTrialsRequest) returns (GetTrialsReply);
-    rpc RunTrial(RunTrialRequest) returns (RunTrialReply);
     rpc CreateWorker(CreateWorkerReauest) returns (CreateWorkerReply);
-    rpc StopWorkers(StopWorkersRequest) returns (StopWorkersReply);
     rpc GetWorkers(GetWorkersRequest) returns (GetWorkersReply);
     rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply);
     rpc GetShouldStopWorkers(GetShouldStopWorkersRequest) returns (GetShouldStopWorkersReply);
@@ -179,10 +176,6 @@ message CreateStudyReply {
     string study_id = 1;
 }
 
-message StopStudyRequest {
-    string study_id = 1;
-}
-
 message StopStudyReply {
 }
 
@@ -215,17 +208,6 @@ message GetTrialsRequest {
 
 message GetTrialsReply {
     repeated Trial trials = 1;
-}
-
-message RunTrialRequest {
-    string study_id = 1;
-    string trial_id = 2;
-    string runtime = 3;
-    WorkerConfig worker_config = 4;
-}
-
-message RunTrialReply {
-    string worker_id = 1;
 }
 
 message CreateWorkerReauest {

@@ -240,6 +240,11 @@ func (in *StudyJobStatus) DeepCopyInto(out *StudyJobStatus) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.BestObjctiveValue != nil {
+		in, out := &in.BestObjctiveValue, &out.BestObjctiveValue
+		*out = new(float64)
+		**out = **in
+	}
 	return
 }
 
