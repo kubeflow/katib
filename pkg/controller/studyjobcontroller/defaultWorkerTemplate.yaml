@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{.WorkerId}}
+  namespace: {{.NameSpace}}
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{.WorkerId}}
+        image: {{.Image}}
+        command: 
+        {{- range .Command}}
+          - "{{.}}"
+        {{- end}}
+        {{- with .HyperParameters}}
+        {{- range .}}
+          - "{{.Name}}={{.Value}}"
+        {{- end}}
+        {{- end}}
+        {{- with .VolumeConfigs}}
+        volumeMounts:
+        {{- range .}}
+          - name: {{.Name}}
+            mountPath: {{.MountPath}}
+        {{- end}}
+        {{- end}}
+      {{- if .WorkerParameters.RestartPolicy}}
+      restartPolicy: {{.WorkerParameters.RestartPolicy}}
+      {{- else}}
+      restartPolicy: Never
+      {{- end}}
+      {{- with .VolumeConfigs}}
+      volumes:
+      {{- range .}}
+      - name: {{.Name}}
+        persistentVolumeClaim:
+        claimName: {{.PvcName}}
+      {{- end}}
+      {{- end}}
+

@@ -101,14 +101,14 @@ func (d *MetricsCollector) parseLogs(wId string, logs []string, objectiveValueNa
 						metrics_name = v[0]
 					}
 				}
-				if metrics_name == "" {
-					continue
-				}
-				mlogs[metrics_name].Values = append(mlogs[metrics_name].Values, &api.MetricsValueTime{
-					Time:  ls[0],
-					Value: v[1],
-				})
 			}
+			if metrics_name == "" {
+				continue
+			}
+			mlogs[metrics_name].Values = append(mlogs[metrics_name].Values, &api.MetricsValueTime{
+				Time:  ls[0],
+				Value: v[1],
+			})
 		}
 	}
 	for _, ml := range mlogs {
