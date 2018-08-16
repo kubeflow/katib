@@ -21,7 +21,7 @@ const (
 	port = "0.0.0.0:6789"
 )
 
-var ingressHost = flag.String("i", "kube-cluster.example.net", "Ingress host for TensorBoard visualize")
+var ingressHost = flag.String("i", "kube-cluster.example.net", "Ingress host")
 var dbIf kdb.VizierDBInterface
 
 type server struct {
@@ -280,31 +280,6 @@ func (s *server) SaveStudy(ctx context.Context, in *pb.SaveStudyRequest) (*pb.Sa
 }
 
 func (s *server) SaveModel(ctx context.Context, in *pb.SaveModelRequest) (*pb.SaveModelReply, error) {
-	if in.TensorBoard {
-		ret, err := s.GetSavedModel(ctx, &pb.GetSavedModelRequest{
-			StudyName: in.Model.StudyName,
-			WorkerId:  in.Model.WorkerId,
-		})
-		if err != nil {
-			log.Printf("Save Model failed %v", err)
-			return &pb.SaveModelReply{}, err
-		}
-		//Model is not Saved
-		if ret.Model == nil {
-			mountconf := strings.SplitN(in.Model.ModelPath, ":", 2)
-			if len(mountconf) != 2 {
-				log.Printf("Invalid ModelPath %v", mountconf)
-				return &pb.SaveModelReply{}, errors.New("Invalid ModelPath " + in.Model.ModelPath)
-			}
-			//			if in.TensorBoard {
-			//				err = tbif.SpawnTensorBoard(in.Model.WorkerId, in.Model.StudyName, namespace, ingressHost, mountconf[0], mountconf[1])
-			//				if err != nil {
-			//					log.Printf("SpawnTB failed %v", err)
-			//					return &pb.SaveModelReply{}, err
-			//				}
-			//			}
-		}
-	}
 	err := s.msIf.SaveModel(in)
 	if err != nil {
 		log.Printf("Save Model failed %v", err)
