@@ -6,7 +6,6 @@ import (
 	"flag"
 	"log"
 	"net"
-	"strings"
 	"time"
 
 	pb "github.com/kubeflow/katib/pkg/api"
