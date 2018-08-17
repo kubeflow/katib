@@ -9,18 +9,14 @@ data:
     kind: CronJob
     metadata:
       name: {{.WorkerId}}
-      namespace: {{.NameSpace}}
+      namespace: katib
     spec:
       schedule: "*/1 * * * *"
       jobTemplate:
         spec:
           template:
             spec:
-              {{- if .ServiceAccount}}
-              serviceAccountName: {{.ServiceAccount}}
-              {{- else}}
               serviceAccountName: metrics-collector
-              {{- end}}
               containers:
               - name: {{.WorkerId}}
                 image: katib/metrics-collector
@@ -28,6 +24,8 @@ data:
                 - "./metricscollector"
                 - "-s"
                 - "{{.StudyId}}"
+                - "-t"
+                - "{{.TrialId}}"
                 - "-w"
                 - "{{.WorkerId}}"
                 - "-n"

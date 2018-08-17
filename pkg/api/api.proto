@@ -137,19 +137,13 @@ message VolumeConf {
    string mount_path = 3;
 }
 
-message WorkerConfig {
-    string image = 1;
-    repeated string command =  2;
-    repeated VolumeConf volumes = 3;
-}
-
 message Worker {
     string worker_id = 1;
     string study_id = 2;
     string trial_id = 3;
     string Type = 4; 
     State status = 5;
-    WorkerConfig config = 6;
+    string TemplatePath = 6;
     repeated Tag tags = 7;
 }
 

@@ -41,6 +41,13 @@ The client will read three config files.
 * worker-config.yml: Define config for evaluation worker.
 
 ## Create Study
+## Upload Worker Template
+First, you should upload template for your worker.
+Let's use [this](./workerConfigMap.yaml) template.
+In this demo, hyper-parameters are embbeded as args.
+You can embbed in another way(e.g. eviroment values) by using template.
+It is written in [go template](https://golang.org/pkg/text/template/) format.
+
 ### Random Suggestion Demo
 You can run rundom suggesiton demo.
 
@@ -165,7 +172,6 @@ You can set any configuration for your worker pods.
 Here, try to set config for GPU.
 The manifest of the worker pods are generated from template.
 The template is define [ConfigMap](/manifest/studyjobcontroller/workerConfigMap.yaml)
-It is written in [go template](https://golang.org/pkg/text/template/) format.
 There are two templates, defaultWorkerTemplate.yaml and gpuWorkerTemplate.yaml.
 You can add your template for worker.
 Then you should specify the template in your studyjob spec.

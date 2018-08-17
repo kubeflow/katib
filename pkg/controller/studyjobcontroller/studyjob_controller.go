@@ -399,21 +399,13 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 		return nil
 	}
 	log.Printf("Study: %s Suggestions %v", instance.Status.StudyId, getSuggestReply)
-	wids, wins, err := r.getWorerManifest(c, instance.Status.StudyId, instance.Spec.WorkerSpec, ns, trials)
+	wids, wins, mcs, err := r.getManifests(c, instance.Status.StudyId, instance.Spec.WorkerSpec, instance.Spec.MetricsCollectorSpec, trials)
 	if err != nil {
-		log.Printf("getWorerManifest error %v", err)
+		log.Printf("getManifest error %v", err)
 		return err
 	}
-	mcs := make([]*bytes.Buffer, len(wins))
-	for i := range wids {
-		mcs[i], err = r.getMetricsCollectorManifest(instance.Status.StudyId, wids[i], ns, instance.Spec.MetricsCollectorSpec)
-		if err != nil {
-			log.Printf("getMetricsCollectorManifest error %v", err)
-			return err
-		}
-	}
-	jobs := make([]*batchv1.Job, len(wins))
-	mcjobs := make([]*batchv1beta.CronJob, len(wins))
+	jobs := make([]*batchv1.Job, len(wids))
+	mcjobs := make([]*batchv1beta.CronJob, len(wids))
 	BUFSIZE := 1024
 	for i := range jobs {
 		jobs[i] = &batchv1.Job{}
@@ -532,97 +524,90 @@ func (r *ReconcileStudyJobController) getSuggestion(c katibapi.ManagerClient, st
 }
 
 type WorkerInstance struct {
-	WorkerId         string
-	NameSpace        string
-	Image            string
-	Command          []string
-	VolumeConfigs    []katibv1alpha1.VolumeConfig
-	WorkerParameters map[string]string
-	HyperParameters  []*katibapi.Parameter
+	StudyId         string
+	TrialId         string
+	WorkerId        string
+	HyperParameters []*katibapi.Parameter
 }
 
-func (r *ReconcileStudyJobController) getWorerManifest(c katibapi.ManagerClient, studyId string, workerSpec *katibv1alpha1.WorkerSpec, ns string, tl []*katibapi.Trial) ([]string, []*bytes.Buffer, error) {
-	wins := make([]*bytes.Buffer, len(tl))
+func (r *ReconcileStudyJobController) getManifests(c katibapi.ManagerClient, studyId string, workerSpec *katibv1alpha1.WorkerSpec, mcSpec *katibv1alpha1.MetricsCollectorSpec, tl []*katibapi.Trial) ([]string, []*bytes.Buffer, []*bytes.Buffer, error) {
 	wids := make([]string, len(tl))
+	wm := make([]*bytes.Buffer, len(tl))
+	mcm := make([]*bytes.Buffer, len(tl))
+	var err error
+	for i, t := range tl {
+		wids[i], wm[i], err = r.getWorerManifest(c, studyId, t, workerSpec)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		mcm[i], err = r.getMetricsCollectorManifest(studyId, t.TrialId, wids[i], mcSpec)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+	}
+	return wids, wm, mcm, nil
+}
+
+func (r *ReconcileStudyJobController) getWorerManifest(c katibapi.ManagerClient, studyId string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec) (string, *bytes.Buffer, error) {
 	var wtp *template.Template
 	var err error
 	wpath := "/worker-template/defaultWorkerTemplate.yaml"
+	wType := "Default"
 
-	//wtp, err := template.New("DefaultWorkerTemplate").Parse(DefaultWorkerTemplate)
-	if workerSpec.WorkerTemplatePath != "" {
-		wpath = workerSpec.WorkerTemplatePath
+	if workerSpec != nil {
+		if workerSpec.GoTemplate.Path != "" {
+			wpath = workerSpec.GoTemplate.Path
+		}
+		if workerSpec.WorkerType != "" {
+			wType = workerSpec.WorkerType
+		}
 	}
-	log.Printf("Worker Image %v", workerSpec.Image)
-	log.Printf("Worker Parameter %v", workerSpec.WorkerParameters)
-	log.Printf("Worker Template path %s", wpath)
 	wtp, err = template.ParseFiles(wpath)
 	if err != nil {
-		return nil, nil, err
+		return "", nil, err
 	}
-	for i, t := range tl {
-		vconf := make([]*katibapi.VolumeConf, len(workerSpec.VolumeConfigs))
-		for i := range workerSpec.VolumeConfigs {
-			vconf[i] = &katibapi.VolumeConf{
-				Name:      workerSpec.VolumeConfigs[i].Name,
-				PvcName:   workerSpec.VolumeConfigs[i].PvcName,
-				MountPath: workerSpec.VolumeConfigs[i].MountPath,
-			}
-		}
-		cwreq := &katibapi.CreateWorkerReauest{
-			Worker: &katibapi.Worker{
-				StudyId: studyId,
-				TrialId: t.TrialId,
-				Type:    workerSpec.WorkerType,
-				Status:  katibapi.State_PENDING,
-				Config: &katibapi.WorkerConfig{
-					Image:   workerSpec.Image,
-					Command: workerSpec.Command,
-					Volumes: vconf,
-				},
-			},
-		}
-		cwrep, err := c.CreateWorker(context.Background(), cwreq)
-		if err != nil {
-			return nil, nil, err
-		}
+	cwreq := &katibapi.CreateWorkerReauest{
+		Worker: &katibapi.Worker{
+			StudyId: studyId,
+			TrialId: trial.TrialId,
+			Type:    wType,
+			Status:  katibapi.State_PENDING,
+		},
+	}
+	cwrep, err := c.CreateWorker(context.Background(), cwreq)
+	if err != nil {
+		return "", nil, err
+	}
 
-		wids[i] = cwrep.WorkerId
-		wi := WorkerInstance{
-			WorkerId:         wids[i],
-			NameSpace:        ns,
-			Image:            workerSpec.Image,
-			Command:          workerSpec.Command,
-			VolumeConfigs:    workerSpec.VolumeConfigs,
-			WorkerParameters: workerSpec.WorkerParameters,
-		}
-		var b bytes.Buffer
-		for _, p := range t.ParameterSet {
-			wi.HyperParameters = append(wi.HyperParameters, p)
-		}
-		err = wtp.Execute(&b, wi)
-		if err != nil {
-			return nil, nil, err
-		}
-		wins[i] = &b
+	wid := cwrep.WorkerId
+	wi := WorkerInstance{
+		StudyId:  studyId,
+		TrialId:  trial.TrialId,
+		WorkerId: wid,
 	}
-	return wids, wins, nil
+	var b bytes.Buffer
+	for _, p := range trial.ParameterSet {
+		wi.HyperParameters = append(wi.HyperParameters, p)
+	}
+	err = wtp.Execute(&b, wi)
+	if err != nil {
+		return "", nil, err
+	}
+	return wid, &b, nil
 }
 
-func (r *ReconcileStudyJobController) getMetricsCollectorManifest(studyId string, workerId string, ns string, mcs *katibv1alpha1.MetricsCollectorSpec) (*bytes.Buffer, error) {
+func (r *ReconcileStudyJobController) getMetricsCollectorManifest(studyId string, trialId string, workerId string, mcs *katibv1alpha1.MetricsCollectorSpec) (*bytes.Buffer, error) {
 	var mtp *template.Template
 	var err error
 	tmpValues := map[string]string{
-		"StudyId":   studyId,
-		"WorkerId":  workerId,
-		"NameSpace": ns,
+		"StudyId":  studyId,
+		"TrialId":  trialId,
+		"WorkerId": workerId,
 	}
 	mpath := "/metricscollector-template/defaultMetricsCollectorTemplate.yaml"
 	if mcs != nil {
-		if mcs.MetricsCollectorTemplatePath != "" {
-			mpath = mcs.MetricsCollectorTemplatePath
-		}
-		if mcs.ServiceAccount != "" {
-			tmpValues["ServiceAccount"] = mcs.ServiceAccount
+		if mcs.GoTemplate.Path != "" {
+			mpath = mcs.GoTemplate.Path
 		}
 	}
 	mtp, err = template.ParseFiles(mpath)

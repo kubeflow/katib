@@ -603,21 +603,16 @@ func (d *db_conn) getWorkers(worker_id string, trial_id string, study_id string)
 	for rows.Next() {
 		worker := new(api.Worker)
 
-		var config, tags string
+		var tags string
 		err := rows.Scan(
 			&worker.WorkerId,
 			&worker.StudyId,
 			&worker.TrialId,
 			&worker.Type,
 			&worker.Status,
-			&config,
+			&worker.TemplatePath,
 			&tags,
 		)
-		if err != nil {
-			return nil, err
-		}
-		worker.Config = new(api.WorkerConfig)
-		err = jsonpb.UnmarshalString(config, worker.Config)
 		if err != nil {
 			return nil, err
 		}
@@ -673,12 +668,6 @@ func (d *db_conn) GetWorkerList(sid string, tid string) ([]*api.Worker, error) {
 func (d *db_conn) CreateWorker(worker *api.Worker) (string, error) {
 	// Users should not overwrite worker.id
 	var err, lastErr error
-	config, err := (&jsonpb.Marshaler{}).MarshalToString(worker.Config)
-	if err != nil {
-		log.Fatalf("Error marshaling configs: %v", err)
-		lastErr = err
-	}
-
 	tags := make([]string, len(worker.Tags))
 	for i := range tags {
 		tags[i], err = (&jsonpb.Marshaler{}).MarshalToString(worker.Tags[i])
@@ -695,7 +684,7 @@ func (d *db_conn) CreateWorker(worker *api.Worker) (string, error) {
 		worker_id = generate_randid()
 		_, err = d.db.Exec("INSERT INTO workers VALUES (?, ?, ?, ?, ?, ?, ?)",
 			worker_id, worker.StudyId, worker.TrialId, worker.Type,
-			api.State_PENDING, config, strings.Join(tags, ",\n"))
+			api.State_PENDING, worker.TemplatePath, strings.Join(tags, ",\n"))
 		if err == nil {
 			worker.WorkerId = worker_id
 			break

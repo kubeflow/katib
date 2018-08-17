@@ -1,4 +1,5 @@
 /*
+Copyright 2018 The Kubeflow Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,6 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/*
+ StudyJobController is a controller (operator) for StudyJob
+ StudyJobController create and watch workers and metricscollectors.
+ The workers and metricscollectors are generated from template defined ConfigMap.
+ The workers and metricscollectors are kubernetes object. The default object is a Job and CronJob.
+*/
 package main
 
 import (
@@ -35,7 +42,7 @@ func main() {
 	}
 	log.Printf("cfg %v", cfg)
 
-	// Create a new StudJobController to provide shared dependencies and start components
+	// Create a new StudyJobController to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, manager.Options{})
 	if err != nil {
 		log.Printf("manager.New")
@@ -50,7 +57,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Setup StudJobController
+	// Setup StudyJobController
 	if err := controller.AddToManager(mgr); err != nil {
 		log.Printf("controller.AddToManager(mgr)")
 		log.Fatal(err)
@@ -58,6 +65,6 @@ func main() {
 
 	log.Printf("Starting the Cmd.")
 
-	// Starting the StudJobController
+	// Starting the StudyJobController
 	log.Fatal(mgr.Start(signals.SetupSignalHandler()))
 }
