@@ -18,7 +18,6 @@ var requestnum = flag.Int("r", 2, "Request number for random Suggestions (defaul
 var suggestionConfFile = flag.String("c", "", "File path to suggestion config.")
 
 var studyConfig = api.StudyConfig{}
-var workerConfig = api.WorkerConfig{}
 var suggestionConfig = api.SetSuggestionParametersRequest{}
 
 const TimeOut = 600
@@ -126,15 +125,6 @@ func readConfigs() {
 		log.Fatalf("fail to Unmarshal yaml")
 	}
 	studyConfig.Name += *suggestArgo
-
-	buf, err = ioutil.ReadFile("worker-config.yml")
-	if err != nil {
-		log.Fatalf("fail to read worker-config yaml")
-	}
-	err = yaml.Unmarshal(buf, &workerConfig)
-	if err != nil {
-		log.Fatalf("fail to Unmarshal yaml")
-	}
 
 	if *suggestionConfFile != "" {
 		buf, err = ioutil.ReadFile(*suggestionConfFile)
