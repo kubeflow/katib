@@ -33,11 +33,8 @@ spec:
             - adam
             - ftrl
   workerSpec:
-    image: "katib/mxnet-mnist-example"
-    command: 
-        - "python"
-        - "/mxnet/example/image-classification/train_mnist.py"
-        - "--batch-size=64"
+    goTemplate:
+        Path: "/worker-template/cpuWorkerTemplate.yaml"
   suggestionSpec:
     suggestionAlgorithm: "grid"
     suggestionParameters:

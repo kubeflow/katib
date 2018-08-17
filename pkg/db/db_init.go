@@ -45,7 +45,7 @@ func (d *db_conn) DB_Init() {
 		"trial_id CHAR(16), " +
 		"type VARCHAR(255), " +
 		"status TINYINT, " +
-		"config TEXT, " +
+		"template_path TEXT, " +
 		"tags TEXT, " +
 		"FOREIGN KEY(study_id) REFERENCES studies(id), " +
 		"FOREIGN KEY(trial_id) REFERENCES trials(id))")

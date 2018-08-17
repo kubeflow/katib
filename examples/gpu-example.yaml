@@ -34,14 +34,8 @@ spec:
             - ftrl
   workerSpec:
     workerType: "Default"
-    image: "katib/mxnet-mnist-example"
-    workerTemplatePath: "/worker-template/gpuWorkerTemplate.yaml"
-    workerParameters:
-        Gpu: "1"
-    command: 
-        - "python"
-        - "/mxnet/example/image-classification/train_mnist.py"
-        - "--batch-size=64"
+    goTemplate:
+        Path: "/worker-template/gpuWorkerTemplate.yaml"
   suggestionSpec:
     suggestionAlgorithm: "random"
     requestNumber: 3

@@ -109,24 +109,17 @@ const (
 	OptimizationTypeMaximize OptimizationType = "maximize"
 )
 
-type WorkerSpec struct {
-	WorkerTemplatePath string            `json:"workerTemplatePath,omitempty"`
-	WorkerType         string            `json:"workerType,omitempty"`
-	Image              string            `json:"image,omitempty"`
-	Command            []string          `json:"command,omitempty"`
-	VolumeConfigs      []VolumeConfig    `json:"volumeConfigs,omitempty"`
-	WorkerParameters   map[string]string `json:"workerParameters,omitempty"`
+type GoTemplate struct {
+	Path string `json:"path,omitempty"`
 }
 
-type VolumeConfig struct {
-	Name      string `json:"name,omitempty"`
-	PvcName   string `json:"pvcName,omitempty"`
-	MountPath string `json:"mountPath,omitempty"`
+type WorkerSpec struct {
+	GoTemplate GoTemplate `json:"goTemplate,omitempty"`
+	WorkerType string     `json:"workerType,omitempty"`
 }
 
 type MetricsCollectorSpec struct {
-	MetricsCollectorTemplatePath string `json:"metricsCollectorTemplatePath,omitempty"`
-	ServiceAccount               string `json"serviceAccount,omitempty"`
+	GoTemplate GoTemplate `json:"goTemplate,omitempty"`
 }
 
 type ServiceParameter struct {
