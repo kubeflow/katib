@@ -1,23 +1,23 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: vizier-suggestion-hayperband
+  name: vizier-suggestion-hyperband
   namespace: katib
   labels:
     app: vizier
-    component: suggestion-hayperband
+    component: suggestion-hyperband
 spec:
   replicas: 1
   template:
     metadata:
-      name: vizier-suggestion-hayperband
+      name: vizier-suggestion-hyperband
       labels:
         app: vizier
-        component: suggestion-hayperband
+        component: suggestion-hyperband
     spec:
       containers:
-      - name: vizier-suggestion-hayperband
-        image: katib/suggestion-hayperband
+      - name: vizier-suggestion-hyperband
+        image: katib/suggestion-hyperband
         ports:
         - name: api
           containerPort: 6789
