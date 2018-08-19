@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: vizier-suggestion-hayperband
-        image: katib/suggestion-hayperband
+        image: katib/suggestion-hyperband
         ports:
         - name: api
           containerPort: 6789
