@@ -160,6 +160,7 @@ message StudyConfig {
     repeated Tag tags = 7;
     string objective_value_name = 8;
     repeated string metrics = 9;
+    string jobId = 10;
 }
 
 message CreateStudyRequest {

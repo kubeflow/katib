@@ -15,7 +15,8 @@ func (d *db_conn) DB_Init() {
 		"parameter_configs TEXT, " +
 		"tags TEXT, " +
 		"objective_value_name VARCHAR(255), " +
-		"metrics TEXT)")
+		"metrics TEXT, " +
+		"job_id TEXT)")
 	if err != nil {
 		log.Fatalf("Error creating studies table: %v", err)
 	}

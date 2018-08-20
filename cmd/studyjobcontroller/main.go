@@ -40,7 +40,6 @@ func main() {
 		log.Printf("config.GetConfig()")
 		log.Fatal(err)
 	}
-	log.Printf("cfg %v", cfg)
 
 	// Create a new StudyJobController to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, manager.Options{})

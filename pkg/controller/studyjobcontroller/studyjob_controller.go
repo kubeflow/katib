@@ -76,7 +76,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// TODO(user): Modify this to be the types you create
 	// Uncomment watch a Deployment created by StudyJobController - change this for objects you create
-	log.Println("c.Watch(&source.Kind{Type: &katibv1alpha1.StudyJobController{}}, &handler.EnqueueRequestForOwner{")
 	err = c.Watch(&source.Kind{Type: &katibv1alpha1.StudyJob{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &katibv1alpha1.StudyJob{},
@@ -144,12 +143,14 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 	default:
 		err = r.initializeStudy(instance, request.Namespace)
 		if err != nil {
+			r.Update(context.TODO(), instance)
 			log.Printf("Fail to initialize %v", err)
 			return reconcile.Result{}, err
 		}
 		err = r.checkStatus(instance, request.Namespace)
 	}
 	if err != nil {
+		r.Update(context.TODO(), instance)
 		log.Printf("Fail to check status %v", err)
 		return reconcile.Result{}, err
 	}
@@ -209,6 +210,7 @@ func (r *ReconcileStudyJobController) getStudyConf(instance *katibv1alpha1.Study
 		}
 		sconf.ParameterConfigs.Configs = append(sconf.ParameterConfigs.Configs, p)
 	}
+	sconf.JobId = string(instance.UID)
 	return sconf, nil
 }
 
@@ -390,6 +392,7 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 		instance.Spec.SuggestionSpec,
 		instance.Status.SuggestionParameterId)
 	if err != nil {
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		return err
 	}
 	trials := getSuggestReply.Trials
@@ -399,9 +402,10 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 		return nil
 	}
 	log.Printf("Study: %s Suggestions %v", instance.Status.StudyId, getSuggestReply)
-	wids, wins, mcs, err := r.getManifests(c, instance.Status.StudyId, instance.Spec.WorkerSpec, instance.Spec.MetricsCollectorSpec, trials)
+	wids, wins, mcs, err := r.getManifests(c, instance.Status.StudyId, instance.Namespace, instance.Spec.WorkerSpec, instance.Spec.MetricsCollectorSpec, trials)
 	if err != nil {
 		log.Printf("getManifest error %v", err)
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		return err
 	}
 	jobs := make([]*batchv1.Job, len(wids))
@@ -410,27 +414,33 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 	for i := range jobs {
 		jobs[i] = &batchv1.Job{}
 		if err := k8syaml.NewYAMLOrJSONDecoder(wins[i], BUFSIZE).Decode(jobs[i]); err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
 			log.Printf("Yaml decode error %v", err)
 			return err
 		}
 		mcjobs[i] = &batchv1beta.CronJob{}
 		if err := k8syaml.NewYAMLOrJSONDecoder(mcs[i], BUFSIZE).Decode(mcjobs[i]); err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
 			log.Printf("MetricsCollector Yaml decode error %v", err)
 			return err
 		}
 		if err := controllerutil.SetControllerReference(instance, jobs[i], r.scheme); err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
 			log.Printf("SetControllerReference error %v", err)
 			return err
 		}
 		if err := controllerutil.SetControllerReference(instance, mcjobs[i], r.scheme); err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
 			log.Printf("MetricsCollector SetControllerReference error %v", err)
 			return err
 		}
 		if err := r.Create(context.TODO(), jobs[i]); err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
 			log.Printf("Job Create error %v", err)
 			return err
 		}
 		if err := r.Create(context.TODO(), mcjobs[i]); err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
 			log.Printf("MetricsCollector Job Create error %v", err)
 			return err
 		}
@@ -530,17 +540,17 @@ type WorkerInstance struct {
 	HyperParameters []*katibapi.Parameter
 }
 
-func (r *ReconcileStudyJobController) getManifests(c katibapi.ManagerClient, studyId string, workerSpec *katibv1alpha1.WorkerSpec, mcSpec *katibv1alpha1.MetricsCollectorSpec, tl []*katibapi.Trial) ([]string, []*bytes.Buffer, []*bytes.Buffer, error) {
+func (r *ReconcileStudyJobController) getManifests(c katibapi.ManagerClient, studyId string, namespace string, workerSpec *katibv1alpha1.WorkerSpec, mcSpec *katibv1alpha1.MetricsCollectorSpec, tl []*katibapi.Trial) ([]string, []*bytes.Buffer, []*bytes.Buffer, error) {
 	wids := make([]string, len(tl))
 	wm := make([]*bytes.Buffer, len(tl))
 	mcm := make([]*bytes.Buffer, len(tl))
 	var err error
 	for i, t := range tl {
-		wids[i], wm[i], err = r.getWorerManifest(c, studyId, t, workerSpec)
+		wids[i], wm[i], err = r.getWorkerManifest(c, studyId, t, workerSpec)
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		mcm[i], err = r.getMetricsCollectorManifest(studyId, t.TrialId, wids[i], mcSpec)
+		mcm[i], err = r.getMetricsCollectorManifest(studyId, t.TrialId, wids[i], namespace, mcSpec)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -548,7 +558,7 @@ func (r *ReconcileStudyJobController) getManifests(c katibapi.ManagerClient, stu
 	return wids, wm, mcm, nil
 }
 
-func (r *ReconcileStudyJobController) getWorerManifest(c katibapi.ManagerClient, studyId string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec) (string, *bytes.Buffer, error) {
+func (r *ReconcileStudyJobController) getWorkerManifest(c katibapi.ManagerClient, studyId string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec) (string, *bytes.Buffer, error) {
 	var wtp *template.Template
 	var err error
 	wpath := "/worker-template/defaultWorkerTemplate.yaml"
@@ -596,13 +606,14 @@ func (r *ReconcileStudyJobController) getWorerManifest(c katibapi.ManagerClient,
 	return wid, &b, nil
 }
 
-func (r *ReconcileStudyJobController) getMetricsCollectorManifest(studyId string, trialId string, workerId string, mcs *katibv1alpha1.MetricsCollectorSpec) (*bytes.Buffer, error) {
+func (r *ReconcileStudyJobController) getMetricsCollectorManifest(studyId string, trialId string, workerId string, namespace string, mcs *katibv1alpha1.MetricsCollectorSpec) (*bytes.Buffer, error) {
 	var mtp *template.Template
 	var err error
 	tmpValues := map[string]string{
-		"StudyId":  studyId,
-		"TrialId":  trialId,
-		"WorkerId": workerId,
+		"StudyId":   studyId,
+		"TrialId":   trialId,
+		"WorkerId":  workerId,
+		"NameSpace": namespace,
 	}
 	mpath := "/metricscollector-template/defaultMetricsCollectorTemplate.yaml"
 	if mcs != nil {

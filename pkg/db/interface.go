@@ -122,6 +122,7 @@ func (d *db_conn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 		&tags,
 		&study.ObjectiveValueName,
 		&metrics,
+		&study.JobId,
 	)
 	if err != nil {
 		return nil, err
@@ -175,21 +176,24 @@ func (d *db_conn) CreateStudy(in *api.StudyConfig) (string, error) {
 		return "", errors.New("ParameterConfigs must be set")
 
 	}
-	row := d.db.QueryRow("SELECT * FROM studies WHERE name = ?", in.Name)
-	dummy_study := new(api.StudyConfig)
-	var dummy_id, dummy_configs, dummy_tags, dummy_metrics string
-	err := row.Scan(&dummy_id,
-		&dummy_study.Name,
-		&dummy_study.Owner,
-		&dummy_study.OptimizationType,
-		&dummy_study.OptimizationGoal,
-		&dummy_configs,
-		&dummy_tags,
-		&dummy_study.ObjectiveValueName,
-		&dummy_metrics,
-	)
-	if err == nil {
-		return "", fmt.Errorf("Study %s already exist.", in.Name)
+	if in.JobId != "" {
+		row := d.db.QueryRow("SELECT * FROM studies WHERE job_id = ?", in.JobId)
+		dummy_study := new(api.StudyConfig)
+		var dummy_id, dummy_configs, dummy_tags, dummy_metrics, dummy_job_id string
+		err := row.Scan(&dummy_id,
+			&dummy_study.Name,
+			&dummy_study.Owner,
+			&dummy_study.OptimizationType,
+			&dummy_study.OptimizationGoal,
+			&dummy_configs,
+			&dummy_tags,
+			&dummy_study.ObjectiveValueName,
+			&dummy_metrics,
+			&dummy_job_id,
+		)
+		if err == nil {
+			return "", fmt.Errorf("Study %s in Job %s already exist.", in.Name, in.JobId)
+		}
 	}
 
 	configs, err := (&jsonpb.Marshaler{}).MarshalToString(in.ParameterConfigs)
@@ -221,7 +225,7 @@ func (d *db_conn) CreateStudy(in *api.StudyConfig) (string, error) {
 	for true {
 		study_id = generate_randid()
 		_, err := d.db.Exec(
-			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			study_id,
 			in.Name,
 			in.Owner,
@@ -231,6 +235,7 @@ func (d *db_conn) CreateStudy(in *api.StudyConfig) (string, error) {
 			strings.Join(tags, ",\n"),
 			in.ObjectiveValueName,
 			strings.Join(in.Metrics, ",\n"),
+			in.JobId,
 		)
 		if err == nil {
 			break
