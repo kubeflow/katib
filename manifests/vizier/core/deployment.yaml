@@ -22,8 +22,6 @@ spec:
         command:
           - './vizier-manager'
         args:
-          - "-w"
-          - "kubernetes"
           - "-i"
           - "k-cluster.example.net"
         ports:

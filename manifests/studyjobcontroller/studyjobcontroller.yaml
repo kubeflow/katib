@@ -1,0 +1,35 @@
+#apiVersion: apps/v1
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: studyjob-controller
+  namespace: katib
+  labels:
+    app: studyjob-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: studyjob-controller
+  template:
+    metadata:
+      labels:
+        app: studyjob-controller
+    spec:
+      serviceAccountName: studyjob-controller
+      containers:
+      - name: studyjob-controller
+        image: katib/studyjob-controller
+        imagePullPolicy: Always
+        volumeMounts:
+            - name: worker-template
+              mountPath: /worker-template
+            - name: metricscollector-template
+              mountPath: /metricscollector-template
+      volumes:
+        - name: worker-template
+          configMap:
+              name: worker-template
+        - name: metricscollector-template
+          configMap:
+              name: metricscollector-template

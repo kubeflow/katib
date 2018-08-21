@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/kubeflow/katib/pkg"
 	"github.com/kubeflow/katib/pkg/api"
 
 	"google.golang.org/grpc"
@@ -364,7 +365,7 @@ func (h *HyperBandSuggestService) evalWorkers(ctx context.Context, c api.Manager
 			if ml.WorkerStatus != api.State_COMPLETED {
 				return nil, nil
 			}
-			v, _ := strconv.ParseFloat(ml.MetricsLogs[0].Values[len(ml.MetricsLogs[0].Values)-1], 64)
+			v, _ := strconv.ParseFloat(ml.MetricsLogs[0].Values[len(ml.MetricsLogs[0].Values)-1].Value, 64)
 			vs += v
 		}
 		if len(gwrep.Workers) > 0 {
@@ -402,7 +403,7 @@ func (h *HyperBandSuggestService) shLoopParamUpdate(studyId string, hbparam *Hyp
 }
 
 func (h *HyperBandSuggestService) GetSuggestions(ctx context.Context, in *api.GetSuggestionsRequest) (*api.GetSuggestionsReply, error) {
-	conn, err := grpc.Dial(manager, grpc.WithInsecure())
+	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("could not connect: %v", err)
 		return &api.GetSuggestionsReply{}, err

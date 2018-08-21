@@ -9,14 +9,12 @@ import (
 	api "github.com/kubeflow/katib/pkg/api"
 	mockdb "github.com/kubeflow/katib/pkg/mock/db"
 	mockmodelstore "github.com/kubeflow/katib/pkg/mock/modelstore"
-	mockworker "github.com/kubeflow/katib/pkg/mock/worker"
 )
 
 func TestCreateStudy(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockDB := mockdb.NewMockVizierDBInterface(ctrl)
-	mockWif := mockworker.NewMockInterface(ctrl)
 	mockModelStore := mockmodelstore.NewMockModelStore(ctrl)
 	sid := "teststudy"
 	sc := &api.StudyConfig{
@@ -37,7 +35,6 @@ func TestCreateStudy(t *testing.T) {
 	mockModelStore.EXPECT().SaveStudy(ssr).Return(nil)
 
 	s := &server{
-		wIF:  mockWif,
 		msIf: mockModelStore,
 	}
 	req := &api.CreateStudyRequest{StudyConfig: sc}
@@ -53,11 +50,9 @@ func TestGetStudies(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockDB := mockdb.NewMockVizierDBInterface(ctrl)
-	mockWif := mockworker.NewMockInterface(ctrl)
 	mockModelStore := mockmodelstore.NewMockModelStore(ctrl)
 	sid := []string{"teststudy1", "teststudy2"}
 	s := &server{
-		wIF:  mockWif,
 		msIf: mockModelStore,
 	}
 	dbIf = mockDB

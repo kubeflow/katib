@@ -15,7 +15,8 @@ func (d *db_conn) DB_Init() {
 		"parameter_configs TEXT, " +
 		"tags TEXT, " +
 		"objective_value_name VARCHAR(255), " +
-		"metrics TEXT)")
+		"metrics TEXT, " +
+		"job_id TEXT)")
 	if err != nil {
 		log.Fatalf("Error creating studies table: %v", err)
 	}
@@ -43,9 +44,9 @@ func (d *db_conn) DB_Init() {
 		"(id CHAR(16) PRIMARY KEY, " +
 		"study_id CHAR(16), " +
 		"trial_id CHAR(16), " +
-		"runtime VARCHAR(255), " +
+		"type VARCHAR(255), " +
 		"status TINYINT, " +
-		"config TEXT, " +
+		"template_path TEXT, " +
 		"tags TEXT, " +
 		"FOREIGN KEY(study_id) REFERENCES studies(id), " +
 		"FOREIGN KEY(trial_id) REFERENCES trials(id))")

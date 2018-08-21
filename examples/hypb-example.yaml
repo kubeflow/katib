@@ -1,0 +1,53 @@
+apiVersion: "kubeflow.org/v1alpha1"
+kind: StudyJob
+metadata:
+  namespace: katib
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: hypb-example
+spec:
+  studySpec:
+      name: hypb-example
+      owner: crd
+      optimizationtype: maximize
+      objectivevaluename: Validation-accuracy
+      metricsnames:
+        - accuracy
+      parameterconfigs:
+        - name: --lr
+          parametertype: double
+          feasible:
+            min: "0.01"
+            max: "0.03"
+        - name: --num-layers
+          parametertype: int
+          feasible:
+            min: "2"
+            max: "5"
+        - name: --optimizer
+          parametertype: categorical
+          feasible:
+            list:
+            - sgd
+            - adam
+            - ftrl
+        - name: --num-epochs
+          parametertype: int
+          feasible:
+            min: "20"
+            max: "20"
+  workerSpec:
+    goTemplate:
+        Path: "/worker-template/cpuWorkerTemplate.yaml"
+  suggestionSpec:
+    suggestionAlgorithm: "hyperband"
+    suggestionParameters:
+      - 
+          name: "ResourceName"
+          value: "--num-epochs"
+      - 
+          name: "eta"
+          value: "3"
+      -
+          name: "r_l"
+          value: "9"

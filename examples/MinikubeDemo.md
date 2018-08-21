@@ -24,6 +24,7 @@ $ kubectl -n katib port-forward svc/modeldb-frontend 3000:3000 &
 ```
 
 kubectl ~v1.9
+
 ```
 & kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep vizier-core | sed -e "s@pods\/@@") 6789:6789 &
 & kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep modeldb-frontend | sed -e "s@pods\/@@") 3000:3000 &
@@ -40,38 +41,125 @@ The client will read three config files.
 * worker-config.yml: Define config for evaluation worker.
 
 ## Create Study
+## Upload Worker Template
+First, you should upload template for your worker.
+Let's use [this](./workerConfigMap.yaml) template.
+In this demo, hyper-parameters are embbeded as args.
+You can embbed in another way(e.g. eviroment values) by using template.
+It is written in [go template](https://golang.org/pkg/text/template/) format.
+
 ### Random Suggestion Demo
 You can run rundom suggesiton demo.
+
 ```
-go run client-example.go -a random
+$ kubectl apply -f random-example.yaml
 ```
+
 In this demo, 2 random parameters in
 * Learning Rate (--lr) - type: double
 * Number of NN Layer (--num-layers) - type: int
 * optimizer (--optimizer) - type: categorical
 
-Logs
 ```
-2018/04/26 17:43:26 Study ID n9debe3de9ef67c8
-2018/04/26 17:43:26 Study ID n9debe3de9ef67c8 StudyConfname:"random-demo" owner:"katib" optimization_type:MAXIMIZE optimization_goal:0.99 parameter_configs:<configs:<name:"--lr" parameter_type:DOUBLE feasible:<max:"0,03" min:"0.07" > > > default_suggestion_algorithm:"random" default_early_stopping_algorithm:"medianstopping" objective_value_name:"Validation-accuracy" metrics:"accuracy" metrics:"Validation-accuracy"
-2018/04/26 17:43:26 Get Random Suggestions [trial_id:"i988add515f1ca4c" study_id:"n9debe3de9ef67c8" parameter_set:<name:"--lr" parameter_type:DOUBLE value:"0.0611" >  trial_id:"g7afad58be7da888" study_id:"n9debe3de9ef67c8" parameter_set:<name:"--lr" parameter_type:DOUBLE value:"0.0444" > ]
-2018/04/26 17:43:26 WorkerID p4482bfb5cdc17ee start
-2018/04/26 17:43:26 WorkerID c19ca08ca4e6aab1 start
+$ kubectl -n katib get studyjob
+NAME             AGE
+random-example   2m
 ```
+
+Check the study status.
+
+```
+$ kubectl -n katib describe studyjobs random-example
+Name:         random-example
+Namespace:    katib
+Labels:       controller-tools.k8s.io=1.0
+Annotations:  kubectl.kubernetes.io/last-applied-configuration={"apiVersion":"kubeflow.org/v1alpha1","kind":"StudyJob","metadata":{"annotations":{},"labels":{"controller-tools.k8s.io":"1.0"},"name":"random-example"...
+API Version:  kubeflow.org/v1alpha1
+Kind:         StudyJob
+Metadata:
+  Cluster Name:
+  Creation Timestamp:  2018-08-15T01:29:13Z
+  Generation:          0
+  Resource Version:    173289
+  Self Link:           /apis/kubeflow.org/v1alpha1/namespaces/katib/studyjobs/random-example
+  UID:                 9e136400-a02a-11e8-b88c-42010af0008b
+Spec:
+  Study Spec:
+    Metricsnames:
+      accuracy
+    Name:                random-example
+    Objectivevaluename:  Validation-accuracy
+    Optimizationgoal:    0.98
+    Optimizationtype:    maximize
+    Owner:               crd
+    Parameterconfigs:
+      Feasible:
+        Max:          0.03
+        Min:          0.01
+      Name:           --lr
+      Parametertype:  double
+      Feasible:
+        Max:          3
+        Min:          2
+      Name:           --num-layers
+      Parametertype:  int
+      Feasible:
+        List:
+          sgd
+          adam
+          ftrl
+      Name:           --optimizer
+      Parametertype:  categorical
+  Suggestion Spec:
+    Request Number:         3
+    Suggestion Algorithm:   random
+    Suggestion Parameters:  <nil>
+  Worker Spec:
+    Command:
+      python
+      /mxnet/example/image-classification/train_mnist.py
+      --batch-size=64
+    Image:        katib/mxnet-mnist-example
+    Worker Type:  Default
+Status:
+  Best Objctive Value:          <nil>
+  Conditon:                     Running
+  Early Stopping Parameter Id:
+  Studyid:                      qb397cc06d1f8302
+  Suggestion Parameter Id:
+  Trials:
+    Trialid:  p18ee16163b85678
+    Workeridlist:
+      Objctive Value:  <nil>
+      Conditon:        Running
+      Workerid:        td08f74b9939350d
+    Trialid:           pb1be3dbe53a5cb0
+    Workeridlist:
+      Objctive Value:  <nil>
+      Conditon:        Running
+      Workerid:        p2b23e25cce4092c
+    Trialid:           m64209fe0867e91a
+    Workeridlist:
+      Objctive Value:  <nil>
+      Conditon:        Running
+      Workerid:        q6258c1ac98a00a5
+Events:                <none>
+```
+
+When the Spec.Status.State become `Completed`, the study is completed.
+You can look the result on `http://127.0.0.1:3000`.
 
 ### Grid Demo
 Almost same as random suggestion.
-```
-go run client-example.go -a grid
-```
+
 In this demo, make 4 grids for learning rate (--lr) Min 0.03 and Max 0.07.
 
 ### Hyperband Demo
-As the Hyperband suggestion is so different from random and grid, use special client example.
+Almost same as random suggestion.
+
 ```
-go run hyperband-example-client.go
+kubectl -n katib describe studyjob hypb-example.yml
 ```
-The parametes of Hyperband are defined [suggestion-config-hyb.yml](./suggestion-config-hyb.yml).
 In this demo, the eta is 3 and the R is 9.
 
 ## UI
@@ -79,8 +167,160 @@ You can check your Model with Web UI.
 Acsess to `http://127.0.0.1:3000/`
 The Results will be saved automatically.
 
+### Using GPU demo
+You can set any configuration for your worker pods.
+Here, try to set config for GPU.
+The manifest of the worker pods are generated from template.
+The template is define [ConfigMap](/manifest/studyjobcontroller/workerConfigMap.yaml)
+There are two templates, defaultWorkerTemplate.yaml and gpuWorkerTemplate.yaml.
+You can add your template for worker.
+Then you should specify the template in your studyjob spec.
+[This](/examples/gpu-example.yaml) is example for using `gpuWorkerTemplate.yaml`.
+Set "/worker-template/gpuWorkerTemplate.yaml at `workerTemplatePath` field and specify gpu number at `workerParameters/Gpu`
+You can apply it same as other examples.
+```
+$ kubectl apply -f gpu-example.yaml
+$ kubectl -n katib get studyjob
+
+NAME             AGE
+gpu-example      1m
+random-example   17m
+
+$ kubectl -n katib describe studyjob gpu-example
+
+Name:         gpu-example
+Namespace:    katib
+Labels:       controller-tools.k8s.io=1.0
+Annotations:  kubectl.kubernetes.io/last-applied-configuration={"apiVersion":"kubeflow.org/v1alpha1","kind":"StudyJob","metadata":{"annotations":{},"labels":{"controller-tools.k8s.io":"1.0"},"name":"gpu-example","n...
+API Version:  kubeflow.org/v1alpha1
+Kind:         StudyJob
+Metadata:
+  Cluster Name:
+  Creation Timestamp:  2018-08-15T01:48:12Z
+  Generation:          0
+  Resource Version:    175002
+  Self Link:           /apis/kubeflow.org/v1alpha1/namespaces/katib/studyjobs/gpu-example
+  UID:                 44afac4c-a02d-11e8-b88c-42010af0008b
+Spec:
+  Study Spec:
+    Metricsnames:
+      accuracy
+    Name:                gpu-example
+
+	...
+
+  Worker Spec:
+    Command:
+      python
+      /mxnet/example/image-classification/train_mnist.py
+      --batch-size=64
+    Image:  katib/mxnet-mnist-example
+    Worker Parameters:
+      Gpu:                 1
+    Worker Template Path:  /worker-template/gpuWorkerTemplate.yaml
+    Worker Type:           Default
+Status:
+  Best Objctive Value:          <nil>
+  Conditon:                     Running
+  Early Stopping Parameter Id:
+  Studyid:                      k549e927046f2136
+  Suggestion Parameter Id:
+  Trials:
+    Trialid:  t721857cd426b68b
+    Workeridlist:
+      Objctive Value:  <nil>
+      Conditon:        Running
+      Workerid:        g07cba174ada521e
+    Trialid:           f27c0ac1c6664533
+    Workeridlist:
+      Objctive Value:  <nil>
+      Conditon:        Running
+      Workerid:        h8d5062f2f1b8633
+    Trialid:           v129109d1331a98e
+    Workeridlist:
+      Objctive Value:  <nil>
+      Conditon:        Running
+      Workerid:        x8f172a64645690e
+```
+
+Check the GPU configuration works correctly.
+
+```
+$ kubectl -n katib describe pod g07cba174ada521e-88wpn
+Name:           g07cba174ada521e-88wpn
+Namespace:      katib
+Node:           <none>
+Labels:         controller-uid=44bfb99f-a02d-11e8-b88c-42010af0008b
+                job-name=g07cba174ada521e
+Annotations:    <none>
+Status:         Pending
+IP:
+Controlled By:  Job/g07cba174ada521e
+Containers:
+  g07cba174ada521e:
+    Image:  katib/mxnet-mnist-example
+    Port:   <none>
+    Command:
+      python
+      /mxnet/example/image-classification/train_mnist.py
+      --batch-size=64
+      --lr=0.0175
+      --num-layers=2
+      --optimizer=adam
+    Limits:
+      nvidia.com/gpu:  1
+    Requests:
+      nvidia.com/gpu:  1
+    Environment:       <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-knffp (ro)
+Conditions:
+  Type           Status
+  PodScheduled   False
+Volumes:
+  default-token-knffp:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-knffp
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+                 nvidia.com/gpu:NoSchedule
+Events:
+  Type     Reason            Age               From               Message
+  ----     ------            ----              ----               -------
+  Warning  FailedScheduling  6s (x21 over 4m)  default-scheduler  0/3 nodes are available: 3 Insufficient nvidia.com/gpu.
+```
+
+## Metrics Collection
+
+When you use default worker type (It specify `Spec.workerSpec.workerType`), the metrics of worker will be collected from default metrics collector.
+It is deploy as a cronjob. It will collect and report metrics periodically.
+It collect metrics through k8s pod log API.
+You should print logs {metrics name}={value} style.
+In the above demo, the objective value name is Validation-accuracy and the metrics are accuracy, your training code should print like this.
+```
+epoch 1:
+batch1 accuracy=0.3
+batch2 accuracy=0.5
+
+Validation-accuracy=0.4
+
+epoch 2:
+batch1 accuracy=0.7
+batch2 accuracy=0.8
+
+Validation-accuracy=0.75
+```
+The metrics collector will collect all logs of metrics.
+The manifest of metrics collector is also generated from template and defined [here](/manifests/studyjobcontroller/metricsControllerConfigMap.yaml).
+You can add your template and specify `spec.metricsCollectorSpec.metricsCollectorTemplatePath` in a studyjob manifest.
+
 ## ModelManagement
+
 You can export model data to yaml file with CLI.
+
 ```
 katib-cli -s {{server-cli}} pull study {{study ID or name}}  -o {{filename}}
 ```

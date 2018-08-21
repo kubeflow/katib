@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metricscollector-template
+  namespace: katib
+data:
+  defaultMetricsCollectorTemplate.yaml : |-
+    apiVersion: batch/v1beta1
+    kind: CronJob
+    metadata:
+      name: {{.WorkerId}}
+      namespace: katib
+    spec:
+      schedule: "*/1 * * * *"
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              serviceAccountName: metrics-collector
+              containers:
+              - name: {{.WorkerId}}
+                image: katib/metrics-collector
+                args:
+                - "./metricscollector"
+                - "-s"
+                - "{{.StudyId}}"
+                - "-t"
+                - "{{.TrialId}}"
+                - "-w"
+                - "{{.WorkerId}}"
+                - "-n"
+                - "{{.NameSpace}}"
+              restartPolicy: Never
