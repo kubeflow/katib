@@ -20,7 +20,6 @@ const (
 	port = "0.0.0.0:6789"
 )
 
-var ingressHost = flag.String("i", "kube-cluster.example.net", "Ingress host")
 var dbIf kdb.VizierDBInterface
 
 type server struct {
@@ -96,9 +95,9 @@ func (s *server) GetSuggestions(ctx context.Context, in *pb.GetSuggestionsReques
 	return r, nil
 }
 
-func (s *server) CreateWorker(ctx context.Context, in *pb.CreateWorkerReauest) (*pb.CreateWorkerReply, error) {
+func (s *server) RegisterWorker(ctx context.Context, in *pb.RegisterWorkerReauest) (*pb.RegisterWorkerReply, error) {
 	wid, err := dbIf.CreateWorker(in.Worker)
-	return &pb.CreateWorkerReply{WorkerId: wid}, err
+	return &pb.RegisterWorkerReply{WorkerId: wid}, err
 }
 
 func (s *server) GetWorkers(ctx context.Context, in *pb.GetWorkersRequest) (*pb.GetWorkersReply, error) {
@@ -178,23 +177,23 @@ func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.
 	return &pb.GetMetricsReply{MetricsLogSets: mls}, nil
 }
 
-func (s *server) ReportMetrics(ctx context.Context, in *pb.ReportMetricsRequest) (*pb.ReportMetricsReply, error) {
+func (s *server) ReportMetricsLogs(ctx context.Context, in *pb.ReportMetricsLogsRequest) (*pb.ReportMetricsLogsReply, error) {
 	sc, err := dbIf.GetStudyConfig(in.StudyId)
 	if err != nil {
-		return &pb.ReportMetricsReply{}, err
+		return &pb.ReportMetricsLogsReply{}, err
 	}
 	for _, mls := range in.MetricsLogSets {
 		w, err := dbIf.GetWorker(mls.WorkerId)
 		if err != nil {
-			return &pb.ReportMetricsReply{}, err
+			return &pb.ReportMetricsLogsReply{}, err
 		}
 		trial, err := dbIf.GetTrial(w.TrialId)
 		if err != nil {
-			return &pb.ReportMetricsReply{}, err
+			return &pb.ReportMetricsLogsReply{}, err
 		}
 		err = dbIf.StoreWorkerLogs(mls.WorkerId, mls.MetricsLogs)
 		if err != nil {
-			return &pb.ReportMetricsReply{}, err
+			return &pb.ReportMetricsLogsReply{}, err
 		}
 		mets := []*pb.Metrics{}
 		for _, ml := range mls.MetricsLogs {
@@ -220,12 +219,12 @@ func (s *server) ReportMetrics(ctx context.Context, in *pb.ReportMetricsRequest)
 			}
 			_, err = s.SaveModel(ctx, smr)
 			if err != nil {
-				return &pb.ReportMetricsReply{}, err
+				return &pb.ReportMetricsLogsReply{}, err
 			}
 			err = dbIf.UpdateWorker(mls.WorkerId, mls.WorkerStatus)
 		}
 	}
-	return &pb.ReportMetricsReply{}, nil
+	return &pb.ReportMetricsLogsReply{}, nil
 
 }
 

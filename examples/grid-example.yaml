@@ -6,32 +6,31 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: grid-example
 spec:
-  studySpec:
-      name: grid-example
-      owner: crd
-      optimizationtype: maximize
-      objectivevaluename: Validation-accuracy
-      optimizationgoal: 0.99
-      metricsnames:
-        - accuracy
-      parameterconfigs:
-        - name: --lr
-          parametertype: double
-          feasible:
-            min: "0.01"
-            max: "0.03"
-        - name: --num-layers
-          parametertype: int
-          feasible:
-            min: "2"
-            max: "5"
-        - name: --optimizer
-          parametertype: categorical
-          feasible:
-            list:
-            - sgd
-            - adam
-            - ftrl
+  studyName: grid-example
+  owner: crd
+  optimizationtype: maximize
+  objectivevaluename: Validation-accuracy
+  optimizationgoal: 0.99
+  metricsnames:
+    - accuracy
+  parameterconfigs:
+    - name: --lr
+      parametertype: double
+      feasible:
+        min: "0.01"
+        max: "0.03"
+    - name: --num-layers
+      parametertype: int
+      feasible:
+        min: "2"
+        max: "5"
+    - name: --optimizer
+      parametertype: categorical
+      feasible:
+        list:
+        - sgd
+        - adam
+        - ftrl
   workerSpec:
     goTemplate:
         Path: "/worker-template/cpuWorkerTemplate.yaml"

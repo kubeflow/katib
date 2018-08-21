@@ -80,11 +80,11 @@ func main() {
 		log.Printf("Failed to collect logs: %v", err)
 		return
 	}
-	rmreq := &api.ReportMetricsRequest{
+	rmreq := &api.ReportMetricsLogsRequest{
 		StudyId:        *studyId,
 		MetricsLogSets: []*api.MetricsLogSet{mls},
 	}
-	_, err = c.ReportMetrics(ctx, rmreq)
+	_, err = c.ReportMetricsLogs(ctx, rmreq)
 	if err != nil {
 		log.Printf("Failed to Report logs: %v", err)
 		return
