@@ -95,7 +95,7 @@ func (s *server) GetSuggestions(ctx context.Context, in *pb.GetSuggestionsReques
 	return r, nil
 }
 
-func (s *server) RegisterWorker(ctx context.Context, in *pb.RegisterWorkerReauest) (*pb.RegisterWorkerReply, error) {
+func (s *server) RegisterWorker(ctx context.Context, in *pb.RegisterWorkerRequest) (*pb.RegisterWorkerReply, error) {
 	wid, err := dbIf.CreateWorker(in.Worker)
 	return &pb.RegisterWorkerReply{WorkerId: wid}, err
 }
