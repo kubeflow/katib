@@ -23,10 +23,16 @@ set -o pipefail
 export PATH=${GOPATH}/bin:/usr/local/go/bin:${PATH}
 REGISTRY="${GCP_REGISTRY}"
 PROJECT="${GCP_PROJECT}"
-GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-suggestion-random
+GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
 VERSION=$(git describe --tags --always --dirty)
+CPATH=$PWD
 
+echo "Copy source to GOPATH"
+echo "copy $PWD to ${GO_DIR}"
+mkdir -p ${GO_DIR}
+cp -r * ${GO_DIR}
 go get -u github.com/golang/dep/cmd/dep
-
+cd ${GO_DIR}
 dep ensure
+mv ${GO_DIR}/vendor ${CPATH}/vendor
 
