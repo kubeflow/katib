@@ -8,7 +8,7 @@ service Manager {
     rpc GetStudyList(GetStudyListRequest) returns (GetStudyListReply);
     rpc CreateTrial(CreateTrialRequest) returns (CreateTrialReply);
     rpc GetTrials(GetTrialsRequest) returns (GetTrialsReply);
-    rpc RegisterWorker(RegisterWorkerReauest) returns (RegisterWorkerReply);
+    rpc RegisterWorker(RegisterWorkerRequest) returns (RegisterWorkerReply);
     rpc GetWorkers(GetWorkersRequest) returns (GetWorkersReply);
     rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply);
     rpc GetShouldStopWorkers(GetShouldStopWorkersRequest) returns (GetShouldStopWorkersReply);
@@ -205,7 +205,7 @@ message GetTrialsReply {
     repeated Trial trials = 1;
 }
 
-message RegisterWorkerReauest {
+message RegisterWorkerRequest {
     Worker worker = 1;
 }
 

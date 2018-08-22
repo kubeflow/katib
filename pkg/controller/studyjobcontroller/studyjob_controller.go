@@ -622,7 +622,7 @@ func (r *ReconcileStudyJobController) getWorkerManifest(c katibapi.ManagerClient
 	if dryrun {
 		wid = "validation"
 	} else {
-		cwreq := &katibapi.RegisterWorkerReauest{
+		cwreq := &katibapi.RegisterWorkerRequest{
 			Worker: &katibapi.Worker{
 				StudyId: studyId,
 				TrialId: trial.TrialId,
