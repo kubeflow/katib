@@ -202,6 +202,12 @@
                   template: "checkout",
                 }],
                 [
+                {
+                    name: "dep-ensure",
+                    template: "dep-ensure",
+                }
+                ],
+                [
                   {
                     name: "build-manager",
                     template: "build-manager",
@@ -323,6 +329,9 @@
               "copy_artifacts",
               "--bucket=" + bucket,
             ]),  // copy-artifacts
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("dep-ensure", testWorkerImage, [
+              "test/scripts/get-vendor-packages.sh",
+            ]),  // dep ensure
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
               "test/scripts/build-manager.sh",
             ]),  // build-manager
