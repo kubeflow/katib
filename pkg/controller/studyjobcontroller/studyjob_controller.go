@@ -325,12 +325,23 @@ func (r *ReconcileStudyJobController) initializeStudy(instance *katibv1alpha1.St
 	}
 	instance.Status.StudyId = studyId
 	log.Printf("Study: %s Suggestion Spec %v", studyId, instance.Spec.SuggestionSpec)
-	sPID, err := r.setSuggestionParam(c, studyId, instance.Spec.SuggestionSpec)
+	var sspec *katibv1alpha1.SuggestionSpec
+	if instance.Spec.SuggestionSpec != nil {
+		sspec = instance.Spec.SuggestionSpec
+	} else {
+		sspec = &katibv1alpha1.SuggestionSpec{}
+	}
+	sspec.SuggestionParameters = append(sspec.SuggestionParameters,
+		katibapi.SuggestionParameter{
+			Name:  "SuggestionCount",
+			Value: "0",
+		})
+	sPID, err := r.setSuggestionParam(c, studyId, sspec)
 	if err != nil {
 		return err
 	}
 	instance.Status.SuggestionParameterId = sPID
-
+	instance.Status.SuggestionCount += 1
 	instance.Status.Condition = katibv1alpha1.ConditionRunning
 	return nil
 }
@@ -413,6 +424,20 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 }
 
 func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, ns string) error {
+	//Check Suggestion Count
+	sps, err := r.getSuggestionParam(c, instance.Status.SuggestionParameterId)
+	if err != nil {
+		return err
+	}
+	for i := range sps {
+		if sps[i].Name == "SuggestionCount" {
+			count, _ := strconv.Atoi(sps[i].Value)
+			if count >= instance.Status.SuggestionCount+1 {
+				return fmt.Errorf("Suggestion count mismatched. May be duplicate suggestion request")
+			}
+			sps[i].Value = strconv.Itoa(instance.Status.SuggestionCount + 1)
+		}
+	}
 	//GetSuggestion
 	getSuggestReply, err := r.getSuggestion(
 		c,
@@ -457,6 +482,19 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 			},
 		)
 	}
+	//Update Suggestion Count
+	sspr := &katibapi.SetSuggestionParametersRequest{
+		StudyId:              instance.Status.StudyId,
+		SuggestionAlgorithm:  instance.Spec.SuggestionSpec.SuggestionAlgorithm,
+		ParamId:              instance.Status.SuggestionParameterId,
+		SuggestionParameters: sps,
+	}
+	_, err = c.SetSuggestionParameters(context.Background(), sspr)
+	if err != nil {
+		log.Printf("Study %s Suggestion Count update Error %v", instance.Status.StudyId, err)
+		return err
+	}
+	instance.Status.SuggestionCount += 1
 	return nil
 }
 
@@ -512,6 +550,14 @@ func (r *ReconcileStudyJobController) setSuggestionParam(c katibapi.ManagerClien
 	return pid, nil
 }
 
+func (r *ReconcileStudyJobController) getSuggestionParam(c katibapi.ManagerClient, paramId string) ([]*katibapi.SuggestionParameter, error) {
+	ctx := context.Background()
+	gsreq := &katibapi.GetSuggestionParametersRequest{
+		ParamId: paramId,
+	}
+	gsrep, err := c.GetSuggestionParameters(ctx, gsreq)
+	return gsrep.SuggestionParameters, err
+}
 func (r *ReconcileStudyJobController) getSuggestion(c katibapi.ManagerClient, studyId string, suggestionSpec *katibv1alpha1.SuggestionSpec, sParamID string) (*katibapi.GetSuggestionsReply, error) {
 	ctx := context.Background()
 	getSuggestRequest := &katibapi.GetSuggestionsRequest{

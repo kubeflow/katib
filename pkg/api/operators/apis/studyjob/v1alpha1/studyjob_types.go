@@ -62,6 +62,7 @@ type StudyJobStatus struct {
 	EarlyStoppingParameterId string     `json:"earlyStoppingParameterId"`
 	Trials                   []TrialSet `json:"trials,omitempty"`
 	BestObjctiveValue        *float64   `jsob:"bestObjctiveValue,omitempty"`
+	SuggestionCount          int        `json:"suggestionCount,omitempty"`
 }
 
 type WorkerCondition struct {
