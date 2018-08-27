@@ -33,7 +33,28 @@ spec:
         - ftrl
   workerSpec:
     goTemplate:
-        Path: "/worker-template/cpuWorkerTemplate.yaml"
+        rawTemplate: |-
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: {{.WorkerId}}
+            namespace: katib
+          spec:
+            template:
+              spec:
+                containers:
+                - name: {{.WorkerId}}
+                  image: katib/mxnet-mnist-example
+                  command:
+                  - "python"
+                  - "/mxnet/example/image-classification/train_mnist.py"
+                  - "--batch-size=64"
+                  {{- with .HyperParameters}}
+                  {{- range .}}
+                  - "{{.Name}}={{.Value}}"
+                  {{- end}}
+                  {{- end}}
+                restartPolicy: Never
   suggestionSpec:
     suggestionAlgorithm: "random"
     requestNumber: 3

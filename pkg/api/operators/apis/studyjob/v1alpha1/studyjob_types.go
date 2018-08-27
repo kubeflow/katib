@@ -108,7 +108,8 @@ const (
 )
 
 type GoTemplate struct {
-	Path string `json:"path,omitempty"`
+	TemplatePath string `json:"templatePath,omitempty"`
+	RawTemplate  string `json:"rawTemplate,omitempty"`
 }
 
 type WorkerSpec struct {

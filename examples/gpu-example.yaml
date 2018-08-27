@@ -32,9 +32,8 @@ spec:
         - adam
         - ftrl
   workerSpec:
-    workerType: "Default"
     goTemplate:
-        Path: "/worker-template/gpuWorkerTemplate.yaml"
+        templatePath: "/worker-template/gpuWorkerTemplate.yaml"
   suggestionSpec:
     suggestionAlgorithm: "random"
     requestNumber: 3

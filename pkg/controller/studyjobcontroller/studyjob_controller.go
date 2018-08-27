@@ -651,18 +651,23 @@ func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJ
 }
 
 func (r *ReconcileStudyJobController) getWorkerManifest(c katibapi.ManagerClient, studyId string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, kind string, dryrun bool) (string, *bytes.Buffer, error) {
-	var wtp *template.Template
+	var wtp *template.Template = nil
 	var err error
-	wpath := "/worker-template/defaultWorkerTemplate.yaml"
-
 	if workerSpec != nil {
-		if workerSpec.GoTemplate.Path != "" {
-			wpath = workerSpec.GoTemplate.Path
+		if workerSpec.GoTemplate.RawTemplate != "" {
+			wtp, err = template.New("Worker").Parse(workerSpec.GoTemplate.RawTemplate)
+		} else if workerSpec.GoTemplate.TemplatePath != "" {
+			wtp, err = template.ParseFiles(workerSpec.GoTemplate.TemplatePath)
+		}
+		if err != nil {
+			return "", nil, err
 		}
 	}
-	wtp, err = template.ParseFiles(wpath)
-	if err != nil {
-		return "", nil, err
+	if wtp == nil {
+		wtp, err = template.ParseFiles("/worker-template/defaultWorkerTemplate.yaml")
+		if err != nil {
+			return "", nil, err
+		}
 	}
 	var wid string
 	if dryrun {
@@ -729,7 +734,7 @@ func (r *ReconcileStudyJobController) spawnMetricsCollector(instance *katibv1alp
 }
 
 func (r *ReconcileStudyJobController) getMetricsCollectorManifest(studyId string, trialId string, workerId string, namespace string, mcs *katibv1alpha1.MetricsCollectorSpec) (*bytes.Buffer, error) {
-	var mtp *template.Template
+	var mtp *template.Template = nil
 	var err error
 	tmpValues := map[string]string{
 		"StudyId":   studyId,
@@ -737,15 +742,22 @@ func (r *ReconcileStudyJobController) getMetricsCollectorManifest(studyId string
 		"WorkerId":  workerId,
 		"NameSpace": namespace,
 	}
-	mpath := "/metricscollector-template/defaultMetricsCollectorTemplate.yaml"
 	if mcs != nil {
-		if mcs.GoTemplate.Path != "" {
-			mpath = mcs.GoTemplate.Path
+		if mcs.GoTemplate.RawTemplate != "" {
+			mtp, err = template.New("MetricsCollector").Parse(mcs.GoTemplate.RawTemplate)
+		} else if mcs.GoTemplate.TemplatePath != "" {
+			mtp, err = template.ParseFiles(mcs.GoTemplate.TemplatePath)
+		} else {
+		}
+		if err != nil {
+			return nil, err
 		}
 	}
-	mtp, err = template.ParseFiles(mpath)
-	if err != nil {
-		return nil, err
+	if mtp == nil {
+		mtp, err = template.ParseFiles("/metricscollector-template/defaultMetricsCollectorTemplate.yaml")
+		if err != nil {
+			return nil, err
+		}
 	}
 	var b bytes.Buffer
 	err = mtp.Execute(&b, tmpValues)

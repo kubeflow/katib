@@ -30,35 +30,23 @@ kubectl ~v1.9
 & kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep modeldb-frontend | sed -e "s@pods\/@@") 3000:3000 &
 ```
 
-To start HyperParameter Tuning, you need a katib client.
-It will call API of Katib to create study, get suggestions, run trial, and get metrics.
-The details of the system flow for the client and katib components is [here](../docs/images/SystemFlow.png).
-
-An example of client is [here](./client-example.go).
-The client will read three config files.
-* study-config.yml: Define study property and feasible space of parameters.
-* suggesiton-config.yml: Define suggesiton parameter for each study and suggestion service. In this file, the config is for grid suggestion service.
-* worker-config.yml: Define config for evaluation worker.
-
 ## Create Study
-## Upload Worker Template
-First, you should upload template for your worker.
-Let's use [this](./workerConfigMap.yaml) template.
-In this demo, hyper-parameters are embbeded as args.
-You can embbed in another way(e.g. eviroment values) by using template.
-It is written in [go template](https://golang.org/pkg/text/template/) format.
-
 ### Random Suggestion Demo
-You can run rundom suggesiton demo.
-
 ```
 $ kubectl apply -f random-example.yaml
 ```
+Only this command, a study will start, generate hyper-parameters and save the results.
+The configurations for the study(hyper-parameter feasible space, optimization parameter, optimization goal, suggestion algorithm, and so on) are defined in `random-example.yaml`,
+In this demo, hyper-parameters are embbeded as args.
+You can embbed in another way(e.g. eviroment values) by using template.
+It defined in `WorkerSpec.GoTemplate.RawTemplate`.
+It is written in [go template](https://golang.org/pkg/text/template/) format.
 
-In this demo, 2 random parameters in
+In this demo, 3 hyper parameters 
 * Learning Rate (--lr) - type: double
 * Number of NN Layer (--num-layers) - type: int
 * optimizer (--optimizer) - type: categorical
+are randomly generated.
 
 ```
 $ kubectl -n katib get studyjob
@@ -149,18 +137,28 @@ Events:                <none>
 When the Spec.Status.State become `Completed`, the study is completed.
 You can look the result on `http://127.0.0.1:3000`.
 
+### Use ConfigMap for Worker Template
+In Random example, the template for workers is defined in StudyJob manifest.
+A ConfigMap is also used for worker template.
+Let's use [this](./workerConfigMap.yaml) template.
+```
+kubectl apply -f workerConfigMap.yaml
+```
+This template will share among blow three demos(Grid, Hyperband, and GPU).
+
 ### Grid Demo
 Almost same as random suggestion.
 
-In this demo, make 4 grids for learning rate (--lr) Min 0.03 and Max 0.07.
+In this demo, Katib will make 4 grids for learning rate (--lr) Min 0.03 and Max 0.07.
+```
+kubectl apply -f grid-example.yaml
+```
 
 ### Hyperband Demo
-Almost same as random suggestion.
-
-```
-kubectl -n katib describe studyjob hypb-example.yml
-```
 In this demo, the eta is 3 and the R is 9.
+```
+kubectl apply -f random-example.yaml
+```
 
 ## UI
 You can check your Model with Web UI.
