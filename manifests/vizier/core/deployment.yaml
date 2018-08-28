@@ -21,9 +21,6 @@ spec:
         image: katib/vizier-core
         command:
           - './vizier-manager'
-        args:
-          - "-i"
-          - "k-cluster.example.net"
         ports:
         - name: api
           containerPort: 6789

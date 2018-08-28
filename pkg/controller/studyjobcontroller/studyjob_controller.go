@@ -28,9 +28,12 @@ import (
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	batchv1 "k8s.io/api/batch/v1"
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	//"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -147,7 +150,6 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 			log.Printf("Fail to initialize %v", err)
 			return reconcile.Result{}, err
 		}
-		err = r.checkStatus(instance, request.Namespace)
 	}
 	if err != nil {
 		r.Update(context.TODO(), instance)
@@ -159,25 +161,20 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 }
 
 func (r *ReconcileStudyJobController) getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
-
 	sconf := &katibapi.StudyConfig{
 		Metrics: []string{},
 		ParameterConfigs: &katibapi.StudyConfig_ParameterConfigs{
 			Configs: []*katibapi.ParameterConfig{},
 		},
 	}
-	if instance.Spec.StudySpec.Name == "" {
-		return nil, fmt.Errorf("StudyName must be set")
-	}
+	sconf.Name = instance.Spec.StudyName
+	sconf.Owner = instance.Spec.Owner
+	if instance.Spec.OptimizationGoal != nil {
 
-	sconf.Name = instance.Spec.StudySpec.Name
-	sconf.Owner = instance.Spec.StudySpec.Owner
-	if instance.Spec.StudySpec.OptimizationGoal != nil {
-
-		sconf.OptimizationGoal = *instance.Spec.StudySpec.OptimizationGoal
+		sconf.OptimizationGoal = *instance.Spec.OptimizationGoal
 	}
-	sconf.ObjectiveValueName = instance.Spec.StudySpec.ObjectiveValueName
-	switch instance.Spec.StudySpec.OptimizationType {
+	sconf.ObjectiveValueName = instance.Spec.ObjectiveValueName
+	switch instance.Spec.OptimizationType {
 	case katibv1alpha1.OptimizationTypeMinimize:
 		sconf.OptimizationType = katibapi.OptimizationType_MINIMIZE
 	case katibv1alpha1.OptimizationTypeMaximize:
@@ -185,10 +182,10 @@ func (r *ReconcileStudyJobController) getStudyConf(instance *katibv1alpha1.Study
 	default:
 		sconf.OptimizationType = katibapi.OptimizationType_UNKNOWN_OPTIMIZATION
 	}
-	for _, m := range instance.Spec.StudySpec.MetricsNames {
+	for _, m := range instance.Spec.MetricsNames {
 		sconf.Metrics = append(sconf.Metrics, m)
 	}
-	for _, pc := range instance.Spec.StudySpec.ParameterConfigs {
+	for _, pc := range instance.Spec.ParameterConfigs {
 		p := &katibapi.ParameterConfig{
 			Feasible: &katibapi.FeasibleSpace{},
 		}
@@ -215,7 +212,7 @@ func (r *ReconcileStudyJobController) getStudyConf(instance *katibv1alpha1.Study
 }
 
 func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, wids []string) (bool, error) {
-	if instance.Spec.StudySpec.OptimizationGoal == nil {
+	if instance.Spec.OptimizationGoal == nil {
 		return false, nil
 	}
 	getMetricsRequest := &katibapi.GetMetricsRequest{
@@ -224,16 +221,35 @@ func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob
 	}
 	mr, err := c.GetMetrics(context.Background(), getMetricsRequest)
 	if err != nil {
-		return false, err
+		errStatus, _ := status.FromError(err)
+		if errStatus.Code() == codes.ResourceExhausted {
+			//GRPC Message is probably too long, get metrics one by one
+			var mls []*katibapi.MetricsLogSet
+			for _, wid := range wids {
+				getMetricsRequest := &katibapi.GetMetricsRequest{
+					StudyId:   instance.Status.StudyId,
+					WorkerIds: []string{wid},
+				}
+				cmr, err := c.GetMetrics(context.Background(), getMetricsRequest)
+				if err != nil {
+					return false, err
+				}
+				mls = append(mls, cmr.MetricsLogSets...)
+			}
+			mr.MetricsLogSets = mls
+		} else {
+			//Unknown error
+			return false, err
+		}
 	}
 	goal := false
 	for _, mls := range mr.MetricsLogSets {
 		for _, ml := range mls.MetricsLogs {
-			if ml.Name == instance.Spec.StudySpec.ObjectiveValueName {
+			if ml.Name == instance.Spec.ObjectiveValueName {
 				if len(ml.Values) > 0 {
 					curValue, _ := strconv.ParseFloat(ml.Values[len(ml.Values)-1].Value, 32)
-					if instance.Spec.StudySpec.OptimizationType == katibv1alpha1.OptimizationTypeMinimize {
-						if curValue < *instance.Spec.StudySpec.OptimizationGoal {
+					if instance.Spec.OptimizationType == katibv1alpha1.OptimizationTypeMinimize {
+						if curValue < *instance.Spec.OptimizationGoal {
 							goal = true
 						}
 						if instance.Status.BestObjctiveValue != nil {
@@ -250,8 +266,8 @@ func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob
 								}
 							}
 						}
-					} else if instance.Spec.StudySpec.OptimizationType == katibv1alpha1.OptimizationTypeMaximize {
-						if curValue > *instance.Spec.StudySpec.OptimizationGoal {
+					} else if instance.Spec.OptimizationType == katibv1alpha1.OptimizationTypeMaximize {
+						if curValue > *instance.Spec.OptimizationGoal {
 							goal = true
 						}
 						if instance.Status.BestObjctiveValue != nil {
@@ -263,7 +279,9 @@ func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob
 						}
 						for i := range instance.Status.Trials {
 							for j := range instance.Status.Trials[i].WorkerList {
-								instance.Status.Trials[i].WorkerList[j].ObjctiveValue = &curValue
+								if instance.Status.Trials[i].WorkerList[j].WorkerId == mls.WorkerId {
+									instance.Status.Trials[i].WorkerList[j].ObjctiveValue = &curValue
+								}
 							}
 						}
 					}
@@ -276,7 +294,7 @@ func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob
 }
 
 func (r *ReconcileStudyJobController) initializeStudy(instance *katibv1alpha1.StudyJob, ns string) error {
-	if instance.Spec.StudySpec == nil || instance.Spec.SuggestionSpec == nil {
+	if instance.Spec.SuggestionSpec == nil {
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		return nil
 	}
@@ -307,12 +325,23 @@ func (r *ReconcileStudyJobController) initializeStudy(instance *katibv1alpha1.St
 	}
 	instance.Status.StudyId = studyId
 	log.Printf("Study: %s Suggestion Spec %v", studyId, instance.Spec.SuggestionSpec)
-	sPID, err := r.setSuggestionParam(c, studyId, instance.Spec.SuggestionSpec)
+	var sspec *katibv1alpha1.SuggestionSpec
+	if instance.Spec.SuggestionSpec != nil {
+		sspec = instance.Spec.SuggestionSpec
+	} else {
+		sspec = &katibv1alpha1.SuggestionSpec{}
+	}
+	sspec.SuggestionParameters = append(sspec.SuggestionParameters,
+		katibapi.SuggestionParameter{
+			Name:  "SuggestionCount",
+			Value: "0",
+		})
+	sPID, err := r.setSuggestionParam(c, studyId, sspec)
 	if err != nil {
 		return err
 	}
 	instance.Status.SuggestionParameterId = sPID
-
+	instance.Status.SuggestionCount += 1
 	instance.Status.Condition = katibv1alpha1.ConditionRunning
 	return nil
 }
@@ -323,18 +352,33 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 	if instance.Status.Condition == katibv1alpha1.ConditionCompleted || instance.Status.Condition == katibv1alpha1.ConditionFailed {
 		nextSuggestionSchedule = false
 	}
+	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Connect katib manager error %v", err)
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		return nil
+	}
+	defer conn.Close()
+	c := katibapi.NewManagerClient(conn)
 	for i, t := range instance.Status.Trials {
 		for j, w := range t.WorkerList {
 			if w.Condition == katibv1alpha1.ConditionCompleted {
+				if w.ObjctiveValue == nil {
+					cwids = append(cwids, w.WorkerId)
+				}
 				continue
 			}
 			nextSuggestionSchedule = false
-			job := &batchv1.Job{}
-			nname := types.NamespacedName{Namespace: ns, Name: w.WorkerId}
-			joberr := r.Client.Get(context.TODO(), nname, job)
-			cjob := &batchv1beta.CronJob{}
-			cjoberr := r.Client.Get(context.TODO(), nname, cjob)
-			if joberr == nil {
+			switch w.Kind {
+			case "Job":
+				job := &batchv1.Job{}
+				nname := types.NamespacedName{Namespace: ns, Name: w.WorkerId}
+				joberr := r.Client.Get(context.TODO(), nname, job)
+				if joberr != nil {
+					continue
+				}
+				cjob := &batchv1beta.CronJob{}
+				cjoberr := r.Client.Get(context.TODO(), nname, cjob)
 				if job.Status.Active == 0 && job.Status.Succeeded > 0 {
 					ctime := job.Status.CompletionTime
 					if cjoberr == nil {
@@ -352,20 +396,15 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 					}
 				} else if job.Status.Active > 0 {
 					instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionRunning
+					if errors.IsNotFound(cjoberr) {
+						r.spawnMetricsCollector(instance, c, instance.Status.StudyId, t.TrialId, w.WorkerId, ns, instance.Spec.MetricsCollectorSpec)
+					}
 				} else if job.Status.Failed > 0 {
 					instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionFailed
 				}
 			}
 		}
 	}
-	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("Connect katib manager error %v", err)
-		instance.Status.Condition = katibv1alpha1.ConditionFailed
-		return nil
-	}
-	defer conn.Close()
-	c := katibapi.NewManagerClient(conn)
 	if len(cwids) > 0 {
 		goal, err := r.checkGoal(instance, c, cwids)
 		if goal {
@@ -385,6 +424,20 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 }
 
 func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, ns string) error {
+	//Check Suggestion Count
+	sps, err := r.getSuggestionParam(c, instance.Status.SuggestionParameterId)
+	if err != nil {
+		return err
+	}
+	for i := range sps {
+		if sps[i].Name == "SuggestionCount" {
+			count, _ := strconv.Atoi(sps[i].Value)
+			if count >= instance.Status.SuggestionCount+1 {
+				return fmt.Errorf("Suggestion count mismatched. May be duplicate suggestion request")
+			}
+			sps[i].Value = strconv.Itoa(instance.Status.SuggestionCount + 1)
+		}
+	}
 	//GetSuggestion
 	getSuggestReply, err := r.getSuggestion(
 		c,
@@ -402,61 +455,46 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 		return nil
 	}
 	log.Printf("Study: %s Suggestions %v", instance.Status.StudyId, getSuggestReply)
-	wids, wins, mcs, err := r.getManifests(c, instance.Status.StudyId, instance.Namespace, instance.Spec.WorkerSpec, instance.Spec.MetricsCollectorSpec, trials)
+	wkind, err := r.getWorkerKind(instance.Spec.WorkerSpec)
 	if err != nil {
-		log.Printf("getManifest error %v", err)
+		log.Printf("getWorkerKind error %v", err)
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		return err
 	}
-	jobs := make([]*batchv1.Job, len(wids))
-	mcjobs := make([]*batchv1beta.CronJob, len(wids))
-	BUFSIZE := 1024
-	for i := range jobs {
-		jobs[i] = &batchv1.Job{}
-		if err := k8syaml.NewYAMLOrJSONDecoder(wins[i], BUFSIZE).Decode(jobs[i]); err != nil {
+	for _, t := range trials {
+		wid, err := r.spawnWorker(instance, c, instance.Status.StudyId, t, instance.Spec.WorkerSpec, wkind, false)
+		if err != nil {
+			log.Printf("Spawn worker error %v", err)
 			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("Yaml decode error %v", err)
-			return err
-		}
-		mcjobs[i] = &batchv1beta.CronJob{}
-		if err := k8syaml.NewYAMLOrJSONDecoder(mcs[i], BUFSIZE).Decode(mcjobs[i]); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("MetricsCollector Yaml decode error %v", err)
-			return err
-		}
-		if err := controllerutil.SetControllerReference(instance, jobs[i], r.scheme); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("SetControllerReference error %v", err)
-			return err
-		}
-		if err := controllerutil.SetControllerReference(instance, mcjobs[i], r.scheme); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("MetricsCollector SetControllerReference error %v", err)
-			return err
-		}
-		if err := r.Create(context.TODO(), jobs[i]); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("Job Create error %v", err)
-			return err
-		}
-		if err := r.Create(context.TODO(), mcjobs[i]); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("MetricsCollector Job Create error %v", err)
 			return err
 		}
 		instance.Status.Trials = append(
 			instance.Status.Trials,
 			katibv1alpha1.TrialSet{
-				TrialId: trials[i].TrialId,
+				TrialId: t.TrialId,
 				WorkerList: []katibv1alpha1.WorkerCondition{
 					katibv1alpha1.WorkerCondition{
-						WorkerId:  wids[i],
+						WorkerId:  wid,
+						Kind:      wkind,
 						Condition: katibv1alpha1.ConditionCreated,
 					},
 				},
 			},
 		)
 	}
+	//Update Suggestion Count
+	sspr := &katibapi.SetSuggestionParametersRequest{
+		StudyId:              instance.Status.StudyId,
+		SuggestionAlgorithm:  instance.Spec.SuggestionSpec.SuggestionAlgorithm,
+		ParamId:              instance.Status.SuggestionParameterId,
+		SuggestionParameters: sps,
+	}
+	_, err = c.SetSuggestionParameters(context.Background(), sspr)
+	if err != nil {
+		log.Printf("Study %s Suggestion Count update Error %v", instance.Status.StudyId, err)
+		return err
+	}
+	instance.Status.SuggestionCount += 1
 	return nil
 }
 
@@ -512,6 +550,14 @@ func (r *ReconcileStudyJobController) setSuggestionParam(c katibapi.ManagerClien
 	return pid, nil
 }
 
+func (r *ReconcileStudyJobController) getSuggestionParam(c katibapi.ManagerClient, paramId string) ([]*katibapi.SuggestionParameter, error) {
+	ctx := context.Background()
+	gsreq := &katibapi.GetSuggestionParametersRequest{
+		ParamId: paramId,
+	}
+	gsrep, err := c.GetSuggestionParameters(ctx, gsreq)
+	return gsrep.SuggestionParameters, err
+}
 func (r *ReconcileStudyJobController) getSuggestion(c katibapi.ManagerClient, studyId string, suggestionSpec *katibv1alpha1.SuggestionSpec, sParamID string) (*katibapi.GetSuggestionsReply, error) {
 	ctx := context.Background()
 	getSuggestRequest := &katibapi.GetSuggestionsRequest{
@@ -540,56 +586,108 @@ type WorkerInstance struct {
 	HyperParameters []*katibapi.Parameter
 }
 
-func (r *ReconcileStudyJobController) getManifests(c katibapi.ManagerClient, studyId string, namespace string, workerSpec *katibv1alpha1.WorkerSpec, mcSpec *katibv1alpha1.MetricsCollectorSpec, tl []*katibapi.Trial) ([]string, []*bytes.Buffer, []*bytes.Buffer, error) {
-	wids := make([]string, len(tl))
-	wm := make([]*bytes.Buffer, len(tl))
-	mcm := make([]*bytes.Buffer, len(tl))
-	var err error
-	for i, t := range tl {
-		wids[i], wm[i], err = r.getWorkerManifest(c, studyId, t, workerSpec)
-		if err != nil {
-			return nil, nil, nil, err
-		}
-		mcm[i], err = r.getMetricsCollectorManifest(studyId, t.TrialId, wids[i], namespace, mcSpec)
-		if err != nil {
-			return nil, nil, nil, err
-		}
+func (r *ReconcileStudyJobController) getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (string, error) {
+	var typeChecker interface{}
+	BUFSIZE := 1024
+	_, m, err := r.getWorkerManifest(
+		nil,
+		"validation",
+		&katibapi.Trial{
+			TrialId:      "validation",
+			ParameterSet: []*katibapi.Parameter{},
+		},
+		workerSpec,
+		"",
+		true,
+	)
+	if err != nil {
+		return "", err
 	}
-	return wids, wm, mcm, nil
+	if err := k8syaml.NewYAMLOrJSONDecoder(m, BUFSIZE).Decode(&typeChecker); err != nil {
+		log.Printf("Yaml decode validation error %v", err)
+		return "", err
+	}
+	tcMap, ok := typeChecker.(map[string]interface{})
+	if !ok {
+		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
+	}
+	wkind, ok := tcMap["kind"]
+	if !ok {
+		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
+	}
+	wkind_s, ok := wkind.(string)
+	if !ok {
+		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
+	}
+	return wkind_s, nil
 }
 
-func (r *ReconcileStudyJobController) getWorkerManifest(c katibapi.ManagerClient, studyId string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec) (string, *bytes.Buffer, error) {
-	var wtp *template.Template
+func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, studyId string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, wkind string, dryrun bool) (string, error) {
+	wid, wm, err := r.getWorkerManifest(c, studyId, trial, workerSpec, wkind, false)
+	if err != nil {
+		return "", err
+	}
+	BUFSIZE := 1024
+	switch wkind {
+	case "Job":
+		var job batchv1.Job
+		if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(&job); err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
+			log.Printf("Yaml decode error %v", err)
+			return "", err
+		}
+		if err := controllerutil.SetControllerReference(instance, &job, r.scheme); err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
+			log.Printf("SetControllerReference error %v", err)
+			return "", err
+		}
+		if err := r.Create(context.TODO(), &job); err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
+			log.Printf("Job Create error %v", err)
+			return "", err
+		}
+	}
+	return wid, nil
+}
+
+func (r *ReconcileStudyJobController) getWorkerManifest(c katibapi.ManagerClient, studyId string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, kind string, dryrun bool) (string, *bytes.Buffer, error) {
+	var wtp *template.Template = nil
 	var err error
-	wpath := "/worker-template/defaultWorkerTemplate.yaml"
-	wType := "Default"
-
 	if workerSpec != nil {
-		if workerSpec.GoTemplate.Path != "" {
-			wpath = workerSpec.GoTemplate.Path
+		if workerSpec.GoTemplate.RawTemplate != "" {
+			wtp, err = template.New("Worker").Parse(workerSpec.GoTemplate.RawTemplate)
+		} else if workerSpec.GoTemplate.TemplatePath != "" {
+			wtp, err = template.ParseFiles(workerSpec.GoTemplate.TemplatePath)
 		}
-		if workerSpec.WorkerType != "" {
-			wType = workerSpec.WorkerType
+		if err != nil {
+			return "", nil, err
 		}
 	}
-	wtp, err = template.ParseFiles(wpath)
-	if err != nil {
-		return "", nil, err
+	if wtp == nil {
+		wtp, err = template.ParseFiles("/worker-template/defaultWorkerTemplate.yaml")
+		if err != nil {
+			return "", nil, err
+		}
 	}
-	cwreq := &katibapi.CreateWorkerReauest{
-		Worker: &katibapi.Worker{
-			StudyId: studyId,
-			TrialId: trial.TrialId,
-			Type:    wType,
-			Status:  katibapi.State_PENDING,
-		},
-	}
-	cwrep, err := c.CreateWorker(context.Background(), cwreq)
-	if err != nil {
-		return "", nil, err
+	var wid string
+	if dryrun {
+		wid = "validation"
+	} else {
+		cwreq := &katibapi.RegisterWorkerRequest{
+			Worker: &katibapi.Worker{
+				StudyId: studyId,
+				TrialId: trial.TrialId,
+				Status:  katibapi.State_PENDING,
+				Type:    kind,
+			},
+		}
+		cwrep, err := c.RegisterWorker(context.Background(), cwreq)
+		if err != nil {
+			return "", nil, err
+		}
+		wid = cwrep.WorkerId
 	}
 
-	wid := cwrep.WorkerId
 	wi := WorkerInstance{
 		StudyId:  studyId,
 		TrialId:  trial.TrialId,
@@ -606,8 +704,37 @@ func (r *ReconcileStudyJobController) getWorkerManifest(c katibapi.ManagerClient
 	return wid, &b, nil
 }
 
+func (r *ReconcileStudyJobController) spawnMetricsCollector(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, studyId string, trialId string, workerId string, namespace string, mcs *katibv1alpha1.MetricsCollectorSpec) error {
+	var mcjob batchv1beta.CronJob
+	BUFSIZE := 1024
+	mcm, err := r.getMetricsCollectorManifest(studyId, trialId, workerId, namespace, mcs)
+	if err != nil {
+		log.Printf("getMetricsCollectorManifest error %v", err)
+		return err
+	}
+
+	if err := k8syaml.NewYAMLOrJSONDecoder(mcm, BUFSIZE).Decode(&mcjob); err != nil {
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		log.Printf("MetricsCollector Yaml decode error %v", err)
+		return err
+	}
+
+	if err := controllerutil.SetControllerReference(instance, &mcjob, r.scheme); err != nil {
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		log.Printf("MetricsCollector SetControllerReference error %v", err)
+		return err
+	}
+
+	if err := r.Create(context.TODO(), &mcjob); err != nil {
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		log.Printf("MetricsCollector Job Create error %v", err)
+		return err
+	}
+	return nil
+}
+
 func (r *ReconcileStudyJobController) getMetricsCollectorManifest(studyId string, trialId string, workerId string, namespace string, mcs *katibv1alpha1.MetricsCollectorSpec) (*bytes.Buffer, error) {
-	var mtp *template.Template
+	var mtp *template.Template = nil
 	var err error
 	tmpValues := map[string]string{
 		"StudyId":   studyId,
@@ -615,15 +742,22 @@ func (r *ReconcileStudyJobController) getMetricsCollectorManifest(studyId string
 		"WorkerId":  workerId,
 		"NameSpace": namespace,
 	}
-	mpath := "/metricscollector-template/defaultMetricsCollectorTemplate.yaml"
 	if mcs != nil {
-		if mcs.GoTemplate.Path != "" {
-			mpath = mcs.GoTemplate.Path
+		if mcs.GoTemplate.RawTemplate != "" {
+			mtp, err = template.New("MetricsCollector").Parse(mcs.GoTemplate.RawTemplate)
+		} else if mcs.GoTemplate.TemplatePath != "" {
+			mtp, err = template.ParseFiles(mcs.GoTemplate.TemplatePath)
+		} else {
+		}
+		if err != nil {
+			return nil, err
 		}
 	}
-	mtp, err = template.ParseFiles(mpath)
-	if err != nil {
-		return nil, err
+	if mtp == nil {
+		mtp, err = template.ParseFiles("/metricscollector-template/defaultMetricsCollectorTemplate.yaml")
+		if err != nil {
+			return nil, err
+		}
 	}
 	var b bytes.Buffer
 	err = mtp.Execute(&b, tmpValues)

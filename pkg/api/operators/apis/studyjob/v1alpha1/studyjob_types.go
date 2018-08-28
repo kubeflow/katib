@@ -26,7 +26,13 @@ import (
 
 // StudyJobSpec defines the desired state of StudyJob
 type StudyJobSpec struct {
-	StudySpec            *StudySpec            `json:"studySpec,omitempty"`
+	StudyName            string                `json:"studyName,omitempty"`
+	Owner                string                `json:"owner,omitempty"`
+	OptimizationType     OptimizationType      `json:"optimizationtype,omitempty"`
+	OptimizationGoal     *float64              `json:"optimizationgoal,omitempty"`
+	ObjectiveValueName   string                `json:"objectivevaluename,omitempty"`
+	MetricsNames         []string              `json:"metricsnames,omitempty"`
+	ParameterConfigs     []ParameterConfig     `json:"parameterconfigs,omitempty"`
 	WorkerSpec           *WorkerSpec           `json:"workerSpec,omitempty"`
 	SuggestionSpec       *SuggestionSpec       `json:"suggestionSpec,omitempty"`
 	EarlyStoppingSpec    *EarlyStoppingSpec    `json:"earlyStoppingSpec,omitempty"`
@@ -56,10 +62,12 @@ type StudyJobStatus struct {
 	EarlyStoppingParameterId string     `json:"earlyStoppingParameterId"`
 	Trials                   []TrialSet `json:"trials,omitempty"`
 	BestObjctiveValue        *float64   `jsob:"bestObjctiveValue,omitempty"`
+	SuggestionCount          int        `json:"suggestionCount,omitempty"`
 }
 
 type WorkerCondition struct {
 	WorkerId      string    `json:"workerid,omitempty"`
+	Kind          string    `json:"kind,omitempty"`
 	Condition     Condition `json:"conditon,omitempty"`
 	ObjctiveValue *float64  `jsob:"objctiveValue,omitempty"`
 }
@@ -67,16 +75,6 @@ type WorkerCondition struct {
 type TrialSet struct {
 	TrialId    string            `json:"trialid,omitempty"`
 	WorkerList []WorkerCondition `json:"workeridlist,omitempty"`
-}
-
-type StudySpec struct {
-	Name               string            `json:"name,omitempty"`
-	Owner              string            `json:"owner,omitempty"`
-	OptimizationType   OptimizationType  `json:"optimizationtype,omitempty"`
-	OptimizationGoal   *float64          `json:"optimizationgoal,omitempty"`
-	ObjectiveValueName string            `json:"objectivevaluename,omitempty"`
-	MetricsNames       []string          `json:"metricsnames,omitempty"`
-	ParameterConfigs   []ParameterConfig `json:"parameterconfigs,omitempty"`
 }
 
 type ParameterConfig struct {
@@ -110,12 +108,12 @@ const (
 )
 
 type GoTemplate struct {
-	Path string `json:"path,omitempty"`
+	TemplatePath string `json:"templatePath,omitempty"`
+	RawTemplate  string `json:"rawTemplate,omitempty"`
 }
 
 type WorkerSpec struct {
 	GoTemplate GoTemplate `json:"goTemplate,omitempty"`
-	WorkerType string     `json:"workerType,omitempty"`
 }
 
 type MetricsCollectorSpec struct {

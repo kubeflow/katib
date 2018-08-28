@@ -8,7 +8,7 @@ service Manager {
     rpc GetStudyList(GetStudyListRequest) returns (GetStudyListReply);
     rpc CreateTrial(CreateTrialRequest) returns (CreateTrialReply);
     rpc GetTrials(GetTrialsRequest) returns (GetTrialsReply);
-    rpc CreateWorker(CreateWorkerReauest) returns (CreateWorkerReply);
+    rpc RegisterWorker(RegisterWorkerRequest) returns (RegisterWorkerReply);
     rpc GetWorkers(GetWorkersRequest) returns (GetWorkersReply);
     rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply);
     rpc GetShouldStopWorkers(GetShouldStopWorkersRequest) returns (GetShouldStopWorkersReply);
@@ -21,7 +21,7 @@ service Manager {
     rpc GetEarlyStoppingParameterList(GetEarlyStoppingParameterListRequest) returns (GetEarlyStoppingParameterListReply);
     rpc SaveStudy(SaveStudyRequest) returns(SaveStudyReply);
     rpc SaveModel(SaveModelRequest) returns(SaveModelReply);
-    rpc ReportMetrics(ReportMetricsRequest) returns (ReportMetricsReply);
+    rpc ReportMetricsLogs(ReportMetricsLogsRequest) returns (ReportMetricsLogsReply);
     rpc GetSavedStudies(GetSavedStudiesRequest) returns(GetSavedStudiesReply);
     rpc GetSavedModels(GetSavedModelsRequest) returns(GetSavedModelsReply);
 }
@@ -205,11 +205,11 @@ message GetTrialsReply {
     repeated Trial trials = 1;
 }
 
-message CreateWorkerReauest {
+message RegisterWorkerRequest {
     Worker worker = 1;
 }
 
-message CreateWorkerReply {
+message RegisterWorkerReply {
     string worker_id = 1;
 }
 
@@ -264,12 +264,12 @@ message GetMetricsReply {
     repeated MetricsLogSet metrics_log_sets = 1;
 }
 
-message ReportMetricsRequest {
+message ReportMetricsLogsRequest {
     string study_id = 1;
     repeated MetricsLogSet metrics_log_sets = 3;
 }
 
-message ReportMetricsReply {
+message ReportMetricsLogsReply {
 }
 
 message ModelInfo {
