@@ -225,7 +225,11 @@ func (s *server) ReportMetricsLogs(ctx context.Context, in *pb.ReportMetricsLogs
 		}
 	}
 	return &pb.ReportMetricsLogsReply{}, nil
+}
 
+func (s *server) UpdateWorkerState(ctx context.Context, in *pb.UpdateWorkerStateRequest) (*pb.UpdateWorkerStateReply, error) {
+	err := dbIf.UpdateWorker(in.WorkerId, in.Status)
+	return &pb.UpdateWorkerStateReply{}, err
 }
 
 func (s *server) SetSuggestionParameters(ctx context.Context, in *pb.SetSuggestionParametersRequest) (*pb.SetSuggestionParametersReply, error) {

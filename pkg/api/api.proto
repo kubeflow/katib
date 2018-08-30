@@ -10,6 +10,7 @@ service Manager {
     rpc GetTrials(GetTrialsRequest) returns (GetTrialsReply);
     rpc RegisterWorker(RegisterWorkerRequest) returns (RegisterWorkerReply);
     rpc GetWorkers(GetWorkersRequest) returns (GetWorkersReply);
+    rpc UpdateWorkerState(UpdateWorkerStateRequest) returns (UpdateWorkerStateReply);
     rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply);
     rpc GetShouldStopWorkers(GetShouldStopWorkersRequest) returns (GetShouldStopWorkersReply);
     rpc GetMetrics(GetMetricsRequest) returns (GetMetricsReply);
@@ -230,6 +231,14 @@ message GetWorkersRequest {
 
 message GetWorkersReply {
     repeated Worker workers = 1;
+}
+
+message UpdateWorkerStateRequest{
+    string workerId = 1;
+    State status = 2;
+}
+
+message UpdateWorkerStateReply{
 }
 
 message GetSuggestionsRequest {

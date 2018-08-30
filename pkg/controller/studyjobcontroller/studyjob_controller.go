@@ -385,6 +385,15 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 						if ctime != nil && cjob.Status.LastScheduleTime != nil {
 							if ctime.Before(cjob.Status.LastScheduleTime) && len(cjob.Status.Active) == 0 {
 								instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionCompleted
+								_, err := c.UpdateWorkerState(
+									context.Background(),
+									&katibapi.UpdateWorkerStateRequest{
+										WorkerId: instance.Status.Trials[i].WorkerList[j].WorkerId,
+										Status:   katibapi.State_COMPLETED,
+									})
+								if err != nil {
+									return err
+								}
 								susp := true
 								cjob.Spec.Suspend = &susp
 								if err := r.Update(context.TODO(), cjob); err != nil {
