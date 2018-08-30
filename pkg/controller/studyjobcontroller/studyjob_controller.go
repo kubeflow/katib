@@ -383,7 +383,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 					ctime := job.Status.CompletionTime
 					if cjoberr == nil {
 						if ctime != nil && cjob.Status.LastScheduleTime != nil {
-							if ctime.Before(cjob.Status.LastScheduleTime) {
+							if ctime.Before(cjob.Status.LastScheduleTime) && len(cjob.Status.Active) == 0 {
 								instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionCompleted
 								susp := true
 								cjob.Spec.Suspend = &susp
