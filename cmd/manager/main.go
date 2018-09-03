@@ -207,15 +207,18 @@ func (s *server) ReportMetricsLogs(ctx context.Context, in *pb.ReportMetricsLogs
 			}
 		}
 		if len(mets) > 0 {
-			mi := &pb.ModelInfo{
-				StudyName:  sc.Name,
-				WorkerId:   mls.WorkerId,
-				Parameters: trial.ParameterSet,
-				Metrics:    mets,
-			}
 			smr := &pb.SaveModelRequest{
-				Model:   mi,
-				DataSet: &pb.DataSetInfo{},
+				Model: &pb.ModelInfo{
+					StudyName:  sc.Name,
+					WorkerId:   mls.WorkerId,
+					Parameters: trial.ParameterSet,
+					Metrics:    mets,
+					ModelPath:  sc.Name,
+				},
+				DataSet: &pb.DataSetInfo{
+					Name: sc.Name,
+					Path: sc.Name,
+				},
 			}
 			_, err = s.SaveModel(ctx, smr)
 			if err != nil {
