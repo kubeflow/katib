@@ -133,6 +133,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 			log.Println("No instance")
 			return reconcile.Result{}, nil
 		}
+		log.Printf("Fail to read Object %v", err)
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
@@ -157,7 +158,11 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, err
 	}
 	err = r.Update(context.TODO(), instance)
-	return reconcile.Result{}, err
+	if err != nil {
+		log.Printf("Fail to Update StudyJob %v : %v", instance.Status.StudyId, err)
+		return reconcile.Result{}, err
+	}
+	return reconcile.Result{}, nil
 }
 
 func (r *ReconcileStudyJobController) getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
@@ -384,6 +389,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 					if cjoberr == nil {
 						if ctime != nil && cjob.Status.LastScheduleTime != nil {
 							if ctime.Before(cjob.Status.LastScheduleTime) && len(cjob.Status.Active) == 0 {
+								r.saveModel(c, instance.Status.StudyId, instance.Status.Trials[i].TrialId, instance.Status.Trials[i].WorkerList[j].WorkerId)
 								instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionCompleted
 								_, err := c.UpdateWorkerState(
 									context.Background(),
@@ -586,6 +592,75 @@ func (r *ReconcileStudyJobController) getSuggestion(c katibapi.ManagerClient, st
 		log.Printf("\t%v", t)
 	}
 	return getSuggestReply, nil
+}
+func (r *ReconcileStudyJobController) saveModel(c katibapi.ManagerClient, studyId string, trialId string, workerId string) error {
+	ctx := context.Background()
+	getStudyreq := &katibapi.GetStudyRequest{
+		StudyId: studyId,
+	}
+	getStudyReply, err := c.GetStudy(ctx, getStudyreq)
+	if err != nil {
+		return err
+	}
+	sc := getStudyReply.StudyConfig
+	getMetricsRequest := &katibapi.GetMetricsRequest{
+		StudyId:   studyId,
+		WorkerIds: []string{workerId},
+	}
+	getMetricsReply, err := c.GetMetrics(ctx, getMetricsRequest)
+	if err != nil {
+		return err
+	}
+	for _, mls := range getMetricsReply.MetricsLogSets {
+		mets := []*katibapi.Metrics{}
+		var trial *katibapi.Trial = nil
+		gtret, err := c.GetTrials(
+			ctx,
+			&katibapi.GetTrialsRequest{
+				StudyId: studyId,
+			})
+		if err != nil {
+			return err
+		}
+		for _, t := range gtret.Trials {
+			if t.TrialId == trialId {
+				trial = t
+			}
+		}
+		for _, ml := range mls.MetricsLogs {
+			if ml != nil {
+				if len(ml.Values) > 0 {
+					mets = append(mets, &katibapi.Metrics{
+						Name:  ml.Name,
+						Value: ml.Values[len(ml.Values)-1].Value,
+					})
+				}
+			}
+		}
+		if trial == nil {
+			return fmt.Errorf("Trial %s not found", trialId)
+		}
+		if len(mets) > 0 {
+			smr := &katibapi.SaveModelRequest{
+				Model: &katibapi.ModelInfo{
+					StudyName:  sc.Name,
+					WorkerId:   mls.WorkerId,
+					Parameters: trial.ParameterSet,
+					Metrics:    mets,
+					ModelPath:  sc.Name,
+				},
+				DataSet: &katibapi.DataSetInfo{
+					Name: sc.Name,
+					Path: sc.Name,
+				},
+			}
+			_, err = c.SaveModel(ctx, smr)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 type WorkerInstance struct {
