@@ -19,6 +19,28 @@ set -o nounset
 set -o pipefail
 
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
+USERNAME=""
+PASSWORD=""
+
+usage_exit() {
+        echo "Usage: $0 [-u username] [-p password]" 1>&2
+        exit 1
+}
+
+while getopts u:p:h OPT
+do
+    case ${OPT} in
+        u)  USERNAME="--username=${OPTARG}"
+            ;;
+        p)  PASSWORD="--password=${OPTARG}"
+            ;;
+        h)  usage_exit
+            ;;
+        \?) usage_exit
+            ;;
+    esac
+done
+shift $((OPTIND-1))
 
 cd ${SCRIPT_ROOT}
 kubectl apply -f manifests/0-namespace.yaml
@@ -26,12 +48,12 @@ kubectl apply -f manifests/modeldb/db
 kubectl apply -f manifests/modeldb/backend
 kubectl apply -f manifests/modeldb/frontend
 kubectl apply -f manifests/vizier/db
-kubectl apply -f manifests/vizier/core
+kubectl ${USERNAME} ${PASSWORD} apply apply -f manifests/vizier/core
 kubectl apply -f manifests/vizier/suggestion/random
 kubectl apply -f manifests/vizier/suggestion/grid
 kubectl apply -f manifests/vizier/suggestion/hyperband
 kubectl apply -f manifests/studyjobcontroller/crd.yaml
-kubectl apply -f manifests/studyjobcontroller/rbac.yaml
+kubectl ${USERNAME} ${PASSWORD} apply apply -f manifests/studyjobcontroller/rbac.yaml
 kubectl apply -f manifests/studyjobcontroller/workerConfigMap.yaml
 kubectl apply -f manifests/studyjobcontroller/metricsControllerConfigMap.yaml
 kubectl apply -f manifests/studyjobcontroller/studyjobcontroller.yaml
