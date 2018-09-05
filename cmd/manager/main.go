@@ -178,54 +178,19 @@ func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.
 }
 
 func (s *server) ReportMetricsLogs(ctx context.Context, in *pb.ReportMetricsLogsRequest) (*pb.ReportMetricsLogsReply, error) {
-	sc, err := dbIf.GetStudyConfig(in.StudyId)
-	if err != nil {
-		return &pb.ReportMetricsLogsReply{}, err
-	}
 	for _, mls := range in.MetricsLogSets {
-		w, err := dbIf.GetWorker(mls.WorkerId)
+		err := dbIf.StoreWorkerLogs(mls.WorkerId, mls.MetricsLogs)
 		if err != nil {
 			return &pb.ReportMetricsLogsReply{}, err
 		}
-		trial, err := dbIf.GetTrial(w.TrialId)
-		if err != nil {
-			return &pb.ReportMetricsLogsReply{}, err
-		}
-		err = dbIf.StoreWorkerLogs(mls.WorkerId, mls.MetricsLogs)
-		if err != nil {
-			return &pb.ReportMetricsLogsReply{}, err
-		}
-		mets := []*pb.Metrics{}
-		for _, ml := range mls.MetricsLogs {
-			if ml != nil {
-				if len(ml.Values) > 0 {
-					mets = append(mets, &pb.Metrics{
-						Name:  ml.Name,
-						Value: ml.Values[len(ml.Values)-1].Value,
-					})
-				}
-			}
-		}
-		if len(mets) > 0 {
-			mi := &pb.ModelInfo{
-				StudyName:  sc.Name,
-				WorkerId:   mls.WorkerId,
-				Parameters: trial.ParameterSet,
-				Metrics:    mets,
-			}
-			smr := &pb.SaveModelRequest{
-				Model:   mi,
-				DataSet: &pb.DataSetInfo{},
-			}
-			_, err = s.SaveModel(ctx, smr)
-			if err != nil {
-				return &pb.ReportMetricsLogsReply{}, err
-			}
-			err = dbIf.UpdateWorker(mls.WorkerId, mls.WorkerStatus)
-		}
+
 	}
 	return &pb.ReportMetricsLogsReply{}, nil
+}
 
+func (s *server) UpdateWorkerState(ctx context.Context, in *pb.UpdateWorkerStateRequest) (*pb.UpdateWorkerStateReply, error) {
+	err := dbIf.UpdateWorker(in.WorkerId, in.Status)
+	return &pb.UpdateWorkerStateReply{}, err
 }
 
 func (s *server) SetSuggestionParameters(ctx context.Context, in *pb.SetSuggestionParametersRequest) (*pb.SetSuggestionParametersReply, error) {
