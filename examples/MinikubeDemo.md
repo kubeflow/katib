@@ -135,7 +135,7 @@ Events:                <none>
 ```
 
 When the Spec.Status.State become `Completed`, the study is completed.
-You can look the result on `http://127.0.0.1:3000`.
+You can look the result on `http://127.0.0.1:3000/katib`.
 
 ### Use ConfigMap for Worker Template
 In Random example, the template for workers is defined in StudyJob manifest.
@@ -162,7 +162,7 @@ kubectl apply -f random-example.yaml
 
 ## UI
 You can check your Model with Web UI.
-Acsess to `http://127.0.0.1:3000/`
+Acsess to `http://127.0.0.1:3000/katib`
 The Results will be saved automatically.
 
 ### Using GPU demo
