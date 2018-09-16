@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"sync"
 	"text/template"
 
 	"github.com/kubeflow/katib/pkg"
@@ -60,7 +61,7 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileStudyJobController{Client: mgr.GetClient(), scheme: mgr.GetScheme()}
+	return &ReconcileStudyJobController{Client: mgr.GetClient(), scheme: mgr.GetScheme(), muxs: make(map[string]*sync.Mutex)}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -114,6 +115,7 @@ var _ reconcile.Reconciler = &ReconcileStudyJobController{}
 type ReconcileStudyJobController struct {
 	client.Client
 	scheme *runtime.Scheme
+	muxs   map[string]*sync.Mutex
 }
 
 // Reconcile reads that state of the cluster for a StudyJob object and makes changes based on the state read
@@ -125,6 +127,11 @@ type ReconcileStudyJobController struct {
 func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the StudyJob instance
 	instance := &katibv1alpha1.StudyJob{}
+	if _, ok := r.muxs[request.NamespacedName.String()]; !ok {
+		r.muxs[request.NamespacedName.String()] = new(sync.Mutex)
+	}
+	r.muxs[request.NamespacedName.String()].Lock()
+	defer r.muxs[request.NamespacedName.String()].Unlock()
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
