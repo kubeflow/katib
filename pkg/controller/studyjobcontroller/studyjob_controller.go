@@ -136,12 +136,12 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 	if err != nil {
 		if errors.IsNotFound(err) {
 			if _, ok := r.muxMap.Load(request.NamespacedName.String()); ok {
+				log.Println("%s was deleted. Resouces will be released.", request.NamespacedName.String())
 				mux.Unlock()
 				r.muxMap.Delete(request.NamespacedName.String())
 			}
 			// Object not found, return.  Created objects are automatically garbage collected.
 			// For additional cleanup logic use finalizers.
-			log.Println("No instance")
 			return reconcile.Result{}, nil
 		}
 		log.Printf("Fail to read Object %v", err)
@@ -149,13 +149,14 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, err
 	}
 	defer mux.Unlock()
+	var update bool = false
 	switch instance.Status.Condition {
 	case katibv1alpha1.ConditionCompleted:
-		err = r.checkStatus(instance, request.Namespace)
+		err, update = r.checkStatus(instance, request.Namespace)
 	case katibv1alpha1.ConditionFailed:
-		err = r.checkStatus(instance, request.Namespace)
+		err, update = r.checkStatus(instance, request.Namespace)
 	case katibv1alpha1.ConditionRunning:
-		err = r.checkStatus(instance, request.Namespace)
+		err, update = r.checkStatus(instance, request.Namespace)
 	default:
 		err = r.initializeStudy(instance, request.Namespace)
 		if err != nil {
@@ -163,16 +164,19 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 			log.Printf("Fail to initialize %v", err)
 			return reconcile.Result{}, err
 		}
+		update = true
 	}
 	if err != nil {
 		r.Update(context.TODO(), instance)
 		log.Printf("Fail to check status %v", err)
 		return reconcile.Result{}, err
 	}
-	err = r.Update(context.TODO(), instance)
-	if err != nil {
-		log.Printf("Fail to Update StudyJob %v : %v", instance.Status.StudyId, err)
-		return reconcile.Result{}, err
+	if update {
+		err = r.Update(context.TODO(), instance)
+		if err != nil {
+			log.Printf("Fail to Update StudyJob %v : %v", instance.Status.StudyId, err)
+			return reconcile.Result{}, err
+		}
 	}
 	return reconcile.Result{}, nil
 }
@@ -362,9 +366,10 @@ func (r *ReconcileStudyJobController) initializeStudy(instance *katibv1alpha1.St
 	return nil
 }
 
-func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJob, ns string) error {
+func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJob, ns string) (error, bool) {
 	nextSuggestionSchedule := true
 	var cwids []string
+	var update bool = false
 	if instance.Status.Condition == katibv1alpha1.ConditionCompleted || instance.Status.Condition == katibv1alpha1.ConditionFailed {
 		nextSuggestionSchedule = false
 	}
@@ -372,7 +377,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 	if err != nil {
 		log.Printf("Connect katib manager error %v", err)
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
-		return nil
+		return nil, true
 	}
 	defer conn.Close()
 	c := katibapi.NewManagerClient(conn)
@@ -402,6 +407,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 							if ctime.Before(cjob.Status.LastScheduleTime) && len(cjob.Status.Active) == 0 {
 								r.saveModel(c, instance.Status.StudyId, instance.Status.Trials[i].TrialId, instance.Status.Trials[i].WorkerList[j].WorkerId)
 								instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionCompleted
+								update = true
 								_, err := c.UpdateWorkerState(
 									context.Background(),
 									&katibapi.UpdateWorkerStateRequest{
@@ -409,12 +415,13 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 										Status:   katibapi.State_COMPLETED,
 									})
 								if err != nil {
-									return err
+									log.Printf("Fail to update worker info. ID %s", instance.Status.Trials[i].WorkerList[j].WorkerId)
+									return err, false
 								}
 								susp := true
 								cjob.Spec.Suspend = &susp
 								if err := r.Update(context.TODO(), cjob); err != nil {
-									return err
+									return err, false
 								}
 								cwids = append(cwids, w.WorkerId)
 							}
@@ -422,10 +429,12 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 					}
 				} else if job.Status.Active > 0 {
 					instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionRunning
+					update = true
 					if errors.IsNotFound(cjoberr) {
 						r.spawnMetricsCollector(instance, c, instance.Status.StudyId, t.TrialId, w.WorkerId, ns, instance.Spec.MetricsCollectorSpec)
 					}
 				} else if job.Status.Failed > 0 {
+					update = true
 					instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionFailed
 				}
 			}
@@ -436,6 +445,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 		if goal {
 			log.Printf("Study %s reached to the goal. It is completed", instance.Status.StudyId)
 			instance.Status.Condition = katibv1alpha1.ConditionCompleted
+			update = true
 			nextSuggestionSchedule = false
 		}
 		if err != nil {
@@ -445,21 +455,22 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 	if nextSuggestionSchedule {
 		return r.getAndRunSuggestion(instance, c, ns)
 	} else {
-		return nil
+		return nil, update
 	}
 }
 
-func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, ns string) error {
+func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, ns string) (error, bool) {
 	//Check Suggestion Count
 	sps, err := r.getSuggestionParam(c, instance.Status.SuggestionParameterId)
 	if err != nil {
-		return err
+		return err, false
 	}
 	for i := range sps {
 		if sps[i].Name == "SuggestionCount" {
 			count, _ := strconv.Atoi(sps[i].Value)
 			if count >= instance.Status.SuggestionCount+1 {
-				return fmt.Errorf("Suggestion count mismatched. May be duplicate suggestion request")
+				//Suggestion count mismatched. May be duplicate suggestion request
+				return nil, false
 			}
 			sps[i].Value = strconv.Itoa(instance.Status.SuggestionCount + 1)
 		}
@@ -472,27 +483,27 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 		instance.Status.SuggestionParameterId)
 	if err != nil {
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
-		return err
+		return err, true
 	}
 	trials := getSuggestReply.Trials
 	if len(trials) <= 0 {
 		log.Printf("Study %s is completed", instance.Status.StudyId)
 		instance.Status.Condition = katibv1alpha1.ConditionCompleted
-		return nil
+		return nil, true
 	}
 	log.Printf("Study: %s Suggestions %v", instance.Status.StudyId, getSuggestReply)
 	wkind, err := r.getWorkerKind(instance.Spec.WorkerSpec)
 	if err != nil {
 		log.Printf("getWorkerKind error %v", err)
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
-		return err
+		return err, true
 	}
 	for _, t := range trials {
 		wid, err := r.spawnWorker(instance, c, instance.Status.StudyId, t, instance.Spec.WorkerSpec, wkind, false)
 		if err != nil {
 			log.Printf("Spawn worker error %v", err)
 			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			return err
+			return err, true
 		}
 		instance.Status.Trials = append(
 			instance.Status.Trials,
@@ -518,10 +529,10 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 	_, err = c.SetSuggestionParameters(context.Background(), sspr)
 	if err != nil {
 		log.Printf("Study %s Suggestion Count update Error %v", instance.Status.StudyId, err)
-		return err
+		return err, false
 	}
 	instance.Status.SuggestionCount += 1
-	return nil
+	return nil, true
 }
 
 func (r *ReconcileStudyJobController) createStudy(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig) (string, error) {
