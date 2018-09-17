@@ -61,7 +61,7 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileStudyJobController{Client: mgr.GetClient(), scheme: mgr.GetScheme(), muxs: make(map[string]*sync.Mutex)}
+	return &ReconcileStudyJobController{Client: mgr.GetClient(), scheme: mgr.GetScheme(), muxMap: sync.Map{}}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -115,7 +115,7 @@ var _ reconcile.Reconciler = &ReconcileStudyJobController{}
 type ReconcileStudyJobController struct {
 	client.Client
 	scheme *runtime.Scheme
-	muxs   map[string]*sync.Mutex
+	muxMap sync.Map
 }
 
 // Reconcile reads that state of the cluster for a StudyJob object and makes changes based on the state read
@@ -127,14 +127,18 @@ type ReconcileStudyJobController struct {
 func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the StudyJob instance
 	instance := &katibv1alpha1.StudyJob{}
-	if _, ok := r.muxs[request.NamespacedName.String()]; !ok {
-		r.muxs[request.NamespacedName.String()] = new(sync.Mutex)
+	mux := new(sync.Mutex)
+	if m, loaded := r.muxMap.LoadOrStore(request.NamespacedName.String(), mux); loaded {
+		mux, _ = m.(*sync.Mutex)
 	}
-	r.muxs[request.NamespacedName.String()].Lock()
-	defer r.muxs[request.NamespacedName.String()].Unlock()
+	mux.Lock()
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
+			if _, ok := r.muxMap.Load(request.NamespacedName.String()); ok {
+				mux.Unlock()
+				r.muxMap.Delete(request.NamespacedName.String())
+			}
 			// Object not found, return.  Created objects are automatically garbage collected.
 			// For additional cleanup logic use finalizers.
 			log.Println("No instance")
@@ -144,6 +148,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
+	defer mux.Unlock()
 	switch instance.Status.Condition {
 	case katibv1alpha1.ConditionCompleted:
 		err = r.checkStatus(instance, request.Namespace)
@@ -182,7 +187,6 @@ func (r *ReconcileStudyJobController) getStudyConf(instance *katibv1alpha1.Study
 	sconf.Name = instance.Spec.StudyName
 	sconf.Owner = instance.Spec.Owner
 	if instance.Spec.OptimizationGoal != nil {
-
 		sconf.OptimizationGoal = *instance.Spec.OptimizationGoal
 	}
 	sconf.ObjectiveValueName = instance.Spec.ObjectiveValueName
