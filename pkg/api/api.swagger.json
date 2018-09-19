@@ -317,7 +317,7 @@
           }
         ],
         "tags": [
-          "EarlyStopping"
+          "Manager"
         ]
       }
     },
@@ -381,14 +381,14 @@
         ]
       }
     },
-    "/api/Manager/RunTrial": {
+    "/api/Manager/RegisterWorker": {
       "post": {
-        "operationId": "RunTrial",
+        "operationId": "RegisterWorker",
         "responses": {
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/apiRunTrialReply"
+              "$ref": "#/definitions/apiRegisterWorkerReply"
             }
           }
         },
@@ -398,7 +398,33 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiRunTrialRequest"
+              "$ref": "#/definitions/apiWorker"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/ReportMetricsLogs": {
+      "post": {
+        "operationId": "ReportMetricsLogs",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiReportMetricsLogsReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiReportMetricsLogsRequest"
             }
           }
         ],
@@ -433,7 +459,7 @@
         ]
       }
     },
-    "/api/Manager/SaveStudyReply": {
+    "/api/Manager/SaveStudy": {
       "post": {
         "operationId": "SaveStudy",
         "responses": {
@@ -511,38 +537,14 @@
         ]
       }
     },
-    "/api/Manager/StopStudy/{study_id}": {
-      "get": {
-        "operationId": "StopStudy",
+    "/api/Manager/UpdateWorkerState": {
+      "put": {
+        "operationId": "UpdateWorkerState",
         "responses": {
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/apiStopStudyReply"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "study_id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Manager"
-        ]
-      }
-    },
-    "/api/Manager/StopWorkers": {
-      "post": {
-        "operationId": "StopWorkers",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/apiStopWorkersReply"
+              "$ref": "#/definitions/apiUpdateWorkerStateReply"
             }
           }
         },
@@ -552,38 +554,12 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiStopWorkersRequest"
+              "$ref": "#/definitions/apiUpdateWorkerStateRequest"
             }
           }
         ],
         "tags": [
           "Manager"
-        ]
-      }
-    },
-    "/api/Suggestion/GetSuggestions": {
-      "post": {
-        "operationId": "GetSuggestions",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/apiGetSuggestionsReply"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/apiGetSuggestionsRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Suggestion"
         ]
       }
     }
@@ -890,7 +866,7 @@
         "values": {
           "type": "array",
           "items": {
-            "type": "string"
+            "$ref": "#/definitions/apiMetricsValueTime"
           }
         }
       }
@@ -909,6 +885,17 @@
         },
         "worker_status": {
           "$ref": "#/definitions/apiState"
+        }
+      }
+    },
+    "apiMetricsValueTime": {
+      "type": "object",
+      "properties": {
+        "time": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
         }
       }
     },
@@ -934,17 +921,6 @@
           }
         },
         "model_path": {
-          "type": "string"
-        }
-      }
-    },
-    "apiMountConf": {
-      "type": "object",
-      "properties": {
-        "pvc": {
-          "type": "string"
-        },
-        "path": {
           "type": "string"
         }
       }
@@ -1000,7 +976,7 @@
       "default": "UNKNOWN_TYPE",
       "title": "- UNKNOWN_TYPE: Not used"
     },
-    "apiRunTrialReply": {
+    "apiRegisterWorkerReply": {
       "type": "object",
       "properties": {
         "worker_id": {
@@ -1008,20 +984,20 @@
         }
       }
     },
-    "apiRunTrialRequest": {
+    "apiReportMetricsLogsReply": {
+      "type": "object"
+    },
+    "apiReportMetricsLogsRequest": {
       "type": "object",
       "properties": {
         "study_id": {
           "type": "string"
         },
-        "trial_id": {
-          "type": "string"
-        },
-        "runtime": {
-          "type": "string"
-        },
-        "worker_config": {
-          "$ref": "#/definitions/apiWorkerConfig"
+        "metrics_log_sets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiMetricsLogSet"
+          }
         }
       }
     },
@@ -1128,30 +1104,6 @@
       "default": "PENDING",
       "description": "This value is stored as TINYINT in MySQL."
     },
-    "apiStopStudyReply": {
-      "type": "object"
-    },
-    "apiStopWorkersReply": {
-      "type": "object"
-    },
-    "apiStopWorkersRequest": {
-      "type": "object",
-      "properties": {
-        "study_id": {
-          "type": "string"
-        },
-        "worker_ids": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "is_complete": {
-          "type": "boolean",
-          "format": "boolean"
-        }
-      }
-    },
     "apiStudyConfig": {
       "type": "object",
       "properties": {
@@ -1191,6 +1143,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "jobId": {
+          "type": "string"
         }
       }
     },
@@ -1276,6 +1231,20 @@
         }
       }
     },
+    "apiUpdateWorkerStateReply": {
+      "type": "object"
+    },
+    "apiUpdateWorkerStateRequest": {
+      "type": "object",
+      "properties": {
+        "workerId": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/apiState"
+        }
+      }
+    },
     "apiWorker": {
       "type": "object",
       "properties": {
@@ -1288,47 +1257,20 @@
         "trial_id": {
           "type": "string"
         },
-        "runtime": {
+        "Type": {
           "type": "string"
         },
         "status": {
           "$ref": "#/definitions/apiState"
         },
-        "config": {
-          "$ref": "#/definitions/apiWorkerConfig"
+        "TemplatePath": {
+          "type": "string"
         },
         "tags": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/apiTag"
           }
-        }
-      }
-    },
-    "apiWorkerConfig": {
-      "type": "object",
-      "properties": {
-        "image": {
-          "type": "string"
-        },
-        "command": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "gpu": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "scheduler": {
-          "type": "string"
-        },
-        "mount": {
-          "$ref": "#/definitions/apiMountConf"
-        },
-        "pull_secret": {
-          "type": "string"
         }
       }
     }
