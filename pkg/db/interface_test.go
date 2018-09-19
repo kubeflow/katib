@@ -69,8 +69,9 @@ func TestGetStudyConfig(t *testing.T) {
 			"tags",
 			"objective_value_name",
 			"metrics",
+			"job_id",
 		}).
-			AddRow("abc", "test", "admin", 1, 0.99, "{}", "", "", ""))
+			AddRow("abc", "test", "admin", 1, 0.99, "{}", "", "", "", "test"))
 	study, err := db_interface.GetStudyConfig(id)
 	if err != nil {
 		t.Errorf("GetStudyConfig failed: %v", err)

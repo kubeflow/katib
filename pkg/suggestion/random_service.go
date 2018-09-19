@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kubeflow/katib/pkg"
 	"github.com/kubeflow/katib/pkg/api"
 	"google.golang.org/grpc"
 )
@@ -32,7 +33,7 @@ func (s *RandomSuggestService) IntRandom(min, max int) int {
 }
 
 func (s *RandomSuggestService) GetSuggestions(ctx context.Context, in *api.GetSuggestionsRequest) (*api.GetSuggestionsReply, error) {
-	conn, err := grpc.Dial(manager, grpc.WithInsecure())
+	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("could not connect: %v", err)
 		return &api.GetSuggestionsReply{}, err

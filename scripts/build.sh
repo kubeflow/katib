@@ -27,6 +27,8 @@ cd ${SCRIPT_ROOT}
 
 echo "Building core image..."
 docker build -t ${PREFIX}/vizier-core -f ${CMD_PREFIX}/manager/Dockerfile .
+docker build -t ${PREFIX}/studyjob-controller -f ${CMD_PREFIX}/studyjobcontroller/Dockerfile .
+docker build -t ${PREFIX}/metrics-collector -f ${CMD_PREFIX}/metricscollector/Dockerfile .
 
 echo "Building REST API for core image..."
 docker build -t ${PREFIX}/vizier-core-rest -f ${CMD_PREFIX}/manager_rest/Dockerfile .
@@ -45,4 +47,4 @@ docker build -t ${PREFIX}/katib-frontend -f modeldb/Dockerfile .
 
 #echo "Building CLI image..."
 #docker build -t ${PREFIX}/katib-cli -f ${CMD_PREFIX}/cli/Dockerfile .
-cd - > /dev/null
+#cd - > /dev/null

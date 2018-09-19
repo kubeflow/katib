@@ -6,32 +6,23 @@ import (
 	"flag"
 	"log"
 	"net"
-	"strings"
+	"time"
 
 	pb "github.com/kubeflow/katib/pkg/api"
 	kdb "github.com/kubeflow/katib/pkg/db"
 	"github.com/kubeflow/katib/pkg/manager/modelstore"
-	tbif "github.com/kubeflow/katib/pkg/manager/visualise/tensorboard"
-	"github.com/kubeflow/katib/pkg/manager/worker"
-	k8swif "github.com/kubeflow/katib/pkg/manager/worker/kubernetes"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 const (
-	namespace                = "katib"
-	port                     = "0.0.0.0:6789"
-	defaultEarlyStopInterval = 60
-	defaultSaveInterval      = 30
+	port = "0.0.0.0:6789"
 )
 
-var workerType = flag.String("w", "kubernetes", "Worker Type")
-var ingressHost = flag.String("i", "kube-cluster.example.net", "Ingress host for TensorBoard visualize")
 var dbIf kdb.VizierDBInterface
 
 type server struct {
-	wIF  worker.Interface
 	msIf modelstore.ModelStore
 }
 
@@ -104,36 +95,14 @@ func (s *server) GetSuggestions(ctx context.Context, in *pb.GetSuggestionsReques
 	return r, nil
 }
 
-func (s *server) RunTrial(ctx context.Context, in *pb.RunTrialRequest) (*pb.RunTrialReply, error) {
-	wid, err := dbIf.CreateWorker(
-		&pb.Worker{
-			StudyId: in.StudyId,
-			TrialId: in.TrialId,
-			Runtime: in.Runtime,
-			Config:  in.WorkerConfig,
-		})
-	if err != nil {
-		return &pb.RunTrialReply{WorkerId: wid}, err
-	}
-	err = s.wIF.SpawnWorker(wid, in.WorkerConfig)
-	return &pb.RunTrialReply{WorkerId: wid}, err
-}
-
-func (s *server) StopWorkers(ctx context.Context, in *pb.StopWorkersRequest) (*pb.StopWorkersReply, error) {
-	err := s.wIF.StopWorkers(in.StudyId, in.WorkerIds, in.IsComplete)
-	return &pb.StopWorkersReply{}, err
+func (s *server) RegisterWorker(ctx context.Context, in *pb.RegisterWorkerRequest) (*pb.RegisterWorkerReply, error) {
+	wid, err := dbIf.CreateWorker(in.Worker)
+	return &pb.RegisterWorkerReply{WorkerId: wid}, err
 }
 
 func (s *server) GetWorkers(ctx context.Context, in *pb.GetWorkersRequest) (*pb.GetWorkersReply, error) {
 	var ws []*pb.Worker
 	var err error
-	if in.StudyId == "" {
-		return &pb.GetWorkersReply{Workers: ws}, errors.New("StudyId should be set")
-	}
-	err = s.wIF.UpdateWorkerStatus(in.StudyId)
-	if err != nil {
-		return &pb.GetWorkersReply{Workers: ws}, err
-	}
 	if in.WorkerId == "" {
 		ws, err = dbIf.GetWorkerList(in.StudyId, in.TrialId)
 	} else {
@@ -162,16 +131,15 @@ func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.
 	if in.StudyId == "" {
 		return &pb.GetMetricsReply{}, errors.New("StudyId should be set")
 	}
+	sc, err := dbIf.GetStudyConfig(in.StudyId)
+	if err != nil {
+		return &pb.GetMetricsReply{}, err
+	}
 	if len(in.MetricsNames) > 0 {
 		mNames = in.MetricsNames
 	} else {
-		sc, err := dbIf.GetStudyConfig(in.StudyId)
-		if err != nil {
-			return &pb.GetMetricsReply{}, err
-		}
 		mNames = sc.Metrics
 	}
-	err := s.wIF.UpdateWorkerStatus(in.StudyId)
 	if err != nil {
 		return &pb.GetMetricsReply{}, err
 	}
@@ -196,14 +164,33 @@ func (s *server) GetMetrics(ctx context.Context, in *pb.GetMetricsRequest) (*pb.
 			}
 			mls[i].MetricsLogs[j] = &pb.MetricsLog{
 				Name:   m,
-				Values: make([]string, len(ls)),
+				Values: make([]*pb.MetricsValueTime, len(ls)),
 			}
 			for k, l := range ls {
-				mls[i].MetricsLogs[j].Values[k] = l.Value
+				mls[i].MetricsLogs[j].Values[k] = &pb.MetricsValueTime{
+					Value: l.Value,
+					Time:  l.Time.UTC().Format(time.RFC3339Nano),
+				}
 			}
 		}
 	}
 	return &pb.GetMetricsReply{MetricsLogSets: mls}, nil
+}
+
+func (s *server) ReportMetricsLogs(ctx context.Context, in *pb.ReportMetricsLogsRequest) (*pb.ReportMetricsLogsReply, error) {
+	for _, mls := range in.MetricsLogSets {
+		err := dbIf.StoreWorkerLogs(mls.WorkerId, mls.MetricsLogs)
+		if err != nil {
+			return &pb.ReportMetricsLogsReply{}, err
+		}
+
+	}
+	return &pb.ReportMetricsLogsReply{}, nil
+}
+
+func (s *server) UpdateWorkerState(ctx context.Context, in *pb.UpdateWorkerStateRequest) (*pb.UpdateWorkerStateReply, error) {
+	err := dbIf.UpdateWorker(in.WorkerId, in.Status)
+	return &pb.UpdateWorkerStateReply{}, err
 }
 
 func (s *server) SetSuggestionParameters(ctx context.Context, in *pb.SetSuggestionParametersRequest) (*pb.SetSuggestionParametersReply, error) {
@@ -250,42 +237,12 @@ func (s *server) GetEarlyStoppingParameterList(ctx context.Context, in *pb.GetEa
 	return &pb.GetEarlyStoppingParameterListReply{EarlyStoppingParameterSets: pss}, err
 }
 
-func (s *server) StopStudy(ctx context.Context, in *pb.StopStudyRequest) (*pb.StopStudyReply, error) {
-	err := s.wIF.CleanWorkers(in.StudyId)
-	return &pb.StopStudyReply{}, err
-}
-
 func (s *server) SaveStudy(ctx context.Context, in *pb.SaveStudyRequest) (*pb.SaveStudyReply, error) {
 	err := s.msIf.SaveStudy(in)
 	return &pb.SaveStudyReply{}, err
 }
 
 func (s *server) SaveModel(ctx context.Context, in *pb.SaveModelRequest) (*pb.SaveModelReply, error) {
-	if in.TensorBoard {
-		ret, err := s.GetSavedModel(ctx, &pb.GetSavedModelRequest{
-			StudyName: in.Model.StudyName,
-			WorkerId:  in.Model.WorkerId,
-		})
-		if err != nil {
-			log.Printf("Save Model failed %v", err)
-			return &pb.SaveModelReply{}, err
-		}
-		//Model is not Saved
-		if ret.Model == nil {
-			mountconf := strings.SplitN(in.Model.ModelPath, ":", 2)
-			if len(mountconf) != 2 {
-				log.Printf("Invalid ModelPath %v", mountconf)
-				return &pb.SaveModelReply{}, errors.New("Invalid ModelPath " + in.Model.ModelPath)
-			}
-			if in.TensorBoard {
-				err = tbif.SpawnTensorBoard(in.Model.WorkerId, in.Model.StudyName, namespace, ingressHost, mountconf[0], mountconf[1])
-				if err != nil {
-					log.Printf("SpawnTB failed %v", err)
-					return &pb.SaveModelReply{}, err
-				}
-			}
-		}
-	}
 	err := s.msIf.SaveModel(in)
 	if err != nil {
 		log.Printf("Save Model failed %v", err)
@@ -319,18 +276,9 @@ func main() {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 	size := 1<<31 - 1
+	log.Printf("Start Katib manager: %s", port)
 	s := grpc.NewServer(grpc.MaxRecvMsgSize(size), grpc.MaxSendMsgSize(size))
-	switch *workerType {
-	case "kubernetes":
-		log.Printf("Worker: kubernetes\n")
-		kw, err := k8swif.NewKubernetesWorkerInterface(dbIf)
-		if err != nil {
-			log.Fatalf("Failed to Create Kubernetes Worker: %v", err)
-		}
-		pb.RegisterManagerServer(s, &server{wIF: kw, msIf: modelstore.NewModelDB("modeldb-backend", "6543")})
-	default:
-		log.Fatalf("Unknown worker")
-	}
+	pb.RegisterManagerServer(s, &server{msIf: modelstore.NewModelDB("modeldb-backend", "6543")})
 	reflection.Register(s)
 	if err = s.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)

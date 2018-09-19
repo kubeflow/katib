@@ -202,9 +202,19 @@
                   template: "checkout",
                 }],
                 [
+                {
+                    name: "dep-ensure",
+                    template: "dep-ensure",
+                }
+                ],
+                [
                   {
                     name: "build-manager",
                     template: "build-manager",
+                  },
+                  {
+                    name: "build-studyjobctr",
+                    template: "build-studyjobctr",
                   },
                   {
                     name: "build-cli",
@@ -319,9 +329,15 @@
               "copy_artifacts",
               "--bucket=" + bucket,
             ]),  // copy-artifacts
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("dep-ensure", testWorkerImage, [
+              "test/scripts/get-vendor-packages.sh",
+            ]),  // dep ensure
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
               "test/scripts/build-manager.sh",
             ]),  // build-manager
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-studyjobctr", testWorkerImage, [
+              "test/scripts/build-studyjobctr.sh",
+            ]),  // build-studyjobctr
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-cli", testWorkerImage, [
               "test/scripts/build-cli.sh",
             ]),  // build-cli
