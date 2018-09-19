@@ -85,7 +85,7 @@ kubectl -n katib get svc
 echo "Katib pods"
 kubectl -n katib get pod
 
-kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep vizier-core | sed -e "s@pods\/@@") 6789:6789 &
+kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep vizier-core | grep -v vizier-core-rest | sed -e "s@pods\/@@") 6789:6789 &
 echo "kubectl port-forward start"
 TIMEOUT=120
 until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
