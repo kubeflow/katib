@@ -749,6 +749,7 @@
     "pkg/client/apiutil",
     "pkg/client/config",
     "pkg/controller",
+    "pkg/controller/controllerutil",
     "pkg/event",
     "pkg/handler",
     "pkg/internal/controller",
@@ -759,6 +760,7 @@
     "pkg/recorder",
     "pkg/runtime/inject",
     "pkg/runtime/log",
+    "pkg/runtime/scheme",
     "pkg/runtime/signals",
     "pkg/source",
     "pkg/source/internal"
@@ -790,6 +792,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "21a50736520e4f58bc8b53256b12601d5c97a3392409c09d0a3827ff94e3392d"
+  inputs-digest = "6d1e519a2b1e0fb4d0cfd425671e0f7a0db9d2b1b506a1d84ccfe844fb5ad2fd"
   solver-name = "gps-cdcl"
   solver-version = 1
