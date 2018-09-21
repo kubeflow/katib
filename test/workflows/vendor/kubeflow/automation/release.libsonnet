@@ -115,8 +115,8 @@
               cpu: "2",
             },
             limits: {
-              memory: "32Gi",
-              cpu: "8",
+              memory: "30Gi",
+              cpu: "7",
             },
           },
           volumeMounts: [
@@ -170,8 +170,8 @@
                 cpu: "2",
               },
               limits: {
-                memory: "32Gi",
-                cpu: "8",
+                memory: "30Gi",
+                cpu: "7",
               },
             },
             mirrorVolumeMounts: true,

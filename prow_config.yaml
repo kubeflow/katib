@@ -10,7 +10,7 @@ workflows:
   # registries
   - app_dir: kubeflow/katib/test/workflows
     component: study-controller-release
-    name: controller-release
+    name: controller
     job_types:
       - presubmit
       # TODO(jlewi): We should probably create a separate postsubmit job that pushes
