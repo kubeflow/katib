@@ -4,39 +4,13 @@ workflows:
   - app_dir: kubeflow/katib/test/workflows
     component: workflows
     name: e2e
-  # Image Auto Release workflows.
-  # The workflows below are related to auto building our Docker images.
-  # We have separate pre/postsubmit jobs because we want to use different
-  # registries
-  - app_dir: kubeflow/katib/test/workflows
-    component: study-controller-release
-    name: controller
     job_types:
       - presubmit
-      # TODO(jlewi): We should probably create a separate postsubmit job that pushes
-      # to kubeflow-images-public.
-      - postsubmit
-    params:
-      cluster: "kubeflow-testing"
-      gcpCredentialsSecretName: "gcp-credentials"
-      namespace: "kubeflow-test-infra"
-      nfsVolumeClaim: "nfs-external"
-      project: "kubeflow-releasing"
-      registry: "gcr.io/kubeflow-ci"
-      testing_image: "gcr.io/kubeflow-ci/test-worker:latest"
+  # The postsubmit run publishes the docker images to gcr.io/kubeflow-images-public      
   - app_dir: kubeflow/katib/test/workflows
-    component: metrics-collector-release
-    name: metrics-release
-    job_types:
-      - presubmit
-      # TODO(jlewi): We should probably create a separate postsubmit job that pushes
-      # to kubeflow-images-public.
+    component: workflows
+    name: e2e-release
+    job_types:      
       - postsubmit
     params:
-      cluster: "kubeflow-testing"
-      gcpCredentialsSecretName: "gcp-credentials"
-      namespace: "kubeflow-test-infra"
-      nfsVolumeClaim: "nfs-external"
-      project: "kubeflow-releasing"
-      registry: "gcr.io/kubeflow-ci"
-      testing_image: "gcr.io/kubeflow-ci/test-worker:latest"
+      registry: "gcr.io/kubeflow-images-public"
