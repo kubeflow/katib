@@ -213,6 +213,10 @@
                     template: "build-manager",
                   },
                   {
+                    name: "build-manager-rest",
+                    template: "build-manager-rest",
+                  },
+                  {
                     name: "build-studyjobctr",
                     template: "build-studyjobctr",
                   },
@@ -335,6 +339,9 @@
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
               "test/scripts/build-manager.sh",
             ]),  // build-manager
+            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-manager-rest", testWorkerImage, [
+              "test/scripts/build-manager-rest.sh",
+            ]),  // build-manager-rest
             $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-studyjobctr", testWorkerImage, [
               "test/scripts/build-studyjobctr.sh",
             ]),  // build-studyjobctr

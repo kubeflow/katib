@@ -50,6 +50,7 @@ echo "REPO_NAME ${REPO_NAME}"
 echo "VERSION ${VERSION}"
 
 sed -i -e "s@image: katib\/vizier-core@image: ${REGISTRY}\/${REPO_NAME}\/vizier-core:${VERSION}@" manifests/vizier/core/deployment.yaml
+sed -i -e "s@image: katib\/vizier-core-rest@image: ${REGISTRY}\/${REPO_NAME}\/vizier-core-rest:${VERSION}@" manifests/vizier/core-rest/deployment.yaml
 sed -i -e "s@type: NodePort@type: ClusterIP@" -e "/nodePort: 30678/d" manifests/vizier/core/service.yaml
 sed -i -e "s@image: katib\/studyjob-controller@image: ${REGISTRY}\/${REPO_NAME}\/studyjob-controller:${VERSION}@" manifests/studyjobcontroller/studyjobcontroller.yaml
 sed -i -e "s@image: katib\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-random:${VERSION}@" manifests/vizier/suggestion/random/deployment.yaml
@@ -84,7 +85,7 @@ kubectl -n katib get svc
 echo "Katib pods"
 kubectl -n katib get pod
 
-kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep vizier-core | sed -e "s@pods\/@@") 6789:6789 &
+kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep vizier-core | grep -v vizier-core-rest | sed -e "s@pods\/@@") 6789:6789 &
 echo "kubectl port-forward start"
 TIMEOUT=120
 until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do

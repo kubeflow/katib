@@ -27,8 +27,12 @@ cd ${SCRIPT_ROOT}
 
 echo "Building core image..."
 docker build -t ${PREFIX}/vizier-core -f ${CMD_PREFIX}/manager/Dockerfile .
+docker build -t ${PREFIX}/vizier-core-rest -f ${CMD_PREFIX}/manager-rest/Dockerfile .
 docker build -t ${PREFIX}/studyjob-controller -f ${CMD_PREFIX}/studyjobcontroller/Dockerfile .
 docker build -t ${PREFIX}/metrics-collector -f ${CMD_PREFIX}/metricscollector/Dockerfile .
+
+echo "Building REST API for core image..."
+docker build -t ${PREFIX}/vizier-core-rest -f ${CMD_PREFIX}/manager-rest/Dockerfile .
 
 echo "Building suggestion images..."
 docker build -t ${PREFIX}/suggestion-random -f ${CMD_PREFIX}/suggestion/random/Dockerfile .

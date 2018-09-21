@@ -1,0 +1,1278 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "api.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/Manager/CreateStudy": {
+      "post": {
+        "operationId": "CreateStudy",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiCreateStudyReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiStudyConfig"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/CreateTrial": {
+      "post": {
+        "operationId": "CreateTrial",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiCreateTrialReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiTrial"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetEarlyStoppingParameterList/{study_id}": {
+      "get": {
+        "operationId": "GetEarlyStoppingParameterList",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetEarlyStoppingParameterListReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "study_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetEarlyStoppingParameters/{param_id}": {
+      "get": {
+        "operationId": "GetEarlyStoppingParameters",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetEarlyStoppingParametersReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "param_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetMetrics": {
+      "post": {
+        "operationId": "GetMetrics",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetMetricsReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiGetMetricsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetSavedModels": {
+      "get": {
+        "operationId": "GetSavedModels",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetSavedModelsReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "study_name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetSavedStudies": {
+      "get": {
+        "operationId": "GetSavedStudies",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetSavedStudiesReply"
+            }
+          }
+        },
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetStudy/{study_id}": {
+      "get": {
+        "operationId": "GetStudy",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetStudyReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "study_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetStudyList": {
+      "get": {
+        "operationId": "GetStudyList",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetStudyListReply"
+            }
+          }
+        },
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetSuggestionParameterList/{study_id}": {
+      "get": {
+        "operationId": "GetSuggestionParameterList",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetSuggestionParameterListReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "study_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetSuggestionParameters/{param_id}": {
+      "get": {
+        "operationId": "GetSuggestionParameters",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetSuggestionParametersReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "param_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetSuggestions": {
+      "post": {
+        "operationId": "GetSuggestions",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetSuggestionsReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiGetSuggestionsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetTrials/GetShouldStopWorkers": {
+      "post": {
+        "operationId": "GetShouldStopWorkers",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetShouldStopWorkersReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiGetShouldStopWorkersRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetTrials/{study_id}": {
+      "get": {
+        "operationId": "GetTrials",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetTrialsReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "study_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetWorkers": {
+      "get": {
+        "operationId": "GetWorkers",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetWorkersReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "study_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "trial_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "worker_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/RegisterWorker": {
+      "post": {
+        "operationId": "RegisterWorker",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiRegisterWorkerReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiWorker"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/ReportMetricsLogs": {
+      "post": {
+        "operationId": "ReportMetricsLogs",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiReportMetricsLogsReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiReportMetricsLogsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/SaveModel": {
+      "post": {
+        "operationId": "SaveModel",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiSaveModelReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiSaveModelRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/SaveStudy": {
+      "post": {
+        "operationId": "SaveStudy",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiSaveStudyReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiSaveStudyRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/SetEarlyStoppingParameters": {
+      "post": {
+        "operationId": "SetEarlyStoppingParameters",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiSetEarlyStoppingParametersReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiSetEarlyStoppingParametersRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/SetSuggestionParameters": {
+      "post": {
+        "operationId": "SetSuggestionParameters",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiSetSuggestionParametersReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiSetSuggestionParametersRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/UpdateWorkerState": {
+      "put": {
+        "operationId": "UpdateWorkerState",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiUpdateWorkerStateReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiUpdateWorkerStateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "StudyConfigParameterConfigs": {
+      "type": "object",
+      "properties": {
+        "configs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiParameterConfig"
+          }
+        }
+      }
+    },
+    "apiCreateStudyReply": {
+      "type": "object",
+      "properties": {
+        "study_id": {
+          "type": "string"
+        }
+      }
+    },
+    "apiCreateTrialReply": {
+      "type": "object",
+      "properties": {
+        "trial_id": {
+          "type": "string"
+        }
+      }
+    },
+    "apiDataSetInfo": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      }
+    },
+    "apiEarlyStoppingParameter": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "apiEarlyStoppingParameterSet": {
+      "type": "object",
+      "properties": {
+        "param_id": {
+          "type": "string"
+        },
+        "early_stopping_algorithm": {
+          "type": "string"
+        },
+        "early_stopping_parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiEarlyStoppingParameter"
+          }
+        }
+      }
+    },
+    "apiFeasibleSpace": {
+      "type": "object",
+      "properties": {
+        "max": {
+          "type": "string"
+        },
+        "min": {
+          "type": "string"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "apiGetEarlyStoppingParameterListReply": {
+      "type": "object",
+      "properties": {
+        "early_stopping_parameter_sets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiEarlyStoppingParameterSet"
+          }
+        }
+      }
+    },
+    "apiGetEarlyStoppingParametersReply": {
+      "type": "object",
+      "properties": {
+        "early_stopping_parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiEarlyStoppingParameter"
+          }
+        }
+      }
+    },
+    "apiGetMetricsReply": {
+      "type": "object",
+      "properties": {
+        "metrics_log_sets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiMetricsLogSet"
+          }
+        }
+      }
+    },
+    "apiGetMetricsRequest": {
+      "type": "object",
+      "properties": {
+        "study_id": {
+          "type": "string"
+        },
+        "worker_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "metrics_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "apiGetSavedModelsReply": {
+      "type": "object",
+      "properties": {
+        "models": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiModelInfo"
+          }
+        }
+      }
+    },
+    "apiGetSavedStudiesReply": {
+      "type": "object",
+      "properties": {
+        "studies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiStudyOverview"
+          }
+        }
+      }
+    },
+    "apiGetShouldStopWorkersReply": {
+      "type": "object",
+      "properties": {
+        "should_stop_worker_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "apiGetShouldStopWorkersRequest": {
+      "type": "object",
+      "properties": {
+        "study_id": {
+          "type": "string"
+        },
+        "early_stopping_algorithm": {
+          "type": "string"
+        },
+        "param_id": {
+          "type": "string"
+        }
+      }
+    },
+    "apiGetStudyListReply": {
+      "type": "object",
+      "properties": {
+        "study_overviews": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiStudyOverview"
+          }
+        }
+      }
+    },
+    "apiGetStudyReply": {
+      "type": "object",
+      "properties": {
+        "study_config": {
+          "$ref": "#/definitions/apiStudyConfig"
+        }
+      }
+    },
+    "apiGetSuggestionParameterListReply": {
+      "type": "object",
+      "properties": {
+        "suggestion_parameter_sets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiSuggestionParameterSet"
+          }
+        }
+      }
+    },
+    "apiGetSuggestionParametersReply": {
+      "type": "object",
+      "properties": {
+        "suggestion_parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiSuggestionParameter"
+          }
+        }
+      }
+    },
+    "apiGetSuggestionsReply": {
+      "type": "object",
+      "properties": {
+        "trials": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTrial"
+          }
+        }
+      }
+    },
+    "apiGetSuggestionsRequest": {
+      "type": "object",
+      "properties": {
+        "study_id": {
+          "type": "string"
+        },
+        "suggestion_algorithm": {
+          "type": "string"
+        },
+        "request_number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "log_worker_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "param_id": {
+          "type": "string"
+        }
+      }
+    },
+    "apiGetTrialsReply": {
+      "type": "object",
+      "properties": {
+        "trials": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTrial"
+          }
+        }
+      }
+    },
+    "apiGetWorkersReply": {
+      "type": "object",
+      "properties": {
+        "workers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiWorker"
+          }
+        }
+      }
+    },
+    "apiMetrics": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "apiMetricsLog": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiMetricsValueTime"
+          }
+        }
+      }
+    },
+    "apiMetricsLogSet": {
+      "type": "object",
+      "properties": {
+        "worker_id": {
+          "type": "string"
+        },
+        "metrics_logs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiMetricsLog"
+          }
+        },
+        "worker_status": {
+          "$ref": "#/definitions/apiState"
+        }
+      }
+    },
+    "apiMetricsValueTime": {
+      "type": "object",
+      "properties": {
+        "time": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "apiModelInfo": {
+      "type": "object",
+      "properties": {
+        "study_name": {
+          "type": "string"
+        },
+        "worker_id": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiParameter"
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiMetrics"
+          }
+        },
+        "model_path": {
+          "type": "string"
+        }
+      }
+    },
+    "apiOptimizationType": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN_OPTIMIZATION",
+        "MINIMIZE",
+        "MAXIMIZE"
+      ],
+      "default": "UNKNOWN_OPTIMIZATION",
+      "title": "- UNKNOWN_OPTIMIZATION: Not used"
+    },
+    "apiParameter": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "parameter_type": {
+          "$ref": "#/definitions/apiParameterType"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "apiParameterConfig": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "parameter_type": {
+          "$ref": "#/definitions/apiParameterType"
+        },
+        "feasible": {
+          "$ref": "#/definitions/apiFeasibleSpace",
+          "description": "The following values defines a feasible parameter space."
+        }
+      }
+    },
+    "apiParameterType": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN_TYPE",
+        "DOUBLE",
+        "INT",
+        "DISCRETE",
+        "CATEGORICAL"
+      ],
+      "default": "UNKNOWN_TYPE",
+      "title": "- UNKNOWN_TYPE: Not used"
+    },
+    "apiRegisterWorkerReply": {
+      "type": "object",
+      "properties": {
+        "worker_id": {
+          "type": "string"
+        }
+      }
+    },
+    "apiReportMetricsLogsReply": {
+      "type": "object"
+    },
+    "apiReportMetricsLogsRequest": {
+      "type": "object",
+      "properties": {
+        "study_id": {
+          "type": "string"
+        },
+        "metrics_log_sets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiMetricsLogSet"
+          }
+        }
+      }
+    },
+    "apiSaveModelReply": {
+      "type": "object"
+    },
+    "apiSaveModelRequest": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "$ref": "#/definitions/apiModelInfo"
+        },
+        "data_set": {
+          "$ref": "#/definitions/apiDataSetInfo"
+        },
+        "tensor_board": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
+    "apiSaveStudyReply": {
+      "type": "object"
+    },
+    "apiSaveStudyRequest": {
+      "type": "object",
+      "properties": {
+        "study_name": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "apiSetEarlyStoppingParametersReply": {
+      "type": "object",
+      "properties": {
+        "param_id": {
+          "type": "string"
+        }
+      }
+    },
+    "apiSetEarlyStoppingParametersRequest": {
+      "type": "object",
+      "properties": {
+        "study_id": {
+          "type": "string"
+        },
+        "early_stopping_algorithm": {
+          "type": "string"
+        },
+        "param_id": {
+          "type": "string"
+        },
+        "early_stopping_parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiEarlyStoppingParameter"
+          }
+        }
+      }
+    },
+    "apiSetSuggestionParametersReply": {
+      "type": "object",
+      "properties": {
+        "param_id": {
+          "type": "string"
+        }
+      }
+    },
+    "apiSetSuggestionParametersRequest": {
+      "type": "object",
+      "properties": {
+        "study_id": {
+          "type": "string"
+        },
+        "suggestion_algorithm": {
+          "type": "string"
+        },
+        "param_id": {
+          "type": "string"
+        },
+        "suggestion_parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiSuggestionParameter"
+          }
+        }
+      }
+    },
+    "apiState": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "RUNNING",
+        "COMPLETED",
+        "KILLED",
+        "ERROR"
+      ],
+      "default": "PENDING",
+      "description": "This value is stored as TINYINT in MySQL."
+    },
+    "apiStudyConfig": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "optimization_type": {
+          "$ref": "#/definitions/apiOptimizationType"
+        },
+        "optimization_goal": {
+          "type": "number",
+          "format": "double"
+        },
+        "parameter_configs": {
+          "$ref": "#/definitions/StudyConfigParameterConfigs"
+        },
+        "access_permissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTag"
+          }
+        },
+        "objective_value_name": {
+          "type": "string"
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "jobId": {
+          "type": "string"
+        }
+      }
+    },
+    "apiStudyOverview": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "apiSuggestionParameter": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "apiSuggestionParameterSet": {
+      "type": "object",
+      "properties": {
+        "param_id": {
+          "type": "string"
+        },
+        "suggestion_algorithm": {
+          "type": "string"
+        },
+        "suggestion_parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiSuggestionParameter"
+          }
+        }
+      }
+    },
+    "apiTag": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "apiTrial": {
+      "type": "object",
+      "properties": {
+        "trial_id": {
+          "type": "string"
+        },
+        "study_id": {
+          "type": "string"
+        },
+        "parameter_set": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiParameter"
+          }
+        },
+        "objective_value": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTag"
+          }
+        }
+      }
+    },
+    "apiUpdateWorkerStateReply": {
+      "type": "object"
+    },
+    "apiUpdateWorkerStateRequest": {
+      "type": "object",
+      "properties": {
+        "workerId": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/apiState"
+        }
+      }
+    },
+    "apiWorker": {
+      "type": "object",
+      "properties": {
+        "worker_id": {
+          "type": "string"
+        },
+        "study_id": {
+          "type": "string"
+        },
+        "trial_id": {
+          "type": "string"
+        },
+        "Type": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/apiState"
+        },
+        "TemplatePath": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTag"
+          }
+        }
+      }
+    }
+  }
+}
