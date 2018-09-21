@@ -34,7 +34,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	//"k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -387,6 +387,35 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 				if w.ObjctiveValue == nil {
 					cwids = append(cwids, w.WorkerId)
 				}
+				switch w.Kind {
+				case "Job":
+					job := &batchv1.Job{}
+					nname := types.NamespacedName{Namespace: ns, Name: w.WorkerId}
+					joberr := r.Client.Get(context.TODO(), nname, job)
+					var wretain, mcretain bool = false, false
+					if joberr == nil {
+						if instance.Spec.WorkerSpec != nil {
+							wretain = instance.Spec.WorkerSpec.Retain
+						}
+						if !wretain {
+							if err := r.Delete(context.TODO(), job, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
+								return err, false
+							}
+						}
+					}
+					cjob := &batchv1beta.CronJob{}
+					cjoberr := r.Client.Get(context.TODO(), nname, cjob)
+					if cjoberr == nil {
+						if instance.Spec.MetricsCollectorSpec != nil {
+							mcretain = instance.Spec.MetricsCollectorSpec.Retain
+						}
+						if !mcretain {
+							if err := r.Delete(context.TODO(), cjob); err != nil {
+								return err, false
+							}
+						}
+					}
+				}
 				continue
 			}
 			nextSuggestionSchedule = false
@@ -423,6 +452,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 								if err := r.Update(context.TODO(), cjob); err != nil {
 									return false, err
 								}
+
 								cwids = append(cwids, w.WorkerId)
 							}
 						}

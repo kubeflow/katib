@@ -113,10 +113,12 @@ type GoTemplate struct {
 }
 
 type WorkerSpec struct {
+	Retain     bool       `json:"retain,omitempty"`
 	GoTemplate GoTemplate `json:"goTemplate,omitempty"`
 }
 
 type MetricsCollectorSpec struct {
+	Retain     bool       `json:"retain,omitempty"`
 	GoTemplate GoTemplate `json:"goTemplate,omitempty"`
 }
 
