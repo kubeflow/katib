@@ -8,7 +8,8 @@
 set -ex
 
 DOCKERFILE=$1
-CONTEXT_DIR=$(dirname "$DOCKERFILE")
+# Context directory should be root directory so we pull in all sources.
+CONTEXT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../../ >/dev/null && pwd )"
 IMAGE=$2
 TAG=$3
 
