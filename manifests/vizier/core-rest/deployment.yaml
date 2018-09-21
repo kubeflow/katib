@@ -15,7 +15,6 @@ spec:
         app: vizier
         component: core-rest
     spec:
-      serviceAccountName: vizier-core-rest
       containers:
       - name: vizier-core-rest
         image: katib/vizier-core-rest
