@@ -1,0 +1,51 @@
+apiVersion: 0.1.0
+gitVersion:
+  commitSha: 61c7da4756c8ba149637bf4a9e1805258fbead96
+  refSpec: master
+kind: ksonnet.io/registry
+libraries:
+  argo:
+    path: argo
+    version: master
+  automation:
+    path: automation
+    version: master
+  chainer-job:
+    path: chainer-job
+    version: master
+  core:
+    path: core
+    version: master
+  katib:
+    path: katib
+    version: master
+  kubebench:
+    path: kubebench
+    version: master
+  mpi-job:
+    path: mpi-job
+    version: master
+  mxnet-job:
+    path: mxnet-job
+    version: master
+  new-package-stub:
+    path: new-package-stub
+    version: master
+  nvidia-inference-server:
+    path: nvidia-inference-server
+    version: master
+  openmpi:
+    path: openmpi
+    version: master
+  pachyderm:
+    path: pachyderm
+    version: master
+  pytorch-job:
+    path: pytorch-job
+    version: master
+  seldon:
+    path: seldon
+    version: master
+  tf-serving:
+    path: tf-serving
+    version: master
