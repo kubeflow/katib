@@ -6,6 +6,12 @@
 
 ## Build from source code
 
+Pull in the dependencies
+
+```
+dep ensure --vendor-only
+```
+
 You can build all images from source.
 
 ```bash

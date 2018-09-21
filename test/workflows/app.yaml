@@ -13,6 +13,7 @@ environments:
     k8sVersion: v1.7.0
     path: test
 kind: ksonnet.io/app
+libraries:
 name: worfklows-app
 registries:
   incubator:
@@ -21,4 +22,10 @@ registries:
       refSpec: master
     protocol: github
     uri: github.com/ksonnet/parts/tree/master/incubator
+  kubeflow:
+    gitVersion:
+      commitSha: 61c7da4756c8ba149637bf4a9e1805258fbead96
+      refSpec: master
+    protocol: github
+    uri: github.com/kubeflow/kubeflow/tree/master/kubeflow
 version: 0.0.1
