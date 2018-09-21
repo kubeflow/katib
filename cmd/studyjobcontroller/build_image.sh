@@ -18,7 +18,7 @@ until docker ps
 do sleep 3
 done
 
-docker build -t ${TAG} -f ${DOCKERFILE} ${CONTEXT_DIR}
+docker build -t ${IMAGE}:${TAG} -f ${DOCKERFILE} ${CONTEXT_DIR}
 
 gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
 gcloud docker -- push "${IMAGE}:${TAG}"
