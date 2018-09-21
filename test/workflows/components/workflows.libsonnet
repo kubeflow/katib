@@ -26,7 +26,7 @@
     project:: "kubeflow-ci",
     zone:: "us-east1-d",
     // Default registry to use.
-    registry:: "gcr.io/" + $.defaultParams.project,
+    //registry:: "gcr.io/" + $.defaultParams.project,
 
     // The image tag to use.
     // Defaults to a value based on the name.
@@ -37,10 +37,11 @@
   },
 
   // overrides is a dictionary of parameters to provide in addition to defaults.
-  parts(namespace, name, overrides={}):: {
+  parts(namespace, name, overrides):: {
     // Workflow to run the e2e test.
     e2e(prow_env, bucket):
       local params = $.defaultParams + overrides;
+
       // mountPath is the directory where the volume to store the test data
       // should be mounted.
       local mountPath = "/mnt/" + "test-data-volume";
@@ -308,13 +309,13 @@
                 ],
               },
             },  // checkout
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("setup-cluster",testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("setup-cluster",testWorkerImage, [
               "test/scripts/create-cluster.sh",
             ]),  // setup cluster
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("run-tests", helmImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tests", helmImage, [
               "test/scripts/run-tests.sh",
             ]),  // run tests
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
               "python",
               "-m",
               "kubeflow.testing.prow_artifacts",
@@ -322,10 +323,10 @@
               "create_pr_symlink",
               "--bucket=" + bucket,
             ]),  // create-pr-symlink
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("teardown-cluster",testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("teardown-cluster",testWorkerImage, [
               "test/scripts/delete-cluster.sh",
              ]),  // teardown cluster
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("copy-artifacts", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("copy-artifacts", testWorkerImage, [
               "python",
               "-m",
               "kubeflow.testing.prow_artifacts",
@@ -333,40 +334,40 @@
               "copy_artifacts",
               "--bucket=" + bucket,
             ]),  // copy-artifacts
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("dep-ensure", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("dep-ensure", testWorkerImage, [
               "test/scripts/get-vendor-packages.sh",
             ]),  // dep ensure
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
               "test/scripts/build-manager.sh",
             ]),  // build-manager
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-manager-rest", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-manager-rest", testWorkerImage, [
               "test/scripts/build-manager-rest.sh",
             ]),  // build-manager-rest
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-studyjobctr", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-studyjobctr", testWorkerImage, [
               "test/scripts/build-studyjobctr.sh",
             ]),  // build-studyjobctr
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-cli", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-cli", testWorkerImage, [
               "test/scripts/build-cli.sh",
             ]),  // build-cli
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-suggestion-random", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-random", testWorkerImage, [
               "test/scripts/build-suggestion-random.sh",
             ]),  // build-suggestion-random
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-suggestion-grid", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-grid", testWorkerImage, [
               "test/scripts/build-suggestion-grid.sh",
             ]),  // build-suggestion-grid
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperband", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperband", testWorkerImage, [
               "test/scripts/build-suggestion-hyperband.sh",
             ]),  // build-suggestion-hyperband
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-suggestion-bo", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-bo", testWorkerImage, [
               "test/scripts/build-suggestion-bo.sh",
             ]),  // build-suggestion-bo
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-earlystopping-median", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-earlystopping-median", testWorkerImage, [
               "test/scripts/build-earlystopping-median.sh",
             ]),  // build-earlystopping-median
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("build-modeldb", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-modeldb", testWorkerImage, [
               "test/scripts/build-modeldb.sh",
             ]),  // build-modeldb
-            $.parts(namespace, name).e2e(prow_env, bucket).buildTemplate("unit-test", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("unit-test", testWorkerImage, [
               "test/scripts/unit-test.sh",
             ]),  // unit test
           ],  // templates
