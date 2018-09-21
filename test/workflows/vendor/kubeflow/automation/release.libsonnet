@@ -111,8 +111,8 @@
           ] + prow_env + env_vars,
           resources: {
             requests: {
-              memory: "2Gi",
-              cpu: "2",
+              memory: "1Gi",
+              cpu: "1",
             },
             limits: {
               memory: "30Gi",
@@ -166,8 +166,8 @@
             },
             resources: {
               requests: {
-                memory: "2Gi",
-                cpu: "2",
+                memory: "1Gi",
+                cpu: "1",
               },
               limits: {
                 memory: "30Gi",
