@@ -1,6 +1,6 @@
 // This workflow builds the metrics collector image.
 local env = std.extVar("__ksonnet/environments");
-local params = std.extVar("__ksonnet/params").components["metrics-collector"];
+local params = std.extVar("__ksonnet/params").components["study-controller-release"];
 
 local k = import "k.libsonnet";
 local release = import "kubeflow/automation/release.libsonnet";

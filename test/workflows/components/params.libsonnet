@@ -13,7 +13,7 @@
       prow_env: "JOB_NAME=tf-k8s-presubmit-test,JOB_TYPE=presubmit,PULL_NUMBER=374,REPO_NAME=k8s,REPO_OWNER=tensorflow,BUILD_NUMBER=6e32",
       versionTag: null,
     },
-    "studyjob-controller-release": {
+    "study-controller-release": {
       bucket: "kubeflow-releasing-artifacts",
       cluster: "kubeflow-releasing",
       dockerfile: "Dockerfile",
