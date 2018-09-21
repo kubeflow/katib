@@ -3,7 +3,22 @@
 For each RPC service, we define an equivalent HTTP REST API method using [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway). The mapping between service and REST API method can be found in this [file](https://github.com/kubeflow/katib/blob/master/pkg/api/api.proto). The mapping includes the URL path, query parameters and request body. You can read more details on the supported methods and binding options at this [link](https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http)
 
 ## Examples
-Assuming `{HOST}` as the ingress host for vizier-core-rest, 
+
+If using ingress, `{HOST}` is the ingress host for vizier-core-rest.
+
+If you are using port forwarding, `{HOST}` is `http://localhost:8080`
+
+Instructions for port forwarding:
+
+kubectl v1.10~
+```bash
+$ kubectl -n katib port-forward svc/vizier-core-rest 8080:80
+```
+
+kubectl ~v1.9
+```bash
+$ kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep vizier-core-rest | sed -e "s@pods\/@@") 8080:80
+```
 
 ### Create a new Study
 
@@ -41,7 +56,7 @@ Sample JSON file (study_config.json)
 Request:
 
 ```shell
-curl -X POST {HOST}/api/Manager/CreateStudy
+curl -X POST -d @study_config.json {HOST}/api/Manager/CreateStudy
 ```
 
 Response:
@@ -74,4 +89,3 @@ Response:
   ]
 }
 ```
-
