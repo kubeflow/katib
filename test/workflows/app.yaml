@@ -14,12 +14,6 @@ environments:
     path: test
 kind: ksonnet.io/app
 libraries:
-  automation:
-    gitVersion:
-      commitSha: 61c7da4756c8ba149637bf4a9e1805258fbead96
-      refSpec: master
-    name: automation
-    registry: kubeflow
 name: worfklows-app
 registries:
   incubator:
