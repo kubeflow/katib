@@ -6,7 +6,7 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: random-example
 spec:
-  studyname: random-example
+  studyName: random-example
   owner: crd
   optimizationtype: maximize
   objectivevaluename: Validation-accuracy
