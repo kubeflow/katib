@@ -55,7 +55,7 @@ func (d *db_conn) DB_Init() {
 	}
 
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS worker_metrics" +
-		"(worker_id CHAR(16) NOT NULL, " +
+		"(worker_id CHAR(32) NOT NULL, " +
 		"id INT AUTO_INCREMENT PRIMARY KEY, " +
 		"time DATETIME(6), " +
 		"name VARCHAR(255), " +
