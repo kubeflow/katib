@@ -10,3 +10,5 @@ spec:
     storage: 10Gi
   accessModes:
     - ReadWriteOnce
+  hostPath:
+    path: /data/katib
