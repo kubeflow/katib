@@ -29,9 +29,9 @@ spec:
         - name: dbapi
           containerPort: 3306
         volumeMounts:
-        - name: katib-volume
+        - name: katib-mysql
           mountPath: /var/lib/mysql
       volumes:
-      - name: katib-volume
+      - name: katib-mysql
         persistentVolumeClaim:
-          claimName: katib-volume
+          claimName: katib-mysql

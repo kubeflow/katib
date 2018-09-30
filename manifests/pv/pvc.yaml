@@ -1,17 +1,16 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: katib-volume
+  name: katib-mysql
   namespace: katib
   labels:
     app: katib
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi
-  storageClassName: ""
   selector:
     matchLabels:
       app: katib
