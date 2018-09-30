@@ -146,6 +146,11 @@ kubectl apply -f workerConfigMap.yaml
 ```
 This template will share among blow three demos(Grid, Hyperband, and GPU).
 
+
+### Limit the length of the studyjob's name
+
+The name of studyjob cannot exceed 238 characters
+
 ### Grid Demo
 Almost same as random suggestion.
 
