@@ -22,6 +22,7 @@ SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
 
 cd ${SCRIPT_ROOT}
 kubectl apply -f manifests/0-namespace.yaml
+kubectl apply -f manifests/pv
 kubectl apply -f manifests/modeldb/db
 kubectl apply -f manifests/modeldb/backend
 kubectl apply -f manifests/modeldb/frontend
@@ -33,6 +34,7 @@ kubectl apply -f manifests/vizier/suggestion/grid
 kubectl apply -f manifests/vizier/suggestion/hyperband
 kubectl apply -f manifests/studyjobcontroller/crd.yaml
 kubectl apply -f manifests/studyjobcontroller/rbac.yaml
+kubectl apply -f manifests/studyjobcontroller/mcrbac.yaml
 kubectl apply -f manifests/studyjobcontroller/workerConfigMap.yaml
 kubectl apply -f manifests/studyjobcontroller/metricsControllerConfigMap.yaml
 kubectl apply -f manifests/studyjobcontroller/studyjobcontroller.yaml

@@ -28,10 +28,10 @@ spec:
         ports:
         - name: dbapi
           containerPort: 3306
-#        resources:
-#          requests:
-#            cpu: 500m
-#            memory: 500M
-#          limits:
-#            cpu: 500m
-#            memory: 500M
+        volumeMounts:
+        - name: katib-mysql
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: katib-mysql
+        persistentVolumeClaim:
+          claimName: katib-mysql
