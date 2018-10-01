@@ -374,35 +374,35 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 	c := katibapi.NewManagerClient(conn)
 	for i, t := range instance.Status.Trials {
 		for j, w := range t.WorkerList {
-			if w.Condition == katibv1alpha1.ConditionCompleted {
-				if w.ObjctiveValue == nil {
+			if w.Condition == katibv1alpha1.ConditionCompleted || w.Condition == katibv1alpha1.ConditionFailed {
+				if w.ObjctiveValue == nil && w.Condition == katibv1alpha1.ConditionCompleted {
 					cwids = append(cwids, w.WorkerId)
 				}
 				switch w.Kind {
 				case "Job":
-					job := &batchv1.Job{}
 					nname := types.NamespacedName{Namespace: ns, Name: w.WorkerId}
-					joberr := r.Client.Get(context.TODO(), nname, job)
 					var wretain, mcretain bool = false, false
-					if joberr == nil {
-						if instance.Spec.WorkerSpec != nil {
-							wretain = instance.Spec.WorkerSpec.Retain
-						}
-						if !wretain {
+					if instance.Spec.WorkerSpec != nil {
+						wretain = instance.Spec.WorkerSpec.Retain
+					}
+					if !wretain {
+						job := &batchv1.Job{}
+						joberr := r.Client.Get(context.TODO(), nname, job)
+						if joberr == nil {
 							if err := r.Delete(context.TODO(), job, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
-								return err, false
+								return false, err
 							}
 						}
 					}
-					cjob := &batchv1beta.CronJob{}
-					cjoberr := r.Client.Get(context.TODO(), nname, cjob)
-					if cjoberr == nil {
-						if instance.Spec.MetricsCollectorSpec != nil {
-							mcretain = instance.Spec.MetricsCollectorSpec.Retain
-						}
-						if !mcretain {
+					if instance.Spec.MetricsCollectorSpec != nil {
+						mcretain = instance.Spec.MetricsCollectorSpec.Retain
+					}
+					if !mcretain {
+						cjob := &batchv1beta.CronJob{}
+						cjoberr := r.Client.Get(context.TODO(), nname, cjob)
+						if cjoberr == nil {
 							if err := r.Delete(context.TODO(), cjob, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
-								return err, false
+								return false, err
 							}
 						}
 					}
