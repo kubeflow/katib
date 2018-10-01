@@ -78,15 +78,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// TODO(user): Modify this to be the types you create
-	// Uncomment watch a Deployment created by StudyJobController - change this for objects you create
-	err = c.Watch(&source.Kind{Type: &katibv1alpha1.StudyJob{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &katibv1alpha1.StudyJob{},
-	})
-	if err != nil {
-		return err
-	}
 	err = c.Watch(
 		&source.Kind{Type: &batchv1.Job{}},
 		&handler.EnqueueRequestForOwner{
@@ -136,7 +127,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 	if err != nil {
 		if errors.IsNotFound(err) {
 			if _, ok := r.muxMap.Load(request.NamespacedName.String()); ok {
-				log.Println("%s was deleted. Resouces will be released.", request.NamespacedName.String())
+				log.Printf("Study %s was deleted. Resouces will be released.", request.NamespacedName.String())
 				mux.Unlock()
 				r.muxMap.Delete(request.NamespacedName.String())
 			}
@@ -410,7 +401,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 							mcretain = instance.Spec.MetricsCollectorSpec.Retain
 						}
 						if !mcretain {
-							if err := r.Delete(context.TODO(), cjob); err != nil {
+							if err := r.Delete(context.TODO(), cjob, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
 								return err, false
 							}
 						}
@@ -458,14 +449,18 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 						}
 					}
 				} else if job.Status.Active > 0 {
-					instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionRunning
-					update = true
+					if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionRunning {
+						instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionRunning
+						update = true
+					}
 					if errors.IsNotFound(cjoberr) {
 						r.spawnMetricsCollector(instance, c, instance.Status.StudyId, t.TrialId, w.WorkerId, ns, instance.Spec.MetricsCollectorSpec)
 					}
 				} else if job.Status.Failed > 0 {
-					update = true
-					instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionFailed
+					if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionFailed {
+						instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionFailed
+						update = true
+					}
 				}
 			}
 		}
