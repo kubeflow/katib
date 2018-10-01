@@ -34,7 +34,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	//"k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -78,15 +78,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// TODO(user): Modify this to be the types you create
-	// Uncomment watch a Deployment created by StudyJobController - change this for objects you create
-	err = c.Watch(&source.Kind{Type: &katibv1alpha1.StudyJob{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &katibv1alpha1.StudyJob{},
-	})
-	if err != nil {
-		return err
-	}
 	err = c.Watch(
 		&source.Kind{Type: &batchv1.Job{}},
 		&handler.EnqueueRequestForOwner{
@@ -136,7 +127,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 	if err != nil {
 		if errors.IsNotFound(err) {
 			if _, ok := r.muxMap.Load(request.NamespacedName.String()); ok {
-				log.Println("%s was deleted. Resouces will be released.", request.NamespacedName.String())
+				log.Printf("Study %s was deleted. Resouces will be released.", request.NamespacedName.String())
 				mux.Unlock()
 				r.muxMap.Delete(request.NamespacedName.String())
 			}
@@ -383,9 +374,38 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 	c := katibapi.NewManagerClient(conn)
 	for i, t := range instance.Status.Trials {
 		for j, w := range t.WorkerList {
-			if w.Condition == katibv1alpha1.ConditionCompleted {
-				if w.ObjctiveValue == nil {
+			if w.Condition == katibv1alpha1.ConditionCompleted || w.Condition == katibv1alpha1.ConditionFailed {
+				if w.ObjctiveValue == nil && w.Condition == katibv1alpha1.ConditionCompleted {
 					cwids = append(cwids, w.WorkerId)
+				}
+				switch w.Kind {
+				case "Job":
+					nname := types.NamespacedName{Namespace: ns, Name: w.WorkerId}
+					var wretain, mcretain bool = false, false
+					if instance.Spec.WorkerSpec != nil {
+						wretain = instance.Spec.WorkerSpec.Retain
+					}
+					if !wretain {
+						job := &batchv1.Job{}
+						joberr := r.Client.Get(context.TODO(), nname, job)
+						if joberr == nil {
+							if err := r.Delete(context.TODO(), job, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
+								return false, err
+							}
+						}
+					}
+					if instance.Spec.MetricsCollectorSpec != nil {
+						mcretain = instance.Spec.MetricsCollectorSpec.Retain
+					}
+					if !mcretain {
+						cjob := &batchv1beta.CronJob{}
+						cjoberr := r.Client.Get(context.TODO(), nname, cjob)
+						if cjoberr == nil {
+							if err := r.Delete(context.TODO(), cjob, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
+								return false, err
+							}
+						}
+					}
 				}
 				continue
 			}
@@ -423,19 +443,24 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 								if err := r.Update(context.TODO(), cjob); err != nil {
 									return false, err
 								}
+
 								cwids = append(cwids, w.WorkerId)
 							}
 						}
 					}
 				} else if job.Status.Active > 0 {
-					instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionRunning
-					update = true
+					if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionRunning {
+						instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionRunning
+						update = true
+					}
 					if errors.IsNotFound(cjoberr) {
 						r.spawnMetricsCollector(instance, c, instance.Status.StudyId, t.TrialId, w.WorkerId, ns, instance.Spec.MetricsCollectorSpec)
 					}
 				} else if job.Status.Failed > 0 {
-					update = true
-					instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionFailed
+					if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionFailed {
+						instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionFailed
+						update = true
+					}
 				}
 			}
 		}
