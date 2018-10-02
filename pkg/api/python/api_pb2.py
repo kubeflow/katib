@@ -3654,4 +3654,1021 @@ _sym_db.RegisterServiceDescriptor(_EARLYSTOPPING)
 
 DESCRIPTOR.services_by_name['EarlyStopping'] = _EARLYSTOPPING
 
+try:
+  # THESE ELEMENTS WILL BE DEPRECATED.
+  # Please use the generated *_pb2_grpc.py files instead.
+  import grpc
+  from grpc.beta import implementations as beta_implementations
+  from grpc.beta import interfaces as beta_interfaces
+  from grpc.framework.common import cardinality
+  from grpc.framework.interfaces.face import utilities as face_utilities
+
+
+  class ManagerStub(object):
+    """For each RPC service, we define mapping to HTTP REST API method.
+    The mapping includes the URL path, query parameters and request body.
+    https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http 
+    """
+
+    def __init__(self, channel):
+      """Constructor.
+
+      Args:
+        channel: A grpc.Channel.
+      """
+      self.CreateStudy = channel.unary_unary(
+          '/api.Manager/CreateStudy',
+          request_serializer=CreateStudyRequest.SerializeToString,
+          response_deserializer=CreateStudyReply.FromString,
+          )
+      self.GetStudy = channel.unary_unary(
+          '/api.Manager/GetStudy',
+          request_serializer=GetStudyRequest.SerializeToString,
+          response_deserializer=GetStudyReply.FromString,
+          )
+      self.GetStudyList = channel.unary_unary(
+          '/api.Manager/GetStudyList',
+          request_serializer=GetStudyListRequest.SerializeToString,
+          response_deserializer=GetStudyListReply.FromString,
+          )
+      self.CreateTrial = channel.unary_unary(
+          '/api.Manager/CreateTrial',
+          request_serializer=CreateTrialRequest.SerializeToString,
+          response_deserializer=CreateTrialReply.FromString,
+          )
+      self.GetTrials = channel.unary_unary(
+          '/api.Manager/GetTrials',
+          request_serializer=GetTrialsRequest.SerializeToString,
+          response_deserializer=GetTrialsReply.FromString,
+          )
+      self.RegisterWorker = channel.unary_unary(
+          '/api.Manager/RegisterWorker',
+          request_serializer=RegisterWorkerRequest.SerializeToString,
+          response_deserializer=RegisterWorkerReply.FromString,
+          )
+      self.GetWorkers = channel.unary_unary(
+          '/api.Manager/GetWorkers',
+          request_serializer=GetWorkersRequest.SerializeToString,
+          response_deserializer=GetWorkersReply.FromString,
+          )
+      self.UpdateWorkerState = channel.unary_unary(
+          '/api.Manager/UpdateWorkerState',
+          request_serializer=UpdateWorkerStateRequest.SerializeToString,
+          response_deserializer=UpdateWorkerStateReply.FromString,
+          )
+      self.GetSuggestions = channel.unary_unary(
+          '/api.Manager/GetSuggestions',
+          request_serializer=GetSuggestionsRequest.SerializeToString,
+          response_deserializer=GetSuggestionsReply.FromString,
+          )
+      self.GetShouldStopWorkers = channel.unary_unary(
+          '/api.Manager/GetShouldStopWorkers',
+          request_serializer=GetShouldStopWorkersRequest.SerializeToString,
+          response_deserializer=GetShouldStopWorkersReply.FromString,
+          )
+      self.GetMetrics = channel.unary_unary(
+          '/api.Manager/GetMetrics',
+          request_serializer=GetMetricsRequest.SerializeToString,
+          response_deserializer=GetMetricsReply.FromString,
+          )
+      self.SetSuggestionParameters = channel.unary_unary(
+          '/api.Manager/SetSuggestionParameters',
+          request_serializer=SetSuggestionParametersRequest.SerializeToString,
+          response_deserializer=SetSuggestionParametersReply.FromString,
+          )
+      self.GetSuggestionParameters = channel.unary_unary(
+          '/api.Manager/GetSuggestionParameters',
+          request_serializer=GetSuggestionParametersRequest.SerializeToString,
+          response_deserializer=GetSuggestionParametersReply.FromString,
+          )
+      self.GetSuggestionParameterList = channel.unary_unary(
+          '/api.Manager/GetSuggestionParameterList',
+          request_serializer=GetSuggestionParameterListRequest.SerializeToString,
+          response_deserializer=GetSuggestionParameterListReply.FromString,
+          )
+      self.SetEarlyStoppingParameters = channel.unary_unary(
+          '/api.Manager/SetEarlyStoppingParameters',
+          request_serializer=SetEarlyStoppingParametersRequest.SerializeToString,
+          response_deserializer=SetEarlyStoppingParametersReply.FromString,
+          )
+      self.GetEarlyStoppingParameters = channel.unary_unary(
+          '/api.Manager/GetEarlyStoppingParameters',
+          request_serializer=GetEarlyStoppingParametersRequest.SerializeToString,
+          response_deserializer=GetEarlyStoppingParametersReply.FromString,
+          )
+      self.GetEarlyStoppingParameterList = channel.unary_unary(
+          '/api.Manager/GetEarlyStoppingParameterList',
+          request_serializer=GetEarlyStoppingParameterListRequest.SerializeToString,
+          response_deserializer=GetEarlyStoppingParameterListReply.FromString,
+          )
+      self.SaveStudy = channel.unary_unary(
+          '/api.Manager/SaveStudy',
+          request_serializer=SaveStudyRequest.SerializeToString,
+          response_deserializer=SaveStudyReply.FromString,
+          )
+      self.SaveModel = channel.unary_unary(
+          '/api.Manager/SaveModel',
+          request_serializer=SaveModelRequest.SerializeToString,
+          response_deserializer=SaveModelReply.FromString,
+          )
+      self.ReportMetricsLogs = channel.unary_unary(
+          '/api.Manager/ReportMetricsLogs',
+          request_serializer=ReportMetricsLogsRequest.SerializeToString,
+          response_deserializer=ReportMetricsLogsReply.FromString,
+          )
+      self.GetSavedStudies = channel.unary_unary(
+          '/api.Manager/GetSavedStudies',
+          request_serializer=GetSavedStudiesRequest.SerializeToString,
+          response_deserializer=GetSavedStudiesReply.FromString,
+          )
+      self.GetSavedModels = channel.unary_unary(
+          '/api.Manager/GetSavedModels',
+          request_serializer=GetSavedModelsRequest.SerializeToString,
+          response_deserializer=GetSavedModelsReply.FromString,
+          )
+
+
+  class ManagerServicer(object):
+    """For each RPC service, we define mapping to HTTP REST API method.
+    The mapping includes the URL path, query parameters and request body.
+    https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http 
+    """
+
+    def CreateStudy(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def GetStudy(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def GetStudyList(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def CreateTrial(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def GetTrials(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def RegisterWorker(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def GetWorkers(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def UpdateWorkerState(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def GetSuggestions(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def GetShouldStopWorkers(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def GetMetrics(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def SetSuggestionParameters(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def GetSuggestionParameters(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def GetSuggestionParameterList(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def SetEarlyStoppingParameters(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def GetEarlyStoppingParameters(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def GetEarlyStoppingParameterList(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def SaveStudy(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def SaveModel(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def ReportMetricsLogs(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def GetSavedStudies(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def GetSavedModels(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+
+  def add_ManagerServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+        'CreateStudy': grpc.unary_unary_rpc_method_handler(
+            servicer.CreateStudy,
+            request_deserializer=CreateStudyRequest.FromString,
+            response_serializer=CreateStudyReply.SerializeToString,
+        ),
+        'GetStudy': grpc.unary_unary_rpc_method_handler(
+            servicer.GetStudy,
+            request_deserializer=GetStudyRequest.FromString,
+            response_serializer=GetStudyReply.SerializeToString,
+        ),
+        'GetStudyList': grpc.unary_unary_rpc_method_handler(
+            servicer.GetStudyList,
+            request_deserializer=GetStudyListRequest.FromString,
+            response_serializer=GetStudyListReply.SerializeToString,
+        ),
+        'CreateTrial': grpc.unary_unary_rpc_method_handler(
+            servicer.CreateTrial,
+            request_deserializer=CreateTrialRequest.FromString,
+            response_serializer=CreateTrialReply.SerializeToString,
+        ),
+        'GetTrials': grpc.unary_unary_rpc_method_handler(
+            servicer.GetTrials,
+            request_deserializer=GetTrialsRequest.FromString,
+            response_serializer=GetTrialsReply.SerializeToString,
+        ),
+        'RegisterWorker': grpc.unary_unary_rpc_method_handler(
+            servicer.RegisterWorker,
+            request_deserializer=RegisterWorkerRequest.FromString,
+            response_serializer=RegisterWorkerReply.SerializeToString,
+        ),
+        'GetWorkers': grpc.unary_unary_rpc_method_handler(
+            servicer.GetWorkers,
+            request_deserializer=GetWorkersRequest.FromString,
+            response_serializer=GetWorkersReply.SerializeToString,
+        ),
+        'UpdateWorkerState': grpc.unary_unary_rpc_method_handler(
+            servicer.UpdateWorkerState,
+            request_deserializer=UpdateWorkerStateRequest.FromString,
+            response_serializer=UpdateWorkerStateReply.SerializeToString,
+        ),
+        'GetSuggestions': grpc.unary_unary_rpc_method_handler(
+            servicer.GetSuggestions,
+            request_deserializer=GetSuggestionsRequest.FromString,
+            response_serializer=GetSuggestionsReply.SerializeToString,
+        ),
+        'GetShouldStopWorkers': grpc.unary_unary_rpc_method_handler(
+            servicer.GetShouldStopWorkers,
+            request_deserializer=GetShouldStopWorkersRequest.FromString,
+            response_serializer=GetShouldStopWorkersReply.SerializeToString,
+        ),
+        'GetMetrics': grpc.unary_unary_rpc_method_handler(
+            servicer.GetMetrics,
+            request_deserializer=GetMetricsRequest.FromString,
+            response_serializer=GetMetricsReply.SerializeToString,
+        ),
+        'SetSuggestionParameters': grpc.unary_unary_rpc_method_handler(
+            servicer.SetSuggestionParameters,
+            request_deserializer=SetSuggestionParametersRequest.FromString,
+            response_serializer=SetSuggestionParametersReply.SerializeToString,
+        ),
+        'GetSuggestionParameters': grpc.unary_unary_rpc_method_handler(
+            servicer.GetSuggestionParameters,
+            request_deserializer=GetSuggestionParametersRequest.FromString,
+            response_serializer=GetSuggestionParametersReply.SerializeToString,
+        ),
+        'GetSuggestionParameterList': grpc.unary_unary_rpc_method_handler(
+            servicer.GetSuggestionParameterList,
+            request_deserializer=GetSuggestionParameterListRequest.FromString,
+            response_serializer=GetSuggestionParameterListReply.SerializeToString,
+        ),
+        'SetEarlyStoppingParameters': grpc.unary_unary_rpc_method_handler(
+            servicer.SetEarlyStoppingParameters,
+            request_deserializer=SetEarlyStoppingParametersRequest.FromString,
+            response_serializer=SetEarlyStoppingParametersReply.SerializeToString,
+        ),
+        'GetEarlyStoppingParameters': grpc.unary_unary_rpc_method_handler(
+            servicer.GetEarlyStoppingParameters,
+            request_deserializer=GetEarlyStoppingParametersRequest.FromString,
+            response_serializer=GetEarlyStoppingParametersReply.SerializeToString,
+        ),
+        'GetEarlyStoppingParameterList': grpc.unary_unary_rpc_method_handler(
+            servicer.GetEarlyStoppingParameterList,
+            request_deserializer=GetEarlyStoppingParameterListRequest.FromString,
+            response_serializer=GetEarlyStoppingParameterListReply.SerializeToString,
+        ),
+        'SaveStudy': grpc.unary_unary_rpc_method_handler(
+            servicer.SaveStudy,
+            request_deserializer=SaveStudyRequest.FromString,
+            response_serializer=SaveStudyReply.SerializeToString,
+        ),
+        'SaveModel': grpc.unary_unary_rpc_method_handler(
+            servicer.SaveModel,
+            request_deserializer=SaveModelRequest.FromString,
+            response_serializer=SaveModelReply.SerializeToString,
+        ),
+        'ReportMetricsLogs': grpc.unary_unary_rpc_method_handler(
+            servicer.ReportMetricsLogs,
+            request_deserializer=ReportMetricsLogsRequest.FromString,
+            response_serializer=ReportMetricsLogsReply.SerializeToString,
+        ),
+        'GetSavedStudies': grpc.unary_unary_rpc_method_handler(
+            servicer.GetSavedStudies,
+            request_deserializer=GetSavedStudiesRequest.FromString,
+            response_serializer=GetSavedStudiesReply.SerializeToString,
+        ),
+        'GetSavedModels': grpc.unary_unary_rpc_method_handler(
+            servicer.GetSavedModels,
+            request_deserializer=GetSavedModelsRequest.FromString,
+            response_serializer=GetSavedModelsReply.SerializeToString,
+        ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+        'api.Manager', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+  class SuggestionStub(object):
+    # missing associated documentation comment in .proto file
+    pass
+
+    def __init__(self, channel):
+      """Constructor.
+
+      Args:
+        channel: A grpc.Channel.
+      """
+      self.GetSuggestions = channel.unary_unary(
+          '/api.Suggestion/GetSuggestions',
+          request_serializer=GetSuggestionsRequest.SerializeToString,
+          response_deserializer=GetSuggestionsReply.FromString,
+          )
+
+
+  class SuggestionServicer(object):
+    # missing associated documentation comment in .proto file
+    pass
+
+    def GetSuggestions(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+
+  def add_SuggestionServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+        'GetSuggestions': grpc.unary_unary_rpc_method_handler(
+            servicer.GetSuggestions,
+            request_deserializer=GetSuggestionsRequest.FromString,
+            response_serializer=GetSuggestionsReply.SerializeToString,
+        ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+        'api.Suggestion', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+  class EarlyStoppingStub(object):
+    # missing associated documentation comment in .proto file
+    pass
+
+    def __init__(self, channel):
+      """Constructor.
+
+      Args:
+        channel: A grpc.Channel.
+      """
+      self.GetShouldStopWorkers = channel.unary_unary(
+          '/api.EarlyStopping/GetShouldStopWorkers',
+          request_serializer=GetShouldStopWorkersRequest.SerializeToString,
+          response_deserializer=GetShouldStopWorkersReply.FromString,
+          )
+
+
+  class EarlyStoppingServicer(object):
+    # missing associated documentation comment in .proto file
+    pass
+
+    def GetShouldStopWorkers(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+
+  def add_EarlyStoppingServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+        'GetShouldStopWorkers': grpc.unary_unary_rpc_method_handler(
+            servicer.GetShouldStopWorkers,
+            request_deserializer=GetShouldStopWorkersRequest.FromString,
+            response_serializer=GetShouldStopWorkersReply.SerializeToString,
+        ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+        'api.EarlyStopping', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+  class BetaManagerServicer(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    """For each RPC service, we define mapping to HTTP REST API method.
+    The mapping includes the URL path, query parameters and request body.
+    https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http 
+    """
+    def CreateStudy(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def GetStudy(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def GetStudyList(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def CreateTrial(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def GetTrials(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def RegisterWorker(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def GetWorkers(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def UpdateWorkerState(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def GetSuggestions(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def GetShouldStopWorkers(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def GetMetrics(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def SetSuggestionParameters(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def GetSuggestionParameters(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def GetSuggestionParameterList(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def SetEarlyStoppingParameters(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def GetEarlyStoppingParameters(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def GetEarlyStoppingParameterList(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def SaveStudy(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def SaveModel(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def ReportMetricsLogs(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def GetSavedStudies(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def GetSavedModels(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+
+
+  class BetaManagerStub(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    """For each RPC service, we define mapping to HTTP REST API method.
+    The mapping includes the URL path, query parameters and request body.
+    https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http 
+    """
+    def CreateStudy(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    CreateStudy.future = None
+    def GetStudy(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    GetStudy.future = None
+    def GetStudyList(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    GetStudyList.future = None
+    def CreateTrial(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    CreateTrial.future = None
+    def GetTrials(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    GetTrials.future = None
+    def RegisterWorker(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    RegisterWorker.future = None
+    def GetWorkers(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    GetWorkers.future = None
+    def UpdateWorkerState(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    UpdateWorkerState.future = None
+    def GetSuggestions(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    GetSuggestions.future = None
+    def GetShouldStopWorkers(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    GetShouldStopWorkers.future = None
+    def GetMetrics(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    GetMetrics.future = None
+    def SetSuggestionParameters(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    SetSuggestionParameters.future = None
+    def GetSuggestionParameters(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    GetSuggestionParameters.future = None
+    def GetSuggestionParameterList(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    GetSuggestionParameterList.future = None
+    def SetEarlyStoppingParameters(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    SetEarlyStoppingParameters.future = None
+    def GetEarlyStoppingParameters(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    GetEarlyStoppingParameters.future = None
+    def GetEarlyStoppingParameterList(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    GetEarlyStoppingParameterList.future = None
+    def SaveStudy(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    SaveStudy.future = None
+    def SaveModel(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    SaveModel.future = None
+    def ReportMetricsLogs(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    ReportMetricsLogs.future = None
+    def GetSavedStudies(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    GetSavedStudies.future = None
+    def GetSavedModels(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    GetSavedModels.future = None
+
+
+  def beta_create_Manager_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_deserializers = {
+      ('api.Manager', 'CreateStudy'): CreateStudyRequest.FromString,
+      ('api.Manager', 'CreateTrial'): CreateTrialRequest.FromString,
+      ('api.Manager', 'GetEarlyStoppingParameterList'): GetEarlyStoppingParameterListRequest.FromString,
+      ('api.Manager', 'GetEarlyStoppingParameters'): GetEarlyStoppingParametersRequest.FromString,
+      ('api.Manager', 'GetMetrics'): GetMetricsRequest.FromString,
+      ('api.Manager', 'GetSavedModels'): GetSavedModelsRequest.FromString,
+      ('api.Manager', 'GetSavedStudies'): GetSavedStudiesRequest.FromString,
+      ('api.Manager', 'GetShouldStopWorkers'): GetShouldStopWorkersRequest.FromString,
+      ('api.Manager', 'GetStudy'): GetStudyRequest.FromString,
+      ('api.Manager', 'GetStudyList'): GetStudyListRequest.FromString,
+      ('api.Manager', 'GetSuggestionParameterList'): GetSuggestionParameterListRequest.FromString,
+      ('api.Manager', 'GetSuggestionParameters'): GetSuggestionParametersRequest.FromString,
+      ('api.Manager', 'GetSuggestions'): GetSuggestionsRequest.FromString,
+      ('api.Manager', 'GetTrials'): GetTrialsRequest.FromString,
+      ('api.Manager', 'GetWorkers'): GetWorkersRequest.FromString,
+      ('api.Manager', 'RegisterWorker'): RegisterWorkerRequest.FromString,
+      ('api.Manager', 'ReportMetricsLogs'): ReportMetricsLogsRequest.FromString,
+      ('api.Manager', 'SaveModel'): SaveModelRequest.FromString,
+      ('api.Manager', 'SaveStudy'): SaveStudyRequest.FromString,
+      ('api.Manager', 'SetEarlyStoppingParameters'): SetEarlyStoppingParametersRequest.FromString,
+      ('api.Manager', 'SetSuggestionParameters'): SetSuggestionParametersRequest.FromString,
+      ('api.Manager', 'UpdateWorkerState'): UpdateWorkerStateRequest.FromString,
+    }
+    response_serializers = {
+      ('api.Manager', 'CreateStudy'): CreateStudyReply.SerializeToString,
+      ('api.Manager', 'CreateTrial'): CreateTrialReply.SerializeToString,
+      ('api.Manager', 'GetEarlyStoppingParameterList'): GetEarlyStoppingParameterListReply.SerializeToString,
+      ('api.Manager', 'GetEarlyStoppingParameters'): GetEarlyStoppingParametersReply.SerializeToString,
+      ('api.Manager', 'GetMetrics'): GetMetricsReply.SerializeToString,
+      ('api.Manager', 'GetSavedModels'): GetSavedModelsReply.SerializeToString,
+      ('api.Manager', 'GetSavedStudies'): GetSavedStudiesReply.SerializeToString,
+      ('api.Manager', 'GetShouldStopWorkers'): GetShouldStopWorkersReply.SerializeToString,
+      ('api.Manager', 'GetStudy'): GetStudyReply.SerializeToString,
+      ('api.Manager', 'GetStudyList'): GetStudyListReply.SerializeToString,
+      ('api.Manager', 'GetSuggestionParameterList'): GetSuggestionParameterListReply.SerializeToString,
+      ('api.Manager', 'GetSuggestionParameters'): GetSuggestionParametersReply.SerializeToString,
+      ('api.Manager', 'GetSuggestions'): GetSuggestionsReply.SerializeToString,
+      ('api.Manager', 'GetTrials'): GetTrialsReply.SerializeToString,
+      ('api.Manager', 'GetWorkers'): GetWorkersReply.SerializeToString,
+      ('api.Manager', 'RegisterWorker'): RegisterWorkerReply.SerializeToString,
+      ('api.Manager', 'ReportMetricsLogs'): ReportMetricsLogsReply.SerializeToString,
+      ('api.Manager', 'SaveModel'): SaveModelReply.SerializeToString,
+      ('api.Manager', 'SaveStudy'): SaveStudyReply.SerializeToString,
+      ('api.Manager', 'SetEarlyStoppingParameters'): SetEarlyStoppingParametersReply.SerializeToString,
+      ('api.Manager', 'SetSuggestionParameters'): SetSuggestionParametersReply.SerializeToString,
+      ('api.Manager', 'UpdateWorkerState'): UpdateWorkerStateReply.SerializeToString,
+    }
+    method_implementations = {
+      ('api.Manager', 'CreateStudy'): face_utilities.unary_unary_inline(servicer.CreateStudy),
+      ('api.Manager', 'CreateTrial'): face_utilities.unary_unary_inline(servicer.CreateTrial),
+      ('api.Manager', 'GetEarlyStoppingParameterList'): face_utilities.unary_unary_inline(servicer.GetEarlyStoppingParameterList),
+      ('api.Manager', 'GetEarlyStoppingParameters'): face_utilities.unary_unary_inline(servicer.GetEarlyStoppingParameters),
+      ('api.Manager', 'GetMetrics'): face_utilities.unary_unary_inline(servicer.GetMetrics),
+      ('api.Manager', 'GetSavedModels'): face_utilities.unary_unary_inline(servicer.GetSavedModels),
+      ('api.Manager', 'GetSavedStudies'): face_utilities.unary_unary_inline(servicer.GetSavedStudies),
+      ('api.Manager', 'GetShouldStopWorkers'): face_utilities.unary_unary_inline(servicer.GetShouldStopWorkers),
+      ('api.Manager', 'GetStudy'): face_utilities.unary_unary_inline(servicer.GetStudy),
+      ('api.Manager', 'GetStudyList'): face_utilities.unary_unary_inline(servicer.GetStudyList),
+      ('api.Manager', 'GetSuggestionParameterList'): face_utilities.unary_unary_inline(servicer.GetSuggestionParameterList),
+      ('api.Manager', 'GetSuggestionParameters'): face_utilities.unary_unary_inline(servicer.GetSuggestionParameters),
+      ('api.Manager', 'GetSuggestions'): face_utilities.unary_unary_inline(servicer.GetSuggestions),
+      ('api.Manager', 'GetTrials'): face_utilities.unary_unary_inline(servicer.GetTrials),
+      ('api.Manager', 'GetWorkers'): face_utilities.unary_unary_inline(servicer.GetWorkers),
+      ('api.Manager', 'RegisterWorker'): face_utilities.unary_unary_inline(servicer.RegisterWorker),
+      ('api.Manager', 'ReportMetricsLogs'): face_utilities.unary_unary_inline(servicer.ReportMetricsLogs),
+      ('api.Manager', 'SaveModel'): face_utilities.unary_unary_inline(servicer.SaveModel),
+      ('api.Manager', 'SaveStudy'): face_utilities.unary_unary_inline(servicer.SaveStudy),
+      ('api.Manager', 'SetEarlyStoppingParameters'): face_utilities.unary_unary_inline(servicer.SetEarlyStoppingParameters),
+      ('api.Manager', 'SetSuggestionParameters'): face_utilities.unary_unary_inline(servicer.SetSuggestionParameters),
+      ('api.Manager', 'UpdateWorkerState'): face_utilities.unary_unary_inline(servicer.UpdateWorkerState),
+    }
+    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
+    return beta_implementations.server(method_implementations, options=server_options)
+
+
+  def beta_create_Manager_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_serializers = {
+      ('api.Manager', 'CreateStudy'): CreateStudyRequest.SerializeToString,
+      ('api.Manager', 'CreateTrial'): CreateTrialRequest.SerializeToString,
+      ('api.Manager', 'GetEarlyStoppingParameterList'): GetEarlyStoppingParameterListRequest.SerializeToString,
+      ('api.Manager', 'GetEarlyStoppingParameters'): GetEarlyStoppingParametersRequest.SerializeToString,
+      ('api.Manager', 'GetMetrics'): GetMetricsRequest.SerializeToString,
+      ('api.Manager', 'GetSavedModels'): GetSavedModelsRequest.SerializeToString,
+      ('api.Manager', 'GetSavedStudies'): GetSavedStudiesRequest.SerializeToString,
+      ('api.Manager', 'GetShouldStopWorkers'): GetShouldStopWorkersRequest.SerializeToString,
+      ('api.Manager', 'GetStudy'): GetStudyRequest.SerializeToString,
+      ('api.Manager', 'GetStudyList'): GetStudyListRequest.SerializeToString,
+      ('api.Manager', 'GetSuggestionParameterList'): GetSuggestionParameterListRequest.SerializeToString,
+      ('api.Manager', 'GetSuggestionParameters'): GetSuggestionParametersRequest.SerializeToString,
+      ('api.Manager', 'GetSuggestions'): GetSuggestionsRequest.SerializeToString,
+      ('api.Manager', 'GetTrials'): GetTrialsRequest.SerializeToString,
+      ('api.Manager', 'GetWorkers'): GetWorkersRequest.SerializeToString,
+      ('api.Manager', 'RegisterWorker'): RegisterWorkerRequest.SerializeToString,
+      ('api.Manager', 'ReportMetricsLogs'): ReportMetricsLogsRequest.SerializeToString,
+      ('api.Manager', 'SaveModel'): SaveModelRequest.SerializeToString,
+      ('api.Manager', 'SaveStudy'): SaveStudyRequest.SerializeToString,
+      ('api.Manager', 'SetEarlyStoppingParameters'): SetEarlyStoppingParametersRequest.SerializeToString,
+      ('api.Manager', 'SetSuggestionParameters'): SetSuggestionParametersRequest.SerializeToString,
+      ('api.Manager', 'UpdateWorkerState'): UpdateWorkerStateRequest.SerializeToString,
+    }
+    response_deserializers = {
+      ('api.Manager', 'CreateStudy'): CreateStudyReply.FromString,
+      ('api.Manager', 'CreateTrial'): CreateTrialReply.FromString,
+      ('api.Manager', 'GetEarlyStoppingParameterList'): GetEarlyStoppingParameterListReply.FromString,
+      ('api.Manager', 'GetEarlyStoppingParameters'): GetEarlyStoppingParametersReply.FromString,
+      ('api.Manager', 'GetMetrics'): GetMetricsReply.FromString,
+      ('api.Manager', 'GetSavedModels'): GetSavedModelsReply.FromString,
+      ('api.Manager', 'GetSavedStudies'): GetSavedStudiesReply.FromString,
+      ('api.Manager', 'GetShouldStopWorkers'): GetShouldStopWorkersReply.FromString,
+      ('api.Manager', 'GetStudy'): GetStudyReply.FromString,
+      ('api.Manager', 'GetStudyList'): GetStudyListReply.FromString,
+      ('api.Manager', 'GetSuggestionParameterList'): GetSuggestionParameterListReply.FromString,
+      ('api.Manager', 'GetSuggestionParameters'): GetSuggestionParametersReply.FromString,
+      ('api.Manager', 'GetSuggestions'): GetSuggestionsReply.FromString,
+      ('api.Manager', 'GetTrials'): GetTrialsReply.FromString,
+      ('api.Manager', 'GetWorkers'): GetWorkersReply.FromString,
+      ('api.Manager', 'RegisterWorker'): RegisterWorkerReply.FromString,
+      ('api.Manager', 'ReportMetricsLogs'): ReportMetricsLogsReply.FromString,
+      ('api.Manager', 'SaveModel'): SaveModelReply.FromString,
+      ('api.Manager', 'SaveStudy'): SaveStudyReply.FromString,
+      ('api.Manager', 'SetEarlyStoppingParameters'): SetEarlyStoppingParametersReply.FromString,
+      ('api.Manager', 'SetSuggestionParameters'): SetSuggestionParametersReply.FromString,
+      ('api.Manager', 'UpdateWorkerState'): UpdateWorkerStateReply.FromString,
+    }
+    cardinalities = {
+      'CreateStudy': cardinality.Cardinality.UNARY_UNARY,
+      'CreateTrial': cardinality.Cardinality.UNARY_UNARY,
+      'GetEarlyStoppingParameterList': cardinality.Cardinality.UNARY_UNARY,
+      'GetEarlyStoppingParameters': cardinality.Cardinality.UNARY_UNARY,
+      'GetMetrics': cardinality.Cardinality.UNARY_UNARY,
+      'GetSavedModels': cardinality.Cardinality.UNARY_UNARY,
+      'GetSavedStudies': cardinality.Cardinality.UNARY_UNARY,
+      'GetShouldStopWorkers': cardinality.Cardinality.UNARY_UNARY,
+      'GetStudy': cardinality.Cardinality.UNARY_UNARY,
+      'GetStudyList': cardinality.Cardinality.UNARY_UNARY,
+      'GetSuggestionParameterList': cardinality.Cardinality.UNARY_UNARY,
+      'GetSuggestionParameters': cardinality.Cardinality.UNARY_UNARY,
+      'GetSuggestions': cardinality.Cardinality.UNARY_UNARY,
+      'GetTrials': cardinality.Cardinality.UNARY_UNARY,
+      'GetWorkers': cardinality.Cardinality.UNARY_UNARY,
+      'RegisterWorker': cardinality.Cardinality.UNARY_UNARY,
+      'ReportMetricsLogs': cardinality.Cardinality.UNARY_UNARY,
+      'SaveModel': cardinality.Cardinality.UNARY_UNARY,
+      'SaveStudy': cardinality.Cardinality.UNARY_UNARY,
+      'SetEarlyStoppingParameters': cardinality.Cardinality.UNARY_UNARY,
+      'SetSuggestionParameters': cardinality.Cardinality.UNARY_UNARY,
+      'UpdateWorkerState': cardinality.Cardinality.UNARY_UNARY,
+    }
+    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
+    return beta_implementations.dynamic_stub(channel, 'api.Manager', cardinalities, options=stub_options)
+
+
+  class BetaSuggestionServicer(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    # missing associated documentation comment in .proto file
+    pass
+    def GetSuggestions(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+
+
+  class BetaSuggestionStub(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    # missing associated documentation comment in .proto file
+    pass
+    def GetSuggestions(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    GetSuggestions.future = None
+
+
+  def beta_create_Suggestion_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_deserializers = {
+      ('api.Suggestion', 'GetSuggestions'): GetSuggestionsRequest.FromString,
+    }
+    response_serializers = {
+      ('api.Suggestion', 'GetSuggestions'): GetSuggestionsReply.SerializeToString,
+    }
+    method_implementations = {
+      ('api.Suggestion', 'GetSuggestions'): face_utilities.unary_unary_inline(servicer.GetSuggestions),
+    }
+    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
+    return beta_implementations.server(method_implementations, options=server_options)
+
+
+  def beta_create_Suggestion_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_serializers = {
+      ('api.Suggestion', 'GetSuggestions'): GetSuggestionsRequest.SerializeToString,
+    }
+    response_deserializers = {
+      ('api.Suggestion', 'GetSuggestions'): GetSuggestionsReply.FromString,
+    }
+    cardinalities = {
+      'GetSuggestions': cardinality.Cardinality.UNARY_UNARY,
+    }
+    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
+    return beta_implementations.dynamic_stub(channel, 'api.Suggestion', cardinalities, options=stub_options)
+
+
+  class BetaEarlyStoppingServicer(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    # missing associated documentation comment in .proto file
+    pass
+    def GetShouldStopWorkers(self, request, context):
+      # missing associated documentation comment in .proto file
+      pass
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+
+
+  class BetaEarlyStoppingStub(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    # missing associated documentation comment in .proto file
+    pass
+    def GetShouldStopWorkers(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      # missing associated documentation comment in .proto file
+      pass
+      raise NotImplementedError()
+    GetShouldStopWorkers.future = None
+
+
+  def beta_create_EarlyStopping_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_deserializers = {
+      ('api.EarlyStopping', 'GetShouldStopWorkers'): GetShouldStopWorkersRequest.FromString,
+    }
+    response_serializers = {
+      ('api.EarlyStopping', 'GetShouldStopWorkers'): GetShouldStopWorkersReply.SerializeToString,
+    }
+    method_implementations = {
+      ('api.EarlyStopping', 'GetShouldStopWorkers'): face_utilities.unary_unary_inline(servicer.GetShouldStopWorkers),
+    }
+    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
+    return beta_implementations.server(method_implementations, options=server_options)
+
+
+  def beta_create_EarlyStopping_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_serializers = {
+      ('api.EarlyStopping', 'GetShouldStopWorkers'): GetShouldStopWorkersRequest.SerializeToString,
+    }
+    response_deserializers = {
+      ('api.EarlyStopping', 'GetShouldStopWorkers'): GetShouldStopWorkersReply.FromString,
+    }
+    cardinalities = {
+      'GetShouldStopWorkers': cardinality.Cardinality.UNARY_UNARY,
+    }
+    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
+    return beta_implementations.dynamic_stub(channel, 'api.EarlyStopping', cardinalities, options=stub_options)
+except ImportError:
+  pass
 # @@protoc_insertion_point(module_scope)
