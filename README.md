@@ -2,7 +2,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/kubeflow/katib)](https://goreportcard.com/report/github.com/kubeflow/katib)
 
-![Katib Logo](./img/Katib_Logo.png)
+<img src="./img/Katib_Logo.png", width="320px">
 Hyperparameter Tuning on Kubernetes.
 This project is inspired by [Google vizier](https://static.googleusercontent.com/media/research.google.com/ja//pubs/archive/bcb15507f4b52991a0783013df4222240e942381.pdf). Katib is a scalable and flexible hyperparameter tuning framework and is tightly integrated with kubernetes. Also it does not depend on a specific Deep Learning framework e.g. TensorFlow, MXNet, and PyTorch).
 
