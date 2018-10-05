@@ -168,8 +168,8 @@ The Results will be saved automatically.
 ### Using GPU demo
 You can set any configuration for your worker pods.
 Here, try to set config for GPU.
-The manifest of the worker pods are generated from template.
-The template is define [ConfigMap](/manifest/studyjobcontroller/workerConfigMap.yaml)
+The manifest of the worker pods are generated from a template.
+The templates are defined in [ConfigMap](./workerConfigMap.yaml).
 There are two templates, defaultWorkerTemplate.yaml and gpuWorkerTemplate.yaml.
 You can add your template for worker.
 Then you should specify the template in your studyjob spec.
