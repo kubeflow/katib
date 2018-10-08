@@ -477,6 +477,9 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 			log.Printf("Check Goal failed %v", err)
 		}
 	}
+	if instance.Status.SuggestionCount > instance.Spec.RequestCount{
+		nextSuggestionSchedule = false
+	}
 	if nextSuggestionSchedule {
 		return r.getAndRunSuggestion(instance, c, ns)
 	} else {
