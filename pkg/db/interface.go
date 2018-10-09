@@ -686,7 +686,12 @@ func (d *dbConn) CreateWorker(worker *api.Worker) (string, error) {
 	var workerID string
 	i := 3
 	for true {
-		workerID = generateRandid()
+		row := d.db.QueryRow("SELECT name FROM studies WHERE id = ?", worker.StudyId)
+		err = row.Scan(&workerID)
+		if err != nil {
+			return "", err
+		}
+		workerID = workerID + "-" + generateRandid()
 		_, err = d.db.Exec("INSERT INTO workers VALUES (?, ?, ?, ?, ?, ?, ?)",
 			workerID, worker.StudyId, worker.TrialId, worker.Type,
 			api.State_PENDING, worker.TemplatePath, strings.Join(tags, ",\n"))

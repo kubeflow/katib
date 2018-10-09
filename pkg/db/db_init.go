@@ -8,7 +8,7 @@ func (d *dbConn) DBInit() {
 	db := d.db
 	_, err := db.Exec("CREATE TABLE IF NOT EXISTS studies" +
 		"(id CHAR(16) PRIMARY KEY, " +
-		"name VARCHAR(255), " +
+		"name VARCHAR(238), " +
 		"owner VARCHAR(255), " +
 		"optimization_type TINYINT, " +
 		"optimization_goal DOUBLE, " +
@@ -41,7 +41,7 @@ func (d *dbConn) DBInit() {
 	}
 
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS workers" +
-		"(id CHAR(16) PRIMARY KEY, " +
+		"(id VARCHAR(255) PRIMARY KEY, " +
 		"study_id CHAR(16), " +
 		"trial_id CHAR(16), " +
 		"type VARCHAR(255), " +
@@ -55,7 +55,7 @@ func (d *dbConn) DBInit() {
 	}
 
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS worker_metrics" +
-		"(worker_id CHAR(16) NOT NULL, " +
+		"(worker_id VARCHAR(255) NOT NULL, " +
 		"id INT AUTO_INCREMENT PRIMARY KEY, " +
 		"time DATETIME(6), " +
 		"name VARCHAR(255), " +
@@ -66,7 +66,7 @@ func (d *dbConn) DBInit() {
 	}
 
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS worker_lastlogs" +
-		"(worker_id CHAR(16) PRIMARY KEY, " +
+		"(worker_id VARCHAR(255) PRIMARY KEY, " +
 		"time DATETIME(6), " +
 		"value TEXT)")
 	if err != nil {
