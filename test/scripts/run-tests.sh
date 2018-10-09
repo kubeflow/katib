@@ -34,10 +34,8 @@ echo "Activating service-account"
 gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
 
 echo "Configuring kubectl"
-gcloud --project ${PROJECT} container clusters get-credentials ${CLUSTER_NAME} \
-    --zone ${ZONE}
-
-mkdir -p kubeconfigs/${CLUSTER_NAME}
+#gcloud --project ${PROJECT} container clusters get-credentials ${CLUSTER_NAME} \
+#    --zone ${ZONE}
 
 gcloud container clusters describe ${CLUSTER_NAME} \
   --zone ${ZONE} \
