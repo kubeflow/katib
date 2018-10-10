@@ -1,7 +1,3 @@
-// This test assumes mysql listening on localhost:3306, which can be
-// prepared by the following:
-// docker run -e MYSQL_ROOT_PASSWORD=test123 -e MYSQL_DATABASE=vizier -p 3306:3306 mysql
-
 package db
 
 import (
@@ -10,7 +6,6 @@ import (
 	"os"
 	"testing"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/jsonpb"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
@@ -21,7 +16,6 @@ var dbInterface VizierDBInterface
 var mock sqlmock.Sqlmock
 
 func TestMain(m *testing.M) {
-	//	db, err := sql.Open("mysql", "root:test123@tcp(localhost:3306)/vizier")
 	db, sm, err := sqlmock.New()
 	mock = sm
 	if err != nil {
