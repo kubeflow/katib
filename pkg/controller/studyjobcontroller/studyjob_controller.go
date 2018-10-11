@@ -123,12 +123,12 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		mux, _ = m.(*sync.Mutex)
 	}
 	mux.Lock()
+	defer mux.Unlock()
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			if _, ok := r.muxMap.Load(request.NamespacedName.String()); ok {
 				log.Printf("Study %s was deleted. Resouces will be released.", request.NamespacedName.String())
-				mux.Unlock()
 				r.muxMap.Delete(request.NamespacedName.String())
 			}
 			// Object not found, return.  Created objects are automatically garbage collected.
@@ -139,7 +139,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
-	defer mux.Unlock()
+
 	var update bool = false
 	switch instance.Status.Condition {
 	case katibv1alpha1.ConditionCompleted:
