@@ -1,0 +1,110 @@
+{{ define "content" }}
+<link rel="stylesheet" href="/static/css/parallelcood.css"></link>
+<link rel="stylesheet" href="/static/css/profile.css"></link>
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://bl.ocks.org/syntagmatic/raw/3341641/render-queue.js"></script>
+<div class="container-fluid m-3">
+    <h1>Study Info</h1>
+    <ul class="nav nav-tabs">
+          <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#sconf">
+                      Study Config
+              </a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#paracoodtab">
+                     Study Results
+              </a>
+          </li>
+    </ul>
+    <div id="myTabContent" class="tab-content">
+        <div class="tab-pane fade show active" id="sconf">
+            <div class="container-fluid m-3">
+                <h1>{{.StudyConf.Name}}</h1>
+                <div class=" col-md-9 col-lg-9 ">
+                    <table class="table table-profile">
+                        <tbody>
+                            <tr>
+                                <td><i class="fa fa-address-card fa-lg"></i></td>
+                                <td>ID</td>
+                                <td>{{.IDList.StudyId}}</td>
+                            </tr>
+                            <tr>
+                                <td><i class="fa fa-user fa-lg"></i></td>
+                                <td>Owner</td>
+                                <td>{{.StudyConf.Owner}}</td>
+                            </tr>
+                            <tr>
+                                <td><i class="fa fa-flag-checkered fa-lg"></i></td>
+                                <td>Objective Value Name</td>
+                                <td>{{.StudyConf.ObjectiveValueName}}</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Optimization Type</td>
+                                <td>{{.StudyConf.OptimizationType}}</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Optimization Goal</td>
+                                <td>{{.StudyConf.OptimizationGoal}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <h2>Parameter Config</h2>
+                <div class="container-fluid mr-3 ml-3">
+                    <div class="card-columns">
+                        {{- range .StudyConf.ParameterConfigs.Configs}}
+                        <div class="card text-white bg-secondary mb-3" style="max-width: 20rem;">
+                            <div class="card-header rounded">{{.Name}}</div>
+                            <div class="card-body rounded">
+                                <h4 class="card-title">Feasible Space</h4>
+                                <p class="card-text"> 
+                                    <table class="table">
+                                        <tbody>
+                                            <tr>
+                                                <td>Type</td>
+                                                <td>{{.ParameterType}}</td>
+                                            </tr>
+                                            {{ if not .Feasible.List }}
+                                            <tr>
+                                                <td>Max</td>
+                                                <td>{{.Feasible.Max}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Min</td>
+                                                <td>{{.Feasible.Min}}</td>
+                                            </tr>
+                                            {{else}}
+                                            <tr>
+                                                <td>List</td>
+                                                <td></td>
+                                            </tr>
+                                            {{- range .Feasible.List}}
+                                            <tr>
+                                                <td>-</td>
+                                                <td>{{.}}</td>
+                                            </tr>
+                                            {{ end }}
+                                            {{ end }}
+                                        </tbody>
+                                    </table>
+                                </p>
+                            </div>
+                        </div>
+                        {{ end }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="paracoodtab">
+            <div class="container-fluid">
+                <div class="container-fluid bg-active" id="paracood">
+                {{ template "parallelcood" . }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

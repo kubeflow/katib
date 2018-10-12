@@ -1,0 +1,18 @@
+{{ define "breadcrumb" }}
+<ol class="breadcrumb">
+    <li class="breadcrumb-item active"><a href="/katib"><i class="fa fa-home"></i></a></li>
+    {{ if ne .StudyId ""}}
+        {{ if eq .TrialId ""}}
+            <li class="breadcrumb-item active"><a href="/katib/{{.StudyId}}">Study</a></li>
+            {{ else }}
+            <li class="breadcrumb-item"><a href="/katib/{{.StudyId}}">Study</a></li>
+            {{ if eq .WorkerId ""}}
+            <li class="breadcrumb-item active"><a href="/katib/{{.StudyId}}/TrialID/{{.TrialId}}">Trial</a></li>
+            {{ else }}
+                <li class="breadcrumb-item"><a href="/katib/{{.StudyId}}/TrialID/{{.TrialId}}">Trial</a></li>
+                <li class="breadcrumb-item active"><a href="/katib/{{.StudyId}}/WorkerID/{{.WorkerId}}">Worker</a></li>
+            {{ end }}
+        {{ end }}
+    {{ end }}
+</ol>
+{{ end }}
