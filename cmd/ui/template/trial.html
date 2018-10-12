@@ -1,0 +1,39 @@
+{{ define "content" }}
+<div class="container-fluid bg-active">
+    <h1>Trial ID: {{.IDList.TrialId}}</h1>
+    <div class="container-fluid ml-3 mr-3">
+        <div class="container-fluid mb-3">
+            <h2>Parameter Set</h2>
+            <table class="table table-hover">
+                  <thead>
+                          <tr>
+                              <th scope="col">Name</th>
+                              <th scope="col">Value</th>
+                          </tr>
+                  </thead>
+                  <tbody>
+                      {{- with .Trial}}
+                      {{- range .ParameterSet}}
+                      <tr class="table-secondary">
+                          <th>{{.Name}}</th>
+                          <td>{{.Value}}</td>
+                      </tr>
+                      {{end}}
+                      {{end}}
+                  </tbody>
+            </table>
+            <h2>Worker List</h2>
+            {{- range .Workers}}
+            <a href="/katib/{{.StudyId}}/WorkerID/{{.WorkerId}}" class="card bg-secondary w-100 mb-3" >
+                <div class="card-header rounded">Worker ID: {{.WorkerId}}</div>
+                <div class="card-body rounded">
+                    <h4 class="card-title">{{.Status}}</h4>
+                            <p class="card-text">Desc
+                            </p>
+                </div>
+            </a>
+            {{- end}}
+        </div>
+    </div>
+</div>
+{{ end }}

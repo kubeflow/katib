@@ -1,0 +1,19 @@
+{{ define "content" }}
+<div class="container-fluid bg-active">
+<h1>Study List</h1>
+    <div class="card-columns">
+        {{- with .StudyOverviews}}
+        {{- range .}}
+        <a href="/katib/{{.Id}}" class="card bg-secondary mb-3" style="max-width: 20rem;" >
+            <div class="card-header rounded">Study ID: {{.Id}}</div>
+            <div class="card-body rounded">
+                <h4 class="card-title">{{.Name}}</h4>
+                        <p class="card-text">Owner: {{.Owner}}
+                        </p>
+            </div>
+        </a>
+        {{- end}}
+        {{- end}}
+    </div>
+</div>
+{{ end }}
