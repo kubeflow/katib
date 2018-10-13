@@ -73,14 +73,14 @@ func (mr *MockVizierDBInterfaceMockRecorder) CreateWorker(arg0 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateWorker", reflect.TypeOf((*MockVizierDBInterface)(nil).CreateWorker), arg0)
 }
 
-// DB_Init mocks base method
-func (m *MockVizierDBInterface) DB_Init() {
-	m.ctrl.Call(m, "DB_Init")
+// DBInit mocks base method
+func (m *MockVizierDBInterface) DBInit() {
+	m.ctrl.Call(m, "DBInit")
 }
 
-// DB_Init indicates an expected call of DB_Init
-func (mr *MockVizierDBInterfaceMockRecorder) DB_Init() *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DB_Init", reflect.TypeOf((*MockVizierDBInterface)(nil).DB_Init))
+// DBInit indicates an expected call of DBInit
+func (mr *MockVizierDBInterfaceMockRecorder) DBInit() *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DBInit", reflect.TypeOf((*MockVizierDBInterface)(nil).DBInit))
 }
 
 // DeleteStudy mocks base method

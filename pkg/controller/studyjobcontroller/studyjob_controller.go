@@ -752,11 +752,11 @@ func (r *ReconcileStudyJobController) getWorkerKind(workerSpec *katibv1alpha1.Wo
 	if !ok {
 		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
 	}
-	wkind_s, ok := wkind.(string)
+	wkindS, ok := wkind.(string)
 	if !ok {
 		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
 	}
-	return wkind_s, nil
+	return wkindS, nil
 }
 
 func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, studyId string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, wkind string, dryrun bool) (string, error) {
