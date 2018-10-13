@@ -75,7 +75,7 @@ func (m *ModelDB) SaveModel(in *api.SaveModelRequest) error {
 		}
 	}
 
-	exrId, err := m.createErun(client, pids[0])
+	exrID, err := m.createErun(client, pids[0])
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (m *ModelDB) SaveModel(in *api.SaveModelRequest) error {
 		NumRows:  -1,
 		Metadata: []*modeldb.MetadataKV{},
 	}
-	did, err = client.StoreDataFrame(context.Background(), df, exrId)
+	did, err = client.StoreDataFrame(context.Background(), df, exrID)
 	if err != nil {
 		return err
 	}
@@ -119,7 +119,7 @@ func (m *ModelDB) SaveModel(in *api.SaveModelRequest) error {
 			Hyperparameters: hs,
 			Tag:             in.Model.StudyName + ":" + in.Model.WorkerId,
 		},
-		ExperimentRunId: exrId,
+		ExperimentRunId: exrID,
 		FeatureColumns:  []string{},
 	}
 	fres, err := client.StoreFitEvent(context.Background(), fe)
@@ -142,7 +142,7 @@ func (m *ModelDB) SaveModel(in *api.SaveModelRequest) error {
 			MetricValue:     mv,
 			LabelCol:        "label_col",
 			PredictionCol:   "prediction_col",
-			ExperimentRunId: exrId,
+			ExperimentRunId: exrID,
 		}
 		_, err = client.StoreMetricEvent(context.Background(), me)
 		if err != nil {

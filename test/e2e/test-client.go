@@ -34,15 +34,15 @@ func main() {
 	c := api.NewManagerClient(conn)
 
 	//CreateStudy
-	studyId := CreateStudy(c)
+	studyID := CreateStudy(c)
 
 	//SetSuggestParam
-	paramId := setSuggestionParam(c, studyId)
+	paramID := setSuggestionParam(c, studyID)
 
 	//GetSuggestion
 	if *suggestArgo == "hyperband" {
 		for true {
-			getSuggestReply := getSuggestion(c, studyId, paramId)
+			getSuggestReply := getSuggestion(c, studyID, paramID)
 			checkSuggestions(getSuggestReply)
 			if len(getSuggestReply.Trials) == 0 {
 				log.Printf("Hyperband ended")
@@ -79,7 +79,7 @@ func main() {
 
 		}
 	} else {
-		getSuggestReply := getSuggestion(c, studyId, paramId)
+		getSuggestReply := getSuggestion(c, studyID, paramID)
 		checkSuggestions(getSuggestReply)
 
 		//RunTrials
@@ -147,26 +147,26 @@ func CreateStudy(c api.ManagerClient) string {
 	if err != nil {
 		log.Fatalf("StudyConfig Error %v", err)
 	}
-	studyId := createStudyreply.StudyId
-	log.Printf("Study ID %s", studyId)
+	studyID := createStudyreply.StudyId
+	log.Printf("Study ID %s", studyID)
 	getStudyreq := &api.GetStudyRequest{
-		StudyId: studyId,
+		StudyId: studyID,
 	}
 	getStudyReply, err := c.GetStudy(ctx, getStudyreq)
 	if err != nil {
 		log.Fatalf("GetConfig Error %v", err)
 	}
-	log.Printf("Study ID %s StudyConf %v", studyId, getStudyReply.StudyConfig)
-	return studyId
+	log.Printf("Study ID %s StudyConf %v", studyID, getStudyReply.StudyConfig)
+	return studyID
 }
 
-func setSuggestionParam(c api.ManagerClient, studyId string) string {
+func setSuggestionParam(c api.ManagerClient, studyID string) string {
 	ctx := context.Background()
 	switch *suggestArgo {
 	case "random":
 		return ""
 	case "grid":
-		suggestionConfig.StudyId = studyId
+		suggestionConfig.StudyId = studyID
 		setSuggesitonParameterReply, err := c.SetSuggestionParameters(ctx, &suggestionConfig)
 		if err != nil {
 			log.Fatalf("SetConfig Error %v", err)
@@ -174,7 +174,7 @@ func setSuggestionParam(c api.ManagerClient, studyId string) string {
 		log.Printf("Grid suggestion prameter ID %s", setSuggesitonParameterReply.ParamId)
 		return setSuggesitonParameterReply.ParamId
 	case "hyperband":
-		suggestionConfig.StudyId = studyId
+		suggestionConfig.StudyId = studyID
 		setSuggesitonParameterReply, err := c.SetSuggestionParameters(ctx, &suggestionConfig)
 		if err != nil {
 			log.Fatalf("SetConfig Error %v", err)
@@ -186,32 +186,32 @@ func setSuggestionParam(c api.ManagerClient, studyId string) string {
 
 }
 
-func getSuggestion(c api.ManagerClient, studyId string, paramId string) *api.GetSuggestionsReply {
+func getSuggestion(c api.ManagerClient, studyID string, paramID string) *api.GetSuggestionsReply {
 	ctx := context.Background()
 	var getSuggestRequest *api.GetSuggestionsRequest
 	switch *suggestArgo {
 	case "random":
 		//Random suggestion doesn't need suggestion parameter
 		getSuggestRequest = &api.GetSuggestionsRequest{
-			StudyId:             studyId,
+			StudyId:             studyID,
 			SuggestionAlgorithm: "random",
 			RequestNumber:       int32(*requestnum),
 		}
 
 	case "grid":
 		getSuggestRequest = &api.GetSuggestionsRequest{
-			StudyId:             studyId,
+			StudyId:             studyID,
 			SuggestionAlgorithm: "grid",
 			RequestNumber:       0,
 			//RequestNumber=0 means get all grids.
-			ParamId: paramId,
+			ParamId: paramID,
 		}
 	case "hyperband":
 		getSuggestRequest = &api.GetSuggestionsRequest{
-			StudyId:             studyId,
+			StudyId:             studyID,
 			SuggestionAlgorithm: "hyperband",
 			RequestNumber:       0,
-			ParamId:             paramId,
+			ParamId:             paramID,
 		}
 	}
 
@@ -350,9 +350,9 @@ func checkSuggestions(getSuggestReply *api.GetSuggestionsReply) bool {
 //	}
 //}
 
-func isCompletedAllWorker(c api.ManagerClient, studyId string) bool {
+func isCompletedAllWorker(c api.ManagerClient, studyID string) bool {
 	ctx := context.Background()
-	getWorkerRequest := &api.GetWorkersRequest{StudyId: studyId}
+	getWorkerRequest := &api.GetWorkersRequest{StudyId: studyID}
 	getWorkerReply, err := c.GetWorkers(ctx, getWorkerRequest)
 	if err != nil {
 		log.Fatalf("GetWorker Error %v", err)
@@ -366,10 +366,10 @@ func isCompletedAllWorker(c api.ManagerClient, studyId string) bool {
 	return true
 }
 
-func checkWorkersResult(c api.ManagerClient, studyId string) bool {
+func checkWorkersResult(c api.ManagerClient, studyID string) bool {
 	ctx := context.Background()
 	getMetricsRequest := &api.GetMetricsRequest{
-		StudyId: studyId,
+		StudyId: studyID,
 	}
 	//GetMetrics
 	getMetricsReply, err := c.GetMetrics(ctx, getMetricsRequest)

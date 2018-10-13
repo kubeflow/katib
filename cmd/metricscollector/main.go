@@ -49,14 +49,14 @@ import (
 	"google.golang.org/grpc"
 )
 
-var studyId = flag.String("s", "", "Study ID")
-var trialId = flag.String("t", "", "Trial ID")
-var workerId = flag.String("w", "", "Worker ID")
+var studyID = flag.String("s", "", "Study ID")
+var trialID = flag.String("t", "", "Trial ID")
+var workerID = flag.String("w", "", "Worker ID")
 var namespace = flag.String("n", "", "NameSpace")
 
 func main() {
 	flag.Parse()
-	log.Printf("Study ID: %s, Trial ID: %s, Worker ID: %s", *studyId, *trialId, *workerId)
+	log.Printf("Study ID: %s, Trial ID: %s, Worker ID: %s", *studyID, *trialID, *workerID)
 	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("could not connect: %v", err)
@@ -69,19 +69,19 @@ func main() {
 	}
 	ctx := context.Background()
 	screq := &api.GetStudyRequest{
-		StudyId: *studyId,
+		StudyId: *studyID,
 	}
 	screp, err := c.GetStudy(ctx, screq)
 	if err != nil {
 		log.Fatalf("Failed to GetStudyConf: %v", err)
 	}
-	mls, err := mc.CollectWorkerLog(*workerId, screp.StudyConfig.ObjectiveValueName, screp.StudyConfig.Metrics, *namespace)
+	mls, err := mc.CollectWorkerLog(*workerID, screp.StudyConfig.ObjectiveValueName, screp.StudyConfig.Metrics, *namespace)
 	if err != nil {
 		log.Printf("Failed to collect logs: %v", err)
 		return
 	}
 	rmreq := &api.ReportMetricsLogsRequest{
-		StudyId:        *studyId,
+		StudyId:        *studyID,
 		MetricsLogSets: []*api.MetricsLogSet{mls},
 	}
 	_, err = c.ReportMetricsLogs(ctx, rmreq)

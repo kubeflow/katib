@@ -75,7 +75,7 @@ type dbConn struct {
 
 var rs1Letters = []rune("abcdefghijklmnopqrstuvwxyz")
 
-func NewWithSqlConn(db *sql.DB) VizierDBInterface {
+func NewWithSQLConn(db *sql.DB) VizierDBInterface {
 	d := new(dbConn)
 	d.db = db
 	seed, err := crand.Int(crand.Reader, big.NewInt(1<<63-1))
@@ -94,7 +94,7 @@ func New() VizierDBInterface {
 	if err != nil {
 		log.Fatalf("DB open failed: %v", err)
 	}
-	return NewWithSqlConn(db)
+	return NewWithSQLConn(db)
 }
 
 func generateRandid() string {
@@ -718,7 +718,7 @@ func (d *dbConn) DeleteWorker(id string) error {
 	return err
 }
 
-func (d *dbConn) SetSuggestionParam(algorithm string, studyId string, params []*api.SuggestionParameter) (string, error) {
+func (d *dbConn) SetSuggestionParam(algorithm string, studyID string, params []*api.SuggestionParameter) (string, error) {
 	var err error
 	ps := make([]string, len(params))
 	for i, elem := range params {
@@ -728,19 +728,19 @@ func (d *dbConn) SetSuggestionParam(algorithm string, studyId string, params []*
 			return "", err
 		}
 	}
-	var paramId string
+	var paramID string
 	for true {
-		paramId = generateRandid()
+		paramID = generateRandid()
 		_, err = d.db.Exec("INSERT INTO suggestion_param VALUES (?, ?, ?, ?)",
-			paramId, algorithm, studyId, strings.Join(ps, ",\n"))
+			paramID, algorithm, studyID, strings.Join(ps, ",\n"))
 		if err == nil {
 			break
 		}
 	}
-	return paramId, err
+	return paramID, err
 }
 
-func (d *dbConn) UpdateSuggestionParam(paramId string, params []*api.SuggestionParameter) error {
+func (d *dbConn) UpdateSuggestionParam(paramID string, params []*api.SuggestionParameter) error {
 	var err error
 	ps := make([]string, len(params))
 	for i, elem := range params {
@@ -751,13 +751,13 @@ func (d *dbConn) UpdateSuggestionParam(paramId string, params []*api.SuggestionP
 		}
 	}
 	_, err = d.db.Exec("UPDATE suggestion_param SET parameters = ? WHERE id = ?",
-		strings.Join(ps, ",\n"), paramId)
+		strings.Join(ps, ",\n"), paramID)
 	return err
 }
 
-func (d *dbConn) GetSuggestionParam(paramId string) ([]*api.SuggestionParameter, error) {
+func (d *dbConn) GetSuggestionParam(paramID string) ([]*api.SuggestionParameter, error) {
 	var params string
-	row := d.db.QueryRow("SELECT parameters FROM suggestion_param WHERE id = ?", paramId)
+	row := d.db.QueryRow("SELECT parameters FROM suggestion_param WHERE id = ?", paramID)
 	err := row.Scan(&params)
 	if err != nil {
 		return nil, err
@@ -781,10 +781,10 @@ func (d *dbConn) GetSuggestionParam(paramId string) ([]*api.SuggestionParameter,
 	return ret, nil
 }
 
-func (d *dbConn) GetSuggestionParamList(studyId string) ([]*api.SuggestionParameterSet, error) {
+func (d *dbConn) GetSuggestionParamList(studyID string) ([]*api.SuggestionParameterSet, error) {
 	var rows *sql.Rows
 	var err error
-	rows, err = d.db.Query("SELECT * FROM suggestion_param WHERE study_id = ?", studyId)
+	rows, err = d.db.Query("SELECT * FROM suggestion_param WHERE study_id = ?", studyID)
 	if err != nil {
 		return nil, err
 	}
@@ -798,7 +798,7 @@ func (d *dbConn) GetSuggestionParamList(studyId string) ([]*api.SuggestionParame
 		if err != nil {
 			return nil, err
 		}
-		if studyId != sID {
+		if studyID != sID {
 			continue
 		}
 		var pArray []string
@@ -826,7 +826,7 @@ func (d *dbConn) GetSuggestionParamList(studyId string) ([]*api.SuggestionParame
 	return result, nil
 }
 
-func (d *dbConn) SetEarlyStopParam(algorithm string, studyId string, params []*api.EarlyStoppingParameter) (string, error) {
+func (d *dbConn) SetEarlyStopParam(algorithm string, studyID string, params []*api.EarlyStoppingParameter) (string, error) {
 	ps := make([]string, len(params))
 	var err error
 	for i, elem := range params {
@@ -836,19 +836,19 @@ func (d *dbConn) SetEarlyStopParam(algorithm string, studyId string, params []*a
 			return "", err
 		}
 	}
-	var paramId string
+	var paramID string
 	for true {
-		paramId := generateRandid()
+		paramID := generateRandid()
 		_, err = d.db.Exec("INSERT INTO earlystopping_param VALUES (?,?, ?, ?)",
-			paramId, algorithm, studyId, strings.Join(ps, ",\n"))
+			paramID, algorithm, studyID, strings.Join(ps, ",\n"))
 		if err == nil {
 			break
 		}
 	}
-	return paramId, nil
+	return paramID, nil
 }
 
-func (d *dbConn) UpdateEarlyStopParam(paramId string, params []*api.EarlyStoppingParameter) error {
+func (d *dbConn) UpdateEarlyStopParam(paramID string, params []*api.EarlyStoppingParameter) error {
 	ps := make([]string, len(params))
 	var err error
 	for i, elem := range params {
@@ -859,13 +859,13 @@ func (d *dbConn) UpdateEarlyStopParam(paramId string, params []*api.EarlyStoppin
 		}
 	}
 	_, err = d.db.Exec("UPDATE earlystopping_param SET parameters = ? WHERE id = ?",
-		strings.Join(ps, ",\n"), paramId)
+		strings.Join(ps, ",\n"), paramID)
 	return err
 }
 
-func (d *dbConn) GetEarlyStopParam(paramId string) ([]*api.EarlyStoppingParameter, error) {
+func (d *dbConn) GetEarlyStopParam(paramID string) ([]*api.EarlyStoppingParameter, error) {
 	var params string
-	row := d.db.QueryRow("SELECT parameters FROM earlystopping_param WHERE id = ?", paramId)
+	row := d.db.QueryRow("SELECT parameters FROM earlystopping_param WHERE id = ?", paramID)
 	err := row.Scan(&params)
 	if err != nil {
 		return nil, err
@@ -889,10 +889,10 @@ func (d *dbConn) GetEarlyStopParam(paramId string) ([]*api.EarlyStoppingParamete
 	return ret, nil
 }
 
-func (d *dbConn) GetEarlyStopParamList(studyId string) ([]*api.EarlyStoppingParameterSet, error) {
+func (d *dbConn) GetEarlyStopParamList(studyID string) ([]*api.EarlyStoppingParameterSet, error) {
 	var rows *sql.Rows
 	var err error
-	rows, err = d.db.Query("SELECT * FROM earlystopping_param WHERE study_id = ?", studyId)
+	rows, err = d.db.Query("SELECT * FROM earlystopping_param WHERE study_id = ?", studyID)
 	if err != nil {
 		return nil, err
 	}
@@ -906,7 +906,7 @@ func (d *dbConn) GetEarlyStopParamList(studyId string) ([]*api.EarlyStoppingPara
 		if err != nil {
 			return nil, err
 		}
-		if studyId != sID {
+		if studyID != sID {
 			continue
 		}
 		var pArray []string
