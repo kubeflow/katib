@@ -1,7 +1,8 @@
 #/bin/bash
 set -x
 set -e
-minikube start --disk-size 50g --memory 4096 --cpus 4
+# Add minikub to kubernetes version
+minikube start --disk-size 50g --memory 4096 --cpus 4 --kubernetes-version=v1.10.6
 kubectl apply -f ../../manifests/0-namespace.yaml
 kubectl apply -f ../../manifests/pv
 kubectl apply -f ../../manifests/modeldb/db
