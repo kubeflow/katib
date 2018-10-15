@@ -693,25 +693,26 @@ func (r *ReconcileStudyJobController) saveModel(c katibapi.ManagerClient, studyI
 		if trial == nil {
 			return fmt.Errorf("Trial %s not found", trialId)
 		}
-		if len(mets) > 0 {
-			smr := &katibapi.SaveModelRequest{
-				Model: &katibapi.ModelInfo{
-					StudyName:  sc.Name,
-					WorkerId:   mls.WorkerId,
-					Parameters: trial.ParameterSet,
-					Metrics:    mets,
-					ModelPath:  sc.Name,
-				},
-				DataSet: &katibapi.DataSetInfo{
-					Name: sc.Name,
-					Path: sc.Name,
-				},
-			}
-			_, err = c.SaveModel(ctx, smr)
-			if err != nil {
-				return err
-			}
-		}
+		// Disable ModelDB
+		//		if len(mets) > 0 {
+		//			smr := &katibapi.SaveModelRequest{
+		//				Model: &katibapi.ModelInfo{
+		//					StudyName:  sc.Name,
+		//					WorkerId:   mls.WorkerId,
+		//					Parameters: trial.ParameterSet,
+		//					Metrics:    mets,
+		//					ModelPath:  sc.Name,
+		//				},
+		//				DataSet: &katibapi.DataSetInfo{
+		//					Name: sc.Name,
+		//					Path: sc.Name,
+		//				},
+		//			}
+		//			_, err = c.SaveModel(ctx, smr)
+		//			if err != nil {
+		//				return err
+		//			}
+		//		}
 	}
 	return nil
 }
