@@ -73,25 +73,25 @@ func pullStudy(cmd *cobra.Command, opt *pullStudyOpt) {
 		log.Fatalf("GetStudy failed: %v", err)
 		return
 	}
-	studyId := ""
+	studyID := ""
 	// Search study by Study ID or name
 	for _, si := range listr.StudyOverviews {
 		if utf8.RuneCountInString(opt.args[0]) >= 7 {
 			if strings.HasPrefix(si.Id, opt.args[0]) {
-				studyId = si.Id
+				studyID = si.Id
 				break
 			}
 		}
 		if si.Name == opt.args[0] {
-			studyId = si.Id
+			studyID = si.Id
 			break
 		}
 	}
-	if studyId == "" {
+	if studyID == "" {
 		log.Fatalf("Study %s is not found", opt.args[0])
 	}
 	req := &api.GetStudyRequest{
-		StudyId: studyId,
+		StudyId: studyID,
 	}
 	r, err := c.GetStudy(context.Background(), req)
 	if err != nil {

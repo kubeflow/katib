@@ -7,8 +7,8 @@ import (
 )
 
 func main() {
-	db_int := db.New()
-	study, err := db_int.GetStudyConfig(os.Args[1])
+	dbInt := db.New()
+	study, err := dbInt.GetStudyConfig(os.Args[1])
 	if err != nil {
 		fmt.Printf("err: %v", err)
 	} else {

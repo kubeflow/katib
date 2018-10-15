@@ -58,23 +58,23 @@ type StudyJobStatus struct {
 	LastReconcileTime *metav1.Time `json:"lastReconcileTime,omitempty"`
 
 	Condition                Condition  `json:"conditon,omitempty"`
-	StudyId                  string     `json:"studyid,omitempty"`
-	SuggestionParameterId    string     `json:"suggestionParameterId"`
-	EarlyStoppingParameterId string     `json:"earlyStoppingParameterId"`
+	StudyID                  string     `json:"studyid,omitempty"`
+	SuggestionParameterID    string     `json:"suggestionParameterId"`
+	EarlyStoppingParameterID string     `json:"earlyStoppingParameterId"`
 	Trials                   []TrialSet `json:"trials,omitempty"`
 	BestObjctiveValue        *float64   `jsob:"bestObjctiveValue,omitempty"`
 	SuggestionCount          int        `json:"suggestionCount,omitempty"`
 }
 
 type WorkerCondition struct {
-	WorkerId      string    `json:"workerid,omitempty"`
+	WorkerID      string    `json:"workerid,omitempty"`
 	Kind          string    `json:"kind,omitempty"`
 	Condition     Condition `json:"conditon,omitempty"`
 	ObjctiveValue *float64  `jsob:"objctiveValue,omitempty"`
 }
 
 type TrialSet struct {
-	TrialId    string            `json:"trialid,omitempty"`
+	TrialID    string            `json:"trialid,omitempty"`
 	WorkerList []WorkerCondition `json:"workeridlist,omitempty"`
 }
 

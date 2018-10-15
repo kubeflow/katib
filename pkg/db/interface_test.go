@@ -17,7 +17,7 @@ import (
 	api "github.com/kubeflow/katib/pkg/api"
 )
 
-var db_interface VizierDBInterface
+var dbInterface VizierDBInterface
 var mock sqlmock.Sqlmock
 
 func TestMain(m *testing.M) {
@@ -29,7 +29,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 	//mock.ExpectBegin()
-	db_interface = NewWithSqlConn(db)
+	dbInterface = NewWithSQLConn(db)
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS studies").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS study_permissions").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS trials").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
@@ -38,7 +38,7 @@ func TestMain(m *testing.M) {
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS worker_lastlogs").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS suggestion_param").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS earlystop_param").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
-	db_interface.DB_Init()
+	dbInterface.DBInit()
 
 	os.Exit(m.Run())
 }
@@ -53,7 +53,7 @@ func TestGetStudyConfig(t *testing.T) {
 	}
 
 	mock.ExpectExec("INSERT INTO studies VALUES").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
-	id, err := db_interface.CreateStudy(&in)
+	id, err := dbInterface.CreateStudy(&in)
 	if err != nil {
 		t.Errorf("CreateStudy error %v", err)
 	}
@@ -72,7 +72,7 @@ func TestGetStudyConfig(t *testing.T) {
 			"job_id",
 		}).
 			AddRow("abc", "test", "admin", 1, 0.99, "{}", "", "", "", "test"))
-	study, err := db_interface.GetStudyConfig(id)
+	study, err := dbInterface.GetStudyConfig(id)
 	if err != nil {
 		t.Errorf("GetStudyConfig failed: %v", err)
 	}
@@ -88,7 +88,7 @@ func TestCreateStudyIdGeneration(t *testing.T) {
 	for i := 0; i < 4; i++ {
 		rand.Seed(int64(i))
 		mock.ExpectExec("INSERT INTO studies VALUES").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
-		id, err := db_interface.CreateStudy(&in)
+		id, err := dbInterface.CreateStudy(&in)
 		if err != nil {
 			t.Errorf("CreateStudy error %v", err)
 		}
@@ -105,7 +105,7 @@ func TestCreateStudyIdGeneration(t *testing.T) {
 	}
 	for _, id := range ids {
 		mock.ExpectExec("DELETE").WillReturnResult(sqlmock.NewResult(1, 1))
-		err := db_interface.DeleteStudy(id)
+		err := dbInterface.DeleteStudy(id)
 		if err != nil {
 			t.Errorf("DeleteStudy error %v", err)
 		}

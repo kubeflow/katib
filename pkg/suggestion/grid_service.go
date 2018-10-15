@@ -107,7 +107,7 @@ func (s *GridSuggestService) purseSuggestParam(suggestParam []*api.SuggestionPar
 	}
 	return defaultGrid, i, ret
 }
-func (s *GridSuggestService) genGrids(studyId string, pcs []*api.ParameterConfig, df int, glist map[string]int) [][]*api.Parameter {
+func (s *GridSuggestService) genGrids(studyID string, pcs []*api.ParameterConfig, df int, glist map[string]int) [][]*api.Parameter {
 	var pg [][]string
 	var holenum = 1
 	gcl := make([]int, len(pcs))
@@ -133,7 +133,7 @@ func (s *GridSuggestService) genGrids(studyId string, pcs []*api.ParameterConfig
 	}
 	ret := make([][]*api.Parameter, holenum)
 	s.setP(0, ret, pg, pcs)
-	log.Printf("Study %v : %v parameters generated", studyId, holenum)
+	log.Printf("Study %v : %v parameters generated", studyID, holenum)
 	return ret
 }
 

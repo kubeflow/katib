@@ -49,35 +49,35 @@ func (s *RandomSuggestService) GetSuggestions(ctx context.Context, in *api.GetSu
 		return &api.GetSuggestionsReply{}, err
 	}
 	reqnum := int(in.RequestNumber)
-	s_t := make([]*api.Trial, reqnum)
+	sT := make([]*api.Trial, reqnum)
 	for i := 0; i < reqnum; i++ {
-		s_t[i] = &api.Trial{}
-		s_t[i].StudyId = in.StudyId
-		s_t[i].ParameterSet = make([]*api.Parameter, len(scr.StudyConfig.ParameterConfigs.Configs))
+		sT[i] = &api.Trial{}
+		sT[i].StudyId = in.StudyId
+		sT[i].ParameterSet = make([]*api.Parameter, len(scr.StudyConfig.ParameterConfigs.Configs))
 		for j, pc := range scr.StudyConfig.ParameterConfigs.Configs {
-			s_t[i].ParameterSet[j] = &api.Parameter{Name: pc.Name}
-			s_t[i].ParameterSet[j].ParameterType = pc.ParameterType
+			sT[i].ParameterSet[j] = &api.Parameter{Name: pc.Name}
+			sT[i].ParameterSet[j].ParameterType = pc.ParameterType
 			switch pc.ParameterType {
 			case api.ParameterType_INT:
 				imin, _ := strconv.Atoi(pc.Feasible.Min)
 				imax, _ := strconv.Atoi(pc.Feasible.Max)
-				s_t[i].ParameterSet[j].Value = strconv.Itoa(s.IntRandom(imin, imax))
+				sT[i].ParameterSet[j].Value = strconv.Itoa(s.IntRandom(imin, imax))
 			case api.ParameterType_DOUBLE:
 				dmin, _ := strconv.ParseFloat(pc.Feasible.Min, 64)
 				dmax, _ := strconv.ParseFloat(pc.Feasible.Max, 64)
-				s_t[i].ParameterSet[j].Value = strconv.FormatFloat(s.DoubelRandom(dmin, dmax), 'f', 4, 64)
+				sT[i].ParameterSet[j].Value = strconv.FormatFloat(s.DoubelRandom(dmin, dmax), 'f', 4, 64)
 			case api.ParameterType_CATEGORICAL:
-				s_t[i].ParameterSet[j].Value = pc.Feasible.List[s.IntRandom(0, len(pc.Feasible.List)-1)]
+				sT[i].ParameterSet[j].Value = pc.Feasible.List[s.IntRandom(0, len(pc.Feasible.List)-1)]
 			}
 		}
 		ctreq := &api.CreateTrialRequest{
-			Trial: s_t[i],
+			Trial: sT[i],
 		}
 		ctret, err := c.CreateTrial(ctx, ctreq)
 		if err != nil {
 			return &api.GetSuggestionsReply{Trials: []*api.Trial{}}, err
 		}
-		s_t[i].TrialId = ctret.TrialId
+		sT[i].TrialId = ctret.TrialId
 	}
-	return &api.GetSuggestionsReply{Trials: s_t}, nil
+	return &api.GetSuggestionsReply{Trials: sT}, nil
 }

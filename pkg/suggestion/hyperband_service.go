@@ -38,8 +38,8 @@ func (b Bracket) Less(i, j int) bool {
 type HyperBandParameters struct {
 	eta                float64
 	sMax               int
-	b_l                float64
-	r_l                float64
+	bL                 float64
+	rL                 float64
 	r                  float64
 	n                  int
 	shloopitr          int
@@ -57,25 +57,25 @@ func NewHyperBandSuggestService() *HyperBandSuggestService {
 	return &HyperBandSuggestService{}
 }
 
-func (h *HyperBandSuggestService) makeBracket(ctx context.Context, c api.ManagerClient, studyId string, n int, r float64, hbparam *HyperBandParameters) ([]string, []*api.Trial, error) {
+func (h *HyperBandSuggestService) makeBracket(ctx context.Context, c api.ManagerClient, studyID string, n int, r float64, hbparam *HyperBandParameters) ([]string, []*api.Trial, error) {
 	if len(hbparam.evaluatingTrials) == 0 || hbparam.shloopitr == 0 {
-		return h.makeMasterBracket(ctx, c, studyId, n, r, hbparam)
+		return h.makeMasterBracket(ctx, c, studyID, n, r, hbparam)
 	} else {
-		err, b := h.evalWorkers(ctx, c, studyId, hbparam)
+		err, b := h.evalWorkers(ctx, c, studyID, hbparam)
 		if err != nil {
 			return nil, nil, err
 		}
 		if b == nil {
 			return nil, nil, nil
 		}
-		return h.makeChildBracket(ctx, c, b, studyId, n, r, hbparam)
+		return h.makeChildBracket(ctx, c, b, studyID, n, r, hbparam)
 	}
 }
 
-func (h *HyperBandSuggestService) makeMasterBracket(ctx context.Context, c api.ManagerClient, studyId string, n int, r float64, hbparam *HyperBandParameters) ([]string, []*api.Trial, error) {
+func (h *HyperBandSuggestService) makeMasterBracket(ctx context.Context, c api.ManagerClient, studyID string, n int, r float64, hbparam *HyperBandParameters) ([]string, []*api.Trial, error) {
 	log.Printf("Make MasterBracket %v Trials", n)
 	gsreq := &api.GetStudyRequest{
-		StudyId: studyId,
+		StudyId: studyID,
 	}
 	gsrep, err := c.GetStudy(ctx, gsreq)
 	if err != nil {
@@ -87,7 +87,7 @@ func (h *HyperBandSuggestService) makeMasterBracket(ctx context.Context, c api.M
 	ts := make([]*api.Trial, n)
 	for i := 0; i < n; i++ {
 		t := &api.Trial{
-			StudyId: studyId,
+			StudyId: studyID,
 		}
 		t.ParameterSet = make([]*api.Parameter, len(sconf.ParameterConfigs.Configs))
 		for j, pc := range sconf.ParameterConfigs.Configs {
@@ -129,9 +129,9 @@ func (h *HyperBandSuggestService) makeMasterBracket(ctx context.Context, c api.M
 	return tids, ts, nil
 }
 
-func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.ManagerClient, parent Bracket, studyId string, n int, r_i float64, hbparam *HyperBandParameters) ([]string, []*api.Trial, error) {
+func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.ManagerClient, parent Bracket, studyID string, n int, rI float64, hbparam *HyperBandParameters) ([]string, []*api.Trial, error) {
 	gsreq := &api.GetStudyRequest{
-		StudyId: studyId,
+		StudyId: studyID,
 	}
 	gsrep, err := c.GetStudy(ctx, gsreq)
 	if err != nil {
@@ -147,7 +147,7 @@ func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.Ma
 		child = parent[:n]
 	}
 	gtreq := &api.GetTrialsRequest{
-		StudyId: studyId,
+		StudyId: studyID,
 	}
 	gtrep, err := c.GetTrials(ctx, gtreq)
 	if err != nil {
@@ -164,7 +164,7 @@ func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.Ma
 	}
 	for i, tid := range child {
 		t := &api.Trial{
-			StudyId: studyId,
+			StudyId: studyID,
 		}
 		for _, pt := range gtrep.Trials {
 			if pt.TrialId == tid.id {
@@ -174,9 +174,9 @@ func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.Ma
 		for i, p := range t.ParameterSet {
 			if p.Name == hbparam.ResourceName {
 				if rtype == api.ParameterType_INT {
-					t.ParameterSet[i].Value = strconv.Itoa(int(r_i))
+					t.ParameterSet[i].Value = strconv.Itoa(int(rI))
 				} else {
-					t.ParameterSet[i].Value = strconv.FormatFloat(r_i, 'f', 4, 64)
+					t.ParameterSet[i].Value = strconv.FormatFloat(rI, 'f', 4, 64)
 				}
 			}
 		}
@@ -195,12 +195,12 @@ func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.Ma
 	return tids, ts, nil
 }
 
-func (h *HyperBandSuggestService) purseSuggestionParameters(ctx context.Context, c api.ManagerClient, studyId string, sparam []*api.SuggestionParameter) (*HyperBandParameters, error) {
+func (h *HyperBandSuggestService) purseSuggestionParameters(ctx context.Context, c api.ManagerClient, studyID string, sparam []*api.SuggestionParameter) (*HyperBandParameters, error) {
 	p := &HyperBandParameters{
 		eta:                -1,
 		sMax:               -1,
-		b_l:                -1,
-		r_l:                -1,
+		bL:                 -1,
+		rL:                 -1,
 		r:                  -1,
 		n:                  -1,
 		shloopitr:          -1,
@@ -214,13 +214,13 @@ func (h *HyperBandSuggestService) purseSuggestionParameters(ctx context.Context,
 		case "eta":
 			p.eta, _ = strconv.ParseFloat(sp.Value, 64)
 		case "r_l":
-			p.r_l, _ = strconv.ParseFloat(sp.Value, 64)
+			p.rL, _ = strconv.ParseFloat(sp.Value, 64)
 		case "ResourceName":
 			p.ResourceName = sp.Value
 		case "ObjectiveValueName":
 			p.ObjectiveValueName = sp.Value
 		case "b_l":
-			p.b_l, _ = strconv.ParseFloat(sp.Value, 64)
+			p.bL, _ = strconv.ParseFloat(sp.Value, 64)
 		case "sMax":
 			p.sMax, _ = strconv.Atoi(sp.Value)
 		case "r":
@@ -237,7 +237,7 @@ func (h *HyperBandSuggestService) purseSuggestionParameters(ctx context.Context,
 			log.Printf("Unknown Suggestion Parameter %v", sp.Name)
 		}
 	}
-	if p.r_l <= 0 || p.ResourceName == "" {
+	if p.rL <= 0 || p.ResourceName == "" {
 		log.Printf("Failed to purse Suggestion Parameter. r_l and ResourceName must be set.")
 		return nil, fmt.Errorf("Suggestion Parameter set Error")
 	}
@@ -246,7 +246,7 @@ func (h *HyperBandSuggestService) purseSuggestionParameters(ctx context.Context,
 	}
 	if p.ObjectiveValueName == "" {
 		gsreq := &api.GetStudyRequest{
-			StudyId: studyId,
+			StudyId: studyID,
 		}
 		gsrep, err := c.GetStudy(ctx, gsreq)
 		if err != nil {
@@ -256,13 +256,13 @@ func (h *HyperBandSuggestService) purseSuggestionParameters(ctx context.Context,
 		p.ObjectiveValueName = gsrep.StudyConfig.ObjectiveValueName
 	}
 	if p.sMax == -1 {
-		p.sMax = int(math.Trunc(math.Log(p.r_l) / math.Log(p.eta)))
+		p.sMax = int(math.Trunc(math.Log(p.rL) / math.Log(p.eta)))
 	}
-	if p.b_l == -1 {
-		p.b_l = float64((p.sMax + 1.0)) * p.r_l
+	if p.bL == -1 {
+		p.bL = float64((p.sMax + 1.0)) * p.rL
 	}
 	if p.n == -1 {
-		p.n = int(math.Ceil((p.b_l / p.r_l) * (math.Pow(p.eta, float64(p.sMax)) / float64(p.sMax+1))))
+		p.n = int(math.Ceil((p.bL / p.rL) * (math.Pow(p.eta, float64(p.sMax)) / float64(p.sMax+1))))
 	}
 	if p.currentS == -1 {
 		p.currentS = p.sMax
@@ -271,10 +271,10 @@ func (h *HyperBandSuggestService) purseSuggestionParameters(ctx context.Context,
 		p.shloopitr = 0
 	}
 	if p.r == -1 {
-		p.r = p.r_l * math.Pow(p.eta, float64(-p.sMax))
+		p.r = p.rL * math.Pow(p.eta, float64(-p.sMax))
 	}
 	log.Printf("Hyb Param sMax %v", p.sMax)
-	log.Printf("Hyb Param B %v", p.b_l)
+	log.Printf("Hyb Param B %v", p.bL)
 	log.Printf("Hyb Param n %v", p.n)
 	log.Printf("Hyb Param currentS %v", p.currentS)
 	log.Printf("Hyb Param r %v", p.r)
@@ -282,11 +282,11 @@ func (h *HyperBandSuggestService) purseSuggestionParameters(ctx context.Context,
 	return p, nil
 }
 
-func (h *HyperBandSuggestService) saveSuggestionParameters(ctx context.Context, c api.ManagerClient, studyId string, algorithm string, paramId string, hbparam *HyperBandParameters) error {
+func (h *HyperBandSuggestService) saveSuggestionParameters(ctx context.Context, c api.ManagerClient, studyID string, algorithm string, paramID string, hbparam *HyperBandParameters) error {
 	req := &api.SetSuggestionParametersRequest{
-		StudyId:             studyId,
+		StudyId:             studyID,
 		SuggestionAlgorithm: algorithm,
-		ParamId:             paramId,
+		ParamId:             paramID,
 	}
 	sp := []*api.SuggestionParameter{}
 	sp = append(sp, &api.SuggestionParameter{
@@ -299,11 +299,11 @@ func (h *HyperBandSuggestService) saveSuggestionParameters(ctx context.Context, 
 	})
 	sp = append(sp, &api.SuggestionParameter{
 		Name:  "b_l",
-		Value: strconv.FormatFloat(hbparam.b_l, 'f', 4, 64),
+		Value: strconv.FormatFloat(hbparam.bL, 'f', 4, 64),
 	})
 	sp = append(sp, &api.SuggestionParameter{
 		Name:  "r_l",
-		Value: strconv.FormatFloat(hbparam.r_l, 'f', 4, 64),
+		Value: strconv.FormatFloat(hbparam.rL, 'f', 4, 64),
 	})
 	sp = append(sp, &api.SuggestionParameter{
 		Name:  "r",
@@ -334,11 +334,11 @@ func (h *HyperBandSuggestService) saveSuggestionParameters(ctx context.Context, 
 	return err
 }
 
-func (h *HyperBandSuggestService) evalWorkers(ctx context.Context, c api.ManagerClient, studyId string, hbparam *HyperBandParameters) (error, Bracket) {
+func (h *HyperBandSuggestService) evalWorkers(ctx context.Context, c api.ManagerClient, studyID string, hbparam *HyperBandParameters) (error, Bracket) {
 	bracket := Bracket{}
 	for _, tid := range hbparam.evaluatingTrials {
 		gwreq := &api.GetWorkersRequest{
-			StudyId: studyId,
+			StudyId: studyID,
 			TrialId: tid,
 		}
 		gwrep, err := c.GetWorkers(ctx, gwreq)
@@ -351,7 +351,7 @@ func (h *HyperBandSuggestService) evalWorkers(ctx context.Context, c api.Manager
 			wl[i] = w.WorkerId
 		}
 		gmreq := &api.GetMetricsRequest{
-			StudyId:      studyId,
+			StudyId:      studyID,
 			WorkerIds:    wl,
 			MetricsNames: []string{hbparam.ObjectiveValueName},
 		}
@@ -382,20 +382,20 @@ func (h *HyperBandSuggestService) evalWorkers(ctx context.Context, c api.Manager
 	return nil, bracket
 }
 
-func (h *HyperBandSuggestService) hbLoopParamUpdate(studyId string, hbparam *HyperBandParameters) {
+func (h *HyperBandSuggestService) hbLoopParamUpdate(studyID string, hbparam *HyperBandParameters) {
 	log.Printf("HB loop s = %v", hbparam.currentS)
 	hbparam.shloopitr = 0
-	hbparam.n = int(math.Trunc((hbparam.b_l / hbparam.r_l) * (math.Pow(hbparam.eta, float64(hbparam.currentS)) / float64(hbparam.currentS+1))))
-	hbparam.r = hbparam.r_l * math.Pow(hbparam.eta, float64(-hbparam.currentS))
+	hbparam.n = int(math.Trunc((hbparam.bL / hbparam.rL) * (math.Pow(hbparam.eta, float64(hbparam.currentS)) / float64(hbparam.currentS+1))))
+	hbparam.r = hbparam.rL * math.Pow(hbparam.eta, float64(-hbparam.currentS))
 }
 
-func (h *HyperBandSuggestService) getLoopParam(studyId string, hbparam *HyperBandParameters) (int, float64) {
+func (h *HyperBandSuggestService) getLoopParam(studyID string, hbparam *HyperBandParameters) (int, float64) {
 	log.Printf("SH loop i = %v", hbparam.shloopitr)
-	n_i := int(math.Trunc(float64(hbparam.n) * math.Pow(hbparam.eta, float64(-hbparam.shloopitr))))
-	r_i := hbparam.r * math.Pow(hbparam.eta, float64(hbparam.shloopitr))
-	return n_i, r_i
+	nI := int(math.Trunc(float64(hbparam.n) * math.Pow(hbparam.eta, float64(-hbparam.shloopitr))))
+	rI := hbparam.r * math.Pow(hbparam.eta, float64(hbparam.shloopitr))
+	return nI, rI
 }
-func (h *HyperBandSuggestService) shLoopParamUpdate(studyId string, hbparam *HyperBandParameters) {
+func (h *HyperBandSuggestService) shLoopParamUpdate(studyID string, hbparam *HyperBandParameters) {
 	hbparam.shloopitr++
 	if hbparam.shloopitr > hbparam.currentS {
 		hbparam.currentS--
@@ -430,8 +430,8 @@ func (h *HyperBandSuggestService) GetSuggestions(ctx context.Context, in *api.Ge
 	if hbparam.shloopitr > hbparam.currentS {
 		h.hbLoopParamUpdate(in.StudyId, hbparam)
 	}
-	n_i, r_i := h.getLoopParam(in.StudyId, hbparam)
-	tids, ts, err := h.makeBracket(ctx, c, in.StudyId, n_i, r_i, hbparam)
+	nI, rI := h.getLoopParam(in.StudyId, hbparam)
+	tids, ts, err := h.makeBracket(ctx, c, in.StudyId, nI, rI, hbparam)
 	if err != nil {
 		return &api.GetSuggestionsReply{}, err
 	}

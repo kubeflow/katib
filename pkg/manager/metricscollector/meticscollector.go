@@ -51,10 +51,10 @@ func (d *MetricsCollector) CollectWorkerLog(wID string, objectiveValueName strin
 	return mls, err
 }
 
-func (d *MetricsCollector) parseLogs(wId string, logs []string, objectiveValueName string, metrics []string) (*api.MetricsLogSet, error) {
+func (d *MetricsCollector) parseLogs(wID string, logs []string, objectiveValueName string, metrics []string) (*api.MetricsLogSet, error) {
 	var lasterr error
 	ret := &api.MetricsLogSet{
-		WorkerId: wId,
+		WorkerId: wID,
 	}
 	mlogs := make(map[string]*api.MetricsLog)
 	mlogs[objectiveValueName] = &api.MetricsLog{
@@ -92,20 +92,20 @@ func (d *MetricsCollector) parseLogs(wId string, logs []string, objectiveValueNa
 			if len(v) == 1 {
 				continue
 			}
-			metrics_name := ""
+			metricsName := ""
 			if v[0] == objectiveValueName {
-				metrics_name = v[0]
+				metricsName = v[0]
 			} else {
 				for _, m := range metrics {
 					if v[0] == m {
-						metrics_name = v[0]
+						metricsName = v[0]
 					}
 				}
 			}
-			if metrics_name == "" {
+			if metricsName == "" {
 				continue
 			}
-			mlogs[metrics_name].Values = append(mlogs[metrics_name].Values, &api.MetricsValueTime{
+			mlogs[metricsName].Values = append(mlogs[metricsName].Values, &api.MetricsValueTime{
 				Time:  ls[0],
 				Value: v[1],
 			})

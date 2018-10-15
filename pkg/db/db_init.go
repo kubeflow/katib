@@ -4,7 +4,7 @@ import (
 	"log"
 )
 
-func (d *db_conn) DB_Init() {
+func (d *dbConn) DBInit() {
 	db := d.db
 	_, err := db.Exec("CREATE TABLE IF NOT EXISTS studies" +
 		"(id CHAR(16) PRIMARY KEY, " +

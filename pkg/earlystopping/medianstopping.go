@@ -112,23 +112,23 @@ func (m *MedianStoppingRule) getBestValue(sid string, sc *api.StudyConfig, logs 
 		return 0, errors.New("OptimizationType Unknown.")
 	}
 	var ret float64
-	var target_objlog []float64
+	var targetObjlog []float64
 	for _, l := range logs {
 		v, err := strconv.ParseFloat(l.Value, 64)
 		if err != nil {
 			log.Printf("Fail to Parse %s : %s", l.Name, l.Value)
 			continue
 		}
-		target_objlog = append(target_objlog, v)
+		targetObjlog = append(targetObjlog, v)
 	}
-	if len(target_objlog) == 0 {
+	if len(targetObjlog) == 0 {
 		return 0, errors.New("No Objective value log in Logs")
 	}
-	sort.Float64s(target_objlog)
+	sort.Float64s(targetObjlog)
 	if ot == api.OptimizationType_MAXIMIZE {
-		ret = target_objlog[len(target_objlog)-1]
+		ret = targetObjlog[len(targetObjlog)-1]
 	} else if ot == api.OptimizationType_MINIMIZE {
-		ret = target_objlog[0]
+		ret = targetObjlog[0]
 	}
 	return ret, nil
 }
@@ -152,7 +152,7 @@ func (m *MedianStoppingRule) GetShouldStopWorkers(ctx context.Context, in *api.G
 
 	rwids := []string{}
 	cwl := make([][]*vdb.WorkerLog, 0, len(wl))
-	s_w := []string{}
+	sW := []string{}
 	for _, w := range wl {
 		switch w.Status {
 		case api.State_RUNNING:
@@ -190,8 +190,8 @@ func (m *MedianStoppingRule) GetShouldStopWorkers(ctx context.Context, in *api.G
 		log.Printf("Worker %s, In step %d Current value: %v Median value: %v\n", w, len(wl), v, om)
 		if (v < (om-p.Margin) && sc.OptimizationType == api.OptimizationType_MAXIMIZE) || v > (om+p.Margin) && sc.OptimizationType == api.OptimizationType_MINIMIZE {
 			log.Printf("Worker %s shuold be stopped", w)
-			s_w = append(s_w, w)
+			sW = append(sW, w)
 		}
 	}
-	return &api.GetShouldStopWorkersReply{ShouldStopWorkerIds: s_w}, nil
+	return &api.GetShouldStopWorkersReply{ShouldStopWorkerIds: sW}, nil
 }
