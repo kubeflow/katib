@@ -61,6 +61,7 @@ echo "VERSION ${VERSION}"
 
 sed -i -e "s@image: katib\/vizier-core@image: ${REGISTRY}\/${REPO_NAME}\/vizier-core:${VERSION}@" manifests/vizier/core/deployment.yaml
 sed -i -e "s@image: katib\/vizier-core-rest@image: ${REGISTRY}\/${REPO_NAME}\/vizier-core-rest:${VERSION}@" manifests/vizier/core-rest/deployment.yaml
+sed -i -e "s@image: katib\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/katib-ui:${VERSION}@" manifests/vizier/ui/deployment.yaml
 sed -i -e "s@type: NodePort@type: ClusterIP@" -e "/nodePort: 30678/d" manifests/vizier/core/service.yaml
 sed -i -e "s@image: katib\/studyjob-controller@image: ${REGISTRY}\/${REPO_NAME}\/studyjob-controller:${VERSION}@" manifests/studyjobcontroller/studyjobcontroller.yaml
 sed -i -e "s@image: katib\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-random:${VERSION}@" manifests/vizier/suggestion/random/deployment.yaml
@@ -68,7 +69,6 @@ sed -i -e "s@image: katib\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/sug
 sed -i -e "s@image: katib\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-hyperband:${VERSION}@" manifests/vizier/suggestion/hyperband/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-bayesianoptimization:${VERSION}@" manifests/vizier/suggestion/bayesianoptimization/deployment.yaml
 sed -i -e "s@image: katib\/earlystopping-medianstopping@image: ${REGISTRY}\/${REPO_NAME}\/earlystopping-medianstopping:${VERSION}@" manifests/vizier/earlystopping/medianstopping/deployment.yaml
-sed -i -e "s@image: katib\/katib-frontend@image: ${REGISTRY}\/${REPO_NAME}\/katib-frontend:${VERSION}@" manifests/modeldb/frontend/deployment.yaml
 sed -i -e "31,37d" manifests/vizier/db/deployment.yaml
 
 cat manifests/vizier/core/deployment.yaml
