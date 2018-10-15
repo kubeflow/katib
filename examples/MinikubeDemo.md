@@ -20,14 +20,14 @@ Then, start port-forward for katib services `6789 -> manager` and `3000 -> UI`.
 kubectl v1.10~
 ```
 $ kubectl -n katib port-forward svc/vizier-core 6789:6789 &
-$ kubectl -n katib port-forward svc/modeldb-frontend 3000:3000 &
+$ kubectl -n katib port-forward svc/katib-ui 3000:3000 &
 ```
 
 kubectl ~v1.9
 
 ```
 & kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep vizier-core | sed -e "s@pods\/@@") 6789:6789 &
-& kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep modeldb-frontend | sed -e "s@pods\/@@") 3000:3000 &
+& kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep katib-ui | sed -e "s@pods\/@@") 3000:3000 &
 ```
 
 ## Create Study
@@ -161,7 +161,7 @@ kubectl apply -f random-example.yaml
 ```
 
 ## UI
-You can check your Model with Web UI.
+You can check your study results with Web UI.
 Acsess to `http://127.0.0.1:3000/katib`
 The Results will be saved automatically.
 
@@ -356,7 +356,7 @@ configs:
         - adam
         - ftrl
 ```
-You can easy to explore the model on ModelDB.
+You can easy to explore the model on KatibUI.
 
 ```
 katib-cli push md -f mnist-models.yaml

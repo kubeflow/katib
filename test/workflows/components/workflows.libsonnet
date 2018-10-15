@@ -246,8 +246,8 @@
                     template: "build-earlystopping-median",
                   },
                   {
-                    name: "build-modeldb",
-                    template: "build-modeldb",
+                    name: "build-ui",
+                    template: "build-ui",
                   },
                   {
                     name: "create-pr-symlink",
@@ -364,9 +364,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-earlystopping-median", testWorkerImage, [
               "test/scripts/build-earlystopping-median.sh",
             ]),  // build-earlystopping-median
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-modeldb", testWorkerImage, [
-              "test/scripts/build-modeldb.sh",
-            ]),  // build-modeldb
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-ui", testWorkerImage, [
+              "test/scripts/build-ui.sh",
+            ]),  // build-ui
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("unit-test", testWorkerImage, [
               "test/scripts/unit-test.sh",
             ]),  // unit test

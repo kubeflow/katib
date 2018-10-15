@@ -34,8 +34,7 @@ mkdir -p ${GO_DIR}
 cp -r cmd ${GO_DIR}/cmd
 cp -r pkg ${GO_DIR}/pkg
 cp -r vendor ${GO_DIR}/vendor
-cp -r modeldb ${GO_DIR}/modeldb
 
 cd ${GO_DIR}
-cp modeldb/Dockerfile .
-gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/katib-frontend:${VERSION} --project=${PROJECT} 
+cp cmd/ui/Dockerfile .
+gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/katib-ui:${VERSION} --project=${PROJECT} 
