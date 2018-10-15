@@ -653,10 +653,10 @@ func (r *ReconcileStudyJobController) getSuggestion(c katibapi.ManagerClient, st
 }
 func (r *ReconcileStudyJobController) saveModel(c katibapi.ManagerClient, studyID string, trialID string, workerID string) error {
 	ctx := context.Background()
-	getStudyreq := &katibapi.GetStudyRequest{
-		StudyId: studyID,
-	}
 	// Disable ModelDB
+	//getStudyreq := &katibapi.GetStudyRequest{
+	//	StudyId: studyId,
+	//}
 	//getStudyReply, err := c.GetStudy(ctx, getStudyreq)
 	//if err != nil {
 	//	return err
