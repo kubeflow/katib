@@ -651,11 +651,12 @@ func (r *ReconcileStudyJobController) saveModel(c katibapi.ManagerClient, studyI
 	getStudyreq := &katibapi.GetStudyRequest{
 		StudyId: studyId,
 	}
-	getStudyReply, err := c.GetStudy(ctx, getStudyreq)
-	if err != nil {
-		return err
-	}
-	sc := getStudyReply.StudyConfig
+	// Disable ModelDB
+	//getStudyReply, err := c.GetStudy(ctx, getStudyreq)
+	//if err != nil {
+	//	return err
+	//}
+	//sc := getStudyReply.StudyConfig
 	getMetricsRequest := &katibapi.GetMetricsRequest{
 		StudyId:   studyId,
 		WorkerIds: []string{workerId},
