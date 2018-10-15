@@ -497,6 +497,7 @@ func TestSelectRoulette(t *testing.T) {
 }
 
 func TestOptimizeSample0_0(t *testing.T) {
+	// target score: 30
 	numGenes := 5
 	numOffsprings := 10
 	geneMutationProbability := 0.05
@@ -553,6 +554,7 @@ func TestOptimizeSample0_0(t *testing.T) {
 }
 
 func TestOptimizeSample0_1(t *testing.T) {
+	// target score: 30
 	numGenes := 5
 	numOffsprings := 10
 	geneMutationProbability := 0.05
@@ -609,11 +611,12 @@ func TestOptimizeSample0_1(t *testing.T) {
 }
 
 func TestOptimizeSample1_0(t *testing.T) {
+	// target score: 10
 	numGenes := 5
 	numOffsprings := 10
 	geneMutationProbability := 0.05
 	offspringMutationProbability := 0.05
-	maxGenerations := 200
+	maxGenerations := 300
 	selection := "elite"
 	selectNum := 2
 	crossover := "uniform"
@@ -665,6 +668,7 @@ func TestOptimizeSample1_0(t *testing.T) {
 }
 
 func TestOptimizeSample1_1(t *testing.T) {
+	// target score: 10
 	numGenes := 5
 	numOffsprings := 10
 	geneMutationProbability := 0.05
@@ -720,6 +724,7 @@ func TestOptimizeSample1_1(t *testing.T) {
 }
 
 func TestOptimizeSample1_2(t *testing.T) {
+	// target score: 0
 	numGenes := 5
 	numOffsprings := 10
 	geneMutationProbability := 0.05
@@ -728,7 +733,7 @@ func TestOptimizeSample1_2(t *testing.T) {
 	selection := "elite"
 	selectNum := 2
 	crossover := "uniform"
-	geneMutation := "perturbation"
+	geneMutation := "random"
 	generationChange := "discrete"
 	evaluationFunction := "accuracy"
 	evaluateHigh := false

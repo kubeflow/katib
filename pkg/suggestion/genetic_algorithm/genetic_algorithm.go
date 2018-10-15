@@ -266,6 +266,7 @@ func (ga *GA) Crossover(bestOffsprings []Offspring, generation Generation) Gener
 func (ga *GA) crossoverUniform(bestOffsprings []Offspring, generation Generation, newOffspringNum int) Generation {
 	offsprings := []Offspring{}
 	nextGeneration := NewGeneration(generation.genNum + 1)
+	offsprings = append(offsprings, bestOffsprings...)
 	for i := 0; i < newOffspringNum; i++ {
 		// chooses a parent pair
 		choice0 := getDiscreteRandom(0, len(bestOffsprings)-1)
@@ -305,11 +306,8 @@ func (ga *GA) crossoverUniform(bestOffsprings []Offspring, generation Generation
 	}
 	// generates the next generation
 	nextGeneration.setGeneration(offsprings)
-	if len(nextGeneration.offsprings) < ga.numOffsprings {
-		nextGeneration.offsprings = append(nextGeneration.offsprings, bestOffsprings...)
-	}
 	if len(nextGeneration.offsprings) > ga.numOffsprings {
-		nextGeneration.offsprings = nextGeneration.offsprings[len(nextGeneration.offsprings)-ga.numOffsprings:]
+		nextGeneration.offsprings = nextGeneration.offsprings[:ga.numOffsprings]
 	}
 	return *nextGeneration
 }
