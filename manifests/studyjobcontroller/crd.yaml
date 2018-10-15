@@ -5,6 +5,7 @@ metadata:
 spec:
   group: kubeflow.org
   version: v1alpha1
+  scope: Namespaced
   names:
     kind: StudyJob
     singular: studyjob
