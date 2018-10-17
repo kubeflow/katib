@@ -34,7 +34,6 @@ mkdir -p ${GO_DIR}
 cp -r cmd ${GO_DIR}/cmd
 cp -r pkg ${GO_DIR}/pkg
 cp -r vendor ${GO_DIR}/vendor
-cp -r modeldb ${GO_DIR}/modeldb
 
 cd ${GO_DIR}
 go build -o bin/katib github.com/kubeflow/katib/cmd/cli
