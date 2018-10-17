@@ -455,17 +455,59 @@ func (d *dbConn) GetWorkerLogs(id string, opts *GetWorkerLogOpts) ([]*WorkerLog,
 	return result, nil
 }
 
-func (d *dbConn) getWorkerLastlog(id string, value *string) (*time.Time, error) {
-	var lastTimestamp string
+func (d *dbConn) getWorkerLastlogs(id string) (time.Time, []*WorkerLog, error) {
+	var timeStr string
+	var timeVal time.Time
 	var err error
 
-	if value != nil {
-		row := d.db.QueryRow("SELECT time, value FROM worker_lastlogs WHERE worker_id = ?", id)
-		err = row.Scan(&lastTimestamp, value)
-	} else {
-		row := d.db.QueryRow("SELECT time FROM worker_lastlogs WHERE worker_id = ?", id)
-		err = row.Scan(&lastTimestamp)
+	// Use LEFT JOIN to ensure a result even if there's no matching
+	// in worker_metrics.
+	rows, err := d.db.Query(
+		"SELECT worker_lastlogs.time, name, value FROM worker_lastlogs "+
+			"LEFT JOIN worker_metrics ON (worker_lastlogs.worker_id = worker_metrics.worker_id AND worker_lastlogs.time = worker_metrics.time) "+
+			"WHERE worker_lastlogs.worker_id = ?", id)
+	if err != nil {
+		return timeVal, nil, err
 	}
+
+	var result []*WorkerLog
+	for rows.Next() {
+		log1 := new(WorkerLog)
+		var thisTime string
+		var name, value sql.NullString
+
+		err := rows.Scan(&thisTime, &name, &value)
+		if err != nil {
+			log.Printf("Error scanning log: %v", err)
+			continue
+		}
+		if timeStr == "" {
+			timeStr = thisTime
+			timeVal, err = time.Parse(mysqlTimeFmt, timeStr)
+			if err != nil {
+				log.Printf("Error parsing time %s: %v", timeStr, err)
+				return timeVal, nil, err
+			}
+		} else if timeStr != thisTime {
+			log.Printf("Unexpected query result %s != %s",
+				timeStr, thisTime)
+		}
+		log1.Time = timeVal
+		if !name.Valid {
+			continue
+		}
+		(*log1).Name = name.String
+		(*log1).Value = value.String
+		result = append(result, log1)
+	}
+	return timeVal, result, nil
+}
+
+func (d *dbConn) GetWorkerTimestamp(id string) (*time.Time, error) {
+	var lastTimestamp string
+
+	row := d.db.QueryRow("SELECT time FROM worker_lastlogs WHERE worker_id = ?", id)
+	err := row.Scan(&lastTimestamp)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -483,10 +525,6 @@ func (d *dbConn) getWorkerLastlog(id string, value *string) (*time.Time, error) 
 	}
 }
 
-func (d *dbConn) GetWorkerTimestamp(id string) (*time.Time, error) {
-	return d.getWorkerLastlog(id, nil)
-}
-
 func (d *dbConn) storeWorkerLog(workerID string, time string, metricsName string, metricsValue string, objectiveValueName string) error {
 	isObjective := 0
 	if metricsName == objectiveValueName {
@@ -502,9 +540,8 @@ func (d *dbConn) storeWorkerLog(workerID string, time string, metricsName string
 
 func (d *dbConn) StoreWorkerLogs(workerID string, logs []*api.MetricsLog) error {
 	var lasterr error
-	var lastValue string
 
-	dbT, err := d.getWorkerLastlog(workerID, &lastValue)
+	dbT, lastLogs, err := d.getWorkerLastlogs(workerID)
 	if err != nil {
 		log.Printf("Error getting last log timestamp: %v", err)
 	}
@@ -519,10 +556,14 @@ func (d *dbConn) StoreWorkerLogs(workerID string, logs []*api.MetricsLog) error 
 		return err
 	}
 
+	// Store logs when
+	//   1. a log is newer than dbT, or,
+	//   2. a log is not yet in the DB when the timestamps are equal
 	var formattedTime string
-	var ls []string
+	var lastTime time.Time
 	for _, mlog := range logs {
 		metricsName := mlog.Name
+	logLoop:
 		for _, mv := range mlog.Values {
 			t, err := time.Parse(time.RFC3339Nano, mv.Time)
 			if err != nil {
@@ -530,47 +571,39 @@ func (d *dbConn) StoreWorkerLogs(workerID string, logs []*api.MetricsLog) error 
 				lasterr = err
 				continue
 			}
-			if dbT != nil && !t.After(*dbT) {
+			if t.Before(dbT) {
 				// dbT is from mysql and has microsec precision.
 				// This code assumes nanosec fractions are rounded down.
 				continue
 			}
 			// use UTC as mysql DATETIME lacks timezone
 			formattedTime = t.UTC().Format(mysqlTimeFmt)
-			if dbT != nil {
-				// Parse again to get rounding effect
-				//reparsed_time, err := time.Parse(mysqlTimeFmt, formattedTime)
-				//if reparsed_time == *dbT {
-				//	if mv.Value == lastValue {
-				//	 stored_logs are already in DB
-				//	 This assignment ensures the remaining
-				//	 logs will be stored in DB.
-				//		dbT = nil
-				//		continue
-				//	}
-				//	// We don't know this is necessary or not yet.
-				//	stored_logs = append(stored_logs, &mv.Value)
-				//	continue
-				//}
-				// (reparsed_time > *dbT) can be assumed
-				err = d.storeWorkerLog(workerID,
-					dbT.UTC().Format(mysqlTimeFmt),
-					metricsName, mv.Value,
-					objectiveValueName)
+			if !dbT.IsZero() {
+				// Parse again to get rounding effect, otherwise
+				// the next comparison will be almost always false.
+				reparsed_time, err := time.Parse(mysqlTimeFmt, formattedTime)
 				if err != nil {
-					log.Printf("Error storing log %s: %v", mv.Value, err)
+					log.Printf("Error parsing time %s: %v", formattedTime, err)
 					lasterr = err
+					continue
 				}
-				dbT = nil
-			} else {
-				err = d.storeWorkerLog(workerID,
-					formattedTime,
-					metricsName, mv.Value,
-					objectiveValueName)
-				if err != nil {
-					log.Printf("Error storing log %s: %v", mv.Value, err)
-					lasterr = err
+				if reparsed_time == dbT {
+					for _, l := range lastLogs {
+						if l.Name == metricsName && l.Value == mv.Value {
+							continue logLoop
+						}
+					}
 				}
+			}
+			err = d.storeWorkerLog(workerID,
+				formattedTime,
+				metricsName, mv.Value,
+				objectiveValueName)
+			if err != nil {
+				log.Printf("Error storing log %s: %v", mv.Value, err)
+				lasterr = err
+			} else if t.After(lastTime) {
+				lastTime = t
 			}
 		}
 	}
@@ -579,9 +612,10 @@ func (d *dbConn) StoreWorkerLogs(workerID string, logs []*api.MetricsLog) error 
 		// would be lost.
 		return lasterr
 	}
-	if len(ls) == 2 {
-		_, err = d.db.Exec("REPLACE INTO worker_lastlogs VALUES (?, ?, ?)",
-			workerID, formattedTime, ls[1])
+	if !lastTime.IsZero() {
+		formattedTime = lastTime.UTC().Format(mysqlTimeFmt)
+		_, err = d.db.Exec("REPLACE INTO worker_lastlogs VALUES (?, ?)",
+			workerID, formattedTime)
 	}
 	return err
 }
