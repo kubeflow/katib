@@ -67,8 +67,7 @@ func (d *dbConn) DBInit() {
 
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS worker_lastlogs" +
 		"(worker_id CHAR(16) PRIMARY KEY, " +
-		"time DATETIME(6), " +
-		"value TEXT)")
+		"time DATETIME(6))")
 	if err != nil {
 		log.Fatalf("Error creating worker_lastlogs table: %v", err)
 	}
