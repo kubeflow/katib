@@ -47,6 +47,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
+const maxMsgSize = 1<<31 - 1
+
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
 * business logic.  Delete these comments after modifying this file.*
@@ -364,7 +366,11 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 	if instance.Status.Condition == katibv1alpha1.ConditionCompleted || instance.Status.Condition == katibv1alpha1.ConditionFailed {
 		nextSuggestionSchedule = false
 	}
-	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
+	opts := []grpc.DialOption{
+		grpc.WithInsecure(),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(maxMsgSize)),
+	}
+	conn, err := grpc.Dial(pkg.ManagerAddr, opts...)
 	if err != nil {
 		log.Printf("Connect katib manager error %v", err)
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
