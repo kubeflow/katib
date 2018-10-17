@@ -874,9 +874,9 @@ func (r *ReconcileStudyJobController) getMetricsCollectorManifest(studyID string
 	var mtp *template.Template = nil
 	var err error
 	tmpValues := map[string]string{
-		"StudyId":   studyID,
-		"TrialId":   trialID,
-		"WorkerId":  workerID,
+		"StudyID":   studyID,
+		"TrialID":   trialID,
+		"WorkerID":  workerID,
 		"NameSpace": namespace,
 	}
 	if mcs != nil {
