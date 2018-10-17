@@ -38,13 +38,13 @@ spec:
           apiVersion: batch/v1
           kind: Job
           metadata:
-            name: {{.WorkerId}}
+            name: {{.WorkerID}}
             namespace: katib
           spec:
             template:
               spec:
                 containers:
-                - name: {{.WorkerId}}
+                - name: {{.WorkerID}}
                   image: katib/mxnet-mnist-example
                   command:
                   - "python"
