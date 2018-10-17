@@ -483,13 +483,12 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 			log.Printf("Check Goal failed %v", err)
 		}
 	}
-	if instance.Status.SuggestionCount > 0 && instance.Status.SuggestionCount > instance.Spec.RequestCount {
-		log.Printf("Study %s reached the request count. It is completed", instance.Status.StudyID)
-		instance.Status.Condition = katibv1alpha1.ConditionCompleted
-		update = true
-		nextSuggestionSchedule = false
-	}
 	if nextSuggestionSchedule {
+		if instance.Spec.RequestCount > 0 && instance.Status.SuggestionCount > instance.Spec.RequestCount {
+			log.Printf("Study %s reached the request count. It is completed", instance.Status.StudyID)
+			instance.Status.Condition = katibv1alpha1.ConditionCompleted
+			return true, nil
+		}
 		return r.getAndRunSuggestion(instance, c, ns)
 	} else {
 		return update, nil
