@@ -236,6 +236,19 @@ func (mr *MockVizierDBInterfaceMockRecorder) GetWorker(arg0 interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorker", reflect.TypeOf((*MockVizierDBInterface)(nil).GetWorker), arg0)
 }
 
+// GetWorkerFullInfo mocks base method
+func (m *MockVizierDBInterface) GetWorkerFullInfo(arg0, arg1, arg2 string) (*api.GetWorkerFullInfoReply, error) {
+	ret := m.ctrl.Call(m, "GetWorkerFullInfo", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*api.GetWorkerFullInfoReply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetWorkerFullInfo indicates an expected call of GetWorkerFullInfo
+func (mr *MockVizierDBInterfaceMockRecorder) GetWorkerFullInfo(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkerFullInfo", reflect.TypeOf((*MockVizierDBInterface)(nil).GetWorkerFullInfo), arg0, arg1, arg2)
+}
+
 // GetWorkerList mocks base method
 func (m *MockVizierDBInterface) GetWorkerList(arg0, arg1 string) ([]*api.Worker, error) {
 	ret := m.ctrl.Call(m, "GetWorkerList", arg0, arg1)

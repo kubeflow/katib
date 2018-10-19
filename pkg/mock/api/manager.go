@@ -287,6 +287,24 @@ func (mr *MockManagerClientMockRecorder) GetTrials(arg0, arg1 interface{}, arg2 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrials", reflect.TypeOf((*MockManagerClient)(nil).GetTrials), varargs...)
 }
 
+// GetWorkerFullInfo mocks base method
+func (m *MockManagerClient) GetWorkerFullInfo(arg0 context.Context, arg1 *api.GetWorkerFullInfoRequest, arg2 ...grpc.CallOption) (*api.GetWorkerFullInfoReply, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetWorkerFullInfo", varargs...)
+	ret0, _ := ret[0].(*api.GetWorkerFullInfoReply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetWorkerFullInfo indicates an expected call of GetWorkerFullInfo
+func (mr *MockManagerClientMockRecorder) GetWorkerFullInfo(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkerFullInfo", reflect.TypeOf((*MockManagerClient)(nil).GetWorkerFullInfo), varargs...)
+}
+
 // GetWorkers mocks base method
 func (m *MockManagerClient) GetWorkers(arg0 context.Context, arg1 *api.GetWorkersRequest, arg2 ...grpc.CallOption) (*api.GetWorkersReply, error) {
 	varargs := []interface{}{arg0, arg1}
@@ -411,4 +429,22 @@ func (m *MockManagerClient) SetSuggestionParameters(arg0 context.Context, arg1 *
 func (mr *MockManagerClientMockRecorder) SetSuggestionParameters(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetSuggestionParameters", reflect.TypeOf((*MockManagerClient)(nil).SetSuggestionParameters), varargs...)
+}
+
+// UpdateWorkerState mocks base method
+func (m *MockManagerClient) UpdateWorkerState(arg0 context.Context, arg1 *api.UpdateWorkerStateRequest, arg2 ...grpc.CallOption) (*api.UpdateWorkerStateReply, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateWorkerState", varargs...)
+	ret0, _ := ret[0].(*api.UpdateWorkerStateReply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateWorkerState indicates an expected call of UpdateWorkerState
+func (mr *MockManagerClientMockRecorder) UpdateWorkerState(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateWorkerState", reflect.TypeOf((*MockManagerClient)(nil).UpdateWorkerState), varargs...)
 }
