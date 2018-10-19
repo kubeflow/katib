@@ -54,20 +54,22 @@ func (d *dbConn) DBInit() {
 		log.Fatalf("Error creating workers table: %v", err)
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS worker_metrics" +
-		"(worker_id CHAR(16) NOT NULL, " +
-		"id INT AUTO_INCREMENT PRIMARY KEY, " +
-		"time DATETIME(6), " +
-		"name VARCHAR(255), " +
-		"value TEXT, " +
-		"is_objective TINYINT)")
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS worker_metrics
+		(worker_id CHAR(16) NOT NULL,
+		id INT AUTO_INCREMENT PRIMARY KEY,
+		time DATETIME(6),
+		name VARCHAR(255),
+		value TEXT,
+		is_objective TINYINT,
+		FOREIGN KEY (worker_id) REFERENCES workers(id) ON DELETE CASCADE)`)
 	if err != nil {
 		log.Fatalf("Error creating worker_metrics table: %v", err)
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS worker_lastlogs" +
-		"(worker_id CHAR(16) PRIMARY KEY, " +
-		"time DATETIME(6))")
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS worker_lastlogs
+		(worker_id CHAR(16) PRIMARY KEY,
+		time DATETIME(6),
+		FOREIGN KEY (worker_id) REFERENCES workers(id) ON DELETE CASCADE)`)
 	if err != nil {
 		log.Fatalf("Error creating worker_lastlogs table: %v", err)
 	}
