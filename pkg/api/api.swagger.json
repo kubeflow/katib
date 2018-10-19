@@ -345,6 +345,42 @@
         ]
       }
     },
+    "/api/Manager/GetWorkerFullInfo": {
+      "get": {
+        "operationId": "GetWorkerFullInfo",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetWorkerFullInfoReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "study_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "trial_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "worker_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
     "/api/Manager/GetWorkers": {
       "get": {
         "operationId": "GetWorkers",
@@ -835,6 +871,17 @@
         }
       }
     },
+    "apiGetWorkerFullInfoReply": {
+      "type": "object",
+      "properties": {
+        "worker_full_infos": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiWorkerFullInfo"
+          }
+        }
+      }
+    },
     "apiGetWorkersReply": {
       "type": "object",
       "properties": {
@@ -1237,7 +1284,7 @@
     "apiUpdateWorkerStateRequest": {
       "type": "object",
       "properties": {
-        "workerId": {
+        "worker_id": {
           "type": "string"
         },
         "status": {
@@ -1270,6 +1317,26 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/apiTag"
+          }
+        }
+      }
+    },
+    "apiWorkerFullInfo": {
+      "type": "object",
+      "properties": {
+        "Worker": {
+          "$ref": "#/definitions/apiWorker"
+        },
+        "parameter_set": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiParameter"
+          }
+        },
+        "metrics_logs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiMetricsLog"
           }
         }
       }

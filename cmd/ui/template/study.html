@@ -100,8 +100,17 @@
         </div>
         <div class="tab-pane fade" id="paracoodtab">
             <div class="container-fluid">
-                <div class="container-fluid bg-active" id="paracood">
-                {{ template "parallelcood" . }}
+                <div class="row">
+                    <div class="col-md-10">
+                    </div>
+                    <div class="col-md-2">
+                        <a class="btn btn-outline-info" href="/katib/{{.IDList.StudyId}}/csv" download="Study-{{.IDList.StudyId}}.csv" target="_blank"><i class="fa fa-download fa-lg"></i> CSV Download</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="container-fluid bg-active" id="paracood">
+                    {{ template "parallelcood" . }}
+                    </div>
                 </div>
             </div>
         </div>

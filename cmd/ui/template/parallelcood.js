@@ -1,6 +1,6 @@
 {{ define "parallelcood" }}
 <script>
-var margin = {top: 66, right: 150, bottom: 20, left: 100},
+var margin = {top: 50, right: 150, bottom: 20, left: 100},
     width = document.body.clientWidth - margin.left - margin.right,
     height = 340 - margin.top - margin.bottom,
     innerHeight = height - 2;

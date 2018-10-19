@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/kubeflow/katib/pkg"
@@ -18,12 +19,12 @@ import (
 const maxMsgSize = 1<<31 - 1
 
 var colors = [...]string{
-	"rgba(255, 99,  132, 0.7)",
-	"rgba(54,  162, 235, 0.7)",
-	"rgba(255, 206, 86,  0.7)",
-	"rgba(75,  192, 192, 0.7)",
-	"rgba(153, 102, 255, 0.7)",
-	"rgba(255, 159, 64,  0.7)",
+	"rgba(255, 99,  132, 0.6)",
+	"rgba(54,  162, 235, 0.6)",
+	"rgba(255, 206, 86,  0.6)",
+	"rgba(75,  192, 192, 0.6)",
+	"rgba(153, 102, 255, 0.6)",
+	"rgba(255, 159, 64,  0.6)",
 }
 
 type IDList struct {
@@ -138,6 +139,7 @@ func (k *KatibUIHandler) StudyInfoCsv(w http.ResponseWriter, r *http.Request) {
 	studyID := chi.URLParam(r, "studyid")
 	conn, c, err := k.connectManager()
 	if err != nil {
+		log.Println(err)
 		return
 	}
 	defer conn.Close()
@@ -148,68 +150,42 @@ func (k *KatibUIHandler) StudyInfoCsv(w http.ResponseWriter, r *http.Request) {
 			StudyId: studyID,
 		},
 	)
-	for _, m := range gsrep.StudyConfig.Metrics {
-		retText += "," + m
+	if err != nil {
+		log.Println(err)
+		return
 	}
-	for _, p := range gsrep.StudyConfig.ParameterConfigs.Configs {
+	metricsList := map[string]int{}
+	for i, m := range gsrep.StudyConfig.Metrics {
+		retText += "," + m
+		metricsList[m] = i
+	}
+	paramList := map[string]int{}
+	for i, p := range gsrep.StudyConfig.ParameterConfigs.Configs {
 		retText += "," + p.Name
+		paramList[p.Name] = i + len(metricsList)
+	}
+	gwfirep, err := c.GetWorkerFullInfo(
+		context.Background(),
+		&api.GetWorkerFullInfoRequest{
+			StudyId: studyID,
+		},
+	)
+	if err != nil {
+		log.Println(err)
+		return
 	}
 	retText += "\n"
-	gwrep, err := c.GetWorkers(
-		context.Background(),
-		&api.GetWorkersRequest{
-			StudyId: studyID,
-		},
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	trialParams := map[string]map[string]string{}
-	gtrep, err := c.GetTrials(
-		context.Background(),
-		&api.GetTrialsRequest{
-			StudyId: studyID,
-		},
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, t := range gtrep.Trials {
-		trialParams[t.TrialId] = map[string]string{}
-		for _, p := range t.ParameterSet {
-			trialParams[t.TrialId][p.Name] = p.Value
-		}
-	}
-
-	workerMetrics := map[string]map[string]string{}
-	for _, w := range gwrep.Workers {
-		workerMetrics[w.WorkerId] = map[string]string{}
-		gmrep, err := c.GetMetrics(
-			context.Background(),
-			&api.GetMetricsRequest{
-				StudyId:   studyID,
-				WorkerIds: []string{w.WorkerId},
-			},
-		)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if len(gmrep.MetricsLogSets) > 0 {
-			for _, m := range gmrep.MetricsLogSets[0].MetricsLogs {
-				if len(m.Values) > 0 {
-					workerMetrics[w.WorkerId][m.Name] = m.Values[len(m.Values)-1].Value
-				}
-			}
-			retText += w.WorkerId + "," + w.TrialId
-			for _, m := range gsrep.StudyConfig.Metrics {
-				retText += "," + workerMetrics[w.WorkerId][m]
-			}
-			for _, p := range gsrep.StudyConfig.ParameterConfigs.Configs {
-				retText += "," + trialParams[w.TrialId][p.Name]
+	restext := make([]string, len(metricsList)+len(paramList))
+	for _, wfi := range gwfirep.WorkerFullInfos {
+		for _, m := range wfi.MetricsLogs {
+			if len(m.Values) > 0 {
+				restext[metricsList[m.Name]] = m.Values[len(m.Values)-1].Value
 			}
 		}
-		retText += "\n"
+		for _, p := range wfi.ParameterSet {
+			restext[paramList[p.Name]] = p.Value
+		}
+		retText += wfi.Worker.WorkerId + "," + wfi.Worker.TrialId + "," + strings.Join(restext, ",") + "\n"
 	}
 	fmt.Fprint(w, retText)
 }
@@ -276,18 +252,18 @@ func (k *KatibUIHandler) WorkerInfoCsv(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 	retText := "symbol,time,value\n"
-	gmrep, err := c.GetMetrics(
+	gwfirep, err := c.GetWorkerFullInfo(
 		context.Background(),
-		&api.GetMetricsRequest{
-			StudyId:   studyID,
-			WorkerIds: []string{workerID},
+		&api.GetWorkerFullInfoRequest{
+			StudyId:  studyID,
+			WorkerId: workerID,
 		},
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	if len(gmrep.MetricsLogSets) > 0 {
-		for _, m := range gmrep.MetricsLogSets[0].MetricsLogs {
+	if len(gwfirep.WorkerFullInfos) > 0 {
+		for _, m := range gwfirep.WorkerFullInfos[0].MetricsLogs {
 			pvtime := ""
 			for _, v := range m.Values {
 				mvtime, _ := time.Parse(time.RFC3339Nano, v.Time)
@@ -324,9 +300,9 @@ func (k *KatibUIHandler) Worker(w http.ResponseWriter, r *http.Request) {
 		Parameters  []*api.Parameter
 		MetricsLogs []MetricsLog
 	}
-	gwrep, err := c.GetWorkers(
+	gwfirep, err := c.GetWorkerFullInfo(
 		context.Background(),
-		&api.GetWorkersRequest{
+		&api.GetWorkerFullInfoRequest{
 			StudyId:  studyID,
 			WorkerId: workerID,
 		},
@@ -334,71 +310,45 @@ func (k *KatibUIHandler) Worker(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if len(gwrep.Workers) != 1 {
+	if len(gwfirep.WorkerFullInfos) != 1 {
 		fmt.Fprint(w, "Worker ID is wrong.")
 		return
 	}
-	worker := gwrep.Workers[0]
+	worker := gwfirep.WorkerFullInfos[0].Worker
 	wv := WorkerView{
 		IDList: &IDList{
 			StudyId:  studyID,
 			WorkerId: workerID,
 			TrialId:  worker.TrialId,
 		},
+		Parameters: gwfirep.WorkerFullInfos[0].ParameterSet,
 	}
-	gtrep, err := c.GetTrials(
-		context.Background(),
-		&api.GetTrialsRequest{
-			StudyId: studyID,
-		},
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, t := range gtrep.Trials {
-		if t.TrialId == worker.TrialId {
-			wv.Parameters = t.ParameterSet
+	wv.MetricsLogs = make([]MetricsLog, len(gwfirep.WorkerFullInfos[0].MetricsLogs))
+	for i, m := range gwfirep.WorkerFullInfos[0].MetricsLogs {
+		wv.MetricsLogs[i].Name = m.Name
+		wv.MetricsLogs[i].Color = colors[i%len(colors)]
+		wv.MetricsLogs[i].LogValues = []TimeValue{}
+		var pvtime float64
+		var baseTime time.Time
+		if len(m.Values) > 0 {
+			baseTime, _ = time.Parse(time.RFC3339Nano, m.Values[0].Time)
 		}
-	}
-
-	gmrep, err := c.GetMetrics(
-		context.Background(),
-		&api.GetMetricsRequest{
-			StudyId:   studyID,
-			WorkerIds: []string{workerID},
-		},
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if len(gmrep.MetricsLogSets) > 0 {
-		wv.MetricsLogs = make([]MetricsLog, len(gmrep.MetricsLogSets[0].MetricsLogs))
-		for i, m := range gmrep.MetricsLogSets[0].MetricsLogs {
-			wv.MetricsLogs[i].Name = m.Name
-			wv.MetricsLogs[i].Color = colors[i%len(colors)]
-			wv.MetricsLogs[i].LogValues = []TimeValue{}
-			var pvtime float64
-			var baseTime time.Time
-			if len(m.Values) > 0 {
-				baseTime, _ = time.Parse(time.RFC3339Nano, m.Values[0].Time)
+		for _, v := range m.Values {
+			mvtime, _ := time.Parse(time.RFC3339Nano, v.Time)
+			tdiff := mvtime.Sub(baseTime)
+			ctime := tdiff.Seconds()
+			if pvtime != ctime {
+				wv.MetricsLogs[i].LogValues = append(
+					wv.MetricsLogs[i].LogValues,
+					TimeValue{
+						Time:  ctime,
+						Value: v.Value,
+					},
+				)
+				pvtime = ctime
 			}
-			for _, v := range m.Values {
-				mvtime, _ := time.Parse(time.RFC3339Nano, v.Time)
-				tdiff := mvtime.Sub(baseTime)
-				ctime := tdiff.Seconds()
-				if pvtime != ctime {
-					wv.MetricsLogs[i].LogValues = append(
-						wv.MetricsLogs[i].LogValues,
-						TimeValue{
-							Time:  ctime,
-							Value: v.Value,
-						},
-					)
-					pvtime = ctime
-				}
-			}
-			fmt.Printf("Log %s %v\n", wv.MetricsLogs[i].Name, wv.MetricsLogs[i].LogValues)
 		}
+		fmt.Printf("Log %s %v\n", wv.MetricsLogs[i].Name, wv.MetricsLogs[i].LogValues)
 	}
 	t, err := template.ParseFiles("/template/layout.html", "/template/worker.html", "/template/linegraph.js", "/template/breadcrumb.html")
 	if err != nil {
