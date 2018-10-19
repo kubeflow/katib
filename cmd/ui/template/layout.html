@@ -4,9 +4,9 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width">
-        <title>KatibUI</title>
+        <title>Katib UI</title>
         <link rel="stylesheet" href="/static/css/bootstrap.css">
-        <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.6/css/all.css">
         <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico">
         <style>
          .content-list{
@@ -17,6 +17,8 @@
     <body>
         <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
         <script src="/static/js/bootstrap.js"></script>
+        <script src="https://d3js.org/d3.v4.js"></script>
+        <script src="https://bl.ocks.org/syntagmatic/raw/3341641/render-queue.js"></script>
         {{ template "breadcrumb" .IDList }}
         {{ template "content" . }}
     </body>

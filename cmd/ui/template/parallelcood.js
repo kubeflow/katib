@@ -1,14 +1,13 @@
 {{ define "parallelcood" }}
 <script>
-var margin = {top: 50, right: 150, bottom: 20, left: 100},
+var margin = {top: 50, right: 150, bottom: 20, left: 50},
     width = document.body.clientWidth - margin.left - margin.right,
-    height = 600 - margin.top - margin.bottom,
+    height = 500 - margin.top - margin.bottom,
     innerHeight = height - 2;
 
 var devicePixelRatio = window.devicePixelRatio || 1;
 
-var color = d3.scaleOrdinal()
-  .range(["#5DA5B3","#D58323","#DD6CA7","#54AF52","#8C92E8","#E15E5A","#725D82","#776327","#50AB84","#954D56","#AB9C27","#517C3F","#9D5130","#357468","#5E9ACF","#C47DCB","#7D9E33","#DB7F85","#BA89AD","#4C6C86","#B59248","#D8597D","#944F7E","#D67D4B","#8F86C2"]);
+var color = d3.scaleOrdinal().range(["#5DA5B3","#D58323","#DD6CA7","#54AF52","#8C92E8","#E15E5A","#725D82","#776327","#50AB84","#954D56","#AB9C27","#517C3F","#9D5130","#357468","#5E9ACF","#C47DCB","#7D9E33","#DB7F85","#BA89AD","#4C6C86","#B59248","#D8597D","#944F7E","#D67D4B","#8F86C2"]);
 
 var types = {
   "Number": {
@@ -107,10 +106,6 @@ var axes = svg.selectAll(".axis")
 $('.loader').fadeIn();
 d3.csv("./{{.IDList.StudyId}}/csv", function(error, data) {
   if (error) throw error;
-
-  // shuffle the data!
-  //data = d3.shuffle(data);
-
   data.forEach(function(d) {
     dimensions.forEach(function(p) {
       d[p.key] = !d[p.key] ? null : p.type.coerce(d[p.key]);
@@ -169,7 +164,7 @@ d3.csv("./{{.IDList.StudyId}}/csv", function(error, data) {
       .attr("x", -8)
       .attr("width", 16);
 
-  d3.selectAll(".axis.pc_view .tick text")
+  d3.selectAll(".axis.WorkerID .tick text")
     .style("fill", color);
 
   var labels = d3.keys(data[0]);
@@ -214,7 +209,8 @@ d3.csv("./{{.IDList.StudyId}}/csv", function(error, data) {
   };
 
   function draw(d) {
-    ctx.strokeStyle = color(d.pc_view);
+    //ctx.strokeStyle = color(d.WorkerID);
+    ctx.strokeStyle = color();
     ctx.beginPath();
     var coords = project(d);
     coords.forEach(function(p,i) {
