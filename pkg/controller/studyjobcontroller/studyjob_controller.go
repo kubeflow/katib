@@ -629,6 +629,9 @@ func (r *ReconcileStudyJobController) getSuggestionParam(c katibapi.ManagerClien
 		ParamId: paramID,
 	}
 	gsrep, err := c.GetSuggestionParameters(ctx, gsreq)
+	if err != nil {
+		return nil, err
+	}
 	return gsrep.SuggestionParameters, err
 }
 func (r *ReconcileStudyJobController) getSuggestion(c katibapi.ManagerClient, studyID string, suggestionSpec *katibv1alpha1.SuggestionSpec, sParamID string) (*katibapi.GetSuggestionsReply, error) {
