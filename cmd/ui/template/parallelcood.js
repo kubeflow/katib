@@ -2,7 +2,7 @@
 <script>
 var margin = {top: 50, right: 150, bottom: 20, left: 100},
     width = document.body.clientWidth - margin.left - margin.right,
-    height = 340 - margin.top - margin.bottom,
+    height = 600 - margin.top - margin.bottom,
     innerHeight = height - 2;
 
 var devicePixelRatio = window.devicePixelRatio || 1;
@@ -35,22 +35,6 @@ var types = {
 };
 
 var dimensions = [
-  {
-     key: "WorkerID",
-     type: types["String"],
-     axis: d3.axisLeft()
-       .tickFormat(function(d,i) {
-         return d;
-       })
-  },
-  {
-     key: "TrialID",
-     type: types["String"],
-     axis: d3.axisLeft()
-       .tickFormat(function(d,i) {
-         return d;
-       })
-  },
   {{- with .StudyConf.Metrics}}
   {{- range .}}
   {
@@ -120,11 +104,12 @@ var axes = svg.selectAll(".axis")
     .attr("class", function(d) { return "axis " + d.key.replace(/ /g, "_"); })
     .attr("transform", function(d,i) { return "translate(" + xscale(i) + ")"; });
 
+$('.loader').fadeIn();
 d3.csv("./{{.IDList.StudyId}}/csv", function(error, data) {
   if (error) throw error;
 
   // shuffle the data!
-  data = d3.shuffle(data);
+  //data = d3.shuffle(data);
 
   data.forEach(function(d) {
     dimensions.forEach(function(p) {
@@ -149,6 +134,7 @@ d3.csv("./{{.IDList.StudyId}}/csv", function(error, data) {
     }
     dim.scale.domain(dim.domain);
   });
+  $('.loader').hide();
 
   var render = renderQueue(draw).rate(50);
 

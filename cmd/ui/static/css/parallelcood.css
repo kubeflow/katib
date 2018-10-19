@@ -82,3 +82,8 @@ pre {
   overflow: auto;
 }
 
+.loader {
+  color: #aaf;
+  text-align: center;
+  @include border-radius(10px);
+}
