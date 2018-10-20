@@ -12,13 +12,11 @@
                           </tr>
                   </thead>
                   <tbody>
-                      {{- with .Trial}}
-                      {{- range .ParameterSet}}
+                      {{- range .Trial.ParameterSet}}
                       <tr class="table-secondary">
                           <th>{{.Name}}</th>
                           <td>{{.Value}}</td>
                       </tr>
-                      {{end}}
                       {{end}}
                   </tbody>
             </table>

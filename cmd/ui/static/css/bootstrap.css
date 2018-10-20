@@ -4960,11 +4960,12 @@ input[type="button"].btn-block {
   display: flex;
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
-  padding: 0.75rem 1rem;
+  padding: 1rem 1rem;
   margin-bottom: 1rem;
   list-style: none;
   background-color: #e9ecef;
   border-radius: 0.25rem;
+  font-size: 20px;
 }
 
 .breadcrumb-item + .breadcrumb-item {
@@ -4975,7 +4976,7 @@ input[type="button"].btn-block {
   display: inline-block;
   padding-right: 0.5rem;
   color: #7A8288;
-  content: "/";
+  content: ">";
 }
 
 .breadcrumb-item + .breadcrumb-item:hover::before {
