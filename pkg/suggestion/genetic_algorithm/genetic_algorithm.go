@@ -1,5 +1,9 @@
 package genetic_algorithm
 
+import (
+	"sort"
+)
+
 // struct for genetic algorithm
 type GA struct {
 	numGenes                     int     // number of genes per offspring
@@ -47,7 +51,7 @@ func (ga *GA) Optimize(evaluateFunc func(offspring Offspring) float64) (Offsprin
 	for i, o := range generation.offsprings {
 		gaResult.recordResult(i, evaluateFunc(o))
 	}
-	bestOffsprings := ga.Select(*gaResult, generation)
+	bestOffsprings := ga.Select(gaResult, generation)
 
 	// run genetic algorithm for maxGeneration iterations to optimize genes
 	for g := 0; g < ga.maxGenerations; g++ {
@@ -56,11 +60,11 @@ func (ga *GA) Optimize(evaluateFunc func(offspring Offspring) float64) (Offsprin
 		for i, o := range generation.offsprings {
 			gaResult.recordResult(i, evaluateFunc(o))
 		}
-		bestOffsprings = ga.Select(*gaResult, generation)
+		bestOffsprings = ga.Select(gaResult, generation)
 	}
 
 	// best genes after optimization
-	bestScoreMap := ga.GetBestScores(*gaResult, 1)
+	bestScoreMap := ga.GetBestScores(gaResult, 1)
 	for k, v := range bestScoreMap {
 		bestScore = v
 		bestOffspring = generation.offsprings[k]
@@ -70,46 +74,52 @@ func (ga *GA) Optimize(evaluateFunc func(offspring Offspring) float64) (Offsprin
 	return bestOffspring, bestScore
 }
 
-// a set of evaluation result for each offspring
-type GAResult struct {
-	result map[int]float64
+// score of a gene
+type GAScore struct {
+	ScoreId int
+	Score   float64
 }
 
-func NewGAResult() *GAResult {
-	initialResult := make(map[int]float64)
-	initialResult[0] = 0
-	return &GAResult{initialResult}
+// a slice of evaluation result for each offspring
+type GAResult []GAScore
+
+func NewGAResult() GAResult {
+	gar := GAResult{}
+	return gar
 }
 
 func (gar *GAResult) recordResult(n int, score float64) {
-	gar.result[n] = score
+	gas := GAScore{n, score}
+	*gar = append(*gar, gas)
+}
+
+func (gar GAResult) Len() int {
+	return len(gar)
+}
+
+func (gar GAResult) Swap(i, j int) {
+	gar[i], gar[j] = gar[j], gar[i]
+}
+
+func (gar GAResult) Less(i, j int) bool {
+	return gar[i].Score < gar[j].Score
+}
+
+func (gar GAResult) SortScore(more bool) GAResult {
+	if more {
+		sort.Sort(sort.Reverse(gar))
+	} else {
+		sort.Sort(gar)
+	}
+	return gar
 }
 
 // get the best score from ga result
 func (ga *GA) GetBestScores(gaResult GAResult, numScores int) map[int]float64 {
 	bestScoreMap := make(map[int]float64)
-
-	for p, s := range gaResult.result {
-		for k, v := range gaResult.result {
-			if _, ok := bestScoreMap[k]; ok {
-				continue
-			} else if p == k {
-				continue
-			} else {
-				if ga.evaluateHigh && s < v {
-					// if higher is better
-					p = k
-					s = v
-				} else if !ga.evaluateHigh && s > v {
-					// if lower is better
-					p = k
-					s = v
-				}
-			}
-		}
-		if len(bestScoreMap) < numScores {
-			bestScoreMap[p] = s
-		}
+	gaSorted := gaResult.SortScore(ga.evaluateHigh)
+	for _, v := range gaSorted {
+		bestScoreMap[v.ScoreId] = v.Score
 		if len(bestScoreMap) >= numScores {
 			break
 		}
@@ -138,23 +148,23 @@ func (ga *GA) selectRoulette(gaResult GAResult, generation Generation) []Offspri
 	chosen := make(map[int]bool)
 	if ga.evaluateHigh {
 		// if higher is better, higher result gets higher probability
-		for k, v := range gaResult.result {
-			if v == 0 {
+		for k, v := range gaResult {
+			if v.Score == 0 {
 				continue
 			}
-			sum = sum + v
+			sum = sum + v.Score
 			positions = append(positions, k)
 			roulette = append(roulette, sum)
 		}
 	} else {
 		// if lower is better, lower result gets higher probability
 		var rsum float64
-		for _, v := range gaResult.result {
-			rsum = rsum + v
+		for _, v := range gaResult {
+			rsum = rsum + v.Score
 		}
-		for k, v := range gaResult.result {
+		for k, v := range gaResult {
 			positions = append(positions, k)
-			sum = sum + rsum - v
+			sum = sum + rsum - v.Score
 			roulette = append(roulette, sum)
 		}
 	}

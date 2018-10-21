@@ -295,15 +295,15 @@ func TestRandomGenes(t *testing.T) {
 
 func TestGAResult(t *testing.T) {
 	gar := NewGAResult()
-	n := 0
-	score := 0.5
-	gar.recordResult(n, score)
-	if gar.result[n] == score {
+	gar.recordResult(0, 0.5)
+	gar.recordResult(1, 1.5)
+	if gar[0].Score == 0.5 && gar[1].Score == 1.5 {
 		t.Log("OK")
 	} else {
 		t.Fatal("NG")
 	}
 }
+
 func TestInitialRandomSuggest(t *testing.T) {
 	numGenes := 5
 	numOffsprings := 10
@@ -341,8 +341,42 @@ func TestInitialRandomSuggest(t *testing.T) {
 	}
 }
 
-func TestGetBestScores(t *testing.T) {
-	numGenes := 5
+func TestSortScore(t *testing.T) {
+	gar := NewGAResult()
+	gar.recordResult(0, 7.0)
+	gar.recordResult(1, 5.6)
+	gar.recordResult(2, 10.3)
+	gar.recordResult(3, -9.0)
+	gaSorted := gar.SortScore(false)
+	t.Log(gaSorted)
+	if gaSorted[0].ScoreId != 3 {
+		t.Fatal("NG")
+	} else if gaSorted[1].ScoreId != 1 {
+		t.Fatal("NG")
+	} else if gaSorted[2].ScoreId != 0 {
+		t.Fatal("NG")
+	} else if gaSorted[3].ScoreId != 2 {
+		t.Fatal("NG")
+	} else {
+		t.Log("OK")
+	}
+	gaRSorted := gar.SortScore(true)
+	t.Log(gaRSorted)
+	if gaSorted[0].ScoreId != 2 {
+		t.Fatal("NG")
+	} else if gaSorted[1].ScoreId != 0 {
+		t.Fatal("NG")
+	} else if gaSorted[2].ScoreId != 1 {
+		t.Fatal("NG")
+	} else if gaSorted[3].ScoreId != 3 {
+		t.Fatal("NG")
+	} else {
+		t.Log("OK")
+	}
+}
+
+func TestGetBestScoresHigh(t *testing.T) {
+	numGenes := 6
 	numOffsprings := 10
 	geneMutationProbability := 0.05
 	offspringMutationProbability := 0.1
@@ -375,16 +409,62 @@ func TestGetBestScores(t *testing.T) {
 		score := float64(i%50) / 20
 		gar.recordResult(i, score)
 	}
-	bestScoreMap := ga.GetBestScores(*gar, 1)
-	if len(bestScoreMap) == 1 {
+	// t.Log(gar)
+	bestScoreMap := ga.GetBestScores(gar, 3)
+	t.Log(bestScoreMap)
+	if len(bestScoreMap) == 3 && bestScoreMap[49] == 2.45 && bestScoreMap[99] == 2.45 {
 		t.Log("OK")
 	} else {
-		t.Log("NG")
+		t.Fatal("NG")
+	}
+}
+
+func TestGetBestScoresLow(t *testing.T) {
+	numGenes := 6
+	numOffsprings := 10
+	geneMutationProbability := 0.05
+	offspringMutationProbability := 0.1
+	maxGenerations := 5
+	selection := "elite"
+	selectNum := 2
+	crossover := "uniform"
+	geneMutation := "perturbation"
+	generationChange := "discrete"
+	evaluationFunction := "accuracy"
+	evaluateHigh := false
+
+	arr := []string{"true", "false", "tf"}
+	cg0 := NewCategoricalGeneType(arr)
+	cg1 := NewCategoricalGeneType(arr)
+	dg0 := NewDiscreteGeneType(0, 5)
+	dg1 := NewDiscreteGeneType(0, 5)
+	cog0 := NewContinuousGeneType(0, 4.0)
+	cog1 := NewContinuousGeneType(0, 4.0)
+	geneNames := []string{"cg0", "cg1",
+		"dg0", "dg1",
+		"cog0", "cog1"}
+	geneTypes := []interface{}{*cg0, *cg1, *dg0, *dg1, *cog0, *cog1}
+	geneTypeMap := NewGeneTypeMap(geneNames, geneTypes)
+
+	ga := NewGA(numGenes, numOffsprings, geneMutationProbability, offspringMutationProbability, maxGenerations, selection, selectNum, crossover, geneMutation, generationChange, evaluationFunction, evaluateHigh, geneNames, geneTypeMap)
+
+	gar := NewGAResult()
+	for i := 0; i < 100; i++ {
+		score := float64(i%50) / 20
+		gar.recordResult(i, score)
+	}
+	// t.Log(gar)
+	bestScoreMap := ga.GetBestScores(gar, 3)
+	t.Log(bestScoreMap)
+	if len(bestScoreMap) == 3 && bestScoreMap[0] == 0 && bestScoreMap[50] == 0 {
+		t.Log("OK")
+	} else {
+		t.Fatal("NG")
 	}
 }
 
 func TestRandomOffspringMutation(t *testing.T) {
-	numGenes := 5
+	numGenes := 6
 	numOffsprings := 10
 	geneMutationProbability := 0.05
 	offspringMutationProbability := 1.0
@@ -416,7 +496,7 @@ func TestRandomOffspringMutation(t *testing.T) {
 }
 
 func TestSelectElite(t *testing.T) {
-	numGenes := 5
+	numGenes := 6
 	numOffsprings := 10
 	geneMutationProbability := 0.05
 	offspringMutationProbability := 0.1
@@ -448,18 +528,25 @@ func TestSelectElite(t *testing.T) {
 	for i, o := range generation.offsprings {
 		gaResult.recordResult(i, sampleEvaluateFunc0(o))
 	}
-	bestOffsprings := ga.Select(*gaResult, generation)
-	bestScoreMap := ga.GetBestScores(*gaResult, ga.selectNum)
-	for _, v := range bestScoreMap {
-		if sampleEvaluateFunc0(bestOffsprings[0]) != v && sampleEvaluateFunc0(bestOffsprings[1]) != v {
+	bestOffsprings := ga.Select(gaResult, generation)
+	bestScoreMap := ga.GetBestScores(gaResult, ga.selectNum)
+	for i := 0; i < len(bestOffsprings); i++ {
+		a := 0
+		tmpScore := sampleEvaluateFunc0(bestOffsprings[i])
+		t.Log(tmpScore)
+		for _, v := range bestScoreMap {
+			if v != tmpScore {
+				a++
+			}
+		}
+		if a > 1 {
 			t.Fatal("NG")
 		}
 	}
-	t.Log("OK")
 }
 
 func TestSelectRoulette(t *testing.T) {
-	numGenes := 5
+	numGenes := 6
 	numOffsprings := 10
 	geneMutationProbability := 0.05
 	offspringMutationProbability := 0.1
@@ -491,14 +578,14 @@ func TestSelectRoulette(t *testing.T) {
 	for i, o := range generation.offsprings {
 		gaResult.recordResult(i, sampleEvaluateFunc0(o))
 	}
-	bestOffsprings := ga.Select(*gaResult, generation)
+	bestOffsprings := ga.Select(gaResult, generation)
 	t.Log(bestOffsprings)
 	t.Log("OK")
 }
 
 func TestOptimizeSample0_0(t *testing.T) {
 	// target score: 30
-	numGenes := 5
+	numGenes := 30
 	numOffsprings := 10
 	geneMutationProbability := 0.05
 	offspringMutationProbability := 0.1
@@ -555,8 +642,8 @@ func TestOptimizeSample0_0(t *testing.T) {
 
 func TestOptimizeSample0_1(t *testing.T) {
 	// target score: 30
-	numGenes := 5
-	numOffsprings := 10
+	numGenes := 30
+	numOffsprings := 20
 	geneMutationProbability := 0.05
 	offspringMutationProbability := 0.1
 	maxGenerations := 200
@@ -610,13 +697,70 @@ func TestOptimizeSample0_1(t *testing.T) {
 	t.Log(bestOffspring, bestScore)
 }
 
+func TestOptimizeSample0_2(t *testing.T) {
+	// target score: 30
+	numGenes := 30
+	numOffsprings := 20
+	geneMutationProbability := 0.05
+	offspringMutationProbability := 0.1
+	maxGenerations := 200
+	selection := "elite"
+	selectNum := 2
+	crossover := "uniform"
+	geneMutation := "perturbation" // not good
+	generationChange := "discrete"
+	evaluationFunction := "accuracy"
+	evaluateHigh := true
+	arr := []string{"true", "false", "tf"}
+	cg0 := NewCategoricalGeneType(arr)
+	cg1 := NewCategoricalGeneType(arr)
+	cg2 := NewCategoricalGeneType(arr)
+	cg3 := NewCategoricalGeneType(arr)
+	cg4 := NewCategoricalGeneType(arr)
+	cg5 := NewCategoricalGeneType(arr)
+	cg6 := NewCategoricalGeneType(arr)
+	cg7 := NewCategoricalGeneType(arr)
+	cg8 := NewCategoricalGeneType(arr)
+	cg9 := NewCategoricalGeneType(arr)
+	dg0 := NewDiscreteGeneType(0, 5)
+	dg1 := NewDiscreteGeneType(0, 5)
+	dg2 := NewDiscreteGeneType(0, 4)
+	dg3 := NewDiscreteGeneType(0, 4)
+	dg4 := NewDiscreteGeneType(0, 3)
+	dg5 := NewDiscreteGeneType(0, 3)
+	dg6 := NewDiscreteGeneType(0, 2)
+	dg7 := NewDiscreteGeneType(0, 2)
+	dg8 := NewDiscreteGeneType(0, 1)
+	dg9 := NewDiscreteGeneType(0, 1)
+	cog0 := NewContinuousGeneType(0, 4.0)
+	cog1 := NewContinuousGeneType(0, 4.0)
+	cog2 := NewContinuousGeneType(0, 3.0)
+	cog3 := NewContinuousGeneType(0, 3.0)
+	cog4 := NewContinuousGeneType(0, 2.0)
+	cog5 := NewContinuousGeneType(0, 2.0)
+	cog6 := NewContinuousGeneType(0, 1.0)
+	cog7 := NewContinuousGeneType(0, 1.0)
+	cog8 := NewContinuousGeneType(0, 1.0)
+	cog9 := NewContinuousGeneType(0, 1.0)
+	geneNames := []string{"cg0", "cg1", "cg2", "cg3", "cg4", "cg5", "cg6", "cg7", "cg8", "cg9",
+		"dg0", "dg1", "dg2", "dg3", "dg4", "dg5", "dg6", "dg7", "dg8", "dg9",
+		"cog0", "cog1", "cog2", "cog3", "cog4", "cog5", "cog6", "cog7", "cog8", "cog9"}
+	geneTypes := []interface{}{*cg0, *cg1, *cg2, *cg3, *cg4, *cg5, *cg6, *cg7, *cg8, *cg9, *dg0, *dg1, *dg2, *dg3, *dg4, *dg5, *dg6, *dg7, *dg8, *dg9, *cog0, *cog1, *cog2, *cog3, *cog4, *cog5, *cog6, *cog7, *cog8, *cog9}
+	// genes := NewGenes(geneNames)
+	geneTypeMap := NewGeneTypeMap(geneNames, geneTypes)
+	ga := NewGA(numGenes, numOffsprings, geneMutationProbability, offspringMutationProbability, maxGenerations, selection, selectNum, crossover, geneMutation, generationChange, evaluationFunction, evaluateHigh, geneNames, geneTypeMap)
+
+	bestOffspring, bestScore := ga.Optimize(sampleEvaluateFunc0)
+	t.Log(bestOffspring, bestScore)
+}
+
 func TestOptimizeSample1_0(t *testing.T) {
 	// target score: 10
-	numGenes := 5
-	numOffsprings := 10
-	geneMutationProbability := 0.05
+	numGenes := 30
+	numOffsprings := 20
+	geneMutationProbability := 0.1
 	offspringMutationProbability := 0.05
-	maxGenerations := 300
+	maxGenerations := 200
 	selection := "elite"
 	selectNum := 2
 	crossover := "uniform"
@@ -669,11 +813,11 @@ func TestOptimizeSample1_0(t *testing.T) {
 
 func TestOptimizeSample1_1(t *testing.T) {
 	// target score: 10
-	numGenes := 5
-	numOffsprings := 10
-	geneMutationProbability := 0.05
-	offspringMutationProbability := 0.1
-	maxGenerations := 100
+	numGenes := 30
+	numOffsprings := 20
+	geneMutationProbability := 0.1
+	offspringMutationProbability := 0.05
+	maxGenerations := 200
 	selection := "elite"
 	selectNum := 2
 	crossover := "uniform"
@@ -725,11 +869,11 @@ func TestOptimizeSample1_1(t *testing.T) {
 
 func TestOptimizeSample1_2(t *testing.T) {
 	// target score: 0
-	numGenes := 5
+	numGenes := 30
 	numOffsprings := 10
 	geneMutationProbability := 0.05
 	offspringMutationProbability := 0.1
-	maxGenerations := 100
+	maxGenerations := 50
 	selection := "elite"
 	selectNum := 2
 	crossover := "uniform"
