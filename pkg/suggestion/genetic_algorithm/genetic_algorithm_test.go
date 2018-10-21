@@ -412,7 +412,7 @@ func TestGetBestScoresHigh(t *testing.T) {
 	// t.Log(gar)
 	bestScoreMap := ga.GetBestScores(gar, 3)
 	t.Log(bestScoreMap)
-	if len(bestScoreMap) == 3 && bestScoreMap[49] == 2.45 && bestScoreMap[99] == 2.45 {
+	if len(bestScoreMap) == 3 && bestScoreMap[0].Score == 2.45 && bestScoreMap[1].Score == 2.45 {
 		t.Log("OK")
 	} else {
 		t.Fatal("NG")
@@ -456,7 +456,7 @@ func TestGetBestScoresLow(t *testing.T) {
 	// t.Log(gar)
 	bestScoreMap := ga.GetBestScores(gar, 3)
 	t.Log(bestScoreMap)
-	if len(bestScoreMap) == 3 && bestScoreMap[0] == 0 && bestScoreMap[50] == 0 {
+	if len(bestScoreMap) == 3 && bestScoreMap[0].Score == 0 && bestScoreMap[1].Score == 0 {
 		t.Log("OK")
 	} else {
 		t.Fatal("NG")
@@ -535,7 +535,7 @@ func TestSelectElite(t *testing.T) {
 		tmpScore := sampleEvaluateFunc0(bestOffsprings[i])
 		t.Log(tmpScore)
 		for _, v := range bestScoreMap {
-			if v != tmpScore {
+			if v.Score != tmpScore {
 				a++
 			}
 		}
@@ -760,7 +760,7 @@ func TestOptimizeSample1_0(t *testing.T) {
 	numOffsprings := 20
 	geneMutationProbability := 0.1
 	offspringMutationProbability := 0.05
-	maxGenerations := 200
+	maxGenerations := 300
 	selection := "elite"
 	selectNum := 2
 	crossover := "uniform"
@@ -817,7 +817,7 @@ func TestOptimizeSample1_1(t *testing.T) {
 	numOffsprings := 20
 	geneMutationProbability := 0.1
 	offspringMutationProbability := 0.05
-	maxGenerations := 200
+	maxGenerations := 300
 	selection := "elite"
 	selectNum := 2
 	crossover := "uniform"

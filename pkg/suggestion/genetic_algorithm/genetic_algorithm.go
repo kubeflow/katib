@@ -65,10 +65,8 @@ func (ga *GA) Optimize(evaluateFunc func(offspring Offspring) float64) (Offsprin
 
 	// best genes after optimization
 	bestScoreMap := ga.GetBestScores(gaResult, 1)
-	for k, v := range bestScoreMap {
-		bestScore = v
-		bestOffspring = generation.offsprings[k]
-	}
+	bestScore = bestScoreMap[0].Score
+	bestOffspring = generation.offsprings[bestScoreMap[0].ScoreId]
 
 	// returns the best optimized offspring and its score
 	return bestOffspring, bestScore
@@ -115,11 +113,11 @@ func (gar GAResult) SortScore(more bool) GAResult {
 }
 
 // get the best score from ga result
-func (ga *GA) GetBestScores(gaResult GAResult, numScores int) map[int]float64 {
-	bestScoreMap := make(map[int]float64)
+func (ga *GA) GetBestScores(gaResult GAResult, numScores int) map[int]GAScore {
+	bestScoreMap := make(map[int]GAScore)
 	gaSorted := gaResult.SortScore(ga.evaluateHigh)
-	for _, v := range gaSorted {
-		bestScoreMap[v.ScoreId] = v.Score
+	for k, v := range gaSorted {
+		bestScoreMap[k] = v
 		if len(bestScoreMap) >= numScores {
 			break
 		}
@@ -192,8 +190,8 @@ func (ga *GA) selectRoulette(gaResult GAResult, generation Generation) []Offspri
 func (ga *GA) selectElite(gaResult GAResult, generation Generation) []Offspring {
 	bestScoreMap := ga.GetBestScores(gaResult, ga.selectNum)
 	bestOffsprings := []Offspring{}
-	for k, _ := range bestScoreMap {
-		bestOffsprings = append(bestOffsprings, generation.offsprings[k])
+	for _, v := range bestScoreMap {
+		bestOffsprings = append(bestOffsprings, generation.offsprings[v.ScoreId])
 	}
 	return bestOffsprings
 }
