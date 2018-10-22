@@ -167,7 +167,8 @@ func (k *KatibUIHandler) StudyInfoCsv(w http.ResponseWriter, r *http.Request) {
 	gwfirep, err := c.GetWorkerFullInfo(
 		context.Background(),
 		&api.GetWorkerFullInfoRequest{
-			StudyId: studyID,
+			StudyId:       studyID,
+			OnlyLatestLog: true,
 		},
 	)
 	if err != nil {

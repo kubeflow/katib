@@ -194,7 +194,7 @@ func (s *server) UpdateWorkerState(ctx context.Context, in *pb.UpdateWorkerState
 }
 
 func (s *server) GetWorkerFullInfo(ctx context.Context, in *pb.GetWorkerFullInfoRequest) (*pb.GetWorkerFullInfoReply, error) {
-	return dbIf.GetWorkerFullInfo(in.StudyId, in.TrialId, in.WorkerId)
+	return dbIf.GetWorkerFullInfo(in.StudyId, in.TrialId, in.WorkerId, in.OnlyLatestLog)
 }
 func (s *server) SetSuggestionParameters(ctx context.Context, in *pb.SetSuggestionParametersRequest) (*pb.SetSuggestionParametersReply, error) {
 	var err error

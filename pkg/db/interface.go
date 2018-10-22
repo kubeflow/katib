@@ -58,7 +58,7 @@ type VizierDBInterface interface {
 	CreateWorker(*api.Worker) (string, error)
 	UpdateWorker(string, api.State) error
 	DeleteWorker(string) error
-	GetWorkerFullInfo(string, string, string) (*api.GetWorkerFullInfoReply, error)
+	GetWorkerFullInfo(string, string, string, bool) (*api.GetWorkerFullInfoReply, error)
 
 	SetSuggestionParam(string, string, []*api.SuggestionParameter) (string, error)
 	UpdateSuggestionParam(string, []*api.SuggestionParameter) error
@@ -718,7 +718,7 @@ func (d *dbConn) DeleteWorker(id string) error {
 	return err
 }
 
-func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId string) (*api.GetWorkerFullInfoReply, error) {
+func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId string, OnlyLatestLog bool) (*api.GetWorkerFullInfoReply, error) {
 	ret := &api.GetWorkerFullInfoReply{}
 	var err error
 	ws := []*api.Worker{}
@@ -751,14 +751,68 @@ func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId stri
 
 	wfilist := make([]*api.WorkerFullInfo, len(ws))
 	var qstr, id string
+	if OnlyLatestLog {
+		qstr = `
+		SELECT 
+			WM.worker_id, WM.time, WM.name, WM.value 
+		FROM (
+			SELECT 
+				Master.worker_id, Master.time,  Master.name,  Master.value
+			FROM (
+				SELECT 
+					worker_id, name, 
+					MAX(id) AS MaxID
+				FROM 
+					worker_metrics 
+				GROUP BY 
+					worker_id, name
+				) AS LATEST
+				JOIN worker_metrics AS Master
+				ON Master.id = LATEST.MaxID
+		) AS WM 
+		JOIN workers AS WS 
+		ON WM.worker_id = WS.id 
+		AND`
+	} else {
+		qstr = `
+		SELECT 
+			WM.worker_id, WM.time, WM.name, WM.value 
+		FROM 
+			worker_metrics AS WM 
+		JOIN workers AS WS 
+		ON WM.worker_id = WS.id 
+		AND`
+	}
 	if workerId != "" {
-		qstr = "SELECT worker_id, time, name, value FROM worker_metrics WHERE worker_id = ?"
+		if OnlyLatestLog {
+			qstr = `
+			SELECT 
+			WM.worker_id, WM.time, WM.name, WM.value 
+			FROM (
+				SELECT 
+					Master.worker_id, Master.time,  Master.name,  Master.value
+				FROM (
+					SELECT 
+						worker_id, name, 
+						MAX(id) AS MaxID
+					FROM 
+						worker_metrics 
+					GROUP BY 
+						worker_id, name
+				) AS LATEST
+				JOIN worker_metrics AS Master
+				ON Master.id = LATEST.MaxID
+				AND Master.worker_id = ?
+			) AS WM`
+		} else {
+			qstr = "SELECT worker_id, time, name, value FROM worker_metrics WHERE worker_id = ?"
+		}
 		id = workerId
 	} else if trialId != "" {
-		qstr = "SELECT WM.worker_id, WM.time, WM.name, WM.value FROM worker_metrics AS WM JOIN workers AS WS ON WM.worker_id = WS.id AND WS.trial_id = ? "
+		qstr += " WS.trial_id = ? "
 		id = trialId
 	} else if studyId != "" {
-		qstr = "SELECT WM.worker_id, WM.time, WM.name, WM.value FROM worker_metrics AS WM JOIN workers AS WS ON WM.worker_id = WS.id AND WS.study_id = ? "
+		qstr += " WS.study_id = ? "
 		id = studyId
 	}
 	rows, err := d.db.Query(qstr+" ORDER BY time", id)
@@ -766,7 +820,7 @@ func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId stri
 		log.Printf("SQL query: %v", err)
 		return ret, err
 	}
-	metricslist := map[string]map[string][]*api.MetricsValueTime{}
+	metricslist := make(map[string]map[string][]*api.MetricsValueTime, len(ws))
 	for rows.Next() {
 		var name, value, timeStr, wid string
 		err := rows.Scan(&wid, &timeStr, &name, &value)
@@ -785,7 +839,7 @@ func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId stri
 				Time:  ptime.UTC().Format(time.RFC3339Nano),
 			})
 		} else {
-			metricslist[wid] = map[string][]*api.MetricsValueTime{}
+			metricslist[wid] = make(map[string][]*api.MetricsValueTime, len(sc.Metrics))
 			metricslist[wid][name] = append(metricslist[wid][name], &api.MetricsValueTime{
 				Value: value,
 				Time:  ptime.UTC().Format(time.RFC3339Nano),

@@ -374,6 +374,13 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "only_latest_log",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
           }
         ],
         "tags": [

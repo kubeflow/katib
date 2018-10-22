@@ -355,6 +355,7 @@ message GetWorkerFullInfoRequest {
     string study_id = 1;
     string trial_id = 2;
     string worker_id = 3;
+    bool only_latest_log = 4;
 }
 
 message WorkerFullInfo {
