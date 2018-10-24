@@ -21,21 +21,21 @@ func (d *dbConn) DBInit() {
 		log.Fatalf("Error creating studies table: %v", err)
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS study_permissions" +
-		"(study_id CHAR(16) NOT NULL, " +
-		"access_permission VARCHAR(255), " +
-		"PRIMARY KEY (study_id, access_permission))")
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS study_permissions
+		(study_id CHAR(16) NOT NULL,
+		access_permission VARCHAR(255),
+		PRIMARY KEY (study_id, access_permission))`)
 	if err != nil {
 		log.Fatalf("Error creating study_permissions table: %v", err)
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS trials" +
-		"(id CHAR(16) PRIMARY KEY, " +
-		"study_id CHAR(16), " +
-		"parameters TEXT, " +
-		"objective_value VARCHAR(255), " +
-		"tags TEXT, " +
-		"FOREIGN KEY(study_id) REFERENCES studies(id))")
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS trials
+		(id CHAR(16) PRIMARY KEY,
+		study_id CHAR(16),
+		parameters TEXT,
+		objective_value VARCHAR(255),
+		tags TEXT,
+		FOREIGN KEY(study_id) REFERENCES studies(id))`)
 	if err != nil {
 		log.Fatalf("Error creating trials table: %v", err)
 	}
@@ -64,7 +64,6 @@ func (d *dbConn) DBInit() {
 	if err != nil {
 		log.Fatalf("Error creating worker_metrics table: %v", err)
 	}
-
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS worker_lastlogs" +
 		"(worker_id VARCHAR(255) PRIMARY KEY, " +
 		"time DATETIME(6), " +
@@ -73,22 +72,22 @@ func (d *dbConn) DBInit() {
 		log.Fatalf("Error creating worker_lastlogs table: %v", err)
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS suggestion_param" +
-		"(id CHAR(16) PRIMARY KEY," +
-		"suggestion_algo TEXT, " +
-		"study_id CHAR(16), " +
-		"parameters TEXT, " +
-		"FOREIGN KEY(study_id) REFERENCES studies(id))")
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS suggestion_param
+		(id CHAR(16) PRIMARY KEY,
+		suggestion_algo TEXT,
+		study_id CHAR(16),
+		parameters TEXT,
+		FOREIGN KEY(study_id) REFERENCES studies(id))`)
 	if err != nil {
 		log.Fatalf("Error creating suggestion_param table: %v", err)
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS earlystop_param" +
-		"(id CHAR(16) PRIMARY KEY, " +
-		"earlystop_argo TEXT, " +
-		"study_id CHAR(16), " +
-		"parameters TEXT, " +
-		"FOREIGN KEY(study_id) REFERENCES studies(id))")
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS earlystop_param
+		(id CHAR(16) PRIMARY KEY,
+		earlystop_argo TEXT,
+		study_id CHAR(16),
+		parameters TEXT,
+		FOREIGN KEY(study_id) REFERENCES studies(id))`)
 	if err != nil {
 		log.Fatalf("Error creating earlystop_param table: %v", err)
 	}
