@@ -113,9 +113,18 @@ type GoTemplate struct {
 	RawTemplate  string `json:"rawTemplate,omitempty"`
 }
 
+type FrameworkType string
+
+const (
+	FrameworkTF      FrameworkType = "tensorflow"
+	FrameworkRaw     FrameworkType = "raw"
+	FrameworkPyTorch FrameworkType = "pytorch"
+)
+
 type WorkerSpec struct {
-	Retain     bool       `json:"retain,omitempty"`
-	GoTemplate GoTemplate `json:"goTemplate,omitempty"`
+	Retain     bool          `json:"retain,omitempty"`
+	Framework  FrameworkType `json:"framework,omitempty"`
+	GoTemplate GoTemplate    `json:"goTemplate,omitempty"`
 }
 
 type MetricsCollectorSpec struct {
