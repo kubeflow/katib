@@ -774,7 +774,7 @@ func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJ
 	}
 	BUFSIZE := 1024
 	switch wkind {
-	case "Job":
+	case workerKindJob:
 		var job batchv1.Job
 		if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(&job); err != nil {
 			instance.Status.Condition = katibv1alpha1.ConditionFailed
@@ -791,6 +791,8 @@ func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJ
 			log.Printf("Job Create error %v", err)
 			return "", err
 		}
+	case workerKindTFJob:
+		// Do what you want for TFJob
 	}
 	return wid, nil
 }
