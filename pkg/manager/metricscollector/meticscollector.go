@@ -34,7 +34,9 @@ func NewMetricsCollector() (*MetricsCollector, error) {
 
 }
 
-func (d *MetricsCollector) CollectWorkerLog(wID string, objectiveValueName string, metrics []string, namespace string) (*api.MetricsLogSet, error) {
+func (d *MetricsCollector) CollectWorkerLog(wID string, objectiveValueName string, metrics []string, namespace string, kind string) (*api.MetricsLogSet, error) {
+	// TODO: Get the logs according to the kind of the worker.
+
 	pl, _ := d.clientset.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "job-name=" + wID, IncludeUninitialized: true})
 	if len(pl.Items) == 0 {
 		return nil, errors.New(fmt.Sprintf("No Pods are found in Job %v", wID))

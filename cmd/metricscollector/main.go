@@ -53,6 +53,7 @@ var studyID = flag.String("s", "", "Study ID")
 var trialID = flag.String("t", "", "Trial ID")
 var workerID = flag.String("w", "", "Worker ID")
 var namespace = flag.String("n", "", "NameSpace")
+var kind = flag.String("k", "", "Kind")
 
 func main() {
 	flag.Parse()
@@ -75,7 +76,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to GetStudyConf: %v", err)
 	}
-	mls, err := mc.CollectWorkerLog(*workerID, screp.StudyConfig.ObjectiveValueName, screp.StudyConfig.Metrics, *namespace)
+	mls, err := mc.CollectWorkerLog(*workerID, screp.StudyConfig.ObjectiveValueName, screp.StudyConfig.Metrics, *namespace, *kind)
 	if err != nil {
 		log.Printf("Failed to collect logs: %v", err)
 		return
