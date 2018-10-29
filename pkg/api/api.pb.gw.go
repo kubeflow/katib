@@ -160,6 +160,23 @@ func request_Manager_UpdateWorkerState_0(ctx context.Context, marshaler runtime.
 
 }
 
+var (
+	filter_Manager_GetWorkerFullInfo_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+)
+
+func request_Manager_GetWorkerFullInfo_0(ctx context.Context, marshaler runtime.Marshaler, client ManagerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetWorkerFullInfoRequest
+	var metadata runtime.ServerMetadata
+
+	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_Manager_GetWorkerFullInfo_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := client.GetWorkerFullInfo(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
 func request_Manager_GetSuggestions_0(ctx context.Context, marshaler runtime.Marshaler, client ManagerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetSuggestionsRequest
 	var metadata runtime.ServerMetadata
@@ -660,6 +677,35 @@ func RegisterManagerHandler(ctx context.Context, mux *runtime.ServeMux, conn *gr
 
 	})
 
+	mux.Handle("GET", pattern_Manager_GetWorkerFullInfo_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+		if cn, ok := w.(http.CloseNotifier); ok {
+			go func(done <-chan struct{}, closed <-chan bool) {
+				select {
+				case <-done:
+				case <-closed:
+					cancel()
+				}
+			}(ctx.Done(), cn.CloseNotify())
+		}
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Manager_GetWorkerFullInfo_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Manager_GetWorkerFullInfo_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	mux.Handle("POST", pattern_Manager_GetSuggestions_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
@@ -1086,6 +1132,8 @@ var (
 
 	pattern_Manager_UpdateWorkerState_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "Manager", "UpdateWorkerState"}, ""))
 
+	pattern_Manager_GetWorkerFullInfo_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "Manager", "GetWorkerFullInfo"}, ""))
+
 	pattern_Manager_GetSuggestions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "Manager", "GetSuggestions"}, ""))
 
 	pattern_Manager_GetShouldStopWorkers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "Manager", "GetTrials", "GetShouldStopWorkers"}, ""))
@@ -1131,6 +1179,8 @@ var (
 	forward_Manager_GetWorkers_0 = runtime.ForwardResponseMessage
 
 	forward_Manager_UpdateWorkerState_0 = runtime.ForwardResponseMessage
+
+	forward_Manager_GetWorkerFullInfo_0 = runtime.ForwardResponseMessage
 
 	forward_Manager_GetSuggestions_0 = runtime.ForwardResponseMessage
 

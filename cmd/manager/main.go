@@ -193,6 +193,9 @@ func (s *server) UpdateWorkerState(ctx context.Context, in *pb.UpdateWorkerState
 	return &pb.UpdateWorkerStateReply{}, err
 }
 
+func (s *server) GetWorkerFullInfo(ctx context.Context, in *pb.GetWorkerFullInfoRequest) (*pb.GetWorkerFullInfoReply, error) {
+	return dbIf.GetWorkerFullInfo(in.StudyId, in.TrialId, in.WorkerId, in.OnlyLatestLog)
+}
 func (s *server) SetSuggestionParameters(ctx context.Context, in *pb.SetSuggestionParametersRequest) (*pb.SetSuggestionParametersReply, error) {
 	var err error
 	var id string
@@ -238,31 +241,48 @@ func (s *server) GetEarlyStoppingParameterList(ctx context.Context, in *pb.GetEa
 }
 
 func (s *server) SaveStudy(ctx context.Context, in *pb.SaveStudyRequest) (*pb.SaveStudyReply, error) {
-	err := s.msIf.SaveStudy(in)
+	var err error
+	if s.msIf != nil {
+		err = s.msIf.SaveStudy(in)
+	}
 	return &pb.SaveStudyReply{}, err
 }
 
 func (s *server) SaveModel(ctx context.Context, in *pb.SaveModelRequest) (*pb.SaveModelReply, error) {
-	err := s.msIf.SaveModel(in)
-	if err != nil {
-		log.Printf("Save Model failed %v", err)
-		return &pb.SaveModelReply{}, err
+	if s.msIf != nil {
+		err := s.msIf.SaveModel(in)
+		if err != nil {
+			log.Printf("Save Model failed %v", err)
+			return &pb.SaveModelReply{}, err
+		}
 	}
 	return &pb.SaveModelReply{}, nil
 }
 
 func (s *server) GetSavedStudies(ctx context.Context, in *pb.GetSavedStudiesRequest) (*pb.GetSavedStudiesReply, error) {
-	ret, err := s.msIf.GetSavedStudies()
+	ret := []*pb.StudyOverview{}
+	var err error
+	if s.msIf != nil {
+		ret, err = s.msIf.GetSavedStudies()
+	}
 	return &pb.GetSavedStudiesReply{Studies: ret}, err
 }
 
 func (s *server) GetSavedModels(ctx context.Context, in *pb.GetSavedModelsRequest) (*pb.GetSavedModelsReply, error) {
-	ret, err := s.msIf.GetSavedModels(in)
+	ret := []*pb.ModelInfo{}
+	var err error
+	if s.msIf != nil {
+		ret, err = s.msIf.GetSavedModels(in)
+	}
 	return &pb.GetSavedModelsReply{Models: ret}, err
 }
 
 func (s *server) GetSavedModel(ctx context.Context, in *pb.GetSavedModelRequest) (*pb.GetSavedModelReply, error) {
-	ret, err := s.msIf.GetSavedModel(in)
+	var ret *pb.ModelInfo = nil
+	var err error
+	if s.msIf != nil {
+		ret, err = s.msIf.GetSavedModel(in)
+	}
 	return &pb.GetSavedModelReply{Model: ret}, err
 }
 
@@ -278,7 +298,7 @@ func main() {
 	size := 1<<31 - 1
 	log.Printf("Start Katib manager: %s", port)
 	s := grpc.NewServer(grpc.MaxRecvMsgSize(size), grpc.MaxSendMsgSize(size))
-	pb.RegisterManagerServer(s, &server{msIf: modelstore.NewModelDB("modeldb-backend", "6543")})
+	pb.RegisterManagerServer(s, &server{})
 	reflection.Register(s)
 	if err = s.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)

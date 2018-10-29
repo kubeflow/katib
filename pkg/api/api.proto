@@ -52,6 +52,11 @@ service Manager {
             body: "*"
         };
     };
+    rpc GetWorkerFullInfo(GetWorkerFullInfoRequest) returns (GetWorkerFullInfoReply){
+        option (google.api.http) = {
+            get: "/api/Manager/GetWorkerFullInfo"
+        };
+    };
     rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply){
         option (google.api.http) = {
             post: "/api/Manager/GetSuggestions"
@@ -338,12 +343,29 @@ message GetWorkersReply {
     repeated Worker workers = 1;
 }
 
-message UpdateWorkerStateRequest{
-    string workerId = 1;
+message UpdateWorkerStateRequest {
+    string worker_id = 1;
     State status = 2;
 }
 
 message UpdateWorkerStateReply{
+}
+
+message GetWorkerFullInfoRequest {
+    string study_id = 1;
+    string trial_id = 2;
+    string worker_id = 3;
+    bool only_latest_log = 4;
+}
+
+message WorkerFullInfo {
+    Worker Worker = 1;
+    repeated Parameter parameter_set = 2;
+    repeated MetricsLog metrics_logs= 3;
+}
+
+message GetWorkerFullInfoReply {
+    repeated WorkerFullInfo worker_full_infos =1;
 }
 
 message GetSuggestionsRequest {

@@ -656,14 +656,15 @@ func (r *ReconcileStudyJobController) getSuggestion(c katibapi.ManagerClient, st
 }
 func (r *ReconcileStudyJobController) saveModel(c katibapi.ManagerClient, studyID string, trialID string, workerID string) error {
 	ctx := context.Background()
-	getStudyreq := &katibapi.GetStudyRequest{
-		StudyId: studyID,
-	}
-	getStudyReply, err := c.GetStudy(ctx, getStudyreq)
-	if err != nil {
-		return err
-	}
-	sc := getStudyReply.StudyConfig
+	// Disable ModelDB
+	//getStudyreq := &katibapi.GetStudyRequest{
+	//	StudyId: studyId,
+	//}
+	//getStudyReply, err := c.GetStudy(ctx, getStudyreq)
+	//if err != nil {
+	//	return err
+	//}
+	//sc := getStudyReply.StudyConfig
 	getMetricsRequest := &katibapi.GetMetricsRequest{
 		StudyId:   studyID,
 		WorkerIds: []string{workerID},
@@ -701,25 +702,26 @@ func (r *ReconcileStudyJobController) saveModel(c katibapi.ManagerClient, studyI
 		if trial == nil {
 			return fmt.Errorf("Trial %s not found", trialID)
 		}
-		if len(mets) > 0 {
-			smr := &katibapi.SaveModelRequest{
-				Model: &katibapi.ModelInfo{
-					StudyName:  sc.Name,
-					WorkerId:   mls.WorkerId,
-					Parameters: trial.ParameterSet,
-					Metrics:    mets,
-					ModelPath:  sc.Name,
-				},
-				DataSet: &katibapi.DataSetInfo{
-					Name: sc.Name,
-					Path: sc.Name,
-				},
-			}
-			_, err = c.SaveModel(ctx, smr)
-			if err != nil {
-				return err
-			}
-		}
+		// Disable ModelDB
+		//		if len(mets) > 0 {
+		//			smr := &katibapi.SaveModelRequest{
+		//				Model: &katibapi.ModelInfo{
+		//					StudyName:  sc.Name,
+		//					WorkerId:   mls.WorkerId,
+		//					Parameters: trial.ParameterSet,
+		//					Metrics:    mets,
+		//					ModelPath:  sc.Name,
+		//				},
+		//				DataSet: &katibapi.DataSetInfo{
+		//					Name: sc.Name,
+		//					Path: sc.Name,
+		//				},
+		//			}
+		//			_, err = c.SaveModel(ctx, smr)
+		//			if err != nil {
+		//				return err
+		//			}
+		//		}
 	}
 	return nil
 }

@@ -56,6 +56,11 @@ class ManagerStub(object):
         request_serializer=api__pb2.UpdateWorkerStateRequest.SerializeToString,
         response_deserializer=api__pb2.UpdateWorkerStateReply.FromString,
         )
+    self.GetWorkerFullInfo = channel.unary_unary(
+        '/api.Manager/GetWorkerFullInfo',
+        request_serializer=api__pb2.GetWorkerFullInfoRequest.SerializeToString,
+        response_deserializer=api__pb2.GetWorkerFullInfoReply.FromString,
+        )
     self.GetSuggestions = channel.unary_unary(
         '/api.Manager/GetSuggestions',
         request_serializer=api__pb2.GetSuggestionsRequest.SerializeToString,
@@ -184,6 +189,13 @@ class ManagerServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def UpdateWorkerState(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetWorkerFullInfo(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -330,6 +342,11 @@ def add_ManagerServicer_to_server(servicer, server):
           servicer.UpdateWorkerState,
           request_deserializer=api__pb2.UpdateWorkerStateRequest.FromString,
           response_serializer=api__pb2.UpdateWorkerStateReply.SerializeToString,
+      ),
+      'GetWorkerFullInfo': grpc.unary_unary_rpc_method_handler(
+          servicer.GetWorkerFullInfo,
+          request_deserializer=api__pb2.GetWorkerFullInfoRequest.FromString,
+          response_serializer=api__pb2.GetWorkerFullInfoReply.SerializeToString,
       ),
       'GetSuggestions': grpc.unary_unary_rpc_method_handler(
           servicer.GetSuggestions,

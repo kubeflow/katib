@@ -58,6 +58,7 @@ type VizierDBInterface interface {
 	CreateWorker(*api.Worker) (string, error)
 	UpdateWorker(string, api.State) error
 	DeleteWorker(string) error
+	GetWorkerFullInfo(string, string, string, bool) (*api.GetWorkerFullInfoReply, error)
 
 	SetSuggestionParam(string, string, []*api.SuggestionParameter) (string, error)
 	UpdateSuggestionParam(string, []*api.SuggestionParameter) error
@@ -439,7 +440,6 @@ func (d *dbConn) GetWorkerLogs(id string, opts *GetWorkerLogOpts) ([]*WorkerLog,
 	for rows.Next() {
 		log1 := new(WorkerLog)
 		var timeStr string
-
 		err := rows.Scan(&timeStr, &((*log1).Name), &((*log1).Value))
 		if err != nil {
 			log.Printf("Error scanning log: %v", err)
@@ -751,6 +751,153 @@ func (d *dbConn) UpdateWorker(id string, newstatus api.State) error {
 func (d *dbConn) DeleteWorker(id string) error {
 	_, err := d.db.Exec("DELETE FROM workers WHERE id = ?", id)
 	return err
+}
+
+func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId string, OnlyLatestLog bool) (*api.GetWorkerFullInfoReply, error) {
+	ret := &api.GetWorkerFullInfoReply{}
+	var err error
+	ws := []*api.Worker{}
+
+	if workerId != "" {
+		w, err := d.GetWorker(workerId)
+		ws = append(ws, w)
+		if err != nil {
+			return ret, err
+		}
+	} else {
+		ws, err = d.GetWorkerList(studyId, trialId)
+		if err != nil {
+			return ret, err
+		}
+	}
+	ts, err := d.GetTrialList(studyId)
+	if err != nil {
+		return ret, err
+	}
+	sc, err := d.GetStudyConfig(studyId)
+	if err != nil {
+		return ret, err
+	}
+
+	plist := make(map[string][]*api.Parameter)
+	for _, t := range ts {
+		plist[t.TrialId] = t.ParameterSet
+	}
+
+	wfilist := make([]*api.WorkerFullInfo, len(ws))
+	var qstr, id string
+	if OnlyLatestLog {
+		qstr = `
+		SELECT 
+			WM.worker_id, WM.time, WM.name, WM.value 
+		FROM (
+			SELECT 
+				Master.worker_id, Master.time,  Master.name,  Master.value
+			FROM (
+				SELECT 
+					worker_id, name, 
+					MAX(id) AS MaxID
+				FROM 
+					worker_metrics 
+				GROUP BY 
+					worker_id, name
+				) AS LATEST
+				JOIN worker_metrics AS Master
+				ON Master.id = LATEST.MaxID
+		) AS WM 
+		JOIN workers AS WS 
+		ON WM.worker_id = WS.id 
+		AND`
+	} else {
+		qstr = `
+		SELECT 
+			WM.worker_id, WM.time, WM.name, WM.value 
+		FROM 
+			worker_metrics AS WM 
+		JOIN workers AS WS 
+		ON WM.worker_id = WS.id 
+		AND`
+	}
+	if workerId != "" {
+		if OnlyLatestLog {
+			qstr = `
+			SELECT 
+			WM.worker_id, WM.time, WM.name, WM.value 
+			FROM (
+				SELECT 
+					Master.worker_id, Master.time,  Master.name,  Master.value
+				FROM (
+					SELECT 
+						worker_id, name, 
+						MAX(id) AS MaxID
+					FROM 
+						worker_metrics 
+					GROUP BY 
+						worker_id, name
+				) AS LATEST
+				JOIN worker_metrics AS Master
+				ON Master.id = LATEST.MaxID
+				AND Master.worker_id = ?
+			) AS WM`
+		} else {
+			qstr = "SELECT worker_id, time, name, value FROM worker_metrics WHERE worker_id = ?"
+		}
+		id = workerId
+	} else if trialId != "" {
+		qstr += " WS.trial_id = ? "
+		id = trialId
+	} else if studyId != "" {
+		qstr += " WS.study_id = ? "
+		id = studyId
+	}
+	rows, err := d.db.Query(qstr+" ORDER BY time", id)
+	if err != nil {
+		log.Printf("SQL query: %v", err)
+		return ret, err
+	}
+	metricslist := make(map[string]map[string][]*api.MetricsValueTime, len(ws))
+	for rows.Next() {
+		var name, value, timeStr, wid string
+		err := rows.Scan(&wid, &timeStr, &name, &value)
+		if err != nil {
+			log.Printf("Error scanning log: %v", err)
+			continue
+		}
+		ptime, err := time.Parse(mysqlTimeFmt, timeStr)
+		if err != nil {
+			log.Printf("Error parsing time %s: %v", timeStr, err)
+			continue
+		}
+		if _, ok := metricslist[wid]; ok {
+			metricslist[wid][name] = append(metricslist[wid][name], &api.MetricsValueTime{
+				Value: value,
+				Time:  ptime.UTC().Format(time.RFC3339Nano),
+			})
+		} else {
+			metricslist[wid] = make(map[string][]*api.MetricsValueTime, len(sc.Metrics))
+			metricslist[wid][name] = append(metricslist[wid][name], &api.MetricsValueTime{
+				Value: value,
+				Time:  ptime.UTC().Format(time.RFC3339Nano),
+			})
+		}
+	}
+	for i, w := range ws {
+		wfilist[i] = &api.WorkerFullInfo{
+			Worker:       w,
+			ParameterSet: plist[w.TrialId],
+		}
+		for _, m := range sc.Metrics {
+			if v, ok := metricslist[w.WorkerId][m]; ok {
+				wfilist[i].MetricsLogs = append(wfilist[i].MetricsLogs, &api.MetricsLog{
+					Name:   m,
+					Values: v,
+				},
+				)
+			}
+		}
+	}
+	ret.WorkerFullInfos = wfilist
+	return ret, nil
 }
 
 func (d *dbConn) SetSuggestionParam(algorithm string, studyID string, params []*api.SuggestionParameter) (string, error) {
