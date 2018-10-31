@@ -33,7 +33,7 @@ func NewMedianStoppingRule() *MedianStoppingRule {
 	return m
 }
 
-func (m *MedianStoppingRule) purseEarlyStoppingParameters(sc *api.StudyConfig, eps []*api.EarlyStoppingParameter) (*MedianStoppingParam, error) {
+func (m *MedianStoppingRule) parseEarlyStoppingParameters(sc *api.StudyConfig, eps []*api.EarlyStoppingParameter) (*MedianStoppingParam, error) {
 	p := &MedianStoppingParam{LeastStep: defaultLeastStep, Margin: defaultMargin, EvalMetric: sc.ObjectiveValueName, BurnIn: defaultBurnIn}
 	for _, ep := range eps {
 		switch ep.Name {
@@ -145,7 +145,7 @@ func (m *MedianStoppingRule) GetShouldStopWorkers(ctx context.Context, in *api.G
 	if err != nil {
 		return &api.GetShouldStopWorkersReply{}, err
 	}
-	p, err := m.purseEarlyStoppingParameters(sc, eparam)
+	p, err := m.parseEarlyStoppingParameters(sc, eparam)
 	if err != nil {
 		return &api.GetShouldStopWorkersReply{}, err
 	}

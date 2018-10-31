@@ -65,13 +65,13 @@ func pushStudy(cmd *cobra.Command, opt *pushStudyOpt) {
 		buf, _ := ioutil.ReadFile(opt.file)
 		err = yaml.Unmarshal(buf, &in)
 		if err != nil {
-			log.Fatalf("Fail to Purse config: %v", err)
+			log.Fatalf("Fail to Parse config: %v", err)
 			return
 		}
 	} else if len(opt.args) > 0 {
 		err := json.Unmarshal(([]byte)(opt.args[0]), &in)
 		if err != nil {
-			log.Fatalf("Fail to Purse input: %v", err)
+			log.Fatalf("Fail to Parse input: %v", err)
 			return
 		}
 	} else {
