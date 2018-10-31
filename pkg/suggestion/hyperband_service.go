@@ -108,7 +108,7 @@ func (h *HyperBandSuggestService) makeMasterBracket(ctx context.Context, c api.M
 				case api.ParameterType_DOUBLE:
 					dmin, _ := strconv.ParseFloat(pc.Feasible.Min, 64)
 					dmax, _ := strconv.ParseFloat(pc.Feasible.Max, 64)
-					t.ParameterSet[j].Value = strconv.FormatFloat(h.DoubelRandom(dmin, dmax), 'f', 4, 64)
+					t.ParameterSet[j].Value = strconv.FormatFloat(h.DoubleRandom(dmin, dmax), 'f', 4, 64)
 				case api.ParameterType_CATEGORICAL:
 					t.ParameterSet[j].Value = pc.Feasible.List[h.IntRandom(0, len(pc.Feasible.List)-1)]
 				}

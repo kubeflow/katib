@@ -19,7 +19,7 @@ func NewRandomSuggestService() *RandomSuggestService {
 	return &RandomSuggestService{}
 }
 
-func (s *RandomSuggestService) DoubelRandom(min, max float64) float64 {
+func (s *RandomSuggestService) DoubleRandom(min, max float64) float64 {
 	if min == max {
 		return min
 	}
@@ -65,7 +65,7 @@ func (s *RandomSuggestService) GetSuggestions(ctx context.Context, in *api.GetSu
 			case api.ParameterType_DOUBLE:
 				dmin, _ := strconv.ParseFloat(pc.Feasible.Min, 64)
 				dmax, _ := strconv.ParseFloat(pc.Feasible.Max, 64)
-				sT[i].ParameterSet[j].Value = strconv.FormatFloat(s.DoubelRandom(dmin, dmax), 'f', 4, 64)
+				sT[i].ParameterSet[j].Value = strconv.FormatFloat(s.DoubleRandom(dmin, dmax), 'f', 4, 64)
 			case api.ParameterType_CATEGORICAL:
 				sT[i].ParameterSet[j].Value = pc.Feasible.List[s.IntRandom(0, len(pc.Feasible.List)-1)]
 			}
