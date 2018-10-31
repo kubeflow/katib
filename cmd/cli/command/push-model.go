@@ -64,13 +64,13 @@ func pushModel(cmd *cobra.Command, opt *pushModelOpt) {
 		buf, _ := ioutil.ReadFile(opt.file)
 		err = yaml.Unmarshal(buf, &req)
 		if err != nil {
-			log.Fatalf("Fail to Parse config: %v", err)
+			log.Fatalf("Fail to parse config: %v", err)
 			return
 		}
 	} else if len(opt.args) > 0 {
 		err := json.Unmarshal(([]byte)(opt.args[0]), &req)
 		if err != nil {
-			log.Fatalf("Fail to Parse input: %v", err)
+			log.Fatalf("Fail to parse input: %v", err)
 			return
 		}
 	} else {
