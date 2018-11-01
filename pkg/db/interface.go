@@ -109,6 +109,14 @@ func generateRandid() string {
 	return string(rs1Letters[rand.Intn(len(rs1Letters))]) + fmt.Sprintf("%016x", id)[1:]
 }
 
+func isDBDuplicateError(err error) bool {
+	errmsg := strings.ToLower(err.Error())
+	if strings.Contains(errmsg, "unique") || strings.Contains(errmsg, "duplicate") {
+		return true
+	}
+	return false
+}
+
 func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
 
@@ -240,13 +248,10 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 		)
 		if err == nil {
 			break
-		} else {
-			errmsg := strings.ToLower(err.Error())
-			if strings.Contains(errmsg, "unique") || strings.Contains(errmsg, "duplicate") {
-				i--
-				if i > 0 {
-					continue
-				}
+		} else if isDBDuplicateError(err) {
+			i--
+			if i > 0 {
+				continue
 			}
 		}
 		return "", err
@@ -387,13 +392,10 @@ func (d *dbConn) CreateTrial(trial *api.Trial) error {
 		if err == nil {
 			trial.TrialId = trialID
 			break
-		} else {
-			errmsg := strings.ToLower(err.Error())
-			if strings.Contains(errmsg, "unique") || strings.Contains(errmsg, "duplicate") {
-				i--
-				if i > 0 {
-					continue
-				}
+		} else if isDBDuplicateError(err) {
+			i--
+			if i > 0 {
+				continue
 			}
 		}
 		return err
@@ -728,13 +730,10 @@ func (d *dbConn) CreateWorker(worker *api.Worker) (string, error) {
 		if err == nil {
 			worker.WorkerId = workerID
 			break
-		} else {
-			errmsg := strings.ToLower(err.Error())
-			if strings.Contains(errmsg, "unique") || strings.Contains(errmsg, "duplicate") {
-				i--
-				if i > 0 {
-					continue
-				}
+		} else if isDBDuplicateError(err) {
+			i--
+			if i > 0 {
+				continue
 			}
 		}
 		return "", err
@@ -917,6 +916,8 @@ func (d *dbConn) SetSuggestionParam(algorithm string, studyID string, params []*
 			paramID, algorithm, studyID, strings.Join(ps, ",\n"))
 		if err == nil {
 			break
+		} else if !isDBDuplicateError(err) {
+			return "", err
 		}
 	}
 	return paramID, err
@@ -1025,6 +1026,8 @@ func (d *dbConn) SetEarlyStopParam(algorithm string, studyID string, params []*a
 			paramID, algorithm, studyID, strings.Join(ps, ",\n"))
 		if err == nil {
 			break
+		} else if !isDBDuplicateError(err) {
+			return "", err
 		}
 	}
 	return paramID, nil
