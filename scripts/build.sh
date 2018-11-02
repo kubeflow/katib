@@ -27,7 +27,6 @@ cd ${SCRIPT_ROOT}
 
 echo "Building core image..."
 docker build -t ${PREFIX}/vizier-core -f ${CMD_PREFIX}/manager/Dockerfile .
-docker build -t ${PREFIX}/vizier-core-rest -f ${CMD_PREFIX}/manager-rest/Dockerfile .
 docker build -t ${PREFIX}/studyjob-controller -f ${CMD_PREFIX}/studyjobcontroller/Dockerfile .
 docker build -t ${PREFIX}/metrics-collector -f ${CMD_PREFIX}/metricscollector/Dockerfile .
 
@@ -44,7 +43,7 @@ echo "Building earlystopping images..."
 docker build -t ${PREFIX}/earlystopping-medianstopping -f ${CMD_PREFIX}/earlystopping/medianstopping/Dockerfile .
 
 echo "Building UI image..."
-docker build -t ${PREFIX}/katib-frontend -f modeldb/Dockerfile .
+docker build -t ${PREFIX}/katib-ui -f ${CMD_PREFIX}/ui/Dockerfile .
 
 #echo "Building CLI image..."
 #docker build -t ${PREFIX}/katib-cli -f ${CMD_PREFIX}/cli/Dockerfile .
