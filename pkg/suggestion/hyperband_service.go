@@ -108,7 +108,7 @@ func (h *HyperBandSuggestService) makeMasterBracket(ctx context.Context, c api.M
 				case api.ParameterType_DOUBLE:
 					dmin, _ := strconv.ParseFloat(pc.Feasible.Min, 64)
 					dmax, _ := strconv.ParseFloat(pc.Feasible.Max, 64)
-					t.ParameterSet[j].Value = strconv.FormatFloat(h.DoubelRandom(dmin, dmax), 'f', 4, 64)
+					t.ParameterSet[j].Value = strconv.FormatFloat(h.DoubleRandom(dmin, dmax), 'f', 4, 64)
 				case api.ParameterType_CATEGORICAL:
 					t.ParameterSet[j].Value = pc.Feasible.List[h.IntRandom(0, len(pc.Feasible.List)-1)]
 				}
@@ -195,7 +195,7 @@ func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.Ma
 	return tids, ts, nil
 }
 
-func (h *HyperBandSuggestService) purseSuggestionParameters(ctx context.Context, c api.ManagerClient, studyID string, sparam []*api.SuggestionParameter) (*HyperBandParameters, error) {
+func (h *HyperBandSuggestService) parseSuggestionParameters(ctx context.Context, c api.ManagerClient, studyID string, sparam []*api.SuggestionParameter) (*HyperBandParameters, error) {
 	p := &HyperBandParameters{
 		eta:                -1,
 		sMax:               -1,
@@ -238,7 +238,7 @@ func (h *HyperBandSuggestService) purseSuggestionParameters(ctx context.Context,
 		}
 	}
 	if p.rL <= 0 || p.ResourceName == "" {
-		log.Printf("Failed to purse Suggestion Parameter. r_l and ResourceName must be set.")
+		log.Printf("Failed to parse Suggestion Parameter. r_l and ResourceName must be set.")
 		return nil, fmt.Errorf("Suggestion Parameter set Error")
 	}
 	if p.eta <= 0 {
@@ -418,7 +418,7 @@ func (h *HyperBandSuggestService) GetSuggestions(ctx context.Context, in *api.Ge
 		log.Fatalf("GetParameter failed: %v", err)
 		return &api.GetSuggestionsReply{}, err
 	}
-	hbparam, err := h.purseSuggestionParameters(ctx, c, in.StudyId, spr.SuggestionParameters)
+	hbparam, err := h.parseSuggestionParameters(ctx, c, in.StudyId, spr.SuggestionParameters)
 	if err != nil {
 		return &api.GetSuggestionsReply{}, err
 	}

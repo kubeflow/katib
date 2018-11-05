@@ -88,7 +88,7 @@ func (s *GridSuggestService) setP(gci int, p [][]*api.Parameter, pg [][]string, 
 	}
 }
 
-func (s *GridSuggestService) purseSuggestParam(suggestParam []*api.SuggestionParameter) (int, int, map[string]int) {
+func (s *GridSuggestService) parseSuggestParam(suggestParam []*api.SuggestionParameter) (int, int, map[string]int) {
 	ret := make(map[string]int)
 	defaultGrid := 0
 	i := 0
@@ -161,7 +161,7 @@ func (s *GridSuggestService) GetSuggestions(ctx context.Context, in *api.GetSugg
 		log.Printf("GetParameter failed: %v", err)
 		return &api.GetSuggestionsReply{}, err
 	}
-	df, iteration, glist := s.purseSuggestParam(spr.SuggestionParameters)
+	df, iteration, glist := s.parseSuggestParam(spr.SuggestionParameters)
 	log.Printf("Study %s iteration %d DefaltGrid %d Grids %v", in.StudyId, iteration, df, glist)
 	grids := s.genGrids(in.StudyId, scr.StudyConfig.ParameterConfigs.Configs, df, glist)
 	var reqnum = int(in.RequestNumber)
