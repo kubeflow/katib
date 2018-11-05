@@ -31,7 +31,8 @@ if __name__ == '__main__':
             va.value = v.value
     channel = grpc.beta.implementations.insecure_channel(opt.manager_addr, opt.manager_port)
     with api_pb2.beta_create_Manager_stub(channel) as client:
+        print("In " + mlset.worker_id + " " + str(len(mlset.metrics_logs)) + " metrics will be reported.")
         client.ReportMetricsLogs(api_pb2.ReportMetricsLogsRequest(
             study_id=opt.study_id,
-            metrics_log_sets=mlset
+            metrics_log_sets=[mlset]
             ), 10)

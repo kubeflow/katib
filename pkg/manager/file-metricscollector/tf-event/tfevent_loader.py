@@ -35,7 +35,7 @@ class MetricsCollector:
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             gsrep = client.GetStudy(api_pb2.GetStudyRequest(study_id=study_id), 10)
-            self.metrics = gsrep.StudyConf.metrics
+            self.metrics = gsrep.study_config.metrics
         self.Parser = TFEventFileParser()
 
     def parse_file(self, directory):
@@ -44,6 +44,7 @@ class MetricsCollector:
             if os.path.isdir(f):
                 continue
             try:
+                print(f+" will be parse.")
                 ml = self.Parser.parse_summary(f, self.metrics)
                 for m in ml:
                     mls.append(ml[m])
