@@ -401,7 +401,7 @@ func TestPurseSuggestionParameters(t *testing.T) {
 	p1 := getSampleSuggestionParameters()
 	mockAPI := mockapi.NewMockManagerClient(ctrl)
 
-	rtn_param1, _ := h.purseSuggestionParameters(context.Background(), mockAPI, "studyId", p1)
+	rtn_param1, _ := h.parseSuggestionParameters(context.Background(), mockAPI, "studyId", p1)
 
 	exp_param1 := &HyperBandParameters{
 		eta:1.5,
@@ -422,7 +422,7 @@ func TestPurseSuggestionParameters(t *testing.T) {
 	}
 
 	p2 := make([]*api.SuggestionParameter, 0)
-	rtn_param2, _ := h.purseSuggestionParameters(context.Background(), mockAPI, "studyId", p2)
+	rtn_param2, _ := h.parseSuggestionParameters(context.Background(), mockAPI, "studyId", p2)
 
 	if rtn_param2 != nil {
 		t.Errorf("expected nil, but returned %v", rtn_param2)
@@ -444,7 +444,7 @@ func TestPurseSuggestionParameters(t *testing.T) {
 	}
 	srep := getSampleStudyReply()
 	mockAPI.EXPECT().GetStudy(context.Background(), sreq).Return(srep, nil)
-	rtn_param3, _ := h.purseSuggestionParameters(context.Background(), mockAPI, "studyId", p3)
+	rtn_param3, _ := h.parseSuggestionParameters(context.Background(), mockAPI, "studyId", p3)
 
 	exp_param3 := &HyperBandParameters{
 		eta:3,
