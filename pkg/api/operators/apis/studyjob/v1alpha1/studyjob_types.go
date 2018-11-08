@@ -67,10 +67,12 @@ type StudyJobStatus struct {
 }
 
 type WorkerCondition struct {
-	WorkerID      string    `json:"workerid,omitempty"`
-	Kind          string    `json:"kind,omitempty"`
-	Condition     Condition `json:"conditon,omitempty"`
-	ObjctiveValue *float64  `jsob:"objctiveValue,omitempty"`
+	WorkerID       string      `json:"workerid,omitempty"`
+	Kind           string      `json:"kind,omitempty"`
+	Condition      Condition   `json:"conditon,omitempty"`
+	ObjctiveValue  *float64    `jsob:"objctiveValue,omitempty"`
+	StartTime      metav1.Time `json:"startTime,omitempty"`
+	CompletionTime metav1.Time `json:"completionTime,omitempty"`
 }
 
 type TrialSet struct {

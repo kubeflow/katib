@@ -433,6 +433,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 							if ctime.Before(cjob.Status.LastScheduleTime) && len(cjob.Status.Active) == 0 {
 								r.saveModel(c, instance.Status.StudyID, instance.Status.Trials[i].TrialID, instance.Status.Trials[i].WorkerList[j].WorkerID)
 								instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionCompleted
+								instance.Status.Trials[i].WorkerList[j].CompletionTime = metav1.Now()
 								update = true
 								_, err := c.UpdateWorkerState(
 									context.Background(),
@@ -550,6 +551,7 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 						WorkerID:  wid,
 						Kind:      wkind,
 						Condition: katibv1alpha1.ConditionCreated,
+						StartTime: metav1.Now(),
 					},
 				},
 			},
