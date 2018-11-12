@@ -265,17 +265,17 @@ func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob
 						if curValue < *instance.Spec.OptimizationGoal {
 							goal = true
 						}
-						if instance.Status.BestObjctiveValue != nil {
-							if *instance.Status.BestObjctiveValue > curValue {
-								instance.Status.BestObjctiveValue = &curValue
+						if instance.Status.BestObjectiveValue != nil {
+							if *instance.Status.BestObjectiveValue > curValue {
+								instance.Status.BestObjectiveValue = &curValue
 							}
 						} else {
-							instance.Status.BestObjctiveValue = &curValue
+							instance.Status.BestObjectiveValue = &curValue
 						}
 						for i := range instance.Status.Trials {
 							for j := range instance.Status.Trials[i].WorkerList {
 								if instance.Status.Trials[i].WorkerList[j].WorkerID == mls.WorkerId {
-									instance.Status.Trials[i].WorkerList[j].ObjctiveValue = &curValue
+									instance.Status.Trials[i].WorkerList[j].ObjectiveValue = &curValue
 								}
 							}
 						}
@@ -283,17 +283,17 @@ func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob
 						if curValue > *instance.Spec.OptimizationGoal {
 							goal = true
 						}
-						if instance.Status.BestObjctiveValue != nil {
-							if *instance.Status.BestObjctiveValue < curValue {
-								instance.Status.BestObjctiveValue = &curValue
+						if instance.Status.BestObjectiveValue != nil {
+							if *instance.Status.BestObjectiveValue < curValue {
+								instance.Status.BestObjectiveValue = &curValue
 							}
 						} else {
-							instance.Status.BestObjctiveValue = &curValue
+							instance.Status.BestObjectiveValue = &curValue
 						}
 						for i := range instance.Status.Trials {
 							for j := range instance.Status.Trials[i].WorkerList {
 								if instance.Status.Trials[i].WorkerList[j].WorkerID == mls.WorkerId {
-									instance.Status.Trials[i].WorkerList[j].ObjctiveValue = &curValue
+									instance.Status.Trials[i].WorkerList[j].ObjectiveValue = &curValue
 								}
 							}
 						}
@@ -381,7 +381,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 	for i, t := range instance.Status.Trials {
 		for j, w := range t.WorkerList {
 			if w.Condition == katibv1alpha1.ConditionCompleted || w.Condition == katibv1alpha1.ConditionFailed {
-				if w.ObjctiveValue == nil && w.Condition == katibv1alpha1.ConditionCompleted {
+				if w.ObjectiveValue == nil && w.Condition == katibv1alpha1.ConditionCompleted {
 					cwids = append(cwids, w.WorkerID)
 				}
 				switch w.Kind {
