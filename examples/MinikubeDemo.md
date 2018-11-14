@@ -110,7 +110,7 @@ Spec:
     Image:        katib/mxnet-mnist-example
     Worker Type:  Default
 Status:
-  Best Objctive Value:          <nil>
+  Best Objective Value:         <nil>
   Conditon:                     Running
   Early Stopping Parameter Id:
   Studyid:                      qb397cc06d1f8302
@@ -118,17 +118,17 @@ Status:
   Trials:
     Trialid:  p18ee16163b85678
     Workeridlist:
-      Objctive Value:  <nil>
+      Objective Value: <nil>
       Conditon:        Running
       Workerid:        td08f74b9939350d
     Trialid:           pb1be3dbe53a5cb0
     Workeridlist:
-      Objctive Value:  <nil>
+      Objective Value: <nil>
       Conditon:        Running
       Workerid:        p2b23e25cce4092c
     Trialid:           m64209fe0867e91a
     Workeridlist:
-      Objctive Value:  <nil>
+      Objective Value: <nil>
       Conditon:        Running
       Workerid:        q6258c1ac98a00a5
 Events:                <none>
@@ -218,7 +218,7 @@ Spec:
     Worker Template Path:  /worker-template/gpuWorkerTemplate.yaml
     Worker Type:           Default
 Status:
-  Best Objctive Value:          <nil>
+  Best Objective Value:         <nil>
   Conditon:                     Running
   Early Stopping Parameter Id:
   Studyid:                      k549e927046f2136
@@ -226,17 +226,17 @@ Status:
   Trials:
     Trialid:  t721857cd426b68b
     Workeridlist:
-      Objctive Value:  <nil>
+      Objective Value: <nil>
       Conditon:        Running
       Workerid:        g07cba174ada521e
     Trialid:           f27c0ac1c6664533
     Workeridlist:
-      Objctive Value:  <nil>
+      Objective Value: <nil>
       Conditon:        Running
       Workerid:        h8d5062f2f1b8633
     Trialid:           v129109d1331a98e
     Workeridlist:
-      Objctive Value:  <nil>
+      Objective Value: <nil>
       Conditon:        Running
       Workerid:        x8f172a64645690e
 ```
