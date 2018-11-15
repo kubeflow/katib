@@ -3,6 +3,7 @@ import argparse
 import api_pb2
 import api_pb2_grpc
 from tfevent_loader import MetricsCollector
+from logging import getLogger, StreamHandler, INFO
 
 def parse_options():
     parser = argparse.ArgumentParser(
@@ -18,6 +19,12 @@ def parse_options():
     return opt
 
 if __name__ == '__main__':
+    logger = getLogger(__name__)
+    handler = StreamHandler()
+    handler.setLevel(INFO)
+    logger.setLevel(INFO)
+    logger.addHandler(handler)
+    logger.propagate = False
     opt = parse_options()
     mlset = api_pb2.MetricsLogSet(worker_id=opt.worker_id, metrics_logs=[])
     mc = MetricsCollector(opt.manager_addr, opt.manager_port, opt.study_id, opt.worker_id)
@@ -31,7 +38,7 @@ if __name__ == '__main__':
             va.value = v.value
     channel = grpc.beta.implementations.insecure_channel(opt.manager_addr, opt.manager_port)
     with api_pb2.beta_create_Manager_stub(channel) as client:
-        print("In " + mlset.worker_id + " " + str(len(mlset.metrics_logs)) + " metrics will be reported.")
+        logger.info("In " + mlset.worker_id + " " + str(len(mlset.metrics_logs)) + " metrics will be reported.")
         client.ReportMetricsLogs(api_pb2.ReportMetricsLogsRequest(
             study_id=opt.study_id,
             metrics_log_sets=[mlset]
