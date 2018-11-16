@@ -3,7 +3,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: studyjob-controller
-  namespace: katib
+  namespace: kubeflow
   labels:
     app: studyjob-controller
 spec:

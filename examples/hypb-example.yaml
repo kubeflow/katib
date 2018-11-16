@@ -1,7 +1,7 @@
 apiVersion: "kubeflow.org/v1alpha1"
 kind: StudyJob
 metadata:
-  namespace: katib
+  namespace: kubeflow
   labels:
     controller-tools.k8s.io: "1.0"
   name: hypb-example

@@ -15,19 +15,19 @@ Don't worry if the `vizier-core` get an error.
 It will be recovered after DB will be prepared.
 Wait until all components will be Running status.
 
-Then, start port-forward for katib services `6789 -> manager` and `3000 -> UI`.
+Then, start port-forward for katib services `6789 -> manager` and `8000 -> UI`.
 
 kubectl v1.10~
 ```
-$ kubectl -n katib port-forward svc/vizier-core 6789:6789 &
-$ kubectl -n katib port-forward svc/katib-ui 3000:3000 &
+$ kubectl -n kubeflow port-forward svc/vizier-core 6789:6789 &
+$ kubectl -n kubeflow port-forward svc/katib-ui 8000:80 &
 ```
 
 kubectl ~v1.9
 
 ```
-& kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep vizier-core | sed -e "s@pods\/@@") 6789:6789 &
-& kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep katib-ui | sed -e "s@pods\/@@") 3000:3000 &
+& kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep vizier-core | sed -e "s@pods\/@@") 6789:6789 &
+& kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-ui | sed -e "s@pods\/@@") 8000:80 &
 ```
 
 ## Create Study
@@ -49,7 +49,7 @@ In this demo, 3 hyper parameters
 are randomly generated.
 
 ```
-$ kubectl -n katib get studyjob
+$ kubectl -n kubeflow get studyjob
 NAME             AGE
 random-example   2m
 ```
@@ -57,9 +57,9 @@ random-example   2m
 Check the study status.
 
 ```
-$ kubectl -n katib describe studyjobs random-example
+$ kubectl -n kubeflow describe studyjobs random-example
 Name:         random-example
-Namespace:    katib
+Namespace:    kubeflow
 Labels:       controller-tools.k8s.io=1.0
 Annotations:  kubectl.kubernetes.io/last-applied-configuration={"apiVersion":"kubeflow.org/v1alpha1","kind":"StudyJob","metadata":{"annotations":{},"labels":{"controller-tools.k8s.io":"1.0"},"name":"random-example"...
 API Version:  kubeflow.org/v1alpha1
@@ -69,7 +69,7 @@ Metadata:
   Creation Timestamp:  2018-08-15T01:29:13Z
   Generation:          0
   Resource Version:    173289
-  Self Link:           /apis/kubeflow.org/v1alpha1/namespaces/katib/studyjobs/random-example
+  Self Link:           /apis/kubeflow.org/v1alpha1/namespaces/kubeflow/studyjobs/random-example
   UID:                 9e136400-a02a-11e8-b88c-42010af0008b
 Spec:
   Study Spec:
@@ -135,7 +135,7 @@ Events:                <none>
 ```
 
 When the Spec.Status.State become `Completed`, the study is completed.
-You can look the result on `http://127.0.0.1:3000/katib`.
+You can look the result on `http://127.0.0.1:8000/katib`.
 
 ### Use ConfigMap for Worker Template
 In Random example, the template for workers is defined in StudyJob manifest.
@@ -162,7 +162,7 @@ kubectl apply -f random-example.yaml
 
 ## UI
 You can check your study results with Web UI.
-Acsess to `http://127.0.0.1:3000/katib`
+Acsess to `http://127.0.0.1:8000/katib`
 The Results will be saved automatically.
 
 ### Using GPU demo
@@ -178,16 +178,16 @@ Set "/worker-template/gpuWorkerTemplate.yaml at `workerTemplatePath` field and s
 You can apply it same as other examples.
 ```
 $ kubectl apply -f gpu-example.yaml
-$ kubectl -n katib get studyjob
+$ kubectl -n kubeflow get studyjob
 
 NAME             AGE
 gpu-example      1m
 random-example   17m
 
-$ kubectl -n katib describe studyjob gpu-example
+$ kubectl -n kubeflow describe studyjob gpu-example
 
 Name:         gpu-example
-Namespace:    katib
+Namespace:    kubeflow
 Labels:       controller-tools.k8s.io=1.0
 Annotations:  kubectl.kubernetes.io/last-applied-configuration={"apiVersion":"kubeflow.org/v1alpha1","kind":"StudyJob","metadata":{"annotations":{},"labels":{"controller-tools.k8s.io":"1.0"},"name":"gpu-example","n...
 API Version:  kubeflow.org/v1alpha1
@@ -197,7 +197,7 @@ Metadata:
   Creation Timestamp:  2018-08-15T01:48:12Z
   Generation:          0
   Resource Version:    175002
-  Self Link:           /apis/kubeflow.org/v1alpha1/namespaces/katib/studyjobs/gpu-example
+  Self Link:           /apis/kubeflow.org/v1alpha1/namespaces/kubeflow/studyjobs/gpu-example
   UID:                 44afac4c-a02d-11e8-b88c-42010af0008b
 Spec:
   Study Spec:
@@ -244,9 +244,9 @@ Status:
 Check the GPU configuration works correctly.
 
 ```
-$ kubectl -n katib describe pod g07cba174ada521e-88wpn
+$ kubectl -n kubeflow describe pod g07cba174ada521e-88wpn
 Name:           g07cba174ada521e-88wpn
-Namespace:      katib
+Namespace:      kubeflow
 Node:           <none>
 Labels:         controller-uid=44bfb99f-a02d-11e8-b88c-42010af0008b
                 job-name=g07cba174ada521e
