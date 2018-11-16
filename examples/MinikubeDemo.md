@@ -293,7 +293,12 @@ Events:
 
 ## Metrics Collection
 
-When you use default worker type (It specify `Spec.workerSpec.workerType`), the metrics of worker will be collected from default metrics collector.
+### Design of Metrics Collector
+![metricscollectordesign](https://user-images.githubusercontent.com/10014831/47256754-e32cb480-d4bf-11e8-98e9-4bbec562ad75.png)
+
+### Default Metrics Collector
+
+The default metrics will be collect from the StdOut of workers.
 It is deploy as a cronjob. It will collect and report metrics periodically.
 It collect metrics through k8s pod log API.
 You should print logs {metrics name}={value} style.
@@ -314,6 +319,28 @@ Validation-accuracy=0.75
 The metrics collector will collect all logs of metrics.
 The manifest of metrics collector is also generated from template and defined [here](/manifests/studyjobcontroller/metricsControllerConfigMap.yaml).
 You can add your template and specify `spec.metricsCollectorSpec.metricsCollectorTemplatePath` in a studyjob manifest.
+
+### TF Event File Metrics Collector
+
+The TF Event file metrics collector will collect metrics from tf.event files.
+It is also deploy as a cronjob.
+When you use TF Event File Metrics Collector, you need to share files between a metrics collector and worker with PVC.
+There is an example for TF Event file metrics collector.
+First, please create PV and PVC for share event file.
+```
+$ kubectl apply -f tfevent-volume/
+```
+Then, create studyjob that use TF Event file metrics collector.
+```
+$ kubectl apply -f tf-event_test.yaml
+```
+
+It will create tensorflow worker and collect metrics from its eventfile.
+The code of tensorflow is [the official tutorial for mnist with summary](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/examples/tutorials/mnist/mnist_with_summaries.py).
+It will save event file to `/log/train` and `/log/test` directory.
+They have same named metrics ('accuracy' and 'cross_entropy').
+The accuracy in training will be save in train directory and test is in test directory.
+In a studyjob, please add directry name to the name of metrics as a prefix e.g. `train/accuracy`, `test/accuracy`.
 
 ## ModelManagement
 
