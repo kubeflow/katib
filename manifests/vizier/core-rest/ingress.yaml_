@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: vizier-core-rest
-  namespace: katib
+  namespace: kubeflow
   annotations:
     ingress.kubernetes.io/rewrite-target: /
 spec:

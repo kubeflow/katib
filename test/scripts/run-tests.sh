@@ -75,14 +75,14 @@ cat manifests/vizier/core/deployment.yaml
 ./scripts/deploy.sh
 
 TIMEOUT=120
-PODNUM=$(kubectl get deploy -n katib | grep -v NAME | wc -l)
-until kubectl get pods -n katib | grep Running | [[ $(wc -l) -eq $PODNUM ]]; do
-    echo Pod Status $(kubectl get pods -n katib | grep Running | wc -l)/$PODNUM
+PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
+until kubectl get pods -n kubeflow | grep Running | [[ $(wc -l) -eq $PODNUM ]]; do
+    echo Pod Status $(kubectl get pods -n kubeflow | grep Running | wc -l)/$PODNUM
     sleep 10
     TIMEOUT=$(( TIMEOUT - 1 ))
     if [[ $TIMEOUT -eq 0 ]];then
         echo "NG"
-        kubectl get pods -n katib
+        kubectl get pods -n kubeflow
         exit 1
     fi
 done
@@ -90,13 +90,13 @@ done
 echo "All Katib components are running."
 kubectl version
 echo "Katib deployments"
-kubectl -n katib get deploy
+kubectl -n kubeflow get deploy
 echo "Katib services"
-kubectl -n katib get svc
+kubectl -n kubeflow get svc
 echo "Katib pods"
-kubectl -n katib get pod
+kubectl -n kubeflow get pod
 
-kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep vizier-core | grep -v vizier-core-rest | sed -e "s@pods\/@@") 6789:6789 &
+kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep vizier-core | grep -v vizier-core-rest | sed -e "s@pods\/@@") 6789:6789 &
 echo "kubectl port-forward start"
 TIMEOUT=120
 until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do

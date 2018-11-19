@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: vizier-suggestion-random
-  namespace: katib
+  namespace: kubeflow
   labels:
     app: vizier
     component: suggestion-random

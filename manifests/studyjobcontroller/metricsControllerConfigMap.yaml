@@ -2,14 +2,14 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: metricscollector-template
-  namespace: katib
+  namespace: kubeflow
 data:
   defaultMetricsCollectorTemplate.yaml : |-
     apiVersion: batch/v1beta1
     kind: CronJob
     metadata:
       name: {{.WorkerID}}
-      namespace: katib
+      namespace: kubeflow
     spec:
       schedule: "*/1 * * * *"
       successfulJobsHistoryLimit: 1

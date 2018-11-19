@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: vizier-db
-  namespace: katib
+  namespace: kubeflow
   labels:
     app: vizier
     component: db

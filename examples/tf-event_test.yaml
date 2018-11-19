@@ -1,7 +1,7 @@
 apiVersion: "kubeflow.org/v1alpha1"
 kind: StudyJob
 metadata:
-  namespace: katib
+  namespace: kubeflow
   labels:
     controller-tools.k8s.io: "1.0"
   name: random-example-goal-test
@@ -34,7 +34,7 @@ spec:
           kind: Job
           metadata:
             name: {{.WorkerID}}
-            namespace: katib
+            namespace: kubeflow
           spec:
             template:
               spec:
@@ -65,7 +65,7 @@ spec:
         kind: CronJob
         metadata:
           name: {{.WorkerID}}
-          namespace: katib
+          namespace: kubeflow
         spec:
           schedule: "*/1 * * * *"
           successfulJobsHistoryLimit: 0
