@@ -119,6 +119,8 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
                         break
         self.logger.info("%d completed trials are found.", len(x_train), extra={"StudyID": studyID})
         if len(x_train) <= burn_in:
+            x_train = []
+            y_train = []
             self.logger.info("Trials will be sampled until %d trials for burn-in are completed.", burn_in, extra={"StudyID": studyID})
         else:
             self.logger.debug("Completed trials: %r", x_train, extra={"StudyID": studyID})
