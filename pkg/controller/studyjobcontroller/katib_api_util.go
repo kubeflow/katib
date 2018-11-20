@@ -22,7 +22,7 @@ import (
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 )
 
-func (r *ReconcileStudyJobController) createStudy(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig) (string, error) {
+func createStudy(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig) (string, error) {
 	ctx := context.Background()
 	createStudyreq := &katibapi.CreateStudyRequest{
 		StudyConfig: studyConfig,
@@ -46,7 +46,7 @@ func (r *ReconcileStudyJobController) createStudy(c katibapi.ManagerClient, stud
 	return studyID, nil
 }
 
-func (r *ReconcileStudyJobController) setSuggestionParam(c katibapi.ManagerClient, studyID string, suggestionSpec *katibv1alpha1.SuggestionSpec) (string, error) {
+func setSuggestionParam(c katibapi.ManagerClient, studyID string, suggestionSpec *katibv1alpha1.SuggestionSpec) (string, error) {
 	ctx := context.Background()
 	pid := ""
 	if suggestionSpec.SuggestionParameters != nil {
@@ -74,7 +74,7 @@ func (r *ReconcileStudyJobController) setSuggestionParam(c katibapi.ManagerClien
 	return pid, nil
 }
 
-func (r *ReconcileStudyJobController) getSuggestionParam(c katibapi.ManagerClient, paramID string) ([]*katibapi.SuggestionParameter, error) {
+func getSuggestionParam(c katibapi.ManagerClient, paramID string) ([]*katibapi.SuggestionParameter, error) {
 	ctx := context.Background()
 	gsreq := &katibapi.GetSuggestionParametersRequest{
 		ParamId: paramID,
@@ -85,7 +85,8 @@ func (r *ReconcileStudyJobController) getSuggestionParam(c katibapi.ManagerClien
 	}
 	return gsrep.SuggestionParameters, err
 }
-func (r *ReconcileStudyJobController) getSuggestion(c katibapi.ManagerClient, studyID string, suggestionSpec *katibv1alpha1.SuggestionSpec, sParamID string) (*katibapi.GetSuggestionsReply, error) {
+
+func getSuggestion(c katibapi.ManagerClient, studyID string, suggestionSpec *katibv1alpha1.SuggestionSpec, sParamID string) (*katibapi.GetSuggestionsReply, error) {
 	ctx := context.Background()
 	getSuggestRequest := &katibapi.GetSuggestionsRequest{
 		StudyId:             studyID,

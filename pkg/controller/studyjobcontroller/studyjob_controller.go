@@ -330,7 +330,7 @@ func (r *ReconcileStudyJobController) initializeStudy(instance *katibv1alpha1.St
 
 	log.Printf("Create Study %s", studyConfig.Name)
 	//CreateStudy
-	studyID, err := r.createStudy(c, studyConfig)
+	studyID, err := createStudy(c, studyConfig)
 	if err != nil {
 		return err
 	}
@@ -347,7 +347,7 @@ func (r *ReconcileStudyJobController) initializeStudy(instance *katibv1alpha1.St
 			Name:  "SuggestionCount",
 			Value: "0",
 		})
-	sPID, err := r.setSuggestionParam(c, studyID, sspec)
+	sPID, err := setSuggestionParam(c, studyID, sspec)
 	if err != nil {
 		return err
 	}
@@ -429,7 +429,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 					if cjoberr == nil {
 						if ctime != nil && cjob.Status.LastScheduleTime != nil {
 							if ctime.Before(cjob.Status.LastScheduleTime) && len(cjob.Status.Active) == 0 {
-								r.saveModel(c, instance.Status.StudyID, instance.Status.Trials[i].TrialID, instance.Status.Trials[i].WorkerList[j].WorkerID)
+								saveModel(c, instance.Status.StudyID, instance.Status.Trials[i].TrialID, instance.Status.Trials[i].WorkerList[j].WorkerID)
 								instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionCompleted
 								instance.Status.Trials[i].WorkerList[j].CompletionTime = metav1.Now()
 								update = true
@@ -496,7 +496,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 
 func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, ns string) (bool, error) {
 	//Check Suggestion Count
-	sps, err := r.getSuggestionParam(c, instance.Status.SuggestionParameterID)
+	sps, err := getSuggestionParam(c, instance.Status.SuggestionParameterID)
 	if err != nil {
 		return false, err
 	}
@@ -511,7 +511,7 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 		}
 	}
 	//GetSuggestion
-	getSuggestReply, err := r.getSuggestion(
+	getSuggestReply, err := getSuggestion(
 		c,
 		instance.Status.StudyID,
 		instance.Spec.SuggestionSpec,
@@ -581,7 +581,7 @@ type WorkerInstance struct {
 func (r *ReconcileStudyJobController) getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (string, error) {
 	var typeChecker interface{}
 	BUFSIZE := 1024
-	_, m, err := r.getWorkerManifest(
+	_, m, err := getWorkerManifest(
 		nil,
 		"validation",
 		&katibapi.Trial{
@@ -615,7 +615,7 @@ func (r *ReconcileStudyJobController) getWorkerKind(workerSpec *katibv1alpha1.Wo
 }
 
 func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, wkind string, dryrun bool) (string, error) {
-	wid, wm, err := r.getWorkerManifest(c, studyID, trial, workerSpec, wkind, false)
+	wid, wm, err := getWorkerManifest(c, studyID, trial, workerSpec, wkind, false)
 	if err != nil {
 		return "", err
 	}
@@ -645,7 +645,7 @@ func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJ
 func (r *ReconcileStudyJobController) spawnMetricsCollector(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, studyID string, trialID string, workerID string, namespace string, mcs *katibv1alpha1.MetricsCollectorSpec) error {
 	var mcjob batchv1beta.CronJob
 	BUFSIZE := 1024
-	mcm, err := r.getMetricsCollectorManifest(studyID, trialID, workerID, namespace, mcs)
+	mcm, err := getMetricsCollectorManifest(studyID, trialID, workerID, namespace, mcs)
 	if err != nil {
 		log.Printf("getMetricsCollectorManifest error %v", err)
 		return err

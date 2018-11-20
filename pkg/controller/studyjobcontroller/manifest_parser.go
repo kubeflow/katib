@@ -1,3 +1,5 @@
+// Copyright 2018 The Kubeflow Authors
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -21,7 +23,7 @@ import (
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 )
 
-func (r *ReconcileStudyJobController) getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, kind string, dryrun bool) (string, *bytes.Buffer, error) {
+func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, kind string, dryrun bool) (string, *bytes.Buffer, error) {
 	var wtp *template.Template = nil
 	var err error
 	if workerSpec != nil {
@@ -75,7 +77,7 @@ func (r *ReconcileStudyJobController) getWorkerManifest(c katibapi.ManagerClient
 	return wid, &b, nil
 }
 
-func (r *ReconcileStudyJobController) getMetricsCollectorManifest(studyID string, trialID string, workerID string, namespace string, mcs *katibv1alpha1.MetricsCollectorSpec) (*bytes.Buffer, error) {
+func getMetricsCollectorManifest(studyID string, trialID string, workerID string, namespace string, mcs *katibv1alpha1.MetricsCollectorSpec) (*bytes.Buffer, error) {
 	var mtp *template.Template = nil
 	var err error
 	tmpValues := map[string]string{

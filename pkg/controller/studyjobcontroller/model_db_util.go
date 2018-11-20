@@ -21,7 +21,7 @@ import (
 	katibapi "github.com/kubeflow/katib/pkg/api"
 )
 
-func (r *ReconcileStudyJobController) saveModel(c katibapi.ManagerClient, studyID string, trialID string, workerID string) error {
+func saveModel(c katibapi.ManagerClient, studyID string, trialID string, workerID string) error {
 	ctx := context.Background()
 	// Disable ModelDB
 	//getStudyreq := &katibapi.GetStudyRequest{
