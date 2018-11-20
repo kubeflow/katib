@@ -16,10 +16,10 @@ limitations under the License.
 package controller
 
 import (
-	"github.com/kubeflow/katib/pkg/controller/studyjobcontroller"
+	"github.com/kubeflow/katib/pkg/controller/studyjob"
 )
 
 func init() {
 	// AddToManagerFuncs is a list of functions to create controllers and add them to a manager.
-	AddToManagerFuncs = append(AddToManagerFuncs, studyjobcontroller.Add)
+	AddToManagerFuncs = append(AddToManagerFuncs, studyjob.Add)
 }
