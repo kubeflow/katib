@@ -6,7 +6,7 @@
 <div class="container-fluid mr-3 ml-3">
     <h1>Worker ID: {{.IDList.WorkerId}}</h1>
     <div class="float-right">
-        <a class="btn btn-outline-info" href="/katib/{{.IDList.StudyId}}/csv" download="Worker-{{.IDList.WorkerId}}.csv" target="_blank"><i class="fa fa-download"></i>CSV Download</a>
+        <a class="btn btn-outline-info" href="/katib/{{.IDList.StudyId}}/WorkerID/{{.IDList.WorkerId}}/csv" download="Worker-{{.IDList.WorkerId}}.csv" target="_blank"><i class="fa fa-download"></i>CSV Download</a>
     </div>
     <button type="button" class="btn btn-primary btn-lg btn-block" data-toggle="collapse" data-target="#param">
         TrialID {{.IDList.TrialId}}

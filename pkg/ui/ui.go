@@ -67,13 +67,26 @@ func (k *KatibUIHandler) Index(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Get Study list failed %v", err)
 		return
 	}
-	type StudyListView struct {
-		IDList         *IDList
-		StudyOverviews []*api.StudyOverview
+	type StudyNameStack struct {
+		StudyId string
+		Owner   string
 	}
-	slv := StudyListView{
-		IDList:         &IDList{},
-		StudyOverviews: gslrep.StudyOverviews,
+	type StudyListView struct {
+		IDList        *IDList
+		StudySummarys map[string][]*StudyNameStack
+	}
+	slv := &StudyListView{
+		IDList:        &IDList{},
+		StudySummarys: make(map[string][]*StudyNameStack),
+	}
+	for _, so := range gslrep.StudyOverviews {
+		if _, ok := slv.StudySummarys[so.Name]; !ok {
+			slv.StudySummarys[so.Name] = []*StudyNameStack{}
+		}
+		slv.StudySummarys[so.Name] = append(slv.StudySummarys[so.Name], &StudyNameStack{
+			StudyId: so.Id,
+			Owner:   so.Owner,
+		})
 	}
 	t, err := template.ParseFiles("/template/layout.html", "/template/index.html", "/template/breadcrumb.html")
 	if err != nil {

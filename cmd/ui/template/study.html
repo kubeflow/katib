@@ -2,6 +2,8 @@
 <link rel="stylesheet" href="/static/css/parallelcood.css"></link>
 <link rel="stylesheet" href="/static/css/profile.css"></link>
 <link rel="stylesheet" href="/static/css/loader.css"></link>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.18/datatables.min.css"/>
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.18/datatables.min.js"></script>
 <div class="container-fluid m-3">
     <h1>Study Info</h1>
     <ul class="nav nav-tabs">
@@ -129,8 +131,12 @@
                     <div class="col-md-5">
                     </div>
                     <div class="container-fluid bg-active" id="paracood">
-                    {{ template "parallelcood" . }}
                     </div>
+                    <div class="container-fluid bg-active">
+                        <table id="result-table" class="table table-hover">
+                        </table>
+                    </div>
+                    {{ template "parallelcood" . }}
                 </div>
             </div>
         </div>
