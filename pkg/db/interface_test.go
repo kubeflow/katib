@@ -1,20 +1,23 @@
 package db
 
 import (
+	"database/sql"
 	"database/sql/driver"
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
 	"testing"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/jsonpb"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	api "github.com/kubeflow/katib/pkg/api"
 )
 
-var dbInterface VizierDBInterface
+var dbInterface, mysqlInterface VizierDBInterface
 var mock sqlmock.Sqlmock
 
 var studyColumns = []string{
@@ -46,10 +49,22 @@ func TestMain(m *testing.M) {
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS earlystop_param").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	dbInterface.DBInit()
 
+	mysqlAddr := os.Getenv("TEST_MYSQL")
+	if mysqlAddr != "" {
+		mysql, err := sql.Open("mysql", "root:test123@tcp("+mysqlAddr+")/vizier")
+
+		if err != nil {
+			fmt.Printf("error opening db: %v\n", err)
+			os.Exit(1)
+		}
+		mysqlInterface = NewWithSQLConn(mysql)
+		mysqlInterface.DBInit()
+	}
+
 	os.Exit(m.Run())
 }
 
-func TestGetStudyConfig(t *testing.T) {
+func TestCreateStudy(t *testing.T) {
 	var in api.StudyConfig
 	in.ParameterConfigs = new(api.StudyConfig_ParameterConfigs)
 	//err := jsonpb.UnmarshalString("{}", &in)
@@ -58,12 +73,18 @@ func TestGetStudyConfig(t *testing.T) {
 		t.Errorf("err %v", err)
 	}
 
+	mock.ExpectExec("INSERT INTO studies VALUES").WithArgs().WillReturnError(errors.New("sql: Duplicated key"))
 	mock.ExpectExec("INSERT INTO studies VALUES").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	id, err := dbInterface.CreateStudy(&in)
 	if err != nil {
 		t.Errorf("CreateStudy error %v", err)
+	} else if len(id) != 16 {
+		t.Errorf("CreateStudy returned incorrect ID %s", id)
 	}
-	//	mock.ExpectExec("SELECT * FROM studies WHERE id").WithArgs(id).WillReturnRows(sqlmock.NewRows())
+}
+
+func TestGetStudyConfig(t *testing.T) {
+	id := generateRandid()
 	mock.ExpectQuery("SELECT").WillReturnRows(
 		sqlmock.NewRows(studyColumns).AddRow(
 			"abc", "test", "admin", 1, 0.99, "{}", "", "", "", "test"))
@@ -105,31 +126,37 @@ func TestDeleteStudy(t *testing.T) {
 }
 
 func TestCreateStudyIdGeneration(t *testing.T) {
+	if mysqlInterface == nil {
+		t.Skip("TEST_MYSQL is not defined.")
+	}
 	var in api.StudyConfig
 	in.ParameterConfigs = new(api.StudyConfig_ParameterConfigs)
 
-	var ids []string
+	seed := rand.Int63()
+	encountered := map[string]bool{}
 	for i := 0; i < 4; i++ {
-		rand.Seed(int64(i))
-		mock.ExpectExec("INSERT INTO studies VALUES").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
-		id, err := dbInterface.CreateStudy(&in)
+		// Repeadedly use the seed to force the same ID generation
+		rand.Seed(seed)
+		id, err := mysqlInterface.CreateStudy(&in)
+		if i == 3 {
+			if err == nil || !isDBDuplicateError(err) {
+				t.Errorf("Expected an duplicate error but got %v",
+					err)
+			} else {
+				break
+			}
+		}
 		if err != nil {
 			t.Errorf("CreateStudy error %v", err)
+		} else if !encountered[id] {
+			encountered[id] = true
+		} else {
+			t.Fatalf("Study ID duplicated %s", id)
 		}
-		ids = append(ids, id)
 		t.Logf("id gen %d %s %v\n", i, id, err)
 	}
-	encountered := map[string]bool{}
-	for i := 0; i < len(ids); i++ {
-		if !encountered[ids[i]] {
-			encountered[ids[i]] = true
-		} else {
-			t.Fatalf("Study ID duplicated %v", ids)
-		}
-	}
-	for _, id := range ids {
-		mock.ExpectExec("DELETE").WillReturnResult(sqlmock.NewResult(1, 1))
-		err := dbInterface.DeleteStudy(id)
+	for id, _ := range encountered {
+		err := mysqlInterface.DeleteStudy(id)
 		if err != nil {
 			t.Errorf("DeleteStudy error %v", err)
 		}
