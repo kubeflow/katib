@@ -18,9 +18,114 @@ import (
 	"context"
 	"log"
 
+	"github.com/kubeflow/katib/pkg"
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
+	"google.golang.org/grpc"
 )
+
+func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) error {
+	if instance.Spec.SuggestionSpec == nil {
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		return nil
+	}
+	if instance.Spec.SuggestionSpec.SuggestionAlgorithm == "" {
+		instance.Spec.SuggestionSpec.SuggestionAlgorithm = "random"
+	}
+	instance.Status.Condition = katibv1alpha1.ConditionRunning
+
+	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Connect katib manager error %v", err)
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		return nil
+	}
+	defer conn.Close()
+	c := katibapi.NewManagerClient(conn)
+
+	studyConfig, err := getStudyConf(instance)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Create Study %s", studyConfig.Name)
+	//CreateStudy
+	studyID, err := createStudy(c, studyConfig)
+	if err != nil {
+		return err
+	}
+	instance.Status.StudyID = studyID
+	log.Printf("Study: %s Suggestion Spec %v", studyID, instance.Spec.SuggestionSpec)
+	var sspec *katibv1alpha1.SuggestionSpec
+	if instance.Spec.SuggestionSpec != nil {
+		sspec = instance.Spec.SuggestionSpec
+	} else {
+		sspec = &katibv1alpha1.SuggestionSpec{}
+	}
+	sspec.SuggestionParameters = append(sspec.SuggestionParameters,
+		katibapi.SuggestionParameter{
+			Name:  "SuggestionCount",
+			Value: "0",
+		})
+	sPID, err := setSuggestionParam(c, studyID, sspec)
+	if err != nil {
+		return err
+	}
+	instance.Status.SuggestionParameterID = sPID
+	instance.Status.SuggestionCount += 1
+	instance.Status.Condition = katibv1alpha1.ConditionRunning
+	return nil
+}
+
+func getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
+	sconf := &katibapi.StudyConfig{
+		Metrics: []string{},
+		ParameterConfigs: &katibapi.StudyConfig_ParameterConfigs{
+			Configs: []*katibapi.ParameterConfig{},
+		},
+	}
+	sconf.Name = instance.Spec.StudyName
+	sconf.Owner = instance.Spec.Owner
+	if instance.Spec.OptimizationGoal != nil {
+		sconf.OptimizationGoal = *instance.Spec.OptimizationGoal
+	}
+	sconf.ObjectiveValueName = instance.Spec.ObjectiveValueName
+	switch instance.Spec.OptimizationType {
+	case katibv1alpha1.OptimizationTypeMinimize:
+		sconf.OptimizationType = katibapi.OptimizationType_MINIMIZE
+	case katibv1alpha1.OptimizationTypeMaximize:
+		sconf.OptimizationType = katibapi.OptimizationType_MAXIMIZE
+	default:
+		sconf.OptimizationType = katibapi.OptimizationType_UNKNOWN_OPTIMIZATION
+	}
+	for _, m := range instance.Spec.MetricsNames {
+		sconf.Metrics = append(sconf.Metrics, m)
+	}
+	for _, pc := range instance.Spec.ParameterConfigs {
+		p := &katibapi.ParameterConfig{
+			Feasible: &katibapi.FeasibleSpace{},
+		}
+		p.Name = pc.Name
+		p.Feasible.Min = pc.Feasible.Min
+		p.Feasible.Max = pc.Feasible.Max
+		p.Feasible.List = pc.Feasible.List
+		switch pc.ParameterType {
+		case katibv1alpha1.ParameterTypeUnknown:
+			p.ParameterType = katibapi.ParameterType_UNKNOWN_TYPE
+		case katibv1alpha1.ParameterTypeDouble:
+			p.ParameterType = katibapi.ParameterType_DOUBLE
+		case katibv1alpha1.ParameterTypeInt:
+			p.ParameterType = katibapi.ParameterType_INT
+		case katibv1alpha1.ParameterTypeDiscrete:
+			p.ParameterType = katibapi.ParameterType_DISCRETE
+		case katibv1alpha1.ParameterTypeCategorical:
+			p.ParameterType = katibapi.ParameterType_CATEGORICAL
+		}
+		sconf.ParameterConfigs.Configs = append(sconf.ParameterConfigs.Configs, p)
+	}
+	sconf.JobId = string(instance.UID)
+	return sconf, nil
+}
 
 func createStudy(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig) (string, error) {
 	ctx := context.Background()

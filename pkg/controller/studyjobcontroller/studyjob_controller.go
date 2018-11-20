@@ -17,7 +17,6 @@ package studyjobcontroller
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strconv"
 	"sync"
@@ -149,7 +148,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 	case katibv1alpha1.ConditionRunning:
 		update, err = r.checkStatus(instance, request.Namespace)
 	default:
-		err = r.initializeStudy(instance, request.Namespace)
+		err = initializeStudy(instance, request.Namespace)
 		if err != nil {
 			r.Update(context.TODO(), instance)
 			log.Printf("Fail to initialize %v", err)
@@ -170,56 +169,6 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		}
 	}
 	return reconcile.Result{}, nil
-}
-
-func (r *ReconcileStudyJobController) getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
-	sconf := &katibapi.StudyConfig{
-		Metrics: []string{},
-		ParameterConfigs: &katibapi.StudyConfig_ParameterConfigs{
-			Configs: []*katibapi.ParameterConfig{},
-		},
-	}
-	sconf.Name = instance.Spec.StudyName
-	sconf.Owner = instance.Spec.Owner
-	if instance.Spec.OptimizationGoal != nil {
-		sconf.OptimizationGoal = *instance.Spec.OptimizationGoal
-	}
-	sconf.ObjectiveValueName = instance.Spec.ObjectiveValueName
-	switch instance.Spec.OptimizationType {
-	case katibv1alpha1.OptimizationTypeMinimize:
-		sconf.OptimizationType = katibapi.OptimizationType_MINIMIZE
-	case katibv1alpha1.OptimizationTypeMaximize:
-		sconf.OptimizationType = katibapi.OptimizationType_MAXIMIZE
-	default:
-		sconf.OptimizationType = katibapi.OptimizationType_UNKNOWN_OPTIMIZATION
-	}
-	for _, m := range instance.Spec.MetricsNames {
-		sconf.Metrics = append(sconf.Metrics, m)
-	}
-	for _, pc := range instance.Spec.ParameterConfigs {
-		p := &katibapi.ParameterConfig{
-			Feasible: &katibapi.FeasibleSpace{},
-		}
-		p.Name = pc.Name
-		p.Feasible.Min = pc.Feasible.Min
-		p.Feasible.Max = pc.Feasible.Max
-		p.Feasible.List = pc.Feasible.List
-		switch pc.ParameterType {
-		case katibv1alpha1.ParameterTypeUnknown:
-			p.ParameterType = katibapi.ParameterType_UNKNOWN_TYPE
-		case katibv1alpha1.ParameterTypeDouble:
-			p.ParameterType = katibapi.ParameterType_DOUBLE
-		case katibv1alpha1.ParameterTypeInt:
-			p.ParameterType = katibapi.ParameterType_INT
-		case katibv1alpha1.ParameterTypeDiscrete:
-			p.ParameterType = katibapi.ParameterType_DISCRETE
-		case katibv1alpha1.ParameterTypeCategorical:
-			p.ParameterType = katibapi.ParameterType_CATEGORICAL
-		}
-		sconf.ParameterConfigs.Configs = append(sconf.ParameterConfigs.Configs, p)
-	}
-	sconf.JobId = string(instance.UID)
-	return sconf, nil
 }
 
 func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, wids []string) (bool, error) {
@@ -302,59 +251,6 @@ func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob
 		}
 	}
 	return goal, nil
-}
-
-func (r *ReconcileStudyJobController) initializeStudy(instance *katibv1alpha1.StudyJob, ns string) error {
-	if instance.Spec.SuggestionSpec == nil {
-		instance.Status.Condition = katibv1alpha1.ConditionFailed
-		return nil
-	}
-	if instance.Spec.SuggestionSpec.SuggestionAlgorithm == "" {
-		instance.Spec.SuggestionSpec.SuggestionAlgorithm = "random"
-	}
-	instance.Status.Condition = katibv1alpha1.ConditionRunning
-
-	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("Connect katib manager error %v", err)
-		instance.Status.Condition = katibv1alpha1.ConditionFailed
-		return nil
-	}
-	defer conn.Close()
-	c := katibapi.NewManagerClient(conn)
-
-	studyConfig, err := r.getStudyConf(instance)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("Create Study %s", studyConfig.Name)
-	//CreateStudy
-	studyID, err := createStudy(c, studyConfig)
-	if err != nil {
-		return err
-	}
-	instance.Status.StudyID = studyID
-	log.Printf("Study: %s Suggestion Spec %v", studyID, instance.Spec.SuggestionSpec)
-	var sspec *katibv1alpha1.SuggestionSpec
-	if instance.Spec.SuggestionSpec != nil {
-		sspec = instance.Spec.SuggestionSpec
-	} else {
-		sspec = &katibv1alpha1.SuggestionSpec{}
-	}
-	sspec.SuggestionParameters = append(sspec.SuggestionParameters,
-		katibapi.SuggestionParameter{
-			Name:  "SuggestionCount",
-			Value: "0",
-		})
-	sPID, err := setSuggestionParam(c, studyID, sspec)
-	if err != nil {
-		return err
-	}
-	instance.Status.SuggestionParameterID = sPID
-	instance.Status.SuggestionCount += 1
-	instance.Status.Condition = katibv1alpha1.ConditionRunning
-	return nil
 }
 
 func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJob, ns string) (bool, error) {
@@ -527,7 +423,7 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 		return true, nil
 	}
 	log.Printf("Study: %s Suggestions %v", instance.Status.StudyID, getSuggestReply)
-	wkind, err := r.getWorkerKind(instance.Spec.WorkerSpec)
+	wkind, err := getWorkerKind(instance.Spec.WorkerSpec)
 	if err != nil {
 		log.Printf("getWorkerKind error %v", err)
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
@@ -576,42 +472,6 @@ type WorkerInstance struct {
 	TrialID         string
 	WorkerID        string
 	HyperParameters []*katibapi.Parameter
-}
-
-func (r *ReconcileStudyJobController) getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (string, error) {
-	var typeChecker interface{}
-	BUFSIZE := 1024
-	_, m, err := getWorkerManifest(
-		nil,
-		"validation",
-		&katibapi.Trial{
-			TrialId:      "validation",
-			ParameterSet: []*katibapi.Parameter{},
-		},
-		workerSpec,
-		"",
-		true,
-	)
-	if err != nil {
-		return "", err
-	}
-	if err := k8syaml.NewYAMLOrJSONDecoder(m, BUFSIZE).Decode(&typeChecker); err != nil {
-		log.Printf("Yaml decode validation error %v", err)
-		return "", err
-	}
-	tcMap, ok := typeChecker.(map[string]interface{})
-	if !ok {
-		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
-	}
-	wkind, ok := tcMap["kind"]
-	if !ok {
-		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
-	}
-	wkindS, ok := wkind.(string)
-	if !ok {
-		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
-	}
-	return wkindS, nil
 }
 
 func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, wkind string, dryrun bool) (string, error) {

@@ -17,11 +17,50 @@ package studyjobcontroller
 import (
 	"bytes"
 	"context"
+	"fmt"
+	"log"
 	"text/template"
 
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
+	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 )
+
+func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (string, error) {
+	var typeChecker interface{}
+	BUFSIZE := 1024
+	_, m, err := getWorkerManifest(
+		nil,
+		"validation",
+		&katibapi.Trial{
+			TrialId:      "validation",
+			ParameterSet: []*katibapi.Parameter{},
+		},
+		workerSpec,
+		"",
+		true,
+	)
+	if err != nil {
+		return "", err
+	}
+	if err := k8syaml.NewYAMLOrJSONDecoder(m, BUFSIZE).Decode(&typeChecker); err != nil {
+		log.Printf("Yaml decode validation error %v", err)
+		return "", err
+	}
+	tcMap, ok := typeChecker.(map[string]interface{})
+	if !ok {
+		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
+	}
+	wkind, ok := tcMap["kind"]
+	if !ok {
+		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
+	}
+	wkindS, ok := wkind.(string)
+	if !ok {
+		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
+	}
+	return wkindS, nil
+}
 
 func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, kind string, dryrun bool) (string, *bytes.Buffer, error) {
 	var wtp *template.Template = nil
