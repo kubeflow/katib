@@ -92,4 +92,3 @@ func saveModel(c katibapi.ManagerClient, studyID string, trialID string, workerI
 	}
 	return nil
 }
-

@@ -106,4 +106,3 @@ func getSuggestion(c katibapi.ManagerClient, studyID string, suggestionSpec *kat
 	}
 	return getSuggestReply, nil
 }
-
