@@ -22,7 +22,23 @@ set -o xtrace
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
 
 cd ${SCRIPT_ROOT}
+# Dedicated namespace has to be present beforehand.
 kubectl apply -f manifests/0-namespace.yaml
+
+# Generate Secret with dynamically initialized data, so as to keep Go codebase
+# simple as possible i.e., without client-go ClientSet.
+cat <<EOF | kubectl create -f -
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: vizier-db-secrets
+  namespace: katib
+data:
+  MYSQL_ROOT_PASSWORD: $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c24 | base64)
+EOF
+
+# Rest of the static manifests.
 kubectl apply -f manifests/pv
 kubectl apply -f manifests/vizier/db
 kubectl apply -f manifests/vizier/core

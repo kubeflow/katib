@@ -9,6 +9,7 @@ import (
 	"log"
 	"math/big"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 
@@ -19,7 +20,7 @@ import (
 
 const (
 	dbDriver     = "mysql"
-	dbName       = "root:test@tcp(vizier-db:3306)/vizier"
+	dbNameTmpl   = "root:%s@tcp(vizier-db:3306)/vizier"
 	mysqlTimeFmt = "2006-01-02 15:04:05.999999"
 )
 
@@ -76,6 +77,19 @@ type dbConn struct {
 
 var rs1Letters = []rune("abcdefghijklmnopqrstuvwxyz")
 
+func getDbName() string {
+	dbPass := os.Getenv("MYSQL_ROOT_PASSWORD")
+	if dbPass == "" {
+		log.Printf("WARN: Env var MYSQL_ROOT_PASSWORD is empty. Falling back to \"test\".")
+
+		// For backward compatibility, e.g. in case that all but vizier-core
+		// is older ones so we do not have Secret nor upgraded vizier-db.
+		dbPass = "test"
+	}
+
+	return fmt.Sprintf(dbNameTmpl, dbPass)
+}
+
 func NewWithSQLConn(db *sql.DB) VizierDBInterface {
 	d := new(dbConn)
 	d.db = db
@@ -91,7 +105,7 @@ func NewWithSQLConn(db *sql.DB) VizierDBInterface {
 }
 
 func New() VizierDBInterface {
-	db, err := sql.Open(dbDriver, dbName)
+	db, err := sql.Open(dbDriver, getDbName())
 	if err != nil {
 		log.Fatalf("DB open failed: %v", err)
 	}
