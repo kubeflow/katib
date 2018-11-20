@@ -16,13 +16,11 @@ limitations under the License.
 package studyjobcontroller
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"log"
 	"strconv"
 	"sync"
-	"text/template"
 
 	"github.com/kubeflow/katib/pkg"
 	katibapi "github.com/kubeflow/katib/pkg/api"
@@ -573,161 +571,6 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 	return true, nil
 }
 
-func (r *ReconcileStudyJobController) createStudy(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig) (string, error) {
-	ctx := context.Background()
-	createStudyreq := &katibapi.CreateStudyRequest{
-		StudyConfig: studyConfig,
-	}
-	createStudyreply, err := c.CreateStudy(ctx, createStudyreq)
-	if err != nil {
-		log.Printf("CreateStudy Error %v", err)
-		return "", err
-	}
-	studyID := createStudyreply.StudyId
-	log.Printf("Study ID %s", studyID)
-	getStudyreq := &katibapi.GetStudyRequest{
-		StudyId: studyID,
-	}
-	getStudyReply, err := c.GetStudy(ctx, getStudyreq)
-	if err != nil {
-		log.Printf("Study: %s GetConfig Error %v", studyID, err)
-		return "", err
-	}
-	log.Printf("Study ID %s StudyConf%v", studyID, getStudyReply.StudyConfig)
-	return studyID, nil
-}
-
-func (r *ReconcileStudyJobController) setSuggestionParam(c katibapi.ManagerClient, studyID string, suggestionSpec *katibv1alpha1.SuggestionSpec) (string, error) {
-	ctx := context.Background()
-	pid := ""
-	if suggestionSpec.SuggestionParameters != nil {
-		sspr := &katibapi.SetSuggestionParametersRequest{
-			StudyId:             studyID,
-			SuggestionAlgorithm: suggestionSpec.SuggestionAlgorithm,
-		}
-		for _, p := range suggestionSpec.SuggestionParameters {
-			sspr.SuggestionParameters = append(
-				sspr.SuggestionParameters,
-				&katibapi.SuggestionParameter{
-					Name:  p.Name,
-					Value: p.Value,
-				},
-			)
-		}
-		setSuggesitonParameterReply, err := c.SetSuggestionParameters(ctx, sspr)
-		if err != nil {
-			log.Printf("Study %s SetConfig Error %v", studyID, err)
-			return "", err
-		}
-		log.Printf("Study: %s setSuggesitonParameterReply %v", studyID, setSuggesitonParameterReply)
-		pid = setSuggesitonParameterReply.ParamId
-	}
-	return pid, nil
-}
-
-func (r *ReconcileStudyJobController) getSuggestionParam(c katibapi.ManagerClient, paramID string) ([]*katibapi.SuggestionParameter, error) {
-	ctx := context.Background()
-	gsreq := &katibapi.GetSuggestionParametersRequest{
-		ParamId: paramID,
-	}
-	gsrep, err := c.GetSuggestionParameters(ctx, gsreq)
-	if err != nil {
-		return nil, err
-	}
-	return gsrep.SuggestionParameters, err
-}
-func (r *ReconcileStudyJobController) getSuggestion(c katibapi.ManagerClient, studyID string, suggestionSpec *katibv1alpha1.SuggestionSpec, sParamID string) (*katibapi.GetSuggestionsReply, error) {
-	ctx := context.Background()
-	getSuggestRequest := &katibapi.GetSuggestionsRequest{
-		StudyId:             studyID,
-		SuggestionAlgorithm: suggestionSpec.SuggestionAlgorithm,
-		RequestNumber:       int32(suggestionSpec.RequestNumber),
-		//RequestNumber=0 means get all grids.
-		ParamId: sParamID,
-	}
-	getSuggestReply, err := c.GetSuggestions(ctx, getSuggestRequest)
-	if err != nil {
-		log.Printf("Study: %s GetSuggestion Error %v", studyID, err)
-		return nil, err
-	}
-	log.Printf("Study: %s CreatedTrials :", studyID)
-	for _, t := range getSuggestReply.Trials {
-		log.Printf("\t%v", t)
-	}
-	return getSuggestReply, nil
-}
-func (r *ReconcileStudyJobController) saveModel(c katibapi.ManagerClient, studyID string, trialID string, workerID string) error {
-	ctx := context.Background()
-	// Disable ModelDB
-	//getStudyreq := &katibapi.GetStudyRequest{
-	//	StudyId: studyId,
-	//}
-	//getStudyReply, err := c.GetStudy(ctx, getStudyreq)
-	//if err != nil {
-	//	return err
-	//}
-	//sc := getStudyReply.StudyConfig
-	getMetricsRequest := &katibapi.GetMetricsRequest{
-		StudyId:   studyID,
-		WorkerIds: []string{workerID},
-	}
-	getMetricsReply, err := c.GetMetrics(ctx, getMetricsRequest)
-	if err != nil {
-		return err
-	}
-	for _, mls := range getMetricsReply.MetricsLogSets {
-		mets := []*katibapi.Metrics{}
-		var trial *katibapi.Trial = nil
-		gtret, err := c.GetTrials(
-			ctx,
-			&katibapi.GetTrialsRequest{
-				StudyId: studyID,
-			})
-		if err != nil {
-			return err
-		}
-		for _, t := range gtret.Trials {
-			if t.TrialId == trialID {
-				trial = t
-			}
-		}
-		for _, ml := range mls.MetricsLogs {
-			if ml != nil {
-				if len(ml.Values) > 0 {
-					mets = append(mets, &katibapi.Metrics{
-						Name:  ml.Name,
-						Value: ml.Values[len(ml.Values)-1].Value,
-					})
-				}
-			}
-		}
-		if trial == nil {
-			return fmt.Errorf("Trial %s not found", trialID)
-		}
-		// Disable ModelDB
-		//		if len(mets) > 0 {
-		//			smr := &katibapi.SaveModelRequest{
-		//				Model: &katibapi.ModelInfo{
-		//					StudyName:  sc.Name,
-		//					WorkerId:   mls.WorkerId,
-		//					Parameters: trial.ParameterSet,
-		//					Metrics:    mets,
-		//					ModelPath:  sc.Name,
-		//				},
-		//				DataSet: &katibapi.DataSetInfo{
-		//					Name: sc.Name,
-		//					Path: sc.Name,
-		//				},
-		//			}
-		//			_, err = c.SaveModel(ctx, smr)
-		//			if err != nil {
-		//				return err
-		//			}
-		//		}
-	}
-	return nil
-}
-
 type WorkerInstance struct {
 	StudyID         string
 	TrialID         string
@@ -799,60 +642,6 @@ func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJ
 	return wid, nil
 }
 
-func (r *ReconcileStudyJobController) getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, kind string, dryrun bool) (string, *bytes.Buffer, error) {
-	var wtp *template.Template = nil
-	var err error
-	if workerSpec != nil {
-		if workerSpec.GoTemplate.RawTemplate != "" {
-			wtp, err = template.New("Worker").Parse(workerSpec.GoTemplate.RawTemplate)
-		} else if workerSpec.GoTemplate.TemplatePath != "" {
-			wtp, err = template.ParseFiles(workerSpec.GoTemplate.TemplatePath)
-		}
-		if err != nil {
-			return "", nil, err
-		}
-	}
-	if wtp == nil {
-		wtp, err = template.ParseFiles("/worker-template/defaultWorkerTemplate.yaml")
-		if err != nil {
-			return "", nil, err
-		}
-	}
-	var wid string
-	if dryrun {
-		wid = "validation"
-	} else {
-		cwreq := &katibapi.RegisterWorkerRequest{
-			Worker: &katibapi.Worker{
-				StudyId: studyID,
-				TrialId: trial.TrialId,
-				Status:  katibapi.State_PENDING,
-				Type:    kind,
-			},
-		}
-		cwrep, err := c.RegisterWorker(context.Background(), cwreq)
-		if err != nil {
-			return "", nil, err
-		}
-		wid = cwrep.WorkerId
-	}
-
-	wi := WorkerInstance{
-		StudyID:  studyID,
-		TrialID:  trial.TrialId,
-		WorkerID: wid,
-	}
-	var b bytes.Buffer
-	for _, p := range trial.ParameterSet {
-		wi.HyperParameters = append(wi.HyperParameters, p)
-	}
-	err = wtp.Execute(&b, wi)
-	if err != nil {
-		return "", nil, err
-	}
-	return wid, &b, nil
-}
-
 func (r *ReconcileStudyJobController) spawnMetricsCollector(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, studyID string, trialID string, workerID string, namespace string, mcs *katibv1alpha1.MetricsCollectorSpec) error {
 	var mcjob batchv1beta.CronJob
 	BUFSIZE := 1024
@@ -880,38 +669,4 @@ func (r *ReconcileStudyJobController) spawnMetricsCollector(instance *katibv1alp
 		return err
 	}
 	return nil
-}
-
-func (r *ReconcileStudyJobController) getMetricsCollectorManifest(studyID string, trialID string, workerID string, namespace string, mcs *katibv1alpha1.MetricsCollectorSpec) (*bytes.Buffer, error) {
-	var mtp *template.Template = nil
-	var err error
-	tmpValues := map[string]string{
-		"StudyID":   studyID,
-		"TrialID":   trialID,
-		"WorkerID":  workerID,
-		"NameSpace": namespace,
-	}
-	if mcs != nil {
-		if mcs.GoTemplate.RawTemplate != "" {
-			mtp, err = template.New("MetricsCollector").Parse(mcs.GoTemplate.RawTemplate)
-		} else if mcs.GoTemplate.TemplatePath != "" {
-			mtp, err = template.ParseFiles(mcs.GoTemplate.TemplatePath)
-		} else {
-		}
-		if err != nil {
-			return nil, err
-		}
-	}
-	if mtp == nil {
-		mtp, err = template.ParseFiles("/metricscollector-template/defaultMetricsCollectorTemplate.yaml")
-		if err != nil {
-			return nil, err
-		}
-	}
-	var b bytes.Buffer
-	err = mtp.Execute(&b, tmpValues)
-	if err != nil {
-		return nil, err
-	}
-	return &b, nil
 }
