@@ -92,10 +92,7 @@ ctx.globalAlpha = 0.15;
 ctx.lineWidth = 1.5;
 ctx.scale(devicePixelRatio, devicePixelRatio);
 
-var output = d3.select("#paracood")
-    .append("table")
-    .attr("class", "table table-hover")
-    .attr("id", "study-result")
+var output = d3.select("#result-table")
 
 var axes = svg.selectAll(".axis")
     .data(dimensions)
@@ -196,6 +193,9 @@ d3.csv("./{{.IDList.StudyId}}/csv", function(error, data) {
       .append("a")
       .attr("href", function(d) { return "/katib/{{.IDList.StudyId}}/"+d.key+"/"+d.value;})
       .text(function(d) { return d.value;});
+  jQuery(function($){
+        $("#result-table").DataTable();
+  });
   function project(d) {
     return dimensions.map(function(p,i) {
       // check if data element has property and contains a value
@@ -303,28 +303,24 @@ d3.csv("./{{.IDList.StudyId}}/csv", function(error, data) {
     ctx.clearRect(0,0,width,height);
     ctx.globalAlpha = d3.min([0.85/Math.pow(selected.length,0.3),1]);
     render(selected);
-
-    output.select("tbody").remove()
-    output.append("tbody")
-        .selectAll("tr")
-        .data(selected)
-        .enter()
-        .append("tr")
-        .selectAll("td")
-        .data(function(row) { return d3.entries(row); })
-        .enter()
-        .append("td")
-        .text(function(d) { 
-          if (d.key == "WorkerID" || d.key == "TrialID"){
-              return "";
-          } else {
-              return d.value;
-          }
-        })
-        .filter(function(d){ return d.key == "WorkerID" || d.key == "TrialID"}) 
-        .append("a")
-        .attr("href", function(d) { return "/katib/{{.IDList.StudyId}}/"+d.key+"/"+d.value;})
-        .text(function(d) { return d.value;});
+    var resultTable = $("#result-table").DataTable();
+    resultTable.rows().every( function () {
+        this.remove().draw();
+    });
+    var labels = d3.keys(data[0]);
+    var newtable = [];
+    for (var s in selected){
+        var l = [];
+        for (i in labels){
+            if (labels[i] == "WorkerID" || labels[i] == "TrialID"){
+                l.push("<a href=\"/katib/{{.IDList.StudyId}}/"+ labels[i] +"/"+selected[s][labels[i]]+"\">"+selected[s][labels[i]]+"</a>");
+            } else {
+                l.push(selected[s][labels[i]]);
+            }
+        }
+        newtable.push(l);
+    }
+    resultTable.rows.add(newtable).draw();
   }
 });
 
