@@ -289,7 +289,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 						job := &batchv1.Job{}
 						joberr := r.Client.Get(context.TODO(), nname, job)
 						if joberr == nil {
-							if err := r.Delete(context.TODO(), job, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
+							if err := r.Delete(context.TODO(), job); err != nil {
 								return false, err
 							}
 						}
@@ -301,7 +301,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 						cjob := &batchv1beta.CronJob{}
 						cjoberr := r.Client.Get(context.TODO(), nname, cjob)
 						if cjoberr == nil {
-							if err := r.Delete(context.TODO(), cjob, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
+							if err := r.Delete(context.TODO(), cjob); err != nil {
 								return false, err
 							}
 						}
