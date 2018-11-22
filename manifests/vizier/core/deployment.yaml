@@ -19,6 +19,12 @@ spec:
       containers:
       - name: vizier-core
         image: katib/vizier-core
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: vizier-db-secrets
+                key: MYSQL_ROOT_PASSWORD
         command:
           - './vizier-manager'
         ports:

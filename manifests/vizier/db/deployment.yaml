@@ -20,7 +20,10 @@ spec:
         image: mysql:8.0.3
         env:
           - name: MYSQL_ROOT_PASSWORD
-            value: "test"
+            valueFrom:
+              secretKeyRef:
+                name: vizier-db-secrets
+                key: MYSQL_ROOT_PASSWORD
           - name: MYSQL_ALLOW_EMPTY_PASSWORD
             value: "true"
           - name: MYSQL_DATABASE
