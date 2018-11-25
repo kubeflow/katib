@@ -51,6 +51,16 @@ func main() {
 			//RunTrials
 			//workerIds := runTrials(c, studyId, getSuggestReply)
 
+			//SpawnWorker
+			trials := getSuggestReply.Trials
+
+			//RegisterWorkers
+			workerIds := registerWorkers(c, studyID, getSuggestReply)
+
+			if workerIds == nil {
+				log.Fatalf("Register Workers error")
+			}
+
 			////GetWorkersCheck
 			//getWorker(c, studyId, getSuggestReply, workerIds)
 			//log.Println("GetWorkers checked!")
