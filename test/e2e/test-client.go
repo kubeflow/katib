@@ -81,34 +81,6 @@ func main() {
 	} else {
 		getSuggestReply := getSuggestion(c, studyID, paramID)
 		checkSuggestions(getSuggestReply)
-
-		//RunTrials
-		//workerIds := runTrials(c, studyId, getSuggestReply)
-
-		////GetWorkersCheck
-		//getWorker(c, studyId, getSuggestReply, workerIds)
-		//log.Println("GetWorkers checked!")
-
-		//iter := 0
-		//for !isCompletedAllWorker(c, studyId) {
-		//	if iter > TimeOut {
-		//		log.Fatal("GetMetrics Timeout.")
-		//	}
-		//	time.Sleep(1 * time.Second)
-		//	getMetricsRequest := &api.GetMetricsRequest{
-		//		StudyId:   studyId,
-		//		WorkerIds: workerIds,
-		//	}
-		//	//GetMetrics
-		//	getMetricsReply, err := c.GetMetrics(ctx, getMetricsRequest)
-		//	if err != nil {
-		//		continue
-		//	}
-		//	//Save or Update model on ModelDB
-		//	SaveOrUpdateModel(c, getMetricsReply)
-		//	iter++
-		//}
-		//checkWorkersResult(c, studyId)
 	}
 	conn.Close()
 	log.Println("E2E test OK!")
@@ -230,11 +202,11 @@ func checkSuggestions(getSuggestReply *api.GetSuggestionsReply) bool {
 	switch *suggestArgo {
 	case "random":
 		if len(getSuggestReply.Trials) != *requestnum {
-			log.Fatalf("Number of Random suggestion incrrect. Expected %d Got %d", *requestnum, len(getSuggestReply.Trials))
+			log.Fatalf("Number of Random suggestion incorrect. Expected %d Got %d", *requestnum, len(getSuggestReply.Trials))
 		}
 	case "grid":
 		if len(getSuggestReply.Trials) != 4 {
-			log.Fatalf("Number of Grid suggestion incrrect. Expected %d Got %d", 4, len(getSuggestReply.Trials))
+			log.Fatalf("Number of Grid suggestion incorrect. Expected %d Got %d", 4, len(getSuggestReply.Trials))
 		}
 	}
 	log.Println("Check suggestion passed!")
