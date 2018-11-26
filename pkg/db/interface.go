@@ -22,6 +22,9 @@ const (
 	dbDriver     = "mysql"
 	dbNameTmpl   = "root:%s@tcp(vizier-db:3306)/vizier"
 	mysqlTimeFmt = "2006-01-02 15:04:05.999999"
+
+	connectInterval = 5 * time.Second
+	connectTimeout  = 60 * time.Second
 )
 
 type GetWorkerLogOpts struct {
@@ -90,6 +93,26 @@ func getDbName() string {
 	return fmt.Sprintf(dbNameTmpl, dbPass)
 }
 
+func openSQLConn(driverName string, dataSourceName string, interval time.Duration,
+	timeout time.Duration) (*sql.DB, error) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	timeoutC := time.After(timeout)
+	for {
+		select {
+		case <-ticker.C:
+			if db, err := sql.Open(driverName, dataSourceName); err == nil {
+				if err = db.Ping(); err == nil {
+					return db, nil
+				}
+			}
+		case <-timeoutC:
+			return nil, fmt.Errorf("Timeout waiting for DB conn successfully opened.")
+		}
+	}
+}
+
 func NewWithSQLConn(db *sql.DB) VizierDBInterface {
 	d := new(dbConn)
 	d.db = db
@@ -105,7 +128,7 @@ func NewWithSQLConn(db *sql.DB) VizierDBInterface {
 }
 
 func New() VizierDBInterface {
-	db, err := sql.Open(dbDriver, getDbName())
+	db, err := openSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
 	if err != nil {
 		log.Fatalf("DB open failed: %v", err)
 	}
