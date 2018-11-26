@@ -1,0 +1,26 @@
+language: generic
+sudo: required
+dist: trusty
+
+services:
+- docker
+
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+before_install:
+- go get github.com/mattn/goveralls
+- go get golang.org/x/tools/cmd/cover
+- curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+
+script:
+- dep ensure --vendor-only
+- ./scripts/build.sh
+- go test -cover -v -coverprofile=.coverprofile $(go list ./pkg/...)
+- $GOPATH/bin/goveralls -service=travis-ci -coverprofile=.coverprofile
+
+env:
+  global:
+  - secure: # run `travis encrypt COVERALLS_TOKEN=xxxxxxxx` and paste its output here.
