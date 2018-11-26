@@ -14,6 +14,11 @@ import (
 	"time"
 
 	api "github.com/kubeflow/katib/pkg/api"
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/kubernetes"
+	restclient "k8s.io/client-go/rest"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -90,6 +95,46 @@ func getDbName() string {
 	return fmt.Sprintf(dbNameTmpl, dbPass)
 }
 
+func waitForDbReady(timeToWait time.Duration) error {
+	config, err := restclient.InClusterConfig()
+	if err != nil {
+		return err
+	}
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return err
+	}
+
+	// TODO: factor out and use common definitions.
+	namespace := "kubeflow"
+	selectors := labels.Set{
+		"app":       "vizier",
+		"component": "db",
+	}.AsSelectorPreValidated()
+	listOptions := metav1.ListOptions{
+		LabelSelector: selectors.String(),
+	}
+
+	watch, err := clientset.CoreV1().Pods(namespace).Watch(listOptions)
+	if err != nil {
+		return fmt.Errorf("Failed to set up watch for pod %v (error: %v)", listOptions, err)
+	}
+	events := watch.ResultChan()
+
+	startTime := time.Now()
+	for {
+		select {
+		case event := <-events:
+			pod := event.Object.(*v1.Pod)
+			if pod.Status.Phase == v1.PodRunning && pod.Status.ContainerStatuses[0].Ready {
+				return nil
+			}
+		case <-time.After(timeToWait - time.Since(startTime)):
+			return fmt.Errorf("Timeout waiting for DB ready")
+		}
+	}
+}
+
 func NewWithSQLConn(db *sql.DB) VizierDBInterface {
 	d := new(dbConn)
 	d.db = db
@@ -105,10 +150,17 @@ func NewWithSQLConn(db *sql.DB) VizierDBInterface {
 }
 
 func New() VizierDBInterface {
+	timeToWait := time.Duration(30) * time.Second
+	err := waitForDbReady(timeToWait)
+	if err != nil {
+		log.Fatalf("DB is not ready: %v", err)
+	}
+
 	db, err := sql.Open(dbDriver, getDbName())
 	if err != nil {
 		log.Fatalf("DB open failed: %v", err)
 	}
+
 	return NewWithSQLConn(db)
 }
 
