@@ -163,18 +163,37 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
         for param in params:
             if param.name in parsed_service_params.keys():
                 if param.name == "length_scale" or param.name == "noise" or param.name == "nu" or param.name == "trade_off":
-                    parsed_service_params[param.name] = float(param.value)
+                    try:
+                        float(param.value)
+                    except ValueError:
+                        self.logger.warning("Parameter must be float for %s: %s back to default value",param.name , param.value)
+                    else:
+                        parsed_service_params[param.name] = float(param.value)
 
                 elif param.name == "N" or param.name == "n_estimators" or param.name == "burn_in":
-                    parsed_service_params[param.name] = int(param.value)
+                    try:
+                        int(param.value)
+                    except ValueError:
+                        self.logger.warning("Parameter must be int for %s: %s back to default value",param.name , param.value)
+                    else:
+                        parsed_service_params[param.name] = int(param.value)
 
-                elif param.name == "kernel_type" and param.value in kernel_types :
-                    parsed_service_params[param.name] = param.value
-
+                elif param.name == "kernel_type":
+                    if param.value != "rbf" and param.value != "matern":
+                        parsed_service_params[param.name] = param.value
+                    else:
+                        self.logger.warning("Unknown Parameter for %s: %s back to default value",param.name , param.value)
                 elif param.name == "mode"  and param.value in modes:
-                    parsed_service_params[param.name] = param.value
-
+                    if param.value != "lcb" and param.value != "ei" and param.value != "pi":
+                        parsed_service_params[param.name] = param.value
+                    else:
+                        self.logger.warning("Unknown Parameter for %s: %s back to default value",param.name , param.value)
                 elif param.name == "model_type" and param.value in model_types:
-                    parsed_service_params[param.name] = param.value
+                    if param.value != "rf" and param.value != "gp":
+                        parsed_service_params[param.name] = param.value
+                    else:
+                        self.logger.warning("Unknown Parameter for %s: %s back to default value",param.name , param.value)
+            else:
+                self.logger.warning("Unknown Parameter name: %s ", param.name)
 
         return parsed_service_params
