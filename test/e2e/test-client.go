@@ -5,6 +5,7 @@ import (
 	"flag"
 	"io/ioutil"
 	"log"
+	"strconv"
 
 	"github.com/kubeflow/katib/pkg/api"
 	"google.golang.org/grpc"
@@ -225,6 +226,29 @@ func checkSuggestions(getSuggestReply *api.GetSuggestionsReply, iter int) bool {
 	case "grid":
 		if len(getSuggestReply.Trials) != 4 {
 			log.Fatalf("Number of Grid suggestion incorrect. Expected %d Got %d", 4, len(getSuggestReply.Trials))
+		}
+		min, max := 1.0, 1.0
+		for _, m := range studyConfig.ParameterConfigs.Configs {
+			if m.Name == "learning-rate" {
+				min, _ = strconv.ParseFloat(m.Feasible.Min, 8)
+				max, _ = strconv.ParseFloat(m.Feasible.Max, 8)
+			}
+		}
+		learningRate := 1.0
+		for _, l := range suggestionConfig.SuggestionParameters {
+			if l.Name == "learning-rate" {
+				learningRate, _ = strconv.ParseFloat(l.Value, 8)
+			}
+		}
+		for i, trial := range getSuggestReply.Trials {
+			for _, param := range trial.ParameterSet {
+				if param.Name == "learning-rate" && learningRate != 0 {
+					expValue := min + (max-min)/(learningRate-1) * float64(i)
+					if param.Value != strconv.FormatFloat(expValue, 'f', 4, 64) {
+						log.Printf("Grid point incorrect. Expected %v Got %v", strconv.FormatFloat(expValue, 'f', 4, 64), param.Value)
+					}
+				}
+			}
 		}
 	case "hyperband":
 		if iter == 1 {
