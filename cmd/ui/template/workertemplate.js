@@ -50,6 +50,7 @@
 					if (wtIndex > -1) {
 						this.WorkerTemplates.splice(wtIndex, 1);
 					}
+                    this.edited = true;
 				},
                 openEditor: function(wt) {
                     this.EditTemplate = wt;

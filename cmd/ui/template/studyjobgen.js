@@ -34,6 +34,7 @@
                 SuggestAlgoTmp: "",
                 SuggestionParameters: [],
                 SuggestionReqNum: 1,
+                created: false,
             },
             computed: {
 				MetricsList: function() {
@@ -280,6 +281,9 @@
                         ];
                     }
 				},
+                unsetCreated: function() {
+                    this.created =  false
+                },
                 uploadStudyJob: function() {
                     var xmlHttpRequest = new XMLHttpRequest();
                     xmlHttpRequest.onreadystatechange = function()
@@ -294,8 +298,11 @@
                     }
                     xmlHttpRequest.open( 'POST', '/katib/studyjob' );
                     xmlHttpRequest.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded' );
-                    xmlHttpRequest.send( "StudyJobManifest=" + encodeURIComponent(this.StudyJobYaml) );
-
+                    xmlHttpRequest.send( "StudyJobManifest=" + encodeURIComponent(this.StudyJobYaml) )
+                    if (xmlHttpRequest.status != 200){
+                        this.created = true;
+                        setTimeout(this.unsetCreated, 3000);
+                    }
                 },
 			}
         });
