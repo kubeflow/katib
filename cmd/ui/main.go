@@ -16,6 +16,10 @@ func main() {
 		r.Handle("/katib/static/*", http.StripPrefix("/katib/static/", http.FileServer(http.Dir("/app/static"))))
 		r.Route("/katib", func(r chi.Router) {
 			r.Get("/", kuh.Index)
+			r.Get("/studyjob", kuh.StudyJobGen)
+			r.Post("/studyjob", kuh.CreateStudyJob)
+			r.Get("/workertemplates", kuh.WorkerTemplate)
+			r.Post("/workertemplates", kuh.UpdateWorkerTemplate)
 			r.Route("/{studyid}", func(r chi.Router) {
 				r.Get("/", kuh.Study)
 				r.Get("/csv", kuh.StudyInfoCsv)

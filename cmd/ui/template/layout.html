@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width">
         <title>Katib UI</title>
         <link rel="stylesheet" href="/katib/static/css/bootstrap.css">
+        <link rel="stylesheet" href="/katib/static/css/dropmenu.css">
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.6/css/all.css">
         <link rel="icon" type="image/x-icon" href="/katib/static/img/favicon.ico">
         <style>
@@ -19,7 +20,7 @@
         <script src="/katib/static/js/bootstrap.js"></script>
         <script src="https://d3js.org/d3.v4.js"></script>
         <script src="https://bl.ocks.org/syntagmatic/raw/3341641/render-queue.js"></script>
-        {{ template "breadcrumb" .IDList }}
+        {{ template "navbar" .IDList }}
         {{ template "content" . }}
     </body>
 </html>

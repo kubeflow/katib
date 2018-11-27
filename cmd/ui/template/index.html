@@ -1,32 +1,46 @@
 {{ define "content" }}
 <div class="container-fluid bg-active">
 <h1>Study List</h1>
-    <div class="card-columns">
         {{- range $k,$v := .StudySummarys}}
-        <div class="card text-white bg-secondary" >
+        {{ if eq .LatestJobCondition "Running" }}
+        <div class="card text-white border-info mb-3" >
+            <div class="card-header rounded">Last Update: {{$v.LastJobUpdateTime}}</div>
+        {{ else if eq .LatestJobCondition "Completed" }}
+        <div class="card text-white border-success mb-3" >
+            <div class="card-header rounded">Last Update: {{$v.LastJobUpdateTime}}</div>
+        {{ else if eq .LatestJobCondition "Failed" }}
+        <div class="card text-white border-danger mb-3" >
+            <div class="card-header rounded">Last Update: {{$v.LastJobUpdateTime}}</div>
+        {{else}}
+        <div class="card text-white border-light mb-3" >
+            <div class="card-header rounded">StudyJob is not found</div>
+        {{end}}
             <div class="card-body rounded">
-                <h4 class="card-title">{{$k}}</h4>
-                <p class="card-text"> 
+                <h4 class="card-title mb-2">{{$k}}</h4>
                 <table class="table table-hover">
                   <thead>
                       <tr>
                           <th scope="col">StudyID</th>
                           <th scope="col">Owner</th>
+                          <th scope="col">StudyJobName</th>
+                          <th scope="col">StudyJobCondition</th>
                       </tr>
                   </thead>
                   <tbody>
-                      {{- range $v}}
-                      <tr class="table-secondary">
+                      {{- range $v.StudyNameStacks}}
+                      <tr>
                           <td><a href="/katib/{{.StudyId}}">{{.StudyId}}</a></td>
                           <td>{{.Owner}}</td>
+                          <td>{{.StudyJobName}}</td>
+                          <td>{{.StudyJobCondition}}</td>
                       </tr>
                       {{- end}}
                   </tbody>
                 </table>
-                </p>
+                <a href="/katib/studyjob?studyname={{$k}}" class="btn btn-info btn-sm" role="button">Create a New Job</a>
             </div>
         </div>
         {{- end}}
-    </div>
+        <a href="/katib/studyjob" class="btn btn-primary btn-sm mb-3" style="min-width: 100%" role="button"><i class="fa fa-plus-circle" style="color:#6BCAE2;"></i> Create a New Study and StudyJob</a>
 </div>
 {{ end }}
