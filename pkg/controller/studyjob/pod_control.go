@@ -48,7 +48,7 @@ func (c PodControl) DeletePodsForWorker(namespace string, wid string) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Listing pods with selector %v", selector.String())
+	log.Printf("Deleting pods with selector %v", selector.String())
 	listOptions := metav1.ListOptions{
 		LabelSelector: selector.String(),
 	}

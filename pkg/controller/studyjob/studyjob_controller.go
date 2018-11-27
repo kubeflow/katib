@@ -301,7 +301,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 							if err := r.Delete(context.TODO(), job); err != nil {
 								return false, err
 							}
-							if err := r.podControl.DeletePodsForWorker(ns, w.WorkerID); err != nil {
+							if err := r.podControl.DeletePodsForWorker(ns, job.GetName()); err != nil {
 								return false, err
 							}
 						}
@@ -316,7 +316,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 							if err := r.Delete(context.TODO(), cjob); err != nil {
 								return false, err
 							}
-							if err := r.podControl.DeletePodsForWorker(ns, w.WorkerID); err != nil {
+							if err := r.podControl.DeletePodsForWorker(ns, cjob.GetName()); err != nil {
 								return false, err
 							}
 
