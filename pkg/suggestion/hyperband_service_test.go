@@ -393,7 +393,7 @@ func TestMakeChildBracket(t *testing.T) {
 
 }
 
-func TestPurseSuggestionParameters(t *testing.T) {
+func TestParseSuggestionParameters(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
