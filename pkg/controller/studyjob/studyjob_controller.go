@@ -55,12 +55,20 @@ const maxMsgSize = 1<<31 - 1
 // and Start it when the Manager is Started.
 // USER ACTION REQUIRED: update cmd/manager/main.go to call this studyjob.Add(mgr) to install this Controller
 func Add(mgr manager.Manager) error {
-	return add(mgr, newReconciler(mgr))
+	r, err := newReconciler(mgr)
+	if err != nil {
+		return err
+	}
+	return add(mgr, r)
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileStudyJobController{Client: mgr.GetClient(), scheme: mgr.GetScheme(), muxMap: sync.Map{}}
+func newReconciler(mgr manager.Manager) (reconcile.Reconciler, error) {
+	pc, err := NewPodControl()
+	if err != nil {
+		return nil, err
+	}
+	return &ReconcileStudyJobController{Client: mgr.GetClient(), scheme: mgr.GetScheme(), muxMap: sync.Map{}, podControl: pc}, nil
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -106,6 +114,7 @@ type ReconcileStudyJobController struct {
 	client.Client
 	scheme *runtime.Scheme
 	muxMap sync.Map
+	podControl *PodControl
 }
 
 // Reconcile reads that state of the cluster for a StudyJob object and makes changes based on the state read
@@ -292,6 +301,9 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 							if err := r.Delete(context.TODO(), job); err != nil {
 								return false, err
 							}
+							if err := r.podControl.DeletePodsForWorker(ns, w.WorkerID); err != nil {
+								return false, err
+							}
 						}
 					}
 					if instance.Spec.MetricsCollectorSpec != nil {
@@ -304,6 +316,10 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 							if err := r.Delete(context.TODO(), cjob); err != nil {
 								return false, err
 							}
+							if err := r.podControl.DeletePodsForWorker(ns, w.WorkerID); err != nil {
+								return false, err
+							}
+
 						}
 					}
 				}
