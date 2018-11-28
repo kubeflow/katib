@@ -301,6 +301,10 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 							if err := r.Delete(context.TODO(), job); err != nil {
 								return false, err
 							}
+							// In order to integrate with tf-operator and pytorch-operator, we need to
+							// downgrade the k8s dependency for katib from 1.11.2 to 1.10.1, and
+							// controller-runtime from 0.1.3 to 0.1.1. This means that we cannot use
+							// DeletePropagationForeground to clean up pods, and must do this manually.
 							if err := r.podControl.DeletePodsForWorker(ns, job.GetName()); err != nil {
 								return false, err
 							}
@@ -316,10 +320,9 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 							if err := r.Delete(context.TODO(), cjob); err != nil {
 								return false, err
 							}
-							if err := r.podControl.DeletePodsForWorker(ns, cjob.GetName()); err != nil {
-								return false, err
-							}
-
+							// Depending on the successfulJobsHistoryLimit setting, cronjob controller
+							// will delete the metrics collector pods accordingly, so we do not need
+							// to manually delete them here.
 						}
 					}
 				}
