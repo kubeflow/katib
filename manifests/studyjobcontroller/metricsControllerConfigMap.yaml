@@ -12,7 +12,7 @@ data:
       namespace: kubeflow
     spec:
       schedule: "*/1 * * * *"
-      successfulJobsHistoryLimit: 1
+      successfulJobsHistoryLimit: 0
       failedJobsHistoryLimit: 1
       jobTemplate:
         spec:

@@ -55,12 +55,20 @@ const maxMsgSize = 1<<31 - 1
 // and Start it when the Manager is Started.
 // USER ACTION REQUIRED: update cmd/manager/main.go to call this studyjob.Add(mgr) to install this Controller
 func Add(mgr manager.Manager) error {
-	return add(mgr, newReconciler(mgr))
+	r, err := newReconciler(mgr)
+	if err != nil {
+		return err
+	}
+	return add(mgr, r)
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileStudyJobController{Client: mgr.GetClient(), scheme: mgr.GetScheme(), muxMap: sync.Map{}}
+func newReconciler(mgr manager.Manager) (reconcile.Reconciler, error) {
+	pc, err := NewPodControl()
+	if err != nil {
+		return nil, err
+	}
+	return &ReconcileStudyJobController{Client: mgr.GetClient(), scheme: mgr.GetScheme(), muxMap: sync.Map{}, podControl: pc}, nil
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -106,6 +114,7 @@ type ReconcileStudyJobController struct {
 	client.Client
 	scheme *runtime.Scheme
 	muxMap sync.Map
+	podControl *PodControl
 }
 
 // Reconcile reads that state of the cluster for a StudyJob object and makes changes based on the state read
@@ -289,7 +298,14 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 						job := &batchv1.Job{}
 						joberr := r.Client.Get(context.TODO(), nname, job)
 						if joberr == nil {
-							if err := r.Delete(context.TODO(), job, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
+							if err := r.Delete(context.TODO(), job); err != nil {
+								return false, err
+							}
+							// In order to integrate with tf-operator and pytorch-operator, we need to
+							// downgrade the k8s dependency for katib from 1.11.2 to 1.10.1, and
+							// controller-runtime from 0.1.3 to 0.1.1. This means that we cannot use
+							// DeletePropagationForeground to clean up pods, and must do this manually.
+							if err := r.podControl.DeletePodsForWorker(ns, job.GetName()); err != nil {
 								return false, err
 							}
 						}
@@ -301,9 +317,12 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 						cjob := &batchv1beta.CronJob{}
 						cjoberr := r.Client.Get(context.TODO(), nname, cjob)
 						if cjoberr == nil {
-							if err := r.Delete(context.TODO(), cjob, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
+							if err := r.Delete(context.TODO(), cjob); err != nil {
 								return false, err
 							}
+							// Depending on the successfulJobsHistoryLimit setting, cronjob controller
+							// will delete the metrics collector pods accordingly, so we do not need
+							// to manually delete them here.
 						}
 					}
 				}
