@@ -106,15 +106,15 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	err = c.Watch(
-		&source.Kind{Type: &tfjobv1beta1.TFJob{}},
-		&handler.EnqueueRequestForOwner{
-			IsController: true,
-			OwnerType:    &katibv1alpha1.StudyJob{},
-		})
-	if err != nil {
-		return err
-	}
+	//err = c.Watch(
+	//	&source.Kind{Type: &tfjobv1beta1.TFJob{}},
+	//	&handler.EnqueueRequestForOwner{
+	//		IsController: true,
+	//		OwnerType:    &katibv1alpha1.StudyJob{},
+	//	})
+	//if err != nil {
+	//	return err
+	//}
 
 	return nil
 }
