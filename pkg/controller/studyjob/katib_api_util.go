@@ -22,41 +22,58 @@ import (
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
-func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) error {
+func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) (bool, error) {
 	if validErr := validateStudy(instance, ns); validErr != nil {
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
-		return validErr
+		return true, validErr
 	}
 
 	if instance.Spec.SuggestionSpec.SuggestionAlgorithm == "" {
-		instance.Spec.SuggestionSpec.SuggestionAlgorithm = "random"
+		instance.Spec.SuggestionSpec.SuggestionAlgorithm = "manual"
 	}
-
 	instance.Status.Condition = katibv1alpha1.ConditionRunning
-
 	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Connect katib manager error %v", err)
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
-		return nil
+		return true, nil
 	}
 	defer conn.Close()
 	c := katibapi.NewManagerClient(conn)
 
-	studyConfig, err := getStudyConf(instance)
-	if err != nil {
-		return err
+	if instance.Spec.ReuseStudyID != "" {
+		_, err = getStudyfromDB(c, instance.Spec.ReuseStudyID)
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		if err != nil {
+			return true, err
+		}
+		instance.Status.StudyID = instance.Spec.ReuseStudyID
+	} else {
+		studyConfig, err := getStudyConf(instance)
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		if err != nil {
+			return true, err
+		}
+		log.Printf("Create Study %s", studyConfig.Name)
+		//CreateStudy
+		studyID, err := createStudy(c, studyConfig)
+		if err != nil {
+			gstatus := status.Convert(err)
+			if gstatus.Code() == codes.AlreadyExists {
+				//Duplicate create study request
+				return false, nil
+			} else {
+				log.Printf("Create Study Error: ", err)
+				return true, err
+			}
+		}
+		instance.Status.StudyID = studyID
 	}
-	log.Printf("Create Study %s", studyConfig.Name)
-	//CreateStudy
-	studyID, err := createStudy(c, studyConfig)
-	if err != nil {
-		return err
-	}
-	instance.Status.StudyID = studyID
-	log.Printf("Study: %s Suggestion Spec %v", studyID, instance.Spec.SuggestionSpec)
+	log.Printf("Study: %s Suggestion Spec %v", instance.Status.StudyID, instance.Spec.SuggestionSpec)
 	var sspec *katibv1alpha1.SuggestionSpec
 	if instance.Spec.SuggestionSpec != nil {
 		sspec = instance.Spec.SuggestionSpec
@@ -68,13 +85,14 @@ func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) error {
 			Name:  "SuggestionCount",
 			Value: "0",
 		})
-	sPID, err := setSuggestionParam(c, studyID, sspec)
+	sPID, err := setSuggestionParam(c, instance.Status.StudyID, sspec)
 	if err != nil {
-		return err
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		return true, err
 	}
 	instance.Status.SuggestionParameterID = sPID
 	instance.Status.Condition = katibv1alpha1.ConditionRunning
-	return nil
+	return true, nil
 }
 
 func getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
@@ -249,14 +267,27 @@ func deleteStudy(instance *katibv1alpha1.StudyJob) error {
 	return nil
 }
 
+func getStudyfromDB(c katibapi.ManagerClient, studyId string) (*katibapi.StudyConfig, error) {
+	ctx := context.Background()
+	getStudyreq := &katibapi.GetStudyRequest{
+		StudyId: studyId,
+	}
+	getStudyrep, err := c.GetStudy(ctx, getStudyreq)
+	if err != nil {
+		log.Printf("GetStudy Error %v", err)
+		return nil, err
+	}
+	return getStudyrep.StudyConfig, nil
+}
+
 func createStudy(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig) (string, error) {
 	ctx := context.Background()
 	createStudyreq := &katibapi.CreateStudyRequest{
 		StudyConfig: studyConfig,
 	}
+	log.Printf("StudyJob UUID %s", studyConfig.JobId)
 	createStudyreply, err := c.CreateStudy(ctx, createStudyreq)
 	if err != nil {
-		log.Printf("CreateStudy Error %v", err)
 		return "", err
 	}
 	studyID := createStudyreply.StudyId

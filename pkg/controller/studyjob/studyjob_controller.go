@@ -53,7 +53,7 @@ const (
 )
 
 var (
-	invalidCRDResources [] string
+	invalidCRDResources []string
 )
 
 /**
@@ -218,13 +218,14 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 	default:
 		now := metav1.Now()
 		instance.Status.StartTime = &now
-		err = initializeStudy(instance, request.Namespace)
+		update, err = initializeStudy(instance, request.Namespace)
 		if err != nil {
-			r.Update(context.TODO(), instance)
 			log.Printf("Fail to initialize %v", err)
+			if update {
+				r.Update(context.TODO(), instance)
+			}
 			return reconcile.Result{}, err
 		}
-		update = true
 	}
 	now := metav1.Now()
 	instance.Status.LastReconcileTime = &now
@@ -490,7 +491,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 	if len(cwids) > 0 {
 		goal, err := r.checkGoal(instance, c, cwids)
 		if goal {
-			log.Printf("Study %s reached to the goal. It is completed", instance.Status.StudyID)
+			log.Printf("StudyJob %s reached to the goal. It is completed", instance.UID)
 			instance.Status.Condition = katibv1alpha1.ConditionCompleted
 			now := metav1.Now()
 			instance.Status.CompletionTime = &now
@@ -503,7 +504,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 	}
 	if nextSuggestionSchedule {
 		if instance.Spec.RequestCount > 0 && instance.Status.SuggestionCount >= instance.Spec.RequestCount {
-			log.Printf("Study %s reached the request count. It is completed", instance.Status.StudyID)
+			log.Printf("StudyJob %s reached the request count. It is completed", instance.UID)
 			instance.Status.Condition = katibv1alpha1.ConditionCompleted
 			now := metav1.Now()
 			instance.Status.CompletionTime = &now

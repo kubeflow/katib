@@ -52,6 +52,10 @@ type VizierDBInterface interface {
 	UpdateStudy(string, *api.StudyConfig) error
 	DeleteStudy(string) error
 
+	RegisterStudyJob(string, string, string) error
+	GetStudyIDfromJob(string) (string, error)
+	GetStudyJobList(string) ([]string, error)
+
 	GetTrial(string) (*api.Trial, error)
 	GetTrialList(string) ([]*api.Trial, error)
 	CreateTrial(*api.Trial) error
@@ -173,7 +177,6 @@ func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 		&tags,
 		&study.ObjectiveValueName,
 		&metrics,
-		&study.JobId,
 	)
 	if err != nil {
 		return nil, err
@@ -227,25 +230,6 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 		return "", errors.New("ParameterConfigs must be set")
 
 	}
-	if in.JobId != "" {
-		row := d.db.QueryRow("SELECT * FROM studies WHERE job_id = ?", in.JobId)
-		dummyStudy := new(api.StudyConfig)
-		var dummyID, dummyConfigs, dummyTags, dummyMetrics, dummyJobID string
-		err := row.Scan(&dummyID,
-			&dummyStudy.Name,
-			&dummyStudy.Owner,
-			&dummyStudy.OptimizationType,
-			&dummyStudy.OptimizationGoal,
-			&dummyConfigs,
-			&dummyTags,
-			&dummyStudy.ObjectiveValueName,
-			&dummyMetrics,
-			&dummyJobID,
-		)
-		if err == nil {
-			return "", fmt.Errorf("Study %s in Job %s already exist.", in.Name, in.JobId)
-		}
-	}
 
 	configs, err := (&jsonpb.Marshaler{}).MarshalToString(in.ParameterConfigs)
 	if err != nil {
@@ -276,7 +260,7 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 	for true {
 		studyID = generateRandid()
 		_, err := d.db.Exec(
-			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			studyID,
 			in.Name,
 			in.Owner,
@@ -286,7 +270,6 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 			strings.Join(tags, ",\n"),
 			in.ObjectiveValueName,
 			strings.Join(in.Metrics, ",\n"),
-			in.JobId,
 		)
 		if err == nil {
 			break
@@ -313,7 +296,7 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 }
 
 // UpdateStudy updates the corresponding row in the DB.
-// It only updates name, owner, tags and job_id.
+// It only updates name, owner and tags.
 // Other columns are silently ignored.
 func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
 	var err error
@@ -326,12 +309,11 @@ func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
 			continue
 		}
 	}
-	_, err = d.db.Exec(`UPDATE studies SET name = ?, owner = ?, tags = ?,
-                job_id = ? WHERE id = ?`,
+	_, err = d.db.Exec(`UPDATE studies SET name = ?, owner = ?, tags = ?
+                 WHERE id = ?`,
 		in.Name,
 		in.Owner,
 		strings.Join(tags, ",\n"),
-		in.JobId,
 		studyID)
 	return err
 }
@@ -339,6 +321,41 @@ func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
 func (d *dbConn) DeleteStudy(id string) error {
 	_, err := d.db.Exec("DELETE FROM studies WHERE id = ?", id)
 	return err
+}
+
+func (d *dbConn) RegisterStudyJob(job_uuid string, study_id string, job_type string) error {
+	_, err := d.db.Exec("INSERT INTO studyjobs (job_uuid, study_id, job_type) VALUES (?, ?, ?)",
+		job_uuid, study_id, job_type)
+	return err
+}
+
+func (d *dbConn) GetStudyIDfromJob(job_uuid string) (string, error) {
+	row := d.db.QueryRow("SELECT study_id FROM studyjobs WHERE job_uuid = ?", job_uuid)
+	var study_id string
+	err := row.Scan(&study_id)
+	if err != nil {
+		return "", err
+	}
+	return study_id, nil
+}
+
+func (d *dbConn) GetStudyJobList(study_id string) ([]string, error) {
+	rows, err := d.db.Query("SELECT job_uuid FROM studyjobs")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var result []string
+	for rows.Next() {
+		var id string
+		err = rows.Scan(&id)
+		if err != nil {
+			log.Printf("err scanning studyjobs.job_uuid: %v", err)
+			continue
+		}
+		result = append(result, id)
+	}
+	return result, nil
 }
 
 func (d *dbConn) getTrials(trialID string, studyID string) ([]*api.Trial, error) {

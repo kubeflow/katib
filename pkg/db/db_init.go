@@ -7,7 +7,8 @@ import (
 
 func (d *dbConn) DBInit() {
 	db := d.db
-	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS studies
+	var err error
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS studies
 		(id CHAR(16) PRIMARY KEY,
 		name VARCHAR(255),
 		owner VARCHAR(255),
@@ -16,10 +17,18 @@ func (d *dbConn) DBInit() {
 		parameter_configs TEXT,
 		tags TEXT,
 		objective_value_name VARCHAR(255),
-		metrics TEXT,
-		job_id TEXT)`)
+		metrics TEXT)`)
 	if err != nil {
 		log.Fatalf("Error creating studies table: %v", err)
+	}
+
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS studyjobs
+		(job_uuid CHAR(36) PRIMARY KEY,
+		study_id CHAR(16),
+		job_type TEXT,
+		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE)`)
+	if err != nil {
+		log.Fatalf("Error creating studyjob table: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS study_permissions

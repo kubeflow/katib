@@ -39,6 +39,7 @@ type StudyJobSpec struct {
 	EarlyStoppingSpec    *EarlyStoppingSpec    `json:"earlyStoppingSpec,omitempty"`
 	MetricsCollectorSpec *MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
 	NasConfig            *NasConfig            `json:"nasConfig,omitempty"`
+	ReuseStudyID         string                `json:"reusestudyid,omitempty"`
 }
 
 // StudyJobStatus defines the observed state of StudyJob

@@ -15,7 +15,9 @@ import (
 	"github.com/kubeflow/katib/pkg/manager/modelstore"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -32,7 +34,17 @@ func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest)
 	if in == nil || in.StudyConfig == nil {
 		return &api_pb.CreateStudyReply{}, errors.New("StudyConfig is missing.")
 	}
+	if in.StudyConfig.JobId != "" {
+		get_study_id, _ := dbIf.GetStudyIDfromJob(in.StudyConfig.JobId)
+		if get_study_id != "" {
+			return &api_pb.CreateStudyReply{StudyId: get_study_id}, status.Errorf(codes.AlreadyExists, "Job UUID is already registerd.")
+		}
+	}
 	studyID, err := dbIf.CreateStudy(in.StudyConfig)
+	if err != nil {
+		return &api_pb.CreateStudyReply{}, err
+	}
+	err = dbIf.RegisterStudyJob(in.StudyConfig.JobId, studyID, in.StudyConfig.JobType)
 	if err != nil {
 		return &api_pb.CreateStudyReply{}, err
 	}
