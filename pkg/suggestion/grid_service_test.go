@@ -12,10 +12,10 @@ func getSampleParameterConfigs() []*api.ParameterConfig {
 
 	config1 := &api.ParameterConfig {
 		Name:		"config1",
-		ParameterType:	api.ParameterType_DOUBLE,
+		ParameterType:	api.ParameterType_INT,
 		Feasible:	&api.FeasibleSpace{
-					Max:	"2.0",
-					Min:	"1.0",
+					Max:	"2",
+					Min:	"1",
 				},
 	}
 	config2 := &api.ParameterConfig {
@@ -28,10 +28,9 @@ func getSampleParameterConfigs() []*api.ParameterConfig {
 	}
 	config3 := &api.ParameterConfig {
 		Name:		"config3",
-		ParameterType:	api.ParameterType_DOUBLE,
+		ParameterType:	api.ParameterType_CATEGORICAL,
 		Feasible:	&api.FeasibleSpace{
-					Max:	"10.0",
-					Min:	"7.0",
+					List:	[]string{"alpha", "beta", "gamma"},
 				},
 	}
 
@@ -160,7 +159,7 @@ func TestSetP(t *testing.T) {
 	p := make([][]*api.Parameter, 4)
 	pcs := getSampleParameterConfigs()
 	pg := make([][]string, 0)
-	pg = append(pg, []string{"1.0", "2.0"})
+	pg = append(pg, []string{"1", "2"})
 	pg = append(pg, []string{"3.5", "5.5"})
 
 	s.setP(gci, p, pg, pcs)
@@ -169,13 +168,13 @@ func TestSetP(t *testing.T) {
 
 	p1 := &api.Parameter {
 		Name:		"config1",
-		ParameterType:	api.ParameterType_DOUBLE,
-		Value:		"1.0",
+		ParameterType:	api.ParameterType_INT,
+		Value:		"1",
 	}
 	p2 := &api.Parameter {
 		Name:		"config1",
-		ParameterType:	api.ParameterType_DOUBLE,
-		Value:		"2.0",
+		ParameterType:	api.ParameterType_INT,
+		Value:		"2",
 	}
 	p3 := &api.Parameter {
 		Name:		"config2",
