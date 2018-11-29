@@ -31,6 +31,7 @@
                 WorkerTemplateName: "scratch",
                 WorkerTemplateScratch: "",
                 SuggestAlgoSelect: "random",
+                SuggestAlgoCustom: "",
                 SuggestAlgoTmp: "",
                 SuggestionParameters: [],
                 SuggestionReqNum: 1,

@@ -102,6 +102,7 @@ func (k *KatibUIHandler) Index(w http.ResponseWriter, r *http.Request) {
 			ss = &StudySummary{
 				StudyNameStacks:    []*StudyNameStack{},
 				LatestJobCondition: "Unknown",
+				LastJobUpdateTime:  nil,
 			}
 			slv.StudySummarys[so.Name] = ss
 		}
@@ -123,16 +124,19 @@ func (k *KatibUIHandler) Index(w http.ResponseWriter, r *http.Request) {
 			}
 			for i := range ss.StudyNameStacks {
 				if ss.StudyNameStacks[i].StudyId == sj.Status.StudyID {
-					ss.StudyNameStacks[i].StudyJobName = sj.Name
-					ss.StudyNameStacks[i].StudyJobCondition = string(sj.Status.Condition)
-					if sj.Status.LastReconcileTime != nil {
-						if ss.LastJobUpdateTime != nil {
-							if ss.LastJobUpdateTime.Before(sj.Status.LastReconcileTime.Time) {
-								continue
+					if ss.StudyNameStacks[i].StudyJobName == "None" {
+						ss.StudyNameStacks[i].StudyJobName = sj.Name
+						ss.StudyNameStacks[i].StudyJobCondition = string(sj.Status.Condition)
+						if sj.Status.LastReconcileTime != nil {
+							if ss.LastJobUpdateTime != nil {
+								if ss.LastJobUpdateTime.Before(sj.Status.LastReconcileTime.Time) {
+									continue
+								}
 							}
+							ss.LatestJobCondition = string(sj.Status.Condition)
+							ss.LastJobUpdateTime = &sj.Status.LastReconcileTime.Time
 						}
-						ss.LatestJobCondition = string(sj.Status.Condition)
-						ss.LastJobUpdateTime = &sj.Status.LastReconcileTime.Time
+						break
 					}
 				}
 			}
