@@ -24,6 +24,7 @@ import (
 	"github.com/kubeflow/katib/pkg"
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
+	tfjobv1beta1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1beta1"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -104,6 +105,17 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	if err != nil {
 		return err
 	}
+
+	err = c.Watch(
+		&source.Kind{Type: &tfjobv1beta1.TFJob{}},
+		&handler.EnqueueRequestForOwner{
+			IsController: true,
+			OwnerType:    &katibv1alpha1.StudyJob{},
+		})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -115,6 +127,23 @@ type ReconcileStudyJobController struct {
 	scheme *runtime.Scheme
 	muxMap sync.Map
 	podControl *PodControl
+}
+
+type JobStatus struct {
+	// +optional
+	CompletionTime *metav1.Time
+
+	// The number of actively running pods.
+	// +optional
+	Active int32
+
+	// The number of pods which reached phase Succeeded.
+	// +optional
+	Succeeded int32
+
+	// The number of pods which reached phase Failed.
+	// +optional
+	Failed int32
 }
 
 // Reconcile reads that state of the cluster for a StudyJob object and makes changes based on the state read
@@ -262,6 +291,101 @@ func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob
 	return goal, nil
 }
 
+func (r *ReconcileStudyJobController) deleteWorkerResources(instance *katibv1alpha1.StudyJob, obj runtime.Object, ns string, wid string) error {
+	nname := types.NamespacedName{Namespace: ns, Name: wid}
+	var wretain, mcretain bool = false, false
+	if instance.Spec.WorkerSpec != nil {
+		wretain = instance.Spec.WorkerSpec.Retain
+	}
+	if !wretain {
+		joberr := r.Client.Get(context.TODO(), nname, obj)
+		if joberr == nil {
+			if err := r.Delete(context.TODO(), obj); err != nil {
+				return err
+			}
+			// In order to integrate with tf-operator and pytorch-operator, we need to
+			// downgrade the k8s dependency for katib from 1.11.2 to 1.10.1, and
+			// controller-runtime from 0.1.3 to 0.1.1. This means that we cannot use
+			// DeletePropagationForeground to clean up pods, and must do this manually.
+			if err := r.podControl.DeletePodsForWorker(ns, wid); err != nil {
+				return err
+			}
+		}
+	}
+	if instance.Spec.MetricsCollectorSpec != nil {
+		mcretain = instance.Spec.MetricsCollectorSpec.Retain
+	}
+	if !mcretain {
+		cjob := &batchv1beta.CronJob{}
+		cjoberr := r.Client.Get(context.TODO(), nname, cjob)
+		if cjoberr == nil {
+			if err := r.Delete(context.TODO(), cjob); err != nil {
+				return err
+			}
+			// Depending on the successfulJobsHistoryLimit setting, cronjob controller
+			// will delete the metrics collector pods accordingly, so we do not need
+			// to manually delete them here.
+		}
+	}
+	return nil
+}
+
+func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, instance *katibv1alpha1.StudyJob, status JobStatus, ns string, cwids []string, i int, j int) (bool, error) {
+	var update bool = false
+	wid := instance.Status.Trials[i].WorkerList[j].WorkerID
+	nname := types.NamespacedName{Namespace: ns, Name: wid}
+	//joberr := r.Client.Get(context.TODO(), nname, obj)
+	//if joberr != nil {
+	//	return update, joberr
+	//}
+	cjob := &batchv1beta.CronJob{}
+	cjoberr := r.Client.Get(context.TODO(), nname, cjob)
+	if status.Active == 0 && status.Succeeded > 0 {
+		ctime := status.CompletionTime
+		if cjoberr == nil {
+			if ctime != nil && cjob.Status.LastScheduleTime != nil {
+				if ctime.Before(cjob.Status.LastScheduleTime) && len(cjob.Status.Active) == 0 {
+					saveModel(c, instance.Status.StudyID, instance.Status.Trials[i].TrialID, wid)
+					instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionCompleted
+					instance.Status.Trials[i].WorkerList[j].CompletionTime = metav1.Now()
+					update = true
+					_, err := c.UpdateWorkerState(
+						context.Background(),
+						&katibapi.UpdateWorkerStateRequest{
+							WorkerId: instance.Status.Trials[i].WorkerList[j].WorkerID,
+							Status:   katibapi.State_COMPLETED,
+						})
+					if err != nil {
+						log.Printf("Fail to update worker info. ID %s", instance.Status.Trials[i].WorkerList[j].WorkerID)
+						return false, err
+					}
+					susp := true
+					cjob.Spec.Suspend = &susp
+					if err := r.Update(context.TODO(), cjob); err != nil {
+						return false, err
+					}
+
+					cwids = append(cwids, wid)
+				}
+			}
+		}
+	} else if status.Active > 0 {
+		if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionRunning {
+			instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionRunning
+			update = true
+		}
+		if errors.IsNotFound(cjoberr) {
+			r.spawnMetricsCollector(instance, c, instance.Status.StudyID, instance.Status.Trials[i].TrialID, wid, ns, instance.Spec.MetricsCollectorSpec)
+		}
+	} else if status.Failed > 0 {
+		if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionFailed {
+			instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionFailed
+			update = true
+		}
+	}
+	return update, nil
+}
+
 func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJob, ns string) (bool, error) {
 	nextSuggestionSchedule := true
 	var cwids []string
@@ -288,100 +412,35 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 					cwids = append(cwids, w.WorkerID)
 				}
 				switch w.Kind {
-				case "Job":
-					nname := types.NamespacedName{Namespace: ns, Name: w.WorkerID}
-					var wretain, mcretain bool = false, false
-					if instance.Spec.WorkerSpec != nil {
-						wretain = instance.Spec.WorkerSpec.Retain
+				case DefaultJobWorker:
+					if err := r.deleteWorkerResources(instance, &batchv1.Job{}, ns, w.WorkerID); err != nil {
+						return false, err
 					}
-					if !wretain {
-						job := &batchv1.Job{}
-						joberr := r.Client.Get(context.TODO(), nname, job)
-						if joberr == nil {
-							if err := r.Delete(context.TODO(), job); err != nil {
-								return false, err
-							}
-							// In order to integrate with tf-operator and pytorch-operator, we need to
-							// downgrade the k8s dependency for katib from 1.11.2 to 1.10.1, and
-							// controller-runtime from 0.1.3 to 0.1.1. This means that we cannot use
-							// DeletePropagationForeground to clean up pods, and must do this manually.
-							if err := r.podControl.DeletePodsForWorker(ns, job.GetName()); err != nil {
-								return false, err
-							}
-						}
-					}
-					if instance.Spec.MetricsCollectorSpec != nil {
-						mcretain = instance.Spec.MetricsCollectorSpec.Retain
-					}
-					if !mcretain {
-						cjob := &batchv1beta.CronJob{}
-						cjoberr := r.Client.Get(context.TODO(), nname, cjob)
-						if cjoberr == nil {
-							if err := r.Delete(context.TODO(), cjob); err != nil {
-								return false, err
-							}
-							// Depending on the successfulJobsHistoryLimit setting, cronjob controller
-							// will delete the metrics collector pods accordingly, so we do not need
-							// to manually delete them here.
-						}
+				case TFJobWorker:
+					if err := r.deleteWorkerResources(instance, &tfjobv1beta1.TFJob{}, ns, w.WorkerID); err != nil {
+						return false, err
 					}
 				}
 				continue
 			}
 			nextSuggestionSchedule = false
 			switch w.Kind {
-			case "Job":
+			case DefaultJobWorker:
 				job := &batchv1.Job{}
 				nname := types.NamespacedName{Namespace: ns, Name: w.WorkerID}
 				joberr := r.Client.Get(context.TODO(), nname, job)
 				if joberr != nil {
 					continue
 				}
-				cjob := &batchv1beta.CronJob{}
-				cjoberr := r.Client.Get(context.TODO(), nname, cjob)
-				if job.Status.Active == 0 && job.Status.Succeeded > 0 {
-					ctime := job.Status.CompletionTime
-					if cjoberr == nil {
-						if ctime != nil && cjob.Status.LastScheduleTime != nil {
-							if ctime.Before(cjob.Status.LastScheduleTime) && len(cjob.Status.Active) == 0 {
-								saveModel(c, instance.Status.StudyID, instance.Status.Trials[i].TrialID, instance.Status.Trials[i].WorkerList[j].WorkerID)
-								instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionCompleted
-								instance.Status.Trials[i].WorkerList[j].CompletionTime = metav1.Now()
-								update = true
-								_, err := c.UpdateWorkerState(
-									context.Background(),
-									&katibapi.UpdateWorkerStateRequest{
-										WorkerId: instance.Status.Trials[i].WorkerList[j].WorkerID,
-										Status:   katibapi.State_COMPLETED,
-									})
-								if err != nil {
-									log.Printf("Fail to update worker info. ID %s", instance.Status.Trials[i].WorkerList[j].WorkerID)
-									return false, err
-								}
-								susp := true
-								cjob.Spec.Suspend = &susp
-								if err := r.Update(context.TODO(), cjob); err != nil {
-									return false, err
-								}
-
-								cwids = append(cwids, w.WorkerID)
-							}
-						}
-					}
-				} else if job.Status.Active > 0 {
-					if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionRunning {
-						instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionRunning
-						update = true
-					}
-					if errors.IsNotFound(cjoberr) {
-						r.spawnMetricsCollector(instance, c, instance.Status.StudyID, t.TrialID, w.WorkerID, ns, instance.Spec.MetricsCollectorSpec)
-					}
-				} else if job.Status.Failed > 0 {
-					if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionFailed {
-						instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionFailed
-						update = true
-					}
+				js := JobStatus{
+					CompletionTime: job.Status.CompletionTime,
+					Active: job.Status.Active,
+					Succeeded: job.Status.Succeeded,
+					Failed: job.Status.Failed,
 				}
+				update, err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
+			case TFJobWorker:
+				// Do stuff here
 			}
 		}
 	}
@@ -500,7 +559,7 @@ func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJ
 	}
 	BUFSIZE := 1024
 	switch wkind {
-	case "Job":
+	case DefaultJobWorker:
 		var job batchv1.Job
 		if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(&job); err != nil {
 			instance.Status.Condition = katibv1alpha1.ConditionFailed
@@ -513,6 +572,23 @@ func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJ
 			return "", err
 		}
 		if err := r.Create(context.TODO(), &job); err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
+			log.Printf("Job Create error %v", err)
+			return "", err
+		}
+	case TFJobWorker:
+		var tfjob tfjobv1beta1.TFJob
+		if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(&tfjob); err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
+			log.Printf("Yaml decode error %v", err)
+			return "", err
+		}
+		if err := controllerutil.SetControllerReference(instance, &tfjob, r.scheme); err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
+			log.Printf("SetControllerReference error %v", err)
+			return "", err
+		}
+		if err := r.Create(context.TODO(), &tfjob); err != nil {
 			instance.Status.Condition = katibv1alpha1.ConditionFailed
 			log.Printf("Job Create error %v", err)
 			return "", err
