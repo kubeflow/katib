@@ -160,7 +160,7 @@ func TestSetP(t *testing.T) {
 	pcs := getSampleParameterConfigs()
 	pg := make([][]string, 0)
 	pg = append(pg, []string{"1", "2"})
-	pg = append(pg, []string{"3.5", "5.5"})
+	pg = append(pg, []string{"3.5000", "5.5000"})
 
 	s.setP(gci, p, pg, pcs)
 
@@ -179,12 +179,12 @@ func TestSetP(t *testing.T) {
 	p3 := &api.Parameter {
 		Name:		"config2",
 		ParameterType:	api.ParameterType_DOUBLE,
-		Value:		"3.5",
+		Value:		"3.5000",
 	}
 	p4 := &api.Parameter {
 		Name:		"config2",
 		ParameterType:	api.ParameterType_DOUBLE,
-		Value:		"5.5",
+		Value:		"5.5000",
 	}
 	exp = append(exp, []*api.Parameter{p1,p3})
 	exp = append(exp, []*api.Parameter{p1,p4})
