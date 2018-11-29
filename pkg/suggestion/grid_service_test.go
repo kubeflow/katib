@@ -234,7 +234,7 @@ func TestGenGrids(t *testing.T) {
 	df := 1
 	glist := make(map[string]int)
 	glist["config1"] = 2
-	glist["config2"] = 2
+	glist["config2"] = 3
 	glist["config3"] = 3
 
 	rtn := s.genGrids(studyID, pcs, df, glist)
@@ -245,5 +245,36 @@ func TestGenGrids(t *testing.T) {
 	}
 	if len(rtn) != exp_len {
 		t.Errorf("expected %v parameters generated, but %v parameters generated", exp_len, len(rtn))
+	}
+
+	config1 := []string{"1", "2"}
+	config2 := []string{"3.5000", "4.5000", "5.5000"}
+	config3 := []string{"alpha", "beta", "gamma"}
+	iter := 0
+	for _, c1 := range config1 {
+		for _, c2 := range config2 {
+			for _, c3 := range config3 {
+				exp_struct1 := &api.Parameter{
+					Name:		"config1",
+					ParameterType:	api.ParameterType_INT,
+					Value:		c1,
+				}
+				exp_struct2 := &api.Parameter{
+					Name:		"config2",
+					ParameterType:	api.ParameterType_DOUBLE,
+					Value:		c2,
+				}
+				exp_struct3 := &api.Parameter{
+					Name:		"config3",
+					ParameterType:	api.ParameterType_CATEGORICAL,
+					Value:		c3,
+				}
+				exp := []*api.Parameter{exp_struct1, exp_struct2, exp_struct3}
+				if !reflect.DeepEqual(rtn[iter], exp) {
+					t.Errorf("expected %v, but %v is returned", exp, rtn[iter])
+				}
+				iter++
+			}
+		}
 	}
 }
