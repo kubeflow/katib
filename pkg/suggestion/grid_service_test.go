@@ -2,7 +2,76 @@ package suggestion
 
 import (
 	"testing"
+	"reflect"
+
+	api "github.com/kubeflow/katib/pkg/api"
 )
+
+func getSampleParameterConfigs() []*api.ParameterConfig {
+	parameterConfigs := make([]*api.ParameterConfig, 0)
+
+	config1 := &api.ParameterConfig {
+		Name:		"config1",
+		ParameterType:	api.ParameterType_DOUBLE,
+		Feasible:	&api.FeasibleSpace{
+					Max:	"2.0",
+					Min:	"1.0",
+				},
+	}
+	config2 := &api.ParameterConfig {
+		Name:		"config2",
+		ParameterType:	api.ParameterType_DOUBLE,
+		Feasible:	&api.FeasibleSpace{
+					Max:	"5.5",
+					Min:	"3.5",
+				},
+	}
+	config3 := &api.ParameterConfig {
+		Name:		"config3",
+		ParameterType:	api.ParameterType_DOUBLE,
+		Feasible:	&api.FeasibleSpace{
+					Max:	"10.0",
+					Min:	"7.0",
+				},
+	}
+
+	parameterConfigs = append(parameterConfigs, config1)
+	parameterConfigs = append(parameterConfigs, config2)
+	parameterConfigs = append(parameterConfigs, config3)
+
+	return parameterConfigs
+}
+
+func getSampleSuggestionParameter(pattern int) []*api.SuggestionParameter {
+	suggestParam := make([]*api.SuggestionParameter, 0)
+
+	switch pattern {
+		case 1:
+		param1 := &api.SuggestionParameter {
+			Name:	"DefaultGrid",
+			Value:	"1",
+		}
+		param2 := &api.SuggestionParameter {
+			Name:	"Iteration",
+			Value:	"2",
+		}
+		param3 := &api.SuggestionParameter {
+			Name:	"learning-rate",
+			Value:	"3",
+		}
+		suggestParam = append(suggestParam, param1)
+		suggestParam = append(suggestParam, param2)
+		suggestParam = append(suggestParam, param3)
+
+		case 2:
+		param := &api.SuggestionParameter {
+			Name:	"DefaultGrid",
+			Value:	"-1",
+		}
+		suggestParam = append(suggestParam, param)
+	}
+	return suggestParam
+}
 
 func TestAllocInt(t *testing.T) {
 	s := &GridSuggestService{}
@@ -81,5 +150,101 @@ func TestAllocCat(t *testing.T) {
 		if rtn2[i] != exp2[i] {
 			t.Errorf("expected Array[%v] = %v, but %v is returned", i, exp2[i], rtn2[i])
 		}
+	}
+}
+
+func TestSetP(t *testing.T) {
+	s := &GridSuggestService{}
+
+	gci := 0
+	p := make([][]*api.Parameter, 4)
+	pcs := getSampleParameterConfigs()
+	pg := make([][]string, 0)
+	pg = append(pg, []string{"1.0", "2.0"})
+	pg = append(pg, []string{"3.5", "5.5"})
+
+	s.setP(gci, p, pg, pcs)
+
+	exp := make([][]*api.Parameter, 0)
+
+	p1 := &api.Parameter {
+		Name:		"config1",
+		ParameterType:	api.ParameterType_DOUBLE,
+		Value:		"1.0",
+	}
+	p2 := &api.Parameter {
+		Name:		"config1",
+		ParameterType:	api.ParameterType_DOUBLE,
+		Value:		"2.0",
+	}
+	p3 := &api.Parameter {
+		Name:		"config2",
+		ParameterType:	api.ParameterType_DOUBLE,
+		Value:		"3.5",
+	}
+	p4 := &api.Parameter {
+		Name:		"config2",
+		ParameterType:	api.ParameterType_DOUBLE,
+		Value:		"5.5",
+	}
+	exp = append(exp, []*api.Parameter{p1,p3})
+	exp = append(exp, []*api.Parameter{p1,p4})
+	exp = append(exp, []*api.Parameter{p2,p3})
+	exp = append(exp, []*api.Parameter{p2,p4})
+
+	for i, rtn := range p {
+		if !reflect.DeepEqual(rtn, exp[i]) {
+			t.Errorf("expected %v, but %v is returned", exp[i], rtn)
+		}
+	}
+}
+
+func TestParseSuggestParam(t *testing.T) {
+	s := &GridSuggestService{}
+
+	sp1 := getSampleSuggestionParameter(1)
+	rtn_defaultGrid1, rtn_i, rtn_ret := s.parseSuggestParam(sp1)
+	exp_defaultGrid1, exp_i := 1, 2
+	exp_ret := make(map[string]int)
+	exp_ret["learning-rate"] = 3
+
+	if rtn_defaultGrid1 != exp_defaultGrid1 {
+		t.Errorf("expected DefaultGrid is %v, but %v is returned", exp_defaultGrid1, rtn_defaultGrid1)
+	}
+	if rtn_i != exp_i {
+		t.Errorf("expected Iteration is %v, but %v is returned", exp_i, rtn_i)
+	}
+	if !reflect.DeepEqual(rtn_ret, exp_ret) {
+		t.Errorf("expected parameter is %v, but %v is returned", exp_ret, rtn_ret)
+	}
+
+	sp2 := getSampleSuggestionParameter(2)
+	rtn_defaultGrid2, _, _ := s.parseSuggestParam(sp2)
+	exp_defaultGrid2 := 1
+
+	if rtn_defaultGrid2 != exp_defaultGrid2 {
+		t.Errorf("expected DefaultGrid is %v, but %v is returned", exp_defaultGrid2, rtn_defaultGrid2)
+	}
+}
+
+func TestGenGrids(t *testing.T) {
+	s := &GridSuggestService{}
+
+	studyID := "testStudy"
+	pcs := getSampleParameterConfigs()
+	df := 1
+	glist := make(map[string]int)
+	glist["config1"] = 2
+	glist["config2"] = 2
+	glist["config3"] = 3
+
+	rtn := s.genGrids(studyID, pcs, df, glist)
+
+	exp_len := 1
+	for _, v := range glist {
+		exp_len *= v
+	}
+	if len(rtn) != exp_len {
+		t.Errorf("expected %v parameters generated, but %v parameters generated", exp_len, len(rtn))
 	}
 }
