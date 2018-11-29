@@ -1,4 +1,6 @@
-language: generic
+language: go
+go:
+  - master
 sudo: required
 dist: trusty
 
@@ -14,9 +16,12 @@ before_install:
 - go get github.com/mattn/goveralls
 - go get golang.org/x/tools/cmd/cover
 - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+- dep ensure --vendor-only
+
+install:
+- dep ensure --vendor-only
 
 script:
-- dep ensure --vendor-only
 - ./scripts/build.sh
 - go test -cover -v -coverprofile=.coverprofile $(go list ./pkg/...)
 - $GOPATH/bin/goveralls -service=travis-ci -coverprofile=.coverprofile
