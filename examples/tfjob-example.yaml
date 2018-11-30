@@ -1,0 +1,111 @@
+apiVersion: "kubeflow.org/v1alpha1"
+kind: StudyJob
+metadata:
+  namespace: kubeflow
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: tfjob-example
+spec:
+  studyName: tfjob-example
+  owner: crd
+  optimizationtype: maximize
+  objectivevaluename: Validation-accuracy
+  optimizationgoal: 0.99
+  requestcount: 4
+  metricsnames:
+    - accuracy
+  parameterconfigs:
+    - name: --lr
+      parametertype: double
+      feasible:
+        min: "0.01"
+        max: "0.03"
+    - name: --num-layers
+      parametertype: int
+      feasible:
+        min: "2"
+        max: "5"
+    - name: --optimizer
+      parametertype: categorical
+      feasible:
+        list:
+        - sgd
+        - adam
+        - ftrl
+  workerSpec:
+    goTemplate:
+        rawTemplate: |-
+          apiVersion: "kubeflow.org/v1beta1"
+          kind: TFJob
+          metadata:
+            name: {{.WorkerID}}
+            namespace: kubeflow
+          spec:
+           tfReplicaSpecs:
+            PS:
+              replicas: 2
+              restartPolicy: Never
+              template:
+                spec:
+                  containers:
+                    - name: tensorflow
+                      image: gcr.io/kubeflow-ci/tf-dist-mnist-test:2.0
+            Worker:
+              replicas: 2 
+              restartPolicy: Never
+              template:
+                spec:
+                  containers:
+                    - name: tensorflow
+                      image: gcr.io/kubeflow-ci/tf-dist-mnist-test:2.0
+                      command:
+                        - "python"
+                        - "/var/tf_dist_mnist/dist_mnist.py"
+                        - "--batch-size=64"
+                        {{- with .HyperParameters}}
+                        {{- range .}}
+                        - "{{.Name}}={{.Value}}"
+                        {{- end}}
+                        {{- end}}
+  metricsCollectorSpec:
+    goTemplate:
+      rawTemplate: |-
+        apiVersion: batch/v1beta1
+        kind: CronJob
+        metadata:
+          name: {{.WorkerID}}
+          namespace: kubeflow
+        spec:
+          schedule: "*/1 * * * *"
+          successfulJobsHistoryLimit: 0
+          failedJobsHistoryLimit: 1
+          jobTemplate:
+            spec:
+              template:
+                spec:
+                  containers:
+                  - name: {{.WorkerID}}
+                    image: gcr.io/kubeflow-ci/katib/tfevent-metrics-collector:v0.1.2-alpha-77-g9324cad
+                    args:
+                    - "python"
+                    - "main.py"
+                    - "-m"
+                    - "vizier-core"
+                    - "-s"
+                    - "{{.StudyID}}"
+                    - "-w"
+                    - "{{.WorkerID}}"
+                    - "-d"
+                    - "/log/{{.WorkerID}}"
+                    volumeMounts:
+                        - mountPath: "/log"
+                          name: "log"
+                  volumes:
+                    - name: "log"
+                      persistentVolumeClaim:
+                          claimName: "tfevent-volume"
+                  restartPolicy: Never
+                  serviceAccountName: metrics-collector
+  suggestionSpec:
+    suggestionAlgorithm: "random"
+    requestNumber: 3

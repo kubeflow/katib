@@ -15,3 +15,9 @@ const (
 	DefaultJobWorker = "Job"
 	TFJobWorker = "TFJob"
 )
+
+const (
+	WorkerState_Active = 0
+	WorkerState_Succeeded = 1
+	WorkerState_Failed = 2
+)

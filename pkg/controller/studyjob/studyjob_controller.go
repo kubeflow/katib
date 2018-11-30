@@ -25,6 +25,7 @@ import (
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 	tfjobv1beta1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1beta1"
+	commonv1beta1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta1"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -106,15 +107,15 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	//err = c.Watch(
-	//	&source.Kind{Type: &tfjobv1beta1.TFJob{}},
-	//	&handler.EnqueueRequestForOwner{
-	//		IsController: true,
-	//		OwnerType:    &katibv1alpha1.StudyJob{},
-	//	})
-	//if err != nil {
-	//	return err
-	//}
+	err = c.Watch(
+		&source.Kind{Type: &tfjobv1beta1.TFJob{}},
+	        &handler.EnqueueRequestForOwner{
+			IsController: true,
+			OwnerType:    &katibv1alpha1.StudyJob{},
+		})
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -129,21 +130,10 @@ type ReconcileStudyJobController struct {
 	podControl *PodControl
 }
 
-type JobStatus struct {
+type WorkerStatus struct {
 	// +optional
 	CompletionTime *metav1.Time
-
-	// The number of actively running pods.
-	// +optional
-	Active int32
-
-	// The number of pods which reached phase Succeeded.
-	// +optional
-	Succeeded int32
-
-	// The number of pods which reached phase Failed.
-	// +optional
-	Failed int32
+	WorkerState int
 }
 
 // Reconcile reads that state of the cluster for a StudyJob object and makes changes based on the state read
@@ -330,17 +320,14 @@ func (r *ReconcileStudyJobController) deleteWorkerResources(instance *katibv1alp
 	return nil
 }
 
-func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, instance *katibv1alpha1.StudyJob, status JobStatus, ns string, cwids []string, i int, j int) (bool, error) {
+func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, instance *katibv1alpha1.StudyJob, status WorkerStatus, ns string, cwids []string, i int, j int) (bool, error) {
 	var update bool = false
 	wid := instance.Status.Trials[i].WorkerList[j].WorkerID
 	nname := types.NamespacedName{Namespace: ns, Name: wid}
-	//joberr := r.Client.Get(context.TODO(), nname, obj)
-	//if joberr != nil {
-	//	return update, joberr
-	//}
 	cjob := &batchv1beta.CronJob{}
 	cjoberr := r.Client.Get(context.TODO(), nname, cjob)
-	if status.Active == 0 && status.Succeeded > 0 {
+	switch(status.WorkerState) {
+	case WorkerState_Succeeded:
 		ctime := status.CompletionTime
 		if cjoberr == nil {
 			if ctime != nil && cjob.Status.LastScheduleTime != nil {
@@ -369,7 +356,7 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 				}
 			}
 		}
-	} else if status.Active > 0 {
+	case WorkerState_Active:
 		if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionRunning {
 			instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionRunning
 			update = true
@@ -377,7 +364,7 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 		if errors.IsNotFound(cjoberr) {
 			r.spawnMetricsCollector(instance, c, instance.Status.StudyID, instance.Status.Trials[i].TrialID, wid, ns, instance.Spec.MetricsCollectorSpec)
 		}
-	} else if status.Failed > 0 {
+	case WorkerState_Failed:
 		if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionFailed {
 			instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionFailed
 			update = true
@@ -432,15 +419,39 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 				if joberr != nil {
 					continue
 				}
-				js := JobStatus{
+				var state int = WorkerState_Active
+				if job.Status.Active == 0 && job.Status.Succeeded > 0 {
+					state = WorkerState_Succeeded
+				} else if job.Status.Failed > 0 {
+					state = WorkerState_Failed
+				}
+				js := WorkerStatus{
 					CompletionTime: job.Status.CompletionTime,
-					Active: job.Status.Active,
-					Succeeded: job.Status.Succeeded,
-					Failed: job.Status.Failed,
+					WorkerState: state,
 				}
 				update, err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
 			case TFJobWorker:
-				// Do stuff here
+				tfjob := &tfjobv1beta1.TFJob{}
+				nname := types.NamespacedName{Namespace: ns, Name: w.WorkerID}
+				tfjoberr := r.Client.Get(context.TODO(), nname, tfjob)
+				if tfjoberr != nil {
+					continue
+				}
+				var state int = WorkerState_Active
+				if len(tfjob.Status.Conditions) > 0 {
+					lc := tfjob.Status.Conditions[len(tfjob.Status.Conditions) - 1]
+					if lc.Type == commonv1beta1.JobSucceeded {
+						state = WorkerState_Succeeded
+					}	else if lc.Type == commonv1beta1.JobFailed {
+						state = WorkerState_Failed
+					}
+				}
+				js := WorkerStatus{
+					CompletionTime: tfjob.Status.CompletionTime,
+					WorkerState: state,
+				}
+				update, err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
+
 			}
 		}
 	}
@@ -590,7 +601,7 @@ func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJ
 		}
 		if err := r.Create(context.TODO(), &tfjob); err != nil {
 			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("Job Create error %v", err)
+			log.Printf("TFJob Create error %v", err)
 			return "", err
 		}
 	}
