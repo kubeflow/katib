@@ -64,6 +64,25 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
+func TestOpenSQLConn(t *testing.T) {
+	_, _, err := sqlmock.New()
+	if err != nil {
+		fmt.Printf("error opening db: %v\n", err)
+		os.Exit(1)
+	}
+	mysqlAddr := os.Getenv("TEST_MYSQL")
+	if mysqlAddr != "" {
+		_, err := openSQLConn("mysql", "root:test123@tcp("+mysqlAddr+")/vizier", time.Second, 3*time.Second)
+		if err != nil {
+			t.Errorf("openSQLConn error: %v", err)
+		}
+	}
+	_, err = openSQLConn("mysql", "root:test123@tcp(dummy)/vizier", time.Second, 3*time.Second)
+	if err.Error() != "Timeout waiting for DB conn successfully opened." {
+		t.Errorf("openSQLConn should timeout but got error: %v", err)
+	}
+}
+
 func TestCreateStudy(t *testing.T) {
 	var in api.StudyConfig
 	in.ParameterConfigs = new(api.StudyConfig_ParameterConfigs)
