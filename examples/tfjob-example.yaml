@@ -9,29 +9,22 @@ spec:
   studyName: tfjob-example
   owner: crd
   optimizationtype: maximize
-  objectivevaluename: Validation-accuracy
+  objectivevaluename: accuracy_1
   optimizationgoal: 0.99
   requestcount: 4
   metricsnames:
-    - accuracy
+    - accuracy_1
   parameterconfigs:
-    - name: --lr
+    - name: --learning_rate
       parametertype: double
       feasible:
         min: "0.01"
-        max: "0.03"
-    - name: --num-layers
+        max: "0.05"
+    - name: --batch_size
       parametertype: int
       feasible:
-        min: "2"
-        max: "5"
-    - name: --optimizer
-      parametertype: categorical
-      feasible:
-        list:
-        - sgd
-        - adam
-        - ftrl
+        min: "100"
+        max: "200"
   workerSpec:
     goTemplate:
         rawTemplate: |-
@@ -42,31 +35,30 @@ spec:
             namespace: kubeflow
           spec:
            tfReplicaSpecs:
-            PS:
-              replicas: 2
-              restartPolicy: Never
-              template:
-                spec:
-                  containers:
-                    - name: tensorflow
-                      image: gcr.io/kubeflow-ci/tf-dist-mnist-test:2.0
             Worker:
-              replicas: 2 
+              replicas: 1
               restartPolicy: Never
               template:
                 spec:
                   containers:
                     - name: tensorflow
-                      image: gcr.io/kubeflow-ci/tf-dist-mnist-test:2.0
+                      image: gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0
                       command:
                         - "python"
-                        - "/var/tf_dist_mnist/dist_mnist.py"
-                        - "--batch-size=64"
+                        - "/var/tf_mnist/mnist_with_summaries.py"
+                        - "--log_dir=/train/{{.WorkerID}}"
                         {{- with .HyperParameters}}
                         {{- range .}}
                         - "{{.Name}}={{.Value}}"
                         {{- end}}
                         {{- end}}
+                      volumeMounts:
+                        - mountPath: "/train"
+                          name: "train"
+                  volumes:
+                    - name: "train"
+                      persistentVolumeClaim:
+                        claimName: "tfevent-volume"
   metricsCollectorSpec:
     goTemplate:
       rawTemplate: |-
@@ -96,12 +88,12 @@ spec:
                     - "-w"
                     - "{{.WorkerID}}"
                     - "-d"
-                    - "/log/{{.WorkerID}}"
+                    - "/train/{{.WorkerID}}"
                     volumeMounts:
-                        - mountPath: "/log"
-                          name: "log"
+                        - mountPath: "/train"
+                          name: "train"
                   volumes:
-                    - name: "log"
+                    - name: "train"
                       persistentVolumeClaim:
                           claimName: "tfevent-volume"
                   restartPolicy: Never
