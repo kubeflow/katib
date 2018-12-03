@@ -168,10 +168,10 @@ func (s *GridSuggestService) GetSuggestions(ctx context.Context, in *api.GetSugg
 	if reqnum == 0 {
 		reqnum = len(grids)
 	}
-	trials := make([]*api.Trial, reqnum)
 	if iteration+reqnum > len(grids) {
 		reqnum = len(grids) - iteration
 	}
+	trials := make([]*api.Trial, reqnum)
 	if reqnum <= 0 {
 		return &api.GetSuggestionsReply{Trials: []*api.Trial{}}, err
 	}
