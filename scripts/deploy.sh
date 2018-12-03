@@ -33,6 +33,8 @@ kubectl apply -f manifests/vizier/suggestion/grid
 kubectl apply -f manifests/vizier/suggestion/hyperband
 kubectl apply -f manifests/vizier/suggestion/bayesianoptimization
 kubectl apply -f manifests/studyjobcontroller/crd.yaml
+echo "Sleeping...."
+sleep 30m
 kubectl apply -f manifests/studyjobcontroller/tfjobsCrd.yaml
 kubectl apply -f manifests/studyjobcontroller/rbac.yaml
 kubectl apply -f manifests/studyjobcontroller/mcrbac.yaml
