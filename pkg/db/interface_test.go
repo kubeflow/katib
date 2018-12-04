@@ -12,7 +12,6 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/jsonpb"
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	api "github.com/kubeflow/katib/pkg/api"
 )
@@ -48,6 +47,10 @@ func TestMain(m *testing.M) {
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS suggestion_param").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS earlystop_param").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	dbInterface.DBInit()
+	err = dbInterface.SelectOne()
+	if err != nil {
+		fmt.Printf("error `SELECT 1` probing: %v\n", err)
+	}
 
 	mysqlAddr := os.Getenv("TEST_MYSQL")
 	if mysqlAddr != "" {

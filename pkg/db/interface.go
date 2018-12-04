@@ -44,6 +44,8 @@ type WorkerLog struct {
 
 type VizierDBInterface interface {
 	DBInit()
+	SelectOne() error
+
 	GetStudyConfig(string) (*api.StudyConfig, error)
 	GetStudyList() ([]string, error)
 	CreateStudy(*api.StudyConfig) (string, error)
