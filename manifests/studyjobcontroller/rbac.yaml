@@ -14,14 +14,6 @@ rules:
   - list
   - watch
 - apiGroups:
-  - ""
-  resources:
-  - pods
-  - pods/log
-  - pods/status
-  verbs:
-  - "*"
-- apiGroups:
   - batch
   resources:
   - jobs
