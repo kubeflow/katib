@@ -20,7 +20,7 @@ import (
 
 const (
 	dbDriver     = "mysql"
-	dbNameTmpl   = "root:%s@tcp(vizier-db:3306)/vizier"
+	dbNameTmpl   = "root:%s@tcp(vizier-db:3306)/vizier?timeout=5s"
 	mysqlTimeFmt = "2006-01-02 15:04:05.999999"
 
 	connectInterval = 5 * time.Second
