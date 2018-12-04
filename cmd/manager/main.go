@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"net"
 	"time"
 
 	api_pb "github.com/kubeflow/katib/pkg/api"
+	health_pb "github.com/kubeflow/katib/pkg/api/health"
 	kdb "github.com/kubeflow/katib/pkg/db"
 	"github.com/kubeflow/katib/pkg/manager/modelstore"
 
@@ -286,6 +288,27 @@ func (s *server) GetSavedModel(ctx context.Context, in *api_pb.GetSavedModelRequ
 	return &api_pb.GetSavedModelReply{Model: ret}, err
 }
 
+func (s *server) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*health_pb.HealthCheckResponse, error) {
+	resp := health_pb.HealthCheckResponse{
+		Status: health_pb.HealthCheckResponse_SERVING,
+	}
+
+	// We only accept optional service name only if it's set to suggested format.
+	if in != nil && in.Service != "" && in.Service != "grpc.health.v1.Health" {
+		resp.Status = health_pb.HealthCheckResponse_UNKNOWN
+		return &resp, fmt.Errorf("grpc.health.v1.Health can only be accepted if you specify service name.")
+	}
+
+	// Check if connection to vizier-db is okay since otherwise manager could not serve most of its methods.
+	err := dbIf.SelectOne()
+	if err != nil {
+		resp.Status = health_pb.HealthCheckResponse_NOT_SERVING
+		return &resp, fmt.Errorf("Failed to execute `SELECT 1` probe: %v", err)
+	}
+
+	return &resp, nil
+}
+
 func main() {
 	flag.Parse()
 	var err error
@@ -304,6 +327,7 @@ func main() {
 	log.Printf("Start Katib manager: %s", port)
 	s := grpc.NewServer(grpc.MaxRecvMsgSize(size), grpc.MaxSendMsgSize(size))
 	api_pb.RegisterManagerServer(s, &server{})
+	health_pb.RegisterHealthServer(s, &server{})
 	reflection.Register(s)
 	if err = s.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
