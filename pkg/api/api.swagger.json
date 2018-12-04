@@ -683,6 +683,9 @@
         "min": {
           "type": "string"
         },
+        "scale": {
+          "$ref": "#/definitions/apiScale"
+        },
         "list": {
           "type": "array",
           "items": {
@@ -1089,6 +1092,16 @@
           "type": "string"
         }
       }
+    },
+    "apiScale": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "LINEAR",
+        "LOG"
+      ],
+      "default": "UNKNOWN",
+      "description": " - UNKNOWN: Not used."
     },
     "apiSetEarlyStoppingParametersReply": {
       "type": "object",
