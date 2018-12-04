@@ -289,12 +289,17 @@ func (s *server) GetSavedModel(ctx context.Context, in *pb.GetSavedModelRequest)
 func main() {
 	flag.Parse()
 	var err error
-	dbIf = kdb.New()
+
+	dbIf, err = kdb.New()
+	if err != nil {
+		log.Fatalf("Failed to open db connection: %v", err)
+	}
 	dbIf.DBInit()
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
+
 	size := 1<<31 - 1
 	log.Printf("Start Katib manager: %s", port)
 	s := grpc.NewServer(grpc.MaxRecvMsgSize(size), grpc.MaxSendMsgSize(size))
