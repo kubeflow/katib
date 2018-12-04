@@ -30,6 +30,14 @@ spec:
         ports:
         - name: api
           containerPort: 6789
+        readinessProbe:
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:6789"]
+          initialDelaySeconds: 5
+        livenessProbe:
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:6789"]
+          initialDelaySeconds: 10
 #        resources:
 #          requests:
 #            cpu: 500m
