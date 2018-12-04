@@ -3,8 +3,11 @@ DIRECT algorithm is used in this case
 """
 import copy
 import numpy as np
+from collections import deque
 
 from pkg.suggestion.bayesianoptimization.src.acquisition_func.acquisition_func import AcquisitionFunc
+import logging
+from logging import getLogger, StreamHandler, INFO, DEBUG
 
 
 class RectPack:
@@ -70,7 +73,19 @@ class GlobalOptimizer:
     """ class for the global optimizer """
 
     def __init__(self, N, l, u, scaler, X_train, y_train, current_optimal, mode, trade_off, length_scale,
-                 noise, nu, kernel_type, n_estimators, max_features, model_type):
+                 noise, nu, kernel_type, n_estimators, max_features, model_type, logger=None):
+        if logger == None:
+            self.logger = getLogger(__name__)
+            FORMAT = '%(asctime)-15s StudyID %(studyid)s %(message)s'
+            logging.basicConfig(format=FORMAT)
+            handler = StreamHandler()
+            handler.setLevel(INFO)
+            self.logger.setLevel(INFO)
+            self.logger.addHandler(handler)
+            self.logger.propagate = False
+        else:
+            self.logger = logger
+
         self.N = N
         self.l = l
         self.u = u
@@ -144,7 +159,7 @@ class GlobalOptimizer:
         #         print(opt.point.fc)
         return opt_list2
 
-    def direct(self):
+    def direct(self, request_num):
         """ main algorithm """
         self.dim = self.l.shape[1]
         division_num = 0
@@ -185,9 +200,30 @@ class GlobalOptimizer:
                         if not bucket.array:
                             index = self.buckets.index(bucket)
                             del self.buckets[index]
-
             ei_min.append(f_min)
-        return f_min, x_next
+        x_next_candidate = self.sample_buckets(request_num)
+        return f_min, x_next_candidate
+
+    def sample_buckets(self, request_num):
+        self.logger.debug("In lne self.buckets: %r", len(self.buckets))
+        bucket_index = []
+        fc_sum = 0.0
+        x_next_candidate = []
+        for bucket in self.buckets:
+            for a in bucket.array:
+                self.logger.debug("fc: %r, %r", a.fc, a.center)
+                fc_sum -= a.fc
+                bucket_index.append([-a.fc, a.center])
+        bucket_index = sorted(bucket_index, key=lambda x: x[0])
+        for i in range(request_num):
+            sample = np.random.rand()
+            stick = 0.0
+            for b in bucket_index:
+                stick += b[0]/fc_sum
+                if stick > sample:
+                    x_next_candidate.append(b[1])
+                    break
+        return x_next_candidate
 
     def divide_rect(self, opt_rect, f_min, x_next, aq_func, scaler):
         """ divide the rectangular into smaller ones """
