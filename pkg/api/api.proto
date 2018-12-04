@@ -145,6 +145,14 @@ service EarlyStopping {
     rpc GetShouldStopWorkers(GetShouldStopWorkersRequest) returns (GetShouldStopWorkersReply);
 }
 
+enum Scale {
+    // Not used.
+    UNKNOWN = 0;
+
+    LINEAR = 1;
+    LOG = 2;
+}
+
 enum ParameterType {
     // Not used
     UNKNOWN_TYPE = 0;
@@ -166,6 +174,7 @@ enum OptimizationType {
 message FeasibleSpace {
     string max = 1;
     string min = 2;
+    Scale scale = 4;
     repeated string list = 3;
 }
 

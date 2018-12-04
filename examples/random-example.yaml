@@ -18,8 +18,9 @@ spec:
     - name: --lr
       parametertype: double
       feasible:
-        min: "0.01"
-        max: "0.03"
+        min: "0.001"
+        max: "0.1"
+        scale: "log"
     - name: --num-layers
       parametertype: int
       feasible:

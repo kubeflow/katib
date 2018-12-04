@@ -89,8 +89,17 @@ type ParameterConfig struct {
 type FeasibleSpace struct {
 	Max  string   `json:"max,omitempty"`
 	Min  string   `json:"min,omitempty"`
+	Scale Scale   `json:"scale,omitempty"`
 	List []string `json:"list,omitempty"`
 }
+
+type Scale string
+
+const (
+	ScaleUnknown Scale = ""
+	ScaleLinear  Scale = "linear"
+	ScaleLog     Scale = "log"
+)
 
 type ParameterType string
 

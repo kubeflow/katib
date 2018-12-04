@@ -3,6 +3,7 @@ package suggestion
 import (
 	"context"
 	"log"
+	"math"
 	"math/rand"
 	"strconv"
 	"time"
@@ -19,17 +20,41 @@ func NewRandomSuggestService() *RandomSuggestService {
 	return &RandomSuggestService{}
 }
 
-func (s *RandomSuggestService) DoubleRandom(min, max float64) float64 {
+func (s *RandomSuggestService) DoubleRandom(min, max float64, scale api.Scale) float64 {
 	if min == max {
 		return min
 	}
 	rand.Seed(time.Now().UnixNano())
-	return rand.Float64()*(max-min) + min
+
+	switch scale {
+	case api.Scale_UNKNOWN:
+		// Shouldn't happen, but I guess we'll just sample linearly since that's intuitive.
+		return s.DoubleRandom(min, max, api.Scale_LINEAR)
+	case api.Scale_LINEAR:
+		return rand.Float64()*(max-min) + min
+	case api.Scale_LOG:
+		log_min := math.Log(min)
+		log_max := math.Log(max)
+		log_rand := s.DoubleRandom(log_min, log_max, api.Scale_LINEAR)
+		return math.Exp(log_rand)
+	}
+	log.Fatal("Unexpectedly reached end of RandomSuggestService.DoubleRandom.")
+	return 0
 }
 
-func (s *RandomSuggestService) IntRandom(min, max int) int {
+func (s *RandomSuggestService) IntRandom(min, max int, scale api.Scale) int {
 	rand.Seed(time.Now().UnixNano())
-	return rand.Intn(max-min+1) + min
+	switch scale {
+	case api.Scale_UNKNOWN:
+		// Shouldn't happen, but I guess we'll just sample linearly since that's intuitive.
+		return s.IntRandom(min, max, api.Scale_LINEAR)
+	case api.Scale_LINEAR:
+		return rand.Intn(max-min+1) + min
+	case api.Scale_LOG:
+		return int(s.DoubleRandom(float64(min), float64(max), scale))
+	}
+	log.Fatal("Unexpectedly reached end of RandomSuggestService.DoubleRandom.")
+	return 0
 }
 
 func (s *RandomSuggestService) GetSuggestions(ctx context.Context, in *api.GetSuggestionsRequest) (*api.GetSuggestionsReply, error) {
@@ -61,13 +86,13 @@ func (s *RandomSuggestService) GetSuggestions(ctx context.Context, in *api.GetSu
 			case api.ParameterType_INT:
 				imin, _ := strconv.Atoi(pc.Feasible.Min)
 				imax, _ := strconv.Atoi(pc.Feasible.Max)
-				sT[i].ParameterSet[j].Value = strconv.Itoa(s.IntRandom(imin, imax))
+				sT[i].ParameterSet[j].Value = strconv.Itoa(s.IntRandom(imin, imax, pc.Feasible.Scale))
 			case api.ParameterType_DOUBLE:
 				dmin, _ := strconv.ParseFloat(pc.Feasible.Min, 64)
 				dmax, _ := strconv.ParseFloat(pc.Feasible.Max, 64)
-				sT[i].ParameterSet[j].Value = strconv.FormatFloat(s.DoubleRandom(dmin, dmax), 'f', 4, 64)
+				sT[i].ParameterSet[j].Value = strconv.FormatFloat(s.DoubleRandom(dmin, dmax, pc.Feasible.Scale), 'f', 4, 64)
 			case api.ParameterType_CATEGORICAL:
-				sT[i].ParameterSet[j].Value = pc.Feasible.List[s.IntRandom(0, len(pc.Feasible.List)-1)]
+				sT[i].ParameterSet[j].Value = pc.Feasible.List[s.IntRandom(0, len(pc.Feasible.List)-1, api.Scale_LINEAR)]
 			}
 		}
 		ctreq := &api.CreateTrialRequest{

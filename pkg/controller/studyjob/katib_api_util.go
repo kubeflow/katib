@@ -108,6 +108,14 @@ func getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, erro
 		p.Name = pc.Name
 		p.Feasible.Min = pc.Feasible.Min
 		p.Feasible.Max = pc.Feasible.Max
+		switch pc.Feasible.Scale {
+		case katibv1alpha1.ScaleUnknown:
+			p.Feasible.Scale = katibapi.Scale_LINEAR
+		case katibv1alpha1.ScaleLinear:
+			p.Feasible.Scale = katibapi.Scale_LINEAR
+		case katibv1alpha1.ScaleLog:
+			p.Feasible.Scale = katibapi.Scale_LOG
+		}
 		p.Feasible.List = pc.Feasible.List
 		switch pc.ParameterType {
 		case katibv1alpha1.ParameterTypeUnknown:
