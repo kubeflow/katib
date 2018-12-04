@@ -189,8 +189,8 @@ func (k *KatibUIHandler) StudyInfoCsv(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	retText += "\n"
-	restext := make([]string, len(metricsList)+len(paramList))
 	for _, wfi := range gwfirep.WorkerFullInfos {
+		restext := make([]string, len(metricsList)+len(paramList))
 		for _, m := range wfi.MetricsLogs {
 			if len(m.Values) > 0 {
 				restext[metricsList[m.Name]] = m.Values[len(m.Values)-1].Value
