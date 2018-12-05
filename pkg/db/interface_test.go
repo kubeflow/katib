@@ -12,6 +12,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/jsonpb"
+	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	api "github.com/kubeflow/katib/pkg/api"
 )
@@ -37,7 +38,10 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 	//mock.ExpectBegin()
-	dbInterface = NewWithSQLConn(db)
+	dbInterface, err = NewWithSQLConn(db)
+	if err != nil {
+		fmt.Printf("error NewWithSQLConn: %v\n", err)
+	}
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS studies").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS study_permissions").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS trials").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
@@ -55,12 +59,17 @@ func TestMain(m *testing.M) {
 	mysqlAddr := os.Getenv("TEST_MYSQL")
 	if mysqlAddr != "" {
 		mysql, err := sql.Open("mysql", "root:test123@tcp("+mysqlAddr+")/vizier")
-
 		if err != nil {
 			fmt.Printf("error opening db: %v\n", err)
 			os.Exit(1)
 		}
-		mysqlInterface = NewWithSQLConn(mysql)
+
+		mysqlInterface, err = NewWithSQLConn(mysql)
+		if err != nil {
+			fmt.Printf("error initializing db interface: %v\n", err)
+			os.Exit(1)
+		}
+
 		mysqlInterface.DBInit()
 	}
 
