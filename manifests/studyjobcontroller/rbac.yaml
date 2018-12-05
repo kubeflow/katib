@@ -33,6 +33,12 @@ rules:
   - studyjobs
   verbs:
   - "*"
+- apiGroups:
+  - kubeflow.org
+  resources:
+  - tfjobs
+  verbs:
+  - "*"
 ---
 apiVersion: v1
 kind: ServiceAccount

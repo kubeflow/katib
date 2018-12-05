@@ -35,6 +35,10 @@ gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS
 
 echo "Configuring kubectl"
 
+echo "CLUSTER_NAME: ${CLUSTER_NAME}"
+echo "ZONE: ${GCP_ZONE}"
+echo "PROJECT: ${GCP_PROJECT}"
+
 gcloud container clusters describe ${CLUSTER_NAME} \
   --zone ${ZONE} \
   --format 'value(masterAuth.clusterCaCertificate)'|  base64 -d > ca.pem
