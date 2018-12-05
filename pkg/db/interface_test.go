@@ -38,7 +38,10 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 	//mock.ExpectBegin()
-	dbInterface = NewWithSQLConn(db)
+	dbInterface, err = NewWithSQLConn(db)
+	if err != nil {
+		fmt.Printf("error NewWithSQLConn: %v\n", err)
+	}
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS studies").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS study_permissions").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS trials").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
@@ -48,16 +51,25 @@ func TestMain(m *testing.M) {
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS suggestion_param").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS earlystop_param").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	dbInterface.DBInit()
+	err = dbInterface.SelectOne()
+	if err != nil {
+		fmt.Printf("error `SELECT 1` probing: %v\n", err)
+	}
 
 	mysqlAddr := os.Getenv("TEST_MYSQL")
 	if mysqlAddr != "" {
 		mysql, err := sql.Open("mysql", "root:test123@tcp("+mysqlAddr+")/vizier")
-
 		if err != nil {
 			fmt.Printf("error opening db: %v\n", err)
 			os.Exit(1)
 		}
-		mysqlInterface = NewWithSQLConn(mysql)
+
+		mysqlInterface, err = NewWithSQLConn(mysql)
+		if err != nil {
+			fmt.Printf("error initializing db interface: %v\n", err)
+			os.Exit(1)
+		}
+
 		mysqlInterface.DBInit()
 	}
 

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"log"
 )
 
@@ -93,4 +94,13 @@ func (d *dbConn) DBInit() {
 	if err != nil {
 		log.Fatalf("Error creating earlystop_param table: %v", err)
 	}
+}
+
+func (d *dbConn) SelectOne() error {
+	db := d.db
+	_, err := db.Exec(`SELECT 1`)
+	if err != nil {
+		return fmt.Errorf("Error `SELECT 1` probing: %v", err)
+	}
+	return nil
 }

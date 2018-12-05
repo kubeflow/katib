@@ -5,13 +5,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/jsonpb"
 	"log"
 	"math/big"
 	"math/rand"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/golang/protobuf/jsonpb"
 
 	api "github.com/kubeflow/katib/pkg/api"
 
@@ -20,7 +21,7 @@ import (
 
 const (
 	dbDriver     = "mysql"
-	dbNameTmpl   = "root:%s@tcp(vizier-db:3306)/vizier"
+	dbNameTmpl   = "root:%s@tcp(vizier-db:3306)/vizier?timeout=5s"
 	mysqlTimeFmt = "2006-01-02 15:04:05.999999"
 
 	connectInterval = 5 * time.Second
@@ -43,6 +44,8 @@ type WorkerLog struct {
 
 type VizierDBInterface interface {
 	DBInit()
+	SelectOne() error
+
 	GetStudyConfig(string) (*api.StudyConfig, error)
 	GetStudyList() ([]string, error)
 	CreateStudy(*api.StudyConfig) (string, error)
@@ -115,24 +118,24 @@ func openSQLConn(driverName string, dataSourceName string, interval time.Duratio
 	}
 }
 
-func NewWithSQLConn(db *sql.DB) VizierDBInterface {
+func NewWithSQLConn(db *sql.DB) (VizierDBInterface, error) {
 	d := new(dbConn)
 	d.db = db
 	seed, err := crand.Int(crand.Reader, big.NewInt(1<<63-1))
 	if err != nil {
-		log.Fatalf("RNG initialization failed: %v", err)
+		return nil, fmt.Errorf("RNG initialization failed: %v", err)
 	}
 	// We can do the following instead, but it creates a locking issue
 	//d.rng = rand.New(rand.NewSource(seed.Int64()))
 	rand.Seed(seed.Int64())
 
-	return d
+	return d, nil
 }
 
-func New() VizierDBInterface {
+func New() (VizierDBInterface, error) {
 	db, err := openSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
 	if err != nil {
-		log.Fatalf("DB open failed: %v", err)
+		return nil, fmt.Errorf("DB open failed: %v", err)
 	}
 	return NewWithSQLConn(db)
 }

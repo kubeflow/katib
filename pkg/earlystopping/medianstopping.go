@@ -3,11 +3,12 @@ package earlystopping
 import (
 	"context"
 	"errors"
-	"github.com/kubeflow/katib/pkg/api"
-	vdb "github.com/kubeflow/katib/pkg/db"
 	"log"
 	"sort"
 	"strconv"
+
+	"github.com/kubeflow/katib/pkg/api"
+	vdb "github.com/kubeflow/katib/pkg/db"
 )
 
 const (
@@ -28,8 +29,12 @@ type MedianStoppingRule struct {
 }
 
 func NewMedianStoppingRule() *MedianStoppingRule {
+	var err error
 	m := &MedianStoppingRule{}
-	m.dbIf = vdb.New()
+	m.dbIf, err = vdb.New()
+	if err != nil {
+		log.Fatalf("Failed to open db connection: %v", err)
+	}
 	return m
 }
 

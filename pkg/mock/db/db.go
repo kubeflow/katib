@@ -78,6 +78,12 @@ func (m *MockVizierDBInterface) DBInit() {
 	m.ctrl.Call(m, "DBInit")
 }
 
+func (m *MockVizierDBInterface) SelectOne() error {
+	ret := m.ctrl.Call(m, "SelectOne")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
 // DBInit indicates an expected call of DBInit
 func (mr *MockVizierDBInterfaceMockRecorder) DBInit() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DBInit", reflect.TypeOf((*MockVizierDBInterface)(nil).DBInit))
