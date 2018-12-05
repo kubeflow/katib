@@ -133,7 +133,7 @@ type ReconcileStudyJobController struct {
 type WorkerStatus struct {
 	// +optional
 	CompletionTime *metav1.Time
-	WorkerState int
+	WorkerState katibapi.State
 }
 
 // Reconcile reads that state of the cluster for a StudyJob object and makes changes based on the state read
@@ -327,7 +327,7 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 	cjob := &batchv1beta.CronJob{}
 	cjoberr := r.Client.Get(context.TODO(), nname, cjob)
 	switch(status.WorkerState) {
-	case WorkerState_Succeeded:
+	case katibapi.State_COMPLETED:
 		ctime := status.CompletionTime
 		if cjoberr == nil {
 			if ctime != nil && cjob.Status.LastScheduleTime != nil {
@@ -356,7 +356,7 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 				}
 			}
 		}
-	case WorkerState_Active:
+	case katibapi.State_RUNNING:
 		if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionRunning {
 			instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionRunning
 			update = true
@@ -364,7 +364,7 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 		if errors.IsNotFound(cjoberr) {
 			r.spawnMetricsCollector(instance, c, instance.Status.StudyID, instance.Status.Trials[i].TrialID, wid, ns, instance.Spec.MetricsCollectorSpec)
 		}
-	case WorkerState_Failed:
+	case katibapi.State_ERROR:
 		if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionFailed {
 			instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionFailed
 			update = true
@@ -419,11 +419,11 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 				if joberr != nil {
 					continue
 				}
-				var state int = WorkerState_Active
+				var state katibapi.State = katibapi.State_RUNNING
 				if job.Status.Active == 0 && job.Status.Succeeded > 0 {
-					state = WorkerState_Succeeded
+					state = katibapi.State_COMPLETED
 				} else if job.Status.Failed > 0 {
-					state = WorkerState_Failed
+					state = katibapi.State_ERROR
 				}
 				js := WorkerStatus{
 					CompletionTime: job.Status.CompletionTime,
@@ -437,13 +437,13 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 				if tfjoberr != nil {
 					continue
 				}
-				var state int = WorkerState_Active
+				var state katibapi.State = katibapi.State_RUNNING
 				if len(tfjob.Status.Conditions) > 0 {
 					lc := tfjob.Status.Conditions[len(tfjob.Status.Conditions) - 1]
 					if lc.Type == commonv1beta1.JobSucceeded {
-						state = WorkerState_Succeeded
+						state = katibapi.State_COMPLETED
 					}	else if lc.Type == commonv1beta1.JobFailed {
-						state = WorkerState_Failed
+						state = katibapi.State_ERROR
 					}
 				}
 				js := WorkerStatus{
