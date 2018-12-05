@@ -135,6 +135,22 @@ func TestGetStudyList(t *testing.T) {
 	}
 }
 
+func TestUpdateStudy(t *testing.T) {
+	studyID := generateRandid()
+	var in api.StudyConfig
+	in.Name = "hoge"
+	in.Owner = "joe"
+	in.JobId = "foobar123"
+
+	mock.ExpectExec(`UPDATE studies SET name = \?, owner = \?, tags = \?,
+                job_id = \? WHERE id = \?`,
+	).WithArgs(in.Name, in.Owner, "", in.JobId, studyID).WillReturnResult(sqlmock.NewResult(1, 1))
+	err := dbInterface.UpdateStudy(studyID, &in)
+	if err != nil {
+		t.Errorf("UpdateStudy error %v", err)
+	}
+}
+
 func TestDeleteStudy(t *testing.T) {
 	studyID := generateRandid()
 	mock.ExpectExec(`DELETE FROM studies WHERE id = \?`).WithArgs(studyID).WillReturnResult(sqlmock.NewResult(1, 1))
@@ -222,6 +238,21 @@ func TestCreateTrial(t *testing.T) {
 	err := dbInterface.CreateTrial(&trial)
 	if err != nil {
 		t.Errorf("CreateTrial error %v", err)
+	}
+}
+
+func TestUpdateTrial(t *testing.T) {
+	var trial api.Trial
+	trial.TrialId = generateRandid()
+	trial.StudyId = generateRandid()
+	trial.ParameterSet = make([]*api.Parameter, 1)
+	trial.ParameterSet[0] = &api.Parameter{Name: "abc"}
+	mock.ExpectExec(`UPDATE trials SET parameters = \?, tags = \?,
+		WHERE id = \?`,
+	).WithArgs("{\"name\":\"abc\"}", "", trial.TrialId).WillReturnResult(sqlmock.NewResult(1, 1))
+	err := dbInterface.UpdateTrial(&trial)
+	if err != nil {
+		t.Errorf("UpdateTrial error %v", err)
 	}
 }
 
