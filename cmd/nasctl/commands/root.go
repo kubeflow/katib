@@ -2,9 +2,17 @@ package commands
 
 import (
 	"errors"
+	"flag"
+	"os"
+	"path/filepath"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	restclient "k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 const (
@@ -48,20 +56,50 @@ func CheckPersistentFlags() (*PersistentFlags, error) {
 		err = errors.New("katib manager endpoint is not specified,use --server provide value")
 		return nil, err
 	}
-
 	rtn := PersistentFlags{
 		server: s,
 	}
-
 	return &rtn, err
 }
 
 //initFlag manage persistent flags
 func initFlag(cmd *cobra.Command) {
-	//	cobra.OnInitialize(initConfig)
 	// add Pesistent flags
 	cmd.PersistentFlags().StringP("server", "s", "localhost:6789", "katib manager API endpoint")
 
 	//bind viper
 	viper.BindPFlag("server", cmd.PersistentFlags().Lookup("server"))
+}
+
+func parseKubernetesConfig() *restclient.Config {
+	var kubeconfig *string
+	if home := homeDir(); home != "" {
+		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+	} else {
+		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+	}
+	flag.Parse()
+	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	if err != nil {
+		log.Fatalf("getClusterConfig: %v", err)
+	}
+	return config
+}
+
+func homeDir() string {
+	if h := os.Getenv("HOME"); h != "" {
+		return h
+	}
+	return os.Getenv("USERPROFILE") // windows
+}
+
+func GetKubernetesClient() kubernetes.Interface {
+
+	config := parseKubernetesConfig()
+	client, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		log.Fatalf("getClusterConfig: %v", err)
+	}
+	log.Info("Successfully constructed k8s client")
+	return client
 }
