@@ -3,71 +3,72 @@ package commands
 import (
 	"context"
 	"fmt"
+	"os"
+	"text/tabwriter"
 
 	"github.com/kubeflow/katib/pkg/api"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
-
-var clientSet = GetKubernetesClient()
 
 //NewCommandList generate list cmd
 func NewCommandList() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List NAS jobs",
+		Short: "List all NAS jobs",
 		Run: func(cmd *cobra.Command, args []string) {
-
-			listNasJobs(args)
+			if len(args) != 0 {
+				cmd.HelpFunc()(cmd, args)
+				os.Exit(1)
+			}
+			listNasJobs()
 		},
 	}
 
 	return cmd
 }
 
-func listNasJobs(args []string) {
+func listNasJobs() {
 
-	fmt.Println("This is list command")
 	//check and get persistent flag volume
 	var pf *PersistentFlags
 	pf, err := CheckPersistentFlags()
 
 	if err != nil {
-		log.Fatalf("Fail to Check Flags: %v", err)
-		return
+		log.Fatalf("Check persistent flags failed: %v", err)
 	}
 
+	//create connection to GRPC server
 	connection, err := grpc.Dial(pf.server, grpc.WithInsecure())
 
-	fmt.Println("con = ", connection)
-
 	if err != nil {
-		log.Fatalf("could not connect: %v", err)
-		return
+		log.Fatalf("Could not connect: %v", err)
 	}
 	defer connection.Close()
 
 	c := api.NewManagerClient(connection)
-	req := &api.GetStudyListRequest{}
 
-	fmt.Println("c = ", c)
-	fmt.Println("req = ", req)
-	r, err := c.GetStudyList(context.Background(), req)
+	getStudyListReq := &api.GetStudyListRequest{}
+	getStudyListResp, err := c.GetStudyList(context.Background(), getStudyListReq)
+
 	if err != nil {
-		log.Fatalf("GetStudy failed: %v", err)
-		return
+		log.Fatalf("GetStudyList failed: %v", err)
 	}
 
-	result := []*api.StudyOverview{}
-	fmt.Println("r= ", r.StudyOverviews)
-	fmt.Println("result = ", result)
-
-	pods, err := clientSet.CoreV1().Pods("default").List(metav1.ListOptions{})
-	for _, pod := range pods.Items {
-		fmt.Println(pod.Name)
+	if len(getStudyListResp.StudyOverviews) == 0 {
+		log.Fatalf("No Study found")
 	}
+
+	w := new(tabwriter.Writer)
+	w.Init(os.Stdout, 0, 14, 0, '\t', tabwriter.TabIndent)
+	fmt.Fprintf(w, "NasJobId\tName\n")
+
+	for _, study := range getStudyListResp.StudyOverviews {
+		fmt.Fprintf(w, "%v\t%v\n", study.GetId(), study.GetName())
+	}
+	w.Flush()
+
 }
