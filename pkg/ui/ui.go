@@ -88,7 +88,7 @@ func (k *KatibUIHandler) Index(w http.ResponseWriter, r *http.Request) {
 			Owner:   so.Owner,
 		})
 	}
-	t, err := template.ParseFiles("/template/layout.html", "/template/index.html", "/template/breadcrumb.html")
+	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/index.html", "/app/template/breadcrumb.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -139,7 +139,7 @@ func (k *KatibUIHandler) Study(w http.ResponseWriter, r *http.Request) {
 			sv.HParams[i].Type = "String"
 		}
 	}
-	t, err := template.ParseFiles("/template/layout.html", "/template/study.html", "/template/parallelcood.js", "/template/breadcrumb.html")
+	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/study.html", "/app/template/parallelcood.js", "/app/template/breadcrumb.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -248,7 +248,7 @@ func (k *KatibUIHandler) Trial(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	view.Workers = gwrep.Workers
-	t, err := template.ParseFiles("/template/layout.html", "/template/trial.html", "/template/breadcrumb.html")
+	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/trial.html", "/app/template/breadcrumb.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -364,7 +364,7 @@ func (k *KatibUIHandler) Worker(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Printf("Log %s %v\n", wv.MetricsLogs[i].Name, wv.MetricsLogs[i].LogValues)
 	}
-	t, err := template.ParseFiles("/template/layout.html", "/template/worker.html", "/template/linegraph.js", "/template/breadcrumb.html")
+	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/worker.html", "/app/template/linegraph.js", "/app/template/breadcrumb.html")
 	if err != nil {
 		log.Fatal(err)
 	}

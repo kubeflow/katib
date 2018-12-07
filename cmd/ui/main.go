@@ -13,7 +13,7 @@ func main() {
 		r.Get("/", func(writer http.ResponseWriter, req *http.Request) {
 			http.Redirect(writer, req, "/katib", http.StatusMovedPermanently)
 		})
-		r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("/static"))))
+		r.Handle("/katib/static/*", http.StripPrefix("/katib/static/", http.FileServer(http.Dir("/app/static"))))
 		r.Route("/katib", func(r chi.Router) {
 			r.Get("/", kuh.Index)
 			r.Route("/{studyid}", func(r chi.Router) {
