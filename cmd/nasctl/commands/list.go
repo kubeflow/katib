@@ -71,4 +71,7 @@ func listNasJobs() {
 	}
 	w.Flush()
 
+	// client := GetKubernetesClient()
+	// fmt.Println(client.CoreV1().Pods("kubeflow").List(v1.ListOptions{}))
+
 }

@@ -2,15 +2,12 @@ apiVersion: "kubeflow.org/v1alpha1"
 kind: StudyJob
 metadata:  
   namespace: kubeflow
-  labels:
-    controller-tools.k8s.io: "1.0"
-  name: random-example-v3
 spec:
-  studyName: random-example-v3
-  owner: crd
+  studyName: random-example-v10
   optimizationtype: maximize
   objectivevaluename: Validation-accuracy
   optimizationgoal: 0.99
+  owner: crd
   requestcount: 4
   metricsnames:
     - accuracy
