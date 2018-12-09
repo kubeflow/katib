@@ -30,11 +30,24 @@
                 },
                 WorkerTemplateName: "scratch",
                 WorkerTemplateScratch: "",
+                {{ if eq .SuggestionAlgorithm "" }}
                 SuggestAlgoSelect: "random",
+                {{else}}
+                SuggestAlgoSelect: "{{.SuggestionAlgorithm}}",
+                {{end}}
                 SuggestAlgoCustom: "",
                 SuggestAlgoTmp: "",
-                SuggestionParameters: [],
-                SuggestionReqNum: 1,
+                SuggestionReqNum: {{.RequestNumber}},
+                SuggestionParameters: [
+                    {{- range $k, $v := .SuggestionParams}}
+                    {
+                        NameDefault: "{{$k}}",
+                        ValueDefault: "{{$v}}",
+                        Name: "",
+                        Value: "",
+                    },
+                    {{- end}}
+                ],
                 created: false,
             },
             computed: {
@@ -302,7 +315,7 @@
                     xmlHttpRequest.send( "StudyJobManifest=" + encodeURIComponent(this.StudyJobYaml) )
                     if (xmlHttpRequest.status != 200){
                         this.created = true;
-                        setTimeout(this.unsetCreated, 3000);
+                        setTimeout(this.unsetCreated, 6000);
                     }
                 },
 			}

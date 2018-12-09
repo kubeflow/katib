@@ -150,6 +150,11 @@
                 </div>
             </div>
         </div>
+        <div class="alert alert-dism buttonissible alert-success" v-if="created">
+              <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <h4 class="alert-heading">Created successfully!</h4>
+                <p class="mb-0">Sutudyjob {{`{{StudyName}}`}} has created successfully.</p>
+        </div>
         <button class="btn btn-info mb-3" v-on:click="uploadStudyJob">Create StudyJob</button>
     </div>
 	<div class="col-md-6">
@@ -159,13 +164,6 @@
         </pre>
 	</div>
 	</div>
-    <div class="row">
-        <div class="alert alert-dismissible alert-success" v-if="created">
-              <button type="button" class="close" data-dismiss="alert">&times;</button>
-                <h4 class="alert-heading">Created successfully!</h4>
-                <p class="mb-0">Sutudyjob {{`{{StudyName}}`}} has created successfully.</p>
-        </div>
-    </div>
 	</div>
 </div>
 {{ template "studyjobgenscript" . }}

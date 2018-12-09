@@ -1,18 +1,18 @@
 {{ define "content" }}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.8.2/js-yaml.min.js"></script>
 <script src="https://unpkg.com/vue"></script>
-<link rel="stylesheet" href="/static/css/codemirror.css">
-<link rel="stylesheet" href="/static/css/editmodal.css">
-<script src="/static/js/codemirror.js"></script>
-<script src="/static/js/yaml.js"></script>
-<script src="/static/js/autorefresh.js"></script>
+<link rel="stylesheet" href="/katib/static/css/codemirror.css">
+<link rel="stylesheet" href="/katib/static/css/editmodal.css">
+<script src="/katib/static/js/codemirror.js"></script>
+<script src="/katib/static/js/yaml.js"></script>
+<script src="/katib/static/js/autorefresh.js"></script>
 <div id="app">
     <div class="container-fluid bg-active">
         <h1>Worker Templates</h1>
         <div class="row">
             <button type="button" class="btn btn-success mb-3" v-on:click="uploadWorkerTemplates()">Upload Templates</button>
             <p class="text-warning" v-if="edited">
-                Your change is not applied until push "Upload Templates".
+                Your change is not applied until push "Upload Templates" button.
             </p>
         </div>
         <div class="row">

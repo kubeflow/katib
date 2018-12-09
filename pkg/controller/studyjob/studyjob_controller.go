@@ -368,10 +368,30 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 		if errors.IsNotFound(cjoberr) {
 			r.spawnMetricsCollector(instance, c, instance.Status.StudyID, instance.Status.Trials[i].TrialID, wid, ns, instance.Spec.MetricsCollectorSpec)
 		}
+		_, err := c.UpdateWorkerState(
+			context.Background(),
+			&katibapi.UpdateWorkerStateRequest{
+				WorkerId: instance.Status.Trials[i].WorkerList[j].WorkerID,
+				Status:   katibapi.State_RUNNING,
+			})
+		if err != nil {
+			log.Printf("Fail to update worker info. ID %s", instance.Status.Trials[i].WorkerList[j].WorkerID)
+			return false, err
+		}
 	case katibapi.State_ERROR:
 		if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionFailed {
 			instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionFailed
 			update = true
+		}
+		_, err := c.UpdateWorkerState(
+			context.Background(),
+			&katibapi.UpdateWorkerStateRequest{
+				WorkerId: instance.Status.Trials[i].WorkerList[j].WorkerID,
+				Status:   katibapi.State_ERROR,
+			})
+		if err != nil {
+			log.Printf("Fail to update worker info. ID %s", instance.Status.Trials[i].WorkerList[j].WorkerID)
+			return false, err
 		}
 	}
 	return update, nil
@@ -477,6 +497,8 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 		if instance.Spec.RequestCount > 0 && instance.Status.SuggestionCount > instance.Spec.RequestCount {
 			log.Printf("Study %s reached the request count. It is completed", instance.Status.StudyID)
 			instance.Status.Condition = katibv1alpha1.ConditionCompleted
+			now := metav1.Now()
+			instance.Status.CompletionTime = &now
 			return true, nil
 		}
 		return r.getAndRunSuggestion(instance, c, ns)
@@ -515,6 +537,8 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 	if len(trials) <= 0 {
 		log.Printf("Study %s is completed", instance.Status.StudyID)
 		instance.Status.Condition = katibv1alpha1.ConditionCompleted
+		now := metav1.Now()
+		instance.Status.CompletionTime = &now
 		return true, nil
 	}
 	log.Printf("Study: %s Suggestions %v", instance.Status.StudyID, getSuggestReply)

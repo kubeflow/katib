@@ -44,6 +44,7 @@
                         Value: wt.Value,
                     };
                     this.WorkerTemplates.push(newWT);
+                    this.edited = true;
                 },
 				deleteWorkerTemplate: function(wt) {
 					var wtIndex = this.WorkerTemplates.indexOf(wt);
