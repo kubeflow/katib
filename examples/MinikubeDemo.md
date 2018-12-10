@@ -37,9 +37,9 @@ $ kubectl apply -f random-example.yaml
 ```
 Only this command, a study will start, generate hyper-parameters and save the results.
 The configurations for the study(hyper-parameter feasible space, optimization parameter, optimization goal, suggestion algorithm, and so on) are defined in `random-example.yaml`,
-In this demo, hyper-parameters are embbeded as args.
-You can embbed in another way(e.g. eviroment values) by using template.
-It defined in `WorkerSpec.GoTemplate.RawTemplate`.
+In this demo, hyper-parameters are embedded as args.
+You can embed hyper-parameters in another way(e.g. environment values) by using template.
+It is defined in `WorkerSpec.GoTemplate.RawTemplate`.
 It is written in [go template](https://golang.org/pkg/text/template/) format.
 
 In this demo, 3 hyper parameters 
@@ -134,7 +134,7 @@ Status:
 Events:                <none>
 ```
 
-When the Spec.Status.State become `Completed`, the study is completed.
+When the Spec.Status.State becomes `Completed`, the study is completed.
 You can look the result on `http://127.0.0.1:8000/katib`.
 
 ### Use ConfigMap for Worker Template
@@ -144,7 +144,7 @@ Let's use [this](./workerConfigMap.yaml) template.
 ```
 kubectl apply -f workerConfigMap.yaml
 ```
-This template will share among blow three demos(Grid, Hyperband, and GPU).
+This template will be shared among the three demos below(Grid, Hyperband, and GPU).
 
 ### Grid Demo
 Almost same as random suggestion.
@@ -157,7 +157,7 @@ kubectl apply -f grid-example.yaml
 ### Hyperband Demo
 In this demo, the eta is 3 and the R is 9.
 ```
-kubectl apply -f random-example.yaml
+kubectl apply -f hypb-example.yaml
 ```
 
 ## UI
