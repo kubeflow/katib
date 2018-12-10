@@ -61,12 +61,12 @@ In the Study config file, we define the feasible space of parameters and configu
 
 - name: Study name
 - owner: Owner
-- objectivevaluename: Name of the objective value. Your evaluated software should be print log `{objectivevaluename}={objective value}` in std-io.
-- optimizationtype: Optimization direction of the objective value. 1=maximize 2=minimize
-- suggestalgorithm: [random, grid, hyperband] now
+- objectivevaluename: Name of the objective value. Your evaluated software should print log `{objectivevaluename}={objective value}` in std-io.
+- optimizationtype: Optimization direction of the objective value. [minimize, maximize] now.
+- suggestalgorithm: [random, grid, hyperband, bayesianoptimization] now
 - suggestionparameters: Parameter of the algorithm. Set name-value style.
     - In random suggestion
-        - SuggestionNum: How many suggestions will Katib create.
+        - SuggestionNum: How many suggestions Katib will create.
         - MaxParallel: Max number of run on kubernetes
     - In grid suggestion
         - MaxParallel: Max number of run on kubernetes
