@@ -116,14 +116,15 @@ func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi
 	return wid, &b, nil
 }
 
-func getMetricsCollectorManifest(studyID string, trialID string, workerID string, namespace string, mcs *katibv1alpha1.MetricsCollectorSpec) (*bytes.Buffer, error) {
+func getMetricsCollectorManifest(studyID string, trialID string, workerID string, workerKind string, namespace string, mcs *katibv1alpha1.MetricsCollectorSpec) (*bytes.Buffer, error) {
 	var mtp *template.Template = nil
 	var err error
 	tmpValues := map[string]string{
-		"StudyID":   studyID,
-		"TrialID":   trialID,
-		"WorkerID":  workerID,
-		"NameSpace": namespace,
+		"StudyID":    studyID,
+		"TrialID":    trialID,
+		"WorkerID":   workerID,
+		"WorkerKind": workerKind,
+		"NameSpace":  namespace,
 	}
 	if mcs != nil {
 		if mcs.GoTemplate.RawTemplate != "" {
