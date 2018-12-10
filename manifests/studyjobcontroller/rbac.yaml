@@ -37,6 +37,7 @@ rules:
   - kubeflow.org
   resources:
   - tfjobs
+  - pytorchjobs
   verbs:
   - "*"
 ---
