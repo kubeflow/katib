@@ -96,3 +96,25 @@ func (s *StudyjobClient) UpdateWorkerTemplates(newWorkerTemplates map[string]str
 	_, err = s.clientset.CoreV1().ConfigMaps(ns).Update(cm)
 	return err
 }
+
+func (s *StudyjobClient) GetMetricsCollectorTemplates() (map[string]string, error) {
+	data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+	ns := strings.TrimSpace(string(data))
+	cm, err := s.clientset.CoreV1().ConfigMaps(ns).Get("metricscollector-template", metav1.GetOptions{})
+	if err != nil {
+		return map[string]string{}, err
+	}
+	return cm.Data, nil
+}
+
+func (s *StudyjobClient) UpdateMetricsCollectorTemplates(newMCTemplates map[string]string) error {
+	data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+	ns := strings.TrimSpace(string(data))
+	cm, err := s.clientset.CoreV1().ConfigMaps(ns).Get("metricscollector-template", metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+	cm.Data = newMCTemplates
+	_, err = s.clientset.CoreV1().ConfigMaps(ns).Update(cm)
+	return err
+}

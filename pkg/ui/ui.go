@@ -177,6 +177,8 @@ func (k *KatibUIHandler) StudyJobGen(w http.ResponseWriter, r *http.Request) {
 	}
 	var sparam *studyjobv1alpha1.SuggestionSpec = nil
 	reqcount := 0
+	wtn := "scratch"
+	mtn := "defaultMetricsCollectorTemplate.yaml"
 	if sid != "" || sname != "" {
 		sl, err := k.studyjobClient.GetStudyJobList()
 		if err != nil {
@@ -196,6 +198,12 @@ func (k *KatibUIHandler) StudyJobGen(w http.ResponseWriter, r *http.Request) {
 					sid = sj.Status.StudyID
 					sparam = sj.Spec.SuggestionSpec
 					reqcount = sj.Spec.RequestCount
+					if sj.Spec.WorkerSpec.GoTemplate.TemplatePath != "" {
+						wtn = sj.Spec.WorkerSpec.GoTemplate.TemplatePath
+					}
+					if sj.Spec.MetricsCollectorSpec.GoTemplate.TemplatePath != "" {
+						mtn = sj.Spec.MetricsCollectorSpec.GoTemplate.TemplatePath
+					}
 				}
 			}
 		}
@@ -222,6 +230,10 @@ func (k *KatibUIHandler) StudyJobGen(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("GetWorkerTemplates err %v", err)
 	}
+	mt, err := k.studyjobClient.GetMetricsCollectorTemplates()
+	if err != nil {
+		log.Printf("GetMetricsCollectorTemplates err %v", err)
+	}
 	type Param struct {
 		Name string
 		Type string
@@ -230,23 +242,27 @@ func (k *KatibUIHandler) StudyJobGen(w http.ResponseWriter, r *http.Request) {
 		List string
 	}
 	type StudyJobDefault struct {
-		IDList              *IDList
-		StudyName           string
-		Owner               string
-		OptimizationType    string
-		OptimizationGoal    float64
-		ObjectiveValueName  string
-		Metrics             string
-		ParamConf           []*Param
-		WorkerTemplates     map[string]string
-		SuggestionAlgorithm string
-		RequestCount        int
-		RequestNumber       int
-		SuggestionParams    map[string]string
+		IDList                       *IDList
+		StudyName                    string
+		Owner                        string
+		OptimizationType             string
+		OptimizationGoal             float64
+		ObjectiveValueName           string
+		Metrics                      string
+		ParamConf                    []*Param
+		WorkerTemplates              map[string]string
+		WorkerTemplateName           string
+		MetricsCollectorTemplates    map[string]string
+		MetricsCollectorTemplateName string
+		SuggestionAlgorithm          string
+		RequestCount                 int
+		RequestNumber                int
+		SuggestionParams             map[string]string
 	}
 	sjd := &StudyJobDefault{
-		IDList:          &IDList{},
-		WorkerTemplates: wt,
+		IDList:                    &IDList{},
+		WorkerTemplates:           wt,
+		MetricsCollectorTemplates: mt,
 	}
 	if sid != "" {
 		if c != nil {
@@ -297,6 +313,8 @@ func (k *KatibUIHandler) StudyJobGen(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+	sjd.WorkerTemplateName = wtn
+	sjd.MetricsCollectorTemplateName = mtn
 	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/studyjobgen.html", "/app/template/studyjobgen.js", "/app/template/navbar.html")
 	if err != nil {
 		log.Fatal(err)
@@ -343,6 +361,46 @@ func (k *KatibUIHandler) UpdateWorkerTemplate(w http.ResponseWriter, r *http.Req
 	err := k.studyjobClient.UpdateWorkerTemplates(wt)
 	if err != nil {
 		log.Print("fail to UpdateWorkerTemplate %v", err)
+	}
+}
+
+func (k *KatibUIHandler) MetricsCollectorTemplate(w http.ResponseWriter, r *http.Request) {
+	mt, err := k.studyjobClient.GetMetricsCollectorTemplates()
+	if err != nil {
+		log.Printf("GetMetricsCollectorTemplates err %v", err)
+	}
+	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/metricscollectortemplate.html", "/app/template/metricscollectortemplate.js", "/app/template/navbar.html")
+	type MetricsCollectorTemplateView struct {
+		IDList                   *IDList
+		MetricsCollectorTemplate map[string]string
+	}
+	mtv := MetricsCollectorTemplateView{
+		IDList:                   &IDList{},
+		MetricsCollectorTemplate: mt,
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := t.ExecuteTemplate(w, "layout", mtv); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (k *KatibUIHandler) UpdateMetricsCollectorTemplate(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	form := r.PostForm
+	mt := make(map[string]string, len(form))
+	for k, v := range form {
+		if len(v) > 1 {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Template Name duplicated"))
+			return
+		}
+		mt[k] = v[0]
+	}
+	err := k.studyjobClient.UpdateMetricsCollectorTemplates(mt)
+	if err != nil {
+		log.Print("fail to UpdateMetricsCollectorTemplate %v", err)
 	}
 }
 

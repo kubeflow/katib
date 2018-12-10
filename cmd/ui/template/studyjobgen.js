@@ -28,8 +28,15 @@
                         {{$k}}: {{$v}},
                     {{- end}}
                 },
-                WorkerTemplateName: "scratch",
+                WorkerTemplateName: "{{.WorkerTemplateName}}",
                 WorkerTemplateScratch: "",
+                MetricsCollectorTemplates: {
+                    {{- range $k,$v := .MetricsCollectorTemplates}}
+                        {{$k}}: {{$v}},
+                    {{- end}}
+                },
+                MetricsCollectorTemplateName: "{{.MetricsCollectorTemplateName}}",
+                MetricsCollectorTemplateScratch: "",
                 {{ if eq .SuggestionAlgorithm "" }}
                 SuggestAlgoSelect: "random",
                 {{else}}
@@ -70,6 +77,13 @@
                         return this.WorkerTemplateScratch;
                     }else{
                         return this.WorkerTemplates[this.WorkerTemplateName];
+                    }
+                },
+                MetricsCollectorTemplateValue: function() {
+                    if (this.MetricsCollectorTemplateName == "scratch"){
+                        return this.MetricsCollectorTemplateScratch;
+                    }else{
+                        return this.MetricsCollectorTemplates[this.MetricsCollectorTemplateName];
                     }
                 },
                 SuggestionAlgo: function() {
@@ -152,11 +166,32 @@
                             },
                             'workerspec': {
                                 'goTemplate': {
-                                    'rawTemplate': this.WorkerTemplateValue,
+                                },
+                            },
+                            'metricscollectorspec': {
+                                'goTemplate': {
                                 },
                             },
 						} // end spec
 					} // end studyjobObj
+                    if (this.WorkerTemplateName == "scratch") {
+                        studyjobObj.spec.workerspec.goTemplate = {
+                                    'rawTemplate': this.WorkerTemplateValue,
+                        }
+                    } else {
+                        studyjobObj.spec.workerspec.goTemplate = {
+                                    'templatePath': this.WorkerTemplateName,
+                        }
+                    }
+                    if (this.MetricsCollectorTemplateName == "scratch") {
+                        studyjobObj.spec.metricscollectorspec.goTemplate = {
+                                    'rawTemplate': this.MetricsCollectorTemplateValue,
+                        }
+                    } else {
+                        studyjobObj.spec.metricscollectorspec.goTemplate = {
+                                    'templatePath': this.MetricsCollectorTemplateName,
+                        }
+                    }
 					return jsyaml.dump(studyjobObj);
 				}
             },

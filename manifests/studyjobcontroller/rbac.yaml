@@ -9,10 +9,7 @@ rules:
   - configmaps
   - serviceaccounts
   verbs:
-  - create
-  - update
-  - list
-  - watch
+  - "*"
 - apiGroups:
   - batch
   resources:

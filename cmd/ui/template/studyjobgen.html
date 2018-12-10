@@ -57,11 +57,22 @@
                 <option value="scratch">From scratch</option>
                 </select>
             </div>
-            <form v-if="WorkerTemplateName=='scratch'">
-                <textarea id="WorkerTemplateScratch" name="WorkerTemplateScratch" v-model="WorkerTemplateScratch" class="form-control mb-2" style="min-width: 100%">
-                </textarea>
-            </form>
+            <textarea id="WorkerTemplateScratch" name="WorkerTemplateScratch" v-model="WorkerTemplateScratch" class="form-control mb-2" style="min-width: 100%" v-bind:disabled="WorkerTemplateName!='scratch'" v-bind:placeholder="WorkerTemplateValue">
+            </textarea>
             <a href="/katib/workertemplates" class="btn btn-success btn-sm mb-3" role="button">Manage Worker Templates</a>
+
+            <div>
+                <label for="selMetricsCollectorTemplate">MetricsCollectorTemplate</label>
+                <select class="form-control form-control-sm mb-3" name="selMetricsCollectorTemplate" ID="selMetricsCollectorTemplate" v-model="MetricsCollectorTemplateName" style="min-width: 100px;">
+                {{- range $k,$v := .MetricsCollectorTemplates}}
+                <option value="{{$k}}">{{$k}}</option>
+                {{- end}}
+                <option value="scratch">From scratch</option>
+                </select>
+            </div>
+            <textarea id="MetricsCollectorTemplateScratch" name="MetricsCollectorTemplateScratch" v-model="MetricsCollectorTemplateScratch" class="form-control mb-2" style="min-width: 100%" v-bind:disabled="MetricsCollectorTemplateName!='scratch'" v-bind:placeholder="MetricsCollectorTemplateValue">
+            </textarea>
+            <a href="/katib/metricscollectortemplates" class="btn btn-success btn-sm mb-3" role="button">Manage MetricsCollector Templates</a>
 
             <div class="card border-light mb-3">
 				<div class="card-header">
