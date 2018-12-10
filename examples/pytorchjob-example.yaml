@@ -14,7 +14,6 @@ spec:
   requestcount: 4
   metricsnames:
     - accuracy
-    - loss
   parameterconfigs:
     - name: --lr
       parametertype: double
@@ -45,6 +44,7 @@ spec:
                   containers:
                     - name: pytorch
                       image: johnugeorge/pytorch-mnist-with-summary:0.4
+                      imagePullPolicy: Always
                       command:
                         - "python"
                         - "/opt/pytorch_dist_mnist/mnist_with_summary.py"
@@ -53,6 +53,41 @@ spec:
                         - "{{.Name}}={{.Value}}"
                         {{- end}}
                         {{- end}}
+  metricsCollectorSpec:
+    retain: true
+    goTemplate:
+      rawTemplate: |-
+        apiVersion: batch/v1beta1
+        kind: CronJob
+        metadata:
+          name: {{.WorkerID}}
+          namespace: kubeflow
+        spec:
+          schedule: "*/1 * * * *"
+          successfulJobsHistoryLimit: 15
+          failedJobsHistoryLimit: 15
+          jobTemplate:
+            spec:
+              template:
+                spec:
+                  serviceAccountName: metrics-collector
+                  containers:
+                  - name: {{.WorkerID}}
+                    image: johnugeorge/metrics-collector
+                    args:
+                    - "./metricscollector"
+                    - "-s"
+                    - "{{.StudyID}}"
+                    - "-t"
+                    - "{{.TrialID}}"
+                    - "-w"
+                    - "{{.WorkerID}}"
+                    - "-k"
+                    - "{{.WorkerKind}}"
+                    - "-n"
+                    - "{{.NameSpace}}"
+                  restartPolicy: Never
+
   suggestionSpec:
     suggestionAlgorithm: "random"
     requestNumber: 3
