@@ -30,6 +30,8 @@ data:
                 - "{{.TrialID}}"
                 - "-w"
                 - "{{.WorkerID}}"
+                - "-k"
+                - "{{.WorkerKind}}"
                 - "-n"
                 - "{{.NameSpace}}"
               restartPolicy: Never

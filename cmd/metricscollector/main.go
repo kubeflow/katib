@@ -52,11 +52,12 @@ import (
 var studyID = flag.String("s", "", "Study ID")
 var trialID = flag.String("t", "", "Trial ID")
 var workerID = flag.String("w", "", "Worker ID")
+var workerKind = flag.String("k", "", "Worker Kind")
 var namespace = flag.String("n", "", "NameSpace")
 
 func main() {
 	flag.Parse()
-	log.Printf("Study ID: %s, Trial ID: %s, Worker ID: %s", *studyID, *trialID, *workerID)
+	log.Printf("Study ID: %s, Trial ID: %s, Worker ID: %s, Worker Kind: %s", *studyID, *trialID, *workerID, *workerKind)
 	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("could not connect: %v", err)
@@ -75,7 +76,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to GetStudyConf: %v", err)
 	}
-	mls, err := mc.CollectWorkerLog(*workerID, screp.StudyConfig.ObjectiveValueName, screp.StudyConfig.Metrics, *namespace)
+	mls, err := mc.CollectWorkerLog(*workerID, *workerKind, screp.StudyConfig.ObjectiveValueName, screp.StudyConfig.Metrics, *namespace)
 	if err != nil {
 		log.Printf("Failed to collect logs: %v", err)
 		return

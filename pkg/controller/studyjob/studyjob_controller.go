@@ -694,7 +694,13 @@ func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJ
 func (r *ReconcileStudyJobController) spawnMetricsCollector(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, studyID string, trialID string, workerID string, namespace string, mcs *katibv1alpha1.MetricsCollectorSpec) error {
 	var mcjob batchv1beta.CronJob
 	BUFSIZE := 1024
-	mcm, err := getMetricsCollectorManifest(studyID, trialID, workerID, namespace, mcs)
+	wkind, err := getWorkerKind(instance.Spec.WorkerSpec)
+	if err != nil {
+		log.Printf("getWorkerKind error %v", err)
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		return err
+	}
+	mcm, err := getMetricsCollectorManifest(studyID, trialID, workerID, wkind, namespace, mcs)
 	if err != nil {
 		log.Printf("getMetricsCollectorManifest error %v", err)
 		return err
