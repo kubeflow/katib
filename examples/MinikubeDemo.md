@@ -144,7 +144,7 @@ Let's use [this](./workerConfigMap.yaml) template.
 ```
 kubectl apply -f workerConfigMap.yaml
 ```
-This template will share among blow three demos(Grid, Hyperband, and GPU).
+This template will share among below three demos(Grid, Hyperband, and GPU).
 
 ### Grid Demo
 Almost same as random suggestion.
@@ -157,7 +157,7 @@ kubectl apply -f grid-example.yaml
 ### Hyperband Demo
 In this demo, the eta is 3 and the R is 9.
 ```
-kubectl apply -f random-example.yaml
+kubectl apply -f hypb-example.yaml
 ```
 
 ## UI
