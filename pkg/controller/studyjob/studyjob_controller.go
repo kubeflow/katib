@@ -24,6 +24,7 @@ import (
 	"github.com/kubeflow/katib/pkg"
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
+	pytorchjobv1beta1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1beta1"
 	commonv1beta1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta1"
 	tfjobv1beta1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1beta1"
 
@@ -109,6 +110,16 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	err = c.Watch(
 		&source.Kind{Type: &tfjobv1beta1.TFJob{}},
+		&handler.EnqueueRequestForOwner{
+			IsController: true,
+			OwnerType:    &katibv1alpha1.StudyJob{},
+		})
+	if err != nil {
+		return err
+	}
+
+	err = c.Watch(
+		&source.Kind{Type: &pytorchjobv1beta1.PyTorchJob{}},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
 			OwnerType:    &katibv1alpha1.StudyJob{},
@@ -431,6 +442,10 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 					if err := r.deleteWorkerResources(instance, &tfjobv1beta1.TFJob{}, ns, w.WorkerID); err != nil {
 						return false, err
 					}
+				case PytorchJobWorker:
+					if err := r.deleteWorkerResources(instance, &pytorchjobv1beta1.PyTorchJob{}, ns, w.WorkerID); err != nil {
+						return false, err
+					}
 				}
 				continue
 			}
@@ -472,6 +487,27 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 				}
 				js := WorkerStatus{
 					CompletionTime: tfjob.Status.CompletionTime,
+					WorkerState:    state,
+				}
+				update, err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
+			case PytorchJobWorker:
+				pytorchjob := &pytorchjobv1beta1.PyTorchJob{}
+				nname := types.NamespacedName{Namespace: ns, Name: w.WorkerID}
+				pytorchjoberr := r.Client.Get(context.TODO(), nname, pytorchjob)
+				if pytorchjoberr != nil {
+					continue
+				}
+				var state katibapi.State = katibapi.State_RUNNING
+				if len(pytorchjob.Status.Conditions) > 0 {
+					lc := pytorchjob.Status.Conditions[len(pytorchjob.Status.Conditions)-1]
+					if lc.Type == commonv1beta1.JobSucceeded {
+						state = katibapi.State_COMPLETED
+					} else if lc.Type == commonv1beta1.JobFailed {
+						state = katibapi.State_ERROR
+					}
+				}
+				js := WorkerStatus{
+					CompletionTime: pytorchjob.Status.CompletionTime,
 					WorkerState:    state,
 				}
 				update, err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
@@ -632,6 +668,23 @@ func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJ
 		if err := r.Create(context.TODO(), &tfjob); err != nil {
 			instance.Status.Condition = katibv1alpha1.ConditionFailed
 			log.Printf("TFJob Create error %v", err)
+			return "", err
+		}
+	case PytorchJobWorker:
+		var pytorchjob pytorchjobv1beta1.PyTorchJob
+		if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(&pytorchjob); err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
+			log.Printf("Yaml decode error %v", err)
+			return "", err
+		}
+		if err := controllerutil.SetControllerReference(instance, &pytorchjob, r.scheme); err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
+			log.Printf("SetControllerReference error %v", err)
+			return "", err
+		}
+		if err := r.Create(context.TODO(), &pytorchjob); err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
+			log.Printf("PytorchJob Create error %v", err)
 			return "", err
 		}
 	}
