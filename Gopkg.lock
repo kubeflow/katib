@@ -52,12 +52,12 @@
   version = "v1.4.7"
 
 [[projects]]
-  digest = "1:2cd7915ab26ede7d95b8749e6b1f933f1c6d5398030684e6505940a10f31cfda"
+  branch = "master"
+  digest = "1:326b3646f45752b2917058d66f5a6921cf72fdf820d57576a11c8fc062f8ad4f"
   name = "github.com/ghodss/yaml"
   packages = ["."]
   pruneopts = "T"
-  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
-  version = "v1.0.0"
+  revision = "c7ce16629ff4cd059ed96ed06419dd3856fd3577"
 
 [[projects]]
   branch = "master"
@@ -274,6 +274,14 @@
   version = "v1.1.5"
 
 [[projects]]
+  digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
+  version = "v1.0.1"
+
+[[projects]]
   digest = "1:53e8c5c79716437e601696140e8b1801aae4204f4ec54a504333702a49572c4f"
   name = "github.com/magiconair/properties"
   packages = ["."]
@@ -394,6 +402,14 @@
   pruneopts = "T"
   revision = "55d61fa8aa702f59229e6cff85793c22e580eaf5"
   version = "v1.5.1"
+
+[[projects]]
+  digest = "1:a204f9aa04d3305be0d4d8f69f42aee6c649a8f9f9a8dbbbaff54bdad5ce50c7"
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "bcd833dfe83d3cebad139e4a29ed79cb2318bf95"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:b7bf9fd95d38ebe6726a63b7d0320611f7c920c64e2c8313eba0cec51926bf55"
@@ -930,7 +946,8 @@
   version = "v0.1.1"
 
 [[projects]]
-  digest = "1:58b878c2275390dcf5160957c3121ebc61e97eb632ae02726d11a4d1988da41f"
+  branch = "revert-63-k8s-1.10-with-clean-deps"
+  digest = "1:bc6cbac523b416d6b5e7062574edc1f7a8fff180dc4295b37289d63d166ec375"
   name = "sigs.k8s.io/controller-tools"
   packages = [
     "cmd/controller-gen",
@@ -942,8 +959,7 @@
     "pkg/util",
   ]
   pruneopts = "T"
-  revision = "62b5a17481a76b7a1feea0b16188d52a6f61ec64"
-  version = "v0.1.3"
+  revision = "999adc0c9bd4ce50108fe91d104557f1d455f4f6"
 
 [[projects]]
   branch = "master"
@@ -962,6 +978,7 @@
   input-imports = [
     "git.apache.org/thrift.git/lib/go/thrift",
     "github.com/emicklei/go-restful",
+    "github.com/ghodss/yaml",
     "github.com/go-sql-driver/mysql",
     "github.com/golang/glog",
     "github.com/golang/mock/gomock",
@@ -975,6 +992,7 @@
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/pressly/chi",
+    "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
     "github.com/spf13/cobra/doc",
     "github.com/spf13/viper",
@@ -1001,6 +1019,7 @@
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
+    "k8s.io/client-go/tools/clientcmd",
     "k8s.io/code-generator/cmd/deepcopy-gen",
     "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",

@@ -22,6 +22,10 @@ required = [
   go-tests = true
 
 [[constraint]]
+  branch = "master"
+  name = "github.com/ghodss/yaml"
+  
+[[constraint]]
   name = "github.com/go-sql-driver/mysql"
   version = "1.4.0"
 
