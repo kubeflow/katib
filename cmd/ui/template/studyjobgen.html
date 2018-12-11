@@ -18,7 +18,7 @@
             <div>
                 <label for="selOptType">OptimizationType</label>
                 <select class="form-control form-control-sm" name="selOptType" ID="selOptType" v-model="OptType" style="min-width: 100px;">
-                <option value="maximize">Maxmize</option>
+                <option value="maximize">Maximize</option>
                 <option value="minimize">Minimize</option>
                 </select>
             </div>
@@ -164,7 +164,7 @@
         <div class="alert alert-dism buttonissible alert-success" v-if="created">
               <button type="button" class="close" data-dismiss="alert">&times;</button>
                 <h4 class="alert-heading">Created successfully!</h4>
-                <p class="mb-0">Sutudyjob {{`{{StudyName}}`}} has created successfully.</p>
+                <p class="mb-0">Studyjob {{`{{StudyName}}`}} has created successfully.</p>
         </div>
         <button class="btn btn-info mb-3" v-on:click="uploadStudyJob">Create StudyJob</button>
     </div>
