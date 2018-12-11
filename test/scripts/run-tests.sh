@@ -109,6 +109,9 @@ until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
 done 
 cp -r test ${GO_DIR}/test
 cd ${GO_DIR}/test/e2e
+kubectl logs $(kubectl get pods -l component=suggestion-random -n kubeflow -o=name) -n kubeflow
+kubectl logs $(kubectl get pods -l component=core -n kubeflow -o=name) -n kubeflow
+
 go run test-client.go -a random
 go run test-client.go -a grid -c suggestion-config-grid.yml
 #go run test-client.go -a hyperband -c suggestion-config-hyb.yml
