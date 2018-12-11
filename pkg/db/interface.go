@@ -5,13 +5,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/jsonpb"
 	"log"
 	"math/big"
 	"math/rand"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/golang/protobuf/jsonpb"
 
 	api "github.com/kubeflow/katib/pkg/api"
 
@@ -20,7 +21,7 @@ import (
 
 const (
 	dbDriver     = "mysql"
-	dbNameTmpl   = "root:%s@tcp(vizier-db:3306)/vizier"
+	dbNameTmpl   = "root:%s@tcp(vizier-db:3306)/vizier?timeout=5s"
 	mysqlTimeFmt = "2006-01-02 15:04:05.999999"
 
 	connectInterval = 5 * time.Second
@@ -43,14 +44,18 @@ type WorkerLog struct {
 
 type VizierDBInterface interface {
 	DBInit()
+	SelectOne() error
+
 	GetStudyConfig(string) (*api.StudyConfig, error)
 	GetStudyList() ([]string, error)
 	CreateStudy(*api.StudyConfig) (string, error)
+	UpdateStudy(string, *api.StudyConfig) error
 	DeleteStudy(string) error
 
 	GetTrial(string) (*api.Trial, error)
 	GetTrialList(string) ([]*api.Trial, error)
 	CreateTrial(*api.Trial) error
+	UpdateTrial(*api.Trial) error
 	DeleteTrial(string) error
 
 	GetWorker(string) (*api.Worker, error)
@@ -113,24 +118,24 @@ func openSQLConn(driverName string, dataSourceName string, interval time.Duratio
 	}
 }
 
-func NewWithSQLConn(db *sql.DB) VizierDBInterface {
+func NewWithSQLConn(db *sql.DB) (VizierDBInterface, error) {
 	d := new(dbConn)
 	d.db = db
 	seed, err := crand.Int(crand.Reader, big.NewInt(1<<63-1))
 	if err != nil {
-		log.Fatalf("RNG initialization failed: %v", err)
+		return nil, fmt.Errorf("RNG initialization failed: %v", err)
 	}
 	// We can do the following instead, but it creates a locking issue
 	//d.rng = rand.New(rand.NewSource(seed.Int64()))
 	rand.Seed(seed.Int64())
 
-	return d
+	return d, nil
 }
 
-func New() VizierDBInterface {
+func New() (VizierDBInterface, error) {
 	db, err := openSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
 	if err != nil {
-		log.Fatalf("DB open failed: %v", err)
+		return nil, fmt.Errorf("DB open failed: %v", err)
 	}
 	return NewWithSQLConn(db)
 }
@@ -307,6 +312,30 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 	return studyID, nil
 }
 
+// UpdateStudy updates the corresponding row in the DB.
+// It only updates name, owner, tags and job_id.
+// Other columns are silently ignored.
+func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
+	var err error
+
+	tags := make([]string, len(in.Tags))
+	for i, elem := range in.Tags {
+		tags[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
+		if err != nil {
+			log.Printf("Error marshalling %v: %v", elem, err)
+			continue
+		}
+	}
+	_, err = d.db.Exec(`UPDATE studies SET name = ?, owner = ?, tags = ?,
+                job_id = ? WHERE id = ?`,
+		in.Name,
+		in.Owner,
+		strings.Join(tags, ",\n"),
+		in.JobId,
+		studyID)
+	return err
+}
+
 func (d *dbConn) DeleteStudy(id string) error {
 	_, err := d.db.Exec("DELETE FROM studies WHERE id = ?", id)
 	return err
@@ -395,9 +424,7 @@ func (d *dbConn) GetTrialList(id string) ([]*api.Trial, error) {
 	return trials, err
 }
 
-func (d *dbConn) CreateTrial(trial *api.Trial) error {
-	// This function sets trial.id, unlike old dbInsertTrials().
-	// Users should not overwrite trial.id
+func marshalTrial(trial *api.Trial) ([]string, []string, error) {
 	var err, lastErr error
 
 	params := make([]string, len(trial.ParameterSet))
@@ -418,12 +445,20 @@ func (d *dbConn) CreateTrial(trial *api.Trial) error {
 			lastErr = err
 		}
 	}
+	return params, tags, lastErr
+}
+
+// CreateTrial stores into the trials DB table.
+// As a side-effect, it generates and sets trial.TrialId.
+// Users should not overwrite TrialId.
+func (d *dbConn) CreateTrial(trial *api.Trial) error {
+	params, tags, lastErr := marshalTrial(trial)
 
 	var trialID string
 	i := 3
 	for true {
 		trialID = generateRandid()
-		_, err = d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?)",
+		_, err := d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?)",
 			trialID, trial.StudyId, strings.Join(params, ",\n"),
 			trial.ObjectiveValue, strings.Join(tags, ",\n"))
 		if err == nil {
@@ -435,6 +470,20 @@ func (d *dbConn) CreateTrial(trial *api.Trial) error {
 				continue
 			}
 		}
+		return err
+	}
+	return lastErr
+}
+
+// UpdateTrial updates the corresponding row in the DB.
+// It only updates parameters and tags. Other columns are silently ignored.
+func (d *dbConn) UpdateTrial(trial *api.Trial) error {
+	params, tags, lastErr := marshalTrial(trial)
+	_, err := d.db.Exec(`UPDATE trials SET parameters = ?, tags = ?,
+		WHERE id = ?`,
+		strings.Join(params, ",\n"), strings.Join(tags, ",\n"),
+		trial.TrialId)
+	if err != nil {
 		return err
 	}
 	return lastErr

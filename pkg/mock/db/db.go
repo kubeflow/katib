@@ -78,6 +78,12 @@ func (m *MockVizierDBInterface) DBInit() {
 	m.ctrl.Call(m, "DBInit")
 }
 
+func (m *MockVizierDBInterface) SelectOne() error {
+	ret := m.ctrl.Call(m, "SelectOne")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
 // DBInit indicates an expected call of DBInit
 func (mr *MockVizierDBInterfaceMockRecorder) DBInit() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DBInit", reflect.TypeOf((*MockVizierDBInterface)(nil).DBInit))
@@ -351,6 +357,18 @@ func (mr *MockVizierDBInterfaceMockRecorder) UpdateEarlyStopParam(arg0, arg1 int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateEarlyStopParam", reflect.TypeOf((*MockVizierDBInterface)(nil).UpdateEarlyStopParam), arg0, arg1)
 }
 
+// UpdateStudy mocks base method
+func (m *MockVizierDBInterface) UpdateStudy(arg0 string, arg1 *api.StudyConfig) error {
+	ret := m.ctrl.Call(m, "UpdateStudy", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateStudy indicates an expected call of UpdateStudy
+func (mr *MockVizierDBInterfaceMockRecorder) UpdateStudy(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateStudy", reflect.TypeOf((*MockVizierDBInterface)(nil).UpdateStudy), arg0, arg1)
+}
+
 // UpdateSuggestionParam mocks base method
 func (m *MockVizierDBInterface) UpdateSuggestionParam(arg0 string, arg1 []*api.SuggestionParameter) error {
 	ret := m.ctrl.Call(m, "UpdateSuggestionParam", arg0, arg1)
@@ -361,6 +379,18 @@ func (m *MockVizierDBInterface) UpdateSuggestionParam(arg0 string, arg1 []*api.S
 // UpdateSuggestionParam indicates an expected call of UpdateSuggestionParam
 func (mr *MockVizierDBInterfaceMockRecorder) UpdateSuggestionParam(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSuggestionParam", reflect.TypeOf((*MockVizierDBInterface)(nil).UpdateSuggestionParam), arg0, arg1)
+}
+
+// UpdateTrial mocks base method
+func (m *MockVizierDBInterface) UpdateTrial(arg0 *api.Trial) error {
+	ret := m.ctrl.Call(m, "UpdateTrial", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateTrial indicates an expected call of UpdateTrial
+func (mr *MockVizierDBInterfaceMockRecorder) UpdateTrial(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTrial", reflect.TypeOf((*MockVizierDBInterface)(nil).UpdateTrial), arg0)
 }
 
 // UpdateWorker mocks base method

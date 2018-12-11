@@ -3,7 +3,8 @@
 import numpy as np
 
 from pkg.api.python import api_pb2
-
+import logging
+from logging import getLogger, StreamHandler, INFO, DEBUG
 
 def deal_with_discrete(feasible_values, current_value):
     """ function to embed the current values to the feasible discrete space"""
@@ -11,18 +12,28 @@ def deal_with_discrete(feasible_values, current_value):
     diff = np.absolute(diff)
     return feasible_values[np.argmin(diff)]
 
-
 def deal_with_categorical(feasible_values, one_hot_values):
     """ function to do the one hot encoding of the categorical values """
-    index = np.argmax(one_hot_values)
-    return feasible_values[index]
-
+    #index = np.argmax(one_hot_values)
+    index = one_hot_values.argmax()
+    return feasible_values[int(index)]
 
 class AlgorithmManager:
     """ class for the algorithm manager
     provide some helper functions
     """
-    def __init__(self, study_id, study_config, X_train, y_train):
+    def __init__(self, study_id, study_config, X_train, y_train, logger=None):
+        if logger == None:
+            self.logger = getLogger(__name__)
+            FORMAT = '%(asctime)-15s StudyID %(studyid)s %(message)s'
+            logging.basicConfig(format=FORMAT)
+            handler = StreamHandler()
+            handler.setLevel(DEBUG)
+            self.logger.setLevel(DEBUG)
+            self.logger.addHandler(handler)
+            self.logger.propagate = False
+        else:
+            self.logger = logger
         self._study_id = study_id
         self._study_config = study_config
         self._goal = self._study_config.optimization_type
@@ -34,17 +45,15 @@ class AlgorithmManager:
         # record all the feasible values of discrete type variables
         self._discrete_info = []
         self._categorical_info = []
+        self._name_id = {}
 
         self._parse_config()
 
-        self._X_train = X_train
+        self._X_train = self._mapping_params(X_train)
         self.parse_X()
 
         self._y_train = y_train
         self._parse_metric()
-
-        # print(self._X_train)
-        # print(self._y_train)
 
     @property
     def study_id(self):
@@ -108,7 +117,8 @@ class AlgorithmManager:
 
     def _parse_config(self):
         """ extract info from the study configuration """
-        for param in self._study_config.parameter_configs.configs:
+        for i, param in enumerate(self._study_config.parameter_configs.configs):
+            self._name_id[param.name]=i
             self._types.append(param.parameter_type)
             self._names.append(param.name)
             if param.parameter_type == api_pb2.DOUBLE or param.parameter_type == api_pb2.INT:
@@ -139,6 +149,29 @@ class AlgorithmManager:
                 }))
                 self._dim += num_feasible
 
+    def _mapping_params(self, parameters_list):
+        if len(parameters_list) == 0:
+            return None
+        ret = []
+        for parameters in parameters_list:
+            maplist = [np.zeros(1)]*len(self._names)
+            for p in parameters:
+                self.logger.debug("mapping: %r", p, extra={"StudyID": self._study_id})
+                map_id = self._name_id[p.name]
+                if self._types[map_id] == api_pb2.DOUBLE or self._types[map_id] == api_pb2.INT or self._types[map_id] == api_pb2.DISCRETE:
+                    maplist[map_id] = float(p.value)
+                elif self._types[map_id] == api_pb2.CATEGORICAL:
+                    for ci in self._categorical_info:
+                        if ci["name"] == p.name:
+                            maplist[map_id] = np.zeros(ci["number"])
+                            for i, v in enumerate(ci["values"]):
+                                if v == p.value:
+                                    maplist[map_id][i]=1
+                                    break
+            self.logger.debug("mapped: %r", maplist, extra={"StudyID": self._study_id})
+            ret.append(np.hstack(maplist))
+        return ret
+
     def _parse_metric(self):
         """ parse the metric to the dictionary """
         if not self._y_train:
@@ -150,14 +183,14 @@ class AlgorithmManager:
                 y.append(float(metric))
             else:
                 y.append(-float(metric))
-
+        self.logger.debug("Ytrain: %r", y, extra={"StudyID": self._study_id})
         self._y_train = np.array(y)
 
     def parse_X(self):
         if not self._X_train:
             self._X_train = None
             return
-
+        self.logger.debug("Xtrain: %r", self._X_train, extra={"StudyID": self._study_id})
         self._X_train = np.array(self._X_train)
 
     def parse_x_next(self, x_next):

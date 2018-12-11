@@ -38,7 +38,10 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 	//mock.ExpectBegin()
-	dbInterface = NewWithSQLConn(db)
+	dbInterface, err = NewWithSQLConn(db)
+	if err != nil {
+		fmt.Printf("error NewWithSQLConn: %v\n", err)
+	}
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS studies").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS study_permissions").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS trials").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
@@ -48,16 +51,25 @@ func TestMain(m *testing.M) {
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS suggestion_param").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS earlystop_param").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	dbInterface.DBInit()
+	err = dbInterface.SelectOne()
+	if err != nil {
+		fmt.Printf("error `SELECT 1` probing: %v\n", err)
+	}
 
 	mysqlAddr := os.Getenv("TEST_MYSQL")
 	if mysqlAddr != "" {
 		mysql, err := sql.Open("mysql", "root:test123@tcp("+mysqlAddr+")/vizier")
-
 		if err != nil {
 			fmt.Printf("error opening db: %v\n", err)
 			os.Exit(1)
 		}
-		mysqlInterface = NewWithSQLConn(mysql)
+
+		mysqlInterface, err = NewWithSQLConn(mysql)
+		if err != nil {
+			fmt.Printf("error initializing db interface: %v\n", err)
+			os.Exit(1)
+		}
+
 		mysqlInterface.DBInit()
 	}
 
@@ -132,6 +144,22 @@ func TestGetStudyList(t *testing.T) {
 			t.Errorf("GetStudyList returned incorrect ID %s != %s",
 				id, ids[i])
 		}
+	}
+}
+
+func TestUpdateStudy(t *testing.T) {
+	studyID := generateRandid()
+	var in api.StudyConfig
+	in.Name = "hoge"
+	in.Owner = "joe"
+	in.JobId = "foobar123"
+
+	mock.ExpectExec(`UPDATE studies SET name = \?, owner = \?, tags = \?,
+                job_id = \? WHERE id = \?`,
+	).WithArgs(in.Name, in.Owner, "", in.JobId, studyID).WillReturnResult(sqlmock.NewResult(1, 1))
+	err := dbInterface.UpdateStudy(studyID, &in)
+	if err != nil {
+		t.Errorf("UpdateStudy error %v", err)
 	}
 }
 
@@ -222,6 +250,21 @@ func TestCreateTrial(t *testing.T) {
 	err := dbInterface.CreateTrial(&trial)
 	if err != nil {
 		t.Errorf("CreateTrial error %v", err)
+	}
+}
+
+func TestUpdateTrial(t *testing.T) {
+	var trial api.Trial
+	trial.TrialId = generateRandid()
+	trial.StudyId = generateRandid()
+	trial.ParameterSet = make([]*api.Parameter, 1)
+	trial.ParameterSet[0] = &api.Parameter{Name: "abc"}
+	mock.ExpectExec(`UPDATE trials SET parameters = \?, tags = \?,
+		WHERE id = \?`,
+	).WithArgs("{\"name\":\"abc\"}", "", trial.TrialId).WillReturnResult(sqlmock.NewResult(1, 1))
+	err := dbInterface.UpdateTrial(&trial)
+	if err != nil {
+		t.Errorf("UpdateTrial error %v", err)
 	}
 }
 

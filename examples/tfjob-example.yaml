@@ -1,0 +1,103 @@
+apiVersion: "kubeflow.org/v1alpha1"
+kind: StudyJob
+metadata:
+  namespace: kubeflow
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: tfjob-example
+spec:
+  studyName: tfjob-example
+  owner: crd
+  optimizationtype: maximize
+  objectivevaluename: accuracy_1
+  optimizationgoal: 0.99
+  requestcount: 4
+  metricsnames:
+    - accuracy_1
+  parameterconfigs:
+    - name: --learning_rate
+      parametertype: double
+      feasible:
+        min: "0.01"
+        max: "0.05"
+    - name: --batch_size
+      parametertype: int
+      feasible:
+        min: "100"
+        max: "200"
+  workerSpec:
+    goTemplate:
+        rawTemplate: |-
+          apiVersion: "kubeflow.org/v1beta1"
+          kind: TFJob
+          metadata:
+            name: {{.WorkerID}}
+            namespace: kubeflow
+          spec:
+           tfReplicaSpecs:
+            Worker:
+              replicas: 1
+              restartPolicy: Never
+              template:
+                spec:
+                  containers:
+                    - name: tensorflow
+                      image: gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0
+                      command:
+                        - "python"
+                        - "/var/tf_mnist/mnist_with_summaries.py"
+                        - "--log_dir=/train/{{.WorkerID}}"
+                        {{- with .HyperParameters}}
+                        {{- range .}}
+                        - "{{.Name}}={{.Value}}"
+                        {{- end}}
+                        {{- end}}
+                      volumeMounts:
+                        - mountPath: "/train"
+                          name: "train"
+                  volumes:
+                    - name: "train"
+                      persistentVolumeClaim:
+                        claimName: "tfevent-volume"
+  metricsCollectorSpec:
+    goTemplate:
+      rawTemplate: |-
+        apiVersion: batch/v1beta1
+        kind: CronJob
+        metadata:
+          name: {{.WorkerID}}
+          namespace: kubeflow
+        spec:
+          schedule: "*/1 * * * *"
+          successfulJobsHistoryLimit: 0
+          failedJobsHistoryLimit: 1
+          jobTemplate:
+            spec:
+              template:
+                spec:
+                  containers:
+                  - name: {{.WorkerID}}
+                    image: gcr.io/kubeflow-ci/katib/tfevent-metrics-collector:v0.1.2-alpha-77-g9324cad
+                    args:
+                    - "python"
+                    - "main.py"
+                    - "-m"
+                    - "vizier-core"
+                    - "-s"
+                    - "{{.StudyID}}"
+                    - "-w"
+                    - "{{.WorkerID}}"
+                    - "-d"
+                    - "/train/{{.WorkerID}}"
+                    volumeMounts:
+                        - mountPath: "/train"
+                          name: "train"
+                  volumes:
+                    - name: "train"
+                      persistentVolumeClaim:
+                          claimName: "tfevent-volume"
+                  restartPolicy: Never
+                  serviceAccountName: metrics-collector
+  suggestionSpec:
+    suggestionAlgorithm: "random"
+    requestNumber: 3

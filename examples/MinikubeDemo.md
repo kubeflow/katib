@@ -37,9 +37,9 @@ $ kubectl apply -f random-example.yaml
 ```
 Only this command, a study will start, generate hyper-parameters and save the results.
 The configurations for the study(hyper-parameter feasible space, optimization parameter, optimization goal, suggestion algorithm, and so on) are defined in `random-example.yaml`,
-In this demo, hyper-parameters are embbeded as args.
-You can embbed in another way(e.g. eviroment values) by using template.
-It defined in `WorkerSpec.GoTemplate.RawTemplate`.
+In this demo, hyper-parameters are embedded as args.
+You can embed hyper-parameters in another way(e.g. environment values) by using template.
+It is defined in `WorkerSpec.GoTemplate.RawTemplate`.
 It is written in [go template](https://golang.org/pkg/text/template/) format.
 
 In this demo, 3 hyper parameters 
@@ -134,7 +134,7 @@ Status:
 Events:                <none>
 ```
 
-When the Spec.Status.State become `Completed`, the study is completed.
+When the Spec.Status.State becomes `Completed`, the study is completed.
 You can look the result on `http://127.0.0.1:8000/katib`.
 
 ### Use ConfigMap for Worker Template
@@ -144,7 +144,7 @@ Let's use [this](./workerConfigMap.yaml) template.
 ```
 kubectl apply -f workerConfigMap.yaml
 ```
-This template will share among blow three demos(Grid, Hyperband, and GPU).
+This template will be shared among the three demos below(Grid, Hyperband, and GPU).
 
 ### Grid Demo
 Almost same as random suggestion.
@@ -157,7 +157,7 @@ kubectl apply -f grid-example.yaml
 ### Hyperband Demo
 In this demo, the eta is 3 and the R is 9.
 ```
-kubectl apply -f random-example.yaml
+kubectl apply -f hypb-example.yaml
 ```
 
 ## UI
@@ -170,11 +170,11 @@ You can set any configuration for your worker pods.
 Here, try to set config for GPU.
 The manifest of the worker pods are generated from a template.
 The templates are defined in [ConfigMap](./workerConfigMap.yaml).
-There are two templates, defaultWorkerTemplate.yaml and gpuWorkerTemplate.yaml.
+There are two templates: defaultWorkerTemplate.yaml and gpuWorkerTemplate.yaml.
 You can add your template for worker.
 Then you should specify the template in your studyjob spec.
-[This](/examples/gpu-example.yaml) is example for using `gpuWorkerTemplate.yaml`.
-Set "/worker-template/gpuWorkerTemplate.yaml at `workerTemplatePath` field and specify gpu number at `workerParameters/Gpu`
+[This example](/examples/gpu-example.yaml) uses `gpuWorkerTemplate.yaml`.
+Set "/worker-template/gpuWorkerTemplate.yaml" at `workerTemplatePath` field and specify gpu number at `workerParameters/Gpu`.
 You can apply it same as other examples.
 ```
 $ kubectl apply -f gpu-example.yaml
@@ -241,7 +241,7 @@ Status:
       Workerid:        x8f172a64645690e
 ```
 
-Check the GPU configuration works correctly.
+Check if the GPU configuration works correctly.
 
 ```
 $ kubectl -n kubeflow describe pod g07cba174ada521e-88wpn
@@ -298,11 +298,11 @@ Events:
 
 ### Default Metrics Collector
 
-The default metrics will be collect from the StdOut of workers.
-It is deploy as a cronjob. It will collect and report metrics periodically.
-It collect metrics through k8s pod log API.
-You should print logs {metrics name}={value} style.
-In the above demo, the objective value name is Validation-accuracy and the metrics are accuracy, your training code should print like this.
+The default metrics collector collects metrics from the StdOut of workers.
+It is deployed as a cronjob. It will collect and report metrics periodically.
+It collects metrics through k8s pod log API.
+You should print logs in {metrics name}={value} style.
+In the above demo, the objective value name is *Validation-accuracy* and the metrics are [*accuracy*], so your training code should print like below.
 ```
 epoch 1:
 batch1 accuracy=0.3
@@ -323,23 +323,23 @@ You can add your template and specify `spec.metricsCollectorSpec.metricsCollecto
 ### TF Event File Metrics Collector
 
 The TF Event file metrics collector will collect metrics from tf.event files.
-It is also deploy as a cronjob.
-When you use TF Event File Metrics Collector, you need to share files between a metrics collector and worker with PVC.
+It is also deployed as a cronjob.
+When you use TF Event File Metrics Collector, you need to share files between the metrics collector and the worker by PVC.
 There is an example for TF Event file metrics collector.
-First, please create PV and PVC for share event file.
+First, please create PV and PVC to share event file.
 ```
 $ kubectl apply -f tfevent-volume/
 ```
-Then, create studyjob that use TF Event file metrics collector.
+Then, create a studyjob that uses TF Event file metrics collector.
 ```
 $ kubectl apply -f tf-event_test.yaml
 ```
 
-It will create tensorflow worker and collect metrics from its eventfile.
+It will create a tensorflow worker from whose eventfile metrics are collected.
 The code of tensorflow is [the official tutorial for mnist with summary](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/examples/tutorials/mnist/mnist_with_summaries.py).
 It will save event file to `/log/train` and `/log/test` directory.
 They have same named metrics ('accuracy' and 'cross_entropy').
-The accuracy in training will be save in train directory and test is in test directory.
+The accuracy in training and test will be saved in *train/* directory and *test/* directory respectively.
 In a studyjob, please add directry name to the name of metrics as a prefix e.g. `train/accuracy`, `test/accuracy`.
 
 ## ModelManagement
@@ -351,7 +351,7 @@ katib-cli -s {{server-cli}} pull study {{study ID or name}}  -o {{filename}}
 ```
 
 And you can push your existing models to Katib with CLI.
-`mnist-models.yaml` is traind 22 models using random suggestion with this Parameter Config.
+`mnist-models.yaml` trains 22 models using random suggestion with the Parameter Config below.
 
 ```
 configs:
@@ -383,7 +383,7 @@ configs:
         - adam
         - ftrl
 ```
-You can easy to explore the model on KatibUI.
+You can explore the model easily on KatibUI.
 
 ```
 katib-cli push md -f mnist-models.yaml

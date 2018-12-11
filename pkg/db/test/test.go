@@ -2,12 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/kubeflow/katib/pkg/db"
 	"os"
+
+	"github.com/kubeflow/katib/pkg/db"
 )
 
 func main() {
-	dbInt := db.New()
+	dbInt, err := db.New()
+	if err != nil {
+		fmt.Printf("err: %v", err)
+	}
 	study, err := dbInt.GetStudyConfig(os.Args[1])
 	if err != nil {
 		fmt.Printf("err: %v", err)

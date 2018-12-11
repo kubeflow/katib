@@ -23,6 +23,8 @@ import (
 
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
+	"github.com/kubeflow/katib/pkg/manager/studyjobclient"
+
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
@@ -69,7 +71,19 @@ func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi
 		if workerSpec.GoTemplate.RawTemplate != "" {
 			wtp, err = template.New("Worker").Parse(workerSpec.GoTemplate.RawTemplate)
 		} else if workerSpec.GoTemplate.TemplatePath != "" {
-			wtp, err = template.ParseFiles(workerSpec.GoTemplate.TemplatePath)
+			sjc, err := studyjobclient.NewStudyjobClient(nil)
+			if err != nil {
+				return "", nil, err
+			}
+			wtl, err := sjc.GetWorkerTemplates()
+			if err != nil {
+				return "", nil, err
+			}
+			if wt, ok := wtl[workerSpec.GoTemplate.TemplatePath]; !ok {
+				return "", nil, fmt.Errorf("No tamplate name %s", workerSpec.GoTemplate.TemplatePath)
+			} else {
+				wtp, err = template.New("Worker").Parse(wt)
+			}
 		}
 		if err != nil {
 			return "", nil, err

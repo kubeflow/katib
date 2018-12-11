@@ -9,10 +9,15 @@ rules:
   - configmaps
   - serviceaccounts
   verbs:
-  - create
-  - update
-  - list
-  - watch
+  - "*"
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/log
+  - pods/status
+  verbs:
+  - "*"
 - apiGroups:
   - batch
   resources:
@@ -31,6 +36,12 @@ rules:
   - kubeflow.org
   resources:
   - studyjobs
+  verbs:
+  - "*"
+- apiGroups:
+  - kubeflow.org
+  resources:
+  - tfjobs
   verbs:
   - "*"
 ---
