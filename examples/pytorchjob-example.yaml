@@ -43,7 +43,7 @@ spec:
                 spec:
                   containers:
                     - name: pytorch
-                      image: johnugeorge/pytorch-mnist-with-summary:0.4
+                      image: gcr.io/kubeflow-ci/pytorch-mnist-with-summary:0.4
                       imagePullPolicy: Always
                       command:
                         - "python"
