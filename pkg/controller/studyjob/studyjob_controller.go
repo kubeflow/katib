@@ -442,7 +442,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 					if err := r.deleteWorkerResources(instance, &tfjobv1beta1.TFJob{}, ns, w.WorkerID); err != nil {
 						return false, err
 					}
-				case PytorchJobWorker:
+				case PyTorchJobWorker:
 					if err := r.deleteWorkerResources(instance, &pytorchjobv1beta1.PyTorchJob{}, ns, w.WorkerID); err != nil {
 						return false, err
 					}
@@ -490,7 +490,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 					WorkerState:    state,
 				}
 				update, err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
-			case PytorchJobWorker:
+			case PyTorchJobWorker:
 				pytorchjob := &pytorchjobv1beta1.PyTorchJob{}
 				nname := types.NamespacedName{Namespace: ns, Name: w.WorkerID}
 				pytorchjoberr := r.Client.Get(context.TODO(), nname, pytorchjob)
@@ -670,7 +670,7 @@ func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJ
 			log.Printf("TFJob Create error %v", err)
 			return "", err
 		}
-	case PytorchJobWorker:
+	case PyTorchJobWorker:
 		var pytorchjob pytorchjobv1beta1.PyTorchJob
 		if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(&pytorchjob); err != nil {
 			instance.Status.Condition = katibv1alpha1.ConditionFailed
