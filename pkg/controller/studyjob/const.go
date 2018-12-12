@@ -15,3 +15,5 @@ const (
 	DefaultJobWorker = "Job"
 	TFJobWorker = "TFJob"
 )
+
+var ValidWorkerKindList = [...]string{DefaultJobWorker, TFJobWorker}

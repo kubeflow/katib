@@ -169,11 +169,9 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 
 	var update bool = false
 	switch instance.Status.Condition {
-	case katibv1alpha1.ConditionCompleted:
-		update, err = r.checkStatus(instance, request.Namespace)
-	case katibv1alpha1.ConditionFailed:
-		update, err = r.checkStatus(instance, request.Namespace)
-	case katibv1alpha1.ConditionRunning:
+	case katibv1alpha1.ConditionCompleted,
+	     katibv1alpha1.ConditionFailed,
+	     katibv1alpha1.ConditionRunning:
 		update, err = r.checkStatus(instance, request.Namespace)
 	default:
 		now := metav1.Now()
