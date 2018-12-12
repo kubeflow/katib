@@ -39,7 +39,7 @@ func (d *MetricsCollector) CollectWorkerLog(wID string, wkind string, objectiveV
 	var labelName string
 	if wkind == studyjob.TFJobWorker {
 		labelName = "tf_job_name"
-	} else if wkind == studyjob.PytorchJobWorker {
+	} else if wkind == studyjob.PyTorchJobWorker {
 		labelName = "pytorch_job_name"
 	} else {
 		labelName = "job-name"
