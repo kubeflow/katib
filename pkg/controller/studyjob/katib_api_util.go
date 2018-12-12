@@ -25,7 +25,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func InitializeStudy(instance *katibv1alpha1.StudyJob, ns string) error {
+func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) error {
 	if instance.Spec.SuggestionSpec == nil {
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		return fmt.Errorf("No Spec.SuggestionSpec specified.")

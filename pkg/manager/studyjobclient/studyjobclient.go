@@ -48,10 +48,15 @@ func NewStudyjobClient(config *rest.Config) (*StudyjobClient, error) {
 	}, nil
 }
 
-func (s *StudyjobClient) GetStudyJobList() (*studyjobv1alpha1.StudyJobList, error) {
+func (s *StudyjobClient) GetStudyJobList(namespace ...string) (*studyjobv1alpha1.StudyJobList, error) {
 	result := &studyjobv1alpha1.StudyJobList{}
-	data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
-	ns := strings.TrimSpace(string(data))
+	var ns string
+	if namespace == nil {
+		data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+		ns = strings.TrimSpace(string(data))
+	} else {
+		ns = namespace[0]
+	}
 	err := s.client.
 		Get().
 		Namespace(ns).
@@ -61,10 +66,15 @@ func (s *StudyjobClient) GetStudyJobList() (*studyjobv1alpha1.StudyJobList, erro
 	return result, err
 }
 
-func (s *StudyjobClient) CreateStudyJob(studyJob *studyjobv1alpha1.StudyJob) (*studyjobv1alpha1.StudyJob, error) {
+func (s *StudyjobClient) CreateStudyJob(studyJob *studyjobv1alpha1.StudyJob, namespace ...string) (*studyjobv1alpha1.StudyJob, error) {
 	result := &studyjobv1alpha1.StudyJob{}
-	data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
-	ns := strings.TrimSpace(string(data))
+	var ns string
+	if namespace == nil {
+		data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+		ns = strings.TrimSpace(string(data))
+	} else {
+		ns = namespace[0]
+	}
 	err := s.client.
 		Post().
 		Namespace(ns).

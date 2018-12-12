@@ -6,12 +6,10 @@ import (
 	"log"
 	"os"
 
-	apis "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
-	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
-
-	// yaml "gopkg.in/yaml.v2"
 	"github.com/ghodss/yaml"
+	apis "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
+	katibClient "github.com/kubeflow/katib/pkg/manager/studyjobclient"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -29,7 +27,7 @@ func NewCommandCreate() *cobra.Command {
 				cmd.HelpFunc()(cmd, args)
 				os.Exit(1)
 			}
-			createNasJob(conf, args)
+			createNasJob(conf)
 		},
 	}
 
@@ -38,84 +36,35 @@ func NewCommandCreate() *cobra.Command {
 	return cmd
 }
 
-func createNasJob(conf string, args []string) {
-	//check and get persistent flag volume
-	var pf *PersistentFlags
-	pf, err := CheckPersistentFlags()
-
-	if err != nil {
-		log.Fatalf("Check persistent flags failed: %v", err)
-	}
-
-	//create connection to GRPC server
-	connection, err := grpc.Dial(pf.server, grpc.WithInsecure())
-
-	if err != nil {
-		log.Fatalf("Could not connect: %v", err)
-	}
-	defer connection.Close()
-
-	// c := api.NewManagerClient(connection)
+func createNasJob(conf string) {
 
 	var studyJob apis.StudyJob
 
-	fmt.Println(conf)
+	//Parse yaml File
 	buf, _ := ioutil.ReadFile(conf)
-	// err = json.Unmarshal(buf, &studyJob) works
-	err = yaml.Unmarshal(buf, &studyJob)
+	err := yaml.Unmarshal(buf, &studyJob)
 	if err != nil {
 		log.Fatalf("Unmarshal failed: %v", err)
 	}
-	fmt.Println(studyJob)
 
-	// fmt.Println(studyJob.ObjectMeta)
+	//Get namespace from studyJob
+	namespace := studyJob.ObjectMeta.Namespace
 
-	// var studyJobConfig api.StudyConfig
+	//Get k8s config
+	config := parseKubernetesConfig()
 
-	// studyJobConfig.Name = studyJob.Spec.StudyName
-	// studyJobConfig.Owner = studyJob.Spec.Owner
+	//Create StudyJobClient
+	studyJobClient, err := katibClient.NewStudyjobClient(config)
 
-	// optimizationTypeString := strings.ToUpper(string(studyJob.Spec.OptimizationType))
-	// studyJobConfig.OptimizationType = api.OptimizationType(api.OptimizationType_value[optimizationTypeString])
-	// studyJobConfig.OptimizationGoal = *studyJob.Spec.OptimizationGoal
+	if err != nil {
+		log.Fatalf("NewStudyJobClient failed: %v", err)
+	}
 
-	// var parameterConfigs api.StudyConfig_ParameterConfigs
-	// parameterConfigList := make([]*api.ParameterConfig, 0)
+	createStudyJob, err := studyJobClient.CreateStudyJob(&studyJob, namespace)
 
-	// for _, parameterConfig := range studyJob.Spec.ParameterConfigs {
+	if err != nil {
+		log.Fatalf("CreateStudyJob failed: %v", err)
+	}
 
-	// 	parameterTypeString := strings.ToUpper(string(parameterConfig.ParameterType))
-
-	// 	pcFeasible := api.FeasibleSpace{
-	// 		List: parameterConfig.Feasible.List,
-	// 		Max:  parameterConfig.Feasible.Max,
-	// 		Min:  parameterConfig.Feasible.Min,
-	// 	}
-
-	// 	pc := api.ParameterConfig{
-	// 		Name:          parameterConfig.Name,
-	// 		ParameterType: api.ParameterType(api.ParameterType_value[parameterTypeString]),
-	// 		Feasible:      &pcFeasible,
-	// 	}
-
-	// 	parameterConfigList = append(parameterConfigList, &pc)
-	// 	// fmt.Println(parameterConfigList)
-
-	// }
-	// parameterConfigs.Configs = parameterConfigList
-
-	// studyJobConfig.ParameterConfigs = &parameterConfigs
-	// outBytes, _ := json.MarshalIndent(studyJobConfig, "", "    ")
-	// fmt.Println(string(outBytes))
-	// fmt.Println(c)
-
-	// createStudyReq := &api.CreateStudyRequest{StudyConfig: &studyJobConfig}
-	// createStudyResp, err := c.CreateStudy(context.Background(), createStudyReq)
-
-	// if err != nil {
-	// 	log.Fatalf("CreateStudy failed: %v", err)
-	// }
-
-	// fmt.Printf("NAS job %v is created", createStudyResp.StudyId)
-
+	fmt.Printf("NAS job %v is created\n", createStudyJob.ObjectMeta.Name)
 }

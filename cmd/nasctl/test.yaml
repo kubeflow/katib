@@ -1,6 +1,0 @@
-apiVersion: "kubeflow.org/v1alpha1"
-kind: StudyJob
-metadata:
-  namespace: kubeflow
-spec:
-  studyName: hypb-example

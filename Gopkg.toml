@@ -22,10 +22,6 @@ required = [
   go-tests = true
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/ghodss/yaml"
-  
-[[constraint]]
   name = "github.com/go-sql-driver/mysql"
   version = "1.4.0"
 
@@ -89,3 +85,8 @@ required = [
 [[constraint]]
   name = "github.com/kubeflow/tf-operator"
   version = "0.4.0-rc.1"
+
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ghodss/yaml"
