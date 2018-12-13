@@ -17,4 +17,4 @@ const (
 	PyTorchJobWorker = "PyTorchJob"
 )
 
-var ValidWorkerKindList = [...]string{DefaultJobWorker, TFJobWorker}
+var ValidWorkerKindList = [...]string{DefaultJobWorker, TFJobWorker, PyTorchJobWorker}
