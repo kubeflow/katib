@@ -73,7 +73,6 @@ func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) error {
 		return err
 	}
 	instance.Status.SuggestionParameterID = sPID
-	instance.Status.SuggestionCount += 1
 	instance.Status.Condition = katibv1alpha1.ConditionRunning
 	return nil
 }
