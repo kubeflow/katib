@@ -140,22 +140,30 @@ func getMetricsCollectorManifest(studyID string, trialID string, workerID string
 		"WorkerKind": workerKind,
 		"NameSpace":  namespace,
 	}
+	mctp := "defaultMetricsCollectorTemplate.yaml"
 	if mcs != nil {
 		if mcs.GoTemplate.RawTemplate != "" {
 			mtp, err = template.New("MetricsCollector").Parse(mcs.GoTemplate.RawTemplate)
 		} else if mcs.GoTemplate.TemplatePath != "" {
-			mtp, err = template.ParseFiles(mcs.GoTemplate.TemplatePath)
-		} else {
+			mctp = mcs.GoTemplate.TemplatePath
 		}
+	} else {
+		sjc, err := studyjobclient.NewStudyjobClient(nil)
 		if err != nil {
 			return nil, err
+		}
+		mtl, err := sjc.GetMetricsCollectorTemplates()
+		if err != nil {
+			return nil, err
+		}
+		if mt, ok := mtl[mctp]; !ok {
+			return nil, fmt.Errorf("No tamplate name %s", mctp)
+		} else {
+			mtp, err = template.New("MetricsCollector").Parse(mt)
 		}
 	}
-	if mtp == nil {
-		mtp, err = template.ParseFiles("/metricscollector-template/defaultMetricsCollectorTemplate.yaml")
-		if err != nil {
-			return nil, err
-		}
+	if err != nil {
+		return nil, err
 	}
 	var b bytes.Buffer
 	err = mtp.Execute(&b, tmpValues)
