@@ -51,7 +51,7 @@ func NewStudyjobClient(config *rest.Config) (*StudyjobClient, error) {
 func (s *StudyjobClient) GetStudyJobList(namespace ...string) (*studyjobv1alpha1.StudyJobList, error) {
 	result := &studyjobv1alpha1.StudyJobList{}
 	var ns string
-	if namespace == nil {
+	if len(namespace) == 0 {
 		data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
 		ns = strings.TrimSpace(string(data))
 	} else {
@@ -69,7 +69,7 @@ func (s *StudyjobClient) GetStudyJobList(namespace ...string) (*studyjobv1alpha1
 func (s *StudyjobClient) CreateStudyJob(studyJob *studyjobv1alpha1.StudyJob, namespace ...string) (*studyjobv1alpha1.StudyJob, error) {
 	result := &studyjobv1alpha1.StudyJob{}
 	var ns string
-	if namespace == nil {
+	if len(namespace) == 0 {
 		data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
 		ns = strings.TrimSpace(string(data))
 	} else {
@@ -87,7 +87,7 @@ func (s *StudyjobClient) CreateStudyJob(studyJob *studyjobv1alpha1.StudyJob, nam
 
 func (s *StudyjobClient) GetWorkerTemplates(namespace ...string) (map[string]string, error) {
 	var ns string
-	if namespace == nil {
+	if len(namespace) == 0 {
 		data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
 		ns = strings.TrimSpace(string(data))
 	} else {
@@ -102,7 +102,7 @@ func (s *StudyjobClient) GetWorkerTemplates(namespace ...string) (map[string]str
 
 func (s *StudyjobClient) UpdateWorkerTemplates(newWorkerTemplates map[string]string, namespace ...string) error {
 	var ns string
-	if namespace == nil {
+	if len(namespace) == 0 {
 		data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
 		ns = strings.TrimSpace(string(data))
 	} else {
@@ -119,7 +119,7 @@ func (s *StudyjobClient) UpdateWorkerTemplates(newWorkerTemplates map[string]str
 
 func (s *StudyjobClient) GetMetricsCollectorTemplates(namespace ...string) (map[string]string, error) {
 	var ns string
-	if namespace == nil {
+	if len(namespace) == 0 {
 		data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
 		ns = strings.TrimSpace(string(data))
 	} else {
@@ -134,7 +134,7 @@ func (s *StudyjobClient) GetMetricsCollectorTemplates(namespace ...string) (map[
 
 func (s *StudyjobClient) UpdateMetricsCollectorTemplates(newMCTemplates map[string]string, namespace ...string) error {
 	var ns string
-	if namespace == nil {
+	if len(namespace) == 0 {
 		data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
 		ns = strings.TrimSpace(string(data))
 	} else {
