@@ -322,6 +322,14 @@
   version = "v1.1.5"
 
 [[projects]]
+  digest = "1:11eef84ee2fae64144174a994ee8b5c96c028c091565a325303d771d2c73e705"
+  name = "github.com/kubeflow/pytorch-operator"
+  packages = ["pkg/apis/pytorch/v1beta1"]
+  pruneopts = "T"
+  revision = "97b3b9974baf73959329ae9ee4d18ef5b85a61a7"
+  version = "v0.4.0-rc.1"
+
+[[projects]]
   digest = "1:931643b24140b2960fb80e46d15c68587485c41d1ee9d9f887563e0d11ab8f15"
   name = "github.com/kubeflow/tf-operator"
   packages = [
@@ -1050,6 +1058,7 @@
     "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger",
     "github.com/grpc-ecosystem/grpc-gateway/runtime",
     "github.com/grpc-ecosystem/grpc-gateway/utilities",
+    "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1beta1",
     "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta1",
     "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1beta1",
     "github.com/onsi/ginkgo",
