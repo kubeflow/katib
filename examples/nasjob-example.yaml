@@ -90,21 +90,15 @@ spec:
   suggestionSpec:
     suggestionAlgorithm: "reinforcementlearning"
     suggestionParameters:
-      - 
-          name: "num_control_cells"
-          value: "32"
-      - 
-          name: "embedding_dim"
-          value: "20"
-      -
-          name: "accuracy_beta"
-          value: "0.8"
-      - 
-          name: "clip_rewards"
-          value: "0"
-      - 
-          name: "embedding_dim"
-          value: "20"
-      -
-          name: "discount_factor"
-          value: "0.95"
+      - name: "num_control_cells"
+        value: "32"
+      - name: "embedding_dim"
+        value: "20"
+      - name: "accuracy_beta"
+        value: "0.8"
+      - name: "clip_rewards"
+        value: "0"
+      - name: "embedding_dim"
+        value: "20"
+      - name: "discount_factor"
+        value: "0.95"
