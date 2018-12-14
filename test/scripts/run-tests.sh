@@ -102,7 +102,6 @@ kubectl -n kubeflow get pod
 
 kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep vizier-core | grep -v vizier-core-rest | sed -e "s@pods\/@@") 6789:6789 &
 echo "kubectl port-forward start"
-sleep 5
 TIMEOUT=120
 until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
     sleep 5

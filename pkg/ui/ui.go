@@ -11,12 +11,9 @@ import (
 
 	"github.com/kubeflow/katib/pkg"
 	"github.com/kubeflow/katib/pkg/api"
-	studyjobv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
-	"github.com/kubeflow/katib/pkg/manager/studyjobclient"
 
 	"github.com/pressly/chi"
 	"google.golang.org/grpc"
-	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
 const maxMsgSize = 1<<31 - 1
@@ -36,17 +33,10 @@ type IDList struct {
 	TrialId  string
 }
 type KatibUIHandler struct {
-	studyjobClient *studyjobclient.StudyjobClient
 }
 
 func NewKatibUIHandler() *KatibUIHandler {
-	sjc, err := studyjobclient.NewStudyjobClient(nil)
-	if err != nil {
-		panic(err)
-	}
-	return &KatibUIHandler{
-		studyjobClient: sjc,
-	}
+	return &KatibUIHandler{}
 }
 
 func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api.ManagerClient, error) {
@@ -78,329 +68,32 @@ func (k *KatibUIHandler) Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	type StudyNameStack struct {
-		StudyId           string
-		Owner             string
-		StudyJobName      string
-		StudyJobCondition string
-	}
-	type StudySummary struct {
-		StudyNameStacks    []*StudyNameStack
-		LatestJobCondition string
-		LastJobUpdateTime  *time.Time
+		StudyId string
+		Owner   string
 	}
 	type StudyListView struct {
 		IDList        *IDList
-		StudySummarys map[string]*StudySummary
+		StudySummarys map[string][]*StudyNameStack
 	}
 	slv := &StudyListView{
 		IDList:        &IDList{},
-		StudySummarys: make(map[string]*StudySummary),
+		StudySummarys: make(map[string][]*StudyNameStack),
 	}
 	for _, so := range gslrep.StudyOverviews {
-		ss, ok := slv.StudySummarys[so.Name]
-		if !ok {
-			ss = &StudySummary{
-				StudyNameStacks:    []*StudyNameStack{},
-				LatestJobCondition: "Unknown",
-				LastJobUpdateTime:  nil,
-			}
-			slv.StudySummarys[so.Name] = ss
+		if _, ok := slv.StudySummarys[so.Name]; !ok {
+			slv.StudySummarys[so.Name] = []*StudyNameStack{}
 		}
-		ss.StudyNameStacks = append(ss.StudyNameStacks, &StudyNameStack{
-			StudyId:           so.Id,
-			Owner:             so.Owner,
-			StudyJobName:      "None",
-			StudyJobCondition: "None",
+		slv.StudySummarys[so.Name] = append(slv.StudySummarys[so.Name], &StudyNameStack{
+			StudyId: so.Id,
+			Owner:   so.Owner,
 		})
 	}
-	sl, err := k.studyjobClient.GetStudyJobList()
-	if err != nil {
-		log.Printf("StudyjobClient List err %v", err)
-	} else {
-		for _, sj := range sl.Items {
-			ss, ok := slv.StudySummarys[sj.Spec.StudyName]
-			if !ok {
-				continue
-			}
-			for i := range ss.StudyNameStacks {
-				if ss.StudyNameStacks[i].StudyId == sj.Status.StudyID {
-					if ss.StudyNameStacks[i].StudyJobName == "None" {
-						ss.StudyNameStacks[i].StudyJobName = sj.Name
-						ss.StudyNameStacks[i].StudyJobCondition = string(sj.Status.Condition)
-						if sj.Status.LastReconcileTime != nil {
-							if ss.LastJobUpdateTime != nil {
-								if ss.LastJobUpdateTime.Before(sj.Status.LastReconcileTime.Time) {
-									continue
-								}
-							}
-							ss.LatestJobCondition = string(sj.Status.Condition)
-							ss.LastJobUpdateTime = &sj.Status.LastReconcileTime.Time
-						}
-						break
-					}
-				}
-			}
-		}
-	}
-	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/index.html", "/app/template/navbar.html")
+	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/index.html", "/app/template/breadcrumb.html")
 	if err != nil {
 		log.Fatal(err)
 	}
 	if err := t.ExecuteTemplate(w, "layout", slv); err != nil {
 		log.Fatal(err)
-	}
-}
-
-func (k *KatibUIHandler) CreateStudyJob(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	form := r.PostForm
-	sjm := form["StudyJobManifest"][0]
-	var job *studyjobv1alpha1.StudyJob
-	BUFSIZE := 1024
-	k8syaml.NewYAMLOrJSONDecoder(strings.NewReader(sjm), BUFSIZE).Decode(&job)
-	_, err := k.studyjobClient.CreateStudyJob(job)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Fail to create Studyjob: " + err.Error()))
-		return
-	}
-}
-
-func (k *KatibUIHandler) StudyJobGen(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
-	sid := query.Get("studyid")
-	sname := query.Get("studyname")
-	conn, c, err := k.connectManager()
-	defer conn.Close()
-	if err != nil {
-		log.Printf("Failed to connect Katib manager %v", err)
-	}
-	var sparam *studyjobv1alpha1.SuggestionSpec = nil
-	reqcount := 0
-	wtn := "scratch"
-	mtn := "defaultMetricsCollectorTemplate.yaml"
-	if sid != "" || sname != "" {
-		sl, err := k.studyjobClient.GetStudyJobList()
-		if err != nil {
-			log.Printf("StudyjobClient List err %v", err)
-		} else {
-			var ltime *time.Time
-			for _, sj := range sl.Items {
-				if sj.Spec.StudyName == sname || sj.Status.StudyID == sid {
-					if ltime != nil {
-						if sj.Status.LastReconcileTime != nil {
-							if ltime.Before(sj.Status.LastReconcileTime.Time) {
-								continue
-							}
-						}
-					}
-					ltime = &sj.Status.LastReconcileTime.Time
-					sid = sj.Status.StudyID
-					sparam = sj.Spec.SuggestionSpec
-					reqcount = sj.Spec.RequestCount
-					if sj.Spec.WorkerSpec.GoTemplate.TemplatePath != "" {
-						wtn = sj.Spec.WorkerSpec.GoTemplate.TemplatePath
-					}
-					if sj.Spec.MetricsCollectorSpec.GoTemplate.TemplatePath != "" {
-						mtn = sj.Spec.MetricsCollectorSpec.GoTemplate.TemplatePath
-					}
-				}
-			}
-		}
-		if sid == "" {
-			if c != nil {
-				gslrep, err := c.GetStudyList(
-					context.Background(),
-					&api.GetStudyListRequest{},
-				)
-				if err != nil {
-					log.Printf("Get Study List err %v", err)
-				} else {
-					for _, so := range gslrep.StudyOverviews {
-						if so.Name == sname {
-							sid = so.Id
-							break
-						}
-					}
-				}
-			}
-		}
-	}
-	wt, err := k.studyjobClient.GetWorkerTemplates()
-	if err != nil {
-		log.Printf("GetWorkerTemplates err %v", err)
-	}
-	mt, err := k.studyjobClient.GetMetricsCollectorTemplates()
-	if err != nil {
-		log.Printf("GetMetricsCollectorTemplates err %v", err)
-	}
-	type Param struct {
-		Name string
-		Type string
-		Min  string
-		Max  string
-		List string
-	}
-	type StudyJobDefault struct {
-		IDList                       *IDList
-		StudyName                    string
-		Owner                        string
-		OptimizationType             string
-		OptimizationGoal             float64
-		ObjectiveValueName           string
-		Metrics                      string
-		ParamConf                    []*Param
-		WorkerTemplates              map[string]string
-		WorkerTemplateName           string
-		MetricsCollectorTemplates    map[string]string
-		MetricsCollectorTemplateName string
-		SuggestionAlgorithm          string
-		RequestCount                 int
-		RequestNumber                int
-		SuggestionParams             map[string]string
-	}
-	sjd := &StudyJobDefault{
-		IDList:                    &IDList{},
-		WorkerTemplates:           wt,
-		MetricsCollectorTemplates: mt,
-	}
-	if sid != "" {
-		if c != nil {
-			gsrep, err := c.GetStudy(
-				context.Background(),
-				&api.GetStudyRequest{
-					StudyId: sid,
-				},
-			)
-			if err != nil {
-				log.Printf("Get Study %s failed %v", sid, err)
-			} else {
-				sjd.StudyName = gsrep.StudyConfig.Name
-				sjd.Owner = gsrep.StudyConfig.Owner
-				sjd.OptimizationType = strings.ToLower(
-					string(
-						api.OptimizationType_name[int32(gsrep.StudyConfig.OptimizationType)],
-					),
-				)
-				sjd.OptimizationGoal = gsrep.StudyConfig.OptimizationGoal
-				sjd.ObjectiveValueName = gsrep.StudyConfig.ObjectiveValueName
-				sjd.RequestCount = reqcount
-				sjd.Metrics = strings.Join(gsrep.StudyConfig.Metrics, " ")
-				sjd.ParamConf = make([]*Param, len(gsrep.StudyConfig.ParameterConfigs.Configs))
-				for i, p := range gsrep.StudyConfig.ParameterConfigs.Configs {
-					sjd.ParamConf[i] = &Param{}
-					sjd.ParamConf[i].Name = p.Name
-					sjd.ParamConf[i].Type = strings.ToLower(
-						string(
-							api.ParameterType_name[int32(p.ParameterType)],
-						),
-					)
-					sjd.ParamConf[i].Min = p.Feasible.Min
-					sjd.ParamConf[i].Max = p.Feasible.Max
-					sjd.ParamConf[i].List = strings.Join(p.Feasible.List, " ")
-				}
-				if sparam != nil {
-					sjd.RequestNumber = sparam.RequestNumber
-					sjd.SuggestionAlgorithm = sparam.SuggestionAlgorithm
-					sjd.SuggestionParams = make(map[string]string, len(sparam.SuggestionParameters))
-					for _, sp := range sparam.SuggestionParameters {
-						if sp.Name == "SuggestionCount" {
-							continue
-						}
-						sjd.SuggestionParams[sp.Name] = sp.Value
-					}
-				}
-			}
-		}
-	}
-	sjd.WorkerTemplateName = wtn
-	sjd.MetricsCollectorTemplateName = mtn
-	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/studyjobgen.html", "/app/template/studyjobgen.js", "/app/template/navbar.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err := t.ExecuteTemplate(w, "layout", sjd); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (k *KatibUIHandler) WorkerTemplate(w http.ResponseWriter, r *http.Request) {
-	wt, err := k.studyjobClient.GetWorkerTemplates()
-	if err != nil {
-		log.Printf("GetWorkerTemplates err %v", err)
-	}
-	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/workertemplate.html", "/app/template/workertemplate.js", "/app/template/navbar.html")
-	type WorkerTemplateView struct {
-		IDList         *IDList
-		WorkerTemplate map[string]string
-	}
-	wtv := WorkerTemplateView{
-		IDList:         &IDList{},
-		WorkerTemplate: wt,
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err := t.ExecuteTemplate(w, "layout", wtv); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (k *KatibUIHandler) UpdateWorkerTemplate(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	form := r.PostForm
-	wt := make(map[string]string, len(form))
-	for k, v := range form {
-		if len(v) > 1 {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Template Name duplicated"))
-			return
-		}
-		wt[k] = v[0]
-	}
-	err := k.studyjobClient.UpdateWorkerTemplates(wt)
-	if err != nil {
-		log.Print("fail to UpdateWorkerTemplate %v", err)
-	}
-}
-
-func (k *KatibUIHandler) MetricsCollectorTemplate(w http.ResponseWriter, r *http.Request) {
-	mt, err := k.studyjobClient.GetMetricsCollectorTemplates()
-	if err != nil {
-		log.Printf("GetMetricsCollectorTemplates err %v", err)
-	}
-	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/metricscollectortemplate.html", "/app/template/metricscollectortemplate.js", "/app/template/navbar.html")
-	type MetricsCollectorTemplateView struct {
-		IDList                   *IDList
-		MetricsCollectorTemplate map[string]string
-	}
-	mtv := MetricsCollectorTemplateView{
-		IDList:                   &IDList{},
-		MetricsCollectorTemplate: mt,
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err := t.ExecuteTemplate(w, "layout", mtv); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (k *KatibUIHandler) UpdateMetricsCollectorTemplate(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	form := r.PostForm
-	mt := make(map[string]string, len(form))
-	for k, v := range form {
-		if len(v) > 1 {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Template Name duplicated"))
-			return
-		}
-		mt[k] = v[0]
-	}
-	err := k.studyjobClient.UpdateMetricsCollectorTemplates(mt)
-	if err != nil {
-		log.Print("fail to UpdateMetricsCollectorTemplate %v", err)
 	}
 }
 
@@ -446,7 +139,7 @@ func (k *KatibUIHandler) Study(w http.ResponseWriter, r *http.Request) {
 			sv.HParams[i].Type = "String"
 		}
 	}
-	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/study.html", "/app/template/parallelcood.js", "/app/template/navbar.html")
+	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/study.html", "/app/template/parallelcood.js", "/app/template/breadcrumb.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -555,7 +248,7 @@ func (k *KatibUIHandler) Trial(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	view.Workers = gwrep.Workers
-	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/trial.html", "/app/template/navbar.html")
+	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/trial.html", "/app/template/breadcrumb.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -671,7 +364,7 @@ func (k *KatibUIHandler) Worker(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Printf("Log %s %v\n", wv.MetricsLogs[i].Name, wv.MetricsLogs[i].LogValues)
 	}
-	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/worker.html", "/app/template/linegraph.js", "/app/template/navbar.html")
+	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/worker.html", "/app/template/linegraph.js", "/app/template/breadcrumb.html")
 	if err != nil {
 		log.Fatal(err)
 	}

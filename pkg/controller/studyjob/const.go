@@ -13,6 +13,5 @@ package studyjob
 
 const (
 	DefaultJobWorker = "Job"
-	TFJobWorker      = "TFJob"
-	PyTorchJobWorker = "PyTorchJob"
+	TFJobWorker = "TFJob"
 )

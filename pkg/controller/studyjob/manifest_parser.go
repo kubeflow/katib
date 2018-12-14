@@ -23,8 +23,6 @@ import (
 
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
-	"github.com/kubeflow/katib/pkg/manager/studyjobclient"
-
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
@@ -71,19 +69,7 @@ func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi
 		if workerSpec.GoTemplate.RawTemplate != "" {
 			wtp, err = template.New("Worker").Parse(workerSpec.GoTemplate.RawTemplate)
 		} else if workerSpec.GoTemplate.TemplatePath != "" {
-			sjc, err := studyjobclient.NewStudyjobClient(nil)
-			if err != nil {
-				return "", nil, err
-			}
-			wtl, err := sjc.GetWorkerTemplates()
-			if err != nil {
-				return "", nil, err
-			}
-			if wt, ok := wtl[workerSpec.GoTemplate.TemplatePath]; !ok {
-				return "", nil, fmt.Errorf("No tamplate name %s", workerSpec.GoTemplate.TemplatePath)
-			} else {
-				wtp, err = template.New("Worker").Parse(wt)
-			}
+			wtp, err = template.ParseFiles(workerSpec.GoTemplate.TemplatePath)
 		}
 		if err != nil {
 			return "", nil, err
@@ -130,40 +116,31 @@ func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi
 	return wid, &b, nil
 }
 
-func getMetricsCollectorManifest(studyID string, trialID string, workerID string, workerKind string, namespace string, mcs *katibv1alpha1.MetricsCollectorSpec) (*bytes.Buffer, error) {
+func getMetricsCollectorManifest(studyID string, trialID string, workerID string, namespace string, mcs *katibv1alpha1.MetricsCollectorSpec) (*bytes.Buffer, error) {
 	var mtp *template.Template = nil
 	var err error
 	tmpValues := map[string]string{
-		"StudyID":    studyID,
-		"TrialID":    trialID,
-		"WorkerID":   workerID,
-		"WorkerKind": workerKind,
-		"NameSpace":  namespace,
+		"StudyID":   studyID,
+		"TrialID":   trialID,
+		"WorkerID":  workerID,
+		"NameSpace": namespace,
 	}
-	mctp := "defaultMetricsCollectorTemplate.yaml"
 	if mcs != nil {
 		if mcs.GoTemplate.RawTemplate != "" {
 			mtp, err = template.New("MetricsCollector").Parse(mcs.GoTemplate.RawTemplate)
 		} else if mcs.GoTemplate.TemplatePath != "" {
-			mctp = mcs.GoTemplate.TemplatePath
-		}
-	} else {
-		sjc, err := studyjobclient.NewStudyjobClient(nil)
-		if err != nil {
-			return nil, err
-		}
-		mtl, err := sjc.GetMetricsCollectorTemplates()
-		if err != nil {
-			return nil, err
-		}
-		if mt, ok := mtl[mctp]; !ok {
-			return nil, fmt.Errorf("No tamplate name %s", mctp)
+			mtp, err = template.ParseFiles(mcs.GoTemplate.TemplatePath)
 		} else {
-			mtp, err = template.New("MetricsCollector").Parse(mt)
+		}
+		if err != nil {
+			return nil, err
 		}
 	}
-	if err != nil {
-		return nil, err
+	if mtp == nil {
+		mtp, err = template.ParseFiles("/metricscollector-template/defaultMetricsCollectorTemplate.yaml")
+		if err != nil {
+			return nil, err
+		}
 	}
 	var b bytes.Buffer
 	err = mtp.Execute(&b, tmpValues)

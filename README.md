@@ -36,7 +36,7 @@ A Suggestion is an algorithm to construct a parameter set. Currently Katib suppo
 ## Components in Katib
 
 Katib consists of several components as shown below. Each component is running on k8s as a deployment.
-Each component communicates with others via GRPC and the API is defined at `pkg/api/api.proto`.
+Each component communicates with others via GRPC and the API is defined at `api/api.proto`.
 
 - vizier: main components.
     - vizier-core : API server of vizier.
@@ -54,6 +54,40 @@ Each component communicates with others via GRPC and the API is defined at `pkg/
 ## Getting Started
 
 Please see [MinikubeDemo.md](./examples/MinikubeDemo.md) for more details.
+
+## StudyConfig
+
+In the Study config file, we define the feasible space of parameters and configuration of a kubernetes job. Examples of such Study configs are in the `conf` directory. The configuration items are as follows:
+
+- name: Study name
+- owner: Owner
+- objectivevaluename: Name of the objective value. Your evaluated software should be print log `{objectivevaluename}={objective value}` in std-io.
+- optimizationtype: Optimization direction of the objective value. 1=maximize 2=minimize
+- suggestalgorithm: [random, grid, hyperband] now
+- suggestionparameters: Parameter of the algorithm. Set name-value style.
+    - In random suggestion
+        - SuggestionNum: How many suggestions will Katib create.
+        - MaxParallel: Max number of run on kubernetes
+    - In grid suggestion
+        - MaxParallel: Max number of run on kubernetes
+        - GridDefault: default number of grid
+        - name: [parameter name] grid number of specified parameter.
+- metrics: The value you want to save to modeldb besides objectivevaluename.
+- image: docker image name
+- mount
+    - pvc: pvc
+    - path: MountPath in container
+- pullsecret: Name of Image pull secret
+- gpu: number of GPU (If you want to run cpu task, set 0 or delete this parameter)
+- command: commands
+- parameterconfigs: define feasible space
+    - configs
+        - name : parameter space
+        - parametertype: 1=float, 2=int, 4=categorical
+        - feasible
+            - min
+            - max
+            - list (for categorical)
 
 ## Web UI
 

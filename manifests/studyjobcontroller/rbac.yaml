@@ -9,7 +9,10 @@ rules:
   - configmaps
   - serviceaccounts
   verbs:
-  - "*"
+  - create
+  - update
+  - list
+  - watch
 - apiGroups:
   - ""
   resources:
@@ -42,7 +45,6 @@ rules:
   - kubeflow.org
   resources:
   - tfjobs
-  - pytorchjobs
   verbs:
   - "*"
 ---
