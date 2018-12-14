@@ -61,7 +61,12 @@ func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
 	}
-	return wkindS, nil
+	for _, kind := range ValidWorkerKindList {
+		if kind == wkindS {
+			return wkindS, nil
+		}
+	}
+	return "", fmt.Errorf("Invalid kind of worker %v", typeChecker)
 }
 
 func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, kind string, dryrun bool) (string, *bytes.Buffer, error) {
