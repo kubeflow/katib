@@ -18,53 +18,17 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
 	"text/template"
 
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
+	"github.com/kubeflow/katib/pkg"
 	"github.com/kubeflow/katib/pkg/manager/studyjobclient"
 
-	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/apimachinery/pkg/util/uuid"
 )
 
-func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (string, error) {
-	var typeChecker interface{}
-	BUFSIZE := 1024
-	_, m, err := getWorkerManifest(
-		nil,
-		"validation",
-		&katibapi.Trial{
-			TrialId:      "validation",
-			ParameterSet: []*katibapi.Parameter{},
-		},
-		workerSpec,
-		"",
-		true,
-	)
-	if err != nil {
-		return "", err
-	}
-	if err := k8syaml.NewYAMLOrJSONDecoder(m, BUFSIZE).Decode(&typeChecker); err != nil {
-		log.Printf("Yaml decode validation error %v", err)
-		return "", err
-	}
-	tcMap, ok := typeChecker.(map[string]interface{})
-	if !ok {
-		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
-	}
-	wkind, ok := tcMap["kind"]
-	if !ok {
-		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
-	}
-	wkindS, ok := wkind.(string)
-	if !ok {
-		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
-	}
-	return wkindS, nil
-}
-
-func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, kind string, dryrun bool) (string, *bytes.Buffer, error) {
+func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, kind string, ns string, dryrun bool) (string, *bytes.Buffer, error) {
 	var wtp *template.Template = nil
 	var err error
 	if workerSpec != nil {
@@ -97,7 +61,7 @@ func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi
 	}
 	var wid string
 	if dryrun {
-		wid = "validation"
+		wid = string(uuid.NewUUID())
 	} else {
 		cwreq := &katibapi.RegisterWorkerRequest{
 			Worker: &katibapi.Worker{
@@ -118,6 +82,7 @@ func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi
 		StudyID:  studyID,
 		TrialID:  trial.TrialId,
 		WorkerID: wid,
+		NameSpace: ns,
 	}
 	var b bytes.Buffer
 	for _, p := range trial.ParameterSet {
@@ -139,6 +104,7 @@ func getMetricsCollectorManifest(studyID string, trialID string, workerID string
 		"WorkerID":   workerID,
 		"WorkerKind": workerKind,
 		"NameSpace":  namespace,
+		"ManagerSerivce": pkg.GetManagerAddr(),
 	}
 	mctp := "defaultMetricsCollectorTemplate.yaml"
 	if mcs != nil {

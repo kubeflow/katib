@@ -16,7 +16,6 @@ package studyjob
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/kubeflow/katib/pkg"
@@ -26,13 +25,15 @@ import (
 )
 
 func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) error {
-	if instance.Spec.SuggestionSpec == nil {
+	if validErr := validateStudy(instance, ns); validErr != nil {
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
-		return fmt.Errorf("No Spec.SuggestionSpec specified.")
+		return validErr
 	}
+
 	if instance.Spec.SuggestionSpec.SuggestionAlgorithm == "" {
 		instance.Spec.SuggestionSpec.SuggestionAlgorithm = "random"
 	}
+
 	instance.Status.Condition = katibv1alpha1.ConditionRunning
 
 	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
@@ -73,7 +74,6 @@ func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) error {
 		return err
 	}
 	instance.Status.SuggestionParameterID = sPID
-	instance.Status.SuggestionCount += 1
 	instance.Status.Condition = katibv1alpha1.ConditionRunning
 	return nil
 }
@@ -126,6 +126,30 @@ func getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, erro
 	}
 	sconf.JobId = string(instance.UID)
 	return sconf, nil
+}
+
+func deleteStudy(instance *katibv1alpha1.StudyJob) error {
+	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Connect katib manager error %v", err)
+		return err
+	}
+	defer conn.Close()
+	c := katibapi.NewManagerClient(conn)
+	ctx := context.Background()
+	studyID := instance.Status.StudyID
+	if studyID == "" {
+	// in case that information for a studyjob is not created in DB
+		return nil
+	}
+	deleteStudyreq := &katibapi.DeleteStudyRequest{
+		StudyId: studyID,
+	}
+	if _, err = c.DeleteStudy(ctx, deleteStudyreq); err != nil {
+		log.Printf("DeleteStudy error %v", err)
+		return err
+	}
+	return nil
 }
 
 func createStudy(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig) (string, error) {

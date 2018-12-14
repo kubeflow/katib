@@ -78,12 +78,6 @@ func (m *MockVizierDBInterface) DBInit() {
 	m.ctrl.Call(m, "DBInit")
 }
 
-func (m *MockVizierDBInterface) SelectOne() error {
-	ret := m.ctrl.Call(m, "SelectOne")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
 // DBInit indicates an expected call of DBInit
 func (mr *MockVizierDBInterfaceMockRecorder) DBInit() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DBInit", reflect.TypeOf((*MockVizierDBInterface)(nil).DBInit))
@@ -305,6 +299,18 @@ func (m *MockVizierDBInterface) GetWorkerTimestamp(arg0 string) (*time.Time, err
 // GetWorkerTimestamp indicates an expected call of GetWorkerTimestamp
 func (mr *MockVizierDBInterfaceMockRecorder) GetWorkerTimestamp(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkerTimestamp", reflect.TypeOf((*MockVizierDBInterface)(nil).GetWorkerTimestamp), arg0)
+}
+
+// SelectOne mocks base method
+func (m *MockVizierDBInterface) SelectOne() error {
+	ret := m.ctrl.Call(m, "SelectOne")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SelectOne indicates an expected call of SelectOne
+func (mr *MockVizierDBInterfaceMockRecorder) SelectOne() *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectOne", reflect.TypeOf((*MockVizierDBInterface)(nil).SelectOne))
 }
 
 // SetEarlyStopParam mocks base method

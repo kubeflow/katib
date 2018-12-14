@@ -46,8 +46,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
+const (
+	maxMsgSize = 1<<31 - 1
+	cleanDataFinalizer = "clean-studyjob-data"
+)
 
-const maxMsgSize = 1<<31 - 1
+var (
+	invalidCRDResources [] string
+)
 
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
@@ -114,7 +120,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			IsController: true,
 			OwnerType:    &katibv1alpha1.StudyJob{},
 		})
-	if err != nil {
+	if isFatalWatchError(err, TFJobWorker) {
 		return err
 	}
 
@@ -124,7 +130,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			IsController: true,
 			OwnerType:    &katibv1alpha1.StudyJob{},
 		})
-	if err != nil {
+	if isFatalWatchError(err, PyTorchJobWorker) {
 		return err
 	}
 
@@ -177,14 +183,36 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
-
 	var update bool = false
+	deleted := instance.GetDeletionTimestamp() != nil
+	pendingFinalizers := instance.GetFinalizers()
+	if !deleted && !contains(pendingFinalizers, cleanDataFinalizer) {
+		log.Printf("Adding finalizer %s", cleanDataFinalizer)
+		finalizers := append(pendingFinalizers, cleanDataFinalizer)
+		return r.updateFinalizers(instance, finalizers)
+	}
+	if deleted {
+		if !contains(pendingFinalizers, cleanDataFinalizer) {
+			return reconcile.Result{}, nil
+		}
+		err = deleteStudy(instance)
+		if err != nil {
+			log.Printf("Fail to delete %v", err)
+			return reconcile.Result{}, err
+		}
+		finalizers := []string{}
+		for _, pendingFinalizer := range pendingFinalizers {
+			if pendingFinalizer != cleanDataFinalizer {
+				finalizers = append(finalizers, pendingFinalizer)
+			}
+		}
+		return r.updateFinalizers(instance, finalizers)
+	}
+
 	switch instance.Status.Condition {
-	case katibv1alpha1.ConditionCompleted:
-		update, err = r.checkStatus(instance, request.Namespace)
-	case katibv1alpha1.ConditionFailed:
-		update, err = r.checkStatus(instance, request.Namespace)
-	case katibv1alpha1.ConditionRunning:
+	case katibv1alpha1.ConditionCompleted,
+	     katibv1alpha1.ConditionFailed,
+	     katibv1alpha1.ConditionRunning:
 		update, err = r.checkStatus(instance, request.Namespace)
 	default:
 		now := metav1.Now()
@@ -212,6 +240,18 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		}
 	}
 	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileStudyJobController) updateFinalizers(instance *katibv1alpha1.StudyJob, finalizers []string) (reconcile.Result, error) {
+	instance.SetFinalizers(finalizers)
+	err := r.Update(context.TODO(), instance)
+	if err != nil {
+		log.Printf("Fail to Update StudyJob %v : %v", instance.Status.StudyID, err)
+		return reconcile.Result{}, err
+	} else {
+		// Need to requeue because finalizer update does not change metadata.generation
+		return reconcile.Result{Requeue: true}, err
+	}
 }
 
 func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, wids []string) (bool, error) {
@@ -251,43 +291,7 @@ func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob
 			if ml.Name == instance.Spec.ObjectiveValueName {
 				if len(ml.Values) > 0 {
 					curValue, _ := strconv.ParseFloat(ml.Values[len(ml.Values)-1].Value, 32)
-					if instance.Spec.OptimizationType == katibv1alpha1.OptimizationTypeMinimize {
-						if curValue < *instance.Spec.OptimizationGoal {
-							goal = true
-						}
-						if instance.Status.BestObjectiveValue != nil {
-							if *instance.Status.BestObjectiveValue > curValue {
-								instance.Status.BestObjectiveValue = &curValue
-							}
-						} else {
-							instance.Status.BestObjectiveValue = &curValue
-						}
-						for i := range instance.Status.Trials {
-							for j := range instance.Status.Trials[i].WorkerList {
-								if instance.Status.Trials[i].WorkerList[j].WorkerID == mls.WorkerId {
-									instance.Status.Trials[i].WorkerList[j].ObjectiveValue = &curValue
-								}
-							}
-						}
-					} else if instance.Spec.OptimizationType == katibv1alpha1.OptimizationTypeMaximize {
-						if curValue > *instance.Spec.OptimizationGoal {
-							goal = true
-						}
-						if instance.Status.BestObjectiveValue != nil {
-							if *instance.Status.BestObjectiveValue < curValue {
-								instance.Status.BestObjectiveValue = &curValue
-							}
-						} else {
-							instance.Status.BestObjectiveValue = &curValue
-						}
-						for i := range instance.Status.Trials {
-							for j := range instance.Status.Trials[i].WorkerList {
-								if instance.Status.Trials[i].WorkerList[j].WorkerID == mls.WorkerId {
-									instance.Status.Trials[i].WorkerList[j].ObjectiveValue = &curValue
-								}
-							}
-						}
-					}
+					goal = checkGoalAndUpdateObject(curValue, instance, mls.WorkerId )
 				}
 				break
 			}
@@ -296,7 +300,9 @@ func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob
 	return goal, nil
 }
 
-func (r *ReconcileStudyJobController) deleteWorkerResources(instance *katibv1alpha1.StudyJob, obj runtime.Object, ns string, wid string) error {
+func (r *ReconcileStudyJobController) deleteWorkerResources(instance *katibv1alpha1.StudyJob, ns string, w *katibv1alpha1.WorkerCondition) error {
+	wid := w.WorkerID
+	obj := createWorkerJobObj(w.Kind)
 	nname := types.NamespacedName{Namespace: ns, Name: wid}
 	var wretain, mcretain bool = false, false
 	if instance.Spec.WorkerSpec != nil {
@@ -348,28 +354,23 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 			if ctime != nil && cjob.Status.LastScheduleTime != nil {
 				if ctime.Before(cjob.Status.LastScheduleTime) && len(cjob.Status.Active) == 0 {
 					saveModel(c, instance.Status.StudyID, instance.Status.Trials[i].TrialID, wid)
-					instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionCompleted
-					instance.Status.Trials[i].WorkerList[j].CompletionTime = metav1.Now()
 					update = true
-					_, err := c.UpdateWorkerState(
-						context.Background(),
-						&katibapi.UpdateWorkerStateRequest{
-							WorkerId: instance.Status.Trials[i].WorkerList[j].WorkerID,
-							Status:   katibapi.State_COMPLETED,
-						})
-					if err != nil {
-						log.Printf("Fail to update worker info. ID %s", instance.Status.Trials[i].WorkerList[j].WorkerID)
-						return false, err
-					}
 					susp := true
 					cjob.Spec.Suspend = &susp
 					if err := r.Update(context.TODO(), cjob); err != nil {
 						return false, err
 					}
-
-					cwids = append(cwids, wid)
 				}
 			}
+		} else {
+		// for some reason, metricsCollector for this worker cannot be found (deleted by anyone accidentally or even failed to be created)
+			update = true
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
+		}
+		if update {
+			instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionCompleted
+			instance.Status.Trials[i].WorkerList[j].CompletionTime = metav1.Now()
+			cwids = append(cwids, wid)
 		}
 	case katibapi.State_RUNNING:
 		if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionRunning {
@@ -377,28 +378,23 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 			update = true
 		}
 		if errors.IsNotFound(cjoberr) {
-			r.spawnMetricsCollector(instance, c, instance.Status.StudyID, instance.Status.Trials[i].TrialID, wid, ns, instance.Spec.MetricsCollectorSpec)
-		}
-		_, err := c.UpdateWorkerState(
-			context.Background(),
-			&katibapi.UpdateWorkerStateRequest{
-				WorkerId: instance.Status.Trials[i].WorkerList[j].WorkerID,
-				Status:   katibapi.State_RUNNING,
-			})
-		if err != nil {
-			log.Printf("Fail to update worker info. ID %s", instance.Status.Trials[i].WorkerList[j].WorkerID)
-			return false, err
+			spawnErr := r.spawnMetricsCollector(instance, c, instance.Status.StudyID, instance.Status.Trials[i].TrialID, wid, ns, instance.Spec.MetricsCollectorSpec)
+			if spawnErr != nil {
+				instance.Status.Condition = katibv1alpha1.ConditionFailed
+			}
 		}
 	case katibapi.State_ERROR:
 		if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionFailed {
 			instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionFailed
 			update = true
 		}
+	}
+	if update {
 		_, err := c.UpdateWorkerState(
 			context.Background(),
 			&katibapi.UpdateWorkerStateRequest{
 				WorkerId: instance.Status.Trials[i].WorkerList[j].WorkerID,
-				Status:   katibapi.State_ERROR,
+				Status: status.WorkerState,
 			})
 		if err != nil {
 			log.Printf("Fail to update worker info. ID %s", instance.Status.Trials[i].WorkerList[j].WorkerID)
@@ -406,6 +402,53 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 		}
 	}
 	return update, nil
+}
+
+func(r *ReconcileStudyJobController) getJobWorkerStatus(w *katibv1alpha1.WorkerCondition, ns string) WorkerStatus {
+	runtimejob := createWorkerJobObj(w.Kind)
+	nname := types.NamespacedName{Namespace: ns, Name: w.WorkerID}
+	joberr := r.Client.Get(context.TODO(), nname, runtimejob)
+	if joberr != nil {
+		return WorkerStatus{}
+	}
+	var state katibapi.State = katibapi.State_RUNNING
+	var cpTime *metav1.Time
+	switch w.Kind {
+	case DefaultJobWorker:
+		job := runtimejob.(* batchv1.Job)
+		if job.Status.Active == 0 && job.Status.Succeeded > 0 {
+			state = katibapi.State_COMPLETED
+		} else if job.Status.Failed > 0 {
+			state = katibapi.State_ERROR
+		}
+		cpTime = job.Status.CompletionTime
+	case TFJobWorker:
+		job := runtimejob.(* tfjobv1beta1.TFJob)
+		if len(job.Status.Conditions) > 0 {
+			lc := job.Status.Conditions[len(job.Status.Conditions)-1]
+			if lc.Type == commonv1beta1.JobSucceeded {
+				state = katibapi.State_COMPLETED
+			} else if lc.Type == commonv1beta1.JobFailed {
+				state = katibapi.State_ERROR
+			}
+		}
+		cpTime = job.Status.CompletionTime
+	case PyTorchJobWorker:
+		job := runtimejob.(* pytorchjobv1beta1.PyTorchJob)
+		if len(job.Status.Conditions) > 0 {
+			lc := job.Status.Conditions[len(job.Status.Conditions)-1]
+			if lc.Type == commonv1beta1.JobSucceeded {
+				state = katibapi.State_COMPLETED
+			} else if lc.Type == commonv1beta1.JobFailed {
+				state = katibapi.State_ERROR
+			}
+		}
+		cpTime = job.Status.CompletionTime
+	}
+	return WorkerStatus{
+			CompletionTime: cpTime,
+			WorkerState:    state,
+	}
 }
 
 func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJob, ns string) (bool, error) {
@@ -433,86 +476,14 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 				if w.ObjectiveValue == nil && w.Condition == katibv1alpha1.ConditionCompleted {
 					cwids = append(cwids, w.WorkerID)
 				}
-				switch w.Kind {
-				case DefaultJobWorker:
-					if err := r.deleteWorkerResources(instance, &batchv1.Job{}, ns, w.WorkerID); err != nil {
-						return false, err
-					}
-				case TFJobWorker:
-					if err := r.deleteWorkerResources(instance, &tfjobv1beta1.TFJob{}, ns, w.WorkerID); err != nil {
-						return false, err
-					}
-				case PyTorchJobWorker:
-					if err := r.deleteWorkerResources(instance, &pytorchjobv1beta1.PyTorchJob{}, ns, w.WorkerID); err != nil {
-						return false, err
-					}
+				if err := r.deleteWorkerResources(instance, ns, &w); err != nil {
+					return false, err
 				}
 				continue
 			}
 			nextSuggestionSchedule = false
-			switch w.Kind {
-			case DefaultJobWorker:
-				job := &batchv1.Job{}
-				nname := types.NamespacedName{Namespace: ns, Name: w.WorkerID}
-				joberr := r.Client.Get(context.TODO(), nname, job)
-				if joberr != nil {
-					continue
-				}
-				var state katibapi.State = katibapi.State_RUNNING
-				if job.Status.Active == 0 && job.Status.Succeeded > 0 {
-					state = katibapi.State_COMPLETED
-				} else if job.Status.Failed > 0 {
-					state = katibapi.State_ERROR
-				}
-				js := WorkerStatus{
-					CompletionTime: job.Status.CompletionTime,
-					WorkerState:    state,
-				}
-				update, err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
-			case TFJobWorker:
-				tfjob := &tfjobv1beta1.TFJob{}
-				nname := types.NamespacedName{Namespace: ns, Name: w.WorkerID}
-				tfjoberr := r.Client.Get(context.TODO(), nname, tfjob)
-				if tfjoberr != nil {
-					continue
-				}
-				var state katibapi.State = katibapi.State_RUNNING
-				if len(tfjob.Status.Conditions) > 0 {
-					lc := tfjob.Status.Conditions[len(tfjob.Status.Conditions)-1]
-					if lc.Type == commonv1beta1.JobSucceeded {
-						state = katibapi.State_COMPLETED
-					} else if lc.Type == commonv1beta1.JobFailed {
-						state = katibapi.State_ERROR
-					}
-				}
-				js := WorkerStatus{
-					CompletionTime: tfjob.Status.CompletionTime,
-					WorkerState:    state,
-				}
-				update, err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
-			case PyTorchJobWorker:
-				pytorchjob := &pytorchjobv1beta1.PyTorchJob{}
-				nname := types.NamespacedName{Namespace: ns, Name: w.WorkerID}
-				pytorchjoberr := r.Client.Get(context.TODO(), nname, pytorchjob)
-				if pytorchjoberr != nil {
-					continue
-				}
-				var state katibapi.State = katibapi.State_RUNNING
-				if len(pytorchjob.Status.Conditions) > 0 {
-					lc := pytorchjob.Status.Conditions[len(pytorchjob.Status.Conditions)-1]
-					if lc.Type == commonv1beta1.JobSucceeded {
-						state = katibapi.State_COMPLETED
-					} else if lc.Type == commonv1beta1.JobFailed {
-						state = katibapi.State_ERROR
-					}
-				}
-				js := WorkerStatus{
-					CompletionTime: pytorchjob.Status.CompletionTime,
-					WorkerState:    state,
-				}
-				update, err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
-
-			}
+			js := r.getJobWorkerStatus(&w, ns)
+			update, err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
 		}
 	}
 	if len(cwids) > 0 {
@@ -530,7 +501,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 		}
 	}
 	if nextSuggestionSchedule {
-		if instance.Spec.RequestCount > 0 && instance.Status.SuggestionCount > instance.Spec.RequestCount {
+		if instance.Spec.RequestCount > 0 && instance.Status.SuggestionCount >= instance.Spec.RequestCount {
 			log.Printf("Study %s reached the request count. It is completed", instance.Status.StudyID)
 			instance.Status.Condition = katibv1alpha1.ConditionCompleted
 			now := metav1.Now()
@@ -626,68 +597,30 @@ type WorkerInstance struct {
 	StudyID         string
 	TrialID         string
 	WorkerID        string
+	NameSpace       string
 	HyperParameters []*katibapi.Parameter
 }
 
 func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, wkind string, dryrun bool) (string, error) {
-	wid, wm, err := getWorkerManifest(c, studyID, trial, workerSpec, wkind, false)
+	wid, wm, err := getWorkerManifest(c, studyID, trial, workerSpec, wkind, instance.Namespace, false)
 	if err != nil {
 		return "", err
 	}
 	BUFSIZE := 1024
-	switch wkind {
-	case DefaultJobWorker:
-		var job batchv1.Job
-		if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(&job); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("Yaml decode error %v", err)
-			return "", err
-		}
-		if err := controllerutil.SetControllerReference(instance, &job, r.scheme); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("SetControllerReference error %v", err)
-			return "", err
-		}
-		if err := r.Create(context.TODO(), &job); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("Job Create error %v", err)
-			return "", err
-		}
-	case TFJobWorker:
-		var tfjob tfjobv1beta1.TFJob
-		if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(&tfjob); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("Yaml decode error %v", err)
-			return "", err
-		}
-		if err := controllerutil.SetControllerReference(instance, &tfjob, r.scheme); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("SetControllerReference error %v", err)
-			return "", err
-		}
-		if err := r.Create(context.TODO(), &tfjob); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("TFJob Create error %v", err)
-			return "", err
-		}
-	case PyTorchJobWorker:
-		var pytorchjob pytorchjobv1beta1.PyTorchJob
-		if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(&pytorchjob); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("Yaml decode error %v", err)
-			return "", err
-		}
-		if err := controllerutil.SetControllerReference(instance, &pytorchjob, r.scheme); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("SetControllerReference error %v", err)
-			return "", err
-		}
-		if err := r.Create(context.TODO(), &pytorchjob); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("PytorchJob Create error %v", err)
-			return "", err
-		}
+	job := createWorkerJobObj(wkind)
+	if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(job); err != nil {
+		log.Printf("Yaml decode error %v", err)
+		return "", err
 	}
+	if err := controllerutil.SetControllerReference(instance, job.(metav1.Object), r.scheme); err != nil {
+		log.Printf("SetControllerReference error %v", err)
+		return "", err
+	}
+	if err := r.Create(context.TODO(), job); err != nil {
+		log.Printf("Job Create error %v", err)
+		return "", err
+	}
+
 	return wid, nil
 }
 
@@ -697,7 +630,6 @@ func (r *ReconcileStudyJobController) spawnMetricsCollector(instance *katibv1alp
 	wkind, err := getWorkerKind(instance.Spec.WorkerSpec)
 	if err != nil {
 		log.Printf("getWorkerKind error %v", err)
-		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		return err
 	}
 	mcm, err := getMetricsCollectorManifest(studyID, trialID, workerID, wkind, namespace, mcs)
@@ -707,19 +639,16 @@ func (r *ReconcileStudyJobController) spawnMetricsCollector(instance *katibv1alp
 	}
 
 	if err := k8syaml.NewYAMLOrJSONDecoder(mcm, BUFSIZE).Decode(&mcjob); err != nil {
-		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		log.Printf("MetricsCollector Yaml decode error %v", err)
 		return err
 	}
 
 	if err := controllerutil.SetControllerReference(instance, &mcjob, r.scheme); err != nil {
-		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		log.Printf("MetricsCollector SetControllerReference error %v", err)
 		return err
 	}
 
 	if err := r.Create(context.TODO(), &mcjob); err != nil {
-		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		log.Printf("MetricsCollector Job Create error %v", err)
 		return err
 	}

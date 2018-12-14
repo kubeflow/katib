@@ -71,6 +71,24 @@ func (mr *MockManagerClientMockRecorder) CreateTrial(arg0, arg1 interface{}, arg
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTrial", reflect.TypeOf((*MockManagerClient)(nil).CreateTrial), varargs...)
 }
 
+// DeleteStudy mocks base method
+func (m *MockManagerClient) DeleteStudy(arg0 context.Context, arg1 *api.DeleteStudyRequest, arg2 ...grpc.CallOption) (*api.DeleteStudyReply, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteStudy", varargs...)
+	ret0, _ := ret[0].(*api.DeleteStudyReply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteStudy indicates an expected call of DeleteStudy
+func (mr *MockManagerClientMockRecorder) DeleteStudy(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteStudy", reflect.TypeOf((*MockManagerClient)(nil).DeleteStudy), varargs...)
+}
+
 // GetEarlyStoppingParameterList mocks base method
 func (m *MockManagerClient) GetEarlyStoppingParameterList(arg0 context.Context, arg1 *api.GetEarlyStoppingParameterListRequest, arg2 ...grpc.CallOption) (*api.GetEarlyStoppingParameterListReply, error) {
 	varargs := []interface{}{arg0, arg1}
@@ -267,6 +285,24 @@ func (m *MockManagerClient) GetSuggestions(arg0 context.Context, arg1 *api.GetSu
 func (mr *MockManagerClientMockRecorder) GetSuggestions(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestions", reflect.TypeOf((*MockManagerClient)(nil).GetSuggestions), varargs...)
+}
+
+// GetTrial mocks base method
+func (m *MockManagerClient) GetTrial(arg0 context.Context, arg1 *api.GetTrialRequest, arg2 ...grpc.CallOption) (*api.GetTrialReply, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetTrial", varargs...)
+	ret0, _ := ret[0].(*api.GetTrialReply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTrial indicates an expected call of GetTrial
+func (mr *MockManagerClientMockRecorder) GetTrial(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrial", reflect.TypeOf((*MockManagerClient)(nil).GetTrial), varargs...)
 }
 
 // GetTrials mocks base method

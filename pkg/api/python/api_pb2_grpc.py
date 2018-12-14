@@ -5,9 +5,11 @@ import api_pb2 as api__pb2
 
 
 class ManagerStub(object):
-  """For each RPC service, we define mapping to HTTP REST API method.
+  """*
+  Service for Main API for Katib
+  For each RPC service, we define mapping to HTTP REST API method.
   The mapping includes the URL path, query parameters and request body.
-  https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http 
+  https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http
   """
 
   def __init__(self, channel):
@@ -26,6 +28,11 @@ class ManagerStub(object):
         request_serializer=api__pb2.GetStudyRequest.SerializeToString,
         response_deserializer=api__pb2.GetStudyReply.FromString,
         )
+    self.DeleteStudy = channel.unary_unary(
+        '/api.Manager/DeleteStudy',
+        request_serializer=api__pb2.DeleteStudyRequest.SerializeToString,
+        response_deserializer=api__pb2.DeleteStudyReply.FromString,
+        )
     self.GetStudyList = channel.unary_unary(
         '/api.Manager/GetStudyList',
         request_serializer=api__pb2.GetStudyListRequest.SerializeToString,
@@ -40,6 +47,11 @@ class ManagerStub(object):
         '/api.Manager/GetTrials',
         request_serializer=api__pb2.GetTrialsRequest.SerializeToString,
         response_deserializer=api__pb2.GetTrialsReply.FromString,
+        )
+    self.GetTrial = channel.unary_unary(
+        '/api.Manager/GetTrial',
+        request_serializer=api__pb2.GetTrialRequest.SerializeToString,
+        response_deserializer=api__pb2.GetTrialReply.FromString,
         )
     self.RegisterWorker = channel.unary_unary(
         '/api.Manager/RegisterWorker',
@@ -134,77 +146,109 @@ class ManagerStub(object):
 
 
 class ManagerServicer(object):
-  """For each RPC service, we define mapping to HTTP REST API method.
+  """*
+  Service for Main API for Katib
+  For each RPC service, we define mapping to HTTP REST API method.
   The mapping includes the URL path, query parameters and request body.
-  https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http 
+  https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http
   """
 
   def CreateStudy(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
+    """*
+    Create a Study from Study Config.
+    Generate a unique ID and store the Study to DB.
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
   def GetStudy(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
+    """* 
+    Get a Study Config from DB by ID of Study.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def DeleteStudy(self, request, context):
+    """* 
+    Delete a Study from DB by Study ID.
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
   def GetStudyList(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
+    """*
+    Get all Study Configs from DB.
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
   def CreateTrial(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
+    """*
+    Create a Trial from Trial Config.
+    Generate a unique ID and store the Trial to DB.
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
   def GetTrials(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
+    """* 
+    Get a Trial Configs from DB by ID of Study.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetTrial(self, request, context):
+    """*
+    Get a Trial Configuration from DB by ID of Trial.
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
   def RegisterWorker(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
+    """*
+    Create a Worker from Worker Config.
+    Generate a unique ID and store the Worker to DB.
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
   def GetWorkers(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
+    """* 
+    Get a Worker Configs and Status from DB by ID of Study, Trial or Worker.
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
   def UpdateWorkerState(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
+    """* 
+    Update a Status of Worker.
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
   def GetWorkerFullInfo(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
+    """* 
+    Get full information related to specified Workers.
+    It includes Worker Config, HyperParameters and Metrics Logs.
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
   def GetSuggestions(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
+    """* 
+    Get Suggestions from a Suggestion service.
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
@@ -217,29 +261,37 @@ class ManagerServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def GetMetrics(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
+    """*
+    Get metrics of workers.
+    You can get all logs of metrics since start of the worker.
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
   def SetSuggestionParameters(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
+    """*
+    Create or Update parameter set for a suggestion service.
+    If you specify an ID of parameter set, it will update the parameter set by your request.
+    If you don't specify an ID, it will create a new parameter set for corresponding study and suggestion service.
+    The parameters are key-value format.
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
   def GetSuggestionParameters(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
+    """*
+    Get suggestion parameter set from DB specified.
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
   def GetSuggestionParameterList(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
+    """*
+    Get all suggestion parameter sets from DB.
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
@@ -280,8 +332,11 @@ class ManagerServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def ReportMetricsLogs(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
+    """*
+    Report a logs of metrics for workers.
+    The logs for each worker must have timestamp and must be ordered in time series.
+    When the log you reported are already reported before, it will be dismissed and get no error.
+    """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
@@ -313,6 +368,11 @@ def add_ManagerServicer_to_server(servicer, server):
           request_deserializer=api__pb2.GetStudyRequest.FromString,
           response_serializer=api__pb2.GetStudyReply.SerializeToString,
       ),
+      'DeleteStudy': grpc.unary_unary_rpc_method_handler(
+          servicer.DeleteStudy,
+          request_deserializer=api__pb2.DeleteStudyRequest.FromString,
+          response_serializer=api__pb2.DeleteStudyReply.SerializeToString,
+      ),
       'GetStudyList': grpc.unary_unary_rpc_method_handler(
           servicer.GetStudyList,
           request_deserializer=api__pb2.GetStudyListRequest.FromString,
@@ -327,6 +387,11 @@ def add_ManagerServicer_to_server(servicer, server):
           servicer.GetTrials,
           request_deserializer=api__pb2.GetTrialsRequest.FromString,
           response_serializer=api__pb2.GetTrialsReply.SerializeToString,
+      ),
+      'GetTrial': grpc.unary_unary_rpc_method_handler(
+          servicer.GetTrial,
+          request_deserializer=api__pb2.GetTrialRequest.FromString,
+          response_serializer=api__pb2.GetTrialReply.SerializeToString,
       ),
       'RegisterWorker': grpc.unary_unary_rpc_method_handler(
           servicer.RegisterWorker,

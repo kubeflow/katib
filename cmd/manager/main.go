@@ -29,23 +29,59 @@ type server struct {
 }
 
 func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest) (*api_pb.CreateStudyReply, error) {
+	var studyID string
+	var err error
 	if in == nil || in.StudyConfig == nil {
 		return &api_pb.CreateStudyReply{}, errors.New("StudyConfig is missing.")
 	}
-	studyID, err := dbIf.CreateStudy(in.StudyConfig)
-	if err != nil {
-		return &api_pb.CreateStudyReply{}, err
+
+	if in.StudyConfig.JobType != "NAS" {
+		//If it is a HP job
+		studyID, err = dbIf.CreateHPStudy(in.StudyConfig)
+		if err != nil {
+			return &api_pb.CreateStudyReply{}, err
+		}
+
+		/*
+			DONT KNOW IF YOU STILL USE MODELDB
+			s.SaveStudy(ctx, &api_pb.SaveStudyRequest{
+				StudyName:   in.StudyConfig.Name,
+				Owner:       in.StudyConfig.Owner,
+				Description: "StudyID: " + studyID,
+			})
+		*/
+
+	} else {
+		//If it is a NAS job
+		studyID, err = dbIf.CreateNASStudy(in.StudyConfig)
+		if err != nil {
+			log.Printf("Error is %v", err)
+			return &api_pb.CreateStudyReply{}, err
+		}
 	}
-	s.SaveStudy(ctx, &api_pb.SaveStudyRequest{
-		StudyName:   in.StudyConfig.Name,
-		Owner:       in.StudyConfig.Owner,
-		Description: "StudyID: " + studyID,
-	})
 	return &api_pb.CreateStudyReply{StudyId: studyID}, nil
 }
 
+func (s *server) DeleteStudy(ctx context.Context, in *api_pb.DeleteStudyRequest) (*api_pb.DeleteStudyReply, error) {
+	if in == nil || in.StudyId == "" {
+		return &api_pb.DeleteStudyReply{}, errors.New("StudyId is missing.")
+	}
+	err := dbIf.DeleteStudy(in.StudyId)
+	if err != nil {
+		log.Printf("Error is %v", err)
+		return &api_pb.DeleteStudyReply{}, err
+	}
+	return &api_pb.DeleteStudyReply{StudyId: in.StudyId}, nil
+}
+
 func (s *server) GetStudy(ctx context.Context, in *api_pb.GetStudyRequest) (*api_pb.GetStudyReply, error) {
-	sc, err := dbIf.GetStudyConfig(in.StudyId)
+
+	sc, err := dbIf.GetStudy(in.StudyId)
+
+	if err != nil {
+		log.Printf("Error is %v", err)
+		return &api_pb.GetStudyReply{}, err
+	}
 	return &api_pb.GetStudyReply{StudyConfig: sc}, err
 }
 
@@ -56,7 +92,7 @@ func (s *server) GetStudyList(ctx context.Context, in *api_pb.GetStudyListReques
 	}
 	result := make([]*api_pb.StudyOverview, len(sl))
 	for i, id := range sl {
-		sc, err := dbIf.GetStudyConfig(id)
+		sc, err := dbIf.GetStudy(id)
 		if err != nil {
 			return &api_pb.GetStudyListReply{}, err
 		}
@@ -77,6 +113,11 @@ func (s *server) CreateTrial(ctx context.Context, in *api_pb.CreateTrialRequest)
 func (s *server) GetTrials(ctx context.Context, in *api_pb.GetTrialsRequest) (*api_pb.GetTrialsReply, error) {
 	tl, err := dbIf.GetTrialList(in.StudyId)
 	return &api_pb.GetTrialsReply{Trials: tl}, err
+}
+
+func (s *server) GetTrial(ctx context.Context, in *api_pb.GetTrialRequest) (*api_pb.GetTrialReply, error) {
+	t, err := dbIf.GetTrial(in.TrialId)
+	return &api_pb.GetTrialReply{Trial: t}, err
 }
 
 func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestionsReply, error) {
@@ -133,7 +174,7 @@ func (s *server) GetMetrics(ctx context.Context, in *api_pb.GetMetricsRequest) (
 	if in.StudyId == "" {
 		return &api_pb.GetMetricsReply{}, errors.New("StudyId should be set")
 	}
-	sc, err := dbIf.GetStudyConfig(in.StudyId)
+	sc, err := dbIf.GetStudy(in.StudyId)
 	if err != nil {
 		return &api_pb.GetMetricsReply{}, err
 	}
@@ -198,6 +239,7 @@ func (s *server) UpdateWorkerState(ctx context.Context, in *api_pb.UpdateWorkerS
 func (s *server) GetWorkerFullInfo(ctx context.Context, in *api_pb.GetWorkerFullInfoRequest) (*api_pb.GetWorkerFullInfoReply, error) {
 	return dbIf.GetWorkerFullInfo(in.StudyId, in.TrialId, in.WorkerId, in.OnlyLatestLog)
 }
+
 func (s *server) SetSuggestionParameters(ctx context.Context, in *api_pb.SetSuggestionParametersRequest) (*api_pb.SetSuggestionParametersReply, error) {
 	var err error
 	var id string

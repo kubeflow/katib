@@ -9,7 +9,7 @@ data:
     kind: CronJob
     metadata:
       name: {{.WorkerID}}
-      namespace: kubeflow
+      namespace: {{.NameSpace}}
     spec:
       schedule: "*/1 * * * *"
       successfulJobsHistoryLimit: 0
@@ -34,4 +34,6 @@ data:
                 - "{{.WorkerKind}}"
                 - "-n"
                 - "{{.NameSpace}}"
+                - "-m"
+                - "{{.ManagerSerivce}}"
               restartPolicy: Never
