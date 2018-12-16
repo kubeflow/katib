@@ -5,7 +5,7 @@
 <img src="./img/Katib_Logo.png" width="320px">
 
 Hyperparameter Tuning on Kubernetes.
-This project is inspired by [Google vizier](https://static.googleusercontent.com/media/research.google.com/ja//pubs/archive/bcb15507f4b52991a0783013df4222240e942381.pdf). Katib is a scalable and flexible hyperparameter tuning framework and is tightly integrated with kubernetes. Also it does not depend on a specific Deep Learning framework e.g. TensorFlow, MXNet, and PyTorch).
+This project is inspired by [Google vizier](https://static.googleusercontent.com/media/research.google.com/ja//pubs/archive/bcb15507f4b52991a0783013df4222240e942381.pdf). Katib is a scalable and flexible hyperparameter tuning framework and is tightly integrated with kubernetes. Also it does not depend on a specific Deep Learning framework (e.g. TensorFlow, MXNet, and PyTorch).
 
 ## Name
 
@@ -22,7 +22,7 @@ Represents a single optimization run over a feasible space. Each Study contains 
 ### Trial
 
 A Trial is a list of parameter values, x, that will lead to a single evaluation of f(x). A Trial can be “Completed”, which means that it has been evaluated and the objective value f(x) has been assigned to it, otherwise it is “Pending”.
-One trial corresponds to one k8s Job.
+One trial corresponds to one job, and the job kind can be [k8s Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/), [TFJob](https://www.kubeflow.org/docs/guides/components/tftraining/) or [PyTorchJob](https://www.kubeflow.org/docs/guides/components/pytorch/), which depends on the Study's worker kind.
 
 ### Suggestion
 
