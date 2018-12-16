@@ -294,7 +294,9 @@ func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob
 	return goal, nil
 }
 
-func (r *ReconcileStudyJobController) deleteWorkerResources(instance *katibv1alpha1.StudyJob, obj runtime.Object, ns string, wid string) error {
+func (r *ReconcileStudyJobController) deleteWorkerResources(instance *katibv1alpha1.StudyJob, ns string, w *katibv1alpha1.WorkerCondition) error {
+	wid := w.WorkerID
+	obj := createWorkerJobObj(w.Kind)
 	nname := types.NamespacedName{Namespace: ns, Name: wid}
 	var wretain, mcretain bool = false, false
 	if instance.Spec.WorkerSpec != nil {
@@ -406,6 +408,53 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 	return update, nil
 }
 
+func(r *ReconcileStudyJobController) getJobWorkerStatus(w *katibv1alpha1.WorkerCondition, ns string) WorkerStatus {
+	runtimejob := createWorkerJobObj(w.Kind)
+	nname := types.NamespacedName{Namespace: ns, Name: w.WorkerID}
+	joberr := r.Client.Get(context.TODO(), nname, runtimejob)
+	if joberr != nil {
+		return WorkerStatus{}
+	}
+	var state katibapi.State = katibapi.State_RUNNING
+	var cpTime *metav1.Time
+	switch w.Kind {
+	case DefaultJobWorker:
+		job := runtimejob.(* batchv1.Job)
+		if job.Status.Active == 0 && job.Status.Succeeded > 0 {
+			state = katibapi.State_COMPLETED
+		} else if job.Status.Failed > 0 {
+			state = katibapi.State_ERROR
+		}
+		cpTime = job.Status.CompletionTime
+	case TFJobWorker:
+		job := runtimejob.(* tfjobv1beta1.TFJob)
+		if len(job.Status.Conditions) > 0 {
+			lc := job.Status.Conditions[len(job.Status.Conditions)-1]
+			if lc.Type == commonv1beta1.JobSucceeded {
+				state = katibapi.State_COMPLETED
+			} else if lc.Type == commonv1beta1.JobFailed {
+				state = katibapi.State_ERROR
+			}
+		}
+		cpTime = job.Status.CompletionTime
+	case PyTorchJobWorker:
+		job := runtimejob.(* pytorchjobv1beta1.PyTorchJob)
+		if len(job.Status.Conditions) > 0 {
+			lc := job.Status.Conditions[len(job.Status.Conditions)-1]
+			if lc.Type == commonv1beta1.JobSucceeded {
+				state = katibapi.State_COMPLETED
+			} else if lc.Type == commonv1beta1.JobFailed {
+				state = katibapi.State_ERROR
+			}
+		}
+		cpTime = job.Status.CompletionTime
+	}
+	return WorkerStatus{
+			CompletionTime: cpTime,
+			WorkerState:    state,
+	}
+}
+
 func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJob, ns string) (bool, error) {
 	nextSuggestionSchedule := true
 	var cwids []string
@@ -431,86 +480,14 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 				if w.ObjectiveValue == nil && w.Condition == katibv1alpha1.ConditionCompleted {
 					cwids = append(cwids, w.WorkerID)
 				}
-				switch w.Kind {
-				case DefaultJobWorker:
-					if err := r.deleteWorkerResources(instance, &batchv1.Job{}, ns, w.WorkerID); err != nil {
-						return false, err
-					}
-				case TFJobWorker:
-					if err := r.deleteWorkerResources(instance, &tfjobv1beta1.TFJob{}, ns, w.WorkerID); err != nil {
-						return false, err
-					}
-				case PyTorchJobWorker:
-					if err := r.deleteWorkerResources(instance, &pytorchjobv1beta1.PyTorchJob{}, ns, w.WorkerID); err != nil {
-						return false, err
-					}
+				if err := r.deleteWorkerResources(instance, ns, &w); err != nil {
+					return false, err
 				}
 				continue
 			}
 			nextSuggestionSchedule = false
-			switch w.Kind {
-			case DefaultJobWorker:
-				job := &batchv1.Job{}
-				nname := types.NamespacedName{Namespace: ns, Name: w.WorkerID}
-				joberr := r.Client.Get(context.TODO(), nname, job)
-				if joberr != nil {
-					continue
-				}
-				var state katibapi.State = katibapi.State_RUNNING
-				if job.Status.Active == 0 && job.Status.Succeeded > 0 {
-					state = katibapi.State_COMPLETED
-				} else if job.Status.Failed > 0 {
-					state = katibapi.State_ERROR
-				}
-				js := WorkerStatus{
-					CompletionTime: job.Status.CompletionTime,
-					WorkerState:    state,
-				}
-				update, err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
-			case TFJobWorker:
-				tfjob := &tfjobv1beta1.TFJob{}
-				nname := types.NamespacedName{Namespace: ns, Name: w.WorkerID}
-				tfjoberr := r.Client.Get(context.TODO(), nname, tfjob)
-				if tfjoberr != nil {
-					continue
-				}
-				var state katibapi.State = katibapi.State_RUNNING
-				if len(tfjob.Status.Conditions) > 0 {
-					lc := tfjob.Status.Conditions[len(tfjob.Status.Conditions)-1]
-					if lc.Type == commonv1beta1.JobSucceeded {
-						state = katibapi.State_COMPLETED
-					} else if lc.Type == commonv1beta1.JobFailed {
-						state = katibapi.State_ERROR
-					}
-				}
-				js := WorkerStatus{
-					CompletionTime: tfjob.Status.CompletionTime,
-					WorkerState:    state,
-				}
-				update, err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
-			case PyTorchJobWorker:
-				pytorchjob := &pytorchjobv1beta1.PyTorchJob{}
-				nname := types.NamespacedName{Namespace: ns, Name: w.WorkerID}
-				pytorchjoberr := r.Client.Get(context.TODO(), nname, pytorchjob)
-				if pytorchjoberr != nil {
-					continue
-				}
-				var state katibapi.State = katibapi.State_RUNNING
-				if len(pytorchjob.Status.Conditions) > 0 {
-					lc := pytorchjob.Status.Conditions[len(pytorchjob.Status.Conditions)-1]
-					if lc.Type == commonv1beta1.JobSucceeded {
-						state = katibapi.State_COMPLETED
-					} else if lc.Type == commonv1beta1.JobFailed {
-						state = katibapi.State_ERROR
-					}
-				}
-				js := WorkerStatus{
-					CompletionTime: pytorchjob.Status.CompletionTime,
-					WorkerState:    state,
-				}
-				update, err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
-
-			}
+			js := r.getJobWorkerStatus(&w, ns)
+			update, err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
 		}
 	}
 	if len(cwids) > 0 {
@@ -633,59 +610,23 @@ func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJ
 		return "", err
 	}
 	BUFSIZE := 1024
-	switch wkind {
-	case DefaultJobWorker:
-		var job batchv1.Job
-		if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(&job); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("Yaml decode error %v", err)
-			return "", err
-		}
-		if err := controllerutil.SetControllerReference(instance, &job, r.scheme); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("SetControllerReference error %v", err)
-			return "", err
-		}
-		if err := r.Create(context.TODO(), &job); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("Job Create error %v", err)
-			return "", err
-		}
-	case TFJobWorker:
-		var tfjob tfjobv1beta1.TFJob
-		if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(&tfjob); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("Yaml decode error %v", err)
-			return "", err
-		}
-		if err := controllerutil.SetControllerReference(instance, &tfjob, r.scheme); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("SetControllerReference error %v", err)
-			return "", err
-		}
-		if err := r.Create(context.TODO(), &tfjob); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("TFJob Create error %v", err)
-			return "", err
-		}
-	case PyTorchJobWorker:
-		var pytorchjob pytorchjobv1beta1.PyTorchJob
-		if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(&pytorchjob); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("Yaml decode error %v", err)
-			return "", err
-		}
-		if err := controllerutil.SetControllerReference(instance, &pytorchjob, r.scheme); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("SetControllerReference error %v", err)
-			return "", err
-		}
-		if err := r.Create(context.TODO(), &pytorchjob); err != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			log.Printf("PytorchJob Create error %v", err)
-			return "", err
-		}
+	job := createWorkerJobObj(wkind)
+	if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(job); err != nil {
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		log.Printf("Yaml decode error %v", err)
+		return "", err
 	}
+	if err := controllerutil.SetControllerReference(instance, job.(metav1.Object), r.scheme); err != nil {
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		log.Printf("SetControllerReference error %v", err)
+		return "", err
+	}
+	if err := r.Create(context.TODO(), job); err != nil {
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		log.Printf("Job Create error %v", err)
+		return "", err
+	}
+
 	return wid, nil
 }
 
