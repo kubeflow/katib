@@ -180,11 +180,9 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 
 	var update bool = false
 	switch instance.Status.Condition {
-	case katibv1alpha1.ConditionCompleted:
-		update, err = r.checkStatus(instance, request.Namespace)
-	case katibv1alpha1.ConditionFailed:
-		update, err = r.checkStatus(instance, request.Namespace)
-	case katibv1alpha1.ConditionRunning:
+	case katibv1alpha1.ConditionCompleted,
+	     katibv1alpha1.ConditionFailed,
+	     katibv1alpha1.ConditionRunning:
 		update, err = r.checkStatus(instance, request.Namespace)
 	default:
 		now := metav1.Now()
@@ -530,7 +528,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 		}
 	}
 	if nextSuggestionSchedule {
-		if instance.Spec.RequestCount > 0 && instance.Status.SuggestionCount > instance.Spec.RequestCount {
+		if instance.Spec.RequestCount > 0 && instance.Status.SuggestionCount >= instance.Spec.RequestCount {
 			log.Printf("Study %s reached the request count. It is completed", instance.Status.StudyID)
 			instance.Status.Condition = katibv1alpha1.ConditionCompleted
 			now := metav1.Now()

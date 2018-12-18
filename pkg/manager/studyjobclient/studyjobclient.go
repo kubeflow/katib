@@ -48,10 +48,9 @@ func NewStudyjobClient(config *rest.Config) (*StudyjobClient, error) {
 	}, nil
 }
 
-func (s *StudyjobClient) GetStudyJobList() (*studyjobv1alpha1.StudyJobList, error) {
+func (s *StudyjobClient) GetStudyJobList(namespace ...string) (*studyjobv1alpha1.StudyJobList, error) {
 	result := &studyjobv1alpha1.StudyJobList{}
-	data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
-	ns := strings.TrimSpace(string(data))
+	ns := getNamespace(namespace...)
 	err := s.client.
 		Get().
 		Namespace(ns).
@@ -61,10 +60,9 @@ func (s *StudyjobClient) GetStudyJobList() (*studyjobv1alpha1.StudyJobList, erro
 	return result, err
 }
 
-func (s *StudyjobClient) CreateStudyJob(studyJob *studyjobv1alpha1.StudyJob) (*studyjobv1alpha1.StudyJob, error) {
+func (s *StudyjobClient) CreateStudyJob(studyJob *studyjobv1alpha1.StudyJob, namespace ...string) (*studyjobv1alpha1.StudyJob, error) {
 	result := &studyjobv1alpha1.StudyJob{}
-	data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
-	ns := strings.TrimSpace(string(data))
+	ns := getNamespace(namespace...)
 	err := s.client.
 		Post().
 		Namespace(ns).
@@ -75,9 +73,8 @@ func (s *StudyjobClient) CreateStudyJob(studyJob *studyjobv1alpha1.StudyJob) (*s
 	return result, err
 }
 
-func (s *StudyjobClient) GetWorkerTemplates() (map[string]string, error) {
-	data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
-	ns := strings.TrimSpace(string(data))
+func (s *StudyjobClient) GetWorkerTemplates(namespace ...string) (map[string]string, error) {
+	ns := getNamespace(namespace...)
 	cm, err := s.clientset.CoreV1().ConfigMaps(ns).Get("worker-template", metav1.GetOptions{})
 	if err != nil {
 		return map[string]string{}, err
@@ -85,9 +82,8 @@ func (s *StudyjobClient) GetWorkerTemplates() (map[string]string, error) {
 	return cm.Data, nil
 }
 
-func (s *StudyjobClient) UpdateWorkerTemplates(newWorkerTemplates map[string]string) error {
-	data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
-	ns := strings.TrimSpace(string(data))
+func (s *StudyjobClient) UpdateWorkerTemplates(newWorkerTemplates map[string]string, namespace ...string) error {
+	ns := getNamespace(namespace...)
 	cm, err := s.clientset.CoreV1().ConfigMaps(ns).Get("worker-template", metav1.GetOptions{})
 	if err != nil {
 		return err
@@ -97,9 +93,8 @@ func (s *StudyjobClient) UpdateWorkerTemplates(newWorkerTemplates map[string]str
 	return err
 }
 
-func (s *StudyjobClient) GetMetricsCollectorTemplates() (map[string]string, error) {
-	data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
-	ns := strings.TrimSpace(string(data))
+func (s *StudyjobClient) GetMetricsCollectorTemplates(namespace ...string) (map[string]string, error) {
+	ns := getNamespace(namespace...)
 	cm, err := s.clientset.CoreV1().ConfigMaps(ns).Get("metricscollector-template", metav1.GetOptions{})
 	if err != nil {
 		return map[string]string{}, err
@@ -107,9 +102,8 @@ func (s *StudyjobClient) GetMetricsCollectorTemplates() (map[string]string, erro
 	return cm.Data, nil
 }
 
-func (s *StudyjobClient) UpdateMetricsCollectorTemplates(newMCTemplates map[string]string) error {
-	data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
-	ns := strings.TrimSpace(string(data))
+func (s *StudyjobClient) UpdateMetricsCollectorTemplates(newMCTemplates map[string]string, namespace ...string) error {
+	ns := getNamespace(namespace...)
 	cm, err := s.clientset.CoreV1().ConfigMaps(ns).Get("metricscollector-template", metav1.GetOptions{})
 	if err != nil {
 		return err
@@ -117,4 +111,12 @@ func (s *StudyjobClient) UpdateMetricsCollectorTemplates(newMCTemplates map[stri
 	cm.Data = newMCTemplates
 	_, err = s.clientset.CoreV1().ConfigMaps(ns).Update(cm)
 	return err
+}
+
+func getNamespace(namespace ...string) string {
+	if len(namespace) == 0 {
+		data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+		return strings.TrimSpace(string(data))
+	}
+	return namespace[0]
 }
