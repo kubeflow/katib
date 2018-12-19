@@ -1,0 +1,3032 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Protocol Documentation</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic"/>
+    <style>
+      body {
+        width: 60em;
+        margin: 1em auto;
+        color: #222;
+        font-family: "Ubuntu", sans-serif;
+        padding-bottom: 4em;
+      }
+
+      h1 {
+        font-weight: normal;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+      }
+
+      h2 {
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+        margin: 1.5em 0;
+      }
+
+      h3 {
+        font-weight: normal;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+      }
+
+      a {
+        text-decoration: none;
+        color: #567e25;
+      }
+
+      table {
+        width: 100%;
+        font-size: 80%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        font-weight: 700;
+        background-color: #dcdcdc;
+      }
+
+      tbody tr:nth-child(even) {
+        background-color: #fbfbfb;
+      }
+
+      td {
+        border: 1px solid #ccc;
+        padding: 0.5ex 2ex;
+      }
+
+      td p {
+        text-indent: 1em;
+        margin: 0;
+      }
+
+      td p:nth-child(1) {
+        text-indent: 0;  
+      }
+
+       
+      .field-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .field-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .field-table td:nth-child(3) {  
+        width: 6em;
+      }
+      .field-table td:nth-child(4) {  
+        width: auto;
+      }
+
+       
+      .extension-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(3) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(4) {  
+        width: 5em;
+      }
+      .extension-table td:nth-child(5) {  
+        width: auto;
+      }
+
+       
+      .enum-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .enum-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .enum-table td:nth-child(3) {  
+        width: auto;
+      }
+
+       
+      .scalar-value-types-table tr {
+        height: 3em;
+      }
+
+       
+      #toc-container ul {
+        list-style-type: none;
+        padding-left: 1em;
+        line-height: 180%;
+        margin: 0;
+      }
+      #toc > li > a {
+        font-weight: bold;
+      }
+
+       
+      .file-heading {
+        width: 100%;
+        display: table;
+        border-bottom: 1px solid #aaa;
+        margin: 4em 0 1.5em 0;
+      }
+      .file-heading h2 {
+        border: none;
+        display: table-cell;
+      }
+      .file-heading a {
+        text-align: right;
+        display: table-cell;
+      }
+
+       
+      .badge {
+        width: 1.6em;
+        height: 1.6em;
+        display: inline-block;
+
+        line-height: 1.6em;
+        text-align: center;
+        font-weight: bold;
+        font-size: 60%;
+
+        color: #89ba48;
+        background-color: #dff0c8;
+
+        margin: 0.5ex 1em 0.5ex -1em;
+        border: 1px solid #fbfbfb;
+        border-radius: 1ex;
+      }
+    </style>
+
+    
+    <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+  </head>
+
+  <body>
+
+    <h1 id="title">Protocol Documentation</h1>
+
+    <h2>Table of Contents</h2>
+
+    <div id="toc-container">
+      <ul id="toc">
+        
+          
+          <li>
+            <a href="#api.proto">api.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#api.CreateStudyReply"><span class="badge">M</span>CreateStudyReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.CreateStudyRequest"><span class="badge">M</span>CreateStudyRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.CreateTrialReply"><span class="badge">M</span>CreateTrialReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.CreateTrialRequest"><span class="badge">M</span>CreateTrialRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.DataSetInfo"><span class="badge">M</span>DataSetInfo</a>
+                </li>
+              
+                <li>
+                  <a href="#api.EarlyStoppingParameter"><span class="badge">M</span>EarlyStoppingParameter</a>
+                </li>
+              
+                <li>
+                  <a href="#api.EarlyStoppingParameterSet"><span class="badge">M</span>EarlyStoppingParameterSet</a>
+                </li>
+              
+                <li>
+                  <a href="#api.FeasibleSpace"><span class="badge">M</span>FeasibleSpace</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetEarlyStoppingParameterListReply"><span class="badge">M</span>GetEarlyStoppingParameterListReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetEarlyStoppingParameterListRequest"><span class="badge">M</span>GetEarlyStoppingParameterListRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetEarlyStoppingParametersReply"><span class="badge">M</span>GetEarlyStoppingParametersReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetEarlyStoppingParametersRequest"><span class="badge">M</span>GetEarlyStoppingParametersRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetMetricsReply"><span class="badge">M</span>GetMetricsReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetMetricsRequest"><span class="badge">M</span>GetMetricsRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetSavedModelReply"><span class="badge">M</span>GetSavedModelReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetSavedModelRequest"><span class="badge">M</span>GetSavedModelRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetSavedModelsReply"><span class="badge">M</span>GetSavedModelsReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetSavedModelsRequest"><span class="badge">M</span>GetSavedModelsRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetSavedStudiesReply"><span class="badge">M</span>GetSavedStudiesReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetSavedStudiesRequest"><span class="badge">M</span>GetSavedStudiesRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetShouldStopWorkersReply"><span class="badge">M</span>GetShouldStopWorkersReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetShouldStopWorkersRequest"><span class="badge">M</span>GetShouldStopWorkersRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetStudyListReply"><span class="badge">M</span>GetStudyListReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetStudyListRequest"><span class="badge">M</span>GetStudyListRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetStudyReply"><span class="badge">M</span>GetStudyReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetStudyRequest"><span class="badge">M</span>GetStudyRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetSuggestionParameterListReply"><span class="badge">M</span>GetSuggestionParameterListReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetSuggestionParameterListRequest"><span class="badge">M</span>GetSuggestionParameterListRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetSuggestionParametersReply"><span class="badge">M</span>GetSuggestionParametersReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetSuggestionParametersRequest"><span class="badge">M</span>GetSuggestionParametersRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetSuggestionsReply"><span class="badge">M</span>GetSuggestionsReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetSuggestionsRequest"><span class="badge">M</span>GetSuggestionsRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetTrialsReply"><span class="badge">M</span>GetTrialsReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetTrialsRequest"><span class="badge">M</span>GetTrialsRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetWorkerFullInfoReply"><span class="badge">M</span>GetWorkerFullInfoReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetWorkerFullInfoRequest"><span class="badge">M</span>GetWorkerFullInfoRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetWorkersReply"><span class="badge">M</span>GetWorkersReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetWorkersRequest"><span class="badge">M</span>GetWorkersRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.Metrics"><span class="badge">M</span>Metrics</a>
+                </li>
+              
+                <li>
+                  <a href="#api.MetricsLog"><span class="badge">M</span>MetricsLog</a>
+                </li>
+              
+                <li>
+                  <a href="#api.MetricsLogSet"><span class="badge">M</span>MetricsLogSet</a>
+                </li>
+              
+                <li>
+                  <a href="#api.MetricsValueTime"><span class="badge">M</span>MetricsValueTime</a>
+                </li>
+              
+                <li>
+                  <a href="#api.ModelInfo"><span class="badge">M</span>ModelInfo</a>
+                </li>
+              
+                <li>
+                  <a href="#api.Parameter"><span class="badge">M</span>Parameter</a>
+                </li>
+              
+                <li>
+                  <a href="#api.ParameterConfig"><span class="badge">M</span>ParameterConfig</a>
+                </li>
+              
+                <li>
+                  <a href="#api.RegisterWorkerReply"><span class="badge">M</span>RegisterWorkerReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.RegisterWorkerRequest"><span class="badge">M</span>RegisterWorkerRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.ReportMetricsLogsReply"><span class="badge">M</span>ReportMetricsLogsReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.ReportMetricsLogsRequest"><span class="badge">M</span>ReportMetricsLogsRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.SaveModelReply"><span class="badge">M</span>SaveModelReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.SaveModelRequest"><span class="badge">M</span>SaveModelRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.SaveStudyReply"><span class="badge">M</span>SaveStudyReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.SaveStudyRequest"><span class="badge">M</span>SaveStudyRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.SetEarlyStoppingParametersReply"><span class="badge">M</span>SetEarlyStoppingParametersReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.SetEarlyStoppingParametersRequest"><span class="badge">M</span>SetEarlyStoppingParametersRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.SetSuggestionParametersReply"><span class="badge">M</span>SetSuggestionParametersReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.SetSuggestionParametersRequest"><span class="badge">M</span>SetSuggestionParametersRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.StopSuggestionReply"><span class="badge">M</span>StopSuggestionReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.StopSuggestionRequest"><span class="badge">M</span>StopSuggestionRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.StopWorkersReply"><span class="badge">M</span>StopWorkersReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.StopWorkersRequest"><span class="badge">M</span>StopWorkersRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.StudyConfig"><span class="badge">M</span>StudyConfig</a>
+                </li>
+              
+                <li>
+                  <a href="#api.StudyConfig.ParameterConfigs"><span class="badge">M</span>StudyConfig.ParameterConfigs</a>
+                </li>
+              
+                <li>
+                  <a href="#api.StudyOverview"><span class="badge">M</span>StudyOverview</a>
+                </li>
+              
+                <li>
+                  <a href="#api.SuggestionParameter"><span class="badge">M</span>SuggestionParameter</a>
+                </li>
+              
+                <li>
+                  <a href="#api.SuggestionParameterSet"><span class="badge">M</span>SuggestionParameterSet</a>
+                </li>
+              
+                <li>
+                  <a href="#api.Tag"><span class="badge">M</span>Tag</a>
+                </li>
+              
+                <li>
+                  <a href="#api.Trial"><span class="badge">M</span>Trial</a>
+                </li>
+              
+                <li>
+                  <a href="#api.UpdateWorkerStateReply"><span class="badge">M</span>UpdateWorkerStateReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.UpdateWorkerStateRequest"><span class="badge">M</span>UpdateWorkerStateRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.Worker"><span class="badge">M</span>Worker</a>
+                </li>
+              
+                <li>
+                  <a href="#api.WorkerFullInfo"><span class="badge">M</span>WorkerFullInfo</a>
+                </li>
+              
+              
+                <li>
+                  <a href="#api.OptimizationType"><span class="badge">E</span>OptimizationType</a>
+                </li>
+              
+                <li>
+                  <a href="#api.ParameterType"><span class="badge">E</span>ParameterType</a>
+                </li>
+              
+                <li>
+                  <a href="#api.State"><span class="badge">E</span>State</a>
+                </li>
+              
+              
+              
+                <li>
+                  <a href="#api.EarlyStopping"><span class="badge">S</span>EarlyStopping</a>
+                </li>
+              
+                <li>
+                  <a href="#api.Manager"><span class="badge">S</span>Manager</a>
+                </li>
+              
+                <li>
+                  <a href="#api.Suggestion"><span class="badge">S</span>Suggestion</a>
+                </li>
+              
+            </ul>
+          </li>
+        
+        <li><a href="#scalar-value-types">Scalar Value Types</a></li>
+      </ul>
+    </div>
+
+    
+      
+      <div class="file-heading">
+        <h2 id="api.proto">api.proto</h2><a href="#title">Top</a>
+      </div>
+      <p>Katib API</p>
+
+      
+        <h3 id="api.CreateStudyReply">CreateStudyReply</h3>
+        <p>Return generated StudyID.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.CreateStudyRequest">CreateStudyRequest</h3>
+        <p>Create a Study from Study Config.</p><p>Generate a unique ID and store the Study to DB.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_config</td>
+                  <td><a href="#api.StudyConfig">StudyConfig</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.CreateTrialReply">CreateTrialReply</h3>
+        <p>Return generated TrialID.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trial_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.CreateTrialRequest">CreateTrialRequest</h3>
+        <p>Create a Trial from Trial Config.</p><p>Generate a unique ID and store the Trial to DB.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trial</td>
+                  <td><a href="#api.Trial">Trial</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.DataSetInfo">DataSetInfo</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>path</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.EarlyStoppingParameter">EarlyStoppingParameter</h3>
+        <p>Parameter for EarlyStopping service. Key value format.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name of Parameter. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Value of Parameter. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.EarlyStoppingParameterSet">EarlyStoppingParameterSet</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>param_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>early_stopping_algorithm</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>early_stopping_parameters</td>
+                  <td><a href="#api.EarlyStoppingParameter">EarlyStoppingParameter</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.FeasibleSpace">FeasibleSpace</h3>
+        <p>Feasible space for optimization.</p><p>Int and Double type use Max/Min.</p><p>Discrete and Categorical type use List.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>max</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Max Value </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Minimum Value </p></td>
+                </tr>
+              
+                <tr>
+                  <td>list</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p>List of Values. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetEarlyStoppingParameterListReply">GetEarlyStoppingParameterListReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>early_stopping_parameter_sets</td>
+                  <td><a href="#api.EarlyStoppingParameterSet">EarlyStoppingParameterSet</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetEarlyStoppingParameterListRequest">GetEarlyStoppingParameterListRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetEarlyStoppingParametersReply">GetEarlyStoppingParametersReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>early_stopping_parameters</td>
+                  <td><a href="#api.EarlyStoppingParameter">EarlyStoppingParameter</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetEarlyStoppingParametersRequest">GetEarlyStoppingParametersRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>param_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetMetricsReply">GetMetricsReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>metrics_log_sets</td>
+                  <td><a href="#api.MetricsLogSet">MetricsLogSet</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetMetricsRequest">GetMetricsRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>worker_ids</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>metrics_names</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetSavedModelReply">GetSavedModelReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>model</td>
+                  <td><a href="#api.ModelInfo">ModelInfo</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetSavedModelRequest">GetSavedModelRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>worker_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetSavedModelsReply">GetSavedModelsReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>models</td>
+                  <td><a href="#api.ModelInfo">ModelInfo</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetSavedModelsRequest">GetSavedModelsRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetSavedStudiesReply">GetSavedStudiesReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>studies</td>
+                  <td><a href="#api.StudyOverview">StudyOverview</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetSavedStudiesRequest">GetSavedStudiesRequest</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.GetShouldStopWorkersReply">GetShouldStopWorkersReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>should_stop_worker_ids</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetShouldStopWorkersRequest">GetShouldStopWorkersRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>early_stopping_algorithm</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>param_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetStudyListReply">GetStudyListReply</h3>
+        <p>Return a overview list of Studies.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_overviews</td>
+                  <td><a href="#api.StudyOverview">StudyOverview</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetStudyListRequest">GetStudyListRequest</h3>
+        <p>Get all Study Configs from DB.</p>
+
+        
+
+        
+      
+        <h3 id="api.GetStudyReply">GetStudyReply</h3>
+        <p>Return a config of specified Study.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_config</td>
+                  <td><a href="#api.StudyConfig">StudyConfig</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetStudyRequest">GetStudyRequest</h3>
+        <p>Get a Study Config from DB by ID of Study.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetSuggestionParameterListReply">GetSuggestionParameterListReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>suggestion_parameter_sets</td>
+                  <td><a href="#api.SuggestionParameterSet">SuggestionParameterSet</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetSuggestionParameterListRequest">GetSuggestionParameterListRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetSuggestionParametersReply">GetSuggestionParametersReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>suggestion_parameters</td>
+                  <td><a href="#api.SuggestionParameter">SuggestionParameter</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetSuggestionParametersRequest">GetSuggestionParametersRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>param_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetSuggestionsReply">GetSuggestionsReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trials</td>
+                  <td><a href="#api.Trial">Trial</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetSuggestionsRequest">GetSuggestionsRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>suggestion_algorithm</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>request_number</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>log_worker_ids</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>param_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetTrialsReply">GetTrialsReply</h3>
+        <p>Return a trial list in specified Study.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trials</td>
+                  <td><a href="#api.Trial">Trial</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetTrialsRequest">GetTrialsRequest</h3>
+        <p>Get a Trial Configs from DB by ID of Study.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetWorkerFullInfoReply">GetWorkerFullInfoReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>worker_full_infos</td>
+                  <td><a href="#api.WorkerFullInfo">WorkerFullInfo</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetWorkerFullInfoRequest">GetWorkerFullInfoRequest</h3>
+        <p>Get a full informations related to specified Workers.</p><p>It includes Worker Config, HyperParameters and Metrics Logs.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>trial_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>worker_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>only_latest_log</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetWorkersReply">GetWorkersReply</h3>
+        <p>Return a Worker list by specified condition.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>workers</td>
+                  <td><a href="#api.Worker">Worker</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetWorkersRequest">GetWorkersRequest</h3>
+        <p>Get a Worker Configs and Statuses from DB by ID of Study, Trial or Worker.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>trial_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>worker_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.Metrics">Metrics</h3>
+        <p>Metrics of a worker</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name of metrics. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Value of metrics. Double float. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.MetricsLog">MetricsLog</h3>
+        <p>Metrics logs of a worker</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name of metrics. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>values</td>
+                  <td><a href="#api.MetricsValueTime">MetricsValueTime</a></td>
+                  <td>repeated</td>
+                  <td><p>Log of metrics. Ordered by time series. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.MetricsLogSet">MetricsLogSet</h3>
+        <p>Logs of metrics for a worker.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>worker_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>ID of the corresponding worker. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>metrics_logs</td>
+                  <td><a href="#api.MetricsLog">MetricsLog</a></td>
+                  <td>repeated</td>
+                  <td><p>Logs of metrics. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>worker_status</td>
+                  <td><a href="#api.State">State</a></td>
+                  <td></td>
+                  <td><p>Status of the corresponding worker. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.MetricsValueTime">MetricsValueTime</h3>
+        <p>Metrics of a worker with timestamp</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Timestamp RFC3339 format. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Value of metrics. Double float. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.ModelInfo">ModelInfo</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>worker_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>parameters</td>
+                  <td><a href="#api.Parameter">Parameter</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>metrics</td>
+                  <td><a href="#api.Metrics">Metrics</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>model_path</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.Parameter">Parameter</h3>
+        <p>Value of a Hyper parameter.</p><p>This will be created from a correcponding Config.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name of the parameter. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>parameter_type</td>
+                  <td><a href="#api.ParameterType">ParameterType</a></td>
+                  <td></td>
+                  <td><p>Type of the parameter. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Value of the parameter. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.ParameterConfig">ParameterConfig</h3>
+        <p>Config for a Hyper parameter.</p><p>Katib will create each Hyper parameter from this config.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name of the parameter. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>parameter_type</td>
+                  <td><a href="#api.ParameterType">ParameterType</a></td>
+                  <td></td>
+                  <td><p>Type of the parameter. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>feasible</td>
+                  <td><a href="#api.FeasibleSpace">FeasibleSpace</a></td>
+                  <td></td>
+                  <td><p>FeasibleSpace for the parameter. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.RegisterWorkerReply">RegisterWorkerReply</h3>
+        <p>Return generated WorkerID.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>worker_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.RegisterWorkerRequest">RegisterWorkerRequest</h3>
+        <p>Create a Worker from Worker Config.</p><p>Generate a unique ID and store the Worker to DB.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>worker</td>
+                  <td><a href="#api.Worker">Worker</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.ReportMetricsLogsReply">ReportMetricsLogsReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.ReportMetricsLogsRequest">ReportMetricsLogsRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>metrics_log_sets</td>
+                  <td><a href="#api.MetricsLogSet">MetricsLogSet</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.SaveModelReply">SaveModelReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.SaveModelRequest">SaveModelRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>model</td>
+                  <td><a href="#api.ModelInfo">ModelInfo</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>data_set</td>
+                  <td><a href="#api.DataSetInfo">DataSetInfo</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>tensor_board</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.SaveStudyReply">SaveStudyReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.SaveStudyRequest">SaveStudyRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>owner</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>description</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.SetEarlyStoppingParametersReply">SetEarlyStoppingParametersReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>param_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.SetEarlyStoppingParametersRequest">SetEarlyStoppingParametersRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>early_stopping_algorithm</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>param_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>early_stopping_parameters</td>
+                  <td><a href="#api.EarlyStoppingParameter">EarlyStoppingParameter</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.SetSuggestionParametersReply">SetSuggestionParametersReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>param_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.SetSuggestionParametersRequest">SetSuggestionParametersRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>suggestion_algorithm</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>param_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>suggestion_parameters</td>
+                  <td><a href="#api.SuggestionParameter">SuggestionParameter</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.StopSuggestionReply">StopSuggestionReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.StopSuggestionRequest">StopSuggestionRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.StopWorkersReply">StopWorkersReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.StopWorkersRequest">StopWorkersRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>worker_ids</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>is_complete</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.StudyConfig">StudyConfig</h3>
+        <p>Config of a Study. Study represents a single optimization run over a feasible space. </p><p>Each Study contains a configuration describing the feasible space, as well as a set of Trials.</p><p>It is assumed that objective function f(x) does not change in the course of a Study.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name of Study. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>owner</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Owner of Study. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>optimization_type</td>
+                  <td><a href="#api.OptimizationType">OptimizationType</a></td>
+                  <td></td>
+                  <td><p>Optimization type. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>optimization_goal</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p>Goal of optimization value. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>parameter_configs</td>
+                  <td><a href="#api.StudyConfig.ParameterConfigs">StudyConfig.ParameterConfigs</a></td>
+                  <td></td>
+                  <td><p>List of ParameterConfig </p></td>
+                </tr>
+              
+                <tr>
+                  <td>access_permissions</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p>Access Permission </p></td>
+                </tr>
+              
+                <tr>
+                  <td>tags</td>
+                  <td><a href="#api.Tag">Tag</a></td>
+                  <td>repeated</td>
+                  <td><p>Tag for Study </p></td>
+                </tr>
+              
+                <tr>
+                  <td>objective_value_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name of objective value. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>metrics</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p>List of metrics name. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>jobId</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>ID of studyjob that is created from this config. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.StudyConfig.ParameterConfigs">StudyConfig.ParameterConfigs</h3>
+        <p>List of ParameterConfig</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>configs</td>
+                  <td><a href="#api.ParameterConfig">ParameterConfig</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.StudyOverview">StudyOverview</h3>
+        <p>Overview of a study. For UI.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name of Study. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>owner</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Owner of Study. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Study ID. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>description</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Discretption of Study. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.SuggestionParameter">SuggestionParameter</h3>
+        <p>Parameter for Suggestion service. Key value format.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name of Parameter. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Value of Parameter. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.SuggestionParameterSet">SuggestionParameterSet</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>param_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>suggestion_algorithm</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>suggestion_parameters</td>
+                  <td><a href="#api.SuggestionParameter">SuggestionParameter</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.Tag">Tag</h3>
+        <p>Tag for each resources.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name of tag. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Value of tag. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.Trial">Trial</h3>
+        <p>A set of Hyperparameter.</p><p>In a study, multiple trials are evaluated by worker.</p><p>Suggestion service will generate next trials.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trial_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Trial ID. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Study ID. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>parameter_set</td>
+                  <td><a href="#api.Parameter">Parameter</a></td>
+                  <td>repeated</td>
+                  <td><p>Hyperparameter set </p></td>
+                </tr>
+              
+                <tr>
+                  <td>objective_value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Objective Value </p></td>
+                </tr>
+              
+                <tr>
+                  <td>tags</td>
+                  <td><a href="#api.Tag">Tag</a></td>
+                  <td>repeated</td>
+                  <td><p>Tags of Trial. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.UpdateWorkerStateReply">UpdateWorkerStateReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.UpdateWorkerStateRequest">UpdateWorkerStateRequest</h3>
+        <p>Update a Status of Worker.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>worker_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>status</td>
+                  <td><a href="#api.State">State</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.Worker">Worker</h3>
+        <p>A process of evaluation for a trial.</p><p>Types of worker supported by Katib are k8s Job, TF-Job, and Pytorch-Job.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>worker_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Worker ID. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Study ID. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>trial_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Trial ID. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>Type</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Type of Worker </p></td>
+                </tr>
+              
+                <tr>
+                  <td>status</td>
+                  <td><a href="#api.State">State</a></td>
+                  <td></td>
+                  <td><p>Status of Worker. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>TemplatePath</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Path for the manufest template of Worker. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>tags</td>
+                  <td><a href="#api.Tag">Tag</a></td>
+                  <td>repeated</td>
+                  <td><p>Tags of Worker. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.WorkerFullInfo">WorkerFullInfo</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>Worker</td>
+                  <td><a href="#api.Worker">Worker</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>parameter_set</td>
+                  <td><a href="#api.Parameter">Parameter</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>metrics_logs</td>
+                  <td><a href="#api.MetricsLog">MetricsLog</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+
+      
+        <h3 id="api.OptimizationType">OptimizationType</h3>
+        <p>Direction of optimization. Minimize or Maximize.</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>UNKNOWN_OPTIMIZATION</td>
+                <td>0</td>
+                <td><p>Undefined type and not used.</p></td>
+              </tr>
+            
+              <tr>
+                <td>MINIMIZE</td>
+                <td>1</td>
+                <td><p>Minimize</p></td>
+              </tr>
+            
+              <tr>
+                <td>MAXIMIZE</td>
+                <td>2</td>
+                <td><p>Maximize</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="api.ParameterType">ParameterType</h3>
+        <p>Types of value for HyperParameter.</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>UNKNOWN_TYPE</td>
+                <td>0</td>
+                <td><p>Undefined type and not used.</p></td>
+              </tr>
+            
+              <tr>
+                <td>DOUBLE</td>
+                <td>1</td>
+                <td><p>Double float type. Use &#34;Max/Min&#34;.</p></td>
+              </tr>
+            
+              <tr>
+                <td>INT</td>
+                <td>2</td>
+                <td><p>Int type. Use &#34;Max/Min&#34;.</p></td>
+              </tr>
+            
+              <tr>
+                <td>DISCRETE</td>
+                <td>3</td>
+                <td><p>Discrete number type. Use &#34;List&#34; as float.</p></td>
+              </tr>
+            
+              <tr>
+                <td>CATEGORICAL</td>
+                <td>4</td>
+                <td><p>Categorical type. Use &#34;List&#34; as string.</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="api.State">State</h3>
+        <p>Status code for worker.</p><p>This value is stored as TINYINT in MySQL.</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>PENDING</td>
+                <td>0</td>
+                <td><p>Pending. Created but not running.</p></td>
+              </tr>
+            
+              <tr>
+                <td>RUNNING</td>
+                <td>1</td>
+                <td><p>Running.</p></td>
+              </tr>
+            
+              <tr>
+                <td>COMPLETED</td>
+                <td>2</td>
+                <td><p>Completed.</p></td>
+              </tr>
+            
+              <tr>
+                <td>KILLED</td>
+                <td>3</td>
+                <td><p>Killed. Not failed.</p></td>
+              </tr>
+            
+              <tr>
+                <td>ERROR</td>
+                <td>120</td>
+                <td><p>Error.</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+
+      
+
+      
+        <h3 id="api.EarlyStopping">EarlyStopping</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>GetShouldStopWorkers</td>
+                <td><a href="#api.GetShouldStopWorkersRequest">GetShouldStopWorkersRequest</a></td>
+                <td><a href="#api.GetShouldStopWorkersReply">GetShouldStopWorkersReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="api.Manager">Manager</h3>
+        <p>Service for Main API for Katib</p><p>For each RPC service, we define mapping to HTTP REST API method.</p><p>The mapping includes the URL path, query parameters and request body.</p><p>https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>CreateStudy</td>
+                <td><a href="#api.CreateStudyRequest">CreateStudyRequest</a></td>
+                <td><a href="#api.CreateStudyReply">CreateStudyReply</a></td>
+                <td><p>Create a Study from Study Config.
+Generate a unique ID and store the Study to DB.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetStudy</td>
+                <td><a href="#api.GetStudyRequest">GetStudyRequest</a></td>
+                <td><a href="#api.GetStudyReply">GetStudyReply</a></td>
+                <td><p>Get a Study Config from DB by ID of Study.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetStudyList</td>
+                <td><a href="#api.GetStudyListRequest">GetStudyListRequest</a></td>
+                <td><a href="#api.GetStudyListReply">GetStudyListReply</a></td>
+                <td><p>Get all Study Configs from DB.</p></td>
+              </tr>
+            
+              <tr>
+                <td>CreateTrial</td>
+                <td><a href="#api.CreateTrialRequest">CreateTrialRequest</a></td>
+                <td><a href="#api.CreateTrialReply">CreateTrialReply</a></td>
+                <td><p>Create a Trial from Trial Config.
+Generate a unique ID and store the Trial to DB.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetTrials</td>
+                <td><a href="#api.GetTrialsRequest">GetTrialsRequest</a></td>
+                <td><a href="#api.GetTrialsReply">GetTrialsReply</a></td>
+                <td><p>Get a Trial Configs from DB by ID of Study.</p></td>
+              </tr>
+            
+              <tr>
+                <td>RegisterWorker</td>
+                <td><a href="#api.RegisterWorkerRequest">RegisterWorkerRequest</a></td>
+                <td><a href="#api.RegisterWorkerReply">RegisterWorkerReply</a></td>
+                <td><p>Create a Worker from Worker Config.
+Generate a unique ID and store the Worker to DB.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetWorkers</td>
+                <td><a href="#api.GetWorkersRequest">GetWorkersRequest</a></td>
+                <td><a href="#api.GetWorkersReply">GetWorkersReply</a></td>
+                <td><p>Get a Worker Configs and Statuses from DB by ID of Study, Trial or Worker.</p></td>
+              </tr>
+            
+              <tr>
+                <td>UpdateWorkerState</td>
+                <td><a href="#api.UpdateWorkerStateRequest">UpdateWorkerStateRequest</a></td>
+                <td><a href="#api.UpdateWorkerStateReply">UpdateWorkerStateReply</a></td>
+                <td><p>Update a Status of Worker.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetWorkerFullInfo</td>
+                <td><a href="#api.GetWorkerFullInfoRequest">GetWorkerFullInfoRequest</a></td>
+                <td><a href="#api.GetWorkerFullInfoReply">GetWorkerFullInfoReply</a></td>
+                <td><p>Get a full informations related to specified Workers.
+It includes Worker Config, HyperParameters and Metrics Logs.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetSuggestions</td>
+                <td><a href="#api.GetSuggestionsRequest">GetSuggestionsRequest</a></td>
+                <td><a href="#api.GetSuggestionsReply">GetSuggestionsReply</a></td>
+                <td><p>Get Suggestions from a Suggestion service.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetShouldStopWorkers</td>
+                <td><a href="#api.GetShouldStopWorkersRequest">GetShouldStopWorkersRequest</a></td>
+                <td><a href="#api.GetShouldStopWorkersReply">GetShouldStopWorkersReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>GetMetrics</td>
+                <td><a href="#api.GetMetricsRequest">GetMetricsRequest</a></td>
+                <td><a href="#api.GetMetricsReply">GetMetricsReply</a></td>
+                <td><p>Get metrics of workers.
+You can get all logs of metrics since start of the worker.</p></td>
+              </tr>
+            
+              <tr>
+                <td>SetSuggestionParameters</td>
+                <td><a href="#api.SetSuggestionParametersRequest">SetSuggestionParametersRequest</a></td>
+                <td><a href="#api.SetSuggestionParametersReply">SetSuggestionParametersReply</a></td>
+                <td><p>Create or Update parameter set for a suggestion service.
+When you specified a ID of parameter set, it will update the parameter set by your request.
+When you specified no ID, it will create a new parameter set for corresponding study and suggestion service.
+The parameters are key-value format.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetSuggestionParameters</td>
+                <td><a href="#api.GetSuggestionParametersRequest">GetSuggestionParametersRequest</a></td>
+                <td><a href="#api.GetSuggestionParametersReply">GetSuggestionParametersReply</a></td>
+                <td><p>Get suggestion parameter set from DB specified.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetSuggestionParameterList</td>
+                <td><a href="#api.GetSuggestionParameterListRequest">GetSuggestionParameterListRequest</a></td>
+                <td><a href="#api.GetSuggestionParameterListReply">GetSuggestionParameterListReply</a></td>
+                <td><p>Get all suggestion parameter sets from DB.</p></td>
+              </tr>
+            
+              <tr>
+                <td>SetEarlyStoppingParameters</td>
+                <td><a href="#api.SetEarlyStoppingParametersRequest">SetEarlyStoppingParametersRequest</a></td>
+                <td><a href="#api.SetEarlyStoppingParametersReply">SetEarlyStoppingParametersReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>GetEarlyStoppingParameters</td>
+                <td><a href="#api.GetEarlyStoppingParametersRequest">GetEarlyStoppingParametersRequest</a></td>
+                <td><a href="#api.GetEarlyStoppingParametersReply">GetEarlyStoppingParametersReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>GetEarlyStoppingParameterList</td>
+                <td><a href="#api.GetEarlyStoppingParameterListRequest">GetEarlyStoppingParameterListRequest</a></td>
+                <td><a href="#api.GetEarlyStoppingParameterListReply">GetEarlyStoppingParameterListReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>SaveStudy</td>
+                <td><a href="#api.SaveStudyRequest">SaveStudyRequest</a></td>
+                <td><a href="#api.SaveStudyReply">SaveStudyReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>SaveModel</td>
+                <td><a href="#api.SaveModelRequest">SaveModelRequest</a></td>
+                <td><a href="#api.SaveModelReply">SaveModelReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ReportMetricsLogs</td>
+                <td><a href="#api.ReportMetricsLogsRequest">ReportMetricsLogsRequest</a></td>
+                <td><a href="#api.ReportMetricsLogsReply">ReportMetricsLogsReply</a></td>
+                <td><p>Report a logs of metrics for workers.
+The logs for each worker must have timestamp and must be ordered in time series.
+When the log you reported are already reported before, it will be dismissed and get no error.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetSavedStudies</td>
+                <td><a href="#api.GetSavedStudiesRequest">GetSavedStudiesRequest</a></td>
+                <td><a href="#api.GetSavedStudiesReply">GetSavedStudiesReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>GetSavedModels</td>
+                <td><a href="#api.GetSavedModelsRequest">GetSavedModelsRequest</a></td>
+                <td><a href="#api.GetSavedModelsReply">GetSavedModelsReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="api.Suggestion">Suggestion</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>GetSuggestions</td>
+                <td><a href="#api.GetSuggestionsRequest">GetSuggestionsRequest</a></td>
+                <td><a href="#api.GetSuggestionsReply">GetSuggestionsReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+
+    <h2 id="scalar-value-types">Scalar Value Types</h2>
+    <table class="scalar-value-types-table">
+      <thead>
+        <tr><td>.proto Type</td><td>Notes</td><td>C++ Type</td><td>Java Type</td><td>Python Type</td></tr>
+      </thead>
+      <tbody>
+        
+          <tr id="double">
+            <td>double</td>
+            <td></td>
+            <td>double</td>
+            <td>double</td>
+            <td>float</td>
+          </tr>
+        
+          <tr id="float">
+            <td>float</td>
+            <td></td>
+            <td>float</td>
+            <td>float</td>
+            <td>float</td>
+          </tr>
+        
+          <tr id="int32">
+            <td>int32</td>
+            <td>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint32 instead.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+          </tr>
+        
+          <tr id="int64">
+            <td>int64</td>
+            <td>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint64 instead.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+          </tr>
+        
+          <tr id="uint32">
+            <td>uint32</td>
+            <td>Uses variable-length encoding.</td>
+            <td>uint32</td>
+            <td>int</td>
+            <td>int/long</td>
+          </tr>
+        
+          <tr id="uint64">
+            <td>uint64</td>
+            <td>Uses variable-length encoding.</td>
+            <td>uint64</td>
+            <td>long</td>
+            <td>int/long</td>
+          </tr>
+        
+          <tr id="sint32">
+            <td>sint32</td>
+            <td>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int32s.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+          </tr>
+        
+          <tr id="sint64">
+            <td>sint64</td>
+            <td>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int64s.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+          </tr>
+        
+          <tr id="fixed32">
+            <td>fixed32</td>
+            <td>Always four bytes. More efficient than uint32 if values are often greater than 2^28.</td>
+            <td>uint32</td>
+            <td>int</td>
+            <td>int</td>
+          </tr>
+        
+          <tr id="fixed64">
+            <td>fixed64</td>
+            <td>Always eight bytes. More efficient than uint64 if values are often greater than 2^56.</td>
+            <td>uint64</td>
+            <td>long</td>
+            <td>int/long</td>
+          </tr>
+        
+          <tr id="sfixed32">
+            <td>sfixed32</td>
+            <td>Always four bytes.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+          </tr>
+        
+          <tr id="sfixed64">
+            <td>sfixed64</td>
+            <td>Always eight bytes.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+          </tr>
+        
+          <tr id="bool">
+            <td>bool</td>
+            <td></td>
+            <td>bool</td>
+            <td>boolean</td>
+            <td>boolean</td>
+          </tr>
+        
+          <tr id="string">
+            <td>string</td>
+            <td>A string must always contain UTF-8 encoded or 7-bit ASCII text.</td>
+            <td>string</td>
+            <td>String</td>
+            <td>str/unicode</td>
+          </tr>
+        
+          <tr id="bytes">
+            <td>bytes</td>
+            <td>May contain any arbitrary sequence of bytes.</td>
+            <td>string</td>
+            <td>ByteString</td>
+            <td>str</td>
+          </tr>
+        
+      </tbody>
+    </table>
+  </body>
+</html>
+

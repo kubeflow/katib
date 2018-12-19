@@ -17,6 +17,7 @@
   "paths": {
     "/api/Manager/CreateStudy": {
       "post": {
+        "summary": "*\nCreate a Study from Study Config.\nGenerate a unique ID and store the Study to DB.",
         "operationId": "CreateStudy",
         "responses": {
           "200": {
@@ -43,6 +44,7 @@
     },
     "/api/Manager/CreateTrial": {
       "post": {
+        "summary": "*\nCreate a Trial from Trial Config.\nGenerate a unique ID and store the Trial to DB.",
         "operationId": "CreateTrial",
         "responses": {
           "200": {
@@ -117,6 +119,7 @@
     },
     "/api/Manager/GetMetrics": {
       "post": {
+        "summary": "*\nGet metrics of workers.\nYou can get all logs of metrics since start of the worker.",
         "operationId": "GetMetrics",
         "responses": {
           "200": {
@@ -183,6 +186,7 @@
     },
     "/api/Manager/GetStudy/{study_id}": {
       "get": {
+        "summary": "* \nGet a Study Config from DB by ID of Study.",
         "operationId": "GetStudy",
         "responses": {
           "200": {
@@ -207,6 +211,7 @@
     },
     "/api/Manager/GetStudyList": {
       "get": {
+        "summary": "* \nGet all Study Configs from DB.",
         "operationId": "GetStudyList",
         "responses": {
           "200": {
@@ -223,6 +228,7 @@
     },
     "/api/Manager/GetSuggestionParameterList/{study_id}": {
       "get": {
+        "summary": "*\nGet all suggestion parameter sets from DB.",
         "operationId": "GetSuggestionParameterList",
         "responses": {
           "200": {
@@ -247,6 +253,7 @@
     },
     "/api/Manager/GetSuggestionParameters/{param_id}": {
       "get": {
+        "summary": "*\nGet suggestion parameter set from DB specified.",
         "operationId": "GetSuggestionParameters",
         "responses": {
           "200": {
@@ -271,6 +278,7 @@
     },
     "/api/Manager/GetSuggestions": {
       "post": {
+        "summary": "* \nGet Suggestions from a Suggestion service.",
         "operationId": "GetSuggestions",
         "responses": {
           "200": {
@@ -323,6 +331,7 @@
     },
     "/api/Manager/GetTrials/{study_id}": {
       "get": {
+        "summary": "* \nGet a Trial Configs from DB by ID of Study.",
         "operationId": "GetTrials",
         "responses": {
           "200": {
@@ -347,6 +356,7 @@
     },
     "/api/Manager/GetWorkerFullInfo": {
       "get": {
+        "summary": "* \nGet a full informations related to specified Workers.\nIt includes Worker Config, HyperParameters and Metrics Logs.",
         "operationId": "GetWorkerFullInfo",
         "responses": {
           "200": {
@@ -390,6 +400,7 @@
     },
     "/api/Manager/GetWorkers": {
       "get": {
+        "summary": "* \nGet a Worker Configs and Statuses from DB by ID of Study, Trial or Worker.",
         "operationId": "GetWorkers",
         "responses": {
           "200": {
@@ -426,6 +437,7 @@
     },
     "/api/Manager/RegisterWorker": {
       "post": {
+        "summary": "*\nCreate a Worker from Worker Config.\nGenerate a unique ID and store the Worker to DB.",
         "operationId": "RegisterWorker",
         "responses": {
           "200": {
@@ -452,6 +464,7 @@
     },
     "/api/Manager/ReportMetricsLogs": {
       "post": {
+        "summary": "*\nReport a logs of metrics for workers.\nThe logs for each worker must have timestamp and must be ordered in time series.\nWhen the log you reported are already reported before, it will be dismissed and get no error.",
         "operationId": "ReportMetricsLogs",
         "responses": {
           "200": {
@@ -556,6 +569,7 @@
     },
     "/api/Manager/SetSuggestionParameters": {
       "post": {
+        "summary": "*\nCreate or Update parameter set for a suggestion service.\nWhen you specified a ID of parameter set, it will update the parameter set by your request.\nWhen you specified no ID, it will create a new parameter set for corresponding study and suggestion service.\nThe parameters are key-value format.",
         "operationId": "SetSuggestionParameters",
         "responses": {
           "200": {
@@ -582,6 +596,7 @@
     },
     "/api/Manager/UpdateWorkerState": {
       "put": {
+        "summary": "* \nUpdate a Status of Worker.",
         "operationId": "UpdateWorkerState",
         "responses": {
           "200": {
@@ -617,7 +632,8 @@
             "$ref": "#/definitions/apiParameterConfig"
           }
         }
-      }
+      },
+      "title": "* \nList of ParameterConfig"
     },
     "apiCreateStudyReply": {
       "type": "object",
@@ -625,7 +641,8 @@
         "study_id": {
           "type": "string"
         }
-      }
+      },
+      "description": "*\nReturn generated StudyID."
     },
     "apiCreateTrialReply": {
       "type": "object",
@@ -633,7 +650,8 @@
         "trial_id": {
           "type": "string"
         }
-      }
+      },
+      "description": "*\nReturn generated TrialID."
     },
     "apiDataSetInfo": {
       "type": "object",
@@ -655,7 +673,8 @@
         "value": {
           "type": "string"
         }
-      }
+      },
+      "description": "*\nParameter for EarlyStopping service. Key value format."
     },
     "apiEarlyStoppingParameterSet": {
       "type": "object",
@@ -689,7 +708,8 @@
             "type": "string"
           }
         }
-      }
+      },
+      "description": "*\nFeasible space for optimization.\nInt and Double type use Max/Min.\nDiscrete and Categorical type use List."
     },
     "apiGetEarlyStoppingParameterListReply": {
       "type": "object",
@@ -800,7 +820,8 @@
             "$ref": "#/definitions/apiStudyOverview"
           }
         }
-      }
+      },
+      "description": "* \nReturn a overview list of Studies."
     },
     "apiGetStudyReply": {
       "type": "object",
@@ -808,7 +829,8 @@
         "study_config": {
           "$ref": "#/definitions/apiStudyConfig"
         }
-      }
+      },
+      "description": "*\nReturn a config of specified Study."
     },
     "apiGetSuggestionParameterListReply": {
       "type": "object",
@@ -876,7 +898,8 @@
             "$ref": "#/definitions/apiTrial"
           }
         }
-      }
+      },
+      "description": "*\nReturn a trial list in specified Study."
     },
     "apiGetWorkerFullInfoReply": {
       "type": "object",
@@ -898,7 +921,8 @@
             "$ref": "#/definitions/apiWorker"
           }
         }
-      }
+      },
+      "description": "*\nReturn a Worker list by specified condition."
     },
     "apiMetrics": {
       "type": "object",
@@ -909,7 +933,8 @@
         "value": {
           "type": "string"
         }
-      }
+      },
+      "title": "*\nMetrics of a worker"
     },
     "apiMetricsLog": {
       "type": "object",
@@ -923,7 +948,8 @@
             "$ref": "#/definitions/apiMetricsValueTime"
           }
         }
-      }
+      },
+      "title": "*\nMetrics logs of a worker"
     },
     "apiMetricsLogSet": {
       "type": "object",
@@ -940,7 +966,8 @@
         "worker_status": {
           "$ref": "#/definitions/apiState"
         }
-      }
+      },
+      "description": "*\nLogs of metrics for a worker."
     },
     "apiMetricsValueTime": {
       "type": "object",
@@ -951,7 +978,8 @@
         "value": {
           "type": "string"
         }
-      }
+      },
+      "title": "*\nMetrics of a worker with timestamp"
     },
     "apiModelInfo": {
       "type": "object",
@@ -987,7 +1015,7 @@
         "MAXIMIZE"
       ],
       "default": "UNKNOWN_OPTIMIZATION",
-      "title": "- UNKNOWN_OPTIMIZATION: Not used"
+      "description": "*\nDirection of optimization. Minimize or Maximize."
     },
     "apiParameter": {
       "type": "object",
@@ -1001,7 +1029,8 @@
         "value": {
           "type": "string"
         }
-      }
+      },
+      "description": "*\nValue of a Hyper parameter.\nThis will be created from a correcponding Config."
     },
     "apiParameterConfig": {
       "type": "object",
@@ -1013,10 +1042,10 @@
           "$ref": "#/definitions/apiParameterType"
         },
         "feasible": {
-          "$ref": "#/definitions/apiFeasibleSpace",
-          "description": "The following values defines a feasible parameter space."
+          "$ref": "#/definitions/apiFeasibleSpace"
         }
-      }
+      },
+      "description": "*\nConfig for a Hyper parameter.\nKatib will create each Hyper parameter from this config."
     },
     "apiParameterType": {
       "type": "string",
@@ -1028,7 +1057,7 @@
         "CATEGORICAL"
       ],
       "default": "UNKNOWN_TYPE",
-      "title": "- UNKNOWN_TYPE: Not used"
+      "description": "*\nTypes of value for HyperParameter."
     },
     "apiRegisterWorkerReply": {
       "type": "object",
@@ -1036,7 +1065,8 @@
         "worker_id": {
           "type": "string"
         }
-      }
+      },
+      "description": "*\nReturn generated WorkerID."
     },
     "apiReportMetricsLogsReply": {
       "type": "object"
@@ -1156,7 +1186,7 @@
         "ERROR"
       ],
       "default": "PENDING",
-      "description": "This value is stored as TINYINT in MySQL."
+      "description": "*\nStatus code for worker.\nThis value is stored as TINYINT in MySQL."
     },
     "apiStudyConfig": {
       "type": "object",
@@ -1201,7 +1231,8 @@
         "jobId": {
           "type": "string"
         }
-      }
+      },
+      "description": "*\nConfig of a Study. Study represents a single optimization run over a feasible space. \nEach Study contains a configuration describing the feasible space, as well as a set of Trials.\nIt is assumed that objective function f(x) does not change in the course of a Study."
     },
     "apiStudyOverview": {
       "type": "object",
@@ -1218,7 +1249,8 @@
         "description": {
           "type": "string"
         }
-      }
+      },
+      "description": "*\nOverview of a study. For UI."
     },
     "apiSuggestionParameter": {
       "type": "object",
@@ -1229,7 +1261,8 @@
         "value": {
           "type": "string"
         }
-      }
+      },
+      "description": "*\nParameter for Suggestion service. Key value format."
     },
     "apiSuggestionParameterSet": {
       "type": "object",
@@ -1257,7 +1290,8 @@
         "value": {
           "type": "string"
         }
-      }
+      },
+      "description": "*\nTag for each resources."
     },
     "apiTrial": {
       "type": "object",
@@ -1283,7 +1317,8 @@
             "$ref": "#/definitions/apiTag"
           }
         }
-      }
+      },
+      "description": "*\nA set of Hyperparameter.\nIn a study, multiple trials are evaluated by worker.\nSuggestion service will generate next trials."
     },
     "apiUpdateWorkerStateReply": {
       "type": "object"
@@ -1297,7 +1332,8 @@
         "status": {
           "$ref": "#/definitions/apiState"
         }
-      }
+      },
+      "description": "* \nUpdate a Status of Worker."
     },
     "apiWorker": {
       "type": "object",
@@ -1326,7 +1362,8 @@
             "$ref": "#/definitions/apiTag"
           }
         }
-      }
+      },
+      "description": "* \nA process of evaluation for a trial.\nTypes of worker supported by Katib are k8s Job, TF-Job, and Pytorch-Job."
     },
     "apiWorkerFullInfo": {
       "type": "object",
