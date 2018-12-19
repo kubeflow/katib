@@ -40,6 +40,7 @@ func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (string, error) {
 		},
 		workerSpec,
 		"",
+		"",
 		true,
 	)
 	if err != nil {
@@ -69,7 +70,7 @@ func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (string, error) {
 	return "", fmt.Errorf("Invalid kind of worker %v", typeChecker)
 }
 
-func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, kind string, dryrun bool) (string, *bytes.Buffer, error) {
+func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, kind string, ns string, dryrun bool) (string, *bytes.Buffer, error) {
 	var wtp *template.Template = nil
 	var err error
 	if workerSpec != nil {
@@ -123,6 +124,7 @@ func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi
 		StudyID:  studyID,
 		TrialID:  trial.TrialId,
 		WorkerID: wid,
+		NameSpace: ns,
 	}
 	var b bytes.Buffer
 	for _, p := range trial.ParameterSet {

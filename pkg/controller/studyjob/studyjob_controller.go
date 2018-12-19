@@ -601,11 +601,12 @@ type WorkerInstance struct {
 	StudyID         string
 	TrialID         string
 	WorkerID        string
+	NameSpace       string
 	HyperParameters []*katibapi.Parameter
 }
 
 func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, wkind string, dryrun bool) (string, error) {
-	wid, wm, err := getWorkerManifest(c, studyID, trial, workerSpec, wkind, false)
+	wid, wm, err := getWorkerManifest(c, studyID, trial, workerSpec, wkind, instance.Namespace, false)
 	if err != nil {
 		return "", err
 	}
