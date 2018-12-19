@@ -9,6 +9,7 @@ import (
 
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 
@@ -36,15 +37,17 @@ func NewMetricsCollector() (*MetricsCollector, error) {
 }
 
 func (d *MetricsCollector) CollectWorkerLog(wID string, wkind string, objectiveValueName string, metrics []string, namespace string) (*api.MetricsLogSet, error) {
-	var labelName string
+	labelMap := make(map[string]string)
 	if wkind == studyjob.TFJobWorker {
-		labelName = "tf_job_name"
+		labelMap["tf_job_name"] = wID
+		labelMap["tf_job_role"] = "master"
 	} else if wkind == studyjob.PyTorchJobWorker {
-		labelName = "pytorch_job_name"
+		labelMap["pytorch_job_name"] = wID
+		labelMap["pytorch_job_role"] = "master"
 	} else {
-		labelName = "job-name"
+		labelMap["job-name"] = wID
 	}
-	pl, _ := d.clientset.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labelName + "=" + wID, IncludeUninitialized: true})
+	pl, _ := d.clientset.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labels.Set(labelMap).String(), IncludeUninitialized: true})
 	if len(pl.Items) == 0 {
 		return nil, errors.New(fmt.Sprintf("No Pods are found in Job %v", wID))
 	}
