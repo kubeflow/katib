@@ -153,6 +153,7 @@ enum ParameterType {
     INT = 2;
     DISCRETE = 3;
     CATEGORICAL = 4;
+    RANGE = 5;
 }
 
 enum OptimizationType {

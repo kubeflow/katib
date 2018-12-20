@@ -1,7 +1,7 @@
 apiVersion: "kubeflow.org/v1alpha1"
 kind: StudyJob
 metadata:
-  namespace: kubeflow
+  namespace: default
   labels:
     controller-tools.k8s.io: "1.0"
   name: nas-rl-example
@@ -13,7 +13,6 @@ spec:
   optimizationgoal: 0.99
   metricsnames:
     - accuracy
-  
   # specify the inpt and output size of your model
   inputSize:
     - 32
@@ -21,7 +20,6 @@ spec:
     - 3
   outputSize:
     - 10
-
   # specify the general architecture and trainability of your neurl network
   networkConfig:
     - blockID: 0
@@ -31,33 +29,33 @@ spec:
           trainable: true
           parametertype: int
           feasible:
-            min: 4
-            max: 8
+            min: "4"
+            max: "8"
         - name: num_filters
           trainable: true
           parametertype: categorical
           feasible:
           list:
-            - 32
-            - 48
-            - 64
-            - 96
-            - 128
+            - "32"
+            - "48"
+            - "64"
+            - "96"
+            - "128"
         - name: filter_size
           trainable: true
           parametertype: categorical
           feasible:
             list:
-            - 3
-            - 5
-            - 7
+            - "3"
+            - "5"
+            - "7"
         - name: pooling
           trainable: true
           parametertype: categorical
           feasible:
             list:
-              - 1
-              - 2
+              - "1"
+              - "2"
     - blockID: 1
       neuronType: flatten
     - blockID: 2
@@ -65,20 +63,21 @@ spec:
       networkSpec:
         - name: num_layers
           trainable: false
-          value: 3
+          value:
+            - "3"
         - name: num_neurons
           trainable: false
           value:
-            - 512
-            - 128
-            - 10
+            - "512"
+            - "128"
+            - "10"
         - name: dropout_rate
           trainable: true
           parametertype: range
           feasible:
-            min: 0.1
-            max: 0.4
-            step: 0.05
+            min: "0.1"
+            max: "0.4"
+            step: "0.05"
         - name: activation_funct
           trainable: false
           value:
@@ -88,7 +87,28 @@ spec:
 
   workerSpec:
     goTemplate:
-        templatePath: "/worker-template/cpuWorkerTemplate.yaml"
+        rawTemplate: |-
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: {{.WorkerID}}
+            namespace: default
+          spec:
+            template:
+              spec:
+                containers:
+                - name: {{.WorkerID}}
+                  image: katib/mxnet-mnist-example
+                  command:
+                  - "python"
+                  - "/mxnet/example/image-classification/train_mnist.py"
+                  - "--batch-size=64"
+                  {{- with .HyperParameters}}
+                  {{- range .}}
+                  - "{{.Name}}={{.Value}}"
+                  {{- end}}
+                  {{- end}}
+                restartPolicy: Never
   suggestionSpec:
     suggestionAlgorithm: "reinforcementlearning"
     suggestionParameters:

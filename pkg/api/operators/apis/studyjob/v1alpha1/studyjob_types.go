@@ -105,6 +105,7 @@ const (
 	ParameterTypeInt         ParameterType = "int"
 	ParameterTypeDiscrete    ParameterType = "discrete"
 	ParameterTypeCategorical ParameterType = "categorical"
+	ParameterTypeRange       ParameterType = "range"
 )
 
 type OptimizationType string
