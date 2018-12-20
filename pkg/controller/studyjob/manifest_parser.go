@@ -103,7 +103,7 @@ func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi
 	}
 	var wid string
 	if dryrun {
-		wid = "validation"
+		wid = generateRandid()
 	} else {
 		cwreq := &katibapi.RegisterWorkerRequest{
 			Worker: &katibapi.Worker{
