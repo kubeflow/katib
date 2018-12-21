@@ -69,7 +69,7 @@ service Manager {
         };
     };
     /** 
-     * Get a Worker Configs and Statuses from DB by ID of Study, Trial or Worker.
+     * Get a Worker Configs and Status from DB by ID of Study, Trial or Worker.
      */
     rpc GetWorkers(GetWorkersRequest) returns (GetWorkersReply){
         option (google.api.http) = {
@@ -86,7 +86,7 @@ service Manager {
         };
     };
     /** 
-     * Get a full informations related to specified Workers.
+     * Get full information related to specified Workers.
      * It includes Worker Config, HyperParameters and Metrics Logs.
      */
     rpc GetWorkerFullInfo(GetWorkerFullInfoRequest) returns (GetWorkerFullInfoReply){
@@ -121,8 +121,8 @@ service Manager {
     };
     /**
      * Create or Update parameter set for a suggestion service.
-     * When you specified a ID of parameter set, it will update the parameter set by your request.
-     * When you specified no ID, it will create a new parameter set for corresponding study and suggestion service.
+     * If you specify an ID of parameter set, it will update the parameter set by your request.
+     * If you don't specify an ID, it will create a new parameter set for corresponding study and suggestion service.
      * The parameters are key-value format.
      */
     rpc SetSuggestionParameters(SetSuggestionParametersRequest) returns (SetSuggestionParametersReply){
@@ -305,7 +305,7 @@ message MetricsLog {
 }
 
 /**
- * Parameter for Suggestion service. Key value format.
+ * Parameter for Suggestion service. Key-value format.
  */
 message SuggestionParameter {
     string name = 1; /// Name of Parameter.
@@ -313,7 +313,7 @@ message SuggestionParameter {
 }
 
 /**
- * Parameter for EarlyStopping service. Key value format.
+ * Parameter for EarlyStopping service. Key-value format.
  */
 message EarlyStoppingParameter {
     string name = 1; /// Name of Parameter.
@@ -321,7 +321,7 @@ message EarlyStoppingParameter {
 }
 
 /**
- * Tag for each resources.
+ * Tag for each resource.
  */
 message Tag {
     string name = 1; /// Name of tag.
@@ -340,7 +340,7 @@ message StudyOverview {
 
 /**
  * A set of Hyperparameter.
- * In a study, multiple trials are evaluated by worker.
+ * In a study, multiple trials are evaluated by workers.
  * Suggestion service will generate next trials.
  */
 message Trial {
@@ -391,7 +391,7 @@ message StudyConfig {
 
 /** 
  * Create a Study from Study Config.
- * Generate a unique ID and store the Study to DB.
+ * Generate an unique ID and store the Study to DB.
  */
 message CreateStudyRequest {
     StudyConfig study_config = 1;
@@ -433,7 +433,7 @@ message GetStudyListReply {
 
 /**
  * Create a Trial from Trial Config.
- * Generate a unique ID and store the Trial to DB.
+ * Generate an unique ID and store the Trial to DB.
  */
 message CreateTrialRequest {
     Trial trial = 1;
@@ -462,7 +462,7 @@ message GetTrialsReply {
 
 /**
  * Create a Worker from Worker Config.
- * Generate a unique ID and store the Worker to DB.
+ * Generate an unique ID and store the Worker to DB.
  */
 message RegisterWorkerRequest {
     Worker worker = 1;
@@ -485,7 +485,7 @@ message StopWorkersReply {
 }
 
 /** 
- * Get a Worker Configs and Statuses from DB by ID of Study, Trial or Worker.
+ * Get a configs and status of a Worker from DB by ID of Study, Trial or Worker.
  */
 message GetWorkersRequest {
     string study_id = 1;
@@ -512,7 +512,7 @@ message UpdateWorkerStateReply{
 }
 
 /** 
- * Get a full informations related to specified Workers.
+ * Get a full information related to specified Workers.
  * It includes Worker Config, HyperParameters and Metrics Logs.
  */
 message GetWorkerFullInfoRequest {
