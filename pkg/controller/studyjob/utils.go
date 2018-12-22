@@ -14,7 +14,6 @@ package studyjob
 import (
 	"fmt"
 	"log"
-	"math/rand"
 
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
@@ -28,8 +27,6 @@ import (
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
-var rs1Letters = []rune("abcdefghijklmnopqrstuvwxyz")
-
 func createWorkerJobObj(kind string) runtime.Object {
 	switch kind {
 	case DefaultJobWorker:
@@ -40,17 +37,6 @@ func createWorkerJobObj(kind string) runtime.Object {
 		return &pytorchjobv1beta1.PyTorchJob{}
 	}
 	return nil
-}
-
-func generateRandid() string {
-	// UUID isn't quite handy in the Go world
-	id := make([]byte, 8)
-	_, err := rand.Read(id)
-	if err != nil {
-		log.Printf("Error reading random: %v", err)
-		return ""
-	}
-	return string(rs1Letters[rand.Intn(len(rs1Letters))]) + fmt.Sprintf("%016x", id)[1:]
 }
 
 func validateStudy(instance *katibv1alpha1.StudyJob, namespace string) error {
@@ -64,8 +50,8 @@ func validateStudy(instance *katibv1alpha1.StudyJob, namespace string) error {
 		return err
 	}
 
-	studyID := generateRandid()
-	trialID := generateRandid()
+	studyID := "studyID4Validation"
+	trialID := "trialID4Validation"
 	workerID, wm, err := getWorkerManifest(
 		nil,
 		studyID,
