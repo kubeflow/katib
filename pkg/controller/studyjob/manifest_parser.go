@@ -25,6 +25,7 @@ import (
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 	"github.com/kubeflow/katib/pkg/manager/studyjobclient"
 
+	"k8s.io/apimachinery/pkg/util/uuid"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
@@ -103,7 +104,7 @@ func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi
 	}
 	var wid string
 	if dryrun {
-		wid = "validation"
+		wid = string(uuid.NewUUID())
 	} else {
 		cwreq := &katibapi.RegisterWorkerRequest{
 			Worker: &katibapi.Worker{
