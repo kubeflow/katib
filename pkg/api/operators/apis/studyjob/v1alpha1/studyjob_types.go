@@ -42,17 +42,17 @@ type StudyJobSpec struct {
 
 // StudyJobStatus defines the observed state of StudyJob
 type StudyJobStatus struct {
-	// Represents time when the TFJob was acknowledged by the TFJob controller.
+	// Represents time when the StudyJob was acknowledged by the StudyJob controller.
 	// It is not guaranteed to be set in happens-before order across separate operations.
 	// It is represented in RFC3339 form and is in UTC.
 	StartTime *metav1.Time `json:"startTime,omitempty"`
 
-	// Represents time when the TFJob was completed. It is not guaranteed to
+	// Represents time when the StudyJob was completed. It is not guaranteed to
 	// be set in happens-before order across separate operations.
 	// It is represented in RFC3339 form and is in UTC.
 	CompletionTime *metav1.Time `json:"completionTime,omitempty"`
 
-	// Represents last time when the TFJob was reconciled. It is not guaranteed to
+	// Represents last time when the StudyJob was reconciled. It is not guaranteed to
 	// be set in happens-before order across separate operations.
 	// It is represented in RFC3339 form and is in UTC.
 	LastReconcileTime *metav1.Time `json:"lastReconcileTime,omitempty"`
@@ -63,6 +63,7 @@ type StudyJobStatus struct {
 	EarlyStoppingParameterID string     `json:"earlyStoppingParameterId"`
 	Trials                   []TrialSet `json:"trials,omitempty"`
 	BestObjectiveValue       *float64   `json:"bestObjectiveValue,omitempty"`
+	BestTrialID              string     `json:"bestTrialId,omitempty"`
 	SuggestionCount          int        `json:"suggestionCount,omitempty"`
 }
 

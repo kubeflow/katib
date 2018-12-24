@@ -96,3 +96,40 @@ func validateStudy(instance *katibv1alpha1.StudyJob, namespace string) error {
 	}
 	return nil
 }
+
+func checkGoalAndUpdateObject(curValue float64, instance *katibv1alpha1.StudyJob, workerId string) bool {
+	optTypeFuncMap := map[katibv1alpha1.OptimizationType] func(float64, float64) bool {
+		katibv1alpha1.OptimizationTypeMinimize: func(a, b float64) bool {return a < b},
+		katibv1alpha1.OptimizationTypeMaximize: func(a, b float64) bool {return a > b},
+	}
+	goal := false
+	if optTypeFuncMap[instance.Spec.OptimizationType] == nil {
+		return false
+	}
+	var trialId string
+	OuterLoop:
+	for i := range instance.Status.Trials {
+		for j := range instance.Status.Trials[i].WorkerList {
+			if instance.Status.Trials[i].WorkerList[j].WorkerID == workerId {
+				instance.Status.Trials[i].WorkerList[j].ObjectiveValue = &curValue
+				trialId = instance.Status.Trials[i].TrialID
+				break OuterLoop
+			}
+		}
+	}
+	opFunc := optTypeFuncMap[instance.Spec.OptimizationType]
+	if opFunc(curValue, *instance.Spec.OptimizationGoal) {
+		goal = true
+	}
+	if instance.Status.BestObjectiveValue != nil {
+		if opFunc(curValue, *instance.Status.BestObjectiveValue) {
+			instance.Status.BestObjectiveValue = &curValue
+			instance.Status.BestTrialID = trialId
+		}
+	} else {
+		instance.Status.BestObjectiveValue = &curValue
+		instance.Status.BestTrialID = trialId
+	}
+
+	return goal
+}

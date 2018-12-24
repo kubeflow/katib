@@ -303,6 +303,31 @@
         ]
       }
     },
+    "/api/Manager/GetTrial/{trial_id}": {
+      "get": {
+        "summary": "Get a Trial Configuration from DB by ID of Trial.",
+        "operationId": "GetTrial",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetTrialReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "trial_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
     "/api/Manager/GetTrials/GetShouldStopWorkers": {
       "post": {
         "operationId": "GetShouldStopWorkers",
@@ -886,6 +911,14 @@
         },
         "param_id": {
           "type": "string"
+        }
+      }
+    },
+    "apiGetTrialReply": {
+      "type": "object",
+      "properties": {
+        "trial": {
+          "$ref": "#/definitions/apiTrial"
         }
       }
     },

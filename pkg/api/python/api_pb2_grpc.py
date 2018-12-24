@@ -43,6 +43,11 @@ class ManagerStub(object):
         request_serializer=api__pb2.GetTrialsRequest.SerializeToString,
         response_deserializer=api__pb2.GetTrialsReply.FromString,
         )
+    self.GetTrial = channel.unary_unary(
+        '/api.Manager/GetTrial',
+        request_serializer=api__pb2.GetTrialRequest.SerializeToString,
+        response_deserializer=api__pb2.GetTrialReply.FromString,
+        )
     self.RegisterWorker = channel.unary_unary(
         '/api.Manager/RegisterWorker',
         request_serializer=api__pb2.RegisterWorkerRequest.SerializeToString,
@@ -180,6 +185,14 @@ class ManagerServicer(object):
   def GetTrials(self, request, context):
     """* 
     Get a Trial Configs from DB by ID of Study.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetTrial(self, request, context):
+    """
+    Get a Trial Configuration from DB by ID of Trial.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -356,6 +369,11 @@ def add_ManagerServicer_to_server(servicer, server):
           servicer.GetTrials,
           request_deserializer=api__pb2.GetTrialsRequest.FromString,
           response_serializer=api__pb2.GetTrialsReply.SerializeToString,
+      ),
+      'GetTrial': grpc.unary_unary_rpc_method_handler(
+          servicer.GetTrial,
+          request_deserializer=api__pb2.GetTrialRequest.FromString,
+          response_serializer=api__pb2.GetTrialReply.SerializeToString,
       ),
       'RegisterWorker': grpc.unary_unary_rpc_method_handler(
           servicer.RegisterWorker,
