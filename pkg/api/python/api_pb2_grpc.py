@@ -191,7 +191,7 @@ class ManagerServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def GetTrial(self, request, context):
-    """
+    """*
     Get a Trial Configuration from DB by ID of Trial.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -209,7 +209,7 @@ class ManagerServicer(object):
 
   def GetWorkers(self, request, context):
     """* 
-    Get a Worker Configs and Statuses from DB by ID of Study, Trial or Worker.
+    Get a Worker Configs and Status from DB by ID of Study, Trial or Worker.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -225,7 +225,7 @@ class ManagerServicer(object):
 
   def GetWorkerFullInfo(self, request, context):
     """* 
-    Get a full informations related to specified Workers.
+    Get full information related to specified Workers.
     It includes Worker Config, HyperParameters and Metrics Logs.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -259,8 +259,8 @@ class ManagerServicer(object):
   def SetSuggestionParameters(self, request, context):
     """*
     Create or Update parameter set for a suggestion service.
-    When you specified a ID of parameter set, it will update the parameter set by your request.
-    When you specified no ID, it will create a new parameter set for corresponding study and suggestion service.
+    If you specify an ID of parameter set, it will update the parameter set by your request.
+    If you don't specify an ID, it will create a new parameter set for corresponding study and suggestion service.
     The parameters are key-value format.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)

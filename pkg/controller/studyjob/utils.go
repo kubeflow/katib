@@ -125,10 +125,12 @@ func checkGoalAndUpdateObject(curValue float64, instance *katibv1alpha1.StudyJob
 		if opFunc(curValue, *instance.Status.BestObjectiveValue) {
 			instance.Status.BestObjectiveValue = &curValue
 			instance.Status.BestTrialID = trialId
+			instance.Status.BestWorkerID = workerId
 		}
 	} else {
 		instance.Status.BestObjectiveValue = &curValue
 		instance.Status.BestTrialID = trialId
+		instance.Status.BestWorkerID = workerId
 	}
 
 	return goal

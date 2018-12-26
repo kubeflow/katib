@@ -305,7 +305,7 @@
     },
     "/api/Manager/GetTrial/{trial_id}": {
       "get": {
-        "summary": "Get a Trial Configuration from DB by ID of Trial.",
+        "summary": "*\nGet a Trial Configuration from DB by ID of Trial.",
         "operationId": "GetTrial",
         "responses": {
           "200": {
@@ -381,7 +381,7 @@
     },
     "/api/Manager/GetWorkerFullInfo": {
       "get": {
-        "summary": "* \nGet a full informations related to specified Workers.\nIt includes Worker Config, HyperParameters and Metrics Logs.",
+        "summary": "* \nGet full information related to specified Workers.\nIt includes Worker Config, HyperParameters and Metrics Logs.",
         "operationId": "GetWorkerFullInfo",
         "responses": {
           "200": {
@@ -425,7 +425,7 @@
     },
     "/api/Manager/GetWorkers": {
       "get": {
-        "summary": "* \nGet a Worker Configs and Statuses from DB by ID of Study, Trial or Worker.",
+        "summary": "* \nGet a Worker Configs and Status from DB by ID of Study, Trial or Worker.",
         "operationId": "GetWorkers",
         "responses": {
           "200": {
@@ -594,7 +594,7 @@
     },
     "/api/Manager/SetSuggestionParameters": {
       "post": {
-        "summary": "*\nCreate or Update parameter set for a suggestion service.\nWhen you specified a ID of parameter set, it will update the parameter set by your request.\nWhen you specified no ID, it will create a new parameter set for corresponding study and suggestion service.\nThe parameters are key-value format.",
+        "summary": "*\nCreate or Update parameter set for a suggestion service.\nIf you specify an ID of parameter set, it will update the parameter set by your request.\nIf you don't specify an ID, it will create a new parameter set for corresponding study and suggestion service.\nThe parameters are key-value format.",
         "operationId": "SetSuggestionParameters",
         "responses": {
           "200": {
@@ -699,7 +699,7 @@
           "type": "string"
         }
       },
-      "description": "*\nParameter for EarlyStopping service. Key value format."
+      "description": "*\nParameter for EarlyStopping service. Key-value format."
     },
     "apiEarlyStoppingParameterSet": {
       "type": "object",
@@ -920,7 +920,8 @@
         "trial": {
           "$ref": "#/definitions/apiTrial"
         }
-      }
+      },
+      "title": "*\nReturn a trial configuration by specified trial ID"
     },
     "apiGetTrialsReply": {
       "type": "object",
@@ -1295,7 +1296,7 @@
           "type": "string"
         }
       },
-      "description": "*\nParameter for Suggestion service. Key value format."
+      "description": "*\nParameter for Suggestion service. Key-value format."
     },
     "apiSuggestionParameterSet": {
       "type": "object",
@@ -1324,7 +1325,7 @@
           "type": "string"
         }
       },
-      "description": "*\nTag for each resources."
+      "description": "*\nTag for each resource."
     },
     "apiTrial": {
       "type": "object",
@@ -1351,7 +1352,7 @@
           }
         }
       },
-      "description": "*\nA set of Hyperparameter.\nIn a study, multiple trials are evaluated by worker.\nSuggestion service will generate next trials."
+      "description": "*\nA set of Hyperparameter.\nIn a study, multiple trials are evaluated by workers.\nSuggestion service will generate next trials."
     },
     "apiUpdateWorkerStateReply": {
       "type": "object"

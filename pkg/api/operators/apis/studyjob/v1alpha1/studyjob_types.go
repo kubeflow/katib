@@ -64,6 +64,7 @@ type StudyJobStatus struct {
 	Trials                   []TrialSet `json:"trials,omitempty"`
 	BestObjectiveValue       *float64   `json:"bestObjectiveValue,omitempty"`
 	BestTrialID              string     `json:"bestTrialId,omitempty"`
+	BestWorkerID             string     `json:"bestWorkerId,omitempty"`
 	SuggestionCount          int        `json:"suggestionCount,omitempty"`
 }
 
