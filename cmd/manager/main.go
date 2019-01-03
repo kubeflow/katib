@@ -79,6 +79,11 @@ func (s *server) GetTrials(ctx context.Context, in *api_pb.GetTrialsRequest) (*a
 	return &api_pb.GetTrialsReply{Trials: tl}, err
 }
 
+func (s *server) GetTrial(ctx context.Context, in *api_pb.GetTrialRequest) (*api_pb.GetTrialReply, error) {
+        t, err := dbIf.GetTrial(in.TrialId)
+        return &api_pb.GetTrialReply{Trial: t}, err
+}
+
 func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestionsReply, error) {
 	if in.SuggestionAlgorithm == "" {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, errors.New("No suggest algorithm specified")

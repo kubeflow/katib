@@ -249,43 +249,7 @@ func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob
 			if ml.Name == instance.Spec.ObjectiveValueName {
 				if len(ml.Values) > 0 {
 					curValue, _ := strconv.ParseFloat(ml.Values[len(ml.Values)-1].Value, 32)
-					if instance.Spec.OptimizationType == katibv1alpha1.OptimizationTypeMinimize {
-						if curValue < *instance.Spec.OptimizationGoal {
-							goal = true
-						}
-						if instance.Status.BestObjectiveValue != nil {
-							if *instance.Status.BestObjectiveValue > curValue {
-								instance.Status.BestObjectiveValue = &curValue
-							}
-						} else {
-							instance.Status.BestObjectiveValue = &curValue
-						}
-						for i := range instance.Status.Trials {
-							for j := range instance.Status.Trials[i].WorkerList {
-								if instance.Status.Trials[i].WorkerList[j].WorkerID == mls.WorkerId {
-									instance.Status.Trials[i].WorkerList[j].ObjectiveValue = &curValue
-								}
-							}
-						}
-					} else if instance.Spec.OptimizationType == katibv1alpha1.OptimizationTypeMaximize {
-						if curValue > *instance.Spec.OptimizationGoal {
-							goal = true
-						}
-						if instance.Status.BestObjectiveValue != nil {
-							if *instance.Status.BestObjectiveValue < curValue {
-								instance.Status.BestObjectiveValue = &curValue
-							}
-						} else {
-							instance.Status.BestObjectiveValue = &curValue
-						}
-						for i := range instance.Status.Trials {
-							for j := range instance.Status.Trials[i].WorkerList {
-								if instance.Status.Trials[i].WorkerList[j].WorkerID == mls.WorkerId {
-									instance.Status.Trials[i].WorkerList[j].ObjectiveValue = &curValue
-								}
-							}
-						}
-					}
+					goal = checkGoalAndUpdateObject(curValue, instance, mls.WorkerId )
 				}
 				break
 			}

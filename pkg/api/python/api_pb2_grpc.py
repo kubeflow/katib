@@ -43,6 +43,11 @@ class ManagerStub(object):
         request_serializer=api__pb2.GetTrialsRequest.SerializeToString,
         response_deserializer=api__pb2.GetTrialsReply.FromString,
         )
+    self.GetTrial = channel.unary_unary(
+        '/api.Manager/GetTrial',
+        request_serializer=api__pb2.GetTrialRequest.SerializeToString,
+        response_deserializer=api__pb2.GetTrialReply.FromString,
+        )
     self.RegisterWorker = channel.unary_unary(
         '/api.Manager/RegisterWorker',
         request_serializer=api__pb2.RegisterWorkerRequest.SerializeToString,
@@ -185,6 +190,14 @@ class ManagerServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def GetTrial(self, request, context):
+    """*
+    Get a Trial Configuration from DB by ID of Trial.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def RegisterWorker(self, request, context):
     """*
     Create a Worker from Worker Config.
@@ -196,7 +209,7 @@ class ManagerServicer(object):
 
   def GetWorkers(self, request, context):
     """* 
-    Get a Worker Configs and Statuses from DB by ID of Study, Trial or Worker.
+    Get a Worker Configs and Status from DB by ID of Study, Trial or Worker.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -212,7 +225,7 @@ class ManagerServicer(object):
 
   def GetWorkerFullInfo(self, request, context):
     """* 
-    Get a full informations related to specified Workers.
+    Get full information related to specified Workers.
     It includes Worker Config, HyperParameters and Metrics Logs.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -246,8 +259,8 @@ class ManagerServicer(object):
   def SetSuggestionParameters(self, request, context):
     """*
     Create or Update parameter set for a suggestion service.
-    When you specified a ID of parameter set, it will update the parameter set by your request.
-    When you specified no ID, it will create a new parameter set for corresponding study and suggestion service.
+    If you specify an ID of parameter set, it will update the parameter set by your request.
+    If you don't specify an ID, it will create a new parameter set for corresponding study and suggestion service.
     The parameters are key-value format.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -356,6 +369,11 @@ def add_ManagerServicer_to_server(servicer, server):
           servicer.GetTrials,
           request_deserializer=api__pb2.GetTrialsRequest.FromString,
           response_serializer=api__pb2.GetTrialsReply.SerializeToString,
+      ),
+      'GetTrial': grpc.unary_unary_rpc_method_handler(
+          servicer.GetTrial,
+          request_deserializer=api__pb2.GetTrialRequest.FromString,
+          response_serializer=api__pb2.GetTrialReply.SerializeToString,
       ),
       'RegisterWorker': grpc.unary_unary_rpc_method_handler(
           servicer.RegisterWorker,

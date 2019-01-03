@@ -59,6 +59,14 @@ service Manager {
         };
     };
     /**
+     * Get a Trial Configuration from DB by ID of Trial.
+     */
+    rpc GetTrial(GetTrialRequest) returns (GetTrialReply){
+        option (google.api.http) = {
+            get: "/api/Manager/GetTrial/{trial_id}"
+        };
+    };
+    /**
      * Create a Worker from Worker Config.
      * Generate a unique ID and store the Worker to DB.
      */
@@ -458,6 +466,20 @@ message GetTrialsRequest {
  */
 message GetTrialsReply {
     repeated Trial trials = 1;
+}
+
+/**
+ * Get a trial configuration from DB by trial ID
+ */
+message GetTrialRequest {
+    string trial_id = 1;
+}
+
+/**
+ * Return a trial configuration by specified trial ID
+ */
+message GetTrialReply {
+    Trial trial = 1;
 }
 
 /**

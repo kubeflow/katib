@@ -36,6 +36,8 @@
     - [GetSuggestionParametersRequest](#api.GetSuggestionParametersRequest)
     - [GetSuggestionsReply](#api.GetSuggestionsReply)
     - [GetSuggestionsRequest](#api.GetSuggestionsRequest)
+    - [GetTrialReply](#api.GetTrialReply)
+    - [GetTrialRequest](#api.GetTrialRequest)
     - [GetTrialsReply](#api.GetTrialsReply)
     - [GetTrialsRequest](#api.GetTrialsRequest)
     - [GetWorkerFullInfoReply](#api.GetWorkerFullInfoReply)
@@ -117,7 +119,7 @@ Return generated StudyID.
 
 ### CreateStudyRequest
 Create a Study from Study Config.
-Generate a unique ID and store the Study to DB.
+Generate an unique ID and store the Study to DB.
 
 
 | Field | Type | Label | Description |
@@ -148,7 +150,7 @@ Return generated TrialID.
 
 ### CreateTrialRequest
 Create a Trial from Trial Config.
-Generate a unique ID and store the Trial to DB.
+Generate an unique ID and store the Trial to DB.
 
 
 | Field | Type | Label | Description |
@@ -179,7 +181,7 @@ Generate a unique ID and store the Trial to DB.
 <a name="api.EarlyStoppingParameter"/>
 
 ### EarlyStoppingParameter
-Parameter for EarlyStopping service. Key value format.
+Parameter for EarlyStopping service. Key-value format.
 
 
 | Field | Type | Label | Description |
@@ -587,6 +589,36 @@ Get a Study Config from DB by ID of Study.
 
 
 
+<a name="api.GetTrialReply"/>
+
+### GetTrialReply
+Return a trial configuration by specified trial ID
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| trial | [Trial](#api.Trial) |  |  |
+
+
+
+
+
+
+<a name="api.GetTrialRequest"/>
+
+### GetTrialRequest
+Get a trial configuration from DB by trial ID
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| trial_id | [string](#string) |  |  |
+
+
+
+
+
+
 <a name="api.GetTrialsReply"/>
 
 ### GetTrialsReply
@@ -635,7 +667,7 @@ Get a Trial Configs from DB by ID of Study.
 <a name="api.GetWorkerFullInfoRequest"/>
 
 ### GetWorkerFullInfoRequest
-Get a full informations related to specified Workers.
+Get a full information related to specified Workers.
 It includes Worker Config, HyperParameters and Metrics Logs.
 
 
@@ -669,7 +701,7 @@ Return a Worker list by specified condition.
 <a name="api.GetWorkersRequest"/>
 
 ### GetWorkersRequest
-Get a Worker Configs and Statuses from DB by ID of Study, Trial or Worker.
+Get a configs and status of a Worker from DB by ID of Study, Trial or Worker.
 
 
 | Field | Type | Label | Description |
@@ -822,7 +854,7 @@ Return generated WorkerID.
 
 ### RegisterWorkerRequest
 Create a Worker from Worker Config.
-Generate a unique ID and store the Worker to DB.
+Generate an unique ID and store the Worker to DB.
 
 
 | Field | Type | Label | Description |
@@ -1094,7 +1126,7 @@ Overview of a study. For UI.
 <a name="api.SuggestionParameter"/>
 
 ### SuggestionParameter
-Parameter for Suggestion service. Key value format.
+Parameter for Suggestion service. Key-value format.
 
 
 | Field | Type | Label | Description |
@@ -1127,7 +1159,7 @@ Parameter for Suggestion service. Key value format.
 <a name="api.Tag"/>
 
 ### Tag
-Tag for each resources.
+Tag for each resource.
 
 
 | Field | Type | Label | Description |
@@ -1144,7 +1176,7 @@ Tag for each resources.
 
 ### Trial
 A set of Hyperparameter.
-In a study, multiple trials are evaluated by worker.
+In a study, multiple trials are evaluated by workers.
 Suggestion service will generate next trials.
 
 
@@ -1301,14 +1333,15 @@ https://cloud.google.com/service-infrastructure/docs/service-management/referenc
 | GetStudyList | [GetStudyListRequest](#api.GetStudyListRequest) | [GetStudyListReply](#api.GetStudyListRequest) | Get all Study Configs from DB. |
 | CreateTrial | [CreateTrialRequest](#api.CreateTrialRequest) | [CreateTrialReply](#api.CreateTrialRequest) | Create a Trial from Trial Config. Generate a unique ID and store the Trial to DB. |
 | GetTrials | [GetTrialsRequest](#api.GetTrialsRequest) | [GetTrialsReply](#api.GetTrialsRequest) | Get a Trial Configs from DB by ID of Study. |
+| GetTrial | [GetTrialRequest](#api.GetTrialRequest) | [GetTrialReply](#api.GetTrialRequest) | Get a Trial Configuration from DB by ID of Trial. |
 | RegisterWorker | [RegisterWorkerRequest](#api.RegisterWorkerRequest) | [RegisterWorkerReply](#api.RegisterWorkerRequest) | Create a Worker from Worker Config. Generate a unique ID and store the Worker to DB. |
-| GetWorkers | [GetWorkersRequest](#api.GetWorkersRequest) | [GetWorkersReply](#api.GetWorkersRequest) | Get a Worker Configs and Statuses from DB by ID of Study, Trial or Worker. |
+| GetWorkers | [GetWorkersRequest](#api.GetWorkersRequest) | [GetWorkersReply](#api.GetWorkersRequest) | Get a Worker Configs and Status from DB by ID of Study, Trial or Worker. |
 | UpdateWorkerState | [UpdateWorkerStateRequest](#api.UpdateWorkerStateRequest) | [UpdateWorkerStateReply](#api.UpdateWorkerStateRequest) | Update a Status of Worker. |
-| GetWorkerFullInfo | [GetWorkerFullInfoRequest](#api.GetWorkerFullInfoRequest) | [GetWorkerFullInfoReply](#api.GetWorkerFullInfoRequest) | Get a full informations related to specified Workers. It includes Worker Config, HyperParameters and Metrics Logs. |
+| GetWorkerFullInfo | [GetWorkerFullInfoRequest](#api.GetWorkerFullInfoRequest) | [GetWorkerFullInfoReply](#api.GetWorkerFullInfoRequest) | Get full information related to specified Workers. It includes Worker Config, HyperParameters and Metrics Logs. |
 | GetSuggestions | [GetSuggestionsRequest](#api.GetSuggestionsRequest) | [GetSuggestionsReply](#api.GetSuggestionsRequest) | Get Suggestions from a Suggestion service. |
 | GetShouldStopWorkers | [GetShouldStopWorkersRequest](#api.GetShouldStopWorkersRequest) | [GetShouldStopWorkersReply](#api.GetShouldStopWorkersRequest) |  |
 | GetMetrics | [GetMetricsRequest](#api.GetMetricsRequest) | [GetMetricsReply](#api.GetMetricsRequest) | Get metrics of workers. You can get all logs of metrics since start of the worker. |
-| SetSuggestionParameters | [SetSuggestionParametersRequest](#api.SetSuggestionParametersRequest) | [SetSuggestionParametersReply](#api.SetSuggestionParametersRequest) | Create or Update parameter set for a suggestion service. When you specified a ID of parameter set, it will update the parameter set by your request. When you specified no ID, it will create a new parameter set for corresponding study and suggestion service. The parameters are key-value format. |
+| SetSuggestionParameters | [SetSuggestionParametersRequest](#api.SetSuggestionParametersRequest) | [SetSuggestionParametersReply](#api.SetSuggestionParametersRequest) | Create or Update parameter set for a suggestion service. If you specify an ID of parameter set, it will update the parameter set by your request. If you don&#39;t specify an ID, it will create a new parameter set for corresponding study and suggestion service. The parameters are key-value format. |
 | GetSuggestionParameters | [GetSuggestionParametersRequest](#api.GetSuggestionParametersRequest) | [GetSuggestionParametersReply](#api.GetSuggestionParametersRequest) | Get suggestion parameter set from DB specified. |
 | GetSuggestionParameterList | [GetSuggestionParameterListRequest](#api.GetSuggestionParameterListRequest) | [GetSuggestionParameterListReply](#api.GetSuggestionParameterListRequest) | Get all suggestion parameter sets from DB. |
 | SetEarlyStoppingParameters | [SetEarlyStoppingParametersRequest](#api.SetEarlyStoppingParametersRequest) | [SetEarlyStoppingParametersReply](#api.SetEarlyStoppingParametersRequest) |  |

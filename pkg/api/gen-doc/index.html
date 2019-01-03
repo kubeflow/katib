@@ -307,6 +307,14 @@
                 </li>
               
                 <li>
+                  <a href="#api.GetTrialReply"><span class="badge">M</span>GetTrialReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetTrialRequest"><span class="badge">M</span>GetTrialRequest</a>
+                </li>
+              
+                <li>
                   <a href="#api.GetTrialsReply"><span class="badge">M</span>GetTrialsReply</a>
                 </li>
               
@@ -532,7 +540,7 @@
         
       
         <h3 id="api.CreateStudyRequest">CreateStudyRequest</h3>
-        <p>Create a Study from Study Config.</p><p>Generate a unique ID and store the Study to DB.</p>
+        <p>Create a Study from Study Config.</p><p>Generate an unique ID and store the Study to DB.</p>
 
         
           <table class="field-table">
@@ -578,7 +586,7 @@
         
       
         <h3 id="api.CreateTrialRequest">CreateTrialRequest</h3>
-        <p>Create a Trial from Trial Config.</p><p>Generate a unique ID and store the Trial to DB.</p>
+        <p>Create a Trial from Trial Config.</p><p>Generate an unique ID and store the Trial to DB.</p>
 
         
           <table class="field-table">
@@ -631,7 +639,7 @@
         
       
         <h3 id="api.EarlyStoppingParameter">EarlyStoppingParameter</h3>
-        <p>Parameter for EarlyStopping service. Key value format.</p>
+        <p>Parameter for EarlyStopping service. Key-value format.</p>
 
         
           <table class="field-table">
@@ -1317,6 +1325,52 @@
 
         
       
+        <h3 id="api.GetTrialReply">GetTrialReply</h3>
+        <p>Return a trial configuration by specified trial ID</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trial</td>
+                  <td><a href="#api.Trial">Trial</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetTrialRequest">GetTrialRequest</h3>
+        <p>Get a trial configuration from DB by trial ID</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trial_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
         <h3 id="api.GetTrialsReply">GetTrialsReply</h3>
         <p>Return a trial list in specified Study.</p>
 
@@ -1387,7 +1441,7 @@
         
       
         <h3 id="api.GetWorkerFullInfoRequest">GetWorkerFullInfoRequest</h3>
-        <p>Get a full informations related to specified Workers.</p><p>It includes Worker Config, HyperParameters and Metrics Logs.</p>
+        <p>Get a full information related to specified Workers.</p><p>It includes Worker Config, HyperParameters and Metrics Logs.</p>
 
         
           <table class="field-table">
@@ -1454,7 +1508,7 @@
         
       
         <h3 id="api.GetWorkersRequest">GetWorkersRequest</h3>
-        <p>Get a Worker Configs and Statuses from DB by ID of Study, Trial or Worker.</p>
+        <p>Get a configs and status of a Worker from DB by ID of Study, Trial or Worker.</p>
 
         
           <table class="field-table">
@@ -1766,7 +1820,7 @@
         
       
         <h3 id="api.RegisterWorkerRequest">RegisterWorkerRequest</h3>
-        <p>Create a Worker from Worker Config.</p><p>Generate a unique ID and store the Worker to DB.</p>
+        <p>Create a Worker from Worker Config.</p><p>Generate an unique ID and store the Worker to DB.</p>
 
         
           <table class="field-table">
@@ -2275,7 +2329,7 @@
         
       
         <h3 id="api.SuggestionParameter">SuggestionParameter</h3>
-        <p>Parameter for Suggestion service. Key value format.</p>
+        <p>Parameter for Suggestion service. Key-value format.</p>
 
         
           <table class="field-table">
@@ -2342,7 +2396,7 @@
         
       
         <h3 id="api.Tag">Tag</h3>
-        <p>Tag for each resources.</p>
+        <p>Tag for each resource.</p>
 
         
           <table class="field-table">
@@ -2372,7 +2426,7 @@
         
       
         <h3 id="api.Trial">Trial</h3>
-        <p>A set of Hyperparameter.</p><p>In a study, multiple trials are evaluated by worker.</p><p>Suggestion service will generate next trials.</p>
+        <p>A set of Hyperparameter.</p><p>In a study, multiple trials are evaluated by workers.</p><p>Suggestion service will generate next trials.</p>
 
         
           <table class="field-table">
@@ -2742,6 +2796,13 @@ Generate a unique ID and store the Trial to DB.</p></td>
               </tr>
             
               <tr>
+                <td>GetTrial</td>
+                <td><a href="#api.GetTrialRequest">GetTrialRequest</a></td>
+                <td><a href="#api.GetTrialReply">GetTrialReply</a></td>
+                <td><p>Get a Trial Configuration from DB by ID of Trial.</p></td>
+              </tr>
+            
+              <tr>
                 <td>RegisterWorker</td>
                 <td><a href="#api.RegisterWorkerRequest">RegisterWorkerRequest</a></td>
                 <td><a href="#api.RegisterWorkerReply">RegisterWorkerReply</a></td>
@@ -2753,7 +2814,7 @@ Generate a unique ID and store the Worker to DB.</p></td>
                 <td>GetWorkers</td>
                 <td><a href="#api.GetWorkersRequest">GetWorkersRequest</a></td>
                 <td><a href="#api.GetWorkersReply">GetWorkersReply</a></td>
-                <td><p>Get a Worker Configs and Statuses from DB by ID of Study, Trial or Worker.</p></td>
+                <td><p>Get a Worker Configs and Status from DB by ID of Study, Trial or Worker.</p></td>
               </tr>
             
               <tr>
@@ -2767,7 +2828,7 @@ Generate a unique ID and store the Worker to DB.</p></td>
                 <td>GetWorkerFullInfo</td>
                 <td><a href="#api.GetWorkerFullInfoRequest">GetWorkerFullInfoRequest</a></td>
                 <td><a href="#api.GetWorkerFullInfoReply">GetWorkerFullInfoReply</a></td>
-                <td><p>Get a full informations related to specified Workers.
+                <td><p>Get full information related to specified Workers.
 It includes Worker Config, HyperParameters and Metrics Logs.</p></td>
               </tr>
             
@@ -2798,8 +2859,8 @@ You can get all logs of metrics since start of the worker.</p></td>
                 <td><a href="#api.SetSuggestionParametersRequest">SetSuggestionParametersRequest</a></td>
                 <td><a href="#api.SetSuggestionParametersReply">SetSuggestionParametersReply</a></td>
                 <td><p>Create or Update parameter set for a suggestion service.
-When you specified a ID of parameter set, it will update the parameter set by your request.
-When you specified no ID, it will create a new parameter set for corresponding study and suggestion service.
+If you specify an ID of parameter set, it will update the parameter set by your request.
+If you don&#39;t specify an ID, it will create a new parameter set for corresponding study and suggestion service.
 The parameters are key-value format.</p></td>
               </tr>
             
