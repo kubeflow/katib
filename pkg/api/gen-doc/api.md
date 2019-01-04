@@ -9,6 +9,8 @@
     - [CreateTrialReply](#api.CreateTrialReply)
     - [CreateTrialRequest](#api.CreateTrialRequest)
     - [DataSetInfo](#api.DataSetInfo)
+    - [DeleteStudyReply](#api.DeleteStudyReply)
+    - [DeleteStudyRequest](#api.DeleteStudyRequest)
     - [EarlyStoppingParameter](#api.EarlyStoppingParameter)
     - [EarlyStoppingParameterSet](#api.EarlyStoppingParameterSet)
     - [FeasibleSpace](#api.FeasibleSpace)
@@ -172,6 +174,36 @@ Generate an unique ID and store the Trial to DB.
 | ----- | ---- | ----- | ----------- |
 | name | [string](#string) |  |  |
 | path | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="api.DeleteStudyReply"/>
+
+### DeleteStudyReply
+Return deleted Study ID.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| study_id | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="api.DeleteStudyRequest"/>
+
+### DeleteStudyRequest
+Delete a Study from DB by Study ID.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| study_id | [string](#string) |  |  |
 
 
 
@@ -1330,6 +1362,7 @@ https://cloud.google.com/service-infrastructure/docs/service-management/referenc
 | ----------- | ------------ | ------------- | ------------|
 | CreateStudy | [CreateStudyRequest](#api.CreateStudyRequest) | [CreateStudyReply](#api.CreateStudyRequest) | Create a Study from Study Config. Generate a unique ID and store the Study to DB. |
 | GetStudy | [GetStudyRequest](#api.GetStudyRequest) | [GetStudyReply](#api.GetStudyRequest) | Get a Study Config from DB by ID of Study. |
+| DeleteStudy | [DeleteStudyRequest](#api.DeleteStudyRequest) | [DeleteStudyReply](#api.DeleteStudyRequest) | Delete a Study from DB by Study ID. |
 | GetStudyList | [GetStudyListRequest](#api.GetStudyListRequest) | [GetStudyListReply](#api.GetStudyListRequest) | Get all Study Configs from DB. |
 | CreateTrial | [CreateTrialRequest](#api.CreateTrialRequest) | [CreateTrialReply](#api.CreateTrialRequest) | Create a Trial from Trial Config. Generate a unique ID and store the Trial to DB. |
 | GetTrials | [GetTrialsRequest](#api.GetTrialsRequest) | [GetTrialsReply](#api.GetTrialsRequest) | Get a Trial Configs from DB by ID of Study. |

@@ -199,6 +199,14 @@
                 </li>
               
                 <li>
+                  <a href="#api.DeleteStudyReply"><span class="badge">M</span>DeleteStudyReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.DeleteStudyRequest"><span class="badge">M</span>DeleteStudyRequest</a>
+                </li>
+              
+                <li>
                   <a href="#api.EarlyStoppingParameter"><span class="badge">M</span>EarlyStoppingParameter</a>
                 </li>
               
@@ -627,6 +635,52 @@
               
                 <tr>
                   <td>path</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.DeleteStudyReply">DeleteStudyReply</h3>
+        <p>Return deleted Study ID.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.DeleteStudyRequest">DeleteStudyRequest</h3>
+        <p>Delete a Study from DB by Study ID.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p> </p></td>
@@ -2771,6 +2825,13 @@ Generate a unique ID and store the Study to DB.</p></td>
                 <td><a href="#api.GetStudyRequest">GetStudyRequest</a></td>
                 <td><a href="#api.GetStudyReply">GetStudyReply</a></td>
                 <td><p>Get a Study Config from DB by ID of Study.</p></td>
+              </tr>
+            
+              <tr>
+                <td>DeleteStudy</td>
+                <td><a href="#api.DeleteStudyRequest">DeleteStudyRequest</a></td>
+                <td><a href="#api.DeleteStudyReply">DeleteStudyReply</a></td>
+                <td><p>Delete a Study from DB by Study ID.</p></td>
               </tr>
             
               <tr>

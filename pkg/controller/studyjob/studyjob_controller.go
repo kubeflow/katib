@@ -46,8 +46,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
-
-const maxMsgSize = 1<<31 - 1
+const (
+	maxMsgSize = 1<<31 - 1
+	cleanDataFinalizer = "clean-studyjob-data"
+)
 
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
@@ -177,8 +179,32 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
-
 	var update bool = false
+	deleted := instance.GetDeletionTimestamp() != nil
+	pendingFinalizers := instance.GetFinalizers()
+	if !deleted && !contains(pendingFinalizers, cleanDataFinalizer) {
+		log.Printf("Adding finalizer %s", cleanDataFinalizer)
+		finalizers := append(pendingFinalizers, cleanDataFinalizer)
+		return r.updateFinalizers(instance, finalizers)
+	}
+	if deleted {
+		if !contains(pendingFinalizers, cleanDataFinalizer) {
+			return reconcile.Result{}, nil
+		}
+		err = deleteStudy(instance)
+		if err != nil {
+			log.Printf("Fail to delete %v", err)
+			return reconcile.Result{}, err
+		}
+		finalizers := []string{}
+		for _, pendingFinalizer := range pendingFinalizers {
+			if pendingFinalizer != cleanDataFinalizer {
+				finalizers = append(finalizers, pendingFinalizer)
+			}
+		}
+		return r.updateFinalizers(instance, finalizers)
+	}
+
 	switch instance.Status.Condition {
 	case katibv1alpha1.ConditionCompleted,
 	     katibv1alpha1.ConditionFailed,
@@ -210,6 +236,18 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		}
 	}
 	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileStudyJobController) updateFinalizers(instance *katibv1alpha1.StudyJob, finalizers []string) (reconcile.Result, error) {
+	instance.SetFinalizers(finalizers)
+	err := r.Update(context.TODO(), instance)
+	if err != nil {
+		log.Printf("Fail to Update StudyJob %v : %v", instance.Status.StudyID, err)
+		return reconcile.Result{}, err
+	} else {
+		// Need to requeue because finalizer update does not change metadata.generation
+		return reconcile.Result{Requeue: true}, err
+	}
 }
 
 func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, wids []string) (bool, error) {

@@ -33,6 +33,14 @@ service Manager {
         };
     };
     /** 
+     * Delete a Study from DB by Study ID.
+     */
+    rpc DeleteStudy(DeleteStudyRequest) returns (DeleteStudyReply){
+        option (google.api.http) = {
+            get: "/api/Manager/DeleteStudy/{study_id}"
+        };
+    };
+    /**
      * Get all Study Configs from DB.
      */
     rpc GetStudyList(GetStudyListRequest) returns (GetStudyListReply){
@@ -413,6 +421,20 @@ message CreateStudyReply {
 }
 
 /** 
+ * Delete a Study from DB by Study ID.
+ */
+message DeleteStudyRequest {
+    string study_id = 1;
+}
+
+/**
+ * Return deleted Study ID.
+ */
+message DeleteStudyReply {
+    string study_id = 1;
+}
+
+/**
  * Get a Study Config from DB by ID of Study.
  */
 message GetStudyRequest {

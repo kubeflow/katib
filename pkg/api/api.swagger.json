@@ -69,6 +69,31 @@
         ]
       }
     },
+    "/api/Manager/DeleteStudy/{study_id}": {
+      "get": {
+        "summary": "* \nDelete a Study from DB by Study ID.",
+        "operationId": "DeleteStudy",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiDeleteStudyReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "study_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
     "/api/Manager/GetEarlyStoppingParameterList/{study_id}": {
       "get": {
         "operationId": "GetEarlyStoppingParameterList",
@@ -211,7 +236,7 @@
     },
     "/api/Manager/GetStudyList": {
       "get": {
-        "summary": "* \nGet all Study Configs from DB.",
+        "summary": "*\nGet all Study Configs from DB.",
         "operationId": "GetStudyList",
         "responses": {
           "200": {
@@ -688,6 +713,15 @@
           "type": "string"
         }
       }
+    },
+    "apiDeleteStudyReply": {
+      "type": "object",
+      "properties": {
+        "study_id": {
+          "type": "string"
+        }
+      },
+      "description": "*\nReturn deleted Study ID."
     },
     "apiEarlyStoppingParameter": {
       "type": "object",
