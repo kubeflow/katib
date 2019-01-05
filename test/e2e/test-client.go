@@ -101,6 +101,7 @@ func main() {
 		getSuggestReply := getSuggestion(c, studyID, paramID)
 		checkSuggestions(getSuggestReply, iter)
 	}
+	DeleteStudy(c, studyID)
 	conn.Close()
 	log.Println("E2E test OK!")
 }
@@ -149,6 +150,17 @@ func CreateStudy(c api.ManagerClient) string {
 	}
 	log.Printf("Study ID %s StudyConf %v", studyID, getStudyReply.StudyConfig)
 	return studyID
+}
+
+func DeleteStudy(c api.ManagerClient, studyID string) {
+	ctx := context.Background()
+	deleteStudyreq := &api.DeleteStudyRequest{
+		StudyId: studyID,
+	}
+	if _, err := c.DeleteStudy(ctx, deleteStudyreq); err != nil {
+		log.Fatalf("DeleteStudy error %v", err)
+	}
+	log.Printf("Study %s is deleted", studyID)
 }
 
 func setSuggestionParam(c api.ManagerClient, studyID string) string {
