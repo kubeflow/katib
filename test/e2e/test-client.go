@@ -160,6 +160,27 @@ func DeleteStudy(c api.ManagerClient, studyID string) {
 	if _, err := c.DeleteStudy(ctx, deleteStudyreq); err != nil {
 		log.Fatalf("DeleteStudy error %v", err)
 	}
+	getStudyreq := &api.GetStudyRequest{
+			StudyId: studyID,
+	}
+	getStudyReply, _ := c.GetStudy(ctx, getStudyreq)
+	if getStudyReply != nil && getStudyReply.StudyConfig != nil {
+		log.Fatalf("Failed to delete Study %s", studyID)
+	}
+	getTrialsRequest := &api.GetTrialsRequest{
+			StudyId: studyID,
+	}
+	gtrep, _ := c.GetTrials(ctx, getTrialsRequest)
+	if gtrep != nil && len(gtrep.Trials) > 0 {
+		log.Fatalf("Failed to delete Trials of Study %s", studyID)
+	}
+	getWorkersRequest := &api.GetWorkersRequest{
+			StudyId: studyID,
+	}
+	gwrep, _ := c.GetWorkers(ctx, getWorkersRequest)
+	if gwrep != nil && len(gwrep.Workers) > 0 {
+		log.Fatalf("Failed to delete Workers of Study %s", studyID)
+	}
 	log.Printf("Study %s is deleted", studyID)
 }
 
