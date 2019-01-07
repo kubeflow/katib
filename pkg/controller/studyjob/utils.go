@@ -135,3 +135,12 @@ func checkGoalAndUpdateObject(curValue float64, instance *katibv1alpha1.StudyJob
 
 	return goal
 }
+
+func contains(l []string, s string) bool {
+	for _, elem := range l {
+		if elem == s {
+			return true
+		}
+	}
+	return false
+}

@@ -28,6 +28,11 @@ class ManagerStub(object):
         request_serializer=api__pb2.GetStudyRequest.SerializeToString,
         response_deserializer=api__pb2.GetStudyReply.FromString,
         )
+    self.DeleteStudy = channel.unary_unary(
+        '/api.Manager/DeleteStudy',
+        request_serializer=api__pb2.DeleteStudyRequest.SerializeToString,
+        response_deserializer=api__pb2.DeleteStudyReply.FromString,
+        )
     self.GetStudyList = channel.unary_unary(
         '/api.Manager/GetStudyList',
         request_serializer=api__pb2.GetStudyListRequest.SerializeToString,
@@ -165,8 +170,16 @@ class ManagerServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def GetStudyList(self, request, context):
+  def DeleteStudy(self, request, context):
     """* 
+    Delete a Study from DB by Study ID.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetStudyList(self, request, context):
+    """*
     Get all Study Configs from DB.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -354,6 +367,11 @@ def add_ManagerServicer_to_server(servicer, server):
           servicer.GetStudy,
           request_deserializer=api__pb2.GetStudyRequest.FromString,
           response_serializer=api__pb2.GetStudyReply.SerializeToString,
+      ),
+      'DeleteStudy': grpc.unary_unary_rpc_method_handler(
+          servicer.DeleteStudy,
+          request_deserializer=api__pb2.DeleteStudyRequest.FromString,
+          response_serializer=api__pb2.DeleteStudyReply.SerializeToString,
       ),
       'GetStudyList': grpc.unary_unary_rpc_method_handler(
           servicer.GetStudyList,

@@ -128,6 +128,26 @@ func getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, erro
 	return sconf, nil
 }
 
+func deleteStudy(instance *katibv1alpha1.StudyJob) error {
+	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Connect katib manager error %v", err)
+		return err
+	}
+	defer conn.Close()
+	c := katibapi.NewManagerClient(conn)
+	ctx := context.Background()
+	studyID := instance.Status.StudyID
+	deleteStudyreq := &katibapi.DeleteStudyRequest{
+		StudyId: studyID,
+	}
+	if _, err = c.DeleteStudy(ctx, deleteStudyreq); err != nil {
+		log.Printf("DeleteStudy error %v", err)
+		return err
+	}
+	return nil
+}
+
 func createStudy(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig) (string, error) {
 	ctx := context.Background()
 	createStudyreq := &katibapi.CreateStudyRequest{
