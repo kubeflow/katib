@@ -13,13 +13,6 @@ spec:
   optimizationgoal: 0.99
   metricsnames:
     - accuracy
-  # specify the inpt and output size of your model
-  inputSize:
-    - 32
-    - 32
-    - 3
-  outputSize:
-    - 10
   # specify the general architecture and trainability of your neurl network
   networkConfig:
     - blockID: 0
@@ -124,3 +117,7 @@ spec:
         value: "20"
       - name: "discount_factor"
         value: "0.95"
+      - name: "input_size"
+        value: "32,32,3"
+      - name: "output_size"
+        value: "10"

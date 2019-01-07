@@ -38,8 +38,6 @@ type StudyJobSpec struct {
 	SuggestionSpec       *SuggestionSpec       `json:"suggestionSpec,omitempty"`
 	EarlyStoppingSpec    *EarlyStoppingSpec    `json:"earlyStoppingSpec,omitempty"`
 	MetricsCollectorSpec *MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
-	InputSize            []int                 `json:"inputSize,omitempty"`
-	OutputSize           []int                 `json:"outputSize,omitempty"`
 	NetworkConfig        []NetworkConfig       `json:"networkConfig,omitempty"`
 }
 
