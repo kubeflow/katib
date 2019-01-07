@@ -44,6 +44,17 @@ func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest)
 	return &api_pb.CreateStudyReply{StudyId: studyID}, nil
 }
 
+func (s *server) DeleteStudy(ctx context.Context, in *api_pb.DeleteStudyRequest) (*api_pb.DeleteStudyReply, error) {
+	if in == nil || in.StudyId == "" {
+		return &api_pb.DeleteStudyReply{}, errors.New("StudyId is missing.")
+	}
+	err := dbIf.DeleteStudy(in.StudyId)
+	if err != nil {
+		return &api_pb.DeleteStudyReply{}, err
+	}
+	return &api_pb.DeleteStudyReply{StudyId: in.StudyId}, nil
+}
+
 func (s *server) GetStudy(ctx context.Context, in *api_pb.GetStudyRequest) (*api_pb.GetStudyReply, error) {
 	sc, err := dbIf.GetStudyConfig(in.StudyId)
 	return &api_pb.GetStudyReply{StudyConfig: sc}, err
@@ -77,6 +88,11 @@ func (s *server) CreateTrial(ctx context.Context, in *api_pb.CreateTrialRequest)
 func (s *server) GetTrials(ctx context.Context, in *api_pb.GetTrialsRequest) (*api_pb.GetTrialsReply, error) {
 	tl, err := dbIf.GetTrialList(in.StudyId)
 	return &api_pb.GetTrialsReply{Trials: tl}, err
+}
+
+func (s *server) GetTrial(ctx context.Context, in *api_pb.GetTrialRequest) (*api_pb.GetTrialReply, error) {
+        t, err := dbIf.GetTrial(in.TrialId)
+        return &api_pb.GetTrialReply{Trial: t}, err
 }
 
 func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestionsReply, error) {

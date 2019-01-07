@@ -101,6 +101,7 @@ func main() {
 		getSuggestReply := getSuggestion(c, studyID, paramID)
 		checkSuggestions(getSuggestReply, iter)
 	}
+	DeleteStudy(c, studyID)
 	conn.Close()
 	log.Println("E2E test OK!")
 }
@@ -149,6 +150,38 @@ func CreateStudy(c api.ManagerClient) string {
 	}
 	log.Printf("Study ID %s StudyConf %v", studyID, getStudyReply.StudyConfig)
 	return studyID
+}
+
+func DeleteStudy(c api.ManagerClient, studyID string) {
+	ctx := context.Background()
+	deleteStudyreq := &api.DeleteStudyRequest{
+		StudyId: studyID,
+	}
+	if _, err := c.DeleteStudy(ctx, deleteStudyreq); err != nil {
+		log.Fatalf("DeleteStudy error %v", err)
+	}
+	getStudyreq := &api.GetStudyRequest{
+			StudyId: studyID,
+	}
+	getStudyReply, _ := c.GetStudy(ctx, getStudyreq)
+	if getStudyReply != nil && getStudyReply.StudyConfig != nil {
+		log.Fatalf("Failed to delete Study %s", studyID)
+	}
+	getTrialsRequest := &api.GetTrialsRequest{
+			StudyId: studyID,
+	}
+	gtrep, _ := c.GetTrials(ctx, getTrialsRequest)
+	if gtrep != nil && len(gtrep.Trials) > 0 {
+		log.Fatalf("Failed to delete Trials of Study %s", studyID)
+	}
+	getWorkersRequest := &api.GetWorkersRequest{
+			StudyId: studyID,
+	}
+	gwrep, _ := c.GetWorkers(ctx, getWorkersRequest)
+	if gwrep != nil && len(gwrep.Workers) > 0 {
+		log.Fatalf("Failed to delete Workers of Study %s", studyID)
+	}
+	log.Printf("Study %s is deleted", studyID)
 }
 
 func setSuggestionParam(c api.ManagerClient, studyID string) string {

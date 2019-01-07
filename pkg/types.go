@@ -1,5 +1,5 @@
 package pkg
 
 const (
-	ManagerAddr = "vizier-core:6789"
+	ManagerAddr = "vizier-core.kubeflow:6789"
 )

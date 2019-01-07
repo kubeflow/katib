@@ -61,9 +61,9 @@ Katib provides a Web UI.
 You can visualize general trend of Hyper parameter space and each training history.
 ![katibui](https://user-images.githubusercontent.com/10014831/48778081-a4388b80-ed17-11e8-938b-fc59a5d2e574.gif)
 
-## CLI Documentation
+## API Documentation
 
-Please refer to [katib-cli.md](./docs/CLI/katib-cli.md).
+Please refer to [api.md](./pkg/api/gen-doc/api.md).
 
 ## CONTRIBUTING
 

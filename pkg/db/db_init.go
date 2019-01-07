@@ -25,7 +25,8 @@ func (d *dbConn) DBInit() {
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS study_permissions
 		(study_id CHAR(16) NOT NULL,
 		access_permission VARCHAR(255),
-		PRIMARY KEY (study_id, access_permission))`)
+		PRIMARY KEY (study_id, access_permission),
+		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE)`)
 	if err != nil {
 		log.Fatalf("Error creating study_permissions table: %v", err)
 	}
@@ -36,7 +37,7 @@ func (d *dbConn) DBInit() {
 		parameters TEXT,
 		objective_value VARCHAR(255),
 		tags TEXT,
-		FOREIGN KEY(study_id) REFERENCES studies(id))`)
+		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE)`)
 	if err != nil {
 		log.Fatalf("Error creating trials table: %v", err)
 	}
@@ -49,8 +50,8 @@ func (d *dbConn) DBInit() {
 		status TINYINT,
 		template_path TEXT,
 		tags TEXT,
-		FOREIGN KEY(study_id) REFERENCES studies(id),
-		FOREIGN KEY(trial_id) REFERENCES trials(id))`)
+		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE,
+		FOREIGN KEY(trial_id) REFERENCES trials(id) ON DELETE CASCADE)`)
 	if err != nil {
 		log.Fatalf("Error creating workers table: %v", err)
 	}
@@ -80,7 +81,7 @@ func (d *dbConn) DBInit() {
 		suggestion_algo TEXT,
 		study_id CHAR(16),
 		parameters TEXT,
-		FOREIGN KEY(study_id) REFERENCES studies(id))`)
+		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE)`)
 	if err != nil {
 		log.Fatalf("Error creating suggestion_param table: %v", err)
 	}
@@ -90,7 +91,7 @@ func (d *dbConn) DBInit() {
 		earlystop_argo TEXT,
 		study_id CHAR(16),
 		parameters TEXT,
-		FOREIGN KEY(study_id) REFERENCES studies(id))`)
+		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE)`)
 	if err != nil {
 		log.Fatalf("Error creating earlystop_param table: %v", err)
 	}

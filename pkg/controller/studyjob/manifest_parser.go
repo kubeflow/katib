@@ -25,6 +25,7 @@ import (
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 	"github.com/kubeflow/katib/pkg/manager/studyjobclient"
 
+	"k8s.io/apimachinery/pkg/util/uuid"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
@@ -39,6 +40,7 @@ func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (string, error) {
 			ParameterSet: []*katibapi.Parameter{},
 		},
 		workerSpec,
+		"",
 		"",
 		true,
 	)
@@ -69,7 +71,7 @@ func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (string, error) {
 	return "", fmt.Errorf("Invalid kind of worker %v", typeChecker)
 }
 
-func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, kind string, dryrun bool) (string, *bytes.Buffer, error) {
+func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, kind string, ns string, dryrun bool) (string, *bytes.Buffer, error) {
 	var wtp *template.Template = nil
 	var err error
 	if workerSpec != nil {
@@ -102,7 +104,7 @@ func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi
 	}
 	var wid string
 	if dryrun {
-		wid = "validation"
+		wid = string(uuid.NewUUID())
 	} else {
 		cwreq := &katibapi.RegisterWorkerRequest{
 			Worker: &katibapi.Worker{
@@ -123,6 +125,7 @@ func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi
 		StudyID:  studyID,
 		TrialID:  trial.TrialId,
 		WorkerID: wid,
+		NameSpace: ns,
 	}
 	var b bytes.Buffer
 	for _, p := range trial.ParameterSet {
