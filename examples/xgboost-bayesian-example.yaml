@@ -1,0 +1,70 @@
+apiVersion: "kubeflow.org/v1alpha1"
+kind: StudyJob
+metadata:
+  namespace: kubeflow
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: xgboost-example
+
+spec:
+  studyName: xgboost-example
+  owner: crd
+  optimizationtype: minimize
+  objectivevaluename: mean_absolute_error
+  optimizationgoal: 10000
+  requestcount: 10
+  metricsnames:
+    - mean_absolute_error
+
+  parameterconfigs:
+    - name: --learning-rate
+      parametertype: double
+      feasible:
+        min: "0.05"
+        max: "0.15"
+    - name: --n-estimators
+      parametertype: int
+      feasible:
+        min: "10000"
+        max: "30000"
+
+  workerSpec:
+    goTemplate:
+      rawTemplate: |-
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          name: {{.WorkerID}}
+          namespace: kubeflow
+        spec:
+          template:
+            spec:
+              containers:
+              - name: {{.WorkerID}}
+                image: gcr.io/kubeflow-examples/ames-housing:latest
+                volumeMounts:
+                - mountPath: "/mnt/xgboost"
+                  name: datadir
+                command:
+                - "python"
+                - "housing.py"
+                - "--train-input=/ames_dataset/train.csv"
+                - "--model-file=/ames_dataset/housing_{{.WorkerID}}.dat"
+                {{- with .HyperParameters}}
+                {{- range .}}
+                - "{{.Name}}={{.Value}}"
+                {{- end}}
+                {{- end}}
+              volumes:
+              - name: datadir
+                persistentVolumeClaim:
+                claimName: claim
+              restartPolicy: Never
+
+  suggestionSpec:
+    suggestionAlgorithm: "bayesianoptimization"
+    suggestionParameters:
+      -
+          name: "burn_in"
+          value: "5"
+    requestNumber: 10
