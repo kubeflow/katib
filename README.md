@@ -65,6 +65,137 @@ You can visualize general trend of Hyper parameter space and each training histo
 
 Please refer to [api.md](./pkg/api/gen-doc/api.md).
 
+## Quickstart to run tfjob and pytorch operator jobs in Katib
+
+For running tfjob and pytorch operator jobs in Katib you have to install their packages.
+
+First install Katib package.
+In your Ksonnet app root, run the following
+
+```
+export KF_ENV=default
+ks env set ${KF_ENV} --namespace=kubeflow
+ks registry add kubeflow github.com/kubeflow/kubeflow/tree/master/kubeflow
+```
+
+### TFjob operator
+
+For installing tfjob operator, run the following
+
+```
+ks pkg install kubeflow/tf-training
+ks pkg install kubeflow/core
+ks generate tf-job-operator tf-job-operator
+ks apply ${KF_ENV} -c tf-job-operator
+```
+
+After this you have to install volume for tfjob operator
+
+If you are using GKE and default StorageClass, you have to create this pvc
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tfevent-volume
+  namespace: kubeflow
+  labels:
+    type: local
+    app: tfjob
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+```
+
+If you are not using GKE and you don't have StorageClass for dynamic volume provisioning at your cluster, you have to create pvc and pv
+
+```
+kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/tfevent-volume/tfevent-pvc.yaml
+
+kubectl create -f https://github.com/kubeflow/katib/blob/master/examples/tfevent-volume/tfevent-pv.yaml
+```
+
+### Pytorch operator
+For installing pytorch operator, run the following
+
+```
+ks pkg install kubeflow/pytorch-job
+ks generate pytorch-operator pytorch-operator
+ks apply ${KF_ENV} -c pytorch-operator
+```
+
+### Katib
+
+Finally, you can install Katib
+
+```
+ks pkg install kubeflow/katib
+ks generate katib katib
+ks apply ${KF_ENV} -c katib
+```
+
+If you want to use Katib not in GKE and you don't have StorageClass for dynamic volume provisioning at your cluster, you have to create persistent volume to bound your persistent volume claim.
+
+This is yaml file for persistent volume:
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: katib-mysql
+  labels:
+    type: local
+    app: katib
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/katib
+```
+
+Create this pv after deploying Katib package
+
+```
+kubectl create -f pv.yaml
+```
+
+### Running examples
+
+After deploy everything you can run examples.
+
+This is example for tfjob operator
+
+```
+https://raw.githubusercontent.com/kubeflow/katib/master/examples/pytorchjob-example.yaml
+```
+
+This is example for pytorch operator
+```
+kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/tfjob-example.yaml
+```
+
+
+### Cleanups
+
+Delete installed components
+
+```
+ks delete ${KF_ENV} -c katib
+ks delete ${KF_ENV} -c pytorch-operator
+ks delete ${KF_ENV} -c tf-job-operator
+```
+
+If you create pv for Katib delete it
+
+```
+kubectl delete -f pv.yaml
+```
+
 ## CONTRIBUTING
 
 Please feel free to test the system! [developer-guide.md](./docs/developer-guide.md) is a good starting point for developers.
