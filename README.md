@@ -94,7 +94,6 @@ Please refer to [api.md](./pkg/api/gen-doc/api.md).
 
 For running tfjob and pytorch operator jobs in Katib you have to install their packages.
 
-First install Katib package.
 In your Ksonnet app root, run the following
 
 ```
@@ -109,12 +108,12 @@ For installing tfjob operator, run the following
 
 ```
 ks pkg install kubeflow/tf-training
-ks pkg install kubeflow/core
+ks pkg install kubeflow/common
 ks generate tf-job-operator tf-job-operator
 ks apply ${KF_ENV} -c tf-job-operator
 ```
 
-After this you have to install volume for tfjob operator
+After this you have to install volume for tfjob operator.
 
 If you are using GKE and default StorageClass, you have to create this pvc
 
@@ -140,7 +139,7 @@ If you are not using GKE and you don't have StorageClass for dynamic volume prov
 ```
 kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/tfevent-volume/tfevent-pvc.yaml
 
-kubectl create -f https://github.com/kubeflow/katib/blob/master/examples/tfevent-volume/tfevent-pv.yaml
+kubectl create -f https://raw.githubusercontent.com/andreyvelich/katib/example-doc-pytorch-tfjob-313/examples/tfevent-volume/tfevent-pv.yaml
 ```
 
 ### Pytorch operator
@@ -164,7 +163,7 @@ ks apply ${KF_ENV} -c katib
 
 If you want to use Katib not in GKE and you don't have StorageClass for dynamic volume provisioning at your cluster, you have to create persistent volume to bound your persistent volume claim.
 
-This is yaml file for persistent volume:
+This is yaml file for persistent volume
 
 ```yaml
 apiVersion: v1
@@ -186,7 +185,7 @@ spec:
 Create this pv after deploying Katib package
 
 ```
-kubectl create -f pv.yaml
+kubectl create -f katib-mysql-pv.yaml
 ```
 
 ### Running examples
@@ -196,7 +195,7 @@ After deploy everything you can run examples.
 This is example for tfjob operator
 
 ```
-https://raw.githubusercontent.com/kubeflow/katib/master/examples/pytorchjob-example.yaml
+kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/pytorchjob-example.yaml
 ```
 
 This is example for pytorch operator
@@ -218,7 +217,7 @@ ks delete ${KF_ENV} -c tf-job-operator
 If you create pv for Katib delete it
 
 ```
-kubectl delete -f pv.yaml
+kubectl delete -f katib-mysql-pv.yaml
 ```
 
 ## CONTRIBUTING
