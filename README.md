@@ -195,14 +195,14 @@ After deploy everything you can run examples.
 This is example for tfjob operator
 
 ```
-kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/pytorchjob-example.yaml
-```
-
-This is example for pytorch operator
-```
 kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/tfjob-example.yaml
 ```
 
+This is example for pytorch operator
+
+```
+kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/pytorchjob-example.yaml
+```
 
 ### Cleanups
 
