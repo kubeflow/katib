@@ -7,6 +7,31 @@
 Hyperparameter Tuning on Kubernetes.
 This project is inspired by [Google vizier](https://static.googleusercontent.com/media/research.google.com/ja//pubs/archive/bcb15507f4b52991a0783013df4222240e942381.pdf). Katib is a scalable and flexible hyperparameter tuning framework and is tightly integrated with kubernetes. Also it does not depend on a specific Deep Learning framework (e.g. TensorFlow, MXNet, and PyTorch).
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Name](#name)
+- [Concepts in Google Vizier](#concepts-in-google-vizier)
+  - [Study](#study)
+  - [Trial](#trial)
+  - [Suggestion](#suggestion)
+- [Components in Katib](#components-in-katib)
+- [Getting Started](#getting-started)
+- [Web UI](#web-ui)
+- [API Documentation](#api-documentation)
+- [Quickstart to run tfjob and pytorch operator jobs in Katib](#quickstart-to-run-tfjob-and-pytorch-operator-jobs-in-katib)
+  - [TFjob operator](#tfjob-operator)
+  - [Pytorch operator](#pytorch-operator)
+  - [Katib](#katib)
+  - [Running examples](#running-examples)
+  - [Cleanups](#cleanups)
+- [CONTRIBUTING](#contributing)
+- [TODOs](#todos)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Name
 
 Katib stands for `secretary` in Arabic. As `Vizier` stands for a high official or a prime minister in Arabic, this project Katib is named in the honor of Vizier.
