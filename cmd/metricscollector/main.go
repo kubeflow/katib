@@ -42,7 +42,6 @@ import (
 	"flag"
 	"log"
 
-	"github.com/kubeflow/katib/pkg"
 	api "github.com/kubeflow/katib/pkg/api"
 	"github.com/kubeflow/katib/pkg/manager/metricscollector"
 
@@ -54,11 +53,12 @@ var trialID = flag.String("t", "", "Trial ID")
 var workerID = flag.String("w", "", "Worker ID")
 var workerKind = flag.String("k", "", "Worker Kind")
 var namespace = flag.String("n", "", "NameSpace")
+var managerSerivce = flag.String("m", "", "Vizier Manager service")
 
 func main() {
 	flag.Parse()
 	log.Printf("Study ID: %s, Trial ID: %s, Worker ID: %s, Worker Kind: %s", *studyID, *trialID, *workerID, *workerKind)
-	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
+	conn, err := grpc.Dial(*managerSerivce, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("could not connect: %v", err)
 	}

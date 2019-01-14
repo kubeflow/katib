@@ -34,4 +34,6 @@ data:
                 - "{{.WorkerKind}}"
                 - "-n"
                 - "{{.NameSpace}}"
+                - "-m"
+                - "{{.ManagerSerivce}}"
               restartPolicy: Never
