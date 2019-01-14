@@ -38,6 +38,8 @@ type StudyJobSpec struct {
 	SuggestionSpec       *SuggestionSpec       `json:"suggestionSpec,omitempty"`
 	EarlyStoppingSpec    *EarlyStoppingSpec    `json:"earlyStoppingSpec,omitempty"`
 	MetricsCollectorSpec *MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
+	GraphConfig          GraphConfig           `json:"graphConfig,omitempty"`
+	Operations           []Operation           `json:"operations,omitempty"`
 }
 
 // StudyJobStatus defines the observed state of StudyJob
@@ -180,6 +182,19 @@ type StudyJobList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []StudyJob `json:"items"`
+}
+
+// GraphConfig contains a config of DAG
+type GraphConfig struct {
+	NumVertex  int   `json:"numVertex,omitempty"`
+	InputSize  []int `json:"inputSize,omitempty"`
+	OutputSize []int `json:"outputSize,omitempty"`
+}
+
+// Operation contains type of operation in DAG
+type Operation struct {
+	OperationType    string            `json:"operationType,omitempty"`
+	ParameterConfigs []ParameterConfig `json:"parameterconfigs,omitempty"`
 }
 
 func init() {

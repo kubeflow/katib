@@ -14,14 +14,12 @@ spec:
   metricsnames:
     - accuracy
   graphConfig:
-    - numVertex: "8"
-    - inputSize:
-      list:
+    numVertex: 8
+    inputSize:
       - 32
       - 32
       - 3
-    - outputSize:
-      list:
+    outputSize:
       - 10
   operations:
     - operationType: "convolution"
@@ -56,7 +54,7 @@ spec:
             - sigmoid
             - tanh
             - identity
-    - operationtype: "reduction"
+    - operationType: "reduction"
       parameterconfigs: 
         - name: "reduction_type"
           parametertype: categorical
@@ -75,7 +73,7 @@ spec:
             list:
             - 1
             - 2
-    - operationtype: "dense"
+    - operationType: "dense"
       parameterconfigs:
         - name: "num_units"
           parametertype: categorical
