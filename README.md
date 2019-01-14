@@ -92,7 +92,7 @@ Please refer to [api.md](./pkg/api/gen-doc/api.md).
 
 ## Quickstart to run tfjob and pytorch operator jobs in Katib
 
-For running tfjob and pytorch operator jobs in Katib you have to install their packages.
+For running tfjob and pytorch operator jobs in Katib, you have to install their packages.
 
 In your Ksonnet app root, run the following
 
@@ -111,35 +111,6 @@ ks pkg install kubeflow/tf-training
 ks pkg install kubeflow/common
 ks generate tf-job-operator tf-job-operator
 ks apply ${KF_ENV} -c tf-job-operator
-```
-
-After this you have to install volume for tfjob operator.
-
-If you are using GKE and default StorageClass, you have to create this pvc
-
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: tfevent-volume
-  namespace: kubeflow
-  labels:
-    type: local
-    app: tfjob
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
-```
-
-If you are not using GKE and you don't have StorageClass for dynamic volume provisioning at your cluster, you have to create pvc and pv
-
-```
-kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/tfevent-volume/tfevent-pvc.yaml
-
-kubectl create -f https://raw.githubusercontent.com/andreyvelich/katib/example-doc-pytorch-tfjob-313/examples/tfevent-volume/tfevent-pv.yaml
 ```
 
 ### Pytorch operator
@@ -185,12 +156,41 @@ spec:
 Create this pv after deploying Katib package
 
 ```
-kubectl create -f katib-mysql-pv.yaml
+kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/manifests/pv/pv.yaml
 ```
 
 ### Running examples
 
-After deploy everything you can run examples.
+After deploy everything, you can run examples.
+
+To run tfjob operator example, you have to install volume for it.
+
+If you are using GKE and default StorageClass, you have to create this pvc
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tfevent-volume
+  namespace: kubeflow
+  labels:
+    type: local
+    app: tfjob
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+```
+
+If you are not using GKE and you don't have StorageClass for dynamic volume provisioning at your cluster, you have to create pvc and pv
+
+```
+kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/tfevent-volume/tfevent-pvc.yaml
+
+kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/tfevent-volume/tfevent-pv.yaml
+```
 
 This is example for tfjob operator
 
@@ -214,10 +214,10 @@ ks delete ${KF_ENV} -c pytorch-operator
 ks delete ${KF_ENV} -c tf-job-operator
 ```
 
-If you create pv for Katib delete it
+If you create pv for Katib, delete it
 
 ```
-kubectl delete -f katib-mysql-pv.yaml
+kubectl delete -f https://raw.githubusercontent.com/kubeflow/katib/master/manifests/pv/pv.yaml
 ```
 
 ## CONTRIBUTING
