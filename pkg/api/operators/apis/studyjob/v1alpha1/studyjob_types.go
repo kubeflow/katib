@@ -38,7 +38,6 @@ type StudyJobSpec struct {
 	SuggestionSpec       *SuggestionSpec       `json:"suggestionSpec,omitempty"`
 	EarlyStoppingSpec    *EarlyStoppingSpec    `json:"earlyStoppingSpec,omitempty"`
 	MetricsCollectorSpec *MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
-	NetworkConfig        []NetworkConfig       `json:"networkConfig,omitempty"`
 }
 
 // StudyJobStatus defines the observed state of StudyJob
@@ -87,8 +86,6 @@ type ParameterConfig struct {
 	Name          string        `json:"name,omitempty"`
 	ParameterType ParameterType `json:"parametertype,omitempty"`
 	Feasible      FeasibleSpace `json:"feasible,omitempty"`
-	Trainable     bool          `json:"trainable,omitempty"`
-	Value         []string      `json:"value,omitempty"`
 }
 
 type FeasibleSpace struct {
@@ -105,7 +102,6 @@ const (
 	ParameterTypeInt         ParameterType = "int"
 	ParameterTypeDiscrete    ParameterType = "discrete"
 	ParameterTypeCategorical ParameterType = "categorical"
-	ParameterTypeRange       ParameterType = "range"
 )
 
 type OptimizationType string
@@ -184,12 +180,6 @@ type StudyJobList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []StudyJob `json:"items"`
-}
-
-type NetworkConfig struct {
-	BlockID     int               `json:"blockID,omitempty"`
-	NeuronType  string            `json:"neuronType,omitempty"`
-	NetworkSpec []ParameterConfig `json:"networkSpec,omitempty"`
 }
 
 func init() {
