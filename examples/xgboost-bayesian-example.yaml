@@ -13,8 +13,6 @@ spec:
   objectivevaluename: mean_absolute_error
   optimizationgoal: 10000
   requestcount: 10
-  metricsnames:
-    - mean_absolute_error
 
   parameterconfigs:
     - name: --learning-rate
@@ -38,6 +36,9 @@ spec:
           namespace: kubeflow
         spec:
           template:
+            # The training worker uses the Ames housing example found at
+            # https://github.com/kubeflow/examples/tree/master/xgboost_ames_housing.
+            # Please first follow the steps and create the required prerequisites.
             spec:
               containers:
               - name: {{.WorkerID}}
