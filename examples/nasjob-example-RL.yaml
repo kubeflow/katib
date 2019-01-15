@@ -23,7 +23,7 @@ spec:
       - 10
   operations:
     - operationType: "convolution"
-      parameterconfigs: 
+      parameterconfigs:
         - name: "filter_size"
           parametertype: categorical
           feasible:
@@ -55,7 +55,7 @@ spec:
             - tanh
             - identity
     - operationType: "reduction"
-      parameterconfigs: 
+      parameterconfigs:
         - name: "reduction_type"
           parametertype: categorical
           feasible:
