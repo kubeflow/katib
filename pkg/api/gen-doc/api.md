@@ -1317,7 +1317,6 @@ Types of value for HyperParameter.
 | INT | 2 | Int type. Use &#34;Max/Min&#34;. |
 | DISCRETE | 3 | Discrete number type. Use &#34;List&#34; as float. |
 | CATEGORICAL | 4 | Categorical type. Use &#34;List&#34; as string. |
-| RANGE | 5 | Range type. Use &#34;Max/Min&#34; and Step parameter. |
 
 
 

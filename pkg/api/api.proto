@@ -232,7 +232,6 @@
      INT = 2; /// Int type. Use "Max/Min".
      DISCRETE = 3; /// Discrete number type. Use "List" as float.
      CATEGORICAL = 4; /// Categorical type. Use "List" as string.
-     RANGE = 5; //Range type. Use "Max/Min" and Step parameter.
  }
  
  /**
