@@ -23,6 +23,7 @@ import (
 
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
+	"github.com/kubeflow/katib/pkg"
 	"github.com/kubeflow/katib/pkg/manager/studyjobclient"
 
 	"k8s.io/apimachinery/pkg/util/uuid"
@@ -147,6 +148,7 @@ func getMetricsCollectorManifest(studyID string, trialID string, workerID string
 		"WorkerID":   workerID,
 		"WorkerKind": workerKind,
 		"NameSpace":  namespace,
+		"ManagerSerivce": pkg.GetManagerAddr(),
 	}
 	mctp := "defaultMetricsCollectorTemplate.yaml"
 	if mcs != nil {

@@ -21,3 +21,8 @@ spec:
       - name: studyjob-controller
         image: katib/studyjob-controller
         imagePullPolicy: Always
+        env:
+        - name: VIZIER_CORE_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
