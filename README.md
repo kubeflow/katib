@@ -204,6 +204,140 @@ This is example for pytorch operator
 kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/pytorchjob-example.yaml
 ```
 
+You can check status of StudyJob
+
+```yaml
+kubectl describe studyjob pytorchjob-example -n kubeflow
+
+Name:         pytorchjob-example
+Namespace:    kubeflow
+Labels:       controller-tools.k8s.io=1.0
+Annotations:  <none>
+API Version:  kubeflow.org/v1alpha1
+Kind:         StudyJob
+Metadata:
+  Cluster Name:
+  Creation Timestamp:  2019-01-15T18:35:20Z
+  Generation:          1
+  Resource Version:    1058135
+  Self Link:           /apis/kubeflow.org/v1alpha1/namespaces/kubeflow/studyjobs/pytorchjob-example
+  UID:                 4fc7ad83-18f4-11e9-a6de-42010a8e0225
+Spec:
+  Metricsnames:
+    accuracy
+  Objectivevaluename:  accuracy
+  Optimizationgoal:    0.99
+  Optimizationtype:    maximize
+  Owner:               crd
+  Parameterconfigs:
+    Feasible:
+      Max:          0.05
+      Min:          0.01
+    Name:           --lr
+    Parametertype:  double
+    Feasible:
+      Max:          0.9
+      Min:          0.5
+    Name:           --momentum
+    Parametertype:  double
+  Requestcount:     4
+  Study Name:       pytorchjob-example
+  Suggestion Spec:
+    Request Number:        3
+    Suggestion Algorithm:  random
+    Suggestion Parameters:
+      Name:   SuggestionCount
+      Value:  0
+  Worker Spec:
+    Go Template:
+      Raw Template:  apiVersion: "kubeflow.org/v1beta1"
+kind: PyTorchJob
+metadata:
+  name: {{.WorkerID}}
+  namespace: kubeflow
+spec:
+ pytorchReplicaSpecs:
+  Master:
+    replicas: 1
+    restartPolicy: OnFailure
+    template:
+      spec:
+        containers:
+          - name: pytorch
+            image: gcr.io/kubeflow-ci/pytorch-mnist-with-summary:1.0
+            imagePullPolicy: Always
+            command:
+              - "python"
+              - "/opt/pytorch_dist_mnist/dist_mnist_with_summary.py"
+              {{- with .HyperParameters}}
+              {{- range .}}
+              - "{{.Name}}={{.Value}}"
+              {{- end}}
+              {{- end}}
+  Worker:
+    replicas: 2
+    restartPolicy: OnFailure
+    template:
+      spec:
+        containers:
+          - name: pytorch
+            image: gcr.io/kubeflow-ci/pytorch-mnist-with-summary:1.0
+            imagePullPolicy: Always
+            command:
+              - "python"
+              - "/opt/pytorch_dist_mnist/dist_mnist_with_summary.py"
+              {{- with .HyperParameters}}
+              {{- range .}}
+              - "{{.Name}}={{.Value}}"
+              {{- end}}
+              {{- end}}
+    Retain:  true
+Status:
+  Conditon:                     Running
+  Early Stopping Parameter Id:
+  Last Reconcile Time:          2019-01-15T18:35:20Z
+  Start Time:                   2019-01-15T18:35:20Z
+  Studyid:                      k291b444a0b68631
+  Suggestion Count:             1
+  Suggestion Parameter Id:      n6f17dd9ff466a2b
+  Trials:
+    Trialid:  o104235328003ad9
+    Workeridlist:
+      Completion Time:  <nil>
+      Conditon:         Running
+      Kind:             PyTorchJob
+      Start Time:       2019-01-15T18:35:20Z
+      Workerid:         b3b371c89144727f
+    Trialid:            ca207b2432231de3
+    Workeridlist:
+      Completion Time:  <nil>
+      Conditon:         Running
+      Kind:             PyTorchJob
+      Start Time:       2019-01-15T18:35:20Z
+      Workerid:         f291b04fb27ece3c
+    Trialid:            ddff69212e826432
+    Workeridlist:
+      Completion Time:  <nil>
+      Conditon:         Running
+      Kind:             PyTorchJob
+      Start Time:       2019-01-15T18:35:20Z
+      Workerid:         ncbed67bbcd4a8ed
+Events:                 <none>
+```
+
+When the spec.Status.Condition becomes ```Completed```, the StudyJob is finished.
+
+You can monitor your results in Katib UI. For accessing to Katib UI you have to install Ambassador.
+
+In your Ksonnet app root, run the following
+
+```
+ks generate ambassador ambassador
+ks apply ${KF_ENV} -c ambassador
+```
+
+After deploy Ambassador, you can access to Katib UI using /katib/ path.
+
 ### Cleanups
 
 Delete installed components
@@ -218,6 +352,12 @@ If you create pv for Katib, delete it
 
 ```
 kubectl delete -f https://raw.githubusercontent.com/kubeflow/katib/master/manifests/pv/pv.yaml
+```
+
+If you deploy Ambassador delete it
+
+```
+ks delete ${KF_ENV} -c ambassador
 ```
 
 ## CONTRIBUTING
