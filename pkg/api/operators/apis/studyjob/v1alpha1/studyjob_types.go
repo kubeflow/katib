@@ -186,7 +186,7 @@ type StudyJobList struct {
 
 // GraphConfig contains a config of DAG
 type GraphConfig struct {
-	NumVertex  int   `json:"numVertex,omitempty"`
+	NumLayers  int   `json:"numLayers,omitempty"`
 	InputSize  []int `json:"inputSize,omitempty"`
 	OutputSize []int `json:"outputSize,omitempty"`
 }
