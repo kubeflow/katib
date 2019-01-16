@@ -207,7 +207,7 @@ kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/exampl
 You can check status of StudyJob
 
 ```yaml
-kubectl describe studyjob pytorchjob-example -n kubeflow
+$ kubectl describe studyjob pytorchjob-example -n kubeflow
 
 Name:         pytorchjob-example
 Namespace:    kubeflow
@@ -327,7 +327,7 @@ Events:                 <none>
 
 When the spec.Status.Condition becomes ```Completed```, the StudyJob is finished.
 
-You can monitor your results in Katib UI. For accessing to Katib UI you have to install Ambassador.
+You can monitor your results in Katib UI. For accessing to Katib UI, you have to install Ambassador.
 
 In your Ksonnet app root, run the following
 
@@ -336,7 +336,13 @@ ks generate ambassador ambassador
 ks apply ${KF_ENV} -c ambassador
 ```
 
-After deploy Ambassador, you can access to Katib UI using /katib/ path.
+After this, you have to port-forward Ambassador service
+
+```
+kubectl port-forward svc/ambassador -n kubeflow 8080:80
+```
+
+Finally, you can access to Katib UI using this URL: ```http://localhost:8080/katib/```.
 
 ### Cleanups
 
@@ -354,7 +360,7 @@ If you create pv for Katib, delete it
 kubectl delete -f https://raw.githubusercontent.com/kubeflow/katib/master/manifests/pv/pv.yaml
 ```
 
-If you deploy Ambassador delete it
+If you deploy Ambassador, delete it
 
 ```
 ks delete ${KF_ENV} -c ambassador
