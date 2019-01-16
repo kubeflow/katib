@@ -179,7 +179,6 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
-	var update bool = false
 	deleted := instance.GetDeletionTimestamp() != nil
 	pendingFinalizers := instance.GetFinalizers()
 	if !deleted && !contains(pendingFinalizers, cleanDataFinalizer) {
@@ -209,7 +208,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 	case katibv1alpha1.ConditionCompleted,
 	     katibv1alpha1.ConditionFailed,
 	     katibv1alpha1.ConditionRunning:
-		update, err = r.checkStatus(instance, request.Namespace)
+		err = r.checkStatus(instance, request.Namespace)
 	default:
 		now := metav1.Now()
 		instance.Status.StartTime = &now
@@ -219,7 +218,6 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 			log.Printf("Fail to initialize %v", err)
 			return reconcile.Result{}, err
 		}
-		update = true
 	}
 	now := metav1.Now()
 	instance.Status.LastReconcileTime = &now
@@ -228,14 +226,13 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		log.Printf("Fail to check status %v", err)
 		return reconcile.Result{}, err
 	}
-	if update {
-		err = r.Update(context.TODO(), instance)
-		if err != nil {
-			log.Printf("Fail to Update StudyJob %v : %v", instance.Status.StudyID, err)
-			return reconcile.Result{}, err
-		}
+	err = r.Update(context.TODO(), instance)
+	if err != nil {
+		log.Printf("Fail to Update StudyJob %v : %v", instance.Status.StudyID, err)
+		return reconcile.Result{}, err
+	} else {
+		return reconcile.Result{}, nil
 	}
-	return reconcile.Result{}, nil
 }
 
 func (r *ReconcileStudyJobController) updateFinalizers(instance *katibv1alpha1.StudyJob, finalizers []string) (reconcile.Result, error) {
@@ -337,7 +334,7 @@ func (r *ReconcileStudyJobController) deleteWorkerResources(instance *katibv1alp
 	return nil
 }
 
-func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, instance *katibv1alpha1.StudyJob, status WorkerStatus, ns string, cwids []string, i int, j int) (bool, error) {
+func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, instance *katibv1alpha1.StudyJob, status WorkerStatus, ns string, cwids []string, i int, j int) error {
 	var update bool = false
 	wid := instance.Status.Trials[i].WorkerList[j].WorkerID
 	nname := types.NamespacedName{Namespace: ns, Name: wid}
@@ -354,7 +351,7 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 					susp := true
 					cjob.Spec.Suspend = &susp
 					if err := r.Update(context.TODO(), cjob); err != nil {
-						return false, err
+						return err
 					}
 				}
 			}
@@ -371,7 +368,6 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 	case katibapi.State_RUNNING:
 		if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionRunning {
 			instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionRunning
-			update = true
 		}
 		if errors.IsNotFound(cjoberr) {
 			spawnErr := r.spawnMetricsCollector(instance, c, instance.Status.StudyID, instance.Status.Trials[i].TrialID, wid, ns, instance.Spec.MetricsCollectorSpec)
@@ -382,7 +378,6 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 	case katibapi.State_ERROR:
 		if instance.Status.Trials[i].WorkerList[j].Condition != katibv1alpha1.ConditionFailed {
 			instance.Status.Trials[i].WorkerList[j].Condition = katibv1alpha1.ConditionFailed
-			update = true
 		}
 	}
 	if update {
@@ -394,10 +389,10 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 			})
 		if err != nil {
 			log.Printf("Fail to update worker info. ID %s", instance.Status.Trials[i].WorkerList[j].WorkerID)
-			return false, err
+			return err
 		}
 	}
-	return update, nil
+	return nil
 }
 
 func(r *ReconcileStudyJobController) getJobWorkerStatus(w *katibv1alpha1.WorkerCondition, ns string) WorkerStatus {
@@ -447,10 +442,9 @@ func(r *ReconcileStudyJobController) getJobWorkerStatus(w *katibv1alpha1.WorkerC
 	}
 }
 
-func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJob, ns string) (bool, error) {
+func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJob, ns string) error {
 	nextSuggestionSchedule := true
 	var cwids []string
-	var update bool = false
 	if instance.Status.Condition == katibv1alpha1.ConditionCompleted || instance.Status.Condition == katibv1alpha1.ConditionFailed {
 		nextSuggestionSchedule = false
 	}
@@ -462,7 +456,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 	if err != nil {
 		log.Printf("Connect katib manager error %v", err)
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
-		return true, nil
+		return nil
 	}
 	defer conn.Close()
 	c := katibapi.NewManagerClient(conn)
@@ -473,13 +467,13 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 					cwids = append(cwids, w.WorkerID)
 				}
 				if err := r.deleteWorkerResources(instance, ns, &w); err != nil {
-					return false, err
+					return err
 				}
 				continue
 			}
 			nextSuggestionSchedule = false
 			js := r.getJobWorkerStatus(&w, ns)
-			update, err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
+			err = r.updateWorker(c, instance, js, ns, cwids[0:], i, j)
 		}
 	}
 	if len(cwids) > 0 {
@@ -489,7 +483,6 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 			instance.Status.Condition = katibv1alpha1.ConditionCompleted
 			now := metav1.Now()
 			instance.Status.CompletionTime = &now
-			update = true
 			nextSuggestionSchedule = false
 		}
 		if err != nil {
@@ -502,26 +495,26 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 			instance.Status.Condition = katibv1alpha1.ConditionCompleted
 			now := metav1.Now()
 			instance.Status.CompletionTime = &now
-			return true, nil
+			return nil
 		}
 		return r.getAndRunSuggestion(instance, c, ns)
 	} else {
-		return update, nil
+		return nil
 	}
 }
 
-func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, ns string) (bool, error) {
+func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, ns string) error {
 	//Check Suggestion Count
 	sps, err := getSuggestionParam(c, instance.Status.SuggestionParameterID)
 	if err != nil {
-		return false, err
+		return err
 	}
 	for i := range sps {
 		if sps[i].Name == "SuggestionCount" {
 			count, _ := strconv.Atoi(sps[i].Value)
 			if count >= instance.Status.SuggestionCount+1 {
 				//Suggestion count mismatched. May be duplicate suggestion request
-				return false, nil
+				return nil
 			}
 			sps[i].Value = strconv.Itoa(instance.Status.SuggestionCount + 1)
 		}
@@ -534,7 +527,7 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 		instance.Status.SuggestionParameterID)
 	if err != nil {
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
-		return true, err
+		return err
 	}
 	trials := getSuggestReply.Trials
 	if len(trials) <= 0 {
@@ -542,21 +535,21 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 		instance.Status.Condition = katibv1alpha1.ConditionCompleted
 		now := metav1.Now()
 		instance.Status.CompletionTime = &now
-		return true, nil
+		return nil
 	}
 	log.Printf("Study: %s Suggestions %v", instance.Status.StudyID, getSuggestReply)
 	wkind, err := getWorkerKind(instance.Spec.WorkerSpec)
 	if err != nil {
 		log.Printf("getWorkerKind error %v", err)
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
-		return true, err
+		return err
 	}
 	for _, t := range trials {
 		wid, err := r.spawnWorker(instance, c, instance.Status.StudyID, t, instance.Spec.WorkerSpec, wkind, false)
 		if err != nil {
 			log.Printf("Spawn worker error %v", err)
 			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			return true, err
+			return err
 		}
 		instance.Status.Trials = append(
 			instance.Status.Trials,
@@ -583,10 +576,10 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 	_, err = c.SetSuggestionParameters(context.Background(), sspr)
 	if err != nil {
 		log.Printf("Study %s Suggestion Count update Error %v", instance.Status.StudyID, err)
-		return false, err
+		return err
 	}
 	instance.Status.SuggestionCount += 1
-	return true, nil
+	return nil
 }
 
 type WorkerInstance struct {
