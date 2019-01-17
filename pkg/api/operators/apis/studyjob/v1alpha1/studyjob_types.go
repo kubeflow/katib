@@ -38,8 +38,9 @@ type StudyJobSpec struct {
 	SuggestionSpec       *SuggestionSpec       `json:"suggestionSpec,omitempty"`
 	EarlyStoppingSpec    *EarlyStoppingSpec    `json:"earlyStoppingSpec,omitempty"`
 	MetricsCollectorSpec *MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
-	GraphConfig          GraphConfig           `json:"graphConfig,omitempty"`
+	GraphConfig          GraphConfig           `json:"graphconfig,omitempty"`
 	Operations           []Operation           `json:"operations,omitempty"`
+	JobType              string                `json:"jobType,omitempty"`
 }
 
 // StudyJobStatus defines the observed state of StudyJob
@@ -94,6 +95,7 @@ type FeasibleSpace struct {
 	Max  string   `json:"max,omitempty"`
 	Min  string   `json:"min,omitempty"`
 	List []string `json:"list,omitempty"`
+	Step string   `json:"step,omitempty"`
 }
 
 type ParameterType string
@@ -104,6 +106,7 @@ const (
 	ParameterTypeInt         ParameterType = "int"
 	ParameterTypeDiscrete    ParameterType = "discrete"
 	ParameterTypeCategorical ParameterType = "categorical"
+	ParameterTypeRange       ParameterType = "range"
 )
 
 type OptimizationType string
@@ -186,9 +189,9 @@ type StudyJobList struct {
 
 // GraphConfig contains a config of DAG
 type GraphConfig struct {
-	NumLayers  int   `json:"numLayers,omitempty"`
-	InputSize  []int `json:"inputSize,omitempty"`
-	OutputSize []int `json:"outputSize,omitempty"`
+	NumLayers  int32   `json:"numLayers,omitempty"`
+	InputSize  []int32 `json:"inputSize,omitempty"`
+	OutputSize []int32 `json:"outputSize,omitempty"`
 }
 
 // Operation contains type of operation in DAG

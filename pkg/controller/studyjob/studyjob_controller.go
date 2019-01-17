@@ -46,8 +46,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
+
 const (
-	maxMsgSize = 1<<31 - 1
+	maxMsgSize         = 1<<31 - 1
 	cleanDataFinalizer = "clean-studyjob-data"
 )
 
@@ -207,8 +208,8 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 
 	switch instance.Status.Condition {
 	case katibv1alpha1.ConditionCompleted,
-	     katibv1alpha1.ConditionFailed,
-	     katibv1alpha1.ConditionRunning:
+		katibv1alpha1.ConditionFailed,
+		katibv1alpha1.ConditionRunning:
 		update, err = r.checkStatus(instance, request.Namespace)
 	default:
 		now := metav1.Now()
@@ -287,7 +288,7 @@ func (r *ReconcileStudyJobController) checkGoal(instance *katibv1alpha1.StudyJob
 			if ml.Name == instance.Spec.ObjectiveValueName {
 				if len(ml.Values) > 0 {
 					curValue, _ := strconv.ParseFloat(ml.Values[len(ml.Values)-1].Value, 32)
-					goal = checkGoalAndUpdateObject(curValue, instance, mls.WorkerId )
+					goal = checkGoalAndUpdateObject(curValue, instance, mls.WorkerId)
 				}
 				break
 			}
@@ -359,7 +360,7 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 				}
 			}
 		} else {
-		// for some reason, metricsCollector for this worker cannot be found (deleted by anyone accidentally or even failed to be created)
+			// for some reason, metricsCollector for this worker cannot be found (deleted by anyone accidentally or even failed to be created)
 			update = true
 			instance.Status.Condition = katibv1alpha1.ConditionFailed
 		}
@@ -390,7 +391,7 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 			context.Background(),
 			&katibapi.UpdateWorkerStateRequest{
 				WorkerId: instance.Status.Trials[i].WorkerList[j].WorkerID,
-				Status: status.WorkerState,
+				Status:   status.WorkerState,
 			})
 		if err != nil {
 			log.Printf("Fail to update worker info. ID %s", instance.Status.Trials[i].WorkerList[j].WorkerID)
@@ -400,7 +401,7 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 	return update, nil
 }
 
-func(r *ReconcileStudyJobController) getJobWorkerStatus(w *katibv1alpha1.WorkerCondition, ns string) WorkerStatus {
+func (r *ReconcileStudyJobController) getJobWorkerStatus(w *katibv1alpha1.WorkerCondition, ns string) WorkerStatus {
 	runtimejob := createWorkerJobObj(w.Kind)
 	nname := types.NamespacedName{Namespace: ns, Name: w.WorkerID}
 	joberr := r.Client.Get(context.TODO(), nname, runtimejob)
@@ -411,7 +412,7 @@ func(r *ReconcileStudyJobController) getJobWorkerStatus(w *katibv1alpha1.WorkerC
 	var cpTime *metav1.Time
 	switch w.Kind {
 	case DefaultJobWorker:
-		job := runtimejob.(* batchv1.Job)
+		job := runtimejob.(*batchv1.Job)
 		if job.Status.Active == 0 && job.Status.Succeeded > 0 {
 			state = katibapi.State_COMPLETED
 		} else if job.Status.Failed > 0 {
@@ -419,7 +420,7 @@ func(r *ReconcileStudyJobController) getJobWorkerStatus(w *katibv1alpha1.WorkerC
 		}
 		cpTime = job.Status.CompletionTime
 	case TFJobWorker:
-		job := runtimejob.(* tfjobv1beta1.TFJob)
+		job := runtimejob.(*tfjobv1beta1.TFJob)
 		if len(job.Status.Conditions) > 0 {
 			lc := job.Status.Conditions[len(job.Status.Conditions)-1]
 			if lc.Type == commonv1beta1.JobSucceeded {
@@ -430,7 +431,7 @@ func(r *ReconcileStudyJobController) getJobWorkerStatus(w *katibv1alpha1.WorkerC
 		}
 		cpTime = job.Status.CompletionTime
 	case PyTorchJobWorker:
-		job := runtimejob.(* pytorchjobv1beta1.PyTorchJob)
+		job := runtimejob.(*pytorchjobv1beta1.PyTorchJob)
 		if len(job.Status.Conditions) > 0 {
 			lc := job.Status.Conditions[len(job.Status.Conditions)-1]
 			if lc.Type == commonv1beta1.JobSucceeded {
@@ -442,12 +443,16 @@ func(r *ReconcileStudyJobController) getJobWorkerStatus(w *katibv1alpha1.WorkerC
 		cpTime = job.Status.CompletionTime
 	}
 	return WorkerStatus{
-			CompletionTime: cpTime,
-			WorkerState:    state,
+		CompletionTime: cpTime,
+		WorkerState:    state,
 	}
 }
 
 func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJob, ns string) (bool, error) {
+	//Automatically stop for NAS jobs
+	if instance.Spec.JobType == "nas" {
+		instance.Status.Condition = katibv1alpha1.ConditionCompleted
+	}
 	nextSuggestionSchedule := true
 	var cwids []string
 	var update bool = false

@@ -29,18 +29,29 @@ type server struct {
 }
 
 func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest) (*api_pb.CreateStudyReply, error) {
+	var studyID string
+	var err error
 	if in == nil || in.StudyConfig == nil {
 		return &api_pb.CreateStudyReply{}, errors.New("StudyConfig is missing.")
 	}
-	studyID, err := dbIf.CreateStudy(in.StudyConfig)
-	if err != nil {
-		return &api_pb.CreateStudyReply{}, err
+
+	if in.StudyConfig.JobType != "nas" {
+		//If it is a HP job
+		studyID, err = dbIf.CreateStudy(in.StudyConfig)
+		if err != nil {
+			return &api_pb.CreateStudyReply{}, err
+		}
+		s.SaveStudy(ctx, &api_pb.SaveStudyRequest{
+			StudyName:   in.StudyConfig.Name,
+			Owner:       in.StudyConfig.Owner,
+			Description: "StudyID: " + studyID,
+		})
+
+	} else {
+		//If it is a NAS job
+		studyID = "11111111111"
+		log.Printf("NAS job is created, id= %v", studyID)
 	}
-	s.SaveStudy(ctx, &api_pb.SaveStudyRequest{
-		StudyName:   in.StudyConfig.Name,
-		Owner:       in.StudyConfig.Owner,
-		Description: "StudyID: " + studyID,
-	})
 	return &api_pb.CreateStudyReply{StudyId: studyID}, nil
 }
 
@@ -48,15 +59,29 @@ func (s *server) DeleteStudy(ctx context.Context, in *api_pb.DeleteStudyRequest)
 	if in == nil || in.StudyId == "" {
 		return &api_pb.DeleteStudyReply{}, errors.New("StudyId is missing.")
 	}
-	err := dbIf.DeleteStudy(in.StudyId)
-	if err != nil {
-		return &api_pb.DeleteStudyReply{}, err
+	if in.JobType != "nas" {
+		//If it is a HP job
+		err := dbIf.DeleteStudy(in.StudyId)
+		if err != nil {
+			return &api_pb.DeleteStudyReply{}, err
+		}
+	} else {
+		//If it is a NAS job
+		log.Printf("NAS job is deleted, id= %v", in.StudyId)
 	}
 	return &api_pb.DeleteStudyReply{StudyId: in.StudyId}, nil
 }
 
 func (s *server) GetStudy(ctx context.Context, in *api_pb.GetStudyRequest) (*api_pb.GetStudyReply, error) {
-	sc, err := dbIf.GetStudyConfig(in.StudyId)
+	var sc *api_pb.StudyConfig
+	var err error
+	if in.JobType != "nas" {
+		//If it is a HP job
+		sc, err = dbIf.GetStudyConfig(in.StudyId)
+	} else {
+		//If it is a NAS job
+		log.Printf("Get NAS job, id = %v", in.StudyId)
+	}
 	return &api_pb.GetStudyReply{StudyConfig: sc}, err
 }
 
@@ -91,8 +116,8 @@ func (s *server) GetTrials(ctx context.Context, in *api_pb.GetTrialsRequest) (*a
 }
 
 func (s *server) GetTrial(ctx context.Context, in *api_pb.GetTrialRequest) (*api_pb.GetTrialReply, error) {
-        t, err := dbIf.GetTrial(in.TrialId)
-        return &api_pb.GetTrialReply{Trial: t}, err
+	t, err := dbIf.GetTrial(in.TrialId)
+	return &api_pb.GetTrialReply{Trial: t}, err
 }
 
 func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestionsReply, error) {
@@ -217,11 +242,17 @@ func (s *server) GetWorkerFullInfo(ctx context.Context, in *api_pb.GetWorkerFull
 func (s *server) SetSuggestionParameters(ctx context.Context, in *api_pb.SetSuggestionParametersRequest) (*api_pb.SetSuggestionParametersReply, error) {
 	var err error
 	var id string
-	if in.ParamId == "" {
-		id, err = dbIf.SetSuggestionParam(in.SuggestionAlgorithm, in.StudyId, in.SuggestionParameters)
+	if in.JobType != "nas" {
+		//If it is a HP job
+		if in.ParamId == "" {
+			id, err = dbIf.SetSuggestionParam(in.SuggestionAlgorithm, in.StudyId, in.SuggestionParameters)
+		} else {
+			id = in.ParamId
+			err = dbIf.UpdateSuggestionParam(in.ParamId, in.SuggestionParameters)
+		}
 	} else {
-		id = in.ParamId
-		err = dbIf.UpdateSuggestionParam(in.ParamId, in.SuggestionParameters)
+		//If it is a NAS job
+		log.Printf("Set suggestion Params for NAS job id= %v", in.StudyId)
 	}
 	return &api_pb.SetSuggestionParametersReply{ParamId: id}, err
 }
