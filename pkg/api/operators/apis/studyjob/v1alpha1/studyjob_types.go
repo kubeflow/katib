@@ -57,7 +57,7 @@ type StudyJobStatus struct {
 	// It is represented in RFC3339 form and is in UTC.
 	LastReconcileTime *metav1.Time `json:"lastReconcileTime,omitempty"`
 
-	Condition                Condition  `json:"conditon,omitempty"`
+	Condition                Condition  `json:"condition,omitempty"`
 	StudyID                  string     `json:"studyid,omitempty"`
 	SuggestionParameterID    string     `json:"suggestionParameterId"`
 	EarlyStoppingParameterID string     `json:"earlyStoppingParameterId"`
@@ -71,7 +71,7 @@ type StudyJobStatus struct {
 type WorkerCondition struct {
 	WorkerID       string      `json:"workerid,omitempty"`
 	Kind           string      `json:"kind,omitempty"`
-	Condition      Condition   `json:"conditon,omitempty"`
+	Condition      Condition   `json:"condition,omitempty"`
 	ObjectiveValue *float64    `json:"objectiveValue,omitempty"`
 	StartTime      metav1.Time `json:"startTime,omitempty"`
 	CompletionTime metav1.Time `json:"completionTime,omitempty"`
