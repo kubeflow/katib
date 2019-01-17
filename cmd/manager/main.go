@@ -49,7 +49,7 @@ func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest)
 
 	} else {
 		//If it is a NAS job
-		studyID = "11111111111"
+		studyID = "1"
 		log.Printf("NAS job is created, id= %v", studyID)
 	}
 	return &api_pb.CreateStudyReply{StudyId: studyID}, nil
