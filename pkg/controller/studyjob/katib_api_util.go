@@ -105,49 +105,8 @@ func getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, erro
 	for _, m := range instance.Spec.MetricsNames {
 		sconf.Metrics = append(sconf.Metrics, m)
 	}
-	for _, pc := range instance.Spec.ParameterConfigs {
-		p := &katibapi.ParameterConfig{
-			Feasible: &katibapi.FeasibleSpace{},
-		}
-		p.Name = pc.Name
-		p.Feasible.Min = pc.Feasible.Min
-		p.Feasible.Max = pc.Feasible.Max
-		p.Feasible.List = pc.Feasible.List
-		switch pc.ParameterType {
-		case katibv1alpha1.ParameterTypeUnknown:
-			p.ParameterType = katibapi.ParameterType_UNKNOWN_TYPE
-		case katibv1alpha1.ParameterTypeDouble:
-			p.ParameterType = katibapi.ParameterType_DOUBLE
-		case katibv1alpha1.ParameterTypeInt:
-			p.ParameterType = katibapi.ParameterType_INT
-		case katibv1alpha1.ParameterTypeDiscrete:
-			p.ParameterType = katibapi.ParameterType_DISCRETE
-		case katibv1alpha1.ParameterTypeCategorical:
-			p.ParameterType = katibapi.ParameterType_CATEGORICAL
-		case katibv1alpha1.ParameterTypeRange:
-			p.ParameterType = katibapi.ParameterType_RANGE
-		}
-		p.Feasible.Step = pc.Feasible.Step
-		sconf.ParameterConfigs.Configs = append(sconf.ParameterConfigs.Configs, p)
-	}
-	sconf.JobId = string(instance.UID)
-
-	sconf.JobType = instance.Spec.JobType
-	sconf.GraphConfig.NumLayers = instance.Spec.GraphConfig.NumLayers
-	for _, i := range instance.Spec.GraphConfig.InputSize {
-		sconf.GraphConfig.InputSize = append(sconf.GraphConfig.InputSize, i)
-	}
-	for _, o := range instance.Spec.GraphConfig.OutputSize {
-		sconf.GraphConfig.OutputSize = append(sconf.GraphConfig.OutputSize, o)
-	}
-	for _, op := range instance.Spec.Operations {
-		operation := &katibapi.Operation{
-			ParameterConfigs: &katibapi.Operation_ParameterConfigs{
-				Configs: []*katibapi.ParameterConfig{},
-			},
-		}
-		operation.OperationType = op.OperationType
-		for _, pc := range op.ParameterConfigs {
+	if instance.Spec.JobType != "nas" {
+		for _, pc := range instance.Spec.ParameterConfigs {
 			p := &katibapi.ParameterConfig{
 				Feasible: &katibapi.FeasibleSpace{},
 			}
@@ -170,11 +129,57 @@ func getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, erro
 				p.ParameterType = katibapi.ParameterType_RANGE
 			}
 			p.Feasible.Step = pc.Feasible.Step
-
-			operation.ParameterConfigs.Configs = append(operation.ParameterConfigs.Configs, p)
+			sconf.ParameterConfigs.Configs = append(sconf.ParameterConfigs.Configs, p)
 		}
-		sconf.Operations.Operation = append(sconf.Operations.Operation, operation)
 	}
+
+	sconf.JobId = string(instance.UID)
+	sconf.JobType = instance.Spec.JobType
+	if instance.Spec.JobType == "nas" {
+		sconf.GraphConfig.NumLayers = instance.Spec.GraphConfig.NumLayers
+		for _, i := range instance.Spec.GraphConfig.InputSize {
+			sconf.GraphConfig.InputSize = append(sconf.GraphConfig.InputSize, i)
+		}
+		for _, o := range instance.Spec.GraphConfig.OutputSize {
+			sconf.GraphConfig.OutputSize = append(sconf.GraphConfig.OutputSize, o)
+		}
+		for _, op := range instance.Spec.Operations {
+			operation := &katibapi.Operation{
+				ParameterConfigs: &katibapi.Operation_ParameterConfigs{
+					Configs: []*katibapi.ParameterConfig{},
+				},
+			}
+			operation.OperationType = op.OperationType
+			for _, pc := range op.ParameterConfigs {
+				p := &katibapi.ParameterConfig{
+					Feasible: &katibapi.FeasibleSpace{},
+				}
+				p.Name = pc.Name
+				p.Feasible.Min = pc.Feasible.Min
+				p.Feasible.Max = pc.Feasible.Max
+				p.Feasible.List = pc.Feasible.List
+				switch pc.ParameterType {
+				case katibv1alpha1.ParameterTypeUnknown:
+					p.ParameterType = katibapi.ParameterType_UNKNOWN_TYPE
+				case katibv1alpha1.ParameterTypeDouble:
+					p.ParameterType = katibapi.ParameterType_DOUBLE
+				case katibv1alpha1.ParameterTypeInt:
+					p.ParameterType = katibapi.ParameterType_INT
+				case katibv1alpha1.ParameterTypeDiscrete:
+					p.ParameterType = katibapi.ParameterType_DISCRETE
+				case katibv1alpha1.ParameterTypeCategorical:
+					p.ParameterType = katibapi.ParameterType_CATEGORICAL
+				case katibv1alpha1.ParameterTypeRange:
+					p.ParameterType = katibapi.ParameterType_RANGE
+				}
+				p.Feasible.Step = pc.Feasible.Step
+
+				operation.ParameterConfigs.Configs = append(operation.ParameterConfigs.Configs, p)
+			}
+			sconf.Operations.Operation = append(sconf.Operations.Operation, operation)
+		}
+	}
+
 	return sconf, nil
 }
 
