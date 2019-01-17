@@ -47,7 +47,7 @@ spec:
                       imagePullPolicy: Always
                       command:
                         - "python"
-                        - "/opt/pytorch_dist_mnist/dist_mnist_with_summary.py"
+                        - "/var/mnist.py"
                         {{- with .HyperParameters}}
                         {{- range .}}
                         - "{{.Name}}={{.Value}}"
@@ -64,7 +64,7 @@ spec:
                       imagePullPolicy: Always
                       command:
                         - "python"
-                        - "/opt/pytorch_dist_mnist/dist_mnist_with_summary.py"
+                        - "/var/mnist.py"
                         {{- with .HyperParameters}}
                         {{- range .}}
                         - "{{.Name}}={{.Value}}"
