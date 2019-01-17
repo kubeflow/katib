@@ -52,6 +52,13 @@ type VizierDBInterface interface {
 	UpdateStudy(string, *api.StudyConfig) error
 	DeleteStudy(string) error
 
+	/* APIs for NAS */
+	GetNASConfig(string) (*api.StudyConfig, error)
+	GetNASList() ([]string, error)
+	CreateNAS(*api.StudyConfig) (string, error)
+	UpdateNAS(string, *api.StudyConfig) (string, error)
+	DeleteNAS(string) error
+
 	GetTrial(string) (*api.Trial, error)
 	GetTrialList(string) ([]*api.Trial, error)
 	CreateTrial(*api.Trial) error
