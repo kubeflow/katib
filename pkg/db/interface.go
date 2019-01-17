@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/jsonpb"
+	yaml "gopkg.in/yaml.v2"
 
 	api "github.com/kubeflow/katib/pkg/api"
 
@@ -56,7 +57,7 @@ type VizierDBInterface interface {
 	GetNASConfig(string) (*api.StudyConfig, error)
 	GetNASList() ([]string, error)
 	CreateNAS(*api.StudyConfig) (string, error)
-	UpdateNAS(string, *api.StudyConfig) (string, error)
+	UpdateNAS(string, *api.StudyConfig) error
 	DeleteNAS(string) error
 
 	GetTrial(string) (*api.Trial, error)
@@ -168,7 +169,6 @@ func isDBDuplicateError(err error) bool {
 
 func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
-
 	study := new(api.StudyConfig)
 	var dummyID, configs, tags, metrics string
 	err := row.Scan(&dummyID,
@@ -346,6 +346,185 @@ func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
 func (d *dbConn) DeleteStudy(id string) error {
 	_, err := d.db.Exec("DELETE FROM studies WHERE id = ?", id)
 	return err
+}
+
+func (d *dbConn) CreateNAS(in *api.StudyConfig) (string, error) {
+
+	for _, operation := range in.Operations.Operation {
+		if len(operation.OperationType) == 0 && operation.ParameterConfigs != nil {
+			return "", errors.New("Operations must be set properly")
+		}
+	}
+
+	if in.JobId != "" {
+		/* BETTER WAY TO CHECK IF THE OBJECT EXISTS */
+		var temporaryId string
+		err := d.db.QueryRow("SELECT id FROM studies WHERE job_id = ?", in.JobId).Scan(&temporaryId)
+		if err == nil {
+			return "", fmt.Errorf("Study %s in Job %s already exist.", in.Name, in.JobId)
+		}
+		// var err error
+		// var count int
+
+		// for row.Next() {
+		// 	err = row.Scan(&count)
+		// 	if err != nil || count == 0 {
+		// 		return "", fmt.Errorf("Study %s in Job %s already exist.", in.Name, in.JobId)
+		// 	}
+		// }
+	}
+
+	graphConfig, err := (&jsonpb.Marshaler{}).MarshalToString(in.GraphConfig)
+	if err != nil {
+		log.Fatalf("Error marshaling graphConfig: %v", err)
+	}
+
+	operations, err := (&jsonpb.Marshaler{}).MarshalToString(in.Operations)
+	if err != nil {
+		log.Fatalf("Error marshaling operations: %v", err)
+	}
+
+	tags := make([]string, len(in.Tags))
+	for i, elem := range in.Tags {
+		tags[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
+		if err != nil {
+			log.Printf("Error marshalling %v: %v", elem, err)
+			continue
+		}
+	}
+
+	/* WE PROBABLY DON'T NEED METRICS AND ALSO THIS LOGIC IS KIND OF CONFUSING */
+	var isin bool = false
+	for _, m := range in.Metrics {
+		if m == in.ObjectiveValueName {
+			isin = true
+		}
+	}
+
+	if !isin {
+		in.Metrics = append(in.Metrics, in.ObjectiveValueName)
+	}
+
+	var studyID string
+	var trials string
+	var configs string
+
+	i := 3
+	for true {
+		studyID = generateRandid()
+		_, err := d.db.Exec(
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			studyID,
+			in.Name,
+			in.Owner,
+			in.OptimizationType,
+			in.OptimizationGoal,
+			configs,
+			strings.Join(tags, ",\n"),
+			trials,
+			in.ObjectiveValueName,
+			strings.Join(in.Metrics, ",\n"),
+			graphConfig,
+			operations,
+			in.JobId,
+			in.JobType,
+		)
+		if err == nil {
+			break
+		} else if isDBDuplicateError(err) {
+			i--
+			if i > 0 {
+				continue
+			}
+		}
+		return "", err
+	}
+
+	// for _, perm := range in.AccessPermissions {
+	// 	_, err := d.db.Exec(
+	// 		"INSERT INTO study_permissions (study_id, access_permission) "+
+	// 			"VALUES (?, ?)",
+	// 		studyID, perm)
+	// 	if err != nil {
+	// 		log.Printf("Error storing permission (%s, %s): %v",
+	// 			studyID, perm, err)
+	// 	}
+	// }
+
+	return studyID, nil
+}
+
+func (d *dbConn) GetNASConfig(id string) (*api.StudyConfig, error) {
+	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
+	study := new(api.StudyConfig)
+	var dummyID, graphConfig, parameters, operations, tags, metrics, trials string
+	err := row.Scan(&dummyID,
+		&study.Name,
+		&study.Owner,
+		&study.OptimizationType,
+		&study.OptimizationGoal,
+		&tags,
+		&parameters,
+		&trials,
+		&study.ObjectiveValueName,
+		&metrics,
+		&graphConfig,
+		&operations,
+		&study.JobId,
+		&study.JobType,
+	)
+	log.Printf("Scanned")
+	if err != nil {
+		log.Printf("Failed to scan: %v", err)
+		return nil, err
+	}
+
+	study.GraphConfig = new(api.GraphConfig)
+	err = jsonpb.UnmarshalString(graphConfig, study.GraphConfig)
+	if err != nil {
+		log.Printf("Failed to unmarshal graphConfig")
+		return nil, err
+	}
+
+	study.Operations = new(api.StudyConfig_Operations)
+	err = jsonpb.UnmarshalString(operations, study.Operations)
+	if err != nil {
+		log.Printf("Failed to unmarshal operations")
+		return nil, err
+	}
+
+	var tagsArray []string
+	if len(tags) > 0 {
+		tagsArray = strings.Split(tags, ",\n")
+	}
+	study.Tags = make([]*api.Tag, len(tagsArray))
+	for i, j := range tagsArray {
+		tag := new(api.Tag)
+		err = jsonpb.UnmarshalString(j, tag)
+		if err != nil {
+			log.Printf("Failed to unmarshal %s", j)
+			return nil, err
+		}
+		study.Tags[i] = tag
+	}
+	study.Metrics = strings.Split(metrics, ",\n")
+	log.Printf("Returning")
+	outBytes, _ := yaml.Marshal(study)
+	log.Printf(string(outBytes))
+	return study, nil
+}
+
+func (d *dbConn) GetNASList() ([]string, error) {
+	jobs := make([]string, 0)
+	return jobs, nil
+}
+
+func (d *dbConn) UpdateNAS(studyID string, in *api.StudyConfig) error {
+	return nil
+}
+
+func (d *dbConn) DeleteNAS(id string) error {
+	return nil
 }
 
 func (d *dbConn) getTrials(trialID string, studyID string) ([]*api.Trial, error) {
