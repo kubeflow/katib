@@ -4,17 +4,19 @@ metadata:
   namespace: kubeflow
   labels:
     controller-tools.k8s.io: "1.0"
-  name: nas-reinfocement-learning-example
+  name: nas-rl-example
 spec:
-  studyName: nas-reinfocement-learning-example
+  studyName: nas-rl-example
   owner: crd
   optimizationtype: maximize
   objectivevaluename: Validation-accuracy
   optimizationgoal: 0.99
+  requestcount: 4
   metricsnames:
     - accuracy
+  jobType: nas
   graphConfig:
-    numVertex: 8
+    numLayers: 8
     inputSize:
       - 32
       - 32
@@ -22,81 +24,81 @@ spec:
     outputSize:
       - 10
   operations:
-    - operationType: "convolution"
+    - operationType: convolution
       parameterconfigs:
-        - name: "filter_size"
+        - name: filter_size
           parametertype: categorical
           feasible:
             list:
-            - 3
-            - 5
-            - 7
-        - name: "num_filter"
+            - "3"
+            - "5"
+            - "7"
+        - name: num_filter
           parametertype: categorical
           feasible:
             list:
-            - 32
-            - 48
-            - 64
-            - 96
-            - 128
-        - name: "stride"
+            - "32"
+            - "48"
+            - "64"
+            - "96"
+            - "128"
+        - name: stride
           parametertype: categorical
           feasible:
             list:
-            - 1
-            - 2
-        - name: "activation"
+            - "1"
+            - "2"
+        - name: activation
           parametertype: categorical
-          fesible:
+          feasible:
             list:
             - relu
             - sigmoid
             - tanh
             - identity
-    - operationType: "reduction"
+    - operationType: reduction
       parameterconfigs:
-        - name: "reduction_type"
+        - name: reduction_type
           parametertype: categorical
           feasible:
             list:
-            - 'maxpooling'
-            - 'avgpooling'
-        - name: "pool_size"
+            - maxpooling
+            - avgpooling
+        - name: pool_size
           parametertype: int
           feasible:
-            min: 1
-            max: 3
-        - name: "stride"
+            min: "1"
+            max: "3"
+        - name: stride
           parametertype: categorical
           feasible:
             list:
-            - 1
-            - 2
-    - operationType: "dense"
+            - "1"
+            - "2"
+    - operationType: dense
       parameterconfigs:
-        - name: "num_units"
+        - name: num_units
           parametertype: categorical
           feasible:
             list:
-              - 128
-              - 256
-              - 512
-              - 1024
-        - name: "activation"
+              - "128"
+              - "256"
+              - "512"
+              - "1024"
+        - name: activation
           parametertype: categorical
-          fesible:
+          feasible:
             list:
             - relu
             - sigmoid
             - tanh
             - identity
-        - name: "dropout_rate"
+        - name: dropout_rate
           parametertype: range
           feasible:
-            min: 0.2
-            max: 0.5
-            step: 0.1
+            min: "0.1"
+            max: "0.6"
+            step: "0.1"
   workerSpec:
     goTemplate:
         rawTemplate: |-
@@ -124,7 +126,7 @@ spec:
                   {{- end}}
                 restartPolicy: Never
   suggestionSpec:
-    suggestionAlgorithm: "reinforcement-learning"
+    suggestionAlgorithm: "nasrl"
     suggestionParameters:
       - name: "num_control_cells"
         value: "32"
