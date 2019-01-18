@@ -42,6 +42,7 @@ func (s *RandomSuggestService) GetSuggestions(ctx context.Context, in *api.GetSu
 	c := api.NewManagerClient(conn)
 	screq := &api.GetStudyRequest{
 		StudyId: in.StudyId,
+		JobType: "HP",
 	}
 	scr, err := c.GetStudy(ctx, screq)
 	if err != nil {
