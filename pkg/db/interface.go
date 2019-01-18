@@ -190,7 +190,7 @@ func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 		return nil, err
 	}
 	study.ParameterConfigs = new(api.StudyConfig_ParameterConfigs)
-	err = jsonpb.UnmarshalString(configs, study.ParameterConfigs)
+	err = jsonpb.UnmarshalString(parameters, study.ParameterConfigs)
 	if err != nil {
 		return nil, err
 	}
