@@ -15,9 +15,13 @@ func (d *dbConn) DBInit() {
 		optimization_goal DOUBLE,
 		parameter_configs TEXT,
 		tags TEXT,
+		trials TEXT,
 		objective_value_name VARCHAR(255),
 		metrics TEXT,
-		job_id TEXT)`)
+		nasconfig TEXT,
+		job_id TEXT,
+		job_type TEXT)`)
+
 	if err != nil {
 		log.Fatalf("Error creating studies table: %v", err)
 	}
@@ -95,6 +99,32 @@ func (d *dbConn) DBInit() {
 	if err != nil {
 		log.Fatalf("Error creating earlystop_param table: %v", err)
 	}
+
+	/* katib-nas related tables
+
+		trials - array of trial ids for that particular study, e.g. "1, 2, 3"
+	   	that is used to reuse the existing trial table AND SINCE TRIALID IS A RANDOM NUMBER
+	   	TO GET THE PROPER ORDER
+
+	*/
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS nasjobs
+		(id CHAR(16) PRIMARY KEY,
+		name VARCHAR(255),
+		owner VARCHAR(255),
+		optimization_type TINYINT,
+		optimization_goal DOUBLE,
+		tags TEXT,
+		trials TEXT,
+		objective_value_name VARCHAR(255),
+		metrics TEXT,
+		graphconfig TEXT,
+		operations TEXT,
+		job_id TEXT)`)
+
+	if err != nil {
+		log.Fatalf("Error creating nasjobs table: %v", err)
+	}
+
 }
 
 func (d *dbConn) SelectOne() error {

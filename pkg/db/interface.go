@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/jsonpb"
+	yaml "gopkg.in/yaml.v2"
 
 	api "github.com/kubeflow/katib/pkg/api"
 
@@ -51,6 +52,13 @@ type VizierDBInterface interface {
 	CreateStudy(*api.StudyConfig) (string, error)
 	UpdateStudy(string, *api.StudyConfig) error
 	DeleteStudy(string) error
+
+	/* APIs for NAS */
+	GetNASConfig(string) (*api.StudyConfig, error)
+	GetNASList() ([]string, error)
+	CreateNAS(*api.StudyConfig) (string, error)
+	UpdateNAS(string, *api.StudyConfig) error
+	DeleteNAS(string) error
 
 	GetTrial(string) (*api.Trial, error)
 	GetTrialList(string) ([]*api.Trial, error)
@@ -161,25 +169,28 @@ func isDBDuplicateError(err error) bool {
 
 func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
-
 	study := new(api.StudyConfig)
-	var dummyID, configs, tags, metrics string
+	var dummyID, graphConfig, parameters, operations, tags, metrics, trials string
 	err := row.Scan(&dummyID,
 		&study.Name,
 		&study.Owner,
 		&study.OptimizationType,
 		&study.OptimizationGoal,
-		&configs,
 		&tags,
+		&parameters,
+		&trials,
 		&study.ObjectiveValueName,
 		&metrics,
+		&graphConfig,
+		&operations,
 		&study.JobId,
+		&study.JobType,
 	)
 	if err != nil {
 		return nil, err
 	}
 	study.ParameterConfigs = new(api.StudyConfig_ParameterConfigs)
-	err = jsonpb.UnmarshalString(configs, study.ParameterConfigs)
+	err = jsonpb.UnmarshalString(parameters, study.ParameterConfigs)
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +214,7 @@ func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 }
 
 func (d *dbConn) GetStudyList() ([]string, error) {
-	rows, err := d.db.Query("SELECT id FROM studies")
+	rows, err := d.db.Query("SELECT id FROM studies WHERE job_type = hp")
 	if err != nil {
 		return nil, err
 	}
@@ -228,20 +239,8 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 
 	}
 	if in.JobId != "" {
-		row := d.db.QueryRow("SELECT * FROM studies WHERE job_id = ?", in.JobId)
-		dummyStudy := new(api.StudyConfig)
-		var dummyID, dummyConfigs, dummyTags, dummyMetrics, dummyJobID string
-		err := row.Scan(&dummyID,
-			&dummyStudy.Name,
-			&dummyStudy.Owner,
-			&dummyStudy.OptimizationType,
-			&dummyStudy.OptimizationGoal,
-			&dummyConfigs,
-			&dummyTags,
-			&dummyStudy.ObjectiveValueName,
-			&dummyMetrics,
-			&dummyJobID,
-		)
+		var temporaryId string
+		err := d.db.QueryRow("SELECT id FROM studies WHERE job_id = ?", in.JobId).Scan(&temporaryId)
 		if err == nil {
 			return "", fmt.Errorf("Study %s in Job %s already exist.", in.Name, in.JobId)
 		}
@@ -272,11 +271,14 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 	}
 
 	var studyID string
+	var trials string
+	var operations string
+	var nasConfig string
 	i := 3
 	for true {
 		studyID = generateRandid()
 		_, err := d.db.Exec(
-			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			studyID,
 			in.Name,
 			in.Owner,
@@ -284,9 +286,12 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 			in.OptimizationGoal,
 			configs,
 			strings.Join(tags, ",\n"),
+			trials,
 			in.ObjectiveValueName,
 			strings.Join(in.Metrics, ",\n"),
+			nasConfig,
 			in.JobId,
+			in.JobType,
 		)
 		if err == nil {
 			break
@@ -337,6 +342,205 @@ func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
 }
 
 func (d *dbConn) DeleteStudy(id string) error {
+	_, err := d.db.Exec("DELETE FROM studies WHERE id = ?", id)
+	return err
+}
+
+func (d *dbConn) CreateNAS(in *api.StudyConfig) (string, error) {
+
+	for _, operation := range in.Operations.Operation {
+		if len(operation.OperationType) == 0 && operation.ParameterConfigs != nil {
+			return "", errors.New("Operations must be set properly")
+		}
+	}
+
+	if in.JobId != "" {
+		/* BETTER WAY TO CHECK IF THE OBJECT EXISTS */
+		var temporaryId string
+		err := d.db.QueryRow("SELECT id FROM studies WHERE job_id = ?", in.JobId).Scan(&temporaryId)
+		if err == nil {
+			return "", fmt.Errorf("Study %s in Job %s already exist.", in.Name, in.JobId)
+		}
+		// var err error
+		// var count int
+
+		// for row.Next() {
+		// 	err = row.Scan(&count)
+		// 	if err != nil || count == 0 {
+		// 		return "", fmt.Errorf("Study %s in Job %s already exist.", in.Name, in.JobId)
+		// 	}
+		// }
+	}
+
+	nasConfig, err := (&jsonpb.Marshaler{}).MarshalToString(in.NasConfig)
+	if err != nil {
+		log.Fatalf("Error marshaling nasConfig: %v", err)
+	}
+
+	tags := make([]string, len(in.Tags))
+	for i, elem := range in.Tags {
+		tags[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
+		if err != nil {
+			log.Printf("Error marshalling %v: %v", elem, err)
+			continue
+		}
+	}
+
+	/* WE PROBABLY DON'T NEED METRICS AND ALSO THIS LOGIC IS KIND OF CONFUSING */
+	var isin bool = false
+	for _, m := range in.Metrics {
+		if m == in.ObjectiveValueName {
+			isin = true
+		}
+	}
+
+	if !isin {
+		in.Metrics = append(in.Metrics, in.ObjectiveValueName)
+	}
+
+	var studyID string
+	var trials string
+	var configs string
+
+	i := 3
+	for true {
+		studyID = generateRandid()
+		_, err := d.db.Exec(
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			studyID,
+			in.Name,
+			in.Owner,
+			in.OptimizationType,
+			in.OptimizationGoal,
+			configs,
+			strings.Join(tags, ",\n"),
+			trials,
+			in.ObjectiveValueName,
+			strings.Join(in.Metrics, ",\n"),
+			nasConfig,
+			in.JobId,
+			in.JobType,
+		)
+		if err == nil {
+			break
+		} else if isDBDuplicateError(err) {
+			i--
+			if i > 0 {
+				continue
+			}
+		}
+		return "", err
+	}
+
+	// for _, perm := range in.AccessPermissions {
+	// 	_, err := d.db.Exec(
+	// 		"INSERT INTO study_permissions (study_id, access_permission) "+
+	// 			"VALUES (?, ?)",
+	// 		studyID, perm)
+	// 	if err != nil {
+	// 		log.Printf("Error storing permission (%s, %s): %v",
+	// 			studyID, perm, err)
+	// 	}
+	// }
+
+	return studyID, nil
+}
+
+func (d *dbConn) GetNASConfig(id string) (*api.StudyConfig, error) {
+	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
+	study := new(api.StudyConfig)
+	var dummyID, nasConfig, parameters, operations, tags, metrics, trials string
+	err := row.Scan(&dummyID,
+		&study.Name,
+		&study.Owner,
+		&study.OptimizationType,
+		&study.OptimizationGoal,
+		&tags,
+		&parameters,
+		&trials,
+		&study.ObjectiveValueName,
+		&metrics,
+		&nasConfig,
+		&study.JobId,
+		&study.JobType,
+	)
+	if err != nil {
+		log.Printf("Failed to scan: %v", err)
+		return nil, err
+	}
+
+	study.NasConfig = new(api.NasConfig)
+	err = jsonpb.UnmarshalString(nasConfig, study.NasConfig)
+	if err != nil {
+		log.Printf("Failed to unmarshal NasConfig")
+		return nil, err
+	}
+
+	var tagsArray []string
+	if len(tags) > 0 {
+		tagsArray = strings.Split(tags, ",\n")
+	}
+	study.Tags = make([]*api.Tag, len(tagsArray))
+	for i, j := range tagsArray {
+		tag := new(api.Tag)
+		err = jsonpb.UnmarshalString(j, tag)
+		if err != nil {
+			log.Printf("Failed to unmarshal %s", j)
+			return nil, err
+		}
+		study.Tags[i] = tag
+	}
+	study.Metrics = strings.Split(metrics, ",\n")
+	log.Printf("Returning")
+	outBytes, _ := yaml.Marshal(study)
+	log.Printf(string(outBytes))
+	return study, nil
+}
+
+func (d *dbConn) GetNASList() ([]string, error) {
+	rows, err := d.db.Query("SELECT id FROM studies WHERE job_type = nas")
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	var result []string
+	for rows.Next() {
+		var id string
+		err = rows.Scan(&id)
+		if err != nil {
+			log.Printf("err scanning studies.id: %v", err)
+			continue
+		}
+		result = append(result, id)
+	}
+	return result, nil
+}
+
+func (d *dbConn) UpdateNAS(studyID string, in *api.StudyConfig) error {
+
+	/* THINK ABOUT TRIALS */
+	var err error
+
+	tags := make([]string, len(in.Tags))
+	for i, elem := range in.Tags {
+		tags[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
+		if err != nil {
+			log.Printf("Error marshalling %v: %v", elem, err)
+			continue
+		}
+	}
+	_, err = d.db.Exec(`UPDATE studies SET name = ?, owner = ?, tags = ?,
+                job_id = ? WHERE id = ?`,
+		in.Name,
+		in.Owner,
+		strings.Join(tags, ",\n"),
+		in.JobId,
+		studyID)
+	return err
+}
+
+func (d *dbConn) DeleteNAS(id string) error {
 	_, err := d.db.Exec("DELETE FROM studies WHERE id = ?", id)
 	return err
 }
@@ -451,6 +655,8 @@ func marshalTrial(trial *api.Trial) ([]string, []string, error) {
 // CreateTrial stores into the trials DB table.
 // As a side-effect, it generates and sets trial.TrialId.
 // Users should not overwrite TrialId.
+
+/* TODO FIX CREATE_TRIAL & DELETE_TRIAL IN CASE OF NAS, SINCE WE WANT TRIALS */
 func (d *dbConn) CreateTrial(trial *api.Trial) error {
 	params, tags, lastErr := marshalTrial(trial)
 
