@@ -232,6 +232,7 @@ enum ParameterType {
     INT = 2; /// Int type. Use "Max/Min".
     DISCRETE = 3; /// Discrete number type. Use "List" as float.
     CATEGORICAL = 4; /// Categorical type. Use "List" as string.
+    RANGE = 5; /// Range type. Use "Max/Min" and "Step" parameter.
 }
 
 /**
@@ -253,6 +254,7 @@ message FeasibleSpace {
     string max = 1; /// Max Value
     string min = 2; /// Minimum Value
     repeated string list = 3; /// List of Values.
+    string step = 4; /// Step for Range parameter
 }
 
 /**
@@ -382,6 +384,41 @@ message Worker {
 }
 
 /**
+ * NasConfig contains a config of NAS job
+ */
+ message NasConfig {
+    GraphConfig graph_config = 1; /// Config of DAG
+    message Operations {
+        repeated Operation operation = 1;
+    }
+    Operations operations = 2; /// List of Operation
+}
+
+
+/**
+ * GraphConfig contains a config of DAG
+ */
+ message GraphConfig {
+    int32 num_layers = 1; /// Number of layers
+    repeated int32 input_size = 2; ///  Dimenstions of input size
+    repeated int32 output_size = 3; /// Dimensions of output size
+}
+
+/**
+ * Config for operations in DAG
+ */
+ message Operation {
+     string operationType = 1; /// Type of operation in DAG
+      /** 
+     * List of ParameterConfig
+     */
+     message ParameterConfigs {
+        repeated ParameterConfig configs = 1;
+    }
+    ParameterConfigs parameter_configs = 2; /// List of ParameterConfig
+}
+
+/**
  * Config of a Study. Study represents a single optimization run over a feasible space. 
  * Each Study contains a configuration describing the feasible space, as well as a set of Trials.
  * It is assumed that objective function f(x) does not change in the course of a Study.
@@ -403,6 +440,8 @@ message StudyConfig {
     string objective_value_name = 8; /// Name of objective value.
     repeated string metrics = 9; /// List of metrics name.
     string jobId = 10; /// ID of studyjob that is created from this config.
+    NasConfig nas_config = 11; /// Config for NAS job
+    string job_type = 12; /// Type of the job, NAS or HP
 }
 
 /** 
@@ -425,6 +464,7 @@ message CreateStudyReply {
  */
 message DeleteStudyRequest {
     string study_id = 1;
+    string job_type = 2;
 }
 
 /**
@@ -439,6 +479,7 @@ message DeleteStudyReply {
  */
 message GetStudyRequest {
     string study_id = 1;
+    string job_type = 2;
 }
 
 /**
