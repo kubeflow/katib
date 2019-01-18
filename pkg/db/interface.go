@@ -210,7 +210,7 @@ func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 }
 
 func (d *dbConn) GetStudyList() ([]string, error) {
-	rows, err := d.db.Query("SELECT id FROM studies")
+	rows, err := d.db.Query("SELECT id FROM studies WHERE job_type = hp")
 	if err != nil {
 		return nil, err
 	}
@@ -279,11 +279,14 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 	}
 
 	var studyID string
+	var trials string
+	var operations string
+	var graphConfig string
 	i := 3
 	for true {
 		studyID = generateRandid()
 		_, err := d.db.Exec(
-			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			studyID,
 			in.Name,
 			in.Owner,
@@ -291,9 +294,13 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 			in.OptimizationGoal,
 			configs,
 			strings.Join(tags, ",\n"),
+			trials,
 			in.ObjectiveValueName,
 			strings.Join(in.Metrics, ",\n"),
+			graphConfig,
+			operations,
 			in.JobId,
+			in.JobType,
 		)
 		if err == nil {
 			break
@@ -515,16 +522,51 @@ func (d *dbConn) GetNASConfig(id string) (*api.StudyConfig, error) {
 }
 
 func (d *dbConn) GetNASList() ([]string, error) {
-	jobs := make([]string, 0)
-	return jobs, nil
+	rows, err := d.db.Query("SELECT id FROM studies WHERE job_type = nas")
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	var result []string
+	for rows.Next() {
+		var id string
+		err = rows.Scan(&id)
+		if err != nil {
+			log.Printf("err scanning studies.id: %v", err)
+			continue
+		}
+		result = append(result, id)
+	}
+	return result, nil
 }
 
 func (d *dbConn) UpdateNAS(studyID string, in *api.StudyConfig) error {
-	return nil
+
+	/* THINK ABOUT TRIALS */
+	var err error
+
+	tags := make([]string, len(in.Tags))
+	for i, elem := range in.Tags {
+		tags[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
+		if err != nil {
+			log.Printf("Error marshalling %v: %v", elem, err)
+			continue
+		}
+	}
+	_, err = d.db.Exec(`UPDATE studies SET name = ?, owner = ?, tags = ?,
+                job_id = ? WHERE id = ?`,
+		in.Name,
+		in.Owner,
+		strings.Join(tags, ",\n"),
+		in.JobId,
+		studyID)
+	return err
 }
 
 func (d *dbConn) DeleteNAS(id string) error {
-	return nil
+	_, err := d.db.Exec("DELETE FROM studies WHERE id = ?", id)
+	return err
 }
 
 func (d *dbConn) getTrials(trialID string, studyID string) ([]*api.Trial, error) {
@@ -637,6 +679,8 @@ func marshalTrial(trial *api.Trial) ([]string, []string, error) {
 // CreateTrial stores into the trials DB table.
 // As a side-effect, it generates and sets trial.TrialId.
 // Users should not overwrite TrialId.
+
+/* TODO FIX CREATE_TRIAL & DELETE_TRIAL IN CASE OF NAS, SINCE WE WANT TRIALS */
 func (d *dbConn) CreateTrial(trial *api.Trial) error {
 	params, tags, lastErr := marshalTrial(trial)
 
