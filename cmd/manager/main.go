@@ -35,7 +35,7 @@ func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest)
 		return &api_pb.CreateStudyReply{}, errors.New("StudyConfig is missing.")
 	}
 
-	if in.StudyConfig.JobType != "nas" {
+	if in.StudyConfig.JobType != "NAS" {
 		//If it is a HP job
 		studyID, err = dbIf.CreateStudy(in.StudyConfig)
 		if err != nil {
@@ -53,10 +53,18 @@ func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest)
 
 	} else {
 		//If it is a NAS job
+		log.Printf("INSIDE NAS JOB IN CREATE STUDY")
 		studyID, err = dbIf.CreateNAS(in.StudyConfig)
 		if err != nil {
+			log.Printf("Error is %v", err)
 			return &api_pb.CreateStudyReply{}, err
 		}
+		log.Printf("BEFORE GETTING")
+		sc, err := dbIf.GetNASConfig(studyID)
+		if err != nil {
+			log.Printf("Error is %v", err)
+		}
+		log.Printf("CONFIG IS: %v", sc)
 	}
 	return &api_pb.CreateStudyReply{StudyId: studyID}, nil
 }
@@ -66,7 +74,7 @@ func (s *server) DeleteStudy(ctx context.Context, in *api_pb.DeleteStudyRequest)
 		return &api_pb.DeleteStudyReply{}, errors.New("StudyId is missing.")
 	}
 	var err error
-	if in.JobType != "nas" {
+	if in.JobType != "NAS" {
 		//If it is a HP job
 		err = dbIf.DeleteStudy(in.StudyId)
 		if err != nil {
@@ -74,8 +82,10 @@ func (s *server) DeleteStudy(ctx context.Context, in *api_pb.DeleteStudyRequest)
 		}
 	} else {
 		//If it is a NAS job
+		log.Printf("NAS job is deleted, id= %v", in.StudyId)
 		err = dbIf.DeleteNAS(in.StudyId)
 		if err != nil {
+			log.Printf("Error is %v", err)
 			return &api_pb.DeleteStudyReply{}, err
 		}
 
@@ -86,13 +96,15 @@ func (s *server) DeleteStudy(ctx context.Context, in *api_pb.DeleteStudyRequest)
 func (s *server) GetStudy(ctx context.Context, in *api_pb.GetStudyRequest) (*api_pb.GetStudyReply, error) {
 	var sc *api_pb.StudyConfig
 	var err error
-	if in.JobType != "nas" {
+	if in.JobType != "NAS" {
 		//If it is a HP job
 		sc, err = dbIf.GetStudyConfig(in.StudyId)
 	} else {
 		//If it is a NAS job
+		log.Printf("Get NAS job, id = %v", in.StudyId)
 		sc, err = dbIf.GetNASConfig(in.StudyId)
 		if err != nil {
+			log.Printf("Error is %v", err)
 			return &api_pb.GetStudyReply{}, err
 		}
 	}
@@ -253,6 +265,7 @@ func (s *server) UpdateWorkerState(ctx context.Context, in *api_pb.UpdateWorkerS
 func (s *server) GetWorkerFullInfo(ctx context.Context, in *api_pb.GetWorkerFullInfoRequest) (*api_pb.GetWorkerFullInfoReply, error) {
 	return dbIf.GetWorkerFullInfo(in.StudyId, in.TrialId, in.WorkerId, in.OnlyLatestLog)
 }
+
 func (s *server) SetSuggestionParameters(ctx context.Context, in *api_pb.SetSuggestionParametersRequest) (*api_pb.SetSuggestionParametersReply, error) {
 	var err error
 	var id string
