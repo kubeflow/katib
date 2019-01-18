@@ -256,17 +256,11 @@ func (s *server) GetWorkerFullInfo(ctx context.Context, in *api_pb.GetWorkerFull
 func (s *server) SetSuggestionParameters(ctx context.Context, in *api_pb.SetSuggestionParametersRequest) (*api_pb.SetSuggestionParametersReply, error) {
 	var err error
 	var id string
-	if in.JobType != "nas" {
-		//If it is a HP job
-		if in.ParamId == "" {
-			id, err = dbIf.SetSuggestionParam(in.SuggestionAlgorithm, in.StudyId, in.SuggestionParameters)
-		} else {
-			id = in.ParamId
-			err = dbIf.UpdateSuggestionParam(in.ParamId, in.SuggestionParameters)
-		}
+	if in.ParamId == "" {
+		id, err = dbIf.SetSuggestionParam(in.SuggestionAlgorithm, in.StudyId, in.SuggestionParameters)
 	} else {
-		//If it is a NAS job
-		log.Printf("Set suggestion Params for NAS job id= %v", in.StudyId)
+		id = in.ParamId
+		err = dbIf.UpdateSuggestionParam(in.ParamId, in.SuggestionParameters)
 	}
 	return &api_pb.SetSuggestionParametersReply{ParamId: id}, err
 }
