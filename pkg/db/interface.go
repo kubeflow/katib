@@ -170,7 +170,7 @@ func isDBDuplicateError(err error) bool {
 func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
 	study := new(api.StudyConfig)
-	var dummyID, graphConfig, parameters, operations, tags, metrics, trials string
+	var dummyID, nasConfig, parameters, tags, metrics, trials string
 	err := row.Scan(&dummyID,
 		&study.Name,
 		&study.Owner,
@@ -181,8 +181,7 @@ func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 		&trials,
 		&study.ObjectiveValueName,
 		&metrics,
-		&graphConfig,
-		&operations,
+		&nasConfig,
 		&study.JobId,
 		&study.JobType,
 	)
