@@ -170,17 +170,21 @@ func isDBDuplicateError(err error) bool {
 func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
 	study := new(api.StudyConfig)
-	var dummyID, configs, tags, metrics string
+	var dummyID, graphConfig, parameters, operations, tags, metrics, trials string
 	err := row.Scan(&dummyID,
 		&study.Name,
 		&study.Owner,
 		&study.OptimizationType,
 		&study.OptimizationGoal,
-		&configs,
 		&tags,
+		&parameters,
+		&trials,
 		&study.ObjectiveValueName,
 		&metrics,
+		&graphConfig,
+		&operations,
 		&study.JobId,
+		&study.JobType,
 	)
 	if err != nil {
 		return nil, err
@@ -235,20 +239,8 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 
 	}
 	if in.JobId != "" {
-		row := d.db.QueryRow("SELECT * FROM studies WHERE job_id = ?", in.JobId)
-		dummyStudy := new(api.StudyConfig)
-		var dummyID, dummyConfigs, dummyTags, dummyMetrics, dummyJobID string
-		err := row.Scan(&dummyID,
-			&dummyStudy.Name,
-			&dummyStudy.Owner,
-			&dummyStudy.OptimizationType,
-			&dummyStudy.OptimizationGoal,
-			&dummyConfigs,
-			&dummyTags,
-			&dummyStudy.ObjectiveValueName,
-			&dummyMetrics,
-			&dummyJobID,
-		)
+		var temporaryId string
+		err := d.db.QueryRow("SELECT id FROM studies WHERE job_id = ?", in.JobId).Scan(&temporaryId)
 		if err == nil {
 			return "", fmt.Errorf("Study %s in Job %s already exist.", in.Name, in.JobId)
 		}
@@ -480,7 +472,6 @@ func (d *dbConn) GetNASConfig(id string) (*api.StudyConfig, error) {
 		&study.JobId,
 		&study.JobType,
 	)
-	log.Printf("Scanned")
 	if err != nil {
 		log.Printf("Failed to scan: %v", err)
 		return nil, err
