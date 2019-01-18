@@ -84,9 +84,9 @@ type TrialSet struct {
 }
 
 type ParameterConfig struct {
-	Name          string         `json:"name,omitempty"`
-	ParameterType ParameterType  `json:"parametertype,omitempty"`
-	Feasible      *FeasibleSpace `json:"feasible,omitempty"`
+	Name          string        `json:"name,omitempty"`
+	ParameterType ParameterType `json:"parametertype,omitempty"`
+	Feasible      FeasibleSpace `json:"feasible,omitempty"`
 }
 
 type FeasibleSpace struct {
@@ -187,8 +187,8 @@ type StudyJobList struct {
 
 // NasConfig contains config for NAS job
 type NasConfig struct {
-	GraphConfig *GraphConfig `json:"graphConfig,omitempty"`
-	Operations  []*Operation `json:"operations,omitempty"`
+	GraphConfig GraphConfig `json:"graphConfig,omitempty"`
+	Operations  []Operation `json:"operations,omitempty"`
 }
 
 // GraphConfig contains a config of DAG
@@ -200,8 +200,8 @@ type GraphConfig struct {
 
 // Operation contains type of operation in DAG
 type Operation struct {
-	OperationType    string             `json:"operationType,omitempty"`
-	ParameterConfigs []*ParameterConfig `json:"parameterconfigs,omitempty"`
+	OperationType    string            `json:"operationType,omitempty"`
+	ParameterConfigs []ParameterConfig `json:"parameterconfigs,omitempty"`
 }
 
 func init() {
