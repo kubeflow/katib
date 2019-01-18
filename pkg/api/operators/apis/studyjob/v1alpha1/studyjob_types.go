@@ -38,7 +38,7 @@ type StudyJobSpec struct {
 	SuggestionSpec       *SuggestionSpec       `json:"suggestionSpec,omitempty"`
 	EarlyStoppingSpec    *EarlyStoppingSpec    `json:"earlyStoppingSpec,omitempty"`
 	MetricsCollectorSpec *MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
-	NasConfig            NasConfig             `json:"NasConfig,omitempty"`
+	NasConfig            NasConfig             `json:"nasConfig,omitempty"`
 }
 
 // StudyJobStatus defines the observed state of StudyJob
