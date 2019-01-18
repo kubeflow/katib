@@ -17,7 +17,6 @@ package studyjob
 import (
 	"context"
 	"log"
-	"unsafe"
 
 	"github.com/kubeflow/katib/pkg"
 	katibapi "github.com/kubeflow/katib/pkg/api"
@@ -87,10 +86,33 @@ func getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, erro
 }
 
 func getJobType(instance *katibv1alpha1.StudyJob) string {
-	if unsafe.Sizeof(instance.Spec.NasConfig) != 0 {
+	if instance.Spec.NasConfig != nil {
 		return "NAS"
 	}
 	return "HP"
+}
+
+func populateCommonConfigFields(instance *katibv1alpha1.StudyJob, sconf *katibapi.StudyConfig) *katibapi.StudyConfig {
+
+	sconf.Name = instance.Spec.StudyName
+	sconf.Owner = instance.Spec.Owner
+	if instance.Spec.OptimizationGoal != nil {
+		sconf.OptimizationGoal = *instance.Spec.OptimizationGoal
+	}
+	sconf.ObjectiveValueName = instance.Spec.ObjectiveValueName
+	switch instance.Spec.OptimizationType {
+	case katibv1alpha1.OptimizationTypeMinimize:
+		sconf.OptimizationType = katibapi.OptimizationType_MINIMIZE
+	case katibv1alpha1.OptimizationTypeMaximize:
+		sconf.OptimizationType = katibapi.OptimizationType_MAXIMIZE
+	default:
+		sconf.OptimizationType = katibapi.OptimizationType_UNKNOWN_OPTIMIZATION
+	}
+	for _, m := range instance.Spec.MetricsNames {
+		sconf.Metrics = append(sconf.Metrics, m)
+	}
+	sconf.JobId = string(instance.UID)
+	return sconf
 }
 
 func populateConfigForHP(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
@@ -100,23 +122,9 @@ func populateConfigForHP(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfi
 			Configs: []*katibapi.ParameterConfig{},
 		},
 	}
-	sconf.Name = instance.Spec.StudyName
-	sconf.Owner = instance.Spec.Owner
-	if instance.Spec.OptimizationGoal != nil {
-		sconf.OptimizationGoal = *instance.Spec.OptimizationGoal
-	}
-	sconf.ObjectiveValueName = instance.Spec.ObjectiveValueName
-	switch instance.Spec.OptimizationType {
-	case katibv1alpha1.OptimizationTypeMinimize:
-		sconf.OptimizationType = katibapi.OptimizationType_MINIMIZE
-	case katibv1alpha1.OptimizationTypeMaximize:
-		sconf.OptimizationType = katibapi.OptimizationType_MAXIMIZE
-	default:
-		sconf.OptimizationType = katibapi.OptimizationType_UNKNOWN_OPTIMIZATION
-	}
-	for _, m := range instance.Spec.MetricsNames {
-		sconf.Metrics = append(sconf.Metrics, m)
-	}
+
+	sconf = populateCommonConfigFields(instance, sconf)
+
 	for _, pc := range instance.Spec.ParameterConfigs {
 		p := &katibapi.ParameterConfig{
 			Feasible: &katibapi.FeasibleSpace{},
@@ -128,6 +136,10 @@ func populateConfigForHP(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfi
 		}
 		if pc.Feasible.List != nil {
 			p.Feasible.List = pc.Feasible.List
+		}
+
+		if pc.Feasible.Step != "" {
+			p.Feasible.Step = pc.Feasible.Step
 		}
 		switch pc.ParameterType {
 		case katibv1alpha1.ParameterTypeUnknown:
@@ -143,13 +155,9 @@ func populateConfigForHP(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfi
 		case katibv1alpha1.ParameterTypeRange:
 			p.ParameterType = katibapi.ParameterType_RANGE
 		}
-		if pc.Feasible.Step != "" {
-			p.Feasible.Step = pc.Feasible.Step
-		}
 		sconf.ParameterConfigs.Configs = append(sconf.ParameterConfigs.Configs, p)
-
 	}
-	sconf.JobId = string(instance.UID)
+
 	sconf.JobType = "HP"
 	return sconf, nil
 }
@@ -157,9 +165,6 @@ func populateConfigForHP(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfi
 func populateConfigForNAS(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
 	sconf := &katibapi.StudyConfig{
 		Metrics: []string{},
-		ParameterConfigs: &katibapi.StudyConfig_ParameterConfigs{
-			Configs: []*katibapi.ParameterConfig{},
-		},
 		NasConfig: &katibapi.NasConfig{
 			GraphConfig: &katibapi.GraphConfig{},
 			Operations: &katibapi.NasConfig_Operations{
@@ -167,60 +172,64 @@ func populateConfigForNAS(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConf
 			},
 		},
 	}
-	sconf.Name = instance.Spec.StudyName
-	sconf.Owner = instance.Spec.Owner
-	if instance.Spec.OptimizationGoal != nil {
-		sconf.OptimizationGoal = *instance.Spec.OptimizationGoal
-	}
-	sconf.ObjectiveValueName = instance.Spec.ObjectiveValueName
-	switch instance.Spec.OptimizationType {
-	case katibv1alpha1.OptimizationTypeMinimize:
-		sconf.OptimizationType = katibapi.OptimizationType_MINIMIZE
-	case katibv1alpha1.OptimizationTypeMaximize:
-		sconf.OptimizationType = katibapi.OptimizationType_MAXIMIZE
-	default:
-		sconf.OptimizationType = katibapi.OptimizationType_UNKNOWN_OPTIMIZATION
-	}
-	for _, m := range instance.Spec.MetricsNames {
-		sconf.Metrics = append(sconf.Metrics, m)
-	}
-	for _, pc := range instance.Spec.ParameterConfigs {
-		p := &katibapi.ParameterConfig{
-			Feasible: &katibapi.FeasibleSpace{},
-		}
-		p.Name = pc.Name
-		if pc.Feasible.Min != "" && pc.Feasible.Max != "" {
-			p.Feasible.Min = pc.Feasible.Min
-			p.Feasible.Max = pc.Feasible.Max
-		}
-		if pc.Feasible.List != nil {
-			p.Feasible.List = pc.Feasible.List
-		}
-		switch pc.ParameterType {
-		case katibv1alpha1.ParameterTypeUnknown:
-			p.ParameterType = katibapi.ParameterType_UNKNOWN_TYPE
-		case katibv1alpha1.ParameterTypeDouble:
-			p.ParameterType = katibapi.ParameterType_DOUBLE
-		case katibv1alpha1.ParameterTypeInt:
-			p.ParameterType = katibapi.ParameterType_INT
-		case katibv1alpha1.ParameterTypeDiscrete:
-			p.ParameterType = katibapi.ParameterType_DISCRETE
-		case katibv1alpha1.ParameterTypeCategorical:
-			p.ParameterType = katibapi.ParameterType_CATEGORICAL
-		case katibv1alpha1.ParameterTypeRange:
-			p.ParameterType = katibapi.ParameterType_RANGE
-		}
-		if pc.Feasible.Step != "" {
-			p.Feasible.Step = pc.Feasible.Step
-		}
-		sconf.ParameterConfigs.Configs = append(sconf.ParameterConfigs.Configs, p)
+	sconf = populateCommonConfigFields(instance, sconf)
 
+	sconf.NasConfig.GraphConfig.NumLayers = instance.Spec.NasConfig.GraphConfig.NumLayers
+	for _, i := range instance.Spec.NasConfig.GraphConfig.InputSize {
+		sconf.NasConfig.GraphConfig.InputSize = append(sconf.NasConfig.GraphConfig.InputSize, i)
+	}
+	for _, o := range instance.Spec.NasConfig.GraphConfig.OutputSize {
+		sconf.NasConfig.GraphConfig.OutputSize = append(sconf.NasConfig.GraphConfig.OutputSize, o)
+	}
+	for _, op := range instance.Spec.NasConfig.Operations {
+		operation := &katibapi.Operation{
+			ParameterConfigs: &katibapi.Operation_ParameterConfigs{
+				Configs: []*katibapi.ParameterConfig{},
+			},
+		}
+		operation.OperationType = op.OperationType
+		for _, pc := range op.ParameterConfigs {
+			p := &katibapi.ParameterConfig{
+				Feasible: &katibapi.FeasibleSpace{},
+			}
+
+			p.Name = pc.Name
+			if pc.Feasible.Min != "" && pc.Feasible.Max != "" {
+				p.Feasible.Min = pc.Feasible.Min
+				p.Feasible.Max = pc.Feasible.Max
+			}
+			if pc.Feasible.List != nil {
+
+				p.Feasible.List = pc.Feasible.List
+
+			}
+			if pc.Feasible.Step != "" {
+				p.Feasible.Step = pc.Feasible.Step
+			}
+			switch pc.ParameterType {
+			case katibv1alpha1.ParameterTypeUnknown:
+				p.ParameterType = katibapi.ParameterType_UNKNOWN_TYPE
+			case katibv1alpha1.ParameterTypeDouble:
+				p.ParameterType = katibapi.ParameterType_DOUBLE
+			case katibv1alpha1.ParameterTypeInt:
+				p.ParameterType = katibapi.ParameterType_INT
+			case katibv1alpha1.ParameterTypeDiscrete:
+				p.ParameterType = katibapi.ParameterType_DISCRETE
+			case katibv1alpha1.ParameterTypeCategorical:
+				p.ParameterType = katibapi.ParameterType_CATEGORICAL
+			case katibv1alpha1.ParameterTypeRange:
+				p.ParameterType = katibapi.ParameterType_RANGE
+			}
+
+			operation.ParameterConfigs.Configs = append(operation.ParameterConfigs.Configs, p)
+		}
+		sconf.NasConfig.Operations.Operation = append(sconf.NasConfig.Operations.Operation, operation)
 	}
 
-	sconf.JobId = string(instance.UID)
 	sconf.JobType = "NAS"
 	return sconf, nil
 }
+
 func deleteStudy(instance *katibv1alpha1.StudyJob) error {
 	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
