@@ -371,6 +371,14 @@
                 </li>
               
                 <li>
+                  <a href="#api.NasConfig"><span class="badge">M</span>NasConfig</a>
+                </li>
+              
+                <li>
+                  <a href="#api.NasConfig.Operations"><span class="badge">M</span>NasConfig.Operations</a>
+                </li>
+              
+                <li>
                   <a href="#api.Operation"><span class="badge">M</span>Operation</a>
                 </li>
               
@@ -452,10 +460,6 @@
               
                 <li>
                   <a href="#api.StudyConfig"><span class="badge">M</span>StudyConfig</a>
-                </li>
-              
-                <li>
-                  <a href="#api.StudyConfig.Operations"><span class="badge">M</span>StudyConfig.Operations</a>
                 </li>
               
                 <li>
@@ -1850,8 +1854,61 @@
 
         
       
+        <h3 id="api.NasConfig">NasConfig</h3>
+        <p>NasConfig contains a config of NAS job</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>graph_config</td>
+                  <td><a href="#api.GraphConfig">GraphConfig</a></td>
+                  <td></td>
+                  <td><p>Config of DAG </p></td>
+                </tr>
+              
+                <tr>
+                  <td>operations</td>
+                  <td><a href="#api.NasConfig.Operations">NasConfig.Operations</a></td>
+                  <td></td>
+                  <td><p>List of Operation </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.NasConfig.Operations">NasConfig.Operations</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>operation</td>
+                  <td><a href="#api.Operation">Operation</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
         <h3 id="api.Operation">Operation</h3>
-        <p>Config for a operation in DAG</p>
+        <p>Config for operations in DAG</p>
 
         
           <table class="field-table">
@@ -2276,13 +2333,6 @@
                   <td><p> </p></td>
                 </tr>
               
-                <tr>
-                  <td>job_type</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
             </tbody>
           </table>
         
@@ -2444,17 +2494,10 @@
                 </tr>
               
                 <tr>
-                  <td>graph_config</td>
-                  <td><a href="#api.GraphConfig">GraphConfig</a></td>
+                  <td>nas_config</td>
+                  <td><a href="#api.NasConfig">NasConfig</a></td>
                   <td></td>
-                  <td><p>GraphConfig for NAS job </p></td>
-                </tr>
-              
-                <tr>
-                  <td>operations</td>
-                  <td><a href="#api.StudyConfig.Operations">StudyConfig.Operations</a></td>
-                  <td></td>
-                  <td><p>List of Operation </p></td>
+                  <td><p>Config for NAS job </p></td>
                 </tr>
               
                 <tr>
@@ -2462,29 +2505,6 @@
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>Type of the job, NAS or HP </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-        
-
-        
-      
-        <h3 id="api.StudyConfig.Operations">StudyConfig.Operations</h3>
-        <p>List of Operation</p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>operation</td>
-                  <td><a href="#api.Operation">Operation</a></td>
-                  <td>repeated</td>
-                  <td><p> </p></td>
                 </tr>
               
             </tbody>

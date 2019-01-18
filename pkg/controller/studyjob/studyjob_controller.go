@@ -449,10 +449,6 @@ func (r *ReconcileStudyJobController) getJobWorkerStatus(w *katibv1alpha1.Worker
 }
 
 func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJob, ns string) (bool, error) {
-	//Automatically stop for NAS jobs
-	if instance.Spec.JobType == "nas" {
-		instance.Status.Condition = katibv1alpha1.ConditionCompleted
-	}
 	nextSuggestionSchedule := true
 	var cwids []string
 	var update bool = false

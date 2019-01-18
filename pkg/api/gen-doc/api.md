@@ -52,6 +52,8 @@
     - [MetricsLogSet](#api.MetricsLogSet)
     - [MetricsValueTime](#api.MetricsValueTime)
     - [ModelInfo](#api.ModelInfo)
+    - [NasConfig](#api.NasConfig)
+    - [NasConfig.Operations](#api.NasConfig.Operations)
     - [Operation](#api.Operation)
     - [Operation.ParameterConfigs](#api.Operation.ParameterConfigs)
     - [Parameter](#api.Parameter)
@@ -73,7 +75,6 @@
     - [StopWorkersReply](#api.StopWorkersReply)
     - [StopWorkersRequest](#api.StopWorkersRequest)
     - [StudyConfig](#api.StudyConfig)
-    - [StudyConfig.Operations](#api.StudyConfig.Operations)
     - [StudyConfig.ParameterConfigs](#api.StudyConfig.ParameterConfigs)
     - [StudyOverview](#api.StudyOverview)
     - [SuggestionParameter](#api.SuggestionParameter)
@@ -855,10 +856,41 @@ Metrics of a worker with timestamp
 
 
 
+<a name="api.NasConfig"/>
+
+### NasConfig
+NasConfig contains a config of NAS job
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| graph_config | [GraphConfig](#api.GraphConfig) |  | Config of DAG |
+| operations | [NasConfig.Operations](#api.NasConfig.Operations) |  | List of Operation |
+
+
+
+
+
+
+<a name="api.NasConfig.Operations"/>
+
+### NasConfig.Operations
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| operation | [Operation](#api.Operation) | repeated |  |
+
+
+
+
+
+
 <a name="api.Operation"/>
 
 ### Operation
-Config for a operation in DAG
+Config for operations in DAG
 
 
 | Field | Type | Label | Description |
@@ -1093,7 +1125,6 @@ Generate an unique ID and store the Worker to DB.
 | suggestion_algorithm | [string](#string) |  |  |
 | param_id | [string](#string) |  |  |
 | suggestion_parameters | [SuggestionParameter](#api.SuggestionParameter) | repeated |  |
-| job_type | [string](#string) |  |  |
 
 
 
@@ -1172,24 +1203,8 @@ It is assumed that objective function f(x) does not change in the course of a St
 | objective_value_name | [string](#string) |  | Name of objective value. |
 | metrics | [string](#string) | repeated | List of metrics name. |
 | jobId | [string](#string) |  | ID of studyjob that is created from this config. |
-| graph_config | [GraphConfig](#api.GraphConfig) |  | GraphConfig for NAS job |
-| operations | [StudyConfig.Operations](#api.StudyConfig.Operations) |  | List of Operation |
+| nas_config | [NasConfig](#api.NasConfig) |  | Config for NAS job |
 | job_type | [string](#string) |  | Type of the job, NAS or HP |
-
-
-
-
-
-
-<a name="api.StudyConfig.Operations"/>
-
-### StudyConfig.Operations
-List of Operation
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| operation | [Operation](#api.Operation) | repeated |  |
 
 
 

@@ -685,7 +685,7 @@
     }
   },
   "definitions": {
-    "StudyConfigOperations": {
+    "NasConfigOperations": {
       "type": "object",
       "properties": {
         "operation": {
@@ -694,8 +694,7 @@
             "$ref": "#/definitions/apiOperation"
           }
         }
-      },
-      "title": "* \nList of Operation"
+      }
     },
     "apiCreateStudyReply": {
       "type": "object",
@@ -1114,6 +1113,18 @@
         }
       }
     },
+    "apiNasConfig": {
+      "type": "object",
+      "properties": {
+        "graph_config": {
+          "$ref": "#/definitions/apiGraphConfig"
+        },
+        "operations": {
+          "$ref": "#/definitions/NasConfigOperations"
+        }
+      },
+      "title": "*\nNasConfig contains a config of NAS job"
+    },
     "apiOperation": {
       "type": "object",
       "properties": {
@@ -1124,7 +1135,7 @@
           "$ref": "#/definitions/apiOperationParameterConfigs"
         }
       },
-      "title": "*\nConfig for a operation in DAG"
+      "title": "*\nConfig for operations in DAG"
     },
     "apiOperationParameterConfigs": {
       "type": "object",
@@ -1305,9 +1316,6 @@
           "items": {
             "$ref": "#/definitions/apiSuggestionParameter"
           }
-        },
-        "job_type": {
-          "type": "string"
         }
       }
     },
@@ -1366,11 +1374,8 @@
         "jobId": {
           "type": "string"
         },
-        "graph_config": {
-          "$ref": "#/definitions/apiGraphConfig"
-        },
-        "operations": {
-          "$ref": "#/definitions/StudyConfigOperations"
+        "nas_config": {
+          "$ref": "#/definitions/apiNasConfig"
         },
         "job_type": {
           "type": "string"

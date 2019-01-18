@@ -384,6 +384,18 @@ message Worker {
 }
 
 /**
+ * NasConfig contains a config of NAS job
+ */
+ message NasConfig {
+    GraphConfig graph_config = 1; /// Config of DAG
+    message Operations {
+        repeated Operation operation = 1;
+    }
+    Operations operations = 2; /// List of Operation
+}
+
+
+/**
  * GraphConfig contains a config of DAG
  */
  message GraphConfig {
@@ -393,7 +405,7 @@ message Worker {
 }
 
 /**
- * Config for a operation in DAG
+ * Config for operations in DAG
  */
  message Operation {
      string operationType = 1; /// Type of operation in DAG
@@ -403,7 +415,7 @@ message Worker {
      message ParameterConfigs {
         repeated ParameterConfig configs = 1;
     }
-    ParameterConfigs parameter_configs = 5; /// List of ParameterConfig
+    ParameterConfigs parameter_configs = 2; /// List of ParameterConfig
 }
 
 /**
@@ -428,15 +440,8 @@ message StudyConfig {
     string objective_value_name = 8; /// Name of objective value.
     repeated string metrics = 9; /// List of metrics name.
     string jobId = 10; /// ID of studyjob that is created from this config.
-    GraphConfig graph_config = 11; ///GraphConfig for NAS job
-    /** 
-     * List of Operation
-     */
-    message Operations {
-        repeated Operation operation = 1;
-    }
-    Operations operations = 12; /// List of Operation
-    string job_type = 13; /// Type of the job, NAS or HP
+    NasConfig nas_config = 11; /// Config for NAS job
+    string job_type = 12; /// Type of the job, NAS or HP
 }
 
 /** 
@@ -712,7 +717,6 @@ message SetSuggestionParametersRequest {
     string suggestion_algorithm = 2;
     string param_id = 3;
     repeated SuggestionParameter suggestion_parameters = 4;
-    string job_type = 5;
 }
 
 message SetSuggestionParametersReply {
