@@ -53,18 +53,10 @@ func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest)
 
 	} else {
 		//If it is a NAS job
-		log.Printf("INSIDE NAS JOB IN CREATE STUDY")
 		studyID, err = dbIf.CreateNAS(in.StudyConfig)
 		if err != nil {
-			log.Printf("Error is %v", err)
 			return &api_pb.CreateStudyReply{}, err
 		}
-		log.Printf("BEFORE GETTING")
-		sc, err := dbIf.GetNASConfig(studyID)
-		if err != nil {
-			log.Printf("Error is %v", err)
-		}
-		log.Printf("CONFIG IS: %v", sc)
 	}
 	return &api_pb.CreateStudyReply{StudyId: studyID}, nil
 }
@@ -82,10 +74,8 @@ func (s *server) DeleteStudy(ctx context.Context, in *api_pb.DeleteStudyRequest)
 		}
 	} else {
 		//If it is a NAS job
-		log.Printf("NAS job is deleted, id= %v", in.StudyId)
 		err = dbIf.DeleteNAS(in.StudyId)
 		if err != nil {
-			log.Printf("Error is %v", err)
 			return &api_pb.DeleteStudyReply{}, err
 		}
 
@@ -101,10 +91,8 @@ func (s *server) GetStudy(ctx context.Context, in *api_pb.GetStudyRequest) (*api
 		sc, err = dbIf.GetStudyConfig(in.StudyId)
 	} else {
 		//If it is a NAS job
-		log.Printf("Get NAS job, id = %v", in.StudyId)
 		sc, err = dbIf.GetNASConfig(in.StudyId)
 		if err != nil {
-			log.Printf("Error is %v", err)
 			return &api_pb.GetStudyReply{}, err
 		}
 	}
@@ -150,6 +138,7 @@ func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRe
 	if in.SuggestionAlgorithm == "" {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, errors.New("No suggest algorithm specified")
 	}
+
 	conn, err := grpc.Dial("vizier-suggestion-"+in.SuggestionAlgorithm+":6789", grpc.WithInsecure())
 	if err != nil {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err

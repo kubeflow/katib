@@ -26,8 +26,7 @@ func (d *dbConn) DBInit() {
 		trials TEXT,
 		objective_value_name VARCHAR(255),
 		metrics TEXT,
-		graphconfig TEXT,
-		operations TEXT,
+		nasconfig TEXT,
 		job_id TEXT,
 		job_type TEXT)`)
 
@@ -108,7 +107,6 @@ func (d *dbConn) DBInit() {
 	if err != nil {
 		log.Fatalf("Error creating earlystop_param table: %v", err)
 	}
-
 }
 
 func (d *dbConn) SelectOne() error {

@@ -170,19 +170,18 @@ func isDBDuplicateError(err error) bool {
 func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
 	study := new(api.StudyConfig)
-	var dummyID, graphConfig, parameters, operations, tags, metrics, trials string
+	var dummyID, nasConfig, parameters, tags, metrics, trials string
 	err := row.Scan(&dummyID,
 		&study.Name,
 		&study.Owner,
 		&study.OptimizationType,
 		&study.OptimizationGoal,
-		&tags,
 		&parameters,
+		&tags,
 		&trials,
 		&study.ObjectiveValueName,
 		&metrics,
-		&graphConfig,
-		&operations,
+		&nasConfig,
 		&study.JobId,
 		&study.JobType,
 	)
@@ -214,7 +213,7 @@ func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 }
 
 func (d *dbConn) GetStudyList() ([]string, error) {
-	rows, err := d.db.Query("SELECT id FROM studies WHERE job_type = hp")
+	rows, err := d.db.Query("SELECT id FROM studies WHERE job_type = 'HP'")
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +235,6 @@ func (d *dbConn) GetStudyList() ([]string, error) {
 func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 	if in.ParameterConfigs == nil {
 		return "", errors.New("ParameterConfigs must be set")
-
 	}
 	if in.JobId != "" {
 		var temporaryId string
@@ -272,13 +270,12 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 
 	var studyID string
 	var trials string
-	var operations string
-	var graphConfig string
+	var nasConfig string
 	i := 3
 	for true {
 		studyID = generateRandid()
 		_, err := d.db.Exec(
-			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			studyID,
 			in.Name,
 			in.Owner,
@@ -289,8 +286,7 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 			trials,
 			in.ObjectiveValueName,
 			strings.Join(in.Metrics, ",\n"),
-			graphConfig,
-			operations,
+			nasConfig,
 			in.JobId,
 			in.JobType,
 		)
@@ -349,7 +345,7 @@ func (d *dbConn) DeleteStudy(id string) error {
 
 func (d *dbConn) CreateNAS(in *api.StudyConfig) (string, error) {
 
-	for _, operation := range in.Operations.Operation {
+	for _, operation := range in.NasConfig.Operations.Operation {
 		if len(operation.OperationType) == 0 && operation.ParameterConfigs != nil {
 			return "", errors.New("Operations must be set properly")
 		}
@@ -373,14 +369,9 @@ func (d *dbConn) CreateNAS(in *api.StudyConfig) (string, error) {
 		// }
 	}
 
-	graphConfig, err := (&jsonpb.Marshaler{}).MarshalToString(in.GraphConfig)
+	nasConfig, err := (&jsonpb.Marshaler{}).MarshalToString(in.NasConfig)
 	if err != nil {
-		log.Fatalf("Error marshaling graphConfig: %v", err)
-	}
-
-	operations, err := (&jsonpb.Marshaler{}).MarshalToString(in.Operations)
-	if err != nil {
-		log.Fatalf("Error marshaling operations: %v", err)
+		log.Fatalf("Error marshaling nasConfig: %v", err)
 	}
 
 	tags := make([]string, len(in.Tags))
@@ -412,7 +403,7 @@ func (d *dbConn) CreateNAS(in *api.StudyConfig) (string, error) {
 	for true {
 		studyID = generateRandid()
 		_, err := d.db.Exec(
-			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			studyID,
 			in.Name,
 			in.Owner,
@@ -423,8 +414,7 @@ func (d *dbConn) CreateNAS(in *api.StudyConfig) (string, error) {
 			trials,
 			in.ObjectiveValueName,
 			strings.Join(in.Metrics, ",\n"),
-			graphConfig,
-			operations,
+			nasConfig,
 			in.JobId,
 			in.JobType,
 		)
@@ -456,7 +446,7 @@ func (d *dbConn) CreateNAS(in *api.StudyConfig) (string, error) {
 func (d *dbConn) GetNASConfig(id string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
 	study := new(api.StudyConfig)
-	var dummyID, graphConfig, parameters, operations, tags, metrics, trials string
+	var dummyID, nasConfig, parameters, tags, metrics, trials string
 	err := row.Scan(&dummyID,
 		&study.Name,
 		&study.Owner,
@@ -467,27 +457,16 @@ func (d *dbConn) GetNASConfig(id string) (*api.StudyConfig, error) {
 		&trials,
 		&study.ObjectiveValueName,
 		&metrics,
-		&graphConfig,
-		&operations,
+		&nasConfig,
 		&study.JobId,
 		&study.JobType,
 	)
 	if err != nil {
-		log.Printf("Failed to scan: %v", err)
 		return nil, err
 	}
-
-	study.GraphConfig = new(api.GraphConfig)
-	err = jsonpb.UnmarshalString(graphConfig, study.GraphConfig)
+	study.NasConfig = new(api.NasConfig)
+	err = jsonpb.UnmarshalString(nasConfig, study.NasConfig)
 	if err != nil {
-		log.Printf("Failed to unmarshal graphConfig")
-		return nil, err
-	}
-
-	study.Operations = new(api.StudyConfig_Operations)
-	err = jsonpb.UnmarshalString(operations, study.Operations)
-	if err != nil {
-		log.Printf("Failed to unmarshal operations")
 		return nil, err
 	}
 
@@ -506,14 +485,13 @@ func (d *dbConn) GetNASConfig(id string) (*api.StudyConfig, error) {
 		study.Tags[i] = tag
 	}
 	study.Metrics = strings.Split(metrics, ",\n")
-	log.Printf("Returning")
 	outBytes, _ := yaml.Marshal(study)
 	log.Printf(string(outBytes))
 	return study, nil
 }
 
 func (d *dbConn) GetNASList() ([]string, error) {
-	rows, err := d.db.Query("SELECT id FROM studies WHERE job_type = nas")
+	rows, err := d.db.Query("SELECT id FROM studies WHERE job_type = 'NAS'")
 	if err != nil {
 		return nil, err
 	}
@@ -1209,6 +1187,7 @@ func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId stri
 func (d *dbConn) SetSuggestionParam(algorithm string, studyID string, params []*api.SuggestionParameter) (string, error) {
 	var err error
 	ps := make([]string, len(params))
+	log.Printf("INSIDE SETSUGGESTION DB CALL ALGO: %v", algorithm)
 	for i, elem := range params {
 		ps[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
 		if err != nil {
@@ -1249,6 +1228,8 @@ func (d *dbConn) GetSuggestionParam(paramID string) ([]*api.SuggestionParameter,
 	var params string
 	row := d.db.QueryRow("SELECT parameters FROM suggestion_param WHERE id = ?", paramID)
 	err := row.Scan(&params)
+	log.Printf("AFTER SCANNING IN GET SUGGESTION")
+	log.Printf("PARAMETER IS %v", params)
 	if err != nil {
 		return nil, err
 	}
@@ -1268,6 +1249,8 @@ func (d *dbConn) GetSuggestionParam(paramID string) ([]*api.SuggestionParameter,
 		}
 		ret[i] = p
 	}
+	log.Printf("RET IS %v", ret)
+
 	return ret, nil
 }
 
