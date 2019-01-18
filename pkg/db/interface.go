@@ -272,7 +272,6 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 
 	var studyID string
 	var trials string
-	var operations string
 	var nasConfig string
 	i := 3
 	for true {
@@ -348,7 +347,7 @@ func (d *dbConn) DeleteStudy(id string) error {
 
 func (d *dbConn) CreateNAS(in *api.StudyConfig) (string, error) {
 
-	for _, operation := range in.Operations.Operation {
+	for _, operation := range in.NasConfig.Operations.Operation {
 		if len(operation.OperationType) == 0 && operation.ParameterConfigs != nil {
 			return "", errors.New("Operations must be set properly")
 		}
@@ -449,7 +448,7 @@ func (d *dbConn) CreateNAS(in *api.StudyConfig) (string, error) {
 func (d *dbConn) GetNASConfig(id string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
 	study := new(api.StudyConfig)
-	var dummyID, nasConfig, parameters, operations, tags, metrics, trials string
+	var dummyID, nasConfig, parameters, tags, metrics, trials string
 	err := row.Scan(&dummyID,
 		&study.Name,
 		&study.Owner,
