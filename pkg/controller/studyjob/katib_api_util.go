@@ -24,6 +24,11 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	jobTypeNAS = "NAS"
+	jobTypeHP  = "HP"
+)
+
 func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) error {
 	if validErr := validateStudy(instance, ns); validErr != nil {
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
@@ -79,7 +84,7 @@ func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) error {
 
 func getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
 	jobType := getJobType(instance)
-	if jobType == "NAS" {
+	if jobType == jobTypeNAS {
 		return populateConfigForNAS(instance)
 	}
 	return populateConfigForHP(instance)
@@ -87,12 +92,12 @@ func getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, erro
 
 func getJobType(instance *katibv1alpha1.StudyJob) string {
 	if instance.Spec.NasConfig != nil {
-		return "NAS"
+		return jobTypeNAS
 	}
-	return "HP"
+	return jobTypeHP
 }
 
-func populateCommonConfigFields(instance *katibv1alpha1.StudyJob, sconf *katibapi.StudyConfig) *katibapi.StudyConfig {
+func populateCommonConfigFields(instance *katibv1alpha1.StudyJob, sconf *katibapi.StudyConfig) {
 
 	sconf.Name = instance.Spec.StudyName
 	sconf.Owner = instance.Spec.Owner
@@ -112,7 +117,6 @@ func populateCommonConfigFields(instance *katibv1alpha1.StudyJob, sconf *katibap
 		sconf.Metrics = append(sconf.Metrics, m)
 	}
 	sconf.JobId = string(instance.UID)
-	return sconf
 }
 
 func populateConfigForHP(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
@@ -123,7 +127,7 @@ func populateConfigForHP(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfi
 		},
 	}
 
-	sconf = populateCommonConfigFields(instance, sconf)
+	populateCommonConfigFields(instance, sconf)
 
 	for _, pc := range instance.Spec.ParameterConfigs {
 		p := &katibapi.ParameterConfig{
@@ -158,7 +162,7 @@ func populateConfigForHP(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfi
 		sconf.ParameterConfigs.Configs = append(sconf.ParameterConfigs.Configs, p)
 	}
 
-	sconf.JobType = "HP"
+	sconf.JobType = jobTypeHP
 	return sconf, nil
 }
 
@@ -172,7 +176,7 @@ func populateConfigForNAS(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConf
 			},
 		},
 	}
-	sconf = populateCommonConfigFields(instance, sconf)
+	populateCommonConfigFields(instance, sconf)
 
 	sconf.NasConfig.GraphConfig.NumLayers = instance.Spec.NasConfig.GraphConfig.NumLayers
 	for _, i := range instance.Spec.NasConfig.GraphConfig.InputSize {
@@ -226,7 +230,7 @@ func populateConfigForNAS(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConf
 		sconf.NasConfig.Operations.Operation = append(sconf.NasConfig.Operations.Operation, operation)
 	}
 
-	sconf.JobType = "NAS"
+	sconf.JobType = jobTypeNAS
 	return sconf, nil
 }
 
