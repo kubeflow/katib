@@ -24,11 +24,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-const (
-	jobTypeNAS = "NAS"
-	jobTypeHP  = "HP"
-)
-
 func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) error {
 	if validErr := validateStudy(instance, ns); validErr != nil {
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
