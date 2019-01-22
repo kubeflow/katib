@@ -47,7 +47,7 @@ type VizierDBInterface interface {
 	SelectOne() error
 
 	GetStudyIDsList() ([]string, error)
-	GetStudyMetrics(string) ([]string, error)
+	GetStudyIDsTypesList(string) ([]JobTypeAndID, error)
 
 	GetHPStudyConfig(string) (*api.StudyConfig, error)
 	GetHPStudyList() ([]string, error)
@@ -133,7 +133,7 @@ func openSQLConn(driverName string, dataSourceName string, interval time.Duratio
 	}
 }
 
-func GetStudyIDsTypesList(db *sql.DB) (VizierDBInterface, error) {
+func NewWithSQLConn(db *sql.DB) (VizierDBInterface, error) {
 	d := new(dbConn)
 	d.db = db
 	seed, err := crand.Int(crand.Reader, big.NewInt(1<<63-1))
@@ -147,7 +147,6 @@ func GetStudyIDsTypesList(db *sql.DB) (VizierDBInterface, error) {
 	return d, nil
 }
 
-//additional functino since they share the same metrics names
 func (d *dbConn) GetStudyMetrics(id string) ([]string, error) {
 	row := d.db.QueryRow("SELECT metrics FROM studies WHERE id = ?", id)
 	var metrics string
