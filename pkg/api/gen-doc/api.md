@@ -262,7 +262,7 @@ Discrete and Categorical type use List.
 | max | [string](#string) |  | Max Value |
 | min | [string](#string) |  | Minimum Value |
 | list | [string](#string) | repeated | List of Values. |
-| step | [string](#string) |  | Step for Range parameter |
+| step | [string](#string) |  | Step for double or int parameter |
 
 
 
@@ -1406,7 +1406,6 @@ Types of value for HyperParameter.
 | INT | 2 | Int type. Use &#34;Max/Min&#34;. |
 | DISCRETE | 3 | Discrete number type. Use &#34;List&#34; as float. |
 | CATEGORICAL | 4 | Categorical type. Use &#34;List&#34; as string. |
-| RANGE | 5 | Range type. Use &#34;Max/Min&#34; and &#34;Step&#34; parameter. |
 
 
 

@@ -17,12 +17,14 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
     def GetSuggestions(self, request, context):
         trials = []
-        print("BEFORE GET STUDY CONFIG")
-        print(request)
         study_conf = self.getStudyConfig(request.study_id)
-        print("Study Config")
+        print("Search Space")
         print(study_conf)
-        print(type(study_conf))
+
+        suggestion_parameters = self.getSuggestionParameters(request.param_id)
+        print("Suggestion Parameters")
+        print(suggestion_parameters)
+
         return api_pb2.GetSuggestionsReply(trials=trials)
     
     def getStudyConfig(self, studyID):
@@ -30,3 +32,9 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         with api_pb2.beta_create_Manager_stub(channel) as client:
             gsrep = client.GetStudy(api_pb2.GetStudyRequest(study_id=studyID, job_type="NAS"), 10)
             return gsrep.study_config
+
+    def getSuggestionParameters(self, paramID):
+        channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
+        with api_pb2.beta_create_Manager_stub(channel) as client:
+            gsprep = client.GetSuggestionParameters(api_pb2.GetSuggestionParametersRequest(param_id=paramID), 10)
+            return gsprep.suggestion_parameters

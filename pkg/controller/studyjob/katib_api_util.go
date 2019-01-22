@@ -151,8 +151,6 @@ func populateConfigForHP(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfi
 			p.ParameterType = katibapi.ParameterType_DISCRETE
 		case katibv1alpha1.ParameterTypeCategorical:
 			p.ParameterType = katibapi.ParameterType_CATEGORICAL
-		case katibv1alpha1.ParameterTypeRange:
-			p.ParameterType = katibapi.ParameterType_RANGE
 		}
 		sconf.ParameterConfigs.Configs = append(sconf.ParameterConfigs.Configs, p)
 	}
@@ -216,8 +214,6 @@ func populateConfigForNAS(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConf
 				p.ParameterType = katibapi.ParameterType_DISCRETE
 			case katibv1alpha1.ParameterTypeCategorical:
 				p.ParameterType = katibapi.ParameterType_CATEGORICAL
-			case katibv1alpha1.ParameterTypeRange:
-				p.ParameterType = katibapi.ParameterType_RANGE
 			}
 
 			operation.ParameterConfigs.Configs = append(operation.ParameterConfigs.Configs, p)

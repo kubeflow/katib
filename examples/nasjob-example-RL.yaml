@@ -94,7 +94,7 @@ spec:
               - tanh
               - identity
           - name: dropout_rate
-            parametertype: range
+            parametertype: double
             feasible:
               min: "0.1"
               max: "0.6"

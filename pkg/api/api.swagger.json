@@ -1196,8 +1196,7 @@
         "DOUBLE",
         "INT",
         "DISCRETE",
-        "CATEGORICAL",
-        "RANGE"
+        "CATEGORICAL"
       ],
       "default": "UNKNOWN_TYPE",
       "description": "*\nTypes of value for HyperParameter."
