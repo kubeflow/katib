@@ -39,6 +39,58 @@ func createWorkerJobObj(kind string) runtime.Object {
 	return nil
 }
 
+func validateWorkerResource(wkind string) error {
+	for _, crd := range invalidCRDResources {
+		if crd == wkind {
+			return fmt.Errorf("Cannot support %s; If CRD for it installed, please restart studyjob-controller to take effect", wkind)
+		}
+	}
+	return nil
+}
+
+
+func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (string, error) {
+	var typeChecker interface{}
+	BUFSIZE := 1024
+	_, m, err := getWorkerManifest(
+		nil,
+		"validation",
+		&katibapi.Trial{
+			TrialId:      "validation",
+			ParameterSet: []*katibapi.Parameter{},
+		},
+		workerSpec,
+		"",
+		"",
+		true,
+	)
+	if err != nil {
+		return "", err
+	}
+	if err := k8syaml.NewYAMLOrJSONDecoder(m, BUFSIZE).Decode(&typeChecker); err != nil {
+		log.Printf("Yaml decode validation error %v", err)
+		return "", err
+	}
+	tcMap, ok := typeChecker.(map[string]interface{})
+	if !ok {
+		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
+	}
+	wkind, ok := tcMap["kind"]
+	if !ok {
+		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
+	}
+	wkindS, ok := wkind.(string)
+	if !ok {
+		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
+	}
+	for _, kind := range ValidWorkerKindList {
+		if kind == wkindS {
+			return wkindS, validateWorkerResource(kind)
+		}
+	}
+	return "", fmt.Errorf("Invalid kind of worker %v", typeChecker)
+}
+
 func validateStudy(instance *katibv1alpha1.StudyJob, namespace string) error {
 	if instance.Spec.SuggestionSpec == nil {
 		return fmt.Errorf("No Spec.SuggestionSpec specified.")

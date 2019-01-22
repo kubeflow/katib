@@ -138,6 +138,10 @@ func deleteStudy(instance *katibv1alpha1.StudyJob) error {
 	c := katibapi.NewManagerClient(conn)
 	ctx := context.Background()
 	studyID := instance.Status.StudyID
+	if studyID == "" {
+		// in case that information for a studyjob is not created in DB
+		return nil
+	}
 	deleteStudyreq := &katibapi.DeleteStudyRequest{
 		StudyId: studyID,
 	}
