@@ -46,6 +46,9 @@ type VizierDBInterface interface {
 	DBInit()
 	SelectOne() error
 
+	GetStudyIDsList() ([]string, error)
+	GetStudyMetrics(string) ([]string, error)
+
 	GetHPStudyConfig(string) (*api.StudyConfig, error)
 	GetHPStudyList() ([]string, error)
 	CreateHPStudy(*api.StudyConfig) (string, error)
@@ -90,6 +93,11 @@ type dbConn struct {
 	db *sql.DB
 }
 
+type JobTypeAndID struct {
+	jbType string
+	jbId   string
+}
+
 var rs1Letters = []rune("abcdefghijklmnopqrstuvwxyz")
 
 func getDbName() string {
@@ -125,7 +133,7 @@ func openSQLConn(driverName string, dataSourceName string, interval time.Duratio
 	}
 }
 
-func NewWithSQLConn(db *sql.DB) (VizierDBInterface, error) {
+func GetStudyIDsTypesList(db *sql.DB) (VizierDBInterface, error) {
 	d := new(dbConn)
 	d.db = db
 	seed, err := crand.Int(crand.Reader, big.NewInt(1<<63-1))
@@ -137,6 +145,18 @@ func NewWithSQLConn(db *sql.DB) (VizierDBInterface, error) {
 	rand.Seed(seed.Int64())
 
 	return d, nil
+}
+
+//additional functino since they share the same metrics names
+func (d *dbConn) GetStudyMetrics(id string) ([]string, error) {
+	row := d.db.QueryRow("SELECT metrics FROM studies WHERE id = ?", id)
+	var metrics string
+	err := row.Scan(&metrics)
+	if err != nil {
+		return nil, err
+	}
+	retMetrics := strings.Split(metrics, ",\n")
+	return retMetrics, nil
 }
 
 func New() (VizierDBInterface, error) {
@@ -164,6 +184,28 @@ func isDBDuplicateError(err error) bool {
 		return true
 	}
 	return false
+}
+
+func (d *dbConn) GetStudyIDsTypesList() ([]JobTypeAndID, error) {
+	rows, err := d.db.Query("SELECT id, job_type FROM studies")
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	var result []JobTypeAndID
+	for rows.Next() {
+		var id, jobType string
+		err = rows.Scan(&id, jobType)
+		if err != nil {
+			log.Printf("err scanning studies.id: %v", err)
+			continue
+		}
+		job := JobTypeAndID{jobType, id}
+		result = append(result, job)
+	}
+
+	return result, nil
 }
 
 func (d *dbConn) GetHPStudyConfig(id string) (*api.StudyConfig, error) {
@@ -1053,7 +1095,8 @@ func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId stri
 	if err != nil {
 		return ret, err
 	}
-	sc, err := d.GetStudyConfig(studyId)
+	// Actually no need to get full config now
+	metrics, err := d.GetStudyMetrics(studyId)
 	if err != nil {
 		return ret, err
 	}
@@ -1153,7 +1196,7 @@ func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId stri
 				Time:  ptime.UTC().Format(time.RFC3339Nano),
 			})
 		} else {
-			metricslist[wid] = make(map[string][]*api.MetricsValueTime, len(sc.Metrics))
+			metricslist[wid] = make(map[string][]*api.MetricsValueTime, len(metrics))
 			metricslist[wid][name] = append(metricslist[wid][name], &api.MetricsValueTime{
 				Value: value,
 				Time:  ptime.UTC().Format(time.RFC3339Nano),
@@ -1165,7 +1208,7 @@ func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId stri
 			Worker:       w,
 			ParameterSet: plist[w.TrialId],
 		}
-		for _, m := range sc.Metrics {
+		for _, m := range metrics {
 			if v, ok := metricslist[w.WorkerId][m]; ok {
 				wfilist[i].MetricsLogs = append(wfilist[i].MetricsLogs, &api.MetricsLog{
 					Name:   m,
@@ -1182,7 +1225,6 @@ func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId stri
 func (d *dbConn) SetSuggestionParam(algorithm string, studyID string, params []*api.SuggestionParameter) (string, error) {
 	var err error
 	ps := make([]string, len(params))
-	log.Printf("INSIDE SETSUGGESTION DB CALL ALGO: %v", algorithm)
 	for i, elem := range params {
 		ps[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
 		if err != nil {
