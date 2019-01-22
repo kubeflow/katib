@@ -23,7 +23,6 @@ func (d *dbConn) DBInit() {
 		optimization_goal DOUBLE,
 		parameter_configs TEXT,
 		tags TEXT,
-		trials TEXT,
 		objective_value_name VARCHAR(255),
 		metrics TEXT,
 		nasconfig TEXT,
@@ -49,6 +48,7 @@ func (d *dbConn) DBInit() {
 		parameters TEXT,
 		objective_value VARCHAR(255),
 		tags TEXT,
+		time DATETIME(6),
 		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE)`)
 	if err != nil {
 		log.Fatalf("Error creating trials table: %v", err)
@@ -107,6 +107,7 @@ func (d *dbConn) DBInit() {
 	if err != nil {
 		log.Fatalf("Error creating earlystop_param table: %v", err)
 	}
+
 }
 
 func (d *dbConn) SelectOne() error {

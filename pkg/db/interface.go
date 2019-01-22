@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/jsonpb"
-	yaml "gopkg.in/yaml.v2"
 
 	api "github.com/kubeflow/katib/pkg/api"
 
@@ -47,18 +46,18 @@ type VizierDBInterface interface {
 	DBInit()
 	SelectOne() error
 
-	GetStudyConfig(string) (*api.StudyConfig, error)
-	GetStudyList() ([]string, error)
-	CreateStudy(*api.StudyConfig) (string, error)
-	UpdateStudy(string, *api.StudyConfig) error
-	DeleteStudy(string) error
+	GetHPStudyConfig(string) (*api.StudyConfig, error)
+	GetHPStudyList() ([]string, error)
+	CreateHPStudy(*api.StudyConfig) (string, error)
+	UpdateHPStudy(string, *api.StudyConfig) error
+	DeleteHPStudy(string) error
 
 	/* APIs for NAS */
-	GetNASConfig(string) (*api.StudyConfig, error)
-	GetNASList() ([]string, error)
-	CreateNAS(*api.StudyConfig) (string, error)
-	UpdateNAS(string, *api.StudyConfig) error
-	DeleteNAS(string) error
+	GetNASStudyConfig(string) (*api.StudyConfig, error)
+	GetNASStudyList() ([]string, error)
+	CreateNASStudy(*api.StudyConfig) (string, error)
+	UpdateNASStudy(string, *api.StudyConfig) error
+	DeleteNASStudy(string) error
 
 	GetTrial(string) (*api.Trial, error)
 	GetTrialList(string) ([]*api.Trial, error)
@@ -167,10 +166,10 @@ func isDBDuplicateError(err error) bool {
 	return false
 }
 
-func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
+func (d *dbConn) GetHPStudyConfig(id string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
 	study := new(api.StudyConfig)
-	var dummyID, nasConfig, parameters, tags, metrics, trials string
+	var dummyID, nasConfig, parameters, tags, metrics string
 	err := row.Scan(&dummyID,
 		&study.Name,
 		&study.Owner,
@@ -178,7 +177,6 @@ func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 		&study.OptimizationGoal,
 		&parameters,
 		&tags,
-		&trials,
 		&study.ObjectiveValueName,
 		&metrics,
 		&nasConfig,
@@ -212,7 +210,7 @@ func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 	return study, nil
 }
 
-func (d *dbConn) GetStudyList() ([]string, error) {
+func (d *dbConn) GetHPStudyList() ([]string, error) {
 	rows, err := d.db.Query("SELECT id FROM studies WHERE job_type = 'HP'")
 	if err != nil {
 		return nil, err
@@ -232,7 +230,7 @@ func (d *dbConn) GetStudyList() ([]string, error) {
 	return result, nil
 }
 
-func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
+func (d *dbConn) CreateHPStudy(in *api.StudyConfig) (string, error) {
 	if in.ParameterConfigs == nil {
 		return "", errors.New("ParameterConfigs must be set")
 	}
@@ -269,13 +267,12 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 	}
 
 	var studyID string
-	var trials string
 	var nasConfig string
 	i := 3
 	for true {
 		studyID = generateRandid()
 		_, err := d.db.Exec(
-			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			studyID,
 			in.Name,
 			in.Owner,
@@ -283,7 +280,6 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 			in.OptimizationGoal,
 			configs,
 			strings.Join(tags, ",\n"),
-			trials,
 			in.ObjectiveValueName,
 			strings.Join(in.Metrics, ",\n"),
 			nasConfig,
@@ -317,7 +313,7 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 // UpdateStudy updates the corresponding row in the DB.
 // It only updates name, owner, tags and job_id.
 // Other columns are silently ignored.
-func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
+func (d *dbConn) UpdateHPStudy(studyID string, in *api.StudyConfig) error {
 	var err error
 
 	tags := make([]string, len(in.Tags))
@@ -338,12 +334,12 @@ func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
 	return err
 }
 
-func (d *dbConn) DeleteStudy(id string) error {
+func (d *dbConn) DeleteHPStudy(id string) error {
 	_, err := d.db.Exec("DELETE FROM studies WHERE id = ?", id)
 	return err
 }
 
-func (d *dbConn) CreateNAS(in *api.StudyConfig) (string, error) {
+func (d *dbConn) CreateNASStudy(in *api.StudyConfig) (string, error) {
 
 	for _, operation := range in.NasConfig.Operations.Operation {
 		if len(operation.OperationType) == 0 && operation.ParameterConfigs != nil {
@@ -396,14 +392,13 @@ func (d *dbConn) CreateNAS(in *api.StudyConfig) (string, error) {
 	}
 
 	var studyID string
-	var trials string
 	var configs string
 
 	i := 3
 	for true {
 		studyID = generateRandid()
 		_, err := d.db.Exec(
-			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			studyID,
 			in.Name,
 			in.Owner,
@@ -411,7 +406,6 @@ func (d *dbConn) CreateNAS(in *api.StudyConfig) (string, error) {
 			in.OptimizationGoal,
 			configs,
 			strings.Join(tags, ",\n"),
-			trials,
 			in.ObjectiveValueName,
 			strings.Join(in.Metrics, ",\n"),
 			nasConfig,
@@ -443,10 +437,10 @@ func (d *dbConn) CreateNAS(in *api.StudyConfig) (string, error) {
 	return studyID, nil
 }
 
-func (d *dbConn) GetNASConfig(id string) (*api.StudyConfig, error) {
+func (d *dbConn) GetNASStudyConfig(id string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
 	study := new(api.StudyConfig)
-	var dummyID, nasConfig, parameters, tags, metrics, trials string
+	var dummyID, nasConfig, parameters, tags, metrics string
 	err := row.Scan(&dummyID,
 		&study.Name,
 		&study.Owner,
@@ -454,7 +448,6 @@ func (d *dbConn) GetNASConfig(id string) (*api.StudyConfig, error) {
 		&study.OptimizationGoal,
 		&tags,
 		&parameters,
-		&trials,
 		&study.ObjectiveValueName,
 		&metrics,
 		&nasConfig,
@@ -467,6 +460,7 @@ func (d *dbConn) GetNASConfig(id string) (*api.StudyConfig, error) {
 	study.NasConfig = new(api.NasConfig)
 	err = jsonpb.UnmarshalString(nasConfig, study.NasConfig)
 	if err != nil {
+		log.Printf("Failed to unmarshal NasConfig")
 		return nil, err
 	}
 
@@ -485,12 +479,10 @@ func (d *dbConn) GetNASConfig(id string) (*api.StudyConfig, error) {
 		study.Tags[i] = tag
 	}
 	study.Metrics = strings.Split(metrics, ",\n")
-	outBytes, _ := yaml.Marshal(study)
-	log.Printf(string(outBytes))
 	return study, nil
 }
 
-func (d *dbConn) GetNASList() ([]string, error) {
+func (d *dbConn) GetNASStudyList() ([]string, error) {
 	rows, err := d.db.Query("SELECT id FROM studies WHERE job_type = 'NAS'")
 	if err != nil {
 		return nil, err
@@ -510,7 +502,7 @@ func (d *dbConn) GetNASList() ([]string, error) {
 	return result, nil
 }
 
-func (d *dbConn) UpdateNAS(studyID string, in *api.StudyConfig) error {
+func (d *dbConn) UpdateNASStudy(studyID string, in *api.StudyConfig) error {
 
 	/* THINK ABOUT TRIALS */
 	var err error
@@ -533,7 +525,7 @@ func (d *dbConn) UpdateNAS(studyID string, in *api.StudyConfig) error {
 	return err
 }
 
-func (d *dbConn) DeleteNAS(id string) error {
+func (d *dbConn) DeleteNASStudy(id string) error {
 	_, err := d.db.Exec("DELETE FROM studies WHERE id = ?", id)
 	return err
 }
@@ -559,11 +551,13 @@ func (d *dbConn) getTrials(trialID string, studyID string) ([]*api.Trial, error)
 		trial := new(api.Trial)
 
 		var parameters, tags string
+		var timeStamp
 		err := rows.Scan(&trial.TrialId,
 			&trial.StudyId,
 			&parameters,
 			&trial.ObjectiveValue,
 			&tags,
+			&timeStamp,
 		)
 		if err != nil {
 			return nil, err
@@ -657,9 +651,10 @@ func (d *dbConn) CreateTrial(trial *api.Trial) error {
 	i := 3
 	for true {
 		trialID = generateRandid()
-		_, err := d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?)",
+		timeString := time.Now().UTC().Format(mysqlTimeFmt)
+		_, err := d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?, ?)",
 			trialID, trial.StudyId, strings.Join(params, ",\n"),
-			trial.ObjectiveValue, strings.Join(tags, ",\n"))
+			trial.ObjectiveValue, strings.Join(tags, ",\n")), timeString,
 		if err == nil {
 			trial.TrialId = trialID
 			break
@@ -1228,8 +1223,6 @@ func (d *dbConn) GetSuggestionParam(paramID string) ([]*api.SuggestionParameter,
 	var params string
 	row := d.db.QueryRow("SELECT parameters FROM suggestion_param WHERE id = ?", paramID)
 	err := row.Scan(&params)
-	log.Printf("AFTER SCANNING IN GET SUGGESTION")
-	log.Printf("PARAMETER IS %v", params)
 	if err != nil {
 		return nil, err
 	}
@@ -1249,7 +1242,6 @@ func (d *dbConn) GetSuggestionParam(paramID string) ([]*api.SuggestionParameter,
 		}
 		ret[i] = p
 	}
-	log.Printf("RET IS %v", ret)
 
 	return ret, nil
 }

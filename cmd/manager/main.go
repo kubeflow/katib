@@ -37,7 +37,7 @@ func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest)
 
 	if in.StudyConfig.JobType != "NAS" {
 		//If it is a HP job
-		studyID, err = dbIf.CreateStudy(in.StudyConfig)
+		studyID, err = dbIf.CreateHPStudy(in.StudyConfig)
 		if err != nil {
 			return &api_pb.CreateStudyReply{}, err
 		}
@@ -53,8 +53,9 @@ func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest)
 
 	} else {
 		//If it is a NAS job
-		studyID, err = dbIf.CreateNAS(in.StudyConfig)
+		studyID, err = dbIf.CreateNASStudy(in.StudyConfig)
 		if err != nil {
+			log.Printf("Error is %v", err)
 			return &api_pb.CreateStudyReply{}, err
 		}
 	}
@@ -68,14 +69,15 @@ func (s *server) DeleteStudy(ctx context.Context, in *api_pb.DeleteStudyRequest)
 	var err error
 	if in.JobType != "NAS" {
 		//If it is a HP job
-		err = dbIf.DeleteStudy(in.StudyId)
+		err = dbIf.DeleteHPStudy(in.StudyId)
 		if err != nil {
 			return &api_pb.DeleteStudyReply{}, err
 		}
 	} else {
 		//If it is a NAS job
-		err = dbIf.DeleteNAS(in.StudyId)
+		err = dbIf.DeleteNASStudy(in.StudyId)
 		if err != nil {
+			log.Printf("Error is %v", err)
 			return &api_pb.DeleteStudyReply{}, err
 		}
 
@@ -88,11 +90,12 @@ func (s *server) GetStudy(ctx context.Context, in *api_pb.GetStudyRequest) (*api
 	var err error
 	if in.JobType != "NAS" {
 		//If it is a HP job
-		sc, err = dbIf.GetStudyConfig(in.StudyId)
+		sc, err = dbIf.GetHPStudyConfig(in.StudyId)
 	} else {
 		//If it is a NAS job
-		sc, err = dbIf.GetNASConfig(in.StudyId)
+		sc, err = dbIf.GetNASStudyConfig(in.StudyId)
 		if err != nil {
+			log.Printf("Error is %v", err)
 			return &api_pb.GetStudyReply{}, err
 		}
 	}
@@ -100,13 +103,24 @@ func (s *server) GetStudy(ctx context.Context, in *api_pb.GetStudyRequest) (*api
 }
 
 func (s *server) GetStudyList(ctx context.Context, in *api_pb.GetStudyListRequest) (*api_pb.GetStudyListReply, error) {
-	sl, err := dbIf.GetStudyList()
+	var err error
+	sl := make([]string)
+	if in.JobType != "NAS" {
+		sl, err = dbIf.GetHPStudyList()
+	} else {
+		sl, err = dbIf.GetNASStudyList()
+	}
 	if err != nil {
 		return &api_pb.GetStudyListReply{}, err
 	}
 	result := make([]*api_pb.StudyOverview, len(sl))
 	for i, id := range sl {
-		sc, err := dbIf.GetStudyConfig(id)
+		var sc *api.StudyConfig
+		if in.JobType != "NAS" {
+			sc, err = dbIf.GetHPStudyConfig(id)
+		} else {
+			sc, err = dbIf.GetNASStudyConfig(id)
+		}
 		if err != nil {
 			return &api_pb.GetStudyListReply{}, err
 		}
@@ -138,15 +152,18 @@ func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRe
 	if in.SuggestionAlgorithm == "" {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, errors.New("No suggest algorithm specified")
 	}
-
+	log.Printf("BEFORE DYING MY ALGORITHM WAS: %v", in.SuggestionAlgorithm)
 	conn, err := grpc.Dial("vizier-suggestion-"+in.SuggestionAlgorithm+":6789", grpc.WithInsecure())
+	log.Printf("ILI YA UMER TYT? %v", err)
 	if err != nil {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
 	}
 
 	defer conn.Close()
 	c := api_pb.NewSuggestionClient(conn)
+	log.Printf("CONNECTION: %v", c)
 	r, err := c.GetSuggestions(ctx, in)
+	log.Printf("YA UMER TYT: %v", err)
 	if err != nil {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
 	}
