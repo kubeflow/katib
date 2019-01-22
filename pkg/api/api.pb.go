@@ -13,20 +13,19 @@ It has these top-level messages:
 	Parameter
 	MetricsLogSet
 	Metrics
+	MetricsValueTime
 	MetricsLog
 	SuggestionParameter
 	EarlyStoppingParameter
 	Tag
-	MountConf
 	StudyOverview
 	Trial
-	WorkerConfig
 	Worker
 	StudyConfig
 	CreateStudyRequest
 	CreateStudyReply
-	StopStudyRequest
-	StopStudyReply
+	DeleteStudyRequest
+	DeleteStudyReply
 	GetStudyRequest
 	GetStudyReply
 	GetStudyListRequest
@@ -35,18 +34,27 @@ It has these top-level messages:
 	CreateTrialReply
 	GetTrialsRequest
 	GetTrialsReply
-	RunTrialRequest
-	RunTrialReply
+	GetTrialRequest
+	GetTrialReply
+	RegisterWorkerRequest
+	RegisterWorkerReply
 	StopWorkersRequest
 	StopWorkersReply
 	GetWorkersRequest
 	GetWorkersReply
+	UpdateWorkerStateRequest
+	UpdateWorkerStateReply
+	GetWorkerFullInfoRequest
+	WorkerFullInfo
+	GetWorkerFullInfoReply
 	GetSuggestionsRequest
 	GetSuggestionsReply
 	GetShouldStopWorkersRequest
 	GetShouldStopWorkersReply
 	GetMetricsRequest
 	GetMetricsReply
+	ReportMetricsLogsRequest
+	ReportMetricsLogsReply
 	ModelInfo
 	DataSetInfo
 	SaveStudyRequest
@@ -81,6 +89,7 @@ package api
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
+import _ "google.golang.org/genproto/googleapis/api/annotations"
 
 import (
 	context "golang.org/x/net/context"
@@ -98,10 +107,11 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
+// *
+// Types of value for HyperParameter.
 type ParameterType int32
 
 const (
-	// Not used
 	ParameterType_UNKNOWN_TYPE ParameterType = 0
 	ParameterType_DOUBLE       ParameterType = 1
 	ParameterType_INT          ParameterType = 2
@@ -129,10 +139,11 @@ func (x ParameterType) String() string {
 }
 func (ParameterType) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
+// *
+// Direction of optimization. Minimize or Maximize.
 type OptimizationType int32
 
 const (
-	// Not used
 	OptimizationType_UNKNOWN_OPTIMIZATION OptimizationType = 0
 	OptimizationType_MINIMIZE             OptimizationType = 1
 	OptimizationType_MAXIMIZE             OptimizationType = 2
@@ -154,6 +165,8 @@ func (x OptimizationType) String() string {
 }
 func (OptimizationType) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
+// *
+// Status code for worker.
 // This value is stored as TINYINT in MySQL.
 type State int32
 
@@ -185,6 +198,10 @@ func (x State) String() string {
 }
 func (State) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
+// *
+// Feasible space for optimization.
+// Int and Double type use Max/Min.
+// Discrete and Categorical type use List.
 type FeasibleSpace struct {
 	Max  string   `protobuf:"bytes,1,opt,name=max" json:"max,omitempty"`
 	Min  string   `protobuf:"bytes,2,opt,name=min" json:"min,omitempty"`
@@ -217,11 +234,13 @@ func (m *FeasibleSpace) GetList() []string {
 	return nil
 }
 
+// *
+// Config for a Hyper parameter.
+// Katib will create each Hyper parameter from this config.
 type ParameterConfig struct {
-	Name          string        `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	ParameterType ParameterType `protobuf:"varint,2,opt,name=parameter_type,json=parameterType,enum=api.ParameterType" json:"parameter_type,omitempty"`
-	// The following values defines a feasible parameter space.
-	Feasible *FeasibleSpace `protobuf:"bytes,3,opt,name=feasible" json:"feasible,omitempty"`
+	Name          string         `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	ParameterType ParameterType  `protobuf:"varint,2,opt,name=parameter_type,json=parameterType,enum=api.ParameterType" json:"parameter_type,omitempty"`
+	Feasible      *FeasibleSpace `protobuf:"bytes,3,opt,name=feasible" json:"feasible,omitempty"`
 }
 
 func (m *ParameterConfig) Reset()                    { *m = ParameterConfig{} }
@@ -250,6 +269,9 @@ func (m *ParameterConfig) GetFeasible() *FeasibleSpace {
 	return nil
 }
 
+// *
+// Value of a Hyper parameter.
+// This will be created from a correcponding Config.
 type Parameter struct {
 	Name          string        `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
 	ParameterType ParameterType `protobuf:"varint,2,opt,name=parameter_type,json=parameterType,enum=api.ParameterType" json:"parameter_type,omitempty"`
@@ -282,6 +304,8 @@ func (m *Parameter) GetValue() string {
 	return ""
 }
 
+// *
+// Logs of metrics for a worker.
 type MetricsLogSet struct {
 	WorkerId     string        `protobuf:"bytes,1,opt,name=worker_id,json=workerId" json:"worker_id,omitempty"`
 	MetricsLogs  []*MetricsLog `protobuf:"bytes,2,rep,name=metrics_logs,json=metricsLogs" json:"metrics_logs,omitempty"`
@@ -314,6 +338,8 @@ func (m *MetricsLogSet) GetWorkerStatus() State {
 	return State_PENDING
 }
 
+// *
+// Metrics of a worker
 type Metrics struct {
 	Name  string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
 	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
@@ -338,15 +364,43 @@ func (m *Metrics) GetValue() string {
 	return ""
 }
 
+// *
+// Metrics of a worker with timestamp
+type MetricsValueTime struct {
+	Time  string `protobuf:"bytes,1,opt,name=time" json:"time,omitempty"`
+	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
+}
+
+func (m *MetricsValueTime) Reset()                    { *m = MetricsValueTime{} }
+func (m *MetricsValueTime) String() string            { return proto.CompactTextString(m) }
+func (*MetricsValueTime) ProtoMessage()               {}
+func (*MetricsValueTime) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+
+func (m *MetricsValueTime) GetTime() string {
+	if m != nil {
+		return m.Time
+	}
+	return ""
+}
+
+func (m *MetricsValueTime) GetValue() string {
+	if m != nil {
+		return m.Value
+	}
+	return ""
+}
+
+// *
+// Metrics logs of a worker
 type MetricsLog struct {
-	Name   string   `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	Values []string `protobuf:"bytes,2,rep,name=values" json:"values,omitempty"`
+	Name   string              `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Values []*MetricsValueTime `protobuf:"bytes,2,rep,name=values" json:"values,omitempty"`
 }
 
 func (m *MetricsLog) Reset()                    { *m = MetricsLog{} }
 func (m *MetricsLog) String() string            { return proto.CompactTextString(m) }
 func (*MetricsLog) ProtoMessage()               {}
-func (*MetricsLog) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+func (*MetricsLog) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
 func (m *MetricsLog) GetName() string {
 	if m != nil {
@@ -355,13 +409,15 @@ func (m *MetricsLog) GetName() string {
 	return ""
 }
 
-func (m *MetricsLog) GetValues() []string {
+func (m *MetricsLog) GetValues() []*MetricsValueTime {
 	if m != nil {
 		return m.Values
 	}
 	return nil
 }
 
+// *
+// Parameter for Suggestion service. Key-value format.
 type SuggestionParameter struct {
 	Name  string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
 	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
@@ -370,7 +426,7 @@ type SuggestionParameter struct {
 func (m *SuggestionParameter) Reset()                    { *m = SuggestionParameter{} }
 func (m *SuggestionParameter) String() string            { return proto.CompactTextString(m) }
 func (*SuggestionParameter) ProtoMessage()               {}
-func (*SuggestionParameter) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+func (*SuggestionParameter) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
 
 func (m *SuggestionParameter) GetName() string {
 	if m != nil {
@@ -386,6 +442,8 @@ func (m *SuggestionParameter) GetValue() string {
 	return ""
 }
 
+// *
+// Parameter for EarlyStopping service. Key-value format.
 type EarlyStoppingParameter struct {
 	Name  string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
 	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
@@ -394,7 +452,7 @@ type EarlyStoppingParameter struct {
 func (m *EarlyStoppingParameter) Reset()                    { *m = EarlyStoppingParameter{} }
 func (m *EarlyStoppingParameter) String() string            { return proto.CompactTextString(m) }
 func (*EarlyStoppingParameter) ProtoMessage()               {}
-func (*EarlyStoppingParameter) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+func (*EarlyStoppingParameter) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
 
 func (m *EarlyStoppingParameter) GetName() string {
 	if m != nil {
@@ -410,6 +468,8 @@ func (m *EarlyStoppingParameter) GetValue() string {
 	return ""
 }
 
+// *
+// Tag for each resource.
 type Tag struct {
 	Name  string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
 	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
@@ -418,7 +478,7 @@ type Tag struct {
 func (m *Tag) Reset()                    { *m = Tag{} }
 func (m *Tag) String() string            { return proto.CompactTextString(m) }
 func (*Tag) ProtoMessage()               {}
-func (*Tag) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+func (*Tag) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
 
 func (m *Tag) GetName() string {
 	if m != nil {
@@ -434,30 +494,8 @@ func (m *Tag) GetValue() string {
 	return ""
 }
 
-type MountConf struct {
-	Pvc  string `protobuf:"bytes,1,opt,name=pvc" json:"pvc,omitempty"`
-	Path string `protobuf:"bytes,2,opt,name=path" json:"path,omitempty"`
-}
-
-func (m *MountConf) Reset()                    { *m = MountConf{} }
-func (m *MountConf) String() string            { return proto.CompactTextString(m) }
-func (*MountConf) ProtoMessage()               {}
-func (*MountConf) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
-
-func (m *MountConf) GetPvc() string {
-	if m != nil {
-		return m.Pvc
-	}
-	return ""
-}
-
-func (m *MountConf) GetPath() string {
-	if m != nil {
-		return m.Path
-	}
-	return ""
-}
-
+// *
+// Overview of a study. For UI.
 type StudyOverview struct {
 	Name        string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
 	Owner       string `protobuf:"bytes,2,opt,name=owner" json:"owner,omitempty"`
@@ -498,6 +536,10 @@ func (m *StudyOverview) GetDescription() string {
 	return ""
 }
 
+// *
+// A set of Hyperparameter.
+// In a study, multiple trials are evaluated by workers.
+// Suggestion service will generate next trials.
 type Trial struct {
 	TrialId        string       `protobuf:"bytes,1,opt,name=trial_id,json=trialId" json:"trial_id,omitempty"`
 	StudyId        string       `protobuf:"bytes,2,opt,name=study_id,json=studyId" json:"study_id,omitempty"`
@@ -546,76 +588,23 @@ func (m *Trial) GetTags() []*Tag {
 	return nil
 }
 
-type WorkerConfig struct {
-	Image      string     `protobuf:"bytes,1,opt,name=image" json:"image,omitempty"`
-	Command    []string   `protobuf:"bytes,2,rep,name=command" json:"command,omitempty"`
-	Gpu        int32      `protobuf:"varint,3,opt,name=gpu" json:"gpu,omitempty"`
-	Scheduler  string     `protobuf:"bytes,4,opt,name=scheduler" json:"scheduler,omitempty"`
-	Mount      *MountConf `protobuf:"bytes,5,opt,name=mount" json:"mount,omitempty"`
-	PullSecret string     `protobuf:"bytes,6,opt,name=pull_secret,json=pullSecret" json:"pull_secret,omitempty"`
-}
-
-func (m *WorkerConfig) Reset()                    { *m = WorkerConfig{} }
-func (m *WorkerConfig) String() string            { return proto.CompactTextString(m) }
-func (*WorkerConfig) ProtoMessage()               {}
-func (*WorkerConfig) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
-
-func (m *WorkerConfig) GetImage() string {
-	if m != nil {
-		return m.Image
-	}
-	return ""
-}
-
-func (m *WorkerConfig) GetCommand() []string {
-	if m != nil {
-		return m.Command
-	}
-	return nil
-}
-
-func (m *WorkerConfig) GetGpu() int32 {
-	if m != nil {
-		return m.Gpu
-	}
-	return 0
-}
-
-func (m *WorkerConfig) GetScheduler() string {
-	if m != nil {
-		return m.Scheduler
-	}
-	return ""
-}
-
-func (m *WorkerConfig) GetMount() *MountConf {
-	if m != nil {
-		return m.Mount
-	}
-	return nil
-}
-
-func (m *WorkerConfig) GetPullSecret() string {
-	if m != nil {
-		return m.PullSecret
-	}
-	return ""
-}
-
+// *
+// A process of evaluation for a trial.
+// Types of worker supported by Katib are k8s Job, TF-Job, and Pytorch-Job.
 type Worker struct {
-	WorkerId string        `protobuf:"bytes,1,opt,name=worker_id,json=workerId" json:"worker_id,omitempty"`
-	StudyId  string        `protobuf:"bytes,2,opt,name=study_id,json=studyId" json:"study_id,omitempty"`
-	TrialId  string        `protobuf:"bytes,3,opt,name=trial_id,json=trialId" json:"trial_id,omitempty"`
-	Runtime  string        `protobuf:"bytes,4,opt,name=runtime" json:"runtime,omitempty"`
-	Status   State         `protobuf:"varint,5,opt,name=status,enum=api.State" json:"status,omitempty"`
-	Config   *WorkerConfig `protobuf:"bytes,6,opt,name=config" json:"config,omitempty"`
-	Tags     []*Tag        `protobuf:"bytes,7,rep,name=tags" json:"tags,omitempty"`
+	WorkerId     string `protobuf:"bytes,1,opt,name=worker_id,json=workerId" json:"worker_id,omitempty"`
+	StudyId      string `protobuf:"bytes,2,opt,name=study_id,json=studyId" json:"study_id,omitempty"`
+	TrialId      string `protobuf:"bytes,3,opt,name=trial_id,json=trialId" json:"trial_id,omitempty"`
+	Type         string `protobuf:"bytes,4,opt,name=Type" json:"Type,omitempty"`
+	Status       State  `protobuf:"varint,5,opt,name=status,enum=api.State" json:"status,omitempty"`
+	TemplatePath string `protobuf:"bytes,6,opt,name=TemplatePath" json:"TemplatePath,omitempty"`
+	Tags         []*Tag `protobuf:"bytes,7,rep,name=tags" json:"tags,omitempty"`
 }
 
 func (m *Worker) Reset()                    { *m = Worker{} }
 func (m *Worker) String() string            { return proto.CompactTextString(m) }
 func (*Worker) ProtoMessage()               {}
-func (*Worker) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
+func (*Worker) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
 
 func (m *Worker) GetWorkerId() string {
 	if m != nil {
@@ -638,9 +627,9 @@ func (m *Worker) GetTrialId() string {
 	return ""
 }
 
-func (m *Worker) GetRuntime() string {
+func (m *Worker) GetType() string {
 	if m != nil {
-		return m.Runtime
+		return m.Type
 	}
 	return ""
 }
@@ -652,11 +641,11 @@ func (m *Worker) GetStatus() State {
 	return State_PENDING
 }
 
-func (m *Worker) GetConfig() *WorkerConfig {
+func (m *Worker) GetTemplatePath() string {
 	if m != nil {
-		return m.Config
+		return m.TemplatePath
 	}
-	return nil
+	return ""
 }
 
 func (m *Worker) GetTags() []*Tag {
@@ -666,6 +655,10 @@ func (m *Worker) GetTags() []*Tag {
 	return nil
 }
 
+// *
+// Config of a Study. Study represents a single optimization run over a feasible space.
+// Each Study contains a configuration describing the feasible space, as well as a set of Trials.
+// It is assumed that objective function f(x) does not change in the course of a Study.
 type StudyConfig struct {
 	Name               string                        `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
 	Owner              string                        `protobuf:"bytes,2,opt,name=owner" json:"owner,omitempty"`
@@ -676,12 +669,13 @@ type StudyConfig struct {
 	Tags               []*Tag                        `protobuf:"bytes,7,rep,name=tags" json:"tags,omitempty"`
 	ObjectiveValueName string                        `protobuf:"bytes,8,opt,name=objective_value_name,json=objectiveValueName" json:"objective_value_name,omitempty"`
 	Metrics            []string                      `protobuf:"bytes,9,rep,name=metrics" json:"metrics,omitempty"`
+	JobId              string                        `protobuf:"bytes,10,opt,name=jobId" json:"jobId,omitempty"`
 }
 
 func (m *StudyConfig) Reset()                    { *m = StudyConfig{} }
 func (m *StudyConfig) String() string            { return proto.CompactTextString(m) }
 func (*StudyConfig) ProtoMessage()               {}
-func (*StudyConfig) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
+func (*StudyConfig) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
 
 func (m *StudyConfig) GetName() string {
 	if m != nil {
@@ -746,6 +740,15 @@ func (m *StudyConfig) GetMetrics() []string {
 	return nil
 }
 
+func (m *StudyConfig) GetJobId() string {
+	if m != nil {
+		return m.JobId
+	}
+	return ""
+}
+
+// *
+// List of ParameterConfig
 type StudyConfig_ParameterConfigs struct {
 	Configs []*ParameterConfig `protobuf:"bytes,1,rep,name=configs" json:"configs,omitempty"`
 }
@@ -754,7 +757,7 @@ func (m *StudyConfig_ParameterConfigs) Reset()         { *m = StudyConfig_Parame
 func (m *StudyConfig_ParameterConfigs) String() string { return proto.CompactTextString(m) }
 func (*StudyConfig_ParameterConfigs) ProtoMessage()    {}
 func (*StudyConfig_ParameterConfigs) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{14, 0}
+	return fileDescriptor0, []int{13, 0}
 }
 
 func (m *StudyConfig_ParameterConfigs) GetConfigs() []*ParameterConfig {
@@ -764,6 +767,9 @@ func (m *StudyConfig_ParameterConfigs) GetConfigs() []*ParameterConfig {
 	return nil
 }
 
+// *
+// Create a Study from Study Config.
+// Generate an unique ID and store the Study to DB.
 type CreateStudyRequest struct {
 	StudyConfig *StudyConfig `protobuf:"bytes,1,opt,name=study_config,json=studyConfig" json:"study_config,omitempty"`
 }
@@ -771,7 +777,7 @@ type CreateStudyRequest struct {
 func (m *CreateStudyRequest) Reset()                    { *m = CreateStudyRequest{} }
 func (m *CreateStudyRequest) String() string            { return proto.CompactTextString(m) }
 func (*CreateStudyRequest) ProtoMessage()               {}
-func (*CreateStudyRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
+func (*CreateStudyRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
 
 func (m *CreateStudyRequest) GetStudyConfig() *StudyConfig {
 	if m != nil {
@@ -780,6 +786,8 @@ func (m *CreateStudyRequest) GetStudyConfig() *StudyConfig {
 	return nil
 }
 
+// *
+// Return generated StudyID.
 type CreateStudyReply struct {
 	StudyId string `protobuf:"bytes,1,opt,name=study_id,json=studyId" json:"study_id,omitempty"`
 }
@@ -787,7 +795,7 @@ type CreateStudyReply struct {
 func (m *CreateStudyReply) Reset()                    { *m = CreateStudyReply{} }
 func (m *CreateStudyReply) String() string            { return proto.CompactTextString(m) }
 func (*CreateStudyReply) ProtoMessage()               {}
-func (*CreateStudyReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
+func (*CreateStudyReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
 
 func (m *CreateStudyReply) GetStudyId() string {
 	if m != nil {
@@ -796,30 +804,44 @@ func (m *CreateStudyReply) GetStudyId() string {
 	return ""
 }
 
-type StopStudyRequest struct {
+// *
+// Delete a Study from DB by Study ID.
+type DeleteStudyRequest struct {
 	StudyId string `protobuf:"bytes,1,opt,name=study_id,json=studyId" json:"study_id,omitempty"`
 }
 
-func (m *StopStudyRequest) Reset()                    { *m = StopStudyRequest{} }
-func (m *StopStudyRequest) String() string            { return proto.CompactTextString(m) }
-func (*StopStudyRequest) ProtoMessage()               {}
-func (*StopStudyRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
+func (m *DeleteStudyRequest) Reset()                    { *m = DeleteStudyRequest{} }
+func (m *DeleteStudyRequest) String() string            { return proto.CompactTextString(m) }
+func (*DeleteStudyRequest) ProtoMessage()               {}
+func (*DeleteStudyRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
 
-func (m *StopStudyRequest) GetStudyId() string {
+func (m *DeleteStudyRequest) GetStudyId() string {
 	if m != nil {
 		return m.StudyId
 	}
 	return ""
 }
 
-type StopStudyReply struct {
+// *
+// Return deleted Study ID.
+type DeleteStudyReply struct {
+	StudyId string `protobuf:"bytes,1,opt,name=study_id,json=studyId" json:"study_id,omitempty"`
 }
 
-func (m *StopStudyReply) Reset()                    { *m = StopStudyReply{} }
-func (m *StopStudyReply) String() string            { return proto.CompactTextString(m) }
-func (*StopStudyReply) ProtoMessage()               {}
-func (*StopStudyReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
+func (m *DeleteStudyReply) Reset()                    { *m = DeleteStudyReply{} }
+func (m *DeleteStudyReply) String() string            { return proto.CompactTextString(m) }
+func (*DeleteStudyReply) ProtoMessage()               {}
+func (*DeleteStudyReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
 
+func (m *DeleteStudyReply) GetStudyId() string {
+	if m != nil {
+		return m.StudyId
+	}
+	return ""
+}
+
+// *
+// Get a Study Config from DB by ID of Study.
 type GetStudyRequest struct {
 	StudyId string `protobuf:"bytes,1,opt,name=study_id,json=studyId" json:"study_id,omitempty"`
 }
@@ -827,7 +849,7 @@ type GetStudyRequest struct {
 func (m *GetStudyRequest) Reset()                    { *m = GetStudyRequest{} }
 func (m *GetStudyRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetStudyRequest) ProtoMessage()               {}
-func (*GetStudyRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
+func (*GetStudyRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
 
 func (m *GetStudyRequest) GetStudyId() string {
 	if m != nil {
@@ -836,6 +858,8 @@ func (m *GetStudyRequest) GetStudyId() string {
 	return ""
 }
 
+// *
+// Return a config of specified Study.
 type GetStudyReply struct {
 	StudyConfig *StudyConfig `protobuf:"bytes,1,opt,name=study_config,json=studyConfig" json:"study_config,omitempty"`
 }
@@ -843,7 +867,7 @@ type GetStudyReply struct {
 func (m *GetStudyReply) Reset()                    { *m = GetStudyReply{} }
 func (m *GetStudyReply) String() string            { return proto.CompactTextString(m) }
 func (*GetStudyReply) ProtoMessage()               {}
-func (*GetStudyReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{20} }
+func (*GetStudyReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
 
 func (m *GetStudyReply) GetStudyConfig() *StudyConfig {
 	if m != nil {
@@ -852,14 +876,18 @@ func (m *GetStudyReply) GetStudyConfig() *StudyConfig {
 	return nil
 }
 
+// *
+// Get all Study Configs from DB.
 type GetStudyListRequest struct {
 }
 
 func (m *GetStudyListRequest) Reset()                    { *m = GetStudyListRequest{} }
 func (m *GetStudyListRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetStudyListRequest) ProtoMessage()               {}
-func (*GetStudyListRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{21} }
+func (*GetStudyListRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{20} }
 
+// *
+// Return a overview list of Studies.
 type GetStudyListReply struct {
 	StudyOverviews []*StudyOverview `protobuf:"bytes,1,rep,name=study_overviews,json=studyOverviews" json:"study_overviews,omitempty"`
 }
@@ -867,7 +895,7 @@ type GetStudyListReply struct {
 func (m *GetStudyListReply) Reset()                    { *m = GetStudyListReply{} }
 func (m *GetStudyListReply) String() string            { return proto.CompactTextString(m) }
 func (*GetStudyListReply) ProtoMessage()               {}
-func (*GetStudyListReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{22} }
+func (*GetStudyListReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{21} }
 
 func (m *GetStudyListReply) GetStudyOverviews() []*StudyOverview {
 	if m != nil {
@@ -876,6 +904,9 @@ func (m *GetStudyListReply) GetStudyOverviews() []*StudyOverview {
 	return nil
 }
 
+// *
+// Create a Trial from Trial Config.
+// Generate an unique ID and store the Trial to DB.
 type CreateTrialRequest struct {
 	Trial *Trial `protobuf:"bytes,1,opt,name=trial" json:"trial,omitempty"`
 }
@@ -883,7 +914,7 @@ type CreateTrialRequest struct {
 func (m *CreateTrialRequest) Reset()                    { *m = CreateTrialRequest{} }
 func (m *CreateTrialRequest) String() string            { return proto.CompactTextString(m) }
 func (*CreateTrialRequest) ProtoMessage()               {}
-func (*CreateTrialRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{23} }
+func (*CreateTrialRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{22} }
 
 func (m *CreateTrialRequest) GetTrial() *Trial {
 	if m != nil {
@@ -892,6 +923,8 @@ func (m *CreateTrialRequest) GetTrial() *Trial {
 	return nil
 }
 
+// *
+// Return generated TrialID.
 type CreateTrialReply struct {
 	TrialId string `protobuf:"bytes,1,opt,name=trial_id,json=trialId" json:"trial_id,omitempty"`
 }
@@ -899,7 +932,7 @@ type CreateTrialReply struct {
 func (m *CreateTrialReply) Reset()                    { *m = CreateTrialReply{} }
 func (m *CreateTrialReply) String() string            { return proto.CompactTextString(m) }
 func (*CreateTrialReply) ProtoMessage()               {}
-func (*CreateTrialReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{24} }
+func (*CreateTrialReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{23} }
 
 func (m *CreateTrialReply) GetTrialId() string {
 	if m != nil {
@@ -908,6 +941,8 @@ func (m *CreateTrialReply) GetTrialId() string {
 	return ""
 }
 
+// *
+// Get a Trial Configs from DB by ID of Study.
 type GetTrialsRequest struct {
 	StudyId string `protobuf:"bytes,1,opt,name=study_id,json=studyId" json:"study_id,omitempty"`
 }
@@ -915,7 +950,7 @@ type GetTrialsRequest struct {
 func (m *GetTrialsRequest) Reset()                    { *m = GetTrialsRequest{} }
 func (m *GetTrialsRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetTrialsRequest) ProtoMessage()               {}
-func (*GetTrialsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{25} }
+func (*GetTrialsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{24} }
 
 func (m *GetTrialsRequest) GetStudyId() string {
 	if m != nil {
@@ -924,6 +959,8 @@ func (m *GetTrialsRequest) GetStudyId() string {
 	return ""
 }
 
+// *
+// Return a trial list in specified Study.
 type GetTrialsReply struct {
 	Trials []*Trial `protobuf:"bytes,1,rep,name=trials" json:"trials,omitempty"`
 }
@@ -931,7 +968,7 @@ type GetTrialsReply struct {
 func (m *GetTrialsReply) Reset()                    { *m = GetTrialsReply{} }
 func (m *GetTrialsReply) String() string            { return proto.CompactTextString(m) }
 func (*GetTrialsReply) ProtoMessage()               {}
-func (*GetTrialsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{26} }
+func (*GetTrialsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{25} }
 
 func (m *GetTrialsReply) GetTrials() []*Trial {
 	if m != nil {
@@ -940,56 +977,73 @@ func (m *GetTrialsReply) GetTrials() []*Trial {
 	return nil
 }
 
-type RunTrialRequest struct {
-	StudyId      string        `protobuf:"bytes,1,opt,name=study_id,json=studyId" json:"study_id,omitempty"`
-	TrialId      string        `protobuf:"bytes,2,opt,name=trial_id,json=trialId" json:"trial_id,omitempty"`
-	Runtime      string        `protobuf:"bytes,3,opt,name=runtime" json:"runtime,omitempty"`
-	WorkerConfig *WorkerConfig `protobuf:"bytes,4,opt,name=worker_config,json=workerConfig" json:"worker_config,omitempty"`
+// *
+// Get a trial configuration from DB by trial ID
+type GetTrialRequest struct {
+	TrialId string `protobuf:"bytes,1,opt,name=trial_id,json=trialId" json:"trial_id,omitempty"`
 }
 
-func (m *RunTrialRequest) Reset()                    { *m = RunTrialRequest{} }
-func (m *RunTrialRequest) String() string            { return proto.CompactTextString(m) }
-func (*RunTrialRequest) ProtoMessage()               {}
-func (*RunTrialRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{27} }
+func (m *GetTrialRequest) Reset()                    { *m = GetTrialRequest{} }
+func (m *GetTrialRequest) String() string            { return proto.CompactTextString(m) }
+func (*GetTrialRequest) ProtoMessage()               {}
+func (*GetTrialRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{26} }
 
-func (m *RunTrialRequest) GetStudyId() string {
-	if m != nil {
-		return m.StudyId
-	}
-	return ""
-}
-
-func (m *RunTrialRequest) GetTrialId() string {
+func (m *GetTrialRequest) GetTrialId() string {
 	if m != nil {
 		return m.TrialId
 	}
 	return ""
 }
 
-func (m *RunTrialRequest) GetRuntime() string {
-	if m != nil {
-		return m.Runtime
-	}
-	return ""
+// *
+// Return a trial configuration by specified trial ID
+type GetTrialReply struct {
+	Trial *Trial `protobuf:"bytes,1,opt,name=trial" json:"trial,omitempty"`
 }
 
-func (m *RunTrialRequest) GetWorkerConfig() *WorkerConfig {
+func (m *GetTrialReply) Reset()                    { *m = GetTrialReply{} }
+func (m *GetTrialReply) String() string            { return proto.CompactTextString(m) }
+func (*GetTrialReply) ProtoMessage()               {}
+func (*GetTrialReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{27} }
+
+func (m *GetTrialReply) GetTrial() *Trial {
 	if m != nil {
-		return m.WorkerConfig
+		return m.Trial
 	}
 	return nil
 }
 
-type RunTrialReply struct {
+// *
+// Create a Worker from Worker Config.
+// Generate an unique ID and store the Worker to DB.
+type RegisterWorkerRequest struct {
+	Worker *Worker `protobuf:"bytes,1,opt,name=worker" json:"worker,omitempty"`
+}
+
+func (m *RegisterWorkerRequest) Reset()                    { *m = RegisterWorkerRequest{} }
+func (m *RegisterWorkerRequest) String() string            { return proto.CompactTextString(m) }
+func (*RegisterWorkerRequest) ProtoMessage()               {}
+func (*RegisterWorkerRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{28} }
+
+func (m *RegisterWorkerRequest) GetWorker() *Worker {
+	if m != nil {
+		return m.Worker
+	}
+	return nil
+}
+
+// *
+// Return generated WorkerID.
+type RegisterWorkerReply struct {
 	WorkerId string `protobuf:"bytes,1,opt,name=worker_id,json=workerId" json:"worker_id,omitempty"`
 }
 
-func (m *RunTrialReply) Reset()                    { *m = RunTrialReply{} }
-func (m *RunTrialReply) String() string            { return proto.CompactTextString(m) }
-func (*RunTrialReply) ProtoMessage()               {}
-func (*RunTrialReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{28} }
+func (m *RegisterWorkerReply) Reset()                    { *m = RegisterWorkerReply{} }
+func (m *RegisterWorkerReply) String() string            { return proto.CompactTextString(m) }
+func (*RegisterWorkerReply) ProtoMessage()               {}
+func (*RegisterWorkerReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{29} }
 
-func (m *RunTrialReply) GetWorkerId() string {
+func (m *RegisterWorkerReply) GetWorkerId() string {
 	if m != nil {
 		return m.WorkerId
 	}
@@ -1005,7 +1059,7 @@ type StopWorkersRequest struct {
 func (m *StopWorkersRequest) Reset()                    { *m = StopWorkersRequest{} }
 func (m *StopWorkersRequest) String() string            { return proto.CompactTextString(m) }
 func (*StopWorkersRequest) ProtoMessage()               {}
-func (*StopWorkersRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{29} }
+func (*StopWorkersRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{30} }
 
 func (m *StopWorkersRequest) GetStudyId() string {
 	if m != nil {
@@ -1034,8 +1088,10 @@ type StopWorkersReply struct {
 func (m *StopWorkersReply) Reset()                    { *m = StopWorkersReply{} }
 func (m *StopWorkersReply) String() string            { return proto.CompactTextString(m) }
 func (*StopWorkersReply) ProtoMessage()               {}
-func (*StopWorkersReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{30} }
+func (*StopWorkersReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{31} }
 
+// *
+// Get a configs and status of a Worker from DB by ID of Study, Trial or Worker.
 type GetWorkersRequest struct {
 	StudyId  string `protobuf:"bytes,1,opt,name=study_id,json=studyId" json:"study_id,omitempty"`
 	TrialId  string `protobuf:"bytes,2,opt,name=trial_id,json=trialId" json:"trial_id,omitempty"`
@@ -1045,7 +1101,7 @@ type GetWorkersRequest struct {
 func (m *GetWorkersRequest) Reset()                    { *m = GetWorkersRequest{} }
 func (m *GetWorkersRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetWorkersRequest) ProtoMessage()               {}
-func (*GetWorkersRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{31} }
+func (*GetWorkersRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{32} }
 
 func (m *GetWorkersRequest) GetStudyId() string {
 	if m != nil {
@@ -1068,6 +1124,8 @@ func (m *GetWorkersRequest) GetWorkerId() string {
 	return ""
 }
 
+// *
+// Return a Worker list by specified condition.
 type GetWorkersReply struct {
 	Workers []*Worker `protobuf:"bytes,1,rep,name=workers" json:"workers,omitempty"`
 }
@@ -1075,11 +1133,136 @@ type GetWorkersReply struct {
 func (m *GetWorkersReply) Reset()                    { *m = GetWorkersReply{} }
 func (m *GetWorkersReply) String() string            { return proto.CompactTextString(m) }
 func (*GetWorkersReply) ProtoMessage()               {}
-func (*GetWorkersReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{32} }
+func (*GetWorkersReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{33} }
 
 func (m *GetWorkersReply) GetWorkers() []*Worker {
 	if m != nil {
 		return m.Workers
+	}
+	return nil
+}
+
+// *
+// Update a Status of Worker.
+type UpdateWorkerStateRequest struct {
+	WorkerId string `protobuf:"bytes,1,opt,name=worker_id,json=workerId" json:"worker_id,omitempty"`
+	Status   State  `protobuf:"varint,2,opt,name=status,enum=api.State" json:"status,omitempty"`
+}
+
+func (m *UpdateWorkerStateRequest) Reset()                    { *m = UpdateWorkerStateRequest{} }
+func (m *UpdateWorkerStateRequest) String() string            { return proto.CompactTextString(m) }
+func (*UpdateWorkerStateRequest) ProtoMessage()               {}
+func (*UpdateWorkerStateRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{34} }
+
+func (m *UpdateWorkerStateRequest) GetWorkerId() string {
+	if m != nil {
+		return m.WorkerId
+	}
+	return ""
+}
+
+func (m *UpdateWorkerStateRequest) GetStatus() State {
+	if m != nil {
+		return m.Status
+	}
+	return State_PENDING
+}
+
+type UpdateWorkerStateReply struct {
+}
+
+func (m *UpdateWorkerStateReply) Reset()                    { *m = UpdateWorkerStateReply{} }
+func (m *UpdateWorkerStateReply) String() string            { return proto.CompactTextString(m) }
+func (*UpdateWorkerStateReply) ProtoMessage()               {}
+func (*UpdateWorkerStateReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{35} }
+
+// *
+// Get a full information related to specified Workers.
+// It includes Worker Config, HyperParameters and Metrics Logs.
+type GetWorkerFullInfoRequest struct {
+	StudyId       string `protobuf:"bytes,1,opt,name=study_id,json=studyId" json:"study_id,omitempty"`
+	TrialId       string `protobuf:"bytes,2,opt,name=trial_id,json=trialId" json:"trial_id,omitempty"`
+	WorkerId      string `protobuf:"bytes,3,opt,name=worker_id,json=workerId" json:"worker_id,omitempty"`
+	OnlyLatestLog bool   `protobuf:"varint,4,opt,name=only_latest_log,json=onlyLatestLog" json:"only_latest_log,omitempty"`
+}
+
+func (m *GetWorkerFullInfoRequest) Reset()                    { *m = GetWorkerFullInfoRequest{} }
+func (m *GetWorkerFullInfoRequest) String() string            { return proto.CompactTextString(m) }
+func (*GetWorkerFullInfoRequest) ProtoMessage()               {}
+func (*GetWorkerFullInfoRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{36} }
+
+func (m *GetWorkerFullInfoRequest) GetStudyId() string {
+	if m != nil {
+		return m.StudyId
+	}
+	return ""
+}
+
+func (m *GetWorkerFullInfoRequest) GetTrialId() string {
+	if m != nil {
+		return m.TrialId
+	}
+	return ""
+}
+
+func (m *GetWorkerFullInfoRequest) GetWorkerId() string {
+	if m != nil {
+		return m.WorkerId
+	}
+	return ""
+}
+
+func (m *GetWorkerFullInfoRequest) GetOnlyLatestLog() bool {
+	if m != nil {
+		return m.OnlyLatestLog
+	}
+	return false
+}
+
+type WorkerFullInfo struct {
+	Worker       *Worker       `protobuf:"bytes,1,opt,name=Worker" json:"Worker,omitempty"`
+	ParameterSet []*Parameter  `protobuf:"bytes,2,rep,name=parameter_set,json=parameterSet" json:"parameter_set,omitempty"`
+	MetricsLogs  []*MetricsLog `protobuf:"bytes,3,rep,name=metrics_logs,json=metricsLogs" json:"metrics_logs,omitempty"`
+}
+
+func (m *WorkerFullInfo) Reset()                    { *m = WorkerFullInfo{} }
+func (m *WorkerFullInfo) String() string            { return proto.CompactTextString(m) }
+func (*WorkerFullInfo) ProtoMessage()               {}
+func (*WorkerFullInfo) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{37} }
+
+func (m *WorkerFullInfo) GetWorker() *Worker {
+	if m != nil {
+		return m.Worker
+	}
+	return nil
+}
+
+func (m *WorkerFullInfo) GetParameterSet() []*Parameter {
+	if m != nil {
+		return m.ParameterSet
+	}
+	return nil
+}
+
+func (m *WorkerFullInfo) GetMetricsLogs() []*MetricsLog {
+	if m != nil {
+		return m.MetricsLogs
+	}
+	return nil
+}
+
+type GetWorkerFullInfoReply struct {
+	WorkerFullInfos []*WorkerFullInfo `protobuf:"bytes,1,rep,name=worker_full_infos,json=workerFullInfos" json:"worker_full_infos,omitempty"`
+}
+
+func (m *GetWorkerFullInfoReply) Reset()                    { *m = GetWorkerFullInfoReply{} }
+func (m *GetWorkerFullInfoReply) String() string            { return proto.CompactTextString(m) }
+func (*GetWorkerFullInfoReply) ProtoMessage()               {}
+func (*GetWorkerFullInfoReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{38} }
+
+func (m *GetWorkerFullInfoReply) GetWorkerFullInfos() []*WorkerFullInfo {
+	if m != nil {
+		return m.WorkerFullInfos
 	}
 	return nil
 }
@@ -1095,7 +1278,7 @@ type GetSuggestionsRequest struct {
 func (m *GetSuggestionsRequest) Reset()                    { *m = GetSuggestionsRequest{} }
 func (m *GetSuggestionsRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetSuggestionsRequest) ProtoMessage()               {}
-func (*GetSuggestionsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{33} }
+func (*GetSuggestionsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{39} }
 
 func (m *GetSuggestionsRequest) GetStudyId() string {
 	if m != nil {
@@ -1139,7 +1322,7 @@ type GetSuggestionsReply struct {
 func (m *GetSuggestionsReply) Reset()                    { *m = GetSuggestionsReply{} }
 func (m *GetSuggestionsReply) String() string            { return proto.CompactTextString(m) }
 func (*GetSuggestionsReply) ProtoMessage()               {}
-func (*GetSuggestionsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{34} }
+func (*GetSuggestionsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{40} }
 
 func (m *GetSuggestionsReply) GetTrials() []*Trial {
 	if m != nil {
@@ -1157,7 +1340,7 @@ type GetShouldStopWorkersRequest struct {
 func (m *GetShouldStopWorkersRequest) Reset()                    { *m = GetShouldStopWorkersRequest{} }
 func (m *GetShouldStopWorkersRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetShouldStopWorkersRequest) ProtoMessage()               {}
-func (*GetShouldStopWorkersRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{35} }
+func (*GetShouldStopWorkersRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{41} }
 
 func (m *GetShouldStopWorkersRequest) GetStudyId() string {
 	if m != nil {
@@ -1187,7 +1370,7 @@ type GetShouldStopWorkersReply struct {
 func (m *GetShouldStopWorkersReply) Reset()                    { *m = GetShouldStopWorkersReply{} }
 func (m *GetShouldStopWorkersReply) String() string            { return proto.CompactTextString(m) }
 func (*GetShouldStopWorkersReply) ProtoMessage()               {}
-func (*GetShouldStopWorkersReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{36} }
+func (*GetShouldStopWorkersReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{42} }
 
 func (m *GetShouldStopWorkersReply) GetShouldStopWorkerIds() []string {
 	if m != nil {
@@ -1205,7 +1388,7 @@ type GetMetricsRequest struct {
 func (m *GetMetricsRequest) Reset()                    { *m = GetMetricsRequest{} }
 func (m *GetMetricsRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetMetricsRequest) ProtoMessage()               {}
-func (*GetMetricsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{37} }
+func (*GetMetricsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{43} }
 
 func (m *GetMetricsRequest) GetStudyId() string {
 	if m != nil {
@@ -1235,7 +1418,7 @@ type GetMetricsReply struct {
 func (m *GetMetricsReply) Reset()                    { *m = GetMetricsReply{} }
 func (m *GetMetricsReply) String() string            { return proto.CompactTextString(m) }
 func (*GetMetricsReply) ProtoMessage()               {}
-func (*GetMetricsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{38} }
+func (*GetMetricsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{44} }
 
 func (m *GetMetricsReply) GetMetricsLogSets() []*MetricsLogSet {
 	if m != nil {
@@ -1243,6 +1426,38 @@ func (m *GetMetricsReply) GetMetricsLogSets() []*MetricsLogSet {
 	}
 	return nil
 }
+
+type ReportMetricsLogsRequest struct {
+	StudyId        string           `protobuf:"bytes,1,opt,name=study_id,json=studyId" json:"study_id,omitempty"`
+	MetricsLogSets []*MetricsLogSet `protobuf:"bytes,3,rep,name=metrics_log_sets,json=metricsLogSets" json:"metrics_log_sets,omitempty"`
+}
+
+func (m *ReportMetricsLogsRequest) Reset()                    { *m = ReportMetricsLogsRequest{} }
+func (m *ReportMetricsLogsRequest) String() string            { return proto.CompactTextString(m) }
+func (*ReportMetricsLogsRequest) ProtoMessage()               {}
+func (*ReportMetricsLogsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{45} }
+
+func (m *ReportMetricsLogsRequest) GetStudyId() string {
+	if m != nil {
+		return m.StudyId
+	}
+	return ""
+}
+
+func (m *ReportMetricsLogsRequest) GetMetricsLogSets() []*MetricsLogSet {
+	if m != nil {
+		return m.MetricsLogSets
+	}
+	return nil
+}
+
+type ReportMetricsLogsReply struct {
+}
+
+func (m *ReportMetricsLogsReply) Reset()                    { *m = ReportMetricsLogsReply{} }
+func (m *ReportMetricsLogsReply) String() string            { return proto.CompactTextString(m) }
+func (*ReportMetricsLogsReply) ProtoMessage()               {}
+func (*ReportMetricsLogsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{46} }
 
 type ModelInfo struct {
 	StudyName  string       `protobuf:"bytes,1,opt,name=study_name,json=studyName" json:"study_name,omitempty"`
@@ -1255,7 +1470,7 @@ type ModelInfo struct {
 func (m *ModelInfo) Reset()                    { *m = ModelInfo{} }
 func (m *ModelInfo) String() string            { return proto.CompactTextString(m) }
 func (*ModelInfo) ProtoMessage()               {}
-func (*ModelInfo) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{39} }
+func (*ModelInfo) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{47} }
 
 func (m *ModelInfo) GetStudyName() string {
 	if m != nil {
@@ -1300,7 +1515,7 @@ type DataSetInfo struct {
 func (m *DataSetInfo) Reset()                    { *m = DataSetInfo{} }
 func (m *DataSetInfo) String() string            { return proto.CompactTextString(m) }
 func (*DataSetInfo) ProtoMessage()               {}
-func (*DataSetInfo) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{40} }
+func (*DataSetInfo) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{48} }
 
 func (m *DataSetInfo) GetName() string {
 	if m != nil {
@@ -1325,7 +1540,7 @@ type SaveStudyRequest struct {
 func (m *SaveStudyRequest) Reset()                    { *m = SaveStudyRequest{} }
 func (m *SaveStudyRequest) String() string            { return proto.CompactTextString(m) }
 func (*SaveStudyRequest) ProtoMessage()               {}
-func (*SaveStudyRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{41} }
+func (*SaveStudyRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{49} }
 
 func (m *SaveStudyRequest) GetStudyName() string {
 	if m != nil {
@@ -1354,7 +1569,7 @@ type SaveStudyReply struct {
 func (m *SaveStudyReply) Reset()                    { *m = SaveStudyReply{} }
 func (m *SaveStudyReply) String() string            { return proto.CompactTextString(m) }
 func (*SaveStudyReply) ProtoMessage()               {}
-func (*SaveStudyReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{42} }
+func (*SaveStudyReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{50} }
 
 type SaveModelRequest struct {
 	Model       *ModelInfo   `protobuf:"bytes,1,opt,name=model" json:"model,omitempty"`
@@ -1365,7 +1580,7 @@ type SaveModelRequest struct {
 func (m *SaveModelRequest) Reset()                    { *m = SaveModelRequest{} }
 func (m *SaveModelRequest) String() string            { return proto.CompactTextString(m) }
 func (*SaveModelRequest) ProtoMessage()               {}
-func (*SaveModelRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{43} }
+func (*SaveModelRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{51} }
 
 func (m *SaveModelRequest) GetModel() *ModelInfo {
 	if m != nil {
@@ -1394,7 +1609,7 @@ type SaveModelReply struct {
 func (m *SaveModelReply) Reset()                    { *m = SaveModelReply{} }
 func (m *SaveModelReply) String() string            { return proto.CompactTextString(m) }
 func (*SaveModelReply) ProtoMessage()               {}
-func (*SaveModelReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{44} }
+func (*SaveModelReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{52} }
 
 type GetSavedStudiesRequest struct {
 }
@@ -1402,7 +1617,7 @@ type GetSavedStudiesRequest struct {
 func (m *GetSavedStudiesRequest) Reset()                    { *m = GetSavedStudiesRequest{} }
 func (m *GetSavedStudiesRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetSavedStudiesRequest) ProtoMessage()               {}
-func (*GetSavedStudiesRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{45} }
+func (*GetSavedStudiesRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{53} }
 
 type GetSavedStudiesReply struct {
 	Studies []*StudyOverview `protobuf:"bytes,1,rep,name=studies" json:"studies,omitempty"`
@@ -1411,7 +1626,7 @@ type GetSavedStudiesReply struct {
 func (m *GetSavedStudiesReply) Reset()                    { *m = GetSavedStudiesReply{} }
 func (m *GetSavedStudiesReply) String() string            { return proto.CompactTextString(m) }
 func (*GetSavedStudiesReply) ProtoMessage()               {}
-func (*GetSavedStudiesReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{46} }
+func (*GetSavedStudiesReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{54} }
 
 func (m *GetSavedStudiesReply) GetStudies() []*StudyOverview {
 	if m != nil {
@@ -1427,7 +1642,7 @@ type GetSavedModelsRequest struct {
 func (m *GetSavedModelsRequest) Reset()                    { *m = GetSavedModelsRequest{} }
 func (m *GetSavedModelsRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetSavedModelsRequest) ProtoMessage()               {}
-func (*GetSavedModelsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{47} }
+func (*GetSavedModelsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{55} }
 
 func (m *GetSavedModelsRequest) GetStudyName() string {
 	if m != nil {
@@ -1443,7 +1658,7 @@ type GetSavedModelsReply struct {
 func (m *GetSavedModelsReply) Reset()                    { *m = GetSavedModelsReply{} }
 func (m *GetSavedModelsReply) String() string            { return proto.CompactTextString(m) }
 func (*GetSavedModelsReply) ProtoMessage()               {}
-func (*GetSavedModelsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{48} }
+func (*GetSavedModelsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{56} }
 
 func (m *GetSavedModelsReply) GetModels() []*ModelInfo {
 	if m != nil {
@@ -1460,7 +1675,7 @@ type GetSavedModelRequest struct {
 func (m *GetSavedModelRequest) Reset()                    { *m = GetSavedModelRequest{} }
 func (m *GetSavedModelRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetSavedModelRequest) ProtoMessage()               {}
-func (*GetSavedModelRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{49} }
+func (*GetSavedModelRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{57} }
 
 func (m *GetSavedModelRequest) GetStudyName() string {
 	if m != nil {
@@ -1483,7 +1698,7 @@ type GetSavedModelReply struct {
 func (m *GetSavedModelReply) Reset()                    { *m = GetSavedModelReply{} }
 func (m *GetSavedModelReply) String() string            { return proto.CompactTextString(m) }
 func (*GetSavedModelReply) ProtoMessage()               {}
-func (*GetSavedModelReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{50} }
+func (*GetSavedModelReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{58} }
 
 func (m *GetSavedModelReply) GetModel() *ModelInfo {
 	if m != nil {
@@ -1502,7 +1717,7 @@ type SetSuggestionParametersRequest struct {
 func (m *SetSuggestionParametersRequest) Reset()                    { *m = SetSuggestionParametersRequest{} }
 func (m *SetSuggestionParametersRequest) String() string            { return proto.CompactTextString(m) }
 func (*SetSuggestionParametersRequest) ProtoMessage()               {}
-func (*SetSuggestionParametersRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{51} }
+func (*SetSuggestionParametersRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{59} }
 
 func (m *SetSuggestionParametersRequest) GetStudyId() string {
 	if m != nil {
@@ -1539,7 +1754,7 @@ type SetSuggestionParametersReply struct {
 func (m *SetSuggestionParametersReply) Reset()                    { *m = SetSuggestionParametersReply{} }
 func (m *SetSuggestionParametersReply) String() string            { return proto.CompactTextString(m) }
 func (*SetSuggestionParametersReply) ProtoMessage()               {}
-func (*SetSuggestionParametersReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{52} }
+func (*SetSuggestionParametersReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{60} }
 
 func (m *SetSuggestionParametersReply) GetParamId() string {
 	if m != nil {
@@ -1555,7 +1770,7 @@ type GetSuggestionParametersRequest struct {
 func (m *GetSuggestionParametersRequest) Reset()                    { *m = GetSuggestionParametersRequest{} }
 func (m *GetSuggestionParametersRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetSuggestionParametersRequest) ProtoMessage()               {}
-func (*GetSuggestionParametersRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{53} }
+func (*GetSuggestionParametersRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{61} }
 
 func (m *GetSuggestionParametersRequest) GetParamId() string {
 	if m != nil {
@@ -1571,7 +1786,7 @@ type GetSuggestionParametersReply struct {
 func (m *GetSuggestionParametersReply) Reset()                    { *m = GetSuggestionParametersReply{} }
 func (m *GetSuggestionParametersReply) String() string            { return proto.CompactTextString(m) }
 func (*GetSuggestionParametersReply) ProtoMessage()               {}
-func (*GetSuggestionParametersReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{54} }
+func (*GetSuggestionParametersReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{62} }
 
 func (m *GetSuggestionParametersReply) GetSuggestionParameters() []*SuggestionParameter {
 	if m != nil {
@@ -1588,7 +1803,7 @@ func (m *GetSuggestionParameterListRequest) Reset()         { *m = GetSuggestion
 func (m *GetSuggestionParameterListRequest) String() string { return proto.CompactTextString(m) }
 func (*GetSuggestionParameterListRequest) ProtoMessage()    {}
 func (*GetSuggestionParameterListRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{55}
+	return fileDescriptor0, []int{63}
 }
 
 func (m *GetSuggestionParameterListRequest) GetStudyId() string {
@@ -1607,7 +1822,7 @@ type SuggestionParameterSet struct {
 func (m *SuggestionParameterSet) Reset()                    { *m = SuggestionParameterSet{} }
 func (m *SuggestionParameterSet) String() string            { return proto.CompactTextString(m) }
 func (*SuggestionParameterSet) ProtoMessage()               {}
-func (*SuggestionParameterSet) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{56} }
+func (*SuggestionParameterSet) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{64} }
 
 func (m *SuggestionParameterSet) GetParamId() string {
 	if m != nil {
@@ -1638,7 +1853,7 @@ func (m *GetSuggestionParameterListReply) Reset()         { *m = GetSuggestionPa
 func (m *GetSuggestionParameterListReply) String() string { return proto.CompactTextString(m) }
 func (*GetSuggestionParameterListReply) ProtoMessage()    {}
 func (*GetSuggestionParameterListReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{57}
+	return fileDescriptor0, []int{65}
 }
 
 func (m *GetSuggestionParameterListReply) GetSuggestionParameterSets() []*SuggestionParameterSet {
@@ -1655,7 +1870,7 @@ type StopSuggestionRequest struct {
 func (m *StopSuggestionRequest) Reset()                    { *m = StopSuggestionRequest{} }
 func (m *StopSuggestionRequest) String() string            { return proto.CompactTextString(m) }
 func (*StopSuggestionRequest) ProtoMessage()               {}
-func (*StopSuggestionRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{58} }
+func (*StopSuggestionRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{66} }
 
 func (m *StopSuggestionRequest) GetStudyId() string {
 	if m != nil {
@@ -1670,7 +1885,7 @@ type StopSuggestionReply struct {
 func (m *StopSuggestionReply) Reset()                    { *m = StopSuggestionReply{} }
 func (m *StopSuggestionReply) String() string            { return proto.CompactTextString(m) }
 func (*StopSuggestionReply) ProtoMessage()               {}
-func (*StopSuggestionReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{59} }
+func (*StopSuggestionReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{67} }
 
 type SetEarlyStoppingParametersRequest struct {
 	StudyId                 string                    `protobuf:"bytes,1,opt,name=study_id,json=studyId" json:"study_id,omitempty"`
@@ -1683,7 +1898,7 @@ func (m *SetEarlyStoppingParametersRequest) Reset()         { *m = SetEarlyStopp
 func (m *SetEarlyStoppingParametersRequest) String() string { return proto.CompactTextString(m) }
 func (*SetEarlyStoppingParametersRequest) ProtoMessage()    {}
 func (*SetEarlyStoppingParametersRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{60}
+	return fileDescriptor0, []int{68}
 }
 
 func (m *SetEarlyStoppingParametersRequest) GetStudyId() string {
@@ -1722,7 +1937,7 @@ func (m *SetEarlyStoppingParametersReply) Reset()         { *m = SetEarlyStoppin
 func (m *SetEarlyStoppingParametersReply) String() string { return proto.CompactTextString(m) }
 func (*SetEarlyStoppingParametersReply) ProtoMessage()    {}
 func (*SetEarlyStoppingParametersReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{61}
+	return fileDescriptor0, []int{69}
 }
 
 func (m *SetEarlyStoppingParametersReply) GetParamId() string {
@@ -1740,7 +1955,7 @@ func (m *GetEarlyStoppingParametersRequest) Reset()         { *m = GetEarlyStopp
 func (m *GetEarlyStoppingParametersRequest) String() string { return proto.CompactTextString(m) }
 func (*GetEarlyStoppingParametersRequest) ProtoMessage()    {}
 func (*GetEarlyStoppingParametersRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{62}
+	return fileDescriptor0, []int{70}
 }
 
 func (m *GetEarlyStoppingParametersRequest) GetParamId() string {
@@ -1758,7 +1973,7 @@ func (m *GetEarlyStoppingParametersReply) Reset()         { *m = GetEarlyStoppin
 func (m *GetEarlyStoppingParametersReply) String() string { return proto.CompactTextString(m) }
 func (*GetEarlyStoppingParametersReply) ProtoMessage()    {}
 func (*GetEarlyStoppingParametersReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{63}
+	return fileDescriptor0, []int{71}
 }
 
 func (m *GetEarlyStoppingParametersReply) GetEarlyStoppingParameters() []*EarlyStoppingParameter {
@@ -1776,7 +1991,7 @@ func (m *GetEarlyStoppingParameterListRequest) Reset()         { *m = GetEarlySt
 func (m *GetEarlyStoppingParameterListRequest) String() string { return proto.CompactTextString(m) }
 func (*GetEarlyStoppingParameterListRequest) ProtoMessage()    {}
 func (*GetEarlyStoppingParameterListRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{64}
+	return fileDescriptor0, []int{72}
 }
 
 func (m *GetEarlyStoppingParameterListRequest) GetStudyId() string {
@@ -1795,7 +2010,7 @@ type EarlyStoppingParameterSet struct {
 func (m *EarlyStoppingParameterSet) Reset()                    { *m = EarlyStoppingParameterSet{} }
 func (m *EarlyStoppingParameterSet) String() string            { return proto.CompactTextString(m) }
 func (*EarlyStoppingParameterSet) ProtoMessage()               {}
-func (*EarlyStoppingParameterSet) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{65} }
+func (*EarlyStoppingParameterSet) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{73} }
 
 func (m *EarlyStoppingParameterSet) GetParamId() string {
 	if m != nil {
@@ -1826,7 +2041,7 @@ func (m *GetEarlyStoppingParameterListReply) Reset()         { *m = GetEarlyStop
 func (m *GetEarlyStoppingParameterListReply) String() string { return proto.CompactTextString(m) }
 func (*GetEarlyStoppingParameterListReply) ProtoMessage()    {}
 func (*GetEarlyStoppingParameterListReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{66}
+	return fileDescriptor0, []int{74}
 }
 
 func (m *GetEarlyStoppingParameterListReply) GetEarlyStoppingParameterSets() []*EarlyStoppingParameterSet {
@@ -1842,21 +2057,20 @@ func init() {
 	proto.RegisterType((*Parameter)(nil), "api.Parameter")
 	proto.RegisterType((*MetricsLogSet)(nil), "api.MetricsLogSet")
 	proto.RegisterType((*Metrics)(nil), "api.Metrics")
+	proto.RegisterType((*MetricsValueTime)(nil), "api.MetricsValueTime")
 	proto.RegisterType((*MetricsLog)(nil), "api.MetricsLog")
 	proto.RegisterType((*SuggestionParameter)(nil), "api.SuggestionParameter")
 	proto.RegisterType((*EarlyStoppingParameter)(nil), "api.EarlyStoppingParameter")
 	proto.RegisterType((*Tag)(nil), "api.Tag")
-	proto.RegisterType((*MountConf)(nil), "api.MountConf")
 	proto.RegisterType((*StudyOverview)(nil), "api.StudyOverview")
 	proto.RegisterType((*Trial)(nil), "api.Trial")
-	proto.RegisterType((*WorkerConfig)(nil), "api.WorkerConfig")
 	proto.RegisterType((*Worker)(nil), "api.Worker")
 	proto.RegisterType((*StudyConfig)(nil), "api.StudyConfig")
 	proto.RegisterType((*StudyConfig_ParameterConfigs)(nil), "api.StudyConfig.ParameterConfigs")
 	proto.RegisterType((*CreateStudyRequest)(nil), "api.CreateStudyRequest")
 	proto.RegisterType((*CreateStudyReply)(nil), "api.CreateStudyReply")
-	proto.RegisterType((*StopStudyRequest)(nil), "api.StopStudyRequest")
-	proto.RegisterType((*StopStudyReply)(nil), "api.StopStudyReply")
+	proto.RegisterType((*DeleteStudyRequest)(nil), "api.DeleteStudyRequest")
+	proto.RegisterType((*DeleteStudyReply)(nil), "api.DeleteStudyReply")
 	proto.RegisterType((*GetStudyRequest)(nil), "api.GetStudyRequest")
 	proto.RegisterType((*GetStudyReply)(nil), "api.GetStudyReply")
 	proto.RegisterType((*GetStudyListRequest)(nil), "api.GetStudyListRequest")
@@ -1865,18 +2079,27 @@ func init() {
 	proto.RegisterType((*CreateTrialReply)(nil), "api.CreateTrialReply")
 	proto.RegisterType((*GetTrialsRequest)(nil), "api.GetTrialsRequest")
 	proto.RegisterType((*GetTrialsReply)(nil), "api.GetTrialsReply")
-	proto.RegisterType((*RunTrialRequest)(nil), "api.RunTrialRequest")
-	proto.RegisterType((*RunTrialReply)(nil), "api.RunTrialReply")
+	proto.RegisterType((*GetTrialRequest)(nil), "api.GetTrialRequest")
+	proto.RegisterType((*GetTrialReply)(nil), "api.GetTrialReply")
+	proto.RegisterType((*RegisterWorkerRequest)(nil), "api.RegisterWorkerRequest")
+	proto.RegisterType((*RegisterWorkerReply)(nil), "api.RegisterWorkerReply")
 	proto.RegisterType((*StopWorkersRequest)(nil), "api.StopWorkersRequest")
 	proto.RegisterType((*StopWorkersReply)(nil), "api.StopWorkersReply")
 	proto.RegisterType((*GetWorkersRequest)(nil), "api.GetWorkersRequest")
 	proto.RegisterType((*GetWorkersReply)(nil), "api.GetWorkersReply")
+	proto.RegisterType((*UpdateWorkerStateRequest)(nil), "api.UpdateWorkerStateRequest")
+	proto.RegisterType((*UpdateWorkerStateReply)(nil), "api.UpdateWorkerStateReply")
+	proto.RegisterType((*GetWorkerFullInfoRequest)(nil), "api.GetWorkerFullInfoRequest")
+	proto.RegisterType((*WorkerFullInfo)(nil), "api.WorkerFullInfo")
+	proto.RegisterType((*GetWorkerFullInfoReply)(nil), "api.GetWorkerFullInfoReply")
 	proto.RegisterType((*GetSuggestionsRequest)(nil), "api.GetSuggestionsRequest")
 	proto.RegisterType((*GetSuggestionsReply)(nil), "api.GetSuggestionsReply")
 	proto.RegisterType((*GetShouldStopWorkersRequest)(nil), "api.GetShouldStopWorkersRequest")
 	proto.RegisterType((*GetShouldStopWorkersReply)(nil), "api.GetShouldStopWorkersReply")
 	proto.RegisterType((*GetMetricsRequest)(nil), "api.GetMetricsRequest")
 	proto.RegisterType((*GetMetricsReply)(nil), "api.GetMetricsReply")
+	proto.RegisterType((*ReportMetricsLogsRequest)(nil), "api.ReportMetricsLogsRequest")
+	proto.RegisterType((*ReportMetricsLogsReply)(nil), "api.ReportMetricsLogsReply")
 	proto.RegisterType((*ModelInfo)(nil), "api.ModelInfo")
 	proto.RegisterType((*DataSetInfo)(nil), "api.DataSetInfo")
 	proto.RegisterType((*SaveStudyRequest)(nil), "api.SaveStudyRequest")
@@ -1921,26 +2144,73 @@ const _ = grpc.SupportPackageIsVersion4
 // Client API for Manager service
 
 type ManagerClient interface {
+	// *
+	// Create a Study from Study Config.
+	// Generate a unique ID and store the Study to DB.
 	CreateStudy(ctx context.Context, in *CreateStudyRequest, opts ...grpc.CallOption) (*CreateStudyReply, error)
-	StopStudy(ctx context.Context, in *StopStudyRequest, opts ...grpc.CallOption) (*StopStudyReply, error)
+	// *
+	// Get a Study Config from DB by ID of Study.
 	GetStudy(ctx context.Context, in *GetStudyRequest, opts ...grpc.CallOption) (*GetStudyReply, error)
+	// *
+	// Delete a Study from DB by Study ID.
+	DeleteStudy(ctx context.Context, in *DeleteStudyRequest, opts ...grpc.CallOption) (*DeleteStudyReply, error)
+	// *
+	// Get all Study Configs from DB.
 	GetStudyList(ctx context.Context, in *GetStudyListRequest, opts ...grpc.CallOption) (*GetStudyListReply, error)
+	// *
+	// Create a Trial from Trial Config.
+	// Generate a unique ID and store the Trial to DB.
 	CreateTrial(ctx context.Context, in *CreateTrialRequest, opts ...grpc.CallOption) (*CreateTrialReply, error)
+	// *
+	// Get a Trial Configs from DB by ID of Study.
 	GetTrials(ctx context.Context, in *GetTrialsRequest, opts ...grpc.CallOption) (*GetTrialsReply, error)
-	RunTrial(ctx context.Context, in *RunTrialRequest, opts ...grpc.CallOption) (*RunTrialReply, error)
-	StopWorkers(ctx context.Context, in *StopWorkersRequest, opts ...grpc.CallOption) (*StopWorkersReply, error)
+	// *
+	// Get a Trial Configuration from DB by ID of Trial.
+	GetTrial(ctx context.Context, in *GetTrialRequest, opts ...grpc.CallOption) (*GetTrialReply, error)
+	// *
+	// Create a Worker from Worker Config.
+	// Generate a unique ID and store the Worker to DB.
+	RegisterWorker(ctx context.Context, in *RegisterWorkerRequest, opts ...grpc.CallOption) (*RegisterWorkerReply, error)
+	// *
+	// Get a Worker Configs and Status from DB by ID of Study, Trial or Worker.
 	GetWorkers(ctx context.Context, in *GetWorkersRequest, opts ...grpc.CallOption) (*GetWorkersReply, error)
+	// *
+	// Update a Status of Worker.
+	UpdateWorkerState(ctx context.Context, in *UpdateWorkerStateRequest, opts ...grpc.CallOption) (*UpdateWorkerStateReply, error)
+	// *
+	// Get full information related to specified Workers.
+	// It includes Worker Config, HyperParameters and Metrics Logs.
+	GetWorkerFullInfo(ctx context.Context, in *GetWorkerFullInfoRequest, opts ...grpc.CallOption) (*GetWorkerFullInfoReply, error)
+	// *
+	// Get Suggestions from a Suggestion service.
 	GetSuggestions(ctx context.Context, in *GetSuggestionsRequest, opts ...grpc.CallOption) (*GetSuggestionsReply, error)
 	GetShouldStopWorkers(ctx context.Context, in *GetShouldStopWorkersRequest, opts ...grpc.CallOption) (*GetShouldStopWorkersReply, error)
+	// *
+	// Get metrics of workers.
+	// You can get all logs of metrics since start of the worker.
 	GetMetrics(ctx context.Context, in *GetMetricsRequest, opts ...grpc.CallOption) (*GetMetricsReply, error)
+	// *
+	// Create or Update parameter set for a suggestion service.
+	// If you specify an ID of parameter set, it will update the parameter set by your request.
+	// If you don't specify an ID, it will create a new parameter set for corresponding study and suggestion service.
+	// The parameters are key-value format.
 	SetSuggestionParameters(ctx context.Context, in *SetSuggestionParametersRequest, opts ...grpc.CallOption) (*SetSuggestionParametersReply, error)
+	// *
+	// Get suggestion parameter set from DB specified.
 	GetSuggestionParameters(ctx context.Context, in *GetSuggestionParametersRequest, opts ...grpc.CallOption) (*GetSuggestionParametersReply, error)
+	// *
+	// Get all suggestion parameter sets from DB.
 	GetSuggestionParameterList(ctx context.Context, in *GetSuggestionParameterListRequest, opts ...grpc.CallOption) (*GetSuggestionParameterListReply, error)
 	SetEarlyStoppingParameters(ctx context.Context, in *SetEarlyStoppingParametersRequest, opts ...grpc.CallOption) (*SetEarlyStoppingParametersReply, error)
 	GetEarlyStoppingParameters(ctx context.Context, in *GetEarlyStoppingParametersRequest, opts ...grpc.CallOption) (*GetEarlyStoppingParametersReply, error)
 	GetEarlyStoppingParameterList(ctx context.Context, in *GetEarlyStoppingParameterListRequest, opts ...grpc.CallOption) (*GetEarlyStoppingParameterListReply, error)
 	SaveStudy(ctx context.Context, in *SaveStudyRequest, opts ...grpc.CallOption) (*SaveStudyReply, error)
 	SaveModel(ctx context.Context, in *SaveModelRequest, opts ...grpc.CallOption) (*SaveModelReply, error)
+	// *
+	// Report a logs of metrics for workers.
+	// The logs for each worker must have timestamp and must be ordered in time series.
+	// When the log you reported are already reported before, it will be dismissed and get no error.
+	ReportMetricsLogs(ctx context.Context, in *ReportMetricsLogsRequest, opts ...grpc.CallOption) (*ReportMetricsLogsReply, error)
 	GetSavedStudies(ctx context.Context, in *GetSavedStudiesRequest, opts ...grpc.CallOption) (*GetSavedStudiesReply, error)
 	GetSavedModels(ctx context.Context, in *GetSavedModelsRequest, opts ...grpc.CallOption) (*GetSavedModelsReply, error)
 }
@@ -1962,18 +2232,18 @@ func (c *managerClient) CreateStudy(ctx context.Context, in *CreateStudyRequest,
 	return out, nil
 }
 
-func (c *managerClient) StopStudy(ctx context.Context, in *StopStudyRequest, opts ...grpc.CallOption) (*StopStudyReply, error) {
-	out := new(StopStudyReply)
-	err := grpc.Invoke(ctx, "/api.Manager/StopStudy", in, out, c.cc, opts...)
+func (c *managerClient) GetStudy(ctx context.Context, in *GetStudyRequest, opts ...grpc.CallOption) (*GetStudyReply, error) {
+	out := new(GetStudyReply)
+	err := grpc.Invoke(ctx, "/api.Manager/GetStudy", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *managerClient) GetStudy(ctx context.Context, in *GetStudyRequest, opts ...grpc.CallOption) (*GetStudyReply, error) {
-	out := new(GetStudyReply)
-	err := grpc.Invoke(ctx, "/api.Manager/GetStudy", in, out, c.cc, opts...)
+func (c *managerClient) DeleteStudy(ctx context.Context, in *DeleteStudyRequest, opts ...grpc.CallOption) (*DeleteStudyReply, error) {
+	out := new(DeleteStudyReply)
+	err := grpc.Invoke(ctx, "/api.Manager/DeleteStudy", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2007,18 +2277,18 @@ func (c *managerClient) GetTrials(ctx context.Context, in *GetTrialsRequest, opt
 	return out, nil
 }
 
-func (c *managerClient) RunTrial(ctx context.Context, in *RunTrialRequest, opts ...grpc.CallOption) (*RunTrialReply, error) {
-	out := new(RunTrialReply)
-	err := grpc.Invoke(ctx, "/api.Manager/RunTrial", in, out, c.cc, opts...)
+func (c *managerClient) GetTrial(ctx context.Context, in *GetTrialRequest, opts ...grpc.CallOption) (*GetTrialReply, error) {
+	out := new(GetTrialReply)
+	err := grpc.Invoke(ctx, "/api.Manager/GetTrial", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *managerClient) StopWorkers(ctx context.Context, in *StopWorkersRequest, opts ...grpc.CallOption) (*StopWorkersReply, error) {
-	out := new(StopWorkersReply)
-	err := grpc.Invoke(ctx, "/api.Manager/StopWorkers", in, out, c.cc, opts...)
+func (c *managerClient) RegisterWorker(ctx context.Context, in *RegisterWorkerRequest, opts ...grpc.CallOption) (*RegisterWorkerReply, error) {
+	out := new(RegisterWorkerReply)
+	err := grpc.Invoke(ctx, "/api.Manager/RegisterWorker", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2028,6 +2298,24 @@ func (c *managerClient) StopWorkers(ctx context.Context, in *StopWorkersRequest,
 func (c *managerClient) GetWorkers(ctx context.Context, in *GetWorkersRequest, opts ...grpc.CallOption) (*GetWorkersReply, error) {
 	out := new(GetWorkersReply)
 	err := grpc.Invoke(ctx, "/api.Manager/GetWorkers", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *managerClient) UpdateWorkerState(ctx context.Context, in *UpdateWorkerStateRequest, opts ...grpc.CallOption) (*UpdateWorkerStateReply, error) {
+	out := new(UpdateWorkerStateReply)
+	err := grpc.Invoke(ctx, "/api.Manager/UpdateWorkerState", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *managerClient) GetWorkerFullInfo(ctx context.Context, in *GetWorkerFullInfoRequest, opts ...grpc.CallOption) (*GetWorkerFullInfoReply, error) {
+	out := new(GetWorkerFullInfoReply)
+	err := grpc.Invoke(ctx, "/api.Manager/GetWorkerFullInfo", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2133,6 +2421,15 @@ func (c *managerClient) SaveModel(ctx context.Context, in *SaveModelRequest, opt
 	return out, nil
 }
 
+func (c *managerClient) ReportMetricsLogs(ctx context.Context, in *ReportMetricsLogsRequest, opts ...grpc.CallOption) (*ReportMetricsLogsReply, error) {
+	out := new(ReportMetricsLogsReply)
+	err := grpc.Invoke(ctx, "/api.Manager/ReportMetricsLogs", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *managerClient) GetSavedStudies(ctx context.Context, in *GetSavedStudiesRequest, opts ...grpc.CallOption) (*GetSavedStudiesReply, error) {
 	out := new(GetSavedStudiesReply)
 	err := grpc.Invoke(ctx, "/api.Manager/GetSavedStudies", in, out, c.cc, opts...)
@@ -2154,26 +2451,73 @@ func (c *managerClient) GetSavedModels(ctx context.Context, in *GetSavedModelsRe
 // Server API for Manager service
 
 type ManagerServer interface {
+	// *
+	// Create a Study from Study Config.
+	// Generate a unique ID and store the Study to DB.
 	CreateStudy(context.Context, *CreateStudyRequest) (*CreateStudyReply, error)
-	StopStudy(context.Context, *StopStudyRequest) (*StopStudyReply, error)
+	// *
+	// Get a Study Config from DB by ID of Study.
 	GetStudy(context.Context, *GetStudyRequest) (*GetStudyReply, error)
+	// *
+	// Delete a Study from DB by Study ID.
+	DeleteStudy(context.Context, *DeleteStudyRequest) (*DeleteStudyReply, error)
+	// *
+	// Get all Study Configs from DB.
 	GetStudyList(context.Context, *GetStudyListRequest) (*GetStudyListReply, error)
+	// *
+	// Create a Trial from Trial Config.
+	// Generate a unique ID and store the Trial to DB.
 	CreateTrial(context.Context, *CreateTrialRequest) (*CreateTrialReply, error)
+	// *
+	// Get a Trial Configs from DB by ID of Study.
 	GetTrials(context.Context, *GetTrialsRequest) (*GetTrialsReply, error)
-	RunTrial(context.Context, *RunTrialRequest) (*RunTrialReply, error)
-	StopWorkers(context.Context, *StopWorkersRequest) (*StopWorkersReply, error)
+	// *
+	// Get a Trial Configuration from DB by ID of Trial.
+	GetTrial(context.Context, *GetTrialRequest) (*GetTrialReply, error)
+	// *
+	// Create a Worker from Worker Config.
+	// Generate a unique ID and store the Worker to DB.
+	RegisterWorker(context.Context, *RegisterWorkerRequest) (*RegisterWorkerReply, error)
+	// *
+	// Get a Worker Configs and Status from DB by ID of Study, Trial or Worker.
 	GetWorkers(context.Context, *GetWorkersRequest) (*GetWorkersReply, error)
+	// *
+	// Update a Status of Worker.
+	UpdateWorkerState(context.Context, *UpdateWorkerStateRequest) (*UpdateWorkerStateReply, error)
+	// *
+	// Get full information related to specified Workers.
+	// It includes Worker Config, HyperParameters and Metrics Logs.
+	GetWorkerFullInfo(context.Context, *GetWorkerFullInfoRequest) (*GetWorkerFullInfoReply, error)
+	// *
+	// Get Suggestions from a Suggestion service.
 	GetSuggestions(context.Context, *GetSuggestionsRequest) (*GetSuggestionsReply, error)
 	GetShouldStopWorkers(context.Context, *GetShouldStopWorkersRequest) (*GetShouldStopWorkersReply, error)
+	// *
+	// Get metrics of workers.
+	// You can get all logs of metrics since start of the worker.
 	GetMetrics(context.Context, *GetMetricsRequest) (*GetMetricsReply, error)
+	// *
+	// Create or Update parameter set for a suggestion service.
+	// If you specify an ID of parameter set, it will update the parameter set by your request.
+	// If you don't specify an ID, it will create a new parameter set for corresponding study and suggestion service.
+	// The parameters are key-value format.
 	SetSuggestionParameters(context.Context, *SetSuggestionParametersRequest) (*SetSuggestionParametersReply, error)
+	// *
+	// Get suggestion parameter set from DB specified.
 	GetSuggestionParameters(context.Context, *GetSuggestionParametersRequest) (*GetSuggestionParametersReply, error)
+	// *
+	// Get all suggestion parameter sets from DB.
 	GetSuggestionParameterList(context.Context, *GetSuggestionParameterListRequest) (*GetSuggestionParameterListReply, error)
 	SetEarlyStoppingParameters(context.Context, *SetEarlyStoppingParametersRequest) (*SetEarlyStoppingParametersReply, error)
 	GetEarlyStoppingParameters(context.Context, *GetEarlyStoppingParametersRequest) (*GetEarlyStoppingParametersReply, error)
 	GetEarlyStoppingParameterList(context.Context, *GetEarlyStoppingParameterListRequest) (*GetEarlyStoppingParameterListReply, error)
 	SaveStudy(context.Context, *SaveStudyRequest) (*SaveStudyReply, error)
 	SaveModel(context.Context, *SaveModelRequest) (*SaveModelReply, error)
+	// *
+	// Report a logs of metrics for workers.
+	// The logs for each worker must have timestamp and must be ordered in time series.
+	// When the log you reported are already reported before, it will be dismissed and get no error.
+	ReportMetricsLogs(context.Context, *ReportMetricsLogsRequest) (*ReportMetricsLogsReply, error)
 	GetSavedStudies(context.Context, *GetSavedStudiesRequest) (*GetSavedStudiesReply, error)
 	GetSavedModels(context.Context, *GetSavedModelsRequest) (*GetSavedModelsReply, error)
 }
@@ -2200,24 +2544,6 @@ func _Manager_CreateStudy_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Manager_StopStudy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(StopStudyRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ManagerServer).StopStudy(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.Manager/StopStudy",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagerServer).StopStudy(ctx, req.(*StopStudyRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Manager_GetStudy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetStudyRequest)
 	if err := dec(in); err != nil {
@@ -2232,6 +2558,24 @@ func _Manager_GetStudy_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ManagerServer).GetStudy(ctx, req.(*GetStudyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_DeleteStudy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteStudyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).DeleteStudy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Manager/DeleteStudy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).DeleteStudy(ctx, req.(*DeleteStudyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2290,38 +2634,38 @@ func _Manager_GetTrials_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Manager_RunTrial_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RunTrialRequest)
+func _Manager_GetTrial_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTrialRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ManagerServer).RunTrial(ctx, in)
+		return srv.(ManagerServer).GetTrial(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Manager/RunTrial",
+		FullMethod: "/api.Manager/GetTrial",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagerServer).RunTrial(ctx, req.(*RunTrialRequest))
+		return srv.(ManagerServer).GetTrial(ctx, req.(*GetTrialRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Manager_StopWorkers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(StopWorkersRequest)
+func _Manager_RegisterWorker_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterWorkerRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ManagerServer).StopWorkers(ctx, in)
+		return srv.(ManagerServer).RegisterWorker(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Manager/StopWorkers",
+		FullMethod: "/api.Manager/RegisterWorker",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagerServer).StopWorkers(ctx, req.(*StopWorkersRequest))
+		return srv.(ManagerServer).RegisterWorker(ctx, req.(*RegisterWorkerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2340,6 +2684,42 @@ func _Manager_GetWorkers_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ManagerServer).GetWorkers(ctx, req.(*GetWorkersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_UpdateWorkerState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateWorkerStateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).UpdateWorkerState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Manager/UpdateWorkerState",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).UpdateWorkerState(ctx, req.(*UpdateWorkerStateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_GetWorkerFullInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetWorkerFullInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).GetWorkerFullInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Manager/GetWorkerFullInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).GetWorkerFullInfo(ctx, req.(*GetWorkerFullInfoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2542,6 +2922,24 @@ func _Manager_SaveModel_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Manager_ReportMetricsLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReportMetricsLogsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).ReportMetricsLogs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Manager/ReportMetricsLogs",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).ReportMetricsLogs(ctx, req.(*ReportMetricsLogsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Manager_GetSavedStudies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetSavedStudiesRequest)
 	if err := dec(in); err != nil {
@@ -2587,12 +2985,12 @@ var _Manager_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Manager_CreateStudy_Handler,
 		},
 		{
-			MethodName: "StopStudy",
-			Handler:    _Manager_StopStudy_Handler,
-		},
-		{
 			MethodName: "GetStudy",
 			Handler:    _Manager_GetStudy_Handler,
+		},
+		{
+			MethodName: "DeleteStudy",
+			Handler:    _Manager_DeleteStudy_Handler,
 		},
 		{
 			MethodName: "GetStudyList",
@@ -2607,16 +3005,24 @@ var _Manager_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Manager_GetTrials_Handler,
 		},
 		{
-			MethodName: "RunTrial",
-			Handler:    _Manager_RunTrial_Handler,
+			MethodName: "GetTrial",
+			Handler:    _Manager_GetTrial_Handler,
 		},
 		{
-			MethodName: "StopWorkers",
-			Handler:    _Manager_StopWorkers_Handler,
+			MethodName: "RegisterWorker",
+			Handler:    _Manager_RegisterWorker_Handler,
 		},
 		{
 			MethodName: "GetWorkers",
 			Handler:    _Manager_GetWorkers_Handler,
+		},
+		{
+			MethodName: "UpdateWorkerState",
+			Handler:    _Manager_UpdateWorkerState_Handler,
+		},
+		{
+			MethodName: "GetWorkerFullInfo",
+			Handler:    _Manager_GetWorkerFullInfo_Handler,
 		},
 		{
 			MethodName: "GetSuggestions",
@@ -2661,6 +3067,10 @@ var _Manager_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveModel",
 			Handler:    _Manager_SaveModel_Handler,
+		},
+		{
+			MethodName: "ReportMetricsLogs",
+			Handler:    _Manager_ReportMetricsLogs_Handler,
 		},
 		{
 			MethodName: "GetSavedStudies",
@@ -2806,154 +3216,184 @@ var _EarlyStopping_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("api.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 2384 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x3a, 0xcd, 0x73, 0xdb, 0xc6,
-	0xf5, 0x06, 0x29, 0x8a, 0xe4, 0xe3, 0x87, 0xe0, 0xd5, 0x87, 0x21, 0xfa, 0x4b, 0x46, 0x1c, 0xc7,
-	0x71, 0x1c, 0xe5, 0x17, 0xd9, 0x3f, 0xc7, 0x4e, 0xe2, 0xb6, 0xb2, 0xc4, 0xb0, 0x9c, 0x48, 0x94,
-	0x06, 0xa4, 0xeb, 0xb4, 0x17, 0x0e, 0x4c, 0xae, 0x69, 0x24, 0x24, 0x81, 0x62, 0x41, 0x39, 0xca,
-	0xb9, 0x33, 0xed, 0xa5, 0x33, 0xed, 0xb1, 0x7f, 0x48, 0x0e, 0xbd, 0xf4, 0xde, 0x43, 0x8f, 0x9d,
-	0xe9, 0xb9, 0xe7, 0xfe, 0x11, 0x9d, 0xfd, 0x00, 0xb0, 0x00, 0x01, 0x90, 0x91, 0x93, 0xde, 0xb0,
-	0xfb, 0xde, 0xbe, 0xef, 0xf7, 0xf6, 0xbd, 0x25, 0xa1, 0x6c, 0x3a, 0xd6, 0xae, 0xe3, 0xda, 0x9e,
-	0x8d, 0xf2, 0xa6, 0x63, 0xe9, 0x2d, 0xa8, 0x7d, 0x81, 0x4d, 0x62, 0xbd, 0x1c, 0xe3, 0xae, 0x63,
-	0x0e, 0x30, 0x52, 0x21, 0x3f, 0x31, 0xbf, 0xd5, 0x94, 0x1d, 0xe5, 0x6e, 0xd9, 0xa0, 0x9f, 0x6c,
-	0xc7, 0x9a, 0x6a, 0x39, 0xb1, 0x63, 0x4d, 0x11, 0x82, 0x95, 0xb1, 0x45, 0x3c, 0x2d, 0xbf, 0x93,
-	0xbf, 0x5b, 0x36, 0xd8, 0xb7, 0xfe, 0x27, 0x05, 0xd6, 0x4e, 0x4d, 0xd7, 0x9c, 0x60, 0x0f, 0xbb,
-	0x07, 0xf6, 0xf4, 0x95, 0x35, 0xa2, 0x78, 0x53, 0x73, 0x82, 0x05, 0x31, 0xf6, 0x8d, 0x9e, 0x40,
-	0xdd, 0xf1, 0xd1, 0xfa, 0xde, 0xb9, 0x83, 0x19, 0xe1, 0xfa, 0x1e, 0xda, 0xa5, 0x92, 0x05, 0x14,
-	0x7a, 0xe7, 0x0e, 0x36, 0x6a, 0x8e, 0xbc, 0x44, 0xbb, 0x50, 0x7a, 0x25, 0x64, 0xd5, 0xf2, 0x3b,
-	0xca, 0xdd, 0x8a, 0x38, 0x14, 0x51, 0xc0, 0x08, 0x70, 0x74, 0x07, 0xca, 0x01, 0xbd, 0x1f, 0x5b,
-	0x96, 0x0d, 0x28, 0x9c, 0x99, 0xe3, 0x19, 0x17, 0xa4, 0x6c, 0xf0, 0x85, 0xfe, 0x67, 0x05, 0x6a,
-	0xc7, 0xd8, 0x73, 0xad, 0x01, 0x39, 0xb2, 0x47, 0x5d, 0xec, 0xa1, 0xab, 0x50, 0x7e, 0x63, 0xbb,
-	0xdf, 0x60, 0xb7, 0x6f, 0x0d, 0x05, 0xef, 0x12, 0xdf, 0x68, 0x0f, 0xd1, 0x1e, 0x54, 0x27, 0x1c,
-	0xbb, 0x3f, 0xb6, 0x47, 0x44, 0xcb, 0xed, 0xe4, 0xef, 0x56, 0xf6, 0xd6, 0x18, 0xf7, 0x90, 0x8c,
-	0x51, 0x99, 0x04, 0xdf, 0x04, 0x7d, 0x04, 0x35, 0x41, 0x90, 0x78, 0xa6, 0x37, 0x23, 0x4c, 0x80,
-	0xfa, 0x1e, 0xb0, 0x43, 0x5d, 0xcf, 0xf4, 0xb0, 0x51, 0xe5, 0x08, 0x5d, 0x06, 0xd7, 0x1f, 0x40,
-	0x51, 0xd0, 0x4a, 0xb4, 0x41, 0xa0, 0x48, 0x4e, 0x56, 0xe4, 0x31, 0x40, 0x28, 0x40, 0xe2, 0xb9,
-	0x2d, 0x58, 0x65, 0xa8, 0x5c, 0xea, 0xb2, 0x21, 0x56, 0xfa, 0xcf, 0x61, 0xbd, 0x3b, 0x1b, 0x8d,
-	0x30, 0xf1, 0x2c, 0x7b, 0x9a, 0x6d, 0xfe, 0x64, 0xd6, 0xcf, 0x60, 0xab, 0x69, 0xba, 0xe3, 0xf3,
-	0xae, 0x67, 0x3b, 0x8e, 0x35, 0x1d, 0x5d, 0x84, 0xc6, 0x47, 0x90, 0xef, 0x99, 0xa3, 0x1f, 0x70,
-	0xe0, 0x63, 0x28, 0x1f, 0xdb, 0xb3, 0xa9, 0x47, 0x03, 0x97, 0x06, 0xbc, 0x73, 0x36, 0xf0, 0x53,
-	0xc0, 0x39, 0x1b, 0x50, 0x42, 0x8e, 0xe9, 0xbd, 0x16, 0x67, 0xd8, 0xb7, 0xfe, 0x0d, 0xd4, 0xba,
-	0xde, 0x6c, 0x78, 0x7e, 0x72, 0x86, 0xdd, 0x33, 0x0b, 0xbf, 0x49, 0xe3, 0x66, 0xbf, 0x99, 0x62,
-	0xd7, 0xe7, 0xc6, 0x16, 0xa8, 0x0e, 0x39, 0x6b, 0x28, 0x22, 0x27, 0x67, 0x0d, 0xd1, 0x0e, 0x54,
-	0x86, 0x98, 0x0c, 0x5c, 0xcb, 0xa1, 0x46, 0xd3, 0x56, 0x18, 0x40, 0xde, 0xd2, 0xff, 0xaa, 0x40,
-	0xa1, 0xe7, 0x5a, 0xe6, 0x18, 0x6d, 0x43, 0xc9, 0xa3, 0x1f, 0x61, 0x3c, 0x15, 0xd9, 0xba, 0x3d,
-	0xa4, 0x20, 0x42, 0x25, 0xa2, 0x20, 0xce, 0xaf, 0xc8, 0xd6, 0xed, 0x21, 0x7a, 0x00, 0x61, 0xfc,
-	0xf6, 0x09, 0xe6, 0xa9, 0x5b, 0xd9, 0xab, 0x47, 0x03, 0xdd, 0xa8, 0x06, 0x48, 0x34, 0x76, 0xdf,
-	0x83, 0x35, 0xfb, 0xe5, 0xd7, 0x78, 0xe0, 0x59, 0x67, 0xb8, 0xcf, 0x8d, 0xc6, 0x45, 0xab, 0x07,
-	0xdb, 0xbf, 0xa2, 0xbb, 0xe8, 0x1a, 0xac, 0x78, 0xe6, 0x88, 0x68, 0x05, 0x46, 0xb4, 0xc4, 0x88,
-	0xf6, 0xcc, 0x91, 0xc1, 0x76, 0xf5, 0xef, 0x15, 0xa8, 0xbe, 0x60, 0x11, 0x29, 0xca, 0xc2, 0x06,
-	0x14, 0xac, 0x89, 0x39, 0xf2, 0x2d, 0xc5, 0x17, 0x48, 0x83, 0xe2, 0xc0, 0x9e, 0x4c, 0xcc, 0xe9,
-	0x50, 0x44, 0x94, 0xbf, 0xa4, 0xfe, 0x18, 0x39, 0x33, 0x66, 0xaf, 0x82, 0x41, 0x3f, 0xd1, 0x35,
-	0x28, 0x93, 0xc1, 0x6b, 0x3c, 0x9c, 0x8d, 0xb1, 0x2b, 0x64, 0x0a, 0x37, 0xd0, 0x6d, 0x28, 0x4c,
-	0xa8, 0x33, 0xb5, 0x02, 0x2b, 0x12, 0x5c, 0xc9, 0xc0, 0xbd, 0x06, 0x07, 0xa2, 0x9b, 0x50, 0x71,
-	0x66, 0xe3, 0x71, 0x9f, 0xe0, 0x81, 0x8b, 0x3d, 0x6d, 0x95, 0x51, 0x01, 0xba, 0xd5, 0x65, 0x3b,
-	0xfa, 0xbf, 0x15, 0x58, 0xe5, 0x72, 0x67, 0x67, 0x71, 0x86, 0xd9, 0x65, 0x67, 0xe5, 0xa3, 0xce,
-	0xd2, 0xa0, 0xe8, 0xce, 0xa6, 0x9e, 0x35, 0xf1, 0x8d, 0xea, 0x2f, 0x91, 0x0e, 0xab, 0x22, 0xb5,
-	0x0b, 0x73, 0xa9, 0x2d, 0x20, 0xe8, 0x7d, 0x58, 0x1d, 0x30, 0x63, 0x32, 0xb9, 0x2b, 0x7b, 0x97,
-	0x19, 0x8e, 0x6c, 0x65, 0x43, 0x20, 0x04, 0xce, 0x29, 0x26, 0x3a, 0xe7, 0x9f, 0x79, 0xa8, 0xb0,
-	0x30, 0xce, 0x28, 0xd9, 0xc9, 0x41, 0xfc, 0x0c, 0x2e, 0xdb, 0x8e, 0x67, 0x4d, 0xac, 0xef, 0x4c,
-	0x1a, 0xa2, 0xbc, 0x7e, 0xf2, 0x62, 0xb4, 0xc9, 0x98, 0x9c, 0x48, 0x50, 0x56, 0x42, 0x55, 0x3b,
-	0xb6, 0x83, 0x3e, 0x88, 0xd1, 0x18, 0xd9, 0xe6, 0x98, 0x99, 0x43, 0x89, 0x22, 0xb7, 0x6c, 0x73,
-	0x8c, 0x3a, 0x70, 0x39, 0x8c, 0x61, 0xae, 0x1c, 0x11, 0x2e, 0xbe, 0x25, 0x4c, 0x14, 0xe8, 0xb1,
-	0x1b, 0xbb, 0x8a, 0x88, 0xa1, 0x3a, 0xb1, 0x1d, 0xf4, 0x21, 0x20, 0x73, 0x30, 0xc0, 0x84, 0xf4,
-	0x1d, 0xec, 0x4e, 0x2c, 0x42, 0x2c, 0x7b, 0x4a, 0xb4, 0x55, 0x16, 0x7b, 0x97, 0x39, 0xe4, 0x34,
-	0x04, 0x64, 0xdb, 0x11, 0xfd, 0x1f, 0x6c, 0xc4, 0x72, 0xa5, 0xcf, 0xec, 0x58, 0x62, 0x26, 0x43,
-	0xd1, 0x84, 0xe9, 0x50, 0xab, 0x6a, 0x50, 0x14, 0x75, 0x5d, 0x2b, 0xf3, 0x78, 0x17, 0xcb, 0xc6,
-	0x33, 0x50, 0xe3, 0xe2, 0xa3, 0x5d, 0x9a, 0x1d, 0x5c, 0x65, 0x85, 0x09, 0xb0, 0x11, 0x4d, 0x5d,
-	0xe1, 0x74, 0x1f, 0x49, 0x6f, 0x03, 0x3a, 0x70, 0xb1, 0xe9, 0x61, 0x66, 0x14, 0x03, 0xff, 0x76,
-	0x86, 0x89, 0x87, 0x1e, 0x40, 0x95, 0x87, 0xaa, 0x08, 0x1e, 0x85, 0x59, 0x4f, 0x8d, 0x5b, 0xcf,
-	0xa8, 0x90, 0x70, 0xa1, 0x7f, 0x08, 0x6a, 0x84, 0x94, 0x33, 0x3e, 0x8f, 0xc4, 0xbc, 0x12, 0x89,
-	0x79, 0x8a, 0x4e, 0x4b, 0x77, 0x84, 0x6f, 0x06, 0xba, 0x0a, 0x75, 0x09, 0xdd, 0x19, 0x9f, 0xeb,
-	0xf7, 0x61, 0xad, 0x85, 0xbd, 0x65, 0xcf, 0x1f, 0x42, 0x2d, 0xc4, 0xa6, 0xa2, 0x5d, 0x48, 0xc7,
-	0x4d, 0x58, 0xf7, 0xa9, 0x1c, 0x59, 0xc4, 0x13, 0x7c, 0xf5, 0x53, 0xb8, 0x1c, 0xdd, 0xa6, 0x0c,
-	0x3e, 0x83, 0x35, 0xce, 0xc0, 0x16, 0x95, 0xdf, 0x77, 0x09, 0x0a, 0x79, 0xf8, 0x97, 0x82, 0x51,
-	0x27, 0xf2, 0x92, 0xe8, 0x8f, 0x7c, 0xbf, 0xb0, 0x6a, 0xee, 0xeb, 0xb7, 0x03, 0x05, 0x56, 0x17,
-	0x84, 0xb0, 0x3c, 0xe3, 0x39, 0x06, 0x07, 0x84, 0x4e, 0x10, 0xe7, 0x84, 0x13, 0x52, 0xae, 0x02,
-	0x8a, 0xde, 0xc2, 0x1e, 0xc3, 0x25, 0x4b, 0x18, 0xf1, 0x21, 0xd4, 0x25, 0x74, 0x4a, 0x5b, 0x87,
-	0x55, 0x46, 0xcb, 0xd7, 0x4d, 0x16, 0x49, 0x40, 0xf4, 0xbf, 0x28, 0xb0, 0x66, 0xcc, 0xa6, 0x11,
-	0x4d, 0xd2, 0x99, 0x44, 0xc4, 0xcd, 0xa5, 0x16, 0xc3, 0x7c, 0xb4, 0x18, 0x3e, 0x0a, 0xda, 0x1d,
-	0xe1, 0xce, 0x95, 0xb4, 0x7a, 0x27, 0xba, 0x1e, 0xe1, 0xd0, 0xfb, 0x50, 0x0b, 0x45, 0xa3, 0x0a,
-	0x65, 0x95, 0x70, 0xdd, 0x06, 0x44, 0x83, 0x90, 0xd3, 0x5b, 0xc2, 0x60, 0xe8, 0x3a, 0x40, 0x40,
-	0xcd, 0xef, 0x80, 0xca, 0x3e, 0x39, 0x42, 0xef, 0x16, 0x8b, 0xf4, 0x07, 0xf6, 0xc4, 0x19, 0x63,
-	0x8f, 0xeb, 0x54, 0x32, 0xc0, 0x22, 0x07, 0x62, 0x47, 0x47, 0x3c, 0x49, 0x02, 0x86, 0x34, 0xee,
-	0x5f, 0xb1, 0x60, 0x5b, 0x5e, 0x86, 0x0c, 0x7b, 0x46, 0x94, 0xcd, 0xc7, 0x94, 0x7d, 0xcc, 0xf2,
-	0x4b, 0x66, 0x8d, 0xde, 0x85, 0x22, 0x07, 0xfb, 0xee, 0xae, 0x48, 0xf6, 0x35, 0x7c, 0x98, 0xfe,
-	0x0f, 0x05, 0x36, 0x69, 0x3e, 0x04, 0xfd, 0xdd, 0x32, 0x62, 0x7e, 0x0c, 0x1b, 0x24, 0x38, 0xd0,
-	0x37, 0xc7, 0x23, 0xdb, 0xb5, 0xbc, 0xd7, 0x13, 0x21, 0xf2, 0x7a, 0x08, 0xdb, 0xf7, 0x41, 0xe8,
-	0x5d, 0xa8, 0xbb, 0x9c, 0x70, 0x7f, 0x3a, 0x9b, 0xbc, 0xc4, 0xae, 0xb8, 0xfb, 0x6b, 0x62, 0xb7,
-	0xc3, 0x36, 0xd1, 0x6d, 0xa8, 0x8f, 0xed, 0x51, 0x5f, 0x72, 0xc4, 0x0a, 0x73, 0x44, 0x75, 0x6c,
-	0x8f, 0x5e, 0x04, 0xbe, 0xd8, 0x86, 0x12, 0x2b, 0xfd, 0x54, 0xb4, 0x02, 0x17, 0x8d, 0xad, 0xdb,
-	0x43, 0xfd, 0x09, 0xcf, 0x7a, 0x59, 0x9d, 0x65, 0x63, 0xff, 0x8f, 0x0a, 0x5c, 0xa5, 0x67, 0x5f,
-	0xdb, 0xb3, 0xf1, 0xf0, 0x87, 0xc5, 0xce, 0x63, 0xd0, 0x30, 0x6d, 0x70, 0xfb, 0x44, 0x74, 0xb8,
-	0x73, 0x46, 0xd9, 0xc2, 0x72, 0x03, 0x1c, 0xda, 0x25, 0x43, 0x95, 0x53, 0xd8, 0x4e, 0x16, 0x87,
-	0x97, 0xc4, 0x2d, 0xc2, 0x20, 0x8c, 0xa5, 0x6c, 0x30, 0x85, 0x19, 0x6c, 0x9d, 0xc4, 0xce, 0xb5,
-	0x87, 0x44, 0x77, 0x59, 0x38, 0x8a, 0x29, 0xe0, 0xed, 0x53, 0xe2, 0x1d, 0xa8, 0xf9, 0xb3, 0x0e,
-	0xbd, 0x18, 0x89, 0x18, 0x1e, 0xfd, 0x01, 0x88, 0x5e, 0x89, 0x44, 0x3f, 0x61, 0xa1, 0x19, 0xf0,
-	0xa4, 0xb2, 0x7f, 0x0e, 0xaa, 0x34, 0x23, 0xd1, 0xde, 0x35, 0x5a, 0x6e, 0x23, 0xe3, 0x96, 0x51,
-	0x9f, 0xc8, 0x4b, 0xa2, 0xff, 0x4d, 0xa1, 0x8d, 0xfd, 0x10, 0x8f, 0xdb, 0xd3, 0x57, 0x36, 0x15,
-	0x91, 0x4b, 0x2f, 0xb5, 0x38, 0x65, 0xb6, 0xc3, 0x6e, 0xe4, 0x48, 0xd6, 0xe4, 0x62, 0x5d, 0xde,
-	0x2e, 0x40, 0xd0, 0x41, 0x90, 0x94, 0xf6, 0x59, 0xc2, 0x40, 0x77, 0xc2, 0xeb, 0x7d, 0x85, 0x21,
-	0x57, 0x65, 0x71, 0x83, 0xcb, 0x9e, 0xca, 0x34, 0xa1, 0x02, 0xf6, 0xd9, 0x80, 0xc1, 0xbd, 0x5a,
-	0x66, 0x3b, 0xa7, 0x74, 0xca, 0xf8, 0x7f, 0xa8, 0x1c, 0x9a, 0x9e, 0xd9, 0xc5, 0x1e, 0xd3, 0x20,
-	0xa9, 0x3d, 0x4b, 0x1a, 0x4e, 0x2c, 0x50, 0xbb, 0xe6, 0x59, 0xf4, 0xf2, 0x5f, 0xa0, 0x7d, 0x72,
-	0x97, 0x17, 0x1b, 0x4d, 0xf2, 0xf3, 0xa3, 0x09, 0xbd, 0xc0, 0x43, 0x56, 0xb4, 0x90, 0xfd, 0x41,
-	0xe1, 0xdc, 0x99, 0xe1, 0x7d, 0xee, 0xac, 0x29, 0x1f, 0x62, 0xff, 0x8a, 0xf3, 0x9b, 0x72, 0xe1,
-	0x1a, 0x83, 0x03, 0xd1, 0x07, 0x50, 0x1a, 0x9a, 0x9e, 0xc9, 0x46, 0x94, 0x9c, 0x74, 0x71, 0x4b,
-	0x36, 0x30, 0x8a, 0x43, 0xbe, 0x40, 0xb7, 0xa0, 0xea, 0xe1, 0x29, 0xb1, 0xdd, 0xfe, 0x4b, 0xdb,
-	0x74, 0x87, 0xa2, 0xcc, 0x56, 0xf8, 0xde, 0x33, 0xba, 0xe5, 0x0b, 0x27, 0x24, 0xa1, 0xc2, 0x69,
-	0xb0, 0x45, 0x13, 0xc5, 0x3c, 0xc3, 0x43, 0x2a, 0xb2, 0x85, 0xfd, 0xd8, 0xd6, 0x0f, 0x61, 0x63,
-	0x0e, 0x42, 0x23, 0xf0, 0x3e, 0xb0, 0x18, 0xb7, 0x70, 0xd6, 0x3d, 0xef, 0xa3, 0xe8, 0x8f, 0x78,
-	0x89, 0xa4, 0x54, 0x18, 0x57, 0xb2, 0x9c, 0xf9, 0xf5, 0xa7, 0xbc, 0x16, 0xc9, 0xe7, 0x28, 0xf3,
-	0x3b, 0xb0, 0xca, 0x2c, 0xe3, 0xf3, 0x8e, 0xdb, 0x4d, 0x40, 0x75, 0x23, 0x14, 0x3e, 0x62, 0xf6,
-	0xb7, 0x08, 0x79, 0xfd, 0x53, 0x40, 0x31, 0x9a, 0x54, 0xa2, 0xa5, 0x1c, 0xa9, 0xff, 0x4b, 0x81,
-	0x1b, 0x5d, 0xb9, 0xb6, 0x06, 0x59, 0xf2, 0x13, 0xdd, 0x19, 0x72, 0x6d, 0xcc, 0x47, 0x6a, 0x23,
-	0x3a, 0x86, 0x4d, 0x89, 0x9a, 0x94, 0xc5, 0x3c, 0x31, 0x35, 0xee, 0xce, 0x79, 0x49, 0x0d, 0x49,
-	0x88, 0x50, 0x7c, 0xfd, 0x09, 0x5c, 0x4b, 0xd5, 0x4c, 0xb4, 0x65, 0x81, 0x24, 0x4a, 0xb4, 0x4a,
-	0x7f, 0x06, 0x37, 0x5a, 0x0b, 0x8d, 0x92, 0x76, 0x78, 0x02, 0xd7, 0x5a, 0x59, 0x7c, 0x53, 0xd5,
-	0x54, 0x2e, 0xa4, 0xe6, 0xcf, 0xe0, 0x56, 0x32, 0x3b, 0xa9, 0x41, 0xce, 0xea, 0x29, 0xbf, 0x57,
-	0x60, 0x2b, 0xe1, 0x34, 0x4d, 0xdc, 0x74, 0x25, 0x2f, 0xe2, 0xf9, 0x54, 0xbd, 0xf3, 0x17, 0xd2,
-	0xfb, 0x3b, 0xb8, 0x99, 0xa5, 0x37, 0xb5, 0xf4, 0x0b, 0xd8, 0x4e, 0xe2, 0x28, 0x5f, 0x4e, 0x57,
-	0xd3, 0xb8, 0xd2, 0x5b, 0xea, 0x0a, 0x49, 0xdc, 0x27, 0xfa, 0x1e, 0x6c, 0xb2, 0x61, 0x28, 0x00,
-	0x2f, 0x61, 0xe7, 0x4d, 0x58, 0x8f, 0x9f, 0xa1, 0x75, 0xee, 0x3f, 0x0a, 0xdc, 0xea, 0x62, 0x2f,
-	0xf9, 0x29, 0xed, 0x7f, 0xd7, 0xa6, 0xc4, 0x52, 0xf1, 0x05, 0x6c, 0xc7, 0x88, 0xce, 0xa5, 0x23,
-	0xb7, 0x5c, 0xb2, 0xdc, 0xc6, 0x15, 0x9c, 0xac, 0x8f, 0xfe, 0x39, 0xdc, 0xcc, 0xd2, 0x76, 0x41,
-	0x5e, 0xf2, 0x58, 0x5f, 0x6c, 0xab, 0xb4, 0xf3, 0x3c, 0x66, 0x32, 0xb9, 0x67, 0x6a, 0xae, 0xbc,
-	0x85, 0xe6, 0xfb, 0x70, 0x3b, 0x95, 0xf7, 0x92, 0xa9, 0xfa, 0x77, 0x05, 0xb6, 0x93, 0x09, 0x2c,
-	0xc8, 0xd6, 0x8b, 0xc7, 0x48, 0xa6, 0x39, 0xf2, 0x6f, 0x61, 0x8e, 0xdf, 0x2b, 0xa0, 0x2f, 0xb0,
-	0x07, 0x75, 0x87, 0x09, 0xd7, 0xd3, 0xf8, 0xcb, 0x69, 0x7c, 0x23, 0x43, 0x06, 0x9a, 0xc9, 0x0d,
-	0x9c, 0x06, 0x22, 0xf7, 0x9e, 0x43, 0x2d, 0xf2, 0x13, 0x02, 0x52, 0xa1, 0xfa, 0xbc, 0xf3, 0x65,
-	0xe7, 0xe4, 0x45, 0xa7, 0xdf, 0xfb, 0xf5, 0x69, 0x53, 0xbd, 0x84, 0x00, 0x56, 0x0f, 0x4f, 0x9e,
-	0x3f, 0x3b, 0x6a, 0xaa, 0x0a, 0x2a, 0x42, 0xbe, 0xdd, 0xe9, 0xa9, 0x39, 0x54, 0x85, 0xd2, 0x61,
-	0xbb, 0x7b, 0x60, 0x34, 0x7b, 0x4d, 0x35, 0x8f, 0xd6, 0xa0, 0x72, 0xb0, 0xdf, 0x6b, 0xb6, 0x4e,
-	0x8c, 0xf6, 0xc1, 0xfe, 0x91, 0xba, 0x72, 0xef, 0x97, 0xa0, 0xc6, 0x5f, 0xd6, 0x90, 0x06, 0x1b,
-	0x3e, 0xe5, 0x93, 0xd3, 0x5e, 0xfb, 0xb8, 0xfd, 0x9b, 0xfd, 0x5e, 0xfb, 0xa4, 0xa3, 0x5e, 0xa2,
-	0xc4, 0x8e, 0xdb, 0x1d, 0xba, 0x43, 0x79, 0xd0, 0xd5, 0xfe, 0x57, 0x7c, 0x95, 0xbb, 0xd7, 0x82,
-	0x02, 0x7b, 0x55, 0x44, 0x15, 0x28, 0x9e, 0x36, 0x3b, 0x87, 0xed, 0x4e, 0x4b, 0xbd, 0x44, 0x17,
-	0xc6, 0xf3, 0x4e, 0x87, 0x2e, 0x14, 0x54, 0x83, 0xf2, 0xc1, 0xc9, 0xf1, 0xe9, 0x51, 0xb3, 0xd7,
-	0x3c, 0x54, 0x73, 0x54, 0xde, 0x2f, 0xdb, 0x47, 0x47, 0xcd, 0x43, 0x35, 0x8f, 0xca, 0x50, 0x68,
-	0x1a, 0xc6, 0x89, 0xa1, 0x7e, 0xbb, 0xf7, 0xbb, 0x1a, 0x14, 0x8f, 0xcd, 0xa9, 0x39, 0xc2, 0x2e,
-	0x7a, 0x0a, 0x15, 0xe9, 0xb5, 0x08, 0x5d, 0x61, 0x06, 0x9c, 0x7f, 0x8a, 0x6a, 0x6c, 0xce, 0x03,
-	0xa8, 0x5f, 0x3e, 0x81, 0x72, 0xf0, 0x1c, 0x84, 0x36, 0x45, 0xa3, 0x15, 0x7d, 0x4d, 0x6a, 0xac,
-	0xc7, 0xb7, 0xe9, 0xc1, 0x87, 0x50, 0xf2, 0x9f, 0x6a, 0x10, 0x7f, 0x1b, 0x8b, 0x3d, 0x22, 0x35,
-	0x50, 0x6c, 0x97, 0x9e, 0xfa, 0x05, 0x54, 0xe5, 0x07, 0x1e, 0xa4, 0x45, 0x70, 0xa4, 0xf4, 0x69,
-	0x6c, 0x25, 0x40, 0x28, 0x85, 0x40, 0x5f, 0xfe, 0x3c, 0x2f, 0xeb, 0x2b, 0x3f, 0x8c, 0x44, 0xf4,
-	0x95, 0x9e, 0x25, 0x3e, 0x81, 0x72, 0xf0, 0xf2, 0x22, 0xf4, 0x8d, 0x3f, 0xdc, 0x08, 0x7d, 0x63,
-	0x0f, 0x34, 0x0f, 0xa1, 0xe4, 0x3f, 0x70, 0x08, 0x7d, 0x63, 0x4f, 0x31, 0x42, 0xdf, 0xe8, 0x2b,
-	0xc8, 0x53, 0xa8, 0x48, 0xd3, 0xa1, 0x90, 0x76, 0x7e, 0x7c, 0x6d, 0x6c, 0xce, 0x03, 0xe8, 0xf1,
-	0x4f, 0x01, 0xc2, 0xa7, 0x03, 0x14, 0x98, 0x24, 0x76, 0x78, 0x63, 0x6e, 0x9f, 0x9e, 0xfd, 0x82,
-	0xbd, 0x31, 0x49, 0xc3, 0x36, 0x6a, 0x04, 0x26, 0x9d, 0x7b, 0x50, 0x68, 0x68, 0x89, 0x30, 0x4a,
-	0xe7, 0x2b, 0xde, 0xe9, 0xc6, 0x27, 0x5d, 0xb4, 0x13, 0x9c, 0x48, 0x99, 0xc9, 0x1b, 0x37, 0x32,
-	0x30, 0x42, 0xed, 0xfc, 0x1f, 0xcb, 0x02, 0xed, 0xa2, 0x23, 0x70, 0xa8, 0x5d, 0x64, 0x4c, 0x35,
-	0xe1, 0x4a, 0x4a, 0x53, 0x88, 0xde, 0xe1, 0xb6, 0xcc, 0xec, 0xfb, 0x1a, 0xb7, 0xb2, 0x91, 0x04,
-	0x8b, 0x56, 0x26, 0x8b, 0xd6, 0x32, 0x2c, 0x32, 0x5b, 0xc8, 0xaf, 0xa1, 0x91, 0xde, 0xfb, 0xa0,
-	0x3b, 0x19, 0x04, 0xe4, 0x54, 0xb9, 0xbd, 0x10, 0x4f, 0xf0, 0x4a, 0xbf, 0xb1, 0x05, 0xaf, 0x85,
-	0x0d, 0x8c, 0xe0, 0xb5, 0xe8, 0xea, 0xe7, 0x7a, 0x65, 0xf3, 0x6a, 0x2d, 0xc9, 0x6b, 0xd1, 0x45,
-	0x4f, 0xe0, 0x7a, 0xe6, 0xfd, 0x83, 0xde, 0xcf, 0x26, 0x23, 0x5b, 0xf2, 0xbd, 0x65, 0x50, 0xfd,
-	0xb2, 0xe9, 0x0f, 0xe1, 0x7e, 0xd9, 0x8c, 0xcd, 0xff, 0x7e, 0xd9, 0x8c, 0xcc, 0xea, 0xfe, 0x41,
-	0x36, 0xbf, 0x49, 0x07, 0xe5, 0x19, 0x52, 0x3a, 0x28, 0x8d, 0x81, 0x6d, 0xfe, 0x4a, 0x2f, 0x4d,
-	0xcb, 0xe8, 0x6a, 0xe0, 0xf7, 0xf9, 0xe9, 0xba, 0xb1, 0x9d, 0x0c, 0x94, 0x2a, 0x43, 0x38, 0xfa,
-	0x4a, 0x95, 0x61, 0x6e, 0x8e, 0x96, 0x2a, 0x43, 0x6c, 0x56, 0xde, 0xeb, 0x01, 0x84, 0x11, 0xf7,
-	0x63, 0xd5, 0x9b, 0x3d, 0x0b, 0x6a, 0x11, 0xeb, 0xff, 0x74, 0x05, 0xe8, 0xe5, 0x2a, 0xfb, 0x63,
-	0xc6, 0x83, 0xff, 0x06, 0x00, 0x00, 0xff, 0xff, 0xbc, 0x6d, 0xfe, 0xa2, 0xa5, 0x21, 0x00, 0x00,
+	// 2858 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x5a, 0x49, 0x73, 0x1b, 0xc7,
+	0xf5, 0xf7, 0x00, 0xdc, 0xf0, 0x40, 0x82, 0x60, 0x73, 0x1b, 0x82, 0x22, 0x45, 0xb6, 0x64, 0x49,
+	0x96, 0x2c, 0xd2, 0x86, 0xbc, 0xca, 0xf2, 0xdf, 0x25, 0x91, 0x34, 0xff, 0x28, 0x93, 0x20, 0x6b,
+	0x08, 0x85, 0x5e, 0xaa, 0x8c, 0x1a, 0x12, 0x4d, 0x78, 0x6c, 0x00, 0x83, 0x60, 0x86, 0x92, 0x29,
+	0x97, 0x2f, 0xb9, 0x24, 0x97, 0x54, 0x39, 0x49, 0xe5, 0x92, 0x83, 0x8f, 0xf9, 0x00, 0xa9, 0xca,
+	0x21, 0x97, 0xdc, 0x73, 0xc8, 0x29, 0x95, 0xaa, 0x7c, 0x80, 0xdc, 0x9c, 0x0f, 0x91, 0xea, 0xd7,
+	0x3d, 0x33, 0x3d, 0x83, 0x99, 0x01, 0x4c, 0x59, 0xb9, 0x4d, 0x77, 0xbf, 0xe5, 0xf7, 0x96, 0x7e,
+	0xdd, 0xfd, 0x00, 0xc8, 0x99, 0x5d, 0x6b, 0xa3, 0xdb, 0xb3, 0x5d, 0x9b, 0x64, 0xcd, 0xae, 0x55,
+	0xba, 0xd2, 0xb4, 0xed, 0x66, 0x8b, 0x6d, 0x9a, 0x5d, 0x6b, 0xd3, 0xec, 0x74, 0x6c, 0xd7, 0x74,
+	0x2d, 0xbb, 0xe3, 0x08, 0x12, 0xba, 0x0b, 0x53, 0x1f, 0x32, 0xd3, 0xb1, 0x4e, 0x5a, 0xec, 0xa8,
+	0x6b, 0x9e, 0x32, 0x52, 0x84, 0x6c, 0xdb, 0xfc, 0x5a, 0xd7, 0xd6, 0xb4, 0x5b, 0x39, 0x83, 0x7f,
+	0xe2, 0x8c, 0xd5, 0xd1, 0x33, 0x72, 0xc6, 0xea, 0x10, 0x02, 0x23, 0x2d, 0xcb, 0x71, 0xf5, 0xec,
+	0x5a, 0xf6, 0x56, 0xce, 0xc0, 0x6f, 0xfa, 0x9d, 0x06, 0xd3, 0x87, 0x66, 0xcf, 0x6c, 0x33, 0x97,
+	0xf5, 0xb6, 0xec, 0xce, 0x99, 0xd5, 0xe4, 0x74, 0x1d, 0xb3, 0xcd, 0xa4, 0x30, 0xfc, 0x26, 0xef,
+	0x42, 0xa1, 0xeb, 0x91, 0xd5, 0xdd, 0x8b, 0x2e, 0x43, 0xc1, 0x85, 0x32, 0xd9, 0xe0, 0xb8, 0x7d,
+	0x09, 0xb5, 0x8b, 0x2e, 0x33, 0xa6, 0xba, 0xea, 0x90, 0x6c, 0xc0, 0xc4, 0x99, 0xc4, 0xaa, 0x67,
+	0xd7, 0xb4, 0x5b, 0x79, 0xc9, 0x14, 0x32, 0xc0, 0xf0, 0x69, 0x68, 0x17, 0x72, 0xbe, 0xbc, 0x9f,
+	0x1a, 0xcb, 0x1c, 0x8c, 0x3e, 0x31, 0x5b, 0xe7, 0x02, 0x48, 0xce, 0x10, 0x03, 0xfa, 0x1b, 0x0d,
+	0xa6, 0xf6, 0x99, 0xdb, 0xb3, 0x4e, 0x9d, 0x3d, 0xbb, 0x79, 0xc4, 0x5c, 0xb2, 0x0c, 0xb9, 0xa7,
+	0x76, 0xef, 0x2b, 0xd6, 0xab, 0x5b, 0x0d, 0xa9, 0x7b, 0x42, 0x4c, 0x54, 0x1a, 0xa4, 0x0c, 0x93,
+	0x6d, 0x41, 0x5d, 0x6f, 0xd9, 0x4d, 0x47, 0xcf, 0xac, 0x65, 0x6f, 0xe5, 0xcb, 0xd3, 0xa8, 0x3d,
+	0x10, 0x63, 0xe4, 0xdb, 0xfe, 0xb7, 0x43, 0x36, 0x61, 0x4a, 0x0a, 0x74, 0x5c, 0xd3, 0x3d, 0x77,
+	0x10, 0x40, 0xa1, 0x0c, 0xc8, 0x74, 0xe4, 0x9a, 0x2e, 0x33, 0x26, 0x05, 0xc1, 0x11, 0xae, 0xd3,
+	0x7b, 0x30, 0x2e, 0x65, 0xc5, 0xfa, 0xc0, 0x37, 0x24, 0xa3, 0x1a, 0xf2, 0x00, 0x8a, 0x92, 0xe9,
+	0x67, 0x7c, 0x5c, 0xb3, 0xda, 0x8c, 0x73, 0xbb, 0x56, 0xc0, 0xcd, 0xbf, 0x13, 0xb8, 0x0f, 0x00,
+	0x02, 0xf8, 0xb1, 0x5a, 0xef, 0xc2, 0x18, 0x92, 0x7a, 0x36, 0xcf, 0xab, 0x36, 0xfb, 0x2a, 0x0d,
+	0x49, 0x44, 0x3f, 0x80, 0xd9, 0xa3, 0xf3, 0x66, 0x93, 0x39, 0x3c, 0x75, 0xd3, 0x63, 0x1a, 0x8f,
+	0xe8, 0x11, 0x2c, 0xec, 0x98, 0xbd, 0xd6, 0xc5, 0x91, 0x6b, 0x77, 0xbb, 0x56, 0xa7, 0x79, 0x19,
+	0x19, 0x9b, 0x90, 0xad, 0x99, 0xcd, 0x1f, 0xc1, 0xf0, 0x15, 0x4c, 0x1d, 0xb9, 0xe7, 0x8d, 0x8b,
+	0x83, 0x27, 0xac, 0xf7, 0xc4, 0x62, 0x4f, 0x93, 0x58, 0xed, 0xa7, 0x1d, 0xd6, 0xf3, 0x58, 0x71,
+	0x40, 0x0a, 0x90, 0xb1, 0x1a, 0x32, 0xb7, 0x32, 0x56, 0x83, 0xac, 0x41, 0xbe, 0xc1, 0x9c, 0xd3,
+	0x9e, 0xd5, 0xe5, 0x1e, 0xd0, 0x47, 0x70, 0x41, 0x9d, 0xa2, 0x7f, 0xd1, 0x60, 0xb4, 0xd6, 0xb3,
+	0xcc, 0x16, 0x59, 0x82, 0x09, 0x97, 0x7f, 0x04, 0x19, 0x37, 0x8e, 0xe3, 0x4a, 0x83, 0x2f, 0x39,
+	0x1c, 0x11, 0x5f, 0x12, 0xfa, 0xc6, 0x71, 0x5c, 0x69, 0x90, 0x7b, 0x10, 0x64, 0x78, 0xdd, 0x61,
+	0x62, 0x73, 0xe7, 0xcb, 0x85, 0xf0, 0x56, 0x30, 0x26, 0x7d, 0x22, 0x9e, 0xdd, 0x37, 0x61, 0xda,
+	0x3e, 0xf9, 0x92, 0x9d, 0xba, 0xd6, 0x13, 0x56, 0x17, 0x1e, 0x10, 0xd0, 0x0a, 0xfe, 0x34, 0x06,
+	0x93, 0x5c, 0x81, 0x11, 0xd7, 0x6c, 0x3a, 0xfa, 0x28, 0x0a, 0x9d, 0x40, 0xa1, 0x35, 0xb3, 0x69,
+	0xe0, 0x2c, 0xfd, 0xa7, 0x06, 0x63, 0xc7, 0x98, 0xb3, 0xe9, 0xfb, 0x25, 0x05, 0xbe, 0x6a, 0x74,
+	0x36, 0x6c, 0x34, 0x81, 0x11, 0xbe, 0x65, 0x25, 0x32, 0xfc, 0x26, 0x14, 0xc6, 0xe4, 0xf6, 0x19,
+	0xed, 0xdb, 0x3e, 0x72, 0x85, 0x50, 0x98, 0xac, 0xb1, 0x76, 0xb7, 0x65, 0xba, 0xec, 0xd0, 0x74,
+	0xbf, 0xd0, 0xc7, 0x90, 0x3f, 0x34, 0xe7, 0xdb, 0x35, 0x1e, 0x6b, 0xd7, 0x0f, 0x59, 0xc8, 0x63,
+	0x06, 0xa4, 0xd4, 0xc3, 0xf8, 0xf8, 0x3f, 0x82, 0x19, 0xbb, 0xeb, 0x5a, 0x6d, 0xeb, 0x19, 0x56,
+	0x6b, 0x51, 0x9c, 0xc4, 0x4e, 0x17, 0x5b, 0xe5, 0x40, 0x59, 0xc5, 0xfa, 0x54, 0xb4, 0x23, 0x33,
+	0xe4, 0x4e, 0x44, 0x46, 0xd3, 0x36, 0x5b, 0xe8, 0x04, 0x2d, 0x4c, 0xbc, 0x6b, 0x9b, 0x2d, 0x52,
+	0x85, 0x99, 0x20, 0xfc, 0xa7, 0x08, 0x57, 0xf8, 0x26, 0x5f, 0x5e, 0x97, 0xbe, 0xf1, 0xed, 0xd8,
+	0x88, 0xd4, 0x79, 0xc7, 0x28, 0x76, 0x23, 0x33, 0xe4, 0x2e, 0x10, 0xf3, 0xf4, 0x94, 0x39, 0x4e,
+	0xbd, 0xcb, 0x7a, 0x6d, 0xcb, 0x71, 0xf8, 0x99, 0xa3, 0x8f, 0xe1, 0x81, 0x31, 0x23, 0x56, 0x0e,
+	0x83, 0x85, 0x74, 0x3f, 0x92, 0xd7, 0x60, 0x2e, 0x92, 0x66, 0x75, 0xf4, 0xe3, 0x04, 0xba, 0x8c,
+	0x84, 0x73, 0xad, 0xca, 0xbd, 0xaa, 0xc3, 0xb8, 0x2c, 0x9a, 0x7a, 0x0e, 0x75, 0x7a, 0x43, 0xee,
+	0xef, 0x2f, 0xed, 0x93, 0x4a, 0x43, 0x07, 0xe1, 0x6f, 0x1c, 0x94, 0x1e, 0x41, 0x31, 0x6a, 0x14,
+	0xd9, 0x80, 0x71, 0xcf, 0x11, 0x1a, 0xc2, 0x9a, 0x0b, 0xef, 0x05, 0x41, 0x67, 0x78, 0x44, 0xb4,
+	0x02, 0x64, 0xab, 0xc7, 0x4c, 0x97, 0xa1, 0xab, 0x0c, 0xf6, 0xf3, 0x73, 0xe6, 0xb8, 0xe4, 0x1e,
+	0x4c, 0x8a, 0x9c, 0x15, 0x64, 0x18, 0xfb, 0x7c, 0xb9, 0x18, 0xf5, 0xa9, 0x91, 0x77, 0x82, 0x01,
+	0xbd, 0x0b, 0xc5, 0x90, 0xa8, 0x6e, 0xeb, 0x22, 0x94, 0xfc, 0x5a, 0x28, 0xf9, 0xe9, 0x26, 0x90,
+	0x6d, 0xd6, 0x62, 0x11, 0xcd, 0x29, 0x0c, 0x77, 0xa1, 0x18, 0x62, 0x18, 0x20, 0xff, 0x55, 0x98,
+	0xde, 0x65, 0xee, 0xb0, 0xc2, 0xb7, 0x61, 0x2a, 0xa0, 0xe6, 0x92, 0x2f, 0xe5, 0x82, 0x79, 0x98,
+	0xf5, 0xa4, 0xec, 0x59, 0x8e, 0x2b, 0xf5, 0xd2, 0x43, 0x98, 0x09, 0x4f, 0x73, 0x05, 0xef, 0xc1,
+	0xb4, 0x50, 0x60, 0xcb, 0x4a, 0xeb, 0x45, 0x8c, 0x04, 0x3a, 0xbc, 0x22, 0x6c, 0x14, 0x1c, 0x75,
+	0xe8, 0xd0, 0xb7, 0xbc, 0xb0, 0x61, 0xf5, 0xf4, 0xec, 0x5b, 0x83, 0x51, 0xac, 0x1f, 0x12, 0xac,
+	0xa8, 0x0f, 0x82, 0x42, 0x2c, 0x04, 0x31, 0x92, 0x7c, 0xd2, 0x87, 0x09, 0xa5, 0x97, 0x93, 0xef,
+	0x32, 0x17, 0x69, 0x9d, 0x21, 0x9c, 0xf8, 0x06, 0x14, 0x14, 0x72, 0x2e, 0x9b, 0xc2, 0x18, 0xca,
+	0xf2, 0x6c, 0x53, 0x21, 0xc9, 0x15, 0x19, 0xa8, 0x90, 0x21, 0x29, 0x90, 0x5e, 0xc7, 0x40, 0x29,
+	0xf0, 0x07, 0x1b, 0xfd, 0x00, 0xe6, 0x0d, 0xd6, 0xb4, 0x1c, 0x97, 0xf5, 0x44, 0xc1, 0xf6, 0xd4,
+	0x5c, 0x83, 0x31, 0x51, 0xa6, 0x25, 0x6f, 0x1e, 0x79, 0x25, 0x8d, 0x5c, 0xa2, 0x65, 0x98, 0x8d,
+	0x72, 0x73, 0xb5, 0x69, 0x35, 0x9f, 0xda, 0x40, 0xf8, 0xa1, 0x2d, 0xe8, 0x87, 0xf0, 0x1c, 0x59,
+	0x01, 0xf0, 0xa5, 0x89, 0xeb, 0x45, 0xce, 0xc8, 0x79, 0xe2, 0x1c, 0x72, 0x15, 0xf2, 0x96, 0x53,
+	0x3f, 0xb5, 0xdb, 0x5d, 0x9e, 0xff, 0x58, 0x53, 0x27, 0x0c, 0xb0, 0x9c, 0x2d, 0x39, 0x43, 0x09,
+	0x14, 0x43, 0x0a, 0xbb, 0xad, 0x0b, 0x7a, 0x86, 0x59, 0x37, 0x3c, 0x06, 0xd5, 0xe9, 0x99, 0xf0,
+	0x69, 0x14, 0x32, 0x36, 0x1b, 0x31, 0xf6, 0x1d, 0x8c, 0x9f, 0xaa, 0x9a, 0xbc, 0x0c, 0xe3, 0x62,
+	0xd9, 0x8b, 0x7b, 0xc8, 0xb3, 0xde, 0x1a, 0xfd, 0x0c, 0xf4, 0xc7, 0xdd, 0x86, 0xe9, 0xb2, 0x63,
+	0xff, 0xee, 0xc7, 0x3c, 0xa0, 0xa9, 0x67, 0x6a, 0x70, 0x12, 0x66, 0x92, 0x4e, 0x42, 0xaa, 0xc3,
+	0x42, 0x8c, 0x70, 0xee, 0x98, 0xdf, 0x6b, 0xa0, 0xfb, 0x88, 0x3f, 0x3c, 0x6f, 0xb5, 0x2a, 0x9d,
+	0x33, 0xfb, 0xc5, 0x39, 0x88, 0xdc, 0x80, 0x69, 0xbb, 0xd3, 0xba, 0xa8, 0xf3, 0x03, 0xd8, 0x71,
+	0xf9, 0xad, 0x19, 0x4f, 0xb4, 0x09, 0x63, 0x8a, 0x4f, 0xef, 0xe1, 0xec, 0x9e, 0xdd, 0xa4, 0xdf,
+	0x6b, 0x50, 0x08, 0x83, 0xe2, 0x19, 0x7a, 0x9c, 0x9c, 0xa1, 0xf2, 0xfa, 0xd1, 0x77, 0x0b, 0xca,
+	0x0c, 0x71, 0x0b, 0x8a, 0x5e, 0xe3, 0xb3, 0x83, 0xaf, 0xf1, 0xf4, 0x13, 0x58, 0x88, 0xf1, 0x1b,
+	0x0f, 0xf8, 0x07, 0x30, 0x23, 0xed, 0x3f, 0x3b, 0x6f, 0xb5, 0xea, 0x56, 0xe7, 0xcc, 0xf6, 0x42,
+	0x3f, 0xab, 0x40, 0xf6, 0x99, 0xa6, 0x9f, 0x86, 0xc6, 0x0e, 0xfd, 0xbb, 0x06, 0xf3, 0xbc, 0x46,
+	0xfa, 0x17, 0xe6, 0x61, 0x32, 0xf6, 0x75, 0x98, 0x73, 0x7c, 0x86, 0xba, 0xd9, 0x6a, 0xda, 0x3d,
+	0xcb, 0xfd, 0xa2, 0x2d, 0x83, 0x33, 0x1b, 0xac, 0x3d, 0xf4, 0x96, 0xc8, 0xcb, 0x50, 0xe8, 0x09,
+	0xc1, 0xf5, 0xce, 0x79, 0xfb, 0x84, 0xf5, 0x30, 0x5a, 0xa3, 0xc6, 0x94, 0x9c, 0xad, 0xe2, 0x24,
+	0xb9, 0x0e, 0x85, 0x96, 0xdd, 0xac, 0x2b, 0x7b, 0x72, 0x04, 0xf7, 0xe4, 0x64, 0xcb, 0x6e, 0x1e,
+	0xfb, 0xdb, 0x72, 0x09, 0x26, 0xd0, 0xa7, 0x1c, 0xda, 0xa8, 0x80, 0x86, 0xe3, 0x4a, 0x83, 0xbe,
+	0x2b, 0x4e, 0x02, 0xd5, 0x9c, 0x61, 0xeb, 0xe1, 0xaf, 0x35, 0x58, 0xe6, 0xbc, 0x5f, 0xd8, 0xe7,
+	0xad, 0xc6, 0x8f, 0x2b, 0x23, 0xef, 0x80, 0xce, 0xf8, 0x8b, 0xa1, 0xee, 0xc8, 0x27, 0x43, 0x9f,
+	0x53, 0x16, 0x98, 0xfa, 0xa2, 0x08, 0xfc, 0x92, 0x62, 0xca, 0x21, 0x2c, 0xc5, 0xc3, 0x11, 0xc7,
+	0xe4, 0x82, 0x83, 0x2b, 0xa8, 0x52, 0x75, 0x98, 0x86, 0x0e, 0x9b, 0x75, 0x22, 0x7c, 0x95, 0x86,
+	0x43, 0x7b, 0x58, 0x99, 0x64, 0x96, 0x3d, 0x7f, 0x75, 0xbc, 0x06, 0x53, 0x5e, 0x2a, 0xf3, 0x1b,
+	0x96, 0x23, 0x9f, 0xf8, 0x5e, 0x7e, 0xf3, 0xbb, 0x95, 0x43, 0x0f, 0xb0, 0x4a, 0xf9, 0x3a, 0x39,
+	0xf6, 0x07, 0x50, 0x54, 0xb6, 0x00, 0xdf, 0x39, 0xe1, 0x23, 0x38, 0xf4, 0x28, 0x36, 0x0a, 0x6d,
+	0x75, 0xe8, 0x50, 0x07, 0x74, 0x83, 0x75, 0xed, 0x9e, 0x1b, 0x90, 0x0d, 0x63, 0x4b, 0x9c, 0xd2,
+	0xec, 0xd0, 0x4a, 0x75, 0x58, 0x88, 0x51, 0xca, 0x8b, 0xda, 0x5f, 0x35, 0xc8, 0xed, 0xdb, 0x0d,
+	0x26, 0xea, 0xc6, 0x0a, 0x80, 0x00, 0xa0, 0x5c, 0xdd, 0x73, 0x38, 0x83, 0x37, 0xcd, 0x50, 0xb9,
+	0xca, 0x44, 0xca, 0xd5, 0x06, 0x80, 0x5f, 0x29, 0x9c, 0x84, 0x17, 0x95, 0x42, 0x41, 0x6e, 0x04,
+	0xd7, 0xd6, 0x11, 0x24, 0x9e, 0x54, 0x0d, 0x09, 0x2e, 0xb1, 0x2b, 0x00, 0x6d, 0x0e, 0xb0, 0xde,
+	0xe5, 0x0f, 0x13, 0x91, 0x64, 0x39, 0x9c, 0xe1, 0xaf, 0x12, 0xfa, 0x26, 0xe4, 0xb7, 0x4d, 0xd7,
+	0x3c, 0x62, 0x2e, 0x5a, 0x10, 0xf7, 0xec, 0x20, 0x30, 0x82, 0xbc, 0x02, 0x31, 0x7e, 0x53, 0x0b,
+	0x8a, 0x47, 0xe6, 0x93, 0xf0, 0x25, 0x72, 0x80, 0xf5, 0xf1, 0xaf, 0x97, 0xc8, 0x6b, 0x35, 0xdb,
+	0xff, 0x5a, 0x2d, 0x42, 0x41, 0x51, 0xc5, 0x9d, 0xfe, 0x2b, 0x4d, 0x68, 0x47, 0xc7, 0x7b, 0xda,
+	0xaf, 0xc3, 0x28, 0x5a, 0x25, 0x4b, 0xb6, 0x70, 0x9d, 0x1f, 0x1a, 0x43, 0x2c, 0x92, 0x3b, 0x30,
+	0xd1, 0x30, 0x5d, 0x53, 0xd6, 0xeb, 0xe0, 0x6e, 0xa9, 0xf8, 0xc0, 0x18, 0x6f, 0x88, 0x01, 0x59,
+	0x87, 0x49, 0x97, 0x75, 0x1c, 0xbb, 0x57, 0x3f, 0xb1, 0xcd, 0x5e, 0x43, 0x5e, 0x00, 0xf2, 0x62,
+	0xee, 0x11, 0x9f, 0xf2, 0xc0, 0x49, 0x24, 0x1c, 0x9c, 0x8e, 0xd5, 0x9a, 0x4f, 0x36, 0x38, 0x64,
+	0x8b, 0x79, 0xe9, 0x49, 0xb7, 0x61, 0xae, 0x6f, 0x85, 0x6f, 0x88, 0x57, 0x01, 0xd3, 0xd4, 0x62,
+	0x69, 0x57, 0x51, 0x8f, 0x84, 0xbe, 0x25, 0x2a, 0x36, 0x97, 0x82, 0x5a, 0x9d, 0xe1, 0xdc, 0x4f,
+	0xdf, 0x17, 0xa5, 0x51, 0xe5, 0xe3, 0xca, 0x6f, 0xc0, 0x18, 0x7a, 0xc6, 0xd3, 0x1d, 0xf5, 0x9b,
+	0x5c, 0xa5, 0x46, 0x00, 0x3e, 0xe4, 0xf6, 0xe7, 0x48, 0x79, 0x7a, 0x1f, 0x48, 0x44, 0x26, 0x47,
+	0x34, 0x54, 0x20, 0xe9, 0xbf, 0x34, 0x58, 0x3d, 0x52, 0x4b, 0xbd, 0xbf, 0x4b, 0x5e, 0xd0, 0x11,
+	0xa6, 0x96, 0xea, 0x6c, 0xa8, 0x54, 0x93, 0x7d, 0x98, 0x57, 0xa4, 0x29, 0xbb, 0x58, 0x6c, 0x4c,
+	0x5d, 0x84, 0xb3, 0x1f, 0xa9, 0xa1, 0x80, 0x08, 0xe0, 0xd3, 0x77, 0xe1, 0x4a, 0xa2, 0x65, 0xf2,
+	0xe5, 0xe0, 0x23, 0xd1, 0xc2, 0x87, 0xc6, 0x7b, 0xb0, 0xba, 0x3b, 0xd0, 0x29, 0x49, 0xcc, 0x6d,
+	0xb8, 0xb2, 0x9b, 0xa6, 0x37, 0xd1, 0x4c, 0xed, 0x52, 0x66, 0xfe, 0x1f, 0xac, 0xc7, 0xab, 0x53,
+	0xde, 0x70, 0x69, 0xcf, 0x9e, 0x3f, 0x6b, 0xb0, 0x10, 0xc3, 0xcd, 0x37, 0x6e, 0xb2, 0x91, 0x97,
+	0x89, 0x7c, 0xa2, 0xdd, 0xd9, 0x4b, 0xd9, 0xfd, 0x0c, 0xae, 0xa6, 0xd9, 0xcd, 0x3d, 0x7d, 0x0c,
+	0x4b, 0x71, 0x1a, 0xd5, 0xb3, 0x72, 0x39, 0x49, 0x2b, 0x3f, 0xbf, 0x16, 0x9d, 0xd8, 0x79, 0x87,
+	0x96, 0x61, 0x9e, 0xdf, 0x09, 0x02, 0xb6, 0x21, 0xfc, 0x3c, 0x0f, 0xb3, 0x51, 0x1e, 0x5e, 0xe7,
+	0xfe, 0xa3, 0xc1, 0xfa, 0x11, 0x73, 0xe3, 0x5b, 0xa5, 0xff, 0xbb, 0x5b, 0x53, 0x64, 0x2b, 0x1e,
+	0xc3, 0x52, 0x44, 0x68, 0xdf, 0x76, 0x14, 0x9e, 0x8b, 0xc7, 0x6d, 0x2c, 0xb2, 0x78, 0x7b, 0xe8,
+	0x03, 0xb8, 0x9a, 0x66, 0xed, 0x80, 0x7d, 0x29, 0x72, 0x7d, 0xb0, 0xaf, 0x92, 0xf8, 0x45, 0xce,
+	0xa4, 0x6a, 0x4f, 0xb5, 0x5c, 0x7b, 0x0e, 0xcb, 0x1f, 0xc2, 0xf5, 0x44, 0xdd, 0x43, 0x6e, 0xd5,
+	0xbf, 0x69, 0xb0, 0x14, 0x2f, 0x60, 0xc0, 0x6e, 0xbd, 0x7c, 0x8e, 0xa4, 0xba, 0x23, 0xfb, 0x1c,
+	0xee, 0xf8, 0xa5, 0x06, 0x74, 0x80, 0x3f, 0x78, 0x38, 0x4c, 0x58, 0x49, 0xd2, 0xaf, 0x6e, 0xe3,
+	0xd5, 0x14, 0x0c, 0x7c, 0x27, 0x97, 0x58, 0xd2, 0x92, 0x73, 0xfb, 0x31, 0x4c, 0x85, 0x7e, 0x77,
+	0x22, 0x45, 0x98, 0x7c, 0x5c, 0xfd, 0xa8, 0x7a, 0x70, 0x5c, 0xad, 0xd7, 0x3e, 0x39, 0xdc, 0x29,
+	0xbe, 0x44, 0x00, 0xc6, 0xb6, 0x0f, 0x1e, 0x3f, 0xda, 0xdb, 0x29, 0x6a, 0x64, 0x1c, 0xb2, 0x95,
+	0x6a, 0xad, 0x98, 0x21, 0x93, 0x30, 0xb1, 0x5d, 0x39, 0xda, 0x32, 0x76, 0x6a, 0x3b, 0xc5, 0x2c,
+	0x99, 0x86, 0xfc, 0xd6, 0xc3, 0xda, 0xce, 0xee, 0x81, 0x51, 0xd9, 0x7a, 0xb8, 0x57, 0x1c, 0xb9,
+	0xfd, 0xff, 0x50, 0x8c, 0x76, 0x8c, 0x89, 0x0e, 0x73, 0x9e, 0xe4, 0x83, 0xc3, 0x5a, 0x65, 0xbf,
+	0xf2, 0xe9, 0xc3, 0x5a, 0xe5, 0xa0, 0x5a, 0x7c, 0x89, 0x0b, 0xdb, 0xaf, 0x54, 0xf9, 0x0c, 0xd7,
+	0xc1, 0x47, 0x0f, 0x3f, 0x16, 0xa3, 0xcc, 0xed, 0x5d, 0x18, 0xc5, 0xf7, 0x3f, 0xc9, 0xc3, 0xf8,
+	0xe1, 0x4e, 0x75, 0xbb, 0x52, 0xdd, 0x2d, 0xbe, 0xc4, 0x07, 0xc6, 0xe3, 0x6a, 0x95, 0x0f, 0x34,
+	0x32, 0x05, 0xb9, 0xad, 0x83, 0xfd, 0xc3, 0xbd, 0x9d, 0xda, 0xce, 0x76, 0x31, 0xc3, 0xf1, 0x7e,
+	0x54, 0xd9, 0xdb, 0xdb, 0xd9, 0x2e, 0x66, 0x49, 0x0e, 0x46, 0x77, 0x0c, 0xe3, 0xc0, 0x28, 0x7e,
+	0x5d, 0xfe, 0x61, 0x11, 0xc6, 0xf7, 0xcd, 0x8e, 0xd9, 0x64, 0x3d, 0xd2, 0x86, 0xbc, 0xd2, 0xef,
+	0x24, 0x8b, 0xe8, 0xc0, 0xfe, 0x66, 0x6a, 0x69, 0xbe, 0x7f, 0x81, 0x97, 0xad, 0x8d, 0x5f, 0xfc,
+	0xe3, 0xdf, 0xbf, 0xcb, 0xdc, 0xa2, 0x3a, 0xfe, 0xc8, 0x29, 0x85, 0x6e, 0x2a, 0x64, 0xf7, 0x43,
+	0x0d, 0x48, 0xf2, 0x39, 0x4c, 0x78, 0x4d, 0x44, 0x22, 0x9a, 0xba, 0x91, 0xf6, 0x66, 0x89, 0x44,
+	0x66, 0xb9, 0x96, 0x5b, 0xa8, 0x85, 0x92, 0xb5, 0x90, 0x16, 0x8f, 0x66, 0xf3, 0x1b, 0x6f, 0xa3,
+	0x7c, 0x4b, 0xbe, 0x84, 0xbc, 0xd2, 0x5e, 0x95, 0xe6, 0xf4, 0x77, 0x68, 0xa5, 0x39, 0xd1, 0x4e,
+	0x2c, 0xbd, 0x83, 0x8a, 0x5e, 0x26, 0xd7, 0x42, 0x8a, 0x14, 0x32, 0x55, 0xd7, 0x29, 0x4c, 0xaa,
+	0x0d, 0x51, 0xa2, 0x87, 0x90, 0x2b, 0x7b, 0xb9, 0xb4, 0x10, 0xb3, 0xc2, 0xd5, 0xad, 0xa3, 0xba,
+	0x65, 0xb2, 0x14, 0x6b, 0x17, 0x0a, 0x3d, 0xf3, 0xe2, 0x23, 0x7e, 0x61, 0x52, 0xe3, 0xa3, 0x36,
+	0x1b, 0x43, 0xf1, 0x09, 0xfa, 0x8a, 0xf4, 0x26, 0x6a, 0x58, 0x8f, 0x8d, 0x0f, 0x92, 0xdd, 0x17,
+	0xed, 0x45, 0x72, 0x02, 0x39, 0xbf, 0xeb, 0x49, 0xe6, 0x3d, 0xbc, 0xa1, 0xa6, 0x69, 0x69, 0x36,
+	0x3a, 0xcd, 0x35, 0xbc, 0x82, 0x1a, 0xae, 0x91, 0xf5, 0xa8, 0x0d, 0x82, 0x48, 0x75, 0x98, 0x08,
+	0xbe, 0x30, 0x64, 0x2e, 0x24, 0xab, 0x2f, 0xf8, 0x8a, 0x09, 0x89, 0xc1, 0x47, 0x9a, 0xcd, 0x6f,
+	0xbc, 0x6e, 0xd6, 0xb7, 0xc4, 0x81, 0x42, 0xb8, 0xc9, 0x49, 0x4a, 0x28, 0x2f, 0xb6, 0x6f, 0x5a,
+	0xd2, 0x63, 0xd7, 0x94, 0x2c, 0xa0, 0xcb, 0x21, 0x8d, 0x61, 0xca, 0xfb, 0xb2, 0xb3, 0x4a, 0x3e,
+	0x03, 0x08, 0x1a, 0x87, 0xc4, 0x8f, 0x74, 0xb8, 0xdd, 0x51, 0x9a, 0xeb, 0x9b, 0xe7, 0x8a, 0xae,
+	0xa2, 0xa2, 0x25, 0xb2, 0x18, 0x35, 0xcd, 0x13, 0xf7, 0x0c, 0x66, 0xfa, 0xda, 0x7f, 0x64, 0x05,
+	0x65, 0x25, 0xf5, 0x1c, 0x4b, 0xcb, 0x49, 0xcb, 0x4a, 0xb4, 0x4a, 0xab, 0x21, 0x8d, 0x7d, 0xc4,
+	0xf7, 0xb5, 0xdb, 0xe4, 0xa9, 0xd2, 0x79, 0xf5, 0x5b, 0x79, 0x2b, 0x61, 0x3b, 0x22, 0x7d, 0x47,
+	0xa9, 0x3b, 0xbe, 0xbd, 0x46, 0x6f, 0xa0, 0xee, 0x35, 0xb2, 0x1a, 0x6f, 0xad, 0xaf, 0xa3, 0x83,
+	0x0d, 0x78, 0xa5, 0xeb, 0x24, 0xc3, 0x18, 0xdb, 0x59, 0x2b, 0xe9, 0xb1, 0x6b, 0x8a, 0xbe, 0x48,
+	0x18, 0xc3, 0x94, 0xdc, 0xd0, 0xef, 0x34, 0xf1, 0x18, 0x8b, 0xf6, 0x86, 0xc8, 0x9a, 0x2f, 0x3a,
+	0xa1, 0x8b, 0x55, 0x5a, 0x4d, 0xa1, 0xe0, 0x10, 0xde, 0x42, 0x08, 0xaf, 0xd1, 0x3b, 0x09, 0x9b,
+	0x23, 0x8e, 0x93, 0x43, 0xfa, 0x1c, 0x93, 0xca, 0xfb, 0xf3, 0x80, 0x9f, 0x54, 0xe1, 0x66, 0x53,
+	0x90, 0x54, 0x6a, 0x43, 0x88, 0x52, 0xd4, 0x79, 0x85, 0xf6, 0x25, 0x95, 0xa4, 0xe2, 0xf2, 0x7f,
+	0xab, 0xc1, 0x62, 0xc2, 0xa3, 0x88, 0x5c, 0x13, 0x57, 0xe1, 0xd4, 0x77, 0x4f, 0x69, 0x3d, 0x9d,
+	0x88, 0xe3, 0xd8, 0x44, 0x1c, 0xaf, 0xd0, 0xeb, 0x21, 0x1c, 0x09, 0x2c, 0x1c, 0xd4, 0x1f, 0x34,
+	0x58, 0xdc, 0x4d, 0x05, 0xb5, 0x3b, 0x0c, 0xa8, 0xb4, 0x47, 0x17, 0x7d, 0x1b, 0x41, 0xbd, 0x4e,
+	0x36, 0x93, 0x73, 0x22, 0x60, 0xd9, 0xfc, 0xc6, 0xbb, 0x48, 0x7d, 0x4b, 0xfe, 0xa8, 0x41, 0x29,
+	0xf9, 0x9d, 0x41, 0x6e, 0xa4, 0xa8, 0x56, 0x4f, 0x82, 0xeb, 0x03, 0xe9, 0x38, 0xca, 0xfb, 0x88,
+	0xf2, 0x0d, 0x52, 0x1e, 0x02, 0x25, 0xe7, 0x52, 0x8b, 0xec, 0xf7, 0x1a, 0x94, 0x92, 0xaf, 0xd6,
+	0x12, 0xe8, 0xc0, 0x97, 0x86, 0x04, 0x3a, 0xe0, 0x8e, 0x4e, 0xcb, 0x08, 0xf4, 0x55, 0x7a, 0x33,
+	0x1a, 0xe3, 0x04, 0x2e, 0x1e, 0x66, 0xe9, 0xc9, 0x74, 0x80, 0xbb, 0x43, 0x02, 0x1c, 0x70, 0x8d,
+	0x4f, 0xf6, 0x64, 0x02, 0x97, 0x1a, 0xf2, 0x3f, 0x69, 0xb0, 0x92, 0x7a, 0x35, 0x25, 0xaf, 0xa4,
+	0x63, 0x50, 0x03, 0x7f, 0x73, 0x18, 0x52, 0x8e, 0xf8, 0x7d, 0x44, 0xfc, 0x36, 0x79, 0x73, 0x38,
+	0xc4, 0xd1, 0xf0, 0x7f, 0x0a, 0x39, 0xbf, 0xbd, 0x27, 0xcf, 0xf1, 0x68, 0x67, 0x51, 0x9e, 0xe3,
+	0x91, 0x2e, 0xa0, 0xbc, 0x8b, 0xd0, 0x85, 0x70, 0x28, 0x3d, 0x22, 0x1e, 0x39, 0x29, 0x1b, 0x9b,
+	0x47, 0x8a, 0x6c, 0xb5, 0x81, 0xa5, 0xc8, 0x56, 0x9a, 0x78, 0xc9, 0xb2, 0x91, 0x88, 0xcb, 0x7e,
+	0x06, 0x33, 0x7d, 0x3d, 0x61, 0x79, 0xda, 0x24, 0x35, 0xa8, 0xe5, 0x69, 0x93, 0xd0, 0x4a, 0x96,
+	0x27, 0x1d, 0x5d, 0x8d, 0x1c, 0xe2, 0x11, 0x62, 0xae, 0xdb, 0x16, 0x3f, 0xb2, 0x2b, 0x9d, 0x44,
+	0xe2, 0x1f, 0x64, 0x31, 0x9d, 0xc7, 0xd2, 0x52, 0xfc, 0x22, 0xd7, 0x7a, 0x1d, 0xb5, 0xae, 0x92,
+	0x2b, 0x7d, 0x3b, 0x57, 0x95, 0xfe, 0x95, 0x38, 0xe1, 0x82, 0xe6, 0xa1, 0x72, 0xc2, 0xf5, 0x75,
+	0x22, 0x95, 0x13, 0x2e, 0xd2, 0x6d, 0xa4, 0xd7, 0x50, 0xdb, 0x0a, 0x59, 0x8e, 0xd5, 0x26, 0x28,
+	0xcb, 0x35, 0x80, 0xa0, 0x6c, 0x90, 0x0f, 0x7f, 0x9a, 0xc3, 0xb5, 0x6c, 0xc1, 0x54, 0x28, 0x21,
+	0xc9, 0xc7, 0x2f, 0xea, 0x10, 0x3d, 0x19, 0xc3, 0xff, 0x4b, 0xde, 0xfb, 0x6f, 0x00, 0x00, 0x00,
+	0xff, 0xff, 0x05, 0xd2, 0x81, 0x35, 0x5f, 0x29, 0x00, 0x00,
 }

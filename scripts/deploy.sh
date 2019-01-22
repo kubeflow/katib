@@ -17,17 +17,28 @@
 set -o errexit
 set -o nounset
 set -o pipefail
+set -o xtrace
 
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
 
 cd ${SCRIPT_ROOT}
 kubectl apply -f manifests/0-namespace.yaml
-kubectl apply -f manifests/modeldb/db
-kubectl apply -f manifests/modeldb/backend
-kubectl apply -f manifests/modeldb/frontend
+kubectl apply -f manifests/pv
 kubectl apply -f manifests/vizier/db
 kubectl apply -f manifests/vizier/core
+kubectl apply -f manifests/vizier/core-rest
+kubectl apply -f manifests/vizier/ui
 kubectl apply -f manifests/vizier/suggestion/random
 kubectl apply -f manifests/vizier/suggestion/grid
 kubectl apply -f manifests/vizier/suggestion/hyperband
+kubectl apply -f manifests/vizier/suggestion/bayesianoptimization
+kubectl apply -f manifests/vizier/earlystopping/medianstopping
+kubectl apply -f manifests/studyjobcontroller/crd.yaml
+kubectl apply -f manifests/studyjobcontroller/tfjobsCrd.yaml
+kubectl apply -f manifests/studyjobcontroller/pytorchjobsCrd.yaml
+kubectl apply -f manifests/studyjobcontroller/rbac.yaml
+kubectl apply -f manifests/studyjobcontroller/mcrbac.yaml
+kubectl apply -f manifests/studyjobcontroller/workerConfigMap.yaml
+kubectl apply -f manifests/studyjobcontroller/metricsControllerConfigMap.yaml
+kubectl apply -f manifests/studyjobcontroller/studyjobcontroller.yaml
 cd - > /dev/null

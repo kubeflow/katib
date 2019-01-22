@@ -27,8 +27,6 @@ echo "Generating SuggestionClient..."
 mockgen -package mock -destination pkg/mock/api/suggestion.go github.com/kubeflow/katib/pkg/api SuggestionClient
 echo "Generating VizierDBInterface..."
 mockgen -package mock -destination pkg/mock/db/db.go github.com/kubeflow/katib/pkg/db VizierDBInterface
-echo "Generating worker interface..."
-mockgen -package mock -destination pkg/mock/worker/worker.go  github.com/kubeflow/katib/pkg/manager/worker Interface
 echo "Generating ModelStore..."
 mockgen -package mock -destination pkg/mock/modelstore/modelstore.go  github.com/kubeflow/katib/pkg/manager/modelstore ModelStore
 cd - > /dev/null

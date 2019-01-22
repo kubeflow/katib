@@ -5,12 +5,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/jsonpb"
 	"log"
 	"math/big"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
+
+	"github.com/golang/protobuf/jsonpb"
 
 	api "github.com/kubeflow/katib/pkg/api"
 
@@ -18,9 +20,12 @@ import (
 )
 
 const (
-	db_driver      = "mysql"
-	db_name        = "root:test@tcp(vizier-db:3306)/vizier"
-	mysql_time_fmt = "2006-01-02 15:04:05.999999"
+	dbDriver     = "mysql"
+	dbNameTmpl   = "root:%s@tcp(vizier-db:3306)/vizier?timeout=5s"
+	mysqlTimeFmt = "2006-01-02 15:04:05.999999"
+
+	connectInterval = 5 * time.Second
+	connectTimeout  = 60 * time.Second
 )
 
 type GetWorkerLogOpts struct {
@@ -38,15 +43,19 @@ type WorkerLog struct {
 }
 
 type VizierDBInterface interface {
-	DB_Init()
+	DBInit()
+	SelectOne() error
+
 	GetStudyConfig(string) (*api.StudyConfig, error)
 	GetStudyList() ([]string, error)
 	CreateStudy(*api.StudyConfig) (string, error)
+	UpdateStudy(string, *api.StudyConfig) error
 	DeleteStudy(string) error
 
 	GetTrial(string) (*api.Trial, error)
 	GetTrialList(string) ([]*api.Trial, error)
 	CreateTrial(*api.Trial) error
+	UpdateTrial(*api.Trial) error
 	DeleteTrial(string) error
 
 	GetWorker(string) (*api.Worker, error)
@@ -54,10 +63,11 @@ type VizierDBInterface interface {
 	GetWorkerList(string, string) ([]*api.Worker, error)
 	GetWorkerLogs(string, *GetWorkerLogOpts) ([]*WorkerLog, error)
 	GetWorkerTimestamp(string) (*time.Time, error)
-	StoreWorkerLogs(string, []string) error
+	StoreWorkerLogs(string, []*api.MetricsLog) error
 	CreateWorker(*api.Worker) (string, error)
 	UpdateWorker(string, api.State) error
 	DeleteWorker(string) error
+	GetWorkerFullInfo(string, string, string, bool) (*api.GetWorkerFullInfoReply, error)
 
 	SetSuggestionParam(string, string, []*api.SuggestionParameter) (string, error)
 	UpdateSuggestionParam(string, []*api.SuggestionParameter) error
@@ -69,51 +79,92 @@ type VizierDBInterface interface {
 	GetEarlyStopParamList(string) ([]*api.EarlyStoppingParameterSet, error)
 }
 
-type db_conn struct {
+type dbConn struct {
 	db *sql.DB
 }
 
 var rs1Letters = []rune("abcdefghijklmnopqrstuvwxyz")
 
-func NewWithSqlConn(db *sql.DB) VizierDBInterface {
-	d := new(db_conn)
+func getDbName() string {
+	dbPass := os.Getenv("MYSQL_ROOT_PASSWORD")
+	if dbPass == "" {
+		log.Printf("WARN: Env var MYSQL_ROOT_PASSWORD is empty. Falling back to \"test\".")
+
+		// For backward compatibility, e.g. in case that all but vizier-core
+		// is older ones so we do not have Secret nor upgraded vizier-db.
+		dbPass = "test"
+	}
+
+	return fmt.Sprintf(dbNameTmpl, dbPass)
+}
+
+func openSQLConn(driverName string, dataSourceName string, interval time.Duration,
+	timeout time.Duration) (*sql.DB, error) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	timeoutC := time.After(timeout)
+	for {
+		select {
+		case <-ticker.C:
+			if db, err := sql.Open(driverName, dataSourceName); err == nil {
+				if err = db.Ping(); err == nil {
+					return db, nil
+				}
+			}
+		case <-timeoutC:
+			return nil, fmt.Errorf("Timeout waiting for DB conn successfully opened.")
+		}
+	}
+}
+
+func NewWithSQLConn(db *sql.DB) (VizierDBInterface, error) {
+	d := new(dbConn)
 	d.db = db
 	seed, err := crand.Int(crand.Reader, big.NewInt(1<<63-1))
 	if err != nil {
-		log.Fatalf("RNG initialization failed: %v", err)
+		return nil, fmt.Errorf("RNG initialization failed: %v", err)
 	}
 	// We can do the following instead, but it creates a locking issue
 	//d.rng = rand.New(rand.NewSource(seed.Int64()))
 	rand.Seed(seed.Int64())
 
-	return d
+	return d, nil
 }
 
-func New() VizierDBInterface {
-	db, err := sql.Open(db_driver, db_name)
+func New() (VizierDBInterface, error) {
+	db, err := openSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
 	if err != nil {
-		log.Fatalf("DB open failed: %v", err)
+		return nil, fmt.Errorf("DB open failed: %v", err)
 	}
-	return NewWithSqlConn(db)
+	return NewWithSQLConn(db)
 }
 
-func generate_randid() string {
+func generateRandid() string {
 	// UUID isn't quite handy in the Go world
-	id_ := make([]byte, 8)
-	_, err := rand.Read(id_)
+	id := make([]byte, 8)
+	_, err := rand.Read(id)
 	if err != nil {
 		log.Printf("Error reading random: %v", err)
 		return ""
 	}
-	return string(rs1Letters[rand.Intn(len(rs1Letters))]) + fmt.Sprintf("%016x", id_)[1:]
+	return string(rs1Letters[rand.Intn(len(rs1Letters))]) + fmt.Sprintf("%016x", id)[1:]
 }
 
-func (d *db_conn) GetStudyConfig(id string) (*api.StudyConfig, error) {
+func isDBDuplicateError(err error) bool {
+	errmsg := strings.ToLower(err.Error())
+	if strings.Contains(errmsg, "unique") || strings.Contains(errmsg, "duplicate") {
+		return true
+	}
+	return false
+}
+
+func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
 
 	study := new(api.StudyConfig)
-	var dummy_id, configs, tags, metrics string
-	err := row.Scan(&dummy_id,
+	var dummyID, configs, tags, metrics string
+	err := row.Scan(&dummyID,
 		&study.Name,
 		&study.Owner,
 		&study.OptimizationType,
@@ -122,6 +173,7 @@ func (d *db_conn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 		&tags,
 		&study.ObjectiveValueName,
 		&metrics,
+		&study.JobId,
 	)
 	if err != nil {
 		return nil, err
@@ -132,12 +184,12 @@ func (d *db_conn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 		return nil, err
 	}
 
-	var tags_array []string
+	var tagsArray []string
 	if len(tags) > 0 {
-		tags_array = strings.Split(tags, ",\n")
+		tagsArray = strings.Split(tags, ",\n")
 	}
-	study.Tags = make([]*api.Tag, len(tags_array))
-	for i, j := range tags_array {
+	study.Tags = make([]*api.Tag, len(tagsArray))
+	for i, j := range tagsArray {
 		tag := new(api.Tag)
 		err = jsonpb.UnmarshalString(j, tag)
 		if err != nil {
@@ -150,7 +202,7 @@ func (d *db_conn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 	return study, nil
 }
 
-func (d *db_conn) GetStudyList() ([]string, error) {
+func (d *dbConn) GetStudyList() ([]string, error) {
 	rows, err := d.db.Query("SELECT id FROM studies")
 	if err != nil {
 		return nil, err
@@ -170,11 +222,31 @@ func (d *db_conn) GetStudyList() ([]string, error) {
 	return result, nil
 }
 
-func (d *db_conn) CreateStudy(in *api.StudyConfig) (string, error) {
+func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 	if in.ParameterConfigs == nil {
 		return "", errors.New("ParameterConfigs must be set")
 
 	}
+	if in.JobId != "" {
+		row := d.db.QueryRow("SELECT * FROM studies WHERE job_id = ?", in.JobId)
+		dummyStudy := new(api.StudyConfig)
+		var dummyID, dummyConfigs, dummyTags, dummyMetrics, dummyJobID string
+		err := row.Scan(&dummyID,
+			&dummyStudy.Name,
+			&dummyStudy.Owner,
+			&dummyStudy.OptimizationType,
+			&dummyStudy.OptimizationGoal,
+			&dummyConfigs,
+			&dummyTags,
+			&dummyStudy.ObjectiveValueName,
+			&dummyMetrics,
+			&dummyJobID,
+		)
+		if err == nil {
+			return "", fmt.Errorf("Study %s in Job %s already exist.", in.Name, in.JobId)
+		}
+	}
+
 	configs, err := (&jsonpb.Marshaler{}).MarshalToString(in.ParameterConfigs)
 	if err != nil {
 		log.Fatalf("Error marshaling configs: %v", err)
@@ -199,13 +271,13 @@ func (d *db_conn) CreateStudy(in *api.StudyConfig) (string, error) {
 		in.Metrics = append(in.Metrics, in.ObjectiveValueName)
 	}
 
-	var study_id string
+	var studyID string
 	i := 3
 	for true {
-		study_id = generate_randid()
+		studyID = generateRandid()
 		_, err := d.db.Exec(
-			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-			study_id,
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			studyID,
 			in.Name,
 			in.Owner,
 			in.OptimizationType,
@@ -214,16 +286,14 @@ func (d *db_conn) CreateStudy(in *api.StudyConfig) (string, error) {
 			strings.Join(tags, ",\n"),
 			in.ObjectiveValueName,
 			strings.Join(in.Metrics, ",\n"),
+			in.JobId,
 		)
 		if err == nil {
 			break
-		} else {
-			errmsg := strings.ToLower(err.Error())
-			if strings.Contains(errmsg, "unique") || strings.Contains(errmsg, "duplicate") {
-				i--
-				if i > 0 {
-					continue
-				}
+		} else if isDBDuplicateError(err) {
+			i--
+			if i > 0 {
+				continue
 			}
 		}
 		return "", err
@@ -232,29 +302,53 @@ func (d *db_conn) CreateStudy(in *api.StudyConfig) (string, error) {
 		_, err := d.db.Exec(
 			"INSERT INTO study_permissions (study_id, access_permission) "+
 				"VALUES (?, ?)",
-			study_id, perm)
+			studyID, perm)
 		if err != nil {
 			log.Printf("Error storing permission (%s, %s): %v",
-				study_id, perm, err)
+				studyID, perm, err)
 		}
 	}
 
-	return study_id, nil
+	return studyID, nil
 }
 
-func (d *db_conn) DeleteStudy(id string) error {
+// UpdateStudy updates the corresponding row in the DB.
+// It only updates name, owner, tags and job_id.
+// Other columns are silently ignored.
+func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
+	var err error
+
+	tags := make([]string, len(in.Tags))
+	for i, elem := range in.Tags {
+		tags[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
+		if err != nil {
+			log.Printf("Error marshalling %v: %v", elem, err)
+			continue
+		}
+	}
+	_, err = d.db.Exec(`UPDATE studies SET name = ?, owner = ?, tags = ?,
+                job_id = ? WHERE id = ?`,
+		in.Name,
+		in.Owner,
+		strings.Join(tags, ",\n"),
+		in.JobId,
+		studyID)
+	return err
+}
+
+func (d *dbConn) DeleteStudy(id string) error {
 	_, err := d.db.Exec("DELETE FROM studies WHERE id = ?", id)
 	return err
 }
 
-func (d *db_conn) getTrials(trial_id string, study_id string) ([]*api.Trial, error) {
+func (d *dbConn) getTrials(trialID string, studyID string) ([]*api.Trial, error) {
 	var rows *sql.Rows
 	var err error
 
-	if trial_id != "" {
-		rows, err = d.db.Query("SELECT * FROM trials WHERE id = ?", trial_id)
-	} else if study_id != "" {
-		rows, err = d.db.Query("SELECT * FROM trials WHERE study_id = ?", study_id)
+	if trialID != "" {
+		rows, err = d.db.Query("SELECT * FROM trials WHERE id = ?", trialID)
+	} else if studyID != "" {
+		rows, err = d.db.Query("SELECT * FROM trials WHERE study_id = ?", studyID)
 	} else {
 		return nil, errors.New("trial_id or study_id must be set")
 	}
@@ -309,7 +403,7 @@ func (d *db_conn) getTrials(trial_id string, study_id string) ([]*api.Trial, err
 	return result, nil
 }
 
-func (d *db_conn) GetTrial(id string) (*api.Trial, error) {
+func (d *dbConn) GetTrial(id string) (*api.Trial, error) {
 	trials, err := d.getTrials(id, "")
 	if err != nil {
 		return nil, err
@@ -324,15 +418,13 @@ func (d *db_conn) GetTrial(id string) (*api.Trial, error) {
 	return trials[0], nil
 }
 
-func (d *db_conn) GetTrialList(id string) ([]*api.Trial, error) {
+func (d *dbConn) GetTrialList(id string) ([]*api.Trial, error) {
 	trials, err := d.getTrials("", id)
 
 	return trials, err
 }
 
-func (d *db_conn) CreateTrial(trial *api.Trial) error {
-	// This function sets trial.id, unlike old dbInsertTrials().
-	// Users should not overwrite trial.id
+func marshalTrial(trial *api.Trial) ([]string, []string, error) {
 	var err, lastErr error
 
 	params := make([]string, len(trial.ParameterSet))
@@ -353,24 +445,29 @@ func (d *db_conn) CreateTrial(trial *api.Trial) error {
 			lastErr = err
 		}
 	}
+	return params, tags, lastErr
+}
 
-	var trial_id string
+// CreateTrial stores into the trials DB table.
+// As a side-effect, it generates and sets trial.TrialId.
+// Users should not overwrite TrialId.
+func (d *dbConn) CreateTrial(trial *api.Trial) error {
+	params, tags, lastErr := marshalTrial(trial)
+
+	var trialID string
 	i := 3
 	for true {
-		trial_id = generate_randid()
-		_, err = d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?)",
-			trial_id, trial.StudyId, strings.Join(params, ",\n"),
+		trialID = generateRandid()
+		_, err := d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?)",
+			trialID, trial.StudyId, strings.Join(params, ",\n"),
 			trial.ObjectiveValue, strings.Join(tags, ",\n"))
 		if err == nil {
-			trial.TrialId = trial_id
+			trial.TrialId = trialID
 			break
-		} else {
-			errmsg := strings.ToLower(err.Error())
-			if strings.Contains(errmsg, "unique") || strings.Contains(errmsg, "duplicate") {
-				i--
-				if i > 0 {
-					continue
-				}
+		} else if isDBDuplicateError(err) {
+			i--
+			if i > 0 {
+				continue
 			}
 		}
 		return err
@@ -378,12 +475,26 @@ func (d *db_conn) CreateTrial(trial *api.Trial) error {
 	return lastErr
 }
 
-func (d *db_conn) DeleteTrial(id string) error {
+// UpdateTrial updates the corresponding row in the DB.
+// It only updates parameters and tags. Other columns are silently ignored.
+func (d *dbConn) UpdateTrial(trial *api.Trial) error {
+	params, tags, lastErr := marshalTrial(trial)
+	_, err := d.db.Exec(`UPDATE trials SET parameters = ?, tags = ?,
+		WHERE id = ?`,
+		strings.Join(params, ",\n"), strings.Join(tags, ",\n"),
+		trial.TrialId)
+	if err != nil {
+		return err
+	}
+	return lastErr
+}
+
+func (d *dbConn) DeleteTrial(id string) error {
 	_, err := d.db.Exec("DELETE FROM trials WHERE id = ?", id)
 	return err
 }
 
-func (d *db_conn) GetWorkerLogs(id string, opts *GetWorkerLogOpts) ([]*WorkerLog, error) {
+func (d *dbConn) GetWorkerLogs(id string, opts *GetWorkerLogOpts) ([]*WorkerLog, error) {
 	qstr := ""
 	qfield := []interface{}{id}
 	order := ""
@@ -416,16 +527,15 @@ func (d *db_conn) GetWorkerLogs(id string, opts *GetWorkerLogOpts) ([]*WorkerLog
 	var result []*WorkerLog
 	for rows.Next() {
 		log1 := new(WorkerLog)
-		var time_str string
-
-		err := rows.Scan(&time_str, &((*log1).Name), &((*log1).Value))
+		var timeStr string
+		err := rows.Scan(&timeStr, &((*log1).Name), &((*log1).Value))
 		if err != nil {
 			log.Printf("Error scanning log: %v", err)
 			continue
 		}
-		log1.Time, err = time.Parse(mysql_time_fmt, time_str)
+		log1.Time, err = time.Parse(mysqlTimeFmt, timeStr)
 		if err != nil {
-			log.Printf("Error parsing time %s: %v", time_str, err)
+			log.Printf("Error parsing time %s: %v", timeStr, err)
 			continue
 		}
 		result = append(result, log1)
@@ -433,17 +543,60 @@ func (d *db_conn) GetWorkerLogs(id string, opts *GetWorkerLogOpts) ([]*WorkerLog
 	return result, nil
 }
 
-func (d *db_conn) getWorkerLastlog(id string, value *string) (*time.Time, error) {
-	var last_timestamp string
+func (d *dbConn) getWorkerLastlogs(id string) (time.Time, []*WorkerLog, error) {
+	var timeStr string
+	var timeVal time.Time
 	var err error
 
-	if value != nil {
-		row := d.db.QueryRow("SELECT time, value FROM worker_lastlogs WHERE worker_id = ?", id)
-		err = row.Scan(&last_timestamp, value)
-	} else {
-		row := d.db.QueryRow("SELECT time FROM worker_lastlogs WHERE worker_id = ?", id)
-		err = row.Scan(&last_timestamp)
+	// Use LEFT JOIN to ensure a result even if there's no matching
+	// in worker_metrics.
+	rows, err := d.db.Query(
+		`SELECT worker_lastlogs.time, name, value FROM worker_lastlogs
+                 LEFT JOIN worker_metrics
+                 ON (worker_lastlogs.worker_id = worker_metrics.worker_id AND worker_lastlogs.time = worker_metrics.time)
+                 WHERE worker_lastlogs.worker_id = ?`, id)
+	if err != nil {
+		return timeVal, nil, err
 	}
+
+	var result []*WorkerLog
+	for rows.Next() {
+		log1 := new(WorkerLog)
+		var thisTime string
+		var name, value sql.NullString
+
+		err := rows.Scan(&thisTime, &name, &value)
+		if err != nil {
+			log.Printf("Error scanning log: %v", err)
+			continue
+		}
+		if timeStr == "" {
+			timeStr = thisTime
+			timeVal, err = time.Parse(mysqlTimeFmt, timeStr)
+			if err != nil {
+				log.Printf("Error parsing time %s: %v", timeStr, err)
+				return timeVal, nil, err
+			}
+		} else if timeStr != thisTime {
+			log.Printf("Unexpected query result %s != %s",
+				timeStr, thisTime)
+		}
+		log1.Time = timeVal
+		if !name.Valid {
+			continue
+		}
+		(*log1).Name = name.String
+		(*log1).Value = value.String
+		result = append(result, log1)
+	}
+	return timeVal, result, nil
+}
+
+func (d *dbConn) GetWorkerTimestamp(id string) (*time.Time, error) {
+	var lastTimestamp string
+
+	row := d.db.QueryRow("SELECT time FROM worker_lastlogs WHERE worker_id = ?", id)
+	err := row.Scan(&lastTimestamp)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -451,144 +604,95 @@ func (d *db_conn) getWorkerLastlog(id string, value *string) (*time.Time, error)
 	case err != nil:
 		return nil, err
 	default:
-		mt, err := time.Parse(mysql_time_fmt, last_timestamp)
+		mt, err := time.Parse(mysqlTimeFmt, lastTimestamp)
 		if err != nil {
 			log.Printf("Error parsing time in log %s: %v",
-				last_timestamp, err)
+				lastTimestamp, err)
 			return nil, err
 		}
 		return &mt, nil
 	}
 }
 
-func (d *db_conn) GetWorkerTimestamp(id string) (*time.Time, error) {
-	return d.getWorkerLastlog(id, nil)
-}
-
-func (d *db_conn) storeWorkerLog(worker_id string, time string, line string,
-	objective_value_name string, metrics []string) error {
-	kvpairs := strings.Fields(line)
-	for _, kv := range kvpairs {
-		v := strings.Split(kv, "=")
-		if len(v) > 2 {
-			log.Printf("Ignoring trailing garbage: %s", kv)
-		}
-		if len(v) == 1 {
-			continue
-		}
-		is_objective := 0
-	search_keyword:
-		switch {
-		case v[0] == objective_value_name:
-			is_objective = 1
-		default:
-			for _, m := range metrics {
-				if v[0] == m {
-					break search_keyword
-				}
-			}
-			continue
-		}
-		_, err := d.db.Exec("INSERT INTO worker_metrics (worker_id, time, name, value, is_objective) VALUES (?, ?, ?, ?, ?)",
-			worker_id, time, v[0], v[1], is_objective)
-		if err != nil {
-			return err
-		}
+func (d *dbConn) storeWorkerLog(workerID string, time string, metricsName string, metricsValue string, objectiveValueName string) error {
+	isObjective := 0
+	if metricsName == objectiveValueName {
+		isObjective = 1
+	}
+	_, err := d.db.Exec("INSERT INTO worker_metrics (worker_id, time, name, value, is_objective) VALUES (?, ?, ?, ?, ?)",
+		workerID, time, metricsName, metricsValue, isObjective)
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
-func (d *db_conn) StoreWorkerLogs(worker_id string, logs []string) error {
+func (d *dbConn) StoreWorkerLogs(workerID string, logs []*api.MetricsLog) error {
 	var lasterr error
-	var last_value string
-	var stored_logs []*string
 
-	db_t, err := d.getWorkerLastlog(worker_id, &last_value)
+	dbT, lastLogs, err := d.getWorkerLastlogs(workerID)
 	if err != nil {
 		log.Printf("Error getting last log timestamp: %v", err)
 	}
 
-	row := d.db.QueryRow("SELECT objective_value_name, metrics FROM workers "+
+	row := d.db.QueryRow("SELECT objective_value_name FROM workers "+
 		"JOIN (studies) ON (workers.study_id = studies.id) WHERE "+
-		"workers.id = ?", worker_id)
-	var objective_value_name, metrics_str string
-	err = row.Scan(&objective_value_name, &metrics_str)
+		"workers.id = ?", workerID)
+	var objectiveValueName string
+	err = row.Scan(&objectiveValueName)
 	if err != nil {
 		log.Printf("Cannot get objective_value_name or metrics: %v", err)
 		return err
 	}
-	metrics := strings.Split(metrics_str, ",\n")
 
-	var formatted_time string
-	var ls []string
-	for _, logline := range logs {
-		if logline == "" {
-			continue
-		}
-		ls = strings.SplitN(logline, " ", 2)
-		if len(ls) != 2 {
-			log.Printf("Error parsing log: %s", logline)
-			lasterr = errors.New("Error parsing log")
-			continue
-		}
-		t, err := time.Parse(time.RFC3339Nano, ls[0])
-		if err != nil {
-			log.Printf("Error parsing time %s: %v", ls[0], err)
-			lasterr = err
-			continue
-		}
-		if db_t != nil && !t.After(*db_t) {
-			// db_t is from mysql and has microsec precision.
-			// This code assumes nanosec fractions are rounded down.
-			continue
-		}
-		// use UTC as mysql DATETIME lacks timezone
-		formatted_time = t.UTC().Format(mysql_time_fmt)
-		if db_t != nil {
-			// Parse again to get rounding effect
-			reparsed_time, err := time.Parse(mysql_time_fmt, formatted_time)
-			if reparsed_time == *db_t {
-				if ls[1] == last_value {
-					// stored_logs are already in DB
-					// This assignment ensures the remaining
-					// logs will be stored in DB.
-					db_t = nil
-					continue
-				}
-				// We don't know this is necessary or not yet.
-				stored_logs = append(stored_logs, &ls[1])
+	// Store logs when
+	//   1. a log is newer than dbT, or,
+	//   2. a log is not yet in the DB when the timestamps are equal
+	var formattedTime string
+	var lastTime time.Time
+	for _, mlog := range logs {
+		metricsName := mlog.Name
+	logLoop:
+		for _, mv := range mlog.Values {
+			t, err := time.Parse(time.RFC3339Nano, mv.Time)
+			if err != nil {
+				log.Printf("Error parsing time %s: %v", mv.Time, err)
+				lasterr = err
 				continue
 			}
-			// (reparsed_time > *db_t) can be assumed
-			for _, value := range stored_logs {
-				err = d.storeWorkerLog(worker_id,
-					db_t.UTC().Format(mysql_time_fmt), *value,
-					objective_value_name, metrics)
+			if t.Before(dbT) {
+				// dbT is from mysql and has microsec precision.
+				// This code assumes nanosec fractions are rounded down.
+				continue
+			}
+			// use UTC as mysql DATETIME lacks timezone
+			formattedTime = t.UTC().Format(mysqlTimeFmt)
+			if !dbT.IsZero() {
+				// Parse again to get rounding effect, otherwise
+				// the next comparison will be almost always false.
+				reparsed_time, err := time.Parse(mysqlTimeFmt, formattedTime)
 				if err != nil {
-					log.Printf("Error storing log %s: %v", *value, err)
+					log.Printf("Error parsing time %s: %v", formattedTime, err)
 					lasterr = err
+					continue
+				}
+				if reparsed_time == dbT {
+					for _, l := range lastLogs {
+						if l.Name == metricsName && l.Value == mv.Value {
+							continue logLoop
+						}
+					}
 				}
 			}
-			db_t = nil
-		}
-
-		err = d.storeWorkerLog(worker_id,
-			formatted_time, ls[1],
-			objective_value_name, metrics)
-		if err != nil {
-			log.Printf("Error storing log %s: %v", logline, err)
-			lasterr = err
-		}
-	}
-	if db_t != nil && len(stored_logs) > 0 {
-		// No duplicate log found. So they are valid.
-		for _, value := range stored_logs {
-			err = d.storeWorkerLog(worker_id,
-				db_t.UTC().Format(mysql_time_fmt), *value,
-				objective_value_name, metrics)
+			err = d.storeWorkerLog(workerID,
+				formattedTime,
+				metricsName, mv.Value,
+				objectiveValueName)
 			if err != nil {
-				log.Printf("Error storing log %s: %v", *value, err)
+				log.Printf("Error storing log %s: %v", mv.Value, err)
 				lasterr = err
+			} else if t.After(lastTime) {
+				lastTime = t
 			}
 		}
 	}
@@ -597,23 +701,24 @@ func (d *db_conn) StoreWorkerLogs(worker_id string, logs []string) error {
 		// would be lost.
 		return lasterr
 	}
-	if len(ls) == 2 {
-		_, err = d.db.Exec("REPLACE INTO worker_lastlogs VALUES (?, ?, ?)",
-			worker_id, formatted_time, ls[1])
+	if !lastTime.IsZero() {
+		formattedTime = lastTime.UTC().Format(mysqlTimeFmt)
+		_, err = d.db.Exec("REPLACE INTO worker_lastlogs VALUES (?, ?)",
+			workerID, formattedTime)
 	}
 	return err
 }
 
-func (d *db_conn) getWorkers(worker_id string, trial_id string, study_id string) ([]*api.Worker, error) {
+func (d *dbConn) getWorkers(workerID string, trialID string, studyID string) ([]*api.Worker, error) {
 	var rows *sql.Rows
 	var err error
 
-	if worker_id != "" {
-		rows, err = d.db.Query("SELECT * FROM workers WHERE id = ?", worker_id)
-	} else if trial_id != "" {
-		rows, err = d.db.Query("SELECT * FROM workers WHERE trial_id = ?", trial_id)
-	} else if study_id != "" {
-		rows, err = d.db.Query("SELECT * FROM workers WHERE study_id = ?", study_id)
+	if workerID != "" {
+		rows, err = d.db.Query("SELECT * FROM workers WHERE id = ?", workerID)
+	} else if trialID != "" {
+		rows, err = d.db.Query("SELECT * FROM workers WHERE trial_id = ?", trialID)
+	} else if studyID != "" {
+		rows, err = d.db.Query("SELECT * FROM workers WHERE study_id = ?", studyID)
 	} else {
 		return nil, errors.New("worker_id, trial_id or study_id must be set")
 	}
@@ -626,21 +731,16 @@ func (d *db_conn) getWorkers(worker_id string, trial_id string, study_id string)
 	for rows.Next() {
 		worker := new(api.Worker)
 
-		var config, tags string
+		var tags string
 		err := rows.Scan(
 			&worker.WorkerId,
 			&worker.StudyId,
 			&worker.TrialId,
-			&worker.Runtime,
+			&worker.Type,
 			&worker.Status,
-			&config,
+			&worker.TemplatePath,
 			&tags,
 		)
-		if err != nil {
-			return nil, err
-		}
-		worker.Config = new(api.WorkerConfig)
-		err = jsonpb.UnmarshalString(config, worker.Config)
 		if err != nil {
 			return nil, err
 		}
@@ -663,7 +763,7 @@ func (d *db_conn) getWorkers(worker_id string, trial_id string, study_id string)
 	return result, nil
 }
 
-func (d *db_conn) GetWorker(id string) (*api.Worker, error) {
+func (d *dbConn) GetWorker(id string) (*api.Worker, error) {
 	workers, err := d.getWorkers(id, "", "")
 	if err != nil {
 		return nil, err
@@ -678,7 +778,7 @@ func (d *db_conn) GetWorker(id string) (*api.Worker, error) {
 
 }
 
-func (d *db_conn) GetWorkerStatus(id string) (*api.State, error) {
+func (d *dbConn) GetWorkerStatus(id string) (*api.State, error) {
 	status := api.State_ERROR
 	row := d.db.QueryRow("SELECT status FROM workers WHERE id = ?", id)
 	err := row.Scan(&status)
@@ -688,20 +788,14 @@ func (d *db_conn) GetWorkerStatus(id string) (*api.State, error) {
 	return &status, nil
 }
 
-func (d *db_conn) GetWorkerList(sid string, tid string) ([]*api.Worker, error) {
+func (d *dbConn) GetWorkerList(sid string, tid string) ([]*api.Worker, error) {
 	workers, err := d.getWorkers("", tid, sid)
 	return workers, err
 }
 
-func (d *db_conn) CreateWorker(worker *api.Worker) (string, error) {
+func (d *dbConn) CreateWorker(worker *api.Worker) (string, error) {
 	// Users should not overwrite worker.id
 	var err, lastErr error
-	config, err := (&jsonpb.Marshaler{}).MarshalToString(worker.Config)
-	if err != nil {
-		log.Fatalf("Error marshaling configs: %v", err)
-		lastErr = err
-	}
-
 	tags := make([]string, len(worker.Tags))
 	for i := range tags {
 		tags[i], err = (&jsonpb.Marshaler{}).MarshalToString(worker.Tags[i])
@@ -712,23 +806,20 @@ func (d *db_conn) CreateWorker(worker *api.Worker) (string, error) {
 		}
 	}
 
-	var worker_id string
+	var workerID string
 	i := 3
 	for true {
-		worker_id = generate_randid()
+		workerID = generateRandid()
 		_, err = d.db.Exec("INSERT INTO workers VALUES (?, ?, ?, ?, ?, ?, ?)",
-			worker_id, worker.StudyId, worker.TrialId, worker.Runtime,
-			api.State_PENDING, config, strings.Join(tags, ",\n"))
+			workerID, worker.StudyId, worker.TrialId, worker.Type,
+			api.State_PENDING, worker.TemplatePath, strings.Join(tags, ",\n"))
 		if err == nil {
-			worker.WorkerId = worker_id
+			worker.WorkerId = workerID
 			break
-		} else {
-			errmsg := strings.ToLower(err.Error())
-			if strings.Contains(errmsg, "unique") || strings.Contains(errmsg, "duplicate") {
-				i--
-				if i > 0 {
-					continue
-				}
+		} else if isDBDuplicateError(err) {
+			i--
+			if i > 0 {
+				continue
 			}
 		}
 		return "", err
@@ -737,17 +828,164 @@ func (d *db_conn) CreateWorker(worker *api.Worker) (string, error) {
 
 }
 
-func (d *db_conn) UpdateWorker(id string, newstatus api.State) error {
+func (d *dbConn) UpdateWorker(id string, newstatus api.State) error {
 	_, err := d.db.Exec("UPDATE workers SET status = ? WHERE id = ?", newstatus, id)
 	return err
 }
 
-func (d *db_conn) DeleteWorker(id string) error {
+func (d *dbConn) DeleteWorker(id string) error {
 	_, err := d.db.Exec("DELETE FROM workers WHERE id = ?", id)
 	return err
 }
 
-func (d *db_conn) SetSuggestionParam(algorithm string, studyId string, params []*api.SuggestionParameter) (string, error) {
+func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId string, OnlyLatestLog bool) (*api.GetWorkerFullInfoReply, error) {
+	ret := &api.GetWorkerFullInfoReply{}
+	var err error
+	ws := []*api.Worker{}
+
+	if workerId != "" {
+		w, err := d.GetWorker(workerId)
+		ws = append(ws, w)
+		if err != nil {
+			return ret, err
+		}
+	} else {
+		ws, err = d.GetWorkerList(studyId, trialId)
+		if err != nil {
+			return ret, err
+		}
+	}
+	ts, err := d.GetTrialList(studyId)
+	if err != nil {
+		return ret, err
+	}
+	sc, err := d.GetStudyConfig(studyId)
+	if err != nil {
+		return ret, err
+	}
+
+	plist := make(map[string][]*api.Parameter)
+	for _, t := range ts {
+		plist[t.TrialId] = t.ParameterSet
+	}
+
+	wfilist := make([]*api.WorkerFullInfo, len(ws))
+	var qstr, id string
+	if OnlyLatestLog {
+		qstr = `
+		SELECT 
+			WM.worker_id, WM.time, WM.name, WM.value 
+		FROM (
+			SELECT 
+				Master.worker_id, Master.time,  Master.name,  Master.value
+			FROM (
+				SELECT 
+					worker_id, name, 
+					MAX(id) AS MaxID
+				FROM 
+					worker_metrics 
+				GROUP BY 
+					worker_id, name
+				) AS LATEST
+				JOIN worker_metrics AS Master
+				ON Master.id = LATEST.MaxID
+		) AS WM 
+		JOIN workers AS WS 
+		ON WM.worker_id = WS.id 
+		AND`
+	} else {
+		qstr = `
+		SELECT 
+			WM.worker_id, WM.time, WM.name, WM.value 
+		FROM 
+			worker_metrics AS WM 
+		JOIN workers AS WS 
+		ON WM.worker_id = WS.id 
+		AND`
+	}
+	if workerId != "" {
+		if OnlyLatestLog {
+			qstr = `
+			SELECT 
+			WM.worker_id, WM.time, WM.name, WM.value 
+			FROM (
+				SELECT 
+					Master.worker_id, Master.time,  Master.name,  Master.value
+				FROM (
+					SELECT 
+						worker_id, name, 
+						MAX(id) AS MaxID
+					FROM 
+						worker_metrics 
+					GROUP BY 
+						worker_id, name
+				) AS LATEST
+				JOIN worker_metrics AS Master
+				ON Master.id = LATEST.MaxID
+				AND Master.worker_id = ?
+			) AS WM`
+		} else {
+			qstr = "SELECT worker_id, time, name, value FROM worker_metrics WHERE worker_id = ?"
+		}
+		id = workerId
+	} else if trialId != "" {
+		qstr += " WS.trial_id = ? "
+		id = trialId
+	} else if studyId != "" {
+		qstr += " WS.study_id = ? "
+		id = studyId
+	}
+	rows, err := d.db.Query(qstr+" ORDER BY time", id)
+	if err != nil {
+		log.Printf("SQL query: %v", err)
+		return ret, err
+	}
+	metricslist := make(map[string]map[string][]*api.MetricsValueTime, len(ws))
+	for rows.Next() {
+		var name, value, timeStr, wid string
+		err := rows.Scan(&wid, &timeStr, &name, &value)
+		if err != nil {
+			log.Printf("Error scanning log: %v", err)
+			continue
+		}
+		ptime, err := time.Parse(mysqlTimeFmt, timeStr)
+		if err != nil {
+			log.Printf("Error parsing time %s: %v", timeStr, err)
+			continue
+		}
+		if _, ok := metricslist[wid]; ok {
+			metricslist[wid][name] = append(metricslist[wid][name], &api.MetricsValueTime{
+				Value: value,
+				Time:  ptime.UTC().Format(time.RFC3339Nano),
+			})
+		} else {
+			metricslist[wid] = make(map[string][]*api.MetricsValueTime, len(sc.Metrics))
+			metricslist[wid][name] = append(metricslist[wid][name], &api.MetricsValueTime{
+				Value: value,
+				Time:  ptime.UTC().Format(time.RFC3339Nano),
+			})
+		}
+	}
+	for i, w := range ws {
+		wfilist[i] = &api.WorkerFullInfo{
+			Worker:       w,
+			ParameterSet: plist[w.TrialId],
+		}
+		for _, m := range sc.Metrics {
+			if v, ok := metricslist[w.WorkerId][m]; ok {
+				wfilist[i].MetricsLogs = append(wfilist[i].MetricsLogs, &api.MetricsLog{
+					Name:   m,
+					Values: v,
+				},
+				)
+			}
+		}
+	}
+	ret.WorkerFullInfos = wfilist
+	return ret, nil
+}
+
+func (d *dbConn) SetSuggestionParam(algorithm string, studyID string, params []*api.SuggestionParameter) (string, error) {
 	var err error
 	ps := make([]string, len(params))
 	for i, elem := range params {
@@ -757,19 +995,21 @@ func (d *db_conn) SetSuggestionParam(algorithm string, studyId string, params []
 			return "", err
 		}
 	}
-	var paramId string
+	var paramID string
 	for true {
-		paramId = generate_randid()
+		paramID = generateRandid()
 		_, err = d.db.Exec("INSERT INTO suggestion_param VALUES (?, ?, ?, ?)",
-			paramId, algorithm, studyId, strings.Join(ps, ",\n"))
+			paramID, algorithm, studyID, strings.Join(ps, ",\n"))
 		if err == nil {
 			break
+		} else if !isDBDuplicateError(err) {
+			return "", err
 		}
 	}
-	return paramId, err
+	return paramID, err
 }
 
-func (d *db_conn) UpdateSuggestionParam(paramId string, params []*api.SuggestionParameter) error {
+func (d *dbConn) UpdateSuggestionParam(paramID string, params []*api.SuggestionParameter) error {
 	var err error
 	ps := make([]string, len(params))
 	for i, elem := range params {
@@ -780,25 +1020,25 @@ func (d *db_conn) UpdateSuggestionParam(paramId string, params []*api.Suggestion
 		}
 	}
 	_, err = d.db.Exec("UPDATE suggestion_param SET parameters = ? WHERE id = ?",
-		strings.Join(ps, ",\n"), paramId)
+		strings.Join(ps, ",\n"), paramID)
 	return err
 }
 
-func (d *db_conn) GetSuggestionParam(paramId string) ([]*api.SuggestionParameter, error) {
+func (d *dbConn) GetSuggestionParam(paramID string) ([]*api.SuggestionParameter, error) {
 	var params string
-	row := d.db.QueryRow("SELECT parameters FROM suggestion_param WHERE id = ?", paramId)
+	row := d.db.QueryRow("SELECT parameters FROM suggestion_param WHERE id = ?", paramID)
 	err := row.Scan(&params)
 	if err != nil {
 		return nil, err
 	}
-	var p_array []string
+	var pArray []string
 	if len(params) > 0 {
-		p_array = strings.Split(params, ",\n")
+		pArray = strings.Split(params, ",\n")
 	} else {
 		return nil, nil
 	}
-	ret := make([]*api.SuggestionParameter, len(p_array))
-	for i, j := range p_array {
+	ret := make([]*api.SuggestionParameter, len(pArray))
+	for i, j := range pArray {
 		p := new(api.SuggestionParameter)
 		err = jsonpb.UnmarshalString(j, p)
 		if err != nil {
@@ -810,10 +1050,10 @@ func (d *db_conn) GetSuggestionParam(paramId string) ([]*api.SuggestionParameter
 	return ret, nil
 }
 
-func (d *db_conn) GetSuggestionParamList(studyId string) ([]*api.SuggestionParameterSet, error) {
+func (d *dbConn) GetSuggestionParamList(studyID string) ([]*api.SuggestionParameterSet, error) {
 	var rows *sql.Rows
 	var err error
-	rows, err = d.db.Query("SELECT * FROM suggestion_param WHERE study_id = ?", studyId)
+	rows, err = d.db.Query("SELECT id, suggestion_algo, parameters FROM suggestion_param WHERE study_id = ?", studyID)
 	if err != nil {
 		return nil, err
 	}
@@ -822,22 +1062,18 @@ func (d *db_conn) GetSuggestionParamList(studyId string) ([]*api.SuggestionParam
 		var id string
 		var algorithm string
 		var params string
-		var sID string
-		err := rows.Scan(&id, &sID, &algorithm, &params)
+		err := rows.Scan(&id, &algorithm, &params)
 		if err != nil {
 			return nil, err
 		}
-		if studyId != sID {
-			continue
-		}
-		var p_array []string
+		var pArray []string
 		if len(params) > 0 {
-			p_array = strings.Split(params, ",\n")
+			pArray = strings.Split(params, ",\n")
 		} else {
 			return nil, nil
 		}
-		suggestparams := make([]*api.SuggestionParameter, len(p_array))
-		for i, j := range p_array {
+		suggestparams := make([]*api.SuggestionParameter, len(pArray))
+		for i, j := range pArray {
 			p := new(api.SuggestionParameter)
 			err = jsonpb.UnmarshalString(j, p)
 			if err != nil {
@@ -855,7 +1091,7 @@ func (d *db_conn) GetSuggestionParamList(studyId string) ([]*api.SuggestionParam
 	return result, nil
 }
 
-func (d *db_conn) SetEarlyStopParam(algorithm string, studyId string, params []*api.EarlyStoppingParameter) (string, error) {
+func (d *dbConn) SetEarlyStopParam(algorithm string, studyID string, params []*api.EarlyStoppingParameter) (string, error) {
 	ps := make([]string, len(params))
 	var err error
 	for i, elem := range params {
@@ -865,19 +1101,21 @@ func (d *db_conn) SetEarlyStopParam(algorithm string, studyId string, params []*
 			return "", err
 		}
 	}
-	var paramId string
+	var paramID string
 	for true {
-		paramId := generate_randid()
+		paramID = generateRandid()
 		_, err = d.db.Exec("INSERT INTO earlystopping_param VALUES (?,?, ?, ?)",
-			paramId, algorithm, studyId, strings.Join(ps, ",\n"))
+			paramID, algorithm, studyID, strings.Join(ps, ",\n"))
 		if err == nil {
 			break
+		} else if !isDBDuplicateError(err) {
+			return "", err
 		}
 	}
-	return paramId, nil
+	return paramID, nil
 }
 
-func (d *db_conn) UpdateEarlyStopParam(paramId string, params []*api.EarlyStoppingParameter) error {
+func (d *dbConn) UpdateEarlyStopParam(paramID string, params []*api.EarlyStoppingParameter) error {
 	ps := make([]string, len(params))
 	var err error
 	for i, elem := range params {
@@ -888,25 +1126,25 @@ func (d *db_conn) UpdateEarlyStopParam(paramId string, params []*api.EarlyStoppi
 		}
 	}
 	_, err = d.db.Exec("UPDATE earlystopping_param SET parameters = ? WHERE id = ?",
-		strings.Join(ps, ",\n"), paramId)
+		strings.Join(ps, ",\n"), paramID)
 	return err
 }
 
-func (d *db_conn) GetEarlyStopParam(paramId string) ([]*api.EarlyStoppingParameter, error) {
+func (d *dbConn) GetEarlyStopParam(paramID string) ([]*api.EarlyStoppingParameter, error) {
 	var params string
-	row := d.db.QueryRow("SELECT parameters FROM earlystopping_param WHERE id = ?", paramId)
+	row := d.db.QueryRow("SELECT parameters FROM earlystopping_param WHERE id = ?", paramID)
 	err := row.Scan(&params)
 	if err != nil {
 		return nil, err
 	}
-	var p_array []string
+	var pArray []string
 	if len(params) > 0 {
-		p_array = strings.Split(params, ",\n")
+		pArray = strings.Split(params, ",\n")
 	} else {
 		return nil, nil
 	}
-	ret := make([]*api.EarlyStoppingParameter, len(p_array))
-	for i, j := range p_array {
+	ret := make([]*api.EarlyStoppingParameter, len(pArray))
+	for i, j := range pArray {
 		p := new(api.EarlyStoppingParameter)
 		err = jsonpb.UnmarshalString(j, p)
 		if err != nil {
@@ -918,10 +1156,10 @@ func (d *db_conn) GetEarlyStopParam(paramId string) ([]*api.EarlyStoppingParamet
 	return ret, nil
 }
 
-func (d *db_conn) GetEarlyStopParamList(studyId string) ([]*api.EarlyStoppingParameterSet, error) {
+func (d *dbConn) GetEarlyStopParamList(studyID string) ([]*api.EarlyStoppingParameterSet, error) {
 	var rows *sql.Rows
 	var err error
-	rows, err = d.db.Query("SELECT * FROM earlystopping_param WHERE study_id = ?", studyId)
+	rows, err = d.db.Query("SELECT id, earlystop_algo, parameters FROM earlystopping_param WHERE study_id = ?", studyID)
 	if err != nil {
 		return nil, err
 	}
@@ -930,22 +1168,18 @@ func (d *db_conn) GetEarlyStopParamList(studyId string) ([]*api.EarlyStoppingPar
 		var id string
 		var algorithm string
 		var params string
-		var sID string
-		err := rows.Scan(&id, &sID, &algorithm, &params)
+		err := rows.Scan(&id, &algorithm, &params)
 		if err != nil {
 			return nil, err
 		}
-		if studyId != sID {
-			continue
-		}
-		var p_array []string
+		var pArray []string
 		if len(params) > 0 {
-			p_array = strings.Split(params, ",\n")
+			pArray = strings.Split(params, ",\n")
 		} else {
 			return nil, nil
 		}
-		esparams := make([]*api.EarlyStoppingParameter, len(p_array))
-		for i, j := range p_array {
+		esparams := make([]*api.EarlyStoppingParameter, len(pArray))
+		for i, j := range pArray {
 			p := new(api.EarlyStoppingParameter)
 			err = jsonpb.UnmarshalString(j, p)
 			if err != nil {

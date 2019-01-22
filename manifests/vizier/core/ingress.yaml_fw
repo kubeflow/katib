@@ -3,7 +3,7 @@
 # kind: Ingress
 # metadata:
 #   name: vizier-core
-#   namespace: katib
+#   namespace: kubeflow
 #   annotations:
 #     ingress.kubernetes.io/ssl-passthrough: "true"
 # spec:

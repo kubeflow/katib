@@ -8,7 +8,7 @@ from pkg.suggestion.bayesianoptimization.src.global_optimizer.global_optimizer i
 class BOAlgorithm:
     """ class for bayesian optimization """
     def __init__(self, dim, N, lowerbound, upperbound, X_train, y_train, mode, trade_off,
-                 length_scale, noise, nu, kernel_type, n_estimators, max_features, model_type):
+                 length_scale, noise, nu, kernel_type, n_estimators, max_features, model_type, logger=None):
         # np.random.seed(0)
         self.dim = dim
         self.N = N or 100
@@ -21,7 +21,6 @@ class BOAlgorithm:
         self.scaler = MinMaxScaler()
         self.scaler.fit(np.append(self.lowerbound, self.upperbound, axis=0))
 
-        self.x_next = None
         self.X_train = X_train
         self.y_train = y_train
         if self.y_train is None:
@@ -47,15 +46,20 @@ class BOAlgorithm:
             n_estimators=n_estimators,
             max_features=max_features,
             model_type=model_type,
+            logger=logger,
         )
 
-    def get_suggestion(self):
+    def get_suggestion(self, request_num):
         """ main function to provide suggestion """
+        x_next_list = []
         if self.X_train is None and self.y_train is None and self.current_optimal is None:
             # randomly pick a point as the first trial
-            self.x_next = np.random.uniform(self.lowerbound, self.upperbound, size=(1, self.dim))
-            return self.x_next
-        _, self.x_next = self.optimizer.direct()
-        self.x_next = np.array(self.x_next).reshape(1, self.dim)
-        self.x_next = self.scaler.inverse_transform(self.x_next)
-        return self.x_next
+            for i in range(request_num):
+                x_next_list.append(np.random.uniform(self.lowerbound, self.upperbound, size=(1, self.dim)))
+        else:
+            _, x_next_list_que = self.optimizer.direct(request_num)
+            for xn in x_next_list_que:
+                x = np.array(xn).reshape(1, self.dim)
+                x = self.scaler.inverse_transform(x)
+                x_next_list.append(x)
+        return x_next_list

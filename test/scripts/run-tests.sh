@@ -34,33 +34,59 @@ echo "Activating service-account"
 gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
 
 echo "Configuring kubectl"
-gcloud --project ${PROJECT} container clusters get-credentials ${CLUSTER_NAME} \
-    --zone ${ZONE}
 
-kubectl config set-credentials temp-admin --username=admin --password=$(gcloud container clusters describe ${CLUSTER_NAME} --format="value(masterAuth.password)" --zone=${ZONE})
+echo "CLUSTER_NAME: ${CLUSTER_NAME}"
+echo "ZONE: ${GCP_ZONE}"
+echo "PROJECT: ${GCP_PROJECT}"
+
+gcloud container clusters describe ${CLUSTER_NAME} \
+  --zone ${ZONE} \
+  --format 'value(masterAuth.clusterCaCertificate)'|  base64 -d > ca.pem
+
+gcloud container clusters describe ${CLUSTER_NAME} \
+  --zone ${ZONE} \
+  --format 'value(masterAuth.clientCertificate)'  |  base64 -d > client.pem
+
+gcloud container clusters describe ${CLUSTER_NAME} \
+  --zone ${ZONE} \
+  --format 'value(masterAuth.clientKey)' |  base64 -d > key.rsa
+
+kubectl config set-credentials temp-admin --username=admin --client-certificate=./client.pem --client-key=./key.rsa
 kubectl config set-context temp-context --cluster=$(kubectl config get-clusters | grep ${CLUSTER_NAME}) --user=temp-admin
 kubectl config use-context temp-context
 
+#This is required. But I don't know why.
+VERSION=${VERSION/%?/}
+
 echo "Install Katib "
+echo "REGISTRY ${REGISTRY}"
+echo "REPO_NAME ${REPO_NAME}"
+echo "VERSION ${VERSION}"
+
 sed -i -e "s@image: katib\/vizier-core@image: ${REGISTRY}\/${REPO_NAME}\/vizier-core:${VERSION}@" manifests/vizier/core/deployment.yaml
+sed -i -e "s@image: katib\/vizier-core-rest@image: ${REGISTRY}\/${REPO_NAME}\/vizier-core-rest:${VERSION}@" manifests/vizier/core-rest/deployment.yaml
+sed -i -e "s@image: katib\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/katib-ui:${VERSION}@" manifests/vizier/ui/deployment.yaml
 sed -i -e "s@type: NodePort@type: ClusterIP@" -e "/nodePort: 30678/d" manifests/vizier/core/service.yaml
+sed -i -e "s@image: katib\/studyjob-controller@image: ${REGISTRY}\/${REPO_NAME}\/studyjob-controller:${VERSION}@" manifests/studyjobcontroller/studyjobcontroller.yaml
 sed -i -e "s@image: katib\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-random:${VERSION}@" manifests/vizier/suggestion/random/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-grid:${VERSION}@" manifests/vizier/suggestion/grid/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-hyperband:${VERSION}@" manifests/vizier/suggestion/hyperband/deployment.yaml
-#sed -i -e "s@image: katib\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-bayesianoptimization:${VERSION}@" manifests/vizier/suggestion/bayesianoptimization/deployment.yaml
+sed -i -e "s@image: katib\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-bayesianoptimization:${VERSION}@" manifests/vizier/suggestion/bayesianoptimization/deployment.yaml
 sed -i -e "s@image: katib\/earlystopping-medianstopping@image: ${REGISTRY}\/${REPO_NAME}\/earlystopping-medianstopping:${VERSION}@" manifests/vizier/earlystopping/medianstopping/deployment.yaml
-sed -i -e "s@image: katib\/katib-frontend@image: ${REGISTRY}\/${REPO_NAME}\/katib-frontend:${VERSION}@" manifests/modeldb/frontend/deployment.yaml
+sed -i -e '/volumeMounts:/,$d' manifests/vizier/db/deployment.yaml
+
+cat manifests/vizier/core/deployment.yaml
 ./scripts/deploy.sh
 
 TIMEOUT=120
-PODNUM=$(kubectl get deploy -n katib | grep -v NAME | wc -l)
-until kubectl get pods -n katib | grep Running | [[ $(wc -l) -eq $PODNUM ]]; do
-    echo Pod Status $(kubectl get pods -n katib | grep Running | wc -l)/$PODNUM
+PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
+until kubectl get pods -n kubeflow | grep Running | [[ $(wc -l) -eq $PODNUM ]]; do
+    echo Pod Status $(kubectl get pods -n kubeflow | grep Running | wc -l)/$PODNUM
     sleep 10
     TIMEOUT=$(( TIMEOUT - 1 ))
     if [[ $TIMEOUT -eq 0 ]];then
         echo "NG"
-        kubectl get pods -n katib
+        kubectl get pods -n kubeflow
         exit 1
     fi
 done
@@ -68,14 +94,15 @@ done
 echo "All Katib components are running."
 kubectl version
 echo "Katib deployments"
-kubectl -n katib get deploy
+kubectl -n kubeflow get deploy
 echo "Katib services"
-kubectl -n katib get svc
+kubectl -n kubeflow get svc
 echo "Katib pods"
-kubectl -n katib get pod
+kubectl -n kubeflow get pod
 
-kubectl -n katib port-forward $(kubectl -n katib get pod -o=name | grep vizier-core | sed -e "s@pods\/@@") 6789:6789 &
+kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep vizier-core | grep -v vizier-core-rest | sed -e "s@pods\/@@") 6789:6789 &
 echo "kubectl port-forward start"
+sleep 5
 TIMEOUT=120
 until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
     sleep 5
@@ -85,4 +112,4 @@ cp -r test ${GO_DIR}/test
 cd ${GO_DIR}/test/e2e
 go run test-client.go -a random
 go run test-client.go -a grid -c suggestion-config-grid.yml
-go run test-client.go -a hyperband -c suggestion-config-hyb.yml
+#go run test-client.go -a hyperband -c suggestion-config-hyb.yml

@@ -6,7 +6,9 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/kubeflow/katib/pkg"
 	"github.com/kubeflow/katib/pkg/api"
+
 	"google.golang.org/grpc"
 )
 
@@ -86,23 +88,26 @@ func (s *GridSuggestService) setP(gci int, p [][]*api.Parameter, pg [][]string, 
 	}
 }
 
-func (s *GridSuggestService) purseSuggestParam(suggestParam []*api.SuggestionParameter) (int, map[string]int) {
+func (s *GridSuggestService) parseSuggestParam(suggestParam []*api.SuggestionParameter) (int, int, map[string]int) {
 	ret := make(map[string]int)
 	defaultGrid := 0
+	i := 0
 	for _, sp := range suggestParam {
 		switch sp.Name {
 		case "DefaultGrid":
 			defaultGrid, _ = strconv.Atoi(sp.Value)
+		case "Iteration":
+			i, _ = strconv.Atoi(sp.Value)
 		default:
 			ret[sp.Name], _ = strconv.Atoi(sp.Value)
 		}
 	}
-	if defaultGrid == 0 {
+	if defaultGrid <= 0 {
 		defaultGrid = 1
 	}
-	return defaultGrid, ret
+	return defaultGrid, i, ret
 }
-func (s *GridSuggestService) genGrids(studyId string, pcs []*api.ParameterConfig, df int, glist map[string]int) [][]*api.Parameter {
+func (s *GridSuggestService) genGrids(studyID string, pcs []*api.ParameterConfig, df int, glist map[string]int) [][]*api.Parameter {
 	var pg [][]string
 	var holenum = 1
 	gcl := make([]int, len(pcs))
@@ -128,14 +133,14 @@ func (s *GridSuggestService) genGrids(studyId string, pcs []*api.ParameterConfig
 	}
 	ret := make([][]*api.Parameter, holenum)
 	s.setP(0, ret, pg, pcs)
-	log.Printf("Study %v : %v parameters generated", studyId, holenum)
+	log.Printf("Study %v : %v parameters generated", studyID, holenum)
 	return ret
 }
 
 func (s *GridSuggestService) GetSuggestions(ctx context.Context, in *api.GetSuggestionsRequest) (*api.GetSuggestionsReply, error) {
-	conn, err := grpc.Dial(manager, grpc.WithInsecure())
+	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("could not connect: %v", err)
+		log.Printf("could not connect: %v", err)
 		return &api.GetSuggestionsReply{}, err
 	}
 	defer conn.Close()
@@ -145,7 +150,7 @@ func (s *GridSuggestService) GetSuggestions(ctx context.Context, in *api.GetSugg
 	}
 	scr, err := c.GetStudy(ctx, screq)
 	if err != nil {
-		log.Fatalf("GetStudyConf failed: %v", err)
+		log.Printf("GetStudyConf failed: %v", err)
 		return &api.GetSuggestionsReply{}, err
 	}
 	spreq := &api.GetSuggestionParametersRequest{
@@ -153,21 +158,55 @@ func (s *GridSuggestService) GetSuggestions(ctx context.Context, in *api.GetSugg
 	}
 	spr, err := c.GetSuggestionParameters(ctx, spreq)
 	if err != nil {
-		log.Fatalf("GetParameter failed: %v", err)
+		log.Printf("GetParameter failed: %v", err)
 		return &api.GetSuggestionsReply{}, err
 	}
-	df, glist := s.purseSuggestParam(spr.SuggestionParameters)
+	df, iteration, glist := s.parseSuggestParam(spr.SuggestionParameters)
+	log.Printf("Study %s iteration %d DefaltGrid %d Grids %v", in.StudyId, iteration, df, glist)
 	grids := s.genGrids(in.StudyId, scr.StudyConfig.ParameterConfigs.Configs, df, glist)
 	var reqnum = int(in.RequestNumber)
 	if reqnum == 0 {
 		reqnum = len(grids)
 	}
+	if iteration+reqnum > len(grids) {
+		reqnum = len(grids) - iteration
+	}
 	trials := make([]*api.Trial, reqnum)
+	if reqnum <= 0 {
+		return &api.GetSuggestionsReply{Trials: []*api.Trial{}}, err
+	}
 	for i := 0; i < int(reqnum); i++ {
 		trials[i] = &api.Trial{
 			StudyId:      in.StudyId,
-			ParameterSet: grids[i],
+			ParameterSet: grids[iteration+i],
 		}
+	}
+	iteration += reqnum
+	sspreq := &api.SetSuggestionParametersRequest{
+		StudyId:             in.StudyId,
+		SuggestionAlgorithm: in.SuggestionAlgorithm,
+		ParamId:             in.ParamId,
+	}
+	sp := []*api.SuggestionParameter{}
+	sp = append(sp, &api.SuggestionParameter{
+		Name:  "DefaultGrid",
+		Value: strconv.Itoa(df),
+	})
+	sp = append(sp, &api.SuggestionParameter{
+		Name:  "Iteration",
+		Value: strconv.Itoa(iteration),
+	})
+	for gn, gv := range glist {
+		sp = append(sp, &api.SuggestionParameter{
+			Name:  gn,
+			Value: strconv.Itoa(gv),
+		})
+	}
+	sspreq.SuggestionParameters = sp
+	_, err = c.SetSuggestionParameters(ctx, sspreq)
+	if err != nil {
+		log.Printf("Save Parameters Failed %v", err)
+		return &api.GetSuggestionsReply{}, err
 	}
 	for i, t := range trials {
 		req := &api.CreateTrialRequest{

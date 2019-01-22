@@ -1,0 +1,28 @@
+#apiVersion: apps/v1
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: studyjob-controller
+  namespace: kubeflow
+  labels:
+    app: studyjob-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: studyjob-controller
+  template:
+    metadata:
+      labels:
+        app: studyjob-controller
+    spec:
+      serviceAccountName: studyjob-controller
+      containers:
+      - name: studyjob-controller
+        image: katib/studyjob-controller
+        imagePullPolicy: Always
+        env:
+        - name: VIZIER_CORE_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace

@@ -6,9 +6,9 @@ package modeldb
 import (
 	"bytes"
 	"context"
-	"reflect"
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"reflect"
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -18,7 +18,5 @@ var _ = context.Background
 var _ = reflect.DeepEqual
 var _ = bytes.Equal
 
-
 func init() {
 }
-

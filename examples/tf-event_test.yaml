@@ -1,0 +1,104 @@
+apiVersion: "kubeflow.org/v1alpha1"
+kind: StudyJob
+metadata:
+  namespace: kubeflow
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: random-example-goal-test
+spec:
+  studyName: random-example-long-test
+  owner: crd
+  optimizationtype: maximize
+  objectivevaluename: test/accuracy
+  optimizationgoal: 0.99
+  metricsnames:
+    - train/accuracy
+    - train/cross_entropy
+    - test/accuracy
+    - test/cross_entropy
+  parameterconfigs:
+    - name: --learning_rate
+      parametertype: double
+      feasible:
+        min: "0.001"
+        max: "0.01"
+    - name: --dropout
+      parametertype: double
+      feasible:
+        min: "0.7"
+        max: "0.9"
+  workerSpec:
+    goTemplate:
+        rawTemplate: |-
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: {{.WorkerID}}
+            namespace: kubeflow
+          spec:
+            template:
+              spec:
+                containers:
+                - name: {{.WorkerID}}
+                  image: katib/tensorflow-mnist-example:latest
+                  command:
+                  - "python"
+                  - "/mnist_with_summaries.py"
+                  - "--log_dir=/log/{{.WorkerID}}"
+                  {{- with .HyperParameters}}
+                  {{- range .}}
+                  - "{{.Name}}={{.Value}}"
+                  {{- end}}
+                  {{- end}}
+                  volumeMounts:
+                      - mountPath: "/log"
+                        name: "log"
+                restartPolicy: Never
+                volumes:
+                  - name: "log"
+                    persistentVolumeClaim:
+                        claimName: "tfevent-volume"
+  metricsCollectorSpec:
+    goTemplate:
+      rawTemplate: |-
+        apiVersion: batch/v1beta1
+        kind: CronJob
+        metadata:
+          name: {{.WorkerID}}
+          namespace: kubeflow
+        spec:
+          schedule: "*/1 * * * *"
+          successfulJobsHistoryLimit: 0
+          failedJobsHistoryLimit: 1
+          jobTemplate:
+            spec:
+              template:
+                spec:
+                  containers:
+                  - name: {{.WorkerID}}
+                    image: registry.gitlab.com/yujioshima/katib-images/tfevent-metrics-collector
+                    args:
+                    - "python"
+                    - "main.py"
+                    - "-m"
+                    - "vizier-core"
+                    - "-s"
+                    - "{{.StudyID}}"
+                    - "-w"
+                    - "{{.WorkerID}}"
+                    - "-d"
+                    - "/log/{{.WorkerID}}"
+                    volumeMounts:
+                        - mountPath: "/log"
+                          name: "log"
+                  volumes:
+                    - name: "log"
+                      persistentVolumeClaim:
+                          claimName: "tfevent-volume"
+                  restartPolicy: Never
+                  serviceAccountName: metrics-collector
+                  imagePullSecrets:
+                      - name: gitlabregcred
+  suggestionSpec:
+    suggestionAlgorithm: "random"
+    requestNumber: 1

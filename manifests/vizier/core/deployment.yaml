@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: vizier-core
-  namespace: katib
+  namespace: kubeflow
   labels:
     app: vizier
     component: core
@@ -19,16 +19,25 @@ spec:
       containers:
       - name: vizier-core
         image: katib/vizier-core
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: vizier-db-secrets
+                key: MYSQL_ROOT_PASSWORD
         command:
           - './vizier-manager'
-        args:
-          - "-w"
-          - "kubernetes"
-          - "-i"
-          - "k-cluster.example.net"
         ports:
         - name: api
           containerPort: 6789
+        readinessProbe:
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:6789"]
+          initialDelaySeconds: 5
+        livenessProbe:
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:6789"]
+          initialDelaySeconds: 10
 #        resources:
 #          requests:
 #            cpu: 500m
