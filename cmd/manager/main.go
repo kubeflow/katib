@@ -37,7 +37,7 @@ func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest)
 
 	if in.StudyConfig.JobType != "NAS" {
 		//If it is a HP job
-		studyID, err = dbIf.CreateStudy(in.StudyConfig)
+		studyID, err = dbIf.CreateHPStudy(in.StudyConfig)
 		if err != nil {
 			return &api_pb.CreateStudyReply{}, err
 		}
@@ -53,18 +53,11 @@ func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest)
 
 	} else {
 		//If it is a NAS job
-		log.Printf("INSIDE NAS JOB IN CREATE STUDY")
-		studyID, err = dbIf.CreateNAS(in.StudyConfig)
+		studyID, err = dbIf.CreateNASStudy(in.StudyConfig)
 		if err != nil {
 			log.Printf("Error is %v", err)
 			return &api_pb.CreateStudyReply{}, err
 		}
-		log.Printf("BEFORE GETTING")
-		sc, err := dbIf.GetNASConfig(studyID)
-		if err != nil {
-			log.Printf("Error is %v", err)
-		}
-		log.Printf("CONFIG IS: %v", sc)
 	}
 	return &api_pb.CreateStudyReply{StudyId: studyID}, nil
 }
@@ -76,14 +69,13 @@ func (s *server) DeleteStudy(ctx context.Context, in *api_pb.DeleteStudyRequest)
 	var err error
 	if in.JobType != "NAS" {
 		//If it is a HP job
-		err = dbIf.DeleteStudy(in.StudyId)
+		err = dbIf.DeleteHPStudy(in.StudyId)
 		if err != nil {
 			return &api_pb.DeleteStudyReply{}, err
 		}
 	} else {
 		//If it is a NAS job
-		log.Printf("NAS job is deleted, id= %v", in.StudyId)
-		err = dbIf.DeleteNAS(in.StudyId)
+		err = dbIf.DeleteNASStudy(in.StudyId)
 		if err != nil {
 			log.Printf("Error is %v", err)
 			return &api_pb.DeleteStudyReply{}, err
@@ -98,12 +90,10 @@ func (s *server) GetStudy(ctx context.Context, in *api_pb.GetStudyRequest) (*api
 	var err error
 	if in.JobType != "NAS" {
 		//If it is a HP job
-		sc, err = dbIf.GetStudyConfig(in.StudyId)
+		sc, err = dbIf.GetHPStudyConfig(in.StudyId)
 	} else {
 		//If it is a NAS job
-		log.Printf("Get NAS job, id = %v", in.StudyId)
-		sc, err = dbIf.GetNASConfig(in.StudyId)
-		log.Printf("PRINTING STUNDYCONF %v", sc)
+		sc, err = dbIf.GetNASStudyConfig(in.StudyId)
 		if err != nil {
 			log.Printf("Error is %v", err)
 			return &api_pb.GetStudyReply{}, err
@@ -113,13 +103,24 @@ func (s *server) GetStudy(ctx context.Context, in *api_pb.GetStudyRequest) (*api
 }
 
 func (s *server) GetStudyList(ctx context.Context, in *api_pb.GetStudyListRequest) (*api_pb.GetStudyListReply, error) {
-	sl, err := dbIf.GetStudyList()
+	var err error
+	sl := make([]string)
+	if in.JobType != "NAS" {
+		sl, err = dbIf.GetHPStudyList()
+	} else {
+		sl, err = dbIf.GetNASStudyList()
+	}
 	if err != nil {
 		return &api_pb.GetStudyListReply{}, err
 	}
 	result := make([]*api_pb.StudyOverview, len(sl))
 	for i, id := range sl {
-		sc, err := dbIf.GetStudyConfig(id)
+		var sc *api.StudyConfig
+		if in.JobType != "NAS" {
+			sc, err = dbIf.GetHPStudyConfig(id)
+		} else {
+			sc, err = dbIf.GetNASStudyConfig(id)
+		}
 		if err != nil {
 			return &api_pb.GetStudyListReply{}, err
 		}

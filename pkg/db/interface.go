@@ -47,18 +47,18 @@ type VizierDBInterface interface {
 	DBInit()
 	SelectOne() error
 
-	GetStudyConfig(string) (*api.StudyConfig, error)
-	GetStudyList() ([]string, error)
-	CreateStudy(*api.StudyConfig) (string, error)
-	UpdateStudy(string, *api.StudyConfig) error
-	DeleteStudy(string) error
+	GetHPStudyConfig(string) (*api.StudyConfig, error)
+	GetHPStudyList() ([]string, error)
+	CreateHPStudy(*api.StudyConfig) (string, error)
+	UpdateHPStudy(string, *api.StudyConfig) error
+	DeleteHPStudy(string) error
 
 	/* APIs for NAS */
-	GetNASConfig(string) (*api.StudyConfig, error)
-	GetNASList() ([]string, error)
-	CreateNAS(*api.StudyConfig) (string, error)
-	UpdateNAS(string, *api.StudyConfig) error
-	DeleteNAS(string) error
+	GetNASStudyConfig(string) (*api.StudyConfig, error)
+	GetNASStudyList() ([]string, error)
+	CreateNASStudy(*api.StudyConfig) (string, error)
+	UpdateNASStudy(string, *api.StudyConfig) error
+	DeleteNASStudy(string) error
 
 	GetTrial(string) (*api.Trial, error)
 	GetTrialList(string) ([]*api.Trial, error)
@@ -167,7 +167,7 @@ func isDBDuplicateError(err error) bool {
 	return false
 }
 
-func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
+func (d *dbConn) GetHPStudyConfig(id string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
 	log.Printf("ROW IS: %v", row)
 	study := new(api.StudyConfig)
@@ -218,7 +218,7 @@ func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
 	return study, nil
 }
 
-func (d *dbConn) GetStudyList() ([]string, error) {
+func (d *dbConn) GetHPStudyList() ([]string, error) {
 	rows, err := d.db.Query("SELECT id FROM studies WHERE job_type = 'HP'")
 	if err != nil {
 		return nil, err
@@ -238,7 +238,7 @@ func (d *dbConn) GetStudyList() ([]string, error) {
 	return result, nil
 }
 
-func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
+func (d *dbConn) CreateHPStudy(in *api.StudyConfig) (string, error) {
 	if in.ParameterConfigs == nil {
 		return "", errors.New("ParameterConfigs must be set")
 	}
@@ -325,7 +325,7 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 // UpdateStudy updates the corresponding row in the DB.
 // It only updates name, owner, tags and job_id.
 // Other columns are silently ignored.
-func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
+func (d *dbConn) UpdateHPStudy(studyID string, in *api.StudyConfig) error {
 	var err error
 
 	tags := make([]string, len(in.Tags))
@@ -346,12 +346,12 @@ func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
 	return err
 }
 
-func (d *dbConn) DeleteStudy(id string) error {
+func (d *dbConn) DeleteHPStudy(id string) error {
 	_, err := d.db.Exec("DELETE FROM studies WHERE id = ?", id)
 	return err
 }
 
-func (d *dbConn) CreateNAS(in *api.StudyConfig) (string, error) {
+func (d *dbConn) CreateNASStudy(in *api.StudyConfig) (string, error) {
 
 	for _, operation := range in.NasConfig.Operations.Operation {
 		if len(operation.OperationType) == 0 && operation.ParameterConfigs != nil {
@@ -453,7 +453,7 @@ func (d *dbConn) CreateNAS(in *api.StudyConfig) (string, error) {
 	return studyID, nil
 }
 
-func (d *dbConn) GetNASConfig(id string) (*api.StudyConfig, error) {
+func (d *dbConn) GetNASStudyConfig(id string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
 	study := new(api.StudyConfig)
 	var dummyID, nasConfig, parameters, tags, metrics, trials string
@@ -504,7 +504,7 @@ func (d *dbConn) GetNASConfig(id string) (*api.StudyConfig, error) {
 	return study, nil
 }
 
-func (d *dbConn) GetNASList() ([]string, error) {
+func (d *dbConn) GetNASStudyList() ([]string, error) {
 	rows, err := d.db.Query("SELECT id FROM studies WHERE job_type = 'NAS'")
 	if err != nil {
 		return nil, err
@@ -524,7 +524,7 @@ func (d *dbConn) GetNASList() ([]string, error) {
 	return result, nil
 }
 
-func (d *dbConn) UpdateNAS(studyID string, in *api.StudyConfig) error {
+func (d *dbConn) UpdateNASStudy(studyID string, in *api.StudyConfig) error {
 
 	/* THINK ABOUT TRIALS */
 	var err error
@@ -547,7 +547,7 @@ func (d *dbConn) UpdateNAS(studyID string, in *api.StudyConfig) error {
 	return err
 }
 
-func (d *dbConn) DeleteNAS(id string) error {
+func (d *dbConn) DeleteNASStudy(id string) error {
 	_, err := d.db.Exec("DELETE FROM studies WHERE id = ?", id)
 	return err
 }
