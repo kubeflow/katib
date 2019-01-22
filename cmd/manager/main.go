@@ -103,16 +103,18 @@ func (s *server) GetStudy(ctx context.Context, in *api_pb.GetStudyRequest) (*api
 }
 
 func (s *server) GetStudyList(ctx context.Context, in *api_pb.GetStudyListRequest) (*api_pb.GetStudyListReply, error) {
-	sl, err := dbIf.GetStudyIDsTypesList()
+	types, ids, err := dbIf.GetStudyIDsTypesList()
 	if err != nil {
 		return &api_pb.GetStudyListReply{}, err
 	}
-	result := make([]*api_pb.StudyOverview, len(sl))
-	for i, job := range sl {
-		if job.jbType == "NAS" {
-			sc, err := dbIf.GetNASStudyConfig(job.jbId)
+	result := make([]*api_pb.StudyOverview, len(types))
+	for i, _ := range types {
+		var sc *api_pb.StudyConfig
+		var err error
+		if types[i] == "NAS" {
+			sc, err = dbIf.GetNASStudyConfig(ids[i])
 		} else {
-			sc, err := dbIf.GetHPStudyConfig(job.jbId)
+			sc, err = dbIf.GetHPStudyConfig(ids[i])
 		}
 		if err != nil {
 			return &api_pb.GetStudyListReply{}, err
@@ -120,7 +122,7 @@ func (s *server) GetStudyList(ctx context.Context, in *api_pb.GetStudyListReques
 		result[i] = &api_pb.StudyOverview{
 			Name:  sc.Name,
 			Owner: sc.Owner,
-			Id:    id,
+			Id:    ids[i],
 		}
 	}
 	return &api_pb.GetStudyListReply{StudyOverviews: result}, err
