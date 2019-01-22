@@ -46,8 +46,8 @@ type VizierDBInterface interface {
 	DBInit()
 	SelectOne() error
 
-	GetStudyIDsList() ([]string, error)
-	GetStudyIDsTypesList(string) ([]JobTypeAndID, error)
+	GetStudyMetrics(string) ([]string, error)
+	GetStudyIDsTypesList() ([]string, []string, error)
 
 	GetHPStudyConfig(string) (*api.StudyConfig, error)
 	GetHPStudyList() ([]string, error)
@@ -91,11 +91,6 @@ type VizierDBInterface interface {
 
 type dbConn struct {
 	db *sql.DB
-}
-
-type JobTypeAndID struct {
-	jbType string
-	jbId   string
 }
 
 var rs1Letters = []rune("abcdefghijklmnopqrstuvwxyz")
@@ -185,14 +180,15 @@ func isDBDuplicateError(err error) bool {
 	return false
 }
 
-func (d *dbConn) GetStudyIDsTypesList() ([]JobTypeAndID, error) {
+func (d *dbConn) GetStudyIDsTypesList() ([]string, []string, error) {
 	rows, err := d.db.Query("SELECT id, job_type FROM studies")
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	defer rows.Close()
-	var result []JobTypeAndID
+	var resultTypes []string
+	var resultIDs []string
 	for rows.Next() {
 		var id, jobType string
 		err = rows.Scan(&id, jobType)
@@ -200,11 +196,11 @@ func (d *dbConn) GetStudyIDsTypesList() ([]JobTypeAndID, error) {
 			log.Printf("err scanning studies.id: %v", err)
 			continue
 		}
-		job := JobTypeAndID{jobType, id}
-		result = append(result, job)
+		resultIDs = append(resultIDs, id)
+		resultTypes = append(resultTypes, jobType)
 	}
 
-	return result, nil
+	return resultIDs, resultTypes, nil
 }
 
 func (d *dbConn) GetHPStudyConfig(id string) (*api.StudyConfig, error) {
