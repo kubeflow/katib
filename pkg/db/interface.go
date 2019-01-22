@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/jsonpb"
-	yaml "gopkg.in/yaml.v2"
 
 	api "github.com/kubeflow/katib/pkg/api"
 
@@ -169,10 +168,8 @@ func isDBDuplicateError(err error) bool {
 
 func (d *dbConn) GetHPStudyConfig(id string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
-	log.Printf("ROW IS: %v", row)
 	study := new(api.StudyConfig)
-	var dummyID, nasConfig, parameters, tags, metrics, trials string
-	log.Printf("SOSISKA")
+	var dummyID, nasConfig, parameters, tags, metrics string
 	err := row.Scan(&dummyID,
 		&study.Name,
 		&study.Owner,
@@ -180,21 +177,17 @@ func (d *dbConn) GetHPStudyConfig(id string) (*api.StudyConfig, error) {
 		&study.OptimizationGoal,
 		&parameters,
 		&tags,
-		&trials,
 		&study.ObjectiveValueName,
 		&metrics,
 		&nasConfig,
 		&study.JobId,
 		&study.JobType,
 	)
-	log.Printf("ERROR HERE IS: %v", err)
 	if err != nil {
 		return nil, err
 	}
 	study.ParameterConfigs = new(api.StudyConfig_ParameterConfigs)
-	log.Printf("PARAMETERS IS: %v", parameters)
 	err = jsonpb.UnmarshalString(parameters, study.ParameterConfigs)
-	log.Printf("ERROR IN MARSHAL 1 : %v", err)
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +207,6 @@ func (d *dbConn) GetHPStudyConfig(id string) (*api.StudyConfig, error) {
 		study.Tags[i] = tag
 	}
 	study.Metrics = strings.Split(metrics, ",\n")
-	log.Printf("STIDDDDDASDSADAS %v", study)
 	return study, nil
 }
 
@@ -275,14 +267,12 @@ func (d *dbConn) CreateHPStudy(in *api.StudyConfig) (string, error) {
 	}
 
 	var studyID string
-	var trials string
 	var nasConfig string
 	i := 3
 	for true {
 		studyID = generateRandid()
-		log.Printf("IN INSERT CONFIG IS: %v", configs)
 		_, err := d.db.Exec(
-			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			studyID,
 			in.Name,
 			in.Owner,
@@ -290,14 +280,12 @@ func (d *dbConn) CreateHPStudy(in *api.StudyConfig) (string, error) {
 			in.OptimizationGoal,
 			configs,
 			strings.Join(tags, ",\n"),
-			trials,
 			in.ObjectiveValueName,
 			strings.Join(in.Metrics, ",\n"),
 			nasConfig,
 			in.JobId,
 			in.JobType,
 		)
-		log.Printf("ANDREY HYI %v", err)
 		if err == nil {
 			break
 		} else if isDBDuplicateError(err) {
@@ -377,9 +365,7 @@ func (d *dbConn) CreateNASStudy(in *api.StudyConfig) (string, error) {
 		// }
 	}
 
-	log.Printf("IN : %v", in.NasConfig)
 	nasConfig, err := (&jsonpb.Marshaler{}).MarshalToString(in.NasConfig)
-	log.Printf("MARSHAL: %v", nasConfig)
 	if err != nil {
 		log.Fatalf("Error marshaling nasConfig: %v", err)
 	}
@@ -406,14 +392,13 @@ func (d *dbConn) CreateNASStudy(in *api.StudyConfig) (string, error) {
 	}
 
 	var studyID string
-	var trials string
 	var configs string
 
 	i := 3
 	for true {
 		studyID = generateRandid()
 		_, err := d.db.Exec(
-			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			studyID,
 			in.Name,
 			in.Owner,
@@ -421,7 +406,6 @@ func (d *dbConn) CreateNASStudy(in *api.StudyConfig) (string, error) {
 			in.OptimizationGoal,
 			configs,
 			strings.Join(tags, ",\n"),
-			trials,
 			in.ObjectiveValueName,
 			strings.Join(in.Metrics, ",\n"),
 			nasConfig,
@@ -456,7 +440,7 @@ func (d *dbConn) CreateNASStudy(in *api.StudyConfig) (string, error) {
 func (d *dbConn) GetNASStudyConfig(id string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
 	study := new(api.StudyConfig)
-	var dummyID, nasConfig, parameters, tags, metrics, trials string
+	var dummyID, nasConfig, parameters, tags, metrics string
 	err := row.Scan(&dummyID,
 		&study.Name,
 		&study.Owner,
@@ -464,7 +448,6 @@ func (d *dbConn) GetNASStudyConfig(id string) (*api.StudyConfig, error) {
 		&study.OptimizationGoal,
 		&tags,
 		&parameters,
-		&trials,
 		&study.ObjectiveValueName,
 		&metrics,
 		&nasConfig,
@@ -472,10 +455,8 @@ func (d *dbConn) GetNASStudyConfig(id string) (*api.StudyConfig, error) {
 		&study.JobType,
 	)
 	if err != nil {
-		log.Printf("Failed to scan: %v", err)
 		return nil, err
 	}
-	log.Printf("IN GET NAS STUDY")
 	study.NasConfig = new(api.NasConfig)
 	err = jsonpb.UnmarshalString(nasConfig, study.NasConfig)
 	if err != nil {
@@ -498,9 +479,6 @@ func (d *dbConn) GetNASStudyConfig(id string) (*api.StudyConfig, error) {
 		study.Tags[i] = tag
 	}
 	study.Metrics = strings.Split(metrics, ",\n")
-	log.Printf("Returning")
-	outBytes, _ := yaml.Marshal(study)
-	log.Printf(string(outBytes))
 	return study, nil
 }
 
@@ -573,11 +551,13 @@ func (d *dbConn) getTrials(trialID string, studyID string) ([]*api.Trial, error)
 		trial := new(api.Trial)
 
 		var parameters, tags string
+		var timeStamp
 		err := rows.Scan(&trial.TrialId,
 			&trial.StudyId,
 			&parameters,
 			&trial.ObjectiveValue,
 			&tags,
+			&timeStamp,
 		)
 		if err != nil {
 			return nil, err
@@ -671,9 +651,10 @@ func (d *dbConn) CreateTrial(trial *api.Trial) error {
 	i := 3
 	for true {
 		trialID = generateRandid()
-		_, err := d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?)",
+		timeString := time.Now().UTC().Format(mysqlTimeFmt)
+		_, err := d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?, ?)",
 			trialID, trial.StudyId, strings.Join(params, ",\n"),
-			trial.ObjectiveValue, strings.Join(tags, ",\n"))
+			trial.ObjectiveValue, strings.Join(tags, ",\n")), timeString,
 		if err == nil {
 			trial.TrialId = trialID
 			break
@@ -1242,8 +1223,6 @@ func (d *dbConn) GetSuggestionParam(paramID string) ([]*api.SuggestionParameter,
 	var params string
 	row := d.db.QueryRow("SELECT parameters FROM suggestion_param WHERE id = ?", paramID)
 	err := row.Scan(&params)
-	log.Printf("AFTER SCANNING IN GET SUGGESTION")
-	log.Printf("PARAMETER IS %v", params)
 	if err != nil {
 		return nil, err
 	}
@@ -1263,7 +1242,6 @@ func (d *dbConn) GetSuggestionParam(paramID string) ([]*api.SuggestionParameter,
 		}
 		ret[i] = p
 	}
-	log.Printf("RET IS %v", ret)
 
 	return ret, nil
 }
