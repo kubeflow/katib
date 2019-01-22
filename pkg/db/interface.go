@@ -551,7 +551,7 @@ func (d *dbConn) getTrials(trialID string, studyID string) ([]*api.Trial, error)
 		trial := new(api.Trial)
 
 		var parameters, tags string
-		var timeStamp
+		var timeStamp string
 		err := rows.Scan(&trial.TrialId,
 			&trial.StudyId,
 			&parameters,
@@ -654,7 +654,7 @@ func (d *dbConn) CreateTrial(trial *api.Trial) error {
 		timeString := time.Now().UTC().Format(mysqlTimeFmt)
 		_, err := d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?, ?)",
 			trialID, trial.StudyId, strings.Join(params, ",\n"),
-			trial.ObjectiveValue, strings.Join(tags, ",\n")), timeString,
+			trial.ObjectiveValue, strings.Join(tags, ",\n"), timeString)
 		if err == nil {
 			trial.TrialId = trialID
 			break
