@@ -24,5 +24,3 @@ def stack_lstm(x, prev_c, prev_h, w):
         next_c.append(curr_c)
         next_h.append(curr_h)
     return next_c, next_h
-
-

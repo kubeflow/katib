@@ -1,4 +1,3 @@
-
 def parseSuggestionParam(params_raw):
     param_standard = {
         "lstm_num_cells": ['value', int, [1, 'inf']],

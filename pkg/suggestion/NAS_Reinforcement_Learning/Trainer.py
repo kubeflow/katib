@@ -141,5 +141,3 @@ def get_train_ops(loss,
         return train_op, learning_rate, grad_norm, opt, grad_norms
     else:
         return train_op, learning_rate, grad_norm, opt
-
-

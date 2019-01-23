@@ -220,4 +220,3 @@ class Controller(object):
             sync_replicas=self.sync_replicas,
             num_aggregate=self.num_aggregate,
             num_replicas=self.num_replicas)
-

@@ -150,7 +150,3 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             print(spec, suggestion_params[spec])
 
         self.suggestion_config = suggestion_params
-
-
-
-
