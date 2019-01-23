@@ -8,13 +8,20 @@ class Operation(object):
         self.opt_id = opt_id
         self.opt_type = opt_type
         self.opt_params = opt_params
+    
+    def get_dict(self):
+        opt_dict = dict()
+        opt_dict['opt_id'] = self.opt_id
+        opt_dict['opt_type'] = self.opt_type
+        opt_dict['opt_params'] = self.opt_params
+        return opt_dict
 
     def print_op(self):
         print("Operation ID: \n\t", self.opt_id)
         print("Operation Type: \n\t", self.opt_type)
         print("Operations Parameters:")
-        for key, value in self.opt_params.items():
-            print("\t {}: {}".format(key, value))
+        for ikey in self.opt_params:
+            print("\t {}: {}".format(ikey, self.opt_params[ikey]))
 
 
 class SearchSpace(object):
@@ -22,8 +29,9 @@ class SearchSpace(object):
         self.operation_list = list(operations.operation)
         self.search_space = list()
         self._parse_operations()
+        print()
         self.num_operations = len(self.search_space)
-
+    
     def _parse_operations(self):
         # search_sapce is a list of Operation class
 

@@ -9,6 +9,7 @@ from pkg.api.python import api_pb2
 from pkg.api.python import api_pb2_grpc
 import logging
 from logging import getLogger, StreamHandler, INFO, DEBUG
+import json
 
 
 class NasrlService(api_pb2_grpc.SuggestionServicer):
@@ -97,7 +98,28 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
                     saver.save(sess, "ctrl_cache/controller.ckpt")
 
-        print(arc)
+        arc = arc.tolist()
+        organized_arc = [0 for _ in range(self.num_layers)]
+        record = 0
+        for l in range(self.num_layers):
+            organized_arc[l] = arc[record: record + l + 1]
+            record += l + 1
+
+        nn_config = dict()
+        nn_config['num_layers'] = self.num_layers
+        nn_config['input_size'] = self.input_size
+        nn_config['output_szie'] = self.output_size
+        nn_config['embedding'] = dict()
+        for l in range(self.num_layers):
+            opt = organized_arc[l][0]
+            nn_config['embedding'][opt] = self.search_space[opt].get_dict()
+
+        nn_config_json = json.dumps(nn_config)
+
+        print("Nerual Network Architecture:")
+        print(organized_arc)
+        print("Seach Space Embedding json:")
+        print(str(nn_config_json))
         
         return api_pb2.GetSuggestionsReply(trials=trials)
 
@@ -116,7 +138,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             gsrep = client.GetStudy(api_pb2.GetStudyRequest(study_id=studyID, job_type="NAS"), 10)
-        
+
         all_params = gsrep.study_config.nas_config
         graph_config = all_params.graph_config
         search_space_raw = all_params.operations
@@ -124,7 +146,6 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         self.num_layers = int(graph_config.num_layers)
         self.input_size = list(map(int, graph_config.input_size))
         self.output_size = list(map(int, graph_config.output_size))
-
         search_space_object = SearchSpace(search_space_raw)
 
 
@@ -133,8 +154,9 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         print("There are", self.num_operations, "operations in total")
         self.search_space = search_space_object.search_space
         for opt in self.search_space:
-            opt.print_op()
+            opt.print_op()    
             print()
+            
 
     def _get_suggestion_param(self, paramID):
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
