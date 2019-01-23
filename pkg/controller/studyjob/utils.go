@@ -42,7 +42,7 @@ func createWorkerJobObj(kind string) runtime.Object {
 func validateWorkerResource(wkind string) error {
 	for _, crd := range invalidCRDResources {
 		if crd == wkind {
-			return fmt.Errorf("Cannot support %s; If CRD for it installed, please restart studyjob-controller to take effect", wkind)
+			return fmt.Errorf("Cannot support %s; Please install the CRD and restart studyjob-controller", wkind)
 		}
 	}
 	return nil
