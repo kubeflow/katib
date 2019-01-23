@@ -11,7 +11,6 @@ spec:
   optimizationtype: maximize
   objectivevaluename: Validation-accuracy
   optimizationgoal: 0.99
-  requestcount: 4
   metricsnames:
     - accuracy
   nasConfig:
@@ -69,6 +68,7 @@ spec:
             feasible:
               min: "1"
               max: "3"
+              step: "1"
           - name: stride
             parametertype: categorical
             feasible:
@@ -128,15 +128,29 @@ spec:
   suggestionSpec:
     suggestionAlgorithm: "nasrl"
     suggestionParameters:
-      - name: "num_control_cells"
-        value: "32"
-      - name: "embedding_dim"
-        value: "20"
-      - name: "accuracy_beta"
-        value: "0.8"
-      - name: "clip_rewards"
+      - name: "lstm_num_cells"
+        value: "64"
+      - name: "lstm_num_layers"
+        value: "1"
+      - name: "lstm_keep_prob"
+        value: "1.0"
+      - name: "optimizer"
+        value: "adam"
+      - name: "init_learning_rate"
+        value: "1e-3"
+      - name: "lr_decay_start"
         value: "0"
-      - name: "embedding_dim"
-        value: "20"
-      - name: "discount_factor"
-        value: "0.95"
+      - name: "lr_decay_every"
+        value: "1000"
+      - name: "lr_decay_rate"
+        value: "0.9"
+      - name: "skip-target"
+        value: "0.4"
+      - name: "skip-weight"
+        value: "0.8"
+      - name: "l2_reg"
+        value: "0"
+      - name: "entropy_weight"
+        value: "1e-4"
+      - name: "baseline_decay"
+        value: "0.9999"
