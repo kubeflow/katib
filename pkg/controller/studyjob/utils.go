@@ -22,6 +22,7 @@ import (
 
 	batchv1 "k8s.io/api/batch/v1"
 	batchv1beta "k8s.io/api/batch/v1beta1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -48,6 +49,18 @@ func validateWorkerResource(wkind string) error {
 	return nil
 }
 
+func ignoreWatchError(err error, job string) bool {
+	if err == nil {
+		return true
+	}
+	if meta.IsNoMatchError(err) {
+		invalidCRDResources = append(invalidCRDResources, job)
+		log.Printf("Fail to watch CRD: %v; Please install the CRD and restart studyjob-controller to support %s worker", err, job)
+		return true
+	} else {
+		return false
+	}
+}
 
 func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (string, error) {
 	var typeChecker interface{}

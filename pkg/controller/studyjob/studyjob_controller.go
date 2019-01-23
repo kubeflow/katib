@@ -120,9 +120,8 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			IsController: true,
 			OwnerType:    &katibv1alpha1.StudyJob{},
 		})
-	if err != nil {
-		invalidCRDResources = append(invalidCRDResources, TFJobWorker)
-		log.Printf("Fail to watch TFJob resource: %v", err)
+	if !ignoreWatchError(err, TFJobWorker) {
+		return err
 	}
 
 	err = c.Watch(
@@ -131,9 +130,8 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			IsController: true,
 			OwnerType:    &katibv1alpha1.StudyJob{},
 		})
-	if err != nil {
-		invalidCRDResources = append(invalidCRDResources, PyTorchJobWorker)
-		log.Printf("Fail to watch PyTorchJob resource: %v", err)
+	if !ignoreWatchError(err, PyTorchJobWorker) {
+		return err
 	}
 
 	return nil
