@@ -48,6 +48,7 @@ type VizierDBInterface interface {
 
 	GetStudyMetrics(string) ([]string, error)
 	GetStudyIDsTypesList() ([]string, []string, error)
+	GetStudyJobType(string) (string, error)
 
 	GetHPStudyConfig(string) (*api.StudyConfig, error)
 	GetHPStudyList() ([]string, error)
@@ -153,6 +154,39 @@ func (d *dbConn) GetStudyMetrics(id string) ([]string, error) {
 	return retMetrics, nil
 }
 
+func (d *dbConn) GetStudyJobType(StudyID string) (string, error) {
+	row := d.db.QueryRow("SELECT distinct job_type FROM studies WHERE study_id = ?", StudyID)
+	var jobType string
+	err := row.Scan(&jobType)
+	if err != nil {
+		return "", err
+	}
+	return jobType, nil
+}
+
+func (d *dbConn) GetStudyIDsTypesList() ([]string, []string, error) {
+	rows, err := d.db.Query("SELECT id, job_type FROM studies")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	defer rows.Close()
+	var resultTypes []string
+	var resultIDs []string
+	for rows.Next() {
+		var id, jobType string
+		err = rows.Scan(&id, jobType)
+		if err != nil {
+			log.Printf("err scanning studies.id: %v", err)
+			continue
+		}
+		resultIDs = append(resultIDs, id)
+		resultTypes = append(resultTypes, jobType)
+	}
+
+	return resultIDs, resultTypes, nil
+}
+
 func New() (VizierDBInterface, error) {
 	db, err := openSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
 	if err != nil {
@@ -178,29 +212,6 @@ func isDBDuplicateError(err error) bool {
 		return true
 	}
 	return false
-}
-
-func (d *dbConn) GetStudyIDsTypesList() ([]string, []string, error) {
-	rows, err := d.db.Query("SELECT id, job_type FROM studies")
-	if err != nil {
-		return nil, nil, err
-	}
-
-	defer rows.Close()
-	var resultTypes []string
-	var resultIDs []string
-	for rows.Next() {
-		var id, jobType string
-		err = rows.Scan(&id, jobType)
-		if err != nil {
-			log.Printf("err scanning studies.id: %v", err)
-			continue
-		}
-		resultIDs = append(resultIDs, id)
-		resultTypes = append(resultTypes, jobType)
-	}
-
-	return resultIDs, resultTypes, nil
 }
 
 func (d *dbConn) GetHPStudyConfig(id string) (*api.StudyConfig, error) {
@@ -692,6 +703,13 @@ func (d *dbConn) CreateTrial(trial *api.Trial) error {
 		_, err := d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?, ?)",
 			trialID, trial.StudyId, strings.Join(params, ",\n"),
 			trial.ObjectiveValue, strings.Join(tags, ",\n"), timeString)
+		log.Printf("Creating trial with following params:")
+		log.Printf("ID: %v", trialID)
+		log.Printf("StudyID: %v", trial.StudyId)
+		log.Printf("Params: %v", strings.Join(params, ",\n"))
+		log.Printf("ObjectiveValue: %v", trial.ObjectiveValue)
+		log.Printf("Tags: %v", strings.Join(tags, ",\n"))
+		log.Printf("Time: %v", timeString)
 		if err == nil {
 			trial.TrialId = trialID
 			break
