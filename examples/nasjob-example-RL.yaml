@@ -114,16 +114,7 @@ spec:
                   - name: gitlabregcred
                 containers:
                 - name: {{.WorkerID}}
-                  image: katib/mxnet-mnist-example
-                  command:
-                  - "python"
-                  - "/mxnet/example/image-classification/train_mnist.py"
-                  - "--batch-size=32"
-                  {{- with .HyperParameters}}
-                  {{- range .}}
-                  - "{{.Name}}={{.Value}}"
-                  {{- end}}
-                  {{- end}}
+                  image: docker.io/andreyvelichkevich/training-container-nas
                 restartPolicy: Never
   suggestionSpec:
     suggestionAlgorithm: "nasrl"

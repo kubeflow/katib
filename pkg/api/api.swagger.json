@@ -246,6 +246,31 @@
         ]
       }
     },
+    "/api/Manager/GetStudyJobType/{study_id}": {
+      "get": {
+        "summary": "*\nGet jobType of Study",
+        "operationId": "GetStudyJobType",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetStudyJobTypeReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "study_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
     "/api/Manager/GetStudyList": {
       "get": {
         "summary": "*\nGet all Study Configs from DB.",
@@ -883,6 +908,15 @@
           "type": "string"
         }
       }
+    },
+    "apiGetStudyJobTypeReply": {
+      "type": "object",
+      "properties": {
+        "job_type": {
+          "type": "string"
+        }
+      },
+      "title": "*\nReturn JobType of Study"
     },
     "apiGetStudyListReply": {
       "type": "object",

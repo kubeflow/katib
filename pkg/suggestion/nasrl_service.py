@@ -17,13 +17,34 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
     def GetSuggestions(self, request, context):
         trials = []
-        study_conf = self.getStudyConfig(request.study_id)
-        print("Search Space")
-        print(study_conf)
+        print("INSIDE GET SUGGESTION WITH request %s" %request)
 
+        study_conf = self.getStudyConfig(request.study_id)
         suggestion_parameters = self.getSuggestionParameters(request.param_id)
-        print("Suggestion Parameters")
-        print(suggestion_parameters)
+        
+        trials.append(api_pb2.Trial(
+                study_id=request.study_id,
+                parameter_set=[
+                    api_pb2.Parameter(
+                        name="Test_name",
+                        value="Test_value",
+                        parameter_type= api_pb2.CATEGORICAL,
+                    )
+                ]
+            )
+        )
+        print("TRIALS CREATED")
+        
+        channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
+        with api_pb2.beta_create_Manager_stub(channel) as client:
+            print("INSIDE CLIENT")
+            for i, t in enumerate(trials):
+                ctrep = client.CreateTrial(api_pb2.CreateTrialRequest(trial=t), 10)
+                trials[i].trial_id = ctrep.trial_id
+            print("TRIALS INSERTED")
+            print(ctrep.trial_id)
+        
+        print("END OF SUGGESTION")
 
         return api_pb2.GetSuggestionsReply(trials=trials)
     

@@ -28,6 +28,8 @@
     - [GetSavedStudiesRequest](#api.GetSavedStudiesRequest)
     - [GetShouldStopWorkersReply](#api.GetShouldStopWorkersReply)
     - [GetShouldStopWorkersRequest](#api.GetShouldStopWorkersRequest)
+    - [GetStudyJobTypeReply](#api.GetStudyJobTypeReply)
+    - [GetStudyJobTypeRequest](#api.GetStudyJobTypeRequest)
     - [GetStudyListReply](#api.GetStudyListReply)
     - [GetStudyListRequest](#api.GetStudyListRequest)
     - [GetStudyReply](#api.GetStudyReply)
@@ -473,6 +475,36 @@ Discrete and Categorical type use List.
 | study_id | [string](#string) |  |  |
 | early_stopping_algorithm | [string](#string) |  |  |
 | param_id | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="api.GetStudyJobTypeReply"/>
+
+### GetStudyJobTypeReply
+Return JobType of Study
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| job_type | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="api.GetStudyJobTypeRequest"/>
+
+### GetStudyJobTypeRequest
+Get JobType of Study
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| study_id | [string](#string) |  |  |
 
 
 
@@ -1453,6 +1485,7 @@ https://cloud.google.com/service-infrastructure/docs/service-management/referenc
 | GetStudy | [GetStudyRequest](#api.GetStudyRequest) | [GetStudyReply](#api.GetStudyRequest) | Get a Study Config from DB by ID of Study. |
 | DeleteStudy | [DeleteStudyRequest](#api.DeleteStudyRequest) | [DeleteStudyReply](#api.DeleteStudyRequest) | Delete a Study from DB by Study ID. |
 | GetStudyList | [GetStudyListRequest](#api.GetStudyListRequest) | [GetStudyListReply](#api.GetStudyListRequest) | Get all Study Configs from DB. |
+| GetStudyJobType | [GetStudyJobTypeRequest](#api.GetStudyJobTypeRequest) | [GetStudyJobTypeReply](#api.GetStudyJobTypeRequest) | Get jobType of Study |
 | CreateTrial | [CreateTrialRequest](#api.CreateTrialRequest) | [CreateTrialReply](#api.CreateTrialRequest) | Create a Trial from Trial Config. Generate a unique ID and store the Trial to DB. |
 | GetTrials | [GetTrialsRequest](#api.GetTrialsRequest) | [GetTrialsReply](#api.GetTrialsRequest) | Get a Trial Configs from DB by ID of Study. |
 | GetTrial | [GetTrialRequest](#api.GetTrialRequest) | [GetTrialReply](#api.GetTrialRequest) | Get a Trial Configuration from DB by ID of Trial. |
