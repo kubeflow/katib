@@ -49,16 +49,16 @@ func validateWorkerResource(wkind string) error {
 	return nil
 }
 
-func ignoreWatchError(err error, job string) bool {
+func isFatalWatchError(err error, job string) bool {
 	if err == nil {
-		return true
+		return false
 	}
 	if meta.IsNoMatchError(err) {
 		invalidCRDResources = append(invalidCRDResources, job)
 		log.Printf("Fail to watch CRD: %v; Please install the CRD and restart studyjob-controller to support %s worker", err, job)
-		return true
-	} else {
 		return false
+	} else {
+		return true
 	}
 }
 

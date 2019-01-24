@@ -120,7 +120,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			IsController: true,
 			OwnerType:    &katibv1alpha1.StudyJob{},
 		})
-	if !ignoreWatchError(err, TFJobWorker) {
+	if isFatalWatchError(err, TFJobWorker) {
 		return err
 	}
 
@@ -130,7 +130,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			IsController: true,
 			OwnerType:    &katibv1alpha1.StudyJob{},
 		})
-	if !ignoreWatchError(err, PyTorchJobWorker) {
+	if isFatalWatchError(err, PyTorchJobWorker) {
 		return err
 	}
 
