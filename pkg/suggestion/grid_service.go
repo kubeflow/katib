@@ -147,6 +147,7 @@ func (s *GridSuggestService) GetSuggestions(ctx context.Context, in *api.GetSugg
 	c := api.NewManagerClient(conn)
 	screq := &api.GetStudyRequest{
 		StudyId: in.StudyId,
+		JobType: "HP",
 	}
 	scr, err := c.GetStudy(ctx, screq)
 	if err != nil {

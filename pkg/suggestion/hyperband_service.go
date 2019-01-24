@@ -76,6 +76,7 @@ func (h *HyperBandSuggestService) makeMasterBracket(ctx context.Context, c api.M
 	log.Printf("Make MasterBracket %v Trials", n)
 	gsreq := &api.GetStudyRequest{
 		StudyId: studyID,
+		JobType: "HP",
 	}
 	gsrep, err := c.GetStudy(ctx, gsreq)
 	if err != nil {
@@ -132,6 +133,7 @@ func (h *HyperBandSuggestService) makeMasterBracket(ctx context.Context, c api.M
 func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.ManagerClient, parent Bracket, studyID string, n int, rI float64, hbparam *HyperBandParameters) ([]string, []*api.Trial, error) {
 	gsreq := &api.GetStudyRequest{
 		StudyId: studyID,
+		JobType: "HP",
 	}
 	gsrep, err := c.GetStudy(ctx, gsreq)
 	if err != nil {
@@ -142,7 +144,7 @@ func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.Ma
 	child := Bracket{}
 
 	if sconf.OptimizationType == api.OptimizationType_MINIMIZE {
-		child = parent[len(parent) - n:]
+		child = parent[len(parent)-n:]
 	} else if sconf.OptimizationType == api.OptimizationType_MAXIMIZE {
 		child = parent[:n]
 	}
@@ -247,6 +249,7 @@ func (h *HyperBandSuggestService) parseSuggestionParameters(ctx context.Context,
 	if p.ObjectiveValueName == "" {
 		gsreq := &api.GetStudyRequest{
 			StudyId: studyID,
+			JobType: "HP",
 		}
 		gsrep, err := c.GetStudy(ctx, gsreq)
 		if err != nil {

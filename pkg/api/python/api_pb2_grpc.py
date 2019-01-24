@@ -38,6 +38,11 @@ class ManagerStub(object):
         request_serializer=api__pb2.GetStudyListRequest.SerializeToString,
         response_deserializer=api__pb2.GetStudyListReply.FromString,
         )
+    self.GetStudyJobType = channel.unary_unary(
+        '/api.Manager/GetStudyJobType',
+        request_serializer=api__pb2.GetStudyJobTypeRequest.SerializeToString,
+        response_deserializer=api__pb2.GetStudyJobTypeReply.FromString,
+        )
     self.CreateTrial = channel.unary_unary(
         '/api.Manager/CreateTrial',
         request_serializer=api__pb2.CreateTrialRequest.SerializeToString,
@@ -181,6 +186,14 @@ class ManagerServicer(object):
   def GetStudyList(self, request, context):
     """*
     Get all Study Configs from DB.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetStudyJobType(self, request, context):
+    """*
+    Get jobType of Study
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -377,6 +390,11 @@ def add_ManagerServicer_to_server(servicer, server):
           servicer.GetStudyList,
           request_deserializer=api__pb2.GetStudyListRequest.FromString,
           response_serializer=api__pb2.GetStudyListReply.SerializeToString,
+      ),
+      'GetStudyJobType': grpc.unary_unary_rpc_method_handler(
+          servicer.GetStudyJobType,
+          request_deserializer=api__pb2.GetStudyJobTypeRequest.FromString,
+          response_serializer=api__pb2.GetStudyJobTypeReply.SerializeToString,
       ),
       'CreateTrial': grpc.unary_unary_rpc_method_handler(
           servicer.CreateTrial,
