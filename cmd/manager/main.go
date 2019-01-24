@@ -376,6 +376,15 @@ func (s *server) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*
 	return &resp, nil
 }
 
+func (s *server) GetStudyJobType(ctx context.Context, in *api_pb.GetStudyJobTypeRequest) (*api_pb.GetStudyJobTypeReply, error) {
+	jobType, err := dbIf.GetStudyJobType(in.StudyId)
+	if err != nil {
+		return &api_pb.GetStudyJobTypeReply{}, err
+	}
+	return &api_pb.GetStudyJobTypeReply{JobType: jobType}, err
+
+}
+
 func main() {
 	flag.Parse()
 	var err error
