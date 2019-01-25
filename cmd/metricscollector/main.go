@@ -69,18 +69,8 @@ func main() {
 		log.Fatalf("Failed to create MetricsCollector: %v", err)
 	}
 	ctx := context.Background()
-
-	jobTypeReq := &api.GetStudyJobTypeRequest{
-		StudyId: *studyID,
-	}
-	jobTypeRep, err := c.GetStudyJobType(ctx, jobTypeReq)
-	if err != nil {
-		log.Fatalf("Failed to GetStudyJobType: %v", err)
-	}
-
 	screq := &api.GetStudyRequest{
 		StudyId: *studyID,
-		JobType: jobTypeRep.JobType,
 	}
 	screp, err := c.GetStudy(ctx, screq)
 	if err != nil {
