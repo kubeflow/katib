@@ -51,6 +51,10 @@ const (
 	cleanDataFinalizer = "clean-studyjob-data"
 )
 
+var (
+	invalidCRDResources [] string
+)
+
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
 * business logic.  Delete these comments after modifying this file.*
@@ -116,7 +120,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			IsController: true,
 			OwnerType:    &katibv1alpha1.StudyJob{},
 		})
-	if err != nil {
+	if isFatalWatchError(err, TFJobWorker) {
 		return err
 	}
 
@@ -126,7 +130,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			IsController: true,
 			OwnerType:    &katibv1alpha1.StudyJob{},
 		})
-	if err != nil {
+	if isFatalWatchError(err, PyTorchJobWorker) {
 		return err
 	}
 
