@@ -48,20 +48,18 @@ type VizierDBInterface interface {
 
 	GetStudyMetrics(string) ([]string, error)
 	GetStudyIDsTypesList() ([]string, []string, error)
-	GetStudyJobType(string) (string, error)
+	GetStudy(string) (*api.StudyConfig, error)
+	GetStudyList() ([]string, error)
 
 	GetHPStudyConfig(string) (*api.StudyConfig, error)
-	GetHPStudyList() ([]string, error)
 	CreateHPStudy(*api.StudyConfig) (string, error)
 	UpdateHPStudy(string, *api.StudyConfig) error
-	DeleteHPStudy(string) error
 
 	/* APIs for NAS */
 	GetNASStudyConfig(string) (*api.StudyConfig, error)
-	GetNASStudyList() ([]string, error)
 	CreateNASStudy(*api.StudyConfig) (string, error)
 	UpdateNASStudy(string, *api.StudyConfig) error
-	DeleteNASStudy(string) error
+	DeleteStudy(string) error
 
 	GetTrial(string) (*api.Trial, error)
 	GetTrialList(string) ([]*api.Trial, error)
@@ -154,16 +152,6 @@ func (d *dbConn) GetStudyMetrics(id string) ([]string, error) {
 	return retMetrics, nil
 }
 
-func (d *dbConn) GetStudyJobType(StudyID string) (string, error) {
-	row := d.db.QueryRow("SELECT distinct job_type FROM studies WHERE study_id = ?", StudyID)
-	var jobType string
-	err := row.Scan(&jobType)
-	if err != nil {
-		return "", err
-	}
-	return jobType, nil
-}
-
 func (d *dbConn) GetStudyIDsTypesList() ([]string, []string, error) {
 	rows, err := d.db.Query("SELECT id, job_type FROM studies")
 	if err != nil {
@@ -185,6 +173,21 @@ func (d *dbConn) GetStudyIDsTypesList() ([]string, []string, error) {
 	}
 
 	return resultIDs, resultTypes, nil
+}
+
+func (d *dbConn) GetStudy(StudyID string) (*api.StudyConfig, error) {
+	row := d.db.QueryRow("SELECT job_type FROM studies WHERE id = ?", StudyID)
+	var jobType string
+	err := row.Scan(&jobType)
+	log.Printf("JobType is: %v", jobType)
+	if err != nil {
+		return &api.StudyConfig{}, err
+	}
+	if jobType == "NAS" {
+		return d.GetNASStudyConfig(StudyID)
+	} else {
+		return d.GetHPStudyConfig(StudyID)
+	}
 }
 
 func New() (VizierDBInterface, error) {
@@ -258,8 +261,8 @@ func (d *dbConn) GetHPStudyConfig(id string) (*api.StudyConfig, error) {
 	return study, nil
 }
 
-func (d *dbConn) GetHPStudyList() ([]string, error) {
-	rows, err := d.db.Query("SELECT id FROM studies WHERE job_type = 'HP'")
+func (d *dbConn) GetStudyList() ([]string, error) {
+	rows, err := d.db.Query("SELECT id FROM studies")
 	if err != nil {
 		return nil, err
 	}
@@ -379,11 +382,6 @@ func (d *dbConn) UpdateHPStudy(studyID string, in *api.StudyConfig) error {
 		strings.Join(tags, ",\n"),
 		in.JobId,
 		studyID)
-	return err
-}
-
-func (d *dbConn) DeleteHPStudy(id string) error {
-	_, err := d.db.Exec("DELETE FROM studies WHERE id = ?", id)
 	return err
 }
 
@@ -530,26 +528,6 @@ func (d *dbConn) GetNASStudyConfig(id string) (*api.StudyConfig, error) {
 	return study, nil
 }
 
-func (d *dbConn) GetNASStudyList() ([]string, error) {
-	rows, err := d.db.Query("SELECT id FROM studies WHERE job_type = 'NAS'")
-	if err != nil {
-		return nil, err
-	}
-
-	defer rows.Close()
-	var result []string
-	for rows.Next() {
-		var id string
-		err = rows.Scan(&id)
-		if err != nil {
-			log.Printf("err scanning studies.id: %v", err)
-			continue
-		}
-		result = append(result, id)
-	}
-	return result, nil
-}
-
 func (d *dbConn) UpdateNASStudy(studyID string, in *api.StudyConfig) error {
 
 	/* THINK ABOUT TRIALS */
@@ -573,7 +551,7 @@ func (d *dbConn) UpdateNASStudy(studyID string, in *api.StudyConfig) error {
 	return err
 }
 
-func (d *dbConn) DeleteNASStudy(id string) error {
+func (d *dbConn) DeleteStudy(id string) error {
 	_, err := d.db.Exec("DELETE FROM studies WHERE id = ?", id)
 	return err
 }

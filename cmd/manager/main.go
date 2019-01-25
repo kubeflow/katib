@@ -66,63 +66,40 @@ func (s *server) DeleteStudy(ctx context.Context, in *api_pb.DeleteStudyRequest)
 	if in == nil || in.StudyId == "" {
 		return &api_pb.DeleteStudyReply{}, errors.New("StudyId is missing.")
 	}
-	var err error
-	if in.JobType != "NAS" {
-		//If it is a HP job
-		err = dbIf.DeleteHPStudy(in.StudyId)
-		if err != nil {
-			return &api_pb.DeleteStudyReply{}, err
-		}
-	} else {
-		//If it is a NAS job
-		err = dbIf.DeleteNASStudy(in.StudyId)
-		if err != nil {
-			log.Printf("Error is %v", err)
-			return &api_pb.DeleteStudyReply{}, err
-		}
-
+	err := dbIf.DeleteStudy(in.StudyId)
+	if err != nil {
+		log.Printf("Error is %v", err)
+		return &api_pb.DeleteStudyReply{}, err
 	}
 	return &api_pb.DeleteStudyReply{StudyId: in.StudyId}, nil
 }
 
 func (s *server) GetStudy(ctx context.Context, in *api_pb.GetStudyRequest) (*api_pb.GetStudyReply, error) {
-	var sc *api_pb.StudyConfig
-	var err error
-	if in.JobType != "NAS" {
-		//If it is a HP job
-		sc, err = dbIf.GetHPStudyConfig(in.StudyId)
-	} else {
-		//If it is a NAS job
-		sc, err = dbIf.GetNASStudyConfig(in.StudyId)
-		if err != nil {
-			log.Printf("Error is %v", err)
-			return &api_pb.GetStudyReply{}, err
-		}
+
+	sc, err := dbIf.GetStudy(in.StudyId)
+
+	if err != nil {
+		log.Printf("Error is %v", err)
+		return &api_pb.GetStudyReply{}, err
 	}
 	return &api_pb.GetStudyReply{StudyConfig: sc}, err
 }
 
 func (s *server) GetStudyList(ctx context.Context, in *api_pb.GetStudyListRequest) (*api_pb.GetStudyListReply, error) {
-	types, ids, err := dbIf.GetStudyIDsTypesList()
+	sl, err := dbIf.GetStudyList()
 	if err != nil {
 		return &api_pb.GetStudyListReply{}, err
 	}
-	result := make([]*api_pb.StudyOverview, len(types))
-	for i, _ := range types {
-		var sc *api_pb.StudyConfig
-		var err error
-		if types[i] == "NAS" {
-			sc, err = dbIf.GetNASStudyConfig(ids[i])
-		} else {
-			sc, err = dbIf.GetHPStudyConfig(ids[i])
-		}
+	result := make([]*api_pb.StudyOverview, len(sl))
+	for i, id := range sl {
+		sc, err := dbIf.GetStudy(id)
 		if err != nil {
 			return &api_pb.GetStudyListReply{}, err
 		}
 		result[i] = &api_pb.StudyOverview{
 			Name:  sc.Name,
 			Owner: sc.Owner,
-			Id:    ids[i],
+			Id:    id,
 		}
 	}
 	return &api_pb.GetStudyListReply{StudyOverviews: result}, err
@@ -147,14 +124,18 @@ func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRe
 	if in.SuggestionAlgorithm == "" {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, errors.New("No suggest algorithm specified")
 	}
+	log.Printf("BEFORE DYING MY ALGORITHM WAS: %v", in.SuggestionAlgorithm)
 	conn, err := grpc.Dial("vizier-suggestion-"+in.SuggestionAlgorithm+":6789", grpc.WithInsecure())
+	log.Printf("ILI YA UMER TYT? %v", err)
 	if err != nil {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
 	}
 
 	defer conn.Close()
 	c := api_pb.NewSuggestionClient(conn)
+	log.Printf("CONNECTION: %v", c)
 	r, err := c.GetSuggestions(ctx, in)
+	log.Printf("YA UMER TYT: %v", err)
 	if err != nil {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
 	}
@@ -192,20 +173,19 @@ func (s *server) GetShouldStopWorkers(ctx context.Context, in *api_pb.GetShouldS
 	return c.GetShouldStopWorkers(context.Background(), in)
 }
 
-// SEPARATION HERE
 func (s *server) GetMetrics(ctx context.Context, in *api_pb.GetMetricsRequest) (*api_pb.GetMetricsReply, error) {
 	var mNames []string
 	if in.StudyId == "" {
 		return &api_pb.GetMetricsReply{}, errors.New("StudyId should be set")
 	}
-	metrics, err := dbIf.GetStudyMetrics(in.StudyId)
+	sc, err := dbIf.GetStudy(in.StudyId)
 	if err != nil {
 		return &api_pb.GetMetricsReply{}, err
 	}
 	if len(in.MetricsNames) > 0 {
 		mNames = in.MetricsNames
 	} else {
-		mNames = metrics
+		mNames = sc.Metrics
 	}
 	if err != nil {
 		return &api_pb.GetMetricsReply{}, err
@@ -260,7 +240,6 @@ func (s *server) UpdateWorkerState(ctx context.Context, in *api_pb.UpdateWorkerS
 	return &api_pb.UpdateWorkerStateReply{}, err
 }
 
-// SEPARATION HERE
 func (s *server) GetWorkerFullInfo(ctx context.Context, in *api_pb.GetWorkerFullInfoRequest) (*api_pb.GetWorkerFullInfoReply, error) {
 	return dbIf.GetWorkerFullInfo(in.StudyId, in.TrialId, in.WorkerId, in.OnlyLatestLog)
 }
@@ -374,15 +353,6 @@ func (s *server) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*
 	}
 
 	return &resp, nil
-}
-
-func (s *server) GetStudyJobType(ctx context.Context, in *api_pb.GetStudyJobTypeRequest) (*api_pb.GetStudyJobTypeReply, error) {
-	jobType, err := dbIf.GetStudyJobType(in.StudyId)
-	if err != nil {
-		return &api_pb.GetStudyJobTypeReply{}, err
-	}
-	return &api_pb.GetStudyJobTypeReply{JobType: jobType}, err
-
 }
 
 func main() {
