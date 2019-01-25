@@ -179,7 +179,6 @@ func (d *dbConn) GetStudy(StudyID string) (*api.StudyConfig, error) {
 	row := d.db.QueryRow("SELECT job_type FROM studies WHERE id = ?", StudyID)
 	var jobType string
 	err := row.Scan(&jobType)
-	log.Printf("JobType is: %v", jobType)
 	if err != nil {
 		return &api.StudyConfig{}, err
 	}
@@ -681,13 +680,6 @@ func (d *dbConn) CreateTrial(trial *api.Trial) error {
 		_, err := d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?, ?)",
 			trialID, trial.StudyId, strings.Join(params, ",\n"),
 			trial.ObjectiveValue, strings.Join(tags, ",\n"), timeString)
-		log.Printf("Creating trial with following params:")
-		log.Printf("ID: %v", trialID)
-		log.Printf("StudyID: %v", trial.StudyId)
-		log.Printf("Params: %v", strings.Join(params, ",\n"))
-		log.Printf("ObjectiveValue: %v", trial.ObjectiveValue)
-		log.Printf("Tags: %v", strings.Join(tags, ",\n"))
-		log.Printf("Time: %v", timeString)
 		if err == nil {
 			trial.TrialId = trialID
 			break

@@ -124,18 +124,14 @@ func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRe
 	if in.SuggestionAlgorithm == "" {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, errors.New("No suggest algorithm specified")
 	}
-	log.Printf("BEFORE DYING MY ALGORITHM WAS: %v", in.SuggestionAlgorithm)
 	conn, err := grpc.Dial("vizier-suggestion-"+in.SuggestionAlgorithm+":6789", grpc.WithInsecure())
-	log.Printf("ILI YA UMER TYT? %v", err)
 	if err != nil {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
 	}
 
 	defer conn.Close()
 	c := api_pb.NewSuggestionClient(conn)
-	log.Printf("CONNECTION: %v", c)
 	r, err := c.GetSuggestions(ctx, in)
-	log.Printf("YA UMER TYT: %v", err)
 	if err != nil {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
 	}
