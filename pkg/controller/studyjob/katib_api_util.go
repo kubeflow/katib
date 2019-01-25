@@ -236,7 +236,7 @@ func deleteStudy(instance *katibv1alpha1.StudyJob) error {
 	ctx := context.Background()
 	studyID := instance.Status.StudyID
 	if studyID == "" {
-	// in case that information for a studyjob is not created in DB
+		// in case that information for a studyjob is not created in DB
 		return nil
 	}
 	deleteStudyreq := &katibapi.DeleteStudyRequest{
@@ -263,7 +263,6 @@ func createStudy(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig) (s
 	log.Printf("Study ID %s", studyID)
 	getStudyreq := &katibapi.GetStudyRequest{
 		StudyId: studyID,
-		JobType: studyConfig.JobType,
 	}
 	getStudyReply, err := c.GetStudy(ctx, getStudyreq)
 	if err != nil {

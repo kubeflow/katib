@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='api.proto',
   package='api',
   syntax='proto3',
-  serialized_pb=_b('\n\tapi.proto\x12\x03\x61pi\x1a\x1cgoogle/api/annotations.proto\"E\n\rFeasibleSpace\x12\x0b\n\x03max\x18\x01 \x01(\t\x12\x0b\n\x03min\x18\x02 \x01(\t\x12\x0c\n\x04list\x18\x03 \x03(\t\x12\x0c\n\x04step\x18\x04 \x01(\t\"q\n\x0fParameterConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12*\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x12.api.ParameterType\x12$\n\x08\x66\x65\x61sible\x18\x03 \x01(\x0b\x32\x12.api.FeasibleSpace\"T\n\tParameter\x12\x0c\n\x04name\x18\x01 \x01(\t\x12*\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x12.api.ParameterType\x12\r\n\x05value\x18\x03 \x01(\t\"l\n\rMetricsLogSet\x12\x11\n\tworker_id\x18\x01 \x01(\t\x12%\n\x0cmetrics_logs\x18\x02 \x03(\x0b\x32\x0f.api.MetricsLog\x12!\n\rworker_status\x18\x03 \x01(\x0e\x32\n.api.State\"&\n\x07Metrics\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"/\n\x10MetricsValueTime\x12\x0c\n\x04time\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"A\n\nMetricsLog\x12\x0c\n\x04name\x18\x01 \x01(\t\x12%\n\x06values\x18\x02 \x03(\x0b\x32\x15.api.MetricsValueTime\"2\n\x13SuggestionParameter\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"5\n\x16\x45\x61rlyStoppingParameter\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\"\n\x03Tag\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"M\n\rStudyOverview\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05owner\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\"\x83\x01\n\x05Trial\x12\x10\n\x08trial_id\x18\x01 \x01(\t\x12\x10\n\x08study_id\x18\x02 \x01(\t\x12%\n\rparameter_set\x18\x03 \x03(\x0b\x32\x0e.api.Parameter\x12\x17\n\x0fobjective_value\x18\x04 \x01(\t\x12\x16\n\x04tags\x18\x05 \x03(\x0b\x32\x08.api.Tag\"\x97\x01\n\x06Worker\x12\x11\n\tworker_id\x18\x01 \x01(\t\x12\x10\n\x08study_id\x18\x02 \x01(\t\x12\x10\n\x08trial_id\x18\x03 \x01(\t\x12\x0c\n\x04Type\x18\x04 \x01(\t\x12\x1a\n\x06status\x18\x05 \x01(\x0e\x32\n.api.State\x12\x14\n\x0cTemplatePath\x18\x06 \x01(\t\x12\x16\n\x04tags\x18\x07 \x03(\x0b\x32\x08.api.Tag\"\x93\x01\n\tNasConfig\x12&\n\x0cgraph_config\x18\x01 \x01(\x0b\x32\x10.api.GraphConfig\x12-\n\noperations\x18\x02 \x01(\x0b\x32\x19.api.NasConfig.Operations\x1a/\n\nOperations\x12!\n\toperation\x18\x01 \x03(\x0b\x32\x0e.api.Operation\"J\n\x0bGraphConfig\x12\x12\n\nnum_layers\x18\x01 \x01(\x05\x12\x12\n\ninput_size\x18\x02 \x03(\x05\x12\x13\n\x0boutput_size\x18\x03 \x03(\x05\"\x99\x01\n\tOperation\x12\x15\n\roperationType\x18\x01 \x01(\t\x12:\n\x11parameter_configs\x18\x02 \x01(\x0b\x32\x1f.api.Operation.ParameterConfigs\x1a\x39\n\x10ParameterConfigs\x12%\n\x07\x63onfigs\x18\x01 \x03(\x0b\x32\x14.api.ParameterConfig\"\x98\x03\n\x0bStudyConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05owner\x18\x02 \x01(\t\x12\x30\n\x11optimization_type\x18\x03 \x01(\x0e\x32\x15.api.OptimizationType\x12\x19\n\x11optimization_goal\x18\x04 \x01(\x01\x12<\n\x11parameter_configs\x18\x05 \x01(\x0b\x32!.api.StudyConfig.ParameterConfigs\x12\x1a\n\x12\x61\x63\x63\x65ss_permissions\x18\x06 \x03(\t\x12\x16\n\x04tags\x18\x07 \x03(\x0b\x32\x08.api.Tag\x12\x1c\n\x14objective_value_name\x18\x08 \x01(\t\x12\x0f\n\x07metrics\x18\t \x03(\t\x12\r\n\x05jobId\x18\n \x01(\t\x12\"\n\nnas_config\x18\x0b \x01(\x0b\x32\x0e.api.NasConfig\x12\x10\n\x08job_type\x18\x0c \x01(\t\x1a\x39\n\x10ParameterConfigs\x12%\n\x07\x63onfigs\x18\x01 \x03(\x0b\x32\x14.api.ParameterConfig\"<\n\x12\x43reateStudyRequest\x12&\n\x0cstudy_config\x18\x01 \x01(\x0b\x32\x10.api.StudyConfig\"$\n\x10\x43reateStudyReply\x12\x10\n\x08study_id\x18\x01 \x01(\t\"8\n\x12\x44\x65leteStudyRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12\x10\n\x08job_type\x18\x02 \x01(\t\"$\n\x10\x44\x65leteStudyReply\x12\x10\n\x08study_id\x18\x01 \x01(\t\"5\n\x0fGetStudyRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12\x10\n\x08job_type\x18\x02 \x01(\t\"7\n\rGetStudyReply\x12&\n\x0cstudy_config\x18\x01 \x01(\x0b\x32\x10.api.StudyConfig\"\x15\n\x13GetStudyListRequest\"@\n\x11GetStudyListReply\x12+\n\x0fstudy_overviews\x18\x01 \x03(\x0b\x32\x12.api.StudyOverview\"*\n\x16GetStudyJobTypeRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\"(\n\x14GetStudyJobTypeReply\x12\x10\n\x08job_type\x18\x01 \x01(\t\"/\n\x12\x43reateTrialRequest\x12\x19\n\x05trial\x18\x01 \x01(\x0b\x32\n.api.Trial\"$\n\x10\x43reateTrialReply\x12\x10\n\x08trial_id\x18\x01 \x01(\t\"$\n\x10GetTrialsRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\",\n\x0eGetTrialsReply\x12\x1a\n\x06trials\x18\x01 \x03(\x0b\x32\n.api.Trial\"#\n\x0fGetTrialRequest\x12\x10\n\x08trial_id\x18\x01 \x01(\t\"*\n\rGetTrialReply\x12\x19\n\x05trial\x18\x01 \x01(\x0b\x32\n.api.Trial\"4\n\x15RegisterWorkerRequest\x12\x1b\n\x06worker\x18\x01 \x01(\x0b\x32\x0b.api.Worker\"(\n\x13RegisterWorkerReply\x12\x11\n\tworker_id\x18\x01 \x01(\t\"O\n\x12StopWorkersRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12\x12\n\nworker_ids\x18\x02 \x03(\t\x12\x13\n\x0bis_complete\x18\x03 \x01(\x08\"\x12\n\x10StopWorkersReply\"J\n\x11GetWorkersRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12\x10\n\x08trial_id\x18\x02 \x01(\t\x12\x11\n\tworker_id\x18\x03 \x01(\t\"/\n\x0fGetWorkersReply\x12\x1c\n\x07workers\x18\x01 \x03(\x0b\x32\x0b.api.Worker\"I\n\x18UpdateWorkerStateRequest\x12\x11\n\tworker_id\x18\x01 \x01(\t\x12\x1a\n\x06status\x18\x02 \x01(\x0e\x32\n.api.State\"\x18\n\x16UpdateWorkerStateReply\"j\n\x18GetWorkerFullInfoRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12\x10\n\x08trial_id\x18\x02 \x01(\t\x12\x11\n\tworker_id\x18\x03 \x01(\t\x12\x17\n\x0fonly_latest_log\x18\x04 \x01(\x08\"{\n\x0eWorkerFullInfo\x12\x1b\n\x06Worker\x18\x01 \x01(\x0b\x32\x0b.api.Worker\x12%\n\rparameter_set\x18\x02 \x03(\x0b\x32\x0e.api.Parameter\x12%\n\x0cmetrics_logs\x18\x03 \x03(\x0b\x32\x0f.api.MetricsLog\"H\n\x16GetWorkerFullInfoReply\x12.\n\x11worker_full_infos\x18\x01 \x03(\x0b\x32\x13.api.WorkerFullInfo\"\x89\x01\n\x15GetSuggestionsRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12\x1c\n\x14suggestion_algorithm\x18\x02 \x01(\t\x12\x16\n\x0erequest_number\x18\x03 \x01(\x05\x12\x16\n\x0elog_worker_ids\x18\x04 \x03(\t\x12\x10\n\x08param_id\x18\x05 \x01(\t\"1\n\x13GetSuggestionsReply\x12\x1a\n\x06trials\x18\x01 \x03(\x0b\x32\n.api.Trial\"c\n\x1bGetShouldStopWorkersRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12 \n\x18\x65\x61rly_stopping_algorithm\x18\x02 \x01(\t\x12\x10\n\x08param_id\x18\x05 \x01(\t\";\n\x19GetShouldStopWorkersReply\x12\x1e\n\x16should_stop_worker_ids\x18\x01 \x03(\t\"P\n\x11GetMetricsRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12\x12\n\nworker_ids\x18\x02 \x03(\t\x12\x15\n\rmetrics_names\x18\x03 \x03(\t\"?\n\x0fGetMetricsReply\x12,\n\x10metrics_log_sets\x18\x01 \x03(\x0b\x32\x12.api.MetricsLogSet\"Z\n\x18ReportMetricsLogsRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12,\n\x10metrics_log_sets\x18\x03 \x03(\x0b\x32\x12.api.MetricsLogSet\"\x18\n\x16ReportMetricsLogsReply\"\x89\x01\n\tModelInfo\x12\x12\n\nstudy_name\x18\x01 \x01(\t\x12\x11\n\tworker_id\x18\x02 \x01(\t\x12\"\n\nparameters\x18\x03 \x03(\x0b\x32\x0e.api.Parameter\x12\x1d\n\x07metrics\x18\x04 \x03(\x0b\x32\x0c.api.Metrics\x12\x12\n\nmodel_path\x18\x05 \x01(\t\")\n\x0b\x44\x61taSetInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04path\x18\x02 \x01(\t\"J\n\x10SaveStudyRequest\x12\x12\n\nstudy_name\x18\x01 \x01(\t\x12\r\n\x05owner\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\"\x10\n\x0eSaveStudyReply\"k\n\x10SaveModelRequest\x12\x1d\n\x05model\x18\x01 \x01(\x0b\x32\x0e.api.ModelInfo\x12\"\n\x08\x64\x61ta_set\x18\x02 \x01(\x0b\x32\x10.api.DataSetInfo\x12\x14\n\x0ctensor_board\x18\x03 \x01(\x08\"\x10\n\x0eSaveModelReply\"\x18\n\x16GetSavedStudiesRequest\";\n\x14GetSavedStudiesReply\x12#\n\x07studies\x18\x01 \x03(\x0b\x32\x12.api.StudyOverview\"+\n\x15GetSavedModelsRequest\x12\x12\n\nstudy_name\x18\x01 \x01(\t\"5\n\x13GetSavedModelsReply\x12\x1e\n\x06models\x18\x01 \x03(\x0b\x32\x0e.api.ModelInfo\"=\n\x14GetSavedModelRequest\x12\x12\n\nstudy_name\x18\x01 \x01(\t\x12\x11\n\tworker_id\x18\x02 \x01(\t\"3\n\x12GetSavedModelReply\x12\x1d\n\x05model\x18\x01 \x01(\x0b\x32\x0e.api.ModelInfo\"\x9b\x01\n\x1eSetSuggestionParametersRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12\x1c\n\x14suggestion_algorithm\x18\x02 \x01(\t\x12\x10\n\x08param_id\x18\x03 \x01(\t\x12\x37\n\x15suggestion_parameters\x18\x04 \x03(\x0b\x32\x18.api.SuggestionParameter\"0\n\x1cSetSuggestionParametersReply\x12\x10\n\x08param_id\x18\x01 \x01(\t\"2\n\x1eGetSuggestionParametersRequest\x12\x10\n\x08param_id\x18\x01 \x01(\t\"W\n\x1cGetSuggestionParametersReply\x12\x37\n\x15suggestion_parameters\x18\x01 \x03(\x0b\x32\x18.api.SuggestionParameter\"5\n!GetSuggestionParameterListRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\"\x81\x01\n\x16SuggestionParameterSet\x12\x10\n\x08param_id\x18\x01 \x01(\t\x12\x1c\n\x14suggestion_algorithm\x18\x02 \x01(\t\x12\x37\n\x15suggestion_parameters\x18\x03 \x03(\x0b\x32\x18.api.SuggestionParameter\"a\n\x1fGetSuggestionParameterListReply\x12>\n\x19suggestion_parameter_sets\x18\x01 \x03(\x0b\x32\x1b.api.SuggestionParameterSet\")\n\x15StopSuggestionRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\"\x15\n\x13StopSuggestionReply\"\xa9\x01\n!SetEarlyStoppingParametersRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12 \n\x18\x65\x61rly_stopping_algorithm\x18\x02 \x01(\t\x12\x10\n\x08param_id\x18\x03 \x01(\t\x12>\n\x19\x65\x61rly_stopping_parameters\x18\x04 \x03(\x0b\x32\x1b.api.EarlyStoppingParameter\"3\n\x1fSetEarlyStoppingParametersReply\x12\x10\n\x08param_id\x18\x01 \x01(\t\"5\n!GetEarlyStoppingParametersRequest\x12\x10\n\x08param_id\x18\x01 \x01(\t\"a\n\x1fGetEarlyStoppingParametersReply\x12>\n\x19\x65\x61rly_stopping_parameters\x18\x01 \x03(\x0b\x32\x1b.api.EarlyStoppingParameter\"8\n$GetEarlyStoppingParameterListRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\"\x8f\x01\n\x19\x45\x61rlyStoppingParameterSet\x12\x10\n\x08param_id\x18\x01 \x01(\t\x12 \n\x18\x65\x61rly_stopping_algorithm\x18\x02 \x01(\t\x12>\n\x19\x65\x61rly_stopping_parameters\x18\x03 \x03(\x0b\x32\x1b.api.EarlyStoppingParameter\"k\n\"GetEarlyStoppingParameterListReply\x12\x45\n\x1d\x65\x61rly_stopping_parameter_sets\x18\x01 \x03(\x0b\x32\x1e.api.EarlyStoppingParameterSet*U\n\rParameterType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\n\n\x06\x44OUBLE\x10\x01\x12\x07\n\x03INT\x10\x02\x12\x0c\n\x08\x44ISCRETE\x10\x03\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x04*H\n\x10OptimizationType\x12\x18\n\x14UNKNOWN_OPTIMIZATION\x10\x00\x12\x0c\n\x08MINIMIZE\x10\x01\x12\x0c\n\x08MAXIMIZE\x10\x02*G\n\x05State\x12\x0b\n\x07PENDING\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tCOMPLETED\x10\x02\x12\n\n\x06KILLED\x10\x03\x12\t\n\x05\x45RROR\x10x2\xe7\x18\n\x07Manager\x12m\n\x0b\x43reateStudy\x12\x17.api.CreateStudyRequest\x1a\x15.api.CreateStudyReply\".\x82\xd3\xe4\x93\x02(\"\x18/api/Manager/CreateStudy:\x0cstudy_config\x12^\n\x08GetStudy\x12\x14.api.GetStudyRequest\x1a\x12.api.GetStudyReply\"(\x82\xd3\xe4\x93\x02\"\x12 /api/Manager/GetStudy/{study_id}\x12j\n\x0b\x44\x65leteStudy\x12\x17.api.DeleteStudyRequest\x1a\x15.api.DeleteStudyReply\"+\x82\xd3\xe4\x93\x02%\x12#/api/Manager/DeleteStudy/{study_id}\x12\x63\n\x0cGetStudyList\x12\x18.api.GetStudyListRequest\x1a\x16.api.GetStudyListReply\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/Manager/GetStudyList\x12z\n\x0fGetStudyJobType\x12\x1b.api.GetStudyJobTypeRequest\x1a\x19.api.GetStudyJobTypeReply\"/\x82\xd3\xe4\x93\x02)\x12\'/api/Manager/GetStudyJobType/{study_id}\x12\x66\n\x0b\x43reateTrial\x12\x17.api.CreateTrialRequest\x1a\x15.api.CreateTrialReply\"\'\x82\xd3\xe4\x93\x02!\"\x18/api/Manager/CreateTrial:\x05trial\x12\x62\n\tGetTrials\x12\x15.api.GetTrialsRequest\x1a\x13.api.GetTrialsReply\")\x82\xd3\xe4\x93\x02#\x12!/api/Manager/GetTrials/{study_id}\x12^\n\x08GetTrial\x12\x14.api.GetTrialRequest\x1a\x12.api.GetTrialReply\"(\x82\xd3\xe4\x93\x02\"\x12 /api/Manager/GetTrial/{trial_id}\x12s\n\x0eRegisterWorker\x12\x1a.api.RegisterWorkerRequest\x1a\x18.api.RegisterWorkerReply\"+\x82\xd3\xe4\x93\x02%\"\x1b/api/Manager/RegisterWorker:\x06worker\x12[\n\nGetWorkers\x12\x16.api.GetWorkersRequest\x1a\x14.api.GetWorkersReply\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/Manager/GetWorkers\x12z\n\x11UpdateWorkerState\x12\x1d.api.UpdateWorkerStateRequest\x1a\x1b.api.UpdateWorkerStateReply\")\x82\xd3\xe4\x93\x02#\x1a\x1e/api/Manager/UpdateWorkerState:\x01*\x12w\n\x11GetWorkerFullInfo\x12\x1d.api.GetWorkerFullInfoRequest\x1a\x1b.api.GetWorkerFullInfoReply\"&\x82\xd3\xe4\x93\x02 \x12\x1e/api/Manager/GetWorkerFullInfo\x12n\n\x0eGetSuggestions\x12\x1a.api.GetSuggestionsRequest\x1a\x18.api.GetSuggestionsReply\"&\x82\xd3\xe4\x93\x02 \"\x1b/api/Manager/GetSuggestions:\x01*\x12\x90\x01\n\x14GetShouldStopWorkers\x12 .api.GetShouldStopWorkersRequest\x1a\x1e.api.GetShouldStopWorkersReply\"6\x82\xd3\xe4\x93\x02\x30\"+/api/Manager/GetTrials/GetShouldStopWorkers:\x01*\x12^\n\nGetMetrics\x12\x16.api.GetMetricsRequest\x1a\x14.api.GetMetricsReply\"\"\x82\xd3\xe4\x93\x02\x1c\"\x17/api/Manager/GetMetrics:\x01*\x12\x92\x01\n\x17SetSuggestionParameters\x12#.api.SetSuggestionParametersRequest\x1a!.api.SetSuggestionParametersReply\"/\x82\xd3\xe4\x93\x02)\"$/api/Manager/SetSuggestionParameters:\x01*\x12\x9a\x01\n\x17GetSuggestionParameters\x12#.api.GetSuggestionParametersRequest\x1a!.api.GetSuggestionParametersReply\"7\x82\xd3\xe4\x93\x02\x31\x12//api/Manager/GetSuggestionParameters/{param_id}\x12\xa6\x01\n\x1aGetSuggestionParameterList\x12&.api.GetSuggestionParameterListRequest\x1a$.api.GetSuggestionParameterListReply\":\x82\xd3\xe4\x93\x02\x34\x12\x32/api/Manager/GetSuggestionParameterList/{study_id}\x12\x9e\x01\n\x1aSetEarlyStoppingParameters\x12&.api.SetEarlyStoppingParametersRequest\x1a$.api.SetEarlyStoppingParametersReply\"2\x82\xd3\xe4\x93\x02,\"\'/api/Manager/SetEarlyStoppingParameters:\x01*\x12\xa6\x01\n\x1aGetEarlyStoppingParameters\x12&.api.GetEarlyStoppingParametersRequest\x1a$.api.GetEarlyStoppingParametersReply\":\x82\xd3\xe4\x93\x02\x34\x12\x32/api/Manager/GetEarlyStoppingParameters/{param_id}\x12\xb2\x01\n\x1dGetEarlyStoppingParameterList\x12).api.GetEarlyStoppingParameterListRequest\x1a\'.api.GetEarlyStoppingParameterListReply\"=\x82\xd3\xe4\x93\x02\x37\x12\x35/api/Manager/GetEarlyStoppingParameterList/{study_id}\x12Z\n\tSaveStudy\x12\x15.api.SaveStudyRequest\x1a\x13.api.SaveStudyReply\"!\x82\xd3\xe4\x93\x02\x1b\"\x16/api/Manager/SaveStudy:\x01*\x12Z\n\tSaveModel\x12\x15.api.SaveModelRequest\x1a\x13.api.SaveModelReply\"!\x82\xd3\xe4\x93\x02\x1b\"\x16/api/Manager/SaveModel:\x01*\x12z\n\x11ReportMetricsLogs\x12\x1d.api.ReportMetricsLogsRequest\x1a\x1b.api.ReportMetricsLogsReply\")\x82\xd3\xe4\x93\x02#\"\x1e/api/Manager/ReportMetricsLogs:\x01*\x12o\n\x0fGetSavedStudies\x12\x1b.api.GetSavedStudiesRequest\x1a\x19.api.GetSavedStudiesReply\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/Manager/GetSavedStudies\x12k\n\x0eGetSavedModels\x12\x1a.api.GetSavedModelsRequest\x1a\x18.api.GetSavedModelsReply\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/Manager/GetSavedModels2T\n\nSuggestion\x12\x46\n\x0eGetSuggestions\x12\x1a.api.GetSuggestionsRequest\x1a\x18.api.GetSuggestionsReply2i\n\rEarlyStopping\x12X\n\x14GetShouldStopWorkers\x12 .api.GetShouldStopWorkersRequest\x1a\x1e.api.GetShouldStopWorkersReplyb\x06proto3')
+  serialized_pb=_b('\n\tapi.proto\x12\x03\x61pi\x1a\x1cgoogle/api/annotations.proto\"E\n\rFeasibleSpace\x12\x0b\n\x03max\x18\x01 \x01(\t\x12\x0b\n\x03min\x18\x02 \x01(\t\x12\x0c\n\x04list\x18\x03 \x03(\t\x12\x0c\n\x04step\x18\x04 \x01(\t\"q\n\x0fParameterConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12*\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x12.api.ParameterType\x12$\n\x08\x66\x65\x61sible\x18\x03 \x01(\x0b\x32\x12.api.FeasibleSpace\"T\n\tParameter\x12\x0c\n\x04name\x18\x01 \x01(\t\x12*\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x12.api.ParameterType\x12\r\n\x05value\x18\x03 \x01(\t\"l\n\rMetricsLogSet\x12\x11\n\tworker_id\x18\x01 \x01(\t\x12%\n\x0cmetrics_logs\x18\x02 \x03(\x0b\x32\x0f.api.MetricsLog\x12!\n\rworker_status\x18\x03 \x01(\x0e\x32\n.api.State\"&\n\x07Metrics\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"/\n\x10MetricsValueTime\x12\x0c\n\x04time\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"A\n\nMetricsLog\x12\x0c\n\x04name\x18\x01 \x01(\t\x12%\n\x06values\x18\x02 \x03(\x0b\x32\x15.api.MetricsValueTime\"2\n\x13SuggestionParameter\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"5\n\x16\x45\x61rlyStoppingParameter\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\"\n\x03Tag\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"M\n\rStudyOverview\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05owner\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\"\x83\x01\n\x05Trial\x12\x10\n\x08trial_id\x18\x01 \x01(\t\x12\x10\n\x08study_id\x18\x02 \x01(\t\x12%\n\rparameter_set\x18\x03 \x03(\x0b\x32\x0e.api.Parameter\x12\x17\n\x0fobjective_value\x18\x04 \x01(\t\x12\x16\n\x04tags\x18\x05 \x03(\x0b\x32\x08.api.Tag\"\x97\x01\n\x06Worker\x12\x11\n\tworker_id\x18\x01 \x01(\t\x12\x10\n\x08study_id\x18\x02 \x01(\t\x12\x10\n\x08trial_id\x18\x03 \x01(\t\x12\x0c\n\x04Type\x18\x04 \x01(\t\x12\x1a\n\x06status\x18\x05 \x01(\x0e\x32\n.api.State\x12\x14\n\x0cTemplatePath\x18\x06 \x01(\t\x12\x16\n\x04tags\x18\x07 \x03(\x0b\x32\x08.api.Tag\"\x93\x01\n\tNasConfig\x12&\n\x0cgraph_config\x18\x01 \x01(\x0b\x32\x10.api.GraphConfig\x12-\n\noperations\x18\x02 \x01(\x0b\x32\x19.api.NasConfig.Operations\x1a/\n\nOperations\x12!\n\toperation\x18\x01 \x03(\x0b\x32\x0e.api.Operation\"J\n\x0bGraphConfig\x12\x12\n\nnum_layers\x18\x01 \x01(\x05\x12\x12\n\ninput_size\x18\x02 \x03(\x05\x12\x13\n\x0boutput_size\x18\x03 \x03(\x05\"\x99\x01\n\tOperation\x12\x15\n\roperationType\x18\x01 \x01(\t\x12:\n\x11parameter_configs\x18\x02 \x01(\x0b\x32\x1f.api.Operation.ParameterConfigs\x1a\x39\n\x10ParameterConfigs\x12%\n\x07\x63onfigs\x18\x01 \x03(\x0b\x32\x14.api.ParameterConfig\"\x98\x03\n\x0bStudyConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05owner\x18\x02 \x01(\t\x12\x30\n\x11optimization_type\x18\x03 \x01(\x0e\x32\x15.api.OptimizationType\x12\x19\n\x11optimization_goal\x18\x04 \x01(\x01\x12<\n\x11parameter_configs\x18\x05 \x01(\x0b\x32!.api.StudyConfig.ParameterConfigs\x12\x1a\n\x12\x61\x63\x63\x65ss_permissions\x18\x06 \x03(\t\x12\x16\n\x04tags\x18\x07 \x03(\x0b\x32\x08.api.Tag\x12\x1c\n\x14objective_value_name\x18\x08 \x01(\t\x12\x0f\n\x07metrics\x18\t \x03(\t\x12\r\n\x05jobId\x18\n \x01(\t\x12\"\n\nnas_config\x18\x0b \x01(\x0b\x32\x0e.api.NasConfig\x12\x10\n\x08job_type\x18\x0c \x01(\t\x1a\x39\n\x10ParameterConfigs\x12%\n\x07\x63onfigs\x18\x01 \x03(\x0b\x32\x14.api.ParameterConfig\"<\n\x12\x43reateStudyRequest\x12&\n\x0cstudy_config\x18\x01 \x01(\x0b\x32\x10.api.StudyConfig\"$\n\x10\x43reateStudyReply\x12\x10\n\x08study_id\x18\x01 \x01(\t\"&\n\x12\x44\x65leteStudyRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\"$\n\x10\x44\x65leteStudyReply\x12\x10\n\x08study_id\x18\x01 \x01(\t\"#\n\x0fGetStudyRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\"7\n\rGetStudyReply\x12&\n\x0cstudy_config\x18\x01 \x01(\x0b\x32\x10.api.StudyConfig\"\x15\n\x13GetStudyListRequest\"@\n\x11GetStudyListReply\x12+\n\x0fstudy_overviews\x18\x01 \x03(\x0b\x32\x12.api.StudyOverview\"/\n\x12\x43reateTrialRequest\x12\x19\n\x05trial\x18\x01 \x01(\x0b\x32\n.api.Trial\"$\n\x10\x43reateTrialReply\x12\x10\n\x08trial_id\x18\x01 \x01(\t\"$\n\x10GetTrialsRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\",\n\x0eGetTrialsReply\x12\x1a\n\x06trials\x18\x01 \x03(\x0b\x32\n.api.Trial\"#\n\x0fGetTrialRequest\x12\x10\n\x08trial_id\x18\x01 \x01(\t\"*\n\rGetTrialReply\x12\x19\n\x05trial\x18\x01 \x01(\x0b\x32\n.api.Trial\"4\n\x15RegisterWorkerRequest\x12\x1b\n\x06worker\x18\x01 \x01(\x0b\x32\x0b.api.Worker\"(\n\x13RegisterWorkerReply\x12\x11\n\tworker_id\x18\x01 \x01(\t\"O\n\x12StopWorkersRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12\x12\n\nworker_ids\x18\x02 \x03(\t\x12\x13\n\x0bis_complete\x18\x03 \x01(\x08\"\x12\n\x10StopWorkersReply\"J\n\x11GetWorkersRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12\x10\n\x08trial_id\x18\x02 \x01(\t\x12\x11\n\tworker_id\x18\x03 \x01(\t\"/\n\x0fGetWorkersReply\x12\x1c\n\x07workers\x18\x01 \x03(\x0b\x32\x0b.api.Worker\"I\n\x18UpdateWorkerStateRequest\x12\x11\n\tworker_id\x18\x01 \x01(\t\x12\x1a\n\x06status\x18\x02 \x01(\x0e\x32\n.api.State\"\x18\n\x16UpdateWorkerStateReply\"j\n\x18GetWorkerFullInfoRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12\x10\n\x08trial_id\x18\x02 \x01(\t\x12\x11\n\tworker_id\x18\x03 \x01(\t\x12\x17\n\x0fonly_latest_log\x18\x04 \x01(\x08\"{\n\x0eWorkerFullInfo\x12\x1b\n\x06Worker\x18\x01 \x01(\x0b\x32\x0b.api.Worker\x12%\n\rparameter_set\x18\x02 \x03(\x0b\x32\x0e.api.Parameter\x12%\n\x0cmetrics_logs\x18\x03 \x03(\x0b\x32\x0f.api.MetricsLog\"H\n\x16GetWorkerFullInfoReply\x12.\n\x11worker_full_infos\x18\x01 \x03(\x0b\x32\x13.api.WorkerFullInfo\"\x89\x01\n\x15GetSuggestionsRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12\x1c\n\x14suggestion_algorithm\x18\x02 \x01(\t\x12\x16\n\x0erequest_number\x18\x03 \x01(\x05\x12\x16\n\x0elog_worker_ids\x18\x04 \x03(\t\x12\x10\n\x08param_id\x18\x05 \x01(\t\"1\n\x13GetSuggestionsReply\x12\x1a\n\x06trials\x18\x01 \x03(\x0b\x32\n.api.Trial\"c\n\x1bGetShouldStopWorkersRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12 \n\x18\x65\x61rly_stopping_algorithm\x18\x02 \x01(\t\x12\x10\n\x08param_id\x18\x05 \x01(\t\";\n\x19GetShouldStopWorkersReply\x12\x1e\n\x16should_stop_worker_ids\x18\x01 \x03(\t\"P\n\x11GetMetricsRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12\x12\n\nworker_ids\x18\x02 \x03(\t\x12\x15\n\rmetrics_names\x18\x03 \x03(\t\"?\n\x0fGetMetricsReply\x12,\n\x10metrics_log_sets\x18\x01 \x03(\x0b\x32\x12.api.MetricsLogSet\"Z\n\x18ReportMetricsLogsRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12,\n\x10metrics_log_sets\x18\x03 \x03(\x0b\x32\x12.api.MetricsLogSet\"\x18\n\x16ReportMetricsLogsReply\"\x89\x01\n\tModelInfo\x12\x12\n\nstudy_name\x18\x01 \x01(\t\x12\x11\n\tworker_id\x18\x02 \x01(\t\x12\"\n\nparameters\x18\x03 \x03(\x0b\x32\x0e.api.Parameter\x12\x1d\n\x07metrics\x18\x04 \x03(\x0b\x32\x0c.api.Metrics\x12\x12\n\nmodel_path\x18\x05 \x01(\t\")\n\x0b\x44\x61taSetInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04path\x18\x02 \x01(\t\"J\n\x10SaveStudyRequest\x12\x12\n\nstudy_name\x18\x01 \x01(\t\x12\r\n\x05owner\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\"\x10\n\x0eSaveStudyReply\"k\n\x10SaveModelRequest\x12\x1d\n\x05model\x18\x01 \x01(\x0b\x32\x0e.api.ModelInfo\x12\"\n\x08\x64\x61ta_set\x18\x02 \x01(\x0b\x32\x10.api.DataSetInfo\x12\x14\n\x0ctensor_board\x18\x03 \x01(\x08\"\x10\n\x0eSaveModelReply\"\x18\n\x16GetSavedStudiesRequest\";\n\x14GetSavedStudiesReply\x12#\n\x07studies\x18\x01 \x03(\x0b\x32\x12.api.StudyOverview\"+\n\x15GetSavedModelsRequest\x12\x12\n\nstudy_name\x18\x01 \x01(\t\"5\n\x13GetSavedModelsReply\x12\x1e\n\x06models\x18\x01 \x03(\x0b\x32\x0e.api.ModelInfo\"=\n\x14GetSavedModelRequest\x12\x12\n\nstudy_name\x18\x01 \x01(\t\x12\x11\n\tworker_id\x18\x02 \x01(\t\"3\n\x12GetSavedModelReply\x12\x1d\n\x05model\x18\x01 \x01(\x0b\x32\x0e.api.ModelInfo\"\x9b\x01\n\x1eSetSuggestionParametersRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12\x1c\n\x14suggestion_algorithm\x18\x02 \x01(\t\x12\x10\n\x08param_id\x18\x03 \x01(\t\x12\x37\n\x15suggestion_parameters\x18\x04 \x03(\x0b\x32\x18.api.SuggestionParameter\"0\n\x1cSetSuggestionParametersReply\x12\x10\n\x08param_id\x18\x01 \x01(\t\"2\n\x1eGetSuggestionParametersRequest\x12\x10\n\x08param_id\x18\x01 \x01(\t\"W\n\x1cGetSuggestionParametersReply\x12\x37\n\x15suggestion_parameters\x18\x01 \x03(\x0b\x32\x18.api.SuggestionParameter\"5\n!GetSuggestionParameterListRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\"\x81\x01\n\x16SuggestionParameterSet\x12\x10\n\x08param_id\x18\x01 \x01(\t\x12\x1c\n\x14suggestion_algorithm\x18\x02 \x01(\t\x12\x37\n\x15suggestion_parameters\x18\x03 \x03(\x0b\x32\x18.api.SuggestionParameter\"a\n\x1fGetSuggestionParameterListReply\x12>\n\x19suggestion_parameter_sets\x18\x01 \x03(\x0b\x32\x1b.api.SuggestionParameterSet\")\n\x15StopSuggestionRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\"\x15\n\x13StopSuggestionReply\"\xa9\x01\n!SetEarlyStoppingParametersRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\x12 \n\x18\x65\x61rly_stopping_algorithm\x18\x02 \x01(\t\x12\x10\n\x08param_id\x18\x03 \x01(\t\x12>\n\x19\x65\x61rly_stopping_parameters\x18\x04 \x03(\x0b\x32\x1b.api.EarlyStoppingParameter\"3\n\x1fSetEarlyStoppingParametersReply\x12\x10\n\x08param_id\x18\x01 \x01(\t\"5\n!GetEarlyStoppingParametersRequest\x12\x10\n\x08param_id\x18\x01 \x01(\t\"a\n\x1fGetEarlyStoppingParametersReply\x12>\n\x19\x65\x61rly_stopping_parameters\x18\x01 \x03(\x0b\x32\x1b.api.EarlyStoppingParameter\"8\n$GetEarlyStoppingParameterListRequest\x12\x10\n\x08study_id\x18\x01 \x01(\t\"\x8f\x01\n\x19\x45\x61rlyStoppingParameterSet\x12\x10\n\x08param_id\x18\x01 \x01(\t\x12 \n\x18\x65\x61rly_stopping_algorithm\x18\x02 \x01(\t\x12>\n\x19\x65\x61rly_stopping_parameters\x18\x03 \x03(\x0b\x32\x1b.api.EarlyStoppingParameter\"k\n\"GetEarlyStoppingParameterListReply\x12\x45\n\x1d\x65\x61rly_stopping_parameter_sets\x18\x01 \x03(\x0b\x32\x1e.api.EarlyStoppingParameterSet*U\n\rParameterType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\n\n\x06\x44OUBLE\x10\x01\x12\x07\n\x03INT\x10\x02\x12\x0c\n\x08\x44ISCRETE\x10\x03\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x04*H\n\x10OptimizationType\x12\x18\n\x14UNKNOWN_OPTIMIZATION\x10\x00\x12\x0c\n\x08MINIMIZE\x10\x01\x12\x0c\n\x08MAXIMIZE\x10\x02*G\n\x05State\x12\x0b\n\x07PENDING\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tCOMPLETED\x10\x02\x12\n\n\x06KILLED\x10\x03\x12\t\n\x05\x45RROR\x10x2\xeb\x17\n\x07Manager\x12m\n\x0b\x43reateStudy\x12\x17.api.CreateStudyRequest\x1a\x15.api.CreateStudyReply\".\x82\xd3\xe4\x93\x02(\"\x18/api/Manager/CreateStudy:\x0cstudy_config\x12^\n\x08GetStudy\x12\x14.api.GetStudyRequest\x1a\x12.api.GetStudyReply\"(\x82\xd3\xe4\x93\x02\"\x12 /api/Manager/GetStudy/{study_id}\x12j\n\x0b\x44\x65leteStudy\x12\x17.api.DeleteStudyRequest\x1a\x15.api.DeleteStudyReply\"+\x82\xd3\xe4\x93\x02%\x12#/api/Manager/DeleteStudy/{study_id}\x12\x63\n\x0cGetStudyList\x12\x18.api.GetStudyListRequest\x1a\x16.api.GetStudyListReply\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/Manager/GetStudyList\x12\x66\n\x0b\x43reateTrial\x12\x17.api.CreateTrialRequest\x1a\x15.api.CreateTrialReply\"\'\x82\xd3\xe4\x93\x02!\"\x18/api/Manager/CreateTrial:\x05trial\x12\x62\n\tGetTrials\x12\x15.api.GetTrialsRequest\x1a\x13.api.GetTrialsReply\")\x82\xd3\xe4\x93\x02#\x12!/api/Manager/GetTrials/{study_id}\x12^\n\x08GetTrial\x12\x14.api.GetTrialRequest\x1a\x12.api.GetTrialReply\"(\x82\xd3\xe4\x93\x02\"\x12 /api/Manager/GetTrial/{trial_id}\x12s\n\x0eRegisterWorker\x12\x1a.api.RegisterWorkerRequest\x1a\x18.api.RegisterWorkerReply\"+\x82\xd3\xe4\x93\x02%\"\x1b/api/Manager/RegisterWorker:\x06worker\x12[\n\nGetWorkers\x12\x16.api.GetWorkersRequest\x1a\x14.api.GetWorkersReply\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/Manager/GetWorkers\x12z\n\x11UpdateWorkerState\x12\x1d.api.UpdateWorkerStateRequest\x1a\x1b.api.UpdateWorkerStateReply\")\x82\xd3\xe4\x93\x02#\x1a\x1e/api/Manager/UpdateWorkerState:\x01*\x12w\n\x11GetWorkerFullInfo\x12\x1d.api.GetWorkerFullInfoRequest\x1a\x1b.api.GetWorkerFullInfoReply\"&\x82\xd3\xe4\x93\x02 \x12\x1e/api/Manager/GetWorkerFullInfo\x12n\n\x0eGetSuggestions\x12\x1a.api.GetSuggestionsRequest\x1a\x18.api.GetSuggestionsReply\"&\x82\xd3\xe4\x93\x02 \"\x1b/api/Manager/GetSuggestions:\x01*\x12\x90\x01\n\x14GetShouldStopWorkers\x12 .api.GetShouldStopWorkersRequest\x1a\x1e.api.GetShouldStopWorkersReply\"6\x82\xd3\xe4\x93\x02\x30\"+/api/Manager/GetTrials/GetShouldStopWorkers:\x01*\x12^\n\nGetMetrics\x12\x16.api.GetMetricsRequest\x1a\x14.api.GetMetricsReply\"\"\x82\xd3\xe4\x93\x02\x1c\"\x17/api/Manager/GetMetrics:\x01*\x12\x92\x01\n\x17SetSuggestionParameters\x12#.api.SetSuggestionParametersRequest\x1a!.api.SetSuggestionParametersReply\"/\x82\xd3\xe4\x93\x02)\"$/api/Manager/SetSuggestionParameters:\x01*\x12\x9a\x01\n\x17GetSuggestionParameters\x12#.api.GetSuggestionParametersRequest\x1a!.api.GetSuggestionParametersReply\"7\x82\xd3\xe4\x93\x02\x31\x12//api/Manager/GetSuggestionParameters/{param_id}\x12\xa6\x01\n\x1aGetSuggestionParameterList\x12&.api.GetSuggestionParameterListRequest\x1a$.api.GetSuggestionParameterListReply\":\x82\xd3\xe4\x93\x02\x34\x12\x32/api/Manager/GetSuggestionParameterList/{study_id}\x12\x9e\x01\n\x1aSetEarlyStoppingParameters\x12&.api.SetEarlyStoppingParametersRequest\x1a$.api.SetEarlyStoppingParametersReply\"2\x82\xd3\xe4\x93\x02,\"\'/api/Manager/SetEarlyStoppingParameters:\x01*\x12\xa6\x01\n\x1aGetEarlyStoppingParameters\x12&.api.GetEarlyStoppingParametersRequest\x1a$.api.GetEarlyStoppingParametersReply\":\x82\xd3\xe4\x93\x02\x34\x12\x32/api/Manager/GetEarlyStoppingParameters/{param_id}\x12\xb2\x01\n\x1dGetEarlyStoppingParameterList\x12).api.GetEarlyStoppingParameterListRequest\x1a\'.api.GetEarlyStoppingParameterListReply\"=\x82\xd3\xe4\x93\x02\x37\x12\x35/api/Manager/GetEarlyStoppingParameterList/{study_id}\x12Z\n\tSaveStudy\x12\x15.api.SaveStudyRequest\x1a\x13.api.SaveStudyReply\"!\x82\xd3\xe4\x93\x02\x1b\"\x16/api/Manager/SaveStudy:\x01*\x12Z\n\tSaveModel\x12\x15.api.SaveModelRequest\x1a\x13.api.SaveModelReply\"!\x82\xd3\xe4\x93\x02\x1b\"\x16/api/Manager/SaveModel:\x01*\x12z\n\x11ReportMetricsLogs\x12\x1d.api.ReportMetricsLogsRequest\x1a\x1b.api.ReportMetricsLogsReply\")\x82\xd3\xe4\x93\x02#\"\x1e/api/Manager/ReportMetricsLogs:\x01*\x12o\n\x0fGetSavedStudies\x12\x1b.api.GetSavedStudiesRequest\x1a\x19.api.GetSavedStudiesReply\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/Manager/GetSavedStudies\x12k\n\x0eGetSavedModels\x12\x1a.api.GetSavedModelsRequest\x1a\x18.api.GetSavedModelsReply\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/Manager/GetSavedModels2T\n\nSuggestion\x12\x46\n\x0eGetSuggestions\x12\x1a.api.GetSuggestionsRequest\x1a\x18.api.GetSuggestionsReply2i\n\rEarlyStopping\x12X\n\x14GetShouldStopWorkers\x12 .api.GetShouldStopWorkersRequest\x1a\x1e.api.GetShouldStopWorkersReplyb\x06proto3')
   ,
   dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,])
 
@@ -54,8 +54,8 @@ _PARAMETERTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=6072,
-  serialized_end=6157,
+  serialized_start=5950,
+  serialized_end=6035,
 )
 _sym_db.RegisterEnumDescriptor(_PARAMETERTYPE)
 
@@ -81,8 +81,8 @@ _OPTIMIZATIONTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=6159,
-  serialized_end=6231,
+  serialized_start=6037,
+  serialized_end=6109,
 )
 _sym_db.RegisterEnumDescriptor(_OPTIMIZATIONTYPE)
 
@@ -116,8 +116,8 @@ _STATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=6233,
-  serialized_end=6304,
+  serialized_start=6111,
+  serialized_end=6182,
 )
 _sym_db.RegisterEnumDescriptor(_STATE)
 
@@ -1132,13 +1132,6 @@ _DELETESTUDYREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
-    _descriptor.FieldDescriptor(
-      name='job_type', full_name='api.DeleteStudyRequest.job_type', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
   ],
   extensions=[
   ],
@@ -1152,7 +1145,7 @@ _DELETESTUDYREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=1989,
-  serialized_end=2045,
+  serialized_end=2027,
 )
 
 
@@ -1182,8 +1175,8 @@ _DELETESTUDYREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2047,
-  serialized_end=2083,
+  serialized_start=2029,
+  serialized_end=2065,
 )
 
 
@@ -1201,13 +1194,6 @@ _GETSTUDYREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
-    _descriptor.FieldDescriptor(
-      name='job_type', full_name='api.GetStudyRequest.job_type', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
   ],
   extensions=[
   ],
@@ -1220,8 +1206,8 @@ _GETSTUDYREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2085,
-  serialized_end=2138,
+  serialized_start=2067,
+  serialized_end=2102,
 )
 
 
@@ -1251,8 +1237,8 @@ _GETSTUDYREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2140,
-  serialized_end=2195,
+  serialized_start=2104,
+  serialized_end=2159,
 )
 
 
@@ -1275,8 +1261,8 @@ _GETSTUDYLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2197,
-  serialized_end=2218,
+  serialized_start=2161,
+  serialized_end=2182,
 )
 
 
@@ -1306,70 +1292,8 @@ _GETSTUDYLISTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2220,
-  serialized_end=2284,
-)
-
-
-_GETSTUDYJOBTYPEREQUEST = _descriptor.Descriptor(
-  name='GetStudyJobTypeRequest',
-  full_name='api.GetStudyJobTypeRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='study_id', full_name='api.GetStudyJobTypeRequest.study_id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2286,
-  serialized_end=2328,
-)
-
-
-_GETSTUDYJOBTYPEREPLY = _descriptor.Descriptor(
-  name='GetStudyJobTypeReply',
-  full_name='api.GetStudyJobTypeReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='job_type', full_name='api.GetStudyJobTypeReply.job_type', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2330,
-  serialized_end=2370,
+  serialized_start=2184,
+  serialized_end=2248,
 )
 
 
@@ -1399,8 +1323,8 @@ _CREATETRIALREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2372,
-  serialized_end=2419,
+  serialized_start=2250,
+  serialized_end=2297,
 )
 
 
@@ -1430,8 +1354,8 @@ _CREATETRIALREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2421,
-  serialized_end=2457,
+  serialized_start=2299,
+  serialized_end=2335,
 )
 
 
@@ -1461,8 +1385,8 @@ _GETTRIALSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2459,
-  serialized_end=2495,
+  serialized_start=2337,
+  serialized_end=2373,
 )
 
 
@@ -1492,8 +1416,8 @@ _GETTRIALSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2497,
-  serialized_end=2541,
+  serialized_start=2375,
+  serialized_end=2419,
 )
 
 
@@ -1523,8 +1447,8 @@ _GETTRIALREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2543,
-  serialized_end=2578,
+  serialized_start=2421,
+  serialized_end=2456,
 )
 
 
@@ -1554,8 +1478,8 @@ _GETTRIALREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2580,
-  serialized_end=2622,
+  serialized_start=2458,
+  serialized_end=2500,
 )
 
 
@@ -1585,8 +1509,8 @@ _REGISTERWORKERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2624,
-  serialized_end=2676,
+  serialized_start=2502,
+  serialized_end=2554,
 )
 
 
@@ -1616,8 +1540,8 @@ _REGISTERWORKERREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2678,
-  serialized_end=2718,
+  serialized_start=2556,
+  serialized_end=2596,
 )
 
 
@@ -1661,8 +1585,8 @@ _STOPWORKERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2720,
-  serialized_end=2799,
+  serialized_start=2598,
+  serialized_end=2677,
 )
 
 
@@ -1685,8 +1609,8 @@ _STOPWORKERSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2801,
-  serialized_end=2819,
+  serialized_start=2679,
+  serialized_end=2697,
 )
 
 
@@ -1730,8 +1654,8 @@ _GETWORKERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2821,
-  serialized_end=2895,
+  serialized_start=2699,
+  serialized_end=2773,
 )
 
 
@@ -1761,8 +1685,8 @@ _GETWORKERSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2897,
-  serialized_end=2944,
+  serialized_start=2775,
+  serialized_end=2822,
 )
 
 
@@ -1799,8 +1723,8 @@ _UPDATEWORKERSTATEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2946,
-  serialized_end=3019,
+  serialized_start=2824,
+  serialized_end=2897,
 )
 
 
@@ -1823,8 +1747,8 @@ _UPDATEWORKERSTATEREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3021,
-  serialized_end=3045,
+  serialized_start=2899,
+  serialized_end=2923,
 )
 
 
@@ -1875,8 +1799,8 @@ _GETWORKERFULLINFOREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3047,
-  serialized_end=3153,
+  serialized_start=2925,
+  serialized_end=3031,
 )
 
 
@@ -1920,8 +1844,8 @@ _WORKERFULLINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3155,
-  serialized_end=3278,
+  serialized_start=3033,
+  serialized_end=3156,
 )
 
 
@@ -1951,8 +1875,8 @@ _GETWORKERFULLINFOREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3280,
-  serialized_end=3352,
+  serialized_start=3158,
+  serialized_end=3230,
 )
 
 
@@ -2010,8 +1934,8 @@ _GETSUGGESTIONSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3355,
-  serialized_end=3492,
+  serialized_start=3233,
+  serialized_end=3370,
 )
 
 
@@ -2041,8 +1965,8 @@ _GETSUGGESTIONSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3494,
-  serialized_end=3543,
+  serialized_start=3372,
+  serialized_end=3421,
 )
 
 
@@ -2086,8 +2010,8 @@ _GETSHOULDSTOPWORKERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3545,
-  serialized_end=3644,
+  serialized_start=3423,
+  serialized_end=3522,
 )
 
 
@@ -2117,8 +2041,8 @@ _GETSHOULDSTOPWORKERSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3646,
-  serialized_end=3705,
+  serialized_start=3524,
+  serialized_end=3583,
 )
 
 
@@ -2162,8 +2086,8 @@ _GETMETRICSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3707,
-  serialized_end=3787,
+  serialized_start=3585,
+  serialized_end=3665,
 )
 
 
@@ -2193,8 +2117,8 @@ _GETMETRICSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3789,
-  serialized_end=3852,
+  serialized_start=3667,
+  serialized_end=3730,
 )
 
 
@@ -2231,8 +2155,8 @@ _REPORTMETRICSLOGSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3854,
-  serialized_end=3944,
+  serialized_start=3732,
+  serialized_end=3822,
 )
 
 
@@ -2255,8 +2179,8 @@ _REPORTMETRICSLOGSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3946,
-  serialized_end=3970,
+  serialized_start=3824,
+  serialized_end=3848,
 )
 
 
@@ -2314,8 +2238,8 @@ _MODELINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3973,
-  serialized_end=4110,
+  serialized_start=3851,
+  serialized_end=3988,
 )
 
 
@@ -2352,8 +2276,8 @@ _DATASETINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4112,
-  serialized_end=4153,
+  serialized_start=3990,
+  serialized_end=4031,
 )
 
 
@@ -2397,8 +2321,8 @@ _SAVESTUDYREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4155,
-  serialized_end=4229,
+  serialized_start=4033,
+  serialized_end=4107,
 )
 
 
@@ -2421,8 +2345,8 @@ _SAVESTUDYREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4231,
-  serialized_end=4247,
+  serialized_start=4109,
+  serialized_end=4125,
 )
 
 
@@ -2466,8 +2390,8 @@ _SAVEMODELREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4249,
-  serialized_end=4356,
+  serialized_start=4127,
+  serialized_end=4234,
 )
 
 
@@ -2490,8 +2414,8 @@ _SAVEMODELREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4358,
-  serialized_end=4374,
+  serialized_start=4236,
+  serialized_end=4252,
 )
 
 
@@ -2514,8 +2438,8 @@ _GETSAVEDSTUDIESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4376,
-  serialized_end=4400,
+  serialized_start=4254,
+  serialized_end=4278,
 )
 
 
@@ -2545,8 +2469,8 @@ _GETSAVEDSTUDIESREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4402,
-  serialized_end=4461,
+  serialized_start=4280,
+  serialized_end=4339,
 )
 
 
@@ -2576,8 +2500,8 @@ _GETSAVEDMODELSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4463,
-  serialized_end=4506,
+  serialized_start=4341,
+  serialized_end=4384,
 )
 
 
@@ -2607,8 +2531,8 @@ _GETSAVEDMODELSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4508,
-  serialized_end=4561,
+  serialized_start=4386,
+  serialized_end=4439,
 )
 
 
@@ -2645,8 +2569,8 @@ _GETSAVEDMODELREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4563,
-  serialized_end=4624,
+  serialized_start=4441,
+  serialized_end=4502,
 )
 
 
@@ -2676,8 +2600,8 @@ _GETSAVEDMODELREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4626,
-  serialized_end=4677,
+  serialized_start=4504,
+  serialized_end=4555,
 )
 
 
@@ -2728,8 +2652,8 @@ _SETSUGGESTIONPARAMETERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4680,
-  serialized_end=4835,
+  serialized_start=4558,
+  serialized_end=4713,
 )
 
 
@@ -2759,8 +2683,8 @@ _SETSUGGESTIONPARAMETERSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4837,
-  serialized_end=4885,
+  serialized_start=4715,
+  serialized_end=4763,
 )
 
 
@@ -2790,8 +2714,8 @@ _GETSUGGESTIONPARAMETERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4887,
-  serialized_end=4937,
+  serialized_start=4765,
+  serialized_end=4815,
 )
 
 
@@ -2821,8 +2745,8 @@ _GETSUGGESTIONPARAMETERSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4939,
-  serialized_end=5026,
+  serialized_start=4817,
+  serialized_end=4904,
 )
 
 
@@ -2852,8 +2776,8 @@ _GETSUGGESTIONPARAMETERLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5028,
-  serialized_end=5081,
+  serialized_start=4906,
+  serialized_end=4959,
 )
 
 
@@ -2897,8 +2821,8 @@ _SUGGESTIONPARAMETERSET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5084,
-  serialized_end=5213,
+  serialized_start=4962,
+  serialized_end=5091,
 )
 
 
@@ -2928,8 +2852,8 @@ _GETSUGGESTIONPARAMETERLISTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5215,
-  serialized_end=5312,
+  serialized_start=5093,
+  serialized_end=5190,
 )
 
 
@@ -2959,8 +2883,8 @@ _STOPSUGGESTIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5314,
-  serialized_end=5355,
+  serialized_start=5192,
+  serialized_end=5233,
 )
 
 
@@ -2983,8 +2907,8 @@ _STOPSUGGESTIONREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5357,
-  serialized_end=5378,
+  serialized_start=5235,
+  serialized_end=5256,
 )
 
 
@@ -3035,8 +2959,8 @@ _SETEARLYSTOPPINGPARAMETERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5381,
-  serialized_end=5550,
+  serialized_start=5259,
+  serialized_end=5428,
 )
 
 
@@ -3066,8 +2990,8 @@ _SETEARLYSTOPPINGPARAMETERSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5552,
-  serialized_end=5603,
+  serialized_start=5430,
+  serialized_end=5481,
 )
 
 
@@ -3097,8 +3021,8 @@ _GETEARLYSTOPPINGPARAMETERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5605,
-  serialized_end=5658,
+  serialized_start=5483,
+  serialized_end=5536,
 )
 
 
@@ -3128,8 +3052,8 @@ _GETEARLYSTOPPINGPARAMETERSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5660,
-  serialized_end=5757,
+  serialized_start=5538,
+  serialized_end=5635,
 )
 
 
@@ -3159,8 +3083,8 @@ _GETEARLYSTOPPINGPARAMETERLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5759,
-  serialized_end=5815,
+  serialized_start=5637,
+  serialized_end=5693,
 )
 
 
@@ -3204,8 +3128,8 @@ _EARLYSTOPPINGPARAMETERSET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5818,
-  serialized_end=5961,
+  serialized_start=5696,
+  serialized_end=5839,
 )
 
 
@@ -3235,8 +3159,8 @@ _GETEARLYSTOPPINGPARAMETERLISTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5963,
-  serialized_end=6070,
+  serialized_start=5841,
+  serialized_end=5948,
 )
 
 _PARAMETERCONFIG.fields_by_name['parameter_type'].enum_type = _PARAMETERTYPE
@@ -3318,8 +3242,6 @@ DESCRIPTOR.message_types_by_name['GetStudyRequest'] = _GETSTUDYREQUEST
 DESCRIPTOR.message_types_by_name['GetStudyReply'] = _GETSTUDYREPLY
 DESCRIPTOR.message_types_by_name['GetStudyListRequest'] = _GETSTUDYLISTREQUEST
 DESCRIPTOR.message_types_by_name['GetStudyListReply'] = _GETSTUDYLISTREPLY
-DESCRIPTOR.message_types_by_name['GetStudyJobTypeRequest'] = _GETSTUDYJOBTYPEREQUEST
-DESCRIPTOR.message_types_by_name['GetStudyJobTypeReply'] = _GETSTUDYJOBTYPEREPLY
 DESCRIPTOR.message_types_by_name['CreateTrialRequest'] = _CREATETRIALREQUEST
 DESCRIPTOR.message_types_by_name['CreateTrialReply'] = _CREATETRIALREPLY
 DESCRIPTOR.message_types_by_name['GetTrialsRequest'] = _GETTRIALSREQUEST
@@ -3576,20 +3498,6 @@ GetStudyListReply = _reflection.GeneratedProtocolMessageType('GetStudyListReply'
   # @@protoc_insertion_point(class_scope:api.GetStudyListReply)
   ))
 _sym_db.RegisterMessage(GetStudyListReply)
-
-GetStudyJobTypeRequest = _reflection.GeneratedProtocolMessageType('GetStudyJobTypeRequest', (_message.Message,), dict(
-  DESCRIPTOR = _GETSTUDYJOBTYPEREQUEST,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.GetStudyJobTypeRequest)
-  ))
-_sym_db.RegisterMessage(GetStudyJobTypeRequest)
-
-GetStudyJobTypeReply = _reflection.GeneratedProtocolMessageType('GetStudyJobTypeReply', (_message.Message,), dict(
-  DESCRIPTOR = _GETSTUDYJOBTYPEREPLY,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.GetStudyJobTypeReply)
-  ))
-_sym_db.RegisterMessage(GetStudyJobTypeReply)
 
 CreateTrialRequest = _reflection.GeneratedProtocolMessageType('CreateTrialRequest', (_message.Message,), dict(
   DESCRIPTOR = _CREATETRIALREQUEST,
@@ -3970,8 +3878,8 @@ _MANAGER = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=6307,
-  serialized_end=9482,
+  serialized_start=6185,
+  serialized_end=9236,
   methods=[
   _descriptor.MethodDescriptor(
     name='CreateStudy',
@@ -4010,18 +3918,9 @@ _MANAGER = _descriptor.ServiceDescriptor(
     options=_descriptor._ParseOptions(descriptor_pb2.MethodOptions(), _b('\202\323\344\223\002\033\022\031/api/Manager/GetStudyList')),
   ),
   _descriptor.MethodDescriptor(
-    name='GetStudyJobType',
-    full_name='api.Manager.GetStudyJobType',
-    index=4,
-    containing_service=None,
-    input_type=_GETSTUDYJOBTYPEREQUEST,
-    output_type=_GETSTUDYJOBTYPEREPLY,
-    options=_descriptor._ParseOptions(descriptor_pb2.MethodOptions(), _b('\202\323\344\223\002)\022\'/api/Manager/GetStudyJobType/{study_id}')),
-  ),
-  _descriptor.MethodDescriptor(
     name='CreateTrial',
     full_name='api.Manager.CreateTrial',
-    index=5,
+    index=4,
     containing_service=None,
     input_type=_CREATETRIALREQUEST,
     output_type=_CREATETRIALREPLY,
@@ -4030,7 +3929,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetTrials',
     full_name='api.Manager.GetTrials',
-    index=6,
+    index=5,
     containing_service=None,
     input_type=_GETTRIALSREQUEST,
     output_type=_GETTRIALSREPLY,
@@ -4039,7 +3938,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetTrial',
     full_name='api.Manager.GetTrial',
-    index=7,
+    index=6,
     containing_service=None,
     input_type=_GETTRIALREQUEST,
     output_type=_GETTRIALREPLY,
@@ -4048,7 +3947,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='RegisterWorker',
     full_name='api.Manager.RegisterWorker',
-    index=8,
+    index=7,
     containing_service=None,
     input_type=_REGISTERWORKERREQUEST,
     output_type=_REGISTERWORKERREPLY,
@@ -4057,7 +3956,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetWorkers',
     full_name='api.Manager.GetWorkers',
-    index=9,
+    index=8,
     containing_service=None,
     input_type=_GETWORKERSREQUEST,
     output_type=_GETWORKERSREPLY,
@@ -4066,7 +3965,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='UpdateWorkerState',
     full_name='api.Manager.UpdateWorkerState',
-    index=10,
+    index=9,
     containing_service=None,
     input_type=_UPDATEWORKERSTATEREQUEST,
     output_type=_UPDATEWORKERSTATEREPLY,
@@ -4075,7 +3974,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetWorkerFullInfo',
     full_name='api.Manager.GetWorkerFullInfo',
-    index=11,
+    index=10,
     containing_service=None,
     input_type=_GETWORKERFULLINFOREQUEST,
     output_type=_GETWORKERFULLINFOREPLY,
@@ -4084,7 +3983,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetSuggestions',
     full_name='api.Manager.GetSuggestions',
-    index=12,
+    index=11,
     containing_service=None,
     input_type=_GETSUGGESTIONSREQUEST,
     output_type=_GETSUGGESTIONSREPLY,
@@ -4093,7 +3992,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetShouldStopWorkers',
     full_name='api.Manager.GetShouldStopWorkers',
-    index=13,
+    index=12,
     containing_service=None,
     input_type=_GETSHOULDSTOPWORKERSREQUEST,
     output_type=_GETSHOULDSTOPWORKERSREPLY,
@@ -4102,7 +4001,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetMetrics',
     full_name='api.Manager.GetMetrics',
-    index=14,
+    index=13,
     containing_service=None,
     input_type=_GETMETRICSREQUEST,
     output_type=_GETMETRICSREPLY,
@@ -4111,7 +4010,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='SetSuggestionParameters',
     full_name='api.Manager.SetSuggestionParameters',
-    index=15,
+    index=14,
     containing_service=None,
     input_type=_SETSUGGESTIONPARAMETERSREQUEST,
     output_type=_SETSUGGESTIONPARAMETERSREPLY,
@@ -4120,7 +4019,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetSuggestionParameters',
     full_name='api.Manager.GetSuggestionParameters',
-    index=16,
+    index=15,
     containing_service=None,
     input_type=_GETSUGGESTIONPARAMETERSREQUEST,
     output_type=_GETSUGGESTIONPARAMETERSREPLY,
@@ -4129,7 +4028,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetSuggestionParameterList',
     full_name='api.Manager.GetSuggestionParameterList',
-    index=17,
+    index=16,
     containing_service=None,
     input_type=_GETSUGGESTIONPARAMETERLISTREQUEST,
     output_type=_GETSUGGESTIONPARAMETERLISTREPLY,
@@ -4138,7 +4037,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='SetEarlyStoppingParameters',
     full_name='api.Manager.SetEarlyStoppingParameters',
-    index=18,
+    index=17,
     containing_service=None,
     input_type=_SETEARLYSTOPPINGPARAMETERSREQUEST,
     output_type=_SETEARLYSTOPPINGPARAMETERSREPLY,
@@ -4147,7 +4046,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetEarlyStoppingParameters',
     full_name='api.Manager.GetEarlyStoppingParameters',
-    index=19,
+    index=18,
     containing_service=None,
     input_type=_GETEARLYSTOPPINGPARAMETERSREQUEST,
     output_type=_GETEARLYSTOPPINGPARAMETERSREPLY,
@@ -4156,7 +4055,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetEarlyStoppingParameterList',
     full_name='api.Manager.GetEarlyStoppingParameterList',
-    index=20,
+    index=19,
     containing_service=None,
     input_type=_GETEARLYSTOPPINGPARAMETERLISTREQUEST,
     output_type=_GETEARLYSTOPPINGPARAMETERLISTREPLY,
@@ -4165,7 +4064,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='SaveStudy',
     full_name='api.Manager.SaveStudy',
-    index=21,
+    index=20,
     containing_service=None,
     input_type=_SAVESTUDYREQUEST,
     output_type=_SAVESTUDYREPLY,
@@ -4174,7 +4073,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='SaveModel',
     full_name='api.Manager.SaveModel',
-    index=22,
+    index=21,
     containing_service=None,
     input_type=_SAVEMODELREQUEST,
     output_type=_SAVEMODELREPLY,
@@ -4183,7 +4082,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='ReportMetricsLogs',
     full_name='api.Manager.ReportMetricsLogs',
-    index=23,
+    index=22,
     containing_service=None,
     input_type=_REPORTMETRICSLOGSREQUEST,
     output_type=_REPORTMETRICSLOGSREPLY,
@@ -4192,7 +4091,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetSavedStudies',
     full_name='api.Manager.GetSavedStudies',
-    index=24,
+    index=23,
     containing_service=None,
     input_type=_GETSAVEDSTUDIESREQUEST,
     output_type=_GETSAVEDSTUDIESREPLY,
@@ -4201,7 +4100,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetSavedModels',
     full_name='api.Manager.GetSavedModels',
-    index=25,
+    index=24,
     containing_service=None,
     input_type=_GETSAVEDMODELSREQUEST,
     output_type=_GETSAVEDMODELSREPLY,
@@ -4219,8 +4118,8 @@ _SUGGESTION = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=1,
   options=None,
-  serialized_start=9484,
-  serialized_end=9568,
+  serialized_start=9238,
+  serialized_end=9322,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetSuggestions',
@@ -4243,8 +4142,8 @@ _EARLYSTOPPING = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=2,
   options=None,
-  serialized_start=9570,
-  serialized_end=9675,
+  serialized_start=9324,
+  serialized_end=9429,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetShouldStopWorkers',
@@ -4303,11 +4202,6 @@ try:
           '/api.Manager/GetStudyList',
           request_serializer=GetStudyListRequest.SerializeToString,
           response_deserializer=GetStudyListReply.FromString,
-          )
-      self.GetStudyJobType = channel.unary_unary(
-          '/api.Manager/GetStudyJobType',
-          request_serializer=GetStudyJobTypeRequest.SerializeToString,
-          response_deserializer=GetStudyJobTypeReply.FromString,
           )
       self.CreateTrial = channel.unary_unary(
           '/api.Manager/CreateTrial',
@@ -4452,14 +4346,6 @@ try:
     def GetStudyList(self, request, context):
       """*
       Get all Study Configs from DB.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def GetStudyJobType(self, request, context):
-      """*
-      Get jobType of Study
       """
       context.set_code(grpc.StatusCode.UNIMPLEMENTED)
       context.set_details('Method not implemented!')
@@ -4656,11 +4542,6 @@ try:
             servicer.GetStudyList,
             request_deserializer=GetStudyListRequest.FromString,
             response_serializer=GetStudyListReply.SerializeToString,
-        ),
-        'GetStudyJobType': grpc.unary_unary_rpc_method_handler(
-            servicer.GetStudyJobType,
-            request_deserializer=GetStudyJobTypeRequest.FromString,
-            response_serializer=GetStudyJobTypeReply.SerializeToString,
         ),
         'CreateTrial': grpc.unary_unary_rpc_method_handler(
             servicer.CreateTrial,
@@ -4890,11 +4771,6 @@ try:
       Get all Study Configs from DB.
       """
       context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def GetStudyJobType(self, request, context):
-      """*
-      Get jobType of Study
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
     def CreateTrial(self, request, context):
       """*
       Create a Trial from Trial Config.
@@ -5040,12 +4916,6 @@ try:
       """
       raise NotImplementedError()
     GetStudyList.future = None
-    def GetStudyJobType(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """*
-      Get jobType of Study
-      """
-      raise NotImplementedError()
-    GetStudyJobType.future = None
     def CreateTrial(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
       """*
       Create a Trial from Trial Config.
@@ -5192,7 +5062,6 @@ try:
       ('api.Manager', 'GetSavedStudies'): GetSavedStudiesRequest.FromString,
       ('api.Manager', 'GetShouldStopWorkers'): GetShouldStopWorkersRequest.FromString,
       ('api.Manager', 'GetStudy'): GetStudyRequest.FromString,
-      ('api.Manager', 'GetStudyJobType'): GetStudyJobTypeRequest.FromString,
       ('api.Manager', 'GetStudyList'): GetStudyListRequest.FromString,
       ('api.Manager', 'GetSuggestionParameterList'): GetSuggestionParameterListRequest.FromString,
       ('api.Manager', 'GetSuggestionParameters'): GetSuggestionParametersRequest.FromString,
@@ -5220,7 +5089,6 @@ try:
       ('api.Manager', 'GetSavedStudies'): GetSavedStudiesReply.SerializeToString,
       ('api.Manager', 'GetShouldStopWorkers'): GetShouldStopWorkersReply.SerializeToString,
       ('api.Manager', 'GetStudy'): GetStudyReply.SerializeToString,
-      ('api.Manager', 'GetStudyJobType'): GetStudyJobTypeReply.SerializeToString,
       ('api.Manager', 'GetStudyList'): GetStudyListReply.SerializeToString,
       ('api.Manager', 'GetSuggestionParameterList'): GetSuggestionParameterListReply.SerializeToString,
       ('api.Manager', 'GetSuggestionParameters'): GetSuggestionParametersReply.SerializeToString,
@@ -5248,7 +5116,6 @@ try:
       ('api.Manager', 'GetSavedStudies'): face_utilities.unary_unary_inline(servicer.GetSavedStudies),
       ('api.Manager', 'GetShouldStopWorkers'): face_utilities.unary_unary_inline(servicer.GetShouldStopWorkers),
       ('api.Manager', 'GetStudy'): face_utilities.unary_unary_inline(servicer.GetStudy),
-      ('api.Manager', 'GetStudyJobType'): face_utilities.unary_unary_inline(servicer.GetStudyJobType),
       ('api.Manager', 'GetStudyList'): face_utilities.unary_unary_inline(servicer.GetStudyList),
       ('api.Manager', 'GetSuggestionParameterList'): face_utilities.unary_unary_inline(servicer.GetSuggestionParameterList),
       ('api.Manager', 'GetSuggestionParameters'): face_utilities.unary_unary_inline(servicer.GetSuggestionParameters),
@@ -5286,7 +5153,6 @@ try:
       ('api.Manager', 'GetSavedStudies'): GetSavedStudiesRequest.SerializeToString,
       ('api.Manager', 'GetShouldStopWorkers'): GetShouldStopWorkersRequest.SerializeToString,
       ('api.Manager', 'GetStudy'): GetStudyRequest.SerializeToString,
-      ('api.Manager', 'GetStudyJobType'): GetStudyJobTypeRequest.SerializeToString,
       ('api.Manager', 'GetStudyList'): GetStudyListRequest.SerializeToString,
       ('api.Manager', 'GetSuggestionParameterList'): GetSuggestionParameterListRequest.SerializeToString,
       ('api.Manager', 'GetSuggestionParameters'): GetSuggestionParametersRequest.SerializeToString,
@@ -5314,7 +5180,6 @@ try:
       ('api.Manager', 'GetSavedStudies'): GetSavedStudiesReply.FromString,
       ('api.Manager', 'GetShouldStopWorkers'): GetShouldStopWorkersReply.FromString,
       ('api.Manager', 'GetStudy'): GetStudyReply.FromString,
-      ('api.Manager', 'GetStudyJobType'): GetStudyJobTypeReply.FromString,
       ('api.Manager', 'GetStudyList'): GetStudyListReply.FromString,
       ('api.Manager', 'GetSuggestionParameterList'): GetSuggestionParameterListReply.FromString,
       ('api.Manager', 'GetSuggestionParameters'): GetSuggestionParametersReply.FromString,
@@ -5342,7 +5207,6 @@ try:
       'GetSavedStudies': cardinality.Cardinality.UNARY_UNARY,
       'GetShouldStopWorkers': cardinality.Cardinality.UNARY_UNARY,
       'GetStudy': cardinality.Cardinality.UNARY_UNARY,
-      'GetStudyJobType': cardinality.Cardinality.UNARY_UNARY,
       'GetStudyList': cardinality.Cardinality.UNARY_UNARY,
       'GetSuggestionParameterList': cardinality.Cardinality.UNARY_UNARY,
       'GetSuggestionParameters': cardinality.Cardinality.UNARY_UNARY,

@@ -87,12 +87,6 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "job_type",
-            "in": "query",
-            "required": false,
-            "type": "string"
           }
         ],
         "tags": [
@@ -224,37 +218,6 @@
             "description": "",
             "schema": {
               "$ref": "#/definitions/apiGetStudyReply"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "study_id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "job_type",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Manager"
-        ]
-      }
-    },
-    "/api/Manager/GetStudyJobType/{study_id}": {
-      "get": {
-        "summary": "*\nGet jobType of Study",
-        "operationId": "GetStudyJobType",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/apiGetStudyJobTypeReply"
             }
           }
         },
@@ -908,15 +871,6 @@
           "type": "string"
         }
       }
-    },
-    "apiGetStudyJobTypeReply": {
-      "type": "object",
-      "properties": {
-        "job_type": {
-          "type": "string"
-        }
-      },
-      "title": "*\nReturn JobType of Study"
     },
     "apiGetStudyListReply": {
       "type": "object",

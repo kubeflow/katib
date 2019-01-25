@@ -98,7 +98,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
     def getStudyConfig(self, studyID):
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
-            gsrep = client.GetStudy(api_pb2.GetStudyRequest(study_id=studyID, job_type="HP"), 10)
+            gsrep = client.GetStudy(api_pb2.GetStudyRequest(study_id=studyID), 10)
             return gsrep.study_config
 
     def getEvalHistory(self, studyID, obj_name, burn_in):
