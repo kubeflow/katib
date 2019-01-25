@@ -5,12 +5,12 @@ import (
 )
 
 const (
-	VizierServiceIPEnvName = "VIZIER_CORE_PORT_6789_TCP_ADDR"
-	VizierServicePortEnvName = "VIZIER_CORE_PORT_6789_TCP_PORT"
+	VizierServiceIPEnvName        = "VIZIER_CORE_PORT_6789_TCP_ADDR"
+	VizierServicePortEnvName      = "VIZIER_CORE_PORT_6789_TCP_PORT"
 	VizierServiceNamespaceEnvName = "VIZIER_CORE_NAMESPACE"
-	VizierService = "vizier-core"
-	VizierPort = "6789"
-	ManagerAddr = VizierService + ":" + VizierPort
+	VizierService                 = "vizier-core"
+	VizierPort                    = "6789"
+	ManagerAddr                   = VizierService + ":" + VizierPort
 )
 
 func GetManagerAddr() string {
@@ -24,6 +24,6 @@ func GetManagerAddr() string {
 			return ManagerAddr
 		}
 	} else {
-		return VizierService + "." + ns + ":"+ VizierPort
+		return VizierService + "." + ns + ":" + VizierPort
 	}
 }

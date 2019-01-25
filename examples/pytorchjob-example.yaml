@@ -43,11 +43,11 @@ spec:
                 spec:
                   containers:
                     - name: pytorch
-                      image: gcr.io/kubeflow-ci/pytorch-mnist-with-summary:1.0
+                      image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:1.0
                       imagePullPolicy: Always
                       command:
                         - "python"
-                        - "/opt/pytorch_dist_mnist/dist_mnist_with_summary.py"
+                        - "/var/mnist.py"
                         {{- with .HyperParameters}}
                         {{- range .}}
                         - "{{.Name}}={{.Value}}"
@@ -60,11 +60,11 @@ spec:
                 spec:
                   containers:
                     - name: pytorch
-                      image: gcr.io/kubeflow-ci/pytorch-mnist-with-summary:1.0
+                      image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:1.0
                       imagePullPolicy: Always
                       command:
                         - "python"
-                        - "/opt/pytorch_dist_mnist/dist_mnist_with_summary.py"
+                        - "/var/mnist.py"
                         {{- with .HyperParameters}}
                         {{- range .}}
                         - "{{.Name}}={{.Value}}"

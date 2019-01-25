@@ -126,12 +126,6 @@ func (s *server) GetStudyList(ctx context.Context, in *api_pb.GetStudyListReques
 	return &api_pb.GetStudyListReply{StudyOverviews: result}, err
 }
 
-func (s *server) GetStudyJobType(ctx context.Context, in *api_pb.GetStudyJobTypeRequest) (*api_pb.GetStudyJobTypeReply, error) {
-
-	return &api_pb.GetStudyJobTypeReply{}, nil
-
-}
-
 func (s *server) CreateTrial(ctx context.Context, in *api_pb.CreateTrialRequest) (*api_pb.CreateTrialReply, error) {
 	err := dbIf.CreateTrial(in.Trial)
 	return &api_pb.CreateTrialReply{TrialId: in.Trial.TrialId}, err

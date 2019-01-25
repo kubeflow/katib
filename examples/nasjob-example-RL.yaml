@@ -9,8 +9,9 @@ spec:
   studyName: nas-rl-example
   owner: crd
   optimizationtype: maximize
-  objectivevaluename: Validation-accuracy
+  objectivevaluename: Validation-Accuracy
   optimizationgoal: 0.99
+  requestcount: 3
   metricsnames:
     - accuracy
   nasConfig:
@@ -47,58 +48,20 @@ spec:
               list:
               - "1"
               - "2"
-          - name: activation
-            parametertype: categorical
-            feasible:
-              list:
-              - relu
-              - sigmoid
-              - tanh
-              - identity
       - operationType: reduction
         parameterconfigs:
           - name: reduction_type
             parametertype: categorical
             feasible:
               list:
-              - maxpooling
-              - avgpooling
+              - max_pooling
+              - avg_pooling
           - name: pool_size
             parametertype: int
             feasible:
-              min: "1"
+              min: "2"
               max: "3"
               step: "1"
-          - name: stride
-            parametertype: categorical
-            feasible:
-              list:
-              - "1"
-              - "2"
-      - operationType: dense
-        parameterconfigs:
-          - name: num_units
-            parametertype: categorical
-            feasible:
-              list:
-                - "128"
-                - "256"
-                - "512"
-                - "1024"
-          - name: activation
-            parametertype: categorical
-            feasible:
-              list:
-              - relu
-              - sigmoid
-              - tanh
-              - identity
-          - name: dropout_rate
-            parametertype: double
-            feasible:
-              min: "0.1"
-              max: "0.6"
-              step: "0.1"
   workerSpec:
     goTemplate:
         rawTemplate: |-
@@ -110,11 +73,17 @@ spec:
           spec:
             template:
               spec:
-                imagePullSecrets:
-                  - name: gitlabregcred
                 containers:
                 - name: {{.WorkerID}}
-                  image: docker.io/andreyvelichkevich/training-container-nas
+                  image: docker.io/deepermind/training-container-nas
+                  command:
+                  - "python"
+                  - "RunTrial.py"
+                  {{- with .HyperParameters}}
+                  {{- range .}}
+                  - "--{{.Name}}={{.Value}}"
+                  {{- end}}
+                  {{- end}}
                 restartPolicy: Never
   suggestionSpec:
     suggestionAlgorithm: "nasrl"

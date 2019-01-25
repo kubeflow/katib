@@ -60,8 +60,8 @@ type StudyJobStatus struct {
 
 	Condition                Condition  `json:"condition,omitempty"`
 	StudyID                  string     `json:"studyid,omitempty"`
-	SuggestionParameterID    string     `json:"suggestionParameterId"`
-	EarlyStoppingParameterID string     `json:"earlyStoppingParameterId"`
+	SuggestionParameterID    string     `json:"suggestionParameterId,omitempty"`
+	EarlyStoppingParameterID string     `json:"earlyStoppingParameterId,omitempty"`
 	Trials                   []TrialSet `json:"trials,omitempty"`
 	BestObjectiveValue       *float64   `json:"bestObjectiveValue,omitempty"`
 	BestTrialID              string     `json:"bestTrialId,omitempty"`

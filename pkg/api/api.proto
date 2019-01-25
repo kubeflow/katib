@@ -49,14 +49,6 @@ service Manager {
         };
     };
     /**
-     * Get jobType of Study
-     */
-    rpc GetStudyJobType(GetStudyJobTypeRequest) returns (GetStudyJobTypeReply){
-        option (google.api.http) = {
-            get: "/api/Manager/GetStudyJobType/{study_id}"
-        };
-    };
-    /**
      * Create a Trial from Trial Config.
      * Generate a unique ID and store the Trial to DB.
      */
@@ -471,7 +463,6 @@ message CreateStudyReply {
  */
 message DeleteStudyRequest {
     string study_id = 1;
-    string job_type = 2;
 }
 
 /**
@@ -486,7 +477,6 @@ message DeleteStudyReply {
  */
 message GetStudyRequest {
     string study_id = 1;
-    string job_type = 2;
 }
 
 /**
@@ -508,21 +498,6 @@ message GetStudyListRequest {
 message GetStudyListReply {
     repeated StudyOverview study_overviews = 1;
 }
-
-/**
- * Get JobType of Study
- */
-message GetStudyJobTypeRequest {
-    string study_id = 1;
-}
-
-/**
- * Return JobType of Study
- */
- message GetStudyJobTypeReply {
-    string job_type = 1;
-}
-
 
 /**
  * Create a Trial from Trial Config.
