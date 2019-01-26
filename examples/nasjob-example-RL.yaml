@@ -77,13 +77,16 @@ spec:
                 - name: {{.WorkerID}}
                   image: docker.io/deepermind/training-container-nas
                   command:
-                  - "python"
+                  - "python3.5"
                   - "RunTrial.py"
                   {{- with .HyperParameters}}
                   {{- range .}}
                   - "--{{.Name}}={{.Value}}"
                   {{- end}}
                   {{- end}}
+                  resources:
+                    limits:
+                      nvidia.com/gpu: 1
                 restartPolicy: Never
   suggestionSpec:
     suggestionAlgorithm: "nasrl"
