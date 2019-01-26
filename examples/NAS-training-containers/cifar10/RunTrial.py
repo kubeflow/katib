@@ -29,7 +29,7 @@ if __name__ == "__main__":
                        optimizer=keras.optimizers.Adam(lr=1e-3, decay=1e-4),
                        metrics=['accuracy'])
 
-    x_train, y_train, x_test, y_test = cifar10.load_data()
+    (x_train, y_train), (x_test, y_test) = cifar10.load_data()
     x_train = x_train.astype('float32')
     x_test = x_test.astype('float32')
     x_train /= 255
