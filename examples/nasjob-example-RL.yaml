@@ -78,6 +78,7 @@ spec:
                   image: docker.io/deepermind/training-container-nas
                   command:
                   - "python3.5"
+                  - "-u"
                   - "RunTrial.py"
                   {{- with .HyperParameters}}
                   {{- range .}}
