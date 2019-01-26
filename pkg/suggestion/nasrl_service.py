@@ -178,14 +178,12 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
         for w in worker_hist:
             if w.Worker.status == api_pb2.COMPLETED:
-                print(">>> type of w.metrics_logs", type(w.metrics_logs))
-                print(w.metrics_logs)
                 for ml in w.metrics_logs:
                     print("Evaluation Result")
-                    print(ml)
+                    print(ml.values.value)
                     print()
 
-        return float(ml)
+        return float(ml.values.value)
 
     def _get_search_space(self, studyID):
 
