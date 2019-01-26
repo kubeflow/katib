@@ -1,0 +1,2 @@
+tensorflow-gpu
+keras
