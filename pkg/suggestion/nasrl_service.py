@@ -10,17 +10,28 @@ from pkg.api.python import api_pb2_grpc
 import logging
 from logging import getLogger, StreamHandler, INFO, DEBUG
 import json
+import os
+import time
 
 
 class NasrlService(api_pb2_grpc.SuggestionServicer):
     def __init__(self):
         self.manager_addr = "vizier-core"
         self.manager_port = 6789
+        self.current_study_id = ""
+        self.current_trial_id = ""
+        self.ctrl_cache_file = ""
+
         self.tf_graph = tf.get_default_graph()
-        self.is_init = False
         self.is_first_run = True
 
-    def init_controller(self, request):
+    def reset_controller(self, request):
+        print("Resetting Controller for StudyJob {}.".format(request.study_id))
+        self.current_study_id = request.study_id
+        self.ctrl_cache_file = "ctrl_cache/{}.ckpt".format(self.current_study_id)
+        if not os.path.exists("ctrl_cache/"):
+            os.makedirs("ctrl_cache/")
+        self.current_trial_id = ""
         self._get_suggestion_param(request.param_id)
         self._get_search_space(request.study_id)
 
@@ -41,17 +52,16 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 optim_algo=self.suggestion_config['optimizer'],
                 skip_target=self.suggestion_config['skip-target'],
                 skip_weight=self.suggestion_config['skip-weight'],
-                name="controller")
+                name="Ctrl_"+self.current_study_id)
 
             self.controller.build_trainer()
-        
-        self.is_init = True
+
+        print("Controller for StudyJob {} has been initialized.".format(request.study_id))
 
     def GetSuggestions(self, request, context):
-        trials = []
-
-        if not self.is_init:
-            self.init_controller(request)
+        if request.study_id != self.current_study_id:
+            self.reset_controller(request)
+            self.is_first_run = True
 
         with self.tf_graph.as_default():
 
@@ -82,21 +92,22 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 with tf.Session() as sess:
                     sess.run(tf.global_variables_initializer())
                     arc = sess.run(controller_ops["sample_arc"])
-                    saver.save(sess, "ctrl_cache/controller.ckpt")
+                    saver.save(sess, self.ctrl_cache_file)
 
                 self.is_first_run = False
 
             else:
                 with tf.Session() as sess:
-                    saver.restore(sess, "ctrl_cache/controller.ckpt")
+                    saver.restore(sess, self.ctrl_cache_file)
+
                     valid_acc = self.controller.reward
-                    result = self.GetEvaluationResult()
+                    result = self.GetEvaluationResult(request.study_id)
                     loss, entropy, lr, gn, bl, skip, _ = sess.run(
                         fetches=run_ops,
                         feed_dict={valid_acc: result})
                     arc = sess.run(controller_ops["sample_arc"])
 
-                    saver.save(sess, "ctrl_cache/controller.ckpt")
+                    saver.save(sess, self.ctrl_cache_file)
 
         arc = arc.tolist()
         organized_arc = [0 for _ in range(self.num_layers)]
@@ -108,25 +119,73 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         nn_config = dict()
         nn_config['num_layers'] = self.num_layers
         nn_config['input_size'] = self.input_size
-        nn_config['output_szie'] = self.output_size
+        nn_config['output_size'] = self.output_size
         nn_config['embedding'] = dict()
         for l in range(self.num_layers):
             opt = organized_arc[l][0]
             nn_config['embedding'][opt] = self.search_space[opt].get_dict()
 
+        organized_arc_json = json.dumps(organized_arc)
         nn_config_json = json.dumps(nn_config)
 
-        print("Nerual Network Architecture:")
-        print(organized_arc)
+        organized_arc_str = str(organized_arc_json).replace('\"', '\'')
+        nn_config_str = str(nn_config_json).replace('\"', '\'')
+
+        print("Nerual Network Architecture json:")
+        print(organized_arc_json)
         print("Seach Space Embedding json:")
-        print(str(nn_config_json))
+        print(nn_config_json)
+
+        trials = []
+        trials.append(api_pb2.Trial(
+                study_id=request.study_id,
+                parameter_set=[
+                    api_pb2.Parameter(
+                        name="architecture",
+                        value=organized_arc_str,
+                        parameter_type= api_pb2.CATEGORICAL),
+                    api_pb2.Parameter(
+                        name="nn_config",
+                        value=nn_config_str,
+                        parameter_type= api_pb2.CATEGORICAL)
+                ], 
+            )
+        )
+
+        channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
+        with api_pb2.beta_create_Manager_stub(channel) as client:
+            print("INSIDE CLIENT")
+            for i, t in enumerate(trials):
+                ctrep = client.CreateTrial(api_pb2.CreateTrialRequest(trial=t), 10)
+                trials[i].trial_id = ctrep.trial_id
+                self.current_trial_id = ctrep.trial_id
+            print("TRIALS INSERTED")
+            print(ctrep.trial_id)
+            self.current_trial_id = ctrep.trial_id
         
         return api_pb2.GetSuggestionsReply(trials=trials)
 
-    def GetEvaluationResult(self):
-        # fake results for tseting
-        # will complete this part after training container is built and integrated
-        return random.uniform(0, 1)
+    def GetEvaluationResult(self, studyID):
+        worker_hist = []
+        channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
+        with api_pb2.beta_create_Manager_stub(channel) as client:
+            print(">>> Calling GetEvaluationResult(). ")
+            print(">>> The current study id is:", studyID)
+            print(">>> The current trial id is:", self.current_trial_id)
+            time.sleep(20)
+            gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=studyID, trial_id=self.current_trial_id, only_latest_log=True), 10)
+            worker_hist = gwfrep.worker_full_infos
+
+        for w in worker_hist:
+            if w.Worker.status == api_pb2.COMPLETED:
+                print(">>> type of w.metrics_logs", type(w.metrics_logs))
+                print(w.metrics_logs)
+                for ml in w.metrics_logs:
+                    print("Evaluation Result")
+                    print(ml)
+                    print()
+
+        return float(ml)
 
     def _get_search_space(self, studyID):
 

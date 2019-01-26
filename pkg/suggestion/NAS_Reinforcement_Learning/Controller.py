@@ -199,11 +199,9 @@ class Controller(object):
         if self.skip_weight is not None:
             self.loss += self.skip_weight * self.skip_penaltys
 
-        self.train_step = tf.Variable(0, dtype=tf.int32, trainable=False, name="train_step")
+        self.train_step = tf.Variable(0, dtype=tf.int32, trainable=False, name=self.name + "_train_step")
         tf_variables = [var for var in tf.trainable_variables() if var.name.startswith(self.name)]
         print("-" * 80)
-        for var in tf_variables:
-            print(var)
 
         self.train_op, self.lr, self.grad_norm, self.optimizer = get_train_ops(
             self.loss,
