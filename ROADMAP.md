@@ -6,9 +6,9 @@ Katib's Critical User Journey (CUJ) can be found [here](https://bit.ly/2QNKMwt).
 
 # Katib 1.0 Readiness
 
-## Stabilize APIs for StudyJobs
-* Beta by end of Q2, 1.0 by end of Q4
-* Formalize naming conventions (we use different names like katib vs vizier in different places)
+* Stabilize APIs for StudyJobs
+	* Beta by end of Q2, 1.0 by end of Q4
+	* Formalize naming conventions (we use different names like katib vs vizier in different places)
 * Fully integrate katib with existing E2E examples:
 	* Xgboost
 	* Mnist
@@ -21,23 +21,23 @@ Katib's Critical User Journey (CUJ) can be found [here](https://bit.ly/2QNKMwt).
 
 The objectives here are organized around the three stages defined in the CUJ:
 
-## Defining Model and Parameters
+## 1. Defining Model and Parameters
 
 Integration with KF distributed training components
 * TFJob
 * PyTorch
 * Allow Katib to support other operator types generically
 
-## Configuring a Study
+## 2. Configuring a Study
 * Streamlining the StudyJob schema - providing simpler ways to write worker specs and metric collector specs.
 * Integration with Jupyter notebooks and Fairing
-* Allow users to start with an existing model from a notebook and do HP tuning with minimal code changes
+	* Allow users to start with an existing model from a notebook and do HP tuning with minimal code changes
 * Generating StudyJob configurations and launching StudyJobs through UI
 * Supporting additional suggestion algorithms
 * Support for StudyJob deployment in a different namespace
 
 
-## Tracking Model Performance
+## 3. Tracking Model Performance
 * Enhance metrics collection
 	* May need to revisit the design - use a push model instead of pull model?
 * UI enhancements: allowing data scientists to visualize results easier
@@ -46,6 +46,7 @@ Integration with KF distributed training components
 
 # Other Features
 
+Designs are pending for the following new features:
 * Multi-Tenancy Support
 * NAS
 * Batch scheduling
