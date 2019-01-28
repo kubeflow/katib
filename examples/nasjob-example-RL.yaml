@@ -69,7 +69,7 @@ spec:
           kind: Job
           metadata:
             name: {{.WorkerID}}
-            namespace: kubeflow
+            namespace: {{.NameSpace}}
           spec:
             template:
               spec:
