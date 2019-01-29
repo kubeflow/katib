@@ -571,4 +571,3 @@ def add_EarlyStoppingServicer_to_server(servicer, server):
   generic_handler = grpc.method_handlers_generic_handler(
       'api.EarlyStopping', rpc_method_handlers)
   server.add_generic_rpc_handlers((generic_handler,))
-  
