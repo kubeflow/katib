@@ -38,6 +38,7 @@ type StudyJobSpec struct {
 	SuggestionSpec       *SuggestionSpec       `json:"suggestionSpec,omitempty"`
 	EarlyStoppingSpec    *EarlyStoppingSpec    `json:"earlyStoppingSpec,omitempty"`
 	MetricsCollectorSpec *MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
+	NasConfig            *NasConfig            `json:"nasConfig,omitempty"`
 }
 
 // StudyJobStatus defines the observed state of StudyJob
@@ -92,6 +93,7 @@ type FeasibleSpace struct {
 	Max  string   `json:"max,omitempty"`
 	Min  string   `json:"min,omitempty"`
 	List []string `json:"list,omitempty"`
+	Step string   `json:"step,omitempty"`
 }
 
 type ParameterType string
@@ -180,6 +182,25 @@ type StudyJobList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []StudyJob `json:"items"`
+}
+
+// NasConfig contains config for NAS job
+type NasConfig struct {
+	GraphConfig GraphConfig `json:"graphConfig,omitempty"`
+	Operations  []Operation `json:"operations,omitempty"`
+}
+
+// GraphConfig contains a config of DAG
+type GraphConfig struct {
+	NumLayers  int32   `json:"numLayers,omitempty"`
+	InputSize  []int32 `json:"inputSize,omitempty"`
+	OutputSize []int32 `json:"outputSize,omitempty"`
+}
+
+// Operation contains type of operation in DAG
+type Operation struct {
+	OperationType    string            `json:"operationType,omitempty"`
+	ParameterConfigs []ParameterConfig `json:"parameterconfigs,omitempty"`
 }
 
 func init() {
