@@ -15,7 +15,6 @@ class ModelConstructor(object):
         self.input_size = nn_config['input_size']
         self.output_size = nn_config['output_size'][-1]
         self.embedding = nn_config['embedding']
-        print(">>> ModelConstructor initialized")
 
     def build_model(self):
         # a list of the data all layers
@@ -25,13 +24,11 @@ class ModelConstructor(object):
 
         # ================= Stacking layers =================
         # Input Layer. Layer 0
-        print(">>> Input Layer")
         input_layer = Input(shape=self.input_size)
         all_layers[0] = input_layer
 
         # Intermediate Layers. Starting from layer 1.
         for l in range(1, self.num_layers + 1):
-            print(">>> Layer {}".format(l))
             input_layers = list()
             opt = self.arch[l - 1][0]
             opt_config = self.embedding[str(opt)]
@@ -55,7 +52,6 @@ class ModelConstructor(object):
 
         # Final Layer
         # Global Average Pooling, then Fully connected with softmax.
-        print(">>> Final Layer")
         avgpooled = GlobalAveragePooling2D()(all_layers[self.num_layers])
         dropped = Dropout(0.4)(avgpooled)
         logits = Dense(units=self.output_size,

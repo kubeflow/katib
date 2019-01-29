@@ -12,17 +12,26 @@ if __name__ == "__main__":
                         help='architecture of the neural network')
     parser.add_argument('--nn_config', type=str, default="", metavar='N',
                         help='configurations and search space embeddings')
+    parser.add_argument('--num_epochs', type=int, default=10, metavar='N',
+                        help='number of epoches that each child will be trained')
     args = parser.parse_args()
 
     arch = args.architecture.replace("\'", "\"")
     print(">>> arch received by trial")
     print(arch)
+
     nn_config = args.nn_config.replace("\'", "\"")
     print(">>> nn_config received by trial")
     print(nn_config)
 
+    num_epochs = args.num_epochs
+    print(">>> num_epochs received by trial")
+    print(num_epochs)
+
+    print(">>> Constructing Model...")
     constructor = ModelConstructor(arch, nn_config)
     test_model = constructor.build_model()
+    print(">>> Model Constructed Successfully")
 
     test_model.summary()
     test_model.compile(loss=keras.losses.categorical_crossentropy,
@@ -36,10 +45,8 @@ if __name__ == "__main__":
     x_test /= 255
     y_train = to_categorical(y_train)
     y_test = to_categorical(y_test)
-    print(">>> Data Loaded.")
 
-    print(">>> Start to train")
-    num_epochs = 10
+    print(">>> Data Loaded. Training start.")
     for e in range(num_epochs):
         print("\nTotal Epoch {}/{}".format(e+1, num_epochs))
         history = test_model.fit(x=x_train, y=y_train,
