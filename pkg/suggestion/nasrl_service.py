@@ -194,7 +194,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
-            gsrep = client.GetStudy(api_pb2.GetStudyRequest(study_id=studyID, job_type="NAS"), 10)
+            gsrep = client.GetStudy(api_pb2.GetStudyRequest(study_id=studyID), 10)
 
         all_params = gsrep.study_config.nas_config
         graph_config = all_params.graph_config
