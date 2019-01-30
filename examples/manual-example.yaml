@@ -1,0 +1,73 @@
+apiVersion: "kubeflow.org/v1alpha1"
+kind: StudyJob
+metadata:
+  namespace: kubeflow
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: manual-example
+spec:
+  studyName: manual-example
+  owner: crd
+  optimizationtype: maximize
+  objectivevaluename: Validation-accuracy
+  optimizationgoal: 0.99
+  requestcount: 10
+  metricsnames:
+    - accuracy
+  parameterconfigs:
+    - name: --lr
+      parametertype: double
+      feasible:
+        min: "0.01"
+        max: "0.03"
+    - name: --num-layers
+      parametertype: int
+      feasible:
+        min: "1"
+        max: "4"
+    - name: --optimizer
+      parametertype: categorical
+      feasible:
+        list:
+        - sgd
+        - adam
+        - ftrl
+  workerSpec:
+    goTemplate:
+        rawTemplate: |-
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: {{.WorkerID}}
+            namespace: kubeflow
+          spec:
+            template:
+              spec:
+                imagePullSecrets:
+                  - name: gitlabregcred
+                containers:
+                - name: {{.WorkerID}}
+                  image: katib/mxnet-mnist-example
+                  command:
+                  - "python"
+                  - "/mxnet/example/image-classification/train_mnist.py"
+                  - "--batch-size=32"
+                  {{- with .HyperParameters}}
+                  {{- range .}}
+                  - "{{.Name}}={{.Value}}"
+                  {{- end}}
+                  {{- end}}
+                restartPolicy: Never
+  suggestionSpec:
+    suggestionAlgorithm: "manual"
+    suggestionParameters:
+      - 
+          name: "--lr"
+          value: "0.02"
+      - 
+          name: "--num-layers"
+          value: "2"
+      - 
+          name: "--optimizer"
+          value: "sgd"
+    requestNumber: 1

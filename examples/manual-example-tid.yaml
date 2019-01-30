@@ -1,0 +1,42 @@
+apiVersion: "kubeflow.org/v1alpha1"
+kind: StudyJob
+metadata:
+  namespace: kubeflow
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: manual-example-tid
+spec:
+  reusestudyid: STUDYID
+  workerSpec:
+    goTemplate:
+        rawTemplate: |-
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: {{.WorkerID}}
+            namespace: kubeflow
+          spec:
+            template:
+              spec:
+                imagePullSecrets:
+                  - name: gitlabregcred
+                containers:
+                - name: {{.WorkerID}}
+                  image: katib/mxnet-mnist-example
+                  command:
+                  - "python"
+                  - "/mxnet/example/image-classification/train_mnist.py"
+                  - "--batch-size=32"
+                  {{- with .HyperParameters}}
+                  {{- range .}}
+                  - "{{.Name}}={{.Value}}"
+                  {{- end}}
+                  {{- end}}
+                restartPolicy: Never
+  suggestionSpec:
+    suggestionAlgorithm: "manual"
+    suggestionParameters:
+      - 
+          name: "trialid"
+          value: "TRIALID"
+    requestNumber: 1

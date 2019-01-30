@@ -35,6 +35,7 @@ echo "Building REST API for core image..."
 docker build -t ${PREFIX}/vizier-core-rest -f ${CMD_PREFIX}/manager-rest/Dockerfile .
 
 echo "Building suggestion images..."
+docker build -t ${PREFIX}/suggestion-manual:${DTAG} -f ${CMD_PREFIX}/suggestion/manual/Dockerfile .
 docker build -t ${PREFIX}/suggestion-random -f ${CMD_PREFIX}/suggestion/random/Dockerfile .
 docker build -t ${PREFIX}/suggestion-grid -f ${CMD_PREFIX}/suggestion/grid/Dockerfile .
 docker build -t ${PREFIX}/suggestion-hyperband -f ${CMD_PREFIX}/suggestion/hyperband/Dockerfile .

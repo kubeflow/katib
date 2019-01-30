@@ -226,6 +226,10 @@
                     template: "build-cli",
                   },
                   {
+                    name: "build-suggestion-manual",
+                    template: "build-suggestion-manual",
+                  },
+                  {
                     name: "build-suggestion-random",
                     template: "build-suggestion-random",
                   },
@@ -349,6 +353,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-cli", testWorkerImage, [
               "test/scripts/build-cli.sh",
             ]),  // build-cli
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-manual", testWorkerImage, [
+              "test/scripts/build-suggestion-manual.sh",
+            ]),  // build-suggestion-manual
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-random", testWorkerImage, [
               "test/scripts/build-suggestion-random.sh",
             ]),  // build-suggestion-random

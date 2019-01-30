@@ -1,0 +1,31 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: vizier-suggestion-manual
+  namespace: kubeflow
+  labels:
+    app: vizier
+    component: suggestion-manual
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: vizier-suggestion-manual
+      labels:
+        app: vizier
+        component: suggestion-manual
+    spec:
+      containers:
+      - name: vizier-suggestion-manual
+        image: katib/suggestion-manual
+        ports:
+        - name: api
+          containerPort: 6789
+        imagePullPolicy: Always
+#        resources:
+#          requests:
+#            cpu: 500m
+#            memory: 500M
+#          limits:
+#            cpu: 500m
+#            memory: 500M
