@@ -165,6 +165,7 @@ class ManagerServicer(object):
   def GetStudy(self, request, context):
     """* 
     Get a Study Config from DB by ID of Study.
+    Return AlreadyExists error when the Job UID in GetStudyRequest is already exist in DB.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')

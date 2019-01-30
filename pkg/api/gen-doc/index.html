@@ -3008,7 +3008,8 @@ Generate a unique ID and store the Study to DB.</p></td>
                 <td>GetStudy</td>
                 <td><a href="#api.GetStudyRequest">GetStudyRequest</a></td>
                 <td><a href="#api.GetStudyReply">GetStudyReply</a></td>
-                <td><p>Get a Study Config from DB by ID of Study.</p></td>
+                <td><p>Get a Study Config from DB by ID of Study.
+Return AlreadyExists error when the Job UID in GetStudyRequest is already exist in DB.</p></td>
               </tr>
             
               <tr>

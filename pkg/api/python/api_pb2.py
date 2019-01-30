@@ -4330,6 +4330,7 @@ try:
     def GetStudy(self, request, context):
       """* 
       Get a Study Config from DB by ID of Study.
+      Return AlreadyExists error when the Job UID in GetStudyRequest is already exist in DB.
       """
       context.set_code(grpc.StatusCode.UNIMPLEMENTED)
       context.set_details('Method not implemented!')
@@ -4759,6 +4760,7 @@ try:
     def GetStudy(self, request, context):
       """* 
       Get a Study Config from DB by ID of Study.
+      Return AlreadyExists error when the Job UID in GetStudyRequest is already exist in DB.
       """
       context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
     def DeleteStudy(self, request, context):
@@ -4901,6 +4903,7 @@ try:
     def GetStudy(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
       """* 
       Get a Study Config from DB by ID of Study.
+      Return AlreadyExists error when the Job UID in GetStudyRequest is already exist in DB.
       """
       raise NotImplementedError()
     GetStudy.future = None

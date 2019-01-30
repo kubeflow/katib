@@ -26,6 +26,7 @@ service Manager {
     };
     /** 
      * Get a Study Config from DB by ID of Study.
+     * Return AlreadyExists error when the Job UID in GetStudyRequest is already exist in DB.
      */
     rpc GetStudy(GetStudyRequest) returns (GetStudyReply){
         option (google.api.http) = {

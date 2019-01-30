@@ -2302,6 +2302,7 @@ type ManagerClient interface {
 	CreateStudy(ctx context.Context, in *CreateStudyRequest, opts ...grpc.CallOption) (*CreateStudyReply, error)
 	// *
 	// Get a Study Config from DB by ID of Study.
+	// Return AlreadyExists error when the Job UID in GetStudyRequest is already exist in DB.
 	GetStudy(ctx context.Context, in *GetStudyRequest, opts ...grpc.CallOption) (*GetStudyReply, error)
 	// *
 	// Delete a Study from DB by Study ID.
@@ -2609,6 +2610,7 @@ type ManagerServer interface {
 	CreateStudy(context.Context, *CreateStudyRequest) (*CreateStudyReply, error)
 	// *
 	// Get a Study Config from DB by ID of Study.
+	// Return AlreadyExists error when the Job UID in GetStudyRequest is already exist in DB.
 	GetStudy(context.Context, *GetStudyRequest) (*GetStudyReply, error)
 	// *
 	// Delete a Study from DB by Study ID.

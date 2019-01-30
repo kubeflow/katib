@@ -211,7 +211,7 @@
     },
     "/api/Manager/GetStudy/{study_id}": {
       "get": {
-        "summary": "* \nGet a Study Config from DB by ID of Study.",
+        "summary": "* \nGet a Study Config from DB by ID of Study.\nReturn AlreadyExists error when the Job UID in GetStudyRequest is already exist in DB.",
         "operationId": "GetStudy",
         "responses": {
           "200": {

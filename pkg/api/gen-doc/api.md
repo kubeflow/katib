@@ -1448,7 +1448,7 @@ https://cloud.google.com/service-infrastructure/docs/service-management/referenc
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
 | CreateStudy | [CreateStudyRequest](#api.CreateStudyRequest) | [CreateStudyReply](#api.CreateStudyRequest) | Create a Study from Study Config. Generate a unique ID and store the Study to DB. |
-| GetStudy | [GetStudyRequest](#api.GetStudyRequest) | [GetStudyReply](#api.GetStudyRequest) | Get a Study Config from DB by ID of Study. |
+| GetStudy | [GetStudyRequest](#api.GetStudyRequest) | [GetStudyReply](#api.GetStudyRequest) | Get a Study Config from DB by ID of Study. Return AlreadyExists error when the Job UID in GetStudyRequest is already exist in DB. |
 | DeleteStudy | [DeleteStudyRequest](#api.DeleteStudyRequest) | [DeleteStudyReply](#api.DeleteStudyRequest) | Delete a Study from DB by Study ID. |
 | GetStudyList | [GetStudyListRequest](#api.GetStudyListRequest) | [GetStudyListReply](#api.GetStudyListRequest) | Get all Study Configs from DB. |
 | CreateTrial | [CreateTrialRequest](#api.CreateTrialRequest) | [CreateTrialReply](#api.CreateTrialRequest) | Create a Trial from Trial Config. Generate a unique ID and store the Trial to DB. |
