@@ -17,13 +17,22 @@ func TestCreateStudy(t *testing.T) {
 	mockDB := mockdb.NewMockVizierDBInterface(ctrl)
 	mockModelStore := mockmodelstore.NewMockModelStore(ctrl)
 	sid := "teststudy"
+	jobid := "teststudyjob"
 	sc := &api.StudyConfig{
 		Name:               "test",
 		Owner:              "admin",
 		OptimizationType:   1,
 		ObjectiveValueName: "obj_name",
+		JobId:              jobid,
+		JobType:            "HP",
 	}
 	dbIf = mockDB
+	mockDB.EXPECT().RegisterStudyJob(
+		jobid,
+		sid,
+		"HP",
+	).Return(nil)
+	mockDB.EXPECT().GetStudyIDfromJob(jobid).Return("", nil)
 	mockDB.EXPECT().CreateStudy(
 		sc,
 	).Return(sid, nil)

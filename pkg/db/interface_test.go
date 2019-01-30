@@ -23,7 +23,7 @@ var mock sqlmock.Sqlmock
 var studyColumns = []string{
 	"id", "name", "owner", "optimization_type", "optimization_goal",
 	"parameter_configs", "tags", "objective_value_name",
-	"metrics", "job_id"}
+	"metrics"}
 var trialColumns = []string{
 	"id", "study_id", "parameters", "objective_value", "tags"}
 var workerColumns = []string{"id",
@@ -43,6 +43,7 @@ func TestMain(m *testing.M) {
 		fmt.Printf("error NewWithSQLConn: %v\n", err)
 	}
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS studies").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec("CREATE TABLE IF NOT EXISTS studyjobs").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS study_permissions").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS trials").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS workers").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
@@ -118,7 +119,7 @@ func TestGetStudyConfig(t *testing.T) {
 	id := generateRandid()
 	mock.ExpectQuery("SELECT").WillReturnRows(
 		sqlmock.NewRows(studyColumns).AddRow(
-			"abc", "test", "admin", 1, 0.99, "{}", "", "", "", "test"))
+			"abc", "test", "admin", 1, 0.99, "{}", "", "", ""))
 	study, err := dbInterface.GetStudyConfig(id)
 	if err != nil {
 		t.Errorf("GetStudyConfig failed: %v", err)
@@ -152,11 +153,10 @@ func TestUpdateStudy(t *testing.T) {
 	var in api.StudyConfig
 	in.Name = "hoge"
 	in.Owner = "joe"
-	in.JobId = "foobar123"
 
-	mock.ExpectExec(`UPDATE studies SET name = \?, owner = \?, tags = \?,
-                job_id = \? WHERE id = \?`,
-	).WithArgs(in.Name, in.Owner, "", in.JobId, studyID).WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec(`UPDATE studies SET name = \?, owner = \?, tags = \?
+                WHERE id = \?`,
+	).WithArgs(in.Name, in.Owner, "", studyID).WillReturnResult(sqlmock.NewResult(1, 1))
 	err := dbInterface.UpdateStudy(studyID, &in)
 	if err != nil {
 		t.Errorf("UpdateStudy error %v", err)
@@ -364,7 +364,7 @@ func TestGetWorkerFullInfo(t *testing.T) {
 		sqlmock.NewRows(trialColumns))
 	mock.ExpectQuery(`SELECT \* FROM studies WHERE id = \?`).WithArgs(studyID).WillReturnRows(
 		sqlmock.NewRows(studyColumns).AddRow(
-			studyID, "test", "admin", 1, 0.99, "{}", "", "", "foo,\nbar", "test"))
+			studyID, "test", "admin", 1, 0.99, "{}", "", "", "foo,\nbar"))
 	WMRows := sqlmock.NewRows([]string{"WM.worker_id", "WM.time", "WM.name", "WM.value"})
 	WMRows.AddRow("w1134567890abcde", "2012-01-01 09:54:32", "foo", "1")
 	WMRows.AddRow("w1134567890abcde", "2012-01-01 09:54:32", "bar", "1")

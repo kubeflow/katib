@@ -158,6 +158,32 @@ func (mr *MockVizierDBInterfaceMockRecorder) GetStudyConfig(arg0 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudyConfig", reflect.TypeOf((*MockVizierDBInterface)(nil).GetStudyConfig), arg0)
 }
 
+// GetStudyIDfromJob mocks base method
+func (m *MockVizierDBInterface) GetStudyIDfromJob(arg0 string) (string, error) {
+	ret := m.ctrl.Call(m, "GetStudyIDfromJob", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStudyIDfromJob indicates an expected call of GetStudyIDfromJob
+func (mr *MockVizierDBInterfaceMockRecorder) GetStudyIDfromJob(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudyIDfromJob", reflect.TypeOf((*MockVizierDBInterface)(nil).GetStudyIDfromJob), arg0)
+}
+
+// GetStudyJobList mocks base method
+func (m *MockVizierDBInterface) GetStudyJobList(arg0 string) ([]string, error) {
+	ret := m.ctrl.Call(m, "GetStudyJobList", arg0)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStudyJobList indicates an expected call of GetStudyJobList
+func (mr *MockVizierDBInterfaceMockRecorder) GetStudyJobList(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudyJobList", reflect.TypeOf((*MockVizierDBInterface)(nil).GetStudyJobList), arg0)
+}
+
 // GetStudyList mocks base method
 func (m *MockVizierDBInterface) GetStudyList() ([]string, error) {
 	ret := m.ctrl.Call(m, "GetStudyList")
@@ -299,6 +325,18 @@ func (m *MockVizierDBInterface) GetWorkerTimestamp(arg0 string) (*time.Time, err
 // GetWorkerTimestamp indicates an expected call of GetWorkerTimestamp
 func (mr *MockVizierDBInterfaceMockRecorder) GetWorkerTimestamp(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkerTimestamp", reflect.TypeOf((*MockVizierDBInterface)(nil).GetWorkerTimestamp), arg0)
+}
+
+// RegisterStudyJob mocks base method
+func (m *MockVizierDBInterface) RegisterStudyJob(arg0, arg1, arg2 string) error {
+	ret := m.ctrl.Call(m, "RegisterStudyJob", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RegisterStudyJob indicates an expected call of RegisterStudyJob
+func (mr *MockVizierDBInterfaceMockRecorder) RegisterStudyJob(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterStudyJob", reflect.TypeOf((*MockVizierDBInterface)(nil).RegisterStudyJob), arg0, arg1, arg2)
 }
 
 // SelectOne mocks base method

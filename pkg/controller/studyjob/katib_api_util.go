@@ -67,7 +67,7 @@ func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) (bool, error) 
 				//Duplicate create study request
 				return false, nil
 			} else {
-				log.Printf("Create Study Error: ", err)
+				log.Printf("Create Study Error: %v", err)
 				return true, err
 			}
 		}
