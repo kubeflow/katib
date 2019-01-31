@@ -68,6 +68,7 @@ sed -i -e "s@image: katib\/vizier-core-rest@image: ${REGISTRY}\/${REPO_NAME}\/vi
 sed -i -e "s@image: katib\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/katib-ui:${VERSION}@" manifests/vizier/ui/deployment.yaml
 sed -i -e "s@type: NodePort@type: ClusterIP@" -e "/nodePort: 30678/d" manifests/vizier/core/service.yaml
 sed -i -e "s@image: katib\/studyjob-controller@image: ${REGISTRY}\/${REPO_NAME}\/studyjob-controller:${VERSION}@" manifests/studyjobcontroller/studyjobcontroller.yaml
+sed -i -e "s@image: katib\/suggestion-manual@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-manual:${VERSION}@" manifests/vizier/suggestion/manual/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-random:${VERSION}@" manifests/vizier/suggestion/random/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-grid:${VERSION}@" manifests/vizier/suggestion/grid/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-hyperband:${VERSION}@" manifests/vizier/suggestion/hyperband/deployment.yaml
