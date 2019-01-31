@@ -29,36 +29,15 @@ type server struct {
 }
 
 func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest) (*api_pb.CreateStudyReply, error) {
-	var studyID string
-	var err error
 	if in == nil || in.StudyConfig == nil {
 		return &api_pb.CreateStudyReply{}, errors.New("StudyConfig is missing.")
 	}
 
-	if in.StudyConfig.JobType != "NAS" {
-		//If it is a HP job
-		studyID, err = dbIf.CreateHPStudy(in.StudyConfig)
-		if err != nil {
-			return &api_pb.CreateStudyReply{}, err
-		}
-
-		/*
-			DONT KNOW IF YOU STILL USE MODELDB
-			s.SaveStudy(ctx, &api_pb.SaveStudyRequest{
-				StudyName:   in.StudyConfig.Name,
-				Owner:       in.StudyConfig.Owner,
-				Description: "StudyID: " + studyID,
-			})
-		*/
-
-	} else {
-		//If it is a NAS job
-		studyID, err = dbIf.CreateNASStudy(in.StudyConfig)
-		if err != nil {
-			log.Printf("Error is %v", err)
-			return &api_pb.CreateStudyReply{}, err
-		}
+	studyId, err := dbIf.CreateStudy(in.StudyConfig)
+	if err != nil {
+		return &api_pb.CreateStudyReply{}, err
 	}
+
 	return &api_pb.CreateStudyReply{StudyId: studyID}, nil
 }
 

@@ -51,14 +51,8 @@ type VizierDBInterface interface {
 	GetStudy(string) (*api.StudyConfig, error)
 	GetStudyList() ([]string, error)
 
-	GetHPStudyConfig(string) (*api.StudyConfig, error)
-	CreateHPStudy(*api.StudyConfig) (string, error)
-	UpdateHPStudy(string, *api.StudyConfig) error
-
-	/* APIs for NAS */
-	GetNASStudyConfig(string) (*api.StudyConfig, error)
-	CreateNASStudy(*api.StudyConfig) (string, error)
-	UpdateNASStudy(string, *api.StudyConfig) error
+	CreateStudy(*api.StudyConfig) (string, error)
+	UpdateStudy(string, *api.StudyConfig) error
 	DeleteStudy(string) error
 
 	GetTrial(string) (*api.Trial, error)
@@ -176,17 +170,57 @@ func (d *dbConn) GetStudyIDsTypesList() ([]string, []string, error) {
 }
 
 func (d *dbConn) GetStudy(StudyID string) (*api.StudyConfig, error) {
-	row := d.db.QueryRow("SELECT job_type FROM studies WHERE id = ?", StudyID)
-	var jobType string
-	err := row.Scan(&jobType)
+	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
+	study := new(api.StudyConfig)
+	var dummyID, nasConfig, parameters, tags, metrics string
+	err := row.Scan(&dummyID,
+		&study.Name,
+		&study.Owner,
+		&study.OptimizationType,
+		&study.OptimizationGoal,
+		&parameters,
+		&tags,
+		&study.ObjectiveValueName,
+		&metrics,
+		&nasConfig,
+		&study.JobId,
+		&study.JobType,
+	)
 	if err != nil {
-		return &api.StudyConfig{}, err
+		return nil, err
 	}
-	if jobType == "NAS" {
-		return d.GetNASStudyConfig(StudyID)
-	} else {
-		return d.GetHPStudyConfig(StudyID)
+	if parameters != "" {
+		study.ParameterConfigs = new(api.StudyConfig_ParameterConfigs)
+		err = jsonpb.UnmarshalString(parameters, study.ParameterConfigs)
+		if err != nil {
+			return nil, err
+		}
 	}
+	if nasConfig != "" {
+		study.NasConfig = new(api.NasConfig)
+		err = jsonpb.UnmarshalString(nasConfig, study.NasConfig)
+		if err != nil {
+			log.Printf("Failed to unmarshal NasConfig")
+			return nil, err
+		}
+	}
+
+	var tagsArray []string
+	if len(tags) > 0 {
+		tagsArray = strings.Split(tags, ",\n")
+	}
+	study.Tags = make([]*api.Tag, len(tagsArray))
+	for i, j := range tagsArray {
+		tag := new(api.Tag)
+		err = jsonpb.UnmarshalString(j, tag)
+		if err != nil {
+			log.Printf("err unmarshal %s", j)
+			return nil, err
+		}
+		study.Tags[i] = tag
+	}
+	study.Metrics = strings.Split(metrics, ",\n")
+	return study, nil
 }
 
 func New() (VizierDBInterface, error) {
@@ -216,50 +250,6 @@ func isDBDuplicateError(err error) bool {
 	return false
 }
 
-func (d *dbConn) GetHPStudyConfig(id string) (*api.StudyConfig, error) {
-	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
-	study := new(api.StudyConfig)
-	var dummyID, nasConfig, parameters, tags, metrics string
-	err := row.Scan(&dummyID,
-		&study.Name,
-		&study.Owner,
-		&study.OptimizationType,
-		&study.OptimizationGoal,
-		&parameters,
-		&tags,
-		&study.ObjectiveValueName,
-		&metrics,
-		&nasConfig,
-		&study.JobId,
-		&study.JobType,
-	)
-	if err != nil {
-		return nil, err
-	}
-	study.ParameterConfigs = new(api.StudyConfig_ParameterConfigs)
-	err = jsonpb.UnmarshalString(parameters, study.ParameterConfigs)
-	if err != nil {
-		return nil, err
-	}
-
-	var tagsArray []string
-	if len(tags) > 0 {
-		tagsArray = strings.Split(tags, ",\n")
-	}
-	study.Tags = make([]*api.Tag, len(tagsArray))
-	for i, j := range tagsArray {
-		tag := new(api.Tag)
-		err = jsonpb.UnmarshalString(j, tag)
-		if err != nil {
-			log.Printf("err unmarshal %s", j)
-			return nil, err
-		}
-		study.Tags[i] = tag
-	}
-	study.Metrics = strings.Split(metrics, ",\n")
-	return study, nil
-}
-
 func (d *dbConn) GetStudyList() ([]string, error) {
 	rows, err := d.db.Query("SELECT id FROM studies")
 	if err != nil {
@@ -280,10 +270,7 @@ func (d *dbConn) GetStudyList() ([]string, error) {
 	return result, nil
 }
 
-func (d *dbConn) CreateHPStudy(in *api.StudyConfig) (string, error) {
-	if in.ParameterConfigs == nil {
-		return "", errors.New("ParameterConfigs must be set")
-	}
+func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 	if in.JobId != "" {
 		var temporaryId string
 		err := d.db.QueryRow("SELECT id FROM studies WHERE job_id = ?", in.JobId).Scan(&temporaryId)
@@ -292,127 +279,21 @@ func (d *dbConn) CreateHPStudy(in *api.StudyConfig) (string, error) {
 		}
 	}
 
-	configs, err := (&jsonpb.Marshaler{}).MarshalToString(in.ParameterConfigs)
-	if err != nil {
-		log.Fatalf("Error marshaling configs: %v", err)
-	}
-
-	tags := make([]string, len(in.Tags))
-	for i, elem := range in.Tags {
-		tags[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
-		if err != nil {
-			log.Printf("Error marshalling %v: %v", elem, err)
-			continue
-		}
-	}
-
-	var isin bool = false
-	for _, m := range in.Metrics {
-		if m == in.ObjectiveValueName {
-			isin = true
-		}
-	}
-	if !isin {
-		in.Metrics = append(in.Metrics, in.ObjectiveValueName)
-	}
-
-	var studyID string
 	var nasConfig string
-	i := 3
-	for true {
-		studyID = generateRandid()
-		_, err := d.db.Exec(
-			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-			studyID,
-			in.Name,
-			in.Owner,
-			in.OptimizationType,
-			in.OptimizationGoal,
-			configs,
-			strings.Join(tags, ",\n"),
-			in.ObjectiveValueName,
-			strings.Join(in.Metrics, ",\n"),
-			nasConfig,
-			in.JobId,
-			in.JobType,
-		)
-		if err == nil {
-			break
-		} else if isDBDuplicateError(err) {
-			i--
-			if i > 0 {
-				continue
-			}
-		}
-		return "", err
-	}
-	for _, perm := range in.AccessPermissions {
-		_, err := d.db.Exec(
-			"INSERT INTO study_permissions (study_id, access_permission) "+
-				"VALUES (?, ?)",
-			studyID, perm)
-		if err != nil {
-			log.Printf("Error storing permission (%s, %s): %v",
-				studyID, perm, err)
-		}
-	}
-
-	return studyID, nil
-}
-
-// UpdateStudy updates the corresponding row in the DB.
-// It only updates name, owner, tags and job_id.
-// Other columns are silently ignored.
-func (d *dbConn) UpdateHPStudy(studyID string, in *api.StudyConfig) error {
+	var configs string
 	var err error
-
-	tags := make([]string, len(in.Tags))
-	for i, elem := range in.Tags {
-		tags[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
+	if in.NasConfig != nil {
+		nasConfig, err = (&jsonpb.Marshaler{}).MarshalToString(in.NasConfig)
 		if err != nil {
-			log.Printf("Error marshalling %v: %v", elem, err)
-			continue
-		}
-	}
-	_, err = d.db.Exec(`UPDATE studies SET name = ?, owner = ?, tags = ?,
-                job_id = ? WHERE id = ?`,
-		in.Name,
-		in.Owner,
-		strings.Join(tags, ",\n"),
-		in.JobId,
-		studyID)
-	return err
-}
-
-func (d *dbConn) CreateNASStudy(in *api.StudyConfig) (string, error) {
-
-	for _, operation := range in.NasConfig.Operations.Operation {
-		if len(operation.OperationType) == 0 && operation.ParameterConfigs != nil {
-			return "", errors.New("Operations must be set properly")
+			log.Fatalf("Error marshaling nasConfig: %v", err)
 		}
 	}
 
-	if in.JobId != "" {
-		/* BETTER WAY TO CHECK IF THE OBJECT EXISTS */
-		var temporaryId string
-		err := d.db.QueryRow("SELECT id FROM studies WHERE job_id = ?", in.JobId).Scan(&temporaryId)
-		if err == nil {
-			return "", fmt.Errorf("Study %s in Job %s already exist.", in.Name, in.JobId)
+	if in.ParameterConfigs != nil {
+		configs, err = (&jsonpb.Marshaler{}).MarshalToString(in.ParameterConfigs)
+		if err != nil {
+			log.Fatalf("Error marshaling configs: %v", err)
 		}
-		// var err error
-		// var count int
-
-		// for row.Next() {
-		// 	err = row.Scan(&count)
-		// 	if err != nil || count == 0 {
-		// 		return "", fmt.Errorf("Study %s in Job %s already exist.", in.Name, in.JobId)
-		// 	}
-		// }
-	}
-
-	nasConfig, err := (&jsonpb.Marshaler{}).MarshalToString(in.NasConfig)
-	if err != nil {
-		log.Fatalf("Error marshaling nasConfig: %v", err)
 	}
 
 	tags := make([]string, len(in.Tags))
@@ -437,7 +318,6 @@ func (d *dbConn) CreateNASStudy(in *api.StudyConfig) (string, error) {
 	}
 
 	var studyID string
-	var configs string
 
 	i := 3
 	for true {
@@ -468,66 +348,13 @@ func (d *dbConn) CreateNASStudy(in *api.StudyConfig) (string, error) {
 		return "", err
 	}
 
-	// for _, perm := range in.AccessPermissions {
-	// 	_, err := d.db.Exec(
-	// 		"INSERT INTO study_permissions (study_id, access_permission) "+
-	// 			"VALUES (?, ?)",
-	// 		studyID, perm)
-	// 	if err != nil {
-	// 		log.Printf("Error storing permission (%s, %s): %v",
-	// 			studyID, perm, err)
-	// 	}
-	// }
-
 	return studyID, nil
 }
 
-func (d *dbConn) GetNASStudyConfig(id string) (*api.StudyConfig, error) {
-	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
-	study := new(api.StudyConfig)
-	var dummyID, nasConfig, parameters, tags, metrics string
-	err := row.Scan(&dummyID,
-		&study.Name,
-		&study.Owner,
-		&study.OptimizationType,
-		&study.OptimizationGoal,
-		&tags,
-		&parameters,
-		&study.ObjectiveValueName,
-		&metrics,
-		&nasConfig,
-		&study.JobId,
-		&study.JobType,
-	)
-	if err != nil {
-		return nil, err
-	}
-	study.NasConfig = new(api.NasConfig)
-	err = jsonpb.UnmarshalString(nasConfig, study.NasConfig)
-	if err != nil {
-		log.Printf("Failed to unmarshal NasConfig")
-		return nil, err
-	}
-
-	var tagsArray []string
-	if len(tags) > 0 {
-		tagsArray = strings.Split(tags, ",\n")
-	}
-	study.Tags = make([]*api.Tag, len(tagsArray))
-	for i, j := range tagsArray {
-		tag := new(api.Tag)
-		err = jsonpb.UnmarshalString(j, tag)
-		if err != nil {
-			log.Printf("Failed to unmarshal %s", j)
-			return nil, err
-		}
-		study.Tags[i] = tag
-	}
-	study.Metrics = strings.Split(metrics, ",\n")
-	return study, nil
-}
-
-func (d *dbConn) UpdateNASStudy(studyID string, in *api.StudyConfig) error {
+// UpdateStudy updates the corresponding row in the DB.
+// It only updates name, owner, tags and job_id.
+// Other columns are silently ignored.
+func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
 
 	/* THINK ABOUT TRIALS */
 	var err error
