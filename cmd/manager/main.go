@@ -37,7 +37,7 @@ func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest)
 	if in.StudyConfig.JobId != "" {
 		get_study_id, _ := dbIf.GetStudyIDfromJob(in.StudyConfig.JobId)
 		if get_study_id != "" {
-			return &api_pb.CreateStudyReply{StudyId: get_study_id}, status.Errorf(codes.AlreadyExists, "Job UUID is already registerd.")
+			return &api_pb.CreateStudyReply{StudyId: get_study_id}, status.Errorf(codes.AlreadyExists, "StudyJob with UUID %s registered already", in.StudyConfig.JobId)
 		}
 	}
 	studyID, err := dbIf.CreateStudy(in.StudyConfig)

@@ -11,7 +11,6 @@ spec:
   optimizationtype: maximize
   objectivevaluename: Validation-accuracy
   optimizationgoal: 0.99
-  requestcount: 10
   metricsnames:
     - accuracy
   parameterconfigs:
@@ -70,4 +69,3 @@ spec:
       - 
           name: "--optimizer"
           value: "sgd"
-    requestNumber: 1

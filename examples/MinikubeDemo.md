@@ -160,6 +160,21 @@ In this demo, the eta is 3 and the R is 9.
 kubectl apply -f hypb-example.yaml
 ```
 
+### Manual suggestion
+Manual Suggestion is a special suggeston.
+Generate trial in two way in manual suggestion.
+
+* Specify all parameters manually. [manual-example.yaml](./manual-example.yaml)
+* Use Trial ID that is created in the past. [manual-example-tid.yaml](manual-example-tid.yaml) (You should replace STUDYID and TRIALID with valid values.)
+
+You can
+* Add a new trial to completed trial.
+* Set a initial value for hyper-parameter search manually.
+* Rerun a best trial.
+
+In Manual Suggestion, only one trial will be created in a studyjob.
+RequestCount and RequestNumber in yaml will be ignored.
+
 ## UI
 You can check your study results with Web UI.
 Acsess to `http://127.0.0.1:8000/katib`

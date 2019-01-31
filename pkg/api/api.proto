@@ -17,6 +17,7 @@ service Manager {
     /**
      * Create a Study from Study Config.
      * Generate a unique ID and store the Study to DB.
+     * Return AlreadyExists error when the Job UID in GetStudyRequest is already exist in DB.
      */
     rpc CreateStudy(CreateStudyRequest) returns (CreateStudyReply){
         option (google.api.http) = {
@@ -26,7 +27,6 @@ service Manager {
     };
     /** 
      * Get a Study Config from DB by ID of Study.
-     * Return AlreadyExists error when the Job UID in GetStudyRequest is already exist in DB.
      */
     rpc GetStudy(GetStudyRequest) returns (GetStudyReply){
         option (google.api.http) = {

@@ -46,14 +46,14 @@ func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) (bool, error) 
 	c := katibapi.NewManagerClient(conn)
 
 	if instance.Spec.ReuseStudyID != "" {
-		_, err = getStudyfromDB(c, instance.Spec.ReuseStudyID)
-		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		_, err = getStudy(c, instance.Spec.ReuseStudyID)
 		if err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
 			return true, err
 		}
 		instance.Status.StudyID = instance.Spec.ReuseStudyID
 	} else {
-		studyConfig, err := getStudyConf(instance)
+		studyConfig, err := populateStudyConf(instance)
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		if err != nil {
 			return true, err
@@ -95,7 +95,7 @@ func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) (bool, error) 
 	return true, nil
 }
 
-func getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
+func populateStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
 	jobType := getJobType(instance)
 	if jobType == jobTypeNAS {
 		return populateConfigForNAS(instance)
@@ -267,7 +267,7 @@ func deleteStudy(instance *katibv1alpha1.StudyJob) error {
 	return nil
 }
 
-func getStudyfromDB(c katibapi.ManagerClient, studyId string) (*katibapi.StudyConfig, error) {
+func getStudy(c katibapi.ManagerClient, studyId string) (*katibapi.StudyConfig, error) {
 	ctx := context.Background()
 	getStudyreq := &katibapi.GetStudyRequest{
 		StudyId: studyId,
@@ -285,7 +285,7 @@ func createStudy(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig) (s
 	createStudyreq := &katibapi.CreateStudyRequest{
 		StudyConfig: studyConfig,
 	}
-	log.Printf("StudyJob UUID %s", studyConfig.JobId)
+	log.Printf("Create study for StudyJob UUID %s", studyConfig.JobId)
 	createStudyreply, err := c.CreateStudy(ctx, createStudyreq)
 	if err != nil {
 		return "", err
