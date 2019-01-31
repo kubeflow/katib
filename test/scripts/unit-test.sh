@@ -50,6 +50,7 @@ kubectl config set-credentials temp-admin --username=admin --client-certificate=
 kubectl config set-context temp-context --cluster=$(kubectl config get-clusters | grep ${CLUSTER_NAME}) --user=temp-admin
 kubectl config use-context temp-context
 
+kubectl delete pod mysql-ut --ignore-not-found
 kubectl apply -f - <<EOF
 apiVersion: v1
 kind: Pod
