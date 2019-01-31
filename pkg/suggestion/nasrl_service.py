@@ -2,8 +2,6 @@ from pkg.suggestion.NAS_Reinforcement_Learning.Controller import Controller
 from pkg.suggestion.NAS_Reinforcement_Learning.Operation import SearchSpace
 from pkg.suggestion.NAS_Reinforcement_Learning.SuggestionParam import parseSuggestionParam
 import tensorflow as tf
-import numpy as np
-import random
 import grpc
 from pkg.api.python import api_pb2
 from pkg.api.python import api_pb2_grpc
@@ -11,7 +9,6 @@ import logging
 from logging import getLogger, StreamHandler, INFO, DEBUG
 import json
 import os
-import time
 
 
 class NasrlService(api_pb2_grpc.SuggestionServicer):
@@ -21,12 +18,13 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         self.current_study_id = ""
         self.current_trial_id = ""
         self.ctrl_cache_file = ""
-
+        self.ctrl_step = 0
         self.tf_graph = tf.get_default_graph()
         self.is_first_run = True
 
     def reset_controller(self, request):
-        print("Resetting Controller for StudyJob {}.".format(request.study_id))
+        print("Resetting Suggestion for StudyJob {}.".format(request.study_id))
+        self.ctrl_step = 0
         self.current_study_id = request.study_id
         self.ctrl_cache_file = "ctrl_cache/{}.ckpt".format(self.current_study_id)
         if not os.path.exists("ctrl_cache/"):
@@ -56,12 +54,14 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
             self.controller.build_trainer()
 
-        print("Controller for StudyJob {} has been initialized.".format(request.study_id))
+        print("Suggestion for StudyJob {} has been initialized.\n".format(request.study_id))
 
     def GetSuggestions(self, request, context):
         if request.study_id != self.current_study_id:
             self.reset_controller(request)
             self.is_first_run = True
+
+        print("======================== Suggestion Step {} =======================\n".format(self.ctrl_step))
 
         with self.tf_graph.as_default():
 
@@ -89,6 +89,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 controller_ops["train_op"]]
 
             if self.is_first_run:
+                print("First time running suggestion. Random architecture will be given. \n")
                 with tf.Session() as sess:
                     sess.run(tf.global_variables_initializer())
                     arc = sess.run(controller_ops["sample_arc"])
@@ -105,6 +106,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     loss, entropy, lr, gn, bl, skip, _ = sess.run(
                         fetches=run_ops,
                         feed_dict={valid_acc: result})
+                    print("Suggetion updated. LSTM Cell Loss:", loss)
                     arc = sess.run(controller_ops["sample_arc"])
 
                     saver.save(sess, self.ctrl_cache_file)
@@ -131,10 +133,11 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         organized_arc_str = str(organized_arc_json).replace('\"', '\'')
         nn_config_str = str(nn_config_json).replace('\"', '\'')
 
-        print("Nerual Network Architecture json:")
+        print("\nNew Neural Network Architecture (internal representation):")
         print(organized_arc_json)
-        print("Seach Space Embedding json:")
-        print(nn_config_json)
+        print("\nCorresponding Seach Space Description:")
+        print(nn_config_str)
+        print()
 
         trials = []
         trials.append(api_pb2.Trial(
@@ -154,34 +157,27 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
-            print("INSIDE CLIENT")
             for i, t in enumerate(trials):
                 ctrep = client.CreateTrial(api_pb2.CreateTrialRequest(trial=t), 10)
                 trials[i].trial_id = ctrep.trial_id
                 self.current_trial_id = ctrep.trial_id
-            print("TRIALS INSERTED")
-            print(ctrep.trial_id)
+            print("\nTrial {} Created\n".format(ctrep.trial_id))
             self.current_trial_id = ctrep.trial_id
         
+        self.ctrl_step += 1
         return api_pb2.GetSuggestionsReply(trials=trials)
 
     def GetEvaluationResult(self, studyID):
         worker_hist = []
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
-            print(">>> Calling GetEvaluationResult(). ")
-            print(">>> The current study id is:", studyID)
-            print(">>> The current trial id is:", self.current_trial_id)
-            time.sleep(20)
             gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=studyID, trial_id=self.current_trial_id, only_latest_log=True), 10)
             worker_hist = gwfrep.worker_full_infos
 
         for w in worker_hist:
             if w.Worker.status == api_pb2.COMPLETED:
                 for ml in w.metrics_logs:
-                    print("Evaluation Result")
-                    print(ml.values[-1].value)
-                    print()
+                    print("Evaluation result of previous candidate:", ml.values[-1].value)
 
         return float(ml.values[-1].value)
 
