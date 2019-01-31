@@ -59,8 +59,8 @@ func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) (bool, error) 
 		instance.Status.StudyID = instance.Spec.ReuseStudyID
 	} else {
 		studyConfig, err := populateStudyConf(instance)
-		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		if err != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
 			return true, err
 		}
 		log.Printf("Create Study %s", studyConfig.Name)
