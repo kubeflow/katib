@@ -173,7 +173,7 @@ You can
 * Rerun a best trial.
 
 In Manual Suggestion, only one trial will be created in a studyjob.
-RequestCount and RequestNumber in yaml will be ignored.
+RequestCount and RequestNumber in yaml will be rewrited to 1.
 
 ## UI
 You can check your study results with Web UI.

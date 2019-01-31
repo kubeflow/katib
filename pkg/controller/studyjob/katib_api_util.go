@@ -35,6 +35,11 @@ func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) (bool, error) 
 	if instance.Spec.SuggestionSpec.SuggestionAlgorithm == "" {
 		instance.Spec.SuggestionSpec.SuggestionAlgorithm = "manual"
 	}
+	if instance.Spec.SuggestionSpec.SuggestionAlgorithm == "manual" {
+		//Manual Suggestion is an one-shot job.
+		instance.Spec.RequestCount = 1
+		instance.Spec.SuggestionSpec.RequestNumber = 1
+	}
 	instance.Status.Condition = katibv1alpha1.ConditionRunning
 	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
