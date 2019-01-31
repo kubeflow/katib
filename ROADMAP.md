@@ -1,6 +1,6 @@
 # Katib 2019 Roadmap
 
-This document provides a high level view of where Katib will grow in 2019. These objectives are based off Katib's Critical User Journey (CUJ),
+This document provides a high level view of where Katib will grow in 2019. These objectives are based on Katib's Critical User Journey (CUJ),
 which can be found [here](https://bit.ly/2QNKMwt).
 
 The original Katib design document can be found [here](https://docs.google.com/document/d/1ZEKhou4z1utFTOgjzhSsnvysJFNEJmygllgDCBnYvm8/edit#heading=h.7fzqir88ovr).
@@ -10,6 +10,8 @@ The original Katib design document can be found [here](https://docs.google.com/d
 * Stabilize APIs for StudyJobs
 	* Beta by end of Q2, 1.0 by end of Q4
 	* Formalize naming conventions (we use different names like katib vs vizier in different places)
+	* Refactor studyjob field names [#351](https://github.com/kubeflow/katib/issues/351)
+	* Rename fields so their names are more meaningful (e.g. requestCount vs requestNumber) [#161](https://github.com/kubeflow/katib/issues/161)
 * Fully integrate katib with existing E2E examples:
 	* Xgboost
 	* Mnist
