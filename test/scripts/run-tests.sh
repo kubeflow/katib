@@ -77,6 +77,7 @@ sed -i -e "s@image: katib\/earlystopping-medianstopping@image: ${REGISTRY}\/${RE
 sed -i -e '/volumeMounts:/,$d' manifests/vizier/db/deployment.yaml
 
 cat manifests/vizier/core/deployment.yaml
+kubectl delete ns kubeflow --ignore-not-found
 ./scripts/deploy.sh
 
 TIMEOUT=120
