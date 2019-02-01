@@ -8,13 +8,6 @@ import (
 func (d *dbConn) DBInit() {
 	db := d.db
 
-	/* katib-nas related tables
-
-		trials - array of trial ids for that particular study, e.g. "1, 2, 3"
-	   	that is used to reuse the existing trial table AND SINCE TRIALID IS A RANDOM NUMBER
-	   	TO GET THE PROPER ORDER
-
-	*/
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS studies
 		(id CHAR(16) PRIMARY KEY,
 		name VARCHAR(255),
