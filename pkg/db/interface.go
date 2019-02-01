@@ -170,7 +170,7 @@ func (d *dbConn) GetStudyIDsTypesList() ([]string, []string, error) {
 }
 
 func (d *dbConn) GetStudy(StudyID string) (*api.StudyConfig, error) {
-	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
+	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", StudyID)
 	study := new(api.StudyConfig)
 	var dummyID, nasConfig, parameters, tags, metrics string
 	err := row.Scan(&dummyID,

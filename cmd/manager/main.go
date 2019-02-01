@@ -33,7 +33,7 @@ func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest)
 		return &api_pb.CreateStudyReply{}, errors.New("StudyConfig is missing.")
 	}
 
-	studyId, err := dbIf.CreateStudy(in.StudyConfig)
+	studyID, err := dbIf.CreateStudy(in.StudyConfig)
 	if err != nil {
 		return &api_pb.CreateStudyReply{}, err
 	}
