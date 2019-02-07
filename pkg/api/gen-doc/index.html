@@ -199,6 +199,14 @@
                 </li>
               
                 <li>
+                  <a href="#api.DeleteStudyJobReply"><span class="badge">M</span>DeleteStudyJobReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.DeleteStudyJobRequest"><span class="badge">M</span>DeleteStudyJobRequest</a>
+                </li>
+              
+                <li>
                   <a href="#api.DeleteStudyReply"><span class="badge">M</span>DeleteStudyReply</a>
                 </li>
               
@@ -272,6 +280,22 @@
               
                 <li>
                   <a href="#api.GetShouldStopWorkersRequest"><span class="badge">M</span>GetShouldStopWorkersRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetStudyJobListReply"><span class="badge">M</span>GetStudyJobListReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetStudyJobListRequest"><span class="badge">M</span>GetStudyJobListRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetStudyJobReply"><span class="badge">M</span>GetStudyJobReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.GetStudyJobRequest"><span class="badge">M</span>GetStudyJobRequest</a>
                 </li>
               
                 <li>
@@ -395,6 +419,14 @@
                 </li>
               
                 <li>
+                  <a href="#api.RegisterStudyJobReply"><span class="badge">M</span>RegisterStudyJobReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.RegisterStudyJobRequest"><span class="badge">M</span>RegisterStudyJobRequest</a>
+                </li>
+              
+                <li>
                   <a href="#api.RegisterWorkerReply"><span class="badge">M</span>RegisterWorkerReply</a>
                 </li>
               
@@ -464,6 +496,10 @@
               
                 <li>
                   <a href="#api.StudyConfig.ParameterConfigs"><span class="badge">M</span>StudyConfig.ParameterConfigs</a>
+                </li>
+              
+                <li>
+                  <a href="#api.StudyJob"><span class="badge">M</span>StudyJob</a>
                 </li>
               
                 <li>
@@ -655,6 +691,52 @@
               
                 <tr>
                   <td>path</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.DeleteStudyJobReply">DeleteStudyJobReply</h3>
+        <p>Return deleted StudyJob UID.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_job_uid</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.DeleteStudyJobRequest">DeleteStudyJobRequest</h3>
+        <p>Delete a StudyJob from DB by StudyJob UID.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_job_uid</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p> </p></td>
@@ -1153,6 +1235,98 @@
               
                 <tr>
                   <td>param_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetStudyJobListReply">GetStudyJobListReply</h3>
+        <p>Return a list of StudyJob UIDs.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_job_uids</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetStudyJobListRequest">GetStudyJobListRequest</h3>
+        <p>Get StudyJob UID List from DB by Study ID.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetStudyJobReply">GetStudyJobReply</h3>
+        <p>Return a specified StudyJob.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_job</td>
+                  <td><a href="#api.StudyJob">StudyJob</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.GetStudyJobRequest">GetStudyJobRequest</h3>
+        <p>Get a StudyJob from DB by StudyJob UID.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_job_uid</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p> </p></td>
@@ -2020,6 +2194,52 @@
 
         
       
+        <h3 id="api.RegisterStudyJobReply">RegisterStudyJobReply</h3>
+        <p>Return registerd StudyJob UID.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_job_uid</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.RegisterStudyJobRequest">RegisterStudyJobRequest</h3>
+        <p>Register a StudyJob to DB.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_job</td>
+                  <td><a href="#api.StudyJob">StudyJob</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
         <h3 id="api.RegisterWorkerReply">RegisterWorkerReply</h3>
         <p>Return generated WorkerID.</p>
 
@@ -2473,13 +2693,6 @@
                 </tr>
               
                 <tr>
-                  <td>jobId</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>ID of studyjob that is created from this config. </p></td>
-                </tr>
-              
-                <tr>
                   <td>nas_config</td>
                   <td><a href="#api.NasConfig">NasConfig</a></td>
                   <td></td>
@@ -2514,6 +2727,57 @@
                   <td><a href="#api.ParameterConfig">ParameterConfig</a></td>
                   <td>repeated</td>
                   <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.StudyJob">StudyJob</h3>
+        <p>A definition of a StudyJob.</p><p>StudyJon operator store the crd info into DB.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_job_uid</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>UID of studyjob CR </p></td>
+                </tr>
+              
+                <tr>
+                  <td>study_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Study ID </p></td>
+                </tr>
+              
+                <tr>
+                  <td>worker_template</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>A template of Manifest for workers </p></td>
+                </tr>
+              
+                <tr>
+                  <td>metrics_collector_template</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>A template of Manifest for metrics collectors </p></td>
+                </tr>
+              
+                <tr>
+                  <td>job_type</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Type of the job, NAS or HP </p></td>
                 </tr>
               
             </tbody>
@@ -2729,7 +2993,7 @@
         
       
         <h3 id="api.UpdateWorkerStateRequest">UpdateWorkerStateRequest</h3>
-        <p>Update a Status of Worker.</p>
+        <p>Update a Status of Worker.</p><p>updatable values are Status, Manufest, MetricsCollectorManufest, Tags,, CreationTime, and CompletionTime.</p><p>Other values in request will be ignored.</p>
 
         
           <table class="field-table">
@@ -2746,8 +3010,8 @@
                 </tr>
               
                 <tr>
-                  <td>status</td>
-                  <td><a href="#api.State">State</a></td>
+                  <td>new_status</td>
+                  <td><a href="#api.Worker">Worker</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
@@ -2790,7 +3054,7 @@
                 </tr>
               
                 <tr>
-                  <td>Type</td>
+                  <td>type</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>Type of Worker </p></td>
@@ -2804,10 +3068,17 @@
                 </tr>
               
                 <tr>
-                  <td>TemplatePath</td>
+                  <td>manufest</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p>Path for the manufest template of Worker. </p></td>
+                  <td><p>A json formatted manufest for Worker. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>metrics_collector_manufest</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>A json formatted manufest for MetricsCollector. </p></td>
                 </tr>
               
                 <tr>
@@ -2815,6 +3086,20 @@
                   <td><a href="#api.Tag">Tag</a></td>
                   <td>repeated</td>
                   <td><p>Tags of Worker. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>creation_time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Creation Time. RFC3339 format. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>completion_time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Completion Time. RFC3339 format. </p></td>
                 </tr>
               
             </tbody>
@@ -2941,26 +3226,32 @@
           <tbody>
             
               <tr>
-                <td>PENDING</td>
+                <td>UNKNOWN</td>
                 <td>0</td>
+                <td><p>Unknown.</p></td>
+              </tr>
+            
+              <tr>
+                <td>PENDING</td>
+                <td>1</td>
                 <td><p>Pending. Created but not running.</p></td>
               </tr>
             
               <tr>
                 <td>RUNNING</td>
-                <td>1</td>
+                <td>2</td>
                 <td><p>Running.</p></td>
               </tr>
             
               <tr>
                 <td>COMPLETED</td>
-                <td>2</td>
+                <td>3</td>
                 <td><p>Completed.</p></td>
               </tr>
             
               <tr>
                 <td>KILLED</td>
-                <td>3</td>
+                <td>4</td>
                 <td><p>Killed. Not failed.</p></td>
               </tr>
             
@@ -3033,6 +3324,36 @@ Generate a unique ID and store the Study to DB.</p></td>
               </tr>
             
               <tr>
+                <td>RegisterStudyJob</td>
+                <td><a href="#api.RegisterStudyJobRequest">RegisterStudyJobRequest</a></td>
+                <td><a href="#api.RegisterStudyJobReply">RegisterStudyJobReply</a></td>
+                <td><p>Register a studyjob to DB.
+In most case, users should not call this manually.
+StudyJobs are registered automatically by the StudyJob Operator.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetStudyJob</td>
+                <td><a href="#api.GetStudyJobRequest">GetStudyJobRequest</a></td>
+                <td><a href="#api.GetStudyJobReply">GetStudyJobReply</a></td>
+                <td><p>Get a StudyJob from DB by StudyJob UID.</p></td>
+              </tr>
+            
+              <tr>
+                <td>DeleteStudyJob</td>
+                <td><a href="#api.DeleteStudyJobRequest">DeleteStudyJobRequest</a></td>
+                <td><a href="#api.DeleteStudyJobReply">DeleteStudyJobReply</a></td>
+                <td><p>Delete a StudyJob from DB by StudyJob UID.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetStudyJobList</td>
+                <td><a href="#api.GetStudyJobListRequest">GetStudyJobListRequest</a></td>
+                <td><a href="#api.GetStudyJobListReply">GetStudyJobListReply</a></td>
+                <td><p>Get StudyJob UID List from DB by Study ID.</p></td>
+              </tr>
+            
+              <tr>
                 <td>CreateTrial</td>
                 <td><a href="#api.CreateTrialRequest">CreateTrialRequest</a></td>
                 <td><a href="#api.CreateTrialReply">CreateTrialReply</a></td>
@@ -3073,7 +3394,7 @@ Generate a unique ID and store the Worker to DB.</p></td>
                 <td>UpdateWorkerState</td>
                 <td><a href="#api.UpdateWorkerStateRequest">UpdateWorkerStateRequest</a></td>
                 <td><a href="#api.UpdateWorkerStateReply">UpdateWorkerStateReply</a></td>
-                <td><p>Update a Status of Worker.</p></td>
+                <td><p>Update a Status of a Worker.</p></td>
               </tr>
             
               <tr>

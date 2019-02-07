@@ -38,6 +38,26 @@ class ManagerStub(object):
         request_serializer=api__pb2.GetStudyListRequest.SerializeToString,
         response_deserializer=api__pb2.GetStudyListReply.FromString,
         )
+    self.RegisterStudyJob = channel.unary_unary(
+        '/api.Manager/RegisterStudyJob',
+        request_serializer=api__pb2.RegisterStudyJobRequest.SerializeToString,
+        response_deserializer=api__pb2.RegisterStudyJobReply.FromString,
+        )
+    self.GetStudyJob = channel.unary_unary(
+        '/api.Manager/GetStudyJob',
+        request_serializer=api__pb2.GetStudyJobRequest.SerializeToString,
+        response_deserializer=api__pb2.GetStudyJobReply.FromString,
+        )
+    self.DeleteStudyJob = channel.unary_unary(
+        '/api.Manager/DeleteStudyJob',
+        request_serializer=api__pb2.DeleteStudyJobRequest.SerializeToString,
+        response_deserializer=api__pb2.DeleteStudyJobReply.FromString,
+        )
+    self.GetStudyJobList = channel.unary_unary(
+        '/api.Manager/GetStudyJobList',
+        request_serializer=api__pb2.GetStudyJobListRequest.SerializeToString,
+        response_deserializer=api__pb2.GetStudyJobListReply.FromString,
+        )
     self.CreateTrial = channel.unary_unary(
         '/api.Manager/CreateTrial',
         request_serializer=api__pb2.CreateTrialRequest.SerializeToString,
@@ -186,6 +206,40 @@ class ManagerServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def RegisterStudyJob(self, request, context):
+    """*
+    Register a studyjob to DB.
+    In most case, users should not call this manually.
+    StudyJobs are registered automatically by the StudyJob Operator.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetStudyJob(self, request, context):
+    """* 
+    Get a StudyJob from DB by StudyJob UID.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def DeleteStudyJob(self, request, context):
+    """*
+    Delete a StudyJob from DB by StudyJob UID.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetStudyJobList(self, request, context):
+    """*
+    Get StudyJob UID List from DB by Study ID.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def CreateTrial(self, request, context):
     """*
     Create a Trial from Trial Config.
@@ -230,7 +284,7 @@ class ManagerServicer(object):
 
   def UpdateWorkerState(self, request, context):
     """* 
-    Update a Status of Worker.
+    Update a Status of a Worker.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -377,6 +431,26 @@ def add_ManagerServicer_to_server(servicer, server):
           servicer.GetStudyList,
           request_deserializer=api__pb2.GetStudyListRequest.FromString,
           response_serializer=api__pb2.GetStudyListReply.SerializeToString,
+      ),
+      'RegisterStudyJob': grpc.unary_unary_rpc_method_handler(
+          servicer.RegisterStudyJob,
+          request_deserializer=api__pb2.RegisterStudyJobRequest.FromString,
+          response_serializer=api__pb2.RegisterStudyJobReply.SerializeToString,
+      ),
+      'GetStudyJob': grpc.unary_unary_rpc_method_handler(
+          servicer.GetStudyJob,
+          request_deserializer=api__pb2.GetStudyJobRequest.FromString,
+          response_serializer=api__pb2.GetStudyJobReply.SerializeToString,
+      ),
+      'DeleteStudyJob': grpc.unary_unary_rpc_method_handler(
+          servicer.DeleteStudyJob,
+          request_deserializer=api__pb2.DeleteStudyJobRequest.FromString,
+          response_serializer=api__pb2.DeleteStudyJobReply.SerializeToString,
+      ),
+      'GetStudyJobList': grpc.unary_unary_rpc_method_handler(
+          servicer.GetStudyJobList,
+          request_deserializer=api__pb2.GetStudyJobListRequest.FromString,
+          response_serializer=api__pb2.GetStudyJobListReply.SerializeToString,
       ),
       'CreateTrial': grpc.unary_unary_rpc_method_handler(
           servicer.CreateTrial,

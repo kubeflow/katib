@@ -2,9 +2,9 @@ package suggestion
 
 import (
 	"context"
-	"testing"
-	"strconv"
 	"reflect"
+	"strconv"
+	"testing"
 
 	"github.com/golang/mock/gomock"
 
@@ -15,97 +15,97 @@ import (
 func getSampleBracket(size int) Bracket {
 	sample := []Evals{}
 	for i := 0; i < size; i++ {
-		sample = append (sample, Evals{ id: "test" + strconv.Itoa(i+1), value: float64(i+1),})
+		sample = append(sample, Evals{id: "test" + strconv.Itoa(i+1), value: float64(i + 1)})
 	}
 	return sample
 }
 
 func getSampleHyperBandParameters() HyperBandParameters {
 	sample := HyperBandParameters{
-		eta:4.0,
-		sMax:100,
-		bL:60.0,
-		rL:30.0,
-		r:8.0,
-		n:50,
-		shloopitr:2,
-		currentS:3,
-		ResourceName:"testResource",
-		ObjectiveValueName:"testValue",
-		evaluatingTrials:[]string{"trial1", "trial2", "trial3"},
+		eta:                4.0,
+		sMax:               100,
+		bL:                 60.0,
+		rL:                 30.0,
+		r:                  8.0,
+		n:                  50,
+		shloopitr:          2,
+		currentS:           3,
+		ResourceName:       "testResource",
+		ObjectiveValueName: "testValue",
+		evaluatingTrials:   []string{"trial1", "trial2", "trial3"},
 	}
 	return sample
 }
 
 func getSampleStudyReply() *api.GetStudyReply {
-	fs := &api.FeasibleSpace {
-		Max:"10",
-		Min:"1",
-		List:[]string{"alpha","beta"},
+	fs := &api.FeasibleSpace{
+		Max:  "10",
+		Min:  "1",
+		List: []string{"alpha", "beta"},
 	}
-	c1 := &api.ParameterConfig {
-		Name:"config1",
-		ParameterType:2,
-		Feasible:fs,
+	c1 := &api.ParameterConfig{
+		Name:          "config1",
+		ParameterType: 2,
+		Feasible:      fs,
 	}
-	c2 := &api.ParameterConfig {
-		Name:"config2",
-		ParameterType:2,
-		Feasible:fs,
+	c2 := &api.ParameterConfig{
+		Name:          "config2",
+		ParameterType: 2,
+		Feasible:      fs,
 	}
 	sp := []*api.ParameterConfig{c1, c2}
-	scpc := &api.StudyConfig_ParameterConfigs {
-		Configs:sp,
+	scpc := &api.StudyConfig_ParameterConfigs{
+		Configs: sp,
 	}
-	sc := &api.StudyConfig {
-		OptimizationType:1,
-		ParameterConfigs:scpc,
+	sc := &api.StudyConfig{
+		OptimizationType: 1,
+		ParameterConfigs: scpc,
 	}
-	srep := &api.GetStudyReply {
-		StudyConfig:sc,
+	srep := &api.GetStudyReply{
+		StudyConfig: sc,
 	}
 
 	return srep
 }
 
 func getSampleTrialsReply() *api.GetTrialsReply {
-	t1 := &api.Trial {
-		TrialId:"trialId1",
+	t1 := &api.Trial{
+		TrialId: "trialId1",
 	}
-	t2 := &api.Trial {
-		TrialId:"trialId2",
+	t2 := &api.Trial{
+		TrialId: "trialId2",
 	}
 	ts := []*api.Trial{t1, t2}
-	trep := &api.GetTrialsReply {
-		Trials:ts,
+	trep := &api.GetTrialsReply{
+		Trials: ts,
 	}
 
 	return trep
 }
 
-func getExpectedTrials(n int) ([]string, []*api.Trial){
+func getExpectedTrials(n int) ([]string, []*api.Trial) {
 	exp_tids := []string{"trialId", "trialId"}
 	exp_ts := make([]*api.Trial, n)
-	parameter1 := &api.Parameter {
-		Name:"config1",
-		ParameterType:1,
-		Value:"1.0",
+	parameter1 := &api.Parameter{
+		Name:          "config1",
+		ParameterType: 1,
+		Value:         "1.0",
 	}
-	parameter2 := &api.Parameter {
-		Name:"config2",
-		ParameterType:2,
-		Value:"1",
+	parameter2 := &api.Parameter{
+		Name:          "config2",
+		ParameterType: 2,
+		Value:         "1",
 	}
-	parameter3 := &api.Parameter {
-		Name:"config3",
-		ParameterType:4,
-		Value:"test",
+	parameter3 := &api.Parameter{
+		Name:          "config3",
+		ParameterType: 4,
+		Value:         "test",
 	}
 	parameterSet := []*api.Parameter{parameter1, parameter2, parameter3}
-	trial := &api.Trial {
-		TrialId:"trialId",
-		StudyId:"studyId",
-		ParameterSet:parameterSet,
+	trial := &api.Trial{
+		TrialId:      "trialId",
+		StudyId:      "studyId",
+		ParameterSet: parameterSet,
 	}
 	for i := range exp_ts {
 		exp_ts[i] = trial
@@ -117,59 +117,59 @@ func getExpectedTrials(n int) ([]string, []*api.Trial){
 func getSampleSuggestionParameters() []*api.SuggestionParameter {
 	exp_sparam := make([]*api.SuggestionParameter, 0)
 
-	eta := &api.SuggestionParameter {
-		Name:"eta",
-		Value:"1.5",
+	eta := &api.SuggestionParameter{
+		Name:  "eta",
+		Value: "1.5",
 	}
 	exp_sparam = append(exp_sparam, eta)
-	r_l := &api.SuggestionParameter {
-		Name:"r_l",
-		Value:"10.5",
+	r_l := &api.SuggestionParameter{
+		Name:  "r_l",
+		Value: "10.5",
 	}
 	exp_sparam = append(exp_sparam, r_l)
-	ResourceName := &api.SuggestionParameter {
-		Name:"ResourceName",
-		Value:"testResourceName",
+	ResourceName := &api.SuggestionParameter{
+		Name:  "ResourceName",
+		Value: "testResourceName",
 	}
 	exp_sparam = append(exp_sparam, ResourceName)
-	ObjectiveValueName := &api.SuggestionParameter {
-		Name:"ObjectiveValueName",
-		Value:"testObjectiveValueName",
+	ObjectiveValueName := &api.SuggestionParameter{
+		Name:  "ObjectiveValueName",
+		Value: "testObjectiveValueName",
 	}
 	exp_sparam = append(exp_sparam, ObjectiveValueName)
-	b_l := &api.SuggestionParameter {
-		Name:"b_l",
-		Value:"10.5",
+	b_l := &api.SuggestionParameter{
+		Name:  "b_l",
+		Value: "10.5",
 	}
 	exp_sparam = append(exp_sparam, b_l)
-	sMax := &api.SuggestionParameter {
-		Name:"sMax",
-		Value:"100",
+	sMax := &api.SuggestionParameter{
+		Name:  "sMax",
+		Value: "100",
 	}
 	exp_sparam = append(exp_sparam, sMax)
-	r := &api.SuggestionParameter {
-		Name:"r",
-		Value:"10.5",
+	r := &api.SuggestionParameter{
+		Name:  "r",
+		Value: "10.5",
 	}
 	exp_sparam = append(exp_sparam, r)
-	n := &api.SuggestionParameter {
-		Name:"n",
-		Value:"10",
+	n := &api.SuggestionParameter{
+		Name:  "n",
+		Value: "10",
 	}
 	exp_sparam = append(exp_sparam, n)
-	shloopitr := &api.SuggestionParameter {
-		Name:"shloopitr",
-		Value:"10",
+	shloopitr := &api.SuggestionParameter{
+		Name:  "shloopitr",
+		Value: "10",
 	}
 	exp_sparam = append(exp_sparam, shloopitr)
-	currentS := &api.SuggestionParameter {
-		Name:"currentS",
-		Value:"10",
+	currentS := &api.SuggestionParameter{
+		Name:  "currentS",
+		Value: "10",
 	}
 	exp_sparam = append(exp_sparam, currentS)
-	evaluatingTrials := &api.SuggestionParameter {
-		Name:"evaluatingTrials",
-		Value:"trial1,trial2,trial3",
+	evaluatingTrials := &api.SuggestionParameter{
+		Name:  "evaluatingTrials",
+		Value: "trial1,trial2,trial3",
 	}
 	exp_sparam = append(exp_sparam, evaluatingTrials)
 
@@ -177,17 +177,17 @@ func getSampleSuggestionParameters() []*api.SuggestionParameter {
 }
 
 func getSampleWorkersRequest() []*api.GetWorkersRequest {
-	wreq1 := &api.GetWorkersRequest {
-		StudyId:"studyId",
-		TrialId:"trial1",
+	wreq1 := &api.GetWorkersRequest{
+		StudyId: "studyId",
+		TrialId: "trial1",
 	}
-	wreq2 := &api.GetWorkersRequest {
-		StudyId:"studyId",
-		TrialId:"trial2",
+	wreq2 := &api.GetWorkersRequest{
+		StudyId: "studyId",
+		TrialId: "trial2",
 	}
-	wreq3 := &api.GetWorkersRequest {
-		StudyId:"studyId",
-		TrialId:"trial3",
+	wreq3 := &api.GetWorkersRequest{
+		StudyId: "studyId",
+		TrialId: "trial3",
 	}
 	wreq := []*api.GetWorkersRequest{wreq1, wreq2, wreq3}
 
@@ -195,46 +195,46 @@ func getSampleWorkersRequest() []*api.GetWorkersRequest {
 }
 
 func getSampleWorkersReplyArray() []*api.GetWorkersReply {
-	worker1 := &api.Worker {
-		WorkerId:"worker1",
-		TrialId:"trial1",
+	worker1 := &api.Worker{
+		WorkerId: "worker1",
+		TrialId:  "trial1",
 	}
-	worker2 := &api.Worker {
-		WorkerId:"worker2",
-		TrialId:"trial2",
+	worker2 := &api.Worker{
+		WorkerId: "worker2",
+		TrialId:  "trial2",
 	}
-	worker3 := &api.Worker {
-		WorkerId:"worker3",
-		TrialId:"trial3",
+	worker3 := &api.Worker{
+		WorkerId: "worker3",
+		TrialId:  "trial3",
 	}
-	wrep1 := &api.GetWorkersReply {
-		Workers:[]*api.Worker{worker1},
+	wrep1 := &api.GetWorkersReply{
+		Workers: []*api.Worker{worker1},
 	}
-	wrep2 := &api.GetWorkersReply {
-		Workers:[]*api.Worker{worker2},
+	wrep2 := &api.GetWorkersReply{
+		Workers: []*api.Worker{worker2},
 	}
-	wrep3 := &api.GetWorkersReply {
-		Workers:[]*api.Worker{worker3},
+	wrep3 := &api.GetWorkersReply{
+		Workers: []*api.Worker{worker3},
 	}
 	wrep := []*api.GetWorkersReply{wrep1, wrep2, wrep3}
 	return wrep
 }
 
 func getSampleMetricsRequestArray(ovn string) []*api.GetMetricsRequest {
-	metrics1 := &api.GetMetricsRequest {
-		StudyId:"studyId",
-		WorkerIds:[]string{"worker1"},
-		MetricsNames:[]string{ovn},
+	metrics1 := &api.GetMetricsRequest{
+		StudyId:      "studyId",
+		WorkerIds:    []string{"worker1"},
+		MetricsNames: []string{ovn},
 	}
-	metrics2 := &api.GetMetricsRequest {
-		StudyId:"studyId",
-		WorkerIds:[]string{"worker2"},
-		MetricsNames:[]string{ovn},
+	metrics2 := &api.GetMetricsRequest{
+		StudyId:      "studyId",
+		WorkerIds:    []string{"worker2"},
+		MetricsNames: []string{ovn},
 	}
-	metrics3 := &api.GetMetricsRequest {
-		StudyId:"studyId",
-		WorkerIds:[]string{"worker3"},
-		MetricsNames:[]string{ovn},
+	metrics3 := &api.GetMetricsRequest{
+		StudyId:      "studyId",
+		WorkerIds:    []string{"worker3"},
+		MetricsNames: []string{ovn},
 	}
 	metrics := []*api.GetMetricsRequest{metrics1, metrics2, metrics3}
 
@@ -244,22 +244,22 @@ func getSampleMetricsRequestArray(ovn string) []*api.GetMetricsRequest {
 func getSampleMetricsReplyArray() []*api.GetMetricsReply {
 	mvt := make([]*api.MetricsValueTime, 0)
 	for i := 0; i < 24; i++ {
-		mvt = append(mvt, &api.MetricsValueTime {Time: "Jan 1 12:00:00 2018 UTC", Value: strconv.Itoa(i),})
+		mvt = append(mvt, &api.MetricsValueTime{Time: "Jan 1 12:00:00 2018 UTC", Value: strconv.Itoa(i)})
 	}
 
 	mLog := make([]*api.MetricsLog, 0)
 	for j := 0; j < 6; j++ {
-		mLog = append(mLog, &api.MetricsLog {Name: "metricsLog" + strconv.Itoa(j), Values: mvt[j*4:(j+1)*4],})
+		mLog = append(mLog, &api.MetricsLog{Name: "metricsLog" + strconv.Itoa(j), Values: mvt[j*4 : (j+1)*4]})
 	}
 
 	mLogSet := make([]*api.MetricsLogSet, 0)
 	for k := 0; k < 3; k++ {
-		mLogSet = append(mLogSet, &api.MetricsLogSet {WorkerId: "worker" + strconv.Itoa(k+1), MetricsLogs: mLog[k*2:(k+1)*2], WorkerStatus: 2})
+		mLogSet = append(mLogSet, &api.MetricsLogSet{WorkerId: "worker" + strconv.Itoa(k+1), MetricsLogs: mLog[k*2 : (k+1)*2], WorkerStatus: api.State_COMPLETED})
 	}
 
 	mrepArray := make([]*api.GetMetricsReply, 0)
 	for l := 0; l < 3; l++ {
-		mrepArray = append(mrepArray, &api.GetMetricsReply {MetricsLogSets: []*api.MetricsLogSet{mLogSet[l],}})
+		mrepArray = append(mrepArray, &api.GetMetricsReply{MetricsLogSets: []*api.MetricsLogSet{mLogSet[l]}})
 	}
 
 	return mrepArray
@@ -281,12 +281,12 @@ func TestSwap(t *testing.T) {
 	b := getSampleBracket(size)
 	exp := Bracket{
 		Evals{
-			id:"test2",
-			value:2.0,
+			id:    "test2",
+			value: 2.0,
 		},
 		Evals{
-			id:"test1",
-			value:1.0,
+			id:    "test1",
+			value: 1.0,
 		},
 	}
 
@@ -299,9 +299,9 @@ func TestSwap(t *testing.T) {
 
 func TestLess(t *testing.T) {
 	size := 2
-	b := getSampleBracket(size) 
+	b := getSampleBracket(size)
 	exp := false
-	rtn := b.Less(0,1)
+	rtn := b.Less(0, 1)
 
 	if exp != rtn {
 		t.Errorf("expected %v, but returned %v", exp, rtn)
@@ -315,14 +315,14 @@ func TestMakeMasterBracket(t *testing.T) {
 	h := HyperBandSuggestService{}
 	mockAPI := mockapi.NewMockManagerClient(ctrl)
 
-	sreq := &api.GetStudyRequest {
+	sreq := &api.GetStudyRequest{
 		StudyId: "studyId",
 	}
 	srep := getSampleStudyReply()
 	mockAPI.EXPECT().GetStudy(context.Background(), sreq).Return(srep, nil)
 
-	trep := &api.CreateTrialReply {
-		TrialId:"trialId",
+	trep := &api.CreateTrialReply{
+		TrialId: "trialId",
 	}
 	mockAPI.EXPECT().CreateTrial(context.Background(), gomock.Any()).Return(trep, nil).AnyTimes()
 
@@ -353,21 +353,20 @@ func TestMakeChildBracket(t *testing.T) {
 	h := HyperBandSuggestService{}
 	mockAPI := mockapi.NewMockManagerClient(ctrl)
 
-	sreq := &api.GetStudyRequest {
+	sreq := &api.GetStudyRequest{
 		StudyId: "studyId",
-
 	}
 	srep := getSampleStudyReply()
 	mockAPI.EXPECT().GetStudy(context.Background(), sreq).Return(srep, nil)
 
-	treq := &api.GetTrialsRequest {
+	treq := &api.GetTrialsRequest{
 		StudyId: "studyId",
 	}
 	strep := getSampleTrialsReply()
 	mockAPI.EXPECT().GetTrials(context.Background(), treq).Return(strep, nil)
 
-	trep := &api.CreateTrialReply {
-		TrialId:"trialId",
+	trep := &api.CreateTrialReply{
+		TrialId: "trialId",
 	}
 	mockAPI.EXPECT().CreateTrial(context.Background(), gomock.Any()).Return(trep, nil).AnyTimes()
 
@@ -404,17 +403,17 @@ func TestParseSuggestionParameters(t *testing.T) {
 	rtn_param1, _ := h.parseSuggestionParameters(context.Background(), mockAPI, "studyId", p1)
 
 	exp_param1 := &HyperBandParameters{
-		eta:1.5,
-		sMax:100,
-		bL:10.5,
-		rL:10.5,
-		r:10.5,
-		n:10,
-		shloopitr:10,
-		currentS:10,
-		ResourceName:"testResourceName",
-		ObjectiveValueName:"testObjectiveValueName",
-		evaluatingTrials:[]string{"trial1", "trial2", "trial3"},
+		eta:                1.5,
+		sMax:               100,
+		bL:                 10.5,
+		rL:                 10.5,
+		r:                  10.5,
+		n:                  10,
+		shloopitr:          10,
+		currentS:           10,
+		ResourceName:       "testResourceName",
+		ObjectiveValueName: "testObjectiveValueName",
+		evaluatingTrials:   []string{"trial1", "trial2", "trial3"},
 	}
 
 	if !reflect.DeepEqual(exp_param1, rtn_param1) {
@@ -429,17 +428,17 @@ func TestParseSuggestionParameters(t *testing.T) {
 	}
 
 	p3 := make([]*api.SuggestionParameter, 0)
-	r_l := &api.SuggestionParameter {
-		Name:"r_l",
-		Value:"27.0",
+	r_l := &api.SuggestionParameter{
+		Name:  "r_l",
+		Value: "27.0",
 	}
 	p3 = append(p3, r_l)
-	ResourceName := &api.SuggestionParameter {
-		Name:"ResourceName",
-		Value:"testResourceName",
+	ResourceName := &api.SuggestionParameter{
+		Name:  "ResourceName",
+		Value: "testResourceName",
 	}
 	p3 = append(p3, ResourceName)
-	sreq := &api.GetStudyRequest {
+	sreq := &api.GetStudyRequest{
 		StudyId: "studyId",
 	}
 	srep := getSampleStudyReply()
@@ -447,17 +446,17 @@ func TestParseSuggestionParameters(t *testing.T) {
 	rtn_param3, _ := h.parseSuggestionParameters(context.Background(), mockAPI, "studyId", p3)
 
 	exp_param3 := &HyperBandParameters{
-		eta:3,
-		sMax:3,
-		bL:108,
-		rL:27,
-		r:1,
-		n:27,
-		shloopitr:0,
-		currentS:3,
-		ResourceName:"testResourceName",
-		ObjectiveValueName:"",
-		evaluatingTrials:[]string{},
+		eta:                3,
+		sMax:               3,
+		bL:                 108,
+		rL:                 27,
+		r:                  1,
+		n:                  27,
+		shloopitr:          0,
+		currentS:           3,
+		ResourceName:       "testResourceName",
+		ObjectiveValueName: "",
+		evaluatingTrials:   []string{},
 	}
 	if !reflect.DeepEqual(exp_param3, rtn_param3) {
 		t.Errorf("exptected %v, but returned %v", exp_param3, rtn_param3)
@@ -504,9 +503,7 @@ func TestEvalWorkers(t *testing.T) {
 
 	_, rtn_bracket := h.evalWorkers(context.Background(), mockAPI, "studyId", &p)
 
-
-	exp_bracket := []Evals{Evals{"trial3", 19,}, Evals{"trial2", 11,}, Evals{"trial1", 3,}}
-
+	exp_bracket := []Evals{Evals{"trial3", 19}, Evals{"trial2", 11}, Evals{"trial1", 3}}
 
 	for i, ebkt := range exp_bracket {
 		if ebkt != rtn_bracket[i] {
@@ -558,7 +555,6 @@ func TestShLoopParamUpdate(t *testing.T) {
 	if exp1 != rtn1 {
 		t.Errorf("expected currentS = %v, but returned currentS = %v", exp1, rtn1)
 	}
-
 
 	p2 := getSampleHyperBandParameters()
 	p2.shloopitr = 100

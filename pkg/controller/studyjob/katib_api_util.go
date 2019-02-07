@@ -21,10 +21,11 @@ import (
 	"github.com/kubeflow/katib/pkg"
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
+	"github.com/kubeflow/katib/pkg/manager/studyjobclient"
 	"google.golang.org/grpc"
 )
 
-func initializeStudy(instance *katibv1alpha1.StudyJob) error {
+func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) (bool, error) {
 	if instance.Spec.SuggestionSpec.SuggestionAlgorithm == "" {
 		instance.Spec.SuggestionSpec.SuggestionAlgorithm = "random"
 	}
@@ -35,22 +36,33 @@ func initializeStudy(instance *katibv1alpha1.StudyJob) error {
 	if err != nil {
 		log.Printf("Connect katib manager error %v", err)
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
-		return nil
+		return true, nil
 	}
 	defer conn.Close()
 	c := katibapi.NewManagerClient(conn)
+	_, err = c.GetStudyJob(context.Background(), &katibapi.GetStudyJobRequest{
+		StudyJobUid: string(instance.UID),
+	})
+	if err == nil {
+		//StudyJob is already registerd. To avoid duplication return without update.
+		return false, nil
+	}
 
 	studyConfig, err := getStudyConf(instance)
 	if err != nil {
-		return err
+		return true, err
 	}
 	log.Printf("Create Study %s", studyConfig.Name)
 	//CreateStudy
 	studyID, err := createStudy(c, studyConfig)
 	if err != nil {
-		return err
+		return true, err
 	}
 	instance.Status.StudyID = studyID
+	err = registerStudyJob(c, instance)
+	if err != nil {
+		return true, err
+	}
 	log.Printf("Study: %s Suggestion Spec %v", studyID, instance.Spec.SuggestionSpec)
 	var sspec *katibv1alpha1.SuggestionSpec
 	if instance.Spec.SuggestionSpec != nil {
@@ -65,11 +77,11 @@ func initializeStudy(instance *katibv1alpha1.StudyJob) error {
 		})
 	sPID, err := setSuggestionParam(c, studyID, sspec)
 	if err != nil {
-		return err
+		return true, err
 	}
 	instance.Status.SuggestionParameterID = sPID
 	instance.Status.Condition = katibv1alpha1.ConditionRunning
-	return nil
+	return true, nil
 }
 
 func getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
@@ -106,7 +118,6 @@ func populateCommonConfigFields(instance *katibv1alpha1.StudyJob, sconf *katibap
 	for _, m := range instance.Spec.MetricsNames {
 		sconf.Metrics = append(sconf.Metrics, m)
 	}
-	sconf.JobId = string(instance.UID)
 }
 
 func populateConfigForHP(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
@@ -150,7 +161,6 @@ func populateConfigForHP(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfi
 		sconf.ParameterConfigs.Configs = append(sconf.ParameterConfigs.Configs, p)
 	}
 
-	sconf.JobType = jobTypeHP
 	return sconf, nil
 }
 
@@ -216,7 +226,6 @@ func populateConfigForNAS(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConf
 		sconf.NasConfig.Operations.Operation = append(sconf.NasConfig.Operations.Operation, operation)
 	}
 
-	sconf.JobType = jobTypeNAS
 	return sconf, nil
 }
 
@@ -266,6 +275,52 @@ func createStudy(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig) (s
 	}
 	log.Printf("Study ID %s StudyConf %v", studyID, getStudyReply.StudyConfig)
 	return studyID, nil
+}
+
+func registerStudyJob(c katibapi.ManagerClient, instance *katibv1alpha1.StudyJob) error {
+	ctx := context.Background()
+	regStudyJobreq := &katibapi.RegisterStudyJobRequest{
+		StudyJob: &katibapi.StudyJob{
+			StudyJobUid: string(instance.UID),
+			StudyId:     instance.Status.StudyID,
+		},
+	}
+	if instance.Spec.WorkerSpec != nil {
+		if instance.Spec.WorkerSpec.GoTemplate.RawTemplate != "" {
+			regStudyJobreq.StudyJob.WorkerTemplate = instance.Spec.WorkerSpec.GoTemplate.RawTemplate
+		} else {
+			sjc, err := studyjobclient.NewStudyjobClient(nil)
+			if err != nil {
+				return err
+			}
+			wtl, err := sjc.GetWorkerTemplates()
+			if err != nil {
+				return err
+			}
+			if wt, ok := wtl[instance.Spec.WorkerSpec.GoTemplate.TemplatePath]; ok {
+				regStudyJobreq.StudyJob.WorkerTemplate = wt
+			}
+		}
+	}
+	if instance.Spec.MetricsCollectorSpec != nil {
+		if instance.Spec.MetricsCollectorSpec.GoTemplate.RawTemplate != "" {
+			regStudyJobreq.StudyJob.MetricsCollectorTemplate = instance.Spec.MetricsCollectorSpec.GoTemplate.RawTemplate
+		} else {
+			sjc, err := studyjobclient.NewStudyjobClient(nil)
+			if err != nil {
+				return err
+			}
+			mtl, err := sjc.GetMetricsCollectorTemplates()
+			if err != nil {
+				return err
+			}
+			if mt, ok := mtl[instance.Spec.MetricsCollectorSpec.GoTemplate.TemplatePath]; ok {
+				regStudyJobreq.StudyJob.MetricsCollectorTemplate = mt
+			}
+		}
+	}
+	_, err := c.RegisterStudyJob(ctx, regStudyJobreq)
+	return err
 }
 
 func setSuggestionParam(c katibapi.ManagerClient, studyID string, suggestionSpec *katibv1alpha1.SuggestionSpec) (string, error) {

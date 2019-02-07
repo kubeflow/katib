@@ -19,10 +19,11 @@ import (
 	"context"
 	"fmt"
 	"text/template"
+	"time"
 
+	"github.com/kubeflow/katib/pkg"
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
-	"github.com/kubeflow/katib/pkg"
 	"github.com/kubeflow/katib/pkg/manager/studyjobclient"
 
 	"k8s.io/apimachinery/pkg/util/uuid"
@@ -59,12 +60,15 @@ func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi
 	if dryrun {
 		wid = string(uuid.NewUUID())
 	} else {
+		t := time.Now()
+		crtime := t.UTC().Format(time.RFC3339Nano)
 		cwreq := &katibapi.RegisterWorkerRequest{
 			Worker: &katibapi.Worker{
-				StudyId: studyID,
-				TrialId: trial.TrialId,
-				Status:  katibapi.State_PENDING,
-				Type:    kind,
+				StudyId:      studyID,
+				TrialId:      trial.TrialId,
+				Status:       katibapi.State_PENDING,
+				Type:         kind,
+				CreationTime: crtime,
 			},
 		}
 		cwrep, err := c.RegisterWorker(context.Background(), cwreq)
@@ -75,9 +79,9 @@ func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi
 	}
 
 	wi := WorkerInstance{
-		StudyID:  studyID,
-		TrialID:  trial.TrialId,
-		WorkerID: wid,
+		StudyID:   studyID,
+		TrialID:   trial.TrialId,
+		WorkerID:  wid,
 		NameSpace: ns,
 	}
 	var b bytes.Buffer
@@ -95,11 +99,11 @@ func getMetricsCollectorManifest(studyID string, trialID string, workerID string
 	var mtp *template.Template = nil
 	var err error
 	tmpValues := map[string]string{
-		"StudyID":    studyID,
-		"TrialID":    trialID,
-		"WorkerID":   workerID,
-		"WorkerKind": workerKind,
-		"NameSpace":  namespace,
+		"StudyID":        studyID,
+		"TrialID":        trialID,
+		"WorkerID":       workerID,
+		"WorkerKind":     workerKind,
+		"NameSpace":      namespace,
 		"ManagerSerivce": pkg.GetManagerAddr(),
 	}
 	if mcs != nil && mcs.GoTemplate.RawTemplate != "" {

@@ -94,6 +94,31 @@
         ]
       }
     },
+    "/api/Manager/DeleteStudyJob/{study_job_uid}": {
+      "get": {
+        "summary": "*\nDelete a StudyJob from DB by StudyJob UID.",
+        "operationId": "DeleteStudyJob",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiDeleteStudyJobReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "study_job_uid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
     "/api/Manager/GetEarlyStoppingParameterList/{study_id}": {
       "get": {
         "operationId": "GetEarlyStoppingParameterList",
@@ -218,6 +243,56 @@
             "description": "",
             "schema": {
               "$ref": "#/definitions/apiGetStudyReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "study_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetStudyJob/{study_job_uid}": {
+      "get": {
+        "summary": "* \nGet a StudyJob from DB by StudyJob UID.",
+        "operationId": "GetStudyJob",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetStudyJobReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "study_job_uid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetStudyJobList/{study_id}": {
+      "get": {
+        "summary": "*\nGet StudyJob UID List from DB by Study ID.",
+        "operationId": "GetStudyJobList",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetStudyJobListReply"
             }
           }
         },
@@ -485,6 +560,33 @@
         ]
       }
     },
+    "/api/Manager/RegisterStudyJob": {
+      "post": {
+        "summary": "*\nRegister a studyjob to DB.\nIn most case, users should not call this manually.\nStudyJobs are registered automatically by the StudyJob Operator.",
+        "operationId": "RegisterStudyJob",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiRegisterStudyJobReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiStudyJob"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
     "/api/Manager/RegisterWorker": {
       "post": {
         "summary": "*\nCreate a Worker from Worker Config.\nGenerate a unique ID and store the Worker to DB.",
@@ -646,7 +748,7 @@
     },
     "/api/Manager/UpdateWorkerState": {
       "put": {
-        "summary": "* \nUpdate a Status of Worker.",
+        "summary": "* \nUpdate a Status of a Worker.",
         "operationId": "UpdateWorkerState",
         "responses": {
           "200": {
@@ -712,6 +814,15 @@
           "type": "string"
         }
       }
+    },
+    "apiDeleteStudyJobReply": {
+      "type": "object",
+      "properties": {
+        "study_job_uid": {
+          "type": "string"
+        }
+      },
+      "description": "*\nReturn deleted StudyJob UID."
     },
     "apiDeleteStudyReply": {
       "type": "object",
@@ -871,6 +982,27 @@
           "type": "string"
         }
       }
+    },
+    "apiGetStudyJobListReply": {
+      "type": "object",
+      "properties": {
+        "study_job_uids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "* \nReturn a list of StudyJob UIDs."
+    },
+    "apiGetStudyJobReply": {
+      "type": "object",
+      "properties": {
+        "study_job": {
+          "$ref": "#/definitions/apiStudyJob"
+        }
+      },
+      "description": "*\nReturn a specified StudyJob."
     },
     "apiGetStudyListReply": {
       "type": "object",
@@ -1189,6 +1321,15 @@
       "default": "UNKNOWN_TYPE",
       "description": "*\nTypes of value for HyperParameter."
     },
+    "apiRegisterStudyJobReply": {
+      "type": "object",
+      "properties": {
+        "study_job_uid": {
+          "type": "string"
+        }
+      },
+      "description": "*\nReturn registerd StudyJob UID."
+    },
     "apiRegisterWorkerReply": {
       "type": "object",
       "properties": {
@@ -1309,13 +1450,14 @@
     "apiState": {
       "type": "string",
       "enum": [
+        "UNKNOWN",
         "PENDING",
         "RUNNING",
         "COMPLETED",
         "KILLED",
         "ERROR"
       ],
-      "default": "PENDING",
+      "default": "UNKNOWN",
       "description": "*\nStatus code for worker.\nThis value is stored as TINYINT in MySQL."
     },
     "apiStudyConfig": {
@@ -1358,9 +1500,6 @@
             "type": "string"
           }
         },
-        "jobId": {
-          "type": "string"
-        },
         "nas_config": {
           "$ref": "#/definitions/apiNasConfig"
         },
@@ -1381,6 +1520,27 @@
         }
       },
       "title": "* \nList of ParameterConfig"
+    },
+    "apiStudyJob": {
+      "type": "object",
+      "properties": {
+        "study_job_uid": {
+          "type": "string"
+        },
+        "study_id": {
+          "type": "string"
+        },
+        "worker_template": {
+          "type": "string"
+        },
+        "metrics_collector_template": {
+          "type": "string"
+        },
+        "job_type": {
+          "type": "string"
+        }
+      },
+      "description": "*\nA definition of a StudyJob.\nStudyJon operator store the crd info into DB."
     },
     "apiStudyOverview": {
       "type": "object",
@@ -1480,11 +1640,11 @@
         "worker_id": {
           "type": "string"
         },
-        "status": {
-          "$ref": "#/definitions/apiState"
+        "new_status": {
+          "$ref": "#/definitions/apiWorker"
         }
       },
-      "description": "* \nUpdate a Status of Worker."
+      "description": "* \nUpdate a Status of Worker.\nupdatable values are Status, Manufest, MetricsCollectorManufest, Tags,, CreationTime, and CompletionTime.\nOther values in request will be ignored."
     },
     "apiWorker": {
       "type": "object",
@@ -1498,13 +1658,16 @@
         "trial_id": {
           "type": "string"
         },
-        "Type": {
+        "type": {
           "type": "string"
         },
         "status": {
           "$ref": "#/definitions/apiState"
         },
-        "TemplatePath": {
+        "manufest": {
+          "type": "string"
+        },
+        "metrics_collector_manufest": {
           "type": "string"
         },
         "tags": {
@@ -1512,6 +1675,12 @@
           "items": {
             "$ref": "#/definitions/apiTag"
           }
+        },
+        "creation_time": {
+          "type": "string"
+        },
+        "completion_time": {
+          "type": "string"
         }
       },
       "description": "* \nA process of evaluation for a trial.\nTypes of worker supported by Katib are k8s Job, TF-Job, and Pytorch-Job."

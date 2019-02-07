@@ -19,11 +19,20 @@ func (d *dbConn) DBInit() {
 		objective_value_name VARCHAR(255),
 		metrics TEXT,
 		nasconfig TEXT,
-		job_id TEXT,
 		job_type TEXT)`)
-
 	if err != nil {
 		log.Fatalf("Error creating studies table: %v", err)
+	}
+
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS studyjobs
+		(job_uid CHAR(36) PRIMARY KEY,
+		study_id CHAR(16),
+		job_type TEXT,
+		worker_template TEXT,
+		metrics_collector_template TEXT,
+		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE)`)
+	if err != nil {
+		log.Fatalf("Error creating studyjob table: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS study_permissions
@@ -53,8 +62,11 @@ func (d *dbConn) DBInit() {
 		trial_id CHAR(16),
 		type VARCHAR(255),
 		status TINYINT,
-		template_path TEXT,
+		manufest TEXT,
+		metrics_collector_manufest TEXT,
 		tags TEXT,
+		creation_time DATETIME(6),
+		completion_time DATETIME(6),
 		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE,
 		FOREIGN KEY(trial_id) REFERENCES trials(id) ON DELETE CASCADE)`)
 	if err != nil {

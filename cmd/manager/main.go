@@ -82,6 +82,36 @@ func (s *server) GetStudyList(ctx context.Context, in *api_pb.GetStudyListReques
 	return &api_pb.GetStudyListReply{StudyOverviews: result}, err
 }
 
+func (s *server) RegisterStudyJob(ctx context.Context, in *api_pb.RegisterStudyJobRequest) (*api_pb.RegisterStudyJobReply, error) {
+	err := dbIf.RegisterStudyJob(in.StudyJob)
+	return &api_pb.RegisterStudyJobReply{
+		StudyJobUid: in.StudyJob.StudyJobUid,
+	}, err
+}
+
+func (s *server) GetStudyJob(ctx context.Context, in *api_pb.GetStudyJobRequest) (*api_pb.GetStudyJobReply, error) {
+	sj, err := dbIf.GetStudyJob(in.StudyJobUid)
+	return &api_pb.GetStudyJobReply{
+		StudyJob: sj,
+	}, err
+}
+
+func (s *server) GetStudyJobList(ctx context.Context, in *api_pb.GetStudyJobListRequest) (*api_pb.GetStudyJobListReply, error) {
+	sjIds, err := dbIf.GetStudyJobList(in.StudyId)
+	return &api_pb.GetStudyJobListReply{
+		StudyJobUids: sjIds,
+	}, err
+}
+func (s *server) DeleteStudyJob(ctx context.Context, in *api_pb.DeleteStudyJobRequest) (*api_pb.DeleteStudyJobReply, error) {
+	if in == nil || in.StudyJobUid == "" {
+		return &api_pb.DeleteStudyJobReply{}, errors.New("StudyJobUID is missing.")
+	}
+	err := dbIf.DeleteStudyJob(in.StudyJobUid)
+	if err != nil {
+		return &api_pb.DeleteStudyJobReply{}, err
+	}
+	return &api_pb.DeleteStudyJobReply{StudyJobUid: in.StudyJobUid}, nil
+}
 func (s *server) CreateTrial(ctx context.Context, in *api_pb.CreateTrialRequest) (*api_pb.CreateTrialReply, error) {
 	err := dbIf.CreateTrial(in.Trial)
 	return &api_pb.CreateTrialReply{TrialId: in.Trial.TrialId}, err
@@ -209,7 +239,7 @@ func (s *server) ReportMetricsLogs(ctx context.Context, in *api_pb.ReportMetrics
 }
 
 func (s *server) UpdateWorkerState(ctx context.Context, in *api_pb.UpdateWorkerStateRequest) (*api_pb.UpdateWorkerStateReply, error) {
-	err := dbIf.UpdateWorker(in.WorkerId, in.Status)
+	err := dbIf.UpdateWorker(in.WorkerId, in.NewStatus)
 	return &api_pb.UpdateWorkerStateReply{}, err
 }
 

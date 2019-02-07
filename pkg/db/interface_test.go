@@ -23,12 +23,13 @@ var mock sqlmock.Sqlmock
 var studyColumns = []string{
 	"id", "name", "owner", "optimization_type", "optimization_goal",
 	"parameter_configs", "tags", "objective_value_name",
-	"metrics", "nas_config", "job_id", "job_type"}
+	"metrics", "nas_config", "job_type"}
 var trialColumns = []string{
 	"id", "study_id", "parameters", "objective_value", "tags", "time"}
 var workerColumns = []string{"id",
 	"study_id", "trial_id", "type",
-	"status", "template_path", "tags"}
+	"status", "manufest", "metrics_collector_manufest",
+	"tags", "creation_time", "completion_time"}
 
 func TestMain(m *testing.M) {
 	db, sm, err := sqlmock.New()
@@ -43,6 +44,7 @@ func TestMain(m *testing.M) {
 		fmt.Printf("error NewWithSQLConn: %v\n", err)
 	}
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS studies").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec("CREATE TABLE IF NOT EXISTS studyjobs").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS study_permissions").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS trials").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS workers").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
@@ -118,7 +120,7 @@ func TestGetStudyConfig(t *testing.T) {
 	id := generateRandid()
 	mock.ExpectQuery("SELECT").WillReturnRows(
 		sqlmock.NewRows(studyColumns).AddRow(
-			"abc", "test", "admin", 1, 0.99, "{}", "", "", "", "", "test", "hp"))
+			"abc", "test", "admin", 1, 0.99, "{}", "", "", "", "", "hp"))
 	study, err := dbInterface.GetStudy(id)
 	if err != nil {
 		t.Errorf("GetStudyConfig failed: %v", err)
@@ -152,11 +154,10 @@ func TestUpdateStudy(t *testing.T) {
 	var in api.StudyConfig
 	in.Name = "hoge"
 	in.Owner = "joe"
-	in.JobId = "foobar123"
 
-	mock.ExpectExec(`UPDATE studies SET name = \?, owner = \?, tags = \?,
-                job_id = \? WHERE id = \?`,
-	).WithArgs(in.Name, in.Owner, "", in.JobId, studyID).WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec(`UPDATE studies SET name = \?, owner = \?, tags = \?
+                WHERE id = \?`,
+	).WithArgs(in.Name, in.Owner, "", studyID).WillReturnResult(sqlmock.NewResult(1, 1))
 	err := dbInterface.UpdateStudy(studyID, &in)
 	if err != nil {
 		t.Errorf("UpdateStudy error %v", err)
@@ -284,7 +285,18 @@ func TestCreateWorker(t *testing.T) {
 	w.StudyId = generateRandid()
 	w.TrialId = generateRandid()
 
-	mock.ExpectExec("INSERT INTO workers VALUES").WithArgs(sqlmock.AnyArg(), w.StudyId, w.TrialId, w.Type, api.State_PENDING, w.TemplatePath, "").WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec("INSERT INTO workers VALUES").WithArgs(
+		sqlmock.AnyArg(),
+		w.StudyId,
+		w.TrialId,
+		w.Type,
+		api.State_PENDING,
+		w.Manufest,
+		w.MetricsCollectorManufest,
+		"",
+		"0001-01-01 00:00:00",
+		"0001-01-01 00:00:00",
+	).WillReturnResult(sqlmock.NewResult(1, 1))
 	worker_id, err := dbInterface.CreateWorker(&w)
 
 	if err != nil {
@@ -299,7 +311,7 @@ const defaultWorkerID = "w123456789abcdef"
 const objValueName = "obj_value"
 
 func TestGetWorker(t *testing.T) {
-	mock.ExpectQuery(`SELECT \* FROM workers WHERE id = \?`).WithArgs(defaultWorkerID).WillReturnRows(sqlmock.NewRows(workerColumns).AddRow(defaultWorkerID, 1, 1, 1, 1, 1, ""))
+	mock.ExpectQuery(`SELECT \* FROM workers WHERE id = \?`).WithArgs(defaultWorkerID).WillReturnRows(sqlmock.NewRows(workerColumns).AddRow(defaultWorkerID, 1, 1, 1, 1, 1, 1, "", "0001-01-01 00:00:00", "0001-01-01 00:00:00"))
 	worker, err := dbInterface.GetWorker(defaultWorkerID)
 	if err != nil {
 		t.Errorf("GetWorker error %v", err)
@@ -320,7 +332,7 @@ func TestGetWorkerStatus(t *testing.T) {
 
 func TestGetWorkerList(t *testing.T) {
 	var trial_id = generateRandid()
-	mock.ExpectQuery(`SELECT \* FROM workers WHERE trial_id = \?`).WithArgs(trial_id).WillReturnRows(sqlmock.NewRows(workerColumns).AddRow(1, 1, 1, 1, 1, 1, ""))
+	mock.ExpectQuery(`SELECT \* FROM workers WHERE trial_id = \?`).WithArgs(trial_id).WillReturnRows(sqlmock.NewRows(workerColumns).AddRow(1, 1, 1, 1, 1, 1, 1, "", "", ""))
 	out_workers, err := dbInterface.GetWorkerList("", trial_id)
 	if err != nil {
 		t.Errorf("GetWorkerList error %v", err)
@@ -330,7 +342,7 @@ func TestGetWorkerList(t *testing.T) {
 	}
 
 	var study_id = generateRandid()
-	mock.ExpectQuery(`SELECT \* FROM workers WHERE study_id = \?`).WithArgs(study_id).WillReturnRows(sqlmock.NewRows(workerColumns).AddRow(1, 1, 1, 1, 1, 1, "").AddRow(1, 1, 1, 1, 1, 1, ""))
+	mock.ExpectQuery(`SELECT \* FROM workers WHERE study_id = \?`).WithArgs(study_id).WillReturnRows(sqlmock.NewRows(workerColumns).AddRow(1, 1, 1, 1, 1, 1, 1, "", "", "").AddRow(1, 1, 1, 1, 1, 1, 1, "", "", ""))
 	out_workers, err = dbInterface.GetWorkerList(study_id, "")
 	if err != nil {
 		t.Errorf("GetWorkerList error %v", err)
@@ -341,12 +353,35 @@ func TestGetWorkerList(t *testing.T) {
 }
 
 func TestUpdateWorker(t *testing.T) {
-	mock.ExpectExec(`UPDATE workers SET status = \? WHERE id = \?`).WithArgs(api.State_COMPLETED, defaultWorkerID).WillReturnResult(sqlmock.NewResult(1, 1))
-	err := dbInterface.UpdateWorker(defaultWorkerID, api.State_COMPLETED)
+	wmanufest := "woker manufest"
+	mcmanufest := "metricscollector manufest"
+	tags := "{\"name\":\"test\",\"value\":\"alpha\"}"
+	mock.ExpectQuery(`SELECT \* FROM workers WHERE id = \?`).WithArgs(defaultWorkerID).WillReturnRows(sqlmock.NewRows(workerColumns).AddRow(defaultWorkerID, 1, 1, 1, 1, 1, 1, "", "0001-01-01 00:00:00", "0001-01-01 00:00:00"))
+	mock.ExpectExec(`UPDATE workers SET status = \?, manufest = \?, metrics_collector_manufest = \?, tags = \?, creation_time = \?, completion_time = \? WHERE id = \?`).WithArgs(
+		api.State_COMPLETED,
+		wmanufest,
+		mcmanufest,
+		tags,
+		"0001-01-02 00:00:00",
+		"0001-01-03 00:00:00",
+		defaultWorkerID,
+	).WillReturnResult(sqlmock.NewResult(1, 1))
+	err := dbInterface.UpdateWorker(
+		defaultWorkerID,
+		&api.Worker{
+			Status:                   api.State_COMPLETED,
+			Manufest:                 wmanufest,
+			MetricsCollectorManufest: mcmanufest,
+			Tags:                     []*api.Tag{&api.Tag{Name: "test", Value: "alpha"}},
+			CreationTime:             "0001-01-02T00:00:00Z",
+			CompletionTime:           "0001-01-03T00:00:00Z",
+		},
+	)
 	if err != nil {
 		t.Errorf("UpdateWorker error %v", err)
 	}
 }
+
 func TestDeleteWorker(t *testing.T) {
 	mock.ExpectExec(`DELETE FROM workers WHERE id = \?`).WithArgs(defaultWorkerID).WillReturnResult(sqlmock.NewResult(1, 1))
 	err := dbInterface.DeleteWorker(defaultWorkerID)
@@ -359,13 +394,12 @@ func TestDeleteWorker(t *testing.T) {
 func TestGetWorkerFullInfo(t *testing.T) {
 	studyID := generateRandid()
 	wRows := sqlmock.NewRows(workerColumns)
-	wRows.AddRow("w1134567890abcde", studyID, "", "", "1", "", "")
-	wRows.AddRow("w2234567890abcde", studyID, "", "", "2", "", "")
+	wRows.AddRow("w1134567890abcde", studyID, "", "", "1", "", "", "", "", "")
+	wRows.AddRow("w2234567890abcde", studyID, "", "", "2", "", "", "", "", "")
 	mock.ExpectQuery(`SELECT \* FROM workers WHERE study_id = \?`).WithArgs(studyID).WillReturnRows(wRows)
 	mock.ExpectQuery(`SELECT \* FROM trials WHERE study_id = \?`).WithArgs(studyID).WillReturnRows(
 		sqlmock.NewRows(trialColumns))
 	mock.ExpectQuery(`SELECT metrics FROM studies WHERE id = \?`).WithArgs(studyID).WillReturnRows(sqlmock.NewRows([]string{"metrics"}).AddRow("foo,\nbar"))
-
 	WMRows := sqlmock.NewRows([]string{"WM.worker_id", "WM.time", "WM.name", "WM.value"})
 	WMRows.AddRow("w1134567890abcde", "2012-01-01 09:54:32", "foo", "1")
 	WMRows.AddRow("w1134567890abcde", "2012-01-01 09:54:32", "bar", "1")

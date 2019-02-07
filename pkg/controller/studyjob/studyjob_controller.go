@@ -20,6 +20,7 @@ import (
 	"log"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/kubeflow/katib/pkg"
 	katibapi "github.com/kubeflow/katib/pkg/api"
@@ -226,11 +227,6 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		if !contains(pendingFinalizers, cleanDataFinalizer) {
 			return reconcile.Result{}, nil
 		}
-		err = deleteStudy(instance)
-		if err != nil {
-			log.Printf("Fail to delete %v", err)
-			return reconcile.Result{}, err
-		}
 		finalizers := []string{}
 		for _, pendingFinalizer := range pendingFinalizers {
 			if pendingFinalizer != cleanDataFinalizer {
@@ -248,7 +244,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 	default:
 		now := metav1.Now()
 		instance.Status.StartTime = &now
-		err = initializeStudy(instance)
+		update, err = initializeStudy(instance, request.Namespace)
 		if err != nil {
 			r.Update(context.TODO(), instance)
 			log.Printf("Fail to initialize %v", err)
@@ -414,12 +410,20 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 		}
 	}
 	if update {
+		uwreq := &katibapi.UpdateWorkerStateRequest{
+			WorkerId: instance.Status.Trials[i].WorkerList[j].WorkerID,
+			NewStatus: &katibapi.Worker{
+				Status: status.WorkerState,
+			},
+		}
+		if status.WorkerState == katibapi.State_COMPLETED {
+			now := metav1.Now()
+			uwreq.NewStatus.CompletionTime = now.UTC().Format(time.RFC3339Nano)
+		}
 		_, err := c.UpdateWorkerState(
 			context.Background(),
-			&katibapi.UpdateWorkerStateRequest{
-				WorkerId: instance.Status.Trials[i].WorkerList[j].WorkerID,
-				Status:   status.WorkerState,
-			})
+			uwreq,
+		)
 		if err != nil {
 			log.Printf("Fail to update worker info. ID %s", instance.Status.Trials[i].WorkerList[j].WorkerID)
 			return false, err
@@ -659,7 +663,16 @@ func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJ
 		log.Printf("Job Create error %v", err)
 		return "", err
 	}
-
+	uwreq := &katibapi.UpdateWorkerStateRequest{
+		WorkerId: wid,
+		NewStatus: &katibapi.Worker{
+			Manufest: wm.String(),
+		},
+	}
+	_, err = c.UpdateWorkerState(context.Background(), uwreq)
+	if err != nil {
+		return wid, err
+	}
 	return wid, nil
 }
 
@@ -689,6 +702,16 @@ func (r *ReconcileStudyJobController) spawnMetricsCollector(instance *katibv1alp
 
 	if err := r.Create(context.TODO(), &mcjob); err != nil {
 		log.Printf("MetricsCollector Job Create error %v", err)
+		return err
+	}
+	uwreq := &katibapi.UpdateWorkerStateRequest{
+		WorkerId: workerID,
+		NewStatus: &katibapi.Worker{
+			MetricsCollectorManufest: mcm.String(),
+		},
+	}
+	_, err = c.UpdateWorkerState(context.Background(), uwreq)
+	if err != nil {
 		return err
 	}
 	return nil

@@ -20,9 +20,11 @@ import (
 )
 
 const (
-	dbDriver     = "mysql"
-	dbNameTmpl   = "root:%s@tcp(vizier-db:3306)/vizier?timeout=5s"
-	mysqlTimeFmt = "2006-01-02 15:04:05.999999"
+	dbDriver         = "mysql"
+	dbNameTmpl       = "root:%s@tcp(vizier-db:3306)/vizier?timeout=5s"
+	mysqlTimeFmt     = "2006-01-02 15:04:05.999999"
+	defaultTime      = "0000-00-00"
+	mysqldefaultTime = "0001-01-01 00:00:00"
 
 	connectInterval = 5 * time.Second
 	connectTimeout  = 60 * time.Second
@@ -53,6 +55,12 @@ type VizierDBInterface interface {
 	UpdateStudy(string, *api.StudyConfig) error
 	DeleteStudy(string) error
 
+	RegisterStudyJob(*api.StudyJob) error
+	DeleteStudyJob(string) error
+	GetStudyJob(string) (*api.StudyJob, error)
+	JobUIDtoStudyID(string) (string, error)
+	GetStudyJobList(string) ([]string, error)
+
 	GetTrial(string) (*api.Trial, error)
 	GetTrialList(string) ([]*api.Trial, error)
 	CreateTrial(*api.Trial) error
@@ -66,7 +74,7 @@ type VizierDBInterface interface {
 	GetWorkerTimestamp(string) (*time.Time, error)
 	StoreWorkerLogs(string, []*api.MetricsLog) error
 	CreateWorker(*api.Worker) (string, error)
-	UpdateWorker(string, api.State) error
+	UpdateWorker(string, *api.Worker) error
 	DeleteWorker(string) error
 	GetWorkerFullInfo(string, string, string, bool) (*api.GetWorkerFullInfoReply, error)
 
@@ -158,7 +166,6 @@ func (d *dbConn) GetStudy(StudyID string) (*api.StudyConfig, error) {
 		&study.ObjectiveValueName,
 		&metrics,
 		&nasConfig,
-		&study.JobId,
 		&study.JobType,
 	)
 	if err != nil {
@@ -246,12 +253,8 @@ func (d *dbConn) GetStudyList() ([]string, error) {
 }
 
 func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
-	if in.JobId != "" {
-		var temporaryId string
-		err := d.db.QueryRow("SELECT id FROM studies WHERE job_id = ?", in.JobId).Scan(&temporaryId)
-		if err == nil {
-			return "", fmt.Errorf("Study %s in Job %s already exist.", in.Name, in.JobId)
-		}
+	if in.ParameterConfigs == nil {
+		return "", errors.New("ParameterConfigs must be set")
 	}
 
 	var nasConfig string
@@ -298,7 +301,7 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 	for true {
 		studyID = generateRandid()
 		_, err := d.db.Exec(
-			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			studyID,
 			in.Name,
 			in.Owner,
@@ -309,7 +312,6 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 			in.ObjectiveValueName,
 			strings.Join(in.Metrics, ",\n"),
 			nasConfig,
-			in.JobId,
 			in.JobType,
 		)
 		if err == nil {
@@ -327,7 +329,7 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 }
 
 // UpdateStudy updates the corresponding row in the DB.
-// It only updates name, owner, tags and job_id.
+// It only updates name, owner and tags.
 // Other columns are silently ignored.
 func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
 
@@ -342,12 +344,11 @@ func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
 			continue
 		}
 	}
-	_, err = d.db.Exec(`UPDATE studies SET name = ?, owner = ?, tags = ?,
-                job_id = ? WHERE id = ?`,
+	_, err = d.db.Exec(`UPDATE studies SET name = ?, owner = ?, tags = ?
+                 WHERE id = ?`,
 		in.Name,
 		in.Owner,
 		strings.Join(tags, ",\n"),
-		in.JobId,
 		studyID)
 	return err
 }
@@ -355,6 +356,61 @@ func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
 func (d *dbConn) DeleteStudy(id string) error {
 	_, err := d.db.Exec("DELETE FROM studies WHERE id = ?", id)
 	return err
+}
+
+func (d *dbConn) RegisterStudyJob(sj *api.StudyJob) error {
+	_, err := d.db.Exec("INSERT INTO studyjobs (job_uid, study_id, job_type, worker_template, metrics_collector_template) VALUES (?, ?, ?, ?, ?)",
+		sj.StudyJobUid, sj.StudyId, sj.JobType, sj.WorkerTemplate, sj.MetricsCollectorTemplate)
+	return err
+}
+
+func (d *dbConn) DeleteStudyJob(uid string) error {
+	_, err := d.db.Exec("DELETE FROM studyjobs WHERE job_uid = ?", uid)
+	return err
+}
+
+func (d *dbConn) JobUIDtoStudyID(job_uid string) (string, error) {
+	row := d.db.QueryRow("SELECT study_id FROM studyjobs WHERE job_uid = ?", job_uid)
+	var study_id string
+	err := row.Scan(&study_id)
+	if err != nil {
+		return "", err
+	}
+	return study_id, nil
+}
+
+func (d *dbConn) GetStudyJob(studyjob_uid string) (*api.StudyJob, error) {
+	row := d.db.QueryRow("SELECT * FROM studyjobs WHERE job_uid = ?", studyjob_uid)
+	sj := new(api.StudyJob)
+	err := row.Scan(
+		&sj.StudyJobUid,
+		&sj.StudyId,
+		&sj.WorkerTemplate,
+		&sj.MetricsCollectorTemplate,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return sj, nil
+}
+
+func (d *dbConn) GetStudyJobList(study_id string) ([]string, error) {
+	rows, err := d.db.Query("SELECT job_uid FROM studyjobs WHERE study_id = study_id")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var result []string
+	for rows.Next() {
+		var id string
+		err = rows.Scan(&id)
+		if err != nil {
+			log.Printf("err scanning studyjobs.job_uid: %v", err)
+			continue
+		}
+		result = append(result, id)
+	}
+	return result, nil
 }
 
 func (d *dbConn) getTrials(trialID string, studyID string) ([]*api.Trial, error) {
@@ -760,19 +816,26 @@ func (d *dbConn) getWorkers(workerID string, trialID string, studyID string) ([]
 	for rows.Next() {
 		worker := new(api.Worker)
 
-		var tags string
+		var tags, crtime, comtime string
 		err := rows.Scan(
 			&worker.WorkerId,
 			&worker.StudyId,
 			&worker.TrialId,
 			&worker.Type,
 			&worker.Status,
-			&worker.TemplatePath,
+			&worker.Manufest,
+			&worker.MetricsCollectorManufest,
 			&tags,
+			&crtime,
+			&comtime,
 		)
 		if err != nil {
 			return nil, err
 		}
+		ptime, _ := time.Parse(mysqlTimeFmt, crtime)
+		worker.CreationTime = ptime.UTC().Format(time.RFC3339Nano)
+		ptime, _ = time.Parse(mysqlTimeFmt, comtime)
+		worker.CompletionTime = ptime.UTC().Format(time.RFC3339Nano)
 
 		taglist := strings.Split(tags, ",\n")
 		t := make([]*api.Tag, len(taglist))
@@ -837,11 +900,32 @@ func (d *dbConn) CreateWorker(worker *api.Worker) (string, error) {
 
 	var workerID string
 	i := 3
+	crtime, cotime := mysqldefaultTime, mysqldefaultTime
+	if worker.CreationTime != "" {
+		t, err := time.Parse(time.RFC3339Nano, worker.CreationTime)
+		if err == nil {
+			crtime = t.UTC().Format(mysqlTimeFmt)
+		}
+	}
+	if worker.CompletionTime != "" {
+		t, err := time.Parse(time.RFC3339Nano, worker.CompletionTime)
+		if err == nil {
+			cotime = t.UTC().Format(mysqlTimeFmt)
+		}
+	}
 	for true {
 		workerID = generateRandid()
-		_, err = d.db.Exec("INSERT INTO workers VALUES (?, ?, ?, ?, ?, ?, ?)",
-			workerID, worker.StudyId, worker.TrialId, worker.Type,
-			api.State_PENDING, worker.TemplatePath, strings.Join(tags, ",\n"))
+		_, err = d.db.Exec("INSERT INTO workers VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			workerID,
+			worker.StudyId,
+			worker.TrialId,
+			worker.Type,
+			api.State_PENDING,
+			worker.Manufest,
+			worker.MetricsCollectorManufest,
+			strings.Join(tags, ",\n"),
+			crtime,
+			cotime)
 		if err == nil {
 			worker.WorkerId = workerID
 			break
@@ -857,8 +941,59 @@ func (d *dbConn) CreateWorker(worker *api.Worker) (string, error) {
 
 }
 
-func (d *dbConn) UpdateWorker(id string, newstatus api.State) error {
-	_, err := d.db.Exec("UPDATE workers SET status = ? WHERE id = ?", newstatus, id)
+func (d *dbConn) UpdateWorker(id string, newstatus *api.Worker) error {
+	original, err := d.GetWorker(id)
+	if err != nil {
+		return err
+	}
+	if newstatus.Status != api.State_UNKNOWN {
+		original.Status = newstatus.Status
+	}
+	if newstatus.Manufest != "" {
+		original.Manufest = newstatus.Manufest
+	}
+	if newstatus.MetricsCollectorManufest != "" {
+		original.MetricsCollectorManufest = newstatus.MetricsCollectorManufest
+	}
+	crtime, cotime := mysqldefaultTime, mysqldefaultTime
+	if newstatus.CreationTime != "" {
+		t, err := time.Parse(time.RFC3339Nano, newstatus.CreationTime)
+		if err == nil {
+			crtime = t.UTC().Format(mysqlTimeFmt)
+		} else {
+			log.Printf("Error parsing worker CreationTime %v: %v",
+				newstatus.CreationTime, err)
+			t, _ := time.Parse(time.RFC3339Nano, original.CreationTime)
+			crtime = t.UTC().Format(mysqlTimeFmt)
+		}
+	}
+	if newstatus.CompletionTime != "" {
+		t, err := time.Parse(time.RFC3339Nano, newstatus.CompletionTime)
+		if err == nil {
+			cotime = t.UTC().Format(mysqlTimeFmt)
+		} else {
+			log.Printf("Error parsing worker ComplitionTime %v: %v",
+				newstatus.CompletionTime, err)
+			t, _ := time.Parse(time.RFC3339Nano, original.CompletionTime)
+			cotime = t.UTC().Format(mysqlTimeFmt)
+		}
+	}
+	tags := make([]string, len(newstatus.Tags))
+	for i := range tags {
+		tags[i], err = (&jsonpb.Marshaler{}).MarshalToString(newstatus.Tags[i])
+		if err != nil {
+			log.Printf("Error marshalling worker.Tags %v: %v",
+				newstatus.Tags[i], err)
+		}
+	}
+	_, err = d.db.Exec("UPDATE workers SET status = ?, manufest = ?, metrics_collector_manufest = ?, tags = ?, creation_time = ?, completion_time = ? WHERE id = ?",
+		original.Status,
+		original.Manufest,
+		original.MetricsCollectorManufest,
+		strings.Join(tags, ",\n"),
+		crtime,
+		cotime,
+		id)
 	return err
 }
 

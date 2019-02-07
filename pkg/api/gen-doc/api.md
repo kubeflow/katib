@@ -9,6 +9,8 @@
     - [CreateTrialReply](#api.CreateTrialReply)
     - [CreateTrialRequest](#api.CreateTrialRequest)
     - [DataSetInfo](#api.DataSetInfo)
+    - [DeleteStudyJobReply](#api.DeleteStudyJobReply)
+    - [DeleteStudyJobRequest](#api.DeleteStudyJobRequest)
     - [DeleteStudyReply](#api.DeleteStudyReply)
     - [DeleteStudyRequest](#api.DeleteStudyRequest)
     - [EarlyStoppingParameter](#api.EarlyStoppingParameter)
@@ -28,6 +30,10 @@
     - [GetSavedStudiesRequest](#api.GetSavedStudiesRequest)
     - [GetShouldStopWorkersReply](#api.GetShouldStopWorkersReply)
     - [GetShouldStopWorkersRequest](#api.GetShouldStopWorkersRequest)
+    - [GetStudyJobListReply](#api.GetStudyJobListReply)
+    - [GetStudyJobListRequest](#api.GetStudyJobListRequest)
+    - [GetStudyJobReply](#api.GetStudyJobReply)
+    - [GetStudyJobRequest](#api.GetStudyJobRequest)
     - [GetStudyListReply](#api.GetStudyListReply)
     - [GetStudyListRequest](#api.GetStudyListRequest)
     - [GetStudyReply](#api.GetStudyReply)
@@ -58,6 +64,8 @@
     - [Operation.ParameterConfigs](#api.Operation.ParameterConfigs)
     - [Parameter](#api.Parameter)
     - [ParameterConfig](#api.ParameterConfig)
+    - [RegisterStudyJobReply](#api.RegisterStudyJobReply)
+    - [RegisterStudyJobRequest](#api.RegisterStudyJobRequest)
     - [RegisterWorkerReply](#api.RegisterWorkerReply)
     - [RegisterWorkerRequest](#api.RegisterWorkerRequest)
     - [ReportMetricsLogsReply](#api.ReportMetricsLogsReply)
@@ -76,6 +84,7 @@
     - [StopWorkersRequest](#api.StopWorkersRequest)
     - [StudyConfig](#api.StudyConfig)
     - [StudyConfig.ParameterConfigs](#api.StudyConfig.ParameterConfigs)
+    - [StudyJob](#api.StudyJob)
     - [StudyOverview](#api.StudyOverview)
     - [SuggestionParameter](#api.SuggestionParameter)
     - [SuggestionParameterSet](#api.SuggestionParameterSet)
@@ -179,6 +188,36 @@ Generate an unique ID and store the Trial to DB.
 | ----- | ---- | ----- | ----------- |
 | name | [string](#string) |  |  |
 | path | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="api.DeleteStudyJobReply"/>
+
+### DeleteStudyJobReply
+Return deleted StudyJob UID.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| study_job_uid | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="api.DeleteStudyJobRequest"/>
+
+### DeleteStudyJobRequest
+Delete a StudyJob from DB by StudyJob UID.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| study_job_uid | [string](#string) |  |  |
 
 
 
@@ -472,6 +511,66 @@ Discrete and Categorical type use List.
 | study_id | [string](#string) |  |  |
 | early_stopping_algorithm | [string](#string) |  |  |
 | param_id | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="api.GetStudyJobListReply"/>
+
+### GetStudyJobListReply
+Return a list of StudyJob UIDs.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| study_job_uids | [string](#string) | repeated |  |
+
+
+
+
+
+
+<a name="api.GetStudyJobListRequest"/>
+
+### GetStudyJobListRequest
+Get StudyJob UID List from DB by Study ID.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| study_id | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="api.GetStudyJobReply"/>
+
+### GetStudyJobReply
+Return a specified StudyJob.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| study_job | [StudyJob](#api.StudyJob) |  |  |
+
+
+
+
+
+
+<a name="api.GetStudyJobRequest"/>
+
+### GetStudyJobRequest
+Get a StudyJob from DB by StudyJob UID.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| study_job_uid | [string](#string) |  |  |
 
 
 
@@ -952,6 +1051,36 @@ Katib will create each Hyper parameter from this config.
 
 
 
+<a name="api.RegisterStudyJobReply"/>
+
+### RegisterStudyJobReply
+Return registerd StudyJob UID.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| study_job_uid | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="api.RegisterStudyJobRequest"/>
+
+### RegisterStudyJobRequest
+Register a StudyJob to DB.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| study_job | [StudyJob](#api.StudyJob) |  |  |
+
+
+
+
+
+
 <a name="api.RegisterWorkerReply"/>
 
 ### RegisterWorkerReply
@@ -1200,7 +1329,6 @@ It is assumed that objective function f(x) does not change in the course of a St
 | tags | [Tag](#api.Tag) | repeated | Tag for Study |
 | objective_value_name | [string](#string) |  | Name of objective value. |
 | metrics | [string](#string) | repeated | List of metrics name. |
-| jobId | [string](#string) |  | ID of studyjob that is created from this config. |
 | nas_config | [NasConfig](#api.NasConfig) |  | Config for NAS job |
 | job_type | [string](#string) |  | Type of the job, NAS or HP |
 
@@ -1218,6 +1346,26 @@ List of ParameterConfig
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | configs | [ParameterConfig](#api.ParameterConfig) | repeated |  |
+
+
+
+
+
+
+<a name="api.StudyJob"/>
+
+### StudyJob
+A definition of a StudyJob.
+StudyJon operator store the crd info into DB.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| study_job_uid | [string](#string) |  | UID of studyjob CR |
+| study_id | [string](#string) |  | Study ID |
+| worker_template | [string](#string) |  | A template of Manifest for workers |
+| metrics_collector_template | [string](#string) |  | A template of Manifest for metrics collectors |
+| job_type | [string](#string) |  | Type of the job, NAS or HP |
 
 
 
@@ -1328,12 +1476,14 @@ Create time will be filled in the server automatically side even user set the va
 
 ### UpdateWorkerStateRequest
 Update a Status of Worker.
+updatable values are Status, Manufest, MetricsCollectorManufest, Tags,, CreationTime, and CompletionTime.
+Other values in request will be ignored.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | worker_id | [string](#string) |  |  |
-| status | [State](#api.State) |  |  |
+| new_status | [Worker](#api.Worker) |  |  |
 
 
 
@@ -1352,10 +1502,13 @@ Types of worker supported by Katib are k8s Job, TF-Job, and Pytorch-Job.
 | worker_id | [string](#string) |  | Worker ID. |
 | study_id | [string](#string) |  | Study ID. |
 | trial_id | [string](#string) |  | Trial ID. |
-| Type | [string](#string) |  | Type of Worker |
+| type | [string](#string) |  | Type of Worker |
 | status | [State](#api.State) |  | Status of Worker. |
-| TemplatePath | [string](#string) |  | Path for the manufest template of Worker. |
+| manufest | [string](#string) |  | A json formatted manufest for Worker. |
+| metrics_collector_manufest | [string](#string) |  | A json formatted manufest for MetricsCollector. |
 | tags | [Tag](#api.Tag) | repeated | Tags of Worker. |
+| creation_time | [string](#string) |  | Creation Time. RFC3339 format. |
+| completion_time | [string](#string) |  | Completion Time. RFC3339 format. |
 
 
 
@@ -1417,10 +1570,11 @@ This value is stored as TINYINT in MySQL.
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
-| PENDING | 0 | Pending. Created but not running. |
-| RUNNING | 1 | Running. |
-| COMPLETED | 2 | Completed. |
-| KILLED | 3 | Killed. Not failed. |
+| UNKNOWN | 0 | Unknown. |
+| PENDING | 1 | Pending. Created but not running. |
+| RUNNING | 2 | Running. |
+| COMPLETED | 3 | Completed. |
+| KILLED | 4 | Killed. Not failed. |
 | ERROR | 120 | Error. |
 
 
@@ -1453,12 +1607,16 @@ https://cloud.google.com/service-infrastructure/docs/service-management/referenc
 | GetStudy | [GetStudyRequest](#api.GetStudyRequest) | [GetStudyReply](#api.GetStudyRequest) | Get a Study Config from DB by ID of Study. |
 | DeleteStudy | [DeleteStudyRequest](#api.DeleteStudyRequest) | [DeleteStudyReply](#api.DeleteStudyRequest) | Delete a Study from DB by Study ID. |
 | GetStudyList | [GetStudyListRequest](#api.GetStudyListRequest) | [GetStudyListReply](#api.GetStudyListRequest) | Get all Study Configs from DB. |
+| RegisterStudyJob | [RegisterStudyJobRequest](#api.RegisterStudyJobRequest) | [RegisterStudyJobReply](#api.RegisterStudyJobRequest) | Register a studyjob to DB. In most case, users should not call this manually. StudyJobs are registered automatically by the StudyJob Operator. |
+| GetStudyJob | [GetStudyJobRequest](#api.GetStudyJobRequest) | [GetStudyJobReply](#api.GetStudyJobRequest) | Get a StudyJob from DB by StudyJob UID. |
+| DeleteStudyJob | [DeleteStudyJobRequest](#api.DeleteStudyJobRequest) | [DeleteStudyJobReply](#api.DeleteStudyJobRequest) | Delete a StudyJob from DB by StudyJob UID. |
+| GetStudyJobList | [GetStudyJobListRequest](#api.GetStudyJobListRequest) | [GetStudyJobListReply](#api.GetStudyJobListRequest) | Get StudyJob UID List from DB by Study ID. |
 | CreateTrial | [CreateTrialRequest](#api.CreateTrialRequest) | [CreateTrialReply](#api.CreateTrialRequest) | Create a Trial from Trial Config. Generate a unique ID and store the Trial to DB. |
 | GetTrials | [GetTrialsRequest](#api.GetTrialsRequest) | [GetTrialsReply](#api.GetTrialsRequest) | Get a Trial Configs from DB by ID of Study. |
 | GetTrial | [GetTrialRequest](#api.GetTrialRequest) | [GetTrialReply](#api.GetTrialRequest) | Get a Trial Configuration from DB by ID of Trial. |
 | RegisterWorker | [RegisterWorkerRequest](#api.RegisterWorkerRequest) | [RegisterWorkerReply](#api.RegisterWorkerRequest) | Create a Worker from Worker Config. Generate a unique ID and store the Worker to DB. |
 | GetWorkers | [GetWorkersRequest](#api.GetWorkersRequest) | [GetWorkersReply](#api.GetWorkersRequest) | Get a Worker Configs and Status from DB by ID of Study, Trial or Worker. |
-| UpdateWorkerState | [UpdateWorkerStateRequest](#api.UpdateWorkerStateRequest) | [UpdateWorkerStateReply](#api.UpdateWorkerStateRequest) | Update a Status of Worker. |
+| UpdateWorkerState | [UpdateWorkerStateRequest](#api.UpdateWorkerStateRequest) | [UpdateWorkerStateReply](#api.UpdateWorkerStateRequest) | Update a Status of a Worker. |
 | GetWorkerFullInfo | [GetWorkerFullInfoRequest](#api.GetWorkerFullInfoRequest) | [GetWorkerFullInfoReply](#api.GetWorkerFullInfoRequest) | Get full information related to specified Workers. It includes Worker Config, HyperParameters and Metrics Logs. |
 | GetSuggestions | [GetSuggestionsRequest](#api.GetSuggestionsRequest) | [GetSuggestionsReply](#api.GetSuggestionsRequest) | Get Suggestions from a Suggestion service. |
 | GetShouldStopWorkers | [GetShouldStopWorkersRequest](#api.GetShouldStopWorkersRequest) | [GetShouldStopWorkersReply](#api.GetShouldStopWorkersRequest) |  |
