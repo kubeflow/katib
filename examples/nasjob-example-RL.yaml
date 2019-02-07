@@ -1,0 +1,120 @@
+apiVersion: "kubeflow.org/v1alpha1"
+kind: StudyJob
+metadata:
+  namespace: kubeflow
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: nas-rl-example
+spec:
+  studyName: nas-rl-example
+  owner: crd
+  optimizationtype: maximize
+  objectivevaluename: Validation-Accuracy
+  optimizationgoal: 0.99
+  requestcount: 3
+  metricsnames:
+    - accuracy
+  nasConfig:
+    graphConfig:
+      numLayers: 8
+      inputSize:
+        - 32
+        - 32
+        - 3
+      outputSize:
+        - 10
+    operations:
+      - operationType: convolution
+        parameterconfigs:
+          - name: filter_size
+            parametertype: categorical
+            feasible:
+              list:
+              - "3"
+              - "5"
+              - "7"
+          - name: num_filter
+            parametertype: categorical
+            feasible:
+              list:
+              - "32"
+              - "48"
+              - "64"
+              - "96"
+              - "128"
+          - name: stride
+            parametertype: categorical
+            feasible:
+              list:
+              - "1"
+              - "2"
+      - operationType: reduction
+        parameterconfigs:
+          - name: reduction_type
+            parametertype: categorical
+            feasible:
+              list:
+              - max_pooling
+              - avg_pooling
+          - name: pool_size
+            parametertype: int
+            feasible:
+              min: "2"
+              max: "3"
+              step: "1"
+  workerSpec:
+    goTemplate:
+        rawTemplate: |-
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: {{.WorkerID}}
+            namespace: {{.NameSpace}}
+          spec:
+            template:
+              spec:
+                containers:
+                - name: {{.WorkerID}}
+                  image: docker.io/deepermind/training-container-nas
+                  command:
+                  - "python3.5"
+                  - "-u"
+                  - "RunTrial.py"
+                  {{- with .HyperParameters}}
+                  {{- range .}}
+                  - "--{{.Name}}={{.Value}}"
+                  {{- end}}
+                  {{- end}}
+                  resources:
+                    limits:
+                      nvidia.com/gpu: 1
+                restartPolicy: Never
+  suggestionSpec:
+    suggestionAlgorithm: "nasrl"
+    suggestionParameters:
+      - name: "lstm_num_cells"
+        value: "64"
+      - name: "lstm_num_layers"
+        value: "1"
+      - name: "lstm_keep_prob"
+        value: "1.0"
+      - name: "optimizer"
+        value: "adam"
+      - name: "init_learning_rate"
+        value: "1e-3"
+      - name: "lr_decay_start"
+        value: "0"
+      - name: "lr_decay_every"
+        value: "1000"
+      - name: "lr_decay_rate"
+        value: "0.9"
+      - name: "skip-target"
+        value: "0.4"
+      - name: "skip-weight"
+        value: "0.8"
+      - name: "l2_reg"
+        value: "0"
+      - name: "entropy_weight"
+        value: "1e-4"
+      - name: "baseline_decay"
+        value: "0.9999"

@@ -83,7 +83,9 @@ Please see [MinikubeDemo.md](./examples/MinikubeDemo.md) for more details.
 ## Web UI
 
 Katib provides a Web UI.
-You can visualize general trend of Hyper parameter space and each training history.
+You can visualize general trend of Hyper parameter space and each training history. You can use
+[random-example](https://github.com/kubeflow/katib/blob/master/examples/random-example.yaml) or
+[other examples](https://github.com/kubeflow/katib/blob/master/examples) to generate a similar UI.
 ![katibui](https://user-images.githubusercontent.com/10014831/48778081-a4388b80-ed17-11e8-938b-fc59a5d2e574.gif)
 
 ## API Documentation

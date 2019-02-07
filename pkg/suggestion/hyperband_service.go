@@ -142,7 +142,7 @@ func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.Ma
 	child := Bracket{}
 
 	if sconf.OptimizationType == api.OptimizationType_MINIMIZE {
-		child = parent[len(parent) - n:]
+		child = parent[len(parent)-n:]
 	} else if sconf.OptimizationType == api.OptimizationType_MAXIMIZE {
 		child = parent[:n]
 	}
