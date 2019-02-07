@@ -95,6 +95,18 @@ func (mr *MockVizierDBInterfaceMockRecorder) DeleteStudy(arg0 interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteStudy", reflect.TypeOf((*MockVizierDBInterface)(nil).DeleteStudy), arg0)
 }
 
+// DeleteStudyJob mocks base method
+func (m *MockVizierDBInterface) DeleteStudyJob(arg0 string) error {
+	ret := m.ctrl.Call(m, "DeleteStudyJob", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteStudyJob indicates an expected call of DeleteStudyJob
+func (mr *MockVizierDBInterfaceMockRecorder) DeleteStudyJob(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteStudyJob", reflect.TypeOf((*MockVizierDBInterface)(nil).DeleteStudyJob), arg0)
+}
+
 // DeleteTrial mocks base method
 func (m *MockVizierDBInterface) DeleteTrial(arg0 string) error {
 	ret := m.ctrl.Call(m, "DeleteTrial", arg0)
@@ -156,6 +168,32 @@ func (m *MockVizierDBInterface) GetStudy(arg0 string) (*api.StudyConfig, error) 
 // GetStudy indicates an expected call of GetStudy
 func (mr *MockVizierDBInterfaceMockRecorder) GetStudy(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudy", reflect.TypeOf((*MockVizierDBInterface)(nil).GetStudy), arg0)
+}
+
+// GetStudyJob mocks base method
+func (m *MockVizierDBInterface) GetStudyJob(arg0 string) (*api.StudyJob, error) {
+	ret := m.ctrl.Call(m, "GetStudyJob", arg0)
+	ret0, _ := ret[0].(*api.StudyJob)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStudyJob indicates an expected call of GetStudyJob
+func (mr *MockVizierDBInterfaceMockRecorder) GetStudyJob(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudyJob", reflect.TypeOf((*MockVizierDBInterface)(nil).GetStudyJob), arg0)
+}
+
+// GetStudyJobList mocks base method
+func (m *MockVizierDBInterface) GetStudyJobList(arg0 string) ([]string, error) {
+	ret := m.ctrl.Call(m, "GetStudyJobList", arg0)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStudyJobList indicates an expected call of GetStudyJobList
+func (mr *MockVizierDBInterfaceMockRecorder) GetStudyJobList(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudyJobList", reflect.TypeOf((*MockVizierDBInterface)(nil).GetStudyJobList), arg0)
 }
 
 // GetStudyList mocks base method
@@ -314,6 +352,31 @@ func (mr *MockVizierDBInterfaceMockRecorder) GetWorkerTimestamp(arg0 interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkerTimestamp", reflect.TypeOf((*MockVizierDBInterface)(nil).GetWorkerTimestamp), arg0)
 }
 
+// JobUIDtoStudyID mocks base method
+func (m *MockVizierDBInterface) JobUIDtoStudyID(arg0 string) (string, error) {
+	ret := m.ctrl.Call(m, "JobUIDtoStudyID", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// JobUIDtoStudyID indicates an expected call of JobUIDtoStudyID
+func (mr *MockVizierDBInterfaceMockRecorder) JobUIDtoStudyID(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "JobUIDtoStudyID", reflect.TypeOf((*MockVizierDBInterface)(nil).JobUIDtoStudyID), arg0)
+}
+
+// RegisterStudyJob mocks base method
+func (m *MockVizierDBInterface) RegisterStudyJob(arg0 *api.StudyJob) error {
+	ret := m.ctrl.Call(m, "RegisterStudyJob", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RegisterStudyJob indicates an expected call of RegisterStudyJob
+func (mr *MockVizierDBInterfaceMockRecorder) RegisterStudyJob(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterStudyJob", reflect.TypeOf((*MockVizierDBInterface)(nil).RegisterStudyJob), arg0)
+}
+
 // SelectOne mocks base method
 func (m *MockVizierDBInterface) SelectOne() error {
 	ret := m.ctrl.Call(m, "SelectOne")
@@ -413,7 +476,7 @@ func (mr *MockVizierDBInterfaceMockRecorder) UpdateTrial(arg0 interface{}) *gomo
 }
 
 // UpdateWorker mocks base method
-func (m *MockVizierDBInterface) UpdateWorker(arg0 string, arg1 api.State) error {
+func (m *MockVizierDBInterface) UpdateWorker(arg0 string, arg1 *api.Worker) error {
 	ret := m.ctrl.Call(m, "UpdateWorker", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0

@@ -49,6 +49,41 @@ service Manager {
         };
     };
     /**
+     * Register a studyjob to DB.
+     * In most case, users should not call this manually.
+     * StudyJobs are registered automatically by the StudyJob Operator.
+     */
+    rpc RegisterStudyJob(RegisterStudyJobRequest) returns (RegisterStudyJobReply){
+        option (google.api.http) = {
+            post: "/api/Manager/RegisterStudyJob"
+            body: "study_job"
+        };
+    };
+    /** 
+     * Get a StudyJob from DB by StudyJob UID.
+     */
+    rpc GetStudyJob(GetStudyJobRequest) returns (GetStudyJobReply){
+        option (google.api.http) = {
+            get: "/api/Manager/GetStudyJob/{study_job_uid}"
+        };
+    };
+    /**
+     * Delete a StudyJob from DB by StudyJob UID.
+     */
+    rpc DeleteStudyJob(DeleteStudyJobRequest) returns (DeleteStudyJobReply){
+        option (google.api.http) = {
+            get: "/api/Manager/DeleteStudyJob/{study_job_uid}"
+        };
+    };
+    /**
+     * Get StudyJob UID List from DB by Study ID.
+     */
+    rpc GetStudyJobList(GetStudyJobListRequest) returns (GetStudyJobListReply){
+        option (google.api.http) = {
+            get: "/api/Manager/GetStudyJobList/{study_id}"
+        };
+    };
+    /**
      * Create a Trial from Trial Config.
      * Generate a unique ID and store the Trial to DB.
      */
@@ -93,7 +128,7 @@ service Manager {
         };
     };
     /** 
-     * Update a Status of Worker.
+     * Update a Status of a Worker.
      */
     rpc UpdateWorkerState(UpdateWorkerStateRequest) returns (UpdateWorkerStateReply){
         option (google.api.http) = {
@@ -281,10 +316,11 @@ message Parameter {
  * This value is stored as TINYINT in MySQL.
  */
 enum State {
-    PENDING = 0; /// Pending. Created but not running.
-    RUNNING = 1; /// Running. 
-    COMPLETED = 2; /// Completed.
-    KILLED = 3; /// Killed. Not failed.
+    UNKNOWN = 0; /// Unknown.
+    PENDING = 1; /// Pending. Created but not running.
+    RUNNING = 2; /// Running. 
+    COMPLETED = 3; /// Completed.
+    KILLED = 4; /// Killed. Not failed.
     ERROR = 120; /// Error.
 }
 
@@ -376,10 +412,13 @@ message Worker {
     string worker_id = 1; /// Worker ID.
     string study_id = 2; /// Study ID.
     string trial_id = 3; /// Trial ID.
-    string Type = 4; /// Type of Worker
+    string type = 4; /// Type of Worker
     State status = 5; /// Status of Worker.
-    string TemplatePath = 6; /// Path for the manufest template of Worker.
-    repeated Tag tags = 7; /// Tags of Worker.
+    string manufest = 6; /// A json formatted manufest for Worker.
+    string metrics_collector_manufest = 7; /// A json formatted manufest for MetricsCollector.
+    repeated Tag tags = 8; /// Tags of Worker.
+    string creation_time = 9; /// Creation Time. RFC3339 format.
+    string completion_time = 10; /// Completion Time. RFC3339 format.
 }
 
 /**
@@ -418,6 +457,18 @@ message Worker {
 }
 
 /**
+ * A definition of a StudyJob.
+ * StudyJon operator store the crd info into DB.
+ */
+message StudyJob {
+    string study_job_uid = 1; /// UID of studyjob CR
+    string study_id = 2; /// Study ID
+    string worker_template = 3; /// A template of Manifest for workers
+    string metrics_collector_template = 4; /// A template of Manifest for metrics collectors
+    string job_type = 5; /// Type of the job, NAS or HP
+}
+
+/**
  * Config of a Study. Study represents a single optimization run over a feasible space. 
  * Each Study contains a configuration describing the feasible space, as well as a set of Trials.
  * It is assumed that objective function f(x) does not change in the course of a Study.
@@ -438,8 +489,7 @@ message StudyConfig {
     repeated Tag tags = 7; /// Tag for Study
     string objective_value_name = 8; /// Name of objective value.
     repeated string metrics = 9; /// List of metrics name.
-    string jobId = 10; /// ID of studyjob that is created from this config.
-    NasConfig nas_config = 11; /// Config for NAS job
+    NasConfig nas_config = 10; /// Config for NAS job
     string job_type = 12; /// Type of the job, NAS or HP
 }
 
@@ -497,6 +547,62 @@ message GetStudyListRequest {
  */
 message GetStudyListReply {
     repeated StudyOverview study_overviews = 1;
+}
+
+/** 
+ * Register a StudyJob to DB.
+ */
+message RegisterStudyJobRequest {
+    StudyJob study_job = 1;
+}
+
+/**
+ * Return registerd StudyJob UID.
+ */
+message RegisterStudyJobReply {
+    string study_job_uid = 1;
+}
+
+/** 
+ * Delete a StudyJob from DB by StudyJob UID.
+ */
+message DeleteStudyJobRequest {
+    string study_job_uid = 1;
+}
+
+/**
+ * Return deleted StudyJob UID.
+ */
+message DeleteStudyJobReply {
+    string study_job_uid = 1;
+}
+
+/**
+ * Get a StudyJob from DB by StudyJob UID.
+ */
+message GetStudyJobRequest {
+    string study_job_uid = 1;
+}
+
+/**
+ * Return a specified StudyJob.
+ */
+message GetStudyJobReply {
+    StudyJob study_job = 1;
+}
+
+/** 
+ * Get StudyJob UID List from DB by Study ID.
+ */
+message GetStudyJobListRequest {
+    string study_id = 1;
+}
+
+/** 
+ * Return a list of StudyJob UIDs.
+ */
+message GetStudyJobListReply {
+    repeated string study_job_uids = 1;
 }
 
 /**
@@ -584,10 +690,12 @@ message GetWorkersReply {
 
 /** 
  * Update a Status of Worker.
+ * updatable values are Status, Manufest, MetricsCollectorManufest, Tags,, CreationTime, and CompletionTime.
+ * Other values in request will be ignored.
  */
 message UpdateWorkerStateRequest {
     string worker_id = 1;
-    State status = 2;
+    Worker new_status = 2;
 }
 
 message UpdateWorkerStateReply{
