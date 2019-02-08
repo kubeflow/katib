@@ -360,7 +360,7 @@ func (k *KatibUIHandler) UpdateWorkerTemplate(w http.ResponseWriter, r *http.Req
 	}
 	err := k.studyjobClient.UpdateWorkerTemplates(wt)
 	if err != nil {
-		log.Print("fail to UpdateWorkerTemplate %v", err)
+		log.Printf("fail to UpdateWorkerTemplate %v", err)
 	}
 }
 
@@ -400,7 +400,7 @@ func (k *KatibUIHandler) UpdateMetricsCollectorTemplate(w http.ResponseWriter, r
 	}
 	err := k.studyjobClient.UpdateMetricsCollectorTemplates(mt)
 	if err != nil {
-		log.Print("fail to UpdateMetricsCollectorTemplate %v", err)
+		log.Printf("fail to UpdateMetricsCollectorTemplate %v", err)
 	}
 }
 
