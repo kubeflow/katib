@@ -37,4 +37,4 @@ cp -r vendor ${GO_DIR}/vendor
 
 cd ${GO_DIR}
 cp cmd/ui/Dockerfile .
-gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/katib-ui:${VERSION} --project=${PROJECT} 
+gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/katib-ui:${VERSION} --project=${PROJECT} 
