@@ -35,7 +35,9 @@ import (
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -115,23 +117,56 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	//err = c.Watch(
+	//	&source.Kind{Type: &tfjobv1beta1.TFJob{}},
+	//	&handler.EnqueueRequestForOwner{
+	//		IsController: true,
+	//		OwnerType:    &katibv1alpha1.StudyJob{},
+	//	})
+	//if isFatalWatchError(err, TFJobWorker) {
+	//	return err
+	//}
+
+	//err = c.Watch(
+	//	&source.Kind{Type: &pytorchjobv1beta1.PyTorchJob{}},
+	//	&handler.EnqueueRequestForOwner{
+	//		IsController: true,
+	//		OwnerType:    &katibv1alpha1.StudyJob{},
+	//	})
+	//if isFatalWatchError(err, PyTorchJobWorker) {
+	//	return err
+	//}
+
+	// Unstructured
+	u := &unstructured.Unstructured{}
+	u.SetGroupVersionKind(schema.GroupVersionKind{
+		Kind:    "TFJob",
+		Group:   "",
+		Version: "v1beta1",
+	})
 	err = c.Watch(
-		&source.Kind{Type: &tfjobv1beta1.TFJob{}},
+		&source.Kind{Type: u},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
 			OwnerType:    &katibv1alpha1.StudyJob{},
 		})
-	if isFatalWatchError(err, TFJobWorker) {
+	if err != nil {
 		return err
 	}
 
+	u = &unstructured.Unstructured{}
+	u.SetGroupVersionKind(schema.GroupVersionKind{
+		Kind:    "PytorchJob",
+		Group:   "",
+		Version: "v1beta1",
+	})
 	err = c.Watch(
-		&source.Kind{Type: &pytorchjobv1beta1.PyTorchJob{}},
+		&source.Kind{Type: u},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
 			OwnerType:    &katibv1alpha1.StudyJob{},
 		})
-	if isFatalWatchError(err, PyTorchJobWorker) {
+	if err != nil {
 		return err
 	}
 
