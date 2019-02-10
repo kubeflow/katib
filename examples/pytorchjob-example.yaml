@@ -8,20 +8,20 @@ metadata:
 spec:
   studyName: pytorchjob-example
   owner: crd
-  optimizationtype: maximize
-  objectivevaluename: accuracy
-  optimizationgoal: 0.99
-  requestcount: 4
-  metricsnames:
+  optimizationType: maximize
+  objectiveValueName: accuracy
+  optimizationGoal: 0.99
+  requestCount: 4
+  metricsNames:
     - accuracy
-  parameterconfigs:
+  parameterConfigs:
     - name: --lr
-      parametertype: double
+      parameterType: double
       feasible:
         min: "0.01"
         max: "0.05"
     - name: --momentum
-      parametertype: double
+      parameterType: double
       feasible:
         min: "0.5"
         max: "0.9"

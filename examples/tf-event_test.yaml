@@ -8,22 +8,22 @@ metadata:
 spec:
   studyName: random-example-long-test
   owner: crd
-  optimizationtype: maximize
-  objectivevaluename: test/accuracy
-  optimizationgoal: 0.99
-  metricsnames:
+  optimizationType: maximize
+  objectiveValueName: test/accuracy
+  optimizationGoal: 0.99
+  metricsNames:
     - train/accuracy
     - train/cross_entropy
     - test/accuracy
     - test/cross_entropy
-  parameterconfigs:
+  parameterConfigs:
     - name: --learning_rate
-      parametertype: double
+      parameterType: double
       feasible:
         min: "0.001"
         max: "0.01"
     - name: --dropout
-      parametertype: double
+      parameterType: double
       feasible:
         min: "0.7"
         max: "0.9"

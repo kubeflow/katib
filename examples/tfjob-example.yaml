@@ -8,20 +8,20 @@ metadata:
 spec:
   studyName: tfjob-example
   owner: crd
-  optimizationtype: maximize
-  objectivevaluename: accuracy_1
-  optimizationgoal: 0.99
-  requestcount: 4
-  metricsnames:
+  optimizationType: maximize
+  objectiveValueName: accuracy_1
+  optimizationGoal: 0.99
+  requestCount: 4
+  metricsNames:
     - accuracy_1
-  parameterconfigs:
+  parameterConfigs:
     - name: --learning_rate
-      parametertype: double
+      parameterType: double
       feasible:
         min: "0.01"
         max: "0.05"
     - name: --batch_size
-      parametertype: int
+      parameterType: int
       feasible:
         min: "100"
         max: "200"

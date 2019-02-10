@@ -8,25 +8,25 @@ metadata:
 spec:
   studyName: random-example
   owner: crd
-  optimizationtype: maximize
-  objectivevaluename: Validation-accuracy
-  optimizationgoal: 0.99
-  requestcount: 10
-  metricsnames:
+  optimizationType: maximize
+  objectiveValueName: Validation-accuracy
+  optimizationGoal: 0.99
+  requestCount: 10
+  metricsNames:
     - accuracy
-  parameterconfigs:
+  parameterConfigs:
     - name: --lr
-      parametertype: double
+      parameterType: double
       feasible:
         min: "0.01"
         max: "0.03"
     - name: --num-layers
-      parametertype: int
+      parameterType: int
       feasible:
         min: "1"
         max: "4"
     - name: --optimizer
-      parametertype: categorical
+      parameterType: categorical
       feasible:
         list:
         - sgd

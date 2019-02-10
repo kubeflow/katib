@@ -8,30 +8,30 @@ metadata:
 spec:
   studyName: hypb-example
   owner: crd
-  optimizationtype: maximize
-  objectivevaluename: Validation-accuracy
-  metricsnames:
+  optimizationType: maximize
+  objectiveValueName: Validation-accuracy
+  metricsNames:
     - accuracy
-  parameterconfigs:
+  parameterConfigs:
     - name: --lr
-      parametertype: double
+      parameterType: double
       feasible:
         min: "0.01"
         max: "0.03"
     - name: --num-layers
-      parametertype: int
+      parameterType: int
       feasible:
         min: "2"
         max: "5"
     - name: --optimizer
-      parametertype: categorical
+      parameterType: categorical
       feasible:
         list:
         - sgd
         - adam
         - ftrl
     - name: --num-epochs
-      parametertype: int
+      parameterType: int
       feasible:
         min: "20"
         max: "20"

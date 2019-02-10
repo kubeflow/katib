@@ -9,19 +9,19 @@ metadata:
 spec:
   studyName: xgboost-example
   owner: crd
-  optimizationtype: minimize
-  objectivevaluename: mean_absolute_error
-  optimizationgoal: 10000
-  requestcount: 10
+  optimizationType: minimize
+  objectiveValueName: mean_absolute_error
+  optimizationGoal: 10000
+  requestCount: 10
 
-  parameterconfigs:
+  parameterConfigs:
     - name: --learning-rate
-      parametertype: double
+      parameterType: double
       feasible:
         min: "0.05"
         max: "0.15"
     - name: --n-estimators
-      parametertype: int
+      parameterType: int
       feasible:
         min: "10000"
         max: "30000"

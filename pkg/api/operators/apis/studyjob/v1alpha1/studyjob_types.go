@@ -28,12 +28,12 @@ import (
 type StudyJobSpec struct {
 	StudyName            string                `json:"studyName,omitempty"`
 	Owner                string                `json:"owner,omitempty"`
-	OptimizationType     OptimizationType      `json:"optimizationtype,omitempty"`
-	OptimizationGoal     *float64              `json:"optimizationgoal,omitempty"`
-	ObjectiveValueName   string                `json:"objectivevaluename,omitempty"`
-	RequestCount         int                   `json:"requestcount,omitempty"`
-	MetricsNames         []string              `json:"metricsnames,omitempty"`
-	ParameterConfigs     []ParameterConfig     `json:"parameterconfigs,omitempty"`
+	OptimizationType     OptimizationType      `json:"optimizationType,omitempty"`
+	OptimizationGoal     *float64              `json:"optimizationGoal,omitempty"`
+	ObjectiveValueName   string                `json:"objectiveValueName,omitempty"`
+	RequestCount         int                   `json:"requestCount,omitempty"`
+	MetricsNames         []string              `json:"metricsNames,omitempty"`
+	ParameterConfigs     []ParameterConfig     `json:"parameterConfigs,omitempty"`
 	WorkerSpec           *WorkerSpec           `json:"workerSpec,omitempty"`
 	SuggestionSpec       *SuggestionSpec       `json:"suggestionSpec,omitempty"`
 	EarlyStoppingSpec    *EarlyStoppingSpec    `json:"earlyStoppingSpec,omitempty"`
@@ -59,7 +59,7 @@ type StudyJobStatus struct {
 	LastReconcileTime *metav1.Time `json:"lastReconcileTime,omitempty"`
 
 	Condition                Condition  `json:"condition,omitempty"`
-	StudyID                  string     `json:"studyid,omitempty"`
+	StudyID                  string     `json:"studyId,omitempty"`
 	SuggestionParameterID    string     `json:"suggestionParameterId,omitempty"`
 	EarlyStoppingParameterID string     `json:"earlyStoppingParameterId,omitempty"`
 	Trials                   []TrialSet `json:"trials,omitempty"`
@@ -70,7 +70,7 @@ type StudyJobStatus struct {
 }
 
 type WorkerCondition struct {
-	WorkerID       string      `json:"workerid,omitempty"`
+	WorkerID       string      `json:"workerId,omitempty"`
 	Kind           string      `json:"kind,omitempty"`
 	Condition      Condition   `json:"condition,omitempty"`
 	ObjectiveValue *float64    `json:"objectiveValue,omitempty"`
@@ -79,13 +79,13 @@ type WorkerCondition struct {
 }
 
 type TrialSet struct {
-	TrialID    string            `json:"trialid,omitempty"`
-	WorkerList []WorkerCondition `json:"workeridlist,omitempty"`
+	TrialID    string            `json:"trialId,omitempty"`
+	WorkerList []WorkerCondition `json:"workerIdList,omitempty"`
 }
 
 type ParameterConfig struct {
 	Name          string        `json:"name,omitempty"`
-	ParameterType ParameterType `json:"parametertype,omitempty"`
+	ParameterType ParameterType `json:"parameterType,omitempty"`
 	Feasible      FeasibleSpace `json:"feasible,omitempty"`
 }
 
@@ -200,7 +200,7 @@ type GraphConfig struct {
 // Operation contains type of operation in DAG
 type Operation struct {
 	OperationType    string            `json:"operationType,omitempty"`
-	ParameterConfigs []ParameterConfig `json:"parameterconfigs,omitempty"`
+	ParameterConfigs []ParameterConfig `json:"parameterConfigs,omitempty"`
 }
 
 func init() {
