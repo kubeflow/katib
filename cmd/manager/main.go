@@ -47,7 +47,6 @@ func (s *server) DeleteStudy(ctx context.Context, in *api_pb.DeleteStudyRequest)
 	}
 	err := dbIf.DeleteStudy(in.StudyId)
 	if err != nil {
-		log.Printf("Error is %v", err)
 		return &api_pb.DeleteStudyReply{}, err
 	}
 	return &api_pb.DeleteStudyReply{StudyId: in.StudyId}, nil
@@ -58,7 +57,6 @@ func (s *server) GetStudy(ctx context.Context, in *api_pb.GetStudyRequest) (*api
 	sc, err := dbIf.GetStudy(in.StudyId)
 
 	if err != nil {
-		log.Printf("Error is %v", err)
 		return &api_pb.GetStudyReply{}, err
 	}
 	return &api_pb.GetStudyReply{StudyConfig: sc}, err

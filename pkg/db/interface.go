@@ -47,7 +47,6 @@ type VizierDBInterface interface {
 	SelectOne() error
 
 	GetStudyMetrics(string) ([]string, error)
-	GetStudyIDsTypesList() ([]string, []string, error)
 	GetStudy(string) (*api.StudyConfig, error)
 	GetStudyList() ([]string, error)
 
@@ -144,29 +143,6 @@ func (d *dbConn) GetStudyMetrics(id string) ([]string, error) {
 	}
 	retMetrics := strings.Split(metrics, ",\n")
 	return retMetrics, nil
-}
-
-func (d *dbConn) GetStudyIDsTypesList() ([]string, []string, error) {
-	rows, err := d.db.Query("SELECT id, job_type FROM studies")
-	if err != nil {
-		return nil, nil, err
-	}
-
-	defer rows.Close()
-	var resultTypes []string
-	var resultIDs []string
-	for rows.Next() {
-		var id, jobType string
-		err = rows.Scan(&id, jobType)
-		if err != nil {
-			log.Printf("err scanning studies.id: %v", err)
-			continue
-		}
-		resultIDs = append(resultIDs, id)
-		resultTypes = append(resultTypes, jobType)
-	}
-
-	return resultIDs, resultTypes, nil
 }
 
 func (d *dbConn) GetStudy(StudyID string) (*api.StudyConfig, error) {
