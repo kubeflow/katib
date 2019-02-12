@@ -23,7 +23,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         self.is_first_run = True
 
     def reset_controller(self, request):
-        print("Resetting Suggestion for StudyJob {}.".format(request.study_id))
+        print("-" * 80 + "\nResetting Suggestion for StudyJob {}\n".format(request.study_id) + "-" * 80)
         self.ctrl_step = 0
         self.current_study_id = request.study_id
         self.ctrl_cache_file = "ctrl_cache/{}.ckpt".format(self.current_study_id)
@@ -54,14 +54,14 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
             self.controller.build_trainer()
 
-        print("Suggestion for StudyJob {} has been initialized.\n".format(request.study_id))
+        print("Suggestion for StudyJob {} has been initialized.".format(request.study_id))
 
     def GetSuggestions(self, request, context):
         if request.study_id != self.current_study_id:
             self.reset_controller(request)
             self.is_first_run = True
 
-        print("======================== Suggestion Step {} =======================\n".format(self.ctrl_step))
+        print("-" * 80 + "\nSuggestion Step {}\n".format(self.ctrl_step) + "-" * 80)
 
         with self.tf_graph.as_default():
 
@@ -161,7 +161,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 ctrep = client.CreateTrial(api_pb2.CreateTrialRequest(trial=t), 10)
                 trials[i].trial_id = ctrep.trial_id
                 self.current_trial_id = ctrep.trial_id
-            print("\nTrial {} Created\n".format(ctrep.trial_id))
+            print("Trial {} Created\n".format(ctrep.trial_id))
             self.current_trial_id = ctrep.trial_id
         
         self.ctrl_step += 1
@@ -202,7 +202,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         search_space_object = SearchSpace(search_space_raw)
 
 
-        print("\n==================== Search Space ====================")
+        print("=" * 24, "Search Space", "=" * 24)
         self.num_operations = search_space_object.num_operations
         print("There are", self.num_operations, "operations in total")
         self.search_space = search_space_object.search_space
@@ -220,7 +220,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
         suggestion_params = parseSuggestionParam(params_raw)
 
-        print("\n=============== Parameters for LSTM Controller ===============")
+        print("\n", "=" * 15, "Parameters for LSTM Controller", "=" * 15)
         for spec in suggestion_params:
             print(spec, suggestion_params[spec])
 

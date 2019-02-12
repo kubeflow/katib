@@ -58,6 +58,9 @@ def parseSuggestionParam(params_raw):
 
 
     for param in params_raw:
+        # SuggestionCount is automatically added by controller and not used currently
+        if param.name == "SuggestionCount":
+            continue
         if param.name in suggestion_params.keys():
             checktype(param.name,
                       param.value,

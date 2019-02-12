@@ -1,6 +1,6 @@
 # About the Nerual Architecture Search with Reinforcement Learning Suggestion
 
-The algorithm follows the idea proposed in *Neural Architecture Search with Reinforcement Learning* by Zoph & Le (https://arxiv.org/abs/1611.01578), and the implementation is based on the github of *Efﬁcient Neural Architecture Search via Parameter Sharing* (https://github.com/melodyguan/enas). It uses a recurrent neural network with LSTM cells as controller to generate neural archiecture canddiates. And this controller network is updated by policy gradients. However, it currently does not support parameter sharing. 
+The algorithm follows the idea proposed in *Neural Architecture Search with Reinforcement Learning* by Zoph & Le (https://arxiv.org/abs/1611.01578), and the implementation is based on the github of *Efﬁcient Neural Architecture Search via Parameter Sharing* (https://github.com/melodyguan/enas). It uses a recurrent neural network with LSTM cells as controller to generate neural architecture candidates. And this controller network is updated by policy gradients. However, it currently does not support parameter sharing. 
 
 ## Definition of a Neural Architecture
 
@@ -23,7 +23,7 @@ If n = 12, m = 6, the definition of an architecture will be like:
 [0 1 1 1 1 0 0 1 1 1 1 0]
 ```
 
-There are n rows, the i<sup>th</sup> row has n elements and describes the i<sup>th</sup> layer. Please notice that layer 0 is the input and is not included in this definition.
+There are n rows, the i<sup>th</sup> row has i elements and describes the i<sup>th</sup> layer. Please notice that layer 0 is the input and is not included in this definition.
 
 In each row:
 The first integer ranges from 0 to m-1, indicates the operation in this layer.
@@ -32,7 +32,7 @@ The next (i-1) integers is either 0 or 1. The k<sup>th</sup> (k>=2) integer indi
 ## Output of `GetSuggestion()`
 The output of `GetSuggestion()` consists of two parts: `architecture` and `nn_config`.
 
-`architecture` is a json string of the deinition of a neural architecture. The format is as stated above. One example is:
+`architecture` is a json string of the definition of a neural architecture. The format is as stated above. One example is:
 ```
 [[27], [29, 0], [22, 1, 0], [13, 0, 0, 0], [26, 1, 1, 0, 0], [30, 1, 0, 1, 0, 0], [11, 0, 1, 1, 0, 1, 1], [9, 1, 0, 0, 1, 0, 0, 0]]
 ```

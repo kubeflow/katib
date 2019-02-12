@@ -87,7 +87,7 @@ class Controller(object):
         """Build the sampler ops and the log_prob ops."""
 
         print("-" * 80)
-        print("Build controller sampler")
+        print("Building Controller Sampler")
         anchors = []
         anchors_w_1 = []
 
