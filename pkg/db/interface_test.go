@@ -119,7 +119,7 @@ func TestGetStudyConfig(t *testing.T) {
 	mock.ExpectQuery("SELECT").WillReturnRows(
 		sqlmock.NewRows(studyColumns).AddRow(
 			"abc", "test", "admin", 1, 0.99, "{}", "", "", "", "test"))
-	study, err := dbInterface.GetStudyConfig(id)
+	study, err := dbInterface.GetStudy(id)
 	if err != nil {
 		t.Errorf("GetStudyConfig failed: %v", err)
 	} else if study.Name != "test" || study.Owner != "admin" {
