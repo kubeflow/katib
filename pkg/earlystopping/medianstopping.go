@@ -142,7 +142,7 @@ func (m *MedianStoppingRule) GetShouldStopWorkers(ctx context.Context, in *api.G
 	if err != nil {
 		return &api.GetShouldStopWorkersReply{}, err
 	}
-	sc, err := m.dbIf.GetStudyConfig(in.StudyId)
+	sc, err := m.dbIf.GetStudy(in.StudyId)
 	if err != nil {
 		return &api.GetShouldStopWorkersReply{}, err
 	}
