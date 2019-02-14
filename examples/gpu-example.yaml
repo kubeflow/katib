@@ -33,7 +33,7 @@ spec:
         - ftrl
   workerSpec:
     goTemplate:
-        templatePath: "/worker-template/gpuWorkerTemplate.yaml"
+        templatePath: "gpuWorkerTemplate.yaml"
   suggestionSpec:
     suggestionAlgorithm: "random"
     requestNumber: 3
