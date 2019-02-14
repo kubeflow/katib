@@ -33,7 +33,10 @@ spec:
         - ftrl
   workerSpec:
     goTemplate:
-        templatePath: "/worker-template/gpuWorkerTemplate.yaml"
+        templateSpec:
+            configMapName: "worker-template"
+            templatePath: "gpuWorkerTemplate.yaml"
+            configMapNamespace: "kubeflow"
   suggestionSpec:
     suggestionAlgorithm: "random"
     requestNumber: 3

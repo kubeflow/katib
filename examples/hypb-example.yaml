@@ -37,7 +37,10 @@ spec:
         max: "20"
   workerSpec:
     goTemplate:
-        templatePath: "/worker-template/cpuWorkerTemplate.yaml"
+        templateSpec:
+            configMapName: "worker-template"
+            templatePath: "cpuWorkerTemplate.yaml"
+            configMapNamespace: "kubeflow"
   suggestionSpec:
     suggestionAlgorithm: "hyperband"
     suggestionParameters:

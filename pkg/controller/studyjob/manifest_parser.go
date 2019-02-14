@@ -17,7 +17,6 @@ package studyjob
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"text/template"
 
 	katibapi "github.com/kubeflow/katib/pkg/api"
@@ -28,30 +27,50 @@ import (
 	"k8s.io/apimachinery/pkg/util/uuid"
 )
 
-func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, kind string, ns string, dryrun bool) (string, *bytes.Buffer, error) {
-	var wtp *template.Template = nil
-	var err error
-	if workerSpec != nil && workerSpec.GoTemplate.RawTemplate != "" {
-		wtp, err = template.New("Worker").Parse(workerSpec.GoTemplate.RawTemplate)
-	} else {
-		wPath := "defaultWorkerTemplate.yaml"
-		if workerSpec != nil && workerSpec.GoTemplate.TemplatePath != "" {
-			wPath = workerSpec.GoTemplate.TemplatePath
-		}
-		sjc, err := studyjobclient.NewStudyjobClient(nil)
-		if err != nil {
-			return "", nil, err
-		}
-		wtl, err := sjc.GetWorkerTemplates()
-		if err != nil {
-			return "", nil, err
-		}
-		if wt, ok := wtl[wPath]; !ok {
-			return "", nil, fmt.Errorf("No worker template name %s", wPath)
-		} else {
-			wtp, err = template.New("Worker").Parse(wt)
-		}
+func getTemplateStrFromConfigMap(cNamespace, cName, tPath string) (string, error) {
+	sjc, err := studyjobclient.NewStudyjobClient(nil)
+	if err != nil {
+		return "", err
 	}
+	return sjc.GetTemplate(cNamespace, cName, tPath)
+}
+
+func getTemplateStr(goTemplate *katibv1alpha1.GoTemplate, getDefaultTemplateSpec func()(string,string,string)) (string, error) {
+	if goTemplate.RawTemplate != "" {
+		return goTemplate.RawTemplate, nil
+	} else {
+		tName, tNamespace, tPath := getDefaultTemplateSpec()
+		if goTemplate.TemplateSpec != nil {
+			tName = goTemplate.TemplateSpec.ConfigMapName
+			tNamespace = goTemplate.TemplateSpec.ConfigMapNamespace
+			tPath = goTemplate.TemplateSpec.TemplatePath
+		}
+		return getTemplateStrFromConfigMap(tNamespace, tName, tPath)
+	}
+}
+
+func getDefaultWorkerTemplateSpec() (string, string, string) {
+	return getKatibNamespace(), "worker-template", "defaultWorkerTemplate.yaml"
+}
+
+func getDefaultMetricsTemplateSpec() (string, string, string) {
+	return getKatibNamespace(), "metricscollector-template", "defaultMetricsCollectorTemplate.yaml"
+}
+
+func getWorkerTemplateStr(workerSpec *katibv1alpha1.WorkerSpec) (string, error) {
+	if workerSpec == nil || workerSpec.GoTemplate == nil {
+		return getTemplateStrFromConfigMap(getDefaultWorkerTemplateSpec())
+	} else {
+		return getTemplateStr(workerSpec.GoTemplate, getDefaultWorkerTemplateSpec)
+	}
+}
+
+func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi.Trial, workerSpec *katibv1alpha1.WorkerSpec, kind string, ns string, dryrun bool) (string, *bytes.Buffer, error) {
+	wStr, err := getWorkerTemplateStr(workerSpec)
+	if err != nil {
+		return "", nil, err
+	}
+	wtp, err := template.New("Worker").Parse(wStr)
 	if err != nil {
 		return "", nil, err
 	}
@@ -91,9 +110,15 @@ func getWorkerManifest(c katibapi.ManagerClient, studyID string, trial *katibapi
 	return wid, &b, nil
 }
 
+func getMetricsCollectorTemplateStr(mcs *katibv1alpha1.MetricsCollectorSpec) (string, error) {
+	if mcs == nil || mcs.GoTemplate == nil {
+		return getTemplateStrFromConfigMap(getDefaultMetricsTemplateSpec())
+	} else {
+		return getTemplateStr(mcs.GoTemplate, getDefaultMetricsTemplateSpec)
+	}
+}
+
 func getMetricsCollectorManifest(studyID string, trialID string, workerID string, workerKind string, namespace string, mcs *katibv1alpha1.MetricsCollectorSpec) (*bytes.Buffer, error) {
-	var mtp *template.Template = nil
-	var err error
 	tmpValues := map[string]string{
 		"StudyID":    studyID,
 		"TrialID":    trialID,
@@ -102,27 +127,11 @@ func getMetricsCollectorManifest(studyID string, trialID string, workerID string
 		"NameSpace":  namespace,
 		"ManagerSerivce": pkg.GetManagerAddr(),
 	}
-	if mcs != nil && mcs.GoTemplate.RawTemplate != "" {
-		mtp, err = template.New("MetricsCollector").Parse(mcs.GoTemplate.RawTemplate)
-	} else {
-		mctp := "defaultMetricsCollectorTemplate.yaml"
-		if mcs != nil && mcs.GoTemplate.TemplatePath != "" {
-			mctp = mcs.GoTemplate.TemplatePath
-		}
-		sjc, err := studyjobclient.NewStudyjobClient(nil)
-		if err != nil {
-			return nil, err
-		}
-		mtl, err := sjc.GetMetricsCollectorTemplates()
-		if err != nil {
-			return nil, err
-		}
-		if mt, ok := mtl[mctp]; !ok {
-			return nil, fmt.Errorf("No MetricsCollector template name %s", mctp)
-		} else {
-			mtp, err = template.New("MetricsCollector").Parse(mt)
-		}
+	tStr, err := getMetricsCollectorTemplateStr(mcs)
+	if err != nil {
+		return nil, err
 	}
+	mtp, err := template.New("MetricsCollector").Parse(tStr)
 	if err != nil {
 		return nil, err
 	}

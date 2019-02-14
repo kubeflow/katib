@@ -114,19 +114,25 @@ const (
 	OptimizationTypeMaximize OptimizationType = "maximize"
 )
 
-type GoTemplate struct {
+type TemplateSpec struct {
+	ConfigMapName string `json:"configMapName,omitempty"`
+	ConfigMapNamespace string `json:"configMapNamespace,omitempty"`
 	TemplatePath string `json:"templatePath,omitempty"`
+}
+
+type GoTemplate struct {
+	TemplateSpec *TemplateSpec `json:"templateSpec,omitempty"`
 	RawTemplate  string `json:"rawTemplate,omitempty"`
 }
 
 type WorkerSpec struct {
 	Retain     bool       `json:"retain,omitempty"`
-	GoTemplate GoTemplate `json:"goTemplate,omitempty"`
+	GoTemplate *GoTemplate `json:"goTemplate,omitempty"`
 }
 
 type MetricsCollectorSpec struct {
 	Retain     bool       `json:"retain,omitempty"`
-	GoTemplate GoTemplate `json:"goTemplate,omitempty"`
+	GoTemplate *GoTemplate `json:"goTemplate,omitempty"`
 }
 
 type ServiceParameter struct {

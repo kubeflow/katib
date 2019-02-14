@@ -13,7 +13,9 @@ package studyjob
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
+	"strings"
 
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
@@ -208,4 +210,9 @@ func contains(l []string, s string) bool {
 		}
 	}
 	return false
+}
+
+func getKatibNamespace() string {
+	data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+	return strings.TrimSpace(string(data))
 }

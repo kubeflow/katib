@@ -1,6 +1,7 @@
 package studyjobclient
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strings"
 
@@ -100,6 +101,18 @@ func (s *StudyjobClient) GetMetricsCollectorTemplates(namespace ...string) (map[
 		return map[string]string{}, err
 	}
 	return cm.Data, nil
+}
+
+func (s *StudyjobClient) GetTemplate(namespace, name, path string) (string, error) {
+	cm, err := s.clientset.CoreV1().ConfigMaps(namespace).Get(name, metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+	if _, ok := cm.Data[path]; !ok {
+		return "", fmt.Errorf("No tamplate name %s in configMap %s/%s", path, namespace, name)
+	} else {
+		return cm.Data[path], nil
+	}
 }
 
 func (s *StudyjobClient) UpdateMetricsCollectorTemplates(newMCTemplates map[string]string, namespace ...string) error {
