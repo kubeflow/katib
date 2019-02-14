@@ -38,4 +38,4 @@ cp -r vendor ${GO_DIR}/vendor
 cd ${GO_DIR}
 
 cp cmd/suggestion/bayesianoptimization/Dockerfile .
-gcloud container builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-bayesianoptimization:${VERSION} --project=${PROJECT}
+gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-bayesianoptimization:${VERSION} --project=${PROJECT}
