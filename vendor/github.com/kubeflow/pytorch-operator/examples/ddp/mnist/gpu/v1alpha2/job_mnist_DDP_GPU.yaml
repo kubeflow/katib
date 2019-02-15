@@ -1,0 +1,29 @@
+apiVersion: "kubeflow.org/v1alpha2"
+kind: "PyTorchJob"
+metadata:
+  name: "pytorch-mnist-ddp-gpu"
+spec:
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: pytorch
+              image: docker.io/deepermind/pytorch-mnist-ddp-gpu
+              resources:
+                limits:
+                  nvidia.com/gpu: 1
+    Worker:
+      replicas: 3
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: pytorch
+              image: docker.io/deepermind/pytorch-mnist-ddp-gpu
+              resources: 
+                limits:
+                  nvidia.com/gpu: 1
+

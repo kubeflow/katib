@@ -1,0 +1,6 @@
+appVersion: 0.1.0
+description: K8s Custom Resource and Operator For PyTorch Jobs
+home: https://github.com/kubeflow/pytorch-operator
+name: pytorch-operator
+sources: ['https://github.com/kubeflow/pytorch-operator']
+version: 0.1.0

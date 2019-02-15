@@ -1,0 +1,26 @@
+apiVersion: "kubeflow.org/v1alpha1"
+kind: "PyTorchJob"
+metadata:
+  name: "pytorch-tcp-dist-mnist"
+spec:
+  backend: "tcp"
+  masterPort: "23456"
+  replicaSpecs:
+    - replicas: 1
+      replicaType: MASTER
+      template:
+        spec:
+          containers:
+          - image: gcr.io/kubeflow-ci/pytorch-dist-mnist_test:1.0
+            imagePullPolicy: IfNotPresent
+            name: pytorch
+          restartPolicy: OnFailure
+    - replicas: 3
+      replicaType: WORKER
+      template:
+        spec:
+          containers:
+          - image: gcr.io/kubeflow-ci/pytorch-dist-mnist_test:1.0
+            imagePullPolicy: IfNotPresent
+            name: pytorch
+          restartPolicy: OnFailure

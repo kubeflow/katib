@@ -1,0 +1,23 @@
+apiVersion: "kubeflow.org/v1alpha2"
+kind: "PyTorchJob"
+metadata:
+  name: "pytorch-gloo-dist-mnist"
+spec:
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: pytorch
+              image: docker.io/anugarg/pytorch-dist
+    Worker:
+      replicas: 3
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: pytorch
+              image: docker.io/anugarg/pytorch-dist
+

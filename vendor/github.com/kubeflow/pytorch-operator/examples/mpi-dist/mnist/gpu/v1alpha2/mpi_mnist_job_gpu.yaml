@@ -1,0 +1,30 @@
+apiVersion: "kubeflow.org/v1alpha2"
+kind: "PyTorchJob"
+metadata:
+  name: "pytorch-mpi-mnist-gpu"
+spec:
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: pytorch
+              image: docker.io/akado2009/mpi-mnist-gpu
+              imagePullPolicy: Always
+              resources:
+                limits:
+                  nvidia.com/gpu: 1
+    Worker:
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: pytorch
+              image: docker.io/akado2009/mpi-mnist-gpu
+              imagePullPolicy: Always
+              resources:
+                limits:
+                  nvidia.com/gpu: 1

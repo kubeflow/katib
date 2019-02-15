@@ -1,0 +1,21 @@
+# Docker image to use.
+image: jgaguirr/pytorch-operator:latest
+
+# Which cloud provider is kubernetes hosted on.
+# Supported values are gke or azure.
+# Leave blank to use a default, non-cloud specific config.
+cloud: 
+
+## Wether the dashboard should be installed and the kind of service to use
+dashboard: 
+  install: false
+  serviceType: ClusterIP
+
+config:
+  configmap:
+  file: /etc/config/controller-config-file.yaml
+
+## Install Default RBAC roles and bindings
+rbac:
+  install: false
+  apiVersion: v1beta1

@@ -1,0 +1,54 @@
+apiVersion: "kubeflow.org/v1alpha1"
+kind: "PyTorchJob"
+metadata:
+  name: "pytorch-cifar-job"
+spec:
+  backend: "tcp"
+  masterPort: "23456"
+  replicaSpecs:
+    - replicas: 1
+      replicaType: MASTER
+      template:
+        spec:
+          containers:
+          - image: pytorch/pytorch:latest
+            imagePullPolicy: IfNotPresent
+            name: pytorch
+            volumeMounts:
+              - name: training-result
+                mountPath: /tmp/result
+              - name: entrypoint
+                mountPath: /tmp/entrypoint
+            command: [/tmp/entrypoint/dist_train_cifar.py]
+          restartPolicy: OnFailure
+          volumes:
+            - name: training-result
+              emptyDir: {}
+            - name: entrypoint
+              configMap:
+                name: dist-train-cifar
+                defaultMode: 0755
+          restartPolicy: OnFailure
+    - replicas: 3
+      replicaType: WORKER
+      template:
+        spec:
+          containers:
+          - image: pytorch/pytorch:latest
+            imagePullPolicy: IfNotPresent
+            name: pytorch
+            volumeMounts:
+              - name: training-result
+                mountPath: /tmp/result
+              - name: entrypoint
+                mountPath: /tmp/entrypoint
+            command: [/tmp/entrypoint/dist_train_cifar.py]
+          restartPolicy: OnFailure
+          volumes:
+            - name: training-result
+              emptyDir: {}
+            - name: entrypoint
+              configMap:
+                name: dist-train-cifar
+                defaultMode: 0755
+          restartPolicy: OnFailure
