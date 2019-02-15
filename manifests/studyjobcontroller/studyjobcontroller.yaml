@@ -21,6 +21,10 @@ spec:
       - name: studyjob-controller
         image: katib/studyjob-controller
         imagePullPolicy: Always
+        ports:
+        - containerPort: 443
+          name: validating
+          protocol: TCP
         env:
         - name: VIZIER_CORE_NAMESPACE
           valueFrom:

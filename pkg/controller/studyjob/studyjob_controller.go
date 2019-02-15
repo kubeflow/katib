@@ -31,6 +31,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	batchv1 "k8s.io/api/batch/v1"
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -47,6 +48,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/builder"
 )
 
 const (
@@ -132,6 +135,37 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	validatingWebhook, err := builder.NewWebhookBuilder().
+		Name("validating.studyjob.kubeflow.org").
+		Validating().
+		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
+		WithManager(mgr).
+		ForType(&katibv1alpha1.StudyJob{}).
+		Handlers(&studyJobValidator{}).
+		Build()
+	if err != nil {
+		return err
+	}
+	as, err := webhook.NewServer("studyjob-admission-server", mgr, webhook.ServerOptions{
+		BootstrapOptions: &webhook.BootstrapOptions{
+			Service: &webhook.Service{
+				Namespace: getMyNamespace(),
+				Name:      "studyjob-controller",
+				Selectors: map[string]string{
+					"app": "studyjob-controller",
+				},
+			},
+			ValidatingWebhookConfigName: "studyjob-validating-webhook-config",
+		},
+	})
+	if err != nil {
+		return err
+	}
+	err = as.Register(validatingWebhook)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -214,7 +248,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 	default:
 		now := metav1.Now()
 		instance.Status.StartTime = &now
-		err = initializeStudy(instance, request.Namespace)
+		err = initializeStudy(instance)
 		if err != nil {
 			r.Update(context.TODO(), instance)
 			log.Printf("Fail to initialize %v", err)

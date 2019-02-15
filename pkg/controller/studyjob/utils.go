@@ -13,7 +13,9 @@ package studyjob
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
+	"strings"
 
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
@@ -98,10 +100,11 @@ func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (*schema.GroupVersionKi
 	return nil, fmt.Errorf("Invalid kind of worker %v", typeChecker)
 }
 
-func validateStudy(instance *katibv1alpha1.StudyJob, namespace string) error {
+func validateStudy(instance *katibv1alpha1.StudyJob) error {
 	if instance.Spec.SuggestionSpec == nil {
 		return fmt.Errorf("No Spec.SuggestionSpec specified.")
 	}
+	namespace := instance.Namespace
 	BUFSIZE := 1024
 	wkind, err := getWorkerKind(instance.Spec.WorkerSpec)
 	if err != nil {
@@ -201,4 +204,9 @@ func contains(l []string, s string) bool {
 		}
 	}
 	return false
+}
+
+func getMyNamespace() string {
+	data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+	return strings.TrimSpace(string(data))
 }
