@@ -21,6 +21,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         self.ctrl_step = 0
         self.tf_graph = tf.get_default_graph()
         self.is_first_run = True
+        self.registered_stuies = list()
 
     def reset_controller(self, request):
         print("-" * 80 + "\nResetting Suggestion for StudyJob {}\n".format(request.study_id) + "-" * 80)
@@ -57,9 +58,10 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         print("Suggestion for StudyJob {} has been initialized.".format(request.study_id))
 
     def GetSuggestions(self, request, context):
-        if request.study_id != self.current_study_id:
+        if request.study_id not in self.registered_stuies:
             self.reset_controller(request)
             self.is_first_run = True
+            self.registered_stuies.append(request.study_id)
 
         print("-" * 80 + "\nSuggestion Step {}\n".format(self.ctrl_step) + "-" * 80)
 
@@ -89,7 +91,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 controller_ops["train_op"]]
 
             if self.is_first_run:
-                print("First time running suggestion. Random architecture will be given. \n")
+                print("First time running suggestion. Random architecture will be given.")
                 with tf.Session() as sess:
                     sess.run(tf.global_variables_initializer())
                     arc = sess.run(controller_ops["sample_arc"])
@@ -168,13 +170,13 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         return api_pb2.GetSuggestionsReply(trials=trials)
 
     def GetEvaluationResult(self, studyID):
-        worker_hist = []
+        worker_list = []
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=studyID, trial_id=self.current_trial_id, only_latest_log=True), 10)
-            worker_hist = gwfrep.worker_full_infos
+            worker_list = gwfrep.worker_full_infos
 
-        for w in worker_hist:
+        for w in worker_list:
             if w.Worker.status == api_pb2.COMPLETED:
                 for ml in w.metrics_logs:
                     print("Evaluation result of previous candidate:", ml.values[-1].value)
@@ -220,7 +222,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
         suggestion_params = parseSuggestionParam(params_raw)
 
-        print("\n", "=" * 15, "Parameters for LSTM Controller", "=" * 15)
+        print("\n" + "=" * 15, "Parameters for LSTM Controller", "=" * 15)
         for spec in suggestion_params:
             print(spec, suggestion_params[spec])
 
