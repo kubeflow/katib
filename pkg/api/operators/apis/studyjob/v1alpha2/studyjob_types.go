@@ -26,7 +26,6 @@ import (
 
 // StudyJobSpec defines the desired state of StudyJob
 type StudyJobSpec struct {
-	StudyName            string                `json:"studyName,omitempty"`
 	Owner                string                `json:"owner,omitempty"`
 	OptimizationType     OptimizationType      `json:"optimizationType,omitempty"`
 	OptimizationGoal     *float64              `json:"optimizationGoal,omitempty"`
@@ -38,7 +37,12 @@ type StudyJobSpec struct {
 	SuggestionSpec       *SuggestionSpec       `json:"suggestionSpec,omitempty"`
 	EarlyStoppingSpec    *EarlyStoppingSpec    `json:"earlyStoppingSpec,omitempty"`
 	MetricsCollectorSpec *MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
+
+	// NAS is still in early development; its API design will be a separate discussion.
 	//NasConfig            *NasConfig            `json:"nasConfig,omitempty"`
+
+	// See #352
+	ReuseStudyID         string                `json:"reuseStudyId,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true
@@ -86,7 +90,7 @@ type StudyJobStatus struct {
 	// It is represented in RFC3339 form and is in UTC.
 	LastReconcileTime *metav1.Time `json:"lastReconcileTime,omitempty"`
 
-	Conditions               JobCondition  `json:"conditions,omitempty"`
+	Conditions               []JobCondition  `json:"conditions,omitempty"`
 	StudyID                  string     `json:"studyId,omitempty"`
 	SuggestionParameterID    string     `json:"suggestionParameterId,omitempty"`
 	EarlyStoppingParameterID string     `json:"earlyStoppingParameterId,omitempty"`
@@ -98,10 +102,38 @@ type StudyJobStatus struct {
 	CurrentSuggestionCount   int        `json:"currentSuggestionCount,omitempty"`
 }
 
+// +k8s:deepcopy-gen=true
+// WorkerCondition describes the state of the worker at a certain point.
 type WorkerCondition struct {
+	// Type of job condition.
+	Type WorkerConditionType `json:"type"`
+	// Status of the condition, one of True, False, Unknown.
+	Status v1.ConditionStatus `json:"status"`
+	// The reason for the condition's last transition.
+	Reason string `json:"reason,omitempty"`
+	// A human readable message indicating details about the transition.
+	Message string `json:"message,omitempty"`
+	// The last time this condition was updated.
+	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
+	// Last time the condition transitioned from one status to another.
+	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+}
+
+// WorkerConditionType defines all kinds of types of WorkerStatus.
+type WorkerConditionType string
+
+const (
+	WorkerPending WorkerConditionType = "Pending"
+	WorkerRunning WorkerConditionType = "Running"
+	WorkerCompleted WorkerConditionType = "Completed"
+	WorkerKilled WorkerConditionType = "Killed"
+	WorkerFailed WorkerConditionType = "Failed"
+)
+
+type WorkerMetadata struct {
 	WorkerID       string      `json:"workerId,omitempty"`
 	Kind           string      `json:"kind,omitempty"`
-	Condition      Condition   `json:"condition,omitempty"`
+	Conditions     []WorkerCondition   `json:"conditions,omitempty"`
 	ObjectiveValue *float64    `json:"objectiveValue,omitempty"`
 	StartTime      metav1.Time `json:"startTime,omitempty"`
 	CompletionTime metav1.Time `json:"completionTime,omitempty"`
@@ -109,7 +141,7 @@ type WorkerCondition struct {
 
 type Trial struct {
 	TrialID    string            `json:"trialId,omitempty"`
-	Workers    []WorkerCondition `json:"workers,omitempty"`
+	Workers    []WorkerMetadata `json:"workers,omitempty"`
 }
 
 type ParameterConfig struct {
@@ -149,19 +181,25 @@ const (
 	OptimizationTypeMaximize OptimizationType = "maximize"
 )
 
-type GoTemplate struct {
+type TemplateSpec struct {
+	ConfigMapName string `json:"configMapName,omitempty"`
+	ConfigMapNamespace string `json:"configMapNamespace,omitempty"`
 	TemplatePath string `json:"templatePath,omitempty"`
+}
+
+type GoTemplate struct {
+	TemplateSpec *TemplateSpec `json:"templateSpec,omitempty"`
 	RawTemplate  string `json:"rawTemplate,omitempty"`
 }
 
 type WorkerSpec struct {
 	Retain     bool       `json:"retain,omitempty"`
-	GoTemplate GoTemplate `json:"goTemplate,omitempty"`
+	GoTemplate *GoTemplate `json:"goTemplate,omitempty"`
 }
 
 type MetricsCollectorSpec struct {
 	Retain     bool       `json:"retain,omitempty"`
-	GoTemplate GoTemplate `json:"goTemplate,omitempty"`
+	GoTemplate *GoTemplate `json:"goTemplate,omitempty"`
 }
 
 type SuggestionSpec struct {
