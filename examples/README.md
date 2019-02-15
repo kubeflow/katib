@@ -61,80 +61,106 @@ $ kubectl -n kubeflow describe studyjobs random-example
 Name:         random-example
 Namespace:    kubeflow
 Labels:       controller-tools.k8s.io=1.0
-Annotations:  kubectl.kubernetes.io/last-applied-configuration={"apiVersion":"kubeflow.org/v1alpha1","kind":"StudyJob","metadata":{"annotations":{},"labels":{"controller-tools.k8s.io":"1.0"},"name":"random-example"...
+Annotations:  <none>
 API Version:  kubeflow.org/v1alpha1
 Kind:         StudyJob
 Metadata:
-  Cluster Name:
-  Creation Timestamp:  2018-08-15T01:29:13Z
-  Generation:          0
-  Resource Version:    173289
-  Self Link:           /apis/kubeflow.org/v1alpha1/namespaces/kubeflow/studyjobs/random-example
-  UID:                 9e136400-a02a-11e8-b88c-42010af0008b
+  Creation Timestamp:  2019-02-14T13:53:11Z
+  Finalizers:
+    clean-studyjob-data
+  Generation:        1
+  Resource Version:  5625476
+  Self Link:         /apis/kubeflow.org/v1alpha1/namespaces/kubeflow/studyjobs/random-example
+  UID:               de365269-305f-11e9-973d-0016ac101a86
 Spec:
-  Study Spec:
-    Metricsnames:
-      accuracy
-    Name:                random-example
-    Objectivevaluename:  Validation-accuracy
-    Optimizationgoal:    0.98
-    Optimizationtype:    maximize
-    Owner:               crd
-    Parameterconfigs:
-      Feasible:
-        Max:          0.03
-        Min:          0.01
-      Name:           --lr
-      Parametertype:  double
-      Feasible:
-        Max:          3
-        Min:          2
-      Name:           --num-layers
-      Parametertype:  int
-      Feasible:
-        List:
-          sgd
-          adam
-          ftrl
-      Name:           --optimizer
-      Parametertype:  categorical
+  Metricsnames:
+    accuracy
+  Objectivevaluename:  Validation-accuracy
+  Optimizationgoal:    0.99
+  Optimizationtype:    maximize
+  Owner:               crd
+  Parameterconfigs:
+    Feasible:
+      Max:          0.03
+      Min:          0.01
+    Name:           --lr
+    Parametertype:  double
+    Feasible:
+      Max:          5
+      Min:          2
+    Name:           --num-layers
+    Parametertype:  int
+    Feasible:
+      List:
+        sgd
+        adam
+        ftrl
+    Name:           --optimizer
+    Parametertype:  categorical
+  Requestcount:     1
+  Study Name:       random-example
   Suggestion Spec:
-    Request Number:         3
-    Suggestion Algorithm:   random
-    Suggestion Parameters:  <nil>
+    Request Number:        3
+    Suggestion Algorithm:  random
+    Suggestion Parameters:
+      Name:   SuggestionCount
+      Value:  0
   Worker Spec:
-    Command:
-      python
-      /mxnet/example/image-classification/train_mnist.py
-      --batch-size=64
-    Image:        katib/mxnet-mnist-example
-    Worker Type:  Default
+    Go Template:
+      Raw Template:  apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{.WorkerID}}
+  namespace: kubeflow
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{.WorkerID}}
+        image: katib/mxnet-mnist-example
+        command:
+        - "python"
+        - "/mxnet/example/image-classification/train_mnist.py"
+        - "--batch-size=64"
+        {{- with .HyperParameters}}
+        {{- range .}}
+        - "{{.Name}}={{.Value}}"
+        {{- end}}
+        {{- end}}
+      restartPolicy: Never
 Status:
-  Best Objective Value:         <nil>
-  Conditon:                     Running
-  Early Stopping Parameter Id:
-  Studyid:                      qb397cc06d1f8302
-  Suggestion Parameter Id:
+  Condition:                Running
+  Last Reconcile Time:      2019-02-14T13:53:12Z
+  Start Time:               2019-02-14T13:53:11Z
+  Studyid:                  q267516663b357c2
+  Suggestion Count:         1
+  Suggestion Parameter Id:  wa4e0d9f801a5a33
   Trials:
-    Trialid:  p18ee16163b85678
+    Trialid:  y9b54306d9d9b4d5
     Workeridlist:
-      Objective Value: <nil>
-      Conditon:        Running
-      Workerid:        td08f74b9939350d
-    Trialid:           pb1be3dbe53a5cb0
+      Completion Time:  <nil>
+      Condition:        Running
+      Kind:             Job
+      Start Time:       2019-02-14T13:53:12Z
+      Workerid:         ib2201d45c3df144
+    Trialid:            dff87c7ef278a1e4
     Workeridlist:
-      Objective Value: <nil>
-      Conditon:        Running
-      Workerid:        p2b23e25cce4092c
-    Trialid:           m64209fe0867e91a
+      Completion Time:  <nil>
+      Condition:        Running
+      Kind:             Job
+      Start Time:       2019-02-14T13:53:12Z
+      Workerid:         cc0402c150661f3c
+    Trialid:            n594a099a65d3a88
     Workeridlist:
-      Objective Value: <nil>
-      Conditon:        Running
-      Workerid:        q6258c1ac98a00a5
-Events:                <none>
+      Completion Time:  <nil>
+      Condition:        Running
+      Kind:             Job
+      Start Time:       2019-02-14T13:53:12Z
+      Workerid:         e9eae6139a57892f
+Events:                 <none>
 ```
 
-When the Spec.Status.State becomes `Completed`, the study is completed.
+When the Spec.Status.Condition becomes `Completed`, the study is completed.
 You can look the result on `http://127.0.0.1:8000/katib`.
 
 ### Use ConfigMap for Worker Template
@@ -174,7 +200,6 @@ There are two templates: defaultWorkerTemplate.yaml and gpuWorkerTemplate.yaml.
 You can add your template for worker.
 Then you should specify the template in your studyjob spec.
 [This example](/examples/gpu-example.yaml) uses `gpuWorkerTemplate.yaml`.
-Set "/worker-template/gpuWorkerTemplate.yaml" at `workerTemplatePath` field and specify gpu number at `workerParameters/Gpu`.
 You can apply it same as other examples.
 ```
 $ kubectl apply -f gpu-example.yaml
@@ -185,110 +210,137 @@ gpu-example      1m
 random-example   17m
 
 $ kubectl -n kubeflow describe studyjob gpu-example
-
 Name:         gpu-example
 Namespace:    kubeflow
 Labels:       controller-tools.k8s.io=1.0
-Annotations:  kubectl.kubernetes.io/last-applied-configuration={"apiVersion":"kubeflow.org/v1alpha1","kind":"StudyJob","metadata":{"annotations":{},"labels":{"controller-tools.k8s.io":"1.0"},"name":"gpu-example","n...
+Annotations:  <none>
 API Version:  kubeflow.org/v1alpha1
 Kind:         StudyJob
 Metadata:
-  Cluster Name:
-  Creation Timestamp:  2018-08-15T01:48:12Z
-  Generation:          0
-  Resource Version:    175002
-  Self Link:           /apis/kubeflow.org/v1alpha1/namespaces/kubeflow/studyjobs/gpu-example
-  UID:                 44afac4c-a02d-11e8-b88c-42010af0008b
+  Creation Timestamp:  2019-02-14T14:00:15Z
+  Finalizers:
+    clean-studyjob-data
+  Generation:        1
+  Resource Version:  5626905
+  Self Link:         /apis/kubeflow.org/v1alpha1/namespaces/kubeflow/studyjobs/gpu-example
+  UID:               daba7165-3060-11e9-973d-0016ac101a86
 Spec:
-  Study Spec:
-    Metricsnames:
-      accuracy
-    Name:                gpu-example
-
-	...
-
+  Metricsnames:
+    accuracy
+  Objectivevaluename:  Validation-accuracy
+  Optimizationgoal:    0.99
+  Optimizationtype:    maximize
+  Owner:               crd
+  Parameterconfigs:
+    Feasible:
+      Max:          0.03
+      Min:          0.01
+    Name:           --lr
+    Parametertype:  double
+    Feasible:
+      Max:          3
+      Min:          2
+    Name:           --num-layers
+    Parametertype:  int
+    Feasible:
+      List:
+        sgd
+        adam
+        ftrl
+    Name:           --optimizer
+    Parametertype:  categorical
+  Study Name:       gpu-example
+  Suggestion Spec:
+    Request Number:        3
+    Suggestion Algorithm:  random
+    Suggestion Parameters:
+      Name:   SuggestionCount
+      Value:  0
   Worker Spec:
-    Command:
-      python
-      /mxnet/example/image-classification/train_mnist.py
-      --batch-size=64
-    Image:  katib/mxnet-mnist-example
-    Worker Parameters:
-      Gpu:                 1
-    Worker Template Path:  /worker-template/gpuWorkerTemplate.yaml
-    Worker Type:           Default
+    Go Template:
+      Template Path:        gpuWorkerTemplate.yaml
 Status:
-  Best Objective Value:         <nil>
-  Conditon:                     Running
-  Early Stopping Parameter Id:
-  Studyid:                      k549e927046f2136
-  Suggestion Parameter Id:
+  Condition:                Running
+  Last Reconcile Time:      2019-02-14T14:00:17Z
+  Start Time:               2019-02-14T14:00:15Z
+  Studyid:                  g3b79d9c0ff8881f
+  Suggestion Count:         1
+  Suggestion Parameter Id:  z313763f77337c14
   Trials:
-    Trialid:  t721857cd426b68b
+    Trialid:  xc63f4f77156df83
     Workeridlist:
-      Objective Value: <nil>
-      Conditon:        Running
-      Workerid:        g07cba174ada521e
-    Trialid:           f27c0ac1c6664533
+      Completion Time:  <nil>
+      Condition:        Running
+      Kind:             Job
+      Start Time:       2019-02-14T14:00:16Z
+      Workerid:         ue4468cbb6cb2045
+    Trialid:            ee8011ddd3937998
     Workeridlist:
-      Objective Value: <nil>
-      Conditon:        Running
-      Workerid:        h8d5062f2f1b8633
-    Trialid:           v129109d1331a98e
+      Completion Time:  <nil>
+      Condition:        Running
+      Kind:             Job
+      Start Time:       2019-02-14T14:00:16Z
+      Workerid:         mcff6fcf01c8f2d4
+    Trialid:            f54ba014544ef2ad
     Workeridlist:
-      Objective Value: <nil>
-      Conditon:        Running
-      Workerid:        x8f172a64645690e
+      Completion Time:  <nil>
+      Condition:        Running
+      Kind:             Job
+      Start Time:       2019-02-14T14:00:16Z
+      Workerid:         r5c011c5c9eca2e9
+Events:                 <none>
 ```
 
 Check if the GPU configuration works correctly.
 
 ```
-$ kubectl -n kubeflow describe pod g07cba174ada521e-88wpn
-Name:           g07cba174ada521e-88wpn
-Namespace:      kubeflow
-Node:           <none>
-Labels:         controller-uid=44bfb99f-a02d-11e8-b88c-42010af0008b
-                job-name=g07cba174ada521e
-Annotations:    <none>
-Status:         Pending
-IP:
-Controlled By:  Job/g07cba174ada521e
+$ kubectl -n kubeflow describe pod r5c011c5c9eca2e9-ftmcj
+Name:               r5c011c5c9eca2e9-ftmcj
+Namespace:          kubeflow
+Priority:           0
+PriorityClassName:  <none>
+Node:               <none>
+Labels:             controller-uid=db82ecf9-3060-11e9-973d-0016ac101a86
+                    job-name=r5c011c5c9eca2e9
+Annotations:        kubernetes.io/psp=ibm-privileged-psp
+Status:             Pending
+IP:                 
+Controlled By:      Job/r5c011c5c9eca2e9
 Containers:
-  g07cba174ada521e:
-    Image:  katib/mxnet-mnist-example
-    Port:   <none>
+  r5c011c5c9eca2e9:
+    Image:      katib/mxnet-mnist-example:gpu
+    Port:       <none>
+    Host Port:  <none>
     Command:
       python
       /mxnet/example/image-classification/train_mnist.py
       --batch-size=64
-      --lr=0.0175
+      --lr=0.0244
       --num-layers=2
-      --optimizer=adam
+      --optimizer=ftrl
     Limits:
       nvidia.com/gpu:  1
     Requests:
       nvidia.com/gpu:  1
     Environment:       <none>
     Mounts:
-      /var/run/secrets/kubernetes.io/serviceaccount from default-token-knffp (ro)
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-vh4d7 (ro)
 Conditions:
   Type           Status
-  PodScheduled   False
+  PodScheduled   False 
 Volumes:
-  default-token-knffp:
+  default-token-vh4d7:
     Type:        Secret (a volume populated by a Secret)
-    SecretName:  default-token-knffp
+    SecretName:  default-token-vh4d7
     Optional:    false
 QoS Class:       BestEffort
 Node-Selectors:  <none>
 Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
                  node.kubernetes.io/unreachable:NoExecute for 300s
-                 nvidia.com/gpu:NoSchedule
 Events:
   Type     Reason            Age               From               Message
   ----     ------            ----              ----               -------
-  Warning  FailedScheduling  6s (x21 over 4m)  default-scheduler  0/3 nodes are available: 3 Insufficient nvidia.com/gpu.
+  Warning  FailedScheduling  3m (x25 over 4m)  default-scheduler  0/3 nodes are available: 3 Insufficient nvidia.com/gpu.
 ```
 
 ## Metrics Collection

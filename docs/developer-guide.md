@@ -2,7 +2,9 @@
 
 ## Requirements
 
-- Docker (17.05 or later.)
+- [Go](https://golang.org/)
+- [Dep](https://golang.github.io/dep/)
+- [Docker](https://docs.docker.com/) (17.05 or later.)
 
 ## Build from source code
 
