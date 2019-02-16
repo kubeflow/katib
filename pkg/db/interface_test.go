@@ -12,7 +12,6 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/jsonpb"
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	api "github.com/kubeflow/katib/pkg/api"
 )
@@ -23,12 +22,12 @@ var mock sqlmock.Sqlmock
 var studyColumns = []string{
 	"id", "name", "owner", "optimization_type", "optimization_goal",
 	"parameter_configs", "tags", "objective_value_name",
-	"metrics", "job_id"}
+	"metrics", "nas_config", "job_id", "job_type"}
 var trialColumns = []string{
 	"id", "study_id", "parameters", "objective_value", "tags"}
 var workerColumns = []string{"id",
 	"study_id", "trial_id", "type",
-	"status", "template_path", "tags"}
+	"status", "template_path", "tags", "time"}
 
 func TestMain(m *testing.M) {
 	db, sm, err := sqlmock.New()
@@ -118,7 +117,7 @@ func TestGetStudyConfig(t *testing.T) {
 	id := generateRandid()
 	mock.ExpectQuery("SELECT").WillReturnRows(
 		sqlmock.NewRows(studyColumns).AddRow(
-			"abc", "test", "admin", 1, 0.99, "{}", "", "", "", "test"))
+			"abc", "test", "admin", 1, 0.99, "{}", "", "", "", "nas_config", "test", "hp"))
 	study, err := dbInterface.GetStudy(id)
 	if err != nil {
 		t.Errorf("GetStudyConfig failed: %v", err)
@@ -216,7 +215,8 @@ func TestGetTrial(t *testing.T) {
 		sqlmock.NewRows(trialColumns).AddRow(
 			id, "s1234567890abcde",
 			"{\"name\": \"1\"},\n{}", "obj_val",
-			"{\"name\": \"foo\"},\n{}"))
+			"{\"name\": \"foo\"},\n{}",
+			""))
 	trial, err := dbInterface.GetTrial(id)
 	if err != nil {
 		t.Errorf("GetTrial error %v", err)
@@ -230,7 +230,7 @@ func TestGetTrialList(t *testing.T) {
 	var ids = []string{"abcdef1234567890", "bcdef1234567890a"}
 	rows := sqlmock.NewRows(trialColumns)
 	for _, id := range ids {
-		rows.AddRow(id, studyID, "", "obj_val", "")
+		rows.AddRow(id, studyID, "", "obj_val", "", "")
 	}
 	mock.ExpectQuery(`SELECT \* FROM trials WHERE study_id = \?`).WithArgs(studyID).WillReturnRows(rows)
 	trials, err := dbInterface.GetTrialList(studyID)
@@ -364,7 +364,7 @@ func TestGetWorkerFullInfo(t *testing.T) {
 		sqlmock.NewRows(trialColumns))
 	mock.ExpectQuery(`SELECT \* FROM studies WHERE id = \?`).WithArgs(studyID).WillReturnRows(
 		sqlmock.NewRows(studyColumns).AddRow(
-			studyID, "test", "admin", 1, 0.99, "{}", "", "", "foo,\nbar", "test"))
+			studyID, "test", "admin", 1, 0.99, "{}", "", "", "foo,\nbar", "nas_config", "test", "hp"))
 	WMRows := sqlmock.NewRows([]string{"WM.worker_id", "WM.time", "WM.name", "WM.value"})
 	WMRows.AddRow("w1134567890abcde", "2012-01-01 09:54:32", "foo", "1")
 	WMRows.AddRow("w1134567890abcde", "2012-01-01 09:54:32", "bar", "1")
