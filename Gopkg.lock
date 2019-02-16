@@ -14,7 +14,8 @@
   name = "git.apache.org/thrift.git"
   packages = ["lib/go/thrift"]
   pruneopts = "T"
-  revision = "c564651dd404d7e9ff6bf7e5b343f429b9e5208"
+  revision = "384647d290e2e4a55a14b1b7ef1b7e66293a2c33"
+  version = "v0.12.0"
 
 [[projects]]
   digest = "1:352fc094dbd1438593b64251de6788bffdf30f9925cf763c7f62e1fd27142b76"
