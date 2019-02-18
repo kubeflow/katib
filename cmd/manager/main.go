@@ -29,7 +29,6 @@ type server struct {
 }
 
 func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest) (*api_pb.CreateStudyReply, error) {
-	var studyID string
 	var err error
 	if in == nil || in.StudyConfig == nil {
 		return &api_pb.CreateStudyReply{}, errors.New("StudyConfig is missing.")
