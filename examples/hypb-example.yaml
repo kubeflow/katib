@@ -37,7 +37,7 @@ spec:
         max: "20"
   workerSpec:
     goTemplate:
-        templatePath: "/worker-template/cpuWorkerTemplate.yaml"
+        templatePath: "cpuWorkerTemplate.yaml"
   suggestionSpec:
     suggestionAlgorithm: "hyperband"
     suggestionParameters:

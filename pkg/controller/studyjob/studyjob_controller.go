@@ -53,7 +53,7 @@ const (
 )
 
 var (
-	invalidCRDResources [] string
+	invalidCRDResources []string
 )
 
 /**
@@ -74,11 +74,7 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) (reconcile.Reconciler, error) {
-	pc, err := NewPodControl()
-	if err != nil {
-		return nil, err
-	}
-	return &ReconcileStudyJobController{Client: mgr.GetClient(), scheme: mgr.GetScheme(), muxMap: sync.Map{}, podControl: pc}, nil
+	return &ReconcileStudyJobController{Client: mgr.GetClient(), scheme: mgr.GetScheme(), muxMap: sync.Map{}}, nil
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -143,9 +139,8 @@ var _ reconcile.Reconciler = &ReconcileStudyJobController{}
 // ReconcileStudyJobController reconciles a StudyJob object
 type ReconcileStudyJobController struct {
 	client.Client
-	scheme     *runtime.Scheme
-	muxMap     sync.Map
-	podControl *PodControl
+	scheme *runtime.Scheme
+	muxMap sync.Map
 }
 
 type WorkerStatus struct {
@@ -312,14 +307,7 @@ func (r *ReconcileStudyJobController) deleteWorkerResources(instance *katibv1alp
 	if !wretain {
 		joberr := r.Client.Get(context.TODO(), nname, obj)
 		if joberr == nil {
-			if err := r.Delete(context.TODO(), obj); err != nil {
-				return err
-			}
-			// In order to integrate with tf-operator and pytorch-operator, we need to
-			// downgrade the k8s dependency for katib from 1.11.2 to 1.10.1, and
-			// controller-runtime from 0.1.3 to 0.1.1. This means that we cannot use
-			// DeletePropagationForeground to clean up pods, and must do this manually.
-			if err := r.podControl.DeletePodsForWorker(ns, wid); err != nil {
+			if err := r.Delete(context.TODO(), obj, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
 				return err
 			}
 		}
