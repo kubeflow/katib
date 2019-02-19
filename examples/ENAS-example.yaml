@@ -1,6 +1,8 @@
-# This example aims to show all the possible operations
-# is not very likely to get good result due to the extensive search space
+# This example reproduces the search space of Efficient Neural Architecture Search via Parameter Sharing
+# Is capable of achieving better result and lower generaliation error than the full search space
+# For more details, please visit https://arxiv.org/abs/1802.03268
 
+# In practice, setting up a limited search space like this is more likely to get better performance. 
 
 apiVersion: "kubeflow.org/v1alpha1"
 kind: StudyJob
@@ -20,7 +22,7 @@ spec:
     - accuracy
   nasConfig:
     graphConfig:
-      numLayers: 8
+      numLayers: 12
       inputSize:
         - 32
         - 32
@@ -36,22 +38,6 @@ spec:
               list:
               - "3"
               - "5"
-              - "7"
-          - name: num_filter
-            parametertype: categorical
-            feasible:
-              list:
-              - "32"
-              - "48"
-              - "64"
-              - "96"
-              - "128"
-          - name: stride
-            parametertype: categorical
-            feasible:
-              list:
-              - "1"
-              - "2"
       - operationType: separable_convolution
         parameterconfigs:
           - name: filter_size
@@ -60,49 +46,6 @@ spec:
               list:
               - "3"
               - "5"
-              - "7"
-          - name: num_filter
-            parametertype: categorical
-            feasible:
-              list:
-              - "32"
-              - "48"
-              - "64"
-              - "96"
-              - "128"
-          - name: stride
-            parametertype: categorical
-            feasible:
-              list:
-              - "1"
-              - "2"
-          - name: depth_multiplier
-            parametertype: categorical
-            feasible:
-              list:
-              - "1"
-              - "2"
-      - operationType: depthwise_convolution
-        parameterconfigs:
-          - name: filter_size
-            parametertype: categorical
-            feasible:
-              list:
-              - "3"
-              - "5"
-              - "7"
-          - name: stride
-            parametertype: categorical
-            feasible:
-              list:
-              - "1"
-              - "2"
-          - name: depth_multiplier
-            parametertype: categorical
-            feasible:
-              list:
-              - "1"
-              - "2"   
       - operationType: reduction
         parameterconfigs:
           - name: reduction_type
@@ -112,11 +55,10 @@ spec:
               - max_pooling
               - avg_pooling
           - name: pool_size
-            parametertype: int
+            parametertype: categorical
             feasible:
-              min: "2"
-              max: "3"
-              step: "1"
+              list:
+              - "3"
   workerSpec:
     goTemplate:
         rawTemplate: |-
