@@ -9,77 +9,90 @@ import logging
 from logging import getLogger, StreamHandler, INFO, DEBUG
 import json
 import os
+import time
 
 
 class NasrlService(api_pb2_grpc.SuggestionServicer):
-    def __init__(self):
+    def __init__(self, logger=None):
         self.manager_addr = "vizier-core"
         self.manager_port = 6789
-        self.current_study_id = ""
-        self.current_trial_id = ""
+        self.registered_studies = list()
+
         self.ctrl_cache_file = ""
         self.ctrl_step = 0
-        self.tf_graph = tf.get_default_graph()
         self.is_first_run = True
-        self.registered_stuies = list()
 
-    def reset_controller(self, request):
-        print("-" * 80 + "\nResetting Suggestion for StudyJob {}\n".format(request.study_id) + "-" * 80)
-        self.ctrl_step = 0
-        self.current_study_id = request.study_id
-        self.ctrl_cache_file = "ctrl_cache/{}.ckpt".format(self.current_study_id)
         if not os.path.exists("ctrl_cache/"):
             os.makedirs("ctrl_cache/")
-        self.current_trial_id = ""
-        self._get_suggestion_param(request.param_id)
+
+        if logger == None:
+            self.logger = getLogger(__name__)
+            FORMAT = '%(asctime)-15s StudyID %(studyid)s %(message)s'
+            logging.basicConfig(format=FORMAT)
+            handler = StreamHandler()
+            handler.setLevel(INFO)
+            self.logger.setLevel(INFO)
+            self.logger.addHandler(handler)
+            self.logger.propagate = False
+        else:
+            self.logger = logger
+
+    def setup_controller(self, request):
+        self.logger.info("-" * 80 + "\nSetting Up Suggestion for StudyJob {}\n".format(request.study_id) + "-" * 80)
+        self.tf_graph = tf.Graph()
+        self.ctrl_step = 0
+        self.ctrl_cache_file = "ctrl_cache/{}.ckpt".format(request.study_id)
+        self._get_suggestion_param(request.param_id, request.study_id)
         self._get_search_space(request.study_id)
 
         with self.tf_graph.as_default():
-            self.controller = Controller(
+            ctrl_param = self.suggestion_config
+            self.controllers = Controller(
                 num_layers=self.num_layers,
                 num_operations=self.num_operations,
-                lstm_size=self.suggestion_config['lstm_num_cells'],
-                lstm_num_layers=self.suggestion_config['lstm_num_layers'],
-                lstm_keep_prob=self.suggestion_config['lstm_keep_prob'],
-                lr_init=self.suggestion_config['init_learning_rate'],
-                lr_dec_start=self.suggestion_config['lr_decay_start'],
-                lr_dec_every=self.suggestion_config['lr_decay_every'],
-                lr_dec_rate=self.suggestion_config['lr_decay_rate'],
-                l2_reg=self.suggestion_config['l2_reg'],
-                entropy_weight=self.suggestion_config['entropy_weight'],
-                bl_dec=self.suggestion_config['baseline_decay'],
-                optim_algo=self.suggestion_config['optimizer'],
-                skip_target=self.suggestion_config['skip-target'],
-                skip_weight=self.suggestion_config['skip-weight'],
-                name="Ctrl_"+self.current_study_id)
+                lstm_size=ctrl_param['lstm_num_cells'],
+                lstm_num_layers=ctrl_param['lstm_num_layers'],
+                lstm_keep_prob=ctrl_param['lstm_keep_prob'],
+                lr_init=ctrl_param['init_learning_rate'],
+                lr_dec_start=ctrl_param['lr_decay_start'],
+                lr_dec_every=ctrl_param['lr_decay_every'],
+                lr_dec_rate=ctrl_param['lr_decay_rate'],
+                l2_reg=ctrl_param['l2_reg'],
+                entropy_weight=ctrl_param['entropy_weight'],
+                bl_dec=ctrl_param['baseline_decay'],
+                optim_algo=ctrl_param['optimizer'],
+                skip_target=ctrl_param['skip-target'],
+                skip_weight=ctrl_param['skip-weight'],
+                name="Ctrl_"+request.study_id)
 
-            self.controller.build_trainer()
+            self.controllers.build_trainer()
 
-        print("Suggestion for StudyJob {} has been initialized.".format(request.study_id))
+        self.logger.info("Suggestion for StudyJob {} has been initialized.".format(request.study_id))
 
     def GetSuggestions(self, request, context):
-        if request.study_id not in self.registered_stuies:
-            self.reset_controller(request)
+        if request.study_id not in self.registered_studies:
+            self.setup_controller(request)
             self.is_first_run = True
-            self.registered_stuies.append(request.study_id)
+            self.registered_studies.append(request.study_id)
 
-        print("-" * 80 + "\nSuggestion Step {}\n".format(self.ctrl_step) + "-" * 80)
+        self.logger.info("-" * 80 + "\nSuggestion Step {} for Study {}\n".format(self.ctrl_step, request.study_id) + "-" * 80)
 
         with self.tf_graph.as_default():
 
             saver = tf.train.Saver()
+            ctrl = self.controllers
 
             controller_ops = {
-                  "train_step": self.controller.train_step,
-                  "loss": self.controller.loss,
-                  "train_op": self.controller.train_op,
-                  "lr": self.controller.lr,
-                  "grad_norm": self.controller.grad_norm,
-                  "optimizer": self.controller.optimizer,
-                  "baseline": self.controller.baseline,
-                  "entropy": self.controller.sample_entropy,
-                  "sample_arc": self.controller.sample_arc,
-                  "skip_rate": self.controller.skip_rate}
+                  "train_step": ctrl.train_step,
+                  "loss": ctrl.loss,
+                  "train_op": ctrl.train_op,
+                  "lr": ctrl.lr,
+                  "grad_norm": ctrl.grad_norm,
+                  "optimizer": ctrl.optimizer,
+                  "baseline": ctrl.baseline,
+                  "entropy": ctrl.sample_entropy,
+                  "sample_arc": ctrl.sample_arc,
+                  "skip_rate": ctrl.skip_rate}
 
             run_ops = [
                 controller_ops["loss"],
@@ -91,10 +104,11 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 controller_ops["train_op"]]
 
             if self.is_first_run:
-                print("First time running suggestion. Random architecture will be given.")
+                self.logger.info("First time running suggestion for {}. Random architecture will be given.".format(request.study_id))
                 with tf.Session() as sess:
                     sess.run(tf.global_variables_initializer())
                     arc = sess.run(controller_ops["sample_arc"])
+                    # TODO: will use PVC to store the checkpoint to protect against unexpected suggestion pod restart
                     saver.save(sess, self.ctrl_cache_file)
 
                 self.is_first_run = False
@@ -103,12 +117,23 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 with tf.Session() as sess:
                     saver.restore(sess, self.ctrl_cache_file)
 
-                    valid_acc = self.controller.reward
+                    valid_acc = ctrl.reward
                     result = self.GetEvaluationResult(request.study_id)
+
+                    # handle the special case where there is no completed trials (though not very likely)
+                    while result is None:
+                        time.sleep(20)
+                        result = self.GetEvaluationResult(request.study_id)
+
+                    # This lstm cell is designed to maximize the metrics
+                    # However, if the user want to minimize the metrics, we can take the negative of the result
+                    if self.opt_direction == api_pb2.MINIMIZE:
+                        result = -result
+
                     loss, entropy, lr, gn, bl, skip, _ = sess.run(
                         fetches=run_ops,
                         feed_dict={valid_acc: result})
-                    print("Suggetion updated. LSTM Cell Loss:", loss)
+                    self.logger.info("Suggetion updated. LSTM Controller Loss: {}".format(loss))
                     arc = sess.run(controller_ops["sample_arc"])
 
                     saver.save(sess, self.ctrl_cache_file)
@@ -135,11 +160,11 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         organized_arc_str = str(organized_arc_json).replace('\"', '\'')
         nn_config_str = str(nn_config_json).replace('\"', '\'')
 
-        print("\nNew Neural Network Architecture (internal representation):")
-        print(organized_arc_json)
-        print("\nCorresponding Seach Space Description:")
-        print(nn_config_str)
-        print()
+        self.logger.info("\nNew Neural Network Architecture (internal representation):")
+        self.logger.info(organized_arc_json)
+        self.logger.info("\nCorresponding Seach Space Description:")
+        self.logger.info(nn_config_str)
+        self.logger.info("")
 
         trials = []
         trials.append(api_pb2.Trial(
@@ -162,9 +187,8 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             for i, t in enumerate(trials):
                 ctrep = client.CreateTrial(api_pb2.CreateTrialRequest(trial=t), 10)
                 trials[i].trial_id = ctrep.trial_id
-                self.current_trial_id = ctrep.trial_id
-            print("Trial {} Created\n".format(ctrep.trial_id))
-            self.current_trial_id = ctrep.trial_id
+            self.logger.info("Trial {} Created\n".format(ctrep.trial_id))
+            self.prev_trial_id = ctrep.trial_id
         
         self.ctrl_step += 1
         return api_pb2.GetSuggestionsReply(trials=trials)
@@ -173,26 +197,37 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         worker_list = []
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
-            gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=studyID, trial_id=self.current_trial_id, only_latest_log=True), 10)
+            gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=studyID, trial_id=self.prev_trial_id, only_latest_log=True), 10)
             worker_list = gwfrep.worker_full_infos
 
+        completed_count = 0
         for w in worker_list:
             if w.Worker.status == api_pb2.COMPLETED:
+                completed_count += 1
                 for ml in w.metrics_logs:
-                    print("Evaluation result of previous candidate:", ml.values[-1].value)
+                    self.logger.info("Evaluation result of previous candidate: {}".format(ml.values[-1].value))
 
-        return float(ml.values[-1].value)
+        # TODO: add support for multiple trials
+        if completed_count >= 1:
+            return float(ml.values[-1].value)
+        else:
+            self.logger.warning("Error. No trials have been completed.")
+            return None
+
 
     def _get_search_space(self, studyID):
 
         # this function need to
         # 1) get the number of layers
         # 2) get the I/O size
-        # 2) get the available operations
-
+        # 3) get the available operations
+        # 4) get the optimization direction (i.e. minimize or maximize)
+        
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             gsrep = client.GetStudy(api_pb2.GetStudyRequest(study_id=studyID), 10)
+        
+        self.opt_direction = gsrep.study_config.optimization_type
 
         all_params = gsrep.study_config.nas_config
         graph_config = all_params.graph_config
@@ -203,17 +238,17 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         self.output_size = list(map(int, graph_config.output_size))
         search_space_object = SearchSpace(search_space_raw)
 
+        self.logger.info("Search Space for Study {}:".format(studyID))
 
-        print("=" * 24, "Search Space", "=" * 24)
-        self.num_operations = search_space_object.num_operations
-        print("There are", self.num_operations, "operations in total")
         self.search_space = search_space_object.search_space
         for opt in self.search_space:
-            opt.print_op()    
-            print()
+            opt.print_op(self.logger)
+        
+        self.num_operations = search_space_object.num_operations
+        self.logger.info("There are {} operations in total.\n".format(self.num_operations))
             
 
-    def _get_suggestion_param(self, paramID):
+    def _get_suggestion_param(self, paramID, studyID):
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             gsprep = client.GetSuggestionParameters(api_pb2.GetSuggestionParametersRequest(param_id=paramID), 10)
@@ -222,8 +257,11 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
         suggestion_params = parseSuggestionParam(params_raw)
 
-        print("\n" + "=" * 15, "Parameters for LSTM Controller", "=" * 15)
+        self.logger.info("Parameters of LSTM Controller for Study {}:".format(studyID))
         for spec in suggestion_params:
-            print(spec, suggestion_params[spec])
+            if len(spec) > 13:
+                self.logger.info("{}: \t{}".format(spec, suggestion_params[spec]))
+            else:
+                self.logger.info("{}: \t\t{}".format(spec, suggestion_params[spec]))
 
         self.suggestion_config = suggestion_params

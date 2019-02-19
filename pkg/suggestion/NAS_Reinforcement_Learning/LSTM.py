@@ -4,6 +4,8 @@ from __future__ import print_function
 import tensorflow as tf
 
 
+# TODO: will remove this function and use tf.nn.LSTMCell instead
+
 def lstm(x, prev_c, prev_h, w):
     ifog = tf.matmul(tf.concat([x, prev_h], axis=1), w)
     i, f, o, g = tf.split(ifog, 4, axis=1)

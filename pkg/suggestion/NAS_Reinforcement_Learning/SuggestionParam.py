@@ -3,7 +3,7 @@ def parseSuggestionParam(params_raw):
         "lstm_num_cells": ['value', int, [1, 'inf']],
         "lstm_num_layers": ['value', int, [1, 'inf']],
         "lstm_keep_prob": ['value', float, [0.0, 1.0]],
-        "optimizer": ['categorical', str, ["adam", "momentum", "momentum"]],
+        "optimizer": ['categorical', str, ["adam", "momentum", "sgd"]],
         "init_learning_rate": ['value', float, [1e-6, 1.0]],
         "lr_decay_start": ['value', int, [0, 'inf']],
         "lr_decay_every": ['value', int, [1, 'inf']],

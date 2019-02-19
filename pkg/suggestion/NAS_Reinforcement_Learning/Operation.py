@@ -16,12 +16,13 @@ class Operation(object):
         opt_dict['opt_params'] = self.opt_params
         return opt_dict
 
-    def print_op(self):
-        print("Operation ID: \n\t", self.opt_id)
-        print("Operation Type: \n\t", self.opt_type)
-        print("Operations Parameters:")
+    def print_op(self, logger):
+        logger.info("Operation ID: \n\t{}".format(self.opt_id))
+        logger.info("Operation Type: \n\t{}".format(self.opt_type))
+        logger.info("Operations Parameters:")
         for ikey in self.opt_params:
-            print("\t {}: {}".format(ikey, self.opt_params[ikey]))
+            logger.info("\t{}: {}".format(ikey, self.opt_params[ikey]))
+        logger.info("")
 
 
 class SearchSpace(object):
@@ -42,7 +43,6 @@ class SearchSpace(object):
             opt_spec = list(operation_dict.parameter_configs.configs)
             # avail_space is dict with the format {"spec_nam": [spec feasible values]}
             avail_space = dict()
-            avail_space_len = list()
             num_spec = len(opt_spec)
 
             for ispec in opt_spec:
@@ -65,8 +65,6 @@ class SearchSpace(object):
                     if double_list[-1] > spec_max:
                         del double_list[-1]
                     avail_space[spec_name] = double_list
-
-                avail_space_len.append(len(avail_space[spec_name]))
 
             # generate all the combinations of possible operations
             key_avail_space = list(avail_space.keys())
