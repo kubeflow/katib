@@ -12,7 +12,6 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/jsonpb"
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	api "github.com/kubeflow/katib/pkg/api"
 )
