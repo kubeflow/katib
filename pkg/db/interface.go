@@ -294,6 +294,7 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 	}
 
 	var studyID string
+
 	i := 3
 	for true {
 		studyID = generateRandid()

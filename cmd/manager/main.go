@@ -29,7 +29,6 @@ type server struct {
 }
 
 func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest) (*api_pb.CreateStudyReply, error) {
-	var err error
 	if in == nil || in.StudyConfig == nil {
 		return &api_pb.CreateStudyReply{}, errors.New("StudyConfig is missing.")
 	}
@@ -48,7 +47,6 @@ func (s *server) DeleteStudy(ctx context.Context, in *api_pb.DeleteStudyRequest)
 	}
 	err := dbIf.DeleteStudy(in.StudyId)
 	if err != nil {
-		log.Printf("Error is %v", err)
 		return &api_pb.DeleteStudyReply{}, err
 	}
 	return &api_pb.DeleteStudyReply{StudyId: in.StudyId}, nil
@@ -103,18 +101,14 @@ func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRe
 	if in.SuggestionAlgorithm == "" {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, errors.New("No suggest algorithm specified")
 	}
-	log.Printf("BEFORE DYING MY ALGORITHM WAS: %v", in.SuggestionAlgorithm)
 	conn, err := grpc.Dial("vizier-suggestion-"+in.SuggestionAlgorithm+":6789", grpc.WithInsecure())
-	log.Printf("ILI YA UMER TYT? %v", err)
 	if err != nil {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
 	}
 
 	defer conn.Close()
 	c := api_pb.NewSuggestionClient(conn)
-	log.Printf("CONNECTION: %v", c)
 	r, err := c.GetSuggestions(ctx, in)
-	log.Printf("YA UMER TYT: %v", err)
 	if err != nil {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
 	}
