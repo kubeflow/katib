@@ -12,8 +12,8 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/jsonpb"
-
 	api "github.com/kubeflow/katib/pkg/api"
+	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
 var dbInterface, mysqlInterface VizierDBInterface
