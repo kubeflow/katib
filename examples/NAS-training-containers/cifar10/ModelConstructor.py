@@ -4,7 +4,7 @@ from keras import backend as K
 import json
 from keras.layers import Input, Conv2D, ZeroPadding2D, concatenate, MaxPooling2D, \
     AveragePooling2D, Dense, Activation, BatchNormalization, GlobalAveragePooling2D, Dropout
-from op_library import concat, conv, reduction
+from op_library import concat, conv, sp_conv, dw_conv, reduction
 
 
 class ModelConstructor(object):
@@ -45,6 +45,10 @@ class ModelConstructor(object):
             layer_input = concat(input_layers)
             if opt_config['opt_type'] == 'convolution':
                 layer_output = conv(layer_input, opt_config)
+            if opt_config['opt_type'] == 'separable_convolution':
+                layer_output = sp_conv(layer_input, opt_config)
+            if opt_config['opt_type'] == 'depthwise_convolution':
+                layer_output = dw_conv(layer_input, opt_config)
             elif opt_config['opt_type'] == 'reduction':
                 layer_output = reduction(layer_input, opt_config)
 
