@@ -125,4 +125,4 @@ This neural architecture can be visualized as
 1. Add support fot multiple studyjobs
 2. Add support for multiple trials
 3. Change LSTM cell from self defined functions in LSTM.py to `tf.nn.rnn_cell.LSTMCell`
-4. Store the suggestion checkpoint to PVC in case of nastl service pod restarts
+4. Store the suggestion checkpoint to PVC in case of nasrl service pod restarts
