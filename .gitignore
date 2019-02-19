@@ -1,6 +1,8 @@
 # python ignore files
 __pycache__/
 .idea/
+.coverage
+.pytest_cache
 
 # Project specific ignore files
 *.swp

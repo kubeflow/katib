@@ -1,10 +1,9 @@
 """ module for acquisition function"""
 import numpy as np
 from scipy.stats import norm
-import forestci as fci
 
-from pkg.suggestion.bayesianoptimization.src.model.gp import GaussianProcessModel
-from pkg.suggestion.bayesianoptimization.src.model.rf import RandomForestModel
+from .model.gp import GaussianProcessModel
+from .model.rf import RandomForestModel
 
 
 class AcquisitionFunc:
@@ -38,20 +37,13 @@ class AcquisitionFunc:
             )
 
     def compute(self, X_test):
-        if self.model_type == "gp":
-            self.model.gp.fit(self.X_train, self.y_train)
-            y_mean, y_std = self.model.gp.predict(X_test, return_std=True)
-            y_variance = y_std ** 2
-        else:
-            self.model.rf.fit(self.y_train, self.y_train)
-            y_mean = self.model.rf.predict(X_test)
-            y_variance = fci.random_forest_error(self.model.rf, self.X_train, X_test)
-            y_std = np.sqrt(y_variance)
+        self.model.fit(self.X_train, self.y_train)
+        y_mean, y_std, y_variance = self.model.predict(X_test)
 
         z = (y_mean - self.current_optimal - self.trade_off) / y_std
 
         if self.mode == "ei":
-            if y_std < 0.000001:
+            if y_std.any() < 0.000001:
                 return 0, y_mean, y_variance
             result = y_std * (z * norm.cdf(z) + norm.pdf(z))
         elif self.mode == "pi":
