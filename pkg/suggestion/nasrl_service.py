@@ -203,8 +203,10 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         completed_count = 0
         for w in worker_list:
             if w.Worker.status == api_pb2.COMPLETED:
-                completed_count += 1
                 for ml in w.metrics_logs:
+                    if ml.name != self.objective_name:
+                        continue
+                    completed_count += 1
                     self.logger.info("Evaluation result of previous candidate: {}".format(ml.values[-1].value))
 
         # TODO: add support for multiple trials
@@ -222,12 +224,14 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         # 2) get the I/O size
         # 3) get the available operations
         # 4) get the optimization direction (i.e. minimize or maximize)
+        # 5) get the objective name
         
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             gsrep = client.GetStudy(api_pb2.GetStudyRequest(study_id=studyID), 10)
         
         self.opt_direction = gsrep.study_config.optimization_type
+        self.objective_name = gsrep.study_config.objective_value_name
 
         all_params = gsrep.study_config.nas_config
         graph_config = all_params.graph_config
