@@ -14,6 +14,7 @@ package studyjob
 import (
 	"fmt"
 	"log"
+	"reflect"
 
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
@@ -208,4 +209,38 @@ func contains(l []string, s string) bool {
 		}
 	}
 	return false
+}
+
+func validateHPJob(instance *katibv1alpha1.StudyJob) error {
+	log.Printf("Validation for the HP job")
+	if instance.Spec.ParameterConfigs == nil {
+		return fmt.Errorf("No Spec.ParameterConfigs specified")
+	}
+	err := validateParameterConfigs(instance.Spec.ParameterConfigs, jobTypeHP)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateNASJob(instance *katibv1alpha1.StudyJob) error {
+	log.Printf("Validation for the NAS job")
+	return nil
+}
+
+func validateParameterConfigs(parameterConfigs []katibv1alpha1.ParameterConfig, jobType string) error {
+	for _, pc := range parameterConfigs {
+		if pc.Name == "" {
+			return fmt.Errorf("Missed Name in ParameterConfig: %v", pc)
+		}
+		if pc.ParameterType == "" {
+			return fmt.Errorf("Missed ParameterType in ParameterConfig: %v", pc)
+		}
+		if pc.ParameterType == katibv1alpha1.ParameterTypeCategorical {
+			if reflect.DeepEqual(pc.Feasible, katibv1alpha1.FeasibleSpace{}) {
+				return fmt.Errorf("Missed Feasible in ParameterConfig: %v", pc)
+			}
+		}
+	}
+	return nil
 }
