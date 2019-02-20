@@ -200,21 +200,16 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=studyID, trial_id=self.prev_trial_id, only_latest_log=True), 10)
             worker_list = gwfrep.worker_full_infos
 
-        completed_count = 0
         for w in worker_list:
             if w.Worker.status == api_pb2.COMPLETED:
                 for ml in w.metrics_logs:
-                    if ml.name != self.objective_name:
-                        continue
-                    completed_count += 1
-                    self.logger.info("Evaluation result of previous candidate: {}".format(ml.values[-1].value))
+                    if ml.name == self.objective_name:
+                        self.logger.info("Evaluation result of previous candidate: {}".format(ml.values[-1].value))
+                        return float(ml.values[-1].value)
 
         # TODO: add support for multiple trials
-        if completed_count >= 1:
-            return float(ml.values[-1].value)
-        else:
-            self.logger.warning("Error. No trials have been completed.")
-            return None
+        self.logger.warning("Error. No trial has completed.")
+        return None
 
 
     def _get_search_space(self, studyID):
