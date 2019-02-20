@@ -15,8 +15,6 @@ const (
 	DefaultJobWorker = "Job"
 	TFJobWorker      = "TFJob"
 	PyTorchJobWorker = "PyTorchJob"
-	jobTypeNAS       = "NAS"
-	jobTypeHP        = "HP"
 )
 
 var ValidWorkerKindList = [...]string{DefaultJobWorker, TFJobWorker, PyTorchJobWorker}

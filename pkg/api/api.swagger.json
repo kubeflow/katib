@@ -673,16 +673,17 @@
     }
   },
   "definitions": {
-    "NasConfigOperations": {
+    "StudyConfigParameterConfigs": {
       "type": "object",
       "properties": {
-        "operation": {
+        "configs": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/apiOperation"
+            "$ref": "#/definitions/apiParameterConfig"
           }
         }
-      }
+      },
+      "title": "* \nList of ParameterConfig"
     },
     "apiCreateStudyReply": {
       "type": "object",
@@ -765,9 +766,6 @@
           "items": {
             "type": "string"
           }
-        },
-        "step": {
-          "type": "string"
         }
       },
       "description": "*\nFeasible space for optimization.\nInt and Double type use Max/Min.\nDiscrete and Categorical type use List."
@@ -994,30 +992,6 @@
       },
       "description": "*\nReturn a Worker list by specified condition."
     },
-    "apiGraphConfig": {
-      "type": "object",
-      "properties": {
-        "num_layers": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "input_size": {
-          "type": "array",
-          "items": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "output_size": {
-          "type": "array",
-          "items": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "title": "*\nGraphConfig contains a config of DAG"
-    },
     "apiMetrics": {
       "type": "object",
       "properties": {
@@ -1100,42 +1074,6 @@
           "type": "string"
         }
       }
-    },
-    "apiNasConfig": {
-      "type": "object",
-      "properties": {
-        "graph_config": {
-          "$ref": "#/definitions/apiGraphConfig"
-        },
-        "operations": {
-          "$ref": "#/definitions/NasConfigOperations"
-        }
-      },
-      "title": "*\nNasConfig contains a config of NAS job"
-    },
-    "apiOperation": {
-      "type": "object",
-      "properties": {
-        "operationType": {
-          "type": "string"
-        },
-        "parameter_configs": {
-          "$ref": "#/definitions/apiOperationParameterConfigs"
-        }
-      },
-      "title": "*\nConfig for operations in DAG"
-    },
-    "apiOperationParameterConfigs": {
-      "type": "object",
-      "properties": {
-        "configs": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiParameterConfig"
-          }
-        }
-      },
-      "title": "* \nList of ParameterConfig"
     },
     "apiOptimizationType": {
       "type": "string",
@@ -1335,7 +1273,7 @@
           "format": "double"
         },
         "parameter_configs": {
-          "$ref": "#/definitions/apiStudyConfigParameterConfigs"
+          "$ref": "#/definitions/StudyConfigParameterConfigs"
         },
         "access_permissions": {
           "type": "array",
@@ -1360,27 +1298,9 @@
         },
         "jobId": {
           "type": "string"
-        },
-        "nas_config": {
-          "$ref": "#/definitions/apiNasConfig"
-        },
-        "job_type": {
-          "type": "string"
         }
       },
       "description": "*\nConfig of a Study. Study represents a single optimization run over a feasible space. \nEach Study contains a configuration describing the feasible space, as well as a set of Trials.\nIt is assumed that objective function f(x) does not change in the course of a Study."
-    },
-    "apiStudyConfigParameterConfigs": {
-      "type": "object",
-      "properties": {
-        "configs": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiParameterConfig"
-          }
-        }
-      },
-      "title": "* \nList of ParameterConfig"
     },
     "apiStudyOverview": {
       "type": "object",

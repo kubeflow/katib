@@ -46,16 +46,11 @@
     - [GetWorkerFullInfoRequest](#api.GetWorkerFullInfoRequest)
     - [GetWorkersReply](#api.GetWorkersReply)
     - [GetWorkersRequest](#api.GetWorkersRequest)
-    - [GraphConfig](#api.GraphConfig)
     - [Metrics](#api.Metrics)
     - [MetricsLog](#api.MetricsLog)
     - [MetricsLogSet](#api.MetricsLogSet)
     - [MetricsValueTime](#api.MetricsValueTime)
     - [ModelInfo](#api.ModelInfo)
-    - [NasConfig](#api.NasConfig)
-    - [NasConfig.Operations](#api.NasConfig.Operations)
-    - [Operation](#api.Operation)
-    - [Operation.ParameterConfigs](#api.Operation.ParameterConfigs)
     - [Parameter](#api.Parameter)
     - [ParameterConfig](#api.ParameterConfig)
     - [RegisterWorkerReply](#api.RegisterWorkerReply)
@@ -261,7 +256,6 @@ Discrete and Categorical type use List.
 | max | [string](#string) |  | Max Value |
 | min | [string](#string) |  | Minimum Value |
 | list | [string](#string) | repeated | List of Values. |
-| step | [string](#string) |  | Step for double or int parameter |
 
 
 
@@ -753,23 +747,6 @@ Get a configs and status of a Worker from DB by ID of Study, Trial or Worker.
 
 
 
-<a name="api.GraphConfig"/>
-
-### GraphConfig
-GraphConfig contains a config of DAG
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| num_layers | [int32](#int32) |  | Number of layers |
-| input_size | [int32](#int32) | repeated | Dimenstions of input size |
-| output_size | [int32](#int32) | repeated | Dimensions of output size |
-
-
-
-
-
-
 <a name="api.Metrics"/>
 
 ### Metrics
@@ -848,68 +825,6 @@ Metrics of a worker with timestamp
 | parameters | [Parameter](#api.Parameter) | repeated |  |
 | metrics | [Metrics](#api.Metrics) | repeated |  |
 | model_path | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="api.NasConfig"/>
-
-### NasConfig
-NasConfig contains a config of NAS job
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| graph_config | [GraphConfig](#api.GraphConfig) |  | Config of DAG |
-| operations | [NasConfig.Operations](#api.NasConfig.Operations) |  | List of Operation |
-
-
-
-
-
-
-<a name="api.NasConfig.Operations"/>
-
-### NasConfig.Operations
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| operation | [Operation](#api.Operation) | repeated |  |
-
-
-
-
-
-
-<a name="api.Operation"/>
-
-### Operation
-Config for operations in DAG
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| operationType | [string](#string) |  | Type of operation in DAG |
-| parameter_configs | [Operation.ParameterConfigs](#api.Operation.ParameterConfigs) |  | List of ParameterConfig |
-
-
-
-
-
-
-<a name="api.Operation.ParameterConfigs"/>
-
-### Operation.ParameterConfigs
-List of ParameterConfig
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| configs | [ParameterConfig](#api.ParameterConfig) | repeated |  |
 
 
 
@@ -1201,8 +1116,6 @@ It is assumed that objective function f(x) does not change in the course of a St
 | objective_value_name | [string](#string) |  | Name of objective value. |
 | metrics | [string](#string) | repeated | List of metrics name. |
 | jobId | [string](#string) |  | ID of studyjob that is created from this config. |
-| nas_config | [NasConfig](#api.NasConfig) |  | Config for NAS job |
-| job_type | [string](#string) |  | Type of the job, NAS or HP |
 
 
 

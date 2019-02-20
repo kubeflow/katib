@@ -347,10 +347,6 @@
                 </li>
               
                 <li>
-                  <a href="#api.GraphConfig"><span class="badge">M</span>GraphConfig</a>
-                </li>
-              
-                <li>
                   <a href="#api.Metrics"><span class="badge">M</span>Metrics</a>
                 </li>
               
@@ -368,22 +364,6 @@
               
                 <li>
                   <a href="#api.ModelInfo"><span class="badge">M</span>ModelInfo</a>
-                </li>
-              
-                <li>
-                  <a href="#api.NasConfig"><span class="badge">M</span>NasConfig</a>
-                </li>
-              
-                <li>
-                  <a href="#api.NasConfig.Operations"><span class="badge">M</span>NasConfig.Operations</a>
-                </li>
-              
-                <li>
-                  <a href="#api.Operation"><span class="badge">M</span>Operation</a>
-                </li>
-              
-                <li>
-                  <a href="#api.Operation.ParameterConfigs"><span class="badge">M</span>Operation.ParameterConfigs</a>
                 </li>
               
                 <li>
@@ -808,13 +788,6 @@
                   <td><a href="#string">string</a></td>
                   <td>repeated</td>
                   <td><p>List of Values. </p></td>
-                </tr>
-              
-                <tr>
-                  <td>step</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>Step for double or int parameter </p></td>
                 </tr>
               
             </tbody>
@@ -1625,43 +1598,6 @@
 
         
       
-        <h3 id="api.GraphConfig">GraphConfig</h3>
-        <p>GraphConfig contains a config of DAG</p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>num_layers</td>
-                  <td><a href="#int32">int32</a></td>
-                  <td></td>
-                  <td><p>Number of layers </p></td>
-                </tr>
-              
-                <tr>
-                  <td>input_size</td>
-                  <td><a href="#int32">int32</a></td>
-                  <td>repeated</td>
-                  <td><p>Dimenstions of input size </p></td>
-                </tr>
-              
-                <tr>
-                  <td>output_size</td>
-                  <td><a href="#int32">int32</a></td>
-                  <td>repeated</td>
-                  <td><p>Dimensions of output size </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-        
-
-        
-      
         <h3 id="api.Metrics">Metrics</h3>
         <p>Metrics of a worker</p>
 
@@ -1831,112 +1767,6 @@
                   <td>model_path</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-        
-
-        
-      
-        <h3 id="api.NasConfig">NasConfig</h3>
-        <p>NasConfig contains a config of NAS job</p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>graph_config</td>
-                  <td><a href="#api.GraphConfig">GraphConfig</a></td>
-                  <td></td>
-                  <td><p>Config of DAG </p></td>
-                </tr>
-              
-                <tr>
-                  <td>operations</td>
-                  <td><a href="#api.NasConfig.Operations">NasConfig.Operations</a></td>
-                  <td></td>
-                  <td><p>List of Operation </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-        
-
-        
-      
-        <h3 id="api.NasConfig.Operations">NasConfig.Operations</h3>
-        <p></p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>operation</td>
-                  <td><a href="#api.Operation">Operation</a></td>
-                  <td>repeated</td>
-                  <td><p> </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-        
-
-        
-      
-        <h3 id="api.Operation">Operation</h3>
-        <p>Config for operations in DAG</p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>operationType</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>Type of operation in DAG </p></td>
-                </tr>
-              
-                <tr>
-                  <td>parameter_configs</td>
-                  <td><a href="#api.Operation.ParameterConfigs">Operation.ParameterConfigs</a></td>
-                  <td></td>
-                  <td><p>List of ParameterConfig </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-        
-
-        
-      
-        <h3 id="api.Operation.ParameterConfigs">Operation.ParameterConfigs</h3>
-        <p>List of ParameterConfig</p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>configs</td>
-                  <td><a href="#api.ParameterConfig">ParameterConfig</a></td>
-                  <td>repeated</td>
                   <td><p> </p></td>
                 </tr>
               
@@ -2477,20 +2307,6 @@
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>ID of studyjob that is created from this config. </p></td>
-                </tr>
-              
-                <tr>
-                  <td>nas_config</td>
-                  <td><a href="#api.NasConfig">NasConfig</a></td>
-                  <td></td>
-                  <td><p>Config for NAS job </p></td>
-                </tr>
-              
-                <tr>
-                  <td>job_type</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>Type of the job, NAS or HP </p></td>
                 </tr>
               
             </tbody>
