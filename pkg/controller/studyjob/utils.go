@@ -225,20 +225,68 @@ func validateHPJob(instance *katibv1alpha1.StudyJob) error {
 
 func validateNASJob(instance *katibv1alpha1.StudyJob) error {
 	log.Printf("Validation for the NAS job")
+	if instance.Spec.NasConfig == nil {
+		return fmt.Errorf("No Spec.NasConfig specified")
+	}
+
+	if reflect.DeepEqual(instance.Spec.NasConfig.GraphConfig, katibv1alpha1.GraphConfig{}) {
+		return fmt.Errorf("Missing GraphConfig in NasConfig: %v", instance.Spec.NasConfig)
+	}
+
+	if instance.Spec.NasConfig.GraphConfig.InputSize == nil {
+		return fmt.Errorf("Missing InputSize in NasConfig.GraphConfig: %v", instance.Spec.NasConfig.GraphConfig)
+	}
+
+	if instance.Spec.NasConfig.GraphConfig.OutputSize == nil {
+		return fmt.Errorf("Missing OutputSize in NasConfig.GraphConfig: %v", instance.Spec.NasConfig.GraphConfig)
+	}
+
+	if instance.Spec.NasConfig.GraphConfig.NumLayers == 0 {
+		return fmt.Errorf("Missing NumLayers in NasConfig.GraphConfig: %v", instance.Spec.NasConfig.GraphConfig)
+	}
+
+	if instance.Spec.NasConfig.Operations == nil {
+		return fmt.Errorf("Missing Operations in NasConfig: %v", instance.Spec.NasConfig)
+	}
+
+	for _, op := range instance.Spec.NasConfig.Operations {
+		if op.OperationType == "" {
+			return fmt.Errorf("Missing OperationType in Operation: %v", op)
+		}
+		err := validateParameterConfigs(op.ParameterConfigs, jobTypeNAS)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
 func validateParameterConfigs(parameterConfigs []katibv1alpha1.ParameterConfig, jobType string) error {
 	for _, pc := range parameterConfigs {
 		if pc.Name == "" {
-			return fmt.Errorf("Missed Name in ParameterConfig: %v", pc)
+			return fmt.Errorf("Missing Name in ParameterConfig: %v", pc)
 		}
 		if pc.ParameterType == "" {
-			return fmt.Errorf("Missed ParameterType in ParameterConfig: %v", pc)
+			return fmt.Errorf("Missing ParameterType in ParameterConfig: %v", pc)
+		}
+		if reflect.DeepEqual(pc.Feasible, katibv1alpha1.FeasibleSpace{}) {
+			return fmt.Errorf("Missing Feasible in ParameterConfig: %v", pc)
 		}
 		if pc.ParameterType == katibv1alpha1.ParameterTypeCategorical {
-			if reflect.DeepEqual(pc.Feasible, katibv1alpha1.FeasibleSpace{}) {
-				return fmt.Errorf("Missed Feasible in ParameterConfig: %v", pc)
+			if pc.Feasible.List == nil {
+				return fmt.Errorf("Missing List in ParameterConfig.Feasible: %v", pc.Feasible)
+			}
+		}
+		if pc.ParameterType == katibv1alpha1.ParameterTypeDouble || pc.ParameterType == katibv1alpha1.ParameterTypeInt {
+			if pc.Feasible.Min == "" {
+				return fmt.Errorf("Missing Min in ParameterConfig.Feasible: %v", pc.Feasible)
+			}
+			if pc.Feasible.Max == "" {
+				return fmt.Errorf("Missing Max in ParameterConfig.Feasible: %v", pc.Feasible)
+			}
+			if jobType == jobTypeNAS && pc.Feasible.Step == "" && pc.ParameterType == katibv1alpha1.ParameterTypeDouble {
+				return fmt.Errorf("Missing Step in ParameterConfig.Feasible for NAS job: %v", pc.Feasible)
 			}
 		}
 	}
