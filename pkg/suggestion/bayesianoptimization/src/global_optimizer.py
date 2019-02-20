@@ -181,7 +181,7 @@ class GlobalOptimizer:
         x_next = first_rect.center
         ei_min.append(f_min)
 
-        for t in range(self.N):
+        for _ in range(self.N):
             opt_set = self.potential_opt(f_min)
 
             # for bucket in self.buckets:
@@ -222,7 +222,7 @@ class GlobalOptimizer:
                 fc_sum -= a.fc
                 bucket_index.append([-a.fc, a.center])
         bucket_index = sorted(bucket_index, key=lambda x: x[0])
-        for i in range(request_num):
+        for _ in range(request_num):
             sample = np.random.rand()
             stick = 0.0
             for b in bucket_index:

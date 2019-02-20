@@ -1,10 +1,11 @@
 """ module for algorithm manager """
+import logging
+from logging import getLogger, StreamHandler, DEBUG
 
 import numpy as np
 
 from pkg.api.python import api_pb2
-import logging
-from logging import getLogger, StreamHandler, INFO, DEBUG
+
 
 def deal_with_discrete(feasible_values, current_value):
     """ function to embed the current values to the feasible discrete space"""
@@ -12,11 +13,13 @@ def deal_with_discrete(feasible_values, current_value):
     diff = np.absolute(diff)
     return feasible_values[np.argmin(diff)]
 
+
 def deal_with_categorical(feasible_values, one_hot_values):
     """ function to do the one hot encoding of the categorical values """
     #index = np.argmax(one_hot_values)
     index = one_hot_values.argmax()
     return feasible_values[int(index)]
+
 
 class AlgorithmManager:
     """ class for the algorithm manager
@@ -118,10 +121,10 @@ class AlgorithmManager:
     def _parse_config(self):
         """ extract info from the study configuration """
         for i, param in enumerate(self._study_config.parameter_configs.configs):
-            self._name_id[param.name]=i
+            self._name_id[param.name] = i
             self._types.append(param.parameter_type)
             self._names.append(param.name)
-            if param.parameter_type == api_pb2.DOUBLE or param.parameter_type == api_pb2.INT:
+            if param.parameter_type in [api_pb2.DOUBLE, api_pb2.INT]:
                 self._dim = self._dim + 1
                 self._lowerbound.append(float(param.feasible.min))
                 self._upperbound.append(float(param.feasible.max))
@@ -166,7 +169,7 @@ class AlgorithmManager:
                             maplist[map_id] = np.zeros(ci["number"])
                             for i, v in enumerate(ci["values"]):
                                 if v == p.value:
-                                    maplist[map_id][i]=1
+                                    maplist[map_id][i] = 1
                                     break
             self.logger.debug("mapped: %r", maplist, extra={"StudyID": self._study_id})
             ret.append(np.hstack(maplist))
@@ -234,4 +237,3 @@ class AlgorithmManager:
             })
             result.append(tmp)
         return result
-

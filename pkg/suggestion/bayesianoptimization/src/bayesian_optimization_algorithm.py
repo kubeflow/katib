@@ -54,7 +54,7 @@ class BOAlgorithm:
         x_next_list = []
         if self.X_train is None and self.y_train is None and self.current_optimal is None:
             # randomly pick a point as the first trial
-            for i in range(request_num):
+            for _ in range(request_num):
                 x_next_list.append(np.random.uniform(self.lowerbound, self.upperbound, size=(1, self.dim)))
         else:
             _, x_next_list_que = self.optimizer.direct(request_num)
