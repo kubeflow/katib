@@ -253,6 +253,9 @@ func validateNASJob(instance *katibv1alpha1.StudyJob) error {
 		if op.OperationType == "" {
 			return fmt.Errorf("Missing OperationType in Operation: %v", op)
 		}
+		if op.ParameterConfigs == nil {
+			return fmt.Errorf("Missing ParameterConfig in Operation: %v", op)
+		}
 		err := validateParameterConfigs(op.ParameterConfigs, jobTypeNAS)
 		if err != nil {
 			return err

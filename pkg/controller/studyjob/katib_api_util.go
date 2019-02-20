@@ -30,13 +30,14 @@ func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) error {
 		return validErr
 	}
 
-	//Validate HP job
-	if getJobType(instance) == jobTypeNAS {
+	if getJobType(instance) != jobTypeNAS {
+		//Validate HP job
 		if validJobErr := validateHPJob(instance); validJobErr != nil {
 			instance.Status.Condition = katibv1alpha1.ConditionFailed
 			return validJobErr
 		}
 	} else {
+		//Validate NAS job
 		if validJobErr := validateNASJob(instance); validJobErr != nil {
 			instance.Status.Condition = katibv1alpha1.ConditionFailed
 			return validJobErr
