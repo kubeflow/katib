@@ -125,11 +125,6 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                         time.sleep(20)
                         result = self.GetEvaluationResult(request.study_id)
 
-                    # This lstm cell is designed to maximize the metrics
-                    # However, if the user want to minimize the metrics, we can take the negative of the result
-                    if self.opt_direction == api_pb2.MINIMIZE:
-                        result = -result
-
                     loss, entropy, lr, gn, bl, skip, _ = sess.run(
                         fetches=run_ops,
                         feed_dict={valid_acc: result})
@@ -208,8 +203,6 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                         return float(ml.values[-1].value)
 
         # TODO: add support for multiple trials
-        self.logger.warning("Error. No trial has completed.")
-        return None
 
 
     def _get_search_space(self, studyID):
