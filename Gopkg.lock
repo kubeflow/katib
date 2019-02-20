@@ -815,14 +815,6 @@
   version = "v1.18.0"
 
 [[projects]]
-  digest = "1:ac39152382a4c8cac6bd3962f0481750a64c1b54689c56a1e8d67834f3330bb7"
-  name = "gopkg.in/DATA-DOG/go-sqlmock.v1"
-  packages = ["."]
-  pruneopts = "T"
-  revision = "472e287dbafe67e526a3797165b64cb14f34705a"
-  version = "v1.3.2"
-
-[[projects]]
   digest = "1:7fc160b460a6fc506b37fcca68332464c3f2cd57b6e3f111f26c5bbfd2d5518e"
   name = "gopkg.in/fsnotify.v1"
   packages = ["."]
@@ -1172,7 +1164,6 @@
     "google.golang.org/grpc/grpclog",
     "google.golang.org/grpc/reflection",
     "google.golang.org/grpc/status",
-    "gopkg.in/DATA-DOG/go-sqlmock.v1",
     "gopkg.in/yaml.v2",
     "k8s.io/api/batch/v1",
     "k8s.io/api/batch/v1beta1",
