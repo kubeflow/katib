@@ -12,7 +12,7 @@ func main() {
 	if err != nil {
 		fmt.Printf("err: %v", err)
 	}
-	study, err := dbInt.GetStudyConfig(os.Args[1])
+	study, err := dbInt.GetStudy(os.Args[1])
 	if err != nil {
 		fmt.Printf("err: %v", err)
 	} else {
