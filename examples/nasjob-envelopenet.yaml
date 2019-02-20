@@ -1,0 +1,143 @@
+apiVersion: "kubeflow.org/v1alpha1"
+kind: StudyJob
+metadata:
+  namespace: kubeflow
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: nasenvelopenet
+spec:
+  studyName: nasenvelopenet
+  owner: crd
+  optimizationtype: maximize
+  objectivevaluename: Validation-Accuracy
+  optimizationgoal: 0.99
+  requestcount: 3
+  metricsnames:
+    - accuracy
+  nasConfig:
+    graphConfig:
+      numLayers: 3
+      inputSize:
+        - 32
+        - 32
+        - 3
+      outputSize:
+        - 10
+    operations:
+      - operationType: envolpenet
+        parameterconfigs:
+          - name: envelopecell
+            parametertype: categorical
+            feasible:
+              list:
+              - "1"
+              - "3"
+              - "5"
+              - "3sep"
+              - "5sep"
+              - "7sep"
+          - name: layers_per_stage
+            parametertype: categorical
+            feasible: 
+              list:
+              - "2"
+              - "2"
+              - "2"
+          - name: max_layers_per_stage
+            parametertype: categorical
+            feasible: 
+              list:
+              - "7"
+              - "6"
+              - "2"
+          - name: construction
+            parametertype: categorical
+            feasible: 
+              list:
+              - "1"
+              - "1"
+              - "0"
+          - name: parameter_limits
+            parametertype: categorical
+            feasible: 
+              list:
+              - "0"
+              - "0"
+              - "0"
+          - name: max_filter_prune
+            parametertype: int
+            feasible: 
+              value: "6"
+          - name: skip
+            parametertype: int
+            feasible: 
+              value: "0"
+          - name: worst_case
+            parametertype: int
+            feasible: 
+              value: "0"
+          - name: outputs
+            parametertype: categorical
+            feasible:
+              list:
+              - "64"
+              - "128"
+              - "256"
+              - "512"
+
+  workerSpec:
+    goTemplate:
+        rawTemplate: |-
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: {{.WorkerID}}
+            namespace: {{.NameSpace}}
+          spec:
+            template:
+              spec:
+                containers:
+                - name: {{.WorkerID}}
+                  image: docker.io/deepermind/training-container-nas
+                  command:
+                  - "python3.5"
+                  - "-u"
+                  - "RunTrial.py"
+                  {{- with .HyperParameters}}
+                  {{- range .}}
+                  - "--{{.Name}}={{.Value}}"
+                  {{- end}}
+                  {{- end}}
+                  resources:
+                    limits:
+                      nvidia.com/gpu: 1
+                restartPolicy: Never
+  suggestionSpec:
+    suggestionAlgorithm: "nas_envelopenet"
+    suggestionParameters:
+      - name: "arch_name"
+        value: "nac-cons-skip-cons-topline"
+      - name: "exec"
+        value: "localhost"
+      - name: "mode"
+        value: "construct"
+      - name: "algorithm"
+        value: "envelopenet"
+      - name: "gpus"
+        value: []
+      - name: "gpu_usage"
+        value: 0.47
+      - name: "steps"
+        value: 100
+      - name: "eval_interval"
+        value: 5000
+      - name: "batch_size"
+        value: 50
+      - name: "dataset"
+        value: "cifar10"
+      - name: "data_dir"
+        value: "~/Desktop/envelopenet/"
+      - name: "iterations"
+        value: 5
+      - name: "log_stats"
+        value: true
