@@ -163,16 +163,16 @@ func validateStudy(instance *katibv1alpha1.StudyJob, namespace string) error {
 }
 
 func checkGoalAndUpdateObject(curValue float64, instance *katibv1alpha1.StudyJob, workerId string) bool {
-	optTypeFuncMap := map[katibv1alpha1.OptimizationType] func(float64, float64) bool {
-		katibv1alpha1.OptimizationTypeMinimize: func(a, b float64) bool {return a < b},
-		katibv1alpha1.OptimizationTypeMaximize: func(a, b float64) bool {return a > b},
+	optTypeFuncMap := map[katibv1alpha1.OptimizationType]func(float64, float64) bool{
+		katibv1alpha1.OptimizationTypeMinimize: func(a, b float64) bool { return a < b },
+		katibv1alpha1.OptimizationTypeMaximize: func(a, b float64) bool { return a > b },
 	}
 	goal := false
 	if optTypeFuncMap[instance.Spec.OptimizationType] == nil {
 		return false
 	}
 	var trialId string
-	OuterLoop:
+OuterLoop:
 	for i := range instance.Status.Trials {
 		for j := range instance.Status.Trials[i].WorkerList {
 			if instance.Status.Trials[i].WorkerList[j].WorkerID == workerId {
