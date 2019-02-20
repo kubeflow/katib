@@ -10,3 +10,10 @@ spec:
     kind: StudyJob
     singular: studyjob
     plural: studyjobs
+  additionalPrinterColumns:
+  - JSONPath: .status.condition
+    name: Condition
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
