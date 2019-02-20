@@ -46,7 +46,6 @@ type VizierDBInterface interface {
 	DBInit()
 	SelectOne() error
 
-	GetStudyMetrics(string) ([]string, error)
 	GetStudy(string) (*api.StudyConfig, error)
 	GetStudyList() ([]string, error)
 
