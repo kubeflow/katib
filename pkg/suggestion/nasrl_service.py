@@ -120,10 +120,10 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     valid_acc = ctrl.reward
                     result = self.GetEvaluationResult(request.study_id)
 
-                    # handle the special case where there is no completed trials (though not very likely)
-                    while result is None:
-                        time.sleep(20)
-                        result = self.GetEvaluationResult(request.study_id)
+                    # This lstm cell is designed to maximize the metrics
+                    # However, if the user want to minimize the metrics, we can take the negative of the result
+                    if self.opt_direction == api_pb2.MINIMIZE:
+                        result = -result
 
                     loss, entropy, lr, gn, bl, skip, _ = sess.run(
                         fetches=run_ops,
