@@ -427,7 +427,8 @@ func (r *ReconcileStudyJobController) getJobWorkerStatus(ns string, wid string, 
 			jobStatus := commonv1beta1.JobStatus{}
 			err := runtime.DefaultUnstructuredConverter.FromUnstructured(statusMap, &jobStatus)
 			if err != nil {
-				log.Printf("Error in converting unstructured to status:%v ", err)
+				log.Printf("Error in converting unstructured to status: %v ", err)
+				return WorkerStatus{}
 			}
 			if len(jobStatus.Conditions) > 0 {
 				lc := jobStatus.Conditions[len(jobStatus.Conditions)-1]
