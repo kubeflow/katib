@@ -19,6 +19,16 @@ def upper_bounds():
 
 
 @pytest.fixture
+def dim():
+    return 2
+
+
+@pytest.fixture
+def request_num():
+    return 5
+
+
+@pytest.fixture
 def X_train(lower_bounds, upper_bounds):
     x_range = np.arange(lower_bounds[0], upper_bounds[0] + 1)
     y_range = np.arange(lower_bounds[1], upper_bounds[1] + 1)
@@ -35,5 +45,5 @@ def X_test():
 
 @pytest.fixture
 def y_train(X_train):
-    y_train = booth_function(X_train)
+    y_train = -booth_function(X_train)
     return y_train
