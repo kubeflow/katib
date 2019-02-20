@@ -2,12 +2,14 @@
 DIRECT algorithm is used in this case
 """
 import copy
-import numpy as np
-from collections import deque
-
-from pkg.suggestion.bayesianoptimization.src.acquisition_func.acquisition_func import AcquisitionFunc
 import logging
-from logging import getLogger, StreamHandler, INFO, DEBUG
+from logging import getLogger, StreamHandler, INFO
+
+import numpy as np
+
+from .acquisition_func import AcquisitionFunc
+from .model.gp import GaussianProcessModel
+from .model.rf import RandomForestModel
 
 
 class RectPack:
@@ -92,19 +94,24 @@ class GlobalOptimizer:
         self.scaler = scaler
         self.buckets = []
         self.dim = None
+        if model_type == "gp":
+            model = GaussianProcessModel(
+                length_scale=length_scale,
+                noise=noise,
+                nu=nu,
+                kernel_type=kernel_type,
+            )
+        else:
+            model = RandomForestModel(
+                n_estimators=n_estimators,
+                max_features=max_features,
+            )
+        model.fit(X_train, y_train)
         self.aq_func = AcquisitionFunc(
-            X_train=X_train,
-            y_train=y_train,
+            model=model,
             current_optimal=current_optimal,
             mode=mode,
             trade_off=trade_off,
-            length_scale=length_scale,
-            noise=noise,
-            nu=nu,
-            kernel_type=kernel_type,
-            n_estimators=n_estimators,
-            max_features=max_features,
-            model_type=model_type,
         )
 
     def potential_opt(self, f_min):

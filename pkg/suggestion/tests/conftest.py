@@ -9,8 +9,19 @@ def booth_function(X):
 
 
 @pytest.fixture
-def X_train():
-    x_range, y_range = np.arange(-5, 6), np.arange(-5, 6)
+def lower_bounds():
+    return [-5, -5]
+
+
+@pytest.fixture
+def upper_bounds():
+    return [5, 5]
+
+
+@pytest.fixture
+def X_train(lower_bounds, upper_bounds):
+    x_range = np.arange(lower_bounds[0], upper_bounds[0] + 1)
+    y_range = np.arange(lower_bounds[1], upper_bounds[1] + 1)
     X_train = np.array([(x, y) for x in x_range for y in y_range])
     return X_train
 
