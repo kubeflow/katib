@@ -114,17 +114,13 @@ done
 cp -r test ${GO_DIR}/test
 cd ${GO_DIR}/test/e2e
 kubectl apply -f valid-studyjob.yaml
-if [ $? -ne 0 ]; then
-  exit 1
-fi
 kubectl delete -f valid-studyjob.yaml
-if [ $? -ne 0 ]; then
-  exit 1
-fi
+set +o errexit
 kubectl apply -f invalid-studyjob.yaml
 if [ $? -ne 1 ]; then
   exit 1
 fi
+set -o errexit
 go run test-client.go -a random
 go run test-client.go -a grid -c suggestion-config-grid.yml
 #go run test-client.go -a hyperband -c suggestion-config-hyb.yml
