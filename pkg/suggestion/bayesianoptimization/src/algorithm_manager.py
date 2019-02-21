@@ -15,8 +15,8 @@ def deal_with_discrete(feasible_values, current_value):
 
 def deal_with_categorical(feasible_values, one_hot_values):
     """ function to do the one hot encoding of the categorical values """
-    #index = np.argmax(one_hot_values)
-    index = one_hot_values.argmax()
+    index = np.argmax(one_hot_values)
+    #index = one_hot_values.argmax()
     return feasible_values[int(index)]
 
 
