@@ -3,10 +3,14 @@ parameters:
       value: 1.0
     - name: "y"
       value: 1.0 
+    - name: "fake_discrete"
+      value: 2
   - - name: "x"
       value: 1.0
     - name: "y"
       value: 1.0
+    - name: "fake_discrete"
+      value: 3
 metrics:
   - 1.0
   - 1.0

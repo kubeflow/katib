@@ -11,3 +11,10 @@ parameter_configs:
       feasible:
         min: -5.0
         max: 5.0
+    - parameter_type: 3 # Code for DISCRETE
+      name: "fake_discrete"
+      feasible:
+        list:
+          - 2
+          - 3
+          - 5
