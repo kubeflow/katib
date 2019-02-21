@@ -9,7 +9,6 @@ import logging
 from logging import getLogger, StreamHandler, INFO, DEBUG
 import json
 import os
-import time
 
 
 class NasrlService(api_pb2_grpc.SuggestionServicer):
@@ -18,9 +17,21 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         self.manager_port = 6789
         self.registered_studies = list()
 
-        self.ctrl_cache_file = ""
-        self.ctrl_step = 0
-        self.is_first_run = True
+        self.study_names = dict()
+        self.tf_graphs = dict()
+        self.prev_trial_id = dict()
+        self.ctrl_cache_file = dict()
+        self.ctrl_step = dict()
+        self.is_first_run = dict()
+        self.suggestion_configs = dict()
+        self.controllers = dict()
+        self.num_layers = dict()
+        self.input_size = dict()
+        self.output_size = dict()
+        self.num_operations = dict()
+        self.search_space = dict()
+        self.opt_direction = dict()
+        self.objective_name = dict()
 
         if not os.path.exists("ctrl_cache/"):
             os.makedirs("ctrl_cache/")
@@ -38,18 +49,24 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             self.logger = logger
 
     def setup_controller(self, request):
-        self.logger.info("-" * 80 + "\nSetting Up Suggestion for StudyJob {}\n".format(request.study_id) + "-" * 80)
-        self.tf_graph = tf.Graph()
-        self.ctrl_step = 0
-        self.ctrl_cache_file = "ctrl_cache/{}.ckpt".format(request.study_id)
-        self._get_suggestion_param(request.param_id, request.study_id)
-        self._get_search_space(request.study_id)
+        studyID = request.study_id
 
-        with self.tf_graph.as_default():
-            ctrl_param = self.suggestion_config
-            self.controllers = Controller(
-                num_layers=self.num_layers,
-                num_operations=self.num_operations,
+        self.logger.info("-" * 100 + "\nSetting Up Suggestion for StudyJob ID {}\n".format(studyID) + "-" * 100)
+
+        self._get_study_param(request.study_id
+        self._get_suggestion_param(request.param_id, request.study_id)
+
+        self.tf_graphs[studyID] = tf.Graph()
+        self.ctrl_step[studyID] = 0
+        self.ctrl_cache_file[studyID] = "ctrl_cache/{}/{}.ckpt".format(studyID, studyID)
+)
+
+        with self.tf_graphs[studyID].as_default():
+            ctrl_param = self.suggestion_configs[studyID]
+
+            self.controllers[studyID] = Controller(
+                num_layers=self.num_layers[studyID],
+                num_operations=self.num_operations[studyID],
                 lstm_size=ctrl_param['lstm_num_cells'],
                 lstm_num_layers=ctrl_param['lstm_num_layers'],
                 lstm_keep_prob=ctrl_param['lstm_keep_prob'],
@@ -63,24 +80,27 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 optim_algo=ctrl_param['optimizer'],
                 skip_target=ctrl_param['skip-target'],
                 skip_weight=ctrl_param['skip-weight'],
-                name="Ctrl_"+request.study_id)
+                name="Ctrl_"+request.study_id,
+                logger=self.logger)
 
-            self.controllers.build_trainer()
+            self.controllers[studyID].build_trainer()
 
-        self.logger.info("Suggestion for StudyJob {} has been initialized.".format(request.study_id))
+        self.logger.info("Suggestion for StudyJob {} (ID: {}) has been initialized.\n".format(self.study_names[studyID], studyID))
 
     def GetSuggestions(self, request, context):
+        studyID = request.study_id
+
         if request.study_id not in self.registered_studies:
             self.setup_controller(request)
-            self.is_first_run = True
-            self.registered_studies.append(request.study_id)
+            self.is_first_run[studyID] = True
+            self.registered_studies.append(studyID)
 
-        self.logger.info("-" * 80 + "\nSuggestion Step {} for Study {}\n".format(self.ctrl_step, request.study_id) + "-" * 80)
+        self.logger.info("-" * 100 + "\nSuggestion Step {} for StudyJob {} (ID: {})\n".format(self.ctrl_step[studyID], self.study_names[studyID], studyID) + "-" * 100)
 
-        with self.tf_graph.as_default():
+        with self.tf_graphs[studyID].as_default():
 
             saver = tf.train.Saver()
-            ctrl = self.controllers
+            ctrl = self.controllers[studyID]
 
             controller_ops = {
                   "train_step": ctrl.train_step,
@@ -103,26 +123,26 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 controller_ops["skip_rate"],
                 controller_ops["train_op"]]
 
-            if self.is_first_run:
-                self.logger.info("First time running suggestion for {}. Random architecture will be given.".format(request.study_id))
+            if self.is_first_run[studyID]:
+                self.logger.info("First time running suggestion for {}. Random architecture will be given.".format(self.study_names[studyID]))
                 with tf.Session() as sess:
                     sess.run(tf.global_variables_initializer())
                     arc = sess.run(controller_ops["sample_arc"])
                     # TODO: will use PVC to store the checkpoint to protect against unexpected suggestion pod restart
-                    saver.save(sess, self.ctrl_cache_file)
+                    saver.save(sess, self.ctrl_cache_file[studyID])
 
-                self.is_first_run = False
+                self.is_first_run[studyID] = False
 
             else:
                 with tf.Session() as sess:
-                    saver.restore(sess, self.ctrl_cache_file)
+                    saver.restore(sess, self.ctrl_cache_file[studyID])
 
                     valid_acc = ctrl.reward
                     result = self.GetEvaluationResult(request.study_id)
 
                     # This lstm cell is designed to maximize the metrics
                     # However, if the user want to minimize the metrics, we can take the negative of the result
-                    if self.opt_direction == api_pb2.MINIMIZE:
+                    if self.opt_direction[studyID] == api_pb2.MINIMIZE:
                         result = -result
 
                     loss, entropy, lr, gn, bl, skip, _ = sess.run(
@@ -131,23 +151,23 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     self.logger.info("Suggetion updated. LSTM Controller Loss: {}".format(loss))
                     arc = sess.run(controller_ops["sample_arc"])
 
-                    saver.save(sess, self.ctrl_cache_file)
+                    saver.save(sess, self.ctrl_cache_file[studyID])
 
         arc = arc.tolist()
-        organized_arc = [0 for _ in range(self.num_layers)]
+        organized_arc = [0 for _ in range(self.num_layers[studyID])]
         record = 0
-        for l in range(self.num_layers):
+        for l in range(self.num_layers[studyID]):
             organized_arc[l] = arc[record: record + l + 1]
             record += l + 1
 
         nn_config = dict()
-        nn_config['num_layers'] = self.num_layers
-        nn_config['input_size'] = self.input_size
-        nn_config['output_size'] = self.output_size
+        nn_config['num_layers'] = self.num_layers[studyID]
+        nn_config['input_size'] = self.input_size[studyID]
+        nn_config['output_size'] = self.output_size[studyID]
         nn_config['embedding'] = dict()
-        for l in range(self.num_layers):
+        for l in range(self.num_layers[studyID]):
             opt = organized_arc[l][0]
-            nn_config['embedding'][opt] = self.search_space[opt].get_dict()
+            nn_config['embedding'][opt] = self.search_space[studyID][opt].get_dict()
 
         organized_arc_json = json.dumps(organized_arc)
         nn_config_json = json.dumps(nn_config)
@@ -183,29 +203,30 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 ctrep = client.CreateTrial(api_pb2.CreateTrialRequest(trial=t), 10)
                 trials[i].trial_id = ctrep.trial_id
             self.logger.info("Trial {} Created\n".format(ctrep.trial_id))
-            self.prev_trial_id = ctrep.trial_id
+            self.prev_trial_id[studyID] = ctrep.trial_id
         
-        self.ctrl_step += 1
+        self.ctrl_step[studyID] += 1
+
         return api_pb2.GetSuggestionsReply(trials=trials)
 
     def GetEvaluationResult(self, studyID):
         worker_list = []
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
-            gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=studyID, trial_id=self.prev_trial_id, only_latest_log=True), 10)
+            gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=studyID, trial_id=self.prev_trial_id[studyID], only_latest_log=True), 10)
             worker_list = gwfrep.worker_full_infos
 
         for w in worker_list:
             if w.Worker.status == api_pb2.COMPLETED:
                 for ml in w.metrics_logs:
-                    if ml.name == self.objective_name:
+                    if ml.name == self.objective_name[studyID]:
                         self.logger.info("Evaluation result of previous candidate: {}".format(ml.values[-1].value))
                         return float(ml.values[-1].value)
 
         # TODO: add support for multiple trials
 
 
-    def _get_search_space(self, studyID):
+    def _get_study_param(self, studyID):
 
         # this function need to
         # 1) get the number of layers
@@ -213,31 +234,33 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         # 3) get the available operations
         # 4) get the optimization direction (i.e. minimize or maximize)
         # 5) get the objective name
+        # 6) get the study name
         
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             gsrep = client.GetStudy(api_pb2.GetStudyRequest(study_id=studyID), 10)
-        
-        self.opt_direction = gsrep.study_config.optimization_type
-        self.objective_name = gsrep.study_config.objective_value_name
+
+        self.study_names[studyID] = gsrep.study_config.name
+        self.opt_direction[studyID] = gsrep.study_config.optimization_type
+        self.objective_name[studyID] = gsrep.study_config.objective_value_name
 
         all_params = gsrep.study_config.nas_config
         graph_config = all_params.graph_config
         search_space_raw = all_params.operations
 
-        self.num_layers = int(graph_config.num_layers)
-        self.input_size = list(map(int, graph_config.input_size))
-        self.output_size = list(map(int, graph_config.output_size))
+        self.num_layers[studyID] = int(graph_config.num_layers)
+        self.input_size[studyID] = list(map(int, graph_config.input_size))
+        self.output_size[studyID] = list(map(int, graph_config.output_size))
         search_space_object = SearchSpace(search_space_raw)
 
-        self.logger.info("Search Space for Study {}:".format(studyID))
+        self.logger.info("Search Space for StudyJob {} (ID: {}):".format(self.study_names[studyID], studyID))
 
-        self.search_space = search_space_object.search_space
-        for opt in self.search_space:
+        self.search_space[studyID] = search_space_object.search_space
+        for opt in self.search_space[studyID]:
             opt.print_op(self.logger)
         
-        self.num_operations = search_space_object.num_operations
-        self.logger.info("There are {} operations in total.\n".format(self.num_operations))
+        self.num_operations[studyID] = search_space_object.num_operations
+        self.logger.info("There are {} operations in total.\n".format(self.num_operations[studyID]))
             
 
     def _get_suggestion_param(self, paramID, studyID):
@@ -249,11 +272,11 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
         suggestion_params = parseSuggestionParam(params_raw)
 
-        self.logger.info("Parameters of LSTM Controller for Study {}:".format(studyID))
+        self.logger.info("Parameters of LSTM Controller for StudyJob {} (ID: {}):".format(self.study_names[studyID], studyID))
         for spec in suggestion_params:
             if len(spec) > 13:
                 self.logger.info("{}: \t{}".format(spec, suggestion_params[spec]))
             else:
                 self.logger.info("{}: \t\t{}".format(spec, suggestion_params[spec]))
 
-        self.suggestion_config = suggestion_params
+        self.suggestion_configs[studyID] = suggestion_params

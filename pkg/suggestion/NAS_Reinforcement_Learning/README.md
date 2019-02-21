@@ -122,7 +122,6 @@ This neural architecture can be visualized as
 ![a neural netowrk architecure example](example.png)
 
 ## To Do
-1. Add support for multiple studyjobs
-2. Add support for multiple trials
-3. Change LSTM cell from self defined functions in LSTM.py to `tf.nn.rnn_cell.LSTMCell`
-4. Store the suggestion checkpoint to PVC in case of nasrl service pod restarts
+1. Add support for multiple trials
+2. Change LSTM cell from self defined functions in LSTM.py to `tf.nn.rnn_cell.LSTMCell`
+3. Store the suggestion checkpoint to PVC to protect against unexpected nasrl service pod restarts
