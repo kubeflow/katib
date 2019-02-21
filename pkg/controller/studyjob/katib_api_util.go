@@ -24,8 +24,8 @@ import (
 	"google.golang.org/grpc"
 )
 
-func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) error {
-	if validErr := validateStudy(instance, ns); validErr != nil {
+func initializeStudy(instance *katibv1alpha1.StudyJob) error {
+	if validErr := validateStudy(instance); validErr != nil {
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		return validErr
 	}
