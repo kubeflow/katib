@@ -25,24 +25,6 @@ import (
 )
 
 func initializeStudy(instance *katibv1alpha1.StudyJob) error {
-	if validErr := validateStudy(instance); validErr != nil {
-		instance.Status.Condition = katibv1alpha1.ConditionFailed
-		return validErr
-	}
-
-	if getJobType(instance) != jobTypeNAS {
-		//Validate HP job
-		if validJobErr := validateHPJob(instance); validJobErr != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			return validJobErr
-		}
-	} else {
-		//Validate NAS job
-		if validJobErr := validateNASJob(instance); validJobErr != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			return validJobErr
-		}
-	}
 
 	if instance.Spec.SuggestionSpec.SuggestionAlgorithm == "" {
 		instance.Spec.SuggestionSpec.SuggestionAlgorithm = "random"
@@ -92,15 +74,15 @@ func initializeStudy(instance *katibv1alpha1.StudyJob) error {
 }
 
 func getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
-	jobType := getJobType(instance)
+	jobType := getJobType(instance.Spec.SuggestionSpec.SuggestionAlgorithm)
 	if jobType == jobTypeNAS {
 		return populateConfigForNAS(instance)
 	}
 	return populateConfigForHP(instance)
 }
 
-func getJobType(instance *katibv1alpha1.StudyJob) string {
-	if instance.Spec.NasConfig != nil {
+func getJobType(suggestionAlgorithm string) string {
+	if contains(suggestionNASList, suggestionAlgorithm) {
 		return jobTypeNAS
 	}
 	return jobTypeHP

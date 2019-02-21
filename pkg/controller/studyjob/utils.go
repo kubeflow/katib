@@ -102,6 +102,21 @@ func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (*schema.GroupVersionKi
 }
 
 func validateStudy(instance *katibv1alpha1.StudyJob) error {
+
+	if getJobType(instance.Spec.SuggestionSpec.SuggestionAlgorithm) != jobTypeNAS {
+		//Validate HP job
+		if validJobErr := validateHPJob(instance); validJobErr != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
+			return validJobErr
+		}
+	} else {
+		//Validate NAS job
+		if validJobErr := validateNASJob(instance); validJobErr != nil {
+			instance.Status.Condition = katibv1alpha1.ConditionFailed
+			return validJobErr
+		}
+	}
+
 	if instance.Spec.SuggestionSpec == nil {
 		return fmt.Errorf("No Spec.SuggestionSpec specified.")
 	}
@@ -156,6 +171,7 @@ func validateStudy(instance *katibv1alpha1.StudyJob) error {
 	if mcjob.GetNamespace() != namespace || mcjob.GetName() != workerID {
 		return fmt.Errorf("Invalid metricsCollector template.")
 	}
+
 	return nil
 }
 
@@ -212,14 +228,12 @@ func validateHPJob(instance *katibv1alpha1.StudyJob) error {
 	if instance.Spec.ParameterConfigs == nil {
 		return fmt.Errorf("No Spec.ParameterConfigs specified")
 	}
-	err := validateParameterConfigs(instance.Spec.ParameterConfigs, jobTypeHP, instance.Spec.SuggestionSpec.SuggestionAlgorithm)
-	if err != nil {
-		return err
-	}
-	return nil
+	return validateParameterConfigs(instance.Spec.ParameterConfigs, jobTypeHP, instance.Spec.SuggestionSpec.SuggestionAlgorithm)
+
 }
 
 func validateNASJob(instance *katibv1alpha1.StudyJob) error {
+
 	log.Printf("Validation for the NAS job")
 	if instance.Spec.NasConfig == nil {
 		return fmt.Errorf("No Spec.NasConfig specified")
@@ -237,7 +251,7 @@ func validateNASJob(instance *katibv1alpha1.StudyJob) error {
 		return fmt.Errorf("Missing OutputSize in NasConfig.GraphConfig: %v", instance.Spec.NasConfig.GraphConfig)
 	}
 
-	if instance.Spec.NasConfig.GraphConfig.NumLayers == 0 && instance.Spec.SuggestionSpec.SuggestionAlgorithm == suggestionAlgorithmRL {
+	if instance.Spec.NasConfig.GraphConfig.NumLayers == 0 && contains(suggestionNASList, instance.Spec.SuggestionSpec.SuggestionAlgorithm) {
 		return fmt.Errorf("Missing NumLayers in NasConfig.GraphConfig: %v", instance.Spec.NasConfig.GraphConfig)
 	}
 
@@ -252,10 +266,7 @@ func validateNASJob(instance *katibv1alpha1.StudyJob) error {
 		if op.ParameterConfigs == nil {
 			return fmt.Errorf("Missing ParameterConfig in Operation: %v", op)
 		}
-		err := validateParameterConfigs(op.ParameterConfigs, jobTypeNAS, instance.Spec.SuggestionSpec.SuggestionAlgorithm)
-		if err != nil {
-			return err
-		}
+		return validateParameterConfigs(op.ParameterConfigs, jobTypeNAS, instance.Spec.SuggestionSpec.SuggestionAlgorithm)
 	}
 
 	return nil
@@ -284,7 +295,7 @@ func validateParameterConfigs(parameterConfigs []katibv1alpha1.ParameterConfig, 
 			if pc.Feasible.Max == "" {
 				return fmt.Errorf("Missing Max in ParameterConfig.Feasible: %v", pc.Feasible)
 			}
-			if jobType == jobTypeNAS && pc.Feasible.Step == "" && pc.ParameterType == katibv1alpha1.ParameterTypeDouble && suggestionAlgorithm == suggestionAlgorithmRL {
+			if jobType == jobTypeNAS && pc.Feasible.Step == "" && pc.ParameterType == katibv1alpha1.ParameterTypeDouble && contains(suggestionNASList, suggestionAlgorithm) {
 				return fmt.Errorf("Missing Step in ParameterConfig.Feasible for NAS job: %v", pc.Feasible)
 			}
 		}
