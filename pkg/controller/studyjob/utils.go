@@ -272,7 +272,7 @@ func validateParameterConfigs(parameterConfigs []katibv1alpha1.ParameterConfig, 
 		if reflect.DeepEqual(pc.Feasible, katibv1alpha1.FeasibleSpace{}) {
 			return fmt.Errorf("Missing Feasible in ParameterConfig: %v", pc)
 		}
-		if pc.ParameterType == katibv1alpha1.ParameterTypeCategorical {
+		if pc.ParameterType == katibv1alpha1.ParameterTypeCategorical || pc.ParameterType == katibv1alpha1.ParameterTypeDiscrete {
 			if pc.Feasible.List == nil {
 				return fmt.Errorf("Missing List in ParameterConfig.Feasible: %v", pc.Feasible)
 			}
