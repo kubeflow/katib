@@ -46,8 +46,9 @@ type VizierDBInterface interface {
 	DBInit()
 	SelectOne() error
 
-	GetStudyConfig(string) (*api.StudyConfig, error)
+	GetStudy(string) (*api.StudyConfig, error)
 	GetStudyList() ([]string, error)
+
 	CreateStudy(*api.StudyConfig) (string, error)
 	UpdateStudy(string, *api.StudyConfig) error
 	DeleteStudy(string) error
@@ -132,6 +133,71 @@ func NewWithSQLConn(db *sql.DB) (VizierDBInterface, error) {
 	return d, nil
 }
 
+func (d *dbConn) GetStudyMetrics(id string) ([]string, error) {
+	row := d.db.QueryRow("SELECT metrics FROM studies WHERE id = ?", id)
+	var metrics string
+	err := row.Scan(&metrics)
+	if err != nil {
+		return nil, err
+	}
+	retMetrics := strings.Split(metrics, ",\n")
+	return retMetrics, nil
+}
+
+func (d *dbConn) GetStudy(StudyID string) (*api.StudyConfig, error) {
+	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", StudyID)
+	study := new(api.StudyConfig)
+	var dummyID, nasConfig, parameters, tags, metrics string
+	err := row.Scan(&dummyID,
+		&study.Name,
+		&study.Owner,
+		&study.OptimizationType,
+		&study.OptimizationGoal,
+		&parameters,
+		&tags,
+		&study.ObjectiveValueName,
+		&metrics,
+		&nasConfig,
+		&study.JobId,
+		&study.JobType,
+	)
+	if err != nil {
+		return nil, err
+	}
+	if parameters != "" {
+		study.ParameterConfigs = new(api.StudyConfig_ParameterConfigs)
+		err = jsonpb.UnmarshalString(parameters, study.ParameterConfigs)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if nasConfig != "" {
+		study.NasConfig = new(api.NasConfig)
+		err = jsonpb.UnmarshalString(nasConfig, study.NasConfig)
+		if err != nil {
+			log.Printf("Failed to unmarshal NasConfig")
+			return nil, err
+		}
+	}
+
+	var tagsArray []string
+	if len(tags) > 0 {
+		tagsArray = strings.Split(tags, ",\n")
+	}
+	study.Tags = make([]*api.Tag, len(tagsArray))
+	for i, j := range tagsArray {
+		tag := new(api.Tag)
+		err = jsonpb.UnmarshalString(j, tag)
+		if err != nil {
+			log.Printf("err unmarshal %s", j)
+			return nil, err
+		}
+		study.Tags[i] = tag
+	}
+	study.Metrics = strings.Split(metrics, ",\n")
+	return study, nil
+}
+
 func New() (VizierDBInterface, error) {
 	db, err := openSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
 	if err != nil {
@@ -159,49 +225,6 @@ func isDBDuplicateError(err error) bool {
 	return false
 }
 
-func (d *dbConn) GetStudyConfig(id string) (*api.StudyConfig, error) {
-	row := d.db.QueryRow("SELECT * FROM studies WHERE id = ?", id)
-
-	study := new(api.StudyConfig)
-	var dummyID, configs, tags, metrics string
-	err := row.Scan(&dummyID,
-		&study.Name,
-		&study.Owner,
-		&study.OptimizationType,
-		&study.OptimizationGoal,
-		&configs,
-		&tags,
-		&study.ObjectiveValueName,
-		&metrics,
-		&study.JobId,
-	)
-	if err != nil {
-		return nil, err
-	}
-	study.ParameterConfigs = new(api.StudyConfig_ParameterConfigs)
-	err = jsonpb.UnmarshalString(configs, study.ParameterConfigs)
-	if err != nil {
-		return nil, err
-	}
-
-	var tagsArray []string
-	if len(tags) > 0 {
-		tagsArray = strings.Split(tags, ",\n")
-	}
-	study.Tags = make([]*api.Tag, len(tagsArray))
-	for i, j := range tagsArray {
-		tag := new(api.Tag)
-		err = jsonpb.UnmarshalString(j, tag)
-		if err != nil {
-			log.Printf("err unmarshal %s", j)
-			return nil, err
-		}
-		study.Tags[i] = tag
-	}
-	study.Metrics = strings.Split(metrics, ",\n")
-	return study, nil
-}
-
 func (d *dbConn) GetStudyList() ([]string, error) {
 	rows, err := d.db.Query("SELECT id FROM studies")
 	if err != nil {
@@ -223,33 +246,29 @@ func (d *dbConn) GetStudyList() ([]string, error) {
 }
 
 func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
-	if in.ParameterConfigs == nil {
-		return "", errors.New("ParameterConfigs must be set")
-
-	}
 	if in.JobId != "" {
-		row := d.db.QueryRow("SELECT * FROM studies WHERE job_id = ?", in.JobId)
-		dummyStudy := new(api.StudyConfig)
-		var dummyID, dummyConfigs, dummyTags, dummyMetrics, dummyJobID string
-		err := row.Scan(&dummyID,
-			&dummyStudy.Name,
-			&dummyStudy.Owner,
-			&dummyStudy.OptimizationType,
-			&dummyStudy.OptimizationGoal,
-			&dummyConfigs,
-			&dummyTags,
-			&dummyStudy.ObjectiveValueName,
-			&dummyMetrics,
-			&dummyJobID,
-		)
+		var temporaryId string
+		err := d.db.QueryRow("SELECT id FROM studies WHERE job_id = ?", in.JobId).Scan(&temporaryId)
 		if err == nil {
 			return "", fmt.Errorf("Study %s in Job %s already exist.", in.Name, in.JobId)
 		}
 	}
 
-	configs, err := (&jsonpb.Marshaler{}).MarshalToString(in.ParameterConfigs)
-	if err != nil {
-		log.Fatalf("Error marshaling configs: %v", err)
+	var nasConfig string
+	var configs string
+	var err error
+	if in.NasConfig != nil {
+		nasConfig, err = (&jsonpb.Marshaler{}).MarshalToString(in.NasConfig)
+		if err != nil {
+			log.Fatalf("Error marshaling nasConfig: %v", err)
+		}
+	}
+
+	if in.ParameterConfigs != nil {
+		configs, err = (&jsonpb.Marshaler{}).MarshalToString(in.ParameterConfigs)
+		if err != nil {
+			log.Fatalf("Error marshaling configs: %v", err)
+		}
 	}
 
 	tags := make([]string, len(in.Tags))
@@ -261,22 +280,25 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 		}
 	}
 
+	/* WE PROBABLY DON'T NEED METRICS AND ALSO THIS LOGIC IS KIND OF CONFUSING */
 	var isin bool = false
 	for _, m := range in.Metrics {
 		if m == in.ObjectiveValueName {
 			isin = true
 		}
 	}
+
 	if !isin {
 		in.Metrics = append(in.Metrics, in.ObjectiveValueName)
 	}
 
 	var studyID string
+
 	i := 3
 	for true {
 		studyID = generateRandid()
 		_, err := d.db.Exec(
-			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO studies VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			studyID,
 			in.Name,
 			in.Owner,
@@ -286,7 +308,9 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 			strings.Join(tags, ",\n"),
 			in.ObjectiveValueName,
 			strings.Join(in.Metrics, ",\n"),
+			nasConfig,
 			in.JobId,
+			in.JobType,
 		)
 		if err == nil {
 			break
@@ -298,16 +322,6 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 		}
 		return "", err
 	}
-	for _, perm := range in.AccessPermissions {
-		_, err := d.db.Exec(
-			"INSERT INTO study_permissions (study_id, access_permission) "+
-				"VALUES (?, ?)",
-			studyID, perm)
-		if err != nil {
-			log.Printf("Error storing permission (%s, %s): %v",
-				studyID, perm, err)
-		}
-	}
 
 	return studyID, nil
 }
@@ -316,6 +330,8 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 // It only updates name, owner, tags and job_id.
 // Other columns are silently ignored.
 func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
+
+	/* THINK ABOUT TRIALS */
 	var err error
 
 	tags := make([]string, len(in.Tags))
@@ -362,11 +378,13 @@ func (d *dbConn) getTrials(trialID string, studyID string) ([]*api.Trial, error)
 		trial := new(api.Trial)
 
 		var parameters, tags string
+		var timeStamp string
 		err := rows.Scan(&trial.TrialId,
 			&trial.StudyId,
 			&parameters,
 			&trial.ObjectiveValue,
 			&tags,
+			&timeStamp,
 		)
 		if err != nil {
 			return nil, err
@@ -451,6 +469,8 @@ func marshalTrial(trial *api.Trial) ([]string, []string, error) {
 // CreateTrial stores into the trials DB table.
 // As a side-effect, it generates and sets trial.TrialId.
 // Users should not overwrite TrialId.
+
+/* TODO FIX CREATE_TRIAL & DELETE_TRIAL IN CASE OF NAS, SINCE WE WANT TRIALS */
 func (d *dbConn) CreateTrial(trial *api.Trial) error {
 	params, tags, lastErr := marshalTrial(trial)
 
@@ -458,9 +478,10 @@ func (d *dbConn) CreateTrial(trial *api.Trial) error {
 	i := 3
 	for true {
 		trialID = generateRandid()
-		_, err := d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?)",
+		timeString := time.Now().UTC().Format(mysqlTimeFmt)
+		_, err := d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?, ?)",
 			trialID, trial.StudyId, strings.Join(params, ",\n"),
-			trial.ObjectiveValue, strings.Join(tags, ",\n"))
+			trial.ObjectiveValue, strings.Join(tags, ",\n"), timeString)
 		if err == nil {
 			trial.TrialId = trialID
 			break
@@ -859,7 +880,8 @@ func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId stri
 	if err != nil {
 		return ret, err
 	}
-	sc, err := d.GetStudyConfig(studyId)
+	// Actually no need to get full config now
+	metrics, err := d.GetStudyMetrics(studyId)
 	if err != nil {
 		return ret, err
 	}
@@ -959,7 +981,7 @@ func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId stri
 				Time:  ptime.UTC().Format(time.RFC3339Nano),
 			})
 		} else {
-			metricslist[wid] = make(map[string][]*api.MetricsValueTime, len(sc.Metrics))
+			metricslist[wid] = make(map[string][]*api.MetricsValueTime, len(metrics))
 			metricslist[wid][name] = append(metricslist[wid][name], &api.MetricsValueTime{
 				Value: value,
 				Time:  ptime.UTC().Format(time.RFC3339Nano),
@@ -971,7 +993,7 @@ func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId stri
 			Worker:       w,
 			ParameterSet: plist[w.TrialId],
 		}
-		for _, m := range sc.Metrics {
+		for _, m := range metrics {
 			if v, ok := metricslist[w.WorkerId][m]; ok {
 				wfilist[i].MetricsLogs = append(wfilist[i].MetricsLogs, &api.MetricsLog{
 					Name:   m,
@@ -1047,6 +1069,7 @@ func (d *dbConn) GetSuggestionParam(paramID string) ([]*api.SuggestionParameter,
 		}
 		ret[i] = p
 	}
+
 	return ret, nil
 }
 

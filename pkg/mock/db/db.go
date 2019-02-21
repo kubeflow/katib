@@ -145,17 +145,17 @@ func (mr *MockVizierDBInterfaceMockRecorder) GetEarlyStopParamList(arg0 interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEarlyStopParamList", reflect.TypeOf((*MockVizierDBInterface)(nil).GetEarlyStopParamList), arg0)
 }
 
-// GetStudyConfig mocks base method
-func (m *MockVizierDBInterface) GetStudyConfig(arg0 string) (*api.StudyConfig, error) {
-	ret := m.ctrl.Call(m, "GetStudyConfig", arg0)
+// GetStudy mocks base method
+func (m *MockVizierDBInterface) GetStudy(arg0 string) (*api.StudyConfig, error) {
+	ret := m.ctrl.Call(m, "GetStudy", arg0)
 	ret0, _ := ret[0].(*api.StudyConfig)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetStudyConfig indicates an expected call of GetStudyConfig
-func (mr *MockVizierDBInterfaceMockRecorder) GetStudyConfig(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudyConfig", reflect.TypeOf((*MockVizierDBInterface)(nil).GetStudyConfig), arg0)
+// GetStudy indicates an expected call of GetStudy
+func (mr *MockVizierDBInterfaceMockRecorder) GetStudy(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudy", reflect.TypeOf((*MockVizierDBInterface)(nil).GetStudy), arg0)
 }
 
 // GetStudyList mocks base method
@@ -169,6 +169,19 @@ func (m *MockVizierDBInterface) GetStudyList() ([]string, error) {
 // GetStudyList indicates an expected call of GetStudyList
 func (mr *MockVizierDBInterfaceMockRecorder) GetStudyList() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudyList", reflect.TypeOf((*MockVizierDBInterface)(nil).GetStudyList))
+}
+
+// GetStudyMetrics mocks base method
+func (m *MockVizierDBInterface) GetStudyMetrics(arg0 string) ([]string, error) {
+	ret := m.ctrl.Call(m, "GetStudyMetrics", arg0)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStudyMetrics indicates an expected call of GetStudyMetrics
+func (mr *MockVizierDBInterfaceMockRecorder) GetStudyMetrics(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudyMetrics", reflect.TypeOf((*MockVizierDBInterface)(nil).GetStudyMetrics), arg0)
 }
 
 // GetSuggestionParam mocks base method
