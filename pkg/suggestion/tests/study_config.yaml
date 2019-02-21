@@ -18,7 +18,7 @@ parameter_configs:
           - 2
           - 3
           - 5
-    - parameter_type: 4 # Code for DISCRETE
+    - parameter_type: 4 # Code for CATEGORICAL
       name: "fake_categorical"
       feasible:
         list:
