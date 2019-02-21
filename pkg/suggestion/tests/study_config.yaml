@@ -1,0 +1,13 @@
+optimization_type: 2 # Code for Maximize
+parameter_configs:
+  configs:
+    - parameter_type: 1 # Code for DOUBLE
+      name: "x"
+      feasible:
+        min: -5.0
+        max: 5.0
+    - parameter_type: 1 # Code for DOUBLE
+      name: "y"
+      feasible:
+        min: -5.0
+        max: 5.0

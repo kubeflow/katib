@@ -2,14 +2,13 @@
 DIRECT algorithm is used in this case
 """
 import copy
-import logging
-from logging import getLogger, StreamHandler, INFO
 
 import numpy as np
 
 from .acquisition_func import AcquisitionFunc
 from .model.gp import GaussianProcessModel
 from .model.rf import RandomForestModel
+from .utils import get_logger
 
 
 class RectPack:
@@ -76,18 +75,7 @@ class GlobalOptimizer:
 
     def __init__(self, N, l, u, scaler, X_train, y_train, current_optimal, mode, trade_off, length_scale,
                  noise, nu, kernel_type, n_estimators, max_features, model_type, logger=None):
-        if logger == None:
-            self.logger = getLogger(__name__)
-            FORMAT = '%(asctime)-15s StudyID %(studyid)s %(message)s'
-            logging.basicConfig(format=FORMAT)
-            handler = StreamHandler()
-            handler.setLevel(INFO)
-            self.logger.setLevel(INFO)
-            self.logger.addHandler(handler)
-            self.logger.propagate = False
-        else:
-            self.logger = logger
-
+        self.logger = logger if (logger is not None) else get_logger()
         self.N = N
         self.l = l
         self.u = u

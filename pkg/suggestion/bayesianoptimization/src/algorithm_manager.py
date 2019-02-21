@@ -1,10 +1,9 @@
 """ module for algorithm manager """
-import logging
-from logging import getLogger, StreamHandler, DEBUG
-
 import numpy as np
 
 from pkg.api.python import api_pb2
+
+from .utils import get_logger
 
 
 def deal_with_discrete(feasible_values, current_value):
@@ -26,17 +25,7 @@ class AlgorithmManager:
     provide some helper functions
     """
     def __init__(self, study_id, study_config, X_train, y_train, logger=None):
-        if logger == None:
-            self.logger = getLogger(__name__)
-            FORMAT = '%(asctime)-15s StudyID %(studyid)s %(message)s'
-            logging.basicConfig(format=FORMAT)
-            handler = StreamHandler()
-            handler.setLevel(DEBUG)
-            self.logger.setLevel(DEBUG)
-            self.logger.addHandler(handler)
-            self.logger.propagate = False
-        else:
-            self.logger = logger
+        self.logger = logger if (logger is not None) else get_logger()
         self._study_id = study_id
         self._study_config = study_config
         self._goal = self._study_config.optimization_type
@@ -85,7 +74,7 @@ class AlgorithmManager:
 
     @property
     def upper_bound(self):
-        """ return the ipper bound of all the parameters """
+        """ return the upper bound of all the parameters """
         return self._upperbound
 
     @property
@@ -161,7 +150,7 @@ class AlgorithmManager:
             for p in parameters:
                 self.logger.debug("mapping: %r", p, extra={"StudyID": self._study_id})
                 map_id = self._name_id[p.name]
-                if self._types[map_id] == api_pb2.DOUBLE or self._types[map_id] == api_pb2.INT or self._types[map_id] == api_pb2.DISCRETE:
+                if self._types[map_id] in [api_pb2.DOUBLE, api_pb2.INT, api_pb2.DISCRETE]:
                     maplist[map_id] = float(p.value)
                 elif self._types[map_id] == api_pb2.CATEGORICAL:
                     for ci in self._categorical_info:
