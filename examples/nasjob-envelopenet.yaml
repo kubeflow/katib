@@ -124,20 +124,20 @@ spec:
       - name: "algorithm"
         value: "envelopenet"
       - name: "gpus"
-        value: []
+        value: "[]"
       - name: "gpu_usage"
-        value: 0.47
+        value: "0.47"
       - name: "steps"
-        value: 100
+        value: "100"
       - name: "eval_interval"
-        value: 5000
+        value: "5000"
       - name: "batch_size"
-        value: 50
+        value: "50"
       - name: "dataset"
         value: "cifar10"
       - name: "data_dir"
-        value: "~/Desktop/envelopenet/"
+        value: "/data/"
       - name: "iterations"
-        value: 5
+        value: "5"
       - name: "log_stats"
-        value: true
+        value: "true"
