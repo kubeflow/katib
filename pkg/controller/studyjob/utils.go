@@ -212,7 +212,7 @@ func validateHPJob(instance *katibv1alpha1.StudyJob) error {
 	if instance.Spec.ParameterConfigs == nil {
 		return fmt.Errorf("No Spec.ParameterConfigs specified")
 	}
-	err := validateParameterConfigs(instance.Spec.ParameterConfigs, jobTypeHP)
+	err := validateParameterConfigs(instance.Spec.ParameterConfigs, jobTypeHP, instance.Spec.SuggestionSpec.SuggestionAlgorithm)
 	if err != nil {
 		return err
 	}
@@ -237,7 +237,7 @@ func validateNASJob(instance *katibv1alpha1.StudyJob) error {
 		return fmt.Errorf("Missing OutputSize in NasConfig.GraphConfig: %v", instance.Spec.NasConfig.GraphConfig)
 	}
 
-	if instance.Spec.NasConfig.GraphConfig.NumLayers == 0 {
+	if instance.Spec.NasConfig.GraphConfig.NumLayers == 0 && instance.Spec.SuggestionSpec.SuggestionAlgorithm == suggestionAlgorithmRL {
 		return fmt.Errorf("Missing NumLayers in NasConfig.GraphConfig: %v", instance.Spec.NasConfig.GraphConfig)
 	}
 
@@ -252,7 +252,7 @@ func validateNASJob(instance *katibv1alpha1.StudyJob) error {
 		if op.ParameterConfigs == nil {
 			return fmt.Errorf("Missing ParameterConfig in Operation: %v", op)
 		}
-		err := validateParameterConfigs(op.ParameterConfigs, jobTypeNAS)
+		err := validateParameterConfigs(op.ParameterConfigs, jobTypeNAS, instance.Spec.SuggestionSpec.SuggestionAlgorithm)
 		if err != nil {
 			return err
 		}
@@ -261,7 +261,7 @@ func validateNASJob(instance *katibv1alpha1.StudyJob) error {
 	return nil
 }
 
-func validateParameterConfigs(parameterConfigs []katibv1alpha1.ParameterConfig, jobType string) error {
+func validateParameterConfigs(parameterConfigs []katibv1alpha1.ParameterConfig, jobType string, suggestionAlgorithm string) error {
 	for _, pc := range parameterConfigs {
 		if pc.Name == "" {
 			return fmt.Errorf("Missing Name in ParameterConfig: %v", pc)
@@ -284,7 +284,7 @@ func validateParameterConfigs(parameterConfigs []katibv1alpha1.ParameterConfig, 
 			if pc.Feasible.Max == "" {
 				return fmt.Errorf("Missing Max in ParameterConfig.Feasible: %v", pc.Feasible)
 			}
-			if jobType == jobTypeNAS && pc.Feasible.Step == "" && pc.ParameterType == katibv1alpha1.ParameterTypeDouble {
+			if jobType == jobTypeNAS && pc.Feasible.Step == "" && pc.ParameterType == katibv1alpha1.ParameterTypeDouble && suggestionAlgorithm == suggestionAlgorithmRL {
 				return fmt.Errorf("Missing Step in ParameterConfig.Feasible for NAS job: %v", pc.Feasible)
 			}
 		}

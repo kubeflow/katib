@@ -12,11 +12,12 @@ limitations under the License.
 package studyjob
 
 const (
-	DefaultJobWorker = "Job"
-	TFJobWorker      = "TFJob"
-	PyTorchJobWorker = "PyTorchJob"
-	jobTypeNAS       = "NAS"
-	jobTypeHP        = "HP"
+	DefaultJobWorker      = "Job"
+	TFJobWorker           = "TFJob"
+	PyTorchJobWorker      = "PyTorchJob"
+	jobTypeNAS            = "NAS"
+	jobTypeHP             = "HP"
+	suggestionAlgorithmRL = "nasrl"
 )
 
 var ValidWorkerKindList = [...]string{DefaultJobWorker, TFJobWorker, PyTorchJobWorker}
