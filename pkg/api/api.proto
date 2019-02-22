@@ -416,8 +416,8 @@ message Worker {
     string trial_id = 3; /// Trial ID.
     string type = 4; /// Type of Worker
     State status = 5; /// Status of Worker.
-    string manufest = 6; /// A json formatted manufest for Worker.
-    string metrics_collector_manufest = 7; /// A json formatted manufest for MetricsCollector.
+    string manifest = 6; /// A json formatted manifest for Worker.
+    string metrics_collector_manifest = 7; /// A json formatted manifest for MetricsCollector.
     repeated Tag tags = 8; /// Tags of Worker.
     string creation_time = 9; /// Creation Time. RFC3339 format.
     string completion_time = 10; /// Completion Time. RFC3339 format.
@@ -692,7 +692,7 @@ message GetWorkersReply {
 
 /** 
  * Update a Status of Worker.
- * updatable values are Status, Manufest, MetricsCollectorManufest, Tags,, CreationTime, and CompletionTime.
+ * updatable values are Status, Manifest, MetricsCollectorManifest, Tags,, CreationTime, and CompletionTime.
  * Other values in request will be ignored.
  */
 message UpdateWorkerStateRequest {

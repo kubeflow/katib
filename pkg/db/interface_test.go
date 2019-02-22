@@ -28,7 +28,7 @@ var trialColumns = []string{
 	"id", "study_id", "parameters", "objective_value", "tags", "time"}
 var workerColumns = []string{"id",
 	"study_id", "trial_id", "type",
-	"status", "manufest", "metrics_collector_manufest",
+	"status", "worker_manifest", "metrics_collector_manifest",
 	"tags", "creation_time", "completion_time"}
 
 func TestMain(m *testing.M) {
@@ -291,8 +291,8 @@ func TestCreateWorker(t *testing.T) {
 		w.TrialId,
 		w.Type,
 		api.State_PENDING,
-		w.Manufest,
-		w.MetricsCollectorManufest,
+		w.Manifest,
+		w.MetricsCollectorManifest,
 		"",
 		"0001-01-01 00:00:00",
 		"0001-01-01 00:00:00",
@@ -353,14 +353,14 @@ func TestGetWorkerList(t *testing.T) {
 }
 
 func TestUpdateWorker(t *testing.T) {
-	wmanufest := "woker manufest"
-	mcmanufest := "metricscollector manufest"
+	wmanifest := "worker manifest"
+	mcmanifest := "metricscollector manifest"
 	tags := "{\"name\":\"test\",\"value\":\"alpha\"}"
 	mock.ExpectQuery(`SELECT \* FROM workers WHERE id = \?`).WithArgs(defaultWorkerID).WillReturnRows(sqlmock.NewRows(workerColumns).AddRow(defaultWorkerID, 1, 1, 1, 1, 1, 1, "", "0001-01-01 00:00:00", "0001-01-01 00:00:00"))
-	mock.ExpectExec(`UPDATE workers SET status = \?, manufest = \?, metrics_collector_manufest = \?, tags = \?, creation_time = \?, completion_time = \? WHERE id = \?`).WithArgs(
+	mock.ExpectExec(`UPDATE workers SET status = \?, worker_manifest = \?, metrics_collector_manifest = \?, tags = \?, creation_time = \?, completion_time = \? WHERE id = \?`).WithArgs(
 		api.State_COMPLETED,
-		wmanufest,
-		mcmanufest,
+		wmanifest,
+		mcmanifest,
 		tags,
 		"0001-01-02 00:00:00",
 		"0001-01-03 00:00:00",
@@ -370,8 +370,8 @@ func TestUpdateWorker(t *testing.T) {
 		defaultWorkerID,
 		&api.Worker{
 			Status:                   api.State_COMPLETED,
-			Manufest:                 wmanufest,
-			MetricsCollectorManufest: mcmanufest,
+			Manifest:                 wmanifest,
+			MetricsCollectorManifest: mcmanifest,
 			Tags:                     []*api.Tag{&api.Tag{Name: "test", Value: "alpha"}},
 			CreationTime:             "0001-01-02T00:00:00Z",
 			CompletionTime:           "0001-01-03T00:00:00Z",

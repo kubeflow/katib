@@ -28,8 +28,8 @@ func (d *dbConn) DBInit() {
 		(job_uid CHAR(36) PRIMARY KEY,
 		study_id CHAR(16),
 		job_type TEXT,
-		worker_template TEXT,
-		metrics_collector_template TEXT,
+		worker_manifest_template TEXT,
+		metrics_collector_manifest_template TEXT,
 		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE)`)
 	if err != nil {
 		log.Fatalf("Error creating studyjob table: %v", err)
@@ -62,8 +62,8 @@ func (d *dbConn) DBInit() {
 		trial_id CHAR(16),
 		type VARCHAR(255),
 		status TINYINT,
-		manufest TEXT,
-		metrics_collector_manufest TEXT,
+		worker_manifest TEXT,
+		metrics_collector_manifest TEXT,
 		tags TEXT,
 		creation_time DATETIME(6),
 		completion_time DATETIME(6),

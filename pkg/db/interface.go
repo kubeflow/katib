@@ -823,8 +823,8 @@ func (d *dbConn) getWorkers(workerID string, trialID string, studyID string) ([]
 			&worker.TrialId,
 			&worker.Type,
 			&worker.Status,
-			&worker.Manufest,
-			&worker.MetricsCollectorManufest,
+			&worker.Manifest,
+			&worker.MetricsCollectorManifest,
 			&tags,
 			&crtime,
 			&comtime,
@@ -921,8 +921,8 @@ func (d *dbConn) CreateWorker(worker *api.Worker) (string, error) {
 			worker.TrialId,
 			worker.Type,
 			api.State_PENDING,
-			worker.Manufest,
-			worker.MetricsCollectorManufest,
+			worker.Manifest,
+			worker.MetricsCollectorManifest,
 			strings.Join(tags, ",\n"),
 			crtime,
 			cotime)
@@ -949,11 +949,11 @@ func (d *dbConn) UpdateWorker(id string, newstatus *api.Worker) error {
 	if newstatus.Status != api.State_UNKNOWN {
 		original.Status = newstatus.Status
 	}
-	if newstatus.Manufest != "" {
-		original.Manufest = newstatus.Manufest
+	if newstatus.Manifest != "" {
+		original.Manifest = newstatus.Manifest
 	}
-	if newstatus.MetricsCollectorManufest != "" {
-		original.MetricsCollectorManufest = newstatus.MetricsCollectorManufest
+	if newstatus.MetricsCollectorManifest != "" {
+		original.MetricsCollectorManifest = newstatus.MetricsCollectorManifest
 	}
 	crtime, cotime := mysqldefaultTime, mysqldefaultTime
 	if newstatus.CreationTime != "" {
@@ -986,10 +986,10 @@ func (d *dbConn) UpdateWorker(id string, newstatus *api.Worker) error {
 				newstatus.Tags[i], err)
 		}
 	}
-	_, err = d.db.Exec("UPDATE workers SET status = ?, manufest = ?, metrics_collector_manufest = ?, tags = ?, creation_time = ?, completion_time = ? WHERE id = ?",
+	_, err = d.db.Exec("UPDATE workers SET status = ?, worker_manifest = ?, metrics_collector_manifest = ?, tags = ?, creation_time = ?, completion_time = ? WHERE id = ?",
 		original.Status,
-		original.Manufest,
-		original.MetricsCollectorManufest,
+		original.Manifest,
+		original.MetricsCollectorManifest,
 		strings.Join(tags, ",\n"),
 		crtime,
 		cotime,

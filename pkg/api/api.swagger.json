@@ -1644,7 +1644,7 @@
           "$ref": "#/definitions/apiWorker"
         }
       },
-      "description": "* \nUpdate a Status of Worker.\nupdatable values are Status, Manufest, MetricsCollectorManufest, Tags,, CreationTime, and CompletionTime.\nOther values in request will be ignored."
+      "description": "* \nUpdate a Status of Worker.\nupdatable values are Status, Manifest, MetricsCollectorManifest, Tags,, CreationTime, and CompletionTime.\nOther values in request will be ignored."
     },
     "apiWorker": {
       "type": "object",
@@ -1664,10 +1664,10 @@
         "status": {
           "$ref": "#/definitions/apiState"
         },
-        "manufest": {
+        "manifest": {
           "type": "string"
         },
-        "metrics_collector_manufest": {
+        "metrics_collector_manifest": {
           "type": "string"
         },
         "tags": {

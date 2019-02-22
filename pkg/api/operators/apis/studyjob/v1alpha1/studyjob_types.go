@@ -31,6 +31,7 @@ type StudyJobSpec struct {
 	OptimizationType     OptimizationType      `json:"optimizationtype,omitempty"`
 	OptimizationGoal     *float64              `json:"optimizationgoal,omitempty"`
 	ObjectiveValueName   string                `json:"objectivevaluename,omitempty"`
+	RetainStudy          bool                  `json:"retainStudy,omitempty"`
 	RequestCount         int                   `json:"requestcount,omitempty"`
 	MetricsNames         []string              `json:"metricsnames,omitempty"`
 	ParameterConfigs     []ParameterConfig     `json:"parameterconfigs,omitempty"`

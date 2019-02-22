@@ -1476,7 +1476,7 @@ Create time will be filled in the server automatically side even user set the va
 
 ### UpdateWorkerStateRequest
 Update a Status of Worker.
-updatable values are Status, Manufest, MetricsCollectorManufest, Tags,, CreationTime, and CompletionTime.
+updatable values are Status, Manifest, MetricsCollectorManifest, Tags,, CreationTime, and CompletionTime.
 Other values in request will be ignored.
 
 
@@ -1504,8 +1504,8 @@ Types of worker supported by Katib are k8s Job, TF-Job, and Pytorch-Job.
 | trial_id | [string](#string) |  | Trial ID. |
 | type | [string](#string) |  | Type of Worker |
 | status | [State](#api.State) |  | Status of Worker. |
-| manufest | [string](#string) |  | A json formatted manufest for Worker. |
-| metrics_collector_manufest | [string](#string) |  | A json formatted manufest for MetricsCollector. |
+| manifest | [string](#string) |  | A json formatted manifest for Worker. |
+| metrics_collector_manifest | [string](#string) |  | A json formatted manifest for MetricsCollector. |
 | tags | [Tag](#api.Tag) | repeated | Tags of Worker. |
 | creation_time | [string](#string) |  | Creation Time. RFC3339 format. |
 | completion_time | [string](#string) |  | Completion Time. RFC3339 format. |

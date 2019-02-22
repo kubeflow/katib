@@ -204,7 +204,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 	if err != nil {
 		if errors.IsNotFound(err) {
 			if _, ok := r.muxMap.Load(request.NamespacedName.String()); ok {
-				log.Printf("Study %s was deleted. Resouces will be released.", request.NamespacedName.String())
+				log.Printf("StudyJob %s was deleted. Resouces will be released.", request.NamespacedName.String())
 				r.muxMap.Delete(request.NamespacedName.String())
 			}
 			// Object not found, return.  Created objects are automatically garbage collected.
@@ -227,6 +227,14 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		if !contains(pendingFinalizers, cleanDataFinalizer) {
 			return reconcile.Result{}, nil
 		}
+		if !instance.Spec.RetainStudy {
+			log.Printf("Study %s will be also deleted.", instance.Status.StudyID)
+			err = deleteStudy(instance)
+			if err != nil {
+				log.Printf("Fail to delete %v", err)
+				return reconcile.Result{}, err
+			}
+		}
 		finalizers := []string{}
 		for _, pendingFinalizer := range pendingFinalizers {
 			if pendingFinalizer != cleanDataFinalizer {
@@ -244,7 +252,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 	default:
 		now := metav1.Now()
 		instance.Status.StartTime = &now
-		update, err = initializeStudy(instance, request.Namespace)
+		update, err = initializeStudy(instance)
 		if err != nil {
 			r.Update(context.TODO(), instance)
 			log.Printf("Fail to initialize %v", err)
@@ -666,7 +674,7 @@ func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJ
 	uwreq := &katibapi.UpdateWorkerStateRequest{
 		WorkerId: wid,
 		NewStatus: &katibapi.Worker{
-			Manufest: wm.String(),
+			Manifest: wm.String(),
 		},
 	}
 	_, err = c.UpdateWorkerState(context.Background(), uwreq)
@@ -707,7 +715,7 @@ func (r *ReconcileStudyJobController) spawnMetricsCollector(instance *katibv1alp
 	uwreq := &katibapi.UpdateWorkerStateRequest{
 		WorkerId: workerID,
 		NewStatus: &katibapi.Worker{
-			MetricsCollectorManufest: mcm.String(),
+			MetricsCollectorManifest: mcm.String(),
 		},
 	}
 	_, err = c.UpdateWorkerState(context.Background(), uwreq)

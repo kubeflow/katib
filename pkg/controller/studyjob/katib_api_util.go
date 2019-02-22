@@ -25,7 +25,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func initializeStudy(instance *katibv1alpha1.StudyJob, ns string) (bool, error) {
+func initializeStudy(instance *katibv1alpha1.StudyJob) (bool, error) {
 	if instance.Spec.SuggestionSpec.SuggestionAlgorithm == "" {
 		instance.Spec.SuggestionSpec.SuggestionAlgorithm = "random"
 	}
