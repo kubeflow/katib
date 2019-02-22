@@ -53,13 +53,12 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
         self.logger.info("-" * 100 + "\nSetting Up Suggestion for StudyJob ID {}\n".format(studyID) + "-" * 100)
 
-        self._get_study_param(request.study_id
+        self._get_study_param(request.study_id)
         self._get_suggestion_param(request.param_id, request.study_id)
 
         self.tf_graphs[studyID] = tf.Graph()
         self.ctrl_step[studyID] = 0
         self.ctrl_cache_file[studyID] = "ctrl_cache/{}/{}.ckpt".format(studyID, studyID)
-)
 
         with self.tf_graphs[studyID].as_default():
             ctrl_param = self.suggestion_configs[studyID]
@@ -278,5 +277,6 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 self.logger.info("{}: \t{}".format(spec, suggestion_params[spec]))
             else:
                 self.logger.info("{}: \t\t{}".format(spec, suggestion_params[spec]))
+        self.logger.info("")
 
         self.suggestion_configs[studyID] = suggestion_params
