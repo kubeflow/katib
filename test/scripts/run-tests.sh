@@ -75,6 +75,7 @@ sed -i -e "s@image: katib\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/s
 sed -i -e "s@image: katib\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-grid:${VERSION}@" manifests/vizier/suggestion/grid/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-hyperband:${VERSION}@" manifests/vizier/suggestion/hyperband/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-bayesianoptimization:${VERSION}@" manifests/vizier/suggestion/bayesianoptimization/deployment.yaml
+sed -i -e "s@image: katib\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-nasrl:${VERSION}@" manifests/vizier/suggestion/nasrl/deployment.yaml
 sed -i -e "s@image: katib\/earlystopping-medianstopping@image: ${REGISTRY}\/${REPO_NAME}\/earlystopping-medianstopping:${VERSION}@" manifests/vizier/earlystopping/medianstopping/deployment.yaml
 sed -i -e '/volumeMounts:/,$d' manifests/vizier/db/deployment.yaml
 
@@ -113,6 +114,14 @@ until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
 done 
 cp -r test ${GO_DIR}/test
 cd ${GO_DIR}/test/e2e
+kubectl apply -f valid-studyjob.yaml
+kubectl delete -f valid-studyjob.yaml
+set +o errexit
+kubectl apply -f invalid-studyjob.yaml
+if [ $? -ne 1 ]; then
+  exit 1
+fi
+set -o errexit
 go run test-client.go -a random
 go run test-client.go -a grid -c suggestion-config-grid.yml
 #go run test-client.go -a hyperband -c suggestion-config-hyb.yml

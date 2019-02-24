@@ -8,6 +8,7 @@ rules:
   resources:
   - configmaps
   - serviceaccounts
+  - services
   verbs:
   - "*"
 - apiGroups:
@@ -32,6 +33,12 @@ rules:
   verbs:
   - create
   - get
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - validatingwebhookconfigurations
+  verbs:
+  - '*'
 - apiGroups:
   - kubeflow.org
   resources:

@@ -60,7 +60,7 @@ func TestGetStudies(t *testing.T) {
 	}
 	mockDB.EXPECT().GetStudyList().Return(sid, nil)
 	for i := range sid {
-		mockDB.EXPECT().GetStudyConfig(sid[i]).Return(sc[i], nil)
+		mockDB.EXPECT().GetStudy(sid[i]).Return(sc[i], nil)
 	}
 
 	req := &api.GetStudyListRequest{}
