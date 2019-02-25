@@ -39,3 +39,4 @@ cd ${GO_DIR}
 
 cp cmd/earlystopping/medianstopping/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/earlystopping-medianstopping:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/earlystopping-medianstopping:${VERSION} ${REGISTRY}/${REPO_NAME}/earlystopping-medianstopping:latest --verbosity=info
