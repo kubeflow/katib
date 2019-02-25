@@ -39,3 +39,4 @@ cd ${GO_DIR}
 
 cp cmd/suggestion/nasrl/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-nasrl:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/suggestion-nasrl:${VERSION} ${REGISTRY}/${REPO_NAME}/suggestion-nasrl:latest --verbosity=info

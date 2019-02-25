@@ -38,11 +38,14 @@ cp -r vendor ${GO_DIR}/vendor
 cd ${GO_DIR}
 cp cmd/studyjobcontroller/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/studyjob-controller:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/studyjob-controller:${VERSION} ${REGISTRY}/${REPO_NAME}/studyjob-controller:latest --verbosity=info
 
 cd ${GO_DIR}
 cp cmd/metricscollector/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/metrics-collector:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/metrics-collector:${VERSION} ${REGISTRY}/${REPO_NAME}/metrics-collector:latest --verbosity=info
 
 cd ${GO_DIR}
 cp cmd/tfevent-metricscollector/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/tfevent-metrics-collector:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/tfevent-metrics-collector:${VERSION} ${REGISTRY}/${REPO_NAME}/tfevent-metrics-collector:latest --verbosity=info

@@ -38,3 +38,4 @@ cp -r vendor ${GO_DIR}/vendor
 cd ${GO_DIR}
 cp cmd/manager-rest/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/vizier-core-rest:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/vizier-core-rest:${VERSION} ${REGISTRY}/${REPO_NAME}/vizier-core-rest:latest --verbosity=info
