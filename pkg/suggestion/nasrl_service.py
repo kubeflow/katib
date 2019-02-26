@@ -137,7 +137,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
         if logger == None:
             self.logger = getLogger(__name__)
-            FORMAT = '%(asctime)-15s study_id %(study_id)s %(message)s'
+            FORMAT = '%(asctime)-15s studyID %(study_id)s %(message)s'
             logging.basicConfig(format=FORMAT)
             handler = StreamHandler()
             handler.setLevel(INFO)
@@ -210,7 +210,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                         fetches=run_ops,
                         feed_dict={valid_acc: result})
                     self.logger.info("Suggetion updated. LSTM Controller Reward: {}".format(loss))
-                    
+
                     arc = sess.run(controller_ops["sample_arc"])
 
                     saver.save(sess, study.ctrl_cache_file)
