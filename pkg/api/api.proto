@@ -112,6 +112,7 @@ service Manager {
     };
     /** 
      * Get Suggestions from a Suggestion service.
+     * Returns newly created trials.
      */
     rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply){
         option (google.api.http) = {
