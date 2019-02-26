@@ -137,7 +137,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
         if logger == None:
             self.logger = getLogger(__name__)
-            FORMAT = '%(asctime)-15s studyID %(study_id)s %(message)s'
+            FORMAT = '%(asctime)-15s StudyID %(studyid)s %(message)s'
             logging.basicConfig(format=FORMAT)
             handler = StreamHandler()
             handler.setLevel(INFO)
