@@ -1306,6 +1306,7 @@ Suggestion service will generate next trials.
 | parameter_set | [Parameter](#api.Parameter) | repeated | Hyperparameter set |
 | objective_value | [string](#string) |  | Objective Value |
 | tags | [Tag](#api.Tag) | repeated | Tags of Trial. |
+| create_time | [string](#string) |  | Trial create timestamp RFC3339 format. |
 
 
 

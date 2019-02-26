@@ -366,6 +366,7 @@ message Trial {
     repeated Parameter parameter_set = 3; /// Hyperparameter set
     string objective_value = 4; /// Objective Value
     repeated Tag tags = 5; /// Tags of Trial.
+    string create_time = 6; /// Trial create timestamp RFC3339 format.
 }
 
 /** 
