@@ -551,6 +551,7 @@ func (m *StudyOverview) GetDescription() string {
 // A set of Hyperparameter.
 // In a study, multiple trials are evaluated by workers.
 // Suggestion service will generate next trials.
+// Create time will be filled in the server automatically side even user set the value
 type Trial struct {
 	TrialId        string       `protobuf:"bytes,1,opt,name=trial_id,json=trialId" json:"trial_id,omitempty"`
 	StudyId        string       `protobuf:"bytes,2,opt,name=study_id,json=studyId" json:"study_id,omitempty"`
