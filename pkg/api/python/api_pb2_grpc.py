@@ -143,6 +143,11 @@ class ManagerStub(object):
         request_serializer=api__pb2.GetSavedModelsRequest.SerializeToString,
         response_deserializer=api__pb2.GetSavedModelsReply.FromString,
         )
+    self.ValidateSuggestionParameters = channel.unary_unary(
+        '/api.Manager/ValidateSuggestionParameters',
+        request_serializer=api__pb2.ValidateSuggestionParametersRequest.SerializeToString,
+        response_deserializer=api__pb2.ValidateSuggestionParametersReply.FromString,
+        )
 
 
 class ManagerServicer(object):
@@ -355,6 +360,14 @@ class ManagerServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def ValidateSuggestionParameters(self, request, context):
+    """* 
+    Validate Suggestion Parameters from Study Job.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_ManagerServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -482,6 +495,11 @@ def add_ManagerServicer_to_server(servicer, server):
           servicer.GetSavedModels,
           request_deserializer=api__pb2.GetSavedModelsRequest.FromString,
           response_serializer=api__pb2.GetSavedModelsReply.SerializeToString,
+      ),
+      'ValidateSuggestionParameters': grpc.unary_unary_rpc_method_handler(
+          servicer.ValidateSuggestionParameters,
+          request_deserializer=api__pb2.ValidateSuggestionParametersRequest.FromString,
+          response_serializer=api__pb2.ValidateSuggestionParametersReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

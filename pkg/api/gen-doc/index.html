@@ -495,6 +495,14 @@
                 </li>
               
                 <li>
+                  <a href="#api.ValidateSuggestionParametersReply"><span class="badge">M</span>ValidateSuggestionParametersReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.ValidateSuggestionParametersRequest"><span class="badge">M</span>ValidateSuggestionParametersRequest</a>
+                </li>
+              
+                <li>
                   <a href="#api.Worker"><span class="badge">M</span>Worker</a>
                 </li>
               
@@ -2751,6 +2759,66 @@
 
         
       
+        <h3 id="api.ValidateSuggestionParametersReply">ValidateSuggestionParametersReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>is_valid</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.ValidateSuggestionParametersRequest">ValidateSuggestionParametersRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_config</td>
+                  <td><a href="#api.StudyConfig">StudyConfig</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>suggestion_algorithm</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>suggestion_parameters</td>
+                  <td><a href="#api.SuggestionParameter">SuggestionParameter</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
         <h3 id="api.Worker">Worker</h3>
         <p>A process of evaluation for a trial.</p><p>Types of worker supported by Katib are k8s Job, TF-Job, and Pytorch-Job.</p>
 
@@ -3179,6 +3247,13 @@ When the log you reported are already reported before, it will be dismissed and 
                 <td><a href="#api.GetSavedModelsRequest">GetSavedModelsRequest</a></td>
                 <td><a href="#api.GetSavedModelsReply">GetSavedModelsReply</a></td>
                 <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ValidateSuggestionParameters</td>
+                <td><a href="#api.ValidateSuggestionParametersRequest">ValidateSuggestionParametersRequest</a></td>
+                <td><a href="#api.ValidateSuggestionParametersReply">ValidateSuggestionParametersReply</a></td>
+                <td><p>Validate Suggestion Parameters from Study Job.</p></td>
               </tr>
             
           </tbody>

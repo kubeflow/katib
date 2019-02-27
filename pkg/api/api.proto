@@ -212,6 +212,15 @@ service Manager {
             get: "/api/Manager/GetSavedModels"
         };
     };
+    /** 
+     * Validate Suggestion Parameters from Study Job.
+     */
+     rpc ValidateSuggestionParameters(ValidateSuggestionParametersRequest) returns (ValidateSuggestionParametersReply){
+        option (google.api.http) = {
+            post: "/api/Manager/ValidateSuggestionParameters"
+            body: "*"
+        };
+    };
 }
 
 service Suggestion {
@@ -781,4 +790,14 @@ message EarlyStoppingParameterSet {
 
 message GetEarlyStoppingParameterListReply {
     repeated EarlyStoppingParameterSet early_stopping_parameter_sets = 1;
+}
+
+message ValidateSuggestionParametersRequest {
+    StudyConfig study_config = 1;
+    string suggestion_algorithm = 2;
+    repeated SuggestionParameter suggestion_parameters = 3;    
+}
+
+message ValidateSuggestionParametersReply {
+    bool is_valid = 1; 
 }

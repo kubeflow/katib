@@ -103,20 +103,6 @@ func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (*schema.GroupVersionKi
 
 func validateStudy(instance *katibv1alpha1.StudyJob) error {
 
-	if getJobType(instance.Spec.SuggestionSpec.SuggestionAlgorithm) != jobTypeNAS {
-		//Validate HP job
-		if validJobErr := validateHPJob(instance); validJobErr != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			return validJobErr
-		}
-	} else {
-		//Validate NAS job
-		if validJobErr := validateNASJob(instance); validJobErr != nil {
-			instance.Status.Condition = katibv1alpha1.ConditionFailed
-			return validJobErr
-		}
-	}
-
 	if instance.Spec.SuggestionSpec == nil {
 		return fmt.Errorf("No Spec.SuggestionSpec specified.")
 	}

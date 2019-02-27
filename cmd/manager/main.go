@@ -115,6 +115,25 @@ func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRe
 	return r, nil
 }
 
+func (s *server) ValidateSuggestionParameters(ctx context.Context, in *api_pb.ValidateSuggestionParametersRequest) (*api_pb.ValidateSuggestionParametersReply, error) {
+	if in.SuggestionAlgorithm == "" {
+		return &api_pb.ValidateSuggestionParametersReply{IsValid: false}, errors.New("No suggest algorithm specified")
+	}
+	conn, err := grpc.Dial("vizier-suggestion-"+in.SuggestionAlgorithm+":6789", grpc.WithInsecure())
+	if err != nil {
+		return &api_pb.ValidateSuggestionParametersReply{IsValid: false}, err
+	}
+	defer conn.Close()
+	c := api_pb.NewManagerClient(conn)
+
+	r, err := c.ValidateSuggestionParameters(ctx, in)
+
+	if err != nil {
+		return &api_pb.ValidateSuggestionParametersReply{IsValid: false}, err
+	}
+	return r, nil
+}
+
 func (s *server) RegisterWorker(ctx context.Context, in *api_pb.RegisterWorkerRequest) (*api_pb.RegisterWorkerReply, error) {
 	wid, err := dbIf.CreateWorker(in.Worker)
 	return &api_pb.RegisterWorkerReply{WorkerId: wid}, err

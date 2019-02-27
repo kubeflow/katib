@@ -16,6 +16,7 @@ package studyjob
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/kubeflow/katib/pkg"
@@ -45,6 +46,17 @@ func initializeStudy(instance *katibv1alpha1.StudyJob) error {
 	if err != nil {
 		return err
 	}
+
+	log.Println("Validate Parameters Start")
+	isValidSuggestionParameters := validateSuggestionParameters(c, studyConfig, instance.Spec.SuggestionSpec.SuggestionParameters, instance.Spec.SuggestionSpec.SuggestionAlgorithm)
+
+	if isValidSuggestionParameters {
+		log.Println("Suggestion Parameters is valid")
+	} else {
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		return errors.New("Suggestion Parameters is not valid")
+	}
+
 	log.Printf("Create Study %s", studyConfig.Name)
 	//CreateStudy
 	studyID, err := createStudy(c, studyConfig)
@@ -328,4 +340,36 @@ func getSuggestion(c katibapi.ManagerClient, studyID string, suggestionSpec *kat
 		log.Printf("\t%v", t)
 	}
 	return getSuggestReply, nil
+}
+
+func validateSuggestionParameters(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig, suggestionParameters []katibapi.SuggestionParameter, suggestionAlgorithm string) bool {
+	ctx := context.Background()
+
+	validateSuggestionParametersReq := &katibapi.ValidateSuggestionParametersRequest{
+		StudyConfig:         studyConfig,
+		SuggestionAlgorithm: suggestionAlgorithm,
+	}
+
+	for _, p := range suggestionParameters {
+		validateSuggestionParametersReq.SuggestionParameters = append(
+			validateSuggestionParametersReq.SuggestionParameters,
+			&katibapi.SuggestionParameter{
+				Name:  p.Name,
+				Value: p.Value,
+			},
+		)
+	}
+
+	validateSuggestionParametersReply, err := c.ValidateSuggestionParameters(ctx, validateSuggestionParametersReq)
+
+	if err.Error() == "rpc error: code = Unimplemented desc = Method not found!" {
+		log.Printf("Method ValidateSuggestionParameters not found inside Suggestion service: %s", suggestionAlgorithm)
+		return true
+	}
+	if err != nil {
+		log.Printf("ValidateSuggestionParameters Error: %v", err)
+		return false
+	}
+	return validateSuggestionParametersReply.IsValid
+
 }
