@@ -27,10 +27,11 @@ class Controller(object):
                  num_replicas=1,
                  skip_target=0.4,
                  skip_weight=0.8,
-                 name="controller"):
+                 name="controller",
+                 logger=None):
 
-        print("-" * 80)
-        print("Building Controller")
+        self.logger = logger
+        self.logger.info("Building Controller")
 
         self.num_layers = num_layers
         self.num_operations = num_operations
@@ -86,8 +87,7 @@ class Controller(object):
     def _build_sampler(self):
         """Build the sampler ops and the log_prob ops."""
 
-        print("-" * 80)
-        print("Building Controller Sampler")
+        self.logger.info("Building Controller Sampler")
         anchors = []
         anchors_w_1 = []
 
@@ -201,7 +201,6 @@ class Controller(object):
 
         self.train_step = tf.Variable(0, dtype=tf.int32, trainable=False, name=self.name + "_train_step")
         tf_variables = [var for var in tf.trainable_variables() if var.name.startswith(self.name)]
-        print("-" * 80)
 
         self.train_op, self.lr, self.grad_norm, self.optimizer = get_train_ops(
             self.loss,

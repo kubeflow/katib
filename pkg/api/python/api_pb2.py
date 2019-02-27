@@ -54,8 +54,13 @@ _PARAMETERTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
+<<<<<<< HEAD
   serialized_start=6172,
   serialized_end=6257,
+=======
+  serialized_start=5971,
+  serialized_end=6056,
+>>>>>>> upstream/master
 )
 _sym_db.RegisterEnumDescriptor(_PARAMETERTYPE)
 
@@ -81,8 +86,13 @@ _OPTIMIZATIONTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
+<<<<<<< HEAD
   serialized_start=6259,
   serialized_end=6331,
+=======
+  serialized_start=6058,
+  serialized_end=6130,
+>>>>>>> upstream/master
 )
 _sym_db.RegisterEnumDescriptor(_OPTIMIZATIONTYPE)
 
@@ -116,8 +126,13 @@ _STATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
+<<<<<<< HEAD
   serialized_start=6333,
   serialized_end=6404,
+=======
+  serialized_start=6132,
+  serialized_end=6203,
+>>>>>>> upstream/master
 )
 _sym_db.RegisterEnumDescriptor(_STATE)
 
@@ -647,6 +662,13 @@ _TRIAL = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='create_time', full_name='api.Trial.create_time', index=5,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -660,7 +682,7 @@ _TRIAL = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=809,
-  serialized_end=940,
+  serialized_end=961,
 )
 
 
@@ -732,8 +754,8 @@ _WORKER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=943,
-  serialized_end=1094,
+  serialized_start=964,
+  serialized_end=1115,
 )
 
 
@@ -763,8 +785,8 @@ _NASCONFIG_OPERATIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1197,
-  serialized_end=1244,
+  serialized_start=1218,
+  serialized_end=1265,
 )
 
 _NASCONFIG = _descriptor.Descriptor(
@@ -800,8 +822,8 @@ _NASCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1097,
-  serialized_end=1244,
+  serialized_start=1118,
+  serialized_end=1265,
 )
 
 
@@ -845,8 +867,8 @@ _GRAPHCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1246,
-  serialized_end=1320,
+  serialized_start=1267,
+  serialized_end=1341,
 )
 
 
@@ -876,8 +898,8 @@ _OPERATION_PARAMETERCONFIGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1419,
-  serialized_end=1476,
+  serialized_start=1440,
+  serialized_end=1497,
 )
 
 _OPERATION = _descriptor.Descriptor(
@@ -913,8 +935,8 @@ _OPERATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1323,
-  serialized_end=1476,
+  serialized_start=1344,
+  serialized_end=1497,
 )
 
 
@@ -944,8 +966,8 @@ _STUDYCONFIG_PARAMETERCONFIGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1419,
-  serialized_end=1476,
+  serialized_start=1440,
+  serialized_end=1497,
 )
 
 _STUDYCONFIG = _descriptor.Descriptor(
@@ -1051,8 +1073,8 @@ _STUDYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1479,
-  serialized_end=1887,
+  serialized_start=1500,
+  serialized_end=1908,
 )
 
 
@@ -1082,8 +1104,8 @@ _CREATESTUDYREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1889,
-  serialized_end=1949,
+  serialized_start=1910,
+  serialized_end=1970,
 )
 
 
@@ -1113,8 +1135,8 @@ _CREATESTUDYREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1951,
-  serialized_end=1987,
+  serialized_start=1972,
+  serialized_end=2008,
 )
 
 
@@ -1144,8 +1166,8 @@ _DELETESTUDYREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1989,
-  serialized_end=2027,
+  serialized_start=2010,
+  serialized_end=2048,
 )
 
 
@@ -1175,8 +1197,8 @@ _DELETESTUDYREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2029,
-  serialized_end=2065,
+  serialized_start=2050,
+  serialized_end=2086,
 )
 
 
@@ -1206,8 +1228,8 @@ _GETSTUDYREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2067,
-  serialized_end=2102,
+  serialized_start=2088,
+  serialized_end=2123,
 )
 
 
@@ -1237,8 +1259,8 @@ _GETSTUDYREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2104,
-  serialized_end=2159,
+  serialized_start=2125,
+  serialized_end=2180,
 )
 
 
@@ -1261,8 +1283,8 @@ _GETSTUDYLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2161,
-  serialized_end=2182,
+  serialized_start=2182,
+  serialized_end=2203,
 )
 
 
@@ -1292,8 +1314,8 @@ _GETSTUDYLISTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2184,
-  serialized_end=2248,
+  serialized_start=2205,
+  serialized_end=2269,
 )
 
 
@@ -1323,8 +1345,8 @@ _CREATETRIALREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2250,
-  serialized_end=2297,
+  serialized_start=2271,
+  serialized_end=2318,
 )
 
 
@@ -1354,8 +1376,8 @@ _CREATETRIALREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2299,
-  serialized_end=2335,
+  serialized_start=2320,
+  serialized_end=2356,
 )
 
 
@@ -1385,8 +1407,8 @@ _GETTRIALSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2337,
-  serialized_end=2373,
+  serialized_start=2358,
+  serialized_end=2394,
 )
 
 
@@ -1416,8 +1438,8 @@ _GETTRIALSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2375,
-  serialized_end=2419,
+  serialized_start=2396,
+  serialized_end=2440,
 )
 
 
@@ -1447,8 +1469,8 @@ _GETTRIALREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2421,
-  serialized_end=2456,
+  serialized_start=2442,
+  serialized_end=2477,
 )
 
 
@@ -1478,8 +1500,8 @@ _GETTRIALREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2458,
-  serialized_end=2500,
+  serialized_start=2479,
+  serialized_end=2521,
 )
 
 
@@ -1509,8 +1531,8 @@ _REGISTERWORKERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2502,
-  serialized_end=2554,
+  serialized_start=2523,
+  serialized_end=2575,
 )
 
 
@@ -1540,8 +1562,8 @@ _REGISTERWORKERREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2556,
-  serialized_end=2596,
+  serialized_start=2577,
+  serialized_end=2617,
 )
 
 
@@ -1585,8 +1607,8 @@ _STOPWORKERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2598,
-  serialized_end=2677,
+  serialized_start=2619,
+  serialized_end=2698,
 )
 
 
@@ -1609,8 +1631,8 @@ _STOPWORKERSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2679,
-  serialized_end=2697,
+  serialized_start=2700,
+  serialized_end=2718,
 )
 
 
@@ -1654,8 +1676,8 @@ _GETWORKERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2699,
-  serialized_end=2773,
+  serialized_start=2720,
+  serialized_end=2794,
 )
 
 
@@ -1685,8 +1707,8 @@ _GETWORKERSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2775,
-  serialized_end=2822,
+  serialized_start=2796,
+  serialized_end=2843,
 )
 
 
@@ -1723,8 +1745,8 @@ _UPDATEWORKERSTATEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2824,
-  serialized_end=2897,
+  serialized_start=2845,
+  serialized_end=2918,
 )
 
 
@@ -1747,8 +1769,8 @@ _UPDATEWORKERSTATEREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2899,
-  serialized_end=2923,
+  serialized_start=2920,
+  serialized_end=2944,
 )
 
 
@@ -1799,8 +1821,8 @@ _GETWORKERFULLINFOREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2925,
-  serialized_end=3031,
+  serialized_start=2946,
+  serialized_end=3052,
 )
 
 
@@ -1844,8 +1866,8 @@ _WORKERFULLINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3033,
-  serialized_end=3156,
+  serialized_start=3054,
+  serialized_end=3177,
 )
 
 
@@ -1875,8 +1897,8 @@ _GETWORKERFULLINFOREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3158,
-  serialized_end=3230,
+  serialized_start=3179,
+  serialized_end=3251,
 )
 
 
@@ -1934,8 +1956,8 @@ _GETSUGGESTIONSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3233,
-  serialized_end=3370,
+  serialized_start=3254,
+  serialized_end=3391,
 )
 
 
@@ -1965,8 +1987,8 @@ _GETSUGGESTIONSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3372,
-  serialized_end=3421,
+  serialized_start=3393,
+  serialized_end=3442,
 )
 
 
@@ -2010,8 +2032,8 @@ _GETSHOULDSTOPWORKERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3423,
-  serialized_end=3522,
+  serialized_start=3444,
+  serialized_end=3543,
 )
 
 
@@ -2041,8 +2063,8 @@ _GETSHOULDSTOPWORKERSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3524,
-  serialized_end=3583,
+  serialized_start=3545,
+  serialized_end=3604,
 )
 
 
@@ -2086,8 +2108,8 @@ _GETMETRICSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3585,
-  serialized_end=3665,
+  serialized_start=3606,
+  serialized_end=3686,
 )
 
 
@@ -2117,8 +2139,8 @@ _GETMETRICSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3667,
-  serialized_end=3730,
+  serialized_start=3688,
+  serialized_end=3751,
 )
 
 
@@ -2155,8 +2177,8 @@ _REPORTMETRICSLOGSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3732,
-  serialized_end=3822,
+  serialized_start=3753,
+  serialized_end=3843,
 )
 
 
@@ -2179,8 +2201,8 @@ _REPORTMETRICSLOGSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3824,
-  serialized_end=3848,
+  serialized_start=3845,
+  serialized_end=3869,
 )
 
 
@@ -2238,8 +2260,8 @@ _MODELINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3851,
-  serialized_end=3988,
+  serialized_start=3872,
+  serialized_end=4009,
 )
 
 
@@ -2276,8 +2298,8 @@ _DATASETINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3990,
-  serialized_end=4031,
+  serialized_start=4011,
+  serialized_end=4052,
 )
 
 
@@ -2321,8 +2343,8 @@ _SAVESTUDYREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4033,
-  serialized_end=4107,
+  serialized_start=4054,
+  serialized_end=4128,
 )
 
 
@@ -2345,8 +2367,8 @@ _SAVESTUDYREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4109,
-  serialized_end=4125,
+  serialized_start=4130,
+  serialized_end=4146,
 )
 
 
@@ -2390,8 +2412,8 @@ _SAVEMODELREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4127,
-  serialized_end=4234,
+  serialized_start=4148,
+  serialized_end=4255,
 )
 
 
@@ -2414,8 +2436,8 @@ _SAVEMODELREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4236,
-  serialized_end=4252,
+  serialized_start=4257,
+  serialized_end=4273,
 )
 
 
@@ -2438,8 +2460,8 @@ _GETSAVEDSTUDIESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4254,
-  serialized_end=4278,
+  serialized_start=4275,
+  serialized_end=4299,
 )
 
 
@@ -2469,8 +2491,8 @@ _GETSAVEDSTUDIESREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4280,
-  serialized_end=4339,
+  serialized_start=4301,
+  serialized_end=4360,
 )
 
 
@@ -2500,8 +2522,8 @@ _GETSAVEDMODELSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4341,
-  serialized_end=4384,
+  serialized_start=4362,
+  serialized_end=4405,
 )
 
 
@@ -2531,8 +2553,8 @@ _GETSAVEDMODELSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4386,
-  serialized_end=4439,
+  serialized_start=4407,
+  serialized_end=4460,
 )
 
 
@@ -2569,8 +2591,8 @@ _GETSAVEDMODELREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4441,
-  serialized_end=4502,
+  serialized_start=4462,
+  serialized_end=4523,
 )
 
 
@@ -2600,8 +2622,8 @@ _GETSAVEDMODELREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4504,
-  serialized_end=4555,
+  serialized_start=4525,
+  serialized_end=4576,
 )
 
 
@@ -2652,8 +2674,8 @@ _SETSUGGESTIONPARAMETERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4558,
-  serialized_end=4713,
+  serialized_start=4579,
+  serialized_end=4734,
 )
 
 
@@ -2683,8 +2705,8 @@ _SETSUGGESTIONPARAMETERSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4715,
-  serialized_end=4763,
+  serialized_start=4736,
+  serialized_end=4784,
 )
 
 
@@ -2714,8 +2736,8 @@ _GETSUGGESTIONPARAMETERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4765,
-  serialized_end=4815,
+  serialized_start=4786,
+  serialized_end=4836,
 )
 
 
@@ -2745,8 +2767,8 @@ _GETSUGGESTIONPARAMETERSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4817,
-  serialized_end=4904,
+  serialized_start=4838,
+  serialized_end=4925,
 )
 
 
@@ -2776,8 +2798,8 @@ _GETSUGGESTIONPARAMETERLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4906,
-  serialized_end=4959,
+  serialized_start=4927,
+  serialized_end=4980,
 )
 
 
@@ -2821,8 +2843,8 @@ _SUGGESTIONPARAMETERSET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4962,
-  serialized_end=5091,
+  serialized_start=4983,
+  serialized_end=5112,
 )
 
 
@@ -2852,8 +2874,8 @@ _GETSUGGESTIONPARAMETERLISTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5093,
-  serialized_end=5190,
+  serialized_start=5114,
+  serialized_end=5211,
 )
 
 
@@ -2883,8 +2905,8 @@ _STOPSUGGESTIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5192,
-  serialized_end=5233,
+  serialized_start=5213,
+  serialized_end=5254,
 )
 
 
@@ -2907,8 +2929,8 @@ _STOPSUGGESTIONREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5235,
-  serialized_end=5256,
+  serialized_start=5256,
+  serialized_end=5277,
 )
 
 
@@ -2959,8 +2981,8 @@ _SETEARLYSTOPPINGPARAMETERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5259,
-  serialized_end=5428,
+  serialized_start=5280,
+  serialized_end=5449,
 )
 
 
@@ -2990,8 +3012,8 @@ _SETEARLYSTOPPINGPARAMETERSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5430,
-  serialized_end=5481,
+  serialized_start=5451,
+  serialized_end=5502,
 )
 
 
@@ -3021,8 +3043,8 @@ _GETEARLYSTOPPINGPARAMETERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5483,
-  serialized_end=5536,
+  serialized_start=5504,
+  serialized_end=5557,
 )
 
 
@@ -3052,8 +3074,8 @@ _GETEARLYSTOPPINGPARAMETERSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5538,
-  serialized_end=5635,
+  serialized_start=5559,
+  serialized_end=5656,
 )
 
 
@@ -3083,8 +3105,8 @@ _GETEARLYSTOPPINGPARAMETERLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5637,
-  serialized_end=5693,
+  serialized_start=5658,
+  serialized_end=5714,
 )
 
 
@@ -3128,8 +3150,8 @@ _EARLYSTOPPINGPARAMETERSET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5696,
-  serialized_end=5839,
+  serialized_start=5717,
+  serialized_end=5860,
 )
 
 
@@ -3159,8 +3181,8 @@ _GETEARLYSTOPPINGPARAMETERLISTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5841,
-  serialized_end=5948,
+  serialized_start=5862,
+  serialized_end=5969,
 )
 
 

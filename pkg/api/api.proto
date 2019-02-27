@@ -368,6 +368,7 @@ message StudyOverview {
  * A set of Hyperparameter.
  * In a study, multiple trials are evaluated by workers.
  * Suggestion service will generate next trials.
+ * Create time will be filled in the server automatically side even user set the value
  */
 message Trial {
     string trial_id = 1; /// Trial ID.
@@ -375,6 +376,7 @@ message Trial {
     repeated Parameter parameter_set = 3; /// Hyperparameter set
     string objective_value = 4; /// Objective Value
     repeated Tag tags = 5; /// Tags of Trial.
+    string create_time = 6; /// Trial create timestamp RFC3339 format.
 }
 
 /** 

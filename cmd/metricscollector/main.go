@@ -78,8 +78,7 @@ func main() {
 	}
 	mls, err := mc.CollectWorkerLog(*workerID, *workerKind, screp.StudyConfig.ObjectiveValueName, screp.StudyConfig.Metrics, *namespace)
 	if err != nil {
-		log.Printf("Failed to collect logs: %v", err)
-		return
+		log.Fatalf("Failed to collect logs: %v", err)
 	}
 	rmreq := &api.ReportMetricsLogsRequest{
 		StudyId:        *studyID,
@@ -87,8 +86,7 @@ func main() {
 	}
 	_, err = c.ReportMetricsLogs(ctx, rmreq)
 	if err != nil {
-		log.Printf("Failed to Report logs: %v", err)
-		return
+		log.Fatalf("Failed to Report logs: %v", err)
 	}
 	log.Printf("Metrics reported. :\n%v", mls)
 	return

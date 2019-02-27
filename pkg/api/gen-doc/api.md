@@ -1299,6 +1299,7 @@ Tag for each resource.
 A set of Hyperparameter.
 In a study, multiple trials are evaluated by workers.
 Suggestion service will generate next trials.
+Create time will be filled in the server automatically side even user set the value
 
 
 | Field | Type | Label | Description |
@@ -1308,6 +1309,7 @@ Suggestion service will generate next trials.
 | parameter_set | [Parameter](#api.Parameter) | repeated | Hyperparameter set |
 | objective_value | [string](#string) |  | Objective Value |
 | tags | [Tag](#api.Tag) | repeated | Tags of Trial. |
+| create_time | [string](#string) |  | Trial create timestamp RFC3339 format. |
 
 
 
