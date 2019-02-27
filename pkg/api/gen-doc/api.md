@@ -1350,7 +1350,7 @@ Update a Status of Worker.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| is_valid | [bool](#bool) |  |  |
+| is_valid | [int32](#int32) |  |  |
 
 
 

@@ -1517,8 +1517,8 @@
       "type": "object",
       "properties": {
         "is_valid": {
-          "type": "boolean",
-          "format": "boolean"
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

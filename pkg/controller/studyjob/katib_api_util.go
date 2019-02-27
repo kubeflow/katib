@@ -50,7 +50,7 @@ func initializeStudy(instance *katibv1alpha1.StudyJob) error {
 	log.Println("Validate Parameters Start")
 	isValidSuggestionParameters := validateSuggestionParameters(c, studyConfig, instance.Spec.SuggestionSpec.SuggestionParameters, instance.Spec.SuggestionSpec.SuggestionAlgorithm)
 
-	if isValidSuggestionParameters {
+	if isValidSuggestionParameters == 1 {
 		log.Println("Suggestion Parameters is valid")
 	} else {
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
@@ -342,7 +342,7 @@ func getSuggestion(c katibapi.ManagerClient, studyID string, suggestionSpec *kat
 	return getSuggestReply, nil
 }
 
-func validateSuggestionParameters(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig, suggestionParameters []katibapi.SuggestionParameter, suggestionAlgorithm string) bool {
+func validateSuggestionParameters(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig, suggestionParameters []katibapi.SuggestionParameter, suggestionAlgorithm string) int32 {
 	ctx := context.Background()
 
 	validateSuggestionParametersReq := &katibapi.ValidateSuggestionParametersRequest{
@@ -362,13 +362,13 @@ func validateSuggestionParameters(c katibapi.ManagerClient, studyConfig *katibap
 
 	validateSuggestionParametersReply, err := c.ValidateSuggestionParameters(ctx, validateSuggestionParametersReq)
 
-	if err.Error() == "rpc error: code = Unimplemented desc = Method not found!" {
+	if err != nil && err.Error() == "rpc error: code = Unimplemented desc = Method not found!" {
 		log.Printf("Method ValidateSuggestionParameters not found inside Suggestion service: %s", suggestionAlgorithm)
-		return true
+		return 1
 	}
 	if err != nil {
 		log.Printf("ValidateSuggestionParameters Error: %v", err)
-		return false
+		return 0
 	}
 	return validateSuggestionParametersReply.IsValid
 

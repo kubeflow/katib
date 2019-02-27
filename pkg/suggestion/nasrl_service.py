@@ -156,7 +156,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         self.logger.info("study Config is {}".format(request.study_config))
         self.logger.info("Suggest Params is {}".format(request.suggestion_parameters))
 
-        return api_pb2.ValidateSuggestionParametersReply(is_valid=False)
+        return api_pb2.ValidateSuggestionParametersReply(is_valid=0)
 
 
     def GetSuggestions(self, request, context):

@@ -801,6 +801,9 @@ message ValidateSuggestionParametersRequest {
     repeated SuggestionParameter suggestion_parameters = 3;    
 }
 
+/**
+ * Return 1 if Suggestion Parameters is Valid, 0 if not
+ */
 message ValidateSuggestionParametersReply {
-    bool is_valid = 1; 
+    int32 is_valid = 1;
 }
