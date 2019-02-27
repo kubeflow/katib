@@ -1464,9 +1464,12 @@
           "items": {
             "$ref": "#/definitions/apiTag"
           }
+        },
+        "create_time": {
+          "type": "string"
         }
       },
-      "description": "*\nA set of Hyperparameter.\nIn a study, multiple trials are evaluated by workers.\nSuggestion service will generate next trials."
+      "title": "*\nA set of Hyperparameter.\nIn a study, multiple trials are evaluated by workers.\nSuggestion service will generate next trials.\nCreate time will be filled in the server automatically side even user set the value"
     },
     "apiUpdateWorkerStateReply": {
       "type": "object"
