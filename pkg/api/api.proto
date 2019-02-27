@@ -225,6 +225,7 @@ service Manager {
 
 service Suggestion {
     rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply);
+    rpc ValidateSuggestionParameters(ValidateSuggestionParametersRequest) returns (ValidateSuggestionParametersReply);
 }
 
 service EarlyStopping {

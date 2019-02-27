@@ -148,7 +148,16 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             self.logger = logger
 
         if not os.path.exists("ctrl_cache/"):
-            os.makedirs("ctrl_cache/")  
+            os.makedirs("ctrl_cache/")
+
+    def ValidateSuggestionParameters(self, request, context):
+        self.logger.info("Start Validation Suggestion Parameters")
+        self.logger.info("requst is {}".format(request))
+        self.logger.info("study Config is {}".format(request.study_config))
+        self.logger.info("Suggest Params is {}".format(request.suggestion_parameters))
+
+        return api_pb2.ValidateSuggestionParametersReply(is_valid=False)
+
 
     def GetSuggestions(self, request, context):
         if request.study_id not in self.registered_studies:

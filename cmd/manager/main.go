@@ -119,12 +119,14 @@ func (s *server) ValidateSuggestionParameters(ctx context.Context, in *api_pb.Va
 	if in.SuggestionAlgorithm == "" {
 		return &api_pb.ValidateSuggestionParametersReply{IsValid: false}, errors.New("No suggest algorithm specified")
 	}
+
 	conn, err := grpc.Dial("vizier-suggestion-"+in.SuggestionAlgorithm+":6789", grpc.WithInsecure())
 	if err != nil {
 		return &api_pb.ValidateSuggestionParametersReply{IsValid: false}, err
 	}
 	defer conn.Close()
-	c := api_pb.NewManagerClient(conn)
+
+	c := api_pb.NewSuggestionClient(conn)
 
 	r, err := c.ValidateSuggestionParameters(ctx, in)
 

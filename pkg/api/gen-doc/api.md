@@ -1519,6 +1519,7 @@ https://cloud.google.com/service-infrastructure/docs/service-management/referenc
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
 | GetSuggestions | [GetSuggestionsRequest](#api.GetSuggestionsRequest) | [GetSuggestionsReply](#api.GetSuggestionsRequest) |  |
+| ValidateSuggestionParameters | [ValidateSuggestionParametersRequest](#api.ValidateSuggestionParametersRequest) | [ValidateSuggestionParametersReply](#api.ValidateSuggestionParametersRequest) |  |
 
  
 

@@ -522,6 +522,11 @@ class SuggestionStub(object):
         request_serializer=api__pb2.GetSuggestionsRequest.SerializeToString,
         response_deserializer=api__pb2.GetSuggestionsReply.FromString,
         )
+    self.ValidateSuggestionParameters = channel.unary_unary(
+        '/api.Suggestion/ValidateSuggestionParameters',
+        request_serializer=api__pb2.ValidateSuggestionParametersRequest.SerializeToString,
+        response_deserializer=api__pb2.ValidateSuggestionParametersReply.FromString,
+        )
 
 
 class SuggestionServicer(object):
@@ -535,6 +540,13 @@ class SuggestionServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def ValidateSuggestionParameters(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_SuggestionServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -542,6 +554,11 @@ def add_SuggestionServicer_to_server(servicer, server):
           servicer.GetSuggestions,
           request_deserializer=api__pb2.GetSuggestionsRequest.FromString,
           response_serializer=api__pb2.GetSuggestionsReply.SerializeToString,
+      ),
+      'ValidateSuggestionParameters': grpc.unary_unary_rpc_method_handler(
+          servicer.ValidateSuggestionParameters,
+          request_deserializer=api__pb2.ValidateSuggestionParametersRequest.FromString,
+          response_serializer=api__pb2.ValidateSuggestionParametersReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
