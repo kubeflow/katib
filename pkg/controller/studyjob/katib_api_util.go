@@ -92,7 +92,6 @@ func initializeStudy(instance *katibv1alpha1.StudyJob) error {
 
 func getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
 	jobType := getJobType(instance)
-
 	if jobType == jobTypeNAS {
 		return populateConfigForNAS(instance)
 	}

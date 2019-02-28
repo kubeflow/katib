@@ -151,7 +151,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             os.makedirs("ctrl_cache/")
 
     def ValidateSuggestionParameters(self, request, context):
-        self.logger.info("Start Validation Suggestion Parameters")
+        self.logger.info("Validate Suggestion Parameters start")
         graph_config = request.study_config.nas_config.graph_config
 
         # Validate GraphConfig

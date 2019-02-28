@@ -101,7 +101,6 @@ func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (*schema.GroupVersionKi
 }
 
 func validateStudy(instance *katibv1alpha1.StudyJob) error {
-
 	if instance.Spec.SuggestionSpec == nil {
 		return fmt.Errorf("No Spec.SuggestionSpec specified.")
 	}
@@ -156,7 +155,6 @@ func validateStudy(instance *katibv1alpha1.StudyJob) error {
 	if mcjob.GetNamespace() != namespace || mcjob.GetName() != workerID {
 		return fmt.Errorf("Invalid metricsCollector template.")
 	}
-
 	return nil
 }
 
