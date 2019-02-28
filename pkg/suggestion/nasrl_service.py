@@ -155,34 +155,29 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         graph_config = request.study_config.nas_config.graph_config
 
         # Validate GraphConfig
+        # Check InputSize
         if not graph_config.input_size:
-            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-            context.set_details("Missing InputSize in GraphConfig:\n{}".format(graph_config))
-            return api_pb2.ValidateSuggestionParametersReply()
+            return self.SetValidateContextError(context, "Missing InputSize in GraphConfig:\n{}".format(graph_config))
 
+        # Check OutputSize
         if not graph_config.output_size:
-            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-            context.set_details("Missing OutputSize in GraphConfig:\n{}".format(graph_config))
-            return api_pb2.ValidateSuggestionParametersReply()
+            return self.SetValidateContextError(context, "Missing OutputSize in GraphConfig:\n{}".format(graph_config))
 
+        # Check NumLayers
         if not graph_config.num_layers:
-            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-            context.set_details("Missing NumLayers in GraphConfig:\n{}".format(graph_config))
-            return api_pb2.ValidateSuggestionParametersReply()
+            return self.SetValidateContextError(context, "Missing NumLayers in GraphConfig:\n{}".format(graph_config))
 
         # Validate each operation
         operations_list = list(request.study_config.nas_config.operations.operation)
         for operation in operations_list:
 
+            # Check OperationType
             if not operation.operationType:
-                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                context.set_details("Missing OperationType in Operation:\n{}".format(operation))
-                return api_pb2.ValidateSuggestionParametersReply()
+                return self.SetValidateContextError(context, "Missing OperationType in Operation:\n{}".format(operation))
 
+            # Check ParameterConfigs
             if not operation.parameter_configs.configs:
-                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                context.set_details("Missing ParameterConfigs in Operation:\n{}".format(operation))
-                return api_pb2.ValidateSuggestionParametersReply()
+                return self.SetValidateContextError(context, "Missing ParameterConfigs in Operation:\n{}".format(operation))
             
             # Validate each ParameterConfig in Operation
             configs_list = list(operation.parameter_configs.configs)
@@ -190,38 +185,33 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
                 # Check Name
                 if not config.name:
-                    context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                    context.set_details("Missing Name in ParameterConfig:\n{}".format(config))
-                    return api_pb2.ValidateSuggestionParametersReply()
+                    return self.SetValidateContextError(context, "Missing Name in ParameterConfig:\n{}".format(config))
 
                 # Check ParameterType
                 if not config.parameter_type:
-                    context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                    context.set_details("Missing ParameterType in ParameterConfig:\n{}".format(config))
-                    return api_pb2.ValidateSuggestionParametersReply()
+                    return self.SetValidateContextError(context, "Missing ParameterType in ParameterConfig:\n{}".format(config))
 
                 # Check List in Categorical or Discrete Type
                 if config.parameter_type == api_pb2.CATEGORICAL or config.parameter_type == api_pb2.DISCRETE:
                     if not config.feasible.list:
-                        context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                        context.set_details("Missing List in ParameterConfig.Feasible:\n{}".format(config))
-                        return api_pb2.ValidateSuggestionParametersReply()
+                        return self.SetValidateContextError(context, "Missing List in ParameterConfig.Feasible:\n{}".format(config) )
 
                 # Check Max, Min, Step in Int or Double Type
                 elif config.parameter_type == api_pb2.INT or config.parameter_type == api_pb2.DOUBLE:
                     if not config.feasible.min and not config.feasible.max:
-                        context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                        context.set_details("Missing Max and Min in ParameterConfig.Feasible:\n{}".format(config))
-                        return api_pb2.ValidateSuggestionParametersReply()
+                        return self.SetValidateContextError(context, "Missing Max and Min in ParameterConfig.Feasible:\n{}".format(config))
 
                     if config.parameter_type == api_pb2.DOUBLE and (not config.feasible.step or float(config.feasible.step) <= 0):
-                        context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                        context.set_details("Step parameter should be > 0 in ParameterConfig.Feasible:\n{}".format(config))
-                        return api_pb2.ValidateSuggestionParametersReply()
+                        return self.SetValidateContextError(context, "Step parameter should be > 0 in ParameterConfig.Feasible:\n{}".format(config))
 
         self.logger.info("All Suggestion Parameters are Valid")
         return api_pb2.ValidateSuggestionParametersReply()
 
+    def SetValidateContextError(self, context, error_message):
+        context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+        context.set_details(error_message)
+        self.logger.info(error_message)
+        return api_pb2.ValidateSuggestionParametersReply()
 
     def GetSuggestions(self, request, context):
         if request.study_id not in self.registered_studies:
