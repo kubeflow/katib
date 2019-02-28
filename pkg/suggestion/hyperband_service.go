@@ -445,3 +445,8 @@ func (h *HyperBandSuggestService) GetSuggestions(ctx context.Context, in *api.Ge
 		Trials: ts,
 	}, nil
 }
+
+func (s *HyperBandSuggestService) ValidateSuggestionParameters(ctx context.Context, in *api.ValidateSuggestionParametersRequest) (*api.ValidateSuggestionParametersReply, error) {
+
+	return &api.ValidateSuggestionParametersReply{}, nil
+}
