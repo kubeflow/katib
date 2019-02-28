@@ -52,14 +52,14 @@ func initializeStudy(instance *katibv1alpha1.StudyJob) error {
 		return err
 	}
 
-	log.Println("Validate Parameters inside Suggestion Start")
+	log.Println("Start to Validate Suggestion Parameters")
 	isValidSuggestionParameters := validateSuggestionParameters(c, studyConfig, instance.Spec.SuggestionSpec.SuggestionParameters, instance.Spec.SuggestionSpec.SuggestionAlgorithm)
 
 	if isValidSuggestionParameters {
-		log.Println("Suggestion Parameters is valid")
+		log.Println("Suggestion Parameters are valid")
 	} else {
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
-		return errors.New("Suggestion Parameters is not valid")
+		return errors.New("Suggestion Parameters are not valid")
 	}
 
 	log.Printf("Create Study %s", studyConfig.Name)

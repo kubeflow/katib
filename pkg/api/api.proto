@@ -802,7 +802,7 @@ message ValidateSuggestionParametersRequest {
 }
 
 /**
- * Return 1 if Suggestion Parameters is Valid, 0 if not
+ * Return Invalid Argument Error if Suggestion Parameters are not Valid
  */
 message ValidateSuggestionParametersReply {
 }
