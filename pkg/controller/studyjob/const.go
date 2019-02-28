@@ -17,9 +17,6 @@ const (
 	PyTorchJobWorker = "PyTorchJob"
 	jobTypeNAS       = "NAS"
 	jobTypeHP        = "HP"
-	suggestionNASRL  = "nasrl"
 )
 
 var ValidWorkerKindList = [...]string{DefaultJobWorker, TFJobWorker, PyTorchJobWorker}
-
-var suggestionNASList = []string{suggestionNASRL}

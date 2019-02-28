@@ -152,11 +152,75 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
     def ValidateSuggestionParameters(self, request, context):
         self.logger.info("Start Validation Suggestion Parameters")
-        self.logger.info("requst is {}".format(request))
-        self.logger.info("study Config is {}".format(request.study_config))
-        self.logger.info("Suggest Params is {}".format(request.suggestion_parameters))
+        graph_config = request.study_config.nas_config.graph_config
 
-        return api_pb2.ValidateSuggestionParametersReply(is_valid=0)
+        # Validate GraphConfig
+        if not graph_config.input_size:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details("Missing InputSize in GraphConfig:\n{}".format(graph_config))
+            return api_pb2.ValidateSuggestionParametersReply()
+
+        if not graph_config.output_size:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details("Missing OutputSize in GraphConfig:\n{}".format(graph_config))
+            return api_pb2.ValidateSuggestionParametersReply()
+
+        if not graph_config.num_layers:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details("Missing NumLayers in GraphConfig:\n{}".format(graph_config))
+            return api_pb2.ValidateSuggestionParametersReply()
+
+        # Validate each operation
+        operations_list = list(request.study_config.nas_config.operations.operation)
+        for operation in operations_list:
+
+            if not operation.operationType:
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                context.set_details("Missing OperationType in Operation:\n{}".format(operation))
+                return api_pb2.ValidateSuggestionParametersReply()
+
+            if not operation.parameter_configs.configs:
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                context.set_details("Missing ParameterConfigs in Operation:\n{}".format(operation))
+                return api_pb2.ValidateSuggestionParametersReply()
+            
+            # Validate each ParameterConfig in Operation
+            configs_list = list(operation.parameter_configs.configs)
+            for config in configs_list:
+
+                # Check Name
+                if not config.name:
+                    context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                    context.set_details("Missing Name in ParameterConfig:\n{}".format(config))
+                    return api_pb2.ValidateSuggestionParametersReply()
+
+                # Check ParameterType
+                if not config.parameter_type:
+                    context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                    context.set_details("Missing ParameterType in ParameterConfig:\n{}".format(config))
+                    return api_pb2.ValidateSuggestionParametersReply()
+
+                # Check List in Categorical or Discrete Type
+                if config.parameter_type == api_pb2.CATEGORICAL or config.parameter_type == api_pb2.DISCRETE:
+                    if not config.feasible.list:
+                        context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                        context.set_details("Missing List in ParameterConfig.Feasible:\n{}".format(config))
+                        return api_pb2.ValidateSuggestionParametersReply()
+
+                # Check Max, Min, Step in Int or Double Type
+                elif config.parameter_type == api_pb2.INT or config.parameter_type == api_pb2.DOUBLE:
+                    if not config.feasible.min and not config.feasible.max:
+                        context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                        context.set_details("Missing Max and Min in ParameterConfig.Feasible:\n{}".format(config))
+                        return api_pb2.ValidateSuggestionParametersReply()
+
+                    if config.parameter_type == api_pb2.DOUBLE and (not config.feasible.step or float(config.feasible.step) <= 0):
+                        context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                        context.set_details("Step parameter should be > 0 in ParameterConfig.Feasible:\n{}".format(config))
+                        return api_pb2.ValidateSuggestionParametersReply()
+
+        self.logger.info("All Suggestion Parameters are Valid")
+        return api_pb2.ValidateSuggestionParametersReply()
 
 
     def GetSuggestions(self, request, context):

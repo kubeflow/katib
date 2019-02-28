@@ -17,12 +17,16 @@ package studyjob
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/kubeflow/katib/pkg"
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func initializeStudy(instance *katibv1alpha1.StudyJob) error {
@@ -44,13 +48,14 @@ func initializeStudy(instance *katibv1alpha1.StudyJob) error {
 
 	studyConfig, err := getStudyConf(instance)
 	if err != nil {
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		return err
 	}
 
-	log.Println("Validate Parameters Start")
+	log.Println("Validate Parameters inside Suggestion Start")
 	isValidSuggestionParameters := validateSuggestionParameters(c, studyConfig, instance.Spec.SuggestionSpec.SuggestionParameters, instance.Spec.SuggestionSpec.SuggestionAlgorithm)
 
-	if isValidSuggestionParameters == 1 {
+	if isValidSuggestionParameters {
 		log.Println("Suggestion Parameters is valid")
 	} else {
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
@@ -86,15 +91,16 @@ func initializeStudy(instance *katibv1alpha1.StudyJob) error {
 }
 
 func getStudyConf(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConfig, error) {
-	jobType := getJobType(instance.Spec.SuggestionSpec.SuggestionAlgorithm)
+	jobType := getJobType(instance)
+
 	if jobType == jobTypeNAS {
 		return populateConfigForNAS(instance)
 	}
 	return populateConfigForHP(instance)
 }
 
-func getJobType(suggestionAlgorithm string) string {
-	if contains(suggestionNASList, suggestionAlgorithm) {
+func getJobType(instance *katibv1alpha1.StudyJob) string {
+	if instance.Spec.NasConfig != nil {
 		return jobTypeNAS
 	}
 	return jobTypeHP
@@ -179,6 +185,10 @@ func populateConfigForNAS(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConf
 	}
 	populateCommonConfigFields(instance, sconf)
 
+	if reflect.DeepEqual(instance.Spec.NasConfig.GraphConfig, katibv1alpha1.GraphConfig{}) {
+		return nil, fmt.Errorf("Missing GraphConfig in NasConfig: %v", instance.Spec.NasConfig)
+	}
+
 	sconf.NasConfig.GraphConfig.NumLayers = instance.Spec.NasConfig.GraphConfig.NumLayers
 	for _, i := range instance.Spec.NasConfig.GraphConfig.InputSize {
 		sconf.NasConfig.GraphConfig.InputSize = append(sconf.NasConfig.GraphConfig.InputSize, i)
@@ -186,6 +196,11 @@ func populateConfigForNAS(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConf
 	for _, o := range instance.Spec.NasConfig.GraphConfig.OutputSize {
 		sconf.NasConfig.GraphConfig.OutputSize = append(sconf.NasConfig.GraphConfig.OutputSize, o)
 	}
+
+	if instance.Spec.NasConfig.Operations == nil {
+		return nil, fmt.Errorf("Missing Operations in NasConfig")
+	}
+
 	for _, op := range instance.Spec.NasConfig.Operations {
 		operation := &katibapi.Operation{
 			ParameterConfigs: &katibapi.Operation_ParameterConfigs{
@@ -342,7 +357,7 @@ func getSuggestion(c katibapi.ManagerClient, studyID string, suggestionSpec *kat
 	return getSuggestReply, nil
 }
 
-func validateSuggestionParameters(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig, suggestionParameters []katibapi.SuggestionParameter, suggestionAlgorithm string) int32 {
+func validateSuggestionParameters(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig, suggestionParameters []katibapi.SuggestionParameter, suggestionAlgorithm string) bool {
 	ctx := context.Background()
 
 	validateSuggestionParametersReq := &katibapi.ValidateSuggestionParametersRequest{
@@ -360,16 +375,19 @@ func validateSuggestionParameters(c katibapi.ManagerClient, studyConfig *katibap
 		)
 	}
 
-	validateSuggestionParametersReply, err := c.ValidateSuggestionParameters(ctx, validateSuggestionParametersReq)
+	_, err := c.ValidateSuggestionParameters(ctx, validateSuggestionParametersReq)
 
-	if err != nil && err.Error() == "rpc error: code = Unimplemented desc = Method not found!" {
+	statusCode, _ := status.FromError(err)
+
+	if statusCode.Code() == codes.Unknown {
 		log.Printf("Method ValidateSuggestionParameters not found inside Suggestion service: %s", suggestionAlgorithm)
-		return 1
+		return true
 	}
+
 	if err != nil {
 		log.Printf("ValidateSuggestionParameters Error: %v", err)
-		return 0
+		return false
 	}
-	return validateSuggestionParametersReply.IsValid
+	return true
 
 }

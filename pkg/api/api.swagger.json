@@ -1515,12 +1515,7 @@
     },
     "apiValidateSuggestionParametersReply": {
       "type": "object",
-      "properties": {
-        "is_valid": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
+      "title": "*\nReturn 1 if Suggestion Parameters is Valid, 0 if not"
     },
     "apiValidateSuggestionParametersRequest": {
       "type": "object",

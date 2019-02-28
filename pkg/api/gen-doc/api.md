@@ -1345,12 +1345,7 @@ Update a Status of Worker.
 <a name="api.ValidateSuggestionParametersReply"/>
 
 ### ValidateSuggestionParametersReply
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| is_valid | [int32](#int32) |  |  |
+Return 1 if Suggestion Parameters is Valid, 0 if not
 
 
 
