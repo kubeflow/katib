@@ -8,14 +8,12 @@ import (
 
 	api "github.com/kubeflow/katib/pkg/api"
 	mockdb "github.com/kubeflow/katib/pkg/mock/db"
-	mockmodelstore "github.com/kubeflow/katib/pkg/mock/modelstore"
 )
 
 func TestCreateStudy(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockDB := mockdb.NewMockVizierDBInterface(ctrl)
-	mockModelStore := mockmodelstore.NewMockModelStore(ctrl)
 	sid := "teststudy"
 	sc := &api.StudyConfig{
 		Name:               "test",
@@ -27,16 +25,9 @@ func TestCreateStudy(t *testing.T) {
 	mockDB.EXPECT().CreateStudy(
 		sc,
 	).Return(sid, nil)
-	ssr := &api.SaveStudyRequest{
-		StudyName:   "test",
-		Owner:       "admin",
-		Description: "StudyID: " + sid,
-	}
-	mockModelStore.EXPECT().SaveStudy(ssr).Return(nil)
 
-	s := &server{
-		msIf: mockModelStore,
-	}
+	s := &server{}
+
 	req := &api.CreateStudyRequest{StudyConfig: sc}
 	ret, err := s.CreateStudy(context.Background(), req)
 	if err != nil {
@@ -50,11 +41,8 @@ func TestGetStudies(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockDB := mockdb.NewMockVizierDBInterface(ctrl)
-	mockModelStore := mockmodelstore.NewMockModelStore(ctrl)
 	sid := []string{"teststudy1", "teststudy2"}
-	s := &server{
-		msIf: mockModelStore,
-	}
+	s := &server{}
 	dbIf = mockDB
 	sc := []*api.StudyConfig{
 		&api.StudyConfig{
@@ -72,7 +60,7 @@ func TestGetStudies(t *testing.T) {
 	}
 	mockDB.EXPECT().GetStudyList().Return(sid, nil)
 	for i := range sid {
-		mockDB.EXPECT().GetStudyConfig(sid[i]).Return(sc[i], nil)
+		mockDB.EXPECT().GetStudy(sid[i]).Return(sc[i], nil)
 	}
 
 	req := &api.GetStudyListRequest{}

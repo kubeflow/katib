@@ -39,3 +39,4 @@ cd ${GO_DIR}
 
 cp cmd/suggestion/grid/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-grid:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/suggestion-grid:${VERSION} ${REGISTRY}/${REPO_NAME}/suggestion-grid:latest --verbosity=info

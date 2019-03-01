@@ -242,6 +242,10 @@
                     template: "build-suggestion-bo",
                   },
                   {
+                    name: "build-suggestion-nasrl",
+                    template: "build-suggestion-nasrl",
+                  },
+                  {
                     name: "build-earlystopping-median",
                     template: "build-earlystopping-median",
                   },
@@ -361,6 +365,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-bo", testWorkerImage, [
               "test/scripts/build-suggestion-bo.sh",
             ]),  // build-suggestion-bo
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-nasrl", testWorkerImage, [
+              "test/scripts/build-suggestion-nasrl.sh",
+            ]),  // build-suggestion-nasrl
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-earlystopping-median", testWorkerImage, [
               "test/scripts/build-earlystopping-median.sh",
             ]),  // build-earlystopping-median

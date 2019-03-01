@@ -13,32 +13,19 @@ package studyjob
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
+	"strings"
 
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
-	pytorchjobv1beta1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1beta1"
-	tfjobv1beta1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1beta1"
 
-	batchv1 "k8s.io/api/batch/v1"
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 )
-
-func createWorkerJobObj(kind string) runtime.Object {
-	switch kind {
-	case DefaultJobWorker:
-		return &batchv1.Job{}
-	case TFJobWorker:
-		return &tfjobv1beta1.TFJob{}
-	case PyTorchJobWorker:
-		return &pytorchjobv1beta1.PyTorchJob{}
-	}
-	return nil
-}
 
 func validateWorkerResource(wkind string) error {
 	for _, crd := range invalidCRDResources {
@@ -62,7 +49,7 @@ func isFatalWatchError(err error, job string) bool {
 	}
 }
 
-func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (string, error) {
+func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (*schema.GroupVersionKind, error) {
 	var typeChecker interface{}
 	BUFSIZE := 1024
 	_, m, err := getWorkerManifest(
@@ -78,36 +65,46 @@ func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (string, error) {
 		true,
 	)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if err := k8syaml.NewYAMLOrJSONDecoder(m, BUFSIZE).Decode(&typeChecker); err != nil {
 		log.Printf("Yaml decode validation error %v", err)
-		return "", err
+		return nil, err
 	}
 	tcMap, ok := typeChecker.(map[string]interface{})
 	if !ok {
-		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
+		return nil, fmt.Errorf("Cannot get kind of worker %v", typeChecker)
 	}
 	wkind, ok := tcMap["kind"]
 	if !ok {
-		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
+		return nil, fmt.Errorf("Cannot get kind of worker %v", typeChecker)
 	}
 	wkindS, ok := wkind.(string)
 	if !ok {
-		return "", fmt.Errorf("Cannot get kind of worker %v", typeChecker)
+		return nil, fmt.Errorf("Cannot get kind of worker %v", typeChecker)
+	}
+	apiVersion, ok := tcMap["apiVersion"]
+	if !ok {
+		return nil, fmt.Errorf("Cannot get apiVersion of worker %v", typeChecker)
+	}
+	apiVersionS, ok := apiVersion.(string)
+	if !ok {
+		return nil, fmt.Errorf("Cannot get apiVersion of worker %v", typeChecker)
 	}
 	for _, kind := range ValidWorkerKindList {
 		if kind == wkindS {
-			return wkindS, validateWorkerResource(kind)
+			workerGVK := schema.FromAPIVersionAndKind(apiVersionS, kind)
+			return &workerGVK, validateWorkerResource(kind)
 		}
 	}
-	return "", fmt.Errorf("Invalid kind of worker %v", typeChecker)
+	return nil, fmt.Errorf("Invalid kind of worker %v", typeChecker)
 }
 
-func validateStudy(instance *katibv1alpha1.StudyJob, namespace string) error {
+func validateStudy(instance *katibv1alpha1.StudyJob) error {
 	if instance.Spec.SuggestionSpec == nil {
 		return fmt.Errorf("No Spec.SuggestionSpec specified.")
 	}
+	namespace := instance.Namespace
 	BUFSIZE := 1024
 	wkind, err := getWorkerKind(instance.Spec.WorkerSpec)
 	if err != nil {
@@ -125,7 +122,7 @@ func validateStudy(instance *katibv1alpha1.StudyJob, namespace string) error {
 			ParameterSet: []*katibapi.Parameter{},
 		},
 		instance.Spec.WorkerSpec,
-		wkind,
+		wkind.Kind,
 		namespace,
 		true,
 	)
@@ -133,19 +130,18 @@ func validateStudy(instance *katibv1alpha1.StudyJob, namespace string) error {
 		return err
 	}
 
-	job := createWorkerJobObj(wkind)
+	job := &unstructured.Unstructured{}
 	if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(job); err != nil {
 		log.Printf("Yaml decode error %v", err)
 		return err
 	}
 
-	metav1Job := job.(metav1.Object)
-	if metav1Job.GetNamespace() != namespace || metav1Job.GetName() != workerID {
+	if job.GetNamespace() != namespace || job.GetName() != workerID {
 		return fmt.Errorf("Invalid worker template.")
 	}
 
 	var mcjob batchv1beta.CronJob
-	mcm, err := getMetricsCollectorManifest(studyID, trialID, workerID, wkind, namespace, instance.Spec.MetricsCollectorSpec)
+	mcm, err := getMetricsCollectorManifest(studyID, trialID, workerID, wkind.Kind, namespace, instance.Spec.MetricsCollectorSpec)
 	if err != nil {
 		log.Printf("getMetricsCollectorManifest error %v", err)
 		return err
@@ -208,4 +204,9 @@ func contains(l []string, s string) bool {
 		}
 	}
 	return false
+}
+
+func getMyNamespace() string {
+	data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+	return strings.TrimSpace(string(data))
 }
