@@ -1,0 +1,2 @@
+MANAGER_ADDRESS = "vizier-core"
+MANAGER_PORT = 6789

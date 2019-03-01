@@ -1,53 +1,32 @@
-import random
-import string
-
 import grpc
 import numpy as np
 
 from pkg.api.python import api_pb2
 from pkg.api.python import api_pb2_grpc
+from pkg.suggestion.config import MANAGER_ADDRESS, MANAGER_PORT
 from pkg.suggestion.bayesianoptimization.src.bayesian_optimization_algorithm import BOAlgorithm
 from pkg.suggestion.bayesianoptimization.src.algorithm_manager import AlgorithmManager
-import logging
-from logging import getLogger, StreamHandler, INFO, DEBUG
+from pkg.suggestion.bayesianoptimization.src.utils import get_logger
 
 
 class BayesianService(api_pb2_grpc.SuggestionServicer):
+
     def __init__(self, logger=None):
-        # {
-        #     study_id:[
-        #         {
-        #             trial_id:
-        #             metric:
-        #             parameters: []
-        #         }
-        #     ]
-        # }
-        self.manager_addr = "vizier-core"
-        self.manager_port = 6789
-        if logger == None:
-            self.logger = getLogger(__name__)
-            FORMAT = '%(asctime)-15s StudyID %(studyid)s %(message)s'
-            logging.basicConfig(format=FORMAT)
-            handler = StreamHandler()
-            handler.setLevel(INFO)
-            self.logger.setLevel(INFO)
-            self.logger.addHandler(handler)
-            self.logger.propagate = False
-        else:
-            self.logger = logger
+        self.manager_addr = MANAGER_ADDRESS
+        self.manager_port = MANAGER_PORT
+        self.logger = logger if (logger is not None) else get_logger()
 
     def GetSuggestions(self, request, context):
-        service_params = self.parseParameters(request.param_id)
-        study_conf = self.getStudyConfig(request.study_id)
-        X_train, y_train  = self.getEvalHistory(request.study_id, study_conf.objective_value_name, service_params["burn_in"])
+        service_params = self._parse_suggestion_parameters(request.param_id)
+        study_conf = self._get_study_config(request.study_id)
+        X_train, y_train = self._get_eval_history(request.study_id, study_conf.objective_value_name, service_params["burn_in"])
 
         algo_manager = AlgorithmManager(
-            study_id = request.study_id,
-            study_config = study_conf,
-            X_train = X_train,
-            y_train = y_train,
-            logger = self.logger,
+            study_id=request.study_id,
+            study_config=study_conf,
+            X_train=X_train,
+            y_train=y_train,
+            logger=self.logger,
         )
 
         lowerbound = np.array(algo_manager.lower_bound)
@@ -81,28 +60,26 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
             x_next = algo_manager.parse_x_next(x_next)
             x_next = algo_manager.convert_to_dict(x_next)
             trials.append(api_pb2.Trial(
-                    study_id=request.study_id,
-                    parameter_set=[
-                        api_pb2.Parameter(
-                            name=x["name"],
-                            value=str(x["value"]),
-                            parameter_type=x["type"],
-                        ) for x in x_next
+                study_id=request.study_id,
+                parameter_set=[
+                    api_pb2.Parameter(
+                        name=x["name"],
+                        value=str(x["value"]),
+                        parameter_type=x["type"],
+                    ) for x in x_next
                     ]
-                )
-            )
-        trials = self.registerTrials(trials)
+            ))
+        trials = self._register_trials(trials)
         return api_pb2.GetSuggestionsReply(
             trials=trials
         )
-    def getStudyConfig(self, studyID):
+    def _get_study_config(self, studyID):
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             gsrep = client.GetStudy(api_pb2.GetStudyRequest(study_id=studyID), 10)
             return gsrep.study_config
 
-    def getEvalHistory(self, studyID, obj_name, burn_in):
-        worker_hist = []
+    def _get_eval_history(self, studyID, obj_name, burn_in):
         x_train = []
         y_train = []
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
@@ -127,7 +104,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
 
         return x_train, y_train
 
-    def registerTrials(self, trials):
+    def _register_trials(self, trials):
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             for i, t in enumerate(trials):
@@ -135,9 +112,8 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
                 trials[i].trial_id = ctrep.trial_id
         return trials
 
-    def parseParameters(self, paramID):
+    def _parse_suggestion_parameters(self, paramID):
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
-        params = []
         with api_pb2.beta_create_Manager_stub(channel) as client:
             gsprep = client.GetSuggestionParameters(api_pb2.GetSuggestionParametersRequest(param_id=paramID), 10)
             params = gsprep.suggestion_parameters
@@ -158,7 +134,6 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
         }
         modes = ["pi", "ei"]
         model_types = ["gp", "rf"]
-        kernel_types = ["matern", "rbf"]
 
         for param in params:
             if param.name in parsed_service_params.keys():
@@ -166,7 +141,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
                     try:
                         float(param.value)
                     except ValueError:
-                        self.logger.warning("Parameter must be float for %s: %s back to default value",param.name , param.value)
+                        self.logger.warning("Parameter must be float for %s: %s back to default value", param.name, param.value)
                     else:
                         parsed_service_params[param.name] = float(param.value)
 
@@ -174,7 +149,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
                     try:
                         int(param.value)
                     except ValueError:
-                        self.logger.warning("Parameter must be int for %s: %s back to default value",param.name , param.value)
+                        self.logger.warning("Parameter must be int for %s: %s back to default value", param.name, param.value)
                     else:
                         parsed_service_params[param.name] = int(param.value)
 
@@ -182,17 +157,17 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
                     if param.value != "rbf" and param.value != "matern":
                         parsed_service_params[param.name] = param.value
                     else:
-                        self.logger.warning("Unknown Parameter for %s: %s back to default value",param.name , param.value)
+                        self.logger.warning("Unknown Parameter for %s: %s back to default value", param.name, param.value)
                 elif param.name == "mode"  and param.value in modes:
                     if param.value != "lcb" and param.value != "ei" and param.value != "pi":
                         parsed_service_params[param.name] = param.value
                     else:
-                        self.logger.warning("Unknown Parameter for %s: %s back to default value",param.name , param.value)
+                        self.logger.warning("Unknown Parameter for %s: %s back to default value", param.name, param.value)
                 elif param.name == "model_type" and param.value in model_types:
                     if param.value != "rf" and param.value != "gp":
                         parsed_service_params[param.name] = param.value
                     else:
-                        self.logger.warning("Unknown Parameter for %s: %s back to default value",param.name , param.value)
+                        self.logger.warning("Unknown Parameter for %s: %s back to default value", param.name, param.value)
             else:
                 self.logger.warning("Unknown Parameter name: %s ", param.name)
 
