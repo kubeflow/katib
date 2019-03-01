@@ -1,8 +1,9 @@
 """ module for algorithm manager """
+from collections.abc import Iterable
+
 import numpy as np
 
 from pkg.api.python import api_pb2
-
 from .utils import get_logger
 
 
@@ -29,23 +30,19 @@ class AlgorithmManager:
         self._study_id = study_id
         self._study_config = study_config
         self._goal = self._study_config.optimization_type
-        self._dim = 0
-        self._lowerbound = []
-        self._upperbound = []
-        self._types = []
-        self._names = []
-        # record all the feasible values of discrete type variables
-        self._discrete_info = []
-        self._categorical_info = []
-        self._name_id = {}
+        name_ids, dim, lower_bounds, upper_bounds, parameter_types, names, discrete_info, categorical_info = \
+            AlgorithmManager._parse_parameter_configs(self._study_config.parameter_configs.configs)
+        self._dim = dim
+        self._lowerbound = lower_bounds
+        self._upperbound = upper_bounds
+        self._types = parameter_types
+        self._names = names
+        self._discrete_info = discrete_info
+        self._categorical_info = categorical_info
+        self._name_id = name_ids
 
-        self._parse_config()
-
-        self._X_train = self._mapping_params(X_train)
-        self.parse_X()
-
-        self._y_train = y_train
-        self._parse_metric()
+        self._X_train = AlgorithmManager._mapping_params(X_train, self._dim, self._name_id, self._types, self._categorical_info)
+        self._y_train = AlgorithmManager._parse_metric(y_train, self.goal)
 
     @property
     def study_id(self):
@@ -107,83 +104,73 @@ class AlgorithmManager:
         """ return the target of the training data"""
         return self._y_train
 
-    def _parse_config(self):
-        """ extract info from the study configuration """
-        for i, param in enumerate(self._study_config.parameter_configs.configs):
-            self._name_id[param.name] = i
-            self._types.append(param.parameter_type)
-            self._names.append(param.name)
+    @staticmethod
+    def _parse_parameter_configs(parameter_configs):
+        name_ids = {}
+        dim = 0
+        lower_bounds = []
+        upper_bounds = []
+        parameter_types = []
+        names = []
+        discrete_info = []
+        categorical_info = []
+        for param_idx, param in enumerate(parameter_configs):
+            name_ids[param.name] = param_idx
+            parameter_types.append(param.parameter_type)
+            names.append(param.name)
             if param.parameter_type in [api_pb2.DOUBLE, api_pb2.INT]:
-                self._dim = self._dim + 1
-                self._lowerbound.append(float(param.feasible.min))
-                self._upperbound.append(float(param.feasible.max))
+                new_lower = param.feasible.min
+                new_upper = param.feasible.max
             elif param.parameter_type == api_pb2.DISCRETE:
-                self._dim = self._dim + 1
                 discrete_values = [int(x) for x in param.feasible.list]
-                min_value = min(discrete_values)
-                max_value = max(discrete_values)
-                self._lowerbound.append(min_value)
-                self._upperbound.append(max_value)
-                self._discrete_info.append(dict({
-                    "name": param.name,
-                    "values": discrete_values,
-                }))
-            # one hot encoding for categorical type
+                new_lower = min(discrete_values)
+                new_upper = max(discrete_values)
+                discrete_info.append(
+                    {"name": param.name, "values": discrete_values})
             elif param.parameter_type == api_pb2.CATEGORICAL:
                 num_feasible = len(param.feasible.list)
-                for i in range(num_feasible):
-                    self._lowerbound.append(0)
-                    self._upperbound.append(1)
-                self._categorical_info.append(dict({
+                new_lower = [0 for _ in range(num_feasible)]
+                new_upper = [1 for _ in range(num_feasible)]
+                categorical_info.append({
                     "name": param.name,
                     "values": param.feasible.list,
                     "number": num_feasible,
-                }))
-                self._dim += num_feasible
-
-    def _mapping_params(self, parameters_list):
-        if len(parameters_list) == 0:
-            return None
-        ret = []
-        for parameters in parameters_list:
-            maplist = [np.zeros(1)]*len(self._names)
-            for p in parameters:
-                self.logger.debug("mapping: %r", p, extra={"StudyID": self._study_id})
-                map_id = self._name_id[p.name]
-                if self._types[map_id] in [api_pb2.DOUBLE, api_pb2.INT, api_pb2.DISCRETE]:
-                    maplist[map_id] = float(p.value)
-                elif self._types[map_id] == api_pb2.CATEGORICAL:
-                    for ci in self._categorical_info:
-                        if ci["name"] == p.name:
-                            maplist[map_id] = np.zeros(ci["number"])
-                            for i, v in enumerate(ci["values"]):
-                                if v == p.value:
-                                    maplist[map_id][i] = 1
-                                    break
-            self.logger.debug("mapped: %r", maplist, extra={"StudyID": self._study_id})
-            ret.append(np.hstack(maplist))
-        return ret
-
-    def _parse_metric(self):
-        """ parse the metric to the dictionary """
-        if not self._y_train:
-            self._y_train = None
-            return
-        y = []
-        for metric in self._y_train:
-            if self._goal == api_pb2.MAXIMIZE:
-                y.append(float(metric))
+                })
+            if isinstance(new_lower, Iterable):
+                lower_bounds.extend(new_lower)
+                upper_bounds.extend(new_upper)
+                dim += len(new_lower)
             else:
-                y.append(-float(metric))
-        self.logger.debug("Ytrain: %r", y, extra={"StudyID": self._study_id})
-        self._y_train = np.array(y)
+                lower_bounds.append(new_lower)
+                upper_bounds.append(new_upper)
+                dim += 1
+        return name_ids, dim, lower_bounds, upper_bounds, parameter_types, names, discrete_info, categorical_info
 
-    def parse_X(self):
-        if not self._X_train:
-            self._X_train = None
-            return
-        self.logger.debug("Xtrain: %r", self._X_train, extra={"StudyID": self._study_id})
-        self._X_train = np.array(self._X_train)
+    @staticmethod
+    def _mapping_params(parameters_list, dim, name_id, types, categorical_info):
+        parsed_X = np.zeros(shape=(len(parameters_list), dim))
+        for row_idx, parameters in enumerate(parameters_list):
+            offset = 0
+            for p in parameters:
+                map_id = name_id[p.name]
+                if types[map_id] in [api_pb2.DOUBLE, api_pb2.INT, api_pb2.DISCRETE]:
+                    parsed_X[row_idx, offset] = float(p.value)
+                    offset += 1
+                elif types[map_id] == api_pb2.CATEGORICAL:
+                    for ci in categorical_info:
+                        if ci["name"] == p.name:
+                            value_num = ci["values"].index(p.value)
+                            parsed_X[row_idx, offset+value_num] = 1
+                            offset += ci["number"]
+        return parsed_X
+
+    @staticmethod
+    def _parse_metric(y_train, goal):
+        """ parse the metric to the dictionary """
+        y_array = np.array(y_train, dtype=np.float64)
+        if goal == api_pb2.MINIMIZE:
+                y_array *= -1
+        return y_array
 
     def parse_x_next(self, x_next):
         """ parse the next suggestion to the proper format """
