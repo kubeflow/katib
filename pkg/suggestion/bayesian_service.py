@@ -20,18 +20,24 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
         service_params = self._parse_suggestion_parameters(request.param_id)
         study_conf = self._get_study_config(request.study_id)
         past_suggestions, past_metrics = self._get_eval_history(request.study_id, study_conf.objective_value_name, service_params["burn_in"])
-        name_ids, dim, lower_bounds, upper_bounds, parameter_types, names, discrete_info, categorical_info = \
-            parsing_utils.parse_parameter_configs(study_conf.parameter_configs.configs)
+        parsed_config = parsing_utils.parse_parameter_configs(study_conf.parameter_configs.configs)
 
 
-        lower_bounds = np.array(lower_bounds)
-        upper_bounds = np.array(upper_bounds)
+        lower_bounds = np.array(parsed_config.lower_bounds)
+        upper_bounds = np.array(parsed_config.upper_bounds)
         self.logger.debug("lowerbound: %r", lower_bounds, extra={"StudyID": request.study_id})
         self.logger.debug("upperbound: %r", upper_bounds, extra={"StudyID": request.study_id})
-        X_train = parsing_utils.parse_previous_observations(past_suggestions)
-        y_train = parsing_utils.parse_metric(past_metrics)
+        X_train = parsing_utils.parse_previous_observations(
+            past_suggestions,
+            parsed_config.dim,
+            parsed_config.name_ids,
+            parsed_config.parameter_types,
+            parsed_config.categorical_info
+        )
+        y_train = parsing_utils.parse_metric(past_metrics,
+                                             study_conf.optimization_type)
         alg = BOAlgorithm(
-            dim=dim,
+            dim=parsed_config.dim,
             N=int(service_params["N"]),
             lowerbound=lower_bounds,
             upperbound=upper_bounds,
@@ -54,7 +60,11 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
         for x_next in x_next_list:
             x_next = x_next.squeeze()
             self.logger.debug("xnext: %r ", x_next, extra={"StudyID": request.study_id})
-            x_next = parsing_utils.parse_x_next(x_next, parameter_types, names, discrete_info, categorical_info)
+            x_next = parsing_utils.parse_x_next(x_next,
+                                                parsed_config.parameter_types,
+                                                parsed_config.names,
+                                                parsed_config.discrete_info,
+                                                parsed_config.categorical_info)
             trials.append(api_pb2.Trial(
                 study_id=request.study_id,
                 parameter_set=[

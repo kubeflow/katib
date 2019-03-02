@@ -8,6 +8,7 @@ from collections.abc import Iterable
 import numpy as np
 
 from pkg.api.python import api_pb2
+from .parameters import ParameterConfig
 
 
 def _deal_with_discrete(feasible_values, current_value):
@@ -63,7 +64,15 @@ def parse_parameter_configs(parameter_configs):
             lower_bounds.append(new_lower)
             upper_bounds.append(new_upper)
             dim += 1
-    return name_ids, dim, lower_bounds, upper_bounds, parameter_types, names, discrete_info, categorical_info
+    parsed_config = ParameterConfig(name_ids,
+                                    dim,
+                                    lower_bounds,
+                                    upper_bounds,
+                                    parameter_types,
+                                    names,
+                                    discrete_info,
+                                    categorical_info)
+    return parsed_config
 
 
 def parse_previous_observations(parameters_list, dim, name_id, types, categorical_info):
