@@ -25,9 +25,8 @@ If n = 12, m = 6, the definition of an architecture will be like:
 
 There are n rows, the i<sup>th</sup> row has i elements and describes the i<sup>th</sup> layer. Please notice that layer 0 is the input and is not included in this definition.
 
-In each row:
-The first integer ranges from 0 to m-1, indicates the operation in this layer.
-The next (i-1) integers is either 0 or 1. The k<sup>th</sup> (k>=2) integer indicates whether (k-2)<sup>th</sup> layer has a skip connection with this layer. (There will always be a connection from (k-1)<sup>th</sup> layer to k<sup>th</sup> layer)
+In each row, the first integer ranges from 0 to m-1 and indicates the operation in this layer.
+Starting from the second position, the k<sup>th</sup> integer is a boolean value that indicates whether (k-2)<sup>th</sup> layer has a skip connection with this layer. (There will always be a connection from (k-1)<sup>th</sup> layer to k<sup>th</sup> layer)
 
 ## Output of `GetSuggestion()`
 The output of `GetSuggestion()` consists of two parts: `architecture` and `nn_config`.
