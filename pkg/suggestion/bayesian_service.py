@@ -5,8 +5,8 @@ from pkg.api.python import api_pb2
 from pkg.api.python import api_pb2_grpc
 from pkg.suggestion.config import MANAGER_ADDRESS, MANAGER_PORT
 from pkg.suggestion.bayesianoptimization.src.bayesian_optimization_algorithm import BOAlgorithm
-from pkg.suggestion.bayesianoptimization.src.algorithm_manager import AlgorithmManager
 from pkg.suggestion.bayesianoptimization.src.utils import get_logger
+from pkg.suggestion.bayesianoptimization.src import parsing_utils
 
 
 class BayesianService(api_pb2_grpc.SuggestionServicer):
@@ -19,27 +19,24 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
     def GetSuggestions(self, request, context):
         service_params = self._parse_suggestion_parameters(request.param_id)
         study_conf = self._get_study_config(request.study_id)
-        X_train, y_train = self._get_eval_history(request.study_id, study_conf.objective_value_name, service_params["burn_in"])
+        past_suggestions, past_metrics = self._get_eval_history(request.study_id, study_conf.objective_value_name, service_params["burn_in"])
+        name_ids, dim, lower_bounds, upper_bounds, parameter_types, names, discrete_info, categorical_info = \
+            parsing_utils.parse_parameter_configs(study_conf.parameter_configs.configs)
 
-        algo_manager = AlgorithmManager(
-            study_id=request.study_id,
-            study_config=study_conf,
+
+        lower_bounds = np.array(lower_bounds)
+        upper_bounds = np.array(upper_bounds)
+        self.logger.debug("lowerbound: %r", lower_bounds, extra={"StudyID": request.study_id})
+        self.logger.debug("upperbound: %r", upper_bounds, extra={"StudyID": request.study_id})
+        X_train = parsing_utils.parse_previous_observations(past_suggestions)
+        y_train = parsing_utils.parse_metric(past_metrics)
+        alg = BOAlgorithm(
+            dim=dim,
+            N=int(service_params["N"]),
+            lowerbound=lower_bounds,
+            upperbound=upper_bounds,
             X_train=X_train,
             y_train=y_train,
-            logger=self.logger,
-        )
-
-        lowerbound = np.array(algo_manager.lower_bound)
-        upperbound = np.array(algo_manager.upper_bound)
-        self.logger.debug("lowerbound: %r", lowerbound, extra={"StudyID": request.study_id})
-        self.logger.debug("upperbound: %r", upperbound, extra={"StudyID": request.study_id})
-        alg = BOAlgorithm(
-            dim=algo_manager.dim,
-            N=int(service_params["N"]),
-            lowerbound=lowerbound,
-            upperbound=upperbound,
-            X_train=algo_manager.X_train,
-            y_train=algo_manager.y_train,
             mode=service_params["mode"],
             trade_off=service_params["trade_off"],
             # todo: support length_scale with array type
@@ -57,8 +54,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
         for x_next in x_next_list:
             x_next = x_next.squeeze()
             self.logger.debug("xnext: %r ", x_next, extra={"StudyID": request.study_id})
-            x_next = algo_manager.parse_x_next(x_next)
-            x_next = algo_manager.convert_to_dict(x_next)
+            x_next = parsing_utils.parse_x_next(x_next, parameter_types, names, discrete_info, categorical_info)
             trials.append(api_pb2.Trial(
                 study_id=request.study_id,
                 parameter_set=[
@@ -73,6 +69,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
         return api_pb2.GetSuggestionsReply(
             trials=trials
         )
+
     def _get_study_config(self, studyID):
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
