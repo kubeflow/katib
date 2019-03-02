@@ -10,8 +10,10 @@ from logging import getLogger, StreamHandler, INFO, DEBUG
 import json
 import os
 
+
 MANAGER_ADDRESS = "vizier-core"
 MANAGER_PORT = 6789
+
 
 class NAS_RL_StudyJob(object):
     def __init__(self, request, logger):
@@ -20,7 +22,7 @@ class NAS_RL_StudyJob(object):
         self.param_id = request.param_id
         self.study_name = None
         self.tf_graph = tf.Graph()
-        self.prev_trial_id = None
+        self.prev_trial_ids = list()
         self.ctrl_cache_file = "ctrl_cache/{}/{}.ckpt".format(request.study_id, request.study_id)
         self.ctrl_step = 0
         self.is_first_run = True
@@ -33,11 +35,13 @@ class NAS_RL_StudyJob(object):
         self.search_space = None
         self.opt_direction = None
         self.objective_name = None
+        self.num_trials = 1
         
         self.logger.info("-" * 100 + "\nSetting Up Suggestion for StudyJob ID {}\n".format(request.study_id) + "-" * 100)
         self._get_study_param()
         self._get_suggestion_param()
         self._setup_controller()
+        self.num_trials = self.suggestion_config["num_trials"]
         self.logger.info("Suggestion for StudyJob {} (ID: {}) has been initialized.\n".format(self.study_name, self.study_id))
         
     def _get_study_param(self):
@@ -188,7 +192,10 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 self.logger.info("First time running suggestion for {}. Random architecture will be given.".format(study.study_name))
                 with tf.Session() as sess:
                     sess.run(tf.global_variables_initializer())
-                    arc = sess.run(controller_ops["sample_arc"])
+                    candidates = list()
+                    for _ in range(study.num_trials):
+                        candidates.append(sess.run(controller_ops["sample_arc"]))
+                    
                     # TODO: will use PVC to store the checkpoint to protect against unexpected suggestion pod restart
                     saver.save(sess, study.ctrl_cache_file)
 
@@ -199,90 +206,108 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     saver.restore(sess, study.ctrl_cache_file)
 
                     valid_acc = ctrl.reward
-                    result = self.GetEvaluationResult(study)
+                    results = self.GetEvaluationResult(study)
+                    avg_result = sum(results) / len(results)
+
+                    self.logger.info("Evaluation results of previous trials: {}".format(str(results)[1:-1]))
+                    self.logger.info("The average is {}".format(avg_result))
 
                     # This lstm cell is designed to maximize the metrics
                     # However, if the user want to minimize the metrics, we can take the negative of the result
                     if study.opt_direction == api_pb2.MINIMIZE:
-                        result = -result
+                        avg_result = -avg_result
 
                     loss, entropy, lr, gn, bl, skip, _ = sess.run(
                         fetches=run_ops,
-                        feed_dict={valid_acc: result})
+                        feed_dict={valid_acc: avg_result})
                     self.logger.info("Suggetion updated. LSTM Controller Reward: {}".format(loss))
 
-                    arc = sess.run(controller_ops["sample_arc"])
+                    candidates = list()
+                    for _ in range(study.num_trials):
+                        candidates.append(sess.run(controller_ops["sample_arc"]))
 
                     saver.save(sess, study.ctrl_cache_file)
+        
+        organized_candidates = list()
+        trials = list()
 
-        arc = arc.tolist()
-        organized_arc = [0 for _ in range(study.num_layers)]
-        record = 0
-        for l in range(study.num_layers):
-            organized_arc[l] = arc[record: record + l + 1]
-            record += l + 1
+        for i in range(study.num_trials):
+            arc = candidates[i].tolist()
+            organized_arc = [0 for _ in range(study.num_layers)]
+            record = 0
+            for l in range(study.num_layers):
+                organized_arc[l] = arc[record: record + l + 1]
+                record += l + 1
+            organized_candidates.append(organized_arc)
 
-        nn_config = dict()
-        nn_config['num_layers'] = study.num_layers
-        nn_config['input_size'] = study.input_size
-        nn_config['output_size'] = study.output_size
-        nn_config['embedding'] = dict()
-        for l in range(study.num_layers):
-            opt = organized_arc[l][0]
-            nn_config['embedding'][opt] = study.search_space[opt].get_dict()
+            nn_config = dict()
+            nn_config['num_layers'] = study.num_layers
+            nn_config['input_size'] = study.input_size
+            nn_config['output_size'] = study.output_size
+            nn_config['embedding'] = dict()
+            for l in range(study.num_layers):
+                opt = organized_arc[l][0]
+                nn_config['embedding'][opt] = study.search_space[opt].get_dict()
 
-        organized_arc_json = json.dumps(organized_arc)
-        nn_config_json = json.dumps(nn_config)
+            organized_arc_json = json.dumps(organized_arc)
+            nn_config_json = json.dumps(nn_config)
 
-        organized_arc_str = str(organized_arc_json).replace('\"', '\'')
-        nn_config_str = str(nn_config_json).replace('\"', '\'')
+            organized_arc_str = str(organized_arc_json).replace('\"', '\'')
+            nn_config_str = str(nn_config_json).replace('\"', '\'')
 
-        self.logger.info("\nNew Neural Network Architecture (internal representation):")
-        self.logger.info(organized_arc_json)
-        self.logger.info("\nCorresponding Seach Space Description:")
-        self.logger.info(nn_config_str)
-        self.logger.info("")
+            self.logger.info("\nNeural Network Architecture Candidate #{} (internal representation):".format(i))
+            self.logger.info(organized_arc_json)
+            self.logger.info("\nCorresponding Seach Space Description:")
+            self.logger.info(nn_config_str)
 
-        trials = []
-        trials.append(api_pb2.Trial(
-                study_id=request.study_id,
-                parameter_set=[
-                    api_pb2.Parameter(
-                        name="architecture",
-                        value=organized_arc_str,
-                        parameter_type= api_pb2.CATEGORICAL),
-                    api_pb2.Parameter(
-                        name="nn_config",
-                        value=nn_config_str,
-                        parameter_type= api_pb2.CATEGORICAL)
-                ], 
+            trials.append(api_pb2.Trial(
+                    study_id=request.study_id,
+                    parameter_set=[
+                        api_pb2.Parameter(
+                            name="architecture",
+                            value=organized_arc_str,
+                            parameter_type= api_pb2.CATEGORICAL),
+                        api_pb2.Parameter(
+                            name="nn_config",
+                            value=nn_config_str,
+                            parameter_type= api_pb2.CATEGORICAL)
+                    ], 
+                )
             )
-        )
 
+        self.logger.info("")
         channel = grpc.beta.implementations.insecure_channel(MANAGER_ADDRESS, MANAGER_PORT)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             for i, t in enumerate(trials):
                 ctrep = client.CreateTrial(api_pb2.CreateTrialRequest(trial=t), 10)
                 trials[i].trial_id = ctrep.trial_id
-            self.logger.info("Trial {} Created\n".format(ctrep.trial_id))
-            study.prev_trial_id = ctrep.trial_id
-        
+                self.logger.info("Trial {} Created".format(ctrep.trial_id))
+                study.prev_trial_ids.append(ctrep.trial_id)
+        self.logger.info("")
+
         study.ctrl_step += 1
 
         return api_pb2.GetSuggestionsReply(trials=trials)
 
     def GetEvaluationResult(self, study):
-        worker_list = []
         channel = grpc.beta.implementations.insecure_channel(MANAGER_ADDRESS, MANAGER_PORT)
         with api_pb2.beta_create_Manager_stub(channel) as client:
-            gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=study.study_id, trial_id=study.prev_trial_id, only_latest_log=True), 10)
-            worker_list = gwfrep.worker_full_infos
+            gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=study.study_id, only_latest_log=True), 10)
+            trials_list = gwfrep.worker_full_infos
+        
+        completed = True
+        for trial in trials_list:
+            completed = completed and (trial.Worker.status == api_pb2.COMPLETED)
+        
 
-        for w in worker_list:
-            if w.Worker.status == api_pb2.COMPLETED:
-                for ml in w.metrics_logs:
+        if completed:
+            metrics = list()
+
+            for t in trials_list:
+                for ml in t.metrics_logs:
                     if ml.name == study.objective_name:
-                        self.logger.info("Evaluation result of previous candidate: {}".format(ml.values[-1].value))
-                        return float(ml.values[-1].value)
+                        metrics.append(float(ml.values[-1].value))
 
+            return metrics
+        
         # TODO: add support for multiple trials

@@ -150,6 +150,8 @@ spec:
   suggestionSpec:
     suggestionAlgorithm: "nasrl"
     suggestionParameters:
+      - name: "num_trials"
+        value: "1"
       - name: "lstm_num_cells"
         value: "64"
       - name: "lstm_num_layers"
