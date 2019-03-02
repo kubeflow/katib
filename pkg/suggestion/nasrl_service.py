@@ -309,5 +309,3 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                         metrics.append(float(ml.values[-1].value))
 
             return metrics
-        
-        # TODO: add support for multiple trials
