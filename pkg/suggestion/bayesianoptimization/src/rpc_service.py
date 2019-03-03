@@ -2,8 +2,8 @@ import grpc
 
 from pkg.api.python import api_pb2
 from pkg.api.python import api_pb2_grpc
-from .config import MANAGER_ADDRESS, MANAGER_PORT
-from .bayesian_optimization_algorithm import BOAlgorithm
+from .config import MANAGER_ADDRESS, MANAGER_PORT, SEARCH_ALGORITHM
+from .algorithm_register import ALGORITHM_REGISTER
 from .utils import get_logger
 from . import parsing_utils
 
@@ -33,7 +33,7 @@ class SuggestionService(api_pb2_grpc.SuggestionServicer):
         )
         y_train = parsing_utils.parse_metric(past_metrics,
                                              study_conf.optimization_type)
-        alg = BOAlgorithm(parameter_config, suggestion_config, X_train, y_train, logger=self.logger)
+        alg = ALGORITHM_REGISTER[SEARCH_ALGORITHM](parameter_config, suggestion_config, X_train, y_train, logger=self.logger)
         trials = []
         x_next_list = alg.get_suggestion(request.request_number)
         for x_next in x_next_list:
