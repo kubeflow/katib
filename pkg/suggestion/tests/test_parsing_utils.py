@@ -26,46 +26,6 @@ def observations():
     return Box(contents)
 
 
-@pytest.fixture()
-def correct_lower_bounds():
-    return [-5.0, -5, 2, 0, 0]
-
-
-@pytest.fixture()
-def correct_upper_bounds():
-    return [5.0, 5, 5, 1, 1]
-
-
-@pytest.fixture
-def correct_names():
-    return ["x", "y", "fake_discrete", "fake_categorical"]
-
-
-@pytest.fixture
-def correct_name_ids():
-    return {"x": 0, "y": 1, "fake_discrete": 2, "fake_categorical": 3}
-
-
-@pytest.fixture
-def correct_dim():
-    return 5
-
-
-@pytest.fixture
-def correct_param_types():
-    return [api_pb2.DOUBLE, api_pb2.INT, api_pb2.DISCRETE, api_pb2.CATEGORICAL]
-
-
-@pytest.fixture
-def correct_discrete_info():
-    return [{"name": "fake_discrete", "values": [2, 3, 5]}]
-
-
-@pytest.fixture
-def correct_categorical_info():
-    return [{"name": "fake_categorical", "values": ["true", "false"], "number": 2}]
-
-
 def test_parsing_study_config(study_config, correct_dim, correct_names, correct_name_ids,
                               correct_param_types, correct_lower_bounds,
                               correct_upper_bounds, correct_discrete_info,
@@ -99,17 +59,16 @@ def test_parsing_x_next(correct_param_types, correct_names,
 
 def test_parsing_past_observations(observations, correct_dim,
                                    correct_name_ids, correct_param_types,
-                                   correct_categorical_info):
+                                   correct_categorical_info, correct_X_train):
     X_train = parsing_utils.parse_previous_observations(
         observations.parameters,
         correct_dim,
         correct_name_ids,
         correct_param_types,
         correct_categorical_info)
-    assert np.allclose(X_train,
-                       np.array([[1.0, 1, 2, 1, 0], [1.0, 1, 3, 0, 1]]))
+    assert np.allclose(X_train, correct_X_train)
 
 
-def test_parsing_past_metrics(study_config, observations):
+def test_parsing_past_metrics(study_config, observations, correct_y_train):
     y_train = parsing_utils.parse_metric(observations.metrics, study_config.optimization_type)
-    assert np.allclose(y_train, np.array([1.0, 1.0]))
+    assert np.allclose(y_train, correct_y_train)

@@ -38,9 +38,12 @@ def parse_parameter_configs(parameter_configs):
         name_ids[param.name] = param_idx
         parameter_types.append(param.parameter_type)
         names.append(param.name)
-        if param.parameter_type in [api_pb2.DOUBLE, api_pb2.INT]:
-            new_lower = param.feasible.min
-            new_upper = param.feasible.max
+        if param.parameter_type == api_pb2.DOUBLE:
+            new_lower = float(param.feasible.min)
+            new_upper = float(param.feasible.max)
+        elif param.parameter_type == api_pb2.INT:
+            new_lower = int(param.feasible.min)
+            new_upper = int(param.feasible.max)
         elif param.parameter_type == api_pb2.DISCRETE:
             discrete_values = [int(x) for x in param.feasible.list]
             new_lower = min(discrete_values)
