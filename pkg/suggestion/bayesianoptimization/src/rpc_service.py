@@ -2,13 +2,13 @@ import grpc
 
 from pkg.api.python import api_pb2
 from pkg.api.python import api_pb2_grpc
-from pkg.suggestion.config import MANAGER_ADDRESS, MANAGER_PORT
-from pkg.suggestion.bayesianoptimization.src.bayesian_optimization_algorithm import BOAlgorithm
-from pkg.suggestion.bayesianoptimization.src.utils import get_logger
-from pkg.suggestion.bayesianoptimization.src import parsing_utils
+from .config import MANAGER_ADDRESS, MANAGER_PORT
+from .bayesian_optimization_algorithm import BOAlgorithm
+from .utils import get_logger
+from . import parsing_utils
 
 
-class BayesianService(api_pb2_grpc.SuggestionServicer):
+class SuggestionService(api_pb2_grpc.SuggestionServicer):
 
     def __init__(self, logger=None):
         self.manager_addr = MANAGER_ADDRESS
@@ -59,13 +59,13 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
             trials=trials
         )
 
-    def _get_study_config(self, studyID):
+    def _get_study_config(self, studyID): # pragma: no cover
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             gsrep = client.GetStudy(api_pb2.GetStudyRequest(study_id=studyID), 10)
             return gsrep.study_config
 
-    def _get_eval_history(self, studyID, obj_name):
+    def _get_eval_history(self, studyID, obj_name): # pragma: no cover
         x_train = []
         y_train = []
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
@@ -84,7 +84,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
 
         return x_train, y_train
 
-    def _register_trials(self, trials):
+    def _register_trials(self, trials): # pragma: no cover
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             for i, t in enumerate(trials):
@@ -92,7 +92,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
                 trials[i].trial_id = ctrep.trial_id
         return trials
 
-    def _parse_suggestion_parameters(self, paramID):
+    def _parse_suggestion_parameters(self, paramID): # pragma: no cover
         channel = grpc.beta.implementations.insecure_channel(self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             gsprep = client.GetSuggestionParameters(api_pb2.GetSuggestionParametersRequest(param_id=paramID), 10)

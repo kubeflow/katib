@@ -1,4 +1,5 @@
 optimization_type: 2 # Code for Maximize
+objective_value_name: "accuracy"
 parameter_configs:
   configs:
     - parameter_type: 1 # Code for DOUBLE

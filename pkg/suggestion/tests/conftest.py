@@ -1,5 +1,9 @@
 # pylint: disable=missing-docstring
+import os
+
+import yaml
 import pytest
+from box import Box
 import numpy as np
 
 from pkg.api.python import api_pb2
@@ -94,6 +98,23 @@ def upper_bounds():
 @pytest.fixture
 def dim():
     return 2
+
+
+TEST_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+@pytest.fixture
+def study_config():
+    with open(os.path.join(TEST_DIR, "study_config.yaml"), "r") as f:
+        contents = yaml.safe_load(f)
+    return Box(contents)
+
+
+@pytest.fixture
+def observations():
+    with open(os.path.join(TEST_DIR, "parameter_values.yaml"), "r") as f:
+        contents = yaml.safe_load(f)
+    return Box(contents)
 
 
 @pytest.fixture
