@@ -32,16 +32,33 @@ class HPJobInfo extends React.Component {
                 </Typography>
                 <br />
                 <Plot
-                    data={[
-                    {
-                        x: [1, 2, 3],
-                        y: [2, 6, 3],
-                        type: 'scatter',
-                        mode: 'lines+points',
-                        marker: {color: 'red'},
-                    },
-                    {type: 'bar', x: [1, 2, 3], y: [2, 5, 3]},
-                    ]}
+                    data={[{
+                        type: 'parcoords',
+                        line: {
+                          color: 'blue'
+                        },
+                        
+                        dimensions: [{
+                          range: [1, 5],
+                          constraintrange: [1, 2],
+                          label: 'A',
+                          values: [1,4]
+                        }, {    
+                          range: [1,5],
+                          label: 'B',
+                          values: [3,1.5],
+                          tickvals: [1.5,3,4.5]
+                        }, {
+                          range: [1, 5],
+                          label: 'C',
+                          values: [2,4],
+                          tickvals: [1,2,4,5],
+                          ticktext: ['text 1','text 2','text 4','text 5']
+                        }, {
+                          range: [1, 5],
+                          label: 'D',
+                          values: [4,2]
+                        }]}]}
                     layout={ {title: `Job id: ${this.props.match.params.id}`} }
                 />
             </div>

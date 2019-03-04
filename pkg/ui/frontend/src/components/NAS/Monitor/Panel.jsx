@@ -8,6 +8,9 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import Button from '@material-ui/core/Button';
 
+import { filterJobs, changeType } from '../../../actions/nasMonitorActions';
+
+
 const module = "nasMonitor";
 
 
@@ -24,7 +27,12 @@ const styles = theme => ({
 
 const FilterPanel = (props) => {
 
-    const {classes} = props;
+    const { classes } = props;
+
+    const handleType = (name) => (event) => {
+        props.changeType(name, event.target.checked);
+    }
+    
     return (
         <div className={classes.filter}>
             <FormGroup row>
@@ -33,7 +41,7 @@ const FilterPanel = (props) => {
                     label="Name"
                     className={classes.textField}
                     value={props.filter}
-                    // onChange={}
+                    onChange={(event) => props.filterJobs(event.target.value)}
                     margin="normal"
                     variant="outlined"
                 />
@@ -45,7 +53,7 @@ const FilterPanel = (props) => {
                                 control={
                                     <Switch
                                         checked={props.filterType[filter]}
-                                        // onChange={this.handleType(filter)}
+                                        onChange={handleType(filter)}
                                         value={filter}
                                         color={"secondary"}
                                         />
@@ -70,4 +78,4 @@ const mapStateToProps = state => {
     }
 }
 
-export default connect(mapStateToProps, null)(withStyles(styles)(FilterPanel));
+export default connect(mapStateToProps, { filterJobs, changeType })(withStyles(styles)(FilterPanel));

@@ -93,6 +93,7 @@ const rootReducer = (state = initialState, action) => {
                     return {
                         ...state,
                         workerTemplates: workers,
+                        deleteOpen: false,
                     }
                 case "collector":
                     let collectors = state.collectorTemplates.slice();

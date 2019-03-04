@@ -1,8 +1,6 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-
-import { connect } from 'react-redux';
-
+ 
 import FilterPanel from './Panel';
 import JobList from './JobList';
 
@@ -27,4 +25,4 @@ const HPMonitor = (props) => {
 
 }
 
-export default withStyles(HPMonitor);
+export default withStyles(styles)(HPMonitor);
