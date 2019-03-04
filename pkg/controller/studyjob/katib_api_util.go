@@ -383,8 +383,8 @@ func validateSuggestionParameters(c katibapi.ManagerClient, studyConfig *katibap
 		return true
 	}
 
-	if err != nil {
-		log.Printf("ValidateSuggestionParameters Error: %v", err)
+	if statusCode.Code() == codes.InvalidArgument || statusCode.Code() == codes.Unavailable {
+		log.Printf("ValidateSuggestionParameters Error: %v", statusCode.Message())
 		return false
 	}
 	return true
