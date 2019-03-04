@@ -1,0 +1,83 @@
+import React from 'react';
+import { connect } from 'react-redux';
+import makeStyles from '@material-ui/styles/makeStyles';
+import brace from 'brace';
+import 'brace/mode/javascript';
+import 'brace/theme/tomorrow';
+import AceEditor from 'react-ace';
+import Button from '@material-ui/core/Button';
+
+import { changeYaml } from '../../../actions/nasCreateActions';
+
+const module = "nasCreate";
+
+const useStyles = makeStyles ({
+    root: {
+        width: '90%',
+        margin: '0 auto',
+    },
+    editor: {
+        margin: '0 auto',
+    },
+    submit: {
+        textAlign: 'center',
+        marginTop: 10,
+    },
+    progress: {
+        height: 10,
+        margin: 10,
+    },
+    close: {
+        padding: 4,
+    },
+});
+
+
+const YAML = (props) => {
+
+    const onYamlChange = (value) => {
+        props.changeYaml(value);
+    };
+
+    // const submitWholeYaml = () => {
+    //     props.submitWholeYaml(props.yaml);
+    // };
+
+    const classes = useStyles();
+    return (
+        <div className={classes.root}>
+            <h1>Generate</h1>
+            <hr />
+            {/* {props.loading && <LinearProgress className={classes.progress}/>} */}
+            <div className={classes.editor}>
+                <AceEditor
+                    mode="text"
+                    theme="tomorrow"
+                    value={props.yaml}
+                    onChange={onYamlChange}
+                    name="UNIQUE_ID_OF_DIV"
+                    editorProps={{$blockScrolling: true}}
+                    tabSize={2}
+                    enableLiveAutocompletion={true}
+                    fontSize={14}
+                    width={'100%'}
+                    height={700}
+                />
+            </div>
+            <div className={classes.submit}>
+                <Button variant="contained" color={"primary"} className={classes.button}>
+                    Deploy
+                </Button>
+            </div>
+        </div>
+    );
+};
+
+const mapStateToProps = (state) => {
+    return {
+        yaml: state[module].currentYaml,
+    };
+};
+
+
+export default connect(mapStateToProps, { changeYaml })(YAML);
