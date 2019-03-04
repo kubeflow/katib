@@ -17,6 +17,7 @@ package studyjob
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"strconv"
 	"sync"
@@ -245,6 +246,9 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		katibv1alpha1.ConditionFailed,
 		katibv1alpha1.ConditionRunning:
 		update, err = r.checkStatus(instance, request.Namespace)
+		if err != nil {
+			log.Printf("Fail to check status %v", err)
+		}
 	default:
 		now := metav1.Now()
 		instance.Status.StartTime = &now
@@ -258,19 +262,23 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 	}
 	now := metav1.Now()
 	instance.Status.LastReconcileTime = &now
-	if err != nil {
-		r.Update(context.TODO(), instance)
-		log.Printf("Fail to check status %v", err)
-		return reconcile.Result{}, err
-	}
-	if update {
-		err = r.Update(context.TODO(), instance)
-		if err != nil {
-			log.Printf("Fail to Update StudyJob %v : %v", instance.Status.StudyID, err)
-			return reconcile.Result{}, err
+	if err != nil || update {
+		uerr := r.Update(context.TODO(), instance)
+		if uerr != nil {
+			log.Printf("Fail to Update StudyJob %v : %v", instance.Status.StudyID, uerr)
+			instance2 := &katibv1alpha1.StudyJob{}
+			err = r.Get(context.TODO(), request.NamespacedName, instance2)
+			if err != nil {
+				log.Printf("Failed to get studyjob: %v", err)
+				return reconcile.Result{}, uerr
+			}
+			str1, _ := json.Marshal(instance)
+			str2, _ := json.Marshal(instance2)
+			log.Printf("Patched studyjob: %s, now: %s", str1, str2)
+			return reconcile.Result{}, uerr
 		}
 	}
-	return reconcile.Result{}, nil
+	return reconcile.Result{}, err
 }
 
 func (r *ReconcileStudyJobController) updateFinalizers(instance *katibv1alpha1.StudyJob, finalizers []string) (reconcile.Result, error) {
