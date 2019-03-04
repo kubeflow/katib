@@ -16,32 +16,57 @@ limitations under the License.
 package v1alpha2
 
 import (
-	pb "github.com/kubeflow/katib/pkg/api"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type TrialSpec struct {
-	// Key-value pairs for Parameters and Assignment values
-	SuggestionParameters []pb.SuggestionParameter `json:"suggestionParameters"`
+	// Key-value pairs for hyperparameters and assignment values.
+	Hyperparameters []Hyperparameter `json:"hyperparameters"`
 
-	// Raw text for the trial run template
-	RawTemplate string `json:"rawTemplate,omitempty"`
+	// Raw text for the trial run spec. This can be any generic Kubernetes
+	// runtime object. The trial operator should create the resource as written,
+	// and let the corresponding resource controller (e.g. tf-operator) handle
+	// the rest.
+	RunSpec string `json:"runSpec,omitempty"`
 }
 
 type TrialStatus struct {
+	// Represents time when the Trial was acknowledged by the Trial controller.
+	// It is not guaranteed to be set in happens-before order across separate operations.
+	// It is represented in RFC3339 form and is in UTC
 	StartTime         *metav1.Time     `json:"startTime,omitempty"`
+
+	// Represents time when the Trial was completed. It is not guaranteed to
+	// be set in happens-before order across separate operations.
+	// It is represented in RFC3339 form and is in UTC
 	CompletionTime    *metav1.Time     `json:"completionTime,omitempty"`
+
+	// Represents last time when the Trial was reconciled. It is not guaranteed to
+	// be set in happens-before order across separate operations.
+	// It is represented in RFC3339 form and is in UTC.
 	LastReconcileTime *metav1.Time     `json:"lastReconcileTime,omitempty"`
+
+	// List of observed runtime conditions for this Trial.
 	Conditions        []TrialCondition `json:"conditions,omitempty"`
 
-	// Results - objectives and other metrics values
+	// Results of the Trial - objectives and other metrics values.
 	Observation Observation `json:"observation,omitempty"`
 }
 
+type Hyperparameter struct {
+	Name  string  `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
+}
+
+type Metric struct {
+	Name  string  `json:"name,omitempty"`
+	Value float64 `json:"value,omitempty"`
+}
+
 type Observation struct {
-	ObjectiveName  string  `json:"objectiveName,omitempty"`
-	ObjectiveValue float64 `json:"objectiveValue,omitempty"`
+	// Key-value pairs for metric names and values
+	Metrics []Metric `json:"metrics"`
 }
 
 // +k8s:deepcopy-gen=true
@@ -80,7 +105,7 @@ const (
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// Trial is the Schema for the trial API
+// Represents the structure of a Trial resource.
 // +k8s:openapi-gen=true
 type Trial struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -99,6 +124,7 @@ type TrialList struct {
 	Items           []Trial `json:"items"`
 }
 
-func init() {
-	SchemeBuilder.Register(&Trial{}, &TrialList{})
-}
+// TODO: Enable this later during API implementation.
+//func init() {
+//	SchemeBuilder.Register(&Trial{}, &TrialList{})
+//}

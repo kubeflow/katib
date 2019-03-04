@@ -33,35 +33,64 @@ type ExperimentSpec struct {
 	Algorithm *AlgorithmSpec `json:"algorithm,omitempty"`
 
 	// Template for each run of the trial.
-	TrialRunSpec *TrialRunSpec `json:"trialRunSpec,omitempty"`
+	TrialTemplate *TrialTemplate `json:"trialTemplate,omitempty"`
 
+	// How many trials can be processed in parallel.
 	ParallelTrialCount int `json:"parallelTrialCount,omitempty"`
-	MaxIterations      int `json:"maxIterations,omitempty"`
+
+	// Total number of trials to run.
+	MaxTrialCount      int `json:"maxTrialCount,omitempty"`
 
 	// TODO - figure out what to do with metric collectors
 	MetricsCollectorType string `json:"metricsCollectorSpec,omitempty"`
 
-	// Other fields, exact format is TBD
+	// TODO - Other fields, exact format is TBD. Will add these back during implementation.
 	// - NAS
-	// - early stopping
-	// - resume experiment
+	// - Early stopping
+	// - Resume experiment
 }
 
 type ExperimentStatus struct {
+	// Represents time when the Experiment was acknowledged by the Experiment controller.
+	// It is not guaranteed to be set in happens-before order across separate operations.
+	// It is represented in RFC3339 form and is in UTC.
 	StartTime         *metav1.Time `json:"startTime,omitempty"`
+
+	// Represents time when the Experiment was completed. It is not guaranteed to
+	// be set in happens-before order across separate operations.
+	// It is represented in RFC3339 form and is in UTC.
 	CompletionTime    *metav1.Time `json:"completionTime,omitempty"`
+
+	// Represents last time when the Experiment was reconciled. It is not guaranteed to
+	// be set in happens-before order across separate operations.
+	// It is represented in RFC3339 form and is in UTC.
 	LastReconcileTime *metav1.Time `json:"lastReconcileTime,omitempty"`
 
+	// List of observed runtime conditions for this Experiment.
 	Conditions []ExperimentCondition `json:"conditions,omitempty"`
 
-	// Since a Trial encapsulates suggestion + evaluation + observation, the user
-	// can access all relevant information here.
-	CurrentOptimalTrial *Trial `json:"currentOptimalTrial,omitempty"`
+	// Current optimal trial parameters and observations.
+	CurrentOptimalTrial OptimalTrial `json:"currentOptimalTrial,omitempty"`
 
-	SuggestionRoundCount int `json:" suggestionRoundCount,omitempty"`
+	// How many trials have successfully completed.
+	TrialsCompleted int `json:"trialsCompleted,omitempty"`
 
-	// Should we include more metadata about Trials here?
-	// E.g. Number of Trials completed/failed/pending
+	// How many trials have failed.
+	TrialsFailed int `json:"trialsFailed,omitempty"`
+
+	// How many trials have been killed.
+	TrialsKilled int `json:"trialsKilled,omitempty"`
+
+	// How many trials are currently pending.
+	TrialsPending int `json:"trialsPending,omitempty"`
+}
+
+type OptimalTrial struct {
+	// Key-value pairs for the current optimal hyperparameters.
+	Hyperparameters []trial.Hyperparameter `json:"hyperparameters"`
+
+	// Observation for this trial
+	Observation trial.Observation `json:"observation,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true
@@ -151,7 +180,7 @@ type EarlyStoppingSpec struct {
 	// TODO
 }
 
-type TrialRunSpec struct {
+type TrialTemplate struct {
 	Retain     bool        `json:"retain,omitempty"`
 	GoTemplate *GoTemplate `json:"goTemplate,omitempty"`
 }
@@ -170,7 +199,7 @@ type GoTemplate struct {
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// Experiment is the Schema for the experiment API
+// Structure of the Experiment custom resource.
 // +k8s:openapi-gen=true
 type Experiment struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -189,6 +218,7 @@ type ExperimentList struct {
 	Items           []Experiment `json:"items"`
 }
 
-func init() {
-	SchemeBuilder.Register(&Experiment{}, &ExperimentList{})
-}
+// TODO - enable this during API implementation.
+//func init() {
+//	SchemeBuilder.Register(&Experiment{}, &ExperimentList{})
+//}
