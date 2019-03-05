@@ -9,6 +9,7 @@ import logging
 from logging import getLogger, StreamHandler, INFO, DEBUG
 import json
 import os
+import time
 
 
 MANAGER_ADDRESS = "vizier-core"
@@ -206,19 +207,23 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     saver.restore(sess, study.ctrl_cache_file)
 
                     valid_acc = ctrl.reward
-                    results = self.GetEvaluationResult(study)
-                    avg_result = sum(results) / len(results)
+                    result = self.GetEvaluationResult(study)
 
-                    self.logger.info(">>> Evaluation results of previous trials: {}. The average is {}".format(str(results)[1:-1], avg_result))
+                    # In some rare cases, GetEvaluationResult() may return None
+                    # if GetSuggestions() is called before all the trials are completed
+                    while result is None:
+                        self.logger.warning(">>> GetEvaluationResult() returns None")
+                        time.sleep(20)
+                        result = self.GetEvaluationResult(study)
 
-                    # This lstm cell is designed to maximize the metrics
-                    # However, if the user want to minimize the metrics, we can take the negative of the result
+                    # This LSTM network is designed to maximize the metrics
+                    # However, if the user wants to minimize the metrics, we can take the negative of the result
                     if study.opt_direction == api_pb2.MINIMIZE:
-                        avg_result = -avg_result
+                        result = -result
 
                     loss, entropy, lr, gn, bl, skip, _ = sess.run(
                         fetches=run_ops,
-                        feed_dict={valid_acc: avg_result})
+                        feed_dict={valid_acc: result})
                     self.logger.info(">>> Suggetion updated. LSTM Controller Reward: {}".format(loss))
 
                     candidates = list()
@@ -254,7 +259,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             organized_arc_str = str(organized_arc_json).replace('\"', '\'')
             nn_config_str = str(nn_config_json).replace('\"', '\'')
 
-            self.logger.info("\n>>> Neural Network Architecture Candidate #{} (internal representation):".format(i))
+            self.logger.info("\n>>> New Neural Network Architecture Candidate #{} (internal representation):".format(i))
             self.logger.info(organized_arc_json)
             self.logger.info("\n>>> Corresponding Seach Space Description:")
             self.logger.info(nn_config_str)
@@ -298,18 +303,18 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=study.study_id, only_latest_log=True), 10)
             trials_list = gwfrep.worker_full_infos
         
-        completed_count = 0
+        completed_trials = dict()
         for t in trials_list:
             if t.Worker.trial_id in self.prev_trial_ids and t.Worker.status == api_pb2.COMPLETED:
-                completed_count += 1
+                for ml in t.metrics_logs:
+                    if ml.name == study.objective_name:
+                        completed_trials[t.Worker.trial_id] = float(ml.values[-1].value)
         
-        if completed_count == study.num_trials:
-            metrics = list()
+        if len(completed_trials) == study.num_trials:
+            self.logger.info(">>> Evaluation results of previous trials:")
+            for k in completed_trials:
+                self.logger.info("{}: {}".format(k, completed_trials[k]))
+            avg_metrics = sum(completed_trials.values()) / study.num_trials
+            self.logger.info("The average is {}\n".format(avg_metrics))
 
-            for t in trials_list:
-                if t.Worker.trial_id in self.prev_trial_ids:
-                    for ml in t.metrics_logs:
-                        if ml.name == study.objective_name:
-                            metrics.append(float(ml.values[-1].value))
-
-            return metrics
+            return avg_metrics
