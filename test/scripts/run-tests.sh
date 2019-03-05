@@ -125,3 +125,8 @@ set -o errexit
 go run test-client.go -a random
 go run test-client.go -a grid -c suggestion-config-grid.yml
 #go run test-client.go -a hyperband -c suggestion-config-hyb.yml
+
+./test/scripts/python_tests.sh
+if [ $? -ne 1 ]; then
+  exit 1
+fi
