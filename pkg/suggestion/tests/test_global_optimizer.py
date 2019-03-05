@@ -1,17 +1,6 @@
-import pytest
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 
 from ..bayesianoptimization.src.global_optimizer import GlobalOptimizer
-
-
-@pytest.fixture
-def scaler(lower_bounds, upper_bounds, dim):
-    scaler = MinMaxScaler()
-    lower_bounds = np.array(lower_bounds, dtype=np.float64).reshape(1, dim)
-    upper_bounds = np.array(upper_bounds, dtype=np.float64).reshape(1, dim)
-    scaler.fit(np.append(lower_bounds, upper_bounds, axis=0))
-    return scaler
 
 
 def test_global_optimizer(dim, request_num, scaler, X_train, y_train):

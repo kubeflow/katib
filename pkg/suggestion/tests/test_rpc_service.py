@@ -5,13 +5,6 @@ from box import Box
 from pkg.suggestion.bayesianoptimization.src.rpc_service import SuggestionService
 
 
-@pytest.fixture
-def rpc_request():
-    return Box({"param_id": "test_param",
-                "study_id": "test_study",
-                "request_number": 2})
-
-
 def test_suggestion_service(rpc_request, study_config, observations):
     service = SuggestionService()
     service._parse_suggestion_parameters = MagicMock(return_value={})

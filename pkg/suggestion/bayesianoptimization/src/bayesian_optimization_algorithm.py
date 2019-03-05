@@ -1,6 +1,5 @@
 """ module for bayesian optimization algorithm """
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 
 from .global_optimizer import GlobalOptimizer
 
@@ -14,16 +13,11 @@ class BOAlgorithm:
         self.suggestion_config = suggestion_config
         self.l = np.zeros((1, parameter_config.dim))
         self.u = np.ones((1, parameter_config.dim))
-        self.lowerbound = np.array(parameter_config.lower_bounds).reshape((1, parameter_config.dim))
-        self.upperbound = np.array(parameter_config.upper_bounds).reshape((1, parameter_config.dim))
-
-        # normalize the upperbound and lowerbound to [0, 1]
-        self.scaler = MinMaxScaler()
-        self.scaler.fit(np.append(self.lowerbound, self.upperbound, axis=0))
-
         self.X_train = X_train
         self.y_train = y_train
-        if len(self.y_train) > 0:
+        self.burn_in = suggestion_config.get("burn_in", 1)
+        if len(self.y_train) > self.burn_in:
+            self.scaler = parameter_config.create_scaler()
             self.current_optimal = max(self.y_train)
 
             # initialize the global optimizer
@@ -49,12 +43,10 @@ class BOAlgorithm:
 
     def get_suggestion(self, request_num):
         """ main function to provide suggestion """
-        x_next_list = []
-        if len(self.y_train) == 0:
-            # randomly pick a point as the first trial
-            for _ in range(request_num):
-                x_next_list.append(np.random.uniform(self.lowerbound, self.upperbound, size=(1, self.parameter_config.dim)))
+        if len(self.y_train) < self.burn_in:
+            x_next_list = [self.parameter_config.random_sample() for _ in range(request_num)]
         else:
+            x_next_list = []
             _, x_next_list_que = self.optimizer.direct(request_num)
             for xn in x_next_list_que:
                 x = np.array(xn).reshape(1, self.parameter_config.dim)
