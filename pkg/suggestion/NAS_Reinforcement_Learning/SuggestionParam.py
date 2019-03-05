@@ -1,6 +1,5 @@
 def parseSuggestionParam(params_raw):
     param_standard = {
-        "num_trials":           ['value', int, [1, 'inf']],
         "lstm_num_cells":       ['value', int, [1, 'inf']],
         "lstm_num_layers":      ['value', int, [1, 'inf']],
         "lstm_keep_prob":       ['value', float, [0.0, 1.0]],
@@ -17,7 +16,6 @@ def parseSuggestionParam(params_raw):
     }
 
     suggestion_params = {
-        "num_trials":           1,
         "lstm_num_cells":       64,
         "lstm_num_layers":      1,
         "lstm_keep_prob":       1.0,

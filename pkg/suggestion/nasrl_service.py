@@ -20,6 +20,7 @@ class NAS_RL_StudyJob(object):
         self.logger = logger
         self.study_id = request.study_id
         self.param_id = request.param_id
+        self.num_trials = request.request_number
         self.study_name = None
         self.tf_graph = tf.Graph()
         self.prev_trial_ids = list()
@@ -35,14 +36,12 @@ class NAS_RL_StudyJob(object):
         self.search_space = None
         self.opt_direction = None
         self.objective_name = None
-        self.num_trials = 1
         
         self.logger.info("-" * 100 + "\nSetting Up Suggestion for StudyJob ID {}\n".format(request.study_id) + "-" * 100)
         self._get_study_param()
         self._get_suggestion_param()
         self._setup_controller()
-        self.num_trials = self.suggestion_config["num_trials"]
-        self.logger.info("Suggestion for StudyJob {} (ID: {}) has been initialized.\n".format(self.study_name, self.study_id))
+        self.logger.info(">>> Suggestion for StudyJob {} (ID: {}) has been initialized.\n".format(self.study_name, self.study_id))
         
     def _get_study_param(self):
         # this function need to
@@ -115,7 +114,7 @@ class NAS_RL_StudyJob(object):
             self.logger.warning("Error! The Suggestion has not yet been initialized!")
             return
         
-        self.logger.info("Search Space for StudyJob {} (ID: {}):".format(self.study_name, self.study_id))
+        self.logger.info(">>> Search Space for StudyJob {} (ID: {}):".format(self.study_name, self.study_id))
         for opt in self.search_space:
             opt.print_op(self.logger)
         self.logger.info("There are {} operations in total.\n".format(self.num_operations))
@@ -125,12 +124,13 @@ class NAS_RL_StudyJob(object):
             self.logger.warning("Error! The Suggestion has not yet been initialized!")
             return
         
-        self.logger.info("Parameters of LSTM Controller for StudyJob {} (ID: {}):".format(self.study_name, self.study_id))
+        self.logger.info(">>> Parameters of LSTM Controller for StudyJob {} (ID: {}):".format(self.study_name, self.study_id))
         for spec in self.suggestion_config:
             if len(spec) > 13:
                 self.logger.info("{}: \t{}".format(spec, self.suggestion_config[spec]))
             else:
                 self.logger.info("{}: \t\t{}".format(spec, self.suggestion_config[spec]))
+        self.logger.info("RequestNumber:\t\t{}".format(self.num_trials))
         self.logger.info("")
 
 
@@ -189,7 +189,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 controller_ops["train_op"]]
 
             if study.is_first_run:
-                self.logger.info("First time running suggestion for {}. Random architecture will be given.".format(study.study_name))
+                self.logger.info(">>> First time running suggestion for {}. Random architecture will be given.".format(study.study_name))
                 with tf.Session() as sess:
                     sess.run(tf.global_variables_initializer())
                     candidates = list()
@@ -209,8 +209,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     results = self.GetEvaluationResult(study)
                     avg_result = sum(results) / len(results)
 
-                    self.logger.info("Evaluation results of previous trials: {}".format(str(results)[1:-1]))
-                    self.logger.info("The average is {}".format(avg_result))
+                    self.logger.info(">>> Evaluation results of previous trials: {}. The average is {}".format(str(results)[1:-1], avg_result))
 
                     # This lstm cell is designed to maximize the metrics
                     # However, if the user want to minimize the metrics, we can take the negative of the result
@@ -220,7 +219,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     loss, entropy, lr, gn, bl, skip, _ = sess.run(
                         fetches=run_ops,
                         feed_dict={valid_acc: avg_result})
-                    self.logger.info("Suggetion updated. LSTM Controller Reward: {}".format(loss))
+                    self.logger.info(">>> Suggetion updated. LSTM Controller Reward: {}".format(loss))
 
                     candidates = list()
                     for _ in range(study.num_trials):
@@ -255,9 +254,9 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             organized_arc_str = str(organized_arc_json).replace('\"', '\'')
             nn_config_str = str(nn_config_json).replace('\"', '\'')
 
-            self.logger.info("\nNeural Network Architecture Candidate #{} (internal representation):".format(i))
+            self.logger.info("\n>>> Neural Network Architecture Candidate #{} (internal representation):".format(i))
             self.logger.info(organized_arc_json)
-            self.logger.info("\nCorresponding Seach Space Description:")
+            self.logger.info("\n>>> Corresponding Seach Space Description:")
             self.logger.info(nn_config_str)
 
             trials.append(api_pb2.Trial(
@@ -275,14 +274,18 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 )
             )
 
+        self.prev_trial_ids = list()
         self.logger.info("")
         channel = grpc.beta.implementations.insecure_channel(MANAGER_ADDRESS, MANAGER_PORT)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             for i, t in enumerate(trials):
                 ctrep = client.CreateTrial(api_pb2.CreateTrialRequest(trial=t), 10)
                 trials[i].trial_id = ctrep.trial_id
-                self.logger.info("Trial {} Created".format(ctrep.trial_id))
-                study.prev_trial_ids.append(ctrep.trial_id)
+                self.prev_trial_ids.append(ctrep.trial_id)
+        
+        self.logger.info(">>> {} Trials were created:".format(study.num_trials))
+        for t in self.prev_trial_ids:
+            self.logger.info(t)
         self.logger.info("")
 
         study.ctrl_step += 1
@@ -296,16 +299,17 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             trials_list = gwfrep.worker_full_infos
         
         completed = True
-        for trial in trials_list:
-            completed = completed and (trial.Worker.status == api_pb2.COMPLETED)
+        for t in trials_list:
+            if t.Worker.trial_id in self.prev_trial_ids:
+                completed = completed and (t.Worker.status == api_pb2.COMPLETED)
         
-
         if completed:
             metrics = list()
 
             for t in trials_list:
-                for ml in t.metrics_logs:
-                    if ml.name == study.objective_name:
-                        metrics.append(float(ml.values[-1].value))
+                if t.Worker.trial_id in self.prev_trial_ids:
+                    for ml in t.metrics_logs:
+                        if ml.name == study.objective_name:
+                            metrics.append(float(ml.values[-1].value))
 
             return metrics
