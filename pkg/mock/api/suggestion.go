@@ -52,3 +52,21 @@ func (mr *MockSuggestionClientMockRecorder) GetSuggestions(arg0, arg1 interface{
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestions", reflect.TypeOf((*MockSuggestionClient)(nil).GetSuggestions), varargs...)
 }
+
+// ValidateSuggestionParameters mocks base method
+func (m *MockSuggestionClient) ValidateSuggestionParameters(arg0 context.Context, arg1 *api.ValidateSuggestionParametersRequest, arg2 ...grpc.CallOption) (*api.ValidateSuggestionParametersReply, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ValidateSuggestionParameters", varargs...)
+	ret0, _ := ret[0].(*api.ValidateSuggestionParametersReply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ValidateSuggestionParameters indicates an expected call of ValidateSuggestionParameters
+func (mr *MockSuggestionClientMockRecorder) ValidateSuggestionParameters(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateSuggestionParameters", reflect.TypeOf((*MockSuggestionClient)(nil).ValidateSuggestionParameters), varargs...)
+}

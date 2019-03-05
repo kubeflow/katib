@@ -670,6 +670,33 @@
           "Manager"
         ]
       }
+    },
+    "/api/Manager/ValidateSuggestionParameters": {
+      "post": {
+        "summary": "* \nValidate Suggestion Parameters from Study Job.",
+        "operationId": "ValidateSuggestionParameters",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiValidateSuggestionParametersReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiValidateSuggestionParametersRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
     }
   },
   "definitions": {
@@ -1485,6 +1512,27 @@
         }
       },
       "description": "* \nUpdate a Status of Worker."
+    },
+    "apiValidateSuggestionParametersReply": {
+      "type": "object",
+      "title": "*\nReturn 1 if Suggestion Parameters is Valid, 0 if not"
+    },
+    "apiValidateSuggestionParametersRequest": {
+      "type": "object",
+      "properties": {
+        "study_config": {
+          "$ref": "#/definitions/apiStudyConfig"
+        },
+        "suggestion_algorithm": {
+          "type": "string"
+        },
+        "suggestion_parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiSuggestionParameter"
+          }
+        }
+      }
     },
     "apiWorker": {
       "type": "object",

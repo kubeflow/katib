@@ -16,15 +16,21 @@ package studyjob
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/kubeflow/katib/pkg"
 	katibapi "github.com/kubeflow/katib/pkg/api"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func initializeStudy(instance *katibv1alpha1.StudyJob) error {
+
 	if instance.Spec.SuggestionSpec.SuggestionAlgorithm == "" {
 		instance.Spec.SuggestionSpec.SuggestionAlgorithm = "random"
 	}
@@ -42,8 +48,20 @@ func initializeStudy(instance *katibv1alpha1.StudyJob) error {
 
 	studyConfig, err := getStudyConf(instance)
 	if err != nil {
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		return err
 	}
+
+	log.Println("Start to Validate Suggestion Parameters")
+	isValidSuggestionParameters := validateSuggestionParameters(c, studyConfig, instance.Spec.SuggestionSpec.SuggestionParameters, instance.Spec.SuggestionSpec.SuggestionAlgorithm)
+
+	if isValidSuggestionParameters {
+		log.Println("Suggestion Parameters are valid")
+	} else {
+		instance.Status.Condition = katibv1alpha1.ConditionFailed
+		return errors.New("Suggestion Parameters are not valid")
+	}
+
 	log.Printf("Create Study %s", studyConfig.Name)
 	//CreateStudy
 	studyID, err := createStudy(c, studyConfig)
@@ -166,6 +184,10 @@ func populateConfigForNAS(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConf
 	}
 	populateCommonConfigFields(instance, sconf)
 
+	if reflect.DeepEqual(instance.Spec.NasConfig.GraphConfig, katibv1alpha1.GraphConfig{}) {
+		return nil, fmt.Errorf("Missing GraphConfig in NasConfig: %v", instance.Spec.NasConfig)
+	}
+
 	sconf.NasConfig.GraphConfig.NumLayers = instance.Spec.NasConfig.GraphConfig.NumLayers
 	for _, i := range instance.Spec.NasConfig.GraphConfig.InputSize {
 		sconf.NasConfig.GraphConfig.InputSize = append(sconf.NasConfig.GraphConfig.InputSize, i)
@@ -173,6 +195,11 @@ func populateConfigForNAS(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConf
 	for _, o := range instance.Spec.NasConfig.GraphConfig.OutputSize {
 		sconf.NasConfig.GraphConfig.OutputSize = append(sconf.NasConfig.GraphConfig.OutputSize, o)
 	}
+
+	if instance.Spec.NasConfig.Operations == nil {
+		return nil, fmt.Errorf("Missing Operations in NasConfig")
+	}
+
 	for _, op := range instance.Spec.NasConfig.Operations {
 		operation := &katibapi.Operation{
 			ParameterConfigs: &katibapi.Operation_ParameterConfigs{
@@ -327,4 +354,39 @@ func getSuggestion(c katibapi.ManagerClient, studyID string, suggestionSpec *kat
 		log.Printf("\t%v", t)
 	}
 	return getSuggestReply, nil
+}
+
+func validateSuggestionParameters(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig, suggestionParameters []katibapi.SuggestionParameter, suggestionAlgorithm string) bool {
+	ctx := context.Background()
+
+	validateSuggestionParametersReq := &katibapi.ValidateSuggestionParametersRequest{
+		StudyConfig:         studyConfig,
+		SuggestionAlgorithm: suggestionAlgorithm,
+	}
+
+	for _, p := range suggestionParameters {
+		validateSuggestionParametersReq.SuggestionParameters = append(
+			validateSuggestionParametersReq.SuggestionParameters,
+			&katibapi.SuggestionParameter{
+				Name:  p.Name,
+				Value: p.Value,
+			},
+		)
+	}
+
+	_, err := c.ValidateSuggestionParameters(ctx, validateSuggestionParametersReq)
+
+	statusCode, _ := status.FromError(err)
+
+	if statusCode.Code() == codes.Unknown {
+		log.Printf("Method ValidateSuggestionParameters not found inside Suggestion service: %s", suggestionAlgorithm)
+		return true
+	}
+
+	if statusCode.Code() == codes.InvalidArgument || statusCode.Code() == codes.Unavailable {
+		log.Printf("ValidateSuggestionParameters Error: %v", statusCode.Message())
+		return false
+	}
+	return true
+
 }
