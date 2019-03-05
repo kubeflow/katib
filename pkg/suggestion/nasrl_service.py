@@ -298,12 +298,12 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=study.study_id, only_latest_log=True), 10)
             trials_list = gwfrep.worker_full_infos
         
-        completed = True
+        completed_count = 0
         for t in trials_list:
-            if t.Worker.trial_id in self.prev_trial_ids:
-                completed = completed and (t.Worker.status == api_pb2.COMPLETED)
+            if t.Worker.trial_id in self.prev_trial_ids and t.Worker.status == api_pb2.COMPLETED:
+                completed_count += 1
         
-        if completed:
+        if completed_count == study.num_trials:
             metrics = list()
 
             for t in trials_list:
