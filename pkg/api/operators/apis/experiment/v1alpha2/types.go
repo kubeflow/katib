@@ -16,7 +16,6 @@ limitations under the License.
 package v1alpha2
 
 import (
-	pb "github.com/kubeflow/katib/pkg/api"
 	trial "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -86,8 +85,8 @@ type ExperimentStatus struct {
 }
 
 type OptimalTrial struct {
-	// Key-value pairs for the current optimal hyperparameters.
-	Hyperparameters []trial.Hyperparameter `json:"hyperparameters"`
+	// Key-value pairs for hyperparameters and assignment values.
+	ParameterAssignments []trial.ParameterAssignment `json:"parameterAssignments"`
 
 	// Observation for this trial
 	Observation trial.Observation `json:"observation,omitempty"`
@@ -167,13 +166,10 @@ const (
 )
 
 type AlgorithmSpec struct {
-	Suggestion    *SuggestionSpec    `json:"suggestion,omitempty"`
+	AlgorithmName string		 `json:"algorithmName,omitempty"`
+	// Key-value pairs for hyperparameters and assignment values.
+	ParameterAssignments []trial.ParameterAssignment `json:"parameterAssignments"`
 	EarlyStopping *EarlyStoppingSpec `json:"earlyStopping,omitempty"`
-}
-
-type SuggestionSpec struct {
-	Name       string                   `json:"name,omitempty"`
-	Parameters []pb.SuggestionParameter `json:"parameters,omitempty"`
 }
 
 type EarlyStoppingSpec struct {

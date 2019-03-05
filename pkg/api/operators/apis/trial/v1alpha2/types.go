@@ -22,7 +22,7 @@ import (
 
 type TrialSpec struct {
 	// Key-value pairs for hyperparameters and assignment values.
-	Hyperparameters []Hyperparameter `json:"hyperparameters"`
+	ParameterAssignments []ParameterAssignment `json:"parameterAssignments"`
 
 	// Raw text for the trial run spec. This can be any generic Kubernetes
 	// runtime object. The trial operator should create the resource as written,
@@ -54,7 +54,7 @@ type TrialStatus struct {
 	Observation Observation `json:"observation,omitempty"`
 }
 
-type Hyperparameter struct {
+type ParameterAssignment struct {
 	Name  string  `json:"name,omitempty"`
 	Value string `json:"value,omitempty"`
 }
