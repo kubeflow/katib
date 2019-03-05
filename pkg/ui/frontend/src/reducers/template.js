@@ -6,29 +6,17 @@ const initialState = {
     editOpen: false,
     deleteOpen: false,
     workerTemplates: [
-        {
-            name: "Worker Test 1",
-            yaml: "ASDASDASDASDasdas djasnd asjdnj akjsdnajsknd jas dsajk nashknd kasnd askjnd aks dnask dnask dnsak j2quw jqoi qwi jna sjljnas jklaskln daklsjls aljkd asj a",
-        },
-        {
-            name: "Worker Test 2",
-            yaml: "ASDASDASDASDasdas djasnd asjdnj akjsdnajsknd jas dsajk nashknd kasnd askjnd aks dnask dnask dnsak j2quw jqoi qwi jna sjljnas jklaskln daklsjls aljkd asj a",
-        },
     ],
     collectorTemplates: [
-        {
-            name: "Collector Test 1",
-            yaml: "ASDASDASDASDasdas djasnd asjdnj akjsdnajsknd jas dsajk nashknd kasnd askjnd aks dnask dnask dnsak j2quw jqoi qwi jna sjljnas jklaskln daklsjls aljkd asj a",
-        },
-        {
-            name: "Collector Test 2",
-            yaml: "ASDASDASDASDasdas djasnd asjdnj akjsdnajsknd jas dsajk nashknd kasnd askjnd aks dnask dnask dnsak j2quw jqoi qwi jna sjljnas jklaskln daklsjls aljkd asj a",
-        },
     ],
     newTemplateName: '',
     newTemplateYaml: '',
     currentTemplateIndex: '',
-    edittedTemplate: {},
+    edittedTemplate: {
+        name: '',
+        yaml: '',
+    },
+    currentTemplateName: '',
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -43,11 +31,26 @@ const rootReducer = (state = initialState, action) => {
         case actions.OPEN_DIALOG:
             switch(action.dialogType) {
                 case "delete":
-                    return {
-                        ...state,
-                        deleteOpen: true,
-                        currentTemplateIndex: action.index,
-                    };
+                    switch(action.templateType) {
+                        case "worker": 
+                            return {
+                                ...state,
+                                deleteOpen: true,
+                                currentTemplateIndex: action.index,
+                                currentTemplateName: state.workerTemplates[action.index].name,
+                            }
+                        case "collector": 
+                            return {
+                                ...state,
+                                deleteOpen: true,
+                                currentTemplateIndex: action.index,
+                                currentTemplateName: state.collectorTemplates[action.index].name,
+                            }
+                        default: 
+                            return {
+                                ...state,
+                            }
+                    }
                 case "edit":
                     switch(action.templateType) {
                         case "worker": 
@@ -80,33 +83,54 @@ const rootReducer = (state = initialState, action) => {
         case actions.CHANGE_TEMPLATE:
             let edittedTemplate = state.edittedTemplate;
             edittedTemplate[action.field] = action.value;
-            console.log(edittedTemplate)
             return {
                 ...state,
                 edittedTemplate: edittedTemplate,
             }
-        case actions.DELETE_TEMPLATE:
-            switch(action.templateType) {
-                case "worker":
-                    let workers = state.workerTemplates.slice();
-                    workers.splice(action.index, 1);
+        case actions.FETCH_WORKER_TEMPLATES_SUCCESS:
+            return {
+                ...state,
+                workerTemplates: action.templates,
+            }
+        // case actions.FETCH_WORKER_TEMPLATES_FAILURE:
+        //     return {
+        //         ...state,
+        //         snac
+        //     }
+        case actions.FETCH_COLLECTOR_TEMPLATES_SUCCESS:
+            return {
+                ...state,
+                collectorTemplates: action.templates,
+            }
+        case actions.ADD_TEMPLATE_SUCCESS:
+        case actions.DELETE_TEMPLATE_SUCCESS:
+        case actions.EDIT_TEMPLATE_SUCCESS:
+            switch (action.templateType) {
+                case "worker": 
                     return {
                         ...state,
-                        workerTemplates: workers,
+                        addOpen: false,
                         deleteOpen: false,
-                    }
+                        editOpen: false,
+                        workerTemplates: action.templates,
+                    } 
                 case "collector":
-                    let collectors = state.collectorTemplates.slice();
-                    collectors.splice(action.index, 1);
                     return {
                         ...state,
-                        collectorTemplates: collectors,
+                        addOpen: false,
                         deleteOpen: false,
+                        editOpen: false,
+                        collectorTemplates: action.templates,
                     }
-                default:
-                    return {
-                        ...state,
-                    }
+            }
+        case actions.ADD_TEMPLATE_FAILURE:
+        case actions.EDIT_TEMPLATE_FAILURE:
+        case actions.DELETE_TEMPLATE_FAILURE:
+            return {
+                ...state,
+                addOpen: false,
+                deleteOpen: false,
+                editOpen: false,
             }
         default:
             return state;

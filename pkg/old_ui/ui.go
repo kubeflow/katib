@@ -375,7 +375,7 @@ func (k *KatibUIHandler) MetricsCollectorTemplate(w http.ResponseWriter, r *http
 		MetricsCollectorTemplate map[string]string
 	}
 	mtv := MetricsCollectorTemplateView{
-		IDList:                   &IDList{},
+		IDList: &IDList{},
 		MetricsCollectorTemplate: mt,
 	}
 	if err != nil {

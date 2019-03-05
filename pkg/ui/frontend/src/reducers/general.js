@@ -18,6 +18,18 @@ const generalReducer = (state = initialState, action) => {
                 ...state,
                 snackOpen: false,
             };
+        case actions.SUBMIT_YAML_SUCCESS:
+            return {
+                ...state,
+                snackOpen: true,
+                snackText: "Successfully submitted",
+            }
+        case actions.SUBMIT_YAML_FAILURE:
+            return {
+                ...state,
+                snackOpen: true,
+                snackText: "Whoops, something went wrong",
+            }
         default:
             return state;
     }

@@ -1,5 +1,5 @@
 import React from 'react';
-import makeStyles from '@material-ui/styles/makeStyles';
+import withStyles from '@material-ui/styles/withStyles';
 
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
@@ -7,38 +7,47 @@ import Button from '@material-ui/core/Button';
 import TemplateList from './Common/TemplateList';
 
 import { connect } from 'react-redux';
-import { openDialog } from '../../actions/templateActions';
+import { openDialog, fetchCollectorTemplates } from '../../actions/templateActions';
 import AddDialog from './Common/AddDialog';
 
-const useStyles = makeStyles({
+const styles = theme => ({
     root: {
         flexGrow: 1,
         marginTop: 40,
     },
 });
 
-const Collector = (props) => {
 
-    const classes = useStyles();
-
-    const type = props.match.path.replace("\/", "");
-
-    const openAddDialog = () => {
-        props.openDialog("add");
+class Collector extends React.Component{
+    
+    componentDidMount() {
+        this.props.fetchCollectorTemplates();
     }
-    return (
-        <div className={classes.root}>
-            <Typography variant={"headline"} color={"secondary"}>
-                Collector Manifests
-            </Typography>
-            <Button variant={"contained"} color={"primary"} onClick={openAddDialog}>
-                Add
-            </Button>
 
-            <TemplateList type={type} />
-            <AddDialog />
-            
-        </div>
-    )
+    openAddDialog = () => {
+        this.props.openDialog("add");
+    }
+
+    render() {
+
+        const { classes } = this.props;
+
+        const type = this.props.match.path.replace("\/", "");
+
+        return (
+            <div className={classes.root}>
+                <Typography variant={"headline"} color={"secondary"}>
+                    Collector Manifests
+                </Typography>
+                <Button variant={"contained"} color={"primary"} onClick={this.openAddDialog}>
+                    Add
+                </Button>
+
+                <TemplateList type={type} />
+                <AddDialog type={type}/>
+                
+            </div>
+        )
+    }
 }
-export default connect(null, { openDialog })(Collector)
+export default connect(null, { openDialog, fetchCollectorTemplates })(withStyles(styles)(Collector))

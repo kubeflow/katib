@@ -10,7 +10,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Slide from '@material-ui/core/Slide';
 
 import { connect } from 'react-redux';
-import { closeDialog, changeTemplate } from '../../../actions/templateActions';
+import { closeDialog, changeTemplate, editTemplate } from '../../../actions/templateActions';
 
 const module = "template";
 
@@ -47,6 +47,11 @@ class EditDialog extends React.Component {
             yaml: newProps.edittedTemplate.yaml,
         })
     }
+
+    submitEditTemplate = () => {
+        this.props.editTemplate(this.state.name, this.state.yaml, this.props.type);
+    }
+
     render () {
         const { classes } = this.props;
         return (
@@ -81,7 +86,7 @@ class EditDialog extends React.Component {
                         />
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.props.closeDialog} color={"primary"}>
+                        <Button onClick={this.submitEditTemplate} color={"primary"}>
                             Save
                         </Button>
                         <Button onClick={this.props.closeDialog} color={"secondary"}>
@@ -102,4 +107,4 @@ const mapStateToProps = (state) => {
     };
 };
 
-export default connect(mapStateToProps, { closeDialog, changeTemplate })(withStyles(styles)(EditDialog));
+export default connect(mapStateToProps, { closeDialog, changeTemplate, editTemplate })(withStyles(styles)(EditDialog));

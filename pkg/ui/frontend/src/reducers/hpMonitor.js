@@ -8,38 +8,8 @@ const initialState = {
         "Succeeded": true,
     },
     jobsList: [
-        {
-            name: "Job 1",
-            status: "Running",
-            id: "1", 
-        },
-        {
-            name: "Job 2",
-            status: "Failed",
-            id: "2", 
-        },
-        {
-            name: "Job 3",
-            status: "Succeeded",
-            id: "3", 
-        }
     ],
     filteredJobsList: [
-        {
-            name: "Job 1",
-            status: "Running",
-            id: "1", 
-        },
-        {
-            name: "Job 2",
-            status: "Failed",
-            id: "2", 
-        },
-        {
-            name: "Job 3",
-            status: "Succeeded",
-            id: "3", 
-        }
     ],
 };
 
@@ -78,6 +48,12 @@ const hpMonitorReducer = (state = initialState, action) => {
                 ...state,
                 filterType: types,
                 filteredJobsList: filtered,
+            }
+        case actions.FETCH_HP_JOBS_SUCCESS:
+            return {
+                ...state,
+                jobsList: action.jobs,
+                filteredJobsList: action.jobs,
             }
         default:
             return state;

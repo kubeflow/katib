@@ -4,6 +4,9 @@ import { withStyles } from '@material-ui/core/styles';
 import FilterPanel from './Panel';
 import JobList from './JobList';
 
+import { fetchHPJobs } from '../../../actions/hpMonitorActions';
+import { connect } from 'react-redux'
+
 
 const styles = theme => ({
     root: {
@@ -12,17 +15,23 @@ const styles = theme => ({
     },
 });
 
-const HPMonitor = (props) => {
+class HPMonitor extends React.Component {
+    componentDidMount() {
+        this.props.fetchHPJobs();
+    }
 
-    const { classes } = props;
-    return (
-        <div className={classes.root}>
-            <h1>Monitor</h1>
-            <FilterPanel />
-            <JobList />
-        </div>
-    )
+    render () {
+        const { classes } = this.props;
 
+        return (
+            <div className={classes.root}>
+                <h1>Monitor</h1>
+                <FilterPanel />
+                <JobList />
+            </div>
+        )
+    }
 }
 
-export default withStyles(styles)(HPMonitor);
+
+export default connect(null, { fetchHPJobs })(withStyles(styles)(HPMonitor));

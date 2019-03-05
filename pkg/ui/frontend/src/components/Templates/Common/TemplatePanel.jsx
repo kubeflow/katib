@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 
 import DeleteIcon from '@material-ui/icons/Delete';
 import CreateIcon from '@material-ui/icons/Create';
+import TextField from '@material-ui/core/TextField';
 
 import { openDialog } from '../../../actions/templateActions';
 
@@ -23,6 +24,13 @@ const useStyles = makeStyles({
     },
     icon: {
         margin: 4,
+    },
+    textField: {
+        width: '100%',
+    },
+    input: {
+        color: 'black !important',
+        fontSize: 24
     }
 });
 
@@ -35,12 +43,25 @@ const TemplatePanel = (props) => {
     };
 
     const openDeleteDialog = (index) => (event) => {
-        props.openDialog("delete", index);
+        props.openDialog("delete", index, props.type);
     };
 
     return (
         <div className={classes.root}>
-            {props.text}
+            <TextField
+                disabled
+                multiline
+                id="outlined-disabled"
+                label="Disabled"
+                className={classes.textField}
+                InputProps={{
+                    className: classes.input
+                }}
+                margin="normal"
+                variant="outlined"
+                value={props.text}
+                />
+
             <br />
             <Grid container spacing={24} className={classes.grid}>
                 <Grid item xs={10}>

@@ -26,7 +26,7 @@ const DeleteDialog = (props) => {
     const classes = useStyles();
 
     const deleteTemplate = (type) => (event) => {
-        props.deleteTemplate(type, props.currentDeleteIndex);
+        props.deleteTemplate(props.currentTemplateName, type);
     }
 
     return (
@@ -65,6 +65,7 @@ const mapStateToProps = (state) => {
     return {
         deleteOpen: state[module].deleteOpen,
         currentTemplateIndex: state[module].currentTemplateIndex,
+        currentTemplateName: state[module].currentTemplateName,
     };
 };
 
