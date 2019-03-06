@@ -201,6 +201,14 @@ func (k *KatibUIHandler) SubmitYamlJob(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (k *KatibUIHandler) FetchJobInfo(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
+	var data map[string]interface{}
+
+	json.NewDecoder(r.Body).Decode(&data)
+	fmt.Println(data)
+}
+
 func (k *KatibUIHandler) FetchWorkerTemplates(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
 	wt, err := k.studyjobClient.GetWorkerTemplates(namespace)

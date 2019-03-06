@@ -353,6 +353,52 @@ const goSubmitYaml = function *(yaml) {
         })
     }
 }
+
+export const fetchJobInfo = function *() {
+    while (true) {
+        const action = yield take(hpMonitorActions.FETCH_JOB_INFO_REQUEST);
+        try {
+            console.log(action)
+            const result = yield call(
+                goFetchJobInfo,
+                action.id
+            )
+            if (result.status === 200) {
+                yield put({
+                    type: hpMonitorActions.FETCH_JOB_INFO_SUCCESS,
+                    data: result.data
+                })
+            } else {
+                yield put({
+                    type: hpMonitorActions.FETCH_JOB_INFO_FAILURE,
+                }) 
+            }
+        } catch (err) {
+            yield put({
+                type: hpMonitorActions.FETCH_JOB_INFO_FAILURE,
+            })
+        }
+    }
+}
+
+const goFetchJobInfo = function *(id) {
+    try {
+        const data = {
+            id
+        }
+        const result = yield call(
+            axios.post,
+            'http://127.0.0.1:9303/katib/fetch_job_info/',
+            data,
+        )
+        return result
+    } catch (err) {
+        yield put({
+            type: hpMonitorActions.FETCH_JOB_INFO_FAILURE,
+        })
+    }
+}
+
 export default function* rootSaga() {
     yield all([
         fork(fetchWorkerTemplates),
@@ -361,6 +407,7 @@ export default function* rootSaga() {
         fork(addTemplate), 
         fork(editTemplate),
         fork(deleteTemplate),
-        fork(submitYaml)
+        fork(submitYaml),
+        fork(fetchJobInfo)
     ]);
 };

@@ -19,3 +19,12 @@ export const FETCH_HP_JOBS_FAILURE = "FETCH_HP_JOBS_FAILURE";
 export const fetchHPJobs = () => ({
     type: FETCH_HP_JOBS_REQUEST,
 })
+
+export const FETCH_JOB_INFO_REQUEST = "FETCH_JOB_INFO_REQUEST"
+export const FETCH_JOB_INFO_SUCCESS = "FETCH_JOB_INFO_SUCCESS"
+export const FETCH_JOB_INFO_FAILURE = "FETCH_JOB_INFO_FAILURE"
+
+export const fetchJobInfo = (id) => ({
+    type: FETCH_JOB_INFO_REQUEST,
+    id
+})

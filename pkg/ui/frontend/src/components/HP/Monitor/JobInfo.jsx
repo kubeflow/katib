@@ -5,6 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 
+import { fetchJobInfo } from '../../../actions/hpMonitorActions';
 import Plot from 'react-plotly.js';
 
 
@@ -17,6 +18,10 @@ const styles = theme => ({
 })
 
 class HPJobInfo extends React.Component {
+
+    componentDidMount() {
+        this.props.fetchJobInfo(this.props.match.params.id);
+    }
 
     render () {
         const { classes } = this.props;
@@ -71,4 +76,4 @@ const mapStateToProps = (state) => ({
 })
 
 
-export default connect(mapStateToProps, null)(withStyles(styles)(HPJobInfo));
+export default connect(mapStateToProps, { fetchJobInfo })(withStyles(styles)(HPJobInfo));

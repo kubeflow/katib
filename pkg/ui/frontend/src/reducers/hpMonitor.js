@@ -11,6 +11,7 @@ const initialState = {
     ],
     filteredJobsList: [
     ],
+    jobData: [],
 };
 
 const hpMonitorReducer = (state = initialState, action) => {
@@ -54,6 +55,11 @@ const hpMonitorReducer = (state = initialState, action) => {
                 ...state,
                 jobsList: action.jobs,
                 filteredJobsList: action.jobs,
+            }
+        case actions.FETCH_JOB_INFO_SUCCESS:
+            return {
+                ...state,
+                jobData: action.data,
             }
         default:
             return state;
