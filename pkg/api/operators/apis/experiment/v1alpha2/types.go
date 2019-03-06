@@ -40,6 +40,9 @@ type ExperimentSpec struct {
 	// Total number of trials to run.
 	MaxTrialCount      int `json:"maxTrialCount,omitempty"`
 
+	// Whether to retain historical data in DB after deletion.
+	RetainHistoricalData     bool        `json:"retainHistoricalData,omitempty"`
+
 	// TODO - figure out what to do with metric collectors
 	MetricsCollectorType string `json:"metricsCollectorSpec,omitempty"`
 
@@ -167,9 +170,14 @@ const (
 
 type AlgorithmSpec struct {
 	AlgorithmName string		 `json:"algorithmName,omitempty"`
-	// Key-value pairs for hyperparameters and assignment values.
-	ParameterAssignments []trial.ParameterAssignment `json:"parameterAssignments"`
+	// Key-value pairs representing settings for suggestion algorithms.
+	AlgorithmSettings []AlgorithmSetting `json:"algorithmSettings"`
 	EarlyStopping *EarlyStoppingSpec `json:"earlyStopping,omitempty"`
+}
+
+type AlgorithmSetting struct {
+	Name  string  `json:"name,omitempty"`
+	Value string  `json:"value,omitempty"`
 }
 
 type EarlyStoppingSpec struct {
