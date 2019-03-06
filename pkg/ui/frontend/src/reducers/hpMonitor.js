@@ -8,10 +8,21 @@ const initialState = {
         "Succeeded": true,
     },
     jobsList: [
+        {
+            name: "Test 1",
+            status: "Running",
+            id: "103askdaksdas"
+        }
     ],
     filteredJobsList: [
+        {
+            name: "Test 1",
+            status: "Running",
+            id: "103askdaksdas"
+        }
     ],
     jobData: [],
+    dialogOpen: false
 };
 
 const hpMonitorReducer = (state = initialState, action) => {
@@ -60,6 +71,16 @@ const hpMonitorReducer = (state = initialState, action) => {
             return {
                 ...state,
                 jobData: action.data,
+            }
+        case actions.OPEN_DIALOG:
+            return {
+                ...state,
+                dialogOpen: true,
+            }
+        case actions.CLOSE_DIALOG:
+            return {
+                ...state,
+                dialogOpen: false,
             }
         default:
             return state;

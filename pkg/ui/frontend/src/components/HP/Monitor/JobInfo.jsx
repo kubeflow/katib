@@ -6,22 +6,25 @@ import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 
 import { fetchJobInfo } from '../../../actions/hpMonitorActions';
-import Plot from 'react-plotly.js';
+
+import HPPlot from './Plot';
+import HPTable from './Table';
+import PlotDialog from './Dialog';
 
 
 const styles = theme => ({
     root: {
         width: '90%',
         margin: '0 auto',
-        paddingTop: 20,
+        padding: 20,
     }
 })
 
 class HPJobInfo extends React.Component {
 
-    componentDidMount() {
-        this.props.fetchJobInfo(this.props.match.params.id);
-    }
+    // componentDidMount() {
+    //     this.props.fetchJobInfo(this.props.match.params.id);
+    // }
 
     render () {
         const { classes } = this.props;
@@ -36,36 +39,9 @@ class HPJobInfo extends React.Component {
                     JOB INFO for {this.props.match.params.id}
                 </Typography>
                 <br />
-                <Plot
-                    data={[{
-                        type: 'parcoords',
-                        line: {
-                          color: 'blue'
-                        },
-                        
-                        dimensions: [{
-                          range: [1, 5],
-                          constraintrange: [1, 2],
-                          label: 'A',
-                          values: [1,4]
-                        }, {    
-                          range: [1,5],
-                          label: 'B',
-                          values: [3,1.5],
-                          tickvals: [1.5,3,4.5]
-                        }, {
-                          range: [1, 5],
-                          label: 'C',
-                          values: [2,4],
-                          tickvals: [1,2,4,5],
-                          ticktext: ['text 1','text 2','text 4','text 5']
-                        }, {
-                          range: [1, 5],
-                          label: 'D',
-                          values: [4,2]
-                        }]}]}
-                    layout={ {title: `Job id: ${this.props.match.params.id}`} }
-                />
+                <HPPlot id={this.props.match.params.id} />
+                <HPTable />
+                <PlotDialog />
             </div>
         )
     }
