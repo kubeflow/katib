@@ -149,6 +149,7 @@ spec:
                 restartPolicy: Never
   suggestionSpec:
     suggestionAlgorithm: "nasrl"
+    requestNumber: 3
     suggestionParameters:
       - name: "lstm_num_cells"
         value: "64"

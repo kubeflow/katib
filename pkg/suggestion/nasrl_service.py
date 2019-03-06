@@ -9,18 +9,22 @@ import logging
 from logging import getLogger, StreamHandler, INFO, DEBUG
 import json
 import os
+import time
+
 
 MANAGER_ADDRESS = "vizier-core"
 MANAGER_PORT = 6789
+
 
 class NAS_RL_StudyJob(object):
     def __init__(self, request, logger):
         self.logger = logger
         self.study_id = request.study_id
         self.param_id = request.param_id
+        self.num_trials = request.request_number
         self.study_name = None
         self.tf_graph = tf.Graph()
-        self.prev_trial_id = None
+        self.prev_trial_ids = list()
         self.ctrl_cache_file = "ctrl_cache/{}/{}.ckpt".format(request.study_id, request.study_id)
         self.ctrl_step = 0
         self.is_first_run = True
@@ -38,7 +42,7 @@ class NAS_RL_StudyJob(object):
         self._get_study_param()
         self._get_suggestion_param()
         self._setup_controller()
-        self.logger.info("Suggestion for StudyJob {} (ID: {}) has been initialized.\n".format(self.study_name, self.study_id))
+        self.logger.info(">>> Suggestion for StudyJob {} (ID: {}) has been initialized.\n".format(self.study_name, self.study_id))
         
     def _get_study_param(self):
         # this function need to
@@ -111,7 +115,7 @@ class NAS_RL_StudyJob(object):
             self.logger.warning("Error! The Suggestion has not yet been initialized!")
             return
         
-        self.logger.info("Search Space for StudyJob {} (ID: {}):".format(self.study_name, self.study_id))
+        self.logger.info(">>> Search Space for StudyJob {} (ID: {}):".format(self.study_name, self.study_id))
         for opt in self.search_space:
             opt.print_op(self.logger)
         self.logger.info("There are {} operations in total.\n".format(self.num_operations))
@@ -121,12 +125,13 @@ class NAS_RL_StudyJob(object):
             self.logger.warning("Error! The Suggestion has not yet been initialized!")
             return
         
-        self.logger.info("Parameters of LSTM Controller for StudyJob {} (ID: {}):".format(self.study_name, self.study_id))
+        self.logger.info(">>> Parameters of LSTM Controller for StudyJob {} (ID: {}):".format(self.study_name, self.study_id))
         for spec in self.suggestion_config:
             if len(spec) > 13:
                 self.logger.info("{}: \t{}".format(spec, self.suggestion_config[spec]))
             else:
                 self.logger.info("{}: \t\t{}".format(spec, self.suggestion_config[spec]))
+        self.logger.info("RequestNumber:\t\t{}".format(self.num_trials))
         self.logger.info("")
 
 
@@ -248,10 +253,13 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 controller_ops["train_op"]]
 
             if study.is_first_run:
-                self.logger.info("First time running suggestion for {}. Random architecture will be given.".format(study.study_name))
+                self.logger.info(">>> First time running suggestion for {}. Random architecture will be given.".format(study.study_name))
                 with tf.Session() as sess:
                     sess.run(tf.global_variables_initializer())
-                    arc = sess.run(controller_ops["sample_arc"])
+                    candidates = list()
+                    for _ in range(study.num_trials):
+                        candidates.append(sess.run(controller_ops["sample_arc"]))
+                    
                     # TODO: will use PVC to store the checkpoint to protect against unexpected suggestion pod restart
                     saver.save(sess, study.ctrl_cache_file)
 
@@ -264,88 +272,112 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     valid_acc = ctrl.reward
                     result = self.GetEvaluationResult(study)
 
-                    # This lstm cell is designed to maximize the metrics
-                    # However, if the user want to minimize the metrics, we can take the negative of the result
+                    # In some rare cases, GetEvaluationResult() may return None
+                    # if GetSuggestions() is called before all the trials are completed
+                    while result is None:
+                        self.logger.warning(">>> GetEvaluationResult() returns None")
+                        time.sleep(20)
+                        result = self.GetEvaluationResult(study)
+
+                    # This LSTM network is designed to maximize the metrics
+                    # However, if the user wants to minimize the metrics, we can take the negative of the result
                     if study.opt_direction == api_pb2.MINIMIZE:
                         result = -result
 
                     loss, entropy, lr, gn, bl, skip, _ = sess.run(
                         fetches=run_ops,
                         feed_dict={valid_acc: result})
-                    self.logger.info("Suggetion updated. LSTM Controller Reward: {}".format(loss))
+                    self.logger.info(">>> Suggetion updated. LSTM Controller Reward: {}".format(loss))
 
-                    arc = sess.run(controller_ops["sample_arc"])
+                    candidates = list()
+                    for _ in range(study.num_trials):
+                        candidates.append(sess.run(controller_ops["sample_arc"]))
 
                     saver.save(sess, study.ctrl_cache_file)
+        
+        organized_candidates = list()
+        trials = list()
 
-        arc = arc.tolist()
-        organized_arc = [0 for _ in range(study.num_layers)]
-        record = 0
-        for l in range(study.num_layers):
-            organized_arc[l] = arc[record: record + l + 1]
-            record += l + 1
+        for i in range(study.num_trials):
+            arc = candidates[i].tolist()
+            organized_arc = [0 for _ in range(study.num_layers)]
+            record = 0
+            for l in range(study.num_layers):
+                organized_arc[l] = arc[record: record + l + 1]
+                record += l + 1
+            organized_candidates.append(organized_arc)
 
-        nn_config = dict()
-        nn_config['num_layers'] = study.num_layers
-        nn_config['input_size'] = study.input_size
-        nn_config['output_size'] = study.output_size
-        nn_config['embedding'] = dict()
-        for l in range(study.num_layers):
-            opt = organized_arc[l][0]
-            nn_config['embedding'][opt] = study.search_space[opt].get_dict()
+            nn_config = dict()
+            nn_config['num_layers'] = study.num_layers
+            nn_config['input_size'] = study.input_size
+            nn_config['output_size'] = study.output_size
+            nn_config['embedding'] = dict()
+            for l in range(study.num_layers):
+                opt = organized_arc[l][0]
+                nn_config['embedding'][opt] = study.search_space[opt].get_dict()
 
-        organized_arc_json = json.dumps(organized_arc)
-        nn_config_json = json.dumps(nn_config)
+            organized_arc_json = json.dumps(organized_arc)
+            nn_config_json = json.dumps(nn_config)
 
-        organized_arc_str = str(organized_arc_json).replace('\"', '\'')
-        nn_config_str = str(nn_config_json).replace('\"', '\'')
+            organized_arc_str = str(organized_arc_json).replace('\"', '\'')
+            nn_config_str = str(nn_config_json).replace('\"', '\'')
 
-        self.logger.info("\nNew Neural Network Architecture (internal representation):")
-        self.logger.info(organized_arc_json)
-        self.logger.info("\nCorresponding Seach Space Description:")
-        self.logger.info(nn_config_str)
-        self.logger.info("")
+            self.logger.info("\n>>> New Neural Network Architecture Candidate #{} (internal representation):".format(i))
+            self.logger.info(organized_arc_json)
+            self.logger.info("\n>>> Corresponding Seach Space Description:")
+            self.logger.info(nn_config_str)
 
-        trials = []
-        trials.append(api_pb2.Trial(
-                study_id=request.study_id,
-                parameter_set=[
-                    api_pb2.Parameter(
-                        name="architecture",
-                        value=organized_arc_str,
-                        parameter_type= api_pb2.CATEGORICAL),
-                    api_pb2.Parameter(
-                        name="nn_config",
-                        value=nn_config_str,
-                        parameter_type= api_pb2.CATEGORICAL)
-                ], 
+            trials.append(api_pb2.Trial(
+                    study_id=request.study_id,
+                    parameter_set=[
+                        api_pb2.Parameter(
+                            name="architecture",
+                            value=organized_arc_str,
+                            parameter_type= api_pb2.CATEGORICAL),
+                        api_pb2.Parameter(
+                            name="nn_config",
+                            value=nn_config_str,
+                            parameter_type= api_pb2.CATEGORICAL)
+                    ], 
+                )
             )
-        )
 
+        self.prev_trial_ids = list()
+        self.logger.info("")
         channel = grpc.beta.implementations.insecure_channel(MANAGER_ADDRESS, MANAGER_PORT)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             for i, t in enumerate(trials):
                 ctrep = client.CreateTrial(api_pb2.CreateTrialRequest(trial=t), 10)
                 trials[i].trial_id = ctrep.trial_id
-            self.logger.info("Trial {} Created\n".format(ctrep.trial_id))
-            study.prev_trial_id = ctrep.trial_id
+                self.prev_trial_ids.append(ctrep.trial_id)
         
+        self.logger.info(">>> {} Trials were created:".format(study.num_trials))
+        for t in self.prev_trial_ids:
+            self.logger.info(t)
+        self.logger.info("")
+
         study.ctrl_step += 1
 
         return api_pb2.GetSuggestionsReply(trials=trials)
 
     def GetEvaluationResult(self, study):
-        worker_list = []
         channel = grpc.beta.implementations.insecure_channel(MANAGER_ADDRESS, MANAGER_PORT)
         with api_pb2.beta_create_Manager_stub(channel) as client:
-            gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=study.study_id, trial_id=study.prev_trial_id, only_latest_log=True), 10)
-            worker_list = gwfrep.worker_full_infos
-
-        for w in worker_list:
-            if w.Worker.status == api_pb2.COMPLETED:
-                for ml in w.metrics_logs:
+            gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=study.study_id, only_latest_log=True), 10)
+            trials_list = gwfrep.worker_full_infos
+        
+        completed_trials = dict()
+        for t in trials_list:
+            if t.Worker.trial_id in self.prev_trial_ids and t.Worker.status == api_pb2.COMPLETED:
+                for ml in t.metrics_logs:
                     if ml.name == study.objective_name:
-                        self.logger.info("Evaluation result of previous candidate: {}".format(ml.values[-1].value))
-                        return float(ml.values[-1].value)
+                        completed_trials[t.Worker.trial_id] = float(ml.values[-1].value)
+        
+        if len(completed_trials) == study.num_trials:
+            self.logger.info(">>> Evaluation results of previous trials:")
+            for k in completed_trials:
+                self.logger.info("{}: {}".format(k, completed_trials[k]))
+            avg_metrics = sum(completed_trials.values()) / study.num_trials
+            self.logger.info("The average is {}\n".format(avg_metrics))
 
-        # TODO: add support for multiple trials
+            return avg_metrics
