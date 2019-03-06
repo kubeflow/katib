@@ -8,34 +8,44 @@ from .utils import get_logger
 from . import parsing_utils
 
 
+REQUIRES_PAST_OBSERVATIONS = ["bayesian_optimization"]
+
+
 class SuggestionService(api_pb2_grpc.SuggestionServicer):
 
-    def __init__(self, logger=None):
+    def __init__(self, search_algorithm=SEARCH_ALGORITHM, logger=None):
         self.manager_addr = MANAGER_ADDRESS
         self.manager_port = MANAGER_PORT
         self.logger = logger if (logger is not None) else get_logger()
+        self.search_algorithm = search_algorithm
+        self.requires_previous = search_algorithm in REQUIRES_PAST_OBSERVATIONS
 
     def GetSuggestions(self, request, context):
         suggestion_config = self._parse_suggestion_parameters(request.param_id)
         suggestion_config = {param.name: param.value for param in suggestion_config}
         study_conf = self._get_study_config(request.study_id)
-        past_suggestions, past_metrics = self._get_eval_history(request.study_id, study_conf.objective_value_name)
         parameter_config = parsing_utils.parse_parameter_configs(study_conf.parameter_configs.configs)
 
         self.logger.debug("lowerbound: %r", parameter_config.lower_bounds, extra={"StudyID": request.study_id})
         self.logger.debug("upperbound: %r", parameter_config.upper_bounds, extra={"StudyID": request.study_id})
-        X_train = parsing_utils.parse_previous_observations(
-            past_suggestions,
-            parameter_config.dim,
-            parameter_config.name_ids,
-            parameter_config.parameter_types,
-            parameter_config.categorical_info
-        )
-        y_train = parsing_utils.parse_metric(past_metrics,
-                                             study_conf.optimization_type)
-        alg = ALGORITHM_REGISTER[SEARCH_ALGORITHM](parameter_config, suggestion_config, X_train, y_train, logger=self.logger)
+        alg = ALGORITHM_REGISTER[self.search_algorithm](parameter_config, suggestion_config, logger=self.logger)
         trials = []
-        x_next_list = alg.get_suggestion(request.request_number)
+        if self.requires_previous:
+            past_suggestions, past_metrics = self._get_eval_history(
+                request.study_id, study_conf.objective_value_name)
+            X_train = parsing_utils.parse_previous_observations(
+                past_suggestions,
+                parameter_config.dim,
+                parameter_config.name_ids,
+                parameter_config.parameter_types,
+                parameter_config.categorical_info
+            )
+            y_train = parsing_utils.parse_metric(past_metrics,
+                                                 study_conf.optimization_type)
+            x_next_list = alg.get_suggestion(X_train, y_train,
+                                             request.request_number)
+        else:
+            x_next_list = alg.get_suggestion(request.request_number)
         for x_next in x_next_list:
             x_next = x_next.squeeze()
             self.logger.debug("xnext: %r ", x_next, extra={"StudyID": request.study_id})
