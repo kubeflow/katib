@@ -55,7 +55,7 @@ const Menu = (props) => {
     };
     
     // Add links
-    const color = "secondary";
+    const color = "primary";
     const iconColor = "primary";
     const variant = "title";
     return (

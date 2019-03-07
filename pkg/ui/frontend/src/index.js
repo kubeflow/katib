@@ -18,10 +18,10 @@ store.runSaga(rootSaga);
 const theme = createMuiTheme({
     palette: {
         primary: {
-            main: '#EC96A4',
+            main: '#000',
         },
         secondary: {
-            main: '#5D535E',
+            main: '#fff',
         },
     },
 });

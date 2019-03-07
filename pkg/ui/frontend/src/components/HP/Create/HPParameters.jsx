@@ -46,7 +46,7 @@ const styles = theme => ({
     selectEmpty: {
         marginTop: 10,
     },
-    addButton: {
+    button: {
         margin: 10,
     }
 })
@@ -79,9 +79,6 @@ const HPParameters = (props) => {
                 {SectionInTypography("Spec", classes)}
                 <CommonParametersSpec />
                 {SectionInTypography("Parameters Config", classes)}
-                <Button variant={"contained"} color={"primary"} className={classes.addButton}>
-                    Add parameter
-                </Button>
                 <ParameterConfig />
                 {SectionInTypography("Worker Spec", classes)}
                 <WorkerSpecParam />

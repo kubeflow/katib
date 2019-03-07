@@ -52,16 +52,26 @@ const initialState = {
     //  specify NASCONFIG?
     parameterConfig: [
         {
-            type: "int",
+            parameterType: "int",
             name: "Shit",
+            feasible: "list",
+            min: "",
+            max: "",
+            step: "",
+            list: [],
         },
         {
-            type: "double",
+            parameterType: "double",
             name: "Shit2",
-        },
-        {
-            type: "categorical",
-            name: "Shit3",
+            feasible: "feasible",
+            min: "",
+            max: "",
+            step: "",
+            list: [
+                {
+                    value: "",
+                }
+            ],
         },
     ],
     paramTypes: ["int", "double", "categorical"],
@@ -110,6 +120,50 @@ const hpCreateReducer = (state = initialState, action) => {
                 ...state,
                 commonParametersSpec: spec,
             }
+        case actions.ADD_PARAMETER:
+            let params = state.parameterConfig.slice();
+            params.push({name: "", parameterType: ""})
+            return {
+                ...state,
+                parameterConfig: params,
+            }
+        case actions.EDIT_PARAMETER:
+            params = state.parameterConfig.slice();
+            params[action.index][action.field] = action.value;
+            return {
+                ...state,
+                parameterConfig: params,
+            }
+        case actions.DELETE_PARAMETER:
+            params = state.parameterConfig.slice();
+            params.splice(action.index, 1);
+            return {
+                ...state,
+                parameterConfig: params,
+            }
+        case actions.ADD_LIST_PARAMETER:
+            params = state.parameterConfig.slice();
+            params[action.paramIndex].list.push({
+                value: "",
+            })
+            return {
+                ...state,
+                parameterConfig: params
+            }
+        case actions.EDIT_LIST_PARAMETER:
+            params = state.parameterConfig.slice();
+            params[action.paramIndex].list[action.index] = action.value;
+            return {
+                ...state,
+                parameterConfig: params
+            }
+        case actions.DELETE_LIST_PARAMETER:
+            params = state.parameterConfig.slice();
+            params[action.paramIndex].list.splice(action.index, 1);
+            return {
+                ...state,
+                parameterConfig: params
+            }
         case actions.CHANGE_WORKER:
             return {
                 ...state,
@@ -122,7 +176,7 @@ const hpCreateReducer = (state = initialState, action) => {
             }
         case actions.ADD_SUGGESTION_PARAMETER:
             let suggestionParameters = state.suggestionParameters.slice();
-            let parameter = {name: "", value: ""};
+            let parameter = {name: "", parameterType: ""};
             suggestionParameters.push(parameter);
             return {
                 ...state,

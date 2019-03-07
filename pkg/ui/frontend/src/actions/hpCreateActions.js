@@ -19,6 +19,47 @@ export const changeSpec = (name, value) => ({
     name, value
 })
 
+export const ADD_PARAMETER = "CHANGE_PARAMETER";
+
+export const addParameter = () => ({
+    type: ADD_PARAMETER,
+})
+
+export const EDIT_PARAMETER = "EDIT_PARAMTER";
+
+export const editParameter = (index, field, value) => ({
+    type: EDIT_PARAMETER,
+    index, field, value,
+})
+
+export const DELETE_PARAMETER = "DELETE_PARAMETER";
+
+export const deleteParameter = (index) => ({
+    type: DELETE_PARAMETER,
+    index,
+})
+
+export const ADD_LIST_PARAMETER = "ADD_LIST_PARAMETER";
+
+export const addListParameter = (paramIndex) => ({
+    type: ADD_LIST_PARAMETER,
+    paramIndex,
+})
+
+export const EDIT_LIST_PARAMETER = "EDIT_LIST_PARAMETER";
+
+export const editListParameter = (paramIndex, index, value) => ({
+    type: EDIT_LIST_PARAMETER,
+    paramIndex, index, value
+})
+
+export const DELETE_LIST_PARAMETER = "DELETE_LIST_PARAMETER";
+
+export const deleteListParameter = (paramIndex, index) => ({
+    type: DELETE_LIST_PARAMETER,
+    paramIndex, index
+})
+
 export const CHANGE_WORKER = "CHANGE_WORKER";
 
 export const changeWorker = (worker) => ({

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import makeStyles from '@material-ui/styles/makeStyles';
+import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
@@ -12,9 +13,14 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormLabel from '@material-ui/core/FormLabel';
+import Divider from '@material-ui/core/Divider';
+import Fab from '@material-ui/core/Fab';
+import AddIcon from '@material-ui/icons/Add';
+import Icon from '@material-ui/core/Icon';
+
+import { addParameter, editParameter, deleteParameter, addListParameter, editListParameter, deleteListParameter } from '../../../../actions/hpCreateActions';
+
 
 const module = "hpCreate";
 
@@ -43,15 +49,47 @@ const useStyles = makeStyles({
     group: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-    }
+    },
+    divider: {
+        margin: 5,
+    },
+    addButton: {
+        margin: 10,
+    },
+    fab: {
+        margin: 2,
+    },
 })
 
 const ParameterConfig = (props) => {
     
     const classes = useStyles();
+    
+    const onDelete = (index) => (event) => {
+        props.deleteParameter(index);
+    }
+
+    const onGeneralEdit = (index, field) => (event) => {
+        props.editParameter(index, field, event.target.value);
+    } 
+    
+    const onParamAdd = (index) => (event) => {
+        props.addListParameter(index);
+    }
+
+    const onParamEdit = (paramIndex, index) => (event) => {
+        props.editListParameter(paramIndex, index, event.target.value);
+    }
+
+    const onParamDelete = (paramIndex, index) => (event) => {
+        props.deleteListParameter(paramIndex, index);
+    }
 
     return (
         <div>
+            <Button variant={"contained"} color={"primary"} className={classes.addButton} onClick={props.addParameter}>
+                    Add parameter
+            </Button>
             {props.parameterConfig.map((param, i) => {
                 return (
                     <div className={classes.parameter} key={i}>
@@ -61,6 +99,7 @@ const ParameterConfig = (props) => {
                                     label={"Name"}
                                     className={classes.textField}
                                     value={param.name}
+                                    onChange={onGeneralEdit(i, "name")}
                                     />
                             </Grid>
                             <Grid item xs={2}>
@@ -69,8 +108,8 @@ const ParameterConfig = (props) => {
                                         Parameter Type
                                     </InputLabel>
                                     <Select
-                                        value={param.type}
-                                        // onChange={handleChange}
+                                        value={param.parameterType}
+                                        onChange={onGeneralEdit(i, "parameterType")}
                                         input={
                                             <OutlinedInput name={"paramType"} labelWidth={120}/>
                                         }
@@ -89,17 +128,67 @@ const ParameterConfig = (props) => {
                                         aria-label="Gender"
                                         name="gender1"
                                         className={classes.group}
+                                        value={param.feasible}
+                                        onChange={onGeneralEdit(i, "feasible")}
                                     >
                                     <FormControlLabel value="feasible" control={<Radio />} label="Feasible" />
                                     <FormControlLabel value="list" control={<Radio />} label="List" />
                                 </RadioGroup>
                             </Grid>
-                            <Grid item xs={5}>
-                                <TextField
-                                    label={"Value"}
-                                    className={classes.textField}
-                                    value={param.name}
-                                    />
+                            <Grid item xs={4}>
+                                {param.feasible === "list" && 
+                                    (param.list.map((element, elIndex) => {
+                                        return (
+                                            <div>
+                                                <TextField
+                                                    label={"Value"}
+                                                    className={classes.textField}
+                                                    value={element.value}
+                                                    onChange={onParamEdit(i, elIndex)}
+                                                />
+                                                <IconButton
+                                                    key="close"
+                                                    aria-label="Close"
+                                                    color={"primary"}
+                                                    className={classes.icon}
+                                                    onClick={onParamDelete(i, elIndex)}
+                                                    >
+                                                        <DeleteIcon />
+                                                </IconButton>
+                                            </div>
+                                        )
+                                    }))
+                                    
+                                }
+                                {param.feasible === "feasible" && 
+                                    <div>
+                                        <TextField
+                                            label={"Min"}
+                                            className={classes.textField}
+                                            value={param.min}
+                                            onChange={onGeneralEdit(i, "min")}
+                                        />
+                                        <TextField
+                                            label={"Max"}
+                                            className={classes.textField}
+                                            value={param.max}
+                                            onChange={onGeneralEdit(i, "max")}
+                                        />
+                                        <TextField
+                                            label={"Step"}
+                                            className={classes.textField}
+                                            value={param.step}
+                                            onChange={onGeneralEdit(i, "step")}
+                                        />
+                                    </div>
+                                }
+                            </Grid>
+                            <Grid item xs={1}>
+                                {param.feasible === "list" && 
+                                    <Fab color={"primary"} className={classes.fab} onClick={onParamAdd(i)}>
+                                        <AddIcon />
+                                    </Fab>
+                                }
                             </Grid>
                             <Grid item xs={1} >
                                 <IconButton
@@ -107,11 +196,13 @@ const ParameterConfig = (props) => {
                                         aria-label="Close"
                                         color={"primary"}
                                         className={classes.icon}
+                                        onClick={onDelete(i)}
                                     >
                                         <DeleteIcon />
                                 </IconButton>
                             </Grid>
                         </Grid>
+                        <Divider className={classes.divider} />
                     </div>
                 )
             })}
@@ -127,4 +218,4 @@ const mapStateToProps = state => {
     }
 }
 
-export default connect(mapStateToProps, null)(ParameterConfig);
+export default connect(mapStateToProps, { addParameter, editParameter, deleteParameter, addListParameter, editListParameter, deleteListParameter })(ParameterConfig);
