@@ -1,5 +1,3 @@
-import itertools
-import numpy as np
 from pkg.api.python import api_pb2
 
 class SearchSpace(object):
@@ -12,9 +10,8 @@ class SearchSpace(object):
 
         for operation in self.operation_list:
             opt_spec = list(operation.parameter_configs.configs)
-            # avail_space is dict with the format {"spec_nam": [spec feasible values]}
+            """ avail_space is dict with the format {"spec_nam": [spec feasible values]} """
             avail_space = dict()
-            num_spec = len(opt_spec)
 
             for ispec in opt_spec:
                 spec_name = ispec.name
@@ -23,5 +20,8 @@ class SearchSpace(object):
                     if len(avail_space[spec_name])==1:
                         avail_space[spec_name]=int(avail_space[spec_name][0])
                 elif ispec.parameter_type == api_pb2.INT:
-                    avail_space[spec_name] = int(ispec.feasible.value)
+                    spec_min = int(ispec.feasible.min)
+                    spec_max = int(ispec.feasible.max)
+                    spec_step = int(ispec.feasible.step)
+                    avail_space[spec_name] = range(spec_min, spec_max+1, spec_step)
         self.search_space = avail_space

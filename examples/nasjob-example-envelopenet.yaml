@@ -23,6 +23,10 @@ spec:
         - 3
       outputSize:
         - 10
+      max_layers_per_stage:
+        - 7
+        - 6
+        - 3
     operations:
       - operationType: envolpenet
         parameterconfigs:
@@ -42,13 +46,6 @@ spec:
               list:
               - "3"
               - "3"
-              - "3"
-          - name: max_layers_per_stage
-            parametertype: categorical
-            feasible: 
-              list:
-              - "7"
-              - "6"
               - "3"
           - name: construction
             parametertype: categorical
@@ -74,11 +71,6 @@ spec:
             feasible: 
               list:
               - "1"
-          - name: worst_case
-            parametertype: categorical
-            feasible: 
-              list:
-              - "0"
           - name: outputs
             parametertype: categorical
             feasible:
@@ -118,20 +110,14 @@ spec:
   suggestionSpec:
     suggestionAlgorithm: "nasenvelopenet"
     suggestionParameters:
-      - name: "arch_name"
-        value: "nac-cons-skip-cons-topline"
-      - name: "mode"
-        value: "construct"
-      - name: "algorithm"
-        value: "envelopenet"
       - name: "gpus"
         value: "12"
       - name: "gpu_usage"
         value: "0.47"
       - name: "steps"
-        value: "1000"
+        value: "10000"
       - name: "eval_interval"
-        value: "50"
+        value: "5000"
       - name: "batch_size"
         value: "50"
       - name: "dataset"

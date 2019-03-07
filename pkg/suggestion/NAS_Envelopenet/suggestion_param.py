@@ -1,7 +1,5 @@
 def parseSuggestionParam(params_raw):
     param_standard = {
-        "mode": ['categorical', str, ["construct","oneshot","random"]],
-        "algorithm": ['categorical', str, ["envelopenet","deterministic","random"]],
         "gpus": ['categorical', list, []],
         "gpu_usage": ['value', float, [1e-6, 1.0]],
         "steps": ['value', int, [0, 'inf']],
@@ -10,23 +8,21 @@ def parseSuggestionParam(params_raw):
         "dataset": ['categorical', str, ["cifar10", "imagenet"]],
         "iterations": ['value', int, [0, 20]],
         "log_stats": ['categorical', bool, [True, False]],
-        "arch_name":['categorical', str, ["nac-cons-skip-cons-topline"]],
-        "data_dir":['categorical', str, ["data/"]]
+        "data_dir":['categorical', str, ["data/"]],
+        "max_layers_per_stage":['categorical', list, []]
     }
 
     suggestion_params = {
-        "arch_name":"nac-cons-skip-cons-topline",
         "data_dir":"data/",
-        "mode": "construct",
-        "algorithm": "envelopenet",
         "gpus": [],
         "gpu_usage": 0.47,
-        "steps": 100000,
+        "steps": 10000,
         "eval_interval": 5000,
         "batch_size": 50,
         "dataset": "cifar10",
         "iterations": 5,
-        "log_stats": True
+        "log_stats": True,
+        "max_layers_per_stage":[7,6,3]
     }
 
     def checktype(param_name, param_value, check_mode, supposed_type, supposed_range=None):
