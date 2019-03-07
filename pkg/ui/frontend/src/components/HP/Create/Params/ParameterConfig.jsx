@@ -195,7 +195,7 @@ const ParameterConfig = (props) => {
                                         key="close"
                                         aria-label="Close"
                                         color={"primary"}
-                                        className={classes.icon}
+                                        className={classes.fab}
                                         onClick={onDelete(i)}
                                     >
                                         <DeleteIcon />

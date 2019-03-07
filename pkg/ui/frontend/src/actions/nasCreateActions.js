@@ -19,6 +19,27 @@ export const changeSpec = (name, value) => ({
     name, value
 })
 
+export const ADD_SIZE = "ADD_SIZE";
+
+export const addSize = (sizeType) => ({
+    type: ADD_SIZE,
+    sizeType,
+})
+
+export const EDIT_SIZE = "EDIT_SIZE";
+
+export const editSize = (sizeType, index, value) => ({
+    type: EDIT_SIZE,
+    sizeType, index, value,
+})
+
+export const DELETE_SIZE = "DELETE_SIZE";
+
+export const deleteSize = (sizeType, index) => ({
+    type: DELETE_SIZE,
+    sizeType, index,
+})
+
 export const CHANGE_WORKER = "CHANGE_WORKER";
 
 export const changeWorker = (worker) => ({

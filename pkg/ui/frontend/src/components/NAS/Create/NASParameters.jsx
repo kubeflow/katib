@@ -11,6 +11,7 @@ import WorkerSpecParam from './Params/Worker';
 
 
 import { connect } from 'react-redux';
+import NASConfig from './Params/NASConfig';
 
 const module = "nasCreate";
 
@@ -77,9 +78,7 @@ const NASParameters = (props) => {
                 {SectionInTypography("Spec", classes)}
                 <CommonParametersSpec />
                 {SectionInTypography("NAS Config", classes)}
-                <Button variant={"contained"} color={"primary"} className={classes.addButton}>
-                    Add parameter
-                </Button>
+                <NASConfig />
                 {SectionInTypography("Worker Spec", classes)}
                 <WorkerSpecParam />
                 {SectionInTypography("Suggestion Parameters", classes)} 

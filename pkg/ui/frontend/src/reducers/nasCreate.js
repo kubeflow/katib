@@ -53,6 +53,9 @@ const initialState = {
     // select!
     workerSpec: ["Test 1", "Test 2"], // fetch names from backend 
     worker: '',
+    numLayers: '1',
+    inputSize: ['32', '32', '3'],
+    outputSize: ['10'],
     suggestionAlgorithms: ["rl", "enas"], // fetch these
     suggestionAlgorithm: "",
     suggestionParameters: [
@@ -126,6 +129,27 @@ const nasCreateReducer = (state = initialState, action) => {
             return {
                 ...state,
                 suggestionParameters: suggestionParameters,
+            }
+        case actions.ADD_SIZE:
+            let size = state[action.sizeType].slice();
+            size.push("0")
+            return {
+                ...state,
+                [action.sizeType]: size,
+            }
+        case actions.EDIT_SIZE:
+            size = state[action.sizeType].slice();
+            size[action.index] = action.value;
+            return {
+                ...state,
+                [action.sizeType]: size,
+            }
+        case actions.DELETE_SIZE:
+            size = state[action.sizeType].slice();
+            size.splice(action.index, 1);
+            return {
+                ...state,
+                [action.sizeType]: size,
             }
         default:
             return state;
