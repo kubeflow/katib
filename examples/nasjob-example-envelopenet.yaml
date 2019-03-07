@@ -23,10 +23,6 @@ spec:
         - 3
       outputSize:
         - 10
-      max_layers_per_stage:
-        - 7
-        - 6
-        - 3
     operations:
       - operationType: envolpenet
         parameterconfigs:
@@ -110,6 +106,8 @@ spec:
   suggestionSpec:
     suggestionAlgorithm: "nasenvelopenet"
     suggestionParameters:
+      - name: "max_layers_per_stage"
+        value: "763"
       - name: "gpus"
         value: "12"
       - name: "gpu_usage"
