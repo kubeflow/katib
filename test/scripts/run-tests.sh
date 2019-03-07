@@ -113,11 +113,6 @@ until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
     TIMEOUT=$(( TIMEOUT - 1 ))
 done
 
-./test/scripts/python-tests.sh
-if [ $? -ne 1 ]; then
-  exit 1
-fi
-
 cp -r test ${GO_DIR}/test
 cd ${GO_DIR}/test/e2e
 kubectl apply -f valid-studyjob.yaml
