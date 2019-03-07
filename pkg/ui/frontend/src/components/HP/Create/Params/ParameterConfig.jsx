@@ -131,8 +131,8 @@ const ParameterConfig = (props) => {
                                         value={param.feasible}
                                         onChange={onGeneralEdit(i, "feasible")}
                                     >
-                                    <FormControlLabel value="feasible" control={<Radio />} label="Feasible" />
-                                    <FormControlLabel value="list" control={<Radio />} label="List" />
+                                    <FormControlLabel value="feasible" control={<Radio color={"primary"} />} label="Feasible" />
+                                    <FormControlLabel value="list" control={<Radio color={"primary"} />} label="List" />
                                 </RadioGroup>
                             </Grid>
                             <Grid item xs={4}>
