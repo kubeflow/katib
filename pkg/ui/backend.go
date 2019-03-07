@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -8,8 +9,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/kubeflow/katib/pkg"
+	"github.com/kubeflow/katib/pkg/api"
 	"github.com/kubeflow/katib/pkg/manager/studyjobclient"
 
 	katibapi "github.com/kubeflow/katib/pkg/api"
@@ -203,10 +207,103 @@ func (k *KatibUIHandler) SubmitYamlJob(w http.ResponseWriter, r *http.Request) {
 
 func (k *KatibUIHandler) FetchJobInfo(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
-	var data map[string]interface{}
+	studyID := r.URL.Query()["id"][0]
 
-	json.NewDecoder(r.Body).Decode(&data)
-	fmt.Println(data)
+	conn, c := k.connectManager()
+	defer conn.Close()
+	retText := "WorkerID,TrialID"
+	gsrep, err := c.GetStudy(
+		context.Background(),
+		&api.GetStudyRequest{
+			StudyId: studyID,
+		},
+	)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	metricsList := map[string]int{}
+	for i, m := range gsrep.StudyConfig.Metrics {
+		retText += "," + m
+		metricsList[m] = i
+	}
+	paramList := map[string]int{}
+	for i, p := range gsrep.StudyConfig.ParameterConfigs.Configs {
+		retText += "," + p.Name
+		paramList[p.Name] = i + len(metricsList)
+	}
+	gwfirep, err := c.GetWorkerFullInfo(
+		context.Background(),
+		&api.GetWorkerFullInfoRequest{
+			StudyId:       studyID,
+			OnlyLatestLog: true,
+		},
+	)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	retText += "\n"
+	for _, wfi := range gwfirep.WorkerFullInfos {
+		restext := make([]string, len(metricsList)+len(paramList))
+		for _, m := range wfi.MetricsLogs {
+			if len(m.Values) > 0 {
+				restext[metricsList[m.Name]] = m.Values[len(m.Values)-1].Value
+			}
+		}
+		for _, p := range wfi.ParameterSet {
+			restext[paramList[p.Name]] = p.Value
+		}
+		retText += wfi.Worker.WorkerId + "," + wfi.Worker.TrialId + "," + strings.Join(restext, ",") + "\n"
+	}
+	response, err := json.Marshal(retText)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
+
+}
+
+func (k *KatibUIHandler) FetchWorkerInfo(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
+	studyID := r.URL.Query()["studyID"][0]
+	workerID := r.URL.Query()["workerID"][0]
+	conn, c := k.connectManager()
+	defer conn.Close()
+
+	defer conn.Close()
+	retText := "symbol,time,value\n"
+	gwfirep, err := c.GetWorkerFullInfo(
+		context.Background(),
+		&api.GetWorkerFullInfoRequest{
+			StudyId:  studyID,
+			WorkerId: workerID,
+		},
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(gwfirep.WorkerFullInfos) > 0 {
+		for _, m := range gwfirep.WorkerFullInfos[0].MetricsLogs {
+			pvtime := ""
+			for _, v := range m.Values {
+				mvtime, _ := time.Parse(time.RFC3339Nano, v.Time)
+				ctime := mvtime.Format("2006-01-02T15:4:5")
+				if pvtime != ctime {
+					retText += m.Name + "," + ctime + "," + v.Value + "\n"
+					pvtime = ctime
+				}
+			}
+		}
+	}
+
+	response, err := json.Marshal(retText)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
 }
 
 func (k *KatibUIHandler) FetchWorkerTemplates(w http.ResponseWriter, r *http.Request) {

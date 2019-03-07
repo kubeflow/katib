@@ -1,5 +1,5 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/styles';
+import { withStyles } from  '@material-ui/styles';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -11,12 +11,13 @@ import Plot from 'react-plotly.js';
 
 const module = "hpMonitor";
 
+const styles = theme => ({
 
-const useStyles = makeStyles({
-});
+})
+
 
 const PlotDialog = (props) => {
-    const classes = useStyles();
+    const { classes } = props;
     const trace1 = {
         x: [1, 2, 3, 4],
         y: [10, 15, 13, 17],
@@ -38,8 +39,34 @@ const PlotDialog = (props) => {
         type: 'scatter'
     };
       
-    const data = [trace1, trace2, trace3];
-
+    let dataToPlot = [];
+    if (props.workerData.length !== 0) { 
+        let data = props.workerData.slice(1);   
+        let tracks = {};
+        for(let i = 0; i < data.length; i++) {
+            if (typeof tracks[data[i][0]] !== "undefined") {
+                tracks[data[i][0]].x.push(data[i][1]);
+                tracks[data[i][0]].y.push(Number(data[i][2]));
+            } else {
+                tracks[data[i][0]] = {};
+                tracks[data[i][0]].x = [data[i][1]];
+                tracks[data[i][0]].y = [Number(data[i][2])];
+            }
+        }
+        let keys = Object.keys(tracks);
+        keys.map((key, i) => {
+            if (key !== "") {
+                dataToPlot.push({
+                    x: tracks[key].x,
+                    y: tracks[key].y,
+                    type: "scatter",
+                    mode: "line",
+                    name: key,
+                })
+            }
+        })
+        console.log(dataToPlot)
+    }
     return (
         <Dialog
                 open={props.open}
@@ -48,13 +75,19 @@ const PlotDialog = (props) => {
                 aria-describedby="alert-dialog-description"
                 maxWidth={"xl"}
             >
-            <DialogTitle id="alert-dialog-title">{"TriadID data"}</DialogTitle>
+            <DialogTitle id="alert-dialog-title">{"Worker data"}</DialogTitle>
             <DialogContent>
                 <Plot 
-                    data={data}
+                    data={dataToPlot}
                     layout={{
-                        width: 640,
-                        height: 480,
+                        width: 800,
+                        height: 600,
+                        xaxis: {
+                            title: "Datetime",
+                        },
+                        yaxis: {
+                            title: "Value",
+                        }
                     }}
                     />
             </DialogContent>
@@ -65,7 +98,8 @@ const PlotDialog = (props) => {
 const mapStateToProps = state => {
     return {
         open: state[module].dialogOpen,
+        workerData: state[module].workerData,
     }
 }
 
-export default connect(mapStateToProps, { closeDialog })(PlotDialog)
+export default connect(mapStateToProps, { closeDialog })(withStyles(styles)(PlotDialog));

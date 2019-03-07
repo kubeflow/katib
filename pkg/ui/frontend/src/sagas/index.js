@@ -42,7 +42,7 @@ const goFetchWorkerTemplates = function *() {
     try {
         const result = yield call(
             axios.get,
-            'http://127.0.0.1:9303/katib/fetch_worker_templates',
+            'http://127.0.0.1:9303/katib/fetch_worker_templates/',
         )
         return result
     } catch (err) {
@@ -89,7 +89,7 @@ const goFetchCollectorTemplates = function *() {
     try {
         const result = yield call(
             axios.get,
-            'http://127.0.0.1:9303/katib/fetch_collector_templates',
+            'http://127.0.0.1:9303/katib/fetch_collector_templates/',
         )
         return result
     } catch (err) {
@@ -136,7 +136,7 @@ const goFetchHPJobs = function *() {
     try {
         const result = yield call(
             axios.get,
-            'http://127.0.0.1:9303/katib/fetch_hp_jobs',
+            'http://127.0.0.1:9303/katib/fetch_hp_jobs/',
         )
         return result
     } catch (err) {
@@ -358,15 +358,15 @@ export const fetchJobInfo = function *() {
     while (true) {
         const action = yield take(hpMonitorActions.FETCH_JOB_INFO_REQUEST);
         try {
-            console.log(action)
             const result = yield call(
                 goFetchJobInfo,
                 action.id
             )
             if (result.status === 200) {
+                let data = result.data.split("\n").map((line, i) => line.split(','))
                 yield put({
                     type: hpMonitorActions.FETCH_JOB_INFO_SUCCESS,
-                    data: result.data
+                    jobData: data
                 })
             } else {
                 yield put({
@@ -383,18 +383,56 @@ export const fetchJobInfo = function *() {
 
 const goFetchJobInfo = function *(id) {
     try {
-        const data = {
-            id
-        }
         const result = yield call(
-            axios.post,
-            'http://127.0.0.1:9303/katib/fetch_job_info/',
-            data,
+            axios.get,
+            `http://127.0.0.1:9303/katib/fetch_job_info/?id=${id}`,
         )
         return result
     } catch (err) {
         yield put({
             type: hpMonitorActions.FETCH_JOB_INFO_FAILURE,
+        })
+    }
+}
+
+export const fetchWorkerInfo = function *() {
+    while (true) {
+        const action = yield take(hpMonitorActions.FETCH_WORKER_INFO_REQUEST);
+        try {
+            const result = yield call(
+                goFetchWorkerInfo,
+                action.studyID,
+                action.workerID
+            )
+            if (result.status === 200) {
+                let data = result.data.split("\n").map((line, i) => line.split(','))
+                yield put({
+                    type: hpMonitorActions.FETCH_WORKER_INFO_SUCCESS,
+                    workerData: data
+                })
+            } else {
+                yield put({
+                    type: hpMonitorActions.FETCH_WORKER_INFO_FAILURE,
+                }) 
+            }
+        } catch (err) {
+            yield put({
+                type: hpMonitorActions.FETCH_WORKER_INFO_FAILURE,
+            })
+        }
+    }
+}
+
+const goFetchWorkerInfo = function *(studyID, workerID) {
+    try {
+        const result = yield call(
+            axios.get,
+            `http://127.0.0.1:9303/katib/fetch_worker_info/?studyID=${studyID}&workerID=${workerID}`,
+        )
+        return result
+    } catch (err) {
+        yield put({
+            type: hpMonitorActions.FETCH_WORKER_INFO_FAILURE,
         })
     }
 }
@@ -408,6 +446,7 @@ export default function* rootSaga() {
         fork(editTemplate),
         fork(deleteTemplate),
         fork(submitYaml),
-        fork(fetchJobInfo)
+        fork(fetchJobInfo),
+        fork(fetchWorkerInfo)
     ]);
 };

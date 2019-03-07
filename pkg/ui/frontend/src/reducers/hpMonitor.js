@@ -8,21 +8,13 @@ const initialState = {
         "Succeeded": true,
     },
     jobsList: [
-        {
-            name: "Test 1",
-            status: "Running",
-            id: "103askdaksdas"
-        }
     ],
     filteredJobsList: [
-        {
-            name: "Test 1",
-            status: "Running",
-            id: "103askdaksdas"
-        }
     ],
     jobData: [],
-    dialogOpen: false
+    workerData: [],
+    dialogOpen: false,
+    loading: false,
 };
 
 const hpMonitorReducer = (state = initialState, action) => {
@@ -67,14 +59,26 @@ const hpMonitorReducer = (state = initialState, action) => {
                 jobsList: action.jobs,
                 filteredJobsList: action.jobs,
             }
+        case actions.FETCH_JOB_INFO_REQUEST:
+            return {
+                ...state,
+                loading: true,
+            }
         case actions.FETCH_JOB_INFO_SUCCESS:
             return {
                 ...state,
-                jobData: action.data,
+                jobData: action.jobData,
+                loading: false,
             }
-        case actions.OPEN_DIALOG:
+        case actions.FETCH_JOB_INFO_FAILURE:
             return {
                 ...state,
+                loading: false,
+            }
+        case actions.FETCH_WORKER_INFO_SUCCESS:
+            return {
+                ...state,
+                workerData: action.workerData,
                 dialogOpen: true,
             }
         case actions.CLOSE_DIALOG:

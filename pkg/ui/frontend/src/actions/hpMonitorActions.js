@@ -29,10 +29,13 @@ export const fetchJobInfo = (id) => ({
     id
 })
 
-export const OPEN_DIALOG = "OPEN_DIALOG";
+export const FETCH_WORKER_INFO_REQUEST = "FETCH_WORKER_INFO_REQUEST";
+export const FETCH_WORKER_INFO_SUCCESS = "FETCH_WORKER_INFO_SUCCESS";
+export const FETCH_WORKER_INFO_FAILURE = "FETCH_WORKER_INFO_FAILURE";
 
-export const openDialog = () => ({
-    type: OPEN_DIALOG,
+export const fetchWorkerInfo = (studyID, workerID) => ({
+    type: FETCH_WORKER_INFO_REQUEST,
+    studyID, workerID
 })
 
 export const CLOSE_DIALOG = "CLOSE_DIALOG";
