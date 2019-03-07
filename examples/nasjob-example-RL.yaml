@@ -1,7 +1,7 @@
 apiVersion: "kubeflow.org/v1alpha1"
 kind: StudyJob
 metadata:
-  namespace: kubeflow
+  namespace: default
   labels:
     controller-tools.k8s.io: "1.0"
   name: nas-rl-example
@@ -75,7 +75,7 @@ spec:
               spec:
                 containers:
                 - name: {{.WorkerID}}
-                  image: docker.io/deepermind/training-container-nas
+                  image: docker.io/deepermind/training-container-cpu
                   command:
                   - "python3.5"
                   - "-u"
@@ -85,12 +85,10 @@ spec:
                   - "--{{.Name}}={{.Value}}"
                   {{- end}}
                   {{- end}}
-                  resources:
-                    limits:
-                      nvidia.com/gpu: 1
                 restartPolicy: Never
   suggestionSpec:
     suggestionAlgorithm: "nasrl"
+    requestNumber: 3
     suggestionParameters:
       - name: "lstm_num_cells"
         value: "64"
