@@ -14,6 +14,8 @@ import time
 
 MANAGER_ADDRESS = "vizier-core"
 MANAGER_PORT = 6789
+RECALL_LIMIT = 10
+RESPAWN_LIMIT = 10
 
 
 class NAS_RL_StudyJob(object):
@@ -21,10 +23,13 @@ class NAS_RL_StudyJob(object):
         self.logger = logger
         self.study_id = request.study_id
         self.param_id = request.param_id
-        self.num_trials = request.request_number
+        self.num_trials = 1
+        if request.request_number > 0:
+            self.num_trials = request.request_number
         self.study_name = None
         self.tf_graph = tf.Graph()
         self.prev_trial_ids = list()
+        self.prev_trials = None
         self.ctrl_cache_file = "ctrl_cache/{}/{}.ckpt".format(request.study_id, request.study_id)
         self.ctrl_step = 0
         self.is_first_run = True
@@ -37,6 +42,7 @@ class NAS_RL_StudyJob(object):
         self.search_space = None
         self.opt_direction = None
         self.objective_name = None
+        self.respawn_count = 0
         
         self.logger.info("-" * 100 + "\nSetting Up Suggestion for StudyJob ID {}\n".format(request.study_id) + "-" * 100)
         self._get_study_param()
@@ -272,13 +278,36 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     valid_acc = ctrl.reward
                     result = self.GetEvaluationResult(study)
 
-                    # In some rare cases, GetEvaluationResult() may return None
-                    # if GetSuggestions() is called before all the trials are completed
-                    while result is None:
-                        self.logger.warning(">>> GetEvaluationResult() returns None")
-                        time.sleep(20)
-                        result = self.GetEvaluationResult(study)
 
+                    # Sometimes training container may fail and GetEvaluationResult() will return None
+                    # In this case, the Suggestion will:
+                    # 1. Try to call GetEvaluationResult() again
+                    # 2. If calling GetEvaluationResult() for RECALL_LIMIT times all return None, 
+                    #    then respawn the previous trials
+                    # 3. If respawning the trials for RESPAWAN_LIMIT times still cannot collect valid results,
+                    #    then fail the task becuase it may indicate that the training container has errors.
+
+                    recall_count = 0
+                    while result is None:
+                        if study.respawn_count >= RESPAWN_LIMIT:
+                            self.logger.warning(">>> Suggestion has spawned trials for {} times, but they all failed.".format(RESPAWN_LIMIT))
+                            self.logger.warning(">>> Please check whether the training container is correctly implemented")
+                            self.logger.info(">>> StudyJob {} failed".format(study.study_name))
+                            return []
+                        
+                        if recall_count >= RECALL_LIMIT:
+                            self.logger.warning(">>> GetEvaluationResult() returns None for {} times. Previous trials probably failed".format(RECALL_LIMIT))
+                            self.logger.info(">>> Respawn the previous trials")
+                            study.respawn_count += 1
+                            return self.SpawnTrials(study, study.prev_trials)
+
+                        self.logger.warning(">>> GetEvaluationResult() returns None. It will be called again after 20 seconds")
+                        time.sleep(20)
+                        recall_count += 1
+                        result  = self.GetEvaluationResult(study)
+
+
+                    study.respawn_count = 0
                     # This LSTM network is designed to maximize the metrics
                     # However, if the user wants to minimize the metrics, we can take the negative of the result
                     if study.opt_direction == api_pb2.MINIMIZE:
@@ -287,7 +316,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     loss, entropy, lr, gn, bl, skip, _ = sess.run(
                         fetches=run_ops,
                         feed_dict={valid_acc: result})
-                    self.logger.info(">>> Suggetion updated. LSTM Controller Reward: {}".format(loss))
+                    self.logger.info(">>> Suggestion updated. LSTM Controller Reward: {}".format(loss))
 
                     candidates = list()
                     for _ in range(study.num_trials):
@@ -342,17 +371,21 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 )
             )
 
-        self.prev_trial_ids = list()
+        return self.SpawnTrials(study, trials)
+    
+    def SpawnTrials(self, study, trials):
+        study.prev_trials = trials
+        study.prev_trial_ids = list()
         self.logger.info("")
         channel = grpc.beta.implementations.insecure_channel(MANAGER_ADDRESS, MANAGER_PORT)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             for i, t in enumerate(trials):
                 ctrep = client.CreateTrial(api_pb2.CreateTrialRequest(trial=t), 10)
                 trials[i].trial_id = ctrep.trial_id
-                self.prev_trial_ids.append(ctrep.trial_id)
+                study.prev_trial_ids.append(ctrep.trial_id)
         
         self.logger.info(">>> {} Trials were created:".format(study.num_trials))
-        for t in self.prev_trial_ids:
+        for t in study.prev_trial_ids:
             self.logger.info(t)
         self.logger.info("")
 
@@ -368,7 +401,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         
         completed_trials = dict()
         for t in trials_list:
-            if t.Worker.trial_id in self.prev_trial_ids and t.Worker.status == api_pb2.COMPLETED:
+            if t.Worker.trial_id in study.prev_trial_ids and t.Worker.status == api_pb2.COMPLETED:
                 for ml in t.metrics_logs:
                     if ml.name == study.objective_name:
                         completed_trials[t.Worker.trial_id] = float(ml.values[-1].value)
