@@ -217,7 +217,7 @@ func TestGetTrial(t *testing.T) {
 			id, "s1234567890abcde",
 			"{\"name\": \"1\"},\n{}", "obj_val",
 			"{\"name\": \"foo\"},\n{}",
-			""))
+			"2019-02-26 09:54:32"))
 	trial, err := dbInterface.GetTrial(id)
 	if err != nil {
 		t.Errorf("GetTrial error %v", err)
@@ -231,7 +231,7 @@ func TestGetTrialList(t *testing.T) {
 	var ids = []string{"abcdef1234567890", "bcdef1234567890a"}
 	rows := sqlmock.NewRows(trialColumns)
 	for _, id := range ids {
-		rows.AddRow(id, studyID, "", "obj_val", "", "")
+		rows.AddRow(id, studyID, "", "obj_val", "", "2019-02-26 09:54:32")
 	}
 	mock.ExpectQuery(`SELECT \* FROM trials WHERE study_id = \?`).WithArgs(studyID).WillReturnRows(rows)
 	trials, err := dbInterface.GetTrialList(studyID)

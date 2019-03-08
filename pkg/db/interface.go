@@ -378,13 +378,13 @@ func (d *dbConn) getTrials(trialID string, studyID string) ([]*api.Trial, error)
 		trial := new(api.Trial)
 
 		var parameters, tags string
-		var timeStamp string
+		var createTimeStr string
 		err := rows.Scan(&trial.TrialId,
 			&trial.StudyId,
 			&parameters,
 			&trial.ObjectiveValue,
 			&tags,
-			&timeStamp,
+			&createTimeStr,
 		)
 		if err != nil {
 			return nil, err
@@ -415,6 +415,14 @@ func (d *dbConn) getTrials(trialID string, studyID string) ([]*api.Trial, error)
 			}
 		}
 		trial.Tags = t
+
+		createTimeMysql, errParseTimeMysql := time.Parse(mysqlTimeFmt, createTimeStr)
+		if errParseTimeMysql != nil {
+			log.Printf("Error parsing Trial create time %s to mysqlFormat: %v", createTimeStr, errParseTimeMysql)
+			continue
+		}
+		trial.CreateTime = createTimeMysql.UTC().Format(time.RFC3339Nano)
+
 		result = append(result, trial)
 	}
 
@@ -478,10 +486,10 @@ func (d *dbConn) CreateTrial(trial *api.Trial) error {
 	i := 3
 	for true {
 		trialID = generateRandid()
-		timeString := time.Now().UTC().Format(mysqlTimeFmt)
+		createTimeString := time.Now().UTC().Format(mysqlTimeFmt)
 		_, err := d.db.Exec("INSERT INTO trials VALUES (?, ?, ?, ?, ?, ?)",
 			trialID, trial.StudyId, strings.Join(params, ",\n"),
-			trial.ObjectiveValue, strings.Join(tags, ",\n"), timeString)
+			trial.ObjectiveValue, strings.Join(tags, ",\n"), createTimeString)
 		if err == nil {
 			trial.TrialId = trialID
 			break

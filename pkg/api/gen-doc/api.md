@@ -83,6 +83,8 @@
     - [Trial](#api.Trial)
     - [UpdateWorkerStateReply](#api.UpdateWorkerStateReply)
     - [UpdateWorkerStateRequest](#api.UpdateWorkerStateRequest)
+    - [ValidateSuggestionParametersReply](#api.ValidateSuggestionParametersReply)
+    - [ValidateSuggestionParametersRequest](#api.ValidateSuggestionParametersRequest)
     - [Worker](#api.Worker)
     - [WorkerFullInfo](#api.WorkerFullInfo)
   
@@ -1297,6 +1299,7 @@ Tag for each resource.
 A set of Hyperparameter.
 In a study, multiple trials are evaluated by workers.
 Suggestion service will generate next trials.
+Create time will be filled in the server automatically side even user set the value
 
 
 | Field | Type | Label | Description |
@@ -1306,6 +1309,7 @@ Suggestion service will generate next trials.
 | parameter_set | [Parameter](#api.Parameter) | repeated | Hyperparameter set |
 | objective_value | [string](#string) |  | Objective Value |
 | tags | [Tag](#api.Tag) | repeated | Tags of Trial. |
+| create_time | [string](#string) |  | Trial create timestamp RFC3339 format. |
 
 
 
@@ -1332,6 +1336,33 @@ Update a Status of Worker.
 | ----- | ---- | ----- | ----------- |
 | worker_id | [string](#string) |  |  |
 | status | [State](#api.State) |  |  |
+
+
+
+
+
+
+<a name="api.ValidateSuggestionParametersReply"/>
+
+### ValidateSuggestionParametersReply
+Return 1 if Suggestion Parameters is Valid, 0 if not
+
+
+
+
+
+
+<a name="api.ValidateSuggestionParametersRequest"/>
+
+### ValidateSuggestionParametersRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| study_config | [StudyConfig](#api.StudyConfig) |  |  |
+| suggestion_algorithm | [string](#string) |  |  |
+| suggestion_parameters | [SuggestionParameter](#api.SuggestionParameter) | repeated |  |
 
 
 
@@ -1472,6 +1503,7 @@ https://cloud.google.com/service-infrastructure/docs/service-management/referenc
 | ReportMetricsLogs | [ReportMetricsLogsRequest](#api.ReportMetricsLogsRequest) | [ReportMetricsLogsReply](#api.ReportMetricsLogsRequest) | Report a logs of metrics for workers. The logs for each worker must have timestamp and must be ordered in time series. When the log you reported are already reported before, it will be dismissed and get no error. |
 | GetSavedStudies | [GetSavedStudiesRequest](#api.GetSavedStudiesRequest) | [GetSavedStudiesReply](#api.GetSavedStudiesRequest) |  |
 | GetSavedModels | [GetSavedModelsRequest](#api.GetSavedModelsRequest) | [GetSavedModelsReply](#api.GetSavedModelsRequest) |  |
+| ValidateSuggestionParameters | [ValidateSuggestionParametersRequest](#api.ValidateSuggestionParametersRequest) | [ValidateSuggestionParametersReply](#api.ValidateSuggestionParametersRequest) | Validate Suggestion Parameters from Study Job. |
 
 
 <a name="api.Suggestion"/>
@@ -1482,6 +1514,7 @@ https://cloud.google.com/service-infrastructure/docs/service-management/referenc
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
 | GetSuggestions | [GetSuggestionsRequest](#api.GetSuggestionsRequest) | [GetSuggestionsReply](#api.GetSuggestionsRequest) |  |
+| ValidateSuggestionParameters | [ValidateSuggestionParametersRequest](#api.ValidateSuggestionParametersRequest) | [ValidateSuggestionParametersReply](#api.ValidateSuggestionParametersRequest) |  |
 
  
 
