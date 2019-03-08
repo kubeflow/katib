@@ -309,7 +309,7 @@ func (k *KatibUIHandler) FetchWorkerInfo(w http.ResponseWriter, r *http.Request)
 func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
 	studyID := r.URL.Query()["studyID"][0]
-	trialID := r.URL.Query()["trialID"][0]
+	// trialID := r.URL.Query()["trialID"][0]
 
 	conn, c := k.connectManager()
 
@@ -325,8 +325,62 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 		log.Println(err)
 		return
 	}
-	fmt.Println(trialID)
-	fmt.Println(gtrep)
+
+	type NNView struct {
+		Architecture string
+		Decoder      string
+		MetricsName  []string
+		MetricsValue []string
+	}
+
+	response_raw := make([]NNView, 0)
+
+	var architecture string
+	var decoder string
+
+	gwfirep, err := c.GetWorkerFullInfo(
+		context.Background(),
+		&api.GetWorkerFullInfoRequest{
+			StudyId:       studyID,
+			OnlyLatestLog: true,
+		},
+	)
+
+	for _, tr := range gtrep.Trials {
+		for _, parameter := range tr.ParameterSet {
+			if parameter.Name == "architecture" {
+				architecture = parameter.Value
+			}
+			if parameter.Name == "nn_config" {
+				decoder = parameter.Value
+			}
+		}
+
+		metricsName := make([]string, 0)
+		metricsValue := make([]string, 0)
+		trialID := tr.TrialId
+		for _, wfi := range gwfirep.WorkerFullInfos {
+			if wfi.Worker.TrialId == trialID {
+				for _, metrics := range wfi.MetricsLogs {
+					metricsName = append(metricsName, metrics.Name)
+					metricsValue = append(metricsValue, metrics.Values[0].GetValue())
+				}
+			}
+		}
+		response_raw = append(response_raw, NNView{
+			Architecture: architecture,
+			Decoder:      decoder,
+			MetricsName:  metricsName,
+			MetricsValue: metricsValue,
+		})
+	}
+
+	response, err := json.Marshal(response_raw)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
 }
 
 func (k *KatibUIHandler) FetchWorkerTemplates(w http.ResponseWriter, r *http.Request) {
