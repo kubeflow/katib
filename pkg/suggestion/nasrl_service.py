@@ -285,7 +285,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     # 2. If calling GetEvaluationResult() for RECALL_LIMIT times all return None, 
                     #    then respawn the previous trials
                     # 3. If respawning the trials for RESPAWAN_LIMIT times still cannot collect valid results,
-                    #    then fail the task becuase it may indicate that the training container has errors.
+                    #    then fail the task because it may indicate that the training container has errors.
 
                     recall_count = 0
                     while result is None:
