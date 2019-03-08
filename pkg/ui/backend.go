@@ -306,6 +306,29 @@ func (k *KatibUIHandler) FetchWorkerInfo(w http.ResponseWriter, r *http.Request)
 	w.Write(response)
 }
 
+func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
+	studyID := r.URL.Query()["studyID"][0]
+	trialID := r.URL.Query()["trialID"][0]
+
+	conn, c := k.connectManager()
+
+	defer conn.Close()
+
+	gtrep, err := c.GetTrials(
+		context.Background(),
+		&api.GetTrialsRequest{
+			StudyId: studyID,
+		},
+	)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println(trialID)
+	fmt.Println(gtrep)
+}
+
 func (k *KatibUIHandler) FetchWorkerTemplates(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
 	wt, err := k.studyjobClient.GetWorkerTemplates(namespace)

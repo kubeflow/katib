@@ -14,6 +14,7 @@ func main() {
 	http.HandleFunc("/katib/submit_yaml/", kuh.SubmitYamlJob)
 
 	http.HandleFunc("/katib/fetch_job_info/", kuh.FetchJobInfo)
+	http.HandleFunc("/katib/fetch_nas_job_info/", kuh.FetchNASJobInfo)
 	http.HandleFunc("/katib/fetch_worker_info/", kuh.FetchWorkerInfo)
 	http.HandleFunc("/katib/fetch_worker_templates/", kuh.FetchWorkerTemplates)
 	http.HandleFunc("/katib/fetch_collector_templates/", kuh.FetchCollectorTemplates)

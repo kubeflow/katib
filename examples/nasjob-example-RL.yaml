@@ -77,9 +77,10 @@ spec:
                 - name: {{.WorkerID}}
                   image: docker.io/deepermind/training-container-cpu
                   command:
-                  - "python3.5"
+                  - "python3"
                   - "-u"
                   - "RunTrial.py"
+                  - "--num_epochs=1"
                   {{- with .HyperParameters}}
                   {{- range .}}
                   - "--{{.Name}}={{.Value}}"
@@ -88,7 +89,7 @@ spec:
                 restartPolicy: Never
   suggestionSpec:
     suggestionAlgorithm: "nasrl"
-    requestNumber: 3
+    requestNumber: 1
     suggestionParameters:
       - name: "lstm_num_cells"
         value: "64"
