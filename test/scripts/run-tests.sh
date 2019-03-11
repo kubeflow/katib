@@ -111,7 +111,8 @@ TIMEOUT=120
 until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
     sleep 5
     TIMEOUT=$(( TIMEOUT - 1 ))
-done 
+done
+
 cp -r test ${GO_DIR}/test
 cd ${GO_DIR}/test/e2e
 kubectl apply -f valid-studyjob.yaml

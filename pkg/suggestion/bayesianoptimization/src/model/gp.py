@@ -5,7 +5,8 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 
 class GaussianProcessModel:
     """ use the gaussian process as a prior """
-    def __init__(self, length_scale, noise, nu, kernel_type):
+    def __init__(self, length_scale=0.5, noise=0.00005,
+                 nu=1.5, kernel_type="matern"):
         """
         :param length_scale: the larger the length_scale is, the smoother the gaussian prior is. If a float,
         an isotropic kernel is used. If an array, an anisotropic kernel is used where each dimension of it defines
@@ -15,20 +16,23 @@ class GaussianProcessModel:
         approximate function is.
         :param kernel_type: "rbf": squared exponential kernel, "matern": Matern kernel.
         """
-
-        length_scale = length_scale or 0.5
-        noise = noise or 0.00005
-        nu = nu or 1.5
-        kernel_type = kernel_type or "matern"
-
         if kernel_type == "rbf":
             kernel = RBF(length_scale=length_scale)
-        else:
+        elif kernel_type == "matern":
             kernel = Matern(length_scale=length_scale, nu=nu)
-
+        else:
+            raise Exception("kernel_type must be 'rbf' or 'matern'")
         self.gp = GaussianProcessRegressor(
             kernel=kernel,
             alpha=noise,
             random_state=0,
             optimizer=None,
         )
+
+    def fit(self, X_train, y_train):
+        self.gp.fit(X_train, y_train)
+
+    def predict(self, X_test):
+        y_mean, y_std = self.gp.predict(X_test, return_std=True)
+        y_variance = y_std ** 2
+        return y_mean, y_std, y_variance

@@ -58,6 +58,7 @@
       local testWorkerImage = "gcr.io/kubeflow-ci/test-worker";
       local golangImage = "golang:1.9.4-stretch";
       // TODO(jose5918) Build our own helm image
+      local pythonImage = "python:3.6-jessie";
       local helmImage = "volumecontroller/golang:1.9.2";
       // The name of the NFS volume claim to use for test files.
       // local nfsVolumeClaim = "kubeflow-testing";
@@ -273,6 +274,12 @@
                 ],
                 [
                   {
+                    name: "python-tests",
+                    template: "python-tests",
+                  },
+                ],
+                [
+                  {
                     name: "run-tests",
                     template: "run-tests",
                   },
@@ -316,6 +323,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("setup-cluster",testWorkerImage, [
               "test/scripts/create-cluster.sh",
             ]),  // setup cluster
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("python-tests", pythonImage, [
+              "test/scripts/python-tests.sh",
+            ]),  // run python tests
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tests", helmImage, [
               "test/scripts/run-tests.sh",
             ]),  // run tests
