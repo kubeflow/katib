@@ -122,6 +122,8 @@ This neural architecture can be visualized as
 
 ## To Do
 1. Add 'micro' mode, which means searching for a neural cell instead of the whole neural network.
-2. Change LSTM cell from self defined functions in LSTM.py to `tf.nn.rnn_cell.LSTMCell`
-3. Store the suggestion checkpoint to PVC to protect against unexpected nasrl service pod restarts
-4. Add `RequestCount` into API so that the suggestion can clean the information of completed studies.
+2. Add supoort for recurrent neural networks and build a training container for the Penn Treebank task.
+3. Add parameter sharing, if possible.
+4. Change LSTM cell from self defined functions in LSTM.py to `tf.nn.rnn_cell.LSTMCell`
+5. Store the suggestion checkpoint to PVC to protect against unexpected nasrl service pod restarts
+6. Add `RequestCount` into API so that the suggestion can clean the information of completed studies.
