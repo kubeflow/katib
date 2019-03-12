@@ -121,6 +121,7 @@ This neural architecture can be visualized as
 ![a neural netowrk architecure example](example.png)
 
 ## To Do
-1. Change LSTM cell from self defined functions in LSTM.py to `tf.nn.rnn_cell.LSTMCell`
-2. Store the suggestion checkpoint to PVC to protect against unexpected nasrl service pod restarts
-3. Add `RequestCount` into API so that the suggestion can clean the information of completed studies.
+1. Add 'micro' mode, which means searching for a nerual network cell instead of the whole nerual netowrk.
+2. Change LSTM cell from self defined functions in LSTM.py to `tf.nn.rnn_cell.LSTMCell`
+3. Store the suggestion checkpoint to PVC to protect against unexpected nasrl service pod restarts
+4. Add `RequestCount` into API so that the suggestion can clean the information of completed studies.
