@@ -14,7 +14,7 @@ import time
 
 MANAGER_ADDRESS = "vizier-core"
 MANAGER_PORT = 6789
-RECALL_LIMIT = 10
+RESPAWN_SLEEP = 20
 RESPAWN_LIMIT = 10
 
 
@@ -281,33 +281,29 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
                     # Sometimes training container may fail and GetEvaluationResult() will return None
                     # In this case, the Suggestion will:
-                    # 1. Try to call GetEvaluationResult() again
-                    # 2. If calling GetEvaluationResult() for RECALL_LIMIT times all return None, 
-                    #    then respawn the previous trials
-                    # 3. If respawning the trials for RESPAWN_LIMIT times still cannot collect valid results,
+                    # 1. Firstly try to respawn the previous trials after waiting for RESPAWN_SLEEP seconds
+                    # 2. If respawning the trials for RESPAWN_LIMIT times still cannot collect valid results,
                     #    then fail the task because it may indicate that the training container has errors.
 
-                    recall_count = 0
-                    while result is None:
+                    if result is None:
                         if study.respawn_count >= RESPAWN_LIMIT:
                             self.logger.warning(">>> Suggestion has spawned trials for {} times, but they all failed.".format(RESPAWN_LIMIT))
                             self.logger.warning(">>> Please check whether the training container is correctly implemented")
                             self.logger.info(">>> StudyJob {} failed".format(study.study_name))
                             return []
-                        
-                        if recall_count >= RECALL_LIMIT:
-                            self.logger.warning(">>> GetEvaluationResult() returns None for {} times. Previous trials probably failed".format(RECALL_LIMIT))
+                            
+                        else:
+                            self.logger.warning(">>> GetEvaluationResult() returns None. All the previous trials failed")
+
+                            self.logger.info(">>> Sleep for {} seconds".format(RESPAWN_SLEEP))
+                            time.sleep(RESPAWN_SLEEP)
+
                             self.logger.info(">>> Respawn the previous trials")
                             study.respawn_count += 1
                             return self.SpawnTrials(study, study.prev_trials)
 
-                        self.logger.warning(">>> GetEvaluationResult() returns None. It will be called again after 20 seconds")
-                        time.sleep(20)
-                        recall_count += 1
-                        result  = self.GetEvaluationResult(study)
-
-
                     study.respawn_count = 0
+
                     # This LSTM network is designed to maximize the metrics
                     # However, if the user wants to minimize the metrics, we can take the negative of the result
                     if study.opt_direction == api_pb2.MINIMIZE:
@@ -405,12 +401,19 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 for ml in t.metrics_logs:
                     if ml.name == study.objective_name:
                         completed_trials[t.Worker.trial_id] = float(ml.values[-1].value)
-        
-        if len(completed_trials) == study.num_trials:
-            self.logger.info(">>> Evaluation results of previous trials:")
-            for k in completed_trials:
-                self.logger.info("{}: {}".format(k, completed_trials[k]))
-            avg_metrics = sum(completed_trials.values()) / study.num_trials
+
+        n_complete = len(completed_trials)
+        n_fail = study.num_trials - n_complete
+
+        self.logger.info(">>> {} Trials succeeded, {} Trials failed:".format(n_complete, n_fail))
+        for tid in study.prev_trial_ids:
+            if tid in completed_trials:
+                self.logger.info("{}: {}".format(tid, completed_trials[tid]))
+            else:
+                self.logger.info("{}: Failed".format(tid))
+
+        if n_complete > 0:
+            avg_metrics = sum(completed_trials.values()) / n_complete
             self.logger.info("The average is {}\n".format(avg_metrics))
 
             return avg_metrics
