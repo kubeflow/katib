@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: vizier-suggestion-nasenvelopenet
+  namespace: kubeflow
+  labels:
+    app: vizier
+    component: suggestion-nasenvelopenet
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: vizier-suggestion-nasenvelopenet
+      labels:
+        app: vizier
+        component: suggestion-nasenvelopenet
+    spec:
+      containers:
+      - name: vizier-suggestion-nasenvelopenet
+        image: docker.io/anubhavgarg/nas_envelopenet_service
+        ports:
+        - name: api
+          containerPort: 6789
