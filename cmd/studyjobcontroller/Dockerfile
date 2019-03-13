@@ -6,7 +6,11 @@ ADD . /go/src/github.com/kubeflow/katib
 
 WORKDIR /go/src/github.com/kubeflow/katib/cmd/studyjobcontroller
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o studyjobcontroller
+RUN if [ "$(uname -m)" = "ppc64le" ]; then \
+        CGO_ENABLED=0 GOOS=linux GOARCH=ppc64le go build -a -o studyjobcontroller; \
+    else \
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o studyjobcontroller; \
+    fi
 # Copy the controller-manager into a thin image
 FROM alpine:3.7
 WORKDIR /app
