@@ -18,7 +18,7 @@ const styles = theme => ({
 class HPMonitor extends React.Component {
     
     componentDidMount() {
-        this.props.fetchHPJobs();
+        // this.props.fetchHPJobs();
     }
 
     render () {

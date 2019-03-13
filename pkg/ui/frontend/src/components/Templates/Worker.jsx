@@ -20,7 +20,7 @@ const styles = theme => ({
 class Worker extends React.Component {
 
     componentDidMount() {
-        this.props.fetchWorkerTemplates();
+        // this.props.fetchWorkerTemplates();
     }
     openAddDialog = () => {
         this.props.openDialog("add");
@@ -33,7 +33,7 @@ class Worker extends React.Component {
         
         return (
             <div className={classes.root}>
-                <Typography variant={"headline"} color={"secondary"}>
+                <Typography variant={"headline"} color={"primary"}>
                     Worker Manifests
                 </Typography>
                 <Button variant={"contained"} color={"primary"} onClick={this.openAddDialog}>

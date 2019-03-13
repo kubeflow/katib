@@ -29,7 +29,7 @@ const styles = theme => ({
 class HPJobInfo extends React.Component {
 
     componentDidMount() {
-        this.props.fetchJobInfo(this.props.match.params.id);
+        // this.props.fetchJobInfo(this.props.match.params.id);
     }
 
     render () {
@@ -45,9 +45,9 @@ class HPJobInfo extends React.Component {
                 <LinearProgress color={"primary"} className={classes.loading} />
                 :
                 <div>
-                <Typography variant={"h5"}>
+                {/* <Typography variant={"h5"}>
                     JOB INFO for {this.props.match.params.id}
-                </Typography>
+                </Typography> */}
                 <br />
                 <HPPlot id={this.props.match.params.id} />
                 <HPTable id={this.props.match.params.id} />

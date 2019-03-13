@@ -43,7 +43,7 @@ const JobList = (props) => {
                         icon = (<DoneIcon className={classes.finished}/>)
                     }
                     return (
-                        <ListItem button key={i} component={Link} to={`/hp_monitor/${job.id}`}>
+                        <ListItem button key={i} component={Link} to={`/hp_monitor/${job.id}`} disabled={job.status === 'Failed'}>
                             <ListItemIcon>
                                 {icon}
                             </ListItemIcon>

@@ -49,7 +49,7 @@ class EditDialog extends React.Component {
     }
 
     submitEditTemplate = () => {
-        this.props.editTemplate(this.state.name, this.state.yaml, this.props.type);
+        // this.props.editTemplate(this.state.name, this.state.yaml, this.props.type);
     }
 
     render () {
@@ -89,7 +89,7 @@ class EditDialog extends React.Component {
                         <Button onClick={this.submitEditTemplate} color={"primary"}>
                             Save
                         </Button>
-                        <Button onClick={this.props.closeDialog} color={"secondary"}>
+                        <Button onClick={this.props.closeDialog} color={"primary"}>
                             Discard
                         </Button>
                     </DialogActions>

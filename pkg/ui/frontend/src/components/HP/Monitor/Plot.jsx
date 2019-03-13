@@ -53,7 +53,6 @@ const HPPlot = (props) => {
       }
       dimensions.push(track)
     }
-    console.log(dimensions)
     // dimensions= [{
     //   constraintrange: [1, 2],
     //   label: 'A',

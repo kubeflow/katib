@@ -55,7 +55,7 @@ const FilterPanel = (props) => {
                                         checked={props.filterType[filter]}
                                         onChange={handleType(filter)}
                                         value={filter}
-                                        color={"secondary"}
+                                        color={"primary"}
                                         />
                                     }
                                 label={filter}

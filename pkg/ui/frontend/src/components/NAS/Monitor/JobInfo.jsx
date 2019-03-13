@@ -37,9 +37,9 @@ class NASJobInfo extends React.Component {
                         Back
                     </Button>
                 </Link>
-                <Typography variant={"h5"}>
+                {/* <Typography variant={"h5"}>
                     JOB INFO for {this.props.match.params.id}
-                </Typography>
+                </Typography> */}
                 <br />
                 {this.props.steps.map((step, i) => {
                     return (
