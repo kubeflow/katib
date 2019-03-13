@@ -24,7 +24,7 @@ spec:
       outputSize:
         - 10
     operations:
-      - operationType: envolpenet
+      - operationType: envelopenet
         parameterconfigs:
           - name: envelopecell
             parametertype: categorical
