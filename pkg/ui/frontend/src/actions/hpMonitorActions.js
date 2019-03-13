@@ -43,11 +43,3 @@ export const CLOSE_DIALOG = "CLOSE_DIALOG";
 export const closeDialog = () => ({
     type: CLOSE_DIALOG,
 })
-
-// FOR DEMO ONLY
-
-export const OPEN_FAKE = "OPEN_FAKE";
-
-export const openFakeDialog = () => ({
-    type: OPEN_FAKE,
-})

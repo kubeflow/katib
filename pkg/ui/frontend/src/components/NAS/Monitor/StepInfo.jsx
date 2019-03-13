@@ -3,9 +3,6 @@ import { withStyles } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 
-// import { Graphviz } from 'graphviz-react';
-
-
 import * as d3 from "d3";
 
 
@@ -255,8 +252,6 @@ class StepInfo extends React.Component {
                     Architecture
                 </Typography> 
                 <div id={id}/>
-                {/* <Graphviz dot={"digraph{node1}"} /> */}
-
                 <br />
                 <Typography variant={"h6"}>
                     {step.metricsName}: {step.metricsValue}.

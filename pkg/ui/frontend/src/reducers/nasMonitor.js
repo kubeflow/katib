@@ -9,17 +9,37 @@ const initialState = {
     },
     jobsList: [
         {
-            name: "nasrl-example",
-            status: "Succeeded",
+            name: "Job 1",
+            status: "Running",
             id: "1", 
         },
+        {
+            name: "Job 2",
+            status: "Failed",
+            id: "2", 
+        },
+        {
+            name: "Job 3",
+            status: "Succeeded",
+            id: "3", 
+        }
     ],
     filteredJobsList: [
         {
-            name: "nasrl-example",
-            status: "Succeeded",
+            name: "Job 1",
+            status: "Running",
             id: "1", 
         },
+        {
+            name: "Job 2",
+            status: "Failed",
+            id: "2", 
+        },
+        {
+            name: "Job 3",
+            status: "Succeeded",
+            id: "3", 
+        }
     ],
     steps: [
         {
@@ -53,7 +73,6 @@ const nasMonitorReducer = (state = initialState, action) => {
     switch (action.type) {
         case actions.FILTER_JOBS:
             const jobs = state.jobsList.slice();
-            console.log(jobs)
             const newList = jobs.filter(job => job.name.includes(action.filter));
 
             const avTypes = Object.assign({}, state.filterType);
@@ -71,7 +90,6 @@ const nasMonitorReducer = (state = initialState, action) => {
                 filter: action.filter,
             }
         case actions.CHANGE_TYPE:
-            console.log("HERE")
             const types = Object.assign({}, state.filterType)
             types[action.filter] = action.checked;
             var keys = Object.keys(types);

@@ -6,72 +6,8 @@ const initialState = {
     editOpen: false,
     deleteOpen: false,
     workerTemplates: [
-        {
-            name: "cpuWorkerTemplate.yaml",
-            yaml: `
-            apiVersion: batch/v1
-            kind: Job
-            metadata:
-              name: {{.WorkerID}}
-              namespace: kubeflow
-            spec:
-              template:
-                spec:
-                  containers:
-                  - name: {{.WorkerID}}
-                    image: katib/mxnet-mnist-example
-                    command:
-                    - "python"
-                    - "/mxnet/example/image-classification/train_mnist.py"
-                    - "--batch-size=64"
-                    {{- with .HyperParameters}}
-                    {{- range .}}
-                    - "{{.Name}}={{.Value}}"
-                    {{- end}}
-                    {{- end}}
-                  restartPolicy: Never
-                  `
-        }
     ],
     collectorTemplates: [
-        {
-            name: "defaultMetricsCollectorTemplate.yaml",
-            yaml: `
-            apiVersion: batch/v1beta1
-    kind: CronJob
-    metadata:
-      name: {{.WorkerID}}
-      namespace: {{.NameSpace}}
-    spec:
-      schedule: "*/1 * * * *"
-      successfulJobsHistoryLimit: 0
-      failedJobsHistoryLimit: 1
-      jobTemplate:
-        spec:
-          backoffLimit: 0
-          template:
-            spec:
-              serviceAccountName: metrics-collector
-              containers:
-              - name: {{.WorkerID}}
-                image: katib/metrics-collector
-                args:
-                - "./metricscollector"
-                - "-s"
-                - "{{.StudyID}}"
-                - "-t"
-                - "{{.TrialID}}"
-                - "-w"
-                - "{{.WorkerID}}"
-                - "-k"
-                - "{{.WorkerKind}}"
-                - "-n"
-                - "{{.NameSpace}}"
-                - "-m"
-                - "{{.ManagerSerivce}}"
-              restartPolicy: Never
-            `
-        }
     ],
     newTemplateName: '',
     newTemplateYaml: '',

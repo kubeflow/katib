@@ -152,7 +152,7 @@ const NASConfig = (props) => {
                 </Grid>
             </div>
             <Button variant={"contained"} color={"primary"} className={classes.addButton}>
-                    Add operation
+                    Add parameter
             </Button>
         </div>
     )

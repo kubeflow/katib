@@ -8,7 +8,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 
 import { connect } from 'react-redux';
-import { fetchWorkerInfo, openFakeDialog } from '../../../actions/hpMonitorActions';
+import { fetchWorkerInfo } from '../../../actions/hpMonitorActions';
 
 const module = "hpMonitor";
 
@@ -31,10 +31,8 @@ const styles = theme => ({
 class HPTable extends React.Component {
 
   fetchAndOpenDialog = (id) => (event) => {
-    // this.props.fetchWorkerInfo(this.props.id, id);
-    this.props.openFakeDialog();
+    this.props.fetchWorkerInfo(this.props.id, id);
   }
-  
 
   render () {
     const { classes } = this.props;
@@ -59,7 +57,7 @@ class HPTable extends React.Component {
             {data.map((row, id) => (
               <TableRow key={id}>
                 {row.map((element, index) => {
-                  if (index === 0) {
+                  if (index == 0) {
                     return (
                       <TableCell className={classes.hover} component="th" scope="row" onClick={this.fetchAndOpenDialog(element)} key={index}>
                         {element}
@@ -85,4 +83,4 @@ const mapStateToProps = (state) => ({
   jobData: state[module].jobData,
 })
 
-export default connect(mapStateToProps, { fetchWorkerInfo, openFakeDialog })(withStyles(styles)(HPTable));
+export default connect(mapStateToProps, { fetchWorkerInfo })(withStyles(styles)(HPTable));

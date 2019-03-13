@@ -56,40 +56,6 @@ const initialState = {
     numLayers: '1',
     inputSize: ['32', '32', '3'],
     outputSize: ['10'],
-    operations: [
-        {
-            name: "convolution",
-            parameters: [
-                {
-                    parameterType: "double",
-                    name: "Shit2",
-                    feasible: "feasible",
-                    min: "",
-                    max: "",
-                    step: "",
-                    list: [
-                        {
-                            value: "",
-                        }
-                    ],
-                },
-                {
-                    parameterType: "double",
-                    name: "Shit2",
-                    feasible: "feasible",
-                    min: "",
-                    max: "",
-                    step: "",
-                    list: [
-                        {
-                            value: "",
-                        }
-                    ],
-                },
-            ]
-        }
-    ],
-    paramTypes: ["int", "double", "categorical"],
     suggestionAlgorithms: ["rl", "enas"], // fetch these
     suggestionAlgorithm: "",
     suggestionParameters: [

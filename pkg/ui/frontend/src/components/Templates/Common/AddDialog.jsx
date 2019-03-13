@@ -57,7 +57,7 @@ class AddDialog extends React.Component {
     }
 
     addTemplate = () => {
-        // this.props.addTemplate(this.state.name, this.state.yaml, this.props.type);
+        this.props.addTemplate(this.state.name, this.state.yaml, this.props.type);
     }
 
     render () {
@@ -98,7 +98,7 @@ class AddDialog extends React.Component {
                         <Button onClick={this.addTemplate} color={"primary"}>
                             Save
                         </Button>
-                        <Button onClick={this.props.closeDialog} color={"primary"}>
+                        <Button onClick={this.props.closeDialog} color={"secondary"}>
                             Discard
                         </Button>
                     </DialogActions>
