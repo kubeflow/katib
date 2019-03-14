@@ -12,7 +12,7 @@ import TextField from '@material-ui/core/TextField';
 
 import { openDialog } from '../../../actions/templateActions';
 
-const module = "template";
+// const module = "template";
 
 const useStyles = makeStyles({
     root: {

@@ -1,7 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import makeStyles from '@material-ui/styles/makeStyles';
-import brace from 'brace';
 import 'brace/mode/javascript';
 import 'brace/theme/tomorrow';
 import AceEditor from 'react-ace';

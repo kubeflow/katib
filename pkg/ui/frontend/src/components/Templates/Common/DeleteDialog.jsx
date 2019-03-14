@@ -52,7 +52,7 @@ const DeleteDialog = (props) => {
                     <Button onClick={props.closeDialog} color={"primary"}>
                         Disagee
                     </Button>
-                    <Button onClick={deleteTemplate(props.type)} color={"secondary"}>
+                    <Button onClick={deleteTemplate(props.type)} color={"primary"}>
                         Agree
                     </Button>
                 </DialogActions>

@@ -9,10 +9,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
-	"github.com/kubeflow/katib/pkg"
 	"github.com/kubeflow/katib/pkg/api"
 	"github.com/kubeflow/katib/pkg/manager/studyjobclient"
 
@@ -21,6 +21,7 @@ import (
 	"google.golang.org/grpc"
 	restclient "k8s.io/client-go/rest"
 
+	gographviz "github.com/awalterschulze/gographviz"
 	"github.com/ghodss/yaml"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -30,6 +31,95 @@ var (
 	port           = "9303"
 	allowedHeaders = "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, X-CSRF-Token"
 )
+
+type Decoder struct {
+	Layers     int            `json:"num_layers"`
+	InputSize  []int          `json:"input_size"`
+	OutputSize []int          `json:"output_size"`
+	Embedding  map[int]*Block `json:"embedding"`
+}
+
+type Block struct {
+	Id    int    `json:"opt_id"`
+	Type  string `json:"opt_type"`
+	Param Option `json:"opt_params"`
+}
+
+type Option struct {
+	FilterNumber string `json:"num_filter"`
+	FilterSize   string `json:"filter_size"`
+	Stride       string `json:"stride"`
+}
+
+func get_node_string(block *Block) string {
+	var node_string string
+	switch block.Type {
+	case "convolution":
+		node_string += block.Param.FilterSize + "x" + block.Param.FilterSize
+		node_string += " conv\n"
+		node_string += block.Param.FilterSize + " channels"
+	case "separable_convolution":
+		node_string += block.Param.FilterSize + "x" + block.Param.FilterSize
+		node_string += " sep_conv\n"
+		node_string += block.Param.FilterSize + " channels"
+	case "depthwise_convolution":
+		node_string += block.Param.FilterSize + "x" + block.Param.FilterSize
+		node_string += " depth_conv\n"
+	case "reduction":
+		// fix this
+		node_string += "3x3 max_pooling"
+	}
+	return strconv.Quote(node_string)
+}
+
+func generate_nn_image(architecture string, decoder string) string {
+
+	var architecture_int [][]int
+
+	if err := json.Unmarshal([]byte(architecture), &architecture_int); err != nil {
+		panic(err)
+	}
+	/*
+		Always has num_layers, input_size, output_size and embeding
+		Embeding is a map: int to Parameter
+		Parameter has id, type, Option
+
+		Beforehand substite all ' to " and wrap the string in `
+	*/
+
+	replaced_decoder := strings.Replace(decoder, `'`, `"`, -1)
+	var decoder_parsed Decoder
+
+	err := json.Unmarshal([]byte(replaced_decoder), &decoder_parsed)
+	if err != nil {
+		panic(err)
+	}
+
+	graphAst, _ := gographviz.ParseString(`digraph G {}`)
+	graph := gographviz.NewGraph()
+	if err := gographviz.Analyse(graphAst, graph); err != nil {
+		panic(err)
+	}
+	graph.AddNode("G", "0", map[string]string{"label": strconv.Quote("Input")})
+	var i int
+	for i = 0; i < len(architecture_int); i++ {
+		graph.AddNode("G", strconv.Itoa(i+1), map[string]string{"label": get_node_string(decoder_parsed.Embedding[architecture_int[i][0]])})
+		graph.AddEdge(strconv.Itoa(i), strconv.Itoa(i+1), true, nil)
+		for j := 1; j < i+1; j++ {
+			if architecture_int[i][j] == 1 {
+				graph.AddEdge(strconv.Itoa(j-1), strconv.Itoa(i+1), true, nil)
+			}
+		}
+	}
+	graph.AddNode("G", strconv.Itoa(i+1), map[string]string{"label": strconv.Quote("GlobalAvgPool")})
+	graph.AddEdge(strconv.Itoa(i), strconv.Itoa(i+1), true, nil)
+	graph.AddNode("G", strconv.Itoa(i+2), map[string]string{"label": strconv.Quote("FullConnect\nSoftmax")})
+	graph.AddEdge(strconv.Itoa(i+1), strconv.Itoa(i+2), true, nil)
+	graph.AddNode("G", strconv.Itoa(i+3), map[string]string{"label": strconv.Quote("Output")})
+	graph.AddEdge(strconv.Itoa(i+2), strconv.Itoa(i+3), true, nil)
+	s := graph.String()
+	return s
+}
 
 func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -117,7 +207,7 @@ func NewKatibUIHandler() *KatibUIHandler {
 // }
 
 func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, katibapi.ManagerClient) {
-	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
+	conn, err := grpc.Dial("10.109.217.211:6789", grpc.WithInsecure())
 	if err != nil {
 		return nil, nil
 	}
@@ -308,8 +398,8 @@ func (k *KatibUIHandler) FetchWorkerInfo(w http.ResponseWriter, r *http.Request)
 
 func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
-	studyID := r.URL.Query()["studyID"][0]
-	// trialID := r.URL.Query()["trialID"][0]
+	studyID := r.URL.Query()["id"][0]
+	fmt.Println(studyID)
 
 	conn, c := k.connectManager()
 
@@ -325,10 +415,11 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 		log.Println(err)
 		return
 	}
+	fmt.Println(gtrep)
 
 	type NNView struct {
+		Name         string
 		Architecture string
-		Decoder      string
 		MetricsName  []string
 		MetricsValue []string
 	}
@@ -346,7 +437,7 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 		},
 	)
 
-	for _, tr := range gtrep.Trials {
+	for i, tr := range gtrep.Trials {
 		for _, parameter := range tr.ParameterSet {
 			if parameter.Name == "architecture" {
 				architecture = parameter.Value
@@ -368,8 +459,8 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 			}
 		}
 		response_raw = append(response_raw, NNView{
-			Architecture: architecture,
-			Decoder:      decoder,
+			Name:         "Generation " + strconv.Itoa(i),
+			Architecture: generate_nn_image(architecture, decoder),
 			MetricsName:  metricsName,
 			MetricsValue: metricsValue,
 		})

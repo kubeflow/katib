@@ -122,6 +122,10 @@ const rootReducer = (state = initialState, action) => {
                         editOpen: false,
                         collectorTemplates: action.templates,
                     }
+                default:
+                    return {
+                        ...state,
+                    }
             }
         case actions.ADD_TEMPLATE_FAILURE:
         case actions.EDIT_TEMPLATE_FAILURE:

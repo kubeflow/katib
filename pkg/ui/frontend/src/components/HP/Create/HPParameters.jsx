@@ -12,8 +12,7 @@ import SuggestionSpec from './Params/SuggestionSpec';
 
 import { connect } from 'react-redux';
 
-const module = "hpCreate";
-
+// const module = "hpCreate";
 
 const styles = theme => ({
     root: {

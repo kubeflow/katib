@@ -36,7 +36,7 @@ class Collector extends React.Component{
 
         return (
             <div className={classes.root}>
-                <Typography variant={"headline"} color={"secondary"}>
+                <Typography variant={"headline"} color={"primary"}>
                     Collector Manifests
                 </Typography>
                 <Button variant={"contained"} color={"primary"} onClick={this.openAddDialog}>

@@ -57,7 +57,7 @@ class HPTable extends React.Component {
             {data.map((row, id) => (
               <TableRow key={id}>
                 {row.map((element, index) => {
-                  if (index == 0) {
+                  if (index === 0) {
                     return (
                       <TableCell className={classes.hover} component="th" scope="row" onClick={this.fetchAndOpenDialog(element)} key={index}>
                         {element}

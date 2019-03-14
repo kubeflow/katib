@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import makeStyles from '@material-ui/styles/makeStyles';
 import Button from '@material-ui/core/Button';
@@ -17,7 +17,6 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Divider from '@material-ui/core/Divider';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
-import Icon from '@material-ui/core/Icon';
 
 import { addParameter, editParameter, deleteParameter, addListParameter, editListParameter, deleteListParameter } from '../../../../actions/hpCreateActions';
 

@@ -2,6 +2,7 @@ import { take, put, call, fork, select, all, takeEvery } from 'redux-saga/effect
 import axios from 'axios';
 import * as templateActions from '../actions/templateActions';
 import * as hpMonitorActions from '../actions/hpMonitorActions';
+import * as nasMonitorActions from '../actions/nasMonitorActions';
 import * as generalActions from '../actions/generalActions';
 
 
@@ -142,6 +143,53 @@ const goFetchHPJobs = function *() {
     } catch (err) {
         yield put({
             type: hpMonitorActions.FETCH_HP_JOBS_FAILURE,
+        })
+    }
+}
+
+export const fetchNASJobs = function *() {
+    while (true) {
+        const action = yield take(nasMonitorActions.FETCH_NAS_JOBS_REQUEST);
+        try {
+            const result = yield call(
+                goFetchNASJobs
+            )
+            if (result.status === 200) {
+                let data = Object.assign(result.data, {})
+                data.map((template, i) => {
+                    Object.keys(template).forEach(key => {
+                        const value = template[key];
+                        delete template[key];
+                        template[key.toLowerCase()] = value;
+                    });
+                })
+                yield put({
+                    type: nasMonitorActions.FETCH_NAS_JOBS_SUCCESS,
+                    jobs: data
+                })
+            } else {
+                yield put({
+                    type: nasMonitorActions.FETCH_NAS_JOBS_FAILURE,
+                }) 
+            }
+        } catch (err) {
+            yield put({
+                type: nasMonitorActions.FETCH_NAS_JOBS_FAILURE,
+            })
+        }
+    }
+}
+
+const goFetchNASJobs = function *() {
+    try {
+        const result = yield call(
+            axios.get,
+            'http://127.0.0.1:9303/katib/fetch_nas_jobs/',
+        )
+        return result
+    } catch (err) {
+        yield put({
+            type: nasMonitorActions.FETCH_NAS_JOBS_FAILURE,
         })
     }
 }
@@ -354,12 +402,12 @@ const goSubmitYaml = function *(yaml) {
     }
 }
 
-export const fetchJobInfo = function *() {
+export const fetchHPJobInfo = function *() {
     while (true) {
         const action = yield take(hpMonitorActions.FETCH_JOB_INFO_REQUEST);
         try {
             const result = yield call(
-                goFetchJobInfo,
+                goFetchHPJobInfo,
                 action.id
             )
             if (result.status === 200) {
@@ -381,16 +429,64 @@ export const fetchJobInfo = function *() {
     }
 }
 
-const goFetchJobInfo = function *(id) {
+const goFetchHPJobInfo = function *(id) {
     try {
         const result = yield call(
             axios.get,
-            `http://127.0.0.1:9303/katib/fetch_job_info/?id=${id}`,
+            `http://127.0.0.1:9303/katib/fetch_hp_job_info/?id=${id}`,
         )
         return result
     } catch (err) {
         yield put({
             type: hpMonitorActions.FETCH_JOB_INFO_FAILURE,
+        })
+    }
+}
+
+export const fetchNASJobInfo = function *() {
+    while (true) {
+        const action = yield take(nasMonitorActions.FETCH_JOB_INFO_REQUEST);
+        try {
+            const result = yield call(
+                goFetchNASJobInfo,
+                action.id
+            )
+            if (result.status === 200) {
+                let data = Object.assign(result.data, {})
+                data.map((template, i) => {
+                    Object.keys(template).forEach(key => {
+                        const value = template[key];
+                        delete template[key];
+                        template[key.toLowerCase()] = value;
+                    });
+                })
+                yield put({
+                    type: nasMonitorActions.FETCH_JOB_INFO_SUCCESS,
+                    steps: data,
+                })
+            } else {
+                yield put({
+                    type: nasMonitorActions.FETCH_JOB_INFO_FAILURE,
+                }) 
+            }
+        } catch (err) {
+            yield put({
+                type: nasMonitorActions.FETCH_JOB_INFO_FAILURE,
+            })
+        }
+    }
+}
+
+const goFetchNASJobInfo = function *(id) {
+    try {
+        const result = yield call(
+            axios.get,
+            `http://127.0.0.1:9303/katib/fetch_nas_job_info/?id=${id}`,
+        )
+        return result
+    } catch (err) {
+        yield put({
+            type: nasMonitorActions.FETCH_JOB_INFO_FAILURE,
         })
     }
 }
@@ -442,11 +538,13 @@ export default function* rootSaga() {
         fork(fetchWorkerTemplates),
         fork(fetchCollectorTemplates),
         fork(fetchHPJobs),
+        fork(fetchNASJobs),
         fork(addTemplate), 
         fork(editTemplate),
         fork(deleteTemplate),
         fork(submitYaml),
-        fork(fetchJobInfo),
-        fork(fetchWorkerInfo)
+        fork(fetchHPJobInfo),
+        fork(fetchWorkerInfo),
+        fork(fetchNASJobInfo)
     ]);
 };

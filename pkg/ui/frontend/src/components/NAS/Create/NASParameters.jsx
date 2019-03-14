@@ -13,7 +13,7 @@ import WorkerSpecParam from './Params/Worker';
 import { connect } from 'react-redux';
 import NASConfig from './Params/NASConfig';
 
-const module = "nasCreate";
+// const module = "nasCreate";
 
 const styles = theme => ({
     root: {

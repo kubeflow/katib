@@ -63,10 +63,6 @@ class AddDialog extends React.Component {
     render () {
         const { classes } = this.props;
 
-    // const addTemplate = () => {
-    //     props.addTemplate(props.type);
-    // }
-
         return (
             <div>
                 <Dialog
@@ -98,7 +94,7 @@ class AddDialog extends React.Component {
                         <Button onClick={this.addTemplate} color={"primary"}>
                             Save
                         </Button>
-                        <Button onClick={this.props.closeDialog} color={"secondary"}>
+                        <Button onClick={this.props.closeDialog} color={"primary"}>
                             Discard
                         </Button>
                     </DialogActions>

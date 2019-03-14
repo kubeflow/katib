@@ -8,6 +8,9 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import LinearProgress from '@material-ui/core/LinearProgress';
+
+import { fetchJobInfo } from '../../../actions/nasMonitorActions';
 
 import StepInfo from './StepInfo';
 
@@ -28,6 +31,10 @@ const styles = theme => ({
 
 class NASJobInfo extends React.Component {
 
+    componentDidMount() {
+        this.props.fetchJobInfo(this.props.match.params.id);
+    }
+
     render () {
         const { classes } = this.props;
         return (
@@ -37,22 +44,28 @@ class NASJobInfo extends React.Component {
                         Back
                     </Button>
                 </Link>
-                <Typography variant={"h5"}>
-                    JOB INFO for {this.props.match.params.id}
-                </Typography>
-                <br />
-                {this.props.steps.map((step, i) => {
-                    return (
-                        <ExpansionPanel key={i}>
-                            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                                <Typography className={classes.heading}>{step.name}</Typography>
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails>
-                               <StepInfo step={step} id={this.props.match.params.id}/>
-                            </ExpansionPanelDetails>
-                        </ExpansionPanel>
-                    )
-                })}
+                {this.props.loading ? 
+                <LinearProgress color={"primary"} className={classes.loading} />
+                :
+                <div>
+                    <Typography variant={"h5"}>
+                        JOB INFO for {this.props.match.params.id}
+                    </Typography>
+                    <br />
+                    {this.props.steps.map((step, i) => {
+                        return (
+                            <ExpansionPanel key={i}>
+                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                                    <Typography className={classes.heading}>{step.name}</Typography>
+                                </ExpansionPanelSummary>
+                                <ExpansionPanelDetails>
+                                    <StepInfo step={step} id={this.props.match.params.id}/>
+                                </ExpansionPanelDetails>
+                            </ExpansionPanel>
+                        )
+                    })}
+                </div>
+                }
                 
             </div>
         )
@@ -62,8 +75,9 @@ class NASJobInfo extends React.Component {
 const mapStateToProps = (state) => {
     return {
         steps: state[module].steps,
+        loading: state[module].loading,
     }
 }
 
 
-export default connect(mapStateToProps, null)(withStyles(styles)(NASJobInfo));
+export default connect(mapStateToProps, { fetchJobInfo })(withStyles(styles)(NASJobInfo));

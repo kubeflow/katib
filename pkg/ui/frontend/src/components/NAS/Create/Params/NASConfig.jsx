@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import makeStyles from '@material-ui/styles/makeStyles';
 import Button from '@material-ui/core/Button';
