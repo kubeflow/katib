@@ -75,6 +75,15 @@ service Manager {
     };
 
     /** 
+     * Delete a Trial from DB by ID.
+     */
+    rpc DeleteTrial(DeleteTrialRequest) returns (DeleteTrialReply){
+        option (google.api.http) = {
+            get: "/api/Manager/DeleteTrial/{id}"
+        };
+    };
+
+    /** 
      * Get a list of Trial from DB by name of a Experiment.
      */
     rpc GetTrialList(GetTrialListRequest) returns (GetTrialListReply){
@@ -277,9 +286,9 @@ message ExperimentStatus {
         SUCCEEDED = 3;
         FAILED = 4;
     }
-    string start_time = 1;
-    string completion_time = 2;
-    string last_reconcile_time = 3;
+    string start_time = 1; /// RFC3339 format
+    string completion_time = 2; /// RFC3339 format
+    string last_reconcile_time = 3; /// RFC3339 format
     ExperimentConditionType condition = 4;
 }
 
@@ -301,7 +310,7 @@ message Metric {
 
 message MetricLog {
     message ValueLog {
-        string reported_time = 1;
+        string time_stamp = 1; /// RFC3339 format
         string value = 2;
     }
     string name = 1;
@@ -330,9 +339,9 @@ message TrialStatus {
         KILLED = 3;
         FAILED = 4;
     }
-    string start_time = 1;
-    string completion_time = 2;
-    string last_reconcile_time = 3;
+    string start_time = 1; /// RFC3339 format
+    string completion_time = 2; /// RFC3339 format
+    string last_reconcile_time = 3; /// RFC3339 format
     TrialConditionType condition = 4;
     Observation observation = 5; /// The best observation in logs.
 }
@@ -398,8 +407,17 @@ message RegisterTrialReply {
     string trial_id = 1;
 }
 
+message DeleteTrialRequest {
+    string trial_id = 1;
+}
+
+message DeleteTrialReply {
+}
+
 message GetTrialListRequest {
     string experiment_name = 1;
+    string start_time = 2; ///The start of the time range. RFC3339 format
+    string end_time = 3; ///The end of the time range. RFC3339 format
 }
 
 message GetTrialListReply {
