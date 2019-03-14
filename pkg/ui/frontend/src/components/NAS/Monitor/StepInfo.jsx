@@ -10,18 +10,30 @@ import * as d3Graphviz     from 'd3-graphviz'
 const styles = theme => ({
 })
 
-const StepInfo = (props) => {
-    const { step, classes } = props;
-    var dotSrc = 'digraph  {a -> b}';
+class StepInfo extends React.Component {
 
-    d3.select(".graph").graphviz().renderDot(dotSrc);
-    return (
+    componentDidMount() {
+        let dotSec = 'digraph  {a -> b}'
+
+        const id = `graph${this.props.id}`
+        d3.select(`#${id}`)
+        .graphviz()
+        .renderDot(this.props.step.architecture)
+        .width(640)
+        .height(480)
+        .fit(true)
+    }
+
+    render() {
+
+        const { step, classes } = this.props;
+        const id = `graph${this.props.id}`
+        return (
             <div>
                 <Typography variant={"h6"}>
                     Architecture
                 </Typography>
-                <div className="graph">
-                </div>
+                <div id={id} style={{textAlign: "center"}} />
                 <br />
                 {step.metricsname.map((metrics, index) => {
                     return (
@@ -37,9 +49,9 @@ const StepInfo = (props) => {
                     </Button>
                 </a>
             </div>
-    )
+        )
+    }
 }
-
-
+    
 
 export default withStyles(styles)(StepInfo);
