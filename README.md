@@ -78,7 +78,7 @@ Each component communicates with others via GRPC and the API is defined at `pkg/
 
 ## Getting Started
 
-Please see [MinikubeDemo.md](./examples/MinikubeDemo.md) for more details.
+Please see [README.md](./examples/README.md) for more details.
 
 ## Web UI
 
