@@ -15,14 +15,14 @@ func (d *dbConn) DBInit() {
 		objective TEXT,
 		algorithm TEXT,
 		trial_template TEXT,
-		pallarel_trial_count INT,
+		parallel_trial_count INT,
 		max_trial_count INT,
 		condition TINYINT,
 		start_time DATETIME(6),
 		metrics_collector_type TEXT,
 		completion_time DATETIME(6),
 		last_reconcile_time DATETIME(6))`)
-
+	//TODO add nas config(may be it will be included in algorithm)
 	if err != nil {
 		log.Fatalf("Error creating experiments table: %v", err)
 	}

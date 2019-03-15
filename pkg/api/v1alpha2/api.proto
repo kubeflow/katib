@@ -114,6 +114,8 @@ service Manager {
     /** 
      * Report a log of Observations for a Trial.
      * The log consists of timestamp and value of metric.
+     * Katib store every log of metrics.
+     * You can see accuracy curve or other metric logs on UI.
      */
     rpc ReportObservationLog(ReportObservationLogRequest) returns (ReportObservationLogReply){
         option (google.api.http) = {
@@ -245,7 +247,7 @@ message AlgorithmSpec {
  */
  message GraphConfig {
     int32 num_layers = 1; /// Number of layers
-    repeated int32 input_size = 2; ///  Dimenstions of input size
+    repeated int32 input_size = 2; /// Dimensions of input size
     repeated int32 output_size = 3; /// Dimensions of output size
 }
 
@@ -273,7 +275,7 @@ message ExperimentSpec {
     ObjectiveSpec objective = 2; 
     AlgorithmSpec algorithm = 3;
     string trial_template = 4;
-    int32 pallarel_trial_count = 5;
+    int32 parallel_trial_count = 5;
     int32 max_trial_count = 6;
     string metrics_collector_type = 7;
 }
@@ -380,14 +382,14 @@ message GetStudyListRequest {
 
 message ExperimentSummary {
     string experiment_name = 1;
-    ExperimentStatus.ExperimentConditionType condition = 4;
+    ExperimentStatus.ExperimentConditionType condition = 2;
 }
 
 message GetExperimentListRequest {
 }
 
 message GetExperimentListReply {
-    repeated ExperimentSummary experiment_summarys = 1;
+    repeated ExperimentSummary experiment_summaries = 1;
 }
 
 message UpdateExperimentStatusRequest {
