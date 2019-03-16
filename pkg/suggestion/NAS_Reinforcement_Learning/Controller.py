@@ -31,7 +31,7 @@ class Controller(object):
                  logger=None):
 
         self.logger = logger
-        self.logger.info("Building Controller")
+        self.logger.info(">>> Building Controller")
 
         self.num_layers = num_layers
         self.num_operations = num_operations
@@ -87,7 +87,7 @@ class Controller(object):
     def _build_sampler(self):
         """Build the sampler ops and the log_prob ops."""
 
-        self.logger.info("Building Controller Sampler")
+        self.logger.info(">>> Building Controller Sampler")
         anchors = []
         anchors_w_1 = []
 

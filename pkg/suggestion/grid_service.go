@@ -220,3 +220,8 @@ func (s *GridSuggestService) GetSuggestions(ctx context.Context, in *api.GetSugg
 	}
 	return &api.GetSuggestionsReply{Trials: trials}, nil
 }
+
+func (s *GridSuggestService) ValidateSuggestionParameters(ctx context.Context, in *api.ValidateSuggestionParametersRequest) (*api.ValidateSuggestionParametersReply, error) {
+
+	return &api.ValidateSuggestionParametersReply{}, nil
+}

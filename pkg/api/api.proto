@@ -212,10 +212,21 @@ service Manager {
             get: "/api/Manager/GetSavedModels"
         };
     };
+    /** 
+     * Validate Suggestion Parameters from Study Job.
+     * Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid
+     */
+     rpc ValidateSuggestionParameters(ValidateSuggestionParametersRequest) returns (ValidateSuggestionParametersReply){
+        option (google.api.http) = {
+            post: "/api/Manager/ValidateSuggestionParameters"
+            body: "*"
+        };
+    };
 }
 
 service Suggestion {
     rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply);
+    rpc ValidateSuggestionParameters(ValidateSuggestionParametersRequest) returns (ValidateSuggestionParametersReply);
 }
 
 service EarlyStopping {
@@ -783,4 +794,16 @@ message EarlyStoppingParameterSet {
 
 message GetEarlyStoppingParameterListReply {
     repeated EarlyStoppingParameterSet early_stopping_parameter_sets = 1;
+}
+
+message ValidateSuggestionParametersRequest {
+    StudyConfig study_config = 1;
+    string suggestion_algorithm = 2;
+    repeated SuggestionParameter suggestion_parameters = 3;    
+}
+
+/**
+ * Return INVALID_ARGUMENT Error if Suggestion Parameters are not Valid
+ */
+message ValidateSuggestionParametersReply {
 }
