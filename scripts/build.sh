@@ -47,6 +47,3 @@ docker build -t ${PREFIX}/earlystopping-medianstopping -f ${CMD_PREFIX}/earlysto
 echo "Building UI image..."
 docker build -t ${PREFIX}/katib-ui -f ${CMD_PREFIX}/ui/Dockerfile .
 
-#echo "Building CLI image..."
-#docker build -t ${PREFIX}/katib-cli -f ${CMD_PREFIX}/cli/Dockerfile .
-#cd - > /dev/null
