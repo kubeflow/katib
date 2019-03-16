@@ -17,14 +17,12 @@ spec:
     spec:
       containers:
       - name: vizier-suggestion-grid
-        image: katib/suggestion-grid
+        image: katib/suggestion-bayesianoptimization:local
         ports:
         - name: api
           containerPort: 6789
-#        resources:
-#          requests:
-#            cpu: 500m
-#            memory: 500M
-#          limits:
-#            cpu: 500m
-#            memory: 500M
+        env:
+        - name: LOG_LEVEL
+          value: "DEBUG"
+        - name: SEARCH_ALGORITHM
+          value: grid_search

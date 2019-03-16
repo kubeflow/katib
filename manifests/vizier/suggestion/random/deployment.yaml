@@ -16,7 +16,7 @@ spec:
         component: suggestion-random
     spec:
       containers:
-      - name: vizier-suggestion-bayesianoptimization
+      - name: vizier-suggestion-random
         image: katib/suggestion-bayesianoptimization:local
         ports:
         - name: api
