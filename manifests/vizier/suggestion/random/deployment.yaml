@@ -25,5 +25,5 @@ spec:
         - name: LOG_LEVEL
           value: "DEBUG"
         - name: SEARCH_ALGORITHM
-          value: random
+          value: random_search
 

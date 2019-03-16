@@ -13,7 +13,7 @@ class BOAlgorithm:
         self.suggestion_config = suggestion_config
         self.l = np.zeros((1, parameter_config.dim))
         self.u = np.ones((1, parameter_config.dim))
-        self.burn_in = suggestion_config.get("burn_in", 1)
+        self.burn_in = int(suggestion_config.get("burn_in", 1))
         self.scaler = self.parameter_config.create_scaler()
         self.logger = logger
 
