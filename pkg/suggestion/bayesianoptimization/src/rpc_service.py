@@ -8,7 +8,7 @@ from .utils import get_logger
 from . import parsing_utils
 
 
-REQUIRES_PAST_OBSERVATIONS = ["bayesian_optimization"]
+REQUIRES_PAST_OBSERVATIONS = ["bayesian_optimization", "grid_search"]
 
 
 class SuggestionService(api_pb2_grpc.SuggestionServicer):
