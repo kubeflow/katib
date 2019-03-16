@@ -58,9 +58,6 @@ class SearchSpace(object):
                     spec_min = float(ispec.feasible.min)
                     spec_max = float(ispec.feasible.max)
                     spec_step = float(ispec.feasible.step)
-                    if spec_step == 0:
-                        print("Error, NAS Reinforcement Learning algorithm cannot accept continuous search space!")
-                        exit(999)
                     double_list = np.arange(spec_min, spec_max+spec_step, spec_step)
                     if double_list[-1] > spec_max:
                         del double_list[-1]

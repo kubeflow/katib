@@ -111,7 +111,8 @@ TIMEOUT=120
 until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
     sleep 5
     TIMEOUT=$(( TIMEOUT - 1 ))
-done 
+done
+
 cp -r test ${GO_DIR}/test
 cd ${GO_DIR}/test/e2e
 kubectl apply -f valid-studyjob.yaml
@@ -125,8 +126,3 @@ set -o errexit
 go run test-client.go -a random
 go run test-client.go -a grid -c suggestion-config-grid.yml
 #go run test-client.go -a hyperband -c suggestion-config-hyb.yml
-
-./test/scripts/python_tests.sh
-if [ $? -ne 1 ]; then
-  exit 1
-fi

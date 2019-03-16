@@ -171,19 +171,6 @@ func (mr *MockVizierDBInterfaceMockRecorder) GetStudyList() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudyList", reflect.TypeOf((*MockVizierDBInterface)(nil).GetStudyList))
 }
 
-// GetStudyMetrics mocks base method
-func (m *MockVizierDBInterface) GetStudyMetrics(arg0 string) ([]string, error) {
-	ret := m.ctrl.Call(m, "GetStudyMetrics", arg0)
-	ret0, _ := ret[0].([]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetStudyMetrics indicates an expected call of GetStudyMetrics
-func (mr *MockVizierDBInterfaceMockRecorder) GetStudyMetrics(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudyMetrics", reflect.TypeOf((*MockVizierDBInterface)(nil).GetStudyMetrics), arg0)
-}
-
 // GetSuggestionParam mocks base method
 func (m *MockVizierDBInterface) GetSuggestionParam(arg0 string) ([]*api.SuggestionParameter, error) {
 	ret := m.ctrl.Call(m, "GetSuggestionParam", arg0)

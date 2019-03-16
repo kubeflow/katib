@@ -9,18 +9,27 @@ import logging
 from logging import getLogger, StreamHandler, INFO, DEBUG
 import json
 import os
+import time
+
 
 MANAGER_ADDRESS = "vizier-core"
 MANAGER_PORT = 6789
+RESPAWN_SLEEP = 20
+RESPAWN_LIMIT = 10
+
 
 class NAS_RL_StudyJob(object):
     def __init__(self, request, logger):
         self.logger = logger
         self.study_id = request.study_id
         self.param_id = request.param_id
+        self.num_trials = 1
+        if request.request_number > 0:
+            self.num_trials = request.request_number
         self.study_name = None
         self.tf_graph = tf.Graph()
-        self.prev_trial_id = None
+        self.prev_trial_ids = list()
+        self.prev_trials = None
         self.ctrl_cache_file = "ctrl_cache/{}/{}.ckpt".format(request.study_id, request.study_id)
         self.ctrl_step = 0
         self.is_first_run = True
@@ -33,12 +42,13 @@ class NAS_RL_StudyJob(object):
         self.search_space = None
         self.opt_direction = None
         self.objective_name = None
+        self.respawn_count = 0
         
         self.logger.info("-" * 100 + "\nSetting Up Suggestion for StudyJob ID {}\n".format(request.study_id) + "-" * 100)
         self._get_study_param()
         self._get_suggestion_param()
         self._setup_controller()
-        self.logger.info("Suggestion for StudyJob {} (ID: {}) has been initialized.\n".format(self.study_name, self.study_id))
+        self.logger.info(">>> Suggestion for StudyJob {} (ID: {}) has been initialized.\n".format(self.study_name, self.study_id))
         
     def _get_study_param(self):
         # this function need to
@@ -111,7 +121,7 @@ class NAS_RL_StudyJob(object):
             self.logger.warning("Error! The Suggestion has not yet been initialized!")
             return
         
-        self.logger.info("Search Space for StudyJob {} (ID: {}):".format(self.study_name, self.study_id))
+        self.logger.info(">>> Search Space for StudyJob {} (ID: {}):".format(self.study_name, self.study_id))
         for opt in self.search_space:
             opt.print_op(self.logger)
         self.logger.info("There are {} operations in total.\n".format(self.num_operations))
@@ -121,12 +131,13 @@ class NAS_RL_StudyJob(object):
             self.logger.warning("Error! The Suggestion has not yet been initialized!")
             return
         
-        self.logger.info("Parameters of LSTM Controller for StudyJob {} (ID: {}):".format(self.study_name, self.study_id))
+        self.logger.info(">>> Parameters of LSTM Controller for StudyJob {} (ID: {}):".format(self.study_name, self.study_id))
         for spec in self.suggestion_config:
             if len(spec) > 13:
                 self.logger.info("{}: \t{}".format(spec, self.suggestion_config[spec]))
             else:
                 self.logger.info("{}: \t\t{}".format(spec, self.suggestion_config[spec]))
+        self.logger.info("RequestNumber:\t\t{}".format(self.num_trials))
         self.logger.info("")
 
 
@@ -148,7 +159,70 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             self.logger = logger
 
         if not os.path.exists("ctrl_cache/"):
-            os.makedirs("ctrl_cache/")  
+            os.makedirs("ctrl_cache/")
+
+    def ValidateSuggestionParameters(self, request, context):
+        self.logger.info("Validate Suggestion Parameters start")
+        graph_config = request.study_config.nas_config.graph_config
+
+        # Validate GraphConfig
+        # Check InputSize
+        if not graph_config.input_size:
+            return self.SetValidateContextError(context, "Missing InputSize in GraphConfig:\n{}".format(graph_config))
+
+        # Check OutputSize
+        if not graph_config.output_size:
+            return self.SetValidateContextError(context, "Missing OutputSize in GraphConfig:\n{}".format(graph_config))
+
+        # Check NumLayers
+        if not graph_config.num_layers:
+            return self.SetValidateContextError(context, "Missing NumLayers in GraphConfig:\n{}".format(graph_config))
+
+        # Validate each operation
+        operations_list = list(request.study_config.nas_config.operations.operation)
+        for operation in operations_list:
+
+            # Check OperationType
+            if not operation.operationType:
+                return self.SetValidateContextError(context, "Missing OperationType in Operation:\n{}".format(operation))
+
+            # Check ParameterConfigs
+            if not operation.parameter_configs.configs:
+                return self.SetValidateContextError(context, "Missing ParameterConfigs in Operation:\n{}".format(operation))
+            
+            # Validate each ParameterConfig in Operation
+            configs_list = list(operation.parameter_configs.configs)
+            for config in configs_list:
+
+                # Check Name
+                if not config.name:
+                    return self.SetValidateContextError(context, "Missing Name in ParameterConfig:\n{}".format(config))
+
+                # Check ParameterType
+                if not config.parameter_type:
+                    return self.SetValidateContextError(context, "Missing ParameterType in ParameterConfig:\n{}".format(config))
+
+                # Check List in Categorical or Discrete Type
+                if config.parameter_type == api_pb2.CATEGORICAL or config.parameter_type == api_pb2.DISCRETE:
+                    if not config.feasible.list:
+                        return self.SetValidateContextError(context, "Missing List in ParameterConfig.Feasible:\n{}".format(config) )
+
+                # Check Max, Min, Step in Int or Double Type
+                elif config.parameter_type == api_pb2.INT or config.parameter_type == api_pb2.DOUBLE:
+                    if not config.feasible.min and not config.feasible.max:
+                        return self.SetValidateContextError(context, "Missing Max and Min in ParameterConfig.Feasible:\n{}".format(config))
+
+                    if config.parameter_type == api_pb2.DOUBLE and (not config.feasible.step or float(config.feasible.step) <= 0):
+                        return self.SetValidateContextError(context, "Step parameter should be > 0 in ParameterConfig.Feasible:\n{}".format(config))
+
+        self.logger.info("All Suggestion Parameters are Valid")
+        return api_pb2.ValidateSuggestionParametersReply()
+
+    def SetValidateContextError(self, context, error_message):
+        context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+        context.set_details(error_message)
+        self.logger.info(error_message)
+        return api_pb2.ValidateSuggestionParametersReply()
 
     def GetSuggestions(self, request, context):
         if request.study_id not in self.registered_studies:
@@ -185,10 +259,13 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 controller_ops["train_op"]]
 
             if study.is_first_run:
-                self.logger.info("First time running suggestion for {}. Random architecture will be given.".format(study.study_name))
+                self.logger.info(">>> First time running suggestion for {}. Random architecture will be given.".format(study.study_name))
                 with tf.Session() as sess:
                     sess.run(tf.global_variables_initializer())
-                    arc = sess.run(controller_ops["sample_arc"])
+                    candidates = list()
+                    for _ in range(study.num_trials):
+                        candidates.append(sess.run(controller_ops["sample_arc"]))
+                    
                     # TODO: will use PVC to store the checkpoint to protect against unexpected suggestion pod restart
                     saver.save(sess, study.ctrl_cache_file)
 
@@ -201,88 +278,142 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     valid_acc = ctrl.reward
                     result = self.GetEvaluationResult(study)
 
-                    # This lstm cell is designed to maximize the metrics
-                    # However, if the user want to minimize the metrics, we can take the negative of the result
+
+                    # Sometimes training container may fail and GetEvaluationResult() will return None
+                    # In this case, the Suggestion will:
+                    # 1. Firstly try to respawn the previous trials after waiting for RESPAWN_SLEEP seconds
+                    # 2. If respawning the trials for RESPAWN_LIMIT times still cannot collect valid results,
+                    #    then fail the task because it may indicate that the training container has errors.
+
+                    if result is None:
+                        if study.respawn_count >= RESPAWN_LIMIT:
+                            self.logger.warning(">>> Suggestion has spawned trials for {} times, but they all failed.".format(RESPAWN_LIMIT))
+                            self.logger.warning(">>> Please check whether the training container is correctly implemented")
+                            self.logger.info(">>> StudyJob {} failed".format(study.study_name))
+                            return []
+                            
+                        else:
+                            self.logger.warning(">>> GetEvaluationResult() returns None. All the previous trials failed")
+
+                            self.logger.info(">>> Sleep for {} seconds".format(RESPAWN_SLEEP))
+                            time.sleep(RESPAWN_SLEEP)
+
+                            self.logger.info(">>> Respawn the previous trials")
+                            study.respawn_count += 1
+                            return self.SpawnTrials(study, study.prev_trials)
+
+                    study.respawn_count = 0
+
+                    # This LSTM network is designed to maximize the metrics
+                    # However, if the user wants to minimize the metrics, we can take the negative of the result
                     if study.opt_direction == api_pb2.MINIMIZE:
                         result = -result
 
                     loss, entropy, lr, gn, bl, skip, _ = sess.run(
                         fetches=run_ops,
                         feed_dict={valid_acc: result})
-                    self.logger.info("Suggetion updated. LSTM Controller Reward: {}".format(loss))
+                    self.logger.info(">>> Suggestion updated. LSTM Controller Reward: {}".format(loss))
 
-                    arc = sess.run(controller_ops["sample_arc"])
+                    candidates = list()
+                    for _ in range(study.num_trials):
+                        candidates.append(sess.run(controller_ops["sample_arc"]))
 
                     saver.save(sess, study.ctrl_cache_file)
+        
+        organized_candidates = list()
+        trials = list()
 
-        arc = arc.tolist()
-        organized_arc = [0 for _ in range(study.num_layers)]
-        record = 0
-        for l in range(study.num_layers):
-            organized_arc[l] = arc[record: record + l + 1]
-            record += l + 1
+        for i in range(study.num_trials):
+            arc = candidates[i].tolist()
+            organized_arc = [0 for _ in range(study.num_layers)]
+            record = 0
+            for l in range(study.num_layers):
+                organized_arc[l] = arc[record: record + l + 1]
+                record += l + 1
+            organized_candidates.append(organized_arc)
 
-        nn_config = dict()
-        nn_config['num_layers'] = study.num_layers
-        nn_config['input_size'] = study.input_size
-        nn_config['output_size'] = study.output_size
-        nn_config['embedding'] = dict()
-        for l in range(study.num_layers):
-            opt = organized_arc[l][0]
-            nn_config['embedding'][opt] = study.search_space[opt].get_dict()
+            nn_config = dict()
+            nn_config['num_layers'] = study.num_layers
+            nn_config['input_size'] = study.input_size
+            nn_config['output_size'] = study.output_size
+            nn_config['embedding'] = dict()
+            for l in range(study.num_layers):
+                opt = organized_arc[l][0]
+                nn_config['embedding'][opt] = study.search_space[opt].get_dict()
 
-        organized_arc_json = json.dumps(organized_arc)
-        nn_config_json = json.dumps(nn_config)
+            organized_arc_json = json.dumps(organized_arc)
+            nn_config_json = json.dumps(nn_config)
 
-        organized_arc_str = str(organized_arc_json).replace('\"', '\'')
-        nn_config_str = str(nn_config_json).replace('\"', '\'')
+            organized_arc_str = str(organized_arc_json).replace('\"', '\'')
+            nn_config_str = str(nn_config_json).replace('\"', '\'')
 
-        self.logger.info("\nNew Neural Network Architecture (internal representation):")
-        self.logger.info(organized_arc_json)
-        self.logger.info("\nCorresponding Seach Space Description:")
-        self.logger.info(nn_config_str)
-        self.logger.info("")
+            self.logger.info("\n>>> New Neural Network Architecture Candidate #{} (internal representation):".format(i))
+            self.logger.info(organized_arc_json)
+            self.logger.info("\n>>> Corresponding Seach Space Description:")
+            self.logger.info(nn_config_str)
 
-        trials = []
-        trials.append(api_pb2.Trial(
-                study_id=request.study_id,
-                parameter_set=[
-                    api_pb2.Parameter(
-                        name="architecture",
-                        value=organized_arc_str,
-                        parameter_type= api_pb2.CATEGORICAL),
-                    api_pb2.Parameter(
-                        name="nn_config",
-                        value=nn_config_str,
-                        parameter_type= api_pb2.CATEGORICAL)
-                ], 
+            trials.append(api_pb2.Trial(
+                    study_id=request.study_id,
+                    parameter_set=[
+                        api_pb2.Parameter(
+                            name="architecture",
+                            value=organized_arc_str,
+                            parameter_type= api_pb2.CATEGORICAL),
+                        api_pb2.Parameter(
+                            name="nn_config",
+                            value=nn_config_str,
+                            parameter_type= api_pb2.CATEGORICAL)
+                    ], 
+                )
             )
-        )
 
+        return self.SpawnTrials(study, trials)
+    
+    def SpawnTrials(self, study, trials):
+        study.prev_trials = trials
+        study.prev_trial_ids = list()
+        self.logger.info("")
         channel = grpc.beta.implementations.insecure_channel(MANAGER_ADDRESS, MANAGER_PORT)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             for i, t in enumerate(trials):
                 ctrep = client.CreateTrial(api_pb2.CreateTrialRequest(trial=t), 10)
                 trials[i].trial_id = ctrep.trial_id
-            self.logger.info("Trial {} Created\n".format(ctrep.trial_id))
-            study.prev_trial_id = ctrep.trial_id
+                study.prev_trial_ids.append(ctrep.trial_id)
         
+        self.logger.info(">>> {} Trials were created:".format(study.num_trials))
+        for t in study.prev_trial_ids:
+            self.logger.info(t)
+        self.logger.info("")
+
         study.ctrl_step += 1
 
         return api_pb2.GetSuggestionsReply(trials=trials)
 
     def GetEvaluationResult(self, study):
-        worker_list = []
         channel = grpc.beta.implementations.insecure_channel(MANAGER_ADDRESS, MANAGER_PORT)
         with api_pb2.beta_create_Manager_stub(channel) as client:
-            gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=study.study_id, trial_id=study.prev_trial_id, only_latest_log=True), 10)
-            worker_list = gwfrep.worker_full_infos
-
-        for w in worker_list:
-            if w.Worker.status == api_pb2.COMPLETED:
-                for ml in w.metrics_logs:
+            gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=study.study_id, only_latest_log=True), 10)
+            trials_list = gwfrep.worker_full_infos
+        
+        completed_trials = dict()
+        for t in trials_list:
+            if t.Worker.trial_id in study.prev_trial_ids and t.Worker.status == api_pb2.COMPLETED:
+                for ml in t.metrics_logs:
                     if ml.name == study.objective_name:
-                        self.logger.info("Evaluation result of previous candidate: {}".format(ml.values[-1].value))
-                        return float(ml.values[-1].value)
+                        completed_trials[t.Worker.trial_id] = float(ml.values[-1].value)
 
-        # TODO: add support for multiple trials
+        n_complete = len(completed_trials)
+        n_fail = study.num_trials - n_complete
+
+        self.logger.info(">>> {} Trials succeeded, {} Trials failed:".format(n_complete, n_fail))
+        for tid in study.prev_trial_ids:
+            if tid in completed_trials:
+                self.logger.info("{}: {}".format(tid, completed_trials[tid]))
+            else:
+                self.logger.info("{}: Failed".format(tid))
+
+        if n_complete > 0:
+            avg_metrics = sum(completed_trials.values()) / n_complete
+            self.logger.info("The average is {}\n".format(avg_metrics))
+
+            return avg_metrics

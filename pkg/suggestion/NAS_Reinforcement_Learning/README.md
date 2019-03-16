@@ -25,9 +25,8 @@ If n = 12, m = 6, the definition of an architecture will be like:
 
 There are n rows, the i<sup>th</sup> row has i elements and describes the i<sup>th</sup> layer. Please notice that layer 0 is the input and is not included in this definition.
 
-In each row:
-The first integer ranges from 0 to m-1, indicates the operation in this layer.
-The next (i-1) integers is either 0 or 1. The k<sup>th</sup> (k>=2) integer indicates whether (k-2)<sup>th</sup> layer has a skip connection with this layer. (There will always be a connection from (k-1)<sup>th</sup> layer to k<sup>th</sup> layer)
+In each row, the first integer ranges from 0 to m-1 and indicates the operation in this layer.
+Starting from the second position, the k<sup>th</sup> integer is a boolean value that indicates whether (k-2)<sup>th</sup> layer has a skip connection with this layer. (There will always be a connection from (k-1)<sup>th</sup> layer to k<sup>th</sup> layer)
 
 ## Output of `GetSuggestion()`
 The output of `GetSuggestion()` consists of two parts: `architecture` and `nn_config`.
@@ -122,6 +121,9 @@ This neural architecture can be visualized as
 ![a neural netowrk architecure example](example.png)
 
 ## To Do
-1. Add support for multiple trials
-2. Change LSTM cell from self defined functions in LSTM.py to `tf.nn.rnn_cell.LSTMCell`
-3. Store the suggestion checkpoint to PVC to protect against unexpected nasrl service pod restarts
+1. Add 'micro' mode, which means searching for a neural cell instead of the whole neural network.
+2. Add supoort for recurrent neural networks and build a training container for the Penn Treebank task.
+3. Add parameter sharing, if possible.
+4. Change LSTM cell from self defined functions in LSTM.py to `tf.nn.rnn_cell.LSTMCell`
+5. Store the suggestion checkpoint to PVC to protect against unexpected nasrl service pod restarts
+6. Add `RequestCount` into API so that the suggestion can clean the information of completed studies.
