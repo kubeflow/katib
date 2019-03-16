@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: vizier-suggestion-bayesianoptimization
-        image: katib/suggestion-bayesianoptimization:local
+        image: katib/suggestion-bayesianoptimization
         ports:
         - name: api
           containerPort: 6789
