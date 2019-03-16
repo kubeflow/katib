@@ -2,6 +2,7 @@
 import numpy as np
 
 from .global_optimizer import GlobalOptimizer
+from .parsing_utils import parse_x_next_vector
 
 
 class BOAlgorithm:
@@ -50,4 +51,10 @@ class BOAlgorithm:
                 x = np.array(xn).reshape(1, self.parameter_config.dim)
                 x = self.scaler.inverse_transform(x)
                 x_next_list.append(x)
-        return x_next_list
+        new_suggestions = [parse_x_next_vector(x_next,
+                                               self.parameter_config.parameter_types,
+                                               self.parameter_config.names,
+                                               self.parameter_config.discrete_info,
+                                               self.parameter_config.categorical_info)
+                           for x_next in x_next_list]
+        return new_suggestions

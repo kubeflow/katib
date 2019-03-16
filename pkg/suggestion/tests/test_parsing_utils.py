@@ -22,11 +22,11 @@ def test_parsing_study_config(study_config, dim, names, name_ids,
 def test_parsing_x_next(param_types, names,
                         discrete_info, categorical_info):
     x_next = [1.0, 1, 5, "true"]
-    parsed_x_next = parsing_utils.parse_x_next(x_next,
-                                               param_types,
-                                               names,
-                                               discrete_info,
-                                               categorical_info)
+    parsed_x_next = parsing_utils.parse_x_next_vector(x_next,
+                                                      param_types,
+                                                      names,
+                                                      discrete_info,
+                                                      categorical_info)
     assert parsed_x_next == \
            [{"name": "x", "value": 1.0, "type": api_pb2.DOUBLE},
             {"name": "y", "value": 1, "type": api_pb2.INT},

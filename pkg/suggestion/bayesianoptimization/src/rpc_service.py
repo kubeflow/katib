@@ -29,7 +29,6 @@ class SuggestionService(api_pb2_grpc.SuggestionServicer):
         self.logger.debug("lowerbound: %r", parameter_config.lower_bounds, extra={"StudyID": request.study_id})
         self.logger.debug("upperbound: %r", parameter_config.upper_bounds, extra={"StudyID": request.study_id})
         alg = ALGORITHM_REGISTER[self.search_algorithm](parameter_config, suggestion_config, logger=self.logger)
-        trials = []
         if self.requires_previous:
             past_suggestions, past_metrics = self._get_eval_history(
                 request.study_id, study_conf.objective_value_name)
@@ -42,26 +41,20 @@ class SuggestionService(api_pb2_grpc.SuggestionServicer):
             )
             y_train = parsing_utils.parse_metric(past_metrics,
                                                  study_conf.optimization_type)
-            x_next_list = alg.get_suggestion(X_train, y_train,
-                                             request.request_number)
+            new_suggestions = alg.get_suggestion(X_train, y_train,
+                                                 request.request_number)
         else:
-            x_next_list = alg.get_suggestion(request.request_number)
-        for x_next in x_next_list:
-            x_next = x_next.squeeze()
-            self.logger.debug("xnext: %r ", x_next, extra={"StudyID": request.study_id})
-            x_next = parsing_utils.parse_x_next(x_next,
-                                                parameter_config.parameter_types,
-                                                parameter_config.names,
-                                                parameter_config.discrete_info,
-                                                parameter_config.categorical_info)
+            new_suggestions = alg.get_suggestion(request.request_number)
+        trials = []
+        for suggestion in new_suggestions:
             trials.append(api_pb2.Trial(
                 study_id=request.study_id,
                 parameter_set=[
                     api_pb2.Parameter(
-                        name=x["name"],
-                        value=str(x["value"]),
-                        parameter_type=x["type"],
-                    ) for x in x_next
+                        name=param["name"],
+                        value=str(param["value"]),
+                        parameter_type=param["type"],
+                    ) for param in suggestion
                     ]
             ))
         trials = self._register_trials(trials)

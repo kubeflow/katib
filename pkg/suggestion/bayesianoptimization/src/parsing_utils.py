@@ -106,10 +106,12 @@ def parse_metric(y_train, goal):
     return y_array
 
 
-def parse_x_next(x_next, param_types, param_names, discrete_info, categorical_info):
+def parse_x_next_vector(x_next, param_types, param_names, discrete_info, categorical_info):
     """ parse the next suggestion to the proper format """
     counter = 0
     result = []
+    if isinstance(x_next, np.ndarray):
+        x_next = x_next.squeeze()
     for par_type, par_name in zip(param_types, param_names):
         if par_type == api_pb2.INT:
             value = int(round(x_next[counter], 0))
@@ -134,4 +136,11 @@ def parse_x_next(x_next, param_types, param_names, discrete_info, categorical_in
                     counter = counter + param["number"]
                     break
         result.append({"name": par_name, "value": value, "type": par_type})
+    return result
+
+
+def parse_x_next_tuple(x_next, param_types, param_names):
+    result = []
+    for value, param_type, param_name in zip(x_next, param_types, param_names):
+        result.append({"name": param_name, "type": param_type, "value": str(value)})
     return result
