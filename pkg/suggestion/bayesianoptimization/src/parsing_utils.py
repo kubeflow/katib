@@ -7,7 +7,7 @@ from collections.abc import Iterable
 
 import numpy as np
 
-from pkg.api.python import api_pb2
+import api_pb2
 from .parameters import ParameterConfig
 
 

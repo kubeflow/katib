@@ -5,7 +5,7 @@ import itertools
 
 import numpy as np
 
-from pkg.api.python import api_pb2
+import api_pb2
 from .parsing_utils import parse_x_next_tuple
 
 

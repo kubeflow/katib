@@ -1,7 +1,7 @@
 import grpc
 
-from pkg.api.python import api_pb2
-from pkg.api.python import api_pb2_grpc
+import api_pb2
+import api_pb2_grpc
 from .config import MANAGER_ADDRESS, MANAGER_PORT, SEARCH_ALGORITHM
 from .algorithm_register import ALGORITHM_REGISTER
 from .utils import get_logger
