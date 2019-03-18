@@ -227,14 +227,6 @@
                     template: "build-cli",
                   },
                   {
-                    name: "build-suggestion-random",
-                    template: "build-suggestion-random",
-                  },
-                  {
-                    name: "build-suggestion-grid",
-                    template: "build-suggestion-grid",
-                  },
-                  {
                     name: "build-suggestion-hyperband",
                     template: "build-suggestion-hyperband",
                   },
@@ -363,12 +355,6 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-cli", testWorkerImage, [
               "test/scripts/build-cli.sh",
             ]),  // build-cli
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-random", testWorkerImage, [
-              "test/scripts/build-suggestion-random.sh",
-            ]),  // build-suggestion-random
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-grid", testWorkerImage, [
-              "test/scripts/build-suggestion-grid.sh",
-            ]),  // build-suggestion-grid
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperband", testWorkerImage, [
               "test/scripts/build-suggestion-hyperband.sh",
             ]),  // build-suggestion-hyperband
