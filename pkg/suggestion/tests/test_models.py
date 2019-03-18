@@ -1,7 +1,7 @@
 import pytest
 
-from ..bayesianoptimization.src.model.rf import RandomForestModel
-from ..bayesianoptimization.src.model.gp import GaussianProcessModel
+from katib_suggestion.model.rf import RandomForestModel
+from katib_suggestion.model.gp import GaussianProcessModel
 
 
 MODELS = [RandomForestModel(n_estimators=5),

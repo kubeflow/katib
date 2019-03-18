@@ -2,8 +2,8 @@ import itertools
 
 import numpy as np
 
-from ..bayesianoptimization.src.algorithm_register import ALGORITHM_REGISTER
-from ..bayesianoptimization.src.parsing_utils import parse_x_next_tuple
+from katib_suggestion.algorithm_register import ALGORITHM_REGISTER
+from katib_suggestion.parsing_utils import parse_x_next_tuple
 
 
 def test_bayesian_optimization(parameter_config, request_num, X_train, y_train):
