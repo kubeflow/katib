@@ -1,4 +1,4 @@
-suggetionalgorithm: "hyperband"
+suggetionAlgorithm: "hyperband"
 suggestionparameters:
     - 
         name: "ResourceName"

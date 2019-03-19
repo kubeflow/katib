@@ -123,6 +123,6 @@ if [ $? -ne 1 ]; then
   exit 1
 fi
 set -o errexit
-go run test-client.go -a random
+go run test-client.go -a random -c suggestion-config-random.yml
 go run test-client.go -a grid -c suggestion-config-grid.yml
 #go run test-client.go -a hyperband -c suggestion-config-hyb.yml

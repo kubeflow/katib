@@ -14,7 +14,7 @@ def test_bayesian_optimization(parameter_config, request_num, X_train, y_train):
 
 
 def test_grid_search(parameter_config):
-    suggestion_config = {"grid_size": 2}
+    suggestion_config = {"DefaultGrid": 2}
     request_num = 24
     X_train, y_train = np.zeros(shape=(0, 2)), np.zeros(shape=(0,))
     boa = ALGORITHM_REGISTER["grid_search"](parameter_config, suggestion_config)

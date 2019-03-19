@@ -13,7 +13,7 @@ import (
 )
 
 var managerAddr = flag.String("s", "127.0.0.1:6789", "Endpoint of manager default 127.0.0.1:6789")
-var suggestArgo = flag.String("a", "random", "Suggestion Algorithm (random, grid, hyperband)")
+var suggestAlgo = flag.String("a", "", "Suggestion Algorithm (random, grid, hyperband)")
 var requestnum = flag.Int("r", 2, "Request number for random Suggestions (default: 2)")
 var suggestionConfFile = flag.String("c", "", "File path to suggestion config.")
 
@@ -43,7 +43,7 @@ func main() {
 	iter := 1
 
 	//GetSuggestion
-	if *suggestArgo == "hyperband" {
+	if *suggestAlgo == "hyperband" {
 		for true {
 			getSuggestReply := getSuggestion(c, studyID, paramID)
 			checkSuggestions(getSuggestReply, iter)
@@ -60,9 +60,9 @@ func main() {
 
 			//UpdateWorkerState
 			for _, w := range workerIds {
-				uwsreq := &api.UpdateWorkerStateRequest {
-					WorkerId:	w,
-					Status:		api.State_COMPLETED,
+				uwsreq := &api.UpdateWorkerStateRequest{
+					WorkerId: w,
+					Status:   api.State_COMPLETED,
 				}
 				c.UpdateWorkerState(ctx, uwsreq)
 			}
@@ -82,15 +82,15 @@ func main() {
 			//add dummy metricsValueTime
 			for i, _ := range mlSet {
 				for j, _ := range mlSet[i].MetricsLogs {
-					mlSet[i].MetricsLogs[j].Values = append(mlSet[i].MetricsLogs[j].Values, &api.MetricsValueTime{Time:"2018-01-01T12:00:00.999999999Z", Value:"1.0",})
-					mlSet[i].MetricsLogs[j].Values = append(mlSet[i].MetricsLogs[j].Values, &api.MetricsValueTime{Time:"2019-02-02T13:30:00.999999999Z", Value:"2.0",})
+					mlSet[i].MetricsLogs[j].Values = append(mlSet[i].MetricsLogs[j].Values, &api.MetricsValueTime{Time: "2018-01-01T12:00:00.999999999Z", Value: "1.0"})
+					mlSet[i].MetricsLogs[j].Values = append(mlSet[i].MetricsLogs[j].Values, &api.MetricsValueTime{Time: "2019-02-02T13:30:00.999999999Z", Value: "2.0"})
 				}
 			}
 
 			//ReportMetrics
-			rmlreq := &api.ReportMetricsLogsRequest {
-				StudyId:	studyID,
-				MetricsLogSets:	mlSet,
+			rmlreq := &api.ReportMetricsLogsRequest{
+				StudyId:        studyID,
+				MetricsLogSets: mlSet,
 			}
 			c.ReportMetricsLogs(ctx, rmlreq)
 
@@ -116,18 +116,17 @@ func readConfigs() {
 	if err != nil {
 		log.Fatalf("fail to Unmarshal yaml")
 	}
-	studyConfig.Name += *suggestArgo
+	studyConfig.Name += *suggestAlgo
 
-	if *suggestionConfFile != "" {
-		buf, err = ioutil.ReadFile(*suggestionConfFile)
-		if err != nil {
-			log.Fatalf("fail to read suggestion-config yaml")
-		}
+	buf, err = ioutil.ReadFile(*suggestionConfFile)
+	if err != nil {
+		log.Fatalf("fail to read suggestion-config yaml")
 	}
 	err = yaml.Unmarshal(buf, &suggestionConfig)
 	if err != nil {
 		log.Fatalf("fail to Unmarshal yaml")
 	}
+	log.Printf("Suggestion spec is: %v", suggestionConfig)
 }
 
 func CreateStudy(c api.ManagerClient) string {
@@ -161,21 +160,21 @@ func DeleteStudy(c api.ManagerClient, studyID string) {
 		log.Fatalf("DeleteStudy error %v", err)
 	}
 	getStudyreq := &api.GetStudyRequest{
-			StudyId: studyID,
+		StudyId: studyID,
 	}
 	getStudyReply, _ := c.GetStudy(ctx, getStudyreq)
 	if getStudyReply != nil && getStudyReply.StudyConfig != nil {
 		log.Fatalf("Failed to delete Study %s", studyID)
 	}
 	getTrialsRequest := &api.GetTrialsRequest{
-			StudyId: studyID,
+		StudyId: studyID,
 	}
 	gtrep, _ := c.GetTrials(ctx, getTrialsRequest)
 	if gtrep != nil && len(gtrep.Trials) > 0 {
 		log.Fatalf("Failed to delete Trials of Study %s", studyID)
 	}
 	getWorkersRequest := &api.GetWorkersRequest{
-			StudyId: studyID,
+		StudyId: studyID,
 	}
 	gwrep, _ := c.GetWorkers(ctx, getWorkersRequest)
 	if gwrep != nil && len(gwrep.Workers) > 0 {
@@ -186,11 +185,15 @@ func DeleteStudy(c api.ManagerClient, studyID string) {
 
 func setSuggestionParam(c api.ManagerClient, studyID string) string {
 	ctx := context.Background()
-	switch *suggestArgo {
+	switch *suggestAlgo {
 	case "random":
 		return ""
 	case "grid":
 		suggestionConfig.StudyId = studyID
+		for idx, l := range suggestionConfig.SuggestionParameters {
+			log.Printf("%d. %s: %s", idx, l.Name, l.Value)
+		}
+		log.Printf("Suggestion algorithm is %s", suggestionConfig.SuggestionAlgorithm)
 		setSuggesitonParameterReply, err := c.SetSuggestionParameters(ctx, &suggestionConfig)
 		if err != nil {
 			log.Fatalf("SetConfig Error %v", err)
@@ -213,7 +216,7 @@ func setSuggestionParam(c api.ManagerClient, studyID string) string {
 func getSuggestion(c api.ManagerClient, studyID string, paramID string) *api.GetSuggestionsReply {
 	ctx := context.Background()
 	var getSuggestRequest *api.GetSuggestionsRequest
-	switch *suggestArgo {
+	switch *suggestAlgo {
 	case "random":
 		//Random suggestion doesn't need suggestion parameter
 		getSuggestRequest = &api.GetSuggestionsRequest{
@@ -243,7 +246,7 @@ func getSuggestion(c api.ManagerClient, studyID string, paramID string) *api.Get
 	if err != nil {
 		log.Fatalf("GetSuggestion Error %v \nRequest %v", err, getSuggestRequest)
 	}
-	log.Println("Get " + *suggestArgo + " Suggestions:")
+	log.Println("Get " + *suggestAlgo + " Suggestions:")
 	for _, t := range getSuggestReply.Trials {
 		log.Printf("%v", t)
 	}
@@ -251,7 +254,7 @@ func getSuggestion(c api.ManagerClient, studyID string, paramID string) *api.Get
 }
 
 func checkSuggestions(getSuggestReply *api.GetSuggestionsReply, iter int) bool {
-	switch *suggestArgo {
+	switch *suggestAlgo {
 	case "random":
 		if len(getSuggestReply.Trials) != *requestnum {
 			log.Fatalf("Number of Random suggestion incorrect. Expected %d Got %d", *requestnum, len(getSuggestReply.Trials))
@@ -276,7 +279,7 @@ func checkSuggestions(getSuggestReply *api.GetSuggestionsReply, iter int) bool {
 		for i, trial := range getSuggestReply.Trials {
 			for _, param := range trial.ParameterSet {
 				if param.Name == "learning-rate" && learningRate != 0 {
-					expValue := min + (max-min)/(learningRate-1) * float64(i)
+					expValue := min + (max-min)/(learningRate-1)*float64(i)
 					if param.Value != strconv.FormatFloat(expValue, 'f', 4, 64) {
 						log.Printf("Grid point incorrect. Expected %v Got %v", strconv.FormatFloat(expValue, 'f', 4, 64), param.Value)
 					}
@@ -306,12 +309,12 @@ func registerWorkers(c api.ManagerClient, studyId string, getSuggestReply *api.G
 	ctx := context.Background()
 	workerIds := make([]string, len(getSuggestReply.Trials))
 	for i, t := range getSuggestReply.Trials {
-		worker := &api.Worker {
-			StudyId:	studyId,
-			TrialId:	t.TrialId,
+		worker := &api.Worker{
+			StudyId: studyId,
+			TrialId: t.TrialId,
 		}
-		workerreq := &api.RegisterWorkerRequest {
-			Worker:		worker,
+		workerreq := &api.RegisterWorkerRequest{
+			Worker: worker,
 		}
 		workerrep, err := c.RegisterWorker(ctx, workerreq)
 		if err != nil {
@@ -319,17 +322,17 @@ func registerWorkers(c api.ManagerClient, studyId string, getSuggestReply *api.G
 		}
 
 		workerIds[i] = workerrep.WorkerId
-		saveModelRequest := &api.SaveModelRequest {
-			Model: &api.ModelInfo {
-				StudyName:	studyConfig.Name,
-				WorkerId:	workerrep.WorkerId,
-				Parameters:	t.ParameterSet,
-				Metrics:	[]*api.Metrics{},
-				ModelPath:	"pvc:/Path/to/Model",
+		saveModelRequest := &api.SaveModelRequest{
+			Model: &api.ModelInfo{
+				StudyName:  studyConfig.Name,
+				WorkerId:   workerrep.WorkerId,
+				Parameters: t.ParameterSet,
+				Metrics:    []*api.Metrics{},
+				ModelPath:  "pvc:/Path/to/Model",
 			},
-			DataSet: &api.DataSetInfo {
-				Name:	"Mnist",
-				Path:	"/path/to/data",
+			DataSet: &api.DataSetInfo{
+				Name: "Mnist",
+				Path: "/path/to/data",
 			},
 		}
 		_, err = c.SaveModel(ctx, saveModelRequest)

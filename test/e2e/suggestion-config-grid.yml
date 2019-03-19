@@ -1,9 +1,6 @@
-suggetionalgorithm: "grid"
-suggestionparameters:
-    - 
-        name: "DefaultGrid"
-        value: "1"
-    - 
-        name: "learning-rate"
-        value: "4"
-
+suggestionAlgorithm: "grid"
+suggestionParameters:
+  - name: "DefaultGrid"
+    value: "1"
+  - name: "learning-rate"
+    value: "4"
