@@ -195,6 +195,14 @@
                 </li>
               
                 <li>
+                  <a href="#api.v1.alpha2.DeleteTrialReply"><span class="badge">M</span>DeleteTrialReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.DeleteTrialRequest"><span class="badge">M</span>DeleteTrialRequest</a>
+                </li>
+              
+                <li>
                   <a href="#api.v1.alpha2.EarlyStoppingSpec"><span class="badge">M</span>EarlyStoppingSpec</a>
                 </li>
               
@@ -243,10 +251,6 @@
                 </li>
               
                 <li>
-                  <a href="#api.v1.alpha2.GetStudyListRequest"><span class="badge">M</span>GetStudyListRequest</a>
-                </li>
-              
-                <li>
                   <a href="#api.v1.alpha2.GetSuggestionsReply"><span class="badge">M</span>GetSuggestionsReply</a>
                 </li>
               
@@ -280,10 +284,6 @@
               
                 <li>
                   <a href="#api.v1.alpha2.MetricLog"><span class="badge">M</span>MetricLog</a>
-                </li>
-              
-                <li>
-                  <a href="#api.v1.alpha2.MetricLog.ValueLog"><span class="badge">M</span>MetricLog.ValueLog</a>
                 </li>
               
                 <li>
@@ -356,6 +356,14 @@
               
                 <li>
                   <a href="#api.v1.alpha2.TrialStatus"><span class="badge">M</span>TrialStatus</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.UpdateAlgorithmSpecReply"><span class="badge">M</span>UpdateAlgorithmSpecReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.UpdateAlgorithmSpecRequest"><span class="badge">M</span>UpdateAlgorithmSpecRequest</a>
                 </li>
               
                 <li>
@@ -499,6 +507,13 @@
         <p></p>
 
         
+
+        
+      
+        <h3 id="api.v1.alpha2.DeleteExperimentRequest">DeleteExperimentRequest</h3>
+        <p></p>
+
+        
           <table class="field-table">
             <thead>
               <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
@@ -518,7 +533,14 @@
 
         
       
-        <h3 id="api.v1.alpha2.DeleteExperimentRequest">DeleteExperimentRequest</h3>
+        <h3 id="api.v1.alpha2.DeleteTrialReply">DeleteTrialReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.DeleteTrialRequest">DeleteTrialRequest</h3>
         <p></p>
 
         
@@ -529,7 +551,7 @@
             <tbody>
               
                 <tr>
-                  <td>experiment_name</td>
+                  <td>trial_name</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p> </p></td>
@@ -624,7 +646,7 @@
                 </tr>
               
                 <tr>
-                  <td>pallarel_trial_count</td>
+                  <td>parallel_trial_count</td>
                   <td><a href="#int32">int32</a></td>
                   <td></td>
                   <td><p> </p></td>
@@ -664,21 +686,14 @@
                   <td>start_time</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>RFC3339 format </p></td>
                 </tr>
               
                 <tr>
                   <td>completion_time</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-                <tr>
-                  <td>last_reconcile_time</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
+                  <td><p>RFC3339 format </p></td>
                 </tr>
               
                 <tr>
@@ -712,8 +727,8 @@
                 </tr>
               
                 <tr>
-                  <td>condition</td>
-                  <td><a href="#api.v1.alpha2.ExperimentStatus.ExperimentConditionType">ExperimentStatus.ExperimentConditionType</a></td>
+                  <td>status</td>
+                  <td><a href="#api.v1.alpha2.ExperimentStatus">ExperimentStatus</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
@@ -779,7 +794,7 @@
             <tbody>
               
                 <tr>
-                  <td>experiment_summarys</td>
+                  <td>experiment_summaries</td>
                   <td><a href="#api.v1.alpha2.ExperimentSummary">ExperimentSummary</a></td>
                   <td>repeated</td>
                   <td><p> </p></td>
@@ -878,7 +893,7 @@
             <tbody>
               
                 <tr>
-                  <td>trial_id</td>
+                  <td>trial_name</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p> </p></td>
@@ -886,13 +901,6 @@
               
             </tbody>
           </table>
-        
-
-        
-      
-        <h3 id="api.v1.alpha2.GetStudyListRequest">GetStudyListRequest</h3>
-        <p></p>
-
         
 
         
@@ -997,6 +1005,27 @@
                   <td><p> </p></td>
                 </tr>
               
+                <tr>
+                  <td>start_time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>The start of the time range. RFC3339 format </p></td>
+                </tr>
+              
+                <tr>
+                  <td>end_time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>The end of the time range. RFC3339 format </p></td>
+                </tr>
+              
+                <tr>
+                  <td>filter</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
             </tbody>
           </table>
         
@@ -1037,7 +1066,7 @@
             <tbody>
               
                 <tr>
-                  <td>trial_id</td>
+                  <td>trial_name</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p> </p></td>
@@ -1070,7 +1099,7 @@
                   <td>input_size</td>
                   <td><a href="#int32">int32</a></td>
                   <td>repeated</td>
-                  <td><p>Dimenstions of input size </p></td>
+                  <td><p>Dimensions of input size </p></td>
                 </tr>
               
                 <tr>
@@ -1127,45 +1156,15 @@
             <tbody>
               
                 <tr>
-                  <td>name</td>
+                  <td>time_stamp</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>RFC3339 format </p></td>
                 </tr>
               
                 <tr>
-                  <td>valuelog</td>
-                  <td><a href="#api.v1.alpha2.MetricLog.ValueLog">MetricLog.ValueLog</a></td>
-                  <td>repeated</td>
-                  <td><p> </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-        
-
-        
-      
-        <h3 id="api.v1.alpha2.MetricLog.ValueLog">MetricLog.ValueLog</h3>
-        <p></p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>reported_time</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-                <tr>
-                  <td>value</td>
-                  <td><a href="#string">string</a></td>
+                  <td>metric</td>
+                  <td><a href="#api.v1.alpha2.Metric">Metric</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
@@ -1261,7 +1260,7 @@
                 </tr>
               
                 <tr>
-                  <td>additional_metrics_name</td>
+                  <td>additional_metrics_names</td>
                   <td><a href="#string">string</a></td>
                   <td>repeated</td>
                   <td><p>This can be empty if we only care about the objective metric. </p></td>
@@ -1330,7 +1329,7 @@
             <tbody>
               
                 <tr>
-                  <td>operationType</td>
+                  <td>operation_type</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>Type of operation in DAG </p></td>
@@ -1473,22 +1472,6 @@
         <p></p>
 
         
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>trial_id</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-        
 
         
       
@@ -1533,7 +1516,7 @@
             <tbody>
               
                 <tr>
-                  <td>trial_id</td>
+                  <td>trial_name</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p> </p></td>
@@ -1563,7 +1546,7 @@
             <tbody>
               
                 <tr>
-                  <td>id</td>
+                  <td>name</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p> </p></td>
@@ -1640,21 +1623,14 @@
                   <td>start_time</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>RFC3339 format </p></td>
                 </tr>
               
                 <tr>
                   <td>completion_time</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-                <tr>
-                  <td>last_reconcile_time</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
+                  <td><p>RFC3339 format </p></td>
                 </tr>
               
                 <tr>
@@ -1677,7 +1653,14 @@
 
         
       
-        <h3 id="api.v1.alpha2.UpdateExperimentStatusReply">UpdateExperimentStatusReply</h3>
+        <h3 id="api.v1.alpha2.UpdateAlgorithmSpecReply">UpdateAlgorithmSpecReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.UpdateAlgorithmSpecRequest">UpdateAlgorithmSpecRequest</h3>
         <p></p>
 
         
@@ -1694,8 +1677,22 @@
                   <td><p> </p></td>
                 </tr>
               
+                <tr>
+                  <td>new_algorithm_spec</td>
+                  <td><a href="#api.v1.alpha2.AlgorithmSpec">AlgorithmSpec</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
             </tbody>
           </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.UpdateExperimentStatusReply">UpdateExperimentStatusReply</h3>
+        <p></p>
+
         
 
         
@@ -1734,22 +1731,6 @@
         <p></p>
 
         
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>trial_id</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-        
 
         
       
@@ -1764,7 +1745,7 @@
             <tbody>
               
                 <tr>
-                  <td>trial_id</td>
+                  <td>trial_name</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p> </p></td>
@@ -2034,11 +2015,25 @@ The summary includes name and condition.</p></td>
               </tr>
             
               <tr>
+                <td>UpdateAlgorithmSpec</td>
+                <td><a href="#api.v1.alpha2.UpdateAlgorithmSpecRequest">UpdateAlgorithmSpecRequest</a></td>
+                <td><a href="#api.v1.alpha2.UpdateAlgorithmSpecReply">UpdateAlgorithmSpecReply</a></td>
+                <td><p>Update AlgorithmParameter of a experiment.</p></td>
+              </tr>
+            
+              <tr>
                 <td>RegisterTrial</td>
                 <td><a href="#api.v1.alpha2.RegisterTrialRequest">RegisterTrialRequest</a></td>
                 <td><a href="#api.v1.alpha2.RegisterTrialReply">RegisterTrialReply</a></td>
                 <td><p>Register a Trial to DB.
 ID will be filled by manager automatically.</p></td>
+              </tr>
+            
+              <tr>
+                <td>DeleteTrial</td>
+                <td><a href="#api.v1.alpha2.DeleteTrialRequest">DeleteTrialRequest</a></td>
+                <td><a href="#api.v1.alpha2.DeleteTrialReply">DeleteTrialReply</a></td>
+                <td><p>Delete a Trial from DB by ID.</p></td>
               </tr>
             
               <tr>
@@ -2067,7 +2062,9 @@ ID will be filled by manager automatically.</p></td>
                 <td><a href="#api.v1.alpha2.ReportObservationLogRequest">ReportObservationLogRequest</a></td>
                 <td><a href="#api.v1.alpha2.ReportObservationLogReply">ReportObservationLogReply</a></td>
                 <td><p>Report a log of Observations for a Trial.
-The log consists of timestamp and value of metric.</p></td>
+The log consists of timestamp and value of metric.
+Katib store every log of metrics.
+You can see accuracy curve or other metric logs on UI.</p></td>
               </tr>
             
               <tr>

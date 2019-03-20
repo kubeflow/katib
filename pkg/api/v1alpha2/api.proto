@@ -57,7 +57,17 @@ service Manager {
      */
     rpc UpdateExperimentStatus(UpdateExperimentStatusRequest) returns (UpdateExperimentStatusReply){
         option (google.api.http) = {
-            put: "/api/Manager/UpdateExperimentStatus",
+            put: "/api/Manager/UpdateExperimentStatus/{experiment_name}",
+            body: "*"
+        };
+    };
+
+    /** 
+     * Update AlgorithmParameter of a experiment.
+     */
+    rpc UpdateAlgorithmSpec(UpdateAlgorithmSpecRequest) returns (UpdateAlgorithmSpecReply){
+        option (google.api.http) = {
+            put: "/api/Manager/UpdateAlgorithmSpec/{experiment_name}",
             body: "*"
         };
     };
@@ -79,7 +89,7 @@ service Manager {
      */
     rpc DeleteTrial(DeleteTrialRequest) returns (DeleteTrialReply){
         option (google.api.http) = {
-            get: "/api/Manager/DeleteTrial/{id}"
+            get: "/api/Manager/DeleteTrial/{trial_name}"
         };
     };
 
@@ -97,7 +107,7 @@ service Manager {
      */
     rpc GetTrial(GetTrialRequest) returns (GetTrialReply){
         option (google.api.http) = {
-            get: "/api/Manager/GetTrial/{trial_id}"
+            get: "/api/Manager/GetTrial/{trial_name}"
         };
     };
 
@@ -129,7 +139,7 @@ service Manager {
      */
     rpc GetObservationLog(GetObservationLogRequest) returns (GetObservationLogReply){
         option (google.api.http) = {
-            get: "/api/Manager/GetObservationLog/{trial_id}"
+            get: "/api/Manager/GetObservationLog/{trial_name}"
             };
     };
 
@@ -211,7 +221,7 @@ message ObjectiveSpec{
     ObjectiveType type = 1;
     float goal = 2;
     string objective_metric_name = 3;
-    repeated string additional_metrics_name = 4; 
+    repeated string additional_metrics_names = 4; 
     /// This can be empty if we only care about the objective metric.
 }
 
@@ -255,7 +265,7 @@ message AlgorithmSpec {
  * Config for operations in DAG
  */
  message Operation {
-     string operationType = 1; /// Type of operation in DAG
+     string operation_type = 1; /// Type of operation in DAG
       /** 
      * List of ParameterAssignment
      */
@@ -290,8 +300,7 @@ message ExperimentStatus {
     }
     string start_time = 1; /// RFC3339 format
     string completion_time = 2; /// RFC3339 format
-    string last_reconcile_time = 3; /// RFC3339 format
-    ExperimentConditionType condition = 4;
+    ExperimentConditionType condition = 3;
 }
 
 message Experiment {
@@ -311,12 +320,8 @@ message Metric {
 }
 
 message MetricLog {
-    message ValueLog {
-        string time_stamp = 1; /// RFC3339 format
-        string value = 2;
-    }
-    string name = 1;
-    repeated ValueLog valuelog = 2;
+    string time_stamp = 1; /// RFC3339 format
+    Metric metric = 2;
 }
 
 message Observation {
@@ -343,13 +348,12 @@ message TrialStatus {
     }
     string start_time = 1; /// RFC3339 format
     string completion_time = 2; /// RFC3339 format
-    string last_reconcile_time = 3; /// RFC3339 format
-    TrialConditionType condition = 4;
-    Observation observation = 5; /// The best observation in logs.
+    TrialConditionType condition = 3;
+    Observation observation = 4; /// The best observation in logs.
 }
 
 message Trial {
-    string id = 1;
+    string name = 1;
     TrialSpec spec = 2;
     TrialStatus status = 3;
 }
@@ -366,7 +370,6 @@ message DeleteExperimentRequest {
 }
 
 message DeleteExperimentReply {
-    string experiment_name = 1;
 }
 
 message GetExperimentRequest {
@@ -377,12 +380,9 @@ message GetExperimentReply {
     Experiment experiment = 1;
 }
 
-message GetStudyListRequest {
-}
-
 message ExperimentSummary {
     string experiment_name = 1;
-    ExperimentStatus.ExperimentConditionType condition = 2;
+    ExperimentStatus status = 2;
 }
 
 message GetExperimentListRequest {
@@ -398,7 +398,14 @@ message UpdateExperimentStatusRequest {
 }
 
 message UpdateExperimentStatusReply {
+}
+
+message UpdateAlgorithmSpecRequest {
     string experiment_name = 1;
+    AlgorithmSpec new_algorithm_spec = 2;
+}
+
+message UpdateAlgorithmSpecReply {
 }
 
 message RegisterTrialRequest {
@@ -406,11 +413,10 @@ message RegisterTrialRequest {
 }
 
 message RegisterTrialReply {
-    string trial_id = 1;
 }
 
 message DeleteTrialRequest {
-    string trial_id = 1;
+    string trial_name = 1;
 }
 
 message DeleteTrialReply {
@@ -420,6 +426,7 @@ message GetTrialListRequest {
     string experiment_name = 1;
     string start_time = 2; ///The start of the time range. RFC3339 format
     string end_time = 3; ///The end of the time range. RFC3339 format
+    string filter = 4;
 }
 
 message GetTrialListReply {
@@ -427,7 +434,7 @@ message GetTrialListReply {
 }
 
 message GetTrialRequest {
-    string trial_id = 1;
+    string trial_name = 1;
 }
 
 message GetTrialReply {
@@ -435,16 +442,15 @@ message GetTrialReply {
 }
 
 message UpdateTrialStatusRequest {
-    string trial_id = 1;
+    string trial_name = 1;
     TrialStatus new_status = 2;
 }
 
 message UpdateTrialStatusReply {
-    string trial_id = 1;
 }
 
 message ReportObservationLogRequest {
-    string trial_id = 1;
+    string trial_name = 1;
     ObservationLog observation_log = 2;
 }
 
@@ -452,7 +458,7 @@ message ReportObservationLogReply {
 }
 
 message GetObservationLogRequest {
-    string trial_id = 1;
+    string trial_name = 1;
 }
 
 message GetObservationLogReply {

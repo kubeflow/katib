@@ -3,16 +3,12 @@ package db
 import (
 	crand "crypto/rand"
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"math/big"
 	"math/rand"
 	"os"
-	"strings"
 	"time"
-
-	"github.com/golang/protobuf/jsonpb"
 
 	v1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 
@@ -42,7 +38,7 @@ type WorkerLog struct {
 	Value string
 }
 
-type VizierDBInterface interface {
+type KatibDBInterface interface {
 	DBInit()
 	SelectOne() error
 
@@ -52,14 +48,14 @@ type VizierDBInterface interface {
 	GetExperimentList() ([]*v1alpha2.ExperimentSummary, error)
 	UpdateExperimentStatus(experimentName string, newStatus *v1alpha2.ExperimentStatus) error
 
-	RegisterTrial(trial *v1alpha2.Trial) (string, error)
+	RegisterTrial(trial *v1alpha2.Trial) error
 	GetTrialList(experimentName string) ([]*v1alpha2.Trial, error)
-	GetTrial(trialId string) (*v1alpha2.Trial, error)
-	UpdateTrialStatus(trialId string, newStatus *v1alpha2.TrialStatus) error
-	DeleteTrial(trialId string) error
+	GetTrial(trialName string) (*v1alpha2.Trial, error)
+	UpdateTrialStatus(trialName string, newStatus *v1alpha2.TrialStatus) error
+	DeleteTrial(trialName string) error
 
-	RegisterObservationLog(trialId string, obsercationLog *v1alpha2.ObservationLog) error
-	GetObservationLog(trialId string, startTime time.Time, endTime time.Time)
+	RegisterObservationLog(trialName string, obsercationLog *v1alpha2.ObservationLog) error
+	GetObservationLog(trialName string, startTime time.Time, endTime time.Time) (*v1alpha2.ObservationLog, error)
 }
 
 type dbConn struct {
@@ -101,7 +97,7 @@ func openSQLConn(driverName string, dataSourceName string, interval time.Duratio
 	}
 }
 
-func NewWithSQLConn(db *sql.DB) (VizierDBInterface, error) {
+func NewWithSQLConn(db *sql.DB) (KatibDBInterface, error) {
 	d := new(dbConn)
 	d.db = db
 	seed, err := crand.Int(crand.Reader, big.NewInt(1<<63-1))
@@ -113,4 +109,43 @@ func NewWithSQLConn(db *sql.DB) (VizierDBInterface, error) {
 	rand.Seed(seed.Int64())
 
 	return d, nil
+}
+
+func (d *dbConn) RegisterExperiment(experiment *v1alpha2.Experiment) error {
+	return nil
+}
+func (d *dbConn) DeleteExperiment(experimentName string) error {
+	return nil
+}
+func (d *dbConn) GetExperiment(experimentName string) (*v1alpha2.Experiment, error) {
+	return nil, nil
+}
+func (d *dbConn) GetExperimentList() ([]*v1alpha2.ExperimentSummary, error) {
+	return nil, nil
+}
+func (d *dbConn) UpdateExperimentStatus(experimentName string, newStatus *v1alpha2.ExperimentStatus) error {
+	return nil
+}
+
+func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
+	return nil
+}
+func (d *dbConn) GetTrialList(experimentName string) ([]*v1alpha2.Trial, error) {
+	return nil, nil
+}
+func (d *dbConn) GetTrial(trialName string) (*v1alpha2.Trial, error) {
+	return nil, nil
+}
+func (d *dbConn) UpdateTrialStatus(trialName string, newStatus *v1alpha2.TrialStatus) error {
+	return nil
+}
+func (d *dbConn) DeleteTrial(trialName string) error {
+	return nil
+}
+
+func (d *dbConn) RegisterObservationLog(trialName string, obsercationLog *v1alpha2.ObservationLog) error {
+	return nil
+}
+func (d *dbConn) GetObservationLog(trialName string, startTime time.Time, endTime time.Time) (*v1alpha2.ObservationLog, error) {
+	return nil, nil
 }

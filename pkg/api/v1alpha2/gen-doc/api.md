@@ -8,6 +8,8 @@
     - [AlgorithmSpec](#api.v1.alpha2.AlgorithmSpec)
     - [DeleteExperimentReply](#api.v1.alpha2.DeleteExperimentReply)
     - [DeleteExperimentRequest](#api.v1.alpha2.DeleteExperimentRequest)
+    - [DeleteTrialReply](#api.v1.alpha2.DeleteTrialReply)
+    - [DeleteTrialRequest](#api.v1.alpha2.DeleteTrialRequest)
     - [EarlyStoppingSpec](#api.v1.alpha2.EarlyStoppingSpec)
     - [Experiment](#api.v1.alpha2.Experiment)
     - [ExperimentSpec](#api.v1.alpha2.ExperimentSpec)
@@ -20,7 +22,6 @@
     - [GetExperimentRequest](#api.v1.alpha2.GetExperimentRequest)
     - [GetObservationLogReply](#api.v1.alpha2.GetObservationLogReply)
     - [GetObservationLogRequest](#api.v1.alpha2.GetObservationLogRequest)
-    - [GetStudyListRequest](#api.v1.alpha2.GetStudyListRequest)
     - [GetSuggestionsReply](#api.v1.alpha2.GetSuggestionsReply)
     - [GetSuggestionsRequest](#api.v1.alpha2.GetSuggestionsRequest)
     - [GetTrialListReply](#api.v1.alpha2.GetTrialListReply)
@@ -30,7 +31,6 @@
     - [GraphConfig](#api.v1.alpha2.GraphConfig)
     - [Metric](#api.v1.alpha2.Metric)
     - [MetricLog](#api.v1.alpha2.MetricLog)
-    - [MetricLog.ValueLog](#api.v1.alpha2.MetricLog.ValueLog)
     - [NasConfig](#api.v1.alpha2.NasConfig)
     - [NasConfig.Operations](#api.v1.alpha2.NasConfig.Operations)
     - [ObjectiveSpec](#api.v1.alpha2.ObjectiveSpec)
@@ -49,6 +49,8 @@
     - [Trial](#api.v1.alpha2.Trial)
     - [TrialSpec](#api.v1.alpha2.TrialSpec)
     - [TrialStatus](#api.v1.alpha2.TrialStatus)
+    - [UpdateAlgorithmSpecReply](#api.v1.alpha2.UpdateAlgorithmSpecReply)
+    - [UpdateAlgorithmSpecRequest](#api.v1.alpha2.UpdateAlgorithmSpecRequest)
     - [UpdateExperimentStatusReply](#api.v1.alpha2.UpdateExperimentStatusReply)
     - [UpdateExperimentStatusRequest](#api.v1.alpha2.UpdateExperimentStatusRequest)
     - [UpdateTrialStatusReply](#api.v1.alpha2.UpdateTrialStatusReply)
@@ -117,11 +119,6 @@ Katib API
 
 
 
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| experiment_name | [string](#string) |  |  |
-
-
 
 
 
@@ -135,6 +132,31 @@ Katib API
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | experiment_name | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="api.v1.alpha2.DeleteTrialReply"/>
+
+### DeleteTrialReply
+
+
+
+
+
+
+
+<a name="api.v1.alpha2.DeleteTrialRequest"/>
+
+### DeleteTrialRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| trial_name | [string](#string) |  |  |
 
 
 
@@ -182,7 +204,7 @@ It is assumed that objective function f(x) does not change in the course of a Ex
 | objective | [ObjectiveSpec](#api.v1.alpha2.ObjectiveSpec) |  |  |
 | algorithm | [AlgorithmSpec](#api.v1.alpha2.AlgorithmSpec) |  |  |
 | trial_template | [string](#string) |  |  |
-| pallarel_trial_count | [int32](#int32) |  |  |
+| parallel_trial_count | [int32](#int32) |  |  |
 | max_trial_count | [int32](#int32) |  |  |
 | metrics_collector_type | [string](#string) |  |  |
 
@@ -199,9 +221,8 @@ It is assumed that objective function f(x) does not change in the course of a Ex
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| start_time | [string](#string) |  |  |
-| completion_time | [string](#string) |  |  |
-| last_reconcile_time | [string](#string) |  |  |
+| start_time | [string](#string) |  | RFC3339 format |
+| completion_time | [string](#string) |  | RFC3339 format |
 | condition | [ExperimentStatus.ExperimentConditionType](#api.v1.alpha2.ExperimentStatus.ExperimentConditionType) |  |  |
 
 
@@ -218,7 +239,7 @@ It is assumed that objective function f(x) does not change in the course of a Ex
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | experiment_name | [string](#string) |  |  |
-| condition | [ExperimentStatus.ExperimentConditionType](#api.v1.alpha2.ExperimentStatus.ExperimentConditionType) |  |  |
+| status | [ExperimentStatus](#api.v1.alpha2.ExperimentStatus) |  |  |
 
 
 
@@ -253,7 +274,7 @@ Discrete and Categorical type use List.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| experiment_summarys | [ExperimentSummary](#api.v1.alpha2.ExperimentSummary) | repeated |  |
+| experiment_summaries | [ExperimentSummary](#api.v1.alpha2.ExperimentSummary) | repeated |  |
 
 
 
@@ -323,17 +344,7 @@ Discrete and Categorical type use List.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| trial_id | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="api.v1.alpha2.GetStudyListRequest"/>
-
-### GetStudyListRequest
-
+| trial_name | [string](#string) |  |  |
 
 
 
@@ -396,6 +407,9 @@ Discrete and Categorical type use List.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | experiment_name | [string](#string) |  |  |
+| start_time | [string](#string) |  | The start of the time range. RFC3339 format |
+| end_time | [string](#string) |  | The end of the time range. RFC3339 format |
+| filter | [string](#string) |  |  |
 
 
 
@@ -425,7 +439,7 @@ Discrete and Categorical type use List.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| trial_id | [string](#string) |  |  |
+| trial_name | [string](#string) |  |  |
 
 
 
@@ -441,7 +455,7 @@ GraphConfig contains a config of DAG
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | num_layers | [int32](#int32) |  | Number of layers |
-| input_size | [int32](#int32) | repeated | Dimenstions of input size |
+| input_size | [int32](#int32) | repeated | Dimensions of input size |
 | output_size | [int32](#int32) | repeated | Dimensions of output size |
 
 
@@ -473,24 +487,8 @@ GraphConfig contains a config of DAG
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| name | [string](#string) |  |  |
-| valuelog | [MetricLog.ValueLog](#api.v1.alpha2.MetricLog.ValueLog) | repeated |  |
-
-
-
-
-
-
-<a name="api.v1.alpha2.MetricLog.ValueLog"/>
-
-### MetricLog.ValueLog
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| reported_time | [string](#string) |  |  |
-| value | [string](#string) |  |  |
+| time_stamp | [string](#string) |  | RFC3339 format |
+| metric | [Metric](#api.v1.alpha2.Metric) |  |  |
 
 
 
@@ -540,7 +538,7 @@ NasConfig contains a config of NAS job
 | type | [ObjectiveType](#api.v1.alpha2.ObjectiveType) |  |  |
 | goal | [float](#float) |  |  |
 | objective_metric_name | [string](#string) |  |  |
-| additional_metrics_name | [string](#string) | repeated | This can be empty if we only care about the objective metric. |
+| additional_metrics_names | [string](#string) | repeated | This can be empty if we only care about the objective metric. |
 
 
 
@@ -585,7 +583,7 @@ Config for operations in DAG
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| operationType | [string](#string) |  | Type of operation in DAG |
+| operation_type | [string](#string) |  | Type of operation in DAG |
 | parameter_assignments | [Operation.ParameterAssignments](#api.v1.alpha2.Operation.ParameterAssignments) |  | List of ParameterAssignments |
 
 
@@ -673,11 +671,6 @@ Katib will create each Hyper parameter from this config.
 
 
 
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| trial_id | [string](#string) |  |  |
-
-
 
 
 
@@ -715,7 +708,7 @@ Katib will create each Hyper parameter from this config.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| trial_id | [string](#string) |  |  |
+| trial_name | [string](#string) |  |  |
 | observation_log | [ObservationLog](#api.v1.alpha2.ObservationLog) |  |  |
 
 
@@ -731,7 +724,7 @@ Katib will create each Hyper parameter from this config.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| id | [string](#string) |  |  |
+| name | [string](#string) |  |  |
 | spec | [TrialSpec](#api.v1.alpha2.TrialSpec) |  |  |
 | status | [TrialStatus](#api.v1.alpha2.TrialStatus) |  |  |
 
@@ -765,11 +758,36 @@ Katib will create each Hyper parameter from this config.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| start_time | [string](#string) |  |  |
-| completion_time | [string](#string) |  |  |
-| last_reconcile_time | [string](#string) |  |  |
+| start_time | [string](#string) |  | RFC3339 format |
+| completion_time | [string](#string) |  | RFC3339 format |
 | condition | [TrialStatus.TrialConditionType](#api.v1.alpha2.TrialStatus.TrialConditionType) |  |  |
 | observation | [Observation](#api.v1.alpha2.Observation) |  | The best observation in logs. |
+
+
+
+
+
+
+<a name="api.v1.alpha2.UpdateAlgorithmSpecReply"/>
+
+### UpdateAlgorithmSpecReply
+
+
+
+
+
+
+
+<a name="api.v1.alpha2.UpdateAlgorithmSpecRequest"/>
+
+### UpdateAlgorithmSpecRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| experiment_name | [string](#string) |  |  |
+| new_algorithm_spec | [AlgorithmSpec](#api.v1.alpha2.AlgorithmSpec) |  |  |
 
 
 
@@ -780,11 +798,6 @@ Katib will create each Hyper parameter from this config.
 
 ### UpdateExperimentStatusReply
 
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| experiment_name | [string](#string) |  |  |
 
 
 
@@ -813,11 +826,6 @@ Katib will create each Hyper parameter from this config.
 
 
 
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| trial_id | [string](#string) |  |  |
-
-
 
 
 
@@ -830,7 +838,7 @@ Katib will create each Hyper parameter from this config.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| trial_id | [string](#string) |  |  |
+| trial_name | [string](#string) |  |  |
 | new_status | [TrialStatus](#api.v1.alpha2.TrialStatus) |  |  |
 
 
@@ -952,11 +960,13 @@ https://cloud.google.com/service-infrastructure/docs/service-management/referenc
 | GetExperiment | [GetExperimentRequest](#api.v1.alpha2.GetExperimentRequest) | [GetExperimentReply](#api.v1.alpha2.GetExperimentRequest) | Get a Experiment from DB by name. |
 | GetExperimentList | [GetExperimentListRequest](#api.v1.alpha2.GetExperimentListRequest) | [GetExperimentListReply](#api.v1.alpha2.GetExperimentListRequest) | Get a summary list of Experiment from DB. The summary includes name and condition. |
 | UpdateExperimentStatus | [UpdateExperimentStatusRequest](#api.v1.alpha2.UpdateExperimentStatusRequest) | [UpdateExperimentStatusReply](#api.v1.alpha2.UpdateExperimentStatusRequest) | Update Status of a experiment. |
+| UpdateAlgorithmSpec | [UpdateAlgorithmSpecRequest](#api.v1.alpha2.UpdateAlgorithmSpecRequest) | [UpdateAlgorithmSpecReply](#api.v1.alpha2.UpdateAlgorithmSpecRequest) | Update AlgorithmParameter of a experiment. |
 | RegisterTrial | [RegisterTrialRequest](#api.v1.alpha2.RegisterTrialRequest) | [RegisterTrialReply](#api.v1.alpha2.RegisterTrialRequest) | Register a Trial to DB. ID will be filled by manager automatically. |
+| DeleteTrial | [DeleteTrialRequest](#api.v1.alpha2.DeleteTrialRequest) | [DeleteTrialReply](#api.v1.alpha2.DeleteTrialRequest) | Delete a Trial from DB by ID. |
 | GetTrialList | [GetTrialListRequest](#api.v1.alpha2.GetTrialListRequest) | [GetTrialListReply](#api.v1.alpha2.GetTrialListRequest) | Get a list of Trial from DB by name of a Experiment. |
 | GetTrial | [GetTrialRequest](#api.v1.alpha2.GetTrialRequest) | [GetTrialReply](#api.v1.alpha2.GetTrialRequest) | Get a Trial from DB by ID of Trial. |
 | UpdateTrialStatus | [UpdateTrialStatusRequest](#api.v1.alpha2.UpdateTrialStatusRequest) | [UpdateTrialStatusReply](#api.v1.alpha2.UpdateTrialStatusRequest) | Update Status of a trial. |
-| ReportObservationLog | [ReportObservationLogRequest](#api.v1.alpha2.ReportObservationLogRequest) | [ReportObservationLogReply](#api.v1.alpha2.ReportObservationLogRequest) | Report a log of Observations for a Trial. The log consists of timestamp and value of metric. |
+| ReportObservationLog | [ReportObservationLogRequest](#api.v1.alpha2.ReportObservationLogRequest) | [ReportObservationLogReply](#api.v1.alpha2.ReportObservationLogRequest) | Report a log of Observations for a Trial. The log consists of timestamp and value of metric. Katib store every log of metrics. You can see accuracy curve or other metric logs on UI. |
 | GetObservationLog | [GetObservationLogRequest](#api.v1.alpha2.GetObservationLogRequest) | [GetObservationLogReply](#api.v1.alpha2.GetObservationLogRequest) | Get all log of Observations for a Trial. |
 | GetSuggestions | [GetSuggestionsRequest](#api.v1.alpha2.GetSuggestionsRequest) | [GetSuggestionsReply](#api.v1.alpha2.GetSuggestionsRequest) | Get Suggestions from a Suggestion service. |
 | ValidateAlgorithmSettings | [ValidateAlgorithmSettingsRequest](#api.v1.alpha2.ValidateAlgorithmSettingsRequest) | [ValidateAlgorithmSettingsReply](#api.v1.alpha2.ValidateAlgorithmSettingsRequest) | Validate AlgorithmSettings in an Experiment. Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid |

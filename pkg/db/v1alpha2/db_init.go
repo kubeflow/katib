@@ -29,6 +29,7 @@ func (d *dbConn) DBInit() {
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS trials
 		(id INT AUTO_INCREMENT PRIMARY KEY,
+		trial_name VARCHAR(255),
 		experiment_name TEXT,
 		parameter_assignments TEXT,
 		run_spec TEXT,
@@ -43,10 +44,10 @@ func (d *dbConn) DBInit() {
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS observation_logs
-		(trial_id INT NOT NULL,
+		(trial_name INT NOT NULL,
 		id INT AUTO_INCREMENT PRIMARY KEY,
 		time DATETIME(6),
-		name VARCHAR(255),
+		metric_name VARCHAR(255),
 		value TEXT,
 		FOREIGN KEY (trial_id) REFERENCES trials(id) ON DELETE CASCADE)`)
 	if err != nil {

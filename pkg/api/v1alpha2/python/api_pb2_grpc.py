@@ -43,10 +43,20 @@ class ManagerStub(object):
         request_serializer=api__pb2.UpdateExperimentStatusRequest.SerializeToString,
         response_deserializer=api__pb2.UpdateExperimentStatusReply.FromString,
         )
+    self.UpdateAlgorithmSpec = channel.unary_unary(
+        '/api.v1.alpha2.Manager/UpdateAlgorithmSpec',
+        request_serializer=api__pb2.UpdateAlgorithmSpecRequest.SerializeToString,
+        response_deserializer=api__pb2.UpdateAlgorithmSpecReply.FromString,
+        )
     self.RegisterTrial = channel.unary_unary(
         '/api.v1.alpha2.Manager/RegisterTrial',
         request_serializer=api__pb2.RegisterTrialRequest.SerializeToString,
         response_deserializer=api__pb2.RegisterTrialReply.FromString,
+        )
+    self.DeleteTrial = channel.unary_unary(
+        '/api.v1.alpha2.Manager/DeleteTrial',
+        request_serializer=api__pb2.DeleteTrialRequest.SerializeToString,
+        response_deserializer=api__pb2.DeleteTrialReply.FromString,
         )
     self.GetTrialList = channel.unary_unary(
         '/api.v1.alpha2.Manager/GetTrialList',
@@ -134,10 +144,26 @@ class ManagerServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def UpdateAlgorithmSpec(self, request, context):
+    """* 
+    Update AlgorithmParameter of a experiment.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def RegisterTrial(self, request, context):
     """*
     Register a Trial to DB.
     ID will be filled by manager automatically.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def DeleteTrial(self, request, context):
+    """* 
+    Delete a Trial from DB by ID.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -171,6 +197,8 @@ class ManagerServicer(object):
     """* 
     Report a log of Observations for a Trial.
     The log consists of timestamp and value of metric.
+    Katib store every log of metrics.
+    You can see accuracy curve or other metric logs on UI.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -229,10 +257,20 @@ def add_ManagerServicer_to_server(servicer, server):
           request_deserializer=api__pb2.UpdateExperimentStatusRequest.FromString,
           response_serializer=api__pb2.UpdateExperimentStatusReply.SerializeToString,
       ),
+      'UpdateAlgorithmSpec': grpc.unary_unary_rpc_method_handler(
+          servicer.UpdateAlgorithmSpec,
+          request_deserializer=api__pb2.UpdateAlgorithmSpecRequest.FromString,
+          response_serializer=api__pb2.UpdateAlgorithmSpecReply.SerializeToString,
+      ),
       'RegisterTrial': grpc.unary_unary_rpc_method_handler(
           servicer.RegisterTrial,
           request_deserializer=api__pb2.RegisterTrialRequest.FromString,
           response_serializer=api__pb2.RegisterTrialReply.SerializeToString,
+      ),
+      'DeleteTrial': grpc.unary_unary_rpc_method_handler(
+          servicer.DeleteTrial,
+          request_deserializer=api__pb2.DeleteTrialRequest.FromString,
+          response_serializer=api__pb2.DeleteTrialReply.SerializeToString,
       ),
       'GetTrialList': grpc.unary_unary_rpc_method_handler(
           servicer.GetTrialList,
