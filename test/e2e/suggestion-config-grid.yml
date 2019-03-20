@@ -1,5 +1,5 @@
-suggestionAlgorithm: "grid"
-suggestionParameters:
+suggestionalgorithm: "grid"
+suggestionparameters:
   - name: "DefaultGrid"
     value: "1"
   - name: "learning-rate"

@@ -5,7 +5,6 @@ import (
 	"flag"
 	"io/ioutil"
 	"log"
-	"strconv"
 
 	"github.com/kubeflow/katib/pkg/api"
 	"google.golang.org/grpc"
@@ -185,32 +184,17 @@ func DeleteStudy(c api.ManagerClient, studyID string) {
 
 func setSuggestionParam(c api.ManagerClient, studyID string) string {
 	ctx := context.Background()
-	switch *suggestAlgo {
-	case "random":
-		return ""
-	case "grid":
-		suggestionConfig.StudyId = studyID
-		for idx, l := range suggestionConfig.SuggestionParameters {
-			log.Printf("%d. %s: %s", idx, l.Name, l.Value)
-		}
-		log.Printf("Suggestion algorithm is %s", suggestionConfig.SuggestionAlgorithm)
-		setSuggesitonParameterReply, err := c.SetSuggestionParameters(ctx, &suggestionConfig)
-		if err != nil {
-			log.Fatalf("SetConfig Error %v", err)
-		}
-		log.Printf("Grid suggestion prameter ID %s", setSuggesitonParameterReply.ParamId)
-		return setSuggesitonParameterReply.ParamId
-	case "hyperband":
-		suggestionConfig.StudyId = studyID
-		setSuggesitonParameterReply, err := c.SetSuggestionParameters(ctx, &suggestionConfig)
-		if err != nil {
-			log.Fatalf("SetConfig Error %v", err)
-		}
-		log.Printf("HyperBand suggestion prameter ID %s", setSuggesitonParameterReply.ParamId)
-		return setSuggesitonParameterReply.ParamId
+	suggestionConfig.StudyId = studyID
+	for idx, l := range suggestionConfig.SuggestionParameters {
+		log.Printf("%d. %s: %s", idx, l.Name, l.Value)
 	}
-	return ""
-
+	log.Printf("Suggestion algorithm is %s", suggestionConfig.SuggestionAlgorithm)
+	setSuggesitonParameterReply, err := c.SetSuggestionParameters(ctx, &suggestionConfig)
+	if err != nil {
+		log.Fatalf("SetConfig Error %v", err)
+	}
+	log.Printf("Suggestion parameter ID %s", setSuggesitonParameterReply.ParamId)
+	return setSuggesitonParameterReply.ParamId
 }
 
 func getSuggestion(c api.ManagerClient, studyID string, paramID string) *api.GetSuggestionsReply {
@@ -223,6 +207,7 @@ func getSuggestion(c api.ManagerClient, studyID string, paramID string) *api.Get
 			StudyId:             studyID,
 			SuggestionAlgorithm: "random",
 			RequestNumber:       int32(*requestnum),
+			ParamId:             paramID,
 		}
 
 	case "grid":
@@ -260,31 +245,8 @@ func checkSuggestions(getSuggestReply *api.GetSuggestionsReply, iter int) bool {
 			log.Fatalf("Number of Random suggestion incorrect. Expected %d Got %d", *requestnum, len(getSuggestReply.Trials))
 		}
 	case "grid":
-		if len(getSuggestReply.Trials) != 4 {
-			log.Fatalf("Number of Grid suggestion incorrect. Expected %d Got %d", 4, len(getSuggestReply.Trials))
-		}
-		min, max := 1.0, 1.0
-		for _, m := range studyConfig.ParameterConfigs.Configs {
-			if m.Name == "learning-rate" {
-				min, _ = strconv.ParseFloat(m.Feasible.Min, 8)
-				max, _ = strconv.ParseFloat(m.Feasible.Max, 8)
-			}
-		}
-		learningRate := 1.0
-		for _, l := range suggestionConfig.SuggestionParameters {
-			if l.Name == "learning-rate" {
-				learningRate, _ = strconv.ParseFloat(l.Value, 8)
-			}
-		}
-		for i, trial := range getSuggestReply.Trials {
-			for _, param := range trial.ParameterSet {
-				if param.Name == "learning-rate" && learningRate != 0 {
-					expValue := min + (max-min)/(learningRate-1)*float64(i)
-					if param.Value != strconv.FormatFloat(expValue, 'f', 4, 64) {
-						log.Printf("Grid point incorrect. Expected %v Got %v", strconv.FormatFloat(expValue, 'f', 4, 64), param.Value)
-					}
-				}
-			}
+		if len(getSuggestReply.Trials) != 12 {
+			log.Fatalf("Number of Grid suggestion incorrect. Expected %d Got %d", 12, len(getSuggestReply.Trials))
 		}
 	case "hyperband":
 		if iter == 1 {
