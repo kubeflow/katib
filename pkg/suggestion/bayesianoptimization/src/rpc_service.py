@@ -21,14 +21,8 @@ class SuggestionService(api_pb2_grpc.SuggestionServicer):
         self.requires_previous = search_algorithm in REQUIRES_PAST_OBSERVATIONS
 
     def GetSuggestions(self, request, context):
-        self.logger.debug(dir(request))
-        self.logger.debug("pre parse suggestions")
         suggestion_config = self._parse_suggestion_parameters(request.param_id)
-        self.logger.debug(type(suggestion_config))
-        self.logger.debug(suggestion_config)
         suggestion_config = {param.name: param.value for param in suggestion_config}
-        self.logger.debug(suggestion_config)
-        self.logger.debug("pre get stufy config")
         study_conf = self._get_study_config(request.study_id)
         parameter_config = parsing_utils.parse_parameter_configs(study_conf.parameter_configs.configs)
 
@@ -36,7 +30,6 @@ class SuggestionService(api_pb2_grpc.SuggestionServicer):
         self.logger.debug("upperbound: %r", parameter_config.upper_bounds, extra={"StudyID": request.study_id})
         alg = ALGORITHM_REGISTER[self.search_algorithm](parameter_config, suggestion_config, logger=self.logger)
         if self.requires_previous:
-            self.logger.debug("pre get eval")
             past_suggestions, past_metrics = self._get_eval_history(
                 request.study_id, study_conf.objective_value_name)
             X_train = parsing_utils.parse_previous_observations(
@@ -107,5 +100,4 @@ class SuggestionService(api_pb2_grpc.SuggestionServicer):
         with api_pb2.beta_create_Manager_stub(channel) as client:
             gsprep = client.GetSuggestionParameters(api_pb2.GetSuggestionParametersRequest(param_id=paramID), 10)
             params = gsprep.suggestion_parameters
-            self.logger.debug(dir(gsprep))
         return params
