@@ -329,7 +329,7 @@ message Observation {
 }
 
 message ObservationLog {
-    repeated MetricLog metriclogs = 1;
+    repeated MetricLog metric_logs = 1;
 }
 
 message TrialSpec {
