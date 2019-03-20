@@ -10,9 +10,11 @@ import WorkerSpecParam from './Params/Worker';
 import ParameterConfig from './Params/ParameterConfig';
 import SuggestionSpec from './Params/SuggestionSpec';
 
+import { submitHPJob } from '../../../actions/hpCreateActions';
+
 import { connect } from 'react-redux';
 
-// const module = "hpCreate";
+const module = "hpCreate";
 
 const styles = theme => ({
     root: {
@@ -50,6 +52,35 @@ const styles = theme => ({
     }
 })
 
+
+const deCapitalizeFirstLetterAndAppend = (source, destination) => {
+    source.map((parameter, i) => {
+        let value = Number(parameter.value)
+        destination[parameter.name.toLowerCase()] = (isNaN(value) ? parameter.value : value)
+    })
+}
+
+const addSuggestionParameters = (spec, destination) => {
+    spec.map((parameter, i) => {
+        destination.push(parameter)
+    })
+}
+
+const addParameterConfig = (source, destination) => {
+    source.map((param, i) => {
+        let  tempParam = {}
+        tempParam.name = param.name
+        tempParam.parametertype = param.parameterType
+        tempParam.feasible = {}
+        if (param.feasible == "list") {
+            tempParam.feasible.list = param.list
+        } else {
+            tempParam.feasible.min = param.min
+            tempParam.feasible.max = param.max
+        }
+        destination.push(tempParam)
+    })
+}
 const SectionInTypography = (name, classes) => {
     return (
         <div className={classes.section}>
@@ -68,7 +99,30 @@ const SectionInTypography = (name, classes) => {
 // probably get render into a function
 
 const HPParameters = (props) => {
+    const submitJob = () => {
+        let data = {}
+        data.metadata = {}
+        deCapitalizeFirstLetterAndAppend(props.commonParametersMetadata, data.metadata)
+        data.spec = {}
+        deCapitalizeFirstLetterAndAppend(props.commonParametersSpec, data.spec)
+
+        data.spec.parameterconfigs = []
+        addParameterConfig(props.parameterConfig, data.spec.parameterconfigs)
+        data.spec.workerSpec = {
+            goTemplate: {
+                templatePath: props.worker,
+            }
+        }
+        data.spec.suggestionSpec = {}
+        data.spec.suggestionSpec.suggestionAlgorithm = props.suggestionAlgorithm;
+        data.spec.suggestionSpec.suggestionParameters = []
+        addSuggestionParameters(props.suggestionParameters, data.spec.suggestionSpec.suggestionParameters)
+        console.log(data)
+        props.submitHPJob(data)
+    }
+
     const { classes } = props;
+
     return (
             <div className={classes.root}>
                 {/* Common Metadata */}
@@ -85,7 +139,7 @@ const HPParameters = (props) => {
                 
                 <SuggestionSpec />
                 <div className={classes.submit}>
-                    <Button variant="contained" color={"primary"} className={classes.button}>
+                    <Button variant="contained" color={"primary"} className={classes.button} onClick={submitJob}>
                         Deploy
                     </Button>
                 </div>                
@@ -93,4 +147,14 @@ const HPParameters = (props) => {
     )
 }
 
-export default connect(null, null)(withStyles(styles)(HPParameters));
+// TODO: think of a better way of passing those
+const mapStateToProps = (state) => ({
+    commonParametersMetadata: state[module].commonParametersMetadata,
+    commonParametersSpec: state[module].commonParametersSpec,
+    parameterConfig: state[module].parameterConfig,
+    worker: state[module].worker,
+    suggestionAlgorithm: state[module].suggestionAlgorithm,
+    suggestionParameters: state[module].suggestionParameters,
+})
+
+export default connect(mapStateToProps, { submitHPJob })(withStyles(styles)(HPParameters));

@@ -1,5 +1,7 @@
-1. Много дупликации кода
-2. Привязать экшены и редакс
-3. Описать саги
-4. Смержить код на бэкенде
-5. Обернуть все в Paper?
+FIXES:
+1. dobavlenie parameter v config lomaet indexi
+2. dopilit loaderi
+3. request number v suggestion spec dobavit
+4. dobavit parameters v nas config
+5. validaciya?
+6. snackbox

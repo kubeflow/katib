@@ -29,11 +29,11 @@ class StepInfo extends React.Component {
         const { step, classes } = this.props;
         const id = `graph${this.props.id}`
         return (
-            <div>
+            <div className={classes.root}>
                 <Typography variant={"h6"}>
                     Architecture
                 </Typography>
-                <div id={id} style={{textAlign: "center"}} />
+                <div id={id} style={{textAlign: "center !important", margin: '0 auto'}} />
                 <br />
                 {step.metricsname.map((metrics, index) => {
                     return (

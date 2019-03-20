@@ -12,6 +12,7 @@ func main() {
 	http.HandleFunc("/katib/fetch_hp_jobs/", kuh.FetchHPJobs)
 	http.HandleFunc("/katib/fetch_nas_jobs/", kuh.FetchNASJobs)
 	http.HandleFunc("/katib/submit_yaml/", kuh.SubmitYamlJob)
+	http.HandleFunc("/katib/submit_hp_job/", kuh.SubmitHPJob)
 
 	http.HandleFunc("/katib/fetch_hp_job_info/", kuh.FetchJobInfo)
 	http.HandleFunc("/katib/fetch_nas_job_info/", kuh.FetchNASJobInfo)

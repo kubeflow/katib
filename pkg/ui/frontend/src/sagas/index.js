@@ -2,7 +2,9 @@ import { take, put, call, fork, select, all, takeEvery } from 'redux-saga/effect
 import axios from 'axios';
 import * as templateActions from '../actions/templateActions';
 import * as hpMonitorActions from '../actions/hpMonitorActions';
+import * as hpCreateActions from '../actions/hpCreateActions';
 import * as nasMonitorActions from '../actions/nasMonitorActions';
+import * as nasCreateActions from '../actions/nasCreateActions';
 import * as generalActions from '../actions/generalActions';
 
 
@@ -402,6 +404,52 @@ const goSubmitYaml = function *(yaml) {
     }
 }
 
+export const submitHPJob = function *() {
+    while (true) {
+        const action = yield take(hpCreateActions.SUBMIT_HP_JOB_REQUEST);
+        try {
+            console.log("ACTIONS_DETE")
+            console.log(action.data)
+            const result = yield call(
+                goSubmitHPJob,
+                action.data
+            )
+            if (result.status === 200) {
+                yield put({
+                    type: hpCreateActions.SUBMIT_HP_JOB_SUCCESS,
+                })
+            } else {
+                yield put({
+                    type: hpCreateActions.SUBMIT_HP_JOB_FAILURE,
+                }) 
+            }
+        } catch (err) {
+            yield put({
+                type: hpCreateActions.SUBMIT_HP_JOB_FAILURE,
+            })
+        }
+    }
+}
+
+const goSubmitHPJob = function *(postData) {
+    try {
+        const data = {
+            postData
+        }
+        const result = yield call(
+            axios.post,
+            'http://127.0.0.1:9303/katib/submit_hp_job/',
+            data,
+        )
+        return result
+    } catch (err) {
+        yield put({
+            type: hpCreateActions.SUBMIT_HP_JOB_FAILURE,
+        })
+    }
+}
+
+
 export const fetchHPJobInfo = function *() {
     while (true) {
         const action = yield take(hpMonitorActions.FETCH_JOB_INFO_REQUEST);
@@ -543,6 +591,7 @@ export default function* rootSaga() {
         fork(editTemplate),
         fork(deleteTemplate),
         fork(submitYaml),
+        fork(submitHPJob),
         fork(fetchHPJobInfo),
         fork(fetchWorkerInfo),
         fork(fetchNASJobInfo)

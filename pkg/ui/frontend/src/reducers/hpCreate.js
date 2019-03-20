@@ -1,6 +1,7 @@
 import * as actions from '../actions/hpCreateActions';
 
 const initialState = {
+    loading: false,
     commonParametersMetadata: [
         {
             name: "Namespace",
@@ -76,7 +77,7 @@ const initialState = {
     ],
     paramTypes: ["int", "double", "categorical"],
     // select!
-    workerSpec: ["Test 1", "Test 2"], // fetch names from backend 
+    workerSpec: ["cpuWorkerTemplate.yaml", "Test 2"], // fetch names from backend 
     worker: '',
     suggestionAlgorithms: ["grid", "random", "hyperband"], // fetch these
     suggestionAlgorithm: "",
@@ -195,6 +196,21 @@ const hpCreateReducer = (state = initialState, action) => {
             return {
                 ...state,
                 suggestionParameters: suggestionParameters,
+            }
+        case actions.SUBMIT_HP_JOB_REQUEST:
+            return {
+                ...state,
+                loading: true,
+            }
+        case actions.SUBMIT_HP_JOB_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+            }
+        case actions.SUBMIT_HP_JOB_FAILURE:
+            return {
+                ...state,
+                loading: false,
             }
         default:
             return state;

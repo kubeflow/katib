@@ -26,6 +26,9 @@ const styles = theme => ({
         fontSize: theme.typography.pxToRem(15),
         fontWeight: theme.typography.fontWeightRegular,
     },
+    panel: {
+        width: '100%',
+    }
 })
 
 
@@ -54,7 +57,7 @@ class NASJobInfo extends React.Component {
                     <br />
                     {this.props.steps.map((step, i) => {
                         return (
-                            <ExpansionPanel key={i}>
+                            <ExpansionPanel key={i} className={classes.panel}>
                                 <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                                     <Typography className={classes.heading}>{step.name}</Typography>
                                 </ExpansionPanelSummary>
