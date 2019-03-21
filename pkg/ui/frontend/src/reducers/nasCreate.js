@@ -1,4 +1,5 @@
 import * as actions from '../actions/nasCreateActions';
+import { stat } from 'fs';
 
 const initialState = {
     commonParametersMetadata: [
@@ -56,6 +57,36 @@ const initialState = {
     numLayers: '1',
     inputSize: ['32', '32', '3'],
     outputSize: ['10'],
+    paramTypes: ["int", "double", "categorical"],
+    operations: [
+        {
+            operationType: "convolution",
+            parameterconfigs: [
+                {
+                    parameterType: "double",
+                    name: "Shit2",
+                    feasible: "feasible",
+                    min: "",
+                    max: "",
+                    step: "",
+                    list: [
+                        {
+                            value: "",
+                        }
+                    ],
+                },
+                {
+                    parameterType: "int",
+                    name: "Shit",
+                    feasible: "list",
+                    min: "",
+                    max: "",
+                    step: "",
+                    list: [],
+                },
+            ]
+        }
+    ],
     suggestionAlgorithms: ["rl", "enas"], // fetch these
     suggestionAlgorithm: "",
     suggestionParameters: [
@@ -150,6 +181,79 @@ const nasCreateReducer = (state = initialState, action) => {
             return {
                 ...state,
                 [action.sizeType]: size,
+            }
+        case actions.ADD_OPERATION:
+            let operations = state.operations.slice();
+            operations.push({
+                operationType: "",
+                parameterconfigs: [],
+            });
+            return {
+                ...state,
+                operations,
+            }
+        case actions.DELETE_OPERATION:
+            operations = state.operations.slice();
+            operations.splice(action.index, 1);
+            return {
+                ...state,
+                operations,
+            }
+        case actions.CHANGE_OPERATION:
+            operations = state.operations.slice();
+            operations[action.index].operationType = action.value;
+            return {
+                ...state,
+                operations,
+            }
+        case actions.ADD_PARAMETER:
+            operations = state.operations.slice();
+            operations[action.opIndex].parameterconfigs.push(
+               {name: "", parameterType: ""}
+            )
+            return {
+                ...state,
+                operations,
+            }
+        case actions.CHANGE_PARAMETER:
+            operations = state.operations.slice();
+            operations[action.opIndex].parameterconfigs[action.paramIndex][action.field] = action.value;
+            return {
+                ...state,
+                operations,
+            }
+        case actions.DELETE_PARAMETER:
+            operations = state.operations.slice();
+            operations[action.opIndex].parameterconfigs.splice(action.paramIndex, 1);
+            return {
+                ...state,
+                operations,
+            }
+        case actions.ADD_LIST_PARAMETER:
+            operations = state.operations.slice();
+            operations[action.opIndex].parameterconfigs[action.paramIndex].list.push(
+                {
+                    name: "",
+                    value: "",
+                }
+            )
+            return {
+                ...state,
+                operations,
+            }
+        case actions.DELETE_LIST_PARAMETER:
+            operations = state.operations.slice();
+            operations[action.opIndex].parameterconfigs[action.paramIndex].list.splice(action.listIndex, 1);
+            return {
+                ...state,
+                operations,
+            }
+        case actions.EDIT_LIST_PARAMETER:
+            operations = state.operations.slice();
+            operations[action.opIndex].parameterconfigs[action.paramIndex].list[action.listIndex] = action.value;
+            return {
+                ...state,
+                operations,
             }
         default:
             return state;

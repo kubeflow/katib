@@ -73,3 +73,65 @@ export const deleteSuggestionParameter = (index) => ({
     type: DELETE_SUGGESTION_PARAMETER,
     index
 })
+
+export const ADD_OPERATION = "ADD_OPERATION";
+
+export const addOperation = () => ({
+    type: ADD_OPERATION,
+})
+
+export const DELETE_OPERATION = "DELETE_OPERATION";
+
+export const deleteOperation = (index) => ({
+    type: DELETE_OPERATION,
+    index,
+})
+
+export const CHANGE_OPERATION = "CHANGE_OPERATION";
+
+export const changeOperation = (index, value) => ({
+    type: CHANGE_OPERATION,
+    index, value,
+})
+
+export const ADD_PARAMETER = "ADD_PARAMETER";
+
+export const addParameter = (opIndex) => ({
+    type: ADD_PARAMETER,
+    opIndex,
+})
+
+export const CHANGE_PARAMETER = "CHANGE_PARAMETER";
+
+export const changeParameter = (opIndex, paramIndex, field, value) => ({
+    type: CHANGE_PARAMETER,
+    opIndex, paramIndex, field, value,
+})
+
+export const DELETE_PARAMETER = "DELETE_PARAMETER";
+
+export const deleteParameter = (opIndex, paramIndex) => ({
+    type: DELETE_PARAMETER,
+    opIndex, paramIndex,
+})
+
+export const ADD_LIST_PARAMETER = "ADD_LIST_PARAMETER";
+
+export const addListParameter = (opIndex, paramIndex) => ({
+    type: ADD_LIST_PARAMETER,
+    opIndex, paramIndex,
+})
+
+export const EDIT_LIST_PARAMETER = "EDIT_LIST_PARAMETER";
+
+export const editListParameter = (opIndex, paramIndex, listIndex, value) => ({
+    type: EDIT_LIST_PARAMETER,
+    opIndex, paramIndex, listIndex, value,
+})
+
+export const DELETE_LIST_PARAMETER = "DELETE_LIST_PARAMETER";
+
+export const deleteListParameter = (opIndex, paramIndex, listIndex) => ({
+    type: DELETE_LIST_PARAMETER,
+    opIndex, paramIndex, listIndex,
+})

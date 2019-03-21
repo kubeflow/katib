@@ -5,3 +5,7 @@ FIXES:
 4. dobavit parameters v nas config
 5. validaciya?
 6. snackbox
+7. try to fetch all in reducers
+8. fix backend где надоиз строки сделать список с metricsname\либо фикс на фронте
+9. заполнять редьюсеры нормально новым полями (т.к. при добавлении нельзя редачить нормально) - в криэйт вкладке
+10. в параметрах label налезает на текст

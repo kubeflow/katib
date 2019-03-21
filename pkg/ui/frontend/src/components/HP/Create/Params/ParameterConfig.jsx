@@ -138,7 +138,7 @@ const ParameterConfig = (props) => {
                                 {param.feasible === "list" && 
                                     (param.list.map((element, elIndex) => {
                                         return (
-                                            <div>
+                                            <div key={elIndex}>
                                                 <TextField
                                                     label={"Value"}
                                                     className={classes.textField}
