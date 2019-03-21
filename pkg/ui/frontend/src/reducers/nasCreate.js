@@ -52,8 +52,8 @@ const initialState = {
     ],
     //  specify NASCONFIG?
     // select!
-    workerSpec: ["Test 1", "Test 2"], // fetch names from backend 
-    worker: '',
+    workerSpec: ["cpuWorkerTemplate.yaml", "Test 2"], // fetch names from backend 
+    worker: 'cpuWorkerTemplate.yaml',
     numLayers: '1',
     inputSize: ['32', '32', '3'],
     outputSize: ['10'],
@@ -87,17 +87,9 @@ const initialState = {
             ]
         }
     ],
-    suggestionAlgorithms: ["rl", "enas"], // fetch these
-    suggestionAlgorithm: "",
+    suggestionAlgorithms: ["nasrl", "enas"], // fetch these
+    suggestionAlgorithm: "nasrl",
     suggestionParameters: [
-        {
-            name: "DefaultGrid",
-            value: "1",
-        },
-        {
-            name: "--lr",
-            value: "4",
-        },
     ],
     currentYaml: '',
 };

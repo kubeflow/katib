@@ -337,6 +337,47 @@ func (k *KatibUIHandler) SubmitHPJob(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (k *KatibUIHandler) SubmitNASJob(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
+	var data map[string]interface{}
+
+	json.NewDecoder(r.Body).Decode(&data)
+	if data, ok := data["postData"]; ok {
+		jsonbody, err := json.Marshal(data)
+		if err != nil {
+			// do error check
+			fmt.Println(err)
+			return
+		}
+		job := katibv1alpha1.StudyJob{}
+		if err := json.Unmarshal(jsonbody, &job); err != nil {
+			// do error check
+			fmt.Println(err)
+		}
+		// mapstructure.Decode(data, &job)
+		// // think of a better way
+		dataMap := data.(map[string]interface{})
+		job.ObjectMeta = metav1.ObjectMeta{
+			Name:      dataMap["metadata"].(map[string]interface{})["name"].(string),
+			Namespace: dataMap["metadata"].(map[string]interface{})["namespace"].(string),
+		}
+		job.TypeMeta = metav1.TypeMeta{
+			APIVersion: "kubeflow.org/v1alpha1",
+			Kind:       "StudyJob",
+		}
+
+		job.Spec.SuggestionSpec.RequestNumber = 3
+		// // parse metricsNames separably
+		// fmt.Println(dataMap["spec"].(map[string]interface{}))
+		_, err = k.studyjobClient.CreateStudyJob(&job, namespace)
+		fmt.Println(err)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
 func (k *KatibUIHandler) FetchJobInfo(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
 	studyID := r.URL.Query()["id"][0]

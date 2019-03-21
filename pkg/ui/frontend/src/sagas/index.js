@@ -408,8 +408,6 @@ export const submitHPJob = function *() {
     while (true) {
         const action = yield take(hpCreateActions.SUBMIT_HP_JOB_REQUEST);
         try {
-            console.log("ACTIONS_DETE")
-            console.log(action.data)
             const result = yield call(
                 goSubmitHPJob,
                 action.data
@@ -449,6 +447,48 @@ const goSubmitHPJob = function *(postData) {
     }
 }
 
+export const submitNASJob = function *() {
+    while (true) {
+        const action = yield take(nasCreateActions.SUBMIT_NAS_JOB_REQUEST);
+        try {
+            const result = yield call(
+                goSubmitNASJob,
+                action.data
+            )
+            if (result.status === 200) {
+                yield put({
+                    type: nasCreateActions.SUBMIT_NAS_JOB_SUCCESS,
+                })
+            } else {
+                yield put({
+                    type: nasCreateActions.SUBMIT_NAS_JOB_FAILURE,
+                }) 
+            }
+        } catch (err) {
+            yield put({
+                type: nasCreateActions.SUBMIT_NAS_JOB_FAILURE,
+            })
+        }
+    }
+}
+
+const goSubmitNASJob = function *(postData) {
+    try {
+        const data = {
+            postData
+        }
+        const result = yield call(
+            axios.post,
+            'http://127.0.0.1:9303/katib/submit_nas_job/',
+            data,
+        )
+        return result
+    } catch (err) {
+        yield put({
+            type: nasCreateActions.SUBMIT_NAS_JOB_FAILURE,
+        })
+    }
+}
 
 export const fetchHPJobInfo = function *() {
     while (true) {
@@ -490,6 +530,8 @@ const goFetchHPJobInfo = function *(id) {
         })
     }
 }
+
+
 
 export const fetchNASJobInfo = function *() {
     while (true) {
@@ -592,6 +634,7 @@ export default function* rootSaga() {
         fork(deleteTemplate),
         fork(submitYaml),
         fork(submitHPJob),
+        fork(submitNASJob),
         fork(fetchHPJobInfo),
         fork(fetchWorkerInfo),
         fork(fetchNASJobInfo)

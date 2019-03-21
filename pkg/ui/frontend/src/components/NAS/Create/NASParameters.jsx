@@ -9,11 +9,13 @@ import CommonParametersSpec from './Params/CommonSpec';
 import SuggestionSpec from './Params/SuggestionSpec';
 import WorkerSpecParam from './Params/Worker';
 
+import { submitNASJob } from '../../../actions/nasCreateActions';
+
 
 import { connect } from 'react-redux';
 import NASConfig from './Params/NASConfig';
 
-// const module = "nasCreate";
+const module = "nasCreate";
 
 const styles = theme => ({
     root: {
@@ -67,9 +69,73 @@ const SectionInTypography = (name, classes) => {
 }
 
 // probably get render into a function
+const deCapitalizeFirstLetterAndAppend = (source, destination) => {
+    source.map((parameter, i) => {
+        let value = Number(parameter.value)
+        destination[parameter.name.toLowerCase()] = (isNaN(value) ? parameter.value : value)
+    })
+}
+
+const addSuggestionParameters = (spec, destination) => {
+    spec.map((parameter, i) => {
+        destination.push(parameter)
+    })
+}
+
+const addOperations = (source, destination) => {
+    source.map((operation, index) => {
+        let parameters = []
+        operation.parameterconfigs.map((param, i) => {
+            let  tempParam = {}
+            tempParam.name = param.name
+            tempParam.parametertype = param.parameterType
+            tempParam.feasible = {}
+            if (param.feasible == "list") {
+                tempParam.feasible.list = param.list
+            } else {
+                tempParam.feasible.min = param.min
+                tempParam.feasible.max = param.max
+            }
+            parameters.push(tempParam)
+        })
+        destination.push({
+            operationType: operation.operationType,
+            parameterconfigs: parameters,
+        })
+    })
+}
 
 const NASParameters = (props) => {
+    const submitNASJob = () => {
+        let data = {}
+        data.metadata = {}
+        deCapitalizeFirstLetterAndAppend(props.commonParametersMetadata, data.metadata)
+        data.spec = {}
+        deCapitalizeFirstLetterAndAppend(props.commonParametersSpec, data.spec)
+        data.spec.nasConfig = {}
+        data.spec.nasConfig.graphConfig = {
+            numLayers: Number(props.numLayers),
+            inputSize: props.inputSize.map(size => Number(size)),
+            outputSize: props.outputSize.map(size => Number(size)),
+        }
+        data.spec.nasConfig.operations = []
+        addOperations(props.operations, data.spec.nasConfig.operations)
+        data.spec.workerSpec = {
+            goTemplate: {
+                templatePath: props.worker,
+            }
+        }
+
+        data.spec.suggestionSpec = {}
+        data.spec.suggestionSpec.suggestionAlgorithm = props.suggestionAlgorithm;
+        data.spec.suggestionSpec.suggestionParameters = []
+        addSuggestionParameters(props.suggestionParameters, data.spec.suggestionSpec.suggestionParameters)
+        console.log(data)
+        props.submitNASJob(data)
+    }
+
     const { classes } = props;
+    
     return (
             <div className={classes.root}>
                 {/* Common Metadata */}
@@ -84,7 +150,7 @@ const NASParameters = (props) => {
                 {SectionInTypography("Suggestion Parameters", classes)} 
                 <SuggestionSpec />
                 <div className={classes.submit}>
-                    <Button variant="contained" color={"primary"} className={classes.button}>
+                    <Button variant="contained" color={"primary"} className={classes.button} onClick={submitNASJob}>
                         Deploy
                     </Button>
                 </div>                
@@ -92,4 +158,16 @@ const NASParameters = (props) => {
     )
 }
 
-export default connect(null, null)(withStyles(styles)(NASParameters));
+const mapStateToProps = (state) => ({
+    commonParametersMetadata: state[module].commonParametersMetadata,
+    commonParametersSpec: state[module].commonParametersSpec,
+    numLayers: state[module].numLayers,
+    inputSize: state[module].inputSize,
+    outputSize: state[module].outputSize,
+    operations: state[module].operations,
+    worker: state[module].worker,
+    suggestionAlgorithm: state[module].suggestionAlgorithm,
+    suggestionParameters: state[module].suggestionParameters,
+})
+
+export default connect(mapStateToProps, { submitNASJob })(withStyles(styles)(NASParameters));

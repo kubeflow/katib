@@ -135,3 +135,12 @@ export const deleteListParameter = (opIndex, paramIndex, listIndex) => ({
     type: DELETE_LIST_PARAMETER,
     opIndex, paramIndex, listIndex,
 })
+
+export const SUBMIT_NAS_JOB_REQUEST = "SUBMIT_NAS_JOB_REQUEST";
+export const SUBMIT_NAS_JOB_SUCCESS = "SUBMIT_NAS_JOB_SUCCESS";
+export const SUBMIT_NAS_JOB_FAILURE = "SUBMIT_NAS_JOB_FAILURE";
+
+export const submitNASJob = (data) => ({
+    type: SUBMIT_NAS_JOB_REQUEST,
+    data,
+})
