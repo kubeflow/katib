@@ -5,7 +5,7 @@ const initialState = {
     filterType: {
         "Running": true,
         "Failed": true,
-        "Completed  ": true,
+        "Completed": true,
     },
     jobsList: [
     ],
