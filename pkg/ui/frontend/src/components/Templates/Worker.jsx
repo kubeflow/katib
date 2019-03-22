@@ -22,6 +22,7 @@ class Worker extends React.Component {
     componentDidMount() {
         this.props.fetchWorkerTemplates();
     }
+    
     openAddDialog = () => {
         this.props.openDialog("add");
     }
@@ -29,7 +30,7 @@ class Worker extends React.Component {
     render () {
         const { classes } = this.props;
 
-        const type = this.props.match.path.replace("\/", "");
+        const type = this.props.match.path.replace("\/katib\/", "");
         
         return (
             <div className={classes.root}>

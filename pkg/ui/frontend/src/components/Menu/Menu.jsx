@@ -81,7 +81,7 @@ const Menu = (props) => {
                                     <NoteAddIcon color={iconColor}/>
                                 </ListItemIcon>
                                 <ListItemText>
-                                    <Link to="/hp">
+                                    <Link to="/katib/hp">
                                         <Typography variant={variant} color={color}>
                                             Submit
                                         </Typography>
@@ -93,7 +93,7 @@ const Menu = (props) => {
                                     <WatchLaterIcon color={iconColor}/>
                                 </ListItemIcon>
                                 <ListItemText>
-                                    <Link to="hp_monitor">
+                                    <Link to="/katib/hp_monitor">
                                         <Typography variant={variant} color={color}>
                                             Monitor 
                                         </Typography>
@@ -122,7 +122,7 @@ const Menu = (props) => {
                                     <NoteAddIcon color={iconColor}/>
                                 </ListItemIcon>
                                 <ListItemText>
-                                    <Link to="/nas">
+                                    <Link to="/katib/nas">
                                         <Typography variant={variant} color={color}>
                                             Submit
                                         </Typography>
@@ -134,7 +134,7 @@ const Menu = (props) => {
                                     <WatchLaterIcon color={iconColor}/>
                                 </ListItemIcon>
                                 <ListItemText>
-                                    <Link to="/nas_monitor">
+                                    <Link to="/katib/nas_monitor">
                                         <Typography variant={variant} color={color}>
                                             Monitor 
                                         </Typography>
@@ -150,7 +150,7 @@ const Menu = (props) => {
                             <SetttingsIcon color={iconColor} />
                         </ListItemIcon>
                         <ListItemText>
-                            <Link to="/worker">
+                            <Link to="/katib/worker">
                                 <Typography variant={variant} color={color}>
                                     Worker Manifests
                                 </Typography>
@@ -164,7 +164,7 @@ const Menu = (props) => {
                             <SetttingsIcon color={iconColor} />
                         </ListItemIcon>
                         <ListItemText>
-                            <Link to="/collector">
+                            <Link to="/katib/collector">
                                 <Typography variant={variant} color={color}>
                                     Metrics Collector Manifests
                                 </Typography>
@@ -178,7 +178,7 @@ const Menu = (props) => {
                             <InfoIcon color={iconColor} />
                         </ListItemIcon>
                         <ListItemText>
-                            <Link to="/about">
+                            <Link to="/katib/about">
                                 <Typography variant={variant} color={color}>
                                     About
                                 </Typography>

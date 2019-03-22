@@ -42,7 +42,7 @@ class NASJobInfo extends React.Component {
         const { classes } = this.props;
         return (
             <div className={classes.root}>
-                <Link to="/nas_monitor">
+                <Link to="/katib/nas_monitor">
                     <Button variant={"contained"} color={"primary"}>
                         Back
                     </Button>

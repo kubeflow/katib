@@ -36,7 +36,7 @@ class HPJobInfo extends React.Component {
         const { classes } = this.props;
         return (
             <div className={classes.root}>
-                <Link to="/hp_monitor">
+                <Link to="/katib/hp_monitor">
                     <Button variant={"contained"} color={"primary"}>
                         Back
                     </Button>

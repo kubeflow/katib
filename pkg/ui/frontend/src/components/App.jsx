@@ -30,14 +30,14 @@ const App = (props) => {
         <div className={classes.root}>
             <Header />
             
-            <Route path="/hp" component={HP} />
-            <Route exact path="/hp_monitor" component={HPMonitor} />
-            <Route path="/hp_monitor/:id" component={HPJobInfo} />
-            <Route path="/nas" component={NAS} />
-            <Route exact path="/nas_monitor" component={NASMonitor} />
-            <Route path="/nas_monitor/:id" component={NASJobInfo} />
-            <Route path="/worker" component={Worker} />
-            <Route path="/collector" component={Collector} />
+            <Route path="/katib/hp" component={HP} />
+            <Route exact path="/katib/hp_monitor" component={HPMonitor} />
+            <Route path="/katib/hp_monitor/:id" component={HPJobInfo} />
+            <Route path="/katib/nas" component={NAS} />
+            <Route exact path="/katib/nas_monitor" component={NASMonitor} />
+            <Route path="/katib/nas_monitor/:id" component={NASJobInfo} />
+            <Route path="/katib/worker" component={Worker} />
+            <Route path="/katib/collector" component={Collector} />
             {/* <Route exact path="/" component={GenerateFromYaml} />
             <Route path="/defaults/" component={GenerateFromParameters} />
             <Route path="/monitor/" component={Watch} /> */}

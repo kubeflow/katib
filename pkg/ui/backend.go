@@ -3,16 +3,15 @@ package ui
 import (
 	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/kubeflow/katib/pkg"
 	"github.com/kubeflow/katib/pkg/api"
 	"github.com/kubeflow/katib/pkg/manager/studyjobclient"
 
@@ -24,12 +23,9 @@ import (
 	gographviz "github.com/awalterschulze/gographviz"
 	"github.com/ghodss/yaml"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 var (
-	namespace      = "default"
-	port           = "9303"
 	allowedHeaders = "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, X-CSRF-Token"
 )
 
@@ -134,14 +130,20 @@ func enableCors(w *http.ResponseWriter) {
 var config = parseKubernetesConfig()
 
 func parseKubernetesConfig() *restclient.Config {
-	var kubeconfig *string
-	if home := homeDir(); home != "" {
-		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	} else {
-		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	}
-	flag.Parse()
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	// var kubeconfig *string
+	// if home := homeDir(); home != "" {
+	// 	kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+	// } else {
+	// 	kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+	// }
+	// flag.Parse()
+	// config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	// if err != nil {
+	// 	log.Fatalf("getClusterConfig: %v", err)
+	// }
+	// return config
+
+	config, err := restclient.InClusterConfig()
 	if err != nil {
 		log.Fatalf("getClusterConfig: %v", err)
 	}
@@ -208,7 +210,7 @@ func NewKatibUIHandler() *KatibUIHandler {
 // }
 
 func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, katibapi.ManagerClient) {
-	conn, err := grpc.Dial("10.109.217.211:6789", grpc.WithInsecure())
+	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
 		return nil, nil
 	}
@@ -287,7 +289,7 @@ func (k *KatibUIHandler) SubmitYamlJob(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		_, err = k.studyjobClient.CreateStudyJob(&job, namespace)
+		_, err = k.studyjobClient.CreateStudyJob(&job)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -328,7 +330,7 @@ func (k *KatibUIHandler) SubmitHPJob(w http.ResponseWriter, r *http.Request) {
 		job.Spec.SuggestionSpec.RequestNumber = 3
 		// // parse metricsNames separably
 		// fmt.Println(dataMap["spec"].(map[string]interface{}))
-		_, err = k.studyjobClient.CreateStudyJob(&job, namespace)
+		_, err = k.studyjobClient.CreateStudyJob(&job)
 		fmt.Println(err)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -369,7 +371,7 @@ func (k *KatibUIHandler) SubmitNASJob(w http.ResponseWriter, r *http.Request) {
 		job.Spec.SuggestionSpec.RequestNumber = 3
 		// // parse metricsNames separably
 		// fmt.Println(dataMap["spec"].(map[string]interface{}))
-		_, err = k.studyjobClient.CreateStudyJob(&job, namespace)
+		_, err = k.studyjobClient.CreateStudyJob(&job)
 		fmt.Println(err)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -559,7 +561,8 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 
 func (k *KatibUIHandler) FetchWorkerTemplates(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
-	wt, err := k.studyjobClient.GetWorkerTemplates(namespace)
+	wt, err := k.studyjobClient.GetWorkerTemplates()
+	log.Printf("WT: %v", wt)
 	if err != nil {
 		log.Printf("GetWorkerTemplates err %v", err)
 	}
@@ -578,7 +581,7 @@ func (k *KatibUIHandler) FetchWorkerTemplates(w http.ResponseWriter, r *http.Req
 
 func (k *KatibUIHandler) FetchCollectorTemplates(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
-	wt, err := k.studyjobClient.GetMetricsCollectorTemplates(namespace)
+	wt, err := k.studyjobClient.GetMetricsCollectorTemplates()
 	if err != nil {
 		log.Printf("GetWorkerTemplates err %v", err)
 	}
@@ -604,17 +607,17 @@ func (k *KatibUIHandler) AddEditTemplate(w http.ResponseWriter, r *http.Request)
 
 	var data map[string]interface{}
 	json.NewDecoder(r.Body).Decode(&data)
-	wt, err := k.studyjobClient.GetWorkerTemplates(namespace)
+	wt, err := k.studyjobClient.GetWorkerTemplates()
 
 	if data["kind"].(string) == "collector" {
-		wt, err = k.studyjobClient.GetMetricsCollectorTemplates(namespace)
+		wt, err = k.studyjobClient.GetMetricsCollectorTemplates()
 	}
 
 	if err != nil {
 		log.Printf("fail to GetWorkerTemplates %v", err)
 	}
 	wt[data["name"].(string)] = data["yaml"].(string)
-	err = k.studyjobClient.UpdateWorkerTemplates(wt, namespace)
+	err = k.studyjobClient.UpdateWorkerTemplates(wt)
 	if err != nil {
 		log.Printf("fail to UpdateWorkerTemplate %v", err)
 	}
@@ -646,17 +649,17 @@ func (k *KatibUIHandler) DeleteTemplate(w http.ResponseWriter, r *http.Request) 
 
 	json.NewDecoder(r.Body).Decode(&data)
 	fmt.Println(data["name"].(string))
-	wt, err := k.studyjobClient.GetWorkerTemplates(namespace)
+	wt, err := k.studyjobClient.GetWorkerTemplates()
 
 	if data["kind"].(string) == "collector" {
-		wt, err = k.studyjobClient.GetMetricsCollectorTemplates(namespace)
+		wt, err = k.studyjobClient.GetMetricsCollectorTemplates()
 	}
 
 	if err != nil {
 		log.Printf("fail to GetWorkerTemplates %v", err)
 	}
 	delete(wt, data["name"].(string))
-	err = k.studyjobClient.UpdateWorkerTemplates(wt, namespace)
+	err = k.studyjobClient.UpdateWorkerTemplates(wt)
 	if err != nil {
 		log.Printf("fail to UpdateWorkerTemplate %v", err)
 	}

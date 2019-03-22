@@ -26,6 +26,12 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/awalterschulze/gographviz"
+  packages = [".","ast","internal/errors","internal/lexer","internal/parser","internal/token"]
+  revision = "1e9ccb565bca58a7ddb77182baad0567b749bd74"
+
+[[projects]]
   name = "github.com/cpuguy83/go-md2man"
   packages = ["md2man"]
   revision = "20f5889cbdc3c73dbd2862796665e7c465ade7d1"
@@ -538,6 +544,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ae870b6ed7ac3fa3d26953abc8cb6dd5862bc09fd4f4f6fb08302cb79255b64f"
+  inputs-digest = "58a0964b4fcef9957e15c5e4a6342dc32a3d2f6101b80b7d8b6bf99729fd7b78"
   solver-name = "gps-cdcl"
   solver-version = 1

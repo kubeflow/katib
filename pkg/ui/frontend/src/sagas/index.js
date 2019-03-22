@@ -45,7 +45,7 @@ const goFetchWorkerTemplates = function *() {
     try {
         const result = yield call(
             axios.get,
-            'http://127.0.0.1:9303/katib/fetch_worker_templates/',
+            '/katib/fetch_worker_templates/',
         )
         return result
     } catch (err) {
@@ -92,7 +92,7 @@ const goFetchCollectorTemplates = function *() {
     try {
         const result = yield call(
             axios.get,
-            'http://127.0.0.1:9303/katib/fetch_collector_templates/',
+            '/katib/fetch_collector_templates/',
         )
         return result
     } catch (err) {
@@ -139,7 +139,7 @@ const goFetchHPJobs = function *() {
     try {
         const result = yield call(
             axios.get,
-            'http://127.0.0.1:9303/katib/fetch_hp_jobs/',
+            '/katib/fetch_hp_jobs/',
         )
         return result
     } catch (err) {
@@ -186,7 +186,7 @@ const goFetchNASJobs = function *() {
     try {
         const result = yield call(
             axios.get,
-            'http://127.0.0.1:9303/katib/fetch_nas_jobs/',
+            '/katib/fetch_nas_jobs/',
         )
         return result
     } catch (err) {
@@ -240,7 +240,7 @@ const goAddTemplate = function *(name, yaml, kind) {
         }
         const result = yield call(
             axios.post,
-            'http://127.0.0.1:9303/katib/update_template/',
+            '/katib/update_template/',
             data,
         )
         return result
@@ -295,7 +295,7 @@ const goEditTemplate = function *(name, yaml, kind) {
         }
         const result = yield call(
             axios.post,
-            'http://127.0.0.1:9303/katib/update_template/',
+            '/katib/update_template/',
             data,
         )
         return result
@@ -349,7 +349,7 @@ const goDeleteTemplate = function *(name, kind) {
         }
         const result = yield call(
             axios.post,
-            'http://127.0.0.1:9303/katib/delete_template/',
+            '/katib/delete_template/',
             data,
         )
         return result
@@ -393,7 +393,7 @@ const goSubmitYaml = function *(yaml) {
         }
         const result = yield call(
             axios.post,
-            'http://127.0.0.1:9303/katib/submit_yaml/',
+            '/katib/submit_yaml/',
             data,
         )
         return result
@@ -436,7 +436,7 @@ const goSubmitHPJob = function *(postData) {
         }
         const result = yield call(
             axios.post,
-            'http://127.0.0.1:9303/katib/submit_hp_job/',
+            '/katib/submit_hp_job/',
             data,
         )
         return result
@@ -479,7 +479,7 @@ const goSubmitNASJob = function *(postData) {
         }
         const result = yield call(
             axios.post,
-            'http://127.0.0.1:9303/katib/submit_nas_job/',
+            '/katib/submit_nas_job/',
             data,
         )
         return result
@@ -521,7 +521,7 @@ const goFetchHPJobInfo = function *(id) {
     try {
         const result = yield call(
             axios.get,
-            `http://127.0.0.1:9303/katib/fetch_hp_job_info/?id=${id}`,
+            `/katib/fetch_hp_job_info/?id=${id}`,
         )
         return result
     } catch (err) {
@@ -571,7 +571,7 @@ const goFetchNASJobInfo = function *(id) {
     try {
         const result = yield call(
             axios.get,
-            `http://127.0.0.1:9303/katib/fetch_nas_job_info/?id=${id}`,
+            `/katib/fetch_nas_job_info/?id=${id}`,
         )
         return result
     } catch (err) {
@@ -613,7 +613,7 @@ const goFetchWorkerInfo = function *(studyID, workerID) {
     try {
         const result = yield call(
             axios.get,
-            `http://127.0.0.1:9303/katib/fetch_worker_info/?studyID=${studyID}&workerID=${workerID}`,
+            `/katib/fetch_worker_info/?studyID=${studyID}&workerID=${workerID}`,
         )
         return result
     } catch (err) {

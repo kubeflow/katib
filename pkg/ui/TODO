@@ -12,3 +12,11 @@ FIXES:
 11. убрать степ из ХП
 12. dobavit norm default argumenti (random + nasrl)
 13. RequestNumber dobavit
+15. templates lazhaut
+16. sujbmit yaml y nas
+17. monitor shtobi pokazival shto est, a ne viletal nahnooi
+18. knopki na dialoge belie blyad
+19. hashirovat vkladki
+20. kliki v menu lagaut
+21. jobinfo pustoi - sdleat text + jobinfo id = studyid
+22. mashtab osei

@@ -73,9 +73,9 @@
     "workbox-webpack-plugin": "3.6.3"
   },
   "scripts": {
-    "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
-    "test": "node scripts/test.js"
+    "start": "node --max-old-space-size=4096 scripts/start.js",
+    "build": "node --max-old-space-size=4096 scripts/build.js",
+    "test": "node --max-old-space-size=4096 scripts/test.js"
   },
   "eslintConfig": {
     "extends": "react-app"

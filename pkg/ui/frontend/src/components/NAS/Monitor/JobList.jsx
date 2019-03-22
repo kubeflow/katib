@@ -42,7 +42,7 @@ const JobList = (props) => {
                         icon = (<DoneIcon className={classes.finished}/>)
                     }
                     return (
-                        <ListItem button key={i} component={Link} to={`/nas_monitor/${job.id}`}>
+                        <ListItem button key={i} component={Link} to={`/katib/nas_monitor/${job.id}`}>
                             <ListItemIcon>
                                 {icon}
                             </ListItemIcon>
