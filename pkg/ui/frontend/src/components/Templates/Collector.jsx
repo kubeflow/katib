@@ -32,7 +32,7 @@ class Collector extends React.Component{
 
         const { classes } = this.props;
 
-        const type = this.props.match.path.replace("\/katib\/", "");
+        const type = "collector";
 
         return (
             <div className={classes.root}>

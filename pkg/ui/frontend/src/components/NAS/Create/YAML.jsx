@@ -7,6 +7,7 @@ import AceEditor from 'react-ace';
 import Button from '@material-ui/core/Button';
 
 import { changeYaml } from '../../../actions/nasCreateActions';
+import { submitYaml } from '../../../actions/generalActions';
 
 const module = "nasCreate";
 
@@ -38,9 +39,9 @@ const YAML = (props) => {
         props.changeYaml(value);
     };
 
-    // const submitWholeYaml = () => {
-    //     props.submitWholeYaml(props.yaml);
-    // };
+    const submitWholeYaml = () => {
+        props.submitYaml(props.yaml);
+    };
 
     const classes = useStyles();
     return (
@@ -64,7 +65,7 @@ const YAML = (props) => {
                 />
             </div>
             <div className={classes.submit}>
-                <Button variant="contained" color={"primary"} className={classes.button}>
+                <Button variant="contained" color={"primary"} className={classes.button} onClick={submitWholeYaml}>
                     Deploy
                 </Button>
             </div>
@@ -79,4 +80,4 @@ const mapStateToProps = (state) => {
 };
 
 
-export default connect(mapStateToProps, { changeYaml })(YAML);
+export default connect(mapStateToProps, { changeYaml, submitYaml })(YAML);

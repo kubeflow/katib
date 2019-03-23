@@ -16,7 +16,7 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 import { connect } from 'react-redux';
-import { changeAlgorithm, addSuggestionParameter, changeSuggestionParameter, deleteSuggestionParameter } from '../../../../actions/hpCreateActions';
+import { changeAlgorithm, addSuggestionParameter, changeSuggestionParameter, deleteSuggestionParameter, changeRequestNumber } from '../../../../actions/hpCreateActions';
 
 const module = "hpCreate";
 
@@ -33,6 +33,7 @@ const useStyles = makeStyles({
     },
     parameter: {
         padding: 2,
+        marginBottom: 10,
     },
     icon: {
         padding: 4,
@@ -66,6 +67,10 @@ const SuggestionSpec = (props) => {
 
     const onDeleteParameter = (index) => (event) => {
         props.deleteSuggestionParameter(index);
+    }
+
+    const onRequestNumberChange = (event) => {
+        props.changeRequestNumber(event.target.value);
     }
     
     return (
@@ -106,7 +111,28 @@ const SuggestionSpec = (props) => {
                     </Grid>
                 </Grid>
             </div>
-            
+            <div className={classes.parameter}> 
+                <Grid container alignItems={"center"}>
+                    <Grid item xs={12} sm={3}>
+                        <Typography>
+                            <Tooltip title={"Number of trials in parallel"}>
+                                <HelpOutlineIcon className={classes.help} color={"primary"}/>
+                            </Tooltip>
+                            {"RequestNumber"}
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={8}>
+                        <FormControl variant="outlined" className={classes.formControl}>
+                            <TextField
+                                label={"Request Number"}
+                                className={classes.textField}
+                                value={props.requestNumber}
+                                onChange={onRequestNumberChange}
+                                />
+                        </FormControl>
+                    </Grid>
+                </Grid>
+            </div>
             <br />
             {props.suggestionParameters.map((param, i) => {
                 return (
@@ -154,7 +180,8 @@ const mapStateToProps = state => {
         suggestionAlgorithm: state[module].suggestionAlgorithm,
         suggestionAlgorithms: state[module].suggestionAlgorithms,
         suggestionParameters: state[module].suggestionParameters,
+        requestNumber: state[module].requestNumber,
     }
 }
 
-export default connect(mapStateToProps, { changeAlgorithm, addSuggestionParameter, changeSuggestionParameter, deleteSuggestionParameter })(SuggestionSpec);
+export default connect(mapStateToProps, { changeAlgorithm, addSuggestionParameter, changeSuggestionParameter, deleteSuggestionParameter, changeRequestNumber })(SuggestionSpec);

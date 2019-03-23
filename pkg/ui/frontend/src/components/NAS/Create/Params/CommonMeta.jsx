@@ -25,6 +25,7 @@ const useStyles = makeStyles({
     },
     parameter: {
         padding: 2,
+        marginBottom: 10,
     },
 })
 

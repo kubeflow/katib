@@ -10,7 +10,7 @@ const (
 	VizierServiceNamespaceEnvName = "VIZIER_CORE_NAMESPACE"
 	VizierService                 = "vizier-core"
 	VizierPort                    = "6789"
-	// ManagerAddr                   = "10.106.60.109:6789"
+	// ManagerAddr                   = "10.97.100.155:6789"
 	ManagerAddr = VizierService + ":" + VizierPort
 )
 

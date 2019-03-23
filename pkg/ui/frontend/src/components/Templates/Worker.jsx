@@ -30,7 +30,7 @@ class Worker extends React.Component {
     render () {
         const { classes } = this.props;
 
-        const type = this.props.match.path.replace("\/katib\/", "");
+        const type = "worker";
         
         return (
             <div className={classes.root}>

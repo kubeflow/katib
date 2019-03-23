@@ -90,8 +90,8 @@ const addOperations = (source, destination) => {
             tempParam.name = param.name
             tempParam.parametertype = param.parameterType
             tempParam.feasible = {}
-            if (param.feasible == "list") {
-                tempParam.feasible.list = param.list
+            if (param.feasible === "list") {
+                tempParam.feasible.list = param.list.map((param, i) => param.value)
             } else {
                 tempParam.feasible.min = param.min
                 tempParam.feasible.max = param.max
@@ -125,12 +125,12 @@ const NASParameters = (props) => {
                 templatePath: props.worker,
             }
         }
-
+        data.spec.metricsnames = props.metricsName.map((metrics, i) => metrics.value)
         data.spec.suggestionSpec = {}
         data.spec.suggestionSpec.suggestionAlgorithm = props.suggestionAlgorithm;
+        data.spec.suggestionSpec.requestNumber = (isNaN(props.requestNumber) ? props.requestNumber : 1)
         data.spec.suggestionSpec.suggestionParameters = []
         addSuggestionParameters(props.suggestionParameters, data.spec.suggestionSpec.suggestionParameters)
-        console.log(data)
         props.submitNASJob(data)
     }
 
@@ -166,7 +166,9 @@ const mapStateToProps = (state) => ({
     outputSize: state[module].outputSize,
     operations: state[module].operations,
     worker: state[module].worker,
+    metricsName: state[module].metricsName,
     suggestionAlgorithm: state[module].suggestionAlgorithm,
+    requestNumber: state[module].requestNumber,
     suggestionParameters: state[module].suggestionParameters,
 })
 

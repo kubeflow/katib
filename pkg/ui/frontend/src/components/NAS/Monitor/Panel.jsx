@@ -8,7 +8,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import Button from '@material-ui/core/Button';
 
-import { filterJobs, changeType } from '../../../actions/nasMonitorActions';
+import { filterJobs, changeType, fetchNASJobs } from '../../../actions/nasMonitorActions';
 
 
 const module = "nasMonitor";
@@ -64,7 +64,7 @@ const FilterPanel = (props) => {
                     })
                 }
             </FormGroup>
-            <Button color={"secondary"} variant={"raised"}>
+            <Button color={"secondary"} variant={"raised"} onClick={props.fetchNASJobs}>
                 Update
             </Button>
         </div>   
@@ -78,4 +78,4 @@ const mapStateToProps = state => {
     }
 }
 
-export default connect(mapStateToProps, { filterJobs, changeType })(withStyles(styles)(FilterPanel));
+export default connect(mapStateToProps, { filterJobs, changeType, fetchNASJobs })(withStyles(styles)(FilterPanel));

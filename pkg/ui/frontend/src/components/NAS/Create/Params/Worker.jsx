@@ -1,5 +1,5 @@
 import React from 'react';
-import makeStyles from '@material-ui/styles/makeStyles';
+import withStyles from '@material-ui/styles/withStyles';
 import Grid from '@material-ui/core/Grid';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
@@ -12,11 +12,12 @@ import Select from '@material-ui/core/Select';
 
 import { connect } from 'react-redux';
 import { changeWorker } from '../../../../actions/nasCreateActions';
-
+import { fetchWorkerTemplates } from '../../../../actions/templateActions';
 
 const module = "nasCreate";
+const templateModule = "template";
 
-const useStyles = makeStyles({
+const styles = theme => ({
     help: {
         padding: 4 / 2,
         verticalAlign: "middle",
@@ -27,6 +28,7 @@ const useStyles = makeStyles({
     },
     parameter: {
         padding: 2,
+        marginBottom: 10,
     },
     formControl: {
         margin: 4,
@@ -37,55 +39,64 @@ const useStyles = makeStyles({
     },
 })
 
-const WorkerSpecParam = (props) => {
+class WorkerSpecParam extends React.Component {
 
-    const classes = useStyles();
-
-    const onWorkerChange = (event) => {
-        props.changeWorker(event.target.value);
+    componentDidMount() {
+        this.props.fetchWorkerTemplates();
     }
 
-    return (
-        <div className={classes.parameter}> 
-            <Grid container alignItems={"center"}>
-                <Grid item xs={12} sm={3}>
-                    <Typography variant={"subheading"}>
-                        <Tooltip title={"Worker spec template"}>
-                            <HelpOutlineIcon className={classes.help} color={"primary"}/>
-                        </Tooltip>
-                        {"WorkerSpec"}
-                    </Typography>
+    onWorkerChange = (event) => {
+        this.props.changeWorker(event.target.value);
+    }
+
+    render() {
+        const names = this.props.templates.map((template, i) => template.name)
+
+        const { classes } = this.props
+        return (
+            <div className={classes.parameter}> 
+                <Grid container alignItems={"center"}>
+                    <Grid item xs={12} sm={3}>
+                        <Typography variant={"subheading"}>
+                            <Tooltip title={"Worker spec template"}>
+                                <HelpOutlineIcon className={classes.help} color={"primary"}/>
+                            </Tooltip>
+                            {"WorkerSpec"}
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={8}>
+                        <FormControl variant="outlined" className={classes.formControl}>
+                            <InputLabel>
+                                Worker Spec
+                            </InputLabel>
+                            <Select
+                                value={this.props.worker}
+                                onChange={this.onWorkerChange}
+                                input={
+                                    <OutlinedInput name={"workerSpec"} labelWidth={100}/>
+                                }
+                                className={classes.select}
+                                >
+                                    {names.map((spec, i) => {
+                                        return (
+                                                <MenuItem value={spec} key={i}>{spec}</MenuItem>
+                                            )
+                                    })}
+                            </Select>
+                        </FormControl>
+                    </Grid>
                 </Grid>
-                <Grid item xs={12} sm={8}>
-                    <FormControl variant="outlined" className={classes.formControl}>
-                        <InputLabel>
-                            Worker Spec
-                        </InputLabel>
-                        <Select
-                            value={props.worker}
-                            onChange={onWorkerChange}
-                            input={
-                                <OutlinedInput name={"workerSpec"} labelWidth={100}/>
-                            }
-                            className={classes.select}
-                            >
-                                {props.workerSpec.map((spec, i) => {
-                                    return (
-                                            <MenuItem value={spec} key={i}>{spec}</MenuItem>
-                                        )
-                                })}
-                        </Select>
-                    </FormControl>
-                </Grid>
-            </Grid>
-        </div>
-    )
+            </div>
+        )
+    }
 }
+
+
 const mapStateToProps = state => {
     return {
-        workerSpec: state[module].workerSpec,
         worker: state[module].worker,
+        templates: state[templateModule].workerTemplates,
     }
 }
 
-export default connect(mapStateToProps, { changeWorker })(WorkerSpecParam);
+export default connect(mapStateToProps, { changeWorker, fetchWorkerTemplates })(withStyles(styles)(WorkerSpecParam));

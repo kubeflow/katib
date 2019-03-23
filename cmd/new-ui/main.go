@@ -6,6 +6,10 @@ import (
 	"github.com/kubeflow/katib/pkg/ui"
 )
 
+var (
+	port = "80"
+)
+
 func main() {
 	kuh := ui.NewKatibUIHandler()
 
@@ -26,5 +30,5 @@ func main() {
 	http.HandleFunc("/katib/update_template/", kuh.AddEditTemplate)
 	http.HandleFunc("/katib/delete_template/", kuh.DeleteTemplate)
 
-	http.ListenAndServe(":80", nil)
+	http.ListenAndServe(":"+port, nil)
 }

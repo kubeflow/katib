@@ -58,17 +58,17 @@ const nasMonitorReducer = (state = initialState, action) => {
                 jobsList: action.jobs,
                 filteredJobsList: action.jobs,
             }
-        case actions.FETCH_JOB_INFO_REQUEST:
+        case actions.FETCH_NAS_JOB_INFO_REQUEST:
             return {
                 ...state,
                 loading: true,
             }
-        case actions.FETCH_JOB_INFO_FAILURE:
+        case actions.FETCH_NAS_JOB_INFO_FAILURE:
             return {
                 ...state,
                 loading: false,
             }
-        case actions.FETCH_JOB_INFO_SUCCESS:
+        case actions.FETCH_NAS_JOB_INFO_SUCCESS:
             return {
                 ...state,
                 loading: false,

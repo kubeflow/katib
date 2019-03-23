@@ -41,6 +41,7 @@ const useStyles = makeStyles({
     },
     parameter: {
         padding: 2,
+        marginBottom: 10,
     },
     formControl: {
         margin: 4,
@@ -306,7 +307,6 @@ const NASConfig = (props) => {
                                                         return (
                                                             <div key={elIndex}>
                                                                 <TextField
-                                                                    label={"Value"}
                                                                     className={classes.textField}
                                                                     value={element.value}
                                                                     onChange={editListParameter(opIndex, paramIndex, elIndex)}

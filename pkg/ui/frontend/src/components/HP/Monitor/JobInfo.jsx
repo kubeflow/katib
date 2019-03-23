@@ -45,13 +45,13 @@ class HPJobInfo extends React.Component {
                 <LinearProgress color={"primary"} className={classes.loading} />
                 :
                 <div>
-                <Typography variant={"h5"}>
-                    JOB INFO for {this.props.match.params.id}
-                </Typography>
-                <br />
-                <HPPlot id={this.props.match.params.id} />
-                <HPTable id={this.props.match.params.id} />
-                <PlotDialog />
+                    <Typography variant={"h5"}>
+                        Study ID: {this.props.match.params.id}
+                    </Typography>
+                    <br />
+                    <HPPlot id={this.props.match.params.id} />
+                    <HPTable id={this.props.match.params.id} />
+                    <PlotDialog />
                 </div>
                 }
             </div>

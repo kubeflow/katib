@@ -73,7 +73,7 @@ const addParameterConfig = (source, destination) => {
         tempParam.parametertype = param.parameterType
         tempParam.feasible = {}
         if (param.feasible == "list") {
-            tempParam.feasible.list = param.list
+            tempParam.feasible.list = param.list.map((param, i) => param.value)
         } else {
             tempParam.feasible.min = param.min
             tempParam.feasible.max = param.max
@@ -113,11 +113,12 @@ const HPParameters = (props) => {
                 templatePath: props.worker,
             }
         }
+        data.spec.metricsnames = props.metricsName.map((metrics, i) => metrics.value)
         data.spec.suggestionSpec = {}
-        data.spec.suggestionSpec.suggestionAlgorithm = props.suggestionAlgorithm;
+        data.spec.suggestionSpec.requestNumber = (isNaN(props.requestNumber) ? props.requestNumber : 1)
+        data.spec.suggestionSpec.suggestionAlgorithm = props.suggestionAlgorithm
         data.spec.suggestionSpec.suggestionParameters = []
         addSuggestionParameters(props.suggestionParameters, data.spec.suggestionSpec.suggestionParameters)
-        console.log(data)
         props.submitHPJob(data)
     }
 
@@ -152,8 +153,10 @@ const mapStateToProps = (state) => ({
     commonParametersMetadata: state[module].commonParametersMetadata,
     commonParametersSpec: state[module].commonParametersSpec,
     parameterConfig: state[module].parameterConfig,
+    metricsName: state[module].metricsName,
     worker: state[module].worker,
     suggestionAlgorithm: state[module].suggestionAlgorithm,
+    requestNumber: state[module].requestNumber,
     suggestionParameters: state[module].suggestionParameters,
 })
 

@@ -19,6 +19,26 @@ export const changeSpec = (name, value) => ({
     name, value
 })
 
+export const ADD_METRICS_HP = "ADD_METRICS_HP";
+
+export const addMetrics = () => ({
+    type: ADD_METRICS_HP,
+})
+
+export const DELETE_METRICS_HP = "DELETE_METRICS_HP";
+
+export const deleteMetrics = (index) => ({
+    type: DELETE_METRICS_HP,
+    index,
+})
+
+export const EDIT_METRICS_HP = "EDIT_METRICS_HP";
+
+export const editMetrics = (index, value) => ({
+    type: EDIT_METRICS_HP,
+    index, value,
+})
+
 export const ADD_PARAMETER = "CHANGE_PARAMETER";
 
 export const addParameter = () => ({
@@ -39,24 +59,25 @@ export const deleteParameter = (index) => ({
     index,
 })
 
-export const ADD_LIST_PARAMETER = "ADD_LIST_PARAMETER";
+export const ADD_LIST_PARAMETER_HP = "ADD_LIST_PARAMETER_HP";
+
 
 export const addListParameter = (paramIndex) => ({
-    type: ADD_LIST_PARAMETER,
+    type: ADD_LIST_PARAMETER_HP,
     paramIndex,
 })
 
-export const EDIT_LIST_PARAMETER = "EDIT_LIST_PARAMETER";
+export const EDIT_LIST_PARAMETER_HP = "EDIT_LIST_PARAMETER_HP";
 
 export const editListParameter = (paramIndex, index, value) => ({
-    type: EDIT_LIST_PARAMETER,
+    type: EDIT_LIST_PARAMETER_HP,
     paramIndex, index, value
 })
 
-export const DELETE_LIST_PARAMETER = "DELETE_LIST_PARAMETER";
+export const DELETE_LIST_PARAMETER_HP = "DELETE_LIST_PARAMETER_HP";
 
 export const deleteListParameter = (paramIndex, index) => ({
-    type: DELETE_LIST_PARAMETER,
+    type: DELETE_LIST_PARAMETER_HP,
     paramIndex, index
 })
 
@@ -72,6 +93,13 @@ export const CHANGE_ALGORITHM = "CHANGE_ALGORITHM";
 export const changeAlgorithm = (algorithm) => ({
     type: CHANGE_ALGORITHM,
     algorithm,
+})
+
+export const CHANGE_REQUEST_NUMBER = "CHANGE_REQUEST_NUMBER";
+
+export const changeRequestNumber = (number) => ({
+    type: CHANGE_REQUEST_NUMBER,
+    number,
 })
 
 export const ADD_SUGGESTION_PARAMETER = "ADD_SUGGESTION_PARAMETER";

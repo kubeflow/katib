@@ -1,5 +1,4 @@
 import * as actions from '../actions/nasCreateActions';
-import { stat } from 'fs';
 
 const initialState = {
     commonParametersMetadata: [
@@ -10,20 +9,20 @@ const initialState = {
         },
         {
             name: "Name",
-            value: "random-example",
+            value: "nasrl-example",
             description: "A name of a study"
         }
     ],
     commonParametersSpec: [
         {
             name: "Name",
-            value: "random-example",
+            value: "nasrl-example",
             description: "A name of a study"
         },
         // owner is always crd
         {
             name: "OptimizationType",
-            value: "Maximize",
+            value: "maximize",
             description: "Optimization type"
         },
         {
@@ -43,16 +42,12 @@ const initialState = {
             value: "4",
             description: "Number of requests"
         },
-        // list here
+    ],
+    metricsName: [
         {
-            name: "MetricsName",
-            value: "list here",
-            description: "A name of a study"
+            value: "accuracy",
         }
     ],
-    //  specify NASCONFIG?
-    // select!
-    workerSpec: ["cpuWorkerTemplate.yaml", "Test 2"], // fetch names from backend 
     worker: 'cpuWorkerTemplate.yaml',
     numLayers: '1',
     inputSize: ['32', '32', '3'],
@@ -63,33 +58,51 @@ const initialState = {
             operationType: "convolution",
             parameterconfigs: [
                 {
-                    parameterType: "double",
-                    name: "Shit2",
-                    feasible: "feasible",
+                    parameterType: "categorical",
+                    name: "filter_size",
+                    feasible: "list",
                     min: "",
                     max: "",
                     step: "",
                     list: [
                         {
-                            value: "",
+                            value: "3",
+                        },
+                        {
+                            value: "5",
+                        },
+                        {
+                            value: "7",
                         }
                     ],
                 },
                 {
-                    parameterType: "int",
-                    name: "Shit",
+                    parameterType: "categorical",
+                    name: "num_filter",
                     feasible: "list",
                     min: "",
                     max: "",
                     step: "",
-                    list: [],
+                    list: [
+                        {
+                            value: "32",
+                        },
+                        {
+                            value: "48",
+                        }
+                    ],
                 },
             ]
         }
     ],
     suggestionAlgorithms: ["nasrl", "enas"], // fetch these
     suggestionAlgorithm: "nasrl",
+    requestNumber: "3",
     suggestionParameters: [
+        {
+            name: "optimizer",
+            value: "adam",
+        }
     ],
     currentYaml: '',
 };
@@ -99,6 +112,7 @@ const filterValue = (obj, key) => {
 };
 
 const nasCreateReducer = (state = initialState, action) => {
+    console.log(state)
     switch (action.type) {
         case actions.CHANGE_YAML:
             return {
@@ -221,7 +235,7 @@ const nasCreateReducer = (state = initialState, action) => {
                 ...state,
                 operations,
             }
-        case actions.ADD_LIST_PARAMETER:
+        case actions.ADD_LIST_PARAMETER_NAS:
             operations = state.operations.slice();
             operations[action.opIndex].parameterconfigs[action.paramIndex].list.push(
                 {
@@ -233,19 +247,47 @@ const nasCreateReducer = (state = initialState, action) => {
                 ...state,
                 operations,
             }
-        case actions.DELETE_LIST_PARAMETER:
+        case actions.DELETE_LIST_PARAMETER_NAS:
             operations = state.operations.slice();
             operations[action.opIndex].parameterconfigs[action.paramIndex].list.splice(action.listIndex, 1);
             return {
                 ...state,
                 operations,
             }
-        case actions.EDIT_LIST_PARAMETER:
+        case actions.EDIT_LIST_PARAMETER_NAS:
             operations = state.operations.slice();
             operations[action.opIndex].parameterconfigs[action.paramIndex].list[action.listIndex] = action.value;
             return {
                 ...state,
                 operations,
+            }
+        case actions.CHANGE_REQUEST_NUMBER:
+            return {
+                ...state,
+                requestNumber: action.number,
+            }
+        case actions.ADD_METRICS_NAS:
+            let metricsName = state.metricsName.slice()
+            metricsName.push({
+                value: "",
+            })
+            return {
+                ...state,
+                metricsName: metricsName,
+            }
+        case actions.DELETE_METRICS_NAS:
+            metricsName = state.metricsName.slice()
+            metricsName.splice(action.index, 1)
+            return {
+                ...state,
+                metricsName: metricsName,
+            }
+        case actions.EDIT_METRICS_NAS:
+            metricsName = state.metricsName.slice()
+            metricsName[action.index].value = action.value
+            return {
+                ...state,
+                metricsName: metricsName,
             }
         default:
             return state;

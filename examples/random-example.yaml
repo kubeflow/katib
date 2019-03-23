@@ -4,9 +4,9 @@ metadata:
   namespace: default
   labels:
     controller-tools.k8s.io: "1.0"
-  name: random1-example
+  name: random1-example-v2
 spec:
-  studyName: random-example
+  studyName: random1-example-v2
   owner: crd
   optimizationtype: maximize
   objectivevaluename: Validation-accuracy

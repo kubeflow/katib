@@ -20,11 +20,11 @@ export const fetchNASJobs = () => ({
     type: FETCH_NAS_JOBS_REQUEST,
 })
 
-export const FETCH_JOB_INFO_REQUEST = "FETCH_JOB_INFO_REQUEST";
-export const FETCH_JOB_INFO_SUCCESS = "FETCH_JOB_INFO_SUCCESS";
-export const FETCH_JOB_INFO_FAILURE = "FETCH_JOB_INFO_FAILURE";
+export const FETCH_NAS_JOB_INFO_REQUEST = "FETCH_JOB_INFO_REQUEST";
+export const FETCH_NAS_JOB_INFO_SUCCESS = "FETCH_JOB_INFO_SUCCESS";
+export const FETCH_NAS_JOB_INFO_FAILURE = "FETCH_JOB_INFO_FAILURE";
 
 export const fetchJobInfo = (id) => ({
-    type: FETCH_JOB_INFO_REQUEST,
+    type: FETCH_NAS_JOB_INFO_REQUEST,
     id
 })

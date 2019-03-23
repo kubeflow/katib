@@ -37,7 +37,7 @@ const HPPlot = (props) => {
       }
       track.values = values;
       if (flag === "number" && flag !== "string") {
-        track.constraintrange = [Math.min(values), Math.max(values)];
+        track.range = [Math.min.apply(null, values), Math.max.apply(null, values)];
       } else {
         // check logic
         track.ticktext = values;
@@ -53,24 +53,6 @@ const HPPlot = (props) => {
       }
       dimensions.push(track)
     }
-    console.log(dimensions)
-    // dimensions= [{
-    //   constraintrange: [1, 2],
-    //   label: 'A',
-    //   values: [1,4]
-    // }, {    
-    //   label: 'B',
-    //   values: [3,1.5],
-    //   tickvals: [1.5,3,4.5]
-    // }, {
-    //   label: 'C',
-    //   values: [2,4],
-    //   tickvals: [1,2,4,5],
-    //   ticktext: ['text 1','text 2','text 4','text 5']
-    // }, {
-    //   label: 'D',
-    //   values: [4,2]
-    // }]
   }
 
   return (
@@ -85,7 +67,6 @@ const HPPlot = (props) => {
               dimensions: dimensions,
             }]}
           layout={ { 
-            title: `Job id: ${props.id}`,
             width: 1000,
             height: 600
           } }

@@ -23,7 +23,7 @@ const initialState = {
         // owner is always crd
         {
             name: "OptimizationType",
-            value: "Maximize",
+            value: "maximize",
             description: "Optimization type"
         },
         {
@@ -43,53 +43,59 @@ const initialState = {
             value: "4",
             description: "Number of requests"
         },
-        // list here
+    ],
+    metricsName: [
         {
-            name: "MetricsName",
-            value: "list here",
-            description: "A name of a study"
+            value: "accuracy",
         }
     ],
     //  specify NASCONFIG?
     parameterConfig: [
         {
-            parameterType: "int",
-            name: "Shit",
-            feasible: "list",
-            min: "",
-            max: "",
-            step: "",
+            parameterType: "double",
+            name: "--lr",
+            feasible: "feasible",
+            min: "0.01",
+            max: "0.03",
             list: [],
         },
         {
-            parameterType: "double",
-            name: "Shit2",
+            parameterType: "int",
+            name: "--num-layers",
             feasible: "feasible",
-            min: "",
-            max: "",
-            step: "",
+            min: "2",
+            max: "5",
             list: [
                 {
                     value: "",
                 }
             ],
         },
+        {
+            parameterType: "categorical",
+            name: "--optimizer",
+            feasible: "list",
+            min: "",
+            max: "",
+            list: [
+                {
+                    value: "sgd",
+                },
+                {
+                    value: "adam",
+                },
+                {
+                    value: "ftrl"
+                }
+            ],
+        },
     ],
     paramTypes: ["int", "double", "categorical"],
-    // select!
-    workerSpec: ["cpuWorkerTemplate.yaml", "Test 2"], // fetch names from backend 
-    worker: '',
+    worker: "cpuWorkerTemplate.yaml",
     suggestionAlgorithms: ["grid", "random", "hyperband"], // fetch these
-    suggestionAlgorithm: "",
+    suggestionAlgorithm: "random",
+    requestNumber: "3",
     suggestionParameters: [
-        {
-            name: "DefaultGrid",
-            value: "1",
-        },
-        {
-            name: "--lr",
-            value: "4",
-        },
     ],
     currentYaml: '',
 };
@@ -142,7 +148,7 @@ const hpCreateReducer = (state = initialState, action) => {
                 ...state,
                 parameterConfig: params,
             }
-        case actions.ADD_LIST_PARAMETER:
+        case actions.ADD_LIST_PARAMETER_HP:
             params = state.parameterConfig.slice();
             params[action.paramIndex].list.push({
                 value: "",
@@ -151,14 +157,14 @@ const hpCreateReducer = (state = initialState, action) => {
                 ...state,
                 parameterConfig: params
             }
-        case actions.EDIT_LIST_PARAMETER:
+        case actions.EDIT_LIST_PARAMETER_HP:
             params = state.parameterConfig.slice();
             params[action.paramIndex].list[action.index] = action.value;
             return {
                 ...state,
                 parameterConfig: params
             }
-        case actions.DELETE_LIST_PARAMETER:
+        case actions.DELETE_LIST_PARAMETER_HP:
             params = state.parameterConfig.slice();
             params[action.paramIndex].list.splice(action.index, 1);
             return {
@@ -211,6 +217,34 @@ const hpCreateReducer = (state = initialState, action) => {
             return {
                 ...state,
                 loading: false,
+            }
+        case actions.CHANGE_REQUEST_NUMBER:
+            return {
+                ...state,
+                requestNumber: action.number,
+            }
+        case actions.ADD_METRICS_HP:
+            let metricsName = state.metricsName.slice()
+            metricsName.push({
+                value: "",
+            })
+            return {
+                ...state,
+                metricsName: metricsName,
+            }
+        case actions.DELETE_METRICS_HP:
+            metricsName = state.metricsName.slice()
+            metricsName.splice(action.index, 1)
+            return {
+                ...state,
+                metricsName: metricsName,
+            }
+        case actions.EDIT_METRICS_HP:
+            metricsName = state.metricsName.slice()
+            metricsName[action.index].value = action.value
+            return {
+                ...state,
+                metricsName: metricsName,
             }
         default:
             return state;

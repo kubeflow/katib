@@ -37,6 +37,7 @@ const useStyles = makeStyles({
     },
     parameter: {
         padding: 2,
+        marginBottom: 10,
     },
     formControl: {
         margin: 4,
@@ -73,6 +74,7 @@ const ParameterConfig = (props) => {
     } 
     
     const onParamAdd = (index) => (event) => {
+        console.log("INEDX IS")
         props.addListParameter(index);
     }
 
@@ -140,7 +142,6 @@ const ParameterConfig = (props) => {
                                         return (
                                             <div key={elIndex}>
                                                 <TextField
-                                                    label={"Value"}
                                                     className={classes.textField}
                                                     value={element.value}
                                                     onChange={onParamEdit(i, elIndex)}
@@ -172,12 +173,6 @@ const ParameterConfig = (props) => {
                                             className={classes.textField}
                                             value={param.max}
                                             onChange={onGeneralEdit(i, "max")}
-                                        />
-                                        <TextField
-                                            label={"Step"}
-                                            className={classes.textField}
-                                            value={param.step}
-                                            onChange={onGeneralEdit(i, "step")}
                                         />
                                     </div>
                                 }

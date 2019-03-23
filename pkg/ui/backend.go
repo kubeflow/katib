@@ -26,6 +26,7 @@ import (
 )
 
 var (
+	namespace      = "default"
 	allowedHeaders = "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, X-CSRF-Token"
 )
 
@@ -326,9 +327,8 @@ func (k *KatibUIHandler) SubmitHPJob(w http.ResponseWriter, r *http.Request) {
 			APIVersion: "kubeflow.org/v1alpha1",
 			Kind:       "StudyJob",
 		}
+		job.Spec.Owner = "crd"
 
-		job.Spec.SuggestionSpec.RequestNumber = 3
-		// // parse metricsNames separably
 		// fmt.Println(dataMap["spec"].(map[string]interface{}))
 		_, err = k.studyjobClient.CreateStudyJob(&job)
 		fmt.Println(err)
@@ -367,9 +367,8 @@ func (k *KatibUIHandler) SubmitNASJob(w http.ResponseWriter, r *http.Request) {
 			APIVersion: "kubeflow.org/v1alpha1",
 			Kind:       "StudyJob",
 		}
+		job.Spec.Owner = "crd"
 
-		job.Spec.SuggestionSpec.RequestNumber = 3
-		// // parse metricsNames separably
 		// fmt.Println(dataMap["spec"].(map[string]interface{}))
 		_, err = k.studyjobClient.CreateStudyJob(&job)
 		fmt.Println(err)
@@ -393,6 +392,7 @@ func (k *KatibUIHandler) FetchJobInfo(w http.ResponseWriter, r *http.Request) {
 			StudyId: studyID,
 		},
 	)
+	log.Printf("Got Study")
 	if err != nil {
 		log.Println(err)
 		return
@@ -402,6 +402,7 @@ func (k *KatibUIHandler) FetchJobInfo(w http.ResponseWriter, r *http.Request) {
 		retText += "," + m
 		metricsList[m] = i
 	}
+	log.Printf("Got metrics names")
 	paramList := map[string]int{}
 	for i, p := range gsrep.StudyConfig.ParameterConfigs.Configs {
 		retText += "," + p.Name
@@ -414,6 +415,7 @@ func (k *KatibUIHandler) FetchJobInfo(w http.ResponseWriter, r *http.Request) {
 			OnlyLatestLog: true,
 		},
 	)
+	log.Printf("Got full logs info")
 	if err != nil {
 		log.Println(err)
 		return
@@ -431,6 +433,8 @@ func (k *KatibUIHandler) FetchJobInfo(w http.ResponseWriter, r *http.Request) {
 		}
 		retText += wfi.Worker.WorkerId + "," + wfi.Worker.TrialId + "," + strings.Join(restext, ",") + "\n"
 	}
+	log.Printf("Parsed logs")
+	log.Printf("%v", retText)
 	response, err := json.Marshal(retText)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -500,7 +504,6 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 		log.Println(err)
 		return
 	}
-	fmt.Println(gtrep)
 
 	type NNView struct {
 		Name         string
@@ -607,19 +610,25 @@ func (k *KatibUIHandler) AddEditTemplate(w http.ResponseWriter, r *http.Request)
 
 	var data map[string]interface{}
 	json.NewDecoder(r.Body).Decode(&data)
-	wt, err := k.studyjobClient.GetWorkerTemplates()
-
+	var wt map[string]string
+	var err error
 	if data["kind"].(string) == "collector" {
 		wt, err = k.studyjobClient.GetMetricsCollectorTemplates()
+	} else {
+		wt, err = k.studyjobClient.GetWorkerTemplates()
 	}
 
 	if err != nil {
 		log.Printf("fail to GetWorkerTemplates %v", err)
 	}
 	wt[data["name"].(string)] = data["yaml"].(string)
-	err = k.studyjobClient.UpdateWorkerTemplates(wt)
+	if data["kind"].(string) == "collector" {
+		err = k.studyjobClient.UpdateMetricsCollectorTemplates(wt)
+	} else {
+		err = k.studyjobClient.UpdateWorkerTemplates(wt)
+	}
 	if err != nil {
-		log.Printf("fail to UpdateWorkerTemplate %v", err)
+		log.Printf("fail to update template %v", err)
 	}
 
 	templates := make([]TemplateView, 0)
@@ -648,18 +657,23 @@ func (k *KatibUIHandler) DeleteTemplate(w http.ResponseWriter, r *http.Request) 
 	var data map[string]interface{}
 
 	json.NewDecoder(r.Body).Decode(&data)
-	fmt.Println(data["name"].(string))
-	wt, err := k.studyjobClient.GetWorkerTemplates()
-
+	var wt map[string]string
+	var err error
 	if data["kind"].(string) == "collector" {
 		wt, err = k.studyjobClient.GetMetricsCollectorTemplates()
+	} else {
+		wt, err = k.studyjobClient.GetWorkerTemplates()
 	}
 
 	if err != nil {
 		log.Printf("fail to GetWorkerTemplates %v", err)
 	}
 	delete(wt, data["name"].(string))
-	err = k.studyjobClient.UpdateWorkerTemplates(wt)
+	if data["kind"].(string) == "collector" {
+		err = k.studyjobClient.UpdateMetricsCollectorTemplates(wt)
+	} else {
+		err = k.studyjobClient.UpdateWorkerTemplates(wt)
+	}
 	if err != nil {
 		log.Printf("fail to UpdateWorkerTemplate %v", err)
 	}

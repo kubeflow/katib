@@ -76,28 +76,24 @@ const Menu = (props) => {
                     </ListItem>
                     <Collapse in={hp} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
-                            <ListItem button className={classes.nested}>
+                            <ListItem button className={classes.nested} component={Link} to="/katib/hp">
                                 <ListItemIcon>
                                     <NoteAddIcon color={iconColor}/>
                                 </ListItemIcon>
                                 <ListItemText>
-                                    <Link to="/katib/hp">
-                                        <Typography variant={variant} color={color}>
+                                    <Typography variant={variant} color={color}>
                                             Submit
-                                        </Typography>
-                                    </Link>
+                                    </Typography>
                                 </ListItemText>
                             </ListItem>
-                            <ListItem button className={classes.nested}>
+                            <ListItem button className={classes.nested} component={Link} to="/katib/hp_monitor">
                                 <ListItemIcon>
                                     <WatchLaterIcon color={iconColor}/>
                                 </ListItemIcon>
                                 <ListItemText>
-                                    <Link to="/katib/hp_monitor">
-                                        <Typography variant={variant} color={color}>
-                                            Monitor 
-                                        </Typography>
-                                    </Link>
+                                    <Typography variant={variant} color={color}>
+                                        Monitor 
+                                    </Typography>
                                 </ListItemText>
                             </ListItem>
                         </List>
@@ -117,72 +113,62 @@ const Menu = (props) => {
                     </ListItem>
                     <Collapse in={nas} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
-                            <ListItem button className={classes.nested}>
+                            <ListItem button className={classes.nested} component={Link} to="/katib/nas">
                                 <ListItemIcon>
                                     <NoteAddIcon color={iconColor}/>
                                 </ListItemIcon>
                                 <ListItemText>
-                                    <Link to="/katib/nas">
-                                        <Typography variant={variant} color={color}>
-                                            Submit
-                                        </Typography>
-                                    </Link>
+                                    <Typography variant={variant} color={color}>
+                                        Submit
+                                    </Typography>
                                 </ListItemText>
                             </ListItem>
-                            <ListItem button className={classes.nested}>
+                            <ListItem button className={classes.nested} component={Link} to="/katib/nas_monitor">
                                 <ListItemIcon>
                                     <WatchLaterIcon color={iconColor}/>
                                 </ListItemIcon>
                                 <ListItemText>
-                                    <Link to="/katib/nas_monitor">
-                                        <Typography variant={variant} color={color}>
-                                            Monitor 
-                                        </Typography>
-                                    </Link>
+                                    <Typography variant={variant} color={color}>
+                                        Monitor 
+                                    </Typography>
                                 </ListItemText>
                             </ListItem>
                         </List>
                     </Collapse>
                     <Divider />
                     {/* WORKER MANIFESTS */}
-                    <ListItem button>
+                    <ListItem button component={Link} to="/katib/worker">
                         <ListItemIcon>
                             <SetttingsIcon color={iconColor} />
                         </ListItemIcon>
                         <ListItemText>
-                            <Link to="/katib/worker">
-                                <Typography variant={variant} color={color}>
-                                    Worker Manifests
-                                </Typography>
-                            </Link>
+                            <Typography variant={variant} color={color}>
+                                Worker Manifests
+                            </Typography>
                         </ListItemText>
                     </ListItem>
                     <Divider />
                     {/* METRICS COLLECTOR */}
-                    <ListItem button>
+                    <ListItem button component={Link} to="/katib/collector">
                         <ListItemIcon>
                             <SetttingsIcon color={iconColor} />
                         </ListItemIcon>
                         <ListItemText>
-                            <Link to="/katib/collector">
-                                <Typography variant={variant} color={color}>
-                                    Metrics Collector Manifests
-                                </Typography>
-                            </Link>
+                            <Typography variant={variant} color={color}>
+                                Metrics Collector Manifests
+                            </Typography>
                         </ListItemText>
                     </ListItem>
                     <Divider />
                     {/* ABOUT */}
-                    <ListItem button>
+                    <ListItem button component={Link} to="/katib/about">
                         <ListItemIcon>
                             <InfoIcon color={iconColor} />
                         </ListItemIcon>
                         <ListItemText>
-                            <Link to="/katib/about">
-                                <Typography variant={variant} color={color}>
+                            <Typography variant={variant} color={color}>
                                     About
-                                </Typography>
-                            </Link>
+                            </Typography>
                         </ListItemText>
                     </ListItem>
                 </List>

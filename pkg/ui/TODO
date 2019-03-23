@@ -4,7 +4,7 @@ FIXES:
 3. request number v suggestion spec dobavit
 4. dobavit parameters v nas config
 5. validaciya?
-6. snackbox
+6. snackbox 
 7. try to fetch all in reducers
 8. fix backend где надоиз строки сделать список с metricsname\либо фикс на фронте
 9. заполнять редьюсеры нормально новым полями (т.к. при добавлении нельзя редачить нормально) - в криэйт вкладке
@@ -21,3 +21,4 @@ FIXES:
 21. jobinfo pustoi - sdleat text + jobinfo id = studyid
 22. mashtab osei
 23. 2 raza completed
+24. snackbox na 5 sec sdelat

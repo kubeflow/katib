@@ -19,6 +19,26 @@ export const changeSpec = (name, value) => ({
     name, value
 })
 
+export const ADD_METRICS_NAS = "ADD_METRICS_NAS";
+
+export const addMetrics = () => ({
+    type: ADD_METRICS_NAS,
+})
+
+export const DELETE_METRICS_NAS = "DELETE_METRICS_NAS";
+
+export const deleteMetrics = (index) => ({
+    type: DELETE_METRICS_NAS,
+    index,
+})
+
+export const EDIT_METRICS_NAS = "EDIT_METRICS_NAS";
+
+export const editMetrics = (index, value) => ({
+    type: EDIT_METRICS_NAS,
+    index, value,
+})
+
 export const ADD_SIZE = "ADD_SIZE";
 
 export const addSize = (sizeType) => ({
@@ -52,6 +72,13 @@ export const CHANGE_ALGORITHM = "CHANGE_ALGORITHM";
 export const changeAlgorithm = (algorithm) => ({
     type: CHANGE_ALGORITHM,
     algorithm,
+})
+
+export const CHANGE_REQUEST_NUMBER = "CHANGE_REQUEST_NUMBER";
+
+export const changeRequestNumber = (number) => ({
+    type: CHANGE_REQUEST_NUMBER,
+    number,
 })
 
 export const ADD_SUGGESTION_PARAMETER = "ADD_SUGGESTION_PARAMETER";
@@ -115,24 +142,25 @@ export const deleteParameter = (opIndex, paramIndex) => ({
     opIndex, paramIndex,
 })
 
-export const ADD_LIST_PARAMETER = "ADD_LIST_PARAMETER";
+
+export const ADD_LIST_PARAMETER_NAS = "ADD_LIST_PARAMETER_NAS";
 
 export const addListParameter = (opIndex, paramIndex) => ({
-    type: ADD_LIST_PARAMETER,
+    type: ADD_LIST_PARAMETER_NAS,
     opIndex, paramIndex,
 })
 
-export const EDIT_LIST_PARAMETER = "EDIT_LIST_PARAMETER";
+export const EDIT_LIST_PARAMETER_NAS = "EDIT_LIST_PARAMETER_NAS";
 
 export const editListParameter = (opIndex, paramIndex, listIndex, value) => ({
-    type: EDIT_LIST_PARAMETER,
+    type: EDIT_LIST_PARAMETER_NAS,
     opIndex, paramIndex, listIndex, value,
 })
 
-export const DELETE_LIST_PARAMETER = "DELETE_LIST_PARAMETER";
+export const DELETE_LIST_PARAMETER_NAS = "DELETE_LIST_PARAMETER_NAS";
 
 export const deleteListParameter = (opIndex, paramIndex, listIndex) => ({
-    type: DELETE_LIST_PARAMETER,
+    type: DELETE_LIST_PARAMETER_NAS,
     opIndex, paramIndex, listIndex,
 })
 

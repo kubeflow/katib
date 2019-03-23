@@ -492,7 +492,7 @@ const goSubmitNASJob = function *(postData) {
 
 export const fetchHPJobInfo = function *() {
     while (true) {
-        const action = yield take(hpMonitorActions.FETCH_JOB_INFO_REQUEST);
+        const action = yield take(hpMonitorActions.FETCH_HP_JOB_INFO_REQUEST);
         try {
             const result = yield call(
                 goFetchHPJobInfo,
@@ -501,17 +501,17 @@ export const fetchHPJobInfo = function *() {
             if (result.status === 200) {
                 let data = result.data.split("\n").map((line, i) => line.split(','))
                 yield put({
-                    type: hpMonitorActions.FETCH_JOB_INFO_SUCCESS,
+                    type: hpMonitorActions.FETCH_HP_JOB_INFO_SUCCESS,
                     jobData: data
                 })
             } else {
                 yield put({
-                    type: hpMonitorActions.FETCH_JOB_INFO_FAILURE,
+                    type: hpMonitorActions.FETCH_HP_JOB_INFO_FAILURE,
                 }) 
             }
         } catch (err) {
             yield put({
-                type: hpMonitorActions.FETCH_JOB_INFO_FAILURE,
+                type: hpMonitorActions.FETCH_HP_JOB_INFO_FAILURE,
             })
         }
     }
@@ -526,7 +526,7 @@ const goFetchHPJobInfo = function *(id) {
         return result
     } catch (err) {
         yield put({
-            type: hpMonitorActions.FETCH_JOB_INFO_FAILURE,
+            type: hpMonitorActions.FETCH_HP_JOB_INFO_FAILURE,
         })
     }
 }
@@ -535,7 +535,7 @@ const goFetchHPJobInfo = function *(id) {
 
 export const fetchNASJobInfo = function *() {
     while (true) {
-        const action = yield take(nasMonitorActions.FETCH_JOB_INFO_REQUEST);
+        const action = yield take(nasMonitorActions.FETCH_NAS_JOB_INFO_REQUEST);
         try {
             const result = yield call(
                 goFetchNASJobInfo,
@@ -551,17 +551,17 @@ export const fetchNASJobInfo = function *() {
                     });
                 })
                 yield put({
-                    type: nasMonitorActions.FETCH_JOB_INFO_SUCCESS,
+                    type: nasMonitorActions.FETCH_NAS_JOB_INFO_SUCCESS,
                     steps: data,
                 })
             } else {
                 yield put({
-                    type: nasMonitorActions.FETCH_JOB_INFO_FAILURE,
+                    type: nasMonitorActions.FETCH_NAS_JOB_INFO_FAILURE,
                 }) 
             }
         } catch (err) {
             yield put({
-                type: nasMonitorActions.FETCH_JOB_INFO_FAILURE,
+                type: nasMonitorActions.FETCH_NAS_JOB_INFO_FAILURE,
             })
         }
     }
@@ -576,7 +576,7 @@ const goFetchNASJobInfo = function *(id) {
         return result
     } catch (err) {
         yield put({
-            type: nasMonitorActions.FETCH_JOB_INFO_FAILURE,
+            type: nasMonitorActions.FETCH_NAS_JOB_INFO_FAILURE,
         })
     }
 }
