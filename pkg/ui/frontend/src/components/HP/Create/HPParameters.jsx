@@ -115,7 +115,7 @@ const HPParameters = (props) => {
         }
         data.spec.metricsnames = props.metricsName.map((metrics, i) => metrics.value)
         data.spec.suggestionSpec = {}
-        data.spec.suggestionSpec.requestNumber = (isNaN(props.requestNumber) ? props.requestNumber : 1)
+        data.spec.suggestionSpec.requestNumber = (!isNaN(props.requestNumber) ? props.requestNumber : 1)
         data.spec.suggestionSpec.suggestionAlgorithm = props.suggestionAlgorithm
         data.spec.suggestionSpec.suggestionParameters = []
         addSuggestionParameters(props.suggestionParameters, data.spec.suggestionSpec.suggestionParameters)

@@ -62,7 +62,7 @@ class NASJobInfo extends React.Component {
                                     <Typography className={classes.heading}>{step.name}</Typography>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
-                                    <StepInfo step={step} id={this.props.match.params.id}/>
+                                    <StepInfo step={step} id={i}/>
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>
                         )

@@ -13,7 +13,6 @@ const styles = theme => ({
 class StepInfo extends React.Component {
 
     componentDidMount() {
-        let dotSec = 'digraph  {a -> b}'
 
         const id = `graph${this.props.id}`
         d3.select(`#${id}`)

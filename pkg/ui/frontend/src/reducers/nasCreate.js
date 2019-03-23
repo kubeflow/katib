@@ -100,8 +100,56 @@ const initialState = {
     requestNumber: "3",
     suggestionParameters: [
         {
+            name: "lstm_num_cells",
+            value: "64",
+        },
+        {
+            name: "lstm_num_layers",
+            value: "1",
+        },
+        {
+            name: "lstm_keep_prob",
+            value: "1.0",
+        },
+        {
             name: "optimizer",
             value: "adam",
+        },
+        {
+            name: "init_learning_rate",
+            value: "1e-3",
+        },
+        {
+            name: "lr_decay_start",
+            value: "0",
+        },
+        {
+            name: "lr_decay_every",
+            value: "1000",
+        },
+        {
+            name: "lr_decay_rate",
+            value: "0.9",
+        },
+        {
+            name: "skip-target",
+            value: "0.4",
+        },
+        {
+            name: "skip-weight",
+            value: "0.8",
+        },
+        {
+            name: "l2_reg",
+            value: "0",
+        },
+        {
+            name: "entropy_weight",
+            value: "1e-4",
+        },
+        {
+            name: "baseline_decay",
+            value: "0.9999",
         }
     ],
     currentYaml: '',
