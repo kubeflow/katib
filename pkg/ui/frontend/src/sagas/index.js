@@ -360,7 +360,6 @@ const goDeleteTemplate = function *(name, kind) {
     }
 }
 
-
 export const submitYaml = function *() {
     while (true) {
         const action = yield take(generalActions.SUBMIT_YAML_REQUEST);
@@ -400,6 +399,45 @@ const goSubmitYaml = function *(yaml) {
     } catch (err) {
         yield put({
             type: generalActions.SUBMIT_YAML_FAILURE,
+        })
+    }
+}
+
+export const deleteJob = function *() {
+    while (true) {
+        const action = yield take(generalActions.DELETE_JOB_REQUEST);
+        try {
+            const result = yield call(
+                goDeleteJob,
+                action.id
+            )
+            if (result.status === 200) {
+                yield put({
+                    type: generalActions.DELETE_JOB_SUCCESS,
+                })
+            } else {
+                yield put({
+                    type: generalActions.DELETE_JOB_FAILURE,
+                }) 
+            }
+        } catch (err) {
+            yield put({
+                type: generalActions.DELETE_JOB_FAILURE,
+            })
+        }
+    }
+}
+
+const goDeleteJob = function *(id) {
+    try {
+        const result = yield call(
+            axios.get,
+            `/katib/delete_job/?id=${id}`,
+        )
+        return result
+    } catch (err) {
+        yield put({
+            type: generalActions.DELETE_JOB_FAILURE,
         })
     }
 }
@@ -531,8 +569,6 @@ const goFetchHPJobInfo = function *(id) {
     }
 }
 
-
-
 export const fetchNASJobInfo = function *() {
     while (true) {
         const action = yield take(nasMonitorActions.FETCH_NAS_JOB_INFO_REQUEST);
@@ -633,6 +669,7 @@ export default function* rootSaga() {
         fork(editTemplate),
         fork(deleteTemplate),
         fork(submitYaml),
+        fork(deleteJob),
         fork(submitHPJob),
         fork(submitNASJob),
         fork(fetchHPJobInfo),

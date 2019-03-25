@@ -4,6 +4,8 @@ const initialState = {
     menuOpen: false,
     snackOpen: false,
     snackText: "",
+    deleteDialog: false,
+    deleteId: '',
 };
 
 const generalReducer = (state = initialState, action) => {
@@ -29,6 +31,31 @@ const generalReducer = (state = initialState, action) => {
                 ...state,
                 snackOpen: true,
                 snackText: "Whoops, something went wrong",
+            }
+        case actions.DELETE_JOB_FAILURE:
+            return {
+                ...state,
+                deleteDialog: false,
+                snackOpen: true,
+                snackText: "Whoops, something went wrong",
+            }
+        case actions.DELETE_JOB_SUCCESS:
+            return {
+                ...state,
+                deleteDialog: false,
+                snackOpen: true,
+                snackText: "Successfully deleted. Press Update button",
+            }
+        case actions.OPEN_DELETE_DIALOG:
+            return {
+                ...state,
+                deleteDialog: true,
+                deleteId: action.id,
+            }
+        case actions.CLOSE_DELETE_DIALOG:
+            return {
+                ...state,
+                deleteDialog: false,
             }
         default:
             return state;

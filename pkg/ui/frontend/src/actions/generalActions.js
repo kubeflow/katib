@@ -23,3 +23,25 @@ export const submitYaml = (yaml) => ({
     type: SUBMIT_YAML_REQUEST,
     yaml,
 })
+
+export const DELETE_JOB_REQUEST = "DELETE_JOB_REQUEST";
+export const DELETE_JOB_FAILURE = "DELETE_JOB_FAILURE";
+export const DELETE_JOB_SUCCESS = "DELETE_JOB_SUCCESS";
+
+export const deleteJob = (id) => ({
+    type: DELETE_JOB_REQUEST,
+    id,
+})
+
+export const OPEN_DELETE_DIALOG = "OPEN_DELETE_DIALOG";
+
+export const openDeleteDialog = (id) => ({
+    type: OPEN_DELETE_DIALOG, 
+    id,
+})
+
+export const CLOSE_DELETE_DIALOG = "CLOSE_DELETE_DIALOG";
+
+export const closeDeleteDialog = () => ({
+    type: CLOSE_DELETE_DIALOG,
+})

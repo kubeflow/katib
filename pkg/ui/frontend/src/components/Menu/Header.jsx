@@ -5,6 +5,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
+import { Link } from 'react-router-dom';
 
 import Menu from './Menu';
 
@@ -23,6 +24,9 @@ const useStyles = makeStyles({
         marginLeft: -12,
         marginRight: 20,
     },
+    link: {
+        textDecoration: 'none',
+    }
 });
 
 const Header = (props) => {
@@ -37,9 +41,9 @@ const Header = (props) => {
             <AppBar position={"static"} color={"primary"}>
                 <Toolbar>
                     <IconButton className={classes.menuButton} color={"inherit"} aria-label={"Menu"} onClick={toggleMenu}>
-                        <MenuIcon/>
+                        <MenuIcon />
                     </IconButton>
-                    <Typography variant={"headline"} color={"secondary"}>
+                    <Typography variant={"headline"} color={"secondary"} component={Link} to="/" classes={classes.link}>
                         Katib
                     </Typography>
                 </Toolbar>

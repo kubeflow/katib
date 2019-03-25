@@ -20,17 +20,17 @@ const initialState = {
 const hpMonitorReducer = (state = initialState, action) => {
     switch (action.type) {
         case actions.FILTER_JOBS:
-            const jobs = state.jobsList.slice();
-            const newList = jobs.filter(job => job.name.includes(action.filter));
+            let jobs = state.jobsList.slice();
+            let newList = jobs.filter(job => job.name.includes(action.filter));
 
-            const avTypes = Object.assign({}, state.filterType);
+            let avTypes = Object.assign({}, state.filterType);
             var typeKeys = Object.keys(avTypes);
 
             var avFilters = typeKeys.filter((key) => {
                 return avTypes[key]
             });
 
-            const filteredJobs = newList.filter(job => avFilters.includes(job.status));
+            let filteredJobs = newList.filter(job => avFilters.includes(job.status));
 
             return {
                 ...state,
@@ -54,10 +54,19 @@ const hpMonitorReducer = (state = initialState, action) => {
                 filteredJobsList: filtered,
             }
         case actions.FETCH_HP_JOBS_SUCCESS:
+            jobs = action.jobs
+            avTypes = Object.assign({}, state.filterType);
+            typeKeys = Object.keys(avTypes);
+
+            avFilters = typeKeys.filter((key) => {
+                return avTypes[key]
+            });
+
+            filteredJobs = jobs.filter(job => avFilters.includes(job.status));
             return {
                 ...state,
                 jobsList: action.jobs,
-                filteredJobsList: action.jobs,
+                filteredJobsList: filteredJobs,
             }
         case actions.FETCH_HP_JOB_INFO_REQUEST:
             return {

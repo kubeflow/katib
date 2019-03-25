@@ -16,7 +16,7 @@ const HPPlot = (props) => {
   const classes = useStyles();
   let dimensions = [];
 
-  if (props.jobData.length !== 0) {
+  if (props.jobData && props.jobData.length !== 0) {
     // everything for the third column
     let header = props.jobData[0];
     let data = props.jobData.slice(1);

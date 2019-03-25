@@ -97,7 +97,7 @@ const initialState = {
     ],
     suggestionAlgorithms: ["nasrl", "enas"], // fetch these
     suggestionAlgorithm: "nasrl",
-    requestNumber: "3",
+    requestNumber: "2",
     suggestionParameters: [
         {
             name: "lstm_num_cells",

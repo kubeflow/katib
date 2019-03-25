@@ -72,7 +72,7 @@ const addParameterConfig = (source, destination) => {
         tempParam.name = param.name
         tempParam.parametertype = param.parameterType
         tempParam.feasible = {}
-        if (param.feasible == "list") {
+        if (param.feasible === "list") {
             tempParam.feasible.list = param.list.map((param, i) => param.value)
         } else {
             tempParam.feasible.min = param.min
@@ -115,7 +115,7 @@ const HPParameters = (props) => {
         }
         data.spec.metricsnames = props.metricsName.map((metrics, i) => metrics.value)
         data.spec.suggestionSpec = {}
-        data.spec.suggestionSpec.requestNumber = (!isNaN(props.requestNumber) ? props.requestNumber : 1)
+        data.spec.suggestionSpec.requestNumber = (!isNaN(Number(props.requestNumber)) ? Number(props.requestNumber) : 1)
         data.spec.suggestionSpec.suggestionAlgorithm = props.suggestionAlgorithm
         data.spec.suggestionSpec.suggestionParameters = []
         addSuggestionParameters(props.suggestionParameters, data.spec.suggestionSpec.suggestionParameters)

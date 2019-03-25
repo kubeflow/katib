@@ -8,6 +8,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Slide from '@material-ui/core/Slide';
+import AceEditor from 'react-ace';
 
 import { connect } from 'react-redux';
 import { closeDialog, addTemplate } from '../../../actions/templateActions';
@@ -56,6 +57,12 @@ class AddDialog extends React.Component {
         })
     }
 
+    onChangeYaml = (name) => (value) => {
+        this.setState({
+            [name]: value,
+        })
+    }
+
     addTemplate = () => {
         this.props.addTemplate(this.state.name, this.state.yaml, this.props.type);
     }
@@ -81,14 +88,27 @@ class AddDialog extends React.Component {
                             onChange={this.onChange("name")}
                             />
                         <br />
-                        <TextField 
+                        <AceEditor
+                            mode="text"
+                            theme="tomorrow"
+                            value={this.state.yaml}
+                            onChange={this.onChangeYaml("yaml")}
+                            name="UNIQUE_ID_OF_DIV"
+                            editorProps={{$blockScrolling: true}}
+                            tabSize={2}
+                            enableLiveAutocompletion={true}
+                            fontSize={14}
+                            width={480}
+                            height={640}
+                            />
+                        {/* <TextField 
                             multiline
                             className={classes.textField}
                             variant={"outlined"}
                             rows={"10"}
                             value={this.state.yaml}
                             onChange={this.onChange("yaml")}
-                            />
+                            /> */}
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.addTemplate} color={"primary"}>

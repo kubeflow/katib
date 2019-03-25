@@ -3,7 +3,7 @@ package ui
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -47,6 +47,14 @@ type Option struct {
 	FilterNumber string `json:"num_filter"`
 	FilterSize   string `json:"filter_size"`
 	Stride       string `json:"stride"`
+}
+
+func getNamespace(namespace ...string) string {
+	if len(namespace) == 0 {
+		data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+		return strings.TrimSpace(string(data))
+	}
+	return namespace[0]
 }
 
 func get_node_string(block *Block) string {
@@ -307,18 +315,16 @@ func (k *KatibUIHandler) SubmitHPJob(w http.ResponseWriter, r *http.Request) {
 	if data, ok := data["postData"]; ok {
 		jsonbody, err := json.Marshal(data)
 		if err != nil {
-			// do error check
-			fmt.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		job := katibv1alpha1.StudyJob{}
 		if err := json.Unmarshal(jsonbody, &job); err != nil {
-			// do error check
-			fmt.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-		// mapstructure.Decode(data, &job)
-		// // think of a better way
 		dataMap := data.(map[string]interface{})
+		job.Spec.StudyName = dataMap["metadata"].(map[string]interface{})["name"].(string)
 		job.ObjectMeta = metav1.ObjectMeta{
 			Name:      dataMap["metadata"].(map[string]interface{})["name"].(string),
 			Namespace: dataMap["metadata"].(map[string]interface{})["namespace"].(string),
@@ -328,10 +334,7 @@ func (k *KatibUIHandler) SubmitHPJob(w http.ResponseWriter, r *http.Request) {
 			Kind:       "StudyJob",
 		}
 		job.Spec.Owner = "crd"
-
-		// fmt.Println(dataMap["spec"].(map[string]interface{}))
 		_, err = k.studyjobClient.CreateStudyJob(&job)
-		fmt.Println(err)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -348,17 +351,20 @@ func (k *KatibUIHandler) SubmitNASJob(w http.ResponseWriter, r *http.Request) {
 		jsonbody, err := json.Marshal(data)
 		if err != nil {
 			// do error check
-			fmt.Println(err)
+			log.Printf("%v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		job := katibv1alpha1.StudyJob{}
 		if err := json.Unmarshal(jsonbody, &job); err != nil {
-			// do error check
-			fmt.Println(err)
+			log.Printf("%v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 		// mapstructure.Decode(data, &job)
 		// // think of a better way
 		dataMap := data.(map[string]interface{})
+		job.Spec.StudyName = dataMap["metadata"].(map[string]interface{})["name"].(string)
 		job.ObjectMeta = metav1.ObjectMeta{
 			Name:      dataMap["metadata"].(map[string]interface{})["name"].(string),
 			Namespace: dataMap["metadata"].(map[string]interface{})["namespace"].(string),
@@ -369,14 +375,41 @@ func (k *KatibUIHandler) SubmitNASJob(w http.ResponseWriter, r *http.Request) {
 		}
 		job.Spec.Owner = "crd"
 
-		// fmt.Println(dataMap["spec"].(map[string]interface{}))
 		_, err = k.studyjobClient.CreateStudyJob(&job)
-		fmt.Println(err)
+		log.Printf("%v", err)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
+}
+
+func (k *KatibUIHandler) DeleteJob(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
+	studyID := r.URL.Query()["id"][0]
+	log.Printf("StudyID: %v", studyID)
+	// conn, c := k.connectManager()
+	// defer conn.Close()
+
+	// resp, err := c.DeleteStudy(
+	// 	context.Background(),
+	// 	&api.DeleteStudyRequest{
+	// 		StudyId: studyID,
+	// 	},
+	// )
+
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+	// fmt.Println(resp)
+	// fmt.Println(studyID)
+	// fmt.Println(err)
+
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
 }
 
 func (k *KatibUIHandler) FetchJobInfo(w http.ResponseWriter, r *http.Request) {
@@ -488,7 +521,6 @@ func (k *KatibUIHandler) FetchWorkerInfo(w http.ResponseWriter, r *http.Request)
 func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
 	studyID := r.URL.Query()["id"][0]
-	fmt.Println(studyID)
 
 	conn, c := k.connectManager()
 
@@ -565,7 +597,6 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 func (k *KatibUIHandler) FetchWorkerTemplates(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
 	wt, err := k.studyjobClient.GetWorkerTemplates()
-	log.Printf("WT: %v", wt)
 	if err != nil {
 		log.Printf("GetWorkerTemplates err %v", err)
 	}
@@ -591,7 +622,6 @@ func (k *KatibUIHandler) FetchCollectorTemplates(w http.ResponseWriter, r *http.
 	templates := make([]TemplateView, 0)
 
 	for key := range wt {
-		fmt.Println(key)
 		templates = append(templates, TemplateView{Name: key, Yaml: wt[key]})
 	}
 	response, err := json.Marshal(templates)

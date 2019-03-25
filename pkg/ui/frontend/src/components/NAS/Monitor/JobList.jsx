@@ -1,5 +1,5 @@
 import React from 'react';
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -9,6 +9,11 @@ import ScheduleIcon from '@material-ui/icons/Schedule';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import DoneIcon from '@material-ui/icons/Done';
 import { Link } from 'react-router-dom';
+import { ListItemSecondaryAction, IconButton } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+
+import { openDeleteDialog } from '../../../actions/generalActions';
+import DeleteDialog from '../../Menu/DeleteDialog';
 
 const module = "nasMonitor";
 
@@ -28,7 +33,12 @@ const styles = theme => ({
 
 const JobList = (props) => {
 
-    const {classes} = props;
+    const { classes } = props;
+
+    const onDelete = (id) => (event) => {
+        props.openDeleteDialog(id);
+    }
+
     return (
         <div>
             <List component="nav">
@@ -47,10 +57,16 @@ const JobList = (props) => {
                                 {icon}
                             </ListItemIcon>
                             <ListItemText inset primary={job.name} />
+                            <ListItemSecondaryAction>
+                                <IconButton aria-label={"Delete"} onClick={onDelete(job.id)}>
+                                    <DeleteIcon />
+                                </IconButton>
+                            </ListItemSecondaryAction>
                         </ListItem>
                     );
                  })}
-            </List>       
+            </List>     
+            <DeleteDialog />  
         </div>
     )
 }
@@ -61,4 +77,4 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps, null)(withStyles(styles)(JobList));
+export default connect(mapStateToProps, { openDeleteDialog })(withStyles(styles)(JobList));

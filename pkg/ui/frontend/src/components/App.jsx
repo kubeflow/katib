@@ -6,6 +6,7 @@ import Snack from './Menu/Snack';
 import { makeStyles } from '@material-ui/styles';
 
 import  { Route } from 'react-router-dom';
+import Main from './Menu/Main';
 import HP from './HP/Create/HP';
 import HPMonitor from './HP/Monitor/Monitor';
 import HPJobInfo from './HP/Monitor/JobInfo';
@@ -29,7 +30,7 @@ const App = (props) => {
     return (
         <div className={classes.root}>
             <Header />
-            
+            <Route exact path="/" component={Main} />
             <Route path="/katib/hp" component={HP} />
             <Route exact path="/katib/hp_monitor" component={HPMonitor} />
             <Route path="/katib/hp_monitor/:id" component={HPJobInfo} />

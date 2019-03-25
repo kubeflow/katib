@@ -28,6 +28,9 @@ const styles = theme => ({
     },
     panel: {
         width: '100%',
+    },
+    button: {
+        marginBottom: 20,
     }
 })
 
@@ -43,7 +46,7 @@ class NASJobInfo extends React.Component {
         return (
             <div className={classes.root}>
                 <Link to="/katib/nas_monitor">
-                    <Button variant={"contained"} color={"primary"}>
+                    <Button variant={"contained"} color={"primary"} className={classes.button}>
                         Back
                     </Button>
                 </Link>
@@ -52,7 +55,7 @@ class NASJobInfo extends React.Component {
                 :
                 <div>
                     <Typography variant={"h5"}>
-                        JOB INFO for {this.props.match.params.id}
+                        StudyJob: {this.props.match.params.id}
                     </Typography>
                     <br />
                     {this.props.steps.map((step, i) => {
@@ -62,7 +65,7 @@ class NASJobInfo extends React.Component {
                                     <Typography className={classes.heading}>{step.name}</Typography>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
-                                    <StepInfo step={step} id={i}/>
+                                    <StepInfo step={step} id={i + 1}/>
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>
                         )

@@ -35,7 +35,7 @@ const Snack = (props) => {
             horizontal: horizontal,
           }}
           open={props.snackOpen}
-          autoHideDuration={6000}
+          autoHideDuration={600}
           onClose={props.handleClose}
           ContentProps={{
             'aria-describedby': 'message-id',

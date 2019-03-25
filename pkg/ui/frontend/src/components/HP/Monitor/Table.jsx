@@ -39,7 +39,7 @@ class HPTable extends React.Component {
 
     let header = [];
     let data = [];
-    if (this.props.jobData.length !== 0) {
+    if (this.props.jobData && this.props.jobData.length !== 0) {
       header = this.props.jobData[0];
       data = this.props.jobData.slice(1)
     }

@@ -180,6 +180,7 @@ const mapStateToProps = state => {
         suggestionAlgorithm: state[module].suggestionAlgorithm,
         suggestionAlgorithms: state[module].suggestionAlgorithms,
         suggestionParameters: state[module].suggestionParameters,
+        requestNumber: state[module].requestNumber,
     }
 }
 
