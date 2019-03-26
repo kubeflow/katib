@@ -1,0 +1,2290 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Protocol Documentation</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic"/>
+    <style>
+      body {
+        width: 60em;
+        margin: 1em auto;
+        color: #222;
+        font-family: "Ubuntu", sans-serif;
+        padding-bottom: 4em;
+      }
+
+      h1 {
+        font-weight: normal;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+      }
+
+      h2 {
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+        margin: 1.5em 0;
+      }
+
+      h3 {
+        font-weight: normal;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+      }
+
+      a {
+        text-decoration: none;
+        color: #567e25;
+      }
+
+      table {
+        width: 100%;
+        font-size: 80%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        font-weight: 700;
+        background-color: #dcdcdc;
+      }
+
+      tbody tr:nth-child(even) {
+        background-color: #fbfbfb;
+      }
+
+      td {
+        border: 1px solid #ccc;
+        padding: 0.5ex 2ex;
+      }
+
+      td p {
+        text-indent: 1em;
+        margin: 0;
+      }
+
+      td p:nth-child(1) {
+        text-indent: 0;  
+      }
+
+       
+      .field-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .field-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .field-table td:nth-child(3) {  
+        width: 6em;
+      }
+      .field-table td:nth-child(4) {  
+        width: auto;
+      }
+
+       
+      .extension-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(3) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(4) {  
+        width: 5em;
+      }
+      .extension-table td:nth-child(5) {  
+        width: auto;
+      }
+
+       
+      .enum-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .enum-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .enum-table td:nth-child(3) {  
+        width: auto;
+      }
+
+       
+      .scalar-value-types-table tr {
+        height: 3em;
+      }
+
+       
+      #toc-container ul {
+        list-style-type: none;
+        padding-left: 1em;
+        line-height: 180%;
+        margin: 0;
+      }
+      #toc > li > a {
+        font-weight: bold;
+      }
+
+       
+      .file-heading {
+        width: 100%;
+        display: table;
+        border-bottom: 1px solid #aaa;
+        margin: 4em 0 1.5em 0;
+      }
+      .file-heading h2 {
+        border: none;
+        display: table-cell;
+      }
+      .file-heading a {
+        text-align: right;
+        display: table-cell;
+      }
+
+       
+      .badge {
+        width: 1.6em;
+        height: 1.6em;
+        display: inline-block;
+
+        line-height: 1.6em;
+        text-align: center;
+        font-weight: bold;
+        font-size: 60%;
+
+        color: #89ba48;
+        background-color: #dff0c8;
+
+        margin: 0.5ex 1em 0.5ex -1em;
+        border: 1px solid #fbfbfb;
+        border-radius: 1ex;
+      }
+    </style>
+
+    
+    <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+  </head>
+
+  <body>
+
+    <h1 id="title">Protocol Documentation</h1>
+
+    <h2>Table of Contents</h2>
+
+    <div id="toc-container">
+      <ul id="toc">
+        
+          
+          <li>
+            <a href="#api.proto">api.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#api.v1.alpha2.AlgorithmSetting"><span class="badge">M</span>AlgorithmSetting</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.AlgorithmSpec"><span class="badge">M</span>AlgorithmSpec</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.DeleteExperimentReply"><span class="badge">M</span>DeleteExperimentReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.DeleteExperimentRequest"><span class="badge">M</span>DeleteExperimentRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.DeleteTrialReply"><span class="badge">M</span>DeleteTrialReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.DeleteTrialRequest"><span class="badge">M</span>DeleteTrialRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.EarlyStoppingSpec"><span class="badge">M</span>EarlyStoppingSpec</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.Experiment"><span class="badge">M</span>Experiment</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.ExperimentSpec"><span class="badge">M</span>ExperimentSpec</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.ExperimentStatus"><span class="badge">M</span>ExperimentStatus</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.ExperimentSummary"><span class="badge">M</span>ExperimentSummary</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.FeasibleSpace"><span class="badge">M</span>FeasibleSpace</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetAlgorithmExtraSettingsReply"><span class="badge">M</span>GetAlgorithmExtraSettingsReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetAlgorithmExtraSettingsRequest"><span class="badge">M</span>GetAlgorithmExtraSettingsRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetExperimentListReply"><span class="badge">M</span>GetExperimentListReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetExperimentListRequest"><span class="badge">M</span>GetExperimentListRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetExperimentReply"><span class="badge">M</span>GetExperimentReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetExperimentRequest"><span class="badge">M</span>GetExperimentRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetObservationLogReply"><span class="badge">M</span>GetObservationLogReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetObservationLogRequest"><span class="badge">M</span>GetObservationLogRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetSuggestionsReply"><span class="badge">M</span>GetSuggestionsReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetSuggestionsRequest"><span class="badge">M</span>GetSuggestionsRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetTrialListReply"><span class="badge">M</span>GetTrialListReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetTrialListRequest"><span class="badge">M</span>GetTrialListRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetTrialReply"><span class="badge">M</span>GetTrialReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetTrialRequest"><span class="badge">M</span>GetTrialRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GraphConfig"><span class="badge">M</span>GraphConfig</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.Metric"><span class="badge">M</span>Metric</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.MetricLog"><span class="badge">M</span>MetricLog</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.NasConfig"><span class="badge">M</span>NasConfig</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.NasConfig.Operations"><span class="badge">M</span>NasConfig.Operations</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.ObjectiveSpec"><span class="badge">M</span>ObjectiveSpec</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.Observation"><span class="badge">M</span>Observation</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.ObservationLog"><span class="badge">M</span>ObservationLog</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.Operation"><span class="badge">M</span>Operation</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.ParameterAssignment"><span class="badge">M</span>ParameterAssignment</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.ParameterSpec"><span class="badge">M</span>ParameterSpec</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.RegisterExperimentReply"><span class="badge">M</span>RegisterExperimentReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.RegisterExperimentRequest"><span class="badge">M</span>RegisterExperimentRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.RegisterTrialReply"><span class="badge">M</span>RegisterTrialReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.RegisterTrialRequest"><span class="badge">M</span>RegisterTrialRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.ReportObservationLogReply"><span class="badge">M</span>ReportObservationLogReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.ReportObservationLogRequest"><span class="badge">M</span>ReportObservationLogRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.Trial"><span class="badge">M</span>Trial</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.TrialSpec"><span class="badge">M</span>TrialSpec</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.TrialStatus"><span class="badge">M</span>TrialStatus</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.UpdateAlgorithmExtraSettingsReply"><span class="badge">M</span>UpdateAlgorithmExtraSettingsReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest"><span class="badge">M</span>UpdateAlgorithmExtraSettingsRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.UpdateExperimentStatusReply"><span class="badge">M</span>UpdateExperimentStatusReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.UpdateExperimentStatusRequest"><span class="badge">M</span>UpdateExperimentStatusRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.UpdateTrialStatusReply"><span class="badge">M</span>UpdateTrialStatusReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.UpdateTrialStatusRequest"><span class="badge">M</span>UpdateTrialStatusRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.ValidateAlgorithmSettingsReply"><span class="badge">M</span>ValidateAlgorithmSettingsReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.ValidateAlgorithmSettingsRequest"><span class="badge">M</span>ValidateAlgorithmSettingsRequest</a>
+                </li>
+              
+              
+                <li>
+                  <a href="#api.v1.alpha2.ExperimentStatus.ExperimentConditionType"><span class="badge">E</span>ExperimentStatus.ExperimentConditionType</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.ObjectiveType"><span class="badge">E</span>ObjectiveType</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.ParameterType"><span class="badge">E</span>ParameterType</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.TrialStatus.TrialConditionType"><span class="badge">E</span>TrialStatus.TrialConditionType</a>
+                </li>
+              
+              
+              
+                <li>
+                  <a href="#api.v1.alpha2.EarlyStopping"><span class="badge">S</span>EarlyStopping</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.Manager"><span class="badge">S</span>Manager</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.Suggestion"><span class="badge">S</span>Suggestion</a>
+                </li>
+              
+            </ul>
+          </li>
+        
+        <li><a href="#scalar-value-types">Scalar Value Types</a></li>
+      </ul>
+    </div>
+
+    
+      
+      <div class="file-heading">
+        <h2 id="api.proto">api.proto</h2><a href="#title">Top</a>
+      </div>
+      <p>Katib API</p>
+
+      
+        <h3 id="api.v1.alpha2.AlgorithmSetting">AlgorithmSetting</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.AlgorithmSpec">AlgorithmSpec</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>algorithm_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>algorithm_setting</td>
+                  <td><a href="#api.v1.alpha2.AlgorithmSetting">AlgorithmSetting</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>early_stopping_spec</td>
+                  <td><a href="#api.v1.alpha2.EarlyStoppingSpec">EarlyStoppingSpec</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.DeleteExperimentReply">DeleteExperimentReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.DeleteExperimentRequest">DeleteExperimentRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.DeleteTrialReply">DeleteTrialReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.DeleteTrialRequest">DeleteTrialRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trial_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.EarlyStoppingSpec">EarlyStoppingSpec</h3>
+        <p>TODO</p>
+
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.Experiment">Experiment</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name of Experiment. This is unique in DB. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>experiment_spec</td>
+                  <td><a href="#api.v1.alpha2.ExperimentSpec">ExperimentSpec</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>experiment_status</td>
+                  <td><a href="#api.v1.alpha2.ExperimentStatus">ExperimentStatus</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.ExperimentSpec">ExperimentSpec</h3>
+        <p>Spec of a Experiment. Experiment represents a single optimization run over a feasible space. </p><p>Each Experiment contains a configuration describing the feasible space, as well as a set of Trials.</p><p>It is assumed that objective function f(x) does not change in the course of a Experiment.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>parameters</td>
+                  <td><a href="#api.v1.alpha2.ParameterSpec">ParameterSpec</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>objective</td>
+                  <td><a href="#api.v1.alpha2.ObjectiveSpec">ObjectiveSpec</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>algorithm</td>
+                  <td><a href="#api.v1.alpha2.AlgorithmSpec">AlgorithmSpec</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>trial_template</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>parallel_trial_count</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>max_trial_count</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>metrics_collector_type</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.ExperimentStatus">ExperimentStatus</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>start_time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>RFC3339 format </p></td>
+                </tr>
+              
+                <tr>
+                  <td>completion_time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>RFC3339 format </p></td>
+                </tr>
+              
+                <tr>
+                  <td>condition</td>
+                  <td><a href="#api.v1.alpha2.ExperimentStatus.ExperimentConditionType">ExperimentStatus.ExperimentConditionType</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.ExperimentSummary">ExperimentSummary</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>status</td>
+                  <td><a href="#api.v1.alpha2.ExperimentStatus">ExperimentStatus</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.FeasibleSpace">FeasibleSpace</h3>
+        <p>Feasible space for optimization.</p><p>Int and Double type use Max/Min.</p><p>Discrete and Categorical type use List.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>max</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Max Value </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Minimum Value </p></td>
+                </tr>
+              
+                <tr>
+                  <td>list</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p>List of Values. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>step</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Step for double or int parameter </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GetAlgorithmExtraSettingsReply">GetAlgorithmExtraSettingsReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>extra_algorithm_settings</td>
+                  <td><a href="#api.v1.alpha2.AlgorithmSetting">AlgorithmSetting</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GetAlgorithmExtraSettingsRequest">GetAlgorithmExtraSettingsRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GetExperimentListReply">GetExperimentListReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment_summaries</td>
+                  <td><a href="#api.v1.alpha2.ExperimentSummary">ExperimentSummary</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GetExperimentListRequest">GetExperimentListRequest</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GetExperimentReply">GetExperimentReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment</td>
+                  <td><a href="#api.v1.alpha2.Experiment">Experiment</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GetExperimentRequest">GetExperimentRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GetObservationLogReply">GetObservationLogReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>observation_log</td>
+                  <td><a href="#api.v1.alpha2.ObservationLog">ObservationLog</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GetObservationLogRequest">GetObservationLogRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trial_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GetSuggestionsReply">GetSuggestionsReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trials</td>
+                  <td><a href="#api.v1.alpha2.Trial">Trial</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GetSuggestionsRequest">GetSuggestionsRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>algorithm_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>request_number</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>The number of Suggestion you request at one time. When you set 3 to request_number, you can get three Suggestions at one time. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GetTrialListReply">GetTrialListReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trials</td>
+                  <td><a href="#api.v1.alpha2.Trial">Trial</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GetTrialListRequest">GetTrialListRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>start_time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>The start of the time range. RFC3339 format </p></td>
+                </tr>
+              
+                <tr>
+                  <td>end_time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>The end of the time range. RFC3339 format </p></td>
+                </tr>
+              
+                <tr>
+                  <td>filter</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GetTrialReply">GetTrialReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trial</td>
+                  <td><a href="#api.v1.alpha2.Trial">Trial</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GetTrialRequest">GetTrialRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trial_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GraphConfig">GraphConfig</h3>
+        <p>GraphConfig contains a config of DAG</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>num_layers</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Number of layers </p></td>
+                </tr>
+              
+                <tr>
+                  <td>input_size</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td>repeated</td>
+                  <td><p>Dimensions of input size </p></td>
+                </tr>
+              
+                <tr>
+                  <td>output_size</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td>repeated</td>
+                  <td><p>Dimensions of output size </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.Metric">Metric</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.MetricLog">MetricLog</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>time_stamp</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>RFC3339 format </p></td>
+                </tr>
+              
+                <tr>
+                  <td>metric</td>
+                  <td><a href="#api.v1.alpha2.Metric">Metric</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.NasConfig">NasConfig</h3>
+        <p>TODO add to AlgorithmSpec</p><p>NasConfig contains a config of NAS job</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>graph_config</td>
+                  <td><a href="#api.v1.alpha2.GraphConfig">GraphConfig</a></td>
+                  <td></td>
+                  <td><p>Config of DAG </p></td>
+                </tr>
+              
+                <tr>
+                  <td>operations</td>
+                  <td><a href="#api.v1.alpha2.NasConfig.Operations">NasConfig.Operations</a></td>
+                  <td></td>
+                  <td><p>List of Operation </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.NasConfig.Operations">NasConfig.Operations</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>operation</td>
+                  <td><a href="#api.v1.alpha2.Operation">Operation</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.ObjectiveSpec">ObjectiveSpec</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>type</td>
+                  <td><a href="#api.v1.alpha2.ObjectiveType">ObjectiveType</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>goal</td>
+                  <td><a href="#float">float</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>objective_metric_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>additional_metrics_names</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p>This can be empty if we only care about the objective metric. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.Observation">Observation</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>metrics</td>
+                  <td><a href="#api.v1.alpha2.Metric">Metric</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.ObservationLog">ObservationLog</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>metric_logs</td>
+                  <td><a href="#api.v1.alpha2.MetricLog">MetricLog</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.Operation">Operation</h3>
+        <p>Config for operations in DAG</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>operation_type</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Type of operation in DAG </p></td>
+                </tr>
+              
+                <tr>
+                  <td>parameter_specs</td>
+                  <td><a href="#api.v1.alpha2.ParameterSpec">ParameterSpec</a></td>
+                  <td>repeated</td>
+                  <td><p>List of ParameterSpec
+
+/ List of ParameterSpec </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.ParameterAssignment">ParameterAssignment</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.ParameterSpec">ParameterSpec</h3>
+        <p>Config for a Hyper parameter.</p><p>Katib will create each Hyper parameter from this config.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name of the parameter. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>parameter_type</td>
+                  <td><a href="#api.v1.alpha2.ParameterType">ParameterType</a></td>
+                  <td></td>
+                  <td><p>Type of the parameter. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>feasible_space</td>
+                  <td><a href="#api.v1.alpha2.FeasibleSpace">FeasibleSpace</a></td>
+                  <td></td>
+                  <td><p>FeasibleSpace for the parameter. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.RegisterExperimentReply">RegisterExperimentReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.RegisterExperimentRequest">RegisterExperimentRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment</td>
+                  <td><a href="#api.v1.alpha2.Experiment">Experiment</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.RegisterTrialReply">RegisterTrialReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.RegisterTrialRequest">RegisterTrialRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trial</td>
+                  <td><a href="#api.v1.alpha2.Trial">Trial</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.ReportObservationLogReply">ReportObservationLogReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.ReportObservationLogRequest">ReportObservationLogRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trial_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>observation_log</td>
+                  <td><a href="#api.v1.alpha2.ObservationLog">ObservationLog</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.Trial">Trial</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>spec</td>
+                  <td><a href="#api.v1.alpha2.TrialSpec">TrialSpec</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>status</td>
+                  <td><a href="#api.v1.alpha2.TrialStatus">TrialStatus</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.TrialSpec">TrialSpec</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>parameter_assignments</td>
+                  <td><a href="#api.v1.alpha2.ParameterAssignment">ParameterAssignment</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>run_spec</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.TrialStatus">TrialStatus</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>start_time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>RFC3339 format </p></td>
+                </tr>
+              
+                <tr>
+                  <td>completion_time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>RFC3339 format </p></td>
+                </tr>
+              
+                <tr>
+                  <td>condition</td>
+                  <td><a href="#api.v1.alpha2.TrialStatus.TrialConditionType">TrialStatus.TrialConditionType</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>observation</td>
+                  <td><a href="#api.v1.alpha2.Observation">Observation</a></td>
+                  <td></td>
+                  <td><p>The best observation in logs. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.UpdateAlgorithmExtraSettingsReply">UpdateAlgorithmExtraSettingsReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest">UpdateAlgorithmExtraSettingsRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>extra_algorithm_settings</td>
+                  <td><a href="#api.v1.alpha2.AlgorithmSetting">AlgorithmSetting</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.UpdateExperimentStatusReply">UpdateExperimentStatusReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.UpdateExperimentStatusRequest">UpdateExperimentStatusRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>new_status</td>
+                  <td><a href="#api.v1.alpha2.ExperimentStatus">ExperimentStatus</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.UpdateTrialStatusReply">UpdateTrialStatusReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.UpdateTrialStatusRequest">UpdateTrialStatusRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trial_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>new_status</td>
+                  <td><a href="#api.v1.alpha2.TrialStatus">TrialStatus</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.ValidateAlgorithmSettingsReply">ValidateAlgorithmSettingsReply</h3>
+        <p>Return INVALID_ARGUMENT Error if Algorithm Settings are not Valid</p>
+
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.ValidateAlgorithmSettingsRequest">ValidateAlgorithmSettingsRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment_spec</td>
+                  <td><a href="#api.v1.alpha2.ExperimentSpec">ExperimentSpec</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>algorithm_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+
+      
+        <h3 id="api.v1.alpha2.ExperimentStatus.ExperimentConditionType">ExperimentStatus.ExperimentConditionType</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>CREATED</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>RUNNING</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>RESTARTING</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>SUCCEEDED</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>FAILED</td>
+                <td>4</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="api.v1.alpha2.ObjectiveType">ObjectiveType</h3>
+        <p>Direction of optimization. Minimize or Maximize.</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>UNKNOWN</td>
+                <td>0</td>
+                <td><p>Undefined type and not used.</p></td>
+              </tr>
+            
+              <tr>
+                <td>MINIMIZE</td>
+                <td>1</td>
+                <td><p>Minimize</p></td>
+              </tr>
+            
+              <tr>
+                <td>MAXIMIZE</td>
+                <td>2</td>
+                <td><p>Maximize</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="api.v1.alpha2.ParameterType">ParameterType</h3>
+        <p>Types of value for HyperParameter.</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>UNKNOWN_TYPE</td>
+                <td>0</td>
+                <td><p>Undefined type and not used.</p></td>
+              </tr>
+            
+              <tr>
+                <td>DOUBLE</td>
+                <td>1</td>
+                <td><p>Double float type. Use &#34;Max/Min&#34;.</p></td>
+              </tr>
+            
+              <tr>
+                <td>INT</td>
+                <td>2</td>
+                <td><p>Int type. Use &#34;Max/Min&#34;.</p></td>
+              </tr>
+            
+              <tr>
+                <td>DISCRETE</td>
+                <td>3</td>
+                <td><p>Discrete number type. Use &#34;List&#34; as float.</p></td>
+              </tr>
+            
+              <tr>
+                <td>CATEGORICAL</td>
+                <td>4</td>
+                <td><p>Categorical type. Use &#34;List&#34; as string.</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="api.v1.alpha2.TrialStatus.TrialConditionType">TrialStatus.TrialConditionType</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>PENDING</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>RUNNING</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>COMPLETED</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>KILLED</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>FAILED</td>
+                <td>4</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+
+      
+
+      
+        <h3 id="api.v1.alpha2.EarlyStopping">EarlyStopping</h3>
+        <p>TODO</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="api.v1.alpha2.Manager">Manager</h3>
+        <p>Service for Main API for Katib</p><p>For each RPC service, we define mapping to HTTP REST API method.</p><p>The mapping includes the URL path, query parameters and request body.</p><p>https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>RegisterExperiment</td>
+                <td><a href="#api.v1.alpha2.RegisterExperimentRequest">RegisterExperimentRequest</a></td>
+                <td><a href="#api.v1.alpha2.RegisterExperimentReply">RegisterExperimentReply</a></td>
+                <td><p>Register a Experiment to DB.</p></td>
+              </tr>
+            
+              <tr>
+                <td>DeleteExperiment</td>
+                <td><a href="#api.v1.alpha2.DeleteExperimentRequest">DeleteExperimentRequest</a></td>
+                <td><a href="#api.v1.alpha2.DeleteExperimentReply">DeleteExperimentReply</a></td>
+                <td><p>Delete a Experiment from DB by name.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetExperiment</td>
+                <td><a href="#api.v1.alpha2.GetExperimentRequest">GetExperimentRequest</a></td>
+                <td><a href="#api.v1.alpha2.GetExperimentReply">GetExperimentReply</a></td>
+                <td><p>Get a Experiment from DB by name.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetExperimentList</td>
+                <td><a href="#api.v1.alpha2.GetExperimentListRequest">GetExperimentListRequest</a></td>
+                <td><a href="#api.v1.alpha2.GetExperimentListReply">GetExperimentListReply</a></td>
+                <td><p>Get a summary list of Experiment from DB.
+The summary includes name and condition.</p></td>
+              </tr>
+            
+              <tr>
+                <td>UpdateExperimentStatus</td>
+                <td><a href="#api.v1.alpha2.UpdateExperimentStatusRequest">UpdateExperimentStatusRequest</a></td>
+                <td><a href="#api.v1.alpha2.UpdateExperimentStatusReply">UpdateExperimentStatusReply</a></td>
+                <td><p>Update Status of a experiment.</p></td>
+              </tr>
+            
+              <tr>
+                <td>UpdateAlgorithmExtraSettings</td>
+                <td><a href="#api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest">UpdateAlgorithmExtraSettingsRequest</a></td>
+                <td><a href="#api.v1.alpha2.UpdateAlgorithmExtraSettingsReply">UpdateAlgorithmExtraSettingsReply</a></td>
+                <td><p>Update AlgorithmExtraSettings.
+The ExtraSetting is created if it does not exist, otherwise it is overwrited.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetAlgorithmExtraSettings</td>
+                <td><a href="#api.v1.alpha2.GetAlgorithmExtraSettingsRequest">GetAlgorithmExtraSettingsRequest</a></td>
+                <td><a href="#api.v1.alpha2.GetAlgorithmExtraSettingsReply">GetAlgorithmExtraSettingsReply</a></td>
+                <td><p>Get all AlgorithmExtraSettings.</p></td>
+              </tr>
+            
+              <tr>
+                <td>RegisterTrial</td>
+                <td><a href="#api.v1.alpha2.RegisterTrialRequest">RegisterTrialRequest</a></td>
+                <td><a href="#api.v1.alpha2.RegisterTrialReply">RegisterTrialReply</a></td>
+                <td><p>Register a Trial to DB.
+ID will be filled by manager automatically.</p></td>
+              </tr>
+            
+              <tr>
+                <td>DeleteTrial</td>
+                <td><a href="#api.v1.alpha2.DeleteTrialRequest">DeleteTrialRequest</a></td>
+                <td><a href="#api.v1.alpha2.DeleteTrialReply">DeleteTrialReply</a></td>
+                <td><p>Delete a Trial from DB by ID.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetTrialList</td>
+                <td><a href="#api.v1.alpha2.GetTrialListRequest">GetTrialListRequest</a></td>
+                <td><a href="#api.v1.alpha2.GetTrialListReply">GetTrialListReply</a></td>
+                <td><p>Get a list of Trial from DB by name of a Experiment.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetTrial</td>
+                <td><a href="#api.v1.alpha2.GetTrialRequest">GetTrialRequest</a></td>
+                <td><a href="#api.v1.alpha2.GetTrialReply">GetTrialReply</a></td>
+                <td><p>Get a Trial from DB by ID of Trial.</p></td>
+              </tr>
+            
+              <tr>
+                <td>UpdateTrialStatus</td>
+                <td><a href="#api.v1.alpha2.UpdateTrialStatusRequest">UpdateTrialStatusRequest</a></td>
+                <td><a href="#api.v1.alpha2.UpdateTrialStatusReply">UpdateTrialStatusReply</a></td>
+                <td><p>Update Status of a trial.</p></td>
+              </tr>
+            
+              <tr>
+                <td>ReportObservationLog</td>
+                <td><a href="#api.v1.alpha2.ReportObservationLogRequest">ReportObservationLogRequest</a></td>
+                <td><a href="#api.v1.alpha2.ReportObservationLogReply">ReportObservationLogReply</a></td>
+                <td><p>Report a log of Observations for a Trial.
+The log consists of timestamp and value of metric.
+Katib store every log of metrics.
+You can see accuracy curve or other metric logs on UI.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetObservationLog</td>
+                <td><a href="#api.v1.alpha2.GetObservationLogRequest">GetObservationLogRequest</a></td>
+                <td><a href="#api.v1.alpha2.GetObservationLogReply">GetObservationLogReply</a></td>
+                <td><p>Get all log of Observations for a Trial.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetSuggestions</td>
+                <td><a href="#api.v1.alpha2.GetSuggestionsRequest">GetSuggestionsRequest</a></td>
+                <td><a href="#api.v1.alpha2.GetSuggestionsReply">GetSuggestionsReply</a></td>
+                <td><p>Get Suggestions from a Suggestion service.</p></td>
+              </tr>
+            
+              <tr>
+                <td>ValidateAlgorithmSettings</td>
+                <td><a href="#api.v1.alpha2.ValidateAlgorithmSettingsRequest">ValidateAlgorithmSettingsRequest</a></td>
+                <td><a href="#api.v1.alpha2.ValidateAlgorithmSettingsReply">ValidateAlgorithmSettingsReply</a></td>
+                <td><p>Validate AlgorithmSettings in an Experiment.
+Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="api.v1.alpha2.Suggestion">Suggestion</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>GetSuggestions</td>
+                <td><a href="#api.v1.alpha2.GetSuggestionsRequest">GetSuggestionsRequest</a></td>
+                <td><a href="#api.v1.alpha2.GetSuggestionsReply">GetSuggestionsReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ValidateAlgorithmSettings</td>
+                <td><a href="#api.v1.alpha2.ValidateAlgorithmSettingsRequest">ValidateAlgorithmSettingsRequest</a></td>
+                <td><a href="#api.v1.alpha2.ValidateAlgorithmSettingsReply">ValidateAlgorithmSettingsReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+
+    <h2 id="scalar-value-types">Scalar Value Types</h2>
+    <table class="scalar-value-types-table">
+      <thead>
+        <tr><td>.proto Type</td><td>Notes</td><td>C++ Type</td><td>Java Type</td><td>Python Type</td></tr>
+      </thead>
+      <tbody>
+        
+          <tr id="double">
+            <td>double</td>
+            <td></td>
+            <td>double</td>
+            <td>double</td>
+            <td>float</td>
+          </tr>
+        
+          <tr id="float">
+            <td>float</td>
+            <td></td>
+            <td>float</td>
+            <td>float</td>
+            <td>float</td>
+          </tr>
+        
+          <tr id="int32">
+            <td>int32</td>
+            <td>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint32 instead.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+          </tr>
+        
+          <tr id="int64">
+            <td>int64</td>
+            <td>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint64 instead.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+          </tr>
+        
+          <tr id="uint32">
+            <td>uint32</td>
+            <td>Uses variable-length encoding.</td>
+            <td>uint32</td>
+            <td>int</td>
+            <td>int/long</td>
+          </tr>
+        
+          <tr id="uint64">
+            <td>uint64</td>
+            <td>Uses variable-length encoding.</td>
+            <td>uint64</td>
+            <td>long</td>
+            <td>int/long</td>
+          </tr>
+        
+          <tr id="sint32">
+            <td>sint32</td>
+            <td>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int32s.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+          </tr>
+        
+          <tr id="sint64">
+            <td>sint64</td>
+            <td>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int64s.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+          </tr>
+        
+          <tr id="fixed32">
+            <td>fixed32</td>
+            <td>Always four bytes. More efficient than uint32 if values are often greater than 2^28.</td>
+            <td>uint32</td>
+            <td>int</td>
+            <td>int</td>
+          </tr>
+        
+          <tr id="fixed64">
+            <td>fixed64</td>
+            <td>Always eight bytes. More efficient than uint64 if values are often greater than 2^56.</td>
+            <td>uint64</td>
+            <td>long</td>
+            <td>int/long</td>
+          </tr>
+        
+          <tr id="sfixed32">
+            <td>sfixed32</td>
+            <td>Always four bytes.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+          </tr>
+        
+          <tr id="sfixed64">
+            <td>sfixed64</td>
+            <td>Always eight bytes.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+          </tr>
+        
+          <tr id="bool">
+            <td>bool</td>
+            <td></td>
+            <td>bool</td>
+            <td>boolean</td>
+            <td>boolean</td>
+          </tr>
+        
+          <tr id="string">
+            <td>string</td>
+            <td>A string must always contain UTF-8 encoded or 7-bit ASCII text.</td>
+            <td>string</td>
+            <td>String</td>
+            <td>str/unicode</td>
+          </tr>
+        
+          <tr id="bytes">
+            <td>bytes</td>
+            <td>May contain any arbitrary sequence of bytes.</td>
+            <td>string</td>
+            <td>ByteString</td>
+            <td>str</td>
+          </tr>
+        
+      </tbody>
+    </table>
+  </body>
+</html>
+
