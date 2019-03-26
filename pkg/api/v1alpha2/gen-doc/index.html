@@ -187,10 +187,6 @@
                 </li>
               
                 <li>
-                  <a href="#api.v1.alpha2.AlgorithmVariable"><span class="badge">M</span>AlgorithmVariable</a>
-                </li>
-              
-                <li>
                   <a href="#api.v1.alpha2.DeleteExperimentReply"><span class="badge">M</span>DeleteExperimentReply</a>
                 </li>
               
@@ -231,11 +227,11 @@
                 </li>
               
                 <li>
-                  <a href="#api.v1.alpha2.GetAlgorithmVariablesReply"><span class="badge">M</span>GetAlgorithmVariablesReply</a>
+                  <a href="#api.v1.alpha2.GetAlgorithmExtraSettingsReply"><span class="badge">M</span>GetAlgorithmExtraSettingsReply</a>
                 </li>
               
                 <li>
-                  <a href="#api.v1.alpha2.GetAlgorithmVariablesRequest"><span class="badge">M</span>GetAlgorithmVariablesRequest</a>
+                  <a href="#api.v1.alpha2.GetAlgorithmExtraSettingsRequest"><span class="badge">M</span>GetAlgorithmExtraSettingsRequest</a>
                 </li>
               
                 <li>
@@ -367,11 +363,11 @@
                 </li>
               
                 <li>
-                  <a href="#api.v1.alpha2.UpdateAlgorithmVariablesReply"><span class="badge">M</span>UpdateAlgorithmVariablesReply</a>
+                  <a href="#api.v1.alpha2.UpdateAlgorithmExtraSettingsReply"><span class="badge">M</span>UpdateAlgorithmExtraSettingsReply</a>
                 </li>
               
                 <li>
-                  <a href="#api.v1.alpha2.UpdateAlgorithmVariablesRequest"><span class="badge">M</span>UpdateAlgorithmVariablesRequest</a>
+                  <a href="#api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest"><span class="badge">M</span>UpdateAlgorithmExtraSettingsRequest</a>
                 </li>
               
                 <li>
@@ -501,36 +497,6 @@
                 <tr>
                   <td>early_stopping_spec</td>
                   <td><a href="#api.v1.alpha2.EarlyStoppingSpec">EarlyStoppingSpec</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-        
-
-        
-      
-        <h3 id="api.v1.alpha2.AlgorithmVariable">AlgorithmVariable</h3>
-        <p></p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>name</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-                <tr>
-                  <td>value</td>
-                  <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
@@ -821,7 +787,7 @@
 
         
       
-        <h3 id="api.v1.alpha2.GetAlgorithmVariablesReply">GetAlgorithmVariablesReply</h3>
+        <h3 id="api.v1.alpha2.GetAlgorithmExtraSettingsReply">GetAlgorithmExtraSettingsReply</h3>
         <p></p>
 
         
@@ -832,8 +798,8 @@
             <tbody>
               
                 <tr>
-                  <td>algorithm_variables</td>
-                  <td><a href="#api.v1.alpha2.AlgorithmVariable">AlgorithmVariable</a></td>
+                  <td>extra_algorithm_settings</td>
+                  <td><a href="#api.v1.alpha2.AlgorithmSetting">AlgorithmSetting</a></td>
                   <td>repeated</td>
                   <td><p> </p></td>
                 </tr>
@@ -844,7 +810,7 @@
 
         
       
-        <h3 id="api.v1.alpha2.GetAlgorithmVariablesRequest">GetAlgorithmVariablesRequest</h3>
+        <h3 id="api.v1.alpha2.GetAlgorithmExtraSettingsRequest">GetAlgorithmExtraSettingsRequest</h3>
         <p></p>
 
         
@@ -1716,14 +1682,14 @@
 
         
       
-        <h3 id="api.v1.alpha2.UpdateAlgorithmVariablesReply">UpdateAlgorithmVariablesReply</h3>
+        <h3 id="api.v1.alpha2.UpdateAlgorithmExtraSettingsReply">UpdateAlgorithmExtraSettingsReply</h3>
         <p></p>
 
         
 
         
       
-        <h3 id="api.v1.alpha2.UpdateAlgorithmVariablesRequest">UpdateAlgorithmVariablesRequest</h3>
+        <h3 id="api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest">UpdateAlgorithmExtraSettingsRequest</h3>
         <p></p>
 
         
@@ -1741,8 +1707,8 @@
                 </tr>
               
                 <tr>
-                  <td>algorithm_variables</td>
-                  <td><a href="#api.v1.alpha2.AlgorithmVariable">AlgorithmVariable</a></td>
+                  <td>extra_algorithm_settings</td>
+                  <td><a href="#api.v1.alpha2.AlgorithmSetting">AlgorithmSetting</a></td>
                   <td>repeated</td>
                   <td><p> </p></td>
                 </tr>
@@ -2078,18 +2044,18 @@ The summary includes name and condition.</p></td>
               </tr>
             
               <tr>
-                <td>UpdateAlgorithmVariables</td>
-                <td><a href="#api.v1.alpha2.UpdateAlgorithmVariablesRequest">UpdateAlgorithmVariablesRequest</a></td>
-                <td><a href="#api.v1.alpha2.UpdateAlgorithmVariablesReply">UpdateAlgorithmVariablesReply</a></td>
-                <td><p>Update AlgorithmVariables.
-The Variable is created if it does not exist, otherwise it is overwrited.</p></td>
+                <td>UpdateAlgorithmExtraSettings</td>
+                <td><a href="#api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest">UpdateAlgorithmExtraSettingsRequest</a></td>
+                <td><a href="#api.v1.alpha2.UpdateAlgorithmExtraSettingsReply">UpdateAlgorithmExtraSettingsReply</a></td>
+                <td><p>Update AlgorithmExtraSettings.
+The ExtraSetting is created if it does not exist, otherwise it is overwrited.</p></td>
               </tr>
             
               <tr>
-                <td>GetAlgorithmVariables</td>
-                <td><a href="#api.v1.alpha2.GetAlgorithmVariablesRequest">GetAlgorithmVariablesRequest</a></td>
-                <td><a href="#api.v1.alpha2.GetAlgorithmVariablesReply">GetAlgorithmVariablesReply</a></td>
-                <td><p>Get all AlgorithmVariables.</p></td>
+                <td>GetAlgorithmExtraSettings</td>
+                <td><a href="#api.v1.alpha2.GetAlgorithmExtraSettingsRequest">GetAlgorithmExtraSettingsRequest</a></td>
+                <td><a href="#api.v1.alpha2.GetAlgorithmExtraSettingsReply">GetAlgorithmExtraSettingsReply</a></td>
+                <td><p>Get all AlgorithmExtraSettings.</p></td>
               </tr>
             
               <tr>

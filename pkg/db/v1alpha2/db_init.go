@@ -10,7 +10,7 @@ func (d *dbConn) DBInit() {
 
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS experiments
 		(id INT AUTO_INCREMENT PRIMARY KEY,
-		name VARCHAR(255),
+		name VARCHAR(255) NOT NULL UNIQUE,
 		parameters TEXT,
 		objective TEXT,
 		algorithm TEXT,
@@ -29,8 +29,8 @@ func (d *dbConn) DBInit() {
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS trials
 		(id INT AUTO_INCREMENT PRIMARY KEY,
-		trial_name VARCHAR(255),
-		experiment_name TEXT,
+		name VARCHAR(255) NOT NULL UNIQUE,
+		experiment_name TEXT NOT NULL,
 		parameter_assignments TEXT,
 		run_spec TEXT,
 		observation TEXT,
@@ -47,21 +47,21 @@ func (d *dbConn) DBInit() {
 		(trial_name VARCHAR(255) NOT NULL,
 		id INT AUTO_INCREMENT PRIMARY KEY,
 		time DATETIME(6),
-		metric_name VARCHAR(255),
-		value TEXT,
-		FOREIGN KEY (trial_name) REFERENCES trials(trial_name) ON DELETE CASCADE)`)
+		metric_name VARCHAR(255) NOT NULL,
+		value TEXT NOT NULL,
+		FOREIGN KEY (trial_name) REFERENCES trials(name) ON DELETE CASCADE)`)
 	if err != nil {
 		log.Fatalf("Error creating observation_logs table: %v", err)
 	}
 
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS algorithm_variables
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS extra_algorithm_settings
 		(experiment_name VARCHAR(255) NOT NULL,
 		id INT AUTO_INCREMENT PRIMARY KEY,
-		variable_name VARCHAR(255),
-		value TEXT,
+		setting_name VARCHAR(255) NOT NULL,
+		value TEXT NOT NULL,
 		FOREIGN KEY (experiment_name) REFERENCES experiments(name) ON DELETE CASCADE)`)
 	if err != nil {
-		log.Fatalf("Error creating observation_logs table: %v", err)
+		log.Fatalf("Error creating extra_algorithm_settings table: %v", err)
 	}
 
 }

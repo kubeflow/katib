@@ -43,15 +43,15 @@ class ManagerStub(object):
         request_serializer=api__pb2.UpdateExperimentStatusRequest.SerializeToString,
         response_deserializer=api__pb2.UpdateExperimentStatusReply.FromString,
         )
-    self.UpdateAlgorithmVariables = channel.unary_unary(
-        '/api.v1.alpha2.Manager/UpdateAlgorithmVariables',
-        request_serializer=api__pb2.UpdateAlgorithmVariablesRequest.SerializeToString,
-        response_deserializer=api__pb2.UpdateAlgorithmVariablesReply.FromString,
+    self.UpdateAlgorithmExtraSettings = channel.unary_unary(
+        '/api.v1.alpha2.Manager/UpdateAlgorithmExtraSettings',
+        request_serializer=api__pb2.UpdateAlgorithmExtraSettingsRequest.SerializeToString,
+        response_deserializer=api__pb2.UpdateAlgorithmExtraSettingsReply.FromString,
         )
-    self.GetAlgorithmVariables = channel.unary_unary(
-        '/api.v1.alpha2.Manager/GetAlgorithmVariables',
-        request_serializer=api__pb2.GetAlgorithmVariablesRequest.SerializeToString,
-        response_deserializer=api__pb2.GetAlgorithmVariablesReply.FromString,
+    self.GetAlgorithmExtraSettings = channel.unary_unary(
+        '/api.v1.alpha2.Manager/GetAlgorithmExtraSettings',
+        request_serializer=api__pb2.GetAlgorithmExtraSettingsRequest.SerializeToString,
+        response_deserializer=api__pb2.GetAlgorithmExtraSettingsReply.FromString,
         )
     self.RegisterTrial = channel.unary_unary(
         '/api.v1.alpha2.Manager/RegisterTrial',
@@ -149,18 +149,18 @@ class ManagerServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def UpdateAlgorithmVariables(self, request, context):
+  def UpdateAlgorithmExtraSettings(self, request, context):
     """* 
-    Update AlgorithmVariables.
-    The Variable is created if it does not exist, otherwise it is overwrited.
+    Update AlgorithmExtraSettings.
+    The ExtraSetting is created if it does not exist, otherwise it is overwrited.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def GetAlgorithmVariables(self, request, context):
+  def GetAlgorithmExtraSettings(self, request, context):
     """* 
-    Get all AlgorithmVariables.
+    Get all AlgorithmExtraSettings.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -271,15 +271,15 @@ def add_ManagerServicer_to_server(servicer, server):
           request_deserializer=api__pb2.UpdateExperimentStatusRequest.FromString,
           response_serializer=api__pb2.UpdateExperimentStatusReply.SerializeToString,
       ),
-      'UpdateAlgorithmVariables': grpc.unary_unary_rpc_method_handler(
-          servicer.UpdateAlgorithmVariables,
-          request_deserializer=api__pb2.UpdateAlgorithmVariablesRequest.FromString,
-          response_serializer=api__pb2.UpdateAlgorithmVariablesReply.SerializeToString,
+      'UpdateAlgorithmExtraSettings': grpc.unary_unary_rpc_method_handler(
+          servicer.UpdateAlgorithmExtraSettings,
+          request_deserializer=api__pb2.UpdateAlgorithmExtraSettingsRequest.FromString,
+          response_serializer=api__pb2.UpdateAlgorithmExtraSettingsReply.SerializeToString,
       ),
-      'GetAlgorithmVariables': grpc.unary_unary_rpc_method_handler(
-          servicer.GetAlgorithmVariables,
-          request_deserializer=api__pb2.GetAlgorithmVariablesRequest.FromString,
-          response_serializer=api__pb2.GetAlgorithmVariablesReply.SerializeToString,
+      'GetAlgorithmExtraSettings': grpc.unary_unary_rpc_method_handler(
+          servicer.GetAlgorithmExtraSettings,
+          request_deserializer=api__pb2.GetAlgorithmExtraSettingsRequest.FromString,
+          response_serializer=api__pb2.GetAlgorithmExtraSettingsReply.SerializeToString,
       ),
       'RegisterTrial': grpc.unary_unary_rpc_method_handler(
           servicer.RegisterTrial,

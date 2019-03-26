@@ -6,7 +6,6 @@
 - [api.proto](#api.proto)
     - [AlgorithmSetting](#api.v1.alpha2.AlgorithmSetting)
     - [AlgorithmSpec](#api.v1.alpha2.AlgorithmSpec)
-    - [AlgorithmVariable](#api.v1.alpha2.AlgorithmVariable)
     - [DeleteExperimentReply](#api.v1.alpha2.DeleteExperimentReply)
     - [DeleteExperimentRequest](#api.v1.alpha2.DeleteExperimentRequest)
     - [DeleteTrialReply](#api.v1.alpha2.DeleteTrialReply)
@@ -17,8 +16,8 @@
     - [ExperimentStatus](#api.v1.alpha2.ExperimentStatus)
     - [ExperimentSummary](#api.v1.alpha2.ExperimentSummary)
     - [FeasibleSpace](#api.v1.alpha2.FeasibleSpace)
-    - [GetAlgorithmVariablesReply](#api.v1.alpha2.GetAlgorithmVariablesReply)
-    - [GetAlgorithmVariablesRequest](#api.v1.alpha2.GetAlgorithmVariablesRequest)
+    - [GetAlgorithmExtraSettingsReply](#api.v1.alpha2.GetAlgorithmExtraSettingsReply)
+    - [GetAlgorithmExtraSettingsRequest](#api.v1.alpha2.GetAlgorithmExtraSettingsRequest)
     - [GetExperimentListReply](#api.v1.alpha2.GetExperimentListReply)
     - [GetExperimentListRequest](#api.v1.alpha2.GetExperimentListRequest)
     - [GetExperimentReply](#api.v1.alpha2.GetExperimentReply)
@@ -51,8 +50,8 @@
     - [Trial](#api.v1.alpha2.Trial)
     - [TrialSpec](#api.v1.alpha2.TrialSpec)
     - [TrialStatus](#api.v1.alpha2.TrialStatus)
-    - [UpdateAlgorithmVariablesReply](#api.v1.alpha2.UpdateAlgorithmVariablesReply)
-    - [UpdateAlgorithmVariablesRequest](#api.v1.alpha2.UpdateAlgorithmVariablesRequest)
+    - [UpdateAlgorithmExtraSettingsReply](#api.v1.alpha2.UpdateAlgorithmExtraSettingsReply)
+    - [UpdateAlgorithmExtraSettingsRequest](#api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest)
     - [UpdateExperimentStatusReply](#api.v1.alpha2.UpdateExperimentStatusReply)
     - [UpdateExperimentStatusRequest](#api.v1.alpha2.UpdateExperimentStatusRequest)
     - [UpdateTrialStatusReply](#api.v1.alpha2.UpdateTrialStatusReply)
@@ -109,22 +108,6 @@ Katib API
 | algorithm_name | [string](#string) |  |  |
 | algorithm_setting | [AlgorithmSetting](#api.v1.alpha2.AlgorithmSetting) | repeated |  |
 | early_stopping_spec | [EarlyStoppingSpec](#api.v1.alpha2.EarlyStoppingSpec) |  |  |
-
-
-
-
-
-
-<a name="api.v1.alpha2.AlgorithmVariable"/>
-
-### AlgorithmVariable
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| name | [string](#string) |  |  |
-| value | [string](#string) |  |  |
 
 
 
@@ -284,24 +267,24 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GetAlgorithmVariablesReply"/>
+<a name="api.v1.alpha2.GetAlgorithmExtraSettingsReply"/>
 
-### GetAlgorithmVariablesReply
+### GetAlgorithmExtraSettingsReply
 
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| algorithm_variables | [AlgorithmVariable](#api.v1.alpha2.AlgorithmVariable) | repeated |  |
+| extra_algorithm_settings | [AlgorithmSetting](#api.v1.alpha2.AlgorithmSetting) | repeated |  |
 
 
 
 
 
 
-<a name="api.v1.alpha2.GetAlgorithmVariablesRequest"/>
+<a name="api.v1.alpha2.GetAlgorithmExtraSettingsRequest"/>
 
-### GetAlgorithmVariablesRequest
+### GetAlgorithmExtraSettingsRequest
 
 
 
@@ -803,26 +786,26 @@ Katib will create each Hyper parameter from this config.
 
 
 
-<a name="api.v1.alpha2.UpdateAlgorithmVariablesReply"/>
+<a name="api.v1.alpha2.UpdateAlgorithmExtraSettingsReply"/>
 
-### UpdateAlgorithmVariablesReply
-
-
+### UpdateAlgorithmExtraSettingsReply
 
 
 
 
 
-<a name="api.v1.alpha2.UpdateAlgorithmVariablesRequest"/>
 
-### UpdateAlgorithmVariablesRequest
+
+<a name="api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest"/>
+
+### UpdateAlgorithmExtraSettingsRequest
 
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | experiment_name | [string](#string) |  |  |
-| algorithm_variables | [AlgorithmVariable](#api.v1.alpha2.AlgorithmVariable) | repeated |  |
+| extra_algorithm_settings | [AlgorithmSetting](#api.v1.alpha2.AlgorithmSetting) | repeated |  |
 
 
 
@@ -995,8 +978,8 @@ https://cloud.google.com/service-infrastructure/docs/service-management/referenc
 | GetExperiment | [GetExperimentRequest](#api.v1.alpha2.GetExperimentRequest) | [GetExperimentReply](#api.v1.alpha2.GetExperimentRequest) | Get a Experiment from DB by name. |
 | GetExperimentList | [GetExperimentListRequest](#api.v1.alpha2.GetExperimentListRequest) | [GetExperimentListReply](#api.v1.alpha2.GetExperimentListRequest) | Get a summary list of Experiment from DB. The summary includes name and condition. |
 | UpdateExperimentStatus | [UpdateExperimentStatusRequest](#api.v1.alpha2.UpdateExperimentStatusRequest) | [UpdateExperimentStatusReply](#api.v1.alpha2.UpdateExperimentStatusRequest) | Update Status of a experiment. |
-| UpdateAlgorithmVariables | [UpdateAlgorithmVariablesRequest](#api.v1.alpha2.UpdateAlgorithmVariablesRequest) | [UpdateAlgorithmVariablesReply](#api.v1.alpha2.UpdateAlgorithmVariablesRequest) | Update AlgorithmVariables. The Variable is created if it does not exist, otherwise it is overwrited. |
-| GetAlgorithmVariables | [GetAlgorithmVariablesRequest](#api.v1.alpha2.GetAlgorithmVariablesRequest) | [GetAlgorithmVariablesReply](#api.v1.alpha2.GetAlgorithmVariablesRequest) | Get all AlgorithmVariables. |
+| UpdateAlgorithmExtraSettings | [UpdateAlgorithmExtraSettingsRequest](#api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest) | [UpdateAlgorithmExtraSettingsReply](#api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest) | Update AlgorithmExtraSettings. The ExtraSetting is created if it does not exist, otherwise it is overwrited. |
+| GetAlgorithmExtraSettings | [GetAlgorithmExtraSettingsRequest](#api.v1.alpha2.GetAlgorithmExtraSettingsRequest) | [GetAlgorithmExtraSettingsReply](#api.v1.alpha2.GetAlgorithmExtraSettingsRequest) | Get all AlgorithmExtraSettings. |
 | RegisterTrial | [RegisterTrialRequest](#api.v1.alpha2.RegisterTrialRequest) | [RegisterTrialReply](#api.v1.alpha2.RegisterTrialRequest) | Register a Trial to DB. ID will be filled by manager automatically. |
 | DeleteTrial | [DeleteTrialRequest](#api.v1.alpha2.DeleteTrialRequest) | [DeleteTrialReply](#api.v1.alpha2.DeleteTrialRequest) | Delete a Trial from DB by ID. |
 | GetTrialList | [GetTrialListRequest](#api.v1.alpha2.GetTrialListRequest) | [GetTrialListReply](#api.v1.alpha2.GetTrialListRequest) | Get a list of Trial from DB by name of a Experiment. |
