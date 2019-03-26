@@ -1,4 +1,6 @@
 import * as actions from '../actions/generalActions';
+import * as nasCreateActions from '../actions/nasCreateActions';
+import * as hpCreateActions from '../actions/hpCreateActions';
 
 const initialState = {
     menuOpen: false,
@@ -30,7 +32,7 @@ const generalReducer = (state = initialState, action) => {
             return {
                 ...state,
                 snackOpen: true,
-                snackText: "Whoops, something went wrong",
+                snackText: action.message,
             }
         case actions.DELETE_JOB_FAILURE:
             return {
@@ -56,6 +58,44 @@ const generalReducer = (state = initialState, action) => {
             return {
                 ...state,
                 deleteDialog: false,
+            }
+        case nasCreateActions.SUBMIT_NAS_JOB_REQUEST:
+            return {
+                ...state,
+                loading: true,
+            }
+        case nasCreateActions.SUBMIT_NAS_JOB_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                snackOpen: true,
+                snackText: "Successfully submitted",
+            }
+        case nasCreateActions.SUBMIT_NAS_JOB_FAILURE:
+            return {
+                ...state,
+                loading: false,
+                snackOpen: true,
+                snackText: action.message,
+            }
+        case hpCreateActions.SUBMIT_HP_JOB_REQUEST:
+            return {
+                ...state,
+                loading: true,
+            }
+        case hpCreateActions.SUBMIT_HP_JOB_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                snackOpen: true,
+                snackText: "Successfully submitted",
+            }
+        case hpCreateActions.SUBMIT_HP_JOB_FAILURE:
+            return {
+                ...state,
+                loading: false,
+                snackOpen: true,
+                snackText: action.message,
             }
         default:
             return state;

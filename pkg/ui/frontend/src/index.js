@@ -24,6 +24,9 @@ const theme = createMuiTheme({
             main: '#fff',
         },
     },
+    typography: {
+        fontFamily: 'open sans,-apple-system,BlinkMacSystemFont,segoe ui,Roboto,helvetica neue,Arial,sans-serif,apple color emoji,segoe ui emoji,segoe ui symbol',
+    }
 });
 
 

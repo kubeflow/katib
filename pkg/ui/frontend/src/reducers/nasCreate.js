@@ -153,6 +153,8 @@ const initialState = {
         }
     ],
     currentYaml: '',
+    snackText: '',
+    snackOpen: false,
 };
 
 const filterValue = (obj, key) => {
@@ -160,7 +162,6 @@ const filterValue = (obj, key) => {
 };
 
 const nasCreateReducer = (state = initialState, action) => {
-    console.log(state)
     switch (action.type) {
         case actions.CHANGE_YAML:
             return {
@@ -263,7 +264,17 @@ const nasCreateReducer = (state = initialState, action) => {
         case actions.ADD_PARAMETER:
             operations = state.operations.slice();
             operations[action.opIndex].parameterconfigs.push(
-               {name: "", parameterType: ""}
+               {
+                name: "",
+                parameterType: "categorical",
+                name: "",
+                feasible: "list",
+                min: "",
+                max: "",
+                step: "",
+                list: [
+                ],
+               }
             )
             return {
                 ...state,
@@ -336,6 +347,11 @@ const nasCreateReducer = (state = initialState, action) => {
             return {
                 ...state,
                 metricsName: metricsName,
+            }
+        case actions.CLOSE_SNACKBAR:
+            return {
+                ...state,
+                snackOpen: false,
             }
         default:
             return state;

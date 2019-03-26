@@ -375,6 +375,7 @@ export const submitYaml = function *() {
             } else {
                 yield put({
                     type: generalActions.SUBMIT_YAML_FAILURE,
+                    message: result.message,
                 }) 
             }
         } catch (err) {
@@ -397,9 +398,10 @@ const goSubmitYaml = function *(yaml) {
         )
         return result
     } catch (err) {
-        yield put({
-            type: generalActions.SUBMIT_YAML_FAILURE,
-        })
+        return {
+            status: 500,
+            message: err.response.data,
+        }
     }
 }
 
@@ -457,6 +459,7 @@ export const submitHPJob = function *() {
             } else {
                 yield put({
                     type: hpCreateActions.SUBMIT_HP_JOB_FAILURE,
+                    message: result.message,
                 }) 
             }
         } catch (err) {
@@ -479,9 +482,10 @@ const goSubmitHPJob = function *(postData) {
         )
         return result
     } catch (err) {
-        yield put({
-            type: hpCreateActions.SUBMIT_HP_JOB_FAILURE,
-        })
+        return {
+            status: 500,
+            message: err.response.data,
+        }
     }
 }
 
@@ -500,6 +504,7 @@ export const submitNASJob = function *() {
             } else {
                 yield put({
                     type: nasCreateActions.SUBMIT_NAS_JOB_FAILURE,
+                    message: result.message,
                 }) 
             }
         } catch (err) {
@@ -522,9 +527,10 @@ const goSubmitNASJob = function *(postData) {
         )
         return result
     } catch (err) {
-        yield put({
-            type: nasCreateActions.SUBMIT_NAS_JOB_FAILURE,
-        })
+        return {
+            status: 500,
+            message: err.response.data,
+        }
     }
 }
 

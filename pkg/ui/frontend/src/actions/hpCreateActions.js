@@ -39,23 +39,23 @@ export const editMetrics = (index, value) => ({
     index, value,
 })
 
-export const ADD_PARAMETER = "CHANGE_PARAMETER";
+export const ADD_PARAMETER_HP = "CHANGE_PARAMETER_HP";
 
 export const addParameter = () => ({
-    type: ADD_PARAMETER,
+    type: ADD_PARAMETER_HP,
 })
 
-export const EDIT_PARAMETER = "EDIT_PARAMTER";
+export const EDIT_PARAMETER_HP = "EDIT_PARAMTER_HP";
 
 export const editParameter = (index, field, value) => ({
-    type: EDIT_PARAMETER,
+    type: EDIT_PARAMETER_HP,
     index, field, value,
 })
 
-export const DELETE_PARAMETER = "DELETE_PARAMETER";
+export const DELETE_PARAMETER_HP = "DELETE_PARAMETER_HP";
 
 export const deleteParameter = (index) => ({
-    type: DELETE_PARAMETER,
+    type: DELETE_PARAMETER_HP,
     index,
 })
 

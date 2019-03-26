@@ -172,3 +172,9 @@ export const submitNASJob = (data) => ({
     type: SUBMIT_NAS_JOB_REQUEST,
     data,
 })
+
+export const CLOSE_SNACKBAR = "CLOSE_SNACKBAR";
+
+export const closeSnackbar = () => ({
+    type: CLOSE_SNACKBAR,
+})

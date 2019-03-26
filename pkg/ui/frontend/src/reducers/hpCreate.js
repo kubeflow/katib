@@ -127,21 +127,28 @@ const hpCreateReducer = (state = initialState, action) => {
                 ...state,
                 commonParametersSpec: spec,
             }
-        case actions.ADD_PARAMETER:
+        case actions.ADD_PARAMETER_HP:
             let params = state.parameterConfig.slice();
-            params.push({name: "", parameterType: ""})
+            params.push({
+                name: "",
+                parameterType: "",
+                feasible: "feasible",
+                min: "",
+                max: "",
+                list: [],
+            })
             return {
                 ...state,
                 parameterConfig: params,
             }
-        case actions.EDIT_PARAMETER:
+        case actions.EDIT_PARAMETER_HP:
             params = state.parameterConfig.slice();
             params[action.index][action.field] = action.value;
             return {
                 ...state,
                 parameterConfig: params,
             }
-        case actions.DELETE_PARAMETER:
+        case actions.DELETE_PARAMETER_HP:
             params = state.parameterConfig.slice();
             params.splice(action.index, 1);
             return {
@@ -202,21 +209,6 @@ const hpCreateReducer = (state = initialState, action) => {
             return {
                 ...state,
                 suggestionParameters: suggestionParameters,
-            }
-        case actions.SUBMIT_HP_JOB_REQUEST:
-            return {
-                ...state,
-                loading: true,
-            }
-        case actions.SUBMIT_HP_JOB_SUCCESS:
-            return {
-                ...state,
-                loading: false,
-            }
-        case actions.SUBMIT_HP_JOB_FAILURE:
-            return {
-                ...state,
-                loading: false,
             }
         case actions.CHANGE_REQUEST_NUMBER:
             return {

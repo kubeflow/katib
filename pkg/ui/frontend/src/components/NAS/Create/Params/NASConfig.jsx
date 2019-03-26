@@ -225,7 +225,7 @@ const NASConfig = (props) => {
                             <div className={classes.section}>
                                 <Grid container spacing={24}>
                                     <Grid item xs={4}>
-                                        <Typography variant={"body1"}>
+                                        <Typography variant={"h5"}>
                                             OperationType
                                         </Typography>
                                     </Grid>
