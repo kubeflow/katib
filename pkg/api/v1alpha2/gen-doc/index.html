@@ -187,6 +187,10 @@
                 </li>
               
                 <li>
+                  <a href="#api.v1.alpha2.AlgorithmVariable"><span class="badge">M</span>AlgorithmVariable</a>
+                </li>
+              
+                <li>
                   <a href="#api.v1.alpha2.DeleteExperimentReply"><span class="badge">M</span>DeleteExperimentReply</a>
                 </li>
               
@@ -224,6 +228,14 @@
               
                 <li>
                   <a href="#api.v1.alpha2.FeasibleSpace"><span class="badge">M</span>FeasibleSpace</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetAlgorithmVariablesReply"><span class="badge">M</span>GetAlgorithmVariablesReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.GetAlgorithmVariablesRequest"><span class="badge">M</span>GetAlgorithmVariablesRequest</a>
                 </li>
               
                 <li>
@@ -311,10 +323,6 @@
                 </li>
               
                 <li>
-                  <a href="#api.v1.alpha2.Operation.ParameterAssignments"><span class="badge">M</span>Operation.ParameterAssignments</a>
-                </li>
-              
-                <li>
                   <a href="#api.v1.alpha2.ParameterAssignment"><span class="badge">M</span>ParameterAssignment</a>
                 </li>
               
@@ -359,11 +367,11 @@
                 </li>
               
                 <li>
-                  <a href="#api.v1.alpha2.UpdateAlgorithmSpecReply"><span class="badge">M</span>UpdateAlgorithmSpecReply</a>
+                  <a href="#api.v1.alpha2.UpdateAlgorithmVariablesReply"><span class="badge">M</span>UpdateAlgorithmVariablesReply</a>
                 </li>
               
                 <li>
-                  <a href="#api.v1.alpha2.UpdateAlgorithmSpecRequest"><span class="badge">M</span>UpdateAlgorithmSpecRequest</a>
+                  <a href="#api.v1.alpha2.UpdateAlgorithmVariablesRequest"><span class="badge">M</span>UpdateAlgorithmVariablesRequest</a>
                 </li>
               
                 <li>
@@ -493,6 +501,36 @@
                 <tr>
                   <td>early_stopping_spec</td>
                   <td><a href="#api.v1.alpha2.EarlyStoppingSpec">EarlyStoppingSpec</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.AlgorithmVariable">AlgorithmVariable</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
@@ -783,6 +821,52 @@
 
         
       
+        <h3 id="api.v1.alpha2.GetAlgorithmVariablesReply">GetAlgorithmVariablesReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>algorithm_variables</td>
+                  <td><a href="#api.v1.alpha2.AlgorithmVariable">AlgorithmVariable</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.GetAlgorithmVariablesRequest">GetAlgorithmVariablesRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
         <h3 id="api.v1.alpha2.GetExperimentListReply">GetExperimentListReply</h3>
         <p></p>
 
@@ -956,7 +1040,7 @@
                   <td>request_number</td>
                   <td><a href="#int32">int32</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>The number of Suggestion you request at one time. When you set 3 to request_number, you can get three Suggestions at one time. </p></td>
                 </tr>
               
             </tbody>
@@ -1306,7 +1390,7 @@
             <tbody>
               
                 <tr>
-                  <td>metriclogs</td>
+                  <td>metric_logs</td>
                   <td><a href="#api.v1.alpha2.MetricLog">MetricLog</a></td>
                   <td>repeated</td>
                   <td><p> </p></td>
@@ -1336,33 +1420,12 @@
                 </tr>
               
                 <tr>
-                  <td>parameter_assignments</td>
-                  <td><a href="#api.v1.alpha2.Operation.ParameterAssignments">Operation.ParameterAssignments</a></td>
-                  <td></td>
-                  <td><p>List of ParameterAssignments </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-        
-
-        
-      
-        <h3 id="api.v1.alpha2.Operation.ParameterAssignments">Operation.ParameterAssignments</h3>
-        <p>List of ParameterAssignment</p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>assignments</td>
-                  <td><a href="#api.v1.alpha2.ParameterAssignment">ParameterAssignment</a></td>
+                  <td>parameter_specs</td>
+                  <td><a href="#api.v1.alpha2.ParameterSpec">ParameterSpec</a></td>
                   <td>repeated</td>
-                  <td><p> </p></td>
+                  <td><p>List of ParameterSpec
+
+/ List of ParameterSpec </p></td>
                 </tr>
               
             </tbody>
@@ -1653,14 +1716,14 @@
 
         
       
-        <h3 id="api.v1.alpha2.UpdateAlgorithmSpecReply">UpdateAlgorithmSpecReply</h3>
+        <h3 id="api.v1.alpha2.UpdateAlgorithmVariablesReply">UpdateAlgorithmVariablesReply</h3>
         <p></p>
 
         
 
         
       
-        <h3 id="api.v1.alpha2.UpdateAlgorithmSpecRequest">UpdateAlgorithmSpecRequest</h3>
+        <h3 id="api.v1.alpha2.UpdateAlgorithmVariablesRequest">UpdateAlgorithmVariablesRequest</h3>
         <p></p>
 
         
@@ -1678,9 +1741,9 @@
                 </tr>
               
                 <tr>
-                  <td>new_algorithm_spec</td>
-                  <td><a href="#api.v1.alpha2.AlgorithmSpec">AlgorithmSpec</a></td>
-                  <td></td>
+                  <td>algorithm_variables</td>
+                  <td><a href="#api.v1.alpha2.AlgorithmVariable">AlgorithmVariable</a></td>
+                  <td>repeated</td>
                   <td><p> </p></td>
                 </tr>
               
@@ -2015,10 +2078,18 @@ The summary includes name and condition.</p></td>
               </tr>
             
               <tr>
-                <td>UpdateAlgorithmSpec</td>
-                <td><a href="#api.v1.alpha2.UpdateAlgorithmSpecRequest">UpdateAlgorithmSpecRequest</a></td>
-                <td><a href="#api.v1.alpha2.UpdateAlgorithmSpecReply">UpdateAlgorithmSpecReply</a></td>
-                <td><p>Update AlgorithmParameter of a experiment.</p></td>
+                <td>UpdateAlgorithmVariables</td>
+                <td><a href="#api.v1.alpha2.UpdateAlgorithmVariablesRequest">UpdateAlgorithmVariablesRequest</a></td>
+                <td><a href="#api.v1.alpha2.UpdateAlgorithmVariablesReply">UpdateAlgorithmVariablesReply</a></td>
+                <td><p>Update AlgorithmVariables.
+The Variable is created if it does not exist, otherwise it is overwrited.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetAlgorithmVariables</td>
+                <td><a href="#api.v1.alpha2.GetAlgorithmVariablesRequest">GetAlgorithmVariablesRequest</a></td>
+                <td><a href="#api.v1.alpha2.GetAlgorithmVariablesReply">GetAlgorithmVariablesReply</a></td>
+                <td><p>Get all AlgorithmVariables.</p></td>
               </tr>
             
               <tr>

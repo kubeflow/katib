@@ -65,6 +65,31 @@
         ]
       }
     },
+    "/api/Manager/GetAlgorithmVariables/{experiment_name}": {
+      "get": {
+        "summary": "* \nGet all AlgorithmVariables.",
+        "operationId": "GetAlgorithmVariables",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2GetAlgorithmVariablesReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "experiment_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
     "/api/Manager/GetExperiment/{experiment_name}": {
       "get": {
         "summary": "* \nGet a Experiment from DB by name.",
@@ -308,15 +333,15 @@
         ]
       }
     },
-    "/api/Manager/UpdateAlgorithmSpec/{experiment_name}": {
+    "/api/Manager/UpdateAlgorithmVariables/{experiment_name}": {
       "put": {
-        "summary": "* \nUpdate AlgorithmParameter of a experiment.",
-        "operationId": "UpdateAlgorithmSpec",
+        "summary": "* \nUpdate AlgorithmVariables.\nThe Variable is created if it does not exist, otherwise it is overwrited.",
+        "operationId": "UpdateAlgorithmVariables",
         "responses": {
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/alpha2UpdateAlgorithmSpecReply"
+              "$ref": "#/definitions/alpha2UpdateAlgorithmVariablesReply"
             }
           }
         },
@@ -332,7 +357,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/alpha2UpdateAlgorithmSpecRequest"
+              "$ref": "#/definitions/alpha2UpdateAlgorithmVariablesRequest"
             }
           }
         ],
@@ -480,6 +505,17 @@
         }
       }
     },
+    "alpha2AlgorithmVariable": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
     "alpha2DeleteExperimentReply": {
       "type": "object"
     },
@@ -580,6 +616,17 @@
         }
       },
       "description": "*\nFeasible space for optimization.\nInt and Double type use Max/Min.\nDiscrete and Categorical type use List."
+    },
+    "alpha2GetAlgorithmVariablesReply": {
+      "type": "object",
+      "properties": {
+        "algorithm_variables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha2AlgorithmVariable"
+          }
+        }
+      }
     },
     "alpha2GetExperimentListReply": {
       "type": "object",
@@ -720,7 +767,7 @@
     "alpha2ObservationLog": {
       "type": "object",
       "properties": {
-        "metriclogs": {
+        "metric_logs": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/alpha2MetricLog"
@@ -834,17 +881,20 @@
         }
       }
     },
-    "alpha2UpdateAlgorithmSpecReply": {
+    "alpha2UpdateAlgorithmVariablesReply": {
       "type": "object"
     },
-    "alpha2UpdateAlgorithmSpecRequest": {
+    "alpha2UpdateAlgorithmVariablesRequest": {
       "type": "object",
       "properties": {
         "experiment_name": {
           "type": "string"
         },
-        "new_algorithm_spec": {
-          "$ref": "#/definitions/alpha2AlgorithmSpec"
+        "algorithm_variables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha2AlgorithmVariable"
+          }
         }
       }
     },

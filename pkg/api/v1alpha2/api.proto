@@ -63,12 +63,22 @@ service Manager {
     };
 
     /** 
-     * Update AlgorithmParameter of a experiment.
+     * Update AlgorithmVariables.
+     * The Variable is created if it does not exist, otherwise it is overwrited.
      */
-    rpc UpdateAlgorithmSpec(UpdateAlgorithmSpecRequest) returns (UpdateAlgorithmSpecReply){
+    rpc UpdateAlgorithmVariables(UpdateAlgorithmVariablesRequest) returns (UpdateAlgorithmVariablesReply){
         option (google.api.http) = {
-            put: "/api/Manager/UpdateAlgorithmSpec/{experiment_name}",
+            put: "/api/Manager/UpdateAlgorithmVariables/{experiment_name}",
             body: "*"
+        };
+    };
+
+    /** 
+     * Get all AlgorithmVariables.
+     */
+    rpc GetAlgorithmVariables(GetAlgorithmVariablesRequest) returns (GetAlgorithmVariablesReply){
+        option (google.api.http) = {
+            get: "/api/Manager/GetAlgorithmVariables/{experiment_name}",
         };
     };
 
@@ -267,12 +277,9 @@ message AlgorithmSpec {
  message Operation {
      string operation_type = 1; /// Type of operation in DAG
       /** 
-     * List of ParameterAssignment
+     * List of ParameterSpec
      */
-     message ParameterAssignments {
-        repeated ParameterAssignment assignments = 1;
-    }
-    ParameterAssignments parameter_assignments = 2; /// List of ParameterAssignments
+    repeated ParameterSpec parameter_specs = 2; /// List of ParameterSpec
 }
 
 /**
@@ -400,12 +407,24 @@ message UpdateExperimentStatusRequest {
 message UpdateExperimentStatusReply {
 }
 
-message UpdateAlgorithmSpecRequest {
+message AlgorithmVariable {
+    string name = 1;
+    string value = 2;
+}
+message UpdateAlgorithmVariablesRequest {
     string experiment_name = 1;
-    AlgorithmSpec new_algorithm_spec = 2;
+    repeated AlgorithmVariable algorithm_variables = 2;
 }
 
-message UpdateAlgorithmSpecReply {
+message UpdateAlgorithmVariablesReply {
+}
+
+message GetAlgorithmVariablesRequest {
+    string experiment_name = 1;
+}
+
+message GetAlgorithmVariablesReply {
+    repeated AlgorithmVariable algorithm_variables = 1;
 }
 
 message RegisterTrialRequest {
@@ -468,7 +487,7 @@ message GetObservationLogReply {
 message GetSuggestionsRequest {
     string experiment_name = 1;
     string algorithm_name = 2;
-    int32 request_number = 3;
+    int32 request_number = 3; ///The number of Suggestion you request at one time. When you set 3 to request_number, you can get three Suggestions at one time.
 }
 
 message GetSuggestionsReply {

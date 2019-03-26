@@ -44,12 +44,22 @@ func (d *dbConn) DBInit() {
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS observation_logs
-		(trial_name INT NOT NULL,
+		(trial_name VARCHAR(255) NOT NULL,
 		id INT AUTO_INCREMENT PRIMARY KEY,
 		time DATETIME(6),
 		metric_name VARCHAR(255),
 		value TEXT,
-		FOREIGN KEY (trial_id) REFERENCES trials(id) ON DELETE CASCADE)`)
+		FOREIGN KEY (trial_name) REFERENCES trials(trial_name) ON DELETE CASCADE)`)
+	if err != nil {
+		log.Fatalf("Error creating observation_logs table: %v", err)
+	}
+
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS algorithm_variables
+		(experiment_name VARCHAR(255) NOT NULL,
+		id INT AUTO_INCREMENT PRIMARY KEY,
+		variable_name VARCHAR(255),
+		value TEXT,
+		FOREIGN KEY (experiment_name) REFERENCES experiments(name) ON DELETE CASCADE)`)
 	if err != nil {
 		log.Fatalf("Error creating observation_logs table: %v", err)
 	}

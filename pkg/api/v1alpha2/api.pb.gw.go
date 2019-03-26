@@ -135,8 +135,8 @@ func request_Manager_UpdateExperimentStatus_0(ctx context.Context, marshaler run
 
 }
 
-func request_Manager_UpdateAlgorithmSpec_0(ctx context.Context, marshaler runtime.Marshaler, client ManagerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq UpdateAlgorithmSpecRequest
+func request_Manager_UpdateAlgorithmVariables_0(ctx context.Context, marshaler runtime.Marshaler, client ManagerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq UpdateAlgorithmVariablesRequest
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -161,7 +161,34 @@ func request_Manager_UpdateAlgorithmSpec_0(ctx context.Context, marshaler runtim
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "experiment_name", err)
 	}
 
-	msg, err := client.UpdateAlgorithmSpec(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.UpdateAlgorithmVariables(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func request_Manager_GetAlgorithmVariables_0(ctx context.Context, marshaler runtime.Marshaler, client ManagerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetAlgorithmVariablesRequest
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["experiment_name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "experiment_name")
+	}
+
+	protoReq.ExperimentName, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "experiment_name", err)
+	}
+
+	msg, err := client.GetAlgorithmVariables(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
@@ -522,7 +549,7 @@ func RegisterManagerHandler(ctx context.Context, mux *runtime.ServeMux, conn *gr
 
 	})
 
-	mux.Handle("PUT", pattern_Manager_UpdateAlgorithmSpec_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_Manager_UpdateAlgorithmVariables_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
@@ -540,14 +567,43 @@ func RegisterManagerHandler(ctx context.Context, mux *runtime.ServeMux, conn *gr
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Manager_UpdateAlgorithmSpec_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Manager_UpdateAlgorithmVariables_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Manager_UpdateAlgorithmSpec_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Manager_UpdateAlgorithmVariables_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_Manager_GetAlgorithmVariables_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+		if cn, ok := w.(http.CloseNotifier); ok {
+			go func(done <-chan struct{}, closed <-chan bool) {
+				select {
+				case <-done:
+				case <-closed:
+					cancel()
+				}
+			}(ctx.Done(), cn.CloseNotify())
+		}
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Manager_GetAlgorithmVariables_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Manager_GetAlgorithmVariables_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -826,7 +882,9 @@ var (
 
 	pattern_Manager_UpdateExperimentStatus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "Manager", "UpdateExperimentStatus", "experiment_name"}, ""))
 
-	pattern_Manager_UpdateAlgorithmSpec_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "Manager", "UpdateAlgorithmSpec", "experiment_name"}, ""))
+	pattern_Manager_UpdateAlgorithmVariables_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "Manager", "UpdateAlgorithmVariables", "experiment_name"}, ""))
+
+	pattern_Manager_GetAlgorithmVariables_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "Manager", "GetAlgorithmVariables", "experiment_name"}, ""))
 
 	pattern_Manager_RegisterTrial_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "Manager", "RegisterTrial"}, ""))
 
@@ -858,7 +916,9 @@ var (
 
 	forward_Manager_UpdateExperimentStatus_0 = runtime.ForwardResponseMessage
 
-	forward_Manager_UpdateAlgorithmSpec_0 = runtime.ForwardResponseMessage
+	forward_Manager_UpdateAlgorithmVariables_0 = runtime.ForwardResponseMessage
+
+	forward_Manager_GetAlgorithmVariables_0 = runtime.ForwardResponseMessage
 
 	forward_Manager_RegisterTrial_0 = runtime.ForwardResponseMessage
 
