@@ -19,7 +19,6 @@ import (
 	"context"
 	"log"
 	"strconv"
-	"sync"
 
 	"github.com/kubeflow/katib/pkg"
 	katibapi "github.com/kubeflow/katib/pkg/api"
@@ -79,7 +78,7 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) (reconcile.Reconciler, error) {
-	return &ReconcileStudyJobController{Client: mgr.GetClient(), scheme: mgr.GetScheme(), muxMap: sync.Map{}}, nil
+	return &ReconcileStudyJobController{Client: mgr.GetClient(), scheme: mgr.GetScheme()}, nil
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -175,7 +174,6 @@ var _ reconcile.Reconciler = &ReconcileStudyJobController{}
 type ReconcileStudyJobController struct {
 	client.Client
 	scheme *runtime.Scheme
-	muxMap sync.Map
 }
 
 type WorkerStatus struct {
@@ -193,19 +191,9 @@ type WorkerStatus struct {
 func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the StudyJob instance
 	instance := &katibv1alpha1.StudyJob{}
-	mux := new(sync.Mutex)
-	if m, loaded := r.muxMap.LoadOrStore(request.NamespacedName.String(), mux); loaded {
-		mux, _ = m.(*sync.Mutex)
-	}
-	mux.Lock()
-	defer mux.Unlock()
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			if _, ok := r.muxMap.Load(request.NamespacedName.String()); ok {
-				log.Printf("Study %s was deleted. Resouces will be released.", request.NamespacedName.String())
-				r.muxMap.Delete(request.NamespacedName.String())
-			}
 			// Object not found, return.  Created objects are automatically garbage collected.
 			// For additional cleanup logic use finalizers.
 			return reconcile.Result{}, nil
