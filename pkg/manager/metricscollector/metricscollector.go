@@ -39,11 +39,11 @@ func NewMetricsCollector() (*MetricsCollector, error) {
 func (d *MetricsCollector) CollectWorkerLog(wID string, wkind string, objectiveValueName string, metrics []string, namespace string) (*api.MetricsLogSet, error) {
 	labelMap := make(map[string]string)
 	if wkind == studyjob.TFJobWorker {
-		labelMap["tf_job_name"] = wID
-		labelMap["tf_job_role"] = "master"
+		labelMap["tf-job-name"] = wID
+		labelMap["tf-job-role"] = "master"
 	} else if wkind == studyjob.PyTorchJobWorker {
-		labelMap["pytorch_job_name"] = wID
-		labelMap["pytorch_job_role"] = "master"
+		labelMap["pytorch-job-name"] = wID
+		labelMap["pytorch-job-role"] = "master"
 	} else {
 		labelMap["job-name"] = wID
 	}
