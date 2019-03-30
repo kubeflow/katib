@@ -2,10 +2,11 @@
 test:
 	go test ./pkg/... ./cmd/...
 
+# Build Katib images
 build: 
 	sh scripts/build.sh
 
-# deploy katib manifests into a k8s cluster
+# Deploy katib manifests into a k8s cluster
 deploy: 
 	sh scripts/deploy.sh
 
