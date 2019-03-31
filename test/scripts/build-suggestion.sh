@@ -37,6 +37,6 @@ cp -r vendor ${GO_DIR}/vendor
 
 cd ${GO_DIR}
 
-cp cmd/suggestion/katib_suggestion/Dockerfile .
+cp cmd/suggestion/katib-suggestion/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion:${VERSION} --project=${PROJECT}
 gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/suggestion:${VERSION} ${REGISTRY}/${REPO_NAME}/suggestion:latest --verbosity=info
