@@ -7,7 +7,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/kubeflow/katib/pkg/api"
+	api "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	"google.golang.org/grpc"
 	"gopkg.in/yaml.v2"
 )
@@ -60,9 +60,9 @@ func main() {
 
 			//UpdateWorkerState
 			for _, w := range workerIds {
-				uwsreq := &api.UpdateWorkerStateRequest {
-					WorkerId:	w,
-					Status:		api.State_COMPLETED,
+				uwsreq := &api.UpdateWorkerStateRequest{
+					WorkerId: w,
+					Status:   api.State_COMPLETED,
 				}
 				c.UpdateWorkerState(ctx, uwsreq)
 			}
@@ -82,15 +82,15 @@ func main() {
 			//add dummy metricsValueTime
 			for i, _ := range mlSet {
 				for j, _ := range mlSet[i].MetricsLogs {
-					mlSet[i].MetricsLogs[j].Values = append(mlSet[i].MetricsLogs[j].Values, &api.MetricsValueTime{Time:"2018-01-01T12:00:00.999999999Z", Value:"1.0",})
-					mlSet[i].MetricsLogs[j].Values = append(mlSet[i].MetricsLogs[j].Values, &api.MetricsValueTime{Time:"2019-02-02T13:30:00.999999999Z", Value:"2.0",})
+					mlSet[i].MetricsLogs[j].Values = append(mlSet[i].MetricsLogs[j].Values, &api.MetricsValueTime{Time: "2018-01-01T12:00:00.999999999Z", Value: "1.0"})
+					mlSet[i].MetricsLogs[j].Values = append(mlSet[i].MetricsLogs[j].Values, &api.MetricsValueTime{Time: "2019-02-02T13:30:00.999999999Z", Value: "2.0"})
 				}
 			}
 
 			//ReportMetrics
-			rmlreq := &api.ReportMetricsLogsRequest {
-				StudyId:	studyID,
-				MetricsLogSets:	mlSet,
+			rmlreq := &api.ReportMetricsLogsRequest{
+				StudyId:        studyID,
+				MetricsLogSets: mlSet,
 			}
 			c.ReportMetricsLogs(ctx, rmlreq)
 
@@ -161,21 +161,21 @@ func DeleteStudy(c api.ManagerClient, studyID string) {
 		log.Fatalf("DeleteStudy error %v", err)
 	}
 	getStudyreq := &api.GetStudyRequest{
-			StudyId: studyID,
+		StudyId: studyID,
 	}
 	getStudyReply, _ := c.GetStudy(ctx, getStudyreq)
 	if getStudyReply != nil && getStudyReply.StudyConfig != nil {
 		log.Fatalf("Failed to delete Study %s", studyID)
 	}
 	getTrialsRequest := &api.GetTrialsRequest{
-			StudyId: studyID,
+		StudyId: studyID,
 	}
 	gtrep, _ := c.GetTrials(ctx, getTrialsRequest)
 	if gtrep != nil && len(gtrep.Trials) > 0 {
 		log.Fatalf("Failed to delete Trials of Study %s", studyID)
 	}
 	getWorkersRequest := &api.GetWorkersRequest{
-			StudyId: studyID,
+		StudyId: studyID,
 	}
 	gwrep, _ := c.GetWorkers(ctx, getWorkersRequest)
 	if gwrep != nil && len(gwrep.Workers) > 0 {
@@ -276,7 +276,7 @@ func checkSuggestions(getSuggestReply *api.GetSuggestionsReply, iter int) bool {
 		for i, trial := range getSuggestReply.Trials {
 			for _, param := range trial.ParameterSet {
 				if param.Name == "learning-rate" && learningRate != 0 {
-					expValue := min + (max-min)/(learningRate-1) * float64(i)
+					expValue := min + (max-min)/(learningRate-1)*float64(i)
 					if param.Value != strconv.FormatFloat(expValue, 'f', 4, 64) {
 						log.Printf("Grid point incorrect. Expected %v Got %v", strconv.FormatFloat(expValue, 'f', 4, 64), param.Value)
 					}
@@ -306,12 +306,12 @@ func registerWorkers(c api.ManagerClient, studyId string, getSuggestReply *api.G
 	ctx := context.Background()
 	workerIds := make([]string, len(getSuggestReply.Trials))
 	for i, t := range getSuggestReply.Trials {
-		worker := &api.Worker {
-			StudyId:	studyId,
-			TrialId:	t.TrialId,
+		worker := &api.Worker{
+			StudyId: studyId,
+			TrialId: t.TrialId,
 		}
-		workerreq := &api.RegisterWorkerRequest {
-			Worker:		worker,
+		workerreq := &api.RegisterWorkerRequest{
+			Worker: worker,
 		}
 		workerrep, err := c.RegisterWorker(ctx, workerreq)
 		if err != nil {
@@ -319,17 +319,17 @@ func registerWorkers(c api.ManagerClient, studyId string, getSuggestReply *api.G
 		}
 
 		workerIds[i] = workerrep.WorkerId
-		saveModelRequest := &api.SaveModelRequest {
-			Model: &api.ModelInfo {
-				StudyName:	studyConfig.Name,
-				WorkerId:	workerrep.WorkerId,
-				Parameters:	t.ParameterSet,
-				Metrics:	[]*api.Metrics{},
-				ModelPath:	"pvc:/Path/to/Model",
+		saveModelRequest := &api.SaveModelRequest{
+			Model: &api.ModelInfo{
+				StudyName:  studyConfig.Name,
+				WorkerId:   workerrep.WorkerId,
+				Parameters: t.ParameterSet,
+				Metrics:    []*api.Metrics{},
+				ModelPath:  "pvc:/Path/to/Model",
 			},
-			DataSet: &api.DataSetInfo {
-				Name:	"Mnist",
-				Path:	"/path/to/data",
+			DataSet: &api.DataSetInfo{
+				Name: "Mnist",
+				Path: "/path/to/data",
 			},
 		}
 		_, err = c.SaveModel(ctx, saveModelRequest)
