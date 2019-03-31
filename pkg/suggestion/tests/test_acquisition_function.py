@@ -1,6 +1,6 @@
 import pytest
 
-from bayesianoptimization.src.acquisition_func import AcquisitionFunc
+from katib_suggestion.acquisition_func import AcquisitionFunc
 
 
 @pytest.mark.parametrize("aq_mode", ["ei", "pi", "lcb"])

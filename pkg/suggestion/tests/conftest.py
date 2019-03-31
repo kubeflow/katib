@@ -7,8 +7,8 @@ from box import Box
 import numpy as np
 
 import api_pb2
-from bayesianoptimization.src.parameters import ParameterConfig
-from bayesianoptimization.src.model.gp import GaussianProcessModel
+from katib_suggestion.parameters import ParameterConfig
+from katib_suggestion.model.gp import GaussianProcessModel
 
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))

@@ -7,7 +7,6 @@ from .algorithm_register import ALGORITHM_REGISTER
 from .utils import get_logger
 from . import parsing_utils
 
-
 REQUIRES_PAST_OBSERVATIONS = ["bayesian_optimization", "grid_search"]
 
 

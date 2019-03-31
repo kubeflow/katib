@@ -1,8 +1,6 @@
-import pytest
 from mock import MagicMock
-from box import Box
 
-from bayesianoptimization.src.rpc_service import SuggestionService
+from katib_suggestion.rpc_service import SuggestionService
 
 
 def test_default_suggestion_service(rpc_request, study_config, observations):

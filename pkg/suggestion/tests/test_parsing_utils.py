@@ -1,7 +1,7 @@
 import numpy as np
 
 import api_pb2
-from bayesianoptimization.src import parsing_utils
+from katib_suggestion import parsing_utils
 
 
 def test_parsing_study_config(study_config, dim, names, name_ids,

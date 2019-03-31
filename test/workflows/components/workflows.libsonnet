@@ -231,8 +231,8 @@
                     template: "build-suggestion-hyperband",
                   },
                   {
-                    name: "build-suggestion-bo",
-                    template: "build-suggestion-bo",
+                    name: "build-suggestion",
+                    template: "build-suggestion",
                   },
                   {
                     name: "build-suggestion-nasrl",
@@ -358,9 +358,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperband", testWorkerImage, [
               "test/scripts/build-suggestion-hyperband.sh",
             ]),  // build-suggestion-hyperband
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-bo", testWorkerImage, [
-              "test/scripts/build-suggestion-bo.sh",
-            ]),  // build-suggestion-bo
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion", testWorkerImage, [
+              "test/scripts/build-suggestion.sh",
+            ]),  // build-suggestion
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-nasrl", testWorkerImage, [
               "test/scripts/build-suggestion-nasrl.sh",
             ]),  // build-suggestion-nasrl

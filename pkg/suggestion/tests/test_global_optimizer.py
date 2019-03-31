@@ -1,6 +1,6 @@
 import numpy as np
 
-from bayesianoptimization.src.global_optimizer import GlobalOptimizer
+from katib_suggestion.global_optimizer import GlobalOptimizer
 
 
 def test_global_optimizer(dim, request_num, scaler, X_train, y_train):

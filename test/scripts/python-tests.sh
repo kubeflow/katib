@@ -24,5 +24,5 @@ popd
 pushd pkg/api/python
 python setup.py develop
 popd
-pylint pkg/suggestion/bayesianoptimization/src --disable=fixme --exit-zero --reports=y
-pytest pkg/suggestion/tests --verbose --cov=pkg/suggestion/bayesianoptimization/src --cov-report term-missing
+pylint pkg/suggestion/katib_suggestion --disable=fixme --exit-zero --reports=y
+pytest pkg/suggestion/tests --verbose --cov=pkg/suggestion/katib_suggestion --cov-report term-missing
