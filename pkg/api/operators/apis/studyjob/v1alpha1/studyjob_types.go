@@ -19,7 +19,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	//runtime "k8s.io/apimachinery/pkg/runtime"
 
-	pb "github.com/kubeflow/katib/pkg/api"
+	pb "github.com/kubeflow/katib/pkg/api/v1alpha1"
 )
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.

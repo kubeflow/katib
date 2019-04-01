@@ -2,7 +2,7 @@ FROM golang:alpine AS build-env
 # The GOPATH in the image is /go.
 ADD . /go/src/github.com/kubeflow/katib
 WORKDIR /go/src/github.com/kubeflow/katib/cmd/earlystopping/medianstopping
-RUN go build -o medianstopping
+RUN go build -o medianstopping ./v1alpha1
 
 FROM alpine:3.7
 WORKDIR /app

@@ -114,7 +114,7 @@ until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
 done
 
 cp -r test ${GO_DIR}/test
-cd ${GO_DIR}/test/e2e
+cd ${GO_DIR}/test/e2e/v1alpha1
 kubectl apply -f valid-studyjob.yaml
 kubectl delete -f valid-studyjob.yaml
 set +o errexit
