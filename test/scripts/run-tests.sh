@@ -71,10 +71,10 @@ sed -i -e "s@image: katib\/vizier-core-rest@image: ${REGISTRY}\/${REPO_NAME}\/vi
 sed -i -e "s@image: katib\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/katib-ui:${VERSION}@" manifests/vizier/ui/deployment.yaml
 sed -i -e "s@type: NodePort@type: ClusterIP@" -e "/nodePort: 30678/d" manifests/vizier/core/service.yaml
 sed -i -e "s@image: katib\/studyjob-controller@image: ${REGISTRY}\/${REPO_NAME}\/studyjob-controller:${VERSION}@" manifests/studyjobcontroller/studyjobcontroller.yaml
-sed -i -e "s@image: katib\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-bayesianoptimization:${VERSION}@" manifests/vizier/suggestion/random/deployment.yaml
-sed -i -e "s@image: katib\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-bayesianoptimization:${VERSION}@" manifests/vizier/suggestion/grid/deployment.yaml
+sed -i -e "s@image: katib\/suggestion@image: ${REGISTRY}\/${REPO_NAME}\/suggestion:${VERSION}@" manifests/vizier/suggestion/random/deployment.yaml
+sed -i -e "s@image: katib\/suggestion@image: ${REGISTRY}\/${REPO_NAME}\/suggestion:${VERSION}@" manifests/vizier/suggestion/grid/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-hyperband:${VERSION}@" manifests/vizier/suggestion/hyperband/deployment.yaml
-sed -i -e "s@image: katib\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-bayesianoptimization:${VERSION}@" manifests/vizier/suggestion/bayesianoptimization/deployment.yaml
+sed -i -e "s@image: katib\/suggestion@image: ${REGISTRY}\/${REPO_NAME}\/suggestion:${VERSION}@" manifests/vizier/suggestion/katib_suggestion/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-nasrl:${VERSION}@" manifests/vizier/suggestion/nasrl/deployment.yaml
 sed -i -e "s@image: katib\/earlystopping-medianstopping@image: ${REGISTRY}\/${REPO_NAME}\/earlystopping-medianstopping:${VERSION}@" manifests/vizier/earlystopping/medianstopping/deployment.yaml
 sed -i -e '/volumeMounts:/,$d' manifests/vizier/db/deployment.yaml
