@@ -223,10 +223,6 @@
                     template: "build-studyjobctr",
                   },
                   {
-                    name: "build-cli",
-                    template: "build-cli",
-                  },
-                  {
                     name: "build-suggestion-hyperband",
                     template: "build-suggestion-hyperband",
                   },
@@ -352,9 +348,6 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-studyjobctr", testWorkerImage, [
               "test/scripts/build-studyjobctr.sh",
             ]),  // build-studyjobctr
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-cli", testWorkerImage, [
-              "test/scripts/build-cli.sh",
-            ]),  // build-cli
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperband", testWorkerImage, [
               "test/scripts/build-suggestion-hyperband.sh",
             ]),  // build-suggestion-hyperband

@@ -394,53 +394,6 @@ They have same named metrics ('accuracy' and 'cross_entropy').
 The accuracy in training and test will be saved in *train/* directory and *test/* directory respectively.
 In a studyjob, please add directry name to the name of metrics as a prefix e.g. `train/accuracy`, `test/accuracy`.
 
-## ModelManagement
-
-You can export model data to yaml file with CLI.
-
-```
-katib-cli -s {{server-cli}} pull study {{study ID or name}}  -o {{filename}}
-```
-
-And you can push your existing models to Katib with CLI.
-`mnist-models.yaml` trains 22 models using random suggestion with the Parameter Config below.
-
-```
-configs:
-    - name: --lr
-      parametertype: 1
-      feasible:
-        max: "0.07"
-        min: "0.03"
-        list: []
-    - name: --lr-factor
-      parametertype: 1
-      feasible:
-        max: "0.05"
-        min: "0.005"
-        list: []
-    - name: --lr-step
-      parametertype: 2
-      feasible:
-        max: "20"
-        min: "5"
-        list: []
-    - name: --optimizer
-      parametertype: 4
-      feasible:
-        max: ""
-        min: ""
-        list:
-        - sgd
-        - adam
-        - ftrl
-```
-You can explore the model easily on KatibUI.
-
-```
-katib-cli push md -f mnist-models.yaml
-```
-
 ## Clean
 Clean up with `./destroy.sh` script.
 It will stop port-forward process and delete minikube cluster.

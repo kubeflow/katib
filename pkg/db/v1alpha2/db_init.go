@@ -1,0 +1,76 @@
+package db
+
+import (
+	"fmt"
+	"log"
+)
+
+func (d *dbConn) DBInit() {
+	db := d.db
+
+	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS experiments
+		(id INT AUTO_INCREMENT PRIMARY KEY,
+		name VARCHAR(255) NOT NULL UNIQUE,
+		parameters TEXT,
+		objective TEXT,
+		algorithm TEXT,
+		trial_template TEXT,
+		parallel_trial_count INT,
+		max_trial_count INT,
+		condition TINYINT,
+		start_time DATETIME(6),
+		metrics_collector_type TEXT,
+		completion_time DATETIME(6),
+		last_reconcile_time DATETIME(6))`)
+	//TODO add nas config(may be it will be included in algorithm)
+	if err != nil {
+		log.Fatalf("Error creating experiments table: %v", err)
+	}
+
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS trials
+		(id INT AUTO_INCREMENT PRIMARY KEY,
+		name VARCHAR(255) NOT NULL UNIQUE,
+		experiment_name TEXT NOT NULL,
+		parameter_assignments TEXT,
+		run_spec TEXT,
+		observation TEXT,
+		condition TINYINT,
+		start_time DATETIME(6),
+		completion_time DATETIME(6),
+		last_reconcile_time DATETIME(6),
+		FOREIGN KEY(experiment_name) REFERENCES experiments(name) ON DELETE CASCADE)`)
+	if err != nil {
+		log.Fatalf("Error creating trials table: %v", err)
+	}
+
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS observation_logs
+		(trial_name VARCHAR(255) NOT NULL,
+		id INT AUTO_INCREMENT PRIMARY KEY,
+		time DATETIME(6),
+		metric_name VARCHAR(255) NOT NULL,
+		value TEXT NOT NULL,
+		FOREIGN KEY (trial_name) REFERENCES trials(name) ON DELETE CASCADE)`)
+	if err != nil {
+		log.Fatalf("Error creating observation_logs table: %v", err)
+	}
+
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS extra_algorithm_settings
+		(experiment_name VARCHAR(255) NOT NULL,
+		id INT AUTO_INCREMENT PRIMARY KEY,
+		setting_name VARCHAR(255) NOT NULL,
+		value TEXT NOT NULL,
+		FOREIGN KEY (experiment_name) REFERENCES experiments(name) ON DELETE CASCADE)`)
+	if err != nil {
+		log.Fatalf("Error creating extra_algorithm_settings table: %v", err)
+	}
+
+}
+
+func (d *dbConn) SelectOne() error {
+	db := d.db
+	_, err := db.Exec(`SELECT 1`)
+	if err != nil {
+		return fmt.Errorf("Error `SELECT 1` probing: %v", err)
+	}
+	return nil
+}
