@@ -16,7 +16,7 @@
 
 # This shell script is used to run the python tests in the argo workflow
 
-pip install -r cmd/suggestion/bayesianoptimization/requirements.txt
+pip install -r cmd/suggestion/katib-suggestion/requirements.txt
 pip install -r pkg/suggestion/test_requirements.txt
 pushd pkg/suggestion
 python setup.py develop
