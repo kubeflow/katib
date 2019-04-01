@@ -4,7 +4,7 @@ from concurrent import futures
 import grpc
 
 from pkg.api.python import api_pb2_grpc
-from katib_suggestion.rpc_service import SuggestionService
+from pkg.suggestion.katib_suggestion.rpc_service import SuggestionService
 from pkg.suggestion.types import DEFAULT_PORT
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
