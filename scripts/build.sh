@@ -36,7 +36,7 @@ docker build -t ${PREFIX}/vizier-core-rest -f ${CMD_PREFIX}/manager-rest/Dockerf
 
 echo "Building suggestion images..."
 docker build -t ${PREFIX}/suggestion-hyperband -f ${CMD_PREFIX}/suggestion/hyperband/Dockerfile .
-docker build -t ${PREFIX}/suggestion-bayesianoptimization -f ${CMD_PREFIX}/suggestion/bayesianoptimization/Dockerfile .
+docker build -t ${PREFIX}/suggestion -f ${CMD_PREFIX}/suggestion/katib-suggestion/Dockerfile .
 docker build -t ${PREFIX}/suggestion-nasrl -f ${CMD_PREFIX}/suggestion/nasrl/Dockerfile .
 
 echo "Building earlystopping images..."
