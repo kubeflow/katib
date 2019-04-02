@@ -4,11 +4,11 @@ test:
 
 # Build Katib images
 build: 
-	sh scripts/build.sh
+	sh scripts/v1alpha1/build.sh
 
 # Deploy katib manifests into a k8s cluster
 deploy: 
-	sh scripts/deploy.sh
+	sh scripts/v1alpha1/deploy.sh
 
 # Run go fmt against code
 fmt:
