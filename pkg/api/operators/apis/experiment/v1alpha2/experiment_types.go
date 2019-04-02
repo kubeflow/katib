@@ -231,9 +231,9 @@ type NasConfig struct {
 
 // GraphConfig contains a config of DAG
 type GraphConfig struct {
-	NumLayers  int32   `json:"numLayers,omitempty"`
-	InputSize  []int32 `json:"inputSize,omitempty"`
-	OutputSize []int32 `json:"outputSize,omitempty"`
+	NumLayers   int32   `json:"numLayers,omitempty"`
+	InputSizes  []int32 `json:"inputSizes,omitempty"`
+	OutputSizes []int32 `json:"outputSizes,omitempty"`
 }
 
 // Operation contains type of operation in DAG
