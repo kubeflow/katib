@@ -487,8 +487,8 @@ GraphConfig contains a config of DAG
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | num_layers | [int32](#int32) |  | Number of layers |
-| input_size | [int32](#int32) | repeated | Dimensions of input size |
-| output_size | [int32](#int32) | repeated | Dimensions of output size |
+| input_sizes | [int32](#int32) | repeated | Dimensions of input size |
+| output_sizes | [int32](#int32) | repeated | Dimensions of output size |
 
 
 

@@ -710,14 +710,14 @@
           "type": "integer",
           "format": "int32"
         },
-        "input_size": {
+        "input_sizes": {
           "type": "array",
           "items": {
             "type": "integer",
             "format": "int32"
           }
         },
-        "output_size": {
+        "output_sizes": {
           "type": "array",
           "items": {
             "type": "integer",

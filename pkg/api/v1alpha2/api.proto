@@ -266,8 +266,8 @@ message AlgorithmSpec {
  */
  message GraphConfig {
     int32 num_layers = 1; /// Number of layers
-    repeated int32 input_size = 2; /// Dimensions of input size
-    repeated int32 output_size = 3; /// Dimensions of output size
+    repeated int32 input_sizes = 2; /// Dimensions of input size
+    repeated int32 output_sizes = 3; /// Dimensions of output size
 }
 
 /**
