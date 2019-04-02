@@ -21,7 +21,7 @@ set -o pipefail
 PREFIX="katib"
 CMD_PREFIX="cmd"
 
-SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
+SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
 cd ${SCRIPT_ROOT}
 
