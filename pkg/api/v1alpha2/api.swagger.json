@@ -466,6 +466,17 @@
       ],
       "default": "CREATED"
     },
+    "NasConfigOperations": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha2Operation"
+          }
+        }
+      }
+    },
     "TrialStatusTrialConditionType": {
       "type": "string",
       "enum": [
@@ -556,6 +567,9 @@
         },
         "metrics_collector_type": {
           "type": "string"
+        },
+        "nas_config": {
+          "$ref": "#/definitions/alpha2NasConfig"
         }
       },
       "description": "*\nSpec of a Experiment. Experiment represents a single optimization run over a feasible space. \nEach Experiment contains a configuration describing the feasible space, as well as a set of Trials.\nIt is assumed that objective function f(x) does not change in the course of a Experiment."
@@ -689,6 +703,30 @@
         }
       }
     },
+    "alpha2GraphConfig": {
+      "type": "object",
+      "properties": {
+        "num_layers": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "input_size": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "output_size": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "title": "*\nGraphConfig contains a config of DAG"
+    },
     "alpha2Metric": {
       "type": "object",
       "properties": {
@@ -710,6 +748,18 @@
           "$ref": "#/definitions/alpha2Metric"
         }
       }
+    },
+    "alpha2NasConfig": {
+      "type": "object",
+      "properties": {
+        "graph_config": {
+          "$ref": "#/definitions/alpha2GraphConfig"
+        },
+        "operations": {
+          "$ref": "#/definitions/NasConfigOperations"
+        }
+      },
+      "title": "*\nNasConfig contains a config of NAS job"
     },
     "alpha2ObjectiveSpec": {
       "type": "object",
@@ -763,6 +813,22 @@
           }
         }
       }
+    },
+    "alpha2Operation": {
+      "type": "object",
+      "properties": {
+        "operation_type": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha2ParameterSpec"
+          },
+          "title": "* \nList of ParameterSpec"
+        }
+      },
+      "title": "*\nConfig for operations in DAG"
     },
     "alpha2ParameterAssignment": {
       "type": "object",

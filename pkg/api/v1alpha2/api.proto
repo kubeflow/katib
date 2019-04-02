@@ -251,7 +251,6 @@ message AlgorithmSpec {
 }
 
 /**
- * TODO add to AlgorithmSpec
  * NasConfig contains a config of NAS job
  */
  message NasConfig {
@@ -279,7 +278,7 @@ message AlgorithmSpec {
       /** 
      * List of ParameterSpec
      */
-    repeated ParameterSpec parameter_specs = 2; /// List of ParameterSpec
+    repeated ParameterSpec parameters = 2; /// List of ParameterSpec
 }
 
 /**
@@ -295,6 +294,7 @@ message ExperimentSpec {
     int32 parallel_trial_count = 5;
     int32 max_trial_count = 6;
     string metrics_collector_type = 7;
+    NasConfig nas_config = 8;
 }
 
 message ExperimentStatus {
