@@ -317,13 +317,13 @@
               },
             },  // checkout
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("setup-cluster",testWorkerImage, [
-              "test/scripts/create-cluster.sh",
+              "test/scripts/v1alpha1/create-cluster.sh",
             ]),  // setup cluster
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("python-tests", pythonImage, [
-              "test/scripts/python-tests.sh",
+              "test/scripts/v1alpha1/python-tests.sh",
             ]),  // run python tests
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tests", helmImage, [
-              "test/scripts/run-tests.sh",
+              "test/scripts/v1alpha1/run-tests.sh",
             ]),  // run tests
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
               "python",
@@ -334,7 +334,7 @@
               "--bucket=" + bucket,
             ]),  // create-pr-symlink
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("teardown-cluster",testWorkerImage, [
-              "test/scripts/delete-cluster.sh",
+              "test/scripts/v1alpha1/delete-cluster.sh",
              ]),  // teardown cluster
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("copy-artifacts", testWorkerImage, [
               "python",
@@ -345,40 +345,40 @@
               "--bucket=" + bucket,
             ]),  // copy-artifacts
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("dep-ensure", testWorkerImage, [
-              "test/scripts/get-vendor-packages.sh",
+              "test/scripts/v1alpha1/get-vendor-packages.sh",
             ]),  // dep ensure
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
-              "test/scripts/build-manager.sh",
+              "test/scripts/v1alpha1/build-manager.sh",
             ]),  // build-manager
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-manager-rest", testWorkerImage, [
-              "test/scripts/build-manager-rest.sh",
+              "test/scripts/v1alpha1/build-manager-rest.sh",
             ]),  // build-manager-rest
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-studyjobctr", testWorkerImage, [
-              "test/scripts/build-studyjobctr.sh",
+              "test/scripts/v1alpha1/build-studyjobctr.sh",
             ]),  // build-studyjobctr
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-random", testWorkerImage, [
-              "test/scripts/build-suggestion-random.sh",
+              "test/scripts/v1alpha1/build-suggestion-random.sh",
             ]),  // build-suggestion-random
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-grid", testWorkerImage, [
-              "test/scripts/build-suggestion-grid.sh",
+              "test/scripts/v1alpha1/build-suggestion-grid.sh",
             ]),  // build-suggestion-grid
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperband", testWorkerImage, [
-              "test/scripts/build-suggestion-hyperband.sh",
+              "test/scripts/v1alpha1/build-suggestion-hyperband.sh",
             ]),  // build-suggestion-hyperband
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-bo", testWorkerImage, [
-              "test/scripts/build-suggestion-bo.sh",
+              "test/scripts/v1alpha1/build-suggestion-bo.sh",
             ]),  // build-suggestion-bo
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-nasrl", testWorkerImage, [
-              "test/scripts/build-suggestion-nasrl.sh",
+              "test/scripts/v1alpha1/build-suggestion-nasrl.sh",
             ]),  // build-suggestion-nasrl
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-earlystopping-median", testWorkerImage, [
-              "test/scripts/build-earlystopping-median.sh",
+              "test/scripts/v1alpha1/build-earlystopping-median.sh",
             ]),  // build-earlystopping-median
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-ui", testWorkerImage, [
-              "test/scripts/build-ui.sh",
+              "test/scripts/v1alpha1/build-ui.sh",
             ]),  // build-ui
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("unit-test", testWorkerImage, [
-              "test/scripts/unit-test.sh",
+              "test/scripts/v1alpha1/unit-test.sh",
             ]),  // unit test
           ],  // templates
         },
