@@ -208,6 +208,7 @@ It is assumed that objective function f(x) does not change in the course of a Ex
 | parallel_trial_count | [int32](#int32) |  |  |
 | max_trial_count | [int32](#int32) |  |  |
 | metrics_collector_type | [string](#string) |  |  |
+| nas_config | [NasConfig](#api.v1.alpha2.NasConfig) |  |  |
 
 
 
@@ -486,8 +487,8 @@ GraphConfig contains a config of DAG
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | num_layers | [int32](#int32) |  | Number of layers |
-| input_size | [int32](#int32) | repeated | Dimensions of input size |
-| output_size | [int32](#int32) | repeated | Dimensions of output size |
+| input_sizes | [int32](#int32) | repeated | Dimensions of input size |
+| output_sizes | [int32](#int32) | repeated | Dimensions of output size |
 
 
 
@@ -529,7 +530,6 @@ GraphConfig contains a config of DAG
 <a name="api.v1.alpha2.NasConfig"/>
 
 ### NasConfig
-TODO add to AlgorithmSpec
 NasConfig contains a config of NAS job
 
 
@@ -615,7 +615,7 @@ Config for operations in DAG
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | operation_type | [string](#string) |  | Type of operation in DAG |
-| parameter_specs | [ParameterSpec](#api.v1.alpha2.ParameterSpec) | repeated | List of ParameterSpec
+| parameters | [ParameterSpec](#api.v1.alpha2.ParameterSpec) | repeated | List of ParameterSpec
 
 / List of ParameterSpec |
 

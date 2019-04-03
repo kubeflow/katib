@@ -17,7 +17,7 @@ package v1alpha2
 
 import (
 	trial "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -46,8 +46,9 @@ type ExperimentSpec struct {
 	// TODO - figure out what to do with metric collectors
 	MetricsCollectorType string `json:"metricsCollectorSpec,omitempty"`
 
+	NasConfig *NasConfig `json:"nasConfig,omitempty"`
+
 	// TODO - Other fields, exact format is TBD. Will add these back during implementation.
-	// - NAS
 	// - Early stopping
 	// - Resume experiment
 }
@@ -220,6 +221,25 @@ type ExperimentList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Experiment `json:"items"`
+}
+
+// NasConfig contains config for NAS job
+type NasConfig struct {
+	GraphConfig GraphConfig `json:"graphConfig,omitempty"`
+	Operations  []Operation `json:"operations,omitempty"`
+}
+
+// GraphConfig contains a config of DAG
+type GraphConfig struct {
+	NumLayers   int32   `json:"numLayers,omitempty"`
+	InputSizes  []int32 `json:"inputSizes,omitempty"`
+	OutputSizes []int32 `json:"outputSizes,omitempty"`
+}
+
+// Operation contains type of operation in DAG
+type Operation struct {
+	OperationType string          `json:"operationType,omitempty"`
+	Parameters    []ParameterSpec `json:"parameterconfigs,omitempty"`
 }
 
 // TODO - enable this during API implementation.
