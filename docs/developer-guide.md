@@ -17,7 +17,7 @@ dep ensure --vendor-only
 You can build all images from source.
 
 ```bash
-./scripts/build.sh
+./scripts/v1alpha1/build.sh
 ```
 
 ## Implement new suggestion algorithm
