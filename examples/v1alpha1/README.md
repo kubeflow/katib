@@ -199,7 +199,7 @@ The templates are defined in [ConfigMap](./workerConfigMap.yaml).
 There are two templates: defaultWorkerTemplate.yaml and gpuWorkerTemplate.yaml.
 You can add your template for worker.
 Then you should specify the template in your studyjob spec.
-[This example](/examples/gpu-example.yaml) uses `gpuWorkerTemplate.yaml`.
+[This example](/examples/v1alpha1/gpu-example.yaml) uses `gpuWorkerTemplate.yaml`.
 You can apply it same as other examples.
 ```
 $ kubectl apply -f gpu-example.yaml
