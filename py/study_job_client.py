@@ -14,6 +14,7 @@
 import datetime
 import json
 import logging
+import multiprocessing
 import time
 
 from kubernetes import client as k8s_client
@@ -75,7 +76,7 @@ def wait_for_condition(client,
           return results
 
     if datetime.datetime.now() + polling_interval > end_time:
-      raise util.JobTimeoutError(
+      raise Exception(
         "Timeout waiting for studyJob {0} in namespace {1} to enter one of the "
         "conditions {2}.".format(name, namespace, expected_condition), results)
 
