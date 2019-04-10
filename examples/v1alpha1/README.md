@@ -369,7 +369,7 @@ batch2 accuracy=0.8
 Validation-accuracy=0.75
 ```
 The metrics collector will collect all logs of metrics.
-The manifest of metrics collector is also generated from template and defined [here](/manifests/studyjobcontroller/metricsControllerConfigMap.yaml).
+The manifest of metrics collector is also generated from template and defined [here](./manifests/v1alpha1/studyjobcontroller/metricsControllerConfigMap.yaml).
 You can add your template and specify `spec.metricsCollectorSpec.metricsCollectorTemplatePath` in a studyjob manifest.
 
 ### TF Event File Metrics Collector

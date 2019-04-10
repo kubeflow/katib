@@ -158,7 +158,7 @@ spec:
 Create this pv after deploying Katib package
 
 ```
-kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/manifests/pv/pv.yaml
+kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/manifests/v1alpha1/pv/pv.yaml
 ```
 
 ### Running examples
@@ -359,7 +359,7 @@ ks delete ${KF_ENV} -c tf-job-operator
 If you create pv for Katib, delete it
 
 ```
-kubectl delete -f https://raw.githubusercontent.com/kubeflow/katib/master/manifests/pv/pv.yaml
+kubectl delete -f https://raw.githubusercontent.com/kubeflow/katib/master/manifests/v1alpha1/pv/pv.yaml
 ```
 
 If you deploy Ambassador, delete it
