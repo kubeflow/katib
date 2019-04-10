@@ -61,7 +61,7 @@ A Suggestion is an algorithm to construct a parameter set. Currently Katib suppo
 ## Components in Katib
 
 Katib consists of several components as shown below. Each component is running on k8s as a deployment.
-Each component communicates with others via GRPC and the API is defined at `pkg/api/api.proto`.
+Each component communicates with others via GRPC and the API is defined at `pkg/api/v1alpha1/api.proto`.
 
 - vizier: main components.
     - vizier-core : API server of vizier.
