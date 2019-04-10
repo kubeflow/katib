@@ -4,7 +4,7 @@ Manager service is an API for core component.
 Suggestion service is an API for Suggestion services.
 EarlyStopping service is an API for EarlyStopping services.
 
-## v1alpha1 Documentation
+## Documentation
 Please refer to the `api.md`:
  * [v1alpha1 documentation](./v1alpha1/gen-doc/api.md)
  * [v1alpha2 documentation](./v1alpha2/gen-doc/api.md)
