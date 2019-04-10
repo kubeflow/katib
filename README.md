@@ -90,7 +90,7 @@ You can visualize general trend of Hyper parameter space and each training histo
 
 ## API Documentation
 
-Please refer to [api.md](./pkg/api/gen-doc/api.md).
+Please refer to [api.md](./pkg/api/v1alpha1/gen-doc/api.md).
 
 ## Quickstart to run tfjob and pytorch operator jobs in Katib
 
