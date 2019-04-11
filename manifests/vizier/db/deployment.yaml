@@ -18,6 +18,9 @@ spec:
       containers:
       - name: vizier-db
         image: mysql:8.0.3
+        args:
+        - --datadir
+        - /var/lib/mysql/datadir
         env:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:
