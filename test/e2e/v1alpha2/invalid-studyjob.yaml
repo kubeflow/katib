@@ -1,0 +1,26 @@
+apiVersion: "kubeflow.org/v1alpha1"
+kind: StudyJob
+metadata:
+  namespace: kubeflow
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: invalid-studyjob
+spec:
+  studyName: invalid-studyjob
+  owner: crd
+  optimizationtype: minimize
+  objectivevaluename: loss
+  optimizationgoal: 0.3
+  # requestcount should be int
+  requestcount: shouldbeint
+  metricsnames:
+    - accuracy
+  parameterconfigs:
+    - name: --tf-learning-rate
+      parametertype: double
+      feasible:
+        min: "0.01"
+        max: "0.03"
+  suggestionSpec:
+    suggestionAlgorithm: "random"
+    requestNumber: 3

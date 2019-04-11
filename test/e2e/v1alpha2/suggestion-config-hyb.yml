@@ -1,0 +1,12 @@
+suggetionalgorithm: "hyperband"
+suggestionparameters:
+    - 
+        name: "ResourceName"
+        value: "epoch-num"
+    - 
+        name: "eta"
+        value: "3"
+    -
+        name: "r_l"
+        value: "3"
+
