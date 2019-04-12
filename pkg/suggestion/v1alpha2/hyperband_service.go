@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/kubeflow/katib/pkg"
-	"github.com/kubeflow/katib/pkg/api"
+	"github.com/kubeflow/katib/pkg/api/v1alpha2"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

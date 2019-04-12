@@ -8,8 +8,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 
-	api "github.com/kubeflow/katib/pkg/api"
-	mockapi "github.com/kubeflow/katib/pkg/mock/api"
+	api "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	mockapi "github.com/kubeflow/katib/pkg/mock/v1alpha2/api"
 )
 
 func getSampleBracket(size int) Bracket {
