@@ -1,8 +1,8 @@
 FROM python:3
 
 ADD . /usr/src/app/github.com/kubeflow/katib
-WORKDIR /usr/src/app/github.com/kubeflow/katib/cmd/suggestion/v1alpha1/bayesianoptimization
-RUN pip install --no-cache-dir -r requirements.txt
+WORKDIR /usr/src/app/github.com/kubeflow/katib/cmd/suggestion/bayesianoptimization/v1alpha1
+RUN pip install --no-cache-dir -r ../requirements.txt
 ENV PYTHONPATH /usr/src/app/github.com/kubeflow/katib:/usr/src/app/github.com/kubeflow/katib/pkg/api/v1alpha1/python
 
 ENTRYPOINT ["python", "main.py"]
