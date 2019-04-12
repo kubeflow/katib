@@ -61,7 +61,7 @@ A Suggestion is an algorithm to construct a parameter set. Currently Katib suppo
 ## Components in Katib
 
 Katib consists of several components as shown below. Each component is running on k8s as a deployment.
-Each component communicates with others via GRPC and the API is defined at `pkg/api/api.proto`.
+Each component communicates with others via GRPC and the API is defined at `pkg/api/v1alpha1/api.proto`.
 
 - vizier: main components.
     - vizier-core : API server of vizier.
@@ -78,19 +78,19 @@ Each component communicates with others via GRPC and the API is defined at `pkg/
 
 ## Getting Started
 
-Please see [README.md](./examples/README.md) for more details.
+Please see [README.md](./examples/v1alpha1/README.md) for more details.
 
 ## Web UI
 
 Katib provides a Web UI.
 You can visualize general trend of Hyper parameter space and each training history. You can use
-[random-example](https://github.com/kubeflow/katib/blob/master/examples/random-example.yaml) or
-[other examples](https://github.com/kubeflow/katib/blob/master/examples) to generate a similar UI.
+[random-example](https://github.com/kubeflow/katib/blob/master/examples/v1alpha1/random-example.yaml) or
+[other examples](https://github.com/kubeflow/katib/blob/master/examples/v1alpha1) to generate a similar UI.
 ![katibui](https://user-images.githubusercontent.com/10014831/48778081-a4388b80-ed17-11e8-938b-fc59a5d2e574.gif)
 
 ## API Documentation
 
-Please refer to [api.md](./pkg/api/gen-doc/api.md).
+Please refer to [api.md](./pkg/api/v1alpha1/gen-doc/api.md).
 
 ## Quickstart to run tfjob and pytorch operator jobs in Katib
 
@@ -158,7 +158,7 @@ spec:
 Create this pv after deploying Katib package
 
 ```
-kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/manifests/pv/pv.yaml
+kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/manifests/v1alpha1/pv/pv.yaml
 ```
 
 ### Running examples
@@ -189,21 +189,21 @@ spec:
 If you are not using GKE and you don't have StorageClass for dynamic volume provisioning at your cluster, you have to create pvc and pv
 
 ```
-kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/tfevent-volume/tfevent-pvc.yaml
+kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1alpha1/tfevent-volume/tfevent-pvc.yaml
 
-kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/tfevent-volume/tfevent-pv.yaml
+kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1alpha1/tfevent-volume/tfevent-pv.yaml
 ```
 
 This is example for tfjob operator
 
 ```
-kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/tfjob-example.yaml
+kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1alpha1/tfjob-example.yaml
 ```
 
 This is example for pytorch operator
 
 ```
-kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/pytorchjob-example.yaml
+kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1alpha1/pytorchjob-example.yaml
 ```
 
 You can check status of StudyJob
@@ -359,7 +359,7 @@ ks delete ${KF_ENV} -c tf-job-operator
 If you create pv for Katib, delete it
 
 ```
-kubectl delete -f https://raw.githubusercontent.com/kubeflow/katib/master/manifests/pv/pv.yaml
+kubectl delete -f https://raw.githubusercontent.com/kubeflow/katib/master/manifests/v1alpha1/pv/pv.yaml
 ```
 
 If you deploy Ambassador, delete it

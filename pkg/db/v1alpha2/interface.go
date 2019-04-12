@@ -111,6 +111,14 @@ func NewWithSQLConn(db *sql.DB) (KatibDBInterface, error) {
 	return d, nil
 }
 
+func New() (KatibDBInterface, error) {
+	db, err := openSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
+	if err != nil {
+		return nil, fmt.Errorf("DB open failed: %v", err)
+	}
+	return NewWithSQLConn(db)
+}
+
 func (d *dbConn) RegisterExperiment(experiment *v1alpha2.Experiment) error {
 	return nil
 }
