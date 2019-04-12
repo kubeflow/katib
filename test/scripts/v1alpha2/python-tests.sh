@@ -16,7 +16,7 @@
 
 # This shell script is used to run the python tests in the argo workflow
 
-pip install -r cmd/suggestion/katib-suggestion/requirements.txt
+pip install -r cmd/suggestion/v1alpha2/katib-suggestion/requirements.txt
 pip install -r pkg/suggestion/test_requirements.txt
 pushd pkg/suggestion
 python setup.py develop
@@ -24,5 +24,5 @@ popd
 pushd pkg/api/python
 python setup.py develop
 popd
-pylint pkg/suggestion/katib_suggestion --disable=fixme --exit-zero --reports=y
-pytest pkg/suggestion/tests --verbose --cov=pkg/suggestion/katib_suggestion --cov-report term-missing
+pylint pkg/suggestion/v1alpha2/katib_suggestion --disable=fixme --exit-zero --reports=y
+pytest pkg/suggestion/v1alpha2/tests --verbose --cov=pkg/suggestion/v1alpha2/katib_suggestion --cov-report term-missing

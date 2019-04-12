@@ -20,4 +20,4 @@ pip install -r cmd/suggestion/bayesianoptimization/requirements.txt
 pip install -r pkg/suggestion/test_requirements.txt
 python setup.py develop
 pylint pkg/suggestion/v1alpha1/bayesianoptimization/src --disable=fixme --exit-zero --reports=y
-pytest pkg/suggestion/v1alpha1/tests --verbose --cov=pkg/suggestion/bayesianoptimization/src --cov-report term-missing
+pytest pkg/suggestion/v1alpha1/tests --verbose --cov=pkg/suggestion/v1alpha1/bayesianoptimization/src --cov-report term-missing

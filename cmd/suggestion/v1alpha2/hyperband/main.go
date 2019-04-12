@@ -7,8 +7,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	pb "github.com/kubeflow/katib/pkg/api"
-	"github.com/kubeflow/katib/pkg/suggestion"
+	pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	"github.com/kubeflow/katib/pkg/suggestion/v1alpha2"
 )
 
 func main() {

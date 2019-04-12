@@ -35,9 +35,9 @@ echo "Building REST API for core image..."
 docker build -t ${PREFIX}/vizier-core-rest -f ${CMD_PREFIX}/manager-rest/Dockerfile .
 
 echo "Building suggestion images..."
-docker build -t ${PREFIX}/suggestion-hyperband -f ${CMD_PREFIX}/suggestion/hyperband/Dockerfile .
-docker build -t ${PREFIX}/suggestion -f ${CMD_PREFIX}/suggestion/katib-suggestion/Dockerfile .
-docker build -t ${PREFIX}/suggestion-nasrl -f ${CMD_PREFIX}/suggestion/nasrl/Dockerfile .
+docker build -t ${PREFIX}/suggestion-hyperband -f ${CMD_PREFIX}/suggestion/v1alpha2/hyperband/Dockerfile .
+docker build -t ${PREFIX}/suggestion -f ${CMD_PREFIX}/suggestion/v1alpha2/katib-suggestion/Dockerfile .
+docker build -t ${PREFIX}/suggestion-nasrl -f ${CMD_PREFIX}/suggestion/v1alpha2/nasrl/Dockerfile .
 
 echo "Building earlystopping images..."
 docker build -t ${PREFIX}/earlystopping-medianstopping -f ${CMD_PREFIX}/earlystopping/medianstopping/Dockerfile .
