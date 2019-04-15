@@ -95,9 +95,9 @@ type TrialCondition struct {
 type TrialConditionType string
 
 const (
-	TrialPending   TrialConditionType = "Pending"
+	TrialCreated   TrialConditionType = "Created"
 	TrialRunning   TrialConditionType = "Running"
-	TrialCompleted TrialConditionType = "Completed"
+	TrialSucceeded TrialConditionType = "Succeeded"
 	TrialKilled    TrialConditionType = "Killed"
 	TrialFailed    TrialConditionType = "Failed"
 )
@@ -107,6 +107,7 @@ const (
 
 // Represents the structure of a Trial resource.
 // +k8s:openapi-gen=true
+// +kubebuilder:subresource:status
 type Trial struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -124,7 +125,6 @@ type TrialList struct {
 	Items           []Trial `json:"items"`
 }
 
-// TODO: Enable this later during API implementation.
-//func init() {
-//	SchemeBuilder.Register(&Trial{}, &TrialList{})
-//}
+func init() {
+	SchemeBuilder.Register(&Trial{}, &TrialList{})
+}
