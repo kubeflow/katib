@@ -78,5 +78,5 @@ cp -r vendor ${GO_DIR}/vendor
 
 echo "Run unit test cases"
 cd ${GO_DIR}
-go test ./...
+go test $(go list ./... | grep -i v1alpha1)
 cd - > /dev/null
