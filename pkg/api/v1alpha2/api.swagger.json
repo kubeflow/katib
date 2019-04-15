@@ -150,6 +150,18 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "start_time",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "end_time",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -226,18 +238,6 @@
             "name": "experiment_name",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "start_time",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "end_time",
-            "in": "query",
-            "required": false,
             "type": "string"
           },
           {
@@ -455,6 +455,18 @@
     }
   },
   "definitions": {
+    "ExperimentSpecParameterSpecs": {
+      "type": "object",
+      "properties": {
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha2ParameterSpec"
+          }
+        }
+      },
+      "title": "* \nList of ParameterSpec"
+    },
     "ExperimentStatusExperimentConditionType": {
       "type": "string",
       "enum": [
@@ -476,6 +488,18 @@
           }
         }
       }
+    },
+    "TrialSpecParameterAssignments": {
+      "type": "object",
+      "properties": {
+        "assignments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha2ParameterAssignment"
+          }
+        }
+      },
+      "title": "* \nList of ParameterAssignment"
     },
     "TrialStatusTrialConditionType": {
       "type": "string",
@@ -542,11 +566,8 @@
     "alpha2ExperimentSpec": {
       "type": "object",
       "properties": {
-        "parameters": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/alpha2ParameterSpec"
-          }
+        "parameter_specs": {
+          "$ref": "#/definitions/ExperimentSpecParameterSpecs"
         },
         "objective": {
           "$ref": "#/definitions/alpha2ObjectiveSpec"
@@ -909,10 +930,7 @@
           "type": "string"
         },
         "parameter_assignments": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/alpha2ParameterAssignment"
-          }
+          "$ref": "#/definitions/TrialSpecParameterAssignments"
         },
         "run_spec": {
           "type": "string"

@@ -287,7 +287,13 @@ message AlgorithmSpec {
  * It is assumed that objective function f(x) does not change in the course of a Experiment.
  */
 message ExperimentSpec {
-    repeated ParameterSpec parameters = 1; 
+     /** 
+     * List of ParameterSpec
+     */
+    message ParameterSpecs {
+        repeated ParameterSpec parameters = 1; 
+    }
+    ParameterSpecs parameter_specs = 1;
     ObjectiveSpec objective = 2; 
     AlgorithmSpec algorithm = 3;
     string trial_template = 4;
@@ -340,8 +346,14 @@ message ObservationLog {
 }
 
 message TrialSpec {
+     /** 
+     * List of ParameterAssignment
+     */
+    message ParameterAssignments{
+        repeated ParameterAssignment assignments = 1;
+    }
     string experiment_name = 1;
-    repeated ParameterAssignment parameter_assignments = 2;
+    ParameterAssignments parameter_assignments = 2;
     string run_spec = 3;
 }
 
@@ -439,9 +451,7 @@ message DeleteTrialReply {
 
 message GetTrialListRequest {
     string experiment_name = 1;
-    string start_time = 2; ///The start of the time range. RFC3339 format
-    string end_time = 3; ///The end of the time range. RFC3339 format
-    string filter = 4;
+    string filter = 2;
 }
 
 message GetTrialListReply {
@@ -474,6 +484,8 @@ message ReportObservationLogReply {
 
 message GetObservationLogRequest {
     string trial_name = 1;
+    string start_time = 2; ///The start of the time range. RFC3339 format
+    string end_time = 3; ///The end of the time range. RFC3339 format
 }
 
 message GetObservationLogReply {
