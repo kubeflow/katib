@@ -19,8 +19,9 @@ package experiment
 import (
 	"context"
 
-	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -29,6 +30,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
 )
 
 var log = logf.Log.WithName("controller")
@@ -63,6 +68,18 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	// Watch for trials for the experiments
+	err = c.Watch(
+		&source.Kind{Type: &trialsv1alpha2.Trial{}},
+		&handler.EnqueueRequestForOwner{
+			IsController: true,
+			OwnerType:    &experimentsv1alpha2.Experiment{},
+		})
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -81,6 +98,7 @@ type ReconcileExperiment struct {
 func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the Experiment instance
 	instance := &experimentsv1alpha2.Experiment{}
+	requeue := false
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -91,6 +109,113 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
+	original := instance.DeepCopy()
 
-	return reconcile.Result{}, nil
+	if instance.IsCompleted() {
+
+		return reconcile.Result{}, nil
+
+	}
+	if !instance.IsCreated() {
+		//Experiment not created in DB
+		err = util.CreateExperimentinDB(instance)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		if instance.Status.StartTime == nil {
+			now := metav1.Now()
+			instance.Status.StartTime = &now
+		}
+		msg := "Experiment is created"
+		instance.MarkExperimentStatusCreated(util.ExperimentCreatedReason, msg)
+		requeue = true
+	} else {
+		// Experiment already created in DB
+		err := r.ReconcileExperiment(instance)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+	}
+
+	if !equality.Semantic.DeepEqual(original.Status, instance.Status) {
+		//assuming that only status change
+		err = util.UpdateExperimentStatusinDB(instance)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		err = r.Status().Update(context.TODO(), instance)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+	}
+
+	return reconcile.Result{Requeue: requeue}, nil
+}
+
+func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.Experiment) error {
+	var err error
+	trials := &trialsv1alpha2.TrialList{}
+	labels := map[string]string{"experiment": instance.Name}
+	lo := &client.ListOptions{}
+	lo.MatchingLabels(labels).InNamespace(instance.Namespace)
+
+	err = r.List(context.TODO(), lo, trials)
+	if err != nil {
+		return err
+	}
+	util.UpdateExperimentStatus(instance, trials)
+
+	reconcileRequired := !instance.IsCompleted()
+	if err != nil {
+		return err
+	}
+	if reconcileRequired {
+		r.ReconcileTrials(instance)
+	}
+	return err
+}
+
+func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Experiment) error {
+	var err error
+	parallelCount := 0
+
+	if instance.Spec.ParallelTrialCount != nil {
+		parallelCount = *instance.Spec.ParallelTrialCount
+	} else {
+		parallelCount = 3
+	}
+	activeCount := instance.Status.TrialsRunning
+	succeededCount := instance.Status.TrialsSucceeded
+
+	if activeCount > parallelCount {
+		deleteCount := activeCount - parallelCount
+		if deleteCount > 0 {
+			//delete 'deleteCount' number of trails. Sort them?
+		}
+
+	} else if activeCount < parallelCount {
+		requiredActiveCount := 0
+		if instance.Spec.MaxTrialCount == nil {
+			requiredActiveCount = parallelCount
+		} else {
+			requiredActiveCount = *instance.Spec.MaxTrialCount - succeededCount
+			if requiredActiveCount > parallelCount {
+				requiredActiveCount = parallelCount
+			}
+		}
+
+		addCount := requiredActiveCount - activeCount
+		if addCount < 0 {
+			log.Info("Invalid setting", "requiredActiveCount", requiredActiveCount, "MaxTrialCount",
+				*instance.Spec.MaxTrialCount, "SucceededCount", succeededCount)
+			addCount = 0
+		}
+
+		//create "addCount" number of trials
+
+	}
+
+	return err
+
 }

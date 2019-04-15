@@ -35,10 +35,13 @@ type ExperimentSpec struct {
 	TrialTemplate *TrialTemplate `json:"trialTemplate,omitempty"`
 
 	// How many trials can be processed in parallel.
-	ParallelTrialCount int `json:"parallelTrialCount,omitempty"`
+	ParallelTrialCount *int `json:"parallelTrialCount,omitempty"`
 
-	// Total number of trials to run.
-	MaxTrialCount int `json:"maxTrialCount,omitempty"`
+	// Max completed trials to mark experiment as succeeded
+	MaxTrialCount *int `json:"maxTrialCount,omitempty"`
+
+	// Max failed trials to mark experiment as failed.
+	MaxFailedTrialCount *int `json:"maxFailedTrialCount,omitempty"`
 
 	// Whether to retain historical data in DB after deletion.
 	RetainHistoricalData bool `json:"retainHistoricalData,omitempty"`
@@ -75,8 +78,8 @@ type ExperimentStatus struct {
 	// Current optimal trial parameters and observations.
 	CurrentOptimalTrial OptimalTrial `json:"currentOptimalTrial,omitempty"`
 
-	// How many trials have successfully completed.
-	TrialsCompleted int `json:"trialsCompleted,omitempty"`
+	// How many trials have succeeded.
+	TrialsSucceeded int `json:"trialsSucceeded,omitempty"`
 
 	// How many trials have failed.
 	TrialsFailed int `json:"trialsFailed,omitempty"`
@@ -86,6 +89,9 @@ type ExperimentStatus struct {
 
 	// How many trials are currently pending.
 	TrialsPending int `json:"trialsPending,omitempty"`
+
+	// How many trials are currently running.
+	TrialsRunning int `json:"trialsRunning,omitempty"`
 }
 
 type OptimalTrial struct {
@@ -206,6 +212,7 @@ type GoTemplate struct {
 
 // Structure of the Experiment custom resource.
 // +k8s:openapi-gen=true
+// +kubebuilder:subresource:status
 type Experiment struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -242,7 +249,6 @@ type Operation struct {
 	Parameters    []ParameterSpec `json:"parameterconfigs,omitempty"`
 }
 
-// TODO - enable this during API implementation.
-//func init() {
-//	SchemeBuilder.Register(&Experiment{}, &ExperimentList{})
-//}
+func init() {
+	SchemeBuilder.Register(&Experiment{}, &ExperimentList{})
+}
