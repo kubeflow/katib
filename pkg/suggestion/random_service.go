@@ -81,3 +81,8 @@ func (s *RandomSuggestService) GetSuggestions(ctx context.Context, in *api.GetSu
 	}
 	return &api.GetSuggestionsReply{Trials: sT}, nil
 }
+
+func (s *RandomSuggestService) ValidateSuggestionParameters(ctx context.Context, in *api.ValidateSuggestionParametersRequest) (*api.ValidateSuggestionParametersReply, error) {
+
+	return &api.ValidateSuggestionParametersReply{}, nil
+}

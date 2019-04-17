@@ -495,6 +495,14 @@
                 </li>
               
                 <li>
+                  <a href="#api.ValidateSuggestionParametersReply"><span class="badge">M</span>ValidateSuggestionParametersReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.ValidateSuggestionParametersRequest"><span class="badge">M</span>ValidateSuggestionParametersRequest</a>
+                </li>
+              
+                <li>
                   <a href="#api.Worker"><span class="badge">M</span>Worker</a>
                 </li>
               
@@ -2664,7 +2672,7 @@
         
       
         <h3 id="api.Trial">Trial</h3>
-        <p>A set of Hyperparameter.</p><p>In a study, multiple trials are evaluated by workers.</p><p>Suggestion service will generate next trials.</p>
+        <p>A set of Hyperparameter.</p><p>In a study, multiple trials are evaluated by workers.</p><p>Suggestion service will generate next trials.</p><p>Create time will be filled in the server automatically side even user set the value</p>
 
         
           <table class="field-table">
@@ -2708,6 +2716,13 @@
                   <td><p>Tags of Trial. </p></td>
                 </tr>
               
+                <tr>
+                  <td>create_time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Trial create timestamp RFC3339 format. </p></td>
+                </tr>
+              
             </tbody>
           </table>
         
@@ -2742,6 +2757,50 @@
                   <td>status</td>
                   <td><a href="#api.State">State</a></td>
                   <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.ValidateSuggestionParametersReply">ValidateSuggestionParametersReply</h3>
+        <p>Return 1 if Suggestion Parameters is Valid, 0 if not</p>
+
+        
+
+        
+      
+        <h3 id="api.ValidateSuggestionParametersRequest">ValidateSuggestionParametersRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>study_config</td>
+                  <td><a href="#api.StudyConfig">StudyConfig</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>suggestion_algorithm</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>suggestion_parameters</td>
+                  <td><a href="#api.SuggestionParameter">SuggestionParameter</a></td>
+                  <td>repeated</td>
                   <td><p> </p></td>
                 </tr>
               
@@ -3181,6 +3240,13 @@ When the log you reported are already reported before, it will be dismissed and 
                 <td><p></p></td>
               </tr>
             
+              <tr>
+                <td>ValidateSuggestionParameters</td>
+                <td><a href="#api.ValidateSuggestionParametersRequest">ValidateSuggestionParametersRequest</a></td>
+                <td><a href="#api.ValidateSuggestionParametersReply">ValidateSuggestionParametersReply</a></td>
+                <td><p>Validate Suggestion Parameters from Study Job.</p></td>
+              </tr>
+            
           </tbody>
         </table>
       
@@ -3196,6 +3262,13 @@ When the log you reported are already reported before, it will be dismissed and 
                 <td>GetSuggestions</td>
                 <td><a href="#api.GetSuggestionsRequest">GetSuggestionsRequest</a></td>
                 <td><a href="#api.GetSuggestionsReply">GetSuggestionsReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ValidateSuggestionParameters</td>
+                <td><a href="#api.ValidateSuggestionParametersRequest">ValidateSuggestionParametersRequest</a></td>
+                <td><a href="#api.ValidateSuggestionParametersReply">ValidateSuggestionParametersReply</a></td>
                 <td><p></p></td>
               </tr>
             

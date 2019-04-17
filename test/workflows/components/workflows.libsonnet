@@ -58,6 +58,7 @@
       local testWorkerImage = "gcr.io/kubeflow-ci/test-worker";
       local golangImage = "golang:1.9.4-stretch";
       // TODO(jose5918) Build our own helm image
+      local pythonImage = "python:3.6-jessie";
       local helmImage = "volumecontroller/golang:1.9.2";
       // The name of the NFS volume claim to use for test files.
       // local nfsVolumeClaim = "kubeflow-testing";
@@ -242,6 +243,10 @@
                     template: "build-suggestion-bo",
                   },
                   {
+                    name: "build-suggestion-nasrl",
+                    template: "build-suggestion-nasrl",
+                  },
+                  {
                     name: "build-earlystopping-median",
                     template: "build-earlystopping-median",
                   },
@@ -265,6 +270,12 @@
                   {
                     name: "unit-test",
                     template: "unit-test",
+                  },
+                ],
+                [
+                  {
+                    name: "python-tests",
+                    template: "python-tests",
                   },
                 ],
                 [
@@ -312,6 +323,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("setup-cluster",testWorkerImage, [
               "test/scripts/create-cluster.sh",
             ]),  // setup cluster
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("python-tests", pythonImage, [
+              "test/scripts/python-tests.sh",
+            ]),  // run python tests
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tests", helmImage, [
               "test/scripts/run-tests.sh",
             ]),  // run tests
@@ -361,6 +375,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-bo", testWorkerImage, [
               "test/scripts/build-suggestion-bo.sh",
             ]),  // build-suggestion-bo
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-nasrl", testWorkerImage, [
+              "test/scripts/build-suggestion-nasrl.sh",
+            ]),  // build-suggestion-nasrl
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-earlystopping-median", testWorkerImage, [
               "test/scripts/build-earlystopping-median.sh",
             ]),  // build-earlystopping-median

@@ -2,12 +2,13 @@
 DIRECT algorithm is used in this case
 """
 import copy
-import numpy as np
-from collections import deque
 
-from pkg.suggestion.bayesianoptimization.src.acquisition_func.acquisition_func import AcquisitionFunc
-import logging
-from logging import getLogger, StreamHandler, INFO, DEBUG
+import numpy as np
+
+from .acquisition_func import AcquisitionFunc
+from .model.gp import GaussianProcessModel
+from .model.rf import RandomForestModel
+from .utils import get_logger
 
 
 class RectPack:
@@ -74,37 +75,31 @@ class GlobalOptimizer:
 
     def __init__(self, N, l, u, scaler, X_train, y_train, current_optimal, mode, trade_off, length_scale,
                  noise, nu, kernel_type, n_estimators, max_features, model_type, logger=None):
-        if logger == None:
-            self.logger = getLogger(__name__)
-            FORMAT = '%(asctime)-15s StudyID %(studyid)s %(message)s'
-            logging.basicConfig(format=FORMAT)
-            handler = StreamHandler()
-            handler.setLevel(INFO)
-            self.logger.setLevel(INFO)
-            self.logger.addHandler(handler)
-            self.logger.propagate = False
-        else:
-            self.logger = logger
-
+        self.logger = logger if (logger is not None) else get_logger()
         self.N = N
         self.l = l
         self.u = u
         self.scaler = scaler
         self.buckets = []
         self.dim = None
+        if model_type == "gp":
+            model = GaussianProcessModel(
+                length_scale=length_scale,
+                noise=noise,
+                nu=nu,
+                kernel_type=kernel_type,
+            )
+        else:
+            model = RandomForestModel(
+                n_estimators=n_estimators,
+                max_features=max_features,
+            )
+        model.fit(X_train, y_train)
         self.aq_func = AcquisitionFunc(
-            X_train=X_train,
-            y_train=y_train,
+            model=model,
             current_optimal=current_optimal,
             mode=mode,
             trade_off=trade_off,
-            length_scale=length_scale,
-            noise=noise,
-            nu=nu,
-            kernel_type=kernel_type,
-            n_estimators=n_estimators,
-            max_features=max_features,
-            model_type=model_type,
         )
 
     def potential_opt(self, f_min):
@@ -174,7 +169,7 @@ class GlobalOptimizer:
         x_next = first_rect.center
         ei_min.append(f_min)
 
-        for t in range(self.N):
+        for _ in range(self.N):
             opt_set = self.potential_opt(f_min)
 
             # for bucket in self.buckets:
@@ -215,7 +210,7 @@ class GlobalOptimizer:
                 fc_sum -= a.fc
                 bucket_index.append([-a.fc, a.center])
         bucket_index = sorted(bucket_index, key=lambda x: x[0])
-        for i in range(request_num):
+        for _ in range(request_num):
             sample = np.random.rand()
             stick = 0.0
             for b in bucket_index:

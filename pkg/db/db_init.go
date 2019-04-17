@@ -7,6 +7,7 @@ import (
 
 func (d *dbConn) DBInit() {
 	db := d.db
+
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS studies
 		(id CHAR(16) PRIMARY KEY,
 		name VARCHAR(255),
@@ -17,7 +18,10 @@ func (d *dbConn) DBInit() {
 		tags TEXT,
 		objective_value_name VARCHAR(255),
 		metrics TEXT,
-		job_id TEXT)`)
+		nasconfig TEXT,
+		job_id TEXT,
+		job_type TEXT)`)
+
 	if err != nil {
 		log.Fatalf("Error creating studies table: %v", err)
 	}
@@ -37,6 +41,7 @@ func (d *dbConn) DBInit() {
 		parameters TEXT,
 		objective_value VARCHAR(255),
 		tags TEXT,
+		time DATETIME(6),
 		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE)`)
 	if err != nil {
 		log.Fatalf("Error creating trials table: %v", err)
@@ -95,6 +100,7 @@ func (d *dbConn) DBInit() {
 	if err != nil {
 		log.Fatalf("Error creating earlystop_param table: %v", err)
 	}
+
 }
 
 func (d *dbConn) SelectOne() error {

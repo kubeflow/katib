@@ -75,6 +75,7 @@ sed -i -e "s@image: katib\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/s
 sed -i -e "s@image: katib\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-grid:${VERSION}@" manifests/vizier/suggestion/grid/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-hyperband:${VERSION}@" manifests/vizier/suggestion/hyperband/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-bayesianoptimization:${VERSION}@" manifests/vizier/suggestion/bayesianoptimization/deployment.yaml
+sed -i -e "s@image: katib\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-nasrl:${VERSION}@" manifests/vizier/suggestion/nasrl/deployment.yaml
 sed -i -e "s@image: katib\/earlystopping-medianstopping@image: ${REGISTRY}\/${REPO_NAME}\/earlystopping-medianstopping:${VERSION}@" manifests/vizier/earlystopping/medianstopping/deployment.yaml
 sed -i -e '/volumeMounts:/,$d' manifests/vizier/db/deployment.yaml
 
@@ -110,7 +111,8 @@ TIMEOUT=120
 until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
     sleep 5
     TIMEOUT=$(( TIMEOUT - 1 ))
-done 
+done
+
 cp -r test ${GO_DIR}/test
 cd ${GO_DIR}/test/e2e
 kubectl apply -f valid-studyjob.yaml

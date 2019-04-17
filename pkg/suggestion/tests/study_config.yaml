@@ -1,0 +1,26 @@
+optimization_type: 2 # Code for Maximize
+parameter_configs:
+  configs:
+    - parameter_type: 1 # Code for DOUBLE
+      name: "x"
+      feasible:
+        min: -5.0
+        max: 5.0
+    - parameter_type: 2 # Code for INT
+      name: "y"
+      feasible:
+        min: -5
+        max: 5
+    - parameter_type: 3 # Code for DISCRETE
+      name: "fake_discrete"
+      feasible:
+        list:
+          - 2
+          - 3
+          - 5
+    - parameter_type: 4 # Code for CATEGORICAL
+      name: "fake_categorical"
+      feasible:
+        list:
+          - "true"
+          - "false"

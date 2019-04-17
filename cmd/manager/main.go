@@ -32,15 +32,12 @@ func (s *server) CreateStudy(ctx context.Context, in *api_pb.CreateStudyRequest)
 	if in == nil || in.StudyConfig == nil {
 		return &api_pb.CreateStudyReply{}, errors.New("StudyConfig is missing.")
 	}
+
 	studyID, err := dbIf.CreateStudy(in.StudyConfig)
 	if err != nil {
 		return &api_pb.CreateStudyReply{}, err
 	}
-	s.SaveStudy(ctx, &api_pb.SaveStudyRequest{
-		StudyName:   in.StudyConfig.Name,
-		Owner:       in.StudyConfig.Owner,
-		Description: "StudyID: " + studyID,
-	})
+
 	return &api_pb.CreateStudyReply{StudyId: studyID}, nil
 }
 
@@ -56,7 +53,12 @@ func (s *server) DeleteStudy(ctx context.Context, in *api_pb.DeleteStudyRequest)
 }
 
 func (s *server) GetStudy(ctx context.Context, in *api_pb.GetStudyRequest) (*api_pb.GetStudyReply, error) {
-	sc, err := dbIf.GetStudyConfig(in.StudyId)
+
+	sc, err := dbIf.GetStudy(in.StudyId)
+
+	if err != nil {
+		return &api_pb.GetStudyReply{}, err
+	}
 	return &api_pb.GetStudyReply{StudyConfig: sc}, err
 }
 
@@ -67,7 +69,7 @@ func (s *server) GetStudyList(ctx context.Context, in *api_pb.GetStudyListReques
 	}
 	result := make([]*api_pb.StudyOverview, len(sl))
 	for i, id := range sl {
-		sc, err := dbIf.GetStudyConfig(id)
+		sc, err := dbIf.GetStudy(id)
 		if err != nil {
 			return &api_pb.GetStudyListReply{}, err
 		}
@@ -113,6 +115,21 @@ func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRe
 	return r, nil
 }
 
+func (s *server) ValidateSuggestionParameters(ctx context.Context, in *api_pb.ValidateSuggestionParametersRequest) (*api_pb.ValidateSuggestionParametersReply, error) {
+
+	conn, err := grpc.Dial("vizier-suggestion-"+in.SuggestionAlgorithm+":6789", grpc.WithInsecure())
+	if err != nil {
+		return &api_pb.ValidateSuggestionParametersReply{}, err
+	}
+	defer conn.Close()
+
+	c := api_pb.NewSuggestionClient(conn)
+
+	r, err := c.ValidateSuggestionParameters(ctx, in)
+
+	return r, err
+}
+
 func (s *server) RegisterWorker(ctx context.Context, in *api_pb.RegisterWorkerRequest) (*api_pb.RegisterWorkerReply, error) {
 	wid, err := dbIf.CreateWorker(in.Worker)
 	return &api_pb.RegisterWorkerReply{WorkerId: wid}, err
@@ -149,7 +166,7 @@ func (s *server) GetMetrics(ctx context.Context, in *api_pb.GetMetricsRequest) (
 	if in.StudyId == "" {
 		return &api_pb.GetMetricsReply{}, errors.New("StudyId should be set")
 	}
-	sc, err := dbIf.GetStudyConfig(in.StudyId)
+	sc, err := dbIf.GetStudy(in.StudyId)
 	if err != nil {
 		return &api_pb.GetMetricsReply{}, err
 	}
@@ -214,6 +231,7 @@ func (s *server) UpdateWorkerState(ctx context.Context, in *api_pb.UpdateWorkerS
 func (s *server) GetWorkerFullInfo(ctx context.Context, in *api_pb.GetWorkerFullInfoRequest) (*api_pb.GetWorkerFullInfoReply, error) {
 	return dbIf.GetWorkerFullInfo(in.StudyId, in.TrialId, in.WorkerId, in.OnlyLatestLog)
 }
+
 func (s *server) SetSuggestionParameters(ctx context.Context, in *api_pb.SetSuggestionParametersRequest) (*api_pb.SetSuggestionParametersReply, error) {
 	var err error
 	var id string

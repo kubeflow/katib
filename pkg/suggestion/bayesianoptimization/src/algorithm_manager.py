@@ -1,10 +1,10 @@
 """ module for algorithm manager """
-
 import numpy as np
 
 from pkg.api.python import api_pb2
-import logging
-from logging import getLogger, StreamHandler, INFO, DEBUG
+
+from .utils import get_logger
+
 
 def deal_with_discrete(feasible_values, current_value):
     """ function to embed the current values to the feasible discrete space"""
@@ -12,28 +12,20 @@ def deal_with_discrete(feasible_values, current_value):
     diff = np.absolute(diff)
     return feasible_values[np.argmin(diff)]
 
+
 def deal_with_categorical(feasible_values, one_hot_values):
     """ function to do the one hot encoding of the categorical values """
-    #index = np.argmax(one_hot_values)
-    index = one_hot_values.argmax()
+    index = np.argmax(one_hot_values)
+    #index = one_hot_values.argmax()
     return feasible_values[int(index)]
+
 
 class AlgorithmManager:
     """ class for the algorithm manager
     provide some helper functions
     """
     def __init__(self, study_id, study_config, X_train, y_train, logger=None):
-        if logger == None:
-            self.logger = getLogger(__name__)
-            FORMAT = '%(asctime)-15s StudyID %(studyid)s %(message)s'
-            logging.basicConfig(format=FORMAT)
-            handler = StreamHandler()
-            handler.setLevel(DEBUG)
-            self.logger.setLevel(DEBUG)
-            self.logger.addHandler(handler)
-            self.logger.propagate = False
-        else:
-            self.logger = logger
+        self.logger = logger if (logger is not None) else get_logger()
         self._study_id = study_id
         self._study_config = study_config
         self._goal = self._study_config.optimization_type
@@ -82,7 +74,7 @@ class AlgorithmManager:
 
     @property
     def upper_bound(self):
-        """ return the ipper bound of all the parameters """
+        """ return the upper bound of all the parameters """
         return self._upperbound
 
     @property
@@ -118,10 +110,10 @@ class AlgorithmManager:
     def _parse_config(self):
         """ extract info from the study configuration """
         for i, param in enumerate(self._study_config.parameter_configs.configs):
-            self._name_id[param.name]=i
+            self._name_id[param.name] = i
             self._types.append(param.parameter_type)
             self._names.append(param.name)
-            if param.parameter_type == api_pb2.DOUBLE or param.parameter_type == api_pb2.INT:
+            if param.parameter_type in [api_pb2.DOUBLE, api_pb2.INT]:
                 self._dim = self._dim + 1
                 self._lowerbound.append(float(param.feasible.min))
                 self._upperbound.append(float(param.feasible.max))
@@ -158,7 +150,7 @@ class AlgorithmManager:
             for p in parameters:
                 self.logger.debug("mapping: %r", p, extra={"StudyID": self._study_id})
                 map_id = self._name_id[p.name]
-                if self._types[map_id] == api_pb2.DOUBLE or self._types[map_id] == api_pb2.INT or self._types[map_id] == api_pb2.DISCRETE:
+                if self._types[map_id] in [api_pb2.DOUBLE, api_pb2.INT, api_pb2.DISCRETE]:
                     maplist[map_id] = float(p.value)
                 elif self._types[map_id] == api_pb2.CATEGORICAL:
                     for ci in self._categorical_info:
@@ -166,7 +158,7 @@ class AlgorithmManager:
                             maplist[map_id] = np.zeros(ci["number"])
                             for i, v in enumerate(ci["values"]):
                                 if v == p.value:
-                                    maplist[map_id][i]=1
+                                    maplist[map_id][i] = 1
                                     break
             self.logger.debug("mapped: %r", maplist, extra={"StudyID": self._study_id})
             ret.append(np.hstack(maplist))
@@ -234,4 +226,3 @@ class AlgorithmManager:
             })
             result.append(tmp)
         return result
-
