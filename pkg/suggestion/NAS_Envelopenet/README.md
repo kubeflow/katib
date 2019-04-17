@@ -18,7 +18,7 @@ The output of `GetSuggestion()` is the `architecture`
 ```
 {'type': 'macro', 'network': [{'filters': ['1', '3', '5', '3sep', '5sep', '7sep'], 'outputs': 26, 'inputs': []}, {'filters': ['1', '3', '5', '3sep', '5sep', '7sep'], 'outputs': 26, 'inputs': []}, {'filters': ['1', '3', '5', '3sep', '5sep', '7sep'], 'outputs': 64, 'inputs': [1]}, {'widener': {}}, {'filters': ['1', '3', '5', '3sep', '5sep', '7sep'], 'outputs': 53, 'inputs': [3, 2, 1]}, {'filters': ['1', '3', '5', '3sep', '5sep', '7sep'], 'outputs': 53, 'inputs': [4, 3, 2, 1]}, {'filters': ['1', '3', '5', '3sep', '5sep', '7sep'], 'outputs': 128, 'inputs': [5, 4, 3, 2, 1]}, {'widener': {}}, {'filters': ['1', '3', '5', '3sep', '5sep', '7sep'], 'outputs': 106, 'inputs': [7, 6, 5, 4, 3, 2, 1]}, {'filters': ['1', '3', '5', '3sep', '5sep', '7sep'], 'outputs': 106, 'inputs': [8, 7, 6, 5, 4, 3, 2, 1]}, {'filters': ['1', '3', '5', '3sep', '5sep', '7sep'], 'outputs': 256, 'inputs': [9, 8, 7, 6, 5, 4, 3, 2, 1]}]}
 ```
-# Flow of program
+# Flow of example
 
 The parameters and initial architecture from yaml file is passed to ModelConstructor, which constructs the model and trains. Then it sends the featuremap statistics from this truncated training and refines the architecture. This process
 continues till the max_iterations parameter.
