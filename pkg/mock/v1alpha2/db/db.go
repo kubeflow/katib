@@ -8,7 +8,6 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	v1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	reflect "reflect"
-	time "time"
 )
 
 // MockKatibDBInterface is a mock of KatibDBInterface interface
@@ -36,19 +35,16 @@ func (m *MockKatibDBInterface) EXPECT() *MockKatibDBInterfaceMockRecorder {
 
 // DBInit mocks base method
 func (m *MockKatibDBInterface) DBInit() {
-	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "DBInit")
 }
 
 // DBInit indicates an expected call of DBInit
 func (mr *MockKatibDBInterfaceMockRecorder) DBInit() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DBInit", reflect.TypeOf((*MockKatibDBInterface)(nil).DBInit))
 }
 
 // DeleteExperiment mocks base method
 func (m *MockKatibDBInterface) DeleteExperiment(arg0 string) error {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteExperiment", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -56,13 +52,11 @@ func (m *MockKatibDBInterface) DeleteExperiment(arg0 string) error {
 
 // DeleteExperiment indicates an expected call of DeleteExperiment
 func (mr *MockKatibDBInterfaceMockRecorder) DeleteExperiment(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteExperiment", reflect.TypeOf((*MockKatibDBInterface)(nil).DeleteExperiment), arg0)
 }
 
 // DeleteTrial mocks base method
 func (m *MockKatibDBInterface) DeleteTrial(arg0 string) error {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteTrial", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -70,13 +64,24 @@ func (m *MockKatibDBInterface) DeleteTrial(arg0 string) error {
 
 // DeleteTrial indicates an expected call of DeleteTrial
 func (mr *MockKatibDBInterfaceMockRecorder) DeleteTrial(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTrial", reflect.TypeOf((*MockKatibDBInterface)(nil).DeleteTrial), arg0)
+}
+
+// GetAlgorithmExtraSettings mocks base method
+func (m *MockKatibDBInterface) GetAlgorithmExtraSettings(arg0 string) ([]*v1alpha2.AlgorithmSetting, error) {
+	ret := m.ctrl.Call(m, "GetAlgorithmExtraSettings", arg0)
+	ret0, _ := ret[0].([]*v1alpha2.AlgorithmSetting)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAlgorithmExtraSettings indicates an expected call of GetAlgorithmExtraSettings
+func (mr *MockKatibDBInterfaceMockRecorder) GetAlgorithmExtraSettings(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAlgorithmExtraSettings", reflect.TypeOf((*MockKatibDBInterface)(nil).GetAlgorithmExtraSettings), arg0)
 }
 
 // GetExperiment mocks base method
 func (m *MockKatibDBInterface) GetExperiment(arg0 string) (*v1alpha2.Experiment, error) {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetExperiment", arg0)
 	ret0, _ := ret[0].(*v1alpha2.Experiment)
 	ret1, _ := ret[1].(error)
@@ -85,13 +90,11 @@ func (m *MockKatibDBInterface) GetExperiment(arg0 string) (*v1alpha2.Experiment,
 
 // GetExperiment indicates an expected call of GetExperiment
 func (mr *MockKatibDBInterfaceMockRecorder) GetExperiment(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExperiment", reflect.TypeOf((*MockKatibDBInterface)(nil).GetExperiment), arg0)
 }
 
 // GetExperimentList mocks base method
 func (m *MockKatibDBInterface) GetExperimentList() ([]*v1alpha2.ExperimentSummary, error) {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetExperimentList")
 	ret0, _ := ret[0].([]*v1alpha2.ExperimentSummary)
 	ret1, _ := ret[1].(error)
@@ -100,13 +103,11 @@ func (m *MockKatibDBInterface) GetExperimentList() ([]*v1alpha2.ExperimentSummar
 
 // GetExperimentList indicates an expected call of GetExperimentList
 func (mr *MockKatibDBInterfaceMockRecorder) GetExperimentList() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExperimentList", reflect.TypeOf((*MockKatibDBInterface)(nil).GetExperimentList))
 }
 
 // GetObservationLog mocks base method
-func (m *MockKatibDBInterface) GetObservationLog(arg0 string, arg1, arg2 time.Time) (*v1alpha2.ObservationLog, error) {
-	m.ctrl.T.Helper()
+func (m *MockKatibDBInterface) GetObservationLog(arg0, arg1, arg2 string) (*v1alpha2.ObservationLog, error) {
 	ret := m.ctrl.Call(m, "GetObservationLog", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*v1alpha2.ObservationLog)
 	ret1, _ := ret[1].(error)
@@ -115,13 +116,11 @@ func (m *MockKatibDBInterface) GetObservationLog(arg0 string, arg1, arg2 time.Ti
 
 // GetObservationLog indicates an expected call of GetObservationLog
 func (mr *MockKatibDBInterfaceMockRecorder) GetObservationLog(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetObservationLog", reflect.TypeOf((*MockKatibDBInterface)(nil).GetObservationLog), arg0, arg1, arg2)
 }
 
 // GetTrial mocks base method
 func (m *MockKatibDBInterface) GetTrial(arg0 string) (*v1alpha2.Trial, error) {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTrial", arg0)
 	ret0, _ := ret[0].(*v1alpha2.Trial)
 	ret1, _ := ret[1].(error)
@@ -130,13 +129,11 @@ func (m *MockKatibDBInterface) GetTrial(arg0 string) (*v1alpha2.Trial, error) {
 
 // GetTrial indicates an expected call of GetTrial
 func (mr *MockKatibDBInterfaceMockRecorder) GetTrial(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrial", reflect.TypeOf((*MockKatibDBInterface)(nil).GetTrial), arg0)
 }
 
 // GetTrialList mocks base method
 func (m *MockKatibDBInterface) GetTrialList(arg0 string) ([]*v1alpha2.Trial, error) {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTrialList", arg0)
 	ret0, _ := ret[0].([]*v1alpha2.Trial)
 	ret1, _ := ret[1].(error)
@@ -145,13 +142,11 @@ func (m *MockKatibDBInterface) GetTrialList(arg0 string) ([]*v1alpha2.Trial, err
 
 // GetTrialList indicates an expected call of GetTrialList
 func (mr *MockKatibDBInterfaceMockRecorder) GetTrialList(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialList", reflect.TypeOf((*MockKatibDBInterface)(nil).GetTrialList), arg0)
 }
 
 // RegisterExperiment mocks base method
 func (m *MockKatibDBInterface) RegisterExperiment(arg0 *v1alpha2.Experiment) error {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterExperiment", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -159,13 +154,11 @@ func (m *MockKatibDBInterface) RegisterExperiment(arg0 *v1alpha2.Experiment) err
 
 // RegisterExperiment indicates an expected call of RegisterExperiment
 func (mr *MockKatibDBInterfaceMockRecorder) RegisterExperiment(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterExperiment", reflect.TypeOf((*MockKatibDBInterface)(nil).RegisterExperiment), arg0)
 }
 
 // RegisterObservationLog mocks base method
 func (m *MockKatibDBInterface) RegisterObservationLog(arg0 string, arg1 *v1alpha2.ObservationLog) error {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterObservationLog", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -173,13 +166,11 @@ func (m *MockKatibDBInterface) RegisterObservationLog(arg0 string, arg1 *v1alpha
 
 // RegisterObservationLog indicates an expected call of RegisterObservationLog
 func (mr *MockKatibDBInterfaceMockRecorder) RegisterObservationLog(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterObservationLog", reflect.TypeOf((*MockKatibDBInterface)(nil).RegisterObservationLog), arg0, arg1)
 }
 
 // RegisterTrial mocks base method
 func (m *MockKatibDBInterface) RegisterTrial(arg0 *v1alpha2.Trial) error {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterTrial", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -187,13 +178,11 @@ func (m *MockKatibDBInterface) RegisterTrial(arg0 *v1alpha2.Trial) error {
 
 // RegisterTrial indicates an expected call of RegisterTrial
 func (mr *MockKatibDBInterfaceMockRecorder) RegisterTrial(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterTrial", reflect.TypeOf((*MockKatibDBInterface)(nil).RegisterTrial), arg0)
 }
 
 // SelectOne mocks base method
 func (m *MockKatibDBInterface) SelectOne() error {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SelectOne")
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -201,13 +190,23 @@ func (m *MockKatibDBInterface) SelectOne() error {
 
 // SelectOne indicates an expected call of SelectOne
 func (mr *MockKatibDBInterfaceMockRecorder) SelectOne() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectOne", reflect.TypeOf((*MockKatibDBInterface)(nil).SelectOne))
+}
+
+// UpdateAlgorithmExtraSettings mocks base method
+func (m *MockKatibDBInterface) UpdateAlgorithmExtraSettings(arg0 string, arg1 []*v1alpha2.AlgorithmSetting) error {
+	ret := m.ctrl.Call(m, "UpdateAlgorithmExtraSettings", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateAlgorithmExtraSettings indicates an expected call of UpdateAlgorithmExtraSettings
+func (mr *MockKatibDBInterfaceMockRecorder) UpdateAlgorithmExtraSettings(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAlgorithmExtraSettings", reflect.TypeOf((*MockKatibDBInterface)(nil).UpdateAlgorithmExtraSettings), arg0, arg1)
 }
 
 // UpdateExperimentStatus mocks base method
 func (m *MockKatibDBInterface) UpdateExperimentStatus(arg0 string, arg1 *v1alpha2.ExperimentStatus) error {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateExperimentStatus", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -215,13 +214,11 @@ func (m *MockKatibDBInterface) UpdateExperimentStatus(arg0 string, arg1 *v1alpha
 
 // UpdateExperimentStatus indicates an expected call of UpdateExperimentStatus
 func (mr *MockKatibDBInterfaceMockRecorder) UpdateExperimentStatus(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateExperimentStatus", reflect.TypeOf((*MockKatibDBInterface)(nil).UpdateExperimentStatus), arg0, arg1)
 }
 
 // UpdateTrialStatus mocks base method
 func (m *MockKatibDBInterface) UpdateTrialStatus(arg0 string, arg1 *v1alpha2.TrialStatus) error {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateTrialStatus", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -229,6 +226,5 @@ func (m *MockKatibDBInterface) UpdateTrialStatus(arg0 string, arg1 *v1alpha2.Tri
 
 // UpdateTrialStatus indicates an expected call of UpdateTrialStatus
 func (mr *MockKatibDBInterfaceMockRecorder) UpdateTrialStatus(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTrialStatus", reflect.TypeOf((*MockKatibDBInterface)(nil).UpdateTrialStatus), arg0, arg1)
 }

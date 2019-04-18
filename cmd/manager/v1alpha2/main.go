@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"net"
 
@@ -126,16 +127,19 @@ func (s *server) GetObservationLog(ctx context.Context, in *api_pb.GetObservatio
 	}, err
 }
 
+func (s *server) suggestionServiceRedirection(algoName string) (*grpc.ClientConn, error) {
+	if algoName == "" {
+		return nil, errors.New("No algorithm name is specified")
+	}
+	return grpc.Dial("katib-suggestion-"+algoName+":6789", grpc.WithInsecure())
+}
+
 // Get Suggestions from a Suggestion service.
 func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestionsReply, error) {
-	if in.AlgorithmName == "" {
-		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, errors.New("No algorithm name is specified")
-	}
-	conn, err := grpc.Dial("vizier-suggestion-"+in.AlgorithmName+":6789", grpc.WithInsecure())
+	conn, err := s.suggestionServiceRedirection(in.AlgorithmName)
 	if err != nil {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
 	}
-
 	defer conn.Close()
 	c := api_pb.NewSuggestionClient(conn)
 	r, err := c.GetSuggestions(ctx, in)
@@ -148,10 +152,7 @@ func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRe
 // Validate AlgorithmSettings in an Experiment.
 // Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid
 func (s *server) ValidateAlgorithmSettings(ctx context.Context, in *api_pb.ValidateAlgorithmSettingsRequest) (*api_pb.ValidateAlgorithmSettingsReply, error) {
-	if in.AlgorithmName == "" {
-		return &api_pb.ValidateAlgorithmSettingsReply{}, errors.New("No algorithm name is specified")
-	}
-	conn, err := grpc.Dial("vizier-suggestion-"+in.AlgorithmName+":6789", grpc.WithInsecure())
+	conn, err := s.suggestionServiceRedirection(in.AlgorithmName)
 	if err != nil {
 		return &api_pb.ValidateAlgorithmSettingsReply{}, err
 	}
@@ -161,7 +162,24 @@ func (s *server) ValidateAlgorithmSettings(ctx context.Context, in *api_pb.Valid
 }
 
 func (s *server) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*health_pb.HealthCheckResponse, error) {
-	return nil, nil
+	resp := health_pb.HealthCheckResponse{
+		Status: health_pb.HealthCheckResponse_SERVING,
+	}
+
+	// We only accept optional service name only if it's set to suggested format.
+	if in != nil && in.Service != "" && in.Service != "grpc.health.v1.Health" {
+		resp.Status = health_pb.HealthCheckResponse_UNKNOWN
+		return &resp, fmt.Errorf("grpc.health.v1.Health can only be accepted if you specify service name.")
+	}
+
+	// Check if connection to vizier-db is okay since otherwise manager could not serve most of its methods.
+	err := dbIf.SelectOne()
+	if err != nil {
+		resp.Status = health_pb.HealthCheckResponse_NOT_SERVING
+		return &resp, fmt.Errorf("Failed to execute `SELECT 1` probe: %v", err)
+	}
+
+	return &resp, nil
 }
 
 func main() {

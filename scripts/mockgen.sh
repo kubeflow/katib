@@ -29,7 +29,6 @@ echo "Generating v1alpha1 VizierDBInterface..."
 mockgen -package mock -destination pkg/mock/v1alpha1/db/db.go github.com/kubeflow/katib/pkg/db/v1alpha1 VizierDBInterface
 echo "Generating ModelStore..."
 mockgen -package mock -destination pkg/mock/modelstore/modelstore.go  github.com/kubeflow/katib/pkg/manager/modelstore ModelStore
-cd - > /dev/null
 
 echo "Generating v1alpha2 ManagerClient..."
 mockgen -package mock -destination pkg/mock/v1alpha2/api/manager.go github.com/kubeflow/katib/pkg/api/v1alpha2 ManagerClient
