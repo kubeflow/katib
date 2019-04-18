@@ -90,7 +90,7 @@ func (s *server) DeleteTrial(ctx context.Context, in *api_pb.DeleteTrialRequest)
 
 // Get a list of Trial from DB by name of a Experiment.
 func (s *server) GetTrialList(ctx context.Context, in *api_pb.GetTrialListRequest) (*api_pb.GetTrialListReply, error) {
-	trList, err := dbIf.GetTrialList(in.ExperimentName)
+	trList, err := dbIf.GetTrialList(in.ExperimentName, in.Filter)
 	return &api_pb.GetTrialListReply{
 		Trials: trList,
 	}, err
@@ -127,7 +127,7 @@ func (s *server) GetObservationLog(ctx context.Context, in *api_pb.GetObservatio
 	}, err
 }
 
-func (s *server) suggestionServiceRedirection(algoName string) (*grpc.ClientConn, error) {
+func (s *server) getSuggestionServiceConnection(algoName string) (*grpc.ClientConn, error) {
 	if algoName == "" {
 		return nil, errors.New("No algorithm name is specified")
 	}
@@ -136,7 +136,7 @@ func (s *server) suggestionServiceRedirection(algoName string) (*grpc.ClientConn
 
 // Get Suggestions from a Suggestion service.
 func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestionsReply, error) {
-	conn, err := s.suggestionServiceRedirection(in.AlgorithmName)
+	conn, err := s.getSuggestionServiceConnection(in.AlgorithmName)
 	if err != nil {
 		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
 	}
@@ -152,7 +152,7 @@ func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRe
 // Validate AlgorithmSettings in an Experiment.
 // Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid
 func (s *server) ValidateAlgorithmSettings(ctx context.Context, in *api_pb.ValidateAlgorithmSettingsRequest) (*api_pb.ValidateAlgorithmSettingsReply, error) {
-	conn, err := s.suggestionServiceRedirection(in.AlgorithmName)
+	conn, err := s.getSuggestionServiceConnection(in.AlgorithmName)
 	if err != nil {
 		return &api_pb.ValidateAlgorithmSettingsReply{}, err
 	}

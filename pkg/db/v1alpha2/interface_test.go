@@ -325,7 +325,7 @@ func TestRegisterTrial(t *testing.T) {
 }
 
 func TestGetTrialList(t *testing.T) {
-	mock.ExpectQuery(`SELECT \* FROM trials WHERE experiment_name = \?`).WillReturnRows(
+	mock.ExpectQuery(`SELECT`).WillReturnRows(
 		sqlmock.NewRows(trialColumns).AddRow(
 			1,
 			"test1_trial1",
@@ -348,7 +348,7 @@ func TestGetTrialList(t *testing.T) {
 			"",
 		),
 	)
-	trials, err := dbInterface.GetTrialList("test1")
+	trials, err := dbInterface.GetTrialList("test1", "trial")
 	if err != nil {
 		t.Errorf("GetTrialList failed %v", err)
 	} else if len(trials) != 2 {

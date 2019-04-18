@@ -310,6 +310,7 @@ func TestGetTrialList(t *testing.T) {
 
 	req := &api_pb.GetTrialListRequest{
 		ExperimentName: "test1",
+		Filter:         "trial",
 	}
 	trialList := []*api_pb.Trial{
 		&api_pb.Trial{
@@ -384,7 +385,7 @@ func TestGetTrialList(t *testing.T) {
 			},
 		},
 	}
-	mockDB.EXPECT().GetTrialList(req.ExperimentName).Return(trialList, nil)
+	mockDB.EXPECT().GetTrialList(req.ExperimentName, "trial").Return(trialList, nil)
 	ret, err := s.GetTrialList(context.Background(), req)
 	if len(ret.Trials) != len(trialList) {
 		t.Fatalf("GetTrialList Test fail expect tiral number %d got %d", len(trialList), len(ret.Trials))

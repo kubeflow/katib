@@ -133,16 +133,16 @@ func (mr *MockKatibDBInterfaceMockRecorder) GetTrial(arg0 interface{}) *gomock.C
 }
 
 // GetTrialList mocks base method
-func (m *MockKatibDBInterface) GetTrialList(arg0 string) ([]*v1alpha2.Trial, error) {
-	ret := m.ctrl.Call(m, "GetTrialList", arg0)
+func (m *MockKatibDBInterface) GetTrialList(arg0, arg1 string) ([]*v1alpha2.Trial, error) {
+	ret := m.ctrl.Call(m, "GetTrialList", arg0, arg1)
 	ret0, _ := ret[0].([]*v1alpha2.Trial)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetTrialList indicates an expected call of GetTrialList
-func (mr *MockKatibDBInterfaceMockRecorder) GetTrialList(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialList", reflect.TypeOf((*MockKatibDBInterface)(nil).GetTrialList), arg0)
+func (mr *MockKatibDBInterfaceMockRecorder) GetTrialList(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialList", reflect.TypeOf((*MockKatibDBInterface)(nil).GetTrialList), arg0, arg1)
 }
 
 // RegisterExperiment mocks base method

@@ -53,7 +53,7 @@ type KatibDBInterface interface {
 	GetAlgorithmExtraSettings(experimentName string) ([]*v1alpha2.AlgorithmSetting, error)
 
 	RegisterTrial(trial *v1alpha2.Trial) error
-	GetTrialList(experimentName string) ([]*v1alpha2.Trial, error)
+	GetTrialList(experimentName string, filter string) ([]*v1alpha2.Trial, error)
 	GetTrial(trialName string) (*v1alpha2.Trial, error)
 	UpdateTrialStatus(trialName string, newStatus *v1alpha2.TrialStatus) error
 	DeleteTrial(trialName string) error
@@ -475,13 +475,13 @@ func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
 	return err
 }
 
-func (d *dbConn) GetTrialList(experimentName string) ([]*v1alpha2.Trial, error) {
+func (d *dbConn) GetTrialList(experimentName string, filter string) ([]*v1alpha2.Trial, error) {
 	var id string
 	var paramAssignment string
 	var start_time string
 	var completion_time string
 	var observation string
-	rows, err := d.db.Query("SELECT * FROM trials WHERE experiment_name = ?", experimentName)
+	rows, err := d.db.Query("SELECT * FROM trials WHERE experiment_name = ? AND name LIKE '%?%'", experimentName, filter)
 	if err != nil {
 		return nil, err
 	}
