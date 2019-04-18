@@ -451,7 +451,7 @@ message DeleteTrialReply {
 
 message GetTrialListRequest {
     string experiment_name = 1;
-    string filter = 2;
+    string filter_by_name = 2;
 }
 
 message GetTrialListReply {

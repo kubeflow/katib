@@ -458,7 +458,7 @@ Discrete and Categorical type use List.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | experiment_name | [string](#string) |  |  |
-| filter | [string](#string) |  |  |
+| filter_by_name | [string](#string) |  |  |
 
 
 

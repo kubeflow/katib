@@ -241,7 +241,7 @@
             "type": "string"
           },
           {
-            "name": "filter",
+            "name": "filter_by_name",
             "in": "query",
             "required": false,
             "type": "string"

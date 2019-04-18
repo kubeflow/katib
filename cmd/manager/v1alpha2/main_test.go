@@ -310,7 +310,7 @@ func TestGetTrialList(t *testing.T) {
 
 	req := &api_pb.GetTrialListRequest{
 		ExperimentName: "test1",
-		Filter:         "trial",
+		FilterByName:   "trial",
 	}
 	trialList := []*api_pb.Trial{
 		&api_pb.Trial{

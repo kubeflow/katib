@@ -90,7 +90,7 @@ func (s *server) DeleteTrial(ctx context.Context, in *api_pb.DeleteTrialRequest)
 
 // Get a list of Trial from DB by name of a Experiment.
 func (s *server) GetTrialList(ctx context.Context, in *api_pb.GetTrialListRequest) (*api_pb.GetTrialListReply, error) {
-	trList, err := dbIf.GetTrialList(in.ExperimentName, in.Filter)
+	trList, err := dbIf.GetTrialList(in.ExperimentName, in.FilterByName)
 	return &api_pb.GetTrialListReply{
 		Trials: trList,
 	}, err
