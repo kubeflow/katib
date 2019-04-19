@@ -34,5 +34,5 @@ echo "Generating v1alpha2 ManagerClient..."
 mockgen -package mock -destination pkg/mock/v1alpha2/api/manager.go github.com/kubeflow/katib/pkg/api/v1alpha2 ManagerClient
 echo "Generating v1alpha2 SuggestionClient..."
 mockgen -package mock -destination pkg/mock/v1alpha2/api/suggestion.go github.com/kubeflow/katib/pkg/api/v1alpha2 SuggestionClient
-echo "Generating v1alpha2 VizierDBInterface..."
+echo "Generating v1alpha2 KatibDBInterface..."
 mockgen -package mock -destination pkg/mock/v1alpha2/db/db.go github.com/kubeflow/katib/pkg/db/v1alpha2 KatibDBInterface

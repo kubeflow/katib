@@ -90,7 +90,7 @@ func (s *server) DeleteTrial(ctx context.Context, in *api_pb.DeleteTrialRequest)
 
 // Get a list of Trial from DB by name of a Experiment.
 func (s *server) GetTrialList(ctx context.Context, in *api_pb.GetTrialListRequest) (*api_pb.GetTrialListReply, error) {
-	trList, err := dbIf.GetTrialList(in.ExperimentName, in.FilterByName)
+	trList, err := dbIf.GetTrialList(in.ExperimentName, in.Filter)
 	return &api_pb.GetTrialListReply{
 		Trials: trList,
 	}, err
@@ -172,7 +172,7 @@ func (s *server) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*
 		return &resp, fmt.Errorf("grpc.health.v1.Health can only be accepted if you specify service name.")
 	}
 
-	// Check if connection to vizier-db is okay since otherwise manager could not serve most of its methods.
+	// Check if connection to katib-db is okay since otherwise manager could not serve most of its methods.
 	err := dbIf.SelectOne()
 	if err != nil {
 		resp.Status = health_pb.HealthCheckResponse_NOT_SERVING

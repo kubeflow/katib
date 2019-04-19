@@ -53,7 +53,7 @@ type KatibDBInterface interface {
 	GetAlgorithmExtraSettings(experimentName string) ([]*v1alpha2.AlgorithmSetting, error)
 
 	RegisterTrial(trial *v1alpha2.Trial) error
-	GetTrialList(experimentName string, filter_by_name string) ([]*v1alpha2.Trial, error)
+	GetTrialList(experimentName string, filter string) ([]*v1alpha2.Trial, error)
 	GetTrial(trialName string) (*v1alpha2.Trial, error)
 	UpdateTrialStatus(trialName string, newStatus *v1alpha2.TrialStatus) error
 	DeleteTrial(trialName string) error
@@ -475,7 +475,7 @@ func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
 	return err
 }
 
-func (d *dbConn) GetTrialList(experimentName string, filter_by_name string) ([]*v1alpha2.Trial, error) {
+func (d *dbConn) GetTrialList(experimentName string, filter string) ([]*v1alpha2.Trial, error) {
 	var id string
 	var paramAssignment string
 	var start_time string
@@ -483,9 +483,15 @@ func (d *dbConn) GetTrialList(experimentName string, filter_by_name string) ([]*
 	var observation string
 	var qstr = "SELECT * FROM trials WHERE experiment_name = ?"
 	var qfield = []interface{}{experimentName}
-	if filter_by_name != "" {
+	if filter != "" {
+		//Currently only support filter by name.
+		//TODO support other type of fiter
+		//e.g.
+		//* filter:name=foo
+		//* filter:start_time>x
+		//*filter:end_time<=y
 		qstr += " AND name LIKE '%?%'"
-		qfield = append(qfield, filter_by_name)
+		qfield = append(qfield, filter)
 	}
 	rows, err := d.db.Query(qstr, qfield...)
 	if err != nil {
