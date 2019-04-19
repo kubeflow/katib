@@ -13,6 +13,7 @@
     - [EarlyStoppingSpec](#api.v1.alpha2.EarlyStoppingSpec)
     - [Experiment](#api.v1.alpha2.Experiment)
     - [ExperimentSpec](#api.v1.alpha2.ExperimentSpec)
+    - [ExperimentSpec.ParameterSpecs](#api.v1.alpha2.ExperimentSpec.ParameterSpecs)
     - [ExperimentStatus](#api.v1.alpha2.ExperimentStatus)
     - [ExperimentSummary](#api.v1.alpha2.ExperimentSummary)
     - [FeasibleSpace](#api.v1.alpha2.FeasibleSpace)
@@ -49,6 +50,7 @@
     - [ReportObservationLogRequest](#api.v1.alpha2.ReportObservationLogRequest)
     - [Trial](#api.v1.alpha2.Trial)
     - [TrialSpec](#api.v1.alpha2.TrialSpec)
+    - [TrialSpec.ParameterAssignments](#api.v1.alpha2.TrialSpec.ParameterAssignments)
     - [TrialStatus](#api.v1.alpha2.TrialStatus)
     - [UpdateAlgorithmExtraSettingsReply](#api.v1.alpha2.UpdateAlgorithmExtraSettingsReply)
     - [UpdateAlgorithmExtraSettingsRequest](#api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest)
@@ -201,7 +203,7 @@ It is assumed that objective function f(x) does not change in the course of a Ex
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| parameters | [ParameterSpec](#api.v1.alpha2.ParameterSpec) | repeated |  |
+| parameter_specs | [ExperimentSpec.ParameterSpecs](#api.v1.alpha2.ExperimentSpec.ParameterSpecs) |  |  |
 | objective | [ObjectiveSpec](#api.v1.alpha2.ObjectiveSpec) |  |  |
 | algorithm | [AlgorithmSpec](#api.v1.alpha2.AlgorithmSpec) |  |  |
 | trial_template | [string](#string) |  |  |
@@ -209,6 +211,21 @@ It is assumed that objective function f(x) does not change in the course of a Ex
 | max_trial_count | [int32](#int32) |  |  |
 | metrics_collector_type | [string](#string) |  |  |
 | nas_config | [NasConfig](#api.v1.alpha2.NasConfig) |  |  |
+
+
+
+
+
+
+<a name="api.v1.alpha2.ExperimentSpec.ParameterSpecs"/>
+
+### ExperimentSpec.ParameterSpecs
+List of ParameterSpec
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| parameters | [ParameterSpec](#api.v1.alpha2.ParameterSpec) | repeated |  |
 
 
 
@@ -377,6 +394,8 @@ Discrete and Categorical type use List.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | trial_name | [string](#string) |  |  |
+| start_time | [string](#string) |  | The start of the time range. RFC3339 format |
+| end_time | [string](#string) |  | The end of the time range. RFC3339 format |
 
 
 
@@ -439,8 +458,6 @@ Discrete and Categorical type use List.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | experiment_name | [string](#string) |  |  |
-| start_time | [string](#string) |  | The start of the time range. RFC3339 format |
-| end_time | [string](#string) |  | The end of the time range. RFC3339 format |
 | filter | [string](#string) |  |  |
 
 
@@ -760,8 +777,23 @@ Katib will create each Hyper parameter from this config.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | experiment_name | [string](#string) |  |  |
-| parameter_assignments | [ParameterAssignment](#api.v1.alpha2.ParameterAssignment) | repeated |  |
+| parameter_assignments | [TrialSpec.ParameterAssignments](#api.v1.alpha2.TrialSpec.ParameterAssignments) |  |  |
 | run_spec | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="api.v1.alpha2.TrialSpec.ParameterAssignments"/>
+
+### TrialSpec.ParameterAssignments
+List of ParameterAssignment
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| assignments | [ParameterAssignment](#api.v1.alpha2.ParameterAssignment) | repeated |  |
 
 
 

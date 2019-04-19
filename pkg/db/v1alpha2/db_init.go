@@ -18,10 +18,10 @@ func (d *dbConn) DBInit() {
 		parallel_trial_count INT,
 		max_trial_count INT,
 		condition TINYINT,
-		start_time DATETIME(6),
 		metrics_collector_type TEXT,
+		start_time DATETIME(6),
 		completion_time DATETIME(6),
-		last_reconcile_time DATETIME(6))`)
+		nas_config TEXT)`)
 	//TODO add nas config(may be it will be included in algorithm)
 	if err != nil {
 		log.Fatalf("Error creating experiments table: %v", err)
@@ -37,7 +37,6 @@ func (d *dbConn) DBInit() {
 		condition TINYINT,
 		start_time DATETIME(6),
 		completion_time DATETIME(6),
-		last_reconcile_time DATETIME(6),
 		FOREIGN KEY(experiment_name) REFERENCES experiments(name) ON DELETE CASCADE)`)
 	if err != nil {
 		log.Fatalf("Error creating trials table: %v", err)

@@ -215,6 +215,10 @@
                 </li>
               
                 <li>
+                  <a href="#api.v1.alpha2.ExperimentSpec.ParameterSpecs"><span class="badge">M</span>ExperimentSpec.ParameterSpecs</a>
+                </li>
+              
+                <li>
                   <a href="#api.v1.alpha2.ExperimentStatus"><span class="badge">M</span>ExperimentStatus</a>
                 </li>
               
@@ -356,6 +360,10 @@
               
                 <li>
                   <a href="#api.v1.alpha2.TrialSpec"><span class="badge">M</span>TrialSpec</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.alpha2.TrialSpec.ParameterAssignments"><span class="badge">M</span>TrialSpec.ParameterAssignments</a>
                 </li>
               
                 <li>
@@ -622,9 +630,9 @@
             <tbody>
               
                 <tr>
-                  <td>parameters</td>
-                  <td><a href="#api.v1.alpha2.ParameterSpec">ParameterSpec</a></td>
-                  <td>repeated</td>
+                  <td>parameter_specs</td>
+                  <td><a href="#api.v1.alpha2.ExperimentSpec.ParameterSpecs">ExperimentSpec.ParameterSpecs</a></td>
+                  <td></td>
                   <td><p> </p></td>
                 </tr>
               
@@ -674,6 +682,29 @@
                   <td>nas_config</td>
                   <td><a href="#api.v1.alpha2.NasConfig">NasConfig</a></td>
                   <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.ExperimentSpec.ParameterSpecs">ExperimentSpec.ParameterSpecs</h3>
+        <p>List of ParameterSpec</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>parameters</td>
+                  <td><a href="#api.v1.alpha2.ParameterSpec">ParameterSpec</a></td>
+                  <td>repeated</td>
                   <td><p> </p></td>
                 </tr>
               
@@ -956,6 +987,20 @@
                   <td><p> </p></td>
                 </tr>
               
+                <tr>
+                  <td>start_time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>The start of the time range. RFC3339 format </p></td>
+                </tr>
+              
+                <tr>
+                  <td>end_time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>The end of the time range. RFC3339 format </p></td>
+                </tr>
+              
             </tbody>
           </table>
         
@@ -1060,20 +1105,6 @@
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p> </p></td>
-                </tr>
-              
-                <tr>
-                  <td>start_time</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>The start of the time range. RFC3339 format </p></td>
-                </tr>
-              
-                <tr>
-                  <td>end_time</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>The end of the time range. RFC3339 format </p></td>
                 </tr>
               
                 <tr>
@@ -1627,8 +1658,8 @@
               
                 <tr>
                   <td>parameter_assignments</td>
-                  <td><a href="#api.v1.alpha2.ParameterAssignment">ParameterAssignment</a></td>
-                  <td>repeated</td>
+                  <td><a href="#api.v1.alpha2.TrialSpec.ParameterAssignments">TrialSpec.ParameterAssignments</a></td>
+                  <td></td>
                   <td><p> </p></td>
                 </tr>
               
@@ -1636,6 +1667,29 @@
                   <td>run_spec</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+        
+
+        
+      
+        <h3 id="api.v1.alpha2.TrialSpec.ParameterAssignments">TrialSpec.ParameterAssignments</h3>
+        <p>List of ParameterAssignment</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>assignments</td>
+                  <td><a href="#api.v1.alpha2.ParameterAssignment">ParameterAssignment</a></td>
+                  <td>repeated</td>
                   <td><p> </p></td>
                 </tr>
               

@@ -321,6 +321,10 @@ func request_Manager_ReportObservationLog_0(ctx context.Context, marshaler runti
 
 }
 
+var (
+	filter_Manager_GetObservationLog_0 = &utilities.DoubleArray{Encoding: map[string]int{"trial_name": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
+)
+
 func request_Manager_GetObservationLog_0(ctx context.Context, marshaler runtime.Marshaler, client ManagerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetObservationLogRequest
 	var metadata runtime.ServerMetadata
@@ -341,6 +345,10 @@ func request_Manager_GetObservationLog_0(ctx context.Context, marshaler runtime.
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "trial_name", err)
+	}
+
+	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_Manager_GetObservationLog_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
 	msg, err := client.GetObservationLog(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
