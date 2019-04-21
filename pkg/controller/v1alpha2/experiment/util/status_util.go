@@ -16,9 +16,6 @@ limitations under the License.
 package util
 
 import (
-	"errors"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
@@ -37,36 +34,22 @@ const (
 
 func UpdateExperimentStatus(instance *experimentsv1alpha2.Experiment, trials *trialsv1alpha2.TrialList) error {
 
-	isObjectiveGoalReached, err := updateTrialsSummary(instance, trials)
-	if err != nil {
-		return err
-	}
+	isObjectiveGoalReached := updateTrialsSummary(instance, trials)
 
 	updateExperimentStatusCondition(instance, isObjectiveGoalReached)
 	return nil
 
 }
 
-func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trialsv1alpha2.TrialList) (bool, error) {
+func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trialsv1alpha2.TrialList) bool {
 
 	var trialsPending, trialsRunning, trialsSucceeded, trialsFailed, trialsKilled int
-	var bestTrialIndex int
 	var bestTrialValue float64
+	bestTrialIndex := -1
 	isObjectiveGoalReached := false
 	objectiveValueGoal := *instance.Spec.Objective.Goal
 	objectiveType := instance.Spec.Objective.Type
 	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
-
-	if objectiveMetricValue := getObjectiveMetricValue(trials.Items[0], objectiveMetricName); objectiveMetricValue != nil {
-		bestTrialValue = *objectiveMetricValue
-		if bestTrialValue <= objectiveValueGoal {
-			isObjectiveGoalReached = true
-		}
-	} else {
-		//may be log
-		err := errors.New(string(metav1.StatusReasonNotFound))
-		return isObjectiveGoalReached, err
-	}
 
 	for index, trial := range trials.Items {
 		if trial.IsKilled() {
@@ -83,9 +66,14 @@ func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trial
 
 		objectiveMetricValue := getObjectiveMetricValue(trial, objectiveMetricName)
 		if objectiveMetricValue == nil {
-			//may be log
-			err := errors.New(string(metav1.StatusReasonNotFound))
-			return isObjectiveGoalReached, err
+			log.Info("Objective metric name not found", "trial", trial.GetName())
+			continue
+		}
+
+		//intialize vars to objective metric value of the first trial
+		if bestTrialIndex == -1 {
+			bestTrialValue = *objectiveMetricValue
+			bestTrialIndex = index
 		}
 
 		if objectiveType == experimentsv1alpha2.ObjectiveTypeMinimize {
@@ -123,7 +111,7 @@ func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trial
 	for _, metric := range bestTrial.Status.Observation.Metrics {
 		instance.Status.CurrentOptimalTrial.Observation.Metrics = append(instance.Status.CurrentOptimalTrial.Observation.Metrics, metric)
 	}
-	return isObjectiveGoalReached, nil
+	return isObjectiveGoalReached
 }
 
 func getObjectiveMetricValue(trial trialsv1alpha2.Trial, objectiveMetricName string) *float64 {
