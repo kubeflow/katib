@@ -160,7 +160,7 @@ type FeasibleSpace struct {
 
 type ObjectiveSpec struct {
 	Type                ObjectiveType `json:"type,omitempty"`
-	Goal                float64       `json:"goal,omitempty"`
+	Goal                *float64      `json:"goal,omitempty"`
 	ObjectiveMetricName string        `json:"objectiveMetricName,omitempty"`
 	// This can be empty if we only care about the objective metric.
 	// Note: If we adopt a push instead of pull mechanism, this can be omitted completely.
@@ -238,7 +238,7 @@ type NasConfig struct {
 
 // GraphConfig contains a config of DAG
 type GraphConfig struct {
-	NumLayers   int32   `json:"numLayers,omitempty"`
+	NumLayers   *int32  `json:"numLayers,omitempty"`
 	InputSizes  []int32 `json:"inputSizes,omitempty"`
 	OutputSizes []int32 `json:"outputSizes,omitempty"`
 }

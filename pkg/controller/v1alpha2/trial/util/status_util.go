@@ -27,7 +27,7 @@ import (
 	commonv1beta1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta1"
 )
 
-var log = logf.Log.WithName("controller")
+var log = logf.Log.WithName("trial-status-util")
 
 const (
 	DefaultJobKind       = "Job"
@@ -51,7 +51,7 @@ func UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *uns
 			jobStatus := batchv1.JobStatus{}
 			err := runtime.DefaultUnstructuredConverter.FromUnstructured(statusMap, &jobStatus)
 			if err != nil {
-				log.Info("Error in converting unstructured to status: %v ", err)
+				log.Error(err, "Convert unstructured to status error")
 				return err
 			}
 			if jobStatus.Active == 0 && jobStatus.Succeeded > 0 {
@@ -66,7 +66,7 @@ func UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *uns
 			err := runtime.DefaultUnstructuredConverter.FromUnstructured(statusMap, &jobStatus)
 
 			if err != nil {
-				log.Info("Error in converting unstructured to status: %v ", err)
+				log.Error(err, "Convert unstructured to status error")
 				return err
 			}
 			if len(jobStatus.Conditions) > 0 {
@@ -81,6 +81,7 @@ func UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *uns
 			}
 		}
 	} else if unerr != nil {
+		log.Error(unerr, "NestedFieldCopy unstructured to status error")
 		return unerr
 	}
 	return nil

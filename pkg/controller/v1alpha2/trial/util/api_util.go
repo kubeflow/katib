@@ -21,12 +21,12 @@ import (
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 )
 
-func CreateTrialinDB(instance *trialsv1alpha2.Trial) error {
+func CreateTrialInDB(instance *trialsv1alpha2.Trial) error {
 
 	return nil
 }
 
-func UpdateTrialStatusinDB(instance *trialsv1alpha2.Trial) error {
+func UpdateTrialStatusInDB(instance *trialsv1alpha2.Trial) error {
 
 	return nil
 }

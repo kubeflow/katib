@@ -16,15 +16,16 @@ limitations under the License.
 package util
 
 import (
-	//v1 "k8s.io/api/core/v1"
+	"errors"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 )
 
-var log = logf.Log.WithName("controller")
+var log = logf.Log.WithName("experiment-status-util")
 
 const (
 	ExperimentCreatedReason   = "ExperimentCreated"
@@ -34,23 +35,39 @@ const (
 	ExperimentKilledReason    = "ExperimentKilled"
 )
 
-func UpdateExperimentStatus(instance *experimentsv1alpha2.Experiment, trials *trialsv1alpha2.TrialList) {
+func UpdateExperimentStatus(instance *experimentsv1alpha2.Experiment, trials *trialsv1alpha2.TrialList) error {
 
-	isObjectiveGoalReached := updateTrialsSummary(instance, trials)
+	isObjectiveGoalReached, err := updateTrialsSummary(instance, trials)
+	if err != nil {
+		return err
+	}
 
 	updateExperimentStatusCondition(instance, isObjectiveGoalReached)
+	return nil
 
 }
 
-func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trialsv1alpha2.TrialList) bool {
+func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trialsv1alpha2.TrialList) (bool, error) {
 
 	var trialsPending, trialsRunning, trialsSucceeded, trialsFailed, trialsKilled int
 	var bestTrialIndex int
 	var bestTrialValue float64
 	isObjectiveGoalReached := false
-	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
-	objectiveValueGoal := instance.Spec.Objective.Goal
+	objectiveValueGoal := *instance.Spec.Objective.Goal
 	objectiveType := instance.Spec.Objective.Type
+	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
+
+	if objectiveMetricValue := getObjectiveMetricValue(trials.Items[0], objectiveMetricName); objectiveMetricValue != nil {
+		bestTrialValue = *objectiveMetricValue
+		if bestTrialValue <= objectiveValueGoal {
+			isObjectiveGoalReached = true
+		}
+	} else {
+		//may be log
+		err := errors.New(string(metav1.StatusReasonNotFound))
+		return isObjectiveGoalReached, err
+	}
+
 	for index, trial := range trials.Items {
 		if trial.IsKilled() {
 			trialsKilled++
@@ -64,48 +81,58 @@ func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trial
 			trialsPending++
 		}
 
-		for _, metric := range trial.Status.Observation.Metrics {
-			if objectiveMetricName == metric.Name {
-				if objectiveType == experimentsv1alpha2.ObjectiveTypeMinimize {
-					if bestTrialValue < metric.Value {
-						bestTrialValue = metric.Value
-						bestTrialIndex = index
-					}
-					if bestTrialValue <= objectiveValueGoal {
-						isObjectiveGoalReached = true
-					}
-				} else if objectiveType == experimentsv1alpha2.ObjectiveTypeMaximize {
-					if bestTrialValue > metric.Value {
-						bestTrialValue = metric.Value
-						bestTrialIndex = index
-					}
-					if bestTrialValue >= objectiveValueGoal {
-						isObjectiveGoalReached = true
-					}
-				}
+		objectiveMetricValue := getObjectiveMetricValue(trial, objectiveMetricName)
+		if objectiveMetricValue == nil {
+			//may be log
+			err := errors.New(string(metav1.StatusReasonNotFound))
+			return isObjectiveGoalReached, err
+		}
+
+		if objectiveType == experimentsv1alpha2.ObjectiveTypeMinimize {
+			if *objectiveMetricValue < bestTrialValue {
+				bestTrialValue = *objectiveMetricValue
+				bestTrialIndex = index
+			}
+			if bestTrialValue <= objectiveValueGoal {
+				isObjectiveGoalReached = true
+			}
+		} else if objectiveType == experimentsv1alpha2.ObjectiveTypeMaximize {
+			if *objectiveMetricValue > bestTrialValue {
+				bestTrialValue = *objectiveMetricValue
+				bestTrialIndex = index
+			}
+			if bestTrialValue >= objectiveValueGoal {
+				isObjectiveGoalReached = true
 			}
 		}
 	}
-	if len(trials.Items) > 0 {
-		instance.Status.TrialsPending = trialsPending
-		instance.Status.TrialsRunning = trialsRunning
-		instance.Status.TrialsSucceeded = trialsSucceeded
-		instance.Status.TrialsFailed = trialsFailed
-		instance.Status.TrialsKilled = trialsKilled
+	instance.Status.TrialsPending = trialsPending
+	instance.Status.TrialsRunning = trialsRunning
+	instance.Status.TrialsSucceeded = trialsSucceeded
+	instance.Status.TrialsFailed = trialsFailed
+	instance.Status.TrialsKilled = trialsKilled
 
-		bestTrial := trials.Items[bestTrialIndex]
+	bestTrial := trials.Items[bestTrialIndex]
 
-		instance.Status.CurrentOptimalTrial.ParameterAssignments = []trialsv1alpha2.ParameterAssignment{}
-		for _, parameterAssigment := range bestTrial.Spec.ParameterAssignments {
-			instance.Status.CurrentOptimalTrial.ParameterAssignments = append(instance.Status.CurrentOptimalTrial.ParameterAssignments, parameterAssigment)
-		}
+	instance.Status.CurrentOptimalTrial.ParameterAssignments = []trialsv1alpha2.ParameterAssignment{}
+	for _, parameterAssigment := range bestTrial.Spec.ParameterAssignments {
+		instance.Status.CurrentOptimalTrial.ParameterAssignments = append(instance.Status.CurrentOptimalTrial.ParameterAssignments, parameterAssigment)
+	}
 
-		instance.Status.CurrentOptimalTrial.Observation.Metrics = []trialsv1alpha2.Metric{}
-		for _, metric := range bestTrial.Status.Observation.Metrics {
-			instance.Status.CurrentOptimalTrial.Observation.Metrics = append(instance.Status.CurrentOptimalTrial.Observation.Metrics, metric)
+	instance.Status.CurrentOptimalTrial.Observation.Metrics = []trialsv1alpha2.Metric{}
+	for _, metric := range bestTrial.Status.Observation.Metrics {
+		instance.Status.CurrentOptimalTrial.Observation.Metrics = append(instance.Status.CurrentOptimalTrial.Observation.Metrics, metric)
+	}
+	return isObjectiveGoalReached, nil
+}
+
+func getObjectiveMetricValue(trial trialsv1alpha2.Trial, objectiveMetricName string) *float64 {
+	for _, metric := range trial.Status.Observation.Metrics {
+		if objectiveMetricName == metric.Name {
+			return &metric.Value
 		}
 	}
-	return isObjectiveGoalReached
+	return nil
 }
 
 func updateExperimentStatusCondition(instance *experimentsv1alpha2.Experiment, isObjectiveGoalReached bool) {
@@ -113,23 +140,24 @@ func updateExperimentStatusCondition(instance *experimentsv1alpha2.Experiment, i
 	completedTrialsCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled
 	failedTrialsCount := instance.Status.TrialsFailed
 
+	if isObjectiveGoalReached {
+		msg := "Experiment has succeeded because Objective goal has reached"
+		instance.MarkExperimentStatusSucceeded(ExperimentSucceededReason, msg)
+		return
+	}
+
 	if (instance.Spec.MaxTrialCount != nil) && (completedTrialsCount >= *instance.Spec.MaxTrialCount) {
-		msg := "Experiment has succeeded"
+		msg := "Experiment has succeeded because max trial count has reached"
 		instance.MarkExperimentStatusSucceeded(ExperimentSucceededReason, msg)
 		return
 	}
 
 	if (instance.Spec.MaxFailedTrialCount != nil) && (failedTrialsCount >= *instance.Spec.MaxFailedTrialCount) {
-		msg := "Experiment has failed"
+		msg := "Experiment has failed because max failed count has reached"
 		instance.MarkExperimentStatusFailed(ExperimentFailedReason, msg)
 		return
 	}
 
-	if isObjectiveGoalReached {
-		msg := "Experiment has succeeded"
-		instance.MarkExperimentStatusSucceeded(ExperimentSucceededReason, msg)
-		return
-	}
 	msg := "Experiment is running"
 	instance.MarkExperimentStatusRunning(ExperimentRunningReason, msg)
 }

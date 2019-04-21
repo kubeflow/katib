@@ -13,20 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package util
+package apis
 
 import (
-	//v1 "k8s.io/api/core/v1"
-
-	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	experiments "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	trials "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 )
 
-func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
-
-	return nil
-}
-
-func UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error {
-
-	return nil
+func init() {
+	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
+	AddToSchemes = append(AddToSchemes, experiments.SchemeBuilder.AddToScheme, trials.SchemeBuilder.AddToScheme)
 }

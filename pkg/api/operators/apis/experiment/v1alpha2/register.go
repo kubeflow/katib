@@ -27,9 +27,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/runtime/scheme"
 )
 
+const (
+	Group   = "kubeflow.org"
+	Version = "v1alpha2"
+)
+
 var (
 	// SchemeGroupVersion is group version used to register these objects
-	SchemeGroupVersion = schema.GroupVersion{Group: "kubeflow.org", Version: "v1alpha2"}
+	SchemeGroupVersion = schema.GroupVersion{Group: Group, Version: Version}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}

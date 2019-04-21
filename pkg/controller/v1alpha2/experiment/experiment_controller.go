@@ -23,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -36,7 +37,7 @@ import (
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
 )
 
-var log = logf.Log.WithName("controller")
+var log = logf.Log.WithName("experiment-controller")
 
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
@@ -59,12 +60,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
 	c, err := controller.New("experiment-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
+		log.Error(err, "Failed to create experiment controller")
 		return err
 	}
 
 	// Watch for changes to Experiment
 	err = c.Watch(&source.Kind{Type: &experimentsv1alpha2.Experiment{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
+		log.Error(err, "Experiment watch failed")
 		return err
 	}
 
@@ -77,9 +80,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		})
 
 	if err != nil {
+		log.Error(err, "Trial watch failed")
 		return err
 	}
 
+	log.Info("Experiment controller created")
 	return nil
 }
 
@@ -97,6 +102,7 @@ type ReconcileExperiment struct {
 // +kubebuilder:rbac:groups=experiments.kubeflow.org,resources=experiments/status,verbs=get;update;patch
 func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the Experiment instance
+	log = log.WithValues("Experiment", request.NamespacedName)
 	instance := &experimentsv1alpha2.Experiment{}
 	requeue := false
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
@@ -107,6 +113,7 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
+		log.Error(err, "Experiment Get error")
 		return reconcile.Result{}, err
 	}
 	original := instance.DeepCopy()
@@ -118,8 +125,9 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 	if !instance.IsCreated() {
 		//Experiment not created in DB
-		err = util.CreateExperimentinDB(instance)
+		err = util.CreateExperimentInDB(instance)
 		if err != nil {
+			log.Error(err, "Create experiment in DB error")
 			return reconcile.Result{}, err
 		}
 
@@ -134,18 +142,21 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		// Experiment already created in DB
 		err := r.ReconcileExperiment(instance)
 		if err != nil {
+			log.Error(err, "Reconcile experiment error")
 			return reconcile.Result{}, err
 		}
 	}
 
 	if !equality.Semantic.DeepEqual(original.Status, instance.Status) {
 		//assuming that only status change
-		err = util.UpdateExperimentStatusinDB(instance)
+		err = util.UpdateExperimentStatusInDB(instance)
 		if err != nil {
+			log.Error(err, "Update experiment status in DB error")
 			return reconcile.Result{}, err
 		}
 		err = r.Status().Update(context.TODO(), instance)
 		if err != nil {
+			log.Error(err, "Update experiment instance status error")
 			return reconcile.Result{}, err
 		}
 	}
@@ -154,7 +165,9 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 }
 
 func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.Experiment) error {
+
 	var err error
+	log := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	trials := &trialsv1alpha2.TrialList{}
 	labels := map[string]string{"experiment": instance.Name}
 	lo := &client.ListOptions{}
@@ -162,14 +175,17 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.
 
 	err = r.List(context.TODO(), lo, trials)
 	if err != nil {
+		log.Error(err, "Trial List error")
 		return err
 	}
-	util.UpdateExperimentStatus(instance, trials)
-
+	if len(trials.Items) > 0 {
+		err := util.UpdateExperimentStatus(instance, trials)
+		if err != nil {
+			log.Error(err, "Update experiment status error")
+			return err
+		}
+	}
 	reconcileRequired := !instance.IsCompleted()
-	if err != nil {
-		return err
-	}
 	if reconcileRequired {
 		r.ReconcileTrials(instance)
 	}
@@ -177,7 +193,9 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.
 }
 
 func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Experiment) error {
+
 	var err error
+	log := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	parallelCount := 0
 
 	if instance.Spec.ParallelTrialCount != nil {

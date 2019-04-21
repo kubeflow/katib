@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 
+	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,7 +42,7 @@ import (
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/trial/util"
 )
 
-var log = logf.Log.WithName("controller")
+var log = logf.Log.WithName("trial-controller")
 
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
@@ -64,15 +65,28 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
 	c, err := controller.New("trial-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
+		log.Error(err, "Create trial controller error")
 		return err
 	}
 
 	// Watch for changes to Trial
 	err = c.Watch(&source.Kind{Type: &trialsv1alpha2.Trial{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
+		log.Error(err, "Trial watch error")
 		return err
 	}
 
+	err = c.Watch(&source.Kind{Type: &batchv1.Job{}},
+		&handler.EnqueueRequestForOwner{
+			IsController: true,
+			OwnerType:    &trialsv1alpha2.Trial{},
+		})
+	if err != nil {
+		log.Error(err, "Job watch error")
+		return err
+	}
+
+	log.Info("Trial  controller created")
 	return nil
 }
 
@@ -90,6 +104,7 @@ type ReconcileTrial struct {
 // +kubebuilder:rbac:groups=trials.kubeflow.org,resources=trials/status,verbs=get;update;patch
 func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the Trial instance
+	log := log.WithValues("Trial", request.NamespacedName)
 	instance := &trialsv1alpha2.Trial{}
 	requeue := false
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
@@ -100,6 +115,7 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
+		log.Error(err, "Trial Get error")
 		return reconcile.Result{}, err
 	}
 
@@ -112,8 +128,9 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 	}
 	if !instance.IsCreated() {
 		//Trial not created in DB
-		err = util.CreateTrialinDB(instance)
+		err = util.CreateTrialInDB(instance)
 		if err != nil {
+			log.Error(err, "Create trial in DB error")
 			return reconcile.Result{}, err
 		}
 		if instance.Status.StartTime == nil {
@@ -128,18 +145,21 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 		// Trial already created in DB
 		err := r.reconcileTrial(instance)
 		if err != nil {
+			log.Error(err, "Reconcile trial error")
 			return reconcile.Result{}, err
 		}
 	}
 
 	if !equality.Semantic.DeepEqual(original.Status, instance.Status) {
 		//assuming that only status change
-		err = util.UpdateTrialStatusinDB(instance)
+		err = util.UpdateTrialStatusInDB(instance)
 		if err != nil {
+			log.Error(err, "Update trial status in DB error")
 			return reconcile.Result{}, err
 		}
 		err = r.Status().Update(context.TODO(), instance)
 		if err != nil {
+			log.Error(err, "Update trial instance status error")
 			return reconcile.Result{}, err
 		}
 	}
@@ -150,14 +170,16 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha2.Trial) error {
 
 	var err error
+	log := log.WithValues("Trial", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	desiredJob, err := r.getDesiredJobSpec(instance)
 	if err != nil {
-		log.Info("Error in getting Job Spec from instance")
+		log.Error(err, "Job Spec Get error")
 		return err
 	}
 
 	deployedJob, err := r.reconcileJob(instance, desiredJob)
 	if err != nil {
+		log.Error(err, "Reconcile job error")
 		return err
 	}
 
@@ -165,9 +187,11 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha2.Trial) error {
 	//TODO Can desired Spec differ from deployedSpec?
 	if deployedJob != nil {
 		if err = util.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
+			log.Error(err, "Update trial status condition error")
 			return err
 		}
 		if err = util.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
+			log.Error(err, "Update trial status observation error")
 			return err
 		}
 	}
@@ -177,22 +201,24 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha2.Trial) error {
 func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob *unstructured.Unstructured) (*unstructured.Unstructured, error) {
 
 	var err error
+	log := log.WithValues("Trial", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	apiVersion := desiredJob.GetAPIVersion()
 	kind := desiredJob.GetKind()
 	gvk := schema.FromAPIVersionAndKind(apiVersion, kind)
 
 	deployedJob := &unstructured.Unstructured{}
 	deployedJob.SetGroupVersionKind(gvk)
-	err = r.Get(context.TODO(), types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, deployedJob)
+	err = r.Get(context.TODO(), types.NamespacedName{Name: desiredJob.GetName(), Namespace: desiredJob.GetNamespace()}, deployedJob)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Info("Creating Job", "namespace", instance.Namespace, "name", instance.Name, "kind", kind)
+			log.Info("Creating Job", "kind", kind)
 			err = r.Create(context.TODO(), desiredJob)
 			if err != nil {
-				log.Info("Error in creating job: %v ", err)
+				log.Error(err, "Create job error")
 				return nil, err
 			}
 		} else {
+			log.Error(err, "Trial Get error")
 			return nil, err
 		}
 	}
@@ -205,16 +231,18 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 }
 
 func (r *ReconcileTrial) getDesiredJobSpec(instance *trialsv1alpha2.Trial) (*unstructured.Unstructured, error) {
-	buf := bytes.NewBufferString(instance.Spec.RunSpec)
+
 	bufSize := 1024
+	log := log.WithValues("Trial", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+	buf := bytes.NewBufferString(instance.Spec.RunSpec)
 
 	desiredJobSpec := &unstructured.Unstructured{}
 	if err := k8syaml.NewYAMLOrJSONDecoder(buf, bufSize).Decode(desiredJobSpec); err != nil {
-		log.Info("Yaml decode error %v", err)
+		log.Error(err, "Yaml decode error")
 		return nil, err
 	}
 	if err := controllerutil.SetControllerReference(instance, desiredJobSpec, r.scheme); err != nil {
-		log.Info("SetControllerReference error %v", err)
+		log.Error(err, "SetControllerReference error")
 		return nil, err
 	}
 
