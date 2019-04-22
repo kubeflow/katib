@@ -19,6 +19,7 @@ import (
 	//v1 "k8s.io/api/core/v1"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	trialapi "github.com/kubeflow/katib/pkg/api/v1alpha2"
 )
 
 func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
@@ -29,4 +30,9 @@ func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
 func UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error {
 
 	return nil
+}
+
+func GetSuggestions(instance *experimentsv1alpha2.Experiment, addCount int) ([]*trialapi.Trial, error) {
+
+	return nil, nil
 }

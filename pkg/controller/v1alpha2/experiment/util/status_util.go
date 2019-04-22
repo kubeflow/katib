@@ -100,16 +100,19 @@ func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trial
 	instance.Status.TrialsFailed = trialsFailed
 	instance.Status.TrialsKilled = trialsKilled
 
-	bestTrial := trials.Items[bestTrialIndex]
+	// if best trial is set
+	if bestTrialIndex != -1 {
+		bestTrial := trials.Items[bestTrialIndex]
 
-	instance.Status.CurrentOptimalTrial.ParameterAssignments = []trialsv1alpha2.ParameterAssignment{}
-	for _, parameterAssigment := range bestTrial.Spec.ParameterAssignments {
-		instance.Status.CurrentOptimalTrial.ParameterAssignments = append(instance.Status.CurrentOptimalTrial.ParameterAssignments, parameterAssigment)
-	}
+		instance.Status.CurrentOptimalTrial.ParameterAssignments = []trialsv1alpha2.ParameterAssignment{}
+		for _, parameterAssigment := range bestTrial.Spec.ParameterAssignments {
+			instance.Status.CurrentOptimalTrial.ParameterAssignments = append(instance.Status.CurrentOptimalTrial.ParameterAssignments, parameterAssigment)
+		}
 
-	instance.Status.CurrentOptimalTrial.Observation.Metrics = []trialsv1alpha2.Metric{}
-	for _, metric := range bestTrial.Status.Observation.Metrics {
-		instance.Status.CurrentOptimalTrial.Observation.Metrics = append(instance.Status.CurrentOptimalTrial.Observation.Metrics, metric)
+		instance.Status.CurrentOptimalTrial.Observation.Metrics = []trialsv1alpha2.Metric{}
+		for _, metric := range bestTrial.Status.Observation.Metrics {
+			instance.Status.CurrentOptimalTrial.Observation.Metrics = append(instance.Status.CurrentOptimalTrial.Observation.Metrics, metric)
+		}
 	}
 	return isObjectiveGoalReached
 }

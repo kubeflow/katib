@@ -16,9 +16,6 @@ limitations under the License.
 
 /*
  Katib-controller is a controller (operator) for Experiments and Trials
- Katib-controller create and watch workers and metricscollectors.
- The workers and metricscollectors are generated from template defined ConfigMap.
- The workers and metricscollectors are kubernetes object. The default object is a Job and CronJob.
 */
 package main
 

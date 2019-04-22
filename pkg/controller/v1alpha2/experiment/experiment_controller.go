@@ -17,15 +17,20 @@ limitations under the License.
 package experiment
 
 import (
+	"bytes"
 	"context"
+	"os"
+	"text/template"
 
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/uuid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -34,6 +39,7 @@ import (
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
 )
 
@@ -102,10 +108,10 @@ type ReconcileExperiment struct {
 // +kubebuilder:rbac:groups=experiments.kubeflow.org,resources=experiments/status,verbs=get;update;patch
 func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the Experiment instance
-	log = log.WithValues("Experiment", request.NamespacedName)
-	instance := &experimentsv1alpha2.Experiment{}
+	logger := log.WithValues("Experiment", request.NamespacedName)
+	original := &experimentsv1alpha2.Experiment{}
 	requeue := false
-	err := r.Get(context.TODO(), request.NamespacedName, instance)
+	err := r.Get(context.TODO(), request.NamespacedName, original)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Object not found, return.  Created objects are automatically garbage collected.
@@ -113,10 +119,10 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
-		log.Error(err, "Experiment Get error")
+		logger.Error(err, "Experiment Get error")
 		return reconcile.Result{}, err
 	}
-	original := instance.DeepCopy()
+	instance := original.DeepCopy()
 
 	if instance.IsCompleted() {
 
@@ -127,7 +133,7 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		//Experiment not created in DB
 		err = util.CreateExperimentInDB(instance)
 		if err != nil {
-			log.Error(err, "Create experiment in DB error")
+			logger.Error(err, "Create experiment in DB error")
 			return reconcile.Result{}, err
 		}
 
@@ -142,7 +148,7 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		// Experiment already created in DB
 		err := r.ReconcileExperiment(instance)
 		if err != nil {
-			log.Error(err, "Reconcile experiment error")
+			logger.Error(err, "Reconcile experiment error")
 			return reconcile.Result{}, err
 		}
 	}
@@ -151,12 +157,12 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		//assuming that only status change
 		err = util.UpdateExperimentStatusInDB(instance)
 		if err != nil {
-			log.Error(err, "Update experiment status in DB error")
+			logger.Error(err, "Update experiment status in DB error")
 			return reconcile.Result{}, err
 		}
 		err = r.Status().Update(context.TODO(), instance)
 		if err != nil {
-			log.Error(err, "Update experiment instance status error")
+			logger.Error(err, "Update experiment instance status error")
 			return reconcile.Result{}, err
 		}
 	}
@@ -167,7 +173,7 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.Experiment) error {
 
 	var err error
-	log := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	trials := &trialsv1alpha2.TrialList{}
 	labels := map[string]string{"experiment": instance.Name}
 	lo := &client.ListOptions{}
@@ -175,13 +181,13 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.
 
 	err = r.List(context.TODO(), lo, trials)
 	if err != nil {
-		log.Error(err, "Trial List error")
+		logger.Error(err, "Trial List error")
 		return err
 	}
 	if len(trials.Items) > 0 {
 		err := util.UpdateExperimentStatus(instance, trials)
 		if err != nil {
-			log.Error(err, "Update experiment status error")
+			logger.Error(err, "Update experiment status error")
 			return err
 		}
 	}
@@ -195,7 +201,7 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.
 func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Experiment) error {
 
 	var err error
-	log := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	parallelCount := 0
 
 	if instance.Spec.ParallelTrialCount != nil {
@@ -203,13 +209,15 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Expe
 	} else {
 		parallelCount = 3
 	}
-	activeCount := instance.Status.TrialsRunning
-	succeededCount := instance.Status.TrialsSucceeded
+	activeCount := instance.Status.TrialsPending + instance.Status.TrialsRunning
+	completedCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled
 
 	if activeCount > parallelCount {
 		deleteCount := activeCount - parallelCount
 		if deleteCount > 0 {
 			//delete 'deleteCount' number of trails. Sort them?
+			logger.Info("DeleteTrials", "deleteCount", deleteCount)
+			err = r.deleteTrials(instance, deleteCount)
 		}
 
 	} else if activeCount < parallelCount {
@@ -217,7 +225,7 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Expe
 		if instance.Spec.MaxTrialCount == nil {
 			requiredActiveCount = parallelCount
 		} else {
-			requiredActiveCount = *instance.Spec.MaxTrialCount - succeededCount
+			requiredActiveCount = *instance.Spec.MaxTrialCount - completedCount
 			if requiredActiveCount > parallelCount {
 				requiredActiveCount = parallelCount
 			}
@@ -225,15 +233,126 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Expe
 
 		addCount := requiredActiveCount - activeCount
 		if addCount < 0 {
-			log.Info("Invalid setting", "requiredActiveCount", requiredActiveCount, "MaxTrialCount",
-				*instance.Spec.MaxTrialCount, "SucceededCount", succeededCount)
+			logger.Info("Invalid setting", "requiredActiveCount", requiredActiveCount, "MaxTrialCount",
+				*instance.Spec.MaxTrialCount, "CompletedCount", completedCount)
 			addCount = 0
 		}
 
 		//create "addCount" number of trials
+		logger.Info("CreateTrials", "addCount", addCount)
+		err = r.createTrials(instance, addCount)
 
 	}
 
 	return err
 
+}
+
+type TrialTemplateParams struct {
+	Experiment      string
+	Trial           string
+	NameSpace       string
+	HyperParameters []*apiv1alpha2.ParameterAssignment
+}
+
+func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha2.Experiment, addCount int) error {
+
+	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+	trials, err := util.GetSuggestions(instance, addCount)
+	/*trials := []apiv1alpha2.Trial{
+		apiv1alpha2.Trial{Spec: &apiv1alpha2.TrialSpec{}}, apiv1alpha2.Trial{Spec: &apiv1alpha2.TrialSpec{}},
+	}*/
+
+	trialTemplate, err := r.getTrialTemplate(instance)
+	if err != nil {
+		logger.Error(err, "Get trial template error")
+	}
+	for _, elem := range trials {
+
+		trial := &trialsv1alpha2.Trial{}
+		trial.Name = string(uuid.NewUUID())
+		trial.Namespace = instance.GetNamespace()
+		trial.Labels = map[string]string{"experiment": instance.GetName()}
+
+		if err := controllerutil.SetControllerReference(instance, trial, r.scheme); err != nil {
+			logger.Error(err, "Set controller reference error")
+		}
+
+		trialParams := TrialTemplateParams{
+			Experiment: instance.GetName(),
+			Trial:      trial.Name,
+			NameSpace:  trial.Namespace,
+		}
+
+		var buf bytes.Buffer
+		if elem.Spec != nil && elem.Spec.ParameterAssignments != nil {
+			for _, p := range elem.Spec.ParameterAssignments.Assignments {
+				trialParams.HyperParameters = append(trialParams.HyperParameters, p)
+			}
+		}
+		err = trialTemplate.Execute(&buf, trialParams)
+		if err != nil {
+			logger.Error(err, "Template execute error")
+		}
+
+		trial.Spec.RunSpec = buf.String()
+
+		err := r.Create(context.TODO(), trial)
+		if err != nil {
+			logger.Error(err, "Trial create error", "Trial name", trial.Name)
+		}
+
+	}
+	return err
+}
+
+func (r *ReconcileExperiment) getTrialTemplate(instance *experimentsv1alpha2.Experiment) (*template.Template, error) {
+
+	var err error
+	var tpl *template.Template = nil
+	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+	trialTemplate := instance.Spec.TrialTemplate
+	if trialTemplate != nil && trialTemplate.GoTemplate.RawTemplate != "" {
+		tpl, err = template.New("Trial").Parse(trialTemplate.GoTemplate.RawTemplate)
+	} else {
+		//default values if user hasn't set
+		configMapNS := os.Getenv("KATIB_CORE_NAMESPACE")
+		configMapName := "trial-template"
+		templatePath := "defaultTrialTemplate.yaml"
+		if trialTemplate != nil && trialTemplate.GoTemplate.TemplateSpec != nil {
+			templateSpec := trialTemplate.GoTemplate.TemplateSpec
+			if templateSpec.ConfigMapName != "" {
+				configMapName = templateSpec.ConfigMapName
+			}
+			if templateSpec.ConfigMapNamespace != "" {
+				configMapNS = templateSpec.ConfigMapNamespace
+			}
+			if templateSpec.TemplatePath != "" {
+				templatePath = templateSpec.TemplatePath
+			}
+		}
+		configMap, err := r.getConfigMap(configMapName, configMapNS)
+		if err != nil {
+			logger.Error(err, "Get config map error", "configMapName", configMapName, "configMapNS", configMapNS)
+		}
+		if configMapTemplate, ok := configMap[templatePath]; !ok {
+		} else {
+			tpl, err = template.New("Trial").Parse(configMapTemplate)
+		}
+	}
+	if err != nil {
+		logger.Error(err, "Template parse error")
+	}
+
+	return tpl, err
+}
+
+func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha2.Experiment, deleteCount int) error {
+
+	return nil
+}
+
+func (r *ReconcileExperiment) getConfigMap(name, namespace string) (map[string]string, error) {
+
+	return nil, nil
 }
