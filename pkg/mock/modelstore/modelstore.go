@@ -6,7 +6,7 @@ package mock
 
 import (
 	gomock "github.com/golang/mock/gomock"
-	api "github.com/kubeflow/katib/pkg/api"
+	v1alpha1 "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	reflect "reflect"
 )
 
@@ -34,9 +34,9 @@ func (m *MockModelStore) EXPECT() *MockModelStoreMockRecorder {
 }
 
 // GetSavedModel mocks base method
-func (m *MockModelStore) GetSavedModel(arg0 *api.GetSavedModelRequest) (*api.ModelInfo, error) {
+func (m *MockModelStore) GetSavedModel(arg0 *v1alpha1.GetSavedModelRequest) (*v1alpha1.ModelInfo, error) {
 	ret := m.ctrl.Call(m, "GetSavedModel", arg0)
-	ret0, _ := ret[0].(*api.ModelInfo)
+	ret0, _ := ret[0].(*v1alpha1.ModelInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -47,9 +47,9 @@ func (mr *MockModelStoreMockRecorder) GetSavedModel(arg0 interface{}) *gomock.Ca
 }
 
 // GetSavedModels mocks base method
-func (m *MockModelStore) GetSavedModels(arg0 *api.GetSavedModelsRequest) ([]*api.ModelInfo, error) {
+func (m *MockModelStore) GetSavedModels(arg0 *v1alpha1.GetSavedModelsRequest) ([]*v1alpha1.ModelInfo, error) {
 	ret := m.ctrl.Call(m, "GetSavedModels", arg0)
-	ret0, _ := ret[0].([]*api.ModelInfo)
+	ret0, _ := ret[0].([]*v1alpha1.ModelInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -60,9 +60,9 @@ func (mr *MockModelStoreMockRecorder) GetSavedModels(arg0 interface{}) *gomock.C
 }
 
 // GetSavedStudies mocks base method
-func (m *MockModelStore) GetSavedStudies() ([]*api.StudyOverview, error) {
+func (m *MockModelStore) GetSavedStudies() ([]*v1alpha1.StudyOverview, error) {
 	ret := m.ctrl.Call(m, "GetSavedStudies")
-	ret0, _ := ret[0].([]*api.StudyOverview)
+	ret0, _ := ret[0].([]*v1alpha1.StudyOverview)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -73,7 +73,7 @@ func (mr *MockModelStoreMockRecorder) GetSavedStudies() *gomock.Call {
 }
 
 // SaveModel mocks base method
-func (m *MockModelStore) SaveModel(arg0 *api.SaveModelRequest) error {
+func (m *MockModelStore) SaveModel(arg0 *v1alpha1.SaveModelRequest) error {
 	ret := m.ctrl.Call(m, "SaveModel", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -85,7 +85,7 @@ func (mr *MockModelStoreMockRecorder) SaveModel(arg0 interface{}) *gomock.Call {
 }
 
 // SaveStudy mocks base method
-func (m *MockModelStore) SaveStudy(arg0 *api.SaveStudyRequest) error {
+func (m *MockModelStore) SaveStudy(arg0 *v1alpha1.SaveStudyRequest) error {
 	ret := m.ctrl.Call(m, "SaveStudy", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0

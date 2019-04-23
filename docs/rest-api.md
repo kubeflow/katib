@@ -1,6 +1,6 @@
-## REST API 
+## REST API
 
-For each RPC service, we define an equivalent HTTP REST API method using [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway). The mapping between service and REST API method can be found in this [file](https://github.com/kubeflow/katib/blob/master/pkg/api/api.proto). The mapping includes the URL path, query parameters and request body. You can read more details on the supported methods and binding options at this [link](https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http)
+For each RPC service, we define an equivalent HTTP REST API method using [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway). The mapping between service and REST API method can be found in this [file](https://github.com/kubeflow/katib/blob/master/pkg/api/v1alpha1/api.proto). The mapping includes the URL path, query parameters and request body. You can read more details on the supported methods and binding options at this [link](https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http)
 
 ## Examples
 

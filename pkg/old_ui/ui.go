@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/kubeflow/katib/pkg"
-	"github.com/kubeflow/katib/pkg/api"
 	studyjobv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
-	"github.com/kubeflow/katib/pkg/manager/studyjobclient"
+	"github.com/kubeflow/katib/pkg/api/v1alpha1"
+	"github.com/kubeflow/katib/pkg/manager/v1alpha1/studyjobclient"
 
 	"github.com/pressly/chi"
 	"google.golang.org/grpc"
