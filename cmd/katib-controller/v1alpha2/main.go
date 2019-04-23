@@ -15,10 +15,7 @@ limitations under the License.
 */
 
 /*
- StudyJobController is a controller (operator) for StudyJob
- StudyJobController create and watch workers and metricscollectors.
- The workers and metricscollectors are generated from template defined ConfigMap.
- The workers and metricscollectors are kubernetes object. The default object is a Job and CronJob.
+ Katib-controller is a controller (operator) for Experiments and Trials
 */
 package main
 
@@ -30,10 +27,12 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 )
 
 func main() {
+	logf.SetLogger(logf.ZapLogger(false))
 	// Get a config to talk to the apiserver
 	cfg, err := config.GetConfig()
 	if err != nil {
@@ -41,7 +40,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Create a new StudyJobController to provide shared dependencies and start components
+	// Create a new katib controller to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, manager.Options{})
 	if err != nil {
 		log.Printf("manager.New")
@@ -56,7 +55,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Setup StudyJobController
+	// Setup katib controller
 	if err := controller.AddToManager(mgr); err != nil {
 		log.Printf("controller.AddToManager(mgr)")
 		log.Fatal(err)
@@ -64,6 +63,6 @@ func main() {
 
 	log.Printf("Starting the Cmd.")
 
-	// Starting the StudyJobController
+	// Starting the katib controller
 	log.Fatal(mgr.Start(signals.SetupSignalHandler()))
 }

@@ -13,11 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package v1alpha2 contains API Schema definitions for the experiment v1alpha2 API group
-// +k8s:openapi-gen=true
-// +k8s:deepcopy-gen=package,register
-// +k8s:conversion-gen=github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2
-// +k8s:defaulter-gen=TypeMeta
-// +kubebuilder:subresource:status
-// +groupName=experiment.kubeflow.org
-package v1alpha2
+package apis
+
+import (
+	experiments "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	trials "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+)
+
+func init() {
+	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
+	AddToSchemes = append(AddToSchemes, experiments.SchemeBuilder.AddToScheme, trials.SchemeBuilder.AddToScheme)
+}

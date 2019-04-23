@@ -13,11 +13,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package v1alpha2 contains API Schema definitions for the experiment v1alpha2 API group
-// +k8s:openapi-gen=true
-// +k8s:deepcopy-gen=package,register
-// +k8s:conversion-gen=github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2
-// +k8s:defaulter-gen=TypeMeta
-// +kubebuilder:subresource:status
-// +groupName=experiment.kubeflow.org
-package v1alpha2
+package util
+
+import (
+	//v1 "k8s.io/api/core/v1"
+
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	trialapi "github.com/kubeflow/katib/pkg/api/v1alpha2"
+)
+
+func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
+
+	return nil
+}
+
+func UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error {
+
+	return nil
+}
+
+func GetSuggestions(instance *experimentsv1alpha2.Experiment, addCount int) ([]*trialapi.Trial, error) {
+
+	return nil, nil
+}
