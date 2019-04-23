@@ -8,6 +8,10 @@ import * as d3Graphviz     from 'd3-graphviz'
 
 
 const styles = theme => ({
+    root: {
+        margin: '0 auto',
+        textAlign: 'center',
+    }
 })
 
 class StepInfo extends React.Component {
@@ -16,11 +20,11 @@ class StepInfo extends React.Component {
 
         const id = `graph${this.props.id}`
         d3.select(`#${id}`)
-        .graphviz()
-        .renderDot(this.props.step.architecture)
-        .width(640)
-        .height(480)
-        .fit(true)
+            .graphviz()
+            .renderDot(this.props.step.architecture)
+            .width(640)
+            .height(480)
+            .fit(true)
     }
 
     render() {
@@ -32,7 +36,7 @@ class StepInfo extends React.Component {
                 <Typography variant={"h6"}>
                     Architecture
                 </Typography>
-                <div id={id} style={{textAlign: "center !important", margin: '0 auto'}} />
+                <div id={id} className={classes.root} />
                 <br />
                 {step.metricsname.map((metrics, index) => {
                     return (

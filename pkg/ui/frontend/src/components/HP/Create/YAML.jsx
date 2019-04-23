@@ -54,7 +54,7 @@ const YAML = (props) => {
                     theme="tomorrow"
                     value={props.yaml}
                     onChange={onYamlChange}
-                    name="UNIQUE_ID_OF_DIV"
+                    name="yaml-editor"
                     editorProps={{$blockScrolling: true}}
                     tabSize={2}
                     enableLiveAutocompletion={true}

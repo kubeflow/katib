@@ -20,13 +20,13 @@ const module = "hpMonitor";
 
 const styles = theme => ({
     running: {
-        color: '#8b8ffb',
+        color: theme.colors.running,
     },
     failed: {
-        color: '#f26363',
+        color: theme.colors.failed,
     },
     finished: {
-        color: '#63f291',
+        color: theme.colors.finished,
     },
 });
 

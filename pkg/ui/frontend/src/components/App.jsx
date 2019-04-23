@@ -39,9 +39,6 @@ const App = (props) => {
             <Route path="/katib/nas_monitor/:id" component={NASJobInfo} />
             <Route path="/katib/worker" component={Worker} />
             <Route path="/katib/collector" component={Collector} />
-            {/* <Route exact path="/" component={GenerateFromYaml} />
-            <Route path="/defaults/" component={GenerateFromParameters} />
-            <Route path="/monitor/" component={Watch} /> */}
             <Snack />
         </div>
     )
