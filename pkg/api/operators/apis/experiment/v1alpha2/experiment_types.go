@@ -35,6 +35,7 @@ type ExperimentSpec struct {
 	TrialTemplate *TrialTemplate `json:"trialTemplate,omitempty"`
 
 	// How many trials can be processed in parallel.
+	// Defaults to 3
 	ParallelTrialCount *int `json:"parallelTrialCount,omitempty"`
 
 	// Max completed trials to mark experiment as succeeded
