@@ -174,7 +174,7 @@ const mapStateToProps = (state) => ({
     suggestionParameters: state[module].suggestionParameters,
 })
 
-HPParameters.propTypes = {
+NASParameters.propTypes = {
     numLayers: PropTypes.number,
     worker: PropTypes.string,
     requestNumber: PropTypes.number,

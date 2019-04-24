@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: vizier-suggestion-nasrl
-  namespace: default
+  namespace: kubeflow
   labels:
     app: vizier
     component: suggestion-nasrl
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: vizier-suggestion-nasrl
-        image: docker.io/deepermind/katib-nasrl-suggestion
+        image: katib/suggestion-nasrl
         ports:
         - name: api
           containerPort: 6789
