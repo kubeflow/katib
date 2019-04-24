@@ -24,3 +24,8 @@ spec:
         - containerPort: 443
           name: webhook
           protocol: TCP
+        env:
+        - name: KATIB_CORE_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
