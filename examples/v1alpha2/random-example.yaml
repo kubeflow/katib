@@ -41,17 +41,17 @@ spec:
                 restartPolicy: Never
   parameters:
     - name: --lr
-      parametertype: double
+      parameterType: double
       feasibleSpace:
         min: "0.01"
         max: "0.03"
     - name: --num-layers
-      parametertype: int
+      parameterType: int
       feasibleSpace:
         min: "2"
         max: "5"
     - name: --optimizer
-      parametertype: categorical
+      parameterType: categorical
       feasibleSpace:
         list:
         - sgd
