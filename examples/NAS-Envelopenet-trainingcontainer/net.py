@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import os
 import re
 import sys
@@ -14,9 +10,7 @@ import cifar10_input
 import cell_init
 import cell_main
 import cell_classification
-TOWER_NAME = 'tower'
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
 DATA_URL = 'https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz'
 NUM_EPOCHS_PER_DECAY = 2
@@ -29,9 +23,6 @@ class Net:
     def __init__(self, task_config,params):
         self.task_config = task_config
         self.params=params
-        self.cells = []
-        self.end_points = []
-        self.nets = []
         self.use_fp16 = False
         self.get_task_params()
 
@@ -272,13 +263,10 @@ class Net:
                 is_training=True,
                 scope='Nacnet'):
         net = self.add_init(inputs, initcell, is_training)
-        end_points = {}
         net = self.add_net(net, log_stats, is_training,arch)
         linear_softmax = self.add_classification(
             net, classificationcell, is_training)
 
-
-        # return logits, end_points
         return linear_softmax
 
     def loss(self, logits, labels):

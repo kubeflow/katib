@@ -1,8 +1,4 @@
 """Routine for decoding the CIFAR-10 binary file format."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import os
 
 from six.moves import xrange 
@@ -229,4 +225,3 @@ def inputs(eval_data, data_dir, batch_size, image_size):
     return _generate_image_and_label_batch(float_image, read_input.label,
                                            min_queue_examples, batch_size,
                                            shuffle=False)
-

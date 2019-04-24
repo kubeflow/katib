@@ -1,6 +1,5 @@
 """ Envelope Cell"""
 import tensorflow as tf
-import sys
 from cell import Cell
 
 slim = tf.contrib.slim
@@ -17,17 +16,14 @@ class CellEnvelope(Cell):
             outputs):
         self.cellidx = cellidx
         self.log_stats = log_stats
-        self.res=sys.argv[2]
         self.cellname = "Envelope"
-        self.numbranches = 4
         self.numbins = 100
         self.batchsize = int(net.shape[0])
-        numfilters = len(filters)
         self.output_per_filter = outputs
         img_dims = int(net.shape[1])
         self.imagesize = [img_dims, img_dims]
         Cell.__init__(self)
-        scope = 'Cell' + str(self.cellidx)
+        scope = 'Cell{}'.format(self.cellidx)
         if self.log_stats:
             with tf.variable_scope(scope, reuse=False):
                 for branch in filters:
@@ -41,9 +37,9 @@ class CellEnvelope(Cell):
           By default use stride=1 and SAME padding
         """
         dropout_keep_prob = 0.8
-        nscope = 'Cell_' + self.cellname + '_' + str(self.cellidx)
+        nscope = 'Cell_{}_{}'.format(self.cellname,self.cellidx)
 
-        scope = 'Cell' + str(self.cellidx)
+        scope = 'Cell{}'.format(self.cellidx)
         nets = []
         with tf.variable_scope(scope):
             for branch in sorted(filters):
@@ -63,11 +59,7 @@ class CellEnvelope(Cell):
                     net = tf.Print(
                         net,
                         [msss],
-                        message="MeanSSS=:" +
-                        scope +
-                        "/" +
-                        branch +
-                        ":")
+                        message="MeanSSS=:{}/{}:".format(scope, branch))
                 net = slim.dropout(
                     net,
                     keep_prob=dropout_keep_prob,
@@ -121,51 +113,3 @@ class CellEnvelope(Cell):
 
             return msss
 
-    def init_entropy(self):
-        bincount = tf.contrib.framework.model_variable(
-            "bincount", [self.numbins], initializer=tf.zeros_initializer)
-        featuremapsum = tf.contrib.framework.model_variable(
-            "featuremapsum", [1], initializer=tf.zeros_initializer)
-        featuremapcount = tf.contrib.framework.model_variable(
-            "featuremapcount", [1], initializer=tf.zeros_initializer)
-
-    def calc_entropy(self, inputs, scope):
-        with tf.variable_scope(scope, reuse=True):
-            maxtensor = tf.to_float(tf.size(inputs))
-
-            bincount = tf.get_variable("bincount", [self.numbins])
-            featuremapsum = tf.get_variable("featuremapsum", [1])
-            featuremapcount = tf.get_variable("featuremapcount", [1])
-            inputs = tf.Print(inputs, [inputs, tf.shape(
-                inputs)], message="Framemap:", summarize=100)
-            binnum = tf.to_int32(
-                tf.floor((tf.reduce_sum(inputs) / maxtensor) * (self.numbins - 1)))
-            tbincount = tf.scatter_add(
-                bincount, binnum, tf.to_float(
-                    tf.constant(1)))
-            bincount = bincount.assign(tbincount)
-            bincount = tf.Print(bincount,
-                                [tf.count_nonzero(bincount)],
-                                message="Non zero bins count:")
-
-            tfeaturemapsum = tf.add(featuremapsum, tf.reduce_sum(inputs))
-            featuremapsum = featuremapsum.assign(tfeaturemapsum)
-
-            tfeaturemapcount = tf.add(featuremapcount, tf.to_float(tf.constant(1)))
-            featuremapcount = featuremapcount.assign(tfeaturemapcount)
-
-            meanactivation = tf.divide(featuremapsum, featuremapcount)
-            pbin = tf.divide(tf.to_float(bincount), tf.to_float(featuremapcount))
-            entropy = tf.multiply(pbin, tf.log(pbin))
-            entropy = tf.where(
-                tf.is_nan(entropy),
-                tf.zeros_like(entropy),
-                entropy)
-            entropy = tf.reduce_sum(entropy)
-            entropy = tf.Print(entropy, [entropy], message=": raw entropy: ")
-            entropy = tf.multiply(entropy, tf.multiply(
-                meanactivation, tf.constant(-1.0)))
-            entropy = tf.Print(
-                entropy, [
-                    scope, entropy], message=": scaled entropy: ")
-            return entropy

@@ -1,13 +1,8 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from datetime import datetime
-import ast
 import sys
 import time
 import json
-
+import os
 import tensorflow as tf
 import net
 from evaluate import Evaluate
@@ -50,7 +45,7 @@ class _LoggerHook(tf.train.SessionRunHook):
                  loss_value,
                  examples_per_sec,
                  sec_per_batch))
-
+            
 class ModelConstructor(object):
     """Trainingtask
     """
@@ -61,7 +56,7 @@ class ModelConstructor(object):
         self.iteration=i
         self.max_iterations = params["iterations"]
         self.params=params
-        self.train_dir=params["data_dir"]+ "/results/"+str(self.iteration)+"/train"
+        self.train_dir=os.path.join(params["data_dir"],"results",str(self.iteration),"train")
         if self.iteration==0 or self.iteration==self.max_iterations+1:
             self.max_steps=10*params["steps"]
         else:

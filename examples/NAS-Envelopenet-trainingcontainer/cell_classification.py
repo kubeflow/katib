@@ -13,11 +13,10 @@ class Classification(Cell):
     def __init__(self):
         self.cellname = "Classification"
         Cell.__init__(self)
-    def __del__(self):
-        pass
+
     def cell(self, inputs, arch, is_training):
         """Create the cell by instantiating the cell blocks"""
-        nscope = 'Cell_' + self.cellname
+        nscope = 'Cell_{}'.format(self.cellname)
         net = inputs
         reuse = None
         with tf.variable_scope(nscope, 'classification_block', [inputs], reuse=reuse) as scope:

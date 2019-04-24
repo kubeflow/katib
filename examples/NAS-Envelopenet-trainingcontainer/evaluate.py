@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from datetime import datetime
 import math
 import numpy as np
@@ -33,8 +29,8 @@ class Evaluate(object):
         self.batch_size = self.task_config["batch_size"]
         self.num_examples = 10000
         self.run_once = True
-        self.eval_dir = self.task_config["data_dir"] + "/results/" + \
-            "nac_envelopenet" + "/" + "/evaluate"
+        self.eval_dir = os.path.join(self.task_config["data_dir"],"results",
+            "nac_envelopenet","evaluate")
         self.evaluate()
         
 
@@ -113,10 +109,6 @@ class Evaluate(object):
             # Get images and labels for CIFAR-10.
             eval_data = True
             images, labels = network.inputs(eval_data=eval_data)
-
-            # Build a Graph that computes the logits predictions from the
-            # inference model.
-            # TODO: Clean up all args
             arch = self.arch
             init_cell = self.init_cell
             classification_cell = self.classification_cell

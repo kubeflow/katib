@@ -16,12 +16,11 @@ class Init(Cell):
 
     def cell(self, inputs, arch, is_training):
         """Create the cell by instantiating the cell blocks"""
-        nscope = 'Cell_' + self.cellname + '_' + str(self.cellidx)
+        nscope = "Cell_{}_{}".format(self.cellname,self.cellidx)
         reuse = None
         with tf.variable_scope(nscope, 'initial_block', [inputs], reuse=reuse) as scope:
             with slim.arg_scope([slim.conv2d, slim.max_pool2d], stride=1, padding='SAME'):
                 net = inputs
-                layeridx = 0
                 for layer in sorted(arch.keys()):
                     cells = []
                     for branch in sorted(arch[layer].keys()):
@@ -74,5 +73,4 @@ class Init(Cell):
                         cells.append(cell)
                     net = tf.concat(cells, axis=-1)
 
-                    layeridx += 1
         return net
