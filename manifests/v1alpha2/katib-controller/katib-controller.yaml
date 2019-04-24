@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: katib-controller
+  namespace: kubeflow
+  labels:
+    app: katib-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: katib-controller
+  template:
+    metadata:
+      labels:
+        app: katib-controller
+    spec:
+      serviceAccountName: katib-controller
+      containers:
+      - name: katib-controller
+        image: katib/katib-controller
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 443
+          name: webhook
+          protocol: TCP

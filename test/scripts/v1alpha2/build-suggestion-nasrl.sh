@@ -15,6 +15,7 @@
 # limitations under the License.
 
 # This shell script is used to build an image from our argo workflow
+exit 0
 
 set -o errexit
 set -o nounset
@@ -23,7 +24,7 @@ set -o pipefail
 export PATH=${GOPATH}/bin:/usr/local/go/bin:${PATH}
 REGISTRY="${GCP_REGISTRY}"
 PROJECT="${GCP_PROJECT}"
-GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-studyjob-controller
+GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-suggestion-nasrl
 VERSION=$(git describe --tags --always --dirty)
 
 echo "Activating service-account"
@@ -36,16 +37,7 @@ cp -r pkg ${GO_DIR}/pkg
 cp -r vendor ${GO_DIR}/vendor
 
 cd ${GO_DIR}
-cp cmd/katib-controller/v1alpha1/Dockerfile .
-gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/studyjob-controller:${VERSION} --project=${PROJECT}
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/studyjob-controller:${VERSION} ${REGISTRY}/${REPO_NAME}/studyjob-controller:latest --verbosity=info
 
-cd ${GO_DIR}
-cp cmd/metricscollector/Dockerfile .
-gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/metrics-collector:${VERSION} --project=${PROJECT}
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/metrics-collector:${VERSION} ${REGISTRY}/${REPO_NAME}/metrics-collector:latest --verbosity=info
-
-cd ${GO_DIR}
-cp cmd/tfevent-metricscollector/Dockerfile .
-gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/tfevent-metrics-collector:${VERSION} --project=${PROJECT}
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/tfevent-metrics-collector:${VERSION} ${REGISTRY}/${REPO_NAME}/tfevent-metrics-collector:latest --verbosity=info
+cp cmd/suggestion/nasrl/Dockerfile .
+gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-nasrl:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/suggestion-nasrl:${VERSION} ${REGISTRY}/${REPO_NAME}/suggestion-nasrl:latest --verbosity=info
