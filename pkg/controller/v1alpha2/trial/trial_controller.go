@@ -157,7 +157,7 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 			logger.Error(err, "Update trial status in DB error")
 			return reconcile.Result{}, err
 		}
-		err = r.Status().Update(context.TODO(), instance)
+		err = r.Update(context.TODO(), instance)
 		if err != nil {
 			logger.Error(err, "Update trial instance status error")
 			return reconcile.Result{}, err

@@ -154,7 +154,7 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 			logger.Error(err, "Update experiment status in DB error")
 			return reconcile.Result{}, err
 		}
-		err = r.Status().Update(context.TODO(), instance)
+		err = r.Update(context.TODO(), instance)
 		if err != nil {
 			logger.Error(err, "Update experiment instance status error")
 			return reconcile.Result{}, err
