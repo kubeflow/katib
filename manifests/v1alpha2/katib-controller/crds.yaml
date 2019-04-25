@@ -6,6 +6,8 @@ spec:
   group: kubeflow.org
   version: v1alpha2
   scope: Namespaced
+  subresources:
+    status: {}
   names:
     kind: Experiment
     singular: experiment
@@ -19,6 +21,8 @@ spec:
   group: kubeflow.org
   version: v1alpha2
   scope: Namespaced
+  subresources:
+    status: {}
   names:
     kind: Trial
     singular: trial
