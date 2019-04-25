@@ -10,7 +10,7 @@ spec:
   objective:
     type: maximize
     goal: 0.99
-    objectiveMetricsName: Validation-accuracy
+    objectiveMetricName: Validation-accuracy
     additionalMetricsNames:
       - accuracy
   algorithm:
@@ -21,13 +21,13 @@ spec:
           apiVersion: batch/v1
           kind: Job
           metadata:
-            name: {{.WorkerID}}
-            namespace: kubeflow
+            name: {{.Trial}}
+            namespace: {{.NameSpace}}
           spec:
             template:
               spec:
                 containers:
-                - name: {{.WorkerID}}
+                - name: {{.Trial}}
                   image: katib/mxnet-mnist-example
                   command:
                   - "python"

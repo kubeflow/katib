@@ -8,13 +8,13 @@ data:
     apiVersion: batch/v1
     kind: Job
     metadata:
-      name: {{.WorkerID}}
+      name: {{.Trial}}
       namespace: {{.NameSpace}}
     spec:
       template:
         spec:
           containers:
-          - name: {{.WorkerID}}
+          - name: {{.Trial}}
             image: alpine
           restartPolicy: Never
 
