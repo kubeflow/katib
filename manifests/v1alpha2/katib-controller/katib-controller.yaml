@@ -20,6 +20,7 @@ spec:
       - name: katib-controller
         image: katib/katib-controller
         imagePullPolicy: Always
+        command: ["./katib-controller.v1alpha2"]
         ports:
         - containerPort: 443
           name: webhook

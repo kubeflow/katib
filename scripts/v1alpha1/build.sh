@@ -27,7 +27,7 @@ cd ${SCRIPT_ROOT}
 
 echo "Building core image..."
 docker build -t ${PREFIX}/vizier-core -f ${CMD_PREFIX}/manager/Dockerfile .
-docker build -t ${PREFIX}/studyjob-controller -f ${CMD_PREFIX}/katib-controller/v1alpha1/Dockerfile .
+docker build -t ${PREFIX}/studyjob-controller -f ${CMD_PREFIX}/katib-controller/Dockerfile .
 docker build -t ${PREFIX}/metrics-collector -f ${CMD_PREFIX}/metricscollector/Dockerfile .
 docker build -t ${PREFIX}/tfevent-metrics-collector -f ${CMD_PREFIX}/tfevent-metricscollector/Dockerfile .
 
