@@ -124,8 +124,10 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 
 	}
 	if !instance.IsCreated() {
+		//Get Experiment config from instance
+		experimentConfig := util.GetExperimentConf(instance)
 		//Experiment not created in DB
-		err = util.CreateExperimentInDB(instance)
+		err = util.CreateExperimentInDB(experimentConfig)
 		if err != nil {
 			logger.Error(err, "Create experiment in DB error")
 			return reconcile.Result{}, err
