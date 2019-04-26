@@ -278,7 +278,10 @@ message AlgorithmSpec {
       /** 
      * List of ParameterSpec
      */
-    repeated ParameterSpec parameters = 2; /// List of ParameterSpec
+     message ParameterSpecs {
+        repeated ParameterSpec parameters = 1; 
+    }
+    ParameterSpecs parameter_specs = 2;
 }
 
 /**

@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='api.proto',
   package='api.v1.alpha2',
   syntax='proto3',
-  serialized_pb=_b('\n\tapi.proto\x12\rapi.v1.alpha2\x1a\x1cgoogle/api/annotations.proto\"E\n\rFeasibleSpace\x12\x0b\n\x03max\x18\x01 \x01(\t\x12\x0b\n\x03min\x18\x02 \x01(\t\x12\x0c\n\x04list\x18\x03 \x03(\t\x12\x0c\n\x04step\x18\x04 \x01(\t\"\x89\x01\n\rParameterSpec\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x34\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x1c.api.v1.alpha2.ParameterType\x12\x34\n\x0e\x66\x65\x61sible_space\x18\x03 \x01(\x0b\x32\x1c.api.v1.alpha2.FeasibleSpace\"\x8a\x01\n\rObjectiveSpec\x12*\n\x04type\x18\x01 \x01(\x0e\x32\x1c.api.v1.alpha2.ObjectiveType\x12\x0c\n\x04goal\x18\x02 \x01(\x02\x12\x1d\n\x15objective_metric_name\x18\x03 \x01(\t\x12 \n\x18\x61\x64\x64itional_metrics_names\x18\x04 \x03(\t\"/\n\x10\x41lgorithmSetting\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\x13\n\x11\x45\x61rlyStoppingSpec\"\xa2\x01\n\rAlgorithmSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x01 \x01(\t\x12:\n\x11\x61lgorithm_setting\x18\x02 \x03(\x0b\x32\x1f.api.v1.alpha2.AlgorithmSetting\x12=\n\x13\x65\x61rly_stopping_spec\x18\x03 \x01(\x0b\x32 .api.v1.alpha2.EarlyStoppingSpec\"\xb1\x01\n\tNasConfig\x12\x30\n\x0cgraph_config\x18\x01 \x01(\x0b\x32\x1a.api.v1.alpha2.GraphConfig\x12\x37\n\noperations\x18\x02 \x01(\x0b\x32#.api.v1.alpha2.NasConfig.Operations\x1a\x39\n\nOperations\x12+\n\toperation\x18\x01 \x03(\x0b\x32\x18.api.v1.alpha2.Operation\"L\n\x0bGraphConfig\x12\x12\n\nnum_layers\x18\x01 \x01(\x05\x12\x13\n\x0binput_sizes\x18\x02 \x03(\x05\x12\x14\n\x0coutput_sizes\x18\x03 \x03(\x05\"U\n\tOperation\x12\x16\n\x0eoperation_type\x18\x01 \x01(\t\x12\x30\n\nparameters\x18\x02 \x03(\x0b\x32\x1c.api.v1.alpha2.ParameterSpec\"\x9a\x03\n\x0e\x45xperimentSpec\x12\x45\n\x0fparameter_specs\x18\x01 \x01(\x0b\x32,.api.v1.alpha2.ExperimentSpec.ParameterSpecs\x12/\n\tobjective\x18\x02 \x01(\x0b\x32\x1c.api.v1.alpha2.ObjectiveSpec\x12/\n\talgorithm\x18\x03 \x01(\x0b\x32\x1c.api.v1.alpha2.AlgorithmSpec\x12\x16\n\x0etrial_template\x18\x04 \x01(\t\x12\x1c\n\x14parallel_trial_count\x18\x05 \x01(\x05\x12\x17\n\x0fmax_trial_count\x18\x06 \x01(\x05\x12\x1e\n\x16metrics_collector_type\x18\x07 \x01(\t\x12,\n\nnas_config\x18\x08 \x01(\x0b\x32\x18.api.v1.alpha2.NasConfig\x1a\x42\n\x0eParameterSpecs\x12\x30\n\nparameters\x18\x01 \x03(\x0b\x32\x1c.api.v1.alpha2.ParameterSpec\"\xeb\x01\n\x10\x45xperimentStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12J\n\tcondition\x18\x03 \x01(\x0e\x32\x37.api.v1.alpha2.ExperimentStatus.ExperimentConditionType\"^\n\x17\x45xperimentConditionType\x12\x0b\n\x07\x43REATED\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\x0e\n\nRESTARTING\x10\x02\x12\r\n\tSUCCEEDED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\"\x8e\x01\n\nExperiment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x36\n\x0f\x65xperiment_spec\x18\x02 \x01(\x0b\x32\x1d.api.v1.alpha2.ExperimentSpec\x12:\n\x11\x65xperiment_status\x18\x03 \x01(\x0b\x32\x1f.api.v1.alpha2.ExperimentStatus\"2\n\x13ParameterAssignment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"%\n\x06Metric\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"F\n\tMetricLog\x12\x12\n\ntime_stamp\x18\x01 \x01(\t\x12%\n\x06metric\x18\x02 \x01(\x0b\x32\x15.api.v1.alpha2.Metric\"5\n\x0bObservation\x12&\n\x07metrics\x18\x01 \x03(\x0b\x32\x15.api.v1.alpha2.Metric\"?\n\x0eObservationLog\x12-\n\x0bmetric_logs\x18\x01 \x03(\x0b\x32\x18.api.v1.alpha2.MetricLog\"\xd5\x01\n\tTrialSpec\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12L\n\x15parameter_assignments\x18\x02 \x01(\x0b\x32-.api.v1.alpha2.TrialSpec.ParameterAssignments\x12\x10\n\x08run_spec\x18\x03 \x01(\t\x1aO\n\x14ParameterAssignments\x12\x37\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32\".api.v1.alpha2.ParameterAssignment\"\x84\x02\n\x0bTrialStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12@\n\tcondition\x18\x03 \x01(\x0e\x32-.api.v1.alpha2.TrialStatus.TrialConditionType\x12/\n\x0bobservation\x18\x04 \x01(\x0b\x32\x1a.api.v1.alpha2.Observation\"U\n\x12TrialConditionType\x12\x0b\n\x07PENDING\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tCOMPLETED\x10\x02\x12\n\n\x06KILLED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\"i\n\x05Trial\x12\x0c\n\x04name\x18\x01 \x01(\t\x12&\n\x04spec\x18\x02 \x01(\x0b\x32\x18.api.v1.alpha2.TrialSpec\x12*\n\x06status\x18\x03 \x01(\x0b\x32\x1a.api.v1.alpha2.TrialStatus\"J\n\x19RegisterExperimentRequest\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha2.Experiment\"\x19\n\x17RegisterExperimentReply\"2\n\x17\x44\x65leteExperimentRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\"\x17\n\x15\x44\x65leteExperimentReply\"/\n\x14GetExperimentRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\"C\n\x12GetExperimentReply\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha2.Experiment\"]\n\x11\x45xperimentSummary\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12/\n\x06status\x18\x02 \x01(\x0b\x32\x1f.api.v1.alpha2.ExperimentStatus\"\x1a\n\x18GetExperimentListRequest\"X\n\x16GetExperimentListReply\x12>\n\x14\x65xperiment_summaries\x18\x01 \x03(\x0b\x32 .api.v1.alpha2.ExperimentSummary\"m\n\x1dUpdateExperimentStatusRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x33\n\nnew_status\x18\x02 \x01(\x0b\x32\x1f.api.v1.alpha2.ExperimentStatus\"\x1d\n\x1bUpdateExperimentStatusReply\"\x81\x01\n#UpdateAlgorithmExtraSettingsRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x41\n\x18\x65xtra_algorithm_settings\x18\x02 \x03(\x0b\x32\x1f.api.v1.alpha2.AlgorithmSetting\"#\n!UpdateAlgorithmExtraSettingsReply\";\n GetAlgorithmExtraSettingsRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\"c\n\x1eGetAlgorithmExtraSettingsReply\x12\x41\n\x18\x65xtra_algorithm_settings\x18\x01 \x03(\x0b\x32\x1f.api.v1.alpha2.AlgorithmSetting\";\n\x14RegisterTrialRequest\x12#\n\x05trial\x18\x01 \x01(\x0b\x32\x14.api.v1.alpha2.Trial\"\x14\n\x12RegisterTrialReply\"(\n\x12\x44\x65leteTrialRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x12\n\x10\x44\x65leteTrialReply\">\n\x13GetTrialListRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x0e\n\x06\x66ilter\x18\x02 \x01(\t\"9\n\x11GetTrialListReply\x12$\n\x06trials\x18\x01 \x03(\x0b\x32\x14.api.v1.alpha2.Trial\"%\n\x0fGetTrialRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"4\n\rGetTrialReply\x12#\n\x05trial\x18\x01 \x01(\x0b\x32\x14.api.v1.alpha2.Trial\"^\n\x18UpdateTrialStatusRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12.\n\nnew_status\x18\x02 \x01(\x0b\x32\x1a.api.v1.alpha2.TrialStatus\"\x18\n\x16UpdateTrialStatusReply\"i\n\x1bReportObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x36\n\x0fobservation_log\x18\x02 \x01(\x0b\x32\x1d.api.v1.alpha2.ObservationLog\"\x1b\n\x19ReportObservationLogReply\"T\n\x18GetObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x12\n\nstart_time\x18\x02 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x03 \x01(\t\"P\n\x16GetObservationLogReply\x12\x36\n\x0fobservation_log\x18\x01 \x01(\x0b\x32\x1d.api.v1.alpha2.ObservationLog\"`\n\x15GetSuggestionsRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x16\n\x0e\x61lgorithm_name\x18\x02 \x01(\t\x12\x16\n\x0erequest_number\x18\x03 \x01(\x05\";\n\x13GetSuggestionsReply\x12$\n\x06trials\x18\x01 \x03(\x0b\x32\x14.api.v1.alpha2.Trial\"r\n ValidateAlgorithmSettingsRequest\x12\x36\n\x0f\x65xperiment_spec\x18\x01 \x01(\x0b\x32\x1d.api.v1.alpha2.ExperimentSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x02 \x01(\t\" \n\x1eValidateAlgorithmSettingsReply*U\n\rParameterType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\n\n\x06\x44OUBLE\x10\x01\x12\x07\n\x03INT\x10\x02\x12\x0c\n\x08\x44ISCRETE\x10\x03\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x04*8\n\rObjectiveType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0c\n\x08MINIMIZE\x10\x01\x12\x0c\n\x08MAXIMIZE\x10\x02\x32\xb0\x13\n\x07Manager\x12\x9b\x01\n\x12RegisterExperiment\x12(.api.v1.alpha2.RegisterExperimentRequest\x1a&.api.v1.alpha2.RegisterExperimentReply\"3\x82\xd3\xe4\x93\x02-\"\x1f/api/Manager/RegisterExperiment:\nexperiment\x12\x99\x01\n\x10\x44\x65leteExperiment\x12&.api.v1.alpha2.DeleteExperimentRequest\x1a$.api.v1.alpha2.DeleteExperimentReply\"7\x82\xd3\xe4\x93\x02\x31\x12//api/Manager/DeleteExperiment/{experiment_name}\x12\x8d\x01\n\rGetExperiment\x12#.api.v1.alpha2.GetExperimentRequest\x1a!.api.v1.alpha2.GetExperimentReply\"4\x82\xd3\xe4\x93\x02.\x12,/api/Manager/GetExperiment/{experiment_name}\x12\x8b\x01\n\x11GetExperimentList\x12\'.api.v1.alpha2.GetExperimentListRequest\x1a%.api.v1.alpha2.GetExperimentListReply\"&\x82\xd3\xe4\x93\x02 \x12\x1e/api/Manager/GetExperimentList\x12\xb4\x01\n\x16UpdateExperimentStatus\x12,.api.v1.alpha2.UpdateExperimentStatusRequest\x1a*.api.v1.alpha2.UpdateExperimentStatusReply\"@\x82\xd3\xe4\x93\x02:\x1a\x35/api/Manager/UpdateExperimentStatus/{experiment_name}:\x01*\x12\xcc\x01\n\x1cUpdateAlgorithmExtraSettings\x12\x32.api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest\x1a\x30.api.v1.alpha2.UpdateAlgorithmExtraSettingsReply\"F\x82\xd3\xe4\x93\x02@\x1a;/api/Manager/UpdateAlgorithmExtraSettings/{experiment_name}:\x01*\x12\xbd\x01\n\x19GetAlgorithmExtraSettings\x12/.api.v1.alpha2.GetAlgorithmExtraSettingsRequest\x1a-.api.v1.alpha2.GetAlgorithmExtraSettingsReply\"@\x82\xd3\xe4\x93\x02:\x12\x38/api/Manager/GetAlgorithmExtraSettings/{experiment_name}\x12\x82\x01\n\rRegisterTrial\x12#.api.v1.alpha2.RegisterTrialRequest\x1a!.api.v1.alpha2.RegisterTrialReply\")\x82\xd3\xe4\x93\x02#\"\x1a/api/Manager/RegisterTrial:\x05trial\x12\x80\x01\n\x0b\x44\x65leteTrial\x12!.api.v1.alpha2.DeleteTrialRequest\x1a\x1f.api.v1.alpha2.DeleteTrialReply\"-\x82\xd3\xe4\x93\x02\'\x12%/api/Manager/DeleteTrial/{trial_name}\x12\x89\x01\n\x0cGetTrialList\x12\".api.v1.alpha2.GetTrialListRequest\x1a .api.v1.alpha2.GetTrialListReply\"3\x82\xd3\xe4\x93\x02-\x12+/api/Manager/GetTrialList/{experiment_name}\x12t\n\x08GetTrial\x12\x1e.api.v1.alpha2.GetTrialRequest\x1a\x1c.api.v1.alpha2.GetTrialReply\"*\x82\xd3\xe4\x93\x02$\x12\"/api/Manager/GetTrial/{trial_name}\x12\x8e\x01\n\x11UpdateTrialStatus\x12\'.api.v1.alpha2.UpdateTrialStatusRequest\x1a%.api.v1.alpha2.UpdateTrialStatusReply\")\x82\xd3\xe4\x93\x02#\x1a\x1e/api/Manager/UpdateTrialStatus:\x01*\x12\x9a\x01\n\x14ReportObservationLog\x12*.api.v1.alpha2.ReportObservationLogRequest\x1a(.api.v1.alpha2.ReportObservationLogReply\",\x82\xd3\xe4\x93\x02&\"!/api/Manager/ReportObservationLog:\x01*\x12\x98\x01\n\x11GetObservationLog\x12\'.api.v1.alpha2.GetObservationLogRequest\x1a%.api.v1.alpha2.GetObservationLogReply\"3\x82\xd3\xe4\x93\x02-\x12+/api/Manager/GetObservationLog/{trial_name}\x12\x82\x01\n\x0eGetSuggestions\x12$.api.v1.alpha2.GetSuggestionsRequest\x1a\".api.v1.alpha2.GetSuggestionsReply\"&\x82\xd3\xe4\x93\x02 \"\x1b/api/Manager/GetSuggestions:\x01*\x12\xae\x01\n\x19ValidateAlgorithmSettings\x12/.api.v1.alpha2.ValidateAlgorithmSettingsRequest\x1a-.api.v1.alpha2.ValidateAlgorithmSettingsReply\"1\x82\xd3\xe4\x93\x02+\"&/api/Manager/ValidateAlgorithmSettings:\x01*2\xe5\x01\n\nSuggestion\x12Z\n\x0eGetSuggestions\x12$.api.v1.alpha2.GetSuggestionsRequest\x1a\".api.v1.alpha2.GetSuggestionsReply\x12{\n\x19ValidateAlgorithmSettings\x12/.api.v1.alpha2.ValidateAlgorithmSettingsRequest\x1a-.api.v1.alpha2.ValidateAlgorithmSettingsReply2\x0f\n\rEarlyStoppingb\x06proto3')
+  serialized_pb=_b('\n\tapi.proto\x12\rapi.v1.alpha2\x1a\x1cgoogle/api/annotations.proto\"E\n\rFeasibleSpace\x12\x0b\n\x03max\x18\x01 \x01(\t\x12\x0b\n\x03min\x18\x02 \x01(\t\x12\x0c\n\x04list\x18\x03 \x03(\t\x12\x0c\n\x04step\x18\x04 \x01(\t\"\x89\x01\n\rParameterSpec\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x34\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x1c.api.v1.alpha2.ParameterType\x12\x34\n\x0e\x66\x65\x61sible_space\x18\x03 \x01(\x0b\x32\x1c.api.v1.alpha2.FeasibleSpace\"\x8a\x01\n\rObjectiveSpec\x12*\n\x04type\x18\x01 \x01(\x0e\x32\x1c.api.v1.alpha2.ObjectiveType\x12\x0c\n\x04goal\x18\x02 \x01(\x02\x12\x1d\n\x15objective_metric_name\x18\x03 \x01(\t\x12 \n\x18\x61\x64\x64itional_metrics_names\x18\x04 \x03(\t\"/\n\x10\x41lgorithmSetting\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\x13\n\x11\x45\x61rlyStoppingSpec\"\xa2\x01\n\rAlgorithmSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x01 \x01(\t\x12:\n\x11\x61lgorithm_setting\x18\x02 \x03(\x0b\x32\x1f.api.v1.alpha2.AlgorithmSetting\x12=\n\x13\x65\x61rly_stopping_spec\x18\x03 \x01(\x0b\x32 .api.v1.alpha2.EarlyStoppingSpec\"\xb1\x01\n\tNasConfig\x12\x30\n\x0cgraph_config\x18\x01 \x01(\x0b\x32\x1a.api.v1.alpha2.GraphConfig\x12\x37\n\noperations\x18\x02 \x01(\x0b\x32#.api.v1.alpha2.NasConfig.Operations\x1a\x39\n\nOperations\x12+\n\toperation\x18\x01 \x03(\x0b\x32\x18.api.v1.alpha2.Operation\"L\n\x0bGraphConfig\x12\x12\n\nnum_layers\x18\x01 \x01(\x05\x12\x13\n\x0binput_sizes\x18\x02 \x03(\x05\x12\x14\n\x0coutput_sizes\x18\x03 \x03(\x05\"\xa9\x01\n\tOperation\x12\x16\n\x0eoperation_type\x18\x01 \x01(\t\x12@\n\x0fparameter_specs\x18\x02 \x01(\x0b\x32\'.api.v1.alpha2.Operation.ParameterSpecs\x1a\x42\n\x0eParameterSpecs\x12\x30\n\nparameters\x18\x01 \x03(\x0b\x32\x1c.api.v1.alpha2.ParameterSpec\"\x9a\x03\n\x0e\x45xperimentSpec\x12\x45\n\x0fparameter_specs\x18\x01 \x01(\x0b\x32,.api.v1.alpha2.ExperimentSpec.ParameterSpecs\x12/\n\tobjective\x18\x02 \x01(\x0b\x32\x1c.api.v1.alpha2.ObjectiveSpec\x12/\n\talgorithm\x18\x03 \x01(\x0b\x32\x1c.api.v1.alpha2.AlgorithmSpec\x12\x16\n\x0etrial_template\x18\x04 \x01(\t\x12\x1c\n\x14parallel_trial_count\x18\x05 \x01(\x05\x12\x17\n\x0fmax_trial_count\x18\x06 \x01(\x05\x12\x1e\n\x16metrics_collector_type\x18\x07 \x01(\t\x12,\n\nnas_config\x18\x08 \x01(\x0b\x32\x18.api.v1.alpha2.NasConfig\x1a\x42\n\x0eParameterSpecs\x12\x30\n\nparameters\x18\x01 \x03(\x0b\x32\x1c.api.v1.alpha2.ParameterSpec\"\xeb\x01\n\x10\x45xperimentStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12J\n\tcondition\x18\x03 \x01(\x0e\x32\x37.api.v1.alpha2.ExperimentStatus.ExperimentConditionType\"^\n\x17\x45xperimentConditionType\x12\x0b\n\x07\x43REATED\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\x0e\n\nRESTARTING\x10\x02\x12\r\n\tSUCCEEDED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\"\x8e\x01\n\nExperiment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x36\n\x0f\x65xperiment_spec\x18\x02 \x01(\x0b\x32\x1d.api.v1.alpha2.ExperimentSpec\x12:\n\x11\x65xperiment_status\x18\x03 \x01(\x0b\x32\x1f.api.v1.alpha2.ExperimentStatus\"2\n\x13ParameterAssignment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"%\n\x06Metric\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"F\n\tMetricLog\x12\x12\n\ntime_stamp\x18\x01 \x01(\t\x12%\n\x06metric\x18\x02 \x01(\x0b\x32\x15.api.v1.alpha2.Metric\"5\n\x0bObservation\x12&\n\x07metrics\x18\x01 \x03(\x0b\x32\x15.api.v1.alpha2.Metric\"?\n\x0eObservationLog\x12-\n\x0bmetric_logs\x18\x01 \x03(\x0b\x32\x18.api.v1.alpha2.MetricLog\"\xd5\x01\n\tTrialSpec\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12L\n\x15parameter_assignments\x18\x02 \x01(\x0b\x32-.api.v1.alpha2.TrialSpec.ParameterAssignments\x12\x10\n\x08run_spec\x18\x03 \x01(\t\x1aO\n\x14ParameterAssignments\x12\x37\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32\".api.v1.alpha2.ParameterAssignment\"\x84\x02\n\x0bTrialStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12@\n\tcondition\x18\x03 \x01(\x0e\x32-.api.v1.alpha2.TrialStatus.TrialConditionType\x12/\n\x0bobservation\x18\x04 \x01(\x0b\x32\x1a.api.v1.alpha2.Observation\"U\n\x12TrialConditionType\x12\x0b\n\x07PENDING\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tCOMPLETED\x10\x02\x12\n\n\x06KILLED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\"i\n\x05Trial\x12\x0c\n\x04name\x18\x01 \x01(\t\x12&\n\x04spec\x18\x02 \x01(\x0b\x32\x18.api.v1.alpha2.TrialSpec\x12*\n\x06status\x18\x03 \x01(\x0b\x32\x1a.api.v1.alpha2.TrialStatus\"J\n\x19RegisterExperimentRequest\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha2.Experiment\"\x19\n\x17RegisterExperimentReply\"2\n\x17\x44\x65leteExperimentRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\"\x17\n\x15\x44\x65leteExperimentReply\"/\n\x14GetExperimentRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\"C\n\x12GetExperimentReply\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha2.Experiment\"]\n\x11\x45xperimentSummary\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12/\n\x06status\x18\x02 \x01(\x0b\x32\x1f.api.v1.alpha2.ExperimentStatus\"\x1a\n\x18GetExperimentListRequest\"X\n\x16GetExperimentListReply\x12>\n\x14\x65xperiment_summaries\x18\x01 \x03(\x0b\x32 .api.v1.alpha2.ExperimentSummary\"m\n\x1dUpdateExperimentStatusRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x33\n\nnew_status\x18\x02 \x01(\x0b\x32\x1f.api.v1.alpha2.ExperimentStatus\"\x1d\n\x1bUpdateExperimentStatusReply\"\x81\x01\n#UpdateAlgorithmExtraSettingsRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x41\n\x18\x65xtra_algorithm_settings\x18\x02 \x03(\x0b\x32\x1f.api.v1.alpha2.AlgorithmSetting\"#\n!UpdateAlgorithmExtraSettingsReply\";\n GetAlgorithmExtraSettingsRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\"c\n\x1eGetAlgorithmExtraSettingsReply\x12\x41\n\x18\x65xtra_algorithm_settings\x18\x01 \x03(\x0b\x32\x1f.api.v1.alpha2.AlgorithmSetting\";\n\x14RegisterTrialRequest\x12#\n\x05trial\x18\x01 \x01(\x0b\x32\x14.api.v1.alpha2.Trial\"\x14\n\x12RegisterTrialReply\"(\n\x12\x44\x65leteTrialRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x12\n\x10\x44\x65leteTrialReply\">\n\x13GetTrialListRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x0e\n\x06\x66ilter\x18\x02 \x01(\t\"9\n\x11GetTrialListReply\x12$\n\x06trials\x18\x01 \x03(\x0b\x32\x14.api.v1.alpha2.Trial\"%\n\x0fGetTrialRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"4\n\rGetTrialReply\x12#\n\x05trial\x18\x01 \x01(\x0b\x32\x14.api.v1.alpha2.Trial\"^\n\x18UpdateTrialStatusRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12.\n\nnew_status\x18\x02 \x01(\x0b\x32\x1a.api.v1.alpha2.TrialStatus\"\x18\n\x16UpdateTrialStatusReply\"i\n\x1bReportObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x36\n\x0fobservation_log\x18\x02 \x01(\x0b\x32\x1d.api.v1.alpha2.ObservationLog\"\x1b\n\x19ReportObservationLogReply\"T\n\x18GetObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x12\n\nstart_time\x18\x02 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x03 \x01(\t\"P\n\x16GetObservationLogReply\x12\x36\n\x0fobservation_log\x18\x01 \x01(\x0b\x32\x1d.api.v1.alpha2.ObservationLog\"`\n\x15GetSuggestionsRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x16\n\x0e\x61lgorithm_name\x18\x02 \x01(\t\x12\x16\n\x0erequest_number\x18\x03 \x01(\x05\";\n\x13GetSuggestionsReply\x12$\n\x06trials\x18\x01 \x03(\x0b\x32\x14.api.v1.alpha2.Trial\"r\n ValidateAlgorithmSettingsRequest\x12\x36\n\x0f\x65xperiment_spec\x18\x01 \x01(\x0b\x32\x1d.api.v1.alpha2.ExperimentSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x02 \x01(\t\" \n\x1eValidateAlgorithmSettingsReply*U\n\rParameterType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\n\n\x06\x44OUBLE\x10\x01\x12\x07\n\x03INT\x10\x02\x12\x0c\n\x08\x44ISCRETE\x10\x03\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x04*8\n\rObjectiveType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0c\n\x08MINIMIZE\x10\x01\x12\x0c\n\x08MAXIMIZE\x10\x02\x32\xb0\x13\n\x07Manager\x12\x9b\x01\n\x12RegisterExperiment\x12(.api.v1.alpha2.RegisterExperimentRequest\x1a&.api.v1.alpha2.RegisterExperimentReply\"3\x82\xd3\xe4\x93\x02-\"\x1f/api/Manager/RegisterExperiment:\nexperiment\x12\x99\x01\n\x10\x44\x65leteExperiment\x12&.api.v1.alpha2.DeleteExperimentRequest\x1a$.api.v1.alpha2.DeleteExperimentReply\"7\x82\xd3\xe4\x93\x02\x31\x12//api/Manager/DeleteExperiment/{experiment_name}\x12\x8d\x01\n\rGetExperiment\x12#.api.v1.alpha2.GetExperimentRequest\x1a!.api.v1.alpha2.GetExperimentReply\"4\x82\xd3\xe4\x93\x02.\x12,/api/Manager/GetExperiment/{experiment_name}\x12\x8b\x01\n\x11GetExperimentList\x12\'.api.v1.alpha2.GetExperimentListRequest\x1a%.api.v1.alpha2.GetExperimentListReply\"&\x82\xd3\xe4\x93\x02 \x12\x1e/api/Manager/GetExperimentList\x12\xb4\x01\n\x16UpdateExperimentStatus\x12,.api.v1.alpha2.UpdateExperimentStatusRequest\x1a*.api.v1.alpha2.UpdateExperimentStatusReply\"@\x82\xd3\xe4\x93\x02:\x1a\x35/api/Manager/UpdateExperimentStatus/{experiment_name}:\x01*\x12\xcc\x01\n\x1cUpdateAlgorithmExtraSettings\x12\x32.api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest\x1a\x30.api.v1.alpha2.UpdateAlgorithmExtraSettingsReply\"F\x82\xd3\xe4\x93\x02@\x1a;/api/Manager/UpdateAlgorithmExtraSettings/{experiment_name}:\x01*\x12\xbd\x01\n\x19GetAlgorithmExtraSettings\x12/.api.v1.alpha2.GetAlgorithmExtraSettingsRequest\x1a-.api.v1.alpha2.GetAlgorithmExtraSettingsReply\"@\x82\xd3\xe4\x93\x02:\x12\x38/api/Manager/GetAlgorithmExtraSettings/{experiment_name}\x12\x82\x01\n\rRegisterTrial\x12#.api.v1.alpha2.RegisterTrialRequest\x1a!.api.v1.alpha2.RegisterTrialReply\")\x82\xd3\xe4\x93\x02#\"\x1a/api/Manager/RegisterTrial:\x05trial\x12\x80\x01\n\x0b\x44\x65leteTrial\x12!.api.v1.alpha2.DeleteTrialRequest\x1a\x1f.api.v1.alpha2.DeleteTrialReply\"-\x82\xd3\xe4\x93\x02\'\x12%/api/Manager/DeleteTrial/{trial_name}\x12\x89\x01\n\x0cGetTrialList\x12\".api.v1.alpha2.GetTrialListRequest\x1a .api.v1.alpha2.GetTrialListReply\"3\x82\xd3\xe4\x93\x02-\x12+/api/Manager/GetTrialList/{experiment_name}\x12t\n\x08GetTrial\x12\x1e.api.v1.alpha2.GetTrialRequest\x1a\x1c.api.v1.alpha2.GetTrialReply\"*\x82\xd3\xe4\x93\x02$\x12\"/api/Manager/GetTrial/{trial_name}\x12\x8e\x01\n\x11UpdateTrialStatus\x12\'.api.v1.alpha2.UpdateTrialStatusRequest\x1a%.api.v1.alpha2.UpdateTrialStatusReply\")\x82\xd3\xe4\x93\x02#\x1a\x1e/api/Manager/UpdateTrialStatus:\x01*\x12\x9a\x01\n\x14ReportObservationLog\x12*.api.v1.alpha2.ReportObservationLogRequest\x1a(.api.v1.alpha2.ReportObservationLogReply\",\x82\xd3\xe4\x93\x02&\"!/api/Manager/ReportObservationLog:\x01*\x12\x98\x01\n\x11GetObservationLog\x12\'.api.v1.alpha2.GetObservationLogRequest\x1a%.api.v1.alpha2.GetObservationLogReply\"3\x82\xd3\xe4\x93\x02-\x12+/api/Manager/GetObservationLog/{trial_name}\x12\x82\x01\n\x0eGetSuggestions\x12$.api.v1.alpha2.GetSuggestionsRequest\x1a\".api.v1.alpha2.GetSuggestionsReply\"&\x82\xd3\xe4\x93\x02 \"\x1b/api/Manager/GetSuggestions:\x01*\x12\xae\x01\n\x19ValidateAlgorithmSettings\x12/.api.v1.alpha2.ValidateAlgorithmSettingsRequest\x1a-.api.v1.alpha2.ValidateAlgorithmSettingsReply\"1\x82\xd3\xe4\x93\x02+\"&/api/Manager/ValidateAlgorithmSettings:\x01*2\xe5\x01\n\nSuggestion\x12Z\n\x0eGetSuggestions\x12$.api.v1.alpha2.GetSuggestionsRequest\x1a\".api.v1.alpha2.GetSuggestionsReply\x12{\n\x19ValidateAlgorithmSettings\x12/.api.v1.alpha2.ValidateAlgorithmSettingsRequest\x1a-.api.v1.alpha2.ValidateAlgorithmSettingsReply2\x0f\n\rEarlyStoppingb\x06proto3')
   ,
   dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,])
 
@@ -54,8 +54,8 @@ _PARAMETERTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=4735,
-  serialized_end=4820,
+  serialized_start=4820,
+  serialized_end=4905,
 )
 _sym_db.RegisterEnumDescriptor(_PARAMETERTYPE)
 
@@ -81,8 +81,8 @@ _OBJECTIVETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=4822,
-  serialized_end=4878,
+  serialized_start=4907,
+  serialized_end=4963,
 )
 _sym_db.RegisterEnumDescriptor(_OBJECTIVETYPE)
 
@@ -126,8 +126,8 @@ _EXPERIMENTSTATUS_EXPERIMENTCONDITIONTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1545,
-  serialized_end=1639,
+  serialized_start=1630,
+  serialized_end=1724,
 )
 _sym_db.RegisterEnumDescriptor(_EXPERIMENTSTATUS_EXPERIMENTCONDITIONTYPE)
 
@@ -160,8 +160,8 @@ _TRIALSTATUS_TRIALCONDITIONTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=2461,
-  serialized_end=2546,
+  serialized_start=2546,
+  serialized_end=2631,
 )
 _sym_db.RegisterEnumDescriptor(_TRIALSTATUS_TRIALCONDITIONTYPE)
 
@@ -535,23 +535,16 @@ _GRAPHCONFIG = _descriptor.Descriptor(
 )
 
 
-_OPERATION = _descriptor.Descriptor(
-  name='Operation',
-  full_name='api.v1.alpha2.Operation',
+_OPERATION_PARAMETERSPECS = _descriptor.Descriptor(
+  name='ParameterSpecs',
+  full_name='api.v1.alpha2.Operation.ParameterSpecs',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='operation_type', full_name='api.v1.alpha2.Operation.operation_type', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='parameters', full_name='api.v1.alpha2.Operation.parameters', index=1,
-      number=2, type=11, cpp_type=10, label=3,
+      name='parameters', full_name='api.v1.alpha2.Operation.ParameterSpecs.parameters', index=0,
+      number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -568,8 +561,45 @@ _OPERATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=903,
-  serialized_end=988,
+  serialized_start=1007,
+  serialized_end=1073,
+)
+
+_OPERATION = _descriptor.Descriptor(
+  name='Operation',
+  full_name='api.v1.alpha2.Operation',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='operation_type', full_name='api.v1.alpha2.Operation.operation_type', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='parameter_specs', full_name='api.v1.alpha2.Operation.parameter_specs', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[_OPERATION_PARAMETERSPECS, ],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=904,
+  serialized_end=1073,
 )
 
 
@@ -599,8 +629,8 @@ _EXPERIMENTSPEC_PARAMETERSPECS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1335,
-  serialized_end=1401,
+  serialized_start=1007,
+  serialized_end=1073,
 )
 
 _EXPERIMENTSPEC = _descriptor.Descriptor(
@@ -678,8 +708,8 @@ _EXPERIMENTSPEC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=991,
-  serialized_end=1401,
+  serialized_start=1076,
+  serialized_end=1486,
 )
 
 
@@ -724,8 +754,8 @@ _EXPERIMENTSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1404,
-  serialized_end=1639,
+  serialized_start=1489,
+  serialized_end=1724,
 )
 
 
@@ -769,8 +799,8 @@ _EXPERIMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1642,
-  serialized_end=1784,
+  serialized_start=1727,
+  serialized_end=1869,
 )
 
 
@@ -807,8 +837,8 @@ _PARAMETERASSIGNMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1786,
-  serialized_end=1836,
+  serialized_start=1871,
+  serialized_end=1921,
 )
 
 
@@ -845,8 +875,8 @@ _METRIC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1838,
-  serialized_end=1875,
+  serialized_start=1923,
+  serialized_end=1960,
 )
 
 
@@ -883,8 +913,8 @@ _METRICLOG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1877,
-  serialized_end=1947,
+  serialized_start=1962,
+  serialized_end=2032,
 )
 
 
@@ -914,8 +944,8 @@ _OBSERVATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1949,
-  serialized_end=2002,
+  serialized_start=2034,
+  serialized_end=2087,
 )
 
 
@@ -945,8 +975,8 @@ _OBSERVATIONLOG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2004,
-  serialized_end=2067,
+  serialized_start=2089,
+  serialized_end=2152,
 )
 
 
@@ -976,8 +1006,8 @@ _TRIALSPEC_PARAMETERASSIGNMENTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2204,
-  serialized_end=2283,
+  serialized_start=2289,
+  serialized_end=2368,
 )
 
 _TRIALSPEC = _descriptor.Descriptor(
@@ -1020,8 +1050,8 @@ _TRIALSPEC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2070,
-  serialized_end=2283,
+  serialized_start=2155,
+  serialized_end=2368,
 )
 
 
@@ -1073,8 +1103,8 @@ _TRIALSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2286,
-  serialized_end=2546,
+  serialized_start=2371,
+  serialized_end=2631,
 )
 
 
@@ -1118,8 +1148,8 @@ _TRIAL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2548,
-  serialized_end=2653,
+  serialized_start=2633,
+  serialized_end=2738,
 )
 
 
@@ -1149,8 +1179,8 @@ _REGISTEREXPERIMENTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2655,
-  serialized_end=2729,
+  serialized_start=2740,
+  serialized_end=2814,
 )
 
 
@@ -1173,8 +1203,8 @@ _REGISTEREXPERIMENTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2731,
-  serialized_end=2756,
+  serialized_start=2816,
+  serialized_end=2841,
 )
 
 
@@ -1204,8 +1234,8 @@ _DELETEEXPERIMENTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2758,
-  serialized_end=2808,
+  serialized_start=2843,
+  serialized_end=2893,
 )
 
 
@@ -1228,8 +1258,8 @@ _DELETEEXPERIMENTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2810,
-  serialized_end=2833,
+  serialized_start=2895,
+  serialized_end=2918,
 )
 
 
@@ -1259,8 +1289,8 @@ _GETEXPERIMENTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2835,
-  serialized_end=2882,
+  serialized_start=2920,
+  serialized_end=2967,
 )
 
 
@@ -1290,8 +1320,8 @@ _GETEXPERIMENTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2884,
-  serialized_end=2951,
+  serialized_start=2969,
+  serialized_end=3036,
 )
 
 
@@ -1328,8 +1358,8 @@ _EXPERIMENTSUMMARY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2953,
-  serialized_end=3046,
+  serialized_start=3038,
+  serialized_end=3131,
 )
 
 
@@ -1352,8 +1382,8 @@ _GETEXPERIMENTLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3048,
-  serialized_end=3074,
+  serialized_start=3133,
+  serialized_end=3159,
 )
 
 
@@ -1383,8 +1413,8 @@ _GETEXPERIMENTLISTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3076,
-  serialized_end=3164,
+  serialized_start=3161,
+  serialized_end=3249,
 )
 
 
@@ -1421,8 +1451,8 @@ _UPDATEEXPERIMENTSTATUSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3166,
-  serialized_end=3275,
+  serialized_start=3251,
+  serialized_end=3360,
 )
 
 
@@ -1445,8 +1475,8 @@ _UPDATEEXPERIMENTSTATUSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3277,
-  serialized_end=3306,
+  serialized_start=3362,
+  serialized_end=3391,
 )
 
 
@@ -1483,8 +1513,8 @@ _UPDATEALGORITHMEXTRASETTINGSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3309,
-  serialized_end=3438,
+  serialized_start=3394,
+  serialized_end=3523,
 )
 
 
@@ -1507,8 +1537,8 @@ _UPDATEALGORITHMEXTRASETTINGSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3440,
-  serialized_end=3475,
+  serialized_start=3525,
+  serialized_end=3560,
 )
 
 
@@ -1538,8 +1568,8 @@ _GETALGORITHMEXTRASETTINGSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3477,
-  serialized_end=3536,
+  serialized_start=3562,
+  serialized_end=3621,
 )
 
 
@@ -1569,8 +1599,8 @@ _GETALGORITHMEXTRASETTINGSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3538,
-  serialized_end=3637,
+  serialized_start=3623,
+  serialized_end=3722,
 )
 
 
@@ -1600,8 +1630,8 @@ _REGISTERTRIALREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3639,
-  serialized_end=3698,
+  serialized_start=3724,
+  serialized_end=3783,
 )
 
 
@@ -1624,8 +1654,8 @@ _REGISTERTRIALREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3700,
-  serialized_end=3720,
+  serialized_start=3785,
+  serialized_end=3805,
 )
 
 
@@ -1655,8 +1685,8 @@ _DELETETRIALREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3722,
-  serialized_end=3762,
+  serialized_start=3807,
+  serialized_end=3847,
 )
 
 
@@ -1679,8 +1709,8 @@ _DELETETRIALREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3764,
-  serialized_end=3782,
+  serialized_start=3849,
+  serialized_end=3867,
 )
 
 
@@ -1717,8 +1747,8 @@ _GETTRIALLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3784,
-  serialized_end=3846,
+  serialized_start=3869,
+  serialized_end=3931,
 )
 
 
@@ -1748,8 +1778,8 @@ _GETTRIALLISTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3848,
-  serialized_end=3905,
+  serialized_start=3933,
+  serialized_end=3990,
 )
 
 
@@ -1779,8 +1809,8 @@ _GETTRIALREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3907,
-  serialized_end=3944,
+  serialized_start=3992,
+  serialized_end=4029,
 )
 
 
@@ -1810,8 +1840,8 @@ _GETTRIALREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3946,
-  serialized_end=3998,
+  serialized_start=4031,
+  serialized_end=4083,
 )
 
 
@@ -1848,8 +1878,8 @@ _UPDATETRIALSTATUSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4000,
-  serialized_end=4094,
+  serialized_start=4085,
+  serialized_end=4179,
 )
 
 
@@ -1872,8 +1902,8 @@ _UPDATETRIALSTATUSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4096,
-  serialized_end=4120,
+  serialized_start=4181,
+  serialized_end=4205,
 )
 
 
@@ -1910,8 +1940,8 @@ _REPORTOBSERVATIONLOGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4122,
-  serialized_end=4227,
+  serialized_start=4207,
+  serialized_end=4312,
 )
 
 
@@ -1934,8 +1964,8 @@ _REPORTOBSERVATIONLOGREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4229,
-  serialized_end=4256,
+  serialized_start=4314,
+  serialized_end=4341,
 )
 
 
@@ -1979,8 +2009,8 @@ _GETOBSERVATIONLOGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4258,
-  serialized_end=4342,
+  serialized_start=4343,
+  serialized_end=4427,
 )
 
 
@@ -2010,8 +2040,8 @@ _GETOBSERVATIONLOGREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4344,
-  serialized_end=4424,
+  serialized_start=4429,
+  serialized_end=4509,
 )
 
 
@@ -2055,8 +2085,8 @@ _GETSUGGESTIONSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4426,
-  serialized_end=4522,
+  serialized_start=4511,
+  serialized_end=4607,
 )
 
 
@@ -2086,8 +2116,8 @@ _GETSUGGESTIONSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4524,
-  serialized_end=4583,
+  serialized_start=4609,
+  serialized_end=4668,
 )
 
 
@@ -2124,8 +2154,8 @@ _VALIDATEALGORITHMSETTINGSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4585,
-  serialized_end=4699,
+  serialized_start=4670,
+  serialized_end=4784,
 )
 
 
@@ -2148,8 +2178,8 @@ _VALIDATEALGORITHMSETTINGSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4701,
-  serialized_end=4733,
+  serialized_start=4786,
+  serialized_end=4818,
 )
 
 _PARAMETERSPEC.fields_by_name['parameter_type'].enum_type = _PARAMETERTYPE
@@ -2161,7 +2191,9 @@ _NASCONFIG_OPERATIONS.fields_by_name['operation'].message_type = _OPERATION
 _NASCONFIG_OPERATIONS.containing_type = _NASCONFIG
 _NASCONFIG.fields_by_name['graph_config'].message_type = _GRAPHCONFIG
 _NASCONFIG.fields_by_name['operations'].message_type = _NASCONFIG_OPERATIONS
-_OPERATION.fields_by_name['parameters'].message_type = _PARAMETERSPEC
+_OPERATION_PARAMETERSPECS.fields_by_name['parameters'].message_type = _PARAMETERSPEC
+_OPERATION_PARAMETERSPECS.containing_type = _OPERATION
+_OPERATION.fields_by_name['parameter_specs'].message_type = _OPERATION_PARAMETERSPECS
 _EXPERIMENTSPEC_PARAMETERSPECS.fields_by_name['parameters'].message_type = _PARAMETERSPEC
 _EXPERIMENTSPEC_PARAMETERSPECS.containing_type = _EXPERIMENTSPEC
 _EXPERIMENTSPEC.fields_by_name['parameter_specs'].message_type = _EXPERIMENTSPEC_PARAMETERSPECS
@@ -2320,11 +2352,19 @@ GraphConfig = _reflection.GeneratedProtocolMessageType('GraphConfig', (_message.
 _sym_db.RegisterMessage(GraphConfig)
 
 Operation = _reflection.GeneratedProtocolMessageType('Operation', (_message.Message,), dict(
+
+  ParameterSpecs = _reflection.GeneratedProtocolMessageType('ParameterSpecs', (_message.Message,), dict(
+    DESCRIPTOR = _OPERATION_PARAMETERSPECS,
+    __module__ = 'api_pb2'
+    # @@protoc_insertion_point(class_scope:api.v1.alpha2.Operation.ParameterSpecs)
+    ))
+  ,
   DESCRIPTOR = _OPERATION,
   __module__ = 'api_pb2'
   # @@protoc_insertion_point(class_scope:api.v1.alpha2.Operation)
   ))
 _sym_db.RegisterMessage(Operation)
+_sym_db.RegisterMessage(Operation.ParameterSpecs)
 
 ExperimentSpec = _reflection.GeneratedProtocolMessageType('ExperimentSpec', (_message.Message,), dict(
 
@@ -2658,8 +2698,8 @@ _MANAGER = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=4881,
-  serialized_end=7361,
+  serialized_start=4966,
+  serialized_end=7446,
   methods=[
   _descriptor.MethodDescriptor(
     name='RegisterExperiment',
@@ -2817,8 +2857,8 @@ _SUGGESTION = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=1,
   options=None,
-  serialized_start=7364,
-  serialized_end=7593,
+  serialized_start=7449,
+  serialized_end=7678,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetSuggestions',
@@ -2850,8 +2890,8 @@ _EARLYSTOPPING = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=2,
   options=None,
-  serialized_start=7595,
-  serialized_end=7610,
+  serialized_start=7680,
+  serialized_end=7695,
   methods=[
 ])
 _sym_db.RegisterServiceDescriptor(_EARLYSTOPPING)
