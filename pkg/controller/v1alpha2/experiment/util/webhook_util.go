@@ -18,6 +18,7 @@ package util
 
 import (
 	"bytes"
+	"database/sql"
 	"fmt"
 
 	ep_v1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
@@ -26,6 +27,11 @@ import (
 )
 
 func ValidateExperiment(instance *ep_v1alpha2.Experiment) error {
+	if !instance.IsCreated() {
+		if err := validateForCreate(instance); err != nil {
+			return err
+		}
+	}
 	if err := validateObjective(instance.Spec.Objective); err != nil {
 		return err
 	}
@@ -122,4 +128,15 @@ func validateSupportedJob(job *unstructured.Unstructured) error {
 		}
 	}
 	return fmt.Errorf("Cannot support to run job: %v", gvk)
+}
+
+func validateForCreate(inst *ep_v1alpha2.Experiment) error {
+	if _, err := GetExperimentFromDB(inst); err != nil {
+		if err != sql.ErrNoRows {
+			return fmt.Errorf("Fail to check record for the experiment in DB: %v", err)
+		}
+		return nil
+	} else {
+		return fmt.Errorf("Record for the experiment has existed in DB; Please try to rename the experiment")
+	}
 }
