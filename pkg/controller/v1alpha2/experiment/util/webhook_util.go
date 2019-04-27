@@ -25,11 +25,6 @@ import (
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
-func DefaultExperiment(instance *ep_v1alpha2.Experiment) error {
-	instance.SetDefault()
-	return nil
-}
-
 func ValidateExperiment(instance *ep_v1alpha2.Experiment) error {
 	if err := validateObjective(instance.Spec.Objective); err != nil {
 		return err

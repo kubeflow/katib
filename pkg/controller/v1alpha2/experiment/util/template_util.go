@@ -17,15 +17,17 @@ package util
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"os"
 	"text/template"
 
 	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type TrialTemplateParams struct {
@@ -93,17 +95,13 @@ func getTrialTemplate(instance *experimentsv1alpha2.Experiment) (*template.Templ
 }
 
 func getConfigMap(name, namespace string) (map[string]string, error) {
-	config, err := rest.InClusterConfig()
+	client, err := NewClient(client.Options{})
 	if err != nil {
 		return map[string]string{}, err
 	}
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
+	configMap := &apiv1.ConfigMap{}
+	if err := client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: namespace}, configMap); err != nil {
 		return map[string]string{}, err
 	}
-	cm, err := clientset.CoreV1().ConfigMaps(namespace).Get(name, metav1.GetOptions{})
-	if err != nil {
-		return map[string]string{}, err
-	}
-	return cm.Data, nil
+	return configMap.Data, nil
 }

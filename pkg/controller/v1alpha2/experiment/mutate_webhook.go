@@ -21,7 +21,6 @@ import (
         "net/http"
 
         experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
         "sigs.k8s.io/controller-runtime/pkg/client"
         "sigs.k8s.io/controller-runtime/pkg/runtime/inject"
         "sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -44,10 +43,7 @@ func (e *experimentDefaulter) Handle(ctx context.Context, req types.Request) typ
         }
 
 	copy := inst.DeepCopy()
-        err = util.DefaultExperiment(copy)
-        if err != nil {
-                return admission.ErrorResponse(http.StatusInternalServerError, err)
-        }
+	copy.SetDefault()
 
 	return admission.PatchResponse(inst, copy)
 }
