@@ -27,7 +27,4 @@ const (
 
 	// Default value of Spec.TemplatePath
 	DefaultTrialTemplatePath = "defaultTrialTemplate.yaml"
-
-	OptimizationTypeMinimize = "minimize"
-	OptimizationTypeMaximize = "maximize"
 )

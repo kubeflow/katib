@@ -60,8 +60,8 @@ func validateObjective(obj *ep_v1alpha2.ObjectiveSpec) error {
 	if obj == nil {
 		return fmt.Errorf("No spec.objective specified.")
 	}
-	if obj.Type != ep_v1alpha2.OptimizationTypeMinimize && obj.Type != ep_v1alpha2.OptimizationTypeMaximize  {
-		return fmt.Errorf("spec.objective.type must be %s or %s.", ep_v1alpha2.OptimizationTypeMinimize, ep_v1alpha2.OptimizationTypeMaximize)
+	if obj.Type != ep_v1alpha2.ObjectiveTypeMinimize && obj.Type != ep_v1alpha2.ObjectiveTypeMaximize  {
+		return fmt.Errorf("spec.objective.type must be %s or %s.", ep_v1alpha2.ObjectiveTypeMinimize, ep_v1alpha2.ObjectiveTypeMaximize)
 	}
 	if obj.ObjectiveMetricName == "" {
 		return fmt.Errorf("No spec.objective.objectiveMetricName specified.")
