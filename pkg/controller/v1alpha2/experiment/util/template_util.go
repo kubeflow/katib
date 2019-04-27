@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"os"
 	"text/template"
 
 	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
@@ -54,28 +53,17 @@ func getTrialTemplate(instance *experimentsv1alpha2.Experiment) (*template.Templ
 	var tpl *template.Template = nil
 
 	trialTemplate := instance.Spec.TrialTemplate
-	if trialTemplate != nil && trialTemplate.GoTemplate.RawTemplate != "" {
+	if trialTemplate.GoTemplate.RawTemplate != "" {
 		tpl, err = template.New("Trial").Parse(trialTemplate.GoTemplate.RawTemplate)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		configMapNS := os.Getenv(experimentsv1alpha2.DefaultKatibNamespaceEnvName)
-		configMapName := experimentsv1alpha2.DefaultTrialConfigMapName
-		templatePath := experimentsv1alpha2.DefaultTrialTemplatePath
+		templateSpec := trialTemplate.GoTemplate.TemplateSpec
+		configMapNS := templateSpec.ConfigMapNamespace
+		configMapName := templateSpec.ConfigMapName
+		templatePath := templateSpec.TemplatePath
 
-		if trialTemplate != nil && trialTemplate.GoTemplate.TemplateSpec != nil {
-			templateSpec := trialTemplate.GoTemplate.TemplateSpec
-			if templateSpec.ConfigMapName != "" {
-				configMapName = templateSpec.ConfigMapName
-			}
-			if templateSpec.ConfigMapNamespace != "" {
-				configMapNS = templateSpec.ConfigMapNamespace
-			}
-			if templateSpec.TemplatePath != "" {
-				templatePath = templateSpec.TemplatePath
-			}
-		}
 		configMap, err := getConfigMap(configMapName, configMapNS)
 		if err != nil {
 			return nil, err

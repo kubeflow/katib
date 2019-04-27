@@ -19,9 +19,38 @@ limitations under the License.
 
 package v1alpha2
 
+import (
+	"os"
+)
+
 func (e *Experiment) SetDefault() {
+	e.setDefaultParallelTrialCount()
+	e.setDefaultTrialTemplate()
+}
+
+func (e *Experiment) setDefaultParallelTrialCount() {
 	if e.Spec.ParallelTrialCount == nil {
-		e.Spec.ParallelTrialCount = new(int)
-		*e.Spec.ParallelTrialCount = DefaultTrialParallelCount
+                e.Spec.ParallelTrialCount = new(int)
+                *e.Spec.ParallelTrialCount = DefaultTrialParallelCount
+        }
+}
+
+func (e *Experiment) setDefaultTrialTemplate() {
+	t := e.Spec.TrialTemplate
+	if t == nil {
+		t = &TrialTemplate {
+			Retain: true,
+		}
 	}
+	if t.GoTemplate == nil {
+		t.GoTemplate = &GoTemplate{}
+	}
+	if t.GoTemplate.RawTemplate == "" && t.GoTemplate.TemplateSpec == nil {
+		t.GoTemplate.TemplateSpec = &TemplateSpec{
+			ConfigMapNamespace: os.Getenv(DefaultKatibNamespaceEnvName),
+			ConfigMapName: DefaultTrialConfigMapName,
+			TemplatePath: DefaultTrialTemplatePath,
+		}
+	}
+	e.Spec.TrialTemplate = t
 }
