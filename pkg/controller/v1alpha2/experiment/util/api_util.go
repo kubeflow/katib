@@ -16,9 +16,10 @@ limitations under the License.
 package util
 
 import (
-	//v1 "k8s.io/api/core/v1"
+	"database/sql"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	trialapi "github.com/kubeflow/katib/pkg/api/v1alpha2"
 )
 
@@ -30,6 +31,10 @@ func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
 func UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error {
 
 	return nil
+}
+
+func GetExperimentFromDB(instance *experimentsv1alpha2.Experiment) (*api_pb.GetExperimentReply, error) {
+	return nil, sql.ErrNoRows
 }
 
 func GetSuggestions(instance *experimentsv1alpha2.Experiment, addCount int) ([]*trialapi.Trial, error) {
