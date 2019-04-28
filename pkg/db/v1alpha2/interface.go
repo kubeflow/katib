@@ -181,9 +181,9 @@ func (d *dbConn) RegisterExperiment(experiment *v1alpha2.Experiment) error {
 			algorithm, 
 			trial_template, 
 			parallel_trial_count, 
-			max_trial_count, 
-			condition, 
-			metrics_collector_type,
+			max_trial_count,` +
+			"`condition`," +
+			`metrics_collector_type,
 			start_time,
 			completion_time,
 			nas_config) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -284,7 +284,7 @@ func (d *dbConn) GetExperiment(experimentName string) (*v1alpha2.Experiment, err
 }
 
 func (d *dbConn) GetExperimentList() ([]*v1alpha2.ExperimentSummary, error) {
-	rows, err := d.db.Query("SELECT name, condition, start_time, completion_time FROM experiments")
+	rows, err := d.db.Query("SELECT name, `condition`, start_time, completion_time FROM experiments")
 	if err != nil {
 		return nil, err
 	}
@@ -346,8 +346,8 @@ func (d *dbConn) UpdateExperimentStatus(experimentName string, newStatus *v1alph
 		}
 		completion_time = c_time.UTC().Format(mysqlTimeFmt)
 	}
-	_, err = d.db.Exec(`UPDATE experiments SET condition = ? ,
-		start_time = ?, 
+	_, err = d.db.Exec("UPDATE experiments SET `condition` = ? ," +
+		`start_time = ?,
 		completion_time = ? WHERE name = ?`,
 		newStatus.Condition,
 		start_time,
@@ -459,9 +459,9 @@ func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
 			experiment_name,
 			parameter_assignments,
 			run_spec,
-			observation,
-			condition,
-			start_time,
+			observation,` +
+			"`condition`," +
+			`start_time,
 			completion_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		trial.Name,
 		trial.Spec.ExperimentName,
@@ -630,8 +630,8 @@ func (d *dbConn) UpdateTrialStatus(trialName string, newStatus *v1alpha2.TrialSt
 		}
 		formattedCompletionTime = completion_time.UTC().Format(mysqlTimeFmt)
 	}
-	_, err = d.db.Exec(`UPDATE trials SET condition = ? ,
-		start_time = ?, 
+	_, err = d.db.Exec("UPDATE trials SET `condition` = ? ," +
+		`start_time = ?,
 		completion_time = ?,
 		observation = ? WHERE name = ?`,
 		newStatus.Condition,
