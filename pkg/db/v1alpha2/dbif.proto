@@ -19,7 +19,7 @@ service DBIF {
      */
     rpc RegisterExperiment(RegisterExperimentRequest) returns (RegisterExperimentReply){
         option (google.api.http) = {
-            post: "/api/Manager/RegisterExperiment"
+            post: "/api/DBIF/RegisterExperiment"
             body: "experiment"
         };
     };
@@ -29,7 +29,7 @@ service DBIF {
      */
     rpc DeleteExperiment(DeleteExperimentRequest) returns (DeleteExperimentReply){
         option (google.api.http) = {
-            get: "/api/Manager/DeleteExperiment/{experiment_name}"
+            get: "/api/DBIF/DeleteExperiment/{experiment_name}"
         };
     };
 
@@ -38,7 +38,7 @@ service DBIF {
      */
     rpc GetExperiment(GetExperimentRequest) returns (GetExperimentReply){
         option (google.api.http) = {
-            get: "/api/Manager/GetExperiment/{experiment_name}"
+            get: "/api/DBIF/GetExperiment/{experiment_name}"
         };
     };
 
@@ -48,7 +48,7 @@ service DBIF {
      */
     rpc GetExperimentList(GetExperimentListRequest) returns (GetExperimentListReply){
         option (google.api.http) = {
-            get: "/api/Manager/GetExperimentList"
+            get: "/api/DBIF/GetExperimentList"
         };
     };
 
@@ -57,7 +57,7 @@ service DBIF {
      */
     rpc UpdateExperimentStatus(UpdateExperimentStatusRequest) returns (UpdateExperimentStatusReply){
         option (google.api.http) = {
-            put: "/api/Manager/UpdateExperimentStatus/{experiment_name}",
+            put: "/api/DBIF/UpdateExperimentStatus/{experiment_name}",
             body: "*"
         };
     };
@@ -68,7 +68,7 @@ service DBIF {
      */
     rpc UpdateAlgorithmExtraSettings(UpdateAlgorithmExtraSettingsRequest) returns (UpdateAlgorithmExtraSettingsReply){
         option (google.api.http) = {
-            put: "/api/Manager/UpdateAlgorithmExtraSettings/{experiment_name}",
+            put: "/api/DBIF/UpdateAlgorithmExtraSettings/{experiment_name}",
             body: "*"
         };
     };
@@ -78,7 +78,7 @@ service DBIF {
      */
     rpc GetAlgorithmExtraSettings(GetAlgorithmExtraSettingsRequest) returns (GetAlgorithmExtraSettingsReply){
         option (google.api.http) = {
-            get: "/api/Manager/GetAlgorithmExtraSettings/{experiment_name}",
+            get: "/api/DBIF/GetAlgorithmExtraSettings/{experiment_name}",
         };
     };
 
@@ -89,7 +89,7 @@ service DBIF {
      */
     rpc RegisterTrial(RegisterTrialRequest) returns (RegisterTrialReply){
         option (google.api.http) = {
-            post: "/api/Manager/RegisterTrial"
+            post: "/api/DBIF/RegisterTrial"
             body: "trial"
         };
     };
@@ -99,7 +99,7 @@ service DBIF {
      */
     rpc DeleteTrial(DeleteTrialRequest) returns (DeleteTrialReply){
         option (google.api.http) = {
-            get: "/api/Manager/DeleteTrial/{trial_name}"
+            get: "/api/DBIF/DeleteTrial/{trial_name}"
         };
     };
 
@@ -108,7 +108,7 @@ service DBIF {
      */
     rpc GetTrialList(GetTrialListRequest) returns (GetTrialListReply){
         option (google.api.http) = {
-            get: "/api/Manager/GetTrialList/{experiment_name}"
+            get: "/api/DBIF/GetTrialList/{experiment_name}"
         };
     };
 
@@ -117,7 +117,7 @@ service DBIF {
      */
     rpc GetTrial(GetTrialRequest) returns (GetTrialReply){
         option (google.api.http) = {
-            get: "/api/Manager/GetTrial/{trial_name}"
+            get: "/api/DBIF/GetTrial/{trial_name}"
         };
     };
 
@@ -126,7 +126,7 @@ service DBIF {
      */
     rpc UpdateTrialStatus(UpdateTrialStatusRequest) returns (UpdateTrialStatusReply){
         option (google.api.http) = {
-            put: "/api/Manager/UpdateTrialStatus",
+            put: "/api/DBIF/UpdateTrialStatus",
             body: "*"
         };
     };
@@ -139,7 +139,7 @@ service DBIF {
      */
     rpc ReportObservationLog(ReportObservationLogRequest) returns (ReportObservationLogReply){
         option (google.api.http) = {
-            post: "/api/Manager/ReportObservationLog"
+            post: "/api/DBIF/ReportObservationLog"
             body: "*"
         };
     };
@@ -149,7 +149,7 @@ service DBIF {
      */
     rpc GetObservationLog(GetObservationLogRequest) returns (GetObservationLogReply){
         option (google.api.http) = {
-            get: "/api/Manager/GetObservationLog/{trial_name}"
+            get: "/api/DBIF/GetObservationLog/{trial_name}"
             };
     };
 }
