@@ -66,6 +66,7 @@ echo "REPO_NAME ${REPO_NAME}"
 echo "VERSION ${VERSION}"
 
 sed -i -e "s@image: katib\/katib-controller@image: ${REGISTRY}\/${REPO_NAME}\/katib-controller:${VERSION}@" manifests/v1alpha2/katib-controller/katib-controller.yaml
+sed -i -e "s@image: katib\/katib-manager@image: ${REGISTRY}\/${REPO_NAME}\/katib-manager:${VERSION}@" manifests/v1alpha2/katib/manager/deployment.yaml
 
 ./scripts/v1alpha2/deploy.sh
 
@@ -92,6 +93,7 @@ echo "Katib pods"
 kubectl -n kubeflow get pod
 
 cp -r test ${GO_DIR}/test
+cp -r pkg/api/v1alpha2/python/* ${GO_DIR}/test/e2e/v1alpha2
 cd ${GO_DIR}/test/e2e/v1alpha2
 kubectl apply -f valid-experiment.yaml
 kubectl delete -f valid-experiment.yaml
@@ -101,5 +103,16 @@ if [ $? -ne 1 ]; then
   exit 1
 fi
 set -o errexit
+
+kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-manager | sed -e "s@pods\/@@") 6789:6789 &
+echo "kubectl port-forward start"
+sleep 5
+TIMEOUT=120
+until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
+    sleep 5
+    TIMEOUT=$(( TIMEOUT - 1 ))
+done
+
+python test-katib-manager.py
 
 exit 0

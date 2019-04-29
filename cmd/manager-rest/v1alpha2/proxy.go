@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	vizierCoreEndpoint = flag.String("echo_endpoint", "vizier-core:6789", "vizier-core endpoint")
+	katibManagerEndpoint = flag.String("echo_endpoint", "katib-manager:6789", "katib-manager endpoint")
 )
 
 func run() error {
@@ -24,7 +24,7 @@ func run() error {
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	// register handlers for the HTTP endpoints
-	err := gw.RegisterManagerHandlerFromEndpoint(ctx, mux, *vizierCoreEndpoint, opts)
+	err := gw.RegisterManagerHandlerFromEndpoint(ctx, mux, *katibManagerEndpoint, opts)
 	if err != nil {
 		return err
 	}
