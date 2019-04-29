@@ -462,7 +462,7 @@ func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
 			observation,
 			status,
 			start_time,
-			completion_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			completion_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		trial.Name,
 		trial.Spec.ExperimentName,
 		paramAssignment,
