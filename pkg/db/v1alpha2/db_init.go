@@ -17,7 +17,7 @@ func (d *dbConn) DBInit() {
 		trial_template TEXT,
 		parallel_trial_count INT,
 		max_trial_count INT,
-		condition TINYINT,
+		status TINYINT,
 		metrics_collector_type TEXT,
 		start_time DATETIME(6),
 		completion_time DATETIME(6),
@@ -30,11 +30,11 @@ func (d *dbConn) DBInit() {
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS trials
 		(id INT AUTO_INCREMENT PRIMARY KEY,
 		name VARCHAR(255) NOT NULL UNIQUE,
-		experiment_name TEXT NOT NULL,
+		experiment_name VARCHAR(255) NOT NULL,
 		parameter_assignments TEXT,
 		run_spec TEXT,
 		observation TEXT,
-		condition TINYINT,
+		status TINYINT,
 		start_time DATETIME(6),
 		completion_time DATETIME(6),
 		FOREIGN KEY(experiment_name) REFERENCES experiments(name) ON DELETE CASCADE)`)

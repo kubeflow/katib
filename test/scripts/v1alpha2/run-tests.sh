@@ -91,4 +91,15 @@ kubectl -n kubeflow get svc
 echo "Katib pods"
 kubectl -n kubeflow get pod
 
+cp -r test ${GO_DIR}/test
+cd ${GO_DIR}/test/e2e/v1alpha2
+kubectl apply -f valid-experiment.yaml
+kubectl delete -f valid-experiment.yaml
+set +o errexit
+kubectl apply -f invalid-experiment.yaml
+if [ $? -ne 1 ]; then
+  exit 1
+fi
+set -o errexit
+
 exit 0

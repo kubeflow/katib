@@ -15,7 +15,19 @@ limitations under the License.
 
 package util
 
-const (
-	jobTypeNAS = "NAS"
-	jobTypeHP  = "HP"
+import (
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
+
+
+func GetSupportdJobList() []schema.GroupVersionKind {
+	// TODO: append other supported jobs, such as tfjob, pytorch and so on 
+	supportedJobList := []schema.GroupVersionKind {
+		schema.GroupVersionKind {
+			Group:   "batch",
+			Version: "v1",
+			Kind:    "Job",
+		},
+	}
+	return supportedJobList
+}
