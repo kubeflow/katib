@@ -9,7 +9,7 @@ import (
 	"net"
 
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
-	health_pb "github.com/kubeflow/katib/pkg/api/v1alpha2/health"
+	health_pb "github.com/kubeflow/katib/pkg/api/health"
 	kdb "github.com/kubeflow/katib/pkg/db/v1alpha2"
 
 	"google.golang.org/grpc"
