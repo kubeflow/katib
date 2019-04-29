@@ -28,7 +28,7 @@ var experimentColums = []string{
 	"trial_template",
 	"parallel_trial_count",
 	"max_trial_count",
-	"condition",
+	"status",
 	"metrics_collector_type",
 	"start_time",
 	"completion_time",
@@ -41,7 +41,7 @@ var trialColumns = []string{
 	"parameter_assignments",
 	"run_spec",
 	"observation",
-	"condition",
+	"status",
 	"start_time",
 	"completion_time",
 }
@@ -116,8 +116,8 @@ func TestRegisterExperiment(t *testing.T) {
 			algorithm, 
 			trial_template, 
 			parallel_trial_count, 
-			max_trial_count, 
-			condition, 
+			max_trial_count,
+			status,
 			metrics_collector_type,
 			start_time,
 			completion_time,
@@ -169,8 +169,8 @@ func TestGetExperiment(t *testing.T) {
 }
 
 func TestGetExperimentList(t *testing.T) {
-	mock.ExpectQuery("SELECT  name, condition, start_time, completion_time FROM experiments").WillReturnRows(
-		sqlmock.NewRows([]string{"name", "condition", "start_time", "completion_time"}).AddRow(
+	mock.ExpectQuery("SELECT  name, status, start_time, completion_time FROM experiments").WillReturnRows(
+		sqlmock.NewRows([]string{"name", "status", "start_time", "completion_time"}).AddRow(
 			"test1",
 			api_pb.ExperimentStatus_CREATED,
 			"2016-12-31 20:02:05.123456",
@@ -198,7 +198,7 @@ func TestUpdateExperimentStatus(t *testing.T) {
 	start_time := "2016-12-31 20:02:05.123456"
 	completion_time := ""
 
-	mock.ExpectExec(`UPDATE experiments SET condition = \? ,
+	mock.ExpectExec(`UPDATE experiments SET status = \?,
 	start_time = \?,
 	completion_time = \? WHERE name = \?`,
 	).WithArgs(condition, start_time, completion_time, exp_name).WillReturnResult(sqlmock.NewResult(1, 1))
@@ -304,7 +304,7 @@ func TestRegisterTrial(t *testing.T) {
 			parameter_assignments,
 			run_spec,
 			observation,
-			condition,
+			status,
 			start_time,
 			completion_time\)`,
 	).WithArgs(
@@ -386,7 +386,7 @@ func TestUpdateTrialStatus(t *testing.T) {
 	start_time := "2016-12-31 20:02:05.123456"
 	completion_time := ""
 
-	mock.ExpectExec(`UPDATE trials SET condition = \? ,
+	mock.ExpectExec(`UPDATE trials SET status = \?,
 	start_time = \?,
 	completion_time = \?,
 	observation = \? WHERE name = \?`,
