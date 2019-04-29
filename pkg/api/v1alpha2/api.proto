@@ -6,7 +6,7 @@ syntax = "proto3";
 package api.v1.alpha2;
 
 import "google/api/annotations.proto";
-
+import "pkg/db/v1alpha2/dbif.proto";
 /**
  * Service for Main API for Katib
  * For each RPC service, we define mapping to HTTP REST API method.
