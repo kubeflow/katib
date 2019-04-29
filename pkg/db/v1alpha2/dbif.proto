@@ -3,7 +3,7 @@
  */
 syntax = "proto3";
 
-package api.v1.alpha2;
+package db.v1.alpha2;
 
 import "google/api/annotations.proto";
 
