@@ -21,8 +21,8 @@ import (
 	"errors"
 	"text/template"
 
-	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -83,12 +83,12 @@ func getTrialTemplate(instance *experimentsv1alpha2.Experiment) (*template.Templ
 }
 
 func getConfigMap(name, namespace string) (map[string]string, error) {
-	client, err := NewClient(client.Options{})
+	katibClient, err := NewClient(client.Options{})
 	if err != nil {
 		return map[string]string{}, err
 	}
 	configMap := &apiv1.ConfigMap{}
-	if err := client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: namespace}, configMap); err != nil {
+	if err := katibClient.client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: namespace}, configMap); err != nil {
 		return map[string]string{}, err
 	}
 	return configMap.Data, nil
