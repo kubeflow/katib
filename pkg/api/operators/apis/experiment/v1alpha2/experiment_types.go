@@ -47,9 +47,6 @@ type ExperimentSpec struct {
 	// Whether to retain historical data in DB after deletion.
 	RetainHistoricalData bool `json:"retainHistoricalData,omitempty"`
 
-	// TODO - figure out what to do with metric collectors
-	MetricsCollectorType string `json:"metricsCollectorSpec,omitempty"`
-
 	// For v1alpha2 we will keep the metrics collector implementation same as v1alpha1. 
 	MetricsCollectorSpec *MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
 

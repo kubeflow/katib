@@ -299,8 +299,7 @@ message ExperimentSpec {
     string trial_template = 4;
     int32 parallel_trial_count = 5;
     int32 max_trial_count = 6;
-    string metrics_collector_type = 7;
-    NasConfig nas_config = 8;
+    NasConfig nas_config = 7;
 }
 
 message ExperimentStatus {
