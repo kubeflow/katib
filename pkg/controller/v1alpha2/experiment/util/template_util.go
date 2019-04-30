@@ -17,15 +17,12 @@ package util
 
 import (
 	"bytes"
-	"context"
 	"errors"
 	"text/template"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
-	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -64,10 +61,15 @@ func getTrialTemplate(instance *experimentsv1alpha2.Experiment) (*template.Templ
 		configMapName := templateSpec.ConfigMapName
 		templatePath := templateSpec.TemplatePath
 
-		configMap, err := getConfigMap(configMapName, configMapNS)
+		katibClient, err := NewClient(client.Options{})
 		if err != nil {
 			return nil, err
 		}
+		configMap, err := katibClient.GetConfigMap(configMapName, configMapNS)
+		if err != nil {
+			return nil, err
+		}
+
 		if configMapTemplate, ok := configMap[templatePath]; !ok {
 			err = errors.New(string(metav1.StatusReasonNotFound))
 			return nil, err
@@ -80,16 +82,4 @@ func getTrialTemplate(instance *experimentsv1alpha2.Experiment) (*template.Templ
 	}
 
 	return tpl, nil
-}
-
-func getConfigMap(name, namespace string) (map[string]string, error) {
-	katibClient, err := NewClient(client.Options{})
-	if err != nil {
-		return map[string]string{}, err
-	}
-	configMap := &apiv1.ConfigMap{}
-	if err := katibClient.client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: namespace}, configMap); err != nil {
-		return map[string]string{}, err
-	}
-	return configMap.Data, nil
 }
