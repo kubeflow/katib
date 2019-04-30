@@ -50,6 +50,9 @@ type ExperimentSpec struct {
 	// TODO - figure out what to do with metric collectors
 	MetricsCollectorType string `json:"metricsCollectorSpec,omitempty"`
 
+	// For v1alpha2 we will keep the metrics collector implementation same as v1alpha1. 
+	MetricsCollectorSpec *MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
+
 	NasConfig *NasConfig `json:"nasConfig,omitempty"`
 
 	// TODO - Other fields, exact format is TBD. Will add these back during implementation.
@@ -248,6 +251,14 @@ type GraphConfig struct {
 type Operation struct {
 	OperationType string          `json:"operationType,omitempty"`
 	Parameters    []ParameterSpec `json:"parameterconfigs,omitempty"`
+}
+
+// Spec for metrics collectors. For v1alpha2 we will keep metrics collection as
+// cron jobs. This can be replaced by a push-model when the metadata client lib
+// is ready.
+type MetricsCollectorSpec struct {
+	Retain     bool       `json:"retain,omitempty"`
+	GoTemplate GoTemplate `json:"goTemplate,omitempty"`
 }
 
 func init() {
