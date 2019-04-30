@@ -42,6 +42,7 @@ import (
 )
 
 const KatibController = "katib-controller"
+
 var log = logf.Log.WithName("experiment-controller")
 
 /**
@@ -135,7 +136,7 @@ func addWebhook(mgr manager.Manager) error {
 				},
 			},
 			ValidatingWebhookConfigName: "experiment-validating-webhook-config",
-			MutatingWebhookConfigName: "experiment-mutating-webhook-config",
+			MutatingWebhookConfigName:   "experiment-mutating-webhook-config",
 		},
 	})
 	if err != nil {
@@ -184,10 +185,8 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 
 	}
 	if !instance.IsCreated() {
-		//Get Experiment config from instance
-		experimentConfig := util.GetExperimentConf(instance)
 		//Experiment not created in DB
-		err = util.CreateExperimentInDB(experimentConfig)
+		err = util.CreateExperimentInDB(instance)
 		if err != nil {
 			logger.Error(err, "Create experiment in DB error")
 			return reconcile.Result{}, err

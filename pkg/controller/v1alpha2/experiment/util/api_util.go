@@ -22,7 +22,9 @@ import (
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 )
 
-func CreateExperimentInDB(experiment *api_pb.Experiment) error {
+func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
+	//TODO: Save experiment in to db
+	// experiment := GetExperimentConf(instance)
 
 	return nil
 }
