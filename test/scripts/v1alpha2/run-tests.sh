@@ -74,6 +74,7 @@ TIMEOUT=120
 PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
 until kubectl get pods -n kubeflow | grep Running | [[ $(wc -l) -eq $PODNUM ]]; do
     echo Pod Status $(kubectl get pods -n kubeflow | grep Running | wc -l)/$PODNUM
+    
     sleep 10
     TIMEOUT=$(( TIMEOUT - 1 ))
     if [[ $TIMEOUT -eq 0 ]];then
@@ -113,6 +114,7 @@ until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
     TIMEOUT=$(( TIMEOUT - 1 ))
 done
 
+sudo python -m pip install grpcio
 python test-katib-manager.py
 
 exit 0
