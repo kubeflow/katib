@@ -15,7 +15,6 @@ spec:
         app: vizier
         component: core
     spec:
-      serviceAccountName: vizier-core
       containers:
       - name: vizier-core
         image: katib/vizier-core
