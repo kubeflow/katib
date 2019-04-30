@@ -22,6 +22,7 @@ import (
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	"github.com/kubeflow/katib/pkg/util/v1alpha2/katibclient"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -61,7 +62,7 @@ func getTrialTemplate(instance *experimentsv1alpha2.Experiment) (*template.Templ
 		configMapName := templateSpec.ConfigMapName
 		templatePath := templateSpec.TemplatePath
 
-		katibClient, err := NewClient(client.Options{})
+		katibClient, err := katibclient.NewClient(client.Options{})
 		if err != nil {
 			return nil, err
 		}
