@@ -228,7 +228,6 @@ func (d *dbConn) GetExperiment(experimentName string) (*v1alpha2.Experiment, err
 		&experiment.ExperimentSpec.ParallelTrialCount,
 		&experiment.ExperimentSpec.MaxTrialCount,
 		&experiment.ExperimentStatus.Condition,
-		&experiment.ExperimentSpec.MetricsCollectorType,
 		&start_time,
 		&completion_time,
 		&nasConfig,
