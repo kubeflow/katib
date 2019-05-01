@@ -51,7 +51,7 @@ func ValidateExperiment(instance *ep_v1alpha2.Experiment) error {
 		return fmt.Errorf("Only one of spec.parameters and spec.nasConfig can be specified.")
 	}
 
-	if err := validateAlgorithmSettings(instance); err !=nil {
+	if err := validateAlgorithmSettings(instance); err != nil {
 		return err
 	}
 	return nil
@@ -66,7 +66,7 @@ func validateObjective(obj *ep_v1alpha2.ObjectiveSpec) error {
 	if obj == nil {
 		return fmt.Errorf("No spec.objective specified.")
 	}
-	if obj.Type != ep_v1alpha2.ObjectiveTypeMinimize && obj.Type != ep_v1alpha2.ObjectiveTypeMaximize  {
+	if obj.Type != ep_v1alpha2.ObjectiveTypeMinimize && obj.Type != ep_v1alpha2.ObjectiveTypeMaximize {
 		return fmt.Errorf("spec.objective.type must be %s or %s.", ep_v1alpha2.ObjectiveTypeMinimize, ep_v1alpha2.ObjectiveTypeMaximize)
 	}
 	if obj.ObjectiveMetricName == "" {
