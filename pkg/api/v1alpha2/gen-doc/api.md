@@ -210,7 +210,6 @@ It is assumed that objective function f(x) does not change in the course of a Ex
 | trial_template | [string](#string) |  |  |
 | parallel_trial_count | [int32](#int32) |  |  |
 | max_trial_count | [int32](#int32) |  |  |
-| metrics_collector_type | [string](#string) |  |  |
 | nas_config | [NasConfig](#api.v1.alpha2.NasConfig) |  |  |
 
 

@@ -574,9 +574,6 @@
           "type": "integer",
           "format": "int32"
         },
-        "metrics_collector_type": {
-          "type": "string"
-        },
         "nas_config": {
           "$ref": "#/definitions/alpha2NasConfig"
         }
