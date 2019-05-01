@@ -76,7 +76,7 @@ func (k *katibClient) GetTrialTemplates(namespace ...string) (map[string]string,
 	ns := getNamespace(namespace...)
 	trialTemplates := &apiv1.ConfigMap{}
 
-	if err := k.client.Get(context.Background(), types.NamespacedName{Name: experimentv1alpha2.TrialTemplatesName, Namespace: ns}, trialTemplates); err != nil {
+	if err := k.client.Get(context.Background(), types.NamespacedName{Name: experimentv1alpha2.DefaultTrialConfigMapName, Namespace: ns}, trialTemplates); err != nil {
 		return nil, err
 	}
 	return trialTemplates.Data, nil
@@ -87,7 +87,7 @@ func (k *katibClient) UpdateTrialTemplates(newTrialTemplates map[string]string, 
 	ns := getNamespace(namespace...)
 	trialTemplates := &apiv1.ConfigMap{}
 
-	if err := k.client.Get(context.Background(), types.NamespacedName{Name: experimentv1alpha2.TrialTemplatesName, Namespace: ns}, trialTemplates); err != nil {
+	if err := k.client.Get(context.Background(), types.NamespacedName{Name: experimentv1alpha2.DefaultTrialConfigMapName, Namespace: ns}, trialTemplates); err != nil {
 		return err
 	}
 	trialTemplates.Data = newTrialTemplates
@@ -103,7 +103,7 @@ func (k *katibClient) GetMetricsCollectorTemplates(namespace ...string) (map[str
 	ns := getNamespace(namespace...)
 	metricsCollectorTemplates := &apiv1.ConfigMap{}
 
-	if err := k.client.Get(context.Background(), types.NamespacedName{Name: experimentv1alpha2.MetricsCollectorTemplatesName, Namespace: ns}, metricsCollectorTemplates); err != nil {
+	if err := k.client.Get(context.Background(), types.NamespacedName{Name: experimentv1alpha2.DefaultMetricsCollectorConfigMapName, Namespace: ns}, metricsCollectorTemplates); err != nil {
 		return nil, err
 	}
 	return metricsCollectorTemplates.Data, nil
@@ -115,7 +115,7 @@ func (k *katibClient) UpdateMetricsCollectorTemplates(newMCTemplates map[string]
 	ns := getNamespace(namespace...)
 	metricsCollectorTemplates := &apiv1.ConfigMap{}
 
-	if err := k.client.Get(context.Background(), types.NamespacedName{Name: experimentv1alpha2.MetricsCollectorTemplatesName, Namespace: ns}, metricsCollectorTemplates); err != nil {
+	if err := k.client.Get(context.Background(), types.NamespacedName{Name: experimentv1alpha2.DefaultMetricsCollectorConfigMapName, Namespace: ns}, metricsCollectorTemplates); err != nil {
 		return err
 	}
 
