@@ -1,0 +1,46 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: vizier-core
+  namespace: kubeflow
+  labels:
+    app: vizier
+    component: core
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: vizier-core
+      labels:
+        app: vizier
+        component: core
+    spec:
+      containers:
+      - name: vizier-core
+        image: katib/vizier-core
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: vizier-db-secrets
+                key: MYSQL_ROOT_PASSWORD
+        command:
+          - './vizier-manager'
+        ports:
+        - name: api
+          containerPort: 6789
+        readinessProbe:
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:6789"]
+          initialDelaySeconds: 5
+        livenessProbe:
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:6789"]
+          initialDelaySeconds: 10
+#        resources:
+#          requests:
+#            cpu: 500m
+#            memory: 500M
+#          limits:
+#            cpu: 500m
+#            memory: 500M

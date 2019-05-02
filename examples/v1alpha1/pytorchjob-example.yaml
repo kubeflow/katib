@@ -1,0 +1,75 @@
+apiVersion: "kubeflow.org/v1alpha1"
+kind: StudyJob
+metadata:
+  namespace: kubeflow
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: pytorchjob-example
+spec:
+  studyName: pytorchjob-example
+  owner: crd
+  optimizationtype: maximize
+  objectivevaluename: accuracy
+  optimizationgoal: 0.99
+  requestcount: 4
+  metricsnames:
+    - accuracy
+  parameterconfigs:
+    - name: --lr
+      parametertype: double
+      feasible:
+        min: "0.01"
+        max: "0.05"
+    - name: --momentum
+      parametertype: double
+      feasible:
+        min: "0.5"
+        max: "0.9"
+  workerSpec:
+    retain: true
+    goTemplate:
+        rawTemplate: |-
+          apiVersion: "kubeflow.org/v1beta1"
+          kind: PyTorchJob
+          metadata:
+            name: {{.WorkerID}}
+            namespace: kubeflow
+          spec:
+           pytorchReplicaSpecs:
+            Master:
+              replicas: 1
+              restartPolicy: OnFailure
+              template:
+                spec:
+                  containers:
+                    - name: pytorch
+                      image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
+                      imagePullPolicy: Always
+                      command:
+                        - "python"
+                        - "/var/mnist.py"
+                        {{- with .HyperParameters}}
+                        {{- range .}}
+                        - "{{.Name}}={{.Value}}"
+                        {{- end}}
+                        {{- end}}
+            Worker:
+              replicas: 2
+              restartPolicy: OnFailure
+              template:
+                spec:
+                  containers:
+                    - name: pytorch
+                      image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
+                      imagePullPolicy: Always
+                      command:
+                        - "python"
+                        - "/var/mnist.py"
+                        {{- with .HyperParameters}}
+                        {{- range .}}
+                        - "{{.Name}}={{.Value}}"
+                        {{- end}}
+                        {{- end}}
+  suggestionSpec:
+    suggestionAlgorithm: "random"
+    requestNumber: 3

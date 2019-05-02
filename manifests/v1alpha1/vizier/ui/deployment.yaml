@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: katib-ui
+  namespace: kubeflow
+  labels:
+    app: vizier
+    component: ui
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: katib-ui
+      labels:
+        app: vizier
+        component: ui
+    spec:
+      containers:
+      - name: katib-ui
+        image: katib/katib-ui
+        command:
+          - './katib-ui'
+        ports:
+        - name: ui
+          containerPort: 80
+      serviceAccountName: katib-ui
+#        resources:
+#          requests:
+#            cpu: 500m
+#            memory: 500M
+#          limits:
+#            cpu: 500m
+#            memory: 500M

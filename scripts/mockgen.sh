@@ -21,12 +21,18 @@ set -o pipefail
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
 
 cd ${SCRIPT_ROOT}
-echo "Generating ManagerClient..."
-mockgen -package mock -destination pkg/mock/api/manager.go github.com/kubeflow/katib/pkg/api ManagerClient
-echo "Generating SuggestionClient..."
-mockgen -package mock -destination pkg/mock/api/suggestion.go github.com/kubeflow/katib/pkg/api SuggestionClient
-echo "Generating VizierDBInterface..."
-mockgen -package mock -destination pkg/mock/db/db.go github.com/kubeflow/katib/pkg/db VizierDBInterface
+echo "Generating v1alpha1 ManagerClient..."
+mockgen -package mock -destination pkg/mock/v1alpha1/api/manager.go github.com/kubeflow/katib/pkg/api/v1alpha1 ManagerClient
+echo "Generating v1alpha1 SuggestionClient..."
+mockgen -package mock -destination pkg/mock/v1alpha1/api/suggestion.go github.com/kubeflow/katib/pkg/api/v1alpha1 SuggestionClient
+echo "Generating v1alpha1 VizierDBInterface..."
+mockgen -package mock -destination pkg/mock/v1alpha1/db/db.go github.com/kubeflow/katib/pkg/db/v1alpha1 VizierDBInterface
 echo "Generating ModelStore..."
 mockgen -package mock -destination pkg/mock/modelstore/modelstore.go  github.com/kubeflow/katib/pkg/manager/modelstore ModelStore
-cd - > /dev/null
+
+echo "Generating v1alpha2 ManagerClient..."
+mockgen -package mock -destination pkg/mock/v1alpha2/api/manager.go github.com/kubeflow/katib/pkg/api/v1alpha2 ManagerClient
+echo "Generating v1alpha2 SuggestionClient..."
+mockgen -package mock -destination pkg/mock/v1alpha2/api/suggestion.go github.com/kubeflow/katib/pkg/api/v1alpha2 SuggestionClient
+echo "Generating v1alpha2 KatibDBInterface..."
+mockgen -package mock -destination pkg/mock/v1alpha2/db/db.go github.com/kubeflow/katib/pkg/db/v1alpha2 KatibDBInterface
