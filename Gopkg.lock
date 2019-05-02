@@ -34,6 +34,21 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
+  branch = "master"
+  digest = "1:7a0f4fd4884a6244a582dbda1a1e6a89aa1ab4f67bf9727bef754f3d5ca15bfe"
+  name = "github.com/awalterschulze/gographviz"
+  packages = [
+    ".",
+    "ast",
+    "internal/errors",
+    "internal/lexer",
+    "internal/parser",
+    "internal/token",
+  ]
+  pruneopts = "T"
+  revision = "1e9ccb565bca58a7ddb77182baad0567b749bd74"
+
+[[projects]]
   digest = "1:9f42202ac457c462ad8bb9642806d275af9ab4850cf0b1960b9c6f083d4a309a"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -1059,7 +1074,9 @@
   analyzer-version = 1
   input-imports = [
     "git.apache.org/thrift.git/lib/go/thrift",
+    "github.com/awalterschulze/gographviz",
     "github.com/emicklei/go-restful",
+    "github.com/ghodss/yaml",
     "github.com/go-sql-driver/mysql",
     "github.com/golang/glog",
     "github.com/golang/mock/gomock",
