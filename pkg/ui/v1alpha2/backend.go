@@ -3,7 +3,6 @@ package ui
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -12,13 +11,13 @@ import (
 	"time"
 
 	"github.com/kubeflow/katib/pkg"
-	"github.com/kubeflow/katib/pkg/manager/v1alpha1/studyjobclient"
+	experimentv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	api_pb_v1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 
-	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
-	api "github.com/kubeflow/katib/pkg/api/v1alpha1"
-	katibapi "github.com/kubeflow/katib/pkg/api/v1alpha1"
+	"github.com/kubeflow/katib/pkg/util/v1alpha2/katibclient"
 	"google.golang.org/grpc"
 	restclient "k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	gographviz "github.com/awalterschulze/gographviz"
 	"github.com/ghodss/yaml"
@@ -47,14 +46,6 @@ type Option struct {
 	FilterNumber string `json:"num_filter"`
 	FilterSize   string `json:"filter_size"`
 	Stride       string `json:"stride"`
-}
-
-func getNamespace(namespace ...string) string {
-	if len(namespace) == 0 {
-		data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
-		return strings.TrimSpace(string(data))
-	}
-	return namespace[0]
 }
 
 func get_node_string(block *Block) string {
@@ -139,6 +130,8 @@ func enableCors(w *http.ResponseWriter) {
 var config = parseKubernetesConfig()
 
 func parseKubernetesConfig() *restclient.Config {
+
+	// For local testing
 	// var kubeconfig *string
 	// if home := homeDir(); home != "" {
 	// 	kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
@@ -152,6 +145,7 @@ func parseKubernetesConfig() *restclient.Config {
 	// }
 	// return config
 
+	// For production
 	config, err := restclient.InClusterConfig()
 	if err != nil {
 		log.Fatalf("getClusterConfig: %v", err)
@@ -175,7 +169,6 @@ type IDList struct {
 }
 
 type JobView struct {
-	ID     string
 	Name   string
 	Status string
 }
@@ -186,7 +179,7 @@ type TemplateView struct {
 }
 
 type KatibUIHandler struct {
-	studyjobClient *studyjobclient.StudyjobClient
+	katibClient *katibclient.KatibClient
 }
 
 type TemplateResponse struct {
@@ -195,35 +188,23 @@ type TemplateResponse struct {
 }
 
 func NewKatibUIHandler() *KatibUIHandler {
-	sjc, err := studyjobclient.NewStudyjobClient(config)
+	kclient, err := katibclient.NewClient(client.Options{})
 	if err != nil {
+		log.Printf("New Katib client failed: %v", err)
 		panic(err)
 	}
 	return &KatibUIHandler{
-		studyjobClient: sjc,
+		katibClient: kclient,
 	}
 }
 
-// func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api.ManagerClient, error) {
-// 	opts := []grpc.DialOption{
-// 		grpc.WithInsecure(),
-// 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(maxMsgSize)),
-// 	}
-// 	conn, err := grpc.Dial(pkg.ManagerAddr, opts...)
-// 	if err != nil {
-// 		log.Printf("Connect katib manager error %v", err)
-// 		return nil, nil, err
-// 	}
-// 	c := api.NewManagerClient(conn)
-// 	return conn, c, nil
-// }
-
-func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, katibapi.ManagerClient) {
+func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1alpha2.ManagerClient) {
 	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
+		log.Printf("Dial to GRPC failed: %v", err)
 		return nil, nil
 	}
-	c := katibapi.NewManagerClient(conn)
+	c := api_pb_v1alpha2.NewManagerClient(conn)
 	return conn, c
 }
 
@@ -232,23 +213,27 @@ func (k *KatibUIHandler) FetchHPJobs(w http.ResponseWriter, r *http.Request) {
 
 	jobs := make([]JobView, 0)
 
-	sl, err := k.studyjobClient.GetStudyJobList()
+	el, err := k.katibClient.GetExperimentList()
 	if err != nil {
-		log.Printf("Get Study list failed %v", err)
+		log.Printf("Get Experiment List for HP failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	for _, sj := range sl.Items {
-		if sj.Spec.ParameterConfigs != nil {
+	for _, experiment := range el.Items {
+		if experiment.Spec.Parameters != nil {
 			jobs = append(jobs, JobView{
-				Name:   sj.Spec.StudyName,
-				ID:     sj.Status.StudyID,
-				Status: string(sj.Status.Condition),
+				Name: experiment.GetName(),
+				// TODO: Delete from frontend
+				// ID:     experiment.Status.StudyID,
+				// TODO: Parse it in frontend
+				Status: string(getExperimentCurrentCondition(&experiment)),
 			})
 		}
 	}
 
 	response, err := json.Marshal(jobs)
 	if err != nil {
+		log.Printf("Marshal HP jobs failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -261,23 +246,27 @@ func (k *KatibUIHandler) FetchNASJobs(w http.ResponseWriter, r *http.Request) {
 
 	jobs := make([]JobView, 0)
 
-	sl, err := k.studyjobClient.GetStudyJobList()
+	el, err := k.katibClient.GetExperimentList()
 	if err != nil {
-		log.Printf("Get Study list failed %v", err)
+		log.Printf("Get Experiment List for NAS failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	for _, sj := range sl.Items {
-		if sj.Spec.NasConfig != nil {
+	for _, experiment := range el.Items {
+		if experiment.Spec.NasConfig != nil {
 			jobs = append(jobs, JobView{
-				Name:   sj.Spec.StudyName,
-				ID:     sj.Status.StudyID,
-				Status: string(sj.Status.Condition),
+				Name: experiment.GetName(),
+				// TODO: Delete from frontend
+				// ID:     experiment.Status.StudyID,
+				// TODO: Parse it in frontend
+				Status: string(getExperimentCurrentCondition(&experiment)),
 			})
 		}
 	}
 
 	response, err := json.Marshal(jobs)
 	if err != nil {
+		log.Printf("Marshal NAS jobs failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -291,15 +280,17 @@ func (k *KatibUIHandler) SubmitYamlJob(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&data)
 
-	job := katibv1alpha1.StudyJob{}
+	job := experimentv1alpha2.Experiment{}
 	if yamlContent, ok := data["yaml"].(string); ok {
 		err := yaml.Unmarshal([]byte(yamlContent), &job)
 		if err != nil {
+			log.Printf("Unmarshal YAML content failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		_, err = k.studyjobClient.CreateStudyJob(&job)
+		err = k.katibClient.CreateExperiment(&job)
 		if err != nil {
+			log.Printf("Create Experiment from YAML failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -315,27 +306,29 @@ func (k *KatibUIHandler) SubmitHPJob(w http.ResponseWriter, r *http.Request) {
 	if data, ok := data["postData"]; ok {
 		jsonbody, err := json.Marshal(data)
 		if err != nil {
+			log.Printf("Marshal data for HP job failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		job := katibv1alpha1.StudyJob{}
+		job := experimentv1alpha2.Experiment{}
+		//TODO: Add new fields of experiment to frontend
 		if err := json.Unmarshal(jsonbody, &job); err != nil {
+			log.Printf("Unmarshal HP job failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		dataMap := data.(map[string]interface{})
-		job.Spec.StudyName = dataMap["metadata"].(map[string]interface{})["name"].(string)
+		job.TypeMeta = metav1.TypeMeta{
+			APIVersion: "kubeflow.org/v1alpha2",
+			Kind:       "Experiment",
+		}
 		job.ObjectMeta = metav1.ObjectMeta{
 			Name:      dataMap["metadata"].(map[string]interface{})["name"].(string),
 			Namespace: dataMap["metadata"].(map[string]interface{})["namespace"].(string),
 		}
-		job.TypeMeta = metav1.TypeMeta{
-			APIVersion: "kubeflow.org/v1alpha1",
-			Kind:       "StudyJob",
-		}
-		job.Spec.Owner = "crd"
-		_, err = k.studyjobClient.CreateStudyJob(&job)
+		err = k.katibClient.CreateExperiment(&job)
 		if err != nil {
+			log.Printf("Create Experiment for HP failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -350,105 +343,104 @@ func (k *KatibUIHandler) SubmitNASJob(w http.ResponseWriter, r *http.Request) {
 	if data, ok := data["postData"]; ok {
 		jsonbody, err := json.Marshal(data)
 		if err != nil {
-			// do error check
-			log.Printf("%v", err)
+			log.Printf("Marshal data for NAS job failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		job := katibv1alpha1.StudyJob{}
+		job := experimentv1alpha2.Experiment{}
 		if err := json.Unmarshal(jsonbody, &job); err != nil {
-			log.Printf("%v", err)
+			log.Printf("Unmarshal NAS job failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		// mapstructure.Decode(data, &job)
 		// // think of a better way
 		dataMap := data.(map[string]interface{})
-		job.Spec.StudyName = dataMap["metadata"].(map[string]interface{})["name"].(string)
+
+		job.TypeMeta = metav1.TypeMeta{
+			APIVersion: "kubeflow.org/v1alpha2",
+			Kind:       "Experiment",
+		}
 		job.ObjectMeta = metav1.ObjectMeta{
 			Name:      dataMap["metadata"].(map[string]interface{})["name"].(string),
 			Namespace: dataMap["metadata"].(map[string]interface{})["namespace"].(string),
 		}
-		job.TypeMeta = metav1.TypeMeta{
-			APIVersion: "kubeflow.org/v1alpha1",
-			Kind:       "StudyJob",
-		}
-		job.Spec.Owner = "crd"
 
-		_, err = k.studyjobClient.CreateStudyJob(&job)
-		log.Printf("%v", err)
+		err = k.katibClient.CreateExperiment(&job)
 		if err != nil {
+			log.Printf("Create Experiment for NAS failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
 }
 
+//TODO:
+// 1. Add delete job to Katib Client
+// 2. Change id to name in frontend
 func (k *KatibUIHandler) DeleteJob(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
-	studyID := r.URL.Query()["id"][0]
-	log.Printf("StudyID: %v", studyID)
-	// conn, c := k.connectManager()
-	// defer conn.Close()
+	experimentName := r.URL.Query()["name"][0]
+	log.Printf("Experiment Name: %v", experimentName)
 
-	// resp, err := c.DeleteStudy(
-	// 	context.Background(),
-	// 	&api.DeleteStudyRequest{
-	// 		StudyId: studyID,
-	// 	},
-	// )
-
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
-	// fmt.Println(resp)
-	// fmt.Println(studyID)
-	// fmt.Println(err)
-
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
 }
 
-func (k *KatibUIHandler) FetchJobInfo(w http.ResponseWriter, r *http.Request) {
+func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
-	studyID := r.URL.Query()["id"][0]
+	//TODO: Change id to name in frontend
+	experimentName := r.URL.Query()["name"][0]
 
 	conn, c := k.connectManager()
 	defer conn.Close()
-	retText := "WorkerID,TrialID"
-	gsrep, err := c.GetStudy(
+	retText := "TrialName"
+	expResp, err := c.GetExperiment(
 		context.Background(),
-		&api.GetStudyRequest{
-			StudyId: studyID,
+		&api_pb_v1alpha2.GetExperimentRequest{
+			ExperimentName: experimentName,
 		},
 	)
-	log.Printf("Got Study")
 	if err != nil {
-		log.Println(err)
+		log.Printf("Get Experiment from HP job failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	log.Printf("Got Experiment")
 	metricsList := map[string]int{}
-	for i, m := range gsrep.StudyConfig.Metrics {
+	metricsName := expResp.Experiment.ExperimentSpec.Objective.ObjectiveMetricName
+	retText += "," + metricsName
+	metricsList[metricsName] = 0
+	for i, m := range expResp.Experiment.ExperimentSpec.Objective.AdditionalMetricsNames {
 		retText += "," + m
-		metricsList[m] = i
+		metricsList[m] = i + 1
 	}
 	log.Printf("Got metrics names")
 	paramList := map[string]int{}
-	for i, p := range gsrep.StudyConfig.ParameterConfigs.Configs {
+	for i, p := range expResp.Experiment.ExperimentSpec.ParameterSpecs.Parameters {
 		retText += "," + p.Name
 		paramList[p.Name] = i + len(metricsList)
 	}
-	gwfirep, err := c.GetWorkerFullInfo(
+	log.Printf("Got Parameters names")
+	trialListResp, err := c.GetTrialList(
 		context.Background(),
-		&api.GetWorkerFullInfoRequest{
-			StudyId:       studyID,
+		&api_pb_v1alpha2.GetTrialListRequest{
+			ExperimentName: expResp.Experiment.GetName(),
+			Filter:         "",
+		},
+	)
+	if err != nil {
+		log.Printf("Get Trial List from HP job failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	log.Printf("Got Trial List")
+	obsLogResp, err := c.GetObservationLog(
+		context.Background(),
+		&api_pb_v1alpha2.GetObservationLogRequest{
+			TrialName:       trialListResp.,
 			OnlyLatestLog: true,
 		},
 	)
-	log.Printf("Got full logs info")
+	log.Printf("Got Parameters results")
 	if err != nil {
 		log.Println(err)
 		return
@@ -488,7 +480,7 @@ func (k *KatibUIHandler) FetchWorkerInfo(w http.ResponseWriter, r *http.Request)
 	retText := "symbol,time,value\n"
 	gwfirep, err := c.GetWorkerFullInfo(
 		context.Background(),
-		&api.GetWorkerFullInfoRequest{
+		&api_pb_v1alpha2.GetWorkerFullInfoRequest{
 			StudyId:  studyID,
 			WorkerId: workerID,
 		},
@@ -528,7 +520,7 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 
 	gtrep, err := c.GetTrials(
 		context.Background(),
-		&api.GetTrialsRequest{
+		&api_pb_v1alpha2.GetTrialsRequest{
 			StudyId: studyID,
 		},
 	)
@@ -551,7 +543,7 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 
 	gwfirep, err := c.GetWorkerFullInfo(
 		context.Background(),
-		&api.GetWorkerFullInfoRequest{
+		&api_pb_v1alpha2.GetWorkerFullInfoRequest{
 			StudyId:       studyID,
 			OnlyLatestLog: true,
 		},

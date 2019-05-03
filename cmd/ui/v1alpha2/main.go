@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/kubeflow/katib/pkg/ui/v1alpha2"
+	ui "github.com/kubeflow/katib/pkg/ui/v1alpha2"
 )
 
 var (
@@ -23,7 +23,7 @@ func main() {
 	http.HandleFunc("/katib/submit_nas_job/", kuh.SubmitNASJob)
 	http.HandleFunc("/katib/delete_job/", kuh.DeleteJob)
 
-	http.HandleFunc("/katib/fetch_hp_job_info/", kuh.FetchJobInfo)
+	http.HandleFunc("/katib/fetch_hp_job_info/", kuh.FetchHPJobInfo)
 	http.HandleFunc("/katib/fetch_nas_job_info/", kuh.FetchNASJobInfo)
 	http.HandleFunc("/katib/fetch_worker_info/", kuh.FetchWorkerInfo)
 	http.HandleFunc("/katib/fetch_worker_templates/", kuh.FetchWorkerTemplates)
