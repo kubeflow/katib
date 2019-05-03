@@ -30,9 +30,9 @@ func getMetricsCollectorManifest(experimentID string, trialID string, jobKind st
 	var mtp *template.Template = nil
 	var err error
 	tmpValues := map[string]string{
-		"ExperimentID":        experimentID,
+		"ExperimentID":   experimentID,
 		"TrialID":        trialID,
-		"JobKind":	  jobKind,
+		"JobKind":        jobKind,
 		"NameSpace":      namespace,
 		"ManagerService": pkg.GetManagerAddr(),
 	}
