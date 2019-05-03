@@ -20,7 +20,7 @@ import (
 )
 
 
-func GetSupportdJobList() []schema.GroupVersionKind {
+func GetSupportedJobList() []schema.GroupVersionKind {
 	// TODO: append other supported jobs, such as tfjob, pytorch and so on 
 	supportedJobList := []schema.GroupVersionKind {
 		schema.GroupVersionKind {
