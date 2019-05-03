@@ -27,22 +27,22 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
-type katibClient struct {
+type KatibClient struct {
 	client client.Client
 }
 
-func NewClient(options client.Options) (*katibClient, error) {
+func NewClient(options client.Options) (*KatibClient, error) {
 	cfg, err := config.GetConfig()
 	if err != nil {
 		return nil, err
 	}
 	cl, err := client.New(cfg, options)
-	return &katibClient{
+	return &KatibClient{
 		client: cl,
 	}, nil
 }
 
-func (k *katibClient) GetExperimentList(namespace ...string) (*experimentv1alpha2.ExperimentList, error) {
+func (k *KatibClient) GetExperimentList(namespace ...string) (*experimentv1alpha2.ExperimentList, error) {
 	ns := getNamespace(namespace...)
 	expList := &experimentv1alpha2.ExperimentList{}
 	listOpt := client.InNamespace(ns)
@@ -54,7 +54,7 @@ func (k *katibClient) GetExperimentList(namespace ...string) (*experimentv1alpha
 
 }
 
-func (k *katibClient) CreateExperiment(experiment *experimentv1alpha2.Experiment, namespace ...string) error {
+func (k *KatibClient) CreateExperiment(experiment *experimentv1alpha2.Experiment, namespace ...string) error {
 
 	if err := k.client.Create(context.Background(), experiment); err != nil {
 		return err
@@ -62,7 +62,7 @@ func (k *katibClient) CreateExperiment(experiment *experimentv1alpha2.Experiment
 	return nil
 }
 
-func (k *katibClient) GetConfigMap(name string, namespace ...string) (map[string]string, error) {
+func (k *KatibClient) GetConfigMap(name string, namespace ...string) (map[string]string, error) {
 	ns := getNamespace(namespace...)
 	configMap := &apiv1.ConfigMap{}
 	if err := k.client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: ns}, configMap); err != nil {
@@ -71,7 +71,7 @@ func (k *katibClient) GetConfigMap(name string, namespace ...string) (map[string
 	return configMap.Data, nil
 }
 
-func (k *katibClient) GetTrialTemplates(namespace ...string) (map[string]string, error) {
+func (k *KatibClient) GetTrialTemplates(namespace ...string) (map[string]string, error) {
 
 	ns := getNamespace(namespace...)
 	trialTemplates := &apiv1.ConfigMap{}
@@ -83,7 +83,7 @@ func (k *katibClient) GetTrialTemplates(namespace ...string) (map[string]string,
 
 }
 
-func (k *katibClient) UpdateTrialTemplates(newTrialTemplates map[string]string, namespace ...string) error {
+func (k *KatibClient) UpdateTrialTemplates(newTrialTemplates map[string]string, namespace ...string) error {
 	ns := getNamespace(namespace...)
 	trialTemplates := &apiv1.ConfigMap{}
 
@@ -98,7 +98,7 @@ func (k *katibClient) UpdateTrialTemplates(newTrialTemplates map[string]string, 
 	return nil
 }
 
-func (k *katibClient) GetMetricsCollectorTemplates(namespace ...string) (map[string]string, error) {
+func (k *KatibClient) GetMetricsCollectorTemplates(namespace ...string) (map[string]string, error) {
 
 	ns := getNamespace(namespace...)
 	metricsCollectorTemplates := &apiv1.ConfigMap{}
@@ -110,7 +110,7 @@ func (k *katibClient) GetMetricsCollectorTemplates(namespace ...string) (map[str
 
 }
 
-func (k *katibClient) UpdateMetricsCollectorTemplates(newMCTemplates map[string]string, namespace ...string) error {
+func (k *KatibClient) UpdateMetricsCollectorTemplates(newMCTemplates map[string]string, namespace ...string) error {
 
 	ns := getNamespace(namespace...)
 	metricsCollectorTemplates := &apiv1.ConfigMap{}
