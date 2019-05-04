@@ -11,7 +11,7 @@ import (
 
 	"github.com/kubeflow/katib/pkg"
 	studyjobv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
-	"github.com/kubeflow/katib/pkg/api/v1alpha1"
+	api "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	"github.com/kubeflow/katib/pkg/manager/v1alpha1/studyjobclient"
 
 	"github.com/pressly/chi"

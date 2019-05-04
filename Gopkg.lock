@@ -780,6 +780,7 @@
   digest = "1:75905606c2db8d9526ccff0acf5655759afe3d901d1d64868bd87985b4a46e36"
   name = "k8s.io/api"
   packages = [
+    ".",
     "admission/v1beta1",
     "admissionregistration/v1alpha1",
     "admissionregistration/v1beta1",
@@ -1102,6 +1103,7 @@
     "google.golang.org/grpc/status",
     "gopkg.in/DATA-DOG/go-sqlmock.v1",
     "gopkg.in/yaml.v2",
+    "k8s.io/api",
     "k8s.io/api/admissionregistration/v1beta1",
     "k8s.io/api/batch/v1",
     "k8s.io/api/batch/v1beta1",

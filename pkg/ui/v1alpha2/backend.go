@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -16,181 +15,16 @@ import (
 
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/katibclient"
 	"google.golang.org/grpc"
-	restclient "k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	gographviz "github.com/awalterschulze/gographviz"
 	"github.com/ghodss/yaml"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var (
-	namespace      = "default"
-	allowedHeaders = "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, X-CSRF-Token"
-)
-
-type Decoder struct {
-	Layers     int            `json:"num_layers"`
-	InputSize  []int          `json:"input_size"`
-	OutputSize []int          `json:"output_size"`
-	Embedding  map[int]*Block `json:"embedding"`
-}
-
-type Block struct {
-	Id    int    `json:"opt_id"`
-	Type  string `json:"opt_type"`
-	Param Option `json:"opt_params"`
-}
-
-type Option struct {
-	FilterNumber string `json:"num_filter"`
-	FilterSize   string `json:"filter_size"`
-	Stride       string `json:"stride"`
-}
-
-func get_node_string(block *Block) string {
-	var node_string string
-	switch block.Type {
-	case "convolution":
-		node_string += block.Param.FilterSize + "x" + block.Param.FilterSize
-		node_string += " conv\n"
-		node_string += block.Param.FilterSize + " channels"
-	case "separable_convolution":
-		node_string += block.Param.FilterSize + "x" + block.Param.FilterSize
-		node_string += " sep_conv\n"
-		node_string += block.Param.FilterSize + " channels"
-	case "depthwise_convolution":
-		node_string += block.Param.FilterSize + "x" + block.Param.FilterSize
-		node_string += " depth_conv\n"
-	case "reduction":
-		// fix this
-		node_string += "3x3 max_pooling"
-	}
-	return strconv.Quote(node_string)
-}
-
-func generate_nn_image(architecture string, decoder string) string {
-
-	var architecture_int [][]int
-
-	if err := json.Unmarshal([]byte(architecture), &architecture_int); err != nil {
-		panic(err)
-	}
-	/*
-		Always has num_layers, input_size, output_size and embeding
-		Embeding is a map: int to Parameter
-		Parameter has id, type, Option
-
-		Beforehand substite all ' to " and wrap the string in `
-	*/
-
-	replaced_decoder := strings.Replace(decoder, `'`, `"`, -1)
-	var decoder_parsed Decoder
-
-	err := json.Unmarshal([]byte(replaced_decoder), &decoder_parsed)
-	if err != nil {
-		panic(err)
-	}
-
-	graphAst, _ := gographviz.ParseString(`digraph G {}`)
-	graph := gographviz.NewGraph()
-	if err := gographviz.Analyse(graphAst, graph); err != nil {
-		panic(err)
-	}
-	graph.AddNode("G", "0", map[string]string{"label": strconv.Quote("Input")})
-	var i int
-	for i = 0; i < len(architecture_int); i++ {
-		graph.AddNode("G", strconv.Itoa(i+1), map[string]string{"label": get_node_string(decoder_parsed.Embedding[architecture_int[i][0]])})
-		graph.AddEdge(strconv.Itoa(i), strconv.Itoa(i+1), true, nil)
-		for j := 1; j < i+1; j++ {
-			if architecture_int[i][j] == 1 {
-				graph.AddEdge(strconv.Itoa(j-1), strconv.Itoa(i+1), true, nil)
-			}
-		}
-	}
-	graph.AddNode("G", strconv.Itoa(i+1), map[string]string{"label": strconv.Quote("GlobalAvgPool")})
-	graph.AddEdge(strconv.Itoa(i), strconv.Itoa(i+1), true, nil)
-	graph.AddNode("G", strconv.Itoa(i+2), map[string]string{"label": strconv.Quote("FullConnect\nSoftmax")})
-	graph.AddEdge(strconv.Itoa(i+1), strconv.Itoa(i+2), true, nil)
-	graph.AddNode("G", strconv.Itoa(i+3), map[string]string{"label": strconv.Quote("Output")})
-	graph.AddEdge(strconv.Itoa(i+2), strconv.Itoa(i+3), true, nil)
-	s := graph.String()
-	return s
-}
-
-func enableCors(w *http.ResponseWriter) {
-	(*w).Header().Set("Content-Type", "text/html; charset=utf-8")
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-	(*w).Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
-	(*w).Header().Set("Access-Control-Allow-Headers", allowedHeaders)
-	(*w).Header().Set("Access-Control-Expose-Headers", "Access-Control-*")
-	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
-}
-
-var config = parseKubernetesConfig()
-
-func parseKubernetesConfig() *restclient.Config {
-
-	// For local testing
-	// var kubeconfig *string
-	// if home := homeDir(); home != "" {
-	// 	kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	// } else {
-	// 	kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	// }
-	// flag.Parse()
-	// config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
-	// if err != nil {
-	// 	log.Fatalf("getClusterConfig: %v", err)
-	// }
-	// return config
-
-	// For production
-	config, err := restclient.InClusterConfig()
-	if err != nil {
-		log.Fatalf("getClusterConfig: %v", err)
-	}
-	return config
-}
-
-func homeDir() string {
-	if h := os.Getenv("HOME"); h != "" {
-		return h
-	}
-	return os.Getenv("USERPROFILE") // windows
-}
-
-const maxMsgSize = 1<<31 - 1
-
-type IDList struct {
-	StudyId  string
-	WorkerId string
-	TrialId  string
-}
-
-type JobView struct {
-	Name   string
-	Status string
-}
-
-type TemplateView struct {
-	Name string
-	Yaml string
-}
-
-type KatibUIHandler struct {
-	katibClient *katibclient.KatibClient
-}
-
-type TemplateResponse struct {
-	TemplateType string
-	Data         []TemplateView
-}
-
 func NewKatibUIHandler() *KatibUIHandler {
 	kclient, err := katibclient.NewClient(client.Options{})
 	if err != nil {
-		log.Printf("New Katib client failed: %v", err)
+		log.Printf("NewClient for Katib failed: %v", err)
 		panic(err)
 	}
 	return &KatibUIHandler{
@@ -209,23 +43,24 @@ func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1alpha2.Man
 }
 
 func (k *KatibUIHandler) FetchHPJobs(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
+	//enableCors(&w)
 
 	jobs := make([]JobView, 0)
 
 	el, err := k.katibClient.GetExperimentList()
 	if err != nil {
-		log.Printf("Get Experiment List for HP failed: %v", err)
+		log.Printf("GetExperimentList for HP failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	for _, experiment := range el.Items {
 		if experiment.Spec.Parameters != nil {
 			jobs = append(jobs, JobView{
-				Name: experiment.GetName(),
+				Name: experiment.Name,
 				// TODO: Delete from frontend
 				// ID:     experiment.Status.StudyID,
 				// TODO: Parse it in frontend
+				// TODO: Use from experiment.util
 				Status: string(getExperimentCurrentCondition(&experiment)),
 			})
 		}
@@ -242,23 +77,24 @@ func (k *KatibUIHandler) FetchHPJobs(w http.ResponseWriter, r *http.Request) {
 }
 
 func (k *KatibUIHandler) FetchNASJobs(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
+	//enableCors(&w)
 
 	jobs := make([]JobView, 0)
 
 	el, err := k.katibClient.GetExperimentList()
 	if err != nil {
-		log.Printf("Get Experiment List for NAS failed: %v", err)
+		log.Printf("GetExperimentList for NAS failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	for _, experiment := range el.Items {
 		if experiment.Spec.NasConfig != nil {
 			jobs = append(jobs, JobView{
-				Name: experiment.GetName(),
+				Name: experiment.Name,
 				// TODO: Delete from frontend
 				// ID:     experiment.Status.StudyID,
 				// TODO: Parse it in frontend
+				// TODO: Use from experiment.util
 				Status: string(getExperimentCurrentCondition(&experiment)),
 			})
 		}
@@ -275,7 +111,7 @@ func (k *KatibUIHandler) FetchNASJobs(w http.ResponseWriter, r *http.Request) {
 }
 
 func (k *KatibUIHandler) SubmitYamlJob(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
+	//enableCors(&w)
 	var data map[string]interface{}
 
 	json.NewDecoder(r.Body).Decode(&data)
@@ -290,7 +126,7 @@ func (k *KatibUIHandler) SubmitYamlJob(w http.ResponseWriter, r *http.Request) {
 		}
 		err = k.katibClient.CreateExperiment(&job)
 		if err != nil {
-			log.Printf("Create Experiment from YAML failed: %v", err)
+			log.Printf("CreateExperiment from YAML failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -299,7 +135,7 @@ func (k *KatibUIHandler) SubmitYamlJob(w http.ResponseWriter, r *http.Request) {
 }
 
 func (k *KatibUIHandler) SubmitHPJob(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
+	//enableCors(&w)
 	var data map[string]interface{}
 
 	json.NewDecoder(r.Body).Decode(&data)
@@ -328,7 +164,7 @@ func (k *KatibUIHandler) SubmitHPJob(w http.ResponseWriter, r *http.Request) {
 		}
 		err = k.katibClient.CreateExperiment(&job)
 		if err != nil {
-			log.Printf("Create Experiment for HP failed: %v", err)
+			log.Printf("CreateExperiment for HP failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -336,7 +172,7 @@ func (k *KatibUIHandler) SubmitHPJob(w http.ResponseWriter, r *http.Request) {
 }
 
 func (k *KatibUIHandler) SubmitNASJob(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
+	//enableCors(&w)
 	var data map[string]interface{}
 
 	json.NewDecoder(r.Body).Decode(&data)
@@ -375,24 +211,25 @@ func (k *KatibUIHandler) SubmitNASJob(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//TODO:
+// TODO:
 // 1. Add delete job to Katib Client
-// 2. Change id to name in frontend
+// 2. Change id to exp_name in frontend
 func (k *KatibUIHandler) DeleteJob(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
-	experimentName := r.URL.Query()["name"][0]
+	//enableCors(&w)
+	experimentName := r.URL.Query()["experimentName"][0]
 	log.Printf("Experiment Name: %v", experimentName)
-
 }
 
 func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
+	//enableCors(&w)
 	//TODO: Change id to name in frontend
-	experimentName := r.URL.Query()["name"][0]
+	experimentName := r.URL.Query()["experimentName"][0]
 
 	conn, c := k.connectManager()
 	defer conn.Close()
-	retText := "TrialName"
+
+	//TODO: Change table in frontend
+	resultText := "trialName"
 	expResp, err := c.GetExperiment(
 		context.Background(),
 		&api_pb_v1alpha2.GetExperimentRequest{
@@ -400,68 +237,73 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 		},
 	)
 	if err != nil {
-		log.Printf("Get Experiment from HP job failed: %v", err)
+		log.Printf("GetExperiment from HP job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	log.Printf("Got Experiment")
 	metricsList := map[string]int{}
 	metricsName := expResp.Experiment.ExperimentSpec.Objective.ObjectiveMetricName
-	retText += "," + metricsName
+	resultText += "," + metricsName
 	metricsList[metricsName] = 0
 	for i, m := range expResp.Experiment.ExperimentSpec.Objective.AdditionalMetricsNames {
-		retText += "," + m
+		resultText += "," + m
 		metricsList[m] = i + 1
 	}
 	log.Printf("Got metrics names")
 	paramList := map[string]int{}
 	for i, p := range expResp.Experiment.ExperimentSpec.ParameterSpecs.Parameters {
-		retText += "," + p.Name
+		resultText += "," + p.Name
 		paramList[p.Name] = i + len(metricsList)
 	}
 	log.Printf("Got Parameters names")
+
 	trialListResp, err := c.GetTrialList(
 		context.Background(),
 		&api_pb_v1alpha2.GetTrialListRequest{
-			ExperimentName: expResp.Experiment.GetName(),
+			ExperimentName: experimentName,
 			Filter:         "",
 		},
 	)
 	if err != nil {
-		log.Printf("Get Trial List from HP job failed: %v", err)
+		log.Printf("GetTrialList from HP job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	log.Printf("Got Trial List")
-	obsLogResp, err := c.GetObservationLog(
-		context.Background(),
-		&api_pb_v1alpha2.GetObservationLogRequest{
-			TrialName:       trialListResp.,
-			OnlyLatestLog: true,
-		},
-	)
-	log.Printf("Got Parameters results")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	retText += "\n"
-	for _, wfi := range gwfirep.WorkerFullInfos {
-		restext := make([]string, len(metricsList)+len(paramList))
-		for _, m := range wfi.MetricsLogs {
-			if len(m.Values) > 0 {
-				restext[metricsList[m.Name]] = m.Values[len(m.Values)-1].Value
-			}
+
+	resultText += "\n"
+
+	for _, t := range trialListResp.Trials {
+
+		obsLogResp, err := c.GetObservationLog(
+			context.Background(),
+			&api_pb_v1alpha2.GetObservationLogRequest{
+				TrialName: t.Name,
+				StartTime: "",
+				EndTime:   "",
+			},
+		)
+		if err != nil {
+			log.Printf("GetObservationLog from HP job failed: %v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-		for _, p := range wfi.ParameterSet {
-			restext[paramList[p.Name]] = p.Value
+
+		trialResText := make([]string, len(metricsList)+len(paramList))
+		for _, m := range obsLogResp.ObservationLog.MetricLogs {
+			trialResText[metricsList[m.Metric.Name]] = m.Metric.Value
+
 		}
-		retText += wfi.Worker.WorkerId + "," + wfi.Worker.TrialId + "," + strings.Join(restext, ",") + "\n"
+		for _, trialParam := range t.Spec.ParameterAssignments.Assignments {
+			trialResText[paramList[trialParam.Name]] = trialParam.Value
+		}
+		resultText += t.Name + "," + strings.Join(trialResText, ",") + "\n"
 	}
-	log.Printf("Parsed logs")
-	log.Printf("%v", retText)
-	response, err := json.Marshal(retText)
+	log.Printf("Logs parsed, result: %v", resultText)
+	response, err := json.Marshal(resultText)
 	if err != nil {
+		log.Printf("Marshal result text for HP job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -469,41 +311,42 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 
 }
 
-func (k *KatibUIHandler) FetchWorkerInfo(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
-	studyID := r.URL.Query()["studyID"][0]
-	workerID := r.URL.Query()["workerID"][0]
+func (k *KatibUIHandler) FetchTrialsInfo(w http.ResponseWriter, r *http.Request) {
+	//enableCors(&w)
+	//TODO: change name to trialName in frontend
+	trialName := r.URL.Query()["trialName"][0]
 	conn, c := k.connectManager()
 	defer conn.Close()
 
 	defer conn.Close()
-	retText := "symbol,time,value\n"
-	gwfirep, err := c.GetWorkerFullInfo(
+	//TODO: Change procced of resultText in frontend
+	resultText := "metricName,time,value\n"
+	obsLogResp, err := c.GetObservationLog(
 		context.Background(),
-		&api_pb_v1alpha2.GetWorkerFullInfoRequest{
-			StudyId:  studyID,
-			WorkerId: workerID,
+		&api_pb_v1alpha2.GetObservationLogRequest{
+			TrialName: trialName,
+			StartTime: "",
+			EndTime:   "",
 		},
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("GetObservationLog failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	if len(gwfirep.WorkerFullInfos) > 0 {
-		for _, m := range gwfirep.WorkerFullInfos[0].MetricsLogs {
-			pvtime := ""
-			for _, v := range m.Values {
-				mvtime, _ := time.Parse(time.RFC3339Nano, v.Time)
-				ctime := mvtime.Format("2006-01-02T15:4:5")
-				if pvtime != ctime {
-					retText += m.Name + "," + ctime + "," + v.Value + "\n"
-					pvtime = ctime
-				}
-			}
+	prevTime := ""
+	for _, m := range obsLogResp.ObservationLog.MetricLogs {
+		parsedTime, _ := time.Parse(time.RFC3339Nano, m.TimeStamp)
+		formatTime := parsedTime.Format("2006-01-02T15:4:5")
+		if formatTime != prevTime {
+			resultText += m.Metric.Name + "," + formatTime + "," + m.Metric.Value + "\n"
+			prevTime = formatTime
 		}
 	}
 
-	response, err := json.Marshal(retText)
+	response, err := json.Marshal(resultText)
 	if err != nil {
+		log.Printf("Marshal result text in Trial info failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -511,23 +354,9 @@ func (k *KatibUIHandler) FetchWorkerInfo(w http.ResponseWriter, r *http.Request)
 }
 
 func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
-	studyID := r.URL.Query()["id"][0]
-
-	conn, c := k.connectManager()
-
-	defer conn.Close()
-
-	gtrep, err := c.GetTrials(
-		context.Background(),
-		&api_pb_v1alpha2.GetTrialsRequest{
-			StudyId: studyID,
-		},
-	)
-	if err != nil {
-		log.Println(err)
-		return
-	}
+	//enableCors(&w)
+	// TODO: Change to experimentName in frontend
+	experimentName := r.URL.Query()["experimentName"][0]
 
 	type NNView struct {
 		Name         string
@@ -535,182 +364,137 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 		MetricsName  []string
 		MetricsValue []string
 	}
-
-	response_raw := make([]NNView, 0)
-
+	responseRaw := make([]NNView, 0)
 	var architecture string
 	var decoder string
 
-	gwfirep, err := c.GetWorkerFullInfo(
+	conn, c := k.connectManager()
+
+	defer conn.Close()
+
+	trialListResp, err := c.GetTrialList(
 		context.Background(),
-		&api_pb_v1alpha2.GetWorkerFullInfoRequest{
-			StudyId:       studyID,
-			OnlyLatestLog: true,
+		&api_pb_v1alpha2.GetTrialListRequest{
+			ExperimentName: experimentName,
+			Filter:         "",
 		},
 	)
+	if err != nil {
+		log.Printf("GetTrialList from NAS job failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	log.Printf("Got Trial List")
 
-	for i, tr := range gtrep.Trials {
-		for _, parameter := range tr.ParameterSet {
-			if parameter.Name == "architecture" {
-				architecture = parameter.Value
-			}
-			if parameter.Name == "nn_config" {
-				decoder = parameter.Value
-			}
+	for i, t := range trialListResp.Trials {
+
+		obsLogResp, err := c.GetObservationLog(
+			context.Background(),
+			&api_pb_v1alpha2.GetObservationLogRequest{
+				TrialName: t.Name,
+				StartTime: "",
+				EndTime:   "",
+			},
+		)
+		if err != nil {
+			log.Printf("GetObservationLog from NAS job failed: %v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-
 		metricsName := make([]string, 0)
 		metricsValue := make([]string, 0)
-		trialID := tr.TrialId
-		for _, wfi := range gwfirep.WorkerFullInfos {
-			if wfi.Worker.TrialId == trialID {
-				for _, metrics := range wfi.MetricsLogs {
-					metricsName = append(metricsName, metrics.Name)
-					metricsValue = append(metricsValue, metrics.Values[0].GetValue())
-				}
+		for _, m := range obsLogResp.ObservationLog.MetricLogs {
+			metricsName = append(metricsName, m.Metric.Name)
+			metricsValue = append(metricsValue, m.Metric.Value)
+
+		}
+		for _, trialParam := range t.Spec.ParameterAssignments.Assignments {
+			if trialParam.Name == "architecture" {
+				architecture = trialParam.Value
+			}
+			if trialParam.Name == "nn_config" {
+				decoder = trialParam.Value
 			}
 		}
-		response_raw = append(response_raw, NNView{
+		responseRaw = append(responseRaw, NNView{
 			Name:         "Generation " + strconv.Itoa(i),
-			Architecture: generate_nn_image(architecture, decoder),
+			Architecture: generateNNImage(architecture, decoder),
 			MetricsName:  metricsName,
 			MetricsValue: metricsValue,
 		})
 	}
+	log.Printf("Logs parsed, result: %v", responseRaw)
 
-	response, err := json.Marshal(response_raw)
+	response, err := json.Marshal(responseRaw)
 	if err != nil {
+		log.Printf("Marshal result in NAS job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Write(response)
 }
 
-func (k *KatibUIHandler) FetchWorkerTemplates(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
-	wt, err := k.studyjobClient.GetWorkerTemplates()
+func (k *KatibUIHandler) FetchTrialTemplates(w http.ResponseWriter, r *http.Request) {
+	//enableCors(&w)
+	trialTemplates, err := k.katibClient.GetTrialTemplates()
 	if err != nil {
-		log.Printf("GetWorkerTemplates err %v", err)
+		log.Printf("GetTrialTemplate failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	templates := make([]TemplateView, 0)
 
-	for key := range wt {
-		templates = append(templates, TemplateView{Name: key, Yaml: wt[key]})
-	}
-	response, err := json.Marshal(templates)
+	response, err := json.Marshal(getTemplatesView(trialTemplates))
 	if err != nil {
+		log.Printf("Marshal templates failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Write(response)
 }
 
-func (k *KatibUIHandler) FetchCollectorTemplates(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
-	wt, err := k.studyjobClient.GetMetricsCollectorTemplates()
+func (k *KatibUIHandler) FetchMetricsCollectorTemplates(w http.ResponseWriter, r *http.Request) {
+	//enableCors(&w)
+	metricsCollectorTemplates, err := k.katibClient.GetMetricsCollectorTemplates()
 	if err != nil {
-		log.Printf("GetWorkerTemplates err %v", err)
+		log.Printf("GetMetricsCollectorTemplates failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	templates := make([]TemplateView, 0)
 
-	for key := range wt {
-		templates = append(templates, TemplateView{Name: key, Yaml: wt[key]})
-	}
-	response, err := json.Marshal(templates)
+	response, err := json.Marshal(getTemplatesView(metricsCollectorTemplates))
 	if err != nil {
+		log.Printf("Marshal templates failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Write(response)
 }
 
-func (k *KatibUIHandler) AddEditTemplate(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
+func (k *KatibUIHandler) AddEditDeleteTemplate(w http.ResponseWriter, r *http.Request) {
+	//enableCors(&w)
+	//TODO: need to delete?
 	if r.Method == "OPTIONS" {
 		return
 	}
-
 	var data map[string]interface{}
-	json.NewDecoder(r.Body).Decode(&data)
-	var wt map[string]string
 	var err error
-	if data["kind"].(string) == "collector" {
-		wt, err = k.studyjobClient.GetMetricsCollectorTemplates()
+	var templateResponse TemplateResponse
+
+	json.NewDecoder(r.Body).Decode(&data)
+	if data["action"].(string) == "delete" {
+		templateResponse, err = k.updateTemplates(data, true)
 	} else {
-		wt, err = k.studyjobClient.GetWorkerTemplates()
-	}
-
-	if err != nil {
-		log.Printf("fail to GetWorkerTemplates %v", err)
-	}
-	wt[data["name"].(string)] = data["yaml"].(string)
-	if data["kind"].(string) == "collector" {
-		err = k.studyjobClient.UpdateMetricsCollectorTemplates(wt)
-	} else {
-		err = k.studyjobClient.UpdateWorkerTemplates(wt)
+		templateResponse, err = k.updateTemplates(data, false)
 	}
 	if err != nil {
-		log.Printf("fail to update template %v", err)
-	}
-
-	templates := make([]TemplateView, 0)
-
-	for key := range wt {
-		templates = append(templates, TemplateView{Name: key, Yaml: wt[key]})
-	}
-	response_raw := TemplateResponse{
-		Data:         templates,
-		TemplateType: data["kind"].(string),
-	}
-	response, err := json.Marshal(response_raw)
-	if err != nil {
+		log.Printf("updateTemplates failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write(response)
-}
 
-func (k *KatibUIHandler) DeleteTemplate(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
-	if r.Method == "OPTIONS" {
-		return
-	}
-
-	var data map[string]interface{}
-
-	json.NewDecoder(r.Body).Decode(&data)
-	var wt map[string]string
-	var err error
-	if data["kind"].(string) == "collector" {
-		wt, err = k.studyjobClient.GetMetricsCollectorTemplates()
-	} else {
-		wt, err = k.studyjobClient.GetWorkerTemplates()
-	}
-
+	response, err := json.Marshal(templateResponse)
 	if err != nil {
-		log.Printf("fail to GetWorkerTemplates %v", err)
-	}
-	delete(wt, data["name"].(string))
-	if data["kind"].(string) == "collector" {
-		err = k.studyjobClient.UpdateMetricsCollectorTemplates(wt)
-	} else {
-		err = k.studyjobClient.UpdateWorkerTemplates(wt)
-	}
-	if err != nil {
-		log.Printf("fail to UpdateWorkerTemplate %v", err)
-	}
-
-	templates := make([]TemplateView, 0)
-
-	for key := range wt {
-		templates = append(templates, TemplateView{Name: key, Yaml: wt[key]})
-	}
-	response_raw := TemplateResponse{
-		Data:         templates,
-		TemplateType: data["kind"].(string),
-	}
-	response, err := json.Marshal(response_raw)
-	if err != nil {
+		log.Printf("Marhal failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

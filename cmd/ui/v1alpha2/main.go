@@ -24,12 +24,15 @@ func main() {
 	http.HandleFunc("/katib/delete_job/", kuh.DeleteJob)
 
 	http.HandleFunc("/katib/fetch_hp_job_info/", kuh.FetchHPJobInfo)
+	//TODO: Change url in frontend
+	http.HandleFunc("/katib/fetch_trial_info/", kuh.FetchTrialsInfo)
 	http.HandleFunc("/katib/fetch_nas_job_info/", kuh.FetchNASJobInfo)
-	http.HandleFunc("/katib/fetch_worker_info/", kuh.FetchWorkerInfo)
-	http.HandleFunc("/katib/fetch_worker_templates/", kuh.FetchWorkerTemplates)
-	http.HandleFunc("/katib/fetch_collector_templates/", kuh.FetchCollectorTemplates)
-	http.HandleFunc("/katib/update_template/", kuh.AddEditTemplate)
-	http.HandleFunc("/katib/delete_template/", kuh.DeleteTemplate)
+	//TODO: Change url in frontend
+	http.HandleFunc("/katib/fetch_trial_templates/", kuh.FetchTrialTemplates)
+	//TODO: Change url in frontend
+	http.HandleFunc("/katib/fetch_collector_templates/", kuh.FetchMetricsCollectorTemplates)
+	//TODO: Add "action" in data for delete and change URL
+	http.HandleFunc("/katib/update_template/", kuh.AddEditDeleteTemplate)
 
 	http.ListenAndServe(":"+port, nil)
 }
