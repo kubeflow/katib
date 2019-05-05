@@ -114,7 +114,9 @@ until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
     TIMEOUT=$(( TIMEOUT - 1 ))
 done
 
-sudo python -m pip install grpcio
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+python get-pip.py
+python -m pip install grpcio gcloud protobuf
 python test-katib-manager.py
 
 exit 0
