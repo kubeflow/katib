@@ -116,7 +116,7 @@ done
 
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 python get-pip.py
-python -m pip install grpcio gcloud protobuf
+pip install -r test_requirements.txt
 python test-katib-manager.py
 
 exit 0
