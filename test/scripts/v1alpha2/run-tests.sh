@@ -17,7 +17,6 @@
 # This shell script is used to build a cluster and create a namespace from our
 # argo workflow
 
-
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -66,21 +65,14 @@ echo "REGISTRY ${REGISTRY}"
 echo "REPO_NAME ${REPO_NAME}"
 echo "VERSION ${VERSION}"
 
-sed -i -e "s@image: katib\/vizier-core@image: ${REGISTRY}\/${REPO_NAME}\/vizier-core:${VERSION}@" manifests/vizier/core/deployment.yaml
-sed -i -e "s@image: katib\/vizier-core-rest@image: ${REGISTRY}\/${REPO_NAME}\/vizier-core-rest:${VERSION}@" manifests/vizier/core-rest/deployment.yaml
-sed -i -e "s@image: katib\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/katib-ui:${VERSION}@" manifests/vizier/ui/deployment.yaml
-sed -i -e "s@type: NodePort@type: ClusterIP@" -e "/nodePort: 30678/d" manifests/vizier/core/service.yaml
-sed -i -e "s@image: katib\/studyjob-controller@image: ${REGISTRY}\/${REPO_NAME}\/studyjob-controller:${VERSION}@" manifests/studyjobcontroller/studyjobcontroller.yaml
+sed -i -e "s@image: katib\/katib-controller@image: ${REGISTRY}\/${REPO_NAME}\/katib-controller:${VERSION}@" manifests/v1alpha2/katib-controller/katib-controller.yaml
 sed -i -e "s@image: katib\/suggestion@image: ${REGISTRY}\/${REPO_NAME}\/suggestion:${VERSION}@" manifests/vizier/suggestion/random/deployment.yaml
 sed -i -e "s@image: katib\/suggestion@image: ${REGISTRY}\/${REPO_NAME}\/suggestion:${VERSION}@" manifests/vizier/suggestion/grid/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-hyperband:${VERSION}@" manifests/vizier/suggestion/hyperband/deployment.yaml
 sed -i -e "s@image: katib\/suggestion@image: ${REGISTRY}\/${REPO_NAME}\/suggestion:${VERSION}@" manifests/vizier/suggestion/katib_suggestion/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-nasrl:${VERSION}@" manifests/vizier/suggestion/nasrl/deployment.yaml
-sed -i -e "s@image: katib\/earlystopping-medianstopping@image: ${REGISTRY}\/${REPO_NAME}\/earlystopping-medianstopping:${VERSION}@" manifests/vizier/earlystopping/medianstopping/deployment.yaml
-sed -i -e '/volumeMounts:/,$d' manifests/vizier/db/deployment.yaml
 
-cat manifests/vizier/core/deployment.yaml
-./scripts/deploy.sh
+./scripts/v1alpha2/deploy.sh
 
 TIMEOUT=120
 PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
@@ -104,25 +96,15 @@ kubectl -n kubeflow get svc
 echo "Katib pods"
 kubectl -n kubeflow get pod
 
-kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep vizier-core | grep -v vizier-core-rest | sed -e "s@pods\/@@") 6789:6789 &
-echo "kubectl port-forward start"
-sleep 5
-TIMEOUT=120
-until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
-    sleep 5
-    TIMEOUT=$(( TIMEOUT - 1 ))
-done
-
 cp -r test ${GO_DIR}/test
-cd ${GO_DIR}/test/e2e
-kubectl apply -f valid-studyjob.yaml
-kubectl delete -f valid-studyjob.yaml
+cd ${GO_DIR}/test/e2e/v1alpha2
+kubectl apply -f valid-experiment.yaml
+kubectl delete -f valid-experiment.yaml
 set +o errexit
-kubectl apply -f invalid-studyjob.yaml
+kubectl apply -f invalid-experiment.yaml
 if [ $? -ne 1 ]; then
   exit 1
 fi
 set -o errexit
-go run test-client.go -a random -c suggestion-config-random.yml
-go run test-client.go -a grid -c suggestion-config-grid.yml
-#go run test-client.go -a hyperband -c suggestion-config-hyb.yml
+
+exit 0

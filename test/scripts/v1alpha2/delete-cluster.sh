@@ -17,7 +17,6 @@
 # This shell script is used to build a cluster and create a namespace from our
 # argo workflow
 
-
 set -o errexit
 set -o nounset
 set -o pipefail
