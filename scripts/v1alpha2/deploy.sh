@@ -19,27 +19,19 @@ set -o nounset
 set -o pipefail
 set -o xtrace
 
-SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
+SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
 cd ${SCRIPT_ROOT}
 kubectl apply -f manifests/v1alpha2/0-namespace.yaml
-kubectl apply -f manifests/v1alpha2/pv
-kubectl apply -f manifests/v1alpha2/vizier/db
-kubectl apply -f manifests/v1alpha2/vizier/core
-kubectl apply -f manifests/v1alpha2/vizier/core-rest
-kubectl apply -f manifests/v1alpha2/vizier/ui
+kubectl apply -f manifests/v1alpha2/katib-controller/crds.yaml
+kubectl apply -f manifests/v1alpha2/katib-controller/rbac.yaml
+kubectl apply -f manifests/v1alpha2/katib-controller/service.yaml
+kubectl apply -f manifests/v1alpha2/katib-controller/secret.yaml
+kubectl apply -f manifests/v1alpha2/katib-controller/trialTemplateConfigmap.yaml
+kubectl apply -f manifests/v1alpha2/katib-controller/katib-controller.yaml
 kubectl apply -f manifests/v1alpha2/vizier/suggestion/random
 kubectl apply -f manifests/v1alpha2/vizier/suggestion/grid
 kubectl apply -f manifests/v1alpha2/vizier/suggestion/hyperband
 kubectl apply -f manifests/v1alpha2/vizier/suggestion/katib_suggestion
 kubectl apply -f manifests/v1alpha2/vizier/suggestion/nasrl
-kubectl apply -f manifests/v1alpha2/vizier/earlystopping/medianstopping
-kubectl apply -f manifests/v1alpha2/studyjobcontroller/crd.yaml
-kubectl apply -f manifests/v1alpha2/studyjobcontroller/tfjobsCrd.yaml
-kubectl apply -f manifests/v1alpha2/studyjobcontroller/pytorchjobsCrd.yaml
-kubectl apply -f manifests/v1alpha2/studyjobcontroller/rbac.yaml
-kubectl apply -f manifests/v1alpha2/studyjobcontroller/mcrbac.yaml
-kubectl apply -f manifests/v1alpha2/studyjobcontroller/workerConfigMap.yaml
-kubectl apply -f manifests/v1alpha2/studyjobcontroller/metricsControllerConfigMap.yaml
-kubectl apply -f manifests/v1alpha2/studyjobcontroller/studyjobcontroller.yaml
 cd - > /dev/null

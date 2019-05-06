@@ -21,27 +21,13 @@ set -o pipefail
 PREFIX="katib"
 CMD_PREFIX="cmd"
 
-SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
+SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
 cd ${SCRIPT_ROOT}
 
-echo "Building core image..."
-docker build -t ${PREFIX}/vizier-core -f ${CMD_PREFIX}/manager/Dockerfile .
-docker build -t ${PREFIX}/studyjob-controller -f ${CMD_PREFIX}/studyjobcontroller/Dockerfile .
-docker build -t ${PREFIX}/metrics-collector -f ${CMD_PREFIX}/metricscollector/Dockerfile .
-docker build -t ${PREFIX}/tfevent-metrics-collector -f ${CMD_PREFIX}/tfevent-metricscollector/Dockerfile .
-
-echo "Building REST API for core image..."
-docker build -t ${PREFIX}/vizier-core-rest -f ${CMD_PREFIX}/manager-rest/Dockerfile .
+docker build -t ${PREFIX}/katib-controller -f ${CMD_PREFIX}/katib-controller/Dockerfile .
 
 echo "Building suggestion images..."
 docker build -t ${PREFIX}/suggestion-hyperband -f ${CMD_PREFIX}/suggestion/v1alpha2/hyperband/Dockerfile .
 docker build -t ${PREFIX}/suggestion -f ${CMD_PREFIX}/suggestion/v1alpha2/katib-suggestion/Dockerfile .
 docker build -t ${PREFIX}/suggestion-nasrl -f ${CMD_PREFIX}/suggestion/v1alpha2/nasrl/Dockerfile .
-
-echo "Building earlystopping images..."
-docker build -t ${PREFIX}/earlystopping-medianstopping -f ${CMD_PREFIX}/earlystopping/medianstopping/Dockerfile .
-
-echo "Building UI image..."
-docker build -t ${PREFIX}/katib-ui -f ${CMD_PREFIX}/ui/Dockerfile .
-
