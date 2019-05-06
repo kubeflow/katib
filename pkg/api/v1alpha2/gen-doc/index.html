@@ -4,7 +4,7 @@
   <head>
     <title>Protocol Documentation</title>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic"/>
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic"/>
     <style>
       body {
         width: 60em;
@@ -215,6 +215,10 @@
                 </li>
               
                 <li>
+                  <a href="#api.v1.alpha2.ExperimentSpec.ParameterSpecs"><span class="badge">M</span>ExperimentSpec.ParameterSpecs</a>
+                </li>
+              
+                <li>
                   <a href="#api.v1.alpha2.ExperimentStatus"><span class="badge">M</span>ExperimentStatus</a>
                 </li>
               
@@ -359,6 +363,10 @@
                 </li>
               
                 <li>
+                  <a href="#api.v1.alpha2.TrialSpec.ParameterAssignments"><span class="badge">M</span>TrialSpec.ParameterAssignments</a>
+                </li>
+              
+                <li>
                   <a href="#api.v1.alpha2.TrialStatus"><span class="badge">M</span>TrialStatus</a>
                 </li>
               
@@ -466,7 +474,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -503,7 +512,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -533,7 +543,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -563,7 +574,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -607,7 +619,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -622,9 +635,9 @@
             <tbody>
               
                 <tr>
-                  <td>parameters</td>
-                  <td><a href="#api.v1.alpha2.ParameterSpec">ParameterSpec</a></td>
-                  <td>repeated</td>
+                  <td>parameter_specs</td>
+                  <td><a href="#api.v1.alpha2.ExperimentSpec.ParameterSpecs">ExperimentSpec.ParameterSpecs</a></td>
+                  <td></td>
                   <td><p> </p></td>
                 </tr>
               
@@ -664,13 +677,6 @@
                 </tr>
               
                 <tr>
-                  <td>metrics_collector_type</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-                <tr>
                   <td>nas_config</td>
                   <td><a href="#api.v1.alpha2.NasConfig">NasConfig</a></td>
                   <td></td>
@@ -679,7 +685,32 @@
               
             </tbody>
           </table>
+
+          
+
         
+      
+        <h3 id="api.v1.alpha2.ExperimentSpec.ParameterSpecs">ExperimentSpec.ParameterSpecs</h3>
+        <p>List of ParameterSpec</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>parameters</td>
+                  <td><a href="#api.v1.alpha2.ParameterSpec">ParameterSpec</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
 
         
       
@@ -716,7 +747,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -746,7 +778,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -790,7 +823,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -813,7 +847,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -836,7 +871,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -859,7 +895,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -889,7 +926,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -912,7 +950,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -935,7 +974,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -956,9 +996,24 @@
                   <td><p> </p></td>
                 </tr>
               
+                <tr>
+                  <td>start_time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>The start of the time range. RFC3339 format </p></td>
+                </tr>
+              
+                <tr>
+                  <td>end_time</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>The end of the time range. RFC3339 format </p></td>
+                </tr>
+              
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -981,7 +1036,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1018,7 +1074,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1041,7 +1098,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1063,20 +1121,6 @@
                 </tr>
               
                 <tr>
-                  <td>start_time</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>The start of the time range. RFC3339 format </p></td>
-                </tr>
-              
-                <tr>
-                  <td>end_time</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>The end of the time range. RFC3339 format </p></td>
-                </tr>
-              
-                <tr>
                   <td>filter</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
@@ -1085,7 +1129,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1108,7 +1153,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1131,7 +1177,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1168,7 +1215,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1198,7 +1246,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1228,7 +1277,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1258,7 +1308,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1281,7 +1332,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1325,7 +1377,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1348,7 +1401,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1371,7 +1425,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1403,7 +1458,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1433,7 +1489,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1470,7 +1527,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1500,7 +1558,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1530,7 +1589,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1567,7 +1627,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1604,7 +1665,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1627,8 +1689,8 @@
               
                 <tr>
                   <td>parameter_assignments</td>
-                  <td><a href="#api.v1.alpha2.ParameterAssignment">ParameterAssignment</a></td>
-                  <td>repeated</td>
+                  <td><a href="#api.v1.alpha2.TrialSpec.ParameterAssignments">TrialSpec.ParameterAssignments</a></td>
+                  <td></td>
                   <td><p> </p></td>
                 </tr>
               
@@ -1641,7 +1703,32 @@
               
             </tbody>
           </table>
+
+          
+
         
+      
+        <h3 id="api.v1.alpha2.TrialSpec.ParameterAssignments">TrialSpec.ParameterAssignments</h3>
+        <p>List of ParameterAssignment</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>assignments</td>
+                  <td><a href="#api.v1.alpha2.ParameterAssignment">ParameterAssignment</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
 
         
       
@@ -1685,7 +1772,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1722,7 +1810,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1759,7 +1848,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1796,7 +1886,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -1833,7 +1924,8 @@
               
             </tbody>
           </table>
-        
+
+          
 
         
       
@@ -2005,7 +2097,8 @@
             
           </tbody>
         </table>
-      
+
+        
         <h3 id="api.v1.alpha2.Manager">Manager</h3>
         <p>Service for Main API for Katib</p><p>For each RPC service, we define mapping to HTTP REST API method.</p><p>The mapping includes the URL path, query parameters and request body.</p><p>https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http</p>
         <table class="enum-table">
@@ -2135,7 +2228,186 @@ Suggestion service should return INVALID_ARGUMENT Error when the parameter is in
             
           </tbody>
         </table>
-      
+
+        
+          
+          
+          <h4>Methods with HTTP bindings</h4>
+          <table>
+            <thead>
+              <tr>
+                <td>Method Name</td>
+                <td>Method</td>
+                <td>Pattern</td>
+                <td>Body</td>
+              </tr>
+            </thead>
+            <tbody>
+            
+              
+              
+              <tr>
+                <td>RegisterExperiment</td>
+                <td>POST</td>
+                <td>/api/Manager/RegisterExperiment</td>
+                <td>experiment</td>
+              </tr>
+              
+            
+              
+              
+              <tr>
+                <td>DeleteExperiment</td>
+                <td>GET</td>
+                <td>/api/Manager/DeleteExperiment/{experiment_name}</td>
+                <td></td>
+              </tr>
+              
+            
+              
+              
+              <tr>
+                <td>GetExperiment</td>
+                <td>GET</td>
+                <td>/api/Manager/GetExperiment/{experiment_name}</td>
+                <td></td>
+              </tr>
+              
+            
+              
+              
+              <tr>
+                <td>GetExperimentList</td>
+                <td>GET</td>
+                <td>/api/Manager/GetExperimentList</td>
+                <td></td>
+              </tr>
+              
+            
+              
+              
+              <tr>
+                <td>UpdateExperimentStatus</td>
+                <td>PUT</td>
+                <td>/api/Manager/UpdateExperimentStatus/{experiment_name}</td>
+                <td>*</td>
+              </tr>
+              
+            
+              
+              
+              <tr>
+                <td>UpdateAlgorithmExtraSettings</td>
+                <td>PUT</td>
+                <td>/api/Manager/UpdateAlgorithmExtraSettings/{experiment_name}</td>
+                <td>*</td>
+              </tr>
+              
+            
+              
+              
+              <tr>
+                <td>GetAlgorithmExtraSettings</td>
+                <td>GET</td>
+                <td>/api/Manager/GetAlgorithmExtraSettings/{experiment_name}</td>
+                <td></td>
+              </tr>
+              
+            
+              
+              
+              <tr>
+                <td>RegisterTrial</td>
+                <td>POST</td>
+                <td>/api/Manager/RegisterTrial</td>
+                <td>trial</td>
+              </tr>
+              
+            
+              
+              
+              <tr>
+                <td>DeleteTrial</td>
+                <td>GET</td>
+                <td>/api/Manager/DeleteTrial/{trial_name}</td>
+                <td></td>
+              </tr>
+              
+            
+              
+              
+              <tr>
+                <td>GetTrialList</td>
+                <td>GET</td>
+                <td>/api/Manager/GetTrialList/{experiment_name}</td>
+                <td></td>
+              </tr>
+              
+            
+              
+              
+              <tr>
+                <td>GetTrial</td>
+                <td>GET</td>
+                <td>/api/Manager/GetTrial/{trial_name}</td>
+                <td></td>
+              </tr>
+              
+            
+              
+              
+              <tr>
+                <td>UpdateTrialStatus</td>
+                <td>PUT</td>
+                <td>/api/Manager/UpdateTrialStatus</td>
+                <td>*</td>
+              </tr>
+              
+            
+              
+              
+              <tr>
+                <td>ReportObservationLog</td>
+                <td>POST</td>
+                <td>/api/Manager/ReportObservationLog</td>
+                <td>*</td>
+              </tr>
+              
+            
+              
+              
+              <tr>
+                <td>GetObservationLog</td>
+                <td>GET</td>
+                <td>/api/Manager/GetObservationLog/{trial_name}</td>
+                <td></td>
+              </tr>
+              
+            
+              
+              
+              <tr>
+                <td>GetSuggestions</td>
+                <td>POST</td>
+                <td>/api/Manager/GetSuggestions</td>
+                <td>*</td>
+              </tr>
+              
+            
+              
+              
+              <tr>
+                <td>ValidateAlgorithmSettings</td>
+                <td>POST</td>
+                <td>/api/Manager/ValidateAlgorithmSettings</td>
+                <td>*</td>
+              </tr>
+              
+            
+            </tbody>
+          </table>
+          
+        
         <h3 id="api.v1.alpha2.Suggestion">Suggestion</h3>
         <p></p>
         <table class="enum-table">
@@ -2160,7 +2432,8 @@ Suggestion service should return INVALID_ARGUMENT Error when the parameter is in
             
           </tbody>
         </table>
-      
+
+        
     
 
     <h2 id="scalar-value-types">Scalar Value Types</h2>

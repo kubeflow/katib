@@ -23,6 +23,7 @@ spec:
         ports:
         - name: ui
           containerPort: 80
+      serviceAccountName: katib-ui
 #        resources:
 #          requests:
 #            cpu: 500m

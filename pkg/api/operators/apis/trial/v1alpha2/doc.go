@@ -13,10 +13,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package v1alpha2 contains API Schema definitions for the experiment v1alpha2 API group
+// Package v1alpha2 contains API Schema definitions for the trial v1alpha2 API group
 // +k8s:openapi-gen=true
 // +k8s:deepcopy-gen=package,register
-// +k8s:conversion-gen=github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2
+// +k8s:conversion-gen=github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2
 // +k8s:defaulter-gen=TypeMeta
-// +groupName=experiment.kubeflow.org
+// +kubebuilder:subresource:status
+// +groupName=trial.kubeflow.org
 package v1alpha2
