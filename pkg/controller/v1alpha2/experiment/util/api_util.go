@@ -55,7 +55,7 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 		},
 	}
 
-	experiment.Name = instance.ObjectMeta.Name
+	experiment.Name = instance.Name
 
 	//Populate Objective
 	switch instance.Spec.Objective.Type {
