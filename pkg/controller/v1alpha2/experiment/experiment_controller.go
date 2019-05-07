@@ -42,6 +42,7 @@ import (
 )
 
 const KatibController = "katib-controller"
+
 var log = logf.Log.WithName("experiment-controller")
 
 /**
@@ -135,7 +136,7 @@ func addWebhook(mgr manager.Manager) error {
 				},
 			},
 			ValidatingWebhookConfigName: "experiment-validating-webhook-config",
-			MutatingWebhookConfigName: "experiment-mutating-webhook-config",
+			MutatingWebhookConfigName:   "experiment-mutating-webhook-config",
 		},
 	})
 	if err != nil {
