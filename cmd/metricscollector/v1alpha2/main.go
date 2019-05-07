@@ -41,6 +41,7 @@ import (
 	"context"
 	"flag"
 	"log"
+	"strings"
 
 	api "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/metricscollector"
@@ -52,12 +53,13 @@ var experimentName = flag.String("e", "", "Experiment Name")
 var trialName = flag.String("t", "", "Trial Name")
 var jobKind = flag.String("k", "", "Job Kind")
 var namespace = flag.String("n", "", "NameSpace")
-var managerSerivce = flag.String("m", "", "Katib Manager service")
+var managerService = flag.String("m", "", "Katib Manager service")
+var metricNames = flag.String("mn", "", "Metric names")
 
 func main() {
 	flag.Parse()
 	log.Printf("Experiment Name: %s, Trial Name: %s, Job Kind: %s", *experimentName, *trialName, *jobKind)
-	conn, err := grpc.Dial(*managerSerivce, grpc.WithInsecure())
+	conn, err := grpc.Dial(*managerService, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("could not connect: %v", err)
 	}
@@ -68,14 +70,7 @@ func main() {
 		log.Fatalf("Failed to create MetricsCollector: %v", err)
 	}
 	ctx := context.Background()
-	getreq := &api.GetExperimentRequest{
-		ExperimentName: *experimentName,
-	}
-	getrep, err := c.GetExperiment(ctx, getreq)
-	if err != nil {
-		log.Fatalf("Failed to GetExperiment: %v", err)
-	}
-	olog, err := mc.CollectObservationLog(*trialName, *jobKind, getrep.Experiment.ExperimentSpec.Objective.ObjectiveMetricName, getrep.Experiment.ExperimentSpec.Objective.AdditionalMetricsNames, *namespace)
+	olog, err := mc.CollectObservationLog(*trialName, *jobKind, strings.Split(*metricNames, ";"), *namespace)
 	if err != nil {
 		log.Fatalf("Failed to collect logs: %v", err)
 	}

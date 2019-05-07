@@ -158,6 +158,11 @@ func validateMetricsCollector(inst *ep_v1alpha2.Experiment) error {
 		Trial:      trialName,
 		NameSpace:  namespace,
 	}
+	var metricNames []string
+	metricNames = append(metricNames, inst.Spec.Objective.ObjectiveMetricName)
+	for _, mn := range inst.Spec.Objective.AdditionalMetricsNames {
+		metricNames = append(metricNames, mn)
+	}
 
 	runSpec, err := GetRunSpec(inst, trialParams)
 	if err != nil {
@@ -172,7 +177,7 @@ func validateMetricsCollector(inst *ep_v1alpha2.Experiment) error {
 	}
 
 	var mcjob batchv1beta.CronJob
-	mcm, err := getMetricsCollectorManifest(experimentName, trialName, job.GetKind(), namespace, inst.Spec.MetricsCollectorSpec)
+	mcm, err := getMetricsCollectorManifest(experimentName, trialName, job.GetKind(), namespace, metricNames, inst.Spec.MetricsCollectorSpec)
 	if err != nil {
 		logger.Printf("getMetricsCollectorManifest error %v", err)
 		return err

@@ -34,5 +34,7 @@ data:
                 - "-n"
                 - "{{.NameSpace}}"
                 - "-m"
-                - "{{.ManagerSerivce}}"
+                - "{{.ManagerService}}"
+                - "-mn"
+                - "{{.MetricNames}}"
               restartPolicy: Never

@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"fmt"
 	"text/template"
+	"strings"
 
 	"github.com/kubeflow/katib/pkg"
 	katibv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
@@ -26,7 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func getMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, mcs *katibv1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error) {
+func getMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *katibv1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error) {
 	var mtp *template.Template = nil
 	var err error
 	tmpValues := map[string]string{
@@ -35,6 +36,7 @@ func getMetricsCollectorManifest(experimentName string, trialName string, jobKin
 		"JobKind":        jobKind,
 		"NameSpace":      namespace,
 		"ManagerService": pkg.GetManagerAddr(),
+		"MetricNames":    strings.Join(metricNames, ";"),
 	}
 	if mcs != nil && mcs.GoTemplate.RawTemplate != "" {
 		mtp, err = template.New("MetricsCollector").Parse(mcs.GoTemplate.RawTemplate)

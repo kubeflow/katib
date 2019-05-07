@@ -35,14 +35,18 @@ func NewMetricsCollector() (*MetricsCollector, error) {
 
 }
 
-func (d *MetricsCollector) CollectObservationLog(tId string, jobKind string, objectiveValueName string, metrics []string, namespace string) (*v1alpha2.ObservationLog, error) {
+func (d *MetricsCollector) CollectObservationLog(tId string, jobKind string, metrics []string, namespace string) (*v1alpha2.ObservationLog, error) {
 	labelMap := make(map[string]string)
 
-	// TODO: Create labelMap based on jobKind
+	// TODO: Add labels for TFJob and PytorchJob
+	labelMap["job-name"] = tId
 
-	pl, _ := d.clientset.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labels.Set(labelMap).String(), IncludeUninitialized: true})
+	pl, err := d.clientset.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labels.Set(labelMap).String(), IncludeUninitialized: true})
+	if err != nil {
+		return nil, err
+	}
 	if len(pl.Items) == 0 {
-		return nil, errors.New(fmt.Sprintf("No Pods are found in Trial %v", tId))
+		return nil, fmt.Errorf("No Pods are found in Trial %v", tId)
 	}
 	logopt := apiv1.PodLogOptions{Timestamps: true}
 	logs, err := d.clientset.CoreV1().Pods(namespace).GetLogs(pl.Items[0].ObjectMeta.Name, &logopt).Do().Raw()
@@ -52,11 +56,11 @@ func (d *MetricsCollector) CollectObservationLog(tId string, jobKind string, obj
 	if len(logs) == 0 {
 		return &v1alpha2.ObservationLog{}, nil
 	}
-	olog, err := d.parseLogs(tId, strings.Split(string(logs), "\n"), objectiveValueName, metrics)
+	olog, err := d.parseLogs(tId, strings.Split(string(logs), "\n"), metrics)
 	return olog, err
 }
 
-func (d *MetricsCollector) parseLogs(tId string, logs []string, objectiveValueName string, metrics []string) (*v1alpha2.ObservationLog, error) {
+func (d *MetricsCollector) parseLogs(tId string, logs []string, metrics []string) (*v1alpha2.ObservationLog, error) {
 	var lasterr error
 	olog := &v1alpha2.ObservationLog{}
 	mlogs := []*v1alpha2.MetricLog{}
@@ -86,13 +90,9 @@ func (d *MetricsCollector) parseLogs(tId string, logs []string, objectiveValueNa
 				continue
 			}
 			metricName := ""
-			if v[0] == objectiveValueName {
-				metricName = v[0]
-			} else {
-				for _, m := range metrics {
-					if v[0] == m {
-						metricName = v[0]
-					}
+			for _, m := range metrics {
+				if v[0] == m {
+					metricName = v[0]
 				}
 			}
 			if metricName == "" {
