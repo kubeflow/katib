@@ -11,7 +11,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
-	restclient "k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	v1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 )
@@ -21,7 +21,7 @@ type MetricsCollector struct {
 }
 
 func NewMetricsCollector() (*MetricsCollector, error) {
-	config, err := restclient.InClusterConfig()
+	config, err := config.GetConfig()
 	if err != nil {
 		return nil, err
 	}

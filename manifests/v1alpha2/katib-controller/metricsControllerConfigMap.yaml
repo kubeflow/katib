@@ -8,7 +8,7 @@ data:
     apiVersion: batch/v1beta1
     kind: CronJob
     metadata:
-      name: {{.TrialName}}
+      name: {{.Trial}}
       namespace: {{.NameSpace}}
     spec:
       schedule: "*/1 * * * *"
@@ -21,14 +21,14 @@ data:
             spec:
               serviceAccountName: metrics-collector
               containers:
-              - name: {{.TrialName}}
+              - name: {{.Trial}}
                 image: katib/metrics-collector
                 args:
                 - "./metricscollector.v1alpha2"
                 - "-e"
-                - "{{.ExperimentName}}"
+                - "{{.Experiment}}"
                 - "-t"
-                - "{{.TrialName}}"
+                - "{{.Trial}}"
                 - "-k"
                 - "{{.JobKind}}"
                 - "-n"
