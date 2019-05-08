@@ -40,6 +40,7 @@
     - [Observation](#api.v1.alpha2.Observation)
     - [ObservationLog](#api.v1.alpha2.ObservationLog)
     - [Operation](#api.v1.alpha2.Operation)
+    - [Operation.ParameterSpecs](#api.v1.alpha2.Operation.ParameterSpecs)
     - [ParameterAssignment](#api.v1.alpha2.ParameterAssignment)
     - [ParameterSpec](#api.v1.alpha2.ParameterSpec)
     - [RegisterExperimentReply](#api.v1.alpha2.RegisterExperimentReply)
@@ -631,9 +632,22 @@ Config for operations in DAG
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | operation_type | [string](#string) |  | Type of operation in DAG |
-| parameters | [ParameterSpec](#api.v1.alpha2.ParameterSpec) | repeated | List of ParameterSpec
+| parameter_specs | [Operation.ParameterSpecs](#api.v1.alpha2.Operation.ParameterSpecs) |  |  |
 
-/ List of ParameterSpec |
+
+
+
+
+
+<a name="api.v1.alpha2.Operation.ParameterSpecs"></a>
+
+### Operation.ParameterSpecs
+List of ParameterSpec
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| parameters | [ParameterSpec](#api.v1.alpha2.ParameterSpec) | repeated |  |
 
 
 
