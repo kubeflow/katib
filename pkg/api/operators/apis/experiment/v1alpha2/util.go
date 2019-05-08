@@ -85,20 +85,8 @@ func (exp *Experiment) IsCompleted() bool {
 	return exp.IsSucceeded() || exp.IsFailed()
 }
 
-func (exp *Experiment) GetCurrentConditionType() ExperimentConditionType {
-	if exp.IsCreated() {
-		return ExperimentCreated
-	}
-	if exp.IsSucceeded() {
-		return ExperimentSucceeded
-	}
-	if exp.IsFailed() {
-		return ExperimentFailed
-	}
-	if exp.IsRunning() {
-		return ExperimentRunning
-	}
-	return ExperimentRestarting
+func (exp *Experiment) GetLastConditionType() ExperimentConditionType {
+	return exp.Status.Conditions[len(exp.Status.Conditions)-1].Type
 }
 
 func (exp *Experiment) setCondition(conditionType ExperimentConditionType, status v1.ConditionStatus, reason, message string) {
