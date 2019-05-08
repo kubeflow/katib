@@ -792,6 +792,7 @@ Katib will create each Hyper parameter from this config.
 | experiment_name | [string](#string) |  |  |
 | parameter_assignments | [TrialSpec.ParameterAssignments](#api.v1.alpha2.TrialSpec.ParameterAssignments) |  |  |
 | run_spec | [string](#string) |  |  |
+| metrics_collector_spec | [string](#string) |  |  |
 
 
 
