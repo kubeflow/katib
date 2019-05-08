@@ -152,6 +152,10 @@ service DBIF {
             get: "/api/DBIF/GetObservationLog/{trial_name}"
             };
     };
+
+    rpc SelectOne(SelectOneRequest) returns (SelectOneReply){
+        
+    };
 }
 
 /**
@@ -460,4 +464,10 @@ message GetObservationLogRequest {
 
 message GetObservationLogReply {
     ObservationLog observation_log = 1;
+}
+
+message SelectOneReply {
+}
+
+message SelectOneRequest {
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	crand "crypto/rand"
 	"database/sql"
 	"fmt"
@@ -13,7 +14,6 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/jsonpb"
-	v1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	dbif "github.com/kubeflow/katib/pkg/db/v1alpha2"
 	"google.golang.org/grpc"
 )
@@ -25,6 +25,7 @@ const (
 
 	connectInterval = 5 * time.Second
 	connectTimeout  = 60 * time.Second
+	port            = "0.0.0.0:6789"
 )
 
 type GetWorkerLogOpts struct {
@@ -41,36 +42,13 @@ type WorkerLog struct {
 	Value string
 }
 
-type KatibDBInterface interface {
-	DBInit()
-	SelectOne() error
-
-	RegisterExperiment(experiment *v1alpha2.Experiment) error
-	DeleteExperiment(experimentName string) error
-	GetExperiment(experimentName string) (*v1alpha2.Experiment, error)
-	GetExperimentList() ([]*v1alpha2.ExperimentSummary, error)
-	UpdateExperimentStatus(experimentName string, newStatus *v1alpha2.ExperimentStatus) error
-
-	UpdateAlgorithmExtraSettings(experimentName string, extraAlgorithmSetting []*v1alpha2.AlgorithmSetting) error
-	GetAlgorithmExtraSettings(experimentName string) ([]*v1alpha2.AlgorithmSetting, error)
-
-	RegisterTrial(trial *v1alpha2.Trial) error
-	GetTrialList(experimentName string, filter string) ([]*v1alpha2.Trial, error)
-	GetTrial(trialName string) (*v1alpha2.Trial, error)
-	UpdateTrialStatus(trialName string, newStatus *v1alpha2.TrialStatus) error
-	DeleteTrial(trialName string) error
-
-	RegisterObservationLog(trialName string, observationLog *v1alpha2.ObservationLog) error
-	GetObservationLog(trialName string, startTime string, endTime string) (*v1alpha2.ObservationLog, error)
-}
-
 type dbConn struct {
 	db *sql.DB
 }
 
 var rs1Letters = []rune("abcdefghijklmnopqrstuvwxyz")
 
-func (d *dbConn) DBInit() {
+func DBInit(d *dbConn) {
 	db := d.db
 
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS experiments
@@ -172,13 +150,14 @@ func openSQLConn(driverName string, dataSourceName string, interval time.Duratio
 	}
 }
 
-func NewWithSQLConn(db *sql.DB) (KatibDBInterface, error) {
+func NewWithSQLConn(db *sql.DB) (*dbConn, error) {
 	d := new(dbConn)
 	d.db = db
 	seed, err := crand.Int(crand.Reader, big.NewInt(1<<63-1))
 	if err != nil {
 		return nil, fmt.Errorf("RNG initialization failed: %v", err)
 	}
+	DBInit(d)
 	// We can do the following instead, but it creates a locking issue
 	//d.rng = rand.New(rand.NewSource(seed.Int64()))
 	rand.Seed(seed.Int64())
@@ -186,15 +165,22 @@ func NewWithSQLConn(db *sql.DB) (KatibDBInterface, error) {
 	return d, nil
 }
 
-func New() (KatibDBInterface, error) {
+func CreateNewDBServer() *dbConn {
 	db, err := openSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
 	if err != nil {
-		return nil, fmt.Errorf("DB open failed: %v", err)
+		log.Fatalf("DB open failed: %v", err)
+		return nil
 	}
-	return NewWithSQLConn(db)
+	dbWithConn, err := NewWithSQLConn(db)
+	if err != nil {
+		log.Fatalf("DB open failed: %v", err)
+		return nil
+	}
+	log.Printf("DB connection opened successfully")
+	return dbWithConn
 }
 
-func (d *dbConn) RegisterExperiment(experiment *v1alpha2.Experiment) error {
+func (d *dbConn) RegisterExperiment(ctx context.Context, in *dbif.RegisterExperimentRequest) (*dbif.RegisterExperimentReply, error) {
 	var paramSpecs string
 	var objSpec string
 	var algoSpec string
@@ -202,6 +188,7 @@ func (d *dbConn) RegisterExperiment(experiment *v1alpha2.Experiment) error {
 	var start_time string
 	var completion_time string
 	var err error
+	var experiment = in.Experiment
 	if experiment.ExperimentSpec != nil {
 		if experiment.ExperimentSpec.ParameterSpecs != nil {
 			paramSpecs, err = (&jsonpb.Marshaler{}).MarshalToString(experiment.ExperimentSpec.ParameterSpecs)
@@ -271,13 +258,13 @@ func (d *dbConn) RegisterExperiment(experiment *v1alpha2.Experiment) error {
 		completion_time,
 		nasConfig,
 	)
-	return err
+	return &dbif.RegisterExperimentReply{}, err
 }
-func (d *dbConn) DeleteExperiment(experimentName string) error {
-	_, err := d.db.Exec("DELETE FROM experiments WHERE name = ?", experimentName)
-	return err
+func (d *dbConn) DeleteExperiment(ctx context.Context, in *dbif.DeleteExperimentRequest) (*dbif.DeleteExperimentReply, error) {
+	_, err := d.db.Exec("DELETE FROM experiments WHERE name = ?", in.ExperimentName)
+	return &dbif.DeleteExperimentReply{}, err
 }
-func (d *dbConn) GetExperiment(experimentName string) (*v1alpha2.Experiment, error) {
+func (d *dbConn) GetExperiment(ctx context.Context, in *dbif.GetExperimentRequest) (*dbif.GetExperimentReply, error) {
 	var id string
 	var paramSpecs string
 	var objSpec string
@@ -285,10 +272,10 @@ func (d *dbConn) GetExperiment(experimentName string) (*v1alpha2.Experiment, err
 	var nasConfig string
 	var start_time string
 	var completion_time string
-
-	experiment := &v1alpha2.Experiment{
-		ExperimentSpec:   &v1alpha2.ExperimentSpec{},
-		ExperimentStatus: &v1alpha2.ExperimentStatus{},
+	experimentName := in.ExperimentName
+	experiment := &dbif.Experiment{
+		ExperimentSpec:   &dbif.ExperimentSpec{},
+		ExperimentStatus: &dbif.ExperimentStatus{},
 	}
 	row := d.db.QueryRow("SELECT * FROM experiments WHERE name = ?", experimentName)
 	err := row.Scan(
@@ -310,28 +297,28 @@ func (d *dbConn) GetExperiment(experimentName string) (*v1alpha2.Experiment, err
 		return nil, err
 	}
 	if paramSpecs != "" {
-		experiment.ExperimentSpec.ParameterSpecs = new(v1alpha2.ExperimentSpec_ParameterSpecs)
+		experiment.ExperimentSpec.ParameterSpecs = new(dbif.ExperimentSpec_ParameterSpecs)
 		err = jsonpb.UnmarshalString(paramSpecs, experiment.ExperimentSpec.ParameterSpecs)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if objSpec != "" {
-		experiment.ExperimentSpec.Objective = new(v1alpha2.ObjectiveSpec)
+		experiment.ExperimentSpec.Objective = new(dbif.ObjectiveSpec)
 		err = jsonpb.UnmarshalString(objSpec, experiment.ExperimentSpec.Objective)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if algoSpec != "" {
-		experiment.ExperimentSpec.Algorithm = new(v1alpha2.AlgorithmSpec)
+		experiment.ExperimentSpec.Algorithm = new(dbif.AlgorithmSpec)
 		err = jsonpb.UnmarshalString(algoSpec, experiment.ExperimentSpec.Algorithm)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if nasConfig != "" {
-		experiment.ExperimentSpec.NasConfig = new(v1alpha2.NasConfig)
+		experiment.ExperimentSpec.NasConfig = new(dbif.NasConfig)
 		err = jsonpb.UnmarshalString(nasConfig, experiment.ExperimentSpec.NasConfig)
 		if err != nil {
 			return nil, err
@@ -351,22 +338,24 @@ func (d *dbConn) GetExperiment(experimentName string) (*v1alpha2.Experiment, err
 		}
 		experiment.ExperimentStatus.CompletionTime = completion_timeMysql.UTC().Format(time.RFC3339Nano)
 	}
-	return experiment, nil
+	return &dbif.GetExperimentReply{
+		Experiment: experiment,
+	}, nil
 }
 
-func (d *dbConn) GetExperimentList() ([]*v1alpha2.ExperimentSummary, error) {
+func (d *dbConn) GetExperimentList(ctx context.Context, in *dbif.GetExperimentListRequest) (*dbif.GetExperimentListReply, error) {
 	rows, err := d.db.Query("SELECT name, condition, start_time, completion_time FROM experiments")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var result []*v1alpha2.ExperimentSummary
+	var result []*dbif.ExperimentSummary
 	var start_time string
 	var completion_time string
 	for rows.Next() {
-		experiment_sum := v1alpha2.ExperimentSummary{
+		experiment_sum := dbif.ExperimentSummary{
 			ExperimentName: "",
-			Status:         &v1alpha2.ExperimentStatus{},
+			Status:         &dbif.ExperimentStatus{},
 		}
 		err = rows.Scan(
 			&experiment_sum.ExperimentName,
@@ -396,12 +385,16 @@ func (d *dbConn) GetExperimentList() ([]*v1alpha2.ExperimentSummary, error) {
 		}
 		result = append(result, &experiment_sum)
 	}
-	return result, nil
+	return &dbif.GetExperimentListReply{
+		ExperimentSummaries: result,
+	}, nil
 }
 
-func (d *dbConn) UpdateExperimentStatus(experimentName string, newStatus *v1alpha2.ExperimentStatus) error {
+func (d *dbConn) UpdateExperimentStatus(ctx context.Context, in *dbif.UpdateExperimentStatusRequest) (*dbif.UpdateExperimentStatusReply, error) {
 	start_time := ""
 	completion_time := ""
+	experimentName := in.ExperimentName
+	newStatus := in.NewStatus
 	var err error
 	if newStatus.StartTime != "" {
 		s_time, err := time.Parse(time.RFC3339Nano, newStatus.StartTime)
@@ -424,14 +417,17 @@ func (d *dbConn) UpdateExperimentStatus(experimentName string, newStatus *v1alph
 		start_time,
 		completion_time,
 		experimentName)
-	return err
+	return &dbif.UpdateExperimentStatusReply{}, err
 }
 
-func (d *dbConn) UpdateAlgorithmExtraSettings(experimentName string, extraAlgorithmSetting []*v1alpha2.AlgorithmSetting) error {
-	aesList, err := d.GetAlgorithmExtraSettings(experimentName)
+func (d *dbConn) UpdateAlgorithmExtraSettings(ctx context.Context, in *dbif.UpdateAlgorithmExtraSettingsRequest) (*dbif.UpdateAlgorithmExtraSettingsReply, error) {
+	experimentName := in.ExperimentName
+	extraAlgorithmSetting := in.ExtraAlgorithmSettings
+	response, err := d.GetAlgorithmExtraSettings(ctx, &dbif.GetAlgorithmExtraSettingsRequest{ExperimentName: experimentName})
+	aesList := response.ExtraAlgorithmSettings
 	if err != nil {
 		log.Printf("Failed to get current state %v", err)
-		return err
+		return nil, err
 	}
 	for _, neas := range extraAlgorithmSetting {
 		isin := false
@@ -442,7 +438,7 @@ func (d *dbConn) UpdateAlgorithmExtraSettings(experimentName string, extraAlgori
 					neas.Value, experimentName, ceas.Name)
 				if err != nil {
 					log.Printf("Failed to update state %v", err)
-					return err
+					return nil, err
 				}
 				isin = true
 				break
@@ -460,22 +456,23 @@ func (d *dbConn) UpdateAlgorithmExtraSettings(experimentName string, extraAlgori
 			)
 			if err != nil {
 				log.Printf("Failed to update state %v", err)
-				return err
+				return nil, err
 			}
 		}
 	}
-	return nil
+	return &dbif.UpdateAlgorithmExtraSettingsReply{}, nil
 }
 
-func (d *dbConn) GetAlgorithmExtraSettings(experimentName string) ([]*v1alpha2.AlgorithmSetting, error) {
+func (d *dbConn) GetAlgorithmExtraSettings(ctx context.Context, in *dbif.GetAlgorithmExtraSettingsRequest) (*dbif.GetAlgorithmExtraSettingsReply, error) {
+	experimentName := in.ExperimentName
 	rows, err := d.db.Query("SELECT setting_name, value FROM extra_algorithm_settings WHERE experiment_name = ?", experimentName)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var result []*v1alpha2.AlgorithmSetting
+	var result []*dbif.AlgorithmSetting
 	for rows.Next() {
-		as := new(v1alpha2.AlgorithmSetting)
+		as := new(dbif.AlgorithmSetting)
 		err := rows.Scan(
 			&as.Name,
 			&as.Value,
@@ -485,15 +482,18 @@ func (d *dbConn) GetAlgorithmExtraSettings(experimentName string) ([]*v1alpha2.A
 		}
 		result = append(result, as)
 	}
-	return result, nil
+	return &dbif.GetAlgorithmExtraSettingsReply{
+		ExtraAlgorithmSettings: result,
+	}, nil
 }
 
-func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
+func (d *dbConn) RegisterTrial(ctx context.Context, in *dbif.RegisterTrialRequest) (*dbif.RegisterTrialReply, error) {
 	var paramAssignment string
 	var start_time string
 	var completion_time string
 	var observation string
 	var err error
+	trial := in.Trial
 	if trial.Spec != nil {
 		if trial.Spec.ParameterAssignments != nil {
 			paramAssignment, err = (&jsonpb.Marshaler{}).MarshalToString(trial.Spec.ParameterAssignments)
@@ -543,16 +543,18 @@ func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
 		start_time,
 		completion_time,
 	)
-	return err
+	return &dbif.RegisterTrialReply{}, err
 }
 
-func (d *dbConn) GetTrialList(experimentName string, filter string) ([]*v1alpha2.Trial, error) {
+func (d *dbConn) GetTrialList(ctx context.Context, in *dbif.GetTrialListRequest) (*dbif.GetTrialListReply, error) {
 	var id string
 	var paramAssignment string
 	var start_time string
 	var completion_time string
 	var observation string
 	var qstr = "SELECT * FROM trials WHERE experiment_name = ?"
+	experimentName := in.ExperimentName
+	filter := in.Filter
 	var qfield = []interface{}{experimentName}
 	if filter != "" {
 		//Currently only support filter by name.
@@ -569,11 +571,11 @@ func (d *dbConn) GetTrialList(experimentName string, filter string) ([]*v1alpha2
 		return nil, err
 	}
 	defer rows.Close()
-	var result []*v1alpha2.Trial
+	var result []*dbif.Trial
 	for rows.Next() {
-		trial := &v1alpha2.Trial{
-			Spec:   &v1alpha2.TrialSpec{},
-			Status: &v1alpha2.TrialStatus{},
+		trial := &dbif.Trial{
+			Spec:   &dbif.TrialSpec{},
+			Status: &dbif.TrialStatus{},
 		}
 		err := rows.Scan(
 			&id,
@@ -590,14 +592,14 @@ func (d *dbConn) GetTrialList(experimentName string, filter string) ([]*v1alpha2
 			log.Printf("Failed to scan trial %v", err)
 		}
 		if paramAssignment != "" {
-			trial.Spec.ParameterAssignments = new(v1alpha2.TrialSpec_ParameterAssignments)
+			trial.Spec.ParameterAssignments = new(dbif.TrialSpec_ParameterAssignments)
 			err = jsonpb.UnmarshalString(paramAssignment, trial.Spec.ParameterAssignments)
 			if err != nil {
 				return nil, err
 			}
 		}
 		if observation != "" {
-			trial.Status.Observation = new(v1alpha2.Observation)
+			trial.Status.Observation = new(dbif.Observation)
 			err = jsonpb.UnmarshalString(observation, trial.Status.Observation)
 			if err != nil {
 				return nil, err
@@ -619,18 +621,21 @@ func (d *dbConn) GetTrialList(experimentName string, filter string) ([]*v1alpha2
 		}
 		result = append(result, trial)
 	}
-	return result, nil
+	return &dbif.GetTrialListReply{
+		Trials: result,
+	}, nil
 }
 
-func (d *dbConn) GetTrial(trialName string) (*v1alpha2.Trial, error) {
+func (d *dbConn) GetTrial(ctx context.Context, in *dbif.GetTrialRequest) (*dbif.GetTrialReply, error) {
 	var id string
 	var paramAssignment string
 	var start_time string
 	var completion_time string
 	var observation string
-	trial := &v1alpha2.Trial{
-		Spec:   &v1alpha2.TrialSpec{},
-		Status: &v1alpha2.TrialStatus{},
+	trialName := in.TrialName
+	trial := &dbif.Trial{
+		Spec:   &dbif.TrialSpec{},
+		Status: &dbif.TrialStatus{},
 	}
 	row := d.db.QueryRow("SELECT * FROM trials WHERE name = ?", trialName)
 	err := row.Scan(
@@ -645,14 +650,14 @@ func (d *dbConn) GetTrial(trialName string) (*v1alpha2.Trial, error) {
 		&completion_time,
 	)
 	if paramAssignment != "" {
-		trial.Spec.ParameterAssignments = new(v1alpha2.TrialSpec_ParameterAssignments)
+		trial.Spec.ParameterAssignments = new(dbif.TrialSpec_ParameterAssignments)
 		err = jsonpb.UnmarshalString(paramAssignment, trial.Spec.ParameterAssignments)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if observation != "" {
-		trial.Status.Observation = new(v1alpha2.Observation)
+		trial.Status.Observation = new(dbif.Observation)
 		err = jsonpb.UnmarshalString(observation, trial.Status.Observation)
 		if err != nil {
 			return nil, err
@@ -673,13 +678,17 @@ func (d *dbConn) GetTrial(trialName string) (*v1alpha2.Trial, error) {
 		trial.Status.CompletionTime = completion_timeMysql.UTC().Format(time.RFC3339Nano)
 	}
 
-	return trial, nil
+	return &dbif.GetTrialReply{
+		Trial: trial,
+	}, nil
 }
 
-func (d *dbConn) UpdateTrialStatus(trialName string, newStatus *v1alpha2.TrialStatus) error {
+func (d *dbConn) UpdateTrialStatus(ctx context.Context, in *dbif.UpdateTrialStatusRequest) (*dbif.UpdateTrialStatusReply, error) {
 	var observation string = ""
 	var formattedStartTime, formattedCompletionTime string = "", ""
 	var err error
+	trialName := in.TrialName
+	newStatus := in.NewStatus
 	if newStatus.Observation != nil {
 		observation, err = (&jsonpb.Marshaler{}).MarshalToString(newStatus.Observation)
 		if err != nil {
@@ -710,15 +719,17 @@ func (d *dbConn) UpdateTrialStatus(trialName string, newStatus *v1alpha2.TrialSt
 		formattedCompletionTime,
 		observation,
 		trialName)
-	return err
+	return &dbif.UpdateTrialStatusReply{}, err
 }
-func (d *dbConn) DeleteTrial(trialName string) error {
-	_, err := d.db.Exec("DELETE FROM trials WHERE name = ?", trialName)
-	return err
+func (d *dbConn) DeleteTrial(ctx context.Context, in *dbif.DeleteTrialRequest) (*dbif.DeleteTrialReply, error) {
+	_, err := d.db.Exec("DELETE FROM trials WHERE name = ?", in.TrialName)
+	return &dbif.DeleteTrialReply{}, err
 }
 
-func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1alpha2.ObservationLog) error {
+func (d *dbConn) ReportObservationLog(ctx context.Context, in *dbif.ReportObservationLogRequest) (*dbif.ReportObservationLogReply, error) {
 	var mname, mvalue string
+	trialName := in.TrialName
+	observationLog := in.ObservationLog
 	for _, mlog := range observationLog.MetricLogs {
 		mname = mlog.Metric.Name
 		mvalue = mlog.Metric.Value
@@ -743,12 +754,15 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1alph
 			mvalue,
 		)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
-	return nil
+	return &dbif.ReportObservationLogReply{}, nil
 }
-func (d *dbConn) GetObservationLog(trialName string, startTime string, endTime string) (*v1alpha2.ObservationLog, error) {
+func (d *dbConn) GetObservationLog(ctx context.Context, in *dbif.GetObservationLogRequest) (*dbif.GetObservationLogReply, error) {
+	trialName := in.TrialName
+	startTime := in.StartTime
+	endTime := in.EndTime
 	qfield := []interface{}{trialName}
 	qstr := ""
 	if startTime != "" {
@@ -775,8 +789,8 @@ func (d *dbConn) GetObservationLog(trialName string, startTime string, endTime s
 		log.Printf("Failed to get ObservationLogs %v", err)
 		return nil, err
 	}
-	result := &v1alpha2.ObservationLog{
-		MetricLogs: []*v1alpha2.MetricLog{},
+	result := &dbif.ObservationLog{
+		MetricLogs: []*dbif.MetricLog{},
 	}
 	for rows.Next() {
 		var mname, mvalue, sqlTimeStr string
@@ -791,15 +805,17 @@ func (d *dbConn) GetObservationLog(trialName string, startTime string, endTime s
 			continue
 		}
 		timeStamp := ptime.UTC().Format(time.RFC3339Nano)
-		result.MetricLogs = append(result.MetricLogs, &v1alpha2.MetricLog{
+		result.MetricLogs = append(result.MetricLogs, &dbif.MetricLog{
 			TimeStamp: timeStamp,
-			Metric: &v1alpha2.Metric{
+			Metric: &dbif.Metric{
 				Name:  mname,
 				Value: mvalue,
 			},
 		})
 	}
-	return result, nil
+	return &dbif.GetObservationLogReply{
+		ObservationLog: result,
+	}, nil
 }
 
 func main() {

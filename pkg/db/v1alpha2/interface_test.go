@@ -1,4 +1,4 @@
-package db
+package db_v1_alpha2
 
 import (
 	//	"database/sql"
@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+
 	//"time"
 
 	_ "github.com/go-sql-driver/mysql"

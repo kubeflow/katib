@@ -6,13 +6,15 @@ package api_v1_alpha2
 import (
 	context "context"
 	fmt "fmt"
+	math "math"
+
+	v1alpha2 "github.com/kubeflow/katib/pkg/db/v1alpha2"
+
 	proto "github.com/golang/protobuf/proto"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	math "math"
-	v1alpha2 "pkg/db/v1alpha2"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

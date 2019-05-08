@@ -10,121 +10,97 @@ import (
 
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	health_pb "github.com/kubeflow/katib/pkg/api/v1alpha2/health"
-	kdb "github.com/kubeflow/katib/pkg/db/v1alpha2"
+	dbif "github.com/kubeflow/katib/pkg/db/v1alpha2"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 const (
-	port = "0.0.0.0:6789"
+	port        = "0.0.0.0:6789"
+	dbIfaddress = "dbif-mysql:6789"
 )
 
-var dbIf kdb.KatibDBInterface
+var dbIf dbif.DBIFClient
 
 type server struct {
 }
 
 // Register a Experiment to DB.
-func (s *server) RegisterExperiment(ctx context.Context, in *api_pb.RegisterExperimentRequest) (*api_pb.RegisterExperimentReply, error) {
-	err := dbIf.RegisterExperiment(in.Experiment)
-	return &api_pb.RegisterExperimentReply{}, err
+func (s *server) RegisterExperiment(ctx context.Context, in *dbif.RegisterExperimentRequest) (*dbif.RegisterExperimentReply, error) {
+	return dbIf.RegisterExperiment(ctx, in)
 }
 
 // Delete a Experiment from DB by name.
-func (s *server) DeleteExperiment(ctx context.Context, in *api_pb.DeleteExperimentRequest) (*api_pb.DeleteExperimentReply, error) {
-	err := dbIf.DeleteExperiment(in.ExperimentName)
-	return &api_pb.DeleteExperimentReply{}, err
+func (s *server) DeleteExperiment(ctx context.Context, in *dbif.DeleteExperimentRequest) (*dbif.DeleteExperimentReply, error) {
+	return dbIf.DeleteExperiment(ctx, in)
 }
 
 // Get a Experiment from DB by name.
-func (s *server) GetExperiment(ctx context.Context, in *api_pb.GetExperimentRequest) (*api_pb.GetExperimentReply, error) {
-	exp, err := dbIf.GetExperiment(in.ExperimentName)
-	return &api_pb.GetExperimentReply{
-		Experiment: exp,
-	}, err
+func (s *server) GetExperiment(ctx context.Context, in *dbif.GetExperimentRequest) (*dbif.GetExperimentReply, error) {
+	return dbIf.GetExperiment(ctx, in)
 }
 
 // Get a summary list of Experiment from DB.
 // The summary includes name and condition.
-func (s *server) GetExperimentList(ctx context.Context, in *api_pb.GetExperimentListRequest) (*api_pb.GetExperimentListReply, error) {
-	expList, err := dbIf.GetExperimentList()
-	return &api_pb.GetExperimentListReply{
-		ExperimentSummaries: expList,
-	}, err
+func (s *server) GetExperimentList(ctx context.Context, in *dbif.GetExperimentListRequest) (*dbif.GetExperimentListReply, error) {
+	return dbIf.GetExperimentList(ctx, in)
 }
 
 // Update Status of a experiment.
-func (s *server) UpdateExperimentStatus(ctx context.Context, in *api_pb.UpdateExperimentStatusRequest) (*api_pb.UpdateExperimentStatusReply, error) {
-	err := dbIf.UpdateExperimentStatus(in.ExperimentName, in.NewStatus)
-	return &api_pb.UpdateExperimentStatusReply{}, err
+func (s *server) UpdateExperimentStatus(ctx context.Context, in *dbif.UpdateExperimentStatusRequest) (*dbif.UpdateExperimentStatusReply, error) {
+	return dbIf.UpdateExperimentStatus(ctx, in)
 }
 
 // Update AlgorithmExtraSettings.
 // The ExtraSetting is created if it does not exist, otherwise it is overwrited.
-func (s *server) UpdateAlgorithmExtraSettings(ctx context.Context, in *api_pb.UpdateAlgorithmExtraSettingsRequest) (*api_pb.UpdateAlgorithmExtraSettingsReply, error) {
-	err := dbIf.UpdateAlgorithmExtraSettings(in.ExperimentName, in.ExtraAlgorithmSettings)
-	return &api_pb.UpdateAlgorithmExtraSettingsReply{}, err
+func (s *server) UpdateAlgorithmExtraSettings(ctx context.Context, in *dbif.UpdateAlgorithmExtraSettingsRequest) (*dbif.UpdateAlgorithmExtraSettingsReply, error) {
+	return dbIf.UpdateAlgorithmExtraSettings(ctx, in)
 }
 
 // Get all AlgorithmExtraSettings.
-func (s *server) GetAlgorithmExtraSettings(ctx context.Context, in *api_pb.GetAlgorithmExtraSettingsRequest) (*api_pb.GetAlgorithmExtraSettingsReply, error) {
-	eas, err := dbIf.GetAlgorithmExtraSettings(in.ExperimentName)
-	return &api_pb.GetAlgorithmExtraSettingsReply{
-		ExtraAlgorithmSettings: eas,
-	}, err
+func (s *server) GetAlgorithmExtraSettings(ctx context.Context, in *dbif.GetAlgorithmExtraSettingsRequest) (*dbif.GetAlgorithmExtraSettingsReply, error) {
+	return dbIf.GetAlgorithmExtraSettings(ctx, in)
 }
 
 // Register a Trial to DB.
 // ID will be filled by manager automatically.
-func (s *server) RegisterTrial(ctx context.Context, in *api_pb.RegisterTrialRequest) (*api_pb.RegisterTrialReply, error) {
-	err := dbIf.RegisterTrial(in.Trial)
-	return &api_pb.RegisterTrialReply{}, err
+func (s *server) RegisterTrial(ctx context.Context, in *dbif.RegisterTrialRequest) (*dbif.RegisterTrialReply, error) {
+	return dbIf.RegisterTrial(ctx, in)
 }
 
 // Delete a Trial from DB by ID.
-func (s *server) DeleteTrial(ctx context.Context, in *api_pb.DeleteTrialRequest) (*api_pb.DeleteTrialReply, error) {
-	err := dbIf.DeleteTrial(in.TrialName)
-	return &api_pb.DeleteTrialReply{}, err
+func (s *server) DeleteTrial(ctx context.Context, in *dbif.DeleteTrialRequest) (*dbif.DeleteTrialReply, error) {
+	return dbIf.DeleteTrial(ctx, in)
 }
 
 // Get a list of Trial from DB by name of a Experiment.
-func (s *server) GetTrialList(ctx context.Context, in *api_pb.GetTrialListRequest) (*api_pb.GetTrialListReply, error) {
-	trList, err := dbIf.GetTrialList(in.ExperimentName, in.Filter)
-	return &api_pb.GetTrialListReply{
-		Trials: trList,
-	}, err
+func (s *server) GetTrialList(ctx context.Context, in *dbif.GetTrialListRequest) (*dbif.GetTrialListReply, error) {
+	return dbIf.GetTrialList(ctx, in)
 }
 
 // Get a Trial from DB by ID of Trial.
-func (s *server) GetTrial(ctx context.Context, in *api_pb.GetTrialRequest) (*api_pb.GetTrialReply, error) {
-	tr, err := dbIf.GetTrial(in.TrialName)
-	return &api_pb.GetTrialReply{
-		Trial: tr,
-	}, err
+func (s *server) GetTrial(ctx context.Context, in *dbif.GetTrialRequest) (*dbif.GetTrialReply, error) {
+	return dbIf.GetTrial(ctx, in)
 }
 
 // Update Status of a trial.
-func (s *server) UpdateTrialStatus(ctx context.Context, in *api_pb.UpdateTrialStatusRequest) (*api_pb.UpdateTrialStatusReply, error) {
+func (s *server) UpdateTrialStatus(ctx context.Context, in *dbif.UpdateTrialStatusRequest) (*dbif.UpdateTrialStatusReply, error) {
 	err := dbIf.UpdateTrialStatus(in.TrialName, in.NewStatus)
-	return &api_pb.UpdateTrialStatusReply{}, err
+	return &dbif.UpdateTrialStatusReply{}, err
 }
 
 // Report a log of Observations for a Trial.
 // The log consists of timestamp and value of metric.
 // Katib store every log of metrics.
 // You can see accuracy curve or other metric logs on UI.
-func (s *server) ReportObservationLog(ctx context.Context, in *api_pb.ReportObservationLogRequest) (*api_pb.ReportObservationLogReply, error) {
-	err := dbIf.RegisterObservationLog(in.TrialName, in.ObservationLog)
-	return &api_pb.ReportObservationLogReply{}, err
+func (s *server) ReportObservationLog(ctx context.Context, in *dbif.ReportObservationLogRequest) (*dbif.ReportObservationLogReply, error) {
+	return dbIf.ReportObservationLog(ctx, in)
 }
 
 // Get all log of Observations for a Trial.
-func (s *server) GetObservationLog(ctx context.Context, in *api_pb.GetObservationLogRequest) (*api_pb.GetObservationLogReply, error) {
-	ol, err := dbIf.GetObservationLog(in.TrialName, in.StartTime, in.EndTime)
-	return &api_pb.GetObservationLogReply{
-		ObservationLog: ol,
-	}, err
+func (s *server) GetObservationLog(ctx context.Context, in *dbif.GetObservationLogRequest) (*dbif.GetObservationLogReply, error) {
+	return dbIf.GetObservationLog(ctx, in)
 }
 
 func (s *server) getSuggestionServiceConnection(algoName string) (*grpc.ClientConn, error) {
@@ -138,13 +114,13 @@ func (s *server) getSuggestionServiceConnection(algoName string) (*grpc.ClientCo
 func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestionsReply, error) {
 	conn, err := s.getSuggestionServiceConnection(in.AlgorithmName)
 	if err != nil {
-		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
+		return &api_pb.GetSuggestionsReply{Trials: []*dbif.Trial{}}, err
 	}
 	defer conn.Close()
 	c := api_pb.NewSuggestionClient(conn)
 	r, err := c.GetSuggestions(ctx, in)
 	if err != nil {
-		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
+		return &api_pb.GetSuggestionsReply{Trials: []*dbif.Trial{}}, err
 	}
 	return r, nil
 }
@@ -186,11 +162,13 @@ func main() {
 	flag.Parse()
 	var err error
 
-	dbIf, err = kdb.New()
+	conn, err := grpc.Dial(dbIfaddress, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("Failed to open db connection: %v", err)
+		log.Fatalf("Could not connect to DBIF service: %v", err)
 	}
-	dbIf.DBInit()
+	defer conn.Close()
+	dbIf = dbif.NewDBIFClient(conn)
+
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
