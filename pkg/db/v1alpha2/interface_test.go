@@ -37,6 +37,7 @@ var trialColumns = []string{
 	"id",
 	"name",
 	"experiment_name",
+	"objective",
 	"parameter_assignments",
 	"run_spec",
 	"metrics_collector_spec",
@@ -92,10 +93,10 @@ func TestRegisterExperiment(t *testing.T) {
 				Parameters: []*api_pb.ParameterSpec{},
 			},
 			Objective: &api_pb.ObjectiveSpec{
-				Type:                   api_pb.ObjectiveType_UNKNOWN,
-				Goal:                   0.99,
-				ObjectiveMetricName:    "f1_score",
-				AdditionalMetricsNames: []string{"loss", "precision", "recall"},
+				Type:                  api_pb.ObjectiveType_UNKNOWN,
+				Goal:                  0.99,
+				ObjectiveMetricName:   "f1_score",
+				AdditionalMetricNames: []string{"loss", "precision", "recall"},
 			},
 			Algorithm:          &api_pb.AlgorithmSpec{},
 			TrialTemplate:      "",
@@ -124,7 +125,7 @@ func TestRegisterExperiment(t *testing.T) {
 	).WithArgs(
 		"test1",
 		"{\"parameters\":[]}",
-		"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricsNames\":[\"loss\",\"precision\",\"recall\"]}",
+		"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricNames\":[\"loss\",\"precision\",\"recall\"]}",
 		"{}",
 		experiment.ExperimentSpec.TrialTemplate,
 		experiment.ExperimentSpec.ParallelTrialCount,
@@ -146,7 +147,7 @@ func TestGetExperiment(t *testing.T) {
 			1,
 			"test1",
 			"{\"parameters\":[]}",
-			"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricsNames\":[\"loss\",\"precision\",\"recall\"]}",
+			"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricNames\":[\"loss\",\"precision\",\"recall\"]}",
 			"{}",
 			"",
 			10,
@@ -254,6 +255,12 @@ func TestRegisterTrial(t *testing.T) {
 		Name: "test1_trial1",
 		Spec: &api_pb.TrialSpec{
 			ExperimentName: "test1",
+			Objective: &api_pb.ObjectiveSpec{
+				Type:                  api_pb.ObjectiveType_UNKNOWN,
+				Goal:                  0.99,
+				ObjectiveMetricName:   "f1_score",
+				AdditionalMetricNames: []string{"loss", "precision", "recall"},
+			},
 			ParameterAssignments: &api_pb.TrialSpec_ParameterAssignments{
 				Assignments: []*api_pb.ParameterAssignment{
 					&api_pb.ParameterAssignment{
@@ -298,6 +305,7 @@ func TestRegisterTrial(t *testing.T) {
 		`INSERT INTO trials \(
 			name, 
 			experiment_name,
+			objective,
 			parameter_assignments,
 			run_spec,
 			metrics_collector_spec,
@@ -308,6 +316,7 @@ func TestRegisterTrial(t *testing.T) {
 	).WithArgs(
 		"test1_trial1",
 		"test1",
+		"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricNames\":[\"loss\",\"precision\",\"recall\"]}",
 		"{\"assignments\":[{\"name\":\"param1\",\"value\":\"0.9\"},{\"name\":\"param2\",\"value\":\"10\"}]}",
 		"",
 		"",
@@ -329,6 +338,7 @@ func TestGetTrialList(t *testing.T) {
 			1,
 			"test1_trial1",
 			"test1",
+			"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricNames\":[\"loss\",\"precision\",\"recall\"]}",
 			"{\"assignments\":[{\"name\":\"param1\",\"value\":\"0.9\"},{\"name\":\"param2\",\"value\":\"10\"}]}",
 			"",
 			"",
@@ -340,6 +350,7 @@ func TestGetTrialList(t *testing.T) {
 			2,
 			"test1_trial2",
 			"test1",
+			"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricNames\":[\"loss\",\"precision\",\"recall\"]}",
 			"{\"assignments\":[{\"name\":\"param1\",\"value\":\"0.8\"},{\"name\":\"param2\",\"value\":\"20\"}]}",
 			"",
 			"",
@@ -365,6 +376,7 @@ func TestGetTrial(t *testing.T) {
 			1,
 			"test1_trial1",
 			"test1",
+			"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricNames\":[\"loss\",\"precision\",\"recall\"]}",
 			"{\"assignments\":[{\"name\":\"param1\",\"value\":\"0.9\"},{\"name\":\"param2\",\"value\":\"10\"}]}",
 			"",
 			"",

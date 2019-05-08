@@ -60,8 +60,10 @@ def delete_experiment(stub):
 
 def register_trial(stub):
   try:
+    obj = api_pb2.ObjectiveSpec(type=1, goal=0.09, objective_metric_name="loss")
     parameters = api_pb2.TrialSpec.ParameterAssignments(assignments=[api_pb2.ParameterAssignment(name="rl", value="0.01")])
     spec = api_pb2.TrialSpec(experiment_name=TEST_EXPERIMENT,
+                             objective=obj,
                              run_spec="a batch/job resource",
                              metrics_collector_spec="metrics/collector",
                              parameter_assignments=parameters)

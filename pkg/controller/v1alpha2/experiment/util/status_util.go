@@ -76,7 +76,7 @@ func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trial
 			bestTrialIndex = index
 		}
 
-		if objectiveType == experimentsv1alpha2.ObjectiveTypeMinimize {
+		if objectiveType == trialsv1alpha2.ObjectiveTypeMinimize {
 			if *objectiveMetricValue < bestTrialValue {
 				bestTrialValue = *objectiveMetricValue
 				bestTrialIndex = index
@@ -84,7 +84,7 @@ func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trial
 			if bestTrialValue <= objectiveValueGoal {
 				isObjectiveGoalReached = true
 			}
-		} else if objectiveType == experimentsv1alpha2.ObjectiveTypeMaximize {
+		} else if objectiveType == trialsv1alpha2.ObjectiveTypeMaximize {
 			if *objectiveMetricValue > bestTrialValue {
 				bestTrialValue = *objectiveMetricValue
 				bestTrialIndex = index

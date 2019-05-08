@@ -17,8 +17,8 @@ package util
 import (
 	"bytes"
 	"fmt"
-	"text/template"
 	"strings"
+	"text/template"
 
 	"github.com/kubeflow/katib/pkg"
 	katibv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"

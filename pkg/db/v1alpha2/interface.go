@@ -415,12 +415,19 @@ func (d *dbConn) GetAlgorithmExtraSettings(experimentName string) ([]*v1alpha2.A
 }
 
 func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
+	var objSpec string
 	var paramAssignment string
 	var start_time string
 	var completion_time string
 	var observation string
 	var err error
 	if trial.Spec != nil {
+		if trial.Spec.Objective != nil {
+			objSpec, err = (&jsonpb.Marshaler{}).MarshalToString(trial.Spec.Objective)
+			if err != nil {
+				log.Fatalf("Error marshaling Objective: %v", err)
+			}
+		}
 		if trial.Spec.ParameterAssignments != nil {
 			paramAssignment, err = (&jsonpb.Marshaler{}).MarshalToString(trial.Spec.ParameterAssignments)
 			if err != nil {
@@ -454,15 +461,17 @@ func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
 		`INSERT INTO trials (
 			name, 
 			experiment_name,
+			objective,
 			parameter_assignments,
 			run_spec,
 			metrics_collector_spec,
 			observation,
 			status,
 			start_time,
-			completion_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			completion_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		trial.Name,
 		trial.Spec.ExperimentName,
+		objSpec,
 		paramAssignment,
 		trial.Spec.RunSpec,
 		trial.Spec.MetricsCollectorSpec,
@@ -476,6 +485,7 @@ func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
 
 func (d *dbConn) GetTrialList(experimentName string, filter string) ([]*v1alpha2.Trial, error) {
 	var id string
+	var objSpec string
 	var paramAssignment string
 	var start_time string
 	var completion_time string
@@ -507,6 +517,7 @@ func (d *dbConn) GetTrialList(experimentName string, filter string) ([]*v1alpha2
 			&id,
 			&trial.Name,
 			&trial.Spec.ExperimentName,
+			&objSpec,
 			&paramAssignment,
 			&trial.Spec.RunSpec,
 			&trial.Spec.MetricsCollectorSpec,
@@ -517,6 +528,13 @@ func (d *dbConn) GetTrialList(experimentName string, filter string) ([]*v1alpha2
 		)
 		if err != nil {
 			log.Printf("Failed to scan trial %v", err)
+		}
+		if objSpec != "" {
+			trial.Spec.Objective = new(v1alpha2.ObjectiveSpec)
+			err = jsonpb.UnmarshalString(objSpec, trial.Spec.Objective)
+			if err != nil {
+				return nil, err
+			}
 		}
 		if paramAssignment != "" {
 			trial.Spec.ParameterAssignments = new(v1alpha2.TrialSpec_ParameterAssignments)
@@ -553,6 +571,7 @@ func (d *dbConn) GetTrialList(experimentName string, filter string) ([]*v1alpha2
 
 func (d *dbConn) GetTrial(trialName string) (*v1alpha2.Trial, error) {
 	var id string
+	var objSpec string
 	var paramAssignment string
 	var start_time string
 	var completion_time string
@@ -566,6 +585,7 @@ func (d *dbConn) GetTrial(trialName string) (*v1alpha2.Trial, error) {
 		&id,
 		&trial.Name,
 		&trial.Spec.ExperimentName,
+		&objSpec,
 		&paramAssignment,
 		&trial.Spec.RunSpec,
 		&trial.Spec.MetricsCollectorSpec,
@@ -574,6 +594,13 @@ func (d *dbConn) GetTrial(trialName string) (*v1alpha2.Trial, error) {
 		&start_time,
 		&completion_time,
 	)
+	if objSpec != "" {
+		trial.Spec.Objective = new(v1alpha2.ObjectiveSpec)
+		err = jsonpb.UnmarshalString(objSpec, trial.Spec.Objective)
+		if err != nil {
+			return nil, err
+		}
+	}
 	if paramAssignment != "" {
 		trial.Spec.ParameterAssignments = new(v1alpha2.TrialSpec_ParameterAssignments)
 		err = jsonpb.UnmarshalString(paramAssignment, trial.Spec.ParameterAssignments)

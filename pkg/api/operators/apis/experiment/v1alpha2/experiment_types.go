@@ -26,7 +26,7 @@ type ExperimentSpec struct {
 	Parameters []ParameterSpec `json:"parameters,omitempty"`
 
 	// Describes the objective of the experiment.
-	Objective *ObjectiveSpec `json:"objective,omitempty"`
+	Objective *trial.ObjectiveSpec `json:"objective,omitempty"`
 
 	// Describes the suggestion algorithm.
 	Algorithm *AlgorithmSpec `json:"algorithm,omitempty"`
@@ -158,23 +158,6 @@ type FeasibleSpace struct {
 	List []string `json:"list,omitempty"`
 	Step string   `json:"step,omitempty"`
 }
-
-type ObjectiveSpec struct {
-	Type                ObjectiveType `json:"type,omitempty"`
-	Goal                *float64      `json:"goal,omitempty"`
-	ObjectiveMetricName string        `json:"objectiveMetricName,omitempty"`
-	// This can be empty if we only care about the objective metric.
-	// Note: If we adopt a push instead of pull mechanism, this can be omitted completely.
-	AdditionalMetricsNames []string `json:"additionalMetricsNames,omitempty"`
-}
-
-type ObjectiveType string
-
-const (
-	ObjectiveTypeUnknown  ObjectiveType = ""
-	ObjectiveTypeMinimize ObjectiveType = "minimize"
-	ObjectiveTypeMaximize ObjectiveType = "maximize"
-)
 
 type AlgorithmSpec struct {
 	AlgorithmName string `json:"algorithmName,omitempty"`

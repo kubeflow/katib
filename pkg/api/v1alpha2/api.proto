@@ -231,7 +231,7 @@ message ObjectiveSpec{
     ObjectiveType type = 1;
     float goal = 2;
     string objective_metric_name = 3;
-    repeated string additional_metrics_names = 4; 
+    repeated string additional_metric_names = 4; 
     /// This can be empty if we only care about the objective metric.
 }
 
@@ -355,9 +355,10 @@ message TrialSpec {
         repeated ParameterAssignment assignments = 1;
     }
     string experiment_name = 1;
-    ParameterAssignments parameter_assignments = 2;
-    string run_spec = 3;
-    string metrics_collector_spec = 4;
+    ObjectiveSpec objective = 2;
+    ParameterAssignments parameter_assignments = 3;
+    string run_spec = 4;
+    string metrics_collector_spec = 5;
 }
 
 message TrialStatus {

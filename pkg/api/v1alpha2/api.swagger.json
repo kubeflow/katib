@@ -792,7 +792,7 @@
         "objective_metric_name": {
           "type": "string"
         },
-        "additional_metrics_names": {
+        "additional_metric_names": {
           "type": "array",
           "items": {
             "type": "string"
@@ -933,6 +933,9 @@
       "properties": {
         "experiment_name": {
           "type": "string"
+        },
+        "objective": {
+          "$ref": "#/definitions/alpha2ObjectiveSpec"
         },
         "parameter_assignments": {
           "$ref": "#/definitions/TrialSpecParameterAssignments"

@@ -21,6 +21,9 @@ import (
 )
 
 type TrialSpec struct {
+	// Describes the objective of the experiment.
+	Objective *ObjectiveSpec `json:"objective,omitempty"`
+
 	// Key-value pairs for hyperparameters and assignment values.
 	ParameterAssignments []ParameterAssignment `json:"parameterAssignments"`
 
@@ -56,6 +59,23 @@ type TrialStatus struct {
 	// Results of the Trial - objectives and other metrics values.
 	Observation Observation `json:"observation,omitempty"`
 }
+
+type ObjectiveSpec struct {
+	Type                ObjectiveType `json:"type,omitempty"`
+	Goal                *float64      `json:"goal,omitempty"`
+	ObjectiveMetricName string        `json:"objectiveMetricName,omitempty"`
+	// This can be empty if we only care about the objective metric.
+	// Note: If we adopt a push instead of pull mechanism, this can be omitted completely.
+	AdditionalMetricNames []string `json:"additionalMetricNames,omitempty"`
+}
+
+type ObjectiveType string
+
+const (
+	ObjectiveTypeUnknown  ObjectiveType = ""
+	ObjectiveTypeMinimize ObjectiveType = "minimize"
+	ObjectiveTypeMaximize ObjectiveType = "maximize"
+)
 
 type ParameterAssignment struct {
 	Name  string `json:"name,omitempty"`

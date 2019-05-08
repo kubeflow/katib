@@ -586,7 +586,7 @@ NasConfig contains a config of NAS job
 | type | [ObjectiveType](#api.v1.alpha2.ObjectiveType) |  |  |
 | goal | [float](#float) |  |  |
 | objective_metric_name | [string](#string) |  |  |
-| additional_metrics_names | [string](#string) | repeated | This can be empty if we only care about the objective metric. |
+| additional_metric_names | [string](#string) | repeated | This can be empty if we only care about the objective metric. |
 
 
 
@@ -790,6 +790,7 @@ Katib will create each Hyper parameter from this config.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | experiment_name | [string](#string) |  |  |
+| objective | [ObjectiveSpec](#api.v1.alpha2.ObjectiveSpec) |  |  |
 | parameter_assignments | [TrialSpec.ParameterAssignments](#api.v1.alpha2.TrialSpec.ParameterAssignments) |  |  |
 | run_spec | [string](#string) |  |  |
 | metrics_collector_spec | [string](#string) |  |  |
