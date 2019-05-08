@@ -29,6 +29,9 @@ type TrialSpec struct {
 	// and let the corresponding resource controller (e.g. tf-operator) handle
 	// the rest.
 	RunSpec string `json:"runSpec,omitempty"`
+
+	// Raw text for the metrics collector spec. This must be a CronJob object.
+	MetricsCollectorSpec string `json:"metricsCollectorSpec,omitempty"`
 }
 
 type TrialStatus struct {

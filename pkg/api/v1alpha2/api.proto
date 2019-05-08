@@ -354,6 +354,7 @@ message TrialSpec {
     string experiment_name = 1;
     ParameterAssignments parameter_assignments = 2;
     string run_spec = 3;
+    string metrics_collector_spec = 4;
 }
 
 message TrialStatus {

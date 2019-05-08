@@ -931,6 +931,9 @@
         },
         "run_spec": {
           "type": "string"
+        },
+        "metrics_collector_spec": {
+          "type": "string"
         }
       }
     },
