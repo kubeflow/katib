@@ -58,11 +58,11 @@ message GetSuggestionsRequest {
 }
 
 message GetSuggestionsReply {
-    repeated Trial trials = 1;
+    repeated db.v1.alpha2.Trial trials = 1;
 }
 
 message ValidateAlgorithmSettingsRequest {
-    ExperimentSpec experiment_spec = 1;
+    db.v1.alpha2.ExperimentSpec experiment_spec = 1;
     string algorithm_name = 2;
 }
 
