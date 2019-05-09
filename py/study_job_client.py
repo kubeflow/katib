@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# Notice: The file is used in https://github.com/kubeflow/pipelines/blob/master/components/kubeflow/katib-launcher/Dockerfile, please do not delete the file.
 import datetime
 import json
 import logging
