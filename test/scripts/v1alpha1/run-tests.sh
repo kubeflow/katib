@@ -71,11 +71,15 @@ sed -i -e "s@image: katib\/vizier-core-rest@image: ${REGISTRY}\/${REPO_NAME}\/vi
 sed -i -e "s@image: katib\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/katib-ui:${VERSION}@" manifests/v1alpha1/vizier/ui/deployment.yaml
 sed -i -e "s@type: NodePort@type: ClusterIP@" -e "/nodePort: 30678/d" manifests/v1alpha1/vizier/core/service.yaml
 sed -i -e "s@image: katib\/studyjob-controller@image: ${REGISTRY}\/${REPO_NAME}\/studyjob-controller:${VERSION}@" manifests/v1alpha1/studyjobcontroller/studyjobcontroller.yaml
+
 sed -i -e "s@image: katib\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-random:${VERSION}@" manifests/v1alpha1/vizier/suggestion/random/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-grid:${VERSION}@" manifests/v1alpha1/vizier/suggestion/grid/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-hyperband:${VERSION}@" manifests/v1alpha1/vizier/suggestion/hyperband/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-bayesianoptimization:${VERSION}@" manifests/v1alpha1/vizier/suggestion/bayesianoptimization/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-nasrl:${VERSION}@" manifests/v1alpha1/vizier/suggestion/nasrl/deployment.yaml
+sed -i -e "s@image: katib\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-nasrl:${VERSION}@" manifests/v1alpha1/vizier/suggestion/nasrl/deployment.yaml
+sed -i -e "s@image: katib\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-nasenvelopenet:${VERSION}@" manifests/v1alpha1/vizier/suggestion/nasenvelopenet/deployment.yaml
+
 sed -i -e "s@image: katib\/earlystopping-medianstopping@image: ${REGISTRY}\/${REPO_NAME}\/earlystopping-medianstopping:${VERSION}@" manifests/v1alpha1/vizier/earlystopping/medianstopping/deployment.yaml
 sed -i -e '/volumeMounts:/,$d' manifests/v1alpha1/vizier/db/deployment.yaml
 

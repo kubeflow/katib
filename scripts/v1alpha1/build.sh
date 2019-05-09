@@ -40,10 +40,10 @@ docker build -t ${PREFIX}/suggestion-grid -f ${CMD_PREFIX}/suggestion/grid/Docke
 docker build -t ${PREFIX}/suggestion-hyperband -f ${CMD_PREFIX}/suggestion/hyperband/Dockerfile .
 docker build -t ${PREFIX}/suggestion-bayesianoptimization -f ${CMD_PREFIX}/suggestion/bayesianoptimization/Dockerfile .
 docker build -t ${PREFIX}/suggestion-nasrl -f ${CMD_PREFIX}/suggestion/nasrl/Dockerfile .
+docker build -t ${PREFIX}/suggestion-nasenvelopenet -f ${CMD_PREFIX}/suggestion/nasenvelopenet/Dockerfile .
 
 echo "Building earlystopping images..."
 docker build -t ${PREFIX}/earlystopping-medianstopping -f ${CMD_PREFIX}/earlystopping/medianstopping/Dockerfile .
 
 echo "Building UI image..."
 docker build -t ${PREFIX}/katib-ui -f ${CMD_PREFIX}/ui/Dockerfile .
-
