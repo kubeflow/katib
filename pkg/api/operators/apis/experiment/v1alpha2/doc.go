@@ -18,5 +18,6 @@ limitations under the License.
 // +k8s:deepcopy-gen=package,register
 // +k8s:conversion-gen=github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2
 // +k8s:defaulter-gen=TypeMeta
+// +kubebuilder:subresource:status
 // +groupName=experiment.kubeflow.org
 package v1alpha2

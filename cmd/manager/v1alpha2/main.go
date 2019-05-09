@@ -2,127 +2,173 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"net"
 
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	health_pb "github.com/kubeflow/katib/pkg/api/v1alpha2/health"
-	kdb "github.com/kubeflow/katib/pkg/db/v1alpha2"
+	dbif "github.com/kubeflow/katib/pkg/db/v1alpha2"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 const (
-	port = "0.0.0.0:6789"
+	port        = "0.0.0.0:6789"
+	dbIfaddress = "dbif-mysql:6789"
 )
 
-var dbIf kdb.KatibDBInterface
+var dbIf dbif.DBIFClient
 
 type server struct {
 }
 
 // Register a Experiment to DB.
-func (s *server) RegisterExperiment(context.Context, *api_pb.RegisterExperimentRequest) (*api_pb.RegisterExperimentReply, error) {
-	return nil, nil
+func (s *server) RegisterExperiment(ctx context.Context, in *dbif.RegisterExperimentRequest) (*dbif.RegisterExperimentReply, error) {
+	return dbIf.RegisterExperiment(ctx, in)
 }
 
 // Delete a Experiment from DB by name.
-func (s *server) DeleteExperiment(context.Context, *api_pb.DeleteExperimentRequest) (*api_pb.DeleteExperimentReply, error) {
-	return nil, nil
+func (s *server) DeleteExperiment(ctx context.Context, in *dbif.DeleteExperimentRequest) (*dbif.DeleteExperimentReply, error) {
+	return dbIf.DeleteExperiment(ctx, in)
 }
 
 // Get a Experiment from DB by name.
-func (s *server) GetExperiment(context.Context, *api_pb.GetExperimentRequest) (*api_pb.GetExperimentReply, error) {
-	return nil, nil
+func (s *server) GetExperiment(ctx context.Context, in *dbif.GetExperimentRequest) (*dbif.GetExperimentReply, error) {
+	return dbIf.GetExperiment(ctx, in)
 }
 
 // Get a summary list of Experiment from DB.
 // The summary includes name and condition.
-func (s *server) GetExperimentList(context.Context, *api_pb.GetExperimentListRequest) (*api_pb.GetExperimentListReply, error) {
-	return nil, nil
+func (s *server) GetExperimentList(ctx context.Context, in *dbif.GetExperimentListRequest) (*dbif.GetExperimentListReply, error) {
+	return dbIf.GetExperimentList(ctx, in)
 }
 
 // Update Status of a experiment.
-func (s *server) UpdateExperimentStatus(context.Context, *api_pb.UpdateExperimentStatusRequest) (*api_pb.UpdateExperimentStatusReply, error) {
-	return nil, nil
+func (s *server) UpdateExperimentStatus(ctx context.Context, in *dbif.UpdateExperimentStatusRequest) (*dbif.UpdateExperimentStatusReply, error) {
+	return dbIf.UpdateExperimentStatus(ctx, in)
 }
 
 // Update AlgorithmExtraSettings.
 // The ExtraSetting is created if it does not exist, otherwise it is overwrited.
-func (s *server) UpdateAlgorithmExtraSettings(context.Context, *api_pb.UpdateAlgorithmExtraSettingsRequest) (*api_pb.UpdateAlgorithmExtraSettingsReply, error) {
-	return nil, nil
+func (s *server) UpdateAlgorithmExtraSettings(ctx context.Context, in *dbif.UpdateAlgorithmExtraSettingsRequest) (*dbif.UpdateAlgorithmExtraSettingsReply, error) {
+	return dbIf.UpdateAlgorithmExtraSettings(ctx, in)
 }
 
 // Get all AlgorithmExtraSettings.
-func (s *server) GetAlgorithmExtraSettings(context.Context, *api_pb.GetAlgorithmExtraSettingsRequest) (*api_pb.GetAlgorithmExtraSettingsReply, error) {
-	return nil, nil
+func (s *server) GetAlgorithmExtraSettings(ctx context.Context, in *dbif.GetAlgorithmExtraSettingsRequest) (*dbif.GetAlgorithmExtraSettingsReply, error) {
+	return dbIf.GetAlgorithmExtraSettings(ctx, in)
 }
 
 // Register a Trial to DB.
 // ID will be filled by manager automatically.
-func (s *server) RegisterTrial(context.Context, *api_pb.RegisterTrialRequest) (*api_pb.RegisterTrialReply, error) {
-	return nil, nil
+func (s *server) RegisterTrial(ctx context.Context, in *dbif.RegisterTrialRequest) (*dbif.RegisterTrialReply, error) {
+	return dbIf.RegisterTrial(ctx, in)
 }
 
 // Delete a Trial from DB by ID.
-func (s *server) DeleteTrial(context.Context, *api_pb.DeleteTrialRequest) (*api_pb.DeleteTrialReply, error) {
-	return nil, nil
+func (s *server) DeleteTrial(ctx context.Context, in *dbif.DeleteTrialRequest) (*dbif.DeleteTrialReply, error) {
+	return dbIf.DeleteTrial(ctx, in)
 }
 
 // Get a list of Trial from DB by name of a Experiment.
-func (s *server) GetTrialList(context.Context, *api_pb.GetTrialListRequest) (*api_pb.GetTrialListReply, error) {
-	return nil, nil
+func (s *server) GetTrialList(ctx context.Context, in *dbif.GetTrialListRequest) (*dbif.GetTrialListReply, error) {
+	return dbIf.GetTrialList(ctx, in)
 }
 
 // Get a Trial from DB by ID of Trial.
-func (s *server) GetTrial(context.Context, *api_pb.GetTrialRequest) (*api_pb.GetTrialReply, error) {
-	return nil, nil
+func (s *server) GetTrial(ctx context.Context, in *dbif.GetTrialRequest) (*dbif.GetTrialReply, error) {
+	return dbIf.GetTrial(ctx, in)
 }
 
 // Update Status of a trial.
-func (s *server) UpdateTrialStatus(context.Context, *api_pb.UpdateTrialStatusRequest) (*api_pb.UpdateTrialStatusReply, error) {
-	return nil, nil
+func (s *server) UpdateTrialStatus(ctx context.Context, in *dbif.UpdateTrialStatusRequest) (*dbif.UpdateTrialStatusReply, error) {
+	err := dbIf.UpdateTrialStatus(in.TrialName, in.NewStatus)
+	return &dbif.UpdateTrialStatusReply{}, err
 }
 
 // Report a log of Observations for a Trial.
 // The log consists of timestamp and value of metric.
 // Katib store every log of metrics.
 // You can see accuracy curve or other metric logs on UI.
-func (s *server) ReportObservationLog(context.Context, *api_pb.ReportObservationLogRequest) (*api_pb.ReportObservationLogReply, error) {
-	return nil, nil
+func (s *server) ReportObservationLog(ctx context.Context, in *dbif.ReportObservationLogRequest) (*dbif.ReportObservationLogReply, error) {
+	return dbIf.ReportObservationLog(ctx, in)
 }
 
 // Get all log of Observations for a Trial.
-func (s *server) GetObservationLog(context.Context, *api_pb.GetObservationLogRequest) (*api_pb.GetObservationLogReply, error) {
-	return nil, nil
+func (s *server) GetObservationLog(ctx context.Context, in *dbif.GetObservationLogRequest) (*dbif.GetObservationLogReply, error) {
+	return dbIf.GetObservationLog(ctx, in)
+}
+
+func (s *server) getSuggestionServiceConnection(algoName string) (*grpc.ClientConn, error) {
+	if algoName == "" {
+		return nil, errors.New("No algorithm name is specified")
+	}
+	return grpc.Dial("katib-suggestion-"+algoName+":6789", grpc.WithInsecure())
 }
 
 // Get Suggestions from a Suggestion service.
-func (s *server) GetSuggestions(context.Context, *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestionsReply, error) {
-	return nil, nil
+func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestionsReply, error) {
+	conn, err := s.getSuggestionServiceConnection(in.AlgorithmName)
+	if err != nil {
+		return &api_pb.GetSuggestionsReply{Trials: []*dbif.Trial{}}, err
+	}
+	defer conn.Close()
+	c := api_pb.NewSuggestionClient(conn)
+	r, err := c.GetSuggestions(ctx, in)
+	if err != nil {
+		return &api_pb.GetSuggestionsReply{Trials: []*dbif.Trial{}}, err
+	}
+	return r, nil
 }
 
 // Validate AlgorithmSettings in an Experiment.
 // Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid
-func (s *server) ValidateAlgorithmSettings(context.Context, *api_pb.ValidateAlgorithmSettingsRequest) (*api_pb.ValidateAlgorithmSettingsReply, error) {
-	return nil, nil
+func (s *server) ValidateAlgorithmSettings(ctx context.Context, in *api_pb.ValidateAlgorithmSettingsRequest) (*api_pb.ValidateAlgorithmSettingsReply, error) {
+	conn, err := s.getSuggestionServiceConnection(in.AlgorithmName)
+	if err != nil {
+		return &api_pb.ValidateAlgorithmSettingsReply{}, err
+	}
+	defer conn.Close()
+	c := api_pb.NewSuggestionClient(conn)
+	return c.ValidateAlgorithmSettings(ctx, in)
 }
 
-func (s *server) Check(context.Context, *health_pb.HealthCheckRequest) (*health_pb.HealthCheckResponse, error) {
-	return nil, nil
+func (s *server) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*health_pb.HealthCheckResponse, error) {
+	resp := health_pb.HealthCheckResponse{
+		Status: health_pb.HealthCheckResponse_SERVING,
+	}
+
+	// We only accept optional service name only if it's set to suggested format.
+	if in != nil && in.Service != "" && in.Service != "grpc.health.v1.Health" {
+		resp.Status = health_pb.HealthCheckResponse_UNKNOWN
+		return &resp, fmt.Errorf("grpc.health.v1.Health can only be accepted if you specify service name.")
+	}
+
+	// Check if connection to katib-db is okay since otherwise manager could not serve most of its methods.
+	err := dbIf.SelectOne()
+	if err != nil {
+		resp.Status = health_pb.HealthCheckResponse_NOT_SERVING
+		return &resp, fmt.Errorf("Failed to execute `SELECT 1` probe: %v", err)
+	}
+
+	return &resp, nil
 }
 
 func main() {
 	flag.Parse()
 	var err error
 
-	dbIf, err = kdb.New()
+	conn, err := grpc.Dial(dbIfaddress, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("Failed to open db connection: %v", err)
+		log.Fatalf("Could not connect to DBIF service: %v", err)
 	}
-	dbIf.DBInit()
+	defer conn.Close()
+	dbIf = dbif.NewDBIFClient(conn)
+
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)

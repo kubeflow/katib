@@ -35,10 +35,14 @@ type ExperimentSpec struct {
 	TrialTemplate *TrialTemplate `json:"trialTemplate,omitempty"`
 
 	// How many trials can be processed in parallel.
-	ParallelTrialCount int `json:"parallelTrialCount,omitempty"`
+	// Defaults to 3
+	ParallelTrialCount *int `json:"parallelTrialCount,omitempty"`
 
-	// Total number of trials to run.
-	MaxTrialCount int `json:"maxTrialCount,omitempty"`
+	// Max completed trials to mark experiment as succeeded
+	MaxTrialCount *int `json:"maxTrialCount,omitempty"`
+
+	// Max failed trials to mark experiment as failed.
+	MaxFailedTrialCount *int `json:"maxFailedTrialCount,omitempty"`
 
 	// Whether to retain historical data in DB after deletion.
 	RetainHistoricalData bool `json:"retainHistoricalData,omitempty"`
@@ -75,8 +79,8 @@ type ExperimentStatus struct {
 	// Current optimal trial parameters and observations.
 	CurrentOptimalTrial OptimalTrial `json:"currentOptimalTrial,omitempty"`
 
-	// How many trials have successfully completed.
-	TrialsCompleted int `json:"trialsCompleted,omitempty"`
+	// How many trials have succeeded.
+	TrialsSucceeded int `json:"trialsSucceeded,omitempty"`
 
 	// How many trials have failed.
 	TrialsFailed int `json:"trialsFailed,omitempty"`
@@ -86,6 +90,9 @@ type ExperimentStatus struct {
 
 	// How many trials are currently pending.
 	TrialsPending int `json:"trialsPending,omitempty"`
+
+	// How many trials are currently running.
+	TrialsRunning int `json:"trialsRunning,omitempty"`
 }
 
 type OptimalTrial struct {
@@ -154,7 +161,7 @@ type FeasibleSpace struct {
 
 type ObjectiveSpec struct {
 	Type                ObjectiveType `json:"type,omitempty"`
-	Goal                float64       `json:"goal,omitempty"`
+	Goal                *float64      `json:"goal,omitempty"`
 	ObjectiveMetricName string        `json:"objectiveMetricName,omitempty"`
 	// This can be empty if we only care about the objective metric.
 	// Note: If we adopt a push instead of pull mechanism, this can be omitted completely.
@@ -206,6 +213,7 @@ type GoTemplate struct {
 
 // Structure of the Experiment custom resource.
 // +k8s:openapi-gen=true
+// +kubebuilder:subresource:status
 type Experiment struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -231,7 +239,7 @@ type NasConfig struct {
 
 // GraphConfig contains a config of DAG
 type GraphConfig struct {
-	NumLayers   int32   `json:"numLayers,omitempty"`
+	NumLayers   *int32  `json:"numLayers,omitempty"`
 	InputSizes  []int32 `json:"inputSizes,omitempty"`
 	OutputSizes []int32 `json:"outputSizes,omitempty"`
 }
@@ -242,7 +250,6 @@ type Operation struct {
 	Parameters    []ParameterSpec `json:"parameterconfigs,omitempty"`
 }
 
-// TODO - enable this during API implementation.
-//func init() {
-//	SchemeBuilder.Register(&Experiment{}, &ExperimentList{})
-//}
+func init() {
+	SchemeBuilder.Register(&Experiment{}, &ExperimentList{})
+}

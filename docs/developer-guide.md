@@ -17,12 +17,12 @@ dep ensure --vendor-only
 You can build all images from source.
 
 ```bash
-./scripts/build.sh
+./scripts/v1alpha1/build.sh
 ```
 
 ## Implement new suggestion algorithm
 
-Suggestion API is defined as GRPC service at `pkg/api/api.proto`. Source code is [here](https://github.com/kubeflow/katib/blob/master/pkg/api/api.proto). You can attach new algorithm easily.
+Suggestion API is defined as GRPC service at `pkg/api/v1alpha1/api.proto`. Source code is [here](https://github.com/kubeflow/katib/blob/master/pkg/api/v1alpha1/api.proto). You can attach new algorithm easily.
 
 - implement suggestion API
 - make k8s service named vizier-suggestion-{ algorithm-name } and expose port 6789
