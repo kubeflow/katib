@@ -16,6 +16,8 @@ limitations under the License.
 package v1alpha2
 
 import (
+	"errors"
+
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -85,8 +87,11 @@ func (exp *Experiment) IsCompleted() bool {
 	return exp.IsSucceeded() || exp.IsFailed()
 }
 
-func (exp *Experiment) GetLastConditionType() ExperimentConditionType {
-	return exp.Status.Conditions[len(exp.Status.Conditions)-1].Type
+func (exp *Experiment) GetLastConditionType() (ExperimentConditionType, error) {
+	if len(exp.Status.Conditions) > 0 {
+		return exp.Status.Conditions[len(exp.Status.Conditions)-1].Type, nil
+	}
+	return "", errors.New("Experiment doesn't have any condition")
 }
 
 func (exp *Experiment) setCondition(conditionType ExperimentConditionType, status v1.ConditionStatus, reason, message string) {
