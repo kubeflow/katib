@@ -151,7 +151,11 @@ func (in *TrialStatus) DeepCopyInto(out *TrialStatus) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
-	in.Observation.DeepCopyInto(&out.Observation)
+	if in.Observation != nil {
+		in, out := &in.Observation, &out.Observation
+		*out = new(commonv1alpha2.Observation)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

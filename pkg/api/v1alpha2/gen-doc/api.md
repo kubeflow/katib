@@ -208,6 +208,7 @@ It is assumed that objective function f(x) does not change in the course of a Ex
 | objective | [ObjectiveSpec](#api.v1.alpha2.ObjectiveSpec) |  |  |
 | algorithm | [AlgorithmSpec](#api.v1.alpha2.AlgorithmSpec) |  |  |
 | trial_template | [string](#string) |  |  |
+| metrics_collector_spec | [string](#string) |  |  |
 | parallel_trial_count | [int32](#int32) |  |  |
 | max_trial_count | [int32](#int32) |  |  |
 | nas_config | [NasConfig](#api.v1.alpha2.NasConfig) |  |  |

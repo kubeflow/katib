@@ -58,7 +58,7 @@ type TrialStatus struct {
 	Conditions []TrialCondition `json:"conditions,omitempty"`
 
 	// Results of the Trial - objectives and other metrics values.
-	Observation common.Observation `json:"observation,omitempty"`
+	Observation *common.Observation `json:"observation,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true

@@ -15,6 +15,7 @@ func (d *dbConn) DBInit() {
 		objective TEXT,
 		algorithm TEXT,
 		trial_template TEXT,
+		metrics_collector_spec TEXT,
 		parallel_trial_count INT,
 		max_trial_count INT,
 		status TINYINT,

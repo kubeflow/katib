@@ -15,6 +15,7 @@ def register_experiment(stub):
   exp_spec = api_pb2.ExperimentSpec(objective=obj,
                                     algorithm=algo,
                                     trial_template="run-mnist",
+                                    metrics_collector_spec="metrics-collector",
                                     parallel_trial_count=2,
                                     max_trial_count=9)
   exp_status = api_pb2.ExperimentStatus(condition=1,

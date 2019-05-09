@@ -566,6 +566,9 @@
         "trial_template": {
           "type": "string"
         },
+        "metrics_collector_spec": {
+          "type": "string"
+        },
         "parallel_trial_count": {
           "type": "integer",
           "format": "int32"
