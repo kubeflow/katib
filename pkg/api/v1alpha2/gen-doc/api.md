@@ -40,6 +40,7 @@
     - [Observation](#api.v1.alpha2.Observation)
     - [ObservationLog](#api.v1.alpha2.ObservationLog)
     - [Operation](#api.v1.alpha2.Operation)
+    - [Operation.ParameterSpecs](#api.v1.alpha2.Operation.ParameterSpecs)
     - [ParameterAssignment](#api.v1.alpha2.ParameterAssignment)
     - [ParameterSpec](#api.v1.alpha2.ParameterSpec)
     - [RegisterExperimentReply](#api.v1.alpha2.RegisterExperimentReply)
@@ -207,6 +208,7 @@ It is assumed that objective function f(x) does not change in the course of a Ex
 | objective | [ObjectiveSpec](#api.v1.alpha2.ObjectiveSpec) |  |  |
 | algorithm | [AlgorithmSpec](#api.v1.alpha2.AlgorithmSpec) |  |  |
 | trial_template | [string](#string) |  |  |
+| metrics_collector_spec | [string](#string) |  |  |
 | parallel_trial_count | [int32](#int32) |  |  |
 | max_trial_count | [int32](#int32) |  |  |
 | nas_config | [NasConfig](#api.v1.alpha2.NasConfig) |  |  |
@@ -585,7 +587,7 @@ NasConfig contains a config of NAS job
 | type | [ObjectiveType](#api.v1.alpha2.ObjectiveType) |  |  |
 | goal | [float](#float) |  |  |
 | objective_metric_name | [string](#string) |  |  |
-| additional_metrics_names | [string](#string) | repeated | This can be empty if we only care about the objective metric. |
+| additional_metric_names | [string](#string) | repeated | This can be empty if we only care about the objective metric. |
 
 
 
@@ -631,9 +633,22 @@ Config for operations in DAG
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | operation_type | [string](#string) |  | Type of operation in DAG |
-| parameters | [ParameterSpec](#api.v1.alpha2.ParameterSpec) | repeated | List of ParameterSpec
+| parameter_specs | [Operation.ParameterSpecs](#api.v1.alpha2.Operation.ParameterSpecs) |  |  |
 
-/ List of ParameterSpec |
+
+
+
+
+
+<a name="api.v1.alpha2.Operation.ParameterSpecs"></a>
+
+### Operation.ParameterSpecs
+List of ParameterSpec
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| parameters | [ParameterSpec](#api.v1.alpha2.ParameterSpec) | repeated |  |
 
 
 
@@ -776,8 +791,10 @@ Katib will create each Hyper parameter from this config.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | experiment_name | [string](#string) |  |  |
+| objective | [ObjectiveSpec](#api.v1.alpha2.ObjectiveSpec) |  |  |
 | parameter_assignments | [TrialSpec.ParameterAssignments](#api.v1.alpha2.TrialSpec.ParameterAssignments) |  |  |
 | run_spec | [string](#string) |  |  |
+| metrics_collector_spec | [string](#string) |  |  |
 
 
 

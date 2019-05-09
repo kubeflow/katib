@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/kubeflow/katib/pkg"
+	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 	katibapi "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	"github.com/kubeflow/katib/pkg/manager/v1alpha1/studyjobclient"
@@ -100,7 +100,7 @@ func getMetricsCollectorManifest(studyID string, trialID string, workerID string
 		"WorkerID":       workerID,
 		"WorkerKind":     workerKind,
 		"NameSpace":      namespace,
-		"ManagerSerivce": pkg.GetManagerAddr(),
+		"ManagerSerivce": common.GetManagerAddr(),
 	}
 	if mcs != nil && mcs.GoTemplate.RawTemplate != "" {
 		mtp, err = template.New("MetricsCollector").Parse(mcs.GoTemplate.RawTemplate)

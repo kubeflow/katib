@@ -20,8 +20,11 @@ import (
 	"bytes"
 	"database/sql"
 	"fmt"
+	logger "log"
 
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	ep_v1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 )
@@ -54,6 +57,11 @@ func ValidateExperiment(instance *ep_v1alpha2.Experiment) error {
 	if err := validateAlgorithmSettings(instance); err != nil {
 		return err
 	}
+
+	if err := validateMetricsCollector(instance); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -62,12 +70,12 @@ func validateAlgorithmSettings(inst *ep_v1alpha2.Experiment) error {
 	return nil
 }
 
-func validateObjective(obj *ep_v1alpha2.ObjectiveSpec) error {
+func validateObjective(obj *commonv1alpha2.ObjectiveSpec) error {
 	if obj == nil {
 		return fmt.Errorf("No spec.objective specified.")
 	}
-	if obj.Type != ep_v1alpha2.ObjectiveTypeMinimize && obj.Type != ep_v1alpha2.ObjectiveTypeMaximize {
-		return fmt.Errorf("spec.objective.type must be %s or %s.", ep_v1alpha2.ObjectiveTypeMinimize, ep_v1alpha2.ObjectiveTypeMaximize)
+	if obj.Type != commonv1alpha2.ObjectiveTypeMinimize && obj.Type != commonv1alpha2.ObjectiveTypeMaximize {
+		return fmt.Errorf("spec.objective.type must be %s or %s.", commonv1alpha2.ObjectiveTypeMinimize, commonv1alpha2.ObjectiveTypeMaximize)
 	}
 	if obj.ObjectiveMetricName == "" {
 		return fmt.Errorf("No spec.objective.objectiveMetricName specified.")
@@ -121,7 +129,7 @@ func validateTrialTemplate(instance *ep_v1alpha2.Experiment) error {
 
 func validateSupportedJob(job *unstructured.Unstructured) error {
 	gvk := job.GroupVersionKind()
-	supportedJobs := GetSupportdJobList()
+	supportedJobs := GetSupportedJobList()
 	for _, sJob := range supportedJobs {
 		if gvk == sJob {
 			return nil
@@ -139,4 +147,50 @@ func validateForCreate(inst *ep_v1alpha2.Experiment) error {
 	} else {
 		return fmt.Errorf("Record for the experiment has existed in DB; Please try to rename the experiment")
 	}
+}
+
+func validateMetricsCollector(inst *ep_v1alpha2.Experiment) error {
+	BUFSIZE := 1024
+	experimentName := inst.GetName()
+	trialName := fmt.Sprintf("%s-trial", inst.GetName())
+	namespace := inst.GetNamespace()
+	trialParams := TrialTemplateParams{
+		Experiment: experimentName,
+		Trial:      trialName,
+		NameSpace:  namespace,
+	}
+	var metricNames []string
+	metricNames = append(metricNames, inst.Spec.Objective.ObjectiveMetricName)
+	for _, mn := range inst.Spec.Objective.AdditionalMetricNames {
+		metricNames = append(metricNames, mn)
+	}
+
+	runSpec, err := GetRunSpec(inst, trialParams)
+	if err != nil {
+		return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
+	}
+
+	buf := bytes.NewBufferString(runSpec)
+
+	job := &unstructured.Unstructured{}
+	if err := k8syaml.NewYAMLOrJSONDecoder(buf, BUFSIZE).Decode(job); err != nil {
+		return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
+	}
+
+	var mcjob batchv1beta.CronJob
+	mcm, err := getMetricsCollectorManifest(experimentName, trialName, job.GetKind(), namespace, metricNames, inst.Spec.MetricsCollectorSpec)
+	if err != nil {
+		logger.Printf("getMetricsCollectorManifest error %v", err)
+		return err
+	}
+
+	if err := k8syaml.NewYAMLOrJSONDecoder(mcm, BUFSIZE).Decode(&mcjob); err != nil {
+		logger.Printf("MetricsCollector Yaml decode error %v", err)
+		return err
+	}
+
+	if mcjob.GetNamespace() != namespace || mcjob.GetName() != trialName {
+		return fmt.Errorf("Invalid metricsCollector template.")
+	}
+	return nil
 }

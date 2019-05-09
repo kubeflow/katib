@@ -11,7 +11,7 @@ spec:
     type: maximize
     goal: 0.99
     objectiveMetricName: Validation-accuracy
-    additionalMetricsNames:
+    additionalMetricNames:
       - accuracy
   algorithm:
     algorithmName: random
