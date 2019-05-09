@@ -18,7 +18,6 @@ func (d *dbConn) DBInit() {
 		parallel_trial_count INT,
 		max_trial_count INT,
 		status TINYINT,
-		metrics_collector_type TEXT,
 		start_time DATETIME(6),
 		completion_time DATETIME(6),
 		nas_config TEXT)`)
