@@ -19,7 +19,7 @@ import (
 	//v1 "k8s.io/api/core/v1"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	trialapi "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	trialapi "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
 )
 
 func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {

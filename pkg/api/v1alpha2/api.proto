@@ -6,7 +6,7 @@ syntax = "proto3";
 package api.v1.alpha2;
 
 import "google/api/annotations.proto";
-import "pkg/db/v1alpha2/dbif.proto";
+import "dbif/dbif.proto";
 /**
  * Service for Main API for Katib
  * For each RPC service, we define mapping to HTTP REST API method.
@@ -58,11 +58,11 @@ message GetSuggestionsRequest {
 }
 
 message GetSuggestionsReply {
-    repeated db.v1.alpha2.Trial trials = 1;
+    dbif.v1.alpha2.Trial trials = 1;
 }
 
 message ValidateAlgorithmSettingsRequest {
-    db.v1.alpha2.ExperimentSpec experiment_spec = 1;
+    dbif.v1.alpha2.ExperimentSpec experiment_spec = 1;
     string algorithm_name = 2;
 }
 

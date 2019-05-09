@@ -28,4 +28,6 @@ kubectl apply -f manifests/v1alpha2/katib-controller/rbac.yaml
 kubectl apply -f manifests/v1alpha2/katib-controller/service.yaml
 kubectl apply -f manifests/v1alpha2/katib-controller/trialTemplateConfigmap.yaml
 kubectl apply -f manifests/v1alpha2/katib-controller/katib-controller.yaml
+kubectl apply -f manifests/v1alpha2/dbif/mysql/deployment.yaml
+kubectl apply -f manifests/v1alpha2/dbif/mysql/service.yaml
 cd - > /dev/null

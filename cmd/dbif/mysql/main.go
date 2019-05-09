@@ -14,7 +14,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/jsonpb"
-	dbif "github.com/kubeflow/katib/pkg/db/v1alpha2"
+	dbif "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
 	"google.golang.org/grpc"
 )
 
@@ -108,15 +108,6 @@ func DBInit(d *dbConn) {
 
 }
 
-func (d *dbConn) SelectOne() error {
-	db := d.db
-	_, err := db.Exec(`SELECT 1`)
-	if err != nil {
-		return fmt.Errorf("Error `SELECT 1` probing: %v", err)
-	}
-	return nil
-}
-
 func getDbName() string {
 	dbPass := os.Getenv("MYSQL_ROOT_PASSWORD")
 	if dbPass == "" {
@@ -178,6 +169,15 @@ func CreateNewDBServer() *dbConn {
 	}
 	log.Printf("DB connection opened successfully")
 	return dbWithConn
+}
+
+func (d *dbConn) SelectOne(ctx context.Context, in *dbif.SelectOneRequest) (*dbif.SelectOneReply, error) {
+        db := d.db
+        _, err := db.Exec(`SELECT 1`)
+        if err != nil {
+                return nil, fmt.Errorf("Error `SELECT 1` probing: %v", err)
+        }
+        return &dbif.SelectOneReply{}, nil
 }
 
 func (d *dbConn) RegisterExperiment(ctx context.Context, in *dbif.RegisterExperimentRequest) (*dbif.RegisterExperimentReply, error) {
