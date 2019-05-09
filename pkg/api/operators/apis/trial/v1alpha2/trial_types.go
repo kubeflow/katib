@@ -60,38 +60,6 @@ type TrialStatus struct {
 	Observation Observation `json:"observation,omitempty"`
 }
 
-type ObjectiveSpec struct {
-	Type                ObjectiveType `json:"type,omitempty"`
-	Goal                *float64      `json:"goal,omitempty"`
-	ObjectiveMetricName string        `json:"objectiveMetricName,omitempty"`
-	// This can be empty if we only care about the objective metric.
-	// Note: If we adopt a push instead of pull mechanism, this can be omitted completely.
-	AdditionalMetricNames []string `json:"additionalMetricNames,omitempty"`
-}
-
-type ObjectiveType string
-
-const (
-	ObjectiveTypeUnknown  ObjectiveType = ""
-	ObjectiveTypeMinimize ObjectiveType = "minimize"
-	ObjectiveTypeMaximize ObjectiveType = "maximize"
-)
-
-type ParameterAssignment struct {
-	Name  string `json:"name,omitempty"`
-	Value string `json:"value,omitempty"`
-}
-
-type Metric struct {
-	Name  string  `json:"name,omitempty"`
-	Value float64 `json:"value,omitempty"`
-}
-
-type Observation struct {
-	// Key-value pairs for metric names and values
-	Metrics []Metric `json:"metrics"`
-}
-
 // +k8s:deepcopy-gen=true
 // TrialCondition describes the state of the trial at a certain point.
 type TrialCondition struct {
