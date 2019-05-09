@@ -1,4 +1,4 @@
-package pkg
+package v1alpha1
 
 import (
 	"os"
