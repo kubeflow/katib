@@ -22,6 +22,7 @@ import (
 	"fmt"
 	logger "log"
 
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	ep_v1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -69,12 +70,12 @@ func validateAlgorithmSettings(inst *ep_v1alpha2.Experiment) error {
 	return nil
 }
 
-func validateObjective(obj *ep_v1alpha2.ObjectiveSpec) error {
+func validateObjective(obj *commonv1alpha2.ObjectiveSpec) error {
 	if obj == nil {
 		return fmt.Errorf("No spec.objective specified.")
 	}
-	if obj.Type != ep_v1alpha2.ObjectiveTypeMinimize && obj.Type != ep_v1alpha2.ObjectiveTypeMaximize {
-		return fmt.Errorf("spec.objective.type must be %s or %s.", ep_v1alpha2.ObjectiveTypeMinimize, ep_v1alpha2.ObjectiveTypeMaximize)
+	if obj.Type != commonv1alpha2.ObjectiveTypeMinimize && obj.Type != commonv1alpha2.ObjectiveTypeMaximize {
+		return fmt.Errorf("spec.objective.type must be %s or %s.", commonv1alpha2.ObjectiveTypeMinimize, commonv1alpha2.ObjectiveTypeMaximize)
 	}
 	if obj.ObjectiveMetricName == "" {
 		return fmt.Errorf("No spec.objective.objectiveMetricName specified.")
@@ -160,7 +161,7 @@ func validateMetricsCollector(inst *ep_v1alpha2.Experiment) error {
 	}
 	var metricNames []string
 	metricNames = append(metricNames, inst.Spec.Objective.ObjectiveMetricName)
-	for _, mn := range inst.Spec.Objective.AdditionalMetricsNames {
+	for _, mn := range inst.Spec.Objective.AdditionalMetricNames {
 		metricNames = append(metricNames, mn)
 	}
 

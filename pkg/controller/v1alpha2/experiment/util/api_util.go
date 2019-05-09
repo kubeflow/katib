@@ -19,6 +19,7 @@ import (
 	"database/sql"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 )
 
@@ -47,7 +48,7 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 	experiment := &api_pb.Experiment{
 		ExperimentSpec: &api_pb.ExperimentSpec{
 			Objective: &api_pb.ObjectiveSpec{
-				AdditionalMetricsNames: []string{},
+				AdditionalMetricNames: []string{},
 			},
 			Algorithm: &api_pb.AlgorithmSpec{
 				AlgorithmSetting: []*api_pb.AlgorithmSetting{},
@@ -59,9 +60,9 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 
 	//Populate Objective
 	switch instance.Spec.Objective.Type {
-	case experimentsv1alpha2.ObjectiveTypeMaximize:
+	case commonv1alpha2.ObjectiveTypeMaximize:
 		experiment.ExperimentSpec.Objective.Type = api_pb.ObjectiveType_MAXIMIZE
-	case experimentsv1alpha2.ObjectiveTypeMinimize:
+	case commonv1alpha2.ObjectiveTypeMinimize:
 		experiment.ExperimentSpec.Objective.Type = api_pb.ObjectiveType_MINIMIZE
 	default:
 		experiment.ExperimentSpec.Objective.Type = api_pb.ObjectiveType_UNKNOWN
@@ -69,8 +70,8 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 	}
 	experiment.ExperimentSpec.Objective.Goal = float32(*instance.Spec.Objective.Goal)
 	experiment.ExperimentSpec.Objective.ObjectiveMetricName = instance.Spec.Objective.ObjectiveMetricName
-	for _, m := range instance.Spec.Objective.AdditionalMetricsNames {
-		experiment.ExperimentSpec.Objective.AdditionalMetricsNames = append(experiment.ExperimentSpec.Objective.AdditionalMetricsNames, m)
+	for _, m := range instance.Spec.Objective.AdditionalMetricNames {
+		experiment.ExperimentSpec.Objective.AdditionalMetricNames = append(experiment.ExperimentSpec.Objective.AdditionalMetricNames, m)
 	}
 
 	//Populate Algorithm Spec

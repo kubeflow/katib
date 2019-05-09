@@ -16,19 +16,26 @@ limitations under the License.
 package v1alpha2
 
 import (
+	common "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type TrialSpec struct {
+	// Describes the objective of the experiment.
+	Objective *common.ObjectiveSpec `json:"objective,omitempty"`
+
 	// Key-value pairs for hyperparameters and assignment values.
-	ParameterAssignments []ParameterAssignment `json:"parameterAssignments"`
+	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments"`
 
 	// Raw text for the trial run spec. This can be any generic Kubernetes
 	// runtime object. The trial operator should create the resource as written,
 	// and let the corresponding resource controller (e.g. tf-operator) handle
 	// the rest.
 	RunSpec string `json:"runSpec,omitempty"`
+
+	// Raw text for the metrics collector spec. This must be a CronJob object.
+	MetricsCollectorSpec string `json:"metricsCollectorSpec,omitempty"`
 }
 
 type TrialStatus struct {
@@ -51,22 +58,7 @@ type TrialStatus struct {
 	Conditions []TrialCondition `json:"conditions,omitempty"`
 
 	// Results of the Trial - objectives and other metrics values.
-	Observation Observation `json:"observation,omitempty"`
-}
-
-type ParameterAssignment struct {
-	Name  string `json:"name,omitempty"`
-	Value string `json:"value,omitempty"`
-}
-
-type Metric struct {
-	Name  string  `json:"name,omitempty"`
-	Value float64 `json:"value,omitempty"`
-}
-
-type Observation struct {
-	// Key-value pairs for metric names and values
-	Metrics []Metric `json:"metrics"`
+	Observation *common.Observation `json:"observation,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true
