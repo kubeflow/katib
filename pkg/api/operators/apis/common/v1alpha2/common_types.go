@@ -15,6 +15,7 @@ limitations under the License.
 
 package v1alpha2
 
+// +k8s:deepcopy-gen=true
 type ObjectiveSpec struct {
 	Type                ObjectiveType `json:"type,omitempty"`
 	Goal                *float64      `json:"goal,omitempty"`
@@ -42,6 +43,7 @@ type Metric struct {
 	Value float64 `json:"value,omitempty"`
 }
 
+// +k8s:deepcopy-gen=true
 type Observation struct {
 	// Key-value pairs for metric names and values
 	Metrics []Metric `json:"metrics"`

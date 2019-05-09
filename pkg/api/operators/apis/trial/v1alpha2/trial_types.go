@@ -16,16 +16,17 @@ limitations under the License.
 package v1alpha2
 
 import (
+	common "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type TrialSpec struct {
 	// Describes the objective of the experiment.
-	Objective *ObjectiveSpec `json:"objective,omitempty"`
+	Objective *common.ObjectiveSpec `json:"objective,omitempty"`
 
 	// Key-value pairs for hyperparameters and assignment values.
-	ParameterAssignments []ParameterAssignment `json:"parameterAssignments"`
+	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments"`
 
 	// Raw text for the trial run spec. This can be any generic Kubernetes
 	// runtime object. The trial operator should create the resource as written,
@@ -57,7 +58,7 @@ type TrialStatus struct {
 	Conditions []TrialCondition `json:"conditions,omitempty"`
 
 	// Results of the Trial - objectives and other metrics values.
-	Observation Observation `json:"observation,omitempty"`
+	Observation common.Observation `json:"observation,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true

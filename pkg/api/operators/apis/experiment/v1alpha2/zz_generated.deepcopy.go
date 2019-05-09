@@ -20,7 +20,7 @@ limitations under the License.
 package v1alpha2
 
 import (
-	trialv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -173,7 +173,7 @@ func (in *ExperimentSpec) DeepCopyInto(out *ExperimentSpec) {
 	}
 	if in.Objective != nil {
 		in, out := &in.Objective, &out.Objective
-		*out = new(trialv1alpha2.ObjectiveSpec)
+		*out = new(commonv1alpha2.ObjectiveSpec)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.Algorithm != nil {
@@ -402,7 +402,7 @@ func (in *OptimalTrial) DeepCopyInto(out *OptimalTrial) {
 	*out = *in
 	if in.ParameterAssignments != nil {
 		in, out := &in.ParameterAssignments, &out.ParameterAssignments
-		*out = make([]trialv1alpha2.ParameterAssignment, len(*in))
+		*out = make([]commonv1alpha2.ParameterAssignment, len(*in))
 		copy(*out, *in)
 	}
 	in.Observation.DeepCopyInto(&out.Observation)

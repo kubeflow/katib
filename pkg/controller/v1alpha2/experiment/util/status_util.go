@@ -18,6 +18,7 @@ package util
 import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 )
@@ -76,7 +77,7 @@ func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trial
 			bestTrialIndex = index
 		}
 
-		if objectiveType == trialsv1alpha2.ObjectiveTypeMinimize {
+		if objectiveType == commonv1alpha2.ObjectiveTypeMinimize {
 			if *objectiveMetricValue < bestTrialValue {
 				bestTrialValue = *objectiveMetricValue
 				bestTrialIndex = index
@@ -84,7 +85,7 @@ func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trial
 			if bestTrialValue <= objectiveValueGoal {
 				isObjectiveGoalReached = true
 			}
-		} else if objectiveType == trialsv1alpha2.ObjectiveTypeMaximize {
+		} else if objectiveType == commonv1alpha2.ObjectiveTypeMaximize {
 			if *objectiveMetricValue > bestTrialValue {
 				bestTrialValue = *objectiveMetricValue
 				bestTrialIndex = index
@@ -104,12 +105,12 @@ func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trial
 	if bestTrialIndex != -1 {
 		bestTrial := trials.Items[bestTrialIndex]
 
-		instance.Status.CurrentOptimalTrial.ParameterAssignments = []trialsv1alpha2.ParameterAssignment{}
+		instance.Status.CurrentOptimalTrial.ParameterAssignments = []commonv1alpha2.ParameterAssignment{}
 		for _, parameterAssigment := range bestTrial.Spec.ParameterAssignments {
 			instance.Status.CurrentOptimalTrial.ParameterAssignments = append(instance.Status.CurrentOptimalTrial.ParameterAssignments, parameterAssigment)
 		}
 
-		instance.Status.CurrentOptimalTrial.Observation.Metrics = []trialsv1alpha2.Metric{}
+		instance.Status.CurrentOptimalTrial.Observation.Metrics = []commonv1alpha2.Metric{}
 		for _, metric := range bestTrial.Status.Observation.Metrics {
 			instance.Status.CurrentOptimalTrial.Observation.Metrics = append(instance.Status.CurrentOptimalTrial.Observation.Metrics, metric)
 		}

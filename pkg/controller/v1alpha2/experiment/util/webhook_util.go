@@ -22,8 +22,8 @@ import (
 	"fmt"
 	logger "log"
 
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	ep_v1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	tr_v1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -70,12 +70,12 @@ func validateAlgorithmSettings(inst *ep_v1alpha2.Experiment) error {
 	return nil
 }
 
-func validateObjective(obj *tr_v1alpha2.ObjectiveSpec) error {
+func validateObjective(obj *commonv1alpha2.ObjectiveSpec) error {
 	if obj == nil {
 		return fmt.Errorf("No spec.objective specified.")
 	}
-	if obj.Type != tr_v1alpha2.ObjectiveTypeMinimize && obj.Type != tr_v1alpha2.ObjectiveTypeMaximize {
-		return fmt.Errorf("spec.objective.type must be %s or %s.", tr_v1alpha2.ObjectiveTypeMinimize, tr_v1alpha2.ObjectiveTypeMaximize)
+	if obj.Type != commonv1alpha2.ObjectiveTypeMinimize && obj.Type != commonv1alpha2.ObjectiveTypeMaximize {
+		return fmt.Errorf("spec.objective.type must be %s or %s.", commonv1alpha2.ObjectiveTypeMinimize, commonv1alpha2.ObjectiveTypeMaximize)
 	}
 	if obj.ObjectiveMetricName == "" {
 		return fmt.Errorf("No spec.objective.objectiveMetricName specified.")

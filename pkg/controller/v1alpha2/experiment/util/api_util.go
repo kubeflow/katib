@@ -19,7 +19,7 @@ import (
 	"database/sql"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 )
 
@@ -60,9 +60,9 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 
 	//Populate Objective
 	switch instance.Spec.Objective.Type {
-	case trialsv1alpha2.ObjectiveTypeMaximize:
+	case commonv1alpha2.ObjectiveTypeMaximize:
 		experiment.ExperimentSpec.Objective.Type = api_pb.ObjectiveType_MAXIMIZE
-	case trialsv1alpha2.ObjectiveTypeMinimize:
+	case commonv1alpha2.ObjectiveTypeMinimize:
 		experiment.ExperimentSpec.Objective.Type = api_pb.ObjectiveType_MINIMIZE
 	default:
 		experiment.ExperimentSpec.Objective.Type = api_pb.ObjectiveType_UNKNOWN
