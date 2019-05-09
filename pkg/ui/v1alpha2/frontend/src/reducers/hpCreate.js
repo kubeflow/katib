@@ -105,12 +105,12 @@ const filterValue = (obj, key) => {
 
 const hpCreateReducer = (state = initialState, action) => {
     switch (action.type) {
-        case actions.CHANGE_YAML:
+        case actions.CHANGE_YAML_HP:
             return {
                 ...state,
                 currentYaml: action.payload,
             }
-        case actions.CHANGE_META:
+        case actions.CHANGE_META_HP:
             let meta = state.commonParametersMetadata.slice();
             let index = filterValue(meta, action.name);
             meta[index].value = action.value;
@@ -118,7 +118,7 @@ const hpCreateReducer = (state = initialState, action) => {
                 ...state,
                 commonParametersMetadata: meta,
             }
-        case actions.CHANGE_SPEC:
+        case actions.CHANGE_SPEC_HP:
             let spec = state.commonParametersSpec.slice();
             index = filterValue(spec, action.name);
             spec[index].value = action.value;
@@ -126,7 +126,7 @@ const hpCreateReducer = (state = initialState, action) => {
                 ...state,
                 commonParametersSpec: spec,
             }
-        case actions.CHANGE_OBJECTIVE:
+        case actions.CHANGE_OBJECTIVE_HP:
             let obj = state.objective.slice();
             index = filterValue(obj, action.name);
             obj[index].value = action.value;
@@ -157,12 +157,12 @@ const hpCreateReducer = (state = initialState, action) => {
                 ...state,
                 additionalMetricNames: additionalMetricNames,
             }
-        case actions.CHANGE_ALGORITHM_NAME:
+        case actions.CHANGE_ALGORITHM_NAME_HP:
             return {
                 ...state, 
                 algorithmName: action.algorithmName,
             }
-        case actions.ADD_ALGORITHM_SETTING:
+        case actions.ADD_ALGORITHM_SETTING_HP:
             let algorithmSettings = state.algorithmSettings.slice();
             let setting = {name: "", value: ""};
             algorithmSettings.push(setting);
@@ -170,14 +170,14 @@ const hpCreateReducer = (state = initialState, action) => {
                 ...state,
                 algorithmSettings: algorithmSettings,
             }
-        case actions.CHANGE_ALGORITHM_SETTING:
+        case actions.CHANGE_ALGORITHM_SETTING_HP:
             algorithmSettings = state.algorithmSettings.slice();
             algorithmSettings[action.index][action.field] = action.value;
             return {
                 ...state,
                 algorithmSettings: algorithmSettings,
             }
-        case actions.DELETE_ALGORITHM_SETTING:
+        case actions.DELETE_ALGORITHM_SETTING_HP:
             algorithmSettings = state.algorithmSettings.slice();
             algorithmSettings.splice(action.index, 1);
             return {
@@ -222,8 +222,8 @@ const hpCreateReducer = (state = initialState, action) => {
                 parameters: parameters
             }
         case actions.EDIT_LIST_PARAMETER_HP:
-            parameters = state.parameterConfig.slice();
-            parameters[action.paramIndex].list[action.index] = action.value;
+            parameters = state.parameters.slice();
+            parameters[action.paramIndex].list[action.index].value = action.value;
             return {
                 ...state,
                 parameters: parameters
@@ -235,7 +235,7 @@ const hpCreateReducer = (state = initialState, action) => {
                 ...state,
                 parameters: parameters
             }
-        case actions.CHANGE_TRIAL:
+        case actions.CHANGE_TRIAL_HP:
             return {
                 ...state,
                 trial: action.trial,

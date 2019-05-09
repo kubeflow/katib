@@ -142,7 +142,6 @@ func (k *KatibUIHandler) SubmitHPJob(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		job := experimentv1alpha2.Experiment{}
-		//TODO: Add new fields of experiment to frontend
 		if err := json.Unmarshal(jsonbody, &job); err != nil {
 			log.Printf("Unmarshal HP job failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)

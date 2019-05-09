@@ -23,7 +23,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 
-import { addSize, editSize, deleteSize, addOperation, deleteOperation, changeOperation, addParameter, changeParameter, deleteParameter, addListParameter, editListParameter, deleteListParameter } from '../../../../actions/nasCreateActions';
+import { editNumLayers, addSize, editSize, deleteSize, addOperation, deleteOperation, changeOperation, addParameter, changeParameter, deleteParameter, addListParameter, editListParameter, deleteListParameter } from '../../../../actions/nasCreateActions';
 
 const module = "nasCreate";
 
@@ -33,6 +33,10 @@ const useStyles = makeStyles({
         marginLeft: 4,
         marginRight: 4,
         width: '80%'
+    },
+    numLayers: {
+        padding: 2,
+        marginBottom: 30,
     },
     help: {
         padding: 4 / 2,
@@ -85,61 +89,84 @@ const NASConfig = (props) => {
     
     const classes = useStyles();
 
-    const addSize = (type) => (event) => {
+    const onEditNumLayers = () => (event) => {
+        props.editNumLayers(event.target.value);
+    }
+    const onAddSize = (type) => (event) => {
         props.addSize(type);
     }
 
-    const editSize = (index, type) => (event) => {
+    const onEditSize = (index, type) => (event) => {
         props.editSize(type, index, event.target.value);
     }
 
-    const deleteSize = (index, type) => (event) => {
+    const onDeleteSize = (index, type) => (event) => {
         props.deleteSize(type, index);
     }
 
-    const deleteOperation = (index) => (event) => {
+    const onDeleteOperation = (index) => (event) => {
         props.deleteOperation(index);
     }
 
-    const changeOperation = (index) => (event) => {
+    const onChangeOperation = (index) => (event) => {
         props.changeOperation(index, event.target.value);
     }
 
-    const addParameter = (opIndex) => (event) => {
+    const onAddParameter = (opIndex) => (event) => {
         props.addParameter(opIndex);
     }
 
-    const changeParameter = (opIndex, paramIndex, name) => (event) => {
+    const onChangeParameter = (opIndex, paramIndex, name) => (event) => {
         props.changeParameter(opIndex, paramIndex, name, event.target.value);
     }
 
-    const deleteParameter = (opIndex, paramIndex) => (event) => {
+    const onDeleteParameter = (opIndex, paramIndex) => (event) => {
         props.deleteParameter(opIndex, paramIndex);
     }
 
-    const addListParameter = (opIndex, paramIndex) => (event) => {
+    const onAddListParameter = (opIndex, paramIndex) => (event) => {
         props.addListParameter(opIndex, paramIndex);
     }
 
-    const deleteListParameter = (opIndex, paramIndex, listIndex) => (event) => {
+    const onDeleteListParameter = (opIndex, paramIndex, listIndex) => (event) => {
         props.deleteListParameter(opIndex, paramIndex, listIndex);
     }
 
-    const editListParameter = (opIndex, paramIndex, listIndex) => (event) => {
+    const onEditListParameter = (opIndex, paramIndex, listIndex) => (event) => {
         props.editListParameter(opIndex, paramIndex, listIndex, event.target.value);
     }
 
     return (
         <div>
+            {/* NUM LAYERS */}
+            <div className={classes.numLayers}>
+                        <Grid container alignItems={"center"}>
+                            <Grid item xs={12} sm={3}>
+                                <Typography variant={"subheading"}>
+                                    <Tooltip title="Number of layers">
+                                        <HelpOutlineIcon className={classes.help} color={"primary"}/>
+                                    </Tooltip>
+                                    {"NumLayers"}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    className={classes.textField}
+                                    value={props.numLayers}
+                                    onChange={onEditNumLayers()}
+                                    />
+                            </Grid>
+                        </Grid>
+                    </div>
             {/* INPUT SIZE */}
             <div className={classes.parameter}>
                 <Grid container alignItems={"center"}>
                     <Grid item xs={12} sm={3}>
                         <Typography variant={"subheading"}>
-                            <Tooltip title={"Input Size"}>
+                            <Tooltip title={"Dimensions of input size"}>
                                 <HelpOutlineIcon className={classes.help} color={"primary"}/>
                             </Tooltip>
-                            {"Input Size"}
+                            {"InputSize"}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -149,14 +176,14 @@ const NASConfig = (props) => {
                                     <TextField
                                         className={classes.textField}
                                         value={size}
-                                        onChange={editSize(index, "inputSize")}
+                                        onChange={onEditSize(index, "inputSize")}
                                     />
                                     <IconButton
                                         key="close"
                                         aria-label="Close"
                                         color={"primary"}
                                         className={classes.fab}
-                                        onClick={deleteSize(index, "inputSize")}
+                                        onClick={onDeleteSize(index, "inputSize")}
                                         >
                                             <DeleteIcon />
                                     </IconButton>
@@ -165,7 +192,7 @@ const NASConfig = (props) => {
                         })}
                     </Grid>
                     <Grid item xs={12} sm={2}>
-                        <Fab color={"primary"} className={classes.fab} onClick={addSize("inputSize")}>
+                        <Fab color={"primary"} className={classes.fab} onClick={onAddSize("inputSize")}>
                             <AddIcon />
                          </Fab>
                     </Grid>
@@ -176,10 +203,10 @@ const NASConfig = (props) => {
                 <Grid container alignItems={"center"}>
                     <Grid item xs={12} sm={3}>
                         <Typography variant={"subheading"}>
-                            <Tooltip title={"Output Size"}>
+                            <Tooltip title={"Dimensions of output size"}>
                                 <HelpOutlineIcon className={classes.help} color={"primary"}/>
                             </Tooltip>
-                            {"Output Size"}
+                            {"OutputSize"}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -189,14 +216,14 @@ const NASConfig = (props) => {
                                     <TextField
                                         className={classes.textField}
                                         value={size}
-                                        onChange={editSize(index, "outputSize")}
+                                        onChange={onEditSize(index, "outputSize")}
                                     />
                                     <IconButton
                                         key="close"
                                         aria-label="Close"
                                         color={"primary"}
                                         className={classes.fab}
-                                        onClick={deleteSize(index, "outputSize")}
+                                        onClick={onDeleteSize(index, "outputSize")}
                                         >
                                             <DeleteIcon />
                                     </IconButton>
@@ -205,7 +232,7 @@ const NASConfig = (props) => {
                         })}
                     </Grid>
                     <Grid item xs={12} sm={2}>
-                        <Fab color={"primary"} className={classes.fab} onClick={addSize("outputSize")} >
+                        <Fab color={"primary"} className={classes.fab} onClick={onAddSize("outputSize")} >
                             <AddIcon />
                          </Fab>
                     </Grid>
@@ -233,7 +260,7 @@ const NASConfig = (props) => {
                                         <TextField 
                                             value={operation.operationType}
                                             classes={classes.textField}
-                                            onChange={changeOperation(opIndex)}
+                                            onChange={onChangeOperation(opIndex)}
                                             />
                                     </Grid>
                                     <Grid item xs={1}>
@@ -242,7 +269,7 @@ const NASConfig = (props) => {
                                             aria-label="Close"
                                             color={"primary"}
                                             className={classes.fab}
-                                            onClick={deleteOperation(opIndex)}
+                                            onClick={onDeleteOperation(opIndex)}
                                         >
                                             <DeleteIcon />
                                         </IconButton>
@@ -250,12 +277,12 @@ const NASConfig = (props) => {
                                     <hr />
                                 </Grid>
                                 <div>
-                                    <Button variant={"contained"} color={"primary"} className={classes.addButton} onClick={addParameter(opIndex)}>
+                                    <Button variant={"contained"} color={"primary"} className={classes.addButton} onClick={onAddParameter(opIndex)}>
                                         Add parameter
                                     </Button>
                                 </div>
                             </div>
-                            {operation.parameterconfigs.map((param, paramIndex) => {
+                            {operation.parameters.map((param, paramIndex) => {
                                 return (
                                     <div className={classes.parameter} key={paramIndex}>
                                         <Grid container alignItems={"center"}>
@@ -264,7 +291,7 @@ const NASConfig = (props) => {
                                                     label={"Name"}
                                                     className={classes.textField}
                                                     value={param.name}
-                                                    onChange={changeParameter(opIndex, paramIndex, "name")}
+                                                    onChange={onChangeParameter(opIndex, paramIndex, "name")}
                                                     />
                                             </Grid>
                                             <Grid item xs={2}>
@@ -273,14 +300,14 @@ const NASConfig = (props) => {
                                                         Parameter Type
                                                     </InputLabel>
                                                     <Select
-                                                        onChange={changeParameter(opIndex, paramIndex, "parameterType")}
+                                                        onChange={onChangeParameter(opIndex, paramIndex, "parameterType")}
                                                         value={param.parameterType}
                                                         input={
                                                             <OutlinedInput name={"paramType"} labelWidth={120}/>
                                                         }
                                                         className={classes.select}
                                                         >
-                                                            {props.paramTypes.map((type, i) => {
+                                                            {props.allParameterTypes.map((type, i) => {
                                                                 return (
                                                                         <MenuItem value={type} key={i}>{type}</MenuItem>
                                                                     )
@@ -293,30 +320,30 @@ const NASConfig = (props) => {
                                                         aria-label="Gender"
                                                         name="gender1"
                                                         className={classes.group}
-                                                        value={param.feasible}
+                                                        value={param.feasibleSpace}
 
-                                                        onChange={changeParameter(opIndex, paramIndex, "feasible")}
+                                                        onChange={onChangeParameter(opIndex, paramIndex, "feasibleSpace")}
                                                     >
-                                                    <FormControlLabel value="feasible" control={<Radio color={"primary"} />} label="Feasible" />
+                                                    <FormControlLabel value="feasibleSpace" control={<Radio color={"primary"} />} label="FeasibleSpace" />
                                                     <FormControlLabel value="list" control={<Radio color={"primary"} />} label="List" />
                                                 </RadioGroup>
                                             </Grid>
                                             <Grid item xs={4}>
-                                                {param.feasible === "list" && 
+                                                {param.feasibleSpace === "list" && 
                                                     (param.list.map((element, elIndex) => {
                                                         return (
                                                             <div key={elIndex}>
                                                                 <TextField
                                                                     className={classes.textField}
                                                                     value={element.value}
-                                                                    onChange={editListParameter(opIndex, paramIndex, elIndex)}
+                                                                    onChange={onEditListParameter(opIndex, paramIndex, elIndex)}
                                                                 />
                                                                 <IconButton
                                                                     key="close"
                                                                     aria-label="Close"
                                                                     color={"primary"}
                                                                     className={classes.icon}
-                                                                    onClick={deleteListParameter(opIndex, paramIndex, elIndex)}
+                                                                    onClick={onDeleteListParameter(opIndex, paramIndex, elIndex)}
                                                                     >
                                                                         <DeleteIcon />
                                                                 </IconButton>
@@ -325,33 +352,33 @@ const NASConfig = (props) => {
                                                     }))
                                                     
                                                 }
-                                                {param.feasible === "feasible" && 
+                                                {param.feasibleSpace === "feasibleSpace" && 
                                                     <div>
                                                         <TextField
                                                             label={"Min"}
                                                             className={classes.textField}
                                                             value={param.min}
 
-                                                            onChange={changeParameter(opIndex, paramIndex, "min")}
+                                                            onChange={onChangeParameter(opIndex, paramIndex, "min")}
                                                         />
                                                         <TextField
                                                             label={"Max"}
                                                             className={classes.textField}
                                                             value={param.max}
-                                                            onChange={changeParameter(opIndex, paramIndex, "max")}
+                                                            onChange={onChangeParameter(opIndex, paramIndex, "max")}
                                                         />
                                                         <TextField
                                                             label={"Step"}
                                                             className={classes.textField}
                                                             value={param.step}
-                                                            onChange={changeParameter(opIndex, paramIndex, "step")}
+                                                            onChange={onChangeParameter(opIndex, paramIndex, "step")}
                                                         />
                                                     </div>
                                                 }
                                             </Grid>
                                             <Grid item xs={1}>
-                                                {param.feasible === "list" && 
-                                                    <Fab color={"primary"} className={classes.fab} onClick={addListParameter(opIndex, paramIndex)}>
+                                                {param.feasibleSpace === "list" && 
+                                                    <Fab color={"primary"} className={classes.fab} onClick={onAddListParameter(opIndex, paramIndex)}>
                                                         <AddIcon />
                                                     </Fab>
                                                 }
@@ -362,7 +389,7 @@ const NASConfig = (props) => {
                                                         aria-label="Close"
                                                         color={"primary"}
                                                         className={classes.fab}
-                                                        onClick={deleteParameter(opIndex, paramIndex)}
+                                                        onClick={onDeleteParameter(opIndex, paramIndex)}
                                                     >
                                                         <DeleteIcon />
                                                 </IconButton>
@@ -383,11 +410,12 @@ const NASConfig = (props) => {
 
 const mapStateToProps = state => {
     return {
+        numLayers: state[module].numLayers,
         inputSize: state[module].inputSize,
         outputSize: state[module].outputSize,
         operations: state[module].operations,
-        paramTypes: state[module].paramTypes,
+        allParameterTypes: state[module].allParameterTypes,
     }
 }
 
-export default connect(mapStateToProps, { addSize, editSize, deleteSize, addOperation, deleteOperation, changeOperation, addParameter, changeParameter, deleteParameter, addListParameter, editListParameter, deleteListParameter })(NASConfig);
+export default connect(mapStateToProps, { editNumLayers, addSize, editSize, deleteSize, addOperation, deleteOperation, changeOperation, addParameter, changeParameter, deleteParameter, addListParameter, editListParameter, deleteListParameter })(NASConfig);

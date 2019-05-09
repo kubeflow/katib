@@ -8,7 +8,8 @@ import Typography from '@material-ui/core/Typography';
 
 import CommonParametersMeta from './Params/CommonMeta';
 import CommonParametersSpec from './Params/CommonSpec';
-import SuggestionSpec from './Params/SuggestionSpec';
+import Objective from "./Params/Objective"
+import Algorithm from "./Params/Algorithm"
 import TrialSpecParam from './Params/Trial';
 
 import { submitNASJob } from '../../../actions/nasCreateActions';
@@ -74,11 +75,12 @@ const SectionInTypography = (name, classes) => {
 const deCapitalizeFirstLetterAndAppend = (source, destination) => {
     source.map((parameter, i) => {
         let value = Number(parameter.value)
-        destination[parameter.name.toLowerCase()] = (isNaN(value) ? parameter.value : value)
+        let name = parameter.name.charAt(0).toLowerCase() + parameter.name.slice(1)
+        destination[name] = (isNaN(value) ? parameter.value : value)
     })
 }
 
-const addSuggestionParameters = (spec, destination) => {
+const addAlgorithmSettings = (spec, destination) => {
     spec.map((parameter, i) => {
         destination.push(parameter)
     })
@@ -87,22 +89,23 @@ const addSuggestionParameters = (spec, destination) => {
 const addOperations = (source, destination) => {
     source.map((operation, index) => {
         let parameters = []
-        operation.parameterconfigs.map((param, i) => {
+        operation.parameters.map((param, i) => {
             let  tempParam = {}
             tempParam.name = param.name
             tempParam.parametertype = param.parameterType
-            tempParam.feasible = {}
-            if (param.feasible === "list") {
-                tempParam.feasible.list = param.list.map((param, i) => param.value)
+            tempParam.feasibleSpace = {}
+            if (param.feasibleSpace === "list") {
+                tempParam.feasibleSpace.list = param.list.map((param, i) => param.value)
             } else {
-                tempParam.feasible.min = param.min
-                tempParam.feasible.max = param.max
+                tempParam.feasibleSpace.min = param.min
+                tempParam.feasibleSpace.max = param.max
+                tempParam.feasibleSpace.step = param.step
             }
             parameters.push(tempParam)
         })
         destination.push({
             operationType: operation.operationType,
-            parameterconfigs: parameters,
+            parameters: parameters,
         })
     })
 }
@@ -110,10 +113,22 @@ const addOperations = (source, destination) => {
 const NASParameters = (props) => {
     const submitNASJob = () => {
         let data = {}
+        
         data.metadata = {}
         deCapitalizeFirstLetterAndAppend(props.commonParametersMetadata, data.metadata)
+        
         data.spec = {}
         deCapitalizeFirstLetterAndAppend(props.commonParametersSpec, data.spec)
+        
+        data.spec.objective = {}
+        deCapitalizeFirstLetterAndAppend(props.objective, data.spec.objective)
+        data.spec.objective.additionalMetricNames = props.additionalMetricNames.map((metrics, i) => metrics.value)
+        
+        data.spec.algorithm = {}
+        data.spec.algorithm.algorithmName = props.algorithmName
+        data.spec.algorithm.algorithmSettings = [] 
+        addAlgorithmSettings(props.algorithmSettings, data.spec.algorithm.algorithmSettings)
+       
         data.spec.nasConfig = {}
         data.spec.nasConfig.graphConfig = {
             numLayers: Number(props.numLayers),
@@ -122,18 +137,16 @@ const NASParameters = (props) => {
         }
         data.spec.nasConfig.operations = []
         addOperations(props.operations, data.spec.nasConfig.operations)
-        data.spec.trialSpec = {
+
+        data.spec.trialTemplate = {
             goTemplate: {
                 templatePath: props.trial,
             }
         }
-        data.spec.metricsnames = props.metricsName.map((metrics, i) => metrics.value)
-        data.spec.suggestionSpec = {}
-        data.spec.suggestionSpec.suggestionAlgorithm = props.suggestionAlgorithm;
-        data.spec.suggestionSpec.requestNumber = (!isNaN(Number(props.requestNumber)) ? Number(props.requestNumber) : 1) 
-        data.spec.suggestionSpec.suggestionParameters = []
-        addSuggestionParameters(props.suggestionParameters, data.spec.suggestionSpec.suggestionParameters)
-        props.submitNASJob(data)
+
+        console.log("DATA BEFORE BACKEND")
+        console.log(data)
+         props.submitNASJob(data)
     }
 
     const { classes } = props;
@@ -143,14 +156,16 @@ const NASParameters = (props) => {
                 {/* Common Metadata */}
                 {SectionInTypography("Metadata", classes)}
                 <CommonParametersMeta />
-                {SectionInTypography("Spec", classes)}
+                {SectionInTypography("Common Parameters", classes)}
                 <CommonParametersSpec />
+                {SectionInTypography("Objective", classes)}
+                <Objective />
+                {SectionInTypography("Algorithm", classes)}
+                <Algorithm/>
                 {SectionInTypography("NAS Config", classes)}
                 <NASConfig />
                 {SectionInTypography("Trial Spec", classes)}
                 <TrialSpecParam />
-                {SectionInTypography("Suggestion Parameters", classes)} 
-                <SuggestionSpec />
                 <div className={classes.submit}>
                     <Button variant="contained" color={"primary"} className={classes.button} onClick={submitNASJob}>
                         Deploy
@@ -160,26 +175,28 @@ const NASParameters = (props) => {
     )
 }
 
+// TODO: think of a better way of passing those
 const mapStateToProps = (state) => ({
     commonParametersMetadata: state[module].commonParametersMetadata,
     commonParametersSpec: state[module].commonParametersSpec,
+    objective: state[module].objective,
+    additionalMetricNames: state[module].additionalMetricNames,
+    algorithmName: state[module].algorithmName,
+    algorithmSettings: state[module].algorithmSettings,
     numLayers: state[module].numLayers,
     inputSize: state[module].inputSize,
     outputSize: state[module].outputSize,
     operations: state[module].operations,
-    trial: state[module].trial,
-    metricsName: state[module].metricsName,
-    suggestionAlgorithm: state[module].suggestionAlgorithm,
-    requestNumber: state[module].requestNumber,
-    suggestionParameters: state[module].suggestionParameters,
+    trial: state[module].trial
 })
 
-NASParameters.propTypes = {
-    numLayers: PropTypes.number,
-    trial: PropTypes.string,
-    requestNumber: PropTypes.number,
-    suggestionAlgorithm: PropTypes.string,
-    metricsName: PropTypes.arrayOf(PropTypes.string),
-}
+//TODO: Added validation and remove it
+// NASParameters.propTypes = {
+//     numLayers: PropTypes.number,
+//     trial: PropTypes.string,
+//     requestNumber: PropTypes.number,
+//     suggestionAlgorithm: PropTypes.string,
+//     metricsName: PropTypes.arrayOf(PropTypes.string),
+// }
 
 export default connect(mapStateToProps, { submitNASJob })(withStyles(styles)(NASParameters));

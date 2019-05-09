@@ -92,8 +92,6 @@ const Algorithm = (props) => {
                                 value={props.algorithmName}
                                 onChange={onAlgorithmNameChange}
                                 input={
-                                  //TODO: delete name  ?? 
-                                    // <OutlinedInput name={"Algorithm"} labelWidth={160}/>
                                     <OutlinedInput labelWidth={160}/>
                                     
                                 }

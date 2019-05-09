@@ -1,28 +1,28 @@
-export const CHANGE_YAML = "CHANGE_YAML";
+export const CHANGE_YAML_HP = "CHANGE_YAML_HP";
 
 export const changeYaml = (yaml) => ({
-    type: CHANGE_YAML,
+    type: CHANGE_YAML_HP,
     payload: yaml
 })
 
-export const CHANGE_META = "CHANGE_META";
+export const CHANGE_META_HP = "CHANGE_META_HP";
 
 export const changeMeta = (name, value) => ({
-    type: CHANGE_META,
+    type: CHANGE_META_HP,
     name, value,
 })
 
-export const CHANGE_SPEC = "CHANGE_SPEC";
+export const CHANGE_SPEC_HP = "CHANGE_SPEC_HP";
 
 export const changeSpec = (name, value) => ({
-    type: CHANGE_SPEC,
+    type: CHANGE_SPEC_HP,
     name, value
 })
 
-export const CHANGE_OBJECTIVE = "CHANGE_OBJECTIVE";
+export const CHANGE_OBJECTIVE_HP = "CHANGE_OBJECTIVE_HP";
 
 export const changeObjective = (name, value) => ({
-    type: CHANGE_OBJECTIVE,
+    type: CHANGE_OBJECTIVE_HP,
     name, value
 })
 export const ADD_METRICS_HP = "ADD_METRICS_HP";
@@ -45,30 +45,30 @@ export const editMetrics = (index, value) => ({
     index, value,
 })
 
-export const CHANGE_ALGORITHM_NAME = "CHANGE_ALGORITHM_NAME";
+export const CHANGE_ALGORITHM_NAME_HP = "CHANGE_ALGORITHM_NAME_HP";
 
 export const changeAlgorithmName = (algorithmName) => ({
-    type: CHANGE_ALGORITHM_NAME,
+    type: CHANGE_ALGORITHM_NAME_HP,
     algorithmName,
 })
 
-export const ADD_ALGORITHM_SETTING = "ADD_ALGORITHM_SETTING";
+export const ADD_ALGORITHM_SETTING_HP = "ADD_ALGORITHM_SETTING_HP";
 
 export const addAlgorithmSetting = () => ({
-    type: ADD_ALGORITHM_SETTING,
+    type: ADD_ALGORITHM_SETTING_HP,
 })
 
-export const CHANGE_ALGORITHM_SETTING = "CHANGE_ALGORITHM_SETTING";
+export const CHANGE_ALGORITHM_SETTING_HP = "CHANGE_ALGORITHM_SETTING_HP";
 
 export const changeAlgorithmSetting = (index, field, value) => ({
-    type: CHANGE_ALGORITHM_SETTING,
+    type: CHANGE_ALGORITHM_SETTING_HP,
     field, value, index
 })
 
-export const DELETE_ALGORITHM_SETTING = "DELETE_ALGORITHM_SETTING";
+export const DELETE_ALGORITHM_SETTING_HP = "DELETE_ALGORITHM_SETTING_HP";
 
 export const deleteAlgorithmSetting = (index) => ({
-    type: DELETE_ALGORITHM_SETTING,
+    type: DELETE_ALGORITHM_SETTING_HP,
     index
 })
 
@@ -114,10 +114,10 @@ export const deleteListParameter = (paramIndex, index) => ({
     paramIndex, index
 })
 
-export const CHANGE_TRIAL = "CHANGE_TRIAL";
+export const CHANGE_TRIAL_HP = "CHANGE_TRIAL_HP";
 
 export const changeTrial = (trial) => ({
-    type: CHANGE_TRIAL,
+    type: CHANGE_TRIAL_HP,
     trial,
 })
 

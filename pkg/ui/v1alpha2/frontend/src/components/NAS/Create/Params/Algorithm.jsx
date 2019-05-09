@@ -16,7 +16,7 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 import { connect } from 'react-redux';
-import { changeAlgorithm, addSuggestionParameter, changeSuggestionParameter, deleteSuggestionParameter, changeRequestNumber } from '../../../../actions/nasCreateActions';
+import { changeAlgorithmName, addAlgorithmSetting, changeAlgorithmSetting, deleteAlgorithmSetting  } from '../../../../actions/nasCreateActions';
 
 const module = "nasCreate";
 
@@ -49,59 +49,55 @@ const useStyles = makeStyles({
     }
 })
 
-const SuggestionSpec = (props) => {
+const Algorithm = (props) => {
     
     const classes = useStyles();
 
-    const onAlgorithmChange = (event) => {
-        props.changeAlgorithm(event.target.value);
+    const onAlgorithmNameChange = (event) => {
+        props.changeAlgorithmName(event.target.value);
     }
 
-    const onAddParameter = (event) => {
-        props.addSuggestionParameter();
+    const onAddAlgorithmSetting = () => {
+        props.addAlgorithmSetting();
     }
 
-    const onChangeParameter = (name, index) => (event) => {
-        props.changeSuggestionParameter(index, name, event.target.value);
+    const onChangeAlgorithmSetting = (name, index) => (event) => {
+        props.changeAlgorithmSetting(index, name, event.target.value);
     }
 
-    const onDeleteParameter = (index) => (event) => {
-        props.deleteSuggestionParameter(index);
-    }
-
-    const onRequestNumberChange = (event) => {
-        props.changeRequestNumber(event.target.value);
+    const onDeleteAlgorithmSetting= (index) => (event) => {
+        props.deleteAlgorithmSetting(index);
     }
 
     return (
         <div>
-            <Button variant={"contained"} color={"primary"} className={classes.addButton} onClick={onAddParameter}>
-                    Add parameter
+            <Button variant={"contained"} color={"primary"} className={classes.addButton} onClick={onAddAlgorithmSetting}>
+            Add algorithm setting
             </Button>
             <div className={classes.parameter}> 
                 <Grid container alignItems={"center"}>
                     <Grid item xs={12} sm={3}>
                         <Typography>
-                            <Tooltip title={"Suggestion algorithm"}>
+                            <Tooltip title={"Name for the NAS Algorithm"}>
                                 <HelpOutlineIcon className={classes.help} color={"primary"}/>
                             </Tooltip>
-                            {"Suggestion Algorithm"}
+                            {"Algorithm Name"}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} sm={8}>
                         <FormControl variant="outlined" className={classes.formControl}>
                             <InputLabel>
-                                Suggestion Algorithm
+                                Algorithm Name
                             </InputLabel>
                             <Select
-                                value={props.suggestionAlgorithm}
-                                onChange={onAlgorithmChange}
+                                value={props.algorithmName}
+                                onChange={onAlgorithmNameChange}
                                 input={
-                                    <OutlinedInput name={"SuggestionAlgorithm"} labelWidth={160}/>
+                                    <OutlinedInput labelWidth={160}/>
                                 }
                                 className={classes.select}
                                 >
-                                    {props.suggestionAlgorithms.map((algorithm, i) => {
+                                    {props.allAlgorithms.map((algorithm, i) => {
                                         return (
                                                 <MenuItem value={algorithm} key={i}>{algorithm}</MenuItem>
                                             )
@@ -111,30 +107,8 @@ const SuggestionSpec = (props) => {
                     </Grid>
                 </Grid>
             </div>
-            <div className={classes.parameter}> 
-                <Grid container alignItems={"center"}>
-                    <Grid item xs={12} sm={3}>
-                        <Typography>
-                            <Tooltip title={"Number of trials in parallel"}>
-                                <HelpOutlineIcon className={classes.help} color={"primary"}/>
-                            </Tooltip>
-                            {"RequestNumber"}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={8}>
-                        <FormControl variant="outlined" className={classes.formControl}>
-                            <TextField
-                                label={"Request Number"}
-                                className={classes.textField}
-                                value={props.requestNumber}
-                                onChange={onRequestNumberChange}
-                                />
-                        </FormControl>
-                    </Grid>
-                </Grid>
-            </div>
             <br />
-            {props.suggestionParameters.map((param, i) => {
+            {props.algorithmSettings.map((param, i) => {
                 return (
                     <div key={i} className={classes.parameter}>
                         <Grid container alignItems={"center"}>
@@ -144,7 +118,7 @@ const SuggestionSpec = (props) => {
                                     label={"Name"}
                                     className={classes.textField}
                                     value={param.name}
-                                    onChange={onChangeParameter("name", i)}
+                                    onChange={onChangeAlgorithmSetting("name", i)}
                                     />
                             </Grid>
                             <Grid item xs={4}>
@@ -152,7 +126,7 @@ const SuggestionSpec = (props) => {
                                     label={"Value"}
                                     className={classes.textField}
                                     value={param.value}
-                                    onChange={onChangeParameter("value", i)}
+                                    onChange={onChangeAlgorithmSetting("value", i)}
                                     />
                             </Grid>
                             <Grid item xs={1} >
@@ -161,7 +135,7 @@ const SuggestionSpec = (props) => {
                                         aria-label="Close"
                                         color={"primary"}
                                         className={classes.icon}
-                                        onClick={onDeleteParameter(i)}
+                                        onClick={onDeleteAlgorithmSetting(i)}
                                     >
                                         <DeleteIcon />
                                 </IconButton>
@@ -177,11 +151,10 @@ const SuggestionSpec = (props) => {
 
 const mapStateToProps = state => {
     return {
-        suggestionAlgorithm: state[module].suggestionAlgorithm,
-        suggestionAlgorithms: state[module].suggestionAlgorithms,
-        suggestionParameters: state[module].suggestionParameters,
-        requestNumber: state[module].requestNumber,
+        algorithmName: state[module].algorithmName,
+        allAlgorithms: state[module].allAlgorithms,
+        algorithmSettings: state[module].algorithmSettings
     }
 }
 
-export default connect(mapStateToProps, { changeAlgorithm, addSuggestionParameter, changeSuggestionParameter, deleteSuggestionParameter, changeRequestNumber })(SuggestionSpec);
+export default connect(mapStateToProps, { changeAlgorithmName,  addAlgorithmSetting, changeAlgorithmSetting, deleteAlgorithmSetting })(Algorithm);

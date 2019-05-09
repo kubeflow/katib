@@ -54,7 +54,22 @@ const styles = theme => ({
     }
 })
 
+const SectionInTypography = (name, classes) => {
+    return (
+        <div className={classes.section}>
+            <Grid container>
+                <Grid item xs={12} sm={12}>
+                    <Typography variant="h6">
+                        {name}
+                    </Typography>
+                <hr />
+                </Grid>
+            </Grid>
+        </div>
+    )
+}
 
+// probably get render into a function
 const deCapitalizeFirstLetterAndAppend = (source, destination) => {
     source.map((parameter, i) => {
         let value = Number(parameter.value)
@@ -84,22 +99,7 @@ const addParameter = (source, destination) => {
         destination.push(tempParam)
     })
 }
-const SectionInTypography = (name, classes) => {
-    return (
-        <div className={classes.section}>
-            <Grid container>
-                <Grid item xs={12} sm={12}>
-                    <Typography variant="h6">
-                        {name}
-                    </Typography>
-                <hr />
-                </Grid>
-            </Grid>
-        </div>
-    )
-}
 
-// probably get render into a function
 
 const HPParameters = (props) => {
     const submitJob = () => {
@@ -120,23 +120,17 @@ const HPParameters = (props) => {
         data.spec.parameters = []
         addParameter(props.parameters, data.spec.parameters)
         
+        data.spec.trialTemplate = {
+            goTemplate: {
+                templatePath: props.trial
+            }
+        }
+
+        console.log("DATA BEFORE BACKEND")
         console.log(data)
 
 
-
-        
-        // data.spec.TrialTemplate = {
-        //     goTemplate: {
-        //         templatePath: props.trial,
-        //     }
-        // }
-        // data.spec.metricsnames = props.metricsName.map((metrics, i) => metrics.value)
-        // data.spec.suggestionSpec = {}
-        // data.spec.suggestionSpec.requestNumber = (!isNaN(Number(props.requestNumber)) ? Number(props.requestNumber) : 1)
-        // data.spec.suggestionSpec.suggestionAlgorithm = props.suggestionAlgorithm
-        // data.spec.suggestionSpec.suggestionParameters = []
-        // addSuggestionParameters(props.suggestionParameters, data.spec.suggestionSpec.suggestionParameters)
-        // props.submitHPJob(data)
+        props.submitHPJob(data)
     }
 
     const { classes } = props;
@@ -147,7 +141,7 @@ const HPParameters = (props) => {
                 {SectionInTypography("Metadata", classes)}
                 <br />
                 <CommonParametersMeta />
-                {SectionInTypography("Spec", classes)}
+                {SectionInTypography("Common Parameters", classes)}
                 <CommonParametersSpec />
                 {SectionInTypography("Objective", classes)}
                 <Objective />
@@ -156,8 +150,8 @@ const HPParameters = (props) => {
 
                 {SectionInTypography("Parameters", classes)}
                 <Parameters />
-                {/* {SectionInTypography("Trial Spec", classes)}
-                <TrialSpecParam /> */}
+                {SectionInTypography("Trial Spec", classes)}
+                <TrialSpecParam />
                 
                 <div className={classes.submit}>
                     <Button variant="contained" color={"primary"} className={classes.button} onClick={submitJob}>
@@ -175,15 +169,12 @@ const mapStateToProps = (state) => ({
     objective: state[module].objective,
     additionalMetricNames: state[module].additionalMetricNames,
     algorithmName: state[module].algorithmName,
-    algorithmSettings: state[module].algorithmSettings
-    // parameterConfig: state[module].parameterConfig,
-    // metricsName: state[module].metricsName,
-    // trial: state[module].trial,
-    // suggestionAlgorithm: state[module].suggestionAlgorithm,
-    // requestNumber: state[module].requestNumber,
-    // suggestionParameters: state[module].suggestionParameters,
+    algorithmSettings: state[module].algorithmSettings,
+    parameters: state[module].parameters,
+    trial: state[module].trial
 })
 
+//TODO: Added validation and remove it
 // HPParameters.propTypes = {
 //     trial: PropTypes.string,
 //     requestNumber: PropTypes.number,

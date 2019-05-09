@@ -1,21 +1,28 @@
-export const CHANGE_YAML = "CHANGE_YAML";
+export const CHANGE_YAML_NAS = "CHANGE_YAML_NAS";
 
 export const changeYaml = (yaml) => ({
-    type: CHANGE_YAML,
+    type: CHANGE_YAML_NAS,
     payload: yaml
 })
 
-export const CHANGE_META = "CHANGE_META";
+export const CHANGE_META_NAS = "CHANGE_META_NAS";
 
 export const changeMeta = (name, value) => ({
-    type: CHANGE_META,
+    type: CHANGE_META_NAS,
     name, value,
 })
 
-export const CHANGE_SPEC = "CHANGE_SPEC";
+export const CHANGE_SPEC_NAS = "CHANGE_SPEC_NAS";
 
 export const changeSpec = (name, value) => ({
-    type: CHANGE_SPEC,
+    type: CHANGE_SPEC_NAS,
+    name, value
+})
+
+export const CHANGE_OBJECTIVE_NAS = "CHANGE_OBJECTIVE_NAS";
+
+export const changeObjective = (name, value) => ({
+    type: CHANGE_OBJECTIVE_NAS,
     name, value
 })
 
@@ -39,6 +46,40 @@ export const editMetrics = (index, value) => ({
     index, value,
 })
 
+export const CHANGE_ALGORITHM_NAME_NAS = "CHANGE_ALGORITHM_NAME_NAS";
+
+export const changeAlgorithmName = (algorithmName) => ({
+    type: CHANGE_ALGORITHM_NAME_NAS,
+    algorithmName,
+})
+
+export const ADD_ALGORITHM_SETTING_NAS = "ADD_ALGORITHM_SETTING_NAS";
+
+export const addAlgorithmSetting = () => ({
+    type: ADD_ALGORITHM_SETTING_NAS,
+})
+
+export const CHANGE_ALGORITHM_SETTING_NAS = "CHANGE_ALGORITHM_SETTING_NAS";
+
+export const changeAlgorithmSetting = (index, field, value) => ({
+    type: CHANGE_ALGORITHM_SETTING_NAS,
+    field, value, index
+})
+
+export const DELETE_ALGORITHM_SETTING_NAS = "DELETE_ALGORITHM_SETTING_NAS";
+
+export const deleteAlgorithmSetting = (index) => ({
+    type: DELETE_ALGORITHM_SETTING_NAS,
+    index
+})
+
+export const EDIT_NUM_LAYERS = "EDIT_NUM_LAYERS"
+
+export const editNumLayers = (value) => ({
+    type: EDIT_NUM_LAYERS,
+    value
+})
+
 export const ADD_SIZE = "ADD_SIZE";
 
 export const addSize = (sizeType) => ({
@@ -58,47 +99,6 @@ export const DELETE_SIZE = "DELETE_SIZE";
 export const deleteSize = (sizeType, index) => ({
     type: DELETE_SIZE,
     sizeType, index,
-})
-
-export const CHANGE_TRIAL = "CHANGE_TRIAL";
-
-export const changeTrial = (trial) => ({
-    type: CHANGE_TRIAL,
-    trial,
-})
-
-export const CHANGE_ALGORITHM = "CHANGE_ALGORITHM";
-
-export const changeAlgorithm = (algorithm) => ({
-    type: CHANGE_ALGORITHM,
-    algorithm,
-})
-
-export const CHANGE_REQUEST_NUMBER = "CHANGE_REQUEST_NUMBER";
-
-export const changeRequestNumber = (number) => ({
-    type: CHANGE_REQUEST_NUMBER,
-    number,
-})
-
-export const ADD_SUGGESTION_PARAMETER = "ADD_SUGGESTION_PARAMETER";
-
-export const addSuggestionParameter = () => ({
-    type: ADD_SUGGESTION_PARAMETER,
-})
-
-export const CHANGE_SUGGESTION_PARAMETER = "CHANGE_SUGGESTION_PARAMETER";
-
-export const changeSuggestionParameter = (index, field, value) => ({
-    type: CHANGE_SUGGESTION_PARAMETER,
-    field, value, index
-})
-
-export const DELETE_SUGGESTION_PARAMETER = "DELETE_SUGGESTION_PARAMETER";
-
-export const deleteSuggestionParameter = (index) => ({
-    type: DELETE_SUGGESTION_PARAMETER,
-    index
 })
 
 export const ADD_OPERATION = "ADD_OPERATION";
@@ -121,24 +121,24 @@ export const changeOperation = (index, value) => ({
     index, value,
 })
 
-export const ADD_PARAMETER = "ADD_PARAMETER";
+export const ADD_PARAMETER_NAS = "ADD_PARAMETER_NAS";
 
 export const addParameter = (opIndex) => ({
-    type: ADD_PARAMETER,
+    type: ADD_PARAMETER_NAS,
     opIndex,
 })
 
-export const CHANGE_PARAMETER = "CHANGE_PARAMETER";
+export const CHANGE_PARAMETER_NAS = "CHANGE_PARAMETER_NAS";
 
 export const changeParameter = (opIndex, paramIndex, field, value) => ({
-    type: CHANGE_PARAMETER,
+    type: CHANGE_PARAMETER_NAS,
     opIndex, paramIndex, field, value,
 })
 
-export const DELETE_PARAMETER = "DELETE_PARAMETER";
+export const DELETE_PARAMETER_NAS = "DELETE_PARAMETER_NAS";
 
 export const deleteParameter = (opIndex, paramIndex) => ({
-    type: DELETE_PARAMETER,
+    type: DELETE_PARAMETER_NAS,
     opIndex, paramIndex,
 })
 
@@ -162,6 +162,13 @@ export const DELETE_LIST_PARAMETER_NAS = "DELETE_LIST_PARAMETER_NAS";
 export const deleteListParameter = (opIndex, paramIndex, listIndex) => ({
     type: DELETE_LIST_PARAMETER_NAS,
     opIndex, paramIndex, listIndex,
+})
+
+export const CHANGE_TRIAL_NAS = "CHANGE_TRIAL_NAS";
+
+export const changeTrial = (trial) => ({
+    type: CHANGE_TRIAL_NAS,
+    trial,
 })
 
 export const SUBMIT_NAS_JOB_REQUEST = "SUBMIT_NAS_JOB_REQUEST";

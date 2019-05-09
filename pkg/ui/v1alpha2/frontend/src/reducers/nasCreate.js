@@ -3,102 +3,54 @@ import * as actions from '../actions/nasCreateActions';
 const initialState = {
     commonParametersMetadata: [
         {
-            name: "Namespace",
-            value: "kubeflow",
-            description: "Namespace to deploy a study into"
-        },
-        {
             name: "Name",
             value: "nasrl-example",
-            description: "A name of a study"
+            description: "A name of an experiment"
+        },
+        {
+            name: "Namespace",
+            value: "kubeflow",
+            description: "Namespace to deploy an experiment"
         }
     ],
     commonParametersSpec: [
         {
-            name: "Name",
-            value: "nasrl-example",
-            description: "A name of a study"
+            name: "ParallelTrialCount",
+            value: "3",
+            description: "How many trials can be processed in parallel"
         },
-        // owner is always crd
         {
-            name: "OptimizationType",
+            name: "MaxTrialCount",
+            value: "12",
+            description: "Max completed trials to mark experiment as succeeded"
+        },
+        {
+            name: "MaxFailedTrialCount",
+            value: "3",
+            description: "Max failed trials to mark experiment as failed"
+        }
+    ],
+    objective: [
+        {
+            name: "Type",
             value: "maximize",
-            description: "Optimization type"
+            description: "Type of optimization"
         },
         {
-            name: "OptimizationValueName",
-            value: "Validation-accuracy",
-            description: "A name of metrics to optimize"
-        },
-        // check for float
-        {
-            name: "OptimizationGoals",
+            name: "Goal",
             value: "0.99",
-            description: "A threshold to optimize up to"
+            description: "Goal of optimization"
         },
-        // check for int
         {
-            name: "RequestCount",
-            value: "4",
-            description: "Number of requests"
-        },
-    ],
-    metricsName: [
-        {
-            value: "accuracy",
+            name: "ObjectiveMetricName",
+            value: "Validation-Accuracy",
+            description: "Name for the objective metric"
         }
     ],
-    trial: 'cpuTrialTemplate.yaml',
-    numLayers: '1',
-    inputSize: ['32', '32', '3'],
-    outputSize: ['10'],
-    paramTypes: ["int", "double", "categorical"],
-    operations: [
-        {
-            operationType: "convolution",
-            parameterconfigs: [
-                {
-                    parameterType: "categorical",
-                    name: "filter_size",
-                    feasible: "list",
-                    min: "",
-                    max: "",
-                    step: "",
-                    list: [
-                        {
-                            value: "3",
-                        },
-                        {
-                            value: "5",
-                        },
-                        {
-                            value: "7",
-                        }
-                    ],
-                },
-                {
-                    parameterType: "categorical",
-                    name: "num_filter",
-                    feasible: "list",
-                    min: "",
-                    max: "",
-                    step: "",
-                    list: [
-                        {
-                            value: "32",
-                        },
-                        {
-                            value: "48",
-                        }
-                    ],
-                },
-            ]
-        }
-    ],
-    suggestionAlgorithms: ["nasrl", "enas"], // fetch these
-    suggestionAlgorithm: "nasrl",
-    requestNumber: "2",
-    suggestionParameters: [
+    additionalMetricNames: [],
+    algorithmName: [ "nasrl" ],
+    allAlgorithms: ["nasrl", "envelopenet"],
+    algorithmSettings: [
         {
             name: "lstm_num_cells",
             value: "64",
@@ -152,6 +104,54 @@ const initialState = {
             value: "0.9999",
         }
     ],
+    //Graph Config
+    numLayers: '1',
+    inputSize: ['32', '32', '3'],
+    outputSize: ['10'],
+    operations: [
+        {
+            operationType: "convolution",
+            parameters: [
+                {
+                    parameterType: "categorical",
+                    name: "filter_size",
+                    feasibleSpace: "list",
+                    min: "",
+                    max: "",
+                    step: "",
+                    list: [
+                        {
+                            value: "3",
+                        },
+                        {
+                            value: "5",
+                        },
+                        {
+                            value: "7",
+                        }
+                    ],
+                },
+                {
+                    parameterType: "categorical",
+                    name: "num_filter",
+                    feasibleSpace: "list",
+                    min: "",
+                    max: "",
+                    step: "",
+                    list: [
+                        {
+                            value: "32",
+                        },
+                        {
+                            value: "48",
+                        }
+                    ],
+                },
+            ]
+        }
+    ],
+    allParameterTypes: ["int", "double", "categorical"],
+    trial: 'cpuTrialTemplate.yaml',
     currentYaml: '',
     snackText: '',
     snackOpen: false,
@@ -163,12 +163,12 @@ const filterValue = (obj, key) => {
 
 const nasCreateReducer = (state = initialState, action) => {
     switch (action.type) {
-        case actions.CHANGE_YAML:
+        case actions.CHANGE_YAML_NAS:
             return {
                 ...state,
                 currentYaml: action.payload,
             }
-        case actions.CHANGE_META:
+        case actions.CHANGE_META_NAS:
             let meta = state.commonParametersMetadata.slice();
             let index = filterValue(meta, action.name);
             meta[index].value = action.value;
@@ -176,7 +176,7 @@ const nasCreateReducer = (state = initialState, action) => {
                 ...state,
                 commonParametersMetadata: meta,
             }
-        case actions.CHANGE_SPEC:
+        case actions.CHANGE_SPEC_NAS:
             let spec = state.commonParametersSpec.slice();
             index = filterValue(spec, action.name);
             spec[index].value = action.value;
@@ -184,37 +184,69 @@ const nasCreateReducer = (state = initialState, action) => {
                 ...state,
                 commonParametersSpec: spec,
             }
-        case actions.CHANGE_TRIAL:
+        case actions.CHANGE_OBJECTIVE_NAS:
+            let obj = state.objective.slice();
+            index = filterValue(obj, action.name);
+            obj[index].value = action.value;
             return {
                 ...state,
-                trial: action.trial,
+                objective: obj,
             }
-        case actions.CHANGE_ALGORITHM:
+        case actions.ADD_METRICS_NAS:
+            let additionalMetricNames = state.additionalMetricNames.slice()
+            additionalMetricNames.push({
+                value: "",
+            })
+            return {
+                ...state,
+                additionalMetricNames: additionalMetricNames,
+            }
+        case actions.DELETE_METRICS_NAS:
+            additionalMetricNames = state.additionalMetricNames.slice()
+            additionalMetricNames.splice(action.index, 1)
+            return {
+                ...state,
+                additionalMetricNames: additionalMetricNames,
+            }
+        case actions.EDIT_METRICS_NAS:
+            additionalMetricNames = state.additionalMetricNames.slice()
+            additionalMetricNames[action.index].value = action.value
+            return {
+                ...state,
+                additionalMetricNames: additionalMetricNames,
+            }
+        case actions.CHANGE_ALGORITHM_NAME_NAS:
             return {
                 ...state, 
-                suggestionAlgorithm: action.algorithm,
+                algorithmName: action.algorithmName,
             }
-        case actions.ADD_SUGGESTION_PARAMETER:
-            let suggestionParameters = state.suggestionParameters.slice();
-            let parameter = {name: "", value: ""};
-            suggestionParameters.push(parameter);
+        case actions.ADD_ALGORITHM_SETTING_NAS:
+            let algorithmSettings = state.algorithmSettings.slice();
+            let setting = {name: "", value: ""};
+            algorithmSettings.push(setting);
             return {
                 ...state,
-                suggestionParameters: suggestionParameters,
+                algorithmSettings: algorithmSettings,
             }
-        case actions.CHANGE_SUGGESTION_PARAMETER:
-            suggestionParameters = state.suggestionParameters.slice();
-            suggestionParameters[action.index][action.field] = action.value;
+        case actions.CHANGE_ALGORITHM_SETTING_NAS:
+            algorithmSettings = state.algorithmSettings.slice();
+            algorithmSettings[action.index][action.field] = action.value;
             return {
                 ...state,
-                suggestionParameters: suggestionParameters,
+                algorithmSettings: algorithmSettings,
             }
-        case actions.DELETE_SUGGESTION_PARAMETER:
-            suggestionParameters = state.suggestionParameters.slice();
-            suggestionParameters.splice(action.index, 1);
+        case actions.DELETE_ALGORITHM_SETTING_NAS:
+            algorithmSettings = state.algorithmSettings.slice();
+            algorithmSettings.splice(action.index, 1);
             return {
                 ...state,
-                suggestionParameters: suggestionParameters,
+                algorithmSettings: algorithmSettings,
+            }
+        case actions.EDIT_NUM_LAYERS:
+            let numLayers = action.value;
+            return {
+                ...state,
+                numLayers: numLayers
             }
         case actions.ADD_SIZE:
             let size = state[action.sizeType].slice();
@@ -241,7 +273,7 @@ const nasCreateReducer = (state = initialState, action) => {
             let operations = state.operations.slice();
             operations.push({
                 operationType: "",
-                parameterconfigs: [],
+                parameters: [],
             });
             return {
                 ...state,
@@ -261,14 +293,13 @@ const nasCreateReducer = (state = initialState, action) => {
                 ...state,
                 operations,
             }
-        case actions.ADD_PARAMETER:
+        case actions.ADD_PARAMETER_NAS:
             operations = state.operations.slice();
-            operations[action.opIndex].parameterconfigs.push(
+            operations[action.opIndex].parameters.push(
                {
                 name: "",
                 parameterType: "categorical",
-                name: "",
-                feasible: "list",
+                feasibleSpace: "list",
                 min: "",
                 max: "",
                 step: "",
@@ -280,25 +311,26 @@ const nasCreateReducer = (state = initialState, action) => {
                 ...state,
                 operations,
             }
-        case actions.CHANGE_PARAMETER:
+        case actions.CHANGE_PARAMETER_NAS:
             operations = state.operations.slice();
-            operations[action.opIndex].parameterconfigs[action.paramIndex][action.field] = action.value;
+            operations[action.opIndex].parameters[action.paramIndex][action.field] = action.value;
             return {
                 ...state,
                 operations,
             }
-        case actions.DELETE_PARAMETER:
+        case actions.DELETE_PARAMETER_NAS:
             operations = state.operations.slice();
-            operations[action.opIndex].parameterconfigs.splice(action.paramIndex, 1);
+            operations[action.opIndex].parameters.splice(action.paramIndex, 1);
             return {
                 ...state,
                 operations,
             }
         case actions.ADD_LIST_PARAMETER_NAS:
             operations = state.operations.slice();
-            operations[action.opIndex].parameterconfigs[action.paramIndex].list.push(
+            operations[action.opIndex].parameters[action.paramIndex].list.push(
                 {
-                    name: "",
+                    //TODO: Remove it?
+                    // name: "",
                     value: "",
                 }
             )
@@ -308,45 +340,22 @@ const nasCreateReducer = (state = initialState, action) => {
             }
         case actions.DELETE_LIST_PARAMETER_NAS:
             operations = state.operations.slice();
-            operations[action.opIndex].parameterconfigs[action.paramIndex].list.splice(action.listIndex, 1);
+            operations[action.opIndex].parameters[action.paramIndex].list.splice(action.listIndex, 1);
             return {
                 ...state,
                 operations,
             }
         case actions.EDIT_LIST_PARAMETER_NAS:
             operations = state.operations.slice();
-            operations[action.opIndex].parameterconfigs[action.paramIndex].list[action.listIndex] = action.value;
+            operations[action.opIndex].parameters[action.paramIndex].list[action.listIndex].value = action.value;
             return {
                 ...state,
                 operations,
             }
-        case actions.CHANGE_REQUEST_NUMBER:
+        case actions.CHANGE_TRIAL_NAS:
             return {
                 ...state,
-                requestNumber: action.number,
-            }
-        case actions.ADD_METRICS_NAS:
-            let metricsName = state.metricsName.slice()
-            metricsName.push({
-                value: "",
-            })
-            return {
-                ...state,
-                metricsName: metricsName,
-            }
-        case actions.DELETE_METRICS_NAS:
-            metricsName = state.metricsName.slice()
-            metricsName.splice(action.index, 1)
-            return {
-                ...state,
-                metricsName: metricsName,
-            }
-        case actions.EDIT_METRICS_NAS:
-            metricsName = state.metricsName.slice()
-            metricsName[action.index].value = action.value
-            return {
-                ...state,
-                metricsName: metricsName,
+                trial: action.trial,
             }
         case actions.CLOSE_SNACKBAR:
             return {
