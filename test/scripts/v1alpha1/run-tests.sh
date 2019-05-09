@@ -76,6 +76,7 @@ sed -i -e "s@image: katib\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/sug
 sed -i -e "s@image: katib\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-hyperband:${VERSION}@" manifests/v1alpha1/vizier/suggestion/hyperband/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-bayesianoptimization:${VERSION}@" manifests/v1alpha1/vizier/suggestion/bayesianoptimization/deployment.yaml
 sed -i -e "s@image: katib\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-nasrl:${VERSION}@" manifests/v1alpha1/vizier/suggestion/nasrl/deployment.yaml
+sed -i -e "s@image: katib\/suggestion-nasenvelopenet@image: ${REGISTRY}\/${REPO_NAME}\/suggestion-nasenvelopenet:${VERSION}@" manifests/v1alpha1/vizier/suggestion/nasenvelopenet/deployment.yaml
 sed -i -e "s@image: katib\/earlystopping-medianstopping@image: ${REGISTRY}\/${REPO_NAME}\/earlystopping-medianstopping:${VERSION}@" manifests/v1alpha1/vizier/earlystopping/medianstopping/deployment.yaml
 sed -i -e '/volumeMounts:/,$d' manifests/v1alpha1/vizier/db/deployment.yaml
 
