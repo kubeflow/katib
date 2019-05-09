@@ -243,6 +243,10 @@
                     template: "build-suggestion-nasrl",
                   },
                   {
+                    name: "build-suggestion-nasenvelopenet",
+                    template: "build-suggestion-nasenvelopenet",
+                  },
+                  {
                     name: "build-earlystopping-median",
                     template: "build-earlystopping-median",
                   },
@@ -371,6 +375,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-nasrl", testWorkerImage, [
               "test/scripts/v1alpha1/build-suggestion-nasrl.sh",
             ]),  // build-suggestion-nasrl
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-nasenvelopenet", testWorkerImage, [
+              "test/scripts/v1alpha1/build-suggestion-nasenvelopenet.sh",
+            ]),  // build-suggestion-nasenvelopenet
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-earlystopping-median", testWorkerImage, [
               "test/scripts/v1alpha1/build-earlystopping-median.sh",
             ]),  // build-earlystopping-median
