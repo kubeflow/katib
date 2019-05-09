@@ -48,7 +48,7 @@ const initialState = {
             value: "accuracy",
         }
     ],
-    worker: 'cpuWorkerTemplate.yaml',
+    trial: 'cpuTrialTemplate.yaml',
     numLayers: '1',
     inputSize: ['32', '32', '3'],
     outputSize: ['10'],
@@ -184,10 +184,10 @@ const nasCreateReducer = (state = initialState, action) => {
                 ...state,
                 commonParametersSpec: spec,
             }
-        case actions.CHANGE_WORKER:
+        case actions.CHANGE_TRIAL:
             return {
                 ...state,
-                worker: action.worker,
+                trial: action.trial,
             }
         case actions.CHANGE_ALGORITHM:
             return {

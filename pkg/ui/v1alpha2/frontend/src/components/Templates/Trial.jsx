@@ -7,8 +7,9 @@ import Button from '@material-ui/core/Button';
 import TemplateList from './Common/TemplateList';
 
 import { connect } from 'react-redux';
-import { openDialog, fetchWorkerTemplates } from '../../actions/templateActions';
+import { openDialog, fetchTrialTemplates } from '../../actions/templateActions';
 import AddDialog from './Common/AddDialog';
+
 
 const styles = theme => ({
     root: {
@@ -17,10 +18,10 @@ const styles = theme => ({
     },
 });
 
-class Worker extends React.Component {
+class Trial extends React.Component {
 
     componentDidMount() {
-        this.props.fetchWorkerTemplates();
+        this.props.fetchTrialTemplates();
     }
     
     openAddDialog = () => {
@@ -30,12 +31,12 @@ class Worker extends React.Component {
     render () {
         const { classes } = this.props;
 
-        const type = "worker";
+        const type = "trial";
         
         return (
             <div className={classes.root}>
                 <Typography variant={"headline"} color={"primary"}>
-                    Worker Manifests
+                    Trial Manifests
                 </Typography>
                 <Button variant={"contained"} color={"primary"} onClick={this.openAddDialog}>
                     Add
@@ -48,4 +49,4 @@ class Worker extends React.Component {
         )
     }
 }
-export default connect(null, { openDialog, fetchWorkerTemplates })(withStyles(styles)(Worker))
+export default connect(null, { openDialog, fetchTrialTemplates })(withStyles(styles)(Trial))

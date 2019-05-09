@@ -24,17 +24,17 @@ export const FETCH_HP_JOB_INFO_REQUEST = "FETCH_HP_JOB_INFO_REQUEST";
 export const FETCH_HP_JOB_INFO_SUCCESS = "FETCH_HP_JOB_INFO_SUCCESS";
 export const FETCH_HP_JOB_INFO_FAILURE = "FETCH_HP_JOB_INFO_FAILURE";
 
-export const fetchJobInfo = (id) => ({
+export const fetchHPJobInfo = (name) => ({
     type: FETCH_HP_JOB_INFO_REQUEST,
-    id
+    name
 })
 
-export const FETCH_WORKER_INFO_REQUEST = "FETCH_WORKER_INFO_REQUEST";
-export const FETCH_WORKER_INFO_SUCCESS = "FETCH_WORKER_INFO_SUCCESS";
-export const FETCH_WORKER_INFO_FAILURE = "FETCH_WORKER_INFO_FAILURE";
+export const FETCH_TRIAL_INFO_REQUEST = "FETCH_TRIAL_INFO_REQUEST";
+export const FETCH_TRIAL_INFO_SUCCESS = "FETCH_TRIAL_INFO_SUCCESS";
+export const FETCH_TRIAL_INFO_FAILURE = "FETCH_TRIAL_INFO_FAILURE";
 
-export const fetchWorkerInfo = (studyID, workerID) => ({
-    type: FETCH_WORKER_INFO_REQUEST,
+export const fetchTrialInfo = (studyID, workerID) => ({
+    type: FETCH_TRIAL_INFO_REQUEST,
     studyID, workerID
 })
 

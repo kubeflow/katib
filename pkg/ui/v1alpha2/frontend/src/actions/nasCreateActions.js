@@ -60,11 +60,11 @@ export const deleteSize = (sizeType, index) => ({
     sizeType, index,
 })
 
-export const CHANGE_WORKER = "CHANGE_WORKER";
+export const CHANGE_TRIAL = "CHANGE_TRIAL";
 
-export const changeWorker = (worker) => ({
-    type: CHANGE_WORKER,
-    worker,
+export const changeTrial = (trial) => ({
+    type: CHANGE_TRIAL,
+    trial,
 })
 
 export const CHANGE_ALGORITHM = "CHANGE_ALGORITHM";

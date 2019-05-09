@@ -8,12 +8,12 @@ import * as nasCreateActions from '../actions/nasCreateActions';
 import * as generalActions from '../actions/generalActions';
 
 
-export const fetchWorkerTemplates = function *() {
+export const fetchTrialTemplates = function *() {
     while (true) {
-        const action = yield take(templateActions.FETCH_WORKER_TEMPLATES_REQUEST);
+        const action = yield take(templateActions.FETCH_TRIAL_TEMPLATES_REQUEST);
         try {
             const result = yield call(
-                goFetchWorkerTemplates
+                goFetchTrialTemplates
             )
             if (result.status === 200) {
                 let data = Object.assign(result.data, {})
@@ -25,32 +25,32 @@ export const fetchWorkerTemplates = function *() {
                     });
                 })
                 yield put({
-                    type: templateActions.FETCH_WORKER_TEMPLATES_SUCCESS,
+                    type: templateActions.FETCH_TRIAL_TEMPLATES_SUCCESS,
                     templates: data
                 })
             } else {
                 yield put({
-                    type: templateActions.FETCH_WORKER_TEMPLATES_FAILURE,
+                    type: templateActions.FETCH_TRIAL_TEMPLATES_FAILURE,
                 }) 
             }
         } catch (err) {
             yield put({
-                type: templateActions.FETCH_WORKER_TEMPLATES_FAILURE,
+                type: templateActions.FETCH_TRIAL_TEMPLATES_FAILURE,
             })
         }
     }
 }
 
-const goFetchWorkerTemplates = function *() {
+const goFetchTrialTemplates = function *() {
     try {
         const result = yield call(
             axios.get,
-            '/katib/fetch_worker_templates/',
+            '/katib/fetch_trial_templates/',
         )
         return result
     } catch (err) {
         yield put({
-            type: templateActions.FETCH_WORKER_TEMPLATES_FAILURE,
+            type: templateActions.FETCH_TRIAL_TEMPLATES_FAILURE,
         })
     }
 }
@@ -97,7 +97,7 @@ const goFetchCollectorTemplates = function *() {
         return result
     } catch (err) {
         yield put({
-            type: templateActions.FETCH_WORKER_TEMPLATES_FAILURE,
+            type: templateActions.FETCH_COLLECTOR_TEMPLATES_FAILURE,
         })
     }
 }
@@ -205,6 +205,7 @@ export const addTemplate = function *() {
                 action.name,
                 action.yaml,
                 action.kind,
+                action.action
             )
             if (result.status === 200) {
                 let data = Object.assign(result.data.Data, {})
@@ -233,10 +234,10 @@ export const addTemplate = function *() {
     }
 }
 
-const goAddTemplate = function *(name, yaml, kind) {
+const goAddTemplate = function *(name, yaml, kind, action) {
     try {
         const data = {
-            name, yaml, kind
+            name, yaml, kind, action
         }
         const result = yield call(
             axios.post,
@@ -260,6 +261,7 @@ export const editTemplate = function *() {
                 action.name,
                 action.yaml,
                 action.kind,
+                action.action
             )
             if (result.status === 200) {
                 let data = Object.assign(result.data.Data, {})
@@ -288,10 +290,10 @@ export const editTemplate = function *() {
     }
 }
 
-const goEditTemplate = function *(name, yaml, kind) {
+const goEditTemplate = function *(name, yaml, kind, action) {
     try {
         const data = {
-            name, yaml, kind
+            name, yaml, kind, action
         }
         const result = yield call(
             axios.post,
@@ -313,7 +315,8 @@ export const deleteTemplate = function *() {
             const result = yield call(
                 goDeleteTemplate,
                 action.name,
-                action.templateType,
+                action.kind,
+                action.action
             )
             if (result.status === 200) {
                 let data = Object.assign(result.data.Data, {})
@@ -342,14 +345,14 @@ export const deleteTemplate = function *() {
     }
 }
 
-const goDeleteTemplate = function *(name, kind) {
+const goDeleteTemplate = function *(name, kind, action) {
     try {
         const data = {
-            name, kind
+            name, kind, action
         }
         const result = yield call(
             axios.post,
-            '/katib/delete_template/',
+            '/katib/update_template/',
             data,
         )
         return result
@@ -623,51 +626,51 @@ const goFetchNASJobInfo = function *(id) {
     }
 }
 
-export const fetchWorkerInfo = function *() {
+export const fetchTrialInfo = function *() {
     while (true) {
-        const action = yield take(hpMonitorActions.FETCH_WORKER_INFO_REQUEST);
+        const action = yield take(hpMonitorActions.FETCH_TRIAL_INFO_REQUEST);
         try {
             const result = yield call(
-                goFetchWorkerInfo,
+                goFetchTrialInfo,
                 action.studyID,
                 action.workerID
             )
             if (result.status === 200) {
                 let data = result.data.split("\n").map((line, i) => line.split(','))
                 yield put({
-                    type: hpMonitorActions.FETCH_WORKER_INFO_SUCCESS,
-                    workerData: data
+                    type: hpMonitorActions.FETCH_TRIAL_INFO_SUCCESS,
+                    trialData: data
                 })
             } else {
                 yield put({
-                    type: hpMonitorActions.FETCH_WORKER_INFO_FAILURE,
+                    type: hpMonitorActions.FETCH_TRIAL_INFO_FAILURE,
                 }) 
             }
         } catch (err) {
             yield put({
-                type: hpMonitorActions.FETCH_WORKER_INFO_FAILURE,
+                type: hpMonitorActions.FETCH_TRIAL_INFO_FAILURE,
             })
         }
     }
 }
 
-const goFetchWorkerInfo = function *(studyID, workerID) {
+const goFetchTrialInfo = function *(studyID, workerID) {
     try {
         const result = yield call(
             axios.get,
-            `/katib/fetch_worker_info/?studyID=${studyID}&workerID=${workerID}`,
+            `/katib/fetch_trial_info/?studyID=${studyID}&workerID=${workerID}`,
         )
         return result
     } catch (err) {
         yield put({
-            type: hpMonitorActions.FETCH_WORKER_INFO_FAILURE,
+            type: hpMonitorActions.FETCH_TRIAL_INFO_FAILURE,
         })
     }
 }
 
 export default function* rootSaga() {
     yield all([
-        fork(fetchWorkerTemplates),
+        fork(fetchTrialTemplates),
         fork(fetchCollectorTemplates),
         fork(fetchHPJobs),
         fork(fetchNASJobs),
@@ -679,7 +682,7 @@ export default function* rootSaga() {
         fork(submitHPJob),
         fork(submitNASJob),
         fork(fetchHPJobInfo),
-        fork(fetchWorkerInfo),
+        fork(fetchTrialInfo),
         fork(fetchNASJobInfo)
     ]);
 };

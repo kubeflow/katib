@@ -7,13 +7,14 @@ import Typography from '@material-ui/core/Typography';
 
 import CommonParametersMeta from './Params/CommonMeta';
 import CommonParametersSpec from './Params/CommonSpec';
-import WorkerSpecParam from './Params/Worker';
-import ParameterConfig from './Params/ParameterConfig';
-import SuggestionSpec from './Params/SuggestionSpec';
+import Objective from './Params/Objective'
+import TrialSpecParam from './Params/Trial';
+import Parameters from './Params/Parameters';
 
 import { submitHPJob } from '../../../actions/hpCreateActions';
 
 import { connect } from 'react-redux';
+import Algorithm from './Params/Algorithm';
 
 const module = "hpCreate";
 
@@ -57,27 +58,28 @@ const styles = theme => ({
 const deCapitalizeFirstLetterAndAppend = (source, destination) => {
     source.map((parameter, i) => {
         let value = Number(parameter.value)
-        destination[parameter.name.toLowerCase()] = (isNaN(value) ? parameter.value : value)
+        let name = parameter.name.charAt(0).toLowerCase() + parameter.name.slice(1)
+        destination[name] = (isNaN(value) ? parameter.value : value)
     })
 }
 
-const addSuggestionParameters = (spec, destination) => {
+const addAlgorithmSettings = (spec, destination) => {
     spec.map((parameter, i) => {
         destination.push(parameter)
     })
 }
 
-const addParameterConfig = (source, destination) => {
+const addParameter = (source, destination) => {
     source.map((param, i) => {
         let  tempParam = {}
         tempParam.name = param.name
-        tempParam.parametertype = param.parameterType
-        tempParam.feasible = {}
-        if (param.feasible === "list") {
-            tempParam.feasible.list = param.list.map((param, i) => param.value)
+        tempParam.parameterType = param.parameterType
+        tempParam.feasibleSpace = {}
+        if (param.feasibleSpace === "list") {
+            tempParam.feasibleSpace.list = param.list.map((param, i) => param.value)
         } else {
-            tempParam.feasible.min = param.min
-            tempParam.feasible.max = param.max
+            tempParam.feasibleSpace.min = param.min
+            tempParam.feasibleSpace.max = param.max
         }
         destination.push(tempParam)
     })
@@ -106,21 +108,35 @@ const HPParameters = (props) => {
         deCapitalizeFirstLetterAndAppend(props.commonParametersMetadata, data.metadata)
         data.spec = {}
         deCapitalizeFirstLetterAndAppend(props.commonParametersSpec, data.spec)
+        data.spec.objective = {}
+        deCapitalizeFirstLetterAndAppend(props.objective, data.spec.objective)
+        data.spec.objective.additionalMetricNames = props.additionalMetricNames.map((metrics, i) => metrics.value)
+        
+        data.spec.algorithm = {}
+        data.spec.algorithm.algorithmName = props.algorithmName
+        data.spec.algorithm.algorithmSettings = [] 
+        addAlgorithmSettings(props.algorithmSettings, data.spec.algorithm.algorithmSettings)
+       
+        data.spec.parameters = []
+        addParameter(props.parameters, data.spec.parameters)
+        
+        console.log(data)
 
-        data.spec.parameterconfigs = []
-        addParameterConfig(props.parameterConfig, data.spec.parameterconfigs)
-        data.spec.workerSpec = {
-            goTemplate: {
-                templatePath: props.worker,
-            }
-        }
-        data.spec.metricsnames = props.metricsName.map((metrics, i) => metrics.value)
-        data.spec.suggestionSpec = {}
-        data.spec.suggestionSpec.requestNumber = (!isNaN(Number(props.requestNumber)) ? Number(props.requestNumber) : 1)
-        data.spec.suggestionSpec.suggestionAlgorithm = props.suggestionAlgorithm
-        data.spec.suggestionSpec.suggestionParameters = []
-        addSuggestionParameters(props.suggestionParameters, data.spec.suggestionSpec.suggestionParameters)
-        props.submitHPJob(data)
+
+
+        
+        // data.spec.TrialTemplate = {
+        //     goTemplate: {
+        //         templatePath: props.trial,
+        //     }
+        // }
+        // data.spec.metricsnames = props.metricsName.map((metrics, i) => metrics.value)
+        // data.spec.suggestionSpec = {}
+        // data.spec.suggestionSpec.requestNumber = (!isNaN(Number(props.requestNumber)) ? Number(props.requestNumber) : 1)
+        // data.spec.suggestionSpec.suggestionAlgorithm = props.suggestionAlgorithm
+        // data.spec.suggestionSpec.suggestionParameters = []
+        // addSuggestionParameters(props.suggestionParameters, data.spec.suggestionSpec.suggestionParameters)
+        // props.submitHPJob(data)
     }
 
     const { classes } = props;
@@ -133,13 +149,16 @@ const HPParameters = (props) => {
                 <CommonParametersMeta />
                 {SectionInTypography("Spec", classes)}
                 <CommonParametersSpec />
-                {SectionInTypography("Parameters Config", classes)}
-                <ParameterConfig />
-                {SectionInTypography("Worker Spec", classes)}
-                <WorkerSpecParam />
-                {SectionInTypography("Suggestion Parameters", classes)} 
+                {SectionInTypography("Objective", classes)}
+                <Objective />
+                {SectionInTypography("Algorithm", classes)}
+                <Algorithm/>
+
+                {SectionInTypography("Parameters", classes)}
+                <Parameters />
+                {/* {SectionInTypography("Trial Spec", classes)}
+                <TrialSpecParam /> */}
                 
-                <SuggestionSpec />
                 <div className={classes.submit}>
                     <Button variant="contained" color={"primary"} className={classes.button} onClick={submitJob}>
                         Deploy
@@ -153,19 +172,23 @@ const HPParameters = (props) => {
 const mapStateToProps = (state) => ({
     commonParametersMetadata: state[module].commonParametersMetadata,
     commonParametersSpec: state[module].commonParametersSpec,
-    parameterConfig: state[module].parameterConfig,
-    metricsName: state[module].metricsName,
-    worker: state[module].worker,
-    suggestionAlgorithm: state[module].suggestionAlgorithm,
-    requestNumber: state[module].requestNumber,
-    suggestionParameters: state[module].suggestionParameters,
+    objective: state[module].objective,
+    additionalMetricNames: state[module].additionalMetricNames,
+    algorithmName: state[module].algorithmName,
+    algorithmSettings: state[module].algorithmSettings
+    // parameterConfig: state[module].parameterConfig,
+    // metricsName: state[module].metricsName,
+    // trial: state[module].trial,
+    // suggestionAlgorithm: state[module].suggestionAlgorithm,
+    // requestNumber: state[module].requestNumber,
+    // suggestionParameters: state[module].suggestionParameters,
 })
 
-HPParameters.propTypes = {
-    worker: PropTypes.string,
-    requestNumber: PropTypes.number,
-    suggestionAlgorithm: PropTypes.string,
-    metricsName: PropTypes.arrayOf(PropTypes.string),
-}
+// HPParameters.propTypes = {
+//     trial: PropTypes.string,
+//     requestNumber: PropTypes.number,
+//     suggestionAlgorithm: PropTypes.string,
+//     metricsName: PropTypes.arrayOf(PropTypes.string),
+// }
 
 export default connect(mapStateToProps, { submitHPJob })(withStyles(styles)(HPParameters));

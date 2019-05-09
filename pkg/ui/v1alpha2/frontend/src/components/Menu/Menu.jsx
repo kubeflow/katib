@@ -136,14 +136,14 @@ const Menu = (props) => {
                         </List>
                     </Collapse>
                     <Divider />
-                    {/* WORKER MANIFESTS */}
-                    <ListItem button component={Link} to="/katib/worker">
+                    {/* TRIAL MANIFESTS */}
+                    <ListItem button component={Link} to="/katib/trial">
                         <ListItemIcon>
                             <SetttingsIcon color={iconColor} />
                         </ListItemIcon>
                         <ListItemText>
                             <Typography variant={variant} color={color}>
-                                Worker Manifests
+                                Trial Manifests
                             </Typography>
                         </ListItemText>
                     </ListItem>

@@ -12,7 +12,7 @@ const initialState = {
     filteredJobsList: [
     ],
     jobData: [],
-    workerData: [],
+    trialData: [],
     dialogOpen: false,
     loading: false,
 };
@@ -84,9 +84,10 @@ const hpMonitorReducer = (state = initialState, action) => {
                 ...state,
                 loading: false,
             }
-        case actions.FETCH_WORKER_INFO_SUCCESS:
+        case actions.FETCH_TRIAL_INFO_SUCCESS:
             return {
                 ...state,
+                //TODO: Change it
                 workerData: action.workerData,
                 dialogOpen: true,
             }

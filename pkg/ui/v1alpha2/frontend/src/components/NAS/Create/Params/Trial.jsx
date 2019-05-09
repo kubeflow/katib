@@ -11,8 +11,8 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 
 import { connect } from 'react-redux';
-import { changeWorker } from '../../../../actions/nasCreateActions';
-import { fetchWorkerTemplates } from '../../../../actions/templateActions';
+import { changeTrial } from '../../../../actions/nasCreateActions';
+import { fetchTrialTemplates } from '../../../../actions/templateActions';
 
 const module = "nasCreate";
 const templateModule = "template";
@@ -39,14 +39,14 @@ const styles = theme => ({
     },
 })
 
-class WorkerSpecParam extends React.Component {
+class TrialSpecParam extends React.Component {
 
     componentDidMount() {
-        this.props.fetchWorkerTemplates();
+        this.props.fetchTrialTemplates();
     }
 
-    onWorkerChange = (event) => {
-        this.props.changeWorker(event.target.value);
+    onTrialChange = (event) => {
+        this.props.changeTrial(event.target.value);
     }
 
     render() {
@@ -58,22 +58,22 @@ class WorkerSpecParam extends React.Component {
                 <Grid container alignItems={"center"}>
                     <Grid item xs={12} sm={3}>
                         <Typography variant={"subheading"}>
-                            <Tooltip title={"Worker spec template"}>
+                            <Tooltip title={"Trial spec template"}>
                                 <HelpOutlineIcon className={classes.help} color={"primary"}/>
                             </Tooltip>
-                            {"WorkerSpec"}
+                            {"TrialSpec"}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} sm={8}>
                         <FormControl variant="outlined" className={classes.formControl}>
                             <InputLabel>
-                                Worker Spec
+                                Trial Spec
                             </InputLabel>
                             <Select
-                                value={this.props.worker}
-                                onChange={this.onWorkerChange}
+                                value={this.props.trial}
+                                onChange={this.onTrialChange}
                                 input={
-                                    <OutlinedInput name={"workerSpec"} labelWidth={100}/>
+                                    <OutlinedInput name={"TrialSpec"} labelWidth={100}/>
                                 }
                                 className={classes.select}
                                 >
@@ -94,9 +94,9 @@ class WorkerSpecParam extends React.Component {
 
 const mapStateToProps = state => {
     return {
-        worker: state[module].worker,
-        templates: state[templateModule].workerTemplates,
+        trial: state[module].trial,
+        templates: state[templateModule].trialTemplates,
     }
 }
 
-export default connect(mapStateToProps, { changeWorker, fetchWorkerTemplates })(withStyles(styles)(WorkerSpecParam));
+export default connect(mapStateToProps, { changeTrial, fetchTrialTemplates })(withStyles(styles)(TrialSpecParam));

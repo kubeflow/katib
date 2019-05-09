@@ -35,8 +35,8 @@ const JobList = (props) => {
 
     const { classes } = props;
 
-    const onDelete = (id) => (event) => {
-        props.openDeleteDialog(id);
+    const onDelete = (name) => (event) => {
+        props.openDeleteDialog(name);
     }
 
     return (
@@ -44,6 +44,7 @@ const JobList = (props) => {
             <List component="nav">
                 {props.filteredJobsList.map((job, i) => {
                     let icon;
+                    //TODO: Change status name
                     if (job.status === 'Running') {
                         icon = (<ScheduleIcon className={classes.running}/>)
                     } else if (job.status === 'Failed') {
@@ -52,13 +53,13 @@ const JobList = (props) => {
                         icon = (<DoneIcon className={classes.finished}/>)
                     }
                     return (
-                        <ListItem button key={i} component={Link} to={`/katib/nas_monitor/${job.id}`}>
+                        <ListItem button key={i} component={Link} to={`/katib/nas_monitor/${job.name}`}>
                             <ListItemIcon>
                                 {icon}
                             </ListItemIcon>
                             <ListItemText inset primary={job.name} />
                             <ListItemSecondaryAction>
-                                <IconButton aria-label={"Delete"} onClick={onDelete(job.id)}>
+                                <IconButton aria-label={"Delete"} onClick={onDelete(job.name)}>
                                     <DeleteIcon />
                                 </IconButton>
                             </ListItemSecondaryAction>

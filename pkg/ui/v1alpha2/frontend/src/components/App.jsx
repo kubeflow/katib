@@ -13,7 +13,7 @@ import HPJobInfo from './HP/Monitor/JobInfo';
 import NAS from './NAS/Create/NAS';
 import NASMonitor from './NAS/Monitor/Monitor';
 import NASJobInfo from './NAS/Monitor/JobInfo';
-import Worker from './Templates/Worker';
+import Trial from './Templates/Trial';
 import Collector from './Templates/Collector';
 
 
@@ -37,7 +37,7 @@ const App = (props) => {
             <Route path="/katib/nas" component={NAS} />
             <Route exact path="/katib/nas_monitor" component={NASMonitor} />
             <Route path="/katib/nas_monitor/:id" component={NASJobInfo} />
-            <Route path="/katib/worker" component={Worker} />
+            <Route path="/katib/trial" component={Trial} />
             <Route path="/katib/collector" component={Collector} />
             <Snack />
         </div>

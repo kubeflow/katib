@@ -49,7 +49,7 @@ class EditDialog extends React.Component {
     }
 
     submitEditTemplate = () => {
-        this.props.editTemplate(this.state.name, this.state.yaml, this.props.type);
+        this.props.editTemplate(this.state.name, this.state.yaml, this.props.type, "edit");
     }
 
     render () {

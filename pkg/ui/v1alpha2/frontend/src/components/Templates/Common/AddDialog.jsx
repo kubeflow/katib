@@ -64,7 +64,7 @@ class AddDialog extends React.Component {
     }
 
     addTemplate = () => {
-        this.props.addTemplate(this.state.name, this.state.yaml, this.props.type);
+        this.props.addTemplate(this.state.name, this.state.yaml, this.props.type, "add");
     }
 
     render () {

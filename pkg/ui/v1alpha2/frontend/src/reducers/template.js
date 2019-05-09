@@ -5,7 +5,7 @@ const initialState = {
     addOpen: false,
     editOpen: false,
     deleteOpen: false,
-    workerTemplates: [
+    trialTemplates: [
     ],
     collectorTemplates: [
     ],
@@ -32,12 +32,12 @@ const rootReducer = (state = initialState, action) => {
             switch(action.dialogType) {
                 case "delete":
                     switch(action.templateType) {
-                        case "worker": 
+                        case "trial": 
                             return {
                                 ...state,
                                 deleteOpen: true,
                                 currentTemplateIndex: action.index,
-                                currentTemplateName: state.workerTemplates[action.index].name,
+                                currentTemplateName: state.trialTemplates[action.index].name,
                             }
                         case "collector": 
                             return {
@@ -53,12 +53,12 @@ const rootReducer = (state = initialState, action) => {
                     }
                 case "edit":
                     switch(action.templateType) {
-                        case "worker": 
+                        case "trial": 
                             return {
                                 ...state,
                                 editOpen: true,
                                 currentTemplateIndex: action.index,
-                                edittedTemplate: state.workerTemplates[action.index],
+                                edittedTemplate: state.trialTemplates[action.index],
                             }
                         case "collector": 
                             return {
@@ -87,10 +87,10 @@ const rootReducer = (state = initialState, action) => {
                 ...state,
                 edittedTemplate: edittedTemplate,
             }
-        case actions.FETCH_WORKER_TEMPLATES_SUCCESS:
+        case actions.FETCH_TRIAL_TEMPLATES_SUCCESS:
             return {
                 ...state,
-                workerTemplates: action.templates,
+                trialTemplates: action.templates,
             }
         // case actions.FETCH_WORKER_TEMPLATES_FAILURE:
         //     return {
@@ -106,13 +106,13 @@ const rootReducer = (state = initialState, action) => {
         case actions.DELETE_TEMPLATE_SUCCESS:
         case actions.EDIT_TEMPLATE_SUCCESS:
             switch (action.templateType) {
-                case "worker": 
+                case "trial": 
                     return {
                         ...state,
                         addOpen: false,
                         deleteOpen: false,
                         editOpen: false,
-                        workerTemplates: action.templates,
+                        trialTemplates: action.templates,
                     } 
                 case "collector":
                     return {

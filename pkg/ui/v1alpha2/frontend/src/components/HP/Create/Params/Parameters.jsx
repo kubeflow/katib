@@ -61,7 +61,7 @@ const useStyles = makeStyles({
     },
 })
 
-const ParameterConfig = (props) => {
+const Parameters = (props) => {
     
     const classes = useStyles();
     
@@ -74,7 +74,6 @@ const ParameterConfig = (props) => {
     } 
     
     const onParamAdd = (index) => (event) => {
-        console.log("INEDX IS")
         props.addListParameter(index);
     }
 
@@ -91,7 +90,7 @@ const ParameterConfig = (props) => {
             <Button variant={"contained"} color={"primary"} className={classes.addButton} onClick={props.addParameter}>
                     Add parameter
             </Button>
-            {props.parameterConfig.map((param, i) => {
+            {props.parameters.map((param, i) => {
                 return (
                     <div className={classes.parameter} key={i}>
                         <Grid container alignItems={"center"}>
@@ -116,7 +115,7 @@ const ParameterConfig = (props) => {
                                         }
                                         className={classes.select}
                                         >
-                                            {props.paramTypes.map((type, i) => {
+                                            {props.allParameterTypes.map((type, i) => {
                                                 return (
                                                         <MenuItem value={type} key={i}>{type}</MenuItem>
                                                     )
@@ -129,15 +128,15 @@ const ParameterConfig = (props) => {
                                         aria-label="Gender"
                                         name="gender1"
                                         className={classes.group}
-                                        value={param.feasible}
-                                        onChange={onGeneralEdit(i, "feasible")}
+                                        value={param.feasibleSpace}
+                                        onChange={onGeneralEdit(i, "feasibleSpace")}
                                     >
-                                    <FormControlLabel value="feasible" control={<Radio color={"primary"} />} label="Feasible" />
+                                    <FormControlLabel value="feasibleSpace" control={<Radio color={"primary"} />} label="Feasible Space" />
                                     <FormControlLabel value="list" control={<Radio color={"primary"} />} label="List" />
                                 </RadioGroup>
                             </Grid>
                             <Grid item xs={4}>
-                                {param.feasible === "list" && 
+                                {param.feasibleSpace === "list" && 
                                     (param.list.map((element, elIndex) => {
                                         return (
                                             <div key={elIndex}>
@@ -160,7 +159,7 @@ const ParameterConfig = (props) => {
                                     }))
                                     
                                 }
-                                {param.feasible === "feasible" && 
+                                {param.feasibleSpace === "feasibleSpace" && 
                                     <div>
                                         <TextField
                                             label={"Min"}
@@ -178,7 +177,7 @@ const ParameterConfig = (props) => {
                                 }
                             </Grid>
                             <Grid item xs={1}>
-                                {param.feasible === "list" && 
+                                {param.feasibleSpace === "list" && 
                                     <Fab color={"primary"} className={classes.fab} onClick={onParamAdd(i)}>
                                         <AddIcon />
                                     </Fab>
@@ -207,9 +206,9 @@ const ParameterConfig = (props) => {
 
 const mapStateToProps = state => {
     return {
-        parameterConfig: state[module].parameterConfig,
-        paramTypes: state[module].paramTypes,
+        parameters: state[module].parameters,
+        allParameterTypes: state[module].allParameterTypes,
     }
 }
 
-export default connect(mapStateToProps, { addParameter, editParameter, deleteParameter, addListParameter, editListParameter, deleteListParameter })(ParameterConfig);
+export default connect(mapStateToProps, { addParameter, editParameter, deleteParameter, addListParameter, editListParameter, deleteListParameter })(Parameters);

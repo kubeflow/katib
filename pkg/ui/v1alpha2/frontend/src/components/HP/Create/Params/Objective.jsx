@@ -6,12 +6,13 @@ import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
-import Fab from '@material-ui/core/Fab';
-import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
+import Fab from '@material-ui/core/Fab';
+import AddIcon from '@material-ui/icons/Add';
 
-import { changeSpec, addMetrics, editMetrics, deleteMetrics } from '../../../../actions/hpCreateActions';
+
+import { changeObjective, addMetrics, editMetrics, deleteMetrics } from '../../../../actions/hpCreateActions';
 
 
 const module = "hpCreate";
@@ -33,25 +34,24 @@ const useStyles = makeStyles({
     },
 })
 
-const CommonParametersSpec = (props) => {
+const Objective = (props) => {
     
     const classes = useStyles();
 
-    const onSpecChange = (name) => (event) => {
-        props.changeSpec(name, event.target.value);
+    const onObjectiveChange = (name) => (event) => {
+      props.changeObjective(name, event.target.value);
+  }
+    const onMetricsEdit = (index) => (event) => {
+        props.editMetrics(index, event.target.value);
     }
 
-    // const onMetricsEdit = (index) => (event) => {
-    //     props.editMetrics(index, event.target.value);
-    // }
-
-    // const onMetricsDelete = (index) => (event) => {
-    //     props.deleteMetrics(index);
-    // }
+    const onMetricsDelete = (index) => (event) => {
+        props.deleteMetrics(index);
+    }
 
     return (
         <div>
-            {props.commonParametersSpec.map((param, i) => {
+          {props.objective.map((param, i) => {
                 return (
                     <div key={i} className={classes.parameter}>
                         <Grid container alignItems={"center"}>
@@ -67,26 +67,26 @@ const CommonParametersSpec = (props) => {
                                 <TextField
                                     className={classes.textField}
                                     value={param.value}
-                                    onChange={onSpecChange(param.name)}
+                                    onChange={onObjectiveChange(param.name)}
                                     />
                             </Grid>
                         </Grid>
                     </div>
                 )
             })}
-            {/* <div className={classes.parameter}>
+            <div className={classes.parameter}>
                 <Grid container alignItems={"center"}>
                     <Grid item xs={12} sm={3}>
                         <Typography variant={"subheading"}>
-                            <Tooltip title={"Different metrics you want to collect"}>
+                            <Tooltip title={"Additional metrics that you want to collect"}>
                                 <HelpOutlineIcon className={classes.help} color={"primary"}/>
                             </Tooltip>
-                            Metrics Name
+                            AdditionalMetricNames
                         </Typography>
                     </Grid>
                     <Grid item xs={12} sm={8}>
                         {
-                            props.metricsName.map((metrics, mIndex) => {
+                            props.additionalMetricNames.map((metrics, mIndex) => {
                                 return (
                                     <Grid container>
                                         <Grid item xs={10}>
@@ -118,7 +118,7 @@ const CommonParametersSpec = (props) => {
                         </Fab>
                     </Grid>
                 </Grid>
-            </div> */}
+            </div>
         </div>
     )
 }
@@ -126,11 +126,10 @@ const CommonParametersSpec = (props) => {
 
 const mapStateToProps = state => {
     return {
-        commonParametersSpec: state[module].commonParametersSpec,
-        // metricsName: state[module].metricsName
+        objective: state[module].objective,
+        additionalMetricNames: state[module].additionalMetricNames
     }
 }
 
-// export default connect(mapStateToProps, { changeSpec, addMetrics, editMetrics, deleteMetrics })(CommonParametersSpec);
+export default connect(mapStateToProps, {changeObjective, addMetrics, editMetrics, deleteMetrics })(Objective);
 
-export default connect(mapStateToProps, { changeSpec })(CommonParametersSpec);

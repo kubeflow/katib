@@ -26,7 +26,7 @@ const DeleteDialog = (props) => {
     const classes = useStyles();
 
     const deleteTemplate = (type) => (event) => {
-        props.deleteTemplate(props.currentTemplateName, type);
+        props.deleteTemplate(props.currentTemplateName, type, "delete");
     }
 
     return (

@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import LinearProgress from '@material-ui/core/LinearProgress';
 
 
-import { fetchJobInfo } from '../../../actions/hpMonitorActions';
+import { fetchHPJobInfo } from '../../../actions/hpMonitorActions';
 
 import HPPlot from './Plot';
 import HPTable from './Table';
@@ -29,7 +29,7 @@ const styles = theme => ({
 class HPJobInfo extends React.Component {
 
     componentDidMount() {
-        this.props.fetchJobInfo(this.props.match.params.id);
+        this.props.fetchHPJobInfo(this.props.match.params.id);
     }
 
     render () {
@@ -64,4 +64,4 @@ const mapStateToProps = (state) => ({
 })
 
 
-export default connect(mapStateToProps, { fetchJobInfo })(withStyles(styles)(HPJobInfo));
+export default connect(mapStateToProps, { fetchHPJobInfo })(withStyles(styles)(HPJobInfo));

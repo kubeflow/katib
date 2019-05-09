@@ -8,7 +8,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 
 import { connect } from 'react-redux';
-import { fetchWorkerInfo } from '../../../actions/hpMonitorActions';
+import { fetchTrialInfo } from '../../../actions/hpMonitorActions';
 
 const module = "hpMonitor";
 
@@ -31,7 +31,7 @@ const styles = theme => ({
 class HPTable extends React.Component {
 
   fetchAndOpenDialog = (id) => (event) => {
-    this.props.fetchWorkerInfo(this.props.id, id);
+    this.props.fetchTrialInfo(this.props.id, id);
   }
 
   render () {
@@ -83,4 +83,4 @@ const mapStateToProps = (state) => ({
   jobData: state[module].jobData,
 })
 
-export default connect(mapStateToProps, { fetchWorkerInfo })(withStyles(styles)(HPTable));
+export default connect(mapStateToProps, { fetchTrialInfo })(withStyles(styles)(HPTable));

@@ -33,7 +33,7 @@ class TemplateList extends React.Component {
 
     render () {
         const { classes } = this.props;
-        const templates = (this.props.type === "worker" ? this.props.workerTemplates : this.props.collectorTemplates);
+        const templates = (this.props.type === "trial" ? this.props.trialTemplates : this.props.collectorTemplates);
         return (
             <div className={classes.root}>
                 {templates.map((template, index) => {
@@ -60,7 +60,7 @@ class TemplateList extends React.Component {
 const mapStateToProps = (state) => {
     return {
         collectorTemplates: state[module].collectorTemplates,
-        workerTemplates: state[module].workerTemplates,
+        trialTemplates: state[module].trialTemplates,
     };
 };
 

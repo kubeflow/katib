@@ -57,10 +57,8 @@ func (k *KatibUIHandler) FetchHPJobs(w http.ResponseWriter, r *http.Request) {
 		if experiment.Spec.Parameters != nil {
 			jobs = append(jobs, JobView{
 				Name: experiment.Name,
-				// TODO: Delete from frontend
-				// ID:     experiment.Status.StudyID,
-				// TODO: Parse it in frontend
 				// TODO: Use from experiment.util
+				// TODO: Change name of the statu in frontend
 				Status: string(getExperimentCurrentCondition(&experiment)),
 			})
 		}
@@ -91,9 +89,6 @@ func (k *KatibUIHandler) FetchNASJobs(w http.ResponseWriter, r *http.Request) {
 		if experiment.Spec.NasConfig != nil {
 			jobs = append(jobs, JobView{
 				Name: experiment.Name,
-				// TODO: Delete from frontend
-				// ID:     experiment.Status.StudyID,
-				// TODO: Parse it in frontend
 				// TODO: Use from experiment.util
 				Status: string(getExperimentCurrentCondition(&experiment)),
 			})
@@ -481,6 +476,7 @@ func (k *KatibUIHandler) AddEditDeleteTemplate(w http.ResponseWriter, r *http.Re
 	var templateResponse TemplateResponse
 
 	json.NewDecoder(r.Body).Decode(&data)
+	//TODO: add new action in frontend
 	if data["action"].(string) == "delete" {
 		templateResponse, err = k.updateTemplates(data, true)
 	} else {

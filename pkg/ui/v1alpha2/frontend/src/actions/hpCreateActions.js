@@ -19,6 +19,12 @@ export const changeSpec = (name, value) => ({
     name, value
 })
 
+export const CHANGE_OBJECTIVE = "CHANGE_OBJECTIVE";
+
+export const changeObjective = (name, value) => ({
+    type: CHANGE_OBJECTIVE,
+    name, value
+})
 export const ADD_METRICS_HP = "ADD_METRICS_HP";
 
 export const addMetrics = () => ({
@@ -37,6 +43,33 @@ export const EDIT_METRICS_HP = "EDIT_METRICS_HP";
 export const editMetrics = (index, value) => ({
     type: EDIT_METRICS_HP,
     index, value,
+})
+
+export const CHANGE_ALGORITHM_NAME = "CHANGE_ALGORITHM_NAME";
+
+export const changeAlgorithmName = (algorithmName) => ({
+    type: CHANGE_ALGORITHM_NAME,
+    algorithmName,
+})
+
+export const ADD_ALGORITHM_SETTING = "ADD_ALGORITHM_SETTING";
+
+export const addAlgorithmSetting = () => ({
+    type: ADD_ALGORITHM_SETTING,
+})
+
+export const CHANGE_ALGORITHM_SETTING = "CHANGE_ALGORITHM_SETTING";
+
+export const changeAlgorithmSetting = (index, field, value) => ({
+    type: CHANGE_ALGORITHM_SETTING,
+    field, value, index
+})
+
+export const DELETE_ALGORITHM_SETTING = "DELETE_ALGORITHM_SETTING";
+
+export const deleteAlgorithmSetting = (index) => ({
+    type: DELETE_ALGORITHM_SETTING,
+    index
 })
 
 export const ADD_PARAMETER_HP = "CHANGE_PARAMETER_HP";
@@ -81,45 +114,11 @@ export const deleteListParameter = (paramIndex, index) => ({
     paramIndex, index
 })
 
-export const CHANGE_WORKER = "CHANGE_WORKER";
+export const CHANGE_TRIAL = "CHANGE_TRIAL";
 
-export const changeWorker = (worker) => ({
-    type: CHANGE_WORKER,
-    worker,
-})
-
-export const CHANGE_ALGORITHM = "CHANGE_ALGORITHM";
-
-export const changeAlgorithm = (algorithm) => ({
-    type: CHANGE_ALGORITHM,
-    algorithm,
-})
-
-export const CHANGE_REQUEST_NUMBER = "CHANGE_REQUEST_NUMBER";
-
-export const changeRequestNumber = (number) => ({
-    type: CHANGE_REQUEST_NUMBER,
-    number,
-})
-
-export const ADD_SUGGESTION_PARAMETER = "ADD_SUGGESTION_PARAMETER";
-
-export const addSuggestionParameter = () => ({
-    type: ADD_SUGGESTION_PARAMETER,
-})
-
-export const CHANGE_SUGGESTION_PARAMETER = "CHANGE_SUGGESTION_PARAMETER";
-
-export const changeSuggestionParameter = (index, field, value) => ({
-    type: CHANGE_SUGGESTION_PARAMETER,
-    field, value, index
-})
-
-export const DELETE_SUGGESTION_PARAMETER = "DELETE_SUGGESTION_PARAMETER";
-
-export const deleteSuggestionParameter = (index) => ({
-    type: DELETE_SUGGESTION_PARAMETER,
-    index
+export const changeTrial = (trial) => ({
+    type: CHANGE_TRIAL,
+    trial,
 })
 
 export const SUBMIT_HP_JOB_REQUEST = "SUBMIT_HP_JOB_REQUEST";

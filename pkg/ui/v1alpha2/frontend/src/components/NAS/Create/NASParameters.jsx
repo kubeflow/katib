@@ -9,7 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import CommonParametersMeta from './Params/CommonMeta';
 import CommonParametersSpec from './Params/CommonSpec';
 import SuggestionSpec from './Params/SuggestionSpec';
-import WorkerSpecParam from './Params/Worker';
+import TrialSpecParam from './Params/Trial';
 
 import { submitNASJob } from '../../../actions/nasCreateActions';
 
@@ -122,9 +122,9 @@ const NASParameters = (props) => {
         }
         data.spec.nasConfig.operations = []
         addOperations(props.operations, data.spec.nasConfig.operations)
-        data.spec.workerSpec = {
+        data.spec.trialSpec = {
             goTemplate: {
-                templatePath: props.worker,
+                templatePath: props.trial,
             }
         }
         data.spec.metricsnames = props.metricsName.map((metrics, i) => metrics.value)
@@ -147,8 +147,8 @@ const NASParameters = (props) => {
                 <CommonParametersSpec />
                 {SectionInTypography("NAS Config", classes)}
                 <NASConfig />
-                {SectionInTypography("Worker Spec", classes)}
-                <WorkerSpecParam />
+                {SectionInTypography("Trial Spec", classes)}
+                <TrialSpecParam />
                 {SectionInTypography("Suggestion Parameters", classes)} 
                 <SuggestionSpec />
                 <div className={classes.submit}>
@@ -167,7 +167,7 @@ const mapStateToProps = (state) => ({
     inputSize: state[module].inputSize,
     outputSize: state[module].outputSize,
     operations: state[module].operations,
-    worker: state[module].worker,
+    trial: state[module].trial,
     metricsName: state[module].metricsName,
     suggestionAlgorithm: state[module].suggestionAlgorithm,
     requestNumber: state[module].requestNumber,
@@ -176,7 +176,7 @@ const mapStateToProps = (state) => ({
 
 NASParameters.propTypes = {
     numLayers: PropTypes.number,
-    worker: PropTypes.string,
+    trial: PropTypes.string,
     requestNumber: PropTypes.number,
     suggestionAlgorithm: PropTypes.string,
     metricsName: PropTypes.arrayOf(PropTypes.string),

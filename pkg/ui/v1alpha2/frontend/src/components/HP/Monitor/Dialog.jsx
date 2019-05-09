@@ -20,8 +20,8 @@ const PlotDialog = (props) => {
     const { classes } = props;
       
     let dataToPlot = [];
-    if (props.workerData.length !== 0) { 
-        let data = props.workerData.slice(1);   
+    if (props.TrialData.length !== 0) { 
+        let data = props.TrialData.slice(1);   
         let tracks = {};
         for(let i = 0; i < data.length; i++) {
             if (typeof tracks[data[i][0]] !== "undefined") {
@@ -55,7 +55,7 @@ const PlotDialog = (props) => {
                 aria-describedby="alert-dialog-description"
                 maxWidth={"xl"}
             >
-            <DialogTitle id="alert-dialog-title">{"Worker data"}</DialogTitle>
+            <DialogTitle id="alert-dialog-title">{"Trial data"}</DialogTitle>
             <DialogContent>
                 <Plot 
                     data={dataToPlot}
@@ -78,7 +78,7 @@ const PlotDialog = (props) => {
 const mapStateToProps = state => {
     return {
         open: state[module].dialogOpen,
-        workerData: state[module].workerData,
+        trialData: state[module].trialData,
     }
 }
 

@@ -4,77 +4,81 @@ const initialState = {
     loading: false,
     commonParametersMetadata: [
         {
-            name: "Namespace",
-            value: "kubeflow",
-            description: "Namespace to deploy a study into"
+            name: "Name",
+            value: "random-experiment",
+            description: "A name of an experiment"
         },
         {
-            name: "Name",
-            value: "random-example",
-            description: "A name of a study"
+            name: "Namespace",
+            value: "kubeflow",
+            description: "Namespace to deploy an experiment"
         }
     ],
     commonParametersSpec: [
         {
-            name: "Name",
-            value: "random-example",
-            description: "A name of a study"
-        },
-        // owner is always crd
-        {
-            name: "OptimizationType",
-            value: "maximize",
-            description: "Optimization type"
+            name: "ParallelTrialCount",
+            value: "3",
+            description: "How many trials can be processed in parallel"
         },
         {
-            name: "OptimizationValueName",
-            value: "Validation-accuracy",
-            description: "A name of metrics to optimize"
+            name: "MaxTrialCount",
+            value: "12",
+            description: "Max completed trials to mark experiment as succeeded"
         },
-        // check for float
         {
-            name: "OptimizationGoals",
-            value: "0.99",
-            description: "A threshold to optimize up to"
-        },
-        // check for int
-        {
-            name: "RequestCount",
-            value: "4",
-            description: "Number of requests"
-        },
-    ],
-    metricsName: [
-        {
-            value: "accuracy",
+            name: "MaxFailedTrialCount",
+            value: "3",
+            description: "Max failed trials to mark experiment as failed"
         }
     ],
-    //  specify NASCONFIG?
-    parameterConfig: [
+    objective: [
         {
-            parameterType: "double",
+            name: "Type",
+            value: "maximize",
+            description: "Type of optimization"
+        },
+        {
+            name: "Goal",
+            value: "0.99",
+            description: "Goal of optimization"
+        },
+        {
+            name: "ObjectiveMetricName",
+            value: "Validation-accuracy",
+            description: "Name for the objective metric"
+        }
+    ],
+    additionalMetricNames: [
+        {
+            value: "accuracy"
+        }
+    ],
+    algorithmName: [ "random" ],
+    allAlgorithms: ["grid", "random", "hyperband"],
+    algorithmSettings: [
+
+    ],
+    parameters: [
+        {
             name: "--lr",
-            feasible: "feasible",
+            parameterType: "double",
+            feasibleSpace: "feasibleSpace",
             min: "0.01",
             max: "0.03",
             list: [],
         },
         {
-            parameterType: "int",
             name: "--num-layers",
-            feasible: "feasible",
+            parameterType: "int",
+            feasibleSpace: "feasibleSpace",
             min: "2",
             max: "5",
-            list: [
-                {
-                    value: "",
-                }
-            ],
+            list: [],
         },
         {
-            parameterType: "categorical",
             name: "--optimizer",
-            feasible: "list",
+            parameterType: "categorical",
+            feasibleSpace: "list",
             min: "",
             max: "",
             list: [
@@ -90,13 +94,8 @@ const initialState = {
             ],
         },
     ],
-    paramTypes: ["int", "double", "categorical"],
-    worker: "cpuWorkerTemplate.yaml",
-    suggestionAlgorithms: ["grid", "random", "hyperband"], // fetch these
-    suggestionAlgorithm: "random",
-    requestNumber: "3",
-    suggestionParameters: [
-    ],
+    allParameterTypes: ["int", "double", "categorical"],
+    trial: "cpuTrialTemplate.yaml",
     currentYaml: '',
 };
 
@@ -127,116 +126,119 @@ const hpCreateReducer = (state = initialState, action) => {
                 ...state,
                 commonParametersSpec: spec,
             }
+        case actions.CHANGE_OBJECTIVE:
+            let obj = state.objective.slice();
+            index = filterValue(obj, action.name);
+            obj[index].value = action.value;
+            return {
+                ...state,
+                objective: obj,
+            }
+        case actions.ADD_METRICS_HP:
+            let additionalMetricNames = state.additionalMetricNames.slice()
+            additionalMetricNames.push({
+                value: "",
+            })
+            return {
+                ...state,
+                additionalMetricNames: additionalMetricNames,
+            }
+        case actions.DELETE_METRICS_HP:
+            additionalMetricNames = state.additionalMetricNames.slice()
+            additionalMetricNames.splice(action.index, 1)
+            return {
+                ...state,
+                additionalMetricNames: additionalMetricNames,
+            }
+        case actions.EDIT_METRICS_HP:
+            additionalMetricNames = state.additionalMetricNames.slice()
+            additionalMetricNames[action.index].value = action.value
+            return {
+                ...state,
+                additionalMetricNames: additionalMetricNames,
+            }
+        case actions.CHANGE_ALGORITHM_NAME:
+            return {
+                ...state, 
+                algorithmName: action.algorithmName,
+            }
+        case actions.ADD_ALGORITHM_SETTING:
+            let algorithmSettings = state.algorithmSettings.slice();
+            let setting = {name: "", value: ""};
+            algorithmSettings.push(setting);
+            return {
+                ...state,
+                algorithmSettings: algorithmSettings,
+            }
+        case actions.CHANGE_ALGORITHM_SETTING:
+            algorithmSettings = state.algorithmSettings.slice();
+            algorithmSettings[action.index][action.field] = action.value;
+            return {
+                ...state,
+                algorithmSettings: algorithmSettings,
+            }
+        case actions.DELETE_ALGORITHM_SETTING:
+            algorithmSettings = state.algorithmSettings.slice();
+            algorithmSettings.splice(action.index, 1);
+            return {
+                ...state,
+                algorithmSettings: algorithmSettings,
+            }
         case actions.ADD_PARAMETER_HP:
-            let params = state.parameterConfig.slice();
-            params.push({
+            let parameters = state.parameters.slice();
+            parameters.push({
                 name: "",
                 parameterType: "",
-                feasible: "feasible",
+                feasibleSpace: "feasibleSpace",
                 min: "",
                 max: "",
                 list: [],
             })
             return {
                 ...state,
-                parameterConfig: params,
+                parameters: parameters,
             }
         case actions.EDIT_PARAMETER_HP:
-            params = state.parameterConfig.slice();
-            params[action.index][action.field] = action.value;
+            parameters = state.parameters.slice();
+            parameters[action.index][action.field] = action.value;
             return {
                 ...state,
-                parameterConfig: params,
+                parameters: parameters,
             }
         case actions.DELETE_PARAMETER_HP:
-            params = state.parameterConfig.slice();
-            params.splice(action.index, 1);
+            parameters = state.parameters.slice();
+            parameters.splice(action.index, 1);
             return {
                 ...state,
-                parameterConfig: params,
+                parameters: parameters,
             }
         case actions.ADD_LIST_PARAMETER_HP:
-            params = state.parameterConfig.slice();
-            params[action.paramIndex].list.push({
+            parameters = state.parameters.slice();
+            parameters[action.paramIndex].list.push({
                 value: "",
             })
             return {
                 ...state,
-                parameterConfig: params
+                parameters: parameters
             }
         case actions.EDIT_LIST_PARAMETER_HP:
-            params = state.parameterConfig.slice();
-            params[action.paramIndex].list[action.index] = action.value;
+            parameters = state.parameterConfig.slice();
+            parameters[action.paramIndex].list[action.index] = action.value;
             return {
                 ...state,
-                parameterConfig: params
+                parameters: parameters
             }
         case actions.DELETE_LIST_PARAMETER_HP:
-            params = state.parameterConfig.slice();
-            params[action.paramIndex].list.splice(action.index, 1);
+            parameters = state.parameters.slice();  
+            parameters[action.paramIndex].list.splice(action.index, 1);
             return {
                 ...state,
-                parameterConfig: params
+                parameters: parameters
             }
-        case actions.CHANGE_WORKER:
+        case actions.CHANGE_TRIAL:
             return {
                 ...state,
-                worker: action.worker,
-            }
-        case actions.CHANGE_ALGORITHM:
-            return {
-                ...state, 
-                suggestionAlgorithm: action.algorithm,
-            }
-        case actions.ADD_SUGGESTION_PARAMETER:
-            let suggestionParameters = state.suggestionParameters.slice();
-            let parameter = {name: "", parameterType: ""};
-            suggestionParameters.push(parameter);
-            return {
-                ...state,
-                suggestionParameters: suggestionParameters,
-            }
-        case actions.CHANGE_SUGGESTION_PARAMETER:
-            suggestionParameters = state.suggestionParameters.slice();
-            suggestionParameters[action.index][action.field] = action.value;
-            return {
-                ...state,
-                suggestionParameters: suggestionParameters,
-            }
-        case actions.DELETE_SUGGESTION_PARAMETER:
-            suggestionParameters = state.suggestionParameters.slice();
-            suggestionParameters.splice(action.index, 1);
-            return {
-                ...state,
-                suggestionParameters: suggestionParameters,
-            }
-        case actions.CHANGE_REQUEST_NUMBER:
-            return {
-                ...state,
-                requestNumber: action.number,
-            }
-        case actions.ADD_METRICS_HP:
-            let metricsName = state.metricsName.slice()
-            metricsName.push({
-                value: "",
-            })
-            return {
-                ...state,
-                metricsName: metricsName,
-            }
-        case actions.DELETE_METRICS_HP:
-            metricsName = state.metricsName.slice()
-            metricsName.splice(action.index, 1)
-            return {
-                ...state,
-                metricsName: metricsName,
-            }
-        case actions.EDIT_METRICS_HP:
-            metricsName = state.metricsName.slice()
-            metricsName[action.index].value = action.value
-            return {
-                ...state,
-                metricsName: metricsName,
+                trial: action.trial,
             }
         default:
             return state;
