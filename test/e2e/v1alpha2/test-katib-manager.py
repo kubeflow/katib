@@ -16,8 +16,7 @@ def register_experiment(stub):
                                     algorithm=algo,
                                     trial_template="run-mnist",
                                     parallel_trial_count=2,
-                                    max_trial_count=9,
-                                    metrics_collector_type='2')
+                                    max_trial_count=9)
   exp_status = api_pb2.ExperimentStatus(condition=1,
                                         start_time="2019-04-28T14:09:15Z",
                                         completion_time="2019-04-28T16:09:15Z")
