@@ -21,7 +21,7 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/kubeflow/katib/pkg"
+	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 	katibapi "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	"google.golang.org/grpc"
@@ -37,7 +37,7 @@ func initializeStudy(instance *katibv1alpha1.StudyJob) error {
 
 	instance.Status.Condition = katibv1alpha1.ConditionRunning
 
-	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
+	conn, err := grpc.Dial(common.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Connect katib manager error %v", err)
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
@@ -248,7 +248,7 @@ func populateConfigForNAS(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConf
 }
 
 func deleteStudy(instance *katibv1alpha1.StudyJob) error {
-	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
+	conn, err := grpc.Dial(common.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Connect katib manager error %v", err)
 		return err

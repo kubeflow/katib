@@ -20,7 +20,7 @@ import (
 	"text/template"
 	"strings"
 
-	"github.com/kubeflow/katib/pkg"
+	common "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	katibv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/katibclient"
 
@@ -35,7 +35,7 @@ func getMetricsCollectorManifest(experimentName string, trialName string, jobKin
 		"Trial":          trialName,
 		"JobKind":        jobKind,
 		"NameSpace":      namespace,
-		"ManagerService": pkg.GetManagerAddr(),
+		"ManagerService": common.GetManagerAddr(),
 		"MetricNames":    strings.Join(metricNames, ";"),
 	}
 	if mcs != nil && mcs.GoTemplate.RawTemplate != "" {
