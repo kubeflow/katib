@@ -27,7 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func getMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *katibv1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error) {
+func GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *katibv1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error) {
 	var mtp *template.Template = nil
 	var err error
 	tmpValues := map[string]string{
