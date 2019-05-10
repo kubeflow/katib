@@ -21,7 +21,7 @@ import (
 	"text/template"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/katibclient"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
