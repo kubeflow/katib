@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom';
 import { ListItemSecondaryAction, IconButton } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 
-import { openDeleteDialog } from '../../../actions/generalActions';
+import { openDeleteJobDialog } from '../../../actions/generalActions';
 import DeleteDialog from '../../Menu/DeleteDialog';
 
 const module = "nasMonitor";
@@ -31,12 +31,12 @@ const styles = theme => ({
 });
 
 
-const JobList = (props) => {
+const NASJobList = (props) => {
 
     const { classes } = props;
 
-    const onDelete = (name) => (event) => {
-        props.openDeleteDialog(name);
+    const onDeleteJob = (experimentName) => (event) => {
+        props.openDeleteJobDialog(experimentName);
     }
 
     return (
@@ -59,7 +59,7 @@ const JobList = (props) => {
                             </ListItemIcon>
                             <ListItemText inset primary={job.name} />
                             <ListItemSecondaryAction>
-                                <IconButton aria-label={"Delete"} onClick={onDelete(job.name)}>
+                                <IconButton aria-label={"Delete"} onClick={onDeleteJob(job.name)}>
                                     <DeleteIcon />
                                 </IconButton>
                             </ListItemSecondaryAction>
@@ -78,4 +78,4 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps, { openDeleteDialog })(withStyles(styles)(JobList));
+export default connect(mapStateToProps, { openDeleteJobDialog })(withStyles(styles)(NASJobList));

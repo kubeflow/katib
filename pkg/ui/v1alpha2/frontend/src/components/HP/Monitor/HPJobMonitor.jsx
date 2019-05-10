@@ -1,8 +1,8 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
  
-import FilterPanel from './Panel';
-import JobList from './JobList';
+import FilterPanel from './FilterPanel';
+import HPJobList from './HPJobList';
 
 import { fetchHPJobs } from '../../../actions/hpMonitorActions';
 import { connect } from 'react-redux'
@@ -15,7 +15,7 @@ const styles = theme => ({
     },
 });
 
-class HPMonitor extends React.Component {
+class HPJobMonitor extends React.Component {
     
     componentDidMount() {
         this.props.fetchHPJobs();
@@ -28,11 +28,11 @@ class HPMonitor extends React.Component {
             <div className={classes.root}>
                 <h1>Monitor</h1>
                 <FilterPanel />
-                <JobList />
+                <HPJobList />
             </div>
         )
     }
 }
 
 
-export default connect(null, { fetchHPJobs })(withStyles(styles)(HPMonitor));
+export default connect(null, { fetchHPJobs })(withStyles(styles)(HPJobMonitor));

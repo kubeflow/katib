@@ -8,11 +8,11 @@ import { makeStyles } from '@material-ui/styles';
 import  { Route } from 'react-router-dom';
 import Main from './Menu/Main';
 import HP from './HP/Create/HP';
-import HPMonitor from './HP/Monitor/Monitor';
-import HPJobInfo from './HP/Monitor/JobInfo';
+import HPJobMonitor from './HP/Monitor/HPJobMonitor';
+import HPJobInfo from './HP/Monitor/HPJobInfo';
 import NAS from './NAS/Create/NAS';
-import NASMonitor from './NAS/Monitor/Monitor';
-import NASJobInfo from './NAS/Monitor/JobInfo';
+import NASJobMonitor from './NAS/Monitor/NASJobMonitor';
+import NASJobInfo from './NAS/Monitor/NASJobInfo';
 import Trial from './Templates/Trial';
 import Collector from './Templates/Collector';
 
@@ -32,11 +32,11 @@ const App = (props) => {
             <Header />
             <Route exact path="/" component={Main} />
             <Route path="/katib/hp" component={HP} />
-            <Route exact path="/katib/hp_monitor" component={HPMonitor} />
-            <Route path="/katib/hp_monitor/:id" component={HPJobInfo} />
+            <Route exact path="/katib/hp_monitor" component={HPJobMonitor} />
+            <Route path="/katib/hp_monitor/:name" component={HPJobInfo} />
             <Route path="/katib/nas" component={NAS} />
-            <Route exact path="/katib/nas_monitor" component={NASMonitor} />
-            <Route path="/katib/nas_monitor/:id" component={NASJobInfo} />
+            <Route exact path="/katib/nas_monitor" component={NASJobMonitor} />
+            <Route path="/katib/nas_monitor/:name" component={NASJobInfo} />
             <Route path="/katib/trial" component={Trial} />
             <Route path="/katib/collector" component={Collector} />
             <Snack />

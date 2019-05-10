@@ -10,9 +10,9 @@ import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import LinearProgress from '@material-ui/core/LinearProgress';
 
-import { fetchJobInfo } from '../../../actions/nasMonitorActions';
+import { fetchNASJobInfo } from '../../../actions/nasMonitorActions';
 
-import StepInfo from './StepInfo';
+import NASJobStepInfo from './NASJobStepInfo';
 
 const module = "nasMonitor";
 
@@ -29,8 +29,9 @@ const styles = theme => ({
     panel: {
         width: '100%',
     },
-    button: {
-        marginBottom: 20,
+    header: {
+        marginTop: 30,
+        textAlign: "center"
     }
 })
 
@@ -38,7 +39,7 @@ const styles = theme => ({
 class NASJobInfo extends React.Component {
 
     componentDidMount() {
-        this.props.fetchJobInfo(this.props.match.params.id);
+        this.props.fetchNASJobInfo(this.props.match.params.name);
     }
 
     render () {
@@ -46,7 +47,7 @@ class NASJobInfo extends React.Component {
         return (
             <div className={classes.root}>
                 <Link to="/katib/nas_monitor">
-                    <Button variant={"contained"} color={"primary"} className={classes.button}>
+                    <Button variant={"contained"} color={"primary"}>
                         Back
                     </Button>
                 </Link>
@@ -54,8 +55,8 @@ class NASJobInfo extends React.Component {
                 <LinearProgress color={"primary"} className={classes.loading} />
                 :
                 <div>
-                    <Typography variant={"h5"}>
-                        StudyJob: {this.props.match.params.id}
+                    <Typography className = {classes.header} variant={"h5"}>
+                        Experiment Name: {this.props.match.params.name}
                     </Typography>
                     <br />
                     {this.props.steps.map((step, i) => {
@@ -65,7 +66,7 @@ class NASJobInfo extends React.Component {
                                     <Typography className={classes.heading}>{step.name}</Typography>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
-                                    <StepInfo step={step} id={i + 1}/>
+                                    <NASJobStepInfo step={step} id={i + 1}/>
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>
                         )
@@ -86,4 +87,4 @@ const mapStateToProps = (state) => {
 }
 
 
-export default connect(mapStateToProps, { fetchJobInfo })(withStyles(styles)(NASJobInfo));
+export default connect(mapStateToProps, { fetchNASJobInfo })(withStyles(styles)(NASJobInfo));

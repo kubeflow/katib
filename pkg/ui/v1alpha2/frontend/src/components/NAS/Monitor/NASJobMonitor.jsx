@@ -1,8 +1,8 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 
-import FilterPanel from './Panel';
-import JobList from './JobList';
+import FilterPanel from './FilterPanel';
+import NASJobList from './NASJobList';
 
 import { connect } from 'react-redux';
 
@@ -16,7 +16,7 @@ const styles = theme => ({
     },
 });
 
-class NASMonitor extends React.Component {
+class NASJobMonitor extends React.Component {
     
     componentDidMount() {
         this.props.fetchNASJobs();
@@ -29,11 +29,11 @@ class NASMonitor extends React.Component {
             <div className={classes.root}>
                 <h1>Monitor</h1>
                 <FilterPanel />
-                <JobList />
+                <NASJobList />
             </div>
         )
     }
 }
 
 
-export default connect(null, { fetchNASJobs })(withStyles(styles)(NASMonitor));
+export default connect(null, { fetchNASJobs })(withStyles(styles)(NASJobMonitor));

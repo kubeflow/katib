@@ -48,13 +48,13 @@ const generalReducer = (state = initialState, action) => {
                 snackOpen: true,
                 snackText: "Successfully deleted. Press Update button",
             }
-        case actions.OPEN_DELETE_DIALOG:
+        case actions.OPEN_DELETE_JOB_DIALOG:
             return {
                 ...state,
                 deleteDialog: true,
-                deleteId: action.id,
+                deleteExperimentName: action.experimentName,
             }
-        case actions.CLOSE_DELETE_DIALOG:
+        case actions.CLOSE_DELETE_JOB_DIALOG:
             return {
                 ...state,
                 deleteDialog: false,

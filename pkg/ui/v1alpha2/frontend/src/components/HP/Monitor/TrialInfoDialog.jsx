@@ -12,16 +12,18 @@ import Plot from 'react-plotly.js';
 const module = "hpMonitor";
 
 const styles = theme => ({
-
+    header: {
+        textAlign: "center"
+    }
 })
 
 
-const PlotDialog = (props) => {
+const TrialInfoDialog = (props) => {
     const { classes } = props;
       
     let dataToPlot = [];
-    if (props.TrialData.length !== 0) { 
-        let data = props.TrialData.slice(1);   
+    if (props.trialData.length !== 0) { 
+        let data = props.trialData.slice(1);   
         let tracks = {};
         for(let i = 0; i < data.length; i++) {
             if (typeof tracks[data[i][0]] !== "undefined") {
@@ -33,6 +35,8 @@ const PlotDialog = (props) => {
                 tracks[data[i][0]].y = [Number(data[i][2])];
             }
         }
+
+        //For plot legend
         let keys = Object.keys(tracks);
         keys.map((key, i) => {
             if (key !== "") {
@@ -45,7 +49,6 @@ const PlotDialog = (props) => {
                 })
             }
         })
-        console.log(dataToPlot)
     }
     return (
         <Dialog
@@ -55,7 +58,7 @@ const PlotDialog = (props) => {
                 aria-describedby="alert-dialog-description"
                 maxWidth={"xl"}
             >
-            <DialogTitle id="alert-dialog-title">{"Trial data"}</DialogTitle>
+            <DialogTitle id="alert-dialog-title" className = {classes.header}>{"Trial data"}</DialogTitle>
             <DialogContent>
                 <Plot 
                     data={dataToPlot}
@@ -82,4 +85,4 @@ const mapStateToProps = state => {
     }
 }
 
-export default connect(mapStateToProps, { closeDialog })(withStyles(styles)(PlotDialog));
+export default connect(mapStateToProps, { closeDialog })(withStyles(styles)(TrialInfoDialog));

@@ -14,7 +14,7 @@ const styles = theme => ({
     }
 })
 
-class StepInfo extends React.Component {
+class NASJobStepInfo extends React.Component {
 
     componentDidMount() {
 
@@ -33,8 +33,8 @@ class StepInfo extends React.Component {
         const id = `graph${this.props.id}`
         return (
             <div className={classes.root}>
-                <Typography variant={"h6"}>
-                    Architecture
+                <Typography variant={"h5"}>
+                    Architecture for Trial: {step.trialname}
                 </Typography>
                 <div id={id} className={classes.root} />
                 <br />
@@ -46,6 +46,7 @@ class StepInfo extends React.Component {
                     )
                 })}
                 <br />
+                {/* TODO: add link in backend */}
                 <a href={`${step.link}`}>
                     <Button variant={"contained"} color={"primary"}>
                         Download
@@ -57,4 +58,4 @@ class StepInfo extends React.Component {
 }
     
 
-export default withStyles(styles)(StepInfo);
+export default withStyles(styles)(NASJobStepInfo);

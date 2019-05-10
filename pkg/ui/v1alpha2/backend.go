@@ -207,7 +207,6 @@ func (k *KatibUIHandler) SubmitNASJob(w http.ResponseWriter, r *http.Request) {
 
 // TODO:
 // 1. Add delete job to Katib Client
-// 2. Change id to exp_name in frontend
 func (k *KatibUIHandler) DeleteJob(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	experimentName := r.URL.Query()["experimentName"][0]
@@ -216,7 +215,6 @@ func (k *KatibUIHandler) DeleteJob(w http.ResponseWriter, r *http.Request) {
 
 func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
-	//TODO: Change id to name in frontend
 	experimentName := r.URL.Query()["experimentName"][0]
 
 	conn, c := k.connectManager()
@@ -305,7 +303,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 
 }
 
-func (k *KatibUIHandler) FetchTrialsInfo(w http.ResponseWriter, r *http.Request) {
+func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	//TODO: change name to trialName in frontend
 	trialName := r.URL.Query()["trialName"][0]
@@ -354,6 +352,7 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 
 	type NNView struct {
 		Name         string
+		TrialName    string
 		Architecture string
 		MetricsName  []string
 		MetricsValue []string
@@ -412,6 +411,7 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 		}
 		responseRaw = append(responseRaw, NNView{
 			Name:         "Generation " + strconv.Itoa(i),
+			TrialName:    t.Name,
 			Architecture: generateNNImage(architecture, decoder),
 			MetricsName:  metricsName,
 			MetricsValue: metricsValue,

@@ -9,9 +9,9 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 
 import { fetchHPJobInfo } from '../../../actions/hpMonitorActions';
 
-import HPPlot from './Plot';
-import HPTable from './Table';
-import PlotDialog from './Dialog';
+import HPJobPlot from './HPJobPlot';
+import HPJobTable from './HPJobTable';
+import TrialInfoDialog from './TrialInfoDialog';
 
 const module = "hpMonitor";
 
@@ -23,13 +23,17 @@ const styles = theme => ({
     },
     loading: {
         marginTop: 30,
+    },
+    header: {
+        marginTop: 30,
+        textAlign: "center"
     }
 })
 
 class HPJobInfo extends React.Component {
 
     componentDidMount() {
-        this.props.fetchHPJobInfo(this.props.match.params.id);
+        this.props.fetchHPJobInfo(this.props.match.params.name);
     }
 
     render () {
@@ -45,13 +49,13 @@ class HPJobInfo extends React.Component {
                 <LinearProgress color={"primary"} className={classes.loading} />
                 :
                 <div>
-                    <Typography variant={"h5"}>
-                        Study ID: {this.props.match.params.id}
+                    <Typography  className = {classes.header} variant={"h5"}>
+                        Experiment Name: {this.props.match.params.name}
                     </Typography>
                     <br />
-                    <HPPlot id={this.props.match.params.id} />
-                    <HPTable id={this.props.match.params.id} />
-                    <PlotDialog />
+                    <HPJobPlot name={this.props.match.params.name} />
+                    <HPJobTable name={this.props.match.params.name} />
+                    <TrialInfoDialog />
                 </div>
                 }
             </div>

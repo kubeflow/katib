@@ -12,7 +12,7 @@ const useStyles = makeStyles({
   }
 })
 
-const HPPlot = (props) => {
+const HPJobPlot = (props) => {
   const classes = useStyles();
   let dimensions = [];
 
@@ -20,7 +20,7 @@ const HPPlot = (props) => {
     // everything for the third column
     let header = props.jobData[0];
     let data = props.jobData.slice(1);
-    for(let i = 2; i < data[0].length; i++) {
+    for(let i = 1; i < data[0].length; i++) {
       if (header[i] !== '') {
         let track = {
           label: header[i],
@@ -33,29 +33,37 @@ const HPPlot = (props) => {
             flag = "string";
             values.push(data[j][i]);
           } else {
-            values.push(number);
+            values.push(number)
           }
         }
         track.values = values;
         if (flag === "number" && flag !== "string") {
           track.range = [Math.min.apply(null, values), Math.max.apply(null, values)];
+          if (Math.min.apply(null, values) < 1) {
+            track.tickformat = ".3f"
+          } else {
+            track.tickformat = "d"
+          }
         } else {
           // check logic
-          track.ticktext = values;
+          // track.ticktext = values;
           let options = new Set(values);
           options = [...options]
           let mapping = {};
-          for(let k = 0; k < options.length; k++) {
+          for (let k = 0; k < options.length; k++) {
             mapping[options[k]] = k;
           }
           track.tickvals = options.map((option, index) => index);
+          track.ticktext = options.map((option, index) => option);
           track.values = values.map((value, index) => mapping[value])
           track.constraintrange = [0, values.length];
         }
         dimensions.push(track)
+        
       }
     }
   }
+
 
   return (
       <div className={classes.root}>
@@ -81,4 +89,4 @@ const mapStateToProps = (state) => ({
   jobData: state[module].jobData,
 })
 
-export default connect(mapStateToProps, null)(HPPlot)
+export default connect(mapStateToProps, null)(HPJobPlot)

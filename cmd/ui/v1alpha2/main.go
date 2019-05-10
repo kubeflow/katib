@@ -25,8 +25,9 @@ func main() {
 	http.HandleFunc("/katib/delete_job/", kuh.DeleteJob)
 
 	http.HandleFunc("/katib/fetch_hp_job_info/", kuh.FetchHPJobInfo)
-	http.HandleFunc("/katib/fetch_trial_info/", kuh.FetchTrialsInfo)
+	http.HandleFunc("/katib/fetch_hp_job_trial_info/", kuh.FetchHPJobTrialInfo)
 	http.HandleFunc("/katib/fetch_nas_job_info/", kuh.FetchNASJobInfo)
+
 	http.HandleFunc("/katib/fetch_trial_templates/", kuh.FetchTrialTemplates)
 	http.HandleFunc("/katib/fetch_collector_templates/", kuh.FetchMetricsCollectorTemplates)
 	//TODO: Add "action" in data for delete and change URL

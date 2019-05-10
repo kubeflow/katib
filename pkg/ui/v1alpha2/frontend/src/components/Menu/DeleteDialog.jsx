@@ -22,7 +22,7 @@ const DeleteDialog = (props) => {
     const classes = useStyles();
 
     const onDelete = () => {
-        props.deleteJob(props.id);
+        props.deleteJob(props.name);
     }
 
     return (
@@ -32,7 +32,7 @@ const DeleteDialog = (props) => {
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
         >
-            <DialogTitle id="alert-dialog-title">{"Delete StudyJob?"}</DialogTitle>
+            <DialogTitle id="alert-dialog-title">{"Delete Experiment?"}</DialogTitle>
             <DialogContent>
                 <DialogContentText id="alert-dialog-description">
                     Are you sure you want to delete this job?
@@ -52,7 +52,7 @@ const DeleteDialog = (props) => {
 
 const mapStateToProps = (state) => ({
     open: state[module].deleteDialog,
-    id: state[module].deleteId,
+    deleteExperimentName: state[module].deleteExperimentName,
 })
 
 export default connect(mapStateToProps, { closeDeleteDialog, deleteJob })(DeleteDialog)

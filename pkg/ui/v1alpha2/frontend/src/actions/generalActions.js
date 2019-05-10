@@ -28,20 +28,20 @@ export const DELETE_JOB_REQUEST = "DELETE_JOB_REQUEST";
 export const DELETE_JOB_FAILURE = "DELETE_JOB_FAILURE";
 export const DELETE_JOB_SUCCESS = "DELETE_JOB_SUCCESS";
 
-export const deleteJob = (id) => ({
+export const deleteJob = (experimentName) => ({
     type: DELETE_JOB_REQUEST,
-    id,
+    experimentName,
 })
 
-export const OPEN_DELETE_DIALOG = "OPEN_DELETE_DIALOG";
+export const OPEN_DELETE_JOB_DIALOG = "OPEN_DELETE_JOB_DIALOG";
 
-export const openDeleteDialog = (id) => ({
-    type: OPEN_DELETE_DIALOG, 
-    id,
+export const openDeleteJobDialog = (experimentName) => ({
+    type: OPEN_DELETE_JOB_DIALOG, 
+    experimentName,
 })
 
-export const CLOSE_DELETE_DIALOG = "CLOSE_DELETE_DIALOG";
+export const CLOSE_DELETE_JOB_DIALOG = "CLOSE_DELETE_JOB_DIALOG";
 
 export const closeDeleteDialog = () => ({
-    type: CLOSE_DELETE_DIALOG,
+    type: CLOSE_DELETE_JOB_DIALOG,
 })
