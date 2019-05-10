@@ -71,18 +71,6 @@
     }
   },
   "definitions": {
-    "ExperimentSpecParameterSpecs": {
-      "type": "object",
-      "properties": {
-        "parameters": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/alpha2ParameterSpec"
-          }
-        }
-      },
-      "title": "* \nList of ParameterSpec"
-    },
     "NasConfigOperations": {
       "type": "object",
       "properties": {
@@ -152,7 +140,7 @@
       "type": "object",
       "properties": {
         "parameter_specs": {
-          "$ref": "#/definitions/ExperimentSpecParameterSpecs"
+          "$ref": "#/definitions/alpha2ExperimentSpecParameterSpecs"
         },
         "objective": {
           "$ref": "#/definitions/alpha2ObjectiveSpec"
@@ -179,6 +167,18 @@
         }
       },
       "description": "*\nSpec of a Experiment. Experiment represents a single optimization run over a feasible space. \nEach Experiment contains a configuration describing the feasible space, as well as a set of Trials.\nIt is assumed that objective function f(x) does not change in the course of a Experiment."
+    },
+    "alpha2ExperimentSpecParameterSpecs": {
+      "type": "object",
+      "properties": {
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha2ParameterSpec"
+          }
+        }
+      },
+      "title": "* \nList of ParameterSpec"
     },
     "alpha2FeasibleSpace": {
       "type": "object",
@@ -319,15 +319,23 @@
         "operation_type": {
           "type": "string"
         },
+        "parameter_specs": {
+          "$ref": "#/definitions/alpha2OperationParameterSpecs"
+        }
+      },
+      "title": "*\nConfig for operations in DAG"
+    },
+    "alpha2OperationParameterSpecs": {
+      "type": "object",
+      "properties": {
         "parameters": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/alpha2ParameterSpec"
-          },
-          "title": "* \nList of ParameterSpec"
+          }
         }
       },
-      "title": "*\nConfig for operations in DAG"
+      "title": "* \nList of ParameterSpec"
     },
     "alpha2ParameterAssignment": {
       "type": "object",
