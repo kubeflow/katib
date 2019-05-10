@@ -247,12 +247,15 @@ message AlgorithmSpec {
 /**
  * Config for operations in DAG
  */
- message Operation {
+  message Operation {
      string operation_type = 1; /// Type of operation in DAG
       /** 
      * List of ParameterSpec
      */
-    repeated ParameterSpec parameters = 2; /// List of ParameterSpec
+     message ParameterSpecs {
+        repeated ParameterSpec parameters = 1; 
+    }
+    ParameterSpecs parameter_specs = 2;
 }
 
 /**
