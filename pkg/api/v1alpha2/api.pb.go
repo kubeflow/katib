@@ -19,7 +19,7 @@ import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
 import _ "google.golang.org/genproto/googleapis/api/annotations"
-import dbif_v1_alpha2 "dbif"
+import dbif_v1_alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
 
 import (
 	context "golang.org/x/net/context"
