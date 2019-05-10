@@ -1,6 +1,7 @@
 package experiment
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 
@@ -12,9 +13,12 @@ import (
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
 func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alpha2.Experiment, trialInstance *apiv1alpha2.Trial) error {
+	BUFSIZE := 1024
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: expInstance.GetName(), Namespace: expInstance.GetNamespace()})
 
 	trial := &trialsv1alpha2.Trial{}
@@ -45,6 +49,25 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 	}
 
 	trial.Spec.RunSpec = runSpec
+
+	buf := bytes.NewBufferString(runSpec)
+	job := &unstructured.Unstructured{}
+	if err := k8syaml.NewYAMLOrJSONDecoder(buf, BUFSIZE).Decode(job); err != nil {
+		return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
+	}
+
+	var metricNames []string
+	metricNames = append(metricNames, expInstance.Spec.Objective.ObjectiveMetricName)
+	for _, mn := range expInstance.Spec.Objective.AdditionalMetricNames {
+		metricNames = append(metricNames, mn)
+	}
+
+	mcSpec, err := util.GetMetricsCollectorManifest(expInstance.GetName(), trial.Name, job.GetKind(), trial.Namespace, metricNames, expInstance.Spec.MetricsCollectorSpec)
+	if err != nil {
+		logger.Error(err, "Error getting metrics collector manifest")
+		return err
+	}
+	trial.Spec.MetricsCollectorSpec = mcSpec.String()
 
 	if err := r.Create(context.TODO(), trial); err != nil {
 		logger.Error(err, "Trial create error", "Trial name", trial.Name)

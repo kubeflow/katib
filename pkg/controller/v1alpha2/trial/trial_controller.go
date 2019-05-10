@@ -21,6 +21,7 @@ import (
 	"context"
 
 	batchv1 "k8s.io/api/batch/v1"
+	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -223,7 +224,11 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 		}
 	}
 
-	//TODO create Metric colletor
+	err = r.spawnMetricsCollector(instance)
+	if err != nil {
+		logger.Error(err, "Metrics collector spawning error")
+		return nil, err
+	}
 
 	msg := "Trial is running"
 	instance.MarkTrialStatusRunning(util.TrialRunningReason, msg)
@@ -247,4 +252,26 @@ func (r *ReconcileTrial) getDesiredJobSpec(instance *trialsv1alpha2.Trial) (*uns
 	}
 
 	return desiredJobSpec, nil
+}
+
+func (r *ReconcileTrial) spawnMetricsCollector(instance *trialsv1alpha2.Trial) error {
+	var mcjob batchv1beta.CronJob
+	bufSize := 1024
+	logger := log.WithValues("Metrics collector for Trial", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+	buf := bytes.NewBufferString(instance.Spec.MetricsCollectorSpec)
+
+	if err := k8syaml.NewYAMLOrJSONDecoder(buf, bufSize).Decode(mcjob); err != nil {
+		logger.Error(err, "Yaml decode error")
+		return err
+	}
+	if err := controllerutil.SetControllerReference(instance, &mcjob, r.scheme); err != nil {
+		logger.Error(err, "Set controller reference error")
+		return err
+	}
+	if err := r.Create(context.TODO(), &mcjob); err != nil {
+		logger.Error(err, "MetricsCollector Job Create error")
+		return err
+	}
+
+	return nil
 }

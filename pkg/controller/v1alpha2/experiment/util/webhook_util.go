@@ -178,7 +178,7 @@ func validateMetricsCollector(inst *ep_v1alpha2.Experiment) error {
 	}
 
 	var mcjob batchv1beta.CronJob
-	mcm, err := getMetricsCollectorManifest(experimentName, trialName, job.GetKind(), namespace, metricNames, inst.Spec.MetricsCollectorSpec)
+	mcm, err := GetMetricsCollectorManifest(experimentName, trialName, job.GetKind(), namespace, metricNames, inst.Spec.MetricsCollectorSpec)
 	if err != nil {
 		logger.Printf("getMetricsCollectorManifest error %v", err)
 		return err
