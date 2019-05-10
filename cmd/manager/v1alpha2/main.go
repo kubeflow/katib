@@ -86,8 +86,7 @@ func (s *server) GetTrial(ctx context.Context, in *dbif.GetTrialRequest) (*dbif.
 
 // Update Status of a trial.
 func (s *server) UpdateTrialStatus(ctx context.Context, in *dbif.UpdateTrialStatusRequest) (*dbif.UpdateTrialStatusReply, error) {
-	err := dbIf.UpdateTrialStatus(in.TrialName, in.NewStatus)
-	return &dbif.UpdateTrialStatusReply{}, err
+	return dbIf.UpdateTrialStatus(ctx, in)
 }
 
 // Report a log of Observations for a Trial.
@@ -114,13 +113,13 @@ func (s *server) getSuggestionServiceConnection(algoName string) (*grpc.ClientCo
 func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestionsReply, error) {
 	conn, err := s.getSuggestionServiceConnection(in.AlgorithmName)
 	if err != nil {
-		return &api_pb.GetSuggestionsReply{Trials: []*dbif.Trial{}}, err
+		return &api_pb.GetSuggestionsReply{}, err
 	}
 	defer conn.Close()
 	c := api_pb.NewSuggestionClient(conn)
 	r, err := c.GetSuggestions(ctx, in)
 	if err != nil {
-		return &api_pb.GetSuggestionsReply{Trials: []*dbif.Trial{}}, err
+		return &api_pb.GetSuggestionsReply{}, err
 	}
 	return r, nil
 }
@@ -149,7 +148,7 @@ func (s *server) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*
 	}
 
 	// Check if connection to katib-db is okay since otherwise manager could not serve most of its methods.
-	err := dbIf.SelectOne()
+	_, err := dbIf.SelectOne(ctx, &dbif.SelectOneRequest{})
 	if err != nil {
 		resp.Status = health_pb.HealthCheckResponse_NOT_SERVING
 		return &resp, fmt.Errorf("Failed to execute `SELECT 1` probe: %v", err)
