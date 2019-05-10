@@ -16,7 +16,7 @@ limitations under the License.
 package v1alpha2
 
 import (
-	trial "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	common "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -26,7 +26,7 @@ type ExperimentSpec struct {
 	Parameters []ParameterSpec `json:"parameters,omitempty"`
 
 	// Describes the objective of the experiment.
-	Objective *ObjectiveSpec `json:"objective,omitempty"`
+	Objective *common.ObjectiveSpec `json:"objective,omitempty"`
 
 	// Describes the suggestion algorithm.
 	Algorithm *AlgorithmSpec `json:"algorithm,omitempty"`
@@ -47,8 +47,8 @@ type ExperimentSpec struct {
 	// Whether to retain historical data in DB after deletion.
 	RetainHistoricalData bool `json:"retainHistoricalData,omitempty"`
 
-	// TODO - figure out what to do with metric collectors
-	MetricsCollectorType string `json:"metricsCollectorSpec,omitempty"`
+	// For v1alpha2 we will keep the metrics collector implementation same as v1alpha1. 
+	MetricsCollectorSpec *MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
 
 	NasConfig *NasConfig `json:"nasConfig,omitempty"`
 
@@ -97,10 +97,10 @@ type ExperimentStatus struct {
 
 type OptimalTrial struct {
 	// Key-value pairs for hyperparameters and assignment values.
-	ParameterAssignments []trial.ParameterAssignment `json:"parameterAssignments"`
+	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments"`
 
 	// Observation for this trial
-	Observation trial.Observation `json:"observation,omitempty"`
+	Observation common.Observation `json:"observation,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true
@@ -158,23 +158,6 @@ type FeasibleSpace struct {
 	List []string `json:"list,omitempty"`
 	Step string   `json:"step,omitempty"`
 }
-
-type ObjectiveSpec struct {
-	Type                ObjectiveType `json:"type,omitempty"`
-	Goal                *float64      `json:"goal,omitempty"`
-	ObjectiveMetricName string        `json:"objectiveMetricName,omitempty"`
-	// This can be empty if we only care about the objective metric.
-	// Note: If we adopt a push instead of pull mechanism, this can be omitted completely.
-	AdditionalMetricsNames []string `json:"additionalMetricsNames,omitempty"`
-}
-
-type ObjectiveType string
-
-const (
-	ObjectiveTypeUnknown  ObjectiveType = ""
-	ObjectiveTypeMinimize ObjectiveType = "minimize"
-	ObjectiveTypeMaximize ObjectiveType = "maximize"
-)
 
 type AlgorithmSpec struct {
 	AlgorithmName string `json:"algorithmName,omitempty"`
@@ -248,6 +231,14 @@ type GraphConfig struct {
 type Operation struct {
 	OperationType string          `json:"operationType,omitempty"`
 	Parameters    []ParameterSpec `json:"parameterconfigs,omitempty"`
+}
+
+// Spec for metrics collectors. For v1alpha2 we will keep metrics collection as
+// cron jobs. This can be replaced by a push-model when the metadata client lib
+// is ready.
+type MetricsCollectorSpec struct {
+	Retain     bool       `json:"retain,omitempty"`
+	GoTemplate GoTemplate `json:"goTemplate,omitempty"`
 }
 
 func init() {

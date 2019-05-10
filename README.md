@@ -29,7 +29,6 @@ This project is inspired by [Google vizier](https://static.googleusercontent.com
   - [Running examples](#running-examples)
   - [Cleanups](#cleanups)
 - [CONTRIBUTING](#contributing)
-- [TODOs](#todos)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -372,9 +371,3 @@ ks delete ${KF_ENV} -c ambassador
 ## CONTRIBUTING
 
 Please feel free to test the system! [developer-guide.md](./docs/developer-guide.md) is a good starting point for developers.
-
-## TODOs
-
-* Integrate KubeFlow (TensorFlow, Caffe2 and PyTorch operators)
-* Support Early Stopping
-* Enrich the GUI

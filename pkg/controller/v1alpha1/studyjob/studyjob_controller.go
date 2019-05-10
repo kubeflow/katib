@@ -20,7 +20,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/kubeflow/katib/pkg"
+	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 	katibapi "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	pytorchjobv1beta1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1beta1"
@@ -484,7 +484,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 		grpc.WithInsecure(),
 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(maxMsgSize)),
 	}
-	conn, err := grpc.Dial(pkg.ManagerAddr, opts...)
+	conn, err := grpc.Dial(common.ManagerAddr, opts...)
 	if err != nil {
 		log.Printf("Connect katib manager error %v", err)
 		instance.Status.Condition = katibv1alpha1.ConditionFailed

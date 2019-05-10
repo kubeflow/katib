@@ -27,10 +27,10 @@ var experimentColums = []string{
 	"objective",
 	"algorithm",
 	"trial_template",
+	"metrics_collector_spec",
 	"parallel_trial_count",
 	"max_trial_count",
-	"condition",
-	"metrics_collector_type",
+	"status",
 	"start_time",
 	"completion_time",
 	"nas_config",
@@ -39,10 +39,12 @@ var trialColumns = []string{
 	"id",
 	"name",
 	"experiment_name",
+	"objective",
 	"parameter_assignments",
 	"run_spec",
+	"metrics_collector_spec",
 	"observation",
-	"condition",
+	"status",
 	"start_time",
 	"completion_time",
 }
@@ -93,10 +95,10 @@ func TestRegisterExperiment(t *testing.T) {
 				Parameters: []*api_pb.ParameterSpec{},
 			},
 			Objective: &api_pb.ObjectiveSpec{
-				Type:                   api_pb.ObjectiveType_UNKNOWN,
-				Goal:                   0.99,
-				ObjectiveMetricName:    "f1_score",
-				AdditionalMetricsNames: []string{"loss", "precision", "recall"},
+				Type:                  api_pb.ObjectiveType_UNKNOWN,
+				Goal:                  0.99,
+				ObjectiveMetricName:   "f1_score",
+				AdditionalMetricNames: []string{"loss", "precision", "recall"},
 			},
 			Algorithm:          &api_pb.AlgorithmSpec{},
 			TrialTemplate:      "",
@@ -115,24 +117,24 @@ func TestRegisterExperiment(t *testing.T) {
 			parameters, 
 			objective, 
 			algorithm, 
-			trial_template, 
+			trial_template,
+			metrics_collector_spec,
 			parallel_trial_count, 
-			max_trial_count, 
-			condition, 
-			metrics_collector_type,
+			max_trial_count,
+			status,
 			start_time,
 			completion_time,
 			nas_config\)`,
 	).WithArgs(
 		"test1",
 		"{\"parameters\":[]}",
-		"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricsNames\":[\"loss\",\"precision\",\"recall\"]}",
+		"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricNames\":[\"loss\",\"precision\",\"recall\"]}",
 		"{}",
 		experiment.ExperimentSpec.TrialTemplate,
+		experiment.ExperimentSpec.MetricsCollectorSpec,
 		experiment.ExperimentSpec.ParallelTrialCount,
 		experiment.ExperimentSpec.MaxTrialCount,
 		experiment.ExperimentStatus.Condition,
-		"",
 		"2016-12-31 20:02:05.123456",
 		"",
 		"",
@@ -149,13 +151,13 @@ func TestGetExperiment(t *testing.T) {
 			1,
 			"test1",
 			"{\"parameters\":[]}",
-			"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricsNames\":[\"loss\",\"precision\",\"recall\"]}",
+			"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricNames\":[\"loss\",\"precision\",\"recall\"]}",
 			"{}",
+			"",
 			"",
 			10,
 			100,
 			api_pb.ExperimentStatus_CREATED,
-			"",
 			"2016-12-31 20:02:05.123456",
 			"",
 			"",
@@ -170,8 +172,8 @@ func TestGetExperiment(t *testing.T) {
 }
 
 func TestGetExperimentList(t *testing.T) {
-	mock.ExpectQuery("SELECT  name, condition, start_time, completion_time FROM experiments").WillReturnRows(
-		sqlmock.NewRows([]string{"name", "condition", "start_time", "completion_time"}).AddRow(
+	mock.ExpectQuery("SELECT  name, status, start_time, completion_time FROM experiments").WillReturnRows(
+		sqlmock.NewRows([]string{"name", "status", "start_time", "completion_time"}).AddRow(
 			"test1",
 			api_pb.ExperimentStatus_CREATED,
 			"2016-12-31 20:02:05.123456",
@@ -199,7 +201,7 @@ func TestUpdateExperimentStatus(t *testing.T) {
 	start_time := "2016-12-31 20:02:05.123456"
 	completion_time := ""
 
-	mock.ExpectExec(`UPDATE experiments SET condition = \? ,
+	mock.ExpectExec(`UPDATE experiments SET status = \?,
 	start_time = \?,
 	completion_time = \? WHERE name = \?`,
 	).WithArgs(condition, start_time, completion_time, exp_name).WillReturnResult(sqlmock.NewResult(1, 1))
@@ -258,6 +260,12 @@ func TestRegisterTrial(t *testing.T) {
 		Name: "test1_trial1",
 		Spec: &api_pb.TrialSpec{
 			ExperimentName: "test1",
+			Objective: &api_pb.ObjectiveSpec{
+				Type:                  api_pb.ObjectiveType_UNKNOWN,
+				Goal:                  0.99,
+				ObjectiveMetricName:   "f1_score",
+				AdditionalMetricNames: []string{"loss", "precision", "recall"},
+			},
 			ParameterAssignments: &api_pb.TrialSpec_ParameterAssignments{
 				Assignments: []*api_pb.ParameterAssignment{
 					&api_pb.ParameterAssignment{
@@ -302,16 +310,20 @@ func TestRegisterTrial(t *testing.T) {
 		`INSERT INTO trials \(
 			name, 
 			experiment_name,
+			objective,
 			parameter_assignments,
 			run_spec,
+			metrics_collector_spec,
 			observation,
-			condition,
+			status,
 			start_time,
 			completion_time\)`,
 	).WithArgs(
 		"test1_trial1",
 		"test1",
+		"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricNames\":[\"loss\",\"precision\",\"recall\"]}",
 		"{\"assignments\":[{\"name\":\"param1\",\"value\":\"0.9\"},{\"name\":\"param2\",\"value\":\"10\"}]}",
+		"",
 		"",
 		"{\"metrics\":[{\"name\":\"f1_score\",\"value\":\"88.95\"},{\"name\":\"loss\",\"value\":\"0.5\"},{\"name\":\"precision\",\"value\":\"88.7\"},{\"name\":\"recall\",\"value\":\"89.2\"}]}",
 		trial.Status.Condition,
@@ -331,7 +343,9 @@ func TestGetTrialList(t *testing.T) {
 			1,
 			"test1_trial1",
 			"test1",
+			"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricNames\":[\"loss\",\"precision\",\"recall\"]}",
 			"{\"assignments\":[{\"name\":\"param1\",\"value\":\"0.9\"},{\"name\":\"param2\",\"value\":\"10\"}]}",
+			"",
 			"",
 			"{\"metrics\":[{\"name\":\"f1_score\",\"value\":\"88.95\"},{\"name\":\"loss\",\"value\":\"0.5\"},{\"name\":\"precision\",\"value\":\"88.7\"},{\"name\":\"recall\",\"value\":\"89.2\"}]}",
 			api_pb.TrialStatus_RUNNING,
@@ -341,7 +355,9 @@ func TestGetTrialList(t *testing.T) {
 			2,
 			"test1_trial2",
 			"test1",
+			"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricNames\":[\"loss\",\"precision\",\"recall\"]}",
 			"{\"assignments\":[{\"name\":\"param1\",\"value\":\"0.8\"},{\"name\":\"param2\",\"value\":\"20\"}]}",
+			"",
 			"",
 			"{\"metrics\":[{\"name\":\"f1_score\",\"value\":\"88.5\"},{\"name\":\"loss\",\"value\":\"0.8\"},{\"name\":\"precision\",\"value\":\"88.2\"},{\"name\":\"recall\",\"value\":\"89.0\"}]}",
 			api_pb.TrialStatus_COMPLETED,
@@ -365,7 +381,9 @@ func TestGetTrial(t *testing.T) {
 			1,
 			"test1_trial1",
 			"test1",
+			"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricNames\":[\"loss\",\"precision\",\"recall\"]}",
 			"{\"assignments\":[{\"name\":\"param1\",\"value\":\"0.9\"},{\"name\":\"param2\",\"value\":\"10\"}]}",
+			"",
 			"",
 			"{\"metrics\":[{\"name\":\"f1_score\",\"value\":\"88.95\"},{\"name\":\"loss\",\"value\":\"0.5\"},{\"name\":\"precision\",\"value\":\"88.7\"},{\"name\":\"recall\",\"value\":\"89.2\"}]}",
 			api_pb.TrialStatus_RUNNING,
@@ -387,7 +405,7 @@ func TestUpdateTrialStatus(t *testing.T) {
 	start_time := "2016-12-31 20:02:05.123456"
 	completion_time := ""
 
-	mock.ExpectExec(`UPDATE trials SET condition = \? ,
+	mock.ExpectExec(`UPDATE trials SET status = \?,
 	start_time = \?,
 	completion_time = \?,
 	observation = \? WHERE name = \?`,

@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kubeflow/katib/pkg"
+	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
 	"github.com/kubeflow/katib/pkg/api/v1alpha1"
 
 	"google.golang.org/grpc"
@@ -403,7 +403,7 @@ func (h *HyperBandSuggestService) shLoopParamUpdate(studyID string, hbparam *Hyp
 }
 
 func (h *HyperBandSuggestService) GetSuggestions(ctx context.Context, in *api.GetSuggestionsRequest) (*api.GetSuggestionsReply, error) {
-	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
+	conn, err := grpc.Dial(common.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("could not connect: %v", err)
 		return &api.GetSuggestionsReply{}, err

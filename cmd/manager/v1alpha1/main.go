@@ -10,7 +10,7 @@ import (
 	"time"
 
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha1"
-	health_pb "github.com/kubeflow/katib/pkg/api/v1alpha1/health"
+	health_pb "github.com/kubeflow/katib/pkg/api/health"
 	kdb "github.com/kubeflow/katib/pkg/db/v1alpha1"
 	"github.com/kubeflow/katib/pkg/manager/modelstore"
 

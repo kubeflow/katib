@@ -19,7 +19,7 @@ const (
 	// Default value of Spec.ParallelTrialCount
 	DefaultTrialParallelCount = 3
 
-	// Default value of Spec.ConfigMapName
+	// Default value of Spec.ConfigMapName for Trial template
 	DefaultTrialConfigMapName = "trial-template"
 
 	// Default env name of katib namespace
@@ -27,4 +27,7 @@ const (
 
 	// Default value of Spec.TemplatePath
 	DefaultTrialTemplatePath = "defaultTrialTemplate.yaml"
+
+	// Default value of Spec.ConfigMapName for Metrics Collector template
+	DefaultMetricsCollectorConfigMapName = "metrics-collector-template"
 )

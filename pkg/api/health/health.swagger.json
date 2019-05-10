@@ -1,0 +1,37 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "health.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {},
+  "definitions": {
+    "HealthCheckResponseServingStatus": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "SERVING",
+        "NOT_SERVING"
+      ],
+      "default": "UNKNOWN"
+    },
+    "v1HealthCheckResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/HealthCheckResponseServingStatus"
+        }
+      }
+    }
+  }
+}

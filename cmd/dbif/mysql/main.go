@@ -58,10 +58,10 @@ func DBInit(d *dbConn) {
 		objective TEXT,
 		algorithm TEXT,
 		trial_template TEXT,
+		metrics_collector_spec TEXT,
 		parallel_trial_count INT,
 		max_trial_count INT,
-		condition TINYINT,
-		metrics_collector_type TEXT,
+		status TINYINT,
 		start_time DATETIME(6),
 		completion_time DATETIME(6),
 		nas_config TEXT)`)
@@ -73,11 +73,13 @@ func DBInit(d *dbConn) {
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS trials
 		(id INT AUTO_INCREMENT PRIMARY KEY,
 		name VARCHAR(255) NOT NULL UNIQUE,
-		experiment_name TEXT NOT NULL,
-		parameter_assignments TEXT,
+		experiment_name VARCHAR(255) NOT NULL,
+		objective TEXT,		
+		parameter_assignments TEXT,		
 		run_spec TEXT,
+		metrics_collector_spec TEXT,
 		observation TEXT,
-		condition TINYINT,
+		status TINYINT,
 		start_time DATETIME(6),
 		completion_time DATETIME(6),
 		FOREIGN KEY(experiment_name) REFERENCES experiments(name) ON DELETE CASCADE)`)
@@ -172,12 +174,12 @@ func CreateNewDBServer() *dbConn {
 }
 
 func (d *dbConn) SelectOne(ctx context.Context, in *dbif.SelectOneRequest) (*dbif.SelectOneReply, error) {
-        db := d.db
-        _, err := db.Exec(`SELECT 1`)
-        if err != nil {
-                return nil, fmt.Errorf("Error `SELECT 1` probing: %v", err)
-        }
-        return &dbif.SelectOneReply{}, nil
+	db := d.db
+	_, err := db.Exec(`SELECT 1`)
+	if err != nil {
+		return nil, fmt.Errorf("Error `SELECT 1` probing: %v", err)
+	}
+	return &dbif.SelectOneReply{}, nil
 }
 
 func (d *dbConn) RegisterExperiment(ctx context.Context, in *dbif.RegisterExperimentRequest) (*dbif.RegisterExperimentReply, error) {
@@ -237,11 +239,11 @@ func (d *dbConn) RegisterExperiment(ctx context.Context, in *dbif.RegisterExperi
 			parameters, 
 			objective, 
 			algorithm, 
-			trial_template, 
+			trial_template,
+			metrics_collector_spec,
 			parallel_trial_count, 
-			max_trial_count, 
-			condition, 
-			metrics_collector_type,
+			max_trial_count,
+			status,
 			start_time,
 			completion_time,
 			nas_config) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -250,10 +252,10 @@ func (d *dbConn) RegisterExperiment(ctx context.Context, in *dbif.RegisterExperi
 		objSpec,
 		algoSpec,
 		experiment.ExperimentSpec.TrialTemplate,
+		experiment.ExperimentSpec.MetricsCollectorSpec,
 		experiment.ExperimentSpec.ParallelTrialCount,
 		experiment.ExperimentSpec.MaxTrialCount,
 		experiment.ExperimentStatus.Condition,
-		experiment.ExperimentSpec.MetricsCollectorType,
 		start_time,
 		completion_time,
 		nasConfig,
@@ -285,10 +287,10 @@ func (d *dbConn) GetExperiment(ctx context.Context, in *dbif.GetExperimentReques
 		&objSpec,
 		&algoSpec,
 		&experiment.ExperimentSpec.TrialTemplate,
+		&experiment.ExperimentSpec.MetricsCollectorSpec,
 		&experiment.ExperimentSpec.ParallelTrialCount,
 		&experiment.ExperimentSpec.MaxTrialCount,
 		&experiment.ExperimentStatus.Condition,
-		&experiment.ExperimentSpec.MetricsCollectorType,
 		&start_time,
 		&completion_time,
 		&nasConfig,
@@ -410,8 +412,8 @@ func (d *dbConn) UpdateExperimentStatus(ctx context.Context, in *dbif.UpdateExpe
 		}
 		completion_time = c_time.UTC().Format(mysqlTimeFmt)
 	}
-	_, err = d.db.Exec(`UPDATE experiments SET condition = ? ,
-		start_time = ?, 
+	_, err = d.db.Exec(`UPDATE experiments SET status = ?,
+		start_time = ?,
 		completion_time = ? WHERE name = ?`,
 		newStatus.Condition,
 		start_time,
@@ -488,6 +490,7 @@ func (d *dbConn) GetAlgorithmExtraSettings(ctx context.Context, in *dbif.GetAlgo
 }
 
 func (d *dbConn) RegisterTrial(ctx context.Context, in *dbif.RegisterTrialRequest) (*dbif.RegisterTrialReply, error) {
+	var objSpec string
 	var paramAssignment string
 	var start_time string
 	var completion_time string
@@ -495,6 +498,12 @@ func (d *dbConn) RegisterTrial(ctx context.Context, in *dbif.RegisterTrialReques
 	var err error
 	trial := in.Trial
 	if trial.Spec != nil {
+		if trial.Spec.Objective != nil {
+			objSpec, err = (&jsonpb.Marshaler{}).MarshalToString(trial.Spec.Objective)
+			if err != nil {
+				log.Fatalf("Error marshaling Objective: %v", err)
+			}
+		}
 		if trial.Spec.ParameterAssignments != nil {
 			paramAssignment, err = (&jsonpb.Marshaler{}).MarshalToString(trial.Spec.ParameterAssignments)
 			if err != nil {
@@ -528,16 +537,20 @@ func (d *dbConn) RegisterTrial(ctx context.Context, in *dbif.RegisterTrialReques
 		`INSERT INTO trials (
 			name, 
 			experiment_name,
+			objective,
 			parameter_assignments,
 			run_spec,
+			metrics_collector_spec,
 			observation,
-			condition,
+			status,
 			start_time,
 			completion_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		trial.Name,
 		trial.Spec.ExperimentName,
+		objSpec,
 		paramAssignment,
 		trial.Spec.RunSpec,
+		trial.Spec.MetricsCollectorSpec,
 		observation,
 		trial.Status.Condition,
 		start_time,
@@ -548,6 +561,7 @@ func (d *dbConn) RegisterTrial(ctx context.Context, in *dbif.RegisterTrialReques
 
 func (d *dbConn) GetTrialList(ctx context.Context, in *dbif.GetTrialListRequest) (*dbif.GetTrialListReply, error) {
 	var id string
+	var objSpec string
 	var paramAssignment string
 	var start_time string
 	var completion_time string
@@ -581,8 +595,10 @@ func (d *dbConn) GetTrialList(ctx context.Context, in *dbif.GetTrialListRequest)
 			&id,
 			&trial.Name,
 			&trial.Spec.ExperimentName,
+			&objSpec,
 			&paramAssignment,
 			&trial.Spec.RunSpec,
+			&trial.Spec.MetricsCollectorSpec,
 			&observation,
 			&trial.Status.Condition,
 			&start_time,
@@ -590,6 +606,13 @@ func (d *dbConn) GetTrialList(ctx context.Context, in *dbif.GetTrialListRequest)
 		)
 		if err != nil {
 			log.Printf("Failed to scan trial %v", err)
+		}
+		if objSpec != "" {
+			trial.Spec.Objective = new(dbif.ObjectiveSpec)
+			err = jsonpb.UnmarshalString(objSpec, trial.Spec.Objective)
+			if err != nil {
+				return nil, err
+			}
 		}
 		if paramAssignment != "" {
 			trial.Spec.ParameterAssignments = new(dbif.TrialSpec_ParameterAssignments)
@@ -628,6 +651,7 @@ func (d *dbConn) GetTrialList(ctx context.Context, in *dbif.GetTrialListRequest)
 
 func (d *dbConn) GetTrial(ctx context.Context, in *dbif.GetTrialRequest) (*dbif.GetTrialReply, error) {
 	var id string
+	var objSpec string
 	var paramAssignment string
 	var start_time string
 	var completion_time string
@@ -642,13 +666,22 @@ func (d *dbConn) GetTrial(ctx context.Context, in *dbif.GetTrialRequest) (*dbif.
 		&id,
 		&trial.Name,
 		&trial.Spec.ExperimentName,
+		&objSpec,
 		&paramAssignment,
 		&trial.Spec.RunSpec,
+		&trial.Spec.MetricsCollectorSpec,
 		&observation,
 		&trial.Status.Condition,
 		&start_time,
 		&completion_time,
 	)
+	if objSpec != "" {
+		trial.Spec.Objective = new(dbif.ObjectiveSpec)
+		err = jsonpb.UnmarshalString(objSpec, trial.Spec.Objective)
+		if err != nil {
+			return nil, err
+		}
+	}
 	if paramAssignment != "" {
 		trial.Spec.ParameterAssignments = new(dbif.TrialSpec_ParameterAssignments)
 		err = jsonpb.UnmarshalString(paramAssignment, trial.Spec.ParameterAssignments)
@@ -710,8 +743,8 @@ func (d *dbConn) UpdateTrialStatus(ctx context.Context, in *dbif.UpdateTrialStat
 		}
 		formattedCompletionTime = completion_time.UTC().Format(mysqlTimeFmt)
 	}
-	_, err = d.db.Exec(`UPDATE trials SET condition = ? ,
-		start_time = ?, 
+	_, err = d.db.Exec(`UPDATE trials SET status = ?,
+		start_time = ?,
 		completion_time = ?,
 		observation = ? WHERE name = ?`,
 		newStatus.Condition,

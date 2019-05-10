@@ -27,4 +27,4 @@ cd ${SCRIPT_ROOT}
 
 docker build -t ${PREFIX}/katib-controller -f ${CMD_PREFIX}/katib-controller/Dockerfile .
 docker build -t ${PREFIX}/katib-dbif -f ${CMD_PREFIX}/dbif/mysql/Dockerfile .
-
+docker build -t ${PREFIX}/katib-manager -f ${CMD_PREFIX}/manager/Dockerfile .

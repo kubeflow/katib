@@ -163,6 +163,9 @@
         "trial_template": {
           "type": "string"
         },
+        "metrics_collector_spec": {
+          "type": "string"
+        },
         "parallel_trial_count": {
           "type": "integer",
           "format": "int32"
@@ -170,9 +173,6 @@
         "max_trial_count": {
           "type": "integer",
           "format": "int32"
-        },
-        "metrics_collector_type": {
-          "type": "string"
         },
         "nas_config": {
           "$ref": "#/definitions/alpha2NasConfig"
@@ -284,7 +284,7 @@
         "objective_metric_name": {
           "type": "string"
         },
-        "additional_metrics_names": {
+        "additional_metric_names": {
           "type": "array",
           "items": {
             "type": "string"
@@ -387,10 +387,16 @@
         "experiment_name": {
           "type": "string"
         },
+        "objective": {
+          "$ref": "#/definitions/alpha2ObjectiveSpec"
+        },
         "parameter_assignments": {
           "$ref": "#/definitions/TrialSpecParameterAssignments"
         },
         "run_spec": {
+          "type": "string"
+        },
+        "metrics_collector_spec": {
           "type": "string"
         }
       }
