@@ -8,9 +8,9 @@ import (
 	"log"
 	"net"
 
+	health_pb "github.com/kubeflow/katib/pkg/api/health"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
-	health_pb "github.com/kubeflow/katib/pkg/api/v1alpha2/health"
-	dbif "github.com/kubeflow/katib/pkg/db/v1alpha2"
+	dbif "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
