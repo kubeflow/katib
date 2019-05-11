@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: dbif-mysql
-        image: acshanth/dbif-mysql
+        image: katib/dbif-mysql
         ports:
         - name: api
           containerPort: 6789
