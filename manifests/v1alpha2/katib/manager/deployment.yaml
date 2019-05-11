@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: katib-manager
-        image: katib/katib-manager
+        image: acshanth/katib-manager
         env:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:
