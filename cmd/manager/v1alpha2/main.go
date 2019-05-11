@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"time"
 
 	health_pb "github.com/kubeflow/katib/pkg/api/health"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
@@ -16,6 +15,11 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
+
+/**
+To plug in a new data store, implement and run the service and change the
+dbIfaddress to point to the new service.
+**/
 
 const (
 	port        = "0.0.0.0:6789"
@@ -173,38 +177,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
-
 	size := 1<<31 - 1
 	log.Printf("Start Katib manager: %s", port)
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-	defer cancel()
-	_, err = dbIf.RegisterExperiment(ctx, &dbif.RegisterExperimentRequest{Experiment: &dbif.Experiment{
-			Name: "testExp",
-			ExperimentSpec: &dbif.ExperimentSpec{
-				ParameterSpecs: &dbif.ExperimentSpec_ParameterSpecs{
-					Parameters: []*dbif.ParameterSpec{},
-				},
-				Objective: &dbif.ObjectiveSpec{
-					Type:                   dbif.ObjectiveType_UNKNOWN,
-					Goal:                   0.99,
-					ObjectiveMetricName:    "f1_score",
-					AdditionalMetricNames:  []string{"loss", "precision", "recall"},
-				},
-				Algorithm:          &dbif.AlgorithmSpec{},
-				TrialTemplate:      "",
-				ParallelTrialCount: 10,
-				MaxTrialCount:      100,
-			},
-			ExperimentStatus: &dbif.ExperimentStatus{
-				Condition:      dbif.ExperimentStatus_CREATED,
-				StartTime:      "2019-02-03T04:05:06+09:00",
-				CompletionTime: "2019-02-03T04:05:06+09:00",
-			},
-		},})
-	if err != nil {
-		log.Fatalf("could not create experiment: %v", err)
-	}
-	log.Printf("Experiment created with id: %s")
 	s := grpc.NewServer(grpc.MaxRecvMsgSize(size), grpc.MaxSendMsgSize(size))
 	api_pb.RegisterManagerServer(s, &server{})
 	health_pb.RegisterHealthServer(s, &server{})
