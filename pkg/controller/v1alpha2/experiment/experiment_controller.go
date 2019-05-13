@@ -72,9 +72,9 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 }
 
 // newSuggestion returns the new Suggestion for the given config.
-func newSuggestion(implementation string) suggestion.Suggestion {
-	// If the flag is set in CLI, use the fake implementation.
-	switch implementation {
+func newSuggestion(config string) suggestion.Suggestion {
+	// Use different implementation according to the configuration.
+	switch config {
 	case "fake":
 		log.Info("Using the fake suggestion implementation")
 		return suggestionfake.New()
