@@ -2,8 +2,11 @@ package v1alpha2
 
 import (
 	"os"
+	"context"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -14,6 +17,11 @@ const (
 	KatibManagerPort                    = "6789"
 	ManagerAddr                   = KatibManagerService + ":" + KatibManagerPort
 )
+
+type katibClientAndConnection struct {
+	Conn *grpc.ClientConn
+	KatibClient api_pb.ManagerClient
+}
 
 func GetManagerAddr() string {
 	ns := os.Getenv(experimentsv1alpha2.DefaultKatibNamespaceEnvName)
@@ -28,4 +36,28 @@ func GetManagerAddr() string {
 	} else {
 		return KatibManagerService + "." + ns + ":" + KatibManagerPort
 	}
+}
+
+func getKatibClientAndConnection() (*katibClientAndConnection, error) {
+	addr := GetManagerAddr()
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+	kc := &katibClientAndConnection {
+		Conn: conn,
+		KatibClient: api_pb.NewManagerClient(conn),
+	}
+	return kc, nil
+}
+
+func RegisterExperiment(request *api_pb.RegisterExperimentRequest) (*api_pb.RegisterExperimentReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibClientAndConnection()
+	if err != nil {
+		return nil, err
+	}
+	defer kcc.Conn.Close()
+	kc := kcc.KatibClient
+	return kc.RegisterExperiment(ctx, request)
 }
