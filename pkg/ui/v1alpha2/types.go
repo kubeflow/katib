@@ -46,3 +46,11 @@ type TemplateResponse struct {
 	TemplateType string
 	Data         []TemplateView
 }
+
+type NNView struct {
+	Name         string
+	TrialName    string
+	Architecture string
+	MetricsName  []string
+	MetricsValue []string
+}

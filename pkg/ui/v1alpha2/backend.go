@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kubeflow/katib/pkg"
 	experimentv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	api_pb_v1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	common_v1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/katibclient"
 	"google.golang.org/grpc"
@@ -33,7 +33,7 @@ func NewKatibUIHandler() *KatibUIHandler {
 }
 
 func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1alpha2.ManagerClient) {
-	conn, err := grpc.Dial(pkg.ManagerAddr, grpc.WithInsecure())
+	conn, err := grpc.Dial(common_v1alpha2.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Dial to GRPC failed: %v", err)
 		return nil, nil
@@ -55,11 +55,15 @@ func (k *KatibUIHandler) FetchHPJobs(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, experiment := range el.Items {
 		if experiment.Spec.Parameters != nil {
+			experimentLastCondition, err := experiment.GetLastConditionType()
+			if err != nil {
+				log.Printf("GetLastConditionType for HP failed: %v", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 			jobs = append(jobs, JobView{
-				Name: experiment.Name,
-				// TODO: Use from experiment.util
-				// TODO: Change name of the statu in frontend
-				Status: string(getExperimentCurrentCondition(&experiment)),
+				Name:   experiment.Name,
+				Status: string(experimentLastCondition),
 			})
 		}
 	}
@@ -87,10 +91,15 @@ func (k *KatibUIHandler) FetchNASJobs(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, experiment := range el.Items {
 		if experiment.Spec.NasConfig != nil {
+			experimentLastCondition, err := experiment.GetLastConditionType()
+			if err != nil {
+				log.Printf("GetLastConditionType for HP failed: %v", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 			jobs = append(jobs, JobView{
-				Name: experiment.Name,
-				// TODO: Use from experiment.util
-				Status: string(getExperimentCurrentCondition(&experiment)),
+				Name:   experiment.Name,
+				Status: string(experimentLastCondition),
 			})
 		}
 	}
@@ -205,8 +214,7 @@ func (k *KatibUIHandler) SubmitNASJob(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// TODO:
-// 1. Add delete job to Katib Client
+// TODO: Add delete job to Katib Client
 func (k *KatibUIHandler) DeleteJob(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	experimentName := r.URL.Query()["experimentName"][0]
@@ -237,7 +245,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	metricsName := expResp.Experiment.ExperimentSpec.Objective.ObjectiveMetricName
 	resultText += "," + metricsName
 	metricsList[metricsName] = 0
-	for i, m := range expResp.Experiment.ExperimentSpec.Objective.AdditionalMetricsNames {
+	for i, m := range expResp.Experiment.ExperimentSpec.Objective.AdditionalMetricNames {
 		resultText += "," + m
 		metricsList[m] = i + 1
 	}
@@ -346,13 +354,6 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 	//enableCors(&w)
 	experimentName := r.URL.Query()["experimentName"][0]
 
-	type NNView struct {
-		Name         string
-		TrialName    string
-		Architecture string
-		MetricsName  []string
-		MetricsValue []string
-	}
 	responseRaw := make([]NNView, 0)
 	var architecture string
 	var decoder string
@@ -471,7 +472,6 @@ func (k *KatibUIHandler) AddEditDeleteTemplate(w http.ResponseWriter, r *http.Re
 	var templateResponse TemplateResponse
 
 	json.NewDecoder(r.Body).Decode(&data)
-	//TODO: add new action in frontend
 	if data["action"].(string) == "delete" {
 		templateResponse, err = k.updateTemplates(data, true)
 	} else {

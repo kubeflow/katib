@@ -3,15 +3,17 @@ import * as actions from '../actions/nasMonitorActions';
 const initialState = {
     filter: '',
     filterType: {
+        "Created": true,
         "Running": true,
+        "Restarting": true,
+        "Succeeded": true,
         "Failed": true,
-        "Completed": true,
     },
     jobsList: [
     ],
     filteredJobsList: [
     ],
-    loading: true,
+    loading: false,
     steps: [
         
     ]

@@ -25,9 +25,11 @@ const theme = createMuiTheme({
         },
     },
     colors: {
+        created: '#2304bd',
         running: '#8b8ffb',
+        restarting: '#1eb9af',
+        succeeded: '#63f291',
         failed: '#f26363',
-        finished: '#63f291',
     },
     typography: {
         fontFamily: 'open sans,-apple-system,BlinkMacSystemFont,segoe ui,Roboto,helvetica neue,Arial,sans-serif,apple color emoji,segoe ui emoji,segoe ui symbol',

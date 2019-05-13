@@ -21,6 +21,7 @@ func main() {
 	http.HandleFunc("/katib/submit_yaml/", kuh.SubmitYamlJob)
 	http.HandleFunc("/katib/submit_hp_job/", kuh.SubmitHPJob)
 	http.HandleFunc("/katib/submit_nas_job/", kuh.SubmitNASJob)
+
 	//TODO: Add it in Katib client
 	http.HandleFunc("/katib/delete_job/", kuh.DeleteJob)
 
@@ -30,7 +31,6 @@ func main() {
 
 	http.HandleFunc("/katib/fetch_trial_templates/", kuh.FetchTrialTemplates)
 	http.HandleFunc("/katib/fetch_collector_templates/", kuh.FetchMetricsCollectorTemplates)
-	//TODO: Add "action" in data for delete and change URL
 	http.HandleFunc("/katib/update_template/", kuh.AddEditDeleteTemplate)
 
 	http.ListenAndServe(":"+port, nil)

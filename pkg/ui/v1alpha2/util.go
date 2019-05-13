@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	gographviz "github.com/awalterschulze/gographviz"
-	experimentv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 )
 
 func enableCors(w *http.ResponseWriter) {
@@ -18,22 +17,6 @@ func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Headers", allowedHeaders)
 	(*w).Header().Set("Access-Control-Expose-Headers", "Access-Control-*")
 	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
-}
-
-//TODO: need to be deleted
-func getExperimentCurrentCondition(experiment *experimentv1alpha2.Experiment) experimentv1alpha2.ExperimentConditionType {
-
-	if experiment.IsFailed() {
-		return experimentv1alpha2.ExperimentFailed
-	}
-	if experiment.IsSucceeded() {
-		return experimentv1alpha2.ExperimentSucceeded
-	}
-	//TODO: Add logic here or in experiments api util
-	// if experiment.IsRunning() {
-	// 	return experimentv1alpha2.ExperimentRunning
-	// }
-	return experimentv1alpha2.ExperimentRunning
 }
 
 func getTemplatesView(templates map[string]string) []TemplateView {
