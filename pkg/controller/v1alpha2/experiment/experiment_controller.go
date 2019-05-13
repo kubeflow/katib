@@ -37,8 +37,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/builder"
 
-	experimentv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	trialv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/consts"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/suggestion"
 	suggestionfake "github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/suggestion/fake"
@@ -85,7 +85,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to Experiment
-	err = c.Watch(&source.Kind{Type: &experimentv1alpha2.Experiment{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &experimentsv1alpha2.Experiment{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		log.Error(err, "Experiment watch failed")
 		return err
@@ -93,10 +93,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch for trials for the experiments
 	err = c.Watch(
-		&source.Kind{Type: &trialv1alpha2.Trial{}},
+		&source.Kind{Type: &trialsv1alpha2.Trial{}},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
-			OwnerType:    &experimentv1alpha2.Experiment{},
+			OwnerType:    &experimentsv1alpha2.Experiment{},
 		})
 
 	if err != nil {
@@ -118,7 +118,7 @@ func addWebhook(mgr manager.Manager) error {
 		Mutating().
 		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
 		WithManager(mgr).
-		ForType(&experimentv1alpha2.Experiment{}).
+		ForType(&experimentsv1alpha2.Experiment{}).
 		Handlers(&experimentDefaulter{}).
 		Build()
 	if err != nil {
@@ -129,7 +129,7 @@ func addWebhook(mgr manager.Manager) error {
 		Validating().
 		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
 		WithManager(mgr).
-		ForType(&experimentv1alpha2.Experiment{}).
+		ForType(&experimentsv1alpha2.Experiment{}).
 		Handlers(&experimentValidator{}).
 		Build()
 	if err != nil {
@@ -139,11 +139,11 @@ func addWebhook(mgr manager.Manager) error {
 		CertDir: "/tmp/cert",
 		BootstrapOptions: &webhook.BootstrapOptions{
 			Secret: &types.NamespacedName{
-				Namespace: os.Getenv(experimentv1alpha2.DefaultKatibNamespaceEnvName),
+				Namespace: os.Getenv(experimentsv1alpha2.DefaultKatibNamespaceEnvName),
 				Name:      katibControllerName,
 			},
 			Service: &webhook.Service{
-				Namespace: os.Getenv(experimentv1alpha2.DefaultKatibNamespaceEnvName),
+				Namespace: os.Getenv(experimentsv1alpha2.DefaultKatibNamespaceEnvName),
 				Name:      katibControllerName,
 				Selectors: map[string]string{
 					"app": katibControllerName,
@@ -179,7 +179,7 @@ type ReconcileExperiment struct {
 func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the Experiment instance
 	logger := log.WithValues("Experiment", request.NamespacedName)
-	original := &experimentv1alpha2.Experiment{}
+	original := &experimentsv1alpha2.Experiment{}
 	requeue := false
 	err := r.Get(context.TODO(), request.NamespacedName, original)
 	if err != nil {
@@ -240,10 +240,10 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	return reconcile.Result{Requeue: requeue}, nil
 }
 
-func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentv1alpha2.Experiment) error {
+func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.Experiment) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	trials := &trialv1alpha2.TrialList{}
+	trials := &trialsv1alpha2.TrialList{}
 	labels := map[string]string{"experiment": instance.Name}
 	lo := &client.ListOptions{}
 	lo.MatchingLabels(labels).InNamespace(instance.Namespace)
@@ -265,7 +265,7 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentv1alpha2.E
 	return nil
 }
 
-func (r *ReconcileExperiment) ReconcileTrials(instance *experimentv1alpha2.Experiment) error {
+func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Experiment) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 
@@ -315,7 +315,7 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentv1alpha2.Exper
 
 }
 
-func (r *ReconcileExperiment) createTrials(instance *experimentv1alpha2.Experiment, addCount int) error {
+func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha2.Experiment, addCount int) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	trials, err := r.GetSuggestions(instance, addCount)
@@ -332,7 +332,7 @@ func (r *ReconcileExperiment) createTrials(instance *experimentv1alpha2.Experime
 	return nil
 }
 
-func (r *ReconcileExperiment) deleteTrials(instance *experimentv1alpha2.Experiment, deleteCount int) error {
+func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha2.Experiment, deleteCount int) error {
 
 	return nil
 }

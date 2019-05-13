@@ -19,27 +19,27 @@ import (
 	"database/sql"
 
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
-	experimentv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 )
 
-func CreateExperimentInDB(instance *experimentv1alpha2.Experiment) error {
+func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
 	//TODO: Save experiment in to db
 	// experiment := GetExperimentConf(instance)
 
 	return nil
 }
 
-func UpdateExperimentStatusInDB(instance *experimentv1alpha2.Experiment) error {
+func UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error {
 
 	return nil
 }
 
-func GetExperimentFromDB(instance *experimentv1alpha2.Experiment) (*api_pb.GetExperimentReply, error) {
+func GetExperimentFromDB(instance *experimentsv1alpha2.Experiment) (*api_pb.GetExperimentReply, error) {
 	return nil, sql.ErrNoRows
 }
 
-func GetExperimentConf(instance *experimentv1alpha2.Experiment) *api_pb.Experiment {
+func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experiment {
 	experiment := &api_pb.Experiment{
 		ExperimentSpec: &api_pb.ExperimentSpec{
 			Objective: &api_pb.ObjectiveSpec{
@@ -95,15 +95,15 @@ func GetExperimentConf(instance *experimentv1alpha2.Experiment) *api_pb.Experime
 			parameter.FeasibleSpace.Step = p.FeasibleSpace.Step
 
 			switch p.ParameterType {
-			case experimentv1alpha2.ParameterTypeCategorical:
+			case experimentsv1alpha2.ParameterTypeCategorical:
 				parameter.ParameterType = api_pb.ParameterType_CATEGORICAL
-			case experimentv1alpha2.ParameterTypeDiscrete:
+			case experimentsv1alpha2.ParameterTypeDiscrete:
 				parameter.ParameterType = api_pb.ParameterType_DISCRETE
-			case experimentv1alpha2.ParameterTypeDouble:
+			case experimentsv1alpha2.ParameterTypeDouble:
 				parameter.ParameterType = api_pb.ParameterType_DOUBLE
-			case experimentv1alpha2.ParameterTypeInt:
+			case experimentsv1alpha2.ParameterTypeInt:
 				parameter.ParameterType = api_pb.ParameterType_INT
-			case experimentv1alpha2.ParameterTypeUnknown:
+			case experimentsv1alpha2.ParameterTypeUnknown:
 				parameter.ParameterType = api_pb.ParameterType_UNKNOWN_TYPE
 			}
 			experiment.ExperimentSpec.ParameterSpecs.Parameters = append(experiment.ExperimentSpec.ParameterSpecs.Parameters, parameter)
@@ -151,15 +151,15 @@ func GetExperimentConf(instance *experimentv1alpha2.Experiment) *api_pb.Experime
 				parameter.FeasibleSpace.Step = p.FeasibleSpace.Step
 
 				switch p.ParameterType {
-				case experimentv1alpha2.ParameterTypeCategorical:
+				case experimentsv1alpha2.ParameterTypeCategorical:
 					parameter.ParameterType = api_pb.ParameterType_CATEGORICAL
-				case experimentv1alpha2.ParameterTypeDiscrete:
+				case experimentsv1alpha2.ParameterTypeDiscrete:
 					parameter.ParameterType = api_pb.ParameterType_DISCRETE
-				case experimentv1alpha2.ParameterTypeDouble:
+				case experimentsv1alpha2.ParameterTypeDouble:
 					parameter.ParameterType = api_pb.ParameterType_DOUBLE
-				case experimentv1alpha2.ParameterTypeInt:
+				case experimentsv1alpha2.ParameterTypeInt:
 					parameter.ParameterType = api_pb.ParameterType_INT
-				case experimentv1alpha2.ParameterTypeUnknown:
+				case experimentsv1alpha2.ParameterTypeUnknown:
 					parameter.ParameterType = api_pb.ParameterType_UNKNOWN_TYPE
 				}
 				operation.ParameterSpecs.Parameters = append(operation.ParameterSpecs.Parameters, parameter)
