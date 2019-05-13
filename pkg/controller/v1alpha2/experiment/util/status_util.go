@@ -44,7 +44,7 @@ func UpdateExperimentStatus(instance *experimentsv1alpha2.Experiment, trials *tr
 
 func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trialsv1alpha2.TrialList) bool {
 
-	var trialsPending, trialsRunning, trialsSucceeded, trialsFailed, trialsKilled int
+	var totalTrials, trialsPending, trialsRunning, trialsSucceeded, trialsFailed, trialsKilled int
 	var bestTrialValue float64
 	bestTrialIndex := -1
 	isObjectiveGoalReached := false
@@ -53,6 +53,7 @@ func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trial
 	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
 
 	for index, trial := range trials.Items {
+		totalTrials++
 		if trial.IsKilled() {
 			trialsKilled++
 		} else if trial.IsFailed() {
@@ -95,6 +96,8 @@ func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trial
 			}
 		}
 	}
+
+	instance.Status.Trials = totalTrials
 	instance.Status.TrialsPending = trialsPending
 	instance.Status.TrialsRunning = trialsRunning
 	instance.Status.TrialsSucceeded = trialsSucceeded
