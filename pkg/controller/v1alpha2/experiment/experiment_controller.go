@@ -83,7 +83,7 @@ func newSuggestion(config string) suggestion.Suggestion {
 		return suggestion.New()
 	default:
 		log.Info("No valid name specified, using the default suggestion implementation",
-			"implementation", implementation)
+			"implementation", config)
 		return suggestion.New()
 	}
 }
