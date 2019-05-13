@@ -20,6 +20,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/spf13/viper"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -38,6 +39,7 @@ import (
 
 	experimentv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	trialv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/consts"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/suggestion"
 	suggestionfake "github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/suggestion/fake"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
@@ -60,11 +62,17 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileExperiment{
+	r := &ReconcileExperiment{
 		Client:     mgr.GetClient(),
 		scheme:     mgr.GetScheme(),
-		Suggestion: suggestionfake.New(),
+		Suggestion: suggestion.New(),
 	}
+	// If the flag is set in CLI, use the fake implementation.
+	if viper.GetBool(consts.ConfigFakeExperimentSuggestion) {
+		log.Info("Using the fake suggestion implementation")
+		r.Suggestion = suggestionfake.New()
+	}
+	return r
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
