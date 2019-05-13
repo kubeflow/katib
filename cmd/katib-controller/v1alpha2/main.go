@@ -39,17 +39,17 @@ func main() {
 	logf.SetLogger(logf.ZapLogger(false))
 	log := logf.Log.WithName("entrypoint")
 
-	var fakeExperimentSuggestion string
+	var experimentSuggestionName string
 
-	flag.StringVar(&fakeExperimentSuggestion, "experiment-suggestion-implementation",
+	flag.StringVar(&experimentSuggestionName, "experiment-suggestion-name",
 		"default", "The implementation of suggestion interface in experiment controller (default|fake)")
 
 	flag.Parse()
 
-	viper.Set(consts.ConfigFakeExperimentSuggestion, fakeExperimentSuggestion)
+	viper.Set(consts.ConfigExperimentSuggestionName, experimentSuggestionName)
 	log.Info("Config:",
-		consts.ConfigFakeExperimentSuggestion,
-		viper.GetString(consts.ConfigFakeExperimentSuggestion))
+		consts.ConfigExperimentSuggestionName,
+		viper.GetString(consts.ConfigExperimentSuggestionName))
 
 	// Get a config to talk to the apiserver
 	cfg, err := config.GetConfig()
