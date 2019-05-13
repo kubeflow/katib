@@ -3,6 +3,8 @@ package v1alpha2
 import (
 	"os"
 
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 )
 
@@ -12,7 +14,7 @@ const (
 	KatibManagerServiceNamespaceEnvName = "KATIB_MANAGER_NAMESPACE"
 	KatibManagerService                 = "katib-manager"
 	KatibManagerPort                    = "6789"
-	ManagerAddr                   = KatibManagerService + ":" + KatibManagerPort
+	ManagerAddr                         = KatibManagerService + ":" + KatibManagerPort
 )
 
 func GetManagerAddr() string {
@@ -28,4 +30,25 @@ func GetManagerAddr() string {
 	} else {
 		return KatibManagerService + "." + ns + ":" + KatibManagerPort
 	}
+}
+
+func GetSupportedJobList() []schema.GroupVersionKind {
+	supportedJobList := []schema.GroupVersionKind{
+		schema.GroupVersionKind{
+			Group:   "batch",
+			Version: "v1",
+			Kind:    "Job",
+		},
+		schema.GroupVersionKind{
+			Group:   "kubeflow.org",
+			Version: "v1beta2",
+			Kind:    "TFJob",
+		},
+		schema.GroupVersionKind{
+			Group:   "kubeflow.org",
+			Version: "v1beta2",
+			Kind:    "PyTorchJob",
+		},
+	}
+	return supportedJobList
 }

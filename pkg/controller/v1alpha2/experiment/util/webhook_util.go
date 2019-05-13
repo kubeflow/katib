@@ -22,11 +22,13 @@ import (
 	"fmt"
 	logger "log"
 
-	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
-	ep_v1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
+
+	commonapi "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
+	ep_v1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 )
 
 func ValidateExperiment(instance *ep_v1alpha2.Experiment) error {
@@ -70,12 +72,12 @@ func validateAlgorithmSettings(inst *ep_v1alpha2.Experiment) error {
 	return nil
 }
 
-func validateObjective(obj *commonv1alpha2.ObjectiveSpec) error {
+func validateObjective(obj *commonapi.ObjectiveSpec) error {
 	if obj == nil {
 		return fmt.Errorf("No spec.objective specified.")
 	}
-	if obj.Type != commonv1alpha2.ObjectiveTypeMinimize && obj.Type != commonv1alpha2.ObjectiveTypeMaximize {
-		return fmt.Errorf("spec.objective.type must be %s or %s.", commonv1alpha2.ObjectiveTypeMinimize, commonv1alpha2.ObjectiveTypeMaximize)
+	if obj.Type != commonapi.ObjectiveTypeMinimize && obj.Type != commonapi.ObjectiveTypeMaximize {
+		return fmt.Errorf("spec.objective.type must be %s or %s.", commonapi.ObjectiveTypeMinimize, commonapi.ObjectiveTypeMaximize)
 	}
 	if obj.ObjectiveMetricName == "" {
 		return fmt.Errorf("No spec.objective.objectiveMetricName specified.")
@@ -129,13 +131,13 @@ func validateTrialTemplate(instance *ep_v1alpha2.Experiment) error {
 
 func validateSupportedJob(job *unstructured.Unstructured) error {
 	gvk := job.GroupVersionKind()
-	supportedJobs := GetSupportedJobList()
+	supportedJobs := commonv1alpha2.GetSupportedJobList()
 	for _, sJob := range supportedJobs {
 		if gvk == sJob {
 			return nil
 		}
 	}
-	return fmt.Errorf("Cannot support to run job: %v", gvk)
+	return fmt.Errorf("Cannot support to run job: %v supported jobs: %v", gvk, supportedJobs)
 }
 
 func validateForCreate(inst *ep_v1alpha2.Experiment) error {
