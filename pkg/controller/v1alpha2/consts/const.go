@@ -1,5 +1,5 @@
 package consts
 
 const (
-	ConfigFakeExperimentSuggestion string = "fake-experiment-suggestion"
+	ConfigExperimentSuggestionName string = "experiment-suggestion-name"
 )

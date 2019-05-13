@@ -66,17 +66,26 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		Client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
 	}
+	imp := viper.GetString(consts.ConfigExperimentSuggestionName)
+	r.Suggestion = newSuggestion(imp)
+	return r
+}
+
+// newSuggestion returns the new Suggestion for the given config.
+func newSuggestion(implementation string) suggestion.Suggestion {
 	// If the flag is set in CLI, use the fake implementation.
-	imp := viper.GetString(consts.ConfigFakeExperimentSuggestion)
-	switch imp {
+	switch implementation {
 	case "fake":
 		log.Info("Using the fake suggestion implementation")
-		r.Suggestion = suggestionfake.New()
-	default:
+		return suggestionfake.New()
+	case "default":
 		log.Info("Using the default suggestion implementation")
-		r.Suggestion = suggestion.New()
+		return suggestion.New()
+	default:
+		log.Info("No valid name specified, using the default suggestion implementation",
+			"implementation", implementation)
+		return suggestion.New()
 	}
-	return r
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
