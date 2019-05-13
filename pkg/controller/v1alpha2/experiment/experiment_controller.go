@@ -63,14 +63,18 @@ func Add(mgr manager.Manager) error {
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	r := &ReconcileExperiment{
-		Client:     mgr.GetClient(),
-		scheme:     mgr.GetScheme(),
-		Suggestion: suggestion.New(),
+		Client: mgr.GetClient(),
+		scheme: mgr.GetScheme(),
 	}
 	// If the flag is set in CLI, use the fake implementation.
-	if viper.GetBool(consts.ConfigFakeExperimentSuggestion) {
+	imp := viper.GetString(consts.ConfigFakeExperimentSuggestion)
+	switch imp {
+	case "fake":
 		log.Info("Using the fake suggestion implementation")
 		r.Suggestion = suggestionfake.New()
+	default:
+		log.Info("Using the default suggestion implementation")
+		r.Suggestion = suggestion.New()
 	}
 	return r
 }

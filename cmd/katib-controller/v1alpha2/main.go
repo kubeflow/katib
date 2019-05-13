@@ -39,10 +39,10 @@ func main() {
 	logf.SetLogger(logf.ZapLogger(false))
 	log := logf.Log.WithName("entrypoint")
 
-	var fakeExperimentSuggestion bool
+	var fakeExperimentSuggestion string
 
-	flag.BoolVar(&fakeExperimentSuggestion, "fake-experiment-suggestion",
-		false, "Use the fake suggestion in experiment controller")
+	flag.StringVar(&fakeExperimentSuggestion, "experiment-suggestion-implementation",
+		"default", "The implementation of suggestion interface in experiment controller (default|fake)")
 
 	flag.Parse()
 
