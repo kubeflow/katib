@@ -113,8 +113,8 @@ const initialState = {
             operationType: "convolution",
             parameters: [
                 {
-                    parameterType: "categorical",
                     name: "filter_size",
+                    parameterType: "categorical",                  
                     feasibleSpace: "list",
                     min: "",
                     max: "",
@@ -132,8 +132,8 @@ const initialState = {
                     ],
                 },
                 {
-                    parameterType: "categorical",
                     name: "num_filter",
+                    parameterType: "categorical",
                     feasibleSpace: "list",
                     min: "",
                     max: "",
@@ -144,14 +144,206 @@ const initialState = {
                         },
                         {
                             value: "48",
+                        },
+                        {
+                            value: "64",
+                        },
+                        {
+                            value: "96",
+                        },
+                        {
+                            value: "128",
+                        }
+                    ],
+                },
+                {
+                    name: "stride",
+                    parameterType: "categorical",
+                    feasibleSpace: "list",
+                    min: "",
+                    max: "",
+                    step: "",
+                    list: [
+                        {
+                            value: "1",
+                        },
+                        {
+                            value: "2",
                         }
                     ],
                 },
             ]
-        }
+        },
+        {
+            operationType: "separable_convolution",
+            parameters: [
+                {
+                    name: "filter_size",
+                    parameterType: "categorical",                  
+                    feasibleSpace: "list",
+                    min: "",
+                    max: "",
+                    step: "",
+                    list: [
+                        {
+                            value: "3",
+                        },
+                        {
+                            value: "5",
+                        },
+                        {
+                            value: "7",
+                        },
+                    ],
+                },
+                {
+                    name: "num_filter",
+                    parameterType: "categorical",
+                    feasibleSpace: "list",
+                    min: "",
+                    max: "",
+                    step: "",
+                    list: [
+                        {
+                            value: "32",
+                        },
+                        {
+                            value: "48",
+                        },
+                        {
+                            value: "64",
+                        },
+                        {
+                            value: "96",
+                        },
+                        {
+                            value: "128",
+                        },
+                    ],
+                },
+                {
+                    name: "stride",
+                    parameterType: "categorical",
+                    feasibleSpace: "list",
+                    min: "",
+                    max: "",
+                    step: "",
+                    list: [
+                        {
+                            value: "1",
+                        },
+                        {
+                            value: "2",
+                        },
+                    ],
+                },
+                {
+                    name: "depth_multiplier",
+                    parameterType: "categorical",
+                    feasibleSpace: "list",
+                    min: "",
+                    max: "",
+                    step: "",
+                    list: [
+                        {
+                            value: "1",
+                        },
+                        {
+                            value: "2",
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            operationType: "depthwise_convolution",
+            parameters: [
+                {
+                    name: "filter_size",
+                    parameterType: "categorical",                  
+                    feasibleSpace: "list",
+                    min: "",
+                    max: "",
+                    step: "",
+                    list: [
+                        {
+                            value: "3",
+                        },
+                        {
+                            value: "5",
+                        },
+                        {
+                            value: "7",
+                        },
+                    ],
+                },
+                {
+                    name: "stride",
+                    parameterType: "categorical",
+                    feasibleSpace: "list",
+                    min: "",
+                    max: "",
+                    step: "",
+                    list: [
+                        {
+                            value: "1",
+                        },
+                        {
+                            value: "2",
+                        },
+                    ],
+                },
+                {
+                    name: "depth_multiplier",
+                    parameterType: "categorical",
+                    feasibleSpace: "list",
+                    min: "",
+                    max: "",
+                    step: "",
+                    list: [
+                        {
+                            value: "1",
+                        },
+                        {
+                            value: "2",
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            operationType: "reduction",
+            parameters: [
+                {
+                    name: "reduction_type",
+                    parameterType: "categorical",                  
+                    feasibleSpace: "list",
+                    min: "",
+                    max: "",
+                    step: "",
+                    list: [
+                        {
+                            value: "max_pooling",
+                        },
+                        {
+                            value: "avg_pooling",
+                        },
+                    ],
+                },
+                {
+                    name: "pool_size",
+                    parameterType: "int",
+                    feasibleSpace: "feasibleSpace",
+                    min: "2",
+                    max: "3",
+                    step: "1",
+                    list: [],
+                },
+            ],
+        },
     ],
     allParameterTypes: ["int", "double", "categorical"],
-    trial: 'cpuTrialTemplate.yaml',
+    trial: 'nasRLTrialTemplate.yaml',
     currentYaml: '',
     snackText: '',
     snackOpen: false,

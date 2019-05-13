@@ -28,8 +28,6 @@ const styles = theme => ({
 
 class TemplateList extends React.Component {
 
-    componentDidMount() {
-    };
 
     render () {
         const { classes } = this.props;

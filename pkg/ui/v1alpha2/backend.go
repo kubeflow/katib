@@ -220,7 +220,6 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	conn, c := k.connectManager()
 	defer conn.Close()
 
-	//TODO: Change table in frontend
 	resultText := "trialName"
 	expResp, err := c.GetExperiment(
 		context.Background(),
@@ -305,13 +304,11 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 
 func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
-	//TODO: change name to trialName in frontend
 	trialName := r.URL.Query()["trialName"][0]
 	conn, c := k.connectManager()
 	defer conn.Close()
 
 	defer conn.Close()
-	//TODO: Change procced of resultText in frontend
 	resultText := "metricName,time,value\n"
 	obsLogResp, err := c.GetObservationLog(
 		context.Background(),
@@ -347,7 +344,6 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 
 func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
-	// TODO: Change to experimentName in frontend
 	experimentName := r.URL.Query()["experimentName"][0]
 
 	type NNView struct {

@@ -5,10 +5,8 @@ const initialState = {
     addOpen: false,
     editOpen: false,
     deleteOpen: false,
-    trialTemplates: [
-    ],
-    collectorTemplates: [
-    ],
+    trialTemplates: [],
+    collectorTemplates: [],
     newTemplateName: '',
     newTemplateYaml: '',
     currentTemplateIndex: '',
@@ -92,11 +90,6 @@ const rootReducer = (state = initialState, action) => {
                 ...state,
                 trialTemplates: action.templates,
             }
-        // case actions.FETCH_WORKER_TEMPLATES_FAILURE:
-        //     return {
-        //         ...state,
-        //         snac
-        //     }
         case actions.FETCH_COLLECTOR_TEMPLATES_SUCCESS:
             return {
                 ...state,

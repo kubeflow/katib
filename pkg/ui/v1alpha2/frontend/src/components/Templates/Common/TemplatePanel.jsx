@@ -43,7 +43,7 @@ const TemplatePanel = (props) => {
     };
 
     const openDeleteDialog = (index) => (event) => {
-        props.openDialog("delete", index, props.type);
+        props.openDialog("delete", index, props.type, "delete");
     };
 
     return (

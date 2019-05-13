@@ -37,20 +37,6 @@ class AddDialog extends React.Component {
         yaml: '',
     }
 
-    componentDidMount() {
-        this.setState({
-            name: this.props.edittedTemplate.name,
-            yaml: this.props.edittedTemplate.yaml
-        })
-    }
-
-    componentWillReceiveProps(newProps) {
-        this.setState({
-            name: newProps.edittedTemplate.name,
-            yaml: newProps.edittedTemplate.yaml,
-        })
-    }
-
     onChange = (name) => (event) => {
         this.setState({
             [name]: event.target.value

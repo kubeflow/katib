@@ -26,7 +26,7 @@ const Snack = (props) => {
 
     const classes = useStyles();
 
-    const vertical = "bottom";
+    const vertical = "top";
     const horizontal = "center";
     return (
         <Snackbar
