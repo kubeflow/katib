@@ -36,12 +36,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/builder"
 
-	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	experimentv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	trialv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/suggestion"
+	suggestionfake "github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/suggestion/fake"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
 )
 
-const KatibController = "katib-controller"
+const katibControllerName = "katib-controller"
 
 var log = logf.Log.WithName("experiment-controller")
 
@@ -58,7 +60,11 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileExperiment{Client: mgr.GetClient(), scheme: mgr.GetScheme()}
+	return &ReconcileExperiment{
+		Client:     mgr.GetClient(),
+		scheme:     mgr.GetScheme(),
+		Suggestion: suggestionfake.New(),
+	}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -71,7 +77,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to Experiment
-	err = c.Watch(&source.Kind{Type: &experimentsv1alpha2.Experiment{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &experimentv1alpha2.Experiment{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		log.Error(err, "Experiment watch failed")
 		return err
@@ -79,10 +85,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch for trials for the experiments
 	err = c.Watch(
-		&source.Kind{Type: &trialsv1alpha2.Trial{}},
+		&source.Kind{Type: &trialv1alpha2.Trial{}},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
-			OwnerType:    &experimentsv1alpha2.Experiment{},
+			OwnerType:    &experimentv1alpha2.Experiment{},
 		})
 
 	if err != nil {
@@ -104,7 +110,7 @@ func addWebhook(mgr manager.Manager) error {
 		Mutating().
 		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
 		WithManager(mgr).
-		ForType(&experimentsv1alpha2.Experiment{}).
+		ForType(&experimentv1alpha2.Experiment{}).
 		Handlers(&experimentDefaulter{}).
 		Build()
 	if err != nil {
@@ -115,7 +121,7 @@ func addWebhook(mgr manager.Manager) error {
 		Validating().
 		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
 		WithManager(mgr).
-		ForType(&experimentsv1alpha2.Experiment{}).
+		ForType(&experimentv1alpha2.Experiment{}).
 		Handlers(&experimentValidator{}).
 		Build()
 	if err != nil {
@@ -125,14 +131,14 @@ func addWebhook(mgr manager.Manager) error {
 		CertDir: "/tmp/cert",
 		BootstrapOptions: &webhook.BootstrapOptions{
 			Secret: &types.NamespacedName{
-				Namespace: os.Getenv(experimentsv1alpha2.DefaultKatibNamespaceEnvName),
-				Name:      KatibController,
+				Namespace: os.Getenv(experimentv1alpha2.DefaultKatibNamespaceEnvName),
+				Name:      katibControllerName,
 			},
 			Service: &webhook.Service{
-				Namespace: os.Getenv(experimentsv1alpha2.DefaultKatibNamespaceEnvName),
-				Name:      KatibController,
+				Namespace: os.Getenv(experimentv1alpha2.DefaultKatibNamespaceEnvName),
+				Name:      katibControllerName,
 				Selectors: map[string]string{
-					"app": KatibController,
+					"app": katibControllerName,
 				},
 			},
 			ValidatingWebhookConfigName: "experiment-validating-webhook-config",
@@ -155,6 +161,7 @@ var _ reconcile.Reconciler = &ReconcileExperiment{}
 type ReconcileExperiment struct {
 	client.Client
 	scheme *runtime.Scheme
+	suggestion.Suggestion
 }
 
 // Reconcile reads that state of the cluster for a Experiment object and makes changes based on the state read
@@ -164,7 +171,7 @@ type ReconcileExperiment struct {
 func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the Experiment instance
 	logger := log.WithValues("Experiment", request.NamespacedName)
-	original := &experimentsv1alpha2.Experiment{}
+	original := &experimentv1alpha2.Experiment{}
 	requeue := false
 	err := r.Get(context.TODO(), request.NamespacedName, original)
 	if err != nil {
@@ -225,10 +232,10 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	return reconcile.Result{Requeue: requeue}, nil
 }
 
-func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.Experiment) error {
+func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentv1alpha2.Experiment) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	trials := &trialsv1alpha2.TrialList{}
+	trials := &trialv1alpha2.TrialList{}
 	labels := map[string]string{"experiment": instance.Name}
 	lo := &client.ListOptions{}
 	lo.MatchingLabels(labels).InNamespace(instance.Namespace)
@@ -250,7 +257,7 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.
 	return nil
 }
 
-func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Experiment) error {
+func (r *ReconcileExperiment) ReconcileTrials(instance *experimentv1alpha2.Experiment) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 
@@ -300,17 +307,14 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Expe
 
 }
 
-func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha2.Experiment, addCount int) error {
+func (r *ReconcileExperiment) createTrials(instance *experimentv1alpha2.Experiment, addCount int) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	trials, err := util.GetSuggestions(instance, addCount)
+	trials, err := r.GetSuggestions(instance, addCount)
 	if err != nil {
 		logger.Error(err, "Get suggestions error")
 		return err
 	}
-	/*trials := []apiv1alpha2.Trial{
-		apiv1alpha2.Trial{Spec: &apiv1alpha2.TrialSpec{}}, apiv1alpha2.Trial{Spec: &apiv1alpha2.TrialSpec{}},
-	}*/
 	for _, trial := range trials {
 		if err = r.createTrialInstance(instance, trial); err != nil {
 			logger.Error(err, "Create trial instance error", "trial", trial)
@@ -320,7 +324,7 @@ func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha2.Experim
 	return nil
 }
 
-func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha2.Experiment, deleteCount int) error {
+func (r *ReconcileExperiment) deleteTrials(instance *experimentv1alpha2.Experiment, deleteCount int) error {
 
 	return nil
 }
