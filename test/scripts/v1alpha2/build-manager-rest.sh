@@ -16,8 +16,6 @@
 
 # This shell script is used to build an image from our argo workflow
 
-exit 0
-
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -39,5 +37,5 @@ cp -r vendor ${GO_DIR}/vendor
 
 cd ${GO_DIR}
 cp cmd/manager-rest/Dockerfile .
-gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/vizier-core-rest:${VERSION} --project=${PROJECT}
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/vizier-core-rest:${VERSION} ${REGISTRY}/${REPO_NAME}/vizier-core-rest:latest --verbosity=info
+gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/katib-manager-rest:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/katib-manager-rest:${VERSION} ${REGISTRY}/${REPO_NAME}/katib-manager-rest:latest --verbosity=info

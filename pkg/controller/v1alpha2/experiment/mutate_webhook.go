@@ -17,14 +17,14 @@ limitations under the License.
 package experiment
 
 import (
-        "context"
-        "net/http"
+	"context"
+	"net/http"
 
-        experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-        "sigs.k8s.io/controller-runtime/pkg/client"
-        "sigs.k8s.io/controller-runtime/pkg/runtime/inject"
-        "sigs.k8s.io/controller-runtime/pkg/webhook/admission"
-        "sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 )
 
 // experimentDefaulter that sets default fields in experiment
@@ -36,11 +36,11 @@ type experimentDefaulter struct {
 var _ admission.Handler = &experimentDefaulter{}
 
 func (e *experimentDefaulter) Handle(ctx context.Context, req types.Request) types.Response {
-        inst := &experimentsv1alpha2.Experiment{}
-        err := e.decoder.Decode(req, inst)
-        if err != nil {
-                return admission.ErrorResponse(http.StatusBadRequest, err)
-        }
+	inst := &experimentsv1alpha2.Experiment{}
+	err := e.decoder.Decode(req, inst)
+	if err != nil {
+		return admission.ErrorResponse(http.StatusBadRequest, err)
+	}
 
 	copy := inst.DeepCopy()
 	copy.SetDefault()

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kubeflow/katib/pkg"
+	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
 	studyjobv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 	api "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	"github.com/kubeflow/katib/pkg/manager/v1alpha1/studyjobclient"
@@ -54,7 +54,7 @@ func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api.ManagerClient, 
 		grpc.WithInsecure(),
 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(maxMsgSize)),
 	}
-	conn, err := grpc.Dial(pkg.ManagerAddr, opts...)
+	conn, err := grpc.Dial(common.ManagerAddr, opts...)
 	if err != nil {
 		log.Printf("Connect katib manager error %v", err)
 		return nil, nil, err

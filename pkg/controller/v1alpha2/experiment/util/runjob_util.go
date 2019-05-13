@@ -19,11 +19,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-
-func GetSupportdJobList() []schema.GroupVersionKind {
-	// TODO: append other supported jobs, such as tfjob, pytorch and so on 
-	supportedJobList := []schema.GroupVersionKind {
-		schema.GroupVersionKind {
+func GetSupportedJobList() []schema.GroupVersionKind {
+	// TODO: append other supported jobs, such as tfjob, pytorch and so on
+	supportedJobList := []schema.GroupVersionKind{
+		schema.GroupVersionKind{
 			Group:   "batch",
 			Version: "v1",
 			Kind:    "Job",

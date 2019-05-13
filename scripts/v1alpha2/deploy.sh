@@ -25,8 +25,17 @@ cd ${SCRIPT_ROOT}
 kubectl apply -f manifests/v1alpha2/0-namespace.yaml
 kubectl apply -f manifests/v1alpha2/katib-controller/crds.yaml
 kubectl apply -f manifests/v1alpha2/katib-controller/rbac.yaml
+kubectl apply -f manifests/v1alpha2/katib-controller/mcrbac.yaml
 kubectl apply -f manifests/v1alpha2/katib-controller/service.yaml
 kubectl apply -f manifests/v1alpha2/katib-controller/secret.yaml
 kubectl apply -f manifests/v1alpha2/katib-controller/trialTemplateConfigmap.yaml
+kubectl apply -f manifests/v1alpha2/katib-controller/metricsControllerConfigMap.yaml
 kubectl apply -f manifests/v1alpha2/katib-controller/katib-controller.yaml
+kubectl apply -f manifests/v1alpha2/katib/manager/service.yaml
+kubectl apply -f manifests/v1alpha2/katib/manager/deployment.yaml
+kubectl apply -f manifests/v1alpha2/katib/pv/pv.yaml
+kubectl apply -f manifests/v1alpha2/katib/pv/pvc.yaml
+kubectl apply -f manifests/v1alpha2/katib/db/secret.yaml
+kubectl apply -f manifests/v1alpha2/katib/db/deployment.yaml
+kubectl apply -f manifests/v1alpha2/katib/db/service.yaml
 cd - > /dev/null
