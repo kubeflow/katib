@@ -1,0 +1,108 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "suggestion.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {},
+  "definitions": {
+    "alpha3GetSuggestionsReply": {
+      "type": "object",
+      "properties": {
+        "trials": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3Trial"
+          }
+        }
+      }
+    },
+    "alpha3Metric": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "alpha3Observation": {
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3Metric"
+          }
+        }
+      }
+    },
+    "alpha3ParameterAssignment": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "alpha3ParameterAssignments": {
+      "type": "object",
+      "properties": {
+        "assignments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3ParameterAssignment"
+          }
+        }
+      }
+    },
+    "alpha3Trial": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "spec": {
+          "$ref": "#/definitions/alpha3TrialSpec"
+        },
+        "status": {
+          "$ref": "#/definitions/alpha3TrialStatus"
+        }
+      }
+    },
+    "alpha3TrialSpec": {
+      "type": "object",
+      "properties": {
+        "parameter_assignments": {
+          "$ref": "#/definitions/alpha3ParameterAssignments"
+        },
+        "run_spec": {
+          "type": "string"
+        }
+      }
+    },
+    "alpha3TrialStatus": {
+      "type": "object",
+      "properties": {
+        "observation": {
+          "$ref": "#/definitions/alpha3Observation"
+        }
+      }
+    }
+  }
+}
