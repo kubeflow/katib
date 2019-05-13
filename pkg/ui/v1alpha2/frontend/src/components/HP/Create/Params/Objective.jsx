@@ -132,4 +132,3 @@ const mapStateToProps = state => {
 }
 
 export default connect(mapStateToProps, {changeObjective, addMetrics, editMetrics, deleteMetrics })(Objective);
-

@@ -61,4 +61,3 @@ export const deleteTemplate = (name, kind, action) => ({
     type: DELETE_TEMPLATE_REQUEST,
     name, kind, action
 })
-

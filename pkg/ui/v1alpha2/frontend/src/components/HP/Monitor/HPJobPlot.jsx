@@ -89,4 +89,4 @@ const mapStateToProps = (state) => ({
   jobData: state[module].jobData,
 })
 
-export default connect(mapStateToProps, null)(HPJobPlot)
+export default connect(mapStateToProps, null)(HPJobPlot);

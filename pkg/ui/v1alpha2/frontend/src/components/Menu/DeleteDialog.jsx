@@ -55,4 +55,4 @@ const mapStateToProps = (state) => ({
     deleteExperimentName: state[module].deleteExperimentName,
 })
 
-export default connect(mapStateToProps, { closeDeleteDialog, deleteJob })(DeleteDialog)
+export default connect(mapStateToProps, { closeDeleteDialog, deleteJob })(DeleteDialog);

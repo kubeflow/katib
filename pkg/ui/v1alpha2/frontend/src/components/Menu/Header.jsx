@@ -53,4 +53,4 @@ const Header = (props) => {
     )
 }
 
-export default connect(null, { toggleMenu }, )(Header);
+export default connect(null, { toggleMenu } )(Header);

@@ -49,4 +49,4 @@ class Trial extends React.Component {
         )
     }
 }
-export default connect(null, { openDialog, fetchTrialTemplates })(withStyles(styles)(Trial))
+export default connect(null, { openDialog, fetchTrialTemplates })(withStyles(styles)(Trial));

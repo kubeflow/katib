@@ -50,4 +50,4 @@ class Collector extends React.Component{
         )
     }
 }
-export default connect(null, { openDialog, fetchCollectorTemplates })(withStyles(styles)(Collector))
+export default connect(null, { openDialog, fetchCollectorTemplates })(withStyles(styles)(Collector));
