@@ -20,11 +20,16 @@ workflows:
     - pkg/ui/*
     - cmd/earlystopping/*
     - cmd/katib-controller/v1alpha1/*
+    - cmd/katib-controller/Dockerfile
     - cmd/manager/v1alpha1/*
+    - cmd/manager/Dockerfile
     - cmd/manager-rest/v1alpha1/*
+    - cmd/manager-rest/Dockerfile
     - cmd/metricscollector/v1alpha1/*
+    - cmd/metricscollector/Dockerfile
     - cmd/suggestion/*
     - cmd/tfevent-metricscollector/v1alpha1/*
+    - cmd/tfevent-metricscollector/Dockerfile
     - cmd/ui/*
     - pkg/util/v1alpha1/*
     - test/e2e/v1alpha1/*
@@ -52,11 +57,16 @@ workflows:
     - pkg/ui/*
     - cmd/earlystopping/*
     - cmd/katib-controller/v1alpha1/*
+    - cmd/katib-controller/Dockerfile
     - cmd/manager/v1alpha1/*
+    - cmd/manager/Dockerfile
     - cmd/manager-rest/v1alpha1/*
+    - cmd/manager-rest/Dockerfile
     - cmd/metricscollector/v1alpha1/*
+    - cmd/metricscollector/Dockerfile
     - cmd/suggestion/*
     - cmd/tfevent-metricscollector/v1alpha1/*
+    - cmd/tfevent-metricscollector/Dockerfile
     - cmd/ui/*
     - pkg/util/v1alpha1/*
     - test/e2e/v1alpha1/*
@@ -83,11 +93,16 @@ workflows:
     - pkg/ui/*
     - cmd/earlystopping/*
     - cmd/katib-controller/v1alpha2/*
+    - cmd/katib-controller/Dockerfile
     - cmd/manager/v1alpha2/*
+    - cmd/manager/Dockerfile
     - cmd/manager-rest/v1alpha2/*
+    - cmd/manager-rest/Dockerfile
     - cmd/metricscollector/v1alpha2/*
+    - cmd/metricscollector/Dockerfile
     - cmd/suggestion/*
     - cmd/tfevent-metricscollector/v1alpha2/*
+    - cmd/tfevent-metricscollector/Dockerfile
     - cmd/ui/*
     - pkg/util/v1alpha2/*
     - test/e2e/v1alpha2/*
@@ -114,11 +129,16 @@ workflows:
     - pkg/ui/*
     - cmd/earlystopping/*
     - cmd/katib-controller/v1alpha2/*
+    - cmd/katib-controller/Dockerfile
     - cmd/manager/v1alpha2/*
+    - cmd/manager/Dockerfile
     - cmd/manager-rest/v1alpha2/*
+    - cmd/manager-rest/Dockerfile
     - cmd/metricscollector/v1alpha2/*
+    - cmd/metricscollector/Dockerfile
     - cmd/suggestion/*
     - cmd/tfevent-metricscollector/v1alpha2/*
+    - cmd/tfevent-metricscollector/Dockerfile
     - cmd/ui/*
     - pkg/util/v1alpha2/*
     - test/e2e/v1alpha2/*
