@@ -16,6 +16,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const (
+	defaultMetricsCollectorTemplateName = "defaultMetricsCollectorTemplate.yaml"
+)
+
 // Producer is the type for manifests producer.
 type Producer interface {
 	GetRunSpec(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string) (string, error)
@@ -25,7 +29,7 @@ type Producer interface {
 
 // General is the default implementation of Producer.
 type General struct {
-	client *katibclient.KatibClient
+	client katibclient.Client
 }
 
 // New creates a new Producer.
@@ -53,7 +57,7 @@ func (g *General) GetMetricsCollectorManifest(experimentName string, trialName s
 	if mcs != nil && mcs.GoTemplate.RawTemplate != "" {
 		mtp, err = template.New("MetricsCollector").Parse(mcs.GoTemplate.RawTemplate)
 	} else {
-		mctp := "defaultMetricsCollectorTemplate.yaml"
+		mctp := defaultMetricsCollectorTemplateName
 		if mcs != nil && mcs.GoTemplate.TemplateSpec != nil {
 			mctp = mcs.GoTemplate.TemplateSpec.TemplatePath
 		}
