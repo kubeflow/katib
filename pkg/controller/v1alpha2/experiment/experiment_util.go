@@ -13,7 +13,6 @@ import (
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 )
@@ -59,7 +58,7 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 		metricNames = append(metricNames, mn)
 	}
 
-	mcSpec, err := util.GetMetricsCollectorManifest(expInstance.GetName(), trial.Name, job.GetKind(), trial.Namespace, metricNames, expInstance.Spec.MetricsCollectorSpec)
+	mcSpec, err := r.GetMetricsCollectorManifest(expInstance.GetName(), trial.Name, job.GetKind(), trial.Namespace, metricNames, expInstance.Spec.MetricsCollectorSpec)
 	if err != nil {
 		logger.Error(err, "Error getting metrics collector manifest")
 		return err
