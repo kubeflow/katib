@@ -20,6 +20,8 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"k8s.io/client-go/rest"
+
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -29,6 +31,16 @@ import (
 
 type KatibClient struct {
 	client client.Client
+}
+
+func MustNewTestClient(cfg *rest.Config) *KatibClient {
+	cli, err := client.New(cfg, client.Options{})
+	if err != nil {
+		panic(err)
+	}
+	return &KatibClient{
+		client: cli,
+	}
 }
 
 func NewClient(options client.Options) (*KatibClient, error) {
