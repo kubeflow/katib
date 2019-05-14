@@ -39,18 +39,11 @@ spec:
 }
 
 func TestValidateJobTrialTemplate(t *testing.T) {
-	trialTFJobTemplate := `apiVersion: "batc1/v1"
+	trialTFJobTemplate := `apiVersion: "batch/v1"
 kind: "Job"
 metadata:
-    name: "dist-mnist-for-e2e-test"
-spec:
-    tfReplicaSpecs:
-        Worker:
-            template:
-                spec:
-                    containers:
-                      - name: tensorflow
-                        image: gaocegege/mnist:1`
+  name: "fake-trial"
+  namespace: fakens`
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
