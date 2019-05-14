@@ -138,7 +138,7 @@ func (k *KatibUIHandler) SubmitYamlJob(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (k *KatibUIHandler) SubmitHPJob(w http.ResponseWriter, r *http.Request) {
+func (k *KatibUIHandler) SubmitParamsJob(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	var data map[string]interface{}
 
@@ -174,48 +174,8 @@ func (k *KatibUIHandler) SubmitHPJob(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (k *KatibUIHandler) SubmitNASJob(w http.ResponseWriter, r *http.Request) {
-	//enableCors(&w)
-	var data map[string]interface{}
-
-	json.NewDecoder(r.Body).Decode(&data)
-	if data, ok := data["postData"]; ok {
-		jsonbody, err := json.Marshal(data)
-		if err != nil {
-			log.Printf("Marshal data for NAS job failed: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		job := experimentv1alpha2.Experiment{}
-		if err := json.Unmarshal(jsonbody, &job); err != nil {
-			log.Printf("Unmarshal NAS job failed: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		// mapstructure.Decode(data, &job)
-		// // think of a better way
-		dataMap := data.(map[string]interface{})
-
-		job.TypeMeta = metav1.TypeMeta{
-			APIVersion: "kubeflow.org/v1alpha2",
-			Kind:       "Experiment",
-		}
-		job.ObjectMeta = metav1.ObjectMeta{
-			Name:      dataMap["metadata"].(map[string]interface{})["name"].(string),
-			Namespace: dataMap["metadata"].(map[string]interface{})["namespace"].(string),
-		}
-
-		err = k.katibClient.CreateExperiment(&job)
-		if err != nil {
-			log.Printf("Create Experiment for NAS failed: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
-}
-
 // TODO: Add delete job to Katib Client
-func (k *KatibUIHandler) DeleteJob(w http.ResponseWriter, r *http.Request) {
+func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	experimentName := r.URL.Query()["experimentName"][0]
 	log.Printf("Experiment Name: %v", experimentName)
@@ -316,7 +276,6 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 	conn, c := k.connectManager()
 	defer conn.Close()
 
-	defer conn.Close()
 	resultText := "metricName,time,value\n"
 	obsLogResp, err := c.GetObservationLog(
 		context.Background(),

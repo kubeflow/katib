@@ -24,24 +24,24 @@ export const submitYaml = (yaml) => ({
     yaml,
 })
 
-export const DELETE_JOB_REQUEST = "DELETE_JOB_REQUEST";
-export const DELETE_JOB_FAILURE = "DELETE_JOB_FAILURE";
-export const DELETE_JOB_SUCCESS = "DELETE_JOB_SUCCESS";
+export const DELETE_EXPERIMENT_REQUEST = "DELETE_EXPERIMENT_REQUEST";
+export const DELETE_EXPERIMENT_FAILURE = "DELETE_EXPERIMENT_FAILURE";
+export const DELETE_EXPERIMENT_SUCCESS = "DELETE_EXPERIMENT_SUCCESS";
 
-export const deleteJob = (experimentName) => ({
-    type: DELETE_JOB_REQUEST,
+export const deleteExperiment = (experimentName) => ({
+    type: DELETE_EXPERIMENT_REQUEST,
     experimentName,
 })
 
-export const OPEN_DELETE_JOB_DIALOG = "OPEN_DELETE_JOB_DIALOG";
+export const OPEN_DELETE_EXPERIMENT_DIALOG = "OPEN_DELETE_EXPERIMENT_DIALOG";
 
-export const openDeleteJobDialog = (experimentName) => ({
-    type: OPEN_DELETE_JOB_DIALOG, 
+export const openDeleteExperimentDialog = (experimentName) => ({
+    type: OPEN_DELETE_EXPERIMENT_DIALOG,
     experimentName,
 })
 
-export const CLOSE_DELETE_JOB_DIALOG = "CLOSE_DELETE_JOB_DIALOG";
+export const CLOSE_DELETE_EXPERIMENT_DIALOG = "CLOSE_DELETE_EXPERIMENT_DIALOG";
 
-export const closeDeleteDialog = () => ({
-    type: CLOSE_DELETE_JOB_DIALOG,
+export const closeDeleteExperimentDialog = () => ({
+    type: CLOSE_DELETE_EXPERIMENT_DIALOG,
 })

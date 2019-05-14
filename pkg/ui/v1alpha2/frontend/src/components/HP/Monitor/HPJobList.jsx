@@ -8,7 +8,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import { Link } from 'react-router-dom';
 import { ListItemSecondaryAction, IconButton } from '@material-ui/core';
 
-import { openDeleteJobDialog } from '../../../actions/generalActions';
+import { openDeleteExperimentDialog } from '../../../actions/generalActions';
 import DeleteDialog from '../../Menu/DeleteDialog';
 
 import ScheduleIcon from '@material-ui/icons/Schedule';
@@ -43,8 +43,8 @@ const HPJobList = (props) => {
 
     const { classes } = props;
 
-    const onDeleteJob = (experimentName) => (event) => {
-        props.openDeleteJobDialog(experimentName);
+    const onDeleteExperiment = (experimentName) => (event) => {
+        props.openDeleteExperimentDialog(experimentName);
     }
 
     return (
@@ -70,7 +70,7 @@ const HPJobList = (props) => {
                             </ListItemIcon>
                             <ListItemText inset primary={job.name} />
                             <ListItemSecondaryAction>
-                                <IconButton aria-label={"Delete"} onClick={onDeleteJob(job.name)}>
+                                <IconButton aria-label={"Delete"} onClick={onDeleteExperiment(job.name)}>
                                     <DeleteIcon />
                                 </IconButton>
                             </ListItemSecondaryAction>
@@ -89,4 +89,4 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps, { openDeleteJobDialog })(withStyles(styles)(HPJobList));
+export default connect(mapStateToProps, { openDeleteExperimentDialog })(withStyles(styles)(HPJobList));

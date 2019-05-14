@@ -53,41 +53,41 @@ const goSubmitYaml = function *(yaml) {
     }
 }
 
-export const deleteJob = function *() {
+export const deleteExperiment = function *() {
     while (true) {
-        const action = yield take(generalActions.DELETE_JOB_REQUEST);
+        const action = yield take(generalActions.DELETE_EXPERIMENT_REQUEST);
         try {
             const result = yield call(
-                goDeleteJob,
+                goDeleteExperiment,
                 action.experimentName
             )
             if (result.status === 200) {
                 yield put({
-                    type: generalActions.DELETE_JOB_SUCCESS,
+                    type: generalActions.DELETE_EXPERIMENT_SUCCESS,
                 })
             } else {
                 yield put({
-                    type: generalActions.DELETE_JOB_FAILURE,
+                    type: generalActions.DELETE_EXPERIMENT_FAILURE,
                 }) 
             }
         } catch (err) {
             yield put({
-                type: generalActions.DELETE_JOB_FAILURE,
+                type: generalActions.DELETE_EXPERIMENT_FAILURE,
             })
         }
     }
 }
 
-const goDeleteJob = function *(experimentName) {
+const goDeleteExperiment = function *(experimentName) {
     try {
         const result = yield call(
             axios.get,
-            `/katib/delete_job/?experimentName=${experimentName}`,
+            `/katib/delete_experiment/?experimentName=${experimentName}`,
         )
         return result
     } catch (err) {
         yield put({
-            type: generalActions.DELETE_JOB_FAILURE,
+            type: generalActions.DELETE_EXPERIMENT_FAILURE,
         })
     }
 }
@@ -680,7 +680,7 @@ export default function* rootSaga() {
         fork(editTemplate),
         fork(deleteTemplate),
         fork(submitYaml),
-        fork(deleteJob),
+        fork(deleteExperiment),
         fork(submitHPJob),
         fork(submitNASJob),
         fork(fetchHPJobInfo),

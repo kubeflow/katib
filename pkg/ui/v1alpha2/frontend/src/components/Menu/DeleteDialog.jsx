@@ -8,7 +8,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import makeStyles from '@material-ui/styles/makeStyles';
 
 import { connect } from 'react-redux';
-import { deleteJob, closeDeleteDialog } from '../../actions/generalActions';
+import { deleteExperiment, closeDeleteExperimentDialog } from '../../actions/generalActions';
 
 
 const module = "general";
@@ -22,24 +22,24 @@ const DeleteDialog = (props) => {
     const classes = useStyles();
 
     const onDelete = () => {
-        props.deleteJob(props.name);
+        props.deleteExperiment(props.name);
     }
 
     return (
         <Dialog
           open={props.open}
-          onClose={props.closeDeleteDialog}
+          onClose={props.closeDeleteExperimentDialog}
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
         >
             <DialogTitle id="alert-dialog-title">{"Delete Experiment?"}</DialogTitle>
             <DialogContent>
                 <DialogContentText id="alert-dialog-description">
-                    Are you sure you want to delete this job?
+                    Are you sure you want to delete this experiment?
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
-                <Button onClick={props.closeDeleteDialog} color="primary">
+                <Button onClick={props.closeDeleteExperimentDialog} color="primary">
                     Disagree
                 </Button>
                 <Button onClick={onDelete} color="primary" autoFocus>
@@ -55,4 +55,4 @@ const mapStateToProps = (state) => ({
     deleteExperimentName: state[module].deleteExperimentName,
 })
 
-export default connect(mapStateToProps, { closeDeleteDialog, deleteJob })(DeleteDialog);
+export default connect(mapStateToProps, { closeDeleteExperimentDialog, deleteExperiment })(DeleteDialog);
