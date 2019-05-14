@@ -1,0 +1,16 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: experiments.kubeflow.org
+spec:
+  group: kubeflow.org
+  version: v1alpha2
+  names:
+    kind: Experiment
+    plural: experiments
+  scope: Namespaced
+  subresources:
+    status: {}
