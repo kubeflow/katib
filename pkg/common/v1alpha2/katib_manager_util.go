@@ -1,3 +1,18 @@
+/*
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package v1alpha2
 
 import (
@@ -15,12 +30,12 @@ const (
 	KatibManagerServiceNamespaceEnvName = "KATIB_MANAGER_NAMESPACE"
 	KatibManagerService                 = "katib-manager"
 	KatibManagerPort                    = "6789"
-	ManagerAddr                   = KatibManagerService + ":" + KatibManagerPort
+	ManagerAddr                         = KatibManagerService + ":" + KatibManagerPort
 )
 
-type katibClientAndConnection struct {
+type katibManagerClientAndConn struct {
 	Conn *grpc.ClientConn
-	KatibClient api_pb.ManagerClient
+	KatibManagerClient api_pb.ManagerClient
 }
 
 func GetManagerAddr() string {
@@ -38,26 +53,26 @@ func GetManagerAddr() string {
 	}
 }
 
-func getKatibClientAndConnection() (*katibClientAndConnection, error) {
+func getKatibManagerClientAndConn() (*katibManagerClientAndConn, error) {
 	addr := GetManagerAddr()
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
-	kc := &katibClientAndConnection {
+	kcc := &katibManagerClientAndConn {
 		Conn: conn,
-		KatibClient: api_pb.NewManagerClient(conn),
+		KatibManagerClient: api_pb.NewManagerClient(conn),
 	}
-	return kc, nil
+	return kcc, nil
 }
 
 func RegisterExperiment(request *api_pb.RegisterExperimentRequest) (*api_pb.RegisterExperimentReply, error) {
 	ctx := context.Background()
-	kcc, err := getKatibClientAndConnection()
+	kcc, err := getKatibManagerClientAndConn()
 	if err != nil {
 		return nil, err
 	}
 	defer kcc.Conn.Close()
-	kc := kcc.KatibClient
+	kc := kcc.KatibManagerClient
 	return kc.RegisterExperiment(ctx, request)
 }
