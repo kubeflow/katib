@@ -18,8 +18,8 @@ package util
 import (
 	"database/sql"
 
-	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 )
 
@@ -37,11 +37,6 @@ func UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error 
 
 func GetExperimentFromDB(instance *experimentsv1alpha2.Experiment) (*api_pb.GetExperimentReply, error) {
 	return nil, sql.ErrNoRows
-}
-
-func GetSuggestions(instance *experimentsv1alpha2.Experiment, addCount int) ([]*api_pb.Trial, error) {
-
-	return nil, nil
 }
 
 func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experiment {
