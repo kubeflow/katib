@@ -91,10 +91,12 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			})
 		if err != nil {
 			if meta.IsNoMatchError(err) {
-				log.Error(err, "Job watch error: CRD might be missing. Please install CRD and restart katib-controller", " CRD kind", gvk.Kind)
+				log.Info("Job watch error. CRD might be missing. Please install CRD and restart katib-controller", "CRD Kind", gvk.Kind)
 				continue
 			}
 			return err
+		} else {
+			log.Info("Job watch added successfully", "CRD Kind", gvk.Kind)
 		}
 	}
 	log.Info("Trial  controller created")

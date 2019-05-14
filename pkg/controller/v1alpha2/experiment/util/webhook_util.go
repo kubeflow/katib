@@ -137,7 +137,7 @@ func validateSupportedJob(job *unstructured.Unstructured) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("Cannot support to run job: %v supported jobs: %v", gvk, supportedJobs)
+	return fmt.Errorf("Job type %v not supported", gvk)
 }
 
 func validateForCreate(inst *ep_v1alpha2.Experiment) error {
