@@ -42,6 +42,7 @@ import (
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/consts"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/suggestion"
 	suggestionfake "github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/suggestion/fake"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/manifest"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
 )
 
@@ -68,6 +69,12 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	}
 	imp := viper.GetString(consts.ConfigExperimentSuggestionName)
 	r.Suggestion = newSuggestion(imp)
+
+	producer, err := manifest.New()
+	if err != nil {
+		panic(err)
+	}
+	r.Producer = producer
 	return r
 }
 
@@ -85,7 +92,6 @@ func newSuggestion(config string) suggestion.Suggestion {
 		log.Info("No valid name specified, using the default suggestion implementation",
 			"implementation", config)
 		return suggestion.New()
-	}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -137,13 +143,17 @@ func addWebhook(mgr manager.Manager) error {
 	if err != nil {
 		return err
 	}
+	validator, err := newExperimentValidator()
+	if err != nil {
+		return err
+	}
 	validatingWebhook, err := builder.NewWebhookBuilder().
 		Name("validating.experiment.kubeflow.org").
 		Validating().
 		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
 		WithManager(mgr).
 		ForType(&experimentsv1alpha2.Experiment{}).
-		Handlers(&experimentValidator{}).
+		Handlers(validator).
 		Build()
 	if err != nil {
 		return err
@@ -182,7 +192,9 @@ var _ reconcile.Reconciler = &ReconcileExperiment{}
 type ReconcileExperiment struct {
 	client.Client
 	scheme *runtime.Scheme
+
 	suggestion.Suggestion
+	manifest.Producer
 }
 
 // Reconcile reads that state of the cluster for a Experiment object and makes changes based on the state read
