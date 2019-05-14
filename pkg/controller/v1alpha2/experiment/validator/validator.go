@@ -173,12 +173,13 @@ func (g *General) validateMetricsCollector(inst *experimentsv1alpha2.Experiment)
 	}
 
 	var mcjob batchv1beta.CronJob
-	mcm, err := util.GetMetricsCollectorManifest(experimentName, trialName, job.GetKind(), namespace, metricNames, inst.Spec.MetricsCollectorSpec)
+	mcm, err := g.GetMetricsCollectorManifest(experimentName, trialName, job.GetKind(), namespace, metricNames, inst.Spec.MetricsCollectorSpec)
 	if err != nil {
 		log.Info("getMetricsCollectorManifest error", "err", err)
 		return err
 	}
 
+	log.Info("1", "m", mcm, "instance", inst)
 	if err := k8syaml.NewYAMLOrJSONDecoder(mcm, BUFSIZE).Decode(&mcjob); err != nil {
 		log.Info("MetricsCollector Yaml decode error", "err", err)
 		return err
