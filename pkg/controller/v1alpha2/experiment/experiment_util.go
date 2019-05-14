@@ -32,18 +32,14 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 		return err
 	}
 
-	trialParams := util.TrialTemplateParams{
-		Experiment: expInstance.GetName(),
-		Trial:      trial.Name,
-		NameSpace:  trial.Namespace,
-	}
+	hps := make([]*apiv1alpha2.ParameterAssignment, 0)
 	if trialInstance.Spec != nil && trialInstance.Spec.ParameterAssignments != nil {
 		for _, p := range trialInstance.Spec.ParameterAssignments.Assignments {
-			trialParams.HyperParameters = append(trialParams.HyperParameters, p)
+			hps = append(hps, p)
 		}
 	}
 
-	runSpec, err := util.GetRunSpec(expInstance, trialParams)
+	runSpec, err := r.GetRunSpecWithHyperParameters(expInstance, expInstance.GetName(), trial.Name, trial.Namespace, hps)
 	if err != nil {
 		logger.Error(err, "Fail to get RunSpec from experiment", expInstance.Name)
 		return err
