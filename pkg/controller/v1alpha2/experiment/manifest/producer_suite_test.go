@@ -18,7 +18,8 @@ var cfg *rest.Config
 func TestMain(m *testing.M) {
 	t := &envtest.Environment{
 		CRDDirectoryPaths: []string{
-			filepath.Join("..", "..", "..", "..", "..", "config", "crds", "v1alpha2"),
+			filepath.Join("..", "..", "..", "..", "..",
+				"manifests", "v1alpha2", "katib-controller"),
 		},
 	}
 	stdlog.Println("Start adding apis")

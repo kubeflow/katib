@@ -3,12 +3,15 @@ package manifest
 import (
 	"bytes"
 	"errors"
+	"fmt"
+	"strings"
 	"text/template"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/katibclient"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -17,6 +20,7 @@ import (
 type Producer interface {
 	GetRunSpec(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string) (string, error)
 	GetRunSpecWithHyperParameters(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string, hps []*apiv1alpha2.ParameterAssignment) (string, error)
+	GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error)
 }
 
 // General is the default implementation of Producer.
@@ -33,6 +37,45 @@ func New() (Producer, error) {
 	return &General{
 		client: katibClient,
 	}, nil
+}
+
+func (g *General) GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error) {
+	var mtp *template.Template = nil
+	var err error
+	tmpValues := map[string]string{
+		"Experiment":     experimentName,
+		"Trial":          trialName,
+		"JobKind":        jobKind,
+		"NameSpace":      namespace,
+		"ManagerService": commonv1alpha2.GetManagerAddr(),
+		"MetricNames":    strings.Join(metricNames, ";"),
+	}
+	if mcs != nil && mcs.GoTemplate.RawTemplate != "" {
+		mtp, err = template.New("MetricsCollector").Parse(mcs.GoTemplate.RawTemplate)
+	} else {
+		mctp := "defaultMetricsCollectorTemplate.yaml"
+		if mcs != nil && mcs.GoTemplate.TemplateSpec != nil {
+			mctp = mcs.GoTemplate.TemplateSpec.TemplatePath
+		}
+		mtl, err := g.client.GetMetricsCollectorTemplates()
+		if err != nil {
+			return nil, err
+		}
+		if mt, ok := mtl[mctp]; !ok {
+			return nil, fmt.Errorf("No MetricsCollector template name %s", mctp)
+		} else {
+			mtp, err = template.New("MetricsCollector").Parse(mt)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	var b bytes.Buffer
+	err = mtp.Execute(&b, tmpValues)
+	if err != nil {
+		return nil, err
+	}
+	return &b, nil
 }
 
 // GetRunSpec get the specification for trial.

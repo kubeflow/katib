@@ -5,6 +5,7 @@
 package mock
 
 import (
+	bytes "bytes"
 	gomock "github.com/golang/mock/gomock"
 	v1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	v1alpha20 "github.com/kubeflow/katib/pkg/api/v1alpha2"
@@ -32,6 +33,21 @@ func NewMockProducer(ctrl *gomock.Controller) *MockProducer {
 // EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockProducer) EXPECT() *MockProducerMockRecorder {
 	return m.recorder
+}
+
+// GetMetricsCollectorManifest mocks base method
+func (m *MockProducer) GetMetricsCollectorManifest(arg0, arg1, arg2, arg3 string, arg4 []string, arg5 *v1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMetricsCollectorManifest", arg0, arg1, arg2, arg3, arg4, arg5)
+	ret0, _ := ret[0].(*bytes.Buffer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMetricsCollectorManifest indicates an expected call of GetMetricsCollectorManifest
+func (mr *MockProducerMockRecorder) GetMetricsCollectorManifest(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMetricsCollectorManifest", reflect.TypeOf((*MockProducer)(nil).GetMetricsCollectorManifest), arg0, arg1, arg2, arg3, arg4, arg5)
 }
 
 // GetRunSpec mocks base method
