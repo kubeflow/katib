@@ -35,6 +35,16 @@ func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
 	return nil
 }
 
+func DeleteExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
+	request := &api_pb.DeleteExperimentRequest {
+		ExperimentName: instance.Name,
+	}
+	if _, err := common.DeleteExperiment(request); err != nil {
+		return err
+	}
+	return nil
+}
+
 func UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error {
 
 	return nil

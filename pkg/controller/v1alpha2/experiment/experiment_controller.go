@@ -207,6 +207,10 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 	instance := original.DeepCopy()
 
+	if needUpdate, finalizers := instance.NeedUpdateFinalizers(); needUpdate {
+		return r.updateFinalizers(instance, finalizers)
+	}
+
 	if instance.IsCompleted() {
 
 		return reconcile.Result{}, nil

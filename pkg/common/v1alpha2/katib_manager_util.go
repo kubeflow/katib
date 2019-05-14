@@ -76,3 +76,14 @@ func RegisterExperiment(request *api_pb.RegisterExperimentRequest) (*api_pb.Regi
 	kc := kcc.KatibManagerClient
 	return kc.RegisterExperiment(ctx, request)
 }
+
+func DeleteExperiment(request *api_pb.DeleteExperimentRequest) (*api_pb.DeleteExperimentReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer kcc.Conn.Close()
+	kc := kcc.KatibManagerClient
+	return kc.DeleteExperiment(ctx, request)
+}
