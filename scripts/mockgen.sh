@@ -38,3 +38,5 @@ echo "Generating v1alpha2 KatibDBInterface..."
 mockgen -package mock -destination pkg/mock/v1alpha2/db/db.go github.com/kubeflow/katib/pkg/db/v1alpha2 KatibDBInterface
 echo "Generating v1alpha2 Producer..."
 mockgen -package mock -destination pkg/mock/v1alpha2/experiment/manifest/producer.go  github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/manifest Producer
+echo "Generating v1alpha2 KatibClient..."
+mockgen -package mock -destination pkg/mock/v1alpha2/util/katibclient/katibclient.go  github.com/kubeflow/katib/pkg/util/v1alpha2/katibclient Client
