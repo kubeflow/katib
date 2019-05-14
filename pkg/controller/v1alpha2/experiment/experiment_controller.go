@@ -20,6 +20,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/spf13/viper"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -38,10 +39,13 @@ import (
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/consts"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/suggestion"
+	suggestionfake "github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/suggestion/fake"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
 )
 
-const KatibController = "katib-controller"
+const katibControllerName = "katib-controller"
 
 var log = logf.Log.WithName("experiment-controller")
 
@@ -58,7 +62,30 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileExperiment{Client: mgr.GetClient(), scheme: mgr.GetScheme()}
+	r := &ReconcileExperiment{
+		Client: mgr.GetClient(),
+		scheme: mgr.GetScheme(),
+	}
+	imp := viper.GetString(consts.ConfigExperimentSuggestionName)
+	r.Suggestion = newSuggestion(imp)
+	return r
+}
+
+// newSuggestion returns the new Suggestion for the given config.
+func newSuggestion(config string) suggestion.Suggestion {
+	// Use different implementation according to the configuration.
+	switch config {
+	case "fake":
+		log.Info("Using the fake suggestion implementation")
+		return suggestionfake.New()
+	case "default":
+		log.Info("Using the default suggestion implementation")
+		return suggestion.New()
+	default:
+		log.Info("No valid name specified, using the default suggestion implementation",
+			"implementation", config)
+		return suggestion.New()
+	}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -126,13 +153,13 @@ func addWebhook(mgr manager.Manager) error {
 		BootstrapOptions: &webhook.BootstrapOptions{
 			Secret: &types.NamespacedName{
 				Namespace: os.Getenv(experimentsv1alpha2.DefaultKatibNamespaceEnvName),
-				Name:      KatibController,
+				Name:      katibControllerName,
 			},
 			Service: &webhook.Service{
 				Namespace: os.Getenv(experimentsv1alpha2.DefaultKatibNamespaceEnvName),
-				Name:      KatibController,
+				Name:      katibControllerName,
 				Selectors: map[string]string{
-					"app": KatibController,
+					"app": katibControllerName,
 				},
 			},
 			ValidatingWebhookConfigName: "experiment-validating-webhook-config",
@@ -155,6 +182,7 @@ var _ reconcile.Reconciler = &ReconcileExperiment{}
 type ReconcileExperiment struct {
 	client.Client
 	scheme *runtime.Scheme
+	suggestion.Suggestion
 }
 
 // Reconcile reads that state of the cluster for a Experiment object and makes changes based on the state read
@@ -303,14 +331,11 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Expe
 func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha2.Experiment, addCount int) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	trials, err := util.GetSuggestions(instance, addCount)
+	trials, err := r.GetSuggestions(instance, addCount)
 	if err != nil {
 		logger.Error(err, "Get suggestions error")
 		return err
 	}
-	/*trials := []apiv1alpha2.Trial{
-		apiv1alpha2.Trial{Spec: &apiv1alpha2.TrialSpec{}}, apiv1alpha2.Trial{Spec: &apiv1alpha2.TrialSpec{}},
-	}*/
 	for _, trial := range trials {
 		if err = r.createTrialInstance(instance, trial); err != nil {
 			logger.Error(err, "Create trial instance error", "trial", trial)
