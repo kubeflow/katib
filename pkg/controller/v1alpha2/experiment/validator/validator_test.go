@@ -40,7 +40,7 @@ spec:
 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialTFJobTemplate, nil)
 
 	instance := newFakeInstance()
-	if err := g.(*General).validateTrialTemplate(instance); err == nil {
+	if err := g.(*DefaultValidator).validateTrialTemplate(instance); err == nil {
 		t.Errorf("Expected error, got nil")
 	}
 }
@@ -61,7 +61,7 @@ metadata:
 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialJobTemplate, nil)
 
 	instance := newFakeInstance()
-	if err := g.(*General).validateTrialTemplate(instance); err != nil {
+	if err := g.(*DefaultValidator).validateTrialTemplate(instance); err != nil {
 		t.Errorf("Expected nil, got err %v", err)
 	}
 }

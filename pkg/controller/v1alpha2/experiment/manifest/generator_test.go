@@ -80,7 +80,7 @@ func TestGetMetricsCollectorManifest(t *testing.T) {
 
 	c := katibclientmock.NewMockClient(mockCtrl)
 
-	p := &General{
+	p := &DefaultGenerator{
 		client: c,
 	}
 
@@ -145,7 +145,7 @@ func TestGetTrialTemplateConfigMap(t *testing.T) {
 
 	c := katibclientmock.NewMockClient(mockCtrl)
 
-	p := &General{
+	p := &DefaultGenerator{
 		client: c,
 	}
 
@@ -179,7 +179,7 @@ func TestGetTrialTemplate(t *testing.T) {
 
 	c := katibclientmock.NewMockClient(mockCtrl)
 
-	p := &General{
+	p := &DefaultGenerator{
 		client: c,
 	}
 
@@ -209,7 +209,7 @@ func TestGetRunSpec(t *testing.T) {
 
 	c := katibclientmock.NewMockClient(mockCtrl)
 
-	p := &General{
+	p := &DefaultGenerator{
 		client: c,
 	}
 
@@ -245,7 +245,7 @@ func TestGetRunSpecWithHP(t *testing.T) {
 
 	c := katibclientmock.NewMockClient(mockCtrl)
 
-	p := &General{
+	p := &DefaultGenerator{
 		client: c,
 	}
 

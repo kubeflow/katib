@@ -70,11 +70,11 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	imp := viper.GetString(consts.ConfigExperimentSuggestionName)
 	r.Suggestion = newSuggestion(imp)
 
-	producer, err := manifest.New()
+	generator, err := manifest.New()
 	if err != nil {
 		panic(err)
 	}
-	r.Producer = producer
+	r.Generator = generator
 	return r
 }
 
@@ -195,7 +195,7 @@ type ReconcileExperiment struct {
 	scheme *runtime.Scheme
 
 	suggestion.Suggestion
-	manifest.Producer
+	manifest.Generator
 }
 
 // Reconcile reads that state of the cluster for a Experiment object and makes changes based on the state read

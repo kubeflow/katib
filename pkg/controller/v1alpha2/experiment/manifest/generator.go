@@ -20,30 +20,30 @@ const (
 	defaultMetricsCollectorTemplateName = "defaultMetricsCollectorTemplate.yaml"
 )
 
-// Producer is the type for manifests producer.
-type Producer interface {
+// Generator is the type for manifests Generator.
+type Generator interface {
 	GetRunSpec(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string) (string, error)
 	GetRunSpecWithHyperParameters(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string, hps []*apiv1alpha2.ParameterAssignment) (string, error)
 	GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error)
 }
 
-// General is the default implementation of Producer.
-type General struct {
+// DefaultGenerator is the default implementation of Generator.
+type DefaultGenerator struct {
 	client katibclient.Client
 }
 
-// New creates a new Producer.
-func New() (Producer, error) {
+// New creates a new Generator.
+func New() (Generator, error) {
 	katibClient, err := katibclient.NewClient(client.Options{})
 	if err != nil {
 		return nil, err
 	}
-	return &General{
+	return &DefaultGenerator{
 		client: katibClient,
 	}, nil
 }
 
-func (g *General) GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error) {
+func (g *DefaultGenerator) GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error) {
 	var mtp *template.Template = nil
 	var err error
 	tmpValues := map[string]string{
@@ -83,7 +83,7 @@ func (g *General) GetMetricsCollectorManifest(experimentName string, trialName s
 }
 
 // GetRunSpec get the specification for trial.
-func (g *General) GetRunSpec(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string) (string, error) {
+func (g *DefaultGenerator) GetRunSpec(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string) (string, error) {
 	params := trialTemplateParams{
 		Experiment: experiment,
 		Trial:      trial,
@@ -93,7 +93,7 @@ func (g *General) GetRunSpec(e *experimentsv1alpha2.Experiment, experiment, tria
 }
 
 // GetRunSpecWithHyperParameters get the specification for trial with hyperparameters.
-func (g *General) GetRunSpecWithHyperParameters(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string, hps []*apiv1alpha2.ParameterAssignment) (string, error) {
+func (g *DefaultGenerator) GetRunSpecWithHyperParameters(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string, hps []*apiv1alpha2.ParameterAssignment) (string, error) {
 	params := trialTemplateParams{
 		Experiment:      experiment,
 		Trial:           trial,
@@ -103,7 +103,7 @@ func (g *General) GetRunSpecWithHyperParameters(e *experimentsv1alpha2.Experimen
 	return g.getRunSpec(e, params)
 }
 
-func (g *General) getRunSpec(e *experimentsv1alpha2.Experiment, params trialTemplateParams) (string, error) {
+func (g *DefaultGenerator) getRunSpec(e *experimentsv1alpha2.Experiment, params trialTemplateParams) (string, error) {
 	var buf bytes.Buffer
 	trialTemplate, err := g.getTrialTemplate(e)
 	if err != nil {
@@ -115,7 +115,7 @@ func (g *General) getRunSpec(e *experimentsv1alpha2.Experiment, params trialTemp
 	return buf.String(), nil
 }
 
-func (g *General) getTrialTemplate(instance *experimentsv1alpha2.Experiment) (*template.Template, error) {
+func (g *DefaultGenerator) getTrialTemplate(instance *experimentsv1alpha2.Experiment) (*template.Template, error) {
 	var err error
 	var tpl *template.Template = nil
 

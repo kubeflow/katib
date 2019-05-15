@@ -7,13 +7,12 @@ import (
 
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
-	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/manifest"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
 )
@@ -24,17 +23,17 @@ type Validator interface {
 	ValidateExperiment(instance *experimentsv1alpha2.Experiment) error
 }
 
-type General struct {
-	manifest.Producer
+type DefaultValidator struct {
+	manifest.Generator
 }
 
-func New(producer manifest.Producer) Validator {
-	return &General{
-		Producer: producer,
+func New(generator manifest.Generator) Validator {
+	return &DefaultValidator{
+		Generator: generator,
 	}
 }
 
-func (g *General) ValidateExperiment(instance *experimentsv1alpha2.Experiment) error {
+func (g *DefaultValidator) ValidateExperiment(instance *experimentsv1alpha2.Experiment) error {
 	if !instance.IsCreated() {
 		if err := g.validateForCreate(instance); err != nil {
 			return err
@@ -70,12 +69,12 @@ func (g *General) ValidateExperiment(instance *experimentsv1alpha2.Experiment) e
 	return nil
 }
 
-func (g *General) validateAlgorithmSettings(inst *experimentsv1alpha2.Experiment) error {
+func (g *DefaultValidator) validateAlgorithmSettings(inst *experimentsv1alpha2.Experiment) error {
 	// TODO: it need call ValidateAlgorithmSettings API of vizier-core manager, implement it when vizier-core done
 	return nil
 }
 
-func (g *General) validateObjective(obj *commonapiv1alpha2.ObjectiveSpec) error {
+func (g *DefaultValidator) validateObjective(obj *commonapiv1alpha2.ObjectiveSpec) error {
 	if obj == nil {
 		return fmt.Errorf("No spec.objective specified.")
 	}
@@ -88,7 +87,7 @@ func (g *General) validateObjective(obj *commonapiv1alpha2.ObjectiveSpec) error 
 	return nil
 }
 
-func (g *General) validateAlgorithm(ag *experimentsv1alpha2.AlgorithmSpec) error {
+func (g *DefaultValidator) validateAlgorithm(ag *experimentsv1alpha2.AlgorithmSpec) error {
 	if ag == nil {
 		return fmt.Errorf("No spec.algorithm specified.")
 	}
@@ -99,7 +98,7 @@ func (g *General) validateAlgorithm(ag *experimentsv1alpha2.AlgorithmSpec) error
 	return nil
 }
 
-func (g *General) validateTrialTemplate(instance *experimentsv1alpha2.Experiment) error {
+func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1alpha2.Experiment) error {
 	trialName := fmt.Sprintf("%s-trial", instance.GetName())
 	runSpec, err := g.GetRunSpec(instance, instance.GetName(), trialName, instance.GetNamespace())
 	if err != nil {
@@ -127,7 +126,7 @@ func (g *General) validateTrialTemplate(instance *experimentsv1alpha2.Experiment
 	return nil
 }
 
-func (g *General) validateSupportedJob(job *unstructured.Unstructured) error {
+func (g *DefaultValidator) validateSupportedJob(job *unstructured.Unstructured) error {
 	gvk := job.GroupVersionKind()
 	supportedJobs := commonv1alpha2.GetSupportedJobList()
 	for _, sJob := range supportedJobs {
@@ -138,7 +137,7 @@ func (g *General) validateSupportedJob(job *unstructured.Unstructured) error {
 	return fmt.Errorf("Job type %v not supported", gvk)
 }
 
-func (g *General) validateForCreate(inst *experimentsv1alpha2.Experiment) error {
+func (g *DefaultValidator) validateForCreate(inst *experimentsv1alpha2.Experiment) error {
 	if _, err := util.GetExperimentFromDB(inst); err != nil {
 		if err != sql.ErrNoRows {
 			return fmt.Errorf("Fail to check record for the experiment in DB: %v", err)
@@ -149,7 +148,7 @@ func (g *General) validateForCreate(inst *experimentsv1alpha2.Experiment) error 
 	}
 }
 
-func (g *General) validateMetricsCollector(inst *experimentsv1alpha2.Experiment) error {
+func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1alpha2.Experiment) error {
 	BUFSIZE := 1024
 	experimentName := inst.GetName()
 	trialName := fmt.Sprintf("%s-trial", inst.GetName())
@@ -189,16 +188,4 @@ func (g *General) validateMetricsCollector(inst *experimentsv1alpha2.Experiment)
 		return fmt.Errorf("Invalid metricsCollector template.")
 	}
 	return nil
-}
-
-func getSupportedJobList() []schema.GroupVersionKind {
-	// TODO: append other supported jobs, such as tfjob, pytorch and so on
-	supportedJobList := []schema.GroupVersionKind{
-		schema.GroupVersionKind{
-			Group:   "batch",
-			Version: "v1",
-			Kind:    "Job",
-		},
-	}
-	return supportedJobList
 }
