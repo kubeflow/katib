@@ -31,5 +31,10 @@ cp -r vendor ${GO_DIR}/vendor
 
 echo "Run unit test cases"
 cd ${GO_DIR}
+os=$(go env GOOS)
+arch=$(go env GOARCH)
+# Install kubebuilder to setup kubernetes apiserver and etcd in the unit test.
+curl -sL https://go.kubebuilder.io/dl/2.0.0/${os}/${arch} | tar -xz -C /tmp/kubebuilder
+export PATH=$PATH:/tmp/kubebuilder/bin
 go test ./...
 cd - > /dev/null
