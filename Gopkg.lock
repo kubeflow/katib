@@ -34,14 +34,6 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
-  digest = "1:9187ad53cd8b43cc82d1615ca6319503735fd87cd2b4dbeb80c57831e9affd79"
-  name = "github.com/caicloud/serving-controller"
-  packages = ["pkg/consts"]
-  pruneopts = "T"
-  revision = "bec825cac979e73109541ca7518dd6b96ce9e68a"
-  version = "v0.0.1-rc.5"
-
-[[projects]]
   digest = "1:9f42202ac457c462ad8bb9642806d275af9ab4850cf0b1960b9c6f083d4a309a"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -344,7 +336,10 @@
 [[projects]]
   digest = "1:83ac030e105f19c505940ec8cbeab42c08a46c4acaf019d601aac265097ff386"
   name = "github.com/kubeflow/pytorch-operator"
-  packages = ["pkg/apis/pytorch/v1beta1"]
+  packages = [
+    "pkg/apis/pytorch/v1beta1",
+    "pkg/apis/pytorch/v1beta2",
+  ]
   pruneopts = "T"
   revision = "da7798e7c2c127a270735c409f9305f3a6c06fd8"
   version = "v0.5.0-rc.1"
@@ -354,7 +349,9 @@
   name = "github.com/kubeflow/tf-operator"
   packages = [
     "pkg/apis/common/v1beta1",
+    "pkg/apis/common/v1beta2",
     "pkg/apis/tensorflow/v1beta1",
+    "pkg/apis/tensorflow/v1beta2",
   ]
   pruneopts = "T"
   revision = "c2849477dffdeacc2ebc11de66f826a6ce5cf690"
@@ -1142,7 +1139,6 @@
   analyzer-version = 1
   input-imports = [
     "git.apache.org/thrift.git/lib/go/thrift",
-    "github.com/caicloud/serving-controller/pkg/consts",
     "github.com/emicklei/go-restful",
     "github.com/go-sql-driver/mysql",
     "github.com/golang/glog",
@@ -1155,8 +1151,11 @@
     "github.com/grpc-ecosystem/grpc-gateway/runtime",
     "github.com/grpc-ecosystem/grpc-gateway/utilities",
     "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1beta1",
+    "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1beta2",
     "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta1",
+    "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta2",
     "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1beta1",
+    "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1beta2",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/pressly/chi",

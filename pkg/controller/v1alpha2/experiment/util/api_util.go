@@ -21,12 +21,27 @@ import (
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	common "github.com/kubeflow/katib/pkg/common/v1alpha2"
 )
 
 func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
-	//TODO: Save experiment in to db
-	// experiment := GetExperimentConf(instance)
+	experiment := GetExperimentConf(instance)
+	request := &api_pb.RegisterExperimentRequest {
+		Experiment: experiment,
+	}
+	if _, err := common.RegisterExperiment(request); err != nil {
+		return err
+	}
+	return nil
+}
 
+func DeleteExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
+	request := &api_pb.DeleteExperimentRequest {
+		ExperimentName: instance.Name,
+	}
+	if _, err := common.DeleteExperiment(request); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -83,7 +98,9 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 
 	//Populate HP Experiment
 	if instance.Spec.Parameters != nil {
-
+		parameterSpecs := &api_pb.ExperimentSpec_ParameterSpecs{
+			Parameters: []*api_pb.ParameterSpec{},
+		}
 		for _, p := range instance.Spec.Parameters {
 			parameter := &api_pb.ParameterSpec{
 				FeasibleSpace: &api_pb.FeasibleSpace{},
@@ -106,9 +123,9 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 			case experimentsv1alpha2.ParameterTypeUnknown:
 				parameter.ParameterType = api_pb.ParameterType_UNKNOWN_TYPE
 			}
-			experiment.ExperimentSpec.ParameterSpecs.Parameters = append(experiment.ExperimentSpec.ParameterSpecs.Parameters, parameter)
+			parameterSpecs.Parameters = append(parameterSpecs.Parameters, parameter)
 		}
-
+		experiment.ExperimentSpec.ParameterSpecs = parameterSpecs
 	}
 
 	//Populate NAS Experiment

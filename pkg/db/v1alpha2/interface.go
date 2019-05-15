@@ -135,44 +135,51 @@ func (d *dbConn) RegisterExperiment(experiment *v1alpha2.Experiment) error {
 		if experiment.ExperimentSpec.ParameterSpecs != nil {
 			paramSpecs, err = (&jsonpb.Marshaler{}).MarshalToString(experiment.ExperimentSpec.ParameterSpecs)
 			if err != nil {
-				log.Fatalf("Error marshaling Parameters: %v", err)
+				return fmt.Errorf("Error marshaling Parameters: %v", err)
 			}
 		}
 		if experiment.ExperimentSpec.Objective != nil {
 			objSpec, err = (&jsonpb.Marshaler{}).MarshalToString(experiment.ExperimentSpec.Objective)
 			if err != nil {
-				log.Fatalf("Error marshaling Objective: %v", err)
+				return fmt.Errorf("Error marshaling Objective: %v", err)
 			}
 		}
 		if experiment.ExperimentSpec.Algorithm != nil {
 			algoSpec, err = (&jsonpb.Marshaler{}).MarshalToString(experiment.ExperimentSpec.Algorithm)
 			if err != nil {
-				log.Fatalf("Error marshaling Algorithm: %v", err)
+				return fmt.Errorf("Error marshaling Algorithm: %v", err)
 			}
 		}
 		if experiment.ExperimentSpec.NasConfig != nil {
 			nasConfig, err = (&jsonpb.Marshaler{}).MarshalToString(experiment.ExperimentSpec.NasConfig)
 			if err != nil {
-				log.Fatalf("Error marshaling NasConfig: %v", err)
+				return fmt.Errorf("Error marshaling NasConfig: %v", err)
 			}
 		}
+	} else {
+		return fmt.Errorf("Invalid experiment: spec is nil.")
 	}
+
+	now_str := time.Now().UTC().Format(mysqlTimeFmt)
+	start_time = now_str
+	completion_time = now_str
 	if experiment.ExperimentStatus != nil {
 		if experiment.ExperimentStatus.StartTime != "" {
 			s_time, err := time.Parse(time.RFC3339Nano, experiment.ExperimentStatus.StartTime)
 			if err != nil {
-				log.Printf("Error parsing start time %s: %v", experiment.ExperimentStatus.StartTime, err)
+				return fmt.Errorf("Error parsing start time %s: %v", experiment.ExperimentStatus.StartTime, err)
 			}
 			start_time = s_time.UTC().Format(mysqlTimeFmt)
 		}
 		if experiment.ExperimentStatus.CompletionTime != "" {
 			c_time, err := time.Parse(time.RFC3339Nano, experiment.ExperimentStatus.CompletionTime)
 			if err != nil {
-				log.Printf("Error parsing completion time %s: %v", experiment.ExperimentStatus.CompletionTime, err)
+				return fmt.Errorf("Error parsing completion time %s: %v", experiment.ExperimentStatus.CompletionTime, err)
 			}
 			completion_time = c_time.UTC().Format(mysqlTimeFmt)
 		}
 	}
+
 	_, err = d.db.Exec(
 		`INSERT INTO experiments (
 			name, 
@@ -195,13 +202,14 @@ func (d *dbConn) RegisterExperiment(experiment *v1alpha2.Experiment) error {
 		experiment.ExperimentSpec.MetricsCollectorSpec,
 		experiment.ExperimentSpec.ParallelTrialCount,
 		experiment.ExperimentSpec.MaxTrialCount,
-		experiment.ExperimentStatus.Condition,
+		v1alpha2.ExperimentStatus_CREATED,
 		start_time,
 		completion_time,
 		nasConfig,
 	)
 	return err
 }
+
 func (d *dbConn) DeleteExperiment(experimentName string) error {
 	_, err := d.db.Exec("DELETE FROM experiments WHERE name = ?", experimentName)
 	return err
