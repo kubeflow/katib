@@ -7,7 +7,8 @@ workflows:
     job_types:
       - presubmit
     include_dirs:
-    - pkg/api/operators/*
+    - pkg/api/operators/apis/studyjob/*
+    - pkg/api/operators/apis/*.go
     - pkg/api/health/*
     - pkg/api/v1alpha1/*
     - pkg/common/v1alpha1/*
@@ -35,6 +36,8 @@ workflows:
     - test/e2e/v1alpha1/*
     - test/scripts/v1alpha1/*
     - test/workflows/*
+    - manifests/v1alpha1/*
+    - scripts/v1alpha1/*
     params:
       registry: "gcr.io/kubeflow-ci"
   # The postsubmit run publishes the docker images to gcr.io/kubeflow-images-public      
@@ -44,7 +47,8 @@ workflows:
     job_types:      
       - postsubmit
     include_dirs:
-    - pkg/api/operators/*
+    - pkg/api/operators/apis/studyjob/*
+    - pkg/api/operators/apis/*.go
     - pkg/api/health/*
     - pkg/api/v1alpha1/*
     - pkg/common/v1alpha1/*
@@ -69,7 +73,6 @@ workflows:
     - cmd/tfevent-metricscollector/Dockerfile
     - cmd/ui/*
     - pkg/util/v1alpha1/*
-    - test/e2e/v1alpha1/*
     - test/scripts/v1alpha1/*
     - test/workflows/*
     params:
@@ -80,7 +83,10 @@ workflows:
     job_types:
       - presubmit
     include_dirs:
-    - pkg/api/operators/*
+    - pkg/api/operators/apis/common/v1alpha2/*
+    - pkg/api/operators/apis/experiment/v1alpha2/*
+    - pkg/api/operators/apis/trial/v1alpha2/*
+    - pkg/api/operators/apis/*.go
     - pkg/api/health/*
     - pkg/api/v1alpha2/*
     - pkg/common/v1alpha2/*
@@ -108,6 +114,8 @@ workflows:
     - test/e2e/v1alpha2/*
     - test/scripts/v1alpha2/*
     - test/workflows/*
+    - manifests/v1alpha2/*
+    - scripts/v1alpha2/*
     params:
       registry: "gcr.io/kubeflow-ci"
   - app_dir: kubeflow/katib/test/workflows
@@ -116,7 +124,10 @@ workflows:
     job_types:
       - postsubmit
     include_dirs:
-    - pkg/api/operators/*
+    - pkg/api/operators/apis/common/v1alpha2/*
+    - pkg/api/operators/apis/experiment/v1alpha2/*
+    - pkg/api/operators/apis/trial/v1alpha2/*
+    - pkg/api/operators/apis/*.go
     - pkg/api/health/*
     - pkg/api/v1alpha2/*
     - pkg/common/v1alpha2/*
@@ -141,7 +152,6 @@ workflows:
     - cmd/tfevent-metricscollector/Dockerfile
     - cmd/ui/*
     - pkg/util/v1alpha2/*
-    - test/e2e/v1alpha2/*
     - test/scripts/v1alpha2/*
     - test/workflows/*
     params:
