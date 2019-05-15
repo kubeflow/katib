@@ -211,6 +211,12 @@
                 ],
                 [
                   {
+                    name: "unit-test",
+                    template: "unit-test",
+                  },
+                ],
+                [
+                  {
                     name: "build-manager",
                     template: "build-manager",
                   },
@@ -260,12 +266,6 @@
                   {
                     name: "setup-cluster",
                     template: "setup-cluster",
-                  },
-                ],
-                [
-                  {
-                    name: "unit-test",
-                    template: "unit-test",
                   },
                 ],
                 [
