@@ -2,7 +2,8 @@ package db
 
 import (
 	"fmt"
-	"log"
+
+	"k8s.io/klog"
 )
 
 func (d *dbConn) DBInit() {
@@ -24,7 +25,7 @@ func (d *dbConn) DBInit() {
 		nas_config TEXT)`)
 	//TODO add nas config(may be it will be included in algorithm)
 	if err != nil {
-		log.Fatalf("Error creating experiments table: %v", err)
+		klog.Fatalf("Error creating experiments table: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS trials
@@ -41,7 +42,7 @@ func (d *dbConn) DBInit() {
 		completion_time DATETIME(6),
 		FOREIGN KEY(experiment_name) REFERENCES experiments(name) ON DELETE CASCADE)`)
 	if err != nil {
-		log.Fatalf("Error creating trials table: %v", err)
+		klog.Fatalf("Error creating trials table: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS observation_logs
@@ -52,7 +53,7 @@ func (d *dbConn) DBInit() {
 		value TEXT NOT NULL,
 		FOREIGN KEY (trial_name) REFERENCES trials(name) ON DELETE CASCADE)`)
 	if err != nil {
-		log.Fatalf("Error creating observation_logs table: %v", err)
+		klog.Fatalf("Error creating observation_logs table: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS extra_algorithm_settings
@@ -62,7 +63,7 @@ func (d *dbConn) DBInit() {
 		value TEXT NOT NULL,
 		FOREIGN KEY (experiment_name) REFERENCES experiments(name) ON DELETE CASCADE)`)
 	if err != nil {
-		log.Fatalf("Error creating extra_algorithm_settings table: %v", err)
+		klog.Fatalf("Error creating extra_algorithm_settings table: %v", err)
 	}
 
 }

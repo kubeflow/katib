@@ -2,14 +2,15 @@ package modelstore
 
 import (
 	"context"
-	"fmt"
-	"git.apache.org/thrift.git/lib/go/thrift"
-	"github.com/kubeflow/katib/pkg/api/v1alpha1"
-	"github.com/kubeflow/katib/pkg/manager/modelstore/modeldb"
-	"log"
 	"net"
 	"strconv"
 	"strings"
+
+	"git.apache.org/thrift.git/lib/go/thrift"
+	api "github.com/kubeflow/katib/pkg/api/v1alpha1"
+	"github.com/kubeflow/katib/pkg/manager/modelstore/modeldb"
+
+	"k8s.io/klog"
 )
 
 type ModelDB struct {
@@ -28,7 +29,7 @@ func (m *ModelDB) createSocket() (thrift.TTransport, *modeldb.ModelDBServiceClie
 	trans, err = thrift.NewTSocket(net.JoinHostPort(m.host, m.port))
 	trans = thrift.NewTFramedTransport(trans)
 	if err != nil {
-		log.Printf("NewTSocket err %v", err)
+		klog.Errorf("NewTSocket err %v", err)
 		return nil, nil, err
 	}
 	var protocolFactory thrift.TProtocolFactory
@@ -48,16 +49,16 @@ func (m *ModelDB) SaveModel(in *api.SaveModelRequest) error {
 	}
 	defer trans.Close()
 	if err := trans.Open(); err != nil {
-		log.Printf("Error opening socket %v ", err)
+		klog.Errorf("Error opening socket %v ", err)
 		return err
 	}
 	pids, err := client.GetProjectIds(context.Background(), map[string]string{"Name": in.Model.StudyName})
 	if err != nil {
-		fmt.Printf("Error get Project IDs %v ", err)
+		klog.Errorf("Error get Project IDs %v ", err)
 		return err
 	}
 	if len(pids) == 0 {
-		log.Printf("There is no Study name %s, You need to create Study before upload Model.\n", in.Model.StudyName)
+		klog.Infof("There is no Study name %s, You need to create Study before upload Model.\n", in.Model.StudyName)
 	}
 	pml, err := m.getProjectModelList(client, in.Model.StudyName)
 	if err != nil {
@@ -67,7 +68,7 @@ func (m *ModelDB) SaveModel(in *api.SaveModelRequest) error {
 	var msid int32 = -1
 	for _, md := range pml {
 		if md.Specification.Tag == in.Model.StudyName+":"+in.Model.WorkerId {
-			log.Printf("Study %s: Trial %s is already exist. Metrics will be updated.\n", in.Model.StudyName, in.Model.WorkerId)
+			klog.Infof("Study %s: Trial %s is already exist. Metrics will be updated.\n", in.Model.StudyName, in.Model.WorkerId)
 			did = md.TrainingDataFrame.ID
 			mid = md.ID
 			msid = md.Specification.ID
@@ -160,7 +161,7 @@ func (m *ModelDB) GetSavedStudies() ([]*api.StudyOverview, error) {
 	}
 	defer trans.Close()
 	if err := trans.Open(); err != nil {
-		log.Printf("Error opening socket %v ", err)
+		klog.Errorf("Error opening socket %v ", err)
 		return nil, err
 	}
 	pov, err := client.GetProjectOverviews(context.Background())
@@ -217,11 +218,11 @@ func (m *ModelDB) convertmdModelToModelInfo(mdm *modeldb.ModelResponse) *api.Mod
 func (m *ModelDB) getProjectModelList(client *modeldb.ModelDBServiceClient, studyName string) ([]*modeldb.ModelResponse, error) {
 	pids, err := client.GetProjectIds(context.Background(), map[string]string{"Name": studyName})
 	if err != nil {
-		log.Printf("Error get Project IDs %v ", err)
+		klog.Errorf("Error get Project IDs %v ", err)
 		return nil, err
 	}
 	if len(pids) == 0 {
-		log.Printf("Study  %s does not exist.", studyName)
+		klog.Errorf("Study  %s does not exist.", studyName)
 		return nil, err
 	}
 	pre, err := client.GetRunsAndExperimentsInProject(context.Background(), pids[0])
@@ -247,7 +248,7 @@ func (m *ModelDB) GetSavedModels(in *api.GetSavedModelsRequest) ([]*api.ModelInf
 	}
 	defer trans.Close()
 	if err := trans.Open(); err != nil {
-		log.Printf("Error opening socket %v ", err)
+		klog.Errorf("Error opening socket %v ", err)
 		return nil, err
 	}
 	pml, err := m.getProjectModelList(client, in.StudyName)
@@ -269,7 +270,7 @@ func (m *ModelDB) GetSavedModel(in *api.GetSavedModelRequest) (*api.ModelInfo, e
 	}
 	defer trans.Close()
 	if err := trans.Open(); err != nil {
-		log.Printf("Error opening socket %v ", err)
+		klog.Errorf("Error opening socket %v ", err)
 		return nil, err
 	}
 	pml, err := m.getProjectModelList(client, in.StudyName)
@@ -290,7 +291,7 @@ func (m *ModelDB) createErun(client *modeldb.ModelDBServiceClient, pid int32) (i
 	exe.Experiment.ProjectId = pid
 	eres, err := client.StoreExperimentEvent(context.Background(), exe)
 	if err != nil {
-		log.Printf("SaveExperimentEvent err %v", err)
+		klog.Errorf("SaveExperimentEvent err %v", err)
 		return -1, err
 	}
 
@@ -299,7 +300,7 @@ func (m *ModelDB) createErun(client *modeldb.ModelDBServiceClient, pid int32) (i
 	exre.ExperimentRun.ExperimentId = eres.ExperimentId
 	exrres, err := client.StoreExperimentRunEvent(context.Background(), exre)
 	if err != nil {
-		log.Printf("SaveExperimentRunEvent err %v", err)
+		klog.Errorf("SaveExperimentRunEvent err %v", err)
 		return -1, err
 	}
 	return exrres.ExperimentRunId, nil
@@ -313,17 +314,17 @@ func (m *ModelDB) SaveStudy(in *api.SaveStudyRequest) error {
 	}
 	defer trans.Close()
 	if err := trans.Open(); err != nil {
-		log.Printf("Error opening socket %v ", err)
+		klog.Errorf("Error opening socket %v ", err)
 		return err
 	}
 	pids, err := client.GetProjectIds(context.Background(), map[string]string{"Name": in.StudyName})
 	if err != nil {
-		log.Printf("Error get Project IDs %v ", err)
+		klog.Errorf("Error get Project IDs %v ", err)
 		return err
 	}
 
 	if len(pids) > 0 {
-		log.Printf("Study %s is already exist (Project ID %d)", in.StudyName, pids[0])
+		klog.Infof("Study %s is already exist (Project ID %d)", in.StudyName, pids[0])
 	} else {
 		pje := modeldb.NewProjectEvent()
 		pje.Project = modeldb.NewProject()
@@ -333,7 +334,7 @@ func (m *ModelDB) SaveStudy(in *api.SaveStudyRequest) error {
 		pje.Project.Description = in.Description
 		pres, err := client.StoreProjectEvent(context.Background(), pje)
 		if err != nil {
-			log.Printf("SaveProjectEvent err %v", err)
+			klog.Errorf("SaveProjectEvent err %v", err)
 			return err
 		}
 		_, err = m.createErun(client, pres.ProjectId)

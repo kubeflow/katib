@@ -18,8 +18,8 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/status"
+	"k8s.io/klog"
 )
 
 var _ codes.Code
@@ -492,14 +492,14 @@ func RegisterManagerHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeM
 	defer func() {
 		if err != nil {
 			if cerr := conn.Close(); cerr != nil {
-				grpclog.Printf("Failed to close conn to %s: %v", endpoint, cerr)
+				klog.Fatalf("Failed to close conn to %s: %v", endpoint, cerr)
 			}
 			return
 		}
 		go func() {
 			<-ctx.Done()
 			if cerr := conn.Close(); cerr != nil {
-				grpclog.Printf("Failed to close conn to %s: %v", endpoint, cerr)
+				klog.Fatalf("Failed to close conn to %s: %v", endpoint, cerr)
 			}
 		}()
 	}()

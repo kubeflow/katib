@@ -14,7 +14,6 @@ package studyjob
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"strings"
 
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
@@ -25,6 +24,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/klog"
 )
 
 func validateWorkerResource(wkind string) error {
@@ -42,7 +42,7 @@ func isFatalWatchError(err error, job string) bool {
 	}
 	if meta.IsNoMatchError(err) {
 		invalidCRDResources = append(invalidCRDResources, job)
-		log.Printf("Fail to watch CRD: %v; Please install the CRD and restart studyjob-controller to support %s worker", err, job)
+		klog.Errorf("Fail to watch CRD: %v; Please install the CRD and restart studyjob-controller to support %s worker", err, job)
 		return false
 	} else {
 		return true
@@ -68,7 +68,7 @@ func getWorkerKind(workerSpec *katibv1alpha1.WorkerSpec) (*schema.GroupVersionKi
 		return nil, err
 	}
 	if err := k8syaml.NewYAMLOrJSONDecoder(m, BUFSIZE).Decode(&typeChecker); err != nil {
-		log.Printf("Yaml decode validation error %v", err)
+		klog.Errorf("Yaml decode validation error %v", err)
 		return nil, err
 	}
 	tcMap, ok := typeChecker.(map[string]interface{})
@@ -108,7 +108,7 @@ func validateStudy(instance *katibv1alpha1.StudyJob) error {
 	BUFSIZE := 1024
 	wkind, err := getWorkerKind(instance.Spec.WorkerSpec)
 	if err != nil {
-		log.Printf("getWorkerKind error %v", err)
+		klog.Errorf("getWorkerKind error %v", err)
 		return err
 	}
 
@@ -132,7 +132,7 @@ func validateStudy(instance *katibv1alpha1.StudyJob) error {
 
 	job := &unstructured.Unstructured{}
 	if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(job); err != nil {
-		log.Printf("Yaml decode error %v", err)
+		klog.Errorf("Yaml decode error %v", err)
 		return err
 	}
 
@@ -143,12 +143,12 @@ func validateStudy(instance *katibv1alpha1.StudyJob) error {
 	var mcjob batchv1beta.CronJob
 	mcm, err := getMetricsCollectorManifest(studyID, trialID, workerID, wkind.Kind, namespace, instance.Spec.MetricsCollectorSpec)
 	if err != nil {
-		log.Printf("getMetricsCollectorManifest error %v", err)
+		klog.Errorf("getMetricsCollectorManifest error %v", err)
 		return err
 	}
 
 	if err := k8syaml.NewYAMLOrJSONDecoder(mcm, BUFSIZE).Decode(&mcjob); err != nil {
-		log.Printf("MetricsCollector Yaml decode error %v", err)
+		klog.Errorf("MetricsCollector Yaml decode error %v", err)
 		return err
 	}
 

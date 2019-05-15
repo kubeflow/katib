@@ -3,18 +3,18 @@ package suggestion
 import (
 	"context"
 	"fmt"
-	"log"
 	"math"
 	"sort"
 	"strconv"
 	"strings"
 
+	api "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
-	"github.com/kubeflow/katib/pkg/api/v1alpha1"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"k8s.io/klog"
 )
 
 type Evals struct {
@@ -73,13 +73,13 @@ func (h *HyperBandSuggestService) makeBracket(ctx context.Context, c api.Manager
 }
 
 func (h *HyperBandSuggestService) makeMasterBracket(ctx context.Context, c api.ManagerClient, studyID string, n int, r float64, hbparam *HyperBandParameters) ([]string, []*api.Trial, error) {
-	log.Printf("Make MasterBracket %v Trials", n)
+	klog.Infof("Make MasterBracket %v Trials", n)
 	gsreq := &api.GetStudyRequest{
 		StudyId: studyID,
 	}
 	gsrep, err := c.GetStudy(ctx, gsreq)
 	if err != nil {
-		log.Printf("GetStudy Error")
+		klog.Info("GetStudy Error")
 		return nil, nil, err
 	}
 	sconf := gsrep.StudyConfig
@@ -119,7 +119,7 @@ func (h *HyperBandSuggestService) makeMasterBracket(ctx context.Context, c api.M
 		}
 		ret, err := c.CreateTrial(ctx, req)
 		if err != nil {
-			log.Printf("CreateTrial Error")
+			klog.Info("CreateTrial Error")
 			return nil, nil, err
 		}
 		tids[i] = ret.TrialId
@@ -135,7 +135,7 @@ func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.Ma
 	}
 	gsrep, err := c.GetStudy(ctx, gsreq)
 	if err != nil {
-		log.Printf("GetStudy Error")
+		klog.Info("GetStudy Error")
 		return nil, nil, err
 	}
 	sconf := gsrep.StudyConfig
@@ -151,7 +151,7 @@ func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.Ma
 	}
 	gtrep, err := c.GetTrials(ctx, gtreq)
 	if err != nil {
-		log.Printf("GetTrials Error")
+		klog.Info("GetTrials Error")
 		return nil, nil, err
 	}
 	tids := make([]string, n)
@@ -185,7 +185,7 @@ func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.Ma
 		}
 		ret, err := c.CreateTrial(ctx, req)
 		if err != nil {
-			log.Printf("CreateTrial Error")
+			klog.Info("CreateTrial Error")
 			return nil, nil, err
 		}
 		tids[i] = ret.TrialId
@@ -234,11 +234,11 @@ func (h *HyperBandSuggestService) parseSuggestionParameters(ctx context.Context,
 		case "evaluatingTrials":
 			p.evaluatingTrials = strings.Split(sp.Value, ",")
 		default:
-			log.Printf("Unknown Suggestion Parameter %v", sp.Name)
+			klog.Infof("Unknown Suggestion Parameter %v", sp.Name)
 		}
 	}
 	if p.rL <= 0 || p.ResourceName == "" {
-		log.Printf("Failed to parse Suggestion Parameter. r_l and ResourceName must be set.")
+		klog.Info("Failed to parse Suggestion Parameter. r_l and ResourceName must be set.")
 		return nil, fmt.Errorf("Suggestion Parameter set Error")
 	}
 	if p.eta <= 0 {
@@ -250,7 +250,7 @@ func (h *HyperBandSuggestService) parseSuggestionParameters(ctx context.Context,
 		}
 		gsrep, err := c.GetStudy(ctx, gsreq)
 		if err != nil {
-			log.Printf("GetStudy Error")
+			klog.Info("GetStudy Error")
 			return nil, err
 		}
 		p.ObjectiveValueName = gsrep.StudyConfig.ObjectiveValueName
@@ -273,12 +273,12 @@ func (h *HyperBandSuggestService) parseSuggestionParameters(ctx context.Context,
 	if p.r == -1 {
 		p.r = p.rL * math.Pow(p.eta, float64(-p.sMax))
 	}
-	log.Printf("Hyb Param sMax %v", p.sMax)
-	log.Printf("Hyb Param B %v", p.bL)
-	log.Printf("Hyb Param n %v", p.n)
-	log.Printf("Hyb Param currentS %v", p.currentS)
-	log.Printf("Hyb Param r %v", p.r)
-	log.Printf("Hyb Param evaluatingTrials %v", p.evaluatingTrials)
+	klog.Infof("Hyb Param sMax %v", p.sMax)
+	klog.Infof("Hyb Param B %v", p.bL)
+	klog.Infof("Hyb Param n %v", p.n)
+	klog.Infof("Hyb Param currentS %v", p.currentS)
+	klog.Infof("Hyb Param r %v", p.r)
+	klog.Infof("Hyb Param evaluatingTrials %v", p.evaluatingTrials)
 	return p, nil
 }
 
@@ -343,7 +343,7 @@ func (h *HyperBandSuggestService) evalWorkers(ctx context.Context, c api.Manager
 		}
 		gwrep, err := c.GetWorkers(ctx, gwreq)
 		if err != nil {
-			log.Printf("GetWorkers error %v", err)
+			klog.Errorf("GetWorkers error %v", err)
 			return err, nil
 		}
 		wl := make([]string, len(gwrep.Workers))
@@ -357,7 +357,7 @@ func (h *HyperBandSuggestService) evalWorkers(ctx context.Context, c api.Manager
 		}
 		gmrep, err := c.GetMetrics(ctx, gmreq)
 		if err != nil {
-			log.Printf("GetMetrics error %v", err)
+			klog.Errorf("GetMetrics error %v", err)
 			return err, nil
 		}
 		vs := 0.0
@@ -383,14 +383,14 @@ func (h *HyperBandSuggestService) evalWorkers(ctx context.Context, c api.Manager
 }
 
 func (h *HyperBandSuggestService) hbLoopParamUpdate(studyID string, hbparam *HyperBandParameters) {
-	log.Printf("HB loop s = %v", hbparam.currentS)
+	klog.Infof("HB loop s = %v", hbparam.currentS)
 	hbparam.shloopitr = 0
 	hbparam.n = int(math.Trunc((hbparam.bL / hbparam.rL) * (math.Pow(hbparam.eta, float64(hbparam.currentS)) / float64(hbparam.currentS+1))))
 	hbparam.r = hbparam.rL * math.Pow(hbparam.eta, float64(-hbparam.currentS))
 }
 
 func (h *HyperBandSuggestService) getLoopParam(studyID string, hbparam *HyperBandParameters) (int, float64) {
-	log.Printf("SH loop i = %v", hbparam.shloopitr)
+	klog.Infof("SH loop i = %v", hbparam.shloopitr)
 	nI := int(math.Trunc(float64(hbparam.n) * math.Pow(hbparam.eta, float64(-hbparam.shloopitr))))
 	rI := hbparam.r * math.Pow(hbparam.eta, float64(hbparam.shloopitr))
 	return nI, rI
@@ -405,7 +405,7 @@ func (h *HyperBandSuggestService) shLoopParamUpdate(studyID string, hbparam *Hyp
 func (h *HyperBandSuggestService) GetSuggestions(ctx context.Context, in *api.GetSuggestionsRequest) (*api.GetSuggestionsReply, error) {
 	conn, err := grpc.Dial(common.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("could not connect: %v", err)
+		klog.Fatalf("could not connect: %v", err)
 		return &api.GetSuggestionsReply{}, err
 	}
 	defer conn.Close()
@@ -415,7 +415,7 @@ func (h *HyperBandSuggestService) GetSuggestions(ctx context.Context, in *api.Ge
 	}
 	spr, err := c.GetSuggestionParameters(ctx, spreq)
 	if err != nil {
-		log.Fatalf("GetParameter failed: %v", err)
+		klog.Fatalf("GetParameter failed: %v", err)
 		return &api.GetSuggestionsReply{}, err
 	}
 	hbparam, err := h.parseSuggestionParameters(ctx, c, in.StudyId, spr.SuggestionParameters)

@@ -5,18 +5,17 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"math/big"
 	"math/rand"
 	"os"
 	"strings"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/jsonpb"
+	"k8s.io/klog"
 
 	api "github.com/kubeflow/katib/pkg/api/v1alpha1"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 const (
@@ -89,7 +88,7 @@ var rs1Letters = []rune("abcdefghijklmnopqrstuvwxyz")
 func getDbName() string {
 	dbPass := os.Getenv("MYSQL_ROOT_PASSWORD")
 	if dbPass == "" {
-		log.Printf("WARN: Env var MYSQL_ROOT_PASSWORD is empty. Falling back to \"test\".")
+		klog.Errorf("WARN: Env var MYSQL_ROOT_PASSWORD is empty. Falling back to \"test\".")
 
 		// For backward compatibility, e.g. in case that all but vizier-core
 		// is older ones so we do not have Secret nor upgraded vizier-db.
@@ -175,7 +174,7 @@ func (d *dbConn) GetStudy(StudyID string) (*api.StudyConfig, error) {
 		study.NasConfig = new(api.NasConfig)
 		err = jsonpb.UnmarshalString(nasConfig, study.NasConfig)
 		if err != nil {
-			log.Printf("Failed to unmarshal NasConfig")
+			klog.Error("Failed to unmarshal NasConfig")
 			return nil, err
 		}
 	}
@@ -189,7 +188,7 @@ func (d *dbConn) GetStudy(StudyID string) (*api.StudyConfig, error) {
 		tag := new(api.Tag)
 		err = jsonpb.UnmarshalString(j, tag)
 		if err != nil {
-			log.Printf("err unmarshal %s", j)
+			klog.Errorf("err unmarshal %s", j)
 			return nil, err
 		}
 		study.Tags[i] = tag
@@ -211,7 +210,7 @@ func generateRandid() string {
 	id := make([]byte, 8)
 	_, err := rand.Read(id)
 	if err != nil {
-		log.Printf("Error reading random: %v", err)
+		klog.Errorf("Error reading random: %v", err)
 		return ""
 	}
 	return string(rs1Letters[rand.Intn(len(rs1Letters))]) + fmt.Sprintf("%016x", id)[1:]
@@ -237,7 +236,7 @@ func (d *dbConn) GetStudyList() ([]string, error) {
 		var id string
 		err = rows.Scan(&id)
 		if err != nil {
-			log.Printf("err scanning studies.id: %v", err)
+			klog.Errorf("err scanning studies.id: %v", err)
 			continue
 		}
 		result = append(result, id)
@@ -260,14 +259,14 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 	if in.NasConfig != nil {
 		nasConfig, err = (&jsonpb.Marshaler{}).MarshalToString(in.NasConfig)
 		if err != nil {
-			log.Fatalf("Error marshaling nasConfig: %v", err)
+			klog.Fatalf("Error marshaling nasConfig: %v", err)
 		}
 	}
 
 	if in.ParameterConfigs != nil {
 		configs, err = (&jsonpb.Marshaler{}).MarshalToString(in.ParameterConfigs)
 		if err != nil {
-			log.Fatalf("Error marshaling configs: %v", err)
+			klog.Fatalf("Error marshaling configs: %v", err)
 		}
 	}
 
@@ -275,7 +274,7 @@ func (d *dbConn) CreateStudy(in *api.StudyConfig) (string, error) {
 	for i, elem := range in.Tags {
 		tags[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
 		if err != nil {
-			log.Printf("Error marshalling %v: %v", elem, err)
+			klog.Errorf("Error marshalling %v: %v", elem, err)
 			continue
 		}
 	}
@@ -338,7 +337,7 @@ func (d *dbConn) UpdateStudy(studyID string, in *api.StudyConfig) error {
 	for i, elem := range in.Tags {
 		tags[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
 		if err != nil {
-			log.Printf("Error marshalling %v: %v", elem, err)
+			klog.Errorf("Error marshalling %v: %v", elem, err)
 			continue
 		}
 	}
@@ -418,7 +417,7 @@ func (d *dbConn) getTrials(trialID string, studyID string) ([]*api.Trial, error)
 
 		createTimeMysql, errParseTimeMysql := time.Parse(mysqlTimeFmt, createTimeStr)
 		if errParseTimeMysql != nil {
-			log.Printf("Error parsing Trial create time %s to mysqlFormat: %v", createTimeStr, errParseTimeMysql)
+			klog.Errorf("Error parsing Trial create time %s to mysqlFormat: %v", createTimeStr, errParseTimeMysql)
 			continue
 		}
 		trial.CreateTime = createTimeMysql.UTC().Format(time.RFC3339Nano)
@@ -457,7 +456,7 @@ func marshalTrial(trial *api.Trial) ([]string, []string, error) {
 	for i, elem := range trial.ParameterSet {
 		params[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
 		if err != nil {
-			log.Printf("Error marshalling trial.ParameterSet %v: %v",
+			klog.Errorf("Error marshalling trial.ParameterSet %v: %v",
 				elem, err)
 			lastErr = err
 		}
@@ -466,7 +465,7 @@ func marshalTrial(trial *api.Trial) ([]string, []string, error) {
 	for i := range tags {
 		tags[i], err = (&jsonpb.Marshaler{}).MarshalToString(trial.Tags[i])
 		if err != nil {
-			log.Printf("Error marshalling trial.Tags %v: %v",
+			klog.Errorf("Error marshalling trial.Tags %v: %v",
 				trial.Tags[i], err)
 			lastErr = err
 		}
@@ -559,12 +558,12 @@ func (d *dbConn) GetWorkerLogs(id string, opts *GetWorkerLogOpts) ([]*WorkerLog,
 		var timeStr string
 		err := rows.Scan(&timeStr, &((*log1).Name), &((*log1).Value))
 		if err != nil {
-			log.Printf("Error scanning log: %v", err)
+			klog.Errorf("Error scanning log: %v", err)
 			continue
 		}
 		log1.Time, err = time.Parse(mysqlTimeFmt, timeStr)
 		if err != nil {
-			log.Printf("Error parsing time %s: %v", timeStr, err)
+			klog.Errorf("Error parsing time %s: %v", timeStr, err)
 			continue
 		}
 		result = append(result, log1)
@@ -596,18 +595,18 @@ func (d *dbConn) getWorkerLastlogs(id string) (time.Time, []*WorkerLog, error) {
 
 		err := rows.Scan(&thisTime, &name, &value)
 		if err != nil {
-			log.Printf("Error scanning log: %v", err)
+			klog.Errorf("Error scanning log: %v", err)
 			continue
 		}
 		if timeStr == "" {
 			timeStr = thisTime
 			timeVal, err = time.Parse(mysqlTimeFmt, timeStr)
 			if err != nil {
-				log.Printf("Error parsing time %s: %v", timeStr, err)
+				klog.Errorf("Error parsing time %s: %v", timeStr, err)
 				return timeVal, nil, err
 			}
 		} else if timeStr != thisTime {
-			log.Printf("Unexpected query result %s != %s",
+			klog.Errorf("Unexpected query result %s != %s",
 				timeStr, thisTime)
 		}
 		log1.Time = timeVal
@@ -635,7 +634,7 @@ func (d *dbConn) GetWorkerTimestamp(id string) (*time.Time, error) {
 	default:
 		mt, err := time.Parse(mysqlTimeFmt, lastTimestamp)
 		if err != nil {
-			log.Printf("Error parsing time in log %s: %v",
+			klog.Errorf("Error parsing time in log %s: %v",
 				lastTimestamp, err)
 			return nil, err
 		}
@@ -661,7 +660,7 @@ func (d *dbConn) StoreWorkerLogs(workerID string, logs []*api.MetricsLog) error 
 
 	dbT, lastLogs, err := d.getWorkerLastlogs(workerID)
 	if err != nil {
-		log.Printf("Error getting last log timestamp: %v", err)
+		klog.Errorf("Error getting last log timestamp: %v", err)
 	}
 
 	row := d.db.QueryRow("SELECT objective_value_name FROM workers "+
@@ -670,7 +669,7 @@ func (d *dbConn) StoreWorkerLogs(workerID string, logs []*api.MetricsLog) error 
 	var objectiveValueName string
 	err = row.Scan(&objectiveValueName)
 	if err != nil {
-		log.Printf("Cannot get objective_value_name or metrics: %v", err)
+		klog.Errorf("Cannot get objective_value_name or metrics: %v", err)
 		return err
 	}
 
@@ -685,7 +684,7 @@ func (d *dbConn) StoreWorkerLogs(workerID string, logs []*api.MetricsLog) error 
 		for _, mv := range mlog.Values {
 			t, err := time.Parse(time.RFC3339Nano, mv.Time)
 			if err != nil {
-				log.Printf("Error parsing time %s: %v", mv.Time, err)
+				klog.Errorf("Error parsing time %s: %v", mv.Time, err)
 				lasterr = err
 				continue
 			}
@@ -701,7 +700,7 @@ func (d *dbConn) StoreWorkerLogs(workerID string, logs []*api.MetricsLog) error 
 				// the next comparison will be almost always false.
 				reparsed_time, err := time.Parse(mysqlTimeFmt, formattedTime)
 				if err != nil {
-					log.Printf("Error parsing time %s: %v", formattedTime, err)
+					klog.Errorf("Error parsing time %s: %v", formattedTime, err)
 					lasterr = err
 					continue
 				}
@@ -718,7 +717,7 @@ func (d *dbConn) StoreWorkerLogs(workerID string, logs []*api.MetricsLog) error 
 				metricsName, mv.Value,
 				objectiveValueName)
 			if err != nil {
-				log.Printf("Error storing log %s: %v", mv.Value, err)
+				klog.Errorf("Error storing log %s: %v", mv.Value, err)
 				lasterr = err
 			} else if t.After(lastTime) {
 				lastTime = t
@@ -829,7 +828,7 @@ func (d *dbConn) CreateWorker(worker *api.Worker) (string, error) {
 	for i := range tags {
 		tags[i], err = (&jsonpb.Marshaler{}).MarshalToString(worker.Tags[i])
 		if err != nil {
-			log.Printf("Error marshalling worker.Tags %v: %v",
+			klog.Errorf("Error marshalling worker.Tags %v: %v",
 				worker.Tags[i], err)
 			lastErr = err
 		}
@@ -967,7 +966,7 @@ func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId stri
 	}
 	rows, err := d.db.Query(qstr+" ORDER BY time", id)
 	if err != nil {
-		log.Printf("SQL query: %v", err)
+		klog.Errorf("SQL query: %v", err)
 		return ret, err
 	}
 	metricslist := make(map[string]map[string][]*api.MetricsValueTime, len(ws))
@@ -975,12 +974,12 @@ func (d *dbConn) GetWorkerFullInfo(studyId string, trialId string, workerId stri
 		var name, value, timeStr, wid string
 		err := rows.Scan(&wid, &timeStr, &name, &value)
 		if err != nil {
-			log.Printf("Error scanning log: %v", err)
+			klog.Errorf("Error scanning log: %v", err)
 			continue
 		}
 		ptime, err := time.Parse(mysqlTimeFmt, timeStr)
 		if err != nil {
-			log.Printf("Error parsing time %s: %v", timeStr, err)
+			klog.Errorf("Error parsing time %s: %v", timeStr, err)
 			continue
 		}
 		if _, ok := metricslist[wid]; ok {
@@ -1021,7 +1020,7 @@ func (d *dbConn) SetSuggestionParam(algorithm string, studyID string, params []*
 	for i, elem := range params {
 		ps[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
 		if err != nil {
-			log.Printf("Error marshalling %v: %v", elem, err)
+			klog.Errorf("Error marshalling %v: %v", elem, err)
 			return "", err
 		}
 	}
@@ -1045,7 +1044,7 @@ func (d *dbConn) UpdateSuggestionParam(paramID string, params []*api.SuggestionP
 	for i, elem := range params {
 		ps[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
 		if err != nil {
-			log.Printf("Error marshalling %v: %v", elem, err)
+			klog.Errorf("Error marshalling %v: %v", elem, err)
 			return err
 		}
 	}
@@ -1072,7 +1071,7 @@ func (d *dbConn) GetSuggestionParam(paramID string) ([]*api.SuggestionParameter,
 		p := new(api.SuggestionParameter)
 		err = jsonpb.UnmarshalString(j, p)
 		if err != nil {
-			log.Printf("err unmarshal %s", j)
+			klog.Errorf("err unmarshal %s", j)
 			return nil, err
 		}
 		ret[i] = p
@@ -1108,7 +1107,7 @@ func (d *dbConn) GetSuggestionParamList(studyID string) ([]*api.SuggestionParame
 			p := new(api.SuggestionParameter)
 			err = jsonpb.UnmarshalString(j, p)
 			if err != nil {
-				log.Printf("err unmarshal %s", j)
+				klog.Errorf("err unmarshal %s", j)
 				return nil, err
 			}
 			suggestparams[i] = p
@@ -1128,7 +1127,7 @@ func (d *dbConn) SetEarlyStopParam(algorithm string, studyID string, params []*a
 	for i, elem := range params {
 		ps[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
 		if err != nil {
-			log.Printf("Error marshalling %v: %v", elem, err)
+			klog.Errorf("Error marshalling %v: %v", elem, err)
 			return "", err
 		}
 	}
@@ -1152,7 +1151,7 @@ func (d *dbConn) UpdateEarlyStopParam(paramID string, params []*api.EarlyStoppin
 	for i, elem := range params {
 		ps[i], err = (&jsonpb.Marshaler{}).MarshalToString(elem)
 		if err != nil {
-			log.Printf("Error marshalling %v: %v", elem, err)
+			klog.Errorf("Error marshalling %v: %v", elem, err)
 			return err
 		}
 	}
@@ -1179,7 +1178,7 @@ func (d *dbConn) GetEarlyStopParam(paramID string) ([]*api.EarlyStoppingParamete
 		p := new(api.EarlyStoppingParameter)
 		err = jsonpb.UnmarshalString(j, p)
 		if err != nil {
-			log.Printf("err unmarshal %s", j)
+			klog.Errorf("err unmarshal %s", j)
 			return nil, err
 		}
 		ret[i] = p
@@ -1214,7 +1213,7 @@ func (d *dbConn) GetEarlyStopParamList(studyID string) ([]*api.EarlyStoppingPara
 			p := new(api.EarlyStoppingParameter)
 			err = jsonpb.UnmarshalString(j, p)
 			if err != nil {
-				log.Printf("err unmarshal %s", j)
+				klog.Errorf("err unmarshal %s", j)
 				return nil, err
 			}
 			esparams[i] = p
