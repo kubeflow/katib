@@ -204,10 +204,18 @@
                   template: "checkout",
                 }],
                 [
-                {
+                  {
                     name: "dep-ensure",
                     template: "dep-ensure",
-                }
+                  },
+                  {
+                    name: "build-suggestion-bo",
+                    template: "build-suggestion-bo",
+                  },
+                  {
+                    name: "build-suggestion-nasrl",
+                    template: "build-suggestion-nasrl",
+                  },
                 ],
                 [
                   {
@@ -239,14 +247,6 @@
                   {
                     name: "build-suggestion-hyperband",
                     template: "build-suggestion-hyperband",
-                  },
-                  {
-                    name: "build-suggestion-bo",
-                    template: "build-suggestion-bo",
-                  },
-                  {
-                    name: "build-suggestion-nasrl",
-                    template: "build-suggestion-nasrl",
                   },
                   {
                     name: "build-earlystopping-median",
