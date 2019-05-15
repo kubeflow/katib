@@ -22,14 +22,16 @@ import (
 	"fmt"
 	logger "log"
 
-	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
-	ep_v1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
+
+	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 )
 
-func ValidateExperiment(instance *ep_v1alpha2.Experiment) error {
+func ValidateExperiment(instance *experimentsv1alpha2.Experiment) error {
 	if !instance.IsCreated() {
 		if err := validateForCreate(instance); err != nil {
 			return err
@@ -65,17 +67,17 @@ func ValidateExperiment(instance *ep_v1alpha2.Experiment) error {
 	return nil
 }
 
-func validateAlgorithmSettings(inst *ep_v1alpha2.Experiment) error {
+func validateAlgorithmSettings(inst *experimentsv1alpha2.Experiment) error {
 	// TODO: it need call ValidateAlgorithmSettings API of vizier-core manager, implement it when vizier-core done
 	return nil
 }
 
-func validateObjective(obj *commonv1alpha2.ObjectiveSpec) error {
+func validateObjective(obj *commonapiv1alpha2.ObjectiveSpec) error {
 	if obj == nil {
 		return fmt.Errorf("No spec.objective specified.")
 	}
-	if obj.Type != commonv1alpha2.ObjectiveTypeMinimize && obj.Type != commonv1alpha2.ObjectiveTypeMaximize {
-		return fmt.Errorf("spec.objective.type must be %s or %s.", commonv1alpha2.ObjectiveTypeMinimize, commonv1alpha2.ObjectiveTypeMaximize)
+	if obj.Type != commonapiv1alpha2.ObjectiveTypeMinimize && obj.Type != commonapiv1alpha2.ObjectiveTypeMaximize {
+		return fmt.Errorf("spec.objective.type must be %s or %s.", commonapiv1alpha2.ObjectiveTypeMinimize, commonapiv1alpha2.ObjectiveTypeMaximize)
 	}
 	if obj.ObjectiveMetricName == "" {
 		return fmt.Errorf("No spec.objective.objectiveMetricName specified.")
@@ -83,7 +85,7 @@ func validateObjective(obj *commonv1alpha2.ObjectiveSpec) error {
 	return nil
 }
 
-func validateAlgorithm(ag *ep_v1alpha2.AlgorithmSpec) error {
+func validateAlgorithm(ag *experimentsv1alpha2.AlgorithmSpec) error {
 	if ag == nil {
 		return fmt.Errorf("No spec.algorithm specified.")
 	}
@@ -94,7 +96,7 @@ func validateAlgorithm(ag *ep_v1alpha2.AlgorithmSpec) error {
 	return nil
 }
 
-func validateTrialTemplate(instance *ep_v1alpha2.Experiment) error {
+func validateTrialTemplate(instance *experimentsv1alpha2.Experiment) error {
 	trialName := fmt.Sprintf("%s-trial", instance.GetName())
 	trialParams := TrialTemplateParams{
 		Experiment: instance.GetName(),
@@ -129,16 +131,16 @@ func validateTrialTemplate(instance *ep_v1alpha2.Experiment) error {
 
 func validateSupportedJob(job *unstructured.Unstructured) error {
 	gvk := job.GroupVersionKind()
-	supportedJobs := GetSupportedJobList()
+	supportedJobs := commonv1alpha2.GetSupportedJobList()
 	for _, sJob := range supportedJobs {
 		if gvk == sJob {
 			return nil
 		}
 	}
-	return fmt.Errorf("Cannot support to run job: %v", gvk)
+	return fmt.Errorf("Job type %v not supported", gvk)
 }
 
-func validateForCreate(inst *ep_v1alpha2.Experiment) error {
+func validateForCreate(inst *experimentsv1alpha2.Experiment) error {
 	if _, err := GetExperimentFromDB(inst); err != nil {
 		if err != sql.ErrNoRows {
 			return fmt.Errorf("Fail to check record for the experiment in DB: %v", err)
@@ -149,7 +151,7 @@ func validateForCreate(inst *ep_v1alpha2.Experiment) error {
 	}
 }
 
-func validateMetricsCollector(inst *ep_v1alpha2.Experiment) error {
+func validateMetricsCollector(inst *experimentsv1alpha2.Experiment) error {
 	BUFSIZE := 1024
 	experimentName := inst.GetName()
 	trialName := fmt.Sprintf("%s-trial", inst.GetName())

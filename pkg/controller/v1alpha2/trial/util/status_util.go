@@ -24,7 +24,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
-	commonv1beta1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta1"
+	commonv1beta2 "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta2"
 )
 
 var log = logf.Log.WithName("trial-status-util")
@@ -62,7 +62,7 @@ func UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *uns
 				instance.MarkTrialStatusFailed(TrialFailedReason, msg)
 			}
 		default:
-			jobStatus := commonv1beta1.JobStatus{}
+			jobStatus := commonv1beta2.JobStatus{}
 			err := runtime.DefaultUnstructuredConverter.FromUnstructured(statusMap, &jobStatus)
 
 			if err != nil {
@@ -71,10 +71,10 @@ func UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *uns
 			}
 			if len(jobStatus.Conditions) > 0 {
 				lc := jobStatus.Conditions[len(jobStatus.Conditions)-1]
-				if lc.Type == commonv1beta1.JobSucceeded {
+				if lc.Type == commonv1beta2.JobSucceeded {
 					msg := "Trial has succeeded"
 					instance.MarkTrialStatusSucceeded(TrialSucceededReason, msg)
-				} else if lc.Type == commonv1beta1.JobFailed {
+				} else if lc.Type == commonv1beta2.JobFailed {
 					msg := "Trial has failed"
 					instance.MarkTrialStatusFailed(TrialFailedReason, msg)
 				}

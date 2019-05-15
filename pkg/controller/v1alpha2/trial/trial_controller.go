@@ -20,10 +20,10 @@ import (
 	"bytes"
 	"context"
 
-	batchv1 "k8s.io/api/batch/v1"
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -40,10 +40,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/trial/util"
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
+	trialutil "github.com/kubeflow/katib/pkg/controller/v1alpha2/trial/util"
 )
 
-var log = logf.Log.WithName("trial-controller")
+var (
+	log = logf.Log.WithName("trial-controller")
+)
 
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
@@ -77,16 +80,25 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &batchv1.Job{}},
-		&handler.EnqueueRequestForOwner{
-			IsController: true,
-			OwnerType:    &trialsv1alpha2.Trial{},
-		})
-	if err != nil {
-		log.Error(err, "Job watch error")
-		return err
+	for _, gvk := range commonv1alpha2.GetSupportedJobList() {
+		unstructuredJob := &unstructured.Unstructured{}
+		unstructuredJob.SetGroupVersionKind(gvk)
+		err = c.Watch(
+			&source.Kind{Type: unstructuredJob},
+			&handler.EnqueueRequestForOwner{
+				IsController: true,
+				OwnerType:    &trialsv1alpha2.Trial{},
+			})
+		if err != nil {
+			if meta.IsNoMatchError(err) {
+				log.Info("Job watch error. CRD might be missing. Please install CRD and restart katib-controller", "CRD Kind", gvk.Kind)
+				continue
+			}
+			return err
+		} else {
+			log.Info("Job watch added successfully", "CRD Kind", gvk.Kind)
+		}
 	}
-
 	log.Info("Trial  controller created")
 	return nil
 }
@@ -129,7 +141,7 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 	}
 	if !instance.IsCreated() {
 		//Trial not created in DB
-		err = util.CreateTrialInDB(instance)
+		err = trialutil.CreateTrialInDB(instance)
 		if err != nil {
 			logger.Error(err, "Create trial in DB error")
 			return reconcile.Result{}, err
@@ -139,7 +151,7 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 			instance.Status.StartTime = &now
 		}
 		msg := "Trial is created"
-		instance.MarkTrialStatusCreated(util.TrialCreatedReason, msg)
+		instance.MarkTrialStatusCreated(trialutil.TrialCreatedReason, msg)
 		requeue = true
 
 	} else {
@@ -153,7 +165,7 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	if !equality.Semantic.DeepEqual(original.Status, instance.Status) {
 		//assuming that only status change
-		err = util.UpdateTrialStatusInDB(instance)
+		err = trialutil.UpdateTrialStatusInDB(instance)
 		if err != nil {
 			logger.Error(err, "Update trial status in DB error")
 			return reconcile.Result{}, err
@@ -187,11 +199,11 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha2.Trial) error {
 	//Job already exists
 	//TODO Can desired Spec differ from deployedSpec?
 	if deployedJob != nil {
-		if err = util.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
+		if err = trialutil.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
 			logger.Error(err, "Update trial status condition error")
 			return err
 		}
-		if err = util.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
+		if err = trialutil.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
 			logger.Error(err, "Update trial status observation error")
 			return err
 		}
@@ -231,7 +243,7 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 	}
 
 	msg := "Trial is running"
-	instance.MarkTrialStatusRunning(util.TrialRunningReason, msg)
+	instance.MarkTrialStatusRunning(trialutil.TrialRunningReason, msg)
 	return deployedJob, nil
 }
 
