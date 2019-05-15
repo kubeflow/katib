@@ -159,9 +159,27 @@ func (d *dbConn) RegisterExperiment(experiment *v1alpha2.Experiment) error {
 	} else {
 		return fmt.Errorf("Invalid experiment: spec is nil.")
 	}
+
 	now_str := time.Now().UTC().Format(mysqlTimeFmt)
 	start_time = now_str
 	completion_time = now_str
+	if experiment.ExperimentStatus != nil {
+		if experiment.ExperimentStatus.StartTime != "" {
+			s_time, err := time.Parse(time.RFC3339Nano, experiment.ExperimentStatus.StartTime)
+			if err != nil {
+				return fmt.Errorf("Error parsing start time %s: %v", experiment.ExperimentStatus.StartTime, err)
+			}
+			start_time = s_time.UTC().Format(mysqlTimeFmt)
+		}
+		if experiment.ExperimentStatus.CompletionTime != "" {
+			c_time, err := time.Parse(time.RFC3339Nano, experiment.ExperimentStatus.CompletionTime)
+			if err != nil {
+				return fmt.Errorf("Error parsing completion time %s: %v", experiment.ExperimentStatus.CompletionTime, err)
+			}
+			completion_time = c_time.UTC().Format(mysqlTimeFmt)
+		}
+	}
+
 	_, err = d.db.Exec(
 		`INSERT INTO experiments (
 			name, 
