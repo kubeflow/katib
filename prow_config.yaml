@@ -38,6 +38,7 @@ workflows:
     - test/workflows/*
     - manifests/v1alpha1/*
     - scripts/v1alpha1/*
+    - Gopkg*
     params:
       registry: "gcr.io/kubeflow-ci"
   # The postsubmit run publishes the docker images to gcr.io/kubeflow-images-public      
@@ -116,6 +117,7 @@ workflows:
     - test/workflows/*
     - manifests/v1alpha2/*
     - scripts/v1alpha2/*
+    - Gopkg*
     params:
       registry: "gcr.io/kubeflow-ci"
   - app_dir: kubeflow/katib/test/workflows
