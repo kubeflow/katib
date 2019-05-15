@@ -12,5 +12,5 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o metricscollector.v1alph
 # Copy the controller-manager into a thin image
 FROM alpine:3.7
 WORKDIR /app
-COPY --from=build-env /go/src/github.com/kubeflow/katib/cmd/metricscollector/metricscollector.v1alpha2 .
-ENTRYPOINT ["./metricscollector.v1alpha2"]
+COPY --from=build-env /go/src/github.com/kubeflow/katib/cmd/metricscollector/metricscollector .
+ENTRYPOINT ["./metricscollector"]

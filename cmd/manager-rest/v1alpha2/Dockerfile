@@ -6,5 +6,5 @@ RUN go build -o katib-manager-rest.v1alpha2 ./v1alpha2
 
 FROM alpine:3.7
 WORKDIR /app
-COPY --from=build-env /go/src/github.com/kubeflow/katib/cmd/manager-rest/katib-manager-rest.v1alpha2 /app/
-ENTRYPOINT ["./katib-manager-rest.v1alpha2"]
+COPY --from=build-env /go/src/github.com/kubeflow/katib/cmd/manager-rest/katib-manager-rest /app/
+ENTRYPOINT ["./katib-manager-rest"]
