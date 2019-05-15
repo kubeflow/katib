@@ -76,6 +76,7 @@ workflows:
     - pkg/util/v1alpha1/*
     - test/scripts/v1alpha1/*
     - test/workflows/*
+    - Gopkg*
     params:
       registry: "gcr.io/kubeflow-images-public"
   - app_dir: kubeflow/katib/test/workflows
@@ -156,5 +157,6 @@ workflows:
     - pkg/util/v1alpha2/*
     - test/scripts/v1alpha2/*
     - test/workflows/*
+    - Gopkg*
     params:
       registry: "gcr.io/kubeflow-images-public"
