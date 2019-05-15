@@ -209,6 +209,14 @@
                     template: "dep-ensure",
                   },
                   {
+                    name: "setup-cluster",
+                    template: "setup-cluster",
+                  },
+                  {
+                    name: "python-tests",
+                    template: "python-tests",
+                  },
+                  {
                     name: "build-suggestion-bo",
                     template: "build-suggestion-bo",
                   },
@@ -259,19 +267,6 @@
                   {
                     name: "create-pr-symlink",
                     template: "create-pr-symlink",
-                  },
-                ],
-                [  // Setup cluster needs to run after build because we depend on the chart
-                  // created by the build statement.
-                  {
-                    name: "setup-cluster",
-                    template: "setup-cluster",
-                  },
-                ],
-                [
-                  {
-                    name: "python-tests",
-                    template: "python-tests",
                   },
                 ],
                 [
