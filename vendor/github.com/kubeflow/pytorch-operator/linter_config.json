@@ -1,0 +1,29 @@
+{
+    "Vendor": true,
+    "DisableAll": true,
+    "Enable": [
+      "vet",
+      "safesql",
+      "errcheck",
+      "goconst",
+      "goimports",
+      "varcheck",
+      "gosec",
+      "gotype",
+      "staticcheck",
+      "lll",
+      "unconvert",
+      "misspell",
+      "unconvert"
+    ],
+    "Aggregate": true,
+    "WarnUnmatchedNolint": true,
+    "LineLength": 240,
+    "Exclude": [
+      "redundant return statement",
+      "comment or be unexported",
+      "comment on exported"
+    ],
+    "Deadline": "600s",
+    "Skip": ["pkg/client"]
+  }
