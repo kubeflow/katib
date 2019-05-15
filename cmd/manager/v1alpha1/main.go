@@ -5,14 +5,14 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"net"
 	"time"
 
-	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	health_pb "github.com/kubeflow/katib/pkg/api/health"
+	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	kdb "github.com/kubeflow/katib/pkg/db/v1alpha1"
 	"github.com/kubeflow/katib/pkg/manager/modelstore"
+	"k8s.io/klog"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -288,7 +288,7 @@ func (s *server) SaveModel(ctx context.Context, in *api_pb.SaveModelRequest) (*a
 	if s.msIf != nil {
 		err := s.msIf.SaveModel(in)
 		if err != nil {
-			log.Printf("Save Model failed %v", err)
+			klog.Fatalf("Save Model failed %v", err)
 			return &api_pb.SaveModelReply{}, err
 		}
 	}
@@ -349,21 +349,21 @@ func main() {
 
 	dbIf, err = kdb.New()
 	if err != nil {
-		log.Fatalf("Failed to open db connection: %v", err)
+		klog.Fatalf("Failed to open db connection: %v", err)
 	}
 	dbIf.DBInit()
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Fatalf("Failed to listen: %v", err)
+		klog.Fatalf("Failed to listen: %v", err)
 	}
 
 	size := 1<<31 - 1
-	log.Printf("Start Katib manager: %s", port)
+	klog.Infof("Start Katib manager: %s", port)
 	s := grpc.NewServer(grpc.MaxRecvMsgSize(size), grpc.MaxSendMsgSize(size))
 	api_pb.RegisterManagerServer(s, &server{})
 	health_pb.RegisterHealthServer(s, &server{})
 	reflection.Register(s)
 	if err = s.Serve(listener); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
+		klog.Fatalf("Failed to serve: %v", err)
 	}
 }

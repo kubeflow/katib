@@ -2,7 +2,8 @@ package db
 
 import (
 	"fmt"
-	"log"
+
+	"k8s.io/klog"
 )
 
 func (d *dbConn) DBInit() {
@@ -23,7 +24,7 @@ func (d *dbConn) DBInit() {
 		job_type TEXT)`)
 
 	if err != nil {
-		log.Fatalf("Error creating studies table: %v", err)
+		klog.Fatalf("Error creating studies table: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS study_permissions
@@ -32,7 +33,7 @@ func (d *dbConn) DBInit() {
 		PRIMARY KEY (study_id, access_permission),
 		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE)`)
 	if err != nil {
-		log.Fatalf("Error creating study_permissions table: %v", err)
+		klog.Fatalf("Error creating study_permissions table: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS trials
@@ -44,7 +45,7 @@ func (d *dbConn) DBInit() {
 		time DATETIME(6),
 		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE)`)
 	if err != nil {
-		log.Fatalf("Error creating trials table: %v", err)
+		klog.Fatalf("Error creating trials table: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS workers
@@ -58,7 +59,7 @@ func (d *dbConn) DBInit() {
 		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE,
 		FOREIGN KEY(trial_id) REFERENCES trials(id) ON DELETE CASCADE)`)
 	if err != nil {
-		log.Fatalf("Error creating workers table: %v", err)
+		klog.Fatalf("Error creating workers table: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS worker_metrics
@@ -70,7 +71,7 @@ func (d *dbConn) DBInit() {
 		is_objective TINYINT,
 		FOREIGN KEY (worker_id) REFERENCES workers(id) ON DELETE CASCADE)`)
 	if err != nil {
-		log.Fatalf("Error creating worker_metrics table: %v", err)
+		klog.Fatalf("Error creating worker_metrics table: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS worker_lastlogs
@@ -78,7 +79,7 @@ func (d *dbConn) DBInit() {
 		time DATETIME(6),
 		FOREIGN KEY (worker_id) REFERENCES workers(id) ON DELETE CASCADE)`)
 	if err != nil {
-		log.Fatalf("Error creating worker_lastlogs table: %v", err)
+		klog.Fatalf("Error creating worker_lastlogs table: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS suggestion_param
@@ -88,7 +89,7 @@ func (d *dbConn) DBInit() {
 		parameters TEXT,
 		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE)`)
 	if err != nil {
-		log.Fatalf("Error creating suggestion_param table: %v", err)
+		klog.Fatalf("Error creating suggestion_param table: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS earlystop_param
@@ -98,7 +99,7 @@ func (d *dbConn) DBInit() {
 		parameters TEXT,
 		FOREIGN KEY(study_id) REFERENCES studies(id) ON DELETE CASCADE)`)
 	if err != nil {
-		log.Fatalf("Error creating earlystop_param table: %v", err)
+		klog.Fatalf("Error creating earlystop_param table: %v", err)
 	}
 
 }

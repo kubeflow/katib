@@ -4,7 +4,6 @@ import (
 	crand "crypto/rand"
 	"database/sql"
 	"fmt"
-	"log"
 	"math/big"
 	"math/rand"
 	"os"
@@ -12,6 +11,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/jsonpb"
+	"k8s.io/klog"
 
 	v1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 )
@@ -71,7 +71,7 @@ var rs1Letters = []rune("abcdefghijklmnopqrstuvwxyz")
 func getDbName() string {
 	dbPass := os.Getenv("MYSQL_ROOT_PASSWORD")
 	if dbPass == "" {
-		log.Printf("WARN: Env var MYSQL_ROOT_PASSWORD is empty. Falling back to \"test\".")
+		klog.Info("WARN: Env var MYSQL_ROOT_PASSWORD is empty. Falling back to \"test\".")
 
 		// For backward compatibility, e.g. in case that all but vizier-core
 		// is older ones so we do not have Secret nor upgraded vizier-db.
@@ -748,12 +748,12 @@ func (d *dbConn) GetObservationLog(trialName string, startTime string, endTime s
 		var mname, mvalue, sqlTimeStr string
 		err := rows.Scan(&sqlTimeStr, &mname, &mvalue)
 		if err != nil {
-			log.Printf("Error scanning log: %v", err)
+			klog.Errorf("Error scanning log: %v", err)
 			continue
 		}
 		ptime, err := time.Parse(mysqlTimeFmt, sqlTimeStr)
 		if err != nil {
-			log.Printf("Error parsing time %s: %v", sqlTimeStr, err)
+			klog.Errorf("Error parsing time %s: %v", sqlTimeStr, err)
 			continue
 		}
 		timeStamp := ptime.UTC().Format(time.RFC3339Nano)

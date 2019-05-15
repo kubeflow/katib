@@ -23,7 +23,7 @@ limitations under the License.
 package main
 
 import (
-	"log"
+	"k8s.io/klog"
 
 	"github.com/kubeflow/katib/pkg/api/operators/apis"
 	controller "github.com/kubeflow/katib/pkg/controller/v1alpha1"
@@ -37,33 +37,33 @@ func main() {
 	// Get a config to talk to the apiserver
 	cfg, err := config.GetConfig()
 	if err != nil {
-		log.Printf("config.GetConfig()")
-		log.Fatal(err)
+		klog.Info("config.GetConfig()")
+		klog.Fatal(err)
 	}
 
 	// Create a new StudyJobController to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, manager.Options{})
 	if err != nil {
-		log.Printf("manager.New")
-		log.Fatal(err)
+		klog.Info("manager.New")
+		klog.Fatal(err)
 	}
 
-	log.Printf("Registering Components.")
+	klog.Info("Registering Components.")
 
 	// Setup Scheme for all resources
 	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Printf("apis.AddToScheme")
-		log.Fatal(err)
+		klog.Info("apis.AddToScheme")
+		klog.Fatal(err)
 	}
 
 	// Setup StudyJobController
 	if err := controller.AddToManager(mgr); err != nil {
-		log.Printf("controller.AddToManager(mgr)")
-		log.Fatal(err)
+		klog.Info("controller.AddToManager(mgr)")
+		klog.Fatal(err)
 	}
 
-	log.Printf("Starting the Cmd.")
+	klog.Info("Starting the Cmd.")
 
 	// Starting the StudyJobController
-	log.Fatal(mgr.Start(signals.SetupSignalHandler()))
+	klog.Fatal(mgr.Start(signals.SetupSignalHandler()))
 }

@@ -3,11 +3,11 @@ package suggestion
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 
+	api "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
-	"github.com/kubeflow/katib/pkg/api/v1alpha1"
+	"k8s.io/klog"
 
 	"google.golang.org/grpc"
 )
@@ -133,14 +133,14 @@ func (s *GridSuggestService) genGrids(studyID string, pcs []*api.ParameterConfig
 	}
 	ret := make([][]*api.Parameter, holenum)
 	s.setP(0, ret, pg, pcs)
-	log.Printf("Study %v : %v parameters generated", studyID, holenum)
+	klog.Infof("Study %v : %v parameters generated", studyID, holenum)
 	return ret
 }
 
 func (s *GridSuggestService) GetSuggestions(ctx context.Context, in *api.GetSuggestionsRequest) (*api.GetSuggestionsReply, error) {
 	conn, err := grpc.Dial(common.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("could not connect: %v", err)
+		klog.Errorf("could not connect: %v", err)
 		return &api.GetSuggestionsReply{}, err
 	}
 	defer conn.Close()
@@ -150,7 +150,7 @@ func (s *GridSuggestService) GetSuggestions(ctx context.Context, in *api.GetSugg
 	}
 	scr, err := c.GetStudy(ctx, screq)
 	if err != nil {
-		log.Printf("GetStudyConf failed: %v", err)
+		klog.Errorf("GetStudyConf failed: %v", err)
 		return &api.GetSuggestionsReply{}, err
 	}
 	spreq := &api.GetSuggestionParametersRequest{
@@ -158,11 +158,11 @@ func (s *GridSuggestService) GetSuggestions(ctx context.Context, in *api.GetSugg
 	}
 	spr, err := c.GetSuggestionParameters(ctx, spreq)
 	if err != nil {
-		log.Printf("GetParameter failed: %v", err)
+		klog.Errorf("GetParameter failed: %v", err)
 		return &api.GetSuggestionsReply{}, err
 	}
 	df, iteration, glist := s.parseSuggestParam(spr.SuggestionParameters)
-	log.Printf("Study %s iteration %d DefaltGrid %d Grids %v", in.StudyId, iteration, df, glist)
+	klog.Infof("Study %s iteration %d DefaltGrid %d Grids %v", in.StudyId, iteration, df, glist)
 	grids := s.genGrids(in.StudyId, scr.StudyConfig.ParameterConfigs.Configs, df, glist)
 	var reqnum = int(in.RequestNumber)
 	if reqnum == 0 {
@@ -205,7 +205,7 @@ func (s *GridSuggestService) GetSuggestions(ctx context.Context, in *api.GetSugg
 	sspreq.SuggestionParameters = sp
 	_, err = c.SetSuggestionParameters(ctx, sspreq)
 	if err != nil {
-		log.Printf("Save Parameters Failed %v", err)
+		klog.Errorf("Save Parameters Failed %v", err)
 		return &api.GetSuggestionsReply{}, err
 	}
 	for i, t := range trials {

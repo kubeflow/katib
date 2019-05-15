@@ -17,12 +17,11 @@ package studyjob
 
 import (
 	"context"
-	"log"
 	"strconv"
 
-	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 	katibapi "github.com/kubeflow/katib/pkg/api/v1alpha1"
+	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
 	pytorchjobv1beta1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1beta1"
 	commonv1beta1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta1"
 	tfjobv1beta1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1beta1"
@@ -40,6 +39,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -198,7 +198,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 			// For additional cleanup logic use finalizers.
 			return reconcile.Result{}, nil
 		}
-		log.Printf("Fail to read Object %v", err)
+		klog.Errorf("Fail to read Object %v", err)
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
@@ -206,7 +206,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 	deleted := instance.GetDeletionTimestamp() != nil
 	pendingFinalizers := instance.GetFinalizers()
 	if !deleted && !contains(pendingFinalizers, cleanDataFinalizer) {
-		log.Printf("Adding finalizer %s", cleanDataFinalizer)
+		klog.Infof("Adding finalizer %s", cleanDataFinalizer)
 		finalizers := append(pendingFinalizers, cleanDataFinalizer)
 		return r.updateFinalizers(instance, finalizers)
 	}
@@ -216,7 +216,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		}
 		err = deleteStudy(instance)
 		if err != nil {
-			log.Printf("Fail to delete %v", err)
+			klog.Errorf("Fail to delete %v", err)
 			return reconcile.Result{}, err
 		}
 		finalizers := []string{}
@@ -239,7 +239,7 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 		err = initializeStudy(instance)
 		if err != nil {
 			r.Update(context.TODO(), instance)
-			log.Printf("Fail to initialize %v", err)
+			klog.Errorf("Fail to initialize %v", err)
 			return reconcile.Result{}, err
 		}
 		update = true
@@ -248,13 +248,13 @@ func (r *ReconcileStudyJobController) Reconcile(request reconcile.Request) (reco
 	instance.Status.LastReconcileTime = &now
 	if err != nil {
 		r.Update(context.TODO(), instance)
-		log.Printf("Fail to check status %v", err)
+		klog.Errorf("Fail to check status %v", err)
 		return reconcile.Result{}, err
 	}
 	if update {
 		err = r.Update(context.TODO(), instance)
 		if err != nil {
-			log.Printf("Fail to Update StudyJob %v : %v", instance.Status.StudyID, err)
+			klog.Errorf("Fail to Update StudyJob %v : %v", instance.Status.StudyID, err)
 			return reconcile.Result{}, err
 		}
 	}
@@ -265,7 +265,7 @@ func (r *ReconcileStudyJobController) updateFinalizers(instance *katibv1alpha1.S
 	instance.SetFinalizers(finalizers)
 	err := r.Update(context.TODO(), instance)
 	if err != nil {
-		log.Printf("Fail to Update StudyJob %v : %v", instance.Status.StudyID, err)
+		klog.Errorf("Fail to Update StudyJob %v : %v", instance.Status.StudyID, err)
 		return reconcile.Result{}, err
 	} else {
 		// Need to requeue because finalizer update does not change metadata.generation
@@ -409,7 +409,7 @@ func (r *ReconcileStudyJobController) updateWorker(c katibapi.ManagerClient, ins
 				Status:   status.WorkerState,
 			})
 		if err != nil {
-			log.Printf("Fail to update worker info. ID %s", instance.Status.Trials[i].WorkerList[j].WorkerID)
+			klog.Errorf("Fail to update worker info. ID %s", instance.Status.Trials[i].WorkerList[j].WorkerID)
 			return false, err
 		}
 	}
@@ -425,7 +425,7 @@ func (r *ReconcileStudyJobController) getJobWorkerStatus(ns string, wid string, 
 	case DefaultJobWorker:
 		var job batchv1.Job
 		if err := r.Client.Get(context.TODO(), nname, &job); err != nil {
-			log.Printf("Client Get error %v for %v", err, nname)
+			klog.Errorf("Client Get error %v for %v", err, nname)
 			return WorkerStatus{}
 		}
 		if job.Status.Active == 0 && job.Status.Succeeded > 0 {
@@ -439,7 +439,7 @@ func (r *ReconcileStudyJobController) getJobWorkerStatus(ns string, wid string, 
 		u := &unstructured.Unstructured{}
 		u.SetGroupVersionKind(*wkind)
 		if err := r.Client.Get(context.TODO(), nname, u); err != nil {
-			log.Printf("Client Get error %v for %v", err, nname)
+			klog.Errorf("Client Get error %v for %v", err, nname)
 			return WorkerStatus{}
 		}
 		status, ok, unerr := unstructured.NestedFieldCopy(u.Object, "status")
@@ -449,7 +449,7 @@ func (r *ReconcileStudyJobController) getJobWorkerStatus(ns string, wid string, 
 			jobStatus := commonv1beta1.JobStatus{}
 			err := runtime.DefaultUnstructuredConverter.FromUnstructured(statusMap, &jobStatus)
 			if err != nil {
-				log.Printf("Error in converting unstructured to status: %v ", err)
+				klog.Errorf("Error in converting unstructured to status: %v ", err)
 				return WorkerStatus{}
 			}
 			if len(jobStatus.Conditions) > 0 {
@@ -463,7 +463,7 @@ func (r *ReconcileStudyJobController) getJobWorkerStatus(ns string, wid string, 
 			cpTime = jobStatus.CompletionTime
 
 		} else if unerr != nil {
-			log.Printf("Error in getting Job Status from unstructured: %v", unerr)
+			klog.Errorf("Error in getting Job Status from unstructured: %v", unerr)
 			return WorkerStatus{}
 		}
 	}
@@ -486,7 +486,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 	}
 	conn, err := grpc.Dial(common.ManagerAddr, opts...)
 	if err != nil {
-		log.Printf("Connect katib manager error %v", err)
+		klog.Errorf("Connect katib manager error %v", err)
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		return true, nil
 	}
@@ -494,7 +494,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 	c := katibapi.NewManagerClient(conn)
 	wkind, err := getWorkerKind(instance.Spec.WorkerSpec)
 	if err != nil {
-		log.Printf("getWorkerKind error %v", err)
+		klog.Errorf("getWorkerKind error %v", err)
 		return false, err
 	}
 	for i, t := range instance.Status.Trials {
@@ -516,7 +516,7 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 	if len(cwids) > 0 {
 		goal, err := r.checkGoal(instance, c, cwids)
 		if goal {
-			log.Printf("Study %s reached to the goal. It is completed", instance.Status.StudyID)
+			klog.Infof("Study %s reached to the goal. It is completed", instance.Status.StudyID)
 			instance.Status.Condition = katibv1alpha1.ConditionCompleted
 			now := metav1.Now()
 			instance.Status.CompletionTime = &now
@@ -524,12 +524,12 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 			nextSuggestionSchedule = false
 		}
 		if err != nil {
-			log.Printf("Check Goal failed %v", err)
+			klog.Errorf("Check Goal failed %v", err)
 		}
 	}
 	if nextSuggestionSchedule {
 		if instance.Spec.RequestCount > 0 && instance.Status.SuggestionCount >= instance.Spec.RequestCount {
-			log.Printf("Study %s reached the request count. It is completed", instance.Status.StudyID)
+			klog.Infof("Study %s reached the request count. It is completed", instance.Status.StudyID)
 			instance.Status.Condition = katibv1alpha1.ConditionCompleted
 			now := metav1.Now()
 			instance.Status.CompletionTime = &now
@@ -569,23 +569,23 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 	}
 	trials := getSuggestReply.Trials
 	if len(trials) <= 0 {
-		log.Printf("Study %s is completed", instance.Status.StudyID)
+		klog.Infof("Study %s is completed", instance.Status.StudyID)
 		instance.Status.Condition = katibv1alpha1.ConditionCompleted
 		now := metav1.Now()
 		instance.Status.CompletionTime = &now
 		return true, nil
 	}
-	log.Printf("Study: %s Suggestions %v", instance.Status.StudyID, getSuggestReply)
+	klog.Infof("Study: %s Suggestions %v", instance.Status.StudyID, getSuggestReply)
 	wkind, err := getWorkerKind(instance.Spec.WorkerSpec)
 	if err != nil {
-		log.Printf("getWorkerKind error %v", err)
+		klog.Errorf("getWorkerKind error %v", err)
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		return true, err
 	}
 	for _, t := range trials {
 		wid, err := r.spawnWorker(instance, c, instance.Status.StudyID, t, instance.Spec.WorkerSpec, wkind.Kind, false)
 		if err != nil {
-			log.Printf("Spawn worker error %v", err)
+			klog.Errorf("Spawn worker error %v", err)
 			instance.Status.Condition = katibv1alpha1.ConditionFailed
 			return true, err
 		}
@@ -613,7 +613,7 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 	}
 	_, err = c.SetSuggestionParameters(context.Background(), sspr)
 	if err != nil {
-		log.Printf("Study %s Suggestion Count update Error %v", instance.Status.StudyID, err)
+		klog.Errorf("Study %s Suggestion Count update Error %v", instance.Status.StudyID, err)
 		return false, err
 	}
 	instance.Status.SuggestionCount += 1
@@ -636,15 +636,15 @@ func (r *ReconcileStudyJobController) spawnWorker(instance *katibv1alpha1.StudyJ
 	BUFSIZE := 1024
 	job := &unstructured.Unstructured{}
 	if err := k8syaml.NewYAMLOrJSONDecoder(wm, BUFSIZE).Decode(job); err != nil {
-		log.Printf("Yaml decode error %v", err)
+		klog.Errorf("Yaml decode error %v", err)
 		return "", err
 	}
 	if err := controllerutil.SetControllerReference(instance, job, r.scheme); err != nil {
-		log.Printf("SetControllerReference error %v", err)
+		klog.Errorf("SetControllerReference error %v", err)
 		return "", err
 	}
 	if err := r.Create(context.TODO(), job); err != nil {
-		log.Printf("Job Create error %v", err)
+		klog.Errorf("Job Create error %v", err)
 		return "", err
 	}
 
@@ -656,27 +656,27 @@ func (r *ReconcileStudyJobController) spawnMetricsCollector(instance *katibv1alp
 	BUFSIZE := 1024
 	wkind, err := getWorkerKind(instance.Spec.WorkerSpec)
 	if err != nil {
-		log.Printf("getWorkerKind error %v", err)
+		klog.Errorf("getWorkerKind error %v", err)
 		return err
 	}
 	mcm, err := getMetricsCollectorManifest(studyID, trialID, workerID, wkind.Kind, namespace, mcs)
 	if err != nil {
-		log.Printf("getMetricsCollectorManifest error %v", err)
+		klog.Errorf("getMetricsCollectorManifest error %v", err)
 		return err
 	}
 
 	if err := k8syaml.NewYAMLOrJSONDecoder(mcm, BUFSIZE).Decode(&mcjob); err != nil {
-		log.Printf("MetricsCollector Yaml decode error %v", err)
+		klog.Errorf("MetricsCollector Yaml decode error %v", err)
 		return err
 	}
 
 	if err := controllerutil.SetControllerReference(instance, &mcjob, r.scheme); err != nil {
-		log.Printf("MetricsCollector SetControllerReference error %v", err)
+		klog.Errorf("MetricsCollector SetControllerReference error %v", err)
 		return err
 	}
 
 	if err := r.Create(context.TODO(), &mcjob); err != nil {
-		log.Printf("MetricsCollector Job Create error %v", err)
+		klog.Errorf("MetricsCollector Job Create error %v", err)
 		return err
 	}
 	return nil

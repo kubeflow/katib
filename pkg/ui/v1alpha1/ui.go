@@ -4,19 +4,19 @@ import (
 	"context"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
-	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
 	studyjobv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 	api "github.com/kubeflow/katib/pkg/api/v1alpha1"
+	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
 	"github.com/kubeflow/katib/pkg/manager/v1alpha1/studyjobclient"
 
 	"github.com/pressly/chi"
 	"google.golang.org/grpc"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/klog"
 )
 
 const maxMsgSize = 1<<31 - 1
@@ -56,7 +56,7 @@ func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api.ManagerClient, 
 	}
 	conn, err := grpc.Dial(common.ManagerAddr, opts...)
 	if err != nil {
-		log.Printf("Connect katib manager error %v", err)
+		klog.Errorf("Connect katib manager error %v", err)
 		return nil, nil, err
 	}
 	c := api.NewManagerClient(conn)
@@ -74,7 +74,7 @@ func (k *KatibUIHandler) Index(w http.ResponseWriter, r *http.Request) {
 		&api.GetStudyListRequest{},
 	)
 	if err != nil {
-		log.Printf("Get Study list failed %v", err)
+		klog.Errorf("Get Study list failed %v", err)
 		return
 	}
 	type StudyNameStack struct {
@@ -115,7 +115,7 @@ func (k *KatibUIHandler) Index(w http.ResponseWriter, r *http.Request) {
 	}
 	sl, err := k.studyjobClient.GetStudyJobList()
 	if err != nil {
-		log.Printf("StudyjobClient List err %v", err)
+		klog.Errorf("StudyjobClient List err %v", err)
 	} else {
 		for _, sj := range sl.Items {
 			ss, ok := slv.StudySummarys[sj.Spec.StudyName]
@@ -144,10 +144,10 @@ func (k *KatibUIHandler) Index(w http.ResponseWriter, r *http.Request) {
 	}
 	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/index.html", "/app/template/navbar.html")
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 	if err := t.ExecuteTemplate(w, "layout", slv); err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 }
 
@@ -173,7 +173,7 @@ func (k *KatibUIHandler) StudyJobGen(w http.ResponseWriter, r *http.Request) {
 	conn, c, err := k.connectManager()
 	defer conn.Close()
 	if err != nil {
-		log.Printf("Failed to connect Katib manager %v", err)
+		klog.Errorf("Failed to connect Katib manager %v", err)
 	}
 	var sparam *studyjobv1alpha1.SuggestionSpec = nil
 	reqcount := 0
@@ -182,7 +182,7 @@ func (k *KatibUIHandler) StudyJobGen(w http.ResponseWriter, r *http.Request) {
 	if sid != "" || sname != "" {
 		sl, err := k.studyjobClient.GetStudyJobList()
 		if err != nil {
-			log.Printf("StudyjobClient List err %v", err)
+			klog.Errorf("StudyjobClient List err %v", err)
 		} else {
 			var ltime *time.Time
 			for _, sj := range sl.Items {
@@ -214,7 +214,7 @@ func (k *KatibUIHandler) StudyJobGen(w http.ResponseWriter, r *http.Request) {
 					&api.GetStudyListRequest{},
 				)
 				if err != nil {
-					log.Printf("Get Study List err %v", err)
+					klog.Errorf("Get Study List err %v", err)
 				} else {
 					for _, so := range gslrep.StudyOverviews {
 						if so.Name == sname {
@@ -228,11 +228,11 @@ func (k *KatibUIHandler) StudyJobGen(w http.ResponseWriter, r *http.Request) {
 	}
 	wt, err := k.studyjobClient.GetWorkerTemplates()
 	if err != nil {
-		log.Printf("GetWorkerTemplates err %v", err)
+		klog.Errorf("GetWorkerTemplates err %v", err)
 	}
 	mt, err := k.studyjobClient.GetMetricsCollectorTemplates()
 	if err != nil {
-		log.Printf("GetMetricsCollectorTemplates err %v", err)
+		klog.Errorf("GetMetricsCollectorTemplates err %v", err)
 	}
 	type Param struct {
 		Name string
@@ -273,7 +273,7 @@ func (k *KatibUIHandler) StudyJobGen(w http.ResponseWriter, r *http.Request) {
 				},
 			)
 			if err != nil {
-				log.Printf("Get Study %s failed %v", sid, err)
+				klog.Errorf("Get Study %s failed %v", sid, err)
 			} else {
 				sjd.StudyName = gsrep.StudyConfig.Name
 				sjd.Owner = gsrep.StudyConfig.Owner
@@ -317,17 +317,17 @@ func (k *KatibUIHandler) StudyJobGen(w http.ResponseWriter, r *http.Request) {
 	sjd.MetricsCollectorTemplateName = mtn
 	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/studyjobgen.html", "/app/template/studyjobgen.js", "/app/template/navbar.html")
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 	if err := t.ExecuteTemplate(w, "layout", sjd); err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 }
 
 func (k *KatibUIHandler) WorkerTemplate(w http.ResponseWriter, r *http.Request) {
 	wt, err := k.studyjobClient.GetWorkerTemplates()
 	if err != nil {
-		log.Printf("GetWorkerTemplates err %v", err)
+		klog.Errorf("GetWorkerTemplates err %v", err)
 	}
 	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/workertemplate.html", "/app/template/workertemplate.js", "/app/template/navbar.html")
 	type WorkerTemplateView struct {
@@ -339,10 +339,10 @@ func (k *KatibUIHandler) WorkerTemplate(w http.ResponseWriter, r *http.Request) 
 		WorkerTemplate: wt,
 	}
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 	if err := t.ExecuteTemplate(w, "layout", wtv); err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 }
 
@@ -360,14 +360,14 @@ func (k *KatibUIHandler) UpdateWorkerTemplate(w http.ResponseWriter, r *http.Req
 	}
 	err := k.studyjobClient.UpdateWorkerTemplates(wt)
 	if err != nil {
-		log.Printf("fail to UpdateWorkerTemplate %v", err)
+		klog.Errorf("fail to UpdateWorkerTemplate %v", err)
 	}
 }
 
 func (k *KatibUIHandler) MetricsCollectorTemplate(w http.ResponseWriter, r *http.Request) {
 	mt, err := k.studyjobClient.GetMetricsCollectorTemplates()
 	if err != nil {
-		log.Printf("GetMetricsCollectorTemplates err %v", err)
+		klog.Errorf("GetMetricsCollectorTemplates err %v", err)
 	}
 	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/metricscollectortemplate.html", "/app/template/metricscollectortemplate.js", "/app/template/navbar.html")
 	type MetricsCollectorTemplateView struct {
@@ -379,10 +379,10 @@ func (k *KatibUIHandler) MetricsCollectorTemplate(w http.ResponseWriter, r *http
 		MetricsCollectorTemplate: mt,
 	}
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 	if err := t.ExecuteTemplate(w, "layout", mtv); err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 }
 
@@ -400,7 +400,7 @@ func (k *KatibUIHandler) UpdateMetricsCollectorTemplate(w http.ResponseWriter, r
 	}
 	err := k.studyjobClient.UpdateMetricsCollectorTemplates(mt)
 	if err != nil {
-		log.Printf("fail to UpdateMetricsCollectorTemplate %v", err)
+		klog.Errorf("fail to UpdateMetricsCollectorTemplate %v", err)
 	}
 }
 
@@ -427,7 +427,7 @@ func (k *KatibUIHandler) Study(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		log.Printf("Get Study %s failed %v", studyID, err)
+		klog.Errorf("Get Study %s failed %v", studyID, err)
 		return
 	}
 	sv := StudyView{
@@ -448,10 +448,10 @@ func (k *KatibUIHandler) Study(w http.ResponseWriter, r *http.Request) {
 	}
 	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/study.html", "/app/template/parallelcood.js", "/app/template/navbar.html")
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 	if err := t.ExecuteTemplate(w, "layout", sv); err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 }
 
@@ -459,7 +459,7 @@ func (k *KatibUIHandler) StudyInfoCsv(w http.ResponseWriter, r *http.Request) {
 	studyID := chi.URLParam(r, "studyid")
 	conn, c, err := k.connectManager()
 	if err != nil {
-		log.Println(err)
+		klog.Error(err)
 		return
 	}
 	defer conn.Close()
@@ -471,7 +471,7 @@ func (k *KatibUIHandler) StudyInfoCsv(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		log.Println(err)
+		klog.Error(err)
 		return
 	}
 	metricsList := map[string]int{}
@@ -492,7 +492,7 @@ func (k *KatibUIHandler) StudyInfoCsv(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		log.Println(err)
+		klog.Error(err)
 		return
 	}
 	retText += "\n"
@@ -531,7 +531,7 @@ func (k *KatibUIHandler) Trial(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 	view := TrialView{
 		IDList: &IDList{
@@ -552,15 +552,15 @@ func (k *KatibUIHandler) Trial(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 	view.Workers = gwrep.Workers
 	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/trial.html", "/app/template/navbar.html")
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 	if err := t.ExecuteTemplate(w, "layout", view); err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 }
 
@@ -581,7 +581,7 @@ func (k *KatibUIHandler) WorkerInfoCsv(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 	if len(gwfirep.WorkerFullInfos) > 0 {
 		for _, m := range gwfirep.WorkerFullInfos[0].MetricsLogs {
@@ -629,7 +629,7 @@ func (k *KatibUIHandler) Worker(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 	if len(gwfirep.WorkerFullInfos) != 1 {
 		fmt.Fprint(w, "Worker ID is wrong.")
@@ -673,9 +673,9 @@ func (k *KatibUIHandler) Worker(w http.ResponseWriter, r *http.Request) {
 	}
 	t, err := template.ParseFiles("/app/template/layout.html", "/app/template/worker.html", "/app/template/linegraph.js", "/app/template/navbar.html")
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 	if err := t.ExecuteTemplate(w, "layout", wv); err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 }
