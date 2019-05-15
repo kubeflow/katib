@@ -7,7 +7,7 @@ workflows:
     job_types:
       - presubmit
     include_dirs:
-    - pkg/api/operators/apis/studyjob
+    - pkg/api/operators/apis/studyjob/*
     - pkg/api/operators/apis/*.go
     - pkg/api/health/*
     - pkg/api/v1alpha1/*
@@ -47,7 +47,7 @@ workflows:
     job_types:      
       - postsubmit
     include_dirs:
-    - pkg/api/operators/apis/studyjob
+    - pkg/api/operators/apis/studyjob/*
     - pkg/api/operators/apis/*.go
     - pkg/api/health/*
     - pkg/api/v1alpha1/*
