@@ -37,6 +37,6 @@ cp -r vendor ${GO_DIR}/vendor
 
 cd ${GO_DIR}
 
-cp cmd/suggestion/grid/Dockerfile .
-gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-grid:${VERSION} --project=${PROJECT}
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/suggestion-grid:${VERSION} ${REGISTRY}/${REPO_NAME}/suggestion-grid:latest --verbosity=info
+cp cmd/suggestion/grid/v1alpha1/Dockerfile .
+gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha1/suggestion-grid:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha1/suggestion-grid:${VERSION} ${REGISTRY}/${REPO_NAME}/suggestion-grid:latest --verbosity=info

@@ -3,10 +3,8 @@ FROM golang:alpine AS build-env
 ADD . /go/src/github.com/kubeflow/katib
 WORKDIR /go/src/github.com/kubeflow/katib/cmd/manager-rest
 RUN go build -o vizier-manager-rest ./v1alpha1
-RUN go build -o katib-manager-rest.v1alpha2 ./v1alpha2
 
 FROM alpine:3.7
 WORKDIR /app
 COPY --from=build-env /go/src/github.com/kubeflow/katib/cmd/manager-rest/vizier-manager-rest /app/
-COPY --from=build-env /go/src/github.com/kubeflow/katib/cmd/manager-rest/katib-manager-rest.v1alpha2 /app/
 ENTRYPOINT ["./vizier-manager-rest"]
