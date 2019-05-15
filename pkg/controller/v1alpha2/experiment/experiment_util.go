@@ -7,6 +7,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/types"
 	utilrand "k8s.io/apimachinery/pkg/util/rand"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
@@ -75,4 +76,22 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 	}
 	return nil
 
+}
+
+func (r *ReconcileExperiment) updateFinalizers(instance *experimentsv1alpha2.Experiment, finalizers []string) (reconcile.Result, error) {
+	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace})
+	if instance.GetDeletionTimestamp() != nil {
+		if err := util.DeleteExperimentInDB(instance); err != nil {
+			logger.Error(err, "Fail to delete data in DB")
+			return reconcile.Result{}, err
+		}
+	}
+	instance.SetFinalizers(finalizers)
+	if err := r.Update(context.TODO(), instance); err != nil {
+		logger.Error(err, "Fail to update finalizers")
+		return reconcile.Result{}, err
+	} else {
+		// Need to requeue because finalizer update does not change metadata.generation
+		return reconcile.Result{Requeue: true}, err
+	}
 }
