@@ -205,10 +205,6 @@
                 }],
                 [
                   {
-                    name: "dep-ensure",
-                    template: "dep-ensure",
-                  },
-                  {
                     name: "python-tests",
                     template: "python-tests",
                   },
@@ -224,8 +220,6 @@
                     name: "build-suggestion-nasrl",
                     template: "build-suggestion-nasrl",
                   },
-                ],
-                [
                   {
                     name: "build-manager",
                     template: "build-manager",

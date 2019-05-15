@@ -205,10 +205,6 @@
                 }],
                 [
                   {
-                    name: "dep-ensure",
-                    template: "dep-ensure",
-                  },
-                  {
                     name: "setup-cluster",
                     template: "setup-cluster",
                   },
@@ -224,14 +220,10 @@
                     name: "build-suggestion-nasrl",
                     template: "build-suggestion-nasrl",
                   },
-                ],
-                [
                   {
                     name: "unit-test",
                     template: "unit-test",
                   },
-                ],
-                [
                   {
                     name: "build-manager",
                     template: "build-manager",
@@ -339,9 +331,6 @@
               "copy_artifacts",
               "--bucket=" + bucket,
             ]),  // copy-artifacts
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("dep-ensure", testWorkerImage, [
-              "test/scripts/v1alpha2/get-vendor-packages.sh",
-            ]),  // dep ensure
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
               "test/scripts/v1alpha2/build-manager.sh",
             ]),  // build-manager
