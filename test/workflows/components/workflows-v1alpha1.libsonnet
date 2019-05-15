@@ -209,10 +209,6 @@
                     template: "python-tests",
                   },
                   {
-                    name: "setup-cluster",
-                    template: "setup-cluster",
-                  },
-                  {
                     name: "build-suggestion-bo",
                     template: "build-suggestion-bo",
                   },
@@ -255,6 +251,12 @@
                   {
                     name: "create-pr-symlink",
                     template: "create-pr-symlink",
+                  },
+                ],
+                [
+                  {
+                    name: "setup-cluster",
+                    template: "setup-cluster",
                   },
                 ],
                 [

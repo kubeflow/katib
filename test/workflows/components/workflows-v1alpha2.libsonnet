@@ -205,10 +205,6 @@
                 }],
                 [
                   {
-                    name: "setup-cluster",
-                    template: "setup-cluster",
-                  },
-                  {
                     name: "python-tests",
                     template: "python-tests",
                   },
@@ -259,6 +255,12 @@
                   {
                     name: "create-pr-symlink",
                     template: "create-pr-symlink",
+                  },
+                ],
+                [
+                  {
+                    name: "setup-cluster",
+                    template: "setup-cluster",
                   },
                 ],
                 [
