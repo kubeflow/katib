@@ -129,7 +129,7 @@ func (g *General) validateTrialTemplate(instance *experimentsv1alpha2.Experiment
 
 func (g *General) validateSupportedJob(job *unstructured.Unstructured) error {
 	gvk := job.GroupVersionKind()
-	supportedJobs := commonv1alpha2.getSupportedJobList()
+	supportedJobs := commonv1alpha2.GetSupportedJobList()
 	for _, sJob := range supportedJobs {
 		if gvk == sJob {
 			return nil
