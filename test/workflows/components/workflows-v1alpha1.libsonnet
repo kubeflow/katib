@@ -333,9 +333,6 @@
               "copy_artifacts",
               "--bucket=" + bucket,
             ]),  // copy-artifacts
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("dep-ensure", testWorkerImage, [
-              "test/scripts/v1alpha1/get-vendor-packages.sh",
-            ]),  // dep ensure
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
               "test/scripts/v1alpha1/build-manager.sh",
             ]),  // build-manager
