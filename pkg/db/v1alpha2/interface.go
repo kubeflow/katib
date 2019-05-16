@@ -277,14 +277,14 @@ func (d *dbConn) GetExperiment(experimentName string) (*v1alpha2.Experiment, err
 	if start_time != "" {
 		start_timeMysql, err := time.Parse(mysqlTimeFmt, start_time)
 		if err != nil {
-			log.Printf("Error parsing Trial start time %s to mysqlFormat: %v", start_time, err)
+			return nil, fmt.Errorf("Error parsing Trial start time %s to mysqlFormat: %v", start_time, err)
 		}
 		experiment.ExperimentStatus.StartTime = start_timeMysql.UTC().Format(time.RFC3339Nano)
 	}
 	if completion_time != "" {
 		completion_timeMysql, err := time.Parse(mysqlTimeFmt, completion_time)
 		if err != nil {
-			log.Printf("Error parsing Trial completion time %s to mysqlFormat: %v", completion_time, err)
+			return nil, fmt.Errorf("Error parsing Trial completion time %s to mysqlFormat: %v", completion_time, err)
 		}
 		experiment.ExperimentStatus.CompletionTime = completion_timeMysql.UTC().Format(time.RFC3339Nano)
 	}
@@ -312,24 +312,21 @@ func (d *dbConn) GetExperimentList() ([]*v1alpha2.ExperimentSummary, error) {
 			&completion_time,
 		)
 		if err != nil {
-			log.Printf("Fail to get Experiment from DB. %v", err)
-			continue
+			return nil, fmt.Errorf("Fail to get Experiment from DB. %v", err)
 		}
 		if start_time != "" {
 			start_timeMysql, err := time.Parse(mysqlTimeFmt, start_time)
 			if err != nil {
-				log.Printf("Error parsing Trial start time %s to mysqlFormat: %v", start_time, err)
-			} else {
-				experiment_sum.Status.StartTime = start_timeMysql.UTC().Format(time.RFC3339Nano)
+				return nil, fmt.Errorf("Error parsing Trial start time %s to mysqlFormat: %v", start_time, err)
 			}
+			experiment_sum.Status.StartTime = start_timeMysql.UTC().Format(time.RFC3339Nano)
 		}
 		if completion_time != "" {
 			completion_timeMysql, err := time.Parse(mysqlTimeFmt, completion_time)
 			if err != nil {
-				log.Printf("Error parsing Trial completion time %s to mysqlFormat: %v", completion_time, err)
-			} else {
-				experiment_sum.Status.CompletionTime = completion_timeMysql.UTC().Format(time.RFC3339Nano)
+				return nil, fmt.Errorf("Error parsing Trial completion time %s to mysqlFormat: %v", completion_time, err)
 			}
+			experiment_sum.Status.CompletionTime = completion_timeMysql.UTC().Format(time.RFC3339Nano)
 		}
 		result = append(result, &experiment_sum)
 	}
@@ -343,14 +340,14 @@ func (d *dbConn) UpdateExperimentStatus(experimentName string, newStatus *v1alph
 	if newStatus.StartTime != "" {
 		s_time, err := time.Parse(time.RFC3339Nano, newStatus.StartTime)
 		if err != nil {
-			log.Printf("Error parsing start time %s: %v", newStatus.StartTime, err)
+			return fmt.Errorf("Error parsing start time %s: %v", newStatus.StartTime, err)
 		}
 		start_time = s_time.UTC().Format(mysqlTimeFmt)
 	}
 	if newStatus.CompletionTime != "" {
 		c_time, err := time.Parse(time.RFC3339Nano, newStatus.CompletionTime)
 		if err != nil {
-			log.Printf("Error parsing completion time %s: %v", newStatus.CompletionTime, err)
+			return fmt.Errorf("Error parsing completion time %s: %v", newStatus.CompletionTime, err)
 		}
 		completion_time = c_time.UTC().Format(mysqlTimeFmt)
 	}
@@ -418,7 +415,7 @@ func (d *dbConn) GetAlgorithmExtraSettings(experimentName string) ([]*v1alpha2.A
 			&as.Value,
 		)
 		if err != nil {
-			log.Printf("Failed to scan ExtraSetting %v", err)
+			return nil, fmt.Errorf("Failed to scan ExtraSetting %v", err)
 		}
 		result = append(result, as)
 	}
@@ -436,13 +433,13 @@ func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
 		if trial.TrialSpec.Objective != nil {
 			objSpec, err = (&jsonpb.Marshaler{}).MarshalToString(trial.TrialSpec.Objective)
 			if err != nil {
-				log.Fatalf("Error marshaling Objective: %v", err)
+				return fmt.Errorf("Error marshaling Objective: %v", err)
 			}
 		}
 		if trial.TrialSpec.ParameterAssignments != nil {
 			paramAssignment, err = (&jsonpb.Marshaler{}).MarshalToString(trial.TrialSpec.ParameterAssignments)
 			if err != nil {
-				log.Fatalf("Error marshaling Parameters: %v", err)
+				return fmt.Errorf("Error marshaling Parameters: %v", err)
 			}
 		}
 	} else {
@@ -457,20 +454,20 @@ func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
 		if trial.TrialStatus.Observation != nil {
 			observation, err = (&jsonpb.Marshaler{}).MarshalToString(trial.TrialStatus.Observation)
 			if err != nil {
-				log.Fatalf("Error marshaling Observation: %v", err)
+				return fmt.Errorf("Error marshaling Objective: %v", err)
 			}
 		}
 		if trial.TrialStatus.StartTime != "" {
 			s_time, err := time.Parse(time.RFC3339Nano, trial.TrialStatus.StartTime)
 			if err != nil {
-				log.Printf("Error parsing start time %s: %v", trial.TrialStatus.StartTime, err)
+				return fmt.Errorf("Error parsing start time %s: %v", trial.Status.StartTime, err)
 			}
 			start_time = s_time.UTC().Format(mysqlTimeFmt)
 		}
 		if trial.TrialStatus.CompletionTime != "" {
 			c_time, err := time.Parse(time.RFC3339Nano, trial.TrialStatus.CompletionTime)
 			if err != nil {
-				log.Printf("Error parsing completion time %s: %v", trial.TrialStatus.CompletionTime, err)
+				return fmt.Errorf("Error parsing completion time %s: %v", trial.Status.CompletionTime, err)
 			}
 			completion_time = c_time.UTC().Format(mysqlTimeFmt)
 		}
@@ -545,7 +542,7 @@ func (d *dbConn) GetTrialList(experimentName string, filter string) ([]*v1alpha2
 			&completion_time,
 		)
 		if err != nil {
-			log.Printf("Failed to scan trial %v", err)
+			return nil, fmt.Errorf("Failed to scan trial %v", err)
 		}
 		if objSpec != "" {
 			trial.TrialSpec.Objective = new(v1alpha2.ObjectiveSpec)
@@ -571,14 +568,14 @@ func (d *dbConn) GetTrialList(experimentName string, filter string) ([]*v1alpha2
 		if start_time != "" {
 			start_timeMysql, err := time.Parse(mysqlTimeFmt, start_time)
 			if err != nil {
-				log.Printf("Error parsing Trial start time %s to mysqlFormat: %v", start_time, err)
+				return nil, fmt.Errorf("Error parsing Trial start time %s to mysqlFormat: %v", start_time, err)
 			}
 			trial.TrialStatus.StartTime = start_timeMysql.UTC().Format(time.RFC3339Nano)
 		}
 		if completion_time != "" {
 			completion_timeMysql, err := time.Parse(mysqlTimeFmt, completion_time)
 			if err != nil {
-				log.Printf("Error parsing Trial completion time %s to mysqlFormat: %v", completion_time, err)
+				return nil, fmt.Errorf("Error parsing Trial completion time %s to mysqlFormat: %v", completion_time, err)
 			}
 			trial.TrialStatus.CompletionTime = completion_timeMysql.UTC().Format(time.RFC3339Nano)
 		}
@@ -636,14 +633,14 @@ func (d *dbConn) GetTrial(trialName string) (*v1alpha2.Trial, error) {
 	if start_time != "" {
 		start_timeMysql, err := time.Parse(mysqlTimeFmt, start_time)
 		if err != nil {
-			log.Printf("Error parsing Trial start time %s to mysqlFormat: %v", start_time, err)
+			return nil, fmt.Errorf("Error parsing Trial start time %s to mysqlFormat: %v", start_time, err)
 		}
 		trial.TrialStatus.StartTime = start_timeMysql.UTC().Format(time.RFC3339Nano)
 	}
 	if completion_time != "" {
 		completion_timeMysql, err := time.Parse(mysqlTimeFmt, completion_time)
 		if err != nil {
-			log.Printf("Error parsing Trial completion time %s to mysqlFormat: %v", completion_time, err)
+			return nil, fmt.Errorf("Error parsing Trial completion time %s to mysqlFormat: %v", completion_time, err)
 		}
 		trial.TrialStatus.CompletionTime = completion_timeMysql.UTC().Format(time.RFC3339Nano)
 	}
@@ -658,21 +655,21 @@ func (d *dbConn) UpdateTrialStatus(trialName string, newStatus *v1alpha2.TrialSt
 	if newStatus.Observation != nil {
 		observation, err = (&jsonpb.Marshaler{}).MarshalToString(newStatus.Observation)
 		if err != nil {
-			log.Fatalf("Error marshaling Objective: %v", err)
+			return fmt.Errorf("Error marshaling Objective: %v", err)
 		}
 	}
 
 	if newStatus.StartTime != "" {
 		start_time, err := time.Parse(time.RFC3339Nano, newStatus.StartTime)
 		if err != nil {
-			log.Printf("Error parsing start time %s: %v", newStatus.StartTime, err)
+			return fmt.Errorf("Error parsing start time %s: %v", newStatus.StartTime, err)
 		}
 		formattedStartTime = start_time.UTC().Format(mysqlTimeFmt)
 	}
 	if newStatus.CompletionTime != "" {
 		completion_time, err := time.Parse(time.RFC3339Nano, newStatus.CompletionTime)
 		if err != nil {
-			log.Printf("Error parsing completion time %s: %v", newStatus.CompletionTime, err)
+			return fmt.Errorf("Error parsing completion time %s: %v", newStatus.CompletionTime, err)
 		}
 		formattedCompletionTime = completion_time.UTC().Format(mysqlTimeFmt)
 	}
@@ -702,7 +699,7 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1alph
 		}
 		t, err := time.Parse(time.RFC3339Nano, mlog.TimeStamp)
 		if err != nil {
-			log.Printf("Error parsing start time %s: %v", mlog.TimeStamp, err)
+			return fmt.Errorf("Error parsing start time %s: %v", mlog.TimeStamp, err)
 		}
 		sqlTimeStr := t.UTC().Format(mysqlTimeFmt)
 		_, err = d.db.Exec(
@@ -729,7 +726,7 @@ func (d *dbConn) GetObservationLog(trialName string, startTime string, endTime s
 	if startTime != "" {
 		s_time, err := time.Parse(time.RFC3339Nano, startTime)
 		if err != nil {
-			log.Printf("Error parsing start time %s: %v", startTime, err)
+			return nil, fmt.Errorf("Error parsing start time %s: %v", startTime, err)
 		}
 		formattedStartTime := s_time.UTC().Format(mysqlTimeFmt)
 		qstr += " AND time >= ?"
@@ -738,7 +735,7 @@ func (d *dbConn) GetObservationLog(trialName string, startTime string, endTime s
 	if endTime != "" {
 		e_time, err := time.Parse(time.RFC3339Nano, endTime)
 		if err != nil {
-			log.Printf("Error parsing completion time %s: %v", endTime, err)
+			return nil, fmt.Errorf("Error parsing completion time %s: %v", endTime, err)
 		}
 		formattedEndTime := e_time.UTC().Format(mysqlTimeFmt)
 		qstr += " AND time <= ?"
