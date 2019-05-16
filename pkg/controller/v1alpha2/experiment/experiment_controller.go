@@ -207,6 +207,10 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 	instance := original.DeepCopy()
 
+	if needUpdate, finalizers := instance.NeedUpdateFinalizers(); needUpdate {
+		return r.updateFinalizers(instance, finalizers)
+	}
+
 	if instance.IsCompleted() {
 
 		return reconcile.Result{}, nil
@@ -214,18 +218,21 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 	if !instance.IsCreated() {
 		//Experiment not created in DB
+		if instance.Status.StartTime == nil {
+			now := metav1.Now()
+			instance.Status.StartTime = &now
+		}
+		if instance.Status.CompletionTime == nil {
+			instance.Status.CompletionTime = &metav1.Time{}
+		}
+		msg := "Experiment is created"
+		instance.MarkExperimentStatusCreated(util.ExperimentCreatedReason, msg)
+
 		err = util.CreateExperimentInDB(instance)
 		if err != nil {
 			logger.Error(err, "Create experiment in DB error")
 			return reconcile.Result{}, err
 		}
-
-		if instance.Status.StartTime == nil {
-			now := metav1.Now()
-			instance.Status.StartTime = &now
-		}
-		msg := "Experiment is created"
-		instance.MarkExperimentStatusCreated(util.ExperimentCreatedReason, msg)
 		requeue = true
 	} else {
 		// Experiment already created in DB

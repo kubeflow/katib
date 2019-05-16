@@ -204,12 +204,18 @@
                   template: "checkout",
                 }],
                 [
-                {
-                    name: "dep-ensure",
-                    template: "dep-ensure",
-                }
-                ],
-                [
+                  {
+                    name: "python-tests",
+                    template: "python-tests",
+                  },
+                  {
+                    name: "build-suggestion-bo",
+                    template: "build-suggestion-bo",
+                  },
+                  {
+                    name: "build-suggestion-nasrl",
+                    template: "build-suggestion-nasrl",
+                  },
                   {
                     name: "build-manager",
                     template: "build-manager",
@@ -235,14 +241,6 @@
                     template: "build-suggestion-hyperband",
                   },
                   {
-                    name: "build-suggestion-bo",
-                    template: "build-suggestion-bo",
-                  },
-                  {
-                    name: "build-suggestion-nasrl",
-                    template: "build-suggestion-nasrl",
-                  },
-                  {
                     name: "build-earlystopping-median",
                     template: "build-earlystopping-median",
                   },
@@ -255,8 +253,7 @@
                     template: "create-pr-symlink",
                   },
                 ],
-                [  // Setup cluster needs to run after build because we depend on the chart
-                  // created by the build statement.
+                [
                   {
                     name: "setup-cluster",
                     template: "setup-cluster",
@@ -267,14 +264,6 @@
                     name: "unit-test",
                     template: "unit-test",
                   },
-                ],
-                [
-                  {
-                    name: "python-tests",
-                    template: "python-tests",
-                  },
-                ],
-                [
                   {
                     name: "run-tests",
                     template: "run-tests",
@@ -344,9 +333,6 @@
               "copy_artifacts",
               "--bucket=" + bucket,
             ]),  // copy-artifacts
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("dep-ensure", testWorkerImage, [
-              "test/scripts/v1alpha1/get-vendor-packages.sh",
-            ]),  // dep ensure
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
               "test/scripts/v1alpha1/build-manager.sh",
             ]),  // build-manager

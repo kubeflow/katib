@@ -65,8 +65,8 @@ echo "REGISTRY ${REGISTRY}"
 echo "REPO_NAME ${REPO_NAME}"
 echo "VERSION ${VERSION}"
 
-sed -i -e "s@image: katib\/katib-controller@image: ${REGISTRY}\/${REPO_NAME}\/katib-controller:${VERSION}@" manifests/v1alpha2/katib-controller/katib-controller.yaml
-sed -i -e "s@image: katib\/katib-manager@image: ${REGISTRY}\/${REPO_NAME}\/katib-manager:${VERSION}@" manifests/v1alpha2/katib/manager/deployment.yaml
+sed -i -e "s@image: katib\/katib-controller@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-controller:${VERSION}@" manifests/v1alpha2/katib-controller/katib-controller.yaml
+sed -i -e "s@image: katib\/katib-manager@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-manager:${VERSION}@" manifests/v1alpha2/katib/manager/deployment.yaml
 
 ./scripts/v1alpha2/deploy.sh
 

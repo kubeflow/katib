@@ -20,6 +20,8 @@ required = [
 
 [prune]
   go-tests = true
+  unused-packages = true
+  non-go = true
 
 [[constraint]]
   name = "github.com/go-sql-driver/mysql"
@@ -97,3 +99,8 @@ required = [
 [[constraint]]
   name = "github.com/awalterschulze/gographviz"
   branch = "master"
+
+[[prune.project]]
+  name = "github.com/kubeflow/katib"
+  unused-packages = false
+  non-go = false

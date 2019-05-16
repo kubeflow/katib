@@ -21,16 +21,11 @@ workflows:
     - pkg/ui/*
     - cmd/earlystopping/*
     - cmd/katib-controller/v1alpha1/*
-    - cmd/katib-controller/Dockerfile
     - cmd/manager/v1alpha1/*
-    - cmd/manager/Dockerfile
     - cmd/manager-rest/v1alpha1/*
-    - cmd/manager-rest/Dockerfile
     - cmd/metricscollector/v1alpha1/*
-    - cmd/metricscollector/Dockerfile
     - cmd/suggestion/*
     - cmd/tfevent-metricscollector/v1alpha1/*
-    - cmd/tfevent-metricscollector/Dockerfile
     - cmd/ui/*
     - pkg/util/v1alpha1/*
     - test/e2e/v1alpha1/*
@@ -38,6 +33,7 @@ workflows:
     - test/workflows/*
     - manifests/v1alpha1/*
     - scripts/v1alpha1/*
+    - vendor/*
     params:
       registry: "gcr.io/kubeflow-ci"
   # The postsubmit run publishes the docker images to gcr.io/kubeflow-images-public      
@@ -61,20 +57,16 @@ workflows:
     - pkg/ui/*
     - cmd/earlystopping/*
     - cmd/katib-controller/v1alpha1/*
-    - cmd/katib-controller/Dockerfile
     - cmd/manager/v1alpha1/*
-    - cmd/manager/Dockerfile
     - cmd/manager-rest/v1alpha1/*
-    - cmd/manager-rest/Dockerfile
     - cmd/metricscollector/v1alpha1/*
-    - cmd/metricscollector/Dockerfile
     - cmd/suggestion/*
     - cmd/tfevent-metricscollector/v1alpha1/*
-    - cmd/tfevent-metricscollector/Dockerfile
     - cmd/ui/*
     - pkg/util/v1alpha1/*
     - test/scripts/v1alpha1/*
     - test/workflows/*
+    - vendor/*
     params:
       registry: "gcr.io/kubeflow-images-public"
   - app_dir: kubeflow/katib/test/workflows
@@ -99,16 +91,11 @@ workflows:
     - pkg/ui/*
     - cmd/earlystopping/*
     - cmd/katib-controller/v1alpha2/*
-    - cmd/katib-controller/Dockerfile
     - cmd/manager/v1alpha2/*
-    - cmd/manager/Dockerfile
     - cmd/manager-rest/v1alpha2/*
-    - cmd/manager-rest/Dockerfile
     - cmd/metricscollector/v1alpha2/*
-    - cmd/metricscollector/Dockerfile
     - cmd/suggestion/*
     - cmd/tfevent-metricscollector/v1alpha2/*
-    - cmd/tfevent-metricscollector/Dockerfile
     - cmd/ui/*
     - pkg/util/v1alpha2/*
     - test/e2e/v1alpha2/*
@@ -116,6 +103,7 @@ workflows:
     - test/workflows/*
     - manifests/v1alpha2/*
     - scripts/v1alpha2/*
+    - vendor/*
     params:
       registry: "gcr.io/kubeflow-ci"
   - app_dir: kubeflow/katib/test/workflows
@@ -140,19 +128,15 @@ workflows:
     - pkg/ui/*
     - cmd/earlystopping/*
     - cmd/katib-controller/v1alpha2/*
-    - cmd/katib-controller/Dockerfile
     - cmd/manager/v1alpha2/*
-    - cmd/manager/Dockerfile
     - cmd/manager-rest/v1alpha2/*
-    - cmd/manager-rest/Dockerfile
     - cmd/metricscollector/v1alpha2/*
-    - cmd/metricscollector/Dockerfile
     - cmd/suggestion/*
     - cmd/tfevent-metricscollector/v1alpha2/*
-    - cmd/tfevent-metricscollector/Dockerfile
     - cmd/ui/*
     - pkg/util/v1alpha2/*
     - test/scripts/v1alpha2/*
     - test/workflows/*
+    - vendor/*
     params:
       registry: "gcr.io/kubeflow-images-public"

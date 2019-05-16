@@ -36,6 +36,6 @@ cp -r pkg ${GO_DIR}/pkg
 cp -r vendor ${GO_DIR}/vendor
 
 cd ${GO_DIR}
-cp cmd/manager-rest/Dockerfile .
-gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/katib-manager-rest:${VERSION} --project=${PROJECT}
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/katib-manager-rest:${VERSION} ${REGISTRY}/${REPO_NAME}/katib-manager-rest:latest --verbosity=info
+cp cmd/manager-rest/v1alpha2/Dockerfile .
+gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha2/katib-manager-rest:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha2/katib-manager-rest:${VERSION} ${REGISTRY}/${REPO_NAME}/katib-manager-rest:latest --verbosity=info
