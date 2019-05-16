@@ -61,6 +61,5 @@ class MetricsCollector:
             except Exception, e:
                 self.logger.warning("Unexpected error: "+ str(e))
                 continue
-        print(str(mls))
         return api_pb2.ObservationLog(metric_logs=mls)
  
