@@ -92,6 +92,17 @@ func DeleteExperiment(request *api_pb.DeleteExperimentRequest) (*api_pb.DeleteEx
 	return kc.DeleteExperiment(ctx, request)
 }
 
+func UpdateExperimentStatus(request *api_pb.UpdateExperimentStatusRequest) (*api_pb.UpdateExperimentStatusReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer closeKatibManagerConnection(kcc)
+	kc := kcc.KatibManagerClient
+	return kc.UpdateExperimentStatus(ctx, request)
+}
+
 func RegisterTrial(request *api_pb.RegisterTrialRequest) (*api_pb.RegisterTrialReply, error) {
 	ctx := context.Background()
 	kcc, err := getKatibManagerClientAndConn()

@@ -21,6 +21,7 @@ import (
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var log = logf.Log.WithName("experiment-status-util")
@@ -44,7 +45,7 @@ func UpdateExperimentStatus(instance *experimentsv1alpha2.Experiment, trials *tr
 
 func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trialsv1alpha2.TrialList) bool {
 
-	var trialsPending, trialsRunning, trialsSucceeded, trialsFailed, trialsKilled int
+	var totalTrials, trialsPending, trialsRunning, trialsSucceeded, trialsFailed, trialsKilled int
 	var bestTrialValue float64
 	bestTrialIndex := -1
 	isObjectiveGoalReached := false
@@ -53,6 +54,7 @@ func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trial
 	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
 
 	for index, trial := range trials.Items {
+		totalTrials++
 		if trial.IsKilled() {
 			trialsKilled++
 		} else if trial.IsFailed() {
@@ -95,6 +97,8 @@ func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trial
 			}
 		}
 	}
+
+	instance.Status.Trials = totalTrials
 	instance.Status.TrialsPending = trialsPending
 	instance.Status.TrialsRunning = trialsRunning
 	instance.Status.TrialsSucceeded = trialsSucceeded
@@ -131,22 +135,26 @@ func updateExperimentStatusCondition(instance *experimentsv1alpha2.Experiment, i
 
 	completedTrialsCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled
 	failedTrialsCount := instance.Status.TrialsFailed
+	now := metav1.Now()
 
 	if isObjectiveGoalReached {
 		msg := "Experiment has succeeded because Objective goal has reached"
 		instance.MarkExperimentStatusSucceeded(ExperimentSucceededReason, msg)
+		instance.Status.CompletionTime = &now
 		return
 	}
 
 	if (instance.Spec.MaxTrialCount != nil) && (completedTrialsCount >= *instance.Spec.MaxTrialCount) {
 		msg := "Experiment has succeeded because max trial count has reached"
 		instance.MarkExperimentStatusSucceeded(ExperimentSucceededReason, msg)
+		instance.Status.CompletionTime = &now
 		return
 	}
 
 	if (instance.Spec.MaxFailedTrialCount != nil) && (failedTrialsCount >= *instance.Spec.MaxFailedTrialCount) {
 		msg := "Experiment has failed because max failed count has reached"
 		instance.MarkExperimentStatusFailed(ExperimentFailedReason, msg)
+		instance.Status.CompletionTime = &now
 		return
 	}
 
