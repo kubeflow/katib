@@ -492,13 +492,13 @@
     "TrialStatusTrialConditionType": {
       "type": "string",
       "enum": [
-        "PENDING",
+        "CREATED",
         "RUNNING",
-        "COMPLETED",
+        "SUCCEEDED",
         "KILLED",
         "FAILED"
       ],
-      "default": "PENDING"
+      "default": "CREATED"
     },
     "alpha2AlgorithmSetting": {
       "type": "object",

@@ -990,9 +990,9 @@ Types of value for HyperParameter.
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
-| PENDING | 0 |  |
+| CREATED | 0 |  |
 | RUNNING | 1 |  |
-| COMPLETED | 2 |  |
+| SUCCEEDED | 2 |  |
 | KILLED | 3 |  |
 | FAILED | 4 |  |
 

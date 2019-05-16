@@ -360,7 +360,7 @@ func TestGetTrialList(t *testing.T) {
 			"",
 			"",
 			"{\"metrics\":[{\"name\":\"f1_score\",\"value\":\"88.5\"},{\"name\":\"loss\",\"value\":\"0.8\"},{\"name\":\"precision\",\"value\":\"88.2\"},{\"name\":\"recall\",\"value\":\"89.0\"}]}",
-			api_pb.TrialStatus_COMPLETED,
+			api_pb.TrialStatus_SUCCEEDED,
 			"2016-12-31 20:02:05.123456",
 			"2016-12-31 20:02:06.123456",
 		),

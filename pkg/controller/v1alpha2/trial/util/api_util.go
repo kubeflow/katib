@@ -16,10 +16,13 @@ limitations under the License.
 package util
 
 import (
+	"time"
+
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	common "github.com/kubeflow/katib/pkg/common/v1alpha2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func CreateTrialInDB(instance *trialsv1alpha2.Trial) error {
@@ -52,6 +55,11 @@ func GetTrialConf(instance *trialsv1alpha2.Trial) *api_pb.Trial {
 			ParameterAssignments: &api_pb.TrialSpec_ParameterAssignments{
 				Assignments: []*api_pb.ParameterAssignment{},
 			},
+		},
+		Status: &api_pb.TrialStatus{
+			StartTime:      convertTime2RFC3339(instance.Status.StartTime),
+			CompletionTime: convertTime2RFC3339(instance.Status.CompletionTime),
+			Condition:      getCondition(instance),
 		},
 	}
 	trial.Name = instance.Name
@@ -89,4 +97,27 @@ func GetTrialConf(instance *trialsv1alpha2.Trial) *api_pb.Trial {
 	trial.Spec.MetricsCollectorSpec = instance.Spec.MetricsCollectorSpec
 
 	return trial
+}
+
+func getCondition(inst *trialsv1alpha2.Trial) api_pb.TrialStatus_TrialConditionType {
+	condition, _ := inst.GetLastConditionType()
+	switch condition {
+	case trialsv1alpha2.TrialCreated:
+		return api_pb.TrialStatus_CREATED
+	case trialsv1alpha2.TrialRunning:
+		return api_pb.TrialStatus_RUNNING
+	case trialsv1alpha2.TrialKilled:
+		return api_pb.TrialStatus_KILLED
+	case trialsv1alpha2.TrialSucceeded:
+		return api_pb.TrialStatus_SUCCEEDED
+	case trialsv1alpha2.TrialFailed:
+		return api_pb.TrialStatus_FAILED
+	default:
+		// TODO: maybe we need add TrialStatus_UNKNOWN
+		return api_pb.TrialStatus_CREATED
+	}
+}
+
+func convertTime2RFC3339(t *metav1.Time) string {
+	return t.UTC().Format(time.RFC3339)
 }
