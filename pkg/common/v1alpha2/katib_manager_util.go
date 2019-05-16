@@ -113,3 +113,14 @@ func RegisterTrial(request *api_pb.RegisterTrialRequest) (*api_pb.RegisterTrialR
 	kc := kcc.KatibManagerClient
 	return kc.RegisterTrial(ctx, request)
 }
+
+func UpdateTrialStatus(request *api_pb.UpdateTrialStatusRequest) (*api_pb.UpdateTrialStatusReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer closeKatibManagerConnection(kcc)
+	kc := kcc.KatibManagerClient
+	return kc.UpdateTrialStatus(ctx, request)
+}

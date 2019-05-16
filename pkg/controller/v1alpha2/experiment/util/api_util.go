@@ -17,13 +17,11 @@ package util
 
 import (
 	"database/sql"
-	"time"
 
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	common "github.com/kubeflow/katib/pkg/common/v1alpha2"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
@@ -49,8 +47,8 @@ func DeleteExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
 
 func UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error {
 	newStatus := &api_pb.ExperimentStatus{
-		StartTime:      convertTime2RFC3339(instance.Status.StartTime),
-		CompletionTime: convertTime2RFC3339(instance.Status.CompletionTime),
+		StartTime:      common.ConvertTime2RFC3339(instance.Status.StartTime),
+		CompletionTime: common.ConvertTime2RFC3339(instance.Status.CompletionTime),
 		Condition:      getCondition(instance),
 	}
 	request := &api_pb.UpdateExperimentStatusRequest{
@@ -78,8 +76,8 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 			},
 		},
 		Status: &api_pb.ExperimentStatus{
-			StartTime:      convertTime2RFC3339(instance.Status.StartTime),
-			CompletionTime: convertTime2RFC3339(instance.Status.CompletionTime),
+			StartTime:      common.ConvertTime2RFC3339(instance.Status.StartTime),
+			CompletionTime: common.ConvertTime2RFC3339(instance.Status.CompletionTime),
 			Condition:      getCondition(instance),
 		},
 	}
@@ -223,11 +221,6 @@ func getCondition(inst *experimentsv1alpha2.Experiment) api_pb.ExperimentStatus_
 	case experimentsv1alpha2.ExperimentFailed:
 		return api_pb.ExperimentStatus_FAILED
 	default:
-		// TODO: maybe we need add ExperimentStatus_UNKNOWN
-		return api_pb.ExperimentStatus_CREATED
+		return api_pb.ExperimentStatus_UNKNOWN
 	}
-}
-
-func convertTime2RFC3339(t *metav1.Time) string {
-	return t.UTC().Format(time.RFC3339)
 }

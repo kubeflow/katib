@@ -19,6 +19,7 @@ import (
 	//v1 "k8s.io/api/core/v1"
 
 	batchv1 "k8s.io/api/batch/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -42,6 +43,7 @@ func UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *uns
 
 	kind := deployedJob.GetKind()
 	status, ok, unerr := unstructured.NestedFieldCopy(deployedJob.Object, "status")
+	now := metav1.Now()
 
 	if ok {
 		statusMap := status.(map[string]interface{})
@@ -57,9 +59,11 @@ func UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *uns
 			if jobStatus.Active == 0 && jobStatus.Succeeded > 0 {
 				msg := "Trial has succeeded"
 				instance.MarkTrialStatusSucceeded(TrialSucceededReason, msg)
+				instance.Status.CompletionTime = &now
 			} else if jobStatus.Failed > 0 {
 				msg := "Trial has failed"
 				instance.MarkTrialStatusFailed(TrialFailedReason, msg)
+				instance.Status.CompletionTime = &now
 			}
 		default:
 			jobStatus := commonv1beta2.JobStatus{}
@@ -74,9 +78,11 @@ func UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *uns
 				if lc.Type == commonv1beta2.JobSucceeded {
 					msg := "Trial has succeeded"
 					instance.MarkTrialStatusSucceeded(TrialSucceededReason, msg)
+					instance.Status.CompletionTime = &now
 				} else if lc.Type == commonv1beta2.JobFailed {
 					msg := "Trial has failed"
 					instance.MarkTrialStatusFailed(TrialFailedReason, msg)
+					instance.Status.CompletionTime = &now
 				}
 			}
 		}

@@ -16,13 +16,12 @@ limitations under the License.
 package util
 
 import (
-	"time"
+	"fmt"
 
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	common "github.com/kubeflow/katib/pkg/common/v1alpha2"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func CreateTrialInDB(instance *trialsv1alpha2.Trial) error {
@@ -37,7 +36,31 @@ func CreateTrialInDB(instance *trialsv1alpha2.Trial) error {
 }
 
 func UpdateTrialStatusInDB(instance *trialsv1alpha2.Trial) error {
-
+	newStatus := &api_pb.TrialStatus{
+		StartTime:      common.ConvertTime2RFC3339(instance.Status.StartTime),
+		CompletionTime: common.ConvertTime2RFC3339(instance.Status.CompletionTime),
+		Condition:      getCondition(instance),
+	}
+	if instance.Status.Observation != nil {
+		observation := &api_pb.Observation{
+			Metrics: []*api_pb.Metric{},
+		}
+		for _, m := range instance.Status.Observation.Metrics {
+			metric := &api_pb.Metric{
+				Name:  m.Name,
+				Value: fmt.Sprintf("%f", m.Value),
+			}
+			observation.Metrics = append(observation.Metrics, metric)
+		}
+		newStatus.Observation = observation
+	}
+	request := &api_pb.UpdateTrialStatusRequest{
+		NewStatus:      newStatus,
+		TrialName:      instance.Name,
+	}
+	if _, err := common.UpdateTrialStatus(request); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -57,8 +80,8 @@ func GetTrialConf(instance *trialsv1alpha2.Trial) *api_pb.Trial {
 			},
 		},
 		Status: &api_pb.TrialStatus{
-			StartTime:      convertTime2RFC3339(instance.Status.StartTime),
-			CompletionTime: convertTime2RFC3339(instance.Status.CompletionTime),
+			StartTime:      common.ConvertTime2RFC3339(instance.Status.StartTime),
+			CompletionTime: common.ConvertTime2RFC3339(instance.Status.CompletionTime),
 			Condition:      getCondition(instance),
 		},
 	}
@@ -113,11 +136,6 @@ func getCondition(inst *trialsv1alpha2.Trial) api_pb.TrialStatus_TrialConditionT
 	case trialsv1alpha2.TrialFailed:
 		return api_pb.TrialStatus_FAILED
 	default:
-		// TODO: maybe we need add TrialStatus_UNKNOWN
-		return api_pb.TrialStatus_CREATED
+		return api_pb.TrialStatus_UNKNOWN
 	}
-}
-
-func convertTime2RFC3339(t *metav1.Time) string {
-	return t.UTC().Format(time.RFC3339)
 }
