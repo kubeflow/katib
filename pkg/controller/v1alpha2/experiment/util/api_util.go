@@ -77,7 +77,7 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 				AlgorithmSetting: []*api_pb.AlgorithmSetting{},
 			},
 		},
-		ExperimentStatus: &api_pb.ExperimentStatus{
+		Status: &api_pb.ExperimentStatus{
 			StartTime:      convertTime2RFC3339(instance.Status.StartTime),
 			CompletionTime: convertTime2RFC3339(instance.Status.CompletionTime),
 			Condition:      getCondition(instance),
