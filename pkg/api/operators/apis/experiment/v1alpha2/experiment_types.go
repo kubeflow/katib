@@ -47,7 +47,7 @@ type ExperimentSpec struct {
 	// Whether to retain historical data in DB after deletion.
 	RetainHistoricalData bool `json:"retainHistoricalData,omitempty"`
 
-	// For v1alpha2 we will keep the metrics collector implementation same as v1alpha1. 
+	// For v1alpha2 we will keep the metrics collector implementation same as v1alpha1.
 	MetricsCollectorSpec *MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
 
 	NasConfig *NasConfig `json:"nasConfig,omitempty"`
@@ -78,6 +78,9 @@ type ExperimentStatus struct {
 
 	// Current optimal trial parameters and observations.
 	CurrentOptimalTrial OptimalTrial `json:"currentOptimalTrial,omitempty"`
+
+	// Trials is the total number of trials owned by the experiment.
+	Trials int `json:"trials,omitempty"`
 
 	// How many trials have succeeded.
 	TrialsSucceeded int `json:"trialsSucceeded,omitempty"`
