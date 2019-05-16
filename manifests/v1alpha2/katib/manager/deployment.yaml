@@ -25,7 +25,7 @@ spec:
                 name: katib-db-secrets
                 key: MYSQL_ROOT_PASSWORD
         command:
-          - './katib-manager.v1alpha2'
+          - './katib-manager'
         ports:
         - name: api
           containerPort: 6789
