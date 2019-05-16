@@ -18,7 +18,7 @@ workflows:
     - pkg/manager/v1alpha1/*
     - pkg/manager/modelstore/*
     - pkg/suggestion/v1alpha1/*
-    - pkg/ui/*
+    - pkg/ui/v1alpha1/*
     - cmd/earlystopping/*
     - cmd/katib-controller/v1alpha1/*
     - cmd/manager/v1alpha1/*
@@ -26,7 +26,7 @@ workflows:
     - cmd/metricscollector/v1alpha1/*
     - cmd/suggestion/*
     - cmd/tfevent-metricscollector/v1alpha1/*
-    - cmd/ui/*
+    - cmd/ui/v1alpha1/*
     - pkg/util/v1alpha1/*
     - test/e2e/v1alpha1/*
     - test/scripts/v1alpha1/*
@@ -54,7 +54,7 @@ workflows:
     - pkg/manager/v1alpha1/*
     - pkg/manager/modelstore/*
     - pkg/suggestion/v1alpha1/*
-    - pkg/ui/*
+    - pkg/ui/v1alpha1/*
     - cmd/earlystopping/*
     - cmd/katib-controller/v1alpha1/*
     - cmd/manager/v1alpha1/*
@@ -62,7 +62,7 @@ workflows:
     - cmd/metricscollector/v1alpha1/*
     - cmd/suggestion/*
     - cmd/tfevent-metricscollector/v1alpha1/*
-    - cmd/ui/*
+    - cmd/ui/v1alpha1/*
     - pkg/util/v1alpha1/*
     - test/scripts/v1alpha1/*
     - test/workflows/*
@@ -88,7 +88,7 @@ workflows:
     - pkg/manager/v1alpha2/*
     - pkg/manager/modelstore/*
     - pkg/suggestion/v1alpha2/*
-    - pkg/ui/*
+    - pkg/ui/v1alpha2/*
     - cmd/earlystopping/*
     - cmd/katib-controller/v1alpha2/*
     - cmd/manager/v1alpha2/*
@@ -96,7 +96,7 @@ workflows:
     - cmd/metricscollector/v1alpha2/*
     - cmd/suggestion/*
     - cmd/tfevent-metricscollector/v1alpha2/*
-    - cmd/ui/*
+    - cmd/ui/v1alpha2/*
     - pkg/util/v1alpha2/*
     - test/e2e/v1alpha2/*
     - test/scripts/v1alpha2/*
@@ -125,7 +125,7 @@ workflows:
     - pkg/manager/v1alpha2/*
     - pkg/manager/modelstore/*
     - pkg/suggestion/v1alpha2/*
-    - pkg/ui/*
+    - pkg/ui/v1alpha2/*
     - cmd/earlystopping/*
     - cmd/katib-controller/v1alpha2/*
     - cmd/manager/v1alpha2/*
@@ -133,7 +133,7 @@ workflows:
     - cmd/metricscollector/v1alpha2/*
     - cmd/suggestion/*
     - cmd/tfevent-metricscollector/v1alpha2/*
-    - cmd/ui/*
+    - cmd/ui/v1alpha2/*
     - pkg/util/v1alpha2/*
     - test/scripts/v1alpha2/*
     - test/workflows/*

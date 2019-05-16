@@ -30,3 +30,5 @@ docker build -t ${PREFIX}/v1alpha2/katib-controller -f ${CMD_PREFIX}/katib-contr
 docker build -t ${PREFIX}/v1alpha2/katib-manager -f ${CMD_PREFIX}/manager/v1alpha2/Dockerfile .
 docker build -t ${PREFIX}/v1alpha2/metrics-collector -f ${CMD_PREFIX}/metricscollector/v1alpha2/Dockerfile .
 
+echo "Building UI image..."
+docker build -t ${PREFIX}/v1alpha2/katib-ui -f ${CMD_PREFIX}/ui/v1alpha2/Dockerfile .
