@@ -376,7 +376,7 @@ func TestGetTrialList(t *testing.T) {
 				},
 			},
 			Status: &api_pb.TrialStatus{
-				Condition:      api_pb.TrialStatus_PENDING,
+				Condition:      api_pb.TrialStatus_CREATED,
 				StartTime:      "",
 				CompletionTime: "",
 				Observation: &api_pb.Observation{
@@ -470,7 +470,7 @@ func TestUpdateTrialStatus(t *testing.T) {
 	req := &api_pb.UpdateTrialStatusRequest{
 		TrialName: "test1-trial1",
 		NewStatus: &api_pb.TrialStatus{
-			Condition:      api_pb.TrialStatus_COMPLETED,
+			Condition:      api_pb.TrialStatus_SUCCEEDED,
 			StartTime:      "2019-02-03T04:05:06+09:00",
 			CompletionTime: "2019-02-03T05:05:06+09:00",
 			Observation: &api_pb.Observation{
