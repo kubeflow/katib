@@ -201,7 +201,7 @@ func (d *dbConn) RegisterExperiment(experiment *v1alpha2.Experiment) error {
 		experiment.Spec.MetricsCollectorSpec,
 		experiment.Spec.ParallelTrialCount,
 		experiment.Spec.MaxTrialCount,
-		v1alpha2.ExperimentStatus_CREATED,
+		experiment.Status.Condition,
 		start_time,
 		completion_time,
 		nasConfig,
@@ -486,7 +486,7 @@ func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
 		trial.Spec.RunSpec,
 		trial.Spec.MetricsCollectorSpec,
 		observation,
-		v1alpha2.TrialStatus_PENDING,
+		trial.Status.Condition,
 		start_time,
 		completion_time,
 	)
