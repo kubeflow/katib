@@ -186,8 +186,8 @@ TODO
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | name | [string](#string) |  | Name of Experiment. This is unique in DB. |
-| experiment_spec | [ExperimentSpec](#api.v1.alpha2.ExperimentSpec) |  |  |
-| experiment_status | [ExperimentStatus](#api.v1.alpha2.ExperimentStatus) |  |  |
+| spec | [ExperimentSpec](#api.v1.alpha2.ExperimentSpec) |  |  |
+| status | [ExperimentStatus](#api.v1.alpha2.ExperimentStatus) |  |  |
 
 
 
@@ -990,9 +990,9 @@ Types of value for HyperParameter.
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
-| PENDING | 0 |  |
+| CREATED | 0 |  |
 | RUNNING | 1 |  |
-| COMPLETED | 2 |  |
+| SUCCEEDED | 2 |  |
 | KILLED | 3 |  |
 | FAILED | 4 |  |
 

@@ -20,22 +20,22 @@ func TestRegisterExperiment(t *testing.T) {
 	req := &api_pb.RegisterExperimentRequest{
 		Experiment: &api_pb.Experiment{
 			Name: "testExp",
-			ExperimentSpec: &api_pb.ExperimentSpec{
+			Spec: &api_pb.ExperimentSpec{
 				ParameterSpecs: &api_pb.ExperimentSpec_ParameterSpecs{
 					Parameters: []*api_pb.ParameterSpec{},
 				},
 				Objective: &api_pb.ObjectiveSpec{
-					Type:                   api_pb.ObjectiveType_UNKNOWN,
-					Goal:                   0.99,
-					ObjectiveMetricName:    "f1_score",
-					AdditionalMetricNames:  []string{"loss", "precision", "recall"},
+					Type:                  api_pb.ObjectiveType_UNKNOWN,
+					Goal:                  0.99,
+					ObjectiveMetricName:   "f1_score",
+					AdditionalMetricNames: []string{"loss", "precision", "recall"},
 				},
 				Algorithm:          &api_pb.AlgorithmSpec{},
 				TrialTemplate:      "",
 				ParallelTrialCount: 10,
 				MaxTrialCount:      100,
 			},
-			ExperimentStatus: &api_pb.ExperimentStatus{
+			Status: &api_pb.ExperimentStatus{
 				Condition:      api_pb.ExperimentStatus_CREATED,
 				StartTime:      "2019-02-03T04:05:06+09:00",
 				CompletionTime: "",
@@ -78,22 +78,22 @@ func TestGetExperiment(t *testing.T) {
 
 	testExp := api_pb.Experiment{
 		Name: "testExp",
-		ExperimentSpec: &api_pb.ExperimentSpec{
+		Spec: &api_pb.ExperimentSpec{
 			ParameterSpecs: &api_pb.ExperimentSpec_ParameterSpecs{
 				Parameters: []*api_pb.ParameterSpec{},
 			},
 			Objective: &api_pb.ObjectiveSpec{
-				Type:                   api_pb.ObjectiveType_UNKNOWN,
-				Goal:                   0.99,
-				ObjectiveMetricName:    "f1_score",
-				AdditionalMetricNames:  []string{"loss", "precision", "recall"},
+				Type:                  api_pb.ObjectiveType_UNKNOWN,
+				Goal:                  0.99,
+				ObjectiveMetricName:   "f1_score",
+				AdditionalMetricNames: []string{"loss", "precision", "recall"},
 			},
 			Algorithm:          &api_pb.AlgorithmSpec{},
 			TrialTemplate:      "",
 			ParallelTrialCount: 10,
 			MaxTrialCount:      100,
 		},
-		ExperimentStatus: &api_pb.ExperimentStatus{
+		Status: &api_pb.ExperimentStatus{
 			Condition:      api_pb.ExperimentStatus_CREATED,
 			StartTime:      "2019-02-03T04:05:06+09:00",
 			CompletionTime: "",
@@ -376,7 +376,7 @@ func TestGetTrialList(t *testing.T) {
 				},
 			},
 			Status: &api_pb.TrialStatus{
-				Condition:      api_pb.TrialStatus_PENDING,
+				Condition:      api_pb.TrialStatus_CREATED,
 				StartTime:      "",
 				CompletionTime: "",
 				Observation: &api_pb.Observation{
@@ -470,7 +470,7 @@ func TestUpdateTrialStatus(t *testing.T) {
 	req := &api_pb.UpdateTrialStatusRequest{
 		TrialName: "test1-trial1",
 		NewStatus: &api_pb.TrialStatus{
-			Condition:      api_pb.TrialStatus_COMPLETED,
+			Condition:      api_pb.TrialStatus_SUCCEEDED,
 			StartTime:      "2019-02-03T04:05:06+09:00",
 			CompletionTime: "2019-02-03T05:05:06+09:00",
 			Observation: &api_pb.Observation{

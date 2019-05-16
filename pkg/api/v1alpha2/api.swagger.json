@@ -492,13 +492,13 @@
     "TrialStatusTrialConditionType": {
       "type": "string",
       "enum": [
-        "PENDING",
+        "CREATED",
         "RUNNING",
-        "COMPLETED",
+        "SUCCEEDED",
         "KILLED",
         "FAILED"
       ],
-      "default": "PENDING"
+      "default": "CREATED"
     },
     "alpha2AlgorithmSetting": {
       "type": "object",
@@ -543,10 +543,10 @@
         "name": {
           "type": "string"
         },
-        "experiment_spec": {
+        "spec": {
           "$ref": "#/definitions/alpha2ExperimentSpec"
         },
-        "experiment_status": {
+        "status": {
           "$ref": "#/definitions/alpha2ExperimentStatus"
         }
       }
