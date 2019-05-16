@@ -25,5 +25,8 @@ SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
 cd ${SCRIPT_ROOT}
 
-docker build -t ${PREFIX}/katib-controller -f ${CMD_PREFIX}/katib-controller/Dockerfile .
-docker build -t ${PREFIX}/katib-manager -f ${CMD_PREFIX}/manager/Dockerfile .
+echo "Building core image..."
+docker build -t ${PREFIX}/v1alpha2/katib-controller -f ${CMD_PREFIX}/katib-controller/v1alpha2/Dockerfile .
+docker build -t ${PREFIX}/v1alpha2/katib-manager -f ${CMD_PREFIX}/manager/v1alpha2/Dockerfile .
+docker build -t ${PREFIX}/v1alpha2/metrics-collector -f ${CMD_PREFIX}/metricscollector/v1alpha2/Dockerfile .
+

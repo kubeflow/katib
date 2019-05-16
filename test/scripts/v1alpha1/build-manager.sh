@@ -36,6 +36,6 @@ cp -r pkg ${GO_DIR}/pkg
 cp -r vendor ${GO_DIR}/vendor
 
 cd ${GO_DIR}
-cp cmd/manager/Dockerfile .
-gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/vizier-core:${VERSION} --project=${PROJECT}
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/vizier-core:${VERSION} ${REGISTRY}/${REPO_NAME}/vizier-core:latest --verbosity=info
+cp cmd/manager/v1alpha1/Dockerfile .
+gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha1/vizier-core:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha1/vizier-core:${VERSION} ${REGISTRY}/${REPO_NAME}/vizier-core:latest --verbosity=info
