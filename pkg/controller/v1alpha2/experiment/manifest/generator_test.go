@@ -68,8 +68,6 @@ data:
 				- "{{.JobKind}}"
 				- "-n"
 				- "{{.NameSpace}}"
-				- "-m"
-				- "{{.ManagerService}}"
 				- "-mn"
 				- "{{.MetricNames}}"`
 )
@@ -129,8 +127,6 @@ data:
 				- "Job"
 				- "-n"
 				- "fakens"
-				- "-m"
-				- "katib-manager.default:6789"
 				- "-mn"
 				- "test"`
 	
