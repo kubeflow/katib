@@ -21,9 +21,9 @@ def register_experiment(stub):
   exp_status = api_pb2.ExperimentStatus(condition=1,
                                         start_time="2019-04-28T14:09:15Z",
                                         completion_time="2019-04-28T16:09:15Z")
-  exp = api_pb2.Experiment(experiment_spec=exp_spec,
+  exp = api_pb2.Experiment(spec=exp_spec,
                            name=TEST_EXPERIMENT,
-                           experiment_status=exp_status)
+                           status=exp_status)
   try:
     stub.RegisterExperiment(api_pb2.RegisterExperimentRequest(experiment=exp), 10)
     logger.info("Register experiment %s successfully" % TEST_EXPERIMENT)
