@@ -20,8 +20,8 @@ import (
 	"strings"
 	"text/template"
 
-	common "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	katibv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	common "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/katibclient"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
