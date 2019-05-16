@@ -241,7 +241,6 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 				logger.Error(err, "Create job error")
 				return nil, err
 			}
-			deployedJob = desiredJob
 		} else {
 			logger.Error(err, "Trial Get error")
 			return nil, err
@@ -309,7 +308,6 @@ func (r *ReconcileTrial) reconcileMetricsCollector(instance *trialsv1alpha2.Tria
 				logger.Error(err, "Create Metrics Collector error")
 				return nil, err
 			}
-			deployedMetricsCollector = desiredMetricsCollector
 		} else {
 			logger.Error(err, "Metrics Collector Get error")
 			return nil, err
