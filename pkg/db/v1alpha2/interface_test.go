@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+
 	//"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -89,7 +90,7 @@ func TestMain(m *testing.M) {
 func TestRegisterExperiment(t *testing.T) {
 	experiment := &api_pb.Experiment{
 		Name: "test1",
-		ExperimentSpec: &api_pb.ExperimentSpec{
+		Spec: &api_pb.ExperimentSpec{
 			ParameterSpecs: &api_pb.ExperimentSpec_ParameterSpecs{
 				Parameters: []*api_pb.ParameterSpec{},
 			},
@@ -104,7 +105,7 @@ func TestRegisterExperiment(t *testing.T) {
 			ParallelTrialCount: 10,
 			MaxTrialCount:      100,
 		},
-		ExperimentStatus: &api_pb.ExperimentStatus{
+		Status: &api_pb.ExperimentStatus{
 			Condition:      api_pb.ExperimentStatus_CREATED,
 			StartTime:      "2016-12-31T20:02:05.123456Z",
 			CompletionTime: "2016-12-31T20:02:06.123456Z",
@@ -129,11 +130,11 @@ func TestRegisterExperiment(t *testing.T) {
 		"{\"parameters\":[]}",
 		"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricNames\":[\"loss\",\"precision\",\"recall\"]}",
 		"{}",
-		experiment.ExperimentSpec.TrialTemplate,
-		experiment.ExperimentSpec.MetricsCollectorSpec,
-		experiment.ExperimentSpec.ParallelTrialCount,
-		experiment.ExperimentSpec.MaxTrialCount,
-		experiment.ExperimentStatus.Condition,
+		experiment.Spec.TrialTemplate,
+		experiment.Spec.MetricsCollectorSpec,
+		experiment.Spec.ParallelTrialCount,
+		experiment.Spec.MaxTrialCount,
+		experiment.Status.Condition,
 		"2016-12-31 20:02:05.123456",
 		"2016-12-31 20:02:06.123456",
 		"",
