@@ -543,10 +543,10 @@
         "name": {
           "type": "string"
         },
-        "experiment_spec": {
+        "spec": {
           "$ref": "#/definitions/alpha2ExperimentSpec"
         },
-        "experiment_status": {
+        "status": {
           "$ref": "#/definitions/alpha2ExperimentStatus"
         }
       }
@@ -923,10 +923,10 @@
         "name": {
           "type": "string"
         },
-        "trial_spec": {
+        "spec": {
           "$ref": "#/definitions/alpha2TrialSpec"
         },
-        "trial_status": {
+        "status": {
           "$ref": "#/definitions/alpha2TrialStatus"
         }
       }

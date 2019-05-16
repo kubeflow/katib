@@ -26,7 +26,7 @@ import (
 
 func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
 	experiment := GetExperimentConf(instance)
-	request := &api_pb.RegisterExperimentRequest {
+	request := &api_pb.RegisterExperimentRequest{
 		Experiment: experiment,
 	}
 	if _, err := common.RegisterExperiment(request); err != nil {
@@ -36,7 +36,7 @@ func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
 }
 
 func DeleteExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
-	request := &api_pb.DeleteExperimentRequest {
+	request := &api_pb.DeleteExperimentRequest{
 		ExperimentName: instance.Name,
 	}
 	if _, err := common.DeleteExperiment(request); err != nil {
@@ -56,7 +56,7 @@ func GetExperimentFromDB(instance *experimentsv1alpha2.Experiment) (*api_pb.GetE
 
 func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experiment {
 	experiment := &api_pb.Experiment{
-		ExperimentSpec: &api_pb.ExperimentSpec{
+		Spec: &api_pb.ExperimentSpec{
 			Objective: &api_pb.ObjectiveSpec{
 				AdditionalMetricNames: []string{},
 			},
@@ -71,25 +71,25 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 	//Populate Objective
 	switch instance.Spec.Objective.Type {
 	case commonv1alpha2.ObjectiveTypeMaximize:
-		experiment.ExperimentSpec.Objective.Type = api_pb.ObjectiveType_MAXIMIZE
+		experiment.Spec.Objective.Type = api_pb.ObjectiveType_MAXIMIZE
 	case commonv1alpha2.ObjectiveTypeMinimize:
-		experiment.ExperimentSpec.Objective.Type = api_pb.ObjectiveType_MINIMIZE
+		experiment.Spec.Objective.Type = api_pb.ObjectiveType_MINIMIZE
 	default:
-		experiment.ExperimentSpec.Objective.Type = api_pb.ObjectiveType_UNKNOWN
+		experiment.Spec.Objective.Type = api_pb.ObjectiveType_UNKNOWN
 
 	}
-	experiment.ExperimentSpec.Objective.Goal = float32(*instance.Spec.Objective.Goal)
-	experiment.ExperimentSpec.Objective.ObjectiveMetricName = instance.Spec.Objective.ObjectiveMetricName
+	experiment.Spec.Objective.Goal = float32(*instance.Spec.Objective.Goal)
+	experiment.Spec.Objective.ObjectiveMetricName = instance.Spec.Objective.ObjectiveMetricName
 	for _, m := range instance.Spec.Objective.AdditionalMetricNames {
-		experiment.ExperimentSpec.Objective.AdditionalMetricNames = append(experiment.ExperimentSpec.Objective.AdditionalMetricNames, m)
+		experiment.Spec.Objective.AdditionalMetricNames = append(experiment.Spec.Objective.AdditionalMetricNames, m)
 	}
 
 	//Populate Algorithm Spec
-	experiment.ExperimentSpec.Algorithm.AlgorithmName = instance.Spec.Algorithm.AlgorithmName
+	experiment.Spec.Algorithm.AlgorithmName = instance.Spec.Algorithm.AlgorithmName
 
 	for _, as := range instance.Spec.Algorithm.AlgorithmSettings {
-		experiment.ExperimentSpec.Algorithm.AlgorithmSetting = append(
-			experiment.ExperimentSpec.Algorithm.AlgorithmSetting,
+		experiment.Spec.Algorithm.AlgorithmSetting = append(
+			experiment.Spec.Algorithm.AlgorithmSetting,
 			&api_pb.AlgorithmSetting{
 				Name:  as.Name,
 				Value: as.Value,
@@ -125,7 +125,7 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 			}
 			parameterSpecs.Parameters = append(parameterSpecs.Parameters, parameter)
 		}
-		experiment.ExperimentSpec.ParameterSpecs = parameterSpecs
+		experiment.Spec.ParameterSpecs = parameterSpecs
 	}
 
 	//Populate NAS Experiment
@@ -184,7 +184,7 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 			nasConfig.Operations.Operation = append(nasConfig.Operations.Operation, operation)
 		}
 
-		experiment.ExperimentSpec.NasConfig = nasConfig
+		experiment.Spec.NasConfig = nasConfig
 	}
 
 	return experiment

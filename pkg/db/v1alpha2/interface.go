@@ -131,27 +131,27 @@ func (d *dbConn) RegisterExperiment(experiment *v1alpha2.Experiment) error {
 	var start_time string
 	var completion_time string
 	var err error
-	if experiment.ExperimentSpec != nil {
-		if experiment.ExperimentSpec.ParameterSpecs != nil {
-			paramSpecs, err = (&jsonpb.Marshaler{}).MarshalToString(experiment.ExperimentSpec.ParameterSpecs)
+	if experiment.Spec != nil {
+		if experiment.Spec.ParameterSpecs != nil {
+			paramSpecs, err = (&jsonpb.Marshaler{}).MarshalToString(experiment.Spec.ParameterSpecs)
 			if err != nil {
 				return fmt.Errorf("Error marshaling Parameters: %v", err)
 			}
 		}
-		if experiment.ExperimentSpec.Objective != nil {
-			objSpec, err = (&jsonpb.Marshaler{}).MarshalToString(experiment.ExperimentSpec.Objective)
+		if experiment.Spec.Objective != nil {
+			objSpec, err = (&jsonpb.Marshaler{}).MarshalToString(experiment.Spec.Objective)
 			if err != nil {
 				return fmt.Errorf("Error marshaling Objective: %v", err)
 			}
 		}
-		if experiment.ExperimentSpec.Algorithm != nil {
-			algoSpec, err = (&jsonpb.Marshaler{}).MarshalToString(experiment.ExperimentSpec.Algorithm)
+		if experiment.Spec.Algorithm != nil {
+			algoSpec, err = (&jsonpb.Marshaler{}).MarshalToString(experiment.Spec.Algorithm)
 			if err != nil {
 				return fmt.Errorf("Error marshaling Algorithm: %v", err)
 			}
 		}
-		if experiment.ExperimentSpec.NasConfig != nil {
-			nasConfig, err = (&jsonpb.Marshaler{}).MarshalToString(experiment.ExperimentSpec.NasConfig)
+		if experiment.Spec.NasConfig != nil {
+			nasConfig, err = (&jsonpb.Marshaler{}).MarshalToString(experiment.Spec.NasConfig)
 			if err != nil {
 				return fmt.Errorf("Error marshaling NasConfig: %v", err)
 			}
@@ -163,18 +163,18 @@ func (d *dbConn) RegisterExperiment(experiment *v1alpha2.Experiment) error {
 	now_str := time.Now().UTC().Format(mysqlTimeFmt)
 	start_time = now_str
 	completion_time = now_str
-	if experiment.ExperimentStatus != nil {
-		if experiment.ExperimentStatus.StartTime != "" {
-			s_time, err := time.Parse(time.RFC3339Nano, experiment.ExperimentStatus.StartTime)
+	if experiment.Status != nil {
+		if experiment.Status.StartTime != "" {
+			s_time, err := time.Parse(time.RFC3339Nano, experiment.Status.StartTime)
 			if err != nil {
-				return fmt.Errorf("Error parsing start time %s: %v", experiment.ExperimentStatus.StartTime, err)
+				return fmt.Errorf("Error parsing start time %s: %v", experiment.Status.StartTime, err)
 			}
 			start_time = s_time.UTC().Format(mysqlTimeFmt)
 		}
-		if experiment.ExperimentStatus.CompletionTime != "" {
-			c_time, err := time.Parse(time.RFC3339Nano, experiment.ExperimentStatus.CompletionTime)
+		if experiment.Status.CompletionTime != "" {
+			c_time, err := time.Parse(time.RFC3339Nano, experiment.Status.CompletionTime)
 			if err != nil {
-				return fmt.Errorf("Error parsing completion time %s: %v", experiment.ExperimentStatus.CompletionTime, err)
+				return fmt.Errorf("Error parsing completion time %s: %v", experiment.Status.CompletionTime, err)
 			}
 			completion_time = c_time.UTC().Format(mysqlTimeFmt)
 		}
@@ -198,10 +198,10 @@ func (d *dbConn) RegisterExperiment(experiment *v1alpha2.Experiment) error {
 		paramSpecs,
 		objSpec,
 		algoSpec,
-		experiment.ExperimentSpec.TrialTemplate,
-		experiment.ExperimentSpec.MetricsCollectorSpec,
-		experiment.ExperimentSpec.ParallelTrialCount,
-		experiment.ExperimentSpec.MaxTrialCount,
+		experiment.Spec.TrialTemplate,
+		experiment.Spec.MetricsCollectorSpec,
+		experiment.Spec.ParallelTrialCount,
+		experiment.Spec.MaxTrialCount,
 		v1alpha2.ExperimentStatus_CREATED,
 		start_time,
 		completion_time,
@@ -224,8 +224,8 @@ func (d *dbConn) GetExperiment(experimentName string) (*v1alpha2.Experiment, err
 	var completion_time string
 
 	experiment := &v1alpha2.Experiment{
-		ExperimentSpec:   &v1alpha2.ExperimentSpec{},
-		ExperimentStatus: &v1alpha2.ExperimentStatus{},
+		Spec:   &v1alpha2.ExperimentSpec{},
+		Status: &v1alpha2.ExperimentStatus{},
 	}
 	row := d.db.QueryRow("SELECT * FROM experiments WHERE name = ?", experimentName)
 	err := row.Scan(
@@ -234,11 +234,11 @@ func (d *dbConn) GetExperiment(experimentName string) (*v1alpha2.Experiment, err
 		&paramSpecs,
 		&objSpec,
 		&algoSpec,
-		&experiment.ExperimentSpec.TrialTemplate,
-		&experiment.ExperimentSpec.MetricsCollectorSpec,
-		&experiment.ExperimentSpec.ParallelTrialCount,
-		&experiment.ExperimentSpec.MaxTrialCount,
-		&experiment.ExperimentStatus.Condition,
+		&experiment.Spec.TrialTemplate,
+		&experiment.Spec.MetricsCollectorSpec,
+		&experiment.Spec.ParallelTrialCount,
+		&experiment.Spec.MaxTrialCount,
+		&experiment.Status.Condition,
 		&start_time,
 		&completion_time,
 		&nasConfig,
@@ -247,29 +247,29 @@ func (d *dbConn) GetExperiment(experimentName string) (*v1alpha2.Experiment, err
 		return nil, err
 	}
 	if paramSpecs != "" {
-		experiment.ExperimentSpec.ParameterSpecs = new(v1alpha2.ExperimentSpec_ParameterSpecs)
-		err = jsonpb.UnmarshalString(paramSpecs, experiment.ExperimentSpec.ParameterSpecs)
+		experiment.Spec.ParameterSpecs = new(v1alpha2.ExperimentSpec_ParameterSpecs)
+		err = jsonpb.UnmarshalString(paramSpecs, experiment.Spec.ParameterSpecs)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if objSpec != "" {
-		experiment.ExperimentSpec.Objective = new(v1alpha2.ObjectiveSpec)
-		err = jsonpb.UnmarshalString(objSpec, experiment.ExperimentSpec.Objective)
+		experiment.Spec.Objective = new(v1alpha2.ObjectiveSpec)
+		err = jsonpb.UnmarshalString(objSpec, experiment.Spec.Objective)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if algoSpec != "" {
-		experiment.ExperimentSpec.Algorithm = new(v1alpha2.AlgorithmSpec)
-		err = jsonpb.UnmarshalString(algoSpec, experiment.ExperimentSpec.Algorithm)
+		experiment.Spec.Algorithm = new(v1alpha2.AlgorithmSpec)
+		err = jsonpb.UnmarshalString(algoSpec, experiment.Spec.Algorithm)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if nasConfig != "" {
-		experiment.ExperimentSpec.NasConfig = new(v1alpha2.NasConfig)
-		err = jsonpb.UnmarshalString(nasConfig, experiment.ExperimentSpec.NasConfig)
+		experiment.Spec.NasConfig = new(v1alpha2.NasConfig)
+		err = jsonpb.UnmarshalString(nasConfig, experiment.Spec.NasConfig)
 		if err != nil {
 			return nil, err
 		}
@@ -279,14 +279,14 @@ func (d *dbConn) GetExperiment(experimentName string) (*v1alpha2.Experiment, err
 		if err != nil {
 			return nil, fmt.Errorf("Error parsing Trial start time %s to mysqlFormat: %v", start_time, err)
 		}
-		experiment.ExperimentStatus.StartTime = start_timeMysql.UTC().Format(time.RFC3339Nano)
+		experiment.Status.StartTime = start_timeMysql.UTC().Format(time.RFC3339Nano)
 	}
 	if completion_time != "" {
 		completion_timeMysql, err := time.Parse(mysqlTimeFmt, completion_time)
 		if err != nil {
 			return nil, fmt.Errorf("Error parsing Trial completion time %s to mysqlFormat: %v", completion_time, err)
 		}
-		experiment.ExperimentStatus.CompletionTime = completion_timeMysql.UTC().Format(time.RFC3339Nano)
+		experiment.Status.CompletionTime = completion_timeMysql.UTC().Format(time.RFC3339Nano)
 	}
 	return experiment, nil
 }
@@ -426,15 +426,15 @@ func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
 	var completion_time string
 	var observation string
 	var err error
-	if trial.TrialSpec != nil {
-		if trial.TrialSpec.Objective != nil {
-			objSpec, err = (&jsonpb.Marshaler{}).MarshalToString(trial.TrialSpec.Objective)
+	if trial.Spec != nil {
+		if trial.Spec.Objective != nil {
+			objSpec, err = (&jsonpb.Marshaler{}).MarshalToString(trial.Spec.Objective)
 			if err != nil {
 				return fmt.Errorf("Error marshaling Objective: %v", err)
 			}
 		}
-		if trial.TrialSpec.ParameterAssignments != nil {
-			paramAssignment, err = (&jsonpb.Marshaler{}).MarshalToString(trial.TrialSpec.ParameterAssignments)
+		if trial.Spec.ParameterAssignments != nil {
+			paramAssignment, err = (&jsonpb.Marshaler{}).MarshalToString(trial.Spec.ParameterAssignments)
 			if err != nil {
 				return fmt.Errorf("Error marshaling Parameters: %v", err)
 			}
@@ -447,24 +447,24 @@ func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
 	start_time = now_str
 	completion_time = now_str
 
-	if trial.TrialStatus != nil {
-		if trial.TrialStatus.Observation != nil {
-			observation, err = (&jsonpb.Marshaler{}).MarshalToString(trial.TrialStatus.Observation)
+	if trial.Status != nil {
+		if trial.Status.Observation != nil {
+			observation, err = (&jsonpb.Marshaler{}).MarshalToString(trial.Status.Observation)
 			if err != nil {
 				return fmt.Errorf("Error marshaling Objective: %v", err)
 			}
 		}
-		if trial.TrialStatus.StartTime != "" {
-			s_time, err := time.Parse(time.RFC3339Nano, trial.TrialStatus.StartTime)
+		if trial.Status.StartTime != "" {
+			s_time, err := time.Parse(time.RFC3339Nano, trial.Status.StartTime)
 			if err != nil {
-				return fmt.Errorf("Error parsing start time %s: %v", trial.TrialStatus.StartTime, err)
+				return fmt.Errorf("Error parsing start time %s: %v", trial.Status.StartTime, err)
 			}
 			start_time = s_time.UTC().Format(mysqlTimeFmt)
 		}
-		if trial.TrialStatus.CompletionTime != "" {
-			c_time, err := time.Parse(time.RFC3339Nano, trial.TrialStatus.CompletionTime)
+		if trial.Status.CompletionTime != "" {
+			c_time, err := time.Parse(time.RFC3339Nano, trial.Status.CompletionTime)
 			if err != nil {
-				return fmt.Errorf("Error parsing completion time %s: %v", trial.TrialStatus.CompletionTime, err)
+				return fmt.Errorf("Error parsing completion time %s: %v", trial.Status.CompletionTime, err)
 			}
 			completion_time = c_time.UTC().Format(mysqlTimeFmt)
 		}
@@ -482,11 +482,11 @@ func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
 			start_time,
 			completion_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		trial.Name,
-		trial.TrialSpec.ExperimentName,
+		trial.Spec.ExperimentName,
 		objSpec,
 		paramAssignment,
-		trial.TrialSpec.RunSpec,
-		trial.TrialSpec.MetricsCollectorSpec,
+		trial.Spec.RunSpec,
+		trial.Spec.MetricsCollectorSpec,
 		observation,
 		v1alpha2.TrialStatus_PENDING,
 		start_time,
@@ -522,19 +522,19 @@ func (d *dbConn) GetTrialList(experimentName string, filter string) ([]*v1alpha2
 	var result []*v1alpha2.Trial
 	for rows.Next() {
 		trial := &v1alpha2.Trial{
-			TrialSpec:   &v1alpha2.TrialSpec{},
-			TrialStatus: &v1alpha2.TrialStatus{},
+			Spec:   &v1alpha2.TrialSpec{},
+			Status: &v1alpha2.TrialStatus{},
 		}
 		err := rows.Scan(
 			&id,
 			&trial.Name,
-			&trial.TrialSpec.ExperimentName,
+			&trial.Spec.ExperimentName,
 			&objSpec,
 			&paramAssignment,
-			&trial.TrialSpec.RunSpec,
-			&trial.TrialSpec.MetricsCollectorSpec,
+			&trial.Spec.RunSpec,
+			&trial.Spec.MetricsCollectorSpec,
 			&observation,
-			&trial.TrialStatus.Condition,
+			&trial.Status.Condition,
 			&start_time,
 			&completion_time,
 		)
@@ -542,22 +542,22 @@ func (d *dbConn) GetTrialList(experimentName string, filter string) ([]*v1alpha2
 			return nil, fmt.Errorf("Failed to scan trial %v", err)
 		}
 		if objSpec != "" {
-			trial.TrialSpec.Objective = new(v1alpha2.ObjectiveSpec)
-			err = jsonpb.UnmarshalString(objSpec, trial.TrialSpec.Objective)
+			trial.Spec.Objective = new(v1alpha2.ObjectiveSpec)
+			err = jsonpb.UnmarshalString(objSpec, trial.Spec.Objective)
 			if err != nil {
 				return nil, err
 			}
 		}
 		if paramAssignment != "" {
-			trial.TrialSpec.ParameterAssignments = new(v1alpha2.TrialSpec_ParameterAssignments)
-			err = jsonpb.UnmarshalString(paramAssignment, trial.TrialSpec.ParameterAssignments)
+			trial.Spec.ParameterAssignments = new(v1alpha2.TrialSpec_ParameterAssignments)
+			err = jsonpb.UnmarshalString(paramAssignment, trial.Spec.ParameterAssignments)
 			if err != nil {
 				return nil, err
 			}
 		}
 		if observation != "" {
-			trial.TrialStatus.Observation = new(v1alpha2.Observation)
-			err = jsonpb.UnmarshalString(observation, trial.TrialStatus.Observation)
+			trial.Status.Observation = new(v1alpha2.Observation)
+			err = jsonpb.UnmarshalString(observation, trial.Status.Observation)
 			if err != nil {
 				return nil, err
 			}
@@ -567,14 +567,14 @@ func (d *dbConn) GetTrialList(experimentName string, filter string) ([]*v1alpha2
 			if err != nil {
 				return nil, fmt.Errorf("Error parsing Trial start time %s to mysqlFormat: %v", start_time, err)
 			}
-			trial.TrialStatus.StartTime = start_timeMysql.UTC().Format(time.RFC3339Nano)
+			trial.Status.StartTime = start_timeMysql.UTC().Format(time.RFC3339Nano)
 		}
 		if completion_time != "" {
 			completion_timeMysql, err := time.Parse(mysqlTimeFmt, completion_time)
 			if err != nil {
 				return nil, fmt.Errorf("Error parsing Trial completion time %s to mysqlFormat: %v", completion_time, err)
 			}
-			trial.TrialStatus.CompletionTime = completion_timeMysql.UTC().Format(time.RFC3339Nano)
+			trial.Status.CompletionTime = completion_timeMysql.UTC().Format(time.RFC3339Nano)
 		}
 		result = append(result, trial)
 	}
@@ -589,40 +589,40 @@ func (d *dbConn) GetTrial(trialName string) (*v1alpha2.Trial, error) {
 	var completion_time string
 	var observation string
 	trial := &v1alpha2.Trial{
-		TrialSpec:   &v1alpha2.TrialSpec{},
-		TrialStatus: &v1alpha2.TrialStatus{},
+		Spec:   &v1alpha2.TrialSpec{},
+		Status: &v1alpha2.TrialStatus{},
 	}
 	row := d.db.QueryRow("SELECT * FROM trials WHERE name = ?", trialName)
 	err := row.Scan(
 		&id,
 		&trial.Name,
-		&trial.TrialSpec.ExperimentName,
+		&trial.Spec.ExperimentName,
 		&objSpec,
 		&paramAssignment,
-		&trial.TrialSpec.RunSpec,
-		&trial.TrialSpec.MetricsCollectorSpec,
+		&trial.Spec.RunSpec,
+		&trial.Spec.MetricsCollectorSpec,
 		&observation,
-		&trial.TrialStatus.Condition,
+		&trial.Status.Condition,
 		&start_time,
 		&completion_time,
 	)
 	if objSpec != "" {
-		trial.TrialSpec.Objective = new(v1alpha2.ObjectiveSpec)
-		err = jsonpb.UnmarshalString(objSpec, trial.TrialSpec.Objective)
+		trial.Spec.Objective = new(v1alpha2.ObjectiveSpec)
+		err = jsonpb.UnmarshalString(objSpec, trial.Spec.Objective)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if paramAssignment != "" {
-		trial.TrialSpec.ParameterAssignments = new(v1alpha2.TrialSpec_ParameterAssignments)
-		err = jsonpb.UnmarshalString(paramAssignment, trial.TrialSpec.ParameterAssignments)
+		trial.Spec.ParameterAssignments = new(v1alpha2.TrialSpec_ParameterAssignments)
+		err = jsonpb.UnmarshalString(paramAssignment, trial.Spec.ParameterAssignments)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if observation != "" {
-		trial.TrialStatus.Observation = new(v1alpha2.Observation)
-		err = jsonpb.UnmarshalString(observation, trial.TrialStatus.Observation)
+		trial.Status.Observation = new(v1alpha2.Observation)
+		err = jsonpb.UnmarshalString(observation, trial.Status.Observation)
 		if err != nil {
 			return nil, err
 		}
@@ -632,14 +632,14 @@ func (d *dbConn) GetTrial(trialName string) (*v1alpha2.Trial, error) {
 		if err != nil {
 			return nil, fmt.Errorf("Error parsing Trial start time %s to mysqlFormat: %v", start_time, err)
 		}
-		trial.TrialStatus.StartTime = start_timeMysql.UTC().Format(time.RFC3339Nano)
+		trial.Status.StartTime = start_timeMysql.UTC().Format(time.RFC3339Nano)
 	}
 	if completion_time != "" {
 		completion_timeMysql, err := time.Parse(mysqlTimeFmt, completion_time)
 		if err != nil {
 			return nil, fmt.Errorf("Error parsing Trial completion time %s to mysqlFormat: %v", completion_time, err)
 		}
-		trial.TrialStatus.CompletionTime = completion_timeMysql.UTC().Format(time.RFC3339Nano)
+		trial.Status.CompletionTime = completion_timeMysql.UTC().Format(time.RFC3339Nano)
 	}
 
 	return trial, nil

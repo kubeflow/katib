@@ -321,8 +321,8 @@ message ExperimentStatus {
 
 message Experiment {
     string name = 1; /// Name of Experiment. This is unique in DB.
-    ExperimentSpec experiment_spec = 2;
-    ExperimentStatus experiment_status = 3;
+    ExperimentSpec spec = 2;
+    ExperimentStatus status = 3;
 }
 
 message ParameterAssignment {
@@ -378,8 +378,8 @@ message TrialStatus {
 
 message Trial {
     string name = 1;
-    TrialSpec trial_spec = 2;
-    TrialStatus trial_status = 3;
+    TrialSpec spec = 2;
+    TrialStatus status = 3;
 }
 
 message RegisterExperimentRequest {

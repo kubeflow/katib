@@ -66,13 +66,17 @@ func getKatibManagerClientAndConn() (*katibManagerClientAndConn, error) {
 	return kcc, nil
 }
 
+func closeKatibManagerConnection(kcc *katibManagerClientAndConn) {
+	kcc.Conn.Close()
+}
+
 func RegisterExperiment(request *api_pb.RegisterExperimentRequest) (*api_pb.RegisterExperimentReply, error) {
 	ctx := context.Background()
 	kcc, err := getKatibManagerClientAndConn()
 	if err != nil {
 		return nil, err
 	}
-	defer kcc.Conn.Close()
+	defer closeKatibManagerConnection(kcc)
 	kc := kcc.KatibManagerClient
 	return kc.RegisterExperiment(ctx, request)
 }
@@ -83,7 +87,7 @@ func DeleteExperiment(request *api_pb.DeleteExperimentRequest) (*api_pb.DeleteEx
 	if err != nil {
 		return nil, err
 	}
-	defer kcc.Conn.Close()
+	defer closeKatibManagerConnection(kcc)
 	kc := kcc.KatibManagerClient
 	return kc.DeleteExperiment(ctx, request)
 }
@@ -94,7 +98,7 @@ func RegisterTrial(request *api_pb.RegisterTrialRequest) (*api_pb.RegisterTrialR
 	if err != nil {
 		return nil, err
 	}
-	defer kcc.Conn.Close()
+	defer closeKatibManagerConnection(kcc)
 	kc := kcc.KatibManagerClient
 	return kc.RegisterTrial(ctx, request)
 }
