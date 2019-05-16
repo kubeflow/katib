@@ -160,9 +160,8 @@ func (d *dbConn) RegisterExperiment(experiment *v1alpha2.Experiment) error {
 		return fmt.Errorf("Invalid experiment: spec is nil.")
 	}
 
-	now_str := time.Now().UTC().Format(mysqlTimeFmt)
-	start_time = now_str
-	completion_time = now_str
+	start_time = time.Now().UTC().Format(mysqlTimeFmt)
+	completion_time = time.Time{}.UTC().Format(mysqlTimeFmt)
 	if experiment.ExperimentStatus != nil {
 		if experiment.ExperimentStatus.StartTime != "" {
 			s_time, err := time.Parse(time.RFC3339Nano, experiment.ExperimentStatus.StartTime)

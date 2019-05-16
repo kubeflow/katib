@@ -54,7 +54,7 @@ func UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error 
 		Condition:      getCondition(instance),
 	}
 	request := &api_pb.UpdateExperimentStatusRequest{
-		NewStatus:       newStatus,
+		NewStatus:      newStatus,
 		ExperimentName: instance.Name,
 	}
 	if _, err := common.UpdateExperimentStatus(request); err != nil {
@@ -77,7 +77,7 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 				AlgorithmSetting: []*api_pb.AlgorithmSetting{},
 			},
 		},
-		ExperimentStatus: &api_pb.ExperimentStatus {
+		ExperimentStatus: &api_pb.ExperimentStatus{
 			StartTime:      convertTime2RFC3339(instance.Status.StartTime),
 			CompletionTime: convertTime2RFC3339(instance.Status.CompletionTime),
 			Condition:      getCondition(instance),
