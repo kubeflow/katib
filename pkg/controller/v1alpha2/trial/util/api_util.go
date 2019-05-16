@@ -18,11 +18,20 @@ package util
 import (
 	//v1 "k8s.io/api/core/v1"
 
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	common "github.com/kubeflow/katib/pkg/common/v1alpha2"
 )
 
 func CreateTrialInDB(instance *trialsv1alpha2.Trial) error {
-
+	trial := GetTrialConf(instance)
+	request := &api_pb.RegisterTrialRequest{
+		Trial: trial,
+	}
+	if _, err := common.RegisterTrial(request); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -34,4 +43,52 @@ func UpdateTrialStatusInDB(instance *trialsv1alpha2.Trial) error {
 func GetTrialObservation(instance *trialsv1alpha2.Trial) error {
 
 	return nil
+}
+
+func GetTrialConf(instance *trialsv1alpha2.Trial) *api_pb.Trial {
+	trial := &api_pb.Trial{
+		TrialSpec: &api_pb.TrialSpec{
+			Objective: &api_pb.ObjectiveSpec{
+				AdditionalMetricNames: []string{},
+			},
+			ParameterAssignments: &api_pb.TrialSpec_ParameterAssignments{
+				Assignments: []*api_pb.ParameterAssignment{},
+			},
+		},
+	}
+	trial.Name = instance.Name
+
+	trial.TrialSpec.ExperimentName = instance.Labels["experiment"]
+
+	//Populate Objective
+	switch instance.Spec.Objective.Type {
+	case commonv1alpha2.ObjectiveTypeMaximize:
+		trial.TrialSpec.Objective.Type = api_pb.ObjectiveType_MAXIMIZE
+	case commonv1alpha2.ObjectiveTypeMinimize:
+		trial.TrialSpec.Objective.Type = api_pb.ObjectiveType_MINIMIZE
+	default:
+		trial.TrialSpec.Objective.Type = api_pb.ObjectiveType_UNKNOWN
+
+	}
+	trial.TrialSpec.Objective.Goal = float32(*instance.Spec.Objective.Goal)
+	trial.TrialSpec.Objective.ObjectiveMetricName = instance.Spec.Objective.ObjectiveMetricName
+	for _, m := range instance.Spec.Objective.AdditionalMetricNames {
+		trial.TrialSpec.Objective.AdditionalMetricNames = append(trial.TrialSpec.Objective.AdditionalMetricNames, m)
+	}
+
+	//Populate Parameter Assignments
+	for _, p := range instance.Spec.ParameterAssignments {
+		trial.TrialSpec.ParameterAssignments.Assignments = append(
+			trial.TrialSpec.ParameterAssignments.Assignments,
+			&api_pb.ParameterAssignment{
+				Name:  p.Name,
+				Value: p.Value,
+			})
+	}
+
+	trial.TrialSpec.RunSpec = instance.Spec.RunSpec
+
+	trial.TrialSpec.MetricsCollectorSpec = instance.Spec.MetricsCollectorSpec
+
+	return trial
 }

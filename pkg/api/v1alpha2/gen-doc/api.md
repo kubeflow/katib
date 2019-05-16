@@ -1,5 +1,5 @@
 # Protocol Documentation
-<a name="top"></a>
+<a name="top"/>
 
 ## Table of Contents
 
@@ -77,14 +77,14 @@
 
 
 
-<a name="api.proto"></a>
+<a name="api.proto"/>
 <p align="right"><a href="#top">Top</a></p>
 
 ## api.proto
 Katib API
 
 
-<a name="api.v1.alpha2.AlgorithmSetting"></a>
+<a name="api.v1.alpha2.AlgorithmSetting"/>
 
 ### AlgorithmSetting
 
@@ -100,7 +100,7 @@ Katib API
 
 
 
-<a name="api.v1.alpha2.AlgorithmSpec"></a>
+<a name="api.v1.alpha2.AlgorithmSpec"/>
 
 ### AlgorithmSpec
 
@@ -117,7 +117,7 @@ Katib API
 
 
 
-<a name="api.v1.alpha2.DeleteExperimentReply"></a>
+<a name="api.v1.alpha2.DeleteExperimentReply"/>
 
 ### DeleteExperimentReply
 
@@ -127,7 +127,7 @@ Katib API
 
 
 
-<a name="api.v1.alpha2.DeleteExperimentRequest"></a>
+<a name="api.v1.alpha2.DeleteExperimentRequest"/>
 
 ### DeleteExperimentRequest
 
@@ -142,7 +142,7 @@ Katib API
 
 
 
-<a name="api.v1.alpha2.DeleteTrialReply"></a>
+<a name="api.v1.alpha2.DeleteTrialReply"/>
 
 ### DeleteTrialReply
 
@@ -152,7 +152,7 @@ Katib API
 
 
 
-<a name="api.v1.alpha2.DeleteTrialRequest"></a>
+<a name="api.v1.alpha2.DeleteTrialRequest"/>
 
 ### DeleteTrialRequest
 
@@ -167,7 +167,7 @@ Katib API
 
 
 
-<a name="api.v1.alpha2.EarlyStoppingSpec"></a>
+<a name="api.v1.alpha2.EarlyStoppingSpec"/>
 
 ### EarlyStoppingSpec
 TODO
@@ -177,7 +177,7 @@ TODO
 
 
 
-<a name="api.v1.alpha2.Experiment"></a>
+<a name="api.v1.alpha2.Experiment"/>
 
 ### Experiment
 
@@ -194,7 +194,7 @@ TODO
 
 
 
-<a name="api.v1.alpha2.ExperimentSpec"></a>
+<a name="api.v1.alpha2.ExperimentSpec"/>
 
 ### ExperimentSpec
 Spec of a Experiment. Experiment represents a single optimization run over a feasible space. 
@@ -218,7 +218,7 @@ It is assumed that objective function f(x) does not change in the course of a Ex
 
 
 
-<a name="api.v1.alpha2.ExperimentSpec.ParameterSpecs"></a>
+<a name="api.v1.alpha2.ExperimentSpec.ParameterSpecs"/>
 
 ### ExperimentSpec.ParameterSpecs
 List of ParameterSpec
@@ -233,7 +233,7 @@ List of ParameterSpec
 
 
 
-<a name="api.v1.alpha2.ExperimentStatus"></a>
+<a name="api.v1.alpha2.ExperimentStatus"/>
 
 ### ExperimentStatus
 
@@ -250,7 +250,7 @@ List of ParameterSpec
 
 
 
-<a name="api.v1.alpha2.ExperimentSummary"></a>
+<a name="api.v1.alpha2.ExperimentSummary"/>
 
 ### ExperimentSummary
 
@@ -266,7 +266,7 @@ List of ParameterSpec
 
 
 
-<a name="api.v1.alpha2.FeasibleSpace"></a>
+<a name="api.v1.alpha2.FeasibleSpace"/>
 
 ### FeasibleSpace
 Feasible space for optimization.
@@ -286,7 +286,7 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GetAlgorithmExtraSettingsReply"></a>
+<a name="api.v1.alpha2.GetAlgorithmExtraSettingsReply"/>
 
 ### GetAlgorithmExtraSettingsReply
 
@@ -301,7 +301,7 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GetAlgorithmExtraSettingsRequest"></a>
+<a name="api.v1.alpha2.GetAlgorithmExtraSettingsRequest"/>
 
 ### GetAlgorithmExtraSettingsRequest
 
@@ -316,7 +316,7 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GetExperimentListReply"></a>
+<a name="api.v1.alpha2.GetExperimentListReply"/>
 
 ### GetExperimentListReply
 
@@ -331,7 +331,7 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GetExperimentListRequest"></a>
+<a name="api.v1.alpha2.GetExperimentListRequest"/>
 
 ### GetExperimentListRequest
 
@@ -341,7 +341,7 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GetExperimentReply"></a>
+<a name="api.v1.alpha2.GetExperimentReply"/>
 
 ### GetExperimentReply
 
@@ -356,7 +356,7 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GetExperimentRequest"></a>
+<a name="api.v1.alpha2.GetExperimentRequest"/>
 
 ### GetExperimentRequest
 
@@ -371,7 +371,7 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GetObservationLogReply"></a>
+<a name="api.v1.alpha2.GetObservationLogReply"/>
 
 ### GetObservationLogReply
 
@@ -386,7 +386,7 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GetObservationLogRequest"></a>
+<a name="api.v1.alpha2.GetObservationLogRequest"/>
 
 ### GetObservationLogRequest
 
@@ -403,7 +403,7 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GetSuggestionsReply"></a>
+<a name="api.v1.alpha2.GetSuggestionsReply"/>
 
 ### GetSuggestionsReply
 
@@ -418,7 +418,7 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GetSuggestionsRequest"></a>
+<a name="api.v1.alpha2.GetSuggestionsRequest"/>
 
 ### GetSuggestionsRequest
 
@@ -435,7 +435,7 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GetTrialListReply"></a>
+<a name="api.v1.alpha2.GetTrialListReply"/>
 
 ### GetTrialListReply
 
@@ -450,7 +450,7 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GetTrialListRequest"></a>
+<a name="api.v1.alpha2.GetTrialListRequest"/>
 
 ### GetTrialListRequest
 
@@ -466,7 +466,7 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GetTrialReply"></a>
+<a name="api.v1.alpha2.GetTrialReply"/>
 
 ### GetTrialReply
 
@@ -481,7 +481,7 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GetTrialRequest"></a>
+<a name="api.v1.alpha2.GetTrialRequest"/>
 
 ### GetTrialRequest
 
@@ -496,7 +496,7 @@ Discrete and Categorical type use List.
 
 
 
-<a name="api.v1.alpha2.GraphConfig"></a>
+<a name="api.v1.alpha2.GraphConfig"/>
 
 ### GraphConfig
 GraphConfig contains a config of DAG
@@ -513,7 +513,7 @@ GraphConfig contains a config of DAG
 
 
 
-<a name="api.v1.alpha2.Metric"></a>
+<a name="api.v1.alpha2.Metric"/>
 
 ### Metric
 
@@ -529,7 +529,7 @@ GraphConfig contains a config of DAG
 
 
 
-<a name="api.v1.alpha2.MetricLog"></a>
+<a name="api.v1.alpha2.MetricLog"/>
 
 ### MetricLog
 
@@ -545,7 +545,7 @@ GraphConfig contains a config of DAG
 
 
 
-<a name="api.v1.alpha2.NasConfig"></a>
+<a name="api.v1.alpha2.NasConfig"/>
 
 ### NasConfig
 NasConfig contains a config of NAS job
@@ -561,7 +561,7 @@ NasConfig contains a config of NAS job
 
 
 
-<a name="api.v1.alpha2.NasConfig.Operations"></a>
+<a name="api.v1.alpha2.NasConfig.Operations"/>
 
 ### NasConfig.Operations
 
@@ -576,7 +576,7 @@ NasConfig contains a config of NAS job
 
 
 
-<a name="api.v1.alpha2.ObjectiveSpec"></a>
+<a name="api.v1.alpha2.ObjectiveSpec"/>
 
 ### ObjectiveSpec
 
@@ -594,7 +594,7 @@ NasConfig contains a config of NAS job
 
 
 
-<a name="api.v1.alpha2.Observation"></a>
+<a name="api.v1.alpha2.Observation"/>
 
 ### Observation
 
@@ -609,7 +609,7 @@ NasConfig contains a config of NAS job
 
 
 
-<a name="api.v1.alpha2.ObservationLog"></a>
+<a name="api.v1.alpha2.ObservationLog"/>
 
 ### ObservationLog
 
@@ -624,7 +624,7 @@ NasConfig contains a config of NAS job
 
 
 
-<a name="api.v1.alpha2.Operation"></a>
+<a name="api.v1.alpha2.Operation"/>
 
 ### Operation
 Config for operations in DAG
@@ -640,7 +640,7 @@ Config for operations in DAG
 
 
 
-<a name="api.v1.alpha2.Operation.ParameterSpecs"></a>
+<a name="api.v1.alpha2.Operation.ParameterSpecs"/>
 
 ### Operation.ParameterSpecs
 List of ParameterSpec
@@ -655,7 +655,7 @@ List of ParameterSpec
 
 
 
-<a name="api.v1.alpha2.ParameterAssignment"></a>
+<a name="api.v1.alpha2.ParameterAssignment"/>
 
 ### ParameterAssignment
 
@@ -671,7 +671,7 @@ List of ParameterSpec
 
 
 
-<a name="api.v1.alpha2.ParameterSpec"></a>
+<a name="api.v1.alpha2.ParameterSpec"/>
 
 ### ParameterSpec
 Config for a Hyper parameter.
@@ -689,7 +689,7 @@ Katib will create each Hyper parameter from this config.
 
 
 
-<a name="api.v1.alpha2.RegisterExperimentReply"></a>
+<a name="api.v1.alpha2.RegisterExperimentReply"/>
 
 ### RegisterExperimentReply
 
@@ -699,7 +699,7 @@ Katib will create each Hyper parameter from this config.
 
 
 
-<a name="api.v1.alpha2.RegisterExperimentRequest"></a>
+<a name="api.v1.alpha2.RegisterExperimentRequest"/>
 
 ### RegisterExperimentRequest
 
@@ -714,7 +714,7 @@ Katib will create each Hyper parameter from this config.
 
 
 
-<a name="api.v1.alpha2.RegisterTrialReply"></a>
+<a name="api.v1.alpha2.RegisterTrialReply"/>
 
 ### RegisterTrialReply
 
@@ -724,7 +724,7 @@ Katib will create each Hyper parameter from this config.
 
 
 
-<a name="api.v1.alpha2.RegisterTrialRequest"></a>
+<a name="api.v1.alpha2.RegisterTrialRequest"/>
 
 ### RegisterTrialRequest
 
@@ -739,7 +739,7 @@ Katib will create each Hyper parameter from this config.
 
 
 
-<a name="api.v1.alpha2.ReportObservationLogReply"></a>
+<a name="api.v1.alpha2.ReportObservationLogReply"/>
 
 ### ReportObservationLogReply
 
@@ -749,7 +749,7 @@ Katib will create each Hyper parameter from this config.
 
 
 
-<a name="api.v1.alpha2.ReportObservationLogRequest"></a>
+<a name="api.v1.alpha2.ReportObservationLogRequest"/>
 
 ### ReportObservationLogRequest
 
@@ -765,7 +765,7 @@ Katib will create each Hyper parameter from this config.
 
 
 
-<a name="api.v1.alpha2.Trial"></a>
+<a name="api.v1.alpha2.Trial"/>
 
 ### Trial
 
@@ -774,15 +774,15 @@ Katib will create each Hyper parameter from this config.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | name | [string](#string) |  |  |
-| spec | [TrialSpec](#api.v1.alpha2.TrialSpec) |  |  |
-| status | [TrialStatus](#api.v1.alpha2.TrialStatus) |  |  |
+| trial_spec | [TrialSpec](#api.v1.alpha2.TrialSpec) |  |  |
+| trial_status | [TrialStatus](#api.v1.alpha2.TrialStatus) |  |  |
 
 
 
 
 
 
-<a name="api.v1.alpha2.TrialSpec"></a>
+<a name="api.v1.alpha2.TrialSpec"/>
 
 ### TrialSpec
 
@@ -801,7 +801,7 @@ Katib will create each Hyper parameter from this config.
 
 
 
-<a name="api.v1.alpha2.TrialSpec.ParameterAssignments"></a>
+<a name="api.v1.alpha2.TrialSpec.ParameterAssignments"/>
 
 ### TrialSpec.ParameterAssignments
 List of ParameterAssignment
@@ -816,7 +816,7 @@ List of ParameterAssignment
 
 
 
-<a name="api.v1.alpha2.TrialStatus"></a>
+<a name="api.v1.alpha2.TrialStatus"/>
 
 ### TrialStatus
 
@@ -834,7 +834,7 @@ List of ParameterAssignment
 
 
 
-<a name="api.v1.alpha2.UpdateAlgorithmExtraSettingsReply"></a>
+<a name="api.v1.alpha2.UpdateAlgorithmExtraSettingsReply"/>
 
 ### UpdateAlgorithmExtraSettingsReply
 
@@ -844,7 +844,7 @@ List of ParameterAssignment
 
 
 
-<a name="api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest"></a>
+<a name="api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest"/>
 
 ### UpdateAlgorithmExtraSettingsRequest
 
@@ -860,7 +860,7 @@ List of ParameterAssignment
 
 
 
-<a name="api.v1.alpha2.UpdateExperimentStatusReply"></a>
+<a name="api.v1.alpha2.UpdateExperimentStatusReply"/>
 
 ### UpdateExperimentStatusReply
 
@@ -870,7 +870,7 @@ List of ParameterAssignment
 
 
 
-<a name="api.v1.alpha2.UpdateExperimentStatusRequest"></a>
+<a name="api.v1.alpha2.UpdateExperimentStatusRequest"/>
 
 ### UpdateExperimentStatusRequest
 
@@ -886,7 +886,7 @@ List of ParameterAssignment
 
 
 
-<a name="api.v1.alpha2.UpdateTrialStatusReply"></a>
+<a name="api.v1.alpha2.UpdateTrialStatusReply"/>
 
 ### UpdateTrialStatusReply
 
@@ -896,7 +896,7 @@ List of ParameterAssignment
 
 
 
-<a name="api.v1.alpha2.UpdateTrialStatusRequest"></a>
+<a name="api.v1.alpha2.UpdateTrialStatusRequest"/>
 
 ### UpdateTrialStatusRequest
 
@@ -912,7 +912,7 @@ List of ParameterAssignment
 
 
 
-<a name="api.v1.alpha2.ValidateAlgorithmSettingsReply"></a>
+<a name="api.v1.alpha2.ValidateAlgorithmSettingsReply"/>
 
 ### ValidateAlgorithmSettingsReply
 Return INVALID_ARGUMENT Error if Algorithm Settings are not Valid
@@ -922,7 +922,7 @@ Return INVALID_ARGUMENT Error if Algorithm Settings are not Valid
 
 
 
-<a name="api.v1.alpha2.ValidateAlgorithmSettingsRequest"></a>
+<a name="api.v1.alpha2.ValidateAlgorithmSettingsRequest"/>
 
 ### ValidateAlgorithmSettingsRequest
 
@@ -940,7 +940,7 @@ Return INVALID_ARGUMENT Error if Algorithm Settings are not Valid
  
 
 
-<a name="api.v1.alpha2.ExperimentStatus.ExperimentConditionType"></a>
+<a name="api.v1.alpha2.ExperimentStatus.ExperimentConditionType"/>
 
 ### ExperimentStatus.ExperimentConditionType
 
@@ -955,7 +955,7 @@ Return INVALID_ARGUMENT Error if Algorithm Settings are not Valid
 
 
 
-<a name="api.v1.alpha2.ObjectiveType"></a>
+<a name="api.v1.alpha2.ObjectiveType"/>
 
 ### ObjectiveType
 Direction of optimization. Minimize or Maximize.
@@ -968,7 +968,7 @@ Direction of optimization. Minimize or Maximize.
 
 
 
-<a name="api.v1.alpha2.ParameterType"></a>
+<a name="api.v1.alpha2.ParameterType"/>
 
 ### ParameterType
 Types of value for HyperParameter.
@@ -983,7 +983,7 @@ Types of value for HyperParameter.
 
 
 
-<a name="api.v1.alpha2.TrialStatus.TrialConditionType"></a>
+<a name="api.v1.alpha2.TrialStatus.TrialConditionType"/>
 
 ### TrialStatus.TrialConditionType
 
@@ -1002,7 +1002,7 @@ Types of value for HyperParameter.
  
 
 
-<a name="api.v1.alpha2.EarlyStopping"></a>
+<a name="api.v1.alpha2.EarlyStopping"/>
 
 ### EarlyStopping
 TODO
@@ -1011,7 +1011,7 @@ TODO
 | ----------- | ------------ | ------------- | ------------|
 
 
-<a name="api.v1.alpha2.Manager"></a>
+<a name="api.v1.alpha2.Manager"/>
 
 ### Manager
 Service for Main API for Katib
@@ -1021,33 +1021,33 @@ https://cloud.google.com/service-infrastructure/docs/service-management/referenc
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| RegisterExperiment | [RegisterExperimentRequest](#api.v1.alpha2.RegisterExperimentRequest) | [RegisterExperimentReply](#api.v1.alpha2.RegisterExperimentReply) | Register a Experiment to DB. |
-| DeleteExperiment | [DeleteExperimentRequest](#api.v1.alpha2.DeleteExperimentRequest) | [DeleteExperimentReply](#api.v1.alpha2.DeleteExperimentReply) | Delete a Experiment from DB by name. |
-| GetExperiment | [GetExperimentRequest](#api.v1.alpha2.GetExperimentRequest) | [GetExperimentReply](#api.v1.alpha2.GetExperimentReply) | Get a Experiment from DB by name. |
-| GetExperimentList | [GetExperimentListRequest](#api.v1.alpha2.GetExperimentListRequest) | [GetExperimentListReply](#api.v1.alpha2.GetExperimentListReply) | Get a summary list of Experiment from DB. The summary includes name and condition. |
-| UpdateExperimentStatus | [UpdateExperimentStatusRequest](#api.v1.alpha2.UpdateExperimentStatusRequest) | [UpdateExperimentStatusReply](#api.v1.alpha2.UpdateExperimentStatusReply) | Update Status of a experiment. |
-| UpdateAlgorithmExtraSettings | [UpdateAlgorithmExtraSettingsRequest](#api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest) | [UpdateAlgorithmExtraSettingsReply](#api.v1.alpha2.UpdateAlgorithmExtraSettingsReply) | Update AlgorithmExtraSettings. The ExtraSetting is created if it does not exist, otherwise it is overwrited. |
-| GetAlgorithmExtraSettings | [GetAlgorithmExtraSettingsRequest](#api.v1.alpha2.GetAlgorithmExtraSettingsRequest) | [GetAlgorithmExtraSettingsReply](#api.v1.alpha2.GetAlgorithmExtraSettingsReply) | Get all AlgorithmExtraSettings. |
-| RegisterTrial | [RegisterTrialRequest](#api.v1.alpha2.RegisterTrialRequest) | [RegisterTrialReply](#api.v1.alpha2.RegisterTrialReply) | Register a Trial to DB. ID will be filled by manager automatically. |
-| DeleteTrial | [DeleteTrialRequest](#api.v1.alpha2.DeleteTrialRequest) | [DeleteTrialReply](#api.v1.alpha2.DeleteTrialReply) | Delete a Trial from DB by ID. |
-| GetTrialList | [GetTrialListRequest](#api.v1.alpha2.GetTrialListRequest) | [GetTrialListReply](#api.v1.alpha2.GetTrialListReply) | Get a list of Trial from DB by name of a Experiment. |
-| GetTrial | [GetTrialRequest](#api.v1.alpha2.GetTrialRequest) | [GetTrialReply](#api.v1.alpha2.GetTrialReply) | Get a Trial from DB by ID of Trial. |
-| UpdateTrialStatus | [UpdateTrialStatusRequest](#api.v1.alpha2.UpdateTrialStatusRequest) | [UpdateTrialStatusReply](#api.v1.alpha2.UpdateTrialStatusReply) | Update Status of a trial. |
-| ReportObservationLog | [ReportObservationLogRequest](#api.v1.alpha2.ReportObservationLogRequest) | [ReportObservationLogReply](#api.v1.alpha2.ReportObservationLogReply) | Report a log of Observations for a Trial. The log consists of timestamp and value of metric. Katib store every log of metrics. You can see accuracy curve or other metric logs on UI. |
-| GetObservationLog | [GetObservationLogRequest](#api.v1.alpha2.GetObservationLogRequest) | [GetObservationLogReply](#api.v1.alpha2.GetObservationLogReply) | Get all log of Observations for a Trial. |
-| GetSuggestions | [GetSuggestionsRequest](#api.v1.alpha2.GetSuggestionsRequest) | [GetSuggestionsReply](#api.v1.alpha2.GetSuggestionsReply) | Get Suggestions from a Suggestion service. |
-| ValidateAlgorithmSettings | [ValidateAlgorithmSettingsRequest](#api.v1.alpha2.ValidateAlgorithmSettingsRequest) | [ValidateAlgorithmSettingsReply](#api.v1.alpha2.ValidateAlgorithmSettingsReply) | Validate AlgorithmSettings in an Experiment. Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid |
+| RegisterExperiment | [RegisterExperimentRequest](#api.v1.alpha2.RegisterExperimentRequest) | [RegisterExperimentReply](#api.v1.alpha2.RegisterExperimentRequest) | Register a Experiment to DB. |
+| DeleteExperiment | [DeleteExperimentRequest](#api.v1.alpha2.DeleteExperimentRequest) | [DeleteExperimentReply](#api.v1.alpha2.DeleteExperimentRequest) | Delete a Experiment from DB by name. |
+| GetExperiment | [GetExperimentRequest](#api.v1.alpha2.GetExperimentRequest) | [GetExperimentReply](#api.v1.alpha2.GetExperimentRequest) | Get a Experiment from DB by name. |
+| GetExperimentList | [GetExperimentListRequest](#api.v1.alpha2.GetExperimentListRequest) | [GetExperimentListReply](#api.v1.alpha2.GetExperimentListRequest) | Get a summary list of Experiment from DB. The summary includes name and condition. |
+| UpdateExperimentStatus | [UpdateExperimentStatusRequest](#api.v1.alpha2.UpdateExperimentStatusRequest) | [UpdateExperimentStatusReply](#api.v1.alpha2.UpdateExperimentStatusRequest) | Update Status of a experiment. |
+| UpdateAlgorithmExtraSettings | [UpdateAlgorithmExtraSettingsRequest](#api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest) | [UpdateAlgorithmExtraSettingsReply](#api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest) | Update AlgorithmExtraSettings. The ExtraSetting is created if it does not exist, otherwise it is overwrited. |
+| GetAlgorithmExtraSettings | [GetAlgorithmExtraSettingsRequest](#api.v1.alpha2.GetAlgorithmExtraSettingsRequest) | [GetAlgorithmExtraSettingsReply](#api.v1.alpha2.GetAlgorithmExtraSettingsRequest) | Get all AlgorithmExtraSettings. |
+| RegisterTrial | [RegisterTrialRequest](#api.v1.alpha2.RegisterTrialRequest) | [RegisterTrialReply](#api.v1.alpha2.RegisterTrialRequest) | Register a Trial to DB. ID will be filled by manager automatically. |
+| DeleteTrial | [DeleteTrialRequest](#api.v1.alpha2.DeleteTrialRequest) | [DeleteTrialReply](#api.v1.alpha2.DeleteTrialRequest) | Delete a Trial from DB by ID. |
+| GetTrialList | [GetTrialListRequest](#api.v1.alpha2.GetTrialListRequest) | [GetTrialListReply](#api.v1.alpha2.GetTrialListRequest) | Get a list of Trial from DB by name of a Experiment. |
+| GetTrial | [GetTrialRequest](#api.v1.alpha2.GetTrialRequest) | [GetTrialReply](#api.v1.alpha2.GetTrialRequest) | Get a Trial from DB by ID of Trial. |
+| UpdateTrialStatus | [UpdateTrialStatusRequest](#api.v1.alpha2.UpdateTrialStatusRequest) | [UpdateTrialStatusReply](#api.v1.alpha2.UpdateTrialStatusRequest) | Update Status of a trial. |
+| ReportObservationLog | [ReportObservationLogRequest](#api.v1.alpha2.ReportObservationLogRequest) | [ReportObservationLogReply](#api.v1.alpha2.ReportObservationLogRequest) | Report a log of Observations for a Trial. The log consists of timestamp and value of metric. Katib store every log of metrics. You can see accuracy curve or other metric logs on UI. |
+| GetObservationLog | [GetObservationLogRequest](#api.v1.alpha2.GetObservationLogRequest) | [GetObservationLogReply](#api.v1.alpha2.GetObservationLogRequest) | Get all log of Observations for a Trial. |
+| GetSuggestions | [GetSuggestionsRequest](#api.v1.alpha2.GetSuggestionsRequest) | [GetSuggestionsReply](#api.v1.alpha2.GetSuggestionsRequest) | Get Suggestions from a Suggestion service. |
+| ValidateAlgorithmSettings | [ValidateAlgorithmSettingsRequest](#api.v1.alpha2.ValidateAlgorithmSettingsRequest) | [ValidateAlgorithmSettingsReply](#api.v1.alpha2.ValidateAlgorithmSettingsRequest) | Validate AlgorithmSettings in an Experiment. Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid |
 
 
-<a name="api.v1.alpha2.Suggestion"></a>
+<a name="api.v1.alpha2.Suggestion"/>
 
 ### Suggestion
 
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| GetSuggestions | [GetSuggestionsRequest](#api.v1.alpha2.GetSuggestionsRequest) | [GetSuggestionsReply](#api.v1.alpha2.GetSuggestionsReply) |  |
-| ValidateAlgorithmSettings | [ValidateAlgorithmSettingsRequest](#api.v1.alpha2.ValidateAlgorithmSettingsRequest) | [ValidateAlgorithmSettingsReply](#api.v1.alpha2.ValidateAlgorithmSettingsReply) |  |
+| GetSuggestions | [GetSuggestionsRequest](#api.v1.alpha2.GetSuggestionsRequest) | [GetSuggestionsReply](#api.v1.alpha2.GetSuggestionsRequest) |  |
+| ValidateAlgorithmSettings | [ValidateAlgorithmSettingsRequest](#api.v1.alpha2.ValidateAlgorithmSettingsRequest) | [ValidateAlgorithmSettingsReply](#api.v1.alpha2.ValidateAlgorithmSettingsRequest) |  |
 
  
 

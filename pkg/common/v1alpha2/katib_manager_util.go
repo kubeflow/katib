@@ -16,8 +16,8 @@ limitations under the License.
 package v1alpha2
 
 import (
-	"os"
 	"context"
+	"os"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
@@ -34,7 +34,7 @@ const (
 )
 
 type katibManagerClientAndConn struct {
-	Conn *grpc.ClientConn
+	Conn               *grpc.ClientConn
 	KatibManagerClient api_pb.ManagerClient
 }
 
@@ -59,8 +59,8 @@ func getKatibManagerClientAndConn() (*katibManagerClientAndConn, error) {
 	if err != nil {
 		return nil, err
 	}
-	kcc := &katibManagerClientAndConn {
-		Conn: conn,
+	kcc := &katibManagerClientAndConn{
+		Conn:               conn,
 		KatibManagerClient: api_pb.NewManagerClient(conn),
 	}
 	return kcc, nil
@@ -86,4 +86,15 @@ func DeleteExperiment(request *api_pb.DeleteExperimentRequest) (*api_pb.DeleteEx
 	defer kcc.Conn.Close()
 	kc := kcc.KatibManagerClient
 	return kc.DeleteExperiment(ctx, request)
+}
+
+func RegisterTrial(request *api_pb.RegisterTrialRequest) (*api_pb.RegisterTrialReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer kcc.Conn.Close()
+	kc := kcc.KatibManagerClient
+	return kc.RegisterTrial(ctx, request)
 }

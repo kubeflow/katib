@@ -923,10 +923,10 @@
         "name": {
           "type": "string"
         },
-        "spec": {
+        "trial_spec": {
           "$ref": "#/definitions/alpha2TrialSpec"
         },
-        "status": {
+        "trial_status": {
           "$ref": "#/definitions/alpha2TrialStatus"
         }
       }
