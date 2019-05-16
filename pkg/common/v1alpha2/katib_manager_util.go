@@ -87,3 +87,14 @@ func DeleteExperiment(request *api_pb.DeleteExperimentRequest) (*api_pb.DeleteEx
 	kc := kcc.KatibManagerClient
 	return kc.DeleteExperiment(ctx, request)
 }
+
+func UpdateExperimentStatus(request *api_pb.UpdateExperimentStatusRequest) (*api_pb.UpdateExperimentStatusReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer kcc.Conn.Close()
+	kc := kcc.KatibManagerClient
+	return kc.UpdateExperimentStatus(ctx, request)
+}

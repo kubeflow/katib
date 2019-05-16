@@ -17,16 +17,18 @@ package util
 
 import (
 	"database/sql"
+	"time"
 
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	common "github.com/kubeflow/katib/pkg/common/v1alpha2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
 	experiment := GetExperimentConf(instance)
-	request := &api_pb.RegisterExperimentRequest {
+	request := &api_pb.RegisterExperimentRequest{
 		Experiment: experiment,
 	}
 	if _, err := common.RegisterExperiment(request); err != nil {
@@ -36,7 +38,7 @@ func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
 }
 
 func DeleteExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
-	request := &api_pb.DeleteExperimentRequest {
+	request := &api_pb.DeleteExperimentRequest{
 		ExperimentName: instance.Name,
 	}
 	if _, err := common.DeleteExperiment(request); err != nil {
@@ -46,7 +48,18 @@ func DeleteExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
 }
 
 func UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error {
-
+	newStatus := &api_pb.ExperimentStatus{
+		StartTime:      convertTime2RFC3339(instance.Status.StartTime),
+		CompletionTime: convertTime2RFC3339(instance.Status.CompletionTime),
+		Condition:      getCondition(instance),
+	}
+	request := &api_pb.UpdateExperimentStatusRequest{
+		NewStatus:       newStatus,
+		ExperimentName: instance.Name,
+	}
+	if _, err := common.UpdateExperimentStatus(request); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -63,6 +76,11 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 			Algorithm: &api_pb.AlgorithmSpec{
 				AlgorithmSetting: []*api_pb.AlgorithmSetting{},
 			},
+		},
+		ExperimentStatus: &api_pb.ExperimentStatus {
+			StartTime:      convertTime2RFC3339(instance.Status.StartTime),
+			CompletionTime: convertTime2RFC3339(instance.Status.CompletionTime),
+			Condition:      getCondition(instance),
 		},
 	}
 
@@ -189,4 +207,27 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 
 	return experiment
 
+}
+
+func getCondition(inst *experimentsv1alpha2.Experiment) api_pb.ExperimentStatus_ExperimentConditionType {
+	condition, _ := inst.GetLastConditionType()
+	switch condition {
+	case experimentsv1alpha2.ExperimentCreated:
+		return api_pb.ExperimentStatus_CREATED
+	case experimentsv1alpha2.ExperimentRunning:
+		return api_pb.ExperimentStatus_RUNNING
+	case experimentsv1alpha2.ExperimentRestarting:
+		return api_pb.ExperimentStatus_RESTARTING
+	case experimentsv1alpha2.ExperimentSucceeded:
+		return api_pb.ExperimentStatus_SUCCEEDED
+	case experimentsv1alpha2.ExperimentFailed:
+		return api_pb.ExperimentStatus_FAILED
+	default:
+		// TODO: maybe we need add ExperimentStatus_UNKNOWN
+		return api_pb.ExperimentStatus_CREATED
+	}
+}
+
+func convertTime2RFC3339(t *metav1.Time) string {
+	return t.UTC().Format(time.RFC3339)
 }

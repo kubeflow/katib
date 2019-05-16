@@ -21,6 +21,7 @@ import (
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var log = logf.Log.WithName("experiment-status-util")
@@ -134,22 +135,26 @@ func updateExperimentStatusCondition(instance *experimentsv1alpha2.Experiment, i
 
 	completedTrialsCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled
 	failedTrialsCount := instance.Status.TrialsFailed
+	now := metav1.Now()
 
 	if isObjectiveGoalReached {
 		msg := "Experiment has succeeded because Objective goal has reached"
 		instance.MarkExperimentStatusSucceeded(ExperimentSucceededReason, msg)
+		instance.Status.CompletionTime = &now
 		return
 	}
 
 	if (instance.Spec.MaxTrialCount != nil) && (completedTrialsCount >= *instance.Spec.MaxTrialCount) {
 		msg := "Experiment has succeeded because max trial count has reached"
 		instance.MarkExperimentStatusSucceeded(ExperimentSucceededReason, msg)
+		instance.Status.CompletionTime = &now
 		return
 	}
 
 	if (instance.Spec.MaxFailedTrialCount != nil) && (failedTrialsCount >= *instance.Spec.MaxFailedTrialCount) {
 		msg := "Experiment has failed because max failed count has reached"
 		instance.MarkExperimentStatusFailed(ExperimentFailedReason, msg)
+		instance.Status.CompletionTime = &now
 		return
 	}
 
