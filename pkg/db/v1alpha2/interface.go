@@ -364,8 +364,7 @@ func (d *dbConn) UpdateExperimentStatus(experimentName string, newStatus *v1alph
 func (d *dbConn) UpdateAlgorithmExtraSettings(experimentName string, extraAlgorithmSetting []*v1alpha2.AlgorithmSetting) error {
 	aesList, err := d.GetAlgorithmExtraSettings(experimentName)
 	if err != nil {
-		log.Printf("Failed to get current state %v", err)
-		return err
+		return fmt.Errorf("Failed to get current state %v", err)
 	}
 	for _, neas := range extraAlgorithmSetting {
 		isin := false
@@ -375,8 +374,7 @@ func (d *dbConn) UpdateAlgorithmExtraSettings(experimentName string, extraAlgori
 						WHERE experiment_name = ? AND setting_name = ?`,
 					neas.Value, experimentName, ceas.Name)
 				if err != nil {
-					log.Printf("Failed to update state %v", err)
-					return err
+					return fmt.Errorf("Failed to update state %v", err)
 				}
 				isin = true
 				break
@@ -393,8 +391,7 @@ func (d *dbConn) UpdateAlgorithmExtraSettings(experimentName string, extraAlgori
 				neas.Value,
 			)
 			if err != nil {
-				log.Printf("Failed to update state %v", err)
-				return err
+				return fmt.Errorf("Failed to update state %v", err)
 			}
 		}
 	}
@@ -460,14 +457,14 @@ func (d *dbConn) RegisterTrial(trial *v1alpha2.Trial) error {
 		if trial.TrialStatus.StartTime != "" {
 			s_time, err := time.Parse(time.RFC3339Nano, trial.TrialStatus.StartTime)
 			if err != nil {
-				return fmt.Errorf("Error parsing start time %s: %v", trial.Status.StartTime, err)
+				return fmt.Errorf("Error parsing start time %s: %v", trial.TrialStatus.StartTime, err)
 			}
 			start_time = s_time.UTC().Format(mysqlTimeFmt)
 		}
 		if trial.TrialStatus.CompletionTime != "" {
 			c_time, err := time.Parse(time.RFC3339Nano, trial.TrialStatus.CompletionTime)
 			if err != nil {
-				return fmt.Errorf("Error parsing completion time %s: %v", trial.Status.CompletionTime, err)
+				return fmt.Errorf("Error parsing completion time %s: %v", trial.TrialStatus.CompletionTime, err)
 			}
 			completion_time = c_time.UTC().Format(mysqlTimeFmt)
 		}
@@ -744,8 +741,7 @@ func (d *dbConn) GetObservationLog(trialName string, startTime string, endTime s
 	rows, err := d.db.Query("SELECT time, metric_name, value FROM observation_logs WHERE trial_name = ?"+qstr+" ORDER BY time",
 		qfield...)
 	if err != nil {
-		log.Printf("Failed to get ObservationLogs %v", err)
-		return nil, err
+		return nil, fmt.Errorf("Failed to get ObservationLogs %v", err)
 	}
 	result := &v1alpha2.ObservationLog{
 		MetricLogs: []*v1alpha2.MetricLog{},
