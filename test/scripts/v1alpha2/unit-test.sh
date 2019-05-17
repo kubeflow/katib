@@ -38,7 +38,7 @@ os=$(go env GOOS)
 arch=$(go env GOARCH)
 version=1.0.2 # latest stable version
 echo "os: ${os}, arch: ${arch}"
-
+ls ./manifests/v1alpha2/katib-controller
 # download the release
 curl -L -O "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${version}/kubebuilder_${version}_${os}_${arch}.tar.gz"
 
