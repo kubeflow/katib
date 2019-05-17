@@ -14,6 +14,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	v1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 )
 
 type MetricsCollector struct {
@@ -36,11 +37,7 @@ func NewMetricsCollector() (*MetricsCollector, error) {
 }
 
 func (d *MetricsCollector) CollectObservationLog(tId string, jobKind string, metrics []string, namespace string) (*v1alpha2.ObservationLog, error) {
-	labelMap := make(map[string]string)
-
-	// TODO: Add labels for TFJob and PytorchJob
-	labelMap["job-name"] = tId
-
+	labelMap := commonv1alpha2.GetJobLabelMap(jobKind, tId)
 	pl, err := d.clientset.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labels.Set(labelMap).String(), IncludeUninitialized: true})
 	if err != nil {
 		return nil, err
