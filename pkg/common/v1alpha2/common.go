@@ -31,3 +31,19 @@ func GetSupportedJobList() []schema.GroupVersionKind {
 func ConvertTime2RFC3339(t *metav1.Time) string {
 	return t.UTC().Format(time.RFC3339)
 }
+
+func GetJobLabelMap(jobKind string, trialName string) map[string]string {
+	labelMap := make(map[string]string)
+
+	if jobKind == "TFJob" {
+		labelMap["tf-job-name"] = trialName
+		labelMap["tf-job-role"] = "master"
+	} else if jobKind == "PyTorchJob" {
+		labelMap["pytorch-job-name"] = trialName
+		labelMap["pytorch-job-role"] = "master"
+	} else {
+		labelMap["job-name"] = trialName
+	}
+
+	return labelMap
+}
