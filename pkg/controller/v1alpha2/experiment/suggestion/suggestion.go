@@ -23,7 +23,7 @@ func (g *General) GetSuggestions(instance *experimentsv1alpha2.Experiment, addCo
 		AlgorithmName:  instance.Spec.Algorithm.AlgorithmName,
 		RequestNumber:  *instance.Spec.ParallelTrialCount,
 	}
-	if reply, err :=common.GetSuggestions(request); err != nil {
+	if reply, err := common.GetSuggestions(request); err != nil {
 		return nil, err
 	} else {
 		return reply.Trials, nil
