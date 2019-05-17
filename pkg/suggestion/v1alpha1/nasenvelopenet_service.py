@@ -1,11 +1,11 @@
 import grpc
-from pkg.api.python import api_pb2
-from pkg.api.python import api_pb2_grpc
+from pkg.api.v1alpha1.python import api_pb2
+from pkg.api.v1alpha1.python import api_pb2_grpc
 import logging
 import json
-from pkg.suggestion.NAS_Envelopenet.operation import SearchSpace
-from pkg.suggestion.NAS_Envelopenet.suggestion_param import parseSuggestionParam
-from pkg.suggestion.NAS_Envelopenet.nac_gen import NAC
+from pkg.suggestion.v1alpha1.NAS_Envelopenet.operation import SearchSpace
+from pkg.suggestion.v1alpha1.NAS_Envelopenet.suggestion_param import parseSuggestionParam
+from pkg.suggestion.v1alpha1.NAS_Envelopenet.nac_gen import NAC
 
 class EnvelopenetService(api_pb2_grpc.SuggestionServicer):
     def __init__(self):
