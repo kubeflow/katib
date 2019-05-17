@@ -5,8 +5,10 @@ import (
 	"context"
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	utilrand "k8s.io/apimachinery/pkg/util/rand"
+	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -14,8 +16,6 @@ import (
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
 func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alpha2.Experiment, trialInstance *apiv1alpha2.Trial) error {
@@ -32,18 +32,14 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 		return err
 	}
 
-	trialParams := util.TrialTemplateParams{
-		Experiment: expInstance.GetName(),
-		Trial:      trial.Name,
-		NameSpace:  trial.Namespace,
-	}
+	hps := make([]*apiv1alpha2.ParameterAssignment, 0)
 	if trialInstance.Spec != nil && trialInstance.Spec.ParameterAssignments != nil {
 		for _, p := range trialInstance.Spec.ParameterAssignments.Assignments {
-			trialParams.HyperParameters = append(trialParams.HyperParameters, p)
+			hps = append(hps, p)
 		}
 	}
 
-	runSpec, err := util.GetRunSpec(expInstance, trialParams)
+	runSpec, err := r.GetRunSpecWithHyperParameters(expInstance, expInstance.GetName(), trial.Name, trial.Namespace, hps)
 	if err != nil {
 		logger.Error(err, "Fail to get RunSpec from experiment", expInstance.Name)
 		return err
@@ -63,7 +59,7 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 		metricNames = append(metricNames, mn)
 	}
 
-	mcSpec, err := util.GetMetricsCollectorManifest(expInstance.GetName(), trial.Name, job.GetKind(), trial.Namespace, metricNames, expInstance.Spec.MetricsCollectorSpec)
+	mcSpec, err := r.GetMetricsCollectorManifest(expInstance.GetName(), trial.Name, job.GetKind(), trial.Namespace, metricNames, expInstance.Spec.MetricsCollectorSpec)
 	if err != nil {
 		logger.Error(err, "Error getting metrics collector manifest")
 		return err

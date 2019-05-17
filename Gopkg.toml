@@ -40,10 +40,6 @@ required = [
   version = "1.2.0"
 
 [[constraint]]
-  name = "github.com/spf13/cobra"
-  version = "0.0.3"
-
-[[constraint]]
   name = "github.com/spf13/viper"
   version = "1.2.0"
 

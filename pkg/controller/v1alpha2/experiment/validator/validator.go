@@ -1,50 +1,52 @@
-/*
-Copyright 2019 The Kubernetes Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-package util
+package validator
 
 import (
 	"bytes"
 	"database/sql"
 	"fmt"
-	logger "log"
 
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/manifest"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
 )
 
-func ValidateExperiment(instance *experimentsv1alpha2.Experiment) error {
+var log = logf.Log.WithName("experiment-controller")
+
+type Validator interface {
+	ValidateExperiment(instance *experimentsv1alpha2.Experiment) error
+}
+
+type DefaultValidator struct {
+	manifest.Generator
+}
+
+func New(generator manifest.Generator) Validator {
+	return &DefaultValidator{
+		Generator: generator,
+	}
+}
+
+func (g *DefaultValidator) ValidateExperiment(instance *experimentsv1alpha2.Experiment) error {
 	if !instance.IsCreated() {
-		if err := validateForCreate(instance); err != nil {
+		if err := g.validateForCreate(instance); err != nil {
 			return err
 		}
 	}
-	if err := validateObjective(instance.Spec.Objective); err != nil {
+	if err := g.validateObjective(instance.Spec.Objective); err != nil {
 		return err
 	}
-	if err := validateAlgorithm(instance.Spec.Algorithm); err != nil {
+	if err := g.validateAlgorithm(instance.Spec.Algorithm); err != nil {
 		return err
 	}
 
-	if err := validateTrialTemplate(instance); err != nil {
+	if err := g.validateTrialTemplate(instance); err != nil {
 		return err
 	}
 
@@ -56,23 +58,23 @@ func ValidateExperiment(instance *experimentsv1alpha2.Experiment) error {
 		return fmt.Errorf("Only one of spec.parameters and spec.nasConfig can be specified.")
 	}
 
-	if err := validateAlgorithmSettings(instance); err != nil {
+	if err := g.validateAlgorithmSettings(instance); err != nil {
 		return err
 	}
 
-	if err := validateMetricsCollector(instance); err != nil {
+	if err := g.validateMetricsCollector(instance); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func validateAlgorithmSettings(inst *experimentsv1alpha2.Experiment) error {
+func (g *DefaultValidator) validateAlgorithmSettings(inst *experimentsv1alpha2.Experiment) error {
 	// TODO: it need call ValidateAlgorithmSettings API of vizier-core manager, implement it when vizier-core done
 	return nil
 }
 
-func validateObjective(obj *commonapiv1alpha2.ObjectiveSpec) error {
+func (g *DefaultValidator) validateObjective(obj *commonapiv1alpha2.ObjectiveSpec) error {
 	if obj == nil {
 		return fmt.Errorf("No spec.objective specified.")
 	}
@@ -85,7 +87,7 @@ func validateObjective(obj *commonapiv1alpha2.ObjectiveSpec) error {
 	return nil
 }
 
-func validateAlgorithm(ag *experimentsv1alpha2.AlgorithmSpec) error {
+func (g *DefaultValidator) validateAlgorithm(ag *experimentsv1alpha2.AlgorithmSpec) error {
 	if ag == nil {
 		return fmt.Errorf("No spec.algorithm specified.")
 	}
@@ -96,14 +98,9 @@ func validateAlgorithm(ag *experimentsv1alpha2.AlgorithmSpec) error {
 	return nil
 }
 
-func validateTrialTemplate(instance *experimentsv1alpha2.Experiment) error {
+func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1alpha2.Experiment) error {
 	trialName := fmt.Sprintf("%s-trial", instance.GetName())
-	trialParams := TrialTemplateParams{
-		Experiment: instance.GetName(),
-		Trial:      trialName,
-		NameSpace:  instance.GetNamespace(),
-	}
-	runSpec, err := GetRunSpec(instance, trialParams)
+	runSpec, err := g.GetRunSpec(instance, instance.GetName(), trialName, instance.GetNamespace())
 	if err != nil {
 		return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
 	}
@@ -116,7 +113,7 @@ func validateTrialTemplate(instance *experimentsv1alpha2.Experiment) error {
 		return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
 	}
 
-	if err := validateSupportedJob(job); err != nil {
+	if err := g.validateSupportedJob(job); err != nil {
 		return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
 	}
 
@@ -129,7 +126,7 @@ func validateTrialTemplate(instance *experimentsv1alpha2.Experiment) error {
 	return nil
 }
 
-func validateSupportedJob(job *unstructured.Unstructured) error {
+func (g *DefaultValidator) validateSupportedJob(job *unstructured.Unstructured) error {
 	gvk := job.GroupVersionKind()
 	supportedJobs := commonv1alpha2.GetSupportedJobList()
 	for _, sJob := range supportedJobs {
@@ -140,8 +137,8 @@ func validateSupportedJob(job *unstructured.Unstructured) error {
 	return fmt.Errorf("Job type %v not supported", gvk)
 }
 
-func validateForCreate(inst *experimentsv1alpha2.Experiment) error {
-	if _, err := GetExperimentFromDB(inst); err != nil {
+func (g *DefaultValidator) validateForCreate(inst *experimentsv1alpha2.Experiment) error {
+	if _, err := util.GetExperimentFromDB(inst); err != nil {
 		if err != sql.ErrNoRows {
 			return fmt.Errorf("Fail to check record for the experiment in DB: %v", err)
 		}
@@ -151,23 +148,18 @@ func validateForCreate(inst *experimentsv1alpha2.Experiment) error {
 	}
 }
 
-func validateMetricsCollector(inst *experimentsv1alpha2.Experiment) error {
+func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1alpha2.Experiment) error {
 	BUFSIZE := 1024
 	experimentName := inst.GetName()
 	trialName := fmt.Sprintf("%s-trial", inst.GetName())
 	namespace := inst.GetNamespace()
-	trialParams := TrialTemplateParams{
-		Experiment: experimentName,
-		Trial:      trialName,
-		NameSpace:  namespace,
-	}
 	var metricNames []string
 	metricNames = append(metricNames, inst.Spec.Objective.ObjectiveMetricName)
 	for _, mn := range inst.Spec.Objective.AdditionalMetricNames {
 		metricNames = append(metricNames, mn)
 	}
 
-	runSpec, err := GetRunSpec(inst, trialParams)
+	runSpec, err := g.GetRunSpec(inst, experimentName, trialName, namespace)
 	if err != nil {
 		return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
 	}
@@ -180,14 +172,15 @@ func validateMetricsCollector(inst *experimentsv1alpha2.Experiment) error {
 	}
 
 	var mcjob batchv1beta.CronJob
-	mcm, err := GetMetricsCollectorManifest(experimentName, trialName, job.GetKind(), namespace, metricNames, inst.Spec.MetricsCollectorSpec)
+	mcm, err := g.GetMetricsCollectorManifest(experimentName, trialName, job.GetKind(), namespace, metricNames, inst.Spec.MetricsCollectorSpec)
 	if err != nil {
-		logger.Printf("getMetricsCollectorManifest error %v", err)
+		log.Info("getMetricsCollectorManifest error", "err", err)
 		return err
 	}
 
+	log.Info("1", "m", mcm, "instance", inst)
 	if err := k8syaml.NewYAMLOrJSONDecoder(mcm, BUFSIZE).Decode(&mcjob); err != nil {
-		logger.Printf("MetricsCollector Yaml decode error %v", err)
+		log.Info("MetricsCollector Yaml decode error", "err", err)
 		return err
 	}
 
