@@ -40,13 +40,13 @@ package main
 import (
 	"context"
 	"flag"
-	"log"
 	"strings"
+
+	"google.golang.org/grpc"
+	"k8s.io/klog"
 
 	api "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/metricscollector"
-
-	"google.golang.org/grpc"
 )
 
 var experimentName = flag.String("e", "", "Experiment Name")
@@ -58,21 +58,21 @@ var metricNames = flag.String("mn", "", "Metric names")
 
 func main() {
 	flag.Parse()
-	log.Printf("Experiment Name: %s, Trial Name: %s, Job Kind: %s", *experimentName, *trialName, *jobKind)
+	klog.Infof("Experiment Name: %s, Trial Name: %s, Job Kind: %s", *experimentName, *trialName, *jobKind)
 	conn, err := grpc.Dial(*managerService, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("could not connect: %v", err)
+		klog.Fatalf("could not connect: %v", err)
 	}
 	defer conn.Close()
 	c := api.NewManagerClient(conn)
 	mc, err := metricscollector.NewMetricsCollector()
 	if err != nil {
-		log.Fatalf("Failed to create MetricsCollector: %v", err)
+		klog.Fatalf("Failed to create MetricsCollector: %v", err)
 	}
 	ctx := context.Background()
 	olog, err := mc.CollectObservationLog(*trialName, *jobKind, strings.Split(*metricNames, ";"), *namespace)
 	if err != nil {
-		log.Fatalf("Failed to collect logs: %v", err)
+		klog.Fatalf("Failed to collect logs: %v", err)
 	}
 	reportreq := &api.ReportObservationLogRequest{
 		TrialName:      *trialName,
@@ -80,8 +80,8 @@ func main() {
 	}
 	_, err = c.ReportObservationLog(ctx, reportreq)
 	if err != nil {
-		log.Fatalf("Failed to Report logs: %v", err)
+		klog.Fatalf("Failed to Report logs: %v", err)
 	}
-	log.Printf("Metrics reported. :\n%v", olog)
+	klog.Infof("Metrics reported. :\n%v", olog)
 	return
 }

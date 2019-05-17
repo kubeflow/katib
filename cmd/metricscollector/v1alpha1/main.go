@@ -40,10 +40,10 @@ package main
 import (
 	"context"
 	"flag"
-	"log"
 
 	api "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	"github.com/kubeflow/katib/pkg/manager/v1alpha1/metricscollector"
+	"k8s.io/klog"
 
 	"google.golang.org/grpc"
 )
@@ -57,16 +57,16 @@ var managerSerivce = flag.String("m", "", "Vizier Manager service")
 
 func main() {
 	flag.Parse()
-	log.Printf("Study ID: %s, Trial ID: %s, Worker ID: %s, Worker Kind: %s", *studyID, *trialID, *workerID, *workerKind)
+	klog.Infof("Study ID: %s, Trial ID: %s, Worker ID: %s, Worker Kind: %s", *studyID, *trialID, *workerID, *workerKind)
 	conn, err := grpc.Dial(*managerSerivce, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("could not connect: %v", err)
+		klog.Fatalf("could not connect: %v", err)
 	}
 	defer conn.Close()
 	c := api.NewManagerClient(conn)
 	mc, err := metricscollector.NewMetricsCollector()
 	if err != nil {
-		log.Fatalf("Failed to create MetricsCollector: %v", err)
+		klog.Fatalf("Failed to create MetricsCollector: %v", err)
 	}
 	ctx := context.Background()
 	screq := &api.GetStudyRequest{
@@ -74,11 +74,11 @@ func main() {
 	}
 	screp, err := c.GetStudy(ctx, screq)
 	if err != nil {
-		log.Fatalf("Failed to GetStudyConf: %v", err)
+		klog.Fatalf("Failed to GetStudyConf: %v", err)
 	}
 	mls, err := mc.CollectWorkerLog(*workerID, *workerKind, screp.StudyConfig.ObjectiveValueName, screp.StudyConfig.Metrics, *namespace)
 	if err != nil {
-		log.Fatalf("Failed to collect logs: %v", err)
+		klog.Fatalf("Failed to collect logs: %v", err)
 	}
 	rmreq := &api.ReportMetricsLogsRequest{
 		StudyId:        *studyID,
@@ -86,8 +86,8 @@ func main() {
 	}
 	_, err = c.ReportMetricsLogs(ctx, rmreq)
 	if err != nil {
-		log.Fatalf("Failed to Report logs: %v", err)
+		klog.Fatalf("Failed to Report logs: %v", err)
 	}
-	log.Printf("Metrics reported. :\n%v", mls)
+	klog.Infof("Metrics reported. :\n%v", mls)
 	return
 }

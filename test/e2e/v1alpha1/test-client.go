@@ -4,12 +4,12 @@ import (
 	"context"
 	"flag"
 	"io/ioutil"
-	"log"
 	"strconv"
 
 	api "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	"google.golang.org/grpc"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
+	"k8s.io/klog"
 )
 
 var managerAddr = flag.String("s", "127.0.0.1:6789", "Endpoint of manager default 127.0.0.1:6789")
@@ -29,7 +29,7 @@ func main() {
 	readConfigs()
 	conn, err := grpc.Dial(*managerAddr, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("could not connect: %v", err)
+		klog.Fatalf("could not connect: %v", err)
 	}
 	defer conn.Close()
 	c := api.NewManagerClient(conn)
@@ -48,14 +48,14 @@ func main() {
 			getSuggestReply := getSuggestion(c, studyID, paramID)
 			checkSuggestions(getSuggestReply, iter)
 			if len(getSuggestReply.Trials) == 0 {
-				log.Printf("Hyperband ended")
+				klog.Infof("Hyperband ended")
 				break
 			}
 
 			//RegisterWorkers
 			workerIds := registerWorkers(c, studyID, getSuggestReply)
 			if workerIds == nil {
-				log.Fatalf("Register Workers error")
+				klog.Fatalf("Register Workers error")
 			}
 
 			//UpdateWorkerState
@@ -103,30 +103,30 @@ func main() {
 	}
 	DeleteStudy(c, studyID)
 	conn.Close()
-	log.Println("E2E test OK!")
+	klog.Infof("E2E test OK!")
 }
 
 func readConfigs() {
 	flag.Parse()
 	buf, err := ioutil.ReadFile("study-config.yml")
 	if err != nil {
-		log.Fatalf("fail to read study-config yaml")
+		klog.Fatalf("fail to read study-config yaml")
 	}
 	err = yaml.Unmarshal(buf, &studyConfig)
 	if err != nil {
-		log.Fatalf("fail to Unmarshal yaml")
+		klog.Fatalf("fail to Unmarshal yaml")
 	}
 	studyConfig.Name += *suggestArgo
 
 	if *suggestionConfFile != "" {
 		buf, err = ioutil.ReadFile(*suggestionConfFile)
 		if err != nil {
-			log.Fatalf("fail to read suggestion-config yaml")
+			klog.Fatalf("fail to read suggestion-config yaml")
 		}
 	}
 	err = yaml.Unmarshal(buf, &suggestionConfig)
 	if err != nil {
-		log.Fatalf("fail to Unmarshal yaml")
+		klog.Fatalf("fail to Unmarshal yaml")
 	}
 }
 
@@ -137,18 +137,18 @@ func CreateStudy(c api.ManagerClient) string {
 	}
 	createStudyreply, err := c.CreateStudy(ctx, createStudyreq)
 	if err != nil {
-		log.Fatalf("StudyConfig Error %v", err)
+		klog.Fatalf("StudyConfig Error %v", err)
 	}
 	studyID := createStudyreply.StudyId
-	log.Printf("Study ID %s", studyID)
+	klog.Infof("Study ID %s", studyID)
 	getStudyreq := &api.GetStudyRequest{
 		StudyId: studyID,
 	}
 	getStudyReply, err := c.GetStudy(ctx, getStudyreq)
 	if err != nil {
-		log.Fatalf("GetConfig Error %v", err)
+		klog.Fatalf("GetConfig Error %v", err)
 	}
-	log.Printf("Study ID %s StudyConf %v", studyID, getStudyReply.StudyConfig)
+	klog.Infof("Study ID %s StudyConf %v", studyID, getStudyReply.StudyConfig)
 	return studyID
 }
 
@@ -158,30 +158,30 @@ func DeleteStudy(c api.ManagerClient, studyID string) {
 		StudyId: studyID,
 	}
 	if _, err := c.DeleteStudy(ctx, deleteStudyreq); err != nil {
-		log.Fatalf("DeleteStudy error %v", err)
+		klog.Fatalf("DeleteStudy error %v", err)
 	}
 	getStudyreq := &api.GetStudyRequest{
 		StudyId: studyID,
 	}
 	getStudyReply, _ := c.GetStudy(ctx, getStudyreq)
 	if getStudyReply != nil && getStudyReply.StudyConfig != nil {
-		log.Fatalf("Failed to delete Study %s", studyID)
+		klog.Fatalf("Failed to delete Study %s", studyID)
 	}
 	getTrialsRequest := &api.GetTrialsRequest{
 		StudyId: studyID,
 	}
 	gtrep, _ := c.GetTrials(ctx, getTrialsRequest)
 	if gtrep != nil && len(gtrep.Trials) > 0 {
-		log.Fatalf("Failed to delete Trials of Study %s", studyID)
+		klog.Fatalf("Failed to delete Trials of Study %s", studyID)
 	}
 	getWorkersRequest := &api.GetWorkersRequest{
 		StudyId: studyID,
 	}
 	gwrep, _ := c.GetWorkers(ctx, getWorkersRequest)
 	if gwrep != nil && len(gwrep.Workers) > 0 {
-		log.Fatalf("Failed to delete Workers of Study %s", studyID)
+		klog.Fatalf("Failed to delete Workers of Study %s", studyID)
 	}
-	log.Printf("Study %s is deleted", studyID)
+	klog.Infof("Study %s is deleted", studyID)
 }
 
 func setSuggestionParam(c api.ManagerClient, studyID string) string {
@@ -193,17 +193,17 @@ func setSuggestionParam(c api.ManagerClient, studyID string) string {
 		suggestionConfig.StudyId = studyID
 		setSuggesitonParameterReply, err := c.SetSuggestionParameters(ctx, &suggestionConfig)
 		if err != nil {
-			log.Fatalf("SetConfig Error %v", err)
+			klog.Fatalf("SetConfig Error %v", err)
 		}
-		log.Printf("Grid suggestion prameter ID %s", setSuggesitonParameterReply.ParamId)
+		klog.Infof("Grid suggestion prameter ID %s", setSuggesitonParameterReply.ParamId)
 		return setSuggesitonParameterReply.ParamId
 	case "hyperband":
 		suggestionConfig.StudyId = studyID
 		setSuggesitonParameterReply, err := c.SetSuggestionParameters(ctx, &suggestionConfig)
 		if err != nil {
-			log.Fatalf("SetConfig Error %v", err)
+			klog.Fatalf("SetConfig Error %v", err)
 		}
-		log.Printf("HyperBand suggestion prameter ID %s", setSuggesitonParameterReply.ParamId)
+		klog.Infof("HyperBand suggestion prameter ID %s", setSuggesitonParameterReply.ParamId)
 		return setSuggesitonParameterReply.ParamId
 	}
 	return ""
@@ -241,11 +241,11 @@ func getSuggestion(c api.ManagerClient, studyID string, paramID string) *api.Get
 
 	getSuggestReply, err := c.GetSuggestions(ctx, getSuggestRequest)
 	if err != nil {
-		log.Fatalf("GetSuggestion Error %v \nRequest %v", err, getSuggestRequest)
+		klog.Fatalf("GetSuggestion Error %v \nRequest %v", err, getSuggestRequest)
 	}
-	log.Println("Get " + *suggestArgo + " Suggestions:")
+	klog.Infof("Get " + *suggestArgo + " Suggestions:")
 	for _, t := range getSuggestReply.Trials {
-		log.Printf("%v", t)
+		klog.Infof("%v", t)
 	}
 	return getSuggestReply
 }
@@ -254,11 +254,11 @@ func checkSuggestions(getSuggestReply *api.GetSuggestionsReply, iter int) bool {
 	switch *suggestArgo {
 	case "random":
 		if len(getSuggestReply.Trials) != *requestnum {
-			log.Fatalf("Number of Random suggestion incorrect. Expected %d Got %d", *requestnum, len(getSuggestReply.Trials))
+			klog.Fatalf("Number of Random suggestion incorrect. Expected %d Got %d", *requestnum, len(getSuggestReply.Trials))
 		}
 	case "grid":
 		if len(getSuggestReply.Trials) != 4 {
-			log.Fatalf("Number of Grid suggestion incorrect. Expected %d Got %d", 4, len(getSuggestReply.Trials))
+			klog.Fatalf("Number of Grid suggestion incorrect. Expected %d Got %d", 4, len(getSuggestReply.Trials))
 		}
 		min, max := 1.0, 1.0
 		for _, m := range studyConfig.ParameterConfigs.Configs {
@@ -278,7 +278,7 @@ func checkSuggestions(getSuggestReply *api.GetSuggestionsReply, iter int) bool {
 				if param.Name == "learning-rate" && learningRate != 0 {
 					expValue := min + (max-min)/(learningRate-1)*float64(i)
 					if param.Value != strconv.FormatFloat(expValue, 'f', 4, 64) {
-						log.Printf("Grid point incorrect. Expected %v Got %v", strconv.FormatFloat(expValue, 'f', 4, 64), param.Value)
+						klog.Infof("Grid point incorrect. Expected %v Got %v", strconv.FormatFloat(expValue, 'f', 4, 64), param.Value)
 					}
 				}
 			}
@@ -286,19 +286,19 @@ func checkSuggestions(getSuggestReply *api.GetSuggestionsReply, iter int) bool {
 	case "hyperband":
 		if iter == 1 {
 			if len(getSuggestReply.Trials) != 3 {
-				log.Fatalf("Number of Hyperband suggestion incorrect. Expected %d Got %d", 3, len(getSuggestReply.Trials))
+				klog.Fatalf("Number of Hyperband suggestion incorrect. Expected %d Got %d", 3, len(getSuggestReply.Trials))
 			}
 		} else if iter == 2 {
 			if len(getSuggestReply.Trials) != 1 {
-				log.Fatalf("Number of Hyperband suggestion incorrect. Expected %d Got %d", 1, len(getSuggestReply.Trials))
+				klog.Fatalf("Number of Hyperband suggestion incorrect. Expected %d Got %d", 1, len(getSuggestReply.Trials))
 			}
 		} else if iter == 3 {
 			if len(getSuggestReply.Trials) != 0 {
-				log.Fatalf("Number of Hyperband suggestion incorrect. Expected %d Got %d", 0, len(getSuggestReply.Trials))
+				klog.Fatalf("Number of Hyperband suggestion incorrect. Expected %d Got %d", 0, len(getSuggestReply.Trials))
 			}
 		}
 	}
-	log.Println("Check suggestion passed!")
+	klog.Infof("Check suggestion passed!")
 	return true
 }
 
@@ -315,7 +315,7 @@ func registerWorkers(c api.ManagerClient, studyId string, getSuggestReply *api.G
 		}
 		workerrep, err := c.RegisterWorker(ctx, workerreq)
 		if err != nil {
-			log.Fatalf("RegisterWorker Error %v", err)
+			klog.Fatalf("RegisterWorker Error %v", err)
 		}
 
 		workerIds[i] = workerrep.WorkerId
@@ -334,9 +334,9 @@ func registerWorkers(c api.ManagerClient, studyId string, getSuggestReply *api.G
 		}
 		_, err = c.SaveModel(ctx, saveModelRequest)
 		if err != nil {
-			log.Fatalf("SaveModel Error %v", err)
+			klog.Fatalf("SaveModel Error %v", err)
 		}
-		log.Printf("WorkerID %s start \n", workerrep.WorkerId)
+		klog.Infof("WorkerID %s start \n", workerrep.WorkerId)
 		trials[workerrep.WorkerId] = t
 	}
 	return workerIds
@@ -350,7 +350,7 @@ func checkWorkersResult(c api.ManagerClient, studyID string) bool {
 	//GetMetrics
 	getMetricsReply, err := c.GetMetrics(ctx, getMetricsRequest)
 	if err != nil {
-		log.Fatalf("Fataled to Get Metrics")
+		klog.Fatalf("Fataled to Get Metrics")
 	}
 
 	for _, mls := range getMetricsReply.MetricsLogSets {
@@ -358,13 +358,13 @@ func checkWorkersResult(c api.ManagerClient, studyID string) bool {
 			for _, ml := range mls.MetricsLogs {
 				if p.Name == ml.Name {
 					if p.Value != ml.Values[len(ml.Values)-1].Value {
-						log.Fatalf("Output %s is mismuched to Input %s", ml.Values[len(ml.Values)-1], p.Value)
+						klog.Fatalf("Output %s is mismuched to Input %s", ml.Values[len(ml.Values)-1], p.Value)
 						return false
 					}
 				}
 			}
 		}
 	}
-	log.Println("Input Output check passed")
+	klog.Info("Input Output check passed")
 	return true
 }

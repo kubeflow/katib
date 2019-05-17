@@ -18,15 +18,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"reflect"
 
-	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 	katibapi "github.com/kubeflow/katib/pkg/api/v1alpha1"
+	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"k8s.io/klog"
 )
 
 func initializeStudy(instance *katibv1alpha1.StudyJob) error {
@@ -39,7 +39,7 @@ func initializeStudy(instance *katibv1alpha1.StudyJob) error {
 
 	conn, err := grpc.Dial(common.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("Connect katib manager error %v", err)
+		klog.Errorf("Connect katib manager error %v", err)
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		return nil
 	}
@@ -52,24 +52,24 @@ func initializeStudy(instance *katibv1alpha1.StudyJob) error {
 		return err
 	}
 
-	log.Println("Start to Validate Suggestion Parameters")
+	klog.Info("Start to Validate Suggestion Parameters")
 	isValidSuggestionParameters := validateSuggestionParameters(c, studyConfig, instance.Spec.SuggestionSpec.SuggestionParameters, instance.Spec.SuggestionSpec.SuggestionAlgorithm)
 
 	if isValidSuggestionParameters {
-		log.Println("Suggestion Parameters are valid")
+		klog.Info("Suggestion Parameters are valid")
 	} else {
 		instance.Status.Condition = katibv1alpha1.ConditionFailed
 		return errors.New("Suggestion Parameters are not valid")
 	}
 
-	log.Printf("Create Study %s", studyConfig.Name)
+	klog.Infof("Create Study %s", studyConfig.Name)
 	//CreateStudy
 	studyID, err := createStudy(c, studyConfig)
 	if err != nil {
 		return err
 	}
 	instance.Status.StudyID = studyID
-	log.Printf("Study: %s Suggestion Spec %v", studyID, instance.Spec.SuggestionSpec)
+	klog.Infof("Study: %s Suggestion Spec %v", studyID, instance.Spec.SuggestionSpec)
 	var sspec *katibv1alpha1.SuggestionSpec
 	if instance.Spec.SuggestionSpec != nil {
 		sspec = instance.Spec.SuggestionSpec
@@ -250,7 +250,7 @@ func populateConfigForNAS(instance *katibv1alpha1.StudyJob) (*katibapi.StudyConf
 func deleteStudy(instance *katibv1alpha1.StudyJob) error {
 	conn, err := grpc.Dial(common.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("Connect katib manager error %v", err)
+		klog.Errorf("Connect katib manager error %v", err)
 		return err
 	}
 	defer conn.Close()
@@ -265,7 +265,7 @@ func deleteStudy(instance *katibv1alpha1.StudyJob) error {
 		StudyId: studyID,
 	}
 	if _, err = c.DeleteStudy(ctx, deleteStudyreq); err != nil {
-		log.Printf("DeleteStudy error %v", err)
+		klog.Errorf("DeleteStudy error %v", err)
 		return err
 	}
 	return nil
@@ -278,20 +278,20 @@ func createStudy(c katibapi.ManagerClient, studyConfig *katibapi.StudyConfig) (s
 	}
 	createStudyreply, err := c.CreateStudy(ctx, createStudyreq)
 	if err != nil {
-		log.Printf("CreateStudy Error %v", err)
+		klog.Errorf("CreateStudy Error %v", err)
 		return "", err
 	}
 	studyID := createStudyreply.StudyId
-	log.Printf("Study ID %s", studyID)
+	klog.Infof("Study ID %s", studyID)
 	getStudyreq := &katibapi.GetStudyRequest{
 		StudyId: studyID,
 	}
 	getStudyReply, err := c.GetStudy(ctx, getStudyreq)
 	if err != nil {
-		log.Printf("Study: %s GetConfig Error %v", studyID, err)
+		klog.Errorf("Study: %s GetConfig Error %v", studyID, err)
 		return "", err
 	}
-	log.Printf("Study ID %s StudyConf %v", studyID, getStudyReply.StudyConfig)
+	klog.Infof("Study ID %s StudyConf %v", studyID, getStudyReply.StudyConfig)
 	return studyID, nil
 }
 
@@ -314,10 +314,10 @@ func setSuggestionParam(c katibapi.ManagerClient, studyID string, suggestionSpec
 		}
 		setSuggesitonParameterReply, err := c.SetSuggestionParameters(ctx, sspr)
 		if err != nil {
-			log.Printf("Study %s SetConfig Error %v", studyID, err)
+			klog.Errorf("Study %s SetConfig Error %v", studyID, err)
 			return "", err
 		}
-		log.Printf("Study: %s setSuggesitonParameterReply %v", studyID, setSuggesitonParameterReply)
+		klog.Infof("Study: %s setSuggesitonParameterReply %v", studyID, setSuggesitonParameterReply)
 		pid = setSuggesitonParameterReply.ParamId
 	}
 	return pid, nil
@@ -346,12 +346,12 @@ func getSuggestion(c katibapi.ManagerClient, studyID string, suggestionSpec *kat
 	}
 	getSuggestReply, err := c.GetSuggestions(ctx, getSuggestRequest)
 	if err != nil {
-		log.Printf("Study: %s GetSuggestion Error %v", studyID, err)
+		klog.Errorf("Study: %s GetSuggestion Error %v", studyID, err)
 		return nil, err
 	}
-	log.Printf("Study: %s CreatedTrials :", studyID)
+	klog.Infof("Study: %s CreatedTrials :", studyID)
 	for _, t := range getSuggestReply.Trials {
-		log.Printf("\t%v", t)
+		klog.Infof("\t%v", t)
 	}
 	return getSuggestReply, nil
 }
@@ -379,12 +379,12 @@ func validateSuggestionParameters(c katibapi.ManagerClient, studyConfig *katibap
 	statusCode, _ := status.FromError(err)
 
 	if statusCode.Code() == codes.Unknown {
-		log.Printf("Method ValidateSuggestionParameters not found inside Suggestion service: %s", suggestionAlgorithm)
+		klog.Errorf("Method ValidateSuggestionParameters not found inside Suggestion service: %s", suggestionAlgorithm)
 		return true
 	}
 
 	if statusCode.Code() == codes.InvalidArgument || statusCode.Code() == codes.Unavailable {
-		log.Printf("ValidateSuggestionParameters Error: %v", statusCode.Message())
+		klog.Errorf("ValidateSuggestionParameters Error: %v", statusCode.Message())
 		return false
 	}
 	return true
