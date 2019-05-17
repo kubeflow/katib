@@ -24,7 +24,12 @@ workflows:
     - cmd/manager/v1alpha1/*
     - cmd/manager-rest/v1alpha1/*
     - cmd/metricscollector/v1alpha1/*
-    - cmd/suggestion/*
+    - cmd/suggestion/bayesianoptimization/v1alpha1/*
+    - cmd/suggestion/grid/v1alpha1/*
+    - cmd/suggestion/hyperband/v1alpha1/*
+    - cmd/suggestion/nasenvelopenet/v1alpha1/*
+    - cmd/suggestion/nasrl/v1alpha1/*
+    - cmd/suggestion/random/v1alpha1/*
     - cmd/tfevent-metricscollector/v1alpha1/*
     - cmd/ui/*
     - pkg/util/v1alpha1/*
@@ -60,7 +65,12 @@ workflows:
     - cmd/manager/v1alpha1/*
     - cmd/manager-rest/v1alpha1/*
     - cmd/metricscollector/v1alpha1/*
-    - cmd/suggestion/*
+    - cmd/suggestion/bayesianoptimization/v1alpha1/*
+    - cmd/suggestion/grid/v1alpha1/*
+    - cmd/suggestion/hyperband/v1alpha1/*
+    - cmd/suggestion/nasenvelopenet/v1alpha1/*
+    - cmd/suggestion/nasrl/v1alpha1/*
+    - cmd/suggestion/random/v1alpha1/*
     - cmd/tfevent-metricscollector/v1alpha1/*
     - cmd/ui/*
     - pkg/util/v1alpha1/*
@@ -94,7 +104,12 @@ workflows:
     - cmd/manager/v1alpha2/*
     - cmd/manager-rest/v1alpha2/*
     - cmd/metricscollector/v1alpha2/*
-    - cmd/suggestion/*
+    - cmd/suggestion/bayesianoptimization/v1alpha2/*
+    - cmd/suggestion/grid/v1alpha2/*
+    - cmd/suggestion/hyperband/v1alpha2/*
+    - cmd/suggestion/nasenvelopenet/v1alpha2/*
+    - cmd/suggestion/nasrl/v1alpha2/*
+    - cmd/suggestion/random/v1alpha2/*
     - cmd/tfevent-metricscollector/v1alpha2/*
     - cmd/ui/*
     - pkg/util/v1alpha2/*
@@ -131,7 +146,12 @@ workflows:
     - cmd/manager/v1alpha2/*
     - cmd/manager-rest/v1alpha2/*
     - cmd/metricscollector/v1alpha2/*
-    - cmd/suggestion/*
+    - cmd/suggestion/bayesianoptimization/v1alpha2/*
+    - cmd/suggestion/grid/v1alpha2/*
+    - cmd/suggestion/hyperband/v1alpha2/*
+    - cmd/suggestion/nasenvelopenet/v1alpha2/*
+    - cmd/suggestion/nasrl/v1alpha2/*
+    - cmd/suggestion/random/v1alpha2/*
     - cmd/tfevent-metricscollector/v1alpha2/*
     - cmd/ui/*
     - pkg/util/v1alpha2/*
