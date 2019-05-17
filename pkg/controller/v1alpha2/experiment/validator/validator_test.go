@@ -34,7 +34,7 @@ spec:
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	p := mockmanifest.NewMockProducer(mockCtrl)
+	p := mockmanifest.NewMockGenerator(mockCtrl)
 	g := New(p)
 
 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialTFJobTemplate, nil)
@@ -55,7 +55,7 @@ metadata:
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	p := mockmanifest.NewMockProducer(mockCtrl)
+	p := mockmanifest.NewMockGenerator(mockCtrl)
 	g := New(p)
 
 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialJobTemplate, nil)
@@ -70,7 +70,7 @@ func TestValidateExperiment(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	p := mockmanifest.NewMockProducer(mockCtrl)
+	p := mockmanifest.NewMockGenerator(mockCtrl)
 	g := New(p)
 
 	trialJobTemplate := `apiVersion: "batch/v1"
