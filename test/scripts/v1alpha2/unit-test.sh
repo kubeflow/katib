@@ -28,6 +28,8 @@ mkdir -p ${GO_DIR}
 cp -r cmd ${GO_DIR}/cmd
 cp -r pkg ${GO_DIR}/pkg
 cp -r vendor ${GO_DIR}/vendor
+cp -r test ${GO_DIR}/test
+cp -r manifests ${GO_DIR}/manifests
 
 echo "Run unit test cases"
 cd ${GO_DIR}
