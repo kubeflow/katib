@@ -38,6 +38,6 @@ kubectl apply -f manifests/v1alpha2/katib/pv/pvc.yaml
 kubectl apply -f manifests/v1alpha2/katib/db/secret.yaml
 kubectl apply -f manifests/v1alpha2/katib/db/deployment.yaml
 kubectl apply -f manifests/v1alpha2/katib/db/service.yaml
-+kubectl apply -f manifests/v1alpha2/katib/suggestion/random/deployment.yaml
-+kubectl apply -f manifests/v1alpha2/katib/suggestion/random/service.yaml
+kubectl apply -f manifests/v1alpha2/katib/suggestion/random/deployment.yaml
+kubectl apply -f manifests/v1alpha2/katib/suggestion/random/service.yaml
 cd - > /dev/null
