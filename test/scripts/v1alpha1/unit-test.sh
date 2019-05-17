@@ -83,7 +83,7 @@ cd ${GO_DIR}
 
 os=$(go env GOOS)
 arch=$(go env GOARCH)
-version=1.0.2
+version=1.0.7
 echo "os: ${os}, arch: ${arch}"
 
 # download the release
