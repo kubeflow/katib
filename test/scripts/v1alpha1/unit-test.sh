@@ -89,8 +89,8 @@ curl -L -O "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${
 
 # extract the archive
 tar -zxvf kubebuilder_${version}_${os}_${arch}.tar.gz
-mv kubebuilder_${version}_${os}_${arch} /usr/local/bin/kubebuilder
-export PATH=$PATH:/usr/local/bin
+mv kubebuilder_${version}_${os}_${arch} /usr/local/kubebuilder
+export PATH=$PATH:/usr/local/kubebuilder/bin
 
 go test ./...
 cd - > /dev/null
