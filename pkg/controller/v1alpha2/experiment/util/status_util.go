@@ -123,6 +123,9 @@ func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trial
 }
 
 func getObjectiveMetricValue(trial trialsv1alpha2.Trial, objectiveMetricName string) *float64 {
+	if trial.Status.Observation == nil {
+		return nil
+	}
 	for _, metric := range trial.Status.Observation.Metrics {
 		if objectiveMetricName == metric.Name {
 			return &metric.Value
