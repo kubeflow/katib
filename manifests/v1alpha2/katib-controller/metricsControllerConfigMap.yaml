@@ -24,7 +24,6 @@ data:
               - name: {{.Trial}}
                 image: katib/metrics-collector
                 args:
-                - "./metricscollector"
                 - "-e"
                 - "{{.Experiment}}"
                 - "-t"
