@@ -78,5 +78,19 @@ cp -r vendor ${GO_DIR}/vendor
 
 echo "Run unit test cases"
 cd ${GO_DIR}
+
+os=$(go env GOOS)
+arch=$(go env GOARCH)
+version=1.0.2
+echo "os: ${os}, arch: ${arch}"
+
+# download the release
+curl -L -O "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${version}/kubebuilder_${version}_${os}_${arch}.tar.gz"
+
+# extract the archive
+tar -zxvf kubebuilder_${version}_${os}_${arch}.tar.gz
+mv kubebuilder_${version}_${os}_${arch} /usr/local/bin/kubebuilder
+export PATH=$PATH:/usr/local/bin
+
 go test ./...
 cd - > /dev/null
