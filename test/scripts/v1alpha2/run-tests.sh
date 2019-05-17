@@ -106,8 +106,7 @@ if [ $? -ne 1 ]; then
   exit 1
 fi
 set -o errexit
-
-kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-manager | sed -e "s@pods\/@@") 6789:6789 &
+kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-manager | grep -v katib-manager-rest |sed -e "s@pods\/@@") 6789:6789 &
 echo "kubectl port-forward start"
 sleep 5
 TIMEOUT=120
