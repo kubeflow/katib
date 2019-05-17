@@ -319,7 +319,7 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Expe
 		}
 
 	} else if activeCount < parallelCount {
-		requiredActiveCount := 0
+		var requiredActiveCount int32 = 0
 		if instance.Spec.MaxTrialCount == nil {
 			requiredActiveCount = parallelCount
 		} else {
@@ -349,7 +349,7 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Expe
 
 }
 
-func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha2.Experiment, addCount int) error {
+func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha2.Experiment, addCount int32) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	trials, err := r.GetSuggestions(instance, addCount)
@@ -366,7 +366,7 @@ func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha2.Experim
 	return nil
 }
 
-func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha2.Experiment, deleteCount int) error {
+func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha2.Experiment, deleteCount int32) error {
 
 	return nil
 }

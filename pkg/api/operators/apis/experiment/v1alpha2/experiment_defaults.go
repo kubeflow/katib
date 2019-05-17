@@ -30,7 +30,7 @@ func (e *Experiment) SetDefault() {
 
 func (e *Experiment) setDefaultParallelTrialCount() {
 	if e.Spec.ParallelTrialCount == nil {
-                e.Spec.ParallelTrialCount = new(int)
+                e.Spec.ParallelTrialCount = new(int32)
                 *e.Spec.ParallelTrialCount = DefaultTrialParallelCount
         }
 }

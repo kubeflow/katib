@@ -124,3 +124,14 @@ func UpdateTrialStatus(request *api_pb.UpdateTrialStatusRequest) (*api_pb.Update
 	kc := kcc.KatibManagerClient
 	return kc.UpdateTrialStatus(ctx, request)
 }
+
+func GetSuggestions(request *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestionsReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer closeKatibManagerConnection(kcc)
+	kc := kcc.KatibManagerClient
+	return kc.GetSuggestions(ctx, request)
+}
