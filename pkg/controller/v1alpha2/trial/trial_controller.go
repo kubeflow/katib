@@ -62,11 +62,13 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileTrial{
+	r := &ReconcileTrial{
 		Client: mgr.GetClient(), 
 		scheme: mgr.GetScheme(),
 		ManagerClient: managerclient.New(),
 	}
+	r.updateStatusHandler = r.updateStatus
+	return r
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -116,6 +118,8 @@ type ReconcileTrial struct {
 	scheme *runtime.Scheme
 
 	managerclient.ManagerClient
+	// updateStatusHandler is defined for test purpose.
+	updateStatusHandler updateStatusFunc
 }
 
 // Reconcile reads that state of the cluster for a Trial object and makes changes based on the state read
@@ -177,7 +181,7 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 			logger.Error(err, "Update trial status in DB error")
 			return reconcile.Result{}, err
 		}
-		err = r.Status().Update(context.TODO(), instance)
+		err = r.updateStatusHandler(instance)
 		if err != nil {
 			logger.Error(err, "Update trial instance status error")
 			return reconcile.Result{}, err

@@ -56,6 +56,9 @@ func TestCreateTFJobTrial(t *testing.T) {
 		Client:        mgr.GetClient(),
 		scheme:        mgr.GetScheme(),
 		ManagerClient: mc,
+		updateStatusHandler: func(instance *trialsv1alpha2.Trial) error {
+			return nil
+		},
 	})
 	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
 
@@ -84,7 +87,6 @@ func TestCreateTFJobTrial(t *testing.T) {
 	if err := k8syaml.NewYAMLOrJSONDecoder(buf, bufSize).Decode(tfJob); err != nil {
 		t.Errorf("Expected nil, got %v", err)
 	}
-	println(tfJob.GetName())
 	g.Eventually(func() error { return c.Get(context.TODO(), tfJobKey, tfJob) }, timeout).
 		Should(gomega.Succeed())
 
