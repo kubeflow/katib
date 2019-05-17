@@ -19,7 +19,7 @@ workflows:
     - pkg/manager/modelstore/*
     - pkg/suggestion/v1alpha1/*
     - pkg/ui/v1alpha1/*
-    - cmd/earlystopping/*
+    - cmd/earlystopping/medianstopping/v1alpha1/*
     - cmd/katib-controller/v1alpha1/*
     - cmd/manager/v1alpha1/*
     - cmd/manager-rest/v1alpha1/*
@@ -60,7 +60,7 @@ workflows:
     - pkg/manager/modelstore/*
     - pkg/suggestion/v1alpha1/*
     - pkg/ui/v1alpha1/*
-    - cmd/earlystopping/*
+    - cmd/earlystopping/medianstopping/v1alpha1/*
     - cmd/katib-controller/v1alpha1/*
     - cmd/manager/v1alpha1/*
     - cmd/manager-rest/v1alpha1/*
@@ -99,7 +99,7 @@ workflows:
     - pkg/manager/modelstore/*
     - pkg/suggestion/v1alpha2/*
     - pkg/ui/v1alpha2/*
-    - cmd/earlystopping/*
+    - cmd/earlystopping/medianstopping/v1alpha2/*
     - cmd/katib-controller/v1alpha2/*
     - cmd/manager/v1alpha2/*
     - cmd/manager-rest/v1alpha2/*
@@ -141,7 +141,7 @@ workflows:
     - pkg/manager/modelstore/*
     - pkg/suggestion/v1alpha2/*
     - pkg/ui/v1alpha2/*
-    - cmd/earlystopping/*
+    - cmd/earlystopping/medianstopping/v1alpha2/*
     - cmd/katib-controller/v1alpha2/*
     - cmd/manager/v1alpha2/*
     - cmd/manager-rest/v1alpha2/*
