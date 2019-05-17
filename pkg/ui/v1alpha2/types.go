@@ -39,7 +39,7 @@ type TemplateView struct {
 }
 
 type KatibUIHandler struct {
-	katibClient *katibclient.KatibClient
+	katibClient katibclient.Client
 }
 
 type TemplateResponse struct {
