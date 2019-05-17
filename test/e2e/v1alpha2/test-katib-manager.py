@@ -12,6 +12,9 @@ TEST_EXPERIMENT = "test_experiment"
 def register_experiment(stub):
   obj = api_pb2.ObjectiveSpec(type=1, goal=0.09, objective_metric_name="loss")
   algo = api_pb2.AlgorithmSpec(algorithm_name="random")
+  feasible_space = api_pb2.FeasibleSpace(min="1", max="5")
+  parameter_specs = api_pb2.ExperimentSpec.ParameterSpecs()
+  parameter_specs.parameters.add(name="lr", parameter_type=api_pb2.DOUBLE, feasible_space=feasible_space)
   exp_spec = api_pb2.ExperimentSpec(objective=obj,
                                     algorithm=algo,
                                     trial_template="run-mnist",
@@ -92,6 +95,20 @@ def get_trial(stub):
     logger.error("Failed to get trial %s" % TEST_TRIAL, exc_info=True)
     raise
 
+def get_random_algo_suggestion(stub):
+  try:
+    reply = stub.GetSuggestions(api_pb2.GetSuggestionsRequest(experiment_name=TEST_EXPERIMENT,
+                                                            algorithm_name="random",
+                                                            request_number=1), 10)
+    trials = reply.trials
+
+    if len(trials) == 1 and trials[0].spec.experiment_name == TEST_EXPERIMENT:
+      logger.info("Get random algorithm suggestion successfully")
+    else:
+      raise Exception()
+  except:
+    logger.error("Failed to get trial %s" % TEST_TRIAL, exc_info=True)
+    raise
 
 def test():
   with grpc.insecure_channel('127.0.0.1:6789') as channel:
@@ -101,6 +118,7 @@ def test():
     update_experiment_status(stub)
     register_trial(stub)
     get_trial(stub)
+    get_random_algo_suggestion(stub)
     delete_experiment(stub)
     try:
       get_trial(stub)
