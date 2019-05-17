@@ -16,8 +16,8 @@ limitations under the License.
 package v1alpha2
 
 import (
-	"os"
 	"context"
+	"os"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
@@ -34,7 +34,7 @@ const (
 )
 
 type katibManagerClientAndConn struct {
-	Conn *grpc.ClientConn
+	Conn               *grpc.ClientConn
 	KatibManagerClient api_pb.ManagerClient
 }
 
@@ -59,11 +59,15 @@ func getKatibManagerClientAndConn() (*katibManagerClientAndConn, error) {
 	if err != nil {
 		return nil, err
 	}
-	kcc := &katibManagerClientAndConn {
-		Conn: conn,
+	kcc := &katibManagerClientAndConn{
+		Conn:               conn,
 		KatibManagerClient: api_pb.NewManagerClient(conn),
 	}
 	return kcc, nil
+}
+
+func closeKatibManagerConnection(kcc *katibManagerClientAndConn) {
+	kcc.Conn.Close()
 }
 
 func RegisterExperiment(request *api_pb.RegisterExperimentRequest) (*api_pb.RegisterExperimentReply, error) {
@@ -72,7 +76,7 @@ func RegisterExperiment(request *api_pb.RegisterExperimentRequest) (*api_pb.Regi
 	if err != nil {
 		return nil, err
 	}
-	defer kcc.Conn.Close()
+	defer closeKatibManagerConnection(kcc)
 	kc := kcc.KatibManagerClient
 	return kc.RegisterExperiment(ctx, request)
 }
@@ -83,7 +87,7 @@ func DeleteExperiment(request *api_pb.DeleteExperimentRequest) (*api_pb.DeleteEx
 	if err != nil {
 		return nil, err
 	}
-	defer kcc.Conn.Close()
+	defer closeKatibManagerConnection(kcc)
 	kc := kcc.KatibManagerClient
 	return kc.DeleteExperiment(ctx, request)
 }
@@ -94,7 +98,18 @@ func UpdateExperimentStatus(request *api_pb.UpdateExperimentStatusRequest) (*api
 	if err != nil {
 		return nil, err
 	}
-	defer kcc.Conn.Close()
+	defer closeKatibManagerConnection(kcc)
 	kc := kcc.KatibManagerClient
 	return kc.UpdateExperimentStatus(ctx, request)
+}
+
+func RegisterTrial(request *api_pb.RegisterTrialRequest) (*api_pb.RegisterTrialReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer closeKatibManagerConnection(kcc)
+	kc := kcc.KatibManagerClient
+	return kc.RegisterTrial(ctx, request)
 }

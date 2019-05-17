@@ -1,0 +1,99 @@
+apiVersion: "kubeflow.org/v1alpha2"
+kind: Experiment
+metadata:
+  namespace: kubeflow
+  name: tfjob-example
+spec:
+  parallelTrialCount: 3
+  maxTrialCount: 12
+  maxFailedTrialCount: 3
+  objective:
+    type: maximize
+    goal: 0.99
+    objectiveMetricName: accuracy_1
+  algorithm:
+    algorithmName: random
+  parameters:
+    - name: --learning_rate
+      parameterType: double
+      feasibleSpace:
+        min: "0.01"
+        max: "0.05"
+    - name: --batch_size
+      parameterType: int
+      feasibleSpace:
+        min: "100"
+        max: "200"
+  trialTemplate:
+    retain: true
+    goTemplate:
+        rawTemplate: |-
+          apiVersion: "kubeflow.org/v1beta2"
+          kind: TFJob
+          metadata:
+            name: {{.Trial}}
+            namespace: {{.NameSpace}}
+          spec:
+           tfReplicaSpecs:
+            Worker:
+              replicas: 1 
+              restartPolicy: OnFailure
+              template:
+                spec:
+                  containers:
+                    - name: tensorflow 
+                      image: gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0
+                      imagePullPolicy: Always
+                      command:
+                        - "python"
+                        - "/var/tf_mnist/mnist_with_summaries.py"
+                        - "--log_dir=/train/{{.Trial}}"
+                        {{- with .HyperParameters}}
+                        {{- range .}}
+                        - "{{.Name}}={{.Value}}"
+                        {{- end}}
+                        {{- end}}
+                      volumeMounts:
+                        - mountPath: "/train"
+                          name: "train"
+                  volumes:
+                    - name: "train"
+                      persistentVolumeClaim:
+                        claimName: "tfevent-volume"
+  metricsCollectorSpec:
+    goTemplate:
+      rawTemplate: |-
+        apiVersion: batch/v1beta1
+        kind: CronJob
+        metadata:
+          name: {{.Trial}}
+          namespace: {{.NameSpace}}
+        spec:
+          schedule: "*/1 * * * *"
+          successfulJobsHistoryLimit: 0
+          failedJobsHistoryLimit: 1
+          jobTemplate:
+            spec:
+              template:
+                spec:
+                  containers:
+                  - name: {{.Trial}}
+                    image: katib/v1alpha2/tfevent-metricscollector
+                    args:
+                    - "python"
+                    - "main.py"
+                    - "-t"
+                    - "{{.Trial}}"
+                    - "-d"
+                    - "/train/{{.Trial}}"
+                    - "-m"
+                    - "accuracy_1"
+                    volumeMounts:
+                        - mountPath: "/train"
+                          name: "train"
+                  volumes:
+                    - name: "train"
+                      persistentVolumeClaim:
+                          claimName: "tfevent-volume"
+                  restartPolicy: Never
+                  serviceAccountName: metrics-collector

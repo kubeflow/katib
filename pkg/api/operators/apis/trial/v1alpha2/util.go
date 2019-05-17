@@ -16,6 +16,8 @@ limitations under the License.
 package v1alpha2
 
 import (
+	"errors"
+
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -83,6 +85,13 @@ func (trial *Trial) IsKilled() bool {
 
 func (trial *Trial) IsCompleted() bool {
 	return trial.IsSucceeded() || trial.IsFailed() || trial.IsKilled()
+}
+
+func (trial *Trial) GetLastConditionType() (TrialConditionType, error) {
+	if len(trial.Status.Conditions) > 0 {
+		return trial.Status.Conditions[len(trial.Status.Conditions)-1].Type, nil
+	}
+	return "", errors.New("Trial doesn't have any condition")
 }
 
 func (trial *Trial) setCondition(conditionType TrialConditionType, status v1.ConditionStatus, reason, message string) {

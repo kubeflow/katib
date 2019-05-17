@@ -321,8 +321,8 @@ message ExperimentStatus {
 
 message Experiment {
     string name = 1; /// Name of Experiment. This is unique in DB.
-    ExperimentSpec experiment_spec = 2;
-    ExperimentStatus experiment_status = 3;
+    ExperimentSpec spec = 2;
+    ExperimentStatus status = 3;
 }
 
 message ParameterAssignment {
@@ -364,9 +364,9 @@ message TrialSpec {
 
 message TrialStatus {
     enum TrialConditionType {
-        PENDING = 0;
+        CREATED = 0;
         RUNNING = 1;
-        COMPLETED = 2;
+        SUCCEEDED = 2;
         KILLED = 3;
         FAILED = 4;
     }
