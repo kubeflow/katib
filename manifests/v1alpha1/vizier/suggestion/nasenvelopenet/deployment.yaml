@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: vizier-suggestion-nasenvelopenet
-        image: docker.io/anubhavgarg/nas_envelopenet_service
+        image: katib/suggestion-nasenvelopenet
         ports:
         - name: api
           containerPort: 6789
