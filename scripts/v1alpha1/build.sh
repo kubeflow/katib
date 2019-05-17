@@ -45,5 +45,5 @@ echo "Building earlystopping images..."
 docker build -t ${PREFIX}/v1alpha1/earlystopping-medianstopping -f ${CMD_PREFIX}/earlystopping/medianstopping/v1alpha1/Dockerfile .
 
 echo "Building UI image..."
-docker build -t ${PREFIX}/v1alpha1/katib-ui -f ${CMD_PREFIX}/ui/Dockerfile .
+docker build -t ${PREFIX}/v1alpha1/katib-ui -f ${CMD_PREFIX}/ui/v1alpha1/Dockerfile .
 
