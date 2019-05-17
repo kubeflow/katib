@@ -92,6 +92,10 @@ required = [
   name = "github.com/kubeflow/pytorch-operator"
   version = "0.5.0-rc.1"
 
+[[constraint]]
+  name = "github.com/awalterschulze/gographviz"
+  branch = "master"
+
 [[prune.project]]
   name = "github.com/kubeflow/katib"
   unused-packages = false
