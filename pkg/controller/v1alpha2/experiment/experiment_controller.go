@@ -319,7 +319,7 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Expe
 		}
 
 	} else if activeCount < parallelCount {
-		var requiredActiveCount int32 = 0
+		var requiredActiveCount int32
 		if instance.Spec.MaxTrialCount == nil {
 			requiredActiveCount = parallelCount
 		} else {
