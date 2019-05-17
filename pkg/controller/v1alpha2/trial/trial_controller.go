@@ -41,6 +41,7 @@ import (
 
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/trial/managerclient"
 	trialutil "github.com/kubeflow/katib/pkg/controller/v1alpha2/trial/util"
 )
 
@@ -61,7 +62,11 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileTrial{Client: mgr.GetClient(), scheme: mgr.GetScheme()}
+	return &ReconcileTrial{
+		Client: mgr.GetClient(), 
+		scheme: mgr.GetScheme(),
+		ManagerClient: managerclient.New(),
+	}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -109,6 +114,8 @@ var _ reconcile.Reconciler = &ReconcileTrial{}
 type ReconcileTrial struct {
 	client.Client
 	scheme *runtime.Scheme
+
+	managerclient.ManagerClient
 }
 
 // Reconcile reads that state of the cluster for a Trial object and makes changes based on the state read
@@ -149,7 +156,7 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 		}
 		msg := "Trial is created"
 		instance.MarkTrialStatusCreated(trialutil.TrialCreatedReason, msg)
-		err = trialutil.CreateTrialInDB(instance)
+		err = r.CreateTrialInDB(instance)
 		if err != nil {
 			logger.Error(err, "Create trial in DB error")
 			return reconcile.Result{}, err
@@ -165,7 +172,7 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	if !equality.Semantic.DeepEqual(original.Status, instance.Status) {
 		//assuming that only status change
-		err = trialutil.UpdateTrialStatusInDB(instance)
+		err = r.UpdateTrialStatusInDB(instance)
 		if err != nil {
 			logger.Error(err, "Update trial status in DB error")
 			return reconcile.Result{}, err
@@ -301,7 +308,7 @@ func (r *ReconcileTrial) reconcileMetricsCollector(instance *trialsv1alpha2.Tria
 	if err != nil {
 		if errors.IsNotFound(err) {
 			logger.Info("Creating Metrics Collector",
-				"name", desiredMetricsCollector.GetName(), 
+				"name", desiredMetricsCollector.GetName(),
 				"namespace", desiredMetricsCollector.GetNamespace())
 			err = r.Create(context.TODO(), desiredMetricsCollector)
 			if err != nil {
