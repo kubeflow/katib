@@ -36,7 +36,7 @@ cd ${GO_DIR}
 
 os=$(go env GOOS)
 arch=$(go env GOARCH)
-version=1.0.2 # latest stable version
+version=1.0.7 # latest stable version
 echo "os: ${os}, arch: ${arch}"
 
 # download the release
@@ -46,6 +46,5 @@ curl -L -O "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${
 tar -zxvf kubebuilder_${version}_${os}_${arch}.tar.gz
 mv kubebuilder_${version}_${os}_${arch} /usr/local/kubebuilder
 export PATH=$PATH:/usr/local/kubebuilder/bin
-
 go test ./...
 cd - > /dev/null
