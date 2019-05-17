@@ -75,6 +75,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		panic(err)
 	}
 	r.Generator = generator
+	r.updateStatusHandler = r.updateStatus
 	return r
 }
 
@@ -196,6 +197,8 @@ type ReconcileExperiment struct {
 
 	suggestion.Suggestion
 	manifest.Generator
+	// updateStatusHandler is defined for test purpose.
+	updateStatusHandler updateStatusFunc
 }
 
 // Reconcile reads that state of the cluster for a Experiment object and makes changes based on the state read
@@ -261,7 +264,7 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 			logger.Error(err, "Update experiment status in DB error")
 			return reconcile.Result{}, err
 		}
-		err = r.Status().Update(context.TODO(), instance)
+		err = r.updateStatusHandler(instance)
 		if err != nil {
 			logger.Error(err, "Update experiment instance status error")
 			return reconcile.Result{}, err
