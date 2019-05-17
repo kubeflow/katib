@@ -45,7 +45,7 @@ func UpdateExperimentStatus(instance *experimentsv1alpha2.Experiment, trials *tr
 
 func updateTrialsSummary(instance *experimentsv1alpha2.Experiment, trials *trialsv1alpha2.TrialList) bool {
 
-	var totalTrials, trialsPending, trialsRunning, trialsSucceeded, trialsFailed, trialsKilled int
+	var totalTrials, trialsPending, trialsRunning, trialsSucceeded, trialsFailed, trialsKilled int32
 	var bestTrialValue float64
 	bestTrialIndex := -1
 	isObjectiveGoalReached := false

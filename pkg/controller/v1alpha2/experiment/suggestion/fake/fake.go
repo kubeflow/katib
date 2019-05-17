@@ -13,6 +13,6 @@ func New() suggestion.Suggestion {
 	return &Fake{}
 }
 
-func (k *Fake) GetSuggestions(instance *experimentsv1alpha2.Experiment, addCount int) ([]*api_pb.Trial, error) {
+func (k *Fake) GetSuggestions(instance *experimentsv1alpha2.Experiment, addCount int32) ([]*api_pb.Trial, error) {
 	return nil, nil
 }
