@@ -21,7 +21,7 @@ func (g *General) GetSuggestions(instance *experimentsv1alpha2.Experiment, addCo
 	request := &api_pb.GetSuggestionsRequest{
 		ExperimentName: instance.Name,
 		AlgorithmName:  instance.Spec.Algorithm.AlgorithmName,
-		RequestNumber:  *instance.Spec.ParallelTrialCount,
+		RequestNumber:  addCount,
 	}
 	if reply, err := common.GetSuggestions(request); err != nil {
 		return nil, err
