@@ -29,7 +29,12 @@ func GetSupportedJobList() []schema.GroupVersionKind {
 }
 
 func ConvertTime2RFC3339(t *metav1.Time) string {
-	return t.UTC().Format(time.RFC3339)
+	if t != nil {
+		return t.UTC().Format(time.RFC3339)
+	} else {
+		zero := &metav1.Time{}
+		return zero.UTC().Format(time.RFC3339)
+	}
 }
 
 func GetJobLabelMap(jobKind string, trialName string) map[string]string {

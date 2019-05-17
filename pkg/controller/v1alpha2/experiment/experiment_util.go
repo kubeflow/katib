@@ -12,6 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	common "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
@@ -32,10 +33,17 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 		return err
 	}
 
+	trial.Spec.Objective = expInstance.Spec.Objective
+
 	hps := make([]*apiv1alpha2.ParameterAssignment, 0)
 	if trialInstance.Spec != nil && trialInstance.Spec.ParameterAssignments != nil {
 		for _, p := range trialInstance.Spec.ParameterAssignments.Assignments {
 			hps = append(hps, p)
+			pa := common.ParameterAssignment {
+				Name: p.Name,
+				Value: p.Value,
+			}
+			trial.Spec.ParameterAssignments = append(trial.Spec.ParameterAssignments, pa)
 		}
 	}
 
