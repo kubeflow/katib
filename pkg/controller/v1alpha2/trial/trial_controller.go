@@ -119,7 +119,6 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 	// Fetch the Trial instance
 	logger := log.WithValues("Trial", request.NamespacedName)
 	original := &trialsv1alpha2.Trial{}
-	requeue := false
 	err := r.Get(context.TODO(), request.NamespacedName, original)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -141,19 +140,20 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 	}
 	if !instance.IsCreated() {
 		//Trial not created in DB
+		if instance.Status.StartTime == nil {
+			now := metav1.Now()
+			instance.Status.StartTime = &now
+		}
+		if instance.Status.CompletionTime == nil {
+			instance.Status.CompletionTime = &metav1.Time{}
+		}
+		msg := "Trial is created"
+		instance.MarkTrialStatusCreated(trialutil.TrialCreatedReason, msg)
 		err = trialutil.CreateTrialInDB(instance)
 		if err != nil {
 			logger.Error(err, "Create trial in DB error")
 			return reconcile.Result{}, err
 		}
-		if instance.Status.StartTime == nil {
-			now := metav1.Now()
-			instance.Status.StartTime = &now
-		}
-		msg := "Trial is created"
-		instance.MarkTrialStatusCreated(trialutil.TrialCreatedReason, msg)
-		requeue = true
-
 	} else {
 		// Trial already created in DB
 		err := r.reconcileTrial(instance)
@@ -177,7 +177,7 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 		}
 	}
 
-	return reconcile.Result{Requeue: requeue}, nil
+	return reconcile.Result{}, nil
 }
 
 func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha2.Trial) error {

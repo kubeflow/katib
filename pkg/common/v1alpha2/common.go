@@ -1,6 +1,9 @@
 package v1alpha2
 
 import (
+	"time"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -23,6 +26,10 @@ func GetSupportedJobList() []schema.GroupVersionKind {
 		},
 	}
 	return supportedJobList
+}
+
+func ConvertTime2RFC3339(t *metav1.Time) string {
+	return t.UTC().Format(time.RFC3339)
 }
 
 func GetJobLabelMap(jobKind string, trialName string) map[string]string {

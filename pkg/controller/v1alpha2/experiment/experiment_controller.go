@@ -193,7 +193,6 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	// Fetch the Experiment instance
 	logger := log.WithValues("Experiment", request.NamespacedName)
 	original := &experimentsv1alpha2.Experiment{}
-	requeue := false
 	err := r.Get(context.TODO(), request.NamespacedName, original)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -233,7 +232,6 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 			logger.Error(err, "Create experiment in DB error")
 			return reconcile.Result{}, err
 		}
-		requeue = true
 	} else {
 		// Experiment already created in DB
 		err := r.ReconcileExperiment(instance)
@@ -257,7 +255,7 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		}
 	}
 
-	return reconcile.Result{Requeue: requeue}, nil
+	return reconcile.Result{}, nil
 }
 
 func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.Experiment) error {

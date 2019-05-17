@@ -462,7 +462,8 @@
         "RUNNING",
         "RESTARTING",
         "SUCCEEDED",
-        "FAILED"
+        "FAILED",
+        "UNKNOWN"
       ],
       "default": "CREATED"
     },
@@ -496,7 +497,8 @@
         "RUNNING",
         "SUCCEEDED",
         "KILLED",
-        "FAILED"
+        "FAILED",
+        "UNKNOWN"
       ],
       "default": "CREATED"
     },
