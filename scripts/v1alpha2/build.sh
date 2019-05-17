@@ -28,6 +28,7 @@ cd ${SCRIPT_ROOT}
 echo "Building core image..."
 docker build -t ${PREFIX}/v1alpha2/katib-controller -f ${CMD_PREFIX}/katib-controller/v1alpha2/Dockerfile .
 docker build -t ${PREFIX}/v1alpha2/katib-manager -f ${CMD_PREFIX}/manager/v1alpha2/Dockerfile .
+docker build -t ${PREFIX}/v1alpha2/katib-manager-rest -f ${CMD_PREFIX}/manager-rest/v1alpha2/Dockerfile .
 docker build -t ${PREFIX}/v1alpha2/metrics-collector -f ${CMD_PREFIX}/metricscollector/v1alpha2/Dockerfile .
 docker build -t ${PREFIX}/v1alpha2/tfevent-metrics-collector -f ${CMD_PREFIX}/tfevent-metricscollector/v1alpha2/Dockerfile .
 

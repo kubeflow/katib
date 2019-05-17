@@ -33,6 +33,8 @@ kubectl apply -f manifests/v1alpha2/katib-controller/metricsControllerConfigMap.
 kubectl apply -f manifests/v1alpha2/katib-controller/katib-controller.yaml
 kubectl apply -f manifests/v1alpha2/katib/manager/service.yaml
 kubectl apply -f manifests/v1alpha2/katib/manager/deployment.yaml
+kubectl apply -f manifests/v1alpha2/katib/manager-rest/service.yaml
+kubectl apply -f manifests/v1alpha2/katib/manager-rest/deployment.yaml
 kubectl apply -f manifests/v1alpha2/katib/pv/pv.yaml
 kubectl apply -f manifests/v1alpha2/katib/pv/pvc.yaml
 kubectl apply -f manifests/v1alpha2/katib/db/secret.yaml
