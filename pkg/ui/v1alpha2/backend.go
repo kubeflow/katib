@@ -202,16 +202,16 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	}
 	log.Printf("Got Experiment")
 	metricsList := map[string]int{}
-	metricsName := expResp.Experiment.ExperimentSpec.Objective.ObjectiveMetricName
+	metricsName := expResp.Experiment.Spec.Objective.ObjectiveMetricName
 	resultText += "," + metricsName
 	metricsList[metricsName] = 0
-	for i, m := range expResp.Experiment.ExperimentSpec.Objective.AdditionalMetricNames {
+	for i, m := range expResp.Experiment.Spec.Objective.AdditionalMetricNames {
 		resultText += "," + m
 		metricsList[m] = i + 1
 	}
 	log.Printf("Got metrics names")
 	paramList := map[string]int{}
-	for i, p := range expResp.Experiment.ExperimentSpec.ParameterSpecs.Parameters {
+	for i, p := range expResp.Experiment.Spec.ParameterSpecs.Parameters {
 		resultText += "," + p.Name
 		paramList[p.Name] = i + len(metricsList)
 	}
