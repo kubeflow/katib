@@ -37,6 +37,6 @@ cp -r vendor ${GO_DIR}/vendor
 
 cd ${GO_DIR}
 
-cp cmd/suggestion/nasenvelopenet/Dockerfile .
+cp cmd/suggestion/nasenvelopenet/v1alpha1/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-nasenvelopenet:${VERSION} --project=${PROJECT}
 gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/suggestion-nasenvelopenet:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha1/suggestion-nasenvelopenet:latest --verbosity=info
