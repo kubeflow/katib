@@ -16,6 +16,8 @@
 
 # This shell script is used to build an image from our argo workflow
 
+exit 0
+
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -39,4 +41,4 @@ cd ${GO_DIR}
 
 cp cmd/suggestion/nasenvelopenet/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-nasenvelopenet:${VERSION} --project=${PROJECT}
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/suggestion-nasenvelopenet:${VERSION} ${REGISTRY}/${REPO_NAME}/suggestion-nasenvelopenet:latest --verbosity=info
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/suggestion-nasenvelopenet:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha2/suggestion-nasenvelopenet:latest --verbosity=info

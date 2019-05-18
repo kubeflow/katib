@@ -40,7 +40,7 @@ docker build -t ${PREFIX}/v1alpha1/suggestion-grid -f ${CMD_PREFIX}/suggestion/g
 docker build -t ${PREFIX}/v1alpha1/suggestion-hyperband -f ${CMD_PREFIX}/suggestion/hyperband/v1alpha1/Dockerfile .
 docker build -t ${PREFIX}/v1alpha1/suggestion-bayesianoptimization -f ${CMD_PREFIX}/suggestion/bayesianoptimization/v1alpha1/Dockerfile .
 docker build -t ${PREFIX}/v1alpha1/suggestion-nasrl -f ${CMD_PREFIX}/suggestion/nasrl/v1alpha1/Dockerfile .
-docker build -t ${PREFIX}/suggestion-nasenvelopenet -f ${CMD_PREFIX}/suggestion/nasenvelopenet/v1alpha1/Dockerfile .
+docker build -t ${PREFIX}/v1alpha1/suggestion-nasenvelopenet -f ${CMD_PREFIX}/suggestion/nasenvelopenet/v1alpha1/Dockerfile .
 
 echo "Building earlystopping images..."
 docker build -t ${PREFIX}/v1alpha1/earlystopping-medianstopping -f ${CMD_PREFIX}/earlystopping/medianstopping/v1alpha1/Dockerfile .
