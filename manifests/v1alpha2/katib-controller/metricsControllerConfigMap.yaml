@@ -23,6 +23,7 @@ data:
               containers:
               - name: {{.Trial}}
                 image: katib/metrics-collector
+                command: ["./metricscollector"]
                 args:
                 - "-e"
                 - "{{.Experiment}}"
