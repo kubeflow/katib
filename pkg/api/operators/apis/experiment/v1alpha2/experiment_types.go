@@ -233,7 +233,7 @@ type GraphConfig struct {
 // Operation contains type of operation in DAG
 type Operation struct {
 	OperationType string          `json:"operationType,omitempty"`
-	Parameters    []ParameterSpec `json:"parameterconfigs,omitempty"`
+	Parameters    []ParameterSpec `json:"parameters,omitempty"`
 }
 
 // Spec for metrics collectors. For v1alpha2 we will keep metrics collection as
