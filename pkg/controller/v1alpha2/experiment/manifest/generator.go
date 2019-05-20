@@ -8,12 +8,12 @@ import (
 	"text/template"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/katibclient"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -22,6 +22,7 @@ const (
 
 // Generator is the type for manifests Generator.
 type Generator interface {
+	InjectClient(c client.Client)
 	GetRunSpec(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string) (string, error)
 	GetRunSpecWithHyperParameters(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string, hps []*apiv1alpha2.ParameterAssignment) (string, error)
 	GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error)
@@ -38,6 +39,10 @@ func New(c client.Client) Generator {
 	return &DefaultGenerator{
 		client: katibClient,
 	}
+}
+
+func (g *DefaultGenerator) InjectClient(c client.Client) {
+	g.client.InjectClient(c)
 }
 
 func (g *DefaultGenerator) GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error) {

@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
@@ -21,6 +22,7 @@ var log = logf.Log.WithName("experiment-controller")
 
 type Validator interface {
 	ValidateExperiment(instance *experimentsv1alpha2.Experiment) error
+	InjectClient(c client.Client)
 }
 
 type DefaultValidator struct {
@@ -33,6 +35,10 @@ func New(generator manifest.Generator, managerClient managerclient.ManagerClient
 		Generator:     generator,
 		ManagerClient: managerClient,
 	}
+}
+
+func (g *DefaultValidator) InjectClient(c client.Client) {
+	g.Generator.InjectClient(c)
 }
 
 func (g *DefaultValidator) ValidateExperiment(instance *experimentsv1alpha2.Experiment) error {
