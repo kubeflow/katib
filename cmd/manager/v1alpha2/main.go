@@ -6,7 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"net"
-
+	"k8s.io/klog"
 	health_pb "github.com/kubeflow/katib/pkg/api/health"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	dbif "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
@@ -167,7 +167,7 @@ func main() {
 
 	conn, err := grpc.Dial(dbIfaddress, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("Could not connect to DBIF service: %v", err)
+		klog.Fatalf("Could not connect to DBIF service: %v", err)
 	}
 	defer conn.Close()
 	dbIf = dbif.NewDBIFClient(conn)

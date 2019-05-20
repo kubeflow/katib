@@ -10,7 +10,6 @@ import (
 	"net"
 	"os"
 	"time"
-	"errors"
 	"k8s.io/klog"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/jsonpb"
@@ -282,8 +281,8 @@ func (d *dbConn) GetExperiment(ctx context.Context, in *dbif.GetExperimentReques
 	var completion_time string
 	experimentName := in.ExperimentName
 	experiment := &dbif.Experiment{
-		Spec:   &dbif.Spec{},
-		Status: &dbif.Status{},
+		Spec:   &dbif.Experiment.Spec{},
+		Status: &dbif.Experiment.Status{},
 	}
 	row := d.db.QueryRow("SELECT * FROM experiments WHERE name = ?", experimentName)
 	err := row.Scan(
