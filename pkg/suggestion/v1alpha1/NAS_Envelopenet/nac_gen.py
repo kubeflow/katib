@@ -1,4 +1,4 @@
-from pkg.suggestion.NAS_Envelopenet.generate_arch import NACAlg
+from pkg.suggestion.v1alpha1.NAS_Envelopenet.generate_arch import NACAlg
 
 class NAC:
     def __init__(self,

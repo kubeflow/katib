@@ -1,4 +1,4 @@
-from pkg.api.python import api_pb2
+from pkg.api.v1alpha1.python import api_pb2
 
 class SearchSpace(object):
     def __init__(self, operations):

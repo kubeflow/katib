@@ -33,6 +33,7 @@ kubectl apply -f manifests/v1alpha1/vizier/suggestion/grid
 kubectl apply -f manifests/v1alpha1/vizier/suggestion/hyperband
 kubectl apply -f manifests/v1alpha1/vizier/suggestion/bayesianoptimization
 kubectl apply -f manifests/v1alpha1/vizier/suggestion/nasrl
+kubectl apply -f manifests/v1alpha1/vizier/suggestion/nasenvelopenet
 kubectl apply -f manifests/v1alpha1/vizier/earlystopping/medianstopping
 kubectl apply -f manifests/v1alpha1/studyjobcontroller
 cd - > /dev/null

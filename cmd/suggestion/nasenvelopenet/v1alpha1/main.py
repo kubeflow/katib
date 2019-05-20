@@ -3,9 +3,9 @@ from concurrent import futures
 
 import time
 
-from pkg.api.python import api_pb2_grpc
-from pkg.suggestion.nasenvelopenet_service import EnvelopenetService
-from pkg.suggestion.types import DEFAULT_PORT
+from pkg.api.v1alpha1.python import api_pb2_grpc
+from pkg.suggestion.v1alpha1.nasenvelopenet_service import EnvelopenetService
+from pkg.suggestion.v1alpha1.types import DEFAULT_PORT
 from logging import getLogger, StreamHandler, INFO, DEBUG
 
 
