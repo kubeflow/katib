@@ -36,18 +36,18 @@ type ExperimentSpec struct {
 
 	// How many trials can be processed in parallel.
 	// Defaults to 3
-	ParallelTrialCount *int `json:"parallelTrialCount,omitempty"`
+	ParallelTrialCount *int32 `json:"parallelTrialCount,omitempty"`
 
 	// Max completed trials to mark experiment as succeeded
-	MaxTrialCount *int `json:"maxTrialCount,omitempty"`
+	MaxTrialCount *int32 `json:"maxTrialCount,omitempty"`
 
 	// Max failed trials to mark experiment as failed.
-	MaxFailedTrialCount *int `json:"maxFailedTrialCount,omitempty"`
+	MaxFailedTrialCount *int32 `json:"maxFailedTrialCount,omitempty"`
 
 	// Whether to retain historical data in DB after deletion.
 	RetainHistoricalData bool `json:"retainHistoricalData,omitempty"`
 
-	// For v1alpha2 we will keep the metrics collector implementation same as v1alpha1. 
+	// For v1alpha2 we will keep the metrics collector implementation same as v1alpha1.
 	MetricsCollectorSpec *MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
 
 	NasConfig *NasConfig `json:"nasConfig,omitempty"`
@@ -79,20 +79,23 @@ type ExperimentStatus struct {
 	// Current optimal trial parameters and observations.
 	CurrentOptimalTrial OptimalTrial `json:"currentOptimalTrial,omitempty"`
 
+	// Trials is the total number of trials owned by the experiment.
+	Trials int32 `json:"trials,omitempty"`
+
 	// How many trials have succeeded.
-	TrialsSucceeded int `json:"trialsSucceeded,omitempty"`
+	TrialsSucceeded int32 `json:"trialsSucceeded,omitempty"`
 
 	// How many trials have failed.
-	TrialsFailed int `json:"trialsFailed,omitempty"`
+	TrialsFailed int32 `json:"trialsFailed,omitempty"`
 
 	// How many trials have been killed.
-	TrialsKilled int `json:"trialsKilled,omitempty"`
+	TrialsKilled int32 `json:"trialsKilled,omitempty"`
 
 	// How many trials are currently pending.
-	TrialsPending int `json:"trialsPending,omitempty"`
+	TrialsPending int32 `json:"trialsPending,omitempty"`
 
 	// How many trials are currently running.
-	TrialsRunning int `json:"trialsRunning,omitempty"`
+	TrialsRunning int32 `json:"trialsRunning,omitempty"`
 }
 
 type OptimalTrial struct {
@@ -230,7 +233,7 @@ type GraphConfig struct {
 // Operation contains type of operation in DAG
 type Operation struct {
 	OperationType string          `json:"operationType,omitempty"`
-	Parameters    []ParameterSpec `json:"parameterconfigs,omitempty"`
+	Parameters    []ParameterSpec `json:"parameters,omitempty"`
 }
 
 // Spec for metrics collectors. For v1alpha2 we will keep metrics collection as

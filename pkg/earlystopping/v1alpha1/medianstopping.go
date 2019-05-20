@@ -3,12 +3,12 @@ package earlystopping
 import (
 	"context"
 	"errors"
-	"log"
 	"sort"
 	"strconv"
 
 	api "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	vdb "github.com/kubeflow/katib/pkg/db/v1alpha1"
+	"k8s.io/klog"
 )
 
 const (
@@ -33,7 +33,7 @@ func NewMedianStoppingRule() *MedianStoppingRule {
 	m := &MedianStoppingRule{}
 	m.dbIf, err = vdb.New()
 	if err != nil {
-		log.Fatalf("Failed to open db connection: %v", err)
+		klog.Fatalf("Failed to open db connection: %v", err)
 	}
 	return m
 }
@@ -45,14 +45,14 @@ func (m *MedianStoppingRule) parseEarlyStoppingParameters(sc *api.StudyConfig, e
 		case "LeastStep":
 			l, err := strconv.Atoi(ep.Value)
 			if err != nil {
-				log.Printf("Fail to puerse parameter %s : %s", ep.Name, ep.Value)
+				klog.Errorf("Fail to puerse parameter %s : %s", ep.Name, ep.Value)
 			} else {
 				p.LeastStep = l
 			}
 		case "EvalMargin":
 			mar, err := strconv.ParseFloat(ep.Value, 64)
 			if err != nil {
-				log.Printf("Fail to puerse parameter %s : %s", ep.Name, ep.Value)
+				klog.Errorf("Fail to puerse parameter %s : %s", ep.Name, ep.Value)
 			} else {
 				p.Margin = mar
 			}
@@ -61,15 +61,15 @@ func (m *MedianStoppingRule) parseEarlyStoppingParameters(sc *api.StudyConfig, e
 		case "BurnInPeriod":
 			b, err := strconv.Atoi(ep.Value)
 			if err != nil {
-				log.Printf("Fail to puerse parameter %s : %s", ep.Name, ep.Value)
+				klog.Errorf("Fail to puerse parameter %s : %s", ep.Name, ep.Value)
 			} else {
 				p.BurnIn = b
 			}
 		default:
-			log.Printf("Unknown EarlyStopping Parameter %v", ep.Name)
+			klog.Errorf("Unknown EarlyStopping Parameter %v", ep.Name)
 		}
 	}
-	log.Printf("Parameter: LeastStep %d, Margin %v, EvalMetric %s, BurnInPeriod %d", p.LeastStep, p.Margin, p.EvalMetric, p.BurnIn)
+	klog.Infof("Parameter: LeastStep %d, Margin %v, EvalMetric %s, BurnInPeriod %d", p.LeastStep, p.Margin, p.EvalMetric, p.BurnIn)
 	return p, nil
 }
 
@@ -88,7 +88,7 @@ func (m *MedianStoppingRule) getMedianRunningAverage(completedWorkerslogs [][]*v
 		for s := burnin; s < st; s++ {
 			v, err := strconv.ParseFloat(cwl[s].Value, 64)
 			if err != nil {
-				log.Printf("Fail to Parse %s : %s", cwl[s].Name, cwl[s].Value)
+				klog.Errorf("Fail to Parse %s : %s", cwl[s].Name, cwl[s].Value)
 				errParce = true
 				break
 			}
@@ -121,7 +121,7 @@ func (m *MedianStoppingRule) getBestValue(sid string, sc *api.StudyConfig, logs 
 	for _, l := range logs {
 		v, err := strconv.ParseFloat(l.Value, 64)
 		if err != nil {
-			log.Printf("Fail to Parse %s : %s", l.Name, l.Value)
+			klog.Errorf("Fail to Parse %s : %s", l.Name, l.Value)
 			continue
 		}
 		targetObjlog = append(targetObjlog, v)
@@ -165,7 +165,7 @@ func (m *MedianStoppingRule) GetShouldStopWorkers(ctx context.Context, in *api.G
 		case api.State_COMPLETED:
 			wl, err := m.dbIf.GetWorkerLogs(w.WorkerId, &vdb.GetWorkerLogOpts{Name: p.EvalMetric})
 			if err != nil {
-				log.Printf("Fail to get worker %v logs", w.WorkerId)
+				klog.Errorf("Fail to get worker %v logs", w.WorkerId)
 				continue
 			}
 			if len(wl) > p.BurnIn {
@@ -180,7 +180,7 @@ func (m *MedianStoppingRule) GetShouldStopWorkers(ctx context.Context, in *api.G
 	for _, w := range rwids {
 		wl, err := m.dbIf.GetWorkerLogs(w, &vdb.GetWorkerLogOpts{Name: p.EvalMetric})
 		if err != nil {
-			log.Printf("Fail to get worker %v logs", w)
+			klog.Errorf("Fail to get worker %v logs", w)
 			continue
 		}
 		if len(wl) < p.LeastStep || len(wl) <= p.BurnIn {
@@ -188,13 +188,13 @@ func (m *MedianStoppingRule) GetShouldStopWorkers(ctx context.Context, in *api.G
 		}
 		v, err := m.getBestValue(in.StudyId, sc, wl)
 		if err != nil {
-			log.Printf("Fail to Get Best Value at %s: %v Log:%v", w, err, wl)
+			klog.Errorf("Fail to Get Best Value at %s: %v Log:%v", w, err, wl)
 			continue
 		}
 		om := m.getMedianRunningAverage(cwl, len(wl), p.BurnIn)
-		log.Printf("Worker %s, In step %d Current value: %v Median value: %v\n", w, len(wl), v, om)
+		klog.Infof("Worker %s, In step %d Current value: %v Median value: %v\n", w, len(wl), v, om)
 		if (v < (om-p.Margin) && sc.OptimizationType == api.OptimizationType_MAXIMIZE) || v > (om+p.Margin) && sc.OptimizationType == api.OptimizationType_MINIMIZE {
-			log.Printf("Worker %s shuold be stopped", w)
+			klog.Infof("Worker %s shuold be stopped", w)
 			sW = append(sW, w)
 		}
 	}

@@ -20,22 +20,32 @@ import (
 	"context"
 	"net/http"
 
-	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
+
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/managerclient"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/manifest"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/validator"
 )
 
 // experimentValidator validates Pods
 type experimentValidator struct {
+	admission.Handler
 	client  client.Client
 	decoder types.Decoder
+	validator.Validator
 }
 
-// Implement admission.Handler so the controller can handle admission request.
-var _ admission.Handler = &experimentValidator{}
+func newExperimentValidator(c client.Client) *experimentValidator {
+	p := manifest.New(c)
+	mc := managerclient.New()
+	return &experimentValidator{
+		Validator: validator.New(p, mc),
+	}
+}
 
 func (v *experimentValidator) Handle(ctx context.Context, req types.Request) types.Response {
 	inst := &experimentsv1alpha2.Experiment{}
@@ -43,7 +53,7 @@ func (v *experimentValidator) Handle(ctx context.Context, req types.Request) typ
 	if err != nil {
 		return admission.ErrorResponse(http.StatusBadRequest, err)
 	}
-	err = util.ValidateExperiment(inst)
+	err = v.ValidateExperiment(inst)
 	if err != nil {
 		return admission.ErrorResponse(http.StatusBadRequest, err)
 	}

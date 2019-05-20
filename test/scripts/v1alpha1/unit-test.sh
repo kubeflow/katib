@@ -75,8 +75,24 @@ mkdir -p ${GO_DIR}
 cp -r cmd ${GO_DIR}/cmd
 cp -r pkg ${GO_DIR}/pkg
 cp -r vendor ${GO_DIR}/vendor
+cp -r test ${GO_DIR}/test
+cp -r manifests ${GO_DIR}/manifests
 
 echo "Run unit test cases"
 cd ${GO_DIR}
+
+os=$(go env GOOS)
+arch=$(go env GOARCH)
+version=1.0.7
+echo "os: ${os}, arch: ${arch}"
+
+# download the release
+curl -L -O "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${version}/kubebuilder_${version}_${os}_${arch}.tar.gz"
+
+# extract the archive
+tar -zxvf kubebuilder_${version}_${os}_${arch}.tar.gz
+mv kubebuilder_${version}_${os}_${arch} /usr/local/kubebuilder
+export PATH=$PATH:/usr/local/kubebuilder/bin
+
 go test ./...
 cd - > /dev/null

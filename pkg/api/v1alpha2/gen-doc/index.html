@@ -508,14 +508,14 @@
                 </tr>
               
                 <tr>
-                  <td>experiment_spec</td>
+                  <td>spec</td>
                   <td><a href="#api.v1.alpha2.ExperimentSpec">ExperimentSpec</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
               
                 <tr>
-                  <td>experiment_status</td>
+                  <td>status</td>
                   <td><a href="#api.v1.alpha2.ExperimentStatus">ExperimentStatus</a></td>
                   <td></td>
                   <td><p> </p></td>
@@ -902,6 +902,13 @@
               
                 <tr>
                   <td>trial_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>metric_name</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p> </p></td>
@@ -1867,6 +1874,170 @@
       
 
       
+        <h3 id="api.v1.alpha2.ExperimentStatus.ExperimentConditionType">ExperimentStatus.ExperimentConditionType</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>CREATED</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>RUNNING</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>RESTARTING</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>SUCCEEDED</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>FAILED</td>
+                <td>4</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>UNKNOWN</td>
+                <td>5</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="api.v1.alpha2.ObjectiveType">ObjectiveType</h3>
+        <p>Direction of optimization. Minimize or Maximize.</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>UNKNOWN</td>
+                <td>0</td>
+                <td><p>Undefined type and not used.</p></td>
+              </tr>
+            
+              <tr>
+                <td>MINIMIZE</td>
+                <td>1</td>
+                <td><p>Minimize</p></td>
+              </tr>
+            
+              <tr>
+                <td>MAXIMIZE</td>
+                <td>2</td>
+                <td><p>Maximize</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="api.v1.alpha2.ParameterType">ParameterType</h3>
+        <p>Types of value for HyperParameter.</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>UNKNOWN_TYPE</td>
+                <td>0</td>
+                <td><p>Undefined type and not used.</p></td>
+              </tr>
+            
+              <tr>
+                <td>DOUBLE</td>
+                <td>1</td>
+                <td><p>Double float type. Use &#34;Max/Min&#34;.</p></td>
+              </tr>
+            
+              <tr>
+                <td>INT</td>
+                <td>2</td>
+                <td><p>Int type. Use &#34;Max/Min&#34;.</p></td>
+              </tr>
+            
+              <tr>
+                <td>DISCRETE</td>
+                <td>3</td>
+                <td><p>Discrete number type. Use &#34;List&#34; as float.</p></td>
+              </tr>
+            
+              <tr>
+                <td>CATEGORICAL</td>
+                <td>4</td>
+                <td><p>Categorical type. Use &#34;List&#34; as string.</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="api.v1.alpha2.TrialStatus.TrialConditionType">TrialStatus.TrialConditionType</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>CREATED</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>RUNNING</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>SUCCEEDED</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>KILLED</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>FAILED</td>
+                <td>4</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>UNKNOWN</td>
+                <td>5</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
 
       
 
@@ -2058,9 +2229,9 @@ Suggestion service should return INVALID_ARGUMENT Error when the parameter is in
               
               <tr>
                 <td>GetObservationLog</td>
-                <td>GET</td>
-                <td>/api/Manager/GetObservationLog/{trial_name}</td>
-                <td></td>
+                <td>POST</td>
+                <td>/api/Manager/GetObservationLog</td>
+                <td>*</td>
               </tr>
               
             

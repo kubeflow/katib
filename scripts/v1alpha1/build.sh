@@ -26,24 +26,24 @@ SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 cd ${SCRIPT_ROOT}
 
 echo "Building core image..."
-docker build -t ${PREFIX}/vizier-core -f ${CMD_PREFIX}/manager/Dockerfile .
-docker build -t ${PREFIX}/studyjob-controller -f ${CMD_PREFIX}/katib-controller/Dockerfile .
-docker build -t ${PREFIX}/metrics-collector -f ${CMD_PREFIX}/metricscollector/Dockerfile .
-docker build -t ${PREFIX}/tfevent-metrics-collector -f ${CMD_PREFIX}/tfevent-metricscollector/Dockerfile .
+docker build -t ${PREFIX}/v1alpha1/vizier-core -f ${CMD_PREFIX}/manager/v1alpha1/Dockerfile .
+docker build -t ${PREFIX}/v1alpha1/studyjob-controller -f ${CMD_PREFIX}/katib-controller/v1alpha1/Dockerfile .
+docker build -t ${PREFIX}/v1alpha1/metrics-collector -f ${CMD_PREFIX}/metricscollector/v1alpha1/Dockerfile .
+docker build -t ${PREFIX}/v1alpha1/tfevent-metrics-collector -f ${CMD_PREFIX}/tfevent-metricscollector/v1alpha1/Dockerfile .
 
 echo "Building REST API for core image..."
-docker build -t ${PREFIX}/vizier-core-rest -f ${CMD_PREFIX}/manager-rest/Dockerfile .
+docker build -t ${PREFIX}/v1alpha1/vizier-core-rest -f ${CMD_PREFIX}/manager-rest/v1alpha1/Dockerfile .
 
 echo "Building suggestion images..."
-docker build -t ${PREFIX}/suggestion-random -f ${CMD_PREFIX}/suggestion/random/Dockerfile .
-docker build -t ${PREFIX}/suggestion-grid -f ${CMD_PREFIX}/suggestion/grid/Dockerfile .
-docker build -t ${PREFIX}/suggestion-hyperband -f ${CMD_PREFIX}/suggestion/hyperband/Dockerfile .
-docker build -t ${PREFIX}/suggestion-bayesianoptimization -f ${CMD_PREFIX}/suggestion/bayesianoptimization/Dockerfile .
-docker build -t ${PREFIX}/suggestion-nasrl -f ${CMD_PREFIX}/suggestion/nasrl/Dockerfile .
+docker build -t ${PREFIX}/v1alpha1/suggestion-random -f ${CMD_PREFIX}/suggestion/random/v1alpha1/Dockerfile .
+docker build -t ${PREFIX}/v1alpha1/suggestion-grid -f ${CMD_PREFIX}/suggestion/grid/v1alpha1/Dockerfile .
+docker build -t ${PREFIX}/v1alpha1/suggestion-hyperband -f ${CMD_PREFIX}/suggestion/hyperband/v1alpha1/Dockerfile .
+docker build -t ${PREFIX}/v1alpha1/suggestion-bayesianoptimization -f ${CMD_PREFIX}/suggestion/bayesianoptimization/v1alpha1/Dockerfile .
+docker build -t ${PREFIX}/v1alpha1/suggestion-nasrl -f ${CMD_PREFIX}/suggestion/nasrl/v1alpha1/Dockerfile .
+docker build -t ${PREFIX}/v1alpha1/suggestion-nasenvelopenet -f ${CMD_PREFIX}/suggestion/nasenvelopenet/v1alpha1/Dockerfile .
 
 echo "Building earlystopping images..."
-docker build -t ${PREFIX}/earlystopping-medianstopping -f ${CMD_PREFIX}/earlystopping/medianstopping/Dockerfile .
+docker build -t ${PREFIX}/v1alpha1/earlystopping-medianstopping -f ${CMD_PREFIX}/earlystopping/medianstopping/v1alpha1/Dockerfile .
 
 echo "Building UI image..."
-docker build -t ${PREFIX}/katib-ui -f ${CMD_PREFIX}/ui/Dockerfile .
-
+docker build -t ${PREFIX}/v1alpha1/katib-ui -f ${CMD_PREFIX}/ui/v1alpha1/Dockerfile .

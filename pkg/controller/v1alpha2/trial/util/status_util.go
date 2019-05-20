@@ -19,12 +19,13 @@ import (
 	//v1 "k8s.io/api/core/v1"
 
 	batchv1 "k8s.io/api/batch/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
-	commonv1beta1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta1"
+	commonv1beta2 "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta2"
 )
 
 var log = logf.Log.WithName("trial-status-util")
@@ -42,6 +43,7 @@ func UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *uns
 
 	kind := deployedJob.GetKind()
 	status, ok, unerr := unstructured.NestedFieldCopy(deployedJob.Object, "status")
+	now := metav1.Now()
 
 	if ok {
 		statusMap := status.(map[string]interface{})
@@ -57,12 +59,14 @@ func UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *uns
 			if jobStatus.Active == 0 && jobStatus.Succeeded > 0 {
 				msg := "Trial has succeeded"
 				instance.MarkTrialStatusSucceeded(TrialSucceededReason, msg)
+				instance.Status.CompletionTime = &now
 			} else if jobStatus.Failed > 0 {
 				msg := "Trial has failed"
 				instance.MarkTrialStatusFailed(TrialFailedReason, msg)
+				instance.Status.CompletionTime = &now
 			}
 		default:
-			jobStatus := commonv1beta1.JobStatus{}
+			jobStatus := commonv1beta2.JobStatus{}
 			err := runtime.DefaultUnstructuredConverter.FromUnstructured(statusMap, &jobStatus)
 
 			if err != nil {
@@ -71,12 +75,14 @@ func UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *uns
 			}
 			if len(jobStatus.Conditions) > 0 {
 				lc := jobStatus.Conditions[len(jobStatus.Conditions)-1]
-				if lc.Type == commonv1beta1.JobSucceeded {
+				if lc.Type == commonv1beta2.JobSucceeded {
 					msg := "Trial has succeeded"
 					instance.MarkTrialStatusSucceeded(TrialSucceededReason, msg)
-				} else if lc.Type == commonv1beta1.JobFailed {
+					instance.Status.CompletionTime = &now
+				} else if lc.Type == commonv1beta2.JobFailed {
 					msg := "Trial has failed"
 					instance.MarkTrialStatusFailed(TrialFailedReason, msg)
+					instance.Status.CompletionTime = &now
 				}
 			}
 		}

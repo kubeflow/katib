@@ -22,7 +22,7 @@ set -o xtrace
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
 cd ${SCRIPT_ROOT}
-kubectl apply -f manifests/v1alpha1/0-namespace.yaml
+kubectl apply -f manifests/v1alpha1
 kubectl apply -f manifests/v1alpha1/pv
 kubectl apply -f manifests/v1alpha1/vizier/db
 kubectl apply -f manifests/v1alpha1/vizier/core
@@ -33,13 +33,7 @@ kubectl apply -f manifests/v1alpha1/vizier/suggestion/grid
 kubectl apply -f manifests/v1alpha1/vizier/suggestion/hyperband
 kubectl apply -f manifests/v1alpha1/vizier/suggestion/bayesianoptimization
 kubectl apply -f manifests/v1alpha1/vizier/suggestion/nasrl
+kubectl apply -f manifests/v1alpha1/vizier/suggestion/nasenvelopenet
 kubectl apply -f manifests/v1alpha1/vizier/earlystopping/medianstopping
-kubectl apply -f manifests/v1alpha1/studyjobcontroller/crd.yaml
-kubectl apply -f manifests/v1alpha1/studyjobcontroller/tfjobsCrd.yaml
-kubectl apply -f manifests/v1alpha1/studyjobcontroller/pytorchjobsCrd.yaml
-kubectl apply -f manifests/v1alpha1/studyjobcontroller/rbac.yaml
-kubectl apply -f manifests/v1alpha1/studyjobcontroller/mcrbac.yaml
-kubectl apply -f manifests/v1alpha1/studyjobcontroller/workerConfigMap.yaml
-kubectl apply -f manifests/v1alpha1/studyjobcontroller/metricsControllerConfigMap.yaml
-kubectl apply -f manifests/v1alpha1/studyjobcontroller/studyjobcontroller.yaml
+kubectl apply -f manifests/v1alpha1/studyjobcontroller
 cd - > /dev/null

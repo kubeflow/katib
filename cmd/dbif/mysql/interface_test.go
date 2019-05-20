@@ -90,7 +90,7 @@ func TestMain(m *testing.M) {
 func TestRegisterExperiment(t *testing.T) {
 	experiment := &api_pb.Experiment{
 		Name: "test1",
-		ExperimentSpec: &api_pb.ExperimentSpec{
+		Spec: &api_pb.ExperimentSpec{
 			ParameterSpecs: &api_pb.ExperimentSpec_ParameterSpecs{
 				Parameters: []*api_pb.ParameterSpec{},
 			},
@@ -105,10 +105,10 @@ func TestRegisterExperiment(t *testing.T) {
 			ParallelTrialCount: 10,
 			MaxTrialCount:      100,
 		},
-		ExperimentStatus: &api_pb.ExperimentStatus{
+		Status: &api_pb.ExperimentStatus{
 			Condition:      api_pb.ExperimentStatus_CREATED,
 			StartTime:      "2016-12-31T20:02:05.123456Z",
-			CompletionTime: "",
+			CompletionTime: "2016-12-31T20:02:06.123456Z",
 		},
 	}
 	mock.ExpectExec(
@@ -130,13 +130,13 @@ func TestRegisterExperiment(t *testing.T) {
 		"{\"parameters\":[]}",
 		"{\"goal\":0.99,\"objectiveMetricName\":\"f1_score\",\"additionalMetricNames\":[\"loss\",\"precision\",\"recall\"]}",
 		"{}",
-		experiment.ExperimentSpec.TrialTemplate,
-		experiment.ExperimentSpec.MetricsCollectorSpec,
-		experiment.ExperimentSpec.ParallelTrialCount,
-		experiment.ExperimentSpec.MaxTrialCount,
-		experiment.ExperimentStatus.Condition,
+		experiment.Spec.TrialTemplate,
+		experiment.Spec.MetricsCollectorSpec,
+		experiment.Spec.ParallelTrialCount,
+		experiment.Spec.MaxTrialCount,
+		experiment.Status.Condition,
 		"2016-12-31 20:02:05.123456",
-		"",
+		"2016-12-31 20:02:06.123456",
 		"",
 	).WillReturnResult(sqlmock.NewResult(1, 1))
 	err := dbInterface.RegisterExperiment(experiment)
@@ -159,7 +159,7 @@ func TestGetExperiment(t *testing.T) {
 			100,
 			api_pb.ExperimentStatus_CREATED,
 			"2016-12-31 20:02:05.123456",
-			"",
+			"2016-12-31 20:02:06.123456",
 			"",
 		),
 	)
@@ -177,7 +177,7 @@ func TestGetExperimentList(t *testing.T) {
 			"test1",
 			api_pb.ExperimentStatus_CREATED,
 			"2016-12-31 20:02:05.123456",
-			"",
+			"2016-12-31 20:02:06.123456",
 		).AddRow(
 			"test2",
 			api_pb.ExperimentStatus_SUCCEEDED,
@@ -199,7 +199,7 @@ func TestUpdateExperimentStatus(t *testing.T) {
 	condition := api_pb.ExperimentStatus_RUNNING
 	exp_name := "test1"
 	start_time := "2016-12-31 20:02:05.123456"
-	completion_time := ""
+	completion_time := "2016-12-31 20:02:06.123456"
 
 	mock.ExpectExec(`UPDATE experiments SET status = \?,
 	start_time = \?,
@@ -210,7 +210,7 @@ func TestUpdateExperimentStatus(t *testing.T) {
 		&api_pb.ExperimentStatus{
 			Condition:      condition,
 			StartTime:      "2016-12-31T20:02:05.123456Z",
-			CompletionTime: "",
+			CompletionTime: "2016-12-31T20:02:06.123456Z",
 		},
 	)
 	if err != nil {
@@ -303,7 +303,7 @@ func TestRegisterTrial(t *testing.T) {
 				},
 			},
 			StartTime:      "2016-12-31T20:02:05.123456Z",
-			CompletionTime: "",
+			CompletionTime: "2016-12-31T20:02:06.123456Z",
 		},
 	}
 	mock.ExpectExec(
@@ -328,7 +328,7 @@ func TestRegisterTrial(t *testing.T) {
 		"{\"metrics\":[{\"name\":\"f1_score\",\"value\":\"88.95\"},{\"name\":\"loss\",\"value\":\"0.5\"},{\"name\":\"precision\",\"value\":\"88.7\"},{\"name\":\"recall\",\"value\":\"89.2\"}]}",
 		trial.Status.Condition,
 		"2016-12-31 20:02:05.123456",
-		"",
+		"2016-12-31 20:02:06.123456",
 	).WillReturnResult(sqlmock.NewResult(1, 1))
 	err := dbInterface.RegisterTrial(trial)
 	if err != nil {
@@ -350,7 +350,7 @@ func TestGetTrialList(t *testing.T) {
 			"{\"metrics\":[{\"name\":\"f1_score\",\"value\":\"88.95\"},{\"name\":\"loss\",\"value\":\"0.5\"},{\"name\":\"precision\",\"value\":\"88.7\"},{\"name\":\"recall\",\"value\":\"89.2\"}]}",
 			api_pb.TrialStatus_RUNNING,
 			"2016-12-31 20:02:05.123456",
-			"",
+			"2016-12-31 20:02:06.123456",
 		).AddRow(
 			2,
 			"test1_trial2",
@@ -360,9 +360,9 @@ func TestGetTrialList(t *testing.T) {
 			"",
 			"",
 			"{\"metrics\":[{\"name\":\"f1_score\",\"value\":\"88.5\"},{\"name\":\"loss\",\"value\":\"0.8\"},{\"name\":\"precision\",\"value\":\"88.2\"},{\"name\":\"recall\",\"value\":\"89.0\"}]}",
-			api_pb.TrialStatus_COMPLETED,
+			api_pb.TrialStatus_SUCCEEDED,
 			"2016-12-31 20:02:05.123456",
-			"",
+			"2016-12-31 20:02:06.123456",
 		),
 	)
 	trials, err := dbInterface.GetTrialList("test1", "trial")
@@ -388,7 +388,7 @@ func TestGetTrial(t *testing.T) {
 			"{\"metrics\":[{\"name\":\"f1_score\",\"value\":\"88.95\"},{\"name\":\"loss\",\"value\":\"0.5\"},{\"name\":\"precision\",\"value\":\"88.7\"},{\"name\":\"recall\",\"value\":\"89.2\"}]}",
 			api_pb.TrialStatus_RUNNING,
 			"2016-12-31 20:02:05.123456",
-			"",
+			"2016-12-31 20:02:06.123456",
 		),
 	)
 	trial, err := dbInterface.GetTrial("test1_trial1")
@@ -403,7 +403,7 @@ func TestUpdateTrialStatus(t *testing.T) {
 	condition := api_pb.TrialStatus_RUNNING
 	trial_name := "test1_trial1"
 	start_time := "2016-12-31 20:02:05.123456"
-	completion_time := ""
+	completion_time := "2016-12-31 20:02:06.123456"
 
 	mock.ExpectExec(`UPDATE trials SET status = \?,
 	start_time = \?,
@@ -421,7 +421,7 @@ func TestUpdateTrialStatus(t *testing.T) {
 		&api_pb.TrialStatus{
 			Condition:      condition,
 			StartTime:      "2016-12-31T20:02:05.123456Z",
-			CompletionTime: "",
+			CompletionTime: "2016-12-31T20:02:06.123456Z",
 			Observation: &api_pb.Observation{
 				Metrics: []*api_pb.Metric{
 					&api_pb.Metric{
@@ -518,6 +518,7 @@ func TestGetObservationLog(t *testing.T) {
 	)
 	obsLog, err := dbInterface.GetObservationLog(
 		"test1_trial1",
+		"",
 		"2016-12-31T21:01:05.123456Z",
 		"",
 	)

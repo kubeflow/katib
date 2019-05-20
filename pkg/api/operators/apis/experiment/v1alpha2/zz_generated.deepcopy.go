@@ -188,17 +188,17 @@ func (in *ExperimentSpec) DeepCopyInto(out *ExperimentSpec) {
 	}
 	if in.ParallelTrialCount != nil {
 		in, out := &in.ParallelTrialCount, &out.ParallelTrialCount
-		*out = new(int)
+		*out = new(int32)
 		**out = **in
 	}
 	if in.MaxTrialCount != nil {
 		in, out := &in.MaxTrialCount, &out.MaxTrialCount
-		*out = new(int)
+		*out = new(int32)
 		**out = **in
 	}
 	if in.MaxFailedTrialCount != nil {
 		in, out := &in.MaxFailedTrialCount, &out.MaxFailedTrialCount
-		*out = new(int)
+		*out = new(int32)
 		**out = **in
 	}
 	if in.MetricsCollectorSpec != nil {

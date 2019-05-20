@@ -20,9 +20,10 @@ import (
 	"bytes"
 	"context"
 
-	batchv1 "k8s.io/api/batch/v1"
+	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -39,10 +40,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/trial/util"
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/trial/managerclient"
+	trialutil "github.com/kubeflow/katib/pkg/controller/v1alpha2/trial/util"
 )
 
-var log = logf.Log.WithName("trial-controller")
+var (
+	log = logf.Log.WithName("trial-controller")
+)
 
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
@@ -57,7 +62,13 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileTrial{Client: mgr.GetClient(), scheme: mgr.GetScheme()}
+	r := &ReconcileTrial{
+		Client:        mgr.GetClient(),
+		scheme:        mgr.GetScheme(),
+		ManagerClient: managerclient.New(),
+	}
+	r.updateStatusHandler = r.updateStatus
+	return r
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -76,16 +87,25 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &batchv1.Job{}},
-		&handler.EnqueueRequestForOwner{
-			IsController: true,
-			OwnerType:    &trialsv1alpha2.Trial{},
-		})
-	if err != nil {
-		log.Error(err, "Job watch error")
-		return err
+	for _, gvk := range commonv1alpha2.GetSupportedJobList() {
+		unstructuredJob := &unstructured.Unstructured{}
+		unstructuredJob.SetGroupVersionKind(gvk)
+		err = c.Watch(
+			&source.Kind{Type: unstructuredJob},
+			&handler.EnqueueRequestForOwner{
+				IsController: true,
+				OwnerType:    &trialsv1alpha2.Trial{},
+			})
+		if err != nil {
+			if meta.IsNoMatchError(err) {
+				log.Info("Job watch error. CRD might be missing. Please install CRD and restart katib-controller", "CRD Kind", gvk.Kind)
+				continue
+			}
+			return err
+		} else {
+			log.Info("Job watch added successfully", "CRD Kind", gvk.Kind)
+		}
 	}
-
 	log.Info("Trial  controller created")
 	return nil
 }
@@ -96,6 +116,10 @@ var _ reconcile.Reconciler = &ReconcileTrial{}
 type ReconcileTrial struct {
 	client.Client
 	scheme *runtime.Scheme
+
+	managerclient.ManagerClient
+	// updateStatusHandler is defined for test purpose.
+	updateStatusHandler updateStatusFunc
 }
 
 // Reconcile reads that state of the cluster for a Trial object and makes changes based on the state read
@@ -106,7 +130,6 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 	// Fetch the Trial instance
 	logger := log.WithValues("Trial", request.NamespacedName)
 	original := &trialsv1alpha2.Trial{}
-	requeue := false
 	err := r.Get(context.TODO(), request.NamespacedName, original)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -128,19 +151,20 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 	}
 	if !instance.IsCreated() {
 		//Trial not created in DB
-		err = util.CreateTrialInDB(instance)
-		if err != nil {
-			logger.Error(err, "Create trial in DB error")
-			return reconcile.Result{}, err
-		}
 		if instance.Status.StartTime == nil {
 			now := metav1.Now()
 			instance.Status.StartTime = &now
 		}
+		if instance.Status.CompletionTime == nil {
+			instance.Status.CompletionTime = &metav1.Time{}
+		}
 		msg := "Trial is created"
-		instance.MarkTrialStatusCreated(util.TrialCreatedReason, msg)
-		requeue = true
-
+		instance.MarkTrialStatusCreated(trialutil.TrialCreatedReason, msg)
+		err = r.CreateTrialInDB(instance)
+		if err != nil {
+			logger.Error(err, "Create trial in DB error")
+			return reconcile.Result{}, err
+		}
 	} else {
 		// Trial already created in DB
 		err := r.reconcileTrial(instance)
@@ -152,19 +176,19 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	if !equality.Semantic.DeepEqual(original.Status, instance.Status) {
 		//assuming that only status change
-		err = util.UpdateTrialStatusInDB(instance)
+		err = r.UpdateTrialStatusInDB(instance)
 		if err != nil {
 			logger.Error(err, "Update trial status in DB error")
 			return reconcile.Result{}, err
 		}
-		err = r.Status().Update(context.TODO(), instance)
+		err = r.updateStatusHandler(instance)
 		if err != nil {
 			logger.Error(err, "Update trial instance status error")
 			return reconcile.Result{}, err
 		}
 	}
 
-	return reconcile.Result{Requeue: requeue}, nil
+	return reconcile.Result{}, nil
 }
 
 func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha2.Trial) error {
@@ -176,21 +200,31 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha2.Trial) error {
 		logger.Error(err, "Job Spec Get error")
 		return err
 	}
+	desiredMetricsCollector, err := r.getDesiredMetricsCollectorSpec(instance)
+	if err != nil {
+		logger.Error(err, "Metrics Collector Get error")
+		return err
+	}
 
 	deployedJob, err := r.reconcileJob(instance, desiredJob)
 	if err != nil {
 		logger.Error(err, "Reconcile job error")
 		return err
 	}
+	_, err = r.reconcileMetricsCollector(instance, desiredMetricsCollector)
+	if err != nil {
+		logger.Error(err, "Reconcile Metrics Collector error")
+		return err
+	}
 
 	//Job already exists
 	//TODO Can desired Spec differ from deployedSpec?
 	if deployedJob != nil {
-		if err = util.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
+		if err = trialutil.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
 			logger.Error(err, "Update trial status condition error")
 			return err
 		}
-		if err = util.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
+		if err = trialutil.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
 			logger.Error(err, "Update trial status observation error")
 			return err
 		}
@@ -211,7 +245,8 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 	err = r.Get(context.TODO(), types.NamespacedName{Name: desiredJob.GetName(), Namespace: desiredJob.GetNamespace()}, deployedJob)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			logger.Info("Creating Job", "kind", kind)
+			logger.Info("Creating Job", "kind", kind,
+				"name", desiredJob.GetName())
 			err = r.Create(context.TODO(), desiredJob)
 			if err != nil {
 				logger.Error(err, "Create job error")
@@ -223,10 +258,8 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 		}
 	}
 
-	//TODO create Metric colletor
-
 	msg := "Trial is running"
-	instance.MarkTrialStatusRunning(util.TrialRunningReason, msg)
+	instance.MarkTrialStatusRunning(trialutil.TrialRunningReason, msg)
 	return deployedJob, nil
 }
 
@@ -247,4 +280,50 @@ func (r *ReconcileTrial) getDesiredJobSpec(instance *trialsv1alpha2.Trial) (*uns
 	}
 
 	return desiredJobSpec, nil
+}
+
+func (r *ReconcileTrial) getDesiredMetricsCollectorSpec(instance *trialsv1alpha2.Trial) (*batchv1beta.CronJob, error) {
+	mcjob := &batchv1beta.CronJob{}
+	bufSize := 1024
+	logger := log.WithValues("Metrics collector for Trial", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+	buf := bytes.NewBufferString(instance.Spec.MetricsCollectorSpec)
+
+	if err := k8syaml.NewYAMLOrJSONDecoder(buf, bufSize).Decode(mcjob); err != nil {
+		logger.Error(err, "Yaml decode error")
+		return nil, err
+	}
+	if err := controllerutil.SetControllerReference(instance, mcjob, r.scheme); err != nil {
+		logger.Error(err, "Set controller reference error")
+		return nil, err
+	}
+	return mcjob, nil
+}
+
+func (r *ReconcileTrial) reconcileMetricsCollector(instance *trialsv1alpha2.Trial,
+	desiredMetricsCollector *batchv1beta.CronJob) (*batchv1beta.CronJob, error) {
+	var err error
+	logger := log.WithValues("Trial", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+
+	deployedMetricsCollector := &batchv1beta.CronJob{}
+	err = r.Get(context.TODO(), types.NamespacedName{
+		Name:      desiredMetricsCollector.GetName(),
+		Namespace: desiredMetricsCollector.GetNamespace(),
+	}, deployedMetricsCollector)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			logger.Info("Creating Metrics Collector",
+				"name", desiredMetricsCollector.GetName(),
+				"namespace", desiredMetricsCollector.GetNamespace())
+			err = r.Create(context.TODO(), desiredMetricsCollector)
+			if err != nil {
+				logger.Error(err, "Create Metrics Collector error")
+				return nil, err
+			}
+		} else {
+			logger.Error(err, "Metrics Collector Get error")
+			return nil, err
+		}
+	}
+
+	return deployedMetricsCollector, nil
 }

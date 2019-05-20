@@ -25,6 +25,18 @@ SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
 cd ${SCRIPT_ROOT}
 
-docker build -t ${PREFIX}/katib-controller -f ${CMD_PREFIX}/katib-controller/Dockerfile .
+echo "Building core image..."
+docker build -t ${PREFIX}/v1alpha2/katib-controller -f ${CMD_PREFIX}/katib-controller/v1alpha2/Dockerfile .
 docker build -t ${PREFIX}/katib-dbif -f ${CMD_PREFIX}/dbif/mysql/Dockerfile .
-docker build -t ${PREFIX}/katib-manager -f ${CMD_PREFIX}/manager/Dockerfile .
+docker build -t ${PREFIX}/v1alpha2/katib-manager -f ${CMD_PREFIX}/manager/v1alpha2/Dockerfile .
+docker build -t ${PREFIX}/v1alpha2/katib-manager-rest -f ${CMD_PREFIX}/manager-rest/v1alpha2/Dockerfile .
+docker build -t ${PREFIX}/v1alpha2/metrics-collector -f ${CMD_PREFIX}/metricscollector/v1alpha2/Dockerfile .
+
+echo "Building UI image..."
+docker build -t ${PREFIX}/v1alpha2/katib-ui -f ${CMD_PREFIX}/ui/v1alpha2/Dockerfile .
+
+echo "Building TF Event metrics collector image..."
+docker build -t ${PREFIX}/v1alpha2/tfevent-metrics-collector -f ${CMD_PREFIX}/tfevent-metricscollector/v1alpha2/Dockerfile .
+
+echo "Building suggestion images..."
+docker build -t ${PREFIX}/v1alpha2/suggestion-random -f ${CMD_PREFIX}/suggestion/random/v1alpha2/Dockerfile .

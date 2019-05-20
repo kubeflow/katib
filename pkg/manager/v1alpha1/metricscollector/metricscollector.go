@@ -3,7 +3,6 @@ package metricscollector
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -12,8 +11,9 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
+	"k8s.io/klog"
 
-	"github.com/kubeflow/katib/pkg/api/v1alpha1"
+	api "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha1/studyjob"
 )
 
@@ -85,13 +85,13 @@ func (d *MetricsCollector) parseLogs(wID string, logs []string, objectiveValueNa
 		}
 		ls := strings.SplitN(logline, " ", 2)
 		if len(ls) != 2 {
-			log.Printf("Error parsing log: %s", logline)
+			klog.Errorf("Error parsing log: %s", logline)
 			lasterr = errors.New("Error parsing log")
 			continue
 		}
 		_, err := time.Parse(time.RFC3339Nano, ls[0])
 		if err != nil {
-			log.Printf("Error parsing time %s: %v", ls[0], err)
+			klog.Errorf("Error parsing time %s: %v", ls[0], err)
 			lasterr = err
 			continue
 		}
@@ -99,7 +99,7 @@ func (d *MetricsCollector) parseLogs(wID string, logs []string, objectiveValueNa
 		for _, kv := range kvpairs {
 			v := strings.Split(kv, "=")
 			if len(v) > 2 {
-				log.Printf("Ignoring trailing garbage: %s", kv)
+				klog.Infof("Ignoring trailing garbage: %s", kv)
 			}
 			if len(v) == 1 {
 				continue

@@ -2,14 +2,14 @@ package suggestion
 
 import (
 	"context"
-	"log"
 	"math/rand"
 	"strconv"
 	"time"
 
+	api "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
-	"github.com/kubeflow/katib/pkg/api/v1alpha1"
 	"google.golang.org/grpc"
+	"k8s.io/klog"
 )
 
 type RandomSuggestService struct {
@@ -35,7 +35,7 @@ func (s *RandomSuggestService) IntRandom(min, max int) int {
 func (s *RandomSuggestService) GetSuggestions(ctx context.Context, in *api.GetSuggestionsRequest) (*api.GetSuggestionsReply, error) {
 	conn, err := grpc.Dial(common.ManagerAddr, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("could not connect: %v", err)
+		klog.Fatalf("could not connect: %v", err)
 		return &api.GetSuggestionsReply{}, err
 	}
 	defer conn.Close()
@@ -45,7 +45,7 @@ func (s *RandomSuggestService) GetSuggestions(ctx context.Context, in *api.GetSu
 	}
 	scr, err := c.GetStudy(ctx, screq)
 	if err != nil {
-		log.Fatalf("GetStudyConf failed: %v", err)
+		klog.Fatalf("GetStudyConf failed: %v", err)
 		return &api.GetSuggestionsReply{}, err
 	}
 	reqnum := int(in.RequestNumber)

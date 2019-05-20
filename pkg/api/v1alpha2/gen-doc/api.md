@@ -161,8 +161,8 @@ TODO
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | name | [string](#string) |  | Name of Experiment. This is unique in DB. |
-| experiment_spec | [ExperimentSpec](#api.v1.alpha2.ExperimentSpec) |  |  |
-| experiment_status | [ExperimentStatus](#api.v1.alpha2.ExperimentStatus) |  |  |
+| spec | [ExperimentSpec](#api.v1.alpha2.ExperimentSpec) |  |  |
+| status | [ExperimentStatus](#api.v1.alpha2.ExperimentStatus) |  |  |
 
 
 
@@ -370,6 +370,7 @@ Discrete and Categorical type use List.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | trial_name | [string](#string) |  |  |
+| metric_name | [string](#string) |  |  |
 | start_time | [string](#string) |  | The start of the time range. RFC3339 format |
 | end_time | [string](#string) |  | The end of the time range. RFC3339 format |
 
@@ -927,6 +928,7 @@ Return INVALID_ARGUMENT Error if Algorithm Settings are not Valid
 | RESTARTING | 2 |  |
 | SUCCEEDED | 3 |  |
 | FAILED | 4 |  |
+| UNKNOWN | 5 |  |
 
 
 
@@ -965,11 +967,12 @@ Types of value for HyperParameter.
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
-| PENDING | 0 |  |
+| CREATED | 0 |  |
 | RUNNING | 1 |  |
-| COMPLETED | 2 |  |
+| SUCCEEDED | 2 |  |
 | KILLED | 3 |  |
 | FAILED | 4 |  |
+| UNKNOWN | 5 |  |
 
 
  

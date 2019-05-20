@@ -5,7 +5,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"net"
 
 	health_pb "github.com/kubeflow/katib/pkg/api/health"
@@ -175,15 +174,15 @@ func main() {
 
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Fatalf("Failed to listen: %v", err)
+		klog.Fatalf("Failed to listen: %v", err)
 	}
 	size := 1<<31 - 1
-	log.Printf("Start Katib manager: %s", port)
+	klog.Infof("Start Katib manager: %s", port)
 	s := grpc.NewServer(grpc.MaxRecvMsgSize(size), grpc.MaxSendMsgSize(size))
 	api_pb.RegisterManagerServer(s, &server{})
 	health_pb.RegisterHealthServer(s, &server{})
 	reflection.Register(s)
 	if err = s.Serve(listener); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
+		klog.Fatalf("Failed to serve: %v", err)
 	}
 }

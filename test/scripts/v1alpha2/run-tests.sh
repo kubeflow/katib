@@ -65,8 +65,10 @@ echo "REGISTRY ${REGISTRY}"
 echo "REPO_NAME ${REPO_NAME}"
 echo "VERSION ${VERSION}"
 
-sed -i -e "s@image: katib\/katib-controller@image: ${REGISTRY}\/${REPO_NAME}\/katib-controller:${VERSION}@" manifests/v1alpha2/katib-controller/katib-controller.yaml
-sed -i -e "s@image: katib\/katib-manager@image: ${REGISTRY}\/${REPO_NAME}\/katib-manager:${VERSION}@" manifests/v1alpha2/katib/manager/deployment.yaml
+sed -i -e "s@image: katib\/katib-controller@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-controller:${VERSION}@" manifests/v1alpha2/katib-controller/katib-controller.yaml
+sed -i -e "s@image: katib\/katib-manager@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-manager:${VERSION}@" manifests/v1alpha2/katib/manager/deployment.yaml
+sed -i -e "s@image: katib\/katib-manager-rest@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-manager-rest:${VERSION}@" manifests/v1alpha2/katib/manager-rest/deployment.yaml
+sed -i -e "s@image: katib\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-random:${VERSION}@" manifests/v1alpha2/katib/suggestion/random/deployment.yaml
 
 ./scripts/v1alpha2/deploy.sh
 
@@ -104,8 +106,7 @@ if [ $? -ne 1 ]; then
   exit 1
 fi
 set -o errexit
-
-kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-manager | sed -e "s@pods\/@@") 6789:6789 &
+kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-manager | grep -v katib-manager-rest |sed -e "s@pods\/@@") 6789:6789 &
 echo "kubectl port-forward start"
 sleep 5
 TIMEOUT=120

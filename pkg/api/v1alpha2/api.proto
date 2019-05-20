@@ -50,7 +50,6 @@ service EarlyStopping {
 }
 
 
-
 message GetSuggestionsRequest {
     string experiment_name = 1;
     string algorithm_name = 2;

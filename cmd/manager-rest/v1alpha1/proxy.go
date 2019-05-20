@@ -4,10 +4,10 @@ import (
 	"flag"
 	"net/http"
 
-	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"k8s.io/klog"
 
 	gw "github.com/kubeflow/katib/pkg/api/v1alpha1"
 )
@@ -35,9 +35,9 @@ func run() error {
 
 func main() {
 	flag.Parse()
-	defer glog.Flush()
+	defer klog.Flush()
 
 	if err := run(); err != nil {
-		glog.Fatal(err)
+		klog.Fatal(err)
 	}
 }

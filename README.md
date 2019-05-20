@@ -3,6 +3,8 @@
   <br>
 </h1>
 
+[![Build Status](https://travis-ci.org/kubeflow/katib.svg?branch=master)](https://travis-ci.org/kubeflow/katib)
+[![Coverage Status](https://coveralls.io/repos/github/kubeflow/katib/badge.svg?branch=master)](https://coveralls.io/github/kubeflow/katib?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kubeflow/katib)](https://goreportcard.com/report/github.com/kubeflow/katib)
 
 Hyperparameter Tuning on Kubernetes.

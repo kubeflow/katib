@@ -15,6 +15,150 @@
     "application/json"
   ],
   "paths": {
+    "/api/Manager/DeleteExperiment/{experiment_name}": {
+      "get": {
+        "summary": "* \nDelete a Experiment from DB by name.",
+        "operationId": "DeleteExperiment",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2DeleteExperimentReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "experiment_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/DeleteTrial/{trial_name}": {
+      "get": {
+        "summary": "* \nDelete a Trial from DB by ID.",
+        "operationId": "DeleteTrial",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2DeleteTrialReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "trial_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetAlgorithmExtraSettings/{experiment_name}": {
+      "get": {
+        "summary": "* \nGet all AlgorithmExtraSettings.",
+        "operationId": "GetAlgorithmExtraSettings",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2GetAlgorithmExtraSettingsReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "experiment_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetExperiment/{experiment_name}": {
+      "get": {
+        "summary": "* \nGet a Experiment from DB by name.",
+        "operationId": "GetExperiment",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2GetExperimentReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "experiment_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetExperimentList": {
+      "get": {
+        "summary": "*\nGet a summary list of Experiment from DB.\nThe summary includes name and condition.",
+        "operationId": "GetExperimentList",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2GetExperimentListReply"
+            }
+          }
+        },
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetObservationLog": {
+      "post": {
+        "summary": "*\nGet all log of Observations for a Trial.",
+        "operationId": "GetObservationLog",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2GetObservationLogReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha2GetObservationLogRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
     "/api/Manager/GetSuggestions": {
       "post": {
         "summary": "* \nGet Suggestions from a Suggestion service.",
@@ -71,6 +215,18 @@
     }
   },
   "definitions": {
+    "ExperimentStatusExperimentConditionType": {
+      "type": "string",
+      "enum": [
+        "CREATED",
+        "RUNNING",
+        "RESTARTING",
+        "SUCCEEDED",
+        "FAILED",
+        "UNKNOWN"
+      ],
+      "default": "CREATED"
+    },
     "NasConfigOperations": {
       "type": "object",
       "properties": {
@@ -97,13 +253,14 @@
     "TrialStatusTrialConditionType": {
       "type": "string",
       "enum": [
-        "PENDING",
+        "CREATED",
         "RUNNING",
-        "COMPLETED",
+        "SUCCEEDED",
         "KILLED",
-        "FAILED"
+        "FAILED",
+        "UNKNOWN"
       ],
-      "default": "PENDING"
+      "default": "CREATED"
     },
     "alpha2AlgorithmSetting": {
       "type": "object",
@@ -135,6 +292,20 @@
     },
     "alpha2EarlyStoppingSpec": {
       "type": "object"
+    },
+    "alpha2Experiment": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "spec": {
+          "$ref": "#/definitions/alpha2ExperimentSpec"
+        },
+        "status": {
+          "$ref": "#/definitions/alpha2ExperimentStatus"
+        }
+      }
     },
     "alpha2ExperimentSpec": {
       "type": "object",
@@ -200,6 +371,61 @@
         }
       },
       "description": "*\nFeasible space for optimization.\nInt and Double type use Max/Min.\nDiscrete and Categorical type use List."
+    },
+    "alpha2GetAlgorithmExtraSettingsReply": {
+      "type": "object",
+      "properties": {
+        "extra_algorithm_settings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha2AlgorithmSetting"
+          }
+        }
+      }
+    },
+    "alpha2GetExperimentListReply": {
+      "type": "object",
+      "properties": {
+        "experiment_summaries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha2ExperimentSummary"
+          }
+        }
+      }
+    },
+    "alpha2GetExperimentReply": {
+      "type": "object",
+      "properties": {
+        "experiment": {
+          "$ref": "#/definitions/alpha2Experiment"
+        }
+      }
+    },
+    "alpha2GetObservationLogReply": {
+      "type": "object",
+      "properties": {
+        "observation_log": {
+          "$ref": "#/definitions/alpha2ObservationLog"
+        }
+      }
+    },
+    "alpha2GetObservationLogRequest": {
+      "type": "object",
+      "properties": {
+        "trial_name": {
+          "type": "string"
+        },
+        "metric_name": {
+          "type": "string"
+        },
+        "start_time": {
+          "type": "string"
+        },
+        "end_time": {
+          "type": "string"
+        }
+      }
     },
     "alpha2GetSuggestionsReply": {
       "type": "object",
