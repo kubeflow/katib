@@ -31,12 +31,20 @@ const (
 	KatibManagerServiceNamespaceEnvName = "KATIB_MANAGER_NAMESPACE"
 	KatibManagerService                 = "katib-manager"
 	KatibManagerPort                    = "6789"
+	DBIFService							= "mysql-db-backend"
+	DBIFPort							= "6789"
 	ManagerAddr                         = KatibManagerService + ":" + KatibManagerPort
+	DBIFAddr							= DBIFService + ":" +  DBIFPort
 )
 
 type katibManagerClientAndConn struct {
 	Conn               *grpc.ClientConn
 	KatibManagerClient api_pb.ManagerClient
+}
+
+type DBIFClientAndConn struct {
+	Conn               *grpc.ClientConn
+	DBIFClient dbif_pb.DBIFClient
 }
 
 func GetManagerAddr() string {
@@ -67,63 +75,79 @@ func getKatibManagerClientAndConn() (*katibManagerClientAndConn, error) {
 	return kcc, nil
 }
 
+func getDBIFClientAndConn() (*katibManagerClientAndConn, error) {
+	conn, err := grpc.Dial(DBIFAddr, grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+	dbif := &DBIFClientAndConn{
+		Conn:               conn,
+		DBIFClient: dbif_pb.NewDBIFClient(conn),
+	}
+	return dbif, nil
+}
+
 func closeKatibManagerConnection(kcc *katibManagerClientAndConn) {
 	kcc.Conn.Close()
 }
 
+func closeDBIFConnection(dbif *DBIFClientAndConn) {
+	dbif.Conn.Close()
+}
+
 func RegisterExperiment(request *dbif_pb.RegisterExperimentRequest) (*dbif_pb.RegisterExperimentReply, error) {
 	ctx := context.Background()
-	kcc, err := getKatibManagerClientAndConn()
+	dbif, err := getDBIFClientAndConn()
 	if err != nil {
 		return nil, err
 	}
-	defer closeKatibManagerConnection(kcc)
-	kc := kcc.KatibManagerClient
-	return kc.RegisterExperiment(ctx, request)
+	defer closeDBIFConnection(dbIf)
+	dbifClient := dbif.DBIFClient
+	return dbifClient.RegisterExperiment(ctx, request)
 }
 
 func DeleteExperiment(request *dbif_pb.DeleteExperimentRequest) (*dbif_pb.DeleteExperimentReply, error) {
 	ctx := context.Background()
-	kcc, err := getKatibManagerClientAndConn()
+	dbif, err := getDBIFClientAndConn()
 	if err != nil {
 		return nil, err
 	}
-	defer closeKatibManagerConnection(kcc)
-	kc := kcc.KatibManagerClient
-	return kc.DeleteExperiment(ctx, request)
+	defer closeDBIFConnection(dbIf)
+	dbifClient := dbif.DBIFClient
+	return dbifClient.DeleteExperiment(ctx, request)
 }
 
 func UpdateExperimentStatus(request *dbif_pb.UpdateExperimentStatusRequest) (*dbif_pb.UpdateExperimentStatusReply, error) {
 	ctx := context.Background()
-	kcc, err := getKatibManagerClientAndConn()
+	dbif, err := getDBIFClientAndConn()
 	if err != nil {
 		return nil, err
 	}
-	defer closeKatibManagerConnection(kcc)
-	kc := kcc.KatibManagerClient
-	return kc.UpdateExperimentStatus(ctx, request)
+	defer closeDBIFConnection(dbIf)
+	dbifClient := dbif.DBIFClient
+	return dbifClient.UpdateExperimentStatus(ctx, request)
 }
 
 func RegisterTrial(request *dbif_pb.RegisterTrialRequest) (*dbif_pb.RegisterTrialReply, error) {
 	ctx := context.Background()
-	kcc, err := getKatibManagerClientAndConn()
+	dbif, err := getDBIFClientAndConn()
 	if err != nil {
 		return nil, err
 	}
-	defer closeKatibManagerConnection(kcc)
-	kc := kcc.KatibManagerClient
-	return kc.RegisterTrial(ctx, request)
+	defer closeDBIFConnection(dbIf)
+	dbifClient := dbif.DBIFClient
+	return dbifClient.RegisterTrial(ctx, request)
 }
 
 func UpdateTrialStatus(request *dbif_pb.UpdateTrialStatusRequest) (*dbif_pb.UpdateTrialStatusReply, error) {
 	ctx := context.Background()
-	kcc, err := getKatibManagerClientAndConn()
+	dbif, err := getDBIFClientAndConn()
 	if err != nil {
 		return nil, err
 	}
-	defer closeKatibManagerConnection(kcc)
-	kc := kcc.KatibManagerClient
-	return kc.UpdateTrialStatus(ctx, request)
+	defer closeDBIFConnection(dbIf)
+	dbifClient := dbif.DBIFClient
+	return dbifClient.UpdateTrialStatus(ctx, request)
 }
 
 func GetSuggestions(request *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestionsReply, error) {
