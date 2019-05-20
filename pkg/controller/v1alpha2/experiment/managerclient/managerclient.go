@@ -1,8 +1,6 @@
 package managerclient
 
 import (
-	"database/sql"
-
 	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
@@ -66,7 +64,14 @@ func (d *DefaultClient) UpdateExperimentStatusInDB(instance *experimentsv1alpha2
 }
 
 func (d *DefaultClient) GetExperimentFromDB(instance *experimentsv1alpha2.Experiment) (*api_pb.GetExperimentReply, error) {
-	return nil, sql.ErrNoRows
+	request := &api_pb.GetExperimentRequest{
+		ExperimentName: instance.Name,
+	}
+	if exp, err := commonv1alpha2.GetExperiment(request); err != nil {
+		return nil, err
+	} else {
+		return exp, nil
+	}
 }
 
 func getExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experiment {
