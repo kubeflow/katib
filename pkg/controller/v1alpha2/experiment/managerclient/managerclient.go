@@ -1,71 +1,75 @@
-/*
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-package util
+package managerclient
 
 import (
 	"database/sql"
 
-	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
+	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
-	common "github.com/kubeflow/katib/pkg/common/v1alpha2"
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 )
 
-func CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
-	experiment := GetExperimentConf(instance)
+// ManagerClient is the interface for katib manager client
+// in experiment controller.
+type ManagerClient interface {
+	CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error
+	DeleteExperimentInDB(instance *experimentsv1alpha2.Experiment) error
+	UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error
+	GetExperimentFromDB(instance *experimentsv1alpha2.Experiment) (
+		*api_pb.GetExperimentReply, error)
+}
+
+// DefaultClient implements the Client interface.
+type DefaultClient struct {
+}
+
+// New creates a new ManagerClient.
+func New() ManagerClient {
+	return &DefaultClient{}
+}
+
+func (d *DefaultClient) CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
+	experiment := getExperimentConf(instance)
 	request := &api_pb.RegisterExperimentRequest{
 		Experiment: experiment,
 	}
-	if _, err := common.RegisterExperiment(request); err != nil {
+	if _, err := commonv1alpha2.RegisterExperiment(request); err != nil {
 		return err
 	}
 	return nil
 }
 
-func DeleteExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
+func (d *DefaultClient) DeleteExperimentInDB(instance *experimentsv1alpha2.Experiment) error {
 	request := &api_pb.DeleteExperimentRequest{
 		ExperimentName: instance.Name,
 	}
-	if _, err := common.DeleteExperiment(request); err != nil {
+	if _, err := commonv1alpha2.DeleteExperiment(request); err != nil {
 		return err
 	}
 	return nil
 }
 
-func UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error {
+func (d *DefaultClient) UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error {
 	newStatus := &api_pb.ExperimentStatus{
-		StartTime:      common.ConvertTime2RFC3339(instance.Status.StartTime),
-		CompletionTime: common.ConvertTime2RFC3339(instance.Status.CompletionTime),
+		StartTime:      commonv1alpha2.ConvertTime2RFC3339(instance.Status.StartTime),
+		CompletionTime: commonv1alpha2.ConvertTime2RFC3339(instance.Status.CompletionTime),
 		Condition:      getCondition(instance),
 	}
 	request := &api_pb.UpdateExperimentStatusRequest{
 		NewStatus:      newStatus,
 		ExperimentName: instance.Name,
 	}
-	if _, err := common.UpdateExperimentStatus(request); err != nil {
+	if _, err := commonv1alpha2.UpdateExperimentStatus(request); err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetExperimentFromDB(instance *experimentsv1alpha2.Experiment) (*api_pb.GetExperimentReply, error) {
+func (d *DefaultClient) GetExperimentFromDB(instance *experimentsv1alpha2.Experiment) (*api_pb.GetExperimentReply, error) {
 	return nil, sql.ErrNoRows
 }
 
-func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experiment {
+func getExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experiment {
 	experiment := &api_pb.Experiment{
 		Spec: &api_pb.ExperimentSpec{
 			Objective: &api_pb.ObjectiveSpec{
@@ -76,8 +80,8 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 			},
 		},
 		Status: &api_pb.ExperimentStatus{
-			StartTime:      common.ConvertTime2RFC3339(instance.Status.StartTime),
-			CompletionTime: common.ConvertTime2RFC3339(instance.Status.CompletionTime),
+			StartTime:      commonv1alpha2.ConvertTime2RFC3339(instance.Status.StartTime),
+			CompletionTime: commonv1alpha2.ConvertTime2RFC3339(instance.Status.CompletionTime),
 			Condition:      getCondition(instance),
 		},
 	}
@@ -86,9 +90,9 @@ func GetExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 
 	//Populate Objective
 	switch instance.Spec.Objective.Type {
-	case commonv1alpha2.ObjectiveTypeMaximize:
+	case commonapiv1alpha2.ObjectiveTypeMaximize:
 		experiment.Spec.Objective.Type = api_pb.ObjectiveType_MAXIMIZE
-	case commonv1alpha2.ObjectiveTypeMinimize:
+	case commonapiv1alpha2.ObjectiveTypeMinimize:
 		experiment.Spec.Objective.Type = api_pb.ObjectiveType_MINIMIZE
 	default:
 		experiment.Spec.Objective.Type = api_pb.ObjectiveType_UNKNOWN

@@ -26,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/managerclient"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/manifest"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/validator"
 )
@@ -43,8 +44,9 @@ func newExperimentValidator() (*experimentValidator, error) {
 	if err != nil {
 		return nil, err
 	}
+	mc := managerclient.New()
 	return &experimentValidator{
-		Validator: validator.New(p),
+		Validator: validator.New(p, mc),
 	}, nil
 }
 

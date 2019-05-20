@@ -42,7 +42,7 @@ func TestCreateTFJobTrial(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	mc := managerclientmock.NewMockClient(mockCtrl)
+	mc := managerclientmock.NewMockManagerClient(mockCtrl)
 	mc.EXPECT().CreateTrialInDB(gomock.Any()).Return(nil).AnyTimes()
 	mc.EXPECT().UpdateTrialStatusInDB(gomock.Any()).Return(nil).AnyTimes()
 
@@ -92,7 +92,7 @@ func TestReconcileTFJobTrial(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	mc := managerclientmock.NewMockClient(mockCtrl)
+	mc := managerclientmock.NewMockManagerClient(mockCtrl)
 	mc.EXPECT().CreateTrialInDB(gomock.Any()).Return(nil).AnyTimes()
 	mc.EXPECT().UpdateTrialStatusInDB(gomock.Any()).Return(nil).AnyTimes()
 
