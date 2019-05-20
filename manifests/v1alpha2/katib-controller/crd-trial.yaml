@@ -3,6 +3,13 @@ kind: CustomResourceDefinition
 metadata:
   name: trials.kubeflow.org
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.conditions[-1:].type
+    name: Status
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
   group: kubeflow.org
   version: v1alpha2
   scope: Namespaced
