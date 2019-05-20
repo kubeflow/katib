@@ -146,4 +146,3 @@ func GetExperiment(request *api_pb.GetExperimentRequest) (*api_pb.GetExperimentR
 	kc := kcc.KatibManagerClient
 	return kc.GetExperiment(ctx, request)
 }
-
