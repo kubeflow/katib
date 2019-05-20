@@ -8,6 +8,7 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	v1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	reflect "reflect"
+	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // MockClient is a mock of Client interface
@@ -127,6 +128,18 @@ func (m *MockClient) GetTrialTemplates(arg0 ...string) (map[string]string, error
 func (mr *MockClientMockRecorder) GetTrialTemplates(arg0 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialTemplates", reflect.TypeOf((*MockClient)(nil).GetTrialTemplates), arg0...)
+}
+
+// InjectClient mocks base method
+func (m *MockClient) InjectClient(arg0 client.Client) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "InjectClient", arg0)
+}
+
+// InjectClient indicates an expected call of InjectClient
+func (mr *MockClientMockRecorder) InjectClient(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InjectClient", reflect.TypeOf((*MockClient)(nil).InjectClient), arg0)
 }
 
 // UpdateMetricsCollectorTemplates mocks base method
