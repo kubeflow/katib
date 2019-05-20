@@ -44,7 +44,7 @@ workflows:
   # The postsubmit run publishes the docker images to gcr.io/kubeflow-images-public      
   - app_dir: kubeflow/katib/test/workflows
     component: workflows-v1alpha1
-    name: e2e-v1alpha1-release
+    name: e2e-v1alpha1
     job_types:      
       - postsubmit
     include_dirs:
@@ -123,7 +123,7 @@ workflows:
       registry: "gcr.io/kubeflow-ci"
   - app_dir: kubeflow/katib/test/workflows
     component: workflows-v1alpha2
-    name: e2e-v1alpha2-release
+    name: e2e-v1alpha2
     job_types:
       - postsubmit
     include_dirs:
