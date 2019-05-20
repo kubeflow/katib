@@ -72,7 +72,7 @@ func main() {
 		klog.Fatalf("could not connect to dbif: %v", err)
 	}
 	defer conn.Close()
-	dbIf := dbif.NewManagerClient(conn)
+	dbIf := dbif.NewDBIFClient(conn)
 
 	mc, err := metricscollector.NewMetricsCollector()
 	if err != nil {
