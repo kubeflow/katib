@@ -1,19 +1,4 @@
-/*
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-package util
+package managerclient
 
 import (
 	"fmt"
@@ -24,8 +9,25 @@ import (
 	common "github.com/kubeflow/katib/pkg/common/v1alpha2"
 )
 
-func CreateTrialInDB(instance *trialsv1alpha2.Trial) error {
-	trial := GetTrialConf(instance)
+// ManagerClient is the interface for katib manager client in trial controller.
+type ManagerClient interface {
+	CreateTrialInDB(instance *trialsv1alpha2.Trial) error
+	UpdateTrialStatusInDB(instance *trialsv1alpha2.Trial) error
+	GetTrialObservation(instance *trialsv1alpha2.Trial) error
+	GetTrialConf(instance *trialsv1alpha2.Trial) *api_pb.Trial
+}
+
+// DefaultClient implements the Client interface.
+type DefaultClient struct {
+}
+
+// New creates a new ManagerClient.
+func New() ManagerClient {
+	return &DefaultClient{}
+}
+
+func (d *DefaultClient) CreateTrialInDB(instance *trialsv1alpha2.Trial) error {
+	trial := d.GetTrialConf(instance)
 	request := &api_pb.RegisterTrialRequest{
 		Trial: trial,
 	}
@@ -35,7 +37,7 @@ func CreateTrialInDB(instance *trialsv1alpha2.Trial) error {
 	return nil
 }
 
-func UpdateTrialStatusInDB(instance *trialsv1alpha2.Trial) error {
+func (d *DefaultClient) UpdateTrialStatusInDB(instance *trialsv1alpha2.Trial) error {
 	newStatus := &api_pb.TrialStatus{
 		StartTime:      common.ConvertTime2RFC3339(instance.Status.StartTime),
 		CompletionTime: common.ConvertTime2RFC3339(instance.Status.CompletionTime),
@@ -55,8 +57,8 @@ func UpdateTrialStatusInDB(instance *trialsv1alpha2.Trial) error {
 		newStatus.Observation = observation
 	}
 	request := &api_pb.UpdateTrialStatusRequest{
-		NewStatus:      newStatus,
-		TrialName:      instance.Name,
+		NewStatus: newStatus,
+		TrialName: instance.Name,
 	}
 	if _, err := common.UpdateTrialStatus(request); err != nil {
 		return err
@@ -64,12 +66,12 @@ func UpdateTrialStatusInDB(instance *trialsv1alpha2.Trial) error {
 	return nil
 }
 
-func GetTrialObservation(instance *trialsv1alpha2.Trial) error {
+func (d *DefaultClient) GetTrialObservation(instance *trialsv1alpha2.Trial) error {
 
 	return nil
 }
 
-func GetTrialConf(instance *trialsv1alpha2.Trial) *api_pb.Trial {
+func (d *DefaultClient) GetTrialConf(instance *trialsv1alpha2.Trial) *api_pb.Trial {
 	trial := &api_pb.Trial{
 		Spec: &api_pb.TrialSpec{
 			Objective: &api_pb.ObjectiveSpec{
