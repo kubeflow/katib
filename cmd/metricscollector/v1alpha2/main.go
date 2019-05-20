@@ -45,7 +45,6 @@ import (
 	"google.golang.org/grpc"
 	"k8s.io/klog"
 
-	api "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	dbif "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/metricscollector"
 )
@@ -61,7 +60,7 @@ func main() {
 	flag.Parse()
 	klog.Infof("Experiment Name: %s, Trial Name: %s, Job Kind: %s", *experimentName, *trialName, *jobKind)
 
-	conn, err = grpc.Dial("mysql-db-backend:6789", grpc.WithInsecure())
+	conn, err := grpc.Dial("mysql-db-backend:6789", grpc.WithInsecure())
 	if err != nil {
 		klog.Fatalf("could not connect to dbif: %v", err)
 	}
