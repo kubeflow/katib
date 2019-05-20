@@ -46,6 +46,7 @@ import (
 	"k8s.io/klog"
 
 	api "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	dbif "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/metricscollector"
 )
 
@@ -61,10 +62,18 @@ func main() {
 	klog.Infof("Experiment Name: %s, Trial Name: %s, Job Kind: %s", *experimentName, *trialName, *jobKind)
 	conn, err := grpc.Dial(*managerService, grpc.WithInsecure())
 	if err != nil {
-		klog.Fatalf("could not connect: %v", err)
+		klog.Fatalf("could not connect to manager: %v", err)
 	}
 	defer conn.Close()
 	c := api.NewManagerClient(conn)
+
+	conn, err = grpc.Dial("mysql-db-backend:6789", grpc.WithInsecure())
+	if err != nil {
+		klog.Fatalf("could not connect to dbif: %v", err)
+	}
+	defer conn.Close()
+	dbIf := dbif.NewManagerClient(conn)
+
 	mc, err := metricscollector.NewMetricsCollector()
 	if err != nil {
 		klog.Fatalf("Failed to create MetricsCollector: %v", err)
@@ -74,11 +83,11 @@ func main() {
 	if err != nil {
 		klog.Fatalf("Failed to collect logs: %v", err)
 	}
-	reportreq := &api.ReportObservationLogRequest{
+	reportreq := &dbif.ReportObservationLogRequest{
 		TrialName:      *trialName,
 		ObservationLog: olog,
 	}
-	_, err = c.ReportObservationLog(ctx, reportreq)
+	_, err = dbIf.ReportObservationLog(ctx, reportreq)
 	if err != nil {
 		klog.Fatalf("Failed to Report logs: %v", err)
 	}
