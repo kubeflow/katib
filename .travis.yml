@@ -11,7 +11,7 @@ install:
   - curl -L -O "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.7/kubebuilder_1.0.7_linux_amd64.tar.gz"
   - # extract the archive
   - tar -zxvf kubebuilder_1.0.7_linux_amd64.tar.gz
-  - mv kubebuilder_1.0.7_linux_amd64 /usr/local/kubebuilder
+  - sudo mv kubebuilder_1.0.7_linux_amd64 /tmp/kubebuilder
   - export PATH=$PATH:/usr/local/kubebuilder/bin
   # get coveralls.io support
   - go get github.com/mattn/goveralls
