@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"text/template"
 
-	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 	katibapi "github.com/kubeflow/katib/pkg/api/v1alpha1"
+	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
 	"github.com/kubeflow/katib/pkg/manager/v1alpha1/studyjobclient"
 
 	"k8s.io/apimachinery/pkg/util/uuid"

@@ -30,15 +30,15 @@ func (e *Experiment) SetDefault() {
 
 func (e *Experiment) setDefaultParallelTrialCount() {
 	if e.Spec.ParallelTrialCount == nil {
-                e.Spec.ParallelTrialCount = new(int32)
-                *e.Spec.ParallelTrialCount = DefaultTrialParallelCount
-        }
+		e.Spec.ParallelTrialCount = new(int32)
+		*e.Spec.ParallelTrialCount = DefaultTrialParallelCount
+	}
 }
 
 func (e *Experiment) setDefaultTrialTemplate() {
 	t := e.Spec.TrialTemplate
 	if t == nil {
-		t = &TrialTemplate {
+		t = &TrialTemplate{
 			Retain: true,
 		}
 	}
@@ -48,8 +48,8 @@ func (e *Experiment) setDefaultTrialTemplate() {
 	if t.GoTemplate.RawTemplate == "" && t.GoTemplate.TemplateSpec == nil {
 		t.GoTemplate.TemplateSpec = &TemplateSpec{
 			ConfigMapNamespace: os.Getenv(DefaultKatibNamespaceEnvName),
-			ConfigMapName: DefaultTrialConfigMapName,
-			TemplatePath: DefaultTrialTemplatePath,
+			ConfigMapName:      DefaultTrialConfigMapName,
+			TemplatePath:       DefaultTrialTemplatePath,
 		}
 	}
 	e.Spec.TrialTemplate = t
