@@ -281,8 +281,8 @@ func (d *dbConn) GetExperiment(ctx context.Context, in *dbif.GetExperimentReques
 	var completion_time string
 	experimentName := in.ExperimentName
 	experiment := &dbif.Experiment{
-		Spec:   &dbif.Experiment.Spec{},
-		Status: &dbif.Experiment.Status{},
+		Spec:   &dbif.ExperimentSpec{},
+		Status: &dbif.ExperimentStatus{},
 	}
 	row := d.db.QueryRow("SELECT * FROM experiments WHERE name = ?", experimentName)
 	err := row.Scan(
