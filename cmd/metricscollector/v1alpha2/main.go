@@ -60,12 +60,6 @@ var metricNames = flag.String("mn", "", "Metric names")
 func main() {
 	flag.Parse()
 	klog.Infof("Experiment Name: %s, Trial Name: %s, Job Kind: %s", *experimentName, *trialName, *jobKind)
-	conn, err := grpc.Dial(*managerService, grpc.WithInsecure())
-	if err != nil {
-		klog.Fatalf("could not connect to manager: %v", err)
-	}
-	defer conn.Close()
-	c := api.NewManagerClient(conn)
 
 	conn, err = grpc.Dial("mysql-db-backend:6789", grpc.WithInsecure())
 	if err != nil {
