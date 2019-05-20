@@ -119,18 +119,18 @@ func (mr *MockKatibDBInterfaceMockRecorder) GetExperimentList() *gomock.Call {
 }
 
 // GetObservationLog mocks base method
-func (m *MockKatibDBInterface) GetObservationLog(arg0, arg1, arg2 string) (*v1alpha2.ObservationLog, error) {
+func (m *MockKatibDBInterface) GetObservationLog(arg0, arg1, arg2, arg3 string) (*v1alpha2.ObservationLog, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetObservationLog", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GetObservationLog", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(*v1alpha2.ObservationLog)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetObservationLog indicates an expected call of GetObservationLog
-func (mr *MockKatibDBInterfaceMockRecorder) GetObservationLog(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockKatibDBInterfaceMockRecorder) GetObservationLog(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetObservationLog", reflect.TypeOf((*MockKatibDBInterface)(nil).GetObservationLog), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetObservationLog", reflect.TypeOf((*MockKatibDBInterface)(nil).GetObservationLog), arg0, arg1, arg2, arg3)
 }
 
 // GetTrial mocks base method

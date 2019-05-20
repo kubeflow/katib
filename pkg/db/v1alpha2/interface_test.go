@@ -518,6 +518,7 @@ func TestGetObservationLog(t *testing.T) {
 	)
 	obsLog, err := dbInterface.GetObservationLog(
 		"test1_trial1",
+		"",
 		"2016-12-31T21:01:05.123456Z",
 		"",
 	)
