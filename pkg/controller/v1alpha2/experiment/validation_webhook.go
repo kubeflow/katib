@@ -39,15 +39,12 @@ type experimentValidator struct {
 	validator.Validator
 }
 
-func newExperimentValidator() (*experimentValidator, error) {
-	p, err := manifest.New()
-	if err != nil {
-		return nil, err
-	}
+func newExperimentValidator(c client.Client) *experimentValidator {
+	p := manifest.New(c)
 	mc := managerclient.New()
 	return &experimentValidator{
 		Validator: validator.New(p, mc),
-	}, nil
+	}
 }
 
 func (v *experimentValidator) Handle(ctx context.Context, req types.Request) types.Response {

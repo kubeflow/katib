@@ -33,14 +33,11 @@ type DefaultGenerator struct {
 }
 
 // New creates a new Generator.
-func New() (Generator, error) {
-	katibClient, err := katibclient.NewClient(client.Options{})
-	if err != nil {
-		return nil, err
-	}
+func New(c client.Client) Generator {
+	katibClient := katibclient.NewWithGivenClient(c)
 	return &DefaultGenerator{
 		client: katibClient,
-	}, nil
+	}
 }
 
 func (g *DefaultGenerator) GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error) {

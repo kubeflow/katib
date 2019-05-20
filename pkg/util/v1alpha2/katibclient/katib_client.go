@@ -41,6 +41,12 @@ type KatibClient struct {
 	client client.Client
 }
 
+func NewWithGivenClient(c client.Client) Client {
+	return &KatibClient{
+		client: c,
+	}
+}
+
 func NewClient(options client.Options) (Client, error) {
 	cfg, err := config.GetConfig()
 	if err != nil {

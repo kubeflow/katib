@@ -72,11 +72,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	imp := viper.GetString(consts.ConfigExperimentSuggestionName)
 	r.Suggestion = newSuggestion(imp)
 
-	generator, err := manifest.New()
-	if err != nil {
-		panic(err)
-	}
-	r.Generator = generator
+	r.Generator = manifest.New(r.Client)
 	r.updateStatusHandler = r.updateStatus
 	return r
 }
@@ -147,17 +143,13 @@ func addWebhook(mgr manager.Manager) error {
 	if err != nil {
 		return err
 	}
-	validator, err := newExperimentValidator()
-	if err != nil {
-		return err
-	}
 	validatingWebhook, err := builder.NewWebhookBuilder().
 		Name("validating.experiment.kubeflow.org").
 		Validating().
 		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
 		WithManager(mgr).
 		ForType(&experimentsv1alpha2.Experiment{}).
-		Handlers(validator).
+		Handlers(newExperimentValidator(mgr.GetClient())).
 		Build()
 	if err != nil {
 		return err
