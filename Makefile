@@ -1,14 +1,15 @@
 # Run tests
+.PHONY: test
 test:
-	go test ./pkg/... ./cmd/...
+	go test ./pkg/... ./cmd/... -coverprofile coverage.out
 
 # Build Katib images
 build: 
-	sh scripts/v1alpha1/build.sh
+	bash scripts/v1alpha1/build.sh
 
 # Deploy katib manifests into a k8s cluster
 deploy: 
-	sh scripts/v1alpha1/deploy.sh
+	bash scripts/v1alpha1/deploy.sh
 
 # Run go fmt against code
 fmt:
