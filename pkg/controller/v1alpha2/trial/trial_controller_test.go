@@ -17,6 +17,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	managerclientmock "github.com/kubeflow/katib/pkg/mock/v1alpha2/trial/managerclient"
 )
@@ -158,12 +159,14 @@ func TestReconcileTFJobTrial(t *testing.T) {
 }
 
 func newFakeTrialWithTFJob() *trialsv1alpha2.Trial {
+	objectiveSpec := commonv1alpha2.ObjectiveSpec{ObjectiveMetricName: "test"}
 	t := &trialsv1alpha2.Trial{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      trialName,
 			Namespace: namespace,
 		},
 		Spec: trialsv1alpha2.TrialSpec{
+			Objective: &objectiveSpec,
 			MetricsCollectorSpec: `apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
