@@ -20,7 +20,8 @@ import (
 	"os"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2/"
+	dbif_pb "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
 	"google.golang.org/grpc"
 )
 
@@ -70,7 +71,7 @@ func closeKatibManagerConnection(kcc *katibManagerClientAndConn) {
 	kcc.Conn.Close()
 }
 
-func RegisterExperiment(request *api_pb.RegisterExperimentRequest) (*api_pb.RegisterExperimentReply, error) {
+func RegisterExperiment(request *dbif_pb.RegisterExperimentRequest) (*dbif_pb.RegisterExperimentReply, error) {
 	ctx := context.Background()
 	kcc, err := getKatibManagerClientAndConn()
 	if err != nil {
@@ -81,7 +82,7 @@ func RegisterExperiment(request *api_pb.RegisterExperimentRequest) (*api_pb.Regi
 	return kc.RegisterExperiment(ctx, request)
 }
 
-func DeleteExperiment(request *api_pb.DeleteExperimentRequest) (*api_pb.DeleteExperimentReply, error) {
+func DeleteExperiment(request *dbif_pb.DeleteExperimentRequest) (*dbif_pb.DeleteExperimentReply, error) {
 	ctx := context.Background()
 	kcc, err := getKatibManagerClientAndConn()
 	if err != nil {
@@ -92,7 +93,7 @@ func DeleteExperiment(request *api_pb.DeleteExperimentRequest) (*api_pb.DeleteEx
 	return kc.DeleteExperiment(ctx, request)
 }
 
-func UpdateExperimentStatus(request *api_pb.UpdateExperimentStatusRequest) (*api_pb.UpdateExperimentStatusReply, error) {
+func UpdateExperimentStatus(request *dbif_pb.UpdateExperimentStatusRequest) (*dbif_pb.UpdateExperimentStatusReply, error) {
 	ctx := context.Background()
 	kcc, err := getKatibManagerClientAndConn()
 	if err != nil {
@@ -103,7 +104,7 @@ func UpdateExperimentStatus(request *api_pb.UpdateExperimentStatusRequest) (*api
 	return kc.UpdateExperimentStatus(ctx, request)
 }
 
-func RegisterTrial(request *api_pb.RegisterTrialRequest) (*api_pb.RegisterTrialReply, error) {
+func RegisterTrial(request *dbif_pb.RegisterTrialRequest) (*dbif_pb.RegisterTrialReply, error) {
 	ctx := context.Background()
 	kcc, err := getKatibManagerClientAndConn()
 	if err != nil {
@@ -114,7 +115,7 @@ func RegisterTrial(request *api_pb.RegisterTrialRequest) (*api_pb.RegisterTrialR
 	return kc.RegisterTrial(ctx, request)
 }
 
-func UpdateTrialStatus(request *api_pb.UpdateTrialStatusRequest) (*api_pb.UpdateTrialStatusReply, error) {
+func UpdateTrialStatus(request *dbif_pb.UpdateTrialStatusRequest) (*dbif_pb.UpdateTrialStatusReply, error) {
 	ctx := context.Background()
 	kcc, err := getKatibManagerClientAndConn()
 	if err != nil {
