@@ -287,6 +287,7 @@ message ExperimentStatus {
         RESTARTING = 2;
         SUCCEEDED = 3;
         FAILED = 4;
+        UNKNOWN = 5;
     }
     string start_time = 1; /// RFC3339 format
     string completion_time = 2; /// RFC3339 format
