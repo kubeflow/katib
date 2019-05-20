@@ -8,10 +8,10 @@ go:
 go_import_path: github.com/kubeflow/katib
 
 install:
-  - curl -L -O "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${version}/kubebuilder_${version}_${os}_${arch}.tar.gz"
+  - curl -L -O "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.7/kubebuilder_1.0.7_linux_amd64.tar.gz"
   - # extract the archive
-  - tar -zxvf kubebuilder_${version}_${os}_${arch}.tar.gz
-  - mv kubebuilder_${version}_${os}_${arch} /usr/local/kubebuilder
+  - tar -zxvf kubebuilder_1.0.7_linux_amd64.tar.gz
+  - mv kubebuilder_1.0.7_linux_amd64 /usr/local/kubebuilder
   - export PATH=$PATH:/usr/local/kubebuilder/bin
   # get coveralls.io support
   - go get github.com/mattn/goveralls
