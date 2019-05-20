@@ -321,33 +321,11 @@ func request_Manager_ReportObservationLog_0(ctx context.Context, marshaler runti
 
 }
 
-var (
-	filter_Manager_GetObservationLog_0 = &utilities.DoubleArray{Encoding: map[string]int{"trial_name": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
-)
-
 func request_Manager_GetObservationLog_0(ctx context.Context, marshaler runtime.Marshaler, client ManagerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetObservationLogRequest
 	var metadata runtime.ServerMetadata
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["trial_name"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "trial_name")
-	}
-
-	protoReq.TrialName, err = runtime.String(val)
-
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "trial_name", err)
-	}
-
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_Manager_GetObservationLog_0); err != nil {
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -789,7 +767,7 @@ func RegisterManagerHandler(ctx context.Context, mux *runtime.ServeMux, conn *gr
 
 	})
 
-	mux.Handle("GET", pattern_Manager_GetObservationLog_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Manager_GetObservationLog_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
@@ -906,7 +884,7 @@ var (
 
 	pattern_Manager_ReportObservationLog_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "Manager", "ReportObservationLog"}, ""))
 
-	pattern_Manager_GetObservationLog_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "Manager", "GetObservationLog", "trial_name"}, ""))
+	pattern_Manager_GetObservationLog_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "Manager", "GetObservationLog"}, ""))
 
 	pattern_Manager_GetSuggestions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "Manager", "GetSuggestions"}, ""))
 

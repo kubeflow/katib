@@ -121,7 +121,7 @@ func (s *server) ReportObservationLog(ctx context.Context, in *api_pb.ReportObse
 
 // Get all log of Observations for a Trial.
 func (s *server) GetObservationLog(ctx context.Context, in *api_pb.GetObservationLogRequest) (*api_pb.GetObservationLogReply, error) {
-	ol, err := dbIf.GetObservationLog(in.TrialName, in.StartTime, in.EndTime)
+	ol, err := dbIf.GetObservationLog(in.TrialName, in.MetricName, in.StartTime, in.EndTime)
 	return &api_pb.GetObservationLogReply{
 		ObservationLog: ol,
 	}, err
