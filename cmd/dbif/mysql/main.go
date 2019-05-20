@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 	"errors"
-	"log"
+	"k8s.io/klog"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/jsonpb"
 	dbif "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
@@ -67,7 +67,7 @@ func DBInit(d *dbConn) {
 		nas_config TEXT)`)
 	//TODO add nas config(may be it will be included in algorithm)
 	if err != nil {
-		log.Fatalf("Error creating experiments table: %v", err)
+		klog.Fatalf("Error creating experiments table: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS trials
@@ -84,7 +84,7 @@ func DBInit(d *dbConn) {
 		completion_time DATETIME(6),
 		FOREIGN KEY(experiment_name) REFERENCES experiments(name) ON DELETE CASCADE)`)
 	if err != nil {
-		log.Fatalf("Error creating trials table: %v", err)
+		klog.Fatalf("Error creating trials table: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS observation_logs
@@ -95,7 +95,7 @@ func DBInit(d *dbConn) {
 		value TEXT NOT NULL,
 		FOREIGN KEY (trial_name) REFERENCES trials(name) ON DELETE CASCADE)`)
 	if err != nil {
-		log.Fatalf("Error creating observation_logs table: %v", err)
+		klog.Fatalf("Error creating observation_logs table: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS extra_algorithm_settings
@@ -105,7 +105,7 @@ func DBInit(d *dbConn) {
 		value TEXT NOT NULL,
 		FOREIGN KEY (experiment_name) REFERENCES experiments(name) ON DELETE CASCADE)`)
 	if err != nil {
-		log.Fatalf("Error creating extra_algorithm_settings table: %v", err)
+		klog.Fatalf("Error creating extra_algorithm_settings table: %v", err)
 	}
 
 }
@@ -113,7 +113,7 @@ func DBInit(d *dbConn) {
 func getDbName() string {
 	dbPass := os.Getenv("MYSQL_ROOT_PASSWORD")
 	if dbPass == "" {
-		log.Info("WARN: Env var MYSQL_ROOT_PASSWORD is empty. Falling back to \"test\".")
+		klog.Infof("WARN: Env var MYSQL_ROOT_PASSWORD is empty. Falling back to \"test\".")
 
 		// For backward compatibility, e.g. in case that all but vizier-core
 		// is older ones so we do not have Secret nor upgraded vizier-db.
@@ -161,15 +161,15 @@ func NewWithSQLConn(db *sql.DB) (*dbConn, error) {
 func CreateNewDBServer() *dbConn {
 	db, err := openSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
 	if err != nil {
-		log.Fatalf("DB open failed: %v", err)
+		klog.Fatalf("DB open failed: %v", err)
 		return nil
 	}
 	dbWithConn, err := NewWithSQLConn(db)
 	if err != nil {
-		log.Fatalf("DB open failed: %v", err)
+		klog.Fatalf("DB open failed: %v", err)
 		return nil
 	}
-	log.Printf("DB connection opened successfully")
+	klog.Infof("DB connection opened successfully")
 	return dbWithConn
 }
 
@@ -217,7 +217,7 @@ func (d *dbConn) RegisterExperiment(ctx context.Context, in *dbif.RegisterExperi
 			}
 		}
 	} else {
-		return fmt.Errorf("Invalid experiment: spec is nil.")
+		return nil, fmt.Errorf("Invalid experiment: spec is nil.")
 	}
 
 	start_time = time.Now().UTC().Format(mysqlTimeFmt)
@@ -282,8 +282,8 @@ func (d *dbConn) GetExperiment(ctx context.Context, in *dbif.GetExperimentReques
 	var completion_time string
 	experimentName := in.ExperimentName
 	experiment := &dbif.Experiment{
-		ExperimentSpec:   &dbif.ExperimentSpec{},
-		ExperimentStatus: &dbif.ExperimentStatus{},
+		Spec:   &dbif.Spec{},
+		Status: &dbif.Status{},
 	}
 	row := d.db.QueryRow("SELECT * FROM experiments WHERE name = ?", experimentName)
 	err := row.Scan(
@@ -404,14 +404,14 @@ func (d *dbConn) UpdateExperimentStatus(ctx context.Context, in *dbif.UpdateExpe
 	if newStatus.StartTime != "" {
 		s_time, err := time.Parse(time.RFC3339Nano, newStatus.StartTime)
 		if err != nil {
-			return fmt.Errorf("Error parsing start time %s: %v", newStatus.StartTime, err)
+			return nil, fmt.Errorf("Error parsing start time %s: %v", newStatus.StartTime, err)
 		}
 		start_time = s_time.UTC().Format(mysqlTimeFmt)
 	}
 	if newStatus.CompletionTime != "" {
 		c_time, err := time.Parse(time.RFC3339Nano, newStatus.CompletionTime)
 		if err != nil {
-			return fmt.Errorf("Error parsing completion time %s: %v", newStatus.CompletionTime, err)
+			return nil, fmt.Errorf("Error parsing completion time %s: %v", newStatus.CompletionTime, err)
 		}
 		completion_time = c_time.UTC().Format(mysqlTimeFmt)
 	}
@@ -431,7 +431,7 @@ func (d *dbConn) UpdateAlgorithmExtraSettings(ctx context.Context, in *dbif.Upda
 	response, err := d.GetAlgorithmExtraSettings(ctx, &dbif.GetAlgorithmExtraSettingsRequest{ExperimentName: experimentName})
 	aesList := response.ExtraAlgorithmSettings
 	if err != nil {
-		log.Printf("Failed to get current state %v", err)
+		klog.Fatalf("Failed to get current state %v", err)
 		return nil, err
 	}
 	for _, neas := range extraAlgorithmSetting {
@@ -442,7 +442,7 @@ func (d *dbConn) UpdateAlgorithmExtraSettings(ctx context.Context, in *dbif.Upda
 						WHERE experiment_name = ? AND setting_name = ?`,
 					neas.Value, experimentName, ceas.Name)
 				if err != nil {
-					log.Printf("Failed to update state %v", err)
+					klog.Fatalf("Failed to update state %v", err)
 					return nil, err
 				}
 				isin = true
@@ -460,7 +460,7 @@ func (d *dbConn) UpdateAlgorithmExtraSettings(ctx context.Context, in *dbif.Upda
 				neas.Value,
 			)
 			if err != nil {
-				log.Printf("Failed to update state %v", err)
+				klog.Fatalf("Failed to update state %v", err)
 				return nil, err
 			}
 		}
@@ -805,6 +805,7 @@ func (d *dbConn) GetObservationLog(ctx context.Context, in *dbif.GetObservationL
 	trialName := in.TrialName
 	startTime := in.StartTime
 	endTime := in.EndTime
+	metricName := in.MetricName
 	qfield := []interface{}{trialName}
 	qstr := ""
 	if metricName != "" {
@@ -866,11 +867,11 @@ func (d *dbConn) GetObservationLog(ctx context.Context, in *dbif.GetObservationL
 func main() {
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		klog.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
 	dbif.RegisterDBIFServer(s, CreateNewDBServer())
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		klog.Fatalf("failed to serve: %v", err)
 	}
 }

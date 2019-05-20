@@ -466,8 +466,9 @@ message ReportObservationLogReply {
 
 message GetObservationLogRequest {
     string trial_name = 1;
-    string start_time = 2; ///The start of the time range. RFC3339 format
-    string end_time = 3; ///The end of the time range. RFC3339 format
+    string metric_name = 2;
+    string start_time = 3; ///The start of the time range. RFC3339 format
+    string end_time = 4; ///The end of the time range. RFC3339 format
 }
 
 message GetObservationLogReply {
