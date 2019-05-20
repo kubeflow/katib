@@ -1,22 +1,22 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: dbif-mysql
+  name: mysql-db-backend
   namespace: kubeflow
   labels:
     app: vizier
-    component: dbif-mysql
+    component: mysql-db-backend
 spec:
   replicas: 1
   template:
     metadata:
-      name: dbif-mysql
+      name: mysql-db-backend
       labels:
         app: vizier
-        component: dbif-mysql
+        component: mysql-db-backend
     spec:
       containers:
-      - name: dbif-mysql
+      - name: mysql-db-backend
         image: acshanth/dbif-mysql
         ports:
         - name: api

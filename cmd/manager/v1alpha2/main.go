@@ -19,7 +19,7 @@ import (
 
 const (
 	port        = "0.0.0.0:6789"
-	dbIfaddress = "dbif-mysql:6789"
+	dbIfaddress = "mysql-db-backend:6789"
 )
 
 var dbIf dbif.DBIFClient
