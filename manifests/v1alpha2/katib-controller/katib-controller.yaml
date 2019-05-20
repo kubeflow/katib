@@ -18,7 +18,7 @@ spec:
       serviceAccountName: katib-controller
       containers:
       - name: katib-controller
-        image: acshanth/katib-controller
+        image: katib/katib-controller
         imagePullPolicy: Always
         command: ["./katib-controller.v1alpha2"]
         ports:
