@@ -20,7 +20,7 @@ import (
 	"os"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2/"
+	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	dbif_pb "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
 	"google.golang.org/grpc"
 )
@@ -75,7 +75,7 @@ func getKatibManagerClientAndConn() (*katibManagerClientAndConn, error) {
 	return kcc, nil
 }
 
-func getDBIFClientAndConn() (*katibManagerClientAndConn, error) {
+func getDBIFClientAndConn() (*DBIFClientAndConn, error) {
 	conn, err := grpc.Dial(DBIFAddr, grpc.WithInsecure())
 	if err != nil {
 		return nil, err
@@ -101,7 +101,7 @@ func RegisterExperiment(request *dbif_pb.RegisterExperimentRequest) (*dbif_pb.Re
 	if err != nil {
 		return nil, err
 	}
-	defer closeDBIFConnection(dbIf)
+	defer closeDBIFConnection(dbif)
 	dbifClient := dbif.DBIFClient
 	return dbifClient.RegisterExperiment(ctx, request)
 }
@@ -112,7 +112,7 @@ func DeleteExperiment(request *dbif_pb.DeleteExperimentRequest) (*dbif_pb.Delete
 	if err != nil {
 		return nil, err
 	}
-	defer closeDBIFConnection(dbIf)
+	defer closeDBIFConnection(dbif)
 	dbifClient := dbif.DBIFClient
 	return dbifClient.DeleteExperiment(ctx, request)
 }
@@ -123,7 +123,7 @@ func UpdateExperimentStatus(request *dbif_pb.UpdateExperimentStatusRequest) (*db
 	if err != nil {
 		return nil, err
 	}
-	defer closeDBIFConnection(dbIf)
+	defer closeDBIFConnection(dbif)
 	dbifClient := dbif.DBIFClient
 	return dbifClient.UpdateExperimentStatus(ctx, request)
 }
@@ -134,7 +134,7 @@ func RegisterTrial(request *dbif_pb.RegisterTrialRequest) (*dbif_pb.RegisterTria
 	if err != nil {
 		return nil, err
 	}
-	defer closeDBIFConnection(dbIf)
+	defer closeDBIFConnection(dbif)
 	dbifClient := dbif.DBIFClient
 	return dbifClient.RegisterTrial(ctx, request)
 }
@@ -145,7 +145,7 @@ func UpdateTrialStatus(request *dbif_pb.UpdateTrialStatusRequest) (*dbif_pb.Upda
 	if err != nil {
 		return nil, err
 	}
-	defer closeDBIFConnection(dbIf)
+	defer closeDBIFConnection(dbif)
 	dbifClient := dbif.DBIFClient
 	return dbifClient.UpdateTrialStatus(ctx, request)
 }
