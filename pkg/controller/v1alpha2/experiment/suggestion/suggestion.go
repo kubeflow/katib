@@ -8,7 +8,7 @@ import (
 )
 
 type Suggestion interface {
-	GetSuggestions(instance *experimentsv1alpha2.Experiment, addCount int32) ([]*api_pb.Trial, error)
+	GetSuggestions(instance *experimentsv1alpha2.Experiment, addCount int32) ([]*dbif.Trial, error)
 }
 
 type General struct {
