@@ -13,8 +13,8 @@ import (
 	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/managerclient"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/manifest"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
 )
 
 var log = logf.Log.WithName("experiment-controller")
@@ -25,11 +25,13 @@ type Validator interface {
 
 type DefaultValidator struct {
 	manifest.Generator
+	managerclient.ManagerClient
 }
 
-func New(generator manifest.Generator) Validator {
+func New(generator manifest.Generator, managerClient managerclient.ManagerClient) Validator {
 	return &DefaultValidator{
-		Generator: generator,
+		Generator:     generator,
+		ManagerClient: managerClient,
 	}
 }
 
@@ -138,7 +140,7 @@ func (g *DefaultValidator) validateSupportedJob(job *unstructured.Unstructured) 
 }
 
 func (g *DefaultValidator) validateForCreate(inst *experimentsv1alpha2.Experiment) error {
-	if _, err := util.GetExperimentFromDB(inst); err != nil {
+	if _, err := g.GetExperimentFromDB(inst); err != nil {
 		if err != sql.ErrNoRows {
 			return fmt.Errorf("Fail to check record for the experiment in DB: %v", err)
 		}

@@ -16,7 +16,6 @@ import (
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
 )
 
 func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alpha2.Experiment, trialInstance *apiv1alpha2.Trial) error {
@@ -39,8 +38,8 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 	if trialInstance.Spec != nil && trialInstance.Spec.ParameterAssignments != nil {
 		for _, p := range trialInstance.Spec.ParameterAssignments.Assignments {
 			hps = append(hps, p)
-			pa := common.ParameterAssignment {
-				Name: p.Name,
+			pa := common.ParameterAssignment{
+				Name:  p.Name,
 				Value: p.Value,
 			}
 			trial.Spec.ParameterAssignments = append(trial.Spec.ParameterAssignments, pa)
@@ -85,7 +84,7 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 func (r *ReconcileExperiment) updateFinalizers(instance *experimentsv1alpha2.Experiment, finalizers []string) (reconcile.Result, error) {
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace})
 	if instance.GetDeletionTimestamp() != nil {
-		if err := util.DeleteExperimentInDB(instance); err != nil {
+		if err := r.DeleteExperimentInDB(instance); err != nil {
 			logger.Error(err, "Fail to delete data in DB")
 			return reconcile.Result{}, err
 		}

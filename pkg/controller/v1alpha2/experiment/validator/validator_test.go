@@ -2,6 +2,7 @@ package validator
 
 import (
 	"bytes"
+	"database/sql"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -10,7 +11,8 @@ import (
 
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	mockmanifest "github.com/kubeflow/katib/pkg/mock/v1alpha2/experiment/manifest"
+	managerclientmock "github.com/kubeflow/katib/pkg/mock/v1alpha2/experiment/managerclient"
+	manifestmock "github.com/kubeflow/katib/pkg/mock/v1alpha2/experiment/manifest"
 )
 
 func init() {
@@ -33,11 +35,15 @@ spec:
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+	mockCtrl2 := gomock.NewController(t)
+	defer mockCtrl2.Finish()
 
-	p := mockmanifest.NewMockGenerator(mockCtrl)
-	g := New(p)
+	p := manifestmock.NewMockGenerator(mockCtrl)
+	mc := managerclientmock.NewMockManagerClient(mockCtrl2)
+	g := New(p, mc)
 
 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialTFJobTemplate, nil)
+	mc.EXPECT().GetExperimentFromDB(gomock.Any()).Return(nil, sql.ErrNoRows).AnyTimes()
 
 	instance := newFakeInstance()
 	if err := g.(*DefaultValidator).validateTrialTemplate(instance); err == nil {
@@ -54,11 +60,15 @@ metadata:
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+	mockCtrl2 := gomock.NewController(t)
+	defer mockCtrl2.Finish()
 
-	p := mockmanifest.NewMockGenerator(mockCtrl)
-	g := New(p)
+	p := manifestmock.NewMockGenerator(mockCtrl)
+	mc := managerclientmock.NewMockManagerClient(mockCtrl2)
+	g := New(p, mc)
 
 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialJobTemplate, nil)
+	mc.EXPECT().GetExperimentFromDB(gomock.Any()).Return(nil, sql.ErrNoRows).AnyTimes()
 
 	instance := newFakeInstance()
 	if err := g.(*DefaultValidator).validateTrialTemplate(instance); err != nil {
@@ -69,9 +79,12 @@ metadata:
 func TestValidateExperiment(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+	mockCtrl2 := gomock.NewController(t)
+	defer mockCtrl2.Finish()
 
-	p := mockmanifest.NewMockGenerator(mockCtrl)
-	g := New(p)
+	p := manifestmock.NewMockGenerator(mockCtrl)
+	mc := managerclientmock.NewMockManagerClient(mockCtrl2)
+	g := New(p, mc)
 
 	trialJobTemplate := `apiVersion: "batch/v1"
 kind: "Job"
@@ -100,6 +113,7 @@ spec:
 			println(b.String())
 			return &b
 		}(), nil).AnyTimes()
+	mc.EXPECT().GetExperimentFromDB(gomock.Any()).Return(nil, sql.ErrNoRows).AnyTimes()
 
 	tcs := []struct {
 		Instance *experimentsv1alpha2.Experiment

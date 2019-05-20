@@ -40,6 +40,7 @@ import (
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/consts"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/managerclient"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/manifest"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/suggestion"
 	suggestionfake "github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/suggestion/fake"
@@ -64,17 +65,14 @@ func Add(mgr manager.Manager) error {
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	r := &ReconcileExperiment{
-		Client: mgr.GetClient(),
-		scheme: mgr.GetScheme(),
+		Client:        mgr.GetClient(),
+		scheme:        mgr.GetScheme(),
+		ManagerClient: managerclient.New(),
 	}
 	imp := viper.GetString(consts.ConfigExperimentSuggestionName)
 	r.Suggestion = newSuggestion(imp)
 
-	generator, err := manifest.New()
-	if err != nil {
-		panic(err)
-	}
-	r.Generator = generator
+	r.Generator = manifest.New(r.Client)
 	r.updateStatusHandler = r.updateStatus
 	return r
 }
@@ -145,17 +143,13 @@ func addWebhook(mgr manager.Manager) error {
 	if err != nil {
 		return err
 	}
-	validator, err := newExperimentValidator()
-	if err != nil {
-		return err
-	}
 	validatingWebhook, err := builder.NewWebhookBuilder().
 		Name("validating.experiment.kubeflow.org").
 		Validating().
 		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
 		WithManager(mgr).
 		ForType(&experimentsv1alpha2.Experiment{}).
-		Handlers(validator).
+		Handlers(newExperimentValidator(mgr.GetClient())).
 		Build()
 	if err != nil {
 		return err
@@ -197,6 +191,7 @@ type ReconcileExperiment struct {
 
 	suggestion.Suggestion
 	manifest.Generator
+	managerclient.ManagerClient
 	// updateStatusHandler is defined for test purpose.
 	updateStatusHandler updateStatusFunc
 }
@@ -243,7 +238,7 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		msg := "Experiment is created"
 		instance.MarkExperimentStatusCreated(util.ExperimentCreatedReason, msg)
 
-		err = util.CreateExperimentInDB(instance)
+		err = r.CreateExperimentInDB(instance)
 		if err != nil {
 			logger.Error(err, "Create experiment in DB error")
 			return reconcile.Result{}, err
@@ -259,7 +254,7 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 
 	if !equality.Semantic.DeepEqual(original.Status, instance.Status) {
 		//assuming that only status change
-		err = util.UpdateExperimentStatusInDB(instance)
+		err = r.UpdateExperimentStatusInDB(instance)
 		if err != nil {
 			logger.Error(err, "Update experiment status in DB error")
 			return reconcile.Result{}, err
