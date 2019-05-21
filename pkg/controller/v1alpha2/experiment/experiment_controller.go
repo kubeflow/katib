@@ -217,7 +217,9 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 	instance := original.DeepCopy()
 
+	log.Info("DEBUG", "ins", instance)
 	if needUpdate, finalizers := instance.NeedUpdateFinalizers(); needUpdate {
+		log.Info("DEBUG+2", "ins", instance, "finalizers", finalizers)
 		return r.updateFinalizers(instance, finalizers)
 	}
 

@@ -16,6 +16,7 @@ import (
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/consts"
 )
 
 func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alpha2.Experiment, trialInstance *apiv1alpha2.Trial) error {
@@ -25,7 +26,7 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 	trial := &trialsv1alpha2.Trial{}
 	trial.Name = fmt.Sprintf("%s-%s", expInstance.GetName(), utilrand.String(8))
 	trial.Namespace = expInstance.GetNamespace()
-	trial.Labels = map[string]string{"experiment": expInstance.GetName()}
+	trial.Labels = map[string]string{consts.LabelExperimentName: expInstance.GetName()}
 
 	if err := controllerutil.SetControllerReference(expInstance, trial, r.scheme); err != nil {
 		logger.Error(err, "Set controller reference error")
@@ -73,6 +74,7 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 	}
 	trial.Spec.MetricsCollectorSpec = mcSpec
 
+	logger.Info("DEBUG-util", "trial", trial)
 	if err := r.Create(context.TODO(), trial); err != nil {
 		logger.Error(err, "Trial create error", "Trial name", trial.Name)
 		return err
