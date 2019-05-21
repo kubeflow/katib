@@ -75,7 +75,6 @@ spec:
               - "128"
               - "256"
               - "512"
-
   workerSpec:
     goTemplate:
         rawTemplate: |-

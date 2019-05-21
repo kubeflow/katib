@@ -67,6 +67,7 @@ var _ inject.Client = &experimentValidator{}
 // InjectClient injects the client.
 func (v *experimentValidator) InjectClient(c client.Client) error {
 	v.client = c
+	v.Validator.InjectClient(c)
 	return nil
 }
 

@@ -5,11 +5,11 @@
 package mock
 
 import (
-	bytes "bytes"
 	gomock "github.com/golang/mock/gomock"
 	v1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	v1alpha20 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	reflect "reflect"
+	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // MockGenerator is a mock of Generator interface
@@ -36,10 +36,10 @@ func (m *MockGenerator) EXPECT() *MockGeneratorMockRecorder {
 }
 
 // GetMetricsCollectorManifest mocks base method
-func (m *MockGenerator) GetMetricsCollectorManifest(arg0, arg1, arg2, arg3 string, arg4 []string, arg5 *v1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error) {
+func (m *MockGenerator) GetMetricsCollectorManifest(arg0, arg1, arg2, arg3 string, arg4 []string, arg5 *v1alpha2.MetricsCollectorSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetMetricsCollectorManifest", arg0, arg1, arg2, arg3, arg4, arg5)
-	ret0, _ := ret[0].(*bytes.Buffer)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -78,4 +78,16 @@ func (m *MockGenerator) GetRunSpecWithHyperParameters(arg0 *v1alpha2.Experiment,
 func (mr *MockGeneratorMockRecorder) GetRunSpecWithHyperParameters(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRunSpecWithHyperParameters", reflect.TypeOf((*MockGenerator)(nil).GetRunSpecWithHyperParameters), arg0, arg1, arg2, arg3, arg4)
+}
+
+// InjectClient mocks base method
+func (m *MockGenerator) InjectClient(arg0 client.Client) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "InjectClient", arg0)
+}
+
+// InjectClient indicates an expected call of InjectClient
+func (mr *MockGeneratorMockRecorder) InjectClient(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InjectClient", reflect.TypeOf((*MockGenerator)(nil).InjectClient), arg0)
 }

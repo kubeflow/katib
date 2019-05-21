@@ -28,6 +28,7 @@ import (
 )
 
 type Client interface {
+	InjectClient(c client.Client)
 	GetExperimentList(namespace ...string) (*experimentsv1alpha2.ExperimentList, error)
 	CreateExperiment(experiment *experimentsv1alpha2.Experiment, namespace ...string) error
 	GetConfigMap(name string, namespace ...string) (map[string]string, error)
@@ -56,6 +57,10 @@ func NewClient(options client.Options) (Client, error) {
 	return &KatibClient{
 		client: cl,
 	}, nil
+}
+
+func (k *KatibClient) InjectClient(c client.Client) {
+	k.client = c
 }
 
 func (k *KatibClient) GetExperimentList(namespace ...string) (*experimentsv1alpha2.ExperimentList, error) {
