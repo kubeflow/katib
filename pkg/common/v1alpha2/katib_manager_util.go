@@ -146,3 +146,14 @@ func GetExperiment(request *api_pb.GetExperimentRequest) (*api_pb.GetExperimentR
 	kc := kcc.KatibManagerClient
 	return kc.GetExperiment(ctx, request)
 }
+
+func GetObservationLog(request *api_pb.GetObservationLogRequest) (*api_pb.GetObservationLogReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer closeKatibManagerConnection(kcc)
+	kc := kcc.KatibManagerClient
+	return kc.GetObservationLog(ctx, request)
+}

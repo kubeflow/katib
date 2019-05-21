@@ -132,8 +132,8 @@
         ]
       }
     },
-    "/api/Manager/GetObservationLog/{trial_name}": {
-      "get": {
+    "/api/Manager/GetObservationLog": {
+      "post": {
         "summary": "*\nGet all log of Observations for a Trial.",
         "operationId": "GetObservationLog",
         "responses": {
@@ -146,22 +146,12 @@
         },
         "parameters": [
           {
-            "name": "trial_name",
-            "in": "path",
+            "name": "body",
+            "in": "body",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "start_time",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "end_time",
-            "in": "query",
-            "required": false,
-            "type": "string"
+            "schema": {
+              "$ref": "#/definitions/alpha2GetObservationLogRequest"
+            }
           }
         ],
         "tags": [
@@ -678,6 +668,23 @@
       "properties": {
         "observation_log": {
           "$ref": "#/definitions/alpha2ObservationLog"
+        }
+      }
+    },
+    "alpha2GetObservationLogRequest": {
+      "type": "object",
+      "properties": {
+        "trial_name": {
+          "type": "string"
+        },
+        "metric_name": {
+          "type": "string"
+        },
+        "start_time": {
+          "type": "string"
+        },
+        "end_time": {
+          "type": "string"
         }
       }
     },

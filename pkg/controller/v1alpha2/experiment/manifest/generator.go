@@ -8,12 +8,12 @@ import (
 	"text/template"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/katibclient"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -22,9 +22,10 @@ const (
 
 // Generator is the type for manifests Generator.
 type Generator interface {
+	InjectClient(c client.Client)
 	GetRunSpec(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string) (string, error)
 	GetRunSpecWithHyperParameters(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string, hps []*apiv1alpha2.ParameterAssignment) (string, error)
-	GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error)
+	GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha2.MetricsCollectorSpec) (string, error)
 }
 
 // DefaultGenerator is the default implementation of Generator.
@@ -40,7 +41,11 @@ func New(c client.Client) Generator {
 	}
 }
 
-func (g *DefaultGenerator) GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error) {
+func (g *DefaultGenerator) InjectClient(c client.Client) {
+	g.client.InjectClient(c)
+}
+
+func (g *DefaultGenerator) GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha2.MetricsCollectorSpec) (string, error) {
 	var mtp *template.Template = nil
 	var err error
 	tmpValues := map[string]string{
@@ -60,23 +65,23 @@ func (g *DefaultGenerator) GetMetricsCollectorManifest(experimentName string, tr
 		}
 		mtl, err := g.client.GetMetricsCollectorTemplates()
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 		if mt, ok := mtl[mctp]; !ok {
-			return nil, fmt.Errorf("No MetricsCollector template name %s", mctp)
+			return "", fmt.Errorf("No MetricsCollector template name %s", mctp)
 		} else {
 			mtp, err = template.New("MetricsCollector").Parse(mt)
 		}
 	}
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	var b bytes.Buffer
 	err = mtp.Execute(&b, tmpValues)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return &b, nil
+	return b.String(), nil
 }
 
 // GetRunSpec get the specification for trial.

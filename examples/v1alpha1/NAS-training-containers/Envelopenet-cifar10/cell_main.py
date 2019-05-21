@@ -112,4 +112,3 @@ class CellEnvelope(Cell):
             msss = tf.reduce_mean(msss)
 
             return msss
-

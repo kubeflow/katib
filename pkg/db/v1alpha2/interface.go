@@ -59,7 +59,7 @@ type KatibDBInterface interface {
 	DeleteTrial(trialName string) error
 
 	RegisterObservationLog(trialName string, observationLog *v1alpha2.ObservationLog) error
-	GetObservationLog(trialName string, startTime string, endTime string) (*v1alpha2.ObservationLog, error)
+	GetObservationLog(trialName string, metricName string, startTime string, endTime string) (*v1alpha2.ObservationLog, error)
 }
 
 type dbConn struct {
@@ -715,9 +715,13 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1alph
 	}
 	return nil
 }
-func (d *dbConn) GetObservationLog(trialName string, startTime string, endTime string) (*v1alpha2.ObservationLog, error) {
+func (d *dbConn) GetObservationLog(trialName string, metricName string, startTime string, endTime string) (*v1alpha2.ObservationLog, error) {
 	qfield := []interface{}{trialName}
 	qstr := ""
+	if metricName != "" {
+		qstr += " AND metric_name = ?"
+		qfield = append(qfield, metricName)
+	}
 	if startTime != "" {
 		s_time, err := time.Parse(time.RFC3339Nano, startTime)
 		if err != nil {

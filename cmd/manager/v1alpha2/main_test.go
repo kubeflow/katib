@@ -597,7 +597,7 @@ func TestGetObservationLog(t *testing.T) {
 		},
 	}
 
-	mockDB.EXPECT().GetObservationLog(req.TrialName, req.StartTime, req.EndTime).Return(obs, nil)
+	mockDB.EXPECT().GetObservationLog(req.TrialName, req.MetricName, req.StartTime, req.EndTime).Return(obs, nil)
 	ret, err := s.GetObservationLog(context.Background(), req)
 	if err != nil {
 		t.Fatalf("GetObservationLog Error %v", err)
