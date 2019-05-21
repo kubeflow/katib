@@ -287,6 +287,7 @@ message ExperimentStatus {
         RESTARTING = 2;
         SUCCEEDED = 3;
         FAILED = 4;
+        UNKNOWN = 5;
     }
     string start_time = 1; /// RFC3339 format
     string completion_time = 2; /// RFC3339 format
@@ -295,8 +296,8 @@ message ExperimentStatus {
 
 message Experiment {
     string name = 1; /// Name of Experiment. This is unique in DB.
-    ExperimentSpec experiment_spec = 2;
-    ExperimentStatus experiment_status = 3;
+    ExperimentSpec spec = 2;
+    ExperimentStatus status = 3;
 }
 
 message ParameterAssignment {
@@ -338,17 +339,19 @@ message TrialSpec {
 
 message TrialStatus {
     enum TrialConditionType {
-        PENDING = 0;
+        CREATED = 0;
         RUNNING = 1;
-        COMPLETED = 2;
+        SUCCEEDED = 2;
         KILLED = 3;
         FAILED = 4;
+        UNKNOWN = 5;
     }
     string start_time = 1; /// RFC3339 format
     string completion_time = 2; /// RFC3339 format
     TrialConditionType condition = 3;
     Observation observation = 4; /// The best observation in logs.
 }
+
 
 message Trial {
     string name = 1;
@@ -463,8 +466,9 @@ message ReportObservationLogReply {
 
 message GetObservationLogRequest {
     string trial_name = 1;
-    string start_time = 2; ///The start of the time range. RFC3339 format
-    string end_time = 3; ///The end of the time range. RFC3339 format
+    string metric_name = 2;
+    string start_time = 3; ///The start of the time range. RFC3339 format
+    string end_time = 4; ///The end of the time range. RFC3339 format
 }
 
 message GetObservationLogReply {

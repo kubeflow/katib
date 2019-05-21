@@ -1,4 +1,4 @@
-package db_v1_alpha2
+package main
 
 import (
 	//	"database/sql"

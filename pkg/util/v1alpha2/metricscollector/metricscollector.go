@@ -13,7 +13,7 @@ import (
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
-	v1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	v1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 )
 

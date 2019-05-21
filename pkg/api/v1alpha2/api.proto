@@ -57,7 +57,7 @@ message GetSuggestionsRequest {
 }
 
 message GetSuggestionsReply {
-    dbif.v1.alpha2.Trial trials = 1;
+    repeated dbif.v1.alpha2.Trial trials = 1;
 }
 
 message ValidateAlgorithmSettingsRequest {

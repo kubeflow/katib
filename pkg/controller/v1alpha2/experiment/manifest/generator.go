@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/katibclient"
 	"sigs.k8s.io/controller-runtime/pkg/client"

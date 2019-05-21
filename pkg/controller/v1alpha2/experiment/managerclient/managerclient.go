@@ -5,7 +5,7 @@ import (
 
 	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 )
 
