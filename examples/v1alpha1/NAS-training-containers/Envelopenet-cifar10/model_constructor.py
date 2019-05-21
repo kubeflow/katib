@@ -230,4 +230,3 @@ class ModelConstructor(object):
 
     def evaluate():
         eval=Evaluate(self.arch, self.params, self.train_dir)
-        
