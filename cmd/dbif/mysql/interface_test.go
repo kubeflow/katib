@@ -4,20 +4,20 @@ import (
 	//	"database/sql"
 	//	"database/sql/driver"
 	//	"errors"
+	"testing"
 	"fmt"
 	"os"
-	"testing"
-
 	//"time"
+	"context"
 
 	_ "github.com/go-sql-driver/mysql"
 	//	"github.com/golang/protobuf/jsonpb"
-
-	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
-var dbInterface, mysqlInterface KatibDBInterface
+
+var dbInterface dbConn
 var mock sqlmock.Sqlmock
 
 var experimentColums = []string{
@@ -65,22 +65,17 @@ var extraAlgorithmSettingsColumns = []string{
 }
 
 func TestMain(m *testing.M) {
-	db, sm, err := sqlmock.New()
+	_, sm, err := sqlmock.New()
 	mock = sm
 	if err != nil {
 		fmt.Printf("error opening db: %v\n", err)
 		os.Exit(1)
 	}
-	dbInterface, err = NewWithSQLConn(db)
-	if err != nil {
-		fmt.Printf("error NewWithSQLConn: %v\n", err)
-	}
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS experiments").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS trials").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS observation_logs").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS extra_algorithm_settings").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
-	dbInterface.DBInit()
-	err = dbInterface.SelectOne()
+	_, err = dbInterface.SelectOne(context.Background(), &api_pb.SelectOneRequest{})
 	if err != nil {
 		fmt.Printf("error `SELECT 1` probing: %v\n", err)
 	}
@@ -139,7 +134,7 @@ func TestRegisterExperiment(t *testing.T) {
 		"2016-12-31 20:02:06.123456",
 		"",
 	).WillReturnResult(sqlmock.NewResult(1, 1))
-	err := dbInterface.RegisterExperiment(experiment)
+	_, err := dbInterface.RegisterExperiment(context.Background(), &api_pb.RegisterExperimentRequest{Experiment: experiment})
 	if err != nil {
 		t.Errorf("RegisterExperiment failed: %v", err)
 	}
@@ -163,11 +158,15 @@ func TestGetExperiment(t *testing.T) {
 			"",
 		),
 	)
-	experiment, err := dbInterface.GetExperiment("test1")
+	response, err := dbInterface.GetExperiment(context.Background(), &api_pb.GetExperimentRequest{ExperimentName: "test1"})
 	if err != nil {
 		t.Errorf("GetExperiment failed %v", err)
-	} else if experiment.Name != "test1" {
+	} else 
+	{
+		experiment := response.Experiment
+		if experiment.Name != "test1" {
 		t.Errorf("GetExperiment incorrect return %v", experiment)
+		}
 	}
 }
 
@@ -185,7 +184,8 @@ func TestGetExperimentList(t *testing.T) {
 			"2016-12-31 20:05:05.123456",
 		),
 	)
-	experiments, err := dbInterface.GetExperimentList()
+	response, err := dbInterface.GetExperimentList(context.Background(), &api_pb.GetExperimentListRequest{})
+	experiments := response.ExperimentSummaries
 	if err != nil {
 		t.Errorf("GetExperimentList failed %v", err)
 	} else if len(experiments) != 2 {
@@ -206,13 +206,14 @@ func TestUpdateExperimentStatus(t *testing.T) {
 	completion_time = \? WHERE name = \?`,
 	).WithArgs(condition, start_time, completion_time, exp_name).WillReturnResult(sqlmock.NewResult(1, 1))
 
-	err := dbInterface.UpdateExperimentStatus(exp_name,
-		&api_pb.ExperimentStatus{
+	_, err := dbInterface.UpdateExperimentStatus(context.Background(), 
+	&api_pb.UpdateExperimentStatusRequest{ExperimentName: exp_name,
+		NewStatus: &api_pb.ExperimentStatus{
 			Condition:      condition,
 			StartTime:      "2016-12-31T20:02:05.123456Z",
 			CompletionTime: "2016-12-31T20:02:06.123456Z",
 		},
-	)
+	})
 	if err != nil {
 		t.Errorf("UpdateExperiment failed %v", err)
 	}
@@ -248,7 +249,11 @@ func TestUpdateAlgorithmExtraSettings(t *testing.T) {
 		setting_name,
 		value\)`,
 	).WithArgs(exp_name, exAlgoSet[1].Name, exAlgoSet[1].Value).WillReturnResult(sqlmock.NewResult(1, 1))
-	err := dbInterface.UpdateAlgorithmExtraSettings(exp_name, exAlgoSet)
+	_, err := dbInterface.UpdateAlgorithmExtraSettings(context.Background(), 
+	&api_pb.UpdateAlgorithmExtraSettingsRequest{
+		ExperimentName: exp_name, 
+		ExtraAlgorithmSettings: exAlgoSet,
+	})
 	if err != nil {
 		t.Errorf("UpdateAlgorithmExtraSettings failed %v", err)
 	}
@@ -330,7 +335,7 @@ func TestRegisterTrial(t *testing.T) {
 		"2016-12-31 20:02:05.123456",
 		"2016-12-31 20:02:06.123456",
 	).WillReturnResult(sqlmock.NewResult(1, 1))
-	err := dbInterface.RegisterTrial(trial)
+	_, err := dbInterface.RegisterTrial(context.Background(), &api_pb.RegisterTrialRequest{Trial: trial})
 	if err != nil {
 		t.Errorf("RegisterTrial failed: %v", err)
 	}
@@ -365,7 +370,11 @@ func TestGetTrialList(t *testing.T) {
 			"2016-12-31 20:02:06.123456",
 		),
 	)
-	trials, err := dbInterface.GetTrialList("test1", "trial")
+	response, err := dbInterface.GetTrialList(context.Background(), &api_pb.GetTrialListRequest{
+		ExperimentName: "test1", 
+		Filter: "trial",
+	})
+	trials := response.Trials
 	if err != nil {
 		t.Errorf("GetTrialList failed %v", err)
 	} else if len(trials) != 2 {
@@ -391,7 +400,8 @@ func TestGetTrial(t *testing.T) {
 			"2016-12-31 20:02:06.123456",
 		),
 	)
-	trial, err := dbInterface.GetTrial("test1_trial1")
+	response, err := dbInterface.GetTrial(context.Background(), &api_pb.GetTrialRequest{TrialName: "test1_trial1"})
+	trial := response.Trial
 	if err != nil {
 		t.Errorf("GetTria failed %v", err)
 	} else if trial.Name != "test1_trial1" {
@@ -416,9 +426,9 @@ func TestUpdateTrialStatus(t *testing.T) {
 		"{\"metrics\":[{\"name\":\"f1_score\",\"value\":\"88.95\"},{\"name\":\"loss\",\"value\":\"0.5\"},{\"name\":\"precision\",\"value\":\"88.7\"},{\"name\":\"recall\",\"value\":\"89.2\"}]}",
 		trial_name).WillReturnResult(sqlmock.NewResult(1, 1))
 
-	err := dbInterface.UpdateTrialStatus(
-		trial_name,
-		&api_pb.TrialStatus{
+	_, err := dbInterface.UpdateTrialStatus(context.Background(), &api_pb.UpdateTrialStatusRequest{
+		TrialName: trial_name,
+		NewStatus: &api_pb.TrialStatus{
 			Condition:      condition,
 			StartTime:      "2016-12-31T20:02:05.123456Z",
 			CompletionTime: "2016-12-31T20:02:06.123456Z",
@@ -443,7 +453,7 @@ func TestUpdateTrialStatus(t *testing.T) {
 				},
 			},
 		},
-	)
+	})
 	if err != nil {
 		t.Errorf("UpdateTrial failed %v", err)
 	}
@@ -497,7 +507,8 @@ func TestRegisterObservationLog(t *testing.T) {
 			m.Metric.Value,
 		).WillReturnResult(sqlmock.NewResult(1, 1))
 	}
-	err := dbInterface.RegisterObservationLog("test1_trial1", obsLog)
+	_, err := dbInterface.ReportObservationLog(context.Background(), 
+			&api_pb.ReportObservationLogRequest{TrialName: "test1_trial1", ObservationLog: obsLog})
 	if err != nil {
 		t.Errorf("RegisterExperiment failed: %v", err)
 	}
@@ -516,12 +527,13 @@ func TestGetObservationLog(t *testing.T) {
 			"0.9",
 		),
 	)
-	obsLog, err := dbInterface.GetObservationLog(
-		"test1_trial1",
-		"",
-		"2016-12-31T21:01:05.123456Z",
-		"",
-	)
+	response, err := dbInterface.GetObservationLog(context.Background(), &api_pb.GetObservationLogRequest{
+		TrialName: "test1_trial1",
+		MetricName: "",
+		StartTime: "2016-12-31T21:01:05.123456Z",
+		EndTime: "",
+	})
+	obsLog := response.ObservationLog
 	if err != nil {
 		t.Errorf("GetObservationLog failed %v", err)
 	} else if len(obsLog.MetricLogs) != 2 {
