@@ -16,7 +16,7 @@ limitations under the License.
 package util
 
 import (
-	//v1 "k8s.io/api/core/v1"
+	"strconv"
 
 	batchv1 "k8s.io/api/batch/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,7 +24,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	common "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	commonv1beta2 "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta2"
 )
 
@@ -96,5 +99,54 @@ func UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *uns
 func UpdateTrialStatusObservation(instance *trialsv1alpha2.Trial, deployedJob *unstructured.Unstructured) error {
 
 	// read GetObservationLog call and update observation field
+	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
+	request := &api_pb.GetObservationLogRequest{
+		TrialName:  instance.Name,
+		MetricName: objectiveMetricName,
+	}
+	if reply, err := common.GetObservationLog(request); err != nil {
+		return err
+	} else {
+		if reply.ObservationLog != nil {
+			bestObjectiveValue := getBestObjectiveMetricValue(reply.ObservationLog.MetricLogs, instance.Spec.Objective.Type)
+			if bestObjectiveValue != nil {
+				if instance.Status.Observation == nil {
+					instance.Status.Observation = &commonv1alpha2.Observation{}
+					metric := commonv1alpha2.Metric{Name: objectiveMetricName, Value: *bestObjectiveValue}
+					instance.Status.Observation.Metrics = []commonv1alpha2.Metric{metric}
+				} else {
+					for index, metric := range instance.Status.Observation.Metrics {
+						if metric.Name == objectiveMetricName {
+							instance.Status.Observation.Metrics[index].Value = *bestObjectiveValue
+						}
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func getBestObjectiveMetricValue(metricLogs []*api_pb.MetricLog, objectiveType commonv1alpha2.ObjectiveType) *float64 {
+	metricLogSize := len(metricLogs)
+	if metricLogSize == 0 {
+		return nil
+	} else {
+		bestObjectiveValue, _ := strconv.ParseFloat(metricLogs[0].Metric.Value, 32)
+		for _, metricLog := range metricLogs[1:] {
+			objectiveMetricValue, _ := strconv.ParseFloat(metricLog.Metric.Value, 32)
+			if objectiveType == commonv1alpha2.ObjectiveTypeMinimize {
+				if objectiveMetricValue < bestObjectiveValue {
+					bestObjectiveValue = objectiveMetricValue
+				}
+			} else if objectiveType == commonv1alpha2.ObjectiveTypeMaximize {
+				if objectiveMetricValue > bestObjectiveValue {
+					bestObjectiveValue = objectiveMetricValue
+				}
+			}
+
+		}
+		return &bestObjectiveValue
+	}
 	return nil
 }

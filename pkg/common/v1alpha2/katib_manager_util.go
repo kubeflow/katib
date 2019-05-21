@@ -135,3 +135,14 @@ func GetSuggestions(request *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestio
 	kc := kcc.KatibManagerClient
 	return kc.GetSuggestions(ctx, request)
 }
+
+func GetObservationLog(request *api_pb.GetObservationLogRequest) (*api_pb.GetObservationLogReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer closeKatibManagerConnection(kcc)
+	kc := kcc.KatibManagerClient
+	return kc.GetObservationLog(ctx, request)
+}
