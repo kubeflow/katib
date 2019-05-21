@@ -130,7 +130,7 @@ data:
 				- "-mn"
 				- "test"`
 
-	if expected != actual.String() {
+	if expected != actual {
 		t.Errorf("Expected %s, got %s", expected, actual)
 	}
 }

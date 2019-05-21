@@ -8,8 +8,8 @@ import (
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
@@ -179,15 +179,16 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1alpha2.Ex
 		return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
 	}
 
-	var mcjob batchv1beta.CronJob
 	mcm, err := g.GetMetricsCollectorManifest(experimentName, trialName, job.GetKind(), namespace, metricNames, inst.Spec.MetricsCollectorSpec)
 	if err != nil {
 		log.Info("getMetricsCollectorManifest error", "err", err)
 		return err
 	}
 
-	log.Info("1", "m", mcm, "instance", inst)
-	if err := k8syaml.NewYAMLOrJSONDecoder(mcm, BUFSIZE).Decode(&mcjob); err != nil {
+	buf = bytes.NewBufferString(mcm)
+
+	mcjob := &batchv1beta.CronJob{}
+	if err := k8syaml.NewYAMLOrJSONDecoder(buf, BUFSIZE).Decode(&mcjob); err != nil {
 		log.Info("MetricsCollector Yaml decode error", "err", err)
 		return err
 	}
