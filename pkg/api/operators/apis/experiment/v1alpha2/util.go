@@ -143,7 +143,7 @@ func (exp *Experiment) MarkExperimentStatusFailed(reason, message string) {
 }
 
 func (exp *Experiment) NeedUpdateFinalizers() (bool, []string) {
-	deleted := exp.GetDeletionTimestamp() != nil
+	deleted := exp.ObjectMeta.DeletionTimestamp.IsZero()
 	pendingFinalizers := exp.GetFinalizers()
 	contained := false
 	for _, elem := range pendingFinalizers {
