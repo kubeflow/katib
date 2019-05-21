@@ -5,7 +5,6 @@
 package mock
 
 import (
-	bytes "bytes"
 	gomock "github.com/golang/mock/gomock"
 	v1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	v1alpha20 "github.com/kubeflow/katib/pkg/api/v1alpha2"
@@ -37,10 +36,10 @@ func (m *MockGenerator) EXPECT() *MockGeneratorMockRecorder {
 }
 
 // GetMetricsCollectorManifest mocks base method
-func (m *MockGenerator) GetMetricsCollectorManifest(arg0, arg1, arg2, arg3 string, arg4 []string, arg5 *v1alpha2.MetricsCollectorSpec) (*bytes.Buffer, error) {
+func (m *MockGenerator) GetMetricsCollectorManifest(arg0, arg1, arg2, arg3 string, arg4 []string, arg5 *v1alpha2.MetricsCollectorSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetMetricsCollectorManifest", arg0, arg1, arg2, arg3, arg4, arg5)
-	ret0, _ := ret[0].(*bytes.Buffer)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

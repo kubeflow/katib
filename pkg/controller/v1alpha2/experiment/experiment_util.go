@@ -71,7 +71,7 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 		logger.Error(err, "Error getting metrics collector manifest")
 		return err
 	}
-	trial.Spec.MetricsCollectorSpec = mcSpec.String()
+	trial.Spec.MetricsCollectorSpec = mcSpec
 
 	if err := r.Create(context.TODO(), trial); err != nil {
 		logger.Error(err, "Trial create error", "Trial name", trial.Name)

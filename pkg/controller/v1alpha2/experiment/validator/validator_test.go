@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"bytes"
 	"database/sql"
 	"testing"
 
@@ -104,15 +103,7 @@ spec:
 	p.EXPECT().GetMetricsCollectorManifest(
 		gomock.Any(), gomock.Any(), gomock.Any(),
 		gomock.Any(), gomock.Any(), gomock.Any()).
-		Return(func() *bytes.Buffer {
-			var b bytes.Buffer
-			_, err := b.WriteString(metricsCollectorTemplate)
-			if err != nil {
-				t.Errorf("Expected nil, got %v", err)
-			}
-			println(b.String())
-			return &b
-		}(), nil).AnyTimes()
+		Return(metricsCollectorTemplate, nil).AnyTimes()
 	mc.EXPECT().GetExperimentFromDB(gomock.Any()).Return(nil, sql.ErrNoRows).AnyTimes()
 
 	tcs := []struct {
