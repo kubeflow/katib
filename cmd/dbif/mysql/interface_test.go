@@ -70,14 +70,14 @@ func TestMain(m *testing.M) {
 		fmt.Printf("error opening db: %v\n", err)
 		os.Exit(1)
 	}
-	dbInterface, err = NewWithSQLConn(db)
-	if err != nil {
-		fmt.Printf("error NewWithSQLConn: %v\n", err)
-	}
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS experiments").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS trials").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS observation_logs").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS extra_algorithm_settings").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
+	dbInterface, err = NewWithSQLConn(db)
+	if err != nil {
+		fmt.Printf("error NewWithSQLConn: %v\n", err)
+	}
 	_, err = dbInterface.SelectOne(context.Background(), &api_pb.SelectOneRequest{})
 	if err != nil {
 		fmt.Printf("error `SELECT 1` probing: %v\n", err)

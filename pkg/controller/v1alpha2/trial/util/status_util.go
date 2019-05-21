@@ -26,7 +26,7 @@ import (
 
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
-	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
 	common "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	commonv1beta2 "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta2"
 )
