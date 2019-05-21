@@ -64,12 +64,15 @@ var extraAlgorithmSettingsColumns = []string{
 }
 
 func TestMain(m *testing.M) {
-	_, sm, err := sqlmock.New()
+	db, sm, err := sqlmock.New()
 	mock = sm
-	dbInterface = CreateNewDBServer()
 	if err != nil {
 		fmt.Printf("error opening db: %v\n", err)
 		os.Exit(1)
+	}
+	dbInterface, err = NewWithSQLConn(db)
+	if err != nil {
+		fmt.Printf("error NewWithSQLConn: %v\n", err)
 	}
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS experiments").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS trials").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
