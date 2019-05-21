@@ -4,7 +4,7 @@ metadata:
   name: mysql-db-backend
   namespace: kubeflow
   labels:
-    app: vizier
+    app: katib
     component: mysql-db-backend
 spec:
   type: ClusterIP
@@ -13,5 +13,5 @@ spec:
       protocol: TCP
       name: api
   selector:
-    app: vizier
+    app: katib
     component: mysql-db-backend
