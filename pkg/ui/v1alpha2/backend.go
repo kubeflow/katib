@@ -202,7 +202,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	resultText := "trialName"
 	expResp, err := c.GetExperiment(
 		context.Background(),
-		&api_pb_v1alpha2.GetExperimentRequest{
+		&dbif.GetExperimentRequest{
 			ExperimentName: experimentName,
 		},
 	)
@@ -230,7 +230,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 
 	trialListResp, err := c.GetTrialList(
 		context.Background(),
-		&api_pb_v1alpha2.GetTrialListRequest{
+		&dbif.GetTrialListRequest{
 			ExperimentName: experimentName,
 			Filter:         "",
 		},
@@ -248,7 +248,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 
 		obsLogResp, err := c.GetObservationLog(
 			context.Background(),
-			&api_pb_v1alpha2.GetObservationLogRequest{
+			&dbif.GetObservationLogRequest{
 				TrialName: t.Name,
 				StartTime: "",
 				EndTime:   "",
@@ -290,7 +290,7 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 	resultText := "metricName,time,value\n"
 	obsLogResp, err := c.GetObservationLog(
 		context.Background(),
-		&api_pb_v1alpha2.GetObservationLogRequest{
+		&dbif.GetObservationLogRequest{
 			TrialName: trialName,
 			StartTime: "",
 			EndTime:   "",
@@ -334,7 +334,7 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 
 	trialListResp, err := c.GetTrialList(
 		context.Background(),
-		&api_pb_v1alpha2.GetTrialListRequest{
+		&dbif.GetTrialListRequest{
 			ExperimentName: experimentName,
 			Filter:         "",
 		},
@@ -350,7 +350,7 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 
 		obsLogResp, err := c.GetObservationLog(
 			context.Background(),
-			&api_pb_v1alpha2.GetObservationLogRequest{
+			&dbif.GetObservationLogRequest{
 				TrialName: t.Name,
 				StartTime: "",
 				EndTime:   "",
