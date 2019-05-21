@@ -17,7 +17,6 @@ import (
 )
 
 
-var dbInterface dbConn
 var mock sqlmock.Sqlmock
 
 var experimentColums = []string{
@@ -71,6 +70,7 @@ func TestMain(m *testing.M) {
 		fmt.Printf("error opening db: %v\n", err)
 		os.Exit(1)
 	}
+	dbInterface := &dbConn{}
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS experiments").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS trials").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS observation_logs").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
@@ -134,6 +134,7 @@ func TestRegisterExperiment(t *testing.T) {
 		"2016-12-31 20:02:06.123456",
 		"",
 	).WillReturnResult(sqlmock.NewResult(1, 1))
+	dbInterface := &dbConn{}
 	_, err := dbInterface.RegisterExperiment(context.Background(), &api_pb.RegisterExperimentRequest{Experiment: experiment})
 	if err != nil {
 		t.Errorf("RegisterExperiment failed: %v", err)
@@ -158,6 +159,7 @@ func TestGetExperiment(t *testing.T) {
 			"",
 		),
 	)
+	dbInterface := &dbConn{}
 	response, err := dbInterface.GetExperiment(context.Background(), &api_pb.GetExperimentRequest{ExperimentName: "test1"})
 	if err != nil {
 		t.Errorf("GetExperiment failed %v", err)
@@ -184,6 +186,7 @@ func TestGetExperimentList(t *testing.T) {
 			"2016-12-31 20:05:05.123456",
 		),
 	)
+	dbInterface := &dbConn{}
 	response, err := dbInterface.GetExperimentList(context.Background(), &api_pb.GetExperimentListRequest{})
 	experiments := response.ExperimentSummaries
 	if err != nil {
@@ -205,7 +208,7 @@ func TestUpdateExperimentStatus(t *testing.T) {
 	start_time = \?,
 	completion_time = \? WHERE name = \?`,
 	).WithArgs(condition, start_time, completion_time, exp_name).WillReturnResult(sqlmock.NewResult(1, 1))
-
+	dbInterface := &dbConn{}
 	_, err := dbInterface.UpdateExperimentStatus(context.Background(), 
 	&api_pb.UpdateExperimentStatusRequest{ExperimentName: exp_name,
 		NewStatus: &api_pb.ExperimentStatus{
@@ -249,6 +252,7 @@ func TestUpdateAlgorithmExtraSettings(t *testing.T) {
 		setting_name,
 		value\)`,
 	).WithArgs(exp_name, exAlgoSet[1].Name, exAlgoSet[1].Value).WillReturnResult(sqlmock.NewResult(1, 1))
+	dbInterface := &dbConn{}
 	_, err := dbInterface.UpdateAlgorithmExtraSettings(context.Background(), 
 	&api_pb.UpdateAlgorithmExtraSettingsRequest{
 		ExperimentName: exp_name, 
@@ -335,6 +339,7 @@ func TestRegisterTrial(t *testing.T) {
 		"2016-12-31 20:02:05.123456",
 		"2016-12-31 20:02:06.123456",
 	).WillReturnResult(sqlmock.NewResult(1, 1))
+	dbInterface := &dbConn{}
 	_, err := dbInterface.RegisterTrial(context.Background(), &api_pb.RegisterTrialRequest{Trial: trial})
 	if err != nil {
 		t.Errorf("RegisterTrial failed: %v", err)
@@ -370,6 +375,7 @@ func TestGetTrialList(t *testing.T) {
 			"2016-12-31 20:02:06.123456",
 		),
 	)
+	dbInterface := &dbConn{}
 	response, err := dbInterface.GetTrialList(context.Background(), &api_pb.GetTrialListRequest{
 		ExperimentName: "test1", 
 		Filter: "trial",
@@ -400,6 +406,7 @@ func TestGetTrial(t *testing.T) {
 			"2016-12-31 20:02:06.123456",
 		),
 	)
+	dbInterface := &dbConn{}
 	response, err := dbInterface.GetTrial(context.Background(), &api_pb.GetTrialRequest{TrialName: "test1_trial1"})
 	trial := response.Trial
 	if err != nil {
@@ -425,7 +432,7 @@ func TestUpdateTrialStatus(t *testing.T) {
 		completion_time,
 		"{\"metrics\":[{\"name\":\"f1_score\",\"value\":\"88.95\"},{\"name\":\"loss\",\"value\":\"0.5\"},{\"name\":\"precision\",\"value\":\"88.7\"},{\"name\":\"recall\",\"value\":\"89.2\"}]}",
 		trial_name).WillReturnResult(sqlmock.NewResult(1, 1))
-
+	dbInterface := &dbConn{}
 	_, err := dbInterface.UpdateTrialStatus(context.Background(), &api_pb.UpdateTrialStatusRequest{
 		TrialName: trial_name,
 		NewStatus: &api_pb.TrialStatus{
@@ -507,6 +514,7 @@ func TestRegisterObservationLog(t *testing.T) {
 			m.Metric.Value,
 		).WillReturnResult(sqlmock.NewResult(1, 1))
 	}
+	dbInterface := &dbConn{}
 	_, err := dbInterface.ReportObservationLog(context.Background(), 
 			&api_pb.ReportObservationLogRequest{TrialName: "test1_trial1", ObservationLog: obsLog})
 	if err != nil {
@@ -527,6 +535,7 @@ func TestGetObservationLog(t *testing.T) {
 			"0.9",
 		),
 	)
+	dbInterface := &dbConn{}
 	response, err := dbInterface.GetObservationLog(context.Background(), &api_pb.GetObservationLogRequest{
 		TrialName: "test1_trial1",
 		MetricName: "",

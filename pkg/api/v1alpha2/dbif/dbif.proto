@@ -149,7 +149,8 @@ service DBIF {
      */
     rpc GetObservationLog(GetObservationLogRequest) returns (GetObservationLogReply){
         option (google.api.http) = {
-            get: "/api/DBIF/GetObservationLog/{trial_name}"
+            post: "/api/DBIF/GetObservationLog"
+            body: "*"
             };
     };
 

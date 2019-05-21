@@ -160,3 +160,14 @@ func GetSuggestions(request *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestio
 	kc := kcc.KatibManagerClient
 	return kc.GetSuggestions(ctx, request)
 }
+
+func GetObservationLog(request *dbif_pb.GetObservationLogRequest) (*dbif_pb.GetObservationLogReply, error) {
+	ctx := context.Background()
+	dbif, err := getDBIFClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer closeDBIFConnection(dbif)
+	dbifClient := dbif.DBIFClient
+	return dbifClient.GetObservationLog(ctx, request)
+}
