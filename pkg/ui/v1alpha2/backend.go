@@ -11,6 +11,7 @@ import (
 
 	experimentv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	api_pb_v1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	dbif "github.com/kubeflow/katib/pkg/api/v1alpha2/dbif"
 	common_v1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/katibclient"
@@ -39,6 +40,16 @@ func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1alpha2.Man
 		return nil, nil
 	}
 	c := api_pb_v1alpha2.NewManagerClient(conn)
+	return conn, c
+}
+
+func (k *KatibUIHandler) connectDBIF() (*grpc.ClientConn, dbif.DBIFClient) {
+	conn, err := grpc.Dial(common_v1alpha2.DBIFAddr, grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Dial to GRPC failed: %v", err)
+		return nil, nil
+	}
+	c := dbif.NewDBIFClient(conn)
 	return conn, c
 }
 
@@ -185,7 +196,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	//enableCors(&w)
 	experimentName := r.URL.Query()["experimentName"][0]
 
-	conn, c := k.connectManager()
+	conn, c := k.connectDBIF()
 	defer conn.Close()
 
 	resultText := "trialName"
@@ -273,7 +284,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	trialName := r.URL.Query()["trialName"][0]
-	conn, c := k.connectManager()
+	conn, c := k.connectDBIF()
 	defer conn.Close()
 
 	resultText := "metricName,time,value\n"
@@ -317,7 +328,7 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 	var architecture string
 	var decoder string
 
-	conn, c := k.connectManager()
+	conn, c := k.connectDBIF()
 
 	defer conn.Close()
 
