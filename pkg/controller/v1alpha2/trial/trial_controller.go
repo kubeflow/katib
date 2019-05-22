@@ -144,7 +144,6 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 	instance := original.DeepCopy()
 
 	if !instance.IsCreated() {
-		//Trial not created in DB
 		if instance.Status.StartTime == nil {
 			now := metav1.Now()
 			instance.Status.StartTime = &now
@@ -152,13 +151,15 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 		if instance.Status.CompletionTime == nil {
 			instance.Status.CompletionTime = &metav1.Time{}
 		}
-		msg := "Trial is created"
-		instance.MarkTrialStatusCreated(TrialCreatedReason, msg)
 		err = r.CreateTrialInDB(instance)
 		if err != nil {
 			logger.Error(err, "Create trial in DB error")
-			return reconcile.Result{}, err
+			return reconcile.Result{
+				Requeue: true,
+			}, err
 		}
+		msg := "Trial is created"
+		instance.MarkTrialStatusCreated(TrialCreatedReason, msg)
 	} else {
 		// Trial already created in DB
 		err := r.reconcileTrial(instance)
