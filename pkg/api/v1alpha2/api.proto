@@ -24,6 +24,17 @@ service Manager {
         };
     };
 
+    /**
+     * PreCheck to register a Experiment to DB.
+     */
+    rpc PreCheckRegisterExperiment(RegisterExperimentRequest) returns (PreCheckRegisterExperimentReply){
+        option (google.api.http) = {
+            post: "/api/Manager/PreCheckRegisterExperiment"
+            body: "experiment"
+        };
+    };
+
+
     /** 
      * Delete a Experiment from DB by name.
      */
@@ -392,6 +403,9 @@ message RegisterExperimentRequest {
 message RegisterExperimentReply {
 }
 
+message PreCheckRegisterExperimentReply {
+	bool can_register = 1;
+}
 message DeleteExperimentRequest {
     string experiment_name = 1;
 }

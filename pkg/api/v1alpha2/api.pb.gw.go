@@ -41,6 +41,19 @@ func request_Manager_RegisterExperiment_0(ctx context.Context, marshaler runtime
 
 }
 
+func request_Manager_PreCheckRegisterExperiment_0(ctx context.Context, marshaler runtime.Marshaler, client ManagerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq RegisterExperimentRequest
+	var metadata runtime.ServerMetadata
+
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.Experiment); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := client.PreCheckRegisterExperiment(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
 func request_Manager_DeleteExperiment_0(ctx context.Context, marshaler runtime.Marshaler, client ManagerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DeleteExperimentRequest
 	var metadata runtime.ServerMetadata
@@ -416,6 +429,35 @@ func RegisterManagerHandler(ctx context.Context, mux *runtime.ServeMux, conn *gr
 		}
 
 		forward_Manager_RegisterExperiment_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("POST", pattern_Manager_PreCheckRegisterExperiment_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+		if cn, ok := w.(http.CloseNotifier); ok {
+			go func(done <-chan struct{}, closed <-chan bool) {
+				select {
+				case <-done:
+				case <-closed:
+					cancel()
+				}
+			}(ctx.Done(), cn.CloseNotify())
+		}
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Manager_PreCheckRegisterExperiment_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Manager_PreCheckRegisterExperiment_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -860,6 +902,8 @@ func RegisterManagerHandler(ctx context.Context, mux *runtime.ServeMux, conn *gr
 var (
 	pattern_Manager_RegisterExperiment_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "Manager", "RegisterExperiment"}, ""))
 
+	pattern_Manager_PreCheckRegisterExperiment_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "Manager", "PreCheckRegisterExperiment"}, ""))
+
 	pattern_Manager_DeleteExperiment_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "Manager", "DeleteExperiment", "experiment_name"}, ""))
 
 	pattern_Manager_GetExperiment_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "Manager", "GetExperiment", "experiment_name"}, ""))
@@ -893,6 +937,8 @@ var (
 
 var (
 	forward_Manager_RegisterExperiment_0 = runtime.ForwardResponseMessage
+
+	forward_Manager_PreCheckRegisterExperiment_0 = runtime.ForwardResponseMessage
 
 	forward_Manager_DeleteExperiment_0 = runtime.ForwardResponseMessage
 

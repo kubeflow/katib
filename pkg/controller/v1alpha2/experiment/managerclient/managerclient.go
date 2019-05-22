@@ -13,8 +13,7 @@ type ManagerClient interface {
 	CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error
 	DeleteExperimentInDB(instance *experimentsv1alpha2.Experiment) error
 	UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error
-	GetExperimentFromDB(instance *experimentsv1alpha2.Experiment) (
-		*api_pb.GetExperimentReply, error)
+	PreCheckRegisterExperimentInDB(inst *experimentsv1alpha2.Experiment) (*api_pb.PreCheckRegisterExperimentReply, error)
 }
 
 // DefaultClient implements the Client interface.
@@ -63,15 +62,12 @@ func (d *DefaultClient) UpdateExperimentStatusInDB(instance *experimentsv1alpha2
 	return nil
 }
 
-func (d *DefaultClient) GetExperimentFromDB(instance *experimentsv1alpha2.Experiment) (*api_pb.GetExperimentReply, error) {
-	request := &api_pb.GetExperimentRequest{
-		ExperimentName: instance.Name,
+func (d *DefaultClient) PreCheckRegisterExperimentInDB(inst *experimentsv1alpha2.Experiment) (*api_pb.PreCheckRegisterExperimentReply, error) {
+	experiment := getExperimentConf(inst)
+	request := &api_pb.RegisterExperimentRequest{
+		Experiment: experiment,
 	}
-	if exp, err := commonv1alpha2.GetExperiment(request); err != nil {
-		return nil, err
-	} else {
-		return exp, nil
-	}
+	return commonv1alpha2.PreCheckRegisterExperiment(request)
 }
 
 func getExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experiment {
