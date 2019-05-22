@@ -42,7 +42,6 @@ import (
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/trial/managerclient"
-	trialutil "github.com/kubeflow/katib/pkg/controller/v1alpha2/trial/util"
 )
 
 var (
@@ -159,7 +158,7 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 			instance.Status.CompletionTime = &metav1.Time{}
 		}
 		msg := "Trial is created"
-		instance.MarkTrialStatusCreated(trialutil.TrialCreatedReason, msg)
+		instance.MarkTrialStatusCreated(TrialCreatedReason, msg)
 		err = r.CreateTrialInDB(instance)
 		if err != nil {
 			logger.Error(err, "Create trial in DB error")
@@ -220,11 +219,11 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha2.Trial) error {
 	//Job already exists
 	//TODO Can desired Spec differ from deployedSpec?
 	if deployedJob != nil {
-		if err = trialutil.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
+		if err = r.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
 			logger.Error(err, "Update trial status condition error")
 			return err
 		}
-		if err = trialutil.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
+		if err = r.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
 			logger.Error(err, "Update trial status observation error")
 			return err
 		}
@@ -259,7 +258,7 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 	}
 
 	msg := "Trial is running"
-	instance.MarkTrialStatusRunning(trialutil.TrialRunningReason, msg)
+	instance.MarkTrialStatusRunning(TrialRunningReason, msg)
 	return deployedJob, nil
 }
 
