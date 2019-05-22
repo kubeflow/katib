@@ -23,6 +23,11 @@ class ManagerStub(object):
         request_serializer=api__pb2.RegisterExperimentRequest.SerializeToString,
         response_deserializer=api__pb2.RegisterExperimentReply.FromString,
         )
+    self.PreCheckRegisterExperiment = channel.unary_unary(
+        '/api.v1.alpha2.Manager/PreCheckRegisterExperiment',
+        request_serializer=api__pb2.RegisterExperimentRequest.SerializeToString,
+        response_deserializer=api__pb2.PreCheckRegisterExperimentReply.FromString,
+        )
     self.DeleteExperiment = channel.unary_unary(
         '/api.v1.alpha2.Manager/DeleteExperiment',
         request_serializer=api__pb2.DeleteExperimentRequest.SerializeToString,
@@ -111,6 +116,14 @@ class ManagerServicer(object):
   def RegisterExperiment(self, request, context):
     """*
     Register a Experiment to DB.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def PreCheckRegisterExperiment(self, request, context):
+    """*
+    PreCheck to register a Experiment to DB.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -250,6 +263,11 @@ def add_ManagerServicer_to_server(servicer, server):
           servicer.RegisterExperiment,
           request_deserializer=api__pb2.RegisterExperimentRequest.FromString,
           response_serializer=api__pb2.RegisterExperimentReply.SerializeToString,
+      ),
+      'PreCheckRegisterExperiment': grpc.unary_unary_rpc_method_handler(
+          servicer.PreCheckRegisterExperiment,
+          request_deserializer=api__pb2.RegisterExperimentRequest.FromString,
+          response_serializer=api__pb2.PreCheckRegisterExperimentReply.SerializeToString,
       ),
       'DeleteExperiment': grpc.unary_unary_rpc_method_handler(
           servicer.DeleteExperiment,

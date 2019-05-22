@@ -136,6 +136,17 @@ func GetSuggestions(request *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestio
 	return kc.GetSuggestions(ctx, request)
 }
 
+func PreCheckRegisterExperiment(request *api_pb.RegisterExperimentRequest) (*api_pb.PreCheckRegisterExperimentReply, error) {
+	ctx := context.Background()
+        kcc, err := getKatibManagerClientAndConn()
+        if err != nil {
+                return nil, err
+        }
+        defer closeKatibManagerConnection(kcc)
+        kc := kcc.KatibManagerClient
+        return kc.PreCheckRegisterExperiment(ctx, request)
+}
+
 func GetObservationLog(request *api_pb.GetObservationLogRequest) (*api_pb.GetObservationLogReply, error) {
 	ctx := context.Background()
 	kcc, err := getKatibManagerClientAndConn()

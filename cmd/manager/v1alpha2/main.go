@@ -31,6 +31,14 @@ func (s *server) RegisterExperiment(ctx context.Context, in *api_pb.RegisterExpe
 	return &api_pb.RegisterExperimentReply{}, err
 }
 
+// Register a Experiment to DB.
+func (s *server) PreCheckRegisterExperiment(ctx context.Context, in *api_pb.RegisterExperimentRequest) (*api_pb.PreCheckRegisterExperimentReply, error) {
+	can_register, err := dbIf.PreCheckRegisterExperiment(in.Experiment)
+	return &api_pb.PreCheckRegisterExperimentReply{
+		CanRegister: can_register,
+	}, err
+}
+
 // Delete a Experiment from DB by name.
 func (s *server) DeleteExperiment(ctx context.Context, in *api_pb.DeleteExperimentRequest) (*api_pb.DeleteExperimentReply, error) {
 	err := dbIf.DeleteExperiment(in.ExperimentName)

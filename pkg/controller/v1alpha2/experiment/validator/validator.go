@@ -2,7 +2,6 @@ package validator
 
 import (
 	"bytes"
-	"database/sql"
 	"fmt"
 
 	batchv1beta "k8s.io/api/batch/v1beta1"
@@ -146,13 +145,13 @@ func (g *DefaultValidator) validateSupportedJob(job *unstructured.Unstructured) 
 }
 
 func (g *DefaultValidator) validateForCreate(inst *experimentsv1alpha2.Experiment) error {
-	if _, err := g.GetExperimentFromDB(inst); err != nil {
-		if err != sql.ErrNoRows {
-			return fmt.Errorf("Fail to check record for the experiment in DB: %v", err)
-		}
-		return nil
-	} else {
+	reply, err := g.PreCheckRegisterExperimentInDB(inst)
+	if err != nil {
+		return fmt.Errorf("Fail to check record for the experiment in DB: %v", err)
+	} else if !reply.CanRegister {
 		return fmt.Errorf("Record for the experiment has existed in DB; Please try to rename the experiment")
+	} else {
+		return nil
 	}
 }
 

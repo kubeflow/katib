@@ -242,6 +242,33 @@
         ]
       }
     },
+    "/api/Manager/PreCheckRegisterExperiment": {
+      "post": {
+        "summary": "*\nPreCheck to register a Experiment to DB.",
+        "operationId": "PreCheckRegisterExperiment",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2PreCheckRegisterExperimentReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha2Experiment"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
     "/api/Manager/RegisterExperiment": {
       "post": {
         "summary": "*\nRegister a Experiment to DB.",
@@ -905,6 +932,15 @@
       ],
       "default": "UNKNOWN_TYPE",
       "description": "*\nTypes of value for HyperParameter."
+    },
+    "alpha2PreCheckRegisterExperimentReply": {
+      "type": "object",
+      "properties": {
+        "can_register": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
     },
     "alpha2RegisterExperimentReply": {
       "type": "object"

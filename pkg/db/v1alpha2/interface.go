@@ -44,6 +44,7 @@ type KatibDBInterface interface {
 	SelectOne() error
 
 	RegisterExperiment(experiment *v1alpha2.Experiment) error
+	PreCheckRegisterExperiment(experiment *v1alpha2.Experiment) (bool, error)
 	DeleteExperiment(experimentName string) error
 	GetExperiment(experimentName string) (*v1alpha2.Experiment, error)
 	GetExperimentList() ([]*v1alpha2.ExperimentSummary, error)
@@ -213,6 +214,19 @@ func (d *dbConn) DeleteExperiment(experimentName string) error {
 	_, err := d.db.Exec("DELETE FROM experiments WHERE name = ?", experimentName)
 	return err
 }
+
+func (d *dbConn) PreCheckRegisterExperiment(experiment *v1alpha2.Experiment) (bool, error) {
+	_, err := d.GetExperiment(experiment.Name)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return true, nil
+		}
+		return false, err
+	} else {
+		return false, nil
+	}
+}
+
 func (d *dbConn) GetExperiment(experimentName string) (*v1alpha2.Experiment, error) {
 	var id string
 	var paramSpecs string

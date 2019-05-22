@@ -1,8 +1,6 @@
 package managerclient
 
 import (
-	"database/sql"
-
 	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
@@ -15,8 +13,7 @@ type ManagerClient interface {
 	CreateExperimentInDB(instance *experimentsv1alpha2.Experiment) error
 	DeleteExperimentInDB(instance *experimentsv1alpha2.Experiment) error
 	UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error
-	GetExperimentFromDB(instance *experimentsv1alpha2.Experiment) (
-		*api_pb.GetExperimentReply, error)
+	PreCheckRegisterExperimentInDB(inst *experimentsv1alpha2.Experiment) (*api_pb.PreCheckRegisterExperimentReply, error)
 }
 
 // DefaultClient implements the Client interface.
@@ -65,8 +62,12 @@ func (d *DefaultClient) UpdateExperimentStatusInDB(instance *experimentsv1alpha2
 	return nil
 }
 
-func (d *DefaultClient) GetExperimentFromDB(instance *experimentsv1alpha2.Experiment) (*api_pb.GetExperimentReply, error) {
-	return nil, sql.ErrNoRows
+func (d *DefaultClient) PreCheckRegisterExperimentInDB(inst *experimentsv1alpha2.Experiment) (*api_pb.PreCheckRegisterExperimentReply, error) {
+	experiment := getExperimentConf(inst)
+	request := &api_pb.RegisterExperimentRequest{
+		Experiment: experiment,
+	}
+	return commonv1alpha2.PreCheckRegisterExperiment(request)
 }
 
 func getExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experiment {
