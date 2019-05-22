@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -12,6 +14,7 @@ import (
 
 	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/managerclient"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/manifest"
@@ -77,7 +80,23 @@ func (g *DefaultValidator) ValidateExperiment(instance *experimentsv1alpha2.Expe
 }
 
 func (g *DefaultValidator) validateAlgorithmSettings(inst *experimentsv1alpha2.Experiment) error {
-	// TODO: it need call ValidateAlgorithmSettings API of vizier-core manager, implement it when vizier-core done
+	algorithmName := inst.Spec.Algorithm.AlgorithmName
+	request := &api_pb.ValidateAlgorithmSettingsRequest{
+		AlgorithmName:  algorithmName,
+		ExperimentSpec: managerclient.GetExperimentSpec(inst),
+	}
+
+	_, err := commonv1alpha2.ValidateAlgorithmSettings(request)
+	statusCode, _ := status.FromError(err)
+
+	if statusCode.Code() == codes.Unknown {
+		return fmt.Errorf("Method ValidateAlgorithmSettings not found inside Suggestion service: %s", algorithmName)
+	}
+
+	if statusCode.Code() == codes.InvalidArgument || statusCode.Code() == codes.Unavailable {
+		return fmt.Errorf("ValidateAlgorithmSettings Error: %v", statusCode.Message())
+	}
+
 	return nil
 }
 

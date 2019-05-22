@@ -89,28 +89,63 @@ func getExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 
 	experiment.Name = instance.Name
 
+	experiment.Spec = GetExperimentSpec(instance)
+
+	return experiment
+
+}
+
+func getCondition(inst *experimentsv1alpha2.Experiment) api_pb.ExperimentStatus_ExperimentConditionType {
+	condition, _ := inst.GetLastConditionType()
+	switch condition {
+	case experimentsv1alpha2.ExperimentCreated:
+		return api_pb.ExperimentStatus_CREATED
+	case experimentsv1alpha2.ExperimentRunning:
+		return api_pb.ExperimentStatus_RUNNING
+	case experimentsv1alpha2.ExperimentRestarting:
+		return api_pb.ExperimentStatus_RESTARTING
+	case experimentsv1alpha2.ExperimentSucceeded:
+		return api_pb.ExperimentStatus_SUCCEEDED
+	case experimentsv1alpha2.ExperimentFailed:
+		return api_pb.ExperimentStatus_FAILED
+	default:
+		return api_pb.ExperimentStatus_UNKNOWN
+	}
+}
+
+func GetExperimentSpec(instance *experimentsv1alpha2.Experiment) *api_pb.ExperimentSpec {
+
+	experimentSpec := &api_pb.ExperimentSpec{
+		Objective: &api_pb.ObjectiveSpec{
+			AdditionalMetricNames: []string{},
+		},
+		Algorithm: &api_pb.AlgorithmSpec{
+			AlgorithmSetting: []*api_pb.AlgorithmSetting{},
+		},
+	}
+
 	//Populate Objective
 	switch instance.Spec.Objective.Type {
 	case commonapiv1alpha2.ObjectiveTypeMaximize:
-		experiment.Spec.Objective.Type = api_pb.ObjectiveType_MAXIMIZE
+		experimentSpec.Objective.Type = api_pb.ObjectiveType_MAXIMIZE
 	case commonapiv1alpha2.ObjectiveTypeMinimize:
-		experiment.Spec.Objective.Type = api_pb.ObjectiveType_MINIMIZE
+		experimentSpec.Objective.Type = api_pb.ObjectiveType_MINIMIZE
 	default:
-		experiment.Spec.Objective.Type = api_pb.ObjectiveType_UNKNOWN
+		experimentSpec.Objective.Type = api_pb.ObjectiveType_UNKNOWN
 
 	}
-	experiment.Spec.Objective.Goal = float32(*instance.Spec.Objective.Goal)
-	experiment.Spec.Objective.ObjectiveMetricName = instance.Spec.Objective.ObjectiveMetricName
+	experimentSpec.Objective.Goal = float32(*instance.Spec.Objective.Goal)
+	experimentSpec.Objective.ObjectiveMetricName = instance.Spec.Objective.ObjectiveMetricName
 	for _, m := range instance.Spec.Objective.AdditionalMetricNames {
-		experiment.Spec.Objective.AdditionalMetricNames = append(experiment.Spec.Objective.AdditionalMetricNames, m)
+		experimentSpec.Objective.AdditionalMetricNames = append(experimentSpec.Objective.AdditionalMetricNames, m)
 	}
 
 	//Populate Algorithm Spec
-	experiment.Spec.Algorithm.AlgorithmName = instance.Spec.Algorithm.AlgorithmName
+	experimentSpec.Algorithm.AlgorithmName = instance.Spec.Algorithm.AlgorithmName
 
 	for _, as := range instance.Spec.Algorithm.AlgorithmSettings {
-		experiment.Spec.Algorithm.AlgorithmSetting = append(
-			experiment.Spec.Algorithm.AlgorithmSetting,
+		experimentSpec.Algorithm.AlgorithmSetting = append(
+			experimentSpec.Algorithm.AlgorithmSetting,
 			&api_pb.AlgorithmSetting{
 				Name:  as.Name,
 				Value: as.Value,
@@ -146,7 +181,7 @@ func getExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 			}
 			parameterSpecs.Parameters = append(parameterSpecs.Parameters, parameter)
 		}
-		experiment.Spec.ParameterSpecs = parameterSpecs
+		experimentSpec.ParameterSpecs = parameterSpecs
 	}
 
 	//Populate NAS Experiment
@@ -205,27 +240,8 @@ func getExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 			nasConfig.Operations.Operation = append(nasConfig.Operations.Operation, operation)
 		}
 
-		experiment.Spec.NasConfig = nasConfig
+		experimentSpec.NasConfig = nasConfig
 	}
 
-	return experiment
-
-}
-
-func getCondition(inst *experimentsv1alpha2.Experiment) api_pb.ExperimentStatus_ExperimentConditionType {
-	condition, _ := inst.GetLastConditionType()
-	switch condition {
-	case experimentsv1alpha2.ExperimentCreated:
-		return api_pb.ExperimentStatus_CREATED
-	case experimentsv1alpha2.ExperimentRunning:
-		return api_pb.ExperimentStatus_RUNNING
-	case experimentsv1alpha2.ExperimentRestarting:
-		return api_pb.ExperimentStatus_RESTARTING
-	case experimentsv1alpha2.ExperimentSucceeded:
-		return api_pb.ExperimentStatus_SUCCEEDED
-	case experimentsv1alpha2.ExperimentFailed:
-		return api_pb.ExperimentStatus_FAILED
-	default:
-		return api_pb.ExperimentStatus_UNKNOWN
-	}
+	return experimentSpec
 }
