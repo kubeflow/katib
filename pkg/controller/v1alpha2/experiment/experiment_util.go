@@ -74,7 +74,6 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 	}
 	trial.Spec.MetricsCollectorSpec = mcSpec
 
-	logger.Info("DEBUG-util", "trial", trial)
 	if err := r.Create(context.TODO(), trial); err != nil {
 		logger.Error(err, "Trial create error", "Trial name", trial.Name)
 		return err
