@@ -19,6 +19,7 @@ import (
 
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	managerclientmock "github.com/kubeflow/katib/pkg/mock/v1alpha2/trial/managerclient"
 )
 
@@ -96,6 +97,9 @@ func TestReconcileTFJobTrial(t *testing.T) {
 	mc := managerclientmock.NewMockManagerClient(mockCtrl)
 	mc.EXPECT().CreateTrialInDB(gomock.Any()).Return(nil).AnyTimes()
 	mc.EXPECT().UpdateTrialStatusInDB(gomock.Any()).Return(nil).AnyTimes()
+	mc.EXPECT().GetTrialObservationLog(gomock.Any()).Return(&api_pb.GetObservationLogReply{
+		ObservationLog: nil,
+	}, nil).AnyTimes()
 
 	// Setup the Manager and Controller.  Wrap the Controller Reconcile function so it writes each request to a
 	// channel when it is finished.

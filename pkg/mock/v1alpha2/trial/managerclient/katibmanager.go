@@ -76,6 +76,21 @@ func (mr *MockManagerClientMockRecorder) GetTrialObservation(arg0 interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialObservation", reflect.TypeOf((*MockManagerClient)(nil).GetTrialObservation), arg0)
 }
 
+// GetTrialObservationLog mocks base method
+func (m *MockManagerClient) GetTrialObservationLog(arg0 *v1alpha2.Trial) (*v1alpha20.GetObservationLogReply, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTrialObservationLog", arg0)
+	ret0, _ := ret[0].(*v1alpha20.GetObservationLogReply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTrialObservationLog indicates an expected call of GetTrialObservationLog
+func (mr *MockManagerClientMockRecorder) GetTrialObservationLog(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialObservationLog", reflect.TypeOf((*MockManagerClient)(nil).GetTrialObservationLog), arg0)
+}
+
 // UpdateTrialStatusInDB mocks base method
 func (m *MockManagerClient) UpdateTrialStatusInDB(arg0 *v1alpha2.Trial) error {
 	m.ctrl.T.Helper()
