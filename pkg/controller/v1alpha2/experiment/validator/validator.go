@@ -14,7 +14,6 @@ import (
 
 	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/managerclient"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/manifest"
@@ -80,24 +79,19 @@ func (g *DefaultValidator) ValidateExperiment(instance *experimentsv1alpha2.Expe
 }
 
 func (g *DefaultValidator) validateAlgorithmSettings(inst *experimentsv1alpha2.Experiment) error {
-	algorithmName := inst.Spec.Algorithm.AlgorithmName
-	request := &api_pb.ValidateAlgorithmSettingsRequest{
-		AlgorithmName:  algorithmName,
-		ExperimentSpec: managerclient.GetExperimentSpec(inst),
-	}
 
-	_, err := commonv1alpha2.ValidateAlgorithmSettings(request)
+	_, err := g.ValidateAlgorithmSettings(inst)
 	statusCode, _ := status.FromError(err)
 
 	if statusCode.Code() == codes.Unknown {
-		return fmt.Errorf("Method ValidateAlgorithmSettings not found inside Suggestion service: %s", algorithmName)
+		return fmt.Errorf("Method ValidateAlgorithmSettings not found inside Suggestion service: %s", inst.Spec.Algorithm.AlgorithmName)
 	}
 
 	if statusCode.Code() == codes.InvalidArgument || statusCode.Code() == codes.Unavailable {
 		return fmt.Errorf("ValidateAlgorithmSettings Error: %v", statusCode.Message())
 	}
-
 	return nil
+
 }
 
 func (g *DefaultValidator) validateObjective(obj *commonapiv1alpha2.ObjectiveSpec) error {

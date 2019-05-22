@@ -14,6 +14,7 @@ type ManagerClient interface {
 	DeleteExperimentInDB(instance *experimentsv1alpha2.Experiment) error
 	UpdateExperimentStatusInDB(instance *experimentsv1alpha2.Experiment) error
 	PreCheckRegisterExperimentInDB(inst *experimentsv1alpha2.Experiment) (*api_pb.PreCheckRegisterExperimentReply, error)
+	ValidateAlgorithmSettings(inst *experimentsv1alpha2.Experiment) (*api_pb.ValidateAlgorithmSettingsReply, error)
 }
 
 // DefaultClient implements the Client interface.
@@ -70,6 +71,17 @@ func (d *DefaultClient) PreCheckRegisterExperimentInDB(inst *experimentsv1alpha2
 	return commonv1alpha2.PreCheckRegisterExperiment(request)
 }
 
+func (d *DefaultClient) ValidateAlgorithmSettings(inst *experimentsv1alpha2.Experiment) (*api_pb.ValidateAlgorithmSettingsReply, error) {
+	algorithmName := inst.Spec.Algorithm.AlgorithmName
+	request := &api_pb.ValidateAlgorithmSettingsRequest{
+		AlgorithmName:  algorithmName,
+		ExperimentSpec: getExperimentSpec(inst),
+	}
+
+	return commonv1alpha2.ValidateAlgorithmSettings(request)
+
+}
+
 func getExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experiment {
 	experiment := &api_pb.Experiment{
 		Spec: &api_pb.ExperimentSpec{
@@ -89,7 +101,7 @@ func getExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 
 	experiment.Name = instance.Name
 
-	experiment.Spec = GetExperimentSpec(instance)
+	experiment.Spec = getExperimentSpec(instance)
 
 	return experiment
 
@@ -113,7 +125,7 @@ func getCondition(inst *experimentsv1alpha2.Experiment) api_pb.ExperimentStatus_
 	}
 }
 
-func GetExperimentSpec(instance *experimentsv1alpha2.Experiment) *api_pb.ExperimentSpec {
+func getExperimentSpec(instance *experimentsv1alpha2.Experiment) *api_pb.ExperimentSpec {
 
 	experimentSpec := &api_pb.ExperimentSpec{
 		Objective: &api_pb.ObjectiveSpec{
