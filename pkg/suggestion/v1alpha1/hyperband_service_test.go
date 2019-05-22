@@ -503,7 +503,7 @@ func TestEvalWorkers(t *testing.T) {
 
 	_, rtn_bracket := h.evalWorkers(context.Background(), mockAPI, "studyId", &p)
 
-	exp_bracket := []Evals{Evals{"trial3", 19}, Evals{"trial2", 11}, Evals{"trial1", 3}}
+	exp_bracket := []Evals{{"trial3", 19}, {"trial2", 11}, {"trial1", 3}}
 
 	for i, ebkt := range exp_bracket {
 		if ebkt != rtn_bracket[i] {

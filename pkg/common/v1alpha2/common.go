@@ -9,17 +9,17 @@ import (
 
 func GetSupportedJobList() []schema.GroupVersionKind {
 	supportedJobList := []schema.GroupVersionKind{
-		schema.GroupVersionKind{
+		{
 			Group:   "batch",
 			Version: "v1",
 			Kind:    "Job",
 		},
-		schema.GroupVersionKind{
+		{
 			Group:   "kubeflow.org",
 			Version: "v1beta2",
 			Kind:    "TFJob",
 		},
-		schema.GroupVersionKind{
+		{
 			Group:   "kubeflow.org",
 			Version: "v1beta2",
 			Kind:    "PyTorchJob",
