@@ -87,6 +87,7 @@ func (r *ReconcileTrial) UpdateTrialStatusObservation(instance *trialsv1alpha2.T
 	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
 	reply, err := r.GetTrialObservationLog(instance)
 	if err != nil {
+		log.Error(err, "Get trial observation log error")
 		return err
 	}
 	if reply.ObservationLog != nil {
