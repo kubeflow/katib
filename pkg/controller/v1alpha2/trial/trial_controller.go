@@ -144,11 +144,6 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	instance := original.DeepCopy()
 
-	if instance.IsCompleted() {
-
-		return reconcile.Result{}, nil
-
-	}
 	if !instance.IsCreated() {
 		//Trial not created in DB
 		if instance.Status.StartTime == nil {
@@ -245,6 +240,9 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 	err = r.Get(context.TODO(), types.NamespacedName{Name: desiredJob.GetName(), Namespace: desiredJob.GetNamespace()}, deployedJob)
 	if err != nil {
 		if errors.IsNotFound(err) {
+			if instance.IsCompleted()  {
+				return nil, nil
+			}
 			logger.Info("Creating Job", "kind", kind,
 				"name", desiredJob.GetName())
 			err = r.Create(context.TODO(), desiredJob)
@@ -255,6 +253,15 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 		} else {
 			logger.Error(err, "Trial Get error")
 			return nil, err
+		}
+	} else {
+		if instance.IsCompleted() && !instance.Spec.RetainRun {
+			if err = r.Delete(context.TODO(), desiredJob); err != nil {
+				logger.Error(err, "Delete job error")
+				return nil, err
+			} else {
+				return nil, nil
+			}
 		}
 	}
 
@@ -311,6 +318,9 @@ func (r *ReconcileTrial) reconcileMetricsCollector(instance *trialsv1alpha2.Tria
 	}, deployedMetricsCollector)
 	if err != nil {
 		if errors.IsNotFound(err) {
+			if instance.IsCompleted()  {
+				return nil, nil
+			}
 			logger.Info("Creating Metrics Collector",
 				"name", desiredMetricsCollector.GetName(),
 				"namespace", desiredMetricsCollector.GetNamespace())
@@ -322,6 +332,15 @@ func (r *ReconcileTrial) reconcileMetricsCollector(instance *trialsv1alpha2.Tria
 		} else {
 			logger.Error(err, "Metrics Collector Get error")
 			return nil, err
+		}
+	} else {
+		if instance.IsCompleted() && !instance.Spec.RetainMetricsCollector {
+			if err = r.Delete(context.TODO(), desiredMetricsCollector); err != nil {
+				logger.Error(err, "Delete Metrics Collector error")
+				return nil, err
+			} else {
+				return nil, nil
+			}
 		}
 	}
 
