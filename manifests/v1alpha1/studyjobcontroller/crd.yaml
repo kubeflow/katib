@@ -10,6 +10,10 @@ spec:
     kind: StudyJob
     singular: studyjob
     plural: studyjobs
+    categories:
+    - all
+    - kubeflow
+    - katib
   additionalPrinterColumns:
   - JSONPath: .status.condition
     name: Condition
