@@ -8,16 +8,22 @@
 
 ## Build from source code
 
-Pull in the dependencies
+Check source code as follows:
 
 ```
-dep ensure --vendor-only -v
+make check
+```
+
+If there are some errors for go fmt, uodate the go fmt as follows:
+
+```
+make update
 ```
 
 You can build all images from source.
 
 ```bash
-./scripts/v1alpha1/build.sh
+make build
 ```
 
 ## Implement new suggestion algorithm
