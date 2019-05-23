@@ -113,22 +113,21 @@ func getBestObjectiveMetricValue(metricLogs []*api_pb.MetricLog, objectiveType c
 	metricLogSize := len(metricLogs)
 	if metricLogSize == 0 {
 		return nil
-	} else {
-		bestObjectiveValue, _ := strconv.ParseFloat(metricLogs[0].Metric.Value, 32)
-		for _, metricLog := range metricLogs[1:] {
-			objectiveMetricValue, _ := strconv.ParseFloat(metricLog.Metric.Value, 32)
-			if objectiveType == commonv1alpha2.ObjectiveTypeMinimize {
-				if objectiveMetricValue < bestObjectiveValue {
-					bestObjectiveValue = objectiveMetricValue
-				}
-			} else if objectiveType == commonv1alpha2.ObjectiveTypeMaximize {
-				if objectiveMetricValue > bestObjectiveValue {
-					bestObjectiveValue = objectiveMetricValue
-				}
-			}
-
-		}
-		return &bestObjectiveValue
 	}
-	return nil
+
+	bestObjectiveValue, _ := strconv.ParseFloat(metricLogs[0].Metric.Value, 32)
+	for _, metricLog := range metricLogs[1:] {
+		objectiveMetricValue, _ := strconv.ParseFloat(metricLog.Metric.Value, 32)
+		if objectiveType == commonv1alpha2.ObjectiveTypeMinimize {
+			if objectiveMetricValue < bestObjectiveValue {
+				bestObjectiveValue = objectiveMetricValue
+			}
+		} else if objectiveType == commonv1alpha2.ObjectiveTypeMaximize {
+			if objectiveMetricValue > bestObjectiveValue {
+				bestObjectiveValue = objectiveMetricValue
+			}
+		}
+
+	}
+	return &bestObjectiveValue
 }

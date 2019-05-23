@@ -42,6 +42,17 @@ func (relations *Relations) Add(parent string, child string) {
 	relations.ChildToParents[child][parent] = true
 }
 
+// Remove removes relation
+func (relations *Relations) Remove(parent string, child string) {
+	if _, ok := relations.ParentToChildren[parent]; ok {
+		delete(relations.ParentToChildren[parent], child)
+	}
+
+	if _, ok := relations.ChildToParents[child]; ok {
+		delete(relations.ChildToParents[child], parent)
+	}
+}
+
 // SortedChildren returns a list of sorted children of the given parent graph.
 func (relations *Relations) SortedChildren(parent string) []string {
 	keys := make([]string, 0)
