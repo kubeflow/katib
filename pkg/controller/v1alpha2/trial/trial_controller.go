@@ -239,7 +239,7 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 	err = r.Get(context.TODO(), types.NamespacedName{Name: desiredJob.GetName(), Namespace: desiredJob.GetNamespace()}, deployedJob)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			if instance.IsCompleted()  {
+			if instance.IsCompleted() {
 				return nil, nil
 			}
 			logger.Info("Creating Job", "kind", kind,
@@ -317,7 +317,7 @@ func (r *ReconcileTrial) reconcileMetricsCollector(instance *trialsv1alpha2.Tria
 	}, deployedMetricsCollector)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			if instance.IsCompleted()  {
+			if instance.IsCompleted() {
 				return nil, nil
 			}
 			logger.Info("Creating Metrics Collector",
