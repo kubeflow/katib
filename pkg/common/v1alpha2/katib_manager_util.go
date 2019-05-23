@@ -157,3 +157,14 @@ func GetObservationLog(request *api_pb.GetObservationLogRequest) (*api_pb.GetObs
 	kc := kcc.KatibManagerClient
 	return kc.GetObservationLog(ctx, request)
 }
+
+func ValidateAlgorithmSettings(request *api_pb.ValidateAlgorithmSettingsRequest) (*api_pb.ValidateAlgorithmSettingsReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer closeKatibManagerConnection(kcc)
+	kc := kcc.KatibManagerClient
+	return kc.ValidateAlgorithmSettings(ctx, request)
+}
