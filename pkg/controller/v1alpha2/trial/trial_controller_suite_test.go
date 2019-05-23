@@ -66,6 +66,18 @@ func SetupTestReconcile(inner reconcile.Reconciler) (reconcile.Reconciler, chan 
 	return fn, requests
 }
 
+func SetupTestReconcileWithResult(inner reconcile.Reconciler) (reconcile.Reconciler, chan reconcile.Request, chan reconcile.Result) {
+	requests := make(chan reconcile.Request)
+	results := make(chan reconcile.Result)
+	fn := reconcile.Func(func(req reconcile.Request) (reconcile.Result, error) {
+		result, err := inner.Reconcile(req)
+		requests <- req
+		results <- result
+		return result, err
+	})
+	return fn, requests, results
+}
+
 // StartTestManager adds recFn
 func StartTestManager(mgr manager.Manager, g *gomega.GomegaWithT) (chan struct{}, *sync.WaitGroup) {
 	stop := make(chan struct{})
