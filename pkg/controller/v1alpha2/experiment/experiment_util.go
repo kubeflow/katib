@@ -84,7 +84,7 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 
 func (r *ReconcileExperiment) updateFinalizers(instance *experimentsv1alpha2.Experiment, finalizers []string) (reconcile.Result, error) {
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace})
-	if instance.GetDeletionTimestamp() != nil {
+	if !instance.ObjectMeta.DeletionTimestamp.IsZero() {
 		if err := r.DeleteExperimentInDB(instance); err != nil {
 			logger.Error(err, "Fail to delete data in DB")
 			return reconcile.Result{}, err

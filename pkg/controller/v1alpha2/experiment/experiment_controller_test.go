@@ -50,6 +50,7 @@ func TestCreateExperiment(t *testing.T) {
 	mc := managerclientmock.NewMockManagerClient(mockCtrl)
 	mc.EXPECT().CreateExperimentInDB(gomock.Any()).Return(nil).AnyTimes()
 	mc.EXPECT().UpdateExperimentStatusInDB(gomock.Any()).Return(nil).AnyTimes()
+	mc.EXPECT().DeleteExperimentInDB(gomock.Any()).Return(nil).AnyTimes()
 
 	mockCtrl2 := gomock.NewController(t)
 	defer mockCtrl2.Finish()
@@ -103,8 +104,10 @@ func TestCreateExperiment(t *testing.T) {
 	}
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
+	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 
 	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 	g.Eventually(func() bool {
 		return errors.IsNotFound(c.Get(context.TODO(),
 			expectedRequest.NamespacedName, instance))
@@ -120,6 +123,7 @@ func TestReconcileExperiment(t *testing.T) {
 	mc := managerclientmock.NewMockManagerClient(mockCtrl)
 	mc.EXPECT().CreateExperimentInDB(gomock.Any()).Return(nil).AnyTimes()
 	mc.EXPECT().UpdateExperimentStatusInDB(gomock.Any()).Return(nil).AnyTimes()
+	mc.EXPECT().DeleteExperimentInDB(gomock.Any()).Return(nil).AnyTimes()
 
 	mockCtrl2 := gomock.NewController(t)
 	defer mockCtrl2.Finish()
@@ -238,6 +242,10 @@ spec:
 		return
 	}
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+	// We have 4 reconcile requests to finish the process.
+	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
+	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
+	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 
 	trials := &trialsv1alpha2.TrialList{}
@@ -253,6 +261,7 @@ spec:
 		Should(gomega.Equal(1))
 
 	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 	g.Eventually(func() bool {
 		return errors.IsNotFound(c.Get(context.TODO(),
 			expectedRequest.NamespacedName, instance))
