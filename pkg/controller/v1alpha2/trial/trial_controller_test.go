@@ -164,7 +164,7 @@ func TestReconcileTFJobTrial(t *testing.T) {
 		Should(gomega.MatchError("tfjobs.kubeflow.org \"test\" not found"))
 }
 
-func TestReconcileComplectedTFJobTrial(t *testing.T) {
+func TestReconcileCompletedTFJobTrial(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	instance := newFakeTrialWithTFJob()
 
@@ -174,6 +174,9 @@ func TestReconcileComplectedTFJobTrial(t *testing.T) {
 	mc := managerclientmock.NewMockManagerClient(mockCtrl)
 	mc.EXPECT().CreateTrialInDB(gomock.Any()).Return(nil).AnyTimes()
 	mc.EXPECT().UpdateTrialStatusInDB(gomock.Any()).Return(nil).AnyTimes()
+	mc.EXPECT().GetTrialObservationLog(gomock.Any()).Return(&api_pb.GetObservationLogReply{
+		ObservationLog: nil,
+	}, nil).AnyTimes()
 
 	// Setup the Manager and Controller.  Wrap the Controller Reconcile function so it writes each request to a
 	// channel when it is finished.
@@ -214,6 +217,7 @@ func TestReconcileComplectedTFJobTrial(t *testing.T) {
 	}
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	defer c.Delete(context.TODO(), instance)
+	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 
 	g.Eventually(func() error {
