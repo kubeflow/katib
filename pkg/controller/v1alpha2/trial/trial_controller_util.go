@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package util
+package trial
 
 import (
 	"strconv"
@@ -22,27 +22,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
-	common "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	commonv1beta2 "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta2"
 )
 
-var log = logf.Log.WithName("trial-status-util")
-
-const (
-	DefaultJobKind       = "Job"
-	TrialCreatedReason   = "TrialCreated"
-	TrialRunningReason   = "TrialRunning"
-	TrialSucceededReason = "TrialSucceeded"
-	TrialFailedReason    = "TrialFailed"
-	TrialKilledReason    = "TrialKilled"
-)
-
-func UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *unstructured.Unstructured) error {
+func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *unstructured.Unstructured) error {
 
 	kind := deployedJob.GetKind()
 	status, ok, unerr := unstructured.NestedFieldCopy(deployedJob.Object, "status")
@@ -96,29 +83,24 @@ func UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *uns
 	return nil
 }
 
-func UpdateTrialStatusObservation(instance *trialsv1alpha2.Trial, deployedJob *unstructured.Unstructured) error {
-
-	// read GetObservationLog call and update observation field
+func (r *ReconcileTrial) UpdateTrialStatusObservation(instance *trialsv1alpha2.Trial, deployedJob *unstructured.Unstructured) error {
 	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
-	request := &api_pb.GetObservationLogRequest{
-		TrialName:  instance.Name,
-		MetricName: objectiveMetricName,
-	}
-	if reply, err := common.GetObservationLog(request); err != nil {
+	reply, err := r.GetTrialObservationLog(instance)
+	if err != nil {
+		log.Error(err, "Get trial observation log error")
 		return err
-	} else {
-		if reply.ObservationLog != nil {
-			bestObjectiveValue := getBestObjectiveMetricValue(reply.ObservationLog.MetricLogs, instance.Spec.Objective.Type)
-			if bestObjectiveValue != nil {
-				if instance.Status.Observation == nil {
-					instance.Status.Observation = &commonv1alpha2.Observation{}
-					metric := commonv1alpha2.Metric{Name: objectiveMetricName, Value: *bestObjectiveValue}
-					instance.Status.Observation.Metrics = []commonv1alpha2.Metric{metric}
-				} else {
-					for index, metric := range instance.Status.Observation.Metrics {
-						if metric.Name == objectiveMetricName {
-							instance.Status.Observation.Metrics[index].Value = *bestObjectiveValue
-						}
+	}
+	if reply.ObservationLog != nil {
+		bestObjectiveValue := getBestObjectiveMetricValue(reply.ObservationLog.MetricLogs, instance.Spec.Objective.Type)
+		if bestObjectiveValue != nil {
+			if instance.Status.Observation == nil {
+				instance.Status.Observation = &commonv1alpha2.Observation{}
+				metric := commonv1alpha2.Metric{Name: objectiveMetricName, Value: *bestObjectiveValue}
+				instance.Status.Observation.Metrics = []commonv1alpha2.Metric{metric}
+			} else {
+				for index, metric := range instance.Status.Observation.Metrics {
+					if metric.Name == objectiveMetricName {
+						instance.Status.Observation.Metrics[index].Value = *bestObjectiveValue
 					}
 				}
 			}
