@@ -80,8 +80,8 @@ func main() {
 			mlSet := getMetricsReply.MetricsLogSets
 
 			//add dummy metricsValueTime
-			for i, _ := range mlSet {
-				for j, _ := range mlSet[i].MetricsLogs {
+			for i := range mlSet {
+				for j := range mlSet[i].MetricsLogs {
 					mlSet[i].MetricsLogs[j].Values = append(mlSet[i].MetricsLogs[j].Values, &api.MetricsValueTime{Time: "2018-01-01T12:00:00.999999999Z", Value: "1.0"})
 					mlSet[i].MetricsLogs[j].Values = append(mlSet[i].MetricsLogs[j].Values, &api.MetricsValueTime{Time: "2019-02-02T13:30:00.999999999Z", Value: "2.0"})
 				}

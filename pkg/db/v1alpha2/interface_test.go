@@ -223,11 +223,11 @@ func TestUpdateAlgorithmExtraSettings(t *testing.T) {
 	//settin1 is already stored and setting2 is not exist in DB.
 	exp_name := "test1"
 	exAlgoSet := []*api_pb.AlgorithmSetting{
-		&api_pb.AlgorithmSetting{
+		{
 			Name:  "setting1",
 			Value: "100",
 		},
-		&api_pb.AlgorithmSetting{
+		{
 			Name:  "setting2",
 			Value: "0.2",
 		},
@@ -268,11 +268,11 @@ func TestRegisterTrial(t *testing.T) {
 			},
 			ParameterAssignments: &api_pb.TrialSpec_ParameterAssignments{
 				Assignments: []*api_pb.ParameterAssignment{
-					&api_pb.ParameterAssignment{
+					{
 						Name:  "param1",
 						Value: "0.9",
 					},
-					&api_pb.ParameterAssignment{
+					{
 						Name:  "param2",
 						Value: "10",
 					},
@@ -284,19 +284,19 @@ func TestRegisterTrial(t *testing.T) {
 			Condition: api_pb.TrialStatus_RUNNING,
 			Observation: &api_pb.Observation{
 				Metrics: []*api_pb.Metric{
-					&api_pb.Metric{
+					{
 						Name:  "f1_score",
 						Value: "88.95",
 					},
-					&api_pb.Metric{
+					{
 						Name:  "loss",
 						Value: "0.5",
 					},
-					&api_pb.Metric{
+					{
 						Name:  "precision",
 						Value: "88.7",
 					},
-					&api_pb.Metric{
+					{
 						Name:  "recall",
 						Value: "89.2",
 					},
@@ -424,19 +424,19 @@ func TestUpdateTrialStatus(t *testing.T) {
 			CompletionTime: "2016-12-31T20:02:06.123456Z",
 			Observation: &api_pb.Observation{
 				Metrics: []*api_pb.Metric{
-					&api_pb.Metric{
+					{
 						Name:  "f1_score",
 						Value: "88.95",
 					},
-					&api_pb.Metric{
+					{
 						Name:  "loss",
 						Value: "0.5",
 					},
-					&api_pb.Metric{
+					{
 						Name:  "precision",
 						Value: "88.7",
 					},
-					&api_pb.Metric{
+					{
 						Name:  "recall",
 						Value: "89.2",
 					},
@@ -452,28 +452,28 @@ func TestUpdateTrialStatus(t *testing.T) {
 func TestRegisterObservationLog(t *testing.T) {
 	obsLog := &api_pb.ObservationLog{
 		MetricLogs: []*api_pb.MetricLog{
-			&api_pb.MetricLog{
+			{
 				TimeStamp: "2016-12-31T20:02:05.123456Z",
 				Metric: &api_pb.Metric{
 					Name:  "f1_score",
 					Value: "88.95",
 				},
 			},
-			&api_pb.MetricLog{
+			{
 				TimeStamp: "2016-12-31T20:02:05.123456Z",
 				Metric: &api_pb.Metric{
 					Name:  "loss",
 					Value: "0.5",
 				},
 			},
-			&api_pb.MetricLog{
+			{
 				TimeStamp: "2016-12-31T20:02:05.123456Z",
 				Metric: &api_pb.Metric{
 					Name:  "precision",
 					Value: "88.7",
 				},
 			},
-			&api_pb.MetricLog{
+			{
 				TimeStamp: "2016-12-31T20:02:05.123456Z",
 				Metric: &api_pb.Metric{
 					Name:  "recall",

@@ -45,13 +45,13 @@ func TestGetStudies(t *testing.T) {
 	s := &server{}
 	dbIf = mockDB
 	sc := []*api.StudyConfig{
-		&api.StudyConfig{
+		{
 			Name:               "test1",
 			Owner:              "admin",
 			OptimizationType:   1,
 			ObjectiveValueName: "obj_name1",
 		},
-		&api.StudyConfig{
+		{
 			Name:               "test2",
 			Owner:              "admin",
 			OptimizationType:   1,
