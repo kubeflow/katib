@@ -75,6 +75,9 @@ func isID(s string) bool {
 		if c == '-' {
 			return false
 		}
+		if c == '/' {
+			return false
+		}
 		i++
 	}
 	return pos

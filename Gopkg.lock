@@ -34,7 +34,8 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
-  digest = "1:19c2dd79ebd83f79c358ed8890f7ff9f10060268f9051f39f5ea65c74045b59f"
+  branch = "master"
+  digest = "1:c9335bca964be4fd1d245e44d798f106f191a4d7dfd0217228a8fd58f0e93606"
   name = "github.com/awalterschulze/gographviz"
   packages = [
     ".",
@@ -45,8 +46,7 @@
     "internal/token",
   ]
   pruneopts = "NUT"
-  revision = "c84395e536e1a1199093a4e6253d1bee99e4cd2a"
-  version = "v2.0"
+  revision = "fa59802746ab47bad3c8876d678d41299cdd1aaa"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -1163,7 +1163,6 @@
     "github.com/emicklei/go-restful",
     "github.com/ghodss/yaml",
     "github.com/go-sql-driver/mysql",
-    "github.com/golang/glog",
     "github.com/golang/mock/gomock",
     "github.com/golang/protobuf/jsonpb",
     "github.com/golang/protobuf/proto",
@@ -1215,6 +1214,7 @@
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/code-generator/cmd/deepcopy-gen",
+    "k8s.io/klog",
     "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",
     "sigs.k8s.io/controller-runtime/pkg/controller",

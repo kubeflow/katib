@@ -49,6 +49,11 @@ func (subgraphs *SubGraphs) Add(name string) {
 	}
 }
 
+// Remove removes a subgraph
+func (subgraphs *SubGraphs) Remove(name string) {
+	delete(subgraphs.SubGraphs, name)
+}
+
 // Sorted returns a sorted list of SubGraphs.
 func (subgraphs *SubGraphs) Sorted() []*SubGraph {
 	keys := make([]string, 0)
