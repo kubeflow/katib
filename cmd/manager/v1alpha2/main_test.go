@@ -118,7 +118,7 @@ func TestGetExperimentList(t *testing.T) {
 	req := &api_pb.GetExperimentListRequest{}
 
 	testExpList := []*api_pb.ExperimentSummary{
-		&api_pb.ExperimentSummary{
+		{
 			ExperimentName: "test1",
 			Status: &api_pb.ExperimentStatus{
 				Condition:      api_pb.ExperimentStatus_CREATED,
@@ -126,7 +126,7 @@ func TestGetExperimentList(t *testing.T) {
 				CompletionTime: "",
 			},
 		},
-		&api_pb.ExperimentSummary{
+		{
 			ExperimentName: "test2",
 			Status: &api_pb.ExperimentStatus{
 				Condition:      api_pb.ExperimentStatus_SUCCEEDED,
@@ -177,11 +177,11 @@ func TestUpdateAlgorithmExtraSettings(t *testing.T) {
 	req := &api_pb.UpdateAlgorithmExtraSettingsRequest{
 		ExperimentName: "test1",
 		ExtraAlgorithmSettings: []*api_pb.AlgorithmSetting{
-			&api_pb.AlgorithmSetting{
+			{
 				Name:  "set1",
 				Value: "10",
 			},
-			&api_pb.AlgorithmSetting{
+			{
 				Name:  "set2",
 				Value: "0.5",
 			},
@@ -205,11 +205,11 @@ func TestGetAlgorithmExtraSettings(t *testing.T) {
 		ExperimentName: "test1",
 	}
 	extraAlgoSets := []*api_pb.AlgorithmSetting{
-		&api_pb.AlgorithmSetting{
+		{
 			Name:  "set1",
 			Value: "10",
 		},
-		&api_pb.AlgorithmSetting{
+		{
 			Name:  "set2",
 			Value: "0.5",
 		},
@@ -239,11 +239,11 @@ func TestRegisterTrial(t *testing.T) {
 				RunSpec:        "",
 				ParameterAssignments: &api_pb.TrialSpec_ParameterAssignments{
 					Assignments: []*api_pb.ParameterAssignment{
-						&api_pb.ParameterAssignment{
+						{
 							Name:  "param1",
 							Value: "10",
 						},
-						&api_pb.ParameterAssignment{
+						{
 							Name:  "param2",
 							Value: "0.1",
 						},
@@ -256,19 +256,19 @@ func TestRegisterTrial(t *testing.T) {
 				CompletionTime: "",
 				Observation: &api_pb.Observation{
 					Metrics: []*api_pb.Metric{
-						&api_pb.Metric{
+						{
 							Name:  "f1_score",
 							Value: "88.95",
 						},
-						&api_pb.Metric{
+						{
 							Name:  "loss",
 							Value: "0.5",
 						},
-						&api_pb.Metric{
+						{
 							Name:  "precision",
 							Value: "88.7",
 						},
-						&api_pb.Metric{
+						{
 							Name:  "recall",
 							Value: "89.2",
 						},
@@ -313,18 +313,18 @@ func TestGetTrialList(t *testing.T) {
 		Filter:         "trial",
 	}
 	trialList := []*api_pb.Trial{
-		&api_pb.Trial{
+		{
 			Name: "test1-trial1",
 			Spec: &api_pb.TrialSpec{
 				ExperimentName: "test1",
 				RunSpec:        "",
 				ParameterAssignments: &api_pb.TrialSpec_ParameterAssignments{
 					Assignments: []*api_pb.ParameterAssignment{
-						&api_pb.ParameterAssignment{
+						{
 							Name:  "param1",
 							Value: "10",
 						},
-						&api_pb.ParameterAssignment{
+						{
 							Name:  "param2",
 							Value: "0.1",
 						},
@@ -337,19 +337,19 @@ func TestGetTrialList(t *testing.T) {
 				CompletionTime: "",
 				Observation: &api_pb.Observation{
 					Metrics: []*api_pb.Metric{
-						&api_pb.Metric{
+						{
 							Name:  "f1_score",
 							Value: "88.95",
 						},
-						&api_pb.Metric{
+						{
 							Name:  "loss",
 							Value: "0.5",
 						},
-						&api_pb.Metric{
+						{
 							Name:  "precision",
 							Value: "88.7",
 						},
-						&api_pb.Metric{
+						{
 							Name:  "recall",
 							Value: "89.2",
 						},
@@ -357,18 +357,18 @@ func TestGetTrialList(t *testing.T) {
 				},
 			},
 		},
-		&api_pb.Trial{
+		{
 			Name: "test1-trial2",
 			Spec: &api_pb.TrialSpec{
 				ExperimentName: "test1",
 				RunSpec:        "",
 				ParameterAssignments: &api_pb.TrialSpec_ParameterAssignments{
 					Assignments: []*api_pb.ParameterAssignment{
-						&api_pb.ParameterAssignment{
+						{
 							Name:  "param1",
 							Value: "20",
 						},
-						&api_pb.ParameterAssignment{
+						{
 							Name:  "param2",
 							Value: "0.5",
 						},
@@ -413,11 +413,11 @@ func TestGetTrial(t *testing.T) {
 			RunSpec:        "",
 			ParameterAssignments: &api_pb.TrialSpec_ParameterAssignments{
 				Assignments: []*api_pb.ParameterAssignment{
-					&api_pb.ParameterAssignment{
+					{
 						Name:  "param1",
 						Value: "10",
 					},
-					&api_pb.ParameterAssignment{
+					{
 						Name:  "param2",
 						Value: "0.1",
 					},
@@ -430,19 +430,19 @@ func TestGetTrial(t *testing.T) {
 			CompletionTime: "",
 			Observation: &api_pb.Observation{
 				Metrics: []*api_pb.Metric{
-					&api_pb.Metric{
+					{
 						Name:  "f1_score",
 						Value: "88.95",
 					},
-					&api_pb.Metric{
+					{
 						Name:  "loss",
 						Value: "0.5",
 					},
-					&api_pb.Metric{
+					{
 						Name:  "precision",
 						Value: "88.7",
 					},
-					&api_pb.Metric{
+					{
 						Name:  "recall",
 						Value: "89.2",
 					},
@@ -475,19 +475,19 @@ func TestUpdateTrialStatus(t *testing.T) {
 			CompletionTime: "2019-02-03T05:05:06+09:00",
 			Observation: &api_pb.Observation{
 				Metrics: []*api_pb.Metric{
-					&api_pb.Metric{
+					{
 						Name:  "f1_score",
 						Value: "88.95",
 					},
-					&api_pb.Metric{
+					{
 						Name:  "loss",
 						Value: "0.5",
 					},
-					&api_pb.Metric{
+					{
 						Name:  "precision",
 						Value: "88.7",
 					},
-					&api_pb.Metric{
+					{
 						Name:  "recall",
 						Value: "89.2",
 					},
@@ -513,28 +513,28 @@ func TestReportObservationLog(t *testing.T) {
 		TrialName: "test1-trial1",
 		ObservationLog: &api_pb.ObservationLog{
 			MetricLogs: []*api_pb.MetricLog{
-				&api_pb.MetricLog{
+				{
 					TimeStamp: "2019-02-03T04:05:06+09:00",
 					Metric: &api_pb.Metric{
 						Name:  "f1_score",
 						Value: "88.95",
 					},
 				},
-				&api_pb.MetricLog{
+				{
 					TimeStamp: "2019-02-03T04:05:06+09:00",
 					Metric: &api_pb.Metric{
 						Name:  "loss",
 						Value: "0.5",
 					},
 				},
-				&api_pb.MetricLog{
+				{
 					TimeStamp: "2019-02-03T04:05:06+09:00",
 					Metric: &api_pb.Metric{
 						Name:  "precision",
 						Value: "88.7",
 					},
 				},
-				&api_pb.MetricLog{
+				{
 					TimeStamp: "2019-02-03T04:05:06+09:00",
 					Metric: &api_pb.Metric{
 						Name:  "recall",
@@ -566,28 +566,28 @@ func TestGetObservationLog(t *testing.T) {
 
 	obs := &api_pb.ObservationLog{
 		MetricLogs: []*api_pb.MetricLog{
-			&api_pb.MetricLog{
+			{
 				TimeStamp: "2019-02-03T04:05:06+09:00",
 				Metric: &api_pb.Metric{
 					Name:  "f1_score",
 					Value: "88.95",
 				},
 			},
-			&api_pb.MetricLog{
+			{
 				TimeStamp: "2019-02-03T04:05:06+09:00",
 				Metric: &api_pb.Metric{
 					Name:  "loss",
 					Value: "0.5",
 				},
 			},
-			&api_pb.MetricLog{
+			{
 				TimeStamp: "2019-02-03T04:05:06+09:00",
 				Metric: &api_pb.Metric{
 					Name:  "precision",
 					Value: "88.7",
 				},
 			},
-			&api_pb.MetricLog{
+			{
 				TimeStamp: "2019-02-03T04:05:06+09:00",
 				Metric: &api_pb.Metric{
 					Name:  "recall",

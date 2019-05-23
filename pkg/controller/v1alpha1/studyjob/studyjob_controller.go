@@ -594,7 +594,7 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 			katibv1alpha1.TrialSet{
 				TrialID: t.TrialId,
 				WorkerList: []katibv1alpha1.WorkerCondition{
-					katibv1alpha1.WorkerCondition{
+					{
 						WorkerID:  wid,
 						Kind:      wkind.Kind,
 						Condition: katibv1alpha1.ConditionCreated,
