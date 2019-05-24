@@ -73,6 +73,7 @@ sed -i -e "s@image: katib\/v1alpha2\/suggestion-random@image: ${REGISTRY}\/${REP
 sed -i -e "s@image: katib\/v1alpha2\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-bayesianoptimization:${VERSION}@" manifests/v1alpha2/suggestion/bayesianoptimization/deployment.yaml
 sed -i -e "s@image: katib\/v1alpha2\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-nasrl:${VERSION}@" manifests/v1alpha2/suggestion/nasrl/deployment.yaml
 sed -i -e "s@image: katib\/v1alpha2\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-grid:${VERSION}@" manifests/v1alpha2/suggestion/grid/deployment.yaml
+sed -i -e "s@image: katib\/v1alpha2\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-hyperband:${VERSION}@" manifests/v1alpha2/suggestion/hyperband/deployment.yaml
 
 ./scripts/v1alpha2/deploy.sh
 
