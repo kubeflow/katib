@@ -30,13 +30,29 @@ vet: depend generate
 update:
 	hack/update-gofmt.sh
 
-# Build Katib images
+# Build Katib images for v1alpha2
 build: 
+	bash scripts/v1alpha2/build.sh
+
+# Deploy katib v1alpha2 manifests into a k8s cluster
+deploy: 
+	bash scripts/v1alpha2/deploy.sh
+
+# Undeploy katib v1alpha2 manifests into a k8s cluster
+undeploy:
+	bash scripts/v1alpha2/undeploy.sh
+
+# Build Katib images for v1alpha1
+buildv1alpha1:
 	bash scripts/v1alpha1/build.sh
 
-# Deploy katib manifests into a k8s cluster
-deploy: 
+# Deploy katib v1alpha1 manifests into a k8s cluster
+deployv1alpha1:
 	bash scripts/v1alpha1/deploy.sh
+
+# Undeploy katib v1alpha1 manifests into a k8s cluster
+undeployv1alpha1:
+	bash scripts/v1alpha1/undeploy.sh
 
 # Generate code
 generate:
