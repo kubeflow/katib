@@ -32,8 +32,8 @@ cd ${SCRIPT_ROOT}
 kubectl delete -f manifests/v1alpha2/katib-controller
 kubectl delete -f manifests/v1alpha2/katib/manager
 kubectl delete -f manifests/v1alpha2/katib/manager-rest
-kubectl delete -f manifests/v1alpha2/katib/pv
 kubectl delete -f manifests/v1alpha2/katib/db
+kubectl delete -f manifests/v1alpha2/katib/pv
 kubectl delete -f manifests/v1alpha2/katib/suggestion/random
 kubectl delete -f manifests/v1alpha2
 cd - > /dev/null
