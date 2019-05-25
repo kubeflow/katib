@@ -95,6 +95,9 @@ func openSQLConn(driverName string, dataSourceName string, interval time.Duratio
 				if err = db.Ping(); err == nil {
 					return db, nil
 				}
+				klog.Infof("Ping to Katib db failed: %v", err)
+			} else {
+				klog.Infof("Open sql connection failed: %v", err)
 			}
 		case <-timeoutC:
 			return nil, fmt.Errorf("Timeout waiting for DB conn successfully opened.")
