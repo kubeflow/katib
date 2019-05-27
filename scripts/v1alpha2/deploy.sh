@@ -28,5 +28,6 @@ kubectl apply -f manifests/v1alpha2/katib/manager
 kubectl apply -f manifests/v1alpha2/katib/manager-rest
 kubectl apply -f manifests/v1alpha2/katib/pv
 kubectl apply -f manifests/v1alpha2/katib/db
+kubectl apply -f manifests/v1alpha2/katib/ui
 kubectl apply -f manifests/v1alpha2/katib/suggestion/random
 cd - > /dev/null

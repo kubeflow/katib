@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
       - name: katib-suggestion-random
-        image: katib/suggestion-random
+        image: katib/v1alpha2/suggestion-random
+        imagePullPolicy: IfNotPresent
         ports:
         - name: api
           containerPort: 6789
