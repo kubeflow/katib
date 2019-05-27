@@ -11,6 +11,7 @@ spec:
   ports:
     - port: 6789
       protocol: TCP
+      name: api
   selector:
     app: katib
     component: manager
