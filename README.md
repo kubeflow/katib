@@ -62,7 +62,6 @@ In v1alpha2, `Trial` is defined as a CRD `Trial` in Kubernetes.
 
 ### Job
 
-`Job` is also known as `Worker` in [Google Vizier][3].
 A `Job` refers to a process responsible for evaluating a Pending `Trial` and calculating its objective value.
 
 The job kind can be [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/), [Kubeflow TFJob](https://www.kubeflow.org/docs/guides/components/tftraining/) or [Kubeflow PyTorchJob](https://www.kubeflow.org/docs/guides/components/pytorch/).
