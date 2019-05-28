@@ -32,7 +32,7 @@ func (b Bracket) Swap(i, j int) {
 }
 
 func (b Bracket) Less(i, j int) bool {
-	return b[i].value > b[j].value
+	return b[i].value < b[j].value
 }
 
 type HyperBandParameters struct {
@@ -142,9 +142,9 @@ func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.Ma
 	child := Bracket{}
 
 	if sconf.OptimizationType == api.OptimizationType_MINIMIZE {
-		child = parent[len(parent)-n:]
-	} else if sconf.OptimizationType == api.OptimizationType_MAXIMIZE {
 		child = parent[:n]
+	} else if sconf.OptimizationType == api.OptimizationType_MAXIMIZE {
+		child = parent[len(parent)-n:]
 	}
 	gtreq := &api.GetTrialsRequest{
 		StudyId: studyID,
