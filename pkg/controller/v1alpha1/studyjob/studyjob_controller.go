@@ -542,21 +542,6 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 }
 
 func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, ns string) (bool, error) {
-	//Check Suggestion Count
-	sps, err := getSuggestionParam(c, instance.Status.SuggestionParameterID)
-	if err != nil {
-		return false, err
-	}
-	for i := range sps {
-		if sps[i].Name == "SuggestionCount" {
-			count, _ := strconv.Atoi(sps[i].Value)
-			if count >= instance.Status.SuggestionCount+1 {
-				//Suggestion count mismatched. May be duplicate suggestion request
-				return false, nil
-			}
-			sps[i].Value = strconv.Itoa(instance.Status.SuggestionCount + 1)
-		}
-	}
 	//GetSuggestion
 	getSuggestReply, err := getSuggestion(
 		c,
@@ -604,7 +589,17 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 			},
 		)
 	}
+
 	//Update Suggestion Count
+	sps, err := getSuggestionParam(c, instance.Status.SuggestionParameterID)
+	if err != nil {
+		return false, err
+	}
+	for i := range sps {
+		if sps[i].Name == "SuggestionCount" {
+			sps[i].Value = strconv.Itoa(instance.Status.SuggestionCount + 1)
+		}
+	}
 	sspr := &katibapi.SetSuggestionParametersRequest{
 		StudyId:              instance.Status.StudyID,
 		SuggestionAlgorithm:  instance.Spec.SuggestionSpec.SuggestionAlgorithm,
