@@ -47,7 +47,10 @@ func (d *MetricsCollector) CollectWorkerLog(wID string, wkind string, objectiveV
 	} else {
 		labelMap["job-name"] = wID
 	}
-	pl, _ := d.clientset.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labels.Set(labelMap).String(), IncludeUninitialized: true})
+	pl, err := d.clientset.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labels.Set(labelMap).String(), IncludeUninitialized: true})
+	if err != nil {
+		return nil, err
+	}
 	if len(pl.Items) == 0 {
 		return nil, errors.New(fmt.Sprintf("No Pods are found in Job %v", wID))
 	}
