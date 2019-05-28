@@ -66,10 +66,11 @@ echo "REPO_NAME ${REPO_NAME}"
 echo "VERSION ${VERSION}"
 
 sed -i -e "s@image: katib\/v1alpha2\/katib-controller@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-controller:${VERSION}@" manifests/v1alpha2/katib-controller/katib-controller.yaml
-sed -i -e "s@image: katib\/v1alpha2\/katib-manager@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-manager:${VERSION}@" manifests/v1alpha2/manager/deployment.yaml
-sed -i -e "s@image: katib\/v1alpha2\/katib-manager-rest@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-manager-rest:${VERSION}@" manifests/v1alpha2/manager-rest/deployment.yaml
-sed -i -e "s@image: katib\/v1alpha2\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-ui:${VERSION}@" manifests/v1alpha2/ui/deployment.yaml
-sed -i -e "s@image: katib\/v1alpha2\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-random:${VERSION}@" manifests/v1alpha2/suggestion/random/deployment.yaml
+sed -i -e "s@image: katib\/v1alpha2\/katib-manager@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-manager:${VERSION}@" manifests/v1alpha2/katib/manager/deployment.yaml
+sed -i -e "s@image: katib\/v1alpha2\/katib-manager-rest@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-manager-rest:${VERSION}@" manifests/v1alpha2/katib/manager-rest/deployment.yaml
+sed -i -e "s@image: katib\/v1alpha2\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-ui:${VERSION}@" manifests/v1alpha2/katib/ui/deployment.yaml
+sed -i -e "s@image: katib\/v1alpha2\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-random:${VERSION}@" manifests/v1alpha2/katib/suggestion/random/deployment.yaml
+sed -i -e "s@image: katib\/v1alpha2\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-bayesianoptimization:${VERSION}@" manifests/v1alpha2/katib/suggestion/bayesianoptimization/deployment.yaml
 
 ./scripts/v1alpha2/deploy.sh
 
