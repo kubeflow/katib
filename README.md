@@ -42,12 +42,11 @@ Katib stands for `secretary` in Arabic. As `Vizier` stands for a high official o
 
 ## Concepts in Katib
 
-As in [Google Vizier][3], Katib also has the concepts of Experiment, Trial and Suggestion.
+Katib has the concepts of Experiment, Trial, Job and Suggestion.
 
 ### Experiment
 
-`Experiment` is also known as `Study` in [Google Vizier][3].
-It represents a single optimization run over a feasible space.
+`Experiment` represents a single optimization run over a feasible space.
 Each `Experiment` contains a configuration describing the feasible space, as well as a set of Trials. 
 It is assumed that objective function f(x) does not change in the course of a `Experiment`.
 
