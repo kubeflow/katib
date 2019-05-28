@@ -77,8 +77,8 @@ Currently Katib supports the following exploration algorithms in v1alpha1:
 * grid search
 * [hyperband](https://arxiv.org/pdf/1603.06560.pdf)
 * [bayesian optimization](https://arxiv.org/pdf/1012.2599.pdf)
-* NAS based on reinforcement learning. The algorithm follows the idea proposed in [*Neural Architecture Search with Reinforcement Learning*](https://arxiv.org/abs/1611.01578), and the implementation is based on the open source implementation of [*Efﬁcient Neural Architecture Search via Parameter Sharing*](https://github.com/melodyguan/enas) (Also known as ENAS).
-* [NAS based on EnvelopeNets](https://arxiv.org/pdf/1803.06744.pdf)
+* [NAS based on reinforcement learning](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1alpha1/NAS_Reinforcement_Learning)
+* [NAS based on EnvelopeNets](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1alpha1/NAS_Envelopenet)
 
 And Katib supports the following exploration algorithms in v1alpha2:
 
