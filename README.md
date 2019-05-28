@@ -12,7 +12,7 @@ The system is inspired by [Google vizier][3] and supports multiple ML/DL framewo
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Name](#name)
 - [Concepts in Katib](#concepts-in-katib)
