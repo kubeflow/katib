@@ -22,7 +22,8 @@ data:
               serviceAccountName: metrics-collector
               containers:
               - name: {{.Trial}}
-                image: katib/metrics-collector
+                image: katib/v1alpha2/metrics-collector
+                imagePullPolicy: IfNotPresent
                 command: ["./metricscollector"]
                 args:
                 - "-e"
