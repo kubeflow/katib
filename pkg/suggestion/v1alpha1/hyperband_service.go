@@ -365,6 +365,9 @@ func (h *HyperBandSuggestService) evalWorkers(ctx context.Context, c api.Manager
 			if ml.WorkerStatus != api.State_COMPLETED {
 				return nil, nil
 			}
+			if len(ml.MetricsLogs) == 0 {
+				return nil, nil
+			}
 			v, _ := strconv.ParseFloat(ml.MetricsLogs[0].Values[len(ml.MetricsLogs[0].Values)-1].Value, 64)
 			vs += v
 		}
@@ -441,6 +444,10 @@ func (h *HyperBandSuggestService) GetSuggestions(ctx context.Context, in *api.Ge
 	hbparam.evaluatingTrials = tids
 	h.shLoopParamUpdate(in.StudyId, hbparam)
 	err = h.saveSuggestionParameters(ctx, c, in.StudyId, in.SuggestionAlgorithm, in.ParamId, hbparam)
+	if err != nil {
+		klog.Fatalf("saveSuggestionParameters failed: %v", err)
+		return &api.GetSuggestionsReply{}, err
+	}
 	return &api.GetSuggestionsReply{
 		Trials: ts,
 	}, nil
