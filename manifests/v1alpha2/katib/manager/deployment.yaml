@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
       - name: katib-manager
-        image: katib/katib-manager
+        image: katib/v1alpha2/katib-manager
+        imagePullPolicy: IfNotPresent
         env:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:

@@ -1,17 +1,17 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: katib-manager
+  name: katib-ui
   namespace: kubeflow
   labels:
     app: katib
-    component: manager
+    component: ui
 spec:
   type: ClusterIP
   ports:
-    - port: 6789
+    - port: 80
       protocol: TCP
-      name: api
+      name: ui
   selector:
     app: katib
-    component: manager
+    component: ui
