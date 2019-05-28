@@ -39,4 +39,4 @@ cd ${GO_DIR}
 
 cp cmd/suggestion/random/v1alpha2/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha2/suggestion-random:${VERSION} --project=${PROJECT}
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha2/suggestion-random:${VERSION} ${REGISTRY}/${REPO_NAME}/suggestion-random:latest --verbosity=info
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha2/suggestion-random:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha2/suggestion-random:latest --verbosity=info
