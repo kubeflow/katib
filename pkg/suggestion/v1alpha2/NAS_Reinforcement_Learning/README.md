@@ -40,8 +40,8 @@ The output of `GetSuggestion()` consists of two parts: `architecture` and `nn_co
 ```
 {
     "num_layers": 8, 
-    "input_size": [32, 32, 3], 
-    "output_size": [10], 
+    "input_sizes": [32, 32, 3], 
+    "output_sizes": [10], 
     "embedding": {
         "27": {
             "opt_id": 27, 

@@ -1,4 +1,4 @@
-def parseSuggestionParam(params_raw):
+def parseAlgorithmSettings(params_raw):
     param_standard = {
         "lstm_num_cells":       ['value', int, [1, 'inf']],
         "lstm_num_layers":      ['value', int, [1, 'inf']],
@@ -15,7 +15,7 @@ def parseSuggestionParam(params_raw):
         "baseline_decay":       ['value', float, [0.0, 1.0]],
     }
 
-    suggestion_params = {
+    algorithm_settings = {
         "lstm_num_cells":       64,
         "lstm_num_layers":      1,
         "lstm_keep_prob":       1.0,
@@ -39,29 +39,26 @@ def parseSuggestionParam(params_raw):
         except:
             correct = False
             print("Parameter {} is of wrong type. Set back to default value {}"
-                  .format(param_name, suggestion_params[param_name]))
+                  .format(param_name, algorithm_settings[param_name]))
 
         if correct and check_mode == 'value':
             if not ((supposed_range[0] == '-inf' or converted_value >= supposed_range[0]) and
                     (supposed_range[1] == 'inf' or converted_value <= supposed_range[1])):
                 correct = False
                 print("Parameter {} out of range. Set back to default value {}"
-                      .format(param_name, suggestion_params[param_name]))
+                      .format(param_name, algorithm_settings[param_name]))
         elif correct and check_mode == 'categorical':
             if converted_value not in supposed_range:
                 correct = False
                 print("Parameter {} out of range. Set back to default value {}"
-                      .format(param_name, suggestion_params[param_name]))
+                      .format(param_name, algorithm_settings[param_name]))
 
         if correct:
-            suggestion_params[param_name] = converted_value
+            algorithm_settings[param_name] = converted_value
 
 
     for param in params_raw:
-        # SuggestionCount is automatically added by controller and not used currently
-        if param.name == "SuggestionCount":
-            continue
-        if param.name in suggestion_params.keys():
+        if param.name in algorithm_settings.keys():
             checktype(param.name,
                       param.value,
                       param_standard[param.name][0],  # mode
@@ -70,4 +67,4 @@ def parseSuggestionParam(params_raw):
         else:
             print("Unknown Parameter name: {}".format(param.name))
 
-    return suggestion_params
+    return algorithm_settings
