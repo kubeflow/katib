@@ -34,7 +34,7 @@ make update
 You can build all images from source for v1alpha2 as follows:
 
 ```bash
-make build
+make images
 ```
 
 You can deploy katib v1alpha2 manifests into a k8s cluster as follows:
