@@ -1,9 +1,7 @@
 language: go
 
 go:
-  - "1.10"
-  - "1.11"
-  - "1.12"
+  - "1.12.5"
 
 go_import_path: github.com/kubeflow/katib
 
