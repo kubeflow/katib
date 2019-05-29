@@ -17,5 +17,6 @@ install:
   - go get github.com/mattn/goveralls
 
 script:
+  - make check
   - make test
   - goveralls -coverprofile=coverage.out
