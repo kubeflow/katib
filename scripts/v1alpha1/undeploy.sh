@@ -29,8 +29,8 @@ done
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
 cd ${SCRIPT_ROOT}
-kubectl delete -f manifests/v1alpha1/pv
 kubectl delete -f manifests/v1alpha1/vizier/db
+kubectl delete -f manifests/v1alpha1/pv
 kubectl delete -f manifests/v1alpha1/vizier/core
 kubectl delete -f manifests/v1alpha1/vizier/core-rest
 kubectl delete -f manifests/v1alpha1/vizier/ui

@@ -1,19 +1,27 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"net/http"
 
 	ui "github.com/kubeflow/katib/pkg/ui/v1alpha2"
 )
 
 var (
-	port = "80"
+	port, host, buildDir *string
 )
 
+func init() {
+	port = flag.String("port", "80", "the port to listen to for incoming HTTP connections")
+	host = flag.String("host", "0.0.0.0", "the host to listen to for incoming HTTP connections")
+	buildDir = flag.String("build-dir", "/app/build", "the dir of frontend")
+}
 func main() {
+	flag.Parse()
 	kuh := ui.NewKatibUIHandler()
 
-	frontend := http.FileServer(http.Dir("/app/build/"))
+	frontend := http.FileServer(http.Dir(*buildDir))
 	http.Handle("/katib/", http.StripPrefix("/katib/", frontend))
 
 	http.HandleFunc("/katib/fetch_hp_jobs/", kuh.FetchHPJobs)
@@ -33,5 +41,7 @@ func main() {
 	http.HandleFunc("/katib/fetch_collector_templates/", kuh.FetchMetricsCollectorTemplates)
 	http.HandleFunc("/katib/update_template/", kuh.AddEditDeleteTemplate)
 
-	http.ListenAndServe(":"+port, nil)
+	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", *host, *port), nil); err != nil {
+		panic(err)
+	}
 }

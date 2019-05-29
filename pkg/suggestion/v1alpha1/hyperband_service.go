@@ -32,7 +32,7 @@ func (b Bracket) Swap(i, j int) {
 }
 
 func (b Bracket) Less(i, j int) bool {
-	return b[i].value > b[j].value
+	return b[i].value < b[j].value
 }
 
 type HyperBandParameters struct {
@@ -142,9 +142,9 @@ func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.Ma
 	child := Bracket{}
 
 	if sconf.OptimizationType == api.OptimizationType_MINIMIZE {
-		child = parent[len(parent)-n:]
-	} else if sconf.OptimizationType == api.OptimizationType_MAXIMIZE {
 		child = parent[:n]
+	} else if sconf.OptimizationType == api.OptimizationType_MAXIMIZE {
+		child = parent[len(parent)-n:]
 	}
 	gtreq := &api.GetTrialsRequest{
 		StudyId: studyID,
@@ -365,6 +365,9 @@ func (h *HyperBandSuggestService) evalWorkers(ctx context.Context, c api.Manager
 			if ml.WorkerStatus != api.State_COMPLETED {
 				return nil, nil
 			}
+			if len(ml.MetricsLogs) == 0 {
+				return nil, nil
+			}
 			v, _ := strconv.ParseFloat(ml.MetricsLogs[0].Values[len(ml.MetricsLogs[0].Values)-1].Value, 64)
 			vs += v
 		}
@@ -441,6 +444,10 @@ func (h *HyperBandSuggestService) GetSuggestions(ctx context.Context, in *api.Ge
 	hbparam.evaluatingTrials = tids
 	h.shLoopParamUpdate(in.StudyId, hbparam)
 	err = h.saveSuggestionParameters(ctx, c, in.StudyId, in.SuggestionAlgorithm, in.ParamId, hbparam)
+	if err != nil {
+		klog.Fatalf("saveSuggestionParameters failed: %v", err)
+		return &api.GetSuggestionsReply{}, err
+	}
 	return &api.GetSuggestionsReply{
 		Trials: ts,
 	}, nil

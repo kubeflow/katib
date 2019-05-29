@@ -1,25 +1,27 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: katib-manager-rest
+  name: katib-ui
   namespace: kubeflow
   labels:
     app: katib
-    component: manager-rest
+    component: ui
 spec:
   replicas: 1
   template:
     metadata:
-      name: katib-manager-rest
+      name: katib-ui
       labels:
         app: katib
-        component: manager-rest
+        component: ui
     spec:
       containers:
-      - name: katib-manager-rest
-        image: katib/katib-manager-rest
+      - name: katib-ui
+        image: katib/v1alpha2/katib-ui
+        imagePullPolicy: IfNotPresent
         command:
-          - './katib-manager-rest'
+          - './katib-ui'
         ports:
-        - name: api
+        - name: ui
           containerPort: 80
+      serviceAccountName: katib-ui

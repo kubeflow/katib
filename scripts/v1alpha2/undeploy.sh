@@ -30,10 +30,10 @@ SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
 cd ${SCRIPT_ROOT}
 kubectl delete -f manifests/v1alpha2/katib-controller
-kubectl delete -f manifests/v1alpha2/katib/manager
-kubectl delete -f manifests/v1alpha2/katib/manager-rest
-kubectl delete -f manifests/v1alpha2/katib/pv
-kubectl delete -f manifests/v1alpha2/katib/db
-kubectl delete -f manifests/v1alpha2/katib/suggestion/random
+kubectl delete -f manifests/v1alpha2/manager
+kubectl delete -f manifests/v1alpha2/manager-rest
+kubectl delete -f manifests/v1alpha2/db
+kubectl delete -f manifests/v1alpha2/pv
+kubectl delete -f manifests/v1alpha2/suggestion/random
 kubectl delete -f manifests/v1alpha2
 cd - > /dev/null

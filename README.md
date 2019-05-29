@@ -7,20 +7,22 @@
 [![Coverage Status](https://coveralls.io/repos/github/kubeflow/katib/badge.svg?branch=master)](https://coveralls.io/github/kubeflow/katib?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kubeflow/katib)](https://goreportcard.com/report/github.com/kubeflow/katib)
 
-Hyperparameter Tuning on Kubernetes.
-This project is inspired by [Google vizier](https://static.googleusercontent.com/media/research.google.com/ja//pubs/archive/bcb15507f4b52991a0783013df4222240e942381.pdf). Katib is a scalable and flexible hyperparameter tuning framework and is tightly integrated with kubernetes. Also it does not depend on a specific Deep Learning framework (e.g. TensorFlow, MXNet, and PyTorch).
+Katib is a Kubernetes Native System for [Hyperparameter Tuning][1] and [Neural Architecture Search][2].
+The system is inspired by [Google vizier][3] and supports multiple ML/DL frameworks (e.g. TensorFlow, MXNet, and PyTorch).
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Name](#name)
-- [Concepts in Google Vizier](#concepts-in-google-vizier)
-  - [Study](#study)
+- [Concepts in Katib](#concepts-in-katib)
+  - [Experiment](#experiment)
   - [Trial](#trial)
+  - [Job](#job)
   - [Suggestion](#suggestion)
 - [Components in Katib](#components-in-katib)
+  - [v1alpha1](#v1alpha1)
+  - [v1alpha2](#v1alpha2)
 - [Getting Started](#getting-started)
 - [Web UI](#web-ui)
 - [API Documentation](#api-documentation)
@@ -38,45 +40,89 @@ This project is inspired by [Google vizier](https://static.googleusercontent.com
 
 Katib stands for `secretary` in Arabic. As `Vizier` stands for a high official or a prime minister in Arabic, this project Katib is named in the honor of Vizier.
 
-## Concepts in Google Vizier
+## Concepts in Katib
 
-As in Google Vizier, Katib also has the concepts of Study, Trial and Suggestion.
+Katib has the concepts of Experiment, Trial, Job and Suggestion.
 
-### Study
+### Experiment
 
-Represents a single optimization run over a feasible space. Each Study contains a configuration describing the feasible space, as well as a set of Trials. It is assumed that objective function f(x) does not change in the course of a Study.
+`Experiment` represents a single optimization run over a feasible space.
+Each `Experiment` contains a configuration describing the feasible space, as well as a set of Trials. 
+It is assumed that objective function f(x) does not change in the course of a `Experiment`.
+
+In v1alpha1, `Experiment` is defined as a CRD `StudyJob` in Kubernetes.
+In v1alpha2, `Experiment` is defined as a CRD `Experiment`.
 
 ### Trial
 
-A Trial is a list of parameter values, x, that will lead to a single evaluation of f(x). A Trial can be “Completed”, which means that it has been evaluated and the objective value f(x) has been assigned to it, otherwise it is “Pending”.
-One trial corresponds to one job, and the job kind can be [k8s Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/), [TFJob](https://www.kubeflow.org/docs/guides/components/tftraining/) or [PyTorchJob](https://www.kubeflow.org/docs/guides/components/pytorch/), which depends on the Study's worker kind.
+A `Trial` is a list of parameter values, x, that will lead to a single evaluation of f(x). A Trial can be “Completed”, which means that it has been evaluated and the objective value f(x) has been assigned to it, otherwise it is “Pending”.
+
+In v1alpha1, `Trial` is just a concept inside Katib and not exposed to users.
+In v1alpha2, `Trial` is defined as a CRD `Trial` in Kubernetes.
+
+### Job
+
+A `Job` refers to a process responsible for evaluating a Pending `Trial` and calculating its objective value.
+
+The job kind can be [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/), [Kubeflow TFJob](https://www.kubeflow.org/docs/guides/components/tftraining/) or [Kubeflow PyTorchJob](https://www.kubeflow.org/docs/guides/components/pytorch/).
+Thus Katib supports multiple frameworks with the help of different job kinds.
 
 ### Suggestion
 
-A Suggestion is an algorithm to construct a parameter set. Currently Katib supports the following exploration algorithms:
+A Suggestion is an algorithm to construct a parameter set according to the `Experiment`. Then `Trial` will be created to evaluate the parameter set.
 
-* random
-* grid
+Currently Katib supports the following exploration algorithms in v1alpha1:
+
+* random search
+* grid search
 * [hyperband](https://arxiv.org/pdf/1603.06560.pdf)
 * [bayesian optimization](https://arxiv.org/pdf/1012.2599.pdf)
+* [NAS based on reinforcement learning](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1alpha1/NAS_Reinforcement_Learning)
+* [NAS based on EnvelopeNets](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1alpha1/NAS_Envelopenet)
+
+And Katib supports the following exploration algorithms in v1alpha2:
+
+* random search
 
 ## Components in Katib
+
+### v1alpha1
 
 Katib consists of several components as shown below. Each component is running on k8s as a deployment.
 Each component communicates with others via GRPC and the API is defined at `pkg/api/v1alpha1/api.proto`.
 
 - vizier: main components.
-    - vizier-core : API server of vizier.
-    - vizier-db
-- suggestion : implementation of each exploration algorithm.
-    - vizier-suggestion-random
-    - vizier-suggestion-grid
-    - vizier-suggestion-hyperband
-    - vizier-suggestion-bayesianoptimization
+  - vizier-core: GRPC API server of vizier.
+  - vizier-core-rest: REST API server of vizier.
+  - vizier-db: Data storage backend of vizier.
+  - suggestion: implementation of each exploration algorithm.
+    - suggestion-random
+    - suggestion-grid
+    - suggestion-hyperband
+    - suggestion-bayesianoptimization
+    - suggestion-nasrl
+    - suggestion-nasenvelopenets
+- studyjob-controller: Controller for `StudyJob` CRD in Kubernetes.
 - modeldb : WebUI
-    - modeldb-frontend
-    - modeldb-backend
-    - modeldb-db
+  - modeldb-frontend
+  - modeldb-backend
+  - modeldb-db
+
+### v1alpha2
+
+Katib consists of several components as shown below. Each component is running on k8s as a deployment.
+Each component communicates with others via GRPC and the API is defined at `pkg/api/v1alpha2/api.proto`.
+
+- katib: main components.
+  - katib-manager: GRPC API server of katib.
+  - katib-manager-rest: REST API server of katib.
+  - katib-db: Data storage backend of katib.
+  - katib-ui: User interface of katib.
+  - suggestion: implementation of each exploration algorithm.
+    - suggestion-random
+-  katib-controller: Controller for katib CRDs in Kubernetes.
+  - experiment-controller: Controller for `Experiment` CRD in Kubernetes.
+  - trial-controller: Controller for `Trial` CRD in Kubernetes.
 
 ## Getting Started
 
@@ -373,3 +419,7 @@ ks delete ${KF_ENV} -c ambassador
 ## CONTRIBUTING
 
 Please feel free to test the system! [developer-guide.md](./docs/developer-guide.md) is a good starting point for developers.
+
+[1]: https://en.wikipedia.org/wiki/Hyperparameter_optimization
+[2]: https://en.wikipedia.org/wiki/Neural_architecture_search
+[3]: https://static.googleusercontent.com/media/research.google.com/ja//pubs/archive/bcb15507f4b52991a0783013df4222240e942381.pdf

@@ -1,3 +1,14 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Developer Guide](#developer-guide)
+  - [Requirements](#requirements)
+  - [Build from source code](#build-from-source-code)
+  - [Implement new suggestion algorithm](#implement-new-suggestion-algorithm)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Developer Guide
 
 ## Requirements
@@ -14,16 +25,28 @@ Check source code as follows:
 make check
 ```
 
-If there are some errors for go fmt, uodate the go fmt as follows:
+If there are some errors for go fmt, update the go fmt as follows:
 
 ```
 make update
 ```
 
-You can build all images from source.
+You can build all images from source for v1alpha2 as follows:
 
 ```bash
-make build
+make images
+```
+
+You can deploy katib v1alpha2 manifests into a k8s cluster as follows:
+
+```bash
+make deploy
+```
+
+You can undeploy katib v1alpha2 manifests from a k8s cluster as follows:
+
+```bash
+make undeploy
 ```
 
 ## Implement new suggestion algorithm

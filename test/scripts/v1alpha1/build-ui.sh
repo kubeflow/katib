@@ -39,4 +39,4 @@ cd ${GO_DIR}
 
 cp cmd/ui/v1alpha1/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha1/katib-ui:${VERSION} --project=${PROJECT} 
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha1/katib-ui:${VERSION} ${REGISTRY}/${REPO_NAME}/katib-ui:latest --verbosity=info
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha1/katib-ui:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha1/katib-ui:latest --verbosity=info
