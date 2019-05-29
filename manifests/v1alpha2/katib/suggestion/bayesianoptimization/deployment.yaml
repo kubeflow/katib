@@ -18,6 +18,7 @@ spec:
       containers:
       - name: katib-suggestion-bayesianoptimization
         image: katib/v1alpha2/suggestion-bayesianoptimization
+        imagePullPolicy: IfNotPresent
         ports:
         - name: api
           containerPort: 6789
