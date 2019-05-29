@@ -36,6 +36,9 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
                 api_pb2.GetExperimentRequest(experiment_name=name), 10)
             return exp.experiment
 
+    def ValidateAlgorithmSettings(self, request, context):
+        return api_pb2.ValidateAlgorithmSettingsReply()
+
     def GetSuggestions(self, request, context):
         """
         Main function to provide suggestion.
