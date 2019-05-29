@@ -84,7 +84,7 @@ func (d *DefaultClient) ValidateAlgorithmSettings(inst *experimentsv1alpha2.Expe
 
 func getExperimentConf(instance *experimentsv1alpha2.Experiment) *api_pb.Experiment {
 	experiment := &api_pb.Experiment{
-		Spec:   getExperimentSpec(instance),
+		Spec: getExperimentSpec(instance),
 		Status: &api_pb.ExperimentStatus{
 			StartTime:      commonv1alpha2.ConvertTime2RFC3339(instance.Status.StartTime),
 			CompletionTime: commonv1alpha2.ConvertTime2RFC3339(instance.Status.CompletionTime),
