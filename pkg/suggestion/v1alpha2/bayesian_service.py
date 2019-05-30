@@ -59,9 +59,9 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
         lowerbound = np.array(algo_manager.lower_bound)
         upperbound = np.array(algo_manager.upper_bound)
         self.logger.debug("lowerbound: %r", lowerbound,
-                          extra={"StudyID": request.study_id})
+                          extra={"experimeng_name": request.experiment_name})
         self.logger.debug("upperbound: %r", upperbound,
-                          extra={"StudyID": request.study_id})
+                          extra={"experimeng_name": request.experiment_name})
         alg = BOAlgorithm(
             dim=algo_manager.dim,
             N=int(service_params["N"]),
@@ -86,7 +86,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
         for x_next in x_next_list:
             x_next = x_next.squeeze()
             self.logger.debug("xnext: %r ", x_next, extra={
-                              "StudyID": request.study_id})
+                              "experiment_name": request.experiment_name})
             x_next = algo_manager.parse_x_next(x_next)
             x_next = algo_manager.convert_to_dict(x_next)
             trials.append(api_pb2.Trial(
