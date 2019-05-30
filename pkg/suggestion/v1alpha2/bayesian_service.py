@@ -18,7 +18,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
         self.manager_port = 6789
         if logger == None:
             self.logger = getLogger(__name__)
-            FORMAT = '%(asctime)-15s StudyID %(studyid)s %(message)s'
+            FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
             logging.basicConfig(format=FORMAT)
             handler = StreamHandler()
             handler.setLevel(INFO)
@@ -59,9 +59,9 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
         lowerbound = np.array(algo_manager.lower_bound)
         upperbound = np.array(algo_manager.upper_bound)
         self.logger.debug("lowerbound: %r", lowerbound,
-                          extra={"experimeng_name": request.experiment_name})
+                          extra={"experiment_name": request.experiment_name})
         self.logger.debug("upperbound: %r", upperbound,
-                          extra={"experimeng_name": request.experiment_name})
+                          extra={"experiment_name": request.experiment_name})
         alg = BOAlgorithm(
             dim=algo_manager.dim,
             N=int(service_params["N"]),
@@ -134,10 +134,10 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
             x_train = []
             y_train = []
             self.logger.info("Trials will be sampled until %d trials for burn-in are completed.",
-                             burn_in, extra={"Experiment": experiment_name})
+                             burn_in, extra={"experiment_name": experiment_name})
         else:
             self.logger.debug("Completed trials: %r", x_train,
-                              extra={"Experiment": experiment_name})
+                              extra={"experiment_name": experiment_name})
 
         return x_train, y_train
 

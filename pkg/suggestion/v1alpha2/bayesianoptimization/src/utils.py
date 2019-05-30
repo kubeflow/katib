@@ -3,7 +3,7 @@ import logging
 from logging import getLogger, StreamHandler
 
 
-FORMAT = '%(asctime)-15s StudyID %(studyid)s %(message)s'
+FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 
 
