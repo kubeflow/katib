@@ -50,12 +50,12 @@ class AlgorithmManager:
 
     @property
     def experiment_name(self):
-        """ return the study id """
+        """ return the experiment_name """
         return self._experiment_name
 
     @property
     def experiment(self):
-        """ return the study configuration """
+        """ return the experiment """
         return self._experiment
 
     @property
