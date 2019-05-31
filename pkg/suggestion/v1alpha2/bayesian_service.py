@@ -11,6 +11,7 @@ from pkg.suggestion.v1alpha2.bayesianoptimization.src.algorithm_manager import A
 import logging
 from logging import getLogger, StreamHandler, INFO, DEBUG
 
+timeout = 10
 
 class BayesianService(api_pb2_grpc.SuggestionServicer):
     def __init__(self, logger=None):
@@ -117,17 +118,15 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
                 experiment_name=experiment_name
             ))
             for t in trialsrep.trials:
-                if t.status.condition == 2:
+                if t.status.condition == api_pb2.TrialStatus.TrialConditionType.SUCCEEDED:
                     gwfrep = client.GetObservationLog(
                         api_pb2.GetObservationLogRequest(
                             trial_name=t.name,
-                            metric_name=obj_name))
+                            metric_name=obj_name), timeout)
                     w = gwfrep.observation_log
-                    for ml in w.metrics_logs:
-                        if ml.name == obj_name:
-                            y_train.append(float(ml.values[-1].value))
-                            x_train.append(w.parameter_set)
-                            break
+                    for ml in w.metric_logs:
+                        y_train.append(float(ml.metric.value))
+                        x_train.append(w.parameter_set)
         self.logger.info("%d completed trials are found.",
                          len(x_train), extra={"Experiment": experiment_name})
         if len(x_train) <= burn_in:
@@ -147,7 +146,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
         params = []
         with api_pb2.beta_create_Manager_stub(channel) as client:
             gsprep = client.GetAlgorithmExtraSettings(
-                api_pb2.GetAlgorithmExtraSettingsRequest(param_id=experiment_name), 10)
+                api_pb2.GetAlgorithmExtraSettingsRequest(experiment_name=experiment_name), timeout)
             params = gsprep.extra_algorithm_settings
 
         parsed_service_params = {
