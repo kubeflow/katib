@@ -217,10 +217,6 @@
                     template: "build-suggestion-nasrl",
                   },
                   {
-                    name: "unit-test",
-                    template: "unit-test",
-                  },
-                  {
                     name: "build-manager",
                     template: "build-manager",
                   },
@@ -363,9 +359,6 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-ui", testWorkerImage, [
               "test/scripts/v1alpha2/build-ui.sh",
             ]),  // build-ui
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("unit-test", testWorkerImage, [
-              "test/scripts/v1alpha2/unit-test.sh",
-            ]),  // unit test
           ],  // templates
         },
       },  // e2e
