@@ -87,7 +87,13 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to Cronjob
-	err = c.Watch(&source.Kind{Type: &batchv1beta.CronJob{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(
+		&source.Kind{Type: &batchv1beta.CronJob{}},
+		&handler.EnqueueRequestForOwner{
+			IsController: true,
+			OwnerType:    &trialsv1alpha2.Trial{},
+		})
+
 	if err != nil {
 		log.Error(err, "CronJob watch error")
 		return err
