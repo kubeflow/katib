@@ -17,7 +17,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_epochs', type=int, default=10, metavar='N',
                         help='number of epoches that each child will be trained')
     parser.add_argument('--num_gpus', type=int, default=1, metavar='N',
-                        help='number of epoches that each child will be trained')
+                        help='number of GPU that used for training')
     args = parser.parse_args()
 
     arch = args.architecture.replace("\'", "\"")
