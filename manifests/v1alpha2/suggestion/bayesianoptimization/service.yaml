@@ -14,4 +14,4 @@ spec:
       name: api
   selector:
     app: katib
-    component: katib-bayesianoptimization
+    component: suggestion-bayesianoptimization
