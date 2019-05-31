@@ -109,6 +109,18 @@ func (r *ReconcileTrial) UpdateTrialStatusObservation(instance *trialsv1alpha2.T
 	return nil
 }
 
+func isTrialObservationAvailable(instance *trialsv1alpha2.Trial) bool {
+	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
+	if instance.Status.Observation != nil && instance.Status.Observation.Metrics != nil {
+		for _, metric := range instance.Status.Observation.Metrics {
+			if metric.Name == objectiveMetricName {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func getBestObjectiveMetricValue(metricLogs []*api_pb.MetricLog, objectiveType commonv1alpha2.ObjectiveType) *float64 {
 	metricLogSize := len(metricLogs)
 	if metricLogSize == 0 {

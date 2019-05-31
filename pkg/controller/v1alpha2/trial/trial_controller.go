@@ -86,6 +86,13 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	// Watch for changes to Cronjob
+	err = c.Watch(&source.Kind{Type: &batchv1beta.CronJob{}}, &handler.EnqueueRequestForObject{})
+	if err != nil {
+		log.Error(err, "CronJob watch error")
+		return err
+	}
+
 	for _, gvk := range commonv1alpha2.GetSupportedJobList() {
 		unstructuredJob := &unstructured.Unstructured{}
 		unstructuredJob.SetGroupVersionKind(gvk)
@@ -215,13 +222,17 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha2.Trial) error {
 	//Job already exists
 	//TODO Can desired Spec differ from deployedSpec?
 	if deployedJob != nil {
-		if err = r.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
-			logger.Error(err, "Update trial status condition error")
-			return err
-		}
 		if err = r.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
 			logger.Error(err, "Update trial status observation error")
 			return err
+		}
+		// Update Trial job status only if observation field is available.
+		// This will ensure that trial is set to be complete only if metric is collected atleast once
+		if isTrialObservationAvailable(instance) {
+			if err = r.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
+				logger.Error(err, "Update trial status condition error")
+				return err
+			}
 		}
 	}
 	return nil
