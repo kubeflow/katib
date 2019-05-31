@@ -331,13 +331,15 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Expe
 			addCount = 0
 		}
 
-		//create "addCount" number of trials
-		logger.Info("CreateTrials", "addCount", addCount)
-		if err := r.createTrials(instance, addCount); err != nil {
-			logger.Error(err, "Create trials error")
-			return err
+		//skip if no trials need to be created
+		if addCount > 0 {
+			//create "addCount" number of trials
+			logger.Info("CreateTrials", "addCount", addCount)
+			if err := r.createTrials(instance, addCount); err != nil {
+				logger.Error(err, "Create trials error")
+				return err
+			}
 		}
-
 	}
 
 	return nil
