@@ -22,7 +22,8 @@ class RectPack:
         self.center = (l + u) / 2
         j = np.mod(division_num, dim)
         k = (division_num - j) / dim
-        self.d = np.sqrt(j * np.power(3, float(-2 * (k + 1))) + (dim - j) * np.power(3, float(-2 * k))) / 2
+        self.d = np.sqrt(j * np.power(3, float(-2 * (k + 1))) +
+                         (dim - j) * np.power(3, float(-2 * k))) / 2
         self.division_num = division_num
         self.fc, _, _ = aq_func.compute(scaler.inverse_transform(self.center))
         self.fc = -self.fc
@@ -73,7 +74,8 @@ class DimPack:
 class GlobalOptimizer:
     """ class for the global optimizer """
 
-    def __init__(self, N, l, u, scaler, X_train, y_train, current_optimal, mode, trade_off, length_scale,
+    def __init__(self, N, l, u, scaler, X_train, y_train, current_optimal,
+                 experiment_name, mode, trade_off, length_scale,
                  noise, nu, kernel_type, n_estimators, max_features, model_type, logger=None):
         self.logger = logger if (logger is not None) else get_logger()
         self.N = N
@@ -82,6 +84,7 @@ class GlobalOptimizer:
         self.scaler = scaler
         self.buckets = []
         self.dim = None
+        self._experiment_name = experiment_name
         if model_type == "gp":
             model = GaussianProcessModel(
                 length_scale=length_scale,
@@ -94,7 +97,11 @@ class GlobalOptimizer:
                 n_estimators=n_estimators,
                 max_features=max_features,
             )
+        self.logger.debug("before model fit", extra={
+            "Experiment": self._experiment_name})
         model.fit(X_train, y_train)
+        self.logger.debug("after model fit", extra={
+            "Experiment": self._experiment_name})
         self.aq_func = AcquisitionFunc(
             model=model,
             current_optimal=current_optimal,
@@ -120,7 +127,8 @@ class GlobalOptimizer:
             prev = len(opt_list) - 1
             diff1 = b[i].d
             diff2 = opt_list[prev].point.d
-            current_slope = (b[i].fc - opt_list[prev].point.fc) / (diff1 - diff2)
+            current_slope = (
+                b[i].fc - opt_list[prev].point.fc) / (diff1 - diff2)
             prev_slope = opt_list[prev].slope
 
             while prev >= 0 and current_slope < prev_slope:
@@ -130,7 +138,8 @@ class GlobalOptimizer:
                 prev_slope = opt_list[prev].slope
                 diff1 = b[i].d
                 diff2 = opt_list[prev].point.d
-                current_slope = (b[i].fc - opt_list[prev].point.fc) / (diff1 - diff2)
+                current_slope = (
+                    b[i].fc - opt_list[prev].point.fc) / (diff1 - diff2)
 
             opt_list.append(OptimalPoint(b[i], prev, current_slope))
 
@@ -238,8 +247,10 @@ class GlobalOptimizer:
             e = np.zeros((1, self.dim))
             e[0, i] = 1
             function_value = min(
-                aq_func.compute(scaler.inverse_transform(rect.center + delta * e)),
-                aq_func.compute(scaler.inverse_transform(rect.center - delta * e))
+                aq_func.compute(scaler.inverse_transform(
+                    rect.center + delta * e)),
+                aq_func.compute(scaler.inverse_transform(
+                    rect.center - delta * e))
             )
             dim_list.append(DimPack(i, function_value))
         dim_list.sort(key=lambda x: x.fc)

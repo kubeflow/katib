@@ -10,6 +10,7 @@ from pkg.suggestion.v1alpha2.bayesianoptimization.src.bayesian_optimization_algo
 from pkg.suggestion.v1alpha2.bayesianoptimization.src.algorithm_manager import AlgorithmManager
 import logging
 from logging import getLogger, StreamHandler, INFO, DEBUG
+from . import parsing_util
 
 timeout = 10
 
@@ -22,8 +23,8 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
             FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
             logging.basicConfig(format=FORMAT)
             handler = StreamHandler()
-            handler.setLevel(INFO)
-            self.logger.setLevel(INFO)
+            handler.setLevel(DEBUG)
+            self.logger.setLevel(DEBUG)
             self.logger.addHandler(handler)
             self.logger.propagate = False
         else:
@@ -34,7 +35,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
             self.manager_addr, self.manager_port)
         with api_pb2.beta_create_Manager_stub(channel) as client:
             exp = client.GetExperiment(
-                api_pb2.GetExperimentRequest(experiment_name=name), 10)
+                api_pb2.GetExperimentRequest(experiment_name=name), timeout)
             return exp.experiment
 
     def ValidateAlgorithmSettings(self, request, context):
@@ -49,9 +50,12 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
         X_train, y_train = self.getEvalHistory(
             request.experiment_name, experiment.spec.objective.objective_metric_name, service_params["burn_in"])
 
+        parameter_config = parsing_util.parse_parameter_configs(
+            experiment.spec.parameter_specs.parameters)
         algo_manager = AlgorithmManager(
             experiment_name=request.experiment_name,
             experiment=experiment,
+            parameter_config=parameter_config,
             X_train=X_train,
             y_train=y_train,
             logger=self.logger,
@@ -64,6 +68,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
         self.logger.debug("upperbound: %r", upperbound,
                           extra={"experiment_name": request.experiment_name})
         alg = BOAlgorithm(
+            experiment_name=request.experiment_name,
             dim=algo_manager.dim,
             N=int(service_params["N"]),
             lowerbound=lowerbound,
@@ -82,8 +87,12 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
             model_type=service_params["model_type"],
             logger=self.logger,
         )
+        self.logger.debug("alg: %r", alg,
+                          extra={"experiment_name": request.experiment_name})
         trials = []
         x_next_list = alg.get_suggestion(request.request_number)
+        self.logger.debug("x_next_list: %r", x_next_list,
+                          extra={"experiment_name": request.experiment_name})
         for x_next in x_next_list:
             x_next = x_next.squeeze()
             self.logger.debug("xnext: %r ", x_next, extra={
@@ -116,7 +125,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
         with api_pb2.beta_create_Manager_stub(channel) as client:
             trialsrep = client.GetTrialList(api_pb2.GetTrialListRequest(
                 experiment_name=experiment_name
-            ))
+            ), timeout)
             for t in trialsrep.trials:
                 if t.status.condition == api_pb2.TrialStatus.TrialConditionType.SUCCEEDED:
                     gwfrep = client.GetObservationLog(

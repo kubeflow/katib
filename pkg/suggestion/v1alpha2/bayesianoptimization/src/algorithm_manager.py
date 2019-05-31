@@ -25,22 +25,20 @@ class AlgorithmManager:
     provide some helper functions
     """
 
-    def __init__(self, experiment_name, experiment, X_train, y_train, logger=None):
+    def __init__(self, experiment_name, experiment, parameter_config, X_train, y_train, logger=None):
         self.logger = logger if (logger is not None) else get_logger()
         self._experiment_name = experiment_name
         self._experiment = experiment
         self._goal = self._experiment.spec.objective.type
-        self._dim = 0
-        self._lowerbound = []
-        self._upperbound = []
-        self._types = []
-        self._names = []
+        self._dim = parameter_config.dim
+        self._lowerbound = parameter_config.lower_bounds
+        self._upperbound = parameter_config.upper_bounds
+        self._types = parameter_config.parameter_types
+        self._names = parameter_config.names
         # record all the feasible values of discrete type variables
-        self._discrete_info = []
-        self._categorical_info = []
-        self._name_id = {}
-
-        self._parse_config()
+        self._discrete_info = parameter_config.discrete_info
+        self._categorical_info = parameter_config.categorical_info
+        self._name_id = parameter_config.name_ids
 
         self._X_train = self._mapping_params(X_train)
         self.parse_X()
@@ -108,40 +106,6 @@ class AlgorithmManager:
         """ return the target of the training data"""
         return self._y_train
 
-    def _parse_config(self):
-        """ extract info from the study configuration """
-        for i, param in enumerate(self._experiment.spec.parameter_specs.parameters):
-            self._name_id[param.name] = i
-            self._types.append(param.parameter_type)
-            self._names.append(param.name)
-            if param.parameter_type in [api_pb2.DOUBLE, api_pb2.INT]:
-                self._dim = self._dim + 1
-                self._lowerbound.append(float(param.feasible_space.min))
-                self._upperbound.append(float(param.feasible_space.max))
-            elif param.parameter_type == api_pb2.DISCRETE:
-                self._dim = self._dim + 1
-                discrete_values = [int(x) for x in param.feasible_space.list]
-                min_value = min(discrete_values)
-                max_value = max(discrete_values)
-                self._lowerbound.append(min_value)
-                self._upperbound.append(max_value)
-                self._discrete_info.append(dict({
-                    "name": param.name,
-                    "values": discrete_values,
-                }))
-            # one hot encoding for categorical type
-            elif param.parameter_type == api_pb2.CATEGORICAL:
-                num_feasible = len(param.feasible.list)
-                for i in range(num_feasible):
-                    self._lowerbound.append(0)
-                    self._upperbound.append(1)
-                self._categorical_info.append(dict({
-                    "name": param.name,
-                    "values": param.feasible.list,
-                    "number": num_feasible,
-                }))
-                self._dim += num_feasible
-
     def _mapping_params(self, parameters_list):
         if len(parameters_list) == 0:
             return None
@@ -169,6 +133,8 @@ class AlgorithmManager:
 
     def _parse_metric(self):
         """ parse the metric to the dictionary """
+        self.logger.info("Ytrain: %r", self._y_train, extra={
+            "Experiment": self._experiment_name})
         if not self._y_train:
             self._y_train = None
             return
