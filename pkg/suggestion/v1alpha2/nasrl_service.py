@@ -219,8 +219,6 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         return api_pb2.ValidateSuggestionParametersReply()
 
     def GetSuggestions(self, request, context):
-        self.logger.info("SUCCCCEDDDD IS {}".format(api_pb2.TrialStatus.TrialConditionType.SUCCEEDED))
-
 
         if request.experiment_name not in self.registered_experiments:
             self.registered_experiments[request.experiment_name] = NAS_RL_Experiment(request, self.logger)
@@ -370,13 +368,13 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             if t.status.condition == api_pb2.TrialStatus.TrialConditionType.SUCCEEDED:
                 obslog_resp = client.GetObservationLog(
                     api_pb2.GetObservationLogRequest(
-                        trial_name = t.name,
-                        metric_name = experiment.objective_name
-                    )
+                        trial_name=t.name,
+                        metric_name=t.spec.objective.objective_metric_name
+                    ), 10
                 )
                 obslog = obslog_resp.observation_log
-                for ml in obslog.metrics_log:
-                    completed_trials[t.name] = float(ml.values[-1].value)
+                for ml in obslog.metric_logs:
+                    completed_trials[t.name] = float(ml.metric.value)
             if t.status.condition == api_pb2.TrialStatus.TrialConditionType.FAILED:
                 failed_trials.append(t.name)
 
