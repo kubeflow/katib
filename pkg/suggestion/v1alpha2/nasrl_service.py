@@ -26,8 +26,8 @@ class NAS_RL_Experiment(object):
         if request.request_number > 0:
             self.num_trials = request.request_number
         self.tf_graph = tf.Graph()
-        self.prev_trial_ids = list()
-        self.prev_trials = None
+        # self.prev_trial_ids = list()
+        # self.prev_trials = None
         self.ctrl_cache_file = "ctrl_cache/{}.ckpt".format(request.experiment_name)
         self.ctrl_step = 0
         self.is_first_run = True
@@ -40,11 +40,11 @@ class NAS_RL_Experiment(object):
         self.search_space = None
         self.opt_direction = None
         self.objective_name = None
-        self.respawn_count = 0
+        # self.respawn_count = 0
         
         self.logger.info("-" * 100 + "\nSetting Up Suggestion for Experiment {}\n".format(request.experiment_name) + "-" * 100)
         self._get_experiment_param()
-        # self._setup_controller()
+        self._setup_controller()
         self.logger.info(">>> Suggestion for Experiment {} has been initialized.\n".format(self.experiment_name))
         
     def _get_experiment_param(self):
@@ -142,7 +142,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
 
         if logger == None:
             self.logger = getLogger(__name__)
-            FORMAT = '%(asctime)-15s ExperimentName %(experimentname)s %(message)s'
+            FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
             logging.basicConfig(format=FORMAT)
             handler = StreamHandler()
             handler.setLevel(INFO)
@@ -219,196 +219,176 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         return api_pb2.ValidateSuggestionParametersReply()
 
     def GetSuggestions(self, request, context):
+        self.logger.info("SUCCCCEDDDD IS {}".format(api_pb2.TrialStatus.TrialConditionType.SUCCEEDED))
+
+
         if request.experiment_name not in self.registered_experiments:
             self.registered_experiments[request.experiment_name] = NAS_RL_Experiment(request, self.logger)
         
         experiment = self.registered_experiments[request.experiment_name]
 
-        self.logger.info("-" * 100 + "\nSuggestion Step {} for StudyJob {}\n".format(experiment.ctrl_step, experiment.experiment_name) + "-" * 100)
+        self.logger.info("-" * 100 + "\nSuggestion Step {} for Experiment {}\n".format(experiment.ctrl_step, experiment.experiment_name) + "-" * 100)
 
-        # with experiment.tf_graph.as_default():
+        with experiment.tf_graph.as_default():
+            saver = tf.train.Saver()
+            ctrl = experiment.controller
 
-        #     saver = tf.train.Saver()
-        #     ctrl = experiment.controller
+            controller_ops = {
+                  "train_step": ctrl.train_step,
+                  "loss": ctrl.loss,
+                  "train_op": ctrl.train_op,
+                  "lr": ctrl.lr,
+                  "grad_norm": ctrl.grad_norm,
+                  "optimizer": ctrl.optimizer,
+                  "baseline": ctrl.baseline,
+                  "entropy": ctrl.sample_entropy,
+                  "sample_arc": ctrl.sample_arc,
+                  "skip_rate": ctrl.skip_rate}
 
-        #     controller_ops = {
-        #           "train_step": ctrl.train_step,
-        #           "loss": ctrl.loss,
-        #           "train_op": ctrl.train_op,
-        #           "lr": ctrl.lr,
-        #           "grad_norm": ctrl.grad_norm,
-        #           "optimizer": ctrl.optimizer,
-        #           "baseline": ctrl.baseline,
-        #           "entropy": ctrl.sample_entropy,
-        #           "sample_arc": ctrl.sample_arc,
-        #           "skip_rate": ctrl.skip_rate}
+            run_ops = [
+                controller_ops["loss"],
+                controller_ops["entropy"],
+                controller_ops["lr"],
+                controller_ops["grad_norm"],
+                controller_ops["baseline"],
+                controller_ops["skip_rate"],
+                controller_ops["train_op"]]
 
-        #     run_ops = [
-        #         controller_ops["loss"],
-        #         controller_ops["entropy"],
-        #         controller_ops["lr"],
-        #         controller_ops["grad_norm"],
-        #         controller_ops["baseline"],
-        #         controller_ops["skip_rate"],
-        #         controller_ops["train_op"]]
-
-        #     if experiment.is_first_run:
-        #         self.logger.info(">>> First time running suggestion for {}. Random architecture will be given.".format(experiment.experiment_name))
-        #         with tf.Session() as sess:
-        #             sess.run(tf.global_variables_initializer())
-        #             candidates = list()
-        #             for _ in range(experiment.num_trials):
-        #                 candidates.append(sess.run(controller_ops["sample_arc"]))
+            if experiment.is_first_run:
+                self.logger.info(">>> First time running suggestion for {}. Random architecture will be given.".format(experiment.experiment_name))
+                with tf.Session() as sess:
+                    sess.run(tf.global_variables_initializer())
+                    candidates = list()
+                    for _ in range(experiment.num_trials):
+                        candidates.append(sess.run(controller_ops["sample_arc"]))
                     
-        #             # TODO: will use PVC to store the checkpoint to protect against unexpected suggestion pod restart
-        #             saver.save(sess, experiment.ctrl_cache_file)
+                    # TODO: will use PVC to store the checkpoint to protect against unexpected suggestion pod restart
+                    saver.save(sess, experiment.ctrl_cache_file)
 
-        #         experiment.is_first_run = False
+                experiment.is_first_run = False
 
-        #     else:
-        #         with tf.Session() as sess:
-        #             saver.restore(sess, experiment.ctrl_cache_file)
+            else:
+                with tf.Session() as sess:
+                    saver.restore(sess, experiment.ctrl_cache_file)
 
-        #             valid_acc = ctrl.reward
-        #             result = self.GetEvaluationResult(experiment)
+                    valid_acc = ctrl.reward
+                    result = self.GetEvaluationResult(experiment)
+
+                    # TODO: (andreyvelich) I deleted this part, should it be handle by controller?
+                    # Sometimes training container may fail and GetEvaluationResult() will return None
+                    # In this case, the Suggestion will:
+                    # 1. Firstly try to respawn the previous trials after waiting for RESPAWN_SLEEP seconds
+                    # 2. If respawning the trials for RESPAWN_LIMIT times still cannot collect valid results,
+                    #    then fail the task because it may indicate that the training container has errors.
 
 
-        #             # Sometimes training container may fail and GetEvaluationResult() will return None
-        #             # In this case, the Suggestion will:
-        #             # 1. Firstly try to respawn the previous trials after waiting for RESPAWN_SLEEP seconds
-        #             # 2. If respawning the trials for RESPAWN_LIMIT times still cannot collect valid results,
-        #             #    then fail the task because it may indicate that the training container has errors.
+                    # This LSTM network is designed to maximize the metrics
+                    # However, if the user wants to minimize the metrics, we can take the negative of the result
 
-        #             if result is None:
-        #                 if study.respawn_count >= RESPAWN_LIMIT:
-        #                     self.logger.warning(">>> Suggestion has spawned trials for {} times, but they all failed.".format(RESPAWN_LIMIT))
-        #                     self.logger.warning(">>> Please check whether the training container is correctly implemented")
-        #                     self.logger.info(">>> StudyJob {} failed".format(study.study_name))
-        #                     return []
-                            
-        #                 else:
-        #                     self.logger.warning(">>> GetEvaluationResult() returns None. All the previous trials failed")
+                    if experiment.opt_direction == api_pb2.MINIMIZE:
+                        result = -result
 
-        #                     self.logger.info(">>> Sleep for {} seconds".format(RESPAWN_SLEEP))
-        #                     time.sleep(RESPAWN_SLEEP)
+                    loss, entropy, lr, gn, bl, skip, _ = sess.run(
+                        fetches=run_ops,
+                        feed_dict={valid_acc: result})
+                    
+                    self.logger.info(">>> Suggestion updated. LSTM Controller Reward: {}".format(loss))
 
-        #                     self.logger.info(">>> Respawn the previous trials")
-        #                     study.respawn_count += 1
-        #                     return self.SpawnTrials(study, study.prev_trials)
+                    candidates = list()
+                    for _ in range(experiment.num_trials):
+                        candidates.append(sess.run(controller_ops["sample_arc"]))
 
-        #             study.respawn_count = 0
-
-        #             # This LSTM network is designed to maximize the metrics
-        #             # However, if the user wants to minimize the metrics, we can take the negative of the result
-        #             if study.opt_direction == api_pb2.MINIMIZE:
-        #                 result = -result
-
-        #             loss, entropy, lr, gn, bl, skip, _ = sess.run(
-        #                 fetches=run_ops,
-        #                 feed_dict={valid_acc: result})
-        #             self.logger.info(">>> Suggestion updated. LSTM Controller Reward: {}".format(loss))
-
-        #             candidates = list()
-        #             for _ in range(study.num_trials):
-        #                 candidates.append(sess.run(controller_ops["sample_arc"]))
-
-        #             saver.save(sess, study.ctrl_cache_file)
+                    saver.save(sess, experiment.ctrl_cache_file)
         
-        # organized_candidates = list()
-        # trials = list()
+        organized_candidates = list()
+        trials = list()
 
-        # for i in range(study.num_trials):
-        #     arc = candidates[i].tolist()
-        #     organized_arc = [0 for _ in range(study.num_layers)]
-        #     record = 0
-        #     for l in range(study.num_layers):
-        #         organized_arc[l] = arc[record: record + l + 1]
-        #         record += l + 1
-        #     organized_candidates.append(organized_arc)
+        for i in range(experiment.num_trials):
+            arc = candidates[i].tolist()
+            organized_arc = [0 for _ in range(experiment.num_layers)]
+            record = 0
+            for l in range(experiment.num_layers):
+                organized_arc[l] = arc[record: record + l + 1]
+                record += l + 1
+            organized_candidates.append(organized_arc)
 
-        #     nn_config = dict()
-        #     nn_config['num_layers'] = study.num_layers
-        #     nn_config['input_sizes'] = study.input_sizes
-        #     nn_config['output_sizes'] = study.output_sizes
-        #     nn_config['embedding'] = dict()
-        #     for l in range(study.num_layers):
-        #         opt = organized_arc[l][0]
-        #         nn_config['embedding'][opt] = study.search_space[opt].get_dict()
+            nn_config = dict()
+            nn_config['num_layers'] = experiment.num_layers
+            nn_config['input_sizes'] = experiment.input_sizes
+            nn_config['output_sizes'] = experiment.output_sizes
+            nn_config['embedding'] = dict()
+            for l in range(experiment.num_layers):
+                opt = organized_arc[l][0]
+                nn_config['embedding'][opt] = experiment.search_space[opt].get_dict()
 
-        #     organized_arc_json = json.dumps(organized_arc)
-        #     nn_config_json = json.dumps(nn_config)
+            organized_arc_json = json.dumps(organized_arc)
+            nn_config_json = json.dumps(nn_config)
 
-        #     organized_arc_str = str(organized_arc_json).replace('\"', '\'')
-        #     nn_config_str = str(nn_config_json).replace('\"', '\'')
+            organized_arc_str = str(organized_arc_json).replace('\"', '\'')
+            nn_config_str = str(nn_config_json).replace('\"', '\'')
 
-        #     self.logger.info("\n>>> New Neural Network Architecture Candidate #{} (internal representation):".format(i))
-        #     self.logger.info(organized_arc_json)
-        #     self.logger.info("\n>>> Corresponding Seach Space Description:")
-        #     self.logger.info(nn_config_str)
+            self.logger.info("\n>>> New Neural Network Architecture Candidate #{} (internal representation):".format(i))
+            self.logger.info(organized_arc_json)
+            self.logger.info("\n>>> Corresponding Seach Space Description:")
+            self.logger.info(nn_config_str)
 
-        #     trials.append(api_pb2.Trial(
-        #             study_id=request.study_id,
-        #             parameter_set=[
-        #                 api_pb2.Parameter(
-        #                     name="architecture",
-        #                     value=organized_arc_str,
-        #                     parameter_type= api_pb2.CATEGORICAL),
-        #                 api_pb2.Parameter(
-        #                     name="nn_config",
-        #                     value=nn_config_str,
-        #                     parameter_type= api_pb2.CATEGORICAL)
-        #             ], 
-        #         )
-        #     )
-
-        return None
-        # return self.SpawnTrials(study, trials)
-    
-    def SpawnTrials(self, study, trials):
-        study.prev_trials = trials
-        study.prev_trial_ids = list()
+            trials.append(api_pb2.Trial(
+                spec=api_pb2.TrialSpec(
+                    experiment_name=request.experiment_name,
+                    parameter_assignments=api_pb2.TrialSpec.ParameterAssignments(
+                        assignments=[
+                            api_pb2.ParameterAssignment(
+                                name="architecture",
+                                value=organized_arc_str
+                            ),
+                            api_pb2.ParameterAssignment(
+                                name="nn_config",
+                                value=nn_config_str
+                            )
+                        ]
+                    )
+                )
+            ))
+        
         self.logger.info("")
-        channel = grpc.beta.implementations.insecure_channel(MANAGER_ADDRESS, MANAGER_PORT)
-        with api_pb2.beta_create_Manager_stub(channel) as client:
-            for i, t in enumerate(trials):
-                ctrep = client.CreateTrial(api_pb2.CreateTrialRequest(trial=t), 10)
-                trials[i].trial_id = ctrep.trial_id
-                study.prev_trial_ids.append(ctrep.trial_id)
-        
-        self.logger.info(">>> {} Trials were created:".format(study.num_trials))
-        for t in study.prev_trial_ids:
-            self.logger.info(t)
+        self.logger.info(">>> {} Trials were created for Experiment {}".format(experiment.num_trials, experiment.experiment_name))
         self.logger.info("")
 
-        study.ctrl_step += 1
+        experiment.ctrl_step += 1
 
-        return api_pb2.GetSuggestionsReply(trials=trials)
+        return api_pb2.GetSuggestionsReply(trials=trials)        
 
-    def GetEvaluationResult(self, study):
+    def GetEvaluationResult(self, experiment):
         channel = grpc.beta.implementations.insecure_channel(MANAGER_ADDRESS, MANAGER_PORT)
         with api_pb2.beta_create_Manager_stub(channel) as client:
-            gwfrep = client.GetWorkerFullInfo(api_pb2.GetWorkerFullInfoRequest(study_id=study.study_id, only_latest_log=True), 10)
-            trials_list = gwfrep.worker_full_infos
+            trials_resp = client.GetTrialList(api_pb2.GetTrialListRequest(experiment_name=experiment.experiment_name), 10)
+            trials_list = trials_resp.trials
         
         completed_trials = dict()
+        failed_trials = []
         for t in trials_list:
-            if t.Worker.trial_id in study.prev_trial_ids and t.Worker.status == api_pb2.COMPLETED:
-                for ml in t.metrics_logs:
-                    if ml.name == study.objective_name:
-                        completed_trials[t.Worker.trial_id] = float(ml.values[-1].value)
+            if t.status.condition == api_pb2.TrialStatus.TrialConditionType.SUCCEEDED:
+                obslog_resp = client.GetObservationLog(
+                    api_pb2.GetObservationLogRequest(
+                        trial_name = t.name,
+                        metric_name = experiment.objective_name
+                    )
+                )
+                obslog = obslog_resp.observation_log
+                for ml in obslog.metrics_log:
+                    completed_trials[t.name] = float(ml.values[-1].value)
+            if t.status.condition == api_pb2.TrialStatus.TrialConditionType.FAILED:
+                failed_trials.append(t.name)
 
-        n_complete = len(completed_trials)
-        n_fail = study.num_trials - n_complete
-
-        self.logger.info(">>> {} Trials succeeded, {} Trials failed:".format(n_complete, n_fail))
-        for tid in study.prev_trial_ids:
-            if tid in completed_trials:
-                self.logger.info("{}: {}".format(tid, completed_trials[tid]))
-            else:
-                self.logger.info("{}: Failed".format(tid))
-
-        if n_complete > 0:
-            avg_metrics = sum(completed_trials.values()) / n_complete
+        n_completed = len(completed_trials)
+        self.logger.info(">>> {} Trials succeeded, {} Trials failed:".format(n_completed, len(failed_trials)))
+        for tname, value in completed_trials:
+            self.logger.info("Trial: {}, Value: {}".format(tname, value))
+        for tname in failed_trials:
+            self.logger.info("Trial: {} was failed".format(tname))
+       
+        if n_completed > 0:
+            avg_metrics = sum(completed_trials.values()) / len()
             self.logger.info("The average is {}\n".format(avg_metrics))
 
             return avg_metrics
