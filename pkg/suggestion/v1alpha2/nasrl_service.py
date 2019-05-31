@@ -278,7 +278,11 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     # 1. Firstly try to respawn the previous trials after waiting for RESPAWN_SLEEP seconds
                     # 2. If respawning the trials for RESPAWN_LIMIT times still cannot collect valid results,
                     #    then fail the task because it may indicate that the training container has errors.
-
+                    if result is None:
+                        self.logger.warning(">>> Suggestion has spawned trials, but they all failed.")
+                        self.logger.warning(">>> Please check whether the training container is correctly implemented")
+                        self.logger.info(">>> Experiment {} failed".format(experiment.experiment_name))
+                        return []
 
                     # This LSTM network is designed to maximize the metrics
                     # However, if the user wants to minimize the metrics, we can take the negative of the result
@@ -372,21 +376,22 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                         metric_name=t.spec.objective.objective_metric_name
                     ), 10
                 )
-                obslog = obslog_resp.observation_log
-                for ml in obslog.metric_logs:
-                    completed_trials[t.name] = float(ml.metric.value)
+
+                # Take only the latest metric value
+                completed_trials[t.name] = float(obslog_resp.observation_log.metric_logs[-1].metric.value)
+
             if t.status.condition == api_pb2.TrialStatus.TrialConditionType.FAILED:
                 failed_trials.append(t.name)
 
         n_completed = len(completed_trials)
-        self.logger.info(">>> {} Trials succeeded, {} Trials failed:".format(n_completed, len(failed_trials)))
-        for tname, value in completed_trials:
-            self.logger.info("Trial: {}, Value: {}".format(tname, value))
+        self.logger.info(">>> By now: {} Trials succeeded, {} Trials failed".format(n_completed, len(failed_trials)))
+        for tname in completed_trials:
+            self.logger.info("Trial: {}, Value: {}".format(tname, completed_trials[tname]))
         for tname in failed_trials:
             self.logger.info("Trial: {} was failed".format(tname))
        
         if n_completed > 0:
-            avg_metrics = sum(completed_trials.values()) / len()
+            avg_metrics = sum(completed_trials.values()) / n_completed
             self.logger.info("The average is {}\n".format(avg_metrics))
 
             return avg_metrics
