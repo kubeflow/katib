@@ -1,0 +1,24 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: katib-suggestion-grid
+  namespace: kubeflow
+  labels:
+    app: katib
+    component: suggestion-grid
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: katib-suggestion-grid
+      labels:
+        app: katib
+        component: suggestion-grid
+    spec:
+      containers:
+      - name: katib-suggestion-grid
+        image: katib/v1alpha2/suggestion-grid
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: api
+          containerPort: 6789
