@@ -138,14 +138,18 @@ const NASParameters = (props) => {
         data.spec.nasConfig.operations = []
         addOperations(props.operations, data.spec.nasConfig.operations)
 
+        
+        //TODO: Add support not only for default ConfigMap for Trial-Templates
         data.spec.trialTemplate = {
             goTemplate: {
-                templatePath: props.trial,
+                templateSpec: {
+                    configMapName: "trial-template",
+                    configMapNamespace: data.metadata.namespace,
+                    templatePath: props.trial,
+                }
             }
         }
 
-        console.log("DATA BEFORE BACKEND")
-        console.log(data)
          props.submitNASJob(data)
     }
 
