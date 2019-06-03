@@ -71,6 +71,7 @@ sed -i -e "s@image: katib\/v1alpha2\/katib-manager-rest@image: ${REGISTRY}\/${RE
 sed -i -e "s@image: katib\/v1alpha2\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-ui:${VERSION}@" manifests/v1alpha2/ui/deployment.yaml
 sed -i -e "s@image: katib\/v1alpha2\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-random:${VERSION}@" manifests/v1alpha2/suggestion/random/deployment.yaml
 sed -i -e "s@image: katib\/v1alpha2\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-bayesianoptimization:${VERSION}@" manifests/v1alpha2/suggestion/bayesianoptimization/deployment.yaml
+sed -i -e "s@image: katib\/v1alpha2\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-nasrl:${VERSION}@" manifests/v1alpha2/suggestion/nasrl/deployment.yaml
 
 ./scripts/v1alpha2/deploy.sh
 
@@ -97,6 +98,7 @@ kubectl -n kubeflow get svc
 echo "Katib pods"
 kubectl -n kubeflow get pod
 
+mkdir -p ${GO_DIR}
 cp -r test ${GO_DIR}/test
 cp -r pkg/api/v1alpha2/python/* ${GO_DIR}/test/e2e/v1alpha2
 cd ${GO_DIR}/test/e2e/v1alpha2
