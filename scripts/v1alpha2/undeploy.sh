@@ -35,5 +35,6 @@ kubectl delete -f manifests/v1alpha2/manager-rest
 kubectl delete -f manifests/v1alpha2/db
 kubectl delete -f manifests/v1alpha2/pv
 kubectl delete -f manifests/v1alpha2/suggestion/random
+kubectl delete -f manifests/v1alpha2/suggestion/nasrl
 kubectl delete -f manifests/v1alpha2
 cd - > /dev/null
