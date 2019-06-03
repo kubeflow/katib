@@ -24,7 +24,12 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: expInstance.GetName(), Namespace: expInstance.GetNamespace()})
 
 	trial := &trialsv1alpha2.Trial{}
-	trial.Name = fmt.Sprintf("%s-%s", expInstance.GetName(), utilrand.String(8))
+
+	if trialInstance.Name != "" {
+		trial.Name = trialInstance.Name
+	} else {
+		trial.Name = fmt.Sprintf("%s-%s", expInstance.GetName(), utilrand.String(8))
+	}
 	trial.Namespace = expInstance.GetNamespace()
 	trial.Labels = map[string]string{consts.LabelExperimentName: expInstance.GetName()}
 
