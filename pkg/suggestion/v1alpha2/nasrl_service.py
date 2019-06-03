@@ -216,7 +216,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
         context.set_details(error_message)
         self.logger.info(error_message)
-        return api_pb2.ValidateSuggestionParametersReply()
+        return api_pb2.ValidateAlgorithmSettingsReply()
 
     def GetSuggestions(self, request, context):
 
