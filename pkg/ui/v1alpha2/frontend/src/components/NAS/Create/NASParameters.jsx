@@ -132,8 +132,8 @@ const NASParameters = (props) => {
         data.spec.nasConfig = {}
         data.spec.nasConfig.graphConfig = {
             numLayers: Number(props.numLayers),
-            inputSize: props.inputSize.map(size => Number(size)),
-            outputSize: props.outputSize.map(size => Number(size)),
+            inputSizes: props.inputSize.map(size => Number(size)),
+            outputSizes: props.outputSize.map(size => Number(size)),
         }
         data.spec.nasConfig.operations = []
         addOperations(props.operations, data.spec.nasConfig.operations)

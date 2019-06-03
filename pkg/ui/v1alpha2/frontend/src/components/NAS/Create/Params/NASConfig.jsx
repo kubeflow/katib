@@ -163,10 +163,10 @@ const NASConfig = (props) => {
                 <Grid container alignItems={"center"}>
                     <Grid item xs={12} sm={3}>
                         <Typography variant={"subheading"}>
-                            <Tooltip title={"Dimensions of input size"}>
+                            <Tooltip title={"Dimensions of input sizes"}>
                                 <HelpOutlineIcon className={classes.help} color={"primary"}/>
                             </Tooltip>
-                            {"InputSize"}
+                            {"InputSizes"}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -203,10 +203,10 @@ const NASConfig = (props) => {
                 <Grid container alignItems={"center"}>
                     <Grid item xs={12} sm={3}>
                         <Typography variant={"subheading"}>
-                            <Tooltip title={"Dimensions of output size"}>
+                            <Tooltip title={"Dimensions of output sizes"}>
                                 <HelpOutlineIcon className={classes.help} color={"primary"}/>
                             </Tooltip>
-                            {"OutputSize"}
+                            {"OutputSizes"}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>

@@ -105,7 +105,7 @@ const initialState = {
         }
     ],
     //Graph Config
-    numLayers: '1',
+    numLayers: '8',
     inputSize: ['32', '32', '3'],
     outputSize: ['10'],
     operations: [
