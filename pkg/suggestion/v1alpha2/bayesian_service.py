@@ -135,7 +135,7 @@ class BayesianService(api_pb2_grpc.SuggestionServicer):
                     w = gwfrep.observation_log
                     for ml in w.metric_logs:
                         y_train.append(float(ml.metric.value))
-                        x_train.append(w.parameter_set)
+                        x_train.append(t.spec.parameter_assignments.assignments)
         self.logger.info("%d completed trials are found.",
                          len(x_train), extra={"Experiment": experiment_name})
         if len(x_train) <= burn_in:
