@@ -53,7 +53,7 @@ const initialState = {
             value: "accuracy"
         }
     ],
-    algorithmName: [ "random" ],
+    algorithmName: "random",
     allAlgorithms: ["grid", "random", "hyperband"],
     algorithmSettings: [
 

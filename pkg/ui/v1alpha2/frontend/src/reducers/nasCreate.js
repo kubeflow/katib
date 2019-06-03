@@ -48,7 +48,7 @@ const initialState = {
         }
     ],
     additionalMetricNames: [],
-    algorithmName: [ "nasrl" ],
+    algorithmName: "nasrl",
     allAlgorithms: ["nasrl", "envelopenet"],
     algorithmSettings: [
         {
