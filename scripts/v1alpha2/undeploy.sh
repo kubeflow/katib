@@ -33,8 +33,10 @@ kubectl delete -f manifests/v1alpha2/katib-controller
 kubectl delete -f manifests/v1alpha2/manager
 kubectl delete -f manifests/v1alpha2/manager-rest
 kubectl delete -f manifests/v1alpha2/db
+kubectl delete -f manifests/v1alpha2/ui
 kubectl delete -f manifests/v1alpha2/pv
 kubectl delete -f manifests/v1alpha2/suggestion/random
+kubectl delete -f manifests/v1alpha2/suggestion/bayesianoptimization
 kubectl delete -f manifests/v1alpha2/suggestion/nasrl
 kubectl delete -f manifests/v1alpha2
 cd - > /dev/null
