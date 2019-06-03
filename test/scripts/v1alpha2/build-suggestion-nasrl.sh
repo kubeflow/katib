@@ -15,7 +15,6 @@
 # limitations under the License.
 
 # This shell script is used to build an image from our argo workflow
-exit 0
 
 set -o errexit
 set -o nounset
