@@ -32,4 +32,5 @@ kubectl apply -f manifests/v1alpha2/ui
 kubectl apply -f manifests/v1alpha2/suggestion/random
 kubectl apply -f manifests/v1alpha2/suggestion/bayesianoptimization
 kubectl apply -f manifests/v1alpha2/suggestion/nasrl
+kubectl apply -f manifests/v1alpha2/suggestion/grid
 cd - > /dev/null
