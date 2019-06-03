@@ -15,7 +15,6 @@
 # limitations under the License.
 
 # This shell script is used to build an image from our argo workflow
-exit 0
 
 set -o errexit
 set -o nounset
@@ -38,6 +37,6 @@ cp -r vendor ${GO_DIR}/vendor
 
 cd ${GO_DIR}
 
-#cp cmd/suggestion/nasrl/Dockerfile .
-#gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-nasrl:${VERSION} --project=${PROJECT}
-#gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/suggestion-nasrl:${VERSION} ${REGISTRY}/${REPO_NAME}/suggestion-nasrl:latest --verbosity=info
+cp cmd/suggestion/nasrl/v1alpha2/Dockerfile .
+gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha2/suggestion-nasrl:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha2/suggestion-nasrl:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha2/suggestion-nasrl:latest --verbosity=info

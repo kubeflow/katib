@@ -48,7 +48,7 @@ const initialState = {
         }
     ],
     additionalMetricNames: [],
-    algorithmName: [ "nasrl" ],
+    algorithmName: "nasrl",
     allAlgorithms: ["nasrl", "envelopenet"],
     algorithmSettings: [
         {
@@ -105,7 +105,7 @@ const initialState = {
         }
     ],
     //Graph Config
-    numLayers: '1',
+    numLayers: '8',
     inputSize: ['32', '32', '3'],
     outputSize: ['10'],
     operations: [

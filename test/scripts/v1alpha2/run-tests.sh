@@ -71,6 +71,7 @@ sed -i -e "s@image: katib\/v1alpha2\/katib-manager-rest@image: ${REGISTRY}\/${RE
 sed -i -e "s@image: katib\/v1alpha2\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-ui:${VERSION}@" manifests/v1alpha2/ui/deployment.yaml
 sed -i -e "s@image: katib\/v1alpha2\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-random:${VERSION}@" manifests/v1alpha2/suggestion/random/deployment.yaml
 sed -i -e "s@image: katib\/v1alpha2\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-grid:${VERSION}@" manifests/v1alpha2/suggestion/grid/deployment.yaml
+sed -i -e "s@image: katib\/v1alpha2\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-nasrl:${VERSION}@" manifests/v1alpha2/suggestion/nasrl/deployment.yaml
 
 ./scripts/v1alpha2/deploy.sh
 

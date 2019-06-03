@@ -23,6 +23,7 @@ import (
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
@@ -53,6 +54,7 @@ func NewClient(options client.Options) (Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	experimentsv1alpha2.AddToScheme(scheme.Scheme)
 	cl, err := client.New(cfg, options)
 	return &KatibClient{
 		client: cl,
