@@ -272,7 +272,7 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 		}
 	} else {
 		if instance.IsCompleted() && !instance.Spec.RetainRun {
-			if err = r.Delete(context.TODO(), desiredJob); err != nil {
+			if err = r.Delete(context.TODO(), desiredJob, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
 				logger.Error(err, "Delete job error")
 				return nil, err
 			} else {
@@ -351,7 +351,7 @@ func (r *ReconcileTrial) reconcileMetricsCollector(instance *trialsv1alpha2.Tria
 		}
 	} else {
 		if instance.IsCompleted() && !instance.Spec.RetainMetricsCollector {
-			if err = r.Delete(context.TODO(), desiredMetricsCollector); err != nil {
+			if err = r.Delete(context.TODO(), desiredMetricsCollector, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
 				logger.Error(err, "Delete Metrics Collector error")
 				return nil, err
 			} else {
