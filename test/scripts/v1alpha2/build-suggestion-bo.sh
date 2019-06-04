@@ -39,4 +39,4 @@ cd ${GO_DIR}
 
 cp cmd/suggestion/bayesianoptimization/v1alpha2/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha2/suggestion-bayesianoptimization:${VERSION} --project=${PROJECT}
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha2/suggestion-bayesianoptimization:${VERSION} ${REGISTRY}/${REPO_NAME}/suggestion-bayesianoptimization:latest --verbosity=info
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha2/suggestion-bayesianoptimization:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha2/suggestion-bayesianoptimization:latest --verbosity=info
