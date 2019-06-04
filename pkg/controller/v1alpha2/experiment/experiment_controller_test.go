@@ -66,7 +66,7 @@ func TestCreateExperiment(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	c := mgr.GetClient()
 
-	recFn, requests := SetupTestReconcile(&ReconcileExperiment{
+	recFn := SetupTestReconcile(&ReconcileExperiment{
 		Client:        mgr.GetClient(),
 		scheme:        mgr.GetScheme(),
 		ManagerClient: mc,
@@ -103,11 +103,8 @@ func TestCreateExperiment(t *testing.T) {
 		return
 	}
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 
 	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 	g.Eventually(func() bool {
 		return errors.IsNotFound(c.Get(context.TODO(),
 			expectedRequest.NamespacedName, instance))
@@ -217,7 +214,7 @@ spec:
 		return r.updateStatus(instance)
 	}
 
-	recFn, requests := SetupTestReconcile(r)
+	recFn := SetupTestReconcile(r)
 	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
 
 	stopMgr, mgrStopped := StartTestManager(mgr, g)
@@ -242,11 +239,6 @@ spec:
 		return
 	}
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	// We have 4 reconcile requests to finish the process.
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 
 	trials := &trialsv1alpha2.TrialList{}
 	g.Eventually(func() int {
@@ -261,7 +253,6 @@ spec:
 		Should(gomega.Equal(1))
 
 	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 	g.Eventually(func() bool {
 		return errors.IsNotFound(c.Get(context.TODO(),
 			expectedRequest.NamespacedName, instance))
