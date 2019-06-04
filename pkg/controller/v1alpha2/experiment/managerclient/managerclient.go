@@ -34,6 +34,17 @@ func (d *DefaultClient) CreateExperimentInDB(instance *experimentsv1alpha2.Exper
 	if _, err := commonv1alpha2.RegisterExperiment(request); err != nil {
 		return err
 	}
+	if len(experiment.Spec.Algorithm.AlgorithmSetting) > 0 {
+		req := &api_pb.UpdateAlgorithmExtraSettingsRequest{
+			ExperimentName:         experiment.Name,
+			ExtraAlgorithmSettings: experiment.Spec.Algorithm.AlgorithmSetting,
+		}
+
+		if _, err := commonv1alpha2.UpdateAlgorithmExtraSettings(req); err != nil {
+			return err
+		}
+
+	}
 	return nil
 }
 
