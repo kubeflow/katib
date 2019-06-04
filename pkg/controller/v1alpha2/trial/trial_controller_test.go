@@ -85,7 +85,7 @@ func TestCreateTFJobTrial(t *testing.T) {
 		return
 	}
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	defer c.Delete(context.TODO(), instance)
+	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
 }
 
 func TestReconcileTFJobTrial(t *testing.T) {
@@ -140,7 +140,6 @@ func TestReconcileTFJobTrial(t *testing.T) {
 		return
 	}
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	defer c.Delete(context.TODO(), instance)
 
 	tfJob := &unstructured.Unstructured{}
 	bufSize := 1024
@@ -159,6 +158,7 @@ func TestReconcileTFJobTrial(t *testing.T) {
 	// Manually delete TFJob since GC isn't enabled in the test control plane
 	g.Eventually(func() error { return c.Delete(context.TODO(), tfJob) }, timeout).
 		Should(gomega.MatchError("tfjobs.kubeflow.org \"test\" not found"))
+	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
 }
 
 func TestFailedToCreateTrialInDB(t *testing.T) {
@@ -192,15 +192,13 @@ func TestFailedToCreateTrialInDB(t *testing.T) {
 		return r.updateStatus(instance)
 	}
 
-	recFn, requests, results := SetupTestReconcileWithResult(r)
+	recFn := SetupTestReconcile(r)
 	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
 
 	stopMgr, mgrStopped := StartTestManager(mgr, g)
 
 	defer func() {
 		close(stopMgr)
-		close(requests)
-		close(results)
 		mgrStopped.Wait()
 	}()
 
@@ -213,9 +211,12 @@ func TestFailedToCreateTrialInDB(t *testing.T) {
 		return
 	}
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	defer c.Delete(context.TODO(), instance)
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
-	g.Eventually(results, timeout).Should(gomega.Receive(gomega.Equal(expectedResult)))
+	g.Expect(c.Get(context.TODO(), expectedRequest.NamespacedName, instance)).
+		NotTo(gomega.HaveOccurred())
+	if instance.IsCreated() {
+		t.Errorf("Expected not to got condition created")
+	}
+	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
 }
 
 func TestReconcileCompletedTFJobTrial(t *testing.T) {
