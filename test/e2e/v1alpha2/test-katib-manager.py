@@ -110,6 +110,21 @@ def get_random_algo_suggestion(stub):
     logger.error("Failed to get trial %s" % TEST_TRIAL, exc_info=True)
     raise
 
+def get_grid_algo_suggestion(stub):
+  try:
+    reply = stub.GetSuggestions(api_pb2.GetSuggestionsRequest(experiment_name=TEST_EXPERIMENT,
+                                                            algorithm_name="grid",
+                                                            request_number=1), 10)
+    trials = reply.trials
+
+    if len(trials) == 1 and trials[0].spec.experiment_name == TEST_EXPERIMENT:
+      logger.info("Get grid algorithm suggestion successfully")
+    else:
+      raise Exception()
+  except:
+    logger.error("Failed to get trial %s" % TEST_TRIAL, exc_info=True)
+    raise
+
 def test():
   with grpc.insecure_channel('127.0.0.1:6789') as channel:
     stub = api_pb2_grpc.ManagerStub(channel)
@@ -119,6 +134,7 @@ def test():
     register_trial(stub)
     get_trial(stub)
     get_random_algo_suggestion(stub)
+    get_grid_algo_suggestion(stub)
     delete_experiment(stub)
     try:
       get_trial(stub)
