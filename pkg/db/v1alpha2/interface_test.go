@@ -239,7 +239,7 @@ func TestUpdateAlgorithmExtraSettings(t *testing.T) {
 		),
 	)
 
-	mock.ExpectExec(`UPDATE extra_algorithm_settings SET value = \? ,
+	mock.ExpectExec(`UPDATE extra_algorithm_settings SET value = \?
 	WHERE experiment_name = \? AND setting_name = \?`,
 	).WithArgs(exAlgoSet[0].Value, exp_name, exAlgoSet[0].Name).WillReturnResult(sqlmock.NewResult(1, 1))
 
