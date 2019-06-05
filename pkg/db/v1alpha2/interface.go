@@ -386,7 +386,7 @@ func (d *dbConn) UpdateAlgorithmExtraSettings(experimentName string, extraAlgori
 		isin := false
 		for _, ceas := range aesList {
 			if ceas.Name == neas.Name {
-				_, err = d.db.Exec(`UPDATE extra_algorithm_settings SET value = ? ,
+				_, err = d.db.Exec(`UPDATE extra_algorithm_settings SET value = ?
 						WHERE experiment_name = ? AND setting_name = ?`,
 					neas.Value, experimentName, ceas.Name)
 				if err != nil {
