@@ -4,7 +4,7 @@ metadata:
   name: pytorchjobs.kubeflow.org
 spec:
   group: kubeflow.org
-  version: v1beta2
+  version: v1
   scope: Namespaced
   names:
     kind: PyTorchJob

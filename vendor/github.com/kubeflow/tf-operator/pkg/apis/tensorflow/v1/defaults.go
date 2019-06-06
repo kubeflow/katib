@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v1beta1
+package v1
 
 import (
 	"strings"
 
-	common "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta1"
+	common "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -32,7 +32,7 @@ func addDefaultingFuncs(scheme *runtime.Scheme) error {
 	return RegisterDefaults(scheme)
 }
 
-// setDefaultPort sets the default ports for pytorch container.
+// setDefaultPort sets the default ports for tensorflow container.
 func setDefaultPort(spec *v1.PodSpec) {
 	index := 0
 	for i, container := range spec.Containers {
@@ -42,14 +42,14 @@ func setDefaultPort(spec *v1.PodSpec) {
 		}
 	}
 
-	hasPyTorchJobPort := false
+	hasTFJobPort := false
 	for _, port := range spec.Containers[index].Ports {
 		if port.Name == DefaultPortName {
-			hasPyTorchJobPort = true
+			hasTFJobPort = true
 			break
 		}
 	}
-	if !hasPyTorchJobPort {
+	if !hasTFJobPort {
 		spec.Containers[index].Ports = append(spec.Containers[index].Ports, v1.ContainerPort{
 			Name:          DefaultPortName,
 			ContainerPort: DefaultPort,
@@ -67,38 +67,42 @@ func setDefaultReplicas(spec *common.ReplicaSpec) {
 }
 
 // setTypeNamesToCamelCase sets the name of all replica types from any case to correct case.
-func setTypeNamesToCamelCase(job *PyTorchJob) {
-	setTypeNameToCamelCase(job, PyTorchReplicaTypeMaster)
-	setTypeNameToCamelCase(job, PyTorchReplicaTypeWorker)
+func setTypeNamesToCamelCase(tfJob *TFJob) {
+	setTypeNameToCamelCase(tfJob, TFReplicaTypePS)
+	setTypeNameToCamelCase(tfJob, TFReplicaTypeWorker)
+	setTypeNameToCamelCase(tfJob, TFReplicaTypeChief)
+	setTypeNameToCamelCase(tfJob, TFReplicaTypeMaster)
+	setTypeNameToCamelCase(tfJob, TFReplicaTypeEval)
 }
 
 // setTypeNameToCamelCase sets the name of the replica type from any case to correct case.
-func setTypeNameToCamelCase(job *PyTorchJob, typ PyTorchReplicaType) {
-	for t := range job.Spec.PyTorchReplicaSpecs {
+// E.g. from ps to PS; from WORKER to Worker.
+func setTypeNameToCamelCase(tfJob *TFJob, typ TFReplicaType) {
+	for t := range tfJob.Spec.TFReplicaSpecs {
 		if strings.EqualFold(string(t), string(typ)) && t != typ {
-			spec := job.Spec.PyTorchReplicaSpecs[t]
-			delete(job.Spec.PyTorchReplicaSpecs, t)
-			job.Spec.PyTorchReplicaSpecs[typ] = spec
+			spec := tfJob.Spec.TFReplicaSpecs[t]
+			delete(tfJob.Spec.TFReplicaSpecs, t)
+			tfJob.Spec.TFReplicaSpecs[typ] = spec
 			return
 		}
 	}
 }
 
-// SetDefaults_PyTorchJob sets any unspecified values to defaults.
-func SetDefaults_PyTorchJob(job *PyTorchJob) {
+// SetDefaults_TFJob sets any unspecified values to defaults.
+func SetDefaults_TFJob(tfjob *TFJob) {
 	// Set default cleanpod policy to Running.
-	if job.Spec.CleanPodPolicy == nil {
-		policy := common.CleanPodPolicyNone
-		job.Spec.CleanPodPolicy = &policy
+	if tfjob.Spec.CleanPodPolicy == nil {
+		running := common.CleanPodPolicyRunning
+		tfjob.Spec.CleanPodPolicy = &running
 	}
 
-	// Update the key of PyTorchReplicaSpecs to camel case.
-	setTypeNamesToCamelCase(job)
+	// Update the key of TFReplicaSpecs to camel case.
+	setTypeNamesToCamelCase(tfjob)
 
-	for _, spec := range job.Spec.PyTorchReplicaSpecs {
+	for _, spec := range tfjob.Spec.TFReplicaSpecs {
 		// Set default replicas to 1.
 		setDefaultReplicas(spec)
-		// Set default port to pytorch container.
+		// Set default port to tensorFlow container.
 		setDefaultPort(&spec.Template.Spec)
 	}
 }

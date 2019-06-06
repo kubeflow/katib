@@ -139,7 +139,7 @@ func TestReconcileExperiment(t *testing.T) {
 	defer mockCtrl3.Finish()
 	generator := manifestmock.NewMockGenerator(mockCtrl)
 	generator.EXPECT().GetRunSpecWithHyperParameters(gomock.Any(), gomock.Any(),
-		gomock.Any(), gomock.Any(), gomock.Any()).Return(`apiVersion: "kubeflow.org/v1beta2"
+		gomock.Any(), gomock.Any(), gomock.Any()).Return(`apiVersion: "kubeflow.org/v1"
 kind: "TFJob"
 metadata:
   name: "test"
@@ -287,7 +287,7 @@ func newFakeInstance() *experimentsv1alpha2.Experiment {
 			},
 			TrialTemplate: &experimentsv1alpha2.TrialTemplate{
 				GoTemplate: &experimentsv1alpha2.GoTemplate{
-					RawTemplate: `apiVersion: "kubeflow.org/v1beta2"
+					RawTemplate: `apiVersion: "kubeflow.org/v1"
 kind: TFJob
 metadata:
   name: {{.Trial}}

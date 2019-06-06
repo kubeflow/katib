@@ -349,28 +349,28 @@
   version = "v1.1.5"
 
 [[projects]]
-  digest = "1:a0d34e77e6bb768a105145f56bb39631a449efd97379210f7fdc9e9e437d9487"
+  digest = "1:81bf086c2ebc845b5fbe833c0fd967a8ee8e33413084ccc68f36ecdaa73919fd"
   name = "github.com/kubeflow/pytorch-operator"
   packages = [
-    "pkg/apis/pytorch/v1beta1",
+    "pkg/apis/pytorch/v1",
     "pkg/apis/pytorch/v1beta2",
   ]
   pruneopts = "NUT"
-  revision = "da7798e7c2c127a270735c409f9305f3a6c06fd8"
-  version = "v0.5.0-rc.1"
+  revision = "396fb2f062e47e518240228f7f65ea5134dcbc43"
+  version = "v0.5.1"
 
 [[projects]]
-  digest = "1:aa39f57002948b31f67912913ad8ec7dd7a7e410c9bf0d4a6500335c9792eceb"
+  digest = "1:412ddde4fadb72f54ae7f5395f122a0fa4c63038174c336972a251ab2d0fa6ea"
   name = "github.com/kubeflow/tf-operator"
   packages = [
-    "pkg/apis/common/v1beta1",
+    "pkg/apis/common/v1",
     "pkg/apis/common/v1beta2",
-    "pkg/apis/tensorflow/v1beta1",
+    "pkg/apis/tensorflow/v1",
     "pkg/apis/tensorflow/v1beta2",
   ]
   pruneopts = "NUT"
-  revision = "c2849477dffdeacc2ebc11de66f826a6ce5cf690"
-  version = "v0.4.0"
+  revision = "d0b973be7135b7cbed3138d3d5ac70ae3a9bcd88"
+  version = "v0.5.3"
 
 [[projects]]
   digest = "1:802689c84994b7f2e41ffe7e39d29a8d8227f2121938dc025db44dfaa9633b15"
@@ -1171,11 +1171,11 @@
     "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger",
     "github.com/grpc-ecosystem/grpc-gateway/runtime",
     "github.com/grpc-ecosystem/grpc-gateway/utilities",
-    "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1beta1",
+    "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1",
     "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1beta2",
-    "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta1",
+    "github.com/kubeflow/tf-operator/pkg/apis/common/v1",
     "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta2",
-    "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1beta1",
+    "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1",
     "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1beta2",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",

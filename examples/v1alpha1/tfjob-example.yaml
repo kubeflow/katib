@@ -28,7 +28,7 @@ spec:
   workerSpec:
     goTemplate:
         rawTemplate: |-
-          apiVersion: "kubeflow.org/v1beta1"
+          apiVersion: "kubeflow.org/v1"
           kind: TFJob
           metadata:
             name: {{.WorkerID}}

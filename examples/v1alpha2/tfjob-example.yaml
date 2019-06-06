@@ -28,7 +28,7 @@ spec:
     retain: true
     goTemplate:
         rawTemplate: |-
-          apiVersion: "kubeflow.org/v1beta2"
+          apiVersion: "kubeflow.org/v1"
           kind: TFJob
           metadata:
             name: {{.Trial}}
