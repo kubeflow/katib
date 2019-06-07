@@ -12,19 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v1beta1
+// +k8s:deepcopy-gen=package,register
+// +k8s:defaulter-gen=TypeMeta
 
-// IsChieforMaster returns true if the type is Master or Chief.
-func IsChieforMaster(typ TFReplicaType) bool {
-	return typ == TFReplicaTypeChief || typ == TFReplicaTypeMaster
-}
-
-// IsWorker returns true if the type is Worker.
-func IsWorker(typ TFReplicaType) bool {
-	return typ == TFReplicaTypeWorker
-}
-
-// IsEvaluator returns true if the type is Evaluator.
-func IsEvaluator(typ TFReplicaType) bool {
-	return typ == TFReplicaTypeEval
-}
+// Package v1 is the v1 version of the API.
+// +groupName=kubeflow.org
+package v1

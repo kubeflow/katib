@@ -16,12 +16,12 @@ func GetSupportedJobList() []schema.GroupVersionKind {
 		},
 		{
 			Group:   "kubeflow.org",
-			Version: "v1beta2",
+			Version: "v1",
 			Kind:    "TFJob",
 		},
 		{
 			Group:   "kubeflow.org",
-			Version: "v1beta2",
+			Version: "v1",
 			Kind:    "PyTorchJob",
 		},
 	}

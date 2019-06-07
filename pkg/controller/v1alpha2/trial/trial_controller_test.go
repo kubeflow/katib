@@ -333,7 +333,7 @@ spec:
             - "-mn"
             - "test"
           restartPolicy: Never`,
-			RunSpec: `apiVersion: "kubeflow.org/v1beta2"
+			RunSpec: `apiVersion: "kubeflow.org/v1"
 kind: "TFJob"
 metadata:
   name: "test"

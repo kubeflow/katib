@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v1beta1
+package v1
 
 import (
-	common "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta1"
+	common "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 )
 
 const (

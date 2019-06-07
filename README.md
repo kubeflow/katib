@@ -300,7 +300,7 @@ Spec:
       Value:  0
   Worker Spec:
     Go Template:
-      Raw Template:  apiVersion: "kubeflow.org/v1beta1"
+      Raw Template:  apiVersion: "kubeflow.org/v1"
 kind: PyTorchJob
 metadata:
   name: {{.WorkerID}}
