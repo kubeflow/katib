@@ -233,7 +233,7 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha2.Trial) error {
 			return err
 		}
 		// Update Trial job status only if observation field is available.
-		// This will ensure that trial is set to be complete only if metric is collected atleast once
+		// This will ensure that trial is set to be complete only if metric is collected at least once
 		if isTrialObservationAvailable(instance) {
 			if err = r.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
 				logger.Error(err, "Update trial status condition error")

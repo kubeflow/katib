@@ -354,6 +354,10 @@ func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha2.Experim
 		logger.Error(err, "Get suggestions error")
 		return err
 	}
+	if len(trials) == 0 {
+		// for some suggestion services, such as hyperband, it will stop generating new trial once some condition satisfied
+		util.UpdateExperimentStatusCondition(instance, false, true)
+	}
 	for _, trial := range trials {
 		if err = r.createTrialInstance(instance, trial); err != nil {
 			logger.Error(err, "Create trial instance error", "trial", trial)
