@@ -54,7 +54,7 @@ const initialState = {
         }
     ],
     algorithmName: "random",
-    allAlgorithms: ["grid", "random", "hyperband"],
+    allAlgorithms: ["grid", "random", "hyperband", "bayesianoptimization"],
     algorithmSettings: [
 
     ],
