@@ -83,15 +83,15 @@ func TestCreateExperiment(t *testing.T) {
 
 	stopMgr, mgrStopped := StartTestManager(mgr, g)
 
-	defer func() {
-		close(stopMgr)
-		mgrStopped.Wait()
-	}()
-
 	stopCh := make(chan struct{})
 	g.Expect(mgr.GetCache().WaitForCacheSync(stopCh)).To(gomega.BeTrue())
 	defer func() {
 		close(stopCh)
+	}()
+
+	defer func() {
+		close(stopMgr)
+		mgrStopped.Wait()
 	}()
 
 	// Create the Trial object and expect the Reconcile and Deployment to be created
@@ -113,7 +113,9 @@ func TestCreateExperiment(t *testing.T) {
 
 func TestReconcileExperiment(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
+	testName := "tn"
 	instance := newFakeInstance()
+	instance.Name = testName
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -219,15 +221,15 @@ spec:
 
 	stopMgr, mgrStopped := StartTestManager(mgr, g)
 
+	stopCh := make(chan struct{})
+	g.Expect(mgr.GetCache().WaitForCacheSync(stopCh)).To(gomega.BeTrue())
+	defer func() {
+		close(stopCh)
+	}()
+
 	defer func() {
 		close(stopMgr)
 		mgrStopped.Wait()
-	}()
-
-	stopCh := make(chan struct{})
-	mgr.GetCache().WaitForCacheSync(stopCh)
-	defer func() {
-		close(stopCh)
 	}()
 
 	// Create the Trial object and expect the Reconcile and Deployment to be created
@@ -243,7 +245,7 @@ spec:
 	trials := &trialsv1alpha2.TrialList{}
 	g.Eventually(func() int {
 		label := labels.Set{
-			consts.LabelExperimentName: experimentName,
+			consts.LabelExperimentName: testName,
 		}
 		c.List(context.TODO(), &client.ListOptions{
 			LabelSelector: label.AsSelector(),
@@ -255,7 +257,7 @@ spec:
 	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
 	g.Eventually(func() bool {
 		return errors.IsNotFound(c.Get(context.TODO(),
-			expectedRequest.NamespacedName, instance))
+			types.NamespacedName{Namespace: instance.Namespace, Name: instance.Name}, instance))
 	}, timeout).Should(gomega.BeTrue())
 }
 
