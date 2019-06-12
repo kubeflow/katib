@@ -19,6 +19,7 @@ package experiment
 import (
 	"context"
 	"os"
+	"sort"
 
 	"github.com/spf13/viper"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
@@ -270,10 +271,9 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 }
 
 func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.Experiment) error {
-
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	trials := &trialsv1alpha2.TrialList{}
-	labels := map[string]string{"experiment": instance.Name}
+	labels := map[string]string{consts.LabelExperimentName: instance.Name}
 	lo := &client.ListOptions{}
 	lo.MatchingLabels(labels).InNamespace(instance.Namespace)
 
@@ -289,12 +289,12 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.
 	}
 	reconcileRequired := !instance.IsCompleted()
 	if reconcileRequired {
-		r.ReconcileTrials(instance)
+		r.ReconcileTrials(instance, trials.Items)
 	}
 	return nil
 }
 
-func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Experiment) error {
+func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Experiment, trials []trialsv1alpha2.Trial) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 
@@ -307,7 +307,7 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Expe
 		if deleteCount > 0 {
 			//delete 'deleteCount' number of trails. Sort them?
 			logger.Info("DeleteTrials", "deleteCount", deleteCount)
-			if err := r.deleteTrials(instance, deleteCount); err != nil {
+			if err := r.deleteTrials(instance, trials, deleteCount); err != nil {
 				logger.Error(err, "Delete trials error")
 				return err
 			}
@@ -367,7 +367,22 @@ func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha2.Experim
 	return nil
 }
 
-func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha2.Experiment, deleteCount int32) error {
+func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha2.Experiment,
+	trials []trialsv1alpha2.Trial,
+	deleteCount int32) error {
+	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 
+	trialSlice := trials
+	sort.Slice(trialSlice, func(i, j int) bool {
+		return trialSlice[i].CreationTimestamp.Time.
+			After(trialSlice[j].CreationTimestamp.Time)
+	})
+
+	for i := 0; i < int(deleteCount); i++ {
+		if err := r.Delete(context.TODO(), &trialSlice[i]); err != nil {
+			logger.Error(err, "Trial Delete error")
+			return err
+		}
+	}
 	return nil
 }
