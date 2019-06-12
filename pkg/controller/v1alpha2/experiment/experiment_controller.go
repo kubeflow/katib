@@ -273,7 +273,7 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	trials := &trialsv1alpha2.TrialList{}
-	labels := map[string]string{"experiment": instance.Name}
+	labels := map[string]string{consts.LabelExperimentName: instance.Name}
 	lo := &client.ListOptions{}
 	lo.MatchingLabels(labels).InNamespace(instance.Namespace)
 
@@ -368,6 +368,26 @@ func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha2.Experim
 }
 
 func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha2.Experiment, deleteCount int32) error {
+	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+	trials := &trialsv1alpha2.TrialList{}
+	labels := map[string]string{consts.LabelExperimentName: instance.Name}
+	lo := &client.ListOptions{}
+	lo.MatchingLabels(labels).InNamespace(instance.Namespace)
 
+	if err := r.List(context.TODO(), lo, trials); err != nil {
+		logger.Error(err, "Trial List error")
+		return err
+	}
+	actualDeleteCount := int(deleteCount)
+	if int32(len(trials.Items)) < deleteCount {
+		actualDeleteCount = len(trials.Items)
+	}
+
+	for i := 0; i < actualDeleteCount; i++ {
+		if err := r.Delete(context.TODO(), &trials.Items[len(trials.Items)-1-i]); err != nil {
+			logger.Error(err, "Trial Delete error")
+			return err
+		}
+	}
 	return nil
 }
