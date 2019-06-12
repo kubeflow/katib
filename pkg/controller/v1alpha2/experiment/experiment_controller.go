@@ -235,14 +235,15 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		if instance.Status.CompletionTime == nil {
 			instance.Status.CompletionTime = &metav1.Time{}
 		}
-		msg := "Experiment is created"
-		instance.MarkExperimentStatusCreated(util.ExperimentCreatedReason, msg)
-
 		err = r.CreateExperimentInDB(instance)
 		if err != nil {
 			logger.Error(err, "Create experiment in DB error")
-			return reconcile.Result{}, err
+			return reconcile.Result{
+				Requeue: true,
+			}, err
 		}
+		msg := "Experiment is created"
+		instance.MarkExperimentStatusCreated(util.ExperimentCreatedReason, msg)
 	} else {
 		// Experiment already created in DB
 		err := r.ReconcileExperiment(instance)
