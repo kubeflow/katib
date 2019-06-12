@@ -31,7 +31,7 @@ const (
 	experimentName = "foo"
 	namespace      = "default"
 
-	timeout = time.Second * 20
+	timeout = time.Second * 40
 )
 
 var expectedRequest = reconcile.Request{NamespacedName: types.NamespacedName{Name: experimentName, Namespace: namespace}}
