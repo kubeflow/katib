@@ -126,6 +126,12 @@ func TestReconcileTFJobTrial(t *testing.T) {
 
 	stopMgr, mgrStopped := StartTestManager(mgr, g)
 
+	stopCh := make(chan struct{})
+	g.Expect(mgr.GetCache().WaitForCacheSync(stopCh)).To(gomega.BeTrue())
+	defer func() {
+		close(stopCh)
+	}()
+
 	defer func() {
 		close(stopMgr)
 		mgrStopped.Wait()

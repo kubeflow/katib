@@ -31,7 +31,7 @@ const (
 	experimentName = "foo"
 	namespace      = "default"
 
-	timeout = time.Second * 5
+	timeout = time.Second * 20
 )
 
 var expectedRequest = reconcile.Request{NamespacedName: types.NamespacedName{Name: experimentName, Namespace: namespace}}
@@ -89,7 +89,7 @@ func TestCreateExperiment(t *testing.T) {
 	}()
 
 	stopCh := make(chan struct{})
-	mgr.GetCache().WaitForCacheSync(stopCh)
+	g.Expect(mgr.GetCache().WaitForCacheSync(stopCh)).To(gomega.BeTrue())
 	defer func() {
 		close(stopCh)
 	}()
