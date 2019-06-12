@@ -135,6 +135,7 @@ func getExperimentSpec(instance *experimentsv1alpha2.Experiment) *api_pb.Experim
 		Algorithm: &api_pb.AlgorithmSpec{
 			AlgorithmSetting: []*api_pb.AlgorithmSetting{},
 		},
+		ParallelTrialCount: *instance.Spec.ParallelTrialCount,
 	}
 
 	//Populate Objective

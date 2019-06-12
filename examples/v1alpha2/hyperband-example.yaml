@@ -19,7 +19,7 @@ spec:
         value: "3"
       - name: "r_l"
         value: "9"
-  maxFailedTrialCount: 3
+  maxFailedTrialCount: 9
   parameters:
     - name: --lr
       parameterType: double
