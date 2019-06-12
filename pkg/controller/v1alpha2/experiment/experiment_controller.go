@@ -19,6 +19,7 @@ package experiment
 import (
 	"context"
 	"os"
+	"sort"
 
 	"github.com/spf13/viper"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
@@ -270,7 +271,6 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 }
 
 func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.Experiment) error {
-
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	trials := &trialsv1alpha2.TrialList{}
 	labels := map[string]string{consts.LabelExperimentName: instance.Name}
@@ -383,8 +383,14 @@ func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha2.Experim
 		actualDeleteCount = len(trials.Items)
 	}
 
+	trialSlice := trials.Items
+	sort.Slice(trialSlice, func(i, j int) bool {
+		return trialSlice[i].CreationTimestamp.Time.
+			After(trialSlice[j].CreationTimestamp.Time)
+	})
+
 	for i := 0; i < actualDeleteCount; i++ {
-		if err := r.Delete(context.TODO(), &trials.Items[len(trials.Items)-1-i]); err != nil {
+		if err := r.Delete(context.TODO(), &trialSlice[i]); err != nil {
 			logger.Error(err, "Trial Delete error")
 			return err
 		}
