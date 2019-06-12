@@ -31,7 +31,7 @@ const (
 	experimentName = "foo"
 	namespace      = "default"
 
-	timeout = time.Second * 5
+	timeout = time.Second * 40
 )
 
 var expectedRequest = reconcile.Request{NamespacedName: types.NamespacedName{Name: experimentName, Namespace: namespace}}
@@ -66,7 +66,7 @@ func TestCreateExperiment(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	c := mgr.GetClient()
 
-	recFn, requests := SetupTestReconcile(&ReconcileExperiment{
+	recFn := SetupTestReconcile(&ReconcileExperiment{
 		Client:        mgr.GetClient(),
 		scheme:        mgr.GetScheme(),
 		ManagerClient: mc,
@@ -88,12 +88,6 @@ func TestCreateExperiment(t *testing.T) {
 		mgrStopped.Wait()
 	}()
 
-	stopCh := make(chan struct{})
-	mgr.GetCache().WaitForCacheSync(stopCh)
-	defer func() {
-		close(stopCh)
-	}()
-
 	// Create the Trial object and expect the Reconcile and Deployment to be created
 	err = c.Create(context.TODO(), instance)
 	// The instance object may not be a valid object because it might be missing some required fields.
@@ -103,11 +97,8 @@ func TestCreateExperiment(t *testing.T) {
 		return
 	}
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 
 	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 	g.Eventually(func() bool {
 		return errors.IsNotFound(c.Get(context.TODO(),
 			expectedRequest.NamespacedName, instance))
@@ -116,7 +107,9 @@ func TestCreateExperiment(t *testing.T) {
 
 func TestReconcileExperiment(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
+	testName := "tn"
 	instance := newFakeInstance()
+	instance.Name = testName
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -217,7 +210,7 @@ spec:
 		return r.updateStatus(instance)
 	}
 
-	recFn, requests := SetupTestReconcile(r)
+	recFn := SetupTestReconcile(r)
 	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
 
 	stopMgr, mgrStopped := StartTestManager(mgr, g)
@@ -225,12 +218,6 @@ spec:
 	defer func() {
 		close(stopMgr)
 		mgrStopped.Wait()
-	}()
-
-	stopCh := make(chan struct{})
-	mgr.GetCache().WaitForCacheSync(stopCh)
-	defer func() {
-		close(stopCh)
 	}()
 
 	// Create the Trial object and expect the Reconcile and Deployment to be created
@@ -242,16 +229,11 @@ spec:
 		return
 	}
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	// We have 4 reconcile requests to finish the process.
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 
 	trials := &trialsv1alpha2.TrialList{}
 	g.Eventually(func() int {
 		label := labels.Set{
-			consts.LabelExperimentName: experimentName,
+			consts.LabelExperimentName: testName,
 		}
 		c.List(context.TODO(), &client.ListOptions{
 			LabelSelector: label.AsSelector(),
@@ -261,10 +243,9 @@ spec:
 		Should(gomega.Equal(1))
 
 	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 	g.Eventually(func() bool {
 		return errors.IsNotFound(c.Get(context.TODO(),
-			expectedRequest.NamespacedName, instance))
+			types.NamespacedName{Namespace: instance.Namespace, Name: instance.Name}, instance))
 	}, timeout).Should(gomega.BeTrue())
 }
 
