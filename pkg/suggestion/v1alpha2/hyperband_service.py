@@ -255,6 +255,48 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer):
             client.UpdateAlgorithmExtraSettings(api_pb2.UpdateAlgorithmExtraSettingsRequest(
                 experiment_name=experiment_name, extra_algorithm_settings=as_list), 10)
 
+    def _set_validate_context_error(self, context, error_message):
+        context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+        context.set_details(error_message)
+        self.logger.info(error_message)
+        return api_pb2.ValidateAlgorithmSettingsReply()
+
     def ValidateAlgorithmSettings(self, request, context):
-        # TODO
+        params = request.experiment_spec.parameter_specs.parameters
+        settings = request.experiment_spec.algorithm.algorithm_setting
+        setting_dict = {}
+        for setting in settings:
+            setting_dict[setting.name] = setting.value
+        if "r_l" not in setting_dict or "resourceName" not in setting_dict:
+            return self._set_validate_context_error(context, "r_l and resourceName must be set.")
+        try:
+            rl = float(setting_dict["r_l"])
+        except:
+            return self._set_validate_context_error(context, "r_l must be a positive float number.")
+        else:
+            if rl < 0:
+                return self._set_validate_context_error(context, "r_l must be a positive float number.")
+
+        if "eta" in setting_dict:
+            eta = int(float(setting_dict["eta"]))
+            if eta <= 0:
+                eta = 3
+        else:
+            eta = 3
+
+        smax = int(math.log(rl)/math.log(eta))
+        max_parallel = int(math.ceil(eta**smax))
+        if request.experiment_spec.parallel_trial_count < max_parallel:
+            return self._set_validate_context_error(context,
+                            "parallelTrialCount must be not less than %d." % max_parallel)
+
+        valid_resourceName = False
+        for param in params:
+            if param.name == setting_dict["resourceName"]:
+                valid_resourceName = True
+                break
+        if not valid_resourceName:
+            return self._set_validate_context_error(context,
+                            "value of resourceName setting must be in parameters.")
+
         return api_pb2.ValidateAlgorithmSettingsReply()
