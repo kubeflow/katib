@@ -231,33 +231,33 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	}
 	log.Printf("Got Trial List")
 
-	resultText += "\n"
-
 	for _, t := range trialListResp.Trials {
 
-		obsLogResp, err := c.GetObservationLog(
-			context.Background(),
-			&api_pb_v1alpha2.GetObservationLogRequest{
-				TrialName: t.Name,
-				StartTime: "",
-				EndTime:   "",
-			},
-		)
-		if err != nil {
-			log.Printf("GetObservationLog from HP job failed: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		if t.Status.Condition == api_pb_v1alpha2.TrialStatus_SUCCEEDED {
+			obsLogResp, err := c.GetObservationLog(
+				context.Background(),
+				&api_pb_v1alpha2.GetObservationLogRequest{
+					TrialName: t.Name,
+					StartTime: "",
+					EndTime:   "",
+				},
+			)
+			if err != nil {
+				log.Printf("GetObservationLog from HP job failed: %v", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 
-		trialResText := make([]string, len(metricsList)+len(paramList))
-		for _, m := range obsLogResp.ObservationLog.MetricLogs {
-			trialResText[metricsList[m.Metric.Name]] = m.Metric.Value
+			trialResText := make([]string, len(metricsList)+len(paramList))
+			for _, m := range obsLogResp.ObservationLog.MetricLogs {
+				trialResText[metricsList[m.Metric.Name]] = m.Metric.Value
 
+			}
+			for _, trialParam := range t.Spec.ParameterAssignments.Assignments {
+				trialResText[paramList[trialParam.Name]] = trialParam.Value
+			}
+			resultText += "\n" + t.Name + "," + strings.Join(trialResText, ",")
 		}
-		for _, trialParam := range t.Spec.ParameterAssignments.Assignments {
-			trialResText[paramList[trialParam.Name]] = trialParam.Value
-		}
-		resultText += t.Name + "," + strings.Join(trialResText, ",") + "\n"
 	}
 	log.Printf("Logs parsed, result: %v", resultText)
 	response, err := json.Marshal(resultText)
@@ -337,41 +337,43 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 
 	for i, t := range trialListResp.Trials {
 
-		obsLogResp, err := c.GetObservationLog(
-			context.Background(),
-			&api_pb_v1alpha2.GetObservationLogRequest{
-				TrialName: t.Name,
-				StartTime: "",
-				EndTime:   "",
-			},
-		)
-		if err != nil {
-			log.Printf("GetObservationLog from NAS job failed: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		metricsName := make([]string, 0)
-		metricsValue := make([]string, 0)
-		for _, m := range obsLogResp.ObservationLog.MetricLogs {
-			metricsName = append(metricsName, m.Metric.Name)
-			metricsValue = append(metricsValue, m.Metric.Value)
+		if t.Status.Condition == api_pb_v1alpha2.TrialStatus_SUCCEEDED {
+			obsLogResp, err := c.GetObservationLog(
+				context.Background(),
+				&api_pb_v1alpha2.GetObservationLogRequest{
+					TrialName: t.Name,
+					StartTime: "",
+					EndTime:   "",
+				},
+			)
+			if err != nil {
+				log.Printf("GetObservationLog from NAS job failed: %v", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			metricsName := make([]string, 0)
+			metricsValue := make([]string, 0)
+			for _, m := range obsLogResp.ObservationLog.MetricLogs {
+				metricsName = append(metricsName, m.Metric.Name)
+				metricsValue = append(metricsValue, m.Metric.Value)
 
-		}
-		for _, trialParam := range t.Spec.ParameterAssignments.Assignments {
-			if trialParam.Name == "architecture" {
-				architecture = trialParam.Value
 			}
-			if trialParam.Name == "nn_config" {
-				decoder = trialParam.Value
+			for _, trialParam := range t.Spec.ParameterAssignments.Assignments {
+				if trialParam.Name == "architecture" {
+					architecture = trialParam.Value
+				}
+				if trialParam.Name == "nn_config" {
+					decoder = trialParam.Value
+				}
 			}
+			responseRaw = append(responseRaw, NNView{
+				Name:         "Generation " + strconv.Itoa(i),
+				TrialName:    t.Name,
+				Architecture: generateNNImage(architecture, decoder),
+				MetricsName:  metricsName,
+				MetricsValue: metricsValue,
+			})
 		}
-		responseRaw = append(responseRaw, NNView{
-			Name:         "Generation " + strconv.Itoa(i),
-			TrialName:    t.Name,
-			Architecture: generateNNImage(architecture, decoder),
-			MetricsName:  metricsName,
-			MetricsValue: metricsValue,
-		})
 	}
 	log.Printf("Logs parsed, result: %v", responseRaw)
 
