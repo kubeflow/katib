@@ -10,7 +10,11 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
-
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
+import OutlinedInput from '@material-ui/core/OutlinedInput';
+import MenuItem from '@material-ui/core/MenuItem';
 
 import { changeObjective, addMetrics, editMetrics, deleteMetrics } from '../../../../actions/nasCreateActions';
 
@@ -32,6 +36,9 @@ const useStyles = makeStyles({
         padding: 2,
         marginBottom: 10,
     },
+    selectBox: {
+        width: 150
+    }
 })
 
 const Objective = (props) => {
@@ -39,8 +46,9 @@ const Objective = (props) => {
     const classes = useStyles();
 
     const onObjectiveChange = (name) => (event) => {
-      props.changeObjective(name, event.target.value);
-  }
+        props.changeObjective(name, event.target.value);
+    }
+
     const onMetricsEdit = (index) => (event) => {
         props.editMetrics(index, event.target.value);
     }
@@ -53,25 +61,60 @@ const Objective = (props) => {
         <div>
           {props.objective.map((param, i) => {
                 return (
-                    <div key={i} className={classes.parameter}>
-                        <Grid container alignItems={"center"}>
-                            <Grid item xs={12} sm={3}>
-                                <Typography variant={"subheading"}>
-                                    <Tooltip title={param.description}>
-                                        <HelpOutlineIcon className={classes.help} color={"primary"}/>
-                                    </Tooltip>
-                                    {param.name}
-                                </Typography>
+                    param.name === "Type" ?
+                        <div key={i} className={classes.parameter}>
+                            <Grid container alignItems={"center"}>
+                                <Grid item xs={12} sm={3}>
+                                    <Typography>
+                                        <Tooltip title={param.description}>
+                                            <HelpOutlineIcon className={classes.help} color={"primary"}/>
+                                        </Tooltip>
+                                        {param.name}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={12} sm={8}>
+                                    <FormControl variant="outlined" className={classes.formControl}>
+                                        <InputLabel>
+                                            Objective Type
+                                        </InputLabel>
+                                        <Select
+                                            value={param.value}
+                                            onChange={onObjectiveChange(param.name)}
+                                            input={
+                                                <OutlinedInput labelWidth={160}/>
+                                            }
+                                            className={classes.selectBox}
+                                            >
+                                                {props.allObjectiveTypes.map((type, i) => {
+                                                    return (
+                                                            <MenuItem value={type} key={i}>{type}</MenuItem>
+                                                        )
+                                                })}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
                             </Grid>
-                            <Grid item xs={12} sm={8}>
-                                <TextField
-                                    className={classes.textField}
-                                    value={param.value}
-                                    onChange={onObjectiveChange(param.name)}
-                                    />
+                        </div>
+                    :
+                        <div key={i} className={classes.parameter}>
+                            <Grid container alignItems={"center"}>
+                                <Grid item xs={12} sm={3}>
+                                    <Typography variant={"subheading"}>
+                                        <Tooltip title={param.description}>
+                                            <HelpOutlineIcon className={classes.help} color={"primary"}/>
+                                        </Tooltip>
+                                        {param.name}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={12} sm={8}>
+                                    <TextField
+                                        className={classes.textField}
+                                        value={param.value}
+                                        onChange={onObjectiveChange(param.name)}
+                                        />
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    </div>
+                        </div>
                 )
             })}
             <div className={classes.parameter}>
@@ -126,6 +169,7 @@ const Objective = (props) => {
 
 const mapStateToProps = state => {
     return {
+        allObjectiveTypes: state[module].allObjectiveTypes,
         objective: state[module].objective,
         additionalMetricNames: state[module].additionalMetricNames
     }
