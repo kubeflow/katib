@@ -27,9 +27,11 @@ const (
 )
 
 func getCondition(exp *Experiment, condType ExperimentConditionType) *ExperimentCondition {
-	for _, condition := range exp.Status.Conditions {
-		if condition.Type == condType {
-			return &condition
+	if exp.Status.Conditions != nil {
+		for _, condition := range exp.Status.Conditions {
+			if condition.Type == condType {
+				return &condition
+			}
 		}
 	}
 	return nil
