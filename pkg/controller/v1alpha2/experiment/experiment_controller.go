@@ -155,15 +155,19 @@ func addWebhook(mgr manager.Manager) error {
 	if err != nil {
 		return err
 	}
+	namespace := experimentsv1alpha2.DefaultKatibNamespace
+	if ns := os.Getenv(experimentsv1alpha2.DefaultKatibNamespaceEnvName); ns != "" {
+		namespace = ns
+	}
 	as, err := webhook.NewServer("experiment-admission-server", mgr, webhook.ServerOptions{
 		CertDir: "/tmp/cert",
 		BootstrapOptions: &webhook.BootstrapOptions{
 			Secret: &types.NamespacedName{
-				Namespace: os.Getenv(experimentsv1alpha2.DefaultKatibNamespaceEnvName),
+				Namespace: namespace,
 				Name:      katibControllerName,
 			},
 			Service: &webhook.Service{
-				Namespace: os.Getenv(experimentsv1alpha2.DefaultKatibNamespaceEnvName),
+				Namespace: namespace,
 				Name:      katibControllerName,
 				Selectors: map[string]string{
 					"app": katibControllerName,

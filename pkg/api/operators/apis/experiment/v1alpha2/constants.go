@@ -25,6 +25,9 @@ const (
 	// Default env name of katib namespace
 	DefaultKatibNamespaceEnvName = "KATIB_CORE_NAMESPACE"
 
+	//Default katib namespace
+	DefaultKatibNamespace = "kubeflow"
+
 	// Default value of Spec.TemplatePath
 	DefaultTrialTemplatePath = "defaultTrialTemplate.yaml"
 

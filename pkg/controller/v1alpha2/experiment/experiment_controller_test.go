@@ -29,11 +29,11 @@ import (
 
 const (
 	experimentName = "foo"
-	namespace      = "default"
 
 	timeout = time.Second * 40
 )
 
+var namespace = experimentsv1alpha2.DefaultKatibNamespace
 var expectedRequest = reconcile.Request{NamespacedName: types.NamespacedName{Name: experimentName, Namespace: namespace}}
 var trialKey = types.NamespacedName{Name: "test", Namespace: namespace}
 
