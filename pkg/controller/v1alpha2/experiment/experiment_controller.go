@@ -104,8 +104,23 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	if err = addWatch(mgr, c); err != nil {
+		log.Error(err, "Trial watch failed")
+		return err
+	}
+	if err = addWebhook(mgr); err != nil {
+		log.Error(err, "Failed to create webhook")
+		return err
+	}
+
+	log.Info("Experiment controller created")
+	return nil
+}
+
+// addWatch adds a new Controller to mgr with r as the reconcile.Reconciler
+func addWatch(mgr manager.Manager, c controller.Controller) error {
 	// Watch for changes to Experiment
-	err = c.Watch(&source.Kind{Type: &experimentsv1alpha2.Experiment{}}, &handler.EnqueueRequestForObject{})
+	err := c.Watch(&source.Kind{Type: &experimentsv1alpha2.Experiment{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		log.Error(err, "Experiment watch failed")
 		return err
@@ -123,12 +138,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		log.Error(err, "Trial watch failed")
 		return err
 	}
-	if err = addWebhook(mgr); err != nil {
-		log.Error(err, "Failed to create webhook")
-		return err
-	}
-
-	log.Info("Experiment controller created")
 	return nil
 }
 
