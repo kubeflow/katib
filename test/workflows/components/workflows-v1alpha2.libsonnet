@@ -261,7 +261,7 @@
                 ],
                 [
                   {
-                    name: "run-tests",
+                    name: "run-e2e-tests",
                     template: "run-tests",
                   },
                 ],
