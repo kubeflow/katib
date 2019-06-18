@@ -66,6 +66,7 @@ echo "REPO_NAME ${REPO_NAME}"
 echo "VERSION ${VERSION}"
 
 sed -i -e "s@image: katib\/v1alpha2\/katib-controller@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-controller:${VERSION}@" manifests/v1alpha2/katib-controller/katib-controller.yaml
+sed -i -e "s@image: katib\/v1alpha2\/metrics-collector@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/metrics-collector:${VERSION}@" manifests/v1alpha2/katib-controller/metricsControllerConfigMap.yaml
 sed -i -e "s@image: katib\/v1alpha2\/katib-manager@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-manager:${VERSION}@" manifests/v1alpha2/manager/deployment.yaml
 sed -i -e "s@image: katib\/v1alpha2\/katib-manager-rest@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-manager-rest:${VERSION}@" manifests/v1alpha2/manager-rest/deployment.yaml
 sed -i -e "s@image: katib\/v1alpha2\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-ui:${VERSION}@" manifests/v1alpha2/ui/deployment.yaml
@@ -93,6 +94,7 @@ done
 
 echo "All Katib components are running."
 kubectl version
+kubectl cluster-info
 echo "Katib deployments"
 kubectl -n kubeflow get deploy
 echo "Katib services"
@@ -101,7 +103,7 @@ echo "Katib pods"
 kubectl -n kubeflow get pod
 
 mkdir -p ${GO_DIR}
-cp -r test ${GO_DIR}/test
+cp -r . ${GO_DIR}/
 cp -r pkg/api/v1alpha2/python/* ${GO_DIR}/test/e2e/v1alpha2
 cd ${GO_DIR}/test/e2e/v1alpha2
 kubectl apply -f valid-experiment.yaml
@@ -126,4 +128,7 @@ python get-pip.py
 pip install -r test_requirements.txt
 python test-katib-manager.py
 
+echo "Running e2e grid experiment"
+export KUBECONFIG=$HOME/.kube/config
+go run run-e2e-experiment.go ../../../examples/v1alpha2/grid-example.yaml
 exit 0

@@ -67,6 +67,9 @@ const useStyles = makeStyles({
     fab: {
         margin: 2,
     },
+    section: {
+        marginTop: 20
+    }
 })
 
 const SectionInTypography = (name, classes, variant) => {
