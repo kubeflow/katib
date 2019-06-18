@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -18,6 +19,22 @@ import (
 const (
 	timeout = 20 * time.Minute
 )
+
+func verifyResult(exp *experimentsv1alpha2.Experiment) error {
+	if len(exp.Status.CurrentOptimalTrial.ParameterAssignments) == 0 {
+		return fmt.Errorf("Best parameter assignments not updated in status")
+	}
+
+	if len(exp.Status.CurrentOptimalTrial.Observation.Metrics) == 0 {
+		return fmt.Errorf("Bst metrics not updated in status")
+	}
+
+	metric := exp.Status.CurrentOptimalTrial.Observation.Metrics[0]
+	if metric.Name != exp.Spec.Objective.ObjectiveMetricName {
+		return fmt.Errorf("Best objective metric not updated in status")
+	}
+	return nil
+}
 
 func main() {
 	if len(os.Args) != 2 {
@@ -70,8 +87,9 @@ func main() {
 	if exp.Status.TrialsSucceeded != *exp.Spec.MaxTrialCount {
 		log.Fatal("All trials are not successful ", exp.Status.TrialsSucceeded, *exp.Spec.MaxTrialCount)
 	}
-	if len(exp.Status.CurrentOptimalTrial.ParameterAssignments) == 0 {
-		log.Fatal("Current Optimal Trial is empty")
+	err = verifyResult(exp)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	log.Printf("Experiment has recorded best current Optimal Trial %v", exp.Status.CurrentOptimalTrial)
