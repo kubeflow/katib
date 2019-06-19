@@ -174,11 +174,20 @@ func (k *KatibUIHandler) SubmitParamsJob(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-// TODO: Add delete job to Katib Client
 func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request) {
-	//enableCors(&w)
 	experimentName := r.URL.Query()["experimentName"][0]
-	log.Printf("Experiment Name: %v", experimentName)
+	experiment, err := k.katibClient.GetExperiment(experimentName)
+	if err != nil {
+		log.Printf("GetExperiment failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = k.katibClient.DeleteExperiment(experiment)
+	if err != nil {
+		log.Printf("DeleteExperiment failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) {
@@ -259,7 +268,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 			resultText += "\n" + t.Name + "," + strings.Join(trialResText, ",")
 		}
 	}
-	log.Printf("Logs parsed, result: %v", resultText)
+	log.Printf("Logs parsed, results:\n %v", resultText)
 	response, err := json.Marshal(resultText)
 	if err != nil {
 		log.Printf("Marshal result text for HP job failed: %v", err)
