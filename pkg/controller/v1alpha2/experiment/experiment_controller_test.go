@@ -79,7 +79,7 @@ func TestCreateExperiment(t *testing.T) {
 			return nil
 		},
 	})
-	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
+	g.Expect(addForTestPurpose(mgr, recFn)).NotTo(gomega.HaveOccurred())
 
 	stopMgr, mgrStopped := StartTestManager(mgr, g)
 
@@ -211,7 +211,7 @@ spec:
 	}
 
 	recFn := SetupTestReconcile(r)
-	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
+	g.Expect(addForTestPurpose(mgr, recFn)).NotTo(gomega.HaveOccurred())
 
 	stopMgr, mgrStopped := StartTestManager(mgr, g)
 

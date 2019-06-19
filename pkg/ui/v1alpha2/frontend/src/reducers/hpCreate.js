@@ -31,6 +31,7 @@ const initialState = {
             description: "Max failed trials to mark experiment as failed"
         }
     ],
+    allObjectiveTypes: ["minimize", "maximize"],
     objective: [
         {
             name: "Type",
