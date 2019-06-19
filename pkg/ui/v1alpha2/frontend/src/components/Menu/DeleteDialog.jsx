@@ -22,7 +22,7 @@ const DeleteDialog = (props) => {
     const classes = useStyles();
 
     const onDelete = () => {
-        props.deleteExperiment(props.name);
+        props.deleteExperiment(props.deleteExperimentName);
     }
 
     return (

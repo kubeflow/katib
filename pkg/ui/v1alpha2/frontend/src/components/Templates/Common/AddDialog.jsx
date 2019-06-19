@@ -72,6 +72,8 @@ class AddDialog extends React.Component {
                             className={classes.textField}
                             value={this.state.name}
                             onChange={this.onChange("name")}
+                            label="Template name"
+                            placeholder="Template name"
                             />
                         <br />
                         <AceEditor
@@ -97,7 +99,7 @@ class AddDialog extends React.Component {
                             /> */}
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.addTemplate} color={"primary"}>
+                        <Button disabled={!this.state.name || !this.state.yaml} onClick={this.addTemplate} color={"primary"}>
                             Save
                         </Button>
                         <Button onClick={this.props.closeDialog} color={"primary"}>
