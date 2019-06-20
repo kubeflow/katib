@@ -22,11 +22,11 @@ RUN apt-get update && apt-get install -y software-properties-common && \
     rm -rf /var/lib/apt/lists/*
 
 
-ADD . /app
-WORKDIR /app
+ADD . /usr/src/app/github.com/kubeflow/katib
+WORKDIR /usr/src/app/github.com/kubeflow/katib/examples/v1alpha2/NAS-training-containers/RL-cifar10
 
 RUN pip3 install --upgrade pip
 RUN pip3 install --no-cache-dir -r requirements.txt
-ENV PYTHONPATH /app
+ENV PYTHONPATH /usr/src/app/github.com/kubeflow/katib/examples/v1alpha2/NAS-training-containers/RL-cifar10
 
 ENTRYPOINT ["python3.5", "-u", "RunTrial.py"]
