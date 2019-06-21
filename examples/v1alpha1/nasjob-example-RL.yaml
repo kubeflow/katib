@@ -133,7 +133,7 @@ spec:
               spec:
                 containers:
                 - name: {{.WorkerID}}
-                  image: docker.io/deepermind/training-container-nas
+                  image: katib/v1alpha1/training-container-nasrl-cifar10
                   command:
                   - "python3.5"
                   - "-u"

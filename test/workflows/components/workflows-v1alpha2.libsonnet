@@ -252,6 +252,10 @@
                     name: "create-pr-symlink",
                     template: "create-pr-symlink",
                   },
+                  {
+                    name: "build-tc-nasrl-cifar10",
+                    template: "build-tc-nasrl-cifar10",
+                  },
                 ],
                 [
                   {
@@ -359,6 +363,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-ui", testWorkerImage, [
               "test/scripts/v1alpha2/build-ui.sh",
             ]),  // build-ui
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-tc-nasrl-cifar10", testWorkerImage, [
+              "test/scripts/v1alpha2/build-tc-nasrl-cifar10.sh",
+            ]),  // build-tc-nasrl-cifar10
           ],  // templates
         },
       },  // e2e
