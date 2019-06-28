@@ -128,7 +128,12 @@ python get-pip.py
 pip install -r test_requirements.txt
 python test-katib-manager.py
 
-echo "Running e2e grid experiment"
 export KUBECONFIG=$HOME/.kube/config
+
+echo "Running e2e grid experiment"
 go run run-e2e-experiment.go ../../../examples/v1alpha2/grid-example.yaml
+
+echo "Running e2e nasrl experiment"
+go run run-e2e-experiment.go ../../../examples/v1alpha2/nasrl-example.yaml
+
 exit 0
