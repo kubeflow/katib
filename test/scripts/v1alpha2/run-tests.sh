@@ -58,7 +58,7 @@ roleRef:
 EOF
 
 #This is required. But I don't know why.
-VERSION=${VERSION/%?/}
+# VERSION=${VERSION/%?/}
 
 echo "Install Katib "
 echo "REGISTRY ${REGISTRY}"
