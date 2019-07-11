@@ -58,9 +58,6 @@ roleRef:
   apiGroup: ""
 EOF
 
-#This is required. But I don't know why.
-VERSION=${VERSION/%?/}
-
 echo "Install Katib "
 echo "REGISTRY ${REGISTRY}"
 echo "REPO_NAME ${REPO_NAME}"
