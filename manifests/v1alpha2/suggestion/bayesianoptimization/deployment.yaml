@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: katib-suggestion-bayesianoptimization
-        image: katib/v1alpha2/suggestion-bayesianoptimization
+        image: gcr.io/kubeflow-images-public/katib/v1alpha2/suggestion-bayesianoptimization
         imagePullPolicy: IfNotPresent
         ports:
         - name: api

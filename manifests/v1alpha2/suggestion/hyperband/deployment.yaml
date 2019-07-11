@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: katib-suggestion-hyperband
-        image: katib/v1alpha2/suggestion-hyperband
+        image: gcr.io/kubeflow-images-public/katib/v1alpha2/suggestion-hyperband
         imagePullPolicy: IfNotPresent
         ports:
         - name: api

@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: katib-suggestion-nasrl
-        image: katib/v1alpha2/suggestion-nasrl
+        image: gcr.io/kubeflow-images-public/katib/v1alpha2/suggestion-nasrl
         ports:
         - name: api
           containerPort: 6789

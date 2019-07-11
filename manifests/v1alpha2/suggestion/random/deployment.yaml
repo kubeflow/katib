@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: katib-suggestion-random
-        image: katib/v1alpha2/suggestion-random
+        image: gcr.io/kubeflow-images-public/katib/v1alpha2/suggestion-random
         imagePullPolicy: IfNotPresent
         ports:
         - name: api

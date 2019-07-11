@@ -17,14 +17,7 @@ spec:
     spec:
       containers:
       - name: vizier-suggestion-random
-        image: katib/suggestion-random
+        image: gcr.io/kubeflow-images-public/katib/v1alpha1/suggestion-random
         ports:
         - name: api
           containerPort: 6789
-#        resources:
-#          requests:
-#            cpu: 500m
-#            memory: 500M
-#          limits:
-#            cpu: 500m
-#            memory: 500M

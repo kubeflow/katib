@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: katib-ui
-        image: katib/katib-ui
+        image: gcr.io/kubeflow-images-public/katib/v1alpha1/katib-ui
         command:
           - './katib-ui'
         ports:
