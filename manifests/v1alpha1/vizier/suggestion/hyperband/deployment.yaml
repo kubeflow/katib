@@ -17,14 +17,7 @@ spec:
     spec:
       containers:
       - name: vizier-suggestion-hyperband
-        image: katib/suggestion-hyperband
+        image: gcr.io/kubeflow-images-public/katib/v1alpha1/suggestion-hyperband
         ports:
         - name: api
           containerPort: 6789
-#        resources:
-#          requests:
-#            cpu: 500m
-#            memory: 500M
-#          limits:
-#            cpu: 500m
-#            memory: 500M
