@@ -4,9 +4,9 @@ ADD . /go/src/github.com/kubeflow/katib
 WORKDIR /go/src/github.com/kubeflow/katib/cmd/manager-rest
 RUN if [ "$(uname -m)" = "ppc64le" ]; then \
         apk --update add gcc musl-dev  && \
-        go build -o vizier-manager-rest ./v1alpha2; \
+        go build -o katib-manager-rest ./v1alpha2; \
     else \
-        go build -o vizier-manager-rest ./v1alpha2; \
+        go build -o katib-manager-rest ./v1alpha2; \
     fi
 
 FROM alpine:3.7
