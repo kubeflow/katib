@@ -58,27 +58,24 @@ roleRef:
   apiGroup: ""
 EOF
 
-#This is required. But I don't know why.
-VERSION=${VERSION/%?/}
-
 echo "Install Katib "
 echo "REGISTRY ${REGISTRY}"
 echo "REPO_NAME ${REPO_NAME}"
 echo "VERSION ${VERSION}"
 
-sed -i -e "s@image: katib\/vizier-core@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/vizier-core:${VERSION}@" manifests/v1alpha1/vizier/core/deployment.yaml
-sed -i -e "s@image: katib\/vizier-core-rest@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/vizier-core-rest:${VERSION}@" manifests/v1alpha1/vizier/core-rest/deployment.yaml
-sed -i -e "s@image: katib\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/katib-ui:${VERSION}@" manifests/v1alpha1/vizier/ui/deployment.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha1\/vizier-core@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/vizier-core:${VERSION}@" manifests/v1alpha1/vizier/core/deployment.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha1\/vizier-core-rest@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/vizier-core-rest:${VERSION}@" manifests/v1alpha1/vizier/core-rest/deployment.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha1\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/katib-ui:${VERSION}@" manifests/v1alpha1/vizier/ui/deployment.yaml
 sed -i -e "s@type: NodePort@type: ClusterIP@" -e "/nodePort: 30678/d" manifests/v1alpha1/vizier/core/service.yaml
-sed -i -e "s@image: katib\/studyjob-controller@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/studyjob-controller:${VERSION}@" manifests/v1alpha1/studyjobcontroller/studyjobcontroller.yaml
-sed -i -e "s@image: katib\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/suggestion-random:${VERSION}@" manifests/v1alpha1/vizier/suggestion/random/deployment.yaml
-sed -i -e "s@image: katib\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/suggestion-grid:${VERSION}@" manifests/v1alpha1/vizier/suggestion/grid/deployment.yaml
-sed -i -e "s@image: katib\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/suggestion-hyperband:${VERSION}@" manifests/v1alpha1/vizier/suggestion/hyperband/deployment.yaml
-sed -i -e "s@image: katib\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/suggestion-bayesianoptimization:${VERSION}@" manifests/v1alpha1/vizier/suggestion/bayesianoptimization/deployment.yaml
-sed -i -e "s@image: katib\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/suggestion-nasrl:${VERSION}@" manifests/v1alpha1/vizier/suggestion/nasrl/deployment.yaml
-sed -i -e "s@image: katib\/suggestion-nasenvelopenet@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/suggestion-nasenvelopenet:${VERSION}@" manifests/v1alpha1/vizier/suggestion/nasenvelopenet/deployment.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha1\/studyjob-controller@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/studyjob-controller:${VERSION}@" manifests/v1alpha1/studyjobcontroller/studyjobcontroller.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha1\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/suggestion-random:${VERSION}@" manifests/v1alpha1/vizier/suggestion/random/deployment.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha1\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/suggestion-grid:${VERSION}@" manifests/v1alpha1/vizier/suggestion/grid/deployment.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha1\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/suggestion-hyperband:${VERSION}@" manifests/v1alpha1/vizier/suggestion/hyperband/deployment.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha1\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/suggestion-bayesianoptimization:${VERSION}@" manifests/v1alpha1/vizier/suggestion/bayesianoptimization/deployment.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha1\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/suggestion-nasrl:${VERSION}@" manifests/v1alpha1/vizier/suggestion/nasrl/deployment.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha1\/suggestion-nasenvelopenet@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/suggestion-nasenvelopenet:${VERSION}@" manifests/v1alpha1/vizier/suggestion/nasenvelopenet/deployment.yaml
 
-sed -i -e "s@image: katib\/earlystopping-medianstopping@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/earlystopping-medianstopping:${VERSION}@" manifests/v1alpha1/vizier/earlystopping/medianstopping/deployment.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha1\/earlystopping-medianstopping@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha1\/earlystopping-medianstopping:${VERSION}@" manifests/v1alpha1/vizier/earlystopping/medianstopping/deployment.yaml
 sed -i -e '/volumeMounts:/,$d' manifests/v1alpha1/vizier/db/deployment.yaml
 
 cat manifests/v1alpha1/vizier/core/deployment.yaml

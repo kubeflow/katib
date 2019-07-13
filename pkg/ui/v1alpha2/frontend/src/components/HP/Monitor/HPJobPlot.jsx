@@ -16,7 +16,7 @@ const HPJobPlot = (props) => {
   const classes = useStyles();
   let dimensions = [];
 
-  if (props.jobData && props.jobData.length !== 0) {
+  if (props.jobData && props.jobData.length > 1) {
     // everything for the third column
     let header = props.jobData[0];
     let data = props.jobData.slice(1);
@@ -27,7 +27,7 @@ const HPJobPlot = (props) => {
         }
         let flag = "number";
         let values = [];
-        for (let j = 0; j < data.length - 1; j++) {
+        for (let j = 0; j < data.length; j++) {
           let number = Number(data[j][i])
           if (isNaN(number)) {
             flag = "string";
@@ -67,20 +67,22 @@ const HPJobPlot = (props) => {
 
   return (
       <div className={classes.root}>
-        <Plot
-          data={
-            [{
-              type: 'parcoords',
-              line: {
-                color: "red",
-              },
-              dimensions: dimensions,
-            }]}
-          layout={ { 
-            width: 1000,
-            height: 600
-          } }
-        /> 
+        {props.jobData.length > 1 &&
+          <Plot
+            data={
+              [{
+                type: 'parcoords',
+                line: {
+                  color: "red",
+                },
+                dimensions: dimensions,
+              }]}
+            layout={ {
+              width: 1000,
+              height: 600
+            } }
+          />
+        }
       </div>
     )
 }

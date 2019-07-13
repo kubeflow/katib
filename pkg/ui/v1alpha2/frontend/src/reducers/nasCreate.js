@@ -30,6 +30,7 @@ const initialState = {
             description: "Max failed trials to mark experiment as failed"
         }
     ],
+    allObjectiveTypes: ["minimize", "maximize"],
     objective: [
         {
             name: "Type",
@@ -49,7 +50,7 @@ const initialState = {
     ],
     additionalMetricNames: [],
     algorithmName: "nasrl",
-    allAlgorithms: ["nasrl", "envelopenet"],
+    allAlgorithms: ["nasrl", "nasenvelopenet"],
     algorithmSettings: [
         {
             name: "lstm_num_cells",

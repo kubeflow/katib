@@ -29,7 +29,7 @@ spec:
     retain: true
     goTemplate:
         rawTemplate: |-
-          apiVersion: "kubeflow.org/v1beta1"
+          apiVersion: "kubeflow.org/v1"
           kind: PyTorchJob
           metadata:
             name: {{.WorkerID}}

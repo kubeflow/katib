@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: katib-ui
-        image: katib/v1alpha2/katib-ui
+        image: gcr.io/kubeflow-images-public/katib/v1alpha2/katib-ui
         imagePullPolicy: IfNotPresent
         command:
           - './katib-ui'

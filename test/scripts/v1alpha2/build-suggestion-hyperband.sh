@@ -16,8 +16,6 @@
 
 # This shell script is used to build an image from our argo workflow
 
-exit 0
-
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -39,6 +37,6 @@ cp -r vendor ${GO_DIR}/vendor
 
 cd ${GO_DIR}
 
-#cp cmd/suggestion/hyperband/Dockerfile .
-#gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/suggestion-hyperband:${VERSION} --project=${PROJECT}
-#gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/suggestion-hyperband:${VERSION} ${REGISTRY}/${REPO_NAME}/suggestion-hyperband:latest --verbosity=info
+cp cmd/suggestion/hyperband/v1alpha2/Dockerfile .
+gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha2/suggestion-hyperband:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha2/suggestion-hyperband:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha2/suggestion-hyperband:latest --verbosity=info

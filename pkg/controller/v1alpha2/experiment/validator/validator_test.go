@@ -19,7 +19,7 @@ func init() {
 }
 
 func TestValidateTFJobTrialTemplate(t *testing.T) {
-	trialTFJobTemplate := `apiVersion: "kubeflow.org/v1beta1"
+	trialTFJobTemplate := `apiVersion: "kubeflow.org/v1"
 kind: "TFJob"
 metadata:
     name: "dist-mnist-for-e2e-test"

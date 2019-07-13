@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: vizier-core
-        image: katib/vizier-core
+        image: gcr.io/kubeflow-images-public/katib/v1alpha1/vizier-core
         env:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:
@@ -37,10 +37,3 @@ spec:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:6789"]
           initialDelaySeconds: 10
-#        resources:
-#          requests:
-#            cpu: 500m
-#            memory: 500M
-#          limits:
-#            cpu: 500m
-#            memory: 500M

@@ -60,8 +60,7 @@ spec:
               spec:
                 containers:
                 - name: {{.Trial}}
-                  #TODO: Add build container in Katib.
-                  image: docker.io/deepermind/training-container-nas
+                  image: katib/v1alpha2/training-container-nasrl-cifar10
                   command:
                   - "python3.5"
                   - "-u"

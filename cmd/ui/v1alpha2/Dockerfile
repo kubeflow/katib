@@ -1,4 +1,11 @@
-FROM golang:alpine AS build-env
+FROM node:10.16.0-jessie AS npm-build
+
+ADD /pkg/ui/v1alpha2/frontend /frontend
+RUN cd /frontend && npm install
+RUN cd /frontend && npm run build
+RUN rm -rf /frontend/node_modules
+
+FROM golang:alpine AS go-build
 # The GOPATH in the image is /go.
 ADD . /go/src/github.com/kubeflow/katib
 WORKDIR /go/src/github.com/kubeflow/katib/cmd/ui
@@ -7,7 +14,7 @@ RUN go build -o katib-ui ./v1alpha2
 FROM alpine:3.7
 WORKDIR /app
 # v1alpha2 source code
-COPY --from=build-env /go/src/github.com/kubeflow/katib/cmd/ui/katib-ui /app/
-COPY --from=build-env /go/src/github.com/kubeflow/katib/pkg/ui/v1alpha2/frontend/build/ /app/build
+COPY --from=go-build /go/src/github.com/kubeflow/katib/cmd/ui/katib-ui /app/
+COPY --from=npm-build /frontend/build /app/build
 
 ENTRYPOINT ["./katib-ui"]

@@ -233,7 +233,7 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha2.Trial) error {
 			return err
 		}
 		// Update Trial job status only if observation field is available.
-		// This will ensure that trial is set to be complete only if metric is collected atleast once
+		// This will ensure that trial is set to be complete only if metric is collected at least once
 		if isTrialObservationAvailable(instance) {
 			if err = r.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
 				logger.Error(err, "Update trial status condition error")
@@ -272,7 +272,7 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 		}
 	} else {
 		if instance.IsCompleted() && !instance.Spec.RetainRun {
-			if err = r.Delete(context.TODO(), desiredJob); err != nil {
+			if err = r.Delete(context.TODO(), desiredJob, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
 				logger.Error(err, "Delete job error")
 				return nil, err
 			} else {
@@ -351,7 +351,7 @@ func (r *ReconcileTrial) reconcileMetricsCollector(instance *trialsv1alpha2.Tria
 		}
 	} else {
 		if instance.IsCompleted() && !instance.Spec.RetainMetricsCollector {
-			if err = r.Delete(context.TODO(), desiredMetricsCollector); err != nil {
+			if err = r.Delete(context.TODO(), desiredMetricsCollector, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
 				logger.Error(err, "Delete Metrics Collector error")
 				return nil, err
 			} else {

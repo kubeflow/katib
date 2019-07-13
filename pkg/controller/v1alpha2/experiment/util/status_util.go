@@ -38,7 +38,7 @@ func UpdateExperimentStatus(instance *experimentsv1alpha2.Experiment, trials *tr
 
 	isObjectiveGoalReached := updateTrialsSummary(instance, trials)
 
-	updateExperimentStatusCondition(instance, isObjectiveGoalReached)
+	UpdateExperimentStatusCondition(instance, isObjectiveGoalReached, false)
 	return nil
 
 }
@@ -134,7 +134,7 @@ func getObjectiveMetricValue(trial trialsv1alpha2.Trial, objectiveMetricName str
 	return nil
 }
 
-func updateExperimentStatusCondition(instance *experimentsv1alpha2.Experiment, isObjectiveGoalReached bool) {
+func UpdateExperimentStatusCondition(instance *experimentsv1alpha2.Experiment, isObjectiveGoalReached bool, getSuggestionDone bool) {
 
 	completedTrialsCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled
 	failedTrialsCount := instance.Status.TrialsFailed
@@ -149,6 +149,13 @@ func updateExperimentStatusCondition(instance *experimentsv1alpha2.Experiment, i
 
 	if (instance.Spec.MaxTrialCount != nil) && (completedTrialsCount >= *instance.Spec.MaxTrialCount) {
 		msg := "Experiment has succeeded because max trial count has reached"
+		instance.MarkExperimentStatusSucceeded(ExperimentSucceededReason, msg)
+		instance.Status.CompletionTime = &now
+		return
+	}
+
+	if getSuggestionDone && (instance.Status.TrialsPending+instance.Status.TrialsRunning) == 0 {
+		msg := "Experiment has succeeded because suggestion service has reached the end"
 		instance.MarkExperimentStatusSucceeded(ExperimentSucceededReason, msg)
 		instance.Status.CompletionTime = &now
 		return

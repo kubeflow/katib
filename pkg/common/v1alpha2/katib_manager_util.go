@@ -103,6 +103,17 @@ func UpdateExperimentStatus(request *api_pb.UpdateExperimentStatusRequest) (*api
 	return kc.UpdateExperimentStatus(ctx, request)
 }
 
+func UpdateAlgorithmExtraSettings(request *api_pb.UpdateAlgorithmExtraSettingsRequest) (*api_pb.UpdateAlgorithmExtraSettingsReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer closeKatibManagerConnection(kcc)
+	kc := kcc.KatibManagerClient
+	return kc.UpdateAlgorithmExtraSettings(ctx, request)
+}
+
 func RegisterTrial(request *api_pb.RegisterTrialRequest) (*api_pb.RegisterTrialReply, error) {
 	ctx := context.Background()
 	kcc, err := getKatibManagerClientAndConn()
