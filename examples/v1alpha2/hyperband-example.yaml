@@ -4,6 +4,7 @@ metadata:
   namespace: kubeflow
   name: hyperband-example
 spec:
+  parallelTrialCount: 9
   objective:
     type: maximize
     goal: 0.99

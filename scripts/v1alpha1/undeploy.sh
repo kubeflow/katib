@@ -20,10 +20,12 @@ set -o pipefail
 set -o xtrace
 
 # Delete CR first
-studyjobs=`kubectl get studyjobs --all-namespaces | awk 'NR>1' | awk '{print $1"/"$2}'`
+studyjobs=`kubectl get studyjobs --all-namespaces | awk '{if(NR>1){print $1"/"$2}}'`
 for s in $studyjobs
 do
-  kubectl delete studyjobs $s --grace-period=0 --force;
+  ns=`echo $s|cut -d "/" -f 1`
+  sjob=`echo $s|cut -d "/" -f 2`
+  kubectl delete studyjobs $sjob -n $ns
 done
 
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
