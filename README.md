@@ -126,7 +126,8 @@ Each component communicates with others via GRPC and the API is defined at `pkg/
 
 ## Getting Started
 
-Please see [README.md](./examples/v1alpha1/README.md) for more details.
+Please see [here](./examples/v1alpha1/README.md) for more details about katib v1alpha1.  
+Please see [here](./examples/v1alpha2/README.md) for more details about katib v1alpha2.
 
 ## Web UI
 
