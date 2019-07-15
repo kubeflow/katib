@@ -20,10 +20,12 @@ set -o pipefail
 set -o xtrace
 
 # Delete CR first
-experiments=`kubectl get experiments --all-namespaces | awk 'NR>1' | awk '{print $1"/"$2}'`
+experiments=`kubectl get experiments --all-namespaces | awk '{if (NR>1) {print $1"/"$2}}'`
 for s in $experiments
 do
-  kubectl delete experiments $s --grace-period=0 --force;
+  ns=`echo $s|cut -d "/" -f 1`
+  exp=`echo $s|cut -d "/" -f 2`
+  kubectl delete experiments $exp -n $ns
 done
 
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
