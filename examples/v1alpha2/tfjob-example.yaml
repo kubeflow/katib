@@ -78,7 +78,7 @@ spec:
                 spec:
                   containers:
                   - name: {{.Trial}}
-                    image: katib/v1alpha2/tfevent-metricscollector
+                    image: gcr.io/kubeflow-images-public/katib/v1alpha2/tfevent-metrics-collector
                     args:
                     - "python"
                     - "main.py"
