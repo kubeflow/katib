@@ -130,8 +130,10 @@ def get_nasrl_algo_suggestion(stub):
     reply = stub.GetSuggestions(api_pb2.GetSuggestionsRequest(experiment_name=TEST_EXPERIMENT,
                                                             algorithm_name="nasrl",
                                                             request_number=1), 10)
+
     trials = reply.trials
 
+    logger.info("Trial info: {}".format(reply))
     if len(trials) == 1 and trials[0].spec.experiment_name == TEST_EXPERIMENT:
       logger.info("Get nasrl algorithm suggestion successfully")
     else:
