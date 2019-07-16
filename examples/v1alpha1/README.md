@@ -384,7 +384,7 @@ $ kubectl apply -f tfevent-volume/
 ```
 Then, create a studyjob that uses TF Event file metrics collector.
 ```
-$ kubectl apply -f tf-event_test.yaml
+$ kubectl apply -f tfjob-example.yaml
 ```
 
 It will create a tensorflow worker from whose eventfile metrics are collected.
