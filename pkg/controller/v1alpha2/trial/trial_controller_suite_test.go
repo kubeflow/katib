@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/onsi/gomega"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -33,10 +34,16 @@ import (
 	"github.com/kubeflow/katib/pkg/api/operators/apis"
 )
 
-var cfg *rest.Config
+var (
+	cfg                      *rest.Config
+	controlPlaneStartTimeout = 60 * time.Second
+	controlPlaneStopTimeout  = 60 * time.Second
+)
 
 func TestMain(m *testing.M) {
 	t := &envtest.Environment{
+		ControlPlaneStartTimeout: controlPlaneStartTimeout,
+		ControlPlaneStopTimeout:  controlPlaneStopTimeout,
 		CRDDirectoryPaths: []string{
 			filepath.Join("..", "..", "..", "..", "manifests", "v1alpha2", "katib-controller"),
 			filepath.Join("..", "..", "..", "..", "test", "unit", "v1alpha2", "crds"),
@@ -54,16 +61,13 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-// SetupTestReconcile returns a reconcile.Reconcile implementation that delegates to inner and
-// writes the request to requests after Reconcile is finished.
-func SetupTestReconcile(inner reconcile.Reconciler) (reconcile.Reconciler, chan reconcile.Request) {
-	requests := make(chan reconcile.Request)
+// SetupTestReconcile returns a reconcile.Reconcile implementation that delegates to inner.
+func SetupTestReconcile(inner reconcile.Reconciler) reconcile.Reconciler {
 	fn := reconcile.Func(func(req reconcile.Request) (reconcile.Result, error) {
 		result, err := inner.Reconcile(req)
-		requests <- req
 		return result, err
 	})
-	return fn, requests
+	return fn
 }
 
 // StartTestManager adds recFn

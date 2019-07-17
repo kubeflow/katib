@@ -22,9 +22,9 @@ import (
 	katibv1alpha1 "github.com/kubeflow/katib/pkg/api/operators/apis/studyjob/v1alpha1"
 	katibapi "github.com/kubeflow/katib/pkg/api/v1alpha1"
 	common "github.com/kubeflow/katib/pkg/common/v1alpha1"
-	pytorchjobv1beta1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1beta1"
-	commonv1beta1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta1"
-	tfjobv1beta1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1beta1"
+	pytorchjobv1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1"
+	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
+	tfjobv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -116,7 +116,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	err = c.Watch(
-		&source.Kind{Type: &tfjobv1beta1.TFJob{}},
+		&source.Kind{Type: &tfjobv1.TFJob{}},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
 			OwnerType:    &katibv1alpha1.StudyJob{},
@@ -125,7 +125,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 	err = c.Watch(
-		&source.Kind{Type: &pytorchjobv1beta1.PyTorchJob{}},
+		&source.Kind{Type: &pytorchjobv1.PyTorchJob{}},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
 			OwnerType:    &katibv1alpha1.StudyJob{},
@@ -446,7 +446,7 @@ func (r *ReconcileStudyJobController) getJobWorkerStatus(ns string, wid string, 
 
 		if ok {
 			statusMap := status.(map[string]interface{})
-			jobStatus := commonv1beta1.JobStatus{}
+			jobStatus := commonv1.JobStatus{}
 			err := runtime.DefaultUnstructuredConverter.FromUnstructured(statusMap, &jobStatus)
 			if err != nil {
 				klog.Errorf("Error in converting unstructured to status: %v ", err)
@@ -454,9 +454,9 @@ func (r *ReconcileStudyJobController) getJobWorkerStatus(ns string, wid string, 
 			}
 			if len(jobStatus.Conditions) > 0 {
 				lc := jobStatus.Conditions[len(jobStatus.Conditions)-1]
-				if lc.Type == commonv1beta1.JobSucceeded {
+				if lc.Type == commonv1.JobSucceeded {
 					state = katibapi.State_COMPLETED
-				} else if lc.Type == commonv1beta1.JobFailed {
+				} else if lc.Type == commonv1.JobFailed {
 					state = katibapi.State_ERROR
 				}
 			}
@@ -542,21 +542,6 @@ func (r *ReconcileStudyJobController) checkStatus(instance *katibv1alpha1.StudyJ
 }
 
 func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha1.StudyJob, c katibapi.ManagerClient, ns string) (bool, error) {
-	//Check Suggestion Count
-	sps, err := getSuggestionParam(c, instance.Status.SuggestionParameterID)
-	if err != nil {
-		return false, err
-	}
-	for i := range sps {
-		if sps[i].Name == "SuggestionCount" {
-			count, _ := strconv.Atoi(sps[i].Value)
-			if count >= instance.Status.SuggestionCount+1 {
-				//Suggestion count mismatched. May be duplicate suggestion request
-				return false, nil
-			}
-			sps[i].Value = strconv.Itoa(instance.Status.SuggestionCount + 1)
-		}
-	}
 	//GetSuggestion
 	getSuggestReply, err := getSuggestion(
 		c,
@@ -594,7 +579,7 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 			katibv1alpha1.TrialSet{
 				TrialID: t.TrialId,
 				WorkerList: []katibv1alpha1.WorkerCondition{
-					katibv1alpha1.WorkerCondition{
+					{
 						WorkerID:  wid,
 						Kind:      wkind.Kind,
 						Condition: katibv1alpha1.ConditionCreated,
@@ -604,7 +589,17 @@ func (r *ReconcileStudyJobController) getAndRunSuggestion(instance *katibv1alpha
 			},
 		)
 	}
+
 	//Update Suggestion Count
+	sps, err := getSuggestionParam(c, instance.Status.SuggestionParameterID)
+	if err != nil {
+		return false, err
+	}
+	for i := range sps {
+		if sps[i].Name == "SuggestionCount" {
+			sps[i].Value = strconv.Itoa(instance.Status.SuggestionCount + 1)
+		}
+	}
 	sspr := &katibapi.SetSuggestionParametersRequest{
 		StudyId:              instance.Status.StudyID,
 		SuggestionAlgorithm:  instance.Spec.SuggestionSpec.SuggestionAlgorithm,

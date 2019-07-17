@@ -19,3 +19,7 @@ spec:
     kind: Experiment
     singular: experiment
     plural: experiments
+    categories:
+    - all
+    - kubeflow
+    - katib

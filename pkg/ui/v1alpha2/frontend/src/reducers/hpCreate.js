@@ -31,6 +31,7 @@ const initialState = {
             description: "Max failed trials to mark experiment as failed"
         }
     ],
+    allObjectiveTypes: ["minimize", "maximize"],
     objective: [
         {
             name: "Type",
@@ -53,8 +54,8 @@ const initialState = {
             value: "accuracy"
         }
     ],
-    algorithmName: [ "random" ],
-    allAlgorithms: ["grid", "random", "hyperband"],
+    algorithmName: "random",
+    allAlgorithms: ["grid", "random", "hyperband", "bayesianoptimization"],
     algorithmSettings: [
 
     ],

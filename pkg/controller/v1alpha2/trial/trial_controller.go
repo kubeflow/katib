@@ -42,7 +42,6 @@ import (
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/trial/managerclient"
-	trialutil "github.com/kubeflow/katib/pkg/controller/v1alpha2/trial/util"
 )
 
 var (
@@ -84,6 +83,19 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	err = c.Watch(&source.Kind{Type: &trialsv1alpha2.Trial{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		log.Error(err, "Trial watch error")
+		return err
+	}
+
+	// Watch for changes to Cronjob
+	err = c.Watch(
+		&source.Kind{Type: &batchv1beta.CronJob{}},
+		&handler.EnqueueRequestForOwner{
+			IsController: true,
+			OwnerType:    &trialsv1alpha2.Trial{},
+		})
+
+	if err != nil {
+		log.Error(err, "CronJob watch error")
 		return err
 	}
 
@@ -144,13 +156,7 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	instance := original.DeepCopy()
 
-	if instance.IsCompleted() {
-
-		return reconcile.Result{}, nil
-
-	}
 	if !instance.IsCreated() {
-		//Trial not created in DB
 		if instance.Status.StartTime == nil {
 			now := metav1.Now()
 			instance.Status.StartTime = &now
@@ -158,13 +164,15 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 		if instance.Status.CompletionTime == nil {
 			instance.Status.CompletionTime = &metav1.Time{}
 		}
-		msg := "Trial is created"
-		instance.MarkTrialStatusCreated(trialutil.TrialCreatedReason, msg)
 		err = r.CreateTrialInDB(instance)
 		if err != nil {
 			logger.Error(err, "Create trial in DB error")
-			return reconcile.Result{}, err
+			return reconcile.Result{
+				Requeue: true,
+			}, err
 		}
+		msg := "Trial is created"
+		instance.MarkTrialStatusCreated(TrialCreatedReason, msg)
 	} else {
 		// Trial already created in DB
 		err := r.reconcileTrial(instance)
@@ -220,20 +228,23 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha2.Trial) error {
 	//Job already exists
 	//TODO Can desired Spec differ from deployedSpec?
 	if deployedJob != nil {
-		if err = trialutil.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
-			logger.Error(err, "Update trial status condition error")
-			return err
-		}
-		if err = trialutil.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
+		if err = r.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
 			logger.Error(err, "Update trial status observation error")
 			return err
+		}
+		// Update Trial job status only if observation field is available.
+		// This will ensure that trial is set to be complete only if metric is collected at least once
+		if isTrialObservationAvailable(instance) {
+			if err = r.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
+				logger.Error(err, "Update trial status condition error")
+				return err
+			}
 		}
 	}
 	return nil
 }
 
 func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob *unstructured.Unstructured) (*unstructured.Unstructured, error) {
-
 	var err error
 	logger := log.WithValues("Trial", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	apiVersion := desiredJob.GetAPIVersion()
@@ -245,6 +256,9 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 	err = r.Get(context.TODO(), types.NamespacedName{Name: desiredJob.GetName(), Namespace: desiredJob.GetNamespace()}, deployedJob)
 	if err != nil {
 		if errors.IsNotFound(err) {
+			if instance.IsCompleted() {
+				return nil, nil
+			}
 			logger.Info("Creating Job", "kind", kind,
 				"name", desiredJob.GetName())
 			err = r.Create(context.TODO(), desiredJob)
@@ -256,10 +270,19 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 			logger.Error(err, "Trial Get error")
 			return nil, err
 		}
+	} else {
+		if instance.IsCompleted() && !instance.Spec.RetainRun {
+			if err = r.Delete(context.TODO(), desiredJob, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
+				logger.Error(err, "Delete job error")
+				return nil, err
+			} else {
+				return nil, nil
+			}
+		}
 	}
 
 	msg := "Trial is running"
-	instance.MarkTrialStatusRunning(trialutil.TrialRunningReason, msg)
+	instance.MarkTrialStatusRunning(TrialRunningReason, msg)
 	return deployedJob, nil
 }
 
@@ -311,6 +334,9 @@ func (r *ReconcileTrial) reconcileMetricsCollector(instance *trialsv1alpha2.Tria
 	}, deployedMetricsCollector)
 	if err != nil {
 		if errors.IsNotFound(err) {
+			if instance.IsCompleted() {
+				return nil, nil
+			}
 			logger.Info("Creating Metrics Collector",
 				"name", desiredMetricsCollector.GetName(),
 				"namespace", desiredMetricsCollector.GetNamespace())
@@ -322,6 +348,15 @@ func (r *ReconcileTrial) reconcileMetricsCollector(instance *trialsv1alpha2.Tria
 		} else {
 			logger.Error(err, "Metrics Collector Get error")
 			return nil, err
+		}
+	} else {
+		if instance.IsCompleted() && !instance.Spec.RetainMetricsCollector {
+			if err = r.Delete(context.TODO(), desiredMetricsCollector, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
+				logger.Error(err, "Delete Metrics Collector error")
+				return nil, err
+			} else {
+				return nil, nil
+			}
 		}
 	}
 

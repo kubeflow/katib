@@ -20,18 +20,25 @@ import (
 	"io/ioutil"
 	"strings"
 
-	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/consts"
 )
 
 type Client interface {
 	InjectClient(c client.Client)
 	GetExperimentList(namespace ...string) (*experimentsv1alpha2.ExperimentList, error)
 	CreateExperiment(experiment *experimentsv1alpha2.Experiment, namespace ...string) error
+	DeleteExperiment(experiment *experimentsv1alpha2.Experiment, namespace ...string) error
+	GetExperiment(name string, namespace ...string) (*experimentsv1alpha2.Experiment, error)
 	GetConfigMap(name string, namespace ...string) (map[string]string, error)
+	GetTrialList(name string, namespace ...string) (*trialsv1alpha2.TrialList, error)
 	GetTrialTemplates(namespace ...string) (map[string]string, error)
 	UpdateTrialTemplates(newTrialTemplates map[string]string, namespace ...string) error
 	GetMetricsCollectorTemplates(namespace ...string) (map[string]string, error)
@@ -53,6 +60,8 @@ func NewClient(options client.Options) (Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	experimentsv1alpha2.AddToScheme(scheme.Scheme)
+	trialsv1alpha2.AddToScheme(scheme.Scheme)
 	cl, err := client.New(cfg, options)
 	return &KatibClient{
 		client: cl,
@@ -75,12 +84,43 @@ func (k *KatibClient) GetExperimentList(namespace ...string) (*experimentsv1alph
 
 }
 
+func (k *KatibClient) GetTrialList(name string, namespace ...string) (*trialsv1alpha2.TrialList, error) {
+	ns := getNamespace(namespace...)
+	trialList := &trialsv1alpha2.TrialList{}
+	labels := map[string]string{consts.LabelExperimentName: name}
+	listOpt := &client.ListOptions{}
+	listOpt.MatchingLabels(labels).InNamespace(ns)
+
+	if err := k.client.List(context.Background(), listOpt, trialList); err != nil {
+		return trialList, err
+	}
+	return trialList, nil
+
+}
+
 func (k *KatibClient) CreateExperiment(experiment *experimentsv1alpha2.Experiment, namespace ...string) error {
 
 	if err := k.client.Create(context.Background(), experiment); err != nil {
 		return err
 	}
 	return nil
+}
+
+func (k *KatibClient) DeleteExperiment(experiment *experimentsv1alpha2.Experiment, namespace ...string) error {
+
+	if err := k.client.Delete(context.Background(), experiment); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (k *KatibClient) GetExperiment(name string, namespace ...string) (*experimentsv1alpha2.Experiment, error) {
+	ns := getNamespace(namespace...)
+	exp := &experimentsv1alpha2.Experiment{}
+	if err := k.client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: ns}, exp); err != nil {
+		return nil, err
+	}
+	return exp, nil
 }
 
 func (k *KatibClient) GetConfigMap(name string, namespace ...string) (map[string]string, error) {

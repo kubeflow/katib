@@ -128,7 +128,18 @@ func UpdateExperimentStatus(request *dbif_pb.UpdateExperimentStatusRequest) (*db
 	return dbifClient.UpdateExperimentStatus(ctx, request)
 }
 
-func RegisterTrial(request *dbif_pb.RegisterTrialRequest) (*dbif_pb.RegisterTrialReply, error) {
+func UpdateAlgorithmExtraSettings(request *api_pb.UpdateAlgorithmExtraSettingsRequest) (*api_pb.UpdateAlgorithmExtraSettingsReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer closeKatibManagerConnection(kcc)
+	kc := kcc.KatibManagerClient
+	return kc.UpdateAlgorithmExtraSettings(ctx, request)
+}
+
+func RegisterTrial(request *api_pb.RegisterTrialRequest) (*api_pb.RegisterTrialReply, error) {
 	ctx := context.Background()
 	dbif, err := getDBIFClientAndConn()
 	if err != nil {
@@ -161,7 +172,18 @@ func GetSuggestions(request *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestio
 	return kc.GetSuggestions(ctx, request)
 }
 
-func GetObservationLog(request *dbif_pb.GetObservationLogRequest) (*dbif_pb.GetObservationLogReply, error) {
+func PreCheckRegisterExperiment(request *api_pb.RegisterExperimentRequest) (*api_pb.PreCheckRegisterExperimentReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer closeKatibManagerConnection(kcc)
+	kc := kcc.KatibManagerClient
+	return kc.PreCheckRegisterExperiment(ctx, request)
+}
+
+func GetObservationLog(request *api_pb.GetObservationLogRequest) (*api_pb.GetObservationLogReply, error) {
 	ctx := context.Background()
 	dbif, err := getDBIFClientAndConn()
 	if err != nil {
@@ -170,4 +192,15 @@ func GetObservationLog(request *dbif_pb.GetObservationLogRequest) (*dbif_pb.GetO
 	defer closeDBIFConnection(dbif)
 	dbifClient := dbif.DBIFClient
 	return dbifClient.GetObservationLog(ctx, request)
+}
+
+func ValidateAlgorithmSettings(request *api_pb.ValidateAlgorithmSettingsRequest) (*api_pb.ValidateAlgorithmSettingsReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer closeKatibManagerConnection(kcc)
+	kc := kcc.KatibManagerClient
+	return kc.ValidateAlgorithmSettings(ctx, request)
 }

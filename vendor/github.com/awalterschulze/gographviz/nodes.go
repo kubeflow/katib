@@ -15,6 +15,7 @@
 package gographviz
 
 import (
+	"fmt"
 	"sort"
 )
 
@@ -35,11 +36,27 @@ func NewNodes() *Nodes {
 	return &Nodes{make(map[string]*Node), make([]*Node, 0)}
 }
 
-// Add adds a Node to the set of Nodes, ammending the attributes of an already existing node.
+// Remove removes a node
+func (nodes *Nodes) Remove(name string) error {
+	for i := 0; i < len(nodes.Nodes); i++ {
+		if nodes.Nodes[i].Name != name {
+			continue
+		}
+
+		nodes.Nodes = append(nodes.Nodes[:i], nodes.Nodes[i+1:]...)
+		delete(nodes.Lookup, name)
+
+		return nil
+	}
+
+	return fmt.Errorf("node %s not found", name)
+}
+
+// Add adds a Node to the set of Nodes, extending the attributes of an already existing node.
 func (nodes *Nodes) Add(node *Node) {
 	n, ok := nodes.Lookup[node.Name]
 	if ok {
-		n.Attrs.Ammend(node.Attrs)
+		n.Attrs.Extend(node.Attrs)
 		return
 	}
 	nodes.Lookup[node.Name] = node

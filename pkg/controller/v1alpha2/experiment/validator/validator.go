@@ -2,9 +2,10 @@ package validator
 
 import (
 	"bytes"
-	"database/sql"
 	"fmt"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -78,8 +79,19 @@ func (g *DefaultValidator) ValidateExperiment(instance *experimentsv1alpha2.Expe
 }
 
 func (g *DefaultValidator) validateAlgorithmSettings(inst *experimentsv1alpha2.Experiment) error {
-	// TODO: it need call ValidateAlgorithmSettings API of vizier-core manager, implement it when vizier-core done
+
+	_, err := g.ValidateAlgorithmSettings(inst)
+	statusCode, _ := status.FromError(err)
+
+	if statusCode.Code() == codes.Unknown {
+		return fmt.Errorf("Method ValidateAlgorithmSettings not found inside Suggestion service: %s", inst.Spec.Algorithm.AlgorithmName)
+	}
+
+	if statusCode.Code() == codes.InvalidArgument || statusCode.Code() == codes.Unavailable {
+		return fmt.Errorf("ValidateAlgorithmSettings Error: %v", statusCode.Message())
+	}
 	return nil
+
 }
 
 func (g *DefaultValidator) validateObjective(obj *commonapiv1alpha2.ObjectiveSpec) error {
@@ -146,13 +158,13 @@ func (g *DefaultValidator) validateSupportedJob(job *unstructured.Unstructured) 
 }
 
 func (g *DefaultValidator) validateForCreate(inst *experimentsv1alpha2.Experiment) error {
-	if _, err := g.GetExperimentFromDB(inst); err != nil {
-		if err != sql.ErrNoRows {
-			return fmt.Errorf("Fail to check record for the experiment in DB: %v", err)
-		}
-		return nil
-	} else {
+	reply, err := g.PreCheckRegisterExperimentInDB(inst)
+	if err != nil {
+		return fmt.Errorf("Fail to check record for the experiment in DB: %v", err)
+	} else if !reply.CanRegister {
 		return fmt.Errorf("Record for the experiment has existed in DB; Please try to rename the experiment")
+	} else {
+		return nil
 	}
 }
 

@@ -384,7 +384,7 @@ $ kubectl apply -f tfevent-volume/
 ```
 Then, create a studyjob that uses TF Event file metrics collector.
 ```
-$ kubectl apply -f tf-event_test.yaml
+$ kubectl apply -f tfjob-example.yaml
 ```
 
 It will create a tensorflow worker from whose eventfile metrics are collected.
@@ -395,5 +395,5 @@ The accuracy in training and test will be saved in *train/* directory and *test/
 In a studyjob, please add directry name to the name of metrics as a prefix e.g. `train/accuracy`, `test/accuracy`.
 
 ## Clean
-Clean up with `./destroy.sh` script.
+Clean up with [destroy.sh](./MinikubeDemo/destroy.sh) script.
 It will stop port-forward process and delete minikube cluster.

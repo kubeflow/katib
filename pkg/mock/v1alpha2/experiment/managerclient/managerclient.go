@@ -62,19 +62,19 @@ func (mr *MockManagerClientMockRecorder) DeleteExperimentInDB(arg0 interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteExperimentInDB", reflect.TypeOf((*MockManagerClient)(nil).DeleteExperimentInDB), arg0)
 }
 
-// GetExperimentFromDB mocks base method
-func (m *MockManagerClient) GetExperimentFromDB(arg0 *v1alpha2.Experiment) (*v1alpha20.GetExperimentReply, error) {
+// PreCheckRegisterExperimentInDB mocks base method
+func (m *MockManagerClient) PreCheckRegisterExperimentInDB(arg0 *v1alpha2.Experiment) (*v1alpha20.PreCheckRegisterExperimentReply, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetExperimentFromDB", arg0)
-	ret0, _ := ret[0].(*v1alpha20.GetExperimentReply)
+	ret := m.ctrl.Call(m, "PreCheckRegisterExperimentInDB", arg0)
+	ret0, _ := ret[0].(*v1alpha20.PreCheckRegisterExperimentReply)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetExperimentFromDB indicates an expected call of GetExperimentFromDB
-func (mr *MockManagerClientMockRecorder) GetExperimentFromDB(arg0 interface{}) *gomock.Call {
+// PreCheckRegisterExperimentInDB indicates an expected call of PreCheckRegisterExperimentInDB
+func (mr *MockManagerClientMockRecorder) PreCheckRegisterExperimentInDB(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExperimentFromDB", reflect.TypeOf((*MockManagerClient)(nil).GetExperimentFromDB), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PreCheckRegisterExperimentInDB", reflect.TypeOf((*MockManagerClient)(nil).PreCheckRegisterExperimentInDB), arg0)
 }
 
 // UpdateExperimentStatusInDB mocks base method
@@ -89,4 +89,19 @@ func (m *MockManagerClient) UpdateExperimentStatusInDB(arg0 *v1alpha2.Experiment
 func (mr *MockManagerClientMockRecorder) UpdateExperimentStatusInDB(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateExperimentStatusInDB", reflect.TypeOf((*MockManagerClient)(nil).UpdateExperimentStatusInDB), arg0)
+}
+
+// ValidateAlgorithmSettings mocks base method
+func (m *MockManagerClient) ValidateAlgorithmSettings(arg0 *v1alpha2.Experiment) (*v1alpha20.ValidateAlgorithmSettingsReply, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateAlgorithmSettings", arg0)
+	ret0, _ := ret[0].(*v1alpha20.ValidateAlgorithmSettingsReply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ValidateAlgorithmSettings indicates an expected call of ValidateAlgorithmSettings
+func (mr *MockManagerClientMockRecorder) ValidateAlgorithmSettings(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateAlgorithmSettings", reflect.TypeOf((*MockManagerClient)(nil).ValidateAlgorithmSettings), arg0)
 }

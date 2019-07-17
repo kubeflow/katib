@@ -14,6 +14,8 @@ type ManagerClient interface {
 	CreateTrialInDB(instance *trialsv1alpha2.Trial) error
 	UpdateTrialStatusInDB(instance *trialsv1alpha2.Trial) error
 	GetTrialObservation(instance *trialsv1alpha2.Trial) error
+	GetTrialObservationLog(
+		instance *trialsv1alpha2.Trial) (*api_pb.GetObservationLogReply, error)
 	GetTrialConf(instance *trialsv1alpha2.Trial) *api_pb.Trial
 }
 
@@ -66,8 +68,22 @@ func (d *DefaultClient) UpdateTrialStatusInDB(instance *trialsv1alpha2.Trial) er
 	return nil
 }
 
-func (d *DefaultClient) GetTrialObservation(instance *trialsv1alpha2.Trial) error {
+func (d *DefaultClient) GetTrialObservationLog(
+	instance *trialsv1alpha2.Trial) (*api_pb.GetObservationLogReply, error) {
+	// read GetObservationLog call and update observation field
+	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
+	request := &api_pb.GetObservationLogRequest{
+		TrialName:  instance.Name,
+		MetricName: objectiveMetricName,
+	}
+	reply, err := common.GetObservationLog(request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
 
+func (d *DefaultClient) GetTrialObservation(instance *trialsv1alpha2.Trial) error {
 	return nil
 }
 

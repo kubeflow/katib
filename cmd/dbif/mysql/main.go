@@ -45,7 +45,12 @@ type dbConn struct {
 	db *sql.DB
 }
 
-var rs1Letters = []rune("abcdefghijklmnopqrstuvwxyz")
+	RegisterExperiment(experiment *v1alpha2.Experiment) error
+	PreCheckRegisterExperiment(experiment *v1alpha2.Experiment) (bool, error)
+	DeleteExperiment(experimentName string) error
+	GetExperiment(experimentName string) (*v1alpha2.Experiment, error)
+	GetExperimentList() ([]*v1alpha2.ExperimentSummary, error)
+	UpdateExperimentStatus(experimentName string, newStatus *v1alpha2.ExperimentStatus) error
 
 func DBInit(d *dbConn) {
 	db := d.db
@@ -135,6 +140,9 @@ func openSQLConn(driverName string, dataSourceName string, interval time.Duratio
 				if err = db.Ping(); err == nil {
 					return db, nil
 				}
+				klog.Errorf("Ping to Katib db failed: %v", err)
+			} else {
+				klog.Errorf("Open sql connection failed: %v", err)
 			}
 		case <-timeoutC:
 			return nil, fmt.Errorf("Timeout waiting for DB conn successfully opened.")
@@ -271,7 +279,20 @@ func (d *dbConn) DeleteExperiment(ctx context.Context, in *dbif.DeleteExperiment
 	_, err := d.db.Exec("DELETE FROM experiments WHERE name = ?", in.ExperimentName)
 	return &dbif.DeleteExperimentReply{}, err
 }
-func (d *dbConn) GetExperiment(ctx context.Context, in *dbif.GetExperimentRequest) (*dbif.GetExperimentReply, error) {
+
+func (d *dbConn) PreCheckRegisterExperiment(experiment *v1alpha2.Experiment) (bool, error) {
+	_, err := d.GetExperiment(experiment.Name)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return true, nil
+		}
+		return false, err
+	} else {
+		return false, nil
+	}
+}
+
+func (d *dbConn) GetExperiment(experimentName string) (*v1alpha2.Experiment, error) {
 	var id string
 	var paramSpecs string
 	var objSpec string
@@ -437,7 +458,7 @@ func (d *dbConn) UpdateAlgorithmExtraSettings(ctx context.Context, in *dbif.Upda
 		isin := false
 		for _, ceas := range aesList {
 			if ceas.Name == neas.Name {
-				_, err = d.db.Exec(`UPDATE extra_algorithm_settings SET value = ? ,
+				_, err = d.db.Exec(`UPDATE extra_algorithm_settings SET value = ?
 						WHERE experiment_name = ? AND setting_name = ?`,
 					neas.Value, experimentName, ceas.Name)
 				if err != nil {

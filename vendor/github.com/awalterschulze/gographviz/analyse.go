@@ -54,11 +54,13 @@ func (w *graphVisitor) Visit(v ast.Elem) ast.Visitor {
 	w.g.SetDir(graph.Type == ast.DIGRAPH)
 	graphName := graph.ID.String()
 	w.g.SetName(graphName)
-	return newStmtVisitor(w.g, graphName)
+	return newStmtVisitor(w.g, graphName, nil, nil)
 }
 
-func newStmtVisitor(g errInterface, graphName string) *stmtVisitor {
-	return &stmtVisitor{g, graphName, make(map[string]string), make(map[string]string), make(map[string]string)}
+func newStmtVisitor(g errInterface, graphName string, nodeAttrs, edgeAttrs map[string]string) *stmtVisitor {
+	nodeAttrs = ammend(make(map[string]string), nodeAttrs)
+	edgeAttrs = ammend(make(map[string]string), edgeAttrs)
+	return &stmtVisitor{g, graphName, nodeAttrs, edgeAttrs, make(map[string]string), make(map[string]struct{})}
 }
 
 type stmtVisitor struct {
@@ -67,6 +69,7 @@ type stmtVisitor struct {
 	currentNodeAttrs  map[string]string
 	currentEdgeAttrs  map[string]string
 	currentGraphAttrs map[string]string
+	createdNodes      map[string]struct{}
 }
 
 func (w *stmtVisitor) Visit(v ast.Elem) ast.Visitor {
@@ -109,9 +112,23 @@ func overwrite(attrs map[string]string, overwrite map[string]string) map[string]
 	return attrs
 }
 
+func (w *stmtVisitor) addNodeFromEdge(nodeID string) {
+	if _, ok := w.createdNodes[nodeID]; !ok {
+		w.createdNodes[nodeID] = struct{}{}
+		w.g.AddNode(w.graphName, nodeID, w.currentNodeAttrs)
+	}
+}
+
 func (w *stmtVisitor) nodeStmt(stmt ast.NodeStmt) ast.Visitor {
-	attrs := ammend(stmt.Attrs.GetMap(), w.currentNodeAttrs)
-	w.g.AddNode(w.graphName, stmt.NodeID.String(), attrs)
+	nodeID := stmt.NodeID.String()
+	var defaultAttrs map[string]string
+	if _, ok := w.createdNodes[nodeID]; !ok {
+		defaultAttrs = w.currentNodeAttrs
+		w.createdNodes[nodeID] = struct{}{}
+	}
+	// else the defaults were already inherited
+	attrs := ammend(stmt.Attrs.GetMap(), defaultAttrs)
+	w.g.AddNode(w.graphName, nodeID, attrs)
 	return &nilVisitor{}
 }
 
@@ -121,7 +138,7 @@ func (w *stmtVisitor) edgeStmt(stmt ast.EdgeStmt) ast.Visitor {
 	src := stmt.Source.GetID()
 	srcName := src.String()
 	if stmt.Source.IsNode() {
-		w.g.AddNode(w.graphName, srcName, w.currentNodeAttrs)
+		w.addNodeFromEdge(srcName)
 	}
 	srcPort := stmt.Source.GetPort()
 	for i := range stmt.EdgeRHS {
@@ -129,7 +146,7 @@ func (w *stmtVisitor) edgeStmt(stmt ast.EdgeStmt) ast.Visitor {
 		dst := stmt.EdgeRHS[i].Destination.GetID()
 		dstName := dst.String()
 		if stmt.EdgeRHS[i].Destination.IsNode() {
-			w.g.AddNode(w.graphName, dstName, w.currentNodeAttrs)
+			w.addNodeFromEdge(dstName)
 		}
 		dstPort := stmt.EdgeRHS[i].Destination.GetPort()
 		w.g.AddPortEdge(srcName, srcPort.String(), dstName, dstPort.String(), directed, attrs)
@@ -162,7 +179,7 @@ func (w *stmtVisitor) graphAttrs(stmt ast.GraphAttrs) ast.Visitor {
 func (w *stmtVisitor) subGraph(stmt *ast.SubGraph) ast.Visitor {
 	subGraphName := stmt.ID.String()
 	w.g.AddSubGraph(w.graphName, subGraphName, w.currentGraphAttrs)
-	return newStmtVisitor(w.g, subGraphName)
+	return newStmtVisitor(w.g, subGraphName, w.currentNodeAttrs, w.currentEdgeAttrs)
 }
 
 func (w *stmtVisitor) attr(stmt *ast.Attr) ast.Visitor {

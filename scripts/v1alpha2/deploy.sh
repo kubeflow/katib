@@ -24,10 +24,14 @@ SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 cd ${SCRIPT_ROOT}
 kubectl apply -f manifests/v1alpha2
 kubectl apply -f manifests/v1alpha2/katib-controller
-kubectl apply -f manifests/v1alpha2/dbif/mysql/
-kubectl apply -f manifests/v1alpha2/katib/manager
-kubectl apply -f manifests/v1alpha2/katib/manager-rest
-kubectl apply -f manifests/v1alpha2/katib/pv
-kubectl apply -f manifests/v1alpha2/katib/db
-kubectl apply -f manifests/v1alpha2/katib/suggestion/random
+kubectl apply -f manifests/v1alpha2/manager
+kubectl apply -f manifests/v1alpha2/manager-rest
+kubectl apply -f manifests/v1alpha2/pv
+kubectl apply -f manifests/v1alpha2/db
+kubectl apply -f manifests/v1alpha2/ui
+kubectl apply -f manifests/v1alpha2/suggestion/random
+kubectl apply -f manifests/v1alpha2/suggestion/bayesianoptimization
+kubectl apply -f manifests/v1alpha2/suggestion/nasrl
+kubectl apply -f manifests/v1alpha2/suggestion/grid
+kubectl apply -f manifests/v1alpha2/suggestion/hyperband
 cd - > /dev/null

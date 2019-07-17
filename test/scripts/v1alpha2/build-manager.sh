@@ -38,4 +38,4 @@ cp -r vendor ${GO_DIR}/vendor
 cd ${GO_DIR}
 cp cmd/manager/v1alpha2/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha2/katib-manager:${VERSION} --project=${PROJECT}
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha2/katib-manager:${VERSION} ${REGISTRY}/${REPO_NAME}/katib-manager:latest --verbosity=info
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha2/katib-manager:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha2/katib-manager:latest --verbosity=info

@@ -32,7 +32,7 @@ func (b Bracket) Swap(i, j int) {
 }
 
 func (b Bracket) Less(i, j int) bool {
-	return b[i].value > b[j].value
+	return b[i].value < b[j].value
 }
 
 type HyperBandParameters struct {
@@ -57,9 +57,14 @@ func NewHyperBandSuggestService() *HyperBandSuggestService {
 	return &HyperBandSuggestService{}
 }
 
-func (h *HyperBandSuggestService) makeBracket(ctx context.Context, c api.ManagerClient, studyID string, n int, r float64, hbparam *HyperBandParameters) ([]string, []*api.Trial, error) {
-	if len(hbparam.evaluatingTrials) == 0 || hbparam.shloopitr == 0 {
-		return h.makeMasterBracket(ctx, c, studyID, n, r, hbparam)
+func (h *HyperBandSuggestService) makeBracket(ctx context.Context, c api.ManagerClient, studyID string, hbparam *HyperBandParameters) ([]string, []*api.Trial, error) {
+	var tids []string
+	var trials []*api.Trial
+	var err error
+	n, r := h.getLoopParam(hbparam)
+
+	if len(hbparam.evaluatingTrials) == 0 {
+		tids, trials, err = h.makeMasterBracket(ctx, c, studyID, n, r, hbparam)
 	} else {
 		err, b := h.evalWorkers(ctx, c, studyID, hbparam)
 		if err != nil {
@@ -68,8 +73,31 @@ func (h *HyperBandSuggestService) makeBracket(ctx context.Context, c api.Manager
 		if b == nil {
 			return nil, nil, nil
 		}
-		return h.makeChildBracket(ctx, c, b, studyID, n, r, hbparam)
+		newTrialNum := int(math.Ceil(float64(n) / hbparam.eta))
+		h.shLoopParamUpdate(hbparam)
+		_, ri := h.getLoopParam(hbparam)
+		tids, trials, err = h.makeChildBracket(ctx, c, b, studyID, newTrialNum, ri, hbparam)
 	}
+	// evaluatingTrials is no need for last inner loop since makeMasterBracket will work for next loop
+	if hbparam.shloopitr < hbparam.currentS {
+		hbparam.evaluatingTrials = tids
+	} else {
+		hbparam.evaluatingTrials = []string{}
+	}
+	klog.Infof("Hyb Param sMax %v", hbparam.sMax)
+	klog.Infof("Hyb Param B %v", hbparam.bL)
+	klog.Infof("Hyb Param n %v", hbparam.n)
+	klog.Infof("Hyb Param r %v", hbparam.r)
+	klog.Infof("Hyb Param currentS %v", hbparam.currentS)
+	klog.Infof("Hyb Param shloopitr %v", hbparam.shloopitr)
+	klog.Infof("Hyb Param evaluatingTrials %v", hbparam.evaluatingTrials)
+	if err == nil && len(hbparam.evaluatingTrials) == 0 {
+		hbparam.currentS--
+		if hbparam.currentS >= 0 {
+			h.hbLoopParamUpdate(hbparam)
+		}
+	}
+	return tids, trials, err
 }
 
 func (h *HyperBandSuggestService) makeMasterBracket(ctx context.Context, c api.ManagerClient, studyID string, n int, r float64, hbparam *HyperBandParameters) ([]string, []*api.Trial, error) {
@@ -130,6 +158,7 @@ func (h *HyperBandSuggestService) makeMasterBracket(ctx context.Context, c api.M
 }
 
 func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.ManagerClient, parent Bracket, studyID string, n int, rI float64, hbparam *HyperBandParameters) ([]string, []*api.Trial, error) {
+	klog.Infof("Make ChildBracket %v Trials", n)
 	gsreq := &api.GetStudyRequest{
 		StudyId: studyID,
 	}
@@ -142,9 +171,9 @@ func (h *HyperBandSuggestService) makeChildBracket(ctx context.Context, c api.Ma
 	child := Bracket{}
 
 	if sconf.OptimizationType == api.OptimizationType_MINIMIZE {
-		child = parent[len(parent)-n:]
-	} else if sconf.OptimizationType == api.OptimizationType_MAXIMIZE {
 		child = parent[:n]
+	} else if sconf.OptimizationType == api.OptimizationType_MAXIMIZE {
+		child = parent[len(parent)-n:]
 	}
 	gtreq := &api.GetTrialsRequest{
 		StudyId: studyID,
@@ -204,7 +233,7 @@ func (h *HyperBandSuggestService) parseSuggestionParameters(ctx context.Context,
 		r:                  -1,
 		n:                  -1,
 		shloopitr:          -1,
-		currentS:           -1,
+		currentS:           -2,
 		ResourceName:       "",
 		ObjectiveValueName: "",
 		evaluatingTrials:   []string{},
@@ -232,10 +261,16 @@ func (h *HyperBandSuggestService) parseSuggestionParameters(ctx context.Context,
 		case "currentS":
 			p.currentS, _ = strconv.Atoi(sp.Value)
 		case "evaluatingTrials":
-			p.evaluatingTrials = strings.Split(sp.Value, ",")
+			if sp.Value != "" {
+				p.evaluatingTrials = strings.Split(sp.Value, ",")
+			}
 		default:
 			klog.Infof("Unknown Suggestion Parameter %v", sp.Name)
 		}
+	}
+	if p.currentS == -1 {
+		klog.Infof("HyperBand outlerloop has finished")
+		return p, nil
 	}
 	if p.rL <= 0 || p.ResourceName == "" {
 		klog.Info("Failed to parse Suggestion Parameter. r_l and ResourceName must be set.")
@@ -264,7 +299,7 @@ func (h *HyperBandSuggestService) parseSuggestionParameters(ctx context.Context,
 	if p.n == -1 {
 		p.n = int(math.Ceil((p.bL / p.rL) * (math.Pow(p.eta, float64(p.sMax)) / float64(p.sMax+1))))
 	}
-	if p.currentS == -1 {
+	if p.currentS == -2 {
 		p.currentS = p.sMax
 	}
 	if p.shloopitr == -1 {
@@ -273,12 +308,6 @@ func (h *HyperBandSuggestService) parseSuggestionParameters(ctx context.Context,
 	if p.r == -1 {
 		p.r = p.rL * math.Pow(p.eta, float64(-p.sMax))
 	}
-	klog.Infof("Hyb Param sMax %v", p.sMax)
-	klog.Infof("Hyb Param B %v", p.bL)
-	klog.Infof("Hyb Param n %v", p.n)
-	klog.Infof("Hyb Param currentS %v", p.currentS)
-	klog.Infof("Hyb Param r %v", p.r)
-	klog.Infof("Hyb Param evaluatingTrials %v", p.evaluatingTrials)
 	return p, nil
 }
 
@@ -365,6 +394,9 @@ func (h *HyperBandSuggestService) evalWorkers(ctx context.Context, c api.Manager
 			if ml.WorkerStatus != api.State_COMPLETED {
 				return nil, nil
 			}
+			if len(ml.MetricsLogs) == 0 {
+				return nil, nil
+			}
 			v, _ := strconv.ParseFloat(ml.MetricsLogs[0].Values[len(ml.MetricsLogs[0].Values)-1].Value, 64)
 			vs += v
 		}
@@ -382,23 +414,25 @@ func (h *HyperBandSuggestService) evalWorkers(ctx context.Context, c api.Manager
 	return nil, bracket
 }
 
-func (h *HyperBandSuggestService) hbLoopParamUpdate(studyID string, hbparam *HyperBandParameters) {
-	klog.Infof("HB loop s = %v", hbparam.currentS)
+func (h *HyperBandSuggestService) hbLoopParamUpdate(hbparam *HyperBandParameters) {
 	hbparam.shloopitr = 0
-	hbparam.n = int(math.Trunc((hbparam.bL / hbparam.rL) * (math.Pow(hbparam.eta, float64(hbparam.currentS)) / float64(hbparam.currentS+1))))
+	hbparam.n = int(math.Ceil((hbparam.bL / hbparam.rL) * (math.Pow(hbparam.eta, float64(hbparam.currentS)) / float64(hbparam.currentS+1))))
 	hbparam.r = hbparam.rL * math.Pow(hbparam.eta, float64(-hbparam.currentS))
 }
 
-func (h *HyperBandSuggestService) getLoopParam(studyID string, hbparam *HyperBandParameters) (int, float64) {
-	klog.Infof("SH loop i = %v", hbparam.shloopitr)
-	nI := int(math.Trunc(float64(hbparam.n) * math.Pow(hbparam.eta, float64(-hbparam.shloopitr))))
+func (h *HyperBandSuggestService) getLoopParam(hbparam *HyperBandParameters) (int, float64) {
+	nI := int(math.Ceil(float64(hbparam.n) * math.Pow(hbparam.eta, float64(-hbparam.shloopitr))))
 	rI := hbparam.r * math.Pow(hbparam.eta, float64(hbparam.shloopitr))
 	return nI, rI
 }
-func (h *HyperBandSuggestService) shLoopParamUpdate(studyID string, hbparam *HyperBandParameters) {
+
+func (h *HyperBandSuggestService) shLoopParamUpdate(hbparam *HyperBandParameters) {
 	hbparam.shloopitr++
 	if hbparam.shloopitr > hbparam.currentS {
 		hbparam.currentS--
+		if hbparam.currentS >= 0 {
+			h.hbLoopParamUpdate(hbparam)
+		}
 	}
 }
 
@@ -423,24 +457,23 @@ func (h *HyperBandSuggestService) GetSuggestions(ctx context.Context, in *api.Ge
 		return &api.GetSuggestionsReply{}, err
 	}
 
-	if hbparam.currentS <= 0 {
+	if hbparam.currentS < 0 {
 		return &api.GetSuggestionsReply{}, nil
 	}
 
-	if hbparam.shloopitr > hbparam.currentS {
-		h.hbLoopParamUpdate(in.StudyId, hbparam)
-	}
-	nI, rI := h.getLoopParam(in.StudyId, hbparam)
-	tids, ts, err := h.makeBracket(ctx, c, in.StudyId, nI, rI, hbparam)
+	tids, ts, err := h.makeBracket(ctx, c, in.StudyId, hbparam)
 	if err != nil {
 		return &api.GetSuggestionsReply{}, err
 	}
 	if tids == nil {
 		return &api.GetSuggestionsReply{}, status.Errorf(codes.FailedPrecondition, "Previous workers are not completed.")
 	}
-	hbparam.evaluatingTrials = tids
-	h.shLoopParamUpdate(in.StudyId, hbparam)
+
 	err = h.saveSuggestionParameters(ctx, c, in.StudyId, in.SuggestionAlgorithm, in.ParamId, hbparam)
+	if err != nil {
+		klog.Fatalf("saveSuggestionParameters failed: %v", err)
+		return &api.GetSuggestionsReply{}, err
+	}
 	return &api.GetSuggestionsReply{
 		Trials: ts,
 	}, nil

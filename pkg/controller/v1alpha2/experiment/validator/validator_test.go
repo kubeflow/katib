@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"database/sql"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -10,6 +9,7 @@ import (
 
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	managerclientmock "github.com/kubeflow/katib/pkg/mock/v1alpha2/experiment/managerclient"
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1alpha2/experiment/manifest"
 )
@@ -19,7 +19,7 @@ func init() {
 }
 
 func TestValidateTFJobTrialTemplate(t *testing.T) {
-	trialTFJobTemplate := `apiVersion: "kubeflow.org/v1beta1"
+	trialTFJobTemplate := `apiVersion: "kubeflow.org/v1"
 kind: "TFJob"
 metadata:
     name: "dist-mnist-for-e2e-test"
@@ -42,7 +42,10 @@ spec:
 	g := New(p, mc)
 
 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialTFJobTemplate, nil)
-	mc.EXPECT().GetExperimentFromDB(gomock.Any()).Return(nil, sql.ErrNoRows).AnyTimes()
+	mc.EXPECT().PreCheckRegisterExperimentInDB(gomock.Any()).Return(
+		&api_pb.PreCheckRegisterExperimentReply{
+			CanRegister: true,
+		}, nil).AnyTimes()
 
 	instance := newFakeInstance()
 	if err := g.(*DefaultValidator).validateTrialTemplate(instance); err == nil {
@@ -67,7 +70,10 @@ metadata:
 	g := New(p, mc)
 
 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialJobTemplate, nil)
-	mc.EXPECT().GetExperimentFromDB(gomock.Any()).Return(nil, sql.ErrNoRows).AnyTimes()
+	mc.EXPECT().PreCheckRegisterExperimentInDB(gomock.Any()).Return(
+		&api_pb.PreCheckRegisterExperimentReply{
+			CanRegister: true,
+		}, nil).AnyTimes()
 
 	instance := newFakeInstance()
 	if err := g.(*DefaultValidator).validateTrialTemplate(instance); err != nil {
@@ -104,7 +110,13 @@ spec:
 		gomock.Any(), gomock.Any(), gomock.Any(),
 		gomock.Any(), gomock.Any(), gomock.Any()).
 		Return(metricsCollectorTemplate, nil).AnyTimes()
-	mc.EXPECT().GetExperimentFromDB(gomock.Any()).Return(nil, sql.ErrNoRows).AnyTimes()
+	mc.EXPECT().PreCheckRegisterExperimentInDB(gomock.Any()).Return(
+		&api_pb.PreCheckRegisterExperimentReply{
+			CanRegister: true,
+		}, nil).AnyTimes()
+
+	mc.EXPECT().ValidateAlgorithmSettings(gomock.Any()).Return(
+		&api_pb.ValidateAlgorithmSettingsReply{}, nil).AnyTimes()
 
 	tcs := []struct {
 		Instance *experimentsv1alpha2.Experiment

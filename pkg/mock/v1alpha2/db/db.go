@@ -163,6 +163,21 @@ func (mr *MockKatibDBInterfaceMockRecorder) GetTrialList(arg0, arg1 interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialList", reflect.TypeOf((*MockKatibDBInterface)(nil).GetTrialList), arg0, arg1)
 }
 
+// PreCheckRegisterExperiment mocks base method
+func (m *MockKatibDBInterface) PreCheckRegisterExperiment(arg0 *v1alpha2.Experiment) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PreCheckRegisterExperiment", arg0)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PreCheckRegisterExperiment indicates an expected call of PreCheckRegisterExperiment
+func (mr *MockKatibDBInterfaceMockRecorder) PreCheckRegisterExperiment(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PreCheckRegisterExperiment", reflect.TypeOf((*MockKatibDBInterface)(nil).PreCheckRegisterExperiment), arg0)
+}
+
 // RegisterExperiment mocks base method
 func (m *MockKatibDBInterface) RegisterExperiment(arg0 *v1alpha2.Experiment) error {
 	m.ctrl.T.Helper()

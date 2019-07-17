@@ -39,40 +39,42 @@ class HPJobTable extends React.Component {
 
     let header = [];
     let data = [];
-    if (this.props.jobData && this.props.jobData.length !== 0) {
+    if (this.props.jobData && this.props.jobData.length > 1) {
       header = this.props.jobData[0];
       data = this.props.jobData.slice(1)
     }
     return (
       <Paper className={classes.root}>
-        <Table className={classes.table}>
-          <TableHead>
-            <TableRow>
-              {header.map(header => (
-                <TableCell>{header}</TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.map((row, id) => (
-              <TableRow key={id}>
-                {row.map((element, index) => {
-                  if (index === 0) {
-                    return (
-                      <TableCell className={classes.hover} component="th" scope="row" onClick={this.fetchAndOpenDialog(element)} key={index}>
-                        {element}
-                      </TableCell>
-                    )
-                  } else {
-                    return (
-                      <TableCell align="right">{element}</TableCell>
-                    )
-                  }
-                })}
+        {this.props.jobData.length > 1 &&
+          <Table className={classes.table}>
+            <TableHead>
+              <TableRow>
+                {header.map(header => (
+                  <TableCell>{header}</TableCell>
+                ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {data.map((row, id) => (
+                <TableRow key={id}>
+                  {row.map((element, index) => {
+                    if (index === 0) {
+                      return (
+                        <TableCell className={classes.hover} component="th" scope="row" onClick={this.fetchAndOpenDialog(element)} key={index}>
+                          {element}
+                        </TableCell>
+                      )
+                    } else {
+                      return (
+                        <TableCell align="right">{element}</TableCell>
+                      )
+                    }
+                  })}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        }
       </Paper>
     );
   }

@@ -8,6 +8,56 @@ It is generated from these files:
 	api.proto
 
 It has these top-level messages:
+	FeasibleSpace
+	ParameterSpec
+	ObjectiveSpec
+	AlgorithmSetting
+	EarlyStoppingSpec
+	AlgorithmSpec
+	NasConfig
+	GraphConfig
+	Operation
+	ExperimentSpec
+	ExperimentStatus
+	Experiment
+	ParameterAssignment
+	Metric
+	MetricLog
+	Observation
+	ObservationLog
+	TrialSpec
+	TrialStatus
+	Trial
+	RegisterExperimentRequest
+	RegisterExperimentReply
+	PreCheckRegisterExperimentReply
+	DeleteExperimentRequest
+	DeleteExperimentReply
+	GetExperimentRequest
+	GetExperimentReply
+	ExperimentSummary
+	GetExperimentListRequest
+	GetExperimentListReply
+	UpdateExperimentStatusRequest
+	UpdateExperimentStatusReply
+	UpdateAlgorithmExtraSettingsRequest
+	UpdateAlgorithmExtraSettingsReply
+	GetAlgorithmExtraSettingsRequest
+	GetAlgorithmExtraSettingsReply
+	RegisterTrialRequest
+	RegisterTrialReply
+	DeleteTrialRequest
+	DeleteTrialReply
+	GetTrialListRequest
+	GetTrialListReply
+	GetTrialRequest
+	GetTrialReply
+	UpdateTrialStatusRequest
+	UpdateTrialStatusReply
+	ReportObservationLogRequest
+	ReportObservationLogReply
+	GetObservationLogRequest
+	GetObservationLogReply
 	GetSuggestionsRequest
 	GetSuggestionsReply
 	ValidateAlgorithmSettingsRequest
@@ -37,6 +87,1329 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
+// *
+// Types of value for HyperParameter.
+type ParameterType int32
+
+const (
+	ParameterType_UNKNOWN_TYPE ParameterType = 0
+	ParameterType_DOUBLE       ParameterType = 1
+	ParameterType_INT          ParameterType = 2
+	ParameterType_DISCRETE     ParameterType = 3
+	ParameterType_CATEGORICAL  ParameterType = 4
+)
+
+var ParameterType_name = map[int32]string{
+	0: "UNKNOWN_TYPE",
+	1: "DOUBLE",
+	2: "INT",
+	3: "DISCRETE",
+	4: "CATEGORICAL",
+}
+var ParameterType_value = map[string]int32{
+	"UNKNOWN_TYPE": 0,
+	"DOUBLE":       1,
+	"INT":          2,
+	"DISCRETE":     3,
+	"CATEGORICAL":  4,
+}
+
+func (x ParameterType) String() string {
+	return proto.EnumName(ParameterType_name, int32(x))
+}
+func (ParameterType) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+
+// *
+// Direction of optimization. Minimize or Maximize.
+type ObjectiveType int32
+
+const (
+	ObjectiveType_UNKNOWN  ObjectiveType = 0
+	ObjectiveType_MINIMIZE ObjectiveType = 1
+	ObjectiveType_MAXIMIZE ObjectiveType = 2
+)
+
+var ObjectiveType_name = map[int32]string{
+	0: "UNKNOWN",
+	1: "MINIMIZE",
+	2: "MAXIMIZE",
+}
+var ObjectiveType_value = map[string]int32{
+	"UNKNOWN":  0,
+	"MINIMIZE": 1,
+	"MAXIMIZE": 2,
+}
+
+func (x ObjectiveType) String() string {
+	return proto.EnumName(ObjectiveType_name, int32(x))
+}
+func (ObjectiveType) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+type ExperimentStatus_ExperimentConditionType int32
+
+const (
+	ExperimentStatus_CREATED    ExperimentStatus_ExperimentConditionType = 0
+	ExperimentStatus_RUNNING    ExperimentStatus_ExperimentConditionType = 1
+	ExperimentStatus_RESTARTING ExperimentStatus_ExperimentConditionType = 2
+	ExperimentStatus_SUCCEEDED  ExperimentStatus_ExperimentConditionType = 3
+	ExperimentStatus_FAILED     ExperimentStatus_ExperimentConditionType = 4
+	ExperimentStatus_UNKNOWN    ExperimentStatus_ExperimentConditionType = 5
+)
+
+var ExperimentStatus_ExperimentConditionType_name = map[int32]string{
+	0: "CREATED",
+	1: "RUNNING",
+	2: "RESTARTING",
+	3: "SUCCEEDED",
+	4: "FAILED",
+	5: "UNKNOWN",
+}
+var ExperimentStatus_ExperimentConditionType_value = map[string]int32{
+	"CREATED":    0,
+	"RUNNING":    1,
+	"RESTARTING": 2,
+	"SUCCEEDED":  3,
+	"FAILED":     4,
+	"UNKNOWN":    5,
+}
+
+func (x ExperimentStatus_ExperimentConditionType) String() string {
+	return proto.EnumName(ExperimentStatus_ExperimentConditionType_name, int32(x))
+}
+func (ExperimentStatus_ExperimentConditionType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{10, 0}
+}
+
+type TrialStatus_TrialConditionType int32
+
+const (
+	TrialStatus_CREATED   TrialStatus_TrialConditionType = 0
+	TrialStatus_RUNNING   TrialStatus_TrialConditionType = 1
+	TrialStatus_SUCCEEDED TrialStatus_TrialConditionType = 2
+	TrialStatus_KILLED    TrialStatus_TrialConditionType = 3
+	TrialStatus_FAILED    TrialStatus_TrialConditionType = 4
+	TrialStatus_UNKNOWN   TrialStatus_TrialConditionType = 5
+)
+
+var TrialStatus_TrialConditionType_name = map[int32]string{
+	0: "CREATED",
+	1: "RUNNING",
+	2: "SUCCEEDED",
+	3: "KILLED",
+	4: "FAILED",
+	5: "UNKNOWN",
+}
+var TrialStatus_TrialConditionType_value = map[string]int32{
+	"CREATED":   0,
+	"RUNNING":   1,
+	"SUCCEEDED": 2,
+	"KILLED":    3,
+	"FAILED":    4,
+	"UNKNOWN":   5,
+}
+
+func (x TrialStatus_TrialConditionType) String() string {
+	return proto.EnumName(TrialStatus_TrialConditionType_name, int32(x))
+}
+func (TrialStatus_TrialConditionType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{18, 0}
+}
+
+// *
+// Feasible space for optimization.
+// Int and Double type use Max/Min.
+// Discrete and Categorical type use List.
+type FeasibleSpace struct {
+	Max  string   `protobuf:"bytes,1,opt,name=max" json:"max,omitempty"`
+	Min  string   `protobuf:"bytes,2,opt,name=min" json:"min,omitempty"`
+	List []string `protobuf:"bytes,3,rep,name=list" json:"list,omitempty"`
+	Step string   `protobuf:"bytes,4,opt,name=step" json:"step,omitempty"`
+}
+
+func (m *FeasibleSpace) Reset()                    { *m = FeasibleSpace{} }
+func (m *FeasibleSpace) String() string            { return proto.CompactTextString(m) }
+func (*FeasibleSpace) ProtoMessage()               {}
+func (*FeasibleSpace) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+
+func (m *FeasibleSpace) GetMax() string {
+	if m != nil {
+		return m.Max
+	}
+	return ""
+}
+
+func (m *FeasibleSpace) GetMin() string {
+	if m != nil {
+		return m.Min
+	}
+	return ""
+}
+
+func (m *FeasibleSpace) GetList() []string {
+	if m != nil {
+		return m.List
+	}
+	return nil
+}
+
+func (m *FeasibleSpace) GetStep() string {
+	if m != nil {
+		return m.Step
+	}
+	return ""
+}
+
+// *
+// Config for a Hyper parameter.
+// Katib will create each Hyper parameter from this config.
+type ParameterSpec struct {
+	Name          string         `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	ParameterType ParameterType  `protobuf:"varint,2,opt,name=parameter_type,json=parameterType,enum=api.v1.alpha2.ParameterType" json:"parameter_type,omitempty"`
+	FeasibleSpace *FeasibleSpace `protobuf:"bytes,3,opt,name=feasible_space,json=feasibleSpace" json:"feasible_space,omitempty"`
+}
+
+func (m *ParameterSpec) Reset()                    { *m = ParameterSpec{} }
+func (m *ParameterSpec) String() string            { return proto.CompactTextString(m) }
+func (*ParameterSpec) ProtoMessage()               {}
+func (*ParameterSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+func (m *ParameterSpec) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *ParameterSpec) GetParameterType() ParameterType {
+	if m != nil {
+		return m.ParameterType
+	}
+	return ParameterType_UNKNOWN_TYPE
+}
+
+func (m *ParameterSpec) GetFeasibleSpace() *FeasibleSpace {
+	if m != nil {
+		return m.FeasibleSpace
+	}
+	return nil
+}
+
+type ObjectiveSpec struct {
+	Type                  ObjectiveType `protobuf:"varint,1,opt,name=type,enum=api.v1.alpha2.ObjectiveType" json:"type,omitempty"`
+	Goal                  float32       `protobuf:"fixed32,2,opt,name=goal" json:"goal,omitempty"`
+	ObjectiveMetricName   string        `protobuf:"bytes,3,opt,name=objective_metric_name,json=objectiveMetricName" json:"objective_metric_name,omitempty"`
+	AdditionalMetricNames []string      `protobuf:"bytes,4,rep,name=additional_metric_names,json=additionalMetricNames" json:"additional_metric_names,omitempty"`
+}
+
+func (m *ObjectiveSpec) Reset()                    { *m = ObjectiveSpec{} }
+func (m *ObjectiveSpec) String() string            { return proto.CompactTextString(m) }
+func (*ObjectiveSpec) ProtoMessage()               {}
+func (*ObjectiveSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+
+func (m *ObjectiveSpec) GetType() ObjectiveType {
+	if m != nil {
+		return m.Type
+	}
+	return ObjectiveType_UNKNOWN
+}
+
+func (m *ObjectiveSpec) GetGoal() float32 {
+	if m != nil {
+		return m.Goal
+	}
+	return 0
+}
+
+func (m *ObjectiveSpec) GetObjectiveMetricName() string {
+	if m != nil {
+		return m.ObjectiveMetricName
+	}
+	return ""
+}
+
+func (m *ObjectiveSpec) GetAdditionalMetricNames() []string {
+	if m != nil {
+		return m.AdditionalMetricNames
+	}
+	return nil
+}
+
+type AlgorithmSetting struct {
+	Name  string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
+}
+
+func (m *AlgorithmSetting) Reset()                    { *m = AlgorithmSetting{} }
+func (m *AlgorithmSetting) String() string            { return proto.CompactTextString(m) }
+func (*AlgorithmSetting) ProtoMessage()               {}
+func (*AlgorithmSetting) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+
+func (m *AlgorithmSetting) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *AlgorithmSetting) GetValue() string {
+	if m != nil {
+		return m.Value
+	}
+	return ""
+}
+
+type EarlyStoppingSpec struct {
+}
+
+func (m *EarlyStoppingSpec) Reset()                    { *m = EarlyStoppingSpec{} }
+func (m *EarlyStoppingSpec) String() string            { return proto.CompactTextString(m) }
+func (*EarlyStoppingSpec) ProtoMessage()               {}
+func (*EarlyStoppingSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+
+type AlgorithmSpec struct {
+	AlgorithmName     string              `protobuf:"bytes,1,opt,name=algorithm_name,json=algorithmName" json:"algorithm_name,omitempty"`
+	AlgorithmSetting  []*AlgorithmSetting `protobuf:"bytes,2,rep,name=algorithm_setting,json=algorithmSetting" json:"algorithm_setting,omitempty"`
+	EarlyStoppingSpec *EarlyStoppingSpec  `protobuf:"bytes,3,opt,name=early_stopping_spec,json=earlyStoppingSpec" json:"early_stopping_spec,omitempty"`
+}
+
+func (m *AlgorithmSpec) Reset()                    { *m = AlgorithmSpec{} }
+func (m *AlgorithmSpec) String() string            { return proto.CompactTextString(m) }
+func (*AlgorithmSpec) ProtoMessage()               {}
+func (*AlgorithmSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+
+func (m *AlgorithmSpec) GetAlgorithmName() string {
+	if m != nil {
+		return m.AlgorithmName
+	}
+	return ""
+}
+
+func (m *AlgorithmSpec) GetAlgorithmSetting() []*AlgorithmSetting {
+	if m != nil {
+		return m.AlgorithmSetting
+	}
+	return nil
+}
+
+func (m *AlgorithmSpec) GetEarlyStoppingSpec() *EarlyStoppingSpec {
+	if m != nil {
+		return m.EarlyStoppingSpec
+	}
+	return nil
+}
+
+// *
+// NasConfig contains a config of NAS job
+type NasConfig struct {
+	GraphConfig *GraphConfig          `protobuf:"bytes,1,opt,name=graph_config,json=graphConfig" json:"graph_config,omitempty"`
+	Operations  *NasConfig_Operations `protobuf:"bytes,2,opt,name=operations" json:"operations,omitempty"`
+}
+
+func (m *NasConfig) Reset()                    { *m = NasConfig{} }
+func (m *NasConfig) String() string            { return proto.CompactTextString(m) }
+func (*NasConfig) ProtoMessage()               {}
+func (*NasConfig) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+
+func (m *NasConfig) GetGraphConfig() *GraphConfig {
+	if m != nil {
+		return m.GraphConfig
+	}
+	return nil
+}
+
+func (m *NasConfig) GetOperations() *NasConfig_Operations {
+	if m != nil {
+		return m.Operations
+	}
+	return nil
+}
+
+type NasConfig_Operations struct {
+	Operation []*Operation `protobuf:"bytes,1,rep,name=operation" json:"operation,omitempty"`
+}
+
+func (m *NasConfig_Operations) Reset()                    { *m = NasConfig_Operations{} }
+func (m *NasConfig_Operations) String() string            { return proto.CompactTextString(m) }
+func (*NasConfig_Operations) ProtoMessage()               {}
+func (*NasConfig_Operations) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6, 0} }
+
+func (m *NasConfig_Operations) GetOperation() []*Operation {
+	if m != nil {
+		return m.Operation
+	}
+	return nil
+}
+
+// *
+// GraphConfig contains a config of DAG
+type GraphConfig struct {
+	NumLayers   int32   `protobuf:"varint,1,opt,name=num_layers,json=numLayers" json:"num_layers,omitempty"`
+	InputSizes  []int32 `protobuf:"varint,2,rep,packed,name=input_sizes,json=inputSizes" json:"input_sizes,omitempty"`
+	OutputSizes []int32 `protobuf:"varint,3,rep,packed,name=output_sizes,json=outputSizes" json:"output_sizes,omitempty"`
+}
+
+func (m *GraphConfig) Reset()                    { *m = GraphConfig{} }
+func (m *GraphConfig) String() string            { return proto.CompactTextString(m) }
+func (*GraphConfig) ProtoMessage()               {}
+func (*GraphConfig) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+
+func (m *GraphConfig) GetNumLayers() int32 {
+	if m != nil {
+		return m.NumLayers
+	}
+	return 0
+}
+
+func (m *GraphConfig) GetInputSizes() []int32 {
+	if m != nil {
+		return m.InputSizes
+	}
+	return nil
+}
+
+func (m *GraphConfig) GetOutputSizes() []int32 {
+	if m != nil {
+		return m.OutputSizes
+	}
+	return nil
+}
+
+// *
+// Config for operations in DAG
+type Operation struct {
+	OperationType  string                    `protobuf:"bytes,1,opt,name=operation_type,json=operationType" json:"operation_type,omitempty"`
+	ParameterSpecs *Operation_ParameterSpecs `protobuf:"bytes,2,opt,name=parameter_specs,json=parameterSpecs" json:"parameter_specs,omitempty"`
+}
+
+func (m *Operation) Reset()                    { *m = Operation{} }
+func (m *Operation) String() string            { return proto.CompactTextString(m) }
+func (*Operation) ProtoMessage()               {}
+func (*Operation) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+
+func (m *Operation) GetOperationType() string {
+	if m != nil {
+		return m.OperationType
+	}
+	return ""
+}
+
+func (m *Operation) GetParameterSpecs() *Operation_ParameterSpecs {
+	if m != nil {
+		return m.ParameterSpecs
+	}
+	return nil
+}
+
+// *
+// List of ParameterSpec
+type Operation_ParameterSpecs struct {
+	Parameters []*ParameterSpec `protobuf:"bytes,1,rep,name=parameters" json:"parameters,omitempty"`
+}
+
+func (m *Operation_ParameterSpecs) Reset()                    { *m = Operation_ParameterSpecs{} }
+func (m *Operation_ParameterSpecs) String() string            { return proto.CompactTextString(m) }
+func (*Operation_ParameterSpecs) ProtoMessage()               {}
+func (*Operation_ParameterSpecs) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8, 0} }
+
+func (m *Operation_ParameterSpecs) GetParameters() []*ParameterSpec {
+	if m != nil {
+		return m.Parameters
+	}
+	return nil
+}
+
+// *
+// Spec of a Experiment. Experiment represents a single optimization run over a feasible space.
+// Each Experiment contains a configuration describing the feasible space, as well as a set of Trials.
+// It is assumed that objective function f(x) does not change in the course of a Experiment.
+type ExperimentSpec struct {
+	ParameterSpecs       *ExperimentSpec_ParameterSpecs `protobuf:"bytes,1,opt,name=parameter_specs,json=parameterSpecs" json:"parameter_specs,omitempty"`
+	Objective            *ObjectiveSpec                 `protobuf:"bytes,2,opt,name=objective" json:"objective,omitempty"`
+	Algorithm            *AlgorithmSpec                 `protobuf:"bytes,3,opt,name=algorithm" json:"algorithm,omitempty"`
+	TrialTemplate        string                         `protobuf:"bytes,4,opt,name=trial_template,json=trialTemplate" json:"trial_template,omitempty"`
+	MetricsCollectorSpec string                         `protobuf:"bytes,5,opt,name=metrics_collector_spec,json=metricsCollectorSpec" json:"metrics_collector_spec,omitempty"`
+	ParallelTrialCount   int32                          `protobuf:"varint,6,opt,name=parallel_trial_count,json=parallelTrialCount" json:"parallel_trial_count,omitempty"`
+	MaxTrialCount        int32                          `protobuf:"varint,7,opt,name=max_trial_count,json=maxTrialCount" json:"max_trial_count,omitempty"`
+	NasConfig            *NasConfig                     `protobuf:"bytes,8,opt,name=nas_config,json=nasConfig" json:"nas_config,omitempty"`
+}
+
+func (m *ExperimentSpec) Reset()                    { *m = ExperimentSpec{} }
+func (m *ExperimentSpec) String() string            { return proto.CompactTextString(m) }
+func (*ExperimentSpec) ProtoMessage()               {}
+func (*ExperimentSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
+
+func (m *ExperimentSpec) GetParameterSpecs() *ExperimentSpec_ParameterSpecs {
+	if m != nil {
+		return m.ParameterSpecs
+	}
+	return nil
+}
+
+func (m *ExperimentSpec) GetObjective() *ObjectiveSpec {
+	if m != nil {
+		return m.Objective
+	}
+	return nil
+}
+
+func (m *ExperimentSpec) GetAlgorithm() *AlgorithmSpec {
+	if m != nil {
+		return m.Algorithm
+	}
+	return nil
+}
+
+func (m *ExperimentSpec) GetTrialTemplate() string {
+	if m != nil {
+		return m.TrialTemplate
+	}
+	return ""
+}
+
+func (m *ExperimentSpec) GetMetricsCollectorSpec() string {
+	if m != nil {
+		return m.MetricsCollectorSpec
+	}
+	return ""
+}
+
+func (m *ExperimentSpec) GetParallelTrialCount() int32 {
+	if m != nil {
+		return m.ParallelTrialCount
+	}
+	return 0
+}
+
+func (m *ExperimentSpec) GetMaxTrialCount() int32 {
+	if m != nil {
+		return m.MaxTrialCount
+	}
+	return 0
+}
+
+func (m *ExperimentSpec) GetNasConfig() *NasConfig {
+	if m != nil {
+		return m.NasConfig
+	}
+	return nil
+}
+
+// *
+// List of ParameterSpec
+type ExperimentSpec_ParameterSpecs struct {
+	Parameters []*ParameterSpec `protobuf:"bytes,1,rep,name=parameters" json:"parameters,omitempty"`
+}
+
+func (m *ExperimentSpec_ParameterSpecs) Reset()         { *m = ExperimentSpec_ParameterSpecs{} }
+func (m *ExperimentSpec_ParameterSpecs) String() string { return proto.CompactTextString(m) }
+func (*ExperimentSpec_ParameterSpecs) ProtoMessage()    {}
+func (*ExperimentSpec_ParameterSpecs) Descriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{9, 0}
+}
+
+func (m *ExperimentSpec_ParameterSpecs) GetParameters() []*ParameterSpec {
+	if m != nil {
+		return m.Parameters
+	}
+	return nil
+}
+
+type ExperimentStatus struct {
+	StartTime      string                                   `protobuf:"bytes,1,opt,name=start_time,json=startTime" json:"start_time,omitempty"`
+	CompletionTime string                                   `protobuf:"bytes,2,opt,name=completion_time,json=completionTime" json:"completion_time,omitempty"`
+	Condition      ExperimentStatus_ExperimentConditionType `protobuf:"varint,3,opt,name=condition,enum=api.v1.alpha2.ExperimentStatus_ExperimentConditionType" json:"condition,omitempty"`
+}
+
+func (m *ExperimentStatus) Reset()                    { *m = ExperimentStatus{} }
+func (m *ExperimentStatus) String() string            { return proto.CompactTextString(m) }
+func (*ExperimentStatus) ProtoMessage()               {}
+func (*ExperimentStatus) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
+
+func (m *ExperimentStatus) GetStartTime() string {
+	if m != nil {
+		return m.StartTime
+	}
+	return ""
+}
+
+func (m *ExperimentStatus) GetCompletionTime() string {
+	if m != nil {
+		return m.CompletionTime
+	}
+	return ""
+}
+
+func (m *ExperimentStatus) GetCondition() ExperimentStatus_ExperimentConditionType {
+	if m != nil {
+		return m.Condition
+	}
+	return ExperimentStatus_CREATED
+}
+
+type Experiment struct {
+	Name   string            `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Spec   *ExperimentSpec   `protobuf:"bytes,2,opt,name=spec" json:"spec,omitempty"`
+	Status *ExperimentStatus `protobuf:"bytes,3,opt,name=status" json:"status,omitempty"`
+}
+
+func (m *Experiment) Reset()                    { *m = Experiment{} }
+func (m *Experiment) String() string            { return proto.CompactTextString(m) }
+func (*Experiment) ProtoMessage()               {}
+func (*Experiment) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
+
+func (m *Experiment) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *Experiment) GetSpec() *ExperimentSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *Experiment) GetStatus() *ExperimentStatus {
+	if m != nil {
+		return m.Status
+	}
+	return nil
+}
+
+type ParameterAssignment struct {
+	Name  string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
+}
+
+func (m *ParameterAssignment) Reset()                    { *m = ParameterAssignment{} }
+func (m *ParameterAssignment) String() string            { return proto.CompactTextString(m) }
+func (*ParameterAssignment) ProtoMessage()               {}
+func (*ParameterAssignment) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
+
+func (m *ParameterAssignment) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *ParameterAssignment) GetValue() string {
+	if m != nil {
+		return m.Value
+	}
+	return ""
+}
+
+type Metric struct {
+	Name  string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
+}
+
+func (m *Metric) Reset()                    { *m = Metric{} }
+func (m *Metric) String() string            { return proto.CompactTextString(m) }
+func (*Metric) ProtoMessage()               {}
+func (*Metric) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
+
+func (m *Metric) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *Metric) GetValue() string {
+	if m != nil {
+		return m.Value
+	}
+	return ""
+}
+
+type MetricLog struct {
+	TimeStamp string  `protobuf:"bytes,1,opt,name=time_stamp,json=timeStamp" json:"time_stamp,omitempty"`
+	Metric    *Metric `protobuf:"bytes,2,opt,name=metric" json:"metric,omitempty"`
+}
+
+func (m *MetricLog) Reset()                    { *m = MetricLog{} }
+func (m *MetricLog) String() string            { return proto.CompactTextString(m) }
+func (*MetricLog) ProtoMessage()               {}
+func (*MetricLog) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
+
+func (m *MetricLog) GetTimeStamp() string {
+	if m != nil {
+		return m.TimeStamp
+	}
+	return ""
+}
+
+func (m *MetricLog) GetMetric() *Metric {
+	if m != nil {
+		return m.Metric
+	}
+	return nil
+}
+
+type Observation struct {
+	Metrics []*Metric `protobuf:"bytes,1,rep,name=metrics" json:"metrics,omitempty"`
+}
+
+func (m *Observation) Reset()                    { *m = Observation{} }
+func (m *Observation) String() string            { return proto.CompactTextString(m) }
+func (*Observation) ProtoMessage()               {}
+func (*Observation) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
+
+func (m *Observation) GetMetrics() []*Metric {
+	if m != nil {
+		return m.Metrics
+	}
+	return nil
+}
+
+type ObservationLog struct {
+	MetricLogs []*MetricLog `protobuf:"bytes,1,rep,name=metric_logs,json=metricLogs" json:"metric_logs,omitempty"`
+}
+
+func (m *ObservationLog) Reset()                    { *m = ObservationLog{} }
+func (m *ObservationLog) String() string            { return proto.CompactTextString(m) }
+func (*ObservationLog) ProtoMessage()               {}
+func (*ObservationLog) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
+
+func (m *ObservationLog) GetMetricLogs() []*MetricLog {
+	if m != nil {
+		return m.MetricLogs
+	}
+	return nil
+}
+
+type TrialSpec struct {
+	ExperimentName       string                          `protobuf:"bytes,1,opt,name=experiment_name,json=experimentName" json:"experiment_name,omitempty"`
+	Objective            *ObjectiveSpec                  `protobuf:"bytes,2,opt,name=objective" json:"objective,omitempty"`
+	ParameterAssignments *TrialSpec_ParameterAssignments `protobuf:"bytes,3,opt,name=parameter_assignments,json=parameterAssignments" json:"parameter_assignments,omitempty"`
+	RunSpec              string                          `protobuf:"bytes,4,opt,name=run_spec,json=runSpec" json:"run_spec,omitempty"`
+	MetricsCollectorSpec string                          `protobuf:"bytes,5,opt,name=metrics_collector_spec,json=metricsCollectorSpec" json:"metrics_collector_spec,omitempty"`
+}
+
+func (m *TrialSpec) Reset()                    { *m = TrialSpec{} }
+func (m *TrialSpec) String() string            { return proto.CompactTextString(m) }
+func (*TrialSpec) ProtoMessage()               {}
+func (*TrialSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
+
+func (m *TrialSpec) GetExperimentName() string {
+	if m != nil {
+		return m.ExperimentName
+	}
+	return ""
+}
+
+func (m *TrialSpec) GetObjective() *ObjectiveSpec {
+	if m != nil {
+		return m.Objective
+	}
+	return nil
+}
+
+func (m *TrialSpec) GetParameterAssignments() *TrialSpec_ParameterAssignments {
+	if m != nil {
+		return m.ParameterAssignments
+	}
+	return nil
+}
+
+func (m *TrialSpec) GetRunSpec() string {
+	if m != nil {
+		return m.RunSpec
+	}
+	return ""
+}
+
+func (m *TrialSpec) GetMetricsCollectorSpec() string {
+	if m != nil {
+		return m.MetricsCollectorSpec
+	}
+	return ""
+}
+
+// *
+// List of ParameterAssignment
+type TrialSpec_ParameterAssignments struct {
+	Assignments []*ParameterAssignment `protobuf:"bytes,1,rep,name=assignments" json:"assignments,omitempty"`
+}
+
+func (m *TrialSpec_ParameterAssignments) Reset()         { *m = TrialSpec_ParameterAssignments{} }
+func (m *TrialSpec_ParameterAssignments) String() string { return proto.CompactTextString(m) }
+func (*TrialSpec_ParameterAssignments) ProtoMessage()    {}
+func (*TrialSpec_ParameterAssignments) Descriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{17, 0}
+}
+
+func (m *TrialSpec_ParameterAssignments) GetAssignments() []*ParameterAssignment {
+	if m != nil {
+		return m.Assignments
+	}
+	return nil
+}
+
+type TrialStatus struct {
+	StartTime      string                         `protobuf:"bytes,1,opt,name=start_time,json=startTime" json:"start_time,omitempty"`
+	CompletionTime string                         `protobuf:"bytes,2,opt,name=completion_time,json=completionTime" json:"completion_time,omitempty"`
+	Condition      TrialStatus_TrialConditionType `protobuf:"varint,3,opt,name=condition,enum=api.v1.alpha2.TrialStatus_TrialConditionType" json:"condition,omitempty"`
+	Observation    *Observation                   `protobuf:"bytes,4,opt,name=observation" json:"observation,omitempty"`
+}
+
+func (m *TrialStatus) Reset()                    { *m = TrialStatus{} }
+func (m *TrialStatus) String() string            { return proto.CompactTextString(m) }
+func (*TrialStatus) ProtoMessage()               {}
+func (*TrialStatus) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
+
+func (m *TrialStatus) GetStartTime() string {
+	if m != nil {
+		return m.StartTime
+	}
+	return ""
+}
+
+func (m *TrialStatus) GetCompletionTime() string {
+	if m != nil {
+		return m.CompletionTime
+	}
+	return ""
+}
+
+func (m *TrialStatus) GetCondition() TrialStatus_TrialConditionType {
+	if m != nil {
+		return m.Condition
+	}
+	return TrialStatus_CREATED
+}
+
+func (m *TrialStatus) GetObservation() *Observation {
+	if m != nil {
+		return m.Observation
+	}
+	return nil
+}
+
+type Trial struct {
+	Name   string       `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Spec   *TrialSpec   `protobuf:"bytes,2,opt,name=spec" json:"spec,omitempty"`
+	Status *TrialStatus `protobuf:"bytes,3,opt,name=status" json:"status,omitempty"`
+}
+
+func (m *Trial) Reset()                    { *m = Trial{} }
+func (m *Trial) String() string            { return proto.CompactTextString(m) }
+func (*Trial) ProtoMessage()               {}
+func (*Trial) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
+
+func (m *Trial) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *Trial) GetSpec() *TrialSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+func (m *Trial) GetStatus() *TrialStatus {
+	if m != nil {
+		return m.Status
+	}
+	return nil
+}
+
+type RegisterExperimentRequest struct {
+	Experiment *Experiment `protobuf:"bytes,1,opt,name=experiment" json:"experiment,omitempty"`
+}
+
+func (m *RegisterExperimentRequest) Reset()                    { *m = RegisterExperimentRequest{} }
+func (m *RegisterExperimentRequest) String() string            { return proto.CompactTextString(m) }
+func (*RegisterExperimentRequest) ProtoMessage()               {}
+func (*RegisterExperimentRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{20} }
+
+func (m *RegisterExperimentRequest) GetExperiment() *Experiment {
+	if m != nil {
+		return m.Experiment
+	}
+	return nil
+}
+
+type RegisterExperimentReply struct {
+}
+
+func (m *RegisterExperimentReply) Reset()                    { *m = RegisterExperimentReply{} }
+func (m *RegisterExperimentReply) String() string            { return proto.CompactTextString(m) }
+func (*RegisterExperimentReply) ProtoMessage()               {}
+func (*RegisterExperimentReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{21} }
+
+type PreCheckRegisterExperimentReply struct {
+	CanRegister bool `protobuf:"varint,1,opt,name=can_register,json=canRegister" json:"can_register,omitempty"`
+}
+
+func (m *PreCheckRegisterExperimentReply) Reset()         { *m = PreCheckRegisterExperimentReply{} }
+func (m *PreCheckRegisterExperimentReply) String() string { return proto.CompactTextString(m) }
+func (*PreCheckRegisterExperimentReply) ProtoMessage()    {}
+func (*PreCheckRegisterExperimentReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{22}
+}
+
+func (m *PreCheckRegisterExperimentReply) GetCanRegister() bool {
+	if m != nil {
+		return m.CanRegister
+	}
+	return false
+}
+
+type DeleteExperimentRequest struct {
+	ExperimentName string `protobuf:"bytes,1,opt,name=experiment_name,json=experimentName" json:"experiment_name,omitempty"`
+}
+
+func (m *DeleteExperimentRequest) Reset()                    { *m = DeleteExperimentRequest{} }
+func (m *DeleteExperimentRequest) String() string            { return proto.CompactTextString(m) }
+func (*DeleteExperimentRequest) ProtoMessage()               {}
+func (*DeleteExperimentRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{23} }
+
+func (m *DeleteExperimentRequest) GetExperimentName() string {
+	if m != nil {
+		return m.ExperimentName
+	}
+	return ""
+}
+
+type DeleteExperimentReply struct {
+}
+
+func (m *DeleteExperimentReply) Reset()                    { *m = DeleteExperimentReply{} }
+func (m *DeleteExperimentReply) String() string            { return proto.CompactTextString(m) }
+func (*DeleteExperimentReply) ProtoMessage()               {}
+func (*DeleteExperimentReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{24} }
+
+type GetExperimentRequest struct {
+	ExperimentName string `protobuf:"bytes,1,opt,name=experiment_name,json=experimentName" json:"experiment_name,omitempty"`
+}
+
+func (m *GetExperimentRequest) Reset()                    { *m = GetExperimentRequest{} }
+func (m *GetExperimentRequest) String() string            { return proto.CompactTextString(m) }
+func (*GetExperimentRequest) ProtoMessage()               {}
+func (*GetExperimentRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{25} }
+
+func (m *GetExperimentRequest) GetExperimentName() string {
+	if m != nil {
+		return m.ExperimentName
+	}
+	return ""
+}
+
+type GetExperimentReply struct {
+	Experiment *Experiment `protobuf:"bytes,1,opt,name=experiment" json:"experiment,omitempty"`
+}
+
+func (m *GetExperimentReply) Reset()                    { *m = GetExperimentReply{} }
+func (m *GetExperimentReply) String() string            { return proto.CompactTextString(m) }
+func (*GetExperimentReply) ProtoMessage()               {}
+func (*GetExperimentReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{26} }
+
+func (m *GetExperimentReply) GetExperiment() *Experiment {
+	if m != nil {
+		return m.Experiment
+	}
+	return nil
+}
+
+type ExperimentSummary struct {
+	ExperimentName string            `protobuf:"bytes,1,opt,name=experiment_name,json=experimentName" json:"experiment_name,omitempty"`
+	Status         *ExperimentStatus `protobuf:"bytes,2,opt,name=status" json:"status,omitempty"`
+}
+
+func (m *ExperimentSummary) Reset()                    { *m = ExperimentSummary{} }
+func (m *ExperimentSummary) String() string            { return proto.CompactTextString(m) }
+func (*ExperimentSummary) ProtoMessage()               {}
+func (*ExperimentSummary) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{27} }
+
+func (m *ExperimentSummary) GetExperimentName() string {
+	if m != nil {
+		return m.ExperimentName
+	}
+	return ""
+}
+
+func (m *ExperimentSummary) GetStatus() *ExperimentStatus {
+	if m != nil {
+		return m.Status
+	}
+	return nil
+}
+
+type GetExperimentListRequest struct {
+}
+
+func (m *GetExperimentListRequest) Reset()                    { *m = GetExperimentListRequest{} }
+func (m *GetExperimentListRequest) String() string            { return proto.CompactTextString(m) }
+func (*GetExperimentListRequest) ProtoMessage()               {}
+func (*GetExperimentListRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{28} }
+
+type GetExperimentListReply struct {
+	ExperimentSummaries []*ExperimentSummary `protobuf:"bytes,1,rep,name=experiment_summaries,json=experimentSummaries" json:"experiment_summaries,omitempty"`
+}
+
+func (m *GetExperimentListReply) Reset()                    { *m = GetExperimentListReply{} }
+func (m *GetExperimentListReply) String() string            { return proto.CompactTextString(m) }
+func (*GetExperimentListReply) ProtoMessage()               {}
+func (*GetExperimentListReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{29} }
+
+func (m *GetExperimentListReply) GetExperimentSummaries() []*ExperimentSummary {
+	if m != nil {
+		return m.ExperimentSummaries
+	}
+	return nil
+}
+
+type UpdateExperimentStatusRequest struct {
+	ExperimentName string            `protobuf:"bytes,1,opt,name=experiment_name,json=experimentName" json:"experiment_name,omitempty"`
+	NewStatus      *ExperimentStatus `protobuf:"bytes,2,opt,name=new_status,json=newStatus" json:"new_status,omitempty"`
+}
+
+func (m *UpdateExperimentStatusRequest) Reset()                    { *m = UpdateExperimentStatusRequest{} }
+func (m *UpdateExperimentStatusRequest) String() string            { return proto.CompactTextString(m) }
+func (*UpdateExperimentStatusRequest) ProtoMessage()               {}
+func (*UpdateExperimentStatusRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{30} }
+
+func (m *UpdateExperimentStatusRequest) GetExperimentName() string {
+	if m != nil {
+		return m.ExperimentName
+	}
+	return ""
+}
+
+func (m *UpdateExperimentStatusRequest) GetNewStatus() *ExperimentStatus {
+	if m != nil {
+		return m.NewStatus
+	}
+	return nil
+}
+
+type UpdateExperimentStatusReply struct {
+}
+
+func (m *UpdateExperimentStatusReply) Reset()                    { *m = UpdateExperimentStatusReply{} }
+func (m *UpdateExperimentStatusReply) String() string            { return proto.CompactTextString(m) }
+func (*UpdateExperimentStatusReply) ProtoMessage()               {}
+func (*UpdateExperimentStatusReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{31} }
+
+type UpdateAlgorithmExtraSettingsRequest struct {
+	ExperimentName         string              `protobuf:"bytes,1,opt,name=experiment_name,json=experimentName" json:"experiment_name,omitempty"`
+	ExtraAlgorithmSettings []*AlgorithmSetting `protobuf:"bytes,2,rep,name=extra_algorithm_settings,json=extraAlgorithmSettings" json:"extra_algorithm_settings,omitempty"`
+}
+
+func (m *UpdateAlgorithmExtraSettingsRequest) Reset()         { *m = UpdateAlgorithmExtraSettingsRequest{} }
+func (m *UpdateAlgorithmExtraSettingsRequest) String() string { return proto.CompactTextString(m) }
+func (*UpdateAlgorithmExtraSettingsRequest) ProtoMessage()    {}
+func (*UpdateAlgorithmExtraSettingsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{32}
+}
+
+func (m *UpdateAlgorithmExtraSettingsRequest) GetExperimentName() string {
+	if m != nil {
+		return m.ExperimentName
+	}
+	return ""
+}
+
+func (m *UpdateAlgorithmExtraSettingsRequest) GetExtraAlgorithmSettings() []*AlgorithmSetting {
+	if m != nil {
+		return m.ExtraAlgorithmSettings
+	}
+	return nil
+}
+
+type UpdateAlgorithmExtraSettingsReply struct {
+}
+
+func (m *UpdateAlgorithmExtraSettingsReply) Reset()         { *m = UpdateAlgorithmExtraSettingsReply{} }
+func (m *UpdateAlgorithmExtraSettingsReply) String() string { return proto.CompactTextString(m) }
+func (*UpdateAlgorithmExtraSettingsReply) ProtoMessage()    {}
+func (*UpdateAlgorithmExtraSettingsReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{33}
+}
+
+type GetAlgorithmExtraSettingsRequest struct {
+	ExperimentName string `protobuf:"bytes,1,opt,name=experiment_name,json=experimentName" json:"experiment_name,omitempty"`
+}
+
+func (m *GetAlgorithmExtraSettingsRequest) Reset()         { *m = GetAlgorithmExtraSettingsRequest{} }
+func (m *GetAlgorithmExtraSettingsRequest) String() string { return proto.CompactTextString(m) }
+func (*GetAlgorithmExtraSettingsRequest) ProtoMessage()    {}
+func (*GetAlgorithmExtraSettingsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{34}
+}
+
+func (m *GetAlgorithmExtraSettingsRequest) GetExperimentName() string {
+	if m != nil {
+		return m.ExperimentName
+	}
+	return ""
+}
+
+type GetAlgorithmExtraSettingsReply struct {
+	ExtraAlgorithmSettings []*AlgorithmSetting `protobuf:"bytes,1,rep,name=extra_algorithm_settings,json=extraAlgorithmSettings" json:"extra_algorithm_settings,omitempty"`
+}
+
+func (m *GetAlgorithmExtraSettingsReply) Reset()                    { *m = GetAlgorithmExtraSettingsReply{} }
+func (m *GetAlgorithmExtraSettingsReply) String() string            { return proto.CompactTextString(m) }
+func (*GetAlgorithmExtraSettingsReply) ProtoMessage()               {}
+func (*GetAlgorithmExtraSettingsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{35} }
+
+func (m *GetAlgorithmExtraSettingsReply) GetExtraAlgorithmSettings() []*AlgorithmSetting {
+	if m != nil {
+		return m.ExtraAlgorithmSettings
+	}
+	return nil
+}
+
+type RegisterTrialRequest struct {
+	Trial *Trial `protobuf:"bytes,1,opt,name=trial" json:"trial,omitempty"`
+}
+
+func (m *RegisterTrialRequest) Reset()                    { *m = RegisterTrialRequest{} }
+func (m *RegisterTrialRequest) String() string            { return proto.CompactTextString(m) }
+func (*RegisterTrialRequest) ProtoMessage()               {}
+func (*RegisterTrialRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{36} }
+
+func (m *RegisterTrialRequest) GetTrial() *Trial {
+	if m != nil {
+		return m.Trial
+	}
+	return nil
+}
+
+type RegisterTrialReply struct {
+}
+
+func (m *RegisterTrialReply) Reset()                    { *m = RegisterTrialReply{} }
+func (m *RegisterTrialReply) String() string            { return proto.CompactTextString(m) }
+func (*RegisterTrialReply) ProtoMessage()               {}
+func (*RegisterTrialReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{37} }
+
+type DeleteTrialRequest struct {
+	TrialName string `protobuf:"bytes,1,opt,name=trial_name,json=trialName" json:"trial_name,omitempty"`
+}
+
+func (m *DeleteTrialRequest) Reset()                    { *m = DeleteTrialRequest{} }
+func (m *DeleteTrialRequest) String() string            { return proto.CompactTextString(m) }
+func (*DeleteTrialRequest) ProtoMessage()               {}
+func (*DeleteTrialRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{38} }
+
+func (m *DeleteTrialRequest) GetTrialName() string {
+	if m != nil {
+		return m.TrialName
+	}
+	return ""
+}
+
+type DeleteTrialReply struct {
+}
+
+func (m *DeleteTrialReply) Reset()                    { *m = DeleteTrialReply{} }
+func (m *DeleteTrialReply) String() string            { return proto.CompactTextString(m) }
+func (*DeleteTrialReply) ProtoMessage()               {}
+func (*DeleteTrialReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{39} }
+
+type GetTrialListRequest struct {
+	ExperimentName string `protobuf:"bytes,1,opt,name=experiment_name,json=experimentName" json:"experiment_name,omitempty"`
+	Filter         string `protobuf:"bytes,2,opt,name=filter" json:"filter,omitempty"`
+}
+
+func (m *GetTrialListRequest) Reset()                    { *m = GetTrialListRequest{} }
+func (m *GetTrialListRequest) String() string            { return proto.CompactTextString(m) }
+func (*GetTrialListRequest) ProtoMessage()               {}
+func (*GetTrialListRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{40} }
+
+func (m *GetTrialListRequest) GetExperimentName() string {
+	if m != nil {
+		return m.ExperimentName
+	}
+	return ""
+}
+
+func (m *GetTrialListRequest) GetFilter() string {
+	if m != nil {
+		return m.Filter
+	}
+	return ""
+}
+
+type GetTrialListReply struct {
+	Trials []*Trial `protobuf:"bytes,1,rep,name=trials" json:"trials,omitempty"`
+}
+
+func (m *GetTrialListReply) Reset()                    { *m = GetTrialListReply{} }
+func (m *GetTrialListReply) String() string            { return proto.CompactTextString(m) }
+func (*GetTrialListReply) ProtoMessage()               {}
+func (*GetTrialListReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{41} }
+
+func (m *GetTrialListReply) GetTrials() []*Trial {
+	if m != nil {
+		return m.Trials
+	}
+	return nil
+}
+
+type GetTrialRequest struct {
+	TrialName string `protobuf:"bytes,1,opt,name=trial_name,json=trialName" json:"trial_name,omitempty"`
+}
+
+func (m *GetTrialRequest) Reset()                    { *m = GetTrialRequest{} }
+func (m *GetTrialRequest) String() string            { return proto.CompactTextString(m) }
+func (*GetTrialRequest) ProtoMessage()               {}
+func (*GetTrialRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{42} }
+
+func (m *GetTrialRequest) GetTrialName() string {
+	if m != nil {
+		return m.TrialName
+	}
+	return ""
+}
+
+type GetTrialReply struct {
+	Trial *Trial `protobuf:"bytes,1,opt,name=trial" json:"trial,omitempty"`
+}
+
+func (m *GetTrialReply) Reset()                    { *m = GetTrialReply{} }
+func (m *GetTrialReply) String() string            { return proto.CompactTextString(m) }
+func (*GetTrialReply) ProtoMessage()               {}
+func (*GetTrialReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{43} }
+
+func (m *GetTrialReply) GetTrial() *Trial {
+	if m != nil {
+		return m.Trial
+	}
+	return nil
+}
+
+type UpdateTrialStatusRequest struct {
+	TrialName string       `protobuf:"bytes,1,opt,name=trial_name,json=trialName" json:"trial_name,omitempty"`
+	NewStatus *TrialStatus `protobuf:"bytes,2,opt,name=new_status,json=newStatus" json:"new_status,omitempty"`
+}
+
+func (m *UpdateTrialStatusRequest) Reset()                    { *m = UpdateTrialStatusRequest{} }
+func (m *UpdateTrialStatusRequest) String() string            { return proto.CompactTextString(m) }
+func (*UpdateTrialStatusRequest) ProtoMessage()               {}
+func (*UpdateTrialStatusRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{44} }
+
+func (m *UpdateTrialStatusRequest) GetTrialName() string {
+	if m != nil {
+		return m.TrialName
+	}
+	return ""
+}
+
+func (m *UpdateTrialStatusRequest) GetNewStatus() *TrialStatus {
+	if m != nil {
+		return m.NewStatus
+	}
+	return nil
+}
+
+type UpdateTrialStatusReply struct {
+}
+
+func (m *UpdateTrialStatusReply) Reset()                    { *m = UpdateTrialStatusReply{} }
+func (m *UpdateTrialStatusReply) String() string            { return proto.CompactTextString(m) }
+func (*UpdateTrialStatusReply) ProtoMessage()               {}
+func (*UpdateTrialStatusReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{45} }
+
+type ReportObservationLogRequest struct {
+	TrialName      string          `protobuf:"bytes,1,opt,name=trial_name,json=trialName" json:"trial_name,omitempty"`
+	ObservationLog *ObservationLog `protobuf:"bytes,2,opt,name=observation_log,json=observationLog" json:"observation_log,omitempty"`
+}
+
+func (m *ReportObservationLogRequest) Reset()                    { *m = ReportObservationLogRequest{} }
+func (m *ReportObservationLogRequest) String() string            { return proto.CompactTextString(m) }
+func (*ReportObservationLogRequest) ProtoMessage()               {}
+func (*ReportObservationLogRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{46} }
+
+func (m *ReportObservationLogRequest) GetTrialName() string {
+	if m != nil {
+		return m.TrialName
+	}
+	return ""
+}
+
+func (m *ReportObservationLogRequest) GetObservationLog() *ObservationLog {
+	if m != nil {
+		return m.ObservationLog
+	}
+	return nil
+}
+
+type ReportObservationLogReply struct {
+}
+
+func (m *ReportObservationLogReply) Reset()                    { *m = ReportObservationLogReply{} }
+func (m *ReportObservationLogReply) String() string            { return proto.CompactTextString(m) }
+func (*ReportObservationLogReply) ProtoMessage()               {}
+func (*ReportObservationLogReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{47} }
+
+type GetObservationLogRequest struct {
+	TrialName  string `protobuf:"bytes,1,opt,name=trial_name,json=trialName" json:"trial_name,omitempty"`
+	MetricName string `protobuf:"bytes,2,opt,name=metric_name,json=metricName" json:"metric_name,omitempty"`
+	StartTime  string `protobuf:"bytes,3,opt,name=start_time,json=startTime" json:"start_time,omitempty"`
+	EndTime    string `protobuf:"bytes,4,opt,name=end_time,json=endTime" json:"end_time,omitempty"`
+}
+
+func (m *GetObservationLogRequest) Reset()                    { *m = GetObservationLogRequest{} }
+func (m *GetObservationLogRequest) String() string            { return proto.CompactTextString(m) }
+func (*GetObservationLogRequest) ProtoMessage()               {}
+func (*GetObservationLogRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{48} }
+
+func (m *GetObservationLogRequest) GetTrialName() string {
+	if m != nil {
+		return m.TrialName
+	}
+	return ""
+}
+
+func (m *GetObservationLogRequest) GetMetricName() string {
+	if m != nil {
+		return m.MetricName
+	}
+	return ""
+}
+
+func (m *GetObservationLogRequest) GetStartTime() string {
+	if m != nil {
+		return m.StartTime
+	}
+	return ""
+}
+
+func (m *GetObservationLogRequest) GetEndTime() string {
+	if m != nil {
+		return m.EndTime
+	}
+	return ""
+}
+
+type GetObservationLogReply struct {
+	ObservationLog *ObservationLog `protobuf:"bytes,1,opt,name=observation_log,json=observationLog" json:"observation_log,omitempty"`
+}
+
+func (m *GetObservationLogReply) Reset()                    { *m = GetObservationLogReply{} }
+func (m *GetObservationLogReply) String() string            { return proto.CompactTextString(m) }
+func (*GetObservationLogReply) ProtoMessage()               {}
+func (*GetObservationLogReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{49} }
+
+func (m *GetObservationLogReply) GetObservationLog() *ObservationLog {
+	if m != nil {
+		return m.ObservationLog
+	}
+	return nil
+}
+
 type GetSuggestionsRequest struct {
 	ExperimentName string `protobuf:"bytes,1,opt,name=experiment_name,json=experimentName" json:"experiment_name,omitempty"`
 	AlgorithmName  string `protobuf:"bytes,2,opt,name=algorithm_name,json=algorithmName" json:"algorithm_name,omitempty"`
@@ -46,7 +1419,7 @@ type GetSuggestionsRequest struct {
 func (m *GetSuggestionsRequest) Reset()                    { *m = GetSuggestionsRequest{} }
 func (m *GetSuggestionsRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetSuggestionsRequest) ProtoMessage()               {}
-func (*GetSuggestionsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+func (*GetSuggestionsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{50} }
 
 func (m *GetSuggestionsRequest) GetExperimentName() string {
 	if m != nil {
@@ -76,7 +1449,7 @@ type GetSuggestionsReply struct {
 func (m *GetSuggestionsReply) Reset()                    { *m = GetSuggestionsReply{} }
 func (m *GetSuggestionsReply) String() string            { return proto.CompactTextString(m) }
 func (*GetSuggestionsReply) ProtoMessage()               {}
-func (*GetSuggestionsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+func (*GetSuggestionsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{51} }
 
 func (m *GetSuggestionsReply) GetTrials() []*dbif_v1_alpha2.Trial {
 	if m != nil {
@@ -94,7 +1467,7 @@ func (m *ValidateAlgorithmSettingsRequest) Reset()         { *m = ValidateAlgori
 func (m *ValidateAlgorithmSettingsRequest) String() string { return proto.CompactTextString(m) }
 func (*ValidateAlgorithmSettingsRequest) ProtoMessage()    {}
 func (*ValidateAlgorithmSettingsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{2}
+	return fileDescriptor0, []int{52}
 }
 
 func (m *ValidateAlgorithmSettingsRequest) GetExperimentSpec() *dbif_v1_alpha2.ExperimentSpec {
@@ -119,9 +1492,63 @@ type ValidateAlgorithmSettingsReply struct {
 func (m *ValidateAlgorithmSettingsReply) Reset()                    { *m = ValidateAlgorithmSettingsReply{} }
 func (m *ValidateAlgorithmSettingsReply) String() string            { return proto.CompactTextString(m) }
 func (*ValidateAlgorithmSettingsReply) ProtoMessage()               {}
-func (*ValidateAlgorithmSettingsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+func (*ValidateAlgorithmSettingsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{53} }
 
 func init() {
+	proto.RegisterType((*FeasibleSpace)(nil), "api.v1.alpha2.FeasibleSpace")
+	proto.RegisterType((*ParameterSpec)(nil), "api.v1.alpha2.ParameterSpec")
+	proto.RegisterType((*ObjectiveSpec)(nil), "api.v1.alpha2.ObjectiveSpec")
+	proto.RegisterType((*AlgorithmSetting)(nil), "api.v1.alpha2.AlgorithmSetting")
+	proto.RegisterType((*EarlyStoppingSpec)(nil), "api.v1.alpha2.EarlyStoppingSpec")
+	proto.RegisterType((*AlgorithmSpec)(nil), "api.v1.alpha2.AlgorithmSpec")
+	proto.RegisterType((*NasConfig)(nil), "api.v1.alpha2.NasConfig")
+	proto.RegisterType((*NasConfig_Operations)(nil), "api.v1.alpha2.NasConfig.Operations")
+	proto.RegisterType((*GraphConfig)(nil), "api.v1.alpha2.GraphConfig")
+	proto.RegisterType((*Operation)(nil), "api.v1.alpha2.Operation")
+	proto.RegisterType((*Operation_ParameterSpecs)(nil), "api.v1.alpha2.Operation.ParameterSpecs")
+	proto.RegisterType((*ExperimentSpec)(nil), "api.v1.alpha2.ExperimentSpec")
+	proto.RegisterType((*ExperimentSpec_ParameterSpecs)(nil), "api.v1.alpha2.ExperimentSpec.ParameterSpecs")
+	proto.RegisterType((*ExperimentStatus)(nil), "api.v1.alpha2.ExperimentStatus")
+	proto.RegisterType((*Experiment)(nil), "api.v1.alpha2.Experiment")
+	proto.RegisterType((*ParameterAssignment)(nil), "api.v1.alpha2.ParameterAssignment")
+	proto.RegisterType((*Metric)(nil), "api.v1.alpha2.Metric")
+	proto.RegisterType((*MetricLog)(nil), "api.v1.alpha2.MetricLog")
+	proto.RegisterType((*Observation)(nil), "api.v1.alpha2.Observation")
+	proto.RegisterType((*ObservationLog)(nil), "api.v1.alpha2.ObservationLog")
+	proto.RegisterType((*TrialSpec)(nil), "api.v1.alpha2.TrialSpec")
+	proto.RegisterType((*TrialSpec_ParameterAssignments)(nil), "api.v1.alpha2.TrialSpec.ParameterAssignments")
+	proto.RegisterType((*TrialStatus)(nil), "api.v1.alpha2.TrialStatus")
+	proto.RegisterType((*Trial)(nil), "api.v1.alpha2.Trial")
+	proto.RegisterType((*RegisterExperimentRequest)(nil), "api.v1.alpha2.RegisterExperimentRequest")
+	proto.RegisterType((*RegisterExperimentReply)(nil), "api.v1.alpha2.RegisterExperimentReply")
+	proto.RegisterType((*PreCheckRegisterExperimentReply)(nil), "api.v1.alpha2.PreCheckRegisterExperimentReply")
+	proto.RegisterType((*DeleteExperimentRequest)(nil), "api.v1.alpha2.DeleteExperimentRequest")
+	proto.RegisterType((*DeleteExperimentReply)(nil), "api.v1.alpha2.DeleteExperimentReply")
+	proto.RegisterType((*GetExperimentRequest)(nil), "api.v1.alpha2.GetExperimentRequest")
+	proto.RegisterType((*GetExperimentReply)(nil), "api.v1.alpha2.GetExperimentReply")
+	proto.RegisterType((*ExperimentSummary)(nil), "api.v1.alpha2.ExperimentSummary")
+	proto.RegisterType((*GetExperimentListRequest)(nil), "api.v1.alpha2.GetExperimentListRequest")
+	proto.RegisterType((*GetExperimentListReply)(nil), "api.v1.alpha2.GetExperimentListReply")
+	proto.RegisterType((*UpdateExperimentStatusRequest)(nil), "api.v1.alpha2.UpdateExperimentStatusRequest")
+	proto.RegisterType((*UpdateExperimentStatusReply)(nil), "api.v1.alpha2.UpdateExperimentStatusReply")
+	proto.RegisterType((*UpdateAlgorithmExtraSettingsRequest)(nil), "api.v1.alpha2.UpdateAlgorithmExtraSettingsRequest")
+	proto.RegisterType((*UpdateAlgorithmExtraSettingsReply)(nil), "api.v1.alpha2.UpdateAlgorithmExtraSettingsReply")
+	proto.RegisterType((*GetAlgorithmExtraSettingsRequest)(nil), "api.v1.alpha2.GetAlgorithmExtraSettingsRequest")
+	proto.RegisterType((*GetAlgorithmExtraSettingsReply)(nil), "api.v1.alpha2.GetAlgorithmExtraSettingsReply")
+	proto.RegisterType((*RegisterTrialRequest)(nil), "api.v1.alpha2.RegisterTrialRequest")
+	proto.RegisterType((*RegisterTrialReply)(nil), "api.v1.alpha2.RegisterTrialReply")
+	proto.RegisterType((*DeleteTrialRequest)(nil), "api.v1.alpha2.DeleteTrialRequest")
+	proto.RegisterType((*DeleteTrialReply)(nil), "api.v1.alpha2.DeleteTrialReply")
+	proto.RegisterType((*GetTrialListRequest)(nil), "api.v1.alpha2.GetTrialListRequest")
+	proto.RegisterType((*GetTrialListReply)(nil), "api.v1.alpha2.GetTrialListReply")
+	proto.RegisterType((*GetTrialRequest)(nil), "api.v1.alpha2.GetTrialRequest")
+	proto.RegisterType((*GetTrialReply)(nil), "api.v1.alpha2.GetTrialReply")
+	proto.RegisterType((*UpdateTrialStatusRequest)(nil), "api.v1.alpha2.UpdateTrialStatusRequest")
+	proto.RegisterType((*UpdateTrialStatusReply)(nil), "api.v1.alpha2.UpdateTrialStatusReply")
+	proto.RegisterType((*ReportObservationLogRequest)(nil), "api.v1.alpha2.ReportObservationLogRequest")
+	proto.RegisterType((*ReportObservationLogReply)(nil), "api.v1.alpha2.ReportObservationLogReply")
+	proto.RegisterType((*GetObservationLogRequest)(nil), "api.v1.alpha2.GetObservationLogRequest")
+	proto.RegisterType((*GetObservationLogReply)(nil), "api.v1.alpha2.GetObservationLogReply")
 	proto.RegisterType((*GetSuggestionsRequest)(nil), "api.v1.alpha2.GetSuggestionsRequest")
 	proto.RegisterType((*GetSuggestionsReply)(nil), "api.v1.alpha2.GetSuggestionsReply")
 	proto.RegisterType((*ValidateAlgorithmSettingsRequest)(nil), "api.v1.alpha2.ValidateAlgorithmSettingsRequest")
@@ -135,6 +1562,176 @@ var _ grpc.ClientConn
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
+
+// Client API for Manager service
+
+type ManagerClient interface {
+	// *
+	// Register a Experiment to DB.
+	RegisterExperiment(ctx context.Context, in *RegisterExperimentRequest, opts ...grpc.CallOption) (*RegisterExperimentReply, error)
+	// *
+	// PreCheck to register a Experiment to DB.
+	PreCheckRegisterExperiment(ctx context.Context, in *RegisterExperimentRequest, opts ...grpc.CallOption) (*PreCheckRegisterExperimentReply, error)
+	// *
+	// Delete a Experiment from DB by name.
+	DeleteExperiment(ctx context.Context, in *DeleteExperimentRequest, opts ...grpc.CallOption) (*DeleteExperimentReply, error)
+	// *
+	// Get a Experiment from DB by name.
+	GetExperiment(ctx context.Context, in *GetExperimentRequest, opts ...grpc.CallOption) (*GetExperimentReply, error)
+	// *
+	// Get a summary list of Experiment from DB.
+	// The summary includes name and condition.
+	GetExperimentList(ctx context.Context, in *GetExperimentListRequest, opts ...grpc.CallOption) (*GetExperimentListReply, error)
+	// *
+	// Update Status of a experiment.
+	UpdateExperimentStatus(ctx context.Context, in *UpdateExperimentStatusRequest, opts ...grpc.CallOption) (*UpdateExperimentStatusReply, error)
+	// *
+	// Update AlgorithmExtraSettings.
+	// The ExtraSetting is created if it does not exist, otherwise it is overwrited.
+	UpdateAlgorithmExtraSettings(ctx context.Context, in *UpdateAlgorithmExtraSettingsRequest, opts ...grpc.CallOption) (*UpdateAlgorithmExtraSettingsReply, error)
+	// *
+	// Get all AlgorithmExtraSettings.
+	GetAlgorithmExtraSettings(ctx context.Context, in *GetAlgorithmExtraSettingsRequest, opts ...grpc.CallOption) (*GetAlgorithmExtraSettingsReply, error)
+	// *
+	// Register a Trial to DB.
+	// ID will be filled by manager automatically.
+	RegisterTrial(ctx context.Context, in *RegisterTrialRequest, opts ...grpc.CallOption) (*RegisterTrialReply, error)
+	// *
+	// Delete a Trial from DB by ID.
+	DeleteTrial(ctx context.Context, in *DeleteTrialRequest, opts ...grpc.CallOption) (*DeleteTrialReply, error)
+	// *
+	// Get a list of Trial from DB by name of a Experiment.
+	GetTrialList(ctx context.Context, in *GetTrialListRequest, opts ...grpc.CallOption) (*GetTrialListReply, error)
+	// *
+	// Get a Trial from DB by ID of Trial.
+	GetTrial(ctx context.Context, in *GetTrialRequest, opts ...grpc.CallOption) (*GetTrialReply, error)
+	// *
+	// Update Status of a trial.
+	UpdateTrialStatus(ctx context.Context, in *UpdateTrialStatusRequest, opts ...grpc.CallOption) (*UpdateTrialStatusReply, error)
+	// *
+	// Report a log of Observations for a Trial.
+	// The log consists of timestamp and value of metric.
+	// Katib store every log of metrics.
+	// You can see accuracy curve or other metric logs on UI.
+	ReportObservationLog(ctx context.Context, in *ReportObservationLogRequest, opts ...grpc.CallOption) (*ReportObservationLogReply, error)
+	// *
+	// Get all log of Observations for a Trial.
+	GetObservationLog(ctx context.Context, in *GetObservationLogRequest, opts ...grpc.CallOption) (*GetObservationLogReply, error)
+	// *
+	// Get Suggestions from a Suggestion service.
+	GetSuggestions(ctx context.Context, in *GetSuggestionsRequest, opts ...grpc.CallOption) (*GetSuggestionsReply, error)
+	// *
+	// Validate AlgorithmSettings in an Experiment.
+	// Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid
+	ValidateAlgorithmSettings(ctx context.Context, in *ValidateAlgorithmSettingsRequest, opts ...grpc.CallOption) (*ValidateAlgorithmSettingsReply, error)
+}
+
+type managerClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewManagerClient(cc *grpc.ClientConn) ManagerClient {
+	return &managerClient{cc}
+}
+
+func (c *managerClient) RegisterExperiment(ctx context.Context, in *RegisterExperimentRequest, opts ...grpc.CallOption) (*RegisterExperimentReply, error) {
+	out := new(RegisterExperimentReply)
+	err := grpc.Invoke(ctx, "/api.v1.alpha2.Manager/RegisterExperiment", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *managerClient) PreCheckRegisterExperiment(ctx context.Context, in *RegisterExperimentRequest, opts ...grpc.CallOption) (*PreCheckRegisterExperimentReply, error) {
+	out := new(PreCheckRegisterExperimentReply)
+	err := grpc.Invoke(ctx, "/api.v1.alpha2.Manager/PreCheckRegisterExperiment", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *managerClient) DeleteExperiment(ctx context.Context, in *DeleteExperimentRequest, opts ...grpc.CallOption) (*DeleteExperimentReply, error) {
+	out := new(DeleteExperimentReply)
+	err := grpc.Invoke(ctx, "/api.v1.alpha2.Manager/DeleteExperiment", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *managerClient) GetExperiment(ctx context.Context, in *GetExperimentRequest, opts ...grpc.CallOption) (*GetExperimentReply, error) {
+	out := new(GetExperimentReply)
+	err := grpc.Invoke(ctx, "/api.v1.alpha2.Manager/GetExperiment", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *managerClient) GetExperimentList(ctx context.Context, in *GetExperimentListRequest, opts ...grpc.CallOption) (*GetExperimentListReply, error) {
+	out := new(GetExperimentListReply)
+	err := grpc.Invoke(ctx, "/api.v1.alpha2.Manager/GetExperimentList", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *managerClient) UpdateExperimentStatus(ctx context.Context, in *UpdateExperimentStatusRequest, opts ...grpc.CallOption) (*UpdateExperimentStatusReply, error) {
+	out := new(UpdateExperimentStatusReply)
+	err := grpc.Invoke(ctx, "/api.v1.alpha2.Manager/UpdateExperimentStatus", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *managerClient) UpdateAlgorithmExtraSettings(ctx context.Context, in *UpdateAlgorithmExtraSettingsRequest, opts ...grpc.CallOption) (*UpdateAlgorithmExtraSettingsReply, error) {
+	out := new(UpdateAlgorithmExtraSettingsReply)
+	err := grpc.Invoke(ctx, "/api.v1.alpha2.Manager/UpdateAlgorithmExtraSettings", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *managerClient) GetAlgorithmExtraSettings(ctx context.Context, in *GetAlgorithmExtraSettingsRequest, opts ...grpc.CallOption) (*GetAlgorithmExtraSettingsReply, error) {
+	out := new(GetAlgorithmExtraSettingsReply)
+	err := grpc.Invoke(ctx, "/api.v1.alpha2.Manager/GetAlgorithmExtraSettings", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *managerClient) RegisterTrial(ctx context.Context, in *RegisterTrialRequest, opts ...grpc.CallOption) (*RegisterTrialReply, error) {
+	out := new(RegisterTrialReply)
+	err := grpc.Invoke(ctx, "/api.v1.alpha2.Manager/RegisterTrial", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *managerClient) DeleteTrial(ctx context.Context, in *DeleteTrialRequest, opts ...grpc.CallOption) (*DeleteTrialReply, error) {
+	out := new(DeleteTrialReply)
+	err := grpc.Invoke(ctx, "/api.v1.alpha2.Manager/DeleteTrial", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *managerClient) GetTrialList(ctx context.Context, in *GetTrialListRequest, opts ...grpc.CallOption) (*GetTrialListReply, error) {
+	out := new(GetTrialListReply)
+	err := grpc.Invoke(ctx, "/api.v1.alpha2.Manager/GetTrialList", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
 
 // Client API for Manager service
 
@@ -178,6 +1775,57 @@ func (c *managerClient) ValidateAlgorithmSettings(ctx context.Context, in *Valid
 
 type ManagerServer interface {
 	// *
+	// Register a Experiment to DB.
+	RegisterExperiment(context.Context, *RegisterExperimentRequest) (*RegisterExperimentReply, error)
+	// *
+	// PreCheck to register a Experiment to DB.
+	PreCheckRegisterExperiment(context.Context, *RegisterExperimentRequest) (*PreCheckRegisterExperimentReply, error)
+	// *
+	// Delete a Experiment from DB by name.
+	DeleteExperiment(context.Context, *DeleteExperimentRequest) (*DeleteExperimentReply, error)
+	// *
+	// Get a Experiment from DB by name.
+	GetExperiment(context.Context, *GetExperimentRequest) (*GetExperimentReply, error)
+	// *
+	// Get a summary list of Experiment from DB.
+	// The summary includes name and condition.
+	GetExperimentList(context.Context, *GetExperimentListRequest) (*GetExperimentListReply, error)
+	// *
+	// Update Status of a experiment.
+	UpdateExperimentStatus(context.Context, *UpdateExperimentStatusRequest) (*UpdateExperimentStatusReply, error)
+	// *
+	// Update AlgorithmExtraSettings.
+	// The ExtraSetting is created if it does not exist, otherwise it is overwrited.
+	UpdateAlgorithmExtraSettings(context.Context, *UpdateAlgorithmExtraSettingsRequest) (*UpdateAlgorithmExtraSettingsReply, error)
+	// *
+	// Get all AlgorithmExtraSettings.
+	GetAlgorithmExtraSettings(context.Context, *GetAlgorithmExtraSettingsRequest) (*GetAlgorithmExtraSettingsReply, error)
+	// *
+	// Register a Trial to DB.
+	// ID will be filled by manager automatically.
+	RegisterTrial(context.Context, *RegisterTrialRequest) (*RegisterTrialReply, error)
+	// *
+	// Delete a Trial from DB by ID.
+	DeleteTrial(context.Context, *DeleteTrialRequest) (*DeleteTrialReply, error)
+	// *
+	// Get a list of Trial from DB by name of a Experiment.
+	GetTrialList(context.Context, *GetTrialListRequest) (*GetTrialListReply, error)
+	// *
+	// Get a Trial from DB by ID of Trial.
+	GetTrial(context.Context, *GetTrialRequest) (*GetTrialReply, error)
+	// *
+	// Update Status of a trial.
+	UpdateTrialStatus(context.Context, *UpdateTrialStatusRequest) (*UpdateTrialStatusReply, error)
+	// *
+	// Report a log of Observations for a Trial.
+	// The log consists of timestamp and value of metric.
+	// Katib store every log of metrics.
+	// You can see accuracy curve or other metric logs on UI.
+	ReportObservationLog(context.Context, *ReportObservationLogRequest) (*ReportObservationLogReply, error)
+	// *
+	// Get all log of Observations for a Trial.
+	GetObservationLog(context.Context, *GetObservationLogRequest) (*GetObservationLogReply, error)
+	// *
 	// Get Suggestions from a Suggestion service.
 	GetSuggestions(context.Context, *GetSuggestionsRequest) (*GetSuggestionsReply, error)
 	// *
@@ -188,6 +1836,276 @@ type ManagerServer interface {
 
 func RegisterManagerServer(s *grpc.Server, srv ManagerServer) {
 	s.RegisterService(&_Manager_serviceDesc, srv)
+}
+
+func _Manager_RegisterExperiment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterExperimentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).RegisterExperiment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.alpha2.Manager/RegisterExperiment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).RegisterExperiment(ctx, req.(*RegisterExperimentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_PreCheckRegisterExperiment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterExperimentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).PreCheckRegisterExperiment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.alpha2.Manager/PreCheckRegisterExperiment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).PreCheckRegisterExperiment(ctx, req.(*RegisterExperimentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_DeleteExperiment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteExperimentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).DeleteExperiment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.alpha2.Manager/DeleteExperiment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).DeleteExperiment(ctx, req.(*DeleteExperimentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_GetExperiment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExperimentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).GetExperiment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.alpha2.Manager/GetExperiment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).GetExperiment(ctx, req.(*GetExperimentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_GetExperimentList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExperimentListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).GetExperimentList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.alpha2.Manager/GetExperimentList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).GetExperimentList(ctx, req.(*GetExperimentListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_UpdateExperimentStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateExperimentStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).UpdateExperimentStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.alpha2.Manager/UpdateExperimentStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).UpdateExperimentStatus(ctx, req.(*UpdateExperimentStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_UpdateAlgorithmExtraSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAlgorithmExtraSettingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).UpdateAlgorithmExtraSettings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.alpha2.Manager/UpdateAlgorithmExtraSettings",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).UpdateAlgorithmExtraSettings(ctx, req.(*UpdateAlgorithmExtraSettingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_GetAlgorithmExtraSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAlgorithmExtraSettingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).GetAlgorithmExtraSettings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.alpha2.Manager/GetAlgorithmExtraSettings",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).GetAlgorithmExtraSettings(ctx, req.(*GetAlgorithmExtraSettingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_RegisterTrial_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterTrialRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).RegisterTrial(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.alpha2.Manager/RegisterTrial",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).RegisterTrial(ctx, req.(*RegisterTrialRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_DeleteTrial_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTrialRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).DeleteTrial(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.alpha2.Manager/DeleteTrial",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).DeleteTrial(ctx, req.(*DeleteTrialRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_GetTrialList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTrialListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).GetTrialList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.alpha2.Manager/GetTrialList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).GetTrialList(ctx, req.(*GetTrialListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_GetTrial_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTrialRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).GetTrial(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.alpha2.Manager/GetTrial",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).GetTrial(ctx, req.(*GetTrialRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_UpdateTrialStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTrialStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).UpdateTrialStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.alpha2.Manager/UpdateTrialStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).UpdateTrialStatus(ctx, req.(*UpdateTrialStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_ReportObservationLog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReportObservationLogRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).ReportObservationLog(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.alpha2.Manager/ReportObservationLog",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).ReportObservationLog(ctx, req.(*ReportObservationLogRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_GetObservationLog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetObservationLogRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).GetObservationLog(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.alpha2.Manager/GetObservationLog",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).GetObservationLog(ctx, req.(*GetObservationLogRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Manager_GetSuggestions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -230,6 +2148,66 @@ var _Manager_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "api.v1.alpha2.Manager",
 	HandlerType: (*ManagerServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "RegisterExperiment",
+			Handler:    _Manager_RegisterExperiment_Handler,
+		},
+		{
+			MethodName: "PreCheckRegisterExperiment",
+			Handler:    _Manager_PreCheckRegisterExperiment_Handler,
+		},
+		{
+			MethodName: "DeleteExperiment",
+			Handler:    _Manager_DeleteExperiment_Handler,
+		},
+		{
+			MethodName: "GetExperiment",
+			Handler:    _Manager_GetExperiment_Handler,
+		},
+		{
+			MethodName: "GetExperimentList",
+			Handler:    _Manager_GetExperimentList_Handler,
+		},
+		{
+			MethodName: "UpdateExperimentStatus",
+			Handler:    _Manager_UpdateExperimentStatus_Handler,
+		},
+		{
+			MethodName: "UpdateAlgorithmExtraSettings",
+			Handler:    _Manager_UpdateAlgorithmExtraSettings_Handler,
+		},
+		{
+			MethodName: "GetAlgorithmExtraSettings",
+			Handler:    _Manager_GetAlgorithmExtraSettings_Handler,
+		},
+		{
+			MethodName: "RegisterTrial",
+			Handler:    _Manager_RegisterTrial_Handler,
+		},
+		{
+			MethodName: "DeleteTrial",
+			Handler:    _Manager_DeleteTrial_Handler,
+		},
+		{
+			MethodName: "GetTrialList",
+			Handler:    _Manager_GetTrialList_Handler,
+		},
+		{
+			MethodName: "GetTrial",
+			Handler:    _Manager_GetTrial_Handler,
+		},
+		{
+			MethodName: "UpdateTrialStatus",
+			Handler:    _Manager_UpdateTrialStatus_Handler,
+		},
+		{
+			MethodName: "ReportObservationLog",
+			Handler:    _Manager_ReportObservationLog_Handler,
+		},
+		{
+			MethodName: "GetObservationLog",
+			Handler:    _Manager_GetObservationLog_Handler,
+		},
 		{
 			MethodName: "GetSuggestions",
 			Handler:    _Manager_GetSuggestions_Handler,
@@ -373,31 +2351,162 @@ var _EarlyStopping_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("api.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 415 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x93, 0xc1, 0x6e, 0xd3, 0x30,
-	0x1c, 0xc6, 0xe5, 0x4e, 0x0c, 0xcd, 0x53, 0x5a, 0xc9, 0x68, 0x52, 0x09, 0x68, 0x8a, 0x2c, 0x18,
-	0xd5, 0xd0, 0x12, 0x2d, 0xdc, 0x76, 0x43, 0x62, 0xda, 0x89, 0x1d, 0x12, 0xc4, 0x81, 0xcb, 0xe4,
-	0xae, 0x7f, 0x5c, 0x4b, 0x8e, 0x6d, 0x1c, 0x17, 0x11, 0x71, 0xeb, 0x03, 0x70, 0x80, 0xf7, 0xe0,
-	0x15, 0x78, 0x08, 0x5e, 0x01, 0xde, 0x03, 0xc5, 0x69, 0x53, 0x52, 0x51, 0xda, 0x0b, 0xe2, 0x12,
-	0x25, 0x5f, 0x7e, 0xb6, 0xbf, 0xef, 0xfb, 0x27, 0xf8, 0x80, 0x19, 0x11, 0x1b, 0xab, 0x9d, 0x26,
-	0x41, 0x7d, 0xfb, 0xfe, 0x3c, 0x66, 0xd2, 0x4c, 0x59, 0x1a, 0x3e, 0xe4, 0x5a, 0x73, 0x09, 0x09,
-	0x33, 0x22, 0x61, 0x4a, 0x69, 0xc7, 0x9c, 0xd0, 0xaa, 0x6c, 0xe0, 0x70, 0x30, 0x19, 0x8b, 0xb7,
-	0x49, 0x7d, 0x69, 0x04, 0xfa, 0x09, 0xe1, 0xa3, 0x2b, 0x70, 0xf9, 0x8c, 0x73, 0x28, 0x3d, 0x99,
-	0xc1, 0xbb, 0x19, 0x94, 0x8e, 0x3c, 0xc1, 0x03, 0xf8, 0x60, 0xc0, 0x8a, 0x02, 0x94, 0xbb, 0x51,
-	0xac, 0x80, 0x21, 0x8a, 0xd0, 0xe8, 0x20, 0xeb, 0xaf, 0xe4, 0x6b, 0x56, 0x00, 0x79, 0x8c, 0xfb,
-	0x4c, 0x72, 0x6d, 0x85, 0x9b, 0x16, 0x0d, 0xd7, 0xf3, 0x5c, 0xd0, 0xaa, 0x4b, 0xcc, 0x36, 0x5b,
-	0xdf, 0xa8, 0x59, 0x31, 0x06, 0x3b, 0xdc, 0x8b, 0xd0, 0xe8, 0x4e, 0x16, 0x2c, 0xd4, 0x6b, 0x2f,
-	0xd2, 0x17, 0xf8, 0xde, 0xba, 0x1f, 0x23, 0x2b, 0x72, 0x86, 0xf7, 0x9d, 0x15, 0x4c, 0x96, 0x43,
-	0x14, 0xed, 0x8d, 0x0e, 0xd3, 0xa3, 0xd8, 0x87, 0x68, 0x73, 0xc7, 0xaf, 0xea, 0xb7, 0xd9, 0x02,
-	0xa2, 0x9f, 0x11, 0x8e, 0x5e, 0x33, 0x29, 0x26, 0xcc, 0xc1, 0xf3, 0xa5, 0x8d, 0x1c, 0x9c, 0x13,
-	0x8a, 0xb7, 0x09, 0xaf, 0x3a, 0x09, 0x4b, 0x03, 0xb7, 0x3e, 0xe1, 0x61, 0x7a, 0xbc, 0xbe, 0xf9,
-	0x65, 0x8b, 0xe5, 0x06, 0x6e, 0x7f, 0x6f, 0xa0, 0x7e, 0xde, 0xb1, 0x01, 0x1a, 0xe1, 0xe3, 0xbf,
-	0x78, 0x32, 0xb2, 0x4a, 0xbf, 0xf5, 0xf0, 0xdd, 0x97, 0x4c, 0x31, 0x0e, 0x96, 0xcc, 0x11, 0xee,
-	0x77, 0x9b, 0x20, 0x8f, 0xe2, 0xce, 0xac, 0xe3, 0x3f, 0x0e, 0x2e, 0xa4, 0x5b, 0x28, 0x23, 0x2b,
-	0x7a, 0x32, 0xff, 0xfe, 0xe3, 0x4b, 0x2f, 0xa2, 0x0f, 0xfc, 0x77, 0xb2, 0x38, 0x32, 0xe9, 0x92,
-	0x17, 0xe8, 0x94, 0x7c, 0x45, 0xf8, 0xfe, 0x46, 0xcf, 0x24, 0x59, 0x3b, 0x69, 0x5b, 0xe3, 0xe1,
-	0xd9, 0xee, 0x0b, 0x6a, 0x97, 0xe7, 0xde, 0xe5, 0x53, 0x7a, 0xd2, 0x71, 0xb9, 0x71, 0xd1, 0x05,
-	0x3a, 0x4d, 0x7f, 0x22, 0x8c, 0x57, 0x19, 0xc8, 0x9b, 0x7f, 0xd7, 0x21, 0xf9, 0xf8, 0x1f, 0xab,
-	0x49, 0x07, 0x38, 0xb8, 0x64, 0x56, 0x56, 0xb9, 0xd3, 0xc6, 0x08, 0xc5, 0xc7, 0xfb, 0xfe, 0x7f,
-	0x7e, 0xf6, 0x2b, 0x00, 0x00, 0xff, 0xff, 0xf6, 0xa4, 0x6a, 0xf6, 0x1a, 0x04, 0x00, 0x00,
+	// 2505 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x5a, 0xcb, 0x73, 0x1b, 0x59,
+	0xf5, 0x9e, 0x96, 0xfc, 0xd2, 0x51, 0x24, 0xcb, 0xd7, 0x72, 0x22, 0x2b, 0x0f, 0x2b, 0x37, 0x0f,
+	0xfb, 0xe7, 0x49, 0xec, 0x44, 0xf3, 0xc8, 0x8c, 0x93, 0xdf, 0xcc, 0x38, 0xb2, 0xe2, 0x72, 0xc5,
+	0x91, 0x53, 0x2d, 0x39, 0x90, 0x81, 0x2a, 0xd1, 0x56, 0x6e, 0x94, 0x66, 0x5a, 0xdd, 0x4d, 0x77,
+	0x2b, 0x13, 0x93, 0x4a, 0x15, 0x15, 0x58, 0x40, 0x01, 0xa9, 0xa2, 0x60, 0x03, 0x54, 0xc1, 0x9a,
+	0x05, 0x6c, 0x60, 0xcb, 0x82, 0x2a, 0x96, 0xec, 0x78, 0xac, 0x58, 0xc2, 0xff, 0x41, 0xdd, 0xd3,
+	0xef, 0x97, 0x2c, 0x27, 0xa1, 0xd8, 0xa9, 0xef, 0xfd, 0xee, 0xb9, 0xdf, 0x39, 0xf7, 0x9c, 0xef,
+	0x9e, 0x6e, 0x1b, 0x72, 0x92, 0x2e, 0xaf, 0xe9, 0x86, 0x66, 0x69, 0xa4, 0xc0, 0x7f, 0x3e, 0xbd,
+	0xbe, 0x26, 0x29, 0xfa, 0x13, 0xa9, 0x5e, 0x3d, 0xd3, 0xd7, 0xb4, 0xbe, 0xc2, 0xd6, 0x25, 0x5d,
+	0x5e, 0x97, 0x54, 0x55, 0xb3, 0x24, 0x4b, 0xd6, 0x54, 0xd3, 0x06, 0xd3, 0xaf, 0x41, 0xe1, 0x0e,
+	0x93, 0x4c, 0xf9, 0x40, 0x61, 0x6d, 0x5d, 0xea, 0x31, 0x52, 0x82, 0xec, 0x40, 0x7a, 0x56, 0x11,
+	0x6a, 0xc2, 0x4a, 0x4e, 0xe4, 0x3f, 0x71, 0x44, 0x56, 0x2b, 0x19, 0x67, 0x44, 0x56, 0x09, 0x81,
+	0x09, 0x45, 0x36, 0xad, 0x4a, 0xb6, 0x96, 0x5d, 0xc9, 0x89, 0xf8, 0x9b, 0x8f, 0x99, 0x16, 0xd3,
+	0x2b, 0x13, 0x08, 0xc3, 0xdf, 0xf4, 0xb7, 0x02, 0x14, 0xee, 0x4b, 0x86, 0x34, 0x60, 0x16, 0x33,
+	0xda, 0x3a, 0xeb, 0x71, 0x94, 0x2a, 0x0d, 0x98, 0x63, 0x1e, 0x7f, 0x93, 0x06, 0x14, 0x75, 0x17,
+	0xd4, 0xb5, 0x0e, 0x75, 0x86, 0x5b, 0x15, 0xeb, 0x67, 0xd6, 0x42, 0x8e, 0xac, 0x79, 0x96, 0x3a,
+	0x87, 0x3a, 0x13, 0x0b, 0x7a, 0xf0, 0x91, 0x1b, 0x79, 0xec, 0xf8, 0xd1, 0x35, 0xb9, 0x23, 0x95,
+	0x6c, 0x4d, 0x58, 0xc9, 0xc7, 0x8c, 0x84, 0x9c, 0x15, 0x0b, 0x8f, 0x83, 0x8f, 0xf4, 0x4f, 0x02,
+	0x14, 0xf6, 0x0e, 0xbe, 0xc9, 0x7a, 0x96, 0xfc, 0x94, 0x21, 0xdf, 0x6b, 0x30, 0x81, 0x8c, 0x84,
+	0x44, 0x46, 0x1e, 0x16, 0x19, 0x21, 0x92, 0x7b, 0xd8, 0xd7, 0x24, 0x05, 0x7d, 0xc8, 0x88, 0xf8,
+	0x9b, 0xd4, 0x61, 0x41, 0x73, 0xa1, 0xdd, 0x01, 0xb3, 0x0c, 0xb9, 0xd7, 0xc5, 0x30, 0x64, 0x31,
+	0x0c, 0xf3, 0xde, 0xe4, 0x3d, 0x9c, 0x6b, 0xf1, 0xa8, 0x7c, 0x08, 0xa7, 0xa4, 0x47, 0x8f, 0x64,
+	0x7e, 0x56, 0x92, 0x12, 0x5c, 0x64, 0x56, 0x26, 0x30, 0xec, 0x0b, 0xfe, 0xb4, 0xbf, 0xcc, 0xa4,
+	0xb7, 0xa0, 0xb4, 0xa9, 0xf4, 0x35, 0x43, 0xb6, 0x9e, 0x0c, 0xda, 0xcc, 0xb2, 0x64, 0xb5, 0x9f,
+	0x18, 0xf5, 0x32, 0x4c, 0x3e, 0x95, 0x94, 0x21, 0x73, 0xce, 0xd5, 0x7e, 0xa0, 0xf3, 0x30, 0xd7,
+	0x94, 0x0c, 0xe5, 0xb0, 0x6d, 0x69, 0xba, 0x2e, 0xab, 0x7d, 0x1e, 0x04, 0xfa, 0x0f, 0x01, 0x0a,
+	0xbe, 0x4d, 0x1e, 0x96, 0x4b, 0x50, 0x94, 0xdc, 0x81, 0x6e, 0xc0, 0x74, 0xc1, 0x1b, 0x45, 0x1f,
+	0x76, 0x61, 0xce, 0x87, 0x99, 0x36, 0x99, 0x4a, 0xa6, 0x96, 0x5d, 0xc9, 0xd7, 0x97, 0x22, 0xa1,
+	0x8c, 0x72, 0x16, 0x4b, 0x52, 0xd4, 0x8b, 0xfb, 0x30, 0xcf, 0x38, 0xb7, 0xae, 0xe9, 0x90, 0xeb,
+	0x9a, 0x3a, 0xeb, 0x39, 0xe7, 0x5c, 0x8b, 0xd8, 0x8b, 0x79, 0x21, 0xce, 0xb1, 0x98, 0x63, 0x7f,
+	0x17, 0x20, 0xd7, 0x92, 0xcc, 0x86, 0xa6, 0x3e, 0x96, 0xfb, 0xe4, 0xff, 0xe1, 0x44, 0xdf, 0x90,
+	0xf4, 0x27, 0xdd, 0x1e, 0x3e, 0xa3, 0x4b, 0xf9, 0x7a, 0x35, 0x62, 0x78, 0x9b, 0x43, 0xec, 0x15,
+	0x62, 0xbe, 0xef, 0x3f, 0x90, 0x06, 0x80, 0xa6, 0x33, 0xc3, 0xae, 0x2e, 0x8c, 0x6a, 0xbe, 0x7e,
+	0x21, 0xb2, 0xd8, 0xdb, 0x6c, 0x6d, 0xcf, 0x83, 0x8a, 0x81, 0x65, 0xd5, 0x2d, 0x00, 0x7f, 0x86,
+	0x7c, 0x08, 0x39, 0x6f, 0xae, 0x22, 0x60, 0xdc, 0x2a, 0xd1, 0x14, 0x74, 0xe7, 0x45, 0x1f, 0x4a,
+	0x75, 0xc8, 0x07, 0x68, 0x92, 0xb3, 0x00, 0xea, 0x70, 0xd0, 0x55, 0xa4, 0x43, 0x66, 0x98, 0xe8,
+	0xd6, 0xa4, 0x98, 0x53, 0x87, 0x83, 0x5d, 0x1c, 0x20, 0x4b, 0x90, 0x97, 0x55, 0x7d, 0x68, 0x75,
+	0x4d, 0xf9, 0xdb, 0xcc, 0xc4, 0xf3, 0x99, 0x14, 0x01, 0x87, 0xda, 0x7c, 0x84, 0x9c, 0x87, 0x13,
+	0xda, 0xd0, 0xf2, 0x11, 0x59, 0x44, 0xe4, 0xed, 0x31, 0x84, 0xd0, 0xbf, 0x09, 0x90, 0xf3, 0xa8,
+	0xf0, 0xf4, 0xf0, 0xc8, 0x74, 0xbd, 0xfa, 0xc9, 0x89, 0x05, 0x6f, 0x14, 0x6b, 0xf6, 0x3e, 0xcc,
+	0xfa, 0x85, 0xcf, 0xcf, 0xd2, 0x0d, 0xdb, 0x72, 0x9a, 0x93, 0x6b, 0x21, 0x35, 0x31, 0x45, 0x5f,
+	0x38, 0xf0, 0xb9, 0xda, 0x82, 0x62, 0x18, 0x41, 0x6e, 0x01, 0x78, 0x18, 0xd3, 0x89, 0x61, 0xaa,
+	0xb0, 0x60, 0x9e, 0x04, 0xf0, 0xf4, 0xd7, 0x13, 0x50, 0x6c, 0x3e, 0xd3, 0x99, 0x21, 0x0f, 0x98,
+	0x6a, 0x61, 0xea, 0xef, 0xc7, 0x49, 0xdb, 0x89, 0x72, 0x25, 0x9a, 0x81, 0xa1, 0x75, 0x47, 0x30,
+	0x27, 0x1b, 0x90, 0xf3, 0x54, 0xc0, 0x89, 0x42, 0xaa, 0xda, 0x20, 0x4d, 0x1f, 0xce, 0xd7, 0x7a,
+	0xc5, 0x92, 0x22, 0x7b, 0xa1, 0xf2, 0x15, 0x7d, 0x38, 0x3f, 0x2a, 0xcb, 0x90, 0x25, 0xa5, 0x6b,
+	0xb1, 0x81, 0xae, 0x48, 0x16, 0x73, 0x04, 0xbc, 0x80, 0xa3, 0x1d, 0x67, 0x90, 0xbc, 0x0f, 0x27,
+	0x6d, 0x09, 0x32, 0xbb, 0x3d, 0x4d, 0x51, 0x58, 0xcf, 0xd2, 0x6c, 0xef, 0x2b, 0x93, 0x08, 0x2f,
+	0x3b, 0xb3, 0x0d, 0x77, 0xd2, 0x51, 0xcf, 0x32, 0x77, 0x53, 0x51, 0x98, 0xd2, 0xb5, 0x77, 0xe9,
+	0x69, 0x43, 0xd5, 0xaa, 0x4c, 0x61, 0x0a, 0x12, 0x77, 0xae, 0xc3, 0xa7, 0x1a, 0x7c, 0x86, 0x5c,
+	0x86, 0xd9, 0x81, 0xf4, 0x2c, 0x04, 0x9e, 0x46, 0x70, 0x61, 0x20, 0x3d, 0x0b, 0xe0, 0x6e, 0x00,
+	0xa8, 0x92, 0xe9, 0x56, 0xea, 0x0c, 0xfa, 0x5c, 0x49, 0x2b, 0x36, 0x31, 0xa7, 0xba, 0x3f, 0xdf,
+	0x7a, 0x86, 0xfc, 0x2a, 0x03, 0xa5, 0xc0, 0x49, 0x5b, 0x92, 0x35, 0x34, 0x79, 0xc1, 0x99, 0x96,
+	0x64, 0x58, 0x5d, 0x4b, 0xf6, 0xa4, 0x31, 0x87, 0x23, 0x1d, 0x79, 0xc0, 0xc8, 0x32, 0xcc, 0xf6,
+	0xb4, 0x81, 0xae, 0x30, 0xbb, 0x3e, 0x38, 0xc6, 0x16, 0xe1, 0xa2, 0x3f, 0x8c, 0xc0, 0x7d, 0xc8,
+	0xf5, 0x34, 0xd5, 0x56, 0x79, 0x3c, 0xd8, 0x62, 0xfd, 0x46, 0x7a, 0x96, 0xe1, 0xde, 0x81, 0x81,
+	0x86, 0xbb, 0x14, 0x6f, 0x27, 0xdf, 0x12, 0xfd, 0x02, 0x4e, 0xa5, 0xa0, 0x48, 0x1e, 0xa6, 0x1b,
+	0x62, 0x73, 0xb3, 0xd3, 0xdc, 0x2a, 0xbd, 0xc3, 0x1f, 0xc4, 0xfd, 0x56, 0x6b, 0xa7, 0xb5, 0x5d,
+	0x12, 0x48, 0x11, 0x40, 0x6c, 0xb6, 0x3b, 0x9b, 0x62, 0x87, 0x3f, 0x67, 0x48, 0x01, 0x72, 0xed,
+	0xfd, 0x46, 0xa3, 0xd9, 0xdc, 0x6a, 0x6e, 0x95, 0xb2, 0x04, 0x60, 0xea, 0xce, 0xe6, 0xce, 0x6e,
+	0x73, 0xab, 0x34, 0xc1, 0xd7, 0xed, 0xb7, 0xee, 0xb6, 0xf6, 0xbe, 0xd2, 0x2a, 0x4d, 0xd2, 0x1f,
+	0x09, 0x00, 0xfe, 0x6e, 0x89, 0x57, 0xd1, 0x75, 0x98, 0xc0, 0x54, 0xb2, 0xd3, 0xfe, 0xec, 0xc8,
+	0x3a, 0x12, 0x11, 0x4a, 0x6e, 0xc0, 0x94, 0x89, 0xfe, 0x3a, 0xf9, 0xbe, 0x74, 0x44, 0x58, 0x44,
+	0x07, 0x4e, 0x3f, 0x85, 0x79, 0xef, 0x30, 0x37, 0x4d, 0x53, 0xee, 0xab, 0xa9, 0xb4, 0x92, 0x6f,
+	0xc8, 0x3a, 0x4c, 0xd9, 0xd7, 0xed, 0x31, 0xd6, 0x3c, 0x84, 0x9c, 0xbd, 0x66, 0x57, 0x43, 0x35,
+	0xe6, 0x47, 0xde, 0x35, 0x2d, 0x69, 0xa0, 0xbb, 0xc9, 0xc1, 0x47, 0xda, 0x7c, 0x80, 0x5c, 0x85,
+	0x29, 0xbb, 0x96, 0x9c, 0x70, 0x2c, 0x44, 0x3c, 0xb3, 0x0d, 0x89, 0x0e, 0x88, 0x7e, 0x02, 0xf9,
+	0xbd, 0x03, 0x93, 0x19, 0x4f, 0x6d, 0xe5, 0x5d, 0x87, 0x69, 0xa7, 0x12, 0x9d, 0x4c, 0x4e, 0x59,
+	0xee, 0xa2, 0xe8, 0x5d, 0x28, 0x06, 0xd6, 0x73, 0x7e, 0x1f, 0x43, 0xde, 0xe9, 0x36, 0x14, 0xad,
+	0x6f, 0xa6, 0x5c, 0x3b, 0x9e, 0x3b, 0x22, 0x0c, 0xdc, 0x9f, 0x26, 0xfd, 0x6e, 0x16, 0x72, 0x58,
+	0xa4, 0x58, 0xfd, 0xcb, 0x30, 0xcb, 0xbc, 0x63, 0x08, 0x76, 0x09, 0x45, 0x7f, 0x18, 0xdb, 0x84,
+	0x37, 0xd1, 0xbe, 0x03, 0x58, 0xf0, 0xe5, 0x58, 0xf2, 0x0e, 0xd4, 0xcd, 0x8b, 0xab, 0x11, 0x3b,
+	0x1e, 0xbb, 0xb5, 0x84, 0x2c, 0x30, 0xc5, 0xb2, 0x9e, 0x30, 0x4a, 0x16, 0x61, 0xc6, 0x18, 0xaa,
+	0xb6, 0xdc, 0xd9, 0xea, 0x38, 0x6d, 0x0c, 0x55, 0xf4, 0xf1, 0xb5, 0x74, 0xb1, 0xfa, 0x75, 0x28,
+	0x27, 0x6d, 0x4f, 0xb6, 0x20, 0x1f, 0x74, 0xc1, 0x0e, 0x3d, 0x4d, 0xd3, 0x22, 0x7f, 0xa5, 0x18,
+	0x5c, 0x46, 0xff, 0x9c, 0x81, 0xbc, 0xed, 0xe7, 0xdb, 0x55, 0xa3, 0xbb, 0x71, 0x35, 0x4a, 0x0e,
+	0xaf, 0x2d, 0x44, 0x8e, 0x5a, 0x27, 0x6b, 0x10, 0xb9, 0x05, 0x79, 0xcd, 0xcf, 0x3b, 0x0c, 0x6b,
+	0xbc, 0xd7, 0x0a, 0x64, 0xa6, 0x18, 0x84, 0xd3, 0x03, 0x20, 0x71, 0xf3, 0x23, 0xc4, 0x2b, 0x24,
+	0x56, 0x19, 0x2e, 0x56, 0x77, 0x77, 0x76, 0x77, 0x47, 0x0b, 0xd7, 0x0b, 0x98, 0xc4, 0x3d, 0x12,
+	0xeb, 0xfc, 0x4a, 0x48, 0xb2, 0x2a, 0x69, 0x59, 0xe6, 0xa8, 0x55, 0x3d, 0xa2, 0x56, 0xd5, 0xf4,
+	0xb0, 0x79, 0x42, 0xf5, 0x00, 0x16, 0x45, 0xd6, 0x97, 0x4d, 0x8b, 0x19, 0xbe, 0x98, 0x89, 0xec,
+	0x5b, 0x43, 0x66, 0x5a, 0xe4, 0x63, 0x00, 0xbf, 0x86, 0x9c, 0xfe, 0x63, 0x31, 0x55, 0x02, 0xc5,
+	0x00, 0x98, 0x2e, 0xc2, 0xa9, 0x24, 0xbb, 0xba, 0x72, 0x48, 0xb7, 0x60, 0xe9, 0xbe, 0xc1, 0x1a,
+	0x4f, 0x58, 0xef, 0x8b, 0x14, 0x08, 0x6f, 0x05, 0x7b, 0x92, 0xda, 0x35, 0x9c, 0x69, 0xdc, 0x7a,
+	0x46, 0xcc, 0xf7, 0x24, 0xd5, 0x5d, 0x41, 0x6f, 0xc3, 0xa9, 0x2d, 0xa6, 0x30, 0x8b, 0xc5, 0x69,
+	0x8f, 0xab, 0x08, 0xf4, 0x14, 0x2c, 0xc4, 0x6d, 0x70, 0x8a, 0x9f, 0x42, 0x79, 0x9b, 0x59, 0x6f,
+	0x60, 0x79, 0x0f, 0x48, 0xc4, 0x00, 0x77, 0xeb, 0x0d, 0xe2, 0x39, 0x84, 0xb9, 0xc0, 0x65, 0x33,
+	0x1c, 0x0c, 0x24, 0xe3, 0x70, 0x7c, 0xe9, 0xf3, 0xef, 0xb1, 0xcc, 0xf1, 0xee, 0xb1, 0x2a, 0x54,
+	0x42, 0x7e, 0xec, 0xca, 0xa6, 0x1b, 0x0c, 0x3a, 0x80, 0x93, 0x09, 0x73, 0xdc, 0xcf, 0x36, 0x94,
+	0x03, 0xbc, 0x4c, 0x64, 0x2b, 0x33, 0x57, 0x69, 0x6a, 0xe9, 0x9b, 0xdb, 0x7e, 0x89, 0xf3, 0x2c,
+	0x32, 0x24, 0x33, 0x93, 0x7e, 0x5f, 0x80, 0xb3, 0xfb, 0xfa, 0x23, 0x29, 0x78, 0x5a, 0x0e, 0xdb,
+	0x63, 0x9e, 0x0e, 0xf9, 0x04, 0x40, 0x65, 0x5f, 0x76, 0x8f, 0x17, 0x92, 0x9c, 0xca, 0xbe, 0xb4,
+	0x7f, 0xd2, 0xb3, 0x70, 0x3a, 0x8d, 0x09, 0xcf, 0x9e, 0xdf, 0x08, 0x70, 0xc1, 0x9e, 0xf7, 0xfa,
+	0xe1, 0xe6, 0x33, 0xcb, 0x90, 0x9c, 0x37, 0xcc, 0xe3, 0xf3, 0x7d, 0x08, 0x15, 0xc6, 0x0d, 0x74,
+	0x63, 0xaf, 0xb9, 0xe6, 0xb8, 0xef, 0xb9, 0x27, 0xd1, 0x40, 0x74, 0xd8, 0xa4, 0x17, 0xe0, 0xfc,
+	0x68, 0xaa, 0xdc, 0xa1, 0xbb, 0x50, 0xdb, 0x66, 0xd6, 0xdb, 0x71, 0x86, 0x3e, 0x87, 0x73, 0x23,
+	0x8c, 0xf1, 0xf4, 0x19, 0xe5, 0xae, 0xf0, 0x66, 0xee, 0xde, 0x86, 0xb2, 0xab, 0x20, 0xa8, 0x86,
+	0x2e, 0xfb, 0x55, 0x98, 0xc4, 0x97, 0x01, 0xa7, 0x28, 0xcb, 0x49, 0xca, 0x29, 0xda, 0x10, 0x5a,
+	0x06, 0x12, 0xb1, 0xc1, 0x63, 0xf4, 0x1e, 0x10, 0x5b, 0x4b, 0x42, 0x76, 0x79, 0x17, 0x86, 0x2f,
+	0x19, 0x81, 0x80, 0xe4, 0x70, 0x04, 0x63, 0x41, 0xa0, 0x14, 0x5a, 0xc4, 0x0d, 0x3d, 0x80, 0xf9,
+	0x6d, 0x66, 0xe1, 0x40, 0xa0, 0xda, 0xc6, 0x4f, 0x96, 0x93, 0x30, 0xf5, 0x58, 0x56, 0xb8, 0x6a,
+	0xda, 0xf7, 0xab, 0xf3, 0x44, 0x37, 0x61, 0x2e, 0x6c, 0x97, 0x87, 0xfa, 0x0a, 0x4c, 0x21, 0x1b,
+	0x37, 0xb0, 0xc9, 0x8e, 0x3b, 0x18, 0x7a, 0x0d, 0x66, 0x5d, 0x13, 0x63, 0x3a, 0x78, 0x13, 0x0a,
+	0xfe, 0x0a, 0xbe, 0xe1, 0x71, 0x02, 0x6d, 0x41, 0xc5, 0xce, 0xcd, 0xe0, 0xc5, 0x35, 0xd6, 0xbe,
+	0x5c, 0x69, 0x63, 0x15, 0x3e, 0xea, 0x3a, 0x0c, 0x14, 0x77, 0x05, 0x4e, 0x26, 0xec, 0xca, 0x4f,
+	0xe6, 0x7b, 0x02, 0x9c, 0x16, 0x99, 0xae, 0x19, 0x56, 0xb8, 0x97, 0x1d, 0x93, 0xd3, 0x1d, 0x98,
+	0x0d, 0x34, 0x17, 0xbc, 0xed, 0x4d, 0x79, 0x15, 0x89, 0x58, 0x2f, 0x6a, 0xa1, 0x67, 0x7a, 0x9a,
+	0x5f, 0xd9, 0x49, 0x2c, 0x38, 0xc7, 0x9f, 0x09, 0xa8, 0xd8, 0xaf, 0x45, 0x70, 0xc9, 0x6b, 0xc9,
+	0x71, 0xde, 0x4e, 0x1f, 0xa7, 0xf1, 0x46, 0x40, 0xb8, 0xc5, 0xcb, 0x46, 0x5b, 0xbc, 0x45, 0x98,
+	0x61, 0xea, 0x23, 0x7b, 0xd2, 0x69, 0x60, 0x99, 0xfa, 0x88, 0x4f, 0xd1, 0x6f, 0xe0, 0x5d, 0x91,
+	0x40, 0x38, 0x29, 0x2a, 0xc2, 0xeb, 0x44, 0xe5, 0x95, 0x00, 0x0b, 0xdb, 0xcc, 0x6a, 0x0f, 0xfb,
+	0x7d, 0x66, 0xda, 0x5f, 0xbc, 0x8e, 0x5b, 0x39, 0xf1, 0xcf, 0x8d, 0x99, 0xa4, 0xcf, 0x8d, 0x97,
+	0xa0, 0x68, 0xd8, 0xa6, 0xbb, 0xea, 0x70, 0x70, 0xc0, 0x0c, 0x8c, 0xc4, 0xa4, 0x58, 0x70, 0x46,
+	0x5b, 0x38, 0x48, 0x1b, 0x58, 0xc7, 0x21, 0x3e, 0xc7, 0xaf, 0xb8, 0x9f, 0x08, 0x50, 0x7b, 0x20,
+	0x29, 0x72, 0x48, 0xa1, 0xa3, 0xd2, 0x7b, 0x27, 0xe4, 0x20, 0x36, 0x8c, 0xc2, 0x38, 0xef, 0xb8,
+	0x01, 0xff, 0x53, 0x3e, 0xb7, 0x26, 0xf9, 0x4f, 0x6b, 0x70, 0x6e, 0x04, 0x25, 0x5d, 0x39, 0x5c,
+	0xdd, 0x0f, 0x7c, 0x8f, 0xc7, 0x96, 0xb9, 0x04, 0x27, 0x9c, 0x8e, 0xb7, 0xdb, 0x79, 0x78, 0xbf,
+	0x59, 0x7a, 0x87, 0xf7, 0xc3, 0x5b, 0x7b, 0xfb, 0xb7, 0x77, 0x9b, 0x25, 0x81, 0x4c, 0x43, 0x76,
+	0xa7, 0xd5, 0x29, 0x65, 0xc8, 0x09, 0x98, 0xd9, 0xda, 0x69, 0x37, 0xc4, 0x66, 0xa7, 0x59, 0xca,
+	0x92, 0x59, 0xc8, 0x37, 0x36, 0x3b, 0xcd, 0xed, 0x3d, 0x71, 0xa7, 0xb1, 0xb9, 0x5b, 0x9a, 0x58,
+	0xfd, 0x28, 0xf0, 0xd9, 0xdc, 0xed, 0xc4, 0xdd, 0x46, 0xfa, 0x1d, 0xbe, 0xf8, 0xde, 0x4e, 0x6b,
+	0xe7, 0xde, 0xce, 0xe7, 0xdc, 0x26, 0x7f, 0xda, 0xfc, 0xaa, 0xfd, 0x94, 0xa9, 0xff, 0xb3, 0x0c,
+	0xd3, 0xf7, 0x24, 0x55, 0xea, 0x33, 0x83, 0xfc, 0x52, 0xf0, 0xf5, 0x3b, 0xf0, 0xc5, 0x60, 0x25,
+	0x12, 0xab, 0xd4, 0xae, 0xb8, 0x7a, 0x79, 0x0c, 0x24, 0xde, 0x08, 0x2f, 0xff, 0xfa, 0xaf, 0x9f,
+	0x66, 0xae, 0xd2, 0x25, 0xfc, 0x9b, 0x88, 0xb3, 0xfd, 0x7a, 0x1c, 0xbd, 0x11, 0xe8, 0xf3, 0xc8,
+	0xef, 0x05, 0xa8, 0xa6, 0x77, 0xc7, 0xc7, 0x60, 0xb9, 0x16, 0x7d, 0x9f, 0x1b, 0xdd, 0x72, 0xd3,
+	0x9b, 0xc8, 0xf6, 0x03, 0xba, 0x1c, 0x62, 0x9b, 0xbe, 0x2a, 0xc4, 0xfa, 0xe7, 0x82, 0x7b, 0x91,
+	0x05, 0xb8, 0x46, 0xe3, 0x94, 0xd2, 0xae, 0x57, 0x2f, 0x1e, 0x89, 0xe3, 0xfc, 0x6e, 0x20, 0xbf,
+	0xeb, 0x64, 0x3d, 0xc4, 0x2f, 0x8a, 0x5d, 0x7f, 0x1e, 0x29, 0xf5, 0x17, 0xe4, 0xc7, 0x02, 0xde,
+	0x41, 0x01, 0x62, 0xd1, 0xcf, 0xe5, 0x49, 0xad, 0x7e, 0xf5, 0xfc, 0x68, 0x10, 0xa7, 0xf4, 0x3e,
+	0x52, 0x5a, 0x23, 0x57, 0x42, 0x94, 0x42, 0xc0, 0x04, 0x3e, 0x3f, 0x14, 0xf0, 0x22, 0x0e, 0xf7,
+	0xcd, 0x64, 0x79, 0xd4, 0x76, 0x81, 0x3e, 0xa0, 0x7a, 0xe9, 0x68, 0x20, 0xe7, 0x76, 0x19, 0xb9,
+	0xd5, 0xc8, 0xb9, 0x74, 0x6e, 0xb8, 0xef, 0x1f, 0x04, 0xf7, 0xba, 0x8b, 0x7d, 0x5e, 0x8c, 0x7e,
+	0x69, 0x1e, 0xd9, 0x7c, 0x57, 0x57, 0xc7, 0x44, 0x73, 0x72, 0x9f, 0x21, 0xb9, 0x8d, 0xea, 0x07,
+	0x21, 0x72, 0xc9, 0x2b, 0xe2, 0x11, 0xdc, 0x10, 0x56, 0xc9, 0x5f, 0x04, 0x38, 0x33, 0xaa, 0x6f,
+	0x25, 0xf5, 0x44, 0x3a, 0x23, 0x5b, 0xd8, 0xea, 0xb5, 0x63, 0xad, 0xe1, 0x8e, 0xdc, 0x41, 0x47,
+	0x3e, 0xab, 0xde, 0x4c, 0x70, 0x24, 0x79, 0x5d, 0xb2, 0x3b, 0x7f, 0x14, 0x60, 0x31, 0xb5, 0x29,
+	0x26, 0xeb, 0xf1, 0x23, 0x1f, 0xed, 0xc8, 0xd5, 0xf1, 0x17, 0x04, 0x8e, 0x83, 0x7c, 0x14, 0xcd,
+	0x95, 0x71, 0x5d, 0x20, 0x2f, 0x05, 0x28, 0x84, 0x7a, 0xe2, 0x58, 0x8d, 0x25, 0x75, 0xdd, 0xb1,
+	0x1a, 0x4b, 0x68, 0xab, 0xff, 0x0f, 0xb9, 0x5d, 0xa0, 0xd5, 0x44, 0x11, 0x45, 0xe0, 0x86, 0xdd,
+	0x2e, 0x92, 0xef, 0x08, 0x90, 0x0f, 0x74, 0xd3, 0xe4, 0x7c, 0xa2, 0xae, 0x84, 0x08, 0x2c, 0x8d,
+	0x82, 0xf0, 0xed, 0xaf, 0xe2, 0xf6, 0xcb, 0xe4, 0x52, 0x82, 0xea, 0x20, 0x6c, 0xfd, 0xb9, 0xdf,
+	0x51, 0xbd, 0x20, 0x3f, 0x10, 0xe0, 0x44, 0xb0, 0xc9, 0x26, 0x34, 0x7e, 0x12, 0xd1, 0xce, 0xbe,
+	0x5a, 0x1b, 0x89, 0x09, 0xdc, 0x24, 0xe4, 0xdd, 0xe8, 0x01, 0x79, 0xb8, 0x84, 0x33, 0xb1, 0x60,
+	0xc6, 0x45, 0x90, 0x73, 0x29, 0x5b, 0xb8, 0x14, 0xce, 0xa4, 0xce, 0xf3, 0xed, 0x57, 0x71, 0xfb,
+	0x8b, 0x84, 0x26, 0x6e, 0x1f, 0x8e, 0xc0, 0x2b, 0x01, 0xe6, 0x62, 0xed, 0x73, 0x4c, 0xdd, 0xd2,
+	0xda, 0xfa, 0x98, 0xba, 0xa5, 0x74, 0xe2, 0x4e, 0x56, 0x54, 0xcf, 0x25, 0xd4, 0x5d, 0x00, 0xcc,
+	0x4b, 0xeb, 0x17, 0x02, 0x7f, 0xe5, 0x8b, 0xb7, 0xcb, 0x64, 0x35, 0x96, 0x7c, 0xa9, 0x9d, 0x7d,
+	0x75, 0x65, 0x2c, 0x2c, 0x67, 0x76, 0x05, 0x99, 0x5d, 0xa6, 0xe7, 0x23, 0xf9, 0x1a, 0xc7, 0x73,
+	0x72, 0xaf, 0xec, 0xbb, 0x20, 0xc2, 0x2c, 0xe1, 0x2e, 0x48, 0xa6, 0x75, 0xe9, 0x68, 0x60, 0xb0,
+	0x86, 0x62, 0x77, 0x41, 0x9c, 0xd0, 0x4b, 0x01, 0x8a, 0xe1, 0xae, 0x95, 0x5c, 0x8c, 0x6f, 0x12,
+	0x6f, 0xb2, 0xab, 0xf4, 0x08, 0x54, 0xe0, 0x4e, 0xa2, 0xa7, 0xa3, 0x3c, 0x02, 0x48, 0x4e, 0xe2,
+	0x77, 0x02, 0x2c, 0xa6, 0x76, 0x98, 0x31, 0x35, 0x3c, 0xaa, 0x3d, 0x8e, 0xa9, 0xe1, 0xe8, 0xe6,
+	0x95, 0x5e, 0x47, 0x96, 0xef, 0xd2, 0xcb, 0x21, 0x96, 0xa9, 0x8b, 0x36, 0x84, 0xd5, 0xfa, 0xbf,
+	0x05, 0x00, 0xdf, 0x07, 0xf2, 0xf9, 0x7f, 0x2f, 0x86, 0xe4, 0xf9, 0xff, 0x30, 0x34, 0xf5, 0x59,
+	0x28, 0x84, 0xfe, 0xe1, 0xe1, 0x60, 0x0a, 0xff, 0xbb, 0xe7, 0xbd, 0xff, 0x04, 0x00, 0x00, 0xff,
+	0xff, 0x8b, 0x40, 0x8a, 0x6f, 0x17, 0x24, 0x00, 0x00,
 }

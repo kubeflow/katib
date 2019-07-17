@@ -42,6 +42,263 @@
         ]
       }
     },
+    "/api/Manager/GetTrial/{trial_name}": {
+      "get": {
+        "summary": "*\nGet a Trial from DB by ID of Trial.",
+        "operationId": "GetTrial",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2GetTrialReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "trial_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetTrialList/{experiment_name}": {
+      "get": {
+        "summary": "* \nGet a list of Trial from DB by name of a Experiment.",
+        "operationId": "GetTrialList",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2GetTrialListReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "experiment_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/PreCheckRegisterExperiment": {
+      "post": {
+        "summary": "*\nPreCheck to register a Experiment to DB.",
+        "operationId": "PreCheckRegisterExperiment",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2PreCheckRegisterExperimentReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha2Experiment"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/RegisterExperiment": {
+      "post": {
+        "summary": "*\nRegister a Experiment to DB.",
+        "operationId": "RegisterExperiment",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2RegisterExperimentReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha2Experiment"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/RegisterTrial": {
+      "post": {
+        "summary": "*\nRegister a Trial to DB.\nID will be filled by manager automatically.",
+        "operationId": "RegisterTrial",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2RegisterTrialReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha2Trial"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/ReportObservationLog": {
+      "post": {
+        "summary": "* \nReport a log of Observations for a Trial.\nThe log consists of timestamp and value of metric.\nKatib store every log of metrics.\nYou can see accuracy curve or other metric logs on UI.",
+        "operationId": "ReportObservationLog",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2ReportObservationLogReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha2ReportObservationLogRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/UpdateAlgorithmExtraSettings/{experiment_name}": {
+      "put": {
+        "summary": "* \nUpdate AlgorithmExtraSettings.\nThe ExtraSetting is created if it does not exist, otherwise it is overwrited.",
+        "operationId": "UpdateAlgorithmExtraSettings",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2UpdateAlgorithmExtraSettingsReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "experiment_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha2UpdateAlgorithmExtraSettingsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/UpdateExperimentStatus/{experiment_name}": {
+      "put": {
+        "summary": "* \nUpdate Status of a experiment.",
+        "operationId": "UpdateExperimentStatus",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2UpdateExperimentStatusReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "experiment_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha2UpdateExperimentStatusRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/UpdateTrialStatus": {
+      "put": {
+        "summary": "* \nUpdate Status of a trial.",
+        "operationId": "UpdateTrialStatus",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha2UpdateTrialStatusReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha2UpdateTrialStatusRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
     "/api/Manager/ValidateAlgorithmSettings": {
       "post": {
         "summary": "* \nValidate AlgorithmSettings in an Experiment.\nSuggestion service should return INVALID_ARGUMENT Error when the parameter is invalid",
@@ -378,6 +635,35 @@
       ],
       "default": "UNKNOWN_TYPE",
       "description": "*\nTypes of value for HyperParameter."
+    },
+    "alpha2PreCheckRegisterExperimentReply": {
+      "type": "object",
+      "properties": {
+        "can_register": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
+    "alpha2RegisterExperimentReply": {
+      "type": "object"
+    },
+    "alpha2RegisterTrialReply": {
+      "type": "object"
+    },
+    "alpha2ReportObservationLogReply": {
+      "type": "object"
+    },
+    "alpha2ReportObservationLogRequest": {
+      "type": "object",
+      "properties": {
+        "trial_name": {
+          "type": "string"
+        },
+        "observation_log": {
+          "$ref": "#/definitions/alpha2ObservationLog"
+        }
+      }
     },
     "alpha2Trial": {
       "type": "object",

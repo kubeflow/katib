@@ -19,7 +19,7 @@ spec:
       serviceAccountName: studyjob-controller
       containers:
       - name: studyjob-controller
-        image: katib/studyjob-controller
+        image: gcr.io/kubeflow-images-public/katib/v1alpha1/studyjob-controller
         imagePullPolicy: Always
         ports:
         - containerPort: 443

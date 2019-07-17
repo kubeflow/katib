@@ -7,6 +7,7 @@ package mock
 import (
 	gomock "github.com/golang/mock/gomock"
 	v1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	v1alpha20 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	reflect "reflect"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -53,6 +54,25 @@ func (mr *MockClientMockRecorder) CreateExperiment(arg0 interface{}, arg1 ...int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateExperiment", reflect.TypeOf((*MockClient)(nil).CreateExperiment), varargs...)
 }
 
+// DeleteExperiment mocks base method
+func (m *MockClient) DeleteExperiment(arg0 *v1alpha2.Experiment, arg1 ...string) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteExperiment", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteExperiment indicates an expected call of DeleteExperiment
+func (mr *MockClientMockRecorder) DeleteExperiment(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteExperiment", reflect.TypeOf((*MockClient)(nil).DeleteExperiment), varargs...)
+}
+
 // GetConfigMap mocks base method
 func (m *MockClient) GetConfigMap(arg0 string, arg1 ...string) (map[string]string, error) {
 	m.ctrl.T.Helper()
@@ -71,6 +91,26 @@ func (mr *MockClientMockRecorder) GetConfigMap(arg0 interface{}, arg1 ...interfa
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConfigMap", reflect.TypeOf((*MockClient)(nil).GetConfigMap), varargs...)
+}
+
+// GetExperiment mocks base method
+func (m *MockClient) GetExperiment(arg0 string, arg1 ...string) (*v1alpha2.Experiment, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetExperiment", varargs...)
+	ret0, _ := ret[0].(*v1alpha2.Experiment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetExperiment indicates an expected call of GetExperiment
+func (mr *MockClientMockRecorder) GetExperiment(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExperiment", reflect.TypeOf((*MockClient)(nil).GetExperiment), varargs...)
 }
 
 // GetExperimentList mocks base method
@@ -109,6 +149,26 @@ func (m *MockClient) GetMetricsCollectorTemplates(arg0 ...string) (map[string]st
 func (mr *MockClientMockRecorder) GetMetricsCollectorTemplates(arg0 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMetricsCollectorTemplates", reflect.TypeOf((*MockClient)(nil).GetMetricsCollectorTemplates), arg0...)
+}
+
+// GetTrialList mocks base method
+func (m *MockClient) GetTrialList(arg0 string, arg1 ...string) (*v1alpha20.TrialList, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetTrialList", varargs...)
+	ret0, _ := ret[0].(*v1alpha20.TrialList)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTrialList indicates an expected call of GetTrialList
+func (mr *MockClientMockRecorder) GetTrialList(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialList", reflect.TypeOf((*MockClient)(nil).GetTrialList), varargs...)
 }
 
 // GetTrialTemplates mocks base method

@@ -53,15 +53,14 @@ spec:
           apiVersion: batch/v1
           kind: Job
           metadata:
-            name: {{.WorkerID}}
+            name: {{.Trial}}
             namespace: {{.NameSpace}}
           spec:
             template:
               spec:
                 containers:
-                - name: {{.WorkerID}}
-                  #TODO: Add build container in Katib.
-                  image: docker.io/deepermind/training-container-nas
+                - name: {{.Trial}}
+                  image: katib/v1alpha2/training-container-nasrl-cifar10
                   command:
                   - "python3.5"
                   - "-u"
@@ -78,11 +77,11 @@ spec:
   nasConfig:
     graphConfig:
       numLayers: 8
-      inputSize:
+      inputSizes:
         - 32
         - 32
         - 3
-      outputSize:
+      outputSizes:
         - 10
     operations:
       - operationType: convolution

@@ -19,3 +19,7 @@ spec:
     kind: Trial
     singular: trial
     plural: trials
+    categories:
+    - all
+    - kubeflow
+    - katib

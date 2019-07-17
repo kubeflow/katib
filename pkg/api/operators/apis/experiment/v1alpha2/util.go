@@ -27,9 +27,11 @@ const (
 )
 
 func getCondition(exp *Experiment, condType ExperimentConditionType) *ExperimentCondition {
-	for _, condition := range exp.Status.Conditions {
-		if condition.Type == condType {
-			return &condition
+	if exp.Status.Conditions != nil {
+		for _, condition := range exp.Status.Conditions {
+			if condition.Type == condType {
+				return &condition
+			}
 		}
 	}
 	return nil
@@ -143,7 +145,7 @@ func (exp *Experiment) MarkExperimentStatusFailed(reason, message string) {
 }
 
 func (exp *Experiment) NeedUpdateFinalizers() (bool, []string) {
-	deleted := exp.ObjectMeta.DeletionTimestamp.IsZero()
+	deleted := !exp.ObjectMeta.DeletionTimestamp.IsZero()
 	pendingFinalizers := exp.GetFinalizers()
 	contained := false
 	for _, elem := range pendingFinalizers {

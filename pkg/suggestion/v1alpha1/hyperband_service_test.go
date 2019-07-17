@@ -300,7 +300,7 @@ func TestSwap(t *testing.T) {
 func TestLess(t *testing.T) {
 	size := 2
 	b := getSampleBracket(size)
-	exp := false
+	exp := true
 	rtn := b.Less(0, 1)
 
 	if exp != rtn {
@@ -503,7 +503,7 @@ func TestEvalWorkers(t *testing.T) {
 
 	_, rtn_bracket := h.evalWorkers(context.Background(), mockAPI, "studyId", &p)
 
-	exp_bracket := []Evals{Evals{"trial3", 19}, Evals{"trial2", 11}, Evals{"trial1", 3}}
+	exp_bracket := []Evals{{"trial1", 3}, {"trial2", 11}, {"trial3", 19}}
 
 	for i, ebkt := range exp_bracket {
 		if ebkt != rtn_bracket[i] {
@@ -516,8 +516,7 @@ func TestHbLoopParamUpdate(t *testing.T) {
 	h := HyperBandSuggestService{}
 	p := getSampleHyperBandParameters()
 
-	studyId := "testStudyId"
-	h.hbLoopParamUpdate(studyId, &p)
+	h.hbLoopParamUpdate(&p)
 
 	exp := getSampleHyperBandParameters()
 	exp.r = 0.46875
@@ -533,10 +532,9 @@ func TestGetLoopParam(t *testing.T) {
 	h := HyperBandSuggestService{}
 	p := getSampleHyperBandParameters()
 
-	studyId := "testStudyId"
-	n_i, r_i := h.getLoopParam(studyId, &p)
+	n_i, r_i := h.getLoopParam(&p)
 
-	exp_n_i, exp_r_i := 3, 128.0
+	exp_n_i, exp_r_i := 4, 128.0
 
 	if exp_n_i != n_i || exp_r_i != r_i {
 		t.Errorf("expected {%v %v}, but returned {%v %v}", exp_n_i, exp_r_i, n_i, r_i)
@@ -547,9 +545,8 @@ func TestShLoopParamUpdate(t *testing.T) {
 	h := HyperBandSuggestService{}
 	p1 := getSampleHyperBandParameters()
 
-	studyId := "testStudyId"
 	exp1 := p1.currentS
-	h.shLoopParamUpdate(studyId, &p1)
+	h.shLoopParamUpdate(&p1)
 	rtn1 := p1.currentS
 
 	if exp1 != rtn1 {
@@ -561,7 +558,7 @@ func TestShLoopParamUpdate(t *testing.T) {
 	exp2 := p2.currentS
 	exp2--
 
-	h.shLoopParamUpdate(studyId, &p2)
+	h.shLoopParamUpdate(&p2)
 	rtn2 := p2.currentS
 
 	if exp2 != rtn2 {

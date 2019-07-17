@@ -202,7 +202,7 @@ func TestCreateStudyIdGeneration(t *testing.T) {
 		}
 		t.Logf("id gen %d %s %v\n", i, id, err)
 	}
-	for id, _ := range encountered {
+	for id := range encountered {
 		err := mysqlInterface.DeleteStudy(id)
 		if err != nil {
 			t.Errorf("DeleteStudy error %v", err)
