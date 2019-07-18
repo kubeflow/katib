@@ -15,12 +15,22 @@ def register_experiment(stub):
   feasible_space = api_pb2.FeasibleSpace(min="1", max="5")
   parameter_specs = api_pb2.ExperimentSpec.ParameterSpecs()
   parameter_specs.parameters.add(name="lr", parameter_type=api_pb2.DOUBLE, feasible_space=feasible_space)
+
+  graph_config = api_pb2.GraphConfig(num_layers=8, input_sizes=[32,32,3], output_sizes=[10])
+  operations = api_pb2.NasConfig.Operations()
+  feasible_space = api_pb2.FeasibleSpace(list=["3","5","7"])
+  parameter_specs = api_pb2.Operation.ParameterSpecs()
+  parameter_specs.parameters.add(name="filter_size", parameter_type=api_pb2.CATEGORICAL, feasible_space=feasible_space)
+  operations.operation.add(operation_type="convolution", parameter_specs=parameter_specs)
+  nas_config = api_pb2.NasConfig(graph_config=graph_config, operations=operations)
+
   exp_spec = api_pb2.ExperimentSpec(objective=obj,
                                     algorithm=algo,
                                     trial_template="run-mnist",
                                     metrics_collector_spec="metrics-collector",
                                     parallel_trial_count=2,
-                                    max_trial_count=9)
+                                    max_trial_count=9,
+                                    nas_config=nas_config)
   exp_status = api_pb2.ExperimentStatus(condition=1,
                                         start_time="2019-04-28T14:09:15Z",
                                         completion_time="2019-04-28T16:09:15Z")
@@ -130,10 +140,8 @@ def get_nasrl_algo_suggestion(stub):
     reply = stub.GetSuggestions(api_pb2.GetSuggestionsRequest(experiment_name=TEST_EXPERIMENT,
                                                             algorithm_name="nasrl",
                                                             request_number=1), 10)
-
     trials = reply.trials
 
-    logger.info("Trial info: {}".format(reply))
     if len(trials) == 1 and trials[0].spec.experiment_name == TEST_EXPERIMENT:
       logger.info("Get nasrl algorithm suggestion successfully")
     else:
