@@ -266,6 +266,8 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 				logger.Error(err, "Create job error")
 				return nil, err
 			}
+			msg := "Trial is running"
+			instance.MarkTrialStatusRunning(TrialRunningReason, msg)
 		} else {
 			logger.Error(err, "Trial Get error")
 			return nil, err
@@ -281,8 +283,6 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha2.Trial, desiredJob
 		}
 	}
 
-	msg := "Trial is running"
-	instance.MarkTrialStatusRunning(TrialRunningReason, msg)
 	return deployedJob, nil
 }
 
