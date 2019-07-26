@@ -236,12 +236,64 @@ type Operation struct {
 	Parameters    []ParameterSpec `json:"parameters,omitempty"`
 }
 
-// Spec for metrics collectors. For v1alpha2 we will keep metrics collection as
-// cron jobs. This can be replaced by a push-model when the metadata client lib
-// is ready.
 type MetricsCollectorSpec struct {
-	Retain     bool       `json:"retain,omitempty"`
+	// Deprecated Retain
+	Retain bool `json:"retain,omitempty"`
+	// Deprecated GoTemplate
 	GoTemplate GoTemplate `json:"goTemplate,omitempty"`
+
+	Source    *SourceSpec    `json:"source,omitempty"`
+	Collector *CollectorSpec `json:"collector,omitempty"`
+}
+
+type SourceSpec struct {
+	// Model-train source code can expose metrics by http, such as HTTP endpoint in
+	// prometheus metric format
+	HttpGet *v1.HTTPGetAction `json:"httpGet,omitempty"`
+	// During training model, metrics may be persisted into local file in source
+	// code, such as tfEvent use case
+	FileSystemPath *FileSystemPath `json:"fileSystemPath,omitempty"`
+	// Default metric output format is {"metric": "<metric_name>",
+	// "value": <int_or_float>, "epoch": <int>, "step": <int>}, but if the output doesn't
+	// follow default format, please extend it here
+	Filter *FilterSpec `json:"filter,omitempty"`
+}
+
+type FilterSpec struct {
+	// When the metrics output follows format as this field specified, metricsCollector
+	// collects it and reports to metrics server, it can be "<metric_name>: <float>" or else
+	MetricsFormat []string `json:"metricsFormat,omitempty"`
+}
+
+type FileSystemKind string
+
+const (
+	DirectoryKind FileSystemKind = "diretory"
+	FileKind      FileSystemKind = "file"
+)
+
+type FileSystemPath struct {
+	Path string         `json:"path,omitempty"`
+	Kind FileSystemKind `json:"kind,omitempty"`
+}
+
+type CollectorKind string
+
+const (
+	StdOutCollector           CollectorKind = "stdOutCollector"
+	FileCollector             CollectorKind = "fileCollector"
+	TfEventCollector          CollectorKind = "tfEventCollector"
+	PrometheusMetricCollector CollectorKind = "prometheusMetricCollector"
+	CustomCollector           CollectorKind = "customCollector"
+	// When model train source code persists metrics into persistent layer
+	// directly, metricsCollector isn't in need, and its kind is "noneCollector"
+	NoneCollector CollectorKind = "noneCollector"
+)
+
+type CollectorSpec struct {
+	Kind CollectorKind `json:"kind"`
+	// When kind is "customCollector", this field will be used
+	CustomCollector *v1.Container `json:"customCollector,omitempty"`
 }
 
 func init() {
