@@ -13,19 +13,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package apis
+package v1alpha2
 
 import (
-	experiments "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	trials "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
-	trialmetrics "github.com/kubeflow/katib/pkg/api/operators/apis/trialmetrics/v1alpha2"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"sigs.k8s.io/controller-runtime/pkg/runtime/scheme"
 )
 
-func init() {
-	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
-	AddToSchemes = append(AddToSchemes,
-		experiments.SchemeBuilder.AddToScheme,
-		trialmetrics.SchemeBuilder.AddToScheme,
-		trials.SchemeBuilder.AddToScheme,
-	)
-}
+const (
+	Group   = "kubeflow.org"
+	Version = "v1alpha2"
+)
+
+var (
+	// SchemeGroupVersion is group version used to register these objects
+	SchemeGroupVersion = schema.GroupVersion{Group: Group, Version: Version}
+
+	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
+	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
+	AddToScheme   = SchemeBuilder.AddToScheme
+)
