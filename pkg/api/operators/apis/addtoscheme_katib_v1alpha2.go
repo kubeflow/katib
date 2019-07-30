@@ -18,14 +18,12 @@ package apis
 import (
 	experiments "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	trials "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
-	trialmetrics "github.com/kubeflow/katib/pkg/api/operators/apis/trialmetrics/v1alpha2"
 )
 
 func init() {
 	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
 	AddToSchemes = append(AddToSchemes,
 		experiments.SchemeBuilder.AddToScheme,
-		trialmetrics.SchemeBuilder.AddToScheme,
 		trials.SchemeBuilder.AddToScheme,
 	)
 }
