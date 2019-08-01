@@ -1,6 +1,16 @@
-# Metrics Collector Proposal
+# 1. Metrics Collector Proposal
 
-## Motivation
+- [1. Metrics Collector Proposal](#1-metrics-collector-proposal)
+  - [1.1. Motivation](#11-motivation)
+  - [1.2. Goal](#12-goal)
+  - [1.3. API](#13-api)
+    - [1.3.1. Metric Collector](#131-metric-collector)
+  - [1.4. Implementation](#14-implementation)
+    - [1.4.1. Mutating Webhook](#141-mutating-webhook)
+    - [1.4.2. Metric Collector](#142-metric-collector)
+    - [1.4.3. Collection of Final Metrics](#143-collection-of-final-metrics)
+
+## 1.1. Motivation
 
 [Katib](https://github.com/kubeflow/katib) is a hyperparameter tuning (HPT) and neural architecture search (NAS) system based on Kubernetes.
 During the auto-training, the metrics collection is an essential step.
@@ -17,15 +27,16 @@ The sidecar collects metrics of the master and then store them on the persistent
 
 Fig. 1 Architecture of the new design
 
-## Goal
+## 1.2. Goal
 
 1. **A mutating webhook**: inject metrics collector as a sidecar into master pod.
 2. **A metric collector**: collect metrics and store them on the persistent layer (katib-manager).
 3. **The final metrics** of worker pods should be collected by trail controller and then be stored into trial status.
 
-## API
+## 1.3. API
 
-### Metric Collector
+### 1.3.1. Metric Collector
+
 For more detail, see [here](https://github.com/kubeflow/katib/pull/697#issuecomment-516264282).
 
     type MetricsCollectorSpec struct {
@@ -89,9 +100,9 @@ For more detail, see [here](https://github.com/kubeflow/katib/pull/697#issuecomm
         CustomCollector *v1.Container `json:"customCollector,omitempty"`
     }
 
-## Implementation
+## 1.4. Implementation
 
-### Mutating Webhook
+### 1.4.1. Mutating Webhook
 
 To avoid collecting duplicated metrics, as we discuss in [kubeflow/katib#685](https://github.com/kubeflow/katib/issues/685), only one metrics collector sidecar will be injected into the master pod during one Experiment.
 In the new design, there are two modes for katib mutating webhook to inject the sidecar: **Pod Level Injecting** and **Job Level Injecting**.
@@ -114,11 +125,11 @@ In **Job Level Injecting**,
 
 After injecting, the sidecar collects metrics of the master and then store them on the persistent layer (e.x. katib-manager and metadata server).
 
-### Metric Collector
+### 1.4.2. Metric Collector
 
 _#WIP_
 
-### Collection of Final Metrics
+### 1.4.3. Collection of Final Metrics
 
 The final metrics of worker pods should be collected by trail controller and then be stored into trial status.
 
