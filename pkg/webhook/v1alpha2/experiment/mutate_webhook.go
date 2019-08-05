@@ -62,3 +62,9 @@ func (e *experimentDefaulter) InjectDecoder(d types.Decoder) error {
 	e.decoder = d
 	return nil
 }
+
+func NewExperimentDefaulter(c client.Client) *experimentDefaulter {
+	return &experimentDefaulter{
+		client: c,
+	}
+}

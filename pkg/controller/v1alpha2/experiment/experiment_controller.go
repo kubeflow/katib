@@ -18,11 +18,9 @@ package experiment
 
 import (
 	"context"
-	"os"
 	"sort"
 
 	"github.com/spf13/viper"
-	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,8 +33,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
-	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/builder"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
@@ -47,8 +43,6 @@ import (
 	suggestionfake "github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/suggestion/fake"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/util"
 )
-
-const katibControllerName = "katib-controller"
 
 var log = logf.Log.WithName("experiment-controller")
 
@@ -108,10 +102,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		log.Error(err, "Trial watch failed")
 		return err
 	}
-	if err = addWebhook(mgr); err != nil {
-		log.Error(err, "Failed to create webhook")
-		return err
-	}
 
 	log.Info("Experiment controller created")
 	return nil
@@ -136,57 +126,6 @@ func addWatch(mgr manager.Manager, c controller.Controller) error {
 
 	if err != nil {
 		log.Error(err, "Trial watch failed")
-		return err
-	}
-	return nil
-}
-
-func addWebhook(mgr manager.Manager) error {
-	mutatingWebhook, err := builder.NewWebhookBuilder().
-		Name("mutating.experiment.kubeflow.org").
-		Mutating().
-		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
-		WithManager(mgr).
-		ForType(&experimentsv1alpha2.Experiment{}).
-		Handlers(&experimentDefaulter{}).
-		Build()
-	if err != nil {
-		return err
-	}
-	validatingWebhook, err := builder.NewWebhookBuilder().
-		Name("validating.experiment.kubeflow.org").
-		Validating().
-		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
-		WithManager(mgr).
-		ForType(&experimentsv1alpha2.Experiment{}).
-		Handlers(newExperimentValidator(mgr.GetClient())).
-		Build()
-	if err != nil {
-		return err
-	}
-	as, err := webhook.NewServer("experiment-admission-server", mgr, webhook.ServerOptions{
-		CertDir: "/tmp/cert",
-		BootstrapOptions: &webhook.BootstrapOptions{
-			Secret: &types.NamespacedName{
-				Namespace: os.Getenv(experimentsv1alpha2.DefaultKatibNamespaceEnvName),
-				Name:      katibControllerName,
-			},
-			Service: &webhook.Service{
-				Namespace: os.Getenv(experimentsv1alpha2.DefaultKatibNamespaceEnvName),
-				Name:      katibControllerName,
-				Selectors: map[string]string{
-					"app": katibControllerName,
-				},
-			},
-			ValidatingWebhookConfigName: "experiment-validating-webhook-config",
-			MutatingWebhookConfigName:   "experiment-mutating-webhook-config",
-		},
-	})
-	if err != nil {
-		return err
-	}
-	err = as.Register(mutatingWebhook, validatingWebhook)
-	if err != nil {
 		return err
 	}
 	return nil
