@@ -19,7 +19,7 @@ import (
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/manifest"
 )
 
-var log = logf.Log.WithName("experiment-controller")
+var log = logf.Log.WithName("experiment-validating-webhook")
 
 type Validator interface {
 	ValidateExperiment(instance *experimentsv1alpha2.Experiment) error
