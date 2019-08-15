@@ -70,7 +70,7 @@ sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha2\/katib-contr
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha2\/metrics-collector@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/metrics-collector:${VERSION}@" manifests/v1alpha2/katib-controller/metricsControllerConfigMap.yaml
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha2\/katib-manager@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-manager:${VERSION}@" manifests/v1alpha2/manager/deployment.yaml
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha2\/katib-manager-rest@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-manager-rest:${VERSION}@" manifests/v1alpha2/manager-rest/deployment.yaml
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha2\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-ui:${VERSION}@" manifests/v1alpha2/ui/deployment.yaml
+#sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha2\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/katib-ui:${VERSION}@" manifests/v1alpha2/ui/deployment.yaml
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha2\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-random:${VERSION}@" manifests/v1alpha2/suggestion/random/deployment.yaml
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha2\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-bayesianoptimization:${VERSION}@" manifests/v1alpha2/suggestion/bayesianoptimization/deployment.yaml
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha2\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha2\/suggestion-nasrl:${VERSION}@" manifests/v1alpha2/suggestion/nasrl/deployment.yaml

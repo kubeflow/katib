@@ -311,7 +311,7 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("python-tests", pythonImage, [
               "test/scripts/v1alpha2/python-tests.sh",
             ]),  // run python tests
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tests", helmImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tests", "liuhougangxa/golang-gcloud:1.12.8-257.0.0", [
               "test/scripts/v1alpha2/run-tests.sh",
             ]),  // run tests
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
