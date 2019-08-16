@@ -311,7 +311,7 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("python-tests", pythonImage, [
               "test/scripts/v1alpha2/python-tests.sh",
             ]),  // run python tests
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tests", helmImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tests", "gcr.io/kubeflow-ci/test-worker:v20190802-c6f9140-e3b0c4", [
               "test/scripts/v1alpha2/run-tests.sh",
             ]),  // run tests
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [

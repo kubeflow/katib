@@ -38,9 +38,11 @@ func main() {
 	log := logf.Log.WithName("entrypoint")
 
 	var experimentSuggestionName string
+	var metricsAddr string
 
 	flag.StringVar(&experimentSuggestionName, "experiment-suggestion-name",
 		"default", "The implementation of suggestion interface in experiment controller (default|fake)")
+	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 
 	flag.Parse()
 
@@ -57,7 +59,9 @@ func main() {
 	}
 
 	// Create a new katib controller to provide shared dependencies and start components
-	mgr, err := manager.New(cfg, manager.Options{})
+	mgr, err := manager.New(cfg, manager.Options{
+		MetricsBindAddress: metricsAddr,
+	})
 	if err != nil {
 		log.Error(err, "unable add APIs to scheme")
 		os.Exit(1)
