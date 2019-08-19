@@ -18,6 +18,7 @@ package pod
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -28,7 +29,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
 	v1 "k8s.io/api/core/v1"
-	// "github.com/kubeflow/katib/pkg/webhook/v1alpha2/experiment/injector"
+	apitypes "k8s.io/apimachinery/pkg/types"
+
+	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	katibmanagerv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
+)
+
+const (
+	// JobNameLabel represents the label key for the job name, the value is job name
+	JobNameLabel = "job-name"
+	// JobRoleLabel represents the label key for the job role, e.g. the value is master
+	JobRoleLabel = "job-role"
 )
 
 // For debug
@@ -36,9 +47,9 @@ var log = logf.Log.WithName("injector-webhook")
 
 // sidecarInjector that inject metrics collect sidecar into master pod
 type sidecarInjector struct {
-	client  client.Client
-	decoder types.Decoder
-	// injector.Injector
+	client         client.Client
+	decoder        types.Decoder
+	managerService string
 }
 
 var _ admission.Handler = &sidecarInjector{}
@@ -52,15 +63,16 @@ func (s *sidecarInjector) Handle(ctx context.Context, req types.Request) types.R
 
 	// Check whether the pod need to be mutated
 	if !s.MutationRequired(pod) {
-		log.Info("Skipping mutation for " + pod.Name + " due to policy check")
 		return admission.ValidationResponse(true, "")
 	}
 
+	// Get the namespace from req since the namespace in the pod is empty.
+	namespace := req.AdmissionRequest.Namespace
 	// Do mutation
-	mutatedPod := s.Mutate(pod)
-	// if err != nil {
-	// 	return admission.ErrorResponse(http.StatusBadRequest, err)
-	// }
+	mutatedPod, err := s.Mutate(pod, namespace)
+	if err != nil {
+		return admission.ErrorResponse(http.StatusBadRequest, err)
+	}
 
 	return admission.PatchResponse(pod, mutatedPod)
 }
@@ -79,30 +91,68 @@ func (s *sidecarInjector) InjectDecoder(d types.Decoder) error {
 	return nil
 }
 
-func NewSidecarInjector(c client.Client) *sidecarInjector {
+func NewSidecarInjector(c client.Client, ms string) *sidecarInjector {
 	return &sidecarInjector{
-		client: c,
+		client:         c,
+		managerService: ms,
 	}
 }
 
 func (s *sidecarInjector) MutationRequired(pod *v1.Pod) bool {
-	labels := pod.Labels
-	for k, v := range labels {
-		log.Info("FOR TEST: pod label {" + k + ": " + v + "}")
+	value, err := s.GetLabel(pod, JobRoleLabel)
+	if err != nil || value != "master" {
+		return false
 	}
-
 	return true
 }
 
-func (s *sidecarInjector) Mutate(pod *v1.Pod) *v1.Pod {
+func (s *sidecarInjector) GetLabel(pod *v1.Pod, targetLabel string) (string, error) {
+	labels := pod.Labels
+	for k, v := range labels {
+		if k == targetLabel {
+			return v, nil
+		}
+	}
+	return "", errors.New("Label " + targetLabel + " not found.")
+}
+
+func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error) {
 	mutatedPod := pod.DeepCopy()
 
-	// Hard code container, just for test
+	// Get the trial info from client
+	trialName, err := s.GetLabel(pod, JobNameLabel)
+	log.Info("FOR TEST: trialName: " + trialName + ", NameSpace: " + namespace)
+	if err != nil {
+		log.Info(err.Error())
+		return nil, err
+	}
+	trial := &trialsv1alpha2.Trial{}
+	err = s.client.Get(context.TODO(), apitypes.NamespacedName{Name: trialName, Namespace: namespace}, trial)
+	if err != nil {
+		log.Info(err.Error())
+		return nil, err
+	}
+
+	metricName := trial.Spec.Objective.ObjectiveMetricName
+	for _, v := range trial.Spec.Objective.AdditionalMetricNames {
+		metricName += ";"
+		metricName += v
+	}
+
+	// Hard code container, inject metrics collector
 	injectContainer := v1.Container{
-		Name:  "sidecar-nginxk",
-		Image: "nginx:1.12.2",
+		Name:            "metrics-collector",
+		Image:           "gcr.io/kubeflow-images-public/katib/v1alpha2/metrics-collector",
+		Command:         []string{"./metricscollector"},
+		Args:            []string{"-e", "TODO_Experiment", "-t", trialName, "-k", "TFJob", "-n", namespace, "-m", katibmanagerv1alpha2.GetManagerAddr(), "-mn", metricName},
+		ImagePullPolicy: v1.PullIfNotPresent,
+		VolumeMounts:    pod.Spec.Containers[0].VolumeMounts,
 	}
 	mutatedPod.Spec.Containers = append(mutatedPod.Spec.Containers, injectContainer)
 
-	return mutatedPod
+	log.Info("-t " + trialName + " -k " + "TFJob" + " -n " + namespace + " -m " + katibmanagerv1alpha2.GetManagerAddr() + " -mn " + metricName)
+
+	mutatedPod.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
+
+	return mutatedPod, nil
 }
