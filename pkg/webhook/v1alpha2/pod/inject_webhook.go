@@ -121,15 +121,12 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 
 	// Get the trial info from client
 	trialName, err := s.GetLabel(pod, JobNameLabel)
-	log.Info("FOR TEST: trialName: " + trialName + ", NameSpace: " + namespace)
 	if err != nil {
-		log.Info(err.Error())
 		return nil, err
 	}
 	trial := &trialsv1alpha2.Trial{}
 	err = s.client.Get(context.TODO(), apitypes.NamespacedName{Name: trialName, Namespace: namespace}, trial)
 	if err != nil {
-		log.Info(err.Error())
 		return nil, err
 	}
 
@@ -149,9 +146,6 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		VolumeMounts:    pod.Spec.Containers[0].VolumeMounts,
 	}
 	mutatedPod.Spec.Containers = append(mutatedPod.Spec.Containers, injectContainer)
-
-	log.Info("-t " + trialName + " -k " + "TFJob" + " -n " + namespace + " -m " + katibmanagerv1alpha2.GetManagerAddr() + " -mn " + metricName)
-
 	mutatedPod.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
 
 	return mutatedPod, nil
