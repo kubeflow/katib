@@ -1,6 +1,7 @@
 package metricscollector
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"strings"
@@ -45,15 +46,18 @@ func (d *MetricsCollector) CollectObservationLog(tId string, jobKind string, met
 	if len(pl.Items) == 0 {
 		return nil, fmt.Errorf("No Pods are found in Trial %v", tId)
 	}
-	logopt := apiv1.PodLogOptions{Timestamps: true}
-	logs, err := d.clientset.CoreV1().Pods(namespace).GetLogs(pl.Items[0].ObjectMeta.Name, &logopt).Do().Raw()
-	if err != nil {
-		return nil, err
+	logopt := apiv1.PodLogOptions{Container: "tensorflow", Timestamps: true, Follow: true}
+	reader, err := d.clientset.CoreV1().Pods(namespace).GetLogs(pl.Items[0].ObjectMeta.Name, &logopt).Stream()
+	for err != nil {
+		klog.Errorf("Retry to get logs, Error: %v", err)
+		time.Sleep(time.Duration(1) * time.Second)
+		reader, err = d.clientset.CoreV1().Pods(namespace).GetLogs(pl.Items[0].ObjectMeta.Name, &logopt).Stream()
 	}
-	if len(logs) == 0 {
-		return &v1alpha2.ObservationLog{}, nil
-	}
-	olog, err := d.parseLogs(tId, strings.Split(string(logs), "\n"), metrics)
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(reader)
+	logs := buf.String()
+
+	olog, err := d.parseLogs(tId, strings.Split(logs, "\n"), metrics)
 	return olog, err
 }
 
