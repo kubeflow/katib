@@ -1,4 +1,4 @@
-FROM node:10.16.0-jessie AS npm-build
+FROM node:10.16.2-alpine AS npm-build
 
 ADD /pkg/ui/v1alpha2/frontend /frontend
 RUN cd /frontend && npm install
