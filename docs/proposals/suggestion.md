@@ -4,17 +4,17 @@ Table of Contents
 =================
 
    * [Suggestion CRD Design Proposal](#suggestion-crd-design-proposal)
+   * [Table of Contents](#table-of-contents)
       * [Background](#background)
       * [Goals](#goals)
       * [Non-Goals](#non-goals)
       * [Design](#design)
          * [Kubernetes API](#kubernetes-api)
-         * [GRPC API (TODO)](#grpc-api-todo)
+         * [GRPC API](#grpc-api)
          * [Workflow](#workflow)
             * [Example](#example)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
-
 
 ## Background
 
@@ -72,7 +72,120 @@ type Suggestion struct {
 }
 ```
 
-### GRPC API (TODO)
+### GRPC API
+
+```protobuf
+syntax = "proto3";
+
+package api.v1.alpha3;
+
+import "google/api/annotations.proto";
+
+service AdvisorSuggestion {
+    rpc GetSuggestions(GetAdvisorSuggestionsRequest) returns (GetAdvisorSuggestionsReply);
+}
+
+message GetAdvisorSuggestionsRequest {
+    Experiment experiment = 1;
+    repeated Trial trials = 2; // all completed trials owned by the experiment.
+    int32 request_number = 3;
+}
+
+message GetAdvisorSuggestionsReply {
+    repeated Trial trials = 1; // trials should be created in the next run.
+}
+
+message Experiment {
+    string name = 1;
+    ExperimentSpec experiment_spec = 2;
+}
+
+message ExperimentSpec {
+   AlgorithmSpec algorithm = 3;
+   ParameterSpecs parameter_specs = 1;
+   ObjectiveSpec objective = 2;
+}
+
+message ParameterSpecs {
+    repeated ParameterSpec parameters = 1; 
+}
+
+message AlgorithmSpec {
+    string algorithm_name = 1;
+    repeated AlgorithmSetting algorithm_setting = 2;
+}
+
+message AlgorithmSetting {
+    string name = 1;
+    string value = 2;
+}
+
+message ParameterSpec {
+    string name = 1; /// Name of the parameter.
+    ParameterType parameter_type = 2; /// Type of the parameter.
+    FeasibleSpace feasible_space = 3; /// FeasibleSpace for the parameter.
+}
+
+message FeasibleSpace {
+    string max = 1; /// Max Value
+    string min = 2; /// Minimum Value
+    repeated string list = 3; /// List of Values.
+    string step = 4; /// Step for double or int parameter
+}
+
+enum ParameterType {
+    UNKNOWN_TYPE = 0; /// Undefined type and not used.
+    DOUBLE = 1; /// Double float type. Use "Max/Min".
+    INT = 2; /// Int type. Use "Max/Min".
+    DISCRETE = 3; /// Discrete number type. Use "List" as float.
+    CATEGORICAL = 4; /// Categorical type. Use "List" as string.
+}
+
+enum ObjectiveType {
+    UNKNOWN = 0; /// Undefined type and not used.
+    MINIMIZE = 1; /// Minimize
+    MAXIMIZE = 2; /// Maximize
+}
+
+message ObjectiveSpec {
+    ObjectiveType type = 1;
+    double goal = 2;
+    string objective_metric_name = 3;
+}
+
+message Trial {
+   string name = 1;
+   TrialSpec spec = 2;
+   TrialStatus status = 3;
+}
+
+message TrialSpec {
+   ParameterAssignments parameter_assignments = 2;
+   string run_spec = 3;
+}
+
+message ParameterAssignments {
+    repeated ParameterAssignment assignments = 1;
+}
+
+message ParameterAssignment {
+    string name = 1;
+    string value = 2;
+}
+
+message TrialStatus {
+   Observation observation = 4; // The best observation in logs.
+}
+
+message Observation {
+    repeated Metric metrics = 1;
+}
+
+message Metric {
+    string name = 1;
+    string value = 2;
+}
+```
 
 ### Workflow
 
@@ -172,7 +285,7 @@ spec:
   suggestions: 3
 ```
 
-After that, Suggestion controller communicates with the Suggestion and updates the status:
+After that, Suggestion controller communicates with the Suggestion via GRPC and updates the status:
 
 ```yaml
 apiVersion: "kubeflow.org/v1alpha2"
