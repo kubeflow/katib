@@ -40,6 +40,8 @@ const (
 	JobNameLabel = "job-name"
 	// JobRoleLabel represents the label key for the job role, e.g. the value is master
 	JobRoleLabel = "job-role"
+	// ControllerNameLabel represents the label key for the controller name, e.g. tf-operator and pytorch-operator
+	ControllerNameLabel = "controller-name"
 )
 
 // For debug
@@ -116,8 +118,24 @@ func (s *sidecarInjector) GetLabel(pod *v1.Pod, targetLabel string) (string, err
 	return "", errors.New("Label " + targetLabel + " not found.")
 }
 
+func GetJobKind(controllerName string) string {
+	if controllerName == "tf-operator" {
+		return "TFJob"
+	} else if controllerName == "pytorch-operator" {
+		return "PyTorchJob"
+	}
+	return "Unknown"
+}
+
 func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error) {
 	mutatedPod := pod.DeepCopy()
+
+	// Get job Kind from label controller-name.
+	kind := "TODO_Kind"
+	controllerName, err := s.GetLabel(pod, ControllerNameLabel)
+	if err == nil {
+		kind = GetJobKind(controllerName)
+	}
 
 	// Get the trial info from client
 	trialName, err := s.GetLabel(pod, JobNameLabel)
@@ -128,6 +146,13 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	err = s.client.Get(context.TODO(), apitypes.NamespacedName{Name: trialName, Namespace: namespace}, trial)
 	if err != nil {
 		return nil, err
+	}
+
+	experimentName := "TODO_Experiment"
+	for _, v := range trial.OwnerReferences {
+		if v.Kind == "Experiment" {
+			experimentName = v.Name
+		}
 	}
 
 	metricName := trial.Spec.Objective.ObjectiveMetricName
@@ -141,7 +166,7 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		Name:            "metrics-collector",
 		Image:           "gcr.io/kubeflow-images-public/katib/v1alpha2/metrics-collector",
 		Command:         []string{"./metricscollector"},
-		Args:            []string{"-e", "TODO_Experiment", "-t", trialName, "-k", "TFJob", "-n", namespace, "-m", katibmanagerv1alpha2.GetManagerAddr(), "-mn", metricName},
+		Args:            []string{"-e", experimentName, "-t", trialName, "-k", kind, "-n", namespace, "-m", katibmanagerv1alpha2.GetManagerAddr(), "-mn", metricName},
 		ImagePullPolicy: v1.PullIfNotPresent,
 		VolumeMounts:    pod.Spec.Containers[0].VolumeMounts,
 	}
