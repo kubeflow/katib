@@ -44,8 +44,8 @@ func GetJobLabelMap(jobKind string, trialName string) map[string]string {
 		labelMap["job-name"] = trialName
 		labelMap["job-role"] = "master"
 	} else if jobKind == "PyTorchJob" {
-		labelMap["pytorch-job-name"] = trialName
-		labelMap["pytorch-job-role"] = "master"
+		labelMap["job-name"] = trialName
+		labelMap["job-role"] = "master"
 	} else {
 		labelMap["job-name"] = trialName
 	}
