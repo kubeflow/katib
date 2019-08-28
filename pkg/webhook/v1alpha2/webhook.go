@@ -24,6 +24,7 @@ import (
 
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -31,7 +32,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/builder"
 )
 
-const katibControllerName = "katib-controller"
+const (
+	katibControllerName                   = "katib-controller"
+	katibMetricsCollectorInjection        = "katib-metricscollector-injection"
+	katibMetricsCollectorInjectionEnabled = "enabled"
+)
 
 func AddToManager(m manager.Manager) error {
 	server, err := webhook.NewServer("katib-admission-server", m, webhook.ServerOptions{
@@ -86,8 +91,14 @@ func register(manager manager.Manager, server *webhook.Server) error {
 	if err != nil {
 		return err
 	}
+	nsSelector := &metav1.LabelSelector{
+		MatchLabels: map[string]string{
+			katibMetricsCollectorInjection: katibMetricsCollectorInjectionEnabled,
+		},
+	}
 	injectWebhook, err := builder.NewWebhookBuilder().
 		Name("mutating.pod.kubeflow.org").
+		NamespaceSelector(nsSelector).
 		Mutating().
 		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
 		WithManager(manager).
