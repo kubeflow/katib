@@ -34,6 +34,9 @@ docker build -t ${PREFIX}/v1alpha2/metrics-collector -f ${CMD_PREFIX}/metricscol
 echo "Building UI image..."
 docker build -t ${PREFIX}/v1alpha2/katib-ui -f ${CMD_PREFIX}/ui/v1alpha2/Dockerfile .
 
+echo "Building sidecar metrics collector image..."
+docker build -t ${PREFIX}/v1alpha2/sidecar-metrics-collector -f ${CMD_PREFIX}/sidecar-metricscollector/v1alpha2/Dockerfile .
+
 echo "Building TF Event metrics collector image..."
 docker build -t ${PREFIX}/v1alpha2/tfevent-metrics-collector -f ${CMD_PREFIX}/tfevent-metricscollector/v1alpha2/Dockerfile .
 
