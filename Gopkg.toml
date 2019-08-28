@@ -12,7 +12,7 @@ required = [
     "sigs.k8s.io/controller-runtime/pkg/runtime/signals",
     "sigs.k8s.io/controller-runtime/pkg/source",
     "sigs.k8s.io/testing_frameworks/integration", # for integration testing
-	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
+    "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
     "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway",
     "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger",
     "github.com/golang/protobuf/protoc-gen-go",
@@ -57,27 +57,27 @@ required = [
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.11.2"
+  version = "kubernetes-1.12.3"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.11.2"
+  version = "kubernetes-1.12.3"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.11.2"
+  version = "kubernetes-1.12.3"
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  version = "kubernetes-1.11.2"
+  version = "kubernetes-1.12.3"
 
 [[constraint]]
   name = "sigs.k8s.io/controller-runtime"
-  version = "0.1.7"
+  version = "0.1.9"
 
 [[override]]
   name="k8s.io/apiextensions-apiserver"
-  version="kubernetes-1.11.2"
+  version="kubernetes-1.12.3"
 
 [[override]]
   name = "gopkg.in/fsnotify.v1"
@@ -86,11 +86,11 @@ required = [
 
 [[constraint]]
   name = "github.com/kubeflow/tf-operator"
-  version = "0.5.3"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/kubeflow/pytorch-operator"
-  version = "0.5.1"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/awalterschulze/gographviz"
