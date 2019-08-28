@@ -163,9 +163,9 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 
 	// Hard code container, inject metrics collector
 	injectContainer := v1.Container{
-		Name:            "metrics-collector",
-		Image:           "gcr.io/kubeflow-images-public/katib/v1alpha2/metrics-collector",
-		Command:         []string{"./metricscollector"},
+		Name:            "sidecar-metrics-collector",
+		Image:           "gcr.io/kubeflow-images-public/katib/v1alpha2/sidecar-metrics-collector",
+		Command:         []string{"./sidecar-metricscollector"},
 		Args:            []string{"-e", experimentName, "-t", trialName, "-k", kind, "-n", namespace, "-m", katibmanagerv1alpha2.GetManagerAddr(), "-mn", metricName},
 		ImagePullPolicy: v1.PullIfNotPresent,
 		VolumeMounts:    pod.Spec.Containers[0].VolumeMounts,
