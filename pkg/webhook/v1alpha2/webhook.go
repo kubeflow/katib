@@ -20,8 +20,10 @@ import (
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	"github.com/kubeflow/katib/pkg/webhook/v1alpha2/experiment"
+	"github.com/kubeflow/katib/pkg/webhook/v1alpha2/pod"
 
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -84,5 +86,16 @@ func register(manager manager.Manager, server *webhook.Server) error {
 	if err != nil {
 		return err
 	}
-	return server.Register(mutatingWebhook, validatingWebhook)
+	injectWebhook, err := builder.NewWebhookBuilder().
+		Name("mutating.pod.kubeflow.org").
+		Mutating().
+		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
+		WithManager(manager).
+		ForType(&v1.Pod{}).
+		Handlers(pod.NewSidecarInjector(manager.GetClient(), manager.GetConfig().Host)).
+		Build()
+	if err != nil {
+		return err
+	}
+	return server.Register(mutatingWebhook, validatingWebhook, injectWebhook)
 }
