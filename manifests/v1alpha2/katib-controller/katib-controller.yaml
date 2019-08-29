@@ -14,6 +14,8 @@ spec:
     metadata:
       labels:
         app: katib-controller
+      annotations:
+        prometheus.io/scrape: 'true'
     spec:
       serviceAccountName: katib-controller
       containers:
@@ -24,6 +26,9 @@ spec:
         ports:
         - containerPort: 443
           name: webhook
+          protocol: TCP
+        - containerPort: 8080
+          name: metrics
           protocol: TCP
         env:
         - name: KATIB_CORE_NAMESPACE

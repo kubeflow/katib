@@ -30,6 +30,7 @@ import (
 	"github.com/kubeflow/katib/pkg/api/operators/apis"
 	controller "github.com/kubeflow/katib/pkg/controller/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/consts"
+	webhook "github.com/kubeflow/katib/pkg/webhook/v1alpha2"
 )
 
 func main() {
@@ -37,9 +38,11 @@ func main() {
 	log := logf.Log.WithName("entrypoint")
 
 	var experimentSuggestionName string
+	var metricsAddr string
 
 	flag.StringVar(&experimentSuggestionName, "experiment-suggestion-name",
 		"default", "The implementation of suggestion interface in experiment controller (default|fake)")
+	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 
 	flag.Parse()
 
@@ -56,7 +59,9 @@ func main() {
 	}
 
 	// Create a new katib controller to provide shared dependencies and start components
-	mgr, err := manager.New(cfg, manager.Options{})
+	mgr, err := manager.New(cfg, manager.Options{
+		MetricsBindAddress: metricsAddr,
+	})
 	if err != nil {
 		log.Error(err, "unable add APIs to scheme")
 		os.Exit(1)
@@ -74,6 +79,12 @@ func main() {
 	log.Info("Setting up controller")
 	if err := controller.AddToManager(mgr); err != nil {
 		log.Error(err, "unable to register controllers to the manager")
+		os.Exit(1)
+	}
+
+	log.Info("Setting up webhooks")
+	if err := webhook.AddToManager(mgr); err != nil {
+		log.Error(err, "unable to register webhooks to the manager")
 		os.Exit(1)
 	}
 

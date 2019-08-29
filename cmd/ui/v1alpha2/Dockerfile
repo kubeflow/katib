@@ -1,4 +1,4 @@
-FROM node:10.16.0-jessie AS npm-build
+FROM node:10.16.2-alpine AS npm-build
 
 ADD /pkg/ui/v1alpha2/frontend /frontend
 RUN cd /frontend && npm install
@@ -9,7 +9,12 @@ FROM golang:alpine AS go-build
 # The GOPATH in the image is /go.
 ADD . /go/src/github.com/kubeflow/katib
 WORKDIR /go/src/github.com/kubeflow/katib/cmd/ui
-RUN go build -o katib-ui ./v1alpha2
+RUN if [ "$(uname -m)" = "ppc64le" ]; then \
+        apk --update add gcc musl-dev  && \
+	go build -o katib-ui ./v1alpha2; \
+    else \
+	go build -o katib-ui ./v1alpha2; \
+    fi
 
 FROM alpine:3.7
 WORKDIR /app

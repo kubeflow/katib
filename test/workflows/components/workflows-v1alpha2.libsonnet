@@ -55,11 +55,8 @@
       local srcRootDir = testDir + "/src";
       // The directory containing the kubeflow/katib repo
       local srcDir = srcRootDir + "/kubeflow/katib";
-      local testWorkerImage = "gcr.io/kubeflow-ci/test-worker";
-      local golangImage = "golang:1.9.4-stretch";
-      // TODO(jose5918) Build our own helm image
+      local testWorkerImage = "gcr.io/kubeflow-ci/test-worker:v20190802-c6f9140-e3b0c4";
       local pythonImage = "python:3.6-jessie";
-      local helmImage = "volumecontroller/golang:1.9.2";
       // The name of the NFS volume claim to use for test files.
       // local nfsVolumeClaim = "kubeflow-testing";
       local nfsVolumeClaim = "nfs-external";
@@ -311,7 +308,7 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("python-tests", pythonImage, [
               "test/scripts/v1alpha2/python-tests.sh",
             ]),  // run python tests
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tests", helmImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tests", testWorkerImage, [
               "test/scripts/v1alpha2/run-tests.sh",
             ]),  // run tests
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [

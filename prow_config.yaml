@@ -99,6 +99,7 @@ workflows:
     - pkg/manager/modelstore/*
     - pkg/suggestion/v1alpha2/*
     - pkg/ui/v1alpha2/*
+    - pkg/webhook/v1alpha2/*
     - cmd/earlystopping/medianstopping/v1alpha2/*
     - cmd/katib-controller/v1alpha2/*
     - cmd/manager/v1alpha2/*
@@ -141,6 +142,7 @@ workflows:
     - pkg/manager/modelstore/*
     - pkg/suggestion/v1alpha2/*
     - pkg/ui/v1alpha2/*
+    - pkg/webhook/v1alpha2/*
     - cmd/earlystopping/medianstopping/v1alpha2/*
     - cmd/katib-controller/v1alpha2/*
     - cmd/manager/v1alpha2/*
