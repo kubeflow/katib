@@ -46,6 +46,11 @@ gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha2/metrics-collector
 gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha2/metrics-collector:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha2/metrics-collector:latest --verbosity=info
 
 cd ${GO_DIR}
+cp cmd/sidecar-metricscollector/v1alpha2/Dockerfile .
+gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha2/sidecar-metrics-collector:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha2/sidecar-metrics-collector:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha2/sidecar-metrics-collector:latest --verbosity=info
+
+cd ${GO_DIR}
 cp cmd/tfevent-metricscollector/v1alpha2/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha2/tfevent-metrics-collector:${VERSION} --project=${PROJECT}
 gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha2/tfevent-metrics-collector:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha2/tfevent-metrics-collector:latest --verbosity=info
