@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
 	v1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	apitypes "k8s.io/apimachinery/pkg/types"
 
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
@@ -40,6 +41,7 @@ const (
 	JobNameLabel = "job-name"
 	// JobRoleLabel represents the label key for the job role, e.g. the value is master
 	JobRoleLabel = "job-role"
+	MasterRole   = "master"
 	// ControllerNameLabel represents the label key for the controller name, e.g. tf-operator and pytorch-operator
 	ControllerNameLabel = "controller-name"
 )
@@ -57,6 +59,8 @@ type sidecarInjector struct {
 var _ admission.Handler = &sidecarInjector{}
 
 func (s *sidecarInjector) Handle(ctx context.Context, req types.Request) types.Response {
+	// Get the namespace from req since the namespace in the pod is empty.
+	namespace := req.AdmissionRequest.Namespace
 	pod := &v1.Pod{}
 	err := s.decoder.Decode(req, pod)
 	if err != nil {
@@ -64,12 +68,15 @@ func (s *sidecarInjector) Handle(ctx context.Context, req types.Request) types.R
 	}
 
 	// Check whether the pod need to be mutated
-	if !s.MutationRequired(pod) {
-		return admission.ValidationResponse(true, "")
+	needMutate, err := s.MutationRequired(pod, namespace)
+	if err != nil {
+		return admission.ErrorResponse(http.StatusInternalServerError, err)
+	} else {
+		if !needMutate {
+			return admission.ValidationResponse(true, "")
+		}
 	}
 
-	// Get the namespace from req since the namespace in the pod is empty.
-	namespace := req.AdmissionRequest.Namespace
 	// Do mutation
 	mutatedPod, err := s.Mutate(pod, namespace)
 	if err != nil {
@@ -100,12 +107,27 @@ func NewSidecarInjector(c client.Client, ms string) *sidecarInjector {
 	}
 }
 
-func (s *sidecarInjector) MutationRequired(pod *v1.Pod) bool {
+func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error) {
 	value, err := s.GetLabel(pod, JobRoleLabel)
-	if err != nil || value != "master" {
-		return false
+	if err != nil || value != MasterRole {
+		return false, nil
 	}
-	return true
+
+	trialName, err := s.GetLabel(pod, JobNameLabel)
+	if err != nil {
+		return false, nil
+	}
+	trial := &trialsv1alpha2.Trial{}
+	err = s.client.Get(context.TODO(), apitypes.NamespacedName{Name: trialName, Namespace: ns}, trial)
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			return false, nil
+		} else {
+			return false, err
+		}
+	}
+
+	return true, nil
 }
 
 func (s *sidecarInjector) GetLabel(pod *v1.Pod, targetLabel string) (string, error) {
