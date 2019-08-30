@@ -1,8 +1,0 @@
-type: google.api.Service
-config_version: 3
-
-http:
-    rules:
-        - selector: api.Manager.CreateStudy
-          post: /v0.2/manager/createstudy
-          body: "*"
