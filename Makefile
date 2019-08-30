@@ -41,18 +41,6 @@ deploy:
 undeploy:
 	bash scripts/v1alpha2/undeploy.sh
 
-# Build Katib images for v1alpha1
-buildv1alpha1:
-	bash scripts/v1alpha1/build.sh
-
-# Deploy katib v1alpha1 manifests into a k8s cluster
-deployv1alpha1:
-	bash scripts/v1alpha1/deploy.sh
-
-# Undeploy katib v1alpha1 manifests into a k8s cluster
-undeployv1alpha1:
-	bash scripts/v1alpha1/undeploy.sh
-
 # Generate code
 generate:
 ifndef GOPATH
