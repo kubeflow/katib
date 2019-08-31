@@ -407,3 +407,15 @@ status:
         - name: --optimizer
           value: adam
 ```
+
+## Algorithm Supports
+
+### Grid
+
+We can use the length of the trials to know which grid we are in. Please refer to the [implementation in advisor](https://github.com/tobegit3hub/advisor/blob/master/advisor_server/suggestion/algorithm/grid_search.py).
+
+### Bayes Optimization
+
+We can use skopt or the native implementation in katib to run bayes optimization.
+
+### Hyperband
