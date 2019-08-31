@@ -81,18 +81,19 @@ package api.v1.alpha3;
 
 import "google/api/annotations.proto";
 
-service AdvisorSuggestion {
-    rpc GetSuggestions(GetAdvisorSuggestionsRequest) returns (GetAdvisorSuggestionsReply);
+service Suggestion {
+    rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply);
 }
 
-message GetAdvisorSuggestionsRequest {
+message GetSuggestionsRequest {
     Experiment experiment = 1;
     repeated Trial trials = 2; // all completed trials owned by the experiment.
     int32 request_number = 3;
 }
 
-message GetAdvisorSuggestionsReply {
+message GetSuggestionsReply {
     repeated Trial trials = 1; // trials should be created in the next run.
+    AlgorithmSpec algorithm = 2;
 }
 
 message Experiment {
