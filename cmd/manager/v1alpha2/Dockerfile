@@ -19,6 +19,5 @@ FROM alpine:3.7
 WORKDIR /app
 COPY --from=build-env /bin/grpc_health_probe /bin/
 COPY --from=build-env /go/src/github.com/kubeflow/katib/cmd/manager/katib-manager /app/
-#COPY --from=build-env /go/src/github.com/kubeflow/katib/pkg/manager/v1alpha1/visualise /
 ENTRYPOINT ["./katib-manager"]
 CMD ["-w", "kubernetes"]
