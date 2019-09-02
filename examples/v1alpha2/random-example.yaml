@@ -15,6 +15,44 @@ spec:
       - accuracy
   algorithm:
     algorithmName: random
+  metricsCollectorSpec:
+    goTemplate:
+      rawTemplate: |-
+        apiVersion: batch/v1beta1
+        kind: CronJob
+        metadata:
+          name: {{.Trial}}
+          namespace: {{.NameSpace}}
+        spec:
+          schedule: "*/1 * * * *"
+          successfulJobsHistoryLimit: 0
+          failedJobsHistoryLimit: 1
+          concurrencyPolicy: Forbid
+          jobTemplate:
+            spec:
+              backoffLimit: 0
+              template:
+                spec:
+                  serviceAccountName: metrics-collector
+                  containers:
+                  - name: {{.Trial}}
+                    image: gcr.io/kubeflow-images-public/katib/v1alpha2/metrics-collector
+                    imagePullPolicy: IfNotPresent
+                    command: ["./metricscollector"]
+                    args:
+                    - "-e"
+                    - "{{.Experiment}}"
+                    - "-t"
+                    - "{{.Trial}}"
+                    - "-k"
+                    - "{{.JobKind}}"
+                    - "-n"
+                    - "{{.NameSpace}}"
+                    - "-m"
+                    - "{{.ManagerService}}"
+                    - "-mn"
+                    - "{{.MetricNames}}"
+                  restartPolicy: Never
   trialTemplate:
     goTemplate:
         rawTemplate: |-

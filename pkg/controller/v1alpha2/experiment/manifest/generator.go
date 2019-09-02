@@ -10,8 +10,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/katibclient"
 )
@@ -24,7 +24,7 @@ const (
 type Generator interface {
 	InjectClient(c client.Client)
 	GetRunSpec(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string) (string, error)
-	GetRunSpecWithHyperParameters(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string, hps []*apiv1alpha2.ParameterAssignment) (string, error)
+	GetRunSpecWithHyperParameters(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string, hps []commonapiv1alpha2.ParameterAssignment) (string, error)
 	GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha2.MetricsCollectorSpec) (string, error)
 }
 
@@ -95,7 +95,7 @@ func (g *DefaultGenerator) GetRunSpec(e *experimentsv1alpha2.Experiment, experim
 }
 
 // GetRunSpecWithHyperParameters get the specification for trial with hyperparameters.
-func (g *DefaultGenerator) GetRunSpecWithHyperParameters(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string, hps []*apiv1alpha2.ParameterAssignment) (string, error) {
+func (g *DefaultGenerator) GetRunSpecWithHyperParameters(e *experimentsv1alpha2.Experiment, experiment, trial, namespace string, hps []commonapiv1alpha2.ParameterAssignment) (string, error) {
 	params := trialTemplateParams{
 		Experiment:      experiment,
 		Trial:           trial,
@@ -156,5 +156,5 @@ type trialTemplateParams struct {
 	Experiment      string
 	Trial           string
 	NameSpace       string
-	HyperParameters []*apiv1alpha2.ParameterAssignment
+	HyperParameters []commonapiv1alpha2.ParameterAssignment
 }

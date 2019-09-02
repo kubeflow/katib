@@ -35,6 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	suggestionsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/suggestions/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/consts"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/managerclient"
@@ -128,6 +129,18 @@ func addWatch(mgr manager.Manager, c controller.Controller) error {
 		log.Error(err, "Trial watch failed")
 		return err
 	}
+
+	err = c.Watch(
+		&source.Kind{Type: &suggestionsv1alpha2.Suggestion{}},
+		&handler.EnqueueRequestForOwner{
+			IsController: true,
+			OwnerType:    &experimentsv1alpha2.Experiment{},
+		})
+
+	if err != nil {
+		log.Error(err, "Suggestion watch failed")
+		return err
+	}
 	return nil
 }
 
@@ -166,10 +179,6 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 	instance := original.DeepCopy()
 
-	if needUpdate, finalizers := instance.NeedUpdateFinalizers(); needUpdate {
-		return r.updateFinalizers(instance, finalizers)
-	}
-
 	if instance.IsCompleted() {
 
 		return reconcile.Result{}, nil
@@ -200,12 +209,6 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 
 	if !equality.Semantic.DeepEqual(original.Status, instance.Status) {
-		//assuming that only status change
-		err = r.UpdateExperimentStatusInDB(instance)
-		if err != nil {
-			logger.Error(err, "Update experiment status in DB error")
-			return reconcile.Result{}, err
-		}
 		err = r.updateStatusHandler(instance)
 		if err != nil {
 			logger.Error(err, "Update experiment instance status error")
@@ -233,16 +236,47 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha2.
 			return err
 		}
 	}
+
+	suggestion := &suggestionsv1alpha2.Suggestion{}
+	if err := r.Get(context.TODO(),
+		types.NamespacedName{
+			Name:      instance.GetName(),
+			Namespace: instance.GetNamespace(),
+		}, suggestion); err != nil {
+		return err
+	}
+
 	reconcileRequired := !instance.IsCompleted()
 	if reconcileRequired {
-		r.ReconcileTrials(instance, trials.Items)
+		r.ReconcileTrials(instance, suggestion, trials.Items)
 	}
 	return nil
 }
 
-func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Experiment, trials []trialsv1alpha2.Trial) error {
+func (r *ReconcileExperiment) ReconcileTrials(
+	instance *experimentsv1alpha2.Experiment,
+	suggestion *suggestionsv1alpha2.Suggestion,
+	trials []trialsv1alpha2.Trial) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+
+	oldSuggestion := suggestion.DeepCopy()
+
+	if len(suggestion.Status.Assignments) > len(trials) {
+		tas, err := r.GetSuggestions(suggestion)
+		if err != nil {
+			return err
+		}
+		logger.Info("Getting suggestions", "assignments", tas)
+		if err := r.createTrials(instance, suggestion, tas); err != nil {
+			return err
+		}
+		if err := r.UpdateSuggestion(suggestion, oldSuggestion); err != nil {
+			return err
+		}
+		// TODO(gaocegege): Delete redundant trials
+		return nil
+	}
 
 	parallelCount := *instance.Spec.ParallelTrialCount
 	activeCount := instance.Status.TrialsPending + instance.Status.TrialsRunning
@@ -279,10 +313,9 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Expe
 
 		//skip if no trials need to be created
 		if addCount > 0 {
-			//create "addCount" number of trials
-			logger.Info("CreateTrials", "addCount", addCount)
-			if err := r.createTrials(instance, addCount); err != nil {
-				logger.Error(err, "Create trials error")
+			logger.Info("Request suggestions", "addCount", addCount)
+			if err := r.RequestSuggestions(suggestion, addCount); err != nil {
+				logger.Error(err, "Request new suggestions error")
 				return err
 			}
 		}
@@ -292,21 +325,16 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha2.Expe
 
 }
 
-func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha2.Experiment, addCount int32) error {
+func (r *ReconcileExperiment) createTrials(
+	instance *experimentsv1alpha2.Experiment,
+	suggestion *suggestionsv1alpha2.Suggestion,
+	assignments []suggestionsv1alpha2.TrialAssignment) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	trials, err := r.GetSuggestions(instance, addCount)
-	if err != nil {
-		logger.Error(err, "Get suggestions error")
-		return err
-	}
-	if len(trials) == 0 {
-		// for some suggestion services, such as hyperband, it will stop generating new trial once some condition satisfied
-		util.UpdateExperimentStatusCondition(instance, false, true)
-	}
-	for _, trial := range trials {
-		if err = r.createTrialInstance(instance, trial); err != nil {
-			logger.Error(err, "Create trial instance error", "trial", trial)
+
+	for _, assignment := range assignments {
+		if err := r.createTrialInstance(instance, suggestion, &assignment); err != nil {
+			logger.Error(err, "Create trial instance error", "assignment", assignment)
 			continue
 		}
 	}

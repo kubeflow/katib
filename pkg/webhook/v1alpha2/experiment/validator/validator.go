@@ -43,11 +43,6 @@ func (g *DefaultValidator) InjectClient(c client.Client) {
 }
 
 func (g *DefaultValidator) ValidateExperiment(instance *experimentsv1alpha2.Experiment) error {
-	if !instance.IsCreated() {
-		if err := g.validateForCreate(instance); err != nil {
-			return err
-		}
-	}
 	if err := g.validateObjective(instance.Spec.Objective); err != nil {
 		return err
 	}
@@ -155,17 +150,6 @@ func (g *DefaultValidator) validateSupportedJob(job *unstructured.Unstructured) 
 		}
 	}
 	return fmt.Errorf("Job type %v not supported", gvk)
-}
-
-func (g *DefaultValidator) validateForCreate(inst *experimentsv1alpha2.Experiment) error {
-	reply, err := g.PreCheckRegisterExperimentInDB(inst)
-	if err != nil {
-		return fmt.Errorf("Fail to check record for the experiment in DB: %v", err)
-	} else if !reply.CanRegister {
-		return fmt.Errorf("Record for the experiment has existed in DB; Please try to rename the experiment")
-	} else {
-		return nil
-	}
 }
 
 func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1alpha2.Experiment) error {

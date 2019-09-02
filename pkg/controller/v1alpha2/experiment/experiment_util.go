@@ -7,26 +7,29 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
-	utilrand "k8s.io/apimachinery/pkg/util/rand"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	common "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	suggestionsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/suggestions/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
-	apiv1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/consts"
 )
 
-func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alpha2.Experiment, trialInstance *apiv1alpha2.Trial) error {
+func (r *ReconcileExperiment) createTrialInstance(
+	expInstance *experimentsv1alpha2.Experiment,
+	suggestion *suggestionsv1alpha2.Suggestion,
+	assignment *suggestionsv1alpha2.TrialAssignment) error {
 	BUFSIZE := 1024
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: expInstance.GetName(), Namespace: expInstance.GetNamespace()})
 
 	trial := &trialsv1alpha2.Trial{}
-	trial.Name = fmt.Sprintf("%s-%s", expInstance.GetName(), utilrand.String(8))
+	trial.Name = *assignment.Name
 	trial.Namespace = expInstance.GetNamespace()
-	trial.Labels = map[string]string{consts.LabelExperimentName: expInstance.GetName()}
+	trial.Labels = map[string]string{
+		consts.LabelExperimentName: expInstance.GetName(),
+	}
 
 	if err := controllerutil.SetControllerReference(expInstance, trial, r.scheme); err != nil {
 		logger.Error(err, "Set controller reference error")
@@ -35,19 +38,10 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 
 	trial.Spec.Objective = expInstance.Spec.Objective
 
-	hps := make([]*apiv1alpha2.ParameterAssignment, 0)
-	if trialInstance.Spec != nil && trialInstance.Spec.ParameterAssignments != nil {
-		for _, p := range trialInstance.Spec.ParameterAssignments.Assignments {
-			hps = append(hps, p)
-			pa := common.ParameterAssignment{
-				Name:  p.Name,
-				Value: p.Value,
-			}
-			trial.Spec.ParameterAssignments = append(trial.Spec.ParameterAssignments, pa)
-		}
-	}
+	hps := assignment.Assignments
 
-	runSpec, err := r.GetRunSpecWithHyperParameters(expInstance, expInstance.GetName(), trial.Name, trial.Namespace, hps)
+	runSpec, err := r.GetRunSpecWithHyperParameters(
+		expInstance, expInstance.GetName(), trial.Name, trial.Namespace, hps)
 	if err != nil {
 		logger.Error(err, "Fail to get RunSpec from experiment", expInstance.Name)
 		return err

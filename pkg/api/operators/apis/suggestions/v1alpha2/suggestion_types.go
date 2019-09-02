@@ -34,6 +34,9 @@ type SuggestionSpec struct {
 
 // SuggestionStatus defines the observed state of Suggestion
 type SuggestionStatus struct {
+	// Suggestion results
+	Assignments []TrialAssignment `json:"assignments,omitempty"`
+
 	// Represents time when the Suggestion was acknowledged by the Suggestion controller.
 	// It is not guaranteed to be set in happens-before order across separate operations.
 	// It is represented in RFC3339 form and is in UTC.
@@ -51,6 +54,12 @@ type SuggestionStatus struct {
 
 	// List of observed runtime conditions for this Suggestion.
 	Conditions []SuggestionCondition `json:"conditions,omitempty"`
+}
+
+type TrialAssignment struct {
+	// Suggestion results
+	Assignments []common.ParameterAssignment `json:"assignments,omitempty"`
+	Name        *string                      `json:"name,omitempty"`
 }
 
 // SuggestionCondition describes the state of the Suggestion at a certain point.

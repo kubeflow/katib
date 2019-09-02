@@ -49,6 +49,20 @@ You can undeploy katib v1alpha2 manifests from a k8s cluster as follows:
 make undeploy
 ```
 
+## Run katib-controller natively
+
+```bash
+export KATIB_CORE_NAMESPACE=default
+kubectl apply -f ./manifests/v1alpha2/katib-controller/crd-trial.yaml
+kubectl apply -f ./manifests/v1alpha2/katib-controller/crd-suggestion.yaml
+kubectl apply -f ./manifests/v1alpha2/katib-controller/crd-experiment.yaml
+go build -o katib-controller github.com/kubeflow/katib/cmd/katib-controller/v1alpha2
+mkdir -p /tmp/cert
+cd /tmp/cert
+openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem
+./katib-controller
+```
+
 ## Implement new suggestion algorithm
 
 Suggestion API is defined as GRPC service at `pkg/api/v1alpha1/api.proto`. Source code is [here](https://github.com/kubeflow/katib/blob/master/pkg/api/v1alpha1/api.proto). You can attach new algorithm easily.

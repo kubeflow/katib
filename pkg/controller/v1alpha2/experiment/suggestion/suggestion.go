@@ -2,22 +2,25 @@ package suggestion
 
 import (
 	"context"
+	"fmt"
 
+	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	utilrand "k8s.io/apimachinery/pkg/util/rand"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	suggestionsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/suggestions/v1alpha2"
-	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
-	common "github.com/kubeflow/katib/pkg/common/v1alpha2"
 )
 
 // Suggestion is the interface for suggestions in Experiment controller.
 type Suggestion interface {
 	CreateSuggestion(instance *experimentsv1alpha2.Experiment) error
-	GetSuggestions(instance *experimentsv1alpha2.Experiment, addCount int32) ([]*api_pb.Trial, error)
+	RequestSuggestions(s *suggestionsv1alpha2.Suggestion, addcount int32) error
+	UpdateSuggestion(s *suggestionsv1alpha2.Suggestion, os *suggestionsv1alpha2.Suggestion) error
+	GetSuggestions(s *suggestionsv1alpha2.Suggestion) ([]suggestionsv1alpha2.TrialAssignment, error)
 }
 
 type General struct {
@@ -30,6 +33,17 @@ func New(scheme *runtime.Scheme, client client.Client) Suggestion {
 		scheme: scheme,
 		Client: client,
 	}
+}
+
+func (g *General) RequestSuggestions(s *suggestionsv1alpha2.Suggestion, addcount int32) error {
+	if int(s.Spec.Suggestions) > len(s.Status.Assignments) {
+		return nil
+	}
+	s.Spec.Suggestions += addcount
+	if err := g.Update(context.TODO(), s); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (g *General) CreateSuggestion(instance *experimentsv1alpha2.Experiment) error {
@@ -54,15 +68,25 @@ func (g *General) CreateSuggestion(instance *experimentsv1alpha2.Experiment) err
 	return nil
 }
 
-func (g *General) GetSuggestions(instance *experimentsv1alpha2.Experiment, addCount int32) ([]*api_pb.Trial, error) {
-	request := &api_pb.GetSuggestionsRequest{
-		ExperimentName: instance.Name,
-		AlgorithmName:  instance.Spec.Algorithm.AlgorithmName,
-		RequestNumber:  addCount,
+func (g *General) UpdateSuggestion(s *suggestionsv1alpha2.Suggestion, os *suggestionsv1alpha2.Suggestion) error {
+	if !equality.Semantic.DeepEqual(s.Status.Assignments, os.Status.Assignments) {
+		if err := g.Status().Update(context.TODO(), s); err != nil {
+			return err
+		}
 	}
-	if reply, err := common.GetSuggestions(request); err != nil {
-		return nil, err
-	} else {
-		return reply.Trials, nil
+	return nil
+}
+
+func (g *General) GetSuggestions(
+	s *suggestionsv1alpha2.Suggestion) ([]suggestionsv1alpha2.TrialAssignment, error) {
+	tas := make([]suggestionsv1alpha2.TrialAssignment, 0)
+	for i := range s.Status.Assignments {
+		if s.Status.Assignments[i].Name == nil {
+			name := fmt.Sprintf("%s-%s", s.Name, utilrand.String(8))
+			// Set the name for suggestions.
+			s.Status.Assignments[i].Name = &name
+			tas = append(tas, s.Status.Assignments[i])
+		}
 	}
+	return tas, nil
 }

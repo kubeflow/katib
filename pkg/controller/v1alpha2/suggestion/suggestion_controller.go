@@ -18,17 +18,13 @@ package suggestion
 
 import (
 	"context"
-	"reflect"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -36,9 +32,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	suggestionsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/suggestions/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/suggestion/composer"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/suggestion/suggestionclient"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/suggestion/suggestionclient/fake"
 )
 
-var log = logf.Log.WithName("controller")
+const (
+	ControllerName = "suggestion-controller"
+)
+
+var log = logf.Log.WithName(ControllerName)
 
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
@@ -53,7 +56,12 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileSuggestion{Client: mgr.GetClient(), scheme: mgr.GetScheme()}
+	return &ReconcileSuggestion{
+		Client:           mgr.GetClient(),
+		SuggestionClient: fake.New(),
+		scheme:           mgr.GetScheme(),
+		Composer:         composer.New(mgr.GetScheme()),
+	}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -64,7 +72,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for changes to Suggestion
 	err = c.Watch(&source.Kind{Type: &suggestionsv1alpha2.Suggestion{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
@@ -94,6 +101,9 @@ var _ reconcile.Reconciler = &ReconcileSuggestion{}
 // ReconcileSuggestion reconciles a Suggestion object
 type ReconcileSuggestion struct {
 	client.Client
+	composer.Composer
+	suggestionclient.SuggestionClient
+
 	scheme *runtime.Scheme
 }
 
@@ -107,68 +117,48 @@ type ReconcileSuggestion struct {
 // +kubebuilder:rbac:groups=katib.kubeflow.org,resources=suggestions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=katib.kubeflow.org,resources=suggestions/status,verbs=get;update;patch
 func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+	logger := log.WithValues("Suggestion", request.NamespacedName)
 	// Fetch the Suggestion instance
 	instance := &suggestionsv1alpha2.Suggestion{}
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			// Object not found, return.  Created objects are automatically garbage collected.
 			// For additional cleanup logic use finalizers.
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
+	oldS := instance.DeepCopy()
 
-	// TODO(user): Change this to be the object type created by your controller
-	// Define the desired Deployment object
-	deploy := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Name + "-deployment",
-			Namespace: instance.Namespace,
-		},
-		Spec: appsv1.DeploymentSpec{
-			Selector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{"deployment": instance.Name + "-deployment"},
-			},
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{"deployment": instance.Name + "-deployment"}},
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						{
-							Name:  "nginx",
-							Image: "nginx",
-						},
-					},
-				},
-			},
-		},
+	deploy, err := r.DesiredDeployment(instance)
+	if err != nil {
+		return reconcile.Result{}, err
 	}
-	if err := controllerutil.SetControllerReference(instance, deploy, r.scheme); err != nil {
+	_, err = r.createOrUpdateDeployment(deploy)
+	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	// TODO(user): Change this for the object type created by your controller
-	// Check if the Deployment already exists
-	found := &appsv1.Deployment{}
-	err = r.Get(context.TODO(), types.NamespacedName{Name: deploy.Name, Namespace: deploy.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		log.Info("Creating Deployment", "namespace", deploy.Namespace, "name", deploy.Name)
-		err = r.Create(context.TODO(), deploy)
+	service, err := r.DesiredService(instance)
+	if err != nil {
 		return reconcile.Result{}, err
-	} else if err != nil {
+	}
+	_, err = r.createOrUpdateService(service)
+	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	// TODO(user): Change this for the object type created by your controller
-	// Update the found object and write the result back if there are any changes
-	if !reflect.DeepEqual(deploy.Spec, found.Spec) {
-		found.Spec = deploy.Spec
-		log.Info("Updating Deployment", "namespace", deploy.Namespace, "name", deploy.Name)
-		err = r.Update(context.TODO(), found)
-		if err != nil {
+	// TODO(gaocegege): Update status.
+	if int(instance.Spec.Suggestions) > len(instance.Status.Assignments) {
+		logger.Info("Sync assignments", "suggestions", instance.Spec.Suggestions)
+		if err = r.SyncAssignments(instance); err != nil {
 			return reconcile.Result{}, err
 		}
+	}
+
+	if err := r.updateStatus(instance, oldS); err != nil {
+		return reconcile.Result{}, err
 	}
 	return reconcile.Result{}, nil
 }

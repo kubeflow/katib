@@ -41,6 +41,7 @@ const (
 func AddToManager(m manager.Manager) error {
 	server, err := webhook.NewServer("katib-admission-server", m, webhook.ServerOptions{
 		CertDir: "/tmp/cert",
+		Port:    8844,
 		BootstrapOptions: &webhook.BootstrapOptions{
 			Secret: &types.NamespacedName{
 				Namespace: os.Getenv(experimentsv1alpha2.DefaultKatibNamespaceEnvName),
