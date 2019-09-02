@@ -34,6 +34,20 @@ func (m *MockSuggestion) EXPECT() *MockSuggestionMockRecorder {
 	return m.recorder
 }
 
+// CreateSuggestion mocks base method
+func (m *MockSuggestion) CreateSuggestion(arg0 *v1alpha2.Experiment) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateSuggestion", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateSuggestion indicates an expected call of CreateSuggestion
+func (mr *MockSuggestionMockRecorder) CreateSuggestion(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSuggestion", reflect.TypeOf((*MockSuggestion)(nil).CreateSuggestion), arg0)
+}
+
 // GetSuggestions mocks base method
 func (m *MockSuggestion) GetSuggestions(arg0 *v1alpha2.Experiment, arg1 int32) ([]*v1alpha20.Trial, error) {
 	m.ctrl.T.Helper()

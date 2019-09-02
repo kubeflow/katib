@@ -65,7 +65,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		ManagerClient: managerclient.New(),
 	}
 	imp := viper.GetString(consts.ConfigExperimentSuggestionName)
-	r.Suggestion = newSuggestion(imp)
+	r.Suggestion = newSuggestion(imp, mgr.GetScheme(), mgr.GetClient())
 
 	r.Generator = manifest.New(r.Client)
 	r.updateStatusHandler = r.updateStatus
@@ -73,7 +73,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 }
 
 // newSuggestion returns the new Suggestion for the given config.
-func newSuggestion(config string) suggestion.Suggestion {
+func newSuggestion(config string, scheme *runtime.Scheme, client client.Client) suggestion.Suggestion {
 	// Use different implementation according to the configuration.
 	switch config {
 	case "fake":
@@ -81,11 +81,11 @@ func newSuggestion(config string) suggestion.Suggestion {
 		return suggestionfake.New()
 	case "default":
 		log.Info("Using the default suggestion implementation")
-		return suggestion.New()
+		return suggestion.New(scheme, client)
 	default:
 		log.Info("No valid name specified, using the default suggestion implementation",
 			"implementation", config)
-		return suggestion.New()
+		return suggestion.New(scheme, client)
 	}
 }
 
@@ -176,7 +176,6 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 
 	}
 	if !instance.IsCreated() {
-		//Experiment not created in DB
 		if instance.Status.StartTime == nil {
 			now := metav1.Now()
 			instance.Status.StartTime = &now
@@ -184,12 +183,10 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		if instance.Status.CompletionTime == nil {
 			instance.Status.CompletionTime = &metav1.Time{}
 		}
-		err = r.CreateExperimentInDB(instance)
-		if err != nil {
-			logger.Error(err, "Create experiment in DB error")
-			return reconcile.Result{
-				Requeue: true,
-			}, err
+
+		if err := r.CreateSuggestion(instance); err != nil {
+			logger.Error(err, "Fail to create the suggestion")
+			return reconcile.Result{}, nil
 		}
 		msg := "Experiment is created"
 		instance.MarkExperimentStatusCreated(util.ExperimentCreatedReason, msg)

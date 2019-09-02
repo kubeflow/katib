@@ -107,7 +107,7 @@ func (g *DefaultValidator) validateObjective(obj *commonapiv1alpha2.ObjectiveSpe
 	return nil
 }
 
-func (g *DefaultValidator) validateAlgorithm(ag *experimentsv1alpha2.AlgorithmSpec) error {
+func (g *DefaultValidator) validateAlgorithm(ag *commonapiv1alpha2.AlgorithmSpec) error {
 	if ag == nil {
 		return fmt.Errorf("No spec.algorithm specified.")
 	}

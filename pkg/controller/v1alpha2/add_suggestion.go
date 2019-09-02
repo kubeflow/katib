@@ -1,4 +1,5 @@
 /*
+Copyright 2019 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,19 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package apis
+package controller
 
 import (
-	experiments "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	suggestions "github.com/kubeflow/katib/pkg/api/operators/apis/suggestions/v1alpha2"
-	trials "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller/v1alpha2/suggestion"
 )
 
 func init() {
-	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
-	AddToSchemes = append(AddToSchemes,
-		experiments.SchemeBuilder.AddToScheme,
-		trials.SchemeBuilder.AddToScheme,
-		suggestions.SchemeBuilder.AddToScheme,
-	)
+	// AddToManagerFuncs is a list of functions to create controllers and add them to a manager.
+	AddToManagerFuncs = append(AddToManagerFuncs, suggestion.Add)
 }
