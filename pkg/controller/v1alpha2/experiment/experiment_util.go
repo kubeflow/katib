@@ -9,12 +9,11 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	suggestionsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/suggestions/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/consts"
+	"github.com/kubeflow/katib/pkg/util/v1alpha2/helper"
 )
 
 func (r *ReconcileExperiment) createTrialInstance(
@@ -27,9 +26,7 @@ func (r *ReconcileExperiment) createTrialInstance(
 	trial := &trialsv1alpha2.Trial{}
 	trial.Name = *assignment.Name
 	trial.Namespace = expInstance.GetNamespace()
-	trial.Labels = map[string]string{
-		consts.LabelExperimentName: expInstance.GetName(),
-	}
+	trial.Labels = helper.TrialLabels(expInstance)
 
 	if err := controllerutil.SetControllerReference(expInstance, trial, r.scheme); err != nil {
 		logger.Error(err, "Set controller reference error")
@@ -81,22 +78,4 @@ func (r *ReconcileExperiment) createTrialInstance(
 	}
 	return nil
 
-}
-
-func (r *ReconcileExperiment) updateFinalizers(instance *experimentsv1alpha2.Experiment, finalizers []string) (reconcile.Result, error) {
-	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace})
-	if !instance.ObjectMeta.DeletionTimestamp.IsZero() {
-		if err := r.DeleteExperimentInDB(instance); err != nil {
-			logger.Error(err, "Fail to delete data in DB")
-			return reconcile.Result{}, err
-		}
-	}
-	instance.SetFinalizers(finalizers)
-	if err := r.Update(context.TODO(), instance); err != nil {
-		logger.Error(err, "Fail to update finalizers")
-		return reconcile.Result{}, err
-	} else {
-		// Need to requeue because finalizer update does not change metadata.generation
-		return reconcile.Result{Requeue: true}, err
-	}
 }

@@ -723,17 +723,23 @@
           "items": {
             "$ref": "#/definitions/alpha2Trial"
           }
+        },
+        "algorithm": {
+          "$ref": "#/definitions/alpha2AlgorithmSpec"
         }
       }
     },
     "alpha2GetSuggestionsRequest": {
       "type": "object",
       "properties": {
-        "experiment_name": {
-          "type": "string"
+        "experiment": {
+          "$ref": "#/definitions/alpha2Experiment"
         },
-        "algorithm_name": {
-          "type": "string"
+        "trials": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha2Trial"
+          }
         },
         "request_number": {
           "type": "integer",
@@ -826,7 +832,7 @@
         },
         "goal": {
           "type": "number",
-          "format": "float"
+          "format": "double"
         },
         "objective_metric_name": {
           "type": "string"

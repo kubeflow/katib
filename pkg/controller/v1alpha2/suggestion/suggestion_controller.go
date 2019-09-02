@@ -23,6 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -31,10 +32,13 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	suggestionsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/suggestions/v1alpha2"
+	"github.com/kubeflow/katib/pkg/util/v1alpha2/helper"
+
+	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/suggestion/composer"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/suggestion/suggestionclient"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/suggestion/suggestionclient/fake"
 )
 
 const (
@@ -58,7 +62,7 @@ func Add(mgr manager.Manager) error {
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	return &ReconcileSuggestion{
 		Client:           mgr.GetClient(),
-		SuggestionClient: fake.New(),
+		SuggestionClient: suggestionclient.New(),
 		scheme:           mgr.GetScheme(),
 		Composer:         composer.New(mgr.GetScheme()),
 	}
@@ -149,10 +153,25 @@ func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{}, err
 	}
 
+	experiment := &experimentsv1alpha2.Experiment{}
+	trials := &trialsv1alpha2.TrialList{}
+
+	if err := r.Get(context.TODO(), types.NamespacedName{
+		Name:      instance.Name,
+		Namespace: instance.Namespace,
+	}, experiment); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	if err := r.List(context.TODO(),
+		client.MatchingLabels(helper.TrialLabels(experiment)), trials); err != nil {
+		return reconcile.Result{}, err
+	}
+
 	// TODO(gaocegege): Update status.
 	if int(instance.Spec.Suggestions) > len(instance.Status.Assignments) {
 		logger.Info("Sync assignments", "suggestions", instance.Spec.Suggestions)
-		if err = r.SyncAssignments(instance); err != nil {
+		if err = r.SyncAssignments(instance, experiment, trials.Items); err != nil {
 			return reconcile.Result{}, err
 		}
 	}

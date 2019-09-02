@@ -117,7 +117,7 @@ func (d *DefaultClient) GetTrialConf(instance *trialsv1alpha2.Trial) *api_pb.Tri
 		trial.Spec.Objective.Type = api_pb.ObjectiveType_UNKNOWN
 
 	}
-	trial.Spec.Objective.Goal = float32(*instance.Spec.Objective.Goal)
+	trial.Spec.Objective.Goal = float64(*instance.Spec.Objective.Goal)
 	trial.Spec.Objective.ObjectiveMetricName = instance.Spec.Objective.ObjectiveMetricName
 	for _, m := range instance.Spec.Objective.AdditionalMetricNames {
 		trial.Spec.Objective.AdditionalMetricNames = append(trial.Spec.Objective.AdditionalMetricNames, m)

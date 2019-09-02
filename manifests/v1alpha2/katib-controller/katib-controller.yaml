@@ -20,7 +20,7 @@ spec:
       serviceAccountName: katib-controller
       containers:
       - name: katib-controller
-        image: gcr.io/kubeflow-images-public/katib/v1alpha2/katib-controller
+        image: katib/v1alpha2/katib-controller:1
         imagePullPolicy: IfNotPresent
         command: ["./katib-controller"]
         ports:

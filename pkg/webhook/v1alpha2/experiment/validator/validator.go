@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -15,7 +13,6 @@ import (
 	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/managerclient"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/manifest"
 )
 
@@ -28,13 +25,11 @@ type Validator interface {
 
 type DefaultValidator struct {
 	manifest.Generator
-	managerclient.ManagerClient
 }
 
-func New(generator manifest.Generator, managerClient managerclient.ManagerClient) Validator {
+func New(generator manifest.Generator) Validator {
 	return &DefaultValidator{
-		Generator:     generator,
-		ManagerClient: managerClient,
+		Generator: generator,
 	}
 }
 
@@ -62,31 +57,11 @@ func (g *DefaultValidator) ValidateExperiment(instance *experimentsv1alpha2.Expe
 		return fmt.Errorf("Only one of spec.parameters and spec.nasConfig can be specified.")
 	}
 
-	if err := g.validateAlgorithmSettings(instance); err != nil {
-		return err
-	}
-
 	if err := g.validateMetricsCollector(instance); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func (g *DefaultValidator) validateAlgorithmSettings(inst *experimentsv1alpha2.Experiment) error {
-
-	_, err := g.ValidateAlgorithmSettings(inst)
-	statusCode, _ := status.FromError(err)
-
-	if statusCode.Code() == codes.Unknown {
-		return fmt.Errorf("Method ValidateAlgorithmSettings not found inside Suggestion service: %s", inst.Spec.Algorithm.AlgorithmName)
-	}
-
-	if statusCode.Code() == codes.InvalidArgument || statusCode.Code() == codes.Unavailable {
-		return fmt.Errorf("ValidateAlgorithmSettings Error: %v", statusCode.Message())
-	}
-	return nil
-
 }
 
 func (g *DefaultValidator) validateObjective(obj *commonapiv1alpha2.ObjectiveSpec) error {

@@ -38,7 +38,6 @@ import (
 	suggestionsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/suggestions/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/consts"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/managerclient"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/manifest"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/suggestion"
 	suggestionfake "github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/suggestion/fake"
@@ -61,9 +60,8 @@ func Add(mgr manager.Manager) error {
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	r := &ReconcileExperiment{
-		Client:        mgr.GetClient(),
-		scheme:        mgr.GetScheme(),
-		ManagerClient: managerclient.New(),
+		Client: mgr.GetClient(),
+		scheme: mgr.GetScheme(),
 	}
 	imp := viper.GetString(consts.ConfigExperimentSuggestionName)
 	r.Suggestion = newSuggestion(imp, mgr.GetScheme(), mgr.GetClient())
@@ -153,7 +151,6 @@ type ReconcileExperiment struct {
 
 	suggestion.Suggestion
 	manifest.Generator
-	managerclient.ManagerClient
 	// updateStatusHandler is defined for test purpose.
 	updateStatusHandler updateStatusFunc
 }

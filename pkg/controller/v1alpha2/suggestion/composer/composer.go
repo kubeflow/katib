@@ -9,6 +9,7 @@ import (
 
 	suggestionsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/suggestions/v1alpha2"
 	"github.com/kubeflow/katib/pkg/controller/v1alpha2/consts"
+	"github.com/kubeflow/katib/pkg/util/v1alpha2/helper"
 )
 
 type Composer interface {
@@ -34,17 +35,11 @@ func (g *General) DesiredDeployment(s *suggestionsv1alpha2.Suggestion) (*appsv1.
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{
-					"deployment":               s.Name,
-					consts.LabelExperimentName: s.Name,
-				},
+				MatchLabels: helper.SuggestionLabels(s),
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{
-						"deployment":               s.Name,
-						consts.LabelExperimentName: s.Name,
-					},
+					Labels: helper.SuggestionLabels(s),
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
@@ -65,7 +60,7 @@ func (g *General) DesiredService(s *suggestionsv1alpha2.Suggestion) (*corev1.Ser
 	ports := []corev1.ServicePort{
 		corev1.ServicePort{
 			Name: "katib-api",
-			Port: 6789,
+			Port: consts.DefaultSuggestionPort,
 		},
 	}
 
@@ -75,12 +70,9 @@ func (g *General) DesiredService(s *suggestionsv1alpha2.Suggestion) (*corev1.Ser
 			Namespace: s.Namespace,
 		},
 		Spec: corev1.ServiceSpec{
-			Selector: map[string]string{
-				"deployment":               s.Name,
-				consts.LabelExperimentName: s.Name,
-			},
-			Ports: ports,
-			Type:  corev1.ServiceTypeClusterIP,
+			Selector: helper.SuggestionLabels(s),
+			Ports:    ports,
+			Type:     corev1.ServiceTypeClusterIP,
 		},
 	}
 
@@ -97,6 +89,6 @@ func (g *General) desiredContainer(s *suggestionsv1alpha2.Suggestion) *corev1.Co
 	c := &corev1.Container{
 		Name: consts.ContainerSuggestion,
 	}
-	c.Image = "katib/v1alpha2/suggestion-random"
+	c.Image = "katib/v1alpha2/suggestion-random:1"
 	return c
 }
