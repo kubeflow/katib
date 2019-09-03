@@ -50,8 +50,7 @@ func (d *dbConn) DBInit() {
 		id INT AUTO_INCREMENT PRIMARY KEY,
 		time DATETIME(6),
 		metric_name VARCHAR(255) NOT NULL,
-		value TEXT NOT NULL,
-		FOREIGN KEY (trial_name) REFERENCES trials(name) ON DELETE CASCADE)`)
+		value TEXT NOT NULL)`)
 	if err != nil {
 		klog.Fatalf("Error creating observation_logs table: %v", err)
 	}

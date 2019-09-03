@@ -176,12 +176,6 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 	}
 
 	if !equality.Semantic.DeepEqual(original.Status, instance.Status) {
-		//assuming that only status change
-		err = r.UpdateTrialStatusInDB(instance)
-		if err != nil {
-			logger.Error(err, "Update trial status in DB error")
-			return reconcile.Result{}, err
-		}
 		err = r.updateStatusHandler(instance)
 		if err != nil {
 			logger.Error(err, "Update trial instance status error")
@@ -221,18 +215,18 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha2.Trial) error {
 	//Job already exists
 	//TODO Can desired Spec differ from deployedSpec?
 	if deployedJob != nil {
-		if err = r.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
-			logger.Error(err, "Update trial status observation error")
-			return err
-		}
+		// if err = r.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
+		// 	logger.Error(err, "Update trial status observation error")
+		// 	return err
+		// }
 		// Update Trial job status only if observation field is available.
 		// This will ensure that trial is set to be complete only if metric is collected at least once
-		if isTrialObservationAvailable(instance) {
-			if err = r.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
-				logger.Error(err, "Update trial status condition error")
-				return err
-			}
+		// if isTrialObservationAvailable(instance) {
+		if err = r.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
+			logger.Error(err, "Update trial status condition error")
+			return err
 		}
+		// }
 	}
 	return nil
 }

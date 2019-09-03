@@ -8,9 +8,9 @@ spec:
   maxTrialCount: 12
   maxFailedTrialCount: 3
   objective:
-    type: maximize
-    goal: 0.99
-    objectiveMetricName: accuracy_1
+    type: minimize
+    goal: 1000
+    objectiveMetricName: entropy
   algorithm:
     algorithmName: random
   parameters:
@@ -35,6 +35,21 @@ spec:
             namespace: {{.NameSpace}}
           spec:
            tfReplicaSpecs:
+            PS:
+              replicas: 1 
+              restartPolicy: OnFailure
+              template:
+                spec:
+                  containers:
+                    - name: tensorflow 
+                      image: gaocegege/tf-dist-mnist-test:1.2
+                      command:
+                        - "python"
+                        - "/var/tf_dist_mnist/dist_mnist.py"
+                        - "--data_dir"
+                        - "/var/tf_dist_mnist/mnist-data"
+                        - "--train_steps"
+                        - "800"
             Worker:
               replicas: 1 
               restartPolicy: OnFailure
@@ -42,58 +57,16 @@ spec:
                 spec:
                   containers:
                     - name: tensorflow 
-                      image: gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0
-                      imagePullPolicy: Always
+                      image: gaocegege/tf-dist-mnist-test:1.2
                       command:
                         - "python"
-                        - "/var/tf_mnist/mnist_with_summaries.py"
-                        - "--log_dir=/train/{{.Trial}}"
+                        - "/var/tf_dist_mnist/dist_mnist.py"
+                        - "--data_dir"
+                        - "/var/tf_dist_mnist/mnist-data"
+                        - "--train_steps"
+                        - "800"
                         {{- with .HyperParameters}}
                         {{- range .}}
                         - "{{.Name}}={{.Value}}"
                         {{- end}}
                         {{- end}}
-                      volumeMounts:
-                        - mountPath: "/train"
-                          name: "train"
-                  volumes:
-                    - name: "train"
-                      persistentVolumeClaim:
-                        claimName: "tfevent-volume"
-  metricsCollectorSpec:
-    goTemplate:
-      rawTemplate: |-
-        apiVersion: batch/v1beta1
-        kind: CronJob
-        metadata:
-          name: {{.Trial}}
-          namespace: {{.NameSpace}}
-        spec:
-          schedule: "*/1 * * * *"
-          successfulJobsHistoryLimit: 0
-          failedJobsHistoryLimit: 1
-          jobTemplate:
-            spec:
-              template:
-                spec:
-                  containers:
-                  - name: {{.Trial}}
-                    image: gcr.io/kubeflow-images-public/katib/v1alpha2/tfevent-metrics-collector
-                    args:
-                    - "python"
-                    - "main.py"
-                    - "-t"
-                    - "{{.Trial}}"
-                    - "-d"
-                    - "/train/{{.Trial}}"
-                    - "-m"
-                    - "accuracy_1"
-                    volumeMounts:
-                        - mountPath: "/train"
-                          name: "train"
-                  volumes:
-                    - name: "train"
-                      persistentVolumeClaim:
-                          claimName: "tfevent-volume"
-                  restartPolicy: Never
-                  serviceAccountName: metrics-collector

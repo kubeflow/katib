@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: katib-manager
-        image: gcr.io/kubeflow-images-public/katib/v1alpha2/katib-manager
+        image: katib/v1alpha2/katib-manager:1
         imagePullPolicy: IfNotPresent
         env:
           - name: MYSQL_ROOT_PASSWORD
@@ -30,11 +30,3 @@ spec:
         ports:
         - name: api
           containerPort: 6789
-        readinessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:6789"]
-          initialDelaySeconds: 5
-        livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:6789"]
-          initialDelaySeconds: 10
