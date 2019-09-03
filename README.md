@@ -111,7 +111,7 @@ Each component communicates with others via GRPC and the API is defined at `pkg/
 ### v1alpha2
 
 Katib consists of several components as shown below. Each component is running on k8s as a deployment.
-Each component communicates with others via GRPC and the API is defined at `pkg/api/v1alpha2/api.proto`.
+Each component communicates with others via GRPC and the API is defined at `pkg/apis/manager/v1alpha2/api.proto`.
 
 - katib: main components.
   - katib-manager: GRPC API server of katib.

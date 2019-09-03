@@ -45,7 +45,7 @@ import (
 	"google.golang.org/grpc"
 	"k8s.io/klog"
 
-	api "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	api "github.com/kubeflow/katib/pkg/apis/manager/v1alpha2"
 	"github.com/kubeflow/katib/pkg/util/v1alpha2/metricscollector"
 )
 

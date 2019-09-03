@@ -27,9 +27,9 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 
-	"github.com/kubeflow/katib/pkg/api/operators/apis"
-	controller "github.com/kubeflow/katib/pkg/controller/v1alpha2"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/consts"
+	apis "github.com/kubeflow/katib/pkg/apis/controller"
+	controller "github.com/kubeflow/katib/pkg/controller.v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha2/consts"
 	webhook "github.com/kubeflow/katib/pkg/webhook/v1alpha2"
 )
 

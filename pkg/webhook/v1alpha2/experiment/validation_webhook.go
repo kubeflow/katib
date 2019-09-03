@@ -25,9 +25,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
-	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/managerclient"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/manifest"
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha2/experiment/managerclient"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha2/experiment/manifest"
 	"github.com/kubeflow/katib/pkg/webhook/v1alpha2/experiment/validator"
 )
 

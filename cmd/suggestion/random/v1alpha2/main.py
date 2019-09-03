@@ -1,6 +1,6 @@
 import grpc
 import time
-from pkg.api.v1alpha2.python import api_pb2_grpc
+from pkg.apis.manager.v1alpha2.python import api_pb2_grpc
 from pkg.suggestion.v1alpha2.random_service import RandomService
 from concurrent import futures
 

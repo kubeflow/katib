@@ -1,6 +1,6 @@
 import itertools
 import numpy as np
-from pkg.api.v1alpha2.python import api_pb2
+from pkg.apis.manager.v1alpha2.python import api_pb2
 
 
 class Operation(object):

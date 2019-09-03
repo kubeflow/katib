@@ -13,7 +13,7 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"k8s.io/klog"
 
-	v1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	v1alpha2 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha2"
 )
 
 const (

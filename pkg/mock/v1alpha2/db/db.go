@@ -6,7 +6,7 @@ package mock
 
 import (
 	gomock "github.com/golang/mock/gomock"
-	v1alpha2 "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	v1alpha2 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha2"
 	reflect "reflect"
 )
 

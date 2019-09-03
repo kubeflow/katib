@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 	"k8s.io/klog"
 
-	gw "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	gw "github.com/kubeflow/katib/pkg/apis/manager/v1alpha2"
 )
 
 var (

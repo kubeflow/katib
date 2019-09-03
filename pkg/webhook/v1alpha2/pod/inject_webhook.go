@@ -32,7 +32,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	apitypes "k8s.io/apimachinery/pkg/types"
 
-	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
+	trialsv1alpha2 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha2"
 	katibmanagerv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
 )
 

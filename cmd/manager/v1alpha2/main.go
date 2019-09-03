@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"net"
 
-	health_pb "github.com/kubeflow/katib/pkg/api/health"
-	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	health_pb "github.com/kubeflow/katib/pkg/apis/manager/health"
+	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1alpha2"
 	kdb "github.com/kubeflow/katib/pkg/db/v1alpha2"
 	"k8s.io/klog"
 
