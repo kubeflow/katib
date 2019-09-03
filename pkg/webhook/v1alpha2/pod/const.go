@@ -27,7 +27,7 @@ const (
 )
 
 var JobRoleMap = map[string][]string{
-	"TFJob":      []string{JobRoleLabel, TFJobRoleLabel},
-	"PyTorchJob": []string{JobRoleLabel, PyTorchJobRoleLabel},
-	"Job":        []string{},
+	"TFJob":      {JobRoleLabel, TFJobRoleLabel},
+	"PyTorchJob": {JobRoleLabel, PyTorchJobRoleLabel},
+	"Job":        {},
 }
