@@ -46,8 +46,8 @@ func TestMain(m *testing.M) {
 		ControlPlaneStartTimeout: controlPlaneStartTimeout,
 		ControlPlaneStopTimeout:  controlPlaneStopTimeout,
 		CRDDirectoryPaths: []string{
-			filepath.Join("..", "..", "..", "..", "manifests", "v1alpha2", "katib-controller"),
-			filepath.Join("..", "..", "..", "..", "test", "unit", "v1alpha2", "crds"),
+			filepath.Join("..", "..", "..", "manifests", "v1alpha2", "katib-controller"),
+			filepath.Join("..", "..", "..", "test", "unit", "v1alpha2", "crds"),
 		},
 	}
 	apis.AddToScheme(scheme.Scheme)
