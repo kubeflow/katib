@@ -5,15 +5,20 @@ import (
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/api/equality"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	utilrand "k8s.io/apimachinery/pkg/util/rand"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
 	suggestionsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/suggestions/v1alpha2"
 )
+
+var log = logf.Log.WithName("experiment-suggestionc-client")
 
 // Suggestion is the interface for suggestions in Experiment controller.
 type Suggestion interface {
@@ -47,6 +52,7 @@ func (g *General) RequestSuggestions(s *suggestionsv1alpha2.Suggestion, addcount
 }
 
 func (g *General) CreateSuggestion(instance *experimentsv1alpha2.Experiment) error {
+	logger := log.WithValues("experiment", types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace})
 	suggestion := &suggestionsv1alpha2.Suggestion{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.Name,
@@ -62,7 +68,13 @@ func (g *General) CreateSuggestion(instance *experimentsv1alpha2.Experiment) err
 		return err
 	}
 
-	if err := g.Create(context.TODO(), suggestion); err != nil {
+	found := &suggestionsv1alpha2.Suggestion{}
+	err := g.Get(context.TODO(), types.NamespacedName{Name: suggestion.Name, Namespace: suggestion.Namespace}, found)
+	if err != nil && errors.IsNotFound(err) {
+		logger.Info("Creating Suggestion", "namespace", suggestion.Namespace, "name", suggestion.Name)
+		err = g.Create(context.TODO(), suggestion)
+		return err
+	} else if err != nil {
 		return err
 	}
 	return nil

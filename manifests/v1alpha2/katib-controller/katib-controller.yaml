@@ -20,7 +20,7 @@ spec:
       serviceAccountName: katib-controller
       containers:
       - name: katib-controller
-        image: katib/v1alpha2/katib-controller:1
+        image: katib/v1alpha2/katib-controller:3
         imagePullPolicy: IfNotPresent
         command: ["./katib-controller"]
         ports:

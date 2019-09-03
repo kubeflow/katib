@@ -64,9 +64,21 @@ func (g *General) SyncAssignments(
 	if err != nil {
 		return err
 	}
-	if len(response.Trials) == 0 {
-		return fmt.Errorf("The response contains 0 trials")
+	if len(response.Trials) != requestNum {
+		err := fmt.Errorf("The response contains unexpected trials")
+		logger.Error(err, "The response contains unexpected trials", "requestNum", requestNum, "response", response)
+		return err
 	}
+	for _, t := range response.Trials {
+		if t.Spec != nil {
+			instance.Status.Assignments = append(instance.Status.Assignments,
+				suggestionsv1alpha2.TrialAssignment{
+					Assignments: composeParameterAssignments(t.Spec.ParameterAssignments.Assignments),
+				})
+		}
+	}
+
+	// TODO(gaocegege): Set algorithm settings
 	return nil
 }
 

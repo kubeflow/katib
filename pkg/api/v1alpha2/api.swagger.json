@@ -582,20 +582,6 @@
         "algorithm": {
           "$ref": "#/definitions/alpha2AlgorithmSpec"
         },
-        "trial_template": {
-          "type": "string"
-        },
-        "metrics_collector_spec": {
-          "type": "string"
-        },
-        "parallel_trial_count": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "max_trial_count": {
-          "type": "integer",
-          "format": "int32"
-        },
         "nas_config": {
           "$ref": "#/definitions/alpha2NasConfig"
         }

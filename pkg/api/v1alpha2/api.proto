@@ -311,11 +311,7 @@ message ExperimentSpec {
     ParameterSpecs parameter_specs = 1;
     ObjectiveSpec objective = 2; 
     AlgorithmSpec algorithm = 3;
-    string trial_template = 4;
-    string metrics_collector_spec = 5;
-    int32 parallel_trial_count = 6;
-    int32 max_trial_count = 7;
-    NasConfig nas_config = 8;
+    NasConfig nas_config = 4;
 }
 
 message ExperimentStatus {
