@@ -6,7 +6,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 
-	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1alpha2"
 	mockdb "github.com/kubeflow/katib/pkg/mock/v1alpha2/db"
 )
 

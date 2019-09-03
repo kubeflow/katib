@@ -3,8 +3,8 @@ from pkg.suggestion.v1alpha2.NAS_Reinforcement_Learning.Operation import SearchS
 from pkg.suggestion.v1alpha2.NAS_Reinforcement_Learning.AlgorithmSettings import parseAlgorithmSettings
 import tensorflow as tf
 import grpc
-from pkg.api.v1alpha2.python import api_pb2
-from pkg.api.v1alpha2.python import api_pb2_grpc
+from pkg.apis.manager.v1alpha2.python import api_pb2
+from pkg.apis.manager.v1alpha2.python import api_pb2_grpc
 
 import logging
 from logging import getLogger, StreamHandler, INFO, DEBUG

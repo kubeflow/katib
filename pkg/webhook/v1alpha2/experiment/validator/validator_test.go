@@ -7,9 +7,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
-	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
-	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	commonv1alpha2 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha2"
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha2"
+	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1alpha2"
 	managerclientmock "github.com/kubeflow/katib/pkg/mock/v1alpha2/experiment/managerclient"
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1alpha2/experiment/manifest"
 )

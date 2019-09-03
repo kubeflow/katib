@@ -4,8 +4,8 @@ import string
 import grpc
 import numpy as np
 
-from pkg.api.v1alpha2.python import api_pb2
-from pkg.api.v1alpha2.python import api_pb2_grpc
+from pkg.apis.manager.v1alpha2.python import api_pb2
+from pkg.apis.manager.v1alpha2.python import api_pb2_grpc
 from pkg.suggestion.v1alpha2.bayesianoptimization.src.bayesian_optimization_algorithm import BOAlgorithm
 from pkg.suggestion.v1alpha2.bayesianoptimization.src.algorithm_manager import AlgorithmManager
 import logging

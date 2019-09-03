@@ -18,7 +18,7 @@ package webhook
 import (
 	"os"
 
-	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha2"
 	"github.com/kubeflow/katib/pkg/webhook/v1alpha2/experiment"
 	"github.com/kubeflow/katib/pkg/webhook/v1alpha2/pod"
 

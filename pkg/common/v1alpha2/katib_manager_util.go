@@ -19,8 +19,8 @@ import (
 	"context"
 	"os"
 
-	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha2"
+	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1alpha2"
 	"google.golang.org/grpc"
 )
 

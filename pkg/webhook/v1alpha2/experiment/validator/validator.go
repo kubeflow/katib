@@ -12,11 +12,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
-	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
-	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
+	commonapiv1alpha2 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha2"
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha2"
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/managerclient"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/experiment/manifest"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha2/experiment/managerclient"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha2/experiment/manifest"
 )
 
 var log = logf.Log.WithName("experiment-validating-webhook")

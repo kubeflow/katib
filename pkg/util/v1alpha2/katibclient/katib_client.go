@@ -26,9 +26,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
-	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/experiment/v1alpha2"
-	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
-	"github.com/kubeflow/katib/pkg/controller/v1alpha2/consts"
+	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha2"
+	trialsv1alpha2 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha2"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha2/consts"
 )
 
 type Client interface {

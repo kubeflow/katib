@@ -105,7 +105,7 @@ kubectl -n kubeflow get pod
 
 mkdir -p ${GO_DIR}
 cp -r . ${GO_DIR}/
-cp -r pkg/api/v1alpha2/python/* ${GO_DIR}/test/e2e/v1alpha2
+cp -r pkg/apis/manager/v1alpha2/python/* ${GO_DIR}/test/e2e/v1alpha2
 cd ${GO_DIR}/test/e2e/v1alpha2
 kubectl apply -f valid-experiment.yaml
 kubectl delete -f valid-experiment.yaml

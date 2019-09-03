@@ -3,8 +3,8 @@ import traceback
 
 import logging
 from logging import getLogger, StreamHandler, DEBUG
-from pkg.api.v1alpha2.python import api_pb2
-from pkg.api.v1alpha2.python import api_pb2_grpc
+from pkg.apis.manager.v1alpha2.python import api_pb2
+from pkg.apis.manager.v1alpha2.python import api_pb2_grpc
 import grpc
 from . import parsing_util
 

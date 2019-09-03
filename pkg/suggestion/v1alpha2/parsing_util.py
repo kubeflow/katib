@@ -4,7 +4,7 @@ to/from the grpc API into the format accepted/returned by the different
 suggestion generation algorithms.
 """
 from collections.abc import Iterable
-from pkg.api.v1alpha2.python import api_pb2
+from pkg.apis.manager.v1alpha2.python import api_pb2
 import numpy as np
 from .parameter import ParameterConfig
 
