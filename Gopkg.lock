@@ -10,14 +10,6 @@
   version = "v0.36.0"
 
 [[projects]]
-  digest = "1:b39cf81d5f440b9c0757a25058432d33af867e5201109bf53621356d9dab4b73"
-  name = "git.apache.org/thrift.git"
-  packages = ["lib/go/thrift"]
-  pruneopts = "NUT"
-  revision = "384647d290e2e4a55a14b1b7ef1b7e66293a2c33"
-  version = "v0.12.0"
-
-[[projects]]
   digest = "1:d8ebbd207f3d3266d4423ce4860c9f3794956306ded6c7ba312ecc69cdfbf04c"
   name = "github.com/PuerkitoBio/purell"
   packages = ["."]
@@ -362,19 +354,18 @@
   name = "github.com/kubeflow/pytorch-operator"
   packages = ["pkg/apis/pytorch/v1"]
   pruneopts = "NUT"
-  revision = "4e2f0c4011f59c58e6a59e90acfc009adc5a41f9"
+  revision = "c53647cb87e6e08a1f72528d251673c6eaebc33f"
 
 [[projects]]
   branch = "master"
-  digest = "1:3dc2347f98c88f2cfc45b49181e9b46749f70194352b05e2e36c3d5a03e641c4"
+  digest = "1:16b5232717d453aa1434abf114313d3298ee794355c272aa683cb11cd6102885"
   name = "github.com/kubeflow/tf-operator"
   packages = [
     "pkg/apis/common/v1",
-    "pkg/apis/common/v1beta2",
     "pkg/apis/tensorflow/v1",
   ]
   pruneopts = "NUT"
-  revision = "b7de6e47d6d63e6eebdd7550c15fd7c0e8b64e5b"
+  revision = "bc339d0869711bfdc6da087e5cd2ac8dca3e490f"
 
 [[projects]]
   digest = "1:802689c84994b7f2e41ffe7e39d29a8d8227f2121938dc025db44dfaa9633b15"
@@ -533,14 +524,6 @@
   pruneopts = "NUT"
   revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
   version = "v0.8.1"
-
-[[projects]]
-  digest = "1:a55a4612e8ca5a5496bd0aafd09d0f522280824cf7039f4858439ac4fbfad442"
-  name = "github.com/pressly/chi"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "1a6bb108ccf279c8dac6f9bad857d773b4f9b421"
-  version = "v4.0.1"
 
 [[projects]]
   digest = "1:3d7ad9c93ee2e43dc7dd48b76f96804c365be7fe30e75f7405028c4e633d189a"
@@ -1224,7 +1207,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "git.apache.org/thrift.git/lib/go/thrift",
     "github.com/awalterschulze/gographviz",
     "github.com/emicklei/go-restful",
     "github.com/ghodss/yaml",
@@ -1239,11 +1221,9 @@
     "github.com/grpc-ecosystem/grpc-gateway/utilities",
     "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1",
     "github.com/kubeflow/tf-operator/pkg/apis/common/v1",
-    "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta2",
     "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
-    "github.com/pressly/chi",
     "github.com/spf13/viper",
     "golang.org/x/net/context",
     "google.golang.org/genproto/googleapis/api/annotations",
@@ -1253,12 +1233,10 @@
     "google.golang.org/grpc/reflection",
     "google.golang.org/grpc/status",
     "gopkg.in/DATA-DOG/go-sqlmock.v1",
-    "gopkg.in/yaml.v2",
     "k8s.io/api/admissionregistration/v1beta1",
     "k8s.io/api/batch/v1",
     "k8s.io/api/batch/v1beta1",
     "k8s.io/api/core/v1",
-    "k8s.io/api/extensions/v1beta1",
     "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
     "k8s.io/apimachinery/pkg/api/equality",
     "k8s.io/apimachinery/pkg/api/errors",
@@ -1268,10 +1246,8 @@
     "k8s.io/apimachinery/pkg/labels",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
-    "k8s.io/apimachinery/pkg/runtime/serializer",
     "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/rand",
-    "k8s.io/apimachinery/pkg/util/uuid",
     "k8s.io/apimachinery/pkg/util/yaml",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/scheme",
