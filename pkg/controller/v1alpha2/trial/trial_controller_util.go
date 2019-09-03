@@ -26,7 +26,7 @@ import (
 	commonv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/common/v1alpha2"
 	trialsv1alpha2 "github.com/kubeflow/katib/pkg/api/operators/apis/trial/v1alpha2"
 	api_pb "github.com/kubeflow/katib/pkg/api/v1alpha2"
-	commonv1beta2 "github.com/kubeflow/tf-operator/pkg/apis/common/v1beta2"
+	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 )
 
 func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha2.Trial, deployedJob *unstructured.Unstructured) error {
@@ -56,7 +56,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha2.Tri
 				instance.Status.CompletionTime = &now
 			}
 		default:
-			jobStatus := commonv1beta2.JobStatus{}
+			jobStatus := commonv1.JobStatus{}
 			err := runtime.DefaultUnstructuredConverter.FromUnstructured(statusMap, &jobStatus)
 
 			if err != nil {
@@ -65,11 +65,11 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha2.Tri
 			}
 			if len(jobStatus.Conditions) > 0 {
 				lc := jobStatus.Conditions[len(jobStatus.Conditions)-1]
-				if lc.Type == commonv1beta2.JobSucceeded {
+				if lc.Type == commonv1.JobSucceeded {
 					msg := "Trial has succeeded"
 					instance.MarkTrialStatusSucceeded(TrialSucceededReason, msg)
 					instance.Status.CompletionTime = &now
-				} else if lc.Type == commonv1beta2.JobFailed {
+				} else if lc.Type == commonv1.JobFailed {
 					msg := "Trial has failed"
 					instance.MarkTrialStatusFailed(TrialFailedReason, msg)
 					instance.Status.CompletionTime = &now
