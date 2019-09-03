@@ -1,9 +1,9 @@
-# Suggestion CRD Design Proposal
+# Suggestion CRD Design Document
 
 Table of Contents
 =================
 
-   * [Suggestion CRD Design Proposal](#suggestion-crd-design-proposal)
+   * [Suggestion CRD Design Document](#suggestion-crd-design-document)
    * [Table of Contents](#table-of-contents)
       * [Background](#background)
       * [Goals](#goals)
@@ -13,14 +13,36 @@ Table of Contents
          * [GRPC API](#grpc-api)
          * [Workflow](#workflow)
             * [Example](#example)
+      * [Algorithm Supports](#algorithm-supports)
+         * [Random](#random)
+         * [Grid](#grid)
+         * [Bayes Optimization](#bayes-optimization)
+         * [HyperBand](#hyperband)
+         * [BOHB](#bohb)
+         * [TPE](#tpe)
+         * [Anneal](#anneal)
+         * [SMAC](#smac)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 ## Background
 
+Katib makes suggestions long-running in v1alpha2 and v1alpha3. And the suggestions need to communicate with katib manager to get experiments and trials from katib-db. This design hurts high availability. 
+
+Thus we proposed a new design to implement a CRD for suggestion and remove katib-db from main workflow. The new design simplifies the implmentation of experiment and trial controller, and makes katib Kubernetes native.
+
+This document is to illustrate the details of the new design.
+
 ## Goals
 
+- Propose the Suggestion CRD.
+- Propose new GRPC API for Suggestion service.
+- Suggest the approaches to implement suggestion algorithms.
+
 ## Non-Goals
+
+- Metrics collection (See [Metrics Collector Design Document](./metrics-collector.md))
+- Database-related refactor
 
 ## Design
 
@@ -61,14 +83,6 @@ type TrialAssignment struct {
 type ParameterAssignment struct {
 	Name  string `json:"name,omitempty"`
 	Value string `json:"value,omitempty"`
-}
-
-type Suggestion struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   SuggestionSpec   `json:"spec,omitempty"`
-	Status SuggestionStatus `json:"status,omitempty"`
 }
 ```
 
@@ -410,12 +424,36 @@ status:
 
 ## Algorithm Supports
 
+### Random
+
+We can use the implementation in katib or [hyperopt](https://github.com/hyperopt/hyperopt).
+
 ### Grid
 
 We can use the length of the trials to know which grid we are in. Please refer to the [implementation in advisor](https://github.com/tobegit3hub/advisor/blob/master/advisor_server/suggestion/algorithm/grid_search.py).
 
+Or we can use [chocolate](https://github.com/AIworx-Labs/chocolate).
+
 ### Bayes Optimization
 
-We can use skopt or the native implementation in katib to run bayes optimization.
+We can use [skopt](https://github.com/scikit-optimize/scikit-optimize) to run bayes optimization.
 
-### Hyperband
+### HyperBand
+
+We can use [HpBandSter](https://github.com/automl/HpBandSter) to run HyperBand.
+
+### BOHB
+
+We can use [HpBandSter](https://github.com/automl/HpBandSter) to run BOHB.
+
+### TPE
+
+We can use [hyperopt](https://github.com/hyperopt/hyperopt) to run TPE.
+
+### Anneal
+
+We can use [hyperopt](https://github.com/hyperopt/hyperopt) to run Anneal.
+
+### SMAC
+
+We can use [SMAC3](https://github.com/automl/SMAC3) to run SMAC.
