@@ -67,7 +67,10 @@ type AlgorithmSetting struct {
 
 type SuggestionStatus struct {
 	// Suggestion results
-	Assignments []TrialAssignment `json:"assignments,omitempty"`
+  Assignments []TrialAssignment `json:"assignments,omitempty"`
+  
+  // Algorithm settings set by the algorithm.
+	AlgorithmSettings []AlgorithmSetting `json:"algorithm_settings,omitempty"`
 
 	Conditions []SuggestionCondition `json:"conditions,omitempty"`
 	// include all common fields
