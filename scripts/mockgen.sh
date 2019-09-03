@@ -37,3 +37,20 @@ echo "Generating v1alpha2 ManagerClient in Experiment Controller..."
 mockgen -package mock -destination pkg/mock/v1alpha2/experiment/managerclient/managerclient.go  github.com/kubeflow/katib/pkg/controller.v1alpha2/experiment/managerclient ManagerClient
 echo "Generating v1alpha2 Suggestion in Experiment Controller..."
 mockgen -package mock -destination pkg/mock/v1alpha2/experiment/suggestion/suggestion.go  github.com/kubeflow/katib/pkg/controller.v1alpha2/experiment/suggestion Suggestion
+
+echo "Generating v1alpha3 ManagerClient..."
+mockgen -package mock -destination pkg/mock/v1alpha3/api/manager.go github.com/kubeflow/katib/pkg/apis/manager/v1alpha3 ManagerClient
+echo "Generating v1alpha3 SuggestionClient..."
+mockgen -package mock -destination pkg/mock/v1alpha3/api/suggestion.go github.com/kubeflow/katib/pkg/apis/manager/v1alpha3 SuggestionClient
+echo "Generating v1alpha3 KatibDBInterface..."
+mockgen -package mock -destination pkg/mock/v1alpha3/db/db.go github.com/kubeflow/katib/pkg/db/v1alpha3 KatibDBInterface
+echo "Generating v1alpha3 Generator..."
+mockgen -package mock -destination pkg/mock/v1alpha3/experiment/manifest/generator.go  github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/manifest Generator
+echo "Generating v1alpha3 KatibClient..."
+mockgen -package mock -destination pkg/mock/v1alpha3/util/katibclient/katibclient.go  github.com/kubeflow/katib/pkg/util/v1alpha3/katibclient Client
+echo "Generating v1alpha3 ManagerClient in Trial Controller..."
+mockgen -package mock -destination pkg/mock/v1alpha3/trial/managerclient/katibmanager.go  github.com/kubeflow/katib/pkg/controller.v1alpha3/trial/managerclient ManagerClient
+echo "Generating v1alpha3 ManagerClient in Experiment Controller..."
+mockgen -package mock -destination pkg/mock/v1alpha3/experiment/managerclient/managerclient.go  github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/managerclient ManagerClient
+echo "Generating v1alpha3 Suggestion in Experiment Controller..."
+mockgen -package mock -destination pkg/mock/v1alpha3/experiment/suggestion/suggestion.go  github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/suggestion Suggestion
