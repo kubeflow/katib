@@ -167,9 +167,9 @@ func newFakeInstance() *experimentsv1alpha3.Experiment {
 				Goal:                &goal,
 				ObjectiveMetricName: "testme",
 			},
-			Algorithm: &experimentsv1alpha3.AlgorithmSpec{
+			Algorithm: &commonv1alpha3.AlgorithmSpec{
 				AlgorithmName: "test",
-				AlgorithmSettings: []experimentsv1alpha3.AlgorithmSetting{
+				AlgorithmSettings: []commonv1alpha3.AlgorithmSetting{
 					{
 						Name:  "test1",
 						Value: "value1",

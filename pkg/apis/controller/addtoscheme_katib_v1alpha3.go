@@ -17,6 +17,7 @@ package apis
 
 import (
 	experiments "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
+	suggestions "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	trials "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 )
 
@@ -25,5 +26,6 @@ func init() {
 	AddToSchemes = append(AddToSchemes,
 		experiments.SchemeBuilder.AddToScheme,
 		trials.SchemeBuilder.AddToScheme,
+		suggestions.SchemeBuilder.AddToScheme,
 	)
 }
