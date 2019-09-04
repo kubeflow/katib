@@ -20,10 +20,12 @@ const (
 	// JobNameLabel represents the label key for the job name, the value is job name
 	JobNameLabel = "job-name"
 	// JobRoleLabel represents the label key for the job role, e.g. the value is master
-	JobRoleLabel        = "job-role"
-	TFJobRoleLabel      = "tf-job-role"
-	PyTorchJobRoleLabel = "pytorch-job-role"
-	MasterRole          = "master"
+	JobRoleLabel                 = "job-role"
+	TFJobRoleLabel               = "tf-job-role"
+	PyTorchJobRoleLabel          = "pytorch-job-role"
+	MasterRole                   = "master"
+	MetricsCollectorSidecar      = "metrics-collector-sidecar"
+	MetricsCollectorSidecarImage = "image"
 )
 
 var JobRoleMap = map[string][]string{

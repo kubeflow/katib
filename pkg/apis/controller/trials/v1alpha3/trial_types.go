@@ -42,6 +42,13 @@ type TrialSpec struct {
 	// Whether to retain the trial metrics collector CronJob object after completed.
 	// Deprecated
 	RetainMetricsCollector bool `json:"retainMetricsCollector,omitempty"`
+	// Describes how metrics will be collected
+	MetricsCollector MetricsCollectorSpec `json:"metricsCollector,omitempty"`
+}
+
+type MetricsCollectorSpec struct {
+	Source    *common.SourceSpec    `json:"source,omitempty"`
+	Collector *common.CollectorSpec `json:"collector,omitempty"`
 }
 
 type TrialStatus struct {

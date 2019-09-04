@@ -18,8 +18,10 @@ package pod
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
+	"os"
 
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
@@ -32,21 +34,12 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	apitypes "k8s.io/apimachinery/pkg/types"
 
+	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
+	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	katibmanagerv1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
 )
 
-const (
-	// JobNameLabel represents the label key for the job name, the value is job name
-	JobNameLabel = "job-name"
-	// JobRoleLabel represents the label key for the job role, e.g. the value is master
-	JobRoleLabel = "job-role"
-	MasterRole   = "master"
-	// ControllerNameLabel represents the label key for the controller name, e.g. tf-operator and pytorch-operator
-	ControllerNameLabel = "controller-name"
-)
-
-// For debug
 var log = logf.Log.WithName("injector-webhook")
 
 // sidecarInjector that inject metrics collect sidecar into master pod
@@ -108,15 +101,15 @@ func NewSidecarInjector(c client.Client, ms string) *sidecarInjector {
 }
 
 func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error) {
-	value, err := s.GetLabel(pod, JobRoleLabel)
-	if err != nil || value != MasterRole {
-		return false, nil
-	}
-
-	trialName, err := s.GetLabel(pod, JobNameLabel)
+	jobKind, jobName, err := getKabitJob(pod)
 	if err != nil {
 		return false, nil
 	}
+	if !isMasterRole(pod, jobKind) {
+		return false, nil
+	}
+
+	trialName := jobName
 	trial := &trialsv1alpha3.Trial{}
 	err = s.client.Get(context.TODO(), apitypes.NamespacedName{Name: trialName, Namespace: ns}, trial)
 	if err != nil {
@@ -130,43 +123,12 @@ func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 	return true, nil
 }
 
-func (s *sidecarInjector) GetLabel(pod *v1.Pod, targetLabel string) (string, error) {
-	labels := pod.Labels
-	for k, v := range labels {
-		if k == targetLabel {
-			return v, nil
-		}
-	}
-	return "", errors.New("Label " + targetLabel + " not found.")
-}
-
-func GetJobKind(controllerName string) string {
-	if controllerName == "tf-operator" {
-		return "TFJob"
-	} else if controllerName == "pytorch-operator" {
-		return "PyTorchJob"
-	}
-	return "Unknown"
-}
-
 func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error) {
 	mutatedPod := pod.DeepCopy()
 
-	// Get job Kind from label controller-name.
-	kind := "TODO_Kind"
-	controllerName, err := s.GetLabel(pod, ControllerNameLabel)
-	if err == nil {
-		kind = GetJobKind(controllerName)
-	}
-
-	// Get the trial info from client
-	trialName, err := s.GetLabel(pod, JobNameLabel)
-	if err != nil {
-		return nil, err
-	}
+	kind, trialName, _ := getKabitJob(pod)
 	trial := &trialsv1alpha3.Trial{}
-	err = s.client.Get(context.TODO(), apitypes.NamespacedName{Name: trialName, Namespace: namespace}, trial)
-	if err != nil {
+	if err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: trialName, Namespace: namespace}, trial); err != nil {
 		return nil, err
 	}
 
@@ -183,11 +145,13 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		metricName += v
 	}
 
-	// Hard code container, inject metrics collector
+	image, err := s.getMetricsCollectorImage(trial.Spec.MetricsCollector.Collector.Kind)
+	if err != nil {
+		return nil, err
+	}
 	injectContainer := v1.Container{
 		Name:            "sidecar-metrics-collector",
-		Image:           "gcr.io/kubeflow-images-public/katib/v1alpha3/sidecar-metrics-collector",
-		Command:         []string{"./sidecar-metricscollector"},
+		Image:           image,
 		Args:            []string{"-e", experimentName, "-t", trialName, "-k", kind, "-n", namespace, "-m", katibmanagerv1alpha3.GetManagerAddr(), "-mn", metricName},
 		ImagePullPolicy: v1.PullIfNotPresent,
 		VolumeMounts:    pod.Spec.Containers[0].VolumeMounts,
@@ -195,5 +159,37 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	mutatedPod.Spec.Containers = append(mutatedPod.Spec.Containers, injectContainer)
 	mutatedPod.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
 
+	log.Info("Inject metrics collector sidecar container", "Pod", pod.Name, "Trial", trialName, "Experiment", experimentName)
 	return mutatedPod, nil
+}
+
+func (s *sidecarInjector) getMetricsCollectorImage(cKind common.CollectorKind) (string, error) {
+	configMap := &v1.ConfigMap{}
+	err := s.client.Get(
+		context.TODO(),
+		apitypes.NamespacedName{Name: experimentsv1alpha3.KatibConfigMapName, Namespace: os.Getenv(experimentsv1alpha3.DefaultKatibNamespaceEnvName)},
+		configMap)
+	if err != nil {
+		log.Error(err, "Failed to find config map", "name", experimentsv1alpha3.KatibConfigMapName)
+		// Error reading the object - requeue the request.
+		return "", err
+	}
+	if mcs, ok := configMap.Data[MetricsCollectorSidecar]; ok {
+		kind := string(cKind)
+		mcsConfig := map[string]map[string]string{}
+		if err := json.Unmarshal([]byte(mcs), &mcsConfig); err != nil {
+			return "", err
+		}
+		if mc, ok := mcsConfig[kind]; ok {
+			if image, yes := mc[MetricsCollectorSidecarImage]; yes {
+				return image, nil
+			} else {
+				return "", errors.New("Failed to find " + MetricsCollectorSidecarImage + " configuration for metricsCollector kind " + kind)
+			}
+		} else {
+			return "", errors.New("Cannot support metricsCollector injection for kind " + kind)
+		}
+	} else {
+		return "", errors.New("Failed to find metrics collector configuration in configmap " + experimentsv1alpha3.KatibConfigMapName)
+	}
 }
