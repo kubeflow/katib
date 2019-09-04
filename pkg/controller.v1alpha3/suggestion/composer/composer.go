@@ -58,7 +58,7 @@ func (g *General) DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.
 
 func (g *General) DesiredService(s *suggestionsv1alpha3.Suggestion) (*corev1.Service, error) {
 	ports := []corev1.ServicePort{
-		corev1.ServicePort{
+		{
 			Name: "katib-api",
 			Port: consts.DefaultSuggestionPort,
 		},
