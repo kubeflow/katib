@@ -24,6 +24,8 @@ const (
 	TFJobRoleLabel      = "tf-job-role"
 	PyTorchJobRoleLabel = "pytorch-job-role"
 	MasterRole          = "master"
+	MetricsCollectorSidecar = "metrics-collector-sidecar"
+	MetricsCollectorSidecarImage = "image"
 )
 
 var JobRoleMap = map[string][]string{

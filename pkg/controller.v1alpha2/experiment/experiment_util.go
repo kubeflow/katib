@@ -54,6 +54,9 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 	}
 
 	trial.Spec.RunSpec = runSpec
+	if expInstance.Spec.TrialTemplate != nil {
+		trial.Spec.RetainRun = expInstance.Spec.TrialTemplate.Retain
+	}
 
 	buf := bytes.NewBufferString(runSpec)
 	job := &unstructured.Unstructured{}
@@ -74,9 +77,6 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 	}
 	trial.Spec.MetricsCollectorSpec = mcSpec
 
-	if expInstance.Spec.TrialTemplate != nil {
-		trial.Spec.RetainRun = expInstance.Spec.TrialTemplate.Retain
-	}
 	if expInstance.Spec.MetricsCollectorSpec != nil {
 		trial.Spec.RetainMetricsCollector = expInstance.Spec.MetricsCollectorSpec.Retain
 	}

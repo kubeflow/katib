@@ -21,11 +21,14 @@ package v1alpha3
 
 import (
 	"os"
+
+	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 )
 
 func (e *Experiment) SetDefault() {
 	e.setDefaultParallelTrialCount()
 	e.setDefaultTrialTemplate()
+	e.setDefaultMetricsCollector()
 }
 
 func (e *Experiment) setDefaultParallelTrialCount() {
@@ -53,4 +56,15 @@ func (e *Experiment) setDefaultTrialTemplate() {
 		}
 	}
 	e.Spec.TrialTemplate = t
+}
+
+func (e *Experiment) setDefaultMetricsCollector() {
+	if e.Spec.MetricsCollectorSpec == nil {
+		e.Spec.MetricsCollectorSpec = &MetricsCollectorSpec{}
+	}
+	if e.Spec.MetricsCollectorSpec.Collector == nil {
+		e.Spec.MetricsCollectorSpec.Collector = &common.CollectorSpec{
+			Kind: common.StdOutCollector,
+		}
+	}
 }
