@@ -36,5 +36,5 @@ cp -r examples ${GO_DIR}/examples
 cd ${GO_DIR}
 
 cp examples/v1alpha2/NAS-training-containers/RL-cifar10/Dockerfile .
-gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha2/training-container-nasrl-cifar10:${VERSION} --project=${PROJECT}
+gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha2/training-container-nasrl-cifar10:${VERSION} --project=${PROJECT} --timeout=20m
 gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha2/training-container-nasrl-cifar10:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha2/training-container-nasrl-cifar10:latest --verbosity=info
