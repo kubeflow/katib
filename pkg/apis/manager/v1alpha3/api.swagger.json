@@ -1,0 +1,1077 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "api.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/Manager/DeleteExperiment/{experiment_name}": {
+      "get": {
+        "summary": "* \nDelete a Experiment from DB by name.",
+        "operationId": "DeleteExperiment",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3DeleteExperimentReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "experiment_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/DeleteTrial/{trial_name}": {
+      "get": {
+        "summary": "* \nDelete a Trial from DB by ID.",
+        "operationId": "DeleteTrial",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3DeleteTrialReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "trial_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetAlgorithmExtraSettings/{experiment_name}": {
+      "get": {
+        "summary": "* \nGet all AlgorithmExtraSettings.",
+        "operationId": "GetAlgorithmExtraSettings",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3GetAlgorithmExtraSettingsReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "experiment_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetExperiment/{experiment_name}": {
+      "get": {
+        "summary": "* \nGet a Experiment from DB by name.",
+        "operationId": "GetExperiment",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3GetExperimentReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "experiment_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetExperimentList": {
+      "get": {
+        "summary": "*\nGet a summary list of Experiment from DB.\nThe summary includes name and condition.",
+        "operationId": "GetExperimentList",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3GetExperimentListReply"
+            }
+          }
+        },
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetObservationLog": {
+      "post": {
+        "summary": "*\nGet all log of Observations for a Trial.",
+        "operationId": "GetObservationLog",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3GetObservationLogReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha3GetObservationLogRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetSuggestions": {
+      "post": {
+        "summary": "* \nGet Suggestions from a Suggestion service.",
+        "operationId": "GetSuggestions",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3GetSuggestionsReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha3GetSuggestionsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetTrial/{trial_name}": {
+      "get": {
+        "summary": "*\nGet a Trial from DB by ID of Trial.",
+        "operationId": "GetTrial",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3GetTrialReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "trial_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/GetTrialList/{experiment_name}": {
+      "get": {
+        "summary": "* \nGet a list of Trial from DB by name of a Experiment.",
+        "operationId": "GetTrialList",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3GetTrialListReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "experiment_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/PreCheckRegisterExperiment": {
+      "post": {
+        "summary": "*\nPreCheck to register a Experiment to DB.",
+        "operationId": "PreCheckRegisterExperiment",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3PreCheckRegisterExperimentReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha3Experiment"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/RegisterExperiment": {
+      "post": {
+        "summary": "*\nRegister a Experiment to DB.",
+        "operationId": "RegisterExperiment",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3RegisterExperimentReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha3Experiment"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/RegisterTrial": {
+      "post": {
+        "summary": "*\nRegister a Trial to DB.\nID will be filled by manager automatically.",
+        "operationId": "RegisterTrial",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3RegisterTrialReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha3Trial"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/ReportObservationLog": {
+      "post": {
+        "summary": "* \nReport a log of Observations for a Trial.\nThe log consists of timestamp and value of metric.\nKatib store every log of metrics.\nYou can see accuracy curve or other metric logs on UI.",
+        "operationId": "ReportObservationLog",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3ReportObservationLogReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha3ReportObservationLogRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/UpdateAlgorithmExtraSettings/{experiment_name}": {
+      "put": {
+        "summary": "* \nUpdate AlgorithmExtraSettings.\nThe ExtraSetting is created if it does not exist, otherwise it is overwrited.",
+        "operationId": "UpdateAlgorithmExtraSettings",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3UpdateAlgorithmExtraSettingsReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "experiment_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha3UpdateAlgorithmExtraSettingsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/UpdateExperimentStatus/{experiment_name}": {
+      "put": {
+        "summary": "* \nUpdate Status of a experiment.",
+        "operationId": "UpdateExperimentStatus",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3UpdateExperimentStatusReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "experiment_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha3UpdateExperimentStatusRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/UpdateTrialStatus": {
+      "put": {
+        "summary": "* \nUpdate Status of a trial.",
+        "operationId": "UpdateTrialStatus",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3UpdateTrialStatusReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha3UpdateTrialStatusRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/api/Manager/ValidateAlgorithmSettings": {
+      "post": {
+        "summary": "* \nValidate AlgorithmSettings in an Experiment.\nSuggestion service should return INVALID_ARGUMENT Error when the parameter is invalid",
+        "operationId": "ValidateAlgorithmSettings",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3ValidateAlgorithmSettingsReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/alpha3ValidateAlgorithmSettingsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "ExperimentStatusExperimentConditionType": {
+      "type": "string",
+      "enum": [
+        "CREATED",
+        "RUNNING",
+        "RESTARTING",
+        "SUCCEEDED",
+        "FAILED",
+        "UNKNOWN"
+      ],
+      "default": "CREATED"
+    },
+    "NasConfigOperations": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3Operation"
+          }
+        }
+      }
+    },
+    "TrialSpecParameterAssignments": {
+      "type": "object",
+      "properties": {
+        "assignments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3ParameterAssignment"
+          }
+        }
+      },
+      "title": "* \nList of ParameterAssignment"
+    },
+    "TrialStatusTrialConditionType": {
+      "type": "string",
+      "enum": [
+        "CREATED",
+        "RUNNING",
+        "SUCCEEDED",
+        "KILLED",
+        "FAILED",
+        "UNKNOWN"
+      ],
+      "default": "CREATED"
+    },
+    "alpha3AlgorithmSetting": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "alpha3AlgorithmSpec": {
+      "type": "object",
+      "properties": {
+        "algorithm_name": {
+          "type": "string"
+        },
+        "algorithm_setting": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3AlgorithmSetting"
+          }
+        },
+        "early_stopping_spec": {
+          "$ref": "#/definitions/alpha3EarlyStoppingSpec"
+        }
+      }
+    },
+    "alpha3DeleteExperimentReply": {
+      "type": "object"
+    },
+    "alpha3DeleteTrialReply": {
+      "type": "object"
+    },
+    "alpha3EarlyStoppingSpec": {
+      "type": "object"
+    },
+    "alpha3Experiment": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "spec": {
+          "$ref": "#/definitions/alpha3ExperimentSpec"
+        },
+        "status": {
+          "$ref": "#/definitions/alpha3ExperimentStatus"
+        }
+      }
+    },
+    "alpha3ExperimentSpec": {
+      "type": "object",
+      "properties": {
+        "parameter_specs": {
+          "$ref": "#/definitions/alpha3ExperimentSpecParameterSpecs"
+        },
+        "objective": {
+          "$ref": "#/definitions/alpha3ObjectiveSpec"
+        },
+        "algorithm": {
+          "$ref": "#/definitions/alpha3AlgorithmSpec"
+        },
+        "trial_template": {
+          "type": "string"
+        },
+        "metrics_collector_spec": {
+          "type": "string"
+        },
+        "parallel_trial_count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "max_trial_count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "nas_config": {
+          "$ref": "#/definitions/alpha3NasConfig"
+        }
+      },
+      "description": "*\nSpec of a Experiment. Experiment represents a single optimization run over a feasible space. \nEach Experiment contains a configuration describing the feasible space, as well as a set of Trials.\nIt is assumed that objective function f(x) does not change in the course of a Experiment."
+    },
+    "alpha3ExperimentSpecParameterSpecs": {
+      "type": "object",
+      "properties": {
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3ParameterSpec"
+          }
+        }
+      },
+      "title": "* \nList of ParameterSpec"
+    },
+    "alpha3ExperimentStatus": {
+      "type": "object",
+      "properties": {
+        "start_time": {
+          "type": "string"
+        },
+        "completion_time": {
+          "type": "string"
+        },
+        "condition": {
+          "$ref": "#/definitions/ExperimentStatusExperimentConditionType"
+        }
+      }
+    },
+    "alpha3ExperimentSummary": {
+      "type": "object",
+      "properties": {
+        "experiment_name": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/alpha3ExperimentStatus"
+        }
+      }
+    },
+    "alpha3FeasibleSpace": {
+      "type": "object",
+      "properties": {
+        "max": {
+          "type": "string"
+        },
+        "min": {
+          "type": "string"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "step": {
+          "type": "string"
+        }
+      },
+      "description": "*\nFeasible space for optimization.\nInt and Double type use Max/Min.\nDiscrete and Categorical type use List."
+    },
+    "alpha3GetAlgorithmExtraSettingsReply": {
+      "type": "object",
+      "properties": {
+        "extra_algorithm_settings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3AlgorithmSetting"
+          }
+        }
+      }
+    },
+    "alpha3GetExperimentListReply": {
+      "type": "object",
+      "properties": {
+        "experiment_summaries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3ExperimentSummary"
+          }
+        }
+      }
+    },
+    "alpha3GetExperimentReply": {
+      "type": "object",
+      "properties": {
+        "experiment": {
+          "$ref": "#/definitions/alpha3Experiment"
+        }
+      }
+    },
+    "alpha3GetObservationLogReply": {
+      "type": "object",
+      "properties": {
+        "observation_log": {
+          "$ref": "#/definitions/alpha3ObservationLog"
+        }
+      }
+    },
+    "alpha3GetObservationLogRequest": {
+      "type": "object",
+      "properties": {
+        "trial_name": {
+          "type": "string"
+        },
+        "metric_name": {
+          "type": "string"
+        },
+        "start_time": {
+          "type": "string"
+        },
+        "end_time": {
+          "type": "string"
+        }
+      }
+    },
+    "alpha3GetSuggestionsReply": {
+      "type": "object",
+      "properties": {
+        "trials": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3Trial"
+          }
+        }
+      }
+    },
+    "alpha3GetSuggestionsRequest": {
+      "type": "object",
+      "properties": {
+        "experiment_name": {
+          "type": "string"
+        },
+        "algorithm_name": {
+          "type": "string"
+        },
+        "request_number": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "alpha3GetTrialListReply": {
+      "type": "object",
+      "properties": {
+        "trials": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3Trial"
+          }
+        }
+      }
+    },
+    "alpha3GetTrialReply": {
+      "type": "object",
+      "properties": {
+        "trial": {
+          "$ref": "#/definitions/alpha3Trial"
+        }
+      }
+    },
+    "alpha3GraphConfig": {
+      "type": "object",
+      "properties": {
+        "num_layers": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "input_sizes": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "output_sizes": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "title": "*\nGraphConfig contains a config of DAG"
+    },
+    "alpha3Metric": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "alpha3MetricLog": {
+      "type": "object",
+      "properties": {
+        "time_stamp": {
+          "type": "string"
+        },
+        "metric": {
+          "$ref": "#/definitions/alpha3Metric"
+        }
+      }
+    },
+    "alpha3NasConfig": {
+      "type": "object",
+      "properties": {
+        "graph_config": {
+          "$ref": "#/definitions/alpha3GraphConfig"
+        },
+        "operations": {
+          "$ref": "#/definitions/NasConfigOperations"
+        }
+      },
+      "title": "*\nNasConfig contains a config of NAS job"
+    },
+    "alpha3ObjectiveSpec": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/alpha3ObjectiveType"
+        },
+        "goal": {
+          "type": "number",
+          "format": "float"
+        },
+        "objective_metric_name": {
+          "type": "string"
+        },
+        "additional_metric_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "alpha3ObjectiveType": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "MINIMIZE",
+        "MAXIMIZE"
+      ],
+      "default": "UNKNOWN",
+      "description": "*\nDirection of optimization. Minimize or Maximize."
+    },
+    "alpha3Observation": {
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3Metric"
+          }
+        }
+      }
+    },
+    "alpha3ObservationLog": {
+      "type": "object",
+      "properties": {
+        "metric_logs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3MetricLog"
+          }
+        }
+      }
+    },
+    "alpha3Operation": {
+      "type": "object",
+      "properties": {
+        "operation_type": {
+          "type": "string"
+        },
+        "parameter_specs": {
+          "$ref": "#/definitions/alpha3OperationParameterSpecs"
+        }
+      },
+      "title": "*\nConfig for operations in DAG"
+    },
+    "alpha3OperationParameterSpecs": {
+      "type": "object",
+      "properties": {
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3ParameterSpec"
+          }
+        }
+      },
+      "title": "* \nList of ParameterSpec"
+    },
+    "alpha3ParameterAssignment": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "alpha3ParameterSpec": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "parameter_type": {
+          "$ref": "#/definitions/alpha3ParameterType"
+        },
+        "feasible_space": {
+          "$ref": "#/definitions/alpha3FeasibleSpace"
+        }
+      },
+      "description": "*\nConfig for a Hyper parameter.\nKatib will create each Hyper parameter from this config."
+    },
+    "alpha3ParameterType": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN_TYPE",
+        "DOUBLE",
+        "INT",
+        "DISCRETE",
+        "CATEGORICAL"
+      ],
+      "default": "UNKNOWN_TYPE",
+      "description": "*\nTypes of value for HyperParameter."
+    },
+    "alpha3PreCheckRegisterExperimentReply": {
+      "type": "object",
+      "properties": {
+        "can_register": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
+    "alpha3RegisterExperimentReply": {
+      "type": "object"
+    },
+    "alpha3RegisterTrialReply": {
+      "type": "object"
+    },
+    "alpha3ReportObservationLogReply": {
+      "type": "object"
+    },
+    "alpha3ReportObservationLogRequest": {
+      "type": "object",
+      "properties": {
+        "trial_name": {
+          "type": "string"
+        },
+        "observation_log": {
+          "$ref": "#/definitions/alpha3ObservationLog"
+        }
+      }
+    },
+    "alpha3Trial": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "spec": {
+          "$ref": "#/definitions/alpha3TrialSpec"
+        },
+        "status": {
+          "$ref": "#/definitions/alpha3TrialStatus"
+        }
+      }
+    },
+    "alpha3TrialSpec": {
+      "type": "object",
+      "properties": {
+        "experiment_name": {
+          "type": "string"
+        },
+        "objective": {
+          "$ref": "#/definitions/alpha3ObjectiveSpec"
+        },
+        "parameter_assignments": {
+          "$ref": "#/definitions/TrialSpecParameterAssignments"
+        },
+        "run_spec": {
+          "type": "string"
+        },
+        "metrics_collector_spec": {
+          "type": "string"
+        }
+      }
+    },
+    "alpha3TrialStatus": {
+      "type": "object",
+      "properties": {
+        "start_time": {
+          "type": "string"
+        },
+        "completion_time": {
+          "type": "string"
+        },
+        "condition": {
+          "$ref": "#/definitions/TrialStatusTrialConditionType"
+        },
+        "observation": {
+          "$ref": "#/definitions/alpha3Observation"
+        }
+      }
+    },
+    "alpha3UpdateAlgorithmExtraSettingsReply": {
+      "type": "object"
+    },
+    "alpha3UpdateAlgorithmExtraSettingsRequest": {
+      "type": "object",
+      "properties": {
+        "experiment_name": {
+          "type": "string"
+        },
+        "extra_algorithm_settings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3AlgorithmSetting"
+          }
+        }
+      }
+    },
+    "alpha3UpdateExperimentStatusReply": {
+      "type": "object"
+    },
+    "alpha3UpdateExperimentStatusRequest": {
+      "type": "object",
+      "properties": {
+        "experiment_name": {
+          "type": "string"
+        },
+        "new_status": {
+          "$ref": "#/definitions/alpha3ExperimentStatus"
+        }
+      }
+    },
+    "alpha3UpdateTrialStatusReply": {
+      "type": "object"
+    },
+    "alpha3UpdateTrialStatusRequest": {
+      "type": "object",
+      "properties": {
+        "trial_name": {
+          "type": "string"
+        },
+        "new_status": {
+          "$ref": "#/definitions/alpha3TrialStatus"
+        }
+      }
+    },
+    "alpha3ValidateAlgorithmSettingsReply": {
+      "type": "object",
+      "title": "*\nReturn INVALID_ARGUMENT Error if Algorithm Settings are not Valid"
+    },
+    "alpha3ValidateAlgorithmSettingsRequest": {
+      "type": "object",
+      "properties": {
+        "experiment_spec": {
+          "$ref": "#/definitions/alpha3ExperimentSpec"
+        },
+        "algorithm_name": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -84,3 +84,86 @@ workflows:
     - vendor/*
     params:
       registry: "gcr.io/kubeflow-images-public"
+  - app_dir: kubeflow/katib/test/workflows
+    component: workflows-v1alpha3
+    name: e2e-v1alpha3
+    job_types:
+      - presubmit
+    include_dirs:
+    - pkg/api/operators/apis/common/v1alpha3/*
+    - pkg/api/operators/apis/experiment/v1alpha3/*
+    - pkg/api/operators/apis/trial/v1alpha3/*
+    - pkg/api/operators/apis/*.go
+    - pkg/api/health/*
+    - pkg/api/v1alpha3/*
+    - pkg/common/v1alpha3/*
+    - pkg/controller/v1alpha3/*
+    - pkg/db/v1alpha3/*
+    - pkg/earlystopping/v1alpha3/*
+    - pkg/manager/v1alpha3/*
+    - pkg/manager/modelstore/*
+    - pkg/suggestion/v1alpha3/*
+    - pkg/ui/v1alpha3/*
+    - pkg/webhook/v1alpha3/*
+    - cmd/earlystopping/medianstopping/v1alpha3/*
+    - cmd/katib-controller/v1alpha3/*
+    - cmd/manager/v1alpha3/*
+    - cmd/manager-rest/v1alpha3/*
+    - cmd/metricscollector/v1alpha3/*
+    - cmd/suggestion/bayesianoptimization/v1alpha3/*
+    - cmd/suggestion/grid/v1alpha3/*
+    - cmd/suggestion/hyperband/v1alpha3/*
+    - cmd/suggestion/nasenvelopenet/v1alpha3/*
+    - cmd/suggestion/nasrl/v1alpha3/*
+    - cmd/suggestion/random/v1alpha3/*
+    - cmd/tfevent-metricscollector/v1alpha3/*
+    - cmd/ui/v1alpha3/*
+    - pkg/util/v1alpha3/*
+    - test/e2e/v1alpha3/*
+    - test/scripts/v1alpha3/*
+    - test/workflows/*
+    - manifests/v1alpha3/*
+    - scripts/v1alpha3/*
+    - vendor/*
+    params:
+      registry: "gcr.io/kubeflow-ci"
+  - app_dir: kubeflow/katib/test/workflows
+    component: workflows-v1alpha3
+    name: e2e-v1alpha3
+    job_types:
+      - postsubmit
+    include_dirs:
+    - pkg/api/operators/apis/common/v1alpha3/*
+    - pkg/api/operators/apis/experiment/v1alpha3/*
+    - pkg/api/operators/apis/trial/v1alpha3/*
+    - pkg/api/operators/apis/*.go
+    - pkg/api/health/*
+    - pkg/api/v1alpha3/*
+    - pkg/common/v1alpha3/*
+    - pkg/controller/v1alpha3/*
+    - pkg/db/v1alpha3/*
+    - pkg/earlystopping/v1alpha3/*
+    - pkg/manager/v1alpha3/*
+    - pkg/manager/modelstore/*
+    - pkg/suggestion/v1alpha3/*
+    - pkg/ui/v1alpha3/*
+    - pkg/webhook/v1alpha3/*
+    - cmd/earlystopping/medianstopping/v1alpha3/*
+    - cmd/katib-controller/v1alpha3/*
+    - cmd/manager/v1alpha3/*
+    - cmd/manager-rest/v1alpha3/*
+    - cmd/metricscollector/v1alpha3/*
+    - cmd/suggestion/bayesianoptimization/v1alpha3/*
+    - cmd/suggestion/grid/v1alpha3/*
+    - cmd/suggestion/hyperband/v1alpha3/*
+    - cmd/suggestion/nasenvelopenet/v1alpha3/*
+    - cmd/suggestion/nasrl/v1alpha3/*
+    - cmd/suggestion/random/v1alpha3/*
+    - cmd/tfevent-metricscollector/v1alpha3/*
+    - cmd/ui/v1alpha3/*
+    - pkg/util/v1alpha3/*
+    - test/scripts/v1alpha3/*
+    - test/workflows/*
+    - vendor/*
+    params:
+      registry: "gcr.io/kubeflow-images-public"
