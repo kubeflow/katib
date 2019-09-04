@@ -26,10 +26,10 @@ import (
 // SuggestionSpec defines the desired state of Suggestion
 type SuggestionSpec struct {
 	// Number of suggestions requested
-	Suggestions int32 `json:"suggestions,omitempty"`
+	Suggestions *int32 `json:"suggestions,omitempty"`
 
 	//Algorithm settings set by the user in the experiment config
-	AlgorithmSpec *common.AlgorithmSpec `json:"algorithm_settings,omitempty"`
+	AlgorithmSpec *common.AlgorithmSpec `json:"algorithmSpec,omitempty"`
 }
 
 // SuggestionStatus defines the observed state of Suggestion
