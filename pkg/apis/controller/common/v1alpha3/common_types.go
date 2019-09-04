@@ -16,6 +16,23 @@ limitations under the License.
 package v1alpha3
 
 // +k8s:deepcopy-gen=true
+type AlgorithmSpec struct {
+	AlgorithmName string `json:"algorithmName,omitempty"`
+	// Key-value pairs representing settings for suggestion algorithms.
+	AlgorithmSettings []AlgorithmSetting `json:"algorithmSettings"`
+	EarlyStopping     *EarlyStoppingSpec `json:"earlyStopping,omitempty"`
+}
+
+type AlgorithmSetting struct {
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
+}
+
+type EarlyStoppingSpec struct {
+	// TODO
+}
+
+// +k8s:deepcopy-gen=true
 type ObjectiveSpec struct {
 	Type                ObjectiveType `json:"type,omitempty"`
 	Goal                *float64      `json:"goal,omitempty"`
