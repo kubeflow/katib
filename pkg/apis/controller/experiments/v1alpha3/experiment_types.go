@@ -29,7 +29,7 @@ type ExperimentSpec struct {
 	Objective *common.ObjectiveSpec `json:"objective,omitempty"`
 
 	// Describes the suggestion algorithm.
-	Algorithm *AlgorithmSpec `json:"algorithm,omitempty"`
+	Algorithm *common.AlgorithmSpec `json:"algorithm,omitempty"`
 
 	// Template for each run of the trial.
 	TrialTemplate *TrialTemplate `json:"trialTemplate,omitempty"`
@@ -160,22 +160,6 @@ type FeasibleSpace struct {
 	Min  string   `json:"min,omitempty"`
 	List []string `json:"list,omitempty"`
 	Step string   `json:"step,omitempty"`
-}
-
-type AlgorithmSpec struct {
-	AlgorithmName string `json:"algorithmName,omitempty"`
-	// Key-value pairs representing settings for suggestion algorithms.
-	AlgorithmSettings []AlgorithmSetting `json:"algorithmSettings"`
-	EarlyStopping     *EarlyStoppingSpec `json:"earlyStopping,omitempty"`
-}
-
-type AlgorithmSetting struct {
-	Name  string `json:"name,omitempty"`
-	Value string `json:"value,omitempty"`
-}
-
-type EarlyStoppingSpec struct {
-	// TODO
 }
 
 type TrialTemplate struct {
