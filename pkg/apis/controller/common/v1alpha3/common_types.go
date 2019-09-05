@@ -94,8 +94,8 @@ type FilterSpec struct {
 type FileSystemKind string
 
 const (
-	DirectoryKind FileSystemKind = "directory"
-	FileKind      FileSystemKind = "file"
+	DirectoryKind FileSystemKind = "Directory"
+	FileKind      FileSystemKind = "File"
 )
 
 // +k8s:deepcopy-gen=true
@@ -107,14 +107,14 @@ type FileSystemPath struct {
 type CollectorKind string
 
 const (
-	StdOutCollector           CollectorKind = "stdout"
-	FileCollector             CollectorKind = "file"
-	TfEventCollector          CollectorKind = "tensorflow-event"
-	PrometheusMetricCollector CollectorKind = "prometheus-metric"
-	CustomCollector           CollectorKind = "custom"
+	StdOutCollector           CollectorKind = "StdOut"
+	FileCollector             CollectorKind = "File"
+	TfEventCollector          CollectorKind = "TensorflowEvent"
+	PrometheusMetricCollector CollectorKind = "PrometheusMetric"
+	CustomCollector           CollectorKind = "Custom"
 	// When model training source code persists metrics into persistent layer
 	// directly, metricsCollector isn't in need, and its kind is "noneCollector"
-	NoneCollector CollectorKind = "none"
+	NoneCollector CollectorKind = "None"
 )
 
 // +k8s:deepcopy-gen=true
