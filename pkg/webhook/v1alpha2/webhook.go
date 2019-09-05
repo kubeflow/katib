@@ -20,11 +20,8 @@ import (
 
 	experimentsv1alpha2 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha2"
 	"github.com/kubeflow/katib/pkg/webhook/v1alpha2/experiment"
-	"github.com/kubeflow/katib/pkg/webhook/v1alpha2/pod"
 
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -32,11 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/builder"
 )
 
-const (
-	katibControllerName                   = "katib-controller"
-	katibMetricsCollectorInjection        = "katib-metricscollector-injection"
-	katibMetricsCollectorInjectionEnabled = "enabled"
-)
+const katibControllerName = "katib-controller"
 
 func AddToManager(m manager.Manager) error {
 	server, err := webhook.NewServer("katib-admission-server", m, webhook.ServerOptions{
@@ -91,22 +84,5 @@ func register(manager manager.Manager, server *webhook.Server) error {
 	if err != nil {
 		return err
 	}
-	nsSelector := &metav1.LabelSelector{
-		MatchLabels: map[string]string{
-			katibMetricsCollectorInjection: katibMetricsCollectorInjectionEnabled,
-		},
-	}
-	injectWebhook, err := builder.NewWebhookBuilder().
-		Name("mutating.pod.katib.kubeflow.org").
-		NamespaceSelector(nsSelector).
-		Mutating().
-		Operations(admissionregistrationv1beta1.Create).
-		WithManager(manager).
-		ForType(&v1.Pod{}).
-		Handlers(pod.NewSidecarInjector(manager.GetClient(), manager.GetConfig().Host)).
-		Build()
-	if err != nil {
-		return err
-	}
-	return server.Register(mutatingWebhook, validatingWebhook, injectWebhook)
+	return server.Register(mutatingWebhook, validatingWebhook)
 }

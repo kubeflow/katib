@@ -30,4 +30,7 @@ const (
 
 	// Default value of Spec.ConfigMapName for Metrics Collector template
 	DefaultMetricsCollectorConfigMapName = "metrics-collector-template"
+
+	// Configmap name which includes Katib's configuration
+	KatibConfigMapName = "katib-config"
 )

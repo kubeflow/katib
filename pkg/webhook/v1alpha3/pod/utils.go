@@ -23,11 +23,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
+	commonv1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
 )
 
 func getKabitJob(pod *v1.Pod) (string, string, error) {
-	for _, gvk := range commonv1alpha2.GetSupportedJobList() {
+	for _, gvk := range commonv1alpha3.GetSupportedJobList() {
 		owners := pod.GetOwnerReferences()
 		for _, owner := range owners {
 			if isMatchGVK(owner, gvk) {

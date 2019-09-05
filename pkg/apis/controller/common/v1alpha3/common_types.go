@@ -15,6 +15,10 @@ limitations under the License.
 
 package v1alpha3
 
+import (
+	v1 "k8s.io/api/core/v1"
+)
+
 // +k8s:deepcopy-gen=true
 type AlgorithmSpec struct {
 	AlgorithmName string `json:"algorithmName,omitempty"`
@@ -64,4 +68,58 @@ type Metric struct {
 type Observation struct {
 	// Key-value pairs for metric names and values
 	Metrics []Metric `json:"metrics"`
+}
+
+// +k8s:deepcopy-gen=true
+type SourceSpec struct {
+	// Model-train source code can expose metrics by http, such as HTTP endpoint in
+	// prometheus metric format
+	HttpGet *v1.HTTPGetAction `json:"httpGet,omitempty"`
+	// During training model, metrics may be persisted into local file in source
+	// code, such as tfEvent use case
+	FileSystemPath *FileSystemPath `json:"fileSystemPath,omitempty"`
+	// Default metric output format is {"metric": "<metric_name>",
+	// "value": <int_or_float>, "epoch": <int>, "step": <int>}, but if the output doesn't
+	// follow default format, please extend it here
+	Filter *FilterSpec `json:"filter,omitempty"`
+}
+
+// +k8s:deepcopy-gen=true
+type FilterSpec struct {
+	// When the metrics output follows format as this field specified, metricsCollector
+	// collects it and reports to metrics server, it can be "<metric_name>: <float>" or else
+	MetricsFormat []string `json:"metricsFormat,omitempty"`
+}
+
+type FileSystemKind string
+
+const (
+	DirectoryKind FileSystemKind = "diretory"
+	FileKind      FileSystemKind = "file"
+)
+
+// +k8s:deepcopy-gen=true
+type FileSystemPath struct {
+	Path string         `json:"path,omitempty"`
+	Kind FileSystemKind `json:"kind,omitempty"`
+}
+
+type CollectorKind string
+
+const (
+	StdOutCollector           CollectorKind = "stdOutCollector"
+	FileCollector             CollectorKind = "fileCollector"
+	TfEventCollector          CollectorKind = "tfEventCollector"
+	PrometheusMetricCollector CollectorKind = "prometheusMetricCollector"
+	CustomCollector           CollectorKind = "customCollector"
+	// When model training source code persists metrics into persistent layer
+	// directly, metricsCollector isn't in need, and its kind is "noneCollector"
+	NoneCollector CollectorKind = "noneCollector"
+)
+
+// +k8s:deepcopy-gen=true
+type CollectorSpec struct {
+	Kind CollectorKind `json:"kind"`
+	// When kind is "customCollector", this field will be used
+	CustomCollector *v1.Container `json:"customCollector,omitempty"`
 }
