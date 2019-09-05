@@ -413,7 +413,8 @@ Discrete and Categorical type use List.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| trials | [Trial](#api.v1.alpha3.Trial) | repeated |  |
+| trials | [Trial](#api.v1.alpha3.Trial) | repeated | trials should be created in the next run. |
+| algorithm | [AlgorithmSpec](#api.v1.alpha3.AlgorithmSpec) |  |  |
 
 
 
@@ -428,8 +429,8 @@ Discrete and Categorical type use List.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| experiment_name | [string](#string) |  |  |
-| algorithm_name | [string](#string) |  |  |
+| experiment | [Experiment](#api.v1.alpha3.Experiment) |  |  |
+| trials | [Trial](#api.v1.alpha3.Trial) | repeated | all completed trials owned by the experiment. |
 | request_number | [int32](#int32) |  | The number of Suggestion you request at one time. When you set 3 to request_number, you can get three Suggestions at one time. |
 
 
