@@ -21,6 +21,12 @@ rules:
   verbs:
   - "*"
 - apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - "*"
+- apiGroups:
   - batch
   resources:
   - jobs
@@ -48,6 +54,8 @@ rules:
   - experiments/status
   - trials
   - trials/status
+  - suggestions
+  - suggestions/status
   verbs:
   - "*"
 - apiGroups:

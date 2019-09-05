@@ -249,10 +249,10 @@
                     name: "create-pr-symlink",
                     template: "create-pr-symlink",
                   },
-                  {
-                    name: "build-tc-nasrl-cifar10",
-                    template: "build-tc-nasrl-cifar10",
-                  },
+                  //{
+                  //  name: "build-tc-nasrl-cifar10",
+                  //  template: "build-tc-nasrl-cifar10",
+                  //},
                 ],
                 [
                   {
