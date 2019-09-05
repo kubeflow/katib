@@ -723,17 +723,23 @@
           "items": {
             "$ref": "#/definitions/alpha3Trial"
           }
+        },
+        "algorithm": {
+          "$ref": "#/definitions/alpha3AlgorithmSpec"
         }
       }
     },
     "alpha3GetSuggestionsRequest": {
       "type": "object",
       "properties": {
-        "experiment_name": {
-          "type": "string"
+        "experiment": {
+          "$ref": "#/definitions/alpha3Experiment"
         },
-        "algorithm_name": {
-          "type": "string"
+        "trials": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3Trial"
+          }
         },
         "request_number": {
           "type": "integer",

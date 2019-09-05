@@ -1053,6 +1053,13 @@
                   <td>trials</td>
                   <td><a href="#api.v1.alpha3.Trial">Trial</a></td>
                   <td>repeated</td>
+                  <td><p>trials should be created in the next run. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>algorithm</td>
+                  <td><a href="#api.v1.alpha3.AlgorithmSpec">AlgorithmSpec</a></td>
+                  <td></td>
                   <td><p> </p></td>
                 </tr>
               
@@ -1074,17 +1081,17 @@
             <tbody>
               
                 <tr>
-                  <td>experiment_name</td>
-                  <td><a href="#string">string</a></td>
+                  <td>experiment</td>
+                  <td><a href="#api.v1.alpha3.Experiment">Experiment</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
               
                 <tr>
-                  <td>algorithm_name</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
+                  <td>trials</td>
+                  <td><a href="#api.v1.alpha3.Trial">Trial</a></td>
+                  <td>repeated</td>
+                  <td><p>all completed trials owned by the experiment. </p></td>
                 </tr>
               
                 <tr>
