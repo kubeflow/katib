@@ -6,13 +6,13 @@ metadata:
 data:
   metrics-collector-sidecar: |-
     {
-      "stdOutCollector": {
+      "stdout": {
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/stdout-metricscollector"
       },
-      "fileCollector": {
+      "file": {
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/file-metricscollector"
       },
-      "tfEventCollector": {
+      "tensorflow-event": {
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/tfevent-metricscollector"
       }
     }

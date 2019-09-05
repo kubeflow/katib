@@ -119,7 +119,9 @@ func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 			return false, err
 		}
 	}
-
+	if trial.Spec.MetricsCollector.Collector.Kind == common.NoneCollector {
+		return false, nil
+	}
 	return true, nil
 }
 
