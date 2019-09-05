@@ -112,6 +112,7 @@ kubectl delete -f valid-experiment.yaml
 set +o errexit
 kubectl apply -f invalid-experiment.yaml
 if [ $? -ne 1 ]; then
+  echo "Failed to create invalid-experiment: return code $?"
   exit 1
 fi
 set -o errexit
