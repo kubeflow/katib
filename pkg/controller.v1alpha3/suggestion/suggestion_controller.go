@@ -134,7 +134,7 @@ func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Re
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	_, err = r.createOrUpdateDeployment(deploy)
+	_, err = r.reconcileDeployment(deploy)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -143,7 +143,7 @@ func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Re
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	_, err = r.createOrUpdateService(service)
+	_, err = r.reconcileService(service)
 	if err != nil {
 		return reconcile.Result{}, err
 	}

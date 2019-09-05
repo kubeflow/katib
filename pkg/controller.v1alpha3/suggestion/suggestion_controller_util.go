@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-func (r *ReconcileSuggestion) createOrUpdateDeployment(deploy *appsv1.Deployment) (*appsv1.Deployment, error) {
+func (r *ReconcileSuggestion) reconcileDeployment(deploy *appsv1.Deployment) (*appsv1.Deployment, error) {
 	foundDeploy := &appsv1.Deployment{}
 	err := r.Get(context.TODO(), types.NamespacedName{Name: deploy.Name, Namespace: deploy.Namespace}, foundDeploy)
 	if err != nil && errors.IsNotFound(err) {
@@ -22,7 +22,7 @@ func (r *ReconcileSuggestion) createOrUpdateDeployment(deploy *appsv1.Deployment
 	return foundDeploy, nil
 }
 
-func (r *ReconcileSuggestion) createOrUpdateService(service *corev1.Service) (*corev1.Service, error) {
+func (r *ReconcileSuggestion) reconcileService(service *corev1.Service) (*corev1.Service, error) {
 	foundService := &corev1.Service{}
 	err := r.Get(context.TODO(), types.NamespacedName{Name: service.Name, Namespace: service.Namespace}, foundService)
 	if err != nil && errors.IsNotFound(err) {
