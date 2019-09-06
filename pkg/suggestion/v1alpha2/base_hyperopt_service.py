@@ -14,8 +14,10 @@ class BaseHyperoptService(object):
             self.hyperopt_algorithm = hyperopt.tpe.suggest
         elif algorithm_name == 'hyperopt-random':
             self.hyperopt_algorithm = hyperopt.rand.suggest
-        elif algorithm_name == 'hyperopt-anneal':
-            self.hyperopt_algorithm = hyperopt.anneal.suggest
+        # elif algorithm_name == 'hyperopt-anneal':
+        #     self.hyperopt_algorithm = hyperopt.anneal.suggest_batch
+        # elif algorithm_name == 'hyperopt-mix':
+        #     self.hyperopt_algorithm = hyperopt.mix.suggest
         else:
             logger.error("Failed to create the algortihm: %s", algorithm_name)
             self.hyperopt_algorithm = None

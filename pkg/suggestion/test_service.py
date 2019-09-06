@@ -103,7 +103,7 @@ def run():
         name="test",
         spec=api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
-                algorithm_name="hyperopt-tpe"
+                algorithm_name="skopt-bayesian-optimization"
             ),
             objective=api_pb2.ObjectiveSpec(
                 type=api_pb2.MAXIMIZE,
