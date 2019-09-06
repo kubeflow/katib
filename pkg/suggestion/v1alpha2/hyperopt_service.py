@@ -8,20 +8,18 @@ from .internal.trial import Trial
 
 logger = logging.getLogger("HyperoptRandomService")
 
-class HyperoptRandomService(
-        api_pb2_grpc.SuggestionServicer,
-        base_hyperopt_service.BaseHyperoptService):
-    def __init__(self):
-        super(
-            HyperoptRandomService, self).__init__(algorithm_name="random")
 
+class HyperoptService(
+        api_pb2_grpc.SuggestionServicer):
     def GetSuggestions(self, request, context):
         """
         Main function to provide suggestion.
         """
+        base_serice = base_hyperopt_service.BaseHyperoptService(
+            algorithm_name=request.experiment.spec.algorithm.algorithm_name)
         search_space = HyperParameterSearchSpace.convert(request.experiment)
         trials = Trial.convert(request.trials)
-        new_trials = super().getSuggestions(search_space, trials, request.request_number)
+        new_trials = base_serice.getSuggestions(search_space, trials, request.request_number)
         return api_pb2.GetSuggestionsReply(
             trials=Trial.generate(new_trials)
         )

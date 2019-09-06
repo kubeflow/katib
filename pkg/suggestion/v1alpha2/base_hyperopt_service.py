@@ -10,12 +10,15 @@ logger = logging.getLogger("BaseHyperoptService")
 
 class BaseHyperoptService(object):
     def __init__(self, algorithm_name="tpe"):
-        if algorithm_name == 'tpe':
+        if algorithm_name == 'hyperopt-tpe':
             self.hyperopt_algorithm = hyperopt.tpe.suggest
-        elif algorithm_name == 'random':
+        elif algorithm_name == 'hyperopt-random':
             self.hyperopt_algorithm = hyperopt.rand.suggest
-        elif algorithm_name == 'anneal':
+        elif algorithm_name == 'hyperopt-anneal':
             self.hyperopt_algorithm = hyperopt.anneal.suggest
+        else:
+            logger.error("Failed to create the algortihm: %s", algorithm_name)
+            self.hyperopt_algorithm = None
 
     def getSuggestions(self, search_space, trials, request_number):
         """
@@ -25,9 +28,10 @@ class BaseHyperoptService(object):
         hyperopt_search_space = {}
         for param in search_space.params:
             if param.type == INTEGER:
-                hyperopt_search_space[param.name] = int(param.min) + hyperopt.hp.randint(
+                hyperopt_search_space[param.name] = hyperopt.hp.quniform(
                     param.name,
-                    int(param.max) - int(param.min))
+                    float(param.min),
+                    float(param.max), 1)
             elif param.type == DOUBLE:
                 hyperopt_search_space[param.name] = hyperopt.hp.uniform(
                     param.name,
@@ -136,7 +140,7 @@ class BaseHyperoptService(object):
         assignments = []
         for param in search_space.params:
             if param.type == INTEGER:
-                assignments.append(Assignment(param.name, vals[param.name][0]))
+                assignments.append(Assignment(param.name, int(vals[param.name][0])))
             elif param.type == DOUBLE:
                 assignments.append(Assignment(param.name, vals[param.name][0]))
             elif param.type == CATEGORICAL or param.type == DISCRETE:
