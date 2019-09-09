@@ -6,7 +6,7 @@ from . import parsing_util, base_skopt_service
 from .internal.search_space import HyperParameter, HyperParameterSearchSpace
 from .internal.trial import Trial
 
-logger = logging.getLogger("HyperoptRandomService")
+logger = logging.getLogger("SkoptService")
 
 
 class SkoptService(
