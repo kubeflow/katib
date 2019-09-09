@@ -15,9 +15,18 @@ class BaseSkoptService(object):
     Refer to https://github.com/scikit-optimize/scikit-optimize .
     """
 
-    def __init__(self, algorithm_name="skopt-bayesian-optimization"):
-        if algorithm_name != "skopt-bayesian-optimization":
-            logger.error("Failed to create the algortihm: %s", algorithm_name)
+    def __init__(self, algorithm_name="skopt-bayesian-optimization",
+                 base_estimator="GP",
+                 n_initial_points=10,
+                 acq_func="gp_hedge",
+                 acq_optimizer="auto",
+                 random_state=None):
+        self.base_estimator = base_estimator
+        self.n_initial_points = n_initial_points
+        self.acq_func = acq_func
+        self.acq_optimizer = acq_optimizer
+        self.random_state = random_state
+        self.algorithm_name = algorithm_name
 
     def getSuggestions(self, search_space, trials, request_number):
         """
@@ -37,7 +46,14 @@ class BaseSkoptService(object):
                 skopt_search_space.append(
                     skopt.space.Categorical(param.list, name=param.name))
 
-        skopt_optimizer = skopt.Optimizer(skopt_search_space, "GP")
+        if self.algorithm_name != "skopt-bayesian-optimization":
+            raise Exception("Algorithm name is not supported by skopt service.")
+        skopt_optimizer = skopt.Optimizer(skopt_search_space,
+                                          base_estimator=self.base_estimator,
+                                          n_initial_points=self.n_initial_points,
+                                          acq_func=self.acq_func,
+                                          acq_optimizer=self.acq_optimizer,
+                                          random_state=self.random_state)
 
         for trial in trials:
             skopt_suggested = []
@@ -64,7 +80,8 @@ class BaseSkoptService(object):
 
         for i in range(request_number):
             skopt_suggested = skopt_optimizer.ask()
-            return_trial_list.append(BaseSkoptService.convert(search_space, skopt_suggested))
+            return_trial_list.append(
+                BaseSkoptService.convert(search_space, skopt_suggested))
         return return_trial_list
 
     @staticmethod
