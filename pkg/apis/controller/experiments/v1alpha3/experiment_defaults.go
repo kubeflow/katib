@@ -23,6 +23,8 @@ import (
 	"os"
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 func (e *Experiment) SetDefault() {
@@ -65,6 +67,47 @@ func (e *Experiment) setDefaultMetricsCollector() {
 	if e.Spec.MetricsCollectorSpec.Collector == nil {
 		e.Spec.MetricsCollectorSpec.Collector = &common.CollectorSpec{
 			Kind: common.StdOutCollector,
+		}
+	}
+	switch e.Spec.MetricsCollectorSpec.Collector.Kind {
+	case common.PrometheusMetricCollector:
+		if e.Spec.MetricsCollectorSpec.Source == nil {
+			e.Spec.MetricsCollectorSpec.Source = &common.SourceSpec{}
+		}
+		if e.Spec.MetricsCollectorSpec.Source.HttpGet == nil {
+			e.Spec.MetricsCollectorSpec.Source.HttpGet = &v1.HTTPGetAction{}
+		}
+		if e.Spec.MetricsCollectorSpec.Source.HttpGet.Path == "" {
+			e.Spec.MetricsCollectorSpec.Source.HttpGet.Path = common.DefaultPrometheusPath
+		}
+		if e.Spec.MetricsCollectorSpec.Source.HttpGet.Port.String() == "0" {
+			e.Spec.MetricsCollectorSpec.Source.HttpGet.Port = intstr.FromInt(common.DefaultPrometheusPort)
+		}
+	case common.FileCollector:
+		if e.Spec.MetricsCollectorSpec.Source == nil {
+			e.Spec.MetricsCollectorSpec.Source = &common.SourceSpec{}
+		}
+		if e.Spec.MetricsCollectorSpec.Source.FileSystemPath == nil {
+			e.Spec.MetricsCollectorSpec.Source.FileSystemPath = &common.FileSystemPath{}
+		}
+		if e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Kind == "" {
+			e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Kind = common.FileKind
+		}
+		if e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Path == "" {
+			e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Path = common.DefaultFilePath
+		}
+	case common.TfEventCollector:
+		if e.Spec.MetricsCollectorSpec.Source == nil {
+			e.Spec.MetricsCollectorSpec.Source = &common.SourceSpec{}
+		}
+		if e.Spec.MetricsCollectorSpec.Source.FileSystemPath == nil {
+			e.Spec.MetricsCollectorSpec.Source.FileSystemPath = &common.FileSystemPath{}
+		}
+		if e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Kind == "" {
+			e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Kind = common.DirectoryKind
+		}
+		if e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Path == "" {
+			e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Path = common.DefaultTensorflowEventDirPath
 		}
 	}
 }
