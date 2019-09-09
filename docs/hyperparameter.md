@@ -1,6 +1,26 @@
-# Suggestions
+# Hyperparameter Tuning Algorithms
 
-This document describes the usage of suggestion algorithms implemented or integrated in katib.
+This document describes the usage of hyperparameter tuning algorithms implemented or integrated in katib.
+
+Table of Contents
+=================
+
+   * [Suggestions](#suggestions)
+   * [Table of Contents](#table-of-contents)
+      * [Grid Search](#grid-search)
+         * [<a href="https://chocolate.readthedocs.io" rel="nofollow">Chocolate</a>](#chocolate)
+      * [Random Search](#random-search)
+         * [<a href="https://chocolate.readthedocs.io" rel="nofollow">Chocolate</a>](#chocolate-1)
+      * [Quasi Random Search](#quasi-random-search)
+         * [<a href="https://chocolate.readthedocs.io" rel="nofollow">Chocolate</a>](#chocolate-2)
+      * [CMAES](#cmaes)
+         * [<a href="https://chocolate.readthedocs.io" rel="nofollow">Chocolate</a>](#chocolate-3)
+      * [Bayesian Optimization](#bayesian-optimization)
+         * [<a href="https://github.com/scikit-optimize/scikit-optimize">scikit-optimize</a>](#scikit-optimize)
+      * [References](#references)
+
+Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
+
 
 ## Grid Search
 
@@ -38,7 +58,9 @@ Algorithm name in katib is `chocolate-CMAES`.
 
 ## Bayesian Optimization
 
-### [scikit-optimize](https://github.com/scikit-optimize/scikit-optimize)
+Bayes search models the search space using gaussian process regression, which allows to have an estimate of the loss function and the uncertainty on that estimate at every point of the search space. Modeling the search space suffers from the curse of dimensionality, which makes this method more suitable when the number of dimensions is low. Moreover, since it models both the expected loss and uncertainty, this search algorithm converges in few steps on superior configurations, making it a good choice when the time to complete the evaluation of a parameter configuration is high.
+
+### [scikit-optimize][]
 
 > Scikit-Optimize, or skopt, is a simple and efficient library to minimize (very) expensive and noisy black-box functions. It implements several methods for sequential model-based optimization. skopt aims to be accessible and easy to use in many contexts.
 
@@ -52,4 +74,10 @@ Algorithm name in katib is `skopt-bayesian-optimization`, and there are some alg
 | acq_optimizer    |  [string, "sampling" or "lbfgs", default="auto"]: Method to minimize the acquistion function.    The fit model is updated with the optimal value obtained by optimizing acq_func with acq_optimizer. More in [skopt document](https://scikit-optimize.github.io/#skopt.Optimizer)                                                                                                                                                                                                                                          | auto     |
 | random_state     | [int, RandomState instance, or None (default)]: Set random state to something other than None for reproducible results.                                                                                                                                                                                                                                                                                                                                                                                                    | 10       |
 
+## References
+
+- [Chocolate][]
+- [scikit-optimize][]
+
+[scikit-optimize]: https://github.com/scikit-optimize/scikit-optimize
 [Chocolate]: https://chocolate.readthedocs.io
