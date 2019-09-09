@@ -3,6 +3,9 @@ package validator
 import (
 	"bytes"
 	"fmt"
+	"path/filepath"
+	"strconv"
+	"strings"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -208,5 +211,41 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1alpha3.Ex
 	if mcjob.GetNamespace() != namespace || mcjob.GetName() != trialName {
 		return fmt.Errorf("Invalid metricsCollector template.")
 	}
+
+	// Above part of this method will be dropped
+	mcSpec := inst.Spec.MetricsCollectorSpec
+	mcKind := mcSpec.Collector.Kind
+	// TODO(hougangliu):
+	// 1. validate .spec.metricsCollectorSpec.source.filter
+	// 2. log warning message if some field will not be used for the metricsCollector kind
+	switch mcKind {
+	case commonapiv1alpha3.NoneCollector, commonapiv1alpha3.StdOutCollector:
+		return nil
+	case commonapiv1alpha3.FileCollector:
+		if mcSpec.Source == nil || mcSpec.Source.FileSystemPath == nil ||
+			mcSpec.Source.FileSystemPath.Kind != commonapiv1alpha3.FileKind || !filepath.IsAbs(mcSpec.Source.FileSystemPath.Path) {
+			return fmt.Errorf("File path where metrics file exists is required by .spec.metricsCollectorSpec.source.fileSystemPath.path")
+		}
+	case commonapiv1alpha3.TfEventCollector:
+		if mcSpec.Source == nil || mcSpec.Source.FileSystemPath == nil ||
+			mcSpec.Source.FileSystemPath.Kind != commonapiv1alpha3.DirectoryKind || !filepath.IsAbs(mcSpec.Source.FileSystemPath.Path) {
+			return fmt.Errorf("Directory path where tensorflow event files exist is required by .spec.metricsCollectorSpec.source.fileSystemPath.path")
+		}
+	case commonapiv1alpha3.PrometheusMetricCollector:
+		i, err := strconv.Atoi(mcSpec.Source.HttpGet.Port.String())
+		if err != nil || i <= 0 {
+			return fmt.Errorf(".spec.metricsCollectorSpec.source.httpGet.port must be a positive integer value for metrics collector kind: %v.", mcKind)
+		}
+		if !strings.HasPrefix(mcSpec.Source.HttpGet.Path, "/") {
+			return fmt.Errorf(".spec.metricsCollectorSpec.source.httpGet.path is invalid for metrics collector kind: %v.", mcKind)
+		}
+	case commonapiv1alpha3.CustomCollector:
+		if mcSpec.Collector.CustomCollector == nil {
+			return fmt.Errorf(".spec.metricsCollectorSpec.collector.customCollector is required for metrics collector kind: %v.", mcKind)
+		}
+	default:
+		return fmt.Errorf("Invalid metrics collector kind: %v.", mcKind)
+	}
+
 	return nil
 }

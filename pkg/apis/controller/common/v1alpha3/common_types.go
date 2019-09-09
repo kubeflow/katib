@@ -107,11 +107,20 @@ type FileSystemPath struct {
 type CollectorKind string
 
 const (
-	StdOutCollector           CollectorKind = "StdOut"
-	FileCollector             CollectorKind = "File"
-	TfEventCollector          CollectorKind = "TensorflowEvent"
+	StdOutCollector CollectorKind = "StdOut"
+
+	FileCollector   CollectorKind = "File"
+	DefaultFilePath               = "/var/log/katib/metrics.log"
+
+	TfEventCollector              CollectorKind = "TensorFlowEvent"
+	DefaultTensorflowEventDirPath               = "/var/log/katib/tfevent/"
+
 	PrometheusMetricCollector CollectorKind = "PrometheusMetric"
-	CustomCollector           CollectorKind = "Custom"
+	DefaultPrometheusPath                   = "/metrics"
+	DefaultPrometheusPort                   = 8080
+
+	CustomCollector CollectorKind = "Custom"
+
 	// When model training source code persists metrics into persistent layer
 	// directly, metricsCollector isn't in need, and its kind is "noneCollector"
 	NoneCollector CollectorKind = "None"

@@ -162,6 +162,11 @@ func newFakeInstance() *experimentsv1alpha3.Experiment {
 			Namespace: "fakens",
 		},
 		Spec: experimentsv1alpha3.ExperimentSpec{
+			MetricsCollectorSpec: &experimentsv1alpha3.MetricsCollectorSpec{
+				Collector: &commonv1alpha3.CollectorSpec{
+					Kind: commonv1alpha3.StdOutCollector,
+				},
+			},
 			Objective: &commonv1alpha3.ObjectiveSpec{
 				Type:                commonv1alpha3.ObjectiveTypeMaximize,
 				Goal:                &goal,
