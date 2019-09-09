@@ -112,7 +112,7 @@ const (
 	FileCollector   CollectorKind = "File"
 	DefaultFilePath               = "/var/log/katib/metrics.log"
 
-	TfEventCollector              CollectorKind = "TensorflowEvent"
+	TfEventCollector              CollectorKind = "TensorFlowEvent"
 	DefaultTensorflowEventDirPath               = "/var/log/katib/tfevent/"
 
 	PrometheusMetricCollector CollectorKind = "PrometheusMetric"
