@@ -17,7 +17,7 @@ class SkoptService(
         """
         name, config = OptimizerConfiguration.convertAlgorithmSpec(
             request.experiment.spec.algorithm)
-        base_serice = base_skopt_service.BaseSkoptService(
+        base_service = base_skopt_service.BaseSkoptService(
             algorithm_name=name,
             base_estimator=config.base_estimator,
             n_initial_points=config.n_initial_points,
@@ -26,7 +26,7 @@ class SkoptService(
             random_state=config.random_state)
         search_space = HyperParameterSearchSpace.convert(request.experiment)
         trials = Trial.convert(request.trials)
-        new_trials = base_serice.getSuggestions(
+        new_trials = base_service.getSuggestions(
             search_space, trials, request.request_number)
         return api_pb2.GetSuggestionsReply(
             trials=Trial.generate(new_trials)
