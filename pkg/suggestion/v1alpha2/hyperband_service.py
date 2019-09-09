@@ -8,17 +8,16 @@ from pkg.api.v1alpha2.python import api_pb2_grpc
 import grpc
 from . import parsing_util
 
+logger = getLogger(__name__)
+FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
+logging.basicConfig(format=FORMAT)
+handler = StreamHandler()
+handler.setLevel(DEBUG)
+logger.setLevel(DEBUG)
+logger.addHandler(handler)
+
 
 class HyperbandService(api_pb2_grpc.SuggestionServicer):
-    def __init__(self):
-        FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
-        self.logger = getLogger(__name__)
-        logging.basicConfig(format=FORMAT)
-        handler = StreamHandler()
-        handler.setLevel(DEBUG)
-        self.logger.setLevel(DEBUG)
-        self.logger.addHandler(handler)
-
     def GetSuggestions(self, request, context):
         """
         Main function to provide suggestion.
@@ -36,11 +35,11 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer):
             trials = self._make_bracket(experiment, param)
             for trial in trials:
                 reply.trials.add(spec=trial)
-            reply.algorithm = HyperBandParam.generate(param)
+            reply.algorithm.CopyFrom(HyperBandParam.generate(param))
             return reply
         except Exception as e:
-            self.logger.error("Fail to generate trials: \n%s",
-                              traceback.format_exc(), extra={"experiment_name": experiment_name})
+            logger.error("Fail to generate trials: \n%s",
+                              traceback.format_exc(), extra={"experiment_name": experiment.name})
             raise e
 
     def _update_hbParameters(self, param):
@@ -68,26 +67,26 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer):
         else:
             param.evaluating_trials = 0
 
-        self.logger.info("HyperBand Param eta %d.",
+        logger.info("HyperBand Param eta %d.",
                          param.eta, extra={"experiment_name": experiment.name})
-        self.logger.info("HyperBand Param R %d.",
+        logger.info("HyperBand Param R %d.",
                          param.r_l, extra={"experiment_name": experiment.name})
-        self.logger.info("HyperBand Param sMax %d.",
+        logger.info("HyperBand Param sMax %d.",
                          param.s_max, extra={"experiment_name": experiment.name})
-        self.logger.info("HyperBand Param B %d.",
+        logger.info("HyperBand Param B %d.",
                          param.b_l, extra={"experiment_name": experiment.name})
-        self.logger.info("HyperBand Param n %d.",
+        logger.info("HyperBand Param n %d.",
                          param.n, extra={"experiment_name": experiment.name})
-        self.logger.info("HyperBand Param r %d.",
+        logger.info("HyperBand Param r %d.",
                          param.r, extra={"experiment_name": experiment.name})
-        self.logger.info("HyperBand Param s %d.",
+        logger.info("HyperBand Param s %d.",
                          param.current_s, extra={"experiment_name": experiment.name})
-        self.logger.info("HyperBand Param i %d.",
+        logger.info("HyperBand Param i %d.",
                          param.current_i, extra={"experiment_name": experiment.name})
-        self.logger.info("HyperBand evaluating trials count %d.",
+        logger.info("HyperBand evaluating trials count %d.",
                          param.evaluating_trials, extra={"experiment_name": experiment.name})
-        # TODO: Log resource name
-
+        logger.info("HyperBand budget resource name %s.",
+                         param.resource_name, extra={"experiment_name": experiment.name})
         if param.evaluating_trials == 0:
             self._new_hbParameters(param)
 
@@ -103,7 +102,7 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer):
         trialSpecs = self._copy_trials(
             last_trials, r_i, param.resource_name)
 
-        self.logger.info("Generate %d trials by child bracket.",
+        logger.info("Generate %d trials by child bracket.",
                          top_trials_num, extra={"experiment_name": experiment.name})
         return trialSpecs
 
@@ -170,20 +169,20 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer):
                 parameter_config.categorical_info)
             trial_spec = api_pb2.TrialSpec()
             trial_spec.experiment_name = experiment.name
-            for param in suggestion:
-                if param['name'] == param.resource_name:
-                    param['value'] = str(r)
-                trial_spec.parameter_assignments.assignments.add(name=param['name'],
-                                                                 value=str(param['value']))
+            for hp in suggestion:
+                if hp['name'] == param.resource_name:
+                    hp['value'] = str(r)
+                trial_spec.parameter_assignments.assignments.add(name=hp['name'],
+                                                                 value=str(hp['value']))
             trial_specs.append(trial_spec)
-        self.logger.info("Generate %d trials by master bracket.",
+        logger.info("Generate %d trials by master bracket.",
                          n, extra={"experiment_name": experiment.name})
         return trial_specs
 
     def _set_validate_context_error(self, context, error_message):
         context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
         context.set_details(error_message)
-        self.logger.info(error_message)
+        logger.info(error_message)
         return api_pb2.ValidateAlgorithmSettingsReply()
 
     def ValidateAlgorithmSettings(self, request, context):
@@ -229,53 +228,54 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer):
 
 class HyperBandParam(object):
     def __init__(self, eta=3, s_max=-1, r_l=-1,
-                 b_l=-1, r=-1, n=-1, current_s=-2, current_i=-1, resource_name="",
-                 evaluating_trials=0)
-    self.eta = eta
-    self.s_max = s_max
-    self.r_l = r_l
-    self.b_l = b_l
-    self.r = r
-    self.n = n
-    self.current_s = current_s
-    self.current_i = current_i
-    self.resource_name = resource_name
-    self.evaluating_trials = evaluating_trials
+                 b_l=-1, r=-1, n=-1, current_s=-2,
+                 current_i=-1, resource_name="",
+                 evaluating_trials=0):
+        self.eta = eta
+        self.s_max = s_max
+        self.r_l = r_l
+        self.b_l = b_l
+        self.r = r
+        self.n = n
+        self.current_s = current_s
+        self.current_i = current_i
+        self.resource_name = resource_name
+        self.evaluating_trials = evaluating_trials
 
     @staticmethod
     def generate(param):
         algorithm_settings = [
             api_pb2.AlgorithmSetting(
-            name="eta",
-            value=str(param.eta)
-        ), api_pb2.AlgorithmSetting(
-            name="s_max",
-            value=str(param.s_max)
-        ), api_pb2.AlgorithmSetting(
-            name="r_l",
-            value=str(param.r_l)
-        ), api_pb2.AlgorithmSetting(
-            name="b_l",
-            value=str(param.b_l)
-        ), api_pb2.AlgorithmSetting(
-            name="r",
-            value=str(param.r)
-        ), api_pb2.AlgorithmSetting(
-            name="n",
-            value=str(param.n)
-        ), api_pb2.AlgorithmSetting(
-            name="current_s",
-            value=str(param.current_s)
-        ), api_pb2.AlgorithmSetting(
-            name="current_i",
-            value=str(param.current_i)
-        ), api_pb2.AlgorithmSetting(
-            name="resource_name",
-            value=param.resource_name
-        ), api_pb2.AlgorithmSetting(
-            name="evaluating_trials",
-            value=str(param.evaluating_trials)
-        )]
+                name="eta",
+                value=str(param.eta)
+            ), api_pb2.AlgorithmSetting(
+                name="s_max",
+                value=str(param.s_max)
+            ), api_pb2.AlgorithmSetting(
+                name="r_l",
+                value=str(param.r_l)
+            ), api_pb2.AlgorithmSetting(
+                name="b_l",
+                value=str(param.b_l)
+            ), api_pb2.AlgorithmSetting(
+                name="r",
+                value=str(param.r)
+            ), api_pb2.AlgorithmSetting(
+                name="n",
+                value=str(param.n)
+            ), api_pb2.AlgorithmSetting(
+                name="current_s",
+                value=str(param.current_s)
+            ), api_pb2.AlgorithmSetting(
+                name="current_i",
+                value=str(param.current_i)
+            ), api_pb2.AlgorithmSetting(
+                name="resource_name",
+                value=param.resource_name
+            ), api_pb2.AlgorithmSetting(
+                name="evaluating_trials",
+                value=str(param.evaluating_trials)
+            )]
         return api_pb2.AlgorithmSpec(
             algorithm_setting=algorithm_settings
         )
@@ -286,32 +286,33 @@ class HyperBandParam(object):
         """
         param = HyperBandParam()
         # Set the param from the algorithm settings.
-        for k, v in alg_settings.items():
-            if k == "eta":
-                param.eta = float(v)
-            elif k == "r_l":
-                param.r_l = float(v)
-            elif k == "b_l":
-                param.b_l = float(v)
-            elif k == "n"
-            param.n = int(float(v))
-            elif k == "r"
-            param.r = int(float(v))
-            elif k == "current_s":
-                param.current_s = int(float(v))
-            elif k == "current_i":
-                param.current_i = int(float(v))
-            elif k == "s_max":
-                param.s_max = int(float(v))
-            elif k == "evaluating_trials":
-                param.evaluating_trials = int(float(v))
-            elif k == "resource_name":
-                param.resource_name = v
+        for setting in alg_settings:
+            if setting.name == "eta":
+                param.eta = float(setting.value)
+            elif setting.name == "r_l":
+                param.r_l = float(setting.value)
+            elif setting.name == "b_l":
+                param.b_l = float(setting.value)
+            elif setting.name == "n":
+                param.n = int(float(setting.value))
+            elif setting.name == "r":
+                param.r = int(float(setting.value))
+            elif setting.name == "current_s":
+                param.current_s = int(float(setting.value))
+            elif setting.name == "current_i":
+                param.current_i = int(float(setting.value))
+            elif setting.name == "s_max":
+                param.s_max = int(float(setting.value))
+            elif setting.name == "evaluating_trials":
+                param.evaluating_trials = int(float(setting.value))
+            elif setting.name == "resource_name":
+                param.resource_name = setting.value
             else:
-                self.logger.info("Unknown HyperBand Param %s, ignore it", k)
+                logger.info(
+                    "Unknown HyperBand Param %s, ignore it", setting.name)
         if param.current_s == -1:
             # Hyperband outlerloop has finished
-            self.logger.info("HyperBand outlerloop has finished.")
+            logger.info("HyperBand outlerloop has finished.")
             return param
 
         # Deal with illegal parameter values.
