@@ -90,14 +90,15 @@ workflows:
     job_types:
       - presubmit
     include_dirs:
-    - pkg/api/operators/apis/common/v1alpha3/*
-    - pkg/api/operators/apis/experiment/v1alpha3/*
-    - pkg/api/operators/apis/trial/v1alpha3/*
-    - pkg/api/operators/apis/*.go
-    - pkg/api/health/*
-    - pkg/api/v1alpha3/*
+    - pkg/apis/controller/common/v1alpha3/*
+    - pkg/apis/controller/experiments/v1alpha3/*
+    - pkg/apis/controller/trials/v1alpha3/*
+    - pkg/apis/controller/suggestions/v1alpha3/*
+    - pkg/apis/controller/*.go
+    - pkg/apis/manager/health/*
+    - pkg/apis/manager/v1alpha3/*
     - pkg/common/v1alpha3/*
-    - pkg/controller/v1alpha3/*
+    - pkg/controller.v1alpha3/*
     - pkg/db/v1alpha3/*
     - pkg/earlystopping/v1alpha3/*
     - pkg/manager/v1alpha3/*
@@ -133,14 +134,15 @@ workflows:
     job_types:
       - postsubmit
     include_dirs:
-    - pkg/api/operators/apis/common/v1alpha3/*
-    - pkg/api/operators/apis/experiment/v1alpha3/*
-    - pkg/api/operators/apis/trial/v1alpha3/*
-    - pkg/api/operators/apis/*.go
-    - pkg/api/health/*
-    - pkg/api/v1alpha3/*
+    - pkg/apis/controller/common/v1alpha3/*
+    - pkg/apis/controller/experiments/v1alpha3/*
+    - pkg/apis/controller/trials/v1alpha3/*
+    - pkg/apis/controller/suggestions/v1alpha3/*
+    - pkg/apis/controller/*.go
+    - pkg/apis/manager/health/*
+    - pkg/apis/manager/v1alpha3/*
     - pkg/common/v1alpha3/*
-    - pkg/controller/v1alpha3/*
+    - pkg/controller.v1alpha3/*
     - pkg/db/v1alpha3/*
     - pkg/earlystopping/v1alpha3/*
     - pkg/manager/v1alpha3/*
