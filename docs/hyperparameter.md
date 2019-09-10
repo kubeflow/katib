@@ -21,7 +21,6 @@ Table of Contents
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
-
 ## Grid Search
 
 Grid sampling applies when all variables are discrete (Doubles and integers need to be quantized) and the number of possibilities is low. A grid search will perform the exhaustive combinatorial search over all possibilities making the search extremely long even for medium sized problems.
