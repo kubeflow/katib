@@ -41,9 +41,11 @@ func (g *General) GetOrCreateSuggestion(instance *experimentsv1alpha3.Experiment
 	if err != nil && errors.IsNotFound(err) {
 		logger.Info("Creating Suggestion", "namespace", instance.Namespace, "name", instance.Name, "requests", suggestionRequests)
 		if err := g.createSuggestion(instance, suggestionRequests); err != nil {
+			logger.Error(err, "CreateSuggestion failed", "instance", instance.Name)
 			return nil, err
 		}
 	} else if err != nil {
+		logger.Error(err, "Suggestion get failed", "instance", instance.Name)
 		return nil, err
 	} else {
 		return suggestion, nil
