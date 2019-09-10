@@ -130,10 +130,6 @@ python get-pip.py
 pip install -r test_requirements.txt
 python test-katib-manager.py
 
-echo "Running e2e random experiment"
-export KUBECONFIG=$HOME/.kube/config
-go run run-e2e-experiment.go ../../../examples/v1alpha3/random-example.yaml
-
 #echo "Running e2e grid experiment"
 #export KUBECONFIG=$HOME/.kube/config
 #go run run-e2e-experiment.go ../../../examples/v1alpha3/grid-example.yaml
