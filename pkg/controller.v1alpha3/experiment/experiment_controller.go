@@ -35,9 +35,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
+	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
-	"github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/managerclient"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/manifest"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/suggestion"
 	suggestionfake "github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/suggestion/fake"
@@ -60,12 +60,11 @@ func Add(mgr manager.Manager) error {
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	r := &ReconcileExperiment{
-		Client:        mgr.GetClient(),
-		scheme:        mgr.GetScheme(),
-		ManagerClient: managerclient.New(),
+		Client: mgr.GetClient(),
+		scheme: mgr.GetScheme(),
 	}
 	imp := viper.GetString(consts.ConfigExperimentSuggestionName)
-	r.Suggestion = newSuggestion(imp)
+	r.Suggestion = newSuggestion(imp, mgr.GetScheme(), mgr.GetClient())
 
 	r.Generator = manifest.New(r.Client)
 	r.updateStatusHandler = r.updateStatus
@@ -73,7 +72,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 }
 
 // newSuggestion returns the new Suggestion for the given config.
-func newSuggestion(config string) suggestion.Suggestion {
+func newSuggestion(config string, scheme *runtime.Scheme, client client.Client) suggestion.Suggestion {
 	// Use different implementation according to the configuration.
 	switch config {
 	case "fake":
@@ -81,11 +80,11 @@ func newSuggestion(config string) suggestion.Suggestion {
 		return suggestionfake.New()
 	case "default":
 		log.Info("Using the default suggestion implementation")
-		return suggestion.New()
+		return suggestion.New(scheme, client)
 	default:
 		log.Info("No valid name specified, using the default suggestion implementation",
 			"implementation", config)
-		return suggestion.New()
+		return suggestion.New(scheme, client)
 	}
 }
 
@@ -128,6 +127,18 @@ func addWatch(mgr manager.Manager, c controller.Controller) error {
 		log.Error(err, "Trial watch failed")
 		return err
 	}
+
+	err = c.Watch(
+		&source.Kind{Type: &suggestionsv1alpha3.Suggestion{}},
+		&handler.EnqueueRequestForOwner{
+			IsController: true,
+			OwnerType:    &experimentsv1alpha3.Experiment{},
+		})
+
+	if err != nil {
+		log.Error(err, "Suggestion watch failed")
+		return err
+	}
 	return nil
 }
 
@@ -140,7 +151,6 @@ type ReconcileExperiment struct {
 
 	suggestion.Suggestion
 	manifest.Generator
-	managerclient.ManagerClient
 	// updateStatusHandler is defined for test purpose.
 	updateStatusHandler updateStatusFunc
 }
@@ -166,10 +176,6 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 	instance := original.DeepCopy()
 
-	if needUpdate, finalizers := instance.NeedUpdateFinalizers(); needUpdate {
-		return r.updateFinalizers(instance, finalizers)
-	}
-
 	if instance.IsCompleted() {
 
 		return reconcile.Result{}, nil
@@ -184,13 +190,6 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		if instance.Status.CompletionTime == nil {
 			instance.Status.CompletionTime = &metav1.Time{}
 		}
-		err = r.CreateExperimentInDB(instance)
-		if err != nil {
-			logger.Error(err, "Create experiment in DB error")
-			return reconcile.Result{
-				Requeue: true,
-			}, err
-		}
 		msg := "Experiment is created"
 		instance.MarkExperimentStatusCreated(util.ExperimentCreatedReason, msg)
 	} else {
@@ -204,11 +203,6 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 
 	if !equality.Semantic.DeepEqual(original.Status, instance.Status) {
 		//assuming that only status change
-		err = r.UpdateExperimentStatusInDB(instance)
-		if err != nil {
-			logger.Error(err, "Update experiment status in DB error")
-			return reconcile.Result{}, err
-		}
 		err = r.updateStatusHandler(instance)
 		if err != nil {
 			logger.Error(err, "Update experiment instance status error")
@@ -284,7 +278,7 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha3.Expe
 		if addCount > 0 {
 			//create "addCount" number of trials
 			logger.Info("CreateTrials", "addCount", addCount)
-			if err := r.createTrials(instance, addCount); err != nil {
+			if err := r.createTrials(instance, trials, addCount); err != nil {
 				logger.Error(err, "Create trials error")
 				return err
 			}
@@ -295,20 +289,17 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha3.Expe
 
 }
 
-func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha3.Experiment, addCount int32) error {
+func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha3.Experiment, trialList []trialsv1alpha3.Trial, addCount int32) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	trials, err := r.GetSuggestions(instance, addCount)
+	currentCount := int32(len(trialList))
+	trials, err := r.ReconcileSuggestions(instance, currentCount, addCount)
 	if err != nil {
 		logger.Error(err, "Get suggestions error")
 		return err
 	}
-	if len(trials) == 0 {
-		// for some suggestion services, such as hyperband, it will stop generating new trial once some condition satisfied
-		util.UpdateExperimentStatusCondition(instance, false, true)
-	}
 	for _, trial := range trials {
-		if err = r.createTrialInstance(instance, trial); err != nil {
+		if err = r.createTrialInstance(instance, &trial); err != nil {
 			logger.Error(err, "Create trial instance error", "trial", trial)
 			continue
 		}
@@ -334,4 +325,32 @@ func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha3.Experim
 		}
 	}
 	return nil
+}
+
+func (r *ReconcileExperiment) ReconcileSuggestions(instance *experimentsv1alpha3.Experiment, currentCount, addCount int32) ([]suggestionsv1alpha3.TrialAssignment, error) {
+	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+	var assignments []suggestionsv1alpha3.TrialAssignment
+	suggestionRequestsCount := currentCount + addCount
+
+	original, err := r.GetOrCreateSuggestion(instance, suggestionRequestsCount)
+	logger.Info("GetOrCreateSuggestion", "Instance name", instance.Name, "suggestionRequestsCount", suggestionRequestsCount)
+	if err != nil {
+		logger.Error(err, "GetOrCreateSuggestion failed", "instance", instance.Name, "suggestionRequestsCount", suggestionRequestsCount)
+		return nil, err
+	} else {
+		if original != nil {
+			suggestion := original.DeepCopy()
+			if len(suggestion.Status.Suggestions) > int(currentCount) {
+				suggestions := suggestion.Status.Suggestions
+				assignments = suggestions[currentCount:]
+			}
+			if suggestion.Spec.Requests != suggestionRequestsCount {
+				suggestion.Spec.Requests = suggestionRequestsCount
+				if err := r.UpdateSuggestion(suggestion, suggestionRequestsCount); err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+	return assignments, nil
 }

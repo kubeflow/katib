@@ -89,6 +89,6 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) *corev1.Co
 	c := &corev1.Container{
 		Name: consts.ContainerSuggestion,
 	}
-	c.Image = "katib/v1alpha2/suggestion-random:1"
+	c.Image = "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-random"
 	return c
 }

@@ -7,7 +7,7 @@ package mock
 import (
 	gomock "github.com/golang/mock/gomock"
 	v1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
-	v1alpha30 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
+	v1alpha30 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	reflect "reflect"
 )
 
@@ -34,17 +34,31 @@ func (m *MockSuggestion) EXPECT() *MockSuggestionMockRecorder {
 	return m.recorder
 }
 
-// GetSuggestions mocks base method
-func (m *MockSuggestion) GetSuggestions(arg0 *v1alpha3.Experiment, arg1 int32) ([]*v1alpha30.Trial, error) {
+// GetOrCreateSuggestion mocks base method
+func (m *MockSuggestion) GetOrCreateSuggestion(arg0 *v1alpha3.Experiment, arg1 int32) (*v1alpha30.Suggestion, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSuggestions", arg0, arg1)
-	ret0, _ := ret[0].([]*v1alpha30.Trial)
+	ret := m.ctrl.Call(m, "GetOrCreateSuggestion", arg0, arg1)
+	ret0, _ := ret[0].(*v1alpha30.Suggestion)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetSuggestions indicates an expected call of GetSuggestions
-func (mr *MockSuggestionMockRecorder) GetSuggestions(arg0, arg1 interface{}) *gomock.Call {
+// GetOrCreateSuggestion indicates an expected call of GetOrCreateSuggestion
+func (mr *MockSuggestionMockRecorder) GetOrCreateSuggestion(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestions", reflect.TypeOf((*MockSuggestion)(nil).GetSuggestions), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrCreateSuggestion", reflect.TypeOf((*MockSuggestion)(nil).GetOrCreateSuggestion), arg0, arg1)
+}
+
+// UpdateSuggestion mocks base method
+func (m *MockSuggestion) UpdateSuggestion(arg0 *v1alpha30.Suggestion, arg1 int32) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateSuggestion", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateSuggestion indicates an expected call of UpdateSuggestion
+func (mr *MockSuggestionMockRecorder) UpdateSuggestion(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSuggestion", reflect.TypeOf((*MockSuggestion)(nil).UpdateSuggestion), arg0, arg1)
 }

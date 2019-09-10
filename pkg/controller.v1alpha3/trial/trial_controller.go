@@ -164,17 +164,9 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 		if instance.Status.CompletionTime == nil {
 			instance.Status.CompletionTime = &metav1.Time{}
 		}
-		err = r.CreateTrialInDB(instance)
-		if err != nil {
-			logger.Error(err, "Create trial in DB error")
-			return reconcile.Result{
-				Requeue: true,
-			}, err
-		}
 		msg := "Trial is created"
 		instance.MarkTrialStatusCreated(TrialCreatedReason, msg)
 	} else {
-		// Trial already created in DB
 		err := r.reconcileTrial(instance)
 		if err != nil {
 			logger.Error(err, "Reconcile trial error")
@@ -184,11 +176,6 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	if !equality.Semantic.DeepEqual(original.Status, instance.Status) {
 		//assuming that only status change
-		err = r.UpdateTrialStatusInDB(instance)
-		if err != nil {
-			logger.Error(err, "Update trial status in DB error")
-			return reconcile.Result{}, err
-		}
 		err = r.updateStatusHandler(instance)
 		if err != nil {
 			logger.Error(err, "Update trial instance status error")

@@ -19,8 +19,8 @@ import (
 
 	commonapiv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
+	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
-	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 	managerclientmock "github.com/kubeflow/katib/pkg/mock/v1alpha3/experiment/managerclient"
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1alpha3/experiment/manifest"
@@ -67,11 +67,10 @@ func TestCreateExperiment(t *testing.T) {
 	c := mgr.GetClient()
 
 	recFn := SetupTestReconcile(&ReconcileExperiment{
-		Client:        mgr.GetClient(),
-		scheme:        mgr.GetScheme(),
-		ManagerClient: mc,
-		Suggestion:    suggestion,
-		Generator:     generator,
+		Client:     mgr.GetClient(),
+		scheme:     mgr.GetScheme(),
+		Suggestion: suggestion,
+		Generator:  generator,
 		updateStatusHandler: func(instance *experimentsv1alpha3.Experiment) error {
 			if !instance.IsCreated() {
 				t.Errorf("Expected got condition created")
@@ -121,13 +120,27 @@ func TestReconcileExperiment(t *testing.T) {
 	mockCtrl2 := gomock.NewController(t)
 	defer mockCtrl2.Finish()
 	suggestion := suggestionmock.NewMockSuggestion(mockCtrl)
-	suggestion.EXPECT().GetSuggestions(gomock.Any(), gomock.Any()).Return([]*api_pb.Trial{
-		{
-			Name: trialKey.Name,
-			Spec: &api_pb.TrialSpec{},
-		},
-	}, nil).AnyTimes()
-
+	suggestion.EXPECT().GetOrCreateSuggestion(gomock.Any(), gomock.Any()).Return(
+		&suggestionsv1alpha3.Suggestion{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      instance.Name,
+				Namespace: instance.Namespace,
+			},
+			Status: suggestionsv1alpha3.SuggestionStatus{
+				Suggestions: []suggestionsv1alpha3.TrialAssignment{
+					{
+						Name: trialKey.Name,
+						ParameterAssignments: []commonapiv1alpha3.ParameterAssignment{
+							{
+								Name:  "--lr",
+								Value: "0.5",
+							},
+						},
+					},
+				},
+			},
+		}, nil).AnyTimes()
+	suggestion.EXPECT().UpdateSuggestion(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 	mockCtrl3 := gomock.NewController(t)
 	defer mockCtrl3.Finish()
 	generator := manifestmock.NewMockGenerator(mockCtrl)
@@ -197,11 +210,10 @@ spec:
 	c := mgr.GetClient()
 
 	r := &ReconcileExperiment{
-		Client:        mgr.GetClient(),
-		scheme:        mgr.GetScheme(),
-		ManagerClient: mc,
-		Suggestion:    suggestion,
-		Generator:     generator,
+		Client:     mgr.GetClient(),
+		scheme:     mgr.GetScheme(),
+		Suggestion: suggestion,
+		Generator:  generator,
 	}
 	r.updateStatusHandler = func(instance *experimentsv1alpha3.Experiment) error {
 		if !instance.IsCreated() {

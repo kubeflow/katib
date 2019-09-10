@@ -7,8 +7,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 
+	commonapiv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
-	apiv1alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 	katibclientmock "github.com/kubeflow/katib/pkg/mock/v1alpha3/util/katibclient"
 )
 
@@ -245,7 +245,7 @@ func TestGetRunSpecWithHP(t *testing.T) {
 		client: c,
 	}
 
-	actual, err := p.GetRunSpecWithHyperParameters(tc, "", "test", "testns", []*apiv1alpha3.ParameterAssignment{
+	actual, err := p.GetRunSpecWithHyperParameters(tc, "", "test", "testns", []commonapiv1alpha3.ParameterAssignment{
 		{
 			Name:  "testname",
 			Value: "testvalue",
