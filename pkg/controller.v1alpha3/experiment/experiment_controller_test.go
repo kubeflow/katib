@@ -120,13 +120,26 @@ func TestReconcileExperiment(t *testing.T) {
 	mockCtrl2 := gomock.NewController(t)
 	defer mockCtrl2.Finish()
 	suggestion := suggestionmock.NewMockSuggestion(mockCtrl)
-	suggestion.EXPECT().GetSuggestions(gomock.Any()).Return([]suggestionsv1alpha3.TrialAssignment{
-		{
-			Name:                 trialKey.Name,
-			ParameterAssignments: []commonapiv1alpha3.ParameterAssignment{},
-		},
-	}).AnyTimes()
-	suggestion.EXPECT().CreateSuggestion(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	suggestion.EXPECT().GetOrCreateSuggestion(gomock.Any(), gomock.Any()).Return(
+		&suggestionsv1alpha3.Suggestion{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      instance.Name,
+				Namespace: instance.Namespace,
+			},
+			Status: suggestionsv1alpha3.SuggestionStatus{
+				Suggestions: []suggestionsv1alpha3.TrialAssignment{
+					{
+						Name: trialKey.Name,
+						ParameterAssignments: []commonapiv1alpha3.ParameterAssignment{
+							{
+								Name:  "--lr",
+								Value: "0.5",
+							},
+						},
+					},
+				},
+			},
+		}, nil).AnyTimes()
 	suggestion.EXPECT().UpdateSuggestion(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 	mockCtrl3 := gomock.NewController(t)
 	defer mockCtrl3.Finish()

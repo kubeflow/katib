@@ -4,6 +4,7 @@ import (
 	"context"
 	//"fmt"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -19,9 +20,8 @@ import (
 var log = logf.Log.WithName("experiment-suggestion-client")
 
 type Suggestion interface {
-	CreateSuggestion(instance *experimentsv1alpha3.Experiment, suggestionRequests int32) error
+	GetOrCreateSuggestion(instance *experimentsv1alpha3.Experiment, suggestionRequests int32) (*suggestionsv1alpha3.Suggestion, error)
 	UpdateSuggestion(suggestion *suggestionsv1alpha3.Suggestion, suggestionRequests int32) error
-	GetSuggestions(suggestion *suggestionsv1alpha3.Suggestion) []suggestionsv1alpha3.TrialAssignment
 }
 
 type General struct {
@@ -33,11 +33,25 @@ func New(scheme *runtime.Scheme, client client.Client) Suggestion {
 	return &General{scheme: scheme, Client: client}
 }
 
-func (g *General) GetSuggestions(suggestion *suggestionsv1alpha3.Suggestion) []suggestionsv1alpha3.TrialAssignment {
-	return suggestion.Status.Suggestions
+func (g *General) GetOrCreateSuggestion(instance *experimentsv1alpha3.Experiment, suggestionRequests int32) (*suggestionsv1alpha3.Suggestion, error) {
+	logger := log.WithValues("experiment", types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace})
+	suggestion := &suggestionsv1alpha3.Suggestion{}
+	err := g.Get(context.TODO(),
+		types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}, suggestion)
+	if err != nil && errors.IsNotFound(err) {
+		logger.Info("Creating Suggestion", "namespace", instance.Namespace, "name", instance.Name, "requests", suggestionRequests)
+		if err := g.createSuggestion(instance, suggestionRequests); err != nil {
+			return nil, err
+		}
+	} else if err != nil {
+		return nil, err
+	} else {
+		return suggestion, nil
+	}
+	return nil, nil
 }
 
-func (g *General) CreateSuggestion(instance *experimentsv1alpha3.Experiment, suggestionRequests int32) error {
+func (g *General) createSuggestion(instance *experimentsv1alpha3.Experiment, suggestionRequests int32) error {
 	logger := log.WithValues("experiment", types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace})
 	suggestion := &suggestionsv1alpha3.Suggestion{
 		ObjectMeta: metav1.ObjectMeta{

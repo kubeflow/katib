@@ -329,29 +329,28 @@ func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha3.Experim
 
 func (r *ReconcileExperiment) ReconcileSuggestions(instance *experimentsv1alpha3.Experiment, currentCount, addCount int32) ([]suggestionsv1alpha3.TrialAssignment, error) {
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+	var assignments []suggestionsv1alpha3.TrialAssignment
 	suggestionRequestsCount := currentCount + addCount
-	original := &suggestionsv1alpha3.Suggestion{}
-	err := r.Get(context.TODO(),
-		types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}, original)
-	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Creating Suggestion", "namespace", instance.Namespace, "name", instance.Name, "requests", suggestionRequestsCount)
-		if err := r.CreateSuggestion(instance, suggestionRequestsCount); err != nil {
-			return nil, err
-		}
-	} else if err != nil {
+
+	original, err := r.GetOrCreateSuggestion(instance, suggestionRequestsCount)
+	logger.Info("GetOrCreateSuggestion", "Instance name", instance.Name, "suggestionRequestsCount", suggestionRequestsCount)
+	if err != nil {
+		logger.Error(err, "GetOrCreateSuggestion failed", "instance", instance.Name, "suggestionRequestsCount", suggestionRequestsCount)
 		return nil, err
 	} else {
-		suggestion := original.DeepCopy()
-		if suggestion.Spec.Requests != suggestionRequestsCount {
-			suggestion.Spec.Requests = suggestionRequestsCount
-			if err := r.UpdateSuggestion(suggestion, suggestionRequestsCount); err != nil {
-				return nil, err
+		if original != nil {
+			suggestion := original.DeepCopy()
+			if len(suggestion.Status.Suggestions) > int(currentCount) {
+				suggestions := suggestion.Status.Suggestions
+				assignments = suggestions[currentCount:]
+			}
+			if suggestion.Spec.Requests != suggestionRequestsCount {
+				suggestion.Spec.Requests = suggestionRequestsCount
+				if err := r.UpdateSuggestion(suggestion, suggestionRequestsCount); err != nil {
+					return nil, err
+				}
 			}
 		}
-		if len(suggestion.Status.Suggestions) > int(currentCount) {
-			suggestions := r.GetSuggestions(suggestion)
-			return suggestions[currentCount:], nil
-		}
 	}
-	return nil, nil
+	return assignments, nil
 }

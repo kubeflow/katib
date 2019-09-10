@@ -13,14 +13,10 @@ func New() suggestion.Suggestion {
 	return &Fake{}
 }
 
-func (f *Fake) CreateSuggestion(instance *experimentsv1alpha3.Experiment, suggestionRequests int32) error {
-	return nil
+func (f *Fake) GetOrCreateSuggestion(instance *experimentsv1alpha3.Experiment, suggestionRequests int32) (*suggestionsv1alpha3.Suggestion, error) {
+	return nil, nil
 }
 
 func (f *Fake) UpdateSuggestion(suggestion *suggestionsv1alpha3.Suggestion, suggestionRequests int32) error {
-	return nil
-}
-
-func (f *Fake) GetSuggestions(suggestion *suggestionsv1alpha3.Suggestion) []suggestionsv1alpha3.TrialAssignment {
 	return nil
 }
