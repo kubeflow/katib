@@ -1,6 +1,10 @@
 package fake
 
 import (
+	"fmt"
+
+	utilrand "k8s.io/apimachinery/pkg/util/rand"
+
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
@@ -19,10 +23,12 @@ func (f *Fake) SyncAssignments(
 	instance *suggestionsv1alpha3.Suggestion,
 	e *experimentsv1alpha3.Experiment,
 	ts []trialsv1alpha3.Trial) error {
-	if len(instance.Status.Assignments) != int(*instance.Spec.Suggestions) {
-		for i := 0; i < int(*instance.Spec.Suggestions)-len(instance.Status.Assignments); i++ {
-			instance.Status.Assignments = append(instance.Status.Assignments, suggestionsv1alpha3.TrialAssignment{
-				Assignments: []common.ParameterAssignment{
+	if len(instance.Status.Suggestions) != int(instance.Spec.Requests) {
+		for i := 0; i < int(instance.Spec.Requests)-len(instance.Status.Suggestions); i++ {
+			name := fmt.Sprintf("%s-%s", instance.Name, utilrand.String(8))
+			instance.Status.Suggestions = append(instance.Status.Suggestions, suggestionsv1alpha3.TrialAssignment{
+				Name: name,
+				ParameterAssignments: []common.ParameterAssignment{
 					{
 						Name:  "--lr",
 						Value: "0.03",

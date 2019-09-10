@@ -26,7 +26,7 @@ import (
 // SuggestionSpec defines the desired state of Suggestion
 type SuggestionSpec struct {
 	// Number of suggestions requested
-	Suggestions *int32 `json:"suggestions,omitempty"`
+	Requests int32 `json:"requests,omitempty"`
 
 	//Algorithm settings set by the user in the experiment config
 	AlgorithmSpec *common.AlgorithmSpec `json:"algorithmSpec,omitempty"`
@@ -35,7 +35,7 @@ type SuggestionSpec struct {
 // SuggestionStatus defines the observed state of Suggestion
 type SuggestionStatus struct {
 	// Suggestion results
-	Assignments []TrialAssignment `json:"assignments,omitempty"`
+	Suggestions []TrialAssignment `json:"suggestions,omitempty"`
 
 	// Represents time when the Suggestion was acknowledged by the Suggestion controller.
 	// It is not guaranteed to be set in happens-before order across separate operations.
@@ -58,7 +58,10 @@ type SuggestionStatus struct {
 
 type TrialAssignment struct {
 	// Suggestion results
-	Assignments []common.ParameterAssignment `json:"assignments,omitempty"`
+	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments,omitempty"`
+
+	//Name of the suggestion
+	Name string `json:"name,omitempty"`
 }
 
 // SuggestionCondition describes the state of the Suggestion at a certain point.

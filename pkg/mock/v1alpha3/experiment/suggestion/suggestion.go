@@ -7,7 +7,7 @@ package mock
 import (
 	gomock "github.com/golang/mock/gomock"
 	v1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
-	v1alpha30 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
+	v1alpha30 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	reflect "reflect"
 )
 
@@ -34,17 +34,44 @@ func (m *MockSuggestion) EXPECT() *MockSuggestionMockRecorder {
 	return m.recorder
 }
 
-// GetSuggestions mocks base method
-func (m *MockSuggestion) GetSuggestions(arg0 *v1alpha3.Experiment, arg1 int32) ([]*v1alpha30.Trial, error) {
+// CreateSuggestion mocks base method
+func (m *MockSuggestion) CreateSuggestion(arg0 *v1alpha3.Experiment, arg1 int32) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSuggestions", arg0, arg1)
-	ret0, _ := ret[0].([]*v1alpha30.Trial)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "CreateSuggestion", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateSuggestion indicates an expected call of CreateSuggestion
+func (mr *MockSuggestionMockRecorder) CreateSuggestion(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSuggestion", reflect.TypeOf((*MockSuggestion)(nil).CreateSuggestion), arg0, arg1)
+}
+
+// GetSuggestions mocks base method
+func (m *MockSuggestion) GetSuggestions(arg0 *v1alpha30.Suggestion) []v1alpha30.TrialAssignment {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSuggestions", arg0)
+	ret0, _ := ret[0].([]v1alpha30.TrialAssignment)
+	return ret0
 }
 
 // GetSuggestions indicates an expected call of GetSuggestions
-func (mr *MockSuggestionMockRecorder) GetSuggestions(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockSuggestionMockRecorder) GetSuggestions(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestions", reflect.TypeOf((*MockSuggestion)(nil).GetSuggestions), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestions", reflect.TypeOf((*MockSuggestion)(nil).GetSuggestions), arg0)
+}
+
+// UpdateSuggestion mocks base method
+func (m *MockSuggestion) UpdateSuggestion(arg0 *v1alpha30.Suggestion, arg1 int32) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateSuggestion", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateSuggestion indicates an expected call of UpdateSuggestion
+func (mr *MockSuggestionMockRecorder) UpdateSuggestion(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSuggestion", reflect.TypeOf((*MockSuggestion)(nil).UpdateSuggestion), arg0, arg1)
 }

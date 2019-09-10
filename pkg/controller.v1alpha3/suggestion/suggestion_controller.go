@@ -91,7 +91,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	if err != nil {
 		return err
 	}
-
+	log.Info("Suggestion controller created")
 	return nil
 }
 
@@ -163,7 +163,7 @@ func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{}, err
 	}
 
-	logger.Info("Sync assignments", "suggestions", instance.Spec.Suggestions)
+	logger.Info("Sync assignments", "suggestions", instance.Spec.Requests)
 	if err = r.SyncAssignments(instance, experiment, trials.Items); err != nil {
 		return reconcile.Result{}, err
 	}

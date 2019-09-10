@@ -6,8 +6,8 @@ package mock
 
 import (
 	gomock "github.com/golang/mock/gomock"
-	v1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
-	v1alpha30 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
+	v1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
+	v1alpha30 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	reflect "reflect"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -36,7 +36,7 @@ func (m *MockGenerator) EXPECT() *MockGeneratorMockRecorder {
 }
 
 // GetMetricsCollectorManifest mocks base method
-func (m *MockGenerator) GetMetricsCollectorManifest(arg0, arg1, arg2, arg3 string, arg4 []string, arg5 *v1alpha3.MetricsCollectorSpec) (string, error) {
+func (m *MockGenerator) GetMetricsCollectorManifest(arg0, arg1, arg2, arg3 string, arg4 []string, arg5 *v1alpha30.MetricsCollectorSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetMetricsCollectorManifest", arg0, arg1, arg2, arg3, arg4, arg5)
 	ret0, _ := ret[0].(string)
@@ -51,7 +51,7 @@ func (mr *MockGeneratorMockRecorder) GetMetricsCollectorManifest(arg0, arg1, arg
 }
 
 // GetRunSpec mocks base method
-func (m *MockGenerator) GetRunSpec(arg0 *v1alpha3.Experiment, arg1, arg2, arg3 string) (string, error) {
+func (m *MockGenerator) GetRunSpec(arg0 *v1alpha30.Experiment, arg1, arg2, arg3 string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRunSpec", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(string)
@@ -66,7 +66,7 @@ func (mr *MockGeneratorMockRecorder) GetRunSpec(arg0, arg1, arg2, arg3 interface
 }
 
 // GetRunSpecWithHyperParameters mocks base method
-func (m *MockGenerator) GetRunSpecWithHyperParameters(arg0 *v1alpha3.Experiment, arg1, arg2, arg3 string, arg4 []*v1alpha30.ParameterAssignment) (string, error) {
+func (m *MockGenerator) GetRunSpecWithHyperParameters(arg0 *v1alpha30.Experiment, arg1, arg2, arg3 string, arg4 []v1alpha3.ParameterAssignment) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRunSpecWithHyperParameters", arg0, arg1, arg2, arg3, arg4)
 	ret0, _ := ret[0].(string)

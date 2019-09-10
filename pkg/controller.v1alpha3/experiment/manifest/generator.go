@@ -10,8 +10,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	commonapiv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
-	apiv1alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 	commonv1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
 	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibclient"
 )
@@ -24,7 +24,7 @@ const (
 type Generator interface {
 	InjectClient(c client.Client)
 	GetRunSpec(e *experimentsv1alpha3.Experiment, experiment, trial, namespace string) (string, error)
-	GetRunSpecWithHyperParameters(e *experimentsv1alpha3.Experiment, experiment, trial, namespace string, hps []*apiv1alpha3.ParameterAssignment) (string, error)
+	GetRunSpecWithHyperParameters(e *experimentsv1alpha3.Experiment, experiment, trial, namespace string, hps []commonapiv1alpha3.ParameterAssignment) (string, error)
 	GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha3.MetricsCollectorSpec) (string, error)
 }
 
@@ -95,7 +95,7 @@ func (g *DefaultGenerator) GetRunSpec(e *experimentsv1alpha3.Experiment, experim
 }
 
 // GetRunSpecWithHyperParameters get the specification for trial with hyperparameters.
-func (g *DefaultGenerator) GetRunSpecWithHyperParameters(e *experimentsv1alpha3.Experiment, experiment, trial, namespace string, hps []*apiv1alpha3.ParameterAssignment) (string, error) {
+func (g *DefaultGenerator) GetRunSpecWithHyperParameters(e *experimentsv1alpha3.Experiment, experiment, trial, namespace string, hps []commonapiv1alpha3.ParameterAssignment) (string, error) {
 	params := trialTemplateParams{
 		Experiment:      experiment,
 		Trial:           trial,
@@ -156,5 +156,5 @@ type trialTemplateParams struct {
 	Experiment      string
 	Trial           string
 	NameSpace       string
-	HyperParameters []*apiv1alpha3.ParameterAssignment
+	HyperParameters []commonapiv1alpha3.ParameterAssignment
 }
