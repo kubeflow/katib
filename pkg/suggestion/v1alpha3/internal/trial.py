@@ -1,5 +1,5 @@
 import logging
-from pkg.apis.manager.v1alpha3.python import api as api
+from pkg.apis.manager.v1alpha3.python import api_pb2 as api
 
 
 logging.basicConfig(level=logging.DEBUG)
