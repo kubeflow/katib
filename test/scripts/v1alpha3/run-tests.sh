@@ -125,11 +125,6 @@ until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
     TIMEOUT=$(( TIMEOUT - 1 ))
 done
 
-curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-python get-pip.py
-pip install -r test_requirements.txt
-python test-katib-manager.py
-
 #echo "Running e2e grid experiment"
 #export KUBECONFIG=$HOME/.kube/config
 #go run run-e2e-experiment.go ../../../examples/v1alpha3/grid-example.yaml
