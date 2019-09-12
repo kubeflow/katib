@@ -5,6 +5,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -17,9 +18,20 @@ func (r *ReconcileSuggestion) reconcileDeployment(deploy *appsv1.Deployment) (*a
 		err = r.Create(context.TODO(), deploy)
 		return nil, err
 	} else if err != nil {
+		log.Error(err, "Failed to get deployment", "namespace", deploy.Namespace, "name", deploy.Name)
 		return nil, err
+	} else {
+		if !equality.Semantic.DeepEqual(deploy.Spec, foundDeploy.Spec) {
+			foundDeploy.Spec = deploy.Spec
+			log.Info("Updating Deployment", "namespace", deploy.Namespace, "name", deploy.Name)
+			if err = r.Update(context.TODO(), foundDeploy); err != nil {
+				log.Error(err, "Failed to update deployment", "namespace", deploy.Namespace, "name", deploy.Name)
+				return nil, err
+			}
+			return foundDeploy, nil
+		}
 	}
-	return foundDeploy, nil
+	return deploy, nil
 }
 
 func (r *ReconcileSuggestion) reconcileService(service *corev1.Service) (*corev1.Service, error) {
@@ -30,7 +42,8 @@ func (r *ReconcileSuggestion) reconcileService(service *corev1.Service) (*corev1
 		err = r.Create(context.TODO(), service)
 		return nil, err
 	} else if err != nil {
+		log.Error(err, "Failed to get service", "namespace", service.Namespace, "name", service.Name)
 		return nil, err
 	}
-	return foundService, nil
+	return service, nil
 }

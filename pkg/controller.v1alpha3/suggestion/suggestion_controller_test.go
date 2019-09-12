@@ -62,7 +62,7 @@ func TestReconcile(t *testing.T) {
 			},
 		},
 	}
-	configMap := newKatibConfigMapInstance()
+	configMap := newKatibConfigMapInstance("test")
 
 	// Setup the Manager and Controller.  Wrap the Controller Reconcile function so it writes each request to a
 	// channel when it is finished.
@@ -99,6 +99,15 @@ func TestReconcile(t *testing.T) {
 	g.Eventually(func() error { return c.Get(context.TODO(), depKey, deploy) }, timeout).
 		Should(gomega.Succeed())
 
+	g.Expect(deploy.Spec.Template.Spec.Containers[0].Image).Should(gomega.Equal("test"))
+
+	err = c.Update(context.TODO(), newKatibConfigMapInstance("newimage"))
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
+	g.Eventually(func() error { return c.Get(context.TODO(), depKey, deploy) }, timeout).
+		Should(gomega.Succeed())
+	g.Eventually(deploy.Spec.Template.Spec.Containers[0].Image, timeout).Should(gomega.Equal("newimage"))
+
 	// Delete the Deployment and expect Reconcile to be called for Deployment deletion
 	g.Expect(c.Delete(context.TODO(), deploy)).NotTo(gomega.HaveOccurred())
 	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
@@ -111,9 +120,9 @@ func TestReconcile(t *testing.T) {
 
 }
 
-func newKatibConfigMapInstance() *corev1.ConfigMap {
+func newKatibConfigMapInstance(imageName string) *corev1.ConfigMap {
 	suggestionConfig := map[string]map[string]string{
-		"random": {"image": "test"},
+		"random": {"image": imageName},
 	}
 	b, _ := json.Marshal(suggestionConfig)
 	return &corev1.ConfigMap{
