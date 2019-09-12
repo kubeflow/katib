@@ -40,7 +40,7 @@ type katibManagerClientAndConn struct {
 }
 
 func GetManagerAddr() string {
-	ns := os.Getenv(consts.DefaultKatibNamespaceEnvName)
+	ns := consts.DefaultKatibNamespace
 	if len(ns) == 0 {
 		addr := os.Getenv(KatibManagerServiceIPEnvName)
 		port := os.Getenv(KatibManagerServicePortEnvName)

@@ -16,8 +16,6 @@ limitations under the License.
 package webhook
 
 import (
-	"os"
-
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -43,11 +41,11 @@ func AddToManager(m manager.Manager) error {
 		CertDir: "/tmp/cert",
 		BootstrapOptions: &webhook.BootstrapOptions{
 			Secret: &types.NamespacedName{
-				Namespace: os.Getenv(consts.DefaultKatibNamespaceEnvName),
+				Namespace: consts.DefaultKatibNamespace,
 				Name:      katibControllerName,
 			},
 			Service: &webhook.Service{
-				Namespace: os.Getenv(consts.DefaultKatibNamespaceEnvName),
+				Namespace: consts.DefaultKatibNamespace,
 				Name:      katibControllerName,
 				Selectors: map[string]string{
 					"app": katibControllerName,

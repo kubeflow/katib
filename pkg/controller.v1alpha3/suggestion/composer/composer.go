@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"os"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -117,7 +116,7 @@ func (g *General) getSuggestionContainerImage(algorithmName string) (string, err
 	configMap := &corev1.ConfigMap{}
 	err := g.Client.Get(
 		context.TODO(),
-		apitypes.NamespacedName{Name: consts.KatibConfigMapName, Namespace: os.Getenv(consts.DefaultKatibNamespaceEnvName)},
+		apitypes.NamespacedName{Name: consts.KatibConfigMapName, Namespace: consts.DefaultKatibNamespace},
 		configMap)
 	if err != nil {
 		log.Error(err, "Failed to find config map", "name", consts.KatibConfigMapName)

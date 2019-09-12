@@ -1,5 +1,9 @@
 package consts
 
+import (
+	"os"
+)
+
 const (
 	ConfigExperimentSuggestionName = "experiment-suggestion-name"
 
@@ -21,3 +25,14 @@ const (
 
 	LabelSuggestionImageTag = "image"
 )
+
+var (
+	DefaultKatibNamespace = getEnvOrDefault(DefaultKatibNamespaceEnvName, "kubeflow")
+)
+
+func getEnvOrDefault(key string, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
+}

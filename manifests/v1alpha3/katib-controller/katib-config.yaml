@@ -15,7 +15,7 @@ data:
       "TensorFlowEvent": {
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/tfevent-metricscollector"
       }
-    },
+    }
   suggestion: |-
     {
       "random": {

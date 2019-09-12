@@ -21,12 +21,10 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"os"
-
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
@@ -169,7 +167,7 @@ func (s *sidecarInjector) getMetricsCollectorImage(cKind common.CollectorKind) (
 	configMap := &v1.ConfigMap{}
 	err := s.client.Get(
 		context.TODO(),
-		apitypes.NamespacedName{Name: consts.KatibConfigMapName, Namespace: os.Getenv(consts.DefaultKatibNamespaceEnvName)},
+		apitypes.NamespacedName{Name: consts.KatibConfigMapName, Namespace: consts.DefaultKatibNamespace},
 		configMap)
 	if err != nil {
 		log.Error(err, "Failed to find config map", "name", consts.KatibConfigMapName)
