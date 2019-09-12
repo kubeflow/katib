@@ -21,12 +21,10 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"os"
-
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
@@ -35,9 +33,9 @@ import (
 	apitypes "k8s.io/apimachinery/pkg/types"
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
-	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	katibmanagerv1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 )
 
 var log = logf.Log.WithName("injector-webhook")
@@ -169,10 +167,10 @@ func (s *sidecarInjector) getMetricsCollectorImage(cKind common.CollectorKind) (
 	configMap := &v1.ConfigMap{}
 	err := s.client.Get(
 		context.TODO(),
-		apitypes.NamespacedName{Name: experimentsv1alpha3.KatibConfigMapName, Namespace: os.Getenv(experimentsv1alpha3.DefaultKatibNamespaceEnvName)},
+		apitypes.NamespacedName{Name: consts.KatibConfigMapName, Namespace: consts.DefaultKatibNamespace},
 		configMap)
 	if err != nil {
-		log.Error(err, "Failed to find config map", "name", experimentsv1alpha3.KatibConfigMapName)
+		log.Error(err, "Failed to find config map", "name", consts.KatibConfigMapName)
 		// Error reading the object - requeue the request.
 		return "", err
 	}
@@ -192,6 +190,6 @@ func (s *sidecarInjector) getMetricsCollectorImage(cKind common.CollectorKind) (
 			return "", errors.New("Cannot support metricsCollector injection for kind " + kind)
 		}
 	} else {
-		return "", errors.New("Failed to find metrics collector configuration in configmap " + experimentsv1alpha3.KatibConfigMapName)
+		return "", errors.New("Failed to find metrics collector configuration in configmap " + consts.KatibConfigMapName)
 	}
 }

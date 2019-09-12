@@ -17,19 +17,23 @@ limitations under the License.
 package suggestion
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
 	"github.com/onsi/gomega"
 	"golang.org/x/net/context"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
+	commonv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 )
 
@@ -40,9 +44,25 @@ var depKey = types.NamespacedName{Name: "foo", Namespace: "default"}
 
 const timeout = time.Second * 5
 
+func init() {
+	logf.SetLogger(logf.ZapLogger(true))
+}
+
 func TestReconcile(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
-	instance := &suggestionsv1alpha3.Suggestion{ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: "default"}}
+	instance := &suggestionsv1alpha3.Suggestion{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "foo",
+			Namespace: "default",
+		},
+		Spec: suggestionsv1alpha3.SuggestionSpec{
+			Requests: 1,
+			AlgorithmSpec: &commonv1alpha3.AlgorithmSpec{
+				AlgorithmName: "random",
+			},
+		},
+	}
+	configMap := newKatibConfigMapInstance()
 
 	// Setup the Manager and Controller.  Wrap the Controller Reconcile function so it writes each request to a
 	// channel when it is finished.
@@ -62,6 +82,9 @@ func TestReconcile(t *testing.T) {
 
 	// Create the Suggestion object and expect the Reconcile and Deployment to be created
 	err = c.Create(context.TODO(), instance)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	err = c.Create(context.TODO(), configMap)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
 	// The instance object may not be a valid object because it might be missing some required fields.
 	// Please modify the instance object by adding required fields and then remove the following if statement.
 	if apierrors.IsInvalid(err) {
@@ -86,4 +109,20 @@ func TestReconcile(t *testing.T) {
 	g.Eventually(func() error { return c.Delete(context.TODO(), deploy) }, timeout).
 		Should(gomega.MatchError("deployments.apps \"foo\" not found"))
 
+}
+
+func newKatibConfigMapInstance() *corev1.ConfigMap {
+	suggestionConfig := map[string]map[string]string{
+		"random": {"image": "test"},
+	}
+	b, _ := json.Marshal(suggestionConfig)
+	return &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "katib-config",
+			Namespace: "kubeflow",
+		},
+		Data: map[string]string{
+			"suggestion": string(b),
+		},
+	}
 }

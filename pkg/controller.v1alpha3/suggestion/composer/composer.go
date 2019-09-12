@@ -1,16 +1,25 @@
 package composer
 
 import (
+	"context"
+	"encoding/json"
+	"errors"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	apitypes "k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/util"
 )
+
+var log = logf.Log.WithName("suggestion-composer")
 
 type Composer interface {
 	DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.Deployment, error)
@@ -19,15 +28,22 @@ type Composer interface {
 
 type General struct {
 	scheme *runtime.Scheme
+	client.Client
 }
 
-func New(scheme *runtime.Scheme) Composer {
+func New(scheme *runtime.Scheme, client client.Client) Composer {
 	return &General{
 		scheme: scheme,
+		Client: client,
 	}
 }
 
 func (g *General) DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.Deployment, error) {
+	container, err := g.desiredContainer(s)
+	if err != nil {
+		log.Error(err, "Error in constructing container")
+		return nil, err
+	}
 	d := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      s.Name,
@@ -43,7 +59,7 @@ func (g *General) DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
-						*g.desiredContainer(s),
+						*container,
 					},
 				},
 			},
@@ -84,11 +100,45 @@ func (g *General) DesiredService(s *suggestionsv1alpha3.Suggestion) (*corev1.Ser
 	return service, nil
 }
 
-// TODO(gaocegege): Implement switch logic.
-func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) *corev1.Container {
+func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.Container, error) {
+	suggestionContainerImage, err := g.getSuggestionContainerImage(s.Spec.AlgorithmSpec.AlgorithmName)
+	if err != nil {
+		return nil, err
+	}
 	c := &corev1.Container{
 		Name: consts.ContainerSuggestion,
 	}
-	c.Image = "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-random"
-	return c
+	c.Image = suggestionContainerImage
+	return c, nil
+}
+
+func (g *General) getSuggestionContainerImage(algorithmName string) (string, error) {
+	configMap := &corev1.ConfigMap{}
+	err := g.Client.Get(
+		context.TODO(),
+		apitypes.NamespacedName{Name: consts.KatibConfigMapName, Namespace: consts.DefaultKatibNamespace},
+		configMap)
+	if err != nil {
+		log.Error(err, "Failed to find config map", "name", consts.KatibConfigMapName)
+		// Error reading the object - requeue the request.
+		return "", err
+	}
+	if config, ok := configMap.Data[consts.LabelSuggestionTag]; ok {
+		suggestionConfig := map[string]map[string]string{}
+		if err := json.Unmarshal([]byte(config), &suggestionConfig); err != nil {
+			log.Error(err, "Json Unmarshal error", "Config", config)
+			return "", err
+		}
+		if imageConfig, ok := suggestionConfig[algorithmName]; ok {
+			if image, yes := imageConfig[consts.LabelSuggestionImageTag]; yes {
+				return image, nil
+			} else {
+				return "", errors.New("Failed to find " + consts.LabelSuggestionImageTag + " configuration for algorithm name " + algorithmName)
+			}
+		} else {
+			return "", errors.New("Failed to find algorithm image mapping " + algorithmName)
+		}
+	} else {
+		return "", errors.New("Failed to find algorithm image mapping in configmap " + consts.KatibConfigMapName)
+	}
 }
