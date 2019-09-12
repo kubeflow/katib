@@ -113,7 +113,7 @@ func TestReconcile(t *testing.T) {
 
 func newKatibConfigMapInstance() *corev1.ConfigMap {
 	suggestionConfig := map[string]map[string]string{
-		"random": map[string]string{"image": "test"},
+		"random": {"image": "test"},
 	}
 	b, _ := json.Marshal(suggestionConfig)
 	return &corev1.ConfigMap{
