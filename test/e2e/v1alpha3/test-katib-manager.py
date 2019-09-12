@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 TEST_TRIAL = "test_trial"
 TEST_EXPERIMENT = "test_experiment"
+experiment = None
 
 def register_experiment(stub):
   obj = api_pb2.ObjectiveSpec(type=1, goal=0.09, objective_metric_name="loss")
@@ -24,11 +25,11 @@ def register_experiment(stub):
   exp_status = api_pb2.ExperimentStatus(condition=1,
                                         start_time="2019-04-28T14:09:15Z",
                                         completion_time="2019-04-28T16:09:15Z")
-  exp = api_pb2.Experiment(spec=exp_spec,
+  experiment = api_pb2.Experiment(spec=exp_spec,
                            name=TEST_EXPERIMENT,
                            status=exp_status)
   try:
-    stub.RegisterExperiment(api_pb2.RegisterExperimentRequest(experiment=exp), 10)
+    stub.RegisterExperiment(api_pb2.RegisterExperimentRequest(experiment=experiment), 10)
     logger.info("Register experiment %s successfully" % TEST_EXPERIMENT)
   except:
     logger.error("Failed to Register experiment", exc_info=True)
@@ -98,7 +99,7 @@ def get_trial(stub):
 def get_random_algo_suggestion(stub):
   try:
     reply = stub.GetSuggestions(api_pb2.GetSuggestionsRequest(experiment_name=TEST_EXPERIMENT,
-                                                            algorithm_name="random",
+                                                            experiment=experiment,
                                                             request_number=1), 10)
     trials = reply.trials
 
@@ -113,7 +114,7 @@ def get_random_algo_suggestion(stub):
 def get_grid_algo_suggestion(stub):
   try:
     reply = stub.GetSuggestions(api_pb2.GetSuggestionsRequest(experiment_name=TEST_EXPERIMENT,
-                                                            algorithm_name="grid",
+                                                            experiment=experiment,
                                                             request_number=1), 10)
     trials = reply.trials
 
