@@ -2,6 +2,7 @@ import json
 import numpy as np
 import chocolate as choco
 import logging
+import base64
 
 from pkg.api.v1alpha2.python import api_pb2
 from .internal.search_space import *
@@ -27,18 +28,19 @@ class BaseChocolateService(object):
         chocolate_search_space = {}
 
         for param in search_space.params:
+            key = BaseChocolateService.encode(param.name)
             if param.type == INTEGER:
-                chocolate_search_space[param.name] = choco.quantized_uniform(
+                chocolate_search_space[key] = choco.quantized_uniform(
                     int(param.min), int(param.max), 1)
             elif param.type == DOUBLE:
                 if param.step != None:
-                    chocolate_search_space[param.name] = choco.quantized_uniform(
+                    chocolate_search_space[key] = choco.quantized_uniform(
                         float(param.min), float(param.max), float(param.step))
                 else:
-                    chocolate_search_space[param.name] = choco.uniform(
+                    chocolate_search_space[key] = choco.uniform(
                         float(param.min), float(param.max))
             elif param.type == CATEGORICAL or param.type == DISCRETE:
-                chocolate_search_space[param.name] = choco.choice(param.list)
+                chocolate_search_space[key] = choco.choice(param.list)
 
         conn = choco.SQLiteConnection("sqlite:///my_db.db")
         # Refer to https://chocolate.readthedocs.io/tutorials/algo.html
@@ -73,7 +75,7 @@ class BaseChocolateService(object):
                     param_assignment = int(param_assignment)
                 elif param.type == DOUBLE:
                     param_assignment = float(param_assignment)
-                entry.update({param.name: param_assignment})
+                entry.update({BaseChocolateService.encode(param.name): param_assignment})
             logger.info(entry)
             # Should not use sampler.update(token, loss), because we will create 
             # a new BaseChocolateService instance for every request. Thus we need
@@ -83,20 +85,29 @@ class BaseChocolateService(object):
         return_trial_list = []
 
         for i in range(request_number):
+            logger.info("NNNNNNNNNNNNNNNNN %d", i)
             token, chocolate_params = sampler.next()
             return_trial_list.append(
                 BaseChocolateService.convert(search_space, chocolate_params))
         return return_trial_list
 
     @staticmethod
+    def encode(name):
+        """Encode the name. Chocolate will check if the name contains hyphens.
+        Thus we need to encode it.
+        """
+        return base64.b64encode(name.encode('utf-8')).decode('utf-8')
+
+    @staticmethod
     def convert(search_space, chocolate_params):
         assignments = []
         for i in range(len(search_space.params)):
             param = search_space.params[i]
+            key = BaseChocolateService.encode(param.name)
             if param.type == INTEGER:
-                assignments.append(Assignment(param.name, chocolate_params[param.name]))
+                assignments.append(Assignment(param.name, chocolate_params[key]))
             elif param.type == DOUBLE:
-                assignments.append(Assignment(param.name, chocolate_params[param.name]))
+                assignments.append(Assignment(param.name, chocolate_params[key]))
             elif param.type == CATEGORICAL or param.type == DISCRETE:
-                assignments.append(Assignment(param.name, chocolate_params[param.name]))
+                assignments.append(Assignment(param.name, chocolate_params[key]))
         return Trial(None, assignments, None, None, None)

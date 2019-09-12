@@ -21,7 +21,7 @@ def run():
                 parameter_assignments=api_pb2.TrialSpec.ParameterAssignments(
                     assignments=[
                         api_pb2.ParameterAssignment(
-                            name="param1",
+                            name="param-1",
                             value="2",
                         ),
                         api_pb2.ParameterAssignment(
@@ -65,7 +65,7 @@ def run():
                 parameter_assignments=api_pb2.TrialSpec.ParameterAssignments(
                     assignments=[
                         api_pb2.ParameterAssignment(
-                            name="param1",
+                            name="param-1",
                             value="3",
                         ),
                         api_pb2.ParameterAssignment(
@@ -103,7 +103,7 @@ def run():
         name="test",
         spec=api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
-                algorithm_name="chocolate-CMAES",
+                algorithm_name="chocolate-bayesian-optimization",
                 algorithm_setting=[
                 ],
             ),
@@ -114,7 +114,7 @@ def run():
             parameter_specs=api_pb2.ExperimentSpec.ParameterSpecs(
                 parameters=[
                     api_pb2.ParameterSpec(
-                        name="param1",
+                        name="param-1",
                         parameter_type=api_pb2.INT,
                         feasible_space=api_pb2.FeasibleSpace(
                             max="5", min="1", list=[]),
