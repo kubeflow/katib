@@ -22,9 +22,11 @@ package v1alpha3
 import (
 	"os"
 
-	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
+	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 )
 
 func (e *Experiment) SetDefault() {
@@ -52,7 +54,7 @@ func (e *Experiment) setDefaultTrialTemplate() {
 	}
 	if t.GoTemplate.RawTemplate == "" && t.GoTemplate.TemplateSpec == nil {
 		t.GoTemplate.TemplateSpec = &TemplateSpec{
-			ConfigMapNamespace: os.Getenv(DefaultKatibNamespaceEnvName),
+			ConfigMapNamespace: os.Getenv(consts.DefaultKatibNamespaceEnvName),
 			ConfigMapName:      DefaultTrialConfigMapName,
 			TemplatePath:       DefaultTrialTemplatePath,
 		}

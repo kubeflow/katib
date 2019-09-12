@@ -19,9 +19,10 @@ import (
 	"context"
 	"os"
 
-	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
-	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 	"google.golang.org/grpc"
+
+	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 )
 
 const (
@@ -39,7 +40,7 @@ type katibManagerClientAndConn struct {
 }
 
 func GetManagerAddr() string {
-	ns := os.Getenv(experimentsv1alpha3.DefaultKatibNamespaceEnvName)
+	ns := os.Getenv(consts.DefaultKatibNamespaceEnvName)
 	if len(ns) == 0 {
 		addr := os.Getenv(KatibManagerServiceIPEnvName)
 		port := os.Getenv(KatibManagerServicePortEnvName)

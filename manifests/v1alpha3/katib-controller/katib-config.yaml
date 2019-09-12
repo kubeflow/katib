@@ -15,4 +15,19 @@ data:
       "TensorFlowEvent": {
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/tfevent-metricscollector"
       }
+    },
+  suggestion: |-
+    {
+      "random": {
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-random"
+      },
+      "grid": {
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-grid"
+      },
+      "hyperband": {
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperband"
+      },
+      "bayesianoptimization": {
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-bayesianoptimization"
+      }
     }

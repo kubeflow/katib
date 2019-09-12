@@ -18,18 +18,18 @@ package webhook
 import (
 	"os"
 
-	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
-	"github.com/kubeflow/katib/pkg/webhook/v1alpha3/experiment"
-	"github.com/kubeflow/katib/pkg/webhook/v1alpha3/pod"
-
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/builder"
+
+	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
+	"github.com/kubeflow/katib/pkg/webhook/v1alpha3/experiment"
+	"github.com/kubeflow/katib/pkg/webhook/v1alpha3/pod"
 )
 
 const (
@@ -43,11 +43,11 @@ func AddToManager(m manager.Manager) error {
 		CertDir: "/tmp/cert",
 		BootstrapOptions: &webhook.BootstrapOptions{
 			Secret: &types.NamespacedName{
-				Namespace: os.Getenv(experimentsv1alpha3.DefaultKatibNamespaceEnvName),
+				Namespace: os.Getenv(consts.DefaultKatibNamespaceEnvName),
 				Name:      katibControllerName,
 			},
 			Service: &webhook.Service{
-				Namespace: os.Getenv(experimentsv1alpha3.DefaultKatibNamespaceEnvName),
+				Namespace: os.Getenv(consts.DefaultKatibNamespaceEnvName),
 				Name:      katibControllerName,
 				Selectors: map[string]string{
 					"app": katibControllerName,
