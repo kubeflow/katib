@@ -71,14 +71,6 @@ var rs1Letters = []rune("abcdefghijklmnopqrstuvwxyz")
 
 func getDbName() string {
 	dbPass := os.Getenv("MYSQL_ROOT_PASSWORD")
-	if dbPass == "" {
-		klog.Info("WARN: Env var MYSQL_ROOT_PASSWORD is empty. Falling back to \"test\".")
-
-		// For backward compatibility, e.g. in case that all but vizier-core
-		// is older ones so we do not have Secret nor upgraded vizier-db.
-		dbPass = "test"
-	}
-
 	return fmt.Sprintf(dbNameTmpl, dbPass)
 }
 
