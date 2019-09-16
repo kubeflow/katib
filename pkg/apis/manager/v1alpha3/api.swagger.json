@@ -832,7 +832,7 @@
         },
         "goal": {
           "type": "number",
-          "format": "float"
+          "format": "double"
         },
         "objective_metric_name": {
           "type": "string"

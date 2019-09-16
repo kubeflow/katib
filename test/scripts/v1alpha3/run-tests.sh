@@ -71,11 +71,6 @@ sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/metrics-col
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-manager@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-manager:${VERSION}@" manifests/v1alpha3/manager/deployment.yaml
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-manager-rest@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-manager-rest:${VERSION}@" manifests/v1alpha3/manager-rest/deployment.yaml
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-ui:${VERSION}@" manifests/v1alpha3/ui/deployment.yaml
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-random:${VERSION}@" manifests/v1alpha3/suggestion/random/deployment.yaml
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-bayesianoptimization:${VERSION}@" manifests/v1alpha3/suggestion/bayesianoptimization/deployment.yaml
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-nasrl:${VERSION}@" manifests/v1alpha3/suggestion/nasrl/deployment.yaml
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-grid:${VERSION}@" manifests/v1alpha3/suggestion/grid/deployment.yaml
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-hyperband:${VERSION}@" manifests/v1alpha3/suggestion/hyperband/deployment.yaml
 
 ./scripts/v1alpha3/deploy.sh
 
@@ -125,8 +120,8 @@ until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
     TIMEOUT=$(( TIMEOUT - 1 ))
 done
 
-#echo "Running e2e grid experiment"
-#export KUBECONFIG=$HOME/.kube/config
-#go run run-e2e-experiment.go ../../../examples/v1alpha3/grid-example.yaml
-#
+echo "Running e2e hyperopt random experiment"
+export KUBECONFIG=$HOME/.kube/config
+go run run-e2e-experiment.go ../../../examples/v1alpha3/hyperopt-random-example.yaml
+
 exit 0

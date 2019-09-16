@@ -37,7 +37,6 @@ import (
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/suggestion/composer"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/suggestion/suggestionclient"
-	"github.com/kubeflow/katib/pkg/controller.v1alpha3/suggestion/suggestionclient/fake"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/util"
 )
 
@@ -57,7 +56,7 @@ func Add(mgr manager.Manager) error {
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	return &ReconcileSuggestion{
 		Client:           mgr.GetClient(),
-		SuggestionClient: fake.New(),
+		SuggestionClient: suggestionclient.New(),
 		scheme:           mgr.GetScheme(),
 		Composer:         composer.New(mgr.GetScheme(), mgr.GetClient()),
 	}

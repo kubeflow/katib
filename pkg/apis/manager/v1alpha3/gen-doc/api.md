@@ -588,7 +588,7 @@ NasConfig contains a config of NAS job
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | type | [ObjectiveType](#api.v1.alpha3.ObjectiveType) |  |  |
-| goal | [float](#float) |  |  |
+| goal | [double](#double) |  |  |
 | objective_metric_name | [string](#string) |  |  |
 | additional_metric_names | [string](#string) | repeated | This can be empty if we only care about the objective metric. |
 

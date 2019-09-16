@@ -193,7 +193,6 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		msg := "Experiment is created"
 		instance.MarkExperimentStatusCreated(util.ExperimentCreatedReason, msg)
 	} else {
-		// Experiment already created in DB
 		err := r.ReconcileExperiment(instance)
 		if err != nil {
 			logger.Error(err, "Reconcile experiment error")
