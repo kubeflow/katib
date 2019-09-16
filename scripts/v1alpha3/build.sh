@@ -18,6 +18,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+REGISTRY="gcr.io/kubeflow-images-public"
 PREFIX="katib"
 CMD_PREFIX="cmd"
 
@@ -26,22 +27,21 @@ SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 cd ${SCRIPT_ROOT}
 
 echo "Building core image..."
-docker build -t ${PREFIX}/v1alpha3/katib-controller -f ${CMD_PREFIX}/katib-controller/v1alpha3/Dockerfile .
-docker build -t ${PREFIX}/v1alpha3/katib-manager -f ${CMD_PREFIX}/manager/v1alpha3/Dockerfile .
-docker build -t ${PREFIX}/v1alpha3/katib-manager-rest -f ${CMD_PREFIX}/manager-rest/v1alpha3/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/katib-controller -f ${CMD_PREFIX}/katib-controller/v1alpha3/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/katib-manager -f ${CMD_PREFIX}/manager/v1alpha3/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/katib-manager-rest -f ${CMD_PREFIX}/manager-rest/v1alpha3/Dockerfile .
 
 echo "Building UI image..."
-docker build -t ${PREFIX}/v1alpha3/katib-ui -f ${CMD_PREFIX}/ui/v1alpha3/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/katib-ui -f ${CMD_PREFIX}/ui/v1alpha3/Dockerfile .
+
+echo "Building metrics collector image..."
+docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/metrics-collector -f ${CMD_PREFIX}/metricscollector/v1alpha3/Dockerfile .
 
 echo "Building file metrics collector image..."
-docker build -t ${PREFIX}/v1alpha3/file-metrics-collector -f ${CMD_PREFIX}/metricscollector/v1alpha3/file-metricscollector/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/file-metrics-collector -f ${CMD_PREFIX}/metricscollector/v1alpha3/file-metricscollector/Dockerfile .
 
 echo "Building TF Event metrics collector image..."
-docker build -t ${PREFIX}/v1alpha3/tfevent-metrics-collector -f ${CMD_PREFIX}/metricscollector/v1alpha3/tfevent-metricscollector/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/tfevent-metrics-collector -f ${CMD_PREFIX}/metricscollector/v1alpha3/tfevent-metricscollector/Dockerfile .
 
 echo "Building suggestion images..."
-docker build -t ${PREFIX}/v1alpha3/suggestion-random -f ${CMD_PREFIX}/suggestion/random/v1alpha3/Dockerfile .
-docker build -t ${PREFIX}/v1alpha3/suggestion-bayesianoptimization -f ${CMD_PREFIX}/suggestion/bayesianoptimization/v1alpha3/Dockerfile .
-docker build -t ${PREFIX}/v1alpha3/suggestion-grid -f ${CMD_PREFIX}/suggestion/grid/v1alpha3/Dockerfile .
-docker build -t ${PREFIX}/v1alpha3/suggestion-hyperband -f ${CMD_PREFIX}/suggestion/hyperband/v1alpha3/Dockerfile .
-docker build -t ${PREFIX}/v1alpha3/suggestion-nasrl -f ${CMD_PREFIX}/suggestion/nasrl/v1alpha3/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/suggestion-hyperopt -f ${CMD_PREFIX}/suggestion/hyperopt/v1alpha3/Dockerfile .

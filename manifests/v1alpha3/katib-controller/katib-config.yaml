@@ -29,5 +29,11 @@ data:
       },
       "bayesianoptimization": {
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-bayesianoptimization"
+      },
+      "hyperopt-tpe": {
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
+      },
+      "hyperopt-random": {
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
       }
     }
