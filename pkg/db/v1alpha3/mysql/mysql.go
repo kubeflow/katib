@@ -1,4 +1,4 @@
-package db
+package mysql
 
 import (
 	crand "crypto/rand"
@@ -14,6 +14,7 @@ import (
 	"k8s.io/klog"
 
 	v1alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
+	"github.com/kubeflow/katib/pkg/db/v1alpha3/common"
 )
 
 const (
@@ -39,30 +40,6 @@ type WorkerLog struct {
 	Value string
 }
 
-type KatibDBInterface interface {
-	DBInit()
-	SelectOne() error
-
-	RegisterExperiment(experiment *v1alpha3.Experiment) error
-	PreCheckRegisterExperiment(experiment *v1alpha3.Experiment) (bool, error)
-	DeleteExperiment(experimentName string) error
-	GetExperiment(experimentName string) (*v1alpha3.Experiment, error)
-	GetExperimentList() ([]*v1alpha3.ExperimentSummary, error)
-	UpdateExperimentStatus(experimentName string, newStatus *v1alpha3.ExperimentStatus) error
-
-	UpdateAlgorithmExtraSettings(experimentName string, extraAlgorithmSetting []*v1alpha3.AlgorithmSetting) error
-	GetAlgorithmExtraSettings(experimentName string) ([]*v1alpha3.AlgorithmSetting, error)
-
-	RegisterTrial(trial *v1alpha3.Trial) error
-	GetTrialList(experimentName string, filter string) ([]*v1alpha3.Trial, error)
-	GetTrial(trialName string) (*v1alpha3.Trial, error)
-	UpdateTrialStatus(trialName string, newStatus *v1alpha3.TrialStatus) error
-	DeleteTrial(trialName string) error
-
-	RegisterObservationLog(trialName string, observationLog *v1alpha3.ObservationLog) error
-	GetObservationLog(trialName string, metricName string, startTime string, endTime string) (*v1alpha3.ObservationLog, error)
-}
-
 type dbConn struct {
 	db *sql.DB
 }
@@ -70,7 +47,8 @@ type dbConn struct {
 var rs1Letters = []rune("abcdefghijklmnopqrstuvwxyz")
 
 func getDbName() string {
-	dbPass := os.Getenv("MYSQL_ROOT_PASSWORD")
+	dbPassEnvName := common.DBPasswordEnvName
+	dbPass := os.Getenv(dbPassEnvName)
 	return fmt.Sprintf(dbNameTmpl, dbPass)
 }
 
@@ -97,7 +75,7 @@ func openSQLConn(driverName string, dataSourceName string, interval time.Duratio
 	}
 }
 
-func NewWithSQLConn(db *sql.DB) (KatibDBInterface, error) {
+func NewWithSQLConn(db *sql.DB) (common.KatibDBInterface, error) {
 	d := new(dbConn)
 	d.db = db
 	seed, err := crand.Int(crand.Reader, big.NewInt(1<<63-1))
@@ -111,7 +89,7 @@ func NewWithSQLConn(db *sql.DB) (KatibDBInterface, error) {
 	return d, nil
 }
 
-func New() (KatibDBInterface, error) {
+func NewDBInterface() (common.KatibDBInterface, error) {
 	db, err := openSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("DB open failed: %v", err)
