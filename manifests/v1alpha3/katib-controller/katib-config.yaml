@@ -34,6 +34,6 @@ data:
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
       },
       "hyperopt-random": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt:1"
       }
     }

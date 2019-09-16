@@ -148,7 +148,7 @@ func getExperimentSpec(instance *experimentsv1alpha3.Experiment) *api_pb.Experim
 		experimentSpec.Objective.Type = api_pb.ObjectiveType_UNKNOWN
 
 	}
-	experimentSpec.Objective.Goal = float32(*instance.Spec.Objective.Goal)
+	experimentSpec.Objective.Goal = float64(*instance.Spec.Objective.Goal)
 	experimentSpec.Objective.ObjectiveMetricName = instance.Spec.Objective.ObjectiveMetricName
 	for _, m := range instance.Spec.Objective.AdditionalMetricNames {
 		experimentSpec.Objective.AdditionalMetricNames = append(experimentSpec.Objective.AdditionalMetricNames, m)
