@@ -14,15 +14,16 @@ import (
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
-	v1alpha2 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha2"
-	commonv1alpha2 "github.com/kubeflow/katib/pkg/common/v1alpha2"
+	v1alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
+	commonv1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
+	"github.com/kubeflow/katib/pkg/metricscollector/v1alpha3/common"
 )
 
-type SidecarMetricsCollector struct {
+type FileMetricsCollector struct {
 	clientset *kubernetes.Clientset
 }
 
-func NewSidecarMetricsCollector() (*SidecarMetricsCollector, error) {
+func NewFileMetricsCollector() (*FileMetricsCollector, error) {
 	config, err := config.GetConfig()
 	if err != nil {
 		return nil, err
@@ -31,14 +32,24 @@ func NewSidecarMetricsCollector() (*SidecarMetricsCollector, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &SidecarMetricsCollector{
+	return &FileMetricsCollector{
 		clientset: clientset,
 	}, nil
 
 }
 
-func (d *SidecarMetricsCollector) CollectObservationLog(tId string, jobKind string, metrics []string, namespace string) (*v1alpha2.ObservationLog, error) {
-	labelMap := commonv1alpha2.GetJobLabelMap(jobKind, tId)
+// will be dropped, get logs from a file instead of k8s logs api
+func getWorkerContainerName(pod apiv1.Pod) string {
+	for _, c := range pod.Spec.Containers {
+		if c.Name != common.MetricCollectorContainerName {
+			return c.Name
+		}
+	}
+	return ""
+}
+
+func (d *FileMetricsCollector) CollectObservationLog(tId string, jobKind string, metrics []string, namespace string) (*v1alpha3.ObservationLog, error) {
+	labelMap := commonv1alpha3.GetJobLabelMap(jobKind, tId)
 	pl, err := d.clientset.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labels.Set(labelMap).String(), IncludeUninitialized: true})
 	if err != nil {
 		return nil, err
@@ -46,7 +57,7 @@ func (d *SidecarMetricsCollector) CollectObservationLog(tId string, jobKind stri
 	if len(pl.Items) == 0 {
 		return nil, fmt.Errorf("No Pods are found in Trial %v", tId)
 	}
-	logopt := apiv1.PodLogOptions{Container: "tensorflow", Timestamps: true, Follow: true}
+	logopt := apiv1.PodLogOptions{Container: getWorkerContainerName(pl.Items[0]), Timestamps: true, Follow: true}
 	reader, err := d.clientset.CoreV1().Pods(namespace).GetLogs(pl.Items[0].ObjectMeta.Name, &logopt).Stream()
 	for err != nil {
 		klog.Errorf("Retry to get logs, Error: %v", err)
@@ -61,10 +72,10 @@ func (d *SidecarMetricsCollector) CollectObservationLog(tId string, jobKind stri
 	return olog, err
 }
 
-func (d *SidecarMetricsCollector) parseLogs(tId string, logs []string, metrics []string) (*v1alpha2.ObservationLog, error) {
+func (d *FileMetricsCollector) parseLogs(tId string, logs []string, metrics []string) (*v1alpha3.ObservationLog, error) {
 	var lasterr error
-	olog := &v1alpha2.ObservationLog{}
-	mlogs := []*v1alpha2.MetricLog{}
+	olog := &v1alpha3.ObservationLog{}
+	mlogs := []*v1alpha3.MetricLog{}
 	for _, logline := range logs {
 		if logline == "" {
 			continue
@@ -100,9 +111,9 @@ func (d *SidecarMetricsCollector) parseLogs(tId string, logs []string, metrics [
 				continue
 			}
 			timestamp := ls[0]
-			mlogs = append(mlogs, &v1alpha2.MetricLog{
+			mlogs = append(mlogs, &v1alpha3.MetricLog{
 				TimeStamp: timestamp,
-				Metric: &v1alpha2.Metric{
+				Metric: &v1alpha3.Metric{
 					Name:  metricName,
 					Value: v[1],
 				},

@@ -412,6 +412,14 @@
   version = "v1.0.1"
 
 [[projects]]
+  branch = "master"
+  digest = "1:ccbfcadc4082059be76365bbcfdcf8430356ea5dd94537b0e68e8423f200f0cf"
+  name = "github.com/mitchellh/go-ps"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "621e5597135b1d14a7d9c2bfc7bc312e7c58463c"
+
+[[projects]]
   digest = "1:a45ae66dea4c899d79fceb116accfa1892105c251f0dcd9a217ddc276b42ec68"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
@@ -1127,6 +1135,14 @@
   revision = "39cb288412c48cb533ba4be5d6c28620b9a0c1b4"
 
 [[projects]]
+  branch = "master"
+  digest = "1:98bfb68d62e4df4c94f54f333dea17c1f2d26c5b70620b6c9ad6d7bbc6a0f7ea"
+  name = "k8s.io/utils"
+  packages = ["pointer"]
+  pruneopts = "NUT"
+  revision = "3d4f5b7dea0b7c63c77d7fb1f0ee433ad8d54667"
+
+[[projects]]
   digest = "1:5136d715354b29616a153fbf60d3ea46b5ec88b709b932ce46e372e3485ebd66"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
@@ -1222,6 +1238,7 @@
     "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1",
     "github.com/kubeflow/tf-operator/pkg/apis/common/v1",
     "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1",
+    "github.com/mitchellh/go-ps",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/spf13/viper",
@@ -1234,6 +1251,7 @@
     "google.golang.org/grpc/status",
     "gopkg.in/DATA-DOG/go-sqlmock.v1",
     "k8s.io/api/admissionregistration/v1beta1",
+    "k8s.io/api/apps/v1",
     "k8s.io/api/batch/v1",
     "k8s.io/api/batch/v1beta1",
     "k8s.io/api/core/v1",
@@ -1247,6 +1265,7 @@
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/types",
+    "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apimachinery/pkg/util/rand",
     "k8s.io/apimachinery/pkg/util/yaml",
     "k8s.io/client-go/kubernetes",
@@ -1255,6 +1274,7 @@
     "k8s.io/client-go/rest",
     "k8s.io/code-generator/cmd/deepcopy-gen",
     "k8s.io/klog",
+    "k8s.io/utils/pointer",
     "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",
     "sigs.k8s.io/controller-runtime/pkg/controller",
