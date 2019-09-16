@@ -117,9 +117,9 @@ workflows:
     - cmd/suggestion/nasenvelopenet/v1alpha3/*
     - cmd/suggestion/nasrl/v1alpha3/*
     - cmd/suggestion/random/v1alpha3/*
-    - cmd/tfevent-metricscollector/v1alpha3/*
     - cmd/ui/v1alpha3/*
     - pkg/util/v1alpha3/*
+    - pkg/metricscollector/v1alpha3/*
     - test/e2e/v1alpha3/*
     - test/scripts/v1alpha3/*
     - test/workflows/*
@@ -161,8 +161,8 @@ workflows:
     - cmd/suggestion/nasenvelopenet/v1alpha3/*
     - cmd/suggestion/nasrl/v1alpha3/*
     - cmd/suggestion/random/v1alpha3/*
-    - cmd/tfevent-metricscollector/v1alpha3/*
     - cmd/ui/v1alpha3/*
+    - pkg/metricscollector/v1alpha3/*
     - pkg/util/v1alpha3/*
     - test/scripts/v1alpha3/*
     - test/workflows/*

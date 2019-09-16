@@ -40,17 +40,13 @@ cp cmd/katib-controller/v1alpha3/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha3/katib-controller:${VERSION} --project=${PROJECT}
 gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha3/katib-controller:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha3/katib-controller:latest --verbosity=info
 
-cd ${GO_DIR}
-cp cmd/metricscollector/v1alpha3/Dockerfile .
-gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha3/metrics-collector:${VERSION} --project=${PROJECT}
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha3/metrics-collector:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha3/metrics-collector:latest --verbosity=info
 
 cd ${GO_DIR}
-cp cmd/sidecar-metricscollector/v1alpha3/Dockerfile .
-gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha3/sidecar-metrics-collector:${VERSION} --project=${PROJECT}
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha3/sidecar-metrics-collector:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha3/sidecar-metrics-collector:latest --verbosity=info
+cp cmd/metricscollector/v1alpha3/file-metricscollector/Dockerfile .
+gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha3/file-metrics-collector:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha3/file-metrics-collector:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha3/file-metrics-collector:latest --verbosity=info
 
 cd ${GO_DIR}
-cp cmd/tfevent-metricscollector/v1alpha3/Dockerfile .
+cp cmd/metricscollector/v1alpha3/tfevent-metricscollector/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha3/tfevent-metrics-collector:${VERSION} --project=${PROJECT}
 gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha3/tfevent-metrics-collector:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha3/tfevent-metrics-collector:latest --verbosity=info

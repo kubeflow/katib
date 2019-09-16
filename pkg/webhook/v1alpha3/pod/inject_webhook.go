@@ -31,11 +31,13 @@ import (
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	apitypes "k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/pointer"
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	katibmanagerv1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
+	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1alpha3/common"
 )
 
 var log = logf.Log.WithName("injector-webhook")
@@ -71,6 +73,7 @@ func (s *sidecarInjector) Handle(ctx context.Context, req types.Request) types.R
 	// Do mutation
 	mutatedPod, err := s.Mutate(pod, namespace)
 	if err != nil {
+		log.Error(err, "Failed to inject metrics collector")
 		return admission.ErrorResponse(http.StatusBadRequest, err)
 	}
 
@@ -150,16 +153,19 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		return nil, err
 	}
 	injectContainer := v1.Container{
-		Name:            "sidecar-metrics-collector",
+		Name:            mccommon.MetricCollectorContainerName,
 		Image:           image,
 		Args:            []string{"-e", experimentName, "-t", trialName, "-k", kind, "-n", namespace, "-m", katibmanagerv1alpha3.GetManagerAddr(), "-mn", metricName},
-		ImagePullPolicy: v1.PullIfNotPresent,
+		ImagePullPolicy: v1.PullAlways,
 		VolumeMounts:    pod.Spec.Containers[0].VolumeMounts,
 	}
 	mutatedPod.Spec.Containers = append(mutatedPod.Spec.Containers, injectContainer)
 	mutatedPod.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
 
+	mutatedPod.Spec.ShareProcessNamespace = pointer.BoolPtr(true)
+
 	log.Info("Inject metrics collector sidecar container", "Pod", pod.Name, "Trial", trialName, "Experiment", experimentName)
+
 	return mutatedPod, nil
 }
 
