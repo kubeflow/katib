@@ -1,23 +1,18 @@
 package mysql
 
 import (
-	//	"database/sql"
-	//	"database/sql/driver"
-	//	"errors"
 	"fmt"
 	"os"
 	"testing"
 
-	//"time"
-
 	_ "github.com/go-sql-driver/mysql"
-	//	"github.com/golang/protobuf/jsonpb"
+	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
-	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
+	"github.com/kubeflow/katib/pkg/db/v1alpha3/common"
 )
 
-var dbInterface, mysqlInterface KatibDBInterface
+var dbInterface, mysqlInterface common.KatibDBInterface
 var mock sqlmock.Sqlmock
 
 var experimentColums = []string{
