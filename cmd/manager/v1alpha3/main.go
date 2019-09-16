@@ -144,17 +144,18 @@ func (s *server) getSuggestionServiceConnection(algoName string) (*grpc.ClientCo
 
 // Get Suggestions from a Suggestion service.
 func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestionsReply, error) {
-	conn, err := s.getSuggestionServiceConnection(in.AlgorithmName)
-	if err != nil {
-		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
-	}
-	defer conn.Close()
-	c := api_pb.NewSuggestionClient(conn)
-	r, err := c.GetSuggestions(ctx, in)
-	if err != nil {
-		return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
-	}
-	return r, nil
+	// conn, err := s.getSuggestionServiceConnection(in.AlgorithmName)
+	// if err != nil {
+	// 	return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
+	// }
+	// defer conn.Close()
+	// c := api_pb.NewSuggestionClient(conn)
+	// r, err := c.GetSuggestions(ctx, in)
+	// if err != nil {
+	// 	return &api_pb.GetSuggestionsReply{Trials: []*api_pb.Trial{}}, err
+	// }
+	// return r, nil
+	return nil, nil
 }
 
 // Validate AlgorithmSettings in an Experiment.

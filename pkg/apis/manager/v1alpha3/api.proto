@@ -516,13 +516,14 @@ message GetObservationLogReply {
 }
 
 message GetSuggestionsRequest {
-    string experiment_name = 1;
-    string algorithm_name = 2;
+    Experiment experiment = 1;
+    repeated Trial trials = 2; // all completed trials owned by the experiment.
     int32 request_number = 3; ///The number of Suggestion you request at one time. When you set 3 to request_number, you can get three Suggestions at one time.
 }
 
 message GetSuggestionsReply {
-    repeated Trial trials = 1;
+    repeated Trial trials = 1; // trials should be created in the next run.
+    AlgorithmSpec algorithm = 2;
 }
 
 message ValidateAlgorithmSettingsRequest {
