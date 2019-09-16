@@ -47,7 +47,7 @@ type dbConn struct {
 var rs1Letters = []rune("abcdefghijklmnopqrstuvwxyz")
 
 func getDbName() string {
-	dbPassEnvName = common.DBPasswordEnvName
+	dbPassEnvName := common.DBPasswordEnvName
 	dbPass := os.Getenv(dbPassEnvName)
 	return fmt.Sprintf(dbNameTmpl, dbPass)
 }
