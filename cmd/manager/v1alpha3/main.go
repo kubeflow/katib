@@ -196,7 +196,7 @@ func (s *server) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*
 func main() {
 	flag.Parse()
 	var err error
-	dbNameEnvName := common.DB_NAME
+	dbNameEnvName := common.DBNameEnvName
 	dbName := os.Getenv(dbNameEnvName)
 	if dbName == "" {
 		klog.Fatal("DB_NAME env is not set. Exiting")
