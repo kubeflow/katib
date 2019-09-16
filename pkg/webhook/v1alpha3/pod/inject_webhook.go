@@ -162,7 +162,7 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	mutatedPod.Spec.Containers = append(mutatedPod.Spec.Containers, injectContainer)
 	mutatedPod.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
 
-	pod.Spec.ShareProcessNamespace = pointer.BoolPtr(true)
+	mutatedPod.Spec.ShareProcessNamespace = pointer.BoolPtr(true)
 
 	log.Info("Inject metrics collector sidecar container", "Pod", pod.Name, "Trial", trialName, "Experiment", experimentName)
 
