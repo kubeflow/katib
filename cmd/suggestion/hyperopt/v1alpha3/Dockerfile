@@ -7,7 +7,7 @@ RUN if [ "$(uname -m)" = "ppc64le" ]; then \
         apt-get -y install gfortran libopenblas-dev liblapack-dev && \
         pip install cython; \
     fi
-RUN pip install -i https://mirrors.sjtug.sjtu.edu.cn/pypi/web/simple --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 ENV PYTHONPATH /usr/src/app/github.com/kubeflow/katib:/usr/src/app/github.com/kubeflow/katib/pkg/apis/manager/v1alpha3/python
 
 ENTRYPOINT ["python", "main.py"]
