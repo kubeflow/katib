@@ -9,7 +9,7 @@ import (
 
 func NewKatibDBInterface(dbName string) (common.KatibDBInterface, error) {
 
-	if dbName == "mysql" {
+	if dbName == common.MySqlDBNameEnvValue {
 		return mysql.NewDBInterface()
 	}
 	return nil, errors.New("Invalid DB Name")
