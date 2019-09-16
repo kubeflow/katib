@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -46,11 +44,6 @@ func (g *DefaultValidator) InjectClient(c client.Client) {
 }
 
 func (g *DefaultValidator) ValidateExperiment(instance *experimentsv1alpha3.Experiment) error {
-	if !instance.IsCreated() {
-		if err := g.validateForCreate(instance); err != nil {
-			return err
-		}
-	}
 	if err := g.validateObjective(instance.Spec.Objective); err != nil {
 		return err
 	}
@@ -70,31 +63,11 @@ func (g *DefaultValidator) ValidateExperiment(instance *experimentsv1alpha3.Expe
 		return fmt.Errorf("Only one of spec.parameters and spec.nasConfig can be specified.")
 	}
 
-	if err := g.validateAlgorithmSettings(instance); err != nil {
-		return err
-	}
-
 	if err := g.validateMetricsCollector(instance); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func (g *DefaultValidator) validateAlgorithmSettings(inst *experimentsv1alpha3.Experiment) error {
-
-	_, err := g.ValidateAlgorithmSettings(inst)
-	statusCode, _ := status.FromError(err)
-
-	if statusCode.Code() == codes.Unknown {
-		return fmt.Errorf("Method ValidateAlgorithmSettings not found inside Suggestion service: %s", inst.Spec.Algorithm.AlgorithmName)
-	}
-
-	if statusCode.Code() == codes.InvalidArgument || statusCode.Code() == codes.Unavailable {
-		return fmt.Errorf("ValidateAlgorithmSettings Error: %v", statusCode.Message())
-	}
-	return nil
-
 }
 
 func (g *DefaultValidator) validateObjective(obj *commonapiv1alpha3.ObjectiveSpec) error {
@@ -158,17 +131,6 @@ func (g *DefaultValidator) validateSupportedJob(job *unstructured.Unstructured) 
 		}
 	}
 	return fmt.Errorf("Job type %v not supported", gvk)
-}
-
-func (g *DefaultValidator) validateForCreate(inst *experimentsv1alpha3.Experiment) error {
-	reply, err := g.PreCheckRegisterExperimentInDB(inst)
-	if err != nil {
-		return fmt.Errorf("Fail to check record for the experiment in DB: %v", err)
-	} else if !reply.CanRegister {
-		return fmt.Errorf("Record for the experiment has existed in DB; Please try to rename the experiment")
-	} else {
-		return nil
-	}
 }
 
 func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1alpha3.Experiment) error {
