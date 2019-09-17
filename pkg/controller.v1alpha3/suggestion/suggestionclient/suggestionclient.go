@@ -61,10 +61,10 @@ func (g *General) SyncAssignments(
 		RequestNumber: int32(requestNum),
 	}
 	response, err := client.GetSuggestions(ctx, request)
-	logger.V(0).Info("Getting suggestions", "endpoint", endpoint, "response", response, "request", request)
 	if err != nil {
 		return err
 	}
+	logger.V(0).Info("Getting suggestions", "endpoint", endpoint, "response", response, "request", request)
 	if len(response.Trials) != requestNum {
 		err := fmt.Errorf("The response contains unexpected trials")
 		logger.Error(err, "The response contains unexpected trials", "requestNum", requestNum, "response", response)

@@ -18,8 +18,7 @@ class BaseHyperoptService(object):
         # elif algorithm_name == 'hyperopt-mix':
         #     self.hyperopt_algorithm = hyperopt.mix.suggest
         else:
-            logger.error("Failed to create the algortihm: %s", algorithm_name)
-            self.hyperopt_algorithm = None
+            raise Exception('"Failed to create the algortihm: {}'.format(algorithm_name))
 
     def getSuggestions(self, search_space, trials, request_number):
         """
