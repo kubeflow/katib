@@ -49,42 +49,27 @@ This document is to illustrate the details of the new design.
 ### Kubernetes API
 
 ```go
+// SuggestionSpec defines the desired state of Suggestion
 type SuggestionSpec struct {
-	//Name of the algorithm
-	AlgorithmName string `json:"algorithm_name"`
-
 	// Number of suggestions requested
-	Suggestions int `json:"suggestions"`
+	Requests int32 `json:"requests,omitempty"`
 
 	//Algorithm settings set by the user in the experiment config
-	AlgorithmSettings []AlgorithmSetting `json:"algorithm_settings,omitempty"`
+	AlgorithmSpec *common.AlgorithmSpec `json:"algorithmSpec,omitempty"`
 }
 
-type AlgorithmSetting struct {
-	Name  string `json:"name,omitempty"`
-	Value string `json:"value,omitempty"`
-}
-
+// SuggestionStatus defines the observed state of Suggestion
 type SuggestionStatus struct {
 	// Suggestion results
-  Assignments []TrialAssignment `json:"assignments,omitempty"`
-  
-  // Algorithm settings set by the algorithm.
-	AlgorithmSettings []AlgorithmSetting `json:"algorithm_settings,omitempty"`
-
-	Conditions []SuggestionCondition `json:"conditions,omitempty"`
-	// include all common fields
-
+	Suggestions []TrialAssignment `json:"suggestions,omitempty"`
 }
 
 type TrialAssignment struct {
 	// Suggestion results
-	Assignments []ParameterAssignment `json:"assignments,omitempty"`
-}
+	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments,omitempty"`
 
-type ParameterAssignment struct {
-	Name  string `json:"name,omitempty"`
-	Value string `json:"value,omitempty"`
+	//Name of the suggestion
+	Name string `json:"name,omitempty"`
 }
 ```
 
@@ -286,7 +271,7 @@ metadata:
   name: random-experiment
 spec:
   algorithmName: random
-  suggestions: 0
+  requests: 0
 ```
 
 Then, Experiment controller needs 3 parallel trials to run. It updates the Suggestions:
@@ -299,7 +284,7 @@ metadata:
   name: random-experiment
 spec:
   algorithmName: random
-  suggestions: 3
+  requests: 3
 ```
 
 After that, Suggestion controller communicates with the Suggestion via GRPC and updates the status:
@@ -312,7 +297,7 @@ metadata:
   name: random-experiment
 spec:
   algorithmName: random
-  suggestions: 3
+  requests: 3
 status:
   assignments:
     - assignments:
@@ -348,7 +333,7 @@ metadata:
   name: random-experiment
 spec:
   algorithmName: random
-  suggestions: 4
+  requests: 4
 status:
   assignments:
     - assignments:
