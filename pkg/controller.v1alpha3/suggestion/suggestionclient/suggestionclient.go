@@ -65,19 +65,17 @@ func (g *General) SyncAssignments(
 		return err
 	}
 	logger.V(0).Info("Getting suggestions", "endpoint", endpoint, "response", response, "request", request)
-	if len(response.Trials) != requestNum {
+	if len(response.ParameterAssignments) != requestNum {
 		err := fmt.Errorf("The response contains unexpected trials")
 		logger.Error(err, "The response contains unexpected trials", "requestNum", requestNum, "response", response)
 		return err
 	}
-	for _, t := range response.Trials {
-		if t.Spec != nil {
-			instance.Status.Suggestions = append(instance.Status.Suggestions,
-				suggestionsv1alpha3.TrialAssignment{
-					Name:                 fmt.Sprintf("%s-%s", instance.Name, utilrand.String(8)),
-					ParameterAssignments: composeParameterAssignments(t.Spec.ParameterAssignments.Assignments),
-				})
-		}
+	for _, t := range response.ParameterAssignments {
+		instance.Status.Suggestions = append(instance.Status.Suggestions,
+			suggestionsv1alpha3.TrialAssignment{
+				Name:                 fmt.Sprintf("%s-%s", instance.Name, utilrand.String(8)),
+				ParameterAssignments: composeParameterAssignments(t.Assignments),
+			})
 	}
 
 	// TODO(gaocegege): Set algorithm settings
