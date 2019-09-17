@@ -20,24 +20,6 @@ class Trial(object):
         for trial in trials:
             res.append(Trial.convertTrial(trial))
         return res
-    
-    @staticmethod
-    def generate(trials):
-        res = []
-        for trial in trials:
-            assignments = []
-            for assignment in trial.assignments:
-                assignments.append(
-                    api.ParameterAssignment(name=assignment.name, value=str(assignment.value)))
-            rt = api.Trial(
-                spec=api.TrialSpec(
-                    parameter_assignments=api.TrialSpec.ParameterAssignments(
-                        assignments=assignments
-                    )
-                )
-            )
-            res.append(rt)
-        return res
 
     @staticmethod
     def convertTrial(trial):
@@ -69,6 +51,19 @@ class Assignment(object):
     @staticmethod
     def convert(assignment):
         return Assignment(assignment.name, assignment.value)
+
+    @staticmethod
+    def generate(list_of_assignments):
+        res = []
+        for assignments in list_of_assignments:
+            buf = []
+            for assignment in assignments:
+                buf.append(
+                    api.ParameterAssignment(name=assignment.name, value=str(assignment.value)))
+            rt = api.GetSuggestionsReply.ParameterAssignments(
+                assignments=buf)
+            res.append(rt)
+        return res
 
     def __str__(self):
         return "Assignment(name={}, value={})".format(self.name, self.value)

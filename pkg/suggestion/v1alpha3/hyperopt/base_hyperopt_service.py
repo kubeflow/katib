@@ -129,11 +129,11 @@ class BaseHyperoptService(object):
         rval.trials.refresh()
 
         # Construct return advisor trials from new hyperopt trials
-        return_trial_list = []
+        list_of_assignments = []
         for i in range(request_number):
             vals = new_trials[i]['misc']['vals']
-            return_trial_list.append(BaseHyperoptService.convert(search_space, vals))
-        return return_trial_list
+            list_of_assignments.append(BaseHyperoptService.convert(search_space, vals))
+        return list_of_assignments
 
     @staticmethod
     def convert(search_space, vals):
@@ -146,4 +146,4 @@ class BaseHyperoptService(object):
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 assignments.append(
                     Assignment(param.name, param.list[vals[param.name][0]]))
-        return Trial(None, assignments, None, None, None)
+        return assignments
