@@ -238,6 +238,10 @@
                     template: "build-suggestion-hyperband",
                   },
                   {
+                    name: "build-suggestion-hyperopt",
+                    template: "build-suggestion-hyperopt",
+                  },
+                  {
                     name: "build-earlystopping-median",
                     template: "build-earlystopping-median",
                   },
@@ -348,6 +352,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperband", testWorkerImage, [
               "test/scripts/v1alpha3/build-suggestion-hyperband.sh",
             ]),  // build-suggestion-hyperband
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperopt", testWorkerImage, [
+              "test/scripts/v1alpha3/build-suggestion-hyperopt.sh",
+            ]),  // build-suggestion-hyperopt
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-bo", testWorkerImage, [
               "test/scripts/v1alpha3/build-suggestion-bo.sh",
             ]),  // build-suggestion-bo

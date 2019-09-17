@@ -66,6 +66,8 @@ echo "REGISTRY ${REGISTRY}"
 echo "REPO_NAME ${REPO_NAME}"
 echo "VERSION ${VERSION}"
 
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-hyperopt@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-hyperopt:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
+
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-controller@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-controller:${VERSION}@" manifests/v1alpha3/katib-controller/katib-controller.yaml
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/metrics-collector@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/metrics-collector:${VERSION}@" manifests/v1alpha3/katib-controller/metricsControllerConfigMap.yaml
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-manager@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-manager:${VERSION}@" manifests/v1alpha3/manager/deployment.yaml
@@ -125,8 +127,8 @@ until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
     TIMEOUT=$(( TIMEOUT - 1 ))
 done
 
-#echo "Running e2e grid experiment"
-#export KUBECONFIG=$HOME/.kube/config
-#go run run-e2e-experiment.go ../../../examples/v1alpha3/grid-example.yaml
-#
+echo "Running e2e hyperopt random experiment"
+export KUBECONFIG=$HOME/.kube/config
+go run run-e2e-experiment.go ../../../examples/v1alpha3/hyperopt-random-example.yaml
+
 exit 0
