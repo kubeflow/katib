@@ -522,7 +522,10 @@ message GetSuggestionsRequest {
 }
 
 message GetSuggestionsReply {
-    repeated Trial trials = 1; // trials should be created in the next run.
+    message ParameterAssignments{
+        repeated ParameterAssignment assignments = 1;
+    }
+    repeated ParameterAssignments parameter_assignments = 1;
     AlgorithmSpec algorithm = 2;
 }
 

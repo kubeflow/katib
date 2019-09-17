@@ -495,18 +495,6 @@
         }
       }
     },
-    "TrialSpecParameterAssignments": {
-      "type": "object",
-      "properties": {
-        "assignments": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/alpha3ParameterAssignment"
-          }
-        }
-      },
-      "title": "* \nList of ParameterAssignment"
-    },
     "TrialStatusTrialConditionType": {
       "type": "string",
       "enum": [
@@ -718,14 +706,25 @@
     "alpha3GetSuggestionsReply": {
       "type": "object",
       "properties": {
-        "trials": {
+        "parameter_assignments": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/alpha3Trial"
+            "$ref": "#/definitions/alpha3GetSuggestionsReplyParameterAssignments"
           }
         },
         "algorithm": {
           "$ref": "#/definitions/alpha3AlgorithmSpec"
+        }
+      }
+    },
+    "alpha3GetSuggestionsReplyParameterAssignments": {
+      "type": "object",
+      "properties": {
+        "assignments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3ParameterAssignment"
+          }
         }
       }
     },
@@ -992,7 +991,7 @@
           "$ref": "#/definitions/alpha3ObjectiveSpec"
         },
         "parameter_assignments": {
-          "$ref": "#/definitions/TrialSpecParameterAssignments"
+          "$ref": "#/definitions/alpha3TrialSpecParameterAssignments"
         },
         "run_spec": {
           "type": "string"
@@ -1001,6 +1000,18 @@
           "type": "string"
         }
       }
+    },
+    "alpha3TrialSpecParameterAssignments": {
+      "type": "object",
+      "properties": {
+        "assignments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alpha3ParameterAssignment"
+          }
+        }
+      },
+      "title": "* \nList of ParameterAssignment"
     },
     "alpha3TrialStatus": {
       "type": "object",

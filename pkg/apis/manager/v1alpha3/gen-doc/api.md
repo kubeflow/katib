@@ -26,6 +26,7 @@
     - [GetObservationLogReply](#api.v1.alpha3.GetObservationLogReply)
     - [GetObservationLogRequest](#api.v1.alpha3.GetObservationLogRequest)
     - [GetSuggestionsReply](#api.v1.alpha3.GetSuggestionsReply)
+    - [GetSuggestionsReply.ParameterAssignments](#api.v1.alpha3.GetSuggestionsReply.ParameterAssignments)
     - [GetSuggestionsRequest](#api.v1.alpha3.GetSuggestionsRequest)
     - [GetTrialListReply](#api.v1.alpha3.GetTrialListReply)
     - [GetTrialListRequest](#api.v1.alpha3.GetTrialListRequest)
@@ -413,8 +414,23 @@ Discrete and Categorical type use List.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| trials | [Trial](#api.v1.alpha3.Trial) | repeated | trials should be created in the next run. |
+| parameter_assignments | [GetSuggestionsReply.ParameterAssignments](#api.v1.alpha3.GetSuggestionsReply.ParameterAssignments) | repeated |  |
 | algorithm | [AlgorithmSpec](#api.v1.alpha3.AlgorithmSpec) |  |  |
+
+
+
+
+
+
+<a name="api.v1.alpha3.GetSuggestionsReply.ParameterAssignments"></a>
+
+### GetSuggestionsReply.ParameterAssignments
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| assignments | [ParameterAssignment](#api.v1.alpha3.ParameterAssignment) | repeated |  |
 
 
 
