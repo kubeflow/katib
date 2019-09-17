@@ -170,9 +170,9 @@ class TestHyperopt(unittest.TestCase):
             request=request, timeout=1)
 
         response, metadata, code, details = get_suggestion.termination()
-        print(response.trials)
+        print(response.parameter_assignments)
         self.assertEqual(code, grpc.StatusCode.OK)
-        self.assertEqual(2, len(response.trials))
+        self.assertEqual(2, len(response.parameter_assignments))
 
 
 if __name__ == '__main__':
