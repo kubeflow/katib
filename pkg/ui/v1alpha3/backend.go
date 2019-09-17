@@ -413,24 +413,6 @@ func (k *KatibUIHandler) FetchTrialTemplates(w http.ResponseWriter, r *http.Requ
 	w.Write(response)
 }
 
-func (k *KatibUIHandler) FetchMetricsCollectorTemplates(w http.ResponseWriter, r *http.Request) {
-	//enableCors(&w)
-	metricsCollectorTemplates, err := k.katibClient.GetMetricsCollectorTemplates()
-	if err != nil {
-		log.Printf("GetMetricsCollectorTemplates failed: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	response, err := json.Marshal(getTemplatesView(metricsCollectorTemplates))
-	if err != nil {
-		log.Printf("Marshal templates failed: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Write(response)
-}
-
 func (k *KatibUIHandler) AddEditDeleteTemplate(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	//TODO: need to delete?
