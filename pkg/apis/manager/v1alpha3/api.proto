@@ -530,8 +530,7 @@ message GetSuggestionsReply {
 }
 
 message ValidateAlgorithmSettingsRequest {
-    ExperimentSpec experiment_spec = 1;
-    string algorithm_name = 2;
+    Experiment experiment = 1;
 }
 
 /**

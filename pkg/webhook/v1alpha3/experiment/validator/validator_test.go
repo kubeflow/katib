@@ -115,9 +115,6 @@ spec:
 			CanRegister: true,
 		}, nil).AnyTimes()
 
-	mc.EXPECT().ValidateAlgorithmSettings(gomock.Any()).Return(
-		&api_pb.ValidateAlgorithmSettingsReply{}, nil).AnyTimes()
-
 	tcs := []struct {
 		Instance *experimentsv1alpha3.Experiment
 		Err      bool

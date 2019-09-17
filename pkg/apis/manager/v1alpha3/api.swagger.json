@@ -1082,11 +1082,8 @@
     "alpha3ValidateAlgorithmSettingsRequest": {
       "type": "object",
       "properties": {
-        "experiment_spec": {
-          "$ref": "#/definitions/alpha3ExperimentSpec"
-        },
-        "algorithm_name": {
-          "type": "string"
+        "experiment": {
+          "$ref": "#/definitions/alpha3Experiment"
         }
       }
     }

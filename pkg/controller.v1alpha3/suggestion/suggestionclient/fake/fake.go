@@ -47,3 +47,7 @@ func (f *Fake) SyncAssignments(
 	}
 	return nil
 }
+
+func (f *Fake) ValidateAlgorithmSettings(instance *suggestionsv1alpha3.Suggestion, e *experimentsv1alpha3.Experiment) error {
+	return nil
+}

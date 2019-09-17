@@ -964,8 +964,7 @@ Return INVALID_ARGUMENT Error if Algorithm Settings are not Valid
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| experiment_spec | [ExperimentSpec](#api.v1.alpha3.ExperimentSpec) |  |  |
-| algorithm_name | [string](#string) |  |  |
+| experiment | [Experiment](#api.v1.alpha3.Experiment) |  |  |
 
 
 

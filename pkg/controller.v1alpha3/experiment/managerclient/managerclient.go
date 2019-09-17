@@ -14,7 +14,6 @@ type ManagerClient interface {
 	DeleteExperimentInDB(instance *experimentsv1alpha3.Experiment) error
 	UpdateExperimentStatusInDB(instance *experimentsv1alpha3.Experiment) error
 	PreCheckRegisterExperimentInDB(inst *experimentsv1alpha3.Experiment) (*api_pb.PreCheckRegisterExperimentReply, error)
-	ValidateAlgorithmSettings(inst *experimentsv1alpha3.Experiment) (*api_pb.ValidateAlgorithmSettingsReply, error)
 }
 
 // DefaultClient implements the Client interface.
@@ -80,17 +79,6 @@ func (d *DefaultClient) PreCheckRegisterExperimentInDB(inst *experimentsv1alpha3
 		Experiment: experiment,
 	}
 	return commonv1alpha3.PreCheckRegisterExperiment(request)
-}
-
-func (d *DefaultClient) ValidateAlgorithmSettings(inst *experimentsv1alpha3.Experiment) (*api_pb.ValidateAlgorithmSettingsReply, error) {
-	algorithmName := inst.Spec.Algorithm.AlgorithmName
-	request := &api_pb.ValidateAlgorithmSettingsRequest{
-		AlgorithmName:  algorithmName,
-		ExperimentSpec: getExperimentSpec(inst),
-	}
-
-	return commonv1alpha3.ValidateAlgorithmSettings(request)
-
 }
 
 func getExperimentConf(instance *experimentsv1alpha3.Experiment) *api_pb.Experiment {

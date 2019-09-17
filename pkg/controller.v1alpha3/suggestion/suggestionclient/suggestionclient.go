@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"k8s.io/apimachinery/pkg/types"
 	utilrand "k8s.io/apimachinery/pkg/util/rand"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -21,10 +23,10 @@ import (
 var log = logf.Log.WithName("suggestion-client")
 
 type SuggestionClient interface {
-	SyncAssignments(
-		instance *suggestionsv1alpha3.Suggestion,
-		e *experimentsv1alpha3.Experiment,
+	SyncAssignments(instance *suggestionsv1alpha3.Suggestion, e *experimentsv1alpha3.Experiment,
 		ts []trialsv1alpha3.Trial) error
+
+	ValidateAlgorithmSettings(instance *suggestionsv1alpha3.Suggestion, e *experimentsv1alpha3.Experiment) error
 }
 
 type General struct {
@@ -79,6 +81,46 @@ func (g *General) SyncAssignments(
 	}
 
 	// TODO(gaocegege): Set algorithm settings
+	return nil
+}
+
+func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1alpha3.Suggestion, e *experimentsv1alpha3.Experiment) error {
+	logger := log.WithValues("Suggestion", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+	endpoint := fmt.Sprintf("%s:%d", instance.Name, consts.DefaultSuggestionPort)
+	conn, err := grpc.Dial(endpoint, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := suggestionapi.NewSuggestionClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	request := &suggestionapi.ValidateAlgorithmSettingsRequest{
+		Experiment: g.ConvertExperiment(e),
+	}
+	_, err = client.ValidateAlgorithmSettings(ctx, request)
+	statusCode, _ := status.FromError(err)
+
+	// validation error
+	if statusCode.Code() == codes.InvalidArgument || statusCode.Code() == codes.Unknown {
+		logger.Error(err, "ValidateAlgorithmSettings error")
+		return fmt.Errorf("ValidateAlgorithmSettings Error: %v", statusCode.Message())
+	}
+
+	// Connection error
+	if statusCode.Code() == codes.Unavailable {
+		logger.Error(err, "Connection to Suggestion algorithm service currently unavailable")
+		return err
+	}
+
+	// Validate to true as function is not implemented
+	if statusCode.Code() == codes.Unimplemented {
+		logger.Info("Method ValidateAlgorithmSettings not found", "Suggestion service", e.Spec.Algorithm.AlgorithmName)
+		return nil
+	}
+	logger.Info("Algorithm settings validated")
 	return nil
 }
 

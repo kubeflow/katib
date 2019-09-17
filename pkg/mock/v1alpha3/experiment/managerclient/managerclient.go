@@ -90,18 +90,3 @@ func (mr *MockManagerClientMockRecorder) UpdateExperimentStatusInDB(arg0 interfa
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateExperimentStatusInDB", reflect.TypeOf((*MockManagerClient)(nil).UpdateExperimentStatusInDB), arg0)
 }
-
-// ValidateAlgorithmSettings mocks base method
-func (m *MockManagerClient) ValidateAlgorithmSettings(arg0 *v1alpha3.Experiment) (*v1alpha30.ValidateAlgorithmSettingsReply, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ValidateAlgorithmSettings", arg0)
-	ret0, _ := ret[0].(*v1alpha30.ValidateAlgorithmSettingsReply)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ValidateAlgorithmSettings indicates an expected call of ValidateAlgorithmSettings
-func (mr *MockManagerClientMockRecorder) ValidateAlgorithmSettings(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateAlgorithmSettings", reflect.TypeOf((*MockManagerClient)(nil).ValidateAlgorithmSettings), arg0)
-}
