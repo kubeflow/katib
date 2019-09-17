@@ -29,7 +29,6 @@ spec:
               restartPolicy: OnFailure
               template:
                 spec:
-                  serviceAccountName: metrics-collector
                   containers:
                     - name: pytorch
                       image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
@@ -47,7 +46,6 @@ spec:
               restartPolicy: OnFailure
               template:
                 spec:
-                  serviceAccountName: metrics-collector
                   containers:
                     - name: pytorch
                       image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
