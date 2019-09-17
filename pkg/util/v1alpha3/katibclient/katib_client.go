@@ -41,7 +41,6 @@ type Client interface {
 	GetTrialList(name string, namespace ...string) (*trialsv1alpha3.TrialList, error)
 	GetTrialTemplates(namespace ...string) (map[string]string, error)
 	UpdateTrialTemplates(newTrialTemplates map[string]string, namespace ...string) error
-	UpdateMetricsCollectorTemplates(newMCTemplates map[string]string, namespace ...string) error
 }
 
 type KatibClient struct {
@@ -153,28 +152,6 @@ func (k *KatibClient) UpdateTrialTemplates(newTrialTemplates map[string]string, 
 	trialTemplates.Data = newTrialTemplates
 
 	if err := k.client.Update(context.Background(), trialTemplates); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (k *KatibClient) GetMetricsCollectorTemplates(namespace ...string) (map[string]string, error) {
-	ns := getNamespace(namespace...)
-	return k.GetConfigMap(experimentsv1alpha3.DefaultMetricsCollectorConfigMapName, ns)
-}
-
-func (k *KatibClient) UpdateMetricsCollectorTemplates(newMCTemplates map[string]string, namespace ...string) error {
-
-	ns := getNamespace(namespace...)
-	metricsCollectorTemplates := &apiv1.ConfigMap{}
-
-	if err := k.client.Get(context.Background(), types.NamespacedName{Name: experimentsv1alpha3.DefaultMetricsCollectorConfigMapName, Namespace: ns}, metricsCollectorTemplates); err != nil {
-		return err
-	}
-
-	metricsCollectorTemplates.Data = newMCTemplates
-
-	if err := k.client.Update(context.Background(), metricsCollectorTemplates); err != nil {
 		return err
 	}
 	return nil

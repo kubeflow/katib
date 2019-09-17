@@ -32,16 +32,9 @@ func (k *KatibUIHandler) updateTemplates(newTemplate map[string]interface{}, isD
 	var currentTemplates map[string]string
 	var err error
 
-	if newTemplate["kind"].(string) == "collector" {
-		currentTemplates, err = k.katibClient.GetMetricsCollectorTemplates()
-		if err != nil {
-			return TemplateResponse{}, errors.New("GetMetricsCollectorTemplates failed: " + err.Error())
-		}
-	} else {
-		currentTemplates, err = k.katibClient.GetTrialTemplates()
-		if err != nil {
-			return TemplateResponse{}, errors.New("GetTrialTemplates failed: " + err.Error())
-		}
+	currentTemplates, err = k.katibClient.GetTrialTemplates()
+	if err != nil {
+		return TemplateResponse{}, errors.New("GetTrialTemplates failed: " + err.Error())
 	}
 
 	if isDelete {
@@ -50,16 +43,9 @@ func (k *KatibUIHandler) updateTemplates(newTemplate map[string]interface{}, isD
 		currentTemplates[newTemplate["name"].(string)] = newTemplate["yaml"].(string)
 	}
 
-	if newTemplate["kind"].(string) == "collector" {
-		err = k.katibClient.UpdateMetricsCollectorTemplates(currentTemplates)
-		if err != nil {
-			return TemplateResponse{}, errors.New("UpdateMetricsCollectorTemplates failed: " + err.Error())
-		}
-	} else {
-		err = k.katibClient.UpdateTrialTemplates(currentTemplates)
-		if err != nil {
-			return TemplateResponse{}, errors.New("UpdateTrialTemplates failed: " + err.Error())
-		}
+	err = k.katibClient.UpdateTrialTemplates(currentTemplates)
+	if err != nil {
+		return TemplateResponse{}, errors.New("UpdateTrialTemplates failed: " + err.Error())
 	}
 
 	TemplateResponse := TemplateResponse{

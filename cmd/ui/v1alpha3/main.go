@@ -38,7 +38,6 @@ func main() {
 	http.HandleFunc("/katib/fetch_nas_job_info/", kuh.FetchNASJobInfo)
 
 	http.HandleFunc("/katib/fetch_trial_templates/", kuh.FetchTrialTemplates)
-	http.HandleFunc("/katib/fetch_collector_templates/", kuh.FetchMetricsCollectorTemplates)
 	http.HandleFunc("/katib/update_template/", kuh.AddEditDeleteTemplate)
 
 	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", *host, *port), nil); err != nil {

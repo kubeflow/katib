@@ -13,7 +13,7 @@ data:
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/file-metrics-collector"
       },
       "TensorFlowEvent": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/tfevent-metricscollector"
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/tfevent-metrics-collector"
       }
     }
   suggestion: |-

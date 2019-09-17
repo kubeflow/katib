@@ -69,7 +69,11 @@ echo "VERSION ${VERSION}"
 sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-hyperopt@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-hyperopt:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
 
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-controller@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-controller:${VERSION}@" manifests/v1alpha3/katib-controller/katib-controller.yaml
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/metrics-collector@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/metrics-collector:${VERSION}@" manifests/v1alpha3/katib-controller/metricsControllerConfigMap.yaml
+
+
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/file-metrics-collector@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/file-metrics-collector:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/tfevent-metrics-collector@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/tfevent-metrics-collector:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
+
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-manager@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-manager:${VERSION}@" manifests/v1alpha3/manager/deployment.yaml
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-manager-rest@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-manager-rest:${VERSION}@" manifests/v1alpha3/manager-rest/deployment.yaml
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-ui:${VERSION}@" manifests/v1alpha3/ui/deployment.yaml

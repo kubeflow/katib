@@ -24,7 +24,4 @@ const (
 
 	// Default value of Spec.TemplatePath
 	DefaultTrialTemplatePath = "defaultTrialTemplate.yaml"
-
-	// Default value of Spec.ConfigMapName for Metrics Collector template
-	DefaultMetricsCollectorConfigMapName = "metrics-collector-template"
 )
