@@ -34,9 +34,6 @@ docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/katib-manager-rest -f ${CMD_PREFI
 echo "Building UI image..."
 docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/katib-ui -f ${CMD_PREFIX}/ui/v1alpha3/Dockerfile .
 
-echo "Building metrics collector image..."
-docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/metrics-collector -f ${CMD_PREFIX}/metricscollector/v1alpha3/Dockerfile .
-
 echo "Building file metrics collector image..."
 docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/file-metrics-collector -f ${CMD_PREFIX}/metricscollector/v1alpha3/file-metricscollector/Dockerfile .
 
