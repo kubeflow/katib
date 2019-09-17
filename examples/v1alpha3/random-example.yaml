@@ -26,6 +26,7 @@ spec:
           spec:
             template:
               spec:
+                serviceAccountName: metrics-collector
                 containers:
                 - name: {{.Trial}}
                   image: katib/mxnet-mnist-example
@@ -33,6 +34,7 @@ spec:
                   - "python"
                   - "/mxnet/example/image-classification/train_mnist.py"
                   - "--batch-size=64"
+                  - "--num-epochs=1"
                   {{- with .HyperParameters}}
                   {{- range .}}
                   - "{{.Name}}={{.Value}}"

@@ -36,12 +36,6 @@ type TrialSpec struct {
 	// Whether to retain the trial run object after completed.
 	RetainRun bool `json:"retainRun,omitempty"`
 
-	// Raw text for the metrics collector spec. This must be a CronJob object.
-	// Deprecated
-	MetricsCollectorSpec string `json:"metricsCollectorSpec,omitempty"`
-	// Whether to retain the trial metrics collector CronJob object after completed.
-	// Deprecated
-	RetainMetricsCollector bool `json:"retainMetricsCollector,omitempty"`
 	// Describes how metrics will be collected
 	MetricsCollector MetricsCollectorSpec `json:"metricsCollector,omitempty"`
 }

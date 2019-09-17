@@ -134,9 +134,6 @@ func (d *DefaultClient) GetTrialConf(instance *trialsv1alpha3.Trial) *api_pb.Tri
 	}
 
 	trial.Spec.RunSpec = instance.Spec.RunSpec
-
-	trial.Spec.MetricsCollectorSpec = instance.Spec.MetricsCollectorSpec
-
 	return trial
 }
 

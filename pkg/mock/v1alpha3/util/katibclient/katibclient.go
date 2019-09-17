@@ -132,25 +132,6 @@ func (mr *MockClientMockRecorder) GetExperimentList(arg0 ...interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExperimentList", reflect.TypeOf((*MockClient)(nil).GetExperimentList), arg0...)
 }
 
-// GetMetricsCollectorTemplates mocks base method
-func (m *MockClient) GetMetricsCollectorTemplates(arg0 ...string) (map[string]string, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{}
-	for _, a := range arg0 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetMetricsCollectorTemplates", varargs...)
-	ret0, _ := ret[0].(map[string]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetMetricsCollectorTemplates indicates an expected call of GetMetricsCollectorTemplates
-func (mr *MockClientMockRecorder) GetMetricsCollectorTemplates(arg0 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMetricsCollectorTemplates", reflect.TypeOf((*MockClient)(nil).GetMetricsCollectorTemplates), arg0...)
-}
-
 // GetTrialList mocks base method
 func (m *MockClient) GetTrialList(arg0 string, arg1 ...string) (*v1alpha30.TrialList, error) {
 	m.ctrl.T.Helper()
@@ -200,25 +181,6 @@ func (m *MockClient) InjectClient(arg0 client.Client) {
 func (mr *MockClientMockRecorder) InjectClient(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InjectClient", reflect.TypeOf((*MockClient)(nil).InjectClient), arg0)
-}
-
-// UpdateMetricsCollectorTemplates mocks base method
-func (m *MockClient) UpdateMetricsCollectorTemplates(arg0 map[string]string, arg1 ...string) error {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0}
-	for _, a := range arg1 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "UpdateMetricsCollectorTemplates", varargs...)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateMetricsCollectorTemplates indicates an expected call of UpdateMetricsCollectorTemplates
-func (mr *MockClientMockRecorder) UpdateMetricsCollectorTemplates(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0}, arg1...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMetricsCollectorTemplates", reflect.TypeOf((*MockClient)(nil).UpdateMetricsCollectorTemplates), varargs...)
 }
 
 // UpdateTrialTemplates mocks base method

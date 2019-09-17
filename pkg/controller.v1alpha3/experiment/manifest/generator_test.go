@@ -33,107 +33,7 @@ spec:
 					- "{{.Name}}={{.Value}}"
 					{{- end}}
 					{{- end}}`
-	rawMetricsCollector = `apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: metrics-collector-template
-  namespace: kubeflow
-data:
-  defaultMetricsCollectorTemplate.yaml : |-
-	apiVersion: batch/v1beta1
-	kind: CronJob
-	metadata:
-	  name: {{.Trial}}
-	  namespace: {{.NameSpace}}
-	spec:
-	  schedule: "*/1 * * * *"
-	  successfulJobsHistoryLimit: 0
-	  failedJobsHistoryLimit: 1
-	  jobTemplate:
-		spec:
-		  backoffLimit: 0
-		  template:
-			spec:
-			  serviceAccountName: metrics-collector
-			  containers:
-			  - name: {{.Trial}}
-				image: katib/metrics-collector
-				args:
-				- "./metricscollector.v1alpha3"
-				- "-e"
-				- "{{.Experiment}}"
-				- "-t"
-				- "{{.Trial}}"
-				- "-k"
-				- "{{.JobKind}}"
-				- "-n"
-				- "{{.NameSpace}}"
-				- "-mn"
-				- "{{.MetricNames}}"`
 )
-
-func TestGetMetricsCollectorManifest(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
-	c := katibclientmock.NewMockClient(mockCtrl)
-
-	p := &DefaultGenerator{
-		client: c,
-	}
-
-	c.EXPECT().GetMetricsCollectorTemplates(gomock.Any()).Return(map[string]string{
-		defaultMetricsCollectorTemplateName: rawMetricsCollector,
-	}, nil)
-
-	instance := newFakeInstance()
-
-	actual, err := p.GetMetricsCollectorManifest("test", "test", "Job", "fakens", []string{"test"}, instance.Spec.MetricsCollectorSpec)
-	if err != nil {
-		t.Errorf("Expected nil, got %v", err)
-	}
-	expected := `apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: metrics-collector-template
-  namespace: kubeflow
-data:
-  defaultMetricsCollectorTemplate.yaml : |-
-	apiVersion: batch/v1beta1
-	kind: CronJob
-	metadata:
-	  name: test
-	  namespace: fakens
-	spec:
-	  schedule: "*/1 * * * *"
-	  successfulJobsHistoryLimit: 0
-	  failedJobsHistoryLimit: 1
-	  jobTemplate:
-		spec:
-		  backoffLimit: 0
-		  template:
-			spec:
-			  serviceAccountName: metrics-collector
-			  containers:
-			  - name: test
-				image: katib/metrics-collector
-				args:
-				- "./metricscollector.v1alpha3"
-				- "-e"
-				- "test"
-				- "-t"
-				- "test"
-				- "-k"
-				- "Job"
-				- "-n"
-				- "fakens"
-				- "-mn"
-				- "test"`
-
-	if expected != actual {
-		t.Errorf("Expected %s, got %s", expected, actual)
-	}
-}
 
 func TestGetTrialTemplateConfigMap(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
@@ -281,13 +181,6 @@ func newFakeInstance() *experimentsv1alpha3.Experiment {
 			TrialTemplate: &experimentsv1alpha3.TrialTemplate{
 				GoTemplate: &experimentsv1alpha3.GoTemplate{
 					RawTemplate: rawTemplate,
-				},
-			},
-			MetricsCollectorSpec: &experimentsv1alpha3.MetricsCollectorSpec{
-				GoTemplate: experimentsv1alpha3.GoTemplate{
-					TemplateSpec: &experimentsv1alpha3.TemplateSpec{
-						TemplatePath: defaultMetricsCollectorTemplateName,
-					},
 				},
 			},
 		},

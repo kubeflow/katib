@@ -195,20 +195,10 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha3.Trial) error {
 		logger.Error(err, "Job Spec Get error")
 		return err
 	}
-	desiredMetricsCollector, err := r.getDesiredMetricsCollectorSpec(instance)
-	if err != nil {
-		logger.Error(err, "Metrics Collector Get error")
-		return err
-	}
 
 	deployedJob, err := r.reconcileJob(instance, desiredJob)
 	if err != nil {
 		logger.Error(err, "Reconcile job error")
-		return err
-	}
-	_, err = r.reconcileMetricsCollector(instance, desiredMetricsCollector)
-	if err != nil {
-		logger.Error(err, "Reconcile Metrics Collector error")
 		return err
 	}
 
@@ -290,62 +280,4 @@ func (r *ReconcileTrial) getDesiredJobSpec(instance *trialsv1alpha3.Trial) (*uns
 	}
 
 	return desiredJobSpec, nil
-}
-
-func (r *ReconcileTrial) getDesiredMetricsCollectorSpec(instance *trialsv1alpha3.Trial) (*batchv1beta.CronJob, error) {
-	mcjob := &batchv1beta.CronJob{}
-	bufSize := 1024
-	logger := log.WithValues("Metrics collector for Trial", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	buf := bytes.NewBufferString(instance.Spec.MetricsCollectorSpec)
-
-	if err := k8syaml.NewYAMLOrJSONDecoder(buf, bufSize).Decode(mcjob); err != nil {
-		logger.Error(err, "Yaml decode error")
-		return nil, err
-	}
-	if err := controllerutil.SetControllerReference(instance, mcjob, r.scheme); err != nil {
-		logger.Error(err, "Set controller reference error")
-		return nil, err
-	}
-	return mcjob, nil
-}
-
-func (r *ReconcileTrial) reconcileMetricsCollector(instance *trialsv1alpha3.Trial,
-	desiredMetricsCollector *batchv1beta.CronJob) (*batchv1beta.CronJob, error) {
-	var err error
-	logger := log.WithValues("Trial", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-
-	deployedMetricsCollector := &batchv1beta.CronJob{}
-	err = r.Get(context.TODO(), types.NamespacedName{
-		Name:      desiredMetricsCollector.GetName(),
-		Namespace: desiredMetricsCollector.GetNamespace(),
-	}, deployedMetricsCollector)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			if instance.IsCompleted() {
-				return nil, nil
-			}
-			logger.Info("Creating Metrics Collector",
-				"name", desiredMetricsCollector.GetName(),
-				"namespace", desiredMetricsCollector.GetNamespace())
-			err = r.Create(context.TODO(), desiredMetricsCollector)
-			if err != nil {
-				logger.Error(err, "Create Metrics Collector error")
-				return nil, err
-			}
-		} else {
-			logger.Error(err, "Metrics Collector Get error")
-			return nil, err
-		}
-	} else {
-		if instance.IsCompleted() && !instance.Spec.RetainMetricsCollector {
-			if err = r.Delete(context.TODO(), desiredMetricsCollector, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
-				logger.Error(err, "Delete Metrics Collector error")
-				return nil, err
-			} else {
-				return nil, nil
-			}
-		}
-	}
-
-	return deployedMetricsCollector, nil
 }
