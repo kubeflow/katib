@@ -16,10 +16,10 @@
 
 # This shell script is used to run the python tests in the argo workflow
 
-exit 0
+set -o errexit
+set -o nounset
+set -o pipefail
 
-pip install -r cmd/suggestion/bayesianoptimization/v1alpha3/requirements.txt
-pip install -r pkg/suggestion/test_requirements.txt
-python setup.py develop
-pylint pkg/suggestion/v1alpha3/bayesianoptimization/src --disable=fixme --exit-zero --reports=y
-pytest pkg/suggestion/v1alpha3/tests --verbose --cov=pkg/suggestion/bayesianoptimization/src --cov-report term-missing
+pip install -r test/suggestion/v1alpha3/test_requirements.txt
+pip install -r cmd/suggestion/hyperopt/v1alpha3/requirements.txt
+pytest -s ./test
