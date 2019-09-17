@@ -124,6 +124,8 @@ const (
 	// When model training source code persists metrics into persistent layer
 	// directly, metricsCollector isn't in need, and its kind is "noneCollector"
 	NoneCollector CollectorKind = "None"
+
+	MetricsVolume = "metrics-volume"
 )
 
 // +k8s:deepcopy-gen=true

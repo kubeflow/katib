@@ -20,7 +20,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"path/filepath"
+	"strings"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
@@ -135,13 +138,6 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		return nil, err
 	}
 
-	experimentName := "TODO_Experiment"
-	for _, v := range trial.OwnerReferences {
-		if v.Kind == "Experiment" {
-			experimentName = v.Name
-		}
-	}
-
 	metricName := trial.Spec.Objective.ObjectiveMetricName
 	for _, v := range trial.Spec.Objective.AdditionalMetricNames {
 		metricName += ";"
@@ -152,19 +148,25 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	if err != nil {
 		return nil, err
 	}
+	args := getMetricsCollectorArgs(trialName, metricName, trial.Spec.MetricsCollector)
 	injectContainer := v1.Container{
 		Name:            mccommon.MetricCollectorContainerName,
 		Image:           image,
-		Args:            []string{"-e", experimentName, "-t", trialName, "-k", kind, "-n", namespace, "-m", katibmanagerv1alpha3.GetManagerAddr(), "-mn", metricName},
-		ImagePullPolicy: v1.PullAlways,
-		VolumeMounts:    pod.Spec.Containers[0].VolumeMounts,
+		Args:            args,
+		ImagePullPolicy: v1.PullIfNotPresent,
 	}
 	mutatedPod.Spec.Containers = append(mutatedPod.Spec.Containers, injectContainer)
 	mutatedPod.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
-
 	mutatedPod.Spec.ShareProcessNamespace = pointer.BoolPtr(true)
 
-	log.Info("Inject metrics collector sidecar container", "Pod", pod.Name, "Trial", trialName, "Experiment", experimentName)
+	if mountFile := getMountFile(trial.Spec.MetricsCollector); mountFile != "" {
+		wrapWorkerContainer(mutatedPod, kind, mountFile, trial.Spec.MetricsCollector)
+		if err = mutateVolume(mutatedPod, kind, mountFile); err != nil {
+			return nil, err
+		}
+	}
+
+	log.Info("Inject metrics collector sidecar container", "Pod", pod.Name, "Trial", trialName)
 
 	return mutatedPod, nil
 }
@@ -198,4 +200,111 @@ func (s *sidecarInjector) getMetricsCollectorImage(cKind common.CollectorKind) (
 	} else {
 		return "", errors.New("Failed to find metrics collector configuration in configmap " + consts.KatibConfigMapName)
 	}
+}
+
+func getMetricsCollectorArgs(trialName, metricName string, mc trialsv1alpha3.MetricsCollectorSpec) []string {
+	args := []string{"-t", trialName, "-m", katibmanagerv1alpha3.GetManagerAddr(), "-mn", metricName}
+	if mountFile := getMountFile(mc); mountFile != "" {
+		args = append(args, "-f", mountFile)
+	}
+	return args
+}
+
+func getMountFile(mc trialsv1alpha3.MetricsCollectorSpec) string {
+	if mc.Collector.Kind == common.StdOutCollector {
+		return common.DefaultFilePath
+	} else if mc.Collector.Kind == common.FileCollector {
+		return mc.Source.FileSystemPath.Path
+	} else {
+		return ""
+	}
+}
+
+func wrapWorkerContainer(pod *v1.Pod, jobKind, metricsFile string, mc trialsv1alpha3.MetricsCollectorSpec) {
+	if mc.Collector.Kind != common.StdOutCollector {
+		return
+	}
+	index := -1
+	for i, c := range pod.Spec.Containers {
+		if isWorkerContainer(jobKind, i, c) {
+			index = i
+			break
+		}
+	}
+	if index >= 0 {
+		// TODO(hougangliu): handle container.command is nil case
+		c := &pod.Spec.Containers[index]
+		command := []string{"sh", "-c"}
+		args := []string{}
+		if c.Command != nil {
+			args = append(args, c.Command...)
+		}
+		if c.Args != nil {
+			args = append(args, c.Args...)
+		}
+		redirectStr := fmt.Sprintf("1>%s 2>&1", metricsFile)
+		args = append(args, redirectStr)
+		argsStr := strings.Join(args, " ")
+		c.Command = command
+		c.Args = []string{argsStr}
+	}
+}
+
+func isWorkerContainer(jobKind string, index int, c v1.Container) bool {
+	switch jobKind {
+	case BatchJob:
+		if index == 0 {
+			// for Job worker, the first container will be taken as worker container,
+			// katib document should note it
+			return true
+		}
+	case TFJob:
+		if c.Name == TFJobWorkerContainerName {
+			return true
+		}
+	case PyTorchJob:
+		if c.Name == PyTorchJobWorkerContainerName {
+			return true
+		}
+	default:
+		log.Info("Invalid Katib worker kind", "JobKind", jobKind)
+		return false
+	}
+	return false
+}
+
+func mutateVolume(pod *v1.Pod, jobKind, mountFile string) error {
+	metricsVol := v1.Volume{
+		Name: common.MetricsVolume,
+		VolumeSource: v1.VolumeSource{
+			EmptyDir: &v1.EmptyDirVolumeSource{},
+		},
+	}
+	vm := v1.VolumeMount{
+		Name:      metricsVol.Name,
+		MountPath: filepath.Dir(mountFile),
+	}
+	index_list := []int{}
+	for i, c := range pod.Spec.Containers {
+		shouldMount := false
+		if c.Name == mccommon.MetricCollectorContainerName {
+			shouldMount = true
+		} else {
+			shouldMount = isWorkerContainer(jobKind, i, c)
+		}
+		if shouldMount {
+			index_list = append(index_list, i)
+		}
+	}
+	for _, i := range index_list {
+		c := &pod.Spec.Containers[i]
+		if c.VolumeMounts == nil {
+			c.VolumeMounts = make([]v1.VolumeMount, 0)
+		}
+		c.VolumeMounts = append(c.VolumeMounts, vm)
+		pod.Spec.Containers[i] = *c
+	}
+	pod.Spec.Volumes = append(pod.Spec.Volumes, metricsVol)
+
+	return nil
 }

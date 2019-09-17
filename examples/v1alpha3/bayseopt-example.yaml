@@ -49,7 +49,6 @@ spec:
           spec:
             template:
               spec:
-                serviceAccountName: metrics-collector
                 containers:
                 - name: {{.Trial}}
                   image: katib/mxnet-mnist-example

@@ -31,7 +31,6 @@ spec:
           spec:
             template:
               spec:
-                serviceAccountName: metrics-collector # will be dropped
                 containers:
                 - name: {{.Trial}}
                   image: katib/mxnet-mnist-example
