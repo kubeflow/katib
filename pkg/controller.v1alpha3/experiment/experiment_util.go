@@ -51,23 +51,6 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 		return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
 	}
 
-	var metricNames []string
-	metricNames = append(metricNames, expInstance.Spec.Objective.ObjectiveMetricName)
-	for _, mn := range expInstance.Spec.Objective.AdditionalMetricNames {
-		metricNames = append(metricNames, mn)
-	}
-
-	mcSpec, err := r.GetMetricsCollectorManifest(expInstance.GetName(), trial.Name, job.GetKind(), trial.Namespace, metricNames, expInstance.Spec.MetricsCollectorSpec)
-	if err != nil {
-		logger.Error(err, "Error getting metrics collector manifest")
-		return err
-	}
-	trial.Spec.MetricsCollectorSpec = mcSpec
-
-	if expInstance.Spec.MetricsCollectorSpec != nil {
-		trial.Spec.RetainMetricsCollector = expInstance.Spec.MetricsCollectorSpec.Retain
-	}
-
 	if expInstance.Spec.MetricsCollectorSpec != nil {
 		trial.Spec.MetricsCollector.Collector = expInstance.Spec.MetricsCollectorSpec.Collector
 		trial.Spec.MetricsCollector.Source = expInstance.Spec.MetricsCollectorSpec.Source

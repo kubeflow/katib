@@ -3,8 +3,6 @@ package manifest
 import (
 	"bytes"
 	"errors"
-	"fmt"
-	"strings"
 	"text/template"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,7 +10,6 @@ import (
 
 	commonapiv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
-	commonv1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
 	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibclient"
 )
 
@@ -25,7 +22,6 @@ type Generator interface {
 	InjectClient(c client.Client)
 	GetRunSpec(e *experimentsv1alpha3.Experiment, experiment, trial, namespace string) (string, error)
 	GetRunSpecWithHyperParameters(e *experimentsv1alpha3.Experiment, experiment, trial, namespace string, hps []commonapiv1alpha3.ParameterAssignment) (string, error)
-	GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha3.MetricsCollectorSpec) (string, error)
 }
 
 // DefaultGenerator is the default implementation of Generator.
@@ -43,45 +39,6 @@ func New(c client.Client) Generator {
 
 func (g *DefaultGenerator) InjectClient(c client.Client) {
 	g.client.InjectClient(c)
-}
-
-func (g *DefaultGenerator) GetMetricsCollectorManifest(experimentName string, trialName string, jobKind string, namespace string, metricNames []string, mcs *experimentsv1alpha3.MetricsCollectorSpec) (string, error) {
-	var mtp *template.Template = nil
-	var err error
-	tmpValues := map[string]string{
-		"Experiment":     experimentName,
-		"Trial":          trialName,
-		"JobKind":        jobKind,
-		"NameSpace":      namespace,
-		"ManagerService": commonv1alpha3.GetManagerAddr(),
-		"MetricNames":    strings.Join(metricNames, ";"),
-	}
-	if mcs != nil && mcs.GoTemplate.RawTemplate != "" {
-		mtp, err = template.New("MetricsCollector").Parse(mcs.GoTemplate.RawTemplate)
-	} else {
-		mctp := defaultMetricsCollectorTemplateName
-		if mcs != nil && mcs.GoTemplate.TemplateSpec != nil {
-			mctp = mcs.GoTemplate.TemplateSpec.TemplatePath
-		}
-		mtl, err := g.client.GetMetricsCollectorTemplates()
-		if err != nil {
-			return "", err
-		}
-		if mt, ok := mtl[mctp]; !ok {
-			return "", fmt.Errorf("No MetricsCollector template name %s", mctp)
-		} else {
-			mtp, err = template.New("MetricsCollector").Parse(mt)
-		}
-	}
-	if err != nil {
-		return "", err
-	}
-	var b bytes.Buffer
-	err = mtp.Execute(&b, tmpValues)
-	if err != nil {
-		return "", err
-	}
-	return b.String(), nil
 }
 
 // GetRunSpec get the specification for trial.

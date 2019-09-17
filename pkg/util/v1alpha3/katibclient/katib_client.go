@@ -41,7 +41,6 @@ type Client interface {
 	GetTrialList(name string, namespace ...string) (*trialsv1alpha3.TrialList, error)
 	GetTrialTemplates(namespace ...string) (map[string]string, error)
 	UpdateTrialTemplates(newTrialTemplates map[string]string, namespace ...string) error
-	GetMetricsCollectorTemplates(namespace ...string) (map[string]string, error)
 	UpdateMetricsCollectorTemplates(newMCTemplates map[string]string, namespace ...string) error
 }
 

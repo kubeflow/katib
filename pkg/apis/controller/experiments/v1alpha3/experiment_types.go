@@ -221,11 +221,6 @@ type Operation struct {
 }
 
 type MetricsCollectorSpec struct {
-	// Deprecated Retain
-	Retain bool `json:"retain,omitempty"`
-	// Deprecated GoTemplate
-	GoTemplate GoTemplate `json:"goTemplate,omitempty"`
-
 	Source    *common.SourceSpec    `json:"source,omitempty"`
 	Collector *common.CollectorSpec `json:"collector,omitempty"`
 }

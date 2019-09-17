@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	batchv1beta "k8s.io/api/batch/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -134,47 +133,6 @@ func (g *DefaultValidator) validateSupportedJob(job *unstructured.Unstructured) 
 }
 
 func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1alpha3.Experiment) error {
-	BUFSIZE := 1024
-	experimentName := inst.GetName()
-	trialName := fmt.Sprintf("%s-trial", inst.GetName())
-	namespace := inst.GetNamespace()
-	var metricNames []string
-	metricNames = append(metricNames, inst.Spec.Objective.ObjectiveMetricName)
-	for _, mn := range inst.Spec.Objective.AdditionalMetricNames {
-		metricNames = append(metricNames, mn)
-	}
-
-	runSpec, err := g.GetRunSpec(inst, experimentName, trialName, namespace)
-	if err != nil {
-		return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
-	}
-
-	buf := bytes.NewBufferString(runSpec)
-
-	job := &unstructured.Unstructured{}
-	if err := k8syaml.NewYAMLOrJSONDecoder(buf, BUFSIZE).Decode(job); err != nil {
-		return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
-	}
-
-	mcm, err := g.GetMetricsCollectorManifest(experimentName, trialName, job.GetKind(), namespace, metricNames, inst.Spec.MetricsCollectorSpec)
-	if err != nil {
-		log.Info("getMetricsCollectorManifest error", "err", err)
-		return err
-	}
-
-	buf = bytes.NewBufferString(mcm)
-
-	mcjob := &batchv1beta.CronJob{}
-	if err := k8syaml.NewYAMLOrJSONDecoder(buf, BUFSIZE).Decode(&mcjob); err != nil {
-		log.Info("MetricsCollector Yaml decode error", "err", err)
-		return err
-	}
-
-	if mcjob.GetNamespace() != namespace || mcjob.GetName() != trialName {
-		return fmt.Errorf("Invalid metricsCollector template.")
-	}
-
-	// Above part of this method will be dropped
 	mcSpec := inst.Spec.MetricsCollectorSpec
 	mcKind := mcSpec.Collector.Kind
 	// TODO(hougangliu):
