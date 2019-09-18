@@ -93,16 +93,6 @@ class ManagerStub(object):
         request_serializer=api__pb2.GetObservationLogRequest.SerializeToString,
         response_deserializer=api__pb2.GetObservationLogReply.FromString,
         )
-    self.GetSuggestions = channel.unary_unary(
-        '/api.v1.alpha3.Manager/GetSuggestions',
-        request_serializer=api__pb2.GetSuggestionsRequest.SerializeToString,
-        response_deserializer=api__pb2.GetSuggestionsReply.FromString,
-        )
-    self.ValidateAlgorithmSettings = channel.unary_unary(
-        '/api.v1.alpha3.Manager/ValidateAlgorithmSettings',
-        request_serializer=api__pb2.ValidateAlgorithmSettingsRequest.SerializeToString,
-        response_deserializer=api__pb2.ValidateAlgorithmSettingsReply.FromString,
-        )
 
 
 class ManagerServicer(object):
@@ -239,23 +229,6 @@ class ManagerServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def GetSuggestions(self, request, context):
-    """* 
-    Get Suggestions from a Suggestion service.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def ValidateAlgorithmSettings(self, request, context):
-    """* 
-    Validate AlgorithmSettings in an Experiment.
-    Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
 
 def add_ManagerServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -333,16 +306,6 @@ def add_ManagerServicer_to_server(servicer, server):
           servicer.GetObservationLog,
           request_deserializer=api__pb2.GetObservationLogRequest.FromString,
           response_serializer=api__pb2.GetObservationLogReply.SerializeToString,
-      ),
-      'GetSuggestions': grpc.unary_unary_rpc_method_handler(
-          servicer.GetSuggestions,
-          request_deserializer=api__pb2.GetSuggestionsRequest.FromString,
-          response_serializer=api__pb2.GetSuggestionsReply.SerializeToString,
-      ),
-      'ValidateAlgorithmSettings': grpc.unary_unary_rpc_method_handler(
-          servicer.ValidateAlgorithmSettings,
-          request_deserializer=api__pb2.ValidateAlgorithmSettingsRequest.FromString,
-          response_serializer=api__pb2.ValidateAlgorithmSettingsReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

@@ -164,27 +164,6 @@ service Manager {
             body: "*"
             };
     };
-
-    /** 
-     * Get Suggestions from a Suggestion service.
-     */
-    rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply){
-        option (google.api.http) = {
-            post: "/api/Manager/GetSuggestions"
-            body: "*"
-        };
-    };
-
-    /** 
-     * Validate AlgorithmSettings in an Experiment.
-     * Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid
-     */
-     rpc ValidateAlgorithmSettings(ValidateAlgorithmSettingsRequest) returns (ValidateAlgorithmSettingsReply){
-        option (google.api.http) = {
-            post: "/api/Manager/ValidateAlgorithmSettings"
-            body: "*"
-        };
-    };
 }
 
 service Suggestion {

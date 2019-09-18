@@ -137,17 +137,6 @@ func UpdateTrialStatus(request *api_pb.UpdateTrialStatusRequest) (*api_pb.Update
 	return kc.UpdateTrialStatus(ctx, request)
 }
 
-func GetSuggestions(request *api_pb.GetSuggestionsRequest) (*api_pb.GetSuggestionsReply, error) {
-	ctx := context.Background()
-	kcc, err := getKatibManagerClientAndConn()
-	if err != nil {
-		return nil, err
-	}
-	defer closeKatibManagerConnection(kcc)
-	kc := kcc.KatibManagerClient
-	return kc.GetSuggestions(ctx, request)
-}
-
 func PreCheckRegisterExperiment(request *api_pb.RegisterExperimentRequest) (*api_pb.PreCheckRegisterExperimentReply, error) {
 	ctx := context.Background()
 	kcc, err := getKatibManagerClientAndConn()
@@ -168,15 +157,4 @@ func GetObservationLog(request *api_pb.GetObservationLogRequest) (*api_pb.GetObs
 	defer closeKatibManagerConnection(kcc)
 	kc := kcc.KatibManagerClient
 	return kc.GetObservationLog(ctx, request)
-}
-
-func ValidateAlgorithmSettings(request *api_pb.ValidateAlgorithmSettingsRequest) (*api_pb.ValidateAlgorithmSettingsReply, error) {
-	ctx := context.Background()
-	kcc, err := getKatibManagerClientAndConn()
-	if err != nil {
-		return nil, err
-	}
-	defer closeKatibManagerConnection(kcc)
-	kc := kcc.KatibManagerClient
-	return kc.ValidateAlgorithmSettings(ctx, request)
 }

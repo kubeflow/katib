@@ -159,33 +159,6 @@
         ]
       }
     },
-    "/api/Manager/GetSuggestions": {
-      "post": {
-        "summary": "* \nGet Suggestions from a Suggestion service.",
-        "operationId": "GetSuggestions",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/alpha3GetSuggestionsReply"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/alpha3GetSuggestionsRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Manager"
-        ]
-      }
-    },
     "/api/Manager/GetTrial/{trial_name}": {
       "get": {
         "summary": "*\nGet a Trial from DB by ID of Trial.",
@@ -435,33 +408,6 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/alpha3UpdateTrialStatusRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Manager"
-        ]
-      }
-    },
-    "/api/Manager/ValidateAlgorithmSettings": {
-      "post": {
-        "summary": "* \nValidate AlgorithmSettings in an Experiment.\nSuggestion service should return INVALID_ARGUMENT Error when the parameter is invalid",
-        "operationId": "ValidateAlgorithmSettings",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/alpha3ValidateAlgorithmSettingsReply"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/alpha3ValidateAlgorithmSettingsRequest"
             }
           }
         ],
@@ -725,24 +671,6 @@
           "items": {
             "$ref": "#/definitions/alpha3ParameterAssignment"
           }
-        }
-      }
-    },
-    "alpha3GetSuggestionsRequest": {
-      "type": "object",
-      "properties": {
-        "experiment": {
-          "$ref": "#/definitions/alpha3Experiment"
-        },
-        "trials": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/alpha3Trial"
-          }
-        },
-        "request_number": {
-          "type": "integer",
-          "format": "int32"
         }
       }
     },
@@ -1078,14 +1006,6 @@
     "alpha3ValidateAlgorithmSettingsReply": {
       "type": "object",
       "title": "*\nReturn INVALID_ARGUMENT Error if Algorithm Settings are not Valid"
-    },
-    "alpha3ValidateAlgorithmSettingsRequest": {
-      "type": "object",
-      "properties": {
-        "experiment": {
-          "$ref": "#/definitions/alpha3Experiment"
-        }
-      }
     }
   }
 }

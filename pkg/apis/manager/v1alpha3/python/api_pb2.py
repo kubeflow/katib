@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='api.proto',
   package='api.v1.alpha3',
   syntax='proto3',
-  serialized_pb=_b('\n\tapi.proto\x12\rapi.v1.alpha3\x1a\x1cgoogle/api/annotations.proto\"E\n\rFeasibleSpace\x12\x0b\n\x03max\x18\x01 \x01(\t\x12\x0b\n\x03min\x18\x02 \x01(\t\x12\x0c\n\x04list\x18\x03 \x03(\t\x12\x0c\n\x04step\x18\x04 \x01(\t\"\x89\x01\n\rParameterSpec\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x34\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x1c.api.v1.alpha3.ParameterType\x12\x34\n\x0e\x66\x65\x61sible_space\x18\x03 \x01(\x0b\x32\x1c.api.v1.alpha3.FeasibleSpace\"\x89\x01\n\rObjectiveSpec\x12*\n\x04type\x18\x01 \x01(\x0e\x32\x1c.api.v1.alpha3.ObjectiveType\x12\x0c\n\x04goal\x18\x02 \x01(\x01\x12\x1d\n\x15objective_metric_name\x18\x03 \x01(\t\x12\x1f\n\x17\x61\x64\x64itional_metric_names\x18\x04 \x03(\t\"/\n\x10\x41lgorithmSetting\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\x13\n\x11\x45\x61rlyStoppingSpec\"\xa2\x01\n\rAlgorithmSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x01 \x01(\t\x12:\n\x11\x61lgorithm_setting\x18\x02 \x03(\x0b\x32\x1f.api.v1.alpha3.AlgorithmSetting\x12=\n\x13\x65\x61rly_stopping_spec\x18\x03 \x01(\x0b\x32 .api.v1.alpha3.EarlyStoppingSpec\"\xb1\x01\n\tNasConfig\x12\x30\n\x0cgraph_config\x18\x01 \x01(\x0b\x32\x1a.api.v1.alpha3.GraphConfig\x12\x37\n\noperations\x18\x02 \x01(\x0b\x32#.api.v1.alpha3.NasConfig.Operations\x1a\x39\n\nOperations\x12+\n\toperation\x18\x01 \x03(\x0b\x32\x18.api.v1.alpha3.Operation\"L\n\x0bGraphConfig\x12\x12\n\nnum_layers\x18\x01 \x01(\x05\x12\x13\n\x0binput_sizes\x18\x02 \x03(\x05\x12\x14\n\x0coutput_sizes\x18\x03 \x03(\x05\"\xa9\x01\n\tOperation\x12\x16\n\x0eoperation_type\x18\x01 \x01(\t\x12@\n\x0fparameter_specs\x18\x02 \x01(\x0b\x32\'.api.v1.alpha3.Operation.ParameterSpecs\x1a\x42\n\x0eParameterSpecs\x12\x30\n\nparameters\x18\x01 \x03(\x0b\x32\x1c.api.v1.alpha3.ParameterSpec\"\x9a\x03\n\x0e\x45xperimentSpec\x12\x45\n\x0fparameter_specs\x18\x01 \x01(\x0b\x32,.api.v1.alpha3.ExperimentSpec.ParameterSpecs\x12/\n\tobjective\x18\x02 \x01(\x0b\x32\x1c.api.v1.alpha3.ObjectiveSpec\x12/\n\talgorithm\x18\x03 \x01(\x0b\x32\x1c.api.v1.alpha3.AlgorithmSpec\x12\x16\n\x0etrial_template\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x12\x1c\n\x14parallel_trial_count\x18\x06 \x01(\x05\x12\x17\n\x0fmax_trial_count\x18\x07 \x01(\x05\x12,\n\nnas_config\x18\x08 \x01(\x0b\x32\x18.api.v1.alpha3.NasConfig\x1a\x42\n\x0eParameterSpecs\x12\x30\n\nparameters\x18\x01 \x03(\x0b\x32\x1c.api.v1.alpha3.ParameterSpec\"\xf8\x01\n\x10\x45xperimentStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12J\n\tcondition\x18\x03 \x01(\x0e\x32\x37.api.v1.alpha3.ExperimentStatus.ExperimentConditionType\"k\n\x17\x45xperimentConditionType\x12\x0b\n\x07\x43REATED\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\x0e\n\nRESTARTING\x10\x02\x12\r\n\tSUCCEEDED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x12\x0b\n\x07UNKNOWN\x10\x05\"x\n\nExperiment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12+\n\x04spec\x18\x02 \x01(\x0b\x32\x1d.api.v1.alpha3.ExperimentSpec\x12/\n\x06status\x18\x03 \x01(\x0b\x32\x1f.api.v1.alpha3.ExperimentStatus\"2\n\x13ParameterAssignment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"%\n\x06Metric\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"F\n\tMetricLog\x12\x12\n\ntime_stamp\x18\x01 \x01(\t\x12%\n\x06metric\x18\x02 \x01(\x0b\x32\x15.api.v1.alpha3.Metric\"5\n\x0bObservation\x12&\n\x07metrics\x18\x01 \x03(\x0b\x32\x15.api.v1.alpha3.Metric\"?\n\x0eObservationLog\x12-\n\x0bmetric_logs\x18\x01 \x03(\x0b\x32\x18.api.v1.alpha3.MetricLog\"\xa6\x02\n\tTrialSpec\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12/\n\tobjective\x18\x02 \x01(\x0b\x32\x1c.api.v1.alpha3.ObjectiveSpec\x12L\n\x15parameter_assignments\x18\x03 \x01(\x0b\x32-.api.v1.alpha3.TrialSpec.ParameterAssignments\x12\x10\n\x08run_spec\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x1aO\n\x14ParameterAssignments\x12\x37\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32\".api.v1.alpha3.ParameterAssignment\"\x91\x02\n\x0bTrialStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12@\n\tcondition\x18\x03 \x01(\x0e\x32-.api.v1.alpha3.TrialStatus.TrialConditionType\x12/\n\x0bobservation\x18\x04 \x01(\x0b\x32\x1a.api.v1.alpha3.Observation\"b\n\x12TrialConditionType\x12\x0b\n\x07\x43REATED\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tSUCCEEDED\x10\x02\x12\n\n\x06KILLED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x12\x0b\n\x07UNKNOWN\x10\x05\"i\n\x05Trial\x12\x0c\n\x04name\x18\x01 \x01(\t\x12&\n\x04spec\x18\x02 \x01(\x0b\x32\x18.api.v1.alpha3.TrialSpec\x12*\n\x06status\x18\x03 \x01(\x0b\x32\x1a.api.v1.alpha3.TrialStatus\"J\n\x19RegisterExperimentRequest\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha3.Experiment\"\x19\n\x17RegisterExperimentReply\"7\n\x1fPreCheckRegisterExperimentReply\x12\x14\n\x0c\x63\x61n_register\x18\x01 \x01(\x08\"2\n\x17\x44\x65leteExperimentRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\"\x17\n\x15\x44\x65leteExperimentReply\"/\n\x14GetExperimentRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\"C\n\x12GetExperimentReply\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha3.Experiment\"]\n\x11\x45xperimentSummary\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12/\n\x06status\x18\x02 \x01(\x0b\x32\x1f.api.v1.alpha3.ExperimentStatus\"\x1a\n\x18GetExperimentListRequest\"X\n\x16GetExperimentListReply\x12>\n\x14\x65xperiment_summaries\x18\x01 \x03(\x0b\x32 .api.v1.alpha3.ExperimentSummary\"m\n\x1dUpdateExperimentStatusRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x33\n\nnew_status\x18\x02 \x01(\x0b\x32\x1f.api.v1.alpha3.ExperimentStatus\"\x1d\n\x1bUpdateExperimentStatusReply\"\x81\x01\n#UpdateAlgorithmExtraSettingsRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x41\n\x18\x65xtra_algorithm_settings\x18\x02 \x03(\x0b\x32\x1f.api.v1.alpha3.AlgorithmSetting\"#\n!UpdateAlgorithmExtraSettingsReply\";\n GetAlgorithmExtraSettingsRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\"c\n\x1eGetAlgorithmExtraSettingsReply\x12\x41\n\x18\x65xtra_algorithm_settings\x18\x01 \x03(\x0b\x32\x1f.api.v1.alpha3.AlgorithmSetting\";\n\x14RegisterTrialRequest\x12#\n\x05trial\x18\x01 \x01(\x0b\x32\x14.api.v1.alpha3.Trial\"\x14\n\x12RegisterTrialReply\"(\n\x12\x44\x65leteTrialRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x12\n\x10\x44\x65leteTrialReply\">\n\x13GetTrialListRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x0e\n\x06\x66ilter\x18\x02 \x01(\t\"9\n\x11GetTrialListReply\x12$\n\x06trials\x18\x01 \x03(\x0b\x32\x14.api.v1.alpha3.Trial\"%\n\x0fGetTrialRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"4\n\rGetTrialReply\x12#\n\x05trial\x18\x01 \x01(\x0b\x32\x14.api.v1.alpha3.Trial\"^\n\x18UpdateTrialStatusRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12.\n\nnew_status\x18\x02 \x01(\x0b\x32\x1a.api.v1.alpha3.TrialStatus\"\x18\n\x16UpdateTrialStatusReply\"i\n\x1bReportObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x36\n\x0fobservation_log\x18\x02 \x01(\x0b\x32\x1d.api.v1.alpha3.ObservationLog\"\x1b\n\x19ReportObservationLogReply\"i\n\x18GetObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x13\n\x0bmetric_name\x18\x02 \x01(\t\x12\x12\n\nstart_time\x18\x03 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\t\"P\n\x16GetObservationLogReply\x12\x36\n\x0fobservation_log\x18\x01 \x01(\x0b\x32\x1d.api.v1.alpha3.ObservationLog\"\x84\x01\n\x15GetSuggestionsRequest\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha3.Experiment\x12$\n\x06trials\x18\x02 \x03(\x0b\x32\x14.api.v1.alpha3.Trial\x12\x16\n\x0erequest_number\x18\x03 \x01(\x05\"\xef\x01\n\x13GetSuggestionsReply\x12V\n\x15parameter_assignments\x18\x01 \x03(\x0b\x32\x37.api.v1.alpha3.GetSuggestionsReply.ParameterAssignments\x12/\n\talgorithm\x18\x02 \x01(\x0b\x32\x1c.api.v1.alpha3.AlgorithmSpec\x1aO\n\x14ParameterAssignments\x12\x37\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32\".api.v1.alpha3.ParameterAssignment\"Q\n ValidateAlgorithmSettingsRequest\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha3.Experiment\" \n\x1eValidateAlgorithmSettingsReply*U\n\rParameterType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\n\n\x06\x44OUBLE\x10\x01\x12\x07\n\x03INT\x10\x02\x12\x0c\n\x08\x44ISCRETE\x10\x03\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x04*8\n\rObjectiveType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0c\n\x08MINIMIZE\x10\x01\x12\x0c\n\x08MAXIMIZE\x10\x02\x32\xdc\x14\n\x07Manager\x12\x9b\x01\n\x12RegisterExperiment\x12(.api.v1.alpha3.RegisterExperimentRequest\x1a&.api.v1.alpha3.RegisterExperimentReply\"3\x82\xd3\xe4\x93\x02-\"\x1f/api/Manager/RegisterExperiment:\nexperiment\x12\xb3\x01\n\x1aPreCheckRegisterExperiment\x12(.api.v1.alpha3.RegisterExperimentRequest\x1a..api.v1.alpha3.PreCheckRegisterExperimentReply\";\x82\xd3\xe4\x93\x02\x35\"\'/api/Manager/PreCheckRegisterExperiment:\nexperiment\x12\x99\x01\n\x10\x44\x65leteExperiment\x12&.api.v1.alpha3.DeleteExperimentRequest\x1a$.api.v1.alpha3.DeleteExperimentReply\"7\x82\xd3\xe4\x93\x02\x31\x12//api/Manager/DeleteExperiment/{experiment_name}\x12\x8d\x01\n\rGetExperiment\x12#.api.v1.alpha3.GetExperimentRequest\x1a!.api.v1.alpha3.GetExperimentReply\"4\x82\xd3\xe4\x93\x02.\x12,/api/Manager/GetExperiment/{experiment_name}\x12\x8b\x01\n\x11GetExperimentList\x12\'.api.v1.alpha3.GetExperimentListRequest\x1a%.api.v1.alpha3.GetExperimentListReply\"&\x82\xd3\xe4\x93\x02 \x12\x1e/api/Manager/GetExperimentList\x12\xb4\x01\n\x16UpdateExperimentStatus\x12,.api.v1.alpha3.UpdateExperimentStatusRequest\x1a*.api.v1.alpha3.UpdateExperimentStatusReply\"@\x82\xd3\xe4\x93\x02:\x1a\x35/api/Manager/UpdateExperimentStatus/{experiment_name}:\x01*\x12\xcc\x01\n\x1cUpdateAlgorithmExtraSettings\x12\x32.api.v1.alpha3.UpdateAlgorithmExtraSettingsRequest\x1a\x30.api.v1.alpha3.UpdateAlgorithmExtraSettingsReply\"F\x82\xd3\xe4\x93\x02@\x1a;/api/Manager/UpdateAlgorithmExtraSettings/{experiment_name}:\x01*\x12\xbd\x01\n\x19GetAlgorithmExtraSettings\x12/.api.v1.alpha3.GetAlgorithmExtraSettingsRequest\x1a-.api.v1.alpha3.GetAlgorithmExtraSettingsReply\"@\x82\xd3\xe4\x93\x02:\x12\x38/api/Manager/GetAlgorithmExtraSettings/{experiment_name}\x12\x82\x01\n\rRegisterTrial\x12#.api.v1.alpha3.RegisterTrialRequest\x1a!.api.v1.alpha3.RegisterTrialReply\")\x82\xd3\xe4\x93\x02#\"\x1a/api/Manager/RegisterTrial:\x05trial\x12\x80\x01\n\x0b\x44\x65leteTrial\x12!.api.v1.alpha3.DeleteTrialRequest\x1a\x1f.api.v1.alpha3.DeleteTrialReply\"-\x82\xd3\xe4\x93\x02\'\x12%/api/Manager/DeleteTrial/{trial_name}\x12\x89\x01\n\x0cGetTrialList\x12\".api.v1.alpha3.GetTrialListRequest\x1a .api.v1.alpha3.GetTrialListReply\"3\x82\xd3\xe4\x93\x02-\x12+/api/Manager/GetTrialList/{experiment_name}\x12t\n\x08GetTrial\x12\x1e.api.v1.alpha3.GetTrialRequest\x1a\x1c.api.v1.alpha3.GetTrialReply\"*\x82\xd3\xe4\x93\x02$\x12\"/api/Manager/GetTrial/{trial_name}\x12\x8e\x01\n\x11UpdateTrialStatus\x12\'.api.v1.alpha3.UpdateTrialStatusRequest\x1a%.api.v1.alpha3.UpdateTrialStatusReply\")\x82\xd3\xe4\x93\x02#\x1a\x1e/api/Manager/UpdateTrialStatus:\x01*\x12\x9a\x01\n\x14ReportObservationLog\x12*.api.v1.alpha3.ReportObservationLogRequest\x1a(.api.v1.alpha3.ReportObservationLogReply\",\x82\xd3\xe4\x93\x02&\"!/api/Manager/ReportObservationLog:\x01*\x12\x8e\x01\n\x11GetObservationLog\x12\'.api.v1.alpha3.GetObservationLogRequest\x1a%.api.v1.alpha3.GetObservationLogReply\")\x82\xd3\xe4\x93\x02#\"\x1e/api/Manager/GetObservationLog:\x01*\x12\x82\x01\n\x0eGetSuggestions\x12$.api.v1.alpha3.GetSuggestionsRequest\x1a\".api.v1.alpha3.GetSuggestionsReply\"&\x82\xd3\xe4\x93\x02 \"\x1b/api/Manager/GetSuggestions:\x01*\x12\xae\x01\n\x19ValidateAlgorithmSettings\x12/.api.v1.alpha3.ValidateAlgorithmSettingsRequest\x1a-.api.v1.alpha3.ValidateAlgorithmSettingsReply\"1\x82\xd3\xe4\x93\x02+\"&/api/Manager/ValidateAlgorithmSettings:\x01*2\xe5\x01\n\nSuggestion\x12Z\n\x0eGetSuggestions\x12$.api.v1.alpha3.GetSuggestionsRequest\x1a\".api.v1.alpha3.GetSuggestionsReply\x12{\n\x19ValidateAlgorithmSettings\x12/.api.v1.alpha3.ValidateAlgorithmSettingsRequest\x1a-.api.v1.alpha3.ValidateAlgorithmSettingsReply2\x0f\n\rEarlyStoppingb\x06proto3')
+  serialized_pb=_b('\n\tapi.proto\x12\rapi.v1.alpha3\x1a\x1cgoogle/api/annotations.proto\"E\n\rFeasibleSpace\x12\x0b\n\x03max\x18\x01 \x01(\t\x12\x0b\n\x03min\x18\x02 \x01(\t\x12\x0c\n\x04list\x18\x03 \x03(\t\x12\x0c\n\x04step\x18\x04 \x01(\t\"\x89\x01\n\rParameterSpec\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x34\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x1c.api.v1.alpha3.ParameterType\x12\x34\n\x0e\x66\x65\x61sible_space\x18\x03 \x01(\x0b\x32\x1c.api.v1.alpha3.FeasibleSpace\"\x89\x01\n\rObjectiveSpec\x12*\n\x04type\x18\x01 \x01(\x0e\x32\x1c.api.v1.alpha3.ObjectiveType\x12\x0c\n\x04goal\x18\x02 \x01(\x01\x12\x1d\n\x15objective_metric_name\x18\x03 \x01(\t\x12\x1f\n\x17\x61\x64\x64itional_metric_names\x18\x04 \x03(\t\"/\n\x10\x41lgorithmSetting\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\x13\n\x11\x45\x61rlyStoppingSpec\"\xa2\x01\n\rAlgorithmSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x01 \x01(\t\x12:\n\x11\x61lgorithm_setting\x18\x02 \x03(\x0b\x32\x1f.api.v1.alpha3.AlgorithmSetting\x12=\n\x13\x65\x61rly_stopping_spec\x18\x03 \x01(\x0b\x32 .api.v1.alpha3.EarlyStoppingSpec\"\xb1\x01\n\tNasConfig\x12\x30\n\x0cgraph_config\x18\x01 \x01(\x0b\x32\x1a.api.v1.alpha3.GraphConfig\x12\x37\n\noperations\x18\x02 \x01(\x0b\x32#.api.v1.alpha3.NasConfig.Operations\x1a\x39\n\nOperations\x12+\n\toperation\x18\x01 \x03(\x0b\x32\x18.api.v1.alpha3.Operation\"L\n\x0bGraphConfig\x12\x12\n\nnum_layers\x18\x01 \x01(\x05\x12\x13\n\x0binput_sizes\x18\x02 \x03(\x05\x12\x14\n\x0coutput_sizes\x18\x03 \x03(\x05\"\xa9\x01\n\tOperation\x12\x16\n\x0eoperation_type\x18\x01 \x01(\t\x12@\n\x0fparameter_specs\x18\x02 \x01(\x0b\x32\'.api.v1.alpha3.Operation.ParameterSpecs\x1a\x42\n\x0eParameterSpecs\x12\x30\n\nparameters\x18\x01 \x03(\x0b\x32\x1c.api.v1.alpha3.ParameterSpec\"\x9a\x03\n\x0e\x45xperimentSpec\x12\x45\n\x0fparameter_specs\x18\x01 \x01(\x0b\x32,.api.v1.alpha3.ExperimentSpec.ParameterSpecs\x12/\n\tobjective\x18\x02 \x01(\x0b\x32\x1c.api.v1.alpha3.ObjectiveSpec\x12/\n\talgorithm\x18\x03 \x01(\x0b\x32\x1c.api.v1.alpha3.AlgorithmSpec\x12\x16\n\x0etrial_template\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x12\x1c\n\x14parallel_trial_count\x18\x06 \x01(\x05\x12\x17\n\x0fmax_trial_count\x18\x07 \x01(\x05\x12,\n\nnas_config\x18\x08 \x01(\x0b\x32\x18.api.v1.alpha3.NasConfig\x1a\x42\n\x0eParameterSpecs\x12\x30\n\nparameters\x18\x01 \x03(\x0b\x32\x1c.api.v1.alpha3.ParameterSpec\"\xf8\x01\n\x10\x45xperimentStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12J\n\tcondition\x18\x03 \x01(\x0e\x32\x37.api.v1.alpha3.ExperimentStatus.ExperimentConditionType\"k\n\x17\x45xperimentConditionType\x12\x0b\n\x07\x43REATED\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\x0e\n\nRESTARTING\x10\x02\x12\r\n\tSUCCEEDED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x12\x0b\n\x07UNKNOWN\x10\x05\"x\n\nExperiment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12+\n\x04spec\x18\x02 \x01(\x0b\x32\x1d.api.v1.alpha3.ExperimentSpec\x12/\n\x06status\x18\x03 \x01(\x0b\x32\x1f.api.v1.alpha3.ExperimentStatus\"2\n\x13ParameterAssignment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"%\n\x06Metric\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"F\n\tMetricLog\x12\x12\n\ntime_stamp\x18\x01 \x01(\t\x12%\n\x06metric\x18\x02 \x01(\x0b\x32\x15.api.v1.alpha3.Metric\"5\n\x0bObservation\x12&\n\x07metrics\x18\x01 \x03(\x0b\x32\x15.api.v1.alpha3.Metric\"?\n\x0eObservationLog\x12-\n\x0bmetric_logs\x18\x01 \x03(\x0b\x32\x18.api.v1.alpha3.MetricLog\"\xa6\x02\n\tTrialSpec\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12/\n\tobjective\x18\x02 \x01(\x0b\x32\x1c.api.v1.alpha3.ObjectiveSpec\x12L\n\x15parameter_assignments\x18\x03 \x01(\x0b\x32-.api.v1.alpha3.TrialSpec.ParameterAssignments\x12\x10\n\x08run_spec\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x1aO\n\x14ParameterAssignments\x12\x37\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32\".api.v1.alpha3.ParameterAssignment\"\x91\x02\n\x0bTrialStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12@\n\tcondition\x18\x03 \x01(\x0e\x32-.api.v1.alpha3.TrialStatus.TrialConditionType\x12/\n\x0bobservation\x18\x04 \x01(\x0b\x32\x1a.api.v1.alpha3.Observation\"b\n\x12TrialConditionType\x12\x0b\n\x07\x43REATED\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tSUCCEEDED\x10\x02\x12\n\n\x06KILLED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x12\x0b\n\x07UNKNOWN\x10\x05\"i\n\x05Trial\x12\x0c\n\x04name\x18\x01 \x01(\t\x12&\n\x04spec\x18\x02 \x01(\x0b\x32\x18.api.v1.alpha3.TrialSpec\x12*\n\x06status\x18\x03 \x01(\x0b\x32\x1a.api.v1.alpha3.TrialStatus\"J\n\x19RegisterExperimentRequest\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha3.Experiment\"\x19\n\x17RegisterExperimentReply\"7\n\x1fPreCheckRegisterExperimentReply\x12\x14\n\x0c\x63\x61n_register\x18\x01 \x01(\x08\"2\n\x17\x44\x65leteExperimentRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\"\x17\n\x15\x44\x65leteExperimentReply\"/\n\x14GetExperimentRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\"C\n\x12GetExperimentReply\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha3.Experiment\"]\n\x11\x45xperimentSummary\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12/\n\x06status\x18\x02 \x01(\x0b\x32\x1f.api.v1.alpha3.ExperimentStatus\"\x1a\n\x18GetExperimentListRequest\"X\n\x16GetExperimentListReply\x12>\n\x14\x65xperiment_summaries\x18\x01 \x03(\x0b\x32 .api.v1.alpha3.ExperimentSummary\"m\n\x1dUpdateExperimentStatusRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x33\n\nnew_status\x18\x02 \x01(\x0b\x32\x1f.api.v1.alpha3.ExperimentStatus\"\x1d\n\x1bUpdateExperimentStatusReply\"\x81\x01\n#UpdateAlgorithmExtraSettingsRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x41\n\x18\x65xtra_algorithm_settings\x18\x02 \x03(\x0b\x32\x1f.api.v1.alpha3.AlgorithmSetting\"#\n!UpdateAlgorithmExtraSettingsReply\";\n GetAlgorithmExtraSettingsRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\"c\n\x1eGetAlgorithmExtraSettingsReply\x12\x41\n\x18\x65xtra_algorithm_settings\x18\x01 \x03(\x0b\x32\x1f.api.v1.alpha3.AlgorithmSetting\";\n\x14RegisterTrialRequest\x12#\n\x05trial\x18\x01 \x01(\x0b\x32\x14.api.v1.alpha3.Trial\"\x14\n\x12RegisterTrialReply\"(\n\x12\x44\x65leteTrialRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x12\n\x10\x44\x65leteTrialReply\">\n\x13GetTrialListRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x0e\n\x06\x66ilter\x18\x02 \x01(\t\"9\n\x11GetTrialListReply\x12$\n\x06trials\x18\x01 \x03(\x0b\x32\x14.api.v1.alpha3.Trial\"%\n\x0fGetTrialRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"4\n\rGetTrialReply\x12#\n\x05trial\x18\x01 \x01(\x0b\x32\x14.api.v1.alpha3.Trial\"^\n\x18UpdateTrialStatusRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12.\n\nnew_status\x18\x02 \x01(\x0b\x32\x1a.api.v1.alpha3.TrialStatus\"\x18\n\x16UpdateTrialStatusReply\"i\n\x1bReportObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x36\n\x0fobservation_log\x18\x02 \x01(\x0b\x32\x1d.api.v1.alpha3.ObservationLog\"\x1b\n\x19ReportObservationLogReply\"i\n\x18GetObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x13\n\x0bmetric_name\x18\x02 \x01(\t\x12\x12\n\nstart_time\x18\x03 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\t\"P\n\x16GetObservationLogReply\x12\x36\n\x0fobservation_log\x18\x01 \x01(\x0b\x32\x1d.api.v1.alpha3.ObservationLog\"\x84\x01\n\x15GetSuggestionsRequest\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha3.Experiment\x12$\n\x06trials\x18\x02 \x03(\x0b\x32\x14.api.v1.alpha3.Trial\x12\x16\n\x0erequest_number\x18\x03 \x01(\x05\"\xef\x01\n\x13GetSuggestionsReply\x12V\n\x15parameter_assignments\x18\x01 \x03(\x0b\x32\x37.api.v1.alpha3.GetSuggestionsReply.ParameterAssignments\x12/\n\talgorithm\x18\x02 \x01(\x0b\x32\x1c.api.v1.alpha3.AlgorithmSpec\x1aO\n\x14ParameterAssignments\x12\x37\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32\".api.v1.alpha3.ParameterAssignment\"Q\n ValidateAlgorithmSettingsRequest\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha3.Experiment\" \n\x1eValidateAlgorithmSettingsReply*U\n\rParameterType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\n\n\x06\x44OUBLE\x10\x01\x12\x07\n\x03INT\x10\x02\x12\x0c\n\x08\x44ISCRETE\x10\x03\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x04*8\n\rObjectiveType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0c\n\x08MINIMIZE\x10\x01\x12\x0c\n\x08MAXIMIZE\x10\x02\x32\xa6\x12\n\x07Manager\x12\x9b\x01\n\x12RegisterExperiment\x12(.api.v1.alpha3.RegisterExperimentRequest\x1a&.api.v1.alpha3.RegisterExperimentReply\"3\x82\xd3\xe4\x93\x02-\"\x1f/api/Manager/RegisterExperiment:\nexperiment\x12\xb3\x01\n\x1aPreCheckRegisterExperiment\x12(.api.v1.alpha3.RegisterExperimentRequest\x1a..api.v1.alpha3.PreCheckRegisterExperimentReply\";\x82\xd3\xe4\x93\x02\x35\"\'/api/Manager/PreCheckRegisterExperiment:\nexperiment\x12\x99\x01\n\x10\x44\x65leteExperiment\x12&.api.v1.alpha3.DeleteExperimentRequest\x1a$.api.v1.alpha3.DeleteExperimentReply\"7\x82\xd3\xe4\x93\x02\x31\x12//api/Manager/DeleteExperiment/{experiment_name}\x12\x8d\x01\n\rGetExperiment\x12#.api.v1.alpha3.GetExperimentRequest\x1a!.api.v1.alpha3.GetExperimentReply\"4\x82\xd3\xe4\x93\x02.\x12,/api/Manager/GetExperiment/{experiment_name}\x12\x8b\x01\n\x11GetExperimentList\x12\'.api.v1.alpha3.GetExperimentListRequest\x1a%.api.v1.alpha3.GetExperimentListReply\"&\x82\xd3\xe4\x93\x02 \x12\x1e/api/Manager/GetExperimentList\x12\xb4\x01\n\x16UpdateExperimentStatus\x12,.api.v1.alpha3.UpdateExperimentStatusRequest\x1a*.api.v1.alpha3.UpdateExperimentStatusReply\"@\x82\xd3\xe4\x93\x02:\x1a\x35/api/Manager/UpdateExperimentStatus/{experiment_name}:\x01*\x12\xcc\x01\n\x1cUpdateAlgorithmExtraSettings\x12\x32.api.v1.alpha3.UpdateAlgorithmExtraSettingsRequest\x1a\x30.api.v1.alpha3.UpdateAlgorithmExtraSettingsReply\"F\x82\xd3\xe4\x93\x02@\x1a;/api/Manager/UpdateAlgorithmExtraSettings/{experiment_name}:\x01*\x12\xbd\x01\n\x19GetAlgorithmExtraSettings\x12/.api.v1.alpha3.GetAlgorithmExtraSettingsRequest\x1a-.api.v1.alpha3.GetAlgorithmExtraSettingsReply\"@\x82\xd3\xe4\x93\x02:\x12\x38/api/Manager/GetAlgorithmExtraSettings/{experiment_name}\x12\x82\x01\n\rRegisterTrial\x12#.api.v1.alpha3.RegisterTrialRequest\x1a!.api.v1.alpha3.RegisterTrialReply\")\x82\xd3\xe4\x93\x02#\"\x1a/api/Manager/RegisterTrial:\x05trial\x12\x80\x01\n\x0b\x44\x65leteTrial\x12!.api.v1.alpha3.DeleteTrialRequest\x1a\x1f.api.v1.alpha3.DeleteTrialReply\"-\x82\xd3\xe4\x93\x02\'\x12%/api/Manager/DeleteTrial/{trial_name}\x12\x89\x01\n\x0cGetTrialList\x12\".api.v1.alpha3.GetTrialListRequest\x1a .api.v1.alpha3.GetTrialListReply\"3\x82\xd3\xe4\x93\x02-\x12+/api/Manager/GetTrialList/{experiment_name}\x12t\n\x08GetTrial\x12\x1e.api.v1.alpha3.GetTrialRequest\x1a\x1c.api.v1.alpha3.GetTrialReply\"*\x82\xd3\xe4\x93\x02$\x12\"/api/Manager/GetTrial/{trial_name}\x12\x8e\x01\n\x11UpdateTrialStatus\x12\'.api.v1.alpha3.UpdateTrialStatusRequest\x1a%.api.v1.alpha3.UpdateTrialStatusReply\")\x82\xd3\xe4\x93\x02#\x1a\x1e/api/Manager/UpdateTrialStatus:\x01*\x12\x9a\x01\n\x14ReportObservationLog\x12*.api.v1.alpha3.ReportObservationLogRequest\x1a(.api.v1.alpha3.ReportObservationLogReply\",\x82\xd3\xe4\x93\x02&\"!/api/Manager/ReportObservationLog:\x01*\x12\x8e\x01\n\x11GetObservationLog\x12\'.api.v1.alpha3.GetObservationLogRequest\x1a%.api.v1.alpha3.GetObservationLogReply\")\x82\xd3\xe4\x93\x02#\"\x1e/api/Manager/GetObservationLog:\x01*2\xe5\x01\n\nSuggestion\x12Z\n\x0eGetSuggestions\x12$.api.v1.alpha3.GetSuggestionsRequest\x1a\".api.v1.alpha3.GetSuggestionsReply\x12{\n\x19ValidateAlgorithmSettings\x12/.api.v1.alpha3.ValidateAlgorithmSettingsRequest\x1a-.api.v1.alpha3.ValidateAlgorithmSettingsReply2\x0f\n\rEarlyStoppingb\x06proto3')
   ,
   dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,])
 
@@ -2811,7 +2811,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   index=0,
   options=None,
   serialized_start=5312,
-  serialized_end=7964,
+  serialized_end=7654,
   methods=[
   _descriptor.MethodDescriptor(
     name='RegisterExperiment',
@@ -2948,24 +2948,6 @@ _MANAGER = _descriptor.ServiceDescriptor(
     output_type=_GETOBSERVATIONLOGREPLY,
     options=_descriptor._ParseOptions(descriptor_pb2.MethodOptions(), _b('\202\323\344\223\002#\"\036/api/Manager/GetObservationLog:\001*')),
   ),
-  _descriptor.MethodDescriptor(
-    name='GetSuggestions',
-    full_name='api.v1.alpha3.Manager.GetSuggestions',
-    index=15,
-    containing_service=None,
-    input_type=_GETSUGGESTIONSREQUEST,
-    output_type=_GETSUGGESTIONSREPLY,
-    options=_descriptor._ParseOptions(descriptor_pb2.MethodOptions(), _b('\202\323\344\223\002 \"\033/api/Manager/GetSuggestions:\001*')),
-  ),
-  _descriptor.MethodDescriptor(
-    name='ValidateAlgorithmSettings',
-    full_name='api.v1.alpha3.Manager.ValidateAlgorithmSettings',
-    index=16,
-    containing_service=None,
-    input_type=_VALIDATEALGORITHMSETTINGSREQUEST,
-    output_type=_VALIDATEALGORITHMSETTINGSREPLY,
-    options=_descriptor._ParseOptions(descriptor_pb2.MethodOptions(), _b('\202\323\344\223\002+\"&/api/Manager/ValidateAlgorithmSettings:\001*')),
-  ),
 ])
 _sym_db.RegisterServiceDescriptor(_MANAGER)
 
@@ -2978,8 +2960,8 @@ _SUGGESTION = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=1,
   options=None,
-  serialized_start=7967,
-  serialized_end=8196,
+  serialized_start=7657,
+  serialized_end=7886,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetSuggestions',
@@ -3011,8 +2993,8 @@ _EARLYSTOPPING = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=2,
   options=None,
-  serialized_start=8198,
-  serialized_end=8213,
+  serialized_start=7888,
+  serialized_end=7903,
   methods=[
 ])
 _sym_db.RegisterServiceDescriptor(_EARLYSTOPPING)
@@ -3117,16 +3099,6 @@ try:
           '/api.v1.alpha3.Manager/GetObservationLog',
           request_serializer=GetObservationLogRequest.SerializeToString,
           response_deserializer=GetObservationLogReply.FromString,
-          )
-      self.GetSuggestions = channel.unary_unary(
-          '/api.v1.alpha3.Manager/GetSuggestions',
-          request_serializer=GetSuggestionsRequest.SerializeToString,
-          response_deserializer=GetSuggestionsReply.FromString,
-          )
-      self.ValidateAlgorithmSettings = channel.unary_unary(
-          '/api.v1.alpha3.Manager/ValidateAlgorithmSettings',
-          request_serializer=ValidateAlgorithmSettingsRequest.SerializeToString,
-          response_deserializer=ValidateAlgorithmSettingsReply.FromString,
           )
 
 
@@ -3264,23 +3236,6 @@ try:
       context.set_details('Method not implemented!')
       raise NotImplementedError('Method not implemented!')
 
-    def GetSuggestions(self, request, context):
-      """* 
-      Get Suggestions from a Suggestion service.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def ValidateAlgorithmSettings(self, request, context):
-      """* 
-      Validate AlgorithmSettings in an Experiment.
-      Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
 
   def add_ManagerServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -3358,16 +3313,6 @@ try:
             servicer.GetObservationLog,
             request_deserializer=GetObservationLogRequest.FromString,
             response_serializer=GetObservationLogReply.SerializeToString,
-        ),
-        'GetSuggestions': grpc.unary_unary_rpc_method_handler(
-            servicer.GetSuggestions,
-            request_deserializer=GetSuggestionsRequest.FromString,
-            response_serializer=GetSuggestionsReply.SerializeToString,
-        ),
-        'ValidateAlgorithmSettings': grpc.unary_unary_rpc_method_handler(
-            servicer.ValidateAlgorithmSettings,
-            request_deserializer=ValidateAlgorithmSettingsRequest.FromString,
-            response_serializer=ValidateAlgorithmSettingsReply.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -3552,17 +3497,6 @@ try:
       Get all log of Observations for a Trial.
       """
       context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def GetSuggestions(self, request, context):
-      """* 
-      Get Suggestions from a Suggestion service.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def ValidateAlgorithmSettings(self, request, context):
-      """* 
-      Validate AlgorithmSettings in an Experiment.
-      Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
 
 
   class BetaManagerStub(object):
@@ -3673,19 +3607,6 @@ try:
       """
       raise NotImplementedError()
     GetObservationLog.future = None
-    def GetSuggestions(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """* 
-      Get Suggestions from a Suggestion service.
-      """
-      raise NotImplementedError()
-    GetSuggestions.future = None
-    def ValidateAlgorithmSettings(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """* 
-      Validate AlgorithmSettings in an Experiment.
-      Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid
-      """
-      raise NotImplementedError()
-    ValidateAlgorithmSettings.future = None
 
 
   def beta_create_Manager_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
@@ -3701,7 +3622,6 @@ try:
       ('api.v1.alpha3.Manager', 'GetExperiment'): GetExperimentRequest.FromString,
       ('api.v1.alpha3.Manager', 'GetExperimentList'): GetExperimentListRequest.FromString,
       ('api.v1.alpha3.Manager', 'GetObservationLog'): GetObservationLogRequest.FromString,
-      ('api.v1.alpha3.Manager', 'GetSuggestions'): GetSuggestionsRequest.FromString,
       ('api.v1.alpha3.Manager', 'GetTrial'): GetTrialRequest.FromString,
       ('api.v1.alpha3.Manager', 'GetTrialList'): GetTrialListRequest.FromString,
       ('api.v1.alpha3.Manager', 'PreCheckRegisterExperiment'): RegisterExperimentRequest.FromString,
@@ -3711,7 +3631,6 @@ try:
       ('api.v1.alpha3.Manager', 'UpdateAlgorithmExtraSettings'): UpdateAlgorithmExtraSettingsRequest.FromString,
       ('api.v1.alpha3.Manager', 'UpdateExperimentStatus'): UpdateExperimentStatusRequest.FromString,
       ('api.v1.alpha3.Manager', 'UpdateTrialStatus'): UpdateTrialStatusRequest.FromString,
-      ('api.v1.alpha3.Manager', 'ValidateAlgorithmSettings'): ValidateAlgorithmSettingsRequest.FromString,
     }
     response_serializers = {
       ('api.v1.alpha3.Manager', 'DeleteExperiment'): DeleteExperimentReply.SerializeToString,
@@ -3720,7 +3639,6 @@ try:
       ('api.v1.alpha3.Manager', 'GetExperiment'): GetExperimentReply.SerializeToString,
       ('api.v1.alpha3.Manager', 'GetExperimentList'): GetExperimentListReply.SerializeToString,
       ('api.v1.alpha3.Manager', 'GetObservationLog'): GetObservationLogReply.SerializeToString,
-      ('api.v1.alpha3.Manager', 'GetSuggestions'): GetSuggestionsReply.SerializeToString,
       ('api.v1.alpha3.Manager', 'GetTrial'): GetTrialReply.SerializeToString,
       ('api.v1.alpha3.Manager', 'GetTrialList'): GetTrialListReply.SerializeToString,
       ('api.v1.alpha3.Manager', 'PreCheckRegisterExperiment'): PreCheckRegisterExperimentReply.SerializeToString,
@@ -3730,7 +3648,6 @@ try:
       ('api.v1.alpha3.Manager', 'UpdateAlgorithmExtraSettings'): UpdateAlgorithmExtraSettingsReply.SerializeToString,
       ('api.v1.alpha3.Manager', 'UpdateExperimentStatus'): UpdateExperimentStatusReply.SerializeToString,
       ('api.v1.alpha3.Manager', 'UpdateTrialStatus'): UpdateTrialStatusReply.SerializeToString,
-      ('api.v1.alpha3.Manager', 'ValidateAlgorithmSettings'): ValidateAlgorithmSettingsReply.SerializeToString,
     }
     method_implementations = {
       ('api.v1.alpha3.Manager', 'DeleteExperiment'): face_utilities.unary_unary_inline(servicer.DeleteExperiment),
@@ -3739,7 +3656,6 @@ try:
       ('api.v1.alpha3.Manager', 'GetExperiment'): face_utilities.unary_unary_inline(servicer.GetExperiment),
       ('api.v1.alpha3.Manager', 'GetExperimentList'): face_utilities.unary_unary_inline(servicer.GetExperimentList),
       ('api.v1.alpha3.Manager', 'GetObservationLog'): face_utilities.unary_unary_inline(servicer.GetObservationLog),
-      ('api.v1.alpha3.Manager', 'GetSuggestions'): face_utilities.unary_unary_inline(servicer.GetSuggestions),
       ('api.v1.alpha3.Manager', 'GetTrial'): face_utilities.unary_unary_inline(servicer.GetTrial),
       ('api.v1.alpha3.Manager', 'GetTrialList'): face_utilities.unary_unary_inline(servicer.GetTrialList),
       ('api.v1.alpha3.Manager', 'PreCheckRegisterExperiment'): face_utilities.unary_unary_inline(servicer.PreCheckRegisterExperiment),
@@ -3749,7 +3665,6 @@ try:
       ('api.v1.alpha3.Manager', 'UpdateAlgorithmExtraSettings'): face_utilities.unary_unary_inline(servicer.UpdateAlgorithmExtraSettings),
       ('api.v1.alpha3.Manager', 'UpdateExperimentStatus'): face_utilities.unary_unary_inline(servicer.UpdateExperimentStatus),
       ('api.v1.alpha3.Manager', 'UpdateTrialStatus'): face_utilities.unary_unary_inline(servicer.UpdateTrialStatus),
-      ('api.v1.alpha3.Manager', 'ValidateAlgorithmSettings'): face_utilities.unary_unary_inline(servicer.ValidateAlgorithmSettings),
     }
     server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
     return beta_implementations.server(method_implementations, options=server_options)
@@ -3768,7 +3683,6 @@ try:
       ('api.v1.alpha3.Manager', 'GetExperiment'): GetExperimentRequest.SerializeToString,
       ('api.v1.alpha3.Manager', 'GetExperimentList'): GetExperimentListRequest.SerializeToString,
       ('api.v1.alpha3.Manager', 'GetObservationLog'): GetObservationLogRequest.SerializeToString,
-      ('api.v1.alpha3.Manager', 'GetSuggestions'): GetSuggestionsRequest.SerializeToString,
       ('api.v1.alpha3.Manager', 'GetTrial'): GetTrialRequest.SerializeToString,
       ('api.v1.alpha3.Manager', 'GetTrialList'): GetTrialListRequest.SerializeToString,
       ('api.v1.alpha3.Manager', 'PreCheckRegisterExperiment'): RegisterExperimentRequest.SerializeToString,
@@ -3778,7 +3692,6 @@ try:
       ('api.v1.alpha3.Manager', 'UpdateAlgorithmExtraSettings'): UpdateAlgorithmExtraSettingsRequest.SerializeToString,
       ('api.v1.alpha3.Manager', 'UpdateExperimentStatus'): UpdateExperimentStatusRequest.SerializeToString,
       ('api.v1.alpha3.Manager', 'UpdateTrialStatus'): UpdateTrialStatusRequest.SerializeToString,
-      ('api.v1.alpha3.Manager', 'ValidateAlgorithmSettings'): ValidateAlgorithmSettingsRequest.SerializeToString,
     }
     response_deserializers = {
       ('api.v1.alpha3.Manager', 'DeleteExperiment'): DeleteExperimentReply.FromString,
@@ -3787,7 +3700,6 @@ try:
       ('api.v1.alpha3.Manager', 'GetExperiment'): GetExperimentReply.FromString,
       ('api.v1.alpha3.Manager', 'GetExperimentList'): GetExperimentListReply.FromString,
       ('api.v1.alpha3.Manager', 'GetObservationLog'): GetObservationLogReply.FromString,
-      ('api.v1.alpha3.Manager', 'GetSuggestions'): GetSuggestionsReply.FromString,
       ('api.v1.alpha3.Manager', 'GetTrial'): GetTrialReply.FromString,
       ('api.v1.alpha3.Manager', 'GetTrialList'): GetTrialListReply.FromString,
       ('api.v1.alpha3.Manager', 'PreCheckRegisterExperiment'): PreCheckRegisterExperimentReply.FromString,
@@ -3797,7 +3709,6 @@ try:
       ('api.v1.alpha3.Manager', 'UpdateAlgorithmExtraSettings'): UpdateAlgorithmExtraSettingsReply.FromString,
       ('api.v1.alpha3.Manager', 'UpdateExperimentStatus'): UpdateExperimentStatusReply.FromString,
       ('api.v1.alpha3.Manager', 'UpdateTrialStatus'): UpdateTrialStatusReply.FromString,
-      ('api.v1.alpha3.Manager', 'ValidateAlgorithmSettings'): ValidateAlgorithmSettingsReply.FromString,
     }
     cardinalities = {
       'DeleteExperiment': cardinality.Cardinality.UNARY_UNARY,
@@ -3806,7 +3717,6 @@ try:
       'GetExperiment': cardinality.Cardinality.UNARY_UNARY,
       'GetExperimentList': cardinality.Cardinality.UNARY_UNARY,
       'GetObservationLog': cardinality.Cardinality.UNARY_UNARY,
-      'GetSuggestions': cardinality.Cardinality.UNARY_UNARY,
       'GetTrial': cardinality.Cardinality.UNARY_UNARY,
       'GetTrialList': cardinality.Cardinality.UNARY_UNARY,
       'PreCheckRegisterExperiment': cardinality.Cardinality.UNARY_UNARY,
@@ -3816,7 +3726,6 @@ try:
       'UpdateAlgorithmExtraSettings': cardinality.Cardinality.UNARY_UNARY,
       'UpdateExperimentStatus': cardinality.Cardinality.UNARY_UNARY,
       'UpdateTrialStatus': cardinality.Cardinality.UNARY_UNARY,
-      'ValidateAlgorithmSettings': cardinality.Cardinality.UNARY_UNARY,
     }
     stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
     return beta_implementations.dynamic_stub(channel, 'api.v1.alpha3.Manager', cardinalities, options=stub_options)
