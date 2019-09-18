@@ -7,6 +7,14 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 )
 
+const (
+	SuggestionCreatedReason   = "SuggestionCreated"
+	SuggestionRunningReason   = "SuggestionRunning"
+	SuggestionSucceededReason = "SuggestionSucceeded"
+	SuggestionFailedReason    = "SuggestionFailed"
+	SuggestionKilledReason    = "SuggestionKilled"
+)
+
 func (r *ReconcileSuggestion) updateStatus(s *suggestionsv1alpha3.Suggestion, oldS *suggestionsv1alpha3.Suggestion) error {
 	if !equality.Semantic.DeepEqual(s.Status, oldS.Status) {
 		if err := r.Status().Update(context.TODO(), s); err != nil {

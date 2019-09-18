@@ -182,7 +182,6 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 
 	}
 	if !instance.IsCreated() {
-		//Experiment not created in DB
 		if instance.Status.StartTime == nil {
 			now := metav1.Now()
 			instance.Status.StartTime = &now

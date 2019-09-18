@@ -163,13 +163,14 @@ func (s *server) GetSuggestions(ctx context.Context, in *api_pb.GetSuggestionsRe
 // Validate AlgorithmSettings in an Experiment.
 // Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid
 func (s *server) ValidateAlgorithmSettings(ctx context.Context, in *api_pb.ValidateAlgorithmSettingsRequest) (*api_pb.ValidateAlgorithmSettingsReply, error) {
-	conn, err := s.getSuggestionServiceConnection(in.AlgorithmName)
+	/*conn, err := s.getSuggestionServiceConnection(in.AlgorithmName)
 	if err != nil {
 		return &api_pb.ValidateAlgorithmSettingsReply{}, err
 	}
 	defer conn.Close()
 	c := api_pb.NewSuggestionClient(conn)
-	return c.ValidateAlgorithmSettings(ctx, in)
+	return c.ValidateAlgorithmSettings(ctx, in)*/
+	return nil, nil
 }
 
 func (s *server) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*health_pb.HealthCheckResponse, error) {
