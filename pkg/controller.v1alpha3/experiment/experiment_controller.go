@@ -337,15 +337,20 @@ func (r *ReconcileExperiment) ReconcileSuggestions(instance *experimentsv1alpha3
 		return nil, err
 	} else {
 		if original != nil {
-			suggestion := original.DeepCopy()
-			if len(suggestion.Status.Suggestions) > int(currentCount) {
-				suggestions := suggestion.Status.Suggestions
-				assignments = suggestions[currentCount:]
-			}
-			if suggestion.Spec.Requests != suggestionRequestsCount {
-				suggestion.Spec.Requests = suggestionRequestsCount
-				if err := r.UpdateSuggestion(suggestion, suggestionRequestsCount); err != nil {
-					return nil, err
+			if original.IsFailed() {
+				msg := "Suggestion has failed"
+				instance.MarkExperimentStatusFailed(util.ExperimentFailedReason, msg)
+			} else {
+				suggestion := original.DeepCopy()
+				if len(suggestion.Status.Suggestions) > int(currentCount) {
+					suggestions := suggestion.Status.Suggestions
+					assignments = suggestions[currentCount:]
+				}
+				if suggestion.Spec.Requests != suggestionRequestsCount {
+					suggestion.Spec.Requests = suggestionRequestsCount
+					if err := r.UpdateSuggestion(suggestion, suggestionRequestsCount); err != nil {
+						return nil, err
+					}
 				}
 			}
 		}
