@@ -7,4 +7,4 @@ scipy>=0.19.1
 forestci
 protobuf
 googleapis-common-protos
-hyperopt==0.1.2
+scikit-optimize==0.5.2
