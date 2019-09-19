@@ -1,8 +1,9 @@
+ARG GOARCH=amd64
 FROM golang:alpine AS build-env
 # The GOPATH in the image is /go.
 ADD . /go/src/github.com/kubeflow/katib
 WORKDIR /go/src/github.com/kubeflow/katib/cmd/manager
-RUN if [ "$(uname -m)" = "ppc64le" ]; then \
+RUN if [ "${GOARCH}" = "ppc64le" ]; then \
         apk --update add git gcc musl-dev && \
         go build -o katib-manager ./v1alpha3  && \
         go get github.com/grpc-ecosystem/grpc-health-probe && \
@@ -15,7 +16,7 @@ RUN if [ "$(uname -m)" = "ppc64le" ]; then \
             chmod +x /bin/grpc_health_probe; \
     fi
 
-FROM alpine:3.7
+FROM ${GOARCH}/alpine:3.7
 WORKDIR /app
 COPY --from=build-env /bin/grpc_health_probe /bin/
 COPY --from=build-env /go/src/github.com/kubeflow/katib/cmd/manager/katib-manager /app/

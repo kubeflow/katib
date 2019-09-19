@@ -1,0 +1,100 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'amd64'
+  args:
+  - 'build'
+  - '--build-arg=CGO_ENABLED=0'
+  - '--build-arg=GOARCH=amd64'
+  - '--tag=${_REGISTRY}/${_REPO_NAME}/v1alpha3/katib-ui-amd64:${_VERSION}'
+  - '.'
+  waitFor: ['-']
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'push-amd64'
+  args:
+  - 'push'
+  - '${_REGISTRY}/${_REPO_NAME}/v1alpha3/katib-ui-amd64:${_VERSION}'
+  waitFor: ['amd64']
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'qemu-user-static'
+  args:
+  - 'run'
+  - '--rm'
+  - '--privileged'
+  - 'multiarch/qemu-user-static'
+  - '--reset'
+  waitFor: ['-']
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'ppc64le'
+  args:
+  - 'build'
+  - '--build-arg=GOARCH=ppc64le'
+  - '--tag=${_REGISTRY}/${_REPO_NAME}/v1alpha3/katib-ui-ppc64le:${_VERSION}'
+  - '.'
+  waitFor: ['qemu-user-static']
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'push-ppc64le'
+  args:
+  - 'push'
+  - '${_REGISTRY}/${_REPO_NAME}/v1alpha3/katib-ui-ppc64le:${_VERSION}'
+  waitFor: ['ppc64le']
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'create-manifest'
+  env:
+  - 'DOCKER_CLI_EXPERIMENTAL=enabled'
+  args:
+  - 'manifest'
+  - 'create'
+  - '${_REGISTRY}/${_REPO_NAME}/v1alpha3/katib-ui:${_VERSION}'
+  - '${_REGISTRY}/${_REPO_NAME}/v1alpha3/katib-ui-amd64:${_VERSION}'
+  - '${_REGISTRY}/${_REPO_NAME}/v1alpha3/katib-ui-ppc64le:${_VERSION}'
+  waitFor: ['push-amd64', 'push-ppc64le']
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'annotate-manifest-amd64'
+  env:
+  - 'DOCKER_CLI_EXPERIMENTAL=enabled'
+  args:
+  - 'manifest'
+  - 'annotate'
+  - '${_REGISTRY}/${_REPO_NAME}/v1alpha3/katib-ui:${_VERSION}'
+  - '${_REGISTRY}/${_REPO_NAME}/v1alpha3/katib-ui-amd64:${_VERSION}'
+  - '--os=linux'
+  - '--arch=amd64'
+  waitFor: ['create-manifest']
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'annotate-manifest-ppc64'
+  env:
+  - 'DOCKER_CLI_EXPERIMENTAL=enabled'
+  args:
+  - 'manifest'
+  - 'annotate'
+  - '${_REGISTRY}/${_REPO_NAME}/v1alpha3/katib-ui:${_VERSION}'
+  - '${_REGISTRY}/${_REPO_NAME}/v1alpha3/katib-ui-ppc64le:${_VERSION}'
+  - '--os=linux'
+  - '--arch=ppc64le'
+  waitFor: ['create-manifest']
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'push-manifest'
+  env:
+  - 'DOCKER_CLI_EXPERIMENTAL=enabled'
+  args:
+  - 'manifest'
+  - 'push'
+  - '${_REGISTRY}/${_REPO_NAME}/v1alpha3/katib-ui:${_VERSION}'
+  waitFor: ['annotate-manifest-amd64', 'annotate-manifest-ppc64']
+
+substitutions:
+    _VERSION: v0.6.0
+    _REGISTRY: gcr.io/kubeflow-ci
+    _REPO_NAME: katib
+images:
+  - '${_REGISTRY}/${_REPO_NAME}/v1alpha3/katib-ui-amd64:${_VERSION}'
+  - '${_REGISTRY}/${_REPO_NAME}/v1alpha3/katib-ui-ppc64le:${_VERSION}'
+timeout: 10800s

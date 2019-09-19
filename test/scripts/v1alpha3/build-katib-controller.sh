@@ -35,15 +35,20 @@ cp -r cmd ${GO_DIR}/cmd
 cp -r pkg ${GO_DIR}/pkg
 cp -r vendor ${GO_DIR}/vendor
 
+echo "Copying the cloud build yaml file to ${GO_DIR}/cloud-build ..."
+mkdir -p ${GO_DIR}/cloud-build
+cp -r test/scripts/v1alpha3/cloud-build/katib-controller.yaml ${GO_DIR}/cloud-build
+cp -r test/scripts/v1alpha3/cloud-build/file-metrics-collector.yaml ${GO_DIR}/cloud-build
+
 cd ${GO_DIR}
 cp cmd/katib-controller/v1alpha3/Dockerfile .
-gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha3/katib-controller:${VERSION} --project=${PROJECT}
+gcloud builds submit --config cloud-build/katib-controller.yaml --substitutions=_VERSION=${VERSION},_REGISTRY=${REGISTRY},_REPO_NAME=${REPO_NAME} .
 gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha3/katib-controller:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha3/katib-controller:latest --verbosity=info
 
 
 cd ${GO_DIR}
 cp cmd/metricscollector/v1alpha3/file-metricscollector/Dockerfile .
-gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha3/file-metrics-collector:${VERSION} --project=${PROJECT}
+gcloud builds submit --config cloud-build/file-metrics-collector.yaml --substitutions=_VERSION=${VERSION},_REGISTRY=${REGISTRY},_REPO_NAME=${REPO_NAME} .
 gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha3/file-metrics-collector:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha3/file-metrics-collector:latest --verbosity=info
 
 cd ${GO_DIR}

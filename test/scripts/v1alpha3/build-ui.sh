@@ -36,8 +36,12 @@ cp -r cmd ${GO_DIR}/cmd
 cp -r pkg ${GO_DIR}/pkg
 cp -r vendor ${GO_DIR}/vendor
 
+echo "Copying the cloud build yaml file to ${GO_DIR}/cloud-build ..."
+mkdir -p ${GO_DIR}/cloud-build
+cp -r test/scripts/v1alpha3/cloud-build/katib-ui.yaml ${GO_DIR}/cloud-build
+
 cd ${GO_DIR}
 
 cp cmd/ui/v1alpha3/Dockerfile .
-gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha3/katib-ui:${VERSION} --project=${PROJECT} --timeout=20m
+gcloud builds submit --config cloud-build/katib-ui.yaml --substitutions=_VERSION=${VERSION},_REGISTRY=${REGISTRY},_REPO_NAME=${REPO_NAME} .
 gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha3/katib-ui:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha3/katib-ui:latest --verbosity=info
