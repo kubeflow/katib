@@ -168,42 +168,6 @@ spec:
           containers:
             - name: tensorflow
               image: kubeflow/tf-dist-mnist-test:1.0`, nil).AnyTimes()
-	generator.EXPECT().GetMetricsCollectorManifest(
-		gomock.Any(), gomock.Any(),
-		gomock.Any(), gomock.Any(),
-		gomock.Any(), gomock.Any()).Return(`apiVersion: batch/v1beta1
-kind: CronJob
-metadata:
-  name: test
-  namespace: default
-spec:
-  schedule: "*/1 * * * *"
-  successfulJobsHistoryLimit: 0
-  failedJobsHistoryLimit: 1
-  jobTemplate:
-    spec:
-      backoffLimit: 0
-      template:
-        spec:
-          serviceAccountName: metrics-collector
-          containers:
-          - name: test
-            image: katib/metrics-collector
-            args:
-            - "./metricscollector.v1alpha3"
-            - "-e"
-            - "teste"
-            - "-t"
-            - "test"
-            - "-k"
-            - "TFJob"
-            - "-n"
-            - "default"
-            - "-m"
-            - "test"
-            - "-mn"
-            - "test"
-          restartPolicy: Never`, nil).AnyTimes()
 
 	mgr, err := manager.New(cfg, manager.Options{})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
