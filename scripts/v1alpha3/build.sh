@@ -42,3 +42,4 @@ docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/tfevent-metrics-collector -f ${CM
 
 echo "Building suggestion images..."
 docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/suggestion-hyperopt -f ${CMD_PREFIX}/suggestion/hyperopt/v1alpha3/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/suggestion-skopt -f ${CMD_PREFIX}/suggestion/skopt/v1alpha3/Dockerfile .
