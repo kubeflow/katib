@@ -38,5 +38,8 @@ data:
       },
       "hyperopt-random": {
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
+      },
+      "skopt-bayesian-optimization": {
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-skopt"
       }
     }
