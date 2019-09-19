@@ -18,6 +18,7 @@ package suggestion
 
 import (
 	"context"
+	"fmt"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -193,7 +194,7 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1alpha3.
 	if !instance.IsRunning() {
 		if err = r.ValidateAlgorithmSettings(instance, experiment); err != nil {
 			logger.Error(err, "Marking suggestion failed as algorithm settings validation failed")
-			msg := "Suggestion has failed because Algorithm settings validation failed"
+			msg := fmt.Sprintf("Validation failed: %v", err)
 			instance.MarkSuggestionStatusFailed(SuggestionFailedReason, msg)
 			// return nil since it is a terminal condition
 			return nil
