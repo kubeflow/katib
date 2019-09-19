@@ -68,10 +68,6 @@ func main() {
 		if err != nil {
 			log.Fatal("Get Experiment error ", err)
 		}
-		if exp.IsCompleted() {
-			log.Printf("Experiment %v finished", exp.Name)
-			break
-		}
 		log.Printf("Waiting for Experiment %s to finish.", exp.Name)
 		log.Printf(`Experiment %s's trials: %d trials, %d pending trials,
 %d running trials, %d killed trials, %d succeeded trials, %d failed trials.`,
@@ -81,6 +77,11 @@ func main() {
 		log.Printf("Optimal Trial for Experiment %s: %v", exp.Name,
 			exp.Status.CurrentOptimalTrial)
 		log.Printf("Experiment %s's conditions: %v", exp.Name, exp.Status.Conditions)
+
+		if exp.IsCompleted() {
+			log.Printf("Experiment %v finished", exp.Name)
+			break
+		}
 		time.Sleep(20 * time.Second)
 	}
 
