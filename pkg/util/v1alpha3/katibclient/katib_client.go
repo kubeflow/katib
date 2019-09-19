@@ -27,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
+	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 )
@@ -40,6 +41,7 @@ type Client interface {
 	GetConfigMap(name string, namespace ...string) (map[string]string, error)
 	GetTrialList(name string, namespace ...string) (*trialsv1alpha3.TrialList, error)
 	GetTrialTemplates(namespace ...string) (map[string]string, error)
+	GetSuggestion(name string, namespace ...string) (*suggestionsv1alpha3.Suggestion, error)
 	UpdateTrialTemplates(newTrialTemplates map[string]string, namespace ...string) error
 }
 
@@ -60,6 +62,7 @@ func NewClient(options client.Options) (Client, error) {
 	}
 	experimentsv1alpha3.AddToScheme(scheme.Scheme)
 	trialsv1alpha3.AddToScheme(scheme.Scheme)
+	suggestionsv1alpha3.AddToScheme(scheme.Scheme)
 	cl, err := client.New(cfg, options)
 	return &KatibClient{
 		client: cl,
@@ -79,6 +82,18 @@ func (k *KatibClient) GetExperimentList(namespace ...string) (*experimentsv1alph
 		return expList, err
 	}
 	return expList, nil
+
+}
+
+func (k *KatibClient) GetSuggestion(name string, namespace ...string) (
+	*suggestionsv1alpha3.Suggestion, error) {
+	ns := getNamespace(namespace...)
+	suggestion := &suggestionsv1alpha3.Suggestion{}
+
+	if err := k.client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: ns}, suggestion); err != nil {
+		return nil, err
+	}
+	return suggestion, nil
 
 }
 
