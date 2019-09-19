@@ -136,5 +136,6 @@ done
 echo "Running e2e hyperopt random experiment"
 export KUBECONFIG=$HOME/.kube/config
 go run run-e2e-experiment.go ../../../examples/v1alpha3/hyperopt-random-example.yaml
+go run run-e2e-experiment.go ../../../examples/v1alpha3/skopt-bayesian-optimization-example.yaml
 
 exit 0
