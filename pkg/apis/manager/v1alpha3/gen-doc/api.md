@@ -1071,8 +1071,6 @@ https://cloud.google.com/service-infrastructure/docs/service-management/referenc
 | UpdateTrialStatus | [UpdateTrialStatusRequest](#api.v1.alpha3.UpdateTrialStatusRequest) | [UpdateTrialStatusReply](#api.v1.alpha3.UpdateTrialStatusReply) | Update Status of a trial. |
 | ReportObservationLog | [ReportObservationLogRequest](#api.v1.alpha3.ReportObservationLogRequest) | [ReportObservationLogReply](#api.v1.alpha3.ReportObservationLogReply) | Report a log of Observations for a Trial. The log consists of timestamp and value of metric. Katib store every log of metrics. You can see accuracy curve or other metric logs on UI. |
 | GetObservationLog | [GetObservationLogRequest](#api.v1.alpha3.GetObservationLogRequest) | [GetObservationLogReply](#api.v1.alpha3.GetObservationLogReply) | Get all log of Observations for a Trial. |
-| GetSuggestions | [GetSuggestionsRequest](#api.v1.alpha3.GetSuggestionsRequest) | [GetSuggestionsReply](#api.v1.alpha3.GetSuggestionsReply) | Get Suggestions from a Suggestion service. |
-| ValidateAlgorithmSettings | [ValidateAlgorithmSettingsRequest](#api.v1.alpha3.ValidateAlgorithmSettingsRequest) | [ValidateAlgorithmSettingsReply](#api.v1.alpha3.ValidateAlgorithmSettingsReply) | Validate AlgorithmSettings in an Experiment. Suggestion service should return INVALID_ARGUMENT Error when the parameter is invalid |
 
 
 <a name="api.v1.alpha3.Suggestion"></a>

@@ -29,9 +29,4 @@ kubectl apply -f manifests/v1alpha3/manager-rest
 kubectl apply -f manifests/v1alpha3/pv
 kubectl apply -f manifests/v1alpha3/db
 kubectl apply -f manifests/v1alpha3/ui
-kubectl apply -f manifests/v1alpha3/suggestion/random
-kubectl apply -f manifests/v1alpha3/suggestion/bayesianoptimization
-kubectl apply -f manifests/v1alpha3/suggestion/nasrl
-kubectl apply -f manifests/v1alpha3/suggestion/grid
-kubectl apply -f manifests/v1alpha3/suggestion/hyperband
 cd - > /dev/null

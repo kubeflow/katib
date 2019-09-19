@@ -66,22 +66,27 @@ echo "REGISTRY ${REGISTRY}"
 echo "REPO_NAME ${REPO_NAME}"
 echo "VERSION ${VERSION}"
 
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-hyperopt@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-hyperopt:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
-
+# Katib controller
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-controller@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-controller:${VERSION}@" manifests/v1alpha3/katib-controller/katib-controller.yaml
 
-
+# Metrics collector
 sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/file-metrics-collector@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/file-metrics-collector:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
 sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/tfevent-metrics-collector@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/tfevent-metrics-collector:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
 
+# Katib manager
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-manager@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-manager:${VERSION}@" manifests/v1alpha3/manager/deployment.yaml
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-manager-rest@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-manager-rest:${VERSION}@" manifests/v1alpha3/manager-rest/deployment.yaml
+
+# UI
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-ui:${VERSION}@" manifests/v1alpha3/ui/deployment.yaml
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-random:${VERSION}@" manifests/v1alpha3/suggestion/random/deployment.yaml
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-bayesianoptimization:${VERSION}@" manifests/v1alpha3/suggestion/bayesianoptimization/deployment.yaml
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-nasrl:${VERSION}@" manifests/v1alpha3/suggestion/nasrl/deployment.yaml
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-grid:${VERSION}@" manifests/v1alpha3/suggestion/grid/deployment.yaml
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-hyperband:${VERSION}@" manifests/v1alpha3/suggestion/hyperband/deployment.yaml
+
+# Suggestion algorithms
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-random@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-random:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-bayesianoptimization@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-bayesianoptimization:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-nasrl@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-nasrl:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-grid:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-hyperband:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-hyperopt@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-hyperopt:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
 
 ./scripts/v1alpha3/deploy.sh
 
