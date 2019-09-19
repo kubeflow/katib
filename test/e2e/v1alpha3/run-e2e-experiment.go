@@ -68,11 +68,29 @@ func main() {
 		if err != nil {
 			log.Fatal("Get Experiment error ", err)
 		}
+		log.Printf("Waiting for Experiment %s to finish.", exp.Name)
+		log.Printf(`Experiment %s's trials: %d trials, %d pending trials,
+%d running trials, %d killed trials, %d succeeded trials, %d failed trials.`,
+			exp.Name,
+			exp.Status.Trials, exp.Status.TrialsPending, exp.Status.TrialsRunning,
+			exp.Status.TrialsKilled, exp.Status.TrialsSucceeded, exp.Status.TrialsFailed)
+		log.Printf("Optimal Trial for Experiment %s: %v", exp.Name,
+			exp.Status.CurrentOptimalTrial)
+		log.Printf("Experiment %s's conditions: %v", exp.Name, exp.Status.Conditions)
+
+		suggestion, err := kclient.GetSuggestion(exp.Name, exp.Namespace)
+		if err != nil {
+			log.Printf("Get Suggestion error: %v", err)
+		} else {
+			log.Printf("Suggestion %s's conditions: %v", suggestion.Name,
+				suggestion.Status.Conditions)
+			log.Printf("Suggestion %s's suggestions: %v", suggestion.Name,
+				suggestion.Status.Suggestions)
+		}
 		if exp.IsCompleted() {
-			log.Printf("Job %v finished", exp.Name)
+			log.Printf("Experiment %v finished", exp.Name)
 			break
 		}
-		log.Printf("Waiting for job %v to finish. [ %v trials running %v succeeded ]", exp.Name, exp.Status.TrialsRunning, exp.Status.TrialsSucceeded)
 		time.Sleep(20 * time.Second)
 	}
 

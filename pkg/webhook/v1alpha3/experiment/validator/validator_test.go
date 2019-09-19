@@ -97,19 +97,7 @@ metadata:
   name: "fake-trial"
   namespace: fakens`
 
-	metricsCollectorTemplate := `apiVersion: batch/v1beta1
-kind: CronJob
-metadata:
-  name: fake-trial
-  namespace: fakens
-spec:
-  schedule: "*/1 * * * *"`
-
 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialJobTemplate, nil).AnyTimes()
-	p.EXPECT().GetMetricsCollectorManifest(
-		gomock.Any(), gomock.Any(), gomock.Any(),
-		gomock.Any(), gomock.Any(), gomock.Any()).
-		Return(metricsCollectorTemplate, nil).AnyTimes()
 	mc.EXPECT().PreCheckRegisterExperimentInDB(gomock.Any()).Return(
 		&api_pb.PreCheckRegisterExperimentReply{
 			CanRegister: true,
