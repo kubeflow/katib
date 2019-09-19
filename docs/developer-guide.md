@@ -49,7 +49,7 @@ When an experiment is created, one algorithm service will be created. Then katib
 from pkg.apis.manager.v1alpha3.python import api_pb2
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
 from pkg.suggestion.v1alpha3.internal.search_space import HyperParameter, HyperParameterSearchSpace
-from pkg.suggestion.v1alpha3.internal.trial import Trial
+from pkg.suggestion.v1alpha3.internal.trial import Trial, Assignment
 from pkg.suggestion.v1alpha3.hyperopt.base_hyperopt_service import BaseHyperoptService
 
 # Inherit SuggestionServicer and implement GetSuggestions
@@ -105,6 +105,6 @@ class HyperoptService(
         #--------------------------------------------------------------
         # Convert list_of_assignments to 
         return api_pb2.GetSuggestionsReply(
-            trials=Trial.generate(list_of_assignments)
+            trials=Assignment.generate(list_of_assignments)
         )
 ```
