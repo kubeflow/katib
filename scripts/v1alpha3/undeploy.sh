@@ -37,9 +37,5 @@ kubectl delete -f manifests/v1alpha3/manager-rest
 kubectl delete -f manifests/v1alpha3/db
 kubectl delete -f manifests/v1alpha3/ui
 kubectl delete -f manifests/v1alpha3/pv
-kubectl delete -f manifests/v1alpha3/suggestion/random
-kubectl delete -f manifests/v1alpha3/suggestion/bayesianoptimization
-kubectl delete -f manifests/v1alpha3/suggestion/nasrl
-kubectl delete -f manifests/v1alpha3/suggestion/grid
 kubectl delete -f manifests/v1alpha3
 cd - > /dev/null
