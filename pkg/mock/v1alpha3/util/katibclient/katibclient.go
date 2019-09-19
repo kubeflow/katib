@@ -7,7 +7,8 @@ package mock
 import (
 	gomock "github.com/golang/mock/gomock"
 	v1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
-	v1alpha30 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
+	v1alpha30 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
+	v1alpha31 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	reflect "reflect"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -132,15 +133,35 @@ func (mr *MockClientMockRecorder) GetExperimentList(arg0 ...interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExperimentList", reflect.TypeOf((*MockClient)(nil).GetExperimentList), arg0...)
 }
 
+// GetSuggestion mocks base method
+func (m *MockClient) GetSuggestion(arg0 string, arg1 ...string) (*v1alpha30.Suggestion, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetSuggestion", varargs...)
+	ret0, _ := ret[0].(*v1alpha30.Suggestion)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSuggestion indicates an expected call of GetSuggestion
+func (mr *MockClientMockRecorder) GetSuggestion(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestion", reflect.TypeOf((*MockClient)(nil).GetSuggestion), varargs...)
+}
+
 // GetTrialList mocks base method
-func (m *MockClient) GetTrialList(arg0 string, arg1 ...string) (*v1alpha30.TrialList, error) {
+func (m *MockClient) GetTrialList(arg0 string, arg1 ...string) (*v1alpha31.TrialList, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
 	for _, a := range arg1 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetTrialList", varargs...)
-	ret0, _ := ret[0].(*v1alpha30.TrialList)
+	ret0, _ := ret[0].(*v1alpha31.TrialList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

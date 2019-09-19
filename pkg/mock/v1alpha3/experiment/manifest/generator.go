@@ -35,21 +35,6 @@ func (m *MockGenerator) EXPECT() *MockGeneratorMockRecorder {
 	return m.recorder
 }
 
-// GetMetricsCollectorManifest mocks base method
-func (m *MockGenerator) GetMetricsCollectorManifest(arg0, arg1, arg2, arg3 string, arg4 []string, arg5 *v1alpha30.MetricsCollectorSpec) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMetricsCollectorManifest", arg0, arg1, arg2, arg3, arg4, arg5)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetMetricsCollectorManifest indicates an expected call of GetMetricsCollectorManifest
-func (mr *MockGeneratorMockRecorder) GetMetricsCollectorManifest(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMetricsCollectorManifest", reflect.TypeOf((*MockGenerator)(nil).GetMetricsCollectorManifest), arg0, arg1, arg2, arg3, arg4, arg5)
-}
-
 // GetRunSpec mocks base method
 func (m *MockGenerator) GetRunSpec(arg0 *v1alpha30.Experiment, arg1, arg2, arg3 string) (string, error) {
 	m.ctrl.T.Helper()
