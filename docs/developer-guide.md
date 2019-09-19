@@ -37,7 +37,9 @@ You can undeploy katib v1alpha3 manifests from a k8s cluster as follows:
 make undeploy
 ```
 
-## Implement a new algorithm
+## Implement a new algorithm and use it in katib
+
+### Implement the algorithm
 
 The design of katib follows the [`ask-and-tell` pattern](https://scikit-optimize.github.io/notebooks/ask-and-tell.html):
 
@@ -108,3 +110,64 @@ class HyperoptService(
             trials=Assignment.generate(list_of_assignments)
         )
 ```
+
+### Make the algorithm a GRPC server
+
+Create a package under [cmd/suggestion](../cmd/suggestion). Then create the main function and Dockerfile. Here is an example: [cmd/suggestion/hyperopt](../cmd/suggestion/hyperopt). Then build the Docker image.
+
+### Use the algorithm in katib.
+
+Update the [katib-config](../manifests/v1alpha3/katib-controller/katib-config.yaml), add a new object:
+
+```json
+  suggestion: |-
+    {
+      "hyperopt-tpe": {
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
+      },
+      "hyperopt-random": {
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
+      },
+      "<new-algorithm-name>": {
+        "image": "image built in the previous stage"
+      }
+    }
+```
+
+### Contribute the algorithm to katib
+
+If you want to contribute the algorithm to katib, you could add unit test or e2e test for it in CI and submit a PR.
+
+#### Unit Test
+
+Here is an example [test_hyperopt_service.py](../test/suggestion/v1alpha3/test_hyperopt_service.py):
+
+```python
+import grpc
+import grpc_testing
+import unittest
+
+from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
+from pkg.apis.manager.v1alpha3.python import api_pb2
+
+from pkg.suggestion.v1alpha3.hyperopt_service import HyperoptService
+
+class TestHyperopt(unittest.TestCase):
+    def setUp(self):
+        servicers = {
+            api_pb2.DESCRIPTOR.services_by_name['Suggestion']: HyperoptService()
+        }
+
+        self.test_server = grpc_testing.server_from_dictionary(
+            servicers, grpc_testing.strict_real_time())
+
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+You can setup the GRPC server using `grpc_testing`, then define you own test cases.
+
+#### E2E Test
+
+TODO
