@@ -87,6 +87,7 @@ sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-grid@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-grid:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-hyperband@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-hyperband:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
 sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-hyperopt@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-hyperopt:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-skopt@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-skopt:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
 
 ./scripts/v1alpha3/deploy.sh
 
