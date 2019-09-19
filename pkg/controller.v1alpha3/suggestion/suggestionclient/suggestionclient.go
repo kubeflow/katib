@@ -94,7 +94,7 @@ func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1alpha3.Sugges
 	defer conn.Close()
 
 	client := suggestionapi.NewSuggestionClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	request := &suggestionapi.ValidateAlgorithmSettingsRequest{
