@@ -343,21 +343,12 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-katib-controller", testWorkerImage, [
               "test/scripts/v1alpha3/build-katib-controller.sh",
             ]),  // build-katib-controller
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-random", testWorkerImage, [
-              "test/scripts/v1alpha3/build-suggestion-random.sh",
-            ]),  // build-suggestion-random
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-grid", testWorkerImage, [
-              "test/scripts/v1alpha3/build-suggestion-grid.sh",
-            ]),  // build-suggestion-grid
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperband", testWorkerImage, [
               "test/scripts/v1alpha3/build-suggestion-hyperband.sh",
             ]),  // build-suggestion-hyperband
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperopt", testWorkerImage, [
               "test/scripts/v1alpha3/build-suggestion-hyperopt.sh",
             ]),  // build-suggestion-hyperopt
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-bo", testWorkerImage, [
-              "test/scripts/v1alpha3/build-suggestion-bo.sh",
-            ]),  // build-suggestion-bo
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-nasrl", testWorkerImage, [
               "test/scripts/v1alpha3/build-suggestion-nasrl.sh",
             ]),  // build-suggestion-nasrl
