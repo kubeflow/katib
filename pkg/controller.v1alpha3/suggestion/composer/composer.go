@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	defaultInitialDelaySeconds = 10
+	defaultInitialDelaySeconds = 60
 	// Ref https://github.com/grpc-ecosystem/grpc-health-probe/
 	defaultGRPCHealthCheckProbe = "/bin/grpc_health_probe"
 )
