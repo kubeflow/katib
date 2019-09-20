@@ -12,7 +12,9 @@ const (
 
 	ContainerSuggestion = "suggestion"
 
-	DefaultSuggestionPort = 6789
+	DefaultSuggestionPort     = 6789
+	DefaultSuggestionPortName = "katib-api"
+	DefaultGRPCService        = "manager.v1alpha3.Suggestion"
 
 	// Default env name of katib namespace
 	DefaultKatibNamespaceEnvName = "KATIB_CORE_NAMESPACE"

@@ -26,6 +26,9 @@ SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
 cd ${SCRIPT_ROOT}
 
+echo "Building suggestion images..."
+docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/suggestion-hyperopt -f ${CMD_PREFIX}/suggestion/hyperopt/v1alpha3/Dockerfile .
+
 echo "Building core image..."
 docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/katib-controller -f ${CMD_PREFIX}/katib-controller/v1alpha3/Dockerfile .
 docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/katib-manager -f ${CMD_PREFIX}/manager/v1alpha3/Dockerfile .
@@ -39,6 +42,3 @@ docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/file-metrics-collector -f ${CMD_P
 
 echo "Building TF Event metrics collector image..."
 docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/tfevent-metrics-collector -f ${CMD_PREFIX}/metricscollector/v1alpha3/tfevent-metricscollector/Dockerfile .
-
-echo "Building suggestion images..."
-docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/suggestion-hyperopt -f ${CMD_PREFIX}/suggestion/hyperopt/v1alpha3/Dockerfile .

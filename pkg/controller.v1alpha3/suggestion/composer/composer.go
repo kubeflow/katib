@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -17,6 +18,12 @@ import (
 	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/util"
+)
+
+const (
+	defaultInitialDelaySeconds = 10
+	// Ref https://github.com/grpc-ecosystem/grpc-health-probe/
+	defaultGRPCHealthCheckProbe = "/bin/grpc_health_probe"
 )
 
 var log = logf.Log.WithName("suggestion-composer")
@@ -75,7 +82,7 @@ func (g *General) DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.
 func (g *General) DesiredService(s *suggestionsv1alpha3.Suggestion) (*corev1.Service, error) {
 	ports := []corev1.ServicePort{
 		{
-			Name: "katib-api",
+			Name: consts.DefaultSuggestionPortName,
 			Port: consts.DefaultSuggestionPort,
 		},
 	}
@@ -109,6 +116,36 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 		Name: consts.ContainerSuggestion,
 	}
 	c.Image = suggestionContainerImage
+	c.Ports = []corev1.ContainerPort{
+		{
+			Name:          consts.DefaultSuggestionPortName,
+			ContainerPort: consts.DefaultSuggestionPort,
+		},
+	}
+	c.ReadinessProbe = &corev1.Probe{
+		Handler: corev1.Handler{
+			Exec: &corev1.ExecAction{
+				Command: []string{
+					defaultGRPCHealthCheckProbe,
+					fmt.Sprintf("-addr=:%d", consts.DefaultSuggestionPort),
+					fmt.Sprintf("-service=%s", consts.DefaultGRPCService),
+				},
+			},
+		},
+		InitialDelaySeconds: defaultInitialDelaySeconds,
+	}
+	c.LivenessProbe = &corev1.Probe{
+		Handler: corev1.Handler{
+			Exec: &corev1.ExecAction{
+				Command: []string{
+					defaultGRPCHealthCheckProbe,
+					fmt.Sprintf("-addr=:%d", consts.DefaultSuggestionPort),
+					fmt.Sprintf("-service=%s", consts.DefaultGRPCService),
+				},
+			},
+		},
+		InitialDelaySeconds: defaultInitialDelaySeconds,
+	}
 	return c, nil
 }
 
