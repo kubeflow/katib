@@ -22,7 +22,7 @@ import (
 
 var (
 	log     = logf.Log.WithName("suggestion-client")
-	timeout = 120 * time.Second
+	timeout = 60 * time.Second
 )
 
 type SuggestionClient interface {
@@ -57,7 +57,7 @@ func (g *General) SyncAssignments(
 	defer conn.Close()
 
 	client := suggestionapi.NewSuggestionClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	request := &suggestionapi.GetSuggestionsRequest{
