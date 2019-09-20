@@ -194,7 +194,7 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1alpha3.
 	if !instance.IsRunning() {
 		if err = r.ValidateAlgorithmSettings(instance, experiment); err != nil {
 			logger.Error(err, "Marking suggestion failed as algorithm settings validation failed")
-			msg := fmt.Sprintf("Algorithm Validation failed: %v", err)
+			msg := fmt.Sprintf("Algorithm validation failed: %v", err)
 			instance.MarkSuggestionStatusFailed(SuggestionFailedReason, msg)
 			// return nil since it is a terminal condition
 			return nil
