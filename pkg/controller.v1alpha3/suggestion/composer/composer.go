@@ -22,6 +22,7 @@ import (
 
 const (
 	defaultInitialDelaySeconds = 60
+	defaultPeriod              = 60
 	// Ref https://github.com/grpc-ecosystem/grpc-health-probe/
 	defaultGRPCHealthCheckProbe = "/bin/grpc_health_probe"
 )
@@ -133,6 +134,7 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 			},
 		},
 		InitialDelaySeconds: defaultInitialDelaySeconds,
+		PeriodSeconds:       defaultPeriod,
 	}
 	c.LivenessProbe = &corev1.Probe{
 		Handler: corev1.Handler{
@@ -145,6 +147,7 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 			},
 		},
 		InitialDelaySeconds: defaultInitialDelaySeconds,
+		PeriodSeconds:       defaultPeriod,
 	}
 	return c, nil
 }
