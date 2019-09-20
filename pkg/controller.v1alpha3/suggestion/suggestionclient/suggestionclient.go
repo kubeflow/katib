@@ -100,7 +100,9 @@ func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1alpha3.Sugges
 	request := &suggestionapi.ValidateAlgorithmSettingsRequest{
 		Experiment: g.ConvertExperiment(e),
 	}
-	_, err = client.ValidateAlgorithmSettings(ctx, request)
+	// See https://github.com/grpc/grpc-go/issues/2636
+	// See https://github.com/grpc/grpc-go/pull/2503
+	_, err = client.ValidateAlgorithmSettings(ctx, request, grpc.WaitForReady(true))
 	statusCode, _ := status.FromError(err)
 
 	// validation error
