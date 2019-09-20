@@ -206,10 +206,6 @@
                     template: "python-tests",
                   },
                   {
-                    name: "build-suggestion-bo",
-                    template: "build-suggestion-bo",
-                  },
-                  {
                     name: "build-suggestion-nasrl",
                     template: "build-suggestion-nasrl",
                   },
@@ -224,14 +220,6 @@
                   {
                     name: "build-katib-controller",
                     template: "build-katib-controller",
-                  },
-                  {
-                    name: "build-suggestion-random",
-                    template: "build-suggestion-random",
-                  },
-                  {
-                    name: "build-suggestion-grid",
-                    template: "build-suggestion-grid",
                   },
                   {
                     name: "build-suggestion-hyperband",
