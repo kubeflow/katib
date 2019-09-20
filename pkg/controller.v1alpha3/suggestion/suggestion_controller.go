@@ -174,8 +174,14 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1alpha3.
 	} else {
 		if isReady := r.checkDeploymentReady(foundDeploy); isReady != true {
 			// deployment is not ready yet
+			msg := "Deployment is not ready"
+			instance.MarkSuggestionStatusDeploymentReady(corev1.ConditionFalse, SuggestionDeploymentNotReady, msg)
 			return nil
+		} else {
+			msg := "Deployment is ready"
+			instance.MarkSuggestionStatusDeploymentReady(corev1.ConditionTrue, SuggestionDeploymentReady, msg)
 		}
+
 	}
 	experiment := &experimentsv1alpha3.Experiment{}
 	trials := &trialsv1alpha3.TrialList{}

@@ -90,10 +90,11 @@ type SuggestionCondition struct {
 type SuggestionConditionType string
 
 const (
-	SuggestionCreated   SuggestionConditionType = "Created"
-	SuggestionRunning   SuggestionConditionType = "Running"
-	SuggestionSucceeded SuggestionConditionType = "Succeeded"
-	SuggestionFailed    SuggestionConditionType = "Failed"
+	SuggestionCreated         SuggestionConditionType = "Created"
+	SuggestionDeploymentReady SuggestionConditionType = "DeploymentReady"
+	SuggestionRunning         SuggestionConditionType = "Running"
+	SuggestionSucceeded       SuggestionConditionType = "Succeeded"
+	SuggestionFailed          SuggestionConditionType = "Failed"
 )
 
 // +genclient

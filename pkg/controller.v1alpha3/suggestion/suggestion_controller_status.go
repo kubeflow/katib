@@ -8,11 +8,13 @@ import (
 )
 
 const (
-	SuggestionCreatedReason   = "SuggestionCreated"
-	SuggestionRunningReason   = "SuggestionRunning"
-	SuggestionSucceededReason = "SuggestionSucceeded"
-	SuggestionFailedReason    = "SuggestionFailed"
-	SuggestionKilledReason    = "SuggestionKilled"
+	SuggestionCreatedReason      = "SuggestionCreated"
+	SuggestionDeploymentReady    = "DeploymentReady"
+	SuggestionDeploymentNotReady = "DeploymentNotReady"
+	SuggestionRunningReason      = "SuggestionRunning"
+	SuggestionSucceededReason    = "SuggestionSucceeded"
+	SuggestionFailedReason       = "SuggestionFailed"
+	SuggestionKilledReason       = "SuggestionKilled"
 )
 
 func (r *ReconcileSuggestion) updateStatus(s *suggestionsv1alpha3.Suggestion, oldS *suggestionsv1alpha3.Suggestion) error {
