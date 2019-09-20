@@ -201,7 +201,6 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1alpha3.
 		}
 		msg := "Suggestion is running"
 		instance.MarkSuggestionStatusRunning(SuggestionRunningReason, msg)
-		return nil
 	}
 	logger.Info("Sync assignments", "suggestions", instance.Spec.Requests)
 	if err = r.SyncAssignments(instance, experiment, trials.Items); err != nil {
