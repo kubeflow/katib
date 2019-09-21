@@ -230,6 +230,10 @@
                     template: "build-suggestion-hyperopt",
                   },
                   {
+                    name: "build-suggestion-skopt",
+                    template: "build-suggestion-skopt",
+                  },
+                  {
                     name: "build-earlystopping-median",
                     template: "build-earlystopping-median",
                   },
@@ -337,6 +341,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperopt", testWorkerImage, [
               "test/scripts/v1alpha3/build-suggestion-hyperopt.sh",
             ]),  // build-suggestion-hyperopt
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-skopt", testWorkerImage, [
+              "test/scripts/v1alpha3/build-suggestion-skopt.sh",
+            ]),  // build-suggestion-skopt
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-nasrl", testWorkerImage, [
               "test/scripts/v1alpha3/build-suggestion-nasrl.sh",
             ]),  // build-suggestion-nasrl

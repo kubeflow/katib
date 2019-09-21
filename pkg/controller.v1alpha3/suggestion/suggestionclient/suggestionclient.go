@@ -20,7 +20,10 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 )
 
-var log = logf.Log.WithName("suggestion-client")
+var (
+	log     = logf.Log.WithName("suggestion-client")
+	timeout = 60 * time.Second
+)
 
 type SuggestionClient interface {
 	SyncAssignments(instance *suggestionsv1alpha3.Suggestion, e *experimentsv1alpha3.Experiment,
@@ -54,7 +57,7 @@ func (g *General) SyncAssignments(
 	defer conn.Close()
 
 	client := suggestionapi.NewSuggestionClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	request := &suggestionapi.GetSuggestionsRequest{
@@ -94,7 +97,7 @@ func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1alpha3.Sugges
 	defer conn.Close()
 
 	client := suggestionapi.NewSuggestionClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	request := &suggestionapi.ValidateAlgorithmSettingsRequest{
