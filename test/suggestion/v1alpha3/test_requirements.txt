@@ -1,2 +1,2 @@
 grpcio-testing
-pytest
+pytest==5.1.2
