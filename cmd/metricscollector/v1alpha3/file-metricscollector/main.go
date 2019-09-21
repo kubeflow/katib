@@ -50,10 +50,8 @@ import (
 	filemc "github.com/kubeflow/katib/pkg/metricscollector/v1alpha3/file-metricscollector"
 )
 
-var experimentName = flag.String("e", "", "Experiment Name")
+var metricsFileName = flag.String("f", "", "Metrics File Name")
 var trialName = flag.String("t", "", "Trial Name")
-var jobKind = flag.String("k", "", "Job Kind")
-var namespace = flag.String("n", "", "NameSpace")
 var managerService = flag.String("m", "", "Katib Manager service")
 var metricNames = flag.String("mn", "", "Metric names")
 var pollInterval = flag.Duration("p", common.DefaultPollInterval, "Poll interval to check if main process of worker container exit")
@@ -62,7 +60,7 @@ var waitAll = flag.Bool("w", common.DefaultWaitAll, "Whether wait for all other 
 
 func main() {
 	flag.Parse()
-	klog.Infof("Experiment Name: %s, Trial Name: %s, Job Kind: %s", *experimentName, *trialName, *jobKind)
+	klog.Infof("Trial Name: %s", *trialName)
 
 	wopts := common.WaitPidsOpts{
 		PollInterval: *pollInterval,
@@ -84,7 +82,7 @@ func main() {
 		klog.Fatalf("Failed to create MetricsCollector: %v", err)
 	}
 	ctx := context.Background()
-	olog, err := mc.CollectObservationLog(*trialName, *jobKind, strings.Split(*metricNames, ";"), *namespace)
+	olog, err := mc.CollectObservationLog(*metricsFileName, strings.Split(*metricNames, ";"))
 	if err != nil {
 		klog.Fatalf("Failed to collect logs: %v", err)
 	}

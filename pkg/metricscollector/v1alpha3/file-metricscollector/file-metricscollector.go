@@ -1,78 +1,36 @@
 package sidecarmetricscollector
 
 import (
-	"bytes"
-	"errors"
-	"fmt"
+	"io/ioutil"
+	"os"
 	"strings"
 	"time"
 
-	apiv1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/klog"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
-
 	v1alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
-	commonv1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
-	"github.com/kubeflow/katib/pkg/metricscollector/v1alpha3/common"
+	"k8s.io/klog"
 )
 
 type FileMetricsCollector struct {
-	clientset *kubernetes.Clientset
 }
 
 func NewFileMetricsCollector() (*FileMetricsCollector, error) {
-	config, err := config.GetConfig()
-	if err != nil {
-		return nil, err
-	}
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-	return &FileMetricsCollector{
-		clientset: clientset,
-	}, nil
-
+	return &FileMetricsCollector{}, nil
 }
 
-// will be dropped, get logs from a file instead of k8s logs api
-func getWorkerContainerName(pod apiv1.Pod) string {
-	for _, c := range pod.Spec.Containers {
-		if c.Name != common.MetricCollectorContainerName {
-			return c.Name
-		}
-	}
-	return ""
-}
-
-func (d *FileMetricsCollector) CollectObservationLog(tId string, jobKind string, metrics []string, namespace string) (*v1alpha3.ObservationLog, error) {
-	labelMap := commonv1alpha3.GetJobLabelMap(jobKind, tId)
-	pl, err := d.clientset.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labels.Set(labelMap).String(), IncludeUninitialized: true})
+func (d *FileMetricsCollector) CollectObservationLog(fileName string, metrics []string) (*v1alpha3.ObservationLog, error) {
+	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, err
 	}
-	if len(pl.Items) == 0 {
-		return nil, fmt.Errorf("No Pods are found in Trial %v", tId)
-	}
-	logopt := apiv1.PodLogOptions{Container: getWorkerContainerName(pl.Items[0]), Timestamps: true, Follow: true}
-	reader, err := d.clientset.CoreV1().Pods(namespace).GetLogs(pl.Items[0].ObjectMeta.Name, &logopt).Stream()
-	for err != nil {
-		klog.Errorf("Retry to get logs, Error: %v", err)
-		time.Sleep(time.Duration(1) * time.Second)
-		reader, err = d.clientset.CoreV1().Pods(namespace).GetLogs(pl.Items[0].ObjectMeta.Name, &logopt).Stream()
-	}
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(reader)
-	logs := buf.String()
-
-	olog, err := d.parseLogs(tId, strings.Split(logs, "\n"), metrics)
+	defer file.Close()
+	content, err := ioutil.ReadAll(file)
+	logs := string(content)
+	olog, err := d.parseLogs(strings.Split(logs, "\n"), metrics)
 	return olog, err
 }
 
-func (d *FileMetricsCollector) parseLogs(tId string, logs []string, metrics []string) (*v1alpha3.ObservationLog, error) {
+func (d *FileMetricsCollector) parseLogs(logs []string, metrics []string) (*v1alpha3.ObservationLog, error) {
+	// TODO(hougangliu): handle custom filter string
 	var lasterr error
 	olog := &v1alpha3.ObservationLog{}
 	mlogs := []*v1alpha3.MetricLog{}
@@ -80,19 +38,22 @@ func (d *FileMetricsCollector) parseLogs(tId string, logs []string, metrics []st
 		if logline == "" {
 			continue
 		}
+		timestamp := time.Time{}.UTC().Format(time.RFC3339)
+		parseStr := logline
 		ls := strings.SplitN(logline, " ", 2)
 		if len(ls) != 2 {
-			klog.Errorf("Error parsing log: %s", logline)
-			lasterr = errors.New("Error parsing log")
-			continue
+			klog.Warningf("Metrics will not have timestamp since %s doesn't begin with timestamp string", logline)
+		} else {
+			_, err := time.Parse(time.RFC3339Nano, ls[0])
+			if err != nil {
+				klog.Warningf("Metrics will not have timestamp since error parsing time %s: %v", ls[0], err)
+			} else {
+				parseStr = ls[1]
+				timestamp = ls[0]
+			}
 		}
-		_, err := time.Parse(time.RFC3339Nano, ls[0])
-		if err != nil {
-			klog.Errorf("Error parsing time %s: %v", ls[0], err)
-			lasterr = err
-			continue
-		}
-		kvpairs := strings.Fields(ls[1])
+
+		kvpairs := strings.Fields(parseStr)
 		for _, kv := range kvpairs {
 			v := strings.Split(kv, "=")
 			if len(v) > 2 {
@@ -110,7 +71,6 @@ func (d *FileMetricsCollector) parseLogs(tId string, logs []string, metrics []st
 			if metricName == "" {
 				continue
 			}
-			timestamp := ls[0]
 			mlogs = append(mlogs, &v1alpha3.MetricLog{
 				TimeStamp: timestamp,
 				Metric: &v1alpha3.Metric{

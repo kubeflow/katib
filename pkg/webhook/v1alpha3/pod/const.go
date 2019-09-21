@@ -26,6 +26,14 @@ const (
 	MasterRole                   = "master"
 	MetricsCollectorSidecar      = "metrics-collector-sidecar"
 	MetricsCollectorSidecarImage = "image"
+
+	PyTorchJob                    = "PyTorchJob"
+	PyTorchJobWorkerContainerName = "pytorch"
+
+	TFJob                    = "TFJob"
+	TFJobWorkerContainerName = "tensorflow"
+
+	BatchJob = "Job"
 )
 
 var JobRoleMap = map[string][]string{
