@@ -111,3 +111,7 @@ func (suggestion *Suggestion) MarkSuggestionStatusFailed(reason, message string)
 	}
 	suggestion.setCondition(SuggestionFailed, v1.ConditionTrue, reason, message)
 }
+
+func (suggestion *Suggestion) MarkSuggestionStatusDeploymentReady(status v1.ConditionStatus, reason, message string) {
+	suggestion.setCondition(SuggestionDeploymentReady, status, reason, message)
+}
