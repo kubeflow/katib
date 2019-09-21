@@ -230,6 +230,10 @@
                     template: "build-suggestion-hyperopt",
                   },
                   {
+                    name: "build-suggestion-skopt",
+                    template: "build-suggestion-skopt",
+                  },
+                  {
                     name: "build-earlystopping-median",
                     template: "build-earlystopping-median",
                   },
