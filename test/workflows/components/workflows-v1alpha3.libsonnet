@@ -222,6 +222,10 @@
                     template: "build-katib-controller",
                   },
                   {
+                    name: "build-suggestion-chocolate",
+                    template: "build-suggestion-chocolate",
+                  },
+                  {
                     name: "build-suggestion-hyperband",
                     template: "build-suggestion-hyperband",
                   },
@@ -344,6 +348,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-skopt", testWorkerImage, [
               "test/scripts/v1alpha3/build-suggestion-skopt.sh",
             ]),  // build-suggestion-skopt
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-chocolate", testWorkerImage, [
+              "test/scripts/v1alpha3/build-suggestion-chocolate.sh",
+            ]),  // build-suggestion-chocolate
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-nasrl", testWorkerImage, [
               "test/scripts/v1alpha3/build-suggestion-nasrl.sh",
             ]),  // build-suggestion-nasrl
