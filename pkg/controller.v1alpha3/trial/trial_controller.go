@@ -209,13 +209,18 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha3.Trial) error {
 			logger.Error(err, "Update trial status observation error")
 			return err
 		}
-		// Update Trial job status only if observation field is available.
+
+		jobConditionType, err := r.GetDeployedJobStatus(deployedJob)
+		if err != nil {
+			logger.Error(err, "Get deployed status  error")
+			return err
+		}
+		// Update Trial job status only
+		//    if job has succeded and if observation field is available.
+		//    if job has failed
 		// This will ensure that trial is set to be complete only if metric is collected at least once
-		if isTrialObservationAvailable(instance) {
-			if err = r.UpdateTrialStatusCondition(instance, deployedJob); err != nil {
-				logger.Error(err, "Update trial status condition error")
-				return err
-			}
+		if isTrialComplete(instance, *jobConditionType) {
+			r.UpdateTrialStatusCondition(instance, *jobConditionType)
 		}
 	}
 	return nil
