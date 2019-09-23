@@ -159,9 +159,9 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	mutatedPod.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
 	mutatedPod.Spec.ShareProcessNamespace = pointer.BoolPtr(true)
 
-	if mountPath := getMountPath(trial.Spec.MetricsCollector); mountPath != "" {
+	if mountPath, pathKind := getMountPath(trial.Spec.MetricsCollector); mountPath != "" {
 		wrapWorkerContainer(mutatedPod, kind, mountPath, trial.Spec.MetricsCollector)
-		if err = mutateVolume(mutatedPod, kind, mountPath, trial.Spec.MetricsCollector.Source.FileSystemPath.Kind); err != nil {
+		if err = mutateVolume(mutatedPod, kind, mountPath, pathKind); err != nil {
 			return nil, err
 		}
 	}
@@ -204,19 +204,21 @@ func (s *sidecarInjector) getMetricsCollectorImage(cKind common.CollectorKind) (
 
 func getMetricsCollectorArgs(trialName, metricName string, mc trialsv1alpha3.MetricsCollectorSpec) []string {
 	args := []string{"-t", trialName, "-m", metricName, "-s", katibmanagerv1alpha3.GetManagerAddr()}
-	if mountPath := getMountPath(mc); mountPath != "" {
+	if mountPath, _ := getMountPath(mc); mountPath != "" {
 		args = append(args, "-path", mountPath)
 	}
 	return args
 }
 
-func getMountPath(mc trialsv1alpha3.MetricsCollectorSpec) string {
+func getMountPath(mc trialsv1alpha3.MetricsCollectorSpec) (string, common.FileSystemKind) {
 	if mc.Collector.Kind == common.StdOutCollector {
-		return common.DefaultFilePath
-	} else if mc.Collector.Kind == common.FileCollector || mc.Collector.Kind == common.TfEventCollector {
-		return mc.Source.FileSystemPath.Path
+		return common.DefaultFilePath, common.FileKind
+	} else if mc.Collector.Kind == common.FileCollector {
+		return mc.Source.FileSystemPath.Path, common.FileKind
+	} else if mc.Collector.Kind == common.TfEventCollector {
+		return mc.Source.FileSystemPath.Path, common.DirectoryKind
 	} else {
-		return ""
+		return "", common.InvalidKind
 	}
 }
 

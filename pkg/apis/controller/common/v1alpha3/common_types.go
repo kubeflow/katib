@@ -96,6 +96,7 @@ type FileSystemKind string
 const (
 	DirectoryKind FileSystemKind = "Directory"
 	FileKind      FileSystemKind = "File"
+	InvalidKind   FileSystemKind = "Invalid"
 )
 
 // +k8s:deepcopy-gen=true
