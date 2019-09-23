@@ -1,17 +1,17 @@
-from pkg.suggestion.v1alpha3.NAS_Reinforcement_Learning.Controller import Controller
-from pkg.suggestion.v1alpha3.NAS_Reinforcement_Learning.Operation import SearchSpace
-from pkg.suggestion.v1alpha3.NAS_Reinforcement_Learning.AlgorithmSettings import parseAlgorithmSettings
-import tensorflow as tf
-import grpc
-from pkg.apis.manager.v1alpha3.python import api_pb2
-from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
-
 import logging
 from logging import getLogger, StreamHandler, INFO, DEBUG
 import json
 import os
 import time
+import tensorflow as tf
+import grpc
 
+from pkg.apis.manager.v1alpha3.python import api_pb2
+from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
+from pkg.suggestion.v1alpha3.NAS_Reinforcement_Learning.Controller import Controller
+from pkg.suggestion.v1alpha3.NAS_Reinforcement_Learning.Operation import SearchSpace
+from pkg.suggestion.v1alpha3.NAS_Reinforcement_Learning.AlgorithmSettings import parseAlgorithmSettings
+from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
 
 class NAS_RL_Experiment(object):
     def __init__(self, request, logger):
@@ -136,7 +136,7 @@ class NAS_RL_Experiment(object):
         self.logger.info("")
 
 
-class NasrlService(api_pb2_grpc.SuggestionServicer):
+class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
     def __init__(self, logger=None):
         if logger == None:
             self.logger = getLogger(__name__)
