@@ -46,8 +46,9 @@ class BaseChocolateService(object):
 
         conn = choco.SQLiteConnection("sqlite:///my_db.db")
         # Refer to https://chocolate.readthedocs.io/tutorials/algo.html
-        if self.algorithm_name == "chocolate-grid" or self.algorithm_name == "grid":
+        if self.algorithm_name == "grid":
             sampler = choco.Grid(conn, chocolate_search_space, clear_db=True)
+        # hyperopt-random is the default option in katib.
         elif self.algorithm_name == "chocolate-random":
             sampler = choco.Random(conn, chocolate_search_space, clear_db=True)
         elif self.algorithm_name == "chocolate-quasirandom":

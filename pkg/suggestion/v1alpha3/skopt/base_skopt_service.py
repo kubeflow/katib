@@ -45,10 +45,9 @@ class BaseSkoptService(object):
                 skopt_search_space.append(
                     skopt.space.Categorical(param.list, name=param.name))
 
-        if self.algorithm_name != "skopt-bayesian-optimization" or \
-                self.algorithm_name != "bayesianoptimization":
+        if self.algorithm_name != "bayesianoptimization":
             raise Exception(
-                "Algorithm name is not supported by skopt service.")
+                '"Failed to create the algortihm: {}'.format(self.algorithm_name))
         skopt_optimizer = skopt.Optimizer(skopt_search_space,
                                           base_estimator=self.base_estimator,
                                           n_initial_points=self.n_initial_points,
