@@ -26,6 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -37,6 +38,7 @@ import (
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/suggestion/composer"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/suggestion/suggestionclient"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/util"
@@ -61,6 +63,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		SuggestionClient: suggestionclient.New(),
 		scheme:           mgr.GetScheme(),
 		Composer:         composer.New(mgr.GetScheme(), mgr.GetClient()),
+		recorder:         mgr.GetRecorder(ControllerName),
 	}
 }
 
@@ -104,7 +107,8 @@ type ReconcileSuggestion struct {
 	composer.Composer
 	suggestionclient.SuggestionClient
 
-	scheme *runtime.Scheme
+	scheme   *runtime.Scheme
+	recorder record.EventRecorder
 }
 
 // Reconcile reads that state of the cluster for a Suggestion object and makes changes based on the state read
@@ -143,6 +147,8 @@ func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Re
 	} else {
 		err := r.ReconcileSuggestion(instance)
 		if err != nil {
+			r.recorder.Eventf(instance, corev1.EventTypeWarning,
+				consts.ReconcileErrorReason, err.Error())
 			logger.Error(err, "Reconcile Suggestion error")
 			return reconcile.Result{}, err
 		}

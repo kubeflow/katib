@@ -111,10 +111,4 @@ func main() {
 	}
 
 	log.Printf("Experiment has recorded best current Optimal Trial %v", exp.Status.CurrentOptimalTrial)
-	err = kclient.DeleteExperiment(exp)
-	if err != nil {
-		log.Printf("CreateExperiment from YAML failed: %v", err)
-		return
-	}
-	log.Printf("Experiment %v deleted", exp.Name)
 }

@@ -62,5 +62,6 @@ cd ${GO_DIR}/test/e2e/v1alpha3
 echo "Running e2e chocolate grid experiment"
 export KUBECONFIG=$HOME/.kube/config
 go run run-e2e-experiment.go ../../../examples/v1alpha3/chocolate-grid-example.yaml
-
+kubectl -n kubeflow describe suggestion
+kubectl -n kubeflow delete experiment chocolate-grid-example
 exit 0

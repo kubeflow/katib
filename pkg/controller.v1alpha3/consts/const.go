@@ -26,6 +26,8 @@ const (
 	LabelSuggestionTag = "suggestion"
 
 	LabelSuggestionImageTag = "image"
+
+	ReconcileErrorReason = "ReconcileError"
 )
 
 var (
