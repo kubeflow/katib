@@ -46,7 +46,7 @@ class BaseChocolateService(object):
 
         conn = choco.SQLiteConnection("sqlite:///my_db.db")
         # Refer to https://chocolate.readthedocs.io/tutorials/algo.html
-        if self.algorithm_name == "chocolate-grid":
+        if self.algorithm_name == "chocolate-grid" or self.algorithm_name == "grid":
             sampler = choco.Grid(conn, chocolate_search_space, clear_db=True)
         elif self.algorithm_name == "chocolate-random":
             sampler = choco.Random(conn, chocolate_search_space, clear_db=True)
@@ -61,7 +61,8 @@ class BaseChocolateService(object):
             mu = 1
             sampler = choco.MOCMAES(
                 conn, chocolate_search_space, mu=mu, clear_db=True)
-        logger.info("algortihm: %s", self.algorithm_name)
+        else:
+            raise Exception('"Failed to create the algortihm: {}'.format(self.algorithm_name))
 
         for index, trial in enumerate(trials):
             loss_for_choco = float(trial.target_metric.value)

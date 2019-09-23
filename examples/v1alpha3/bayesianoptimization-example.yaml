@@ -4,7 +4,7 @@ metadata:
   namespace: kubeflow
   labels:
     controller-tools.k8s.io: "1.0"
-  name: hyperopt-tpe-example
+  name: bayesianoptimization-example
 spec:
   objective:
     type: maximize
@@ -13,7 +13,10 @@ spec:
     additionalMetricNames:
       - accuracy
   algorithm:
-    algorithmName: hyperopt-tpe
+    algorithmName: bayesianoptimization
+    algorithmSettings:
+      - name: "random_state"
+        value: "10"
   parallelTrialCount: 3
   maxTrialCount: 12
   maxFailedTrialCount: 3
@@ -46,6 +49,7 @@ spec:
           spec:
             template:
               spec:
+                serviceAccountName: metrics-collector # will be dropped
                 containers:
                 - name: {{.Trial}}
                   image: docker.io/katib/mxnet-mnist-example
