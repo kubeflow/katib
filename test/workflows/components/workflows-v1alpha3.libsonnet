@@ -262,8 +262,22 @@
                 ],
                 [
                   {
-                    name: "run-e2e-tests",
-                    template: "run-tests",
+                    name: "check-katib-ready",
+                    template: "check-katib-ready",
+                  },
+                ],
+                [
+                  {
+                    name: "run-random-e2e-tests",
+                    template: "run-random-e2e-tests",
+                  },
+                  {
+                    name: "run-grid-e2e-tests",
+                    template: "run-grid-e2e-tests",
+                  },
+                  {
+                    name: "run-bayesian-e2e-tests",
+                    template: "run-bayesian-e2e-tests",
                   },
                 ],
               ],
@@ -308,9 +322,18 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("python-tests", pythonImage, [
               "test/scripts/v1alpha3/python-tests.sh",
             ]),  // run python tests
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-tests.sh",
-            ]),  // run tests
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("check-katib-ready", testWorkerImage, [
+              "test/scripts/v1alpha3/check-katib-ready.sh",
+            ]),  // check katib readiness
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-random-e2e-tests", testWorkerImage, [
+              "test/scripts/v1alpha3/run-suggestion-random.sh",
+            ]),  // run random algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-grid-e2e-tests", testWorkerImage, [
+              "test/scripts/v1alpha3/run-suggestion-grid.sh",
+            ]),  // run grid algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-bayesian-e2e-tests", testWorkerImage, [
+              "test/scripts/v1alpha3/run-suggestion-bayesian.sh",
+            ]),  // run bayesian algorithm
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
               "python",
               "-m",
