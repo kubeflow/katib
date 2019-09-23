@@ -12,7 +12,7 @@ spec:
     goal: 0.99
     objectiveMetricName: accuracy_1
   algorithm:
-    algorithmName: hyperopt-random
+    algorithmName: random
   metricsCollectorSpec:
     source:
       fileSystemPath:

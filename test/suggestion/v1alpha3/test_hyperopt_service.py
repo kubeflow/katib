@@ -113,7 +113,7 @@ class TestHyperopt(unittest.TestCase):
             name="test",
             spec=api_pb2.ExperimentSpec(
                 algorithm=api_pb2.AlgorithmSpec(
-                    algorithm_name="hyperopt-tpe",
+                    algorithm_name="tpe",
                     algorithm_setting=[
                         api_pb2.AlgorithmSetting(
                             name="random_state",

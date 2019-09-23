@@ -61,7 +61,7 @@ cd ${GO_DIR}/test/e2e/v1alpha3
 
 echo "Running e2e skopt bayesian optimization experiment"
 export KUBECONFIG=$HOME/.kube/config
-go run run-e2e-experiment.go ../../../examples/v1alpha3/skopt-bayesian-optimization-example.yaml
+go run run-e2e-experiment.go ../../../examples/v1alpha3/bayesianoptimization-example.yaml
 kubectl -n kubeflow describe suggestion
-kubectl -n kubeflow delete experiment skopt-bayesian-optimization-example
+kubectl -n kubeflow delete experiment bayesianoptimization-example
 exit 0

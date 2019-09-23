@@ -8,7 +8,7 @@ from pkg.apis.manager.v1alpha3.python import api_pb2
 from pkg.suggestion.v1alpha3.skopt_service import SkoptService
 
 
-class TestHyperopt(unittest.TestCase):
+class TestSkopt(unittest.TestCase):
     def setUp(self):
         servicers = {
             api_pb2.DESCRIPTOR.services_by_name['Suggestion']: SkoptService(
@@ -113,7 +113,7 @@ class TestHyperopt(unittest.TestCase):
             name="test",
             spec=api_pb2.ExperimentSpec(
                 algorithm=api_pb2.AlgorithmSpec(
-                    algorithm_name="skopt-bayesian-optimization",
+                    algorithm_name="bayesianoptimization",
                     algorithm_setting=[
                         api_pb2.AlgorithmSetting(
                             name="random_state",

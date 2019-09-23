@@ -62,20 +62,3 @@ class OptimizerConfiguration(object):
             elif s.name == "random_state":
                 optmizer.random_state = int(s.value)
         return algorithm_spec.algorithm_name, optmizer
-
-
-class HyperoptService(
-        api_pb2_grpc.SuggestionServicer):
-    def GetSuggestions(self, request, context):
-        """
-        Main function to provide suggestion.
-        """
-        base_serice = BaseHyperoptService(
-            algorithm_name=request.experiment.spec.algorithm.algorithm_name)
-        search_space = HyperParameterSearchSpace.convert(request.experiment)
-        trials = Trial.convert(request.trials)
-        new_assignments = base_serice.getSuggestions(
-            search_space, trials, request.request_number)
-        return api_pb2.GetSuggestionsReply(
-            parameter_assignments=Assignment.generate(new_assignments)
-        )
