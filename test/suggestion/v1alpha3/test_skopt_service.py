@@ -8,7 +8,7 @@ from pkg.apis.manager.v1alpha3.python import api_pb2
 from pkg.suggestion.v1alpha3.skopt_service import SkoptService
 
 
-class TestHyperopt(unittest.TestCase):
+class TestSkopt(unittest.TestCase):
     def setUp(self):
         servicers = {
             api_pb2.DESCRIPTOR.services_by_name['Suggestion']: SkoptService(
