@@ -12,28 +12,25 @@ import json
 import os
 import time
 
-MANAGER_ADDRESS = "katib-manager"
-MANAGER_PORT = 6789
-RESPAWN_SLEEP = 20
-RESPAWN_LIMIT = 10
-
 
 class NAS_RL_Experiment(object):
     def __init__(self, request, logger):
         self.logger = logger
-        self.experiment_name = request.experiment_name
+        self.experiment_name = request.experiment.name
+        self.experiment = request.experiment
         self.num_trials = 1
         if request.request_number > 0:
             self.num_trials = request.request_number
         self.tf_graph = tf.Graph()
         # self.prev_trial_ids = list()
         # self.prev_trials = None
-        self.ctrl_cache_file = "ctrl_cache/{}.ckpt".format(request.experiment_name)
+        self.ctrl_cache_file = "ctrl_cache/{}.ckpt".format(
+            self.experiment_name)
         self.ctrl_step = 0
         self.is_first_run = True
         self.algorithm_settings = None
         self.controller = None
-        self.num_layers  = None
+        self.num_layers = None
         self.input_sizes = None
         self.output_sizes = None
         self.num_operations = None
@@ -41,12 +38,14 @@ class NAS_RL_Experiment(object):
         self.opt_direction = None
         self.objective_name = None
         # self.respawn_count = 0
-        
-        self.logger.info("-" * 100 + "\nSetting Up Suggestion for Experiment {}\n".format(request.experiment_name) + "-" * 100)
+
+        self.logger.info("-" * 100 + "\nSetting Up Suggestion for Experiment {}\n".format(
+            self.experiment_name) + "-" * 100)
         self._get_experiment_param()
         self._setup_controller()
-        self.logger.info(">>> Suggestion for Experiment {} has been initialized.\n".format(self.experiment_name))
-        
+        self.logger.info(">>> Suggestion for Experiment {} has been initialized.\n".format(
+            self.experiment_name))
+
     def _get_experiment_param(self):
         # this function need to
         # 1) get the number of layers
@@ -56,17 +55,12 @@ class NAS_RL_Experiment(object):
         # 5) get the objective name
         # 6) get the algorithm settings
 
-        channel = grpc.beta.implementations.insecure_channel(MANAGER_ADDRESS, MANAGER_PORT)
-        with api_pb2.beta_create_Manager_stub(channel) as client:
-            api_experiment_param = client.GetExperiment(api_pb2.GetExperimentRequest(experiment_name=self.experiment_name), 10)
-
         # Get Search Space
-        self.experiment_name = api_experiment_param.experiment.name
-        self.opt_direction = api_experiment_param.experiment.spec.objective.type
-        self.objective_name = api_experiment_param.experiment.spec.objective.objective_metric_name
+        self.opt_direction = self.experiment.spec.objective.type
+        self.objective_name = self.experiment.spec.objective.objective_metric_name
 
-        nas_config = api_experiment_param.experiment.spec.nas_config
-        
+        nas_config = self.experiment.spec.nas_config
+
         graph_config = nas_config.graph_config
         self.num_layers = int(graph_config.num_layers)
         self.input_sizes = list(map(int, graph_config.input_sizes))
@@ -76,17 +70,17 @@ class NAS_RL_Experiment(object):
         search_space_object = SearchSpace(search_space_raw)
         self.search_space = search_space_object.search_space
         self.num_operations = search_space_object.num_operations
-        
+
         self.print_search_space()
 
         # Get Experiment Parameters
-        params_raw = api_experiment_param.experiment.spec.algorithm.algorithm_setting
+        params_raw = self.experiment.spec.algorithm.algorithm_setting
         self.algorithm_settings = parseAlgorithmSettings(params_raw)
 
         self.print_algorithm_settings()
-    
+
     def _setup_controller(self):
-        
+
         with self.tf_graph.as_default():
 
             self.controller = Controller(
@@ -112,34 +106,38 @@ class NAS_RL_Experiment(object):
 
     def print_search_space(self):
         if self.search_space is None:
-            self.logger.warning("Error! The Suggestion has not yet been initialized!")
+            self.logger.warning(
+                "Error! The Suggestion has not yet been initialized!")
             return
-        
-        self.logger.info(">>> Search Space for Experiment {}".format(self.experiment_name))
+
+        self.logger.info(
+            ">>> Search Space for Experiment {}".format(self.experiment_name))
         for opt in self.search_space:
             opt.print_op(self.logger)
-        self.logger.info("There are {} operations in total.\n".format(self.num_operations))
-    
+        self.logger.info(
+            "There are {} operations in total.\n".format(self.num_operations))
+
     def print_algorithm_settings(self):
         if self.algorithm_settings is None:
-            self.logger.warning("Error! The Suggestion has not yet been initialized!")
+            self.logger.warning(
+                "Error! The Suggestion has not yet been initialized!")
             return
-        
-        self.logger.info(">>> Parameters of LSTM Controller for Experiment {}".format(self.experiment_name))
+
+        self.logger.info(">>> Parameters of LSTM Controller for Experiment {}".format(
+            self.experiment_name))
         for spec in self.algorithm_settings:
             if len(spec) > 13:
-                self.logger.info("{}: \t{}".format(spec, self.algorithm_settings[spec]))
+                self.logger.info("{}: \t{}".format(
+                    spec, self.algorithm_settings[spec]))
             else:
-                self.logger.info("{}: \t\t{}".format(spec, self.algorithm_settings[spec]))
+                self.logger.info("{}: \t\t{}".format(
+                    spec, self.algorithm_settings[spec]))
         self.logger.info("RequestNumber:\t\t{}".format(self.num_trials))
         self.logger.info("")
 
 
 class NasrlService(api_pb2_grpc.SuggestionServicer):
     def __init__(self, logger=None):
-
-        self.registered_experiments = dict()
-
         if logger == None:
             self.logger = getLogger(__name__)
             FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
@@ -173,7 +171,8 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             return self.SetValidateContextError(context, "Missing NumLayers in GraphConfig:\n{}".format(graph_config))
 
         # Validate each operation
-        operations_list = list(request.experiment_spec.nas_config.operations.operation)
+        operations_list = list(
+            request.experiment_spec.nas_config.operations.operation)
         for operation in operations_list:
 
             # Check OperationType
@@ -183,7 +182,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             # Check ParameterConfigs
             if not operation.parameter_specs.parameters:
                 return self.SetValidateContextError(context, "Missing ParameterConfigs in Operation:\n{}".format(operation))
-            
+
             # Validate each ParameterConfig in Operation
             parameters_list = list(operation.parameter_specs.parameters)
             for parameter in parameters_list:
@@ -199,7 +198,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 # Check List in Categorical or Discrete Type
                 if parameter.parameter_type == api_pb2.CATEGORICAL or parameter.parameter_type == api_pb2.DISCRETE:
                     if not parameter.feasible_space.list:
-                        return self.SetValidateContextError(context, "Missing List in ParameterConfig.feasibleSpace:\n{}".format(parameter) )
+                        return self.SetValidateContextError(context, "Missing List in ParameterConfig.feasibleSpace:\n{}".format(parameter))
 
                 # Check Max, Min, Step in Int or Double Type
                 elif parameter.parameter_type == api_pb2.INT or parameter.parameter_type == api_pb2.DOUBLE:
@@ -219,29 +218,25 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
         return api_pb2.ValidateAlgorithmSettingsReply()
 
     def GetSuggestions(self, request, context):
-
-        if request.experiment_name not in self.registered_experiments:
-            self.registered_experiments[request.experiment_name] = NAS_RL_Experiment(request, self.logger)
-        
-        experiment = self.registered_experiments[request.experiment_name]
-
-        self.logger.info("-" * 100 + "\nSuggestion Step {} for Experiment {}\n".format(experiment.ctrl_step, experiment.experiment_name) + "-" * 100)
+        experiment = NAS_RL_Experiment(request, self.logger)
+        self.logger.info("-" * 100 + "\nSuggestion Step {} for Experiment {}\n".format(
+            experiment.ctrl_step, experiment.experiment_name) + "-" * 100)
 
         with experiment.tf_graph.as_default():
             saver = tf.train.Saver()
             ctrl = experiment.controller
 
             controller_ops = {
-                  "train_step": ctrl.train_step,
-                  "loss": ctrl.loss,
-                  "train_op": ctrl.train_op,
-                  "lr": ctrl.lr,
-                  "grad_norm": ctrl.grad_norm,
-                  "optimizer": ctrl.optimizer,
-                  "baseline": ctrl.baseline,
-                  "entropy": ctrl.sample_entropy,
-                  "sample_arc": ctrl.sample_arc,
-                  "skip_rate": ctrl.skip_rate}
+                "train_step": ctrl.train_step,
+                "loss": ctrl.loss,
+                "train_op": ctrl.train_op,
+                "lr": ctrl.lr,
+                "grad_norm": ctrl.grad_norm,
+                "optimizer": ctrl.optimizer,
+                "baseline": ctrl.baseline,
+                "entropy": ctrl.sample_entropy,
+                "sample_arc": ctrl.sample_arc,
+                "skip_rate": ctrl.skip_rate}
 
             run_ops = [
                 controller_ops["loss"],
@@ -253,13 +248,15 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                 controller_ops["train_op"]]
 
             if experiment.is_first_run:
-                self.logger.info(">>> First time running suggestion for {}. Random architecture will be given.".format(experiment.experiment_name))
+                self.logger.info(">>> First time running suggestion for {}. Random architecture will be given.".format(
+                    experiment.experiment_name))
                 with tf.Session() as sess:
                     sess.run(tf.global_variables_initializer())
                     candidates = list()
                     for _ in range(experiment.num_trials):
-                        candidates.append(sess.run(controller_ops["sample_arc"]))
-                    
+                        candidates.append(
+                            sess.run(controller_ops["sample_arc"]))
+
                     # TODO: will use PVC to store the checkpoint to protect against unexpected suggestion pod restart
                     saver.save(sess, experiment.ctrl_cache_file)
 
@@ -270,7 +267,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     saver.restore(sess, experiment.ctrl_cache_file)
 
                     valid_acc = ctrl.reward
-                    result = self.GetEvaluationResult(experiment)
+                    result = self.GetEvaluationResult(request.trials)
 
                     # TODO: (andreyvelich) I deleted this part, should it be handle by controller?
                     # Sometimes training container may fail and GetEvaluationResult() will return None
@@ -279,9 +276,12 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     # 2. If respawning the trials for RESPAWN_LIMIT times still cannot collect valid results,
                     #    then fail the task because it may indicate that the training container has errors.
                     if result is None:
-                        self.logger.warning(">>> Suggestion has spawned trials, but they all failed.")
-                        self.logger.warning(">>> Please check whether the training container is correctly implemented")
-                        self.logger.info(">>> Experiment {} failed".format(experiment.experiment_name))
+                        self.logger.warning(
+                            ">>> Suggestion has spawned trials, but they all failed.")
+                        self.logger.warning(
+                            ">>> Please check whether the training container is correctly implemented")
+                        self.logger.info(">>> Experiment {} failed".format(
+                            experiment.experiment_name))
                         return []
 
                     # This LSTM network is designed to maximize the metrics
@@ -293,17 +293,19 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
                     loss, entropy, lr, gn, bl, skip, _ = sess.run(
                         fetches=run_ops,
                         feed_dict={valid_acc: result})
-                    
-                    self.logger.info(">>> Suggestion updated. LSTM Controller Reward: {}".format(loss))
+
+                    self.logger.info(
+                        ">>> Suggestion updated. LSTM Controller Reward: {}".format(loss))
 
                     candidates = list()
                     for _ in range(experiment.num_trials):
-                        candidates.append(sess.run(controller_ops["sample_arc"]))
+                        candidates.append(
+                            sess.run(controller_ops["sample_arc"]))
 
                     saver.save(sess, experiment.ctrl_cache_file)
-        
+
         organized_candidates = list()
-        trials = list()
+        parameter_assignments = list()
 
         for i in range(experiment.num_trials):
             arc = candidates[i].tolist()
@@ -329,67 +331,62 @@ class NasrlService(api_pb2_grpc.SuggestionServicer):
             organized_arc_str = str(organized_arc_json).replace('\"', '\'')
             nn_config_str = str(nn_config_json).replace('\"', '\'')
 
-            self.logger.info("\n>>> New Neural Network Architecture Candidate #{} (internal representation):".format(i))
+            self.logger.info(
+                "\n>>> New Neural Network Architecture Candidate #{} (internal representation):".format(i))
             self.logger.info(organized_arc_json)
             self.logger.info("\n>>> Corresponding Seach Space Description:")
             self.logger.info(nn_config_str)
 
-            trials.append(api_pb2.Trial(
-                spec=api_pb2.TrialSpec(
-                    experiment_name=request.experiment_name,
-                    parameter_assignments=api_pb2.TrialSpec.ParameterAssignments(
-                        assignments=[
-                            api_pb2.ParameterAssignment(
-                                name="architecture",
-                                value=organized_arc_str
-                            ),
-                            api_pb2.ParameterAssignment(
-                                name="nn_config",
-                                value=nn_config_str
-                            )
-                        ]
-                    )
+            parameter_assignments.append(
+                api_pb2.GetSuggestionsReply.ParameterAssignments(
+                    assignments=[
+                        api_pb2.ParameterAssignment(
+                            name="architecture",
+                            value=organized_arc_str
+                        ),
+                        api_pb2.ParameterAssignment(
+                            name="nn_config",
+                            value=nn_config_str
+                        )
+                    ]
                 )
-            ))
-        
+            )
+
         self.logger.info("")
-        self.logger.info(">>> {} Trials were created for Experiment {}".format(experiment.num_trials, experiment.experiment_name))
+        self.logger.info(">>> {} Trials were created for Experiment {}".format(
+            experiment.num_trials, experiment.experiment_name))
         self.logger.info("")
 
         experiment.ctrl_step += 1
 
-        return api_pb2.GetSuggestionsReply(trials=trials)        
+        return api_pb2.GetSuggestionsReply(parameter_assignments=parameter_assignments)
 
-    def GetEvaluationResult(self, experiment):
-        channel = grpc.beta.implementations.insecure_channel(MANAGER_ADDRESS, MANAGER_PORT)
-        with api_pb2.beta_create_Manager_stub(channel) as client:
-            trials_resp = client.GetTrialList(api_pb2.GetTrialListRequest(experiment_name=experiment.experiment_name), 10)
-            trials_list = trials_resp.trials
-        
+    def GetEvaluationResult(self, trials_list):
         completed_trials = dict()
         failed_trials = []
         for t in trials_list:
             if t.status.condition == api_pb2.TrialStatus.TrialConditionType.SUCCEEDED:
-                obslog_resp = client.GetObservationLog(
-                    api_pb2.GetObservationLogRequest(
-                        trial_name=t.name,
-                        metric_name=t.spec.objective.objective_metric_name
-                    ), 10
-                )
+                target_value = None
+                for metric in t.status.observation.metrics:
+                    if metric.name == t.spec.objective.objective_metric_name:
+                        target_value = metric.value
+                        break
 
                 # Take only the latest metric value
-                completed_trials[t.name] = float(obslog_resp.observation_log.metric_logs[-1].metric.value)
+                completed_trials[t.name] = float(target_value)
 
             if t.status.condition == api_pb2.TrialStatus.TrialConditionType.FAILED:
                 failed_trials.append(t.name)
 
         n_completed = len(completed_trials)
-        self.logger.info(">>> By now: {} Trials succeeded, {} Trials failed".format(n_completed, len(failed_trials)))
+        self.logger.info(">>> By now: {} Trials succeeded, {} Trials failed".format(
+            n_completed, len(failed_trials)))
         for tname in completed_trials:
-            self.logger.info("Trial: {}, Value: {}".format(tname, completed_trials[tname]))
+            self.logger.info("Trial: {}, Value: {}".format(
+                tname, completed_trials[tname]))
         for tname in failed_trials:
             self.logger.info("Trial: {} was failed".format(tname))
-       
+
         if n_completed > 0:
             avg_metrics = sum(completed_trials.values()) / n_completed
             self.logger.info("The average is {}\n".format(avg_metrics))
