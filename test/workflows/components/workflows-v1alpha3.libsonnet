@@ -279,6 +279,10 @@
                     name: "run-bayesian-e2e-tests",
                     template: "run-bayesian-e2e-tests",
                   },
+                  {
+                    name: "run-nasrl-e2e-tests",
+                    template: "run-nasrl-e2e-tests",
+                  },
                 ],
               ],
             },
@@ -331,6 +335,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-grid-e2e-tests", testWorkerImage, [
               "test/scripts/v1alpha3/run-suggestion-grid.sh",
             ]),  // run grid algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-nasrl-e2e-tests", testWorkerImage, [
+              "test/scripts/v1alpha3/run-suggestion-nasrl.sh",
+            ]),  // run nasrl algorithm
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-bayesian-e2e-tests", testWorkerImage, [
               "test/scripts/v1alpha3/run-suggestion-bayesian.sh",
             ]),  // run bayesian algorithm
