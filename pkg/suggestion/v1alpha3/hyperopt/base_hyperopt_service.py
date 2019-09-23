@@ -9,9 +9,9 @@ logger = logging.getLogger("BaseHyperoptService")
 
 class BaseHyperoptService(object):
     def __init__(self, algorithm_name="tpe"):
-        if algorithm_name == 'hyperopt-tpe' or algorithm_name == 'tpe':
+        if algorithm_name == 'tpe':
             self.hyperopt_algorithm = hyperopt.tpe.suggest
-        elif algorithm_name == 'hyperopt-random' or algorithm_name == 'random':
+        elif algorithm_name == 'random':
             self.hyperopt_algorithm = hyperopt.rand.suggest
         # elif algorithm_name == 'hyperopt-anneal':
         #     self.hyperopt_algorithm = hyperopt.anneal.suggest_batch
