@@ -29,11 +29,10 @@ import (
 	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 )
 
-func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Trial, deployedJob *unstructured.Unstructured) error {
-
+func (r *ReconcileTrial) GetDeployedJobStatus(deployedJob *unstructured.Unstructured) (*commonv1.JobConditionType, error) {
+	jobConditionType := commonv1.JobRunning
 	kind := deployedJob.GetKind()
 	status, ok, unerr := unstructured.NestedFieldCopy(deployedJob.Object, "status")
-	now := metav1.Now()
 
 	if ok {
 		statusMap := status.(map[string]interface{})
@@ -44,16 +43,12 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Tri
 			err := runtime.DefaultUnstructuredConverter.FromUnstructured(statusMap, &jobStatus)
 			if err != nil {
 				log.Error(err, "Convert unstructured to status error")
-				return err
+				return nil, err
 			}
 			if jobStatus.Active == 0 && jobStatus.Succeeded > 0 {
-				msg := "Trial has succeeded"
-				instance.MarkTrialStatusSucceeded(TrialSucceededReason, msg)
-				instance.Status.CompletionTime = &now
+				jobConditionType = commonv1.JobSucceeded
 			} else if jobStatus.Failed > 0 {
-				msg := "Trial has failed"
-				instance.MarkTrialStatusFailed(TrialFailedReason, msg)
-				instance.Status.CompletionTime = &now
+				jobConditionType = commonv1.JobFailed
 			}
 		default:
 			jobStatus := commonv1.JobStatus{}
@@ -61,26 +56,33 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Tri
 
 			if err != nil {
 				log.Error(err, "Convert unstructured to status error")
-				return err
+				return nil, err
 			}
 			if len(jobStatus.Conditions) > 0 {
 				lc := jobStatus.Conditions[len(jobStatus.Conditions)-1]
-				if lc.Type == commonv1.JobSucceeded {
-					msg := "Trial has succeeded"
-					instance.MarkTrialStatusSucceeded(TrialSucceededReason, msg)
-					instance.Status.CompletionTime = &now
-				} else if lc.Type == commonv1.JobFailed {
-					msg := "Trial has failed"
-					instance.MarkTrialStatusFailed(TrialFailedReason, msg)
-					instance.Status.CompletionTime = &now
-				}
+				jobConditionType = lc.Type
 			}
 		}
 	} else if unerr != nil {
 		log.Error(unerr, "NestedFieldCopy unstructured to status error")
-		return unerr
+		return nil, unerr
 	}
-	return nil
+	return &jobConditionType, nil
+}
+
+func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Trial, jobCondition commonv1.JobConditionType) {
+	now := metav1.Now()
+	if jobCondition == commonv1.JobSucceeded {
+		msg := "Trial has succeeded"
+		instance.MarkTrialStatusSucceeded(TrialSucceededReason, msg)
+		instance.Status.CompletionTime = &now
+	} else if jobCondition == commonv1.JobFailed {
+		msg := "Trial has failed"
+		instance.MarkTrialStatusFailed(TrialFailedReason, msg)
+		instance.Status.CompletionTime = &now
+	}
+	//else nothing to do
+	return
 }
 
 func (r *ReconcileTrial) UpdateTrialStatusObservation(instance *trialsv1alpha3.Trial, deployedJob *unstructured.Unstructured) error {
@@ -118,6 +120,17 @@ func isTrialObservationAvailable(instance *trialsv1alpha3.Trial) bool {
 			}
 		}
 	}
+	return false
+}
+
+func isTrialComplete(instance *trialsv1alpha3.Trial, jobConditionType commonv1.JobConditionType) bool {
+	if jobConditionType == commonv1.JobSucceeded && isTrialObservationAvailable(instance) {
+		return true
+	}
+	if jobConditionType == commonv1.JobFailed {
+		return true
+	}
+
 	return false
 }
 
