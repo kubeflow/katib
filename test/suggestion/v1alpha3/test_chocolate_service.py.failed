@@ -113,7 +113,7 @@ class TestHyperopt(unittest.TestCase):
             name="test",
             spec=api_pb2.ExperimentSpec(
                 algorithm=api_pb2.AlgorithmSpec(
-                    algorithm_name="chocolate-grid",
+                    algorithm_name="grid",
                     algorithm_setting=[
                         api_pb2.AlgorithmSetting(
                             name="random_state",

@@ -19,30 +19,21 @@ data:
   suggestion: |-
     {
       "random": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-random"
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
       },
       "grid": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-grid"
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-chocolate"
       },
       "hyperband": {
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperband"
       },
       "bayesianoptimization": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-bayesianoptimization"
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-skopt"
+      },
+      "tpe": {
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
       },
       "nasrl": {
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-nasrl"
       },
-      "chocolate-grid": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-chocolate"
-      },
-      "hyperopt-tpe": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
-      },
-      "hyperopt-random": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
-      },
-      "skopt-bayesian-optimization": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-skopt"
-      }
     }

@@ -4,7 +4,7 @@ metadata:
   namespace: kubeflow
   labels:
     controller-tools.k8s.io: "1.0"
-  name: hyperopt-random-example
+  name: tpe-example
 spec:
   objective:
     type: maximize
@@ -13,7 +13,7 @@ spec:
     additionalMetricNames:
       - accuracy
   algorithm:
-    algorithmName: hyperopt-random
+    algorithmName: tpe
   parallelTrialCount: 3
   maxTrialCount: 12
   maxFailedTrialCount: 3

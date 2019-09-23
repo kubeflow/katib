@@ -4,7 +4,7 @@ metadata:
   namespace: kubeflow
   labels:
     controller-tools.k8s.io: "1.0"
-  name: chocolate-grid-example
+  name: random-example
 spec:
   objective:
     type: maximize
@@ -13,7 +13,7 @@ spec:
     additionalMetricNames:
       - accuracy
   algorithm:
-    algorithmName: chocolate-grid
+    algorithmName: random
   parallelTrialCount: 3
   maxTrialCount: 12
   maxFailedTrialCount: 3
@@ -21,9 +21,8 @@ spec:
     - name: --lr
       parameterType: double
       feasibleSpace:
-        min: "0.001"
-        max: "0.01"
-        step: "0.001"
+        min: "0.01"
+        max: "0.03"
     - name: --num-layers
       parameterType: int
       feasibleSpace:
@@ -47,7 +46,6 @@ spec:
           spec:
             template:
               spec:
-                serviceAccountName: metrics-collector # will be dropped
                 containers:
                 - name: {{.Trial}}
                   image: docker.io/katib/mxnet-mnist-example
