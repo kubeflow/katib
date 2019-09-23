@@ -19,28 +19,49 @@ set -o nounset
 set -o pipefail
 
 REGISTRY="gcr.io/kubeflow-images-public"
-PREFIX="katib"
+TAG="latest"
+PREFIX="katib/v1alpha3"
 CMD_PREFIX="cmd"
 
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
 cd ${SCRIPT_ROOT}
 
+usage() { echo "Usage: $0 [-t <tag>] [-r <registry>] [-p <prefix>]" 1>&2; exit 1; }
+
+while getopts ":t::r::p:" opt; do
+    case $opt in
+        t)
+            TAG=${OPTARG}
+            ;;
+        r)
+            REGISTRY=${OPTARG}
+            ;;
+        p)
+            PREFIX=${OPTARG}
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+echo "Registry: ${REGISTRY}, tag: ${TAG}, prefix: ${PREFIX}"
+
 echo "Building core image..."
-docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/katib-controller -f ${CMD_PREFIX}/katib-controller/v1alpha3/Dockerfile .
-docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/katib-manager -f ${CMD_PREFIX}/manager/v1alpha3/Dockerfile .
-docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/katib-manager-rest -f ${CMD_PREFIX}/manager-rest/v1alpha3/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/katib-controller:${TAG} -f ${CMD_PREFIX}/katib-controller/v1alpha3/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/katib-manager:${TAG} -f ${CMD_PREFIX}/manager/v1alpha3/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/katib-manager-rest:${TAG} -f ${CMD_PREFIX}/manager-rest/v1alpha3/Dockerfile .
 
 echo "Building UI image..."
-docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/katib-ui -f ${CMD_PREFIX}/ui/v1alpha3/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/katib-ui:${TAG} -f ${CMD_PREFIX}/ui/v1alpha3/Dockerfile .
 
 echo "Building file metrics collector image..."
-docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/file-metrics-collector -f ${CMD_PREFIX}/metricscollector/v1alpha3/file-metricscollector/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/file-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/v1alpha3/file-metricscollector/Dockerfile .
 
 echo "Building TF Event metrics collector image..."
-docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/tfevent-metrics-collector -f ${CMD_PREFIX}/metricscollector/v1alpha3/tfevent-metricscollector/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/tfevent-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/v1alpha3/tfevent-metricscollector/Dockerfile .
 
 echo "Building suggestion images..."
-docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/suggestion-hyperopt -f ${CMD_PREFIX}/suggestion/hyperopt/v1alpha3/Dockerfile .
-docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/suggestion-skopt -f ${CMD_PREFIX}/suggestion/skopt/v1alpha3/Dockerfile .
-docker build -t ${REGISTRY}/${PREFIX}/v1alpha3/suggestion-chocolate -f ${CMD_PREFIX}/suggestion/chocolate/v1alpha3/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/suggestion-hyperopt:${TAG} -f ${CMD_PREFIX}/suggestion/hyperopt/v1alpha3/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/suggestion-skopt:${TAG} -f ${CMD_PREFIX}/suggestion/skopt/v1alpha3/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/suggestion-chocolate:${TAG} -f ${CMD_PREFIX}/suggestion/chocolate/v1alpha3/Dockerfile .
