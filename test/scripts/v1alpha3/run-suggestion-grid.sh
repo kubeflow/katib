@@ -61,6 +61,6 @@ cd ${GO_DIR}/test/e2e/v1alpha3
 
 echo "Running e2e chocolate grid experiment"
 export KUBECONFIG=$HOME/.kube/config
-go run run-e2e-experiment.go ../../../examples/v1alpha3/chocolate-grid-example.yaml
+go run run-e2e-experiment.go ../../../examples/v1alpha3/grid-example.yaml
 
 exit 0
