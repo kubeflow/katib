@@ -159,9 +159,9 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	mutatedPod.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
 	mutatedPod.Spec.ShareProcessNamespace = pointer.BoolPtr(true)
 
-	if mountFile := getMountFile(trial.Spec.MetricsCollector); mountFile != "" {
-		wrapWorkerContainer(mutatedPod, kind, mountFile, trial.Spec.MetricsCollector)
-		if err = mutateVolume(mutatedPod, kind, mountFile); err != nil {
+	if mountPath, pathKind := getMountPath(trial.Spec.MetricsCollector); mountPath != "" {
+		wrapWorkerContainer(mutatedPod, kind, mountPath, trial.Spec.MetricsCollector)
+		if err = mutateVolume(mutatedPod, kind, mountPath, pathKind); err != nil {
 			return nil, err
 		}
 	}
@@ -203,20 +203,22 @@ func (s *sidecarInjector) getMetricsCollectorImage(cKind common.CollectorKind) (
 }
 
 func getMetricsCollectorArgs(trialName, metricName string, mc trialsv1alpha3.MetricsCollectorSpec) []string {
-	args := []string{"-t", trialName, "-m", katibmanagerv1alpha3.GetManagerAddr(), "-mn", metricName}
-	if mountFile := getMountFile(mc); mountFile != "" {
-		args = append(args, "-f", mountFile)
+	args := []string{"-t", trialName, "-m", metricName, "-s", katibmanagerv1alpha3.GetManagerAddr()}
+	if mountPath, _ := getMountPath(mc); mountPath != "" {
+		args = append(args, "-path", mountPath)
 	}
 	return args
 }
 
-func getMountFile(mc trialsv1alpha3.MetricsCollectorSpec) string {
+func getMountPath(mc trialsv1alpha3.MetricsCollectorSpec) (string, common.FileSystemKind) {
 	if mc.Collector.Kind == common.StdOutCollector {
-		return common.DefaultFilePath
+		return common.DefaultFilePath, common.FileKind
 	} else if mc.Collector.Kind == common.FileCollector {
-		return mc.Source.FileSystemPath.Path
+		return mc.Source.FileSystemPath.Path, common.FileKind
+	} else if mc.Collector.Kind == common.TfEventCollector {
+		return mc.Source.FileSystemPath.Path, common.DirectoryKind
 	} else {
-		return ""
+		return "", common.InvalidKind
 	}
 }
 
@@ -273,16 +275,20 @@ func isWorkerContainer(jobKind string, index int, c v1.Container) bool {
 	return false
 }
 
-func mutateVolume(pod *v1.Pod, jobKind, mountFile string) error {
+func mutateVolume(pod *v1.Pod, jobKind, mountPath string, pathKind common.FileSystemKind) error {
 	metricsVol := v1.Volume{
 		Name: common.MetricsVolume,
 		VolumeSource: v1.VolumeSource{
 			EmptyDir: &v1.EmptyDirVolumeSource{},
 		},
 	}
+	dir := mountPath
+	if pathKind == common.FileKind {
+		dir = filepath.Dir(mountPath)
+	}
 	vm := v1.VolumeMount{
 		Name:      metricsVol.Name,
-		MountPath: filepath.Dir(mountFile),
+		MountPath: dir,
 	}
 	index_list := []int{}
 	for i, c := range pod.Spec.Containers {

@@ -12,7 +12,14 @@ spec:
     goal: 0.99
     objectiveMetricName: accuracy_1
   algorithm:
-    algorithmName: random
+    algorithmName: hyperopt-random
+  metricsCollectorSpec:
+    source:
+      fileSystemPath:
+        path: /train
+        kind: Directory
+    collector:
+      kind: TensorFlowEvent
   parameters:
     - name: --learning_rate
       parameterType: double
@@ -47,16 +54,9 @@ spec:
                       command:
                         - "python"
                         - "/var/tf_mnist/mnist_with_summaries.py"
-                        - "--log_dir=/train/{{.Trial}}"
+                        - "--log_dir=/train/metrics"
                         {{- with .HyperParameters}}
                         {{- range .}}
                         - "{{.Name}}={{.Value}}"
                         {{- end}}
                         {{- end}}
-                      volumeMounts:
-                        - mountPath: "/train"
-                          name: "train"
-                  volumes:
-                    - name: "train"
-                      persistentVolumeClaim:
-                        claimName: "tfevent-volume"

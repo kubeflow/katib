@@ -50,10 +50,10 @@ import (
 	filemc "github.com/kubeflow/katib/pkg/metricscollector/v1alpha3/file-metricscollector"
 )
 
-var metricsFileName = flag.String("f", "", "Metrics File Name")
+var metricsFileName = flag.String("path", "", "Metrics File Path")
 var trialName = flag.String("t", "", "Trial Name")
-var managerService = flag.String("m", "", "Katib Manager service")
-var metricNames = flag.String("mn", "", "Metric names")
+var managerService = flag.String("s", "", "Katib Manager service")
+var metricNames = flag.String("m", "", "Metric names")
 var pollInterval = flag.Duration("p", common.DefaultPollInterval, "Poll interval to check if main process of worker container exit")
 var timeout = flag.Duration("timeout", common.DefaultTimeout, "Timeout to check if main process of worker container exit")
 var waitAll = flag.Bool("w", common.DefaultWaitAll, "Whether wait for all other main process of container exiting")
