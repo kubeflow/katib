@@ -10,6 +10,7 @@ import (
 	"time"
 
 	experimentv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
+	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	api_pb_v1alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 	common_v1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
 
@@ -198,12 +199,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	defer conn.Close()
 
 	resultText := "trialName"
-	expResp, err := c.GetExperiment(
-		context.Background(),
-		&api_pb_v1alpha3.GetExperimentRequest{
-			ExperimentName: experimentName,
-		},
-	)
+	experiment, err := k.katibClient.GetExperiment(experimentName, "kubeflow")
 	if err != nil {
 		log.Printf("GetExperiment from HP job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -211,28 +207,22 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	}
 	log.Printf("Got Experiment")
 	metricsList := map[string]int{}
-	metricsName := expResp.Experiment.Spec.Objective.ObjectiveMetricName
+	metricsName := experiment.Spec.Objective.ObjectiveMetricName
 	resultText += "," + metricsName
 	metricsList[metricsName] = 0
-	for i, m := range expResp.Experiment.Spec.Objective.AdditionalMetricNames {
+	for i, m := range experiment.Spec.Objective.AdditionalMetricNames {
 		resultText += "," + m
 		metricsList[m] = i + 1
 	}
 	log.Printf("Got metrics names")
 	paramList := map[string]int{}
-	for i, p := range expResp.Experiment.Spec.ParameterSpecs.Parameters {
+	for i, p := range experiment.Spec.Parameters {
 		resultText += "," + p.Name
 		paramList[p.Name] = i + len(metricsList)
 	}
 	log.Printf("Got Parameters names")
 
-	trialListResp, err := c.GetTrialList(
-		context.Background(),
-		&api_pb_v1alpha3.GetTrialListRequest{
-			ExperimentName: experimentName,
-			Filter:         "",
-		},
-	)
+	trialList, err := k.katibClient.GetTrialList(experimentName, "kubeflow")
 	if err != nil {
 		log.Printf("GetTrialList from HP job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -240,9 +230,14 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	}
 	log.Printf("Got Trial List")
 
-	for _, t := range trialListResp.Trials {
-
-		if t.Status.Condition == api_pb_v1alpha3.TrialStatus_SUCCEEDED {
+	for _, t := range trialList.Items {
+		succeeded := false
+		for _, condition := range t.Status.Conditions {
+			if condition.Type == trialsv1alpha3.TrialSucceeded {
+				succeeded = true
+			}
+		}
+		if succeeded {
 			obsLogResp, err := c.GetObservationLog(
 				context.Background(),
 				&api_pb_v1alpha3.GetObservationLogRequest{
@@ -262,7 +257,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 				trialResText[metricsList[m.Metric.Name]] = m.Metric.Value
 
 			}
-			for _, trialParam := range t.Spec.ParameterAssignments.Assignments {
+			for _, trialParam := range t.Spec.ParameterAssignments {
 				trialResText[paramList[trialParam.Name]] = trialParam.Value
 			}
 			resultText += "\n" + t.Name + "," + strings.Join(trialResText, ",")

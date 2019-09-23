@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"k8s.io/klog"
+
 	ui "github.com/kubeflow/katib/pkg/ui/v1alpha3"
 )
 
@@ -21,6 +23,7 @@ func main() {
 	flag.Parse()
 	kuh := ui.NewKatibUIHandler()
 
+	klog.Infof("Serving the frontend dir %s", *buildDir)
 	frontend := http.FileServer(http.Dir(*buildDir))
 	http.Handle("/katib/", http.StripPrefix("/katib/", frontend))
 
@@ -40,6 +43,7 @@ func main() {
 	http.HandleFunc("/katib/fetch_trial_templates/", kuh.FetchTrialTemplates)
 	http.HandleFunc("/katib/update_template/", kuh.AddEditDeleteTemplate)
 
+	klog.Infof("Serving at %s:%s", *host, *port)
 	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", *host, *port), nil); err != nil {
 		panic(err)
 	}
