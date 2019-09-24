@@ -58,5 +58,6 @@ echo "Running e2e skopt bayesian optimization experiment"
 export KUBECONFIG=$HOME/.kube/config
 go run run-e2e-experiment.go ../../../examples/v1alpha3/bayesianoptimization-example.yaml
 kubectl -n kubeflow describe suggestion
+kubectl -n kubeflow describe pods
 kubectl -n kubeflow delete experiment bayesianoptimization-example
 exit 0
