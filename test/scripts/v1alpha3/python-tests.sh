@@ -25,4 +25,5 @@ pip install -r test/suggestion/v1alpha3/test_requirements.txt
 pip install -r cmd/suggestion/chocolate/v1alpha3/requirements.txt
 pip install -r cmd/suggestion/hyperopt/v1alpha3/requirements.txt
 pip install -r cmd/suggestion/skopt/v1alpha3/requirements.txt
+pip install -r cmd/suggestion/hyperband/v1alpha3/requirements.txt
 pytest -s ./test
