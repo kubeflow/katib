@@ -15,6 +15,14 @@ data:
         spec:
           containers:
           - name: {{.Trial}}
-            image: alpine
+            image: docker.io/katib/mxnet-mnist-example
+            command:
+            - "python"
+            - "/mxnet/example/image-classification/train_mnist.py"
+            - "--batch-size=64"
+            {{- with .HyperParameters}}
+            {{- range .}}
+            - "{{.Name}}={{.Value}}"
+            {{- end}}
+            {{- end}}
           restartPolicy: Never
-
