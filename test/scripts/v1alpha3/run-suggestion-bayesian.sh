@@ -60,4 +60,5 @@ go run run-e2e-experiment.go ../../../examples/v1alpha3/bayesianoptimization-exa
 kubectl -n kubeflow describe suggestion
 kubectl -n kubeflow describe pods
 kubectl -n kubeflow delete experiment bayesianoptimization-example
+kubectl describe pods
 exit 0
