@@ -20,6 +20,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 func NewKatibUIHandler() *KatibUIHandler {
@@ -199,7 +200,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	defer conn.Close()
 
 	resultText := "trialName"
-	experiment, err := k.katibClient.GetExperiment(experimentName, "kubeflow")
+	experiment, err := k.katibClient.GetExperiment(experimentName)
 	if err != nil {
 		log.Printf("GetExperiment from HP job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -222,7 +223,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	}
 	log.Printf("Got Parameters names")
 
-	trialList, err := k.katibClient.GetTrialList(experimentName, "kubeflow")
+	trialList, err := k.katibClient.GetTrialList(experimentName)
 	if err != nil {
 		log.Printf("GetTrialList from HP job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
