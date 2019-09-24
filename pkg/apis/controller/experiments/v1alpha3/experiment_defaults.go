@@ -62,7 +62,7 @@ func (e *Experiment) setDefaultTrialTemplate() {
 
 func (e *Experiment) setDefaultMetricsCollector() {
 	if e.Spec.MetricsCollectorSpec == nil {
-		e.Spec.MetricsCollectorSpec = &MetricsCollectorSpec{}
+		e.Spec.MetricsCollectorSpec = &common.MetricsCollectorSpec{}
 	}
 	if e.Spec.MetricsCollectorSpec.Collector == nil {
 		e.Spec.MetricsCollectorSpec.Collector = &common.CollectorSpec{

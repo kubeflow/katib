@@ -71,6 +71,12 @@ type Observation struct {
 }
 
 // +k8s:deepcopy-gen=true
+type MetricsCollectorSpec struct {
+	Source    *SourceSpec    `json:"source,omitempty"`
+	Collector *CollectorSpec `json:"collector,omitempty"`
+}
+
+// +k8s:deepcopy-gen=true
 type SourceSpec struct {
 	// Model-train source code can expose metrics by http, such as HTTP endpoint in
 	// prometheus metric format
