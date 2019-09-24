@@ -189,8 +189,8 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         return api_pb2.ValidateAlgorithmSettingsReply()
 
     def ValidateAlgorithmSettings(self, request, context):
-        params = request.experiment_spec.parameter_specs.parameters
-        settings = request.experiment_spec.algorithm.algorithm_setting
+        params = request.experiment.spec.parameter_specs.parameters
+        settings = request.experiment.spec.algorithm.algorithm_setting
         setting_dict = {}
         for setting in settings:
             setting_dict[setting.name] = setting.value
