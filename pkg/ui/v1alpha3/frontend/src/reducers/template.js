@@ -6,7 +6,6 @@ const initialState = {
     editOpen: false,
     deleteOpen: false,
     trialTemplates: [],
-    collectorTemplates: [],
     newTemplateName: '',
     newTemplateYaml: '',
     currentTemplateIndex: '',
@@ -37,13 +36,6 @@ const rootReducer = (state = initialState, action) => {
                                 currentTemplateIndex: action.index,
                                 currentTemplateName: state.trialTemplates[action.index].name,
                             }
-                        case "collector": 
-                            return {
-                                ...state,
-                                deleteOpen: true,
-                                currentTemplateIndex: action.index,
-                                currentTemplateName: state.collectorTemplates[action.index].name,
-                            }
                         default: 
                             return {
                                 ...state,
@@ -57,13 +49,6 @@ const rootReducer = (state = initialState, action) => {
                                 editOpen: true,
                                 currentTemplateIndex: action.index,
                                 edittedTemplate: state.trialTemplates[action.index],
-                            }
-                        case "collector": 
-                            return {
-                                ...state,
-                                editOpen: true,
-                                currentTemplateIndex: action.index,
-                                edittedTemplate: state.collectorTemplates[action.index],
                             }
                         default: 
                             return {
@@ -90,11 +75,6 @@ const rootReducer = (state = initialState, action) => {
                 ...state,
                 trialTemplates: action.templates,
             }
-        case actions.FETCH_COLLECTOR_TEMPLATES_SUCCESS:
-            return {
-                ...state,
-                collectorTemplates: action.templates,
-            }
         case actions.ADD_TEMPLATE_SUCCESS:
         case actions.DELETE_TEMPLATE_SUCCESS:
         case actions.EDIT_TEMPLATE_SUCCESS:
@@ -107,14 +87,6 @@ const rootReducer = (state = initialState, action) => {
                         editOpen: false,
                         trialTemplates: action.templates,
                     } 
-                case "collector":
-                    return {
-                        ...state,
-                        addOpen: false,
-                        deleteOpen: false,
-                        editOpen: false,
-                        collectorTemplates: action.templates,
-                    }
                 default:
                     return {
                         ...state,

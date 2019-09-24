@@ -455,54 +455,6 @@ const goFetchTrialTemplates = function *() {
     }
 }
 
-export const fetchCollectorTemplates = function *() {
-    while (true) {
-        const action = yield take(templateActions.FETCH_COLLECTOR_TEMPLATES_REQUEST);
-        try {
-            const result = yield call(
-                goFetchCollectorTemplates
-            )
-            if (result.status === 200) {
-                let data = Object.assign(result.data, {})
-                data.map((template, i) => {
-                    Object.keys(template).forEach(key => {
-                        const value = template[key];
-                        delete template[key];
-                        template[key.toLowerCase()] = value;
-                    });
-                })
-                yield put({
-                    type: templateActions.FETCH_COLLECTOR_TEMPLATES_SUCCESS,
-                    templates: data
-                })
-            } else {
-                yield put({
-                    type: templateActions.FETCH_COLLECTOR_TEMPLATES_FAILURE,
-                }) 
-            }
-        } catch (err) {
-            yield put({
-                type: templateActions.FETCH_COLLECTOR_TEMPLATES_FAILURE,
-            })
-        }
-    }
-}
-
-const goFetchCollectorTemplates = function *() {
-    try {
-        const result = yield call(
-            axios.get,
-            '/katib/fetch_collector_templates/',
-        )
-        return result
-    } catch (err) {
-        yield put({
-            type: templateActions.FETCH_COLLECTOR_TEMPLATES_FAILURE,
-        })
-    }
-}
-
-
 export const addTemplate = function *() {
     while (true) {
         const action = yield take(templateActions.ADD_TEMPLATE_REQUEST);
@@ -673,7 +625,6 @@ const goDeleteTemplate = function *(name, kind, action) {
 export default function* rootSaga() {
     yield all([
         fork(fetchTrialTemplates),
-        fork(fetchCollectorTemplates),
         fork(fetchHPJobs),
         fork(fetchNASJobs),
         fork(addTemplate), 

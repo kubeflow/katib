@@ -148,18 +148,6 @@ const Menu = (props) => {
                         </ListItemText>
                     </ListItem>
                     <Divider />
-                    {/* METRICS COLLECTOR */}
-                    <ListItem button component={Link} to="/katib/collector">
-                        <ListItemIcon>
-                            <SetttingsIcon color={iconColor} />
-                        </ListItemIcon>
-                        <ListItemText>
-                            <Typography variant={variant} color={color}>
-                                Metrics Collector Manifests
-                            </Typography>
-                        </ListItemText>
-                    </ListItem>
-                    <Divider />
                     {/* ABOUT */}
                     <ListItem button component={Link} to="/katib/about">
                         <ListItemIcon>

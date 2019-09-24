@@ -14,7 +14,6 @@ import NAS from './NAS/Create/NAS';
 import NASJobMonitor from './NAS/Monitor/NASJobMonitor';
 import NASJobInfo from './NAS/Monitor/NASJobInfo';
 import Trial from './Templates/Trial';
-import Collector from './Templates/Collector';
 
 
 const useStyles = makeStyles({
@@ -38,7 +37,6 @@ const App = (props) => {
             <Route exact path="/katib/nas_monitor" component={NASJobMonitor} />
             <Route path="/katib/nas_monitor/:name" component={NASJobInfo} />
             <Route path="/katib/trial" component={Trial} />
-            <Route path="/katib/collector" component={Collector} />
             <Snack />
         </div>
     )
