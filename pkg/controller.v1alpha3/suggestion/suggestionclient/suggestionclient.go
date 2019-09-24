@@ -147,6 +147,12 @@ func (g *General) ConvertExperiment(e *experimentsv1alpha3.Experiment) *suggesti
 			Parameters: convertParameters(e.Spec.Parameters),
 		},
 	}
+	if e.Spec.ParallelTrialCount != nil {
+		res.Spec.ParallelTrialCount = *e.Spec.ParallelTrialCount
+	}
+	if e.Spec.MaxTrialCount != nil {
+		res.Spec.MaxTrialCount = *e.Spec.MaxTrialCount
+	}
 	return res
 }
 
