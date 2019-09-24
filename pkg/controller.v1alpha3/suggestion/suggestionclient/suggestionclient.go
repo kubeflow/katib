@@ -147,6 +147,10 @@ func (g *General) ConvertExperiment(e *experimentsv1alpha3.Experiment) *suggesti
 			Parameters: convertParameters(e.Spec.Parameters),
 		},
 	}
+	// Set NasConfig if the user defines it in Spec.
+	if e.Spec.NasConfig != nil {
+		res.Spec.NasConfig = convertNasConfig(e.Spec.NasConfig)
+	}
 	return res
 }
 
