@@ -26,8 +26,7 @@ ZONE="${GCP_ZONE}"
 PROJECT="${GCP_PROJECT}"
 NAMESPACE="${DEPLOY_NAMESPACE}"
 REGISTRY="${GCP_REGISTRY}"
-# VERSION=$(git describe --tags --always --dirty)
-VERSION="latest"
+VERSION=$(git describe --tags --always --dirty)
 GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
 
 echo "Activating service-account"
