@@ -25,6 +25,7 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         try:
             reply = api_pb2.GetSuggestionsReply()
             experiment = request.experiment
+            self.all_trials = request.trials
             alg_settings = experiment.spec.algorithm.algorithm_setting
 
             param = HyperBandParam.convert(alg_settings)
@@ -126,7 +127,7 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                     return float(m.value)
 
         top_trials = []
-        all_trials = self._get_trials(experiment.name)
+        all_trials = self.all_trials
         latest_trials = self._get_last_trials(all_trials, latest_trials_num)
 
         for t in latest_trials:
