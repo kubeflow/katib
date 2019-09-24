@@ -62,5 +62,6 @@ cd ${GO_DIR}/test/e2e/v1alpha3
 echo "Running e2e NASRL experiment"
 export KUBECONFIG=$HOME/.kube/config
 go run run-e2e-experiment.go ../../../examples/v1alpha3/nasjob-example-RL.yaml
-
+kubectl -n kubeflow describe suggestion
+kubectl -n kubeflow delete experiment nas-rl-example
 exit 0
