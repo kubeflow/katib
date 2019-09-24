@@ -52,9 +52,6 @@ kubectl -n kubeflow get svc
 echo "Katib pods"
 kubectl -n kubeflow get pod
 
-mkdir -p ${GO_DIR}
-cp -r . ${GO_DIR}/
-cp -r pkg/apis/manager/v1alpha3/python/* ${GO_DIR}/test/e2e/v1alpha3
 cd ${GO_DIR}/test/e2e/v1alpha3
 
 echo "Running e2e skopt bayesian optimization experiment"
