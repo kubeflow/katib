@@ -146,6 +146,7 @@ func (g *General) ConvertExperiment(e *experimentsv1alpha3.Experiment) *suggesti
 		ParameterSpecs: &suggestionapi.ExperimentSpec_ParameterSpecs{
 			Parameters: convertParameters(e.Spec.Parameters),
 		},
+		NasConfig: convertNasConfig(e.Spec.NasConfig),
 	}
 	return res
 }

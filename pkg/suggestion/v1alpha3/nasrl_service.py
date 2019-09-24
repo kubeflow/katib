@@ -138,6 +138,7 @@ class NAS_RL_Experiment(object):
 
 class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
     def __init__(self, logger=None):
+        super(NasrlService, self).__init__()
         if logger == None:
             self.logger = getLogger(__name__)
             FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
@@ -155,7 +156,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
     def ValidateAlgorithmSettings(self, request, context):
         self.logger.info("Validate Algorithm Settings start")
-        graph_config = request.experiment_spec.nas_config.graph_config
+        graph_config = request.experiment.spec.nas_config.graph_config
 
         # Validate GraphConfig
         # Check InputSize
@@ -172,7 +173,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
         # Validate each operation
         operations_list = list(
-            request.experiment_spec.nas_config.operations.operation)
+            request.experiment.spec.nas_config.operations.operation)
         for operation in operations_list:
 
             # Check OperationType
