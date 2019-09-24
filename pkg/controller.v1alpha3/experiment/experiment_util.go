@@ -52,8 +52,7 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 	}
 
 	if expInstance.Spec.MetricsCollectorSpec != nil {
-		trial.Spec.MetricsCollector.Collector = expInstance.Spec.MetricsCollectorSpec.Collector
-		trial.Spec.MetricsCollector.Source = expInstance.Spec.MetricsCollectorSpec.Source
+		trial.Spec.MetricsCollector = *expInstance.Spec.MetricsCollectorSpec
 	}
 
 	if err := r.Create(context.TODO(), trial); err != nil {

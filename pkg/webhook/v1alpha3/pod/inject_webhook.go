@@ -202,7 +202,7 @@ func (s *sidecarInjector) getMetricsCollectorImage(cKind common.CollectorKind) (
 	}
 }
 
-func getMetricsCollectorArgs(trialName, metricName string, mc trialsv1alpha3.MetricsCollectorSpec) []string {
+func getMetricsCollectorArgs(trialName, metricName string, mc common.MetricsCollectorSpec) []string {
 	args := []string{"-t", trialName, "-m", metricName, "-s", katibmanagerv1alpha3.GetManagerAddr()}
 	if mountPath, _ := getMountPath(mc); mountPath != "" {
 		args = append(args, "-path", mountPath)
@@ -210,7 +210,7 @@ func getMetricsCollectorArgs(trialName, metricName string, mc trialsv1alpha3.Met
 	return args
 }
 
-func getMountPath(mc trialsv1alpha3.MetricsCollectorSpec) (string, common.FileSystemKind) {
+func getMountPath(mc common.MetricsCollectorSpec) (string, common.FileSystemKind) {
 	if mc.Collector.Kind == common.StdOutCollector {
 		return common.DefaultFilePath, common.FileKind
 	} else if mc.Collector.Kind == common.FileCollector {
@@ -222,7 +222,7 @@ func getMountPath(mc trialsv1alpha3.MetricsCollectorSpec) (string, common.FileSy
 	}
 }
 
-func wrapWorkerContainer(pod *v1.Pod, jobKind, metricsFile string, mc trialsv1alpha3.MetricsCollectorSpec) {
+func wrapWorkerContainer(pod *v1.Pod, jobKind, metricsFile string, mc common.MetricsCollectorSpec) {
 	if mc.Collector.Kind != common.StdOutCollector {
 		return
 	}

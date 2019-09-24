@@ -48,7 +48,7 @@ type ExperimentSpec struct {
 	RetainHistoricalData bool `json:"retainHistoricalData,omitempty"`
 
 	// For v1alpha3 we will keep the metrics collector implementation same as v1alpha1.
-	MetricsCollectorSpec *MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
+	MetricsCollectorSpec *common.MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
 
 	NasConfig *NasConfig `json:"nasConfig,omitempty"`
 
@@ -218,11 +218,6 @@ type GraphConfig struct {
 type Operation struct {
 	OperationType string          `json:"operationType,omitempty"`
 	Parameters    []ParameterSpec `json:"parameters,omitempty"`
-}
-
-type MetricsCollectorSpec struct {
-	Source    *common.SourceSpec    `json:"source,omitempty"`
-	Collector *common.CollectorSpec `json:"collector,omitempty"`
 }
 
 func init() {

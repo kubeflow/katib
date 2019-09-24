@@ -37,12 +37,7 @@ type TrialSpec struct {
 	RetainRun bool `json:"retainRun,omitempty"`
 
 	// Describes how metrics will be collected
-	MetricsCollector MetricsCollectorSpec `json:"metricsCollector,omitempty"`
-}
-
-type MetricsCollectorSpec struct {
-	Source    *common.SourceSpec    `json:"source,omitempty"`
-	Collector *common.CollectorSpec `json:"collector,omitempty"`
+	MetricsCollector common.MetricsCollectorSpec `json:"metricsCollector,omitempty"`
 }
 
 type TrialStatus struct {
