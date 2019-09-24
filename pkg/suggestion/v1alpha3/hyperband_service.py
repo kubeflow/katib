@@ -213,7 +213,7 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
         smax = int(math.log(rl)/math.log(eta))
         max_parallel = int(math.ceil(eta**smax))
-        if request.experiment_spec.parallel_trial_count < max_parallel:
+        if request.experiment.spec.parallel_trial_count < max_parallel:
             return self._set_validate_context_error(context,
                                                     "parallelTrialCount must be not less than %d." % max_parallel)
 
