@@ -62,4 +62,5 @@ export KUBECONFIG=$HOME/.kube/config
 go run run-e2e-experiment.go ../../../examples/v1alpha3/bayesianoptimization-example.yaml
 kubectl -n kubeflow describe suggestion
 kubectl -n kubeflow delete experiment bayesianoptimization-example
+kubectl describe pods
 exit 0

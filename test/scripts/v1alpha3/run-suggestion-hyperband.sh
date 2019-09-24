@@ -25,9 +25,6 @@ CLUSTER_NAME="${CLUSTER_NAME}"
 ZONE="${GCP_ZONE}"
 PROJECT="${GCP_PROJECT}"
 NAMESPACE="${DEPLOY_NAMESPACE}"
-REGISTRY="${GCP_REGISTRY}"
-# VERSION=$(git describe --tags --always --dirty)
-VERSION="latest"
 GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
 
 echo "Activating service-account"
@@ -64,4 +61,5 @@ export KUBECONFIG=$HOME/.kube/config
 go run run-e2e-experiment.go ../../../examples/v1alpha3/hyperband-example.yaml
 kubectl -n kubeflow describe suggestion
 kubectl -n kubeflow delete experiment hyperband-example
+kubectl describe pods
 exit 0

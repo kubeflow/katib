@@ -62,4 +62,5 @@ export KUBECONFIG=$HOME/.kube/config
 go run run-e2e-experiment.go ../../../examples/v1alpha3/random-example.yaml
 kubectl -n kubeflow describe suggestion
 kubectl -n kubeflow delete experiment random-example
+kubectl describe pods
 exit 0
