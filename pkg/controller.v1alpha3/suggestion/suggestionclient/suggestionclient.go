@@ -151,6 +151,12 @@ func (g *General) ConvertExperiment(e *experimentsv1alpha3.Experiment) *suggesti
 	if e.Spec.NasConfig != nil {
 		res.Spec.NasConfig = convertNasConfig(e.Spec.NasConfig)
 	}
+	if e.Spec.ParallelTrialCount != nil {
+		res.Spec.ParallelTrialCount = *e.Spec.ParallelTrialCount
+	}
+	if e.Spec.MaxTrialCount != nil {
+		res.Spec.MaxTrialCount = *e.Spec.MaxTrialCount
+	}
 	return res
 }
 
