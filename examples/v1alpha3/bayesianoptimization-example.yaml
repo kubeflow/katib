@@ -49,7 +49,6 @@ spec:
           spec:
             template:
               spec:
-                serviceAccountName: metrics-collector # will be dropped
                 containers:
                 - name: {{.Trial}}
                   image: docker.io/katib/mxnet-mnist-example
