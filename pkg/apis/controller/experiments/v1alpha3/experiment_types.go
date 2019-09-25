@@ -44,9 +44,6 @@ type ExperimentSpec struct {
 	// Max failed trials to mark experiment as failed.
 	MaxFailedTrialCount *int32 `json:"maxFailedTrialCount,omitempty"`
 
-	// Whether to retain historical data in DB after deletion.
-	RetainHistoricalData bool `json:"retainHistoricalData,omitempty"`
-
 	// For v1alpha3 we will keep the metrics collector implementation same as v1alpha1.
 	MetricsCollectorSpec *common.MetricsCollectorSpec `json:"metricsCollectorSpec,omitempty"`
 
