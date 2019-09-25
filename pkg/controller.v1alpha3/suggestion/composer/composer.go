@@ -109,7 +109,7 @@ func (g *General) DesiredService(s *suggestionsv1alpha3.Suggestion) (*corev1.Ser
 }
 
 func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.Container, error) {
-	suggestionContainerImage, err := g.getSuggestionContainerImage(s.Spec.AlgorithmSpec.AlgorithmName)
+	suggestionContainerImage, err := g.getSuggestionContainerImage(s.Spec.AlgorithmName)
 	if err != nil {
 		return nil, err
 	}
