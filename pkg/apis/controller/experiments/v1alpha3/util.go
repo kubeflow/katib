@@ -143,33 +143,3 @@ func (exp *Experiment) MarkExperimentStatusFailed(reason, message string) {
 	}
 	exp.setCondition(ExperimentFailed, v1.ConditionTrue, reason, message)
 }
-
-func (exp *Experiment) NeedUpdateFinalizers() (bool, []string) {
-	deleted := !exp.ObjectMeta.DeletionTimestamp.IsZero()
-	pendingFinalizers := exp.GetFinalizers()
-	contained := false
-	for _, elem := range pendingFinalizers {
-		if elem == cleanDataFinalizer {
-			contained = true
-			break
-		}
-	}
-
-	if !deleted && !contained {
-		if exp.Spec.RetainHistoricalData {
-			return false, []string{}
-		}
-		finalizers := append(pendingFinalizers, cleanDataFinalizer)
-		return true, finalizers
-	}
-	if deleted && contained {
-		finalizers := []string{}
-		for _, pendingFinalizer := range pendingFinalizers {
-			if pendingFinalizer != cleanDataFinalizer {
-				finalizers = append(finalizers, pendingFinalizer)
-			}
-		}
-		return true, finalizers
-	}
-	return false, []string{}
-}
