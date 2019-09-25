@@ -14,7 +14,7 @@ spec:
   algorithm:
     algorithmName: hyperband
     algorithmSettings:
-      - name: "resourceName"
+      - name: "resource_name"
         value: "--num-epochs"
       - name: "eta"
         value: "3"
@@ -41,7 +41,7 @@ spec:
         - ftrl
     - name: --num-epochs
       parametertype: int
-      feasible:
+      feasibleSpace:
         min: "20"
         max: "20"
   trialTemplate:

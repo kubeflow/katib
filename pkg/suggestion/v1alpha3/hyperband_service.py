@@ -194,8 +194,8 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         setting_dict = {}
         for setting in settings:
             setting_dict[setting.name] = setting.value
-        if "r_l" not in setting_dict or "resourceName" not in setting_dict:
-            return self._set_validate_context_error(context, "r_l and resourceName must be set.")
+        if "r_l" not in setting_dict or "resource_name" not in setting_dict:
+            return self._set_validate_context_error(context, "r_l and resource_name must be set.")
         try:
             rl = float(setting_dict["r_l"])
         except:
@@ -219,12 +219,12 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
         valid_resourceName = False
         for param in params:
-            if param.name == setting_dict["resourceName"]:
+            if param.name == setting_dict["resource_name"]:
                 valid_resourceName = True
                 break
         if not valid_resourceName:
             return self._set_validate_context_error(context,
-                                                    "value of resourceName setting must be in parameters.")
+                                                    "value of resource_name setting must be in parameters.")
 
         return api_pb2.ValidateAlgorithmSettingsReply()
 
