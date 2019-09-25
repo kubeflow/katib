@@ -1,4 +1,5 @@
 import logging
+import grpc
 
 from pkg.apis.manager.v1alpha3.python import api_pb2
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
