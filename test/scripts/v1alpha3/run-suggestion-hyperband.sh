@@ -62,4 +62,5 @@ go run run-e2e-experiment.go ../../../examples/v1alpha3/hyperband-example.yaml
 kubectl -n kubeflow describe suggestion
 kubectl -n kubeflow delete experiment hyperband-example
 kubectl describe pods
+kubectl describe deploy
 exit 0

@@ -61,4 +61,5 @@ kubectl -n kubeflow describe suggestion
 kubectl -n kubeflow describe pods
 kubectl -n kubeflow delete experiment bayesianoptimization-example
 kubectl describe pods
+kubectl describe deploy
 exit 0
