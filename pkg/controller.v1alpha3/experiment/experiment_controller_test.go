@@ -234,9 +234,8 @@ func newFakeInstance() *experimentsv1alpha3.Experiment {
 			Namespace: namespace,
 		},
 		Spec: experimentsv1alpha3.ExperimentSpec{
-			RetainHistoricalData: false,
-			ParallelTrialCount:   &parallelCount,
-			MaxTrialCount:        &parallelCount,
+			ParallelTrialCount: &parallelCount,
+			MaxTrialCount:      &parallelCount,
 			Objective: &commonapiv1alpha3.ObjectiveSpec{
 				Type:                commonapiv1alpha3.ObjectiveTypeMaximize,
 				Goal:                &goal,
