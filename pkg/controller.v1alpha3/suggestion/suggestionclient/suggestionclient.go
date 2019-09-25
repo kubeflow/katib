@@ -67,10 +67,9 @@ func (g *General) SyncAssignments(
 	// Algorithm settings in suggestion will overwrite the settings in experiment.
 	filledE := e.DeepCopy()
 	appendAlgorithmSettingsFromSuggestion(filledE, instance.Spec.AlgorithmSpec)
-	experiment := g.ConvertExperiment(e)
 
 	request := &suggestionapi.GetSuggestionsRequest{
-		Experiment:    experiment,
+		Experiment:    g.ConvertExperiment(filledE),
 		Trials:        g.ConvertTrials(ts),
 		RequestNumber: int32(requestNum),
 	}
