@@ -5,6 +5,7 @@ metadata:
   name: hyperband-example
 spec:
   parallelTrialCount: 9
+  maxTrialCount: 9
   objective:
     type: maximize
     goal: 0.99
