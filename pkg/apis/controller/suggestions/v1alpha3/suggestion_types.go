@@ -32,8 +32,8 @@ type SuggestionSpec struct {
 
 // SuggestionStatus defines the observed state of Suggestion
 type SuggestionStatus struct {
-	//Algorithm settings set by the user in the experiment config
-	Algorithm *common.AlgorithmSpec `json:"algorithm,omitempty"`
+	// Algorithmsettings set by the algorithm services.
+	AlgorithmSettings []common.AlgorithmSetting `json:"algorithmSettings,omitempty"`
 
 	// Suggestion results
 	Suggestions []TrialAssignment `json:"suggestions,omitempty"`
