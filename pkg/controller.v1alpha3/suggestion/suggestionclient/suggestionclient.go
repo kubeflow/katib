@@ -25,6 +25,7 @@ var (
 	timeout = 60 * time.Second
 )
 
+// SuggestionClient is the interface to communicate with algorithm services.
 type SuggestionClient interface {
 	SyncAssignments(instance *suggestionsv1alpha3.Suggestion, e *experimentsv1alpha3.Experiment,
 		ts []trialsv1alpha3.Trial) error
@@ -32,13 +33,16 @@ type SuggestionClient interface {
 	ValidateAlgorithmSettings(instance *suggestionsv1alpha3.Suggestion, e *experimentsv1alpha3.Experiment) error
 }
 
+// General is the implementation for SuggestionClient.
 type General struct {
 }
 
+// New creates a new SuggestionClient.
 func New() SuggestionClient {
 	return &General{}
 }
 
+// SyncAssignments syncs assignments from algorithm services.
 func (g *General) SyncAssignments(
 	instance *suggestionsv1alpha3.Suggestion,
 	e *experimentsv1alpha3.Experiment,
@@ -60,8 +64,13 @@ func (g *General) SyncAssignments(
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
+	// Algorithm settings in suggestion will overwrite the settings in experiment.
+	filledE := e.DeepCopy()
+	appendAlgorithmSettingsFromSuggestion(filledE, instance.Spec.AlgorithmSpec)
+	experiment := g.ConvertExperiment(e)
+
 	request := &suggestionapi.GetSuggestionsRequest{
-		Experiment:    g.ConvertExperiment(e),
+		Experiment:    experiment,
 		Trials:        g.ConvertTrials(ts),
 		RequestNumber: int32(requestNum),
 	}
@@ -83,10 +92,11 @@ func (g *General) SyncAssignments(
 			})
 	}
 
-	// TODO(gaocegege): Set algorithm settings
+	updateAlgorithmSettings(instance, response.Algorithm)
 	return nil
 }
 
+// ValidateAlgorithmSettings validates if the algorithm specific configurations are valid.
 func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1alpha3.Suggestion, e *experimentsv1alpha3.Experiment) error {
 	logger := log.WithValues("Suggestion", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	endpoint := fmt.Sprintf("%s:%d", instance.Name, consts.DefaultSuggestionPort)
