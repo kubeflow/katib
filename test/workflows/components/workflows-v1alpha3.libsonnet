@@ -287,6 +287,10 @@
                     name: "run-hyperband-e2e-tests",
                     template: "run-hyperband-e2e-tests",
                   },
+                  {
+                    name: "run-tpe-e2e-tests",
+                    template: "run-tpe-e2e-tests",
+                  },
                 ],
               ],
             },
@@ -336,6 +340,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-random-e2e-tests", testWorkerImage, [
               "test/scripts/v1alpha3/run-suggestion-random.sh",
             ]),  // run random algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tpe-e2e-tests", testWorkerImage, [
+              "test/scripts/v1alpha3/run-suggestion-tpe.sh",
+            ]),  // run tpe algorithm
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-hyperband-e2e-tests", testWorkerImage, [
               "test/scripts/v1alpha3/run-suggestion-hyperband.sh",
             ]),  // run hyperband algorithm
