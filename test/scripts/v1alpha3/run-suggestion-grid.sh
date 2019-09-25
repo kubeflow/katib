@@ -59,4 +59,6 @@ export KUBECONFIG=$HOME/.kube/config
 go run run-e2e-experiment.go ../../../examples/v1alpha3/grid-example.yaml
 kubectl -n kubeflow describe suggestion
 kubectl -n kubeflow delete experiment grid-example
+kubectl describe pods
+kubectl describe deploy
 exit 0

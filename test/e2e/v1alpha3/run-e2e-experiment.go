@@ -54,10 +54,14 @@ func main() {
 	if err != nil {
 		log.Fatal("NewClient for Katib failed: ", err)
 	}
-	var maxtrials int32 = 3
-	var paralleltrials int32 = 2
-	exp.Spec.MaxTrialCount = &maxtrials
-	exp.Spec.ParallelTrialCount = &paralleltrials
+	if exp.Spec.Algorithm.AlgorithmName != "hyperband" {
+		// Hyperband will validate the parallel trial count,
+		// thus we should not change it.
+		var maxtrials int32 = 3
+		var paralleltrials int32 = 2
+		exp.Spec.MaxTrialCount = &maxtrials
+		exp.Spec.ParallelTrialCount = &paralleltrials
+	}
 	err = kclient.CreateExperiment(exp)
 	if err != nil {
 		log.Fatal("CreateExperiment from YAML failed: ", err)

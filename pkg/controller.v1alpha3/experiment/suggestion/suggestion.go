@@ -61,7 +61,7 @@ func (g *General) createSuggestion(instance *experimentsv1alpha3.Experiment, sug
 			Namespace: instance.Namespace,
 		},
 		Spec: suggestionsv1alpha3.SuggestionSpec{
-			AlgorithmSpec: instance.Spec.Algorithm,
+			AlgorithmName: instance.Spec.Algorithm.AlgorithmName,
 			Requests:      suggestionRequests,
 		},
 	}
