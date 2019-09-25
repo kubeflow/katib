@@ -154,6 +154,9 @@ func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Re
 		}
 	}
 
+	if err := r.updateSpec(instance, oldS); err != nil {
+		return reconcile.Result{}, err
+	}
 	if err := r.updateStatus(instance, oldS); err != nil {
 		return reconcile.Result{}, err
 	}
