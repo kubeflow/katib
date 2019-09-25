@@ -91,7 +91,9 @@ func (g *General) SyncAssignments(
 			})
 	}
 
-	updateAlgorithmSettings(instance, response.Algorithm)
+	if response.Algorithm != nil {
+		updateAlgorithmSettings(instance, response.Algorithm)
+	}
 	return nil
 }
 
