@@ -33,7 +33,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
-	commonv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 )
 
@@ -56,10 +55,8 @@ func TestReconcile(t *testing.T) {
 			Namespace: "default",
 		},
 		Spec: suggestionsv1alpha3.SuggestionSpec{
-			Requests: 1,
-			AlgorithmSpec: &commonv1alpha3.AlgorithmSpec{
-				AlgorithmName: "random",
-			},
+			Requests:      1,
+			AlgorithmName: "random",
 		},
 	}
 	configMap := newKatibConfigMapInstance()
