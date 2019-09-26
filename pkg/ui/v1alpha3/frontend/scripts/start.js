@@ -113,12 +113,13 @@ checkBrowsers(paths.appPath, isInteractive)
       if (isInteractive) {
         clearConsole();
       }
-      console.log(chalk.cyan('Starting the development server...\n'));
+      console.log(chalk.cyan(`Starting the development server on ${HOST}:${port}...\n`));
       openBrowser(urls.localUrlForBrowser);
     });
 
-    ['SIGINT', 'SIGTERM'].forEach(function(sig) {
+    ['SIGINT', 'SIGTERM', 'SIGQUIT'].forEach(function(sig) {
       process.on(sig, function() {
+        console.log("Terminating");
         devServer.close();
         process.exit();
       });
