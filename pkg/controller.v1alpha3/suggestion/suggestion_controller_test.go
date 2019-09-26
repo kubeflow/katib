@@ -39,7 +39,7 @@ import (
 var c client.Client
 
 var expectedRequest = reconcile.Request{NamespacedName: types.NamespacedName{Name: "foo", Namespace: "default"}}
-var depKey = types.NamespacedName{Name: "foo", Namespace: "default"}
+var depKey = types.NamespacedName{Name: "foo-random", Namespace: "default"}
 
 const timeout = time.Second * 5
 
@@ -104,7 +104,7 @@ func TestReconcile(t *testing.T) {
 
 	// Manually delete Deployment since GC isn't enabled in the test control plane
 	g.Eventually(func() error { return c.Delete(context.TODO(), deploy) }, timeout).
-		Should(gomega.MatchError("deployments.apps \"foo\" not found"))
+		Should(gomega.MatchError("deployments.apps \"foo-random\" not found"))
 
 }
 

@@ -8,7 +8,7 @@ import (
 
 func SuggestionLabels(instance *suggestionsv1alpha3.Suggestion) map[string]string {
 	return map[string]string{
-		"deployment":               instance.Name,
+		"deployment":               GetAlgorithmDeploymentName(instance),
 		consts.LabelExperimentName: instance.Name,
 		consts.LabelSuggestionName: instance.Name,
 	}

@@ -18,6 +18,7 @@ import (
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	suggestionapi "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/util"
 )
 
 var (
@@ -53,7 +54,7 @@ func (g *General) SyncAssignments(
 		return nil
 	}
 
-	endpoint := fmt.Sprintf("%s:%d", instance.Name, consts.DefaultSuggestionPort)
+	endpoint := util.GetAlgorithmEndpoint(instance)
 	conn, err := grpc.Dial(endpoint, grpc.WithInsecure())
 	if err != nil {
 		return err
