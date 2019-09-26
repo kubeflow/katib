@@ -368,8 +368,6 @@ e
               "test/scripts/v1alpha3/run-pytorchjob.sh",
             ]),  // run pytorchjob
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-hyperband-e2e-tests", testWorkerImage, [
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-hyperband-e2e-tests", testWorkerImage, [
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-hyperband-e2e-tests", testWorkerImage, [
               "test/scripts/v1alpha3/run-suggestion-hyperband.sh",
             ]),  // run hyperband algorithm
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-grid-e2e-tests", testWorkerImage, [
