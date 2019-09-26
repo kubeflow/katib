@@ -53,10 +53,12 @@ from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
 from pkg.suggestion.v1alpha3.internal.search_space import HyperParameter, HyperParameterSearchSpace
 from pkg.suggestion.v1alpha3.internal.trial import Trial, Assignment
 from pkg.suggestion.v1alpha3.hyperopt.base_hyperopt_service import BaseHyperoptService
+from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
+
 
 # Inherit SuggestionServicer and implement GetSuggestions
 class HyperoptService(
-        api_pb2_grpc.SuggestionServicer):
+        api_pb2_grpc.SuggestionServicer, HealthServicer):
     def GetSuggestions(self, request, context):
         # Convert the experiment in GRPC request to the search space.
         # search_space example:
@@ -122,10 +124,10 @@ Update the [katib-config](../manifests/v1alpha3/katib-controller/katib-config.ya
 ```json
   suggestion: |-
     {
-      "hyperopt-tpe": {
+      "tpe": {
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
       },
-      "hyperopt-random": {
+      "random": {
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
       },
       "<new-algorithm-name>": {
@@ -168,6 +170,107 @@ if __name__ == '__main__':
 
 You can setup the GRPC server using `grpc_testing`, then define you own test cases.
 
-#### E2E Test
+#### E2E Test (Optional)
 
-TODO
+E2e tests help katib verify that the algorithm works well. To add a e2e test for the new algorithm, you need to:
+
+Create a new script `run-suggestion-xxx.sh` in [test/scripts/v1alpha3](../test/scripts/v1alpha3). Here is an example [test/scripts/v1alpha3/build-suggestion-hyperopt.sh](../test/scripts/v1alpha3/build-suggestion-hyperopt.sh) (Replace `<name>` with the new algorithm name):
+
+```bash
+#!/bin/bash
+
+# Copyright 2018 The Kubernetes Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# This shell script is used to build a cluster and create a namespace from our
+# argo workflow
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+CLUSTER_NAME="${CLUSTER_NAME}"
+ZONE="${GCP_ZONE}"
+PROJECT="${GCP_PROJECT}"
+NAMESPACE="${DEPLOY_NAMESPACE}"
+GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
+
+echo "Activating service-account"
+gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+
+echo "Configuring kubectl"
+
+echo "CLUSTER_NAME: ${CLUSTER_NAME}"
+echo "ZONE: ${GCP_ZONE}"
+echo "PROJECT: ${GCP_PROJECT}"
+
+gcloud --project ${PROJECT} container clusters get-credentials ${CLUSTER_NAME} \
+  --zone ${ZONE}
+kubectl config set-context $(kubectl config current-context) --namespace=default
+USER=`gcloud config get-value account`
+
+echo "All Katib components are running."
+kubectl version
+kubectl cluster-info
+echo "Katib deployments"
+kubectl -n kubeflow get deploy
+echo "Katib services"
+kubectl -n kubeflow get svc
+echo "Katib pods"
+kubectl -n kubeflow get pod
+
+mkdir -p ${GO_DIR}
+cp -r . ${GO_DIR}/
+cp -r pkg/apis/manager/v1alpha3/python/* ${GO_DIR}/test/e2e/v1alpha3
+cd ${GO_DIR}/test/e2e/v1alpha3
+
+echo "Running e2e <name> experiment"
+export KUBECONFIG=$HOME/.kube/config
+go run run-e2e-experiment.go ../../../examples/v1alpha3/<name>-example.yaml
+kubectl -n kubeflow describe suggestion
+kubectl -n kubeflow delete experiment <name>-example
+exit 0
+```
+
+Then add a new step in our CI to run the new e2e test case in [test/workflows/components/workflows-v1alpha3.libsonnet](../test/workflows/components/workflows-v1alpha3.libsonnet) (Replace `<name>` with the new algorithm name):
+
+```diff
+// ...
+                  {
+                    name: "run-nasrl-e2e-tests",
+                    template: "run-nasrl-e2e-tests",
+                  },
+                  {
+                    name: "run-hyperband-e2e-tests",
+                    template: "run-hyperband-e2e-tests",
+                  },
+                  {
+                    name: "run-tpe-e2e-tests",
+                    template: "run-tpe-e2e-tests",
+                  },
++                  {
++                    name: "run-<name>-e2e-tests",
++                    template: "run-<name>-e2e-tests",
++                  },
+// ...
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tpe-e2e-tests", testWorkerImage, [
+              "test/scripts/v1alpha3/run-suggestion-tpe.sh",
+            ]),  // run tpe algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-hyperband-e2e-tests", testWorkerImage, [
+              "test/scripts/v1alpha3/run-suggestion-hyperband.sh",
+            ]),  // run hyperband algorithm
++            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-<name>-e2e-tests", testWorkerImage, [
++              "test/scripts/v1alpha3/run-suggestion-<name>.sh",
++            ]),  // run <name> algorithm
+```
