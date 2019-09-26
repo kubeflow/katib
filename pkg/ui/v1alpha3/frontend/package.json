@@ -128,8 +128,8 @@
       "node"
     ],
     "watchPlugins": [
-      "/home/akado2009/go/src/github.com/kubeflow/katib/pkg/ui/frontend/node_modules/jest-watch-typeahead/filename.js",
-      "/home/akado2009/go/src/github.com/kubeflow/katib/pkg/ui/frontend/node_modules/jest-watch-typeahead/testname.js"
+      "./node_modules/jest-watch-typeahead/filename.js",
+      "./node_modules/jest-watch-typeahead/testname.js"
     ]
   },
   "babel": {
