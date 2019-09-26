@@ -9,8 +9,6 @@ import (
 
 	commonv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
-	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
-	managerclientmock "github.com/kubeflow/katib/pkg/mock/v1alpha3/experiment/managerclient"
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1alpha3/experiment/manifest"
 )
 
@@ -38,14 +36,9 @@ spec:
 	defer mockCtrl2.Finish()
 
 	p := manifestmock.NewMockGenerator(mockCtrl)
-	mc := managerclientmock.NewMockManagerClient(mockCtrl2)
-	g := New(p, mc)
+	g := New(p)
 
 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialTFJobTemplate, nil)
-	mc.EXPECT().PreCheckRegisterExperimentInDB(gomock.Any()).Return(
-		&api_pb.PreCheckRegisterExperimentReply{
-			CanRegister: true,
-		}, nil).AnyTimes()
 
 	instance := newFakeInstance()
 	if err := g.(*DefaultValidator).validateTrialTemplate(instance); err == nil {
@@ -66,14 +59,9 @@ metadata:
 	defer mockCtrl2.Finish()
 
 	p := manifestmock.NewMockGenerator(mockCtrl)
-	mc := managerclientmock.NewMockManagerClient(mockCtrl2)
-	g := New(p, mc)
+	g := New(p)
 
 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialJobTemplate, nil)
-	mc.EXPECT().PreCheckRegisterExperimentInDB(gomock.Any()).Return(
-		&api_pb.PreCheckRegisterExperimentReply{
-			CanRegister: true,
-		}, nil).AnyTimes()
 
 	instance := newFakeInstance()
 	if err := g.(*DefaultValidator).validateTrialTemplate(instance); err != nil {
@@ -88,8 +76,7 @@ func TestValidateExperiment(t *testing.T) {
 	defer mockCtrl2.Finish()
 
 	p := manifestmock.NewMockGenerator(mockCtrl)
-	mc := managerclientmock.NewMockManagerClient(mockCtrl2)
-	g := New(p, mc)
+	g := New(p)
 
 	trialJobTemplate := `apiVersion: "batch/v1"
 kind: "Job"
@@ -98,10 +85,6 @@ metadata:
   namespace: fakens`
 
 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialJobTemplate, nil).AnyTimes()
-	mc.EXPECT().PreCheckRegisterExperimentInDB(gomock.Any()).Return(
-		&api_pb.PreCheckRegisterExperimentReply{
-			CanRegister: true,
-		}, nil).AnyTimes()
 
 	tcs := []struct {
 		Instance *experimentsv1alpha3.Experiment

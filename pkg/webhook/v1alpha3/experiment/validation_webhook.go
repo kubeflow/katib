@@ -26,7 +26,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
-	"github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/managerclient"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/manifest"
 	"github.com/kubeflow/katib/pkg/webhook/v1alpha3/experiment/validator"
 )
@@ -41,9 +40,8 @@ type experimentValidator struct {
 
 func NewExperimentValidator(c client.Client) *experimentValidator {
 	p := manifest.New(c)
-	mc := managerclient.New()
 	return &experimentValidator{
-		Validator: validator.New(p, mc),
+		Validator: validator.New(p),
 	}
 }
 
