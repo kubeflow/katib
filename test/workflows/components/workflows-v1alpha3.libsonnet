@@ -1,4 +1,4 @@
-{
+e
   // TODO(https://github.com/ksonnet/ksonnet/issues/222): Taking namespace as an argument is a work around for the fact that ksonnet
   // doesn't support automatically piping in the namespace from the environment to prototypes.
 
@@ -55,6 +55,8 @@
       local srcRootDir = testDir + "/src";
       // The directory containing the kubeflow/katib repo
       local srcDir = srcRootDir + "/kubeflow/katib";
+      // The directory containing the kubeflow/manifests repo;
+      local manifestsDir = srcRootDir + "/kubeflow/manifests";
       local testWorkerImage = "gcr.io/kubeflow-ci/test-worker:v20190802-c6f9140-e3b0c4";
       local pythonImage = "python:3.6-jessie";
       // The name of the NFS volume claim to use for test files.
@@ -104,6 +106,10 @@
                 // Add the source directories to the python path.
                 name: "PYTHONPATH",
                 value: k8sPy + ":" + kubeflowPy,
+              },
+              {
+                name: "MANIFESTS_DIR",
+                value: manifestsDir,
               },
               {
                 // Set the GOPATH
@@ -295,6 +301,14 @@
                     name: "run-tpe-e2e-tests",
                     template: "run-tpe-e2e-tests",
                   },
+                  {
+                    name: "run-tfjob-e2e-tests",
+                    template: "run-tfjob-e2e-tests",
+                  },
+                  {
+                    name: "run-pytorchjob-e2e-tests",
+                    template: "run-pytorchjob-e2e-tests",
+                  },
                 ],
               ],
             },
@@ -321,7 +335,7 @@
                 ],
                 env: prow_env + [{
                   name: "EXTRA_REPOS",
-                  value: "kubeflow/testing@HEAD",
+                  value: "kubeflow/testing@HEAD;kubeflow/manifests@HEAD"",
                 }],
                 image: testWorkerImage,
                 volumeMounts: [
@@ -347,6 +361,14 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tpe-e2e-tests", testWorkerImage, [
               "test/scripts/v1alpha3/run-suggestion-tpe.sh",
             ]),  // run tpe algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tfjob-e2e-tests", testWorkerImage, [
+              "test/scripts/v1alpha3/run-tfjob.sh",
+            ]),  // run tfjob
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-pytorchjob-e2e-tests", testWorkerImage, [
+              "test/scripts/v1alpha3/run-pytorchjob.sh",
+            ]),  // run pytorchjob
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-hyperband-e2e-tests", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-hyperband-e2e-tests", testWorkerImage, [
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-hyperband-e2e-tests", testWorkerImage, [
               "test/scripts/v1alpha3/run-suggestion-hyperband.sh",
             ]),  // run hyperband algorithm
