@@ -118,6 +118,10 @@ mkdir -p ${GO_DIR}
 cp -r . ${GO_DIR}/
 cp -r pkg/apis/manager/v1alpha3/python/* ${GO_DIR}/test/e2e/v1alpha3
 cd ${GO_DIR}/test/e2e/v1alpha3
+
+echo "Building run-e2e-experiment for e2e test cases"
+go build -o run-e2e-experiment github.com/kubeflow/katib/test/e2e/v1alpha3
+
 kubectl apply -f valid-experiment.yaml
 kubectl delete -f valid-experiment.yaml
 set +o errexit
