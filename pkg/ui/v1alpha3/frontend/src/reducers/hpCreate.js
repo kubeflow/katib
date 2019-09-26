@@ -66,7 +66,6 @@ const initialState = {
             feasibleSpace: "feasibleSpace",
             min: "0.01",
             max: "0.03",
-            step: "0.001",
             list: [],
         },
         {

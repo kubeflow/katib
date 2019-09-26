@@ -173,7 +173,7 @@ const Parameters = (props) => {
                                             value={param.max}
                                             onChange={onGeneralEdit(i, "max")}
                                         />
-                                {param.parameterType === "double" &&
+                                {props.algorithmName === "grid" && param.parameterType === "double" &&
                                         <TextField
                                             label={"Step"}
                                             className={classes.textField}
@@ -216,6 +216,7 @@ const mapStateToProps = state => {
     return {
         parameters: state[module].parameters,
         allParameterTypes: state[module].allParameterTypes,
+        algorithmName: state[module].algorithmName
     }
 }
 

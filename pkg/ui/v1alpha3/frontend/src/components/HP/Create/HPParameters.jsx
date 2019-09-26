@@ -95,7 +95,9 @@ const addParameter = (source, destination) => {
         } else {
             tempParam.feasibleSpace.min = param.min
             tempParam.feasibleSpace.max = param.max
-            tempParam.feasibleSpace.step = param.step
+            if (param.step != "") {
+                tempParam.feasibleSpace.step = param.step
+            }
         }
         destination.push(tempParam)
     })
