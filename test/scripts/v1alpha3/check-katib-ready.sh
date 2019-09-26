@@ -90,6 +90,10 @@ cat manifests/v1alpha3/katib-controller/katib-config.yaml
 
 ./scripts/v1alpha3/deploy.sh
 
+mkdir -p ${GO_DIR}
+cp -r . ${GO_DIR}/
+cp -r pkg/apis/manager/v1alpha3/python/* ${GO_DIR}/test/e2e/v1alpha3
+
 echo "Deploying tf-operator from kubeflow/manifests master"
 cd "${MANIFESTS_DIR}/tf-training/tf-job-operator/base"
 kustomize build . | kubectl apply -n kubeflow -f -
@@ -125,9 +129,6 @@ kubectl -n kubeflow get svc
 echo "Katib pods"
 kubectl -n kubeflow get pod
 
-mkdir -p ${GO_DIR}
-cp -r . ${GO_DIR}/
-cp -r pkg/apis/manager/v1alpha3/python/* ${GO_DIR}/test/e2e/v1alpha3
 cd ${GO_DIR}/test/e2e/v1alpha3
 kubectl apply -f valid-experiment.yaml
 kubectl delete -f valid-experiment.yaml
