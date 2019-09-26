@@ -2,7 +2,7 @@ apiVersion: "kubeflow.org/v1alpha3"
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: random-experiment
+  name: pytorchjob-example
 spec:
   parallelTrialCount: 3
   maxTrialCount: 12

@@ -90,6 +90,17 @@ cat manifests/v1alpha3/katib-controller/katib-config.yaml
 
 ./scripts/v1alpha3/deploy.sh
 
+echo "Deploying tf-operator from kubeflow/manifests master"
+cd "${MANIFESTS_DIR}/tf-training/tf-job-operator/base"
+kustomize build . | kubectl apply -n kubeflow -f -
+
+echo "Deploying pytorch-operator from kubeflow/manifests master"
+cd "${MANIFESTS_DIR}/pytorch-job/pytorch-job-crds/base"
+kustomize build . | kubectl apply -n kubeflow -f -
+cd "${MANIFESTS_DIR}/pytorch-job/pytorch-operator/base/"
+kustomize build . | kubectl apply -n kubeflow -f -
+
+
 TIMEOUT=120
 PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
 until kubectl get pods -n kubeflow | grep Running | [[ $(wc -l) -eq $PODNUM ]]; do
