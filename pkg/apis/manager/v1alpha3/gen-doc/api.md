@@ -1056,19 +1056,6 @@ https://cloud.google.com/service-infrastructure/docs/service-management/referenc
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| RegisterExperiment | [RegisterExperimentRequest](#api.v1.alpha3.RegisterExperimentRequest) | [RegisterExperimentReply](#api.v1.alpha3.RegisterExperimentReply) | Register a Experiment to DB. |
-| PreCheckRegisterExperiment | [RegisterExperimentRequest](#api.v1.alpha3.RegisterExperimentRequest) | [PreCheckRegisterExperimentReply](#api.v1.alpha3.PreCheckRegisterExperimentReply) | PreCheck to register a Experiment to DB. |
-| DeleteExperiment | [DeleteExperimentRequest](#api.v1.alpha3.DeleteExperimentRequest) | [DeleteExperimentReply](#api.v1.alpha3.DeleteExperimentReply) | Delete a Experiment from DB by name. |
-| GetExperiment | [GetExperimentRequest](#api.v1.alpha3.GetExperimentRequest) | [GetExperimentReply](#api.v1.alpha3.GetExperimentReply) | Get a Experiment from DB by name. |
-| GetExperimentList | [GetExperimentListRequest](#api.v1.alpha3.GetExperimentListRequest) | [GetExperimentListReply](#api.v1.alpha3.GetExperimentListReply) | Get a summary list of Experiment from DB. The summary includes name and condition. |
-| UpdateExperimentStatus | [UpdateExperimentStatusRequest](#api.v1.alpha3.UpdateExperimentStatusRequest) | [UpdateExperimentStatusReply](#api.v1.alpha3.UpdateExperimentStatusReply) | Update Status of a experiment. |
-| UpdateAlgorithmExtraSettings | [UpdateAlgorithmExtraSettingsRequest](#api.v1.alpha3.UpdateAlgorithmExtraSettingsRequest) | [UpdateAlgorithmExtraSettingsReply](#api.v1.alpha3.UpdateAlgorithmExtraSettingsReply) | Update AlgorithmExtraSettings. The ExtraSetting is created if it does not exist, otherwise it is overwrited. |
-| GetAlgorithmExtraSettings | [GetAlgorithmExtraSettingsRequest](#api.v1.alpha3.GetAlgorithmExtraSettingsRequest) | [GetAlgorithmExtraSettingsReply](#api.v1.alpha3.GetAlgorithmExtraSettingsReply) | Get all AlgorithmExtraSettings. |
-| RegisterTrial | [RegisterTrialRequest](#api.v1.alpha3.RegisterTrialRequest) | [RegisterTrialReply](#api.v1.alpha3.RegisterTrialReply) | Register a Trial to DB. ID will be filled by manager automatically. |
-| DeleteTrial | [DeleteTrialRequest](#api.v1.alpha3.DeleteTrialRequest) | [DeleteTrialReply](#api.v1.alpha3.DeleteTrialReply) | Delete a Trial from DB by ID. |
-| GetTrialList | [GetTrialListRequest](#api.v1.alpha3.GetTrialListRequest) | [GetTrialListReply](#api.v1.alpha3.GetTrialListReply) | Get a list of Trial from DB by name of a Experiment. |
-| GetTrial | [GetTrialRequest](#api.v1.alpha3.GetTrialRequest) | [GetTrialReply](#api.v1.alpha3.GetTrialReply) | Get a Trial from DB by ID of Trial. |
-| UpdateTrialStatus | [UpdateTrialStatusRequest](#api.v1.alpha3.UpdateTrialStatusRequest) | [UpdateTrialStatusReply](#api.v1.alpha3.UpdateTrialStatusReply) | Update Status of a trial. |
 | ReportObservationLog | [ReportObservationLogRequest](#api.v1.alpha3.ReportObservationLogRequest) | [ReportObservationLogReply](#api.v1.alpha3.ReportObservationLogReply) | Report a log of Observations for a Trial. The log consists of timestamp and value of metric. Katib store every log of metrics. You can see accuracy curve or other metric logs on UI. |
 | GetObservationLog | [GetObservationLogRequest](#api.v1.alpha3.GetObservationLogRequest) | [GetObservationLogReply](#api.v1.alpha3.GetObservationLogReply) | Get all log of Observations for a Trial. |
 
