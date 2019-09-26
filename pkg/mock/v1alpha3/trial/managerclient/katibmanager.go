@@ -34,48 +34,6 @@ func (m *MockManagerClient) EXPECT() *MockManagerClientMockRecorder {
 	return m.recorder
 }
 
-// CreateTrialInDB mocks base method
-func (m *MockManagerClient) CreateTrialInDB(arg0 *v1alpha3.Trial) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateTrialInDB", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CreateTrialInDB indicates an expected call of CreateTrialInDB
-func (mr *MockManagerClientMockRecorder) CreateTrialInDB(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTrialInDB", reflect.TypeOf((*MockManagerClient)(nil).CreateTrialInDB), arg0)
-}
-
-// GetTrialConf mocks base method
-func (m *MockManagerClient) GetTrialConf(arg0 *v1alpha3.Trial) *v1alpha30.Trial {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTrialConf", arg0)
-	ret0, _ := ret[0].(*v1alpha30.Trial)
-	return ret0
-}
-
-// GetTrialConf indicates an expected call of GetTrialConf
-func (mr *MockManagerClientMockRecorder) GetTrialConf(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialConf", reflect.TypeOf((*MockManagerClient)(nil).GetTrialConf), arg0)
-}
-
-// GetTrialObservation mocks base method
-func (m *MockManagerClient) GetTrialObservation(arg0 *v1alpha3.Trial) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTrialObservation", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// GetTrialObservation indicates an expected call of GetTrialObservation
-func (mr *MockManagerClientMockRecorder) GetTrialObservation(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialObservation", reflect.TypeOf((*MockManagerClient)(nil).GetTrialObservation), arg0)
-}
-
 // GetTrialObservationLog mocks base method
 func (m *MockManagerClient) GetTrialObservationLog(arg0 *v1alpha3.Trial) (*v1alpha30.GetObservationLogReply, error) {
 	m.ctrl.T.Helper()
@@ -89,18 +47,4 @@ func (m *MockManagerClient) GetTrialObservationLog(arg0 *v1alpha3.Trial) (*v1alp
 func (mr *MockManagerClientMockRecorder) GetTrialObservationLog(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialObservationLog", reflect.TypeOf((*MockManagerClient)(nil).GetTrialObservationLog), arg0)
-}
-
-// UpdateTrialStatusInDB mocks base method
-func (m *MockManagerClient) UpdateTrialStatusInDB(arg0 *v1alpha3.Trial) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateTrialStatusInDB", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateTrialStatusInDB indicates an expected call of UpdateTrialStatusInDB
-func (mr *MockManagerClientMockRecorder) UpdateTrialStatusInDB(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTrialStatusInDB", reflect.TypeOf((*MockManagerClient)(nil).UpdateTrialStatusInDB), arg0)
 }

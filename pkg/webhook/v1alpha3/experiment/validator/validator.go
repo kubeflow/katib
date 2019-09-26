@@ -15,7 +15,6 @@ import (
 	commonapiv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	commonv1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
-	"github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/managerclient"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/manifest"
 )
 
@@ -28,13 +27,11 @@ type Validator interface {
 
 type DefaultValidator struct {
 	manifest.Generator
-	managerclient.ManagerClient
 }
 
-func New(generator manifest.Generator, managerClient managerclient.ManagerClient) Validator {
+func New(generator manifest.Generator) Validator {
 	return &DefaultValidator{
-		Generator:     generator,
-		ManagerClient: managerClient,
+		Generator: generator,
 	}
 }
 

@@ -22,7 +22,6 @@ import (
 	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
-	managerclientmock "github.com/kubeflow/katib/pkg/mock/v1alpha3/experiment/managerclient"
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1alpha3/experiment/manifest"
 	suggestionmock "github.com/kubeflow/katib/pkg/mock/v1alpha3/experiment/suggestion"
 )
@@ -47,10 +46,6 @@ func TestCreateExperiment(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mc := managerclientmock.NewMockManagerClient(mockCtrl)
-	mc.EXPECT().CreateExperimentInDB(gomock.Any()).Return(nil).AnyTimes()
-	mc.EXPECT().UpdateExperimentStatusInDB(gomock.Any()).Return(nil).AnyTimes()
-	mc.EXPECT().DeleteExperimentInDB(gomock.Any()).Return(nil).AnyTimes()
 
 	mockCtrl2 := gomock.NewController(t)
 	defer mockCtrl2.Finish()
@@ -112,10 +107,6 @@ func TestReconcileExperiment(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mc := managerclientmock.NewMockManagerClient(mockCtrl)
-	mc.EXPECT().CreateExperimentInDB(gomock.Any()).Return(nil).AnyTimes()
-	mc.EXPECT().UpdateExperimentStatusInDB(gomock.Any()).Return(nil).AnyTimes()
-	mc.EXPECT().DeleteExperimentInDB(gomock.Any()).Return(nil).AnyTimes()
 
 	mockCtrl2 := gomock.NewController(t)
 	defer mockCtrl2.Finish()

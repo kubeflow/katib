@@ -326,13 +326,7 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 
 	defer conn.Close()
 
-	trialListResp, err := c.GetTrialList(
-		context.Background(),
-		&api_pb_v1alpha3.GetTrialListRequest{
-			ExperimentName: experimentName,
-			Filter:         "",
-		},
-	)
+	trials, err := k.katibClient.GetTrialList(experimentName)
 	if err != nil {
 		log.Printf("GetTrialList from NAS job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -340,9 +334,14 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 	}
 	log.Printf("Got Trial List")
 
-	for i, t := range trialListResp.Trials {
-
-		if t.Status.Condition == api_pb_v1alpha3.TrialStatus_SUCCEEDED {
+	for i, t := range trials.Items {
+		succeeded := false
+		for _, condition := range t.Status.Conditions {
+			if condition.Type == trialsv1alpha3.TrialSucceeded {
+				succeeded = true
+			}
+		}
+		if succeeded {
 			obsLogResp, err := c.GetObservationLog(
 				context.Background(),
 				&api_pb_v1alpha3.GetObservationLogRequest{
@@ -363,7 +362,7 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 				metricsValue = append(metricsValue, m.Metric.Value)
 
 			}
-			for _, trialParam := range t.Spec.ParameterAssignments.Assignments {
+			for _, trialParam := range t.Spec.ParameterAssignments {
 				if trialParam.Name == "architecture" {
 					architecture = trialParam.Value
 				}
