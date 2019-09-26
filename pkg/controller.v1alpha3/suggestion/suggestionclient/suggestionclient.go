@@ -49,7 +49,7 @@ func (g *General) SyncAssignments(
 	e *experimentsv1alpha3.Experiment,
 	ts []trialsv1alpha3.Trial) error {
 	logger := log.WithValues("Suggestion", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	requestNum := int(instance.Spec.Requests) - len(instance.Status.Suggestions)
+	requestNum := int(instance.Spec.Requests) - int(instance.Status.SuggestionCount)
 	if requestNum <= 0 {
 		return nil
 	}
@@ -92,6 +92,7 @@ func (g *General) SyncAssignments(
 				ParameterAssignments: composeParameterAssignments(t.Assignments),
 			})
 	}
+	instance.Status.SuggestionCount = int32(len(instance.Status.Suggestions))
 
 	if response.Algorithm != nil {
 		updateAlgorithmSettings(instance, response.Algorithm)
