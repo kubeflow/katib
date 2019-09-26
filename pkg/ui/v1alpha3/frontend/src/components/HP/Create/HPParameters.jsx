@@ -62,7 +62,7 @@ const SectionInTypography = (name, classes) => {
                     <Typography variant="h6">
                         {name}
                     </Typography>
-                <hr />
+                    <hr />
                 </Grid>
             </Grid>
         </div>
@@ -86,7 +86,7 @@ const addAlgorithmSettings = (spec, destination) => {
 
 const addParameter = (source, destination) => {
     source.map((param, i) => {
-        let  tempParam = {}
+        let tempParam = {}
         tempParam.name = param.name
         tempParam.parameterType = param.parameterType
         tempParam.feasibleSpace = {}
@@ -95,6 +95,9 @@ const addParameter = (source, destination) => {
         } else {
             tempParam.feasibleSpace.min = param.min
             tempParam.feasibleSpace.max = param.max
+            if (param.step != "") {
+                tempParam.feasibleSpace.step = param.step
+            }
         }
         destination.push(tempParam)
     })
@@ -111,15 +114,15 @@ const HPParameters = (props) => {
         data.spec.objective = {}
         deCapitalizeFirstLetterAndAppend(props.objective, data.spec.objective)
         data.spec.objective.additionalMetricNames = props.additionalMetricNames.map((metrics, i) => metrics.value)
-        
+
         data.spec.algorithm = {}
         data.spec.algorithm.algorithmName = props.algorithmName
-        data.spec.algorithm.algorithmSettings = [] 
+        data.spec.algorithm.algorithmSettings = []
         addAlgorithmSettings(props.algorithmSettings, data.spec.algorithm.algorithmSettings)
-       
+
         data.spec.parameters = []
         addParameter(props.parameters, data.spec.parameters)
-        
+
         //TODO: Add support not only for default ConfigMap for Trial-Templates
         data.spec.trialTemplate = {
             goTemplate: {
@@ -137,29 +140,29 @@ const HPParameters = (props) => {
     const { classes } = props;
 
     return (
-            <div className={classes.root}>
-                {/* Common Metadata */}
-                {SectionInTypography("Metadata", classes)}
-                <br />
-                <CommonParametersMeta />
-                {SectionInTypography("Common Parameters", classes)}
-                <CommonParametersSpec />
-                {SectionInTypography("Objective", classes)}
-                <Objective />
-                {SectionInTypography("Algorithm", classes)}
-                <Algorithm/>
+        <div className={classes.root}>
+            {/* Common Metadata */}
+            {SectionInTypography("Metadata", classes)}
+            <br />
+            <CommonParametersMeta />
+            {SectionInTypography("Common Parameters", classes)}
+            <CommonParametersSpec />
+            {SectionInTypography("Objective", classes)}
+            <Objective />
+            {SectionInTypography("Algorithm", classes)}
+            <Algorithm />
 
-                {SectionInTypography("Parameters", classes)}
-                <Parameters />
-                {SectionInTypography("Trial Spec", classes)}
-                <TrialSpecParam />
-                
-                <div className={classes.submit}>
-                    <Button variant="contained" color={"primary"} className={classes.button} onClick={submitJob}>
-                        Deploy
+            {SectionInTypography("Parameters", classes)}
+            <Parameters />
+            {SectionInTypography("Trial Spec", classes)}
+            <TrialSpecParam />
+
+            <div className={classes.submit}>
+                <Button variant="contained" color={"primary"} className={classes.button} onClick={submitJob}>
+                    Deploy
                     </Button>
-                </div>                
             </div>
+        </div>
     )
 }
 

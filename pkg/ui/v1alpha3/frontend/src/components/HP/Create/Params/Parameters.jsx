@@ -159,7 +159,7 @@ const Parameters = (props) => {
                                     }))
                                     
                                 }
-                                {param.feasibleSpace === "feasibleSpace" && 
+                                {param.feasibleSpace === "feasibleSpace" &&
                                     <div>
                                         <TextField
                                             label={"Min"}
@@ -173,7 +173,15 @@ const Parameters = (props) => {
                                             value={param.max}
                                             onChange={onGeneralEdit(i, "max")}
                                         />
-                                    </div>
+                                {props.algorithmName === "grid" && param.parameterType === "double" &&
+                                        <TextField
+                                            label={"Step"}
+                                            className={classes.textField}
+                                            value={param.step}
+                                            onChange={onGeneralEdit(i, "step")}
+                                        />
+                                }
+                                </div>
                                 }
                             </Grid>
                             <Grid item xs={1}>
@@ -208,6 +216,7 @@ const mapStateToProps = state => {
     return {
         parameters: state[module].parameters,
         allParameterTypes: state[module].allParameterTypes,
+        algorithmName: state[module].algorithmName
     }
 }
 
