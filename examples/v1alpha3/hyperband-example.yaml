@@ -41,7 +41,7 @@ spec:
         - adam
         - ftrl
     - name: --num-epochs
-      parametertype: int
+      parameterType: int
       feasibleSpace:
         min: "20"
         max: "20"
