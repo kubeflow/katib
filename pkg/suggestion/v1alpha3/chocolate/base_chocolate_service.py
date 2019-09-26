@@ -32,12 +32,8 @@ class BaseChocolateService(object):
                 chocolate_search_space[key] = choco.quantized_uniform(
                     int(param.min), int(param.max), 1)
             elif param.type == DOUBLE:
-                if param.step != None:
-                    chocolate_search_space[key] = choco.quantized_uniform(
-                        float(param.min), float(param.max), float(param.step))
-                else:
-                    chocolate_search_space[key] = choco.uniform(
-                        float(param.min), float(param.max))
+                chocolate_search_space[key] = choco.quantized_uniform(
+                    float(param.min), float(param.max), float(param.step))
             elif param.type == CATEGORICAL:
                 chocolate_search_space[key] = choco.choice(param.list)
             else:
@@ -63,7 +59,8 @@ class BaseChocolateService(object):
             sampler = choco.MOCMAES(
                 conn, chocolate_search_space, mu=mu, clear_db=True)
         else:
-            raise Exception('"Failed to create the algortihm: {}'.format(self.algorithm_name))
+            raise Exception(
+                '"Failed to create the algortihm: {}'.format(self.algorithm_name))
 
         for index, trial in enumerate(trials):
             loss_for_choco = float(trial.target_metric.value)
