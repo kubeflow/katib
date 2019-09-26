@@ -54,7 +54,7 @@ func (g *General) DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.
 	}
 	d := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      s.Name,
+			Name:      util.GetAlgorithmDeploymentName(s),
 			Namespace: s.Namespace,
 		},
 		Spec: appsv1.DeploymentSpec{
@@ -90,7 +90,7 @@ func (g *General) DesiredService(s *suggestionsv1alpha3.Suggestion) (*corev1.Ser
 
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      s.Name,
+			Name:      util.GetAlgorithmServiceName(s),
 			Namespace: s.Namespace,
 		},
 		Spec: corev1.ServiceSpec{
