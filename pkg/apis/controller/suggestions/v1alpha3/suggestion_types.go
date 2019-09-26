@@ -35,6 +35,9 @@ type SuggestionStatus struct {
 	// Algorithmsettings set by the algorithm services.
 	AlgorithmSettings []common.AlgorithmSetting `json:"algorithmSettings,omitempty"`
 
+	// Number of suggestion results
+	SuggestionCount int32 `json:"suggestionCount,omitempty"`
+
 	// Suggestion results
 	Suggestions []TrialAssignment `json:"suggestions,omitempty"`
 

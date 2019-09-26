@@ -23,8 +23,8 @@ func (f *Fake) SyncAssignments(
 	instance *suggestionsv1alpha3.Suggestion,
 	e *experimentsv1alpha3.Experiment,
 	ts []trialsv1alpha3.Trial) error {
-	if len(instance.Status.Suggestions) != int(instance.Spec.Requests) {
-		for i := 0; i < int(instance.Spec.Requests)-len(instance.Status.Suggestions); i++ {
+	if int(instance.Status.SuggestionCount) != int(instance.Spec.Requests) {
+		for i := 0; i < int(instance.Spec.Requests)-int(instance.Status.SuggestionCount); i++ {
 			name := fmt.Sprintf("%s-%s", instance.Name, utilrand.String(8))
 			instance.Status.Suggestions = append(instance.Status.Suggestions, suggestionsv1alpha3.TrialAssignment{
 				Name: name,

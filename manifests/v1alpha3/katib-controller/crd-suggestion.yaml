@@ -5,7 +5,16 @@ metadata:
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.conditions[-1:].type
+    name: Type
+    type: string
+  - JSONPath: .status.conditions[-1:].status
     name: Status
+    type: string
+  - JSONPath: .spec.requests
+    name: Requested
+    type: string
+  - JSONPath: .status.suggestionCount
+    name: Assigned
     type: string
   - JSONPath: .metadata.creationTimestamp
     name: Age
