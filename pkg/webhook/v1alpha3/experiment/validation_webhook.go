@@ -18,8 +18,11 @@ package experiment
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
+	v1 "k8s.io/api/core/v1"
+	ktypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -27,6 +30,7 @@ import (
 
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/manifest"
+	"github.com/kubeflow/katib/pkg/webhook/v1alpha3/common"
 	"github.com/kubeflow/katib/pkg/webhook/v1alpha3/experiment/validator"
 )
 
@@ -51,6 +55,26 @@ func (v *experimentValidator) Handle(ctx context.Context, req types.Request) typ
 	if err != nil {
 		return admission.ErrorResponse(http.StatusBadRequest, err)
 	}
+
+	// After metrics collector sidecar injection in Job level done, delete validation for namespace labels
+	ns := &v1.Namespace{}
+	if err := v.client.Get(context.TODO(), ktypes.NamespacedName{Name: req.AdmissionRequest.Namespace}, ns); err != nil {
+		return admission.ErrorResponse(http.StatusInternalServerError, err)
+	}
+	validNS := true
+	if ns.Labels == nil {
+		validNS = false
+	} else {
+		if v, ok := ns.Labels[common.KatibMetricsCollectorInjection]; !ok || v != common.KatibMetricsCollectorInjectionEnabled {
+			validNS = false
+		}
+	}
+	if !validNS {
+		err = fmt.Errorf("Cannot create the Experiment %q in namespace %q: the namespace lacks label \"%s: %s\"",
+			inst.Name, req.AdmissionRequest.Namespace, common.KatibMetricsCollectorInjection, common.KatibMetricsCollectorInjectionEnabled)
+		return admission.ErrorResponse(http.StatusBadRequest, err)
+	}
+
 	err = v.ValidateExperiment(inst)
 	if err != nil {
 		return admission.ErrorResponse(http.StatusBadRequest, err)
