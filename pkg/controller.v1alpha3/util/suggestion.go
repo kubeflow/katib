@@ -15,7 +15,11 @@ func GetAlgorithmServiceName(s *suggestionsv1alpha3.Suggestion) string {
 	return s.Name + "-" + s.Spec.AlgorithmName
 }
 
+// GetAlgorithmEndpoint returns the endpoint of the algorithm service.
 func GetAlgorithmEndpoint(s *suggestionsv1alpha3.Suggestion) string {
 	serviceName := GetAlgorithmServiceName(s)
-	return fmt.Sprintf("%s:%d", serviceName, consts.DefaultSuggestionPort)
+	return fmt.Sprintf("%s.%s:%d",
+		serviceName,
+		s.Namespace,
+		consts.DefaultSuggestionPort)
 }
