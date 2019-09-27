@@ -18,6 +18,8 @@ import Algorithm from './Params/Algorithm';
 
 const module = "hpCreate";
 
+const deploymentNamespace = "kubeflow"
+
 const styles = theme => ({
     root: {
         width: '90%',
@@ -128,7 +130,7 @@ const HPParameters = (props) => {
             goTemplate: {
                 templateSpec: {
                     configMapName: "trial-template",
-                    configMapNamespace: data.metadata.namespace,
+                    configMapNamespace: deploymentNamespace,
                     templatePath: props.trial,
                 }
             }
