@@ -17,8 +17,6 @@ package katibclient
 
 import (
 	"context"
-	"io/ioutil"
-	"strings"
 
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -174,8 +172,7 @@ func (k *KatibClient) UpdateTrialTemplates(newTrialTemplates map[string]string, 
 
 func getNamespace(namespace ...string) string {
 	if len(namespace) == 0 {
-		data, _ := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
-		return strings.TrimSpace(string(data))
+		return consts.DefaultKatibNamespace
 	}
 	return namespace[0]
 }
