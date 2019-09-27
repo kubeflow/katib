@@ -26,14 +26,13 @@ import (
 
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
+	"github.com/kubeflow/katib/pkg/webhook/v1alpha3/common"
 	"github.com/kubeflow/katib/pkg/webhook/v1alpha3/experiment"
 	"github.com/kubeflow/katib/pkg/webhook/v1alpha3/pod"
 )
 
 const (
-	katibControllerName                   = "katib-controller"
-	katibMetricsCollectorInjection        = "katib-metricscollector-injection"
-	katibMetricsCollectorInjectionEnabled = "enabled"
+	katibControllerName = "katib-controller"
 )
 
 func AddToManager(m manager.Manager) error {
@@ -91,7 +90,7 @@ func register(manager manager.Manager, server *webhook.Server) error {
 	}
 	nsSelector := &metav1.LabelSelector{
 		MatchLabels: map[string]string{
-			katibMetricsCollectorInjection: katibMetricsCollectorInjectionEnabled,
+			common.KatibMetricsCollectorInjection: common.KatibMetricsCollectorInjectionEnabled,
 		},
 	}
 	injectWebhook, err := builder.NewWebhookBuilder().
