@@ -128,7 +128,7 @@ const HPParameters = (props) => {
             goTemplate: {
                 templateSpec: {
                     configMapName: "trial-template",
-                    configMapNamespace: data.metadata.namespace,
+                    configMapNamespace: props.trialNamespace,
                     templatePath: props.trial,
                 }
             }
