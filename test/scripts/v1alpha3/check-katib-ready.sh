@@ -88,12 +88,13 @@ sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-skopt@$
 
 cat manifests/v1alpha3/katib-controller/katib-config.yaml
 
-./scripts/v1alpha3/deploy.sh
 
 mkdir -p ${GO_DIR}
 cp -r . ${GO_DIR}/
 cp -r pkg/apis/manager/v1alpha3/python/* ${GO_DIR}/test/e2e/v1alpha3
 
+
+kubectl create ns kubeflow
 echo "Deploying tf-operator from kubeflow/manifests master"
 cd "${MANIFESTS_DIR}/tf-training/tf-job-operator/base"
 kustomize build . | kubectl apply -n kubeflow -f -
@@ -104,6 +105,8 @@ kustomize build . | kubectl apply -n kubeflow -f -
 cd "${MANIFESTS_DIR}/pytorch-job/pytorch-operator/base/"
 kustomize build . | kubectl apply -n kubeflow -f -
 
+cd ${GO_DIR}
+./scripts/v1alpha3/deploy.sh
 
 TIMEOUT=120
 PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
