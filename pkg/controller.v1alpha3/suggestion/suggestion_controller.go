@@ -149,6 +149,11 @@ func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Re
 		if err != nil {
 			r.recorder.Eventf(instance, corev1.EventTypeWarning,
 				consts.ReconcileErrorReason, err.Error())
+
+			// Try updating just the status condition when possible
+			// Status conditions might need to be  updated even in error
+			// Ignore all other status fields else it will be inconsistent during retry
+			_ = r.updateStatusCondition(instance, oldS)
 			logger.Error(err, "Reconcile Suggestion error")
 			return reconcile.Result{}, err
 		}
