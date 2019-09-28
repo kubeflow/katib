@@ -702,6 +702,12 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1alph
 	}
 	return nil
 }
+
+func (d *dbConn) DeleteObservationLog(trialName string) error {
+	_, err := d.db.Exec("DELETE FROM observation_logs WHERE trial_name = ?", trialName)
+	return err
+}
+
 func (d *dbConn) GetObservationLog(trialName string, metricName string, startTime string, endTime string) (*v1alpha3.ObservationLog, error) {
 	qfield := []interface{}{trialName}
 	qstr := ""

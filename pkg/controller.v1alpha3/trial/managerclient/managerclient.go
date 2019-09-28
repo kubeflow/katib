@@ -10,6 +10,8 @@ import (
 type ManagerClient interface {
 	GetTrialObservationLog(
 		instance *trialsv1alpha3.Trial) (*api_pb.GetObservationLogReply, error)
+	DeleteTrialObservationLog(
+		instance *trialsv1alpha3.Trial) (*api_pb.DeleteObservationLogReply, error)
 }
 
 // DefaultClient implements the Client interface.
@@ -30,6 +32,18 @@ func (d *DefaultClient) GetTrialObservationLog(
 		MetricName: objectiveMetricName,
 	}
 	reply, err := common.GetObservationLog(request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (d *DefaultClient) DeleteTrialObservationLog(
+	instance *trialsv1alpha3.Trial) (*api_pb.DeleteObservationLogReply, error) {
+	request := &api_pb.DeleteObservationLogRequest{
+		TrialName: instance.Name,
+	}
+	reply, err := common.DeleteObservationLog(request)
 	if err != nil {
 		return nil, err
 	}

@@ -36,6 +36,15 @@ service Manager {
             body: "*"
             };
     };
+
+    /**
+     * Delete all log of Observations for a Trial.
+     */
+    rpc DeleteObservationLog(DeleteObservationLogRequest) returns (DeleteObservationLogReply){
+        option (google.api.http) = {
+            delete: "/api/Manager/DeleteObservationLog/{{trial_name}"
+            };
+    };
 }
 
 service Suggestion {
@@ -354,6 +363,14 @@ message ReportObservationLogRequest {
 
 message ReportObservationLogReply {
 }
+
+message DeleteObservationLogRequest {
+    string trial_name = 1;
+}
+
+message DeleteObservationLogReply {
+}
+
 
 message GetObservationLogRequest {
     string trial_name = 1;

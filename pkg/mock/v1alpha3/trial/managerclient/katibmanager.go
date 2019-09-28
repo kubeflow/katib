@@ -34,6 +34,21 @@ func (m *MockManagerClient) EXPECT() *MockManagerClientMockRecorder {
 	return m.recorder
 }
 
+// DeleteTrialObservationLog mocks base method
+func (m *MockManagerClient) DeleteTrialObservationLog(arg0 *v1alpha3.Trial) (*v1alpha30.DeleteObservationLogReply, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteTrialObservationLog", arg0)
+	ret0, _ := ret[0].(*v1alpha30.DeleteObservationLogReply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteTrialObservationLog indicates an expected call of DeleteTrialObservationLog
+func (mr *MockManagerClientMockRecorder) DeleteTrialObservationLog(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTrialObservationLog", reflect.TypeOf((*MockManagerClient)(nil).DeleteTrialObservationLog), arg0)
+}
+
 // GetTrialObservationLog mocks base method
 func (m *MockManagerClient) GetTrialObservationLog(arg0 *v1alpha3.Trial) (*v1alpha30.GetObservationLogReply, error) {
 	m.ctrl.T.Helper()

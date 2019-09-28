@@ -16,17 +16,23 @@ limitations under the License.
 package trial
 
 import (
+	"context"
 	"strconv"
 
 	batchv1 "k8s.io/api/batch/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	commonv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
+)
+
+const (
+	cleanMetricsFinalizer = "clean-metrics-in-db"
 )
 
 func (r *ReconcileTrial) GetDeployedJobStatus(deployedJob *unstructured.Unstructured) (*commonv1.JobConditionType, error) {
@@ -111,6 +117,21 @@ func (r *ReconcileTrial) UpdateTrialStatusObservation(instance *trialsv1alpha3.T
 	return nil
 }
 
+func (r *ReconcileTrial) updateFinalizers(instance *trialsv1alpha3.Trial, finalizers []string) (reconcile.Result, error) {
+	if !instance.ObjectMeta.DeletionTimestamp.IsZero() {
+		if _, err := r.DeleteTrialObservationLog(instance); err != nil {
+			return reconcile.Result{}, err
+		}
+	}
+	instance.SetFinalizers(finalizers)
+	if err := r.Update(context.TODO(), instance); err != nil {
+		return reconcile.Result{}, err
+	} else {
+		// Need to requeue because finalizer update does not change metadata.generation
+		return reconcile.Result{Requeue: true}, err
+	}
+}
+
 func isTrialObservationAvailable(instance *trialsv1alpha3.Trial) bool {
 	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
 	if instance.Status.Observation != nil && instance.Status.Observation.Metrics != nil {
@@ -155,4 +176,31 @@ func getBestObjectiveMetricValue(metricLogs []*api_pb.MetricLog, objectiveType c
 
 	}
 	return &bestObjectiveValue
+}
+
+func needUpdateFinalizers(trial *trialsv1alpha3.Trial) (bool, []string) {
+	deleted := !trial.ObjectMeta.DeletionTimestamp.IsZero()
+	pendingFinalizers := trial.GetFinalizers()
+	contained := false
+	for _, elem := range pendingFinalizers {
+		if elem == cleanMetricsFinalizer {
+			contained = true
+			break
+		}
+	}
+
+	if !deleted && !contained {
+		finalizers := append(pendingFinalizers, cleanMetricsFinalizer)
+		return true, finalizers
+	}
+	if deleted && contained {
+		finalizers := []string{}
+		for _, pendingFinalizer := range pendingFinalizers {
+			if pendingFinalizer != cleanMetricsFinalizer {
+				finalizers = append(finalizers, pendingFinalizer)
+			}
+		}
+		return true, finalizers
+	}
+	return false, []string{}
 }

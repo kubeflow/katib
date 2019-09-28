@@ -59,6 +59,20 @@ func (mr *MockKatibDBInterfaceMockRecorder) DeleteExperiment(arg0 interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteExperiment", reflect.TypeOf((*MockKatibDBInterface)(nil).DeleteExperiment), arg0)
 }
 
+// DeleteObservationLog mocks base method
+func (m *MockKatibDBInterface) DeleteObservationLog(arg0 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteObservationLog", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteObservationLog indicates an expected call of DeleteObservationLog
+func (mr *MockKatibDBInterfaceMockRecorder) DeleteObservationLog(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteObservationLog", reflect.TypeOf((*MockKatibDBInterface)(nil).DeleteObservationLog), arg0)
+}
+
 // DeleteTrial mocks base method
 func (m *MockKatibDBInterface) DeleteTrial(arg0 string) error {
 	m.ctrl.T.Helper()

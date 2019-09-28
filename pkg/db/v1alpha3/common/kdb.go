@@ -26,4 +26,5 @@ type KatibDBInterface interface {
 
 	RegisterObservationLog(trialName string, observationLog *v1alpha3.ObservationLog) error
 	GetObservationLog(trialName string, metricName string, startTime string, endTime string) (*v1alpha3.ObservationLog, error)
+	DeleteObservationLog(trialName string) error
 }

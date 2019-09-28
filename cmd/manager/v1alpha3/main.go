@@ -136,6 +136,12 @@ func (s *server) GetObservationLog(ctx context.Context, in *api_pb.GetObservatio
 	}, err
 }
 
+// Delete all log of Observations for a Trial.
+func (s *server) DeleteObservationLog(ctx context.Context, in *api_pb.DeleteObservationLogRequest) (*api_pb.DeleteObservationLogReply, error) {
+	err := dbIf.DeleteObservationLog(in.TrialName)
+	return &api_pb.DeleteObservationLogReply{}, err
+}
+
 func (s *server) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*health_pb.HealthCheckResponse, error) {
 	resp := health_pb.HealthCheckResponse{
 		Status: health_pb.HealthCheckResponse_SERVING,

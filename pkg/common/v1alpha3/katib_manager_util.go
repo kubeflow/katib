@@ -81,3 +81,14 @@ func GetObservationLog(request *api_pb.GetObservationLogRequest) (*api_pb.GetObs
 	kc := kcc.KatibManagerClient
 	return kc.GetObservationLog(ctx, request)
 }
+
+func DeleteObservationLog(request *api_pb.DeleteObservationLogRequest) (*api_pb.DeleteObservationLogReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer closeKatibManagerConnection(kcc)
+	kc := kcc.KatibManagerClient
+	return kc.DeleteObservationLog(ctx, request)
+}

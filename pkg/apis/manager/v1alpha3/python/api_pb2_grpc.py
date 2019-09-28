@@ -28,6 +28,11 @@ class ManagerStub(object):
         request_serializer=api__pb2.GetObservationLogRequest.SerializeToString,
         response_deserializer=api__pb2.GetObservationLogReply.FromString,
         )
+    self.DeleteObservationLog = channel.unary_unary(
+        '/api.v1.alpha3.Manager/DeleteObservationLog',
+        request_serializer=api__pb2.DeleteObservationLogRequest.SerializeToString,
+        response_deserializer=api__pb2.DeleteObservationLogReply.FromString,
+        )
 
 
 class ManagerServicer(object):
@@ -57,6 +62,14 @@ class ManagerServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def DeleteObservationLog(self, request, context):
+    """*
+    Delete all log of Observations for a Trial.
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_ManagerServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -69,6 +82,11 @@ def add_ManagerServicer_to_server(servicer, server):
           servicer.GetObservationLog,
           request_deserializer=api__pb2.GetObservationLogRequest.FromString,
           response_serializer=api__pb2.GetObservationLogReply.SerializeToString,
+      ),
+      'DeleteObservationLog': grpc.unary_unary_rpc_method_handler(
+          servicer.DeleteObservationLog,
+          request_deserializer=api__pb2.DeleteObservationLogRequest.FromString,
+          response_serializer=api__pb2.DeleteObservationLogReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
