@@ -19,10 +19,6 @@ const styles = theme => ({
 });
 
 class Trial extends React.Component {
-
-    componentDidMount() {
-        this.props.fetchTrialTemplates();
-    }
     
     openAddDialog = () => {
         this.props.openDialog("add");

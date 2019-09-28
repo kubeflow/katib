@@ -42,8 +42,8 @@ const styles = theme => ({
 
 class TrialSpecParam extends React.Component {
 
-    componentDidMount() {
-        this.props.fetchTrialTemplates();
+    onTrialNamespaceChange = (event) => {
+        this.props.fetchTrialTemplates(event.target.value);
     }
 
     onTrialChange = (event) => {
@@ -70,6 +70,7 @@ class TrialSpecParam extends React.Component {
                             <TextField
                                 className={"Trial Namespace"}
                                 value={this.props.trialNamespace}
+                                onChange={this.onTrialNamespaceChange}
                             />
                         </Grid>
                     </Grid>
