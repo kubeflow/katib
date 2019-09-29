@@ -83,6 +83,10 @@ func TestCreateTFJobTrial(t *testing.T) {
 	}
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+	g.Eventually(func() bool {
+		return apierrors.IsNotFound(c.Get(context.TODO(),
+			expectedRequest.NamespacedName, instance))
+	}, timeout).Should(gomega.BeTrue())
 }
 
 func TestReconcileTFJobTrial(t *testing.T) {
@@ -96,6 +100,7 @@ func TestReconcileTFJobTrial(t *testing.T) {
 	mc.EXPECT().GetTrialObservationLog(gomock.Any()).Return(&api_pb.GetObservationLogReply{
 		ObservationLog: nil,
 	}, nil).AnyTimes()
+	mc.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(&api_pb.DeleteObservationLogReply{}, nil).AnyTimes()
 
 	// Setup the Manager and Controller.  Wrap the Controller Reconcile function so it writes each request to a
 	// channel when it is finished.
@@ -159,6 +164,7 @@ func TestReconcileTFJobTrial(t *testing.T) {
 func TestReconcileCompletedTFJobTrial(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	instance := newFakeTrialWithTFJob()
+	instance.Name = "tfjob-trial"
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -167,6 +173,7 @@ func TestReconcileCompletedTFJobTrial(t *testing.T) {
 	mc.EXPECT().GetTrialObservationLog(gomock.Any()).Return(&api_pb.GetObservationLogReply{
 		ObservationLog: nil,
 	}, nil).AnyTimes()
+	mc.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(&api_pb.DeleteObservationLogReply{}, nil).AnyTimes()
 
 	// Setup the Manager and Controller.  Wrap the Controller Reconcile function so it writes each request to a
 	// channel when it is finished.

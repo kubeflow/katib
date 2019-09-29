@@ -156,6 +156,10 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	instance := original.DeepCopy()
 
+	if needUpdate, finalizers := needUpdateFinalizers(instance); needUpdate {
+		return r.updateFinalizers(instance, finalizers)
+	}
+
 	if !instance.IsCreated() {
 		if instance.Status.StartTime == nil {
 			now := metav1.Now()
