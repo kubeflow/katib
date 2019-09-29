@@ -6,32 +6,18 @@
 - [api.proto](#api.proto)
     - [AlgorithmSetting](#api.v1.alpha3.AlgorithmSetting)
     - [AlgorithmSpec](#api.v1.alpha3.AlgorithmSpec)
-    - [DeleteExperimentReply](#api.v1.alpha3.DeleteExperimentReply)
-    - [DeleteExperimentRequest](#api.v1.alpha3.DeleteExperimentRequest)
-    - [DeleteTrialReply](#api.v1.alpha3.DeleteTrialReply)
-    - [DeleteTrialRequest](#api.v1.alpha3.DeleteTrialRequest)
+    - [DeleteObservationLogReply](#api.v1.alpha3.DeleteObservationLogReply)
+    - [DeleteObservationLogRequest](#api.v1.alpha3.DeleteObservationLogRequest)
     - [EarlyStoppingSpec](#api.v1.alpha3.EarlyStoppingSpec)
     - [Experiment](#api.v1.alpha3.Experiment)
     - [ExperimentSpec](#api.v1.alpha3.ExperimentSpec)
     - [ExperimentSpec.ParameterSpecs](#api.v1.alpha3.ExperimentSpec.ParameterSpecs)
-    - [ExperimentStatus](#api.v1.alpha3.ExperimentStatus)
-    - [ExperimentSummary](#api.v1.alpha3.ExperimentSummary)
     - [FeasibleSpace](#api.v1.alpha3.FeasibleSpace)
-    - [GetAlgorithmExtraSettingsReply](#api.v1.alpha3.GetAlgorithmExtraSettingsReply)
-    - [GetAlgorithmExtraSettingsRequest](#api.v1.alpha3.GetAlgorithmExtraSettingsRequest)
-    - [GetExperimentListReply](#api.v1.alpha3.GetExperimentListReply)
-    - [GetExperimentListRequest](#api.v1.alpha3.GetExperimentListRequest)
-    - [GetExperimentReply](#api.v1.alpha3.GetExperimentReply)
-    - [GetExperimentRequest](#api.v1.alpha3.GetExperimentRequest)
     - [GetObservationLogReply](#api.v1.alpha3.GetObservationLogReply)
     - [GetObservationLogRequest](#api.v1.alpha3.GetObservationLogRequest)
     - [GetSuggestionsReply](#api.v1.alpha3.GetSuggestionsReply)
     - [GetSuggestionsReply.ParameterAssignments](#api.v1.alpha3.GetSuggestionsReply.ParameterAssignments)
     - [GetSuggestionsRequest](#api.v1.alpha3.GetSuggestionsRequest)
-    - [GetTrialListReply](#api.v1.alpha3.GetTrialListReply)
-    - [GetTrialListRequest](#api.v1.alpha3.GetTrialListRequest)
-    - [GetTrialReply](#api.v1.alpha3.GetTrialReply)
-    - [GetTrialRequest](#api.v1.alpha3.GetTrialRequest)
     - [GraphConfig](#api.v1.alpha3.GraphConfig)
     - [Metric](#api.v1.alpha3.Metric)
     - [MetricLog](#api.v1.alpha3.MetricLog)
@@ -44,27 +30,15 @@
     - [Operation.ParameterSpecs](#api.v1.alpha3.Operation.ParameterSpecs)
     - [ParameterAssignment](#api.v1.alpha3.ParameterAssignment)
     - [ParameterSpec](#api.v1.alpha3.ParameterSpec)
-    - [PreCheckRegisterExperimentReply](#api.v1.alpha3.PreCheckRegisterExperimentReply)
-    - [RegisterExperimentReply](#api.v1.alpha3.RegisterExperimentReply)
-    - [RegisterExperimentRequest](#api.v1.alpha3.RegisterExperimentRequest)
-    - [RegisterTrialReply](#api.v1.alpha3.RegisterTrialReply)
-    - [RegisterTrialRequest](#api.v1.alpha3.RegisterTrialRequest)
     - [ReportObservationLogReply](#api.v1.alpha3.ReportObservationLogReply)
     - [ReportObservationLogRequest](#api.v1.alpha3.ReportObservationLogRequest)
     - [Trial](#api.v1.alpha3.Trial)
     - [TrialSpec](#api.v1.alpha3.TrialSpec)
     - [TrialSpec.ParameterAssignments](#api.v1.alpha3.TrialSpec.ParameterAssignments)
     - [TrialStatus](#api.v1.alpha3.TrialStatus)
-    - [UpdateAlgorithmExtraSettingsReply](#api.v1.alpha3.UpdateAlgorithmExtraSettingsReply)
-    - [UpdateAlgorithmExtraSettingsRequest](#api.v1.alpha3.UpdateAlgorithmExtraSettingsRequest)
-    - [UpdateExperimentStatusReply](#api.v1.alpha3.UpdateExperimentStatusReply)
-    - [UpdateExperimentStatusRequest](#api.v1.alpha3.UpdateExperimentStatusRequest)
-    - [UpdateTrialStatusReply](#api.v1.alpha3.UpdateTrialStatusReply)
-    - [UpdateTrialStatusRequest](#api.v1.alpha3.UpdateTrialStatusRequest)
     - [ValidateAlgorithmSettingsReply](#api.v1.alpha3.ValidateAlgorithmSettingsReply)
     - [ValidateAlgorithmSettingsRequest](#api.v1.alpha3.ValidateAlgorithmSettingsRequest)
   
-    - [ExperimentStatus.ExperimentConditionType](#api.v1.alpha3.ExperimentStatus.ExperimentConditionType)
     - [ObjectiveType](#api.v1.alpha3.ObjectiveType)
     - [ParameterType](#api.v1.alpha3.ParameterType)
     - [TrialStatus.TrialConditionType](#api.v1.alpha3.TrialStatus.TrialConditionType)
@@ -119,34 +93,9 @@ Katib API
 
 
 
-<a name="api.v1.alpha3.DeleteExperimentReply"></a>
+<a name="api.v1.alpha3.DeleteObservationLogReply"></a>
 
-### DeleteExperimentReply
-
-
-
-
-
-
-
-<a name="api.v1.alpha3.DeleteExperimentRequest"></a>
-
-### DeleteExperimentRequest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| experiment_name | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="api.v1.alpha3.DeleteTrialReply"></a>
-
-### DeleteTrialReply
+### DeleteObservationLogReply
 
 
 
@@ -154,9 +103,9 @@ Katib API
 
 
 
-<a name="api.v1.alpha3.DeleteTrialRequest"></a>
+<a name="api.v1.alpha3.DeleteObservationLogRequest"></a>
 
-### DeleteTrialRequest
+### DeleteObservationLogRequest
 
 
 
@@ -189,7 +138,6 @@ TODO
 | ----- | ---- | ----- | ----------- |
 | name | [string](#string) |  | Name of Experiment. This is unique in DB. |
 | spec | [ExperimentSpec](#api.v1.alpha3.ExperimentSpec) |  |  |
-| status | [ExperimentStatus](#api.v1.alpha3.ExperimentStatus) |  |  |
 
 
 
@@ -235,39 +183,6 @@ List of ParameterSpec
 
 
 
-<a name="api.v1.alpha3.ExperimentStatus"></a>
-
-### ExperimentStatus
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| start_time | [string](#string) |  | RFC3339 format |
-| completion_time | [string](#string) |  | RFC3339 format |
-| condition | [ExperimentStatus.ExperimentConditionType](#api.v1.alpha3.ExperimentStatus.ExperimentConditionType) |  |  |
-
-
-
-
-
-
-<a name="api.v1.alpha3.ExperimentSummary"></a>
-
-### ExperimentSummary
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| experiment_name | [string](#string) |  |  |
-| status | [ExperimentStatus](#api.v1.alpha3.ExperimentStatus) |  |  |
-
-
-
-
-
-
 <a name="api.v1.alpha3.FeasibleSpace"></a>
 
 ### FeasibleSpace
@@ -282,91 +197,6 @@ Discrete and Categorical type use List.
 | min | [string](#string) |  | Minimum Value |
 | list | [string](#string) | repeated | List of Values. |
 | step | [string](#string) |  | Step for double or int parameter |
-
-
-
-
-
-
-<a name="api.v1.alpha3.GetAlgorithmExtraSettingsReply"></a>
-
-### GetAlgorithmExtraSettingsReply
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| extra_algorithm_settings | [AlgorithmSetting](#api.v1.alpha3.AlgorithmSetting) | repeated |  |
-
-
-
-
-
-
-<a name="api.v1.alpha3.GetAlgorithmExtraSettingsRequest"></a>
-
-### GetAlgorithmExtraSettingsRequest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| experiment_name | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="api.v1.alpha3.GetExperimentListReply"></a>
-
-### GetExperimentListReply
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| experiment_summaries | [ExperimentSummary](#api.v1.alpha3.ExperimentSummary) | repeated |  |
-
-
-
-
-
-
-<a name="api.v1.alpha3.GetExperimentListRequest"></a>
-
-### GetExperimentListRequest
-
-
-
-
-
-
-
-<a name="api.v1.alpha3.GetExperimentReply"></a>
-
-### GetExperimentReply
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| experiment | [Experiment](#api.v1.alpha3.Experiment) |  |  |
-
-
-
-
-
-
-<a name="api.v1.alpha3.GetExperimentRequest"></a>
-
-### GetExperimentRequest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| experiment_name | [string](#string) |  |  |
 
 
 
@@ -448,67 +278,6 @@ Discrete and Categorical type use List.
 | experiment | [Experiment](#api.v1.alpha3.Experiment) |  |  |
 | trials | [Trial](#api.v1.alpha3.Trial) | repeated | all completed trials owned by the experiment. |
 | request_number | [int32](#int32) |  | The number of Suggestion you request at one time. When you set 3 to request_number, you can get three Suggestions at one time. |
-
-
-
-
-
-
-<a name="api.v1.alpha3.GetTrialListReply"></a>
-
-### GetTrialListReply
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| trials | [Trial](#api.v1.alpha3.Trial) | repeated |  |
-
-
-
-
-
-
-<a name="api.v1.alpha3.GetTrialListRequest"></a>
-
-### GetTrialListRequest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| experiment_name | [string](#string) |  |  |
-| filter | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="api.v1.alpha3.GetTrialReply"></a>
-
-### GetTrialReply
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| trial | [Trial](#api.v1.alpha3.Trial) |  |  |
-
-
-
-
-
-
-<a name="api.v1.alpha3.GetTrialRequest"></a>
-
-### GetTrialRequest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| trial_name | [string](#string) |  |  |
 
 
 
@@ -708,71 +477,6 @@ Katib will create each Hyper parameter from this config.
 
 
 
-<a name="api.v1.alpha3.PreCheckRegisterExperimentReply"></a>
-
-### PreCheckRegisterExperimentReply
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| can_register | [bool](#bool) |  |  |
-
-
-
-
-
-
-<a name="api.v1.alpha3.RegisterExperimentReply"></a>
-
-### RegisterExperimentReply
-
-
-
-
-
-
-
-<a name="api.v1.alpha3.RegisterExperimentRequest"></a>
-
-### RegisterExperimentRequest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| experiment | [Experiment](#api.v1.alpha3.Experiment) |  |  |
-
-
-
-
-
-
-<a name="api.v1.alpha3.RegisterTrialReply"></a>
-
-### RegisterTrialReply
-
-
-
-
-
-
-
-<a name="api.v1.alpha3.RegisterTrialRequest"></a>
-
-### RegisterTrialRequest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| trial | [Trial](#api.v1.alpha3.Trial) |  |  |
-
-
-
-
-
-
 <a name="api.v1.alpha3.ReportObservationLogReply"></a>
 
 ### ReportObservationLogReply
@@ -868,84 +572,6 @@ List of ParameterAssignment
 
 
 
-<a name="api.v1.alpha3.UpdateAlgorithmExtraSettingsReply"></a>
-
-### UpdateAlgorithmExtraSettingsReply
-
-
-
-
-
-
-
-<a name="api.v1.alpha3.UpdateAlgorithmExtraSettingsRequest"></a>
-
-### UpdateAlgorithmExtraSettingsRequest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| experiment_name | [string](#string) |  |  |
-| extra_algorithm_settings | [AlgorithmSetting](#api.v1.alpha3.AlgorithmSetting) | repeated |  |
-
-
-
-
-
-
-<a name="api.v1.alpha3.UpdateExperimentStatusReply"></a>
-
-### UpdateExperimentStatusReply
-
-
-
-
-
-
-
-<a name="api.v1.alpha3.UpdateExperimentStatusRequest"></a>
-
-### UpdateExperimentStatusRequest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| experiment_name | [string](#string) |  |  |
-| new_status | [ExperimentStatus](#api.v1.alpha3.ExperimentStatus) |  |  |
-
-
-
-
-
-
-<a name="api.v1.alpha3.UpdateTrialStatusReply"></a>
-
-### UpdateTrialStatusReply
-
-
-
-
-
-
-
-<a name="api.v1.alpha3.UpdateTrialStatusRequest"></a>
-
-### UpdateTrialStatusRequest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| trial_name | [string](#string) |  |  |
-| new_status | [TrialStatus](#api.v1.alpha3.TrialStatus) |  |  |
-
-
-
-
-
-
 <a name="api.v1.alpha3.ValidateAlgorithmSettingsReply"></a>
 
 ### ValidateAlgorithmSettingsReply
@@ -971,22 +597,6 @@ Return INVALID_ARGUMENT Error if Algorithm Settings are not Valid
 
 
  
-
-
-<a name="api.v1.alpha3.ExperimentStatus.ExperimentConditionType"></a>
-
-### ExperimentStatus.ExperimentConditionType
-
-
-| Name | Number | Description |
-| ---- | ------ | ----------- |
-| CREATED | 0 |  |
-| RUNNING | 1 |  |
-| RESTARTING | 2 |  |
-| SUCCEEDED | 3 |  |
-| FAILED | 4 |  |
-| UNKNOWN | 5 |  |
-
 
 
 <a name="api.v1.alpha3.ObjectiveType"></a>
@@ -1058,6 +668,7 @@ https://cloud.google.com/service-infrastructure/docs/service-management/referenc
 | ----------- | ------------ | ------------- | ------------|
 | ReportObservationLog | [ReportObservationLogRequest](#api.v1.alpha3.ReportObservationLogRequest) | [ReportObservationLogReply](#api.v1.alpha3.ReportObservationLogReply) | Report a log of Observations for a Trial. The log consists of timestamp and value of metric. Katib store every log of metrics. You can see accuracy curve or other metric logs on UI. |
 | GetObservationLog | [GetObservationLogRequest](#api.v1.alpha3.GetObservationLogRequest) | [GetObservationLogReply](#api.v1.alpha3.GetObservationLogReply) | Get all log of Observations for a Trial. |
+| DeleteObservationLog | [DeleteObservationLogRequest](#api.v1.alpha3.DeleteObservationLogRequest) | [DeleteObservationLogReply](#api.v1.alpha3.DeleteObservationLogReply) | Delete all log of Observations for a Trial. |
 
 
 <a name="api.v1.alpha3.Suggestion"></a>

@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='api.proto',
   package='api.v1.alpha3',
   syntax='proto3',
-  serialized_pb=_b('\n\tapi.proto\x12\rapi.v1.alpha3\x1a\x1cgoogle/api/annotations.proto\"E\n\rFeasibleSpace\x12\x0b\n\x03max\x18\x01 \x01(\t\x12\x0b\n\x03min\x18\x02 \x01(\t\x12\x0c\n\x04list\x18\x03 \x03(\t\x12\x0c\n\x04step\x18\x04 \x01(\t\"\x89\x01\n\rParameterSpec\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x34\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x1c.api.v1.alpha3.ParameterType\x12\x34\n\x0e\x66\x65\x61sible_space\x18\x03 \x01(\x0b\x32\x1c.api.v1.alpha3.FeasibleSpace\"\x89\x01\n\rObjectiveSpec\x12*\n\x04type\x18\x01 \x01(\x0e\x32\x1c.api.v1.alpha3.ObjectiveType\x12\x0c\n\x04goal\x18\x02 \x01(\x01\x12\x1d\n\x15objective_metric_name\x18\x03 \x01(\t\x12\x1f\n\x17\x61\x64\x64itional_metric_names\x18\x04 \x03(\t\"/\n\x10\x41lgorithmSetting\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\x13\n\x11\x45\x61rlyStoppingSpec\"\xa2\x01\n\rAlgorithmSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x01 \x01(\t\x12:\n\x11\x61lgorithm_setting\x18\x02 \x03(\x0b\x32\x1f.api.v1.alpha3.AlgorithmSetting\x12=\n\x13\x65\x61rly_stopping_spec\x18\x03 \x01(\x0b\x32 .api.v1.alpha3.EarlyStoppingSpec\"\xb1\x01\n\tNasConfig\x12\x30\n\x0cgraph_config\x18\x01 \x01(\x0b\x32\x1a.api.v1.alpha3.GraphConfig\x12\x37\n\noperations\x18\x02 \x01(\x0b\x32#.api.v1.alpha3.NasConfig.Operations\x1a\x39\n\nOperations\x12+\n\toperation\x18\x01 \x03(\x0b\x32\x18.api.v1.alpha3.Operation\"L\n\x0bGraphConfig\x12\x12\n\nnum_layers\x18\x01 \x01(\x05\x12\x13\n\x0binput_sizes\x18\x02 \x03(\x05\x12\x14\n\x0coutput_sizes\x18\x03 \x03(\x05\"\xa9\x01\n\tOperation\x12\x16\n\x0eoperation_type\x18\x01 \x01(\t\x12@\n\x0fparameter_specs\x18\x02 \x01(\x0b\x32\'.api.v1.alpha3.Operation.ParameterSpecs\x1a\x42\n\x0eParameterSpecs\x12\x30\n\nparameters\x18\x01 \x03(\x0b\x32\x1c.api.v1.alpha3.ParameterSpec\"\x9a\x03\n\x0e\x45xperimentSpec\x12\x45\n\x0fparameter_specs\x18\x01 \x01(\x0b\x32,.api.v1.alpha3.ExperimentSpec.ParameterSpecs\x12/\n\tobjective\x18\x02 \x01(\x0b\x32\x1c.api.v1.alpha3.ObjectiveSpec\x12/\n\talgorithm\x18\x03 \x01(\x0b\x32\x1c.api.v1.alpha3.AlgorithmSpec\x12\x16\n\x0etrial_template\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x12\x1c\n\x14parallel_trial_count\x18\x06 \x01(\x05\x12\x17\n\x0fmax_trial_count\x18\x07 \x01(\x05\x12,\n\nnas_config\x18\x08 \x01(\x0b\x32\x18.api.v1.alpha3.NasConfig\x1a\x42\n\x0eParameterSpecs\x12\x30\n\nparameters\x18\x01 \x03(\x0b\x32\x1c.api.v1.alpha3.ParameterSpec\"\xf8\x01\n\x10\x45xperimentStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12J\n\tcondition\x18\x03 \x01(\x0e\x32\x37.api.v1.alpha3.ExperimentStatus.ExperimentConditionType\"k\n\x17\x45xperimentConditionType\x12\x0b\n\x07\x43REATED\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\x0e\n\nRESTARTING\x10\x02\x12\r\n\tSUCCEEDED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x12\x0b\n\x07UNKNOWN\x10\x05\"x\n\nExperiment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12+\n\x04spec\x18\x02 \x01(\x0b\x32\x1d.api.v1.alpha3.ExperimentSpec\x12/\n\x06status\x18\x03 \x01(\x0b\x32\x1f.api.v1.alpha3.ExperimentStatus\"2\n\x13ParameterAssignment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"%\n\x06Metric\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"F\n\tMetricLog\x12\x12\n\ntime_stamp\x18\x01 \x01(\t\x12%\n\x06metric\x18\x02 \x01(\x0b\x32\x15.api.v1.alpha3.Metric\"5\n\x0bObservation\x12&\n\x07metrics\x18\x01 \x03(\x0b\x32\x15.api.v1.alpha3.Metric\"?\n\x0eObservationLog\x12-\n\x0bmetric_logs\x18\x01 \x03(\x0b\x32\x18.api.v1.alpha3.MetricLog\"\xa6\x02\n\tTrialSpec\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12/\n\tobjective\x18\x02 \x01(\x0b\x32\x1c.api.v1.alpha3.ObjectiveSpec\x12L\n\x15parameter_assignments\x18\x03 \x01(\x0b\x32-.api.v1.alpha3.TrialSpec.ParameterAssignments\x12\x10\n\x08run_spec\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x1aO\n\x14ParameterAssignments\x12\x37\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32\".api.v1.alpha3.ParameterAssignment\"\x91\x02\n\x0bTrialStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12@\n\tcondition\x18\x03 \x01(\x0e\x32-.api.v1.alpha3.TrialStatus.TrialConditionType\x12/\n\x0bobservation\x18\x04 \x01(\x0b\x32\x1a.api.v1.alpha3.Observation\"b\n\x12TrialConditionType\x12\x0b\n\x07\x43REATED\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tSUCCEEDED\x10\x02\x12\n\n\x06KILLED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x12\x0b\n\x07UNKNOWN\x10\x05\"i\n\x05Trial\x12\x0c\n\x04name\x18\x01 \x01(\t\x12&\n\x04spec\x18\x02 \x01(\x0b\x32\x18.api.v1.alpha3.TrialSpec\x12*\n\x06status\x18\x03 \x01(\x0b\x32\x1a.api.v1.alpha3.TrialStatus\"J\n\x19RegisterExperimentRequest\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha3.Experiment\"\x19\n\x17RegisterExperimentReply\"7\n\x1fPreCheckRegisterExperimentReply\x12\x14\n\x0c\x63\x61n_register\x18\x01 \x01(\x08\"2\n\x17\x44\x65leteExperimentRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\"\x17\n\x15\x44\x65leteExperimentReply\"/\n\x14GetExperimentRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\"C\n\x12GetExperimentReply\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha3.Experiment\"]\n\x11\x45xperimentSummary\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12/\n\x06status\x18\x02 \x01(\x0b\x32\x1f.api.v1.alpha3.ExperimentStatus\"\x1a\n\x18GetExperimentListRequest\"X\n\x16GetExperimentListReply\x12>\n\x14\x65xperiment_summaries\x18\x01 \x03(\x0b\x32 .api.v1.alpha3.ExperimentSummary\"m\n\x1dUpdateExperimentStatusRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x33\n\nnew_status\x18\x02 \x01(\x0b\x32\x1f.api.v1.alpha3.ExperimentStatus\"\x1d\n\x1bUpdateExperimentStatusReply\"\x81\x01\n#UpdateAlgorithmExtraSettingsRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x41\n\x18\x65xtra_algorithm_settings\x18\x02 \x03(\x0b\x32\x1f.api.v1.alpha3.AlgorithmSetting\"#\n!UpdateAlgorithmExtraSettingsReply\";\n GetAlgorithmExtraSettingsRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\"c\n\x1eGetAlgorithmExtraSettingsReply\x12\x41\n\x18\x65xtra_algorithm_settings\x18\x01 \x03(\x0b\x32\x1f.api.v1.alpha3.AlgorithmSetting\";\n\x14RegisterTrialRequest\x12#\n\x05trial\x18\x01 \x01(\x0b\x32\x14.api.v1.alpha3.Trial\"\x14\n\x12RegisterTrialReply\"(\n\x12\x44\x65leteTrialRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x12\n\x10\x44\x65leteTrialReply\">\n\x13GetTrialListRequest\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12\x0e\n\x06\x66ilter\x18\x02 \x01(\t\"9\n\x11GetTrialListReply\x12$\n\x06trials\x18\x01 \x03(\x0b\x32\x14.api.v1.alpha3.Trial\"%\n\x0fGetTrialRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"4\n\rGetTrialReply\x12#\n\x05trial\x18\x01 \x01(\x0b\x32\x14.api.v1.alpha3.Trial\"^\n\x18UpdateTrialStatusRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12.\n\nnew_status\x18\x02 \x01(\x0b\x32\x1a.api.v1.alpha3.TrialStatus\"\x18\n\x16UpdateTrialStatusReply\"i\n\x1bReportObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x36\n\x0fobservation_log\x18\x02 \x01(\x0b\x32\x1d.api.v1.alpha3.ObservationLog\"\x1b\n\x19ReportObservationLogReply\"1\n\x1b\x44\x65leteObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x1b\n\x19\x44\x65leteObservationLogReply\"i\n\x18GetObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x13\n\x0bmetric_name\x18\x02 \x01(\t\x12\x12\n\nstart_time\x18\x03 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\t\"P\n\x16GetObservationLogReply\x12\x36\n\x0fobservation_log\x18\x01 \x01(\x0b\x32\x1d.api.v1.alpha3.ObservationLog\"\x84\x01\n\x15GetSuggestionsRequest\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha3.Experiment\x12$\n\x06trials\x18\x02 \x03(\x0b\x32\x14.api.v1.alpha3.Trial\x12\x16\n\x0erequest_number\x18\x03 \x01(\x05\"\xef\x01\n\x13GetSuggestionsReply\x12V\n\x15parameter_assignments\x18\x01 \x03(\x0b\x32\x37.api.v1.alpha3.GetSuggestionsReply.ParameterAssignments\x12/\n\talgorithm\x18\x02 \x01(\x0b\x32\x1c.api.v1.alpha3.AlgorithmSpec\x1aO\n\x14ParameterAssignments\x12\x37\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32\".api.v1.alpha3.ParameterAssignment\"Q\n ValidateAlgorithmSettingsRequest\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha3.Experiment\" \n\x1eValidateAlgorithmSettingsReply*U\n\rParameterType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\n\n\x06\x44OUBLE\x10\x01\x12\x07\n\x03INT\x10\x02\x12\x0c\n\x08\x44ISCRETE\x10\x03\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x04*8\n\rObjectiveType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0c\n\x08MINIMIZE\x10\x01\x12\x0c\n\x08MAXIMIZE\x10\x02\x32\xdf\x03\n\x07Manager\x12\x9a\x01\n\x14ReportObservationLog\x12*.api.v1.alpha3.ReportObservationLogRequest\x1a(.api.v1.alpha3.ReportObservationLogReply\",\x82\xd3\xe4\x93\x02&\"!/api/Manager/ReportObservationLog:\x01*\x12\x8e\x01\n\x11GetObservationLog\x12\'.api.v1.alpha3.GetObservationLogRequest\x1a%.api.v1.alpha3.GetObservationLogReply\")\x82\xd3\xe4\x93\x02#\"\x1e/api/Manager/GetObservationLog:\x01*\x12\xa5\x01\n\x14\x44\x65leteObservationLog\x12*.api.v1.alpha3.DeleteObservationLogRequest\x1a(.api.v1.alpha3.DeleteObservationLogReply\"7\x82\xd3\xe4\x93\x02\x31*//api/Manager/DeleteObservationLog/{{trial_name}2\xe5\x01\n\nSuggestion\x12Z\n\x0eGetSuggestions\x12$.api.v1.alpha3.GetSuggestionsRequest\x1a\".api.v1.alpha3.GetSuggestionsReply\x12{\n\x19ValidateAlgorithmSettings\x12/.api.v1.alpha3.ValidateAlgorithmSettingsRequest\x1a-.api.v1.alpha3.ValidateAlgorithmSettingsReply2\x0f\n\rEarlyStoppingb\x06proto3')
+  serialized_pb=_b('\n\tapi.proto\x12\rapi.v1.alpha3\x1a\x1cgoogle/api/annotations.proto\"E\n\rFeasibleSpace\x12\x0b\n\x03max\x18\x01 \x01(\t\x12\x0b\n\x03min\x18\x02 \x01(\t\x12\x0c\n\x04list\x18\x03 \x03(\t\x12\x0c\n\x04step\x18\x04 \x01(\t\"\x89\x01\n\rParameterSpec\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x34\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x1c.api.v1.alpha3.ParameterType\x12\x34\n\x0e\x66\x65\x61sible_space\x18\x03 \x01(\x0b\x32\x1c.api.v1.alpha3.FeasibleSpace\"\x89\x01\n\rObjectiveSpec\x12*\n\x04type\x18\x01 \x01(\x0e\x32\x1c.api.v1.alpha3.ObjectiveType\x12\x0c\n\x04goal\x18\x02 \x01(\x01\x12\x1d\n\x15objective_metric_name\x18\x03 \x01(\t\x12\x1f\n\x17\x61\x64\x64itional_metric_names\x18\x04 \x03(\t\"/\n\x10\x41lgorithmSetting\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\x13\n\x11\x45\x61rlyStoppingSpec\"\xa2\x01\n\rAlgorithmSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x01 \x01(\t\x12:\n\x11\x61lgorithm_setting\x18\x02 \x03(\x0b\x32\x1f.api.v1.alpha3.AlgorithmSetting\x12=\n\x13\x65\x61rly_stopping_spec\x18\x03 \x01(\x0b\x32 .api.v1.alpha3.EarlyStoppingSpec\"\xb1\x01\n\tNasConfig\x12\x30\n\x0cgraph_config\x18\x01 \x01(\x0b\x32\x1a.api.v1.alpha3.GraphConfig\x12\x37\n\noperations\x18\x02 \x01(\x0b\x32#.api.v1.alpha3.NasConfig.Operations\x1a\x39\n\nOperations\x12+\n\toperation\x18\x01 \x03(\x0b\x32\x18.api.v1.alpha3.Operation\"L\n\x0bGraphConfig\x12\x12\n\nnum_layers\x18\x01 \x01(\x05\x12\x13\n\x0binput_sizes\x18\x02 \x03(\x05\x12\x14\n\x0coutput_sizes\x18\x03 \x03(\x05\"\xa9\x01\n\tOperation\x12\x16\n\x0eoperation_type\x18\x01 \x01(\t\x12@\n\x0fparameter_specs\x18\x02 \x01(\x0b\x32\'.api.v1.alpha3.Operation.ParameterSpecs\x1a\x42\n\x0eParameterSpecs\x12\x30\n\nparameters\x18\x01 \x03(\x0b\x32\x1c.api.v1.alpha3.ParameterSpec\"\x9a\x03\n\x0e\x45xperimentSpec\x12\x45\n\x0fparameter_specs\x18\x01 \x01(\x0b\x32,.api.v1.alpha3.ExperimentSpec.ParameterSpecs\x12/\n\tobjective\x18\x02 \x01(\x0b\x32\x1c.api.v1.alpha3.ObjectiveSpec\x12/\n\talgorithm\x18\x03 \x01(\x0b\x32\x1c.api.v1.alpha3.AlgorithmSpec\x12\x16\n\x0etrial_template\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x12\x1c\n\x14parallel_trial_count\x18\x06 \x01(\x05\x12\x17\n\x0fmax_trial_count\x18\x07 \x01(\x05\x12,\n\nnas_config\x18\x08 \x01(\x0b\x32\x18.api.v1.alpha3.NasConfig\x1a\x42\n\x0eParameterSpecs\x12\x30\n\nparameters\x18\x01 \x03(\x0b\x32\x1c.api.v1.alpha3.ParameterSpec\"G\n\nExperiment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12+\n\x04spec\x18\x02 \x01(\x0b\x32\x1d.api.v1.alpha3.ExperimentSpec\"2\n\x13ParameterAssignment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"%\n\x06Metric\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"F\n\tMetricLog\x12\x12\n\ntime_stamp\x18\x01 \x01(\t\x12%\n\x06metric\x18\x02 \x01(\x0b\x32\x15.api.v1.alpha3.Metric\"5\n\x0bObservation\x12&\n\x07metrics\x18\x01 \x03(\x0b\x32\x15.api.v1.alpha3.Metric\"?\n\x0eObservationLog\x12-\n\x0bmetric_logs\x18\x01 \x03(\x0b\x32\x18.api.v1.alpha3.MetricLog\"\xa6\x02\n\tTrialSpec\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12/\n\tobjective\x18\x02 \x01(\x0b\x32\x1c.api.v1.alpha3.ObjectiveSpec\x12L\n\x15parameter_assignments\x18\x03 \x01(\x0b\x32-.api.v1.alpha3.TrialSpec.ParameterAssignments\x12\x10\n\x08run_spec\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x1aO\n\x14ParameterAssignments\x12\x37\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32\".api.v1.alpha3.ParameterAssignment\"\x91\x02\n\x0bTrialStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12@\n\tcondition\x18\x03 \x01(\x0e\x32-.api.v1.alpha3.TrialStatus.TrialConditionType\x12/\n\x0bobservation\x18\x04 \x01(\x0b\x32\x1a.api.v1.alpha3.Observation\"b\n\x12TrialConditionType\x12\x0b\n\x07\x43REATED\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tSUCCEEDED\x10\x02\x12\n\n\x06KILLED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x12\x0b\n\x07UNKNOWN\x10\x05\"i\n\x05Trial\x12\x0c\n\x04name\x18\x01 \x01(\t\x12&\n\x04spec\x18\x02 \x01(\x0b\x32\x18.api.v1.alpha3.TrialSpec\x12*\n\x06status\x18\x03 \x01(\x0b\x32\x1a.api.v1.alpha3.TrialStatus\"i\n\x1bReportObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x36\n\x0fobservation_log\x18\x02 \x01(\x0b\x32\x1d.api.v1.alpha3.ObservationLog\"\x1b\n\x19ReportObservationLogReply\"1\n\x1b\x44\x65leteObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x1b\n\x19\x44\x65leteObservationLogReply\"i\n\x18GetObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x13\n\x0bmetric_name\x18\x02 \x01(\t\x12\x12\n\nstart_time\x18\x03 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\t\"P\n\x16GetObservationLogReply\x12\x36\n\x0fobservation_log\x18\x01 \x01(\x0b\x32\x1d.api.v1.alpha3.ObservationLog\"\x84\x01\n\x15GetSuggestionsRequest\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha3.Experiment\x12$\n\x06trials\x18\x02 \x03(\x0b\x32\x14.api.v1.alpha3.Trial\x12\x16\n\x0erequest_number\x18\x03 \x01(\x05\"\xef\x01\n\x13GetSuggestionsReply\x12V\n\x15parameter_assignments\x18\x01 \x03(\x0b\x32\x37.api.v1.alpha3.GetSuggestionsReply.ParameterAssignments\x12/\n\talgorithm\x18\x02 \x01(\x0b\x32\x1c.api.v1.alpha3.AlgorithmSpec\x1aO\n\x14ParameterAssignments\x12\x37\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32\".api.v1.alpha3.ParameterAssignment\"Q\n ValidateAlgorithmSettingsRequest\x12-\n\nexperiment\x18\x01 \x01(\x0b\x32\x19.api.v1.alpha3.Experiment\" \n\x1eValidateAlgorithmSettingsReply*U\n\rParameterType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\n\n\x06\x44OUBLE\x10\x01\x12\x07\n\x03INT\x10\x02\x12\x0c\n\x08\x44ISCRETE\x10\x03\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x04*8\n\rObjectiveType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0c\n\x08MINIMIZE\x10\x01\x12\x0c\n\x08MAXIMIZE\x10\x02\x32\xde\x03\n\x07Manager\x12\x9a\x01\n\x14ReportObservationLog\x12*.api.v1.alpha3.ReportObservationLogRequest\x1a(.api.v1.alpha3.ReportObservationLogReply\",\x82\xd3\xe4\x93\x02&\"!/api/Manager/ReportObservationLog:\x01*\x12\x8e\x01\n\x11GetObservationLog\x12\'.api.v1.alpha3.GetObservationLogRequest\x1a%.api.v1.alpha3.GetObservationLogReply\")\x82\xd3\xe4\x93\x02#\"\x1e/api/Manager/GetObservationLog:\x01*\x12\xa4\x01\n\x14\x44\x65leteObservationLog\x12*.api.v1.alpha3.DeleteObservationLogRequest\x1a(.api.v1.alpha3.DeleteObservationLogReply\"6\x82\xd3\xe4\x93\x02\x30*./api/Manager/DeleteObservationLog/{trial_name}2\xe5\x01\n\nSuggestion\x12Z\n\x0eGetSuggestions\x12$.api.v1.alpha3.GetSuggestionsRequest\x1a\".api.v1.alpha3.GetSuggestionsReply\x12{\n\x19ValidateAlgorithmSettings\x12/.api.v1.alpha3.ValidateAlgorithmSettingsRequest\x1a-.api.v1.alpha3.ValidateAlgorithmSettingsReply2\x0f\n\rEarlyStoppingb\x06proto3')
   ,
   dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,])
 
@@ -54,8 +54,8 @@ _PARAMETERTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=5246,
-  serialized_end=5331,
+  serialized_start=3422,
+  serialized_end=3507,
 )
 _sym_db.RegisterEnumDescriptor(_PARAMETERTYPE)
 
@@ -81,8 +81,8 @@ _OBJECTIVETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=5333,
-  serialized_end=5389,
+  serialized_start=3509,
+  serialized_end=3565,
 )
 _sym_db.RegisterEnumDescriptor(_OBJECTIVETYPE)
 
@@ -96,44 +96,6 @@ UNKNOWN = 0
 MINIMIZE = 1
 MAXIMIZE = 2
 
-
-_EXPERIMENTSTATUS_EXPERIMENTCONDITIONTYPE = _descriptor.EnumDescriptor(
-  name='ExperimentConditionType',
-  full_name='api.v1.alpha3.ExperimentStatus.ExperimentConditionType',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='CREATED', index=0, number=0,
-      options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='RUNNING', index=1, number=1,
-      options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='RESTARTING', index=2, number=2,
-      options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='SUCCEEDED', index=3, number=3,
-      options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='FAILED', index=4, number=4,
-      options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='UNKNOWN', index=5, number=5,
-      options=None,
-      type=None),
-  ],
-  containing_type=None,
-  options=None,
-  serialized_start=1629,
-  serialized_end=1736,
-)
-_sym_db.RegisterEnumDescriptor(_EXPERIMENTSTATUS_EXPERIMENTCONDITIONTYPE)
 
 _TRIALSTATUS_TRIALCONDITIONTYPE = _descriptor.EnumDescriptor(
   name='TrialConditionType',
@@ -168,8 +130,8 @@ _TRIALSTATUS_TRIALCONDITIONTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=2616,
-  serialized_end=2714,
+  serialized_start=2316,
+  serialized_end=2414,
 )
 _sym_db.RegisterEnumDescriptor(_TRIALSTATUS_TRIALCONDITIONTYPE)
 
@@ -721,52 +683,6 @@ _EXPERIMENTSPEC = _descriptor.Descriptor(
 )
 
 
-_EXPERIMENTSTATUS = _descriptor.Descriptor(
-  name='ExperimentStatus',
-  full_name='api.v1.alpha3.ExperimentStatus',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='start_time', full_name='api.v1.alpha3.ExperimentStatus.start_time', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='completion_time', full_name='api.v1.alpha3.ExperimentStatus.completion_time', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='condition', full_name='api.v1.alpha3.ExperimentStatus.condition', index=2,
-      number=3, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-    _EXPERIMENTSTATUS_EXPERIMENTCONDITIONTYPE,
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1488,
-  serialized_end=1736,
-)
-
-
 _EXPERIMENT = _descriptor.Descriptor(
   name='Experiment',
   full_name='api.v1.alpha3.Experiment',
@@ -788,13 +704,6 @@ _EXPERIMENT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
-    _descriptor.FieldDescriptor(
-      name='status', full_name='api.v1.alpha3.Experiment.status', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
   ],
   extensions=[
   ],
@@ -807,8 +716,8 @@ _EXPERIMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1738,
-  serialized_end=1858,
+  serialized_start=1487,
+  serialized_end=1558,
 )
 
 
@@ -845,8 +754,8 @@ _PARAMETERASSIGNMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1860,
-  serialized_end=1910,
+  serialized_start=1560,
+  serialized_end=1610,
 )
 
 
@@ -883,8 +792,8 @@ _METRIC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1912,
-  serialized_end=1949,
+  serialized_start=1612,
+  serialized_end=1649,
 )
 
 
@@ -921,8 +830,8 @@ _METRICLOG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1951,
-  serialized_end=2021,
+  serialized_start=1651,
+  serialized_end=1721,
 )
 
 
@@ -952,8 +861,8 @@ _OBSERVATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2023,
-  serialized_end=2076,
+  serialized_start=1723,
+  serialized_end=1776,
 )
 
 
@@ -983,8 +892,8 @@ _OBSERVATIONLOG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2078,
-  serialized_end=2141,
+  serialized_start=1778,
+  serialized_end=1841,
 )
 
 
@@ -1014,8 +923,8 @@ _TRIALSPEC_PARAMETERASSIGNMENTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2359,
-  serialized_end=2438,
+  serialized_start=2059,
+  serialized_end=2138,
 )
 
 _TRIALSPEC = _descriptor.Descriptor(
@@ -1072,8 +981,8 @@ _TRIALSPEC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2144,
-  serialized_end=2438,
+  serialized_start=1844,
+  serialized_end=2138,
 )
 
 
@@ -1125,8 +1034,8 @@ _TRIALSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2441,
-  serialized_end=2714,
+  serialized_start=2141,
+  serialized_end=2414,
 )
 
 
@@ -1170,793 +1079,8 @@ _TRIAL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2716,
-  serialized_end=2821,
-)
-
-
-_REGISTEREXPERIMENTREQUEST = _descriptor.Descriptor(
-  name='RegisterExperimentRequest',
-  full_name='api.v1.alpha3.RegisterExperimentRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='experiment', full_name='api.v1.alpha3.RegisterExperimentRequest.experiment', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2823,
-  serialized_end=2897,
-)
-
-
-_REGISTEREXPERIMENTREPLY = _descriptor.Descriptor(
-  name='RegisterExperimentReply',
-  full_name='api.v1.alpha3.RegisterExperimentReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2899,
-  serialized_end=2924,
-)
-
-
-_PRECHECKREGISTEREXPERIMENTREPLY = _descriptor.Descriptor(
-  name='PreCheckRegisterExperimentReply',
-  full_name='api.v1.alpha3.PreCheckRegisterExperimentReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='can_register', full_name='api.v1.alpha3.PreCheckRegisterExperimentReply.can_register', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2926,
-  serialized_end=2981,
-)
-
-
-_DELETEEXPERIMENTREQUEST = _descriptor.Descriptor(
-  name='DeleteExperimentRequest',
-  full_name='api.v1.alpha3.DeleteExperimentRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='experiment_name', full_name='api.v1.alpha3.DeleteExperimentRequest.experiment_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2983,
-  serialized_end=3033,
-)
-
-
-_DELETEEXPERIMENTREPLY = _descriptor.Descriptor(
-  name='DeleteExperimentReply',
-  full_name='api.v1.alpha3.DeleteExperimentReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3035,
-  serialized_end=3058,
-)
-
-
-_GETEXPERIMENTREQUEST = _descriptor.Descriptor(
-  name='GetExperimentRequest',
-  full_name='api.v1.alpha3.GetExperimentRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='experiment_name', full_name='api.v1.alpha3.GetExperimentRequest.experiment_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3060,
-  serialized_end=3107,
-)
-
-
-_GETEXPERIMENTREPLY = _descriptor.Descriptor(
-  name='GetExperimentReply',
-  full_name='api.v1.alpha3.GetExperimentReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='experiment', full_name='api.v1.alpha3.GetExperimentReply.experiment', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3109,
-  serialized_end=3176,
-)
-
-
-_EXPERIMENTSUMMARY = _descriptor.Descriptor(
-  name='ExperimentSummary',
-  full_name='api.v1.alpha3.ExperimentSummary',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='experiment_name', full_name='api.v1.alpha3.ExperimentSummary.experiment_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='status', full_name='api.v1.alpha3.ExperimentSummary.status', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3178,
-  serialized_end=3271,
-)
-
-
-_GETEXPERIMENTLISTREQUEST = _descriptor.Descriptor(
-  name='GetExperimentListRequest',
-  full_name='api.v1.alpha3.GetExperimentListRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3273,
-  serialized_end=3299,
-)
-
-
-_GETEXPERIMENTLISTREPLY = _descriptor.Descriptor(
-  name='GetExperimentListReply',
-  full_name='api.v1.alpha3.GetExperimentListReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='experiment_summaries', full_name='api.v1.alpha3.GetExperimentListReply.experiment_summaries', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3301,
-  serialized_end=3389,
-)
-
-
-_UPDATEEXPERIMENTSTATUSREQUEST = _descriptor.Descriptor(
-  name='UpdateExperimentStatusRequest',
-  full_name='api.v1.alpha3.UpdateExperimentStatusRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='experiment_name', full_name='api.v1.alpha3.UpdateExperimentStatusRequest.experiment_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='new_status', full_name='api.v1.alpha3.UpdateExperimentStatusRequest.new_status', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3391,
-  serialized_end=3500,
-)
-
-
-_UPDATEEXPERIMENTSTATUSREPLY = _descriptor.Descriptor(
-  name='UpdateExperimentStatusReply',
-  full_name='api.v1.alpha3.UpdateExperimentStatusReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3502,
-  serialized_end=3531,
-)
-
-
-_UPDATEALGORITHMEXTRASETTINGSREQUEST = _descriptor.Descriptor(
-  name='UpdateAlgorithmExtraSettingsRequest',
-  full_name='api.v1.alpha3.UpdateAlgorithmExtraSettingsRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='experiment_name', full_name='api.v1.alpha3.UpdateAlgorithmExtraSettingsRequest.experiment_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='extra_algorithm_settings', full_name='api.v1.alpha3.UpdateAlgorithmExtraSettingsRequest.extra_algorithm_settings', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3534,
-  serialized_end=3663,
-)
-
-
-_UPDATEALGORITHMEXTRASETTINGSREPLY = _descriptor.Descriptor(
-  name='UpdateAlgorithmExtraSettingsReply',
-  full_name='api.v1.alpha3.UpdateAlgorithmExtraSettingsReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3665,
-  serialized_end=3700,
-)
-
-
-_GETALGORITHMEXTRASETTINGSREQUEST = _descriptor.Descriptor(
-  name='GetAlgorithmExtraSettingsRequest',
-  full_name='api.v1.alpha3.GetAlgorithmExtraSettingsRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='experiment_name', full_name='api.v1.alpha3.GetAlgorithmExtraSettingsRequest.experiment_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3702,
-  serialized_end=3761,
-)
-
-
-_GETALGORITHMEXTRASETTINGSREPLY = _descriptor.Descriptor(
-  name='GetAlgorithmExtraSettingsReply',
-  full_name='api.v1.alpha3.GetAlgorithmExtraSettingsReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='extra_algorithm_settings', full_name='api.v1.alpha3.GetAlgorithmExtraSettingsReply.extra_algorithm_settings', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3763,
-  serialized_end=3862,
-)
-
-
-_REGISTERTRIALREQUEST = _descriptor.Descriptor(
-  name='RegisterTrialRequest',
-  full_name='api.v1.alpha3.RegisterTrialRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='trial', full_name='api.v1.alpha3.RegisterTrialRequest.trial', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3864,
-  serialized_end=3923,
-)
-
-
-_REGISTERTRIALREPLY = _descriptor.Descriptor(
-  name='RegisterTrialReply',
-  full_name='api.v1.alpha3.RegisterTrialReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3925,
-  serialized_end=3945,
-)
-
-
-_DELETETRIALREQUEST = _descriptor.Descriptor(
-  name='DeleteTrialRequest',
-  full_name='api.v1.alpha3.DeleteTrialRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='trial_name', full_name='api.v1.alpha3.DeleteTrialRequest.trial_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3947,
-  serialized_end=3987,
-)
-
-
-_DELETETRIALREPLY = _descriptor.Descriptor(
-  name='DeleteTrialReply',
-  full_name='api.v1.alpha3.DeleteTrialReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3989,
-  serialized_end=4007,
-)
-
-
-_GETTRIALLISTREQUEST = _descriptor.Descriptor(
-  name='GetTrialListRequest',
-  full_name='api.v1.alpha3.GetTrialListRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='experiment_name', full_name='api.v1.alpha3.GetTrialListRequest.experiment_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='filter', full_name='api.v1.alpha3.GetTrialListRequest.filter', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4009,
-  serialized_end=4071,
-)
-
-
-_GETTRIALLISTREPLY = _descriptor.Descriptor(
-  name='GetTrialListReply',
-  full_name='api.v1.alpha3.GetTrialListReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='trials', full_name='api.v1.alpha3.GetTrialListReply.trials', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4073,
-  serialized_end=4130,
-)
-
-
-_GETTRIALREQUEST = _descriptor.Descriptor(
-  name='GetTrialRequest',
-  full_name='api.v1.alpha3.GetTrialRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='trial_name', full_name='api.v1.alpha3.GetTrialRequest.trial_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4132,
-  serialized_end=4169,
-)
-
-
-_GETTRIALREPLY = _descriptor.Descriptor(
-  name='GetTrialReply',
-  full_name='api.v1.alpha3.GetTrialReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='trial', full_name='api.v1.alpha3.GetTrialReply.trial', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4171,
-  serialized_end=4223,
-)
-
-
-_UPDATETRIALSTATUSREQUEST = _descriptor.Descriptor(
-  name='UpdateTrialStatusRequest',
-  full_name='api.v1.alpha3.UpdateTrialStatusRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='trial_name', full_name='api.v1.alpha3.UpdateTrialStatusRequest.trial_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='new_status', full_name='api.v1.alpha3.UpdateTrialStatusRequest.new_status', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4225,
-  serialized_end=4319,
-)
-
-
-_UPDATETRIALSTATUSREPLY = _descriptor.Descriptor(
-  name='UpdateTrialStatusReply',
-  full_name='api.v1.alpha3.UpdateTrialStatusReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4321,
-  serialized_end=4345,
+  serialized_start=2416,
+  serialized_end=2521,
 )
 
 
@@ -1993,8 +1117,8 @@ _REPORTOBSERVATIONLOGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4347,
-  serialized_end=4452,
+  serialized_start=2523,
+  serialized_end=2628,
 )
 
 
@@ -2017,8 +1141,8 @@ _REPORTOBSERVATIONLOGREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4454,
-  serialized_end=4481,
+  serialized_start=2630,
+  serialized_end=2657,
 )
 
 
@@ -2048,8 +1172,8 @@ _DELETEOBSERVATIONLOGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4483,
-  serialized_end=4532,
+  serialized_start=2659,
+  serialized_end=2708,
 )
 
 
@@ -2072,8 +1196,8 @@ _DELETEOBSERVATIONLOGREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4534,
-  serialized_end=4561,
+  serialized_start=2710,
+  serialized_end=2737,
 )
 
 
@@ -2124,8 +1248,8 @@ _GETOBSERVATIONLOGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4563,
-  serialized_end=4668,
+  serialized_start=2739,
+  serialized_end=2844,
 )
 
 
@@ -2155,8 +1279,8 @@ _GETOBSERVATIONLOGREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4670,
-  serialized_end=4750,
+  serialized_start=2846,
+  serialized_end=2926,
 )
 
 
@@ -2200,8 +1324,8 @@ _GETSUGGESTIONSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4753,
-  serialized_end=4885,
+  serialized_start=2929,
+  serialized_end=3061,
 )
 
 
@@ -2231,8 +1355,8 @@ _GETSUGGESTIONSREPLY_PARAMETERASSIGNMENTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2359,
-  serialized_end=2438,
+  serialized_start=2059,
+  serialized_end=2138,
 )
 
 _GETSUGGESTIONSREPLY = _descriptor.Descriptor(
@@ -2268,8 +1392,8 @@ _GETSUGGESTIONSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4888,
-  serialized_end=5127,
+  serialized_start=3064,
+  serialized_end=3303,
 )
 
 
@@ -2299,8 +1423,8 @@ _VALIDATEALGORITHMSETTINGSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5129,
-  serialized_end=5210,
+  serialized_start=3305,
+  serialized_end=3386,
 )
 
 
@@ -2323,8 +1447,8 @@ _VALIDATEALGORITHMSETTINGSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5212,
-  serialized_end=5244,
+  serialized_start=3388,
+  serialized_end=3420,
 )
 
 _PARAMETERSPEC.fields_by_name['parameter_type'].enum_type = _PARAMETERTYPE
@@ -2345,10 +1469,7 @@ _EXPERIMENTSPEC.fields_by_name['parameter_specs'].message_type = _EXPERIMENTSPEC
 _EXPERIMENTSPEC.fields_by_name['objective'].message_type = _OBJECTIVESPEC
 _EXPERIMENTSPEC.fields_by_name['algorithm'].message_type = _ALGORITHMSPEC
 _EXPERIMENTSPEC.fields_by_name['nas_config'].message_type = _NASCONFIG
-_EXPERIMENTSTATUS.fields_by_name['condition'].enum_type = _EXPERIMENTSTATUS_EXPERIMENTCONDITIONTYPE
-_EXPERIMENTSTATUS_EXPERIMENTCONDITIONTYPE.containing_type = _EXPERIMENTSTATUS
 _EXPERIMENT.fields_by_name['spec'].message_type = _EXPERIMENTSPEC
-_EXPERIMENT.fields_by_name['status'].message_type = _EXPERIMENTSTATUS
 _METRICLOG.fields_by_name['metric'].message_type = _METRIC
 _OBSERVATION.fields_by_name['metrics'].message_type = _METRIC
 _OBSERVATIONLOG.fields_by_name['metric_logs'].message_type = _METRICLOG
@@ -2361,17 +1482,6 @@ _TRIALSTATUS.fields_by_name['observation'].message_type = _OBSERVATION
 _TRIALSTATUS_TRIALCONDITIONTYPE.containing_type = _TRIALSTATUS
 _TRIAL.fields_by_name['spec'].message_type = _TRIALSPEC
 _TRIAL.fields_by_name['status'].message_type = _TRIALSTATUS
-_REGISTEREXPERIMENTREQUEST.fields_by_name['experiment'].message_type = _EXPERIMENT
-_GETEXPERIMENTREPLY.fields_by_name['experiment'].message_type = _EXPERIMENT
-_EXPERIMENTSUMMARY.fields_by_name['status'].message_type = _EXPERIMENTSTATUS
-_GETEXPERIMENTLISTREPLY.fields_by_name['experiment_summaries'].message_type = _EXPERIMENTSUMMARY
-_UPDATEEXPERIMENTSTATUSREQUEST.fields_by_name['new_status'].message_type = _EXPERIMENTSTATUS
-_UPDATEALGORITHMEXTRASETTINGSREQUEST.fields_by_name['extra_algorithm_settings'].message_type = _ALGORITHMSETTING
-_GETALGORITHMEXTRASETTINGSREPLY.fields_by_name['extra_algorithm_settings'].message_type = _ALGORITHMSETTING
-_REGISTERTRIALREQUEST.fields_by_name['trial'].message_type = _TRIAL
-_GETTRIALLISTREPLY.fields_by_name['trials'].message_type = _TRIAL
-_GETTRIALREPLY.fields_by_name['trial'].message_type = _TRIAL
-_UPDATETRIALSTATUSREQUEST.fields_by_name['new_status'].message_type = _TRIALSTATUS
 _REPORTOBSERVATIONLOGREQUEST.fields_by_name['observation_log'].message_type = _OBSERVATIONLOG
 _GETOBSERVATIONLOGREPLY.fields_by_name['observation_log'].message_type = _OBSERVATIONLOG
 _GETSUGGESTIONSREQUEST.fields_by_name['experiment'].message_type = _EXPERIMENT
@@ -2391,7 +1501,6 @@ DESCRIPTOR.message_types_by_name['NasConfig'] = _NASCONFIG
 DESCRIPTOR.message_types_by_name['GraphConfig'] = _GRAPHCONFIG
 DESCRIPTOR.message_types_by_name['Operation'] = _OPERATION
 DESCRIPTOR.message_types_by_name['ExperimentSpec'] = _EXPERIMENTSPEC
-DESCRIPTOR.message_types_by_name['ExperimentStatus'] = _EXPERIMENTSTATUS
 DESCRIPTOR.message_types_by_name['Experiment'] = _EXPERIMENT
 DESCRIPTOR.message_types_by_name['ParameterAssignment'] = _PARAMETERASSIGNMENT
 DESCRIPTOR.message_types_by_name['Metric'] = _METRIC
@@ -2401,32 +1510,6 @@ DESCRIPTOR.message_types_by_name['ObservationLog'] = _OBSERVATIONLOG
 DESCRIPTOR.message_types_by_name['TrialSpec'] = _TRIALSPEC
 DESCRIPTOR.message_types_by_name['TrialStatus'] = _TRIALSTATUS
 DESCRIPTOR.message_types_by_name['Trial'] = _TRIAL
-DESCRIPTOR.message_types_by_name['RegisterExperimentRequest'] = _REGISTEREXPERIMENTREQUEST
-DESCRIPTOR.message_types_by_name['RegisterExperimentReply'] = _REGISTEREXPERIMENTREPLY
-DESCRIPTOR.message_types_by_name['PreCheckRegisterExperimentReply'] = _PRECHECKREGISTEREXPERIMENTREPLY
-DESCRIPTOR.message_types_by_name['DeleteExperimentRequest'] = _DELETEEXPERIMENTREQUEST
-DESCRIPTOR.message_types_by_name['DeleteExperimentReply'] = _DELETEEXPERIMENTREPLY
-DESCRIPTOR.message_types_by_name['GetExperimentRequest'] = _GETEXPERIMENTREQUEST
-DESCRIPTOR.message_types_by_name['GetExperimentReply'] = _GETEXPERIMENTREPLY
-DESCRIPTOR.message_types_by_name['ExperimentSummary'] = _EXPERIMENTSUMMARY
-DESCRIPTOR.message_types_by_name['GetExperimentListRequest'] = _GETEXPERIMENTLISTREQUEST
-DESCRIPTOR.message_types_by_name['GetExperimentListReply'] = _GETEXPERIMENTLISTREPLY
-DESCRIPTOR.message_types_by_name['UpdateExperimentStatusRequest'] = _UPDATEEXPERIMENTSTATUSREQUEST
-DESCRIPTOR.message_types_by_name['UpdateExperimentStatusReply'] = _UPDATEEXPERIMENTSTATUSREPLY
-DESCRIPTOR.message_types_by_name['UpdateAlgorithmExtraSettingsRequest'] = _UPDATEALGORITHMEXTRASETTINGSREQUEST
-DESCRIPTOR.message_types_by_name['UpdateAlgorithmExtraSettingsReply'] = _UPDATEALGORITHMEXTRASETTINGSREPLY
-DESCRIPTOR.message_types_by_name['GetAlgorithmExtraSettingsRequest'] = _GETALGORITHMEXTRASETTINGSREQUEST
-DESCRIPTOR.message_types_by_name['GetAlgorithmExtraSettingsReply'] = _GETALGORITHMEXTRASETTINGSREPLY
-DESCRIPTOR.message_types_by_name['RegisterTrialRequest'] = _REGISTERTRIALREQUEST
-DESCRIPTOR.message_types_by_name['RegisterTrialReply'] = _REGISTERTRIALREPLY
-DESCRIPTOR.message_types_by_name['DeleteTrialRequest'] = _DELETETRIALREQUEST
-DESCRIPTOR.message_types_by_name['DeleteTrialReply'] = _DELETETRIALREPLY
-DESCRIPTOR.message_types_by_name['GetTrialListRequest'] = _GETTRIALLISTREQUEST
-DESCRIPTOR.message_types_by_name['GetTrialListReply'] = _GETTRIALLISTREPLY
-DESCRIPTOR.message_types_by_name['GetTrialRequest'] = _GETTRIALREQUEST
-DESCRIPTOR.message_types_by_name['GetTrialReply'] = _GETTRIALREPLY
-DESCRIPTOR.message_types_by_name['UpdateTrialStatusRequest'] = _UPDATETRIALSTATUSREQUEST
-DESCRIPTOR.message_types_by_name['UpdateTrialStatusReply'] = _UPDATETRIALSTATUSREPLY
 DESCRIPTOR.message_types_by_name['ReportObservationLogRequest'] = _REPORTOBSERVATIONLOGREQUEST
 DESCRIPTOR.message_types_by_name['ReportObservationLogReply'] = _REPORTOBSERVATIONLOGREPLY
 DESCRIPTOR.message_types_by_name['DeleteObservationLogRequest'] = _DELETEOBSERVATIONLOGREQUEST
@@ -2535,13 +1618,6 @@ ExperimentSpec = _reflection.GeneratedProtocolMessageType('ExperimentSpec', (_me
 _sym_db.RegisterMessage(ExperimentSpec)
 _sym_db.RegisterMessage(ExperimentSpec.ParameterSpecs)
 
-ExperimentStatus = _reflection.GeneratedProtocolMessageType('ExperimentStatus', (_message.Message,), dict(
-  DESCRIPTOR = _EXPERIMENTSTATUS,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.ExperimentStatus)
-  ))
-_sym_db.RegisterMessage(ExperimentStatus)
-
 Experiment = _reflection.GeneratedProtocolMessageType('Experiment', (_message.Message,), dict(
   DESCRIPTOR = _EXPERIMENT,
   __module__ = 'api_pb2'
@@ -2612,188 +1688,6 @@ Trial = _reflection.GeneratedProtocolMessageType('Trial', (_message.Message,), d
   # @@protoc_insertion_point(class_scope:api.v1.alpha3.Trial)
   ))
 _sym_db.RegisterMessage(Trial)
-
-RegisterExperimentRequest = _reflection.GeneratedProtocolMessageType('RegisterExperimentRequest', (_message.Message,), dict(
-  DESCRIPTOR = _REGISTEREXPERIMENTREQUEST,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.RegisterExperimentRequest)
-  ))
-_sym_db.RegisterMessage(RegisterExperimentRequest)
-
-RegisterExperimentReply = _reflection.GeneratedProtocolMessageType('RegisterExperimentReply', (_message.Message,), dict(
-  DESCRIPTOR = _REGISTEREXPERIMENTREPLY,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.RegisterExperimentReply)
-  ))
-_sym_db.RegisterMessage(RegisterExperimentReply)
-
-PreCheckRegisterExperimentReply = _reflection.GeneratedProtocolMessageType('PreCheckRegisterExperimentReply', (_message.Message,), dict(
-  DESCRIPTOR = _PRECHECKREGISTEREXPERIMENTREPLY,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.PreCheckRegisterExperimentReply)
-  ))
-_sym_db.RegisterMessage(PreCheckRegisterExperimentReply)
-
-DeleteExperimentRequest = _reflection.GeneratedProtocolMessageType('DeleteExperimentRequest', (_message.Message,), dict(
-  DESCRIPTOR = _DELETEEXPERIMENTREQUEST,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.DeleteExperimentRequest)
-  ))
-_sym_db.RegisterMessage(DeleteExperimentRequest)
-
-DeleteExperimentReply = _reflection.GeneratedProtocolMessageType('DeleteExperimentReply', (_message.Message,), dict(
-  DESCRIPTOR = _DELETEEXPERIMENTREPLY,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.DeleteExperimentReply)
-  ))
-_sym_db.RegisterMessage(DeleteExperimentReply)
-
-GetExperimentRequest = _reflection.GeneratedProtocolMessageType('GetExperimentRequest', (_message.Message,), dict(
-  DESCRIPTOR = _GETEXPERIMENTREQUEST,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.GetExperimentRequest)
-  ))
-_sym_db.RegisterMessage(GetExperimentRequest)
-
-GetExperimentReply = _reflection.GeneratedProtocolMessageType('GetExperimentReply', (_message.Message,), dict(
-  DESCRIPTOR = _GETEXPERIMENTREPLY,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.GetExperimentReply)
-  ))
-_sym_db.RegisterMessage(GetExperimentReply)
-
-ExperimentSummary = _reflection.GeneratedProtocolMessageType('ExperimentSummary', (_message.Message,), dict(
-  DESCRIPTOR = _EXPERIMENTSUMMARY,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.ExperimentSummary)
-  ))
-_sym_db.RegisterMessage(ExperimentSummary)
-
-GetExperimentListRequest = _reflection.GeneratedProtocolMessageType('GetExperimentListRequest', (_message.Message,), dict(
-  DESCRIPTOR = _GETEXPERIMENTLISTREQUEST,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.GetExperimentListRequest)
-  ))
-_sym_db.RegisterMessage(GetExperimentListRequest)
-
-GetExperimentListReply = _reflection.GeneratedProtocolMessageType('GetExperimentListReply', (_message.Message,), dict(
-  DESCRIPTOR = _GETEXPERIMENTLISTREPLY,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.GetExperimentListReply)
-  ))
-_sym_db.RegisterMessage(GetExperimentListReply)
-
-UpdateExperimentStatusRequest = _reflection.GeneratedProtocolMessageType('UpdateExperimentStatusRequest', (_message.Message,), dict(
-  DESCRIPTOR = _UPDATEEXPERIMENTSTATUSREQUEST,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.UpdateExperimentStatusRequest)
-  ))
-_sym_db.RegisterMessage(UpdateExperimentStatusRequest)
-
-UpdateExperimentStatusReply = _reflection.GeneratedProtocolMessageType('UpdateExperimentStatusReply', (_message.Message,), dict(
-  DESCRIPTOR = _UPDATEEXPERIMENTSTATUSREPLY,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.UpdateExperimentStatusReply)
-  ))
-_sym_db.RegisterMessage(UpdateExperimentStatusReply)
-
-UpdateAlgorithmExtraSettingsRequest = _reflection.GeneratedProtocolMessageType('UpdateAlgorithmExtraSettingsRequest', (_message.Message,), dict(
-  DESCRIPTOR = _UPDATEALGORITHMEXTRASETTINGSREQUEST,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.UpdateAlgorithmExtraSettingsRequest)
-  ))
-_sym_db.RegisterMessage(UpdateAlgorithmExtraSettingsRequest)
-
-UpdateAlgorithmExtraSettingsReply = _reflection.GeneratedProtocolMessageType('UpdateAlgorithmExtraSettingsReply', (_message.Message,), dict(
-  DESCRIPTOR = _UPDATEALGORITHMEXTRASETTINGSREPLY,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.UpdateAlgorithmExtraSettingsReply)
-  ))
-_sym_db.RegisterMessage(UpdateAlgorithmExtraSettingsReply)
-
-GetAlgorithmExtraSettingsRequest = _reflection.GeneratedProtocolMessageType('GetAlgorithmExtraSettingsRequest', (_message.Message,), dict(
-  DESCRIPTOR = _GETALGORITHMEXTRASETTINGSREQUEST,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.GetAlgorithmExtraSettingsRequest)
-  ))
-_sym_db.RegisterMessage(GetAlgorithmExtraSettingsRequest)
-
-GetAlgorithmExtraSettingsReply = _reflection.GeneratedProtocolMessageType('GetAlgorithmExtraSettingsReply', (_message.Message,), dict(
-  DESCRIPTOR = _GETALGORITHMEXTRASETTINGSREPLY,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.GetAlgorithmExtraSettingsReply)
-  ))
-_sym_db.RegisterMessage(GetAlgorithmExtraSettingsReply)
-
-RegisterTrialRequest = _reflection.GeneratedProtocolMessageType('RegisterTrialRequest', (_message.Message,), dict(
-  DESCRIPTOR = _REGISTERTRIALREQUEST,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.RegisterTrialRequest)
-  ))
-_sym_db.RegisterMessage(RegisterTrialRequest)
-
-RegisterTrialReply = _reflection.GeneratedProtocolMessageType('RegisterTrialReply', (_message.Message,), dict(
-  DESCRIPTOR = _REGISTERTRIALREPLY,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.RegisterTrialReply)
-  ))
-_sym_db.RegisterMessage(RegisterTrialReply)
-
-DeleteTrialRequest = _reflection.GeneratedProtocolMessageType('DeleteTrialRequest', (_message.Message,), dict(
-  DESCRIPTOR = _DELETETRIALREQUEST,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.DeleteTrialRequest)
-  ))
-_sym_db.RegisterMessage(DeleteTrialRequest)
-
-DeleteTrialReply = _reflection.GeneratedProtocolMessageType('DeleteTrialReply', (_message.Message,), dict(
-  DESCRIPTOR = _DELETETRIALREPLY,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.DeleteTrialReply)
-  ))
-_sym_db.RegisterMessage(DeleteTrialReply)
-
-GetTrialListRequest = _reflection.GeneratedProtocolMessageType('GetTrialListRequest', (_message.Message,), dict(
-  DESCRIPTOR = _GETTRIALLISTREQUEST,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.GetTrialListRequest)
-  ))
-_sym_db.RegisterMessage(GetTrialListRequest)
-
-GetTrialListReply = _reflection.GeneratedProtocolMessageType('GetTrialListReply', (_message.Message,), dict(
-  DESCRIPTOR = _GETTRIALLISTREPLY,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.GetTrialListReply)
-  ))
-_sym_db.RegisterMessage(GetTrialListReply)
-
-GetTrialRequest = _reflection.GeneratedProtocolMessageType('GetTrialRequest', (_message.Message,), dict(
-  DESCRIPTOR = _GETTRIALREQUEST,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.GetTrialRequest)
-  ))
-_sym_db.RegisterMessage(GetTrialRequest)
-
-GetTrialReply = _reflection.GeneratedProtocolMessageType('GetTrialReply', (_message.Message,), dict(
-  DESCRIPTOR = _GETTRIALREPLY,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.GetTrialReply)
-  ))
-_sym_db.RegisterMessage(GetTrialReply)
-
-UpdateTrialStatusRequest = _reflection.GeneratedProtocolMessageType('UpdateTrialStatusRequest', (_message.Message,), dict(
-  DESCRIPTOR = _UPDATETRIALSTATUSREQUEST,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.UpdateTrialStatusRequest)
-  ))
-_sym_db.RegisterMessage(UpdateTrialStatusRequest)
-
-UpdateTrialStatusReply = _reflection.GeneratedProtocolMessageType('UpdateTrialStatusReply', (_message.Message,), dict(
-  DESCRIPTOR = _UPDATETRIALSTATUSREPLY,
-  __module__ = 'api_pb2'
-  # @@protoc_insertion_point(class_scope:api.v1.alpha3.UpdateTrialStatusReply)
-  ))
-_sym_db.RegisterMessage(UpdateTrialStatusReply)
 
 ReportObservationLogRequest = _reflection.GeneratedProtocolMessageType('ReportObservationLogRequest', (_message.Message,), dict(
   DESCRIPTOR = _REPORTOBSERVATIONLOGREQUEST,
@@ -2881,8 +1775,8 @@ _MANAGER = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=5392,
-  serialized_end=5871,
+  serialized_start=3568,
+  serialized_end=4046,
   methods=[
   _descriptor.MethodDescriptor(
     name='ReportObservationLog',
@@ -2909,7 +1803,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_DELETEOBSERVATIONLOGREQUEST,
     output_type=_DELETEOBSERVATIONLOGREPLY,
-    options=_descriptor._ParseOptions(descriptor_pb2.MethodOptions(), _b('\202\323\344\223\0021*//api/Manager/DeleteObservationLog/{{trial_name}')),
+    options=_descriptor._ParseOptions(descriptor_pb2.MethodOptions(), _b('\202\323\344\223\0020*./api/Manager/DeleteObservationLog/{trial_name}')),
   ),
 ])
 _sym_db.RegisterServiceDescriptor(_MANAGER)
@@ -2923,8 +1817,8 @@ _SUGGESTION = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=1,
   options=None,
-  serialized_start=5874,
-  serialized_end=6103,
+  serialized_start=4049,
+  serialized_end=4278,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetSuggestions',
@@ -2956,8 +1850,8 @@ _EARLYSTOPPING = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=2,
   options=None,
-  serialized_start=6105,
-  serialized_end=6120,
+  serialized_start=4280,
+  serialized_end=4295,
   methods=[
 ])
 _sym_db.RegisterServiceDescriptor(_EARLYSTOPPING)

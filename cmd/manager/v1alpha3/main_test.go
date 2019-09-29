@@ -114,3 +114,20 @@ func TestGetObservationLog(t *testing.T) {
 		t.Fatalf("GetObservationLog Test fail expect metrics number %d got %d", len(obs.MetricLogs), len(ret.ObservationLog.MetricLogs))
 	}
 }
+
+func TestDeleteObservationLog(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	s := &server{}
+	mockDB := mockdb.NewMockKatibDBInterface(ctrl)
+	dbIf = mockDB
+
+	req := &api_pb.DeleteObservationLogRequest{
+		TrialName: "test1-trial1",
+	}
+	mockDB.EXPECT().DeleteObservationLog(req.TrialName).Return(nil)
+	_, err := s.DeleteObservationLog(context.Background(), req)
+	if err != nil {
+		t.Fatalf("DeleteExperiment Error %v", err)
+	}
+}
