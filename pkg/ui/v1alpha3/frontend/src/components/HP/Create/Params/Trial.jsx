@@ -12,7 +12,7 @@ import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 
 import { connect } from 'react-redux';
-import { changeTrial } from '../../../../actions/hpCreateActions';
+import { changeTrial, changeTrialNamespace } from '../../../../actions/hpCreateActions';
 import { fetchTrialTemplates } from '../../../../actions/templateActions';
 
 const module = "hpCreate";
@@ -44,6 +44,7 @@ class TrialSpecParam extends React.Component {
 
     onTrialNamespaceChange = (event) => {
         this.props.fetchTrialTemplates(event.target.value);
+        this.props.changeTrialNamespace(event.target.value);
     }
 
     onTrialChange = (event) => {
@@ -118,7 +119,8 @@ const mapStateToProps = state => {
     return {
         trial: state[module].trial,
         templates: state[templateModule].trialTemplates,
+        trialNamespace: state[module].trialNamespace,
     }
 }
 
-export default connect(mapStateToProps, { changeTrial, fetchTrialTemplates })(withStyles(styles)(TrialSpecParam));
+export default connect(mapStateToProps, { changeTrialNamespace, changeTrial, fetchTrialTemplates })(withStyles(styles)(TrialSpecParam));

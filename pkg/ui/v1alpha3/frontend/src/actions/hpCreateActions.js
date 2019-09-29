@@ -121,6 +121,13 @@ export const changeTrial = (trial) => ({
     trial,
 })
 
+export const CHANGE_TRIAL_NAMESPACE_HP = "CHANGE_TRIAL_NAMESPACE_HP";
+
+export const changeTrialNamespace = (namespace) => ({
+    type: CHANGE_TRIAL_NAMESPACE_HP,
+    namespace,
+})
+
 export const SUBMIT_HP_JOB_REQUEST = "SUBMIT_HP_JOB_REQUEST";
 export const SUBMIT_HP_JOB_SUCCESS = "SUBMIT_HP_JOB_SUCCESS";
 export const SUBMIT_HP_JOB_FAILURE = "SUBMIT_HP_JOB_FAILURE";

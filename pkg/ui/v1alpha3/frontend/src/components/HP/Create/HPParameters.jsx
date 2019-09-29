@@ -175,7 +175,8 @@ const mapStateToProps = (state) => ({
     algorithmName: state[module].algorithmName,
     algorithmSettings: state[module].algorithmSettings,
     parameters: state[module].parameters,
-    trial: state[module].trial
+    trial: state[module].trial,
+    trialNamespace: state[module].trialNamespace,
 })
 
 //TODO: Added validation and remove it
