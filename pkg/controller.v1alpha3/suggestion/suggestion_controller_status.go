@@ -25,3 +25,15 @@ func (r *ReconcileSuggestion) updateStatus(s *suggestionsv1alpha3.Suggestion, ol
 	}
 	return nil
 }
+
+func (r *ReconcileSuggestion) updateStatusCondition(s *suggestionsv1alpha3.Suggestion, oldS *suggestionsv1alpha3.Suggestion) error {
+	if !equality.Semantic.DeepEqual(s.Status.Conditions, oldS.Status.Conditions) {
+		newConditions := s.Status.Conditions
+		s.Status = oldS.Status
+		s.Status.Conditions = newConditions
+		if err := r.Status().Update(context.TODO(), s); err != nil {
+			return err
+		}
+	}
+	return nil
+}
