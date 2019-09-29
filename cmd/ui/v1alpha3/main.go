@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+
 	ui "github.com/kubeflow/katib/pkg/ui/v1alpha3"
 )
 
