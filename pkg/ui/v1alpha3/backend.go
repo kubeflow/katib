@@ -46,7 +46,7 @@ func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1alpha3.Man
 
 func (k *KatibUIHandler) FetchHPJobs(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
-	jobs, err := k.getExperimentList()
+	jobs, err := k.getExperimentList(consts.DefaultKatibNamespace)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -70,6 +70,7 @@ func (k *KatibUIHandler) FetchAllHPJobs(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	log.Printf("?????: %v", jobs)
 	response, err := json.Marshal(jobs)
 	if err != nil {
 		log.Printf("Marshal NAS jobs failed: %v", err)
@@ -81,7 +82,7 @@ func (k *KatibUIHandler) FetchAllHPJobs(w http.ResponseWriter, r *http.Request) 
 
 func (k *KatibUIHandler) FetchNASJobs(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
-	jobs, err := k.getExperimentList()
+	jobs, err := k.getExperimentList(consts.DefaultKatibNamespace)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -424,10 +425,10 @@ func (k *KatibUIHandler) AddEditDeleteTemplate(w http.ResponseWriter, r *http.Re
 	w.Write(response)
 }
 
-func (k *KatibUIHandler) getExperimentList(namespace ...string) ([]JobView, error) {
+func (k *KatibUIHandler) getExperimentList(namespace string) ([]JobView, error) {
 	jobs := make([]JobView, 0)
 
-	el, err := k.katibClient.GetExperimentList()
+	el, err := k.katibClient.GetExperimentList(namespace)
 	if err != nil {
 		log.Printf("GetExperimentList for NAS failed: %v", err)
 		return nil, err
