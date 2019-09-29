@@ -94,19 +94,25 @@ cp -r . ${GO_DIR}/
 cp -r pkg/apis/manager/v1alpha3/python/* ${GO_DIR}/test/e2e/v1alpha3
 
 
-kubectl create ns kubeflow
+echo "Deploying tf-operator crds from kubeflow/manifests master"
+cd "${MANIFESTS_DIR}/tf-training/tf-job-crds/base"
+kustomize build . | kubectl apply -f -
+
+echo "Deploying pytorch-operator crds from kubeflow/manifests master"
+cd "${MANIFESTS_DIR}/pytorch-job/pytorch-job-crds/base"
+kustomize build . | kubectl apply -f -
+
+cd ${GO_DIR}
+./scripts/v1alpha3/deploy.sh
+
 echo "Deploying tf-operator from kubeflow/manifests master"
 cd "${MANIFESTS_DIR}/tf-training/tf-job-operator/base"
 kustomize build . | kubectl apply -n kubeflow -f -
 
 echo "Deploying pytorch-operator from kubeflow/manifests master"
-cd "${MANIFESTS_DIR}/pytorch-job/pytorch-job-crds/base"
-kustomize build . | kubectl apply -n kubeflow -f -
 cd "${MANIFESTS_DIR}/pytorch-job/pytorch-operator/base/"
 kustomize build . | kubectl apply -n kubeflow -f -
 
-cd ${GO_DIR}
-./scripts/v1alpha3/deploy.sh
 
 TIMEOUT=120
 PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
