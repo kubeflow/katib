@@ -1,11 +1,10 @@
-package ui
+package v1alpha3
 
 import (
 	"context"
 	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -45,7 +44,7 @@ func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1alpha3.Man
 
 func (k *KatibUIHandler) FetchHPJobs(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
-	jobs, err := k.getExperimentList(consts.DefaultKatibNamespace)
+	jobs, err := k.getExperimentList(consts.DefaultKatibNamespace, JobTypeHP)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -64,32 +63,14 @@ func (k *KatibUIHandler) FetchHPJobs(w http.ResponseWriter, r *http.Request) {
 // FetchAllHPJobs gets experiments in all namespaces.
 func (k *KatibUIHandler) FetchAllHPJobs(w http.ResponseWriter, r *http.Request) {
 	// Use "" to get experiments in all namespaces.
-	jobs, err := k.getExperimentList("")
+	jobs, err := k.getExperimentList("", JobTypeHP)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("?????: %v", jobs)
 	response, err := json.Marshal(jobs)
 	if err != nil {
-		log.Printf("Marshal NAS jobs failed: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Write(response)
-}
-
-func (k *KatibUIHandler) FetchNASJobs(w http.ResponseWriter, r *http.Request) {
-	//enableCors(&w)
-	jobs, err := k.getExperimentList(consts.DefaultKatibNamespace)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	response, err := json.Marshal(jobs)
-	if err != nil {
-		log.Printf("Marshal NAS jobs failed: %v", err)
+		log.Printf("Marshal HP jobs failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -294,82 +275,6 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 	w.Write(response)
 }
 
-func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request) {
-	//enableCors(&w)
-	experimentName := r.URL.Query()["experimentName"][0]
-
-	responseRaw := make([]NNView, 0)
-	var architecture string
-	var decoder string
-
-	conn, c := k.connectManager()
-
-	defer conn.Close()
-
-	trials, err := k.katibClient.GetTrialList(experimentName)
-	if err != nil {
-		log.Printf("GetTrialList from NAS job failed: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	log.Printf("Got Trial List")
-
-	for i, t := range trials.Items {
-		succeeded := false
-		for _, condition := range t.Status.Conditions {
-			if condition.Type == trialsv1alpha3.TrialSucceeded {
-				succeeded = true
-			}
-		}
-		if succeeded {
-			obsLogResp, err := c.GetObservationLog(
-				context.Background(),
-				&api_pb_v1alpha3.GetObservationLogRequest{
-					TrialName: t.Name,
-					StartTime: "",
-					EndTime:   "",
-				},
-			)
-			if err != nil {
-				log.Printf("GetObservationLog from NAS job failed: %v", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			metricsName := make([]string, 0)
-			metricsValue := make([]string, 0)
-			for _, m := range obsLogResp.ObservationLog.MetricLogs {
-				metricsName = append(metricsName, m.Metric.Name)
-				metricsValue = append(metricsValue, m.Metric.Value)
-
-			}
-			for _, trialParam := range t.Spec.ParameterAssignments {
-				if trialParam.Name == "architecture" {
-					architecture = trialParam.Value
-				}
-				if trialParam.Name == "nn_config" {
-					decoder = trialParam.Value
-				}
-			}
-			responseRaw = append(responseRaw, NNView{
-				Name:         "Generation " + strconv.Itoa(i),
-				TrialName:    t.Name,
-				Architecture: generateNNImage(architecture, decoder),
-				MetricsName:  metricsName,
-				MetricsValue: metricsValue,
-			})
-		}
-	}
-	log.Printf("Logs parsed, result: %v", responseRaw)
-
-	response, err := json.Marshal(responseRaw)
-	if err != nil {
-		log.Printf("Marshal result in NAS job failed: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Write(response)
-}
-
 // FetchTrialTemplates gets the trial templates for the given namespace.
 func (k *KatibUIHandler) FetchTrialTemplates(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
@@ -422,28 +327,4 @@ func (k *KatibUIHandler) AddEditDeleteTemplate(w http.ResponseWriter, r *http.Re
 		return
 	}
 	w.Write(response)
-}
-
-func (k *KatibUIHandler) getExperimentList(namespace string) ([]JobView, error) {
-	jobs := make([]JobView, 0)
-
-	el, err := k.katibClient.GetExperimentList(namespace)
-	if err != nil {
-		log.Printf("GetExperimentList for NAS failed: %v", err)
-		return nil, err
-	}
-	for _, experiment := range el.Items {
-		if experiment.Spec.NasConfig != nil {
-			experimentLastCondition, err := experiment.GetLastConditionType()
-			if err != nil {
-				log.Printf("GetLastConditionType for HP failed: %v", err)
-				return nil, err
-			}
-			jobs = append(jobs, JobView{
-				Name:   experiment.Name,
-				Status: string(experimentLastCondition),
-			})
-		}
-	}
-	return jobs, nil
 }

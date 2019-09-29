@@ -1,6 +1,8 @@
-package ui
+package v1alpha3
 
-import "github.com/kubeflow/katib/pkg/util/v1alpha3/katibclient"
+import (
+	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibclient"
+)
 
 const maxMsgSize = 1<<31 - 1
 
@@ -54,3 +56,10 @@ type NNView struct {
 	MetricsName  []string
 	MetricsValue []string
 }
+
+type JobType string
+
+const (
+	JobTypeHP  = "HP"
+	JobTypeNAS = "NAS"
+)
