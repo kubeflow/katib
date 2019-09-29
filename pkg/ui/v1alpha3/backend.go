@@ -46,28 +46,10 @@ func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1alpha3.Man
 
 func (k *KatibUIHandler) FetchHPJobs(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
-
-	jobs := make([]JobView, 0)
-
-	el, err := k.katibClient.GetExperimentList()
+	jobs, err := k.getExperimentList()
 	if err != nil {
-		log.Printf("GetExperimentList for HP failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-	for _, experiment := range el.Items {
-		if experiment.Spec.Parameters != nil {
-			experimentLastCondition, err := experiment.GetLastConditionType()
-			if err != nil {
-				log.Printf("GetLastConditionType for HP failed: %v", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			jobs = append(jobs, JobView{
-				Name:   experiment.Name,
-				Status: string(experimentLastCondition),
-			})
-		}
 	}
 
 	response, err := json.Marshal(jobs)
@@ -80,30 +62,29 @@ func (k *KatibUIHandler) FetchHPJobs(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (k *KatibUIHandler) FetchNASJobs(w http.ResponseWriter, r *http.Request) {
-	//enableCors(&w)
-
-	jobs := make([]JobView, 0)
-
-	el, err := k.katibClient.GetExperimentList()
+// FetchAllHPJobs gets experiments in all namespaces.
+func (k *KatibUIHandler) FetchAllHPJobs(w http.ResponseWriter, r *http.Request) {
+	// Use "" to get experiments in all namespaces.
+	jobs, err := k.getExperimentList("")
 	if err != nil {
-		log.Printf("GetExperimentList for NAS failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	for _, experiment := range el.Items {
-		if experiment.Spec.NasConfig != nil {
-			experimentLastCondition, err := experiment.GetLastConditionType()
-			if err != nil {
-				log.Printf("GetLastConditionType for HP failed: %v", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			jobs = append(jobs, JobView{
-				Name:   experiment.Name,
-				Status: string(experimentLastCondition),
-			})
-		}
+	response, err := json.Marshal(jobs)
+	if err != nil {
+		log.Printf("Marshal NAS jobs failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
+}
+
+func (k *KatibUIHandler) FetchNASJobs(w http.ResponseWriter, r *http.Request) {
+	//enableCors(&w)
+	jobs, err := k.getExperimentList()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	response, err := json.Marshal(jobs)
@@ -113,7 +94,6 @@ func (k *KatibUIHandler) FetchNASJobs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(response)
-
 }
 
 func (k *KatibUIHandler) SubmitYamlJob(w http.ResponseWriter, r *http.Request) {
@@ -442,4 +422,28 @@ func (k *KatibUIHandler) AddEditDeleteTemplate(w http.ResponseWriter, r *http.Re
 		return
 	}
 	w.Write(response)
+}
+
+func (k *KatibUIHandler) getExperimentList(namespace ...string) ([]JobView, error) {
+	jobs := make([]JobView, 0)
+
+	el, err := k.katibClient.GetExperimentList()
+	if err != nil {
+		log.Printf("GetExperimentList for NAS failed: %v", err)
+		return nil, err
+	}
+	for _, experiment := range el.Items {
+		if experiment.Spec.NasConfig != nil {
+			experimentLastCondition, err := experiment.GetLastConditionType()
+			if err != nil {
+				log.Printf("GetLastConditionType for HP failed: %v", err)
+				return nil, err
+			}
+			jobs = append(jobs, JobView{
+				Name:   experiment.Name,
+				Status: string(experimentLastCondition),
+			})
+		}
+	}
+	return jobs, nil
 }

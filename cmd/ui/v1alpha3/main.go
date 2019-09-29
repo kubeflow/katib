@@ -26,7 +26,7 @@ func main() {
 	frontend := http.FileServer(http.Dir(*buildDir))
 	http.Handle("/katib/", http.StripPrefix("/katib/", frontend))
 
-	http.HandleFunc("/katib/fetch_hp_jobs/", kuh.FetchHPJobs)
+	http.HandleFunc("/katib/fetch_hp_jobs/", kuh.FetchAllHPJobs)
 	http.HandleFunc("/katib/fetch_nas_jobs/", kuh.FetchNASJobs)
 	http.HandleFunc("/katib/submit_yaml/", kuh.SubmitYamlJob)
 	http.HandleFunc("/katib/submit_hp_job/", kuh.SubmitParamsJob)
