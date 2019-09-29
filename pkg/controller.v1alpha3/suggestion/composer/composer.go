@@ -22,7 +22,9 @@ import (
 
 const (
 	defaultInitialDelaySeconds = 10
-	defaultPeriod              = 10
+	defaultPeriodForReady      = 10
+	defaultPeriodForLive       = 120
+	defaultFailureThreshold    = 12
 	// Ref https://github.com/grpc-ecosystem/grpc-health-probe/
 	defaultGRPCHealthCheckProbe = "/bin/grpc_health_probe"
 )
@@ -134,7 +136,7 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 			},
 		},
 		InitialDelaySeconds: defaultInitialDelaySeconds,
-		PeriodSeconds:       defaultPeriod,
+		PeriodSeconds:       defaultPeriodForReady,
 	}
 	c.LivenessProbe = &corev1.Probe{
 		Handler: corev1.Handler{
@@ -146,8 +148,10 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 				},
 			},
 		},
+		// Ref https://srcco.de/posts/kubernetes-liveness-probes-are-dangerous.html
 		InitialDelaySeconds: defaultInitialDelaySeconds,
-		PeriodSeconds:       defaultPeriod,
+		PeriodSeconds:       defaultPeriodForLive,
+		FailureThreshold:    defaultFailureThreshold,
 	}
 	return c, nil
 }
