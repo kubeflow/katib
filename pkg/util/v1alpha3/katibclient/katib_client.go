@@ -19,6 +19,7 @@ import (
 	"context"
 
 	apiv1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -134,6 +135,7 @@ func (k *KatibClient) GetExperiment(name string, namespace ...string) (*experime
 	return exp, nil
 }
 
+// GetConfigMap returns the configmap for the given name and namespace.
 func (k *KatibClient) GetConfigMap(name string, namespace ...string) (map[string]string, error) {
 	ns := getNamespace(namespace...)
 	configMap := &apiv1.ConfigMap{}
@@ -143,23 +145,24 @@ func (k *KatibClient) GetConfigMap(name string, namespace ...string) (map[string
 	return configMap.Data, nil
 }
 
+// GetTrialTemplates returns the trial template if it exists.
 func (k *KatibClient) GetTrialTemplates(namespace ...string) (map[string]string, error) {
-
 	ns := getNamespace(namespace...)
-	trialTemplates := &apiv1.ConfigMap{}
 
-	if err := k.client.Get(context.Background(), types.NamespacedName{Name: experimentsv1alpha3.DefaultTrialConfigMapName, Namespace: ns}, trialTemplates); err != nil {
+	data, err := k.GetConfigMap(experimentsv1alpha3.DefaultTrialConfigMapName, ns)
+	if err != nil && errors.IsNotFound(err) {
+		return map[string]string{}, nil
+	} else if err != nil {
 		return nil, err
 	}
-	return trialTemplates.Data, nil
-
+	return data, nil
 }
 
 func (k *KatibClient) UpdateTrialTemplates(newTrialTemplates map[string]string, namespace ...string) error {
 	ns := getNamespace(namespace...)
 	trialTemplates := &apiv1.ConfigMap{}
 
-	if err := k.client.Get(context.Background(), types.NamespacedName{Name: experimentsv1alpha3.DefaultTrialConfigMapName, Namespace: ns}, trialTemplates); err != nil {
+	if err := k.client.Get(context.TODO(), types.NamespacedName{Name: experimentsv1alpha3.DefaultTrialConfigMapName, Namespace: ns}, trialTemplates); err != nil {
 		return err
 	}
 	trialTemplates.Data = newTrialTemplates

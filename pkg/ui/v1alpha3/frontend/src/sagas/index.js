@@ -413,7 +413,8 @@ export const fetchTrialTemplates = function *() {
         const action = yield take(templateActions.FETCH_TRIAL_TEMPLATES_REQUEST);
         try {
             const result = yield call(
-                goFetchTrialTemplates
+                goFetchTrialTemplates,
+                action.namespace
             )
             if (result.status === 200) {
                 let data = Object.assign(result.data, {})
@@ -441,11 +442,11 @@ export const fetchTrialTemplates = function *() {
     }
 }
 
-const goFetchTrialTemplates = function *() {
+const goFetchTrialTemplates = function *(namespace) {
     try {
         const result = yield call(
             axios.get,
-            '/katib/fetch_trial_templates/',
+            `/katib/fetch_trial_templates/?namespace=${namespace}`,
         )
         return result
     } catch (err) {

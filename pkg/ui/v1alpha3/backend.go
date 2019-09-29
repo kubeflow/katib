@@ -9,18 +9,18 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ghodss/yaml"
+	"google.golang.org/grpc"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	experimentv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	api_pb_v1alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 	common_v1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
-
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibclient"
-	"google.golang.org/grpc"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/ghodss/yaml"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 func NewKatibUIHandler() *KatibUIHandler {
@@ -390,9 +390,14 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 	w.Write(response)
 }
 
+// FetchTrialTemplates gets the trial templates for the given namespace.
 func (k *KatibUIHandler) FetchTrialTemplates(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
-	trialTemplates, err := k.katibClient.GetTrialTemplates()
+	namespace := r.URL.Query()["namespace"][0]
+	if namespace == "" {
+		namespace = consts.DefaultKatibNamespace
+	}
+	trialTemplates, err := k.katibClient.GetTrialTemplates(namespace)
 	if err != nil {
 		log.Printf("GetTrialTemplate failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -23,8 +23,9 @@ export const FETCH_TRIAL_TEMPLATES_REQUEST = "FETCH_TRIAL_TEMPLATES_REQUEST"
 export const FETCH_TRIAL_TEMPLATES_SUCCESS = "FETCH_TRIAL_TEMPLATES_SUCCESS"
 export const FETCH_TRIAL_TEMPLATES_FAILURE = "FETCH_TRIAL_TEMPLATES_FAILURE"
 
-export const fetchTrialTemplates = () => ({
+export const fetchTrialTemplates = (namespace) => ({
     type: FETCH_TRIAL_TEMPLATES_REQUEST,
+    namespace
 })
 
 export const ADD_TEMPLATE_REQUEST = "ADD_TEMPLATE_REQUEST"
