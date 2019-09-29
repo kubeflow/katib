@@ -88,7 +88,31 @@ sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-skopt@$
 
 cat manifests/v1alpha3/katib-controller/katib-config.yaml
 
+
+mkdir -p ${GO_DIR}
+cp -r . ${GO_DIR}/
+cp -r pkg/apis/manager/v1alpha3/python/* ${GO_DIR}/test/e2e/v1alpha3
+
+
+echo "Deploying tf-operator crds from kubeflow/manifests master"
+cd "${MANIFESTS_DIR}/tf-training/tf-job-crds/base"
+kustomize build . | kubectl apply -f -
+
+echo "Deploying pytorch-operator crds from kubeflow/manifests master"
+cd "${MANIFESTS_DIR}/pytorch-job/pytorch-job-crds/base"
+kustomize build . | kubectl apply -f -
+
+cd ${GO_DIR}
 ./scripts/v1alpha3/deploy.sh
+
+echo "Deploying tf-operator from kubeflow/manifests master"
+cd "${MANIFESTS_DIR}/tf-training/tf-job-operator/base"
+kustomize build . | kubectl apply -n kubeflow -f -
+
+echo "Deploying pytorch-operator from kubeflow/manifests master"
+cd "${MANIFESTS_DIR}/pytorch-job/pytorch-operator/base/"
+kustomize build . | kubectl apply -n kubeflow -f -
+
 
 TIMEOUT=120
 PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
@@ -114,9 +138,6 @@ kubectl -n kubeflow get svc
 echo "Katib pods"
 kubectl -n kubeflow get pod
 
-mkdir -p ${GO_DIR}
-cp -r . ${GO_DIR}/
-cp -r pkg/apis/manager/v1alpha3/python/* ${GO_DIR}/test/e2e/v1alpha3
 cd ${GO_DIR}/test/e2e/v1alpha3
 
 echo "Building run-e2e-experiment for e2e test cases"

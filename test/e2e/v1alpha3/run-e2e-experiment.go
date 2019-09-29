@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	timeout = 20 * time.Minute
+	timeout = 30 * time.Minute
 )
 
 func verifyResult(exp *experimentsv1alpha3.Experiment) error {
