@@ -191,7 +191,8 @@ export const fetchHPJobInfo = function* () {
         try {
             const result = yield call(
                 goFetchHPJobInfo,
-                action.experimentName
+                action.name,
+                action.namespace
             )
             if (result.status === 200) {
                 let data = result.data.split("\n").map((line, i) => line.split(','))
@@ -212,11 +213,11 @@ export const fetchHPJobInfo = function* () {
     }
 }
 
-const goFetchHPJobInfo = function* (experimentName) {
+const goFetchHPJobInfo = function* (name, namespace) {
     try {
         const result = yield call(
             axios.get,
-            `/katib/fetch_hp_job_info/?experimentName=${experimentName}`,
+            `/katib/fetch_hp_job_info/?experimentName=${name}&namespace=${namespace}`,
         )
         return result
     } catch (err) {

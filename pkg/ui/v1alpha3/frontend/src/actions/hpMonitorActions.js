@@ -24,9 +24,10 @@ export const FETCH_HP_JOB_INFO_REQUEST = "FETCH_HP_JOB_INFO_REQUEST";
 export const FETCH_HP_JOB_INFO_SUCCESS = "FETCH_HP_JOB_INFO_SUCCESS";
 export const FETCH_HP_JOB_INFO_FAILURE = "FETCH_HP_JOB_INFO_FAILURE";
 
-export const fetchHPJobInfo = (experimentName) => ({
+export const fetchHPJobInfo = (name, namespace) => ({
     type: FETCH_HP_JOB_INFO_REQUEST,
-    experimentName
+    name,
+    namespace,
 })
 
 export const FETCH_HP_JOB_TRIAL_INFO_REQUEST = "FETCH_HP_JOB_TRIAL_INFO_REQUEST";

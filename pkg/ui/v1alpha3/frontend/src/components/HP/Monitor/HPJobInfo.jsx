@@ -33,7 +33,8 @@ const styles = theme => ({
 class HPJobInfo extends React.Component {
 
     componentDidMount() {
-        this.props.fetchHPJobInfo(this.props.match.params.name);
+        this.props.fetchHPJobInfo(
+            this.props.match.params.name, this.props.match.params.namespace);
     }
 
     render () {
@@ -51,6 +52,9 @@ class HPJobInfo extends React.Component {
                 <div>
                     <Typography  className = {classes.header} variant={"h5"}>
                         Experiment Name: {this.props.match.params.name}
+                    </Typography>
+                    <Typography  className = {classes.header} variant={"h5"}>
+                        Experiment Namespace: {this.props.match.params.namespace}
                     </Typography>
                     <br />
                     <HPJobPlot name={this.props.match.params.name} />

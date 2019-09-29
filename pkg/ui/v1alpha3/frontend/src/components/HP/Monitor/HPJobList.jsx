@@ -64,7 +64,7 @@ const HPJobList = (props) => {
                         icon = (<HighlightOffIcon className={classes.failed}/>)
                     }
                     return (
-                        <ListItem button key={i} component={Link} to={`/katib/hp_monitor/${job.name}`}>
+                        <ListItem button key={i} component={Link} to={`/katib/hp_monitor/${job.namespace}/${job.name}`}>
                             <ListItemIcon>
                                 {icon}
                             </ListItemIcon>

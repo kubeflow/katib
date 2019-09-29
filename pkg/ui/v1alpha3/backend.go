@@ -140,6 +140,7 @@ func (k *KatibUIHandler) SubmitParamsJob(w http.ResponseWriter, r *http.Request)
 func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request) {
 	experimentName := r.URL.Query()["experimentName"][0]
 	namespace := r.URL.Query()["namespace"][0]
+
 	experiment, err := k.katibClient.GetExperiment(experimentName, namespace)
 	if err != nil {
 		log.Printf("GetExperiment failed: %v", err)
@@ -157,12 +158,13 @@ func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request
 func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	experimentName := r.URL.Query()["experimentName"][0]
+	namespace := r.URL.Query()["namespace"][0]
 
 	conn, c := k.connectManager()
 	defer conn.Close()
 
 	resultText := "trialName"
-	experiment, err := k.katibClient.GetExperiment(experimentName)
+	experiment, err := k.katibClient.GetExperiment(experimentName, namespace)
 	if err != nil {
 		log.Printf("GetExperiment from HP job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -234,7 +236,6 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	w.Write(response)
-
 }
 
 func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Request) {
