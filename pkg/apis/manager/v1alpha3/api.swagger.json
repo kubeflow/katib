@@ -15,6 +15,31 @@
     "application/json"
   ],
   "paths": {
+    "/api/Manager/DeleteObservationLog/{trial_name}": {
+      "delete": {
+        "summary": "*\nDelete all log of Observations for a Trial.",
+        "operationId": "DeleteObservationLog",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/alpha3DeleteObservationLogReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "trial_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
     "/api/Manager/GetObservationLog": {
       "post": {
         "summary": "*\nGet all log of Observations for a Trial.",
@@ -98,6 +123,9 @@
           "$ref": "#/definitions/alpha3EarlyStoppingSpec"
         }
       }
+    },
+    "alpha3DeleteObservationLogReply": {
+      "type": "object"
     },
     "alpha3EarlyStoppingSpec": {
       "type": "object"

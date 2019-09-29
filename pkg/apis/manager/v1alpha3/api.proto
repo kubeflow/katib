@@ -42,7 +42,7 @@ service Manager {
      */
     rpc DeleteObservationLog(DeleteObservationLogRequest) returns (DeleteObservationLogReply){
         option (google.api.http) = {
-            delete: "/api/Manager/DeleteObservationLog/{{trial_name}"
+            delete: "/api/Manager/DeleteObservationLog/{trial_name}"
             };
     };
 }
@@ -178,24 +178,9 @@ message ExperimentSpec {
     NasConfig nas_config = 8;
 }
 
-message ExperimentStatus {
-    enum ExperimentConditionType {
-        CREATED = 0;
-        RUNNING = 1;
-        RESTARTING = 2;
-        SUCCEEDED = 3;
-        FAILED = 4;
-        UNKNOWN = 5;
-    }
-    string start_time = 1; /// RFC3339 format
-    string completion_time = 2; /// RFC3339 format
-    ExperimentConditionType condition = 3;
-}
-
 message Experiment {
     string name = 1; /// Name of Experiment. This is unique in DB.
     ExperimentSpec spec = 2;
-    ExperimentStatus status = 3;
 }
 
 message ParameterAssignment {
@@ -256,106 +241,6 @@ message Trial {
     TrialStatus status = 3;
 }
 
-message RegisterExperimentRequest {
-    Experiment experiment = 1;
-}
-
-message RegisterExperimentReply {
-}
-
-message PreCheckRegisterExperimentReply {
-	bool can_register = 1;
-}
-message DeleteExperimentRequest {
-    string experiment_name = 1;
-}
-
-message DeleteExperimentReply {
-}
-
-message GetExperimentRequest {
-    string experiment_name = 1;
-}
-
-message GetExperimentReply {
-    Experiment experiment = 1;
-}
-
-message ExperimentSummary {
-    string experiment_name = 1;
-    ExperimentStatus status = 2;
-}
-
-message GetExperimentListRequest {
-}
-
-message GetExperimentListReply {
-    repeated ExperimentSummary experiment_summaries = 1;
-}
-
-message UpdateExperimentStatusRequest {
-    string experiment_name = 1;
-    ExperimentStatus new_status = 2;
-}
-
-message UpdateExperimentStatusReply {
-}
-
-message UpdateAlgorithmExtraSettingsRequest {
-    string experiment_name = 1;
-    repeated AlgorithmSetting extra_algorithm_settings = 2;
-}
-
-message UpdateAlgorithmExtraSettingsReply {
-}
-
-message GetAlgorithmExtraSettingsRequest {
-    string experiment_name = 1;
-}
-
-message GetAlgorithmExtraSettingsReply {
-    repeated AlgorithmSetting extra_algorithm_settings = 1;
-}
-
-message RegisterTrialRequest {
-    Trial trial = 1;
-}
-
-message RegisterTrialReply {
-}
-
-message DeleteTrialRequest {
-    string trial_name = 1;
-}
-
-message DeleteTrialReply {
-}
-
-message GetTrialListRequest {
-    string experiment_name = 1;
-    string filter = 2;
-}
-
-message GetTrialListReply {
-    repeated Trial trials = 1;
-}
-
-message GetTrialRequest {
-    string trial_name = 1;
-}
-
-message GetTrialReply {
-    Trial trial = 1;
-}
-
-message UpdateTrialStatusRequest {
-    string trial_name = 1;
-    TrialStatus new_status = 2;
-}
-
-message UpdateTrialStatusReply {
-}
-
 message ReportObservationLogRequest {
     string trial_name = 1;
     ObservationLog observation_log = 2;
@@ -370,7 +255,6 @@ message DeleteObservationLogRequest {
 
 message DeleteObservationLogReply {
 }
-
 
 message GetObservationLogRequest {
     string trial_name = 1;
