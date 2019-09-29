@@ -52,7 +52,8 @@ const generalReducer = (state = initialState, action) => {
             return {
                 ...state,
                 deleteDialog: true,
-                deleteExperimentName: action.experimentName,
+                deleteExperimentName: action.name,
+                deleteExperimentNamespace: action.namespace,
             }
         case actions.CLOSE_DELETE_EXPERIMENT_DIALOG:
             return {

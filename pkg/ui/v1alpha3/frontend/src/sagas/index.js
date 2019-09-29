@@ -8,7 +8,7 @@ import * as nasCreateActions from '../actions/nasCreateActions';
 import * as generalActions from '../actions/generalActions';
 
 
-export const submitYaml = function *() {
+export const submitYaml = function* () {
     while (true) {
         const action = yield take(generalActions.SUBMIT_YAML_REQUEST);
         try {
@@ -24,7 +24,7 @@ export const submitYaml = function *() {
                 yield put({
                     type: generalActions.SUBMIT_YAML_FAILURE,
                     message: result.message,
-                }) 
+                })
             }
         } catch (err) {
             yield put({
@@ -34,7 +34,7 @@ export const submitYaml = function *() {
     }
 }
 
-const goSubmitYaml = function *(yaml) {
+const goSubmitYaml = function* (yaml) {
     try {
         const data = {
             yaml
@@ -53,13 +53,14 @@ const goSubmitYaml = function *(yaml) {
     }
 }
 
-export const deleteExperiment = function *() {
+export const deleteExperiment = function* () {
     while (true) {
         const action = yield take(generalActions.DELETE_EXPERIMENT_REQUEST);
         try {
             const result = yield call(
                 goDeleteExperiment,
-                action.experimentName
+                action.name,
+                action.namespace,
             )
             if (result.status === 200) {
                 yield put({
@@ -68,7 +69,7 @@ export const deleteExperiment = function *() {
             } else {
                 yield put({
                     type: generalActions.DELETE_EXPERIMENT_FAILURE,
-                }) 
+                })
             }
         } catch (err) {
             yield put({
@@ -78,11 +79,11 @@ export const deleteExperiment = function *() {
     }
 }
 
-const goDeleteExperiment = function *(experimentName) {
+const goDeleteExperiment = function* (name, namespace) {
     try {
         const result = yield call(
             axios.get,
-            `/katib/delete_experiment/?experimentName=${experimentName}`,
+            `/katib/delete_experiment/?experimentName=${name}&namespace=${namespace}`,
         )
         return result
     } catch (err) {
@@ -92,7 +93,7 @@ const goDeleteExperiment = function *(experimentName) {
     }
 }
 
-export const submitHPJob = function *() {
+export const submitHPJob = function* () {
     while (true) {
         const action = yield take(hpCreateActions.SUBMIT_HP_JOB_REQUEST);
         try {
@@ -108,7 +109,7 @@ export const submitHPJob = function *() {
                 yield put({
                     type: hpCreateActions.SUBMIT_HP_JOB_FAILURE,
                     message: result.message,
-                }) 
+                })
             }
         } catch (err) {
             yield put({
@@ -118,7 +119,7 @@ export const submitHPJob = function *() {
     }
 }
 
-const goSubmitHPJob = function *(postData) {
+const goSubmitHPJob = function* (postData) {
     try {
         const data = {
             postData
@@ -137,7 +138,7 @@ const goSubmitHPJob = function *(postData) {
     }
 }
 
-export const fetchHPJobs = function *() {
+export const fetchHPJobs = function* () {
     while (true) {
         const action = yield take(hpMonitorActions.FETCH_HP_JOBS_REQUEST);
         try {
@@ -160,7 +161,7 @@ export const fetchHPJobs = function *() {
             } else {
                 yield put({
                     type: hpMonitorActions.FETCH_HP_JOBS_FAILURE,
-                }) 
+                })
             }
         } catch (err) {
             yield put({
@@ -170,7 +171,7 @@ export const fetchHPJobs = function *() {
     }
 }
 
-const goFetchHPJobs = function *() {
+const goFetchHPJobs = function* () {
     try {
         const result = yield call(
             axios.get,
@@ -184,7 +185,7 @@ const goFetchHPJobs = function *() {
     }
 }
 
-export const fetchHPJobInfo = function *() {
+export const fetchHPJobInfo = function* () {
     while (true) {
         const action = yield take(hpMonitorActions.FETCH_HP_JOB_INFO_REQUEST);
         try {
@@ -201,7 +202,7 @@ export const fetchHPJobInfo = function *() {
             } else {
                 yield put({
                     type: hpMonitorActions.FETCH_HP_JOB_INFO_FAILURE,
-                }) 
+                })
             }
         } catch (err) {
             yield put({
@@ -211,7 +212,7 @@ export const fetchHPJobInfo = function *() {
     }
 }
 
-const goFetchHPJobInfo = function *(experimentName) {
+const goFetchHPJobInfo = function* (experimentName) {
     try {
         const result = yield call(
             axios.get,
@@ -225,7 +226,7 @@ const goFetchHPJobInfo = function *(experimentName) {
     }
 }
 
-export const fetchHPJobTrialInfo = function *() {
+export const fetchHPJobTrialInfo = function* () {
     while (true) {
         const action = yield take(hpMonitorActions.FETCH_HP_JOB_TRIAL_INFO_REQUEST);
         try {
@@ -242,7 +243,7 @@ export const fetchHPJobTrialInfo = function *() {
             } else {
                 yield put({
                     type: hpMonitorActions.FETCH_HP_JOB_TRIAL_INFO_FAILURE,
-                }) 
+                })
             }
         } catch (err) {
             yield put({
@@ -252,7 +253,7 @@ export const fetchHPJobTrialInfo = function *() {
     }
 }
 
-const gofetchHPJobTrialInfo = function *(trialName) {
+const gofetchHPJobTrialInfo = function* (trialName) {
     try {
         const result = yield call(
             axios.get,
@@ -266,7 +267,7 @@ const gofetchHPJobTrialInfo = function *(trialName) {
     }
 }
 
-export const submitNASJob = function *() {
+export const submitNASJob = function* () {
     while (true) {
         const action = yield take(nasCreateActions.SUBMIT_NAS_JOB_REQUEST);
         try {
@@ -282,7 +283,7 @@ export const submitNASJob = function *() {
                 yield put({
                     type: nasCreateActions.SUBMIT_NAS_JOB_FAILURE,
                     message: result.message,
-                }) 
+                })
             }
         } catch (err) {
             yield put({
@@ -292,7 +293,7 @@ export const submitNASJob = function *() {
     }
 }
 
-const goSubmitNASJob = function *(postData) {
+const goSubmitNASJob = function* (postData) {
     try {
         const data = {
             postData
@@ -312,7 +313,7 @@ const goSubmitNASJob = function *(postData) {
 }
 
 
-export const fetchNASJobs = function *() {
+export const fetchNASJobs = function* () {
     while (true) {
         const action = yield take(nasMonitorActions.FETCH_NAS_JOBS_REQUEST);
         try {
@@ -335,7 +336,7 @@ export const fetchNASJobs = function *() {
             } else {
                 yield put({
                     type: nasMonitorActions.FETCH_NAS_JOBS_FAILURE,
-                }) 
+                })
             }
         } catch (err) {
             yield put({
@@ -345,7 +346,7 @@ export const fetchNASJobs = function *() {
     }
 }
 
-const goFetchNASJobs = function *() {
+const goFetchNASJobs = function* () {
     try {
         const result = yield call(
             axios.get,
@@ -359,7 +360,7 @@ const goFetchNASJobs = function *() {
     }
 }
 
-export const fetchNASJobInfo = function *() {
+export const fetchNASJobInfo = function* () {
     while (true) {
         const action = yield take(nasMonitorActions.FETCH_NAS_JOB_INFO_REQUEST);
         try {
@@ -383,7 +384,7 @@ export const fetchNASJobInfo = function *() {
             } else {
                 yield put({
                     type: nasMonitorActions.FETCH_NAS_JOB_INFO_FAILURE,
-                }) 
+                })
             }
         } catch (err) {
             yield put({
@@ -393,7 +394,7 @@ export const fetchNASJobInfo = function *() {
     }
 }
 
-const goFetchNASJobInfo = function *(experimentName) {
+const goFetchNASJobInfo = function* (experimentName) {
     try {
         const result = yield call(
             axios.get,
@@ -408,7 +409,7 @@ const goFetchNASJobInfo = function *(experimentName) {
 }
 
 
-export const fetchTrialTemplates = function *() {
+export const fetchTrialTemplates = function* () {
     while (true) {
         const action = yield take(templateActions.FETCH_TRIAL_TEMPLATES_REQUEST);
         try {
@@ -432,7 +433,7 @@ export const fetchTrialTemplates = function *() {
             } else {
                 yield put({
                     type: templateActions.FETCH_TRIAL_TEMPLATES_FAILURE,
-                }) 
+                })
             }
         } catch (err) {
             yield put({
@@ -442,7 +443,7 @@ export const fetchTrialTemplates = function *() {
     }
 }
 
-const goFetchTrialTemplates = function *(namespace) {
+const goFetchTrialTemplates = function* (namespace) {
     try {
         const result = yield call(
             axios.get,
@@ -456,7 +457,7 @@ const goFetchTrialTemplates = function *(namespace) {
     }
 }
 
-export const addTemplate = function *() {
+export const addTemplate = function* () {
     while (true) {
         const action = yield take(templateActions.ADD_TEMPLATE_REQUEST);
         try {
@@ -484,7 +485,7 @@ export const addTemplate = function *() {
             } else {
                 yield put({
                     type: templateActions.ADD_TEMPLATE_FAILURE,
-                }) 
+                })
             }
         } catch (err) {
             yield put({
@@ -494,7 +495,7 @@ export const addTemplate = function *() {
     }
 }
 
-const goAddTemplate = function *(name, yaml, kind, action) {
+const goAddTemplate = function* (name, yaml, kind, action) {
     try {
         const data = {
             name, yaml, kind, action
@@ -512,7 +513,7 @@ const goAddTemplate = function *(name, yaml, kind, action) {
     }
 }
 
-export const editTemplate = function *() {
+export const editTemplate = function* () {
     while (true) {
         const action = yield take(templateActions.EDIT_TEMPLATE_REQUEST);
         try {
@@ -540,7 +541,7 @@ export const editTemplate = function *() {
             } else {
                 yield put({
                     type: templateActions.EDIT_TEMPLATE_FAILURE,
-                }) 
+                })
             }
         } catch (err) {
             yield put({
@@ -550,7 +551,7 @@ export const editTemplate = function *() {
     }
 }
 
-const goEditTemplate = function *(name, yaml, kind, action) {
+const goEditTemplate = function* (name, yaml, kind, action) {
     try {
         const data = {
             name, yaml, kind, action
@@ -568,7 +569,7 @@ const goEditTemplate = function *(name, yaml, kind, action) {
     }
 }
 
-export const deleteTemplate = function *() {
+export const deleteTemplate = function* () {
     while (true) {
         const action = yield take(templateActions.DELETE_TEMPLATE_REQUEST);
         try {
@@ -595,7 +596,7 @@ export const deleteTemplate = function *() {
             } else {
                 yield put({
                     type: templateActions.DELETE_TEMPLATE_FAILURE,
-                }) 
+                })
             }
         } catch (err) {
             yield put({
@@ -605,7 +606,7 @@ export const deleteTemplate = function *() {
     }
 }
 
-const goDeleteTemplate = function *(name, kind, action) {
+const goDeleteTemplate = function* (name, kind, action) {
     try {
         const data = {
             name, kind, action
@@ -628,7 +629,7 @@ export default function* rootSaga() {
         fork(fetchTrialTemplates),
         fork(fetchHPJobs),
         fork(fetchNASJobs),
-        fork(addTemplate), 
+        fork(addTemplate),
         fork(editTemplate),
         fork(deleteTemplate),
         fork(submitYaml),

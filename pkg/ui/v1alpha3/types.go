@@ -31,8 +31,9 @@ type Option struct {
 }
 
 type JobView struct {
-	Name   string
-	Status string
+	Name      string
+	Status    string
+	Namespace string
 }
 
 type TemplateView struct {

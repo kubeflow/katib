@@ -28,16 +28,18 @@ export const DELETE_EXPERIMENT_REQUEST = "DELETE_EXPERIMENT_REQUEST";
 export const DELETE_EXPERIMENT_FAILURE = "DELETE_EXPERIMENT_FAILURE";
 export const DELETE_EXPERIMENT_SUCCESS = "DELETE_EXPERIMENT_SUCCESS";
 
-export const deleteExperiment = (experimentName) => ({
+export const deleteExperiment = (name, namespace) => ({
     type: DELETE_EXPERIMENT_REQUEST,
-    experimentName,
+    name,
+    namespace,
 })
 
 export const OPEN_DELETE_EXPERIMENT_DIALOG = "OPEN_DELETE_EXPERIMENT_DIALOG";
 
-export const openDeleteExperimentDialog = (experimentName) => ({
+export const openDeleteExperimentDialog = (name, namespace) => ({
     type: OPEN_DELETE_EXPERIMENT_DIALOG,
-    experimentName,
+    name,
+    namespace,
 })
 
 export const CLOSE_DELETE_EXPERIMENT_DIALOG = "CLOSE_DELETE_EXPERIMENT_DIALOG";

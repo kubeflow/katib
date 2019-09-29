@@ -139,7 +139,8 @@ func (k *KatibUIHandler) SubmitParamsJob(w http.ResponseWriter, r *http.Request)
 
 func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request) {
 	experimentName := r.URL.Query()["experimentName"][0]
-	experiment, err := k.katibClient.GetExperiment(experimentName)
+	namespace := r.URL.Query()["namespace"][0]
+	experiment, err := k.katibClient.GetExperiment(experimentName, namespace)
 	if err != nil {
 		log.Printf("GetExperiment failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

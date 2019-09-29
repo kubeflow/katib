@@ -43,8 +43,8 @@ const HPJobList = (props) => {
 
     const { classes } = props;
 
-    const onDeleteExperiment = (experimentName) => (event) => {
-        props.openDeleteExperimentDialog(experimentName);
+    const onDeleteExperiment = (name, namespace) => (event) => {
+        props.openDeleteExperimentDialog(name, namespace);
     }
 
     return (
@@ -68,9 +68,9 @@ const HPJobList = (props) => {
                             <ListItemIcon>
                                 {icon}
                             </ListItemIcon>
-                            <ListItemText inset primary={job.name} />
+                            <ListItemText inset primary={`${job.name}`} secondary={job.namespace} />
                             <ListItemSecondaryAction>
-                                <IconButton aria-label={"Delete"} onClick={onDeleteExperiment(job.name)}>
+                                <IconButton aria-label={"Delete"} onClick={onDeleteExperiment(job.name, job.namespace)}>
                                     <DeleteIcon />
                                 </IconButton>
                             </ListItemSecondaryAction>
