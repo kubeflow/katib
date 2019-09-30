@@ -35,7 +35,7 @@ const App = (props) => {
             <Route path="/katib/hp_monitor/:namespace/:name" component={HPJobInfo} />
             <Route path="/katib/nas" component={NAS} />
             <Route exact path="/katib/nas_monitor" component={NASJobMonitor} />
-            <Route path="/katib/nas_monitor/:name" component={NASJobInfo} />
+            <Route path="/katib/nas_monitor/:namespace/:name" component={NASJobInfo} />
             <Route path="/katib/trial" component={Trial} />
             <Snack />
         </div>

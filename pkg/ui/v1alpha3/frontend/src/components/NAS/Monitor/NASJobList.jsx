@@ -64,13 +64,13 @@ const NASJobList = (props) => {
                         icon = (<HighlightOffIcon className={classes.failed}/>)
                     }
                     return (
-                        <ListItem button key={i} component={Link} to={`/katib/nas_monitor/${job.name}`}>
+                        <ListItem button key={i} component={Link} to={`/katib/nas_monitor/${job.namespace}/${job.name}`}>
                             <ListItemIcon>
                                 {icon}
                             </ListItemIcon>
-                            <ListItemText inset primary={job.name} />
+                            <ListItemText inset primary={`${job.name}`} secondary={job.namespace} />
                             <ListItemSecondaryAction>
-                                <IconButton aria-label={"Delete"} onClick={onDeleteExperiment(job.name)}>
+                                <IconButton aria-label={"Delete"} onClick={onDeleteExperiment(job.name, job.namespace)}>
                                     <DeleteIcon />
                                 </IconButton>
                             </ListItemSecondaryAction>

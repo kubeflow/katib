@@ -9,12 +9,12 @@ import (
 
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	api_pb_v1alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
-	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 )
 
-func (k *KatibUIHandler) FetchNASJobs(w http.ResponseWriter, r *http.Request) {
+func (k *KatibUIHandler) FetchAllNASJobs(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
-	jobs, err := k.getExperimentList(consts.DefaultKatibNamespace, JobTypeNAS)
+	// Use "" to get experiments in all namespaces.
+	jobs, err := k.getExperimentList("", JobTypeNAS)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -32,6 +32,7 @@ func (k *KatibUIHandler) FetchNASJobs(w http.ResponseWriter, r *http.Request) {
 func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	experimentName := r.URL.Query()["experimentName"][0]
+	namespace := r.URL.Query()["namespace"][0]
 
 	responseRaw := make([]NNView, 0)
 	var architecture string
@@ -41,7 +42,7 @@ func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request)
 
 	defer conn.Close()
 
-	trials, err := k.katibClient.GetTrialList(experimentName)
+	trials, err := k.katibClient.GetTrialList(experimentName, namespace)
 	if err != nil {
 		log.Printf("GetTrialList from NAS job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

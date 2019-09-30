@@ -39,10 +39,11 @@ const styles = theme => ({
 class NASJobInfo extends React.Component {
 
     componentDidMount() {
-        this.props.fetchNASJobInfo(this.props.match.params.name);
+        this.props.fetchNASJobInfo(
+            this.props.match.params.name, this.props.match.params.namespace);
     }
 
-    render () {
+    render() {
         const { classes } = this.props;
         return (
             <div className={classes.root}>
@@ -51,29 +52,32 @@ class NASJobInfo extends React.Component {
                         Back
                     </Button>
                 </Link>
-                {this.props.loading ? 
-                <LinearProgress color={"primary"} className={classes.loading} />
-                :
-                <div>
-                    <Typography className = {classes.header} variant={"h5"}>
-                        Experiment Name: {this.props.match.params.name}
-                    </Typography>
-                    <br />
-                    {this.props.steps.map((step, i) => {
-                        return (
-                            <ExpansionPanel key={i} className={classes.panel}>
-                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                                    <Typography className={classes.heading}>{step.name}</Typography>
-                                </ExpansionPanelSummary>
-                                <ExpansionPanelDetails>
-                                    <NASJobStepInfo step={step} id={i + 1}/>
-                                </ExpansionPanelDetails>
-                            </ExpansionPanel>
-                        )
-                    })}
-                </div>
+                {this.props.loading ?
+                    <LinearProgress color={"primary"} className={classes.loading} />
+                    :
+                    <div>
+                        <Typography className={classes.header} variant={"h5"}>
+                            Experiment Name: {this.props.match.params.name}
+                        </Typography>
+                        <Typography className={classes.header} variant={"h5"}>
+                            Experiment Namespace: {this.props.match.params.namespace}
+                        </Typography>
+                        <br />
+                        {this.props.steps.map((step, i) => {
+                            return (
+                                <ExpansionPanel key={i} className={classes.panel}>
+                                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                                        <Typography className={classes.heading}>{step.name}</Typography>
+                                    </ExpansionPanelSummary>
+                                    <ExpansionPanelDetails>
+                                        <NASJobStepInfo step={step} id={i + 1} />
+                                    </ExpansionPanelDetails>
+                                </ExpansionPanel>
+                            )
+                        })}
+                    </div>
                 }
-                
+
             </div>
         )
     }
