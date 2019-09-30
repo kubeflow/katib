@@ -367,7 +367,8 @@ export const fetchNASJobInfo = function* () {
         try {
             const result = yield call(
                 goFetchNASJobInfo,
-                action.experimentName
+                action.experimentName,
+                action.namespace,
             )
             if (result.status === 200) {
                 let data = Object.assign(result.data, {})
@@ -395,11 +396,11 @@ export const fetchNASJobInfo = function* () {
     }
 }
 
-const goFetchNASJobInfo = function* (experimentName) {
+const goFetchNASJobInfo = function* (experimentName, namespace) {
     try {
         const result = yield call(
             axios.get,
-            `/katib/fetch_nas_job_info/?experimentName=${experimentName}`,
+            `/katib/fetch_nas_job_info/?experimentName=${experimentName}&namespace=${namespace}`,
         )
         return result
     } catch (err) {

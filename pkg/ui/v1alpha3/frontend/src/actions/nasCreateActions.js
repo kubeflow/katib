@@ -171,6 +171,13 @@ export const changeTrial = (trial) => ({
     trial,
 })
 
+export const CHANGE_TRIAL_NAMESPACE_NAS = "CHANGE_TRIAL_NAMESPACE_HP";
+
+export const changeTrialNamespace = (namespace) => ({
+    type: CHANGE_TRIAL_NAMESPACE_NAS,
+    namespace,
+})
+
 export const SUBMIT_NAS_JOB_REQUEST = "SUBMIT_NAS_JOB_REQUEST";
 export const SUBMIT_NAS_JOB_SUCCESS = "SUBMIT_NAS_JOB_SUCCESS";
 export const SUBMIT_NAS_JOB_FAILURE = "SUBMIT_NAS_JOB_FAILURE";

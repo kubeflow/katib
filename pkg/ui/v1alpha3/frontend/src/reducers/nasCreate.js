@@ -550,6 +550,11 @@ const nasCreateReducer = (state = initialState, action) => {
                 ...state,
                 trial: action.trial,
             }
+        case actions.CHANGE_TRIAL_NAMESPACE_NAS:
+            return {
+                ...state,
+                trialNamespace: action.namespace,
+            }
         case actions.CLOSE_SNACKBAR:
             return {
                 ...state,
