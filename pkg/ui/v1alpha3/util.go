@@ -16,7 +16,7 @@ func (k *KatibUIHandler) getExperimentList(namespace string, typ JobType) ([]Job
 
 	el, err := k.katibClient.GetExperimentList(namespace)
 	if err != nil {
-		log.Printf("GetExperimentList for NAS failed: %v", err)
+		log.Printf("GetExperimentList failed: %v", err)
 		return nil, err
 	}
 	for _, experiment := range el.Items {
@@ -24,7 +24,7 @@ func (k *KatibUIHandler) getExperimentList(namespace string, typ JobType) ([]Job
 			(typ == JobTypeHP && experiment.Spec.NasConfig == nil) {
 			experimentLastCondition, err := experiment.GetLastConditionType()
 			if err != nil {
-				log.Printf("GetLastConditionType for NAS failed: %v", err)
+				log.Printf("GetLastConditionType failed: %v", err)
 				return nil, err
 			}
 			jobs = append(jobs, JobView{
