@@ -45,7 +45,9 @@ The design of katib follows the [`ask-and-tell` pattern](https://scikit-optimize
 
 > They often follow a pattern a bit like this: 1. ask for a new set of parameters 1. walk to the experiment and program in the new parameters 1. observe the outcome of running the experiment 1. walk back to your laptop and tell the optimizer about the outcome 1. go to step 1
 
-When an experiment is created, one algorithm service will be created. Then katib asks for new sets of parameters via `GetSuggestions` GRPC call. After that, katib creates new trials according to the sets and observe the outcome. When the trials are finished, katib tells the metrics of the finished trials to the algorithm, and ask another new sets. One sample algorithm looks like:
+When an experiment is created, one algorithm service will be created. Then katib asks for new sets of parameters via `GetSuggestions` GRPC call. After that, katib creates new trials according to the sets and observe the outcome. When the trials are finished, katib tells the metrics of the finished trials to the algorithm, and ask another new sets. 
+
+The new algorithm needs to implement `Suggestion` service defined in [api.proto](../pkg/apis/manager/v1alpha3/api.proto). One sample algorithm looks like:
 
 ```python
 from pkg.apis.manager.v1alpha3.python import api_pb2
@@ -59,6 +61,9 @@ from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
 # Inherit SuggestionServicer and implement GetSuggestions
 class HyperoptService(
         api_pb2_grpc.SuggestionServicer, HealthServicer):
+    def ValidateAlgorithmSettings(self, request, context):
+        # Optional, it is used to validate algorithm settings defined by users.
+        pass
     def GetSuggestions(self, request, context):
         # Convert the experiment in GRPC request to the search space.
         # search_space example:
@@ -115,7 +120,9 @@ class HyperoptService(
 
 ### Make the algorithm a GRPC server
 
-Create a package under [cmd/suggestion](../cmd/suggestion). Then create the main function and Dockerfile. Here is an example: [cmd/suggestion/hyperopt](../cmd/suggestion/hyperopt). Then build the Docker image.
+Create a package under [cmd/suggestion](../cmd/suggestion). Then create the main function and Dockerfile. The new GRPC server should serve in port 6789.
+
+Here is an example: [cmd/suggestion/hyperopt](../cmd/suggestion/hyperopt). Then build the Docker image.
 
 ### Use the algorithm in katib.
 
