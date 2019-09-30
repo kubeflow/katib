@@ -294,7 +294,7 @@ spec:
   algorithmName: random
   requests: 3
 status:
-  assignments:
+  suggestions:
     - assignments:
         - name: --lr
           value: 0.02
@@ -330,7 +330,7 @@ spec:
   algorithmName: random
   requests: 4
 status:
-  assignments:
+  suggestions:
     - assignments:
         - name: --lr
           value: 0.02
