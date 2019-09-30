@@ -27,7 +27,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 ## Background
 
-Katib makes suggestions long-running in v1alpha2 and v1alpha3. And the suggestions need to communicate with katib manager to get experiments and trials from katib-db. This design hurts high availability. 
+Katib makes suggestions long-running in v1alpha3 and v1alpha3. And the suggestions need to communicate with katib manager to get experiments and trials from katib-db. This design hurts high availability. 
 
 Thus we proposed a new design to implement a CRD for suggestion and remove katib-db from main workflow. The new design simplifies the implmentation of experiment and trial controller, and makes katib Kubernetes native.
 
@@ -51,19 +51,24 @@ This document is to illustrate the details of the new design.
 ```go
 // SuggestionSpec defines the desired state of Suggestion
 type SuggestionSpec struct {
+	AlgorithmName string `json:"algorithmName"`
 	// Number of suggestions requested
 	Requests int32 `json:"requests,omitempty"`
-
-	//Algorithm settings set by the user in the experiment config
-	AlgorithmSpec *common.AlgorithmSpec `json:"algorithmSpec,omitempty"`
 }
 
 // SuggestionStatus defines the observed state of Suggestion
 type SuggestionStatus struct {
+	// Algorithmsettings set by the algorithm services.
+	AlgorithmSettings []common.AlgorithmSetting `json:"algorithmSettings,omitempty"`
+
+	// Number of suggestion results
+	SuggestionCount int32 `json:"suggestionCount,omitempty"`
+
 	// Suggestion results
 	Suggestions []TrialAssignment `json:"suggestions,omitempty"`
 }
 
+// TrialAssignment is the assignment for one trial.
 type TrialAssignment struct {
 	// Suggestion results
 	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments,omitempty"`
@@ -89,11 +94,14 @@ service Suggestion {
 message GetSuggestionsRequest {
     Experiment experiment = 1;
     repeated Trial trials = 2; // all completed trials owned by the experiment.
-    int32 request_number = 3;
+    int32 request_number = 3; ///The number of Suggestion you request at one time. When you set 3 to request_number, you can get three Suggestions at one time.
 }
 
 message GetSuggestionsReply {
-    repeated Trial trials = 1; // trials should be created in the next run.
+    message ParameterAssignments{
+        repeated ParameterAssignment assignments = 1;
+    }
+    repeated ParameterAssignments parameter_assignments = 1;
     AlgorithmSpec algorithm = 2;
 }
 
@@ -200,7 +208,7 @@ When the user creates a Experiment, we will create a Suggestion for the Experime
 Now the workflow will be illustrated with an example.
 
 ```yaml
-apiVersion: "kubeflow.org/v1alpha2"
+apiVersion: "kubeflow.org/v1alpha3"
 kind: Experiment
 metadata:
   namespace: kubeflow
@@ -261,23 +269,10 @@ spec:
         - ftrl
 ```
 
-Now, we will create a Suggestion for the Experiment:
+Then, Experiment controller needs 3 parallel trials to run. It creates the Suggestions:
 
 ```yaml
-apiVersion: "kubeflow.org/v1alpha2"
-kind: Suggestion
-metadata:
-  namespace: kubeflow
-  name: random-experiment
-spec:
-  algorithmName: random
-  requests: 0
-```
-
-Then, Experiment controller needs 3 parallel trials to run. It updates the Suggestions:
-
-```yaml
-apiVersion: "kubeflow.org/v1alpha2"
+apiVersion: "kubeflow.org/v1alpha3"
 kind: Suggestion
 metadata:
   namespace: kubeflow
@@ -290,7 +285,7 @@ spec:
 After that, Suggestion controller communicates with the Suggestion via GRPC and updates the status:
 
 ```yaml
-apiVersion: "kubeflow.org/v1alpha2"
+apiVersion: "kubeflow.org/v1alpha3"
 kind: Suggestion
 metadata:
   namespace: kubeflow
@@ -326,7 +321,7 @@ status:
 Then Experiment controller creates the trial. When there is one trial finished, Experiment controller will ask Suggestion controller for a new suggestion:
 
 ```yaml
-apiVersion: "kubeflow.org/v1alpha2"
+apiVersion: "kubeflow.org/v1alpha3"
 kind: Suggestion
 metadata:
   namespace: kubeflow

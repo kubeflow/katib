@@ -60,6 +60,7 @@ type SuggestionStatus struct {
 	Conditions []SuggestionCondition `json:"conditions,omitempty"`
 }
 
+// TrialAssignment is the assignment for one trial.
 type TrialAssignment struct {
 	// Suggestion results
 	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments,omitempty"`
