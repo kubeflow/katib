@@ -1,13 +1,18 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+Table of Contents
+=================
 
-- [Developer Guide](#developer-guide)
-  - [Requirements](#requirements)
-  - [Build from source code](#build-from-source-code)
-  - [Implement new suggestion algorithm](#implement-new-suggestion-algorithm)
+   * [Developer Guide](#developer-guide)
+      * [Requirements](#requirements)
+      * [Build from source code](#build-from-source-code)
+      * [Implement a new algorithm and use it in katib](#implement-a-new-algorithm-and-use-it-in-katib)
+         * [Implement the algorithm](#implement-the-algorithm)
+         * [Make the algorithm a GRPC server](#make-the-algorithm-a-grpc-server)
+         * [Use the algorithm in katib.](#use-the-algorithm-in-katib)
+         * [Contribute the algorithm to katib](#contribute-the-algorithm-to-katib)
+            * [Unit Test](#unit-test)
+            * [E2E Test (Optional)](#e2e-test-optional)
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 # Developer Guide
 
