@@ -32,7 +32,6 @@ spec:
         min: "100"
         max: "200"
   trialTemplate:
-    retain: true
     goTemplate:
         rawTemplate: |-
           apiVersion: "kubeflow.org/v1"

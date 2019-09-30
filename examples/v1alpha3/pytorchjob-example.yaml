@@ -14,7 +14,6 @@ spec:
   algorithm:
     algorithmName: random
   trialTemplate:
-    retain: true
     goTemplate:
         rawTemplate: |-
           apiVersion: "kubeflow.org/v1"
