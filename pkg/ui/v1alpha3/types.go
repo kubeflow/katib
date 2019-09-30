@@ -1,6 +1,8 @@
-package ui
+package v1alpha3
 
-import "github.com/kubeflow/katib/pkg/util/v1alpha3/katibclient"
+import (
+	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibclient"
+)
 
 const maxMsgSize = 1<<31 - 1
 
@@ -29,8 +31,9 @@ type Option struct {
 }
 
 type JobView struct {
-	Name   string
-	Status string
+	Name      string
+	Status    string
+	Namespace string
 }
 
 type TemplateView struct {
@@ -54,3 +57,10 @@ type NNView struct {
 	MetricsName  []string
 	MetricsValue []string
 }
+
+type JobType string
+
+const (
+	JobTypeHP  = "HP"
+	JobTypeNAS = "NAS"
+)

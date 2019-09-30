@@ -1,18 +1,16 @@
-package ui
+package v1alpha3
 
 import (
 	"context"
 	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/ghodss/yaml"
 	"google.golang.org/grpc"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	experimentv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
@@ -46,28 +44,10 @@ func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1alpha3.Man
 
 func (k *KatibUIHandler) FetchHPJobs(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
-
-	jobs := make([]JobView, 0)
-
-	el, err := k.katibClient.GetExperimentList()
+	jobs, err := k.getExperimentList(consts.DefaultKatibNamespace, JobTypeHP)
 	if err != nil {
-		log.Printf("GetExperimentList for HP failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-	for _, experiment := range el.Items {
-		if experiment.Spec.Parameters != nil {
-			experimentLastCondition, err := experiment.GetLastConditionType()
-			if err != nil {
-				log.Printf("GetLastConditionType for HP failed: %v", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			jobs = append(jobs, JobView{
-				Name:   experiment.Name,
-				Status: string(experimentLastCondition),
-			})
-		}
 	}
 
 	response, err := json.Marshal(jobs)
@@ -80,40 +60,21 @@ func (k *KatibUIHandler) FetchHPJobs(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (k *KatibUIHandler) FetchNASJobs(w http.ResponseWriter, r *http.Request) {
-	//enableCors(&w)
-
-	jobs := make([]JobView, 0)
-
-	el, err := k.katibClient.GetExperimentList()
+// FetchAllHPJobs gets experiments in all namespaces.
+func (k *KatibUIHandler) FetchAllHPJobs(w http.ResponseWriter, r *http.Request) {
+	// Use "" to get experiments in all namespaces.
+	jobs, err := k.getExperimentList("", JobTypeHP)
 	if err != nil {
-		log.Printf("GetExperimentList for NAS failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	for _, experiment := range el.Items {
-		if experiment.Spec.NasConfig != nil {
-			experimentLastCondition, err := experiment.GetLastConditionType()
-			if err != nil {
-				log.Printf("GetLastConditionType for HP failed: %v", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			jobs = append(jobs, JobView{
-				Name:   experiment.Name,
-				Status: string(experimentLastCondition),
-			})
-		}
-	}
-
 	response, err := json.Marshal(jobs)
 	if err != nil {
-		log.Printf("Marshal NAS jobs failed: %v", err)
+		log.Printf("Marshal HP jobs failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Write(response)
-
 }
 
 func (k *KatibUIHandler) SubmitYamlJob(w http.ResponseWriter, r *http.Request) {
@@ -178,7 +139,9 @@ func (k *KatibUIHandler) SubmitParamsJob(w http.ResponseWriter, r *http.Request)
 
 func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request) {
 	experimentName := r.URL.Query()["experimentName"][0]
-	experiment, err := k.katibClient.GetExperiment(experimentName)
+	namespace := r.URL.Query()["namespace"][0]
+
+	experiment, err := k.katibClient.GetExperiment(experimentName, namespace)
 	if err != nil {
 		log.Printf("GetExperiment failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -195,12 +158,13 @@ func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request
 func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	experimentName := r.URL.Query()["experimentName"][0]
+	namespace := r.URL.Query()["namespace"][0]
 
 	conn, c := k.connectManager()
 	defer conn.Close()
 
 	resultText := "trialName"
-	experiment, err := k.katibClient.GetExperiment(experimentName)
+	experiment, err := k.katibClient.GetExperiment(experimentName, namespace)
 	if err != nil {
 		log.Printf("GetExperiment from HP job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -272,7 +236,6 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	w.Write(response)
-
 }
 
 func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Request) {
@@ -308,82 +271,6 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 	response, err := json.Marshal(resultText)
 	if err != nil {
 		log.Printf("Marshal result text in Trial info failed: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Write(response)
-}
-
-func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request) {
-	//enableCors(&w)
-	experimentName := r.URL.Query()["experimentName"][0]
-
-	responseRaw := make([]NNView, 0)
-	var architecture string
-	var decoder string
-
-	conn, c := k.connectManager()
-
-	defer conn.Close()
-
-	trials, err := k.katibClient.GetTrialList(experimentName)
-	if err != nil {
-		log.Printf("GetTrialList from NAS job failed: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	log.Printf("Got Trial List")
-
-	for i, t := range trials.Items {
-		succeeded := false
-		for _, condition := range t.Status.Conditions {
-			if condition.Type == trialsv1alpha3.TrialSucceeded {
-				succeeded = true
-			}
-		}
-		if succeeded {
-			obsLogResp, err := c.GetObservationLog(
-				context.Background(),
-				&api_pb_v1alpha3.GetObservationLogRequest{
-					TrialName: t.Name,
-					StartTime: "",
-					EndTime:   "",
-				},
-			)
-			if err != nil {
-				log.Printf("GetObservationLog from NAS job failed: %v", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			metricsName := make([]string, 0)
-			metricsValue := make([]string, 0)
-			for _, m := range obsLogResp.ObservationLog.MetricLogs {
-				metricsName = append(metricsName, m.Metric.Name)
-				metricsValue = append(metricsValue, m.Metric.Value)
-
-			}
-			for _, trialParam := range t.Spec.ParameterAssignments {
-				if trialParam.Name == "architecture" {
-					architecture = trialParam.Value
-				}
-				if trialParam.Name == "nn_config" {
-					decoder = trialParam.Value
-				}
-			}
-			responseRaw = append(responseRaw, NNView{
-				Name:         "Generation " + strconv.Itoa(i),
-				TrialName:    t.Name,
-				Architecture: generateNNImage(architecture, decoder),
-				MetricsName:  metricsName,
-				MetricsValue: metricsValue,
-			})
-		}
-	}
-	log.Printf("Logs parsed, result: %v", responseRaw)
-
-	response, err := json.Marshal(responseRaw)
-	if err != nil {
-		log.Printf("Marshal result in NAS job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

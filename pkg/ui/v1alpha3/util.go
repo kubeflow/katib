@@ -1,14 +1,41 @@
-package ui
+package v1alpha3
 
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
 	gographviz "github.com/awalterschulze/gographviz"
 )
+
+func (k *KatibUIHandler) getExperimentList(namespace string, typ JobType) ([]JobView, error) {
+	jobs := make([]JobView, 0)
+
+	el, err := k.katibClient.GetExperimentList(namespace)
+	if err != nil {
+		log.Printf("GetExperimentList failed: %v", err)
+		return nil, err
+	}
+	for _, experiment := range el.Items {
+		if (typ == JobTypeNAS && experiment.Spec.NasConfig != nil) ||
+			(typ == JobTypeHP && experiment.Spec.NasConfig == nil) {
+			experimentLastCondition, err := experiment.GetLastConditionType()
+			if err != nil {
+				log.Printf("GetLastConditionType failed: %v", err)
+				return nil, err
+			}
+			jobs = append(jobs, JobView{
+				Name:      experiment.Name,
+				Namespace: experiment.Namespace,
+				Status:    string(experimentLastCondition),
+			})
+		}
+	}
+	return jobs, nil
+}
 
 func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Content-Type", "text/html; charset=utf-8")

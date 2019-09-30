@@ -22,7 +22,7 @@ const DeleteDialog = (props) => {
     const classes = useStyles();
 
     const onDelete = () => {
-        props.deleteExperiment(props.deleteExperimentName);
+        props.deleteExperiment(props.deleteExperimentName, props.deleteExperimentNamespace);
     }
 
     return (
@@ -53,6 +53,7 @@ const DeleteDialog = (props) => {
 const mapStateToProps = (state) => ({
     open: state[module].deleteDialog,
     deleteExperimentName: state[module].deleteExperimentName,
+    deleteExperimentNamespace: state[module].deleteExperimentNamespace,
 })
 
 export default connect(mapStateToProps, { closeDeleteExperimentDialog, deleteExperiment })(DeleteDialog);
