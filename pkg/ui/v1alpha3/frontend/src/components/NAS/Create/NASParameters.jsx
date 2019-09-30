@@ -144,7 +144,7 @@ const NASParameters = (props) => {
             goTemplate: {
                 templateSpec: {
                     configMapName: "trial-template",
-                    configMapNamespace: data.metadata.namespace,
+                    configMapNamespace: props.trialNamespace,
                     templatePath: props.trial,
                 }
             }
@@ -191,7 +191,8 @@ const mapStateToProps = (state) => ({
     inputSize: state[module].inputSize,
     outputSize: state[module].outputSize,
     operations: state[module].operations,
-    trial: state[module].trial
+    trial: state[module].trial,
+    trialNamespace: state[module].trialNamespace,
 })
 
 //TODO: Added validation and remove it

@@ -43,8 +43,8 @@ const NASJobList = (props) => {
 
     const { classes } = props;
 
-    const onDeleteExperiment = (experimentName) => (event) => {
-        props.openDeleteExperimentDialog(experimentName);
+    const onDeleteExperiment = (name, namespace) => (event) => {
+        props.openDeleteExperimentDialog(name, namespace);
     }
 
     return (

@@ -9,9 +9,10 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
+import TextField from '@material-ui/core/TextField';
 
 import { connect } from 'react-redux';
-import { changeTrial } from '../../../../actions/nasCreateActions';
+import { changeTrial, changeTrialNamespace } from '../../../../actions/nasCreateActions';
 import { fetchTrialTemplates } from '../../../../actions/templateActions';
 
 const module = "nasCreate";
@@ -41,8 +42,9 @@ const styles = theme => ({
 
 class TrialSpecParam extends React.Component {
 
-    componentDidMount() {
-        this.props.fetchTrialTemplates();
+    onTrialNamespaceChange = (event) => {
+        this.props.fetchTrialTemplates(event.target.value);
+        this.props.changeTrialNamespace(event.target.value);
     }
 
     onTrialChange = (event) => {
@@ -54,38 +56,59 @@ class TrialSpecParam extends React.Component {
 
         const { classes } = this.props
         return (
-            <div className={classes.parameter}> 
-                <Grid container alignItems={"center"}>
-                    <Grid item xs={12} sm={3}>
-                        <Typography variant={"subheading"}>
-                            <Tooltip title={"Trial spec template"}>
-                                <HelpOutlineIcon className={classes.help} color={"primary"}/>
-                            </Tooltip>
-                            {"TrialSpec"}
-                        </Typography>
+            <div>
+                <div className={classes.parameter}>
+                    <Grid container alignItems={"center"}>
+                        <Grid item xs={12} sm={3}>
+                            <Typography variant={"subheading"}>
+                                <Tooltip title={"Trial namespace"}>
+                                    <HelpOutlineIcon className={classes.help} color={"primary"} />
+                                </Tooltip>
+                                {"Namespace"}
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={8}>
+                            <TextField
+                                className={"Trial Namespace"}
+                                value={this.props.trialNamespace}
+                                onChange={this.onTrialNamespaceChange}
+                            />
+                        </Grid>
                     </Grid>
-                    <Grid item xs={12} sm={8}>
-                        <FormControl variant="outlined" className={classes.formControl}>
-                            <InputLabel>
-                                Trial Spec
-                            </InputLabel>
-                            <Select
-                                value={this.props.trial}
-                                onChange={this.onTrialChange}
-                                input={
-                                    <OutlinedInput name={"TrialSpec"} labelWidth={100}/>
-                                }
-                                className={classes.select}
+                </div>
+                <div className={classes.parameter}>
+                    <Grid container alignItems={"center"}>
+                        <Grid item xs={12} sm={3}>
+                            <Typography variant={"subheading"}>
+                                <Tooltip title={"Trial spec template"}>
+                                    <HelpOutlineIcon className={classes.help} color={"primary"} />
+                                </Tooltip>
+                                {"TrialSpec"}
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={8}>
+                            <FormControl variant="outlined" className={classes.formControl}>
+                                <InputLabel>
+                                    Trial Spec
+                                </InputLabel>
+                                <Select
+                                    value={this.props.trial}
+                                    onChange={this.onTrialChange}
+                                    input={
+                                        <OutlinedInput name={"TrialSpec"} labelWidth={100} />
+                                    }
+                                    className={classes.select}
                                 >
                                     {names.map((spec, i) => {
                                         return (
-                                                <MenuItem value={spec} key={i}>{spec}</MenuItem>
-                                            )
+                                            <MenuItem value={spec} key={i}>{spec}</MenuItem>
+                                        )
                                     })}
-                            </Select>
-                        </FormControl>
+                                </Select>
+                            </FormControl>
+                        </Grid>
                     </Grid>
-                </Grid>
+                </div>
             </div>
         )
     }
@@ -96,7 +119,8 @@ const mapStateToProps = state => {
     return {
         trial: state[module].trial,
         templates: state[templateModule].trialTemplates,
+        trialNamespace: state[module].trialNamespace,
     }
 }
 
-export default connect(mapStateToProps, { changeTrial, fetchTrialTemplates })(withStyles(styles)(TrialSpecParam));
+export default connect(mapStateToProps, { changeTrialNamespace, changeTrial, fetchTrialTemplates })(withStyles(styles)(TrialSpecParam));
