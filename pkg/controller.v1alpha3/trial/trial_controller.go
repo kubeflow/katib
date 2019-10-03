@@ -19,8 +19,10 @@ package trial
 import (
 	"bytes"
 	"context"
+	"fmt"
 
 	batchv1beta "k8s.io/api/batch/v1beta1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -30,6 +32,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -44,8 +47,12 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/trial/managerclient"
 )
 
+const (
+	ControllerName = "trial-controller"
+)
+
 var (
-	log = logf.Log.WithName("trial-controller")
+	log = logf.Log.WithName(ControllerName)
 )
 
 /**
@@ -65,6 +72,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		Client:        mgr.GetClient(),
 		scheme:        mgr.GetScheme(),
 		ManagerClient: managerclient.New(),
+		recorder:      mgr.GetRecorder(ControllerName),
 	}
 	r.updateStatusHandler = r.updateStatus
 	return r
@@ -127,7 +135,8 @@ var _ reconcile.Reconciler = &ReconcileTrial{}
 // ReconcileTrial reconciles a Trial object
 type ReconcileTrial struct {
 	client.Client
-	scheme *runtime.Scheme
+	scheme   *runtime.Scheme
+	recorder record.EventRecorder
 
 	managerclient.ManagerClient
 	// updateStatusHandler is defined for test purpose.
@@ -209,14 +218,14 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha3.Trial) error {
 	// Job already exists
 	// TODO Can desired Spec differ from deployedSpec?
 	if deployedJob != nil {
-		jobConditionType, err := r.GetDeployedJobStatus(deployedJob)
+		jobCondition, err := r.GetDeployedJobStatus(deployedJob)
 		if err != nil {
 			logger.Error(err, "Get deployed status  error")
 			return err
 		}
 
 		// Update trial observation when the job is succeeded.
-		if isTrialSucceeded(instance, *jobConditionType) {
+		if isJobSucceeded(jobCondition) {
 			if err = r.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
 				logger.Error(err, "Update trial status observation error")
 				return err
@@ -227,8 +236,9 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha3.Trial) error {
 		//    if job has succeded and if observation field is available.
 		//    if job has failed
 		// This will ensure that trial is set to be complete only if metric is collected at least once
-		if isTrialComplete(instance, *jobConditionType) {
-			r.UpdateTrialStatusCondition(instance, *jobConditionType)
+		if isTrialComplete(instance, jobCondition) {
+			r.UpdateTrialStatusCondition(instance, deployedJob, jobCondition)
+
 		}
 	}
 	return nil
@@ -256,6 +266,8 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha3.Trial, desiredJob
 				logger.Error(err, "Create job error")
 				return nil, err
 			}
+			eventMsg := fmt.Sprintf("Job %s has been created", desiredJob.GetName())
+			r.recorder.Eventf(instance, corev1.EventTypeNormal, JobCreatedReason, eventMsg)
 			msg := "Trial is running"
 			instance.MarkTrialStatusRunning(TrialRunningReason, msg)
 		} else {
@@ -268,6 +280,8 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha3.Trial, desiredJob
 				logger.Error(err, "Delete job error")
 				return nil, err
 			} else {
+				eventMsg := fmt.Sprintf("Job %s has been deleted", desiredJob.GetName())
+				r.recorder.Eventf(instance, corev1.EventTypeNormal, JobDeletedReason, eventMsg)
 				return nil, nil
 			}
 		}

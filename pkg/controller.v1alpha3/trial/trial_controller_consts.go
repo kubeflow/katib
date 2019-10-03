@@ -1,10 +1,18 @@
 package trial
 
 const (
-	DefaultJobKind       = "Job"
+	DefaultJobKind = "Job"
+
+	// For trials
 	TrialCreatedReason   = "TrialCreated"
 	TrialRunningReason   = "TrialRunning"
 	TrialSucceededReason = "TrialSucceeded"
 	TrialFailedReason    = "TrialFailed"
 	TrialKilledReason    = "TrialKilled"
+
+	// For Jobs
+	JobCreatedReason   = "JobCreated"
+	JobDeletedReason   = "JobDeleted"
+	JobSucceededReason = "JobSucceeded"
+	JobFailedReason    = "JobFailed"
 )

@@ -17,9 +17,11 @@ package trial
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -35,8 +37,9 @@ const (
 	cleanMetricsFinalizer = "clean-metrics-in-db"
 )
 
-func (r *ReconcileTrial) GetDeployedJobStatus(deployedJob *unstructured.Unstructured) (*commonv1.JobConditionType, error) {
-	jobConditionType := commonv1.JobRunning
+func (r *ReconcileTrial) GetDeployedJobStatus(deployedJob *unstructured.Unstructured) (*commonv1.JobCondition, error) {
+	jobCondition := commonv1.JobCondition{}
+	jobCondition.Type = commonv1.JobRunning
 	kind := deployedJob.GetKind()
 	status, ok, unerr := unstructured.NestedFieldCopy(deployedJob.Object, "status")
 
@@ -51,10 +54,17 @@ func (r *ReconcileTrial) GetDeployedJobStatus(deployedJob *unstructured.Unstruct
 				log.Error(err, "Convert unstructured to status error")
 				return nil, err
 			}
-			if jobStatus.Active == 0 && jobStatus.Succeeded > 0 {
-				jobConditionType = commonv1.JobSucceeded
-			} else if jobStatus.Failed > 0 {
-				jobConditionType = commonv1.JobFailed
+			for _, cond := range jobStatus.Conditions {
+				if cond.Type == batchv1.JobComplete && cond.Status == corev1.ConditionTrue {
+					jobCondition.Type = commonv1.JobSucceeded
+					//  JobConditions message not populated when succeeded for batchv1 Job
+					break
+				}
+				if cond.Type == batchv1.JobFailed && cond.Status == corev1.ConditionTrue {
+					jobCondition.Type = commonv1.JobFailed
+					jobCondition.Message = cond.Message
+					break
+				}
 			}
 		default:
 			jobStatus := commonv1.JobStatus{}
@@ -66,28 +76,38 @@ func (r *ReconcileTrial) GetDeployedJobStatus(deployedJob *unstructured.Unstruct
 			}
 			if len(jobStatus.Conditions) > 0 {
 				lc := jobStatus.Conditions[len(jobStatus.Conditions)-1]
-				jobConditionType = lc.Type
+				jobCondition.Type = lc.Type
+				jobCondition.Message = lc.Message
 			}
 		}
 	} else if unerr != nil {
 		log.Error(unerr, "NestedFieldCopy unstructured to status error")
 		return nil, unerr
 	}
-	return &jobConditionType, nil
+	return &jobCondition, nil
 }
 
-func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Trial, jobCondition commonv1.JobConditionType) {
+func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Trial, deployedJob *unstructured.Unstructured, jobCondition *commonv1.JobCondition) {
 	now := metav1.Now()
-	if jobCondition == commonv1.JobSucceeded {
+	jobConditionType := (*jobCondition).Type
+	if jobConditionType == commonv1.JobSucceeded {
 		msg := "Trial has succeeded"
 		instance.MarkTrialStatusSucceeded(TrialSucceededReason, msg)
 		instance.Status.CompletionTime = &now
-	} else if jobCondition == commonv1.JobFailed {
+	} else if jobConditionType == commonv1.JobFailed {
 		msg := "Trial has failed"
 		instance.MarkTrialStatusFailed(TrialFailedReason, msg)
 		instance.Status.CompletionTime = &now
 	}
 	//else nothing to do
+	if jobConditionType == commonv1.JobSucceeded {
+		eventMsg := fmt.Sprintf("Job %s has succeeded", deployedJob.GetName())
+		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobSucceededReason, eventMsg)
+	} else if jobConditionType == commonv1.JobFailed {
+		jobConditionMessage := (*jobCondition).Message
+		eventMsg := fmt.Sprintf("Job %s has failed: %s", deployedJob.GetName(), jobConditionMessage)
+		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobFailedReason, eventMsg)
+	}
 	return
 }
 
@@ -144,7 +164,8 @@ func isTrialObservationAvailable(instance *trialsv1alpha3.Trial) bool {
 	return false
 }
 
-func isTrialComplete(instance *trialsv1alpha3.Trial, jobConditionType commonv1.JobConditionType) bool {
+func isTrialComplete(instance *trialsv1alpha3.Trial, jobCondition *commonv1.JobCondition) bool {
+	jobConditionType := (*jobCondition).Type
 	if jobConditionType == commonv1.JobSucceeded && isTrialObservationAvailable(instance) {
 		return true
 	}
@@ -155,7 +176,8 @@ func isTrialComplete(instance *trialsv1alpha3.Trial, jobConditionType commonv1.J
 	return false
 }
 
-func isTrialSucceeded(instance *trialsv1alpha3.Trial, jobConditionType commonv1.JobConditionType) bool {
+func isJobSucceeded(jobCondition *commonv1.JobCondition) bool {
+	jobConditionType := (*jobCondition).Type
 	if jobConditionType == commonv1.JobSucceeded {
 		return true
 	}
