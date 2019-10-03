@@ -54,6 +54,7 @@
     "react-app-polyfill": "^0.2.2",
     "react-dev-utils": "^8.0.0",
     "react-dom": "^16.8.3",
+    "react-json-view": "^1.19.1",
     "react-html-parser": "^2.0.2",
     "react-plotly.js": "^2.3.0",
     "react-redux": "^6.0.1",

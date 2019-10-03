@@ -6,8 +6,10 @@ import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import LinearProgress from '@material-ui/core/LinearProgress';
 
+// import the react-json-view component
+import ReactJson from 'react-json-view'
 
-import { fetchHPJobInfo } from '../../../actions/hpMonitorActions';
+import { fetchHPJobInfo, fetchHPJob } from '../../../actions/hpMonitorActions';
 
 import HPJobPlot from './HPJobPlot';
 import HPJobTable from './HPJobTable';
@@ -35,6 +37,8 @@ class HPJobInfo extends React.Component {
     componentDidMount() {
         this.props.fetchHPJobInfo(
             this.props.match.params.name, this.props.match.params.namespace);
+        this.props.fetchHPJob(
+            this.props.match.params.name, this.props.match.params.namespace)
     }
 
     render () {
@@ -59,6 +63,7 @@ class HPJobInfo extends React.Component {
                     <br />
                     <HPJobPlot name={this.props.match.params.name} />
                     <HPJobTable name={this.props.match.params.name} />
+                    <ReactJson src={this.props.experiment} />
                     <TrialInfoDialog />
                 </div>
                 }
@@ -69,7 +74,8 @@ class HPJobInfo extends React.Component {
 
 const mapStateToProps = (state) => ({
   loading: state[module].loading,
+  experiment: state[module].experiment,
 })
 
 
-export default connect(mapStateToProps, { fetchHPJobInfo })(withStyles(styles)(HPJobInfo));
+export default connect(mapStateToProps, { fetchHPJobInfo, fetchHPJob })(withStyles(styles)(HPJobInfo));

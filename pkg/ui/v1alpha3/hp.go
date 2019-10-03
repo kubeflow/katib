@@ -31,6 +31,25 @@ func (k *KatibUIHandler) FetchAllHPJobs(w http.ResponseWriter, r *http.Request) 
 	w.Write(response)
 }
 
+// FetchAllHPJobs gets experiments in all namespaces.
+func (k *KatibUIHandler) FetchHPJob(w http.ResponseWriter, r *http.Request) {
+	experimentName := r.URL.Query()["experimentName"][0]
+	namespace := r.URL.Query()["namespace"][0]
+
+	experiment, err := k.katibClient.GetExperiment(experimentName, namespace)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	response, err := json.Marshal(experiment)
+	if err != nil {
+		log.Printf("Marshal HP job failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
+}
+
 func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	experimentName := r.URL.Query()["experimentName"][0]
