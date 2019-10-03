@@ -206,19 +206,23 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha3.Trial) error {
 		return err
 	}
 
-	//Job already exists
-	//TODO Can desired Spec differ from deployedSpec?
+	// Job already exists
+	// TODO Can desired Spec differ from deployedSpec?
 	if deployedJob != nil {
-		if err = r.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
-			logger.Error(err, "Update trial status observation error")
-			return err
-		}
-
 		jobConditionType, err := r.GetDeployedJobStatus(deployedJob)
 		if err != nil {
 			logger.Error(err, "Get deployed status  error")
 			return err
 		}
+
+		// Update trial observation when the job is succeeded.
+		if isTrialSucceeded(instance, *jobConditionType) {
+			if err = r.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
+				logger.Error(err, "Update trial status observation error")
+				return err
+			}
+		}
+
 		// Update Trial job status only
 		//    if job has succeded and if observation field is available.
 		//    if job has failed
