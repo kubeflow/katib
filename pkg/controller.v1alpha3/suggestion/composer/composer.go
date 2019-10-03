@@ -119,6 +119,7 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 		Name: consts.ContainerSuggestion,
 	}
 	c.Image = suggestionContainerImage
+	c.ImagePullPolicy = corev1.PullIfNotPresent
 	c.Ports = []corev1.ContainerPort{
 		{
 			Name:          consts.DefaultSuggestionPortName,
