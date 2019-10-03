@@ -155,6 +155,14 @@ func isTrialComplete(instance *trialsv1alpha3.Trial, jobConditionType commonv1.J
 	return false
 }
 
+func isTrialSucceeded(instance *trialsv1alpha3.Trial, jobConditionType commonv1.JobConditionType) bool {
+	if jobConditionType == commonv1.JobSucceeded {
+		return true
+	}
+
+	return false
+}
+
 func getBestObjectiveMetricValue(metricLogs []*api_pb.MetricLog, objectiveType commonv1alpha3.ObjectiveType) *float64 {
 	metricLogSize := len(metricLogs)
 	if metricLogSize == 0 {
