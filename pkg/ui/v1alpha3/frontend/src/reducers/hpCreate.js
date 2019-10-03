@@ -96,8 +96,9 @@ const initialState = {
         },
     ],
     allParameterTypes: ["int", "double", "categorical"],
-    trial: "cpuTrialTemplate.yaml",
+    trial: "defaultTrialTemplate.yaml",
     currentYaml: '',
+    trialNamespace: "kubeflow",
 };
 
 const filterValue = (obj, key) => {
