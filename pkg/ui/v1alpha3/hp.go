@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
+
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	api_pb_v1alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 )
@@ -61,18 +63,19 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	}
 	log.Printf("Got Parameters names")
 
-	trialList, err := k.katibClient.GetTrialList(experimentName)
+	trialList, err := k.katibClient.GetTrialList(experimentName, namespace)
 	if err != nil {
 		log.Printf("GetTrialList from HP job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("Got Trial List")
+	log.Printf("Got Trial List, %v", trialList.Items)
 
 	for _, t := range trialList.Items {
 		succeeded := false
 		for _, condition := range t.Status.Conditions {
-			if condition.Type == trialsv1alpha3.TrialSucceeded {
+			if condition.Type == trialsv1alpha3.TrialSucceeded &&
+				condition.Status == corev1.ConditionTrue {
 				succeeded = true
 			}
 		}
