@@ -57,6 +57,7 @@ func TestCreateTFJobTrial(t *testing.T) {
 		Client:        mgr.GetClient(),
 		scheme:        mgr.GetScheme(),
 		ManagerClient: mc,
+		recorder:      mgr.GetRecorder(ControllerName),
 		updateStatusHandler: func(instance *trialsv1alpha3.Trial) error {
 			if !instance.IsCreated() {
 				t.Errorf("Expected got condition created")
@@ -112,6 +113,7 @@ func TestReconcileTFJobTrial(t *testing.T) {
 		Client:        mgr.GetClient(),
 		scheme:        mgr.GetScheme(),
 		ManagerClient: mc,
+		recorder:      mgr.GetRecorder(ControllerName),
 	}
 
 	r.updateStatusHandler = func(instance *trialsv1alpha3.Trial) error {
@@ -185,6 +187,7 @@ func TestReconcileCompletedTFJobTrial(t *testing.T) {
 		Client:        mgr.GetClient(),
 		scheme:        mgr.GetScheme(),
 		ManagerClient: mc,
+		recorder:      mgr.GetRecorder(ControllerName),
 	}
 
 	r.updateStatusHandler = func(instance *trialsv1alpha3.Trial) error {
