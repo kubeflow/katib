@@ -199,7 +199,7 @@ message Metric {
 
 ### Workflow
 
-![](../images/suggestion-workflow.png)
+![](../images/katib-workflow.png)
 
 When the user creates a Experiment, we will create a Suggestion for the Experiment. When the Experiment needs some suggestions, Experiment controller updates the `Suggestions`, then Suggestion controller communicates with the Suggestion to get parameter assignments and set them in Suggestion status.
 
