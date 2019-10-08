@@ -24,7 +24,7 @@ The system is inspired by [Google vizier][3] and supports multiple ML/DL framewo
 - [Getting Started](#getting-started)
 - [Web UI](#web-ui)
 - [API Documentation](#api-documentation)
-- [Katib Installation](#katib-nstallation)
+- [Installation](#installation)
   - [TFjob operator](#tfjob-operator)
   - [Pytorch operator](#pytorch-operator)
   - [Katib](#katib)
@@ -111,7 +111,7 @@ You can visualize general trend of Hyper parameter space and each training histo
 
 Please refer to [api.md](./pkg/apis/manager/v1alpha3/gen-doc/api.md).
 
-## Katib Installation
+## Installation
 
 For standard installation of Katib with support for all job operators, refer to [Kubeflow Official Docs](http://kubeflow.org) and skip this section. Or if you want to install Katib manually, Follow these steps
 
