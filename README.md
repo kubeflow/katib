@@ -17,15 +17,15 @@ The system is inspired by [Google vizier][3] and supports multiple ML/DL framewo
 - [Name](#name)
 - [Concepts in Katib](#concepts-in-katib)
   - [Experiment](#experiment)
-  - [Trial](#trial)
-  - [Job](#job)
   - [Suggestion](#suggestion)
+  - [Trial](#trial)
+  - [Worker Job](#worker-job)
 - [Components in Katib](#components-in-katib)
 - [Getting Started](#getting-started)
 - [Web UI](#web-ui)
 - [API Documentation](#api-documentation)
 - [Installation](#installation)
-  - [TFjob operator](#tf-operator)
+  - [TF operator](#tf-operator)
   - [Pytorch operator](#pytorch-operator)
   - [Katib](#katib)
   - [Running examples](#running-examples)
@@ -60,13 +60,13 @@ A Suggestion is a proposed solution to the optimization problem which is one set
 
 ### Trial
 
-A `Trial` is one iteration of the optimization process, which is one `worker` instance with a list of parameter assingments(corresponding to a suggestion).
+A `Trial` is one iteration of the optimization process, which is one `worker job` instance with a list of parameter assignments(corresponding to a suggestion).
 
 `Trial` is defined as a CRD
 
-### Worker 
+### Worker Job 
 
-A `Worker` refers to a process responsible for evaluating a `Trial` and calculating its objective value. 
+A `Worker Job` refers to a process responsible for evaluating a `Trial` and calculating its objective value. 
 
 The worker kind can be [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) which is a non distributed execution, [Kubeflow TFJob](https://www.kubeflow.org/docs/guides/components/tftraining/) or [Kubeflow PyTorchJob](https://www.kubeflow.org/docs/guides/components/pytorch/) which are distributed executions.
 Thus, Katib supports multiple frameworks with the help of different job kinds. 
@@ -105,7 +105,7 @@ Katib provides a Web UI.
 You can visualize general trend of Hyper parameter space and each training history. You can use
 [random-example](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/random-example.yaml) or
 [other examples](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3) to generate a similar UI.
-![katibui](https://user-images.githubusercontent.com/10014831/48778081-a4388b80-ed17-11e8-938b-fc59a5d2e574.gif)
+![katibui](./docs/images/katib-ui.png)
 
 ## API Documentation
 
