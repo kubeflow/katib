@@ -93,6 +93,10 @@ func (exp *Experiment) IsCompleted() bool {
 	return exp.IsSucceeded() || exp.IsFailed()
 }
 
+func (exp *Experiment) HasRunningTrials() bool {
+	return exp.Status.TrialsRunning != 0
+}
+
 func (exp *Experiment) GetLastConditionType() (ExperimentConditionType, error) {
 	if len(exp.Status.Conditions) > 0 {
 		return exp.Status.Conditions[len(exp.Status.Conditions)-1].Type, nil

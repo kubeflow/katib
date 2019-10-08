@@ -38,7 +38,9 @@ func UpdateExperimentStatus(instance *experimentsv1alpha3.Experiment, trials *tr
 
 	isObjectiveGoalReached := updateTrialsSummary(instance, trials)
 
-	UpdateExperimentStatusCondition(instance, isObjectiveGoalReached, false)
+	if !instance.IsCompleted() {
+		UpdateExperimentStatusCondition(instance, isObjectiveGoalReached, false)
+	}
 	return nil
 
 }
@@ -69,7 +71,6 @@ func updateTrialsSummary(instance *experimentsv1alpha3.Experiment, trials *trial
 
 		objectiveMetricValue := getObjectiveMetricValue(trial, objectiveMetricName)
 		if objectiveMetricValue == nil {
-			log.Info("Objective metric name not found", "trial", trial.GetName())
 			continue
 		}
 

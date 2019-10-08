@@ -176,7 +176,7 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 	instance := original.DeepCopy()
 
-	if instance.IsCompleted() {
+	if instance.IsCompleted() && !instance.HasRunningTrials() {
 
 		return reconcile.Result{}, nil
 
