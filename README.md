@@ -25,7 +25,7 @@ The system is inspired by [Google vizier][3] and supports multiple ML/DL framewo
 - [Web UI](#web-ui)
 - [API Documentation](#api-documentation)
 - [Installation](#installation)
-  - [TFjob operator](#tfjob-operator)
+  - [TFjob operator](#tf-operator)
   - [Pytorch operator](#pytorch-operator)
   - [Katib](#katib)
   - [Running examples](#running-examples)
@@ -121,7 +121,7 @@ Set `MANIFESTS_DIR` to the cloned folder.
 
 ```
 
-### TFjob operator
+### TF operator
 
 For installing tfjob operator, run the following
 
