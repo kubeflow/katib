@@ -80,7 +80,7 @@ Currently Katib supports the following exploration algorithms:
 * [hyperband](https://arxiv.org/pdf/1603.06560.pdf)
 * [bayesian optimization](https://arxiv.org/pdf/1012.2599.pdf)
 * [NAS based on reinforcement learning](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1alpha3/NAS_Reinforcement_Learning)
-* [NAS based on EnvelopeNets](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1alpha3/NAS_Envelopenet)
+
 
 ## Components in Katib
 
@@ -155,7 +155,7 @@ kustomize build . | kubectl apply -f -
 
 ```
 
-If you want to use Katib not in GKE and you don't have StorageClass for dynamic volume provisioning at your cluster, you have to create persistent volume to bound your persistent volume claim.
+If you want to use Katib in a cluster that doesn't have a StorageClass for dynamic volume provisioning at your cluster, you have to create persistent volume manually to bound your persistent volume claim.
 
 This is sample yaml file for creating a persistent volume
 
