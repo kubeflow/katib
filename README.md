@@ -24,7 +24,7 @@ The system is inspired by [Google vizier][3] and supports multiple ML/DL framewo
 - [Getting Started](#getting-started)
 - [Web UI](#web-ui)
 - [API Documentation](#api-documentation)
-- [Quickstart to run tfjob and pytorch operator jobs in Katib](#quickstart-to-run-tfjob-and-pytorch-operator-jobs-in-katib)
+- [Katib Installation](#katib-nstallation)
   - [TFjob operator](#tfjob-operator)
   - [Pytorch operator](#pytorch-operator)
   - [Katib](#katib)
@@ -305,7 +305,7 @@ Status:
 Events:              <none>
 ```
 
-When the spec.Status.Condition becomes ```Completed```, the experiment is finished.
+When the spec.Status.Condition becomes ```Succeeded```, the experiment is finished.
 
 You can monitor your results in Katib UI. Access Katib UI via Kubeflow dashboard if you have used standard installation or port-forward the katib-ui service if you have installed manually.
 
