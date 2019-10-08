@@ -17,17 +17,15 @@ The system is inspired by [Google vizier][3] and supports multiple ML/DL framewo
 - [Name](#name)
 - [Concepts in Katib](#concepts-in-katib)
   - [Experiment](#experiment)
-  - [Trial](#trial)
-  - [Job](#job)
   - [Suggestion](#suggestion)
+  - [Trial](#trial)
+  - [Worker Job](#worker-job)
 - [Components in Katib](#components-in-katib)
-  - [v1alpha1](#v1alpha1)
-  - [v1alpha2](#v1alpha2)
 - [Getting Started](#getting-started)
 - [Web UI](#web-ui)
 - [API Documentation](#api-documentation)
-- [Quickstart to run tfjob and pytorch operator jobs in Katib](#quickstart-to-run-tfjob-and-pytorch-operator-jobs-in-katib)
-  - [TFjob operator](#tfjob-operator)
+- [Installation](#installation)
+  - [TF operator](#tf-operator)
   - [Pytorch operator](#pytorch-operator)
   - [Katib](#katib)
   - [Running examples](#running-examples)
@@ -47,130 +45,102 @@ Katib has the concepts of Experiment, Trial, Job and Suggestion.
 ### Experiment
 
 `Experiment` represents a single optimization run over a feasible space.
-Each `Experiment` contains a configuration describing the feasible space, as well as a set of Trials. 
-It is assumed that objective function f(x) does not change in the course of a `Experiment`.
+Each `Experiment` contains a configuration 
+1. Objective: What we are trying to optimize
+2. Search Space: Constraints for configurations describing the feasible space.
+3. Search Algorithm: How to find the optimal configurations
 
-In v1alpha1, `Experiment` is defined as a CRD `StudyJob` in Kubernetes.
-In v1alpha2, `Experiment` is defined as a CRD `Experiment`.
-
-### Trial
-
-A `Trial` is a list of parameter values, x, that will lead to a single evaluation of f(x). A Trial can be “Completed”, which means that it has been evaluated and the objective value f(x) has been assigned to it, otherwise it is “Pending”.
-
-In v1alpha1, `Trial` is just a concept inside Katib and not exposed to users.
-In v1alpha2, `Trial` is defined as a CRD `Trial` in Kubernetes.
-
-### Job
-
-A `Job` refers to a process responsible for evaluating a Pending `Trial` and calculating its objective value.
-
-The job kind can be [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/), [Kubeflow TFJob](https://www.kubeflow.org/docs/guides/components/tftraining/) or [Kubeflow PyTorchJob](https://www.kubeflow.org/docs/guides/components/pytorch/).
-Thus Katib supports multiple frameworks with the help of different job kinds.
+`Experiment` is defined as a CRD
 
 ### Suggestion
 
-A Suggestion is an algorithm to construct a parameter set according to the `Experiment`. Then `Trial` will be created to evaluate the parameter set.
+A Suggestion is a proposed solution to the optimization problem which is one set of hyperparameter values or a list of parameter assignments. Then a `Trial` will be created to evaluate the parameter assignments.
 
-Currently Katib supports the following exploration algorithms in v1alpha1:
+`Suggestion` is defined as a CRD
+
+### Trial
+
+A `Trial` is one iteration of the optimization process, which is one `worker job` instance with a list of parameter assignments(corresponding to a suggestion).
+
+`Trial` is defined as a CRD
+
+### Worker Job 
+
+A `Worker Job` refers to a process responsible for evaluating a `Trial` and calculating its objective value. 
+
+The worker kind can be [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) which is a non distributed execution, [Kubeflow TFJob](https://www.kubeflow.org/docs/guides/components/tftraining/) or [Kubeflow PyTorchJob](https://www.kubeflow.org/docs/guides/components/pytorch/) which are distributed executions.
+Thus, Katib supports multiple frameworks with the help of different job kinds. 
+
+
+
+Currently Katib supports the following exploration algorithms:
 
 * random search
 * grid search
 * [hyperband](https://arxiv.org/pdf/1603.06560.pdf)
 * [bayesian optimization](https://arxiv.org/pdf/1012.2599.pdf)
-* [NAS based on reinforcement learning](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1alpha1/NAS_Reinforcement_Learning)
-* [NAS based on EnvelopeNets](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1alpha1/NAS_Envelopenet)
+* [NAS based on reinforcement learning](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1alpha3/NAS_Reinforcement_Learning)
 
-And Katib supports the following exploration algorithms in v1alpha2:
-
-* random search
 
 ## Components in Katib
-
-### v1alpha1
-
-Katib consists of several components as shown below. Each component is running on k8s as a deployment.
-Each component communicates with others via GRPC and the API is defined at `pkg/api/v1alpha1/api.proto`.
-
-- vizier: main components.
-  - vizier-core: GRPC API server of vizier.
-  - vizier-core-rest: REST API server of vizier.
-  - vizier-db: Data storage backend of vizier.
-  - suggestion: implementation of each exploration algorithm.
-    - suggestion-random
-    - suggestion-grid
-    - suggestion-hyperband
-    - suggestion-bayesianoptimization
-    - suggestion-nasrl
-    - suggestion-nasenvelopenets
-- studyjob-controller: Controller for `StudyJob` CRD in Kubernetes.
-- modeldb : WebUI
-  - modeldb-frontend
-  - modeldb-backend
-  - modeldb-db
-
-### v1alpha2
 
 Katib consists of several components as shown below. Each component is running on k8s as a deployment.
 Each component communicates with others via GRPC and the API is defined at `pkg/apis/manager/v1alpha2/api.proto`.
 
 - katib: main components.
-  - katib-manager: GRPC API server of katib.
+  - katib-manager: GRPC API server of katib which is the DB Interface.
   - katib-manager-rest: REST API server of katib.
   - katib-db: Data storage backend of katib.
   - katib-ui: User interface of katib.
-  - suggestion: implementation of each exploration algorithm.
-    - suggestion-random
--  katib-controller: Controller for katib CRDs in Kubernetes.
-  - experiment-controller: Controller for `Experiment` CRD in Kubernetes.
-  - trial-controller: Controller for `Trial` CRD in Kubernetes.
+  - katib-controller: Controller for katib CRDs in Kubernetes.
+
 
 ## Getting Started
 
-Please see [here](./examples/v1alpha1/README.md) for more details about katib v1alpha1.  
-Please see [here](./examples/v1alpha2/README.md) for more details about katib v1alpha2.
+Please see [here](./examples/v1alpha3/README.md) for more details.
 
 ## Web UI
 
 Katib provides a Web UI.
 You can visualize general trend of Hyper parameter space and each training history. You can use
-[random-example](https://github.com/kubeflow/katib/blob/master/examples/v1alpha1/random-example.yaml) or
-[other examples](https://github.com/kubeflow/katib/blob/master/examples/v1alpha1) to generate a similar UI.
-![katibui](https://user-images.githubusercontent.com/10014831/48778081-a4388b80-ed17-11e8-938b-fc59a5d2e574.gif)
+[random-example](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/random-example.yaml) or
+[other examples](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3) to generate a similar UI.
+![katibui](./docs/images/katib-ui.png)
 
 ## API Documentation
 
-Please refer to [api.md](./pkg/api/v1alpha1/gen-doc/api.md).
+Please refer to [api.md](./pkg/apis/manager/v1alpha3/gen-doc/api.md).
 
-## Quickstart to run tfjob and pytorch operator jobs in Katib
+## Installation
 
-For running tfjob and pytorch operator jobs in Katib, you have to install their packages.
-
-In your Ksonnet app root, run the following
+For standard installation of Katib with support for all job operators, refer to [Kubeflow Official Docs](http://kubeflow.org) and skip this section. Or if you want to install Katib manually, follow these steps
 
 ```
-export KF_ENV=default
-ks env set ${KF_ENV} --namespace=kubeflow
-ks registry add kubeflow github.com/kubeflow/kubeflow/tree/master/kubeflow
+git clone git@github.com:kubeflow/manifests.git
+Set `MANIFESTS_DIR` to the cloned folder.
+
 ```
 
-### TFjob operator
+### TF operator
 
 For installing tfjob operator, run the following
 
 ```
-ks pkg install kubeflow/tf-training
-ks pkg install kubeflow/common
-ks generate tf-job-operator tf-job-operator
-ks apply ${KF_ENV} -c tf-job-operator
+cd "${MANIFESTS_DIR}/tf-training/tf-job-crds/base"
+kustomize build . | kubectl apply -f -
+cd "${MANIFESTS_DIR}/tf-training/tf-job-operator/base"
+kustomize build . | kubectl apply -n kubeflow -f -
+
 ```
 
 ### Pytorch operator
 For installing pytorch operator, run the following
 
 ```
-ks pkg install kubeflow/pytorch-job
-ks generate pytorch-operator pytorch-operator
-ks apply ${KF_ENV} -c pytorch-operator
+cd "${MANIFESTS_DIR}/pytorch-job/pytorch-job-crds/base"
+kustomize build . | kubectl apply -f -
+cd "${MANIFESTS_DIR}/pytorch-job/pytorch-operator/base/"
+kustomize build . | kubectl apply -n kubeflow -f -
 ```
 
 ### Katib
@@ -178,14 +148,16 @@ ks apply ${KF_ENV} -c pytorch-operator
 Finally, you can install Katib
 
 ```
-ks pkg install kubeflow/katib
-ks generate katib katib
-ks apply ${KF_ENV} -c katib
+cd "${MANIFESTS_DIR}/katib/katib-crds/base"
+kustomize build . | kubectl apply -f -
+cd "${MANIFESTS_DIR}/katib/katib-controller/base"
+kustomize build . | kubectl apply -f -
+
 ```
 
-If you want to use Katib not in GKE and you don't have StorageClass for dynamic volume provisioning at your cluster, you have to create persistent volume to bound your persistent volume claim.
+If you want to use Katib in a cluster that doesn't have a StorageClass for dynamic volume provisioning at your cluster, you have to create persistent volume manually to bound your persistent volume claim.
 
-This is yaml file for persistent volume
+This is sample yaml file for creating a persistent volume
 
 ```yaml
 apiVersion: v1
@@ -206,216 +178,148 @@ spec:
 
 Create this pv after deploying Katib package
 
-```
-kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/manifests/v1alpha1/pv/pv.yaml
-```
-
 ### Running examples
 
-After deploy everything, you can run examples.
-
-To run tfjob operator example, you have to install volume for it.
-
-If you are using GKE and default StorageClass, you have to create this pvc
-
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: tfevent-volume
-  namespace: kubeflow
-  labels:
-    type: local
-    app: tfjob
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
-```
-
-If you are not using GKE and you don't have StorageClass for dynamic volume provisioning at your cluster, you have to create pvc and pv
-
-```
-kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1alpha1/tfevent-volume/tfevent-pvc.yaml
-
-kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1alpha1/tfevent-volume/tfevent-pv.yaml
-```
+After deploy everything, you can run examples to verify the installation.
 
 This is example for tfjob operator
 
 ```
-kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1alpha1/tfjob-example.yaml
+kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1alpha3/tfjob-example.yaml
 ```
 
 This is example for pytorch operator
 
 ```
-kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1alpha1/pytorchjob-example.yaml
+kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1alpha3/pytorchjob-example.yaml
 ```
 
-You can check status of StudyJob
+You can check status of experiment 
 
 ```yaml
-$ kubectl describe studyjob pytorchjob-example -n kubeflow
+$ kubectl describe experiment tfjob-example -n kubeflow
 
-Name:         pytorchjob-example
+
+Name:         tfjob-example
 Namespace:    kubeflow
-Labels:       controller-tools.k8s.io=1.0
+Labels:       <none>
 Annotations:  <none>
-API Version:  kubeflow.org/v1alpha1
-Kind:         StudyJob
+API Version:  kubeflow.org/v1alpha3
+Kind:         Experiment
 Metadata:
-  Cluster Name:
-  Creation Timestamp:  2019-01-15T18:35:20Z
+  Creation Timestamp:  2019-10-06T12:25:44Z
   Generation:          1
-  Resource Version:    1058135
-  Self Link:           /apis/kubeflow.org/v1alpha1/namespaces/kubeflow/studyjobs/pytorchjob-example
-  UID:                 4fc7ad83-18f4-11e9-a6de-42010a8e0225
+  Resource Version:    2110410
+  Self Link:           /apis/kubeflow.org/v1alpha3/namespaces/kubeflow/experiments/tfjob-example
+  UID:                 6b2bef2d-e834-11e9-93ee-42010aa00075
 Spec:
-  Metricsnames:
-    accuracy
-  Objectivevaluename:  accuracy
-  Optimizationgoal:    0.99
-  Optimizationtype:    maximize
-  Owner:               crd
-  Parameterconfigs:
-    Feasible:
-      Max:          0.05
-      Min:          0.01
-    Name:           --lr
-    Parametertype:  double
-    Feasible:
-      Max:          0.9
-      Min:          0.5
-    Name:           --momentum
-    Parametertype:  double
-  Requestcount:     4
-  Study Name:       pytorchjob-example
-  Suggestion Spec:
-    Request Number:        3
-    Suggestion Algorithm:  random
-    Suggestion Parameters:
-      Name:   SuggestionCount
-      Value:  0
-  Worker Spec:
+  Algorithm:
+    Algorithm Name:        random
+  Max Failed Trial Count:  3
+  Max Trial Count:         12
+  Metrics Collector Spec:
+    Collector:
+      Kind:  TensorFlowEvent
+    Source:
+      File System Path:
+        Kind:  Directory
+        Path:  /train
+  Objective:
+    Goal:                   0.99
+    Objective Metric Name:  accuracy_1
+    Type:                   maximize
+  Parallel Trial Count:     3
+  Parameters:
+    Feasible Space:
+      Max:           0.05
+      Min:           0.01
+    Name:            --learning_rate
+    Parameter Type:  double
+    Feasible Space:
+      Max:           200
+      Min:           100
+    Name:            --batch_size
+    Parameter Type:  int
+  Trial Template:
     Go Template:
       Raw Template:  apiVersion: "kubeflow.org/v1"
-kind: PyTorchJob
+kind: TFJob
 metadata:
-  name: {{.WorkerID}}
-  namespace: kubeflow
+  name: {{.Trial}}
+  namespace: {{.NameSpace}}
 spec:
- pytorchReplicaSpecs:
-  Master:
-    replicas: 1
-    restartPolicy: OnFailure
-    template:
-      spec:
-        containers:
-          - name: pytorch
-            image: gcr.io/kubeflow-ci/pytorch-mnist-with-summary:1.0
-            imagePullPolicy: Always
-            command:
-              - "python"
-              - "/opt/pytorch_dist_mnist/dist_mnist_with_summary.py"
-              {{- with .HyperParameters}}
-              {{- range .}}
-              - "{{.Name}}={{.Value}}"
-              {{- end}}
-              {{- end}}
+ tfReplicaSpecs:
   Worker:
-    replicas: 2
+    replicas: 1 
     restartPolicy: OnFailure
     template:
       spec:
         containers:
-          - name: pytorch
-            image: gcr.io/kubeflow-ci/pytorch-mnist-with-summary:1.0
+          - name: tensorflow 
+            image: gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0
             imagePullPolicy: Always
             command:
               - "python"
-              - "/opt/pytorch_dist_mnist/dist_mnist_with_summary.py"
+              - "/var/tf_mnist/mnist_with_summaries.py"
+              - "--log_dir=/train/metrics"
               {{- with .HyperParameters}}
               {{- range .}}
               - "{{.Name}}={{.Value}}"
               {{- end}}
               {{- end}}
-    Retain:  true
 Status:
-  Conditon:                     Running
-  Early Stopping Parameter Id:
-  Last Reconcile Time:          2019-01-15T18:35:20Z
-  Start Time:                   2019-01-15T18:35:20Z
-  Studyid:                      k291b444a0b68631
-  Suggestion Count:             1
-  Suggestion Parameter Id:      n6f17dd9ff466a2b
-  Trials:
-    Trialid:  o104235328003ad9
-    Workeridlist:
-      Completion Time:  <nil>
-      Conditon:         Running
-      Kind:             PyTorchJob
-      Start Time:       2019-01-15T18:35:20Z
-      Workerid:         b3b371c89144727f
-    Trialid:            ca207b2432231de3
-    Workeridlist:
-      Completion Time:  <nil>
-      Conditon:         Running
-      Kind:             PyTorchJob
-      Start Time:       2019-01-15T18:35:20Z
-      Workerid:         f291b04fb27ece3c
-    Trialid:            ddff69212e826432
-    Workeridlist:
-      Completion Time:  <nil>
-      Conditon:         Running
-      Kind:             PyTorchJob
-      Start Time:       2019-01-15T18:35:20Z
-      Workerid:         ncbed67bbcd4a8ed
-Events:                 <none>
+  Completion Time:  2019-10-06T12:28:50Z
+  Conditions:
+    Last Transition Time:  2019-10-06T12:25:44Z
+    Last Update Time:      2019-10-06T12:25:44Z
+    Message:               Experiment is created
+    Reason:                ExperimentCreated
+    Status:                True
+    Type:                  Created
+    Last Transition Time:  2019-10-06T12:28:50Z
+    Last Update Time:      2019-10-06T12:28:50Z
+    Message:               Experiment is running
+    Reason:                ExperimentRunning
+    Status:                False
+    Type:                  Running
+    Last Transition Time:  2019-10-06T12:28:50Z
+    Last Update Time:      2019-10-06T12:28:50Z
+    Message:               Experiment has succeeded because Objective goal has reached
+    Reason:                ExperimentSucceeded
+    Status:                True
+    Type:                  Succeeded
+  Current Optimal Trial:
+    Observation:
+      Metrics:
+        Name:   accuracy_1
+        Value:  1
+    Parameter Assignments:
+      Name:          --learning_rate
+      Value:         0.018532845700535087
+      Name:          --batch_size
+      Value:         109
+  Start Time:        2019-10-06T12:25:44Z
+  Trials:            4
+  Trials Running:    2
+  Trials Succeeded:  2
+Events:              <none>
 ```
 
-When the spec.Status.Condition becomes ```Completed```, the StudyJob is finished.
+When the spec.Status.Condition becomes ```Succeeded```, the experiment is finished.
 
-You can monitor your results in Katib UI. For accessing to Katib UI, you have to install Ambassador.
-
-In your Ksonnet app root, run the following
-
-```
-ks generate ambassador ambassador
-ks apply ${KF_ENV} -c ambassador
-```
-
-After this, you have to port-forward Ambassador service
+You can monitor your results in Katib UI. 
+Access Katib UI via Kubeflow dashboard if you have used standard installation or port-forward the `katib-ui` service if you have installed manually.
 
 ```
-kubectl port-forward svc/ambassador -n kubeflow 8080:80
+kubectl -n kubeflow port-forward svc/katib-ui 8080:80
 ```
 
-Finally, you can access to Katib UI using this URL: ```http://localhost:8080/katib/```.
+You can access the Katib UI using this URL: ```http://localhost:8080/katib/```.
 
 ### Cleanups
 
-Delete installed components
+Delete installed components using `kubectl delete -f` on the respective folders. 
 
-```
-ks delete ${KF_ENV} -c katib
-ks delete ${KF_ENV} -c pytorch-operator
-ks delete ${KF_ENV} -c tf-job-operator
-```
-
-If you create pv for Katib, delete it
-
-```
-kubectl delete -f https://raw.githubusercontent.com/kubeflow/katib/master/manifests/v1alpha1/pv/pv.yaml
-```
-
-If you deploy Ambassador, delete it
-
-```
-ks delete ${KF_ENV} -c ambassador
-```
 
 ## CONTRIBUTING
 
