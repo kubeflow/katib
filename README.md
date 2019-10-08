@@ -69,7 +69,7 @@ A `Trial` is one iteration of the optimization process, which is one `worker` in
 A `Worker` refers to a process responsible for evaluating a `Trial` and calculating its objective value. 
 
 The worker kind can be [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) which is a non distributed execution, [Kubeflow TFJob](https://www.kubeflow.org/docs/guides/components/tftraining/) or [Kubeflow PyTorchJob](https://www.kubeflow.org/docs/guides/components/pytorch/) which are distributed executions.
-Thus Katib supports multiple frameworks with the help of different job kinds. 
+Thus, Katib supports multiple frameworks with the help of different job kinds. 
 
 
 
@@ -113,7 +113,7 @@ Please refer to [api.md](./pkg/apis/manager/v1alpha3/gen-doc/api.md).
 
 ## Installation
 
-For standard installation of Katib with support for all job operators, refer to [Kubeflow Official Docs](http://kubeflow.org) and skip this section. Or if you want to install Katib manually, Follow these steps
+For standard installation of Katib with support for all job operators, refer to [Kubeflow Official Docs](http://kubeflow.org) and skip this section. Or if you want to install Katib manually, follow these steps
 
 ```
 git clone git@github.com:kubeflow/manifests.git
@@ -307,17 +307,18 @@ Events:              <none>
 
 When the spec.Status.Condition becomes ```Succeeded```, the experiment is finished.
 
-You can monitor your results in Katib UI. Access Katib UI via Kubeflow dashboard if you have used standard installation or port-forward the katib-ui service if you have installed manually.
+You can monitor your results in Katib UI. 
+Access Katib UI via Kubeflow dashboard if you have used standard installation or port-forward the `katib-ui` service if you have installed manually.
 
 ```
 kubectl -n kubeflow port-forward svc/katib-ui 8080:80
 ```
 
-You can access to Katib UI using this URL: ```http://localhost:8080/katib/```.
+You can access the Katib UI using this URL: ```http://localhost:8080/katib/```.
 
 ### Cleanups
 
-Delete installed components using `kubectl delete -f` on the respective folder 
+Delete installed components using `kubectl delete -f` on the respective folders. 
 
 
 ## CONTRIBUTING
