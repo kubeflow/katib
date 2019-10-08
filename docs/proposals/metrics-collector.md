@@ -118,8 +118,8 @@ For more detail, see [here](https://github.com/kubeflow/katib/pull/697#issuecomm
 To avoid collecting duplicated metrics, as we discuss in [kubeflow/katib#685](https://github.com/kubeflow/katib/issues/685), only one metrics collector sidecar will be injected into the master pod during one Experiment.
 In the new design, there are two modes for katib mutating webhook to inject the sidecar: **Pod Level Injecting** and **Job Level Injecting**.
 
-The webhook decides which mode to be used based on the `katib-metrics-collector-injection=enabled` label tagged on the namespace.
-In the namespace with `katib-metrics-collector-injection=enabled` label, the webhook inject the sidecar in the pod level. Otherwise, without this label, injecting in the job level.
+The webhook decides which mode to be used based on the `katib-metricscollector-injection=enabled` label tagged on the namespace.
+In the namespace with `katib-metricscollector-injection=enabled` label, the webhook inject the sidecar in the pod level. Otherwise, without this label, injecting in the job level.
 
 In **Pod Level Injecting**,
 
