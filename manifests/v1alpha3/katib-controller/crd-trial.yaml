@@ -5,6 +5,9 @@ metadata:
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.conditions[-1:].type
+    name: Type
+    type: string
+  - JSONPath: .status.conditions[-1:].status
     name: Status
     type: string
   - JSONPath: .metadata.creationTimestamp
