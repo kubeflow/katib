@@ -107,11 +107,11 @@ cd ${GO_DIR}
 
 echo "Deploying tf-operator from kubeflow/manifests master"
 cd "${MANIFESTS_DIR}/tf-training/tf-job-operator/base"
-kustomize build . | kubectl apply -n kubeflow -f -
+kustomize build . | kubectl apply -n kubeflow -f - --validate=false
 
 echo "Deploying pytorch-operator from kubeflow/manifests master"
 cd "${MANIFESTS_DIR}/pytorch-job/pytorch-operator/base/"
-kustomize build . | kubectl apply -n kubeflow -f -
+kustomize build . | kubectl apply -n kubeflow -f - --validate=false
 
 
 TIMEOUT=120
