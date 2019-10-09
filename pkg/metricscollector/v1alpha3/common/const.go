@@ -21,5 +21,6 @@ const (
 	DefaultTimeout      = 0
 	DefaultWaitAll      = false
 
-	MetricCollectorContainerName = "metrics-collector"
+	MetricCollectorContainerName       = "metrics-collector"
+	MetricLoggerCollectorContainerName = "metrics-logger-and-collector"
 )
