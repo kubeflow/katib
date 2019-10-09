@@ -120,12 +120,12 @@ func (trial *Trial) MarkTrialStatusRunning(reason, message string) {
 	trial.setCondition(TrialRunning, v1.ConditionTrue, reason, message)
 }
 
-func (trial *Trial) MarkTrialStatusSucceeded(reason, message string) {
+func (trial *Trial) MarkTrialStatusSucceeded(status v1.ConditionStatus, reason, message string) {
 	currentCond := getCondition(trial, TrialRunning)
 	if currentCond != nil {
 		trial.setCondition(TrialRunning, v1.ConditionFalse, currentCond.Reason, currentCond.Message)
 	}
-	trial.setCondition(TrialSucceeded, v1.ConditionTrue, reason, message)
+	trial.setCondition(TrialSucceeded, status, reason, message)
 
 }
 

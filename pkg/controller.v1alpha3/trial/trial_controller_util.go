@@ -91,23 +91,30 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Tri
 	now := metav1.Now()
 	jobConditionType := (*jobCondition).Type
 	if jobConditionType == commonv1.JobSucceeded {
-		msg := "Trial has succeeded"
-		instance.MarkTrialStatusSucceeded(TrialSucceededReason, msg)
-		instance.Status.CompletionTime = &now
+		if isTrialObservationAvailable(instance) {
+			msg := "Trial has succeeded"
+			instance.MarkTrialStatusSucceeded(corev1.ConditionTrue, TrialSucceededReason, msg)
+			instance.Status.CompletionTime = &now
+
+			eventMsg := fmt.Sprintf("Job %s has succeeded", deployedJob.GetName())
+			r.recorder.Eventf(instance, corev1.EventTypeNormal, JobSucceededReason, eventMsg)
+		} else {
+			msg := "Metrics are not available"
+			instance.MarkTrialStatusSucceeded(corev1.ConditionFalse, TrialMetricsUnavailableReason, msg)
+
+			eventMsg := fmt.Sprintf("Metrics are not available for Job %s", deployedJob.GetName())
+			r.recorder.Eventf(instance, corev1.EventTypeWarning, JobMetricsUnavailableReason, eventMsg)
+		}
 	} else if jobConditionType == commonv1.JobFailed {
 		msg := "Trial has failed"
 		instance.MarkTrialStatusFailed(TrialFailedReason, msg)
 		instance.Status.CompletionTime = &now
-	}
-	//else nothing to do
-	if jobConditionType == commonv1.JobSucceeded {
-		eventMsg := fmt.Sprintf("Job %s has succeeded", deployedJob.GetName())
-		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobSucceededReason, eventMsg)
-	} else if jobConditionType == commonv1.JobFailed {
+
 		jobConditionMessage := (*jobCondition).Message
 		eventMsg := fmt.Sprintf("Job %s has failed: %s", deployedJob.GetName(), jobConditionMessage)
 		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobFailedReason, eventMsg)
 	}
+	//else nothing to do
 	return
 }
 

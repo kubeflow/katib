@@ -8,6 +8,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/onsi/gomega"
 	"golang.org/x/net/context"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -222,7 +223,7 @@ func TestReconcileCompletedTFJobTrial(t *testing.T) {
 		return c.Get(context.TODO(), expectedRequest.NamespacedName, instance)
 	}, timeout).
 		Should(gomega.Succeed())
-	instance.MarkTrialStatusSucceeded("", "")
+	instance.MarkTrialStatusSucceeded(corev1.ConditionTrue, "", "")
 	g.Expect(c.Status().Update(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
 	g.Eventually(func() bool {
 		err := c.Get(context.TODO(), expectedRequest.NamespacedName, instance)
