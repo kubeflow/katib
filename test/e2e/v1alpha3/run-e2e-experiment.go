@@ -12,6 +12,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	commonv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibclient"
 )
@@ -20,20 +21,20 @@ const (
 	timeout = 30 * time.Minute
 )
 
-func verifyResult(exp *experimentsv1alpha3.Experiment) error {
+func verifyResult(exp *experimentsv1alpha3.Experiment) (*float64, error) {
 	if len(exp.Status.CurrentOptimalTrial.ParameterAssignments) == 0 {
-		return fmt.Errorf("Best parameter assignments not updated in status")
+		return nil, fmt.Errorf("Best parameter assignments not updated in status")
 	}
 
 	if len(exp.Status.CurrentOptimalTrial.Observation.Metrics) == 0 {
-		return fmt.Errorf("Bst metrics not updated in status")
+		return nil, fmt.Errorf("Best metrics not updated in status")
 	}
 
 	metric := exp.Status.CurrentOptimalTrial.Observation.Metrics[0]
 	if metric.Name != exp.Spec.Objective.ObjectiveMetricName {
-		return fmt.Errorf("Best objective metric not updated in status")
+		return nil, fmt.Errorf("Best objective metric not updated in status")
 	}
-	return nil
+	return &metric.Value, nil
 }
 
 func main() {
@@ -102,17 +103,28 @@ func main() {
 		log.Fatal("Experiment run timed out")
 	}
 
-	if exp.Status.Trials != *exp.Spec.MaxTrialCount {
-		log.Fatal("All trials are not run in the experiment ", exp.Status.Trials, exp.Spec.MaxTrialCount)
-	}
-
-	if exp.Status.TrialsSucceeded != *exp.Spec.MaxTrialCount {
-		log.Fatal("All trials are not successful ", exp.Status.TrialsSucceeded, *exp.Spec.MaxTrialCount)
-	}
-	err = verifyResult(exp)
+	metricVal, err := verifyResult(exp)
 	if err != nil {
 		log.Fatal(err)
 	}
+	if metricVal == nil {
+		log.Fatal("Metric value in CurrentOptimalTrial not populated")
+	}
 
+	objectiveType := exp.Spec.Objective.Type
+	goal := *exp.Spec.Objective.Goal
+	if (objectiveType == commonv1alpha3.ObjectiveTypeMinimize && *metricVal < goal) ||
+		(objectiveType == commonv1alpha3.ObjectiveTypeMaximize && *metricVal > goal) {
+		log.Print("Objective Goal reached")
+	} else {
+
+		if exp.Status.Trials != *exp.Spec.MaxTrialCount {
+			log.Fatal("All trials are not run in the experiment ", exp.Status.Trials, exp.Spec.MaxTrialCount)
+		}
+
+		if exp.Status.TrialsSucceeded != *exp.Spec.MaxTrialCount {
+			log.Fatal("All trials are not successful ", exp.Status.TrialsSucceeded, *exp.Spec.MaxTrialCount)
+		}
+	}
 	log.Printf("Experiment has recorded best current Optimal Trial %v", exp.Status.CurrentOptimalTrial)
 }
