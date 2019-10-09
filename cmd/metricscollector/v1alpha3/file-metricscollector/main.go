@@ -71,7 +71,8 @@ func printMetricsFile(mFile string) {
 			klog.Fatalf("could not watch metrics file: %v", err)
 		}
 	}
-	t, err := tail.TailFile("/var/log/nginx.log", tail.Config{Follow: true})
+
+	t, _ := tail.TailFile(mFile, tail.Config{Follow: true})
 	for line := range t.Lines {
 		klog.Info(line.Text)
 	}
