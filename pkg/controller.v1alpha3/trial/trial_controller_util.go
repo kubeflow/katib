@@ -93,14 +93,17 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Tri
 	if jobConditionType == commonv1.JobSucceeded {
 		if isTrialObservationAvailable(instance) {
 			msg := "Trial has succeeded"
-			instance.MarkTrialStatusSucceeded(TrialSucceededReason, msg)
+			instance.MarkTrialStatusSucceeded(corev1.ConditionTrue, TrialSucceededReason, msg)
 			instance.Status.CompletionTime = &now
 
 			eventMsg := fmt.Sprintf("Job %s has succeeded", deployedJob.GetName())
 			r.recorder.Eventf(instance, corev1.EventTypeNormal, JobSucceededReason, eventMsg)
 		} else {
+			msg := "Metrics are not available"
+			instance.MarkTrialStatusSucceeded(corev1.ConditionFalse, TrialMetricsUnavailableReason, msg)
+
 			eventMsg := fmt.Sprintf("Metrics are not available for Job %s", deployedJob.GetName())
-			r.recorder.Eventf(instance, corev1.EventTypeWarning, MetricsUnavailableReason, eventMsg)
+			r.recorder.Eventf(instance, corev1.EventTypeWarning, JobMetricsUnavailableReason, eventMsg)
 		}
 	} else if jobConditionType == commonv1.JobFailed {
 		msg := "Trial has failed"

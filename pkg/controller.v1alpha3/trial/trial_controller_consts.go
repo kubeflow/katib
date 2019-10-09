@@ -4,16 +4,17 @@ const (
 	DefaultJobKind = "Job"
 
 	// For trials
-	TrialCreatedReason   = "TrialCreated"
-	TrialRunningReason   = "TrialRunning"
-	TrialSucceededReason = "TrialSucceeded"
-	TrialFailedReason    = "TrialFailed"
-	TrialKilledReason    = "TrialKilled"
+	TrialCreatedReason            = "TrialCreated"
+	TrialRunningReason            = "TrialRunning"
+	TrialSucceededReason          = "TrialSucceeded"
+	TrialMetricsUnavailableReason = "MetricsUnavailable"
+	TrialFailedReason             = "TrialFailed"
+	TrialKilledReason             = "TrialKilled"
 
 	// For Jobs
-	JobCreatedReason         = "JobCreated"
-	JobDeletedReason         = "JobDeleted"
-	JobSucceededReason       = "JobSucceeded"
-	MetricsUnavailableReason = "MetricsUnavailable"
-	JobFailedReason          = "JobFailed"
+	JobCreatedReason            = "JobCreated"
+	JobDeletedReason            = "JobDeleted"
+	JobSucceededReason          = "JobSucceeded"
+	JobMetricsUnavailableReason = "MetricsUnavailable"
+	JobFailedReason             = "JobFailed"
 )
