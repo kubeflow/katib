@@ -11,8 +11,9 @@ const (
 	TrialKilledReason    = "TrialKilled"
 
 	// For Jobs
-	JobCreatedReason   = "JobCreated"
-	JobDeletedReason   = "JobDeleted"
-	JobSucceededReason = "JobSucceeded"
-	JobFailedReason    = "JobFailed"
+	JobCreatedReason         = "JobCreated"
+	JobDeletedReason         = "JobDeleted"
+	JobSucceededReason       = "JobSucceeded"
+	MetricsUnavailableReason = "MetricsUnavailable"
+	JobFailedReason          = "JobFailed"
 )
