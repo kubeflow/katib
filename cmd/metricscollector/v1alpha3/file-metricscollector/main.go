@@ -38,8 +38,12 @@ The metrics collector will collect all logs of metrics.
 package main
 
 import (
+	"bufio"
 	"context"
 	"flag"
+	"io"
+	"os"
+	"os/exec"
 	"strings"
 
 	"google.golang.org/grpc"
@@ -58,10 +62,40 @@ var pollInterval = flag.Duration("p", common.DefaultPollInterval, "Poll interval
 var timeout = flag.Duration("timeout", common.DefaultTimeout, "Timeout to check if main process of worker container exit")
 var waitAll = flag.Bool("w", common.DefaultWaitAll, "Whether wait for all other main process of container exiting")
 
+func printMetricsFile(mFile string) {
+	for {
+		_, err := os.Stat(mFile)
+		if err == nil {
+			break
+		} else if os.IsNotExist(err) {
+			continue
+		} else {
+			klog.Fatalf("could not watch metrics file: %v", err)
+		}
+	}
+	cmd := exec.Command("tail", "-f", mFile)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		klog.Fatalf("Fail to get stdout pipe of logging metrics file: %v", err)
+	}
+
+	cmd.Start()
+	reader := bufio.NewReader(stdout)
+	for {
+		if line, err := reader.ReadString('\n'); err != nil || io.EOF == err {
+			break
+		} else {
+			klog.Info(line)
+		}
+	}
+	cmd.Wait()
+}
+
 func main() {
 	flag.Parse()
 	klog.Infof("Trial Name: %s", *trialName)
 
+	go printMetricsFile(*metricsFileName)
 	wopts := common.WaitPidsOpts{
 		PollInterval: *pollInterval,
 		Timeout:      *timeout,

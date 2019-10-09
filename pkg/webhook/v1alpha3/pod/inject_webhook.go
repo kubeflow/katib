@@ -244,7 +244,7 @@ func wrapWorkerContainer(pod *v1.Pod, jobKind, metricsFile string, mc common.Met
 		if c.Args != nil {
 			args = append(args, c.Args...)
 		}
-		redirectStr := fmt.Sprintf(" 2>&1 | tee %s", metricsFile)
+		redirectStr := fmt.Sprintf("1>%s 2>&1", metricsFile)
 		args = append(args, redirectStr)
 		argsStr := strings.Join(args, " ")
 		c.Command = command
