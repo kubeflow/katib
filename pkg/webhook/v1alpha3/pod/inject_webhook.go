@@ -149,8 +149,9 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		return nil, err
 	}
 	args := getMetricsCollectorArgs(trialName, metricName, trial.Spec.MetricsCollector)
+	sidecarContainerName := getSidecarContainerName(trial.Spec.MetricsCollector.Collector.Kind)
 	injectContainer := v1.Container{
-		Name:            mccommon.MetricCollectorContainerName,
+		Name:            sidecarContainerName,
 		Image:           image,
 		Args:            args,
 		ImagePullPolicy: v1.PullIfNotPresent,
@@ -161,7 +162,7 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 
 	if mountPath, pathKind := getMountPath(trial.Spec.MetricsCollector); mountPath != "" {
 		wrapWorkerContainer(mutatedPod, kind, mountPath, trial.Spec.MetricsCollector)
-		if err = mutateVolume(mutatedPod, kind, mountPath, pathKind); err != nil {
+		if err = mutateVolume(mutatedPod, kind, mountPath, sidecarContainerName, pathKind); err != nil {
 			return nil, err
 		}
 	}
@@ -244,7 +245,7 @@ func wrapWorkerContainer(pod *v1.Pod, jobKind, metricsFile string, mc common.Met
 		if c.Args != nil {
 			args = append(args, c.Args...)
 		}
-		redirectStr := fmt.Sprintf(" 2>&1 | tee %s", metricsFile)
+		redirectStr := fmt.Sprintf("1>%s 2>&1", metricsFile)
 		args = append(args, redirectStr)
 		argsStr := strings.Join(args, " ")
 		c.Command = command
@@ -275,7 +276,7 @@ func isWorkerContainer(jobKind string, index int, c v1.Container) bool {
 	return false
 }
 
-func mutateVolume(pod *v1.Pod, jobKind, mountPath string, pathKind common.FileSystemKind) error {
+func mutateVolume(pod *v1.Pod, jobKind, mountPath, sidecarContainerName string, pathKind common.FileSystemKind) error {
 	metricsVol := v1.Volume{
 		Name: common.MetricsVolume,
 		VolumeSource: v1.VolumeSource{
@@ -293,7 +294,7 @@ func mutateVolume(pod *v1.Pod, jobKind, mountPath string, pathKind common.FileSy
 	index_list := []int{}
 	for i, c := range pod.Spec.Containers {
 		shouldMount := false
-		if c.Name == mccommon.MetricCollectorContainerName {
+		if c.Name == sidecarContainerName {
 			shouldMount = true
 		} else {
 			shouldMount = isWorkerContainer(jobKind, i, c)
@@ -313,4 +314,12 @@ func mutateVolume(pod *v1.Pod, jobKind, mountPath string, pathKind common.FileSy
 	pod.Spec.Volumes = append(pod.Spec.Volumes, metricsVol)
 
 	return nil
+}
+
+func getSidecarContainerName(cKind common.CollectorKind) string {
+	if cKind == common.StdOutCollector || cKind == common.FileCollector {
+		return mccommon.MetricLoggerCollectorContainerName
+	} else {
+		return mccommon.MetricCollectorContainerName
+	}
 }
