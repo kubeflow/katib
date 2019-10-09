@@ -88,6 +88,22 @@ const hpMonitorReducer = (state = initialState, action) => {
                 ...state,
                 loading: false,
             }
+        case actions.FETCH_HP_JOB_REQUEST:
+            return {
+                ...state,
+                loading: true,
+            }
+        case actions.FETCH_HP_JOB_SUCCESS:
+            return {
+                ...state,
+                experiment: action.experiment,
+                loading: false,
+            }
+        case actions.FETCH_HP_JOB_FAILURE:
+            return {
+                ...state,
+                loading: false,
+            }
         case actions.FETCH_HP_JOB_TRIAL_INFO_SUCCESS:
             return {
                 ...state,

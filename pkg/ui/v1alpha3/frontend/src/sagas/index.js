@@ -185,6 +185,47 @@ const goFetchHPJobs = function* () {
     }
 }
 
+export const fetchHPJob = function* () {
+    while (true) {
+        const action = yield take(hpMonitorActions.FETCH_HP_JOB_REQUEST);
+        try {
+            const result = yield call(
+                goFetchHPJob,
+                action.name,
+                action.namespace
+            )
+            if (result.status === 200) {
+                yield put({
+                    type: hpMonitorActions.FETCH_HP_JOB_SUCCESS,
+                    experiment: result.data
+                })
+            } else {
+                yield put({
+                    type: hpMonitorActions.FETCH_HP_JOB_FAILURE,
+                })
+            }
+        } catch (err) {
+            yield put({
+                type: hpMonitorActions.FETCH_HP_JOB_FAILURE,
+            })
+        }
+    }
+}
+
+const goFetchHPJob = function* (name, namespace) {
+    try {
+        const result = yield call(
+            axios.get,
+            `/katib/fetch_hp_job/?experimentName=${name}&namespace=${namespace}`,
+        )
+        return result
+    } catch (err) {
+        yield put({
+            type: hpMonitorActions.FETCH_HP_JOB_FAILURE,
+        })
+    }
+}
+
 export const fetchHPJobInfo = function* () {
     while (true) {
         const action = yield take(hpMonitorActions.FETCH_HP_JOB_INFO_REQUEST);
@@ -639,6 +680,7 @@ export default function* rootSaga() {
         fork(submitHPJob),
         fork(submitNASJob),
         fork(fetchHPJobInfo),
+        fork(fetchHPJob),
         fork(fetchHPJobTrialInfo),
         fork(fetchNASJobInfo)
     ]);
