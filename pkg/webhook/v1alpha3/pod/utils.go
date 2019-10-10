@@ -23,11 +23,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	commonv1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
+	jobv1alpha3 "github.com/kubeflow/katib/pkg/job/v1alpha3"
 )
 
 func getKabitJob(pod *v1.Pod) (string, string, error) {
-	for _, gvk := range commonv1alpha3.GetSupportedJobList() {
+	for _, gvk := range jobv1alpha3.GetSupportedJobList() {
 		owners := pod.GetOwnerReferences()
 		for _, owner := range owners {
 			if isMatchGVK(owner, gvk) {
@@ -50,7 +50,7 @@ func isMatchGVK(owner metav1.OwnerReference, gvk schema.GroupVersionKind) bool {
 }
 
 func isMasterRole(pod *v1.Pod, jobKind string) bool {
-	if labels, ok := JobRoleMap[jobKind]; ok {
+	if labels, ok := jobv1alpha3.JobRoleMap[jobKind]; ok {
 		if len(labels) == 0 {
 			return true
 		}
