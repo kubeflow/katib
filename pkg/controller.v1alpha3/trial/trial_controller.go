@@ -48,6 +48,7 @@ import (
 )
 
 const (
+	// ControllerName is the controller name.
 	ControllerName = "trial-controller"
 )
 
