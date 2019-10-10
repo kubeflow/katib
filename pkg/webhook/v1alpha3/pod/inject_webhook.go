@@ -40,6 +40,7 @@ import (
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	katibmanagerv1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
+	jobv1alpha3 "github.com/kubeflow/katib/pkg/job/v1alpha3"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1alpha3/common"
 )
 
@@ -161,7 +162,10 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	mutatedPod.Spec.ShareProcessNamespace = pointer.BoolPtr(true)
 
 	if mountPath, pathKind := getMountPath(trial.Spec.MetricsCollector); mountPath != "" {
-		wrapWorkerContainer(mutatedPod, kind, mountPath, trial.Spec.MetricsCollector)
+		if err = wrapWorkerContainer(
+			mutatedPod, kind, mountPath, trial.Spec.MetricsCollector); err != nil {
+			return nil, err
+		}
 		if err = mutateVolume(mutatedPod, kind, mountPath, sidecarContainerName, pathKind); err != nil {
 			return nil, err
 		}
@@ -223,13 +227,19 @@ func getMountPath(mc common.MetricsCollectorSpec) (string, common.FileSystemKind
 	}
 }
 
-func wrapWorkerContainer(pod *v1.Pod, jobKind, metricsFile string, mc common.MetricsCollectorSpec) {
+func wrapWorkerContainer(
+	pod *v1.Pod, jobKind, metricsFile string,
+	mc common.MetricsCollectorSpec) error {
 	if mc.Collector.Kind != common.StdOutCollector {
-		return
+		return nil
 	}
 	index := -1
 	for i, c := range pod.Spec.Containers {
-		if isWorkerContainer(jobKind, i, c) {
+		jobProvider, err := jobv1alpha3.New(jobKind)
+		if err != nil {
+			return err
+		}
+		if jobProvider.IsTrainingContainer(i, c) {
 			index = i
 			break
 		}
@@ -251,29 +261,7 @@ func wrapWorkerContainer(pod *v1.Pod, jobKind, metricsFile string, mc common.Met
 		c.Command = command
 		c.Args = []string{argsStr}
 	}
-}
-
-func isWorkerContainer(jobKind string, index int, c v1.Container) bool {
-	switch jobKind {
-	case BatchJob:
-		if index == 0 {
-			// for Job worker, the first container will be taken as worker container,
-			// katib document should note it
-			return true
-		}
-	case TFJob:
-		if c.Name == TFJobWorkerContainerName {
-			return true
-		}
-	case PyTorchJob:
-		if c.Name == PyTorchJobWorkerContainerName {
-			return true
-		}
-	default:
-		log.Info("Invalid Katib worker kind", "JobKind", jobKind)
-		return false
-	}
-	return false
+	return nil
 }
 
 func mutateVolume(pod *v1.Pod, jobKind, mountPath, sidecarContainerName string, pathKind common.FileSystemKind) error {
@@ -291,19 +279,23 @@ func mutateVolume(pod *v1.Pod, jobKind, mountPath, sidecarContainerName string, 
 		Name:      metricsVol.Name,
 		MountPath: dir,
 	}
-	index_list := []int{}
+	indexList := []int{}
 	for i, c := range pod.Spec.Containers {
 		shouldMount := false
 		if c.Name == sidecarContainerName {
 			shouldMount = true
 		} else {
-			shouldMount = isWorkerContainer(jobKind, i, c)
+			jobProvider, err := jobv1alpha3.New(jobKind)
+			if err != nil {
+				return err
+			}
+			shouldMount = jobProvider.IsTrainingContainer(i, c)
 		}
 		if shouldMount {
-			index_list = append(index_list, i)
+			indexList = append(indexList, i)
 		}
 	}
-	for _, i := range index_list {
+	for _, i := range indexList {
 		c := &pod.Spec.Containers[i]
 		if c.VolumeMounts == nil {
 			c.VolumeMounts = make([]v1.VolumeMount, 0)

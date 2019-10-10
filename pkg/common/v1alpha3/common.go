@@ -4,29 +4,7 @@ import (
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
-
-func GetSupportedJobList() []schema.GroupVersionKind {
-	supportedJobList := []schema.GroupVersionKind{
-		{
-			Group:   "batch",
-			Version: "v1",
-			Kind:    "Job",
-		},
-		{
-			Group:   "kubeflow.org",
-			Version: "v1",
-			Kind:    "TFJob",
-		},
-		{
-			Group:   "kubeflow.org",
-			Version: "v1",
-			Kind:    "PyTorchJob",
-		},
-	}
-	return supportedJobList
-}
 
 func ConvertTime2RFC3339(t *metav1.Time) string {
 	if t != nil {

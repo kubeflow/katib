@@ -14,8 +14,8 @@ import (
 
 	commonapiv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
-	commonv1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/manifest"
+	jobv1alpha3 "github.com/kubeflow/katib/pkg/job/v1alpha3"
 )
 
 var log = logf.Log.WithName("experiment-validating-webhook")
@@ -120,7 +120,7 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1alpha3.E
 
 func (g *DefaultValidator) validateSupportedJob(job *unstructured.Unstructured) error {
 	gvk := job.GroupVersionKind()
-	supportedJobs := commonv1alpha3.GetSupportedJobList()
+	supportedJobs := jobv1alpha3.GetSupportedJobList()
 	for _, sJob := range supportedJobs {
 		if gvk == sJob {
 			return nil

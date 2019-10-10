@@ -17,27 +17,9 @@ limitations under the License.
 package pod
 
 const (
-	// JobNameLabel represents the label key for the job name, the value is job name
-	JobNameLabel = "job-name"
-	// JobRoleLabel represents the label key for the job role, e.g. the value is master
-	JobRoleLabel                 = "job-role"
-	TFJobRoleLabel               = "tf-job-role"
-	PyTorchJobRoleLabel          = "pytorch-job-role"
 	MasterRole                   = "master"
 	MetricsCollectorSidecar      = "metrics-collector-sidecar"
 	MetricsCollectorSidecarImage = "image"
 
-	PyTorchJob                    = "PyTorchJob"
-	PyTorchJobWorkerContainerName = "pytorch"
-
-	TFJob                    = "TFJob"
-	TFJobWorkerContainerName = "tensorflow"
-
 	BatchJob = "Job"
 )
-
-var JobRoleMap = map[string][]string{
-	"TFJob":      {JobRoleLabel, TFJobRoleLabel},
-	"PyTorchJob": {JobRoleLabel, PyTorchJobRoleLabel},
-	"Job":        {},
-}
