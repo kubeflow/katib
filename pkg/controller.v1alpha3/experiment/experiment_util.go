@@ -9,11 +9,17 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
+	utilv1alpha3 "github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/util"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/util"
+)
+
+const (
+	updatePrometheusMetrics = "update-prometheus-metrics"
 )
 
 func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alpha3.Experiment, trialAssignment *suggestionsv1alpha3.TrialAssignment) error {
@@ -61,4 +67,46 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1alph
 	}
 	return nil
 
+}
+
+func needUpdateFinalizers(exp *experimentsv1alpha3.Experiment) (bool, []string) {
+	deleted := !exp.ObjectMeta.DeletionTimestamp.IsZero()
+	pendingFinalizers := exp.GetFinalizers()
+	contained := false
+	for _, elem := range pendingFinalizers {
+		if elem == updatePrometheusMetrics {
+			contained = true
+			break
+		}
+	}
+
+	if !deleted && !contained {
+		finalizers := append(pendingFinalizers, updatePrometheusMetrics)
+		return true, finalizers
+	}
+	if deleted && contained {
+		finalizers := []string{}
+		for _, pendingFinalizer := range pendingFinalizers {
+			if pendingFinalizer != updatePrometheusMetrics {
+				finalizers = append(finalizers, pendingFinalizer)
+			}
+		}
+		return true, finalizers
+	}
+	return false, []string{}
+}
+
+func (r *ReconcileExperiment) updateFinalizers(instance *experimentsv1alpha3.Experiment, finalizers []string) (reconcile.Result, error) {
+	instance.SetFinalizers(finalizers)
+	if err := r.Update(context.TODO(), instance); err != nil {
+		return reconcile.Result{}, err
+	} else {
+		if !instance.ObjectMeta.DeletionTimestamp.IsZero() {
+			utilv1alpha3.IncreaseExperimentsDeletedCount()
+		} else {
+			utilv1alpha3.IncreaseExperimentsCreatedCount()
+		}
+		// Need to requeue because finalizer update does not change metadata.generation
+		return reconcile.Result{Requeue: true}, err
+	}
 }
