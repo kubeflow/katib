@@ -98,6 +98,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Tri
 
 			eventMsg := fmt.Sprintf("Job %s has succeeded", deployedJob.GetName())
 			r.recorder.Eventf(instance, corev1.EventTypeNormal, JobSucceededReason, eventMsg)
+			IncreaseTrialsSucceededCount()
 		} else {
 			msg := "Metrics are not available"
 			instance.MarkTrialStatusSucceeded(corev1.ConditionFalse, TrialMetricsUnavailableReason, msg)
@@ -113,6 +114,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Tri
 		jobConditionMessage := (*jobCondition).Message
 		eventMsg := fmt.Sprintf("Job %s has failed: %s", deployedJob.GetName(), jobConditionMessage)
 		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobFailedReason, eventMsg)
+		IncreaseTrialsFailedCount()
 	}
 	//else nothing to do
 	return
@@ -145,15 +147,23 @@ func (r *ReconcileTrial) UpdateTrialStatusObservation(instance *trialsv1alpha3.T
 }
 
 func (r *ReconcileTrial) updateFinalizers(instance *trialsv1alpha3.Trial, finalizers []string) (reconcile.Result, error) {
+	isDelete := true
 	if !instance.ObjectMeta.DeletionTimestamp.IsZero() {
 		if _, err := r.DeleteTrialObservationLog(instance); err != nil {
 			return reconcile.Result{}, err
 		}
+	} else {
+		isDelete = false
 	}
 	instance.SetFinalizers(finalizers)
 	if err := r.Update(context.TODO(), instance); err != nil {
 		return reconcile.Result{}, err
 	} else {
+		if isDelete {
+			IncreaseTrialsDeletedCount()
+		} else {
+			IncreaseTrialsCreatedCount()
+		}
 		// Need to requeue because finalizer update does not change metadata.generation
 		return reconcile.Result{Requeue: true}, err
 	}
