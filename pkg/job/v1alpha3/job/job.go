@@ -9,17 +9,14 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-
-	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 )
 
 var (
-	log = logf.Log.WithName(fmt.Sprintf("provider-%s", consts.JobKindJob))
+	log = logf.Log.WithName("provider-job")
 )
 
 // Job is the provider of Job kind.
-type Job struct {
-}
+type Job struct{}
 
 // GetDeployedJobStatus get the deployed job status.
 func (j Job) GetDeployedJobStatus(

@@ -3,7 +3,10 @@ package kubeflow
 import (
 	"fmt"
 
+	pytorchv1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1"
 	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
+	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -12,14 +15,8 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 )
 
-const (
-	PyTorchJobWorkerContainerName = "pytorch"
-
-	TFJobWorkerContainerName = "tensorflow"
-)
-
 var (
-	log = logf.Log.WithName(fmt.Sprintf("provider-%s", consts.JobKindJob))
+	log = logf.Log.WithName("provider-kubeflow")
 )
 
 // Kubeflow is the provider of Kubeflow kinds.
@@ -64,11 +61,11 @@ func (k Kubeflow) GetDeployedJobStatus(
 func (k Kubeflow) IsTrainingContainer(index int, c corev1.Container) bool {
 	switch k.Kind {
 	case consts.JobKindTF:
-		if c.Name == TFJobWorkerContainerName {
+		if c.Name == tfv1.DefaultContainerName {
 			return true
 		}
 	case consts.JobKindPyTorch:
-		if c.Name == PyTorchJobWorkerContainerName {
+		if c.Name == pytorchv1.DefaultContainerName {
 			return true
 		}
 	default:
