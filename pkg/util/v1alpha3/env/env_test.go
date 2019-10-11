@@ -1,4 +1,4 @@
-package common
+package env
 
 import (
 	"os"
@@ -8,13 +8,13 @@ import (
 func TestGetEnvWithDefault(t *testing.T) {
 	expected := "FAKE"
 	key := "TEST"
-	v := GetEnvWithDefault(key, expected)
+	v := GetEnvOrDefault(key, expected)
 	if v != expected {
 		t.Errorf("Expected %s, got %s", expected, v)
 	}
 	expected = "FAKE1"
 	os.Setenv(key, expected)
-	v = GetEnvWithDefault(key, "")
+	v = GetEnvOrDefault(key, "")
 	if v != expected {
 		t.Errorf("Expected %s, got %s", expected, v)
 	}

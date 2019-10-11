@@ -1,8 +1,6 @@
 package consts
 
-import (
-	"os"
-)
+import "github.com/kubeflow/katib/pkg/util/v1alpha3/env"
 
 const (
 	ConfigExperimentSuggestionName = "experiment-suggestion-name"
@@ -31,12 +29,5 @@ const (
 )
 
 var (
-	DefaultKatibNamespace = getEnvOrDefault(DefaultKatibNamespaceEnvName, "kubeflow")
+	DefaultKatibNamespace = env.GetEnvOrDefault(DefaultKatibNamespaceEnvName, "kubeflow")
 )
-
-func getEnvOrDefault(key string, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return fallback
-}

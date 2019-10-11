@@ -14,6 +14,7 @@ import (
 
 	v1alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 	"github.com/kubeflow/katib/pkg/db/v1alpha3/common"
+	"github.com/kubeflow/katib/pkg/util/v1alpha3/env"
 )
 
 const (
@@ -32,9 +33,9 @@ type dbConn struct {
 func getDbName() string {
 	dbPassEnvName := common.DBPasswordEnvName
 	dbPass := os.Getenv(dbPassEnvName)
-	dbHost := common.GetEnvWithDefault(
+	dbHost := env.GetEnvOrDefault(
 		common.MySQLDBHostEnvName, common.DefaultMySQLHost)
-	dbPort := common.GetEnvWithDefault(
+	dbPort := env.GetEnvOrDefault(
 		common.MySQLDBPortEnvName, common.DefaultMySQLPort)
 	return fmt.Sprintf(dbNameTmpl, dbPass, dbHost, dbPort)
 }
