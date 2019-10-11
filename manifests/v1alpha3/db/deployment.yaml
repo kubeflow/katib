@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: katib-db
-        image: mysql:8.0.3
+        image: mysql:8
         args:
         - --datadir
         - /var/lib/mysql/datadir
