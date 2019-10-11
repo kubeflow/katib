@@ -74,7 +74,6 @@ sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/tfevent-metrics-co
 
 # Katib manager
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-manager@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-manager:${VERSION}@" manifests/v1alpha3/manager/deployment.yaml
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-manager-rest@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-manager-rest:${VERSION}@" manifests/v1alpha3/manager-rest/deployment.yaml
 
 # UI
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-ui:${VERSION}@" manifests/v1alpha3/ui/deployment.yaml
@@ -152,7 +151,7 @@ if [ $? -ne 1 ]; then
   exit 1
 fi
 set -o errexit
-kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-manager | grep -v katib-manager-rest |sed -e "s@pods\/@@") 6789:6789 &
+kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-manager |sed -e "s@pods\/@@") 6789:6789 &
 echo "kubectl port-forward start"
 sleep 5
 TIMEOUT=120

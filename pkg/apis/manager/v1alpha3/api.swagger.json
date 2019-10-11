@@ -14,87 +14,7 @@
   "produces": [
     "application/json"
   ],
-  "paths": {
-    "/api/Manager/DeleteObservationLog/{trial_name}": {
-      "delete": {
-        "summary": "*\nDelete all log of Observations for a Trial.",
-        "operationId": "DeleteObservationLog",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/alpha3DeleteObservationLogReply"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "trial_name",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Manager"
-        ]
-      }
-    },
-    "/api/Manager/GetObservationLog": {
-      "post": {
-        "summary": "*\nGet all log of Observations for a Trial.",
-        "operationId": "GetObservationLog",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/alpha3GetObservationLogReply"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/alpha3GetObservationLogRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Manager"
-        ]
-      }
-    },
-    "/api/Manager/ReportObservationLog": {
-      "post": {
-        "summary": "* \nReport a log of Observations for a Trial.\nThe log consists of timestamp and value of metric.\nKatib store every log of metrics.\nYou can see accuracy curve or other metric logs on UI.",
-        "operationId": "ReportObservationLog",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/alpha3ReportObservationLogReply"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/alpha3ReportObservationLogRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Manager"
-        ]
-      }
-    }
-  },
+  "paths": {},
   "definitions": {
     "alpha3AlgorithmSetting": {
       "type": "object",
@@ -135,23 +55,6 @@
       "properties": {
         "observation_log": {
           "$ref": "#/definitions/alpha3ObservationLog"
-        }
-      }
-    },
-    "alpha3GetObservationLogRequest": {
-      "type": "object",
-      "properties": {
-        "trial_name": {
-          "type": "string"
-        },
-        "metric_name": {
-          "type": "string"
-        },
-        "start_time": {
-          "type": "string"
-        },
-        "end_time": {
-          "type": "string"
         }
       }
     },
@@ -226,17 +129,6 @@
     },
     "alpha3ReportObservationLogReply": {
       "type": "object"
-    },
-    "alpha3ReportObservationLogRequest": {
-      "type": "object",
-      "properties": {
-        "trial_name": {
-          "type": "string"
-        },
-        "observation_log": {
-          "$ref": "#/definitions/alpha3ObservationLog"
-        }
-      }
     },
     "alpha3ValidateAlgorithmSettingsReply": {
       "type": "object",

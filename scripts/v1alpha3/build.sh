@@ -50,7 +50,6 @@ echo "Registry: ${REGISTRY}, tag: ${TAG}, prefix: ${PREFIX}"
 echo "Building core image..."
 docker build -t ${REGISTRY}/${PREFIX}/katib-controller:${TAG} -f ${CMD_PREFIX}/katib-controller/v1alpha3/Dockerfile .
 docker build -t ${REGISTRY}/${PREFIX}/katib-manager:${TAG} -f ${CMD_PREFIX}/manager/v1alpha3/Dockerfile .
-docker build -t ${REGISTRY}/${PREFIX}/katib-manager-rest:${TAG} -f ${CMD_PREFIX}/manager-rest/v1alpha3/Dockerfile .
 
 echo "Building UI image..."
 docker build -t ${REGISTRY}/${PREFIX}/katib-ui:${TAG} -f ${CMD_PREFIX}/ui/v1alpha3/Dockerfile .
