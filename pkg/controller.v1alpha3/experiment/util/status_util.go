@@ -145,6 +145,7 @@ func UpdateExperimentStatusCondition(instance *experimentsv1alpha3.Experiment, i
 		msg := "Experiment has succeeded because Objective goal has reached"
 		instance.MarkExperimentStatusSucceeded(ExperimentSucceededReason, msg)
 		instance.Status.CompletionTime = &now
+		IncreaseExperimentsSucceededCount()
 		return
 	}
 
@@ -152,6 +153,7 @@ func UpdateExperimentStatusCondition(instance *experimentsv1alpha3.Experiment, i
 		msg := "Experiment has succeeded because max trial count has reached"
 		instance.MarkExperimentStatusSucceeded(ExperimentSucceededReason, msg)
 		instance.Status.CompletionTime = &now
+		IncreaseExperimentsSucceededCount()
 		return
 	}
 
@@ -159,6 +161,7 @@ func UpdateExperimentStatusCondition(instance *experimentsv1alpha3.Experiment, i
 		msg := "Experiment has succeeded because suggestion service has reached the end"
 		instance.MarkExperimentStatusSucceeded(ExperimentSucceededReason, msg)
 		instance.Status.CompletionTime = &now
+		IncreaseExperimentsSucceededCount()
 		return
 	}
 
@@ -166,6 +169,7 @@ func UpdateExperimentStatusCondition(instance *experimentsv1alpha3.Experiment, i
 		msg := "Experiment has failed because max failed count has reached"
 		instance.MarkExperimentStatusFailed(ExperimentFailedReason, msg)
 		instance.Status.CompletionTime = &now
+		IncreaseExperimentsFailedCount()
 		return
 	}
 
