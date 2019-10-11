@@ -8,7 +8,8 @@ from pkg.suggestion.v1alpha3.internal.trial import *
 logger = logging.getLogger("BaseHyperoptService")
 
 class BaseHyperoptService(object):
-    def __init__(self, algorithm_name="tpe"):
+    def __init__(self, algorithm_name="tpe", random_state=None):
+        self.random_state = random_state
         if algorithm_name == 'tpe':
             self.hyperopt_algorithm = hyperopt.tpe.suggest
         elif algorithm_name == 'random':
@@ -42,7 +43,7 @@ class BaseHyperoptService(object):
                 hyperopt_search_space[param.name] = hyperopt.hp.choice(
                     param.name, param.list)
          # New hyperopt variables
-        hyperopt_rstate = np.random.RandomState()
+        hyperopt_rstate = np.random.RandomState(self.random_state)
         hyperopt_domain = hyperopt.Domain(
             None, hyperopt_search_space, pass_expr_memo_ctrl=None)
 

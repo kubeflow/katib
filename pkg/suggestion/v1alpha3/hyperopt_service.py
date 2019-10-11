@@ -17,8 +17,10 @@ class HyperoptService(
         """
         Main function to provide suggestion.
         """
+        name, config = OptimizerConfiguration.convertAlgorithmSpec(
+            request.experiment.spec.algorithm)
         base_serice = BaseHyperoptService(
-            algorithm_name=request.experiment.spec.algorithm.algorithm_name)
+            algorithm_name=name, random_state=config.random_state)
         search_space = HyperParameterSearchSpace.convert(request.experiment)
         trials = Trial.convert(request.trials)
         new_assignments = base_serice.getSuggestions(
@@ -26,3 +28,16 @@ class HyperoptService(
         return api_pb2.GetSuggestionsReply(
             parameter_assignments=Assignment.generate(new_assignments)
         )
+
+
+class OptimizerConfiguration(object):
+    def __init__(self, random_state=None):
+        self.random_state = random_state
+
+    @staticmethod
+    def convertAlgorithmSpec(algorithm_spec):
+        optmizer = OptimizerConfiguration()
+        for s in algorithm_spec.algorithm_setting:
+            if s.name == "random_state":
+                optmizer.random_state = int(s.value)
+        return algorithm_spec.algorithm_name, optmizer
