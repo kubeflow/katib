@@ -56,7 +56,7 @@ cd ${GO_DIR}/test/e2e/v1alpha3
 
 echo "Running e2e pytorchjob random experiment"
 export KUBECONFIG=$HOME/.kube/config
-go run run-e2e-experiment.go ../../../examples/v1alpha3/pytorchjob-example.yaml
+./run-e2e-experiment ../../../examples/v1alpha3/pytorchjob-example.yaml
 kubectl -n kubeflow describe suggestion
 kubectl -n kubeflow delete experiment pytorchjob-example
 kubectl describe pods
