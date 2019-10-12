@@ -20,11 +20,9 @@ import (
 	"fmt"
 	"strconv"
 
-	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	commonv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
@@ -36,56 +34,6 @@ import (
 const (
 	cleanMetricsFinalizer = "clean-metrics-in-db"
 )
-
-func (r *ReconcileTrial) GetDeployedJobStatus(deployedJob *unstructured.Unstructured) (*commonv1.JobCondition, error) {
-	jobCondition := commonv1.JobCondition{}
-	jobCondition.Type = commonv1.JobRunning
-	kind := deployedJob.GetKind()
-	status, ok, unerr := unstructured.NestedFieldCopy(deployedJob.Object, "status")
-
-	if ok {
-		statusMap := status.(map[string]interface{})
-		switch kind {
-
-		case DefaultJobKind:
-			jobStatus := batchv1.JobStatus{}
-			err := runtime.DefaultUnstructuredConverter.FromUnstructured(statusMap, &jobStatus)
-			if err != nil {
-				log.Error(err, "Convert unstructured to status error")
-				return nil, err
-			}
-			for _, cond := range jobStatus.Conditions {
-				if cond.Type == batchv1.JobComplete && cond.Status == corev1.ConditionTrue {
-					jobCondition.Type = commonv1.JobSucceeded
-					//  JobConditions message not populated when succeeded for batchv1 Job
-					break
-				}
-				if cond.Type == batchv1.JobFailed && cond.Status == corev1.ConditionTrue {
-					jobCondition.Type = commonv1.JobFailed
-					jobCondition.Message = cond.Message
-					break
-				}
-			}
-		default:
-			jobStatus := commonv1.JobStatus{}
-			err := runtime.DefaultUnstructuredConverter.FromUnstructured(statusMap, &jobStatus)
-
-			if err != nil {
-				log.Error(err, "Convert unstructured to status error")
-				return nil, err
-			}
-			if len(jobStatus.Conditions) > 0 {
-				lc := jobStatus.Conditions[len(jobStatus.Conditions)-1]
-				jobCondition.Type = lc.Type
-				jobCondition.Message = lc.Message
-			}
-		}
-	} else if unerr != nil {
-		log.Error(unerr, "NestedFieldCopy unstructured to status error")
-		return nil, unerr
-	}
-	return &jobCondition, nil
-}
 
 func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Trial, deployedJob *unstructured.Unstructured, jobCondition *commonv1.JobCondition) {
 	now := metav1.Now()

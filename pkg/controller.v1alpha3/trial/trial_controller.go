@@ -43,11 +43,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
-	commonv1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/trial/managerclient"
+	jobv1alpha3 "github.com/kubeflow/katib/pkg/job/v1alpha3"
 )
 
 const (
+	// ControllerName is the controller name.
 	ControllerName = "trial-controller"
 )
 
@@ -107,7 +108,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	for _, gvk := range commonv1alpha3.GetSupportedJobList() {
+	for _, gvk := range jobv1alpha3.GetSupportedJobList() {
 		unstructuredJob := &unstructured.Unstructured{}
 		unstructuredJob.SetGroupVersionKind(gvk)
 		err = c.Watch(
@@ -218,9 +219,15 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha3.Trial) error {
 	// Job already exists
 	// TODO Can desired Spec differ from deployedSpec?
 	if deployedJob != nil {
-		jobCondition, err := r.GetDeployedJobStatus(deployedJob)
+		kind := deployedJob.GetKind()
+		jobProvider, err := jobv1alpha3.New(kind)
 		if err != nil {
-			logger.Error(err, "Get deployed status  error")
+			logger.Error(err, "Failed to create the provider")
+			return err
+		}
+		jobCondition, err := jobProvider.GetDeployedJobStatus(deployedJob)
+		if err != nil {
+			logger.Error(err, "Get deployed status error")
 			return err
 		}
 
