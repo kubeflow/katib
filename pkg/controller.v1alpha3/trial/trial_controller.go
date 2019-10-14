@@ -185,7 +185,8 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 		if err != nil {
 			logger.Error(err, "Reconcile trial error")
 			r.recorder.Eventf(instance,
-				corev1.EventTypeWarning, ReconcileFailedReason, err.Error())
+				corev1.EventTypeWarning, ReconcileFailedReason,
+				"Failed to reconcile: %v", err)
 			return reconcile.Result{}, err
 		}
 	}
