@@ -21,11 +21,13 @@ import (
 	"sort"
 
 	"github.com/spf13/viper"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -44,12 +46,14 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/util"
 )
 
-var log = logf.Log.WithName("experiment-controller")
+const (
+	// ControllerName is the controller name.
+	ControllerName = "experiment-controller"
+)
 
-/**
-* USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
-* business logic.  Delete these comments after modifying this file.*
- */
+var (
+	log = logf.Log.WithName(ControllerName)
+)
 
 // Add creates a new Experiment Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -60,8 +64,9 @@ func Add(mgr manager.Manager) error {
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	r := &ReconcileExperiment{
-		Client: mgr.GetClient(),
-		scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		scheme:   mgr.GetScheme(),
+		recorder: mgr.GetRecorder(ControllerName),
 	}
 	imp := viper.GetString(consts.ConfigExperimentSuggestionName)
 	r.Suggestion = newSuggestion(imp, mgr.GetScheme(), mgr.GetClient())
@@ -147,7 +152,8 @@ var _ reconcile.Reconciler = &ReconcileExperiment{}
 // ReconcileExperiment reconciles a Experiment object
 type ReconcileExperiment struct {
 	client.Client
-	scheme *runtime.Scheme
+	scheme   *runtime.Scheme
+	recorder record.EventRecorder
 
 	suggestion.Suggestion
 	manifest.Generator
@@ -181,9 +187,7 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 
 	if instance.IsCompleted() && !instance.HasRunningTrials() {
-
 		return reconcile.Result{}, nil
-
 	}
 	if !instance.IsCreated() {
 		if instance.Status.StartTime == nil {
@@ -199,6 +203,9 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		err := r.ReconcileExperiment(instance)
 		if err != nil {
 			logger.Error(err, "Reconcile experiment error")
+			r.recorder.Eventf(instance,
+				corev1.EventTypeWarning, ReconcileFailedReason,
+				"Failed to reconcile: %v", err)
 			return reconcile.Result{}, err
 		}
 	}
