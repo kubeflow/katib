@@ -20,31 +20,17 @@ service Manager {
      * Katib store every log of metrics.
      * You can see accuracy curve or other metric logs on UI.
      */
-    rpc ReportObservationLog(ReportObservationLogRequest) returns (ReportObservationLogReply){
-        option (google.api.http) = {
-            post: "/api/Manager/ReportObservationLog"
-            body: "*"
-        };
-    };
+    rpc ReportObservationLog(ReportObservationLogRequest) returns (ReportObservationLogReply);
 
     /**
      * Get all log of Observations for a Trial.
      */
-    rpc GetObservationLog(GetObservationLogRequest) returns (GetObservationLogReply){
-        option (google.api.http) = {
-            post: "/api/Manager/GetObservationLog"
-            body: "*"
-            };
-    };
+    rpc GetObservationLog(GetObservationLogRequest) returns (GetObservationLogReply);
 
     /**
      * Delete all log of Observations for a Trial.
      */
-    rpc DeleteObservationLog(DeleteObservationLogRequest) returns (DeleteObservationLogReply){
-        option (google.api.http) = {
-            delete: "/api/Manager/DeleteObservationLog/{trial_name}"
-            };
-    };
+    rpc DeleteObservationLog(DeleteObservationLogRequest) returns (DeleteObservationLogReply);
 }
 
 service Suggestion {

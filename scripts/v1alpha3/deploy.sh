@@ -25,7 +25,6 @@ cd ${SCRIPT_ROOT}
 kubectl apply -f manifests/v1alpha3
 kubectl apply -f manifests/v1alpha3/katib-controller
 kubectl apply -f manifests/v1alpha3/manager
-kubectl apply -f manifests/v1alpha3/manager-rest
 kubectl apply -f manifests/v1alpha3/pv
 kubectl apply -f manifests/v1alpha3/db
 kubectl apply -f manifests/v1alpha3/ui

@@ -220,10 +220,6 @@
                     template: "build-manager",
                   },
                   {
-                    name: "build-manager-rest",
-                    template: "build-manager-rest",
-                  },
-                  {
                     name: "build-katib-controller",
                     template: "build-katib-controller",
                   },
@@ -404,9 +400,6 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
               "test/scripts/v1alpha3/build-manager.sh",
             ]),  // build-manager
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-manager-rest", testWorkerImage, [
-              "test/scripts/v1alpha3/build-manager-rest.sh",
-            ]),  // build-manager-rest
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-katib-controller", testWorkerImage, [
               "test/scripts/v1alpha3/build-katib-controller.sh",
             ]),  // build-katib-controller

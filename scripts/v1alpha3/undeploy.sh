@@ -33,7 +33,6 @@ SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 cd ${SCRIPT_ROOT}
 kubectl delete -f manifests/v1alpha3/katib-controller
 kubectl delete -f manifests/v1alpha3/manager
-kubectl delete -f manifests/v1alpha3/manager-rest
 kubectl delete -f manifests/v1alpha3/db
 kubectl delete -f manifests/v1alpha3/ui
 kubectl delete -f manifests/v1alpha3/pv
