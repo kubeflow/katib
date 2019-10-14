@@ -17,4 +17,5 @@ const (
 	JobSucceededReason          = "JobSucceeded"
 	JobMetricsUnavailableReason = "MetricsUnavailable"
 	JobFailedReason             = "JobFailed"
+	ReconcileFailedReason       = "ReconcileFailed"
 )
