@@ -144,7 +144,7 @@ You should get the output:
 
 Or you could get the result in UI: `<Katib-URL>/katib/#/katib/hp_monitor/kubeflow/quick-start-example`.
 
-TODO: UI
+![](./images/quickstart.png)
 
 <!-- ## Hyperparameter Tuning with Distributed Training on MNIST -->
 
