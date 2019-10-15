@@ -9,7 +9,8 @@ spec:
   maxFailedTrialCount: 3
   objective:
     type: maximize
-    goal: 0.99
+    # It is a hack to show the functionality of katib, in production we can use 1.
+    goal: 1.1
     objectiveMetricName: accuracy_1
   algorithm:
     algorithmName: random
