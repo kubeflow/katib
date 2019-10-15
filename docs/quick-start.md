@@ -146,6 +146,10 @@ Or you could get the result in UI: `<Katib-URL>/katib/#/katib/hp_monitor/kubeflo
 
 ![](./images/quickstart.png)
 
+When you click the trial name, you should get the details about metrics:
+
+![](./images/quickstart-trial.png)
+
 <!-- ## Hyperparameter Tuning with Distributed Training on MNIST -->
 
 [1]: https://en.wikipedia.org/wiki/Hyperparameter_optimization
