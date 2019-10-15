@@ -222,6 +222,7 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	return reconcile.Result{}, nil
 }
 
+// ReconcileExperiment is the main reconcile loop.
 func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha3.Experiment) error {
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	trials := &trialsv1alpha3.TrialList{}
@@ -246,6 +247,7 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha3.
 	return nil
 }
 
+// ReconcileTrials syncs trials.
 func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha3.Experiment, trials []trialsv1alpha3.Trial) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
@@ -282,6 +284,13 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha3.Expe
 				*instance.Spec.MaxTrialCount, "CompletedCount", completedCount)
 			addCount = 0
 		}
+
+		logger.Info("Statistics",
+			"requiredActiveCount", requiredActiveCount,
+			"parallelCount", parallelCount,
+			"activeCount", activeCount,
+			"completedCount", completedCount,
+		)
 
 		//skip if no trials need to be created
 		if addCount > 0 {
@@ -336,6 +345,7 @@ func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha3.Experim
 	return nil
 }
 
+// ReconcileSuggestions gets or creates the suggestion if needed.
 func (r *ReconcileExperiment) ReconcileSuggestions(instance *experimentsv1alpha3.Experiment, currentCount, addCount int32) ([]suggestionsv1alpha3.TrialAssignment, error) {
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	var assignments []suggestionsv1alpha3.TrialAssignment

@@ -156,9 +156,9 @@ func getBestObjectiveMetricValue(metricLogs []*api_pb.MetricLog, objectiveType c
 		return nil
 	}
 
-	bestObjectiveValue, _ := strconv.ParseFloat(metricLogs[0].Metric.Value, 32)
+	bestObjectiveValue, _ := strconv.ParseFloat(metricLogs[0].Metric.Value, 64)
 	for _, metricLog := range metricLogs[1:] {
-		objectiveMetricValue, _ := strconv.ParseFloat(metricLog.Metric.Value, 32)
+		objectiveMetricValue, _ := strconv.ParseFloat(metricLog.Metric.Value, 64)
 		if objectiveType == commonv1alpha3.ObjectiveTypeMinimize {
 			if objectiveMetricValue < bestObjectiveValue {
 				bestObjectiveValue = objectiveMetricValue
