@@ -58,8 +58,7 @@ class MetricsCollector:
             try:
                 self.logger.info(f + " will be parsed.")
                 mls = self.parser.parse_summary(f, self.metrics)
-            except Exception, e:
+            except Exception as e:
                 self.logger.warning("Unexpected error: "+ str(e))
                 continue
         return api_pb2.ObservationLog(metric_logs=mls)
- 
