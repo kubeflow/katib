@@ -97,7 +97,7 @@ Each component communicates with others via GRPC and the API is defined at `pkg/
 
 ## Getting Started
 
-Please see [here](./examples/v1alpha3/README.md) for more details.
+Please see [here](./docs/quick-start.md) for more details.
 
 ## Web UI
 
