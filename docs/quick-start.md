@@ -45,7 +45,7 @@ apiVersion: "kubeflow.org/v1alpha3"
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: quick-start-example
+  name: tfjob-example
 spec:
   parallelTrialCount: 3
   maxTrialCount: 12
@@ -77,26 +77,31 @@ spec:
   trialTemplate:
     goTemplate:
         rawTemplate: |-
-          apiVersion: batch/v1
-          kind: Job
+          apiVersion: "kubeflow.org/v1"
+          kind: TFJob
           metadata:
             name: {{.Trial}}
             namespace: {{.NameSpace}}
           spec:
-            template:
-              spec:
-                containers:
-                - name: {{.Trial}}
-                  image: gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0
-                  command:
-                  - "python"
-                  - "/var/tf_mnist/mnist_with_summaries.py"
-                  - "--log_dir=/train/metrics"
-                  {{- with .HyperParameters}}
-                  {{- range .}}
-                  - "{{.Name}}={{.Value}}"
-                  {{- end}}
-                  {{- end}}
+           tfReplicaSpecs:
+            Worker:
+              replicas: 1 
+              restartPolicy: OnFailure
+              template:
+                spec:
+                  containers:
+                    - name: tensorflow 
+                      image: gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0
+                      imagePullPolicy: Always
+                      command:
+                        - "python"
+                        - "/var/tf_mnist/mnist_with_summaries.py"
+                        - "--log_dir=/train/metrics"
+                        {{- with .HyperParameters}}
+                        {{- range .}}
+                        - "{{.Name}}={{.Value}}"
+                        {{- end}}
+                        {{- end}}
 ```
 
 The experiment has two hyperparameters defined in `parameters`： `--learning_rate` and `--batch_size`. We decide to use random search algorithm, and collect metrics from the TF Events.
@@ -106,7 +111,7 @@ The experiment has two hyperparameters defined in `parameters`： `--learning_ra
 Or you could just run:
 
 ```bash
-kubectl apply -f ./examples/v1alpha3/quick-start-example.yaml
+kubectl apply -f ./examples/v1alpha3/tfjob-example.yaml
 ```
 
 ### Get trial results
