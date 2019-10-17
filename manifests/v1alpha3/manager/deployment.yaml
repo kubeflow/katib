@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: katib-manager
@@ -8,6 +8,10 @@ metadata:
     component: manager
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+        app: katib
+        component: manager
   template:
     metadata:
       name: katib-manager
