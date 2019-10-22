@@ -22,6 +22,7 @@ REGISTRY="gcr.io/kubeflow-images-public"
 TAG="latest"
 PREFIX="katib/v1alpha3"
 CMD_PREFIX="cmd"
+MACHINE_ARCH=`uname -m`
 
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
@@ -58,11 +59,19 @@ echo "Building file metrics collector image..."
 docker build -t ${REGISTRY}/${PREFIX}/file-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/v1alpha3/file-metricscollector/Dockerfile .
 
 echo "Building TF Event metrics collector image..."
-docker build -t ${REGISTRY}/${PREFIX}/tfevent-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/v1alpha3/tfevent-metricscollector/Dockerfile .
+if [ $MACHINE_ARCH == "aarch64" ]; then
+        docker build -t ${REGISTRY}/${PREFIX}/tfevent-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/v1alpha3/tfevent-metricscollector/Dockerfile.aarch64 .
+else
+        docker build -t ${REGISTRY}/${PREFIX}/tfevent-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/v1alpha3/tfevent-metricscollector/Dockerfile .
+fi
 
 echo "Building suggestion images..."
 docker build -t ${REGISTRY}/${PREFIX}/suggestion-hyperopt:${TAG} -f ${CMD_PREFIX}/suggestion/hyperopt/v1alpha3/Dockerfile .
 docker build -t ${REGISTRY}/${PREFIX}/suggestion-skopt:${TAG} -f ${CMD_PREFIX}/suggestion/skopt/v1alpha3/Dockerfile .
 docker build -t ${REGISTRY}/${PREFIX}/suggestion-chocolate:${TAG} -f ${CMD_PREFIX}/suggestion/chocolate/v1alpha3/Dockerfile .
-docker build -t ${REGISTRY}/${PREFIX}/suggestion-nasrl:${TAG} -f ${CMD_PREFIX}/suggestion/nasrl/v1alpha3/Dockerfile .
+if [ $MACHINE_ARCH == "aarch64" ]; then
+	docker build -t ${REGISTRY}/${PREFIX}/suggestion-nasrl:${TAG} -f ${CMD_PREFIX}/suggestion/nasrl/v1alpha3/Dockerfile.aarch64 .
+else
+	docker build -t ${REGISTRY}/${PREFIX}/suggestion-nasrl:${TAG} -f ${CMD_PREFIX}/suggestion/nasrl/v1alpha3/Dockerfile .
+fi
 docker build -t ${REGISTRY}/${PREFIX}/suggestion-hyperband:${TAG} -f ${CMD_PREFIX}/suggestion/hyperband/v1alpha3/Dockerfile .
