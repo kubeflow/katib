@@ -2,7 +2,7 @@ FROM python:3
 
 ADD . /usr/src/app/github.com/kubeflow/katib
 WORKDIR /usr/src/app/github.com/kubeflow/katib/cmd/suggestion/hyperband/v1alpha2
-RUN if [ "$(uname -m)" = "ppc64le" ]; then \
+RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
         apt-get -y update && \
         apt-get -y install gfortran libopenblas-dev liblapack-dev && \
         pip install cython; \

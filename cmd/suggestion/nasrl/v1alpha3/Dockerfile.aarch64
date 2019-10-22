@@ -12,19 +12,39 @@ RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
             chmod +x /bin/grpc_health_probe; \
     fi
 
-FROM python:3
+FROM python:3.7-slim-buster
 
-RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
-        apt-get -y update && \
-        apt-get -y install gfortran libopenblas-dev liblapack-dev && \
-        pip install cython 'numpy>=1.13.3'; \
-    fi
+RUN apt-get update \
+    && apt-get -y install software-properties-common \
+	autoconf \
+	automake \
+	build-essential \
+	cmake \
+	libtool \
+	pkg-config \
+	wget \
+	gfortran \
+	libopenblas-dev \
+	liblapack-dev \
+	libhdf5-dev \
+	libhdf5-serial-dev \
+	hdf5-tools \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install cython numpy
+
+RUN wget https://github.com/lhelontra/tensorflow-on-arm/releases/download/v1.14.0-buster/tensorflow-1.14.0-cp37-none-linux_aarch64.whl \
+    && pip install tensorflow-1.14.0-cp37-none-linux_aarch64.whl \
+    && rm tensorflow-1.14.0-cp37-none-linux_aarch64.whl \
+    && rm -rf .cache
+
+RUN pip install 'grpcio==1.23.0' 'protobuf==3.9.1' 'googleapis-common-protos==1.6.0'
 
 COPY --from=build-env /bin/grpc_health_probe /bin/
 
 ADD . /usr/src/app/github.com/kubeflow/katib
-WORKDIR /usr/src/app/github.com/kubeflow/katib/cmd/suggestion/chocolate/v1alpha3
-RUN pip install --no-cache-dir -r requirements.txt
+WORKDIR /usr/src/app/github.com/kubeflow/katib/cmd/suggestion/nasrl/v1alpha3
 
 ENV PYTHONPATH /usr/src/app/github.com/kubeflow/katib:/usr/src/app/github.com/kubeflow/katib/pkg/apis/manager/v1alpha3/python:/usr/src/app/github.com/kubeflow/katib/pkg/apis/manager/health/python
 
