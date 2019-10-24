@@ -46,10 +46,13 @@ func (k Kubeflow) GetDeployedJobStatus(
 		log.Error(err, "Convert unstructured to status error")
 		return nil, err
 	}
+	// Get the latest condition and set it to jobCondition.
 	if len(jobStatus.Conditions) > 0 {
 		lc := jobStatus.Conditions[len(jobStatus.Conditions)-1]
 		jobCondition.Type = lc.Type
 		jobCondition.Message = lc.Message
+		jobCondition.Status = lc.Status
+		jobCondition.Reason = lc.Reason
 	}
 
 	return &jobCondition, nil

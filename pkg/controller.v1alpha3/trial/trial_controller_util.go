@@ -63,8 +63,17 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Tri
 		eventMsg := fmt.Sprintf("Job %s has failed: %s", deployedJob.GetName(), jobConditionMessage)
 		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobFailedReason, eventMsg)
 		IncreaseTrialsFailedCount()
+	} else if jobConditionType == commonv1.JobRunning {
+		msg := "Trial is running"
+		instance.MarkTrialStatusRunning(TrialRunningReason, msg)
+		jobConditionMessage := (*jobCondition).Message
+		eventMsg := fmt.Sprintf("Job %s is running: %s",
+			deployedJob.GetName(), jobConditionMessage)
+		r.recorder.Eventf(instance, corev1.EventTypeNormal,
+			JobRunningReason, eventMsg)
+		// TODO(gaocegege): Should we maintain a TrialsRunningCount?
 	}
-	//else nothing to do
+	// else nothing to do
 	return
 }
 
