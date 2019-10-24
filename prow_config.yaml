@@ -103,6 +103,7 @@ workflows:
     - pkg/earlystopping/v1alpha3/*
     - pkg/manager/v1alpha3/*
     - pkg/manager/modelstore/*
+    - pkg/job/v1alpha3/*
     - pkg/suggestion/v1alpha3/*
     - pkg/ui/v1alpha3/*
     - pkg/webhook/v1alpha3/*
@@ -147,6 +148,7 @@ workflows:
     - pkg/earlystopping/v1alpha3/*
     - pkg/manager/v1alpha3/*
     - pkg/manager/modelstore/*
+    - pkg/job/v1alpha3/*
     - pkg/suggestion/v1alpha3/*
     - pkg/ui/v1alpha3/*
     - pkg/webhook/v1alpha3/*
