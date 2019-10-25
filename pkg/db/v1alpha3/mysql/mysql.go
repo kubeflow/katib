@@ -14,12 +14,11 @@ import (
 
 	v1alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 	"github.com/kubeflow/katib/pkg/db/v1alpha3/common"
-	"github.com/kubeflow/katib/pkg/util/v1alpha3/env"
 )
 
 const (
 	dbDriver     = "mysql"
-	dbNameTmpl   = "root:%s@tcp(%s:%s)/katib?timeout=5s"
+	dbNameTmpl   = "root:%s@tcp(katib-db:3306)/katib?timeout=5s"
 	mysqlTimeFmt = "2006-01-02 15:04:05.999999"
 
 	connectInterval = 5 * time.Second
@@ -33,11 +32,7 @@ type dbConn struct {
 func getDbName() string {
 	dbPassEnvName := common.DBPasswordEnvName
 	dbPass := os.Getenv(dbPassEnvName)
-	dbHost := env.GetEnvOrDefault(
-		common.MySQLDBHostEnvName, common.DefaultMySQLHost)
-	dbPort := env.GetEnvOrDefault(
-		common.MySQLDBPortEnvName, common.DefaultMySQLPort)
-	return fmt.Sprintf(dbNameTmpl, dbPass, dbHost, dbPort)
+	return fmt.Sprintf(dbNameTmpl, dbPass)
 }
 
 func openSQLConn(driverName string, dataSourceName string, interval time.Duration,
