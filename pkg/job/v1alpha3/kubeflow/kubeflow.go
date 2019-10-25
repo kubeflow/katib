@@ -1,8 +1,6 @@
 package kubeflow
 
 import (
-	"fmt"
-
 	pytorchv1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1"
 	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
@@ -36,9 +34,9 @@ func (k Kubeflow) GetDeployedJobStatus(
 			log.Error(unerr, "NestedFieldCopy unstructured to status error")
 			return nil, unerr
 		}
-		err := fmt.Errorf("value is missing")
-		log.Error(err, "NestedFieldCopy unstructured to status error")
-		return nil, err
+		log.Info("NestedFieldCopy unstructured to status error",
+			"err", "Status is not found in job")
+		return &jobCondition, nil
 	}
 
 	statusMap := status.(map[string]interface{})
