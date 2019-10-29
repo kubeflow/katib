@@ -14,7 +14,7 @@ def GetOtherMainProcesses():
     pids.add(pid)
   return pids
 
-def WaitPIDs(pids, poll_interval_seconds=1, timeout_seconds=0, is_wait_all=False):
+def WaitPIDs(pids, poll_interval_seconds=1, timeout_seconds=0, is_wait_all=False, completed_marked_dir=""):
   start = 0
   pids = set(pids)
   if poll_interval_seconds <= 0:
@@ -26,6 +26,12 @@ def WaitPIDs(pids, poll_interval_seconds=1, timeout_seconds=0, is_wait_all=False
       if os.path.isdir(path):
         continue
       else:
+        if completed_marked_dir:
+          mark_file = os.path.join(completed_marked_dir, "%d.pid" % pid)
+          with open(mark_file) as file_obj:
+            contents = file_obj.read()
+            if contents.strip() != "completed":
+              raise Exception("Pid %d hadn't completed" % pid)
         if is_wait_all:
           stop_pids.add(pid)
         else:
@@ -35,5 +41,5 @@ def WaitPIDs(pids, poll_interval_seconds=1, timeout_seconds=0, is_wait_all=False
     time.sleep(poll_interval_seconds)
     start = start + poll_interval_seconds
 
-def WaitOtherMainProcesses(poll_interval_seconds=1, timeout_seconds=0, is_wait_all=False):
-  return WaitPIDs(GetOtherMainProcesses(), poll_interval_seconds, timeout_seconds, is_wait_all)
+def WaitOtherMainProcesses(poll_interval_seconds=1, timeout_seconds=0, is_wait_all=False, completed_marked_dir=""):
+  return WaitPIDs(GetOtherMainProcesses(), poll_interval_seconds, timeout_seconds, is_wait_all, completed_marked_dir)
