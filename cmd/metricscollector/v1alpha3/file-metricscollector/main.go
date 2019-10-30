@@ -41,6 +41,7 @@ import (
 	"context"
 	"flag"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/hpcloud/tail"
@@ -84,9 +85,10 @@ func main() {
 
 	go printMetricsFile(*metricsFileName)
 	wopts := common.WaitPidsOpts{
-		PollInterval: *pollInterval,
-		Timeout:      *timeout,
-		WaitAll:      *waitAll,
+		PollInterval:           *pollInterval,
+		Timeout:                *timeout,
+		WaitAll:                *waitAll,
+		CompletedMarkedDirPath: filepath.Dir(*metricsFileName),
 	}
 	if err := common.Wait(wopts); err != nil {
 		klog.Fatalf("Failed to wait for worker container: %v", err)

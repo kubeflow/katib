@@ -23,4 +23,6 @@ const (
 
 	MetricCollectorContainerName       = "metrics-collector"
 	MetricLoggerCollectorContainerName = "metrics-logger-and-collector"
+
+	TrainingCompleted = "completed"
 )
