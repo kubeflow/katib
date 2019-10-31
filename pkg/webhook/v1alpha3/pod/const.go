@@ -17,9 +17,6 @@ limitations under the License.
 package pod
 
 const (
-	MasterRole                   = "master"
-	MetricsCollectorSidecar      = "metrics-collector-sidecar"
-	MetricsCollectorSidecarImage = "image"
-
-	BatchJob = "Job"
+	MasterRole = "master"
+	BatchJob   = "Job"
 )

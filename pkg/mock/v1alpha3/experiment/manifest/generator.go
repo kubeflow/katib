@@ -65,6 +65,21 @@ func (mr *MockGeneratorMockRecorder) GetRunSpecWithHyperParameters(arg0, arg1, a
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRunSpecWithHyperParameters", reflect.TypeOf((*MockGenerator)(nil).GetRunSpecWithHyperParameters), arg0, arg1, arg2, arg3, arg4)
 }
 
+// GetSuggestionContainerImage mocks base method
+func (m *MockGenerator) GetSuggestionContainerImage(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSuggestionContainerImage", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSuggestionContainerImage indicates an expected call of GetSuggestionContainerImage
+func (mr *MockGeneratorMockRecorder) GetSuggestionContainerImage(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestionContainerImage", reflect.TypeOf((*MockGenerator)(nil).GetSuggestionContainerImage), arg0)
+}
+
 // InjectClient mocks base method
 func (m *MockGenerator) InjectClient(arg0 client.Client) {
 	m.ctrl.T.Helper()
