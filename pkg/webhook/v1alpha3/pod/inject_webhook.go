@@ -137,17 +137,46 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		return nil, err
 	}
 
+	injectContainer, err := s.getMetricsCollectorContainer(trial)
+	if err != nil {
+		return nil, err
+	}
+	mutatedPod.Spec.Containers = append(mutatedPod.Spec.Containers, *injectContainer)
+
+	mutatedPod.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
+	mutatedPod.Spec.ShareProcessNamespace = pointer.BoolPtr(true)
+
+	mountPath, pathKind := getMountPath(trial.Spec.MetricsCollector)
+	if mountPath != "" {
+		if err = mutateVolume(mutatedPod, kind, mountPath, injectContainer.Name, pathKind); err != nil {
+			return nil, err
+		}
+	}
+	if needWrapWorkerContainer(trial.Spec.MetricsCollector) {
+		if err = wrapWorkerContainer(mutatedPod, kind, mountPath, pathKind, trial.Spec.MetricsCollector); err != nil {
+			return nil, err
+		}
+	}
+
+	log.Info("Inject metrics collector sidecar container", "Pod", pod.Name, "Trial", trialName)
+	return mutatedPod, nil
+}
+
+func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1alpha3.Trial) (*v1.Container, error) {
+	mc := trial.Spec.MetricsCollector
+	if mc.Collector.Kind == common.CustomCollector {
+		return mc.Collector.CustomCollector, nil
+	}
 	metricName := trial.Spec.Objective.ObjectiveMetricName
 	for _, v := range trial.Spec.Objective.AdditionalMetricNames {
 		metricName += ";"
 		metricName += v
 	}
-
-	image, err := katibconfig.GetMetricsCollectorImage(trial.Spec.MetricsCollector.Collector.Kind, s.client)
+	image, err := katibconfig.GetMetricsCollectorImage(mc.Collector.Kind, s.client)
 	if err != nil {
 		return nil, err
 	}
-	args := getMetricsCollectorArgs(trialName, metricName, trial.Spec.MetricsCollector)
+	args := getMetricsCollectorArgs(trial.Name, metricName, mc)
 	sidecarContainerName := getSidecarContainerName(trial.Spec.MetricsCollector.Collector.Kind)
 	injectContainer := v1.Container{
 		Name:            sidecarContainerName,
@@ -155,23 +184,7 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		Args:            args,
 		ImagePullPolicy: v1.PullIfNotPresent,
 	}
-	mutatedPod.Spec.Containers = append(mutatedPod.Spec.Containers, injectContainer)
-	mutatedPod.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
-	mutatedPod.Spec.ShareProcessNamespace = pointer.BoolPtr(true)
-
-	if mountPath, pathKind := getMountPath(trial.Spec.MetricsCollector); mountPath != "" {
-		if err = wrapWorkerContainer(
-			mutatedPod, kind, mountPath, pathKind, trial.Spec.MetricsCollector); err != nil {
-			return nil, err
-		}
-		if err = mutateVolume(mutatedPod, kind, mountPath, sidecarContainerName, pathKind); err != nil {
-			return nil, err
-		}
-	}
-
-	log.Info("Inject metrics collector sidecar container", "Pod", pod.Name, "Trial", trialName)
-
-	return mutatedPod, nil
+	return &injectContainer, nil
 }
 
 func getMetricsCollectorArgs(trialName, metricName string, mc common.MetricsCollectorSpec) []string {
@@ -189,9 +202,24 @@ func getMountPath(mc common.MetricsCollectorSpec) (string, common.FileSystemKind
 		return mc.Source.FileSystemPath.Path, common.FileKind
 	} else if mc.Collector.Kind == common.TfEventCollector {
 		return mc.Source.FileSystemPath.Path, common.DirectoryKind
+	} else if mc.Collector.Kind == common.CustomCollector {
+		if mc.Source == nil || mc.Source.FileSystemPath == nil {
+			return "", common.InvalidKind
+		}
+		return mc.Source.FileSystemPath.Path, mc.Source.FileSystemPath.Kind
 	} else {
 		return "", common.InvalidKind
 	}
+}
+
+func needWrapWorkerContainer(mc common.MetricsCollectorSpec) bool {
+	mcKind := mc.Collector.Kind
+	for _, kind := range NeedWrapWorkerMetricsCollecterList {
+		if mcKind == kind {
+			return true
+		}
+	}
+	return false
 }
 
 func wrapWorkerContainer(

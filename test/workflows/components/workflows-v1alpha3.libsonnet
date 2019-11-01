@@ -282,6 +282,10 @@
                     template: "run-file-metricscollector-e2e-tests",
                   },
                   {
+                    name: "run-custom-metricscollector-e2e-tests",
+                    template: "run-custom-metricscollector-e2e-tests",
+                  },
+                  {
                     name: "run-bayesian-e2e-tests",
                     template: "run-bayesian-e2e-tests",
                   },
@@ -378,6 +382,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-file-metricscollector-e2e-tests", testWorkerImage, [
               "test/scripts/v1alpha3/run-file-metricscollector.sh",
             ]),  // run file metrics collector test
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-custom-metricscollector-e2e-tests", testWorkerImage, [
+              "test/scripts/v1alpha3/run-custom-metricscollector.sh",
+            ]),  // run custom metrics collector test
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
               "python",
               "-m",

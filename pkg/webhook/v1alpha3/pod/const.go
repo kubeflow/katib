@@ -16,7 +16,19 @@ limitations under the License.
 
 package pod
 
+import (
+	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
+)
+
 const (
 	MasterRole = "master"
 	BatchJob   = "Job"
+)
+
+var (
+	NeedWrapWorkerMetricsCollecterList = [...]common.CollectorKind{
+		common.StdOutCollector,
+		common.TfEventCollector,
+		common.FileCollector,
+	}
 )
