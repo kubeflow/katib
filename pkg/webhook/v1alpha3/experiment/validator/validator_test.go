@@ -85,6 +85,7 @@ metadata:
   namespace: fakens`
 
 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialJobTemplate, nil).AnyTimes()
+	p.EXPECT().GetSuggestionContainerImage(gomock.Any()).Return("algorithmImage", nil).AnyTimes()
 
 	tcs := []struct {
 		Instance *experimentsv1alpha3.Experiment

@@ -74,6 +74,20 @@ func (mr *MockClientMockRecorder) DeleteExperiment(arg0 interface{}, arg1 ...int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteExperiment", reflect.TypeOf((*MockClient)(nil).DeleteExperiment), varargs...)
 }
 
+// GetClient mocks base method
+func (m *MockClient) GetClient() client.Client {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetClient")
+	ret0, _ := ret[0].(client.Client)
+	return ret0
+}
+
+// GetClient indicates an expected call of GetClient
+func (mr *MockClientMockRecorder) GetClient() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClient", reflect.TypeOf((*MockClient)(nil).GetClient))
+}
+
 // GetConfigMap mocks base method
 func (m *MockClient) GetConfigMap(arg0 string, arg1 ...string) (map[string]string, error) {
 	m.ctrl.T.Helper()

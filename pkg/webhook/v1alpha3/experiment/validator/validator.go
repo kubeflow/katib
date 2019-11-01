@@ -87,6 +87,10 @@ func (g *DefaultValidator) validateAlgorithm(ag *commonapiv1alpha3.AlgorithmSpec
 		return fmt.Errorf("No spec.algorithm.name specified.")
 	}
 
+	if _, err := g.GetSuggestionContainerImage(ag.AlgorithmName); err != nil {
+		return fmt.Errorf("Don't support algorithm %s: %v.", ag.AlgorithmName, err)
+	}
+
 	return nil
 }
 

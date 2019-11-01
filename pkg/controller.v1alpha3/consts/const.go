@@ -31,9 +31,12 @@ const (
 	KatibConfigMapName = "katib-config"
 	// LabelSuggestionTag is the name of suggestion config in configmap.
 	LabelSuggestionTag = "suggestion"
-
 	// LabelSuggestionImageTag is the name of suggestion image config in configmap.
 	LabelSuggestionImageTag = "image"
+	// LabelMetricsCollectorSidecar is the name of metrics collector config in configmap.
+	LabelMetricsCollectorSidecar = "metrics-collector-sidecar"
+	// LabelMetricsCollectorSidecarImage is the name of metrics collector image config in configmap.
+	LabelMetricsCollectorSidecarImage = "image"
 
 	// ReconcileErrorReason is the reason when there is a reconcile error.
 	ReconcileErrorReason = "ReconcileError"
