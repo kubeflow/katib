@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3.6
 
 RUN if [ "$(uname -m)" = "ppc64le" ]; then \
         apt-get -y update && \
