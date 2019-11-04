@@ -24,6 +24,7 @@ type Generator interface {
 	GetRunSpec(e *experimentsv1alpha3.Experiment, experiment, trial, namespace string) (string, error)
 	GetRunSpecWithHyperParameters(e *experimentsv1alpha3.Experiment, experiment, trial, namespace string, hps []commonapiv1alpha3.ParameterAssignment) (string, error)
 	GetSuggestionContainerImage(algorithmName string) (string, error)
+	GetMetricsCollectorImage(cKind commonapiv1alpha3.CollectorKind) (string, error)
 }
 
 // DefaultGenerator is the default implementation of Generator.
@@ -41,6 +42,10 @@ func New(c client.Client) Generator {
 
 func (g *DefaultGenerator) InjectClient(c client.Client) {
 	g.client.InjectClient(c)
+}
+
+func (g *DefaultGenerator) GetMetricsCollectorImage(cKind commonapiv1alpha3.CollectorKind) (string, error) {
+	return katibconfig.GetMetricsCollectorImage(cKind, g.client.GetClient())
 }
 
 func (g *DefaultGenerator) GetSuggestionContainerImage(algorithmName string) (string, error) {

@@ -14,7 +14,11 @@ limitations under the License.
 */
 package common
 
-import "time"
+import (
+	"time"
+
+	v1alpha3common "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
+)
 
 const (
 	DefaultPollInterval = time.Second
@@ -25,4 +29,13 @@ const (
 	MetricLoggerCollectorContainerName = "metrics-logger-and-collector"
 
 	TrainingCompleted = "completed"
+)
+
+var (
+	AutoInjectMetricsCollecterList = [...]v1alpha3common.CollectorKind{
+		v1alpha3common.StdOutCollector,
+		v1alpha3common.TfEventCollector,
+		v1alpha3common.FileCollector,
+		v1alpha3common.PrometheusMetricCollector,
+	}
 )
