@@ -37,6 +37,7 @@ func getDbName() string {
 		common.MySQLDBHostEnvName, common.DefaultMySQLHost)
 	dbPort := env.GetEnvOrDefault(
 		common.MySQLDBPortEnvName, common.DefaultMySQLPort)
+
 	return fmt.Sprintf(dbNameTmpl, dbPass, dbHost, dbPort)
 }
 

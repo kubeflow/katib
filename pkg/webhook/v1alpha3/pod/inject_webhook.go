@@ -18,8 +18,6 @@ package pod
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"path/filepath"
@@ -39,9 +37,9 @@ import (
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	katibmanagerv1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
-	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 	jobv1alpha3 "github.com/kubeflow/katib/pkg/job/v1alpha3"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1alpha3/common"
+	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibconfig"
 )
 
 var log = logf.Log.WithName("injector-webhook")
@@ -145,7 +143,7 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		metricName += v
 	}
 
-	image, err := s.getMetricsCollectorImage(trial.Spec.MetricsCollector.Collector.Kind)
+	image, err := katibconfig.GetMetricsCollectorImage(trial.Spec.MetricsCollector.Collector.Kind, s.client)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +161,7 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 
 	if mountPath, pathKind := getMountPath(trial.Spec.MetricsCollector); mountPath != "" {
 		if err = wrapWorkerContainer(
-			mutatedPod, kind, mountPath, trial.Spec.MetricsCollector); err != nil {
+			mutatedPod, kind, mountPath, pathKind, trial.Spec.MetricsCollector); err != nil {
 			return nil, err
 		}
 		if err = mutateVolume(mutatedPod, kind, mountPath, sidecarContainerName, pathKind); err != nil {
@@ -174,37 +172,6 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	log.Info("Inject metrics collector sidecar container", "Pod", pod.Name, "Trial", trialName)
 
 	return mutatedPod, nil
-}
-
-func (s *sidecarInjector) getMetricsCollectorImage(cKind common.CollectorKind) (string, error) {
-	configMap := &v1.ConfigMap{}
-	err := s.client.Get(
-		context.TODO(),
-		apitypes.NamespacedName{Name: consts.KatibConfigMapName, Namespace: consts.DefaultKatibNamespace},
-		configMap)
-	if err != nil {
-		log.Error(err, "Failed to find config map", "name", consts.KatibConfigMapName)
-		// Error reading the object - requeue the request.
-		return "", err
-	}
-	if mcs, ok := configMap.Data[MetricsCollectorSidecar]; ok {
-		kind := string(cKind)
-		mcsConfig := map[string]map[string]string{}
-		if err := json.Unmarshal([]byte(mcs), &mcsConfig); err != nil {
-			return "", err
-		}
-		if mc, ok := mcsConfig[kind]; ok {
-			if image, yes := mc[MetricsCollectorSidecarImage]; yes {
-				return image, nil
-			} else {
-				return "", errors.New("Failed to find " + MetricsCollectorSidecarImage + " configuration for metricsCollector kind " + kind)
-			}
-		} else {
-			return "", errors.New("Cannot support metricsCollector injection for kind " + kind)
-		}
-	} else {
-		return "", errors.New("Failed to find metrics collector configuration in configmap " + consts.KatibConfigMapName)
-	}
 }
 
 func getMetricsCollectorArgs(trialName, metricName string, mc common.MetricsCollectorSpec) []string {
@@ -229,10 +196,8 @@ func getMountPath(mc common.MetricsCollectorSpec) (string, common.FileSystemKind
 
 func wrapWorkerContainer(
 	pod *v1.Pod, jobKind, metricsFile string,
+	pathKind common.FileSystemKind,
 	mc common.MetricsCollectorSpec) error {
-	if mc.Collector.Kind != common.StdOutCollector {
-		return nil
-	}
 	index := -1
 	for i, c := range pod.Spec.Containers {
 		jobProvider, err := jobv1alpha3.New(jobKind)
@@ -255,13 +220,26 @@ func wrapWorkerContainer(
 		if c.Args != nil {
 			args = append(args, c.Args...)
 		}
-		redirectStr := fmt.Sprintf("1>%s 2>&1", metricsFile)
-		args = append(args, redirectStr)
+		if mc.Collector.Kind == common.StdOutCollector {
+			redirectStr := fmt.Sprintf("1>%s 2>&1", metricsFile)
+			args = append(args, redirectStr)
+		}
+		args = append(args, "&&", getMarkCompletedCommand(metricsFile, pathKind))
 		argsStr := strings.Join(args, " ")
 		c.Command = command
 		c.Args = []string{argsStr}
 	}
 	return nil
+}
+
+func getMarkCompletedCommand(mountPath string, pathKind common.FileSystemKind) string {
+	dir := mountPath
+	if pathKind == common.FileKind {
+		dir = filepath.Dir(mountPath)
+	}
+	// $$ is process id in shell
+	pidFile := filepath.Join(dir, "$$$$.pid")
+	return fmt.Sprintf("echo %s > %s", mccommon.TrainingCompleted, pidFile)
 }
 
 func mutateVolume(pod *v1.Pod, jobKind, mountPath, sidecarContainerName string, pathKind common.FileSystemKind) error {

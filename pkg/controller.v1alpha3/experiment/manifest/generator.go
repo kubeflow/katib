@@ -11,6 +11,7 @@ import (
 	commonapiv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibclient"
+	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibconfig"
 )
 
 const (
@@ -22,6 +23,7 @@ type Generator interface {
 	InjectClient(c client.Client)
 	GetRunSpec(e *experimentsv1alpha3.Experiment, experiment, trial, namespace string) (string, error)
 	GetRunSpecWithHyperParameters(e *experimentsv1alpha3.Experiment, experiment, trial, namespace string, hps []commonapiv1alpha3.ParameterAssignment) (string, error)
+	GetSuggestionContainerImage(algorithmName string) (string, error)
 }
 
 // DefaultGenerator is the default implementation of Generator.
@@ -39,6 +41,10 @@ func New(c client.Client) Generator {
 
 func (g *DefaultGenerator) InjectClient(c client.Client) {
 	g.client.InjectClient(c)
+}
+
+func (g *DefaultGenerator) GetSuggestionContainerImage(algorithmName string) (string, error) {
+	return katibconfig.GetSuggestionContainerImage(algorithmName, g.client.GetClient())
 }
 
 // GetRunSpec get the specification for trial.

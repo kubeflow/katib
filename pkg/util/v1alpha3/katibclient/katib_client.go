@@ -33,6 +33,7 @@ import (
 
 type Client interface {
 	InjectClient(c client.Client)
+	GetClient() client.Client
 	GetExperimentList(namespace ...string) (*experimentsv1alpha3.ExperimentList, error)
 	CreateExperiment(experiment *experimentsv1alpha3.Experiment, namespace ...string) error
 	DeleteExperiment(experiment *experimentsv1alpha3.Experiment, namespace ...string) error
@@ -70,6 +71,10 @@ func NewClient(options client.Options) (Client, error) {
 
 func (k *KatibClient) InjectClient(c client.Client) {
 	k.client = c
+}
+
+func (k *KatibClient) GetClient() client.Client {
+	return k.client
 }
 
 func (k *KatibClient) GetExperimentList(namespace ...string) (*experimentsv1alpha3.ExperimentList, error) {

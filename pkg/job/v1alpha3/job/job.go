@@ -1,8 +1,6 @@
 package job
 
 import (
-	"fmt"
-
 	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -30,9 +28,9 @@ func (j Job) GetDeployedJobStatus(
 			log.Error(unerr, "NestedFieldCopy unstructured to status error")
 			return nil, unerr
 		}
-		err := fmt.Errorf("value is missing")
-		log.Error(err, "NestedFieldCopy unstructured to status error")
-		return nil, err
+		log.Info("NestedFieldCopy unstructured to status error",
+			"err", "Status is not found in job")
+		return &jobCondition, nil
 	}
 
 	statusMap := status.(map[string]interface{})

@@ -17,8 +17,11 @@ package common
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	gops "github.com/mitchellh/go-ps"
@@ -27,9 +30,10 @@ import (
 var ErrWaitPidTimeout = fmt.Errorf("Timed out waiting for PID to complete")
 
 type WaitPidsOpts struct {
-	PollInterval time.Duration
-	Timeout      time.Duration
-	WaitAll      bool
+	PollInterval           time.Duration
+	Timeout                time.Duration
+	WaitAll                bool
+	CompletedMarkedDirPath string
 }
 
 func Wait(opts WaitPidsOpts) error {
@@ -95,6 +99,16 @@ func WaitPIDS(pids []int, opts ...WaitPidsOpts) error {
 				_, err := os.Stat(path)
 				if err != nil {
 					if os.IsNotExist(err) {
+						if opts[0].CompletedMarkedDirPath != "" {
+							markFile := filepath.Join(opts[0].CompletedMarkedDirPath, fmt.Sprintf("%d.pid", pid))
+							if data, err := ioutil.ReadFile(markFile); err != nil {
+								return fmt.Errorf("Process %d hadn't completed: %v", pid, err)
+							} else {
+								if strings.TrimSpace(string(data)) != TrainingCompleted {
+									return fmt.Errorf("Process %d hadn't completed", pid)
+								}
+							}
+						}
 						if waitAll {
 							finishedPids = append(finishedPids, pid)
 							if len(finishedPids) == len(pids) {
