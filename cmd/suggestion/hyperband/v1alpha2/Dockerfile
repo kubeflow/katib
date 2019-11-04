@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3.6
 
 ADD . /usr/src/app/github.com/kubeflow/katib
 WORKDIR /usr/src/app/github.com/kubeflow/katib/cmd/suggestion/hyperband/v1alpha2
