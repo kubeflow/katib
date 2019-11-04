@@ -86,6 +86,7 @@ metadata:
 
 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialJobTemplate, nil).AnyTimes()
 	p.EXPECT().GetSuggestionContainerImage(gomock.Any()).Return("algorithmImage", nil).AnyTimes()
+	p.EXPECT().GetMetricsCollectorImage(gomock.Any()).Return("metricsCollectorImage", nil).AnyTimes()
 
 	tcs := []struct {
 		Instance *experimentsv1alpha3.Experiment

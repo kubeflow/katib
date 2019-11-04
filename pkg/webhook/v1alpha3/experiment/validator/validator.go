@@ -16,6 +16,7 @@ import (
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/manifest"
 	jobv1alpha3 "github.com/kubeflow/katib/pkg/job/v1alpha3"
+	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1alpha3/common"
 )
 
 var log = logf.Log.WithName("experiment-validating-webhook")
@@ -136,6 +137,15 @@ func (g *DefaultValidator) validateSupportedJob(job *unstructured.Unstructured) 
 func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1alpha3.Experiment) error {
 	mcSpec := inst.Spec.MetricsCollectorSpec
 	mcKind := mcSpec.Collector.Kind
+	for _, mc := range mccommon.AutoInjectMetricsCollecterList {
+		if mcKind != mc {
+			continue
+		}
+		if _, err := g.GetMetricsCollectorImage(mcKind); err != nil {
+			return fmt.Errorf("Don't support metrics collector kind %q: %v.", string(mcKind), err)
+		}
+		break
+	}
 	// TODO(hougangliu):
 	// 1. validate .spec.metricsCollectorSpec.source.filter
 	// 2. log warning message if some field will not be used for the metricsCollector kind
@@ -163,6 +173,12 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1alpha3.Ex
 	case commonapiv1alpha3.CustomCollector:
 		if mcSpec.Collector.CustomCollector == nil {
 			return fmt.Errorf(".spec.metricsCollectorSpec.collector.customCollector is required for metrics collector kind: %v.", mcKind)
+		}
+		if mcSpec.Source.FileSystemPath != nil {
+			if !filepath.IsAbs(mcSpec.Source.FileSystemPath.Path) || (mcSpec.Source.FileSystemPath.Kind != commonapiv1alpha3.DirectoryKind &&
+				mcSpec.Source.FileSystemPath.Kind != commonapiv1alpha3.FileKind) {
+				return fmt.Errorf(".spec.metricsCollectorSpec.source is invalid")
+			}
 		}
 	default:
 		return fmt.Errorf("Invalid metrics collector kind: %v.", mcKind)

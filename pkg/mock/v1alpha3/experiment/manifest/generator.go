@@ -35,6 +35,21 @@ func (m *MockGenerator) EXPECT() *MockGeneratorMockRecorder {
 	return m.recorder
 }
 
+// GetMetricsCollectorImage mocks base method
+func (m *MockGenerator) GetMetricsCollectorImage(arg0 v1alpha3.CollectorKind) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMetricsCollectorImage", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMetricsCollectorImage indicates an expected call of GetMetricsCollectorImage
+func (mr *MockGeneratorMockRecorder) GetMetricsCollectorImage(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMetricsCollectorImage", reflect.TypeOf((*MockGenerator)(nil).GetMetricsCollectorImage), arg0)
+}
+
 // GetRunSpec mocks base method
 func (m *MockGenerator) GetRunSpec(arg0 *v1alpha30.Experiment, arg1, arg2, arg3 string) (string, error) {
 	m.ctrl.T.Helper()
