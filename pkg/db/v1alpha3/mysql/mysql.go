@@ -19,7 +19,7 @@ import (
 
 const (
 	dbDriver     = "mysql"
-	dbNameTmpl   = "root:%s@tcp(%s:%s)/katib?timeout=5s"
+	dbNameTmpl   = "root:%s@tcp(%s:%s)/%s?timeout=5s"
 	mysqlTimeFmt = "2006-01-02 15:04:05.999999"
 
 	connectInterval = 5 * time.Second
@@ -37,8 +37,10 @@ func getDbName() string {
 		common.MySQLDBHostEnvName, common.DefaultMySQLHost)
 	dbPort := env.GetEnvOrDefault(
 		common.MySQLDBPortEnvName, common.DefaultMySQLPort)
+	dbName := env.GetEnvOrDefault(common.MySQLDatabase,
+		common.DefaultMySQLDatabase)
 
-	return fmt.Sprintf(dbNameTmpl, dbPass, dbHost, dbPort)
+	return fmt.Sprintf(dbNameTmpl, dbPass, dbHost, dbPort, dbName)
 }
 
 func openSQLConn(driverName string, dataSourceName string, interval time.Duration,
