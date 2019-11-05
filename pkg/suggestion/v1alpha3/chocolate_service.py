@@ -25,6 +25,7 @@ class ChocolateService(
                     if param.step == "" or param.step == None:
                         return self._set_validate_context_error(
                             context, "param {} step is nil".format(param.name))
+        return api_pb2.ValidateAlgorithmSettingsReply()
 
     def GetSuggestions(self, request, context):
         """
