@@ -2,7 +2,7 @@ FROM golang:alpine AS build-env
 # The GOPATH in the image is /go.
 ADD . /go/src/github.com/kubeflow/katib
 WORKDIR /go/src/github.com/kubeflow/katib/cmd/manager-rest
-RUN if [ "$(uname -m)" = "ppc64le" ]; then \
+RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
         apk --update add gcc musl-dev  && \
         go build -o katib-manager-rest ./v1alpha2; \
     else \

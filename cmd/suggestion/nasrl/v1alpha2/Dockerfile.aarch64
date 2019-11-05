@@ -1,0 +1,92 @@
+FROM ubuntu:18.04
+
+#install bazel
+RUN apt-get update \
+    && apt-get install -y software-properties-common \
+	build-essential \
+	curl \
+	openjdk-8-jdk \
+	openjdk-8-jre-headless \
+	pkg-config \
+	zip \
+	g++ \
+	wget \
+	git \
+	zlib1g-dev \
+	unzip \
+	python3.6 \
+	python3-pip \
+	python3.6-dev \
+	python3-setuptools \
+	libhdf5-serial-dev \
+	libcurl3-dev \
+	libfreetype6-dev \
+	libzmq3-dev \
+	rsync \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+#set default python as python3
+RUN ln -s /usr/bin/python3.6 /usr/bin/python && ln -s /usr/bin/pip3 /usr/bin/pip
+
+ENV BAZEL_VERSION=0.18.1
+
+RUN mkdir -p /bazel \
+    && cd /bazel \
+    && curl -fSsL -O https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-dist.zip \
+    && unzip bazel-$BAZEL_VERSION-dist.zip \
+    && ./compile.sh \
+    && cp output/bazel /usr/local/bin \
+    && rm -rf /bazel
+
+#build and install tensorflow
+RUN pip install -U cython six 'numpy==1.16.4' wheel mock 'future>=0.17.1' \
+    && pip install keras_applications==1.0.6 --no-deps \
+    && pip install keras_preprocessing==1.0.5 --no-deps \
+    && pip install tensorflow_estimator --no-deps
+
+ENV TF_ROOT=/tensorflow
+ENV PYTHON_BIN_PATH=/usr/bin/python3
+ENV PYTHON_LIB_PATH="$($PYTHON_BIN_PATH -c 'import site; print(site.getsitepackages()[0])')"
+ENV PYTHONPATH=${TF_ROOT}/lib
+ENV PYTHON_ARG=${TF_ROOT}/lib
+ENV TF_NEED_GCP=0
+ENV TF_NEED_CUDA=0
+ENV TF_NEED_HDFS=0
+ENV TF_NEED_OPENCL=0
+ENV TF_NEED_JEMALLOC=0
+ENV TF_ENABLE_XLA=0
+ENV TF_NEED_VERBS=0
+ENV TF_NEED_MKL=0
+ENV TF_DOWNLOAD_MKL=0
+ENV TF_NEED_AWS=0
+ENV TF_NEED_MPI=0
+ENV TF_NEED_GDR=0
+ENV TF_NEED_S3=0
+ENV TF_NEED_OPENCL_SYCL=0
+ENV TF_SET_ANDROID_WORKSPACE=0
+ENV TF_NEED_COMPUTECPP=0
+ENV CC_OPT_FLAGS="-march=native"
+ENV TF_SET_ANDROID_WORKSPACE=0
+ENV TF_NEED_KAFKA=0
+ENV TF_NEED_TENSORRT=0
+ENV TF_NEED_AWS=0
+
+RUN git clone https://github.com/tensorflow/tensorflow.git \
+    && cd tensorflow \
+    && git checkout v1.12.0 \
+    && sed -i 's/ "-mfpu=neon",//' /tensorflow/tensorflow/contrib/lite/kernels/internal/BUILD \
+    && sed -i '0,/conditions:default": \[\],/s//conditions:default": glob(\["aws-cpp-sdk-core\/source\/platform\/linux-shared\/*\.cpp",\]),/' /tensorflow/third_party/aws.BUILD \
+    && ./configure \
+    && bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package \
+    && bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg \
+    && pip install --upgrade --force-reinstall /tmp/tensorflow_pkg/tensorflow*.whl\
+    && rm -rf /tensorflow \
+    && rm -r /tmp/tensorflow_pkg/tensorflow*.whl
+
+ADD . /usr/src/app/github.com/kubeflow/katib
+WORKDIR /usr/src/app/github.com/kubeflow/katib/cmd/suggestion/nasrl/v1alpha2
+RUN pip install --no-cache-dir -r requirements.txt
+ENV PYTHONPATH /usr/src/app/github.com/kubeflow/katib:/usr/src/app/github.com/kubeflow/katib/pkg/apis/manager/v1alpha2/python
+
+ENTRYPOINT ["python", "-u", "main.py"]
