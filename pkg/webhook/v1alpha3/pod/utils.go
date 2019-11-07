@@ -110,7 +110,7 @@ func getRemoteImage(pod *v1.Pod, namespace string, containerIndex int) (crv1.Ima
 	return img, nil
 }
 
-func getImageCommand(pod *v1.Pod, namespace string, containerIndex int) ([]string, error) {
+func getContainerCommand(pod *v1.Pod, namespace string, containerIndex int) ([]string, error) {
 	// https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#notes
 	var err error
 	var img crv1.Image

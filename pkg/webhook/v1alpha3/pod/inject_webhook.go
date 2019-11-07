@@ -239,7 +239,7 @@ func wrapWorkerContainer(
 	}
 	if index >= 0 {
 		command := []string{"sh", "-c"}
-		args, err := getImageCommand(pod, namespace, index)
+		args, err := getContainerCommand(pod, namespace, index)
 		if err != nil {
 			return err
 		}
