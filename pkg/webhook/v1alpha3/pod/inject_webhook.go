@@ -153,7 +153,7 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		}
 	}
 	if needWrapWorkerContainer(trial.Spec.MetricsCollector) {
-		if err = wrapWorkerContainer(mutatedPod, kind, mountPath, pathKind, trial.Spec.MetricsCollector); err != nil {
+		if err = wrapWorkerContainer(mutatedPod, namespace, kind, mountPath, pathKind, trial.Spec.MetricsCollector); err != nil {
 			return nil, err
 		}
 	}
@@ -223,7 +223,7 @@ func needWrapWorkerContainer(mc common.MetricsCollectorSpec) bool {
 }
 
 func wrapWorkerContainer(
-	pod *v1.Pod, jobKind, metricsFile string,
+	pod *v1.Pod, namespace, jobKind, metricsFile string,
 	pathKind common.FileSystemKind,
 	mc common.MetricsCollectorSpec) error {
 	index := -1
@@ -238,15 +238,10 @@ func wrapWorkerContainer(
 		}
 	}
 	if index >= 0 {
-		// TODO(hougangliu): handle container.command is nil case
-		c := &pod.Spec.Containers[index]
 		command := []string{"sh", "-c"}
-		args := []string{}
-		if c.Command != nil {
-			args = append(args, c.Command...)
-		}
-		if c.Args != nil {
-			args = append(args, c.Args...)
+		args, err := getContainerCommand(pod, namespace, index)
+		if err != nil {
+			return err
 		}
 		if mc.Collector.Kind == common.StdOutCollector {
 			redirectStr := fmt.Sprintf("1>%s 2>&1", metricsFile)
@@ -254,6 +249,7 @@ func wrapWorkerContainer(
 		}
 		args = append(args, "&&", getMarkCompletedCommand(metricsFile, pathKind))
 		argsStr := strings.Join(args, " ")
+		c := &pod.Spec.Containers[index]
 		c.Command = command
 		c.Args = []string{argsStr}
 	}

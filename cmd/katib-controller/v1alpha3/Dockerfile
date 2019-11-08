@@ -16,5 +16,6 @@ RUN if [ "$(uname -m)" = "ppc64le" ]; then \
 # Copy the controller-manager into a thin image
 FROM alpine:3.7
 WORKDIR /app
+RUN apk update && apk add ca-certificates
 COPY --from=build-env /go/src/github.com/kubeflow/katib/cmd/katib-controller/katib-controller .
 ENTRYPOINT ["./katib-controller"]
