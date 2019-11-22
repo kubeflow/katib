@@ -3,6 +3,7 @@ package sidecarmetricscollector
 import (
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -34,50 +35,42 @@ func (d *FileMetricsCollector) parseLogs(logs []string, metrics []string) (*v1al
 	var lasterr error
 	olog := &v1alpha3.ObservationLog{}
 	mlogs := []*v1alpha3.MetricLog{}
+	metricReg, _ := regexp.Compile("[\\w|-]+\\s*=\\s*(-?\\d+)(\\.\\d+)?")
+
 	for _, logline := range logs {
 		if logline == "" {
 			continue
 		}
 		timestamp := time.Time{}.UTC().Format(time.RFC3339)
-		parseStr := logline
 		ls := strings.SplitN(logline, " ", 2)
 		if len(ls) != 2 {
 			klog.Warningf("Metrics will not have timestamp since %s doesn't begin with timestamp string", logline)
 		} else {
-			_, err := time.Parse(time.RFC3339Nano, ls[0])
-			if err != nil {
+			if _, err := time.Parse(time.RFC3339Nano, ls[0]); err != nil {
 				klog.Warningf("Metrics will not have timestamp since error parsing time %s: %v", ls[0], err)
 			} else {
-				parseStr = ls[1]
 				timestamp = ls[0]
 			}
 		}
 
-		kvpairs := strings.Fields(parseStr)
-		for _, kv := range kvpairs {
-			v := strings.Split(kv, "=")
-			if len(v) > 2 {
-				klog.Infof("Ignoring trailing garbage: %s", kv)
-			}
-			if len(v) == 1 {
-				continue
-			}
-			metricName := ""
+		matchStrs := metricReg.FindAllString(logline, -1)
+		for _, kev := range matchStrs {
+			kv := strings.SplitN(kev, "=", 2)
+			name := strings.TrimSpace(kv[0])
+			value := strings.TrimSpace(kv[1])
 			for _, m := range metrics {
-				if v[0] == m {
-					metricName = v[0]
+				if name != m {
+					continue
 				}
+				mlogs = append(mlogs, &v1alpha3.MetricLog{
+					TimeStamp: timestamp,
+					Metric: &v1alpha3.Metric{
+						Name:  name,
+						Value: value,
+					},
+				})
+				break
 			}
-			if metricName == "" {
-				continue
-			}
-			mlogs = append(mlogs, &v1alpha3.MetricLog{
-				TimeStamp: timestamp,
-				Metric: &v1alpha3.Metric{
-					Name:  metricName,
-					Value: v[1],
-				},
-			})
 		}
 	}
 	olog.MetricLogs = mlogs
