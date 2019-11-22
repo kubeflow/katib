@@ -10,6 +10,8 @@ spec:
     type: maximize
     goal: 0.99
     objectiveMetricName: accuracy
+    additionalMetricNames:
+    - loss
   metricsCollectorSpec:
     source:
       fileSystemPath:
