@@ -67,6 +67,7 @@ func AddToManager(m manager.Manager) error {
 
 func register(manager manager.Manager, server *webhook.Server) error {
 	mutatingWebhook, err := builder.NewWebhookBuilder().
+		FailurePolicy(admissionregistrationv1beta1.Fail).
 		Name("mutating.experiment.katib.kubeflow.org").
 		Mutating().
 		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
@@ -78,6 +79,7 @@ func register(manager manager.Manager, server *webhook.Server) error {
 		return err
 	}
 	validatingWebhook, err := builder.NewWebhookBuilder().
+		FailurePolicy(admissionregistrationv1beta1.Fail).
 		Name("validating.experiment.katib.kubeflow.org").
 		Validating().
 		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
@@ -94,6 +96,7 @@ func register(manager manager.Manager, server *webhook.Server) error {
 		},
 	}
 	injectWebhook, err := builder.NewWebhookBuilder().
+		FailurePolicy(admissionregistrationv1beta1.Fail).
 		Name("mutating.pod.katib.kubeflow.org").
 		NamespaceSelector(nsSelector).
 		Mutating().
