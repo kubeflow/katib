@@ -3,6 +3,8 @@ package composer
 import (
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/api/resource"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,6 +26,11 @@ const (
 	defaultFailureThreshold    = 12
 	// Ref https://github.com/grpc-ecosystem/grpc-health-probe/
 	defaultGRPCHealthCheckProbe = "/bin/grpc_health_probe"
+
+	cpuLimit   = "500m"
+	cpuRequest = "50m"
+	memLimit   = "100Mi"
+	memRequest = "10Mi"
 )
 
 var log = logf.Log.WithName("suggestion-composer")
@@ -123,6 +130,35 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 			ContainerPort: consts.DefaultSuggestionPort,
 		},
 	}
+
+	cpuLimitQuantity, err := resource.ParseQuantity(cpuLimit)
+	if err != nil {
+		return nil, err
+	}
+	cpuRequestQuantity, err := resource.ParseQuantity(cpuRequest)
+	if err != nil {
+		return nil, err
+	}
+	memLimitQuantity, err := resource.ParseQuantity(memLimit)
+	if err != nil {
+		return nil, err
+	}
+	memRequestQuantity, err := resource.ParseQuantity(memRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	c.Resources = corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    cpuLimitQuantity,
+			corev1.ResourceMemory: memLimitQuantity,
+		},
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    cpuRequestQuantity,
+			corev1.ResourceMemory: memRequestQuantity,
+		},
+	}
+
 	c.ReadinessProbe = &corev1.Probe{
 		Handler: corev1.Handler{
 			Exec: &corev1.ExecAction{
