@@ -57,6 +57,7 @@ var metricsFileName = flag.String("path", "", "Metrics File Path")
 var trialName = flag.String("t", "", "Trial Name")
 var managerService = flag.String("s", "", "Katib Manager service")
 var metricNames = flag.String("m", "", "Metric names")
+var filters = flag.String("f", "", "Metric filters")
 var pollInterval = flag.Duration("p", common.DefaultPollInterval, "Poll interval to check if main process of worker container exit")
 var timeout = flag.Duration("timeout", common.DefaultTimeout, "Timeout to check if main process of worker container exit")
 var waitAll = flag.Bool("w", common.DefaultWaitAll, "Whether wait for all other main process of container exiting")
@@ -105,7 +106,15 @@ func main() {
 		klog.Fatalf("Failed to create MetricsCollector: %v", err)
 	}
 	ctx := context.Background()
-	olog, err := mc.CollectObservationLog(*metricsFileName, strings.Split(*metricNames, ";"))
+	metricList := []string{}
+	if len(*metricNames) != 0 {
+		metricList = strings.Split(*metricNames, ";")
+	}
+	filterList := []string{}
+	if len(*filters) != 0 {
+		filterList = strings.Split(*filters, ";")
+	}
+	olog, err := mc.CollectObservationLog(*metricsFileName, metricList, filterList)
 	if err != nil {
 		klog.Fatalf("Failed to collect logs: %v", err)
 	}

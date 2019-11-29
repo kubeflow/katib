@@ -50,7 +50,7 @@ Each `Experiment` contains a configuration
 2. Search Space: Constraints for configurations describing the feasible space.
 3. Search Algorithm: How to find the optimal configurations
 
-`Experiment` is defined as a CRD
+`Experiment` is defined as a CRD. Refer to [here](docs/user-guide.md) about how to customize a `Experiment`.
 
 ### Suggestion
 
@@ -85,11 +85,10 @@ Currently Katib supports the following exploration algorithms:
 ## Components in Katib
 
 Katib consists of several components as shown below. Each component is running on k8s as a deployment.
-Each component communicates with others via GRPC and the API is defined at `pkg/apis/manager/v1alpha2/api.proto`.
+Each component communicates with others via GRPC and the API is defined at `pkg/apis/manager/v1alpha3/api.proto`.
 
 - katib: main components.
   - katib-manager: GRPC API server of katib which is the DB Interface.
-  - katib-manager-rest: REST API server of katib.
   - katib-db: Data storage backend of katib.
   - katib-ui: User interface of katib.
   - katib-controller: Controller for katib CRDs in Kubernetes.

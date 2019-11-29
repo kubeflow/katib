@@ -192,6 +192,9 @@ func getMetricsCollectorArgs(trialName, metricName string, mc common.MetricsColl
 	if mountPath, _ := getMountPath(mc); mountPath != "" {
 		args = append(args, "-path", mountPath)
 	}
+	if mc.Source != nil && mc.Source.Filter != nil && len(mc.Source.Filter.MetricsFormat) > 0 {
+		args = append(args, "-f", strings.Join(mc.Source.Filter.MetricsFormat, ";"))
+	}
 	return args
 }
 
