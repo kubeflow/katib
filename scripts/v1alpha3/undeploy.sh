@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -o errexit
 set -o nounset
 set -o pipefail
 set -o xtrace
@@ -37,4 +36,6 @@ kubectl delete -f manifests/v1alpha3/db
 kubectl delete -f manifests/v1alpha3/ui
 kubectl delete -f manifests/v1alpha3/pv
 kubectl delete -f manifests/v1alpha3
+kubectl get mutatingwebhookconfigurations katib-mutating-webhook-config && kubectl delete mutatingwebhookconfigurations katib-mutating-webhook-config
+kubectl get validatingwebhookconfigurations katib-validating-webhook-config && kubectl delete validatingwebhookconfigurations katib-validating-webhook-config
 cd - > /dev/null
