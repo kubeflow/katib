@@ -7,6 +7,10 @@ import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import Button from '@material-ui/core/Button';
+import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
 
 import { filterJobs, changeType, fetchHPJobs } from '../../../actions/hpMonitorActions';
 
@@ -23,6 +27,12 @@ const styles = theme => ({
         margin: '0 auto',
         textAlign: 'center',
     },
+    selectBox: {
+        marginLeft: theme.spacing.unit,
+        marginRight: theme.spacing.unit,
+        width: 200,
+        height: 56
+    }
 });
 
 const FilterPanel = (props) => {
@@ -36,6 +46,18 @@ const FilterPanel = (props) => {
     return (
         <div className={classes.filter}>
             <FormGroup row>
+                <FormControl variant="outlined">
+                    <InputLabel>
+                        Namespace
+                    </InputLabel>
+                    <Select
+                        value={props.namespace}
+                        onChange={onNamespaceChange(param.name)}
+                        className={classes.selectBox}
+                    >
+                    <MenuItem value="kubeflow">kubeflow</MenuItem>
+                    </Select>
+                </FormControl>
                 <TextField
                     id="outlined-name"
                     label="Name"
