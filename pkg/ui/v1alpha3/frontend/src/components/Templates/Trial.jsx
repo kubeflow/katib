@@ -19,7 +19,13 @@ const styles = theme => ({
 });
 
 class Trial extends React.Component {
-    
+
+    componentDidMount() {
+        // TODO: Add possibility to change namespace in Trial Manifest form
+        // Right now we get templates only from kubeflow namespace
+        this.props.fetchTrialTemplates("");
+    }
+
     openAddDialog = () => {
         this.props.openDialog("add");
     }
