@@ -34,7 +34,6 @@ func main() {
 	http.HandleFunc("/katib/submit_hp_job/", kuh.SubmitParamsJob)
 	http.HandleFunc("/katib/submit_nas_job/", kuh.SubmitParamsJob)
 
-	//TODO: Add it in Katib client
 	http.HandleFunc("/katib/delete_experiment/", kuh.DeleteExperiment)
 
 	http.HandleFunc("/katib/fetch_hp_job/", kuh.FetchHPJob)
@@ -44,6 +43,8 @@ func main() {
 
 	http.HandleFunc("/katib/fetch_trial_templates/", kuh.FetchTrialTemplates)
 	http.HandleFunc("/katib/update_template/", kuh.AddEditDeleteTemplate)
+
+	http.HandleFunc("/katib/fetch_namespaces", kuh.FetchNamespaces)
 
 	log.Printf("Serving at %s:%s", *host, *port)
 	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", *host, *port), nil); err != nil {

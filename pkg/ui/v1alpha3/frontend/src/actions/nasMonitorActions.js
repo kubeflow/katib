@@ -1,8 +1,9 @@
 export const FILTER_JOBS = "FILTER_JOBS";
 
-export const filterJobs = (filter) => ({
+export const filterJobs = (experimentName, experimentNamespace) => ({
     type: FILTER_JOBS,
-    filter,
+    experimentName,
+    experimentNamespace
 })
 
 export const CHANGE_TYPE = "CHANGE_TYPE";

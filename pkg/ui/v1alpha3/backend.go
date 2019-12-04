@@ -169,3 +169,26 @@ func (k *KatibUIHandler) AddEditDeleteTemplate(w http.ResponseWriter, r *http.Re
 	}
 	w.Write(response)
 }
+
+func (k *KatibUIHandler) FetchNamespaces(w http.ResponseWriter, r *http.Request) {
+
+	namespaceList, err := k.katibClient.GetNamespaceList()
+	if err != nil {
+		log.Printf("GetNamespaceList failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	var namespaces []string
+
+	for _, namespace := range namespaceList.Items {
+		namespaces = append(namespaces, namespace.ObjectMeta.Name)
+	}
+
+	response, err := json.Marshal(namespaces)
+	if err != nil {
+		log.Printf("Marshal namespaces failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
+}

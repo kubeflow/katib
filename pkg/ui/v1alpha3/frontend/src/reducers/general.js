@@ -8,6 +8,8 @@ const initialState = {
     snackText: "",
     deleteDialog: false,
     deleteId: '',
+    namespaces: [
+    ]
 };
 
 const generalReducer = (state = initialState, action) => {
@@ -97,6 +99,11 @@ const generalReducer = (state = initialState, action) => {
                 loading: false,
                 snackOpen: true,
                 snackText: action.message,
+            }
+        case actions.FETCH_NAMESPACES_SUCCESS:
+            return {
+                ...state,
+                namespaces: action.namespaces
             }
         default:
             return state;
