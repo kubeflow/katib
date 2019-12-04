@@ -19,6 +19,7 @@ def parse_options():
     parser.add_argument("-t", "--trial_name", type=str, default="")
     parser.add_argument("-path", "--dir_path", type=str, default="/log")
     parser.add_argument("-m", "--metric_names", type=str, default="")
+    parser.add_argument("-f", "--metric_filters", type=str, default="")
     opt = parser.parse_args()
     return opt
 

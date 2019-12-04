@@ -14,6 +14,9 @@ spec:
     - loss
   metricsCollectorSpec:
     source:
+      filter:
+        metricsFormat:
+        - "{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"
       fileSystemPath:
         path: "/katib/mnist.log"
         kind: File
