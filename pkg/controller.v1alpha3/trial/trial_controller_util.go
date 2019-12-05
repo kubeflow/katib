@@ -127,6 +127,9 @@ func (r *ReconcileTrial) updateFinalizers(instance *trialsv1alpha3.Trial, finali
 }
 
 func isTrialObservationAvailable(instance *trialsv1alpha3.Trial) bool {
+	if instance == nil {
+		return false
+	}
 	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
 	if instance.Status.Observation != nil && instance.Status.Observation.Metrics != nil {
 		for _, metric := range instance.Status.Observation.Metrics {
@@ -139,6 +142,9 @@ func isTrialObservationAvailable(instance *trialsv1alpha3.Trial) bool {
 }
 
 func isTrialComplete(instance *trialsv1alpha3.Trial, jobCondition *commonv1.JobCondition) bool {
+	if jobCondition == nil || instance == nil {
+		return false
+	}
 	jobConditionType := (*jobCondition).Type
 	if jobConditionType == commonv1.JobSucceeded && isTrialObservationAvailable(instance) {
 		return true
@@ -151,6 +157,9 @@ func isTrialComplete(instance *trialsv1alpha3.Trial, jobCondition *commonv1.JobC
 }
 
 func isJobSucceeded(jobCondition *commonv1.JobCondition) bool {
+	if jobCondition == nil {
+		return false
+	}
 	jobConditionType := (*jobCondition).Type
 	if jobConditionType == commonv1.JobSucceeded {
 		return true
