@@ -25,7 +25,7 @@ spec:
         - katib-manager.kubeflow:6789
         - -path
         - /katib/mnist.log
-        image: liuhougangxa/custom-metrics-collector:latest
+        image: kubeflowkatib/custom-metrics-collector:latest
         imagePullPolicy: Always
         name: custom-metrics-logger-and-collector
         env:
@@ -62,7 +62,7 @@ spec:
               spec:
                 containers:
                 - name: {{.Trial}}
-                  image: docker.io/liuhougangxa/pytorch-mnist
+                  image: docker.io/kubeflowkatib/pytorch-mnist
                   imagePullPolicy: Always
                   command:
                   - "python"
