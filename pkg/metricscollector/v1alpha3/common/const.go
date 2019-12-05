@@ -29,6 +29,8 @@ const (
 	MetricLoggerCollectorContainerName = "metrics-logger-and-collector"
 
 	TrainingCompleted = "completed"
+
+	DefaultFilter = `([\w|-]+)\s*=\s*((-?\d+)(\.\d+)?)`
 )
 
 var (

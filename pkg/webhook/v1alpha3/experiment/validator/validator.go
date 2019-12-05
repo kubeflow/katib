@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -146,9 +147,7 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1alpha3.Ex
 		}
 		break
 	}
-	// TODO(hougangliu):
-	// 1. validate .spec.metricsCollectorSpec.source.filter
-	// 2. log warning message if some field will not be used for the metricsCollector kind
+	// TODO(hougangliu): log warning message if some field will not be used for the metricsCollector kind
 	switch mcKind {
 	case commonapiv1alpha3.NoneCollector, commonapiv1alpha3.StdOutCollector:
 		return nil
@@ -182,6 +181,19 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1alpha3.Ex
 		}
 	default:
 		return fmt.Errorf("Invalid metrics collector kind: %v.", mcKind)
+	}
+	if mcSpec.Source != nil && mcSpec.Source.Filter != nil && len(mcSpec.Source.Filter.MetricsFormat) > 0 {
+		// the filter regular expression must have two top subexpressions, the first matched one will be taken as metric name, the second one as metric value
+		mustTwoBracket, _ := regexp.Compile(`.*\(.*\).*\(.*\).*`)
+		for _, mFormat := range mcSpec.Source.Filter.MetricsFormat {
+			if _, err := regexp.Compile(mFormat); err != nil {
+				return fmt.Errorf("Invalid %q in .spec.metricsCollectorSpec.source.filter: %v.", mFormat, err)
+			} else {
+				if !mustTwoBracket.MatchString(mFormat) {
+					return fmt.Errorf("Invalid %q in .spec.metricsCollectorSpec.source.filter: two top subexpressions are required", mFormat)
+				}
+			}
+		}
 	}
 
 	return nil

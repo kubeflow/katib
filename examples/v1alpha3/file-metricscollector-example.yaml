@@ -14,6 +14,9 @@ spec:
     - loss
   metricsCollectorSpec:
     source:
+      filter:
+        metricsFormat:
+        - "{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"
       fileSystemPath:
         path: "/katib/mnist.log"
         kind: File
@@ -48,7 +51,7 @@ spec:
               spec:
                 containers:
                 - name: {{.Trial}}
-                  image: docker.io/liuhougangxa/pytorch-mnist:1.0
+                  image: docker.io/kubeflowkatib/pytorch-mnist:1.0
                   imagePullPolicy: Always
                   command:
                   - "python"

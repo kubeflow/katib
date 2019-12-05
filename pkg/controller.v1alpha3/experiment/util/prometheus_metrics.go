@@ -24,19 +24,19 @@ import (
 
 var (
 	experimentsDeletedCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_experiment_deleted",
+		Name: "katib_experiment_deleted_total",
 		Help: "Counts number of Experiment deleted",
 	})
 	experimentsCreatedCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_experiment_created",
+		Name: "katib_experiment_created_total",
 		Help: "Counts number of Experiment created",
 	})
 	experimentsSucceededCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_experiment_succeeded",
+		Name: "katib_experiment_succeeded_total",
 		Help: "Counts number of Experiment succeeded",
 	})
 	experimentsFailedCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_experiment_failed",
+		Name: "katib_experiment_failed_total",
 		Help: "Counts number of Experiment failed",
 	})
 )

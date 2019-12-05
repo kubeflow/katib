@@ -24,19 +24,19 @@ import (
 
 var (
 	trialsDeletedCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_trial_deleted",
+		Name: "katib_trial_deleted_total",
 		Help: "Counts number of Trial deleted",
 	})
 	trialsCreatedCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_trial_created",
+		Name: "katib_trial_created_total",
 		Help: "Counts number of Trial created",
 	})
 	trialsSucceededCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_trial_succeeded",
+		Name: "katib_trial_succeeded_total",
 		Help: "Counts number of Trial succeeded",
 	})
 	trialsFailedCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_trial_failed",
+		Name: "katib_trial_failed_total",
 		Help: "Counts number of Trial failed",
 	})
 )

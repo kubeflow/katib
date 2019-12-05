@@ -40,7 +40,13 @@ const styles = theme => ({
     },
 })
 
+
 class TrialSpecParam extends React.Component {
+
+    componentDidMount() {
+        this.props.fetchTrialTemplates(this.props.trialNamespace);
+        this.props.changeTrialNamespace(this.props.trialNamespace);
+    }
 
     onTrialNamespaceChange = (event) => {
         this.props.fetchTrialTemplates(event.target.value);

@@ -32,8 +32,15 @@ type AlgorithmSetting struct {
 	Value string `json:"value,omitempty"`
 }
 
+// +k8s:deepcopy-gen=true
 type EarlyStoppingSpec struct {
-	// TODO
+	EarlyStoppingAlgorithmName string                 `json:"earlyStoppingAlgorithmName,omitempty"`
+	EarlyStoppingSettings      []EarlyStoppingSetting `json:"earlyStoppingSettings"`
+}
+
+type EarlyStoppingSetting struct {
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true
