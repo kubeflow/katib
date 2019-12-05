@@ -687,7 +687,6 @@ export const fetchNamespaces = function* () {
                 })
             }
         } catch (err) {
-            console.log(err)
             yield put({
                 type: generalActions.FETCH_NAMESPACES_FAILURE
             })
