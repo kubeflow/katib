@@ -36,6 +36,9 @@ const (
 )
 
 func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Trial, deployedJob *unstructured.Unstructured, jobCondition *commonv1.JobCondition) {
+	if jobCondition == nil || instance == nil || deployedJob == nil {
+		return
+	}
 	now := metav1.Now()
 	jobConditionType := (*jobCondition).Type
 	if jobConditionType == commonv1.JobSucceeded {
