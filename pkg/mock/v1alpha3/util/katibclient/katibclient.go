@@ -9,6 +9,7 @@ import (
 	v1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	v1alpha30 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	v1alpha31 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
+	v1 "k8s.io/api/core/v1"
 	reflect "reflect"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -145,6 +146,21 @@ func (m *MockClient) GetExperimentList(arg0 ...string) (*v1alpha3.ExperimentList
 func (mr *MockClientMockRecorder) GetExperimentList(arg0 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExperimentList", reflect.TypeOf((*MockClient)(nil).GetExperimentList), arg0...)
+}
+
+// GetNamespaceList mocks base method
+func (m *MockClient) GetNamespaceList() (*v1.NamespaceList, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNamespaceList")
+	ret0, _ := ret[0].(*v1.NamespaceList)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNamespaceList indicates an expected call of GetNamespaceList
+func (mr *MockClientMockRecorder) GetNamespaceList() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaceList", reflect.TypeOf((*MockClient)(nil).GetNamespaceList))
 }
 
 // GetSuggestion mocks base method
