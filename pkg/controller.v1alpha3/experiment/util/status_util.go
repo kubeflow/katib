@@ -181,7 +181,7 @@ func UpdateExperimentStatusCondition(instance *experimentsv1alpha3.Experiment, i
 }
 
 func IsCompletedExperimentRestartable(instance *experimentsv1alpha3.Experiment) bool {
-	if instance.IsCompletedReason(ExperimentMaxTrialsReachedReason) {
+	if instance.IsSucceeded() && instance.IsCompletedReason(ExperimentMaxTrialsReachedReason) {
 		return true
 	}
 	return false
