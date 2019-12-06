@@ -36,7 +36,7 @@ func (k Kubeflow) GetDeployedJobStatus(
 		}
 		log.Info("NestedFieldCopy unstructured to status error",
 			"err", "Status is not found in job")
-		return &jobCondition, nil
+		return nil, nil
 	}
 
 	statusMap := status.(map[string]interface{})
