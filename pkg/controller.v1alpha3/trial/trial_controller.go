@@ -271,8 +271,6 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha3.Trial, desiredJob
 			}
 			eventMsg := fmt.Sprintf("Job %s has been created", desiredJob.GetName())
 			r.recorder.Eventf(instance, corev1.EventTypeNormal, JobCreatedReason, eventMsg)
-			msg := "Trial is running"
-			instance.MarkTrialStatusRunning(TrialRunningReason, msg)
 		} else {
 			logger.Error(err, "Trial Get error")
 			return nil, err

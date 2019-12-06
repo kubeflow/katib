@@ -28,9 +28,10 @@ func (j Job) GetDeployedJobStatus(
 			log.Error(unerr, "NestedFieldCopy unstructured to status error")
 			return nil, unerr
 		}
-		log.Info("NestedFieldCopy unstructured to status error",
-			"err", "Status is not found in job")
-		return &jobCondition, nil
+		// Job does not have the running condition in status, thus we think
+		// the job is running when it is created.
+		log.Info("NestedFieldCopy", "err", "status cannot be found in job")
+		return nil, nil
 	}
 
 	statusMap := status.(map[string]interface{})
