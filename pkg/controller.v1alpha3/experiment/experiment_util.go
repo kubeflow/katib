@@ -14,7 +14,6 @@ import (
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
-	utilv1alpha3 "github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/util"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/util"
 )
 
@@ -102,9 +101,9 @@ func (r *ReconcileExperiment) updateFinalizers(instance *experimentsv1alpha3.Exp
 		return reconcile.Result{}, err
 	} else {
 		if !instance.ObjectMeta.DeletionTimestamp.IsZero() {
-			utilv1alpha3.IncreaseExperimentsDeletedCount()
+			r.collector.IncreaseExperimentsDeletedCount(instance.Namespace)
 		} else {
-			utilv1alpha3.IncreaseExperimentsCreatedCount()
+			r.collector.IncreaseExperimentsCreatedCount(instance.Namespace)
 		}
 		// Need to requeue because finalizer update does not change metadata.generation
 		return reconcile.Result{Requeue: true}, err

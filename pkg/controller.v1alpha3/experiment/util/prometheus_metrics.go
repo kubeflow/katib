@@ -17,50 +17,120 @@ limitations under the License.
 package util
 
 import (
+	"context"
+	"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	"github.com/prometheus/client_golang/prometheus"
-
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
-var (
-	experimentsDeletedCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_experiment_deleted_total",
-		Help: "Counts number of Experiment deleted",
-	})
-	experimentsCreatedCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_experiment_created_total",
-		Help: "Counts number of Experiment created",
-	})
-	experimentsSucceededCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_experiment_succeeded_total",
-		Help: "Counts number of Experiment succeeded",
-	})
-	experimentsFailedCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_experiment_failed_total",
-		Help: "Counts number of Experiment failed",
-	})
-)
-
-func init() {
-	metrics.Registry.MustRegister(
-		experimentsDeletedCount,
-		experimentsCreatedCount,
-		experimentsSucceededCount,
-		experimentsFailedCount)
+type ExperimentsCollector struct {
+	store           cache.Cache
+	expDeleteCount  *prometheus.CounterVec
+	expCreateCount  *prometheus.CounterVec
+	expSucceedCount *prometheus.CounterVec
+	expFailCount    *prometheus.CounterVec
+	expCurrent      *prometheus.GaugeVec
 }
 
-func IncreaseExperimentsDeletedCount() {
-	experimentsDeletedCount.Inc()
+func NewExpsCollector(store cache.Cache) *ExperimentsCollector {
+	c := &ExperimentsCollector{
+		store: store,
+		expDeleteCount: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Name: "katib_experiment_deleted_total",
+			Help: "The total number of deleted experiments",
+		}, []string{"namespace"}),
+
+		expCreateCount: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Name: "katib_experiment_created_total",
+			Help: "The total number of created experiments",
+		}, []string{"namespace"}),
+
+		expSucceedCount: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Name: "katib_experiment_succeeded_total",
+			Help: "The total numberr of succeeded experiments",
+		}, []string{"namespace"}),
+
+		expFailCount: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Name: "katib_experiment_failed_total",
+			Help: "The total number of failed experiments",
+		}, []string{"namespace"}),
+
+		expCurrent: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Name: "katib_experiments_current",
+			Help: "The number of current katib experiments in the cluster",
+		}, []string{"namespace", "status"}),
+	}
+	metrics.Registry.MustRegister(c)
+	return c
 }
 
-func IncreaseExperimentsCreatedCount() {
-	experimentsCreatedCount.Inc()
+// Describe implements the prometheus.Collector interface.
+func (m *ExperimentsCollector) Describe(ch chan<- *prometheus.Desc) {
+	m.expDeleteCount.Describe(ch)
+	m.expSucceedCount.Describe(ch)
+	m.expFailCount.Describe(ch)
+	m.expCreateCount.Describe(ch)
+	m.expCurrent.Describe(ch)
 }
 
-func IncreaseExperimentsSucceededCount() {
-	experimentsSucceededCount.Inc()
+// Collect implements the prometheus.Collector interface.
+func (m *ExperimentsCollector) Collect(ch chan<- prometheus.Metric) {
+	m.collect()
+	m.expDeleteCount.Collect(ch)
+	m.expSucceedCount.Collect(ch)
+	m.expFailCount.Collect(ch)
+	m.expCreateCount.Collect(ch)
+	m.expCurrent.Collect(ch)
 }
 
-func IncreaseExperimentsFailedCount() {
-	experimentsFailedCount.Inc()
+func (c *ExperimentsCollector) IncreaseExperimentsDeletedCount(ns string) {
+	c.expDeleteCount.WithLabelValues(ns).Inc()
+}
+
+func (c *ExperimentsCollector) IncreaseExperimentsCreatedCount(ns string) {
+	c.expCreateCount.WithLabelValues(ns).Inc()
+}
+
+func (c *ExperimentsCollector) IncreaseExperimentsSucceededCount(ns string) {
+	c.expSucceedCount.WithLabelValues(ns).Inc()
+}
+
+func (c *ExperimentsCollector) IncreaseExperimentsFailedCount(ns string) {
+	c.expFailCount.WithLabelValues(ns).Inc()
+}
+
+// collect gets the current experiments from cache.
+func (c *ExperimentsCollector) collect() {
+	var (
+		conditionType v1alpha3.ExperimentConditionType
+		status string
+		err error
+	)
+	expLists := &v1alpha3.ExperimentList{}
+	if err = c.store.List(context.TODO(), nil, expLists); err != nil {
+		return
+	}
+
+	expCache := map[string]map[string]int{}
+	for _, exp := range expLists.Items {
+		conditionType, err = exp.GetLastConditionType()
+		status = string(conditionType)
+		// If the experiment doesn't have any condition, use unknown.
+		if err != nil {
+			status = "Unknown"
+		}
+
+		if _, ok := expCache[exp.Namespace]; !ok {
+			expCache[exp.Namespace] = make(map[string]int)
+		}
+		expCache[exp.Namespace][status] += 1
+	}
+
+	c.expCurrent.Reset()
+	for ns, v := range expCache {
+		for status, count := range v {
+			c.expCurrent.WithLabelValues(ns, status).Set(float64(count))
+		}
+	}
 }
