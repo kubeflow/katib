@@ -18,6 +18,7 @@ package util
 
 import (
 	"context"
+
 	"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	"github.com/prometheus/client_golang/prometheus"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
@@ -104,8 +105,8 @@ func (c *ExperimentsCollector) IncreaseExperimentsFailedCount(ns string) {
 func (c *ExperimentsCollector) collect() {
 	var (
 		conditionType v1alpha3.ExperimentConditionType
-		status string
-		err error
+		status        string
+		err           error
 	)
 	expLists := &v1alpha3.ExperimentList{}
 	if err = c.store.List(context.TODO(), nil, expLists); err != nil {
