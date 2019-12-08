@@ -71,8 +71,21 @@ func main() {
 	if err != nil {
 		log.Fatal("UpdateExperiment from YAML failed: ", err)
 	}
+	endTime := time.Now().Add(timeout)
+	for time.Now().Before(endTime) {
+		log.Printf("Waiting for Experiment %s to start running.", exp.Name)
+		exp, err = kclient.GetExperiment(exp.Name, exp.Namespace)
+		if err != nil {
+			log.Fatal("Get Experiment error ", err)
+		}
+		if exp.IsRunning() {
+			log.Printf("Experiment %v started running", exp.Name)
+			break
+		}
+		time.Sleep(5 * time.Second)
+	}
 
-	for endTime := time.Now().Add(timeout); time.Now().Before(endTime); {
+	for time.Now().Before(endTime) {
 		exp, err = kclient.GetExperiment(exp.Name, exp.Namespace)
 		if err != nil {
 			log.Fatal("Get Experiment error ", err)
