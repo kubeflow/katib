@@ -140,7 +140,8 @@ kubectl -n kubeflow get pod
 cd ${GO_DIR}/test/e2e/v1alpha3
 
 echo "Building run-e2e-experiment for e2e test cases"
-go build -o run-e2e-experiment github.com/kubeflow/katib/test/e2e/v1alpha3
+go build -o run-e2e-experiment github.com/kubeflow/katib/test/e2e/v1alpha3/run-e2e-experiment.go
+go build -o resume-e2e-experiment github.com/kubeflow/katib/test/e2e/v1alpha3/resume-e2e-experiment.go
 
 kubectl apply -f valid-experiment.yaml
 kubectl delete -f valid-experiment.yaml

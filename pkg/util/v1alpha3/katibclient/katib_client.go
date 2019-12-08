@@ -36,6 +36,7 @@ type Client interface {
 	GetClient() client.Client
 	GetExperimentList(namespace ...string) (*experimentsv1alpha3.ExperimentList, error)
 	CreateExperiment(experiment *experimentsv1alpha3.Experiment, namespace ...string) error
+	UpdateExperiment(experiment *experimentsv1alpha3.Experiment, namespace ...string) error
 	DeleteExperiment(experiment *experimentsv1alpha3.Experiment, namespace ...string) error
 	GetExperiment(name string, namespace ...string) (*experimentsv1alpha3.Experiment, error)
 	GetConfigMap(name string, namespace ...string) (map[string]string, error)
@@ -118,6 +119,14 @@ func (k *KatibClient) GetTrialList(name string, namespace ...string) (*trialsv1a
 func (k *KatibClient) CreateExperiment(experiment *experimentsv1alpha3.Experiment, namespace ...string) error {
 
 	if err := k.client.Create(context.Background(), experiment); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (k *KatibClient) UpdateExperiment(experiment *experimentsv1alpha3.Experiment, namespace ...string) error {
+
+	if err := k.client.Update(context.Background(), experiment); err != nil {
 		return err
 	}
 	return nil
