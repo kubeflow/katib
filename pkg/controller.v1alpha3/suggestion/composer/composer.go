@@ -28,7 +28,7 @@ const (
 
 	cpuLimit   = "500m"
 	cpuRequest = "50m"
-	memLimit   = "100Mi"
+	memLimit   = "200Mi"
 	memRequest = "10Mi"
 )
 
