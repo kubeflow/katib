@@ -65,6 +65,16 @@ func (g *DefaultValidator) ValidateExperiment(instance *experimentsv1alpha3.Expe
 		return err
 	}
 
+	if instance.Spec.MaxFailedTrialCount != nil && *instance.Spec.MaxFailedTrialCount < 0 {
+		return fmt.Errorf("spec.maxFailedTrialCount should not be less than 0")
+	}
+	if instance.Spec.MaxTrialCount != nil && *instance.Spec.MaxTrialCount <= 0 {
+		return fmt.Errorf("spec.maxTrialCount must be greater than 0")
+	}
+	if instance.Spec.ParallelTrialCount != nil && *instance.Spec.ParallelTrialCount <= 0 {
+		return fmt.Errorf("spec.parallelTrialCount must be greater than 0")
+	}
+
 	return nil
 }
 
