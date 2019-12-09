@@ -73,6 +73,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 
 	r.Generator = manifest.New(r.Client)
 	r.updateStatusHandler = r.updateStatus
+	r.collector = util.NewExpsCollector(mgr.GetCache())
 	return r
 }
 
@@ -159,6 +160,8 @@ type ReconcileExperiment struct {
 	manifest.Generator
 	// updateStatusHandler is defined for test purpose.
 	updateStatusHandler updateStatusFunc
+	// collector is a wrapper for experiment metrics.
+	collector *util.ExperimentsCollector
 }
 
 // Reconcile reads that state of the cluster for a Experiment object and makes changes based on the state read
@@ -235,7 +238,7 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha3.
 		return err
 	}
 	if len(trials.Items) > 0 {
-		if err := util.UpdateExperimentStatus(instance, trials); err != nil {
+		if err := util.UpdateExperimentStatus(r.collector, instance, trials); err != nil {
 			logger.Error(err, "Update experiment status error")
 			return err
 		}

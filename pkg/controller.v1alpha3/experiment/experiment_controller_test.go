@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/util"
 	"github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/api/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -169,6 +170,7 @@ spec:
 		scheme:     mgr.GetScheme(),
 		Suggestion: suggestion,
 		Generator:  generator,
+		collector:  util.NewExpsCollector(mgr.GetCache()),
 	}
 	r.updateStatusHandler = func(instance *experimentsv1alpha3.Experiment) error {
 		if !instance.IsCreated() {
