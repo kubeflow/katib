@@ -191,8 +191,9 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		// Experiment is restartable only if it is in succeeded state by reaching max trials
 		if util.IsCompletedExperimentRestartable(instance) {
 			// Check if max trials is reconfigured
-			if (instance.Spec.MaxTrialCount != nil) &&
-				(*instance.Spec.MaxTrialCount != instance.Status.Trials) {
+			if (instance.Spec.MaxTrialCount != nil &&
+				*instance.Spec.MaxTrialCount != instance.Status.Trials) ||
+				(instance.Spec.MaxTrialCount == nil && instance.Status.Trials != 0) {
 				msg := "Experiment is restarted"
 				instance.MarkExperimentStatusRestarting(util.ExperimentRestartingReason, msg)
 			}
