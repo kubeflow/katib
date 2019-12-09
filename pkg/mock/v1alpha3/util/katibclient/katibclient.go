@@ -218,6 +218,25 @@ func (mr *MockClientMockRecorder) InjectClient(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InjectClient", reflect.TypeOf((*MockClient)(nil).InjectClient), arg0)
 }
 
+// UpdateExperiment mocks base method
+func (m *MockClient) UpdateExperiment(arg0 *v1alpha3.Experiment, arg1 ...string) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateExperiment", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateExperiment indicates an expected call of UpdateExperiment
+func (mr *MockClientMockRecorder) UpdateExperiment(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateExperiment", reflect.TypeOf((*MockClient)(nil).UpdateExperiment), varargs...)
+}
+
 // UpdateTrialTemplates mocks base method
 func (m *MockClient) UpdateTrialTemplates(arg0 map[string]string, arg1 ...string) error {
 	m.ctrl.T.Helper()

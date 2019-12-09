@@ -57,6 +57,8 @@ cd ${GO_DIR}/test/e2e/v1alpha3
 echo "Running e2e hyperopt random experiment"
 export KUBECONFIG=$HOME/.kube/config
 ./run-e2e-experiment ../../../examples/v1alpha3/random-example.yaml
+echo "Resuming the completed random experiment"
+./resume-e2e-experiment ../../../examples/v1alpha3/random-example.yaml
 kubectl -n kubeflow describe suggestion
 kubectl -n kubeflow delete experiment random-example
 kubectl describe pods

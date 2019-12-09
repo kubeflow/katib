@@ -189,8 +189,23 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		return r.updateFinalizers(instance, finalizers)
 	}
 
-	if instance.IsCompleted() && !instance.HasRunningTrials() {
-		return reconcile.Result{}, nil
+	if instance.IsCompleted() {
+		// Check if completed instance is restartable
+		// Experiment is restartable only if it is in succeeded state by reaching max trials
+		if util.IsCompletedExperimentRestartable(instance) {
+			// Check if max trials is reconfigured
+			if (instance.Spec.MaxTrialCount != nil &&
+				*instance.Spec.MaxTrialCount != instance.Status.Trials) ||
+				(instance.Spec.MaxTrialCount == nil && instance.Status.Trials != 0) {
+				msg := "Experiment is restarted"
+				instance.MarkExperimentStatusRestarting(util.ExperimentRestartingReason, msg)
+			}
+		} else {
+			// If experiment is completed with no running trials, stop reconcile
+			if !instance.HasRunningTrials() {
+				return reconcile.Result{}, nil
+			}
+		}
 	}
 	if !instance.IsCreated() {
 		if instance.Status.StartTime == nil {

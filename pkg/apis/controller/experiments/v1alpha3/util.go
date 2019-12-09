@@ -93,6 +93,14 @@ func (exp *Experiment) IsCompleted() bool {
 	return exp.IsSucceeded() || exp.IsFailed()
 }
 
+func (exp *Experiment) IsCompletedReason(reason string) bool {
+	cond := getCondition(exp, ExperimentSucceeded)
+	if cond != nil && cond.Status == v1.ConditionTrue && cond.Reason == reason {
+		return true
+	}
+	return false
+}
+
 func (exp *Experiment) HasRunningTrials() bool {
 	return exp.Status.TrialsRunning != 0
 }
@@ -129,6 +137,12 @@ func (exp *Experiment) MarkExperimentStatusCreated(reason, message string) {
 func (exp *Experiment) MarkExperimentStatusRunning(reason, message string) {
 	//exp.removeCondition(ExperimentRestarting)
 	exp.setCondition(ExperimentRunning, v1.ConditionTrue, reason, message)
+}
+
+func (exp *Experiment) MarkExperimentStatusRestarting(reason, message string) {
+	exp.removeCondition(ExperimentSucceeded)
+	exp.removeCondition(ExperimentFailed)
+	exp.setCondition(ExperimentRestarting, v1.ConditionTrue, reason, message)
 }
 
 func (exp *Experiment) MarkExperimentStatusSucceeded(reason, message string) {
