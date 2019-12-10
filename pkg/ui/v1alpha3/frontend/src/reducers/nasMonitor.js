@@ -1,6 +1,8 @@
 import * as actions from '../actions/nasMonitorActions';
 
 const initialState = {
+    experimentName: '',
+    experimentNamespace: '',
     filter: '',
     filterType: {
         "Created": true,
@@ -23,48 +25,74 @@ const nasMonitorReducer = (state = initialState, action) => {
     switch (action.type) {
         case actions.FILTER_JOBS:
             let jobs = state.jobsList.slice();
-            let newList = jobs.filter(job => job.name.includes(action.filter));
+            let newList = jobs.filter(job =>
+                (
+                    job.name.includes(action.experimentName) &&
+                    (
+                        job.namespace.includes(action.experimentNamespace) ||
+                        job.namespace.includes(action.experimentNamespace.replace("All namespaces", ""))
+                    )
+                )
+            )
+            let types = Object.assign({}, state.filterType);
+            var typeKeys = Object.keys(types);
 
-            let avTypes = Object.assign({}, state.filterType);
-            var typeKeys = Object.keys(avTypes);
-
-            var avFilters = typeKeys.filter((key) => {
-                return avTypes[key]
+            var filters = typeKeys.filter((key) => {
+                return types[key]
             });
 
-            let filteredJobs = newList.filter(job => avFilters.includes(job.status));
+            let filteredJobs = newList.filter(job => filters.includes(job.status));
 
             return {
                 ...state,
                 filteredJobsList: filteredJobs,
-                filter: action.filter,
+                experimentName: action.experimentName,
+                experimentNamespace: action.experimentNamespace
             }
         case actions.CHANGE_TYPE:
-            const types = Object.assign({}, state.filterType)
+            jobs = state.jobsList.slice();
+            newList = jobs.filter(job =>
+                (
+                    job.name.includes(state.experimentName) &&
+                    (
+                        job.namespace.includes(state.experimentNamespace) ||
+                        job.namespace.includes(state.experimentNamespace.replace("All namespaces", ""))
+                    )
+                )
+            )
+            types = Object.assign({}, state.filterType)
             types[action.filter] = action.checked;
-            var keys = Object.keys(types);
+            typeKeys = Object.keys(types);
 
-            var filters = keys.filter((key) => {
+            filters = typeKeys.filter((key) => {
                 return types[key]
             });
-            const jobsList = state.jobsList.slice();
-            const filtered = jobsList.filter(job => filters.includes(job.status));
+            filteredJobs = newList.filter(job => filters.includes(job.status));
             
             return {
                 ...state,
                 filterType: types,
-                filteredJobsList: filtered,
+                filteredJobsList: filteredJobs,
             }
         case actions.FETCH_NAS_JOBS_SUCCESS:
             jobs = action.jobs
-            avTypes = Object.assign({}, state.filterType);
-            typeKeys = Object.keys(avTypes);
+            types = Object.assign({}, state.filterType);
+            typeKeys = Object.keys(types);
 
-            avFilters = typeKeys.filter((key) => {
-                return avTypes[key]
+            filters = typeKeys.filter((key) => {
+                return types[key]
             });
 
-            filteredJobs = jobs.filter(job => avFilters.includes(job.status));
+            filteredJobs = jobs.filter(job =>
+                (
+                    filters.includes(job.status) &&
+                    job.name.includes(state.experimentName) &&
+                    (
+                        job.namespace.includes(state.experimentNamespace) ||
+                        job.namespace.includes(state.experimentNamespace.replace("All namespaces", ""))
+                    )
+                )
+            )
             return {
                 ...state,
                 jobsList: action.jobs,

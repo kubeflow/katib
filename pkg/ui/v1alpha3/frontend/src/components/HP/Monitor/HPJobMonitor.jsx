@@ -12,6 +12,7 @@ const styles = theme => ({
     root: {
         width: '90%',
         margin: '0 auto',
+        marginTop: 10
     },
 });
 
@@ -26,7 +27,7 @@ class HPJobMonitor extends React.Component {
 
         return (
             <div className={classes.root}>
-                <h1>Monitor</h1>
+                <h1>Experiment Monitor</h1>
                 <FilterPanel />
                 <HPJobList />
             </div>

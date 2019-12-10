@@ -44,6 +44,7 @@ type Client interface {
 	GetTrialTemplates(namespace ...string) (map[string]string, error)
 	GetSuggestion(name string, namespace ...string) (*suggestionsv1alpha3.Suggestion, error)
 	UpdateTrialTemplates(newTrialTemplates map[string]string, namespace ...string) error
+	GetNamespaceList() (*apiv1.NamespaceList, error)
 }
 
 type KatibClient struct {
@@ -192,4 +193,15 @@ func getNamespace(namespace ...string) string {
 		return consts.DefaultKatibNamespace
 	}
 	return namespace[0]
+}
+
+func (k *KatibClient) GetNamespaceList() (*apiv1.NamespaceList, error) {
+
+	namespaceList := &apiv1.NamespaceList{}
+	listOpt := &client.ListOptions{}
+
+	if err := k.client.List(context.TODO(), listOpt, namespaceList); err != nil {
+		return namespaceList, err
+	}
+	return namespaceList, nil
 }
