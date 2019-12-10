@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -23,7 +24,7 @@ import (
 var log = logf.Log.WithName("experiment-validating-webhook")
 
 type Validator interface {
-	ValidateExperiment(instance *experimentsv1alpha3.Experiment) error
+	ValidateExperiment(instance, oldInst *experimentsv1alpha3.Experiment) error
 	InjectClient(c client.Client)
 }
 
@@ -41,7 +42,26 @@ func (g *DefaultValidator) InjectClient(c client.Client) {
 	g.Generator.InjectClient(c)
 }
 
-func (g *DefaultValidator) ValidateExperiment(instance *experimentsv1alpha3.Experiment) error {
+func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1alpha3.Experiment) error {
+	if instance.Spec.MaxFailedTrialCount != nil && *instance.Spec.MaxFailedTrialCount < 0 {
+		return fmt.Errorf("spec.maxFailedTrialCount should not be less than 0")
+	}
+	if instance.Spec.MaxTrialCount != nil && *instance.Spec.MaxTrialCount <= 0 {
+		return fmt.Errorf("spec.maxTrialCount must be greater than 0")
+	}
+	if instance.Spec.ParallelTrialCount != nil && *instance.Spec.ParallelTrialCount <= 0 {
+		return fmt.Errorf("spec.parallelTrialCount must be greater than 0")
+	}
+	if oldInst != nil {
+		oldInst.Spec.MaxFailedTrialCount = instance.Spec.MaxFailedTrialCount
+		oldInst.Spec.MaxTrialCount = instance.Spec.MaxTrialCount
+		oldInst.Spec.ParallelTrialCount = instance.Spec.ParallelTrialCount
+		if equality.Semantic.DeepEqual(instance.Spec, oldInst.Spec) {
+			return nil
+		} else {
+			return fmt.Errorf("Only spec.parallelTrialCount, spec.maxTrialCount and spec.maxFailedTrialCount are editable.")
+		}
+	}
 	if err := g.validateObjective(instance.Spec.Objective); err != nil {
 		return err
 	}
@@ -64,17 +84,6 @@ func (g *DefaultValidator) ValidateExperiment(instance *experimentsv1alpha3.Expe
 	if err := g.validateMetricsCollector(instance); err != nil {
 		return err
 	}
-
-	if instance.Spec.MaxFailedTrialCount != nil && *instance.Spec.MaxFailedTrialCount < 0 {
-		return fmt.Errorf("spec.maxFailedTrialCount should not be less than 0")
-	}
-	if instance.Spec.MaxTrialCount != nil && *instance.Spec.MaxTrialCount <= 0 {
-		return fmt.Errorf("spec.maxTrialCount must be greater than 0")
-	}
-	if instance.Spec.ParallelTrialCount != nil && *instance.Spec.ParallelTrialCount <= 0 {
-		return fmt.Errorf("spec.parallelTrialCount must be greater than 0")
-	}
-
 	return nil
 }
 
