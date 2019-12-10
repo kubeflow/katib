@@ -35,9 +35,6 @@ data:
       },
       "nasrl": {
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-nasrl",
-        "cpuLimit": "130m",
-        "cpuRequest": "15m",
-        "memLimit": "150Mi",
-        "memRequest": "13Mi"
+        "memLimit": "200Mi"
       }
     }
