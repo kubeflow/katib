@@ -33,6 +33,22 @@ const (
 	LabelSuggestionTag = "suggestion"
 	// LabelSuggestionImageTag is the name of suggestion image config in configmap.
 	LabelSuggestionImageTag = "image"
+	// LabelSuggestionCPULimitTag is the name of suggestion CPU Limit config in configmap.
+	LabelSuggestionCPULimitTag = "cpuLimit"
+	// DefaultCPULimit is the default value for CPU Limit
+	DefaultCPULimit = "500m"
+	// LabelSuggestionCPURequestTag is the name of suggestion CPU Request config in configmap.
+	LabelSuggestionCPURequestTag = "cpuRequest"
+	// DefaultCPURequest is the default value for CPU Request
+	DefaultCPURequest = "50m"
+	// LabelSuggestionMemLimitTag is the name of suggestion Mem Limit config in configmap.
+	LabelSuggestionMemLimitTag = "memLimit"
+	// DefaultMemLimit is the default value for mem Limit
+	DefaultMemLimit = "100Mi"
+	// LabelSuggestionMemRequestTag is the name of suggestion Mem Request config in configmap.
+	LabelSuggestionMemRequestTag = "memRequest"
+	// DefaultMemRequest is the default value for mem Request
+	DefaultMemRequest = "10Mi"
 	// LabelMetricsCollectorSidecar is the name of metrics collector config in configmap.
 	LabelMetricsCollectorSidecar = "metrics-collector-sidecar"
 	// LabelMetricsCollectorSidecarImage is the name of metrics collector image config in configmap.

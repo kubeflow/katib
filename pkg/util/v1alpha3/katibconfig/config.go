@@ -14,36 +14,71 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 )
 
-func GetSuggestionContainerImage(algorithmName string, client client.Client) (string, error) {
+func GetSuggestionConfigData(algorithmName string, client client.Client) (map[string]string, error) {
 	configMap := &corev1.ConfigMap{}
+	suggestionConfigData := map[string]string{}
 	err := client.Get(
 		context.TODO(),
 		apitypes.NamespacedName{Name: consts.KatibConfigMapName, Namespace: consts.DefaultKatibNamespace},
 		configMap)
 	if err != nil {
-		return "", err
+		return map[string]string{}, err
 	}
 	if config, ok := configMap.Data[consts.LabelSuggestionTag]; ok {
-		suggestionConfig := map[string]map[string]string{}
-		if err := json.Unmarshal([]byte(config), &suggestionConfig); err != nil {
-			return "", err
+		suggestionsConfig := map[string]map[string]string{}
+		if err := json.Unmarshal([]byte(config), &suggestionsConfig); err != nil {
+			return map[string]string{}, err
 		}
-		if imageConfig, ok := suggestionConfig[algorithmName]; ok {
-			if image, yes := imageConfig[consts.LabelSuggestionImageTag]; yes {
+		if suggestionConfig, ok := suggestionsConfig[algorithmName]; ok {
+			// Get image from config
+			if image, yes := suggestionConfig[consts.LabelSuggestionImageTag]; yes {
 				if strings.TrimSpace(image) != "" {
-					return image, nil
+					suggestionConfigData[consts.LabelSuggestionImageTag] = image
 				} else {
-					return "", errors.New("Required value for " + consts.LabelSuggestionImageTag + " configuration of algorithm name " + algorithmName)
+					return map[string]string{}, errors.New("Required value for " + consts.LabelSuggestionImageTag + " configuration of algorithm name " + algorithmName)
 				}
 			} else {
-				return "", errors.New("Failed to find " + consts.LabelSuggestionImageTag + " configuration of algorithm name " + algorithmName)
+				return map[string]string{}, errors.New("Failed to find " + consts.LabelSuggestionImageTag + " configuration of algorithm name " + algorithmName)
+			}
+			// Get CPU Limit from config
+			cpuLimit, yes := suggestionConfig[consts.LabelSuggestionCPULimitTag]
+			if yes && strings.TrimSpace(cpuLimit) != "" {
+				suggestionConfigData[consts.LabelSuggestionCPULimitTag] = cpuLimit
+			} else {
+				// Set default value
+				suggestionConfigData[consts.LabelSuggestionCPULimitTag] = consts.DefaultCPULimit
+			}
+			// Get CPU Request from config
+			cpuRequest, yes := suggestionConfig[consts.LabelSuggestionCPURequestTag]
+			if yes && strings.TrimSpace(cpuRequest) != "" {
+				suggestionConfigData[consts.LabelSuggestionCPURequestTag] = cpuRequest
+			} else {
+				// Set default value
+				suggestionConfigData[consts.LabelSuggestionCPURequestTag] = consts.DefaultCPURequest
+			}
+			// Get Mem Limit from config
+			memLimit, yes := suggestionConfig[consts.LabelSuggestionMemLimitTag]
+			if yes && strings.TrimSpace(memLimit) != "" {
+				suggestionConfigData[consts.LabelSuggestionMemLimitTag] = memLimit
+			} else {
+				// Set default value
+				suggestionConfigData[consts.LabelSuggestionMemLimitTag] = consts.DefaultMemLimit
+			}
+			// Get Mem Request from config
+			memRequest, yes := suggestionConfig[consts.LabelSuggestionMemRequestTag]
+			if yes && strings.TrimSpace(memRequest) != "" {
+				suggestionConfigData[consts.LabelSuggestionMemRequestTag] = memRequest
+			} else {
+				// Set default value
+				suggestionConfigData[consts.LabelSuggestionMemRequestTag] = consts.DefaultMemRequest
 			}
 		} else {
-			return "", errors.New("Failed to find algorithm image mapping " + algorithmName)
+			return map[string]string{}, errors.New("Failed to find algorithm " + algorithmName + " config in configmap " + consts.KatibConfigMapName)
 		}
 	} else {
-		return "", errors.New("Failed to find algorithm image mapping in configmap " + consts.KatibConfigMapName)
+		return map[string]string{}, errors.New("Failed to find suggestions config in configmap " + consts.KatibConfigMapName)
 	}
+	return suggestionConfigData, nil
 }
 
 func GetMetricsCollectorImage(cKind common.CollectorKind, client client.Client) (string, error) {

@@ -23,7 +23,7 @@ type Generator interface {
 	InjectClient(c client.Client)
 	GetRunSpec(e *experimentsv1alpha3.Experiment, experiment, trial, namespace string) (string, error)
 	GetRunSpecWithHyperParameters(e *experimentsv1alpha3.Experiment, experiment, trial, namespace string, hps []commonapiv1alpha3.ParameterAssignment) (string, error)
-	GetSuggestionContainerImage(algorithmName string) (string, error)
+	GetSuggestionConfigData(algorithmName string) (map[string]string, error)
 	GetMetricsCollectorImage(cKind commonapiv1alpha3.CollectorKind) (string, error)
 }
 
@@ -48,8 +48,8 @@ func (g *DefaultGenerator) GetMetricsCollectorImage(cKind commonapiv1alpha3.Coll
 	return katibconfig.GetMetricsCollectorImage(cKind, g.client.GetClient())
 }
 
-func (g *DefaultGenerator) GetSuggestionContainerImage(algorithmName string) (string, error) {
-	return katibconfig.GetSuggestionContainerImage(algorithmName, g.client.GetClient())
+func (g *DefaultGenerator) GetSuggestionConfigData(algorithmName string) (map[string]string, error) {
+	return katibconfig.GetSuggestionConfigData(algorithmName, g.client.GetClient())
 }
 
 // GetRunSpec get the specification for trial.
