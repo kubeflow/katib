@@ -115,7 +115,7 @@ metadata:
 	}
 
 	for _, tc := range tcs {
-		err := g.ValidateExperiment(tc.Instance)
+		err := g.ValidateExperiment(tc.Instance, nil)
 		if !tc.Err && err != nil {
 			t.Errorf("Expected nil, got %v", err)
 		} else if tc.Err && err == nil {

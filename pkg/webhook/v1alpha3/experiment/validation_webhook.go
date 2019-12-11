@@ -17,7 +17,9 @@ limitations under the License.
 package experiment
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -51,9 +53,17 @@ func NewExperimentValidator(c client.Client) *experimentValidator {
 
 func (v *experimentValidator) Handle(ctx context.Context, req types.Request) types.Response {
 	inst := &experimentsv1alpha3.Experiment{}
+	var oldInst *experimentsv1alpha3.Experiment
 	err := v.decoder.Decode(req, inst)
 	if err != nil {
 		return admission.ErrorResponse(http.StatusBadRequest, err)
+	}
+	if len(req.AdmissionRequest.OldObject.Raw) > 0 {
+		oldDecoder := json.NewDecoder(bytes.NewBuffer(req.AdmissionRequest.OldObject.Raw))
+		oldInst = &experimentsv1alpha3.Experiment{}
+		if err := oldDecoder.Decode(&oldInst); err != nil {
+			return admission.ErrorResponse(http.StatusBadRequest, fmt.Errorf("cannot decode incoming old object: %v", err))
+		}
 	}
 
 	// After metrics collector sidecar injection in Job level done, delete validation for namespace labels
@@ -75,7 +85,7 @@ func (v *experimentValidator) Handle(ctx context.Context, req types.Request) typ
 		return admission.ErrorResponse(http.StatusBadRequest, err)
 	}
 
-	err = v.ValidateExperiment(inst)
+	err = v.ValidateExperiment(inst, oldInst)
 	if err != nil {
 		return admission.ErrorResponse(http.StatusBadRequest, err)
 	}
