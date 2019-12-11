@@ -104,7 +104,7 @@ func NewSidecarInjector(c client.Client, ms string) *sidecarInjector {
 }
 
 func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error) {
-	jobKind, jobName, err := getKabitJob(pod)
+	jobKind, jobName, err := getKatibJob(pod)
 	if err != nil {
 		return false, nil
 	}
@@ -131,7 +131,7 @@ func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error) {
 	mutatedPod := pod.DeepCopy()
 
-	kind, trialName, _ := getKabitJob(pod)
+	kind, trialName, _ := getKatibJob(pod)
 	trial := &trialsv1alpha3.Trial{}
 	if err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: trialName, Namespace: namespace}, trial); err != nil {
 		return nil, err
