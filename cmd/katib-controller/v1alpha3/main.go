@@ -39,10 +39,12 @@ func main() {
 
 	var experimentSuggestionName string
 	var metricsAddr string
+	var webhookPort int
 
 	flag.StringVar(&experimentSuggestionName, "experiment-suggestion-name",
 		"default", "The implementation of suggestion interface in experiment controller (default|fake)")
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
+	flag.IntVar(&webhookPort, "webhook-port", 443, "The port number to be used for admission webhook server.")
 
 	flag.Parse()
 
@@ -83,7 +85,7 @@ func main() {
 	}
 
 	log.Info("Setting up webhooks")
-	if err := webhook.AddToManager(mgr); err != nil {
+	if err := webhook.AddToManager(mgr, int32(webhookPort)); err != nil {
 		log.Error(err, "unable to register webhooks to the manager")
 		os.Exit(1)
 	}
