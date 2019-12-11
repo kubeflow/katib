@@ -24,54 +24,50 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (map[st
 	if err != nil {
 		return map[string]string{}, err
 	}
+	type suggestionConfigJSON struct {
+		Image    string                      `json:"image"`
+		Resource corev1.ResourceRequirements `json:"resources"`
+	}
 	if config, ok := configMap.Data[consts.LabelSuggestionTag]; ok {
-		suggestionsConfig := map[string]map[string]string{}
+		suggestionsConfig := map[string]suggestionConfigJSON{}
 		if err := json.Unmarshal([]byte(config), &suggestionsConfig); err != nil {
 			return map[string]string{}, err
 		}
 		if suggestionConfig, ok := suggestionsConfig[algorithmName]; ok {
 			// Get image from config
-			if image, yes := suggestionConfig[consts.LabelSuggestionImageTag]; yes {
-				if strings.TrimSpace(image) != "" {
-					suggestionConfigData[consts.LabelSuggestionImageTag] = image
-				} else {
-					return map[string]string{}, errors.New("Required value for " + consts.LabelSuggestionImageTag + " configuration of algorithm name " + algorithmName)
-				}
+			image := suggestionConfig.Image
+			if strings.TrimSpace(image) != "" {
+				suggestionConfigData[consts.LabelSuggestionImageTag] = image
 			} else {
-				return map[string]string{}, errors.New("Failed to find " + consts.LabelSuggestionImageTag + " configuration of algorithm name " + algorithmName)
+				return map[string]string{}, errors.New("Required value for " + consts.LabelSuggestionImageTag + " configuration of algorithm name " + algorithmName)
 			}
-			// Get CPU Limit from config
-			cpuLimit, yes := suggestionConfig[consts.LabelSuggestionCPULimitTag]
-			if yes && strings.TrimSpace(cpuLimit) != "" {
-				suggestionConfigData[consts.LabelSuggestionCPULimitTag] = cpuLimit
-			} else {
-				// Set default value
-				suggestionConfigData[consts.LabelSuggestionCPULimitTag] = consts.DefaultCPULimit
+
+			// Set default values for CPU and Memory
+			suggestionConfigData[consts.LabelSuggestionCPURequestTag] = consts.DefaultCPURequest
+			suggestionConfigData[consts.LabelSuggestionMemRequestTag] = consts.DefaultMemRequest
+			suggestionConfigData[consts.LabelSuggestionCPULimitTag] = consts.DefaultCPULimit
+			suggestionConfigData[consts.LabelSuggestionMemLimitTag] = consts.DefaultMemLimit
+
+			// Get CPU and Memory Requests from config
+			cpuRequest := suggestionConfig.Resource.Requests[corev1.ResourceCPU]
+			memRequest := suggestionConfig.Resource.Requests[corev1.ResourceMemory]
+			if !cpuRequest.IsZero() {
+				suggestionConfigData[consts.LabelSuggestionCPURequestTag] = cpuRequest.String()
 			}
-			// Get CPU Request from config
-			cpuRequest, yes := suggestionConfig[consts.LabelSuggestionCPURequestTag]
-			if yes && strings.TrimSpace(cpuRequest) != "" {
-				suggestionConfigData[consts.LabelSuggestionCPURequestTag] = cpuRequest
-			} else {
-				// Set default value
-				suggestionConfigData[consts.LabelSuggestionCPURequestTag] = consts.DefaultCPURequest
+			if !memRequest.IsZero() {
+				suggestionConfigData[consts.LabelSuggestionMemRequestTag] = memRequest.String()
 			}
-			// Get Mem Limit from config
-			memLimit, yes := suggestionConfig[consts.LabelSuggestionMemLimitTag]
-			if yes && strings.TrimSpace(memLimit) != "" {
-				suggestionConfigData[consts.LabelSuggestionMemLimitTag] = memLimit
-			} else {
-				// Set default value
-				suggestionConfigData[consts.LabelSuggestionMemLimitTag] = consts.DefaultMemLimit
+
+			// Get CPU and Memory Limits from config
+			cpuLimit := suggestionConfig.Resource.Limits[corev1.ResourceCPU]
+			memLimit := suggestionConfig.Resource.Limits[corev1.ResourceMemory]
+			if !cpuLimit.IsZero() {
+				suggestionConfigData[consts.LabelSuggestionCPULimitTag] = cpuLimit.String()
 			}
-			// Get Mem Request from config
-			memRequest, yes := suggestionConfig[consts.LabelSuggestionMemRequestTag]
-			if yes && strings.TrimSpace(memRequest) != "" {
-				suggestionConfigData[consts.LabelSuggestionMemRequestTag] = memRequest
-			} else {
-				// Set default value
-				suggestionConfigData[consts.LabelSuggestionMemRequestTag] = consts.DefaultMemRequest
+			if !memLimit.IsZero() {
+				suggestionConfigData[consts.LabelSuggestionMemLimitTag] = memLimit.String()
 			}
+
 		} else {
 			return map[string]string{}, errors.New("Failed to find algorithm " + algorithmName + " config in configmap " + consts.KatibConfigMapName)
 		}
