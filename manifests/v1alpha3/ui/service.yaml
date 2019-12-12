@@ -12,6 +12,7 @@ spec:
     - port: 80
       protocol: TCP
       name: ui
+      targetPort: 8080
   selector:
     app: katib
     component: ui
