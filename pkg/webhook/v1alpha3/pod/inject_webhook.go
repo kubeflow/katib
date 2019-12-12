@@ -143,7 +143,6 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	}
 	mutatedPod.Spec.Containers = append(mutatedPod.Spec.Containers, *injectContainer)
 
-	mutatedPod.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
 	mutatedPod.Spec.ShareProcessNamespace = pointer.BoolPtr(true)
 
 	mountPath, pathKind := getMountPath(trial.Spec.MetricsCollector)
