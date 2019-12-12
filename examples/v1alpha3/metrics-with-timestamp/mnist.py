@@ -68,6 +68,7 @@ def test(args, model, device, test_loader, epoch):
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
+    # This metrics will be saved by Metrics Collector
     logging.info('Test after Epoch: {}'.format(epoch))
     logging.info('accuracy={}'.format(float(correct) / len(test_loader.dataset)))
     logging.info('loss={}'.format(test_loss))
