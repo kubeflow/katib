@@ -32,7 +32,7 @@ import (
 	jobv1alpha3 "github.com/kubeflow/katib/pkg/job/v1alpha3"
 )
 
-func getKabitJob(pod *v1.Pod) (string, string, error) {
+func getKatibJob(pod *v1.Pod) (string, string, error) {
 	for _, gvk := range jobv1alpha3.GetSupportedJobList() {
 		owners := pod.GetOwnerReferences()
 		for _, owner := range owners {
