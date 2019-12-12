@@ -25,11 +25,6 @@ const (
 	defaultFailureThreshold    = 12
 	// Ref https://github.com/grpc-ecosystem/grpc-health-probe/
 	defaultGRPCHealthCheckProbe = "/bin/grpc_health_probe"
-
-	cpuLimit   = "500m"
-	cpuRequest = "50m"
-	memLimit   = "100Mi"
-	memRequest = "10Mi"
 )
 
 var log = logf.Log.WithName("suggestion-composer")
@@ -114,10 +109,16 @@ func (g *General) DesiredService(s *suggestionsv1alpha3.Suggestion) (*corev1.Ser
 }
 
 func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.Container, error) {
-	suggestionContainerImage, err := katibconfig.GetSuggestionContainerImage(s.Spec.AlgorithmName, g.Client)
+	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.AlgorithmName, g.Client)
 	if err != nil {
 		return nil, err
 	}
+	// Get Suggestion data from config
+	suggestionContainerImage := suggestionConfigData[consts.LabelSuggestionImageTag]
+	suggestionCPULimit := suggestionConfigData[consts.LabelSuggestionCPULimitTag]
+	suggestionCPURequest := suggestionConfigData[consts.LabelSuggestionCPURequestTag]
+	suggestionMemLimit := suggestionConfigData[consts.LabelSuggestionMemLimitTag]
+	suggestionMemRequest := suggestionConfigData[consts.LabelSuggestionMemRequestTag]
 	c := &corev1.Container{
 		Name: consts.ContainerSuggestion,
 	}
@@ -130,19 +131,19 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 		},
 	}
 
-	cpuLimitQuantity, err := resource.ParseQuantity(cpuLimit)
+	cpuLimitQuantity, err := resource.ParseQuantity(suggestionCPULimit)
 	if err != nil {
 		return nil, err
 	}
-	cpuRequestQuantity, err := resource.ParseQuantity(cpuRequest)
+	cpuRequestQuantity, err := resource.ParseQuantity(suggestionCPURequest)
 	if err != nil {
 		return nil, err
 	}
-	memLimitQuantity, err := resource.ParseQuantity(memLimit)
+	memLimitQuantity, err := resource.ParseQuantity(suggestionMemLimit)
 	if err != nil {
 		return nil, err
 	}
-	memRequestQuantity, err := resource.ParseQuantity(memRequest)
+	memRequestQuantity, err := resource.ParseQuantity(suggestionMemRequest)
 	if err != nil {
 		return nil, err
 	}

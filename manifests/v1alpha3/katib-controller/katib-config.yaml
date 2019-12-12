@@ -34,6 +34,11 @@ data:
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
       },
       "nasrl": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-nasrl"
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-nasrl",
+        "resources": {
+          "limits": {
+            "memory": "200Mi"
+          }
+        }
       }
     }

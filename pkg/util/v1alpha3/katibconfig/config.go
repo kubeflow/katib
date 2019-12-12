@@ -14,36 +14,67 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 )
 
-func GetSuggestionContainerImage(algorithmName string, client client.Client) (string, error) {
+func GetSuggestionConfigData(algorithmName string, client client.Client) (map[string]string, error) {
 	configMap := &corev1.ConfigMap{}
+	suggestionConfigData := map[string]string{}
 	err := client.Get(
 		context.TODO(),
 		apitypes.NamespacedName{Name: consts.KatibConfigMapName, Namespace: consts.DefaultKatibNamespace},
 		configMap)
 	if err != nil {
-		return "", err
+		return map[string]string{}, err
+	}
+	type suggestionConfigJSON struct {
+		Image    string                      `json:"image"`
+		Resource corev1.ResourceRequirements `json:"resources"`
 	}
 	if config, ok := configMap.Data[consts.LabelSuggestionTag]; ok {
-		suggestionConfig := map[string]map[string]string{}
-		if err := json.Unmarshal([]byte(config), &suggestionConfig); err != nil {
-			return "", err
+		suggestionsConfig := map[string]suggestionConfigJSON{}
+		if err := json.Unmarshal([]byte(config), &suggestionsConfig); err != nil {
+			return map[string]string{}, err
 		}
-		if imageConfig, ok := suggestionConfig[algorithmName]; ok {
-			if image, yes := imageConfig[consts.LabelSuggestionImageTag]; yes {
-				if strings.TrimSpace(image) != "" {
-					return image, nil
-				} else {
-					return "", errors.New("Required value for " + consts.LabelSuggestionImageTag + " configuration of algorithm name " + algorithmName)
-				}
+		if suggestionConfig, ok := suggestionsConfig[algorithmName]; ok {
+			// Get image from config
+			image := suggestionConfig.Image
+			if strings.TrimSpace(image) != "" {
+				suggestionConfigData[consts.LabelSuggestionImageTag] = image
 			} else {
-				return "", errors.New("Failed to find " + consts.LabelSuggestionImageTag + " configuration of algorithm name " + algorithmName)
+				return map[string]string{}, errors.New("Required value for " + consts.LabelSuggestionImageTag + " configuration of algorithm name " + algorithmName)
 			}
+
+			// Set default values for CPU and Memory
+			suggestionConfigData[consts.LabelSuggestionCPURequestTag] = consts.DefaultCPURequest
+			suggestionConfigData[consts.LabelSuggestionMemRequestTag] = consts.DefaultMemRequest
+			suggestionConfigData[consts.LabelSuggestionCPULimitTag] = consts.DefaultCPULimit
+			suggestionConfigData[consts.LabelSuggestionMemLimitTag] = consts.DefaultMemLimit
+
+			// Get CPU and Memory Requests from config
+			cpuRequest := suggestionConfig.Resource.Requests[corev1.ResourceCPU]
+			memRequest := suggestionConfig.Resource.Requests[corev1.ResourceMemory]
+			if !cpuRequest.IsZero() {
+				suggestionConfigData[consts.LabelSuggestionCPURequestTag] = cpuRequest.String()
+			}
+			if !memRequest.IsZero() {
+				suggestionConfigData[consts.LabelSuggestionMemRequestTag] = memRequest.String()
+			}
+
+			// Get CPU and Memory Limits from config
+			cpuLimit := suggestionConfig.Resource.Limits[corev1.ResourceCPU]
+			memLimit := suggestionConfig.Resource.Limits[corev1.ResourceMemory]
+			if !cpuLimit.IsZero() {
+				suggestionConfigData[consts.LabelSuggestionCPULimitTag] = cpuLimit.String()
+			}
+			if !memLimit.IsZero() {
+				suggestionConfigData[consts.LabelSuggestionMemLimitTag] = memLimit.String()
+			}
+
 		} else {
-			return "", errors.New("Failed to find algorithm image mapping " + algorithmName)
+			return map[string]string{}, errors.New("Failed to find algorithm " + algorithmName + " config in configmap " + consts.KatibConfigMapName)
 		}
 	} else {
-		return "", errors.New("Failed to find algorithm image mapping in configmap " + consts.KatibConfigMapName)
+		return map[string]string{}, errors.New("Failed to find suggestions config in configmap " + consts.KatibConfigMapName)
 	}
+	return suggestionConfigData, nil
 }
 
 func GetMetricsCollectorImage(cKind common.CollectorKind, client client.Client) (string, error) {

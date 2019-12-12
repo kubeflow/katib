@@ -9,6 +9,7 @@ import (
 
 	commonv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1alpha3/experiment/manifest"
 )
 
@@ -84,8 +85,11 @@ metadata:
   name: "fake-trial"
   namespace: fakens`
 
+	suggestionConfigData := map[string]string{}
+	suggestionConfigData[consts.LabelSuggestionImageTag] = "algorithmImage"
+
 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialJobTemplate, nil).AnyTimes()
-	p.EXPECT().GetSuggestionContainerImage(gomock.Any()).Return("algorithmImage", nil).AnyTimes()
+	p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(suggestionConfigData, nil).AnyTimes()
 	p.EXPECT().GetMetricsCollectorImage(gomock.Any()).Return("metricsCollectorImage", nil).AnyTimes()
 
 	tcs := []struct {
