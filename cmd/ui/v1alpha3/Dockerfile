@@ -22,4 +22,6 @@ WORKDIR /app
 COPY --from=go-build /go/src/github.com/kubeflow/katib/cmd/ui/katib-ui /app/
 COPY --from=npm-build /frontend/build /app/build
 
+USER 1000
+
 ENTRYPOINT ["./katib-ui"]

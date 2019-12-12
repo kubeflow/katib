@@ -43,7 +43,7 @@ spec:
             command:
             - "/bin/bash"
             - "-c"
-            - "mysql -D ${MYSQL_DATABASE} -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'"
+            - "mysql -D ${MYSQL_DATABASE} -u root -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'"
           initialDelaySeconds: 5
           periodSeconds: 10
           timeoutSeconds: 1
