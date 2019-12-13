@@ -35,7 +35,7 @@ const (
 	katibControllerName = "katib-controller"
 )
 
-func AddToManager(m manager.Manager) error {
+func AddToManager(m manager.Manager, port int32) error {
 	server, err := webhook.NewServer("katib-admission-server", m, webhook.ServerOptions{
 		CertDir: "/tmp/cert",
 		BootstrapOptions: &webhook.BootstrapOptions{
@@ -53,6 +53,7 @@ func AddToManager(m manager.Manager) error {
 			ValidatingWebhookConfigName: "katib-validating-webhook-config",
 			MutatingWebhookConfigName:   "katib-mutating-webhook-config",
 		},
+		Port: port,
 	})
 	if err != nil {
 		return err

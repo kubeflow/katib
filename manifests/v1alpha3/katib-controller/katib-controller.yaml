@@ -23,8 +23,10 @@ spec:
         image: gcr.io/kubeflow-images-public/katib/v1alpha3/katib-controller
         imagePullPolicy: IfNotPresent
         command: ["./katib-controller"]
+        args:
+        - '--webhook-port=8443'
         ports:
-        - containerPort: 443
+        - containerPort: 8443
           name: webhook
           protocol: TCP
         - containerPort: 8080
