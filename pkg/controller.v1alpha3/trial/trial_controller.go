@@ -69,6 +69,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		scheme:        mgr.GetScheme(),
 		ManagerClient: managerclient.New(),
 		recorder:      mgr.GetRecorder(ControllerName),
+		collector:     NewTrialsCollector(mgr.GetCache()),
 	}
 	r.updateStatusHandler = r.updateStatus
 	return r
@@ -137,6 +138,8 @@ type ReconcileTrial struct {
 	managerclient.ManagerClient
 	// updateStatusHandler is defined for test purpose.
 	updateStatusHandler updateStatusFunc
+	// collector is a wrapper for experiment metrics.
+	collector *TrialsCollector
 }
 
 // Reconcile reads that state of the cluster for a Trial object and makes changes based on the state read
@@ -238,7 +241,7 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1alpha3.Trial) error {
 		}
 
 		// Update Trial job status only
-		//    if job has succeded and if observation field is available.
+		//    if job has succeeded and if observation field is available.
 		//    if job has failed
 		// This will ensure that trial is set to be complete only if metric is collected at least once
 		r.UpdateTrialStatusCondition(instance, deployedJob, jobCondition)

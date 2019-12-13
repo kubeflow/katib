@@ -49,7 +49,7 @@ func NewExpsCollector(store cache.Cache) *ExperimentsCollector {
 
 		expSucceedCount: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: "katib_experiment_succeeded_total",
-			Help: "The total numberr of succeeded experiments",
+			Help: "The total number of succeeded experiments",
 		}, []string{"namespace"}),
 
 		expFailCount: prometheus.NewCounterVec(prometheus.CounterOpts{
@@ -117,7 +117,7 @@ func (c *ExperimentsCollector) collect() {
 	for _, exp := range expLists.Items {
 		conditionType, err = exp.GetLastConditionType()
 		status = string(conditionType)
-		// If the experiment doesn't have any condition, use unknown.
+		// If experiment doesn't have any condition, use unknown.
 		if err != nil {
 			status = "Unknown"
 		}
