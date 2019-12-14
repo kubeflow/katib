@@ -115,6 +115,7 @@ func TestReconcileTFJobTrial(t *testing.T) {
 		scheme:        mgr.GetScheme(),
 		ManagerClient: mc,
 		recorder:      mgr.GetRecorder(ControllerName),
+		collector:     NewTrialsCollector(mgr.GetCache()),
 	}
 
 	r.updateStatusHandler = func(instance *trialsv1alpha3.Trial) error {
@@ -189,6 +190,7 @@ func TestReconcileCompletedTFJobTrial(t *testing.T) {
 		scheme:        mgr.GetScheme(),
 		ManagerClient: mc,
 		recorder:      mgr.GetRecorder(ControllerName),
+		collector:     NewTrialsCollector(mgr.GetCache()),
 	}
 
 	r.updateStatusHandler = func(instance *trialsv1alpha3.Trial) error {
