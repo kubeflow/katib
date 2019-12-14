@@ -22,7 +22,6 @@ import (
 	"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	"github.com/prometheus/client_golang/prometheus"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
 type ExperimentsCollector struct {
@@ -34,7 +33,7 @@ type ExperimentsCollector struct {
 	expCurrent      *prometheus.GaugeVec
 }
 
-func NewExpsCollector(store cache.Cache) *ExperimentsCollector {
+func NewExpsCollector(store cache.Cache, registerer prometheus.Registerer) *ExperimentsCollector {
 	c := &ExperimentsCollector{
 		store: store,
 		expDeleteCount: prometheus.NewCounterVec(prometheus.CounterOpts{
@@ -62,7 +61,7 @@ func NewExpsCollector(store cache.Cache) *ExperimentsCollector {
 			Help: "The number of current katib experiments in the cluster",
 		}, []string{"namespace", "status"}),
 	}
-	metrics.Registry.MustRegister(c)
+	registerer.MustRegister(c)
 	return c
 }
 

@@ -38,6 +38,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
@@ -69,7 +70,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		scheme:        mgr.GetScheme(),
 		ManagerClient: managerclient.New(),
 		recorder:      mgr.GetRecorder(ControllerName),
-		collector:     NewTrialsCollector(mgr.GetCache()),
+		collector:     NewTrialsCollector(mgr.GetCache(), metrics.Registry),
 	}
 	r.updateStatusHandler = r.updateStatus
 	return r

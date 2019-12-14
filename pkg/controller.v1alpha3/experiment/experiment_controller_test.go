@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	"github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/util"
 	"github.com/onsi/gomega"
+	"github.com/prometheus/client_golang/prometheus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,6 +23,7 @@ import (
 	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/util"
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1alpha3/experiment/manifest"
 	suggestionmock "github.com/kubeflow/katib/pkg/mock/v1alpha3/experiment/suggestion"
 )
@@ -170,7 +171,7 @@ spec:
 		scheme:     mgr.GetScheme(),
 		Suggestion: suggestion,
 		Generator:  generator,
-		collector:  util.NewExpsCollector(mgr.GetCache()),
+		collector:  util.NewExpsCollector(mgr.GetCache(), prometheus.NewRegistry()),
 	}
 	r.updateStatusHandler = func(instance *experimentsv1alpha3.Experiment) error {
 		if !instance.IsCreated() {

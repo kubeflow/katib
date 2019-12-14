@@ -22,7 +22,6 @@ import (
 	"github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	"github.com/prometheus/client_golang/prometheus"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
 type TrialsCollector struct {
@@ -34,7 +33,7 @@ type TrialsCollector struct {
 	trialCurrent      *prometheus.GaugeVec
 }
 
-func NewTrialsCollector(store cache.Cache) *TrialsCollector {
+func NewTrialsCollector(store cache.Cache, registerer prometheus.Registerer) *TrialsCollector {
 	c := &TrialsCollector{
 		store: store,
 		trialDeleteCount: prometheus.NewCounterVec(prometheus.CounterOpts{
@@ -62,7 +61,7 @@ func NewTrialsCollector(store cache.Cache) *TrialsCollector {
 			Help: "The number of current katib trials in the cluster",
 		}, []string{"namespace", "status"}),
 	}
-	metrics.Registry.MustRegister(c)
+	registerer.MustRegister(c)
 	return c
 }
 
