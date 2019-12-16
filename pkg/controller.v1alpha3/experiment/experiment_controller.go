@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
@@ -73,7 +74,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 
 	r.Generator = manifest.New(r.Client)
 	r.updateStatusHandler = r.updateStatus
-	r.collector = util.NewExpsCollector(mgr.GetCache())
+	r.collector = util.NewExpsCollector(mgr.GetCache(), metrics.Registry)
 	return r
 }
 
