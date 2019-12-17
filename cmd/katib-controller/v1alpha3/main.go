@@ -40,18 +40,26 @@ func main() {
 	var experimentSuggestionName string
 	var metricsAddr string
 	var webhookPort int
+	var certLocalFS bool
 
 	flag.StringVar(&experimentSuggestionName, "experiment-suggestion-name",
 		"default", "The implementation of suggestion interface in experiment controller (default|fake)")
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.IntVar(&webhookPort, "webhook-port", 8443, "The port number to be used for admission webhook server.")
+	flag.BoolVar(&certLocalFS, "cert-localfs", false, "Store the webhook cert in local file system")
 
 	flag.Parse()
 
+	// Set the config in viper.
 	viper.Set(consts.ConfigExperimentSuggestionName, experimentSuggestionName)
+	viper.Set(consts.ConfigCertLocalFS, certLocalFS)
+
 	log.Info("Config:",
 		consts.ConfigExperimentSuggestionName,
-		viper.GetString(consts.ConfigExperimentSuggestionName))
+		viper.GetString(consts.ConfigExperimentSuggestionName),
+		consts.ConfigCertLocalFS,
+		viper.GetBool(consts.ConfigCertLocalFS),
+	)
 
 	// Get a config to talk to the apiserver
 	cfg, err := config.GetConfig()
