@@ -55,3 +55,5 @@ export const FETCH_NAMESPACES_FAILURE = "FETCH_NAMESPACES_FAILURE";
 export const fetchNamespaces = () => ({
     type: FETCH_NAMESPACES_REQUEST
 })
+
+export const CHANGE_GLOBAL_NAMESPACE = "CHANGE_GLOBAL_NAMESPACE";

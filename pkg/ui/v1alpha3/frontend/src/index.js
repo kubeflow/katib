@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/App';
+import KubeflowDashboard from './components/KubeflowDashboard'
 import * as serviceWorker from './serviceWorker';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
@@ -41,6 +42,7 @@ ReactDOM.render(
     <Provider store={store}>
         <Router basename="/">
             <MuiThemeProvider theme={theme}>
+                <KubeflowDashboard/>
                 <CssBaseline />
                 <App />
             </MuiThemeProvider>
