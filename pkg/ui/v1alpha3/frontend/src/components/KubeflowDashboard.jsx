@@ -4,6 +4,7 @@ import generalReducer from '../reducers/general';
 
 function onGlobalNamespaceChange(namespace) {
     generalReducer(undefined, {type: CHANGE_GLOBAL_NAMESPACE, globalNamespace: namespace})
+    window.location.reload()
 }
 
 class KubeflowDashboard extends React.Component {

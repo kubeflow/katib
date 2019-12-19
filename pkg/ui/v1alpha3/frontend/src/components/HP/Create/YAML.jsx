@@ -10,6 +10,7 @@ import { changeYaml } from '../../../actions/hpCreateActions';
 import { submitYaml } from '../../../actions/generalActions';
 
 const module = "hpCreate";
+const generalModule = "general";
 
 const useStyles = makeStyles ({
     root: {
@@ -39,7 +40,7 @@ const YAML = (props) => {
     };
 
     const submitWholeYaml = () => {
-        props.submitYaml(props.yaml);
+        props.submitYaml(props.yaml, props.globalNamespace);
     };
 
     const classes = useStyles();
@@ -75,6 +76,7 @@ const YAML = (props) => {
 const mapStateToProps = (state) => {
     return {
         yaml: state[module].currentYaml,
+        globalNamespace: state[generalModule].globalNamespace
     };
 };
 

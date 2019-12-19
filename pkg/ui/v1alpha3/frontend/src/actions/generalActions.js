@@ -19,9 +19,10 @@ export const SUBMIT_YAML_REQUEST = "SUBMIT_YAML_REQUEST";
 export const SUBMIT_YAML_FAILURE = "SUBMIT_YAML_FAILURE";
 export const SUBMIT_YAML_SUCCESS = "SUBMIT_YAML_SUCCESS";
 
-export const submitYaml = (yaml) => ({
+export const submitYaml = (yaml, globalNamespace) => ({
     type: SUBMIT_YAML_REQUEST,
     yaml,
+    globalNamespace
 })
 
 export const DELETE_EXPERIMENT_REQUEST = "DELETE_EXPERIMENT_REQUEST";

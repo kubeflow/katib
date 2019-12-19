@@ -12,18 +12,36 @@ export const submitYaml = function* () {
     while (true) {
         const action = yield take(generalActions.SUBMIT_YAML_REQUEST);
         try {
-            const result = yield call(
-                goSubmitYaml,
-                action.yaml
-            )
-            if (result.status === 200) {
-                yield put({
-                    type: generalActions.SUBMIT_YAML_SUCCESS,
-                })
+            let isRightNamespace = false
+            for (const [key, value] of Object.entries(action.yaml.split("\n"))) {
+                let noSpaceLine = value.replace(/\s/g,'')
+                if (noSpaceLine == "trialTemplate:") {
+                    break
+                }
+                if ((action.globalNamespace == "") || (noSpaceLine == "namespace:"+action.globalNamespace)) {
+                    isRightNamespace = true
+                    break
+                }
+            }
+            if (isRightNamespace) {
+                const result = yield call(
+                    goSubmitYaml,
+                    action.yaml
+                )
+                if (result.status === 200) {
+                    yield put({
+                        type: generalActions.SUBMIT_YAML_SUCCESS,
+                    })
+                } else {
+                    yield put({
+                        type: generalActions.SUBMIT_YAML_FAILURE,
+                        message: result.message,
+                    })
+                }
             } else {
-                yield put({
+                yield put ({
                     type: generalActions.SUBMIT_YAML_FAILURE,
-                    message: result.message,
+                    message: "You can submit experiments only in " + action.globalNamespace + " namespace!",
                 })
             }
         } catch (err) {
