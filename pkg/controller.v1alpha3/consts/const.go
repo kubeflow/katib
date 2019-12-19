@@ -6,6 +6,9 @@ const (
 	// ConfigExperimentSuggestionName is the config name of the
 	// suggestion client implementation in experiment controller.
 	ConfigExperimentSuggestionName = "experiment-suggestion-name"
+	// ConfigCertLocalFS is the config name which indicates if we
+	// should store the cert in file system.
+	ConfigCertLocalFS = "cert-local-filesystem"
 
 	// LabelExperimentName is the label of experiment name.
 	LabelExperimentName = "experiment"
