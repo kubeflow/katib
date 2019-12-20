@@ -4,7 +4,7 @@ import generalReducer from '../reducers/general';
 
 function onGlobalNamespaceChange(namespace) {
     generalReducer(undefined, {type: CHANGE_GLOBAL_NAMESPACE, globalNamespace: namespace})
-    window.location.reload()
+    window.location.replace(window.location.origin)
 }
 
 class KubeflowDashboard extends React.Component {
@@ -22,7 +22,7 @@ class KubeflowDashboard extends React.Component {
                         }
                     });
             }
-        });      
+        });
     }
 
     render () {
