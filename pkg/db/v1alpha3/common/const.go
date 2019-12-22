@@ -1,6 +1,8 @@
 package common
 
 const (
+	DBUserEnvName = "DB_USER"
+
 	DBNameEnvName = "DB_NAME"
 
 	MySqlDBNameEnvValue = "mysql"
@@ -11,6 +13,7 @@ const (
 	MySQLDBPortEnvName = "KATIB_MYSQL_PORT"
 	MySQLDatabase      = "KATIB_MYSQL_DATABASE"
 
+	DefaultMySQLUser     = "root"
 	DefaultMySQLDatabase = "katib"
 	DefaultMySQLHost     = "katib-db"
 	DefaultMySQLPort     = "3306"
