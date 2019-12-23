@@ -13,8 +13,8 @@ export const submitYaml = function* () {
         const action = yield take(generalActions.SUBMIT_YAML_REQUEST);
         try {
             let isRightNamespace = false
-            for (const [key, value] of Object.entries(action.yaml.split("\n"))) {
-                let noSpaceLine = value.replace(/\s/g,'')
+            for (const [index, value] of Object.entries(action.yaml.split("\n"))) {
+                const noSpaceLine = value.replace(/\s/g,'')
                 if (noSpaceLine == "trialTemplate:") {
                     break
                 }
