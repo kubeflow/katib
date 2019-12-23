@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	dbDriver     = "mysql"
+	dbDriver = "mysql"
 	//dbNameTmpl   = "root:%s@tcp(%s:%s)/%s?timeout=5s"
 	dbNameTmpl   = "%s:%s@tcp(%s:%s)/%s?timeout=5s"
 	mysqlTimeFmt = "2006-01-02 15:04:05.999999"
