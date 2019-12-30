@@ -75,7 +75,7 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (map[st
 				suggestionConfigData[consts.LabelSuggestionMemLimitTag] = memLimit.String()
 			}
 			if !diskLimit.IsZero() {
-				suggestionConfigData[consts.LabelSuggestionDiskRequestTag] = diskLimit.String()
+				suggestionConfigData[consts.LabelSuggestionDiskLimitTag] = diskLimit.String()
 			}
 
 		} else {
