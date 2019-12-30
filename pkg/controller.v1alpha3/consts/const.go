@@ -52,6 +52,14 @@ const (
 	LabelSuggestionMemRequestTag = "memRequest"
 	// DefaultMemRequest is the default value for mem Request
 	DefaultMemRequest = "10Mi"
+	// LabelSuggestionDiskLimitTag is the name of suggestion Disk Limit config in configmap.
+	LabelSuggestionDiskLimitTag = "diskLimit"
+	// DefaultMemLimit is the default value for mem Limit
+	DefaultDiskLimit = "5Gi"
+	// LabelSuggestionDiskRequestTag is the name of suggestion Disk Request config in configmap.
+	LabelSuggestionDiskRequestTag = "diskRequest"
+	// DefaultMemRequest is the default value for mem Request
+	DefaultDiskRequest = "500Mi"
 	// LabelMetricsCollectorSidecar is the name of metrics collector config in configmap.
 	LabelMetricsCollectorSidecar = "metrics-collector-sidecar"
 	// LabelMetricsCollectorSidecarImage is the name of metrics collector image config in configmap.
