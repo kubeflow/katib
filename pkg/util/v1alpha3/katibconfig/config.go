@@ -45,27 +45,37 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (map[st
 			// Set default values for CPU and Memory
 			suggestionConfigData[consts.LabelSuggestionCPURequestTag] = consts.DefaultCPURequest
 			suggestionConfigData[consts.LabelSuggestionMemRequestTag] = consts.DefaultMemRequest
+			suggestionConfigData[consts.LabelSuggestionDiskRequestTag] = consts.DefaultDiskRequest
 			suggestionConfigData[consts.LabelSuggestionCPULimitTag] = consts.DefaultCPULimit
 			suggestionConfigData[consts.LabelSuggestionMemLimitTag] = consts.DefaultMemLimit
+			suggestionConfigData[consts.LabelSuggestionDiskLimitTag] = consts.DefaultDiskLimit
 
 			// Get CPU and Memory Requests from config
 			cpuRequest := suggestionConfig.Resource.Requests[corev1.ResourceCPU]
 			memRequest := suggestionConfig.Resource.Requests[corev1.ResourceMemory]
+			diskRequest := suggestionConfig.Resource.Requests[corev1.ResourceEphemeralStorage]
 			if !cpuRequest.IsZero() {
 				suggestionConfigData[consts.LabelSuggestionCPURequestTag] = cpuRequest.String()
 			}
 			if !memRequest.IsZero() {
 				suggestionConfigData[consts.LabelSuggestionMemRequestTag] = memRequest.String()
 			}
+			if !diskRequest.IsZero() {
+				suggestionConfigData[consts.LabelSuggestionDiskRequestTag] = diskRequest.String()
+			}
 
 			// Get CPU and Memory Limits from config
 			cpuLimit := suggestionConfig.Resource.Limits[corev1.ResourceCPU]
 			memLimit := suggestionConfig.Resource.Limits[corev1.ResourceMemory]
+			diskLimit := suggestionConfig.Resource.Limits[corev1.ResourceEphemeralStorage]
 			if !cpuLimit.IsZero() {
 				suggestionConfigData[consts.LabelSuggestionCPULimitTag] = cpuLimit.String()
 			}
 			if !memLimit.IsZero() {
 				suggestionConfigData[consts.LabelSuggestionMemLimitTag] = memLimit.String()
+			}
+			if !diskLimit.IsZero() {
+				suggestionConfigData[consts.LabelSuggestionDiskRequestTag] = diskLimit.String()
 			}
 
 		} else {

@@ -119,6 +119,8 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 	suggestionCPURequest := suggestionConfigData[consts.LabelSuggestionCPURequestTag]
 	suggestionMemLimit := suggestionConfigData[consts.LabelSuggestionMemLimitTag]
 	suggestionMemRequest := suggestionConfigData[consts.LabelSuggestionMemRequestTag]
+	suggestionDiskLimit := suggestionConfigData[consts.LabelSuggestionDiskLimitTag]
+	suggestionDiskRequest := suggestionConfigData[consts.LabelSuggestionDiskRequestTag]
 	c := &corev1.Container{
 		Name: consts.ContainerSuggestion,
 	}
@@ -147,15 +149,25 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 	if err != nil {
 		return nil, err
 	}
+	diskLimitQuantity, err := resource.ParseQuantity(suggestionDiskLimit)
+	if err != nil {
+		return nil, err
+	}
+	diskRequestQuantity, err := resource.ParseQuantity(suggestionDiskRequest)
+	if err != nil {
+		return nil, err
+	}
 
 	c.Resources = corev1.ResourceRequirements{
 		Limits: corev1.ResourceList{
-			corev1.ResourceCPU:    cpuLimitQuantity,
-			corev1.ResourceMemory: memLimitQuantity,
+			corev1.ResourceCPU:              cpuLimitQuantity,
+			corev1.ResourceMemory:           memLimitQuantity,
+			corev1.ResourceEphemeralStorage: diskLimitQuantity,
 		},
 		Requests: corev1.ResourceList{
-			corev1.ResourceCPU:    cpuRequestQuantity,
-			corev1.ResourceMemory: memRequestQuantity,
+			corev1.ResourceCPU:              cpuRequestQuantity,
+			corev1.ResourceMemory:           memRequestQuantity,
+			corev1.ResourceEphemeralStorage: diskRequestQuantity,
 		},
 	}
 
