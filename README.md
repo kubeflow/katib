@@ -60,7 +60,9 @@ Each `Experiment` contains a configuration
 2. Search Space: Constraints for configurations describing the feasible space.
 3. Search Algorithm: How to find the optimal configurations
 
-`Experiment` is defined as a CRD. Refer to [here](docs/user-guide.md) about how to customize a `Experiment`.
+`Experiment` is defined as a CRD. See the detailed guide to [configuring and running a Katib 
+experiment](https://kubeflow.org/docs/components/hyperparameter-tuning/experiment/)
+in the Kubeflow docs.
 
 ### Suggestion
 
