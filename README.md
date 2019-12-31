@@ -34,11 +34,21 @@ The system is inspired by [Google vizier][3] and supports multiple ML/DL framewo
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+## Getting Started
+
+See the [getting-started 
+guide](https://www.kubeflow.org/docs/components/hyperparameter-tuning/hyperparameter/)
+on the Kubeflow website.
+
 ## Name
 
 Katib stands for `secretary` in Arabic. As `Vizier` stands for a high official or a prime minister in Arabic, this project Katib is named in the honor of Vizier.
 
 ## Concepts in Katib
+
+For a detailed description of the concepts in Katib, hyperparameter tuning, and
+neural architecture search, see the [Kubeflow 
+documentation](https://www.kubeflow.org/docs/components/hyperparameter-tuning/)
 
 Katib has the concepts of Experiment, Trial, Job and Suggestion.
 
@@ -94,11 +104,6 @@ Each component communicates with others via GRPC and the API is defined at `pkg/
   - katib-ui: User interface of katib.
   - katib-controller: Controller for katib CRDs in Kubernetes.
 
-
-## Getting Started
-
-Please see [here](./docs/quick-start.md) for more details.
-
 ## Web UI
 
 Katib provides a Web UI.
@@ -113,7 +118,15 @@ Please refer to [api.md](./pkg/apis/manager/v1alpha3/gen-doc/api.md).
 
 ## Installation
 
-For standard installation of Katib with support for all job operators, refer to [Kubeflow Official Docs](http://kubeflow.org) and skip this section. Or if you want to install Katib manually, follow these steps
+For standard installation of Katib with support for all job operators, 
+install Kubeflow. See the documentation:
+
+* [Kubeflow installation 
+guide](https://www.kubeflow.org/docs/started/getting-started/)
+* [Kubeflow hyperparameter tuning 
+guides](https://www.kubeflow.org/docs/components/hyperparameter-tuning/). 
+
+Alternatively, if you want to install Katib manually, follow these steps:
 
 ```
 git clone git@github.com:kubeflow/manifests.git
