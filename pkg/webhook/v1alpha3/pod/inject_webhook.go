@@ -23,9 +23,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/spf13/viper"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	apitypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -176,18 +176,64 @@ func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1alpha3.Tri
 		metricName += ";"
 		metricName += v
 	}
-	image, err := katibconfig.GetMetricsCollectorImage(mc.Collector.Kind, s.client)
+	metricsCollectorConfigData, err := katibconfig.GetMetricsCollectorConfigData(mc.Collector.Kind, s.client)
 	if err != nil {
 		return nil, err
 	}
 	args := getMetricsCollectorArgs(trial.Name, metricName, mc)
 	sidecarContainerName := getSidecarContainerName(trial.Spec.MetricsCollector.Collector.Kind)
 
+	// Get metricsCollector data from config
+	metricsCollectorContainerImage := metricsCollectorConfigData[consts.LabelMetricsCollectorSidecarImage]
+	metricsCollectorCPULimit := metricsCollectorConfigData[consts.LabelMetricsCollectorCPULimitTag]
+	metricsCollectorCPURequest := metricsCollectorConfigData[consts.LabelMetricsCollectorCPURequestTag]
+	metricsCollectorMemLimit := metricsCollectorConfigData[consts.LabelMetricsCollectorMemLimitTag]
+	metricsCollectorMemRequest := metricsCollectorConfigData[consts.LabelMetricsCollectorMemRequestTag]
+	metricsCollectorDiskLimit := metricsCollectorConfigData[consts.LabelMetricsCollectorDiskLimitTag]
+	metricsCollectorDiskRequest := metricsCollectorConfigData[consts.LabelMetricsCollectorDiskRequestTag]
+
+	cpuLimitQuantity, err := resource.ParseQuantity(metricsCollectorCPULimit)
+	if err != nil {
+		return nil, err
+	}
+	cpuRequestQuantity, err := resource.ParseQuantity(metricsCollectorCPURequest)
+	if err != nil {
+		return nil, err
+	}
+	memLimitQuantity, err := resource.ParseQuantity(metricsCollectorMemLimit)
+	if err != nil {
+		return nil, err
+	}
+	memRequestQuantity, err := resource.ParseQuantity(metricsCollectorMemRequest)
+	if err != nil {
+		return nil, err
+	}
+	diskLimitQuantity, err := resource.ParseQuantity(metricsCollectorDiskLimit)
+	if err != nil {
+		return nil, err
+	}
+	diskRequestQuantity, err := resource.ParseQuantity(metricsCollectorDiskRequest)
+	if err != nil {
+		return nil, err
+	}
+
 	injectContainer := v1.Container{
 		Name:            sidecarContainerName,
-		Image:           image,
+		Image:           metricsCollectorContainerImage,
 		Args:            args,
 		ImagePullPolicy: v1.PullIfNotPresent,
+		Resources: v1.ResourceRequirements{
+			Limits: v1.ResourceList{
+				v1.ResourceCPU:              cpuLimitQuantity,
+				v1.ResourceMemory:           memLimitQuantity,
+				v1.ResourceEphemeralStorage: diskLimitQuantity,
+			},
+			Requests: v1.ResourceList{
+				v1.ResourceCPU:              cpuRequestQuantity,
+				v1.ResourceMemory:           memRequestQuantity,
+				v1.ResourceEphemeralStorage: diskRequestQuantity,
+			},
+		},
 	}
 
 	// Inject the security context when the flag is enabled.
