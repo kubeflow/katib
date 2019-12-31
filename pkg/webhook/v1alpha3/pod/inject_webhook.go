@@ -104,7 +104,7 @@ func NewSidecarInjector(c client.Client, ms string) *sidecarInjector {
 }
 
 func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error) {
-	jobKind, jobName, err := getKabitJob(pod)
+	jobKind, jobName, err := getKatibJob(pod)
 	if err != nil {
 		return false, nil
 	}
@@ -131,23 +131,51 @@ func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error) {
 	mutatedPod := pod.DeepCopy()
 
-	kind, trialName, _ := getKabitJob(pod)
+	kind, trialName, _ := getKatibJob(pod)
 	trial := &trialsv1alpha3.Trial{}
 	if err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: trialName, Namespace: namespace}, trial); err != nil {
 		return nil, err
 	}
 
+	injectContainer, err := s.getMetricsCollectorContainer(trial)
+	if err != nil {
+		return nil, err
+	}
+	mutatedPod.Spec.Containers = append(mutatedPod.Spec.Containers, *injectContainer)
+
+	mutatedPod.Spec.ShareProcessNamespace = pointer.BoolPtr(true)
+
+	mountPath, pathKind := getMountPath(trial.Spec.MetricsCollector)
+	if mountPath != "" {
+		if err = mutateVolume(mutatedPod, kind, mountPath, injectContainer.Name, pathKind); err != nil {
+			return nil, err
+		}
+	}
+	if needWrapWorkerContainer(trial.Spec.MetricsCollector) {
+		if err = wrapWorkerContainer(mutatedPod, namespace, kind, mountPath, pathKind, trial.Spec.MetricsCollector); err != nil {
+			return nil, err
+		}
+	}
+
+	log.Info("Inject metrics collector sidecar container", "Pod", pod.Name, "Trial", trialName)
+	return mutatedPod, nil
+}
+
+func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1alpha3.Trial) (*v1.Container, error) {
+	mc := trial.Spec.MetricsCollector
+	if mc.Collector.Kind == common.CustomCollector {
+		return mc.Collector.CustomCollector, nil
+	}
 	metricName := trial.Spec.Objective.ObjectiveMetricName
 	for _, v := range trial.Spec.Objective.AdditionalMetricNames {
 		metricName += ";"
 		metricName += v
 	}
-
-	image, err := katibconfig.GetMetricsCollectorImage(trial.Spec.MetricsCollector.Collector.Kind, s.client)
+	image, err := katibconfig.GetMetricsCollectorImage(mc.Collector.Kind, s.client)
 	if err != nil {
 		return nil, err
 	}
-	args := getMetricsCollectorArgs(trialName, metricName, trial.Spec.MetricsCollector)
+	args := getMetricsCollectorArgs(trial.Name, metricName, mc)
 	sidecarContainerName := getSidecarContainerName(trial.Spec.MetricsCollector.Collector.Kind)
 	injectContainer := v1.Container{
 		Name:            sidecarContainerName,
@@ -155,29 +183,16 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		Args:            args,
 		ImagePullPolicy: v1.PullIfNotPresent,
 	}
-	mutatedPod.Spec.Containers = append(mutatedPod.Spec.Containers, injectContainer)
-	mutatedPod.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
-	mutatedPod.Spec.ShareProcessNamespace = pointer.BoolPtr(true)
-
-	if mountPath, pathKind := getMountPath(trial.Spec.MetricsCollector); mountPath != "" {
-		if err = wrapWorkerContainer(
-			mutatedPod, kind, mountPath, pathKind, trial.Spec.MetricsCollector); err != nil {
-			return nil, err
-		}
-		if err = mutateVolume(mutatedPod, kind, mountPath, sidecarContainerName, pathKind); err != nil {
-			return nil, err
-		}
-	}
-
-	log.Info("Inject metrics collector sidecar container", "Pod", pod.Name, "Trial", trialName)
-
-	return mutatedPod, nil
+	return &injectContainer, nil
 }
 
 func getMetricsCollectorArgs(trialName, metricName string, mc common.MetricsCollectorSpec) []string {
 	args := []string{"-t", trialName, "-m", metricName, "-s", katibmanagerv1alpha3.GetManagerAddr()}
 	if mountPath, _ := getMountPath(mc); mountPath != "" {
 		args = append(args, "-path", mountPath)
+	}
+	if mc.Source != nil && mc.Source.Filter != nil && len(mc.Source.Filter.MetricsFormat) > 0 {
+		args = append(args, "-f", strings.Join(mc.Source.Filter.MetricsFormat, ";"))
 	}
 	return args
 }
@@ -189,13 +204,28 @@ func getMountPath(mc common.MetricsCollectorSpec) (string, common.FileSystemKind
 		return mc.Source.FileSystemPath.Path, common.FileKind
 	} else if mc.Collector.Kind == common.TfEventCollector {
 		return mc.Source.FileSystemPath.Path, common.DirectoryKind
+	} else if mc.Collector.Kind == common.CustomCollector {
+		if mc.Source == nil || mc.Source.FileSystemPath == nil {
+			return "", common.InvalidKind
+		}
+		return mc.Source.FileSystemPath.Path, mc.Source.FileSystemPath.Kind
 	} else {
 		return "", common.InvalidKind
 	}
 }
 
+func needWrapWorkerContainer(mc common.MetricsCollectorSpec) bool {
+	mcKind := mc.Collector.Kind
+	for _, kind := range NeedWrapWorkerMetricsCollecterList {
+		if mcKind == kind {
+			return true
+		}
+	}
+	return false
+}
+
 func wrapWorkerContainer(
-	pod *v1.Pod, jobKind, metricsFile string,
+	pod *v1.Pod, namespace, jobKind, metricsFile string,
 	pathKind common.FileSystemKind,
 	mc common.MetricsCollectorSpec) error {
 	index := -1
@@ -210,15 +240,10 @@ func wrapWorkerContainer(
 		}
 	}
 	if index >= 0 {
-		// TODO(hougangliu): handle container.command is nil case
-		c := &pod.Spec.Containers[index]
 		command := []string{"sh", "-c"}
-		args := []string{}
-		if c.Command != nil {
-			args = append(args, c.Command...)
-		}
-		if c.Args != nil {
-			args = append(args, c.Args...)
+		args, err := getContainerCommand(pod, namespace, index)
+		if err != nil {
+			return err
 		}
 		if mc.Collector.Kind == common.StdOutCollector {
 			redirectStr := fmt.Sprintf("1>%s 2>&1", metricsFile)
@@ -226,6 +251,7 @@ func wrapWorkerContainer(
 		}
 		args = append(args, "&&", getMarkCompletedCommand(metricsFile, pathKind))
 		argsStr := strings.Join(args, " ")
+		c := &pod.Spec.Containers[index]
 		c.Command = command
 		c.Args = []string{argsStr}
 	}

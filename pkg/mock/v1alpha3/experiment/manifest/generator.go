@@ -35,6 +35,21 @@ func (m *MockGenerator) EXPECT() *MockGeneratorMockRecorder {
 	return m.recorder
 }
 
+// GetMetricsCollectorImage mocks base method
+func (m *MockGenerator) GetMetricsCollectorImage(arg0 v1alpha3.CollectorKind) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMetricsCollectorImage", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMetricsCollectorImage indicates an expected call of GetMetricsCollectorImage
+func (mr *MockGeneratorMockRecorder) GetMetricsCollectorImage(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMetricsCollectorImage", reflect.TypeOf((*MockGenerator)(nil).GetMetricsCollectorImage), arg0)
+}
+
 // GetRunSpec mocks base method
 func (m *MockGenerator) GetRunSpec(arg0 *v1alpha30.Experiment, arg1, arg2, arg3 string) (string, error) {
 	m.ctrl.T.Helper()
@@ -65,19 +80,19 @@ func (mr *MockGeneratorMockRecorder) GetRunSpecWithHyperParameters(arg0, arg1, a
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRunSpecWithHyperParameters", reflect.TypeOf((*MockGenerator)(nil).GetRunSpecWithHyperParameters), arg0, arg1, arg2, arg3, arg4)
 }
 
-// GetSuggestionContainerImage mocks base method
-func (m *MockGenerator) GetSuggestionContainerImage(arg0 string) (string, error) {
+// GetSuggestionConfigData mocks base method
+func (m *MockGenerator) GetSuggestionConfigData(arg0 string) (map[string]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSuggestionContainerImage", arg0)
-	ret0, _ := ret[0].(string)
+	ret := m.ctrl.Call(m, "GetSuggestionConfigData", arg0)
+	ret0, _ := ret[0].(map[string]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetSuggestionContainerImage indicates an expected call of GetSuggestionContainerImage
-func (mr *MockGeneratorMockRecorder) GetSuggestionContainerImage(arg0 interface{}) *gomock.Call {
+// GetSuggestionConfigData indicates an expected call of GetSuggestionConfigData
+func (mr *MockGeneratorMockRecorder) GetSuggestionConfigData(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestionContainerImage", reflect.TypeOf((*MockGenerator)(nil).GetSuggestionContainerImage), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestionConfigData", reflect.TypeOf((*MockGenerator)(nil).GetSuggestionConfigData), arg0)
 }
 
 // InjectClient mocks base method

@@ -16,6 +16,7 @@ limitations under the License.
 package webhook
 
 import (
+	"github.com/spf13/viper"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,14 +36,10 @@ const (
 	katibControllerName = "katib-controller"
 )
 
-func AddToManager(m manager.Manager) error {
-	server, err := webhook.NewServer("katib-admission-server", m, webhook.ServerOptions{
+func AddToManager(m manager.Manager, port int32) error {
+	so := webhook.ServerOptions{
 		CertDir: "/tmp/cert",
 		BootstrapOptions: &webhook.BootstrapOptions{
-			Secret: &types.NamespacedName{
-				Namespace: consts.DefaultKatibNamespace,
-				Name:      katibControllerName,
-			},
 			Service: &webhook.Service{
 				Namespace: consts.DefaultKatibNamespace,
 				Name:      katibControllerName,
@@ -53,7 +50,19 @@ func AddToManager(m manager.Manager) error {
 			ValidatingWebhookConfigName: "katib-validating-webhook-config",
 			MutatingWebhookConfigName:   "katib-mutating-webhook-config",
 		},
-	})
+		Port: port,
+	}
+
+	// Decide if we should use local file system.
+	// If not, we set a secret in BootstrapOptions.
+	usingFS := viper.GetBool(consts.ConfigCertLocalFS)
+	if !usingFS {
+		so.BootstrapOptions.Secret = &types.NamespacedName{
+			Namespace: consts.DefaultKatibNamespace,
+			Name:      katibControllerName,
+		}
+	}
+	server, err := webhook.NewServer("katib-admission-server", m, so)
 	if err != nil {
 		return err
 	}
@@ -67,6 +76,7 @@ func AddToManager(m manager.Manager) error {
 
 func register(manager manager.Manager, server *webhook.Server) error {
 	mutatingWebhook, err := builder.NewWebhookBuilder().
+		FailurePolicy(admissionregistrationv1beta1.Fail).
 		Name("mutating.experiment.katib.kubeflow.org").
 		Mutating().
 		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
@@ -78,6 +88,7 @@ func register(manager manager.Manager, server *webhook.Server) error {
 		return err
 	}
 	validatingWebhook, err := builder.NewWebhookBuilder().
+		FailurePolicy(admissionregistrationv1beta1.Fail).
 		Name("validating.experiment.katib.kubeflow.org").
 		Validating().
 		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
@@ -94,6 +105,7 @@ func register(manager manager.Manager, server *webhook.Server) error {
 		},
 	}
 	injectWebhook, err := builder.NewWebhookBuilder().
+		FailurePolicy(admissionregistrationv1beta1.Fail).
 		Name("mutating.pod.katib.kubeflow.org").
 		NamespaceSelector(nsSelector).
 		Mutating().

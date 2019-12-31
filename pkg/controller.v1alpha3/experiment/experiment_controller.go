@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
@@ -73,6 +74,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 
 	r.Generator = manifest.New(r.Client)
 	r.updateStatusHandler = r.updateStatus
+	r.collector = util.NewExpsCollector(mgr.GetCache(), metrics.Registry)
 	return r
 }
 
@@ -159,6 +161,8 @@ type ReconcileExperiment struct {
 	manifest.Generator
 	// updateStatusHandler is defined for test purpose.
 	updateStatusHandler updateStatusFunc
+	// collector is a wrapper for experiment metrics.
+	collector *util.ExperimentsCollector
 }
 
 // Reconcile reads that state of the cluster for a Experiment object and makes changes based on the state read
@@ -186,8 +190,23 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		return r.updateFinalizers(instance, finalizers)
 	}
 
-	if instance.IsCompleted() && !instance.HasRunningTrials() {
-		return reconcile.Result{}, nil
+	if instance.IsCompleted() {
+		// Check if completed instance is restartable
+		// Experiment is restartable only if it is in succeeded state by reaching max trials
+		if util.IsCompletedExperimentRestartable(instance) {
+			// Check if max trials is reconfigured
+			if (instance.Spec.MaxTrialCount != nil &&
+				*instance.Spec.MaxTrialCount != instance.Status.Trials) ||
+				(instance.Spec.MaxTrialCount == nil && instance.Status.Trials != 0) {
+				msg := "Experiment is restarted"
+				instance.MarkExperimentStatusRestarting(util.ExperimentRestartingReason, msg)
+			}
+		} else {
+			// If experiment is completed with no running trials, stop reconcile
+			if !instance.HasRunningTrials() {
+				return reconcile.Result{}, nil
+			}
+		}
 	}
 	if !instance.IsCreated() {
 		if instance.Status.StartTime == nil {
@@ -235,7 +254,7 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha3.
 		return err
 	}
 	if len(trials.Items) > 0 {
-		if err := util.UpdateExperimentStatus(instance, trials); err != nil {
+		if err := util.UpdateExperimentStatus(r.collector, instance, trials); err != nil {
 			logger.Error(err, "Update experiment status error")
 			return err
 		}

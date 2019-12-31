@@ -9,6 +9,7 @@ import (
 	v1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	v1alpha30 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	v1alpha31 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
+	v1 "k8s.io/api/core/v1"
 	reflect "reflect"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -147,6 +148,21 @@ func (mr *MockClientMockRecorder) GetExperimentList(arg0 ...interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExperimentList", reflect.TypeOf((*MockClient)(nil).GetExperimentList), arg0...)
 }
 
+// GetNamespaceList mocks base method
+func (m *MockClient) GetNamespaceList() (*v1.NamespaceList, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNamespaceList")
+	ret0, _ := ret[0].(*v1.NamespaceList)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNamespaceList indicates an expected call of GetNamespaceList
+func (mr *MockClientMockRecorder) GetNamespaceList() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaceList", reflect.TypeOf((*MockClient)(nil).GetNamespaceList))
+}
+
 // GetSuggestion mocks base method
 func (m *MockClient) GetSuggestion(arg0 string, arg1 ...string) (*v1alpha30.Suggestion, error) {
 	m.ctrl.T.Helper()
@@ -216,6 +232,25 @@ func (m *MockClient) InjectClient(arg0 client.Client) {
 func (mr *MockClientMockRecorder) InjectClient(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InjectClient", reflect.TypeOf((*MockClient)(nil).InjectClient), arg0)
+}
+
+// UpdateExperiment mocks base method
+func (m *MockClient) UpdateExperiment(arg0 *v1alpha3.Experiment, arg1 ...string) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateExperiment", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateExperiment indicates an expected call of UpdateExperiment
+func (mr *MockClientMockRecorder) UpdateExperiment(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateExperiment", reflect.TypeOf((*MockClient)(nil).UpdateExperiment), varargs...)
 }
 
 // UpdateTrialTemplates mocks base method

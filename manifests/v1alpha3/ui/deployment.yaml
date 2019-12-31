@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: katib-ui
@@ -8,6 +8,10 @@ metadata:
     component: ui
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: katib
+      component: ui
   template:
     metadata:
       name: katib-ui
@@ -21,6 +25,8 @@ spec:
         imagePullPolicy: IfNotPresent
         command:
           - './katib-ui'
+        args:
+          - '--port=8080'
         env:
         - name: KATIB_CORE_NAMESPACE
           valueFrom:
@@ -28,5 +34,5 @@ spec:
               fieldPath: metadata.namespace
         ports:
         - name: ui
-          containerPort: 80
+          containerPort: 8080
       serviceAccountName: katib-ui

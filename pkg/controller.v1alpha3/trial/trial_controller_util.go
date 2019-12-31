@@ -36,6 +36,9 @@ const (
 )
 
 func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Trial, deployedJob *unstructured.Unstructured, jobCondition *commonv1.JobCondition) {
+	if jobCondition == nil || instance == nil || deployedJob == nil {
+		return
+	}
 	now := metav1.Now()
 	jobConditionType := (*jobCondition).Type
 	if jobConditionType == commonv1.JobSucceeded {
@@ -46,7 +49,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Tri
 
 			eventMsg := fmt.Sprintf("Job %s has succeeded", deployedJob.GetName())
 			r.recorder.Eventf(instance, corev1.EventTypeNormal, JobSucceededReason, eventMsg)
-			IncreaseTrialsSucceededCount()
+			r.collector.IncreaseTrialsSucceededCount(instance.Namespace)
 		} else {
 			msg := "Metrics are not available"
 			instance.MarkTrialStatusSucceeded(corev1.ConditionFalse, TrialMetricsUnavailableReason, msg)
@@ -62,9 +65,18 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Tri
 		jobConditionMessage := (*jobCondition).Message
 		eventMsg := fmt.Sprintf("Job %s has failed: %s", deployedJob.GetName(), jobConditionMessage)
 		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobFailedReason, eventMsg)
-		IncreaseTrialsFailedCount()
+		r.collector.IncreaseTrialsFailedCount(instance.Namespace)
+	} else if jobConditionType == commonv1.JobRunning {
+		msg := "Trial is running"
+		instance.MarkTrialStatusRunning(TrialRunningReason, msg)
+		jobConditionMessage := (*jobCondition).Message
+		eventMsg := fmt.Sprintf("Job %s is running: %s",
+			deployedJob.GetName(), jobConditionMessage)
+		r.recorder.Eventf(instance, corev1.EventTypeNormal,
+			JobRunningReason, eventMsg)
+		// TODO(gaocegege): Should we maintain a TrialsRunningCount?
 	}
-	//else nothing to do
+	// else nothing to do
 	return
 }
 
@@ -108,9 +120,9 @@ func (r *ReconcileTrial) updateFinalizers(instance *trialsv1alpha3.Trial, finali
 		return reconcile.Result{}, err
 	} else {
 		if isDelete {
-			IncreaseTrialsDeletedCount()
+			r.collector.IncreaseTrialsDeletedCount(instance.Namespace)
 		} else {
-			IncreaseTrialsCreatedCount()
+			r.collector.IncreaseTrialsCreatedCount(instance.Namespace)
 		}
 		// Need to requeue because finalizer update does not change metadata.generation
 		return reconcile.Result{Requeue: true}, err
@@ -118,6 +130,9 @@ func (r *ReconcileTrial) updateFinalizers(instance *trialsv1alpha3.Trial, finali
 }
 
 func isTrialObservationAvailable(instance *trialsv1alpha3.Trial) bool {
+	if instance == nil {
+		return false
+	}
 	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
 	if instance.Status.Observation != nil && instance.Status.Observation.Metrics != nil {
 		for _, metric := range instance.Status.Observation.Metrics {
@@ -130,6 +145,9 @@ func isTrialObservationAvailable(instance *trialsv1alpha3.Trial) bool {
 }
 
 func isTrialComplete(instance *trialsv1alpha3.Trial, jobCondition *commonv1.JobCondition) bool {
+	if jobCondition == nil || instance == nil {
+		return false
+	}
 	jobConditionType := (*jobCondition).Type
 	if jobConditionType == commonv1.JobSucceeded && isTrialObservationAvailable(instance) {
 		return true
@@ -142,6 +160,9 @@ func isTrialComplete(instance *trialsv1alpha3.Trial, jobCondition *commonv1.JobC
 }
 
 func isJobSucceeded(jobCondition *commonv1.JobCondition) bool {
+	if jobCondition == nil {
+		return false
+	}
 	jobConditionType := (*jobCondition).Type
 	if jobConditionType == commonv1.JobSucceeded {
 		return true

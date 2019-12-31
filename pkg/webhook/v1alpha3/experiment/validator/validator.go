@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -16,12 +18,13 @@ import (
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/manifest"
 	jobv1alpha3 "github.com/kubeflow/katib/pkg/job/v1alpha3"
+	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1alpha3/common"
 )
 
 var log = logf.Log.WithName("experiment-validating-webhook")
 
 type Validator interface {
-	ValidateExperiment(instance *experimentsv1alpha3.Experiment) error
+	ValidateExperiment(instance, oldInst *experimentsv1alpha3.Experiment) error
 	InjectClient(c client.Client)
 }
 
@@ -39,7 +42,26 @@ func (g *DefaultValidator) InjectClient(c client.Client) {
 	g.Generator.InjectClient(c)
 }
 
-func (g *DefaultValidator) ValidateExperiment(instance *experimentsv1alpha3.Experiment) error {
+func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1alpha3.Experiment) error {
+	if instance.Spec.MaxFailedTrialCount != nil && *instance.Spec.MaxFailedTrialCount < 0 {
+		return fmt.Errorf("spec.maxFailedTrialCount should not be less than 0")
+	}
+	if instance.Spec.MaxTrialCount != nil && *instance.Spec.MaxTrialCount <= 0 {
+		return fmt.Errorf("spec.maxTrialCount must be greater than 0")
+	}
+	if instance.Spec.ParallelTrialCount != nil && *instance.Spec.ParallelTrialCount <= 0 {
+		return fmt.Errorf("spec.parallelTrialCount must be greater than 0")
+	}
+	if oldInst != nil {
+		oldInst.Spec.MaxFailedTrialCount = instance.Spec.MaxFailedTrialCount
+		oldInst.Spec.MaxTrialCount = instance.Spec.MaxTrialCount
+		oldInst.Spec.ParallelTrialCount = instance.Spec.ParallelTrialCount
+		if equality.Semantic.DeepEqual(instance.Spec, oldInst.Spec) {
+			return nil
+		} else {
+			return fmt.Errorf("Only spec.parallelTrialCount, spec.maxTrialCount and spec.maxFailedTrialCount are editable.")
+		}
+	}
 	if err := g.validateObjective(instance.Spec.Objective); err != nil {
 		return err
 	}
@@ -62,7 +84,6 @@ func (g *DefaultValidator) ValidateExperiment(instance *experimentsv1alpha3.Expe
 	if err := g.validateMetricsCollector(instance); err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -87,7 +108,7 @@ func (g *DefaultValidator) validateAlgorithm(ag *commonapiv1alpha3.AlgorithmSpec
 		return fmt.Errorf("No spec.algorithm.name specified.")
 	}
 
-	if _, err := g.GetSuggestionContainerImage(ag.AlgorithmName); err != nil {
+	if _, err := g.GetSuggestionConfigData(ag.AlgorithmName); err != nil {
 		return fmt.Errorf("Don't support algorithm %s: %v.", ag.AlgorithmName, err)
 	}
 
@@ -136,9 +157,16 @@ func (g *DefaultValidator) validateSupportedJob(job *unstructured.Unstructured) 
 func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1alpha3.Experiment) error {
 	mcSpec := inst.Spec.MetricsCollectorSpec
 	mcKind := mcSpec.Collector.Kind
-	// TODO(hougangliu):
-	// 1. validate .spec.metricsCollectorSpec.source.filter
-	// 2. log warning message if some field will not be used for the metricsCollector kind
+	for _, mc := range mccommon.AutoInjectMetricsCollecterList {
+		if mcKind != mc {
+			continue
+		}
+		if _, err := g.GetMetricsCollectorImage(mcKind); err != nil {
+			return fmt.Errorf("Don't support metrics collector kind %q: %v.", string(mcKind), err)
+		}
+		break
+	}
+	// TODO(hougangliu): log warning message if some field will not be used for the metricsCollector kind
 	switch mcKind {
 	case commonapiv1alpha3.NoneCollector, commonapiv1alpha3.StdOutCollector:
 		return nil
@@ -164,8 +192,27 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1alpha3.Ex
 		if mcSpec.Collector.CustomCollector == nil {
 			return fmt.Errorf(".spec.metricsCollectorSpec.collector.customCollector is required for metrics collector kind: %v.", mcKind)
 		}
+		if mcSpec.Source.FileSystemPath != nil {
+			if !filepath.IsAbs(mcSpec.Source.FileSystemPath.Path) || (mcSpec.Source.FileSystemPath.Kind != commonapiv1alpha3.DirectoryKind &&
+				mcSpec.Source.FileSystemPath.Kind != commonapiv1alpha3.FileKind) {
+				return fmt.Errorf(".spec.metricsCollectorSpec.source is invalid")
+			}
+		}
 	default:
 		return fmt.Errorf("Invalid metrics collector kind: %v.", mcKind)
+	}
+	if mcSpec.Source != nil && mcSpec.Source.Filter != nil && len(mcSpec.Source.Filter.MetricsFormat) > 0 {
+		// the filter regular expression must have two top subexpressions, the first matched one will be taken as metric name, the second one as metric value
+		mustTwoBracket, _ := regexp.Compile(`.*\(.*\).*\(.*\).*`)
+		for _, mFormat := range mcSpec.Source.Filter.MetricsFormat {
+			if _, err := regexp.Compile(mFormat); err != nil {
+				return fmt.Errorf("Invalid %q in .spec.metricsCollectorSpec.source.filter: %v.", mFormat, err)
+			} else {
+				if !mustTwoBracket.MatchString(mFormat) {
+					return fmt.Errorf("Invalid %q in .spec.metricsCollectorSpec.source.filter: two top subexpressions are required", mFormat)
+				}
+			}
+		}
 	}
 
 	return nil

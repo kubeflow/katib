@@ -7,6 +7,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/onsi/gomega"
+	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/net/context"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -115,6 +116,7 @@ func TestReconcileTFJobTrial(t *testing.T) {
 		scheme:        mgr.GetScheme(),
 		ManagerClient: mc,
 		recorder:      mgr.GetRecorder(ControllerName),
+		collector:     NewTrialsCollector(mgr.GetCache(), prometheus.NewRegistry()),
 	}
 
 	r.updateStatusHandler = func(instance *trialsv1alpha3.Trial) error {
@@ -189,6 +191,7 @@ func TestReconcileCompletedTFJobTrial(t *testing.T) {
 		scheme:        mgr.GetScheme(),
 		ManagerClient: mc,
 		recorder:      mgr.GetRecorder(ControllerName),
+		collector:     NewTrialsCollector(mgr.GetCache(), prometheus.NewRegistry()),
 	}
 
 	r.updateStatusHandler = func(instance *trialsv1alpha3.Trial) error {

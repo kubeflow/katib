@@ -51,7 +51,7 @@ spec:
               spec:
                 containers:
                 - name: {{.Trial}}
-                  image: docker.io/katib/mxnet-mnist-example
+                  image: docker.io/kubeflowkatib/mxnet-mnist-example
                   command:
                   - "python"
                   - "/mxnet/example/image-classification/train_mnist.py"

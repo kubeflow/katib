@@ -5,6 +5,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -108,10 +109,18 @@ func (g *General) DesiredService(s *suggestionsv1alpha3.Suggestion) (*corev1.Ser
 }
 
 func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.Container, error) {
-	suggestionContainerImage, err := katibconfig.GetSuggestionContainerImage(s.Spec.AlgorithmName, g.Client)
+	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.AlgorithmName, g.Client)
 	if err != nil {
 		return nil, err
 	}
+	// Get Suggestion data from config
+	suggestionContainerImage := suggestionConfigData[consts.LabelSuggestionImageTag]
+	suggestionCPULimit := suggestionConfigData[consts.LabelSuggestionCPULimitTag]
+	suggestionCPURequest := suggestionConfigData[consts.LabelSuggestionCPURequestTag]
+	suggestionMemLimit := suggestionConfigData[consts.LabelSuggestionMemLimitTag]
+	suggestionMemRequest := suggestionConfigData[consts.LabelSuggestionMemRequestTag]
+	suggestionDiskLimit := suggestionConfigData[consts.LabelSuggestionDiskLimitTag]
+	suggestionDiskRequest := suggestionConfigData[consts.LabelSuggestionDiskRequestTag]
 	c := &corev1.Container{
 		Name: consts.ContainerSuggestion,
 	}
@@ -123,6 +132,45 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 			ContainerPort: consts.DefaultSuggestionPort,
 		},
 	}
+
+	cpuLimitQuantity, err := resource.ParseQuantity(suggestionCPULimit)
+	if err != nil {
+		return nil, err
+	}
+	cpuRequestQuantity, err := resource.ParseQuantity(suggestionCPURequest)
+	if err != nil {
+		return nil, err
+	}
+	memLimitQuantity, err := resource.ParseQuantity(suggestionMemLimit)
+	if err != nil {
+		return nil, err
+	}
+	memRequestQuantity, err := resource.ParseQuantity(suggestionMemRequest)
+	if err != nil {
+		return nil, err
+	}
+	diskLimitQuantity, err := resource.ParseQuantity(suggestionDiskLimit)
+	if err != nil {
+		return nil, err
+	}
+	diskRequestQuantity, err := resource.ParseQuantity(suggestionDiskRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	c.Resources = corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:              cpuLimitQuantity,
+			corev1.ResourceMemory:           memLimitQuantity,
+			corev1.ResourceEphemeralStorage: diskLimitQuantity,
+		},
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:              cpuRequestQuantity,
+			corev1.ResourceMemory:           memRequestQuantity,
+			corev1.ResourceEphemeralStorage: diskRequestQuantity,
+		},
+	}
+
 	c.ReadinessProbe = &corev1.Probe{
 		Handler: corev1.Handler{
 			Exec: &corev1.ExecAction{

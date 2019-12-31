@@ -36,6 +36,7 @@ type Client interface {
 	GetClient() client.Client
 	GetExperimentList(namespace ...string) (*experimentsv1alpha3.ExperimentList, error)
 	CreateExperiment(experiment *experimentsv1alpha3.Experiment, namespace ...string) error
+	UpdateExperiment(experiment *experimentsv1alpha3.Experiment, namespace ...string) error
 	DeleteExperiment(experiment *experimentsv1alpha3.Experiment, namespace ...string) error
 	GetExperiment(name string, namespace ...string) (*experimentsv1alpha3.Experiment, error)
 	GetConfigMap(name string, namespace ...string) (map[string]string, error)
@@ -43,6 +44,7 @@ type Client interface {
 	GetTrialTemplates(namespace ...string) (map[string]string, error)
 	GetSuggestion(name string, namespace ...string) (*suggestionsv1alpha3.Suggestion, error)
 	UpdateTrialTemplates(newTrialTemplates map[string]string, namespace ...string) error
+	GetNamespaceList() (*apiv1.NamespaceList, error)
 }
 
 type KatibClient struct {
@@ -123,6 +125,14 @@ func (k *KatibClient) CreateExperiment(experiment *experimentsv1alpha3.Experimen
 	return nil
 }
 
+func (k *KatibClient) UpdateExperiment(experiment *experimentsv1alpha3.Experiment, namespace ...string) error {
+
+	if err := k.client.Update(context.Background(), experiment); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (k *KatibClient) DeleteExperiment(experiment *experimentsv1alpha3.Experiment, namespace ...string) error {
 
 	if err := k.client.Delete(context.Background(), experiment); err != nil {
@@ -183,4 +193,15 @@ func getNamespace(namespace ...string) string {
 		return consts.DefaultKatibNamespace
 	}
 	return namespace[0]
+}
+
+func (k *KatibClient) GetNamespaceList() (*apiv1.NamespaceList, error) {
+
+	namespaceList := &apiv1.NamespaceList{}
+	listOpt := &client.ListOptions{}
+
+	if err := k.client.List(context.TODO(), listOpt, namespaceList); err != nil {
+		return namespaceList, err
+	}
+	return namespaceList, nil
 }

@@ -95,7 +95,10 @@ type ExperimentStatus struct {
 	TrialsRunning int32 `json:"trialsRunning,omitempty"`
 }
 
+// OptimalTrial is the metrics and assignments of the best trial.
 type OptimalTrial struct {
+	// BestTrialName is the name of the best trial.
+	BestTrialName string `json:"bestTrialName"`
 	// Key-value pairs for hyperparameters and assignment values.
 	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments"`
 

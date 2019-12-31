@@ -63,7 +63,7 @@ def test(args, model, device, test_loader, epoch):
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
-    logging.info('\naccuracy={:.4f}\n'.format(float(correct) / len(test_loader.dataset)))
+    logging.info('\n{{metricName: accuracy, metricValue: {:.4f}}};{{metricName: loss, metricValue: {:.4f}}}\n'.format(float(correct) / len(test_loader.dataset), test_loss))
 
 
 def should_distribute():

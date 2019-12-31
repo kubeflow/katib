@@ -667,6 +667,47 @@ const goDeleteTemplate = function* (name, kind, action) {
     }
 }
 
+export const fetchNamespaces = function* () {
+    while (true) {
+        const action = yield take(generalActions.FETCH_NAMESPACES_REQUEST);
+        try {
+            const result = yield call(
+                goFetchNamespaces
+            )
+            if (result.status === 200) {
+                let data = result.data
+                data.unshift("All namespaces")
+                yield put({
+                    type: generalActions.FETCH_NAMESPACES_SUCCESS,
+                    namespaces: data
+                })
+            } else {
+                yield put ({
+                    type: generalActions.FETCH_NAMESPACES_FAILURE
+                })
+            }
+        } catch (err) {
+            yield put({
+                type: generalActions.FETCH_NAMESPACES_FAILURE
+            })
+        }
+    }
+}
+
+const goFetchNamespaces = function* () {
+    try {
+        const result = yield call (
+            axios.get,
+            '/katib/fetch_namespaces'
+        )
+        return result
+    } catch (err) {
+        yield put ({
+            type: generalActions.FETCH_NAMESPACES_FAILURE
+        })
+    }
+}
+
 export default function* rootSaga() {
     yield all([
         fork(fetchTrialTemplates),
@@ -682,6 +723,7 @@ export default function* rootSaga() {
         fork(fetchHPJobInfo),
         fork(fetchHPJob),
         fork(fetchHPJobTrialInfo),
-        fork(fetchNASJobInfo)
+        fork(fetchNASJobInfo),
+        fork(fetchNamespaces)
     ]);
 };

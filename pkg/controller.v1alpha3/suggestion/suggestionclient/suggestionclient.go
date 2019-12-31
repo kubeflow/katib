@@ -17,7 +17,6 @@ import (
 	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	suggestionapi "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
-	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/util"
 )
 
@@ -103,7 +102,7 @@ func (g *General) SyncAssignments(
 // ValidateAlgorithmSettings validates if the algorithm specific configurations are valid.
 func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1alpha3.Suggestion, e *experimentsv1alpha3.Experiment) error {
 	logger := log.WithValues("Suggestion", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	endpoint := fmt.Sprintf("%s:%d", instance.Name, consts.DefaultSuggestionPort)
+	endpoint := util.GetAlgorithmEndpoint(instance)
 	conn, err := grpc.Dial(endpoint, grpc.WithInsecure())
 	if err != nil {
 		return err

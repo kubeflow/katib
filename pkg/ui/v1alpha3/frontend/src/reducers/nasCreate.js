@@ -345,6 +345,7 @@ const initialState = {
     ],
     allParameterTypes: ["int", "double", "categorical"],
     trial: 'nasRLTrialTemplate.yaml',
+    trialNamespace: "kubeflow",
     currentYaml: '',
     snackText: '',
     snackOpen: false,

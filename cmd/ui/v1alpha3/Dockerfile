@@ -9,7 +9,7 @@ FROM golang:alpine AS go-build
 # The GOPATH in the image is /go.
 ADD . /go/src/github.com/kubeflow/katib
 WORKDIR /go/src/github.com/kubeflow/katib/cmd/ui
-RUN if [ "$(uname -m)" = "ppc64le" ]; then \
+RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
         apk --update add gcc musl-dev  && \
 	go build -o katib-ui ./v1alpha3; \
     else \
@@ -21,5 +21,7 @@ WORKDIR /app
 # v1alpha3 source code
 COPY --from=go-build /go/src/github.com/kubeflow/katib/cmd/ui/katib-ui /app/
 COPY --from=npm-build /frontend/build /app/build
+
+USER 1000
 
 ENTRYPOINT ["./katib-ui"]
