@@ -32,19 +32,15 @@ import (
 	"github.com/kubeflow/katib/pkg/webhook/v1alpha3/pod"
 )
 
-const (
-	katibControllerName = "katib-controller"
-)
-
-func AddToManager(m manager.Manager, port int32) error {
+func AddToManager(m manager.Manager, port int32, serviceName string) error {
 	so := webhook.ServerOptions{
 		CertDir: "/tmp/cert",
 		BootstrapOptions: &webhook.BootstrapOptions{
 			Service: &webhook.Service{
 				Namespace: consts.DefaultKatibNamespace,
-				Name:      katibControllerName,
+				Name:      serviceName,
 				Selectors: map[string]string{
-					"app": katibControllerName,
+					"app": serviceName,
 				},
 			},
 			ValidatingWebhookConfigName: "katib-validating-webhook-config",
