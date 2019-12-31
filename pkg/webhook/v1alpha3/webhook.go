@@ -55,7 +55,7 @@ func AddToManager(m manager.Manager, port int32, serviceName string) error {
 	if !usingFS {
 		so.BootstrapOptions.Secret = &types.NamespacedName{
 			Namespace: consts.DefaultKatibNamespace,
-			Name:      katibControllerName,
+			Name:      serviceName,
 		}
 	}
 	server, err := webhook.NewServer("katib-admission-server", m, so)
