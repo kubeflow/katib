@@ -48,7 +48,7 @@ Katib stands for `secretary` in Arabic. As `Vizier` stands for a high official o
 
 For a detailed description of the concepts in Katib, hyperparameter tuning, and
 neural architecture search, see the [Kubeflow 
-documentation](https://www.kubeflow.org/docs/components/hyperparameter-tuning/)
+documentation](https://www.kubeflow.org/docs/components/hyperparameter-tuning/overview/).
 
 Katib has the concepts of Experiment, Trial, Job and Suggestion.
 
