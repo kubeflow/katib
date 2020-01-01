@@ -137,7 +137,7 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		return nil, err
 	}
 
-	injectContainer, err := s.getMetricsCollectorContainer(trial)
+	injectContainer, err := s.getMetricsCollectorContainer(trial, pod)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +161,7 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	return mutatedPod, nil
 }
 
-func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1alpha3.Trial) (*v1.Container, error) {
+func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1alpha3.Trial, originalPod *v1.Pod) (*v1.Container, error) {
 	mc := trial.Spec.MetricsCollector
 	if mc.Collector.Kind == common.CustomCollector {
 		return mc.Collector.CustomCollector, nil
@@ -177,11 +177,13 @@ func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1alpha3.Tri
 	}
 	args := getMetricsCollectorArgs(trial.Name, metricName, mc)
 	sidecarContainerName := getSidecarContainerName(trial.Spec.MetricsCollector.Collector.Kind)
+	securityContext := originalPod.Spec.Containers[0].SecurityContext.DeepCopy()
 	injectContainer := v1.Container{
 		Name:            sidecarContainerName,
 		Image:           image,
 		Args:            args,
 		ImagePullPolicy: v1.PullIfNotPresent,
+		SecurityContext: securityContext,
 	}
 	return &injectContainer, nil
 }
