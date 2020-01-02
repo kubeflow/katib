@@ -112,7 +112,7 @@ func register(manager manager.Manager, server *webhook.Server) error {
 		Operations(admissionregistrationv1beta1.Create).
 		WithManager(manager).
 		ForType(&v1.Pod{}).
-		Handlers(pod.NewSidecarInjector(manager.GetClient(), manager.GetConfig().Host)).
+		Handlers(pod.NewSidecarInjector(manager.GetClient())).
 		Build()
 	if err != nil {
 		return err
