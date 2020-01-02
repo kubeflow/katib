@@ -9,6 +9,10 @@ const (
 	// ConfigCertLocalFS is the config name which indicates if we
 	// should store the cert in file system.
 	ConfigCertLocalFS = "cert-local-filesystem"
+	// ConfigInjectSecurityContext is the config name which indicates
+	// if we should inject the security context into the metrics collector
+	// sidecar.
+	ConfigInjectSecurityContext = "inject-security-context"
 
 	// LabelExperimentName is the label of experiment name.
 	LabelExperimentName = "experiment"
