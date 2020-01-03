@@ -9,7 +9,8 @@ const initialState = {
     deleteDialog: false,
     deleteId: '',
     namespaces: [
-    ]
+    ],
+    globalNamespace: ""
 };
 
 const generalReducer = (state = initialState, action) => {
@@ -104,6 +105,12 @@ const generalReducer = (state = initialState, action) => {
             return {
                 ...state,
                 namespaces: action.namespaces
+            }
+        case actions.CHANGE_GLOBAL_NAMESPACE:
+            state.globalNamespace = action.globalNamespace
+            return {
+                ...state,
+                globalNamespace: action.globalNamespace
             }
         default:
             return state;

@@ -30,8 +30,9 @@ const hpMonitorReducer = (state = initialState, action) => {
                 (
                     job.name.includes(action.experimentName) &&
                     (
-                        job.namespace.includes(action.experimentNamespace) ||
-                        job.namespace.includes(action.experimentNamespace.replace("All namespaces", ""))
+                        job.namespace == action.experimentNamespace ||
+                        action.experimentNamespace == "All namespaces" ||
+                        action.experimentNamespace.length == 0
                     )
                 )
             )
@@ -56,8 +57,9 @@ const hpMonitorReducer = (state = initialState, action) => {
                 (
                     job.name.includes(state.experimentName) &&
                     (
-                        job.namespace.includes(state.experimentNamespace) ||
-                        job.namespace.includes(state.experimentNamespace.replace("All namespaces", ""))
+                        job.namespace == state.experimentNamespace ||
+                        state.experimentNamespace == "All namespaces" ||
+                        state.experimentNamespace.length == 0
                     )
                 )
             )
@@ -89,8 +91,9 @@ const hpMonitorReducer = (state = initialState, action) => {
                     filters.includes(job.status) &&
                     job.name.includes(state.experimentName) &&
                     (
-                        job.namespace.includes(state.experimentNamespace) ||
-                        job.namespace.includes(state.experimentNamespace.replace("All namespaces", ""))
+                        job.namespace == state.experimentNamespace ||
+                        state.experimentNamespace == "All namespaces" ||
+                        state.experimentNamespace.length == 0
                     )
                 )
             )
