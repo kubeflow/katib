@@ -6,16 +6,26 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 )
 
+// SuggestionLabels returns the expected suggestion labels.
 func SuggestionLabels(instance *suggestionsv1alpha3.Suggestion) map[string]string {
-	return map[string]string{
-		"deployment":               GetAlgorithmDeploymentName(instance),
-		consts.LabelExperimentName: instance.Name,
-		consts.LabelSuggestionName: instance.Name,
+	res := make(map[string]string)
+	for k, v := range instance.Labels {
+		res[k] = v
 	}
+	res[consts.LabelDeploymentName] = GetAlgorithmDeploymentName(instance)
+	res[consts.LabelExperimentName] = instance.Name
+	res[consts.LabelSuggestionName] = instance.Name
+
+	return res
 }
 
+// TrialLabels returns the expected trial labels.
 func TrialLabels(instance *experimentsv1alpha3.Experiment) map[string]string {
-	return map[string]string{
-		consts.LabelExperimentName: instance.Name,
+	res := make(map[string]string)
+	for k, v := range instance.Labels {
+		res[k] = v
 	}
+	res[consts.LabelExperimentName] = instance.Name
+
+	return res
 }

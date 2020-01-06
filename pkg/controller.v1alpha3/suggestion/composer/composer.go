@@ -54,8 +54,10 @@ func (g *General) DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.
 	}
 	d := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      util.GetAlgorithmDeploymentName(s),
-			Namespace: s.Namespace,
+			Name:        util.GetAlgorithmDeploymentName(s),
+			Namespace:   s.Namespace,
+			Labels:      s.Labels,
+			Annotations: s.Annotations,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
@@ -63,7 +65,8 @@ func (g *General) DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: util.SuggestionLabels(s),
+					Labels:      util.SuggestionLabels(s),
+					Annotations: s.Annotations,
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
