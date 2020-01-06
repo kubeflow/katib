@@ -27,7 +27,6 @@ class NAS_RL_Experiment(object):
         self.ctrl_cache_file = "ctrl_cache/{}.ckpt".format(
             self.experiment_name)
         self.ctrl_step = 0
-        self.is_first_run = True
         self.algorithm_settings = None
         self.controller = None
         self.num_layers = None
@@ -38,7 +37,6 @@ class NAS_RL_Experiment(object):
         self.opt_direction = None
         self.objective_name = None
         # self.respawn_count = 0
-
         self.logger.info("-" * 100 + "\nSetting Up Suggestion for Experiment {}\n".format(
             self.experiment_name) + "-" * 100)
         self._get_experiment_param()
@@ -139,6 +137,8 @@ class NAS_RL_Experiment(object):
 class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
     def __init__(self, logger=None):
         super(NasrlService, self).__init__()
+        self.is_first_run = True
+        self.experiment = None
         if logger == None:
             self.logger = getLogger(__name__)
             FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
@@ -219,7 +219,9 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         return api_pb2.ValidateAlgorithmSettingsReply()
 
     def GetSuggestions(self, request, context):
-        experiment = NAS_RL_Experiment(request, self.logger)
+        if self.is_first_run:
+            self.experiment = NAS_RL_Experiment(request, self.logger)
+        experiment = self.experiment
         self.logger.info("-" * 100 + "\nSuggestion Step {} for Experiment {}\n".format(
             experiment.ctrl_step, experiment.experiment_name) + "-" * 100)
 
@@ -247,8 +249,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 controller_ops["baseline"],
                 controller_ops["skip_rate"],
                 controller_ops["train_op"]]
-
-            if experiment.is_first_run:
+            if self.is_first_run:
                 self.logger.info(">>> First time running suggestion for {}. Random architecture will be given.".format(
                     experiment.experiment_name))
                 with tf.Session() as sess:
@@ -261,7 +262,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                     # TODO: will use PVC to store the checkpoint to protect against unexpected suggestion pod restart
                     saver.save(sess, experiment.ctrl_cache_file)
 
-                experiment.is_first_run = False
+                self.is_first_run = False
 
             else:
                 with tf.Session() as sess:

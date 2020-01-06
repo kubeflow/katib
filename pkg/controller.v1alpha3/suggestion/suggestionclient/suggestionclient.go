@@ -18,11 +18,13 @@ import (
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	suggestionapi "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/util"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var (
-	log     = logf.Log.WithName("suggestion-client")
-	timeout = 60 * time.Second
+	log        = logf.Log.WithName("suggestion-client")
+	timeout    = 60 * time.Second
+	timeFormat = "2006-01-02T15:04:05Z"
 )
 
 // SuggestionClient is the interface to communicate with algorithm services.
@@ -174,10 +176,86 @@ func (g *General) ConvertExperiment(e *experimentsv1alpha3.Experiment) *suggesti
 }
 
 // ConvertTrials converts CRD to the GRPC definition.
-func (g *General) ConvertTrials(
-	t []trialsv1alpha3.Trial) []*suggestionapi.Trial {
-	res := make([]*suggestionapi.Trial, 0)
-	return res
+func (g *General) ConvertTrials(ts []trialsv1alpha3.Trial) []*suggestionapi.Trial {
+	trialsRes := make([]*suggestionapi.Trial, 0)
+	for _, t := range ts {
+		trialsRes = append(trialsRes, &suggestionapi.Trial{
+			Name: t.Name,
+			Spec: &suggestionapi.TrialSpec{
+				ParameterAssignments: convertTrialParameterAssignments(
+					t.Spec.ParameterAssignments),
+			},
+			Status: &suggestionapi.TrialStatus{
+				StartTime:      convertTrialStatusTime(t.Status.StartTime),
+				CompletionTime: convertTrialStatusTime(t.Status.CompletionTime),
+				// We send only the latest condition of the Trial!
+				Condition: convertTrialConditionType(
+					t.Status.Conditions[len(t.Status.Conditions)-1].Type),
+				Observation: convertTrialObservation(
+					t.Status.Observation),
+			},
+		})
+	}
+
+	return trialsRes
+}
+
+// convertTrialParameterAssignments convert ParameterAssignments CRD to the GRPC definition
+func convertTrialParameterAssignments(pas []commonapiv1alpha3.ParameterAssignment) *suggestionapi.TrialSpec_ParameterAssignments {
+	tsPas := &suggestionapi.TrialSpec_ParameterAssignments{
+		Assignments: make([]*suggestionapi.ParameterAssignment, 0),
+	}
+	for _, pa := range pas {
+		tsPas.Assignments = append(tsPas.Assignments, &suggestionapi.ParameterAssignment{
+			Name:  pa.Name,
+			Value: pa.Value,
+		})
+	}
+
+	return tsPas
+}
+
+// convertTrialConditionType convert Trial Status Condition Type CRD to the GRPC definition
+func convertTrialConditionType(conditionType trialsv1alpha3.TrialConditionType) suggestionapi.TrialStatus_TrialConditionType {
+	switch conditionType {
+	case trialsv1alpha3.TrialCreated:
+		return suggestionapi.TrialStatus_CREATED
+	case trialsv1alpha3.TrialRunning:
+		return suggestionapi.TrialStatus_RUNNING
+	case trialsv1alpha3.TrialSucceeded:
+		return suggestionapi.TrialStatus_SUCCEEDED
+	case trialsv1alpha3.TrialKilled:
+		return suggestionapi.TrialStatus_KILLED
+	case trialsv1alpha3.TrialFailed:
+		return suggestionapi.TrialStatus_FAILED
+	default:
+		return suggestionapi.TrialStatus_UNKNOWN
+	}
+}
+
+// convertTrialObservation convert Trial Observation Metrics CRD to the GRPC definition
+func convertTrialObservation(observation *commonapiv1alpha3.Observation) *suggestionapi.Observation {
+	resObservation := &suggestionapi.Observation{
+		Metrics: make([]*suggestionapi.Metric, 0),
+	}
+	if observation != nil && observation.Metrics != nil {
+		for _, m := range observation.Metrics {
+			resObservation.Metrics = append(resObservation.Metrics, &suggestionapi.Metric{
+				Name:  m.Name,
+				Value: fmt.Sprintf("%f", m.Value),
+			})
+		}
+	}
+	return resObservation
+
+}
+
+// convertTrialStatusTime convert Trial Status Time CRD to the GRPC definition
+func convertTrialStatusTime(time *metav1.Time) string {
+	if time != nil {
+		return time.Format(timeFormat)
+	}
+	return ""
 }
 
 // ComposeTrialsTemplate composes trials with raw template from the GRPC response.
