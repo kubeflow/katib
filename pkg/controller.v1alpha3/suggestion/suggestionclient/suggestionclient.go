@@ -182,6 +182,12 @@ func (g *General) ConvertTrials(ts []trialsv1alpha3.Trial) []*suggestionapi.Tria
 		trialsRes = append(trialsRes, &suggestionapi.Trial{
 			Name: t.Name,
 			Spec: &suggestionapi.TrialSpec{
+				Objective: &suggestionapi.ObjectiveSpec{
+					Type:                  convertObjectiveType(t.Spec.Objective.Type),
+					Goal:                  *t.Spec.Objective.Goal,
+					ObjectiveMetricName:   t.Spec.Objective.ObjectiveMetricName,
+					AdditionalMetricNames: t.Spec.Objective.AdditionalMetricNames,
+				},
 				ParameterAssignments: convertTrialParameterAssignments(
 					t.Spec.ParameterAssignments),
 			},
