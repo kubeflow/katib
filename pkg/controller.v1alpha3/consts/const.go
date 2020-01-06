@@ -58,16 +58,28 @@ const (
 	DefaultMemRequest = "10Mi"
 	// LabelSuggestionDiskLimitTag is the name of suggestion Disk Limit config in configmap.
 	LabelSuggestionDiskLimitTag = "diskLimit"
-	// DefaultMemLimit is the default value for mem Limit
+	// DefaultDiskLimit is the default value for disk limit.
 	DefaultDiskLimit = "5Gi"
 	// LabelSuggestionDiskRequestTag is the name of suggestion Disk Request config in configmap.
 	LabelSuggestionDiskRequestTag = "diskRequest"
-	// DefaultMemRequest is the default value for mem Request
+	// DefaultDiskRequest is the default value for disk request.
 	DefaultDiskRequest = "500Mi"
 	// LabelMetricsCollectorSidecar is the name of metrics collector config in configmap.
 	LabelMetricsCollectorSidecar = "metrics-collector-sidecar"
 	// LabelMetricsCollectorSidecarImage is the name of metrics collector image config in configmap.
 	LabelMetricsCollectorSidecarImage = "image"
+	// LabelMetricsCollectorCPULimitTag is the name of metrics collector CPU Limit config in configmap.
+	LabelMetricsCollectorCPULimitTag = "cpuLimit"
+	// LabelMetricsCollectorCPURequestTag is the name of metrics collector CPU Request config in configmap.
+	LabelMetricsCollectorCPURequestTag = "cpuRequest"
+	// LabelMetricsCollectorMemLimitTag is the name of metrics collector Mem Limit config in configmap.
+	LabelMetricsCollectorMemLimitTag = "memLimit"
+	// LabelMetricsCollectorMemRequestTag is the name of metrics collector Mem Request config in configmap.
+	LabelMetricsCollectorMemRequestTag = "memRequest"
+	// LabelMetricsCollectorDiskLimitTag is the name of metrics collector Disk Limit config in configmap.
+	LabelMetricsCollectorDiskLimitTag = "diskLimit"
+	// LabelMetricsCollectorDiskRequestTag is the name of metrics collector Disk Request config in configmap.
+	LabelMetricsCollectorDiskRequestTag = "diskRequest"
 
 	// ReconcileErrorReason is the reason when there is a reconcile error.
 	ReconcileErrorReason = "ReconcileError"
@@ -93,5 +105,6 @@ const (
 )
 
 var (
+	// DefaultKatibNamespace is the default namespace of katib deployment.
 	DefaultKatibNamespace = env.GetEnvOrDefault(DefaultKatibNamespaceEnvName, "kubeflow")
 )

@@ -14,6 +14,17 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 )
 
+type suggestionConfigJSON struct {
+	Image    string                      `json:"image"`
+	Resource corev1.ResourceRequirements `json:"resources"`
+}
+
+type metricsCollectorConfigJSON struct {
+	Image    string                      `json:"image"`
+	Resource corev1.ResourceRequirements `json:"resources"`
+}
+
+// GetSuggestionConfigData gets the config data for the given algorithm name.
 func GetSuggestionConfigData(algorithmName string, client client.Client) (map[string]string, error) {
 	configMap := &corev1.ConfigMap{}
 	suggestionConfigData := map[string]string{}
@@ -24,10 +35,7 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (map[st
 	if err != nil {
 		return map[string]string{}, err
 	}
-	type suggestionConfigJSON struct {
-		Image    string                      `json:"image"`
-		Resource corev1.ResourceRequirements `json:"resources"`
-	}
+
 	if config, ok := configMap.Data[consts.LabelSuggestionTag]; ok {
 		suggestionsConfig := map[string]suggestionConfigJSON{}
 		if err := json.Unmarshal([]byte(config), &suggestionsConfig); err != nil {
@@ -87,35 +95,75 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (map[st
 	return suggestionConfigData, nil
 }
 
-func GetMetricsCollectorImage(cKind common.CollectorKind, client client.Client) (string, error) {
+// GetMetricsCollectorConfigData gets the config data for the given kind.
+func GetMetricsCollectorConfigData(cKind common.CollectorKind, client client.Client) (map[string]string, error) {
 	configMap := &corev1.ConfigMap{}
+	metricsCollectorConfigData := map[string]string{}
 	err := client.Get(
 		context.TODO(),
 		apitypes.NamespacedName{Name: consts.KatibConfigMapName, Namespace: consts.DefaultKatibNamespace},
 		configMap)
 	if err != nil {
-		return "", err
+		return metricsCollectorConfigData, err
 	}
-	if mcs, ok := configMap.Data[consts.LabelMetricsCollectorSidecar]; ok {
+	// Get the config with name metrics-collector-sidecar.
+	if config, ok := configMap.Data[consts.LabelMetricsCollectorSidecar]; ok {
 		kind := string(cKind)
-		mcsConfig := map[string]map[string]string{}
-		if err := json.Unmarshal([]byte(mcs), &mcsConfig); err != nil {
-			return "", err
+		mcsConfig := map[string]metricsCollectorConfigJSON{}
+		if err := json.Unmarshal([]byte(config), &mcsConfig); err != nil {
+			return metricsCollectorConfigData, err
 		}
-		if mc, ok := mcsConfig[kind]; ok {
-			if image, yes := mc[consts.LabelMetricsCollectorSidecarImage]; yes {
-				if strings.TrimSpace(image) != "" {
-					return image, nil
-				} else {
-					return "", errors.New("Required value for " + consts.LabelMetricsCollectorSidecarImage + "configuration of metricsCollector kind " + kind)
-				}
+		// Get the config for the given cKind.
+		if metricsCollectorConfig, ok := mcsConfig[kind]; ok {
+			image := metricsCollectorConfig.Image
+			// If the image is not empty, we set it into result.
+			if strings.TrimSpace(image) != "" {
+				metricsCollectorConfigData[consts.LabelMetricsCollectorSidecarImage] = image
 			} else {
-				return "", errors.New("Failed to find " + consts.LabelMetricsCollectorSidecarImage + " configuration of metricsCollector kind " + kind)
+				return metricsCollectorConfigData, errors.New("Required value for " + consts.LabelMetricsCollectorSidecarImage + "configuration of metricsCollector kind " + kind)
 			}
+
+			// Set default values for CPU, Memory and Disk
+			metricsCollectorConfigData[consts.LabelMetricsCollectorCPURequestTag] = consts.DefaultCPURequest
+			metricsCollectorConfigData[consts.LabelMetricsCollectorMemRequestTag] = consts.DefaultMemRequest
+			metricsCollectorConfigData[consts.LabelMetricsCollectorDiskRequestTag] = consts.DefaultDiskRequest
+			metricsCollectorConfigData[consts.LabelMetricsCollectorCPULimitTag] = consts.DefaultCPULimit
+			metricsCollectorConfigData[consts.LabelMetricsCollectorMemLimitTag] = consts.DefaultMemLimit
+			metricsCollectorConfigData[consts.LabelMetricsCollectorDiskLimitTag] = consts.DefaultDiskLimit
+
+			// Get CPU, Memory and Disk Requests from config
+			cpuRequest := metricsCollectorConfig.Resource.Requests[corev1.ResourceCPU]
+			memRequest := metricsCollectorConfig.Resource.Requests[corev1.ResourceMemory]
+			diskRequest := metricsCollectorConfig.Resource.Requests[corev1.ResourceEphemeralStorage]
+			if !cpuRequest.IsZero() {
+				metricsCollectorConfigData[consts.LabelSuggestionCPURequestTag] = cpuRequest.String()
+			}
+			if !memRequest.IsZero() {
+				metricsCollectorConfigData[consts.LabelSuggestionMemRequestTag] = memRequest.String()
+			}
+			if !diskRequest.IsZero() {
+				metricsCollectorConfigData[consts.LabelSuggestionDiskRequestTag] = diskRequest.String()
+			}
+
+			// Get CPU, Memory and Disk Limits from config
+			cpuLimit := metricsCollectorConfig.Resource.Limits[corev1.ResourceCPU]
+			memLimit := metricsCollectorConfig.Resource.Limits[corev1.ResourceMemory]
+			diskLimit := metricsCollectorConfig.Resource.Limits[corev1.ResourceEphemeralStorage]
+			if !cpuLimit.IsZero() {
+				metricsCollectorConfigData[consts.LabelSuggestionCPULimitTag] = cpuLimit.String()
+			}
+			if !memLimit.IsZero() {
+				metricsCollectorConfigData[consts.LabelSuggestionMemLimitTag] = memLimit.String()
+			}
+			if !diskLimit.IsZero() {
+				metricsCollectorConfigData[consts.LabelSuggestionDiskLimitTag] = diskLimit.String()
+			}
+
 		} else {
-			return "", errors.New("Cannot support metricsCollector injection for kind " + kind)
+			return metricsCollectorConfigData, errors.New("Cannot support metricsCollector injection for kind " + kind)
 		}
 	} else {
-		return "", errors.New("Failed to find metrics collector configuration in configmap " + consts.KatibConfigMapName)
+		return metricsCollectorConfigData, errors.New("Failed to find metrics collector configuration in configmap " + consts.KatibConfigMapName)
 	}
+	return metricsCollectorConfigData, nil
 }

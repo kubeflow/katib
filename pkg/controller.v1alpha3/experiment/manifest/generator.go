@@ -10,6 +10,7 @@ import (
 
 	commonapiv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibclient"
 	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibconfig"
 )
@@ -45,7 +46,11 @@ func (g *DefaultGenerator) InjectClient(c client.Client) {
 }
 
 func (g *DefaultGenerator) GetMetricsCollectorImage(cKind commonapiv1alpha3.CollectorKind) (string, error) {
-	return katibconfig.GetMetricsCollectorImage(cKind, g.client.GetClient())
+	configData, err := katibconfig.GetMetricsCollectorConfigData(cKind, g.client.GetClient())
+	if err != nil {
+		return "", nil
+	}
+	return configData[consts.LabelMetricsCollectorSidecarImage], nil
 }
 
 func (g *DefaultGenerator) GetSuggestionConfigData(algorithmName string) (map[string]string, error) {
