@@ -74,9 +74,9 @@ status:
   ...
 ```
 #### Experiment
-When you want to tune hyperparameter for your machine learning model before 
-training it further, you just need create an `Experiment` CR like above. To
-lear what fields are included in the `Experiment.spec`, see
+When you want to tune hyperparameters for your machine learning model before 
+training it further, you just need to create an `Experiment` CR like above. To
+learn what fields are included in the `Experiment.spec`, see
 the detailed guide to [configuring and running a Katib 
 experiment](https://kubeflow.org/docs/components/hyperparameter-tuning/experiment/).
 
