@@ -18,7 +18,8 @@ class Trial(object):
     def convert(trials):
         res = []
         for trial in trials:
-            res.append(Trial.convertTrial(trial))
+            if trial.status.condition == api.TrialStatus.TrialConditionType.SUCCEEDED:
+                res.append(Trial.convertTrial(trial))
         return res
 
     @staticmethod
@@ -78,11 +79,11 @@ class Metric(object):
     def convert(observation, target):
         metric = ""
         additional_metrics = []
-        for metric in observation.metrics:
-            if metric.name == target:
-                metric = Metric(metric.name, metric.value)
+        for m in observation.metrics:
+            if m.name == target:
+                metric = Metric(m.name, m.value)
             else:
-                additional_metrics.append(Metric(metric.name, metric.value))
+                additional_metrics.append(Metric(m.name, m.value))
         return metric, additional_metrics
 
     def __str__(self):
