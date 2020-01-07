@@ -61,10 +61,10 @@ const Main = (props) => {
             </Grid>
             <br />
             <Typography variant={"h6"}>
-                For additional information on Kubeflow visit <a href="https://kubeflow.org" target="_blank" className={classes.link}>website</a>
+                For usage instructions, see the <a href="https://www.kubeflow.org/docs/components/hyperparameter-tuning/" target="_blank" className={classes.link}>Kubeflow docs</a>
             </Typography>
             <Typography variant={"h6"}>
-                For additional information on Katib visit <a href="https://github.com/kubeflow/katib/" target="_blank" className={classes.link}>github</a>
+                To contribute to Katib, visit <a href="https://github.com/kubeflow/katib/" target="_blank" className={classes.link}>GitHub</a>
             </Typography>
         </Paper>
     )
