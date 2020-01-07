@@ -89,9 +89,12 @@ class BaseChocolateService(object):
         list_of_assignments = []
 
         for i in range(request_number):
-            token, chocolate_params = sampler.next()
-            list_of_assignments.append(
-                BaseChocolateService.convert(search_space, chocolate_params))
+            try:
+                token, chocolate_params = sampler.next()
+                list_of_assignments.append(
+                    BaseChocolateService.convert(search_space, chocolate_params))
+            except StopIteration:
+                logger.info("Chocolate db is exhausted, increase Search Space or decrease maxTrialCount!")
         return list_of_assignments
 
     @staticmethod
