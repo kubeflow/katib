@@ -18,6 +18,8 @@ const (
 	LabelExperimentName = "experiment"
 	// LabelSuggestionName is the label of suggestion name.
 	LabelSuggestionName = "suggestion"
+	// LabelDeploymentName is the label of deployment name.
+	LabelDeploymentName = "deployment"
 
 	// ContainerSuggestion is the container name in Suggestion.
 	ContainerSuggestion = "suggestion"

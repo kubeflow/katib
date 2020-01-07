@@ -57,8 +57,10 @@ func (g *General) createSuggestion(instance *experimentsv1alpha3.Experiment, sug
 	logger := log.WithValues("experiment", types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace})
 	suggestion := &suggestionsv1alpha3.Suggestion{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Name,
-			Namespace: instance.Namespace,
+			Name:        instance.Name,
+			Namespace:   instance.Namespace,
+			Labels:      instance.Labels,
+			Annotations: instance.Annotations,
 		},
 		Spec: suggestionsv1alpha3.SuggestionSpec{
 			AlgorithmName: instance.Spec.Algorithm.AlgorithmName,
