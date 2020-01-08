@@ -323,7 +323,7 @@ docker.io/kubeflowkatib/mxnet-mnist-example
 docker.io/kubeflowkatib/mxnet-mnist-timestamp
 ```
 
-- Pytorch mnist example, [source](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/file-metrics-collector/mnist.py).
+- Pytorch mnist example with saving metrics to the file, [source](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/file-metrics-collector/mnist.py).
 
 ```
 docker.io/kubeflowkatib/pytorch-mnist
