@@ -311,16 +311,44 @@ It will stop port-forward process and delete minikube cluster.
 
 # List of current Katib training container images
 
-- docker.io/kubeflowkatib/mxnet-mnist-example Mxnet mnist example, [source](https://github.com/apache/incubator-mxnet/blob/master/example/image-classification/train_mnist.py).
+- Mxnet mnist example, [source](https://github.com/apache/incubator-mxnet/blob/master/example/image-classification/train_mnist.py).
 
-- docker.io/kubeflowkatib/mxnet-mnist-timestamp Mxnet mnist example with collecting metrics time, [source](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/mxnet-mnist-timestamp/mnist.py).
+```
+docker.io/kubeflowkatib/mxnet-mnist-example
+```
 
-- docker.io/kubeflowkatib/pytorch-mnist Pytorch mnist example, [source](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/file-metrics-collector/mnist.py).
+- Mxnet mnist example with collecting metrics time, [source](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/mxnet-mnist-timestamp/mnist.py).
 
-- docker.io/kubeflowkatib/nasrl-cifar10-gpu Keras cifar10 example for NAS RL with gpu support, [source](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/NAS-training-containers/RL-cifar10/Dockerfile.cpu).
+```
+docker.io/kubeflowkatib/mxnet-mnist-timestamp
+```
 
-- docker.io/kubeflowkatib/nasrl-cifar10-cpu Keras cifar10 example for NAS RL with cpu support, [source](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/NAS-training-containers/RL-cifar10/Dockerfile.cpu).
+- Pytorch mnist example, [source](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/file-metrics-collector/mnist.py).
 
-- gcr.io/kubeflow-ci/pytorch-dist-mnist-test Pytorch operator mnist example, [source](https://github.com/kubeflow/pytorch-operator/blob/master/examples/mnist/mnist.py).
+```
+docker.io/kubeflowkatib/pytorch-mnist
+```
 
-- gcr.io/kubeflow-ci/tf-mnist-with-summaries Tf operator mnist example, [source](https://github.com/kubeflow/tf-operator/blob/master/examples/v1/mnist_with_summaries/mnist_with_summaries.py).
+- Keras cifar10 example for NAS RL with gpu support, [source](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/NAS-training-containers/RL-cifar10/Dockerfile.cpu).
+
+```
+docker.io/kubeflowkatib/nasrl-cifar10-gpu
+```
+
+- Keras cifar10 example for NAS RL with cpu support, [source](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/NAS-training-containers/RL-cifar10/Dockerfile.cpu).
+
+```
+docker.io/kubeflowkatib/nasrl-cifar10-cpu
+```
+
+- Pytorch operator mnist example, [source](https://github.com/kubeflow/pytorch-operator/blob/master/examples/mnist/mnist.py).
+
+```
+gcr.io/kubeflow-ci/pytorch-dist-mnist-test
+```
+
+- Tf operator mnist example, [source](https://github.com/kubeflow/tf-operator/blob/master/examples/v1/mnist_with_summaries/mnist_with_summaries.py).
+
+```
+gcr.io/kubeflow-ci/tf-mnist-with-summaries
+```
