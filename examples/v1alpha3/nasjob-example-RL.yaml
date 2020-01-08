@@ -67,7 +67,7 @@ spec:
                   - "RunTrial.py"
                   {{- with .HyperParameters}}
                   {{- range .}}
-                  - "--{{.Name}}={{.Value}}"
+                  - "--{{.Name}}=\"{{.Value}}\""
                   {{- end}}
                   {{- end}}
                   resources:

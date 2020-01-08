@@ -29,13 +29,19 @@ spec:
       feasibleSpace:
         min: "2"
         max: "5"
-    - name: --optimizer
-      parameterType: categorical
+    - name: --num-epochs
+      parameterType: int
       feasibleSpace:
-        list:
-        - sgd
-        - adam
-        - ftrl
+        min: "20"
+        max: "40"
+    # Grid doesn't support categorical, refer to https://chocolate.readthedocs.io/api/sample.html#chocolate.Grid
+    # - name: --optimizer
+    #   parameterType: categorical
+    #   feasibleSpace:
+    #     list:
+    #     - sgd
+    #     - adam
+    #     - ftrl
   trialTemplate:
     goTemplate:
         rawTemplate: |-
