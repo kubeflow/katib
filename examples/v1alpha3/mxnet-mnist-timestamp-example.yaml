@@ -2,14 +2,14 @@ apiVersion: "kubeflow.org/v1alpha3"
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: metrics-with-timestamp
+  name: mxnet-mnist-timestamp
 spec:
   objective:
     type: maximize
     goal: 0.99
-    objectiveMetricName: accuracy
+    objectiveMetricName: Validation-accuracy
     additionalMetricNames:
-    - loss
+      - Train-accuracy
   algorithm:
     algorithmName: random
   parallelTrialCount: 3
@@ -21,11 +21,18 @@ spec:
       feasibleSpace:
         min: "0.01"
         max: "0.03"
-    - name: --momentum
-      parameterType: double
+    - name: --num-layers
+      parameterType: int
       feasibleSpace:
-        min: "0.3"
-        max: "0.7"
+        min: "2"
+        max: "5"
+    - name: --optimizer
+      parameterType: categorical
+      feasibleSpace:
+        list:
+        - sgd
+        - adam
+        - ftrl
   trialTemplate:
     goTemplate:
         rawTemplate: |-
@@ -39,12 +46,11 @@ spec:
               spec:
                 containers:
                 - name: {{.Trial}}
-                  image: docker.io/andreyvelichkevich/timestamp-metric
+                  image: docker.io/kubeflowkatib/mxnet-mnist-timestamp
                   imagePullPolicy: Always
                   command:
-                  - "python"
-                  - "/var/mnist.py"
-                  - "--epochs=3"
+                  - "python3"
+                  - "/opt/mxnet-mnist-timestamp/mnist.py"
                   {{- with .HyperParameters}}
                   {{- range .}}
                   - "{{.Name}}={{.Value}}"
