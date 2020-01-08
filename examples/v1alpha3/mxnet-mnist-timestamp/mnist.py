@@ -24,7 +24,6 @@ import logging
 import mxnet as mx
 import numpy as np
 import gzip, struct
-from common import find_mxnet
 from common import fit
 from common import utils
 # This example only for mlp network 
