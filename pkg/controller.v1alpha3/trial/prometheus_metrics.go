@@ -17,50 +17,120 @@ limitations under the License.
 package trial
 
 import (
+	"context"
+
+	"github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	"github.com/prometheus/client_golang/prometheus"
-
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 )
 
-var (
-	trialsDeletedCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_trial_deleted_total",
-		Help: "Counts number of Trial deleted",
-	})
-	trialsCreatedCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_trial_created_total",
-		Help: "Counts number of Trial created",
-	})
-	trialsSucceededCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_trial_succeeded_total",
-		Help: "Counts number of Trial succeeded",
-	})
-	trialsFailedCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "katib_trial_failed_total",
-		Help: "Counts number of Trial failed",
-	})
-)
-
-func init() {
-	metrics.Registry.MustRegister(
-		trialsDeletedCount,
-		trialsCreatedCount,
-		trialsSucceededCount,
-		trialsFailedCount)
+type TrialsCollector struct {
+	store             cache.Cache
+	trialDeleteCount  *prometheus.CounterVec
+	trialCreateCount  *prometheus.CounterVec
+	trialSucceedCount *prometheus.CounterVec
+	trialFailCount    *prometheus.CounterVec
+	trialCurrent      *prometheus.GaugeVec
 }
 
-func IncreaseTrialsDeletedCount() {
-	trialsDeletedCount.Inc()
+func NewTrialsCollector(store cache.Cache, registerer prometheus.Registerer) *TrialsCollector {
+	c := &TrialsCollector{
+		store: store,
+		trialDeleteCount: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Name: "katib_trial_deleted_total",
+			Help: "The total number of deleted trials",
+		}, []string{"namespace"}),
+
+		trialCreateCount: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Name: "katib_trial_created_total",
+			Help: "The total number of created trials",
+		}, []string{"namespace"}),
+
+		trialSucceedCount: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Name: "katib_trial_succeeded_total",
+			Help: "The total number of succeeded trials",
+		}, []string{"namespace"}),
+
+		trialFailCount: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Name: "katib_trial_failed_total",
+			Help: "The total number of failed trials",
+		}, []string{"namespace"}),
+
+		trialCurrent: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Name: "katib_trials_current",
+			Help: "The number of current katib trials in the cluster",
+		}, []string{"namespace", "status"}),
+	}
+	registerer.MustRegister(c)
+	return c
 }
 
-func IncreaseTrialsCreatedCount() {
-	trialsCreatedCount.Inc()
+// Describe implements the prometheus.Collector interface.
+func (m *TrialsCollector) Describe(ch chan<- *prometheus.Desc) {
+	m.trialDeleteCount.Describe(ch)
+	m.trialSucceedCount.Describe(ch)
+	m.trialFailCount.Describe(ch)
+	m.trialCreateCount.Describe(ch)
+	m.trialCurrent.Describe(ch)
 }
 
-func IncreaseTrialsSucceededCount() {
-	trialsSucceededCount.Inc()
+// Collect implements the prometheus.Collector interface.
+func (m *TrialsCollector) Collect(ch chan<- prometheus.Metric) {
+	m.collect()
+	m.trialDeleteCount.Collect(ch)
+	m.trialSucceedCount.Collect(ch)
+	m.trialFailCount.Collect(ch)
+	m.trialCreateCount.Collect(ch)
+	m.trialCurrent.Collect(ch)
 }
 
-func IncreaseTrialsFailedCount() {
-	trialsFailedCount.Inc()
+func (c *TrialsCollector) IncreaseTrialsDeletedCount(ns string) {
+	c.trialDeleteCount.WithLabelValues(ns).Inc()
+}
+
+func (c *TrialsCollector) IncreaseTrialsCreatedCount(ns string) {
+	c.trialCreateCount.WithLabelValues(ns).Inc()
+}
+
+func (c *TrialsCollector) IncreaseTrialsSucceededCount(ns string) {
+	c.trialSucceedCount.WithLabelValues(ns).Inc()
+}
+
+func (c *TrialsCollector) IncreaseTrialsFailedCount(ns string) {
+	c.trialFailCount.WithLabelValues(ns).Inc()
+}
+
+// collect gets the current experiments from cache.
+func (c *TrialsCollector) collect() {
+	var (
+		conditionType v1alpha3.TrialConditionType
+		status        string
+		err           error
+	)
+	trialLists := &v1alpha3.TrialList{}
+	if err = c.store.List(context.TODO(), nil, trialLists); err != nil {
+		return
+	}
+
+	trialCache := map[string]map[string]int{}
+	for _, trial := range trialLists.Items {
+		conditionType, err = trial.GetLastConditionType()
+		status = string(conditionType)
+		// If trial doesn't have any condition, use unknown.
+		if err != nil {
+			status = "Unknown"
+		}
+
+		if _, ok := trialCache[trial.Namespace]; !ok {
+			trialCache[trial.Namespace] = make(map[string]int)
+		}
+		trialCache[trial.Namespace][status] += 1
+	}
+
+	c.trialCurrent.Reset()
+	for ns, v := range trialCache {
+		for status, count := range v {
+			c.trialCurrent.WithLabelValues(ns, status).Set(float64(count))
+		}
+	}
 }

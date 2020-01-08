@@ -41,8 +41,12 @@ const styles = theme => ({
 class FilterPanel extends React.Component {
 
     componentDidMount() {
-        this.props.fetchNamespaces();
-        this.props.filterJobs(this.props.experimentName, this.props.experimentNamespace)
+        if (this.props.globalNamespace != "") {
+            this.props.filterJobs(this.props.experimentName, this.props.globalNamespace)
+        } else {
+            this.props.fetchNamespaces();
+            this.props.filterJobs(this.props.experimentName, this.props.experimentNamespace)
+        }
     }
 
     handleType = (name) => (event) => {
@@ -68,19 +72,31 @@ class FilterPanel extends React.Component {
                         <InputLabel>
                             Namespace
                         </InputLabel>
-                        <Select
-                            value={this.props.experimentNamespace}
-                            onChange={this.onNamespaceChange}
-                            className={classes.selectBox}
-                        >
-                            {this.props.namespaces.map((namespace, i) => {
-                                return (
-                                    <MenuItem value={namespace} key={i}>
-                                        {namespace}
-                                    </MenuItem>
-                                )
-                            })}
-                        </Select>
+                        {this.props.globalNamespace === "" ?
+                            <Select
+                                value={this.props.experimentNamespace}
+                                onChange={this.onNamespaceChange}
+                                className={classes.selectBox}
+                            >
+                                {this.props.namespaces.map((namespace, i) => {
+                                    return (
+                                        <MenuItem value={namespace} key={i}>
+                                            {namespace}
+                                        </MenuItem>
+                                    )
+                                })}
+                            </Select>
+                        :
+                            <Select
+                                value={this.props.experimentNamespace}
+                                className={classes.selectBox}
+                                disabled
+                            >
+                                <MenuItem value={this.props.experimentNamespace}>
+                                    {this.props.experimentNamespace}
+                                </MenuItem>
+                            </Select>
+                        }
                     </FormControl>
                     <TextField
                         id="outlined-name"
@@ -123,7 +139,8 @@ const mapStateToProps = state => {
         experimentName: state[module].experimentName,
         experimentNamespace: state[module].experimentNamespace,
         filterType: state[module].filterType,
-        namespaces: state[generalModule].namespaces
+        namespaces: state[generalModule].namespaces,
+        globalNamespace: state[generalModule].globalNamespace
     }
 }
 

@@ -16,6 +16,16 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 # Developer Guide
 
+This developer guide is for people who want to contribute to the Katib project. 
+If you're interesting in using Katib in your machine learning project, 
+see the following user guides:
+
+* [Concepts](https://www.kubeflow.org/docs/components/hyperparameter-tuning/overview/) 
+  in Katib, hyperparameter tuning, and neural architecture search.
+* [Getting started with Katib](https://kubeflow.org/docs/components/hyperparameter-tuning/hyperparameter/).
+* Detailed guide to [configuring and running a Katib 
+  experiment](https://kubeflow.org/docs/components/hyperparameter-tuning/experiment/).
+
 ## Requirements
 
 - [Go](https://golang.org/)

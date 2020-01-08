@@ -18,8 +18,9 @@ import (
 )
 
 const (
-	dbDriver     = "mysql"
-	dbNameTmpl   = "root:%s@tcp(%s:%s)/%s?timeout=5s"
+	dbDriver = "mysql"
+	//dbNameTmpl   = "root:%s@tcp(%s:%s)/%s?timeout=5s"
+	dbNameTmpl   = "%s:%s@tcp(%s:%s)/%s?timeout=5s"
 	mysqlTimeFmt = "2006-01-02 15:04:05.999999"
 
 	connectInterval = 5 * time.Second
@@ -33,6 +34,8 @@ type dbConn struct {
 func getDbName() string {
 	dbPassEnvName := common.DBPasswordEnvName
 	dbPass := os.Getenv(dbPassEnvName)
+	dbUser := env.GetEnvOrDefault(
+		common.DBUserEnvName, common.DefaultMySQLUser)
 	dbHost := env.GetEnvOrDefault(
 		common.MySQLDBHostEnvName, common.DefaultMySQLHost)
 	dbPort := env.GetEnvOrDefault(
@@ -40,7 +43,7 @@ func getDbName() string {
 	dbName := env.GetEnvOrDefault(common.MySQLDatabase,
 		common.DefaultMySQLDatabase)
 
-	return fmt.Sprintf(dbNameTmpl, dbPass, dbHost, dbPort, dbName)
+	return fmt.Sprintf(dbNameTmpl, dbUser, dbPass, dbHost, dbPort, dbName)
 }
 
 func openSQLConn(driverName string, dataSourceName string, interval time.Duration,

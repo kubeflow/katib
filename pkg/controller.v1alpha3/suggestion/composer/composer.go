@@ -54,8 +54,10 @@ func (g *General) DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.
 	}
 	d := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      util.GetAlgorithmDeploymentName(s),
-			Namespace: s.Namespace,
+			Name:        util.GetAlgorithmDeploymentName(s),
+			Namespace:   s.Namespace,
+			Labels:      s.Labels,
+			Annotations: s.Annotations,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
@@ -63,7 +65,8 @@ func (g *General) DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: util.SuggestionLabels(s),
+					Labels:      util.SuggestionLabels(s),
+					Annotations: s.Annotations,
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
@@ -119,6 +122,8 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 	suggestionCPURequest := suggestionConfigData[consts.LabelSuggestionCPURequestTag]
 	suggestionMemLimit := suggestionConfigData[consts.LabelSuggestionMemLimitTag]
 	suggestionMemRequest := suggestionConfigData[consts.LabelSuggestionMemRequestTag]
+	suggestionDiskLimit := suggestionConfigData[consts.LabelSuggestionDiskLimitTag]
+	suggestionDiskRequest := suggestionConfigData[consts.LabelSuggestionDiskRequestTag]
 	c := &corev1.Container{
 		Name: consts.ContainerSuggestion,
 	}
@@ -147,15 +152,25 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 	if err != nil {
 		return nil, err
 	}
+	diskLimitQuantity, err := resource.ParseQuantity(suggestionDiskLimit)
+	if err != nil {
+		return nil, err
+	}
+	diskRequestQuantity, err := resource.ParseQuantity(suggestionDiskRequest)
+	if err != nil {
+		return nil, err
+	}
 
 	c.Resources = corev1.ResourceRequirements{
 		Limits: corev1.ResourceList{
-			corev1.ResourceCPU:    cpuLimitQuantity,
-			corev1.ResourceMemory: memLimitQuantity,
+			corev1.ResourceCPU:              cpuLimitQuantity,
+			corev1.ResourceMemory:           memLimitQuantity,
+			corev1.ResourceEphemeralStorage: diskLimitQuantity,
 		},
 		Requests: corev1.ResourceList{
-			corev1.ResourceCPU:    cpuRequestQuantity,
-			corev1.ResourceMemory: memRequestQuantity,
+			corev1.ResourceCPU:              cpuRequestQuantity,
+			corev1.ResourceMemory:           memRequestQuantity,
+			corev1.ResourceEphemeralStorage: diskRequestQuantity,
 		},
 	}
 

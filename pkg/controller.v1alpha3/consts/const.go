@@ -6,11 +6,20 @@ const (
 	// ConfigExperimentSuggestionName is the config name of the
 	// suggestion client implementation in experiment controller.
 	ConfigExperimentSuggestionName = "experiment-suggestion-name"
+	// ConfigCertLocalFS is the config name which indicates if we
+	// should store the cert in file system.
+	ConfigCertLocalFS = "cert-local-filesystem"
+	// ConfigInjectSecurityContext is the config name which indicates
+	// if we should inject the security context into the metrics collector
+	// sidecar.
+	ConfigInjectSecurityContext = "inject-security-context"
 
 	// LabelExperimentName is the label of experiment name.
 	LabelExperimentName = "experiment"
 	// LabelSuggestionName is the label of suggestion name.
 	LabelSuggestionName = "suggestion"
+	// LabelDeploymentName is the label of deployment name.
+	LabelDeploymentName = "deployment"
 
 	// ContainerSuggestion is the container name in Suggestion.
 	ContainerSuggestion = "suggestion"
@@ -49,10 +58,30 @@ const (
 	LabelSuggestionMemRequestTag = "memRequest"
 	// DefaultMemRequest is the default value for mem Request
 	DefaultMemRequest = "10Mi"
+	// LabelSuggestionDiskLimitTag is the name of suggestion Disk Limit config in configmap.
+	LabelSuggestionDiskLimitTag = "diskLimit"
+	// DefaultDiskLimit is the default value for disk limit.
+	DefaultDiskLimit = "5Gi"
+	// LabelSuggestionDiskRequestTag is the name of suggestion Disk Request config in configmap.
+	LabelSuggestionDiskRequestTag = "diskRequest"
+	// DefaultDiskRequest is the default value for disk request.
+	DefaultDiskRequest = "500Mi"
 	// LabelMetricsCollectorSidecar is the name of metrics collector config in configmap.
 	LabelMetricsCollectorSidecar = "metrics-collector-sidecar"
 	// LabelMetricsCollectorSidecarImage is the name of metrics collector image config in configmap.
 	LabelMetricsCollectorSidecarImage = "image"
+	// LabelMetricsCollectorCPULimitTag is the name of metrics collector CPU Limit config in configmap.
+	LabelMetricsCollectorCPULimitTag = "cpuLimit"
+	// LabelMetricsCollectorCPURequestTag is the name of metrics collector CPU Request config in configmap.
+	LabelMetricsCollectorCPURequestTag = "cpuRequest"
+	// LabelMetricsCollectorMemLimitTag is the name of metrics collector Mem Limit config in configmap.
+	LabelMetricsCollectorMemLimitTag = "memLimit"
+	// LabelMetricsCollectorMemRequestTag is the name of metrics collector Mem Request config in configmap.
+	LabelMetricsCollectorMemRequestTag = "memRequest"
+	// LabelMetricsCollectorDiskLimitTag is the name of metrics collector Disk Limit config in configmap.
+	LabelMetricsCollectorDiskLimitTag = "diskLimit"
+	// LabelMetricsCollectorDiskRequestTag is the name of metrics collector Disk Request config in configmap.
+	LabelMetricsCollectorDiskRequestTag = "diskRequest"
 
 	// ReconcileErrorReason is the reason when there is a reconcile error.
 	ReconcileErrorReason = "ReconcileError"
@@ -78,5 +107,6 @@ const (
 )
 
 var (
+	// DefaultKatibNamespace is the default namespace of katib deployment.
 	DefaultKatibNamespace = env.GetEnvOrDefault(DefaultKatibNamespaceEnvName, "kubeflow")
 )

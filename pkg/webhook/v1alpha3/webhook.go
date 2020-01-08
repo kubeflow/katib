@@ -16,6 +16,7 @@ limitations under the License.
 package webhook
 
 import (
+	"github.com/spf13/viper"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,29 +32,33 @@ import (
 	"github.com/kubeflow/katib/pkg/webhook/v1alpha3/pod"
 )
 
-const (
-	katibControllerName = "katib-controller"
-)
-
-func AddToManager(m manager.Manager) error {
-	server, err := webhook.NewServer("katib-admission-server", m, webhook.ServerOptions{
+func AddToManager(m manager.Manager, port int32, serviceName string) error {
+	so := webhook.ServerOptions{
 		CertDir: "/tmp/cert",
 		BootstrapOptions: &webhook.BootstrapOptions{
-			Secret: &types.NamespacedName{
-				Namespace: consts.DefaultKatibNamespace,
-				Name:      katibControllerName,
-			},
 			Service: &webhook.Service{
 				Namespace: consts.DefaultKatibNamespace,
-				Name:      katibControllerName,
+				Name:      serviceName,
 				Selectors: map[string]string{
-					"app": katibControllerName,
+					"app": serviceName,
 				},
 			},
 			ValidatingWebhookConfigName: "katib-validating-webhook-config",
 			MutatingWebhookConfigName:   "katib-mutating-webhook-config",
 		},
-	})
+		Port: port,
+	}
+
+	// Decide if we should use local file system.
+	// If not, we set a secret in BootstrapOptions.
+	usingFS := viper.GetBool(consts.ConfigCertLocalFS)
+	if !usingFS {
+		so.BootstrapOptions.Secret = &types.NamespacedName{
+			Namespace: consts.DefaultKatibNamespace,
+			Name:      serviceName,
+		}
+	}
+	server, err := webhook.NewServer("katib-admission-server", m, so)
 	if err != nil {
 		return err
 	}
@@ -103,7 +108,8 @@ func register(manager manager.Manager, server *webhook.Server) error {
 		Operations(admissionregistrationv1beta1.Create).
 		WithManager(manager).
 		ForType(&v1.Pod{}).
-		Handlers(pod.NewSidecarInjector(manager.GetClient(), manager.GetConfig().Host)).
+		Handlers(pod.NewSidecarInjector(manager.GetClient())).
+		FailurePolicy(admissionregistrationv1beta1.Ignore).
 		Build()
 	if err != nil {
 		return err

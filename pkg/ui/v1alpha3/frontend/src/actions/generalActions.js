@@ -19,9 +19,10 @@ export const SUBMIT_YAML_REQUEST = "SUBMIT_YAML_REQUEST";
 export const SUBMIT_YAML_FAILURE = "SUBMIT_YAML_FAILURE";
 export const SUBMIT_YAML_SUCCESS = "SUBMIT_YAML_SUCCESS";
 
-export const submitYaml = (yaml) => ({
+export const submitYaml = (yaml, globalNamespace) => ({
     type: SUBMIT_YAML_REQUEST,
     yaml,
+    globalNamespace
 })
 
 export const DELETE_EXPERIMENT_REQUEST = "DELETE_EXPERIMENT_REQUEST";
@@ -55,3 +56,5 @@ export const FETCH_NAMESPACES_FAILURE = "FETCH_NAMESPACES_FAILURE";
 export const fetchNamespaces = () => ({
     type: FETCH_NAMESPACES_REQUEST
 })
+
+export const CHANGE_GLOBAL_NAMESPACE = "CHANGE_GLOBAL_NAMESPACE";

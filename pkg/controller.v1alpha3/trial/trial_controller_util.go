@@ -49,7 +49,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Tri
 
 			eventMsg := fmt.Sprintf("Job %s has succeeded", deployedJob.GetName())
 			r.recorder.Eventf(instance, corev1.EventTypeNormal, JobSucceededReason, eventMsg)
-			IncreaseTrialsSucceededCount()
+			r.collector.IncreaseTrialsSucceededCount(instance.Namespace)
 		} else {
 			msg := "Metrics are not available"
 			instance.MarkTrialStatusSucceeded(corev1.ConditionFalse, TrialMetricsUnavailableReason, msg)
@@ -65,7 +65,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1alpha3.Tri
 		jobConditionMessage := (*jobCondition).Message
 		eventMsg := fmt.Sprintf("Job %s has failed: %s", deployedJob.GetName(), jobConditionMessage)
 		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobFailedReason, eventMsg)
-		IncreaseTrialsFailedCount()
+		r.collector.IncreaseTrialsFailedCount(instance.Namespace)
 	} else if jobConditionType == commonv1.JobRunning {
 		msg := "Trial is running"
 		instance.MarkTrialStatusRunning(TrialRunningReason, msg)
@@ -120,9 +120,9 @@ func (r *ReconcileTrial) updateFinalizers(instance *trialsv1alpha3.Trial, finali
 		return reconcile.Result{}, err
 	} else {
 		if isDelete {
-			IncreaseTrialsDeletedCount()
+			r.collector.IncreaseTrialsDeletedCount(instance.Namespace)
 		} else {
-			IncreaseTrialsCreatedCount()
+			r.collector.IncreaseTrialsCreatedCount(instance.Namespace)
 		}
 		// Need to requeue because finalizer update does not change metadata.generation
 		return reconcile.Result{Requeue: true}, err

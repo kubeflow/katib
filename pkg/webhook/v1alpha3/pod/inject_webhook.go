@@ -23,20 +23,22 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/spf13/viper"
+	v1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
+	apitypes "k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
-	v1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	apitypes "k8s.io/apimachinery/pkg/types"
-	"k8s.io/utils/pointer"
-
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	katibmanagerv1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 	jobv1alpha3 "github.com/kubeflow/katib/pkg/job/v1alpha3"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1alpha3/common"
 	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibconfig"
@@ -46,9 +48,12 @@ var log = logf.Log.WithName("injector-webhook")
 
 // sidecarInjector that inject metrics collect sidecar into master pod
 type sidecarInjector struct {
-	client         client.Client
-	decoder        types.Decoder
-	managerService string
+	client  client.Client
+	decoder types.Decoder
+
+	// injectSecurityContext indicates if we should inject the security
+	// context into the metrics collector sidecar.
+	injectSecurityContext bool
 }
 
 var _ admission.Handler = &sidecarInjector{}
@@ -96,10 +101,11 @@ func (s *sidecarInjector) InjectDecoder(d types.Decoder) error {
 	return nil
 }
 
-func NewSidecarInjector(c client.Client, ms string) *sidecarInjector {
+// NewSidecarInjector returns a new sidecar injector.
+func NewSidecarInjector(c client.Client) *sidecarInjector {
 	return &sidecarInjector{
-		client:         c,
-		managerService: ms,
+		injectSecurityContext: viper.GetBool(consts.ConfigInjectSecurityContext),
+		client:                c,
 	}
 }
 
@@ -137,7 +143,7 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		return nil, err
 	}
 
-	injectContainer, err := s.getMetricsCollectorContainer(trial)
+	injectContainer, err := s.getMetricsCollectorContainer(trial, pod)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +167,7 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	return mutatedPod, nil
 }
 
-func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1alpha3.Trial) (*v1.Container, error) {
+func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1alpha3.Trial, originalPod *v1.Pod) (*v1.Container, error) {
 	mc := trial.Spec.MetricsCollector
 	if mc.Collector.Kind == common.CustomCollector {
 		return mc.Collector.CustomCollector, nil
@@ -171,18 +177,74 @@ func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1alpha3.Tri
 		metricName += ";"
 		metricName += v
 	}
-	image, err := katibconfig.GetMetricsCollectorImage(mc.Collector.Kind, s.client)
+	metricsCollectorConfigData, err := katibconfig.GetMetricsCollectorConfigData(mc.Collector.Kind, s.client)
 	if err != nil {
 		return nil, err
 	}
 	args := getMetricsCollectorArgs(trial.Name, metricName, mc)
 	sidecarContainerName := getSidecarContainerName(trial.Spec.MetricsCollector.Collector.Kind)
+
+	// Get metricsCollector data from config
+	metricsCollectorContainerImage := metricsCollectorConfigData[consts.LabelMetricsCollectorSidecarImage]
+	metricsCollectorCPULimit := metricsCollectorConfigData[consts.LabelMetricsCollectorCPULimitTag]
+	metricsCollectorCPURequest := metricsCollectorConfigData[consts.LabelMetricsCollectorCPURequestTag]
+	metricsCollectorMemLimit := metricsCollectorConfigData[consts.LabelMetricsCollectorMemLimitTag]
+	metricsCollectorMemRequest := metricsCollectorConfigData[consts.LabelMetricsCollectorMemRequestTag]
+	metricsCollectorDiskLimit := metricsCollectorConfigData[consts.LabelMetricsCollectorDiskLimitTag]
+	metricsCollectorDiskRequest := metricsCollectorConfigData[consts.LabelMetricsCollectorDiskRequestTag]
+
+	cpuLimitQuantity, err := resource.ParseQuantity(metricsCollectorCPULimit)
+	if err != nil {
+		return nil, err
+	}
+	cpuRequestQuantity, err := resource.ParseQuantity(metricsCollectorCPURequest)
+	if err != nil {
+		return nil, err
+	}
+	memLimitQuantity, err := resource.ParseQuantity(metricsCollectorMemLimit)
+	if err != nil {
+		return nil, err
+	}
+	memRequestQuantity, err := resource.ParseQuantity(metricsCollectorMemRequest)
+	if err != nil {
+		return nil, err
+	}
+	diskLimitQuantity, err := resource.ParseQuantity(metricsCollectorDiskLimit)
+	if err != nil {
+		return nil, err
+	}
+	diskRequestQuantity, err := resource.ParseQuantity(metricsCollectorDiskRequest)
+	if err != nil {
+		return nil, err
+	}
+
 	injectContainer := v1.Container{
 		Name:            sidecarContainerName,
-		Image:           image,
+		Image:           metricsCollectorContainerImage,
 		Args:            args,
 		ImagePullPolicy: v1.PullIfNotPresent,
+		Resources: v1.ResourceRequirements{
+			Limits: v1.ResourceList{
+				v1.ResourceCPU:              cpuLimitQuantity,
+				v1.ResourceMemory:           memLimitQuantity,
+				v1.ResourceEphemeralStorage: diskLimitQuantity,
+			},
+			Requests: v1.ResourceList{
+				v1.ResourceCPU:              cpuRequestQuantity,
+				v1.ResourceMemory:           memRequestQuantity,
+				v1.ResourceEphemeralStorage: diskRequestQuantity,
+			},
+		},
 	}
+
+	// Inject the security context when the flag is enabled.
+	if s.injectSecurityContext {
+		if len(originalPod.Spec.Containers) != 0 &&
+			originalPod.Spec.Containers[0].SecurityContext != nil {
+			injectContainer.SecurityContext = originalPod.Spec.Containers[0].SecurityContext.DeepCopy()
+		}
+	}
+
 	return &injectContainer, nil
 }
 

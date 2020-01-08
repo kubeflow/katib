@@ -18,4 +18,5 @@ FROM alpine:3.7
 WORKDIR /app
 RUN apk update && apk add ca-certificates
 COPY --from=build-env /go/src/github.com/kubeflow/katib/cmd/katib-controller/katib-controller .
+USER 1000
 ENTRYPOINT ["./katib-controller"]

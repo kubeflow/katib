@@ -12,6 +12,16 @@ Before you run the hyperparameter tuning experiment, you need to have:
 
 - A Kubernetes cluster with Kubeflow 0.7
 
+## Katib in Kubeflow
+
+See the following guides in the Kubeflow documentation:
+
+* [Concepts](https://www.kubeflow.org/docs/components/hyperparameter-tuning/overview/) 
+  in Katib, hyperparameter tuning, and neural architecture search.
+* [Getting started with Katib](https://kubeflow.org/docs/components/hyperparameter-tuning/hyperparameter/).
+* Detailed guide to [configuring and running a Katib 
+  experiment](https://kubeflow.org/docs/components/hyperparameter-tuning/experiment/).
+
 ## Hyperparameter Tuning on MNIST
 
 Katib supports multiple [Machine Learning Frameworks](https://en.wikipedia.org/wiki/Comparison_of_deep-learning_software) (e.g. TensorFlow, PyTorch, MXNet, and XGBoost).

@@ -1,5 +1,13 @@
 # How Katib v1alpha3 tunes hyperparameter automatically in a Kubernetes native way
 
+See the following guides in the Kubeflow documentation:
+
+* [Concepts](https://www.kubeflow.org/docs/components/hyperparameter-tuning/overview/) 
+  in Katib, hyperparameter tuning, and neural architecture search.
+* [Getting started with Katib](https://kubeflow.org/docs/components/hyperparameter-tuning/hyperparameter/).
+* Detailed guide to [configuring and running a Katib 
+  experiment](https://kubeflow.org/docs/components/hyperparameter-tuning/experiment/).
+
 ## Example and Illustration
 
 After install Katib v1alpha3, you can run `kubectl apply -f katib/examples/v1alpha3/random-example.yaml` to try the first example of Katib.
@@ -66,17 +74,12 @@ status:
   ...
 ```
 #### Experiment
-When you want to tune hyperparameter for your machine learning model before training it further, you just need create an `Experiment` CR like above. See what fields are included in the `Experiment.spec`:
-- **trialTemplate**:
-Your model should be packaged by image, and your model's hyperparameters must be configurable by arguments (in this case) or environment variable so that Katib can automatically set the values in each trial to verify the hyperparameters performance. You can train your model by including your model image in [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/)(in this case), [Kubeflow TFJob](https://www.kubeflow.org/docs/guides/components/tftraining/) or [Kubeflow PyTorchJob](https://www.kubeflow.org/docs/guides/components/pytorch/) (for the latter two job, you should also install corresponding component). You can define the job by raw string way (in this case), but also can refer it in a [configmap](https://cloud.google.com/kubernetes-engine/docs/concepts/configmap). See more about the struct definition as [here](https://github.com/kubeflow/katib/blob/master/pkg/apis/controller/experiments/v1alpha3/experiment_types.go#L165-L179)
-- **parameters**:
-This field defines the range of the hyperparameters you want to tune for your model, Katib will generate hyperparameter combinations in the range based on specified hyperparameters tuning algorithm and then instantiate `.HyperParameters` template scope in the above `trialTemplate` field. See more about the struct definition as [here](https://github.com/kubeflow/katib/blob/master/pkg/apis/controller/experiments/v1alpha3/experiment_types.go#L142-L163)
-- **algorithm**: There are many [hyperparameter tuning algorithms](https://en.wikipedia.org/wiki/Hyperparameter_optimization) to choose a set of optimal hyperparameters for a learning model. For now Katib supports random, grid, [hyperband](https://arxiv.org/pdf/1603.06560.pdf),[bayesian optimization](https://arxiv.org/pdf/1012.2599.pdf) and [tpe](https://arxiv.org/pdf/1703.01785.pdf) algorithms (More algorithms are being developed). And you can develop a new algorithm for Katib noninvasively (we will document the guideline about how to develop an algorithm for Katib soon). See more about the struct definition as [here](https://github.com/kubeflow/katib/blob/master/pkg/apis/controller/common/v1alpha3/common_types.go#L23-L33)
-- **objective**: When the model training job with a set of generated hyperparameters starts, we need monitor how well the hyperparameters work with the model by related metrics specified by `objectiveMetricName` and `additionalMetricNames`. The best `objectiveMetricName` metrics (maximize or minimize based on `type`) value and corresponding hyperparameter set will be record in `Experiment.status`. And if `objectiveMetricName` metrics for a set hyperparameter exceeds (greater or less based on `type`) the `goal`, Katib will stop trying more hyperparameter combinations. See more about the struct definition as [here](https://github.com/kubeflow/katib/blob/master/pkg/apis/controller/common/v1alpha3/common_types.go#L40-L55)
-- **metricsCollectorSpec**: When developing a model, developers are likely to print or record the metrics of the model into stdout or files during training. Now Katib can automatically collect the metrics by a sidecar container. The metrics collector for metrics print or record by stdout, file or [tfevent](https://www.tensorflow.org/api_docs/python/tf/Event) (specified by `collector` field, and metrics output specified by `source` field) are now available (more kinds of collectors will be available). See more about the struct definition as [here](https://github.com/kubeflow/katib/blob/master/pkg/apis/controller/common/v1alpha3/common_types.go#L74-L143)
-- **maxTrialCount**: It specifies how many sets of hyperparameter can be generated to test the model at most.
-- **parallelTrialCount**: This fields specifies how many sets of hyperparameter to be tested in parallel at most.
-- **maxFailedTrialCount**: Some sets of hyperparameter corresponding jobs maybe fail somehow. If the failed count of hyperparameter set exceeds `maxFailedTrialCount`, the hyperparameter tuning for the model will be stopped with `Failed` status.
+When you want to tune hyperparameters for your machine learning model before 
+training it further, you just need to create an `Experiment` CR like above. To
+learn what fields are included in the `Experiment.spec`, see
+the detailed guide to [configuring and running a Katib 
+experiment](https://kubeflow.org/docs/components/hyperparameter-tuning/experiment/).
+
 #### Trial
 For each set of hyperparameters, Katib will internally generate a `Trial` CR with the hyperparameters key-value pairs, job manifest string with parameters instantiated and some other fields like below. `Trial` CR is used for internal logic control, and end user can even ignore it.
 ```

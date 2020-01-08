@@ -2,6 +2,7 @@
 .gitignore
 docs
 examples
+!examples/v1alpha3/NAS-training-containers/RL-cifar10
 manifests
 pkg/ui/*/frontend/node_modules
 pkg/ui/*/frontend/build
