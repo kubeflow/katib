@@ -27,6 +27,7 @@ PROJECT="${GCP_PROJECT}"
 NAMESPACE="${DEPLOY_NAMESPACE}"
 REGISTRY="${GCP_REGISTRY}"
 VERSION=$(git describe --tags --always --dirty)
+KUBECTL_VERSION="v1.14.0"
 GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
 
 echo "Activating service-account"
@@ -38,24 +39,17 @@ echo "CLUSTER_NAME: ${CLUSTER_NAME}"
 echo "ZONE: ${GCP_ZONE}"
 echo "PROJECT: ${GCP_PROJECT}"
 
+# The kubectl need to be upgraded to 1.14.0 to avoid dismatch issue.
+wget -q -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl
+chmod a+x /usr/local/bin/kubectl
 gcloud --project ${PROJECT} container clusters get-credentials ${CLUSTER_NAME} \
   --zone ${ZONE}
 kubectl config set-context $(kubectl config current-context) --namespace=default
-USER=`gcloud config get-value account`
 
-kubectl apply -f - << EOF
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: cluster-admins
-subjects:
-- kind: User
-  name: $USER
-roleRef:
-  kind: ClusterRole
-  name: cluster-admin
-  apiGroup: ""
-EOF
+echo "Grant cluster-admin permissions to the current user ..."
+kubectl create clusterrolebinding cluster-admin-binding \
+  --clusterrole=cluster-admin \
+  --user=$(gcloud config get-value core/account)
 
 #This is required. But I don't know why.
 # VERSION=${VERSION/%?/}
@@ -72,8 +66,8 @@ sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-contr
 sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/file-metrics-collector@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/file-metrics-collector:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
 sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/tfevent-metrics-collector@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/tfevent-metrics-collector:${VERSION}@" manifests/v1alpha3/katib-controller/katib-config.yaml
 
-# Katib manager
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-manager@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-manager:${VERSION}@" manifests/v1alpha3/manager/deployment.yaml
+# Katib DB manager
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-db-manager@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-db-manager:${VERSION}@" manifests/v1alpha3/db-manager/deployment.yaml
 
 # UI
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-ui:${VERSION}@" manifests/v1alpha3/ui/deployment.yaml
@@ -117,7 +111,7 @@ TIMEOUT=120
 PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
 until kubectl get pods -n kubeflow | grep Running | [[ $(wc -l) -eq $PODNUM ]]; do
     echo Pod Status $(kubectl get pods -n kubeflow | grep "1/1" | wc -l)/$PODNUM
-    
+
     sleep 10
     TIMEOUT=$(( TIMEOUT - 1 ))
     if [[ $TIMEOUT -eq 0 ]];then
@@ -152,7 +146,7 @@ if [ $? -ne 1 ]; then
   exit 1
 fi
 set -o errexit
-kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-manager |sed -e "s@pods\/@@") 6789:6789 &
+kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-db-manager |sed -e "s@pods\/@@") 6789:6789 &
 echo "kubectl port-forward start"
 sleep 5
 TIMEOUT=120

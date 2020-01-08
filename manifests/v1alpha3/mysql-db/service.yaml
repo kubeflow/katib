@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: katib-db
+  name: katib-mysql
   namespace: kubeflow
   labels:
     app: katib
-    component: db
+    component: mysql
 spec:
   type: ClusterIP
   ports:
@@ -14,4 +14,4 @@ spec:
       name: dbapi
   selector:
     app: katib
-    component: db
+    component: mysql

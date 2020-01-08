@@ -9,12 +9,12 @@ const (
 
 	DBPasswordEnvName = "DB_PASSWORD"
 
-	MySQLDBHostEnvName = "KATIB_MYSQL_HOST"
-	MySQLDBPortEnvName = "KATIB_MYSQL_PORT"
-	MySQLDatabase      = "KATIB_MYSQL_DATABASE"
+	MySQLDBHostEnvName = "KATIB_MYSQL_DB_HOST"
+	MySQLDBPortEnvName = "KATIB_MYSQL_DB_PORT"
+	MySQLDatabase      = "KATIB_MYSQL_DB_DATABASE"
 
 	DefaultMySQLUser     = "root"
 	DefaultMySQLDatabase = "katib"
-	DefaultMySQLHost     = "katib-db"
+	DefaultMySQLHost     = "katib-mysql"
 	DefaultMySQLPort     = "3306"
 )

@@ -27,9 +27,9 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 ## Background
 
-Katib makes suggestions long-running in v1alpha3 and v1alpha3. And the suggestions need to communicate with katib manager to get experiments and trials from katib-db. This design hurts high availability. 
+Katib makes suggestions long-running in v1alpha3. And the suggestions need to communicate with katib DB manager to get experiments and trials from katib db driver. This design hurts high availability. 
 
-Thus we proposed a new design to implement a CRD for suggestion and remove katib-db from main workflow. The new design simplifies the implmentation of experiment and trial controller, and makes katib Kubernetes native.
+Thus we proposed a new design to implement a CRD for suggestion and remove katib db communication from main workflow. The new design simplifies the implmentation of experiment and trial controller, and makes katib Kubernetes native.
 
 This document is to illustrate the details of the new design.
 

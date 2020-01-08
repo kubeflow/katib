@@ -30,7 +30,7 @@ However, the pulled-based design has [some problems](https://github.com/kubeflow
 
 To enhance the extensibility and support EarlyStopping, we propose a new design of the metrics collector.
 In the new design, katib use mutating webhook to inject metrics collector container as a sidecar into Job/Tfjob/PytorchJob pod.
-The sidecar collects metrics of the master and then store them on the persistent layer (e.x. katib-manager and metadata server).
+The sidecar collects metrics of the master and then store them on the persistent layer (e.x. katib-db-manager and metadata server).
 
 <center>
 <img src="../images/metrics-collector-design.png" width="80%">
@@ -41,7 +41,7 @@ Fig. 1 Architecture of the new design
 ## Goal
 
 1. **A mutating webhook**: inject metrics collector as a sidecar into master pod.
-2. **A metric collector**: collect metrics and store them on the persistent layer (katib-manager).
+2. **A metric collector**: collect metrics and store them on the persistent layer (katib-db-manager).
 3. **The final metrics** of worker pods should be collected by trail controller and then be stored into trial status.
 
 ## API
@@ -134,7 +134,7 @@ In **Job Level Injecting**,
 2. For PytorchJob, the metrics collector sidecar is injected into master template.
 3. For TfJob, the metrics collector sidecar is injected into master template if master exists. Otherwise, the sidecar is injected into worker template with 0 index.
 
-After injecting, the sidecar collects metrics of the master and then store them on the persistent layer (e.x. katib-manager and metadata server).
+After injecting, the sidecar collects metrics of the master and then store them on the persistent layer (e.x. katib-db-manager and metadata server).
 
 ### Metric Collector
 
