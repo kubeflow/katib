@@ -65,24 +65,24 @@ class Controller(object):
 
     def _create_params(self):
         initializer = tf.random_uniform_initializer(minval=-0.1, maxval=0.1)
-        with tf.variable_scope(self.name, initializer=initializer):
-            with tf.variable_scope("lstm"):
+        with tf.compat.v1.variable_scope(self.name, initializer=initializer):
+            with tf.compat.v1.variable_scope("lstm"):
                 self.w_lstm = []
                 for layer_id in range(self.lstm_num_layers):
-                    with tf.variable_scope("layer_{}".format(layer_id)):
-                        w = tf.get_variable("w", [2 * self.lstm_size, 4 * self.lstm_size])
+                    with tf.compat.v1.variable_scope("layer_{}".format(layer_id)):
+                        w = tf.compat.v1.get_variable("w", [2 * self.lstm_size, 4 * self.lstm_size])
                         self.w_lstm.append(w)
 
-            self.g_emb = tf.get_variable("g_emb", [1, self.lstm_size])
-            with tf.variable_scope("emb"):
-                self.w_emb = tf.get_variable("w", [self.num_operations, self.lstm_size])
-            with tf.variable_scope("softmax"):
-                self.w_soft = tf.get_variable("w", [self.lstm_size, self.num_operations])
+            self.g_emb = tf.compat.v1.get_variable("g_emb", [1, self.lstm_size])
+            with tf.compat.v1.variable_scope("emb"):
+                self.w_emb = tf.compat.v1.get_variable("w", [self.num_operations, self.lstm_size])
+            with tf.compat.v1.variable_scope("softmax"):
+                self.w_soft = tf.compat.v1.get_variable("w", [self.lstm_size, self.num_operations])
 
-            with tf.variable_scope("attention"):
-                self.w_attn_1 = tf.get_variable("w_1", [self.lstm_size, self.lstm_size])
-                self.w_attn_2 = tf.get_variable("w_2", [self.lstm_size, self.lstm_size])
-                self.v_attn = tf.get_variable("v", [self.lstm_size, 1])
+            with tf.compat.v1.variable_scope("attention"):
+                self.w_attn_1 = tf.compat.v1.get_variable("w_1", [self.lstm_size, self.lstm_size])
+                self.w_attn_2 = tf.compat.v1.get_variable("w_2", [self.lstm_size, self.lstm_size])
+                self.v_attn = tf.compat.v1.get_variable("v", [self.lstm_size, 1])
 
     def _build_sampler(self):
         """Build the sampler ops and the log_prob ops."""
@@ -110,8 +110,8 @@ class Controller(object):
             if self.tanh_constant is not None:
                 logit = self.tanh_constant * tf.tanh(logit)
 
-            operation_id = tf.multinomial(logit, 1)
-            operation_id = tf.to_int32(operation_id)
+            operation_id = tf.random.categorical(logit, 1)
+            operation_id = tf.dtypes.cast(operation_id, tf.int32)
             operation_id = tf.reshape(operation_id, [1])
 
             arc_seq.append(operation_id)
@@ -135,13 +135,13 @@ class Controller(object):
                 if self.tanh_constant is not None:
                     logit = self.tanh_constant * tf.tanh(logit)
 
-                skip = tf.multinomial(logit, 1)
-                skip = tf.to_int32(skip)
+                skip = tf.random.categorical(logit, 1)
+                skip = tf.dtypes.cast(skip, tf.int32)
                 skip = tf.reshape(skip, [layer_id])
                 arc_seq.append(skip)
 
                 skip_prob = tf.sigmoid(logit)
-                kl = skip_prob * tf.log(skip_prob / skip_targets)
+                kl = skip_prob * tf.math.log(skip_prob / skip_targets)
                 kl = tf.reduce_sum(kl)
                 skip_penaltys.append(kl)
 
@@ -153,7 +153,7 @@ class Controller(object):
                     tf.reduce_sum(log_prob * tf.exp(-log_prob), keepdims=True))
                 entropys.append(entropy)
 
-                skip = tf.to_float(skip)
+                skip = tf.dtypes.cast(skip, tf.float32)
                 skip = tf.reshape(skip, [1, layer_id])
                 skip_count.append(tf.reduce_sum(skip))
                 inputs = tf.matmul(skip, tf.concat(anchors, axis=0))
@@ -180,17 +180,17 @@ class Controller(object):
         self.skip_penaltys = tf.reduce_mean(skip_penaltys)
 
     def build_trainer(self):
-        self.reward = tf.placeholder(tf.float32, shape=())
+        self.reward = tf.compat.v1.placeholder(tf.float32, shape=())
 
-        normalize = tf.to_float(self.num_layers * (self.num_layers - 1) / 2)
-        self.skip_rate = tf.to_float(self.skip_count) / normalize
+        normalize = tf.dtypes.cast(self.num_layers * (self.num_layers - 1) / 2, tf.float32)
+        self.skip_rate = tf.dtypes.cast(self.skip_count, tf.float32) / normalize
 
         if self.entropy_weight is not None:
             self.reward += self.entropy_weight * self.sample_entropy
 
         self.sample_log_prob = tf.reduce_sum(self.sample_log_prob)
         self.baseline = tf.Variable(0.0, dtype=tf.float32, trainable=False)
-        baseline_update = tf.assign_sub(self.baseline, (1 - self.bl_dec) * (self.baseline - self.reward))
+        baseline_update = tf.compat.v1.assign_sub(self.baseline, (1 - self.bl_dec) * (self.baseline - self.reward))
 
         with tf.control_dependencies([baseline_update]):
             self.reward = tf.identity(self.reward)
@@ -200,7 +200,7 @@ class Controller(object):
             self.loss += self.skip_weight * self.skip_penaltys
 
         self.train_step = tf.Variable(0, dtype=tf.int32, trainable=False, name=self.name + "_train_step")
-        tf_variables = [var for var in tf.trainable_variables() if var.name.startswith(self.name)]
+        tf_variables = [var for var in tf.compat.v1.trainable_variables() if var.name.startswith(self.name)]
 
         self.train_op, self.lr, self.grad_norm, self.optimizer = get_train_ops(
             self.loss,
