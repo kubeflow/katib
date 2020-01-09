@@ -60,7 +60,7 @@ func (s *server) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*
 		return &resp, fmt.Errorf("grpc.health.v1.Health can only be accepted if you specify service name.")
 	}
 
-	// Check if connection to katib-db is okay since otherwise manager could not serve most of its methods.
+	// Check if connection to katib db driver is okay since otherwise manager could not serve most of its methods.
 	err := dbIf.SelectOne()
 	if err != nil {
 		resp.Status = health_pb.HealthCheckResponse_NOT_SERVING
