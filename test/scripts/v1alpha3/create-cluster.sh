@@ -33,6 +33,7 @@ echo "Creating GPU cluster"
 gcloud --project ${PROJECT} beta container clusters create ${CLUSTER_NAME} \
     --zone ${ZONE} \
     --machine-type=n1-standard-8 \
+    --enable-autoscaling \
     --cluster-version 1.14
 echo "Configuring kubectl"
 gcloud --project ${PROJECT} container clusters get-credentials ${CLUSTER_NAME} \
