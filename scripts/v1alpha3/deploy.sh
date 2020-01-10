@@ -26,8 +26,8 @@ kubectl get validatingwebhookconfigurations katib-validating-webhook-config && k
 kubectl get mutatingwebhookconfigurations katib-mutating-webhook-config && kubectl delete mutatingwebhookconfigurations katib-mutating-webhook-config
 kubectl apply -f manifests/v1alpha3
 kubectl apply -f manifests/v1alpha3/katib-controller
-kubectl apply -f manifests/v1alpha3/manager
+kubectl apply -f manifests/v1alpha3/db-manager
 kubectl apply -f manifests/v1alpha3/pv
-kubectl apply -f manifests/v1alpha3/db
+kubectl apply -f manifests/v1alpha3/mysql-db
 kubectl apply -f manifests/v1alpha3/ui
 cd - > /dev/null

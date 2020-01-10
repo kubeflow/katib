@@ -26,69 +26,68 @@ import (
 )
 
 const (
-	KatibManagerServiceIPEnvName        = "KATIB_MANAGER_PORT_6789_TCP_ADDR"
-	KatibManagerServicePortEnvName      = "KATIB_MANAGER_PORT_6789_TCP_PORT"
-	KatibManagerServiceNamespaceEnvName = "KATIB_MANAGER_NAMESPACE"
-	KatibManagerService                 = "katib-manager"
-	KatibManagerPort                    = "6789"
-	ManagerAddr                         = KatibManagerService + ":" + KatibManagerPort
+	KatibDBManagerServiceIPEnvName   = "KATIB_DB_MANAGER_PORT_6789_TCP_ADDR"
+	KatibDBManagerServicePortEnvName = "KATIB_DB_MANAGER_PORT_6789_TCP_PORT"
+	KatibDBManagerService            = "katib-db-manager"
+	KatibDBManagerPort               = "6789"
+	KatibDBManagerAddr               = KatibDBManagerService + ":" + KatibDBManagerPort
 )
 
-type katibManagerClientAndConn struct {
-	Conn               *grpc.ClientConn
-	KatibManagerClient api_pb.ManagerClient
+type katibDBManagerClientAndConn struct {
+	Conn                 *grpc.ClientConn
+	KatibDBManagerClient api_pb.ManagerClient
 }
 
-func GetManagerAddr() string {
+func GetDBManagerAddr() string {
 	ns := consts.DefaultKatibNamespace
 	if len(ns) == 0 {
-		addr := os.Getenv(KatibManagerServiceIPEnvName)
-		port := os.Getenv(KatibManagerServicePortEnvName)
+		addr := os.Getenv(KatibDBManagerServiceIPEnvName)
+		port := os.Getenv(KatibDBManagerServicePortEnvName)
 		if len(addr) > 0 && len(port) > 0 {
 			return addr + ":" + port
 		} else {
-			return ManagerAddr
+			return KatibDBManagerAddr
 		}
 	} else {
-		return KatibManagerService + "." + ns + ":" + KatibManagerPort
+		return KatibDBManagerService + "." + ns + ":" + KatibDBManagerPort
 	}
 }
 
-func getKatibManagerClientAndConn() (*katibManagerClientAndConn, error) {
-	addr := GetManagerAddr()
+func getKatibDBManagerClientAndConn() (*katibDBManagerClientAndConn, error) {
+	addr := GetDBManagerAddr()
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
-	kcc := &katibManagerClientAndConn{
-		Conn:               conn,
-		KatibManagerClient: api_pb.NewManagerClient(conn),
+	kcc := &katibDBManagerClientAndConn{
+		Conn:                 conn,
+		KatibDBManagerClient: api_pb.NewManagerClient(conn),
 	}
 	return kcc, nil
 }
 
-func closeKatibManagerConnection(kcc *katibManagerClientAndConn) {
+func closeKatibDBManagerConnection(kcc *katibDBManagerClientAndConn) {
 	kcc.Conn.Close()
 }
 
 func GetObservationLog(request *api_pb.GetObservationLogRequest) (*api_pb.GetObservationLogReply, error) {
 	ctx := context.Background()
-	kcc, err := getKatibManagerClientAndConn()
+	kcc, err := getKatibDBManagerClientAndConn()
 	if err != nil {
 		return nil, err
 	}
-	defer closeKatibManagerConnection(kcc)
-	kc := kcc.KatibManagerClient
+	defer closeKatibDBManagerConnection(kcc)
+	kc := kcc.KatibDBManagerClient
 	return kc.GetObservationLog(ctx, request)
 }
 
 func DeleteObservationLog(request *api_pb.DeleteObservationLogRequest) (*api_pb.DeleteObservationLogReply, error) {
 	ctx := context.Background()
-	kcc, err := getKatibManagerClientAndConn()
+	kcc, err := getKatibDBManagerClientAndConn()
 	if err != nil {
 		return nil, err
 	}
-	defer closeKatibManagerConnection(kcc)
-	kc := kcc.KatibManagerClient
+	defer closeKatibDBManagerConnection(kcc)
+	kc := kcc.KatibDBManagerClient
 	return kc.DeleteObservationLog(ctx, request)
 }

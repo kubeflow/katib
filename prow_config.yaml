@@ -26,8 +26,7 @@ workflows:
     - pkg/webhook/v1alpha3/*
     - cmd/earlystopping/medianstopping/v1alpha3/*
     - cmd/katib-controller/v1alpha3/*
-    - cmd/manager/v1alpha3/*
-    - cmd/manager-rest/v1alpha3/*
+    - cmd/db-manager/v1alpha3/*
     - cmd/metricscollector/v1alpha3/*
     - cmd/suggestion/bayesianoptimization/v1alpha3/*
     - cmd/suggestion/grid/v1alpha3/*
@@ -71,8 +70,7 @@ workflows:
     - pkg/webhook/v1alpha3/*
     - cmd/earlystopping/medianstopping/v1alpha3/*
     - cmd/katib-controller/v1alpha3/*
-    - cmd/manager/v1alpha3/*
-    - cmd/manager-rest/v1alpha3/*
+    - cmd/db-manager/v1alpha3/*
     - cmd/metricscollector/v1alpha3/*
     - cmd/suggestion/bayesianoptimization/v1alpha3/*
     - cmd/suggestion/grid/v1alpha3/*

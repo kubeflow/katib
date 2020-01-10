@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: katib-db
+  name: katib-mysql
   namespace: kubeflow
   labels:
     app: katib
-    component: db
+    component: mysql
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: katib
-      component: db
+      component: mysql
   template:
     metadata:
-      name: katib-db
+      name: katib-mysql
       labels:
         app: katib
-        component: db
+        component: mysql
     spec:
       containers:
-      - name: katib-db
+      - name: katib-mysql
         image: mysql:8
         args:
         - --datadir
@@ -29,7 +29,7 @@ spec:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: katib-db-secrets
+                name: katib-mysql-secrets
                 key: MYSQL_ROOT_PASSWORD
           - name: MYSQL_ALLOW_EMPTY_PASSWORD
             value: "true"

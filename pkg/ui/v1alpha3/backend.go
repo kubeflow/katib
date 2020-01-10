@@ -29,7 +29,7 @@ func NewKatibUIHandler() *KatibUIHandler {
 }
 
 func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1alpha3.ManagerClient) {
-	conn, err := grpc.Dial(common_v1alpha3.ManagerAddr, grpc.WithInsecure())
+	conn, err := grpc.Dial(common_v1alpha3.KatibDBManagerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Dial to GRPC failed: %v", err)
 		return nil, nil
