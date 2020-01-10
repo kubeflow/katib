@@ -311,16 +311,10 @@ It will stop port-forward process and delete minikube cluster.
 
 # List of current Katib training container images
 
-- Mxnet mnist example, [source](https://github.com/apache/incubator-mxnet/blob/master/example/image-classification/train_mnist.py).
+- Mxnet mnist example with collecting metrics time, [source](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/mxnet-mnist/mnist.py).
 
 ```
-docker.io/kubeflowkatib/mxnet-mnist-example
-```
-
-- Mxnet mnist example with collecting metrics time, [source](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/mxnet-mnist-timestamp/mnist.py).
-
-```
-docker.io/kubeflowkatib/mxnet-mnist-timestamp
+docker.io/kubeflowkatib/mxnet-mnist
 ```
 
 - Pytorch mnist example with saving metrics to the file, [source](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/file-metrics-collector/mnist.py).
