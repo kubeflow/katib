@@ -32,8 +32,8 @@ spec:
     - name: --num-epochs
       parameterType: int
       feasibleSpace:
-        min: "20"
-        max: "40"
+        min: "10"
+        max: "15"
     # Grid doesn't support categorical, refer to https://chocolate.readthedocs.io/api/sample.html#chocolate.Grid
     # - name: --optimizer
     #   parameterType: categorical
