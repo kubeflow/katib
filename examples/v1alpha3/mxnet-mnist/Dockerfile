@@ -7,7 +7,7 @@ RUN apt-get update && \
 
 RUN pip3 install mxnet
 
-ADD . /opt/mxnet-mnist-timestamp
-WORKDIR /opt/mxnet-mnist-timestamp
+ADD . /opt/mxnet-mnist
+WORKDIR /opt/mxnet-mnist
 
-ENTRYPOINT ["python3", "/opt/mxnet-mnist-timestamp/mnist.py"]
+ENTRYPOINT ["python3", "/opt/mxnet-mnist/mnist.py"]
