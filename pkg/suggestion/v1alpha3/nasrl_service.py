@@ -19,8 +19,6 @@ class NAS_RL_Experiment(object):
         self.experiment_name = request.experiment.name
         self.experiment = request.experiment
         self.num_trials = 1
-        if request.request_number > 0:
-            self.num_trials = request.request_number
         self.tf_graph = tf.Graph()
         # self.prev_trial_ids = list()
         # self.prev_trials = None
@@ -73,7 +71,7 @@ class NAS_RL_Experiment(object):
 
         # Get Experiment Parameters
         params_raw = self.experiment.spec.algorithm.algorithm_setting
-        self.algorithm_settings = parseAlgorithmSettings(params_raw)
+        self.algorithm_settings = parseAlgorithmSettings(params_raw, self.logger)
 
         self.print_algorithm_settings()
 
@@ -222,11 +220,13 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         if self.is_first_run:
             self.experiment = NAS_RL_Experiment(request, self.logger)
         experiment = self.experiment
+        if request.request_number > 0:
+            experiment.num_trials = request.request_number
         self.logger.info("-" * 100 + "\nSuggestion Step {} for Experiment {}\n".format(
             experiment.ctrl_step, experiment.experiment_name) + "-" * 100)
 
         with experiment.tf_graph.as_default():
-            saver = tf.train.Saver()
+            saver = tf.compat.v1.train.Saver()
             ctrl = experiment.controller
 
             controller_ops = {
@@ -252,8 +252,8 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             if self.is_first_run:
                 self.logger.info(">>> First time running suggestion for {}. Random architecture will be given.".format(
                     experiment.experiment_name))
-                with tf.Session() as sess:
-                    sess.run(tf.global_variables_initializer())
+                with tf.compat.v1.Session() as sess:
+                    sess.run(tf.compat.v1.global_variables_initializer())
                     candidates = list()
                     for _ in range(experiment.num_trials):
                         candidates.append(
@@ -265,7 +265,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 self.is_first_run = False
 
             else:
-                with tf.Session() as sess:
+                with tf.compat.v1.Session() as sess:
                     saver.restore(sess, experiment.ctrl_cache_file)
 
                     valid_acc = ctrl.reward

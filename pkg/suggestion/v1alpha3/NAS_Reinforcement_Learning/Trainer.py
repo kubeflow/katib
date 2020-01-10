@@ -40,7 +40,7 @@ def get_train_ops(loss,
         loss += l2_reg * l2_loss
 
     grads = tf.gradients(loss, tf_variables)
-    grad_norm = tf.global_norm(grads)
+    grad_norm = tf.linalg.global_norm(grads)
 
     grad_norms = {}
     for v, g in zip(tf_variables, grads):
@@ -99,7 +99,7 @@ def get_train_ops(loss,
         learning_rate = tf.cond(
             tf.greater_equal(T_curr, T_i), _update, _no_update)
     else:
-        learning_rate = tf.train.exponential_decay(
+        learning_rate = tf.compat.v1.train.exponential_decay(
             lr_init, tf.maximum(train_step - lr_dec_start, 0), lr_dec_every,
             lr_dec_rate, staircase=True)
         if lr_dec_min is not None:
@@ -110,12 +110,12 @@ def get_train_ops(loss,
                                 lambda: lr_warmup_val, lambda: learning_rate)
 
     if optim_algo == "momentum":
-        opt = tf.train.MomentumOptimizer(
+        opt = tf.compat.v1.train.MomentumOptimizer(
             learning_rate, 0.9, use_locking=True, use_nesterov=True)
     elif optim_algo == "sgd":
-        opt = tf.train.GradientDescentOptimizer(learning_rate, use_locking=True)
+        opt = tf.compat.v1.train.GradientDescentOptimizer(learning_rate, use_locking=True)
     elif optim_algo == "adam":
-        opt = tf.train.AdamOptimizer(learning_rate, beta1=0.0, epsilon=1e-3,
+        opt = tf.compat.v1.train.AdamOptimizer(learning_rate, beta1=0.0, epsilon=1e-3,
                                      use_locking=True)
     else:
         raise ValueError("Unknown optim_algo {}".format(optim_algo))
@@ -124,7 +124,7 @@ def get_train_ops(loss,
         assert num_aggregate is not None, "Need num_aggregate to sync."
         assert num_replicas is not None, "Need num_replicas to sync."
 
-        opt = tf.train.SyncReplicasOptimizer(
+        opt = tf.compat.v1.train.SyncReplicasOptimizer(
             opt,
             replicas_to_aggregate=num_aggregate,
             total_num_replicas=num_replicas,
