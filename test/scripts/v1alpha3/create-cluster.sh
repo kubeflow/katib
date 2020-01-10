@@ -33,6 +33,7 @@ echo "Creating GPU cluster"
 gcloud --project ${PROJECT} beta container clusters create ${CLUSTER_NAME} \
     --zone ${ZONE} \
     --machine-type=n1-standard-8 \
+    --num-nodes=6 \
     --enable-autoscaling \
     --max-nodes=8 \
     --cluster-version 1.14
