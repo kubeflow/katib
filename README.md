@@ -100,8 +100,8 @@ Katib consists of several components as shown below. Each component is running o
 Each component communicates with others via GRPC and the API is defined at `pkg/apis/manager/v1alpha3/api.proto`.
 
 - katib: main components.
-  - katib-manager: GRPC API server of katib which is the DB Interface.
-  - katib-db: Data storage backend of katib.
+  - katib-db-manager: GRPC API server of katib which is the DB Interface.
+  - katib-mysql: Data storage backend of katib using mysql.
   - katib-ui: User interface of katib.
   - katib-controller: Controller for katib CRDs in Kubernetes.
 

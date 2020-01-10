@@ -1,27 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: katib-manager
+  name: katib-db-manager
   namespace: kubeflow
   labels:
     app: katib
-    component: manager
+    component: db-manager
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: katib
-      component: manager
+      component: db-manager
   template:
     metadata:
-      name: katib-manager
+      name: katib-db-manager
       labels:
         app: katib
-        component: manager
+        component: db-manager
     spec:
       containers:
-      - name: katib-manager
-        image: gcr.io/kubeflow-images-public/katib/v1alpha3/katib-manager
+      - name: katib-db-manager
+        image: gcr.io/kubeflow-images-public/katib/v1alpha3/katib-db-manager
         imagePullPolicy: IfNotPresent
         env:
           - name : DB_NAME
@@ -29,10 +29,10 @@ spec:
           - name: DB_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: katib-db-secrets
+                name: katib-mysql-secrets
                 key: MYSQL_ROOT_PASSWORD
         command:
-          - './katib-manager'
+          - './katib-db-manager'
         ports:
         - name: api
           containerPort: 6789

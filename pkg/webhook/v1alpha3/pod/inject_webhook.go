@@ -249,7 +249,7 @@ func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1alpha3.Tri
 }
 
 func getMetricsCollectorArgs(trialName, metricName string, mc common.MetricsCollectorSpec) []string {
-	args := []string{"-t", trialName, "-m", metricName, "-s", katibmanagerv1alpha3.GetManagerAddr()}
+	args := []string{"-t", trialName, "-m", metricName, "-s", katibmanagerv1alpha3.GetDBManagerAddr()}
 	if mountPath, _ := getMountPath(mc); mountPath != "" {
 		args = append(args, "-path", mountPath)
 	}

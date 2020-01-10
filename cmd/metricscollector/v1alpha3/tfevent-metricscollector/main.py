@@ -15,7 +15,7 @@ def parse_options():
         add_help=True
     )
     parser.add_argument("-s", "--manager_server_addr",
-                        type=str, default="katib-manager:6789")
+                        type=str, default="katib-db-manager:6789")
     parser.add_argument("-t", "--trial_name", type=str, default="")
     parser.add_argument("-path", "--dir_path", type=str, default="/log")
     parser.add_argument("-m", "--metric_names", type=str, default="")

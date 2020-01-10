@@ -238,7 +238,7 @@ spec:
                 - "-n"
                 - "kubeflow"
                 - "-m"
-                - "katib-manager.kubeflow:6789"
+                - "katib-db-manager.kubeflow:6789"
                 - "-mn"
                 - "Validation-accuracy;accuracy"
               restartPolicy: Never
