@@ -17,10 +17,6 @@
 # This shell script is used to build a cluster and create a namespace from our
 # argo workflow
 
-echo "The e2e test takes too much time, we comment it now."
-echo "TODO: Fix the test cases to reduce running time."
-exit 0
-
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -63,7 +59,7 @@ cd ${GO_DIR}/test/e2e/v1alpha3
 
 echo "Running e2e NASRL experiment"
 export KUBECONFIG=$HOME/.kube/config
-./run-e2e-experiment ../../../examples/v1alpha3/nasjob-example-RL.yaml
+./run-e2e-experiment ../../../examples/v1alpha3/nasjob-example-RL-cpu.yaml
 kubectl -n kubeflow describe suggestion
 kubectl -n kubeflow delete experiment nas-rl-example
 exit 0
