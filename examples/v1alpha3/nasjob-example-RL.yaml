@@ -60,7 +60,7 @@ spec:
               spec:
                 containers:
                 - name: {{.Trial}}
-                  image: gcr.io/kubeflow-images-public/katib/v1alpha3/training-container-nasrl-cifar10
+                  image: docker.io/kubeflowkatib/nasrl-cifar10-gpu
                   command:
                   - "python3.5"
                   - "-u"
