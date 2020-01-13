@@ -61,5 +61,5 @@ echo "Running e2e NASRL experiment"
 export KUBECONFIG=$HOME/.kube/config
 ./run-e2e-experiment ../../../examples/v1alpha3/nasjob-example-RL-cpu.yaml
 kubectl -n kubeflow describe suggestion
-kubectl -n kubeflow delete experiment nas-rl-example
+kubectl -n kubeflow delete experiment nas-rl-example-cpu
 exit 0
