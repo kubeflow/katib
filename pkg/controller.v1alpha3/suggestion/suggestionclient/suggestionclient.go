@@ -179,7 +179,7 @@ func (g *General) ConvertExperiment(e *experimentsv1alpha3.Experiment) *suggesti
 func (g *General) ConvertTrials(ts []trialsv1alpha3.Trial) []*suggestionapi.Trial {
 	trialsRes := make([]*suggestionapi.Trial, 0)
 	for _, t := range ts {
-		trialsRes = append(trialsRes, &suggestionapi.Trial{
+		trial := &suggestionapi.Trial{
 			Name: t.Name,
 			Spec: &suggestionapi.TrialSpec{
 				Objective: &suggestionapi.ObjectiveSpec{
@@ -194,13 +194,16 @@ func (g *General) ConvertTrials(ts []trialsv1alpha3.Trial) []*suggestionapi.Tria
 			Status: &suggestionapi.TrialStatus{
 				StartTime:      convertTrialStatusTime(t.Status.StartTime),
 				CompletionTime: convertTrialStatusTime(t.Status.CompletionTime),
-				// We send only the latest condition of the Trial!
-				Condition: convertTrialConditionType(
-					t.Status.Conditions[len(t.Status.Conditions)-1].Type),
 				Observation: convertTrialObservation(
 					t.Status.Observation),
 			},
-		})
+		}
+		if len(t.Status.Conditions) > 0 {
+			// We send only the latest condition of the Trial!
+			trial.Status.Condition = convertTrialConditionType(
+				t.Status.Conditions[len(t.Status.Conditions)-1].Type)
+		}
+		trialsRes = append(trialsRes, trial)
 	}
 
 	return trialsRes
