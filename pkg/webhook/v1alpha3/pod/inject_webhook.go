@@ -186,6 +186,7 @@ func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1alpha3.Tri
 
 	// Get metricsCollector data from config
 	metricsCollectorContainerImage := metricsCollectorConfigData[consts.LabelMetricsCollectorSidecarImage]
+	metricsCollectorImagePullPolicy := metricsCollectorConfigData[consts.LabelMetricsCollectorImagePullPolicy]
 	metricsCollectorCPULimit := metricsCollectorConfigData[consts.LabelMetricsCollectorCPULimitTag]
 	metricsCollectorCPURequest := metricsCollectorConfigData[consts.LabelMetricsCollectorCPURequestTag]
 	metricsCollectorMemLimit := metricsCollectorConfigData[consts.LabelMetricsCollectorMemLimitTag]
@@ -222,7 +223,7 @@ func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1alpha3.Tri
 		Name:            sidecarContainerName,
 		Image:           metricsCollectorContainerImage,
 		Args:            args,
-		ImagePullPolicy: v1.PullIfNotPresent,
+		ImagePullPolicy: v1.PullPolicy(metricsCollectorImagePullPolicy),
 		Resources: v1.ResourceRequirements{
 			Limits: v1.ResourceList{
 				v1.ResourceCPU:              cpuLimitQuantity,
