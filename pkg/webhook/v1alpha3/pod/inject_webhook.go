@@ -308,6 +308,13 @@ func wrapWorkerContainer(
 		if err != nil {
 			return err
 		}
+		// If the first two commands are sh -c, we do not inject command.
+		if args[0] == "sh" || args[0] == "bash" {
+			if args[1] == "-c" {
+				command = args[0:2]
+				args = args[2:]
+			}
+		}
 		if mc.Collector.Kind == common.StdOutCollector {
 			redirectStr := fmt.Sprintf("1>%s 2>&1", metricsFile)
 			args = append(args, redirectStr)
