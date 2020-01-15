@@ -1,5 +1,5 @@
 /**
- * Katib API
+ * Katib API v1alpha3
  */
 syntax = "proto3";
 
@@ -39,7 +39,7 @@ service Suggestion {
 }
 
 service EarlyStopping {
-//TODO
+//TODO: This feature is not yet fully implemented.
 }
 
 /**
@@ -99,7 +99,7 @@ message AlgorithmSetting {
 }
 
 message EarlyStoppingSpec {
-//TODO
+//TODO: This feature is not yet fully implemented.
 }
 
 message AlgorithmSpec {
