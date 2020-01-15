@@ -66,6 +66,10 @@ const (
 	LabelSuggestionDiskRequestTag = "diskRequest"
 	// DefaultDiskRequest is the default value for disk request.
 	DefaultDiskRequest = "500Mi"
+	// LabelSuggestionImagePullPolicy is the name of suggestion image pull policy in configmap.
+	LabelSuggestionImagePullPolicy = "imagePullPolicy"
+	// DefaultImagePullPolicy is the default value for image pull policy.
+	DefaultImagePullPolicy = "IfNotPresent"
 	// LabelMetricsCollectorSidecar is the name of metrics collector config in configmap.
 	LabelMetricsCollectorSidecar = "metrics-collector-sidecar"
 	// LabelMetricsCollectorSidecarImage is the name of metrics collector image config in configmap.
@@ -82,6 +86,8 @@ const (
 	LabelMetricsCollectorDiskLimitTag = "diskLimit"
 	// LabelMetricsCollectorDiskRequestTag is the name of metrics collector Disk Request config in configmap.
 	LabelMetricsCollectorDiskRequestTag = "diskRequest"
+	// LabelMetricsCollectorImagePullPolicy is the name of metrics collector image pull policy in configmap.
+	LabelMetricsCollectorImagePullPolicy = "imagePullPolicy"
 
 	// ReconcileErrorReason is the reason when there is a reconcile error.
 	ReconcileErrorReason = "ReconcileError"

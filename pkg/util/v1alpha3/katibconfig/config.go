@@ -15,13 +15,15 @@ import (
 )
 
 type suggestionConfigJSON struct {
-	Image    string                      `json:"image"`
-	Resource corev1.ResourceRequirements `json:"resources"`
+	Image           string                      `json:"image"`
+	ImagePullPolicy corev1.PullPolicy           `json:"imagePullPolicy"`
+	Resource        corev1.ResourceRequirements `json:"resources"`
 }
 
 type metricsCollectorConfigJSON struct {
-	Image    string                      `json:"image"`
-	Resource corev1.ResourceRequirements `json:"resources"`
+	Image           string                      `json:"image"`
+	ImagePullPolicy corev1.PullPolicy           `json:"imagePullPolicy"`
+	Resource        corev1.ResourceRequirements `json:"resources"`
 }
 
 // GetSuggestionConfigData gets the config data for the given algorithm name.
@@ -48,6 +50,14 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (map[st
 				suggestionConfigData[consts.LabelSuggestionImageTag] = image
 			} else {
 				return map[string]string{}, errors.New("Required value for " + consts.LabelSuggestionImageTag + " configuration of algorithm name " + algorithmName)
+			}
+
+			// Get Image Pull Policy
+			imagePullPolicy := suggestionConfig.ImagePullPolicy
+			if imagePullPolicy == corev1.PullAlways || imagePullPolicy == corev1.PullIfNotPresent || imagePullPolicy == corev1.PullNever {
+				suggestionConfigData[consts.LabelSuggestionImagePullPolicy] = string(imagePullPolicy)
+			} else {
+				suggestionConfigData[consts.LabelSuggestionImagePullPolicy] = consts.DefaultImagePullPolicy
 			}
 
 			// Set default values for CPU, Memory and Disk
@@ -121,6 +131,14 @@ func GetMetricsCollectorConfigData(cKind common.CollectorKind, client client.Cli
 				metricsCollectorConfigData[consts.LabelMetricsCollectorSidecarImage] = image
 			} else {
 				return metricsCollectorConfigData, errors.New("Required value for " + consts.LabelMetricsCollectorSidecarImage + "configuration of metricsCollector kind " + kind)
+			}
+
+			// Get Image Pull Policy
+			imagePullPolicy := metricsCollectorConfig.ImagePullPolicy
+			if imagePullPolicy == corev1.PullAlways || imagePullPolicy == corev1.PullIfNotPresent || imagePullPolicy == corev1.PullNever {
+				metricsCollectorConfigData[consts.LabelMetricsCollectorImagePullPolicy] = string(imagePullPolicy)
+			} else {
+				metricsCollectorConfigData[consts.LabelMetricsCollectorImagePullPolicy] = consts.DefaultImagePullPolicy
 			}
 
 			// Set default values for CPU, Memory and Disk

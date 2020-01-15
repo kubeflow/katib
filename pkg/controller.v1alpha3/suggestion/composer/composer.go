@@ -118,6 +118,7 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 	}
 	// Get Suggestion data from config
 	suggestionContainerImage := suggestionConfigData[consts.LabelSuggestionImageTag]
+	suggestionImagePullPolicy := suggestionConfigData[consts.LabelSuggestionImagePullPolicy]
 	suggestionCPULimit := suggestionConfigData[consts.LabelSuggestionCPULimitTag]
 	suggestionCPURequest := suggestionConfigData[consts.LabelSuggestionCPURequestTag]
 	suggestionMemLimit := suggestionConfigData[consts.LabelSuggestionMemLimitTag]
@@ -128,7 +129,7 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 		Name: consts.ContainerSuggestion,
 	}
 	c.Image = suggestionContainerImage
-	c.ImagePullPolicy = corev1.PullIfNotPresent
+	c.ImagePullPolicy = corev1.PullPolicy(suggestionImagePullPolicy)
 	c.Ports = []corev1.ContainerPort{
 		{
 			Name:          consts.DefaultSuggestionPortName,

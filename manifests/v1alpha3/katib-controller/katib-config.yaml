@@ -40,6 +40,7 @@ data:
       },
       "nasrl": {
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-nasrl",
+        "imagePullPolicy": "Always",
         "resources": {
           "limits": {
             "memory": "200Mi"
