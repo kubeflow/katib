@@ -38,9 +38,18 @@ func (d *FileMetricsCollector) parseLogs(logs []string, metrics []string, filter
 	metricRegList := getFilterRegexpList(filters)
 
 	for _, logline := range logs {
-		if logline == "" {
+		// skip line which doesn't contain any metrics keywords, avoiding unnecessary pattern match
+		isObjLine := false
+		for _, m := range metrics {
+			if strings.Contains(logline, m) {
+				isObjLine = true
+				break
+			}
+		}
+		if !isObjLine {
 			continue
 		}
+
 		timestamp := time.Time{}.UTC().Format(time.RFC3339)
 		ls := strings.SplitN(logline, " ", 2)
 		if len(ls) != 2 {
