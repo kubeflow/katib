@@ -43,6 +43,7 @@ func main() {
 	var certLocalFS bool
 	var injectSecurityContext bool
 	var serviceName string
+	var enableGRPCProbeInSuggestion bool
 
 	flag.StringVar(&experimentSuggestionName, "experiment-suggestion-name",
 		"default", "The implementation of suggestion interface in experiment controller (default|fake)")
@@ -51,6 +52,7 @@ func main() {
 	flag.BoolVar(&certLocalFS, "cert-localfs", false, "Store the webhook cert in local file system")
 	flag.BoolVar(&injectSecurityContext, "webhook-inject-securitycontext", false, "Inject the securityContext of container[0] in the sidecar")
 	flag.StringVar(&serviceName, "webhook-service-name", "katib-controller", "The service name which will be used in webhook")
+	flag.BoolVar(&enableGRPCProbeInSuggestion, "enable-grpc-probe-in-suggestion", true, "enable grpc probe in suggestions")
 
 	flag.Parse()
 
@@ -58,6 +60,7 @@ func main() {
 	viper.Set(consts.ConfigExperimentSuggestionName, experimentSuggestionName)
 	viper.Set(consts.ConfigCertLocalFS, certLocalFS)
 	viper.Set(consts.ConfigInjectSecurityContext, injectSecurityContext)
+	viper.Set(consts.ConfigEnableGRPCProbeInSuggestion, enableGRPCProbeInSuggestion)
 
 	log.Info("Config:",
 		consts.ConfigExperimentSuggestionName,
@@ -70,6 +73,8 @@ func main() {
 		metricsAddr,
 		consts.ConfigInjectSecurityContext,
 		viper.GetBool(consts.ConfigInjectSecurityContext),
+		consts.ConfigEnableGRPCProbeInSuggestion,
+		viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion),
 	)
 
 	// Get a config to talk to the apiserver

@@ -13,6 +13,9 @@ const (
 	// if we should inject the security context into the metrics collector
 	// sidecar.
 	ConfigInjectSecurityContext = "inject-security-context"
+	// ConfigEnableGRPCProbeInSuggestion is the config name which indicates
+	// if we should set GRPC probe in suggestion deployments.
+	ConfigEnableGRPCProbeInSuggestion = "enable-grpc-probe-in-suggestion"
 
 	// LabelExperimentName is the label of experiment name.
 	LabelExperimentName = "experiment"

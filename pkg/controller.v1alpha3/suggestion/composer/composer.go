@@ -3,6 +3,7 @@ package composer
 import (
 	"fmt"
 
+	"github.com/spf13/viper"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -175,33 +176,35 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 		},
 	}
 
-	c.ReadinessProbe = &corev1.Probe{
-		Handler: corev1.Handler{
-			Exec: &corev1.ExecAction{
-				Command: []string{
-					defaultGRPCHealthCheckProbe,
-					fmt.Sprintf("-addr=:%d", consts.DefaultSuggestionPort),
-					fmt.Sprintf("-service=%s", consts.DefaultGRPCService),
+	if viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion) {
+		c.ReadinessProbe = &corev1.Probe{
+			Handler: corev1.Handler{
+				Exec: &corev1.ExecAction{
+					Command: []string{
+						defaultGRPCHealthCheckProbe,
+						fmt.Sprintf("-addr=:%d", consts.DefaultSuggestionPort),
+						fmt.Sprintf("-service=%s", consts.DefaultGRPCService),
+					},
 				},
 			},
-		},
-		InitialDelaySeconds: defaultInitialDelaySeconds,
-		PeriodSeconds:       defaultPeriodForReady,
-	}
-	c.LivenessProbe = &corev1.Probe{
-		Handler: corev1.Handler{
-			Exec: &corev1.ExecAction{
-				Command: []string{
-					defaultGRPCHealthCheckProbe,
-					fmt.Sprintf("-addr=:%d", consts.DefaultSuggestionPort),
-					fmt.Sprintf("-service=%s", consts.DefaultGRPCService),
+			InitialDelaySeconds: defaultInitialDelaySeconds,
+			PeriodSeconds:       defaultPeriodForReady,
+		}
+		c.LivenessProbe = &corev1.Probe{
+			Handler: corev1.Handler{
+				Exec: &corev1.ExecAction{
+					Command: []string{
+						defaultGRPCHealthCheckProbe,
+						fmt.Sprintf("-addr=:%d", consts.DefaultSuggestionPort),
+						fmt.Sprintf("-service=%s", consts.DefaultGRPCService),
+					},
 				},
 			},
-		},
-		// Ref https://srcco.de/posts/kubernetes-liveness-probes-are-dangerous.html
-		InitialDelaySeconds: defaultInitialDelaySeconds,
-		PeriodSeconds:       defaultPeriodForLive,
-		FailureThreshold:    defaultFailureThreshold,
+			// Ref https://srcco.de/posts/kubernetes-liveness-probes-are-dangerous.html
+			InitialDelaySeconds: defaultInitialDelaySeconds,
+			PeriodSeconds:       defaultPeriodForLive,
+			FailureThreshold:    defaultFailureThreshold,
+		}
 	}
 	return c, nil
 }
