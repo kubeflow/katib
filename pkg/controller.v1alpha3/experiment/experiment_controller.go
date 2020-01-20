@@ -272,8 +272,8 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1alpha3.Expe
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 
 	parallelCount := *instance.Spec.ParallelTrialCount
-	activeCount := instance.Status.TrialsPending + instance.Status.TrialsRunning
-	completedCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled
+	activeCount := int32(len(instance.Status.PendingTrials) + len(instance.Status.RunningTrials))
+	completedCount := int32(len(instance.Status.SucceededTrials) + len(instance.Status.FailedTrials) + len(instance.Status.KilledTrials))
 
 	if activeCount > parallelCount {
 		deleteCount := activeCount - parallelCount

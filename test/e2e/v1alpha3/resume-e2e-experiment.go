@@ -94,8 +94,12 @@ func main() {
 		log.Printf(`Experiment %s's trials: %d trials, %d pending trials,
 %d running trials, %d killed trials, %d succeeded trials, %d failed trials.`,
 			exp.Name,
-			exp.Status.Trials, exp.Status.TrialsPending, exp.Status.TrialsRunning,
-			exp.Status.TrialsKilled, exp.Status.TrialsSucceeded, exp.Status.TrialsFailed)
+			exp.Status.Trials,
+			len(exp.Status.PendingTrials),
+			len(exp.Status.RunningTrials),
+			len(exp.Status.KilledTrials),
+			len(exp.Status.SucceededTrials),
+			len(exp.Status.FailedTrials))
 		log.Printf("Optimal Trial for Experiment %s: %v", exp.Name,
 			exp.Status.CurrentOptimalTrial)
 		log.Printf("Experiment %s's conditions: %v", exp.Name, exp.Status.Conditions)
@@ -139,8 +143,8 @@ func main() {
 			log.Fatal("All trials are not run in the experiment ", exp.Status.Trials, exp.Spec.MaxTrialCount)
 		}
 
-		if exp.Status.TrialsSucceeded != *exp.Spec.MaxTrialCount {
-			log.Fatal("All trials are not successful ", exp.Status.TrialsSucceeded, *exp.Spec.MaxTrialCount)
+		if int32(len(exp.Status.SucceededTrials)) != *exp.Spec.MaxTrialCount {
+			log.Fatal("All trials are not successful ", len(exp.Status.SucceededTrials), *exp.Spec.MaxTrialCount)
 		}
 	}
 	log.Printf("Experiment has recorded best current Optimal Trial %v", exp.Status.CurrentOptimalTrial)

@@ -189,6 +189,31 @@ func (in *ExperimentStatus) DeepCopyInto(out *ExperimentStatus) {
 		}
 	}
 	in.CurrentOptimalTrial.DeepCopyInto(&out.CurrentOptimalTrial)
+	if in.RunningTrials != nil {
+		in, out := &in.RunningTrials, &out.RunningTrials
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
+	if in.PendingTrials != nil {
+		in, out := &in.PendingTrials, &out.PendingTrials
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
+	if in.FailedTrials != nil {
+		in, out := &in.FailedTrials, &out.FailedTrials
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
+	if in.SucceededTrials != nil {
+		in, out := &in.SucceededTrials, &out.SucceededTrials
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
+	if in.KilledTrials != nil {
+		in, out := &in.KilledTrials, &out.KilledTrials
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 
