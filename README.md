@@ -113,9 +113,9 @@ You can visualize general trend of Hyper parameter space and each training histo
 [other examples](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3) to generate a similar UI.
 ![katibui](./docs/images/katib-ui.png)
 
-## API Documentation
+## API documentation
 
-Please refer to [api.md](./pkg/apis/manager/v1alpha3/gen-doc/api.md).
+See the [Katib API reference docs](https://www.kubeflow.org/docs/reference/katib/).
 
 ## Installation
 

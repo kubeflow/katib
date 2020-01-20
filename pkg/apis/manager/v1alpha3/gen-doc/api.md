@@ -1,3 +1,8 @@
+
+# Latest version of the docs
+
+## For the most up-to-date docs, see the [Katib API reference docs](https://www.kubeflow.org/docs/reference/katib/).
+
 # Protocol Documentation
 <a name="top"></a>
 
