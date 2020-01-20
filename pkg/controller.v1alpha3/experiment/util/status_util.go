@@ -115,7 +115,6 @@ func updateTrialsSummary(instance *experimentsv1alpha3.Experiment, trials *trial
 		bestTrial := trials.Items[bestTrialIndex]
 
 		sts.CurrentOptimalTrial.BestTrialName = bestTrial.Name
-
 		sts.CurrentOptimalTrial.ParameterAssignments = []commonv1alpha3.ParameterAssignment{}
 		for _, parameterAssigment := range bestTrial.Spec.ParameterAssignments {
 			sts.CurrentOptimalTrial.ParameterAssignments = append(sts.CurrentOptimalTrial.ParameterAssignments, parameterAssigment)
