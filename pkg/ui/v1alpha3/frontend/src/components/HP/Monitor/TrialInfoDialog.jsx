@@ -61,7 +61,7 @@ const TrialInfoDialog = (props) => {
                     mode: "line",
                     name: key,
                     showlegend: true,
-                    hoverinfo: "y"
+                    hoverinfo: "x+y"
                 })
             }
         })
