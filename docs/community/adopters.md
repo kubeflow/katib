@@ -6,4 +6,4 @@ please add yourself into the following list by a pull request.
 | Organization | Contact | Description of Use |
 | ------------ | ------- | ------------------ |
 | [caicloud](https://caicloud.io/) |[@gaocegege](https://github.com/gaocegege) | Hyperparameter tuning in Caicloud Cloud-Native AI Platform |
-| [Alipay](https://www.alipay.com/) |[sperlingxx](https://github.com/sperlingxx) | Automatic training on Kubemaker (internal k8s-native AI Platform of Alipay.inc) |
+| [antfin](https://www.antfin.com/) |[sperlingxx](https://github.com/sperlingxx) | Automatic training on Kubemaker (internal k8s-native AI Platform of Antfin.Inc) |
