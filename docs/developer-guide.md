@@ -1,16 +1,15 @@
 Table of Contents
 =================
 
+   * [Table of Contents](#table-of-contents)
    * [Developer Guide](#developer-guide)
       * [Requirements](#requirements)
       * [Build from source code](#build-from-source-code)
+      * [Workflow design](#workflow-design)
       * [Implement a new algorithm and use it in katib](#implement-a-new-algorithm-and-use-it-in-katib)
-         * [Implement the algorithm](#implement-the-algorithm)
-         * [Make the algorithm a GRPC server](#make-the-algorithm-a-grpc-server)
-         * [Use the algorithm in katib.](#use-the-algorithm-in-katib)
-         * [Contribute the algorithm to katib](#contribute-the-algorithm-to-katib)
-            * [Unit Test](#unit-test)
-            * [E2E Test (Optional)](#e2e-test-optional)
+      * [Create a new Trial kind](#create-a-new-trial-kind)
+      * [Algorithm settings documentation](#algorithm-settings-documentation)
+      * [Design proposals](#design-proposals)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
@@ -51,3 +50,23 @@ You can undeploy katib v1alpha3 manifests from a k8s cluster as follows:
 ```bash
 make undeploy
 ```
+
+## Workflow design
+
+Please see [workflow-design.md](./workflow-design.md)
+
+## Implement a new algorithm and use it in katib
+
+Please see [new-algorithm-service.md](./new-algorithm-service.md)
+
+## Create a new Trial kind
+
+Please see [new-trial-kind.md](./new-trial-kind.md)
+
+## Algorithm settings documentation
+
+Please see [algorithm-settings.md](./algorithm-settings.md)
+
+## Design proposals
+
+Please see [proposals](./proposals)

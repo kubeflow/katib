@@ -9,30 +9,30 @@
 
 Katib is a Kubernetes Native System for [Hyperparameter Tuning][1] and [Neural Architecture Search][2].
 The system is inspired by [Google vizier][3] and supports multiple ML/DL frameworks (e.g. TensorFlow, MXNet, and PyTorch).
+Table of Contents
+=================
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+  * [Getting Started](#getting-started)
+  * [Name](#name)
+  * [Concepts in Katib](#concepts-in-katib)
+      * [Experiment](#experiment)
+      * [Suggestion](#suggestion)
+      * [Trial](#trial)
+      * [Worker Job](#worker-job)
+  * [Components in Katib](#components-in-katib)
+  * [Web UI](#web-ui)
+  * [API documentation](#api-documentation)
+  * [Installation](#installation)
+      * [TF operator](#tf-operator)
+      * [Pytorch operator](#pytorch-operator)
+      * [Katib](#katib-1)
+      * [Running examples](#running-examples)
+      * [Cleanups](#cleanups)
+  * [Quick Start](#quick-start)
+  * [Who are using katib?](#who-are-using-katib)
+  * [CONTRIBUTING](#contributing)
 
-- [Name](#name)
-- [Concepts in Katib](#concepts-in-katib)
-  - [Experiment](#experiment)
-  - [Suggestion](#suggestion)
-  - [Trial](#trial)
-  - [Worker Job](#worker-job)
-- [Components in Katib](#components-in-katib)
-- [Getting Started](#getting-started)
-- [Web UI](#web-ui)
-- [API Documentation](#api-documentation)
-- [Installation](#installation)
-  - [TF operator](#tf-operator)
-  - [Pytorch operator](#pytorch-operator)
-  - [Katib](#katib)
-  - [Running examples](#running-examples)
-  - [Cleanups](#cleanups)
-- [CONTRIBUTING](#contributing)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 ## Getting Started
 
@@ -82,8 +82,6 @@ A `Worker Job` refers to a process responsible for evaluating a `Trial` and calc
 
 The worker kind can be [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) which is a non distributed execution, [Kubeflow TFJob](https://www.kubeflow.org/docs/guides/components/tftraining/) or [Kubeflow PyTorchJob](https://www.kubeflow.org/docs/guides/components/pytorch/) which are distributed executions.
 Thus, Katib supports multiple frameworks with the help of different job kinds. 
-
-
 
 Currently Katib supports the following exploration algorithms:
 
@@ -334,6 +332,13 @@ You can access the Katib UI using this URL: ```http://localhost:8080/katib/```.
 
 Delete installed components using `kubectl delete -f` on the respective folders. 
 
+## Quick Start
+
+Please see [Quick Start Guide](./docs/quick-start.md)
+
+## Who are using katib?
+
+Please see [adopters.md](./docs/community/adopters.md)
 
 ## CONTRIBUTING
 
