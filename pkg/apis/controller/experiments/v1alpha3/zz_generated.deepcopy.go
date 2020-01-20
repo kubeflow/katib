@@ -189,28 +189,28 @@ func (in *ExperimentStatus) DeepCopyInto(out *ExperimentStatus) {
 		}
 	}
 	in.CurrentOptimalTrial.DeepCopyInto(&out.CurrentOptimalTrial)
-	if in.RunningTrials != nil {
-		in, out := &in.RunningTrials, &out.RunningTrials
+	if in.RunningTrialList != nil {
+		in, out := &in.RunningTrialList, &out.RunningTrialList
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
-	if in.PendingTrials != nil {
-		in, out := &in.PendingTrials, &out.PendingTrials
+	if in.PendingTrialList != nil {
+		in, out := &in.PendingTrialList, &out.PendingTrialList
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
-	if in.FailedTrials != nil {
-		in, out := &in.FailedTrials, &out.FailedTrials
+	if in.FailedTrialList != nil {
+		in, out := &in.FailedTrialList, &out.FailedTrialList
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
-	if in.SucceededTrials != nil {
-		in, out := &in.SucceededTrials, &out.SucceededTrials
+	if in.SucceededTrialList != nil {
+		in, out := &in.SucceededTrialList, &out.SucceededTrialList
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
-	if in.KilledTrials != nil {
-		in, out := &in.KilledTrials, &out.KilledTrials
+	if in.KilledTrialList != nil {
+		in, out := &in.KilledTrialList, &out.KilledTrialList
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}

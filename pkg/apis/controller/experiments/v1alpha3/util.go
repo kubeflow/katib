@@ -102,7 +102,7 @@ func (exp *Experiment) IsCompletedReason(reason string) bool {
 }
 
 func (exp *Experiment) HasRunningTrials() bool {
-	return len(exp.Status.RunningTrials) != 0
+	return exp.Status.TrialsRunning != 0
 }
 
 func (exp *Experiment) GetLastConditionType() (ExperimentConditionType, error) {
