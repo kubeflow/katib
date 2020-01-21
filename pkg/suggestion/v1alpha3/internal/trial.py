@@ -19,7 +19,9 @@ class Trial(object):
         res = []
         for trial in trials:
             if trial.status.condition == api.TrialStatus.TrialConditionType.SUCCEEDED:
-                res.append(Trial.convertTrial(trial))
+                new_trial = Trial.convertTrial(trial)
+                if new_trial != None:
+                    res.append(Trial.convertTrial(trial))
         return res
 
     @staticmethod
@@ -30,9 +32,12 @@ class Trial(object):
         metric_name = trial.spec.objective.objective_metric_name
         target_metric, additional_metrics = Metric.convert(
             trial.status.observation, metric_name)
-        trial = Trial(trial.name, assignments, target_metric,
+        # If the target_metric is none, ignore the trial.
+        if target_metric != None:
+            trial = Trial(trial.name, assignments, target_metric,
                       metric_name, additional_metrics)
-        return trial
+            return trial
+        return None
 
     def __str__(self):
         if self.name == None:
@@ -77,7 +82,7 @@ class Metric(object):
 
     @staticmethod
     def convert(observation, target):
-        metric = ""
+        metric = None
         additional_metrics = []
         for m in observation.metrics:
             if m.name == target:
