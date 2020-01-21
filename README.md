@@ -26,7 +26,7 @@ Table of Contents
   * [Installation](#installation)
       * [TF operator](#tf-operator)
       * [Pytorch operator](#pytorch-operator)
-      * [Katib](#katib-1)
+      * [Katib](#katib)
       * [Running examples](#running-examples)
       * [Cleanups](#cleanups)
   * [Quick Start](#quick-start)
