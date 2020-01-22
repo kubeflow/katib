@@ -65,7 +65,7 @@ func updateTrialsSummary(instance *experimentsv1alpha3.Experiment, trials *trial
 		if trial.IsKilled() {
 			sts.KilledTrialList = append(sts.KilledTrialList, trial.Name)
 		} else if trial.IsFailed() {
-			sts.KilledTrialList = append(sts.KilledTrialList, trial.Name)
+			sts.FailedTrialList = append(sts.FailedTrialList, trial.Name)
 		} else if trial.IsSucceeded() {
 			sts.SucceededTrialList = append(sts.SucceededTrialList, trial.Name)
 		} else if trial.IsRunning() {
