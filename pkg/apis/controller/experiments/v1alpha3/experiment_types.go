@@ -76,6 +76,21 @@ type ExperimentStatus struct {
 	// Current optimal trial parameters and observations.
 	CurrentOptimalTrial OptimalTrial `json:"currentOptimalTrial,omitempty"`
 
+	// List of trial names which are running.
+	RunningTrialList []string `json:"runningTrialList,omitempty"`
+
+	// List of trial names which are pending.
+	PendingTrialList []string `json:"pendingTrialList,omitempty"`
+
+	// List of trial names which have already failed.
+	FailedTrialList []string `json:"failedTrialList,omitempty"`
+
+	// List of trial names which have already succeeded.
+	SucceededTrialList []string `json:"succeededTrialList,omitempty"`
+
+	// List of trial names which have been killed.
+	KilledTrialList []string `json:"killedTrialList,omitempty"`
+
 	// Trials is the total number of trials owned by the experiment.
 	Trials int32 `json:"trials,omitempty"`
 

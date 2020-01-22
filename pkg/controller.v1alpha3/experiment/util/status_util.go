@@ -50,8 +50,10 @@ func UpdateExperimentStatus(collector *ExperimentsCollector, instance *experimen
 
 func updateTrialsSummary(instance *experimentsv1alpha3.Experiment, trials *trialsv1alpha3.TrialList) bool {
 
-	var totalTrials, trialsPending, trialsRunning, trialsSucceeded, trialsFailed, trialsKilled int32
 	var bestTrialValue float64
+	sts := &instance.Status
+	sts.Trials = 0
+	sts.RunningTrialList, sts.PendingTrialList, sts.FailedTrialList, sts.SucceededTrialList, sts.KilledTrialList = nil, nil, nil, nil, nil
 	bestTrialIndex := -1
 	isObjectiveGoalReached := false
 	objectiveValueGoal := *instance.Spec.Objective.Goal
@@ -59,17 +61,17 @@ func updateTrialsSummary(instance *experimentsv1alpha3.Experiment, trials *trial
 	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
 
 	for index, trial := range trials.Items {
-		totalTrials++
+		sts.Trials++
 		if trial.IsKilled() {
-			trialsKilled++
+			sts.KilledTrialList = append(sts.KilledTrialList, trial.Name)
 		} else if trial.IsFailed() {
-			trialsFailed++
+			sts.FailedTrialList = append(sts.FailedTrialList, trial.Name)
 		} else if trial.IsSucceeded() {
-			trialsSucceeded++
+			sts.SucceededTrialList = append(sts.SucceededTrialList, trial.Name)
 		} else if trial.IsRunning() {
-			trialsRunning++
+			sts.RunningTrialList = append(sts.RunningTrialList, trial.Name)
 		} else {
-			trialsPending++
+			sts.PendingTrialList = append(sts.PendingTrialList, trial.Name)
 		}
 
 		objectiveMetricValue := getObjectiveMetricValue(trial, objectiveMetricName)
@@ -102,26 +104,25 @@ func updateTrialsSummary(instance *experimentsv1alpha3.Experiment, trials *trial
 		}
 	}
 
-	instance.Status.Trials = totalTrials
-	instance.Status.TrialsPending = trialsPending
-	instance.Status.TrialsRunning = trialsRunning
-	instance.Status.TrialsSucceeded = trialsSucceeded
-	instance.Status.TrialsFailed = trialsFailed
-	instance.Status.TrialsKilled = trialsKilled
+	sts.TrialsRunning = int32(len(sts.RunningTrialList))
+	sts.TrialsPending = int32(len(sts.PendingTrialList))
+	sts.TrialsSucceeded = int32(len(sts.SucceededTrialList))
+	sts.TrialsFailed = int32(len(sts.FailedTrialList))
+	sts.TrialsKilled = int32(len(sts.KilledTrialList))
 
 	// if best trial is set
 	if bestTrialIndex != -1 {
 		bestTrial := trials.Items[bestTrialIndex]
 
-		instance.Status.CurrentOptimalTrial.BestTrialName = bestTrial.Name
-		instance.Status.CurrentOptimalTrial.ParameterAssignments = []commonv1alpha3.ParameterAssignment{}
+		sts.CurrentOptimalTrial.BestTrialName = bestTrial.Name
+		sts.CurrentOptimalTrial.ParameterAssignments = []commonv1alpha3.ParameterAssignment{}
 		for _, parameterAssigment := range bestTrial.Spec.ParameterAssignments {
-			instance.Status.CurrentOptimalTrial.ParameterAssignments = append(instance.Status.CurrentOptimalTrial.ParameterAssignments, parameterAssigment)
+			sts.CurrentOptimalTrial.ParameterAssignments = append(sts.CurrentOptimalTrial.ParameterAssignments, parameterAssigment)
 		}
 
-		instance.Status.CurrentOptimalTrial.Observation.Metrics = []commonv1alpha3.Metric{}
+		sts.CurrentOptimalTrial.Observation.Metrics = []commonv1alpha3.Metric{}
 		for _, metric := range bestTrial.Status.Observation.Metrics {
-			instance.Status.CurrentOptimalTrial.Observation.Metrics = append(instance.Status.CurrentOptimalTrial.Observation.Metrics, metric)
+			sts.CurrentOptimalTrial.Observation.Metrics = append(sts.CurrentOptimalTrial.Observation.Metrics, metric)
 		}
 	}
 	return isObjectiveGoalReached
@@ -141,9 +142,9 @@ func getObjectiveMetricValue(trial trialsv1alpha3.Trial, objectiveMetricName str
 
 // UpdateExperimentStatusCondition updates the experiment status.
 func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *experimentsv1alpha3.Experiment, isObjectiveGoalReached bool, getSuggestionDone bool) {
-
 	completedTrialsCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled
 	failedTrialsCount := instance.Status.TrialsFailed
+	activeTrialsCount := instance.Status.TrialsPending + instance.Status.TrialsRunning
 	now := metav1.Now()
 
 	if isObjectiveGoalReached {
@@ -172,7 +173,7 @@ func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *
 		return
 	}
 
-	if getSuggestionDone && (instance.Status.TrialsPending+instance.Status.TrialsRunning) == 0 {
+	if getSuggestionDone && activeTrialsCount == 0 {
 		msg := "Experiment has succeeded because suggestion service has reached the end"
 		instance.MarkExperimentStatusSucceeded(ExperimentSuggestionEndReachedReason, msg)
 		instance.Status.CompletionTime = &now
