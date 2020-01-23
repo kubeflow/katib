@@ -109,6 +109,8 @@ const hpMonitorReducer = (state = initialState, action) => {
             return {
                 ...state,
                 loading: true,
+                dialogExperimentOpen: false,
+                dialogTrialOpen: false,
             }
         case actions.FETCH_HP_JOB_INFO_SUCCESS:
             return {
