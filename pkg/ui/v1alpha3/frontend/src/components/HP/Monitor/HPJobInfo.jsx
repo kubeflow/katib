@@ -6,14 +6,12 @@ import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import LinearProgress from '@material-ui/core/LinearProgress';
 
-// import the react-json-view component
-import ReactJson from 'react-json-view'
-
 import { fetchHPJobInfo, fetchHPJob } from '../../../actions/hpMonitorActions';
 
 import HPJobPlot from './HPJobPlot';
 import HPJobTable from './HPJobTable';
 import TrialInfoDialog from './TrialInfoDialog';
+import ExperimentInfoDialog from './ExperimentInfoDialog';
 
 const module = "hpMonitor";
 
@@ -27,8 +25,9 @@ const styles = theme => ({
         marginTop: 30,
     },
     header: {
-        marginTop: 30,
-        textAlign: "center"
+        marginTop: 10,
+        textAlign: "center",
+        marginBottom: 15
     }
 })
 
@@ -37,8 +36,10 @@ class HPJobInfo extends React.Component {
     componentDidMount() {
         this.props.fetchHPJobInfo(
             this.props.match.params.name, this.props.match.params.namespace);
-        this.props.fetchHPJob(
-            this.props.match.params.name, this.props.match.params.namespace)
+    }
+
+    fetchAndOpenDialogExperiment = (experimentName, experimentNamespace) => (event) => {
+      this.props.fetchHPJob(experimentName, experimentNamespace)
     }
 
     render () {
@@ -60,10 +61,20 @@ class HPJobInfo extends React.Component {
                     <Typography  className = {classes.header} variant={"h5"}>
                         Experiment Namespace: {this.props.match.params.namespace}
                     </Typography>
-                    <br />
+                    <div className = {classes.header}>
+                        <Button
+                          variant={"contained"}
+                          color={"primary"}
+                          onClick={this.fetchAndOpenDialogExperiment(
+                            this.props.match.params.name,
+                            this.props.match.params.namespace)}
+                        >
+                                View Experiment
+                        </Button>
+                    </div>
                     <HPJobPlot name={this.props.match.params.name} />
                     <HPJobTable name={this.props.match.params.name} />
-                    <ReactJson src={this.props.experiment} />
+                    <ExperimentInfoDialog/>
                     <TrialInfoDialog />
                 </div>
                 }
@@ -73,8 +84,7 @@ class HPJobInfo extends React.Component {
 }
 
 const mapStateToProps = (state) => ({
-  loading: state[module].loading,
-  experiment: state[module].experiment,
+  loading: state[module].loading
 })
 
 

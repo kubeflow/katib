@@ -50,8 +50,14 @@ export const fetchHPJobTrialInfo = (trialName) => ({
     trialName
 })
 
-export const CLOSE_DIALOG = "CLOSE_DIALOG";
+export const CLOSE_DIALOG_TRIAL = "CLOSE_DIALOG_TRIAL";
 
-export const closeDialog = () => ({
-    type: CLOSE_DIALOG,
+export const closeDialogTrial = () => ({
+    type: CLOSE_DIALOG_TRIAL,
+})
+
+export const CLOSE_DIALOG_EXPERIMENT = "CLOSE_DIALOG_EXPERIMENT";
+
+export const closeDialogExperiment = () => ({
+    type: CLOSE_DIALOG_EXPERIMENT
 })
