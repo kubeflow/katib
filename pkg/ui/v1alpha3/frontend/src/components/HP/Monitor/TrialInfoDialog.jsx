@@ -96,7 +96,7 @@ const TrialInfoDialog = (props) => {
 
 const mapStateToProps = state => {
     return {
-        open: state[module].dialogOpenTrial,
+        open: state[module].dialogTrialOpen,
         trialData: state[module].trialData,
     }
 }
