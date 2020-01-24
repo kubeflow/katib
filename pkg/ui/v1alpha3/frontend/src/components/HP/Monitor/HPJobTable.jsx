@@ -19,7 +19,7 @@ const styles = theme => ({
     overflowX: 'auto',
   },
   table: {
-    minWidth: 700,
+    minWidth: 700
   },
   hover: {
     '&:hover': {
@@ -30,7 +30,7 @@ const styles = theme => ({
 
 class HPJobTable extends React.Component {
 
-  fetchAndOpenDialog = (trialName) => (event) => {
+  fetchAndOpenDialogTrial = (trialName) => (event) => {
     this.props.fetchHPJobTrialInfo(trialName);
   }
 
@@ -60,13 +60,13 @@ class HPJobTable extends React.Component {
                   {row.map((element, index) => {
                     if (index === 0) {
                       return (
-                        <TableCell className={classes.hover} component="th" scope="row" onClick={this.fetchAndOpenDialog(element)} key={index}>
+                        <TableCell className={classes.hover} component="th" scope="row" onClick={this.fetchAndOpenDialogTrial(element)} key={index}>
                           {element}
                         </TableCell>
                       )
                     } else {
                       return (
-                        <TableCell align="right">{element}</TableCell>
+                        <TableCell>{element}</TableCell>
                       )
                     }
                   })}

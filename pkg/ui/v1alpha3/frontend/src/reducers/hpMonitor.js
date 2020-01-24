@@ -3,6 +3,8 @@ import * as actions from '../actions/hpMonitorActions';
 const initialState = {
     experimentName: '',
     experimentNamespace: '',
+    experiment: {
+    },
     filterType: {
         "Created": true,
         "Running": true,
@@ -18,7 +20,8 @@ const initialState = {
     ],
     trialData: [
     ],
-    dialogOpen: false,
+    dialogTrialOpen: false,
+    dialogExperimentOpen: false,
     loading: false,
 };
 
@@ -106,6 +109,8 @@ const hpMonitorReducer = (state = initialState, action) => {
             return {
                 ...state,
                 loading: true,
+                dialogExperimentOpen: false,
+                dialogTrialOpen: false,
             }
         case actions.FETCH_HP_JOB_INFO_SUCCESS:
             return {
@@ -118,32 +123,27 @@ const hpMonitorReducer = (state = initialState, action) => {
                 ...state,
                 loading: false,
             }
-        case actions.FETCH_HP_JOB_REQUEST:
-            return {
-                ...state,
-                loading: true,
-            }
         case actions.FETCH_HP_JOB_SUCCESS:
             return {
                 ...state,
                 experiment: action.experiment,
-                loading: false,
-            }
-        case actions.FETCH_HP_JOB_FAILURE:
-            return {
-                ...state,
-                loading: false,
+                dialogExperimentOpen: true
             }
         case actions.FETCH_HP_JOB_TRIAL_INFO_SUCCESS:
             return {
                 ...state,
                 trialData: action.trialData,
-                dialogOpen: true,
+                dialogTrialOpen: true,
             }
-        case actions.CLOSE_DIALOG:
+        case actions.CLOSE_DIALOG_TRIAL:
             return {
                 ...state,
-                dialogOpen: false,
+                dialogTrialOpen: false,
+            }
+        case actions.CLOSE_DIALOG_EXPERIMENT:
+            return {
+                ...state,
+                dialogExperimentOpen: false,
             }
         default:
             return state;

@@ -5,7 +5,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { connect } from 'react-redux';
 
-import { closeDialog } from '../../../actions/hpMonitorActions';
+import { closeDialogTrial } from '../../../actions/hpMonitorActions';
 import Plot from 'react-plotly.js';
 
 
@@ -69,7 +69,7 @@ const TrialInfoDialog = (props) => {
     return (
         <Dialog
                 open={props.open}
-                onClose={props.closeDialog}
+                onClose={props.closeDialogTrial}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
                 maxWidth={"xl"}
@@ -96,9 +96,9 @@ const TrialInfoDialog = (props) => {
 
 const mapStateToProps = state => {
     return {
-        open: state[module].dialogOpen,
+        open: state[module].dialogTrialOpen,
         trialData: state[module].trialData,
     }
 }
 
-export default connect(mapStateToProps, { closeDialog })(withStyles(styles)(TrialInfoDialog));
+export default connect(mapStateToProps, { closeDialogTrial })(withStyles(styles)(TrialInfoDialog));
