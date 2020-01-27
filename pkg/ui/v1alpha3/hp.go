@@ -31,7 +31,7 @@ func (k *KatibUIHandler) FetchAllHPJobs(w http.ResponseWriter, r *http.Request) 
 	w.Write(response)
 }
 
-// FetchAllHPJobs gets experiments in all namespaces.
+// FetchHPJob gets experiment in specific namespace.
 func (k *KatibUIHandler) FetchHPJob(w http.ResponseWriter, r *http.Request) {
 	experimentName := r.URL.Query()["experimentName"][0]
 	namespace := r.URL.Query()["namespace"][0]
@@ -58,7 +58,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	conn, c := k.connectManager()
 	defer conn.Close()
 
-	resultText := "trialName"
+	resultText := "trialName,Status"
 	experiment, err := k.katibClient.GetExperiment(experimentName, namespace)
 	if err != nil {
 		log.Printf("GetExperiment from HP job failed: %v", err)
@@ -88,7 +88,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("Got Trial List, %v", trialList.Items)
+	log.Printf("Got Trial List")
 
 	for _, t := range trialList.Items {
 		succeeded := false
@@ -98,6 +98,15 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 				succeeded = true
 			}
 		}
+		var lastTrialCondition string
+
+		// Take only the latest condition
+		if len(t.Status.Conditions) > 0 {
+			lastTrialCondition = string(t.Status.Conditions[len(t.Status.Conditions)-1].Type)
+		}
+
+		trialResText := make([]string, len(metricsList)+len(paramList))
+
 		if succeeded {
 			obsLogResp, err := c.GetObservationLog(
 				context.Background(),
@@ -113,16 +122,15 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 				return
 			}
 
-			trialResText := make([]string, len(metricsList)+len(paramList))
 			for _, m := range obsLogResp.ObservationLog.MetricLogs {
 				trialResText[metricsList[m.Metric.Name]] = m.Metric.Value
 
 			}
-			for _, trialParam := range t.Spec.ParameterAssignments {
-				trialResText[paramList[trialParam.Name]] = trialParam.Value
-			}
-			resultText += "\n" + t.Name + "," + strings.Join(trialResText, ",")
 		}
+		for _, trialParam := range t.Spec.ParameterAssignments {
+			trialResText[paramList[trialParam.Name]] = trialParam.Value
+		}
+		resultText += "\n" + t.Name + "," + lastTrialCondition + "," + strings.Join(trialResText, ",")
 	}
 	log.Printf("Logs parsed, results:\n %v", resultText)
 	response, err := json.Marshal(resultText)
@@ -157,7 +165,7 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 	prevTime := ""
 	for _, m := range obsLogResp.ObservationLog.MetricLogs {
 		parsedTime, _ := time.Parse(time.RFC3339Nano, m.TimeStamp)
-		formatTime := parsedTime.Format("2006-01-02T15:4:5")
+		formatTime := parsedTime.Format("2006-01-02T15:04:05")
 		if formatTime != prevTime {
 			resultText += m.Metric.Name + "," + formatTime + "," + m.Metric.Value + "\n"
 			prevTime = formatTime

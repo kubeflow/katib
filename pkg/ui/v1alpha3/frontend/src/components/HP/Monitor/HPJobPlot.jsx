@@ -15,12 +15,13 @@ const useStyles = makeStyles({
 const HPJobPlot = (props) => {
   const classes = useStyles();
   let dimensions = [];
+  let isShowPlot = false;
 
   if (props.jobData && props.jobData.length > 1) {
     // everything for the third column
     let header = props.jobData[0];
     let data = props.jobData.slice(1);
-    for(let i = 1; i < data[0].length; i++) {
+    for(let i = 2; i < data[0].length; i++) {
       if (header[i] !== '') {
         let track = {
           label: header[i],
@@ -28,12 +29,15 @@ const HPJobPlot = (props) => {
         let flag = "number";
         let values = [];
         for (let j = 0; j < data.length; j++) {
-          let number = Number(data[j][i])
-          if (isNaN(number)) {
-            flag = "string";
-            values.push(data[j][i]);
-          } else {
-            values.push(number)
+          if (data[j][1] == "Succeeded") {
+            isShowPlot = true
+            let number = Number(data[j][i])
+            if (isNaN(number)) {
+              flag = "string";
+              values.push(data[j][i]);
+            } else {
+              values.push(number)
+            }
           }
         }
         track.values = values;
@@ -67,7 +71,7 @@ const HPJobPlot = (props) => {
 
   return (
       <div className={classes.root}>
-        {props.jobData.length > 1 &&
+        {props.jobData.length > 1 && isShowPlot &&
           <Plot
             data={
               [{

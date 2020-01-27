@@ -29,22 +29,11 @@ const TrialInfoDialog = (props) => {
             // Data format should be ["metricName", "time", "value"]
             if (data[i].length == 3) {
                 if (typeof tracks[data[i][0]] !== "undefined") {
-                    // Formatted date if seconds < 10. Length of date should be the same
-                    if (data[i][1].length == 18) {
-                        let formattedDate = data[i][1].slice(0, 17) + "0" + data[i][1][17]
-                        tracks[data[i][0]].x.push(formattedDate);
-                    } else {
-                        tracks[data[i][0]].x.push(data[i][1]);
-                    }
+                    tracks[data[i][0]].x.push(data[i][1]);
                     tracks[data[i][0]].y.push(Number(data[i][2]));
                 } else {
                     tracks[data[i][0]] = {};
-                    if (data[i][1].length == 18) {
-                        let formattedDate = data[i][1].slice(0, 17) + "0" + data[i][1][17]
-                        tracks[data[i][0]].x = [formattedDate];
-                    } else {
-                        tracks[data[i][0]].x = [data[i][1]];
-                    }
+                    tracks[data[i][0]].x = [data[i][1]];
                     tracks[data[i][0]].y = [Number(data[i][2])];
                 }
             }
