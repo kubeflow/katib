@@ -56,6 +56,8 @@ class HPJobTable extends React.Component {
     let data = [];
     if (this.props.jobData && this.props.jobData.length > 1) {
       header = this.props.jobData[0];
+      // TODO: Add sorting by each table column
+      // Sort jobData by Trial Status
       data = this.props.jobData.slice(1).sort(function(a,b) {
         if(a[1] < b[1]) { return -1; }
         if(a[1] > b[1]) { return 1; }
