@@ -25,6 +25,21 @@ const styles = theme => ({
     '&:hover': {
       cursor: "pointer",
     }
+  },
+  created: {
+    color: theme.colors.created,
+  },
+  running: {
+      color: theme.colors.running,
+  },
+  succeeded: {
+      color: theme.colors.succeeded,
+  },
+  killed: {
+      color: theme.colors.killed
+  },
+  failed: {
+      color: theme.colors.failed,
   }
 });
 
@@ -41,7 +56,13 @@ class HPJobTable extends React.Component {
     let data = [];
     if (this.props.jobData && this.props.jobData.length > 1) {
       header = this.props.jobData[0];
-      data = this.props.jobData.slice(1)
+      // TODO: Add sorting by each table column
+      // Sort jobData by Trial Status
+      data = this.props.jobData.slice(1).sort(function(a,b) {
+        if(a[1] < b[1]) { return -1; }
+        if(a[1] > b[1]) { return 1; }
+        return 0;
+      });
     }
     return (
       <Paper className={classes.root}>
@@ -58,12 +79,34 @@ class HPJobTable extends React.Component {
               {data.map((row, id) => (
                 <TableRow key={id}>
                   {row.map((element, index) => {
-                    if (index === 0) {
+                    if (index === 0 && row[1] == "Succeeded") {
                       return (
                         <TableCell className={classes.hover} component="th" scope="row" onClick={this.fetchAndOpenDialogTrial(element)} key={index}>
                           {element}
                         </TableCell>
                       )
+                    } else if (index === 1) {
+                      if (element === "Created") {
+                        return (
+                          <TableCell className={classes.created}>{element}</TableCell>
+                        )
+                      } else if (element === "Running") {
+                        return (
+                          <TableCell className={classes.running}>{element}</TableCell>
+                        )
+                      } else if (element === "Succeeded") {
+                        return (
+                          <TableCell className={classes.succeeded}>{element}</TableCell>
+                        )
+                      } else if (element === "Killed") {
+                        return (
+                          <TableCell className={classes.killed}>{element}</TableCell>
+                        )
+                      } else if (element === "Failed") {
+                        return (
+                          <TableCell className={classes.failed}>{element}</TableCell>
+                        )
+                      }
                     } else {
                       return (
                         <TableCell>{element}</TableCell>
