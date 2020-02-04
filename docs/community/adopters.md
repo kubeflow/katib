@@ -8,3 +8,4 @@ please add yourself into the following list by a pull request.
 | [caicloud](https://caicloud.io/) |[@gaocegege](https://github.com/gaocegege) | Hyperparameter tuning in Caicloud Cloud-Native AI Platform |
 | [antfin](https://www.antfin.com/) |[@sperlingxx](https://github.com/sperlingxx) | Automatic training in AntFin internal AI Platform |
 | [cisco](https://cisco.com/) |[@ramdootp](https://github.com/ramdootp) | Hyperparameter tuning for conversational AI interface using Rasa |
+| [babylon health](https://www.babylonhealth.com/) |[@jeremievallee](https://github.com/jeremievallee) | Hyperparameter tuning for AIR internal AI Platform |
