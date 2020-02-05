@@ -162,13 +162,16 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	prevTime := ""
+	prevMetricTime := map[string]string{}
 	for _, m := range obsLogResp.ObservationLog.MetricLogs {
 		parsedTime, _ := time.Parse(time.RFC3339Nano, m.TimeStamp)
 		formatTime := parsedTime.Format("2006-01-02T15:04:05")
-		if formatTime != prevTime {
+		if _, found := prevMetricTime[m.Metric.Name]; !found {
+			prevMetricTime[m.Metric.Name] = ""
+		}
+		if formatTime != prevMetricTime[m.Metric.Name] {
 			resultText += m.Metric.Name + "," + formatTime + "," + m.Metric.Value + "\n"
-			prevTime = formatTime
+			prevMetricTime[m.Metric.Name] = formatTime
 		}
 	}
 
