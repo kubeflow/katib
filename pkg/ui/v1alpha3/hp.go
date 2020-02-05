@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
 
+	commonv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	api_pb_v1alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 )
@@ -123,8 +125,17 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 			}
 
 			for _, m := range obsLogResp.ObservationLog.MetricLogs {
-				trialResText[metricsList[m.Metric.Name]] = m.Metric.Value
-
+				if trialResText[metricsList[m.Metric.Name]] == "" {
+					trialResText[metricsList[m.Metric.Name]] = m.Metric.Value
+				} else {
+					currentValue, _ := strconv.ParseFloat(m.Metric.Value, 64)
+					bestValue, _ := strconv.ParseFloat(trialResText[metricsList[m.Metric.Name]], 64)
+					if t.Spec.Objective.Type == commonv1alpha3.ObjectiveTypeMinimize && currentValue < bestValue {
+						trialResText[metricsList[m.Metric.Name]] = m.Metric.Value
+					} else if t.Spec.Objective.Type == commonv1alpha3.ObjectiveTypeMaximize && currentValue > bestValue {
+						trialResText[metricsList[m.Metric.Name]] = m.Metric.Value
+					}
+				}
 			}
 		}
 		for _, trialParam := range t.Spec.ParameterAssignments {
