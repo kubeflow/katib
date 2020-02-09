@@ -59,6 +59,9 @@ spec:
             namespace: {{.NameSpace}}
           spec:
             template:
+              metadata:
+                annotations:
+                  sidecar.istio.io/inject: "false"
               spec:
                 containers:
                 - name: {{.Trial}}
