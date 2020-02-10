@@ -25,7 +25,7 @@ func SuggestionAnnotations(instance *suggestionsv1alpha3.Suggestion) map[string]
 		consts.AnnotationIstioSidecarInjectValue)
 }
 
-// TrainingJobAnnotations returns unstructured job with annotations.
+// TrainingJobAnnotations adds annotations to unstructured job.
 func TrainingJobAnnotations(desiredJob *unstructured.Unstructured) error {
 	kind := desiredJob.GetKind()
 	switch kind {
