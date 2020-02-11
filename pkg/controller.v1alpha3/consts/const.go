@@ -113,6 +113,12 @@ const (
 	JobGroupJob = "batch"
 	// JobGroupKubeflow is the group name of Kubeflow.
 	JobGroupKubeflow = "kubeflow.org"
+
+	// AnnotationIstioSidecarInjectName is the annotation of Istio Sidecar
+	AnnotationIstioSidecarInjectName = "sidecar.istio.io/inject"
+
+	// AnnotationIstioSidecarInjectValue is the value of Istio Sidecar annotation
+	AnnotationIstioSidecarInjectValue = "false"
 )
 
 var (

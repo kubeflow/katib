@@ -45,6 +45,7 @@ import (
 
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/trial/managerclient"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/util"
 	jobv1alpha3 "github.com/kubeflow/katib/pkg/job/v1alpha3"
 )
 
@@ -257,6 +258,13 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha3.Trial, desiredJob
 	apiVersion := desiredJob.GetAPIVersion()
 	kind := desiredJob.GetKind()
 	gvk := schema.FromAPIVersionAndKind(apiVersion, kind)
+
+	// Add annotation to desired Job
+	err = util.TrainingJobAnnotations(desiredJob)
+	if err != nil {
+		logger.Error(err, "TrainingJobAnnotations error")
+		return nil, err
+	}
 
 	deployedJob := &unstructured.Unstructured{}
 	deployedJob.SetGroupVersionKind(gvk)

@@ -67,7 +67,7 @@ func (g *General) DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels:      util.SuggestionLabels(s),
-					Annotations: s.Annotations,
+					Annotations: util.SuggestionAnnotations(s),
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
