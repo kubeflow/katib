@@ -1,0 +1,833 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "swagger description for katib",
+    "title": "katib",
+    "version": "v0.1"
+  },
+  "paths": {},
+  "definitions": {
+    ".v1alpha3.Suggestion": {
+      "description": "Suggestion represents the structure of a Suggestion resource.",
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/v1.ObjectMeta"
+        },
+        "spec": {
+          "$ref": "#/definitions/.v1alpha3.SuggestionSpec"
+        },
+        "status": {
+          "$ref": "#/definitions/.v1alpha3.SuggestionStatus"
+        }
+      }
+    },
+    ".v1alpha3.SuggestionCondition": {
+      "description": "SuggestionCondition describes the state of the Suggestion at a certain point.",
+      "required": [
+        "type",
+        "status"
+      ],
+      "properties": {
+        "lastTransitionTime": {
+          "description": "Last time the condition transitioned from one status to another.",
+          "$ref": "#/definitions/v1.Time"
+        },
+        "lastUpdateTime": {
+          "description": "The last time this condition was updated.",
+          "$ref": "#/definitions/v1.Time"
+        },
+        "message": {
+          "description": "A human readable message indicating details about the transition.",
+          "type": "string"
+        },
+        "reason": {
+          "description": "The reason for the condition's last transition.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of the condition, one of True, False, Unknown.",
+          "type": "string"
+        },
+        "type": {
+          "description": "Type of Suggestion condition.",
+          "type": "string"
+        }
+      }
+    },
+    ".v1alpha3.SuggestionList": {
+      "description": "SuggestionList contains a list of Suggestion",
+      "required": [
+        "items"
+      ],
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/.v1alpha3.Suggestion"
+          }
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/v1.ListMeta"
+        }
+      }
+    },
+    ".v1alpha3.SuggestionSpec": {
+      "description": "SuggestionSpec defines the desired state of Suggestion",
+      "required": [
+        "algorithmName"
+      ],
+      "properties": {
+        "algorithmName": {
+          "type": "string"
+        },
+        "requests": {
+          "description": "Number of suggestions requested",
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    ".v1alpha3.SuggestionStatus": {
+      "description": "SuggestionStatus defines the observed state of Suggestion",
+      "properties": {
+        "algorithmSettings": {
+          "description": "Algorithmsettings set by the algorithm services.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1alpha3.AlgorithmSetting"
+          }
+        },
+        "completionTime": {
+          "description": "Represents time when the Suggestion was completed. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.",
+          "$ref": "#/definitions/v1.Time"
+        },
+        "conditions": {
+          "description": "List of observed runtime conditions for this Suggestion.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/.v1alpha3.SuggestionCondition"
+          }
+        },
+        "lastReconcileTime": {
+          "description": "Represents last time when the Suggestion was reconciled. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.",
+          "$ref": "#/definitions/v1.Time"
+        },
+        "startTime": {
+          "description": "Represents time when the Suggestion was acknowledged by the Suggestion controller. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.",
+          "$ref": "#/definitions/v1.Time"
+        },
+        "suggestionCount": {
+          "description": "Number of suggestion results",
+          "type": "integer",
+          "format": "int32"
+        },
+        "suggestions": {
+          "description": "Suggestion results",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/.v1alpha3.TrialAssignment"
+          }
+        }
+      }
+    },
+    ".v1alpha3.Trial": {
+      "description": "Represents the structure of a Trial resource.",
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/v1.ObjectMeta"
+        },
+        "spec": {
+          "$ref": "#/definitions/.v1alpha3.TrialSpec"
+        },
+        "status": {
+          "$ref": "#/definitions/.v1alpha3.TrialStatus"
+        }
+      }
+    },
+    ".v1alpha3.TrialAssignment": {
+      "description": "TrialAssignment is the assignment for one trial.",
+      "properties": {
+        "name": {
+          "description": "Name of the suggestion",
+          "type": "string"
+        },
+        "parameterAssignments": {
+          "description": "Suggestion results",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1alpha3.ParameterAssignment"
+          }
+        }
+      }
+    },
+    ".v1alpha3.TrialCondition": {
+      "description": "TrialCondition describes the state of the trial at a certain point.",
+      "required": [
+        "type",
+        "status"
+      ],
+      "properties": {
+        "lastTransitionTime": {
+          "description": "Last time the condition transitioned from one status to another.",
+          "$ref": "#/definitions/v1.Time"
+        },
+        "lastUpdateTime": {
+          "description": "The last time this condition was updated.",
+          "$ref": "#/definitions/v1.Time"
+        },
+        "message": {
+          "description": "A human readable message indicating details about the transition.",
+          "type": "string"
+        },
+        "reason": {
+          "description": "The reason for the condition's last transition.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of the condition, one of True, False, Unknown.",
+          "type": "string"
+        },
+        "type": {
+          "description": "Type of trial condition.",
+          "type": "string"
+        }
+      }
+    },
+    ".v1alpha3.TrialList": {
+      "description": "TrialList contains a list of Trials",
+      "required": [
+        "items"
+      ],
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/.v1alpha3.Trial"
+          }
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/v1.ListMeta"
+        }
+      }
+    },
+    ".v1alpha3.TrialSpec": {
+      "required": [
+        "parameterAssignments"
+      ],
+      "properties": {
+        "metricsCollector": {
+          "description": "Describes how metrics will be collected",
+          "$ref": "#/definitions/v1alpha3.MetricsCollectorSpec"
+        },
+        "objective": {
+          "description": "Describes the objective of the experiment.",
+          "$ref": "#/definitions/v1alpha3.ObjectiveSpec"
+        },
+        "parameterAssignments": {
+          "description": "Key-value pairs for hyperparameters and assignment values.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1alpha3.ParameterAssignment"
+          }
+        },
+        "retainRun": {
+          "description": "Whether to retain the trial run object after completed.",
+          "type": "boolean"
+        },
+        "runSpec": {
+          "description": "Raw text for the trial run spec. This can be any generic Kubernetes runtime object. The trial operator should create the resource as written, and let the corresponding resource controller (e.g. tf-operator) handle the rest.",
+          "type": "string"
+        }
+      }
+    },
+    ".v1alpha3.TrialStatus": {
+      "properties": {
+        "completionTime": {
+          "description": "Represents time when the Trial was completed. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC",
+          "$ref": "#/definitions/v1.Time"
+        },
+        "conditions": {
+          "description": "List of observed runtime conditions for this Trial.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/.v1alpha3.TrialCondition"
+          }
+        },
+        "lastReconcileTime": {
+          "description": "Represents last time when the Trial was reconciled. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.",
+          "$ref": "#/definitions/v1.Time"
+        },
+        "observation": {
+          "description": "Results of the Trial - objectives and other metrics values.",
+          "$ref": "#/definitions/v1alpha3.Observation"
+        },
+        "startTime": {
+          "description": "Represents time when the Trial was acknowledged by the Trial controller. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC",
+          "$ref": "#/definitions/v1.Time"
+        }
+      }
+    },
+    "v1alpha3.AlgorithmSetting": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "v1alpha3.AlgorithmSpec": {
+      "required": [
+        "algorithmSettings"
+      ],
+      "properties": {
+        "algorithmName": {
+          "type": "string"
+        },
+        "algorithmSettings": {
+          "description": "Key-value pairs representing settings for suggestion algorithms.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1alpha3.AlgorithmSetting"
+          }
+        },
+        "earlyStopping": {
+          "$ref": "#/definitions/v1alpha3.EarlyStoppingSpec"
+        }
+      }
+    },
+    "v1alpha3.CollectorSpec": {
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "customCollector": {
+          "description": "When kind is \"customCollector\", this field will be used",
+          "$ref": "#/definitions/v1.Container"
+        },
+        "kind": {
+          "type": "string"
+        }
+      }
+    },
+    "v1alpha3.EarlyStoppingSetting": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "v1alpha3.EarlyStoppingSpec": {
+      "required": [
+        "earlyStoppingSettings"
+      ],
+      "properties": {
+        "earlyStoppingAlgorithmName": {
+          "type": "string"
+        },
+        "earlyStoppingSettings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1alpha3.EarlyStoppingSetting"
+          }
+        }
+      }
+    },
+    "v1alpha3.Experiment": {
+      "description": "Structure of the Experiment custom resource.",
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/v1.ObjectMeta"
+        },
+        "spec": {
+          "$ref": "#/definitions/v1alpha3.ExperimentSpec"
+        },
+        "status": {
+          "$ref": "#/definitions/v1alpha3.ExperimentStatus"
+        }
+      }
+    },
+    "v1alpha3.ExperimentCondition": {
+      "description": "ExperimentCondition describes the state of the experiment at a certain point.",
+      "required": [
+        "type",
+        "status"
+      ],
+      "properties": {
+        "lastTransitionTime": {
+          "description": "Last time the condition transitioned from one status to another.",
+          "$ref": "#/definitions/v1.Time"
+        },
+        "lastUpdateTime": {
+          "description": "The last time this condition was updated.",
+          "$ref": "#/definitions/v1.Time"
+        },
+        "message": {
+          "description": "A human readable message indicating details about the transition.",
+          "type": "string"
+        },
+        "reason": {
+          "description": "The reason for the condition's last transition.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of the condition, one of True, False, Unknown.",
+          "type": "string"
+        },
+        "type": {
+          "description": "Type of experiment condition.",
+          "type": "string"
+        }
+      }
+    },
+    "v1alpha3.ExperimentList": {
+      "description": "ExperimentList contains a list of Experiments",
+      "required": [
+        "items"
+      ],
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1alpha3.Experiment"
+          }
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/v1.ListMeta"
+        }
+      }
+    },
+    "v1alpha3.ExperimentSpec": {
+      "properties": {
+        "algorithm": {
+          "description": "Describes the suggestion algorithm.",
+          "$ref": "#/definitions/v1alpha3.AlgorithmSpec"
+        },
+        "maxFailedTrialCount": {
+          "description": "Max failed trials to mark experiment as failed.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "maxTrialCount": {
+          "description": "Max completed trials to mark experiment as succeeded",
+          "type": "integer",
+          "format": "int32"
+        },
+        "metricsCollectorSpec": {
+          "description": "For v1alpha3 we will keep the metrics collector implementation same as v1alpha1.",
+          "$ref": "#/definitions/v1alpha3.MetricsCollectorSpec"
+        },
+        "nasConfig": {
+          "$ref": "#/definitions/v1alpha3.NasConfig"
+        },
+        "objective": {
+          "description": "Describes the objective of the experiment.",
+          "$ref": "#/definitions/v1alpha3.ObjectiveSpec"
+        },
+        "parallelTrialCount": {
+          "description": "How many trials can be processed in parallel. Defaults to 3",
+          "type": "integer",
+          "format": "int32"
+        },
+        "parameters": {
+          "description": "List of hyperparameter configurations.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1alpha3.ParameterSpec"
+          }
+        },
+        "trialTemplate": {
+          "description": "Template for each run of the trial.",
+          "$ref": "#/definitions/v1alpha3.TrialTemplate"
+        }
+      }
+    },
+    "v1alpha3.ExperimentStatus": {
+      "properties": {
+        "completionTime": {
+          "description": "Represents time when the Experiment was completed. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.",
+          "$ref": "#/definitions/v1.Time"
+        },
+        "conditions": {
+          "description": "List of observed runtime conditions for this Experiment.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1alpha3.ExperimentCondition"
+          }
+        },
+        "currentOptimalTrial": {
+          "description": "Current optimal trial parameters and observations.",
+          "$ref": "#/definitions/v1alpha3.OptimalTrial"
+        },
+        "failedTrialList": {
+          "description": "List of trial names which have already failed.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "killedTrialList": {
+          "description": "List of trial names which have been killed.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lastReconcileTime": {
+          "description": "Represents last time when the Experiment was reconciled. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.",
+          "$ref": "#/definitions/v1.Time"
+        },
+        "pendingTrialList": {
+          "description": "List of trial names which are pending.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "runningTrialList": {
+          "description": "List of trial names which are running.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "startTime": {
+          "description": "Represents time when the Experiment was acknowledged by the Experiment controller. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.",
+          "$ref": "#/definitions/v1.Time"
+        },
+        "succeededTrialList": {
+          "description": "List of trial names which have already succeeded.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "trials": {
+          "description": "Trials is the total number of trials owned by the experiment.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "trialsFailed": {
+          "description": "How many trials have failed.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "trialsKilled": {
+          "description": "How many trials have been killed.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "trialsPending": {
+          "description": "How many trials are currently pending.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "trialsRunning": {
+          "description": "How many trials are currently running.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "trialsSucceeded": {
+          "description": "How many trials have succeeded.",
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "v1alpha3.FeasibleSpace": {
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "max": {
+          "type": "string"
+        },
+        "min": {
+          "type": "string"
+        },
+        "step": {
+          "type": "string"
+        }
+      }
+    },
+    "v1alpha3.FileSystemPath": {
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      }
+    },
+    "v1alpha3.FilterSpec": {
+      "properties": {
+        "metricsFormat": {
+          "description": "When the metrics output follows format as this field specified, metricsCollector collects it and reports to metrics server, it can be \"\u003cmetric_name\u003e: \u003cfloat\u003e\" or else",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "v1alpha3.GoTemplate": {
+      "properties": {
+        "rawTemplate": {
+          "type": "string"
+        },
+        "templateSpec": {
+          "$ref": "#/definitions/v1alpha3.TemplateSpec"
+        }
+      }
+    },
+    "v1alpha3.GraphConfig": {
+      "description": "GraphConfig contains a config of DAG",
+      "properties": {
+        "inputSizes": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "numLayers": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "outputSizes": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    },
+    "v1alpha3.Metric": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "v1alpha3.MetricsCollectorSpec": {
+      "properties": {
+        "collector": {
+          "$ref": "#/definitions/v1alpha3.CollectorSpec"
+        },
+        "source": {
+          "$ref": "#/definitions/v1alpha3.SourceSpec"
+        }
+      }
+    },
+    "v1alpha3.NasConfig": {
+      "description": "NasConfig contains config for NAS job",
+      "properties": {
+        "graphConfig": {
+          "$ref": "#/definitions/v1alpha3.GraphConfig"
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1alpha3.Operation"
+          }
+        }
+      }
+    },
+    "v1alpha3.ObjectiveSpec": {
+      "properties": {
+        "additionalMetricNames": {
+          "description": "This can be empty if we only care about the objective metric. Note: If we adopt a push instead of pull mechanism, this can be omitted completely.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "goal": {
+          "type": "number",
+          "format": "double"
+        },
+        "objectiveMetricName": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "v1alpha3.Observation": {
+      "required": [
+        "metrics"
+      ],
+      "properties": {
+        "metrics": {
+          "description": "Key-value pairs for metric names and values",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1alpha3.Metric"
+          }
+        }
+      }
+    },
+    "v1alpha3.Operation": {
+      "description": "Operation contains type of operation in DAG",
+      "properties": {
+        "operationType": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1alpha3.ParameterSpec"
+          }
+        }
+      }
+    },
+    "v1alpha3.OptimalTrial": {
+      "description": "OptimalTrial is the metrics and assignments of the best trial.",
+      "required": [
+        "bestTrialName",
+        "parameterAssignments"
+      ],
+      "properties": {
+        "bestTrialName": {
+          "description": "BestTrialName is the name of the best trial.",
+          "type": "string"
+        },
+        "observation": {
+          "description": "Observation for this trial",
+          "$ref": "#/definitions/v1alpha3.Observation"
+        },
+        "parameterAssignments": {
+          "description": "Key-value pairs for hyperparameters and assignment values.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1alpha3.ParameterAssignment"
+          }
+        }
+      }
+    },
+    "v1alpha3.ParameterAssignment": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "v1alpha3.ParameterSpec": {
+      "properties": {
+        "feasibleSpace": {
+          "$ref": "#/definitions/v1alpha3.FeasibleSpace"
+        },
+        "name": {
+          "type": "string"
+        },
+        "parameterType": {
+          "type": "string"
+        }
+      }
+    },
+    "v1alpha3.SourceSpec": {
+      "properties": {
+        "fileSystemPath": {
+          "description": "During training model, metrics may be persisted into local file in source code, such as tfEvent use case",
+          "$ref": "#/definitions/v1alpha3.FileSystemPath"
+        },
+        "filter": {
+          "description": "Default metric output format is {\"metric\": \"\u003cmetric_name\u003e\", \"value\": \u003cint_or_float\u003e, \"epoch\": \u003cint\u003e, \"step\": \u003cint\u003e}, but if the output doesn't follow default format, please extend it here",
+          "$ref": "#/definitions/v1alpha3.FilterSpec"
+        },
+        "httpGet": {
+          "description": "Model-train source code can expose metrics by http, such as HTTP endpoint in prometheus metric format",
+          "$ref": "#/definitions/v1.HTTPGetAction"
+        }
+      }
+    },
+    "v1alpha3.TemplateSpec": {
+      "properties": {
+        "configMapName": {
+          "type": "string"
+        },
+        "configMapNamespace": {
+          "type": "string"
+        },
+        "templatePath": {
+          "type": "string"
+        }
+      }
+    },
+    "v1alpha3.TrialTemplate": {
+      "properties": {
+        "goTemplate": {
+          "$ref": "#/definitions/v1alpha3.GoTemplate"
+        },
+        "retain": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
