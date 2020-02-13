@@ -66,6 +66,9 @@ func NewClient(options client.Options) (Client, error) {
 	trialsv1alpha3.AddToScheme(scheme.Scheme)
 	suggestionsv1alpha3.AddToScheme(scheme.Scheme)
 	cl, err := client.New(cfg, options)
+	if err != nil {
+		return nil, err
+	}
 	return &KatibClient{
 		client: cl,
 	}, nil
