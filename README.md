@@ -8,7 +8,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/kubeflow/katib)](https://goreportcard.com/report/github.com/kubeflow/katib)
 
 Katib is a Kubernetes Native System for [Hyperparameter Tuning][1] and [Neural Architecture Search][2].
-The system is inspired by [Google vizier][3] and supports multiple ML/DL frameworks (e.g. TensorFlow, MXNet, and PyTorch).
+The system is inspired by [Google vizier][3] and supports multiple ML/DL frameworks (e.g. TensorFlow, Apache MXNet, and PyTorch).
 
 Table of Contents
 =================
