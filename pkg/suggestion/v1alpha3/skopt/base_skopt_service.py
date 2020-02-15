@@ -55,8 +55,10 @@ class BaseSkoptService(object):
                                           acq_optimizer=self.acq_optimizer,
                                           random_state=self.random_state)
 
+        skopt_suggested = []
+        loss_for_skopt = []
         for trial in trials:
-            skopt_suggested = []
+            trial_assignment = []
             for param in search_space.params:
                 parameter_value = None
                 for assignment in trial.assignments:
@@ -64,16 +66,19 @@ class BaseSkoptService(object):
                         parameter_value = assignment.value
                         break
                 if param.type == INTEGER:
-                    skopt_suggested.append(int(parameter_value))
+                    trial_assignment.append(int(parameter_value))
                 elif param.type == DOUBLE:
-                    skopt_suggested.append(float(parameter_value))
+                    trial_assignment.append(float(parameter_value))
                 else:
-                    skopt_suggested.append(parameter_value)
+                    trial_assignment.append(parameter_value)
+            skopt_suggested.append(trial_assignment)
 
-            loss_for_skopt = float(trial.target_metric.value)
+            loss_value = float(trial.target_metric.value)
             if search_space.goal == MAX_GOAL:
-                loss_for_skopt = -1 * loss_for_skopt
+                loss_value = -1 * loss_value
+            loss_for_skopt.append(loss_value)
 
+        if loss_for_skopt != [] and skopt_suggested != []:
             skopt_optimizer.tell(skopt_suggested, loss_for_skopt)
 
         return_trial_list = []
