@@ -14,27 +14,26 @@ class BaseSkoptService(object):
     Refer to https://github.com/scikit-optimize/scikit-optimize .
     """
 
-    def __init__(self, algorithm_name="skopt-bayesian-optimization",
+    def __init__(self,
                  base_estimator="GP",
                  n_initial_points=10,
                  acq_func="gp_hedge",
                  acq_optimizer="auto",
-                 random_state=None):
+                 random_state=None,
+                 search_space=None):
         self.base_estimator = base_estimator
         self.n_initial_points = n_initial_points
         self.acq_func = acq_func
         self.acq_optimizer = acq_optimizer
         self.random_state = random_state
-        self.algorithm_name = algorithm_name
+        self.search_space = search_space
+        self.skopt_optimizer = None
+        self.create_optimizer()
 
-    def getSuggestions(self, search_space, trials, request_number):
-        """
-        Get the new suggested trials with skopt algorithm.
-        """
-
+    def create_optimizer(self):
         skopt_search_space = []
 
-        for param in search_space.params:
+        for param in self.search_space.params:
             if param.type == INTEGER:
                 skopt_search_space.append(skopt.space.Integer(
                     int(param.min), int(param.max), name=param.name))
@@ -45,21 +44,24 @@ class BaseSkoptService(object):
                 skopt_search_space.append(
                     skopt.space.Categorical(param.list, name=param.name))
 
-        if self.algorithm_name != "bayesianoptimization":
-            raise Exception(
-                '"Failed to create the algortihm: {}'.format(self.algorithm_name))
-        skopt_optimizer = skopt.Optimizer(skopt_search_space,
-                                          base_estimator=self.base_estimator,
-                                          n_initial_points=self.n_initial_points,
-                                          acq_func=self.acq_func,
-                                          acq_optimizer=self.acq_optimizer,
-                                          random_state=self.random_state)
+        self.skopt_optimizer = skopt.Optimizer(
+            skopt_search_space,
+            base_estimator=self.base_estimator,
+            n_initial_points=self.n_initial_points,
+            acq_func=self.acq_func,
+            acq_optimizer=self.acq_optimizer,
+            random_state=self.random_state)
+
+    def getSuggestions(self, trials, request_number):
+        """
+        Get the new suggested trials with skopt algorithm.
+        """
 
         skopt_suggested = []
         loss_for_skopt = []
         for trial in trials:
             trial_assignment = []
-            for param in search_space.params:
+            for param in self.search_space.params:
                 parameter_value = None
                 for assignment in trial.assignments:
                     if assignment.name == param.name:
@@ -74,19 +76,19 @@ class BaseSkoptService(object):
             skopt_suggested.append(trial_assignment)
 
             loss_value = float(trial.target_metric.value)
-            if search_space.goal == MAX_GOAL:
+            if self.search_space.goal == MAX_GOAL:
                 loss_value = -1 * loss_value
             loss_for_skopt.append(loss_value)
 
         if loss_for_skopt != [] and skopt_suggested != []:
-            skopt_optimizer.tell(skopt_suggested, loss_for_skopt)
+            self.skopt_optimizer.tell(skopt_suggested, loss_for_skopt)
 
         return_trial_list = []
 
         for i in range(request_number):
-            skopt_suggested = skopt_optimizer.ask()
+            skopt_suggested = self.skopt_optimizer.ask()
             return_trial_list.append(
-                BaseSkoptService.convert(search_space, skopt_suggested))
+                BaseSkoptService.convert(self.search_space, skopt_suggested))
         return return_trial_list
 
     @staticmethod

@@ -11,25 +11,35 @@ from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
 logger = logging.getLogger("SkoptService")
 
 
-class SkoptService(
-        api_pb2_grpc.SuggestionServicer, HealthServicer):
+class SkoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
+
+    def __init__(self):
+        super(SkoptService, self).__init__()
+        self.base_service = None
+        self.is_first_run = True
+
     def GetSuggestions(self, request, context):
         """
         Main function to provide suggestion.
         """
-        name, config = OptimizerConfiguration.convertAlgorithmSpec(
+        algorithm_name, config = OptimizerConfiguration.convertAlgorithmSpec(
             request.experiment.spec.algorithm)
-        base_service = BaseSkoptService(
-            algorithm_name=name,
-            base_estimator=config.base_estimator,
-            n_initial_points=config.n_initial_points,
-            acq_func=config.acq_func,
-            acq_optimizer=config.acq_optimizer,
-            random_state=config.random_state)
+        if algorithm_name != "bayesianoptimization":
+            raise Exception("Failed to create the algortihm: {}".format(algorithm_name))
+
         search_space = HyperParameterSearchSpace.convert(request.experiment)
+        if self.is_first_run:
+            self.base_service = BaseSkoptService(
+                base_estimator=config.base_estimator,
+                n_initial_points=config.n_initial_points,
+                acq_func=config.acq_func,
+                acq_optimizer=config.acq_optimizer,
+                random_state=config.random_state,
+                search_space=search_space)
+            self.is_first_run = False
+
         trials = Trial.convert(request.trials)
-        new_trials = base_service.getSuggestions(
-            search_space, trials, request.request_number)
+        new_trials = self.base_service.getSuggestions(trials, request.request_number)
         return api_pb2.GetSuggestionsReply(
             parameter_assignments=Assignment.generate(new_trials)
         )
@@ -49,16 +59,16 @@ class OptimizerConfiguration(object):
 
     @staticmethod
     def convertAlgorithmSpec(algorithm_spec):
-        optmizer = OptimizerConfiguration()
+        optimizer = OptimizerConfiguration()
         for s in algorithm_spec.algorithm_setting:
             if s.name == "base_estimator":
-                optmizer.base_estimator = s.value
+                optimizer.base_estimator = s.value
             elif s.name == "n_initial_points":
-                optmizer.n_initial_points = int(s.value)
+                optimizer.n_initial_points = int(s.value)
             elif s.name == "acq_func":
-                optmizer.acq_func = s.value
+                optimizer.acq_func = s.value
             elif s.name == "acq_optimizer":
-                optmizer.acq_optimizer = s.value
+                optimizer.acq_optimizer = s.value
             elif s.name == "random_state":
-                optmizer.random_state = int(s.value)
-        return algorithm_spec.algorithm_name, optmizer
+                optimizer.random_state = int(s.value)
+        return algorithm_spec.algorithm_name, optimizer
