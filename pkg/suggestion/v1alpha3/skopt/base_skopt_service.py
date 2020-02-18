@@ -63,7 +63,6 @@ class BaseSkoptService(object):
         logger.info("New GetSuggestions call\n")
         skopt_suggested = []
         loss_for_skopt = []
-        return_trial_list = []
         if len(trials) > self.succeeded_trials or self.succeeded_trials == 0:
             self.succeeded_trials = len(trials)
             logger.info("Succeeded Trials changed or first call: {}\n".format(self.succeeded_trials))
@@ -106,12 +105,14 @@ class BaseSkoptService(object):
         else:
             logger.info("Succeeded Trials didn't change: {}\n".format(self.succeeded_trials))
 
-        logger.info("Running Optimizer ask to query new parameters for {} Trials".format(request_number))
-        skopt_suggested = self.skopt_optimizer.ask(n_points=request_number)
-        logger.info("New suggested parameters for Trials: {}\n\n".format(skopt_suggested))
-        for suggested in skopt_suggested:
-            return_trial_list.append(BaseSkoptService.convert(self.search_space, suggested))
+        logger.info("Running Optimizer ask to query new parameters for {} Trials\n".format(request_number))
+        return_trial_list = []
 
+        for i in range(request_number):
+                    skopt_suggested = self.skopt_optimizer.ask()
+                    logger.info("New suggested parameters for Trial: {}".format(skopt_suggested))
+                    return_trial_list.append(
+                        BaseSkoptService.convert(self.search_space, skopt_suggested))
         return return_trial_list
 
     @staticmethod
