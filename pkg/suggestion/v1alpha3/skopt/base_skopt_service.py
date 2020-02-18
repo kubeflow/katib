@@ -65,7 +65,8 @@ class BaseSkoptService(object):
         loss_for_skopt = []
         if len(trials) > self.succeeded_trials or self.succeeded_trials == 0:
             self.succeeded_trials = len(trials)
-            logger.info("Succeeded Trials changed or first call: {}\n".format(self.succeeded_trials))
+            if self.succeeded_trials != 0:
+                logger.info("Succeeded Trials changed: {}\n".format(self.succeeded_trials))
             for trial in trials:
                 trial_assignment = []
                 for param in self.search_space.params:
