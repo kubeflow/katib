@@ -59,13 +59,14 @@ class BaseSkoptService(object):
         """
         Get the new suggested trials with skopt algorithm.
         """
-
+        logger.info("-" * 100 + "\n")
+        logger.info("New GetSuggestions call\n")
         skopt_suggested = []
         loss_for_skopt = []
         return_trial_list = []
         if len(trials) > self.succeeded_trials or self.succeeded_trials == 0:
             self.succeeded_trials = len(trials)
-            logger.info("Succeeded Trials: {}".format(self.succeeded_trials))
+            logger.info("Succeeded Trials changed: {}\n".format(self.succeeded_trials))
             for trial in trials:
                 trial_assignment = []
                 for param in self.search_space.params:
@@ -97,12 +98,19 @@ class BaseSkoptService(object):
                     loss_for_skopt.append(loss_value)
 
             if loss_for_skopt != [] and skopt_suggested != []:
+                logger.info("Running Optimizer tell to record observation")
+                logger.info("Evaluated parameters: {}".format(skopt_suggested))
+                logger.info("Objective values: {}\n".format(loss_for_skopt))
                 self.skopt_optimizer.tell(skopt_suggested, loss_for_skopt)
 
-            for i in range(request_number):
-                skopt_suggested = self.skopt_optimizer.ask()
-                return_trial_list.append(
-                    BaseSkoptService.convert(self.search_space, skopt_suggested))
+        else:
+            logger.info("Succeeded Trials didn't change: {}\n".format(self.succeeded_trials))
+
+        logger.info("Running Optimizer ask to query new parameters for {} Trials".format(request_number))
+        skopt_suggested = self.skopt_optimizer.ask(n_points=request_number)
+        logger.info("New suggested parameters for Trials: {}\n\n".format(skopt_suggested))
+        for suggested in skopt_suggested:
+            return_trial_list.append(BaseSkoptService.convert(self.search_space, suggested))
 
         return return_trial_list
 
@@ -117,7 +125,4 @@ class BaseSkoptService(object):
                 assignments.append(Assignment(param.name, skopt_suggested[i]))
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 assignments.append(Assignment(param.name, skopt_suggested[i]))
-        for a in assignments:
-            logger.info("Generate new Trial with Assignment")
-            logger.info(a)
         return assignments
