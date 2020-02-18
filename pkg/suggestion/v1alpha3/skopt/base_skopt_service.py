@@ -5,6 +5,7 @@ import logging
 
 from pkg.suggestion.v1alpha3.internal.search_space import *
 from pkg.suggestion.v1alpha3.internal.trial import *
+import datetime
 
 logger = logging.getLogger("BaseSkoptService")
 
@@ -30,8 +31,8 @@ class BaseSkoptService(object):
         self.skopt_optimizer = None
         self.create_optimizer()
         self.succeeded_trials = 0
-        # Dict of recorded trials where key = loss value, value = List of trial assignment list for this value
-        self.recorded_trials = {}
+        # List of recorded Trials names
+        self.recorded_trials_names = []
 
     def create_optimizer(self):
         skopt_search_space = []
@@ -68,40 +69,35 @@ class BaseSkoptService(object):
             if self.succeeded_trials != 0:
                 logger.info("Succeeded Trials changed: {}\n".format(self.succeeded_trials))
             for trial in trials:
-                trial_assignment = []
-                for param in self.search_space.params:
-                    parameter_value = None
-                    for assignment in trial.assignments:
-                        if assignment.name == param.name:
-                            parameter_value = assignment.value
-                            break
-                    if param.type == INTEGER:
-                        trial_assignment.append(int(parameter_value))
-                    elif param.type == DOUBLE:
-                        trial_assignment.append(float(parameter_value))
-                    else:
-                        trial_assignment.append(parameter_value)
-
-                loss_value = float(trial.target_metric.value)
-                if self.search_space.goal == MAX_GOAL:
-                    loss_value = -1 * loss_value
-
-                # Update only for new values
-                if loss_value not in self.recorded_trials:
-                    self.recorded_trials[loss_value] = []
-                    self.recorded_trials[loss_value].append(trial_assignment)
+                if trial.name not in self.recorded_trials_names:
+                    self.recorded_trials_names.append(trial.name)
+                    trial_assignment = []
+                    for param in self.search_space.params:
+                        parameter_value = None
+                        for assignment in trial.assignments:
+                            if assignment.name == param.name:
+                                parameter_value = assignment.value
+                                break
+                        if param.type == INTEGER:
+                            trial_assignment.append(int(parameter_value))
+                        elif param.type == DOUBLE:
+                            trial_assignment.append(float(parameter_value))
+                        else:
+                            trial_assignment.append(parameter_value)
                     skopt_suggested.append(trial_assignment)
-                    loss_for_skopt.append(loss_value)
-                elif trial_assignment not in self.recorded_trials[loss_value]:
-                    self.recorded_trials[loss_value].append(trial_assignment)
-                    skopt_suggested.append(trial_assignment)
+                    loss_value = float(trial.target_metric.value)
+                    if self.search_space.goal == MAX_GOAL:
+                        loss_value = -1 * loss_value
                     loss_for_skopt.append(loss_value)
 
             if loss_for_skopt != [] and skopt_suggested != []:
                 logger.info("Running Optimizer tell to record observation")
                 logger.info("Evaluated parameters: {}".format(skopt_suggested))
                 logger.info("Objective values: {}\n".format(loss_for_skopt))
+                t1 = datetime.datetime.now()
                 self.skopt_optimizer.tell(skopt_suggested, loss_for_skopt)
+                logger.info("Optimizer tell method takes {} seconds".format((datetime.datetime.now()-t1).seconds))
+                logger.info("List of recorded Trials names: {}\n".format(self.recorded_trials_names))
 
         else:
             logger.info("Succeeded Trials didn't change: {}\n".format(self.succeeded_trials))
