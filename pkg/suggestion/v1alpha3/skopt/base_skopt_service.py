@@ -106,7 +106,7 @@ class BaseSkoptService(object):
         else:
             logger.info("Succeeded Trials didn't change: {}\n".format(self.succeeded_trials))
 
-        logger.info("Running Optimizer ask to query new parameters for {} Trials\n".format(request_number))
+        logger.info("Running Optimizer ask to query new parameters for Trials\n")
 
         return_trial_list = []
 
@@ -115,7 +115,8 @@ class BaseSkoptService(object):
             logger.info("New suggested parameters for Trial: {}".format(skopt_suggested))
             return_trial_list.append(
                 BaseSkoptService.convert(self.search_space, skopt_suggested))
-        logger.info("\n" * 3)
+
+        logger.info("GetSuggestions return {} new Trials\n\n".format(request_number))
         return return_trial_list
 
     @staticmethod
