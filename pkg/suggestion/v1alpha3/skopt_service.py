@@ -27,8 +27,8 @@ class SkoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         if algorithm_name != "bayesianoptimization":
             raise Exception("Failed to create the algortihm: {}".format(algorithm_name))
 
-        search_space = HyperParameterSearchSpace.convert(request.experiment)
         if self.is_first_run:
+            search_space = HyperParameterSearchSpace.convert(request.experiment)
             self.base_service = BaseSkoptService(
                 base_estimator=config.base_estimator,
                 n_initial_points=config.n_initial_points,
