@@ -70,26 +70,24 @@ class BaseHyperoptService(object):
 
         recorded_trials_names = self.fmin.trials.specs
 
-        # Produce new ids for Trials
-        hyperopt_trial_new_ids = self.fmin.trials.new_trial_ids(request_number)
 
-        tid_index = 0
+        hyperopt_trial_new_ids = []
         hyperopt_trial_specs = []
         hyperopt_trial_results = []
         hyperopt_trial_miscs = []
-        # Update hyperopt FMin with new completed trials
+        # Update hyperopt FMin with new completed Trials
         for trial in trials:
             if {"trial-name":trial.name} not in recorded_trials_names:
-                # New id for the new Trial
-                new_id = hyperopt_trial_new_ids[tid_index]
-                tid_index+=1
+                # Produce new id for the new Trial
+                new_id = self.fmin.trials.new_trial_ids(1)
+                hyperopt_trial_new_ids.append(new_id[0])
                 hyperopt_trial_miscs_idxs = {}
                 # Example: {'l1_normalization': [0.1], 'learning_rate': [0.1], 'hidden2': [1], 'optimizer': [1]}
                 hyperopt_trial_miscs_vals = {}
 
                 # Insert Trial assignment to the misc
                 hyperopt_trial_misc = dict(
-                    tid=new_id, cmd=self.hyperopt_domain.cmd, workdir=self.hyperopt_domain.workdir)
+                    tid=new_id[0], cmd=self.hyperopt_domain.cmd, workdir=self.hyperopt_domain.workdir)
                 for param in self.search_space.params:
                     parameter_value = None
                     for assignment in trial.assignments:
@@ -97,14 +95,14 @@ class BaseHyperoptService(object):
                             parameter_value = assignment.value
                             break
                     if param.type == INTEGER:
-                        hyperopt_trial_miscs_idxs[param.name] = [new_id]
+                        hyperopt_trial_miscs_idxs[param.name] = new_id
                         hyperopt_trial_miscs_vals[param.name] = [int(parameter_value)]
                     elif param.type == DOUBLE:
-                        hyperopt_trial_miscs_idxs[param.name] = [new_id]
+                        hyperopt_trial_miscs_idxs[param.name] = new_id
                         hyperopt_trial_miscs_vals[param.name] = [float(parameter_value)]
                     elif param.type == DISCRETE or param.type == CATEGORICAL:
                         index_of_value_in_list = param.list.index(parameter_value)
-                        hyperopt_trial_miscs_idxs[param.name] = [new_id]
+                        hyperopt_trial_miscs_idxs[param.name] = new_id
                         hyperopt_trial_miscs_vals[param.name] = [index_of_value_in_list]
 
 
@@ -175,9 +173,8 @@ class BaseHyperoptService(object):
             self.fmin.trials.insert_trial_docs(hyperopt_trials)
             self.fmin.trials.refresh()
 
-            # Produce another new ids to make new Suggestion if we inserted Trials before
-            hyperopt_trial_new_ids = self.fmin.trials.new_trial_ids(request_number)
-
+        # Produce new request_number ids to make new Suggestion
+        hyperopt_trial_new_ids = self.fmin.trials.new_trial_ids(request_number)
         random_state = self.fmin.rstate.randint(2**31 - 1)
         if self.algorithm_name == RANDOM_ALGORITHM_NAME:
             new_trials = self.hyperopt_algorithm(
@@ -196,7 +193,7 @@ class BaseHyperoptService(object):
                 seed=random_state,
                 n_startup_jobs=request_number)
 
-        # Construct return advisor trials from new hyperopt trials
+        # Construct return advisor Trials from new hyperopt Trials
         list_of_assignments = []
         for i in range(request_number):
             vals = new_trials[i]['misc']['vals']
