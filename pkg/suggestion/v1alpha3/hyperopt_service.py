@@ -24,6 +24,7 @@ class HyperoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         """
         name, config = OptimizerConfiguration.convertAlgorithmSpec(
             request.experiment.spec.algorithm)
+
         if self.is_first_run:
             search_space = HyperParameterSearchSpace.convert(request.experiment)
             self.base_service = BaseHyperoptService(
