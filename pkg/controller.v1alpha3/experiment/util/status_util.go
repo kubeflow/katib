@@ -56,7 +56,10 @@ func updateTrialsSummary(instance *experimentsv1alpha3.Experiment, trials *trial
 	sts.RunningTrialList, sts.PendingTrialList, sts.FailedTrialList, sts.SucceededTrialList, sts.KilledTrialList = nil, nil, nil, nil, nil
 	bestTrialIndex := -1
 	isObjectiveGoalReached := false
-	objectiveValueGoal := *instance.Spec.Objective.Goal
+	var objectiveValueGoal float64
+	if instance.Spec.Objective.Goal != nil {
+		objectiveValueGoal = *instance.Spec.Objective.Goal
+	}
 	objectiveType := instance.Spec.Objective.Type
 	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
 
@@ -90,7 +93,7 @@ func updateTrialsSummary(instance *experimentsv1alpha3.Experiment, trials *trial
 				bestTrialValue = *objectiveMetricValue
 				bestTrialIndex = index
 			}
-			if bestTrialValue <= objectiveValueGoal {
+			if instance.Spec.Objective.Goal != nil && bestTrialValue <= objectiveValueGoal {
 				isObjectiveGoalReached = true
 			}
 		} else if objectiveType == commonv1alpha3.ObjectiveTypeMaximize {
@@ -98,7 +101,7 @@ func updateTrialsSummary(instance *experimentsv1alpha3.Experiment, trials *trial
 				bestTrialValue = *objectiveMetricValue
 				bestTrialIndex = index
 			}
-			if bestTrialValue >= objectiveValueGoal {
+			if instance.Spec.Objective.Goal != nil && bestTrialValue >= objectiveValueGoal {
 				isObjectiveGoalReached = true
 			}
 		}
