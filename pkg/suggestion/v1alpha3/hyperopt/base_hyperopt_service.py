@@ -196,6 +196,7 @@ class BaseHyperoptService(object):
                     trials=self.fmin.trials,
                     seed=random_state,
                     n_startup_jobs=request_number)
+                self.is_first_run = False
             else:
                 new_trials = []
                 for i in range(request_number):
@@ -212,7 +213,6 @@ class BaseHyperoptService(object):
         for i in range(request_number):
             vals = new_trials[i]['misc']['vals']
             list_of_assignments.append(BaseHyperoptService.convert(self.search_space, vals))
-        self.is_first_run = False
         return list_of_assignments
 
     @staticmethod
