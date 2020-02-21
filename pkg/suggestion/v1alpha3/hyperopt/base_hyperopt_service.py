@@ -29,6 +29,7 @@ class BaseHyperoptService(object):
         self.hyperopt_rstate = np.random.RandomState(random_state)
         self.create_hyperopt_domain()
         self.create_fmin()
+        self.is_first_run = True
 
     def create_hyperopt_domain(self):
         # Construct search space, example: {"x": hyperopt.hp.uniform('x', -10, 10), "x2": hyperopt.hp.uniform('x2', -10, 10)}
@@ -185,19 +186,33 @@ class BaseHyperoptService(object):
         elif self.algorithm_name == TPE_ALGORITHM_NAME:
             # n_startup_jobs indicates for how many Trials we run random suggestion
             # This must be request_number value
-            # After this tpe suggestion starts analyse Trial info
-            new_trials = self.hyperopt_algorithm(
-                new_ids=hyperopt_trial_new_ids,
-                domain=self.fmin.domain,
-                trials=self.fmin.trials,
-                seed=random_state,
-                n_startup_jobs=request_number)
+            # After this tpe suggestion starts analyse Trial info.
+            # On the first run we can run suggest just once with n_startup_jobs
+            # Next suggest runs must be for each new Trial generation
+            if self.is_first_run:
+                new_trials = self.hyperopt_algorithm(
+                    new_ids=hyperopt_trial_new_ids,
+                    domain=self.fmin.domain,
+                    trials=self.fmin.trials,
+                    seed=random_state,
+                    n_startup_jobs=request_number)
+            else:
+                new_trials = []
+                for i in range(request_number):
+                    # hyperopt_algorithm always returns one new Trial
+                    new_trials.append(self.hyperopt_algorithm(
+                        new_ids=[hyperopt_trial_new_ids[i]],
+                        domain=self.fmin.domain,
+                        trials=self.fmin.trials,
+                        seed=random_state,
+                        n_startup_jobs=request_number)[0])
 
         # Construct return advisor Trials from new hyperopt Trials
         list_of_assignments = []
         for i in range(request_number):
             vals = new_trials[i]['misc']['vals']
             list_of_assignments.append(BaseHyperoptService.convert(self.search_space, vals))
+        self.is_first_run = False
         return list_of_assignments
 
     @staticmethod
