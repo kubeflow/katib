@@ -63,7 +63,7 @@ const TrialInfoDialog = (props) => {
                 aria-describedby="alert-dialog-description"
                 maxWidth={"xl"}
             >
-            <DialogTitle id="alert-dialog-title" className = {classes.header}>{"Trial data"}</DialogTitle>
+            <DialogTitle id="alert-dialog-title" className = {classes.header}>{"Trial Name: "+props.trialName}</DialogTitle>
             <DialogContent>
                 <Plot 
                     data={dataToPlot}
@@ -87,6 +87,7 @@ const mapStateToProps = state => {
     return {
         open: state[module].dialogTrialOpen,
         trialData: state[module].trialData,
+        trialName: state[module].trialName
     }
 }
 

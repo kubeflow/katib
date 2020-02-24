@@ -23,6 +23,7 @@ const initialState = {
     dialogTrialOpen: false,
     dialogExperimentOpen: false,
     loading: false,
+    trialName: ''
 };
 
 const hpMonitorReducer = (state = initialState, action) => {
@@ -134,6 +135,7 @@ const hpMonitorReducer = (state = initialState, action) => {
                 ...state,
                 trialData: action.trialData,
                 dialogTrialOpen: true,
+                trialName: action.trialName
             }
         case actions.CLOSE_DIALOG_TRIAL:
             return {

@@ -292,13 +292,15 @@ export const fetchHPJobTrialInfo = function* () {
         try {
             const result = yield call(
                 gofetchHPJobTrialInfo,
-                action.trialName
+                action.trialName,
+                action.namespace
             )
             if (result.status === 200) {
                 let data = result.data.split("\n").map((line, i) => line.split(','))
                 yield put({
                     type: hpMonitorActions.FETCH_HP_JOB_TRIAL_INFO_SUCCESS,
-                    trialData: data
+                    trialData: data,
+                    trialName: action.trialName
                 })
             } else {
                 yield put({
@@ -313,11 +315,11 @@ export const fetchHPJobTrialInfo = function* () {
     }
 }
 
-const gofetchHPJobTrialInfo = function* (trialName) {
+const gofetchHPJobTrialInfo = function* (trialName, namespace) {
     try {
         const result = yield call(
             axios.get,
-            `/katib/fetch_hp_job_trial_info/?trialName=${trialName}`,
+            `/katib/fetch_hp_job_trial_info/?trialName=${trialName}&namespace=${namespace}`,
         )
         return result
     } catch (err) {

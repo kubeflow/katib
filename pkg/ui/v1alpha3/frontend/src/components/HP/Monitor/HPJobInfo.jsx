@@ -73,7 +73,7 @@ class HPJobInfo extends React.Component {
                         </Button>
                     </div>
                     <HPJobPlot name={this.props.match.params.name} />
-                    <HPJobTable name={this.props.match.params.name} />
+                    <HPJobTable namespace={this.props.match.params.namespace} />
                     <ExperimentInfoDialog/>
                     <TrialInfoDialog />
                 </div>
