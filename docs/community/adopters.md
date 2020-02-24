@@ -1,6 +1,6 @@
 # Adopters of Kubeflow Katib
 
-Below are the adopters of project Katib. If you are using katib
+Below are the adopters of project Katib. If you are using Katib
 please add yourself into the following list by a pull request.
 
 | Organization | Contact | Description of Use |

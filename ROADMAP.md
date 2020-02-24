@@ -1,25 +1,22 @@
-# Katib 2019 Roadmap
+# Katib 2020 Roadmap
 
-This document provides a high level view of where Katib will grow in 2019. These objectives are based on Katib's Critical User Journey (CUJ),
-which can be found [here](https://bit.ly/2QNKMwt).
+This document provides a high level view of where Katib will grow in 2020. 
+You can find 2019 Katib's Critical User Journey (CUJ) [here](https://bit.ly/2QNKMwt).
 
 The original Katib design document can be found [here](https://docs.google.com/document/d/1ZEKhou4z1utFTOgjzhSsnvysJFNEJmygllgDCBnYvm8/edit#heading=h.7fzqir88ovr).
 
 # Katib 1.0 Readiness
 
-* Stabilize APIs for StudyJobs
-	* Beta by end of Q2, 1.0 by end of Q4
-	* Formalize naming conventions (we use different names like katib vs vizier in different places)
-	* Refactor studyjob field names [#351](https://github.com/kubeflow/katib/issues/351)
-	* Rename fields so their names are more meaningful (e.g. requestCount vs requestNumber) [#161](https://github.com/kubeflow/katib/issues/161)
-* Fully integrate katib with existing E2E examples:
+* Stabilize APIs for Experiments
+	* Reconsider the design of Trial Template [#906](https://github.com/kubeflow/katib/issues/906)
+	* Early Stopping [#692](https://github.com/kubeflow/katib/issues/692)
+	* Resuming Experiment [#1061](https://github.com/kubeflow/katib/issues/1061), [#1062](https://github.com/kubeflow/katib/issues/1062)
+* Fully integrate Katib with existing E2E examples:
 	* Xgboost
 	* Mnist
 	* GitHub issue summarization
 * Publish API documentation, best practices, tutorials
 * [Issues list](https://github.com/kubeflow/katib/issues)
-* [Issues for 0.5.0 release](https://github.com/kubeflow/katib/labels/area%2F0.5.0)
-
 
 # Enhance HP Tuning Experience
 
@@ -32,35 +29,13 @@ Integration with KF distributed training components
 * PyTorch
 * Allow Katib to support other operator types generically [#341](https://github.com/kubeflow/katib/issues/341)
 
-## 2. Configuring a Study
-* Streamlining the StudyJob schema - providing simpler ways to write worker specs and metric collector specs.
-* Expose more information in StudyJob status fields
-	* List all job conditions with details [#344](https://github.com/kubeflow/katib/issues/344)
-	* Returning study metadata such as number of trials and best hyperparameter values so far [#356](https://github.com/kubeflow/katib/issues/356)
-* Integration with Jupyter notebooks and Fairing [#355](https://github.com/kubeflow/katib/issues/355)
-	* Allow users to start with an existing model from a notebook and do HP tuning with minimal code changes
-* Allowing a StudyJob to be resumed with additional trials [#346](https://github.com/kubeflow/katib/issues/346)
-* Generating StudyJob configurations and launching StudyJobs through UI
+## 2. Configuring a Experiment
 * Supporting additional suggestion algorithms [#15](https://github.com/kubeflow/katib/issues/15)
-* Support for StudyJob deployment in a different namespace [#343](https://github.com/kubeflow/katib/issues/343)
-
 
 ## 3. Tracking Model Performance
-* Enhance metrics collection
-	* May need to revisit the design - use a push model instead of pull model?
 * UI enhancements: allowing data scientists to visualize results easier
 * Support for persistent model and metadata storage
 	* Ideally users should be able to export and reuse trained models from a common storage
-
-
-# Other Features
-
-Designs are pending for the following new features:
-* Multi-Tenancy Support
-* [NAS](https://docs.google.com/document/d/1qGWy-C5XSQmh82XYoMcJ_JWLHwmyvdMRjCkFMfkO0vE/edit)
-* Batch scheduling
-* [Integration with Pipelines](https://github.com/kubeflow/katib/issues/331)
-* Early stopping feature
 
 # Test and Release Infrastructure
 
