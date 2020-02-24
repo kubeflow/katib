@@ -13,7 +13,7 @@
 
 ## Links
 
-- [katib/issues#685 (katib metrics collector solution)](https://github.com/kubeflow/katib/issues/685)
+- [katib/issues#685 (Katib metrics collector solution)](https://github.com/kubeflow/katib/issues/685)
 - [katib/pull#697 (API for metricCollector)](https://github.com/kubeflow/katib/pull/697#issuecomment-516264282)
 - [katib/pull#716 (Add pod level inject webhook)](https://github.com/kubeflow/katib/pull/716)
 - [katib/pull#729 (Inject pod sidecar for specified namespace)](https://github.com/kubeflow/katib/pull/729)
@@ -29,7 +29,7 @@ The cron job pulls the targeted pod logs periodically and then persist the logs 
 However, the pulled-based design has [some problems](https://github.com/kubeflow/tf-operator/issues/722#issuecomment-405669269), such as, at what frequency should we scrape the metrics and so on.
 
 To enhance the extensibility and support EarlyStopping, we propose a new design of the metrics collector.
-In the new design, katib use mutating webhook to inject metrics collector container as a sidecar into Job/Tfjob/PytorchJob pod.
+In the new design, Katib use mutating webhook to inject metrics collector container as a sidecar into Job/Tfjob/PytorchJob pod.
 The sidecar collects metrics of the master and then store them on the persistent layer (e.x. katib-db-manager and metadata server).
 
 <center>
@@ -116,7 +116,7 @@ For more detail, see [here](https://github.com/kubeflow/katib/pull/697#issuecomm
 ### Mutating Webhook
 
 To avoid collecting duplicated metrics, as we discuss in [kubeflow/katib#685](https://github.com/kubeflow/katib/issues/685), only one metrics collector sidecar will be injected into the master pod during one Experiment.
-In the new design, there are two modes for katib mutating webhook to inject the sidecar: **Pod Level Injecting** and **Job Level Injecting**.
+In the new design, there are two modes for Katib mutating webhook to inject the sidecar: **Pod Level Injecting** and **Job Level Injecting**.
 
 The webhook decides which mode to be used based on the `katib-metricscollector-injection=enabled` label tagged on the namespace.
 In the namespace with `katib-metricscollector-injection=enabled` label, the webhook inject the sidecar in the pod level. Otherwise, without this label, injecting in the job level.
