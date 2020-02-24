@@ -1,7 +1,6 @@
 # Katib 2020 Roadmap
 
 This document provides a high level view of where Katib will grow in 2020. 
-You can find 2019 Katib's Critical User Journey (CUJ) [here](https://bit.ly/2QNKMwt).
 
 The original Katib design document can be found [here](https://docs.google.com/document/d/1ZEKhou4z1utFTOgjzhSsnvysJFNEJmygllgDCBnYvm8/edit#heading=h.7fzqir88ovr).
 
