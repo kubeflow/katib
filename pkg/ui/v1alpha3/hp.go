@@ -170,7 +170,7 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 
 	objectiveType := trial.Spec.Objective.Type
 
-	//resultArray - array of arrays, where [i][0] - metricName, [i][1] - metricTime, [i][2] - metriValue
+	// resultArray - array of arrays, where [i][0] - metricName, [i][1] - metricTime, [i][2] - metricValue
 	var resultArray [][]string
 	resultArray = append(resultArray, strings.Split("metricName,time,value", ","))
 	obsLogResp, err := c.GetObservationLog(
