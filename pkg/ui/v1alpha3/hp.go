@@ -153,13 +153,26 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	w.Write(response)
 }
 
+// FetchHPJobTrialInfo returns all metrics for the HP Job Trial
 func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	trialName := r.URL.Query()["trialName"][0]
+	namespace := r.URL.Query()["namespace"][0]
 	conn, c := k.connectManager()
 	defer conn.Close()
 
-	resultText := "metricName,time,value\n"
+	trial, err := k.katibClient.GetTrial(trialName, namespace)
+
+	if err != nil {
+		log.Printf("GetTrial from HP job failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	objectiveType := trial.Spec.Objective.Type
+
+	// resultArray - array of arrays, where [i][0] - metricName, [i][1] - metricTime, [i][2] - metricValue
+	var resultArray [][]string
+	resultArray = append(resultArray, strings.Split("metricName,time,value", ","))
 	obsLogResp, err := c.GetObservationLog(
 		context.Background(),
 		&api_pb_v1alpha3.GetObservationLogRequest{
@@ -173,17 +186,40 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	prevMetricTime := map[string]string{}
+
+	// prevMetricTimeValue is the dict, where key = metric name,
+	// value = array, where [0] - Last metric time, [1] - Best metric value for this time
+	prevMetricTimeValue := make(map[string][]string)
 	for _, m := range obsLogResp.ObservationLog.MetricLogs {
-		parsedTime, _ := time.Parse(time.RFC3339Nano, m.TimeStamp)
-		formatTime := parsedTime.Format("2006-01-02T15:04:05")
-		if _, found := prevMetricTime[m.Metric.Name]; !found {
-			prevMetricTime[m.Metric.Name] = ""
+		parsedCurrentTime, _ := time.Parse(time.RFC3339Nano, m.TimeStamp)
+		formatCurrentTime := parsedCurrentTime.Format("2006-01-02T15:04:05")
+		if _, found := prevMetricTimeValue[m.Metric.Name]; !found {
+			prevMetricTimeValue[m.Metric.Name] = []string{"", ""}
+
 		}
-		if formatTime != prevMetricTime[m.Metric.Name] {
-			resultText += m.Metric.Name + "," + formatTime + "," + m.Metric.Value + "\n"
-			prevMetricTime[m.Metric.Name] = formatTime
+		if formatCurrentTime == prevMetricTimeValue[m.Metric.Name][0] &&
+			((objectiveType == commonv1alpha3.ObjectiveTypeMinimize &&
+				m.Metric.Value < prevMetricTimeValue[m.Metric.Name][1]) ||
+				(objectiveType == commonv1alpha3.ObjectiveTypeMaximize &&
+					m.Metric.Value > prevMetricTimeValue[m.Metric.Name][1])) {
+
+			prevMetricTimeValue[m.Metric.Name][1] = m.Metric.Value
+			for i := len(resultArray) - 1; i >= 0; i-- {
+				if resultArray[i][0] == m.Metric.Name {
+					resultArray[i][2] = m.Metric.Value
+					break
+				}
+			}
+		} else if formatCurrentTime != prevMetricTimeValue[m.Metric.Name][0] {
+			resultArray = append(resultArray, []string{m.Metric.Name, formatCurrentTime, m.Metric.Value})
+			prevMetricTimeValue[m.Metric.Name][0] = formatCurrentTime
+			prevMetricTimeValue[m.Metric.Name][1] = m.Metric.Value
 		}
+	}
+
+	var resultText string
+	for _, metric := range resultArray {
+		resultText += strings.Join(metric, ",") + "\n"
 	}
 
 	response, err := json.Marshal(resultText)

@@ -183,6 +183,26 @@ func (mr *MockClientMockRecorder) GetSuggestion(arg0 interface{}, arg1 ...interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestion", reflect.TypeOf((*MockClient)(nil).GetSuggestion), varargs...)
 }
 
+// GetTrial mocks base method
+func (m *MockClient) GetTrial(arg0 string, arg1 ...string) (*v1alpha31.Trial, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetTrial", varargs...)
+	ret0, _ := ret[0].(*v1alpha31.Trial)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTrial indicates an expected call of GetTrial
+func (mr *MockClientMockRecorder) GetTrial(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrial", reflect.TypeOf((*MockClient)(nil).GetTrial), varargs...)
+}
+
 // GetTrialList mocks base method
 func (m *MockClient) GetTrialList(arg0 string, arg1 ...string) (*v1alpha31.TrialList, error) {
 	m.ctrl.T.Helper()

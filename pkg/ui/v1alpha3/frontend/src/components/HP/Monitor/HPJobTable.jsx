@@ -46,7 +46,7 @@ const styles = theme => ({
 class HPJobTable extends React.Component {
 
   fetchAndOpenDialogTrial = (trialName) => (event) => {
-    this.props.fetchHPJobTrialInfo(trialName);
+    this.props.fetchHPJobTrialInfo(trialName, this.props.namespace);
   }
 
   render () {

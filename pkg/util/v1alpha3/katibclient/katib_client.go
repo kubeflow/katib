@@ -40,6 +40,7 @@ type Client interface {
 	DeleteExperiment(experiment *experimentsv1alpha3.Experiment, namespace ...string) error
 	GetExperiment(name string, namespace ...string) (*experimentsv1alpha3.Experiment, error)
 	GetConfigMap(name string, namespace ...string) (map[string]string, error)
+	GetTrial(name string, namespace ...string) (*trialsv1alpha3.Trial, error)
 	GetTrialList(name string, namespace ...string) (*trialsv1alpha3.TrialList, error)
 	GetTrialTemplates(namespace ...string) (map[string]string, error)
 	GetSuggestion(name string, namespace ...string) (*suggestionsv1alpha3.Suggestion, error)
@@ -103,6 +104,18 @@ func (k *KatibClient) GetSuggestion(name string, namespace ...string) (
 		return nil, err
 	}
 	return suggestion, nil
+
+}
+
+// GetTrial returns the Trial for the given name and namespace
+func (k *KatibClient) GetTrial(name string, namespace ...string) (*trialsv1alpha3.Trial, error) {
+	ns := getNamespace(namespace...)
+	trial := &trialsv1alpha3.Trial{}
+
+	if err := k.client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: ns}, trial); err != nil {
+		return nil, err
+	}
+	return trial, nil
 
 }
 
