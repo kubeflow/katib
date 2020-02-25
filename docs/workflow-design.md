@@ -59,10 +59,10 @@ spec:
             spec:
               containers:
               - name: {{.Trial}}
-                image: docker.io/katib/mxnet-mnist-example
+                image: docker.io/kubeflowkatib/mxnet-mnist
                 command:
-                - "python"
-                - "/mxnet/example/image-classification/train_mnist.py"
+                - "python3"
+                - "/opt/mxnet-mnist/mnist.py"
                 - "--batch-size=64"
                 {{- with .HyperParameters}}
                 {{- range .}}
@@ -131,10 +131,10 @@ spec:
         spec:
           containers:
           - name: random-example-fm2g6jpj
-            image: docker.io/katib/mxnet-mnist-example
+            image: docker.io/kubeflowkatib/mxnet-mnist
             command:
-            - "python"
-            - "/mxnet/example/image-classification/train_mnist.py"
+            - "python3"
+            - "/opt/mxnet-mnist/mnist.py"
             - "--batch-size=64"
             - "--lr=0.027435456064371484"
             - "--num-layers=4"

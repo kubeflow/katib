@@ -1,14 +1,14 @@
-# Document about how to add a new algorithm in katib
+# Document about how to add a new algorithm in Katib
 
-## Implement a new algorithm and use it in katib
+## Implement a new algorithm and use it in Katib
 
 ### Implement the algorithm
 
-The design of katib follows the [`ask-and-tell` pattern](https://scikit-optimize.github.io/notebooks/ask-and-tell.html):
+The design of Katib follows the `ask-and-tell` pattern:
 
 > They often follow a pattern a bit like this: 1. ask for a new set of parameters 1. walk to the experiment and program in the new parameters 1. observe the outcome of running the experiment 1. walk back to your laptop and tell the optimizer about the outcome 1. go to step 1
 
-When an experiment is created, one algorithm service will be created. Then katib asks for new sets of parameters via `GetSuggestions` GRPC call. After that, katib creates new trials according to the sets and observe the outcome. When the trials are finished, katib tells the metrics of the finished trials to the algorithm, and ask another new sets. 
+When an experiment is created, one algorithm service will be created. Then Katib asks for new sets of parameters via `GetSuggestions` GRPC call. After that, Katib creates new trials according to the sets and observe the outcome. When the trials are finished, Katib tells the metrics of the finished trials to the algorithm, and ask another new sets. 
 
 The new algorithm needs to implement `Suggestion` service defined in [api.proto](../pkg/apis/manager/v1alpha3/api.proto). One sample algorithm looks like:
 
@@ -87,7 +87,7 @@ Create a package under [cmd/suggestion](../cmd/suggestion). Then create the main
 
 Here is an example: [cmd/suggestion/hyperopt](../cmd/suggestion/hyperopt). Then build the Docker image.
 
-### Use the algorithm in katib.
+### Use the algorithm in Katib.
 
 Update the [katib-config](../manifests/v1alpha3/katib-controller/katib-config.yaml), add a new object:
 
@@ -106,9 +106,9 @@ Update the [katib-config](../manifests/v1alpha3/katib-controller/katib-config.ya
     }
 ```
 
-### Contribute the algorithm to katib
+### Contribute the algorithm to Katib
 
-If you want to contribute the algorithm to katib, you could add unit test or e2e test for it in CI and submit a PR.
+If you want to contribute the algorithm to Katib, you could add unit test or e2e test for it in CI and submit a PR.
 
 #### Unit Test
 
@@ -142,9 +142,14 @@ You can setup the GRPC server using `grpc_testing`, then define you own test cas
 
 #### E2E Test (Optional)
 
-E2e tests help katib verify that the algorithm works well. To add a e2e test for the new algorithm, you need to:
+E2e tests help Katib verify that the algorithm works well.
+To add a e2e test for the new algorithm, in [test/scripts/v1alpha3](../test/scripts/v1alpha3) you need to:
 
-Create a new script `run-suggestion-xxx.sh` in [test/scripts/v1alpha3](../test/scripts/v1alpha3). Here is an example [test/scripts/v1alpha3/build-suggestion-hyperopt.sh](../test/scripts/v1alpha3/build-suggestion-hyperopt.sh) (Replace `<name>` with the new algorithm name):
+1. Create a new Experiment yaml file in [examples/v1alpha3](../examples/v1alpha3) with the new algorithm.
+
+2. Create a new script `build-suggestion-xxx.sh` to build new suggestion. Here is an example [test/scripts/v1alpha3/build-suggestion-hyperopt.sh](../test/scripts/v1alpha3/build-suggestion-hyperopt.sh).
+
+3. Create a new script `run-suggestion-xxx.sh` to run new suggestion. Below is an example (Replace `<name>` with the new algorithm name):
 
 ```bash
 #!/bin/bash

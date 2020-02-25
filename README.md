@@ -7,8 +7,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/kubeflow/katib/badge.svg?branch=master)](https://coveralls.io/github/kubeflow/katib?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kubeflow/katib)](https://goreportcard.com/report/github.com/kubeflow/katib)
 
-Katib is a Kubernetes Native System for [Hyperparameter Tuning][1] and [Neural Architecture Search][2].
-The system is inspired by [Google vizier][3] and supports multiple ML/DL frameworks (e.g. TensorFlow, Apache MXNet, and PyTorch).
+Katib is a Kubernetes-based system for [Hyperparameter Tuning][1] and [Neural Architecture Search][2]. Katib supports a number of ML frameworks, including TensorFlow, Apache MXNet, PyTorch, XGBoost, and others.
 
 Table of Contents
 =================
@@ -30,7 +29,7 @@ Table of Contents
       * [Running examples](#running-examples)
       * [Cleanups](#cleanups)
   * [Quick Start](#quick-start)
-  * [Who are using katib?](#who-are-using-katib)
+  * [Who are using Katib?](#who-are-using-katib)
   * [CONTRIBUTING](#contributing)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
@@ -43,7 +42,7 @@ on the Kubeflow website.
 
 ## Name
 
-Katib stands for `secretary` in Arabic. As `Vizier` stands for a high official or a prime minister in Arabic, this project Katib is named in the honor of Vizier.
+Katib stands for `secretary` in Arabic.
 
 ## Concepts in Katib
 
@@ -86,11 +85,17 @@ Thus, Katib supports multiple frameworks with the help of different job kinds.
 
 Currently Katib supports the following exploration algorithms:
 
-* random search
-* grid search
-* [hyperband](https://arxiv.org/pdf/1603.06560.pdf)
-* [bayesian optimization](https://arxiv.org/pdf/1012.2599.pdf)
-* [NAS based on reinforcement learning](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1alpha3/NAS_Reinforcement_Learning)
+#### Hyperparameter Tuning
+
+* [Random Search](https://en.wikipedia.org/wiki/Hyperparameter_optimization#Random_search)
+* [Tree of Parzen Estimators (TPE)](https://papers.nips.cc/paper/4443-algorithms-for-hyper-parameter-optimization.pdf)
+* [Grid Search](https://en.wikipedia.org/wiki/Hyperparameter_optimization#Grid_search)
+* [Hyperband](https://arxiv.org/pdf/1603.06560.pdf)
+* [Bayesian Optimization](https://arxiv.org/pdf/1012.2599.pdf)
+
+#### Neural Architecture Search
+
+* [Reinforcement Learning](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1alpha3/NAS_Reinforcement_Learning)
 
 
 ## Components in Katib
@@ -98,11 +103,11 @@ Currently Katib supports the following exploration algorithms:
 Katib consists of several components as shown below. Each component is running on k8s as a deployment.
 Each component communicates with others via GRPC and the API is defined at `pkg/apis/manager/v1alpha3/api.proto`.
 
-- katib: main components.
-  - katib-db-manager: GRPC API server of katib which is the DB Interface.
-  - katib-mysql: Data storage backend of katib using mysql.
-  - katib-ui: User interface of katib.
-  - katib-controller: Controller for katib CRDs in Kubernetes.
+- Katib main components:
+  - katib-db-manager: GRPC API server of Katib which is the DB Interface.
+  - katib-mysql: Data storage backend of Katib using mysql.
+  - katib-ui: User interface of Katib.
+  - katib-controller: Controller for Katib CRDs in Kubernetes.
 
 ## Web UI
 
@@ -124,7 +129,9 @@ install Kubeflow. See the documentation:
 * [Kubeflow installation 
 guide](https://www.kubeflow.org/docs/started/getting-started/)
 * [Kubeflow hyperparameter tuning 
-guides](https://www.kubeflow.org/docs/components/hyperparameter-tuning/). 
+guides](https://www.kubeflow.org/docs/components/hyperparameter-tuning/).
+
+If you install Katib with other Kubeflow components, you can't submit Katib jobs in Kubeflow namespace.
 
 Alternatively, if you want to install Katib manually, follow these steps:
 
@@ -181,12 +188,13 @@ metadata:
     type: local
     app: katib
 spec:
+  storageClassName: katib
   capacity:
     storage: 10Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /data/katib
+    path: /tmp/katib
 ```
 
 Create this pv after deploying Katib package
@@ -337,7 +345,7 @@ Delete installed components using `kubectl delete -f` on the respective folders.
 
 Please see [Quick Start Guide](./docs/quick-start.md)
 
-## Who are using katib?
+## Who are using Katib?
 
 Please see [adopters.md](./docs/community/adopters.md)
 
