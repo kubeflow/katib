@@ -11,20 +11,30 @@ from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
 logger = logging.getLogger("HyperoptRandomService")
 
 
-class HyperoptService(
-        api_pb2_grpc.SuggestionServicer, HealthServicer):
+class HyperoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
+
+    def __init__(self):
+        super(HyperoptService, self).__init__()
+        self.base_service = None
+        self.is_first_run = True
+
     def GetSuggestions(self, request, context):
         """
         Main function to provide suggestion.
         """
         name, config = OptimizerConfiguration.convertAlgorithmSpec(
             request.experiment.spec.algorithm)
-        base_serice = BaseHyperoptService(
-            algorithm_name=name, random_state=config.random_state)
-        search_space = HyperParameterSearchSpace.convert(request.experiment)
+
+        if self.is_first_run:
+            search_space = HyperParameterSearchSpace.convert(request.experiment)
+            self.base_service = BaseHyperoptService(
+                algorithm_name=name,
+                random_state=config.random_state,
+                search_space=search_space)
+            self.is_first_run = False
+
         trials = Trial.convert(request.trials)
-        new_assignments = base_serice.getSuggestions(
-            search_space, trials, request.request_number)
+        new_assignments = self.base_service.getSuggestions(trials, request.request_number)
         return api_pb2.GetSuggestionsReply(
             parameter_assignments=Assignment.generate(new_assignments)
         )
@@ -36,8 +46,8 @@ class OptimizerConfiguration(object):
 
     @staticmethod
     def convertAlgorithmSpec(algorithm_spec):
-        optmizer = OptimizerConfiguration()
+        optimizer = OptimizerConfiguration()
         for s in algorithm_spec.algorithm_setting:
             if s.name == "random_state":
-                optmizer.random_state = int(s.value)
-        return algorithm_spec.algorithm_name, optmizer
+                optimizer.random_state = int(s.value)
+        return algorithm_spec.algorithm_name, optimizer
