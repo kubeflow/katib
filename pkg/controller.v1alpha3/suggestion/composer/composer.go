@@ -2,6 +2,8 @@ package composer
 
 import (
 	"fmt"
+	"reflect"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/spf13/viper"
 	appsv1 "k8s.io/api/apps/v1"
@@ -28,11 +30,15 @@ const (
 	defaultGRPCHealthCheckProbe = "/bin/grpc_health_probe"
 )
 
-var log = logf.Log.WithName("suggestion-composer")
+var (
+	log              = logf.Log.WithName("suggestion-composer")
+	ComposerRegistry = make(map[string]reflect.Type)
+)
 
 type Composer interface {
 	DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.Deployment, error)
 	DesiredService(s *suggestionsv1alpha3.Suggestion) (*corev1.Service, error)
+	CreateComposer(mgr manager.Manager) Composer
 }
 
 type General struct {
@@ -40,11 +46,11 @@ type General struct {
 	client.Client
 }
 
-func New(scheme *runtime.Scheme, client client.Client) Composer {
-	return &General{
-		scheme: scheme,
-		Client: client,
-	}
+func New(mgr manager.Manager) Composer {
+	// We assume DefaultComposer always exists in ComposerRegistry.
+	composerType, _ := ComposerRegistry[consts.DefaultComposer]
+	composer := reflect.New(composerType).Elem().Interface()
+	return composer.(Composer).CreateComposer(mgr)
 }
 
 func (g *General) DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.Deployment, error) {
@@ -207,4 +213,12 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 		}
 	}
 	return c, nil
+}
+
+func (g *General) CreateComposer(mgr manager.Manager) Composer {
+	return &General{mgr.GetScheme(), mgr.GetClient()}
+}
+
+func init() {
+	ComposerRegistry[consts.DefaultComposer] = reflect.TypeOf(&General{})
 }

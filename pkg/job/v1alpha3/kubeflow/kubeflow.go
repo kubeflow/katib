@@ -1,9 +1,13 @@
 package kubeflow
 
 import (
+	"github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
+	job "github.com/kubeflow/katib/pkg/job/v1alpha3"
 	pytorchv1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1"
 	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"reflect"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -74,4 +78,29 @@ func (k Kubeflow) IsTrainingContainer(index int, c corev1.Container) bool {
 		return false
 	}
 	return false
+}
+
+func (k Kubeflow) MutateJob(*v1alpha3.Trial, *unstructured.Unstructured) error {
+	return nil
+}
+
+func (k *Kubeflow) Create(kind string) job.Provider {
+	return &Kubeflow{Kind: kind}
+}
+
+func init() {
+	job.ProviderRegistry[consts.JobKindTF] = reflect.TypeOf(&Kubeflow{})
+	job.SupportedJobList[consts.JobKindTF] = schema.GroupVersionKind{
+		Group:   "kubeflow.org",
+		Version: "v1",
+		Kind:    "TFJob",
+	}
+	job.JobRoleMap[consts.JobKindTF] = []string{"job-role", "tf-job-role"}
+	job.ProviderRegistry[consts.JobKindPyTorch] = reflect.TypeOf(&Kubeflow{})
+	job.SupportedJobList[consts.JobKindPyTorch] = schema.GroupVersionKind{
+		Group:   "kubeflow.org",
+		Version: "v1",
+		Kind:    "PyTorchJob",
+	}
+	job.JobRoleMap[consts.JobKindPyTorch] = []string{"job-role", "pytorch-job-role"}
 }

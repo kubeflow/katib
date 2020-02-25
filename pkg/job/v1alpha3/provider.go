@@ -2,14 +2,17 @@ package v1alpha3
 
 import (
 	"fmt"
+	"github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
+	"reflect"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
-	"github.com/kubeflow/katib/pkg/job/v1alpha3/job"
-	"github.com/kubeflow/katib/pkg/job/v1alpha3/kubeflow"
 	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
+)
+
+var (
+	ProviderRegistry = make(map[string]reflect.Type)
 )
 
 // Provider provides utilities for different jobs.
@@ -19,19 +22,19 @@ type Provider interface {
 		deployedJob *unstructured.Unstructured) (*commonv1.JobCondition, error)
 	// IsTrainingContainer returns if the c is the actual training container.
 	IsTrainingContainer(index int, c corev1.Container) bool
+	// Mutate jobSpec before creation if necessary
+	MutateJob(*v1alpha3.Trial, *unstructured.Unstructured) error
+	// Recreate Provider from kind
+	Create(kind string) Provider
 }
 
 // New creates a new Provider.
 func New(kind string) (Provider, error) {
-	switch kind {
-	case consts.JobKindJob:
-		return &job.Job{}, nil
-	case consts.JobKindPyTorch, consts.JobKindTF:
-		return &kubeflow.Kubeflow{
-			Kind: kind,
-		}, nil
-	default:
+	if providerType, ok := ProviderRegistry[kind]; ok {
+		ptr := reflect.New(providerType).Elem().Interface().(Provider)
+		return ptr.Create(kind), nil
+	} else {
 		return nil, fmt.Errorf(
-			"Failed to create the provider: Unknown kind %s", kind)
+			"failed to create the provider: Unknown kind %s", kind)
 	}
 }

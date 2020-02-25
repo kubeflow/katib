@@ -37,6 +37,8 @@ const (
 
 	// DefaultKatibNamespaceEnvName is the default env name of katib namespace
 	DefaultKatibNamespaceEnvName = "KATIB_CORE_NAMESPACE"
+	// DefaultKatibComposerEnvName is the default env name of katib suggestion composer
+	DefaultKatibComposerEnvName = "KATIB_SUGGESTION_COMPOSER"
 
 	// KatibConfigMapName is the config map constants
 	// Configmap name which includes Katib's configuration
@@ -102,18 +104,6 @@ const (
 	// JobKindPyTorch is the kind of PyTorchJob.
 	JobKindPyTorch = "PyTorchJob"
 
-	// JobVersionJob is the api version of Kubernetes Job.
-	JobVersionJob = "v1"
-	// JobVersionTF is the api version of TFJob.
-	JobVersionTF = "v1"
-	// JobVersionPyTorch is the api version of PyTorchJob.
-	JobVersionPyTorch = "v1"
-
-	// JobGroupJob is the group name of Kubernetes Job.
-	JobGroupJob = "batch"
-	// JobGroupKubeflow is the group name of Kubeflow.
-	JobGroupKubeflow = "kubeflow.org"
-
 	// AnnotationIstioSidecarInjectName is the annotation of Istio Sidecar
 	AnnotationIstioSidecarInjectName = "sidecar.istio.io/inject"
 
@@ -124,4 +114,6 @@ const (
 var (
 	// DefaultKatibNamespace is the default namespace of katib deployment.
 	DefaultKatibNamespace = env.GetEnvOrDefault(DefaultKatibNamespaceEnvName, "kubeflow")
+	// DefaultComposer is the default composer of katib suggestion.
+	DefaultComposer       = env.GetEnvOrDefault(DefaultKatibComposerEnvName, "General")
 )

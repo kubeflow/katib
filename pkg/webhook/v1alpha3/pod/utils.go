@@ -33,7 +33,7 @@ import (
 )
 
 func getKatibJob(pod *v1.Pod) (string, string, error) {
-	for _, gvk := range jobv1alpha3.GetSupportedJobList() {
+	for _, gvk := range jobv1alpha3.SupportedJobList {
 		owners := pod.GetOwnerReferences()
 		for _, owner := range owners {
 			if isMatchGVK(owner, gvk) {
