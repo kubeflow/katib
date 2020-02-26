@@ -115,5 +115,5 @@ var (
 	// DefaultKatibNamespace is the default namespace of katib deployment.
 	DefaultKatibNamespace = env.GetEnvOrDefault(DefaultKatibNamespaceEnvName, "kubeflow")
 	// DefaultComposer is the default composer of katib suggestion.
-	DefaultComposer       = env.GetEnvOrDefault(DefaultKatibComposerEnvName, "General")
+	DefaultComposer = env.GetEnvOrDefault(DefaultKatibComposerEnvName, "General")
 )
