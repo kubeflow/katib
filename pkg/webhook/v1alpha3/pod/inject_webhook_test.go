@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 )
 
-func init()  {
+func init() {
 	kubeflow.Register()
 }
 
