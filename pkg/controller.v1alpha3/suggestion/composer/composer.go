@@ -2,8 +2,6 @@ package composer
 
 import (
 	"fmt"
-	"reflect"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/spf13/viper"
 	appsv1 "k8s.io/api/apps/v1"
@@ -13,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
@@ -32,7 +31,7 @@ const (
 
 var (
 	log              = logf.Log.WithName("suggestion-composer")
-	ComposerRegistry = make(map[string]reflect.Type)
+	ComposerRegistry = make(map[string]Composer)
 )
 
 type Composer interface {
@@ -48,9 +47,8 @@ type General struct {
 
 func New(mgr manager.Manager) Composer {
 	// We assume DefaultComposer always exists in ComposerRegistry.
-	composerType, _ := ComposerRegistry[consts.DefaultComposer]
-	composer := reflect.New(composerType).Elem().Interface()
-	return composer.(Composer).CreateComposer(mgr)
+	ptr, _ := ComposerRegistry[consts.DefaultComposer]
+	return ptr.CreateComposer(mgr)
 }
 
 func (g *General) DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.Deployment, error) {
@@ -220,5 +218,5 @@ func (g *General) CreateComposer(mgr manager.Manager) Composer {
 }
 
 func init() {
-	ComposerRegistry[consts.DefaultComposer] = reflect.TypeOf(&General{})
+	ComposerRegistry[consts.DefaultComposer] = &General{}
 }

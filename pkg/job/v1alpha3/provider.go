@@ -2,17 +2,16 @@ package v1alpha3
 
 import (
 	"fmt"
-	"github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
-	"reflect"
 
+	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
+	"github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 )
 
 var (
-	ProviderRegistry = make(map[string]reflect.Type)
+	ProviderRegistry = make(map[string]Provider)
 )
 
 // Provider provides utilities for different jobs.
@@ -30,8 +29,7 @@ type Provider interface {
 
 // New creates a new Provider.
 func New(kind string) (Provider, error) {
-	if providerType, ok := ProviderRegistry[kind]; ok {
-		ptr := reflect.New(providerType).Elem().Interface().(Provider)
+	if ptr, ok := ProviderRegistry[kind]; ok {
 		return ptr.Create(kind), nil
 	} else {
 		return nil, fmt.Errorf(

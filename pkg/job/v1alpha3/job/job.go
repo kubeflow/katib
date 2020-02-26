@@ -10,7 +10,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"reflect"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
@@ -79,7 +78,7 @@ func (j *Job) Create(kind string) job.Provider {
 }
 
 func Register() {
-	job.ProviderRegistry[consts.JobKindJob] = reflect.TypeOf(&Job{})
+	job.ProviderRegistry[consts.JobKindJob] = &Job{}
 	job.SupportedJobList[consts.JobKindJob] = schema.GroupVersionKind{
 		Group:   "batch",
 		Version: "v1",
