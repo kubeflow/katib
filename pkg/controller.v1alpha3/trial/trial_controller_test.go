@@ -2,6 +2,7 @@ package trial
 
 import (
 	"bytes"
+	"github.com/kubeflow/katib/pkg/job/v1alpha3/kubeflow"
 	"testing"
 	"time"
 
@@ -38,6 +39,7 @@ var tfJobKey = types.NamespacedName{Name: "test", Namespace: namespace}
 
 func init() {
 	logf.SetLogger(logf.ZapLogger(true))
+	kubeflow.Register()
 }
 
 func TestCreateTFJobTrial(t *testing.T) {
