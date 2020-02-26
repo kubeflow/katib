@@ -1,6 +1,8 @@
 package validator
 
 import (
+	"github.com/kubeflow/katib/pkg/job/v1alpha3/job"
+	"github.com/kubeflow/katib/pkg/job/v1alpha3/kubeflow"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -15,6 +17,8 @@ import (
 
 func init() {
 	logf.SetLogger(logf.ZapLogger(false))
+	job.Register()
+	kubeflow.Register()
 }
 
 func TestValidateTFJobTrialTemplate(t *testing.T) {

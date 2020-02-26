@@ -78,7 +78,7 @@ func (j *Job) Create(kind string) job.Provider {
 	return &Job{}
 }
 
-func init() {
+func Register() {
 	job.ProviderRegistry[consts.JobKindJob] = reflect.TypeOf(&Job{})
 	job.SupportedJobList[consts.JobKindJob] = schema.GroupVersionKind{
 		Group:   "batch",
@@ -86,4 +86,8 @@ func init() {
 		Kind:    "Job",
 	}
 	job.JobRoleMap[consts.JobKindJob] = []string{}
+}
+
+func init() {
+	Register()
 }

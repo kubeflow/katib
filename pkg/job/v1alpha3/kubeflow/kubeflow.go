@@ -6,12 +6,11 @@ import (
 	pytorchv1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1"
 	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"reflect"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"reflect"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
@@ -88,7 +87,7 @@ func (k *Kubeflow) Create(kind string) job.Provider {
 	return &Kubeflow{Kind: kind}
 }
 
-func init() {
+func Register() {
 	job.ProviderRegistry[consts.JobKindTF] = reflect.TypeOf(&Kubeflow{})
 	job.SupportedJobList[consts.JobKindTF] = schema.GroupVersionKind{
 		Group:   "kubeflow.org",
@@ -103,4 +102,9 @@ func init() {
 		Kind:    "PyTorchJob",
 	}
 	job.JobRoleMap[consts.JobKindPyTorch] = []string{"job-role", "pytorch-job-role"}
+
+}
+
+func init() {
+	Register()
 }
