@@ -51,7 +51,7 @@ const initialState = {
     ],
     additionalMetricNames: [
         {
-            value: "accuracy"
+            value: "Train-accuracy"
         }
     ],
     algorithmName: "random",
