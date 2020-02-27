@@ -12,11 +12,10 @@ import (
 
 	"github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
-	job "github.com/kubeflow/katib/pkg/job/v1alpha3"
 )
 
 var (
-	log = logf.Log.WithName("provider-kubeflow")
+	kfLogger = logf.Log.WithName("provider-kubeflow")
 )
 
 // Kubeflow is the provider of Kubeflow kinds.
@@ -33,10 +32,10 @@ func (k Kubeflow) GetDeployedJobStatus(
 	status, ok, unerr := unstructured.NestedFieldCopy(deployedJob.Object, "status")
 	if !ok {
 		if unerr != nil {
-			log.Error(unerr, "NestedFieldCopy unstructured to status error")
+			kfLogger.Error(unerr, "NestedFieldCopy unstructured to status error")
 			return nil, unerr
 		}
-		log.Info("NestedFieldCopy unstructured to status error",
+		kfLogger.Info("NestedFieldCopy unstructured to status error",
 			"err", "Status is not found in job")
 		return nil, nil
 	}
@@ -45,7 +44,7 @@ func (k Kubeflow) GetDeployedJobStatus(
 	jobStatus := commonv1.JobStatus{}
 	err := runtime.DefaultUnstructuredConverter.FromUnstructured(statusMap, &jobStatus)
 	if err != nil {
-		log.Error(err, "Convert unstructured to status error")
+		kfLogger.Error(err, "Convert unstructured to status error")
 		return nil, err
 	}
 	// Get the latest condition and set it to jobCondition.
@@ -72,7 +71,7 @@ func (k Kubeflow) IsTrainingContainer(index int, c corev1.Container) bool {
 			return true
 		}
 	default:
-		log.Info("Invalid Katib worker kind", "JobKind", k.Kind)
+		kfLogger.Info("Invalid Katib worker kind", "JobKind", k.Kind)
 		return false
 	}
 	return false
@@ -82,23 +81,23 @@ func (k Kubeflow) MutateJob(*v1alpha3.Trial, *unstructured.Unstructured) error {
 	return nil
 }
 
-func (k *Kubeflow) Create(kind string) job.Provider {
+func (k *Kubeflow) Create(kind string) Provider {
 	return &Kubeflow{Kind: kind}
 }
 
 func init() {
-	job.ProviderRegistry[consts.JobKindTF] = &Kubeflow{}
-	job.SupportedJobList[consts.JobKindTF] = schema.GroupVersionKind{
+	ProviderRegistry[consts.JobKindTF] = &Kubeflow{}
+	SupportedJobList[consts.JobKindTF] = schema.GroupVersionKind{
 		Group:   "kubeflow.org",
 		Version: "v1",
 		Kind:    "TFJob",
 	}
-	job.JobRoleMap[consts.JobKindTF] = []string{"job-role", "tf-job-role"}
-	job.ProviderRegistry[consts.JobKindPyTorch] = &Kubeflow{}
-	job.SupportedJobList[consts.JobKindPyTorch] = schema.GroupVersionKind{
+	JobRoleMap[consts.JobKindTF] = []string{"job-role", "tf-job-role"}
+	ProviderRegistry[consts.JobKindPyTorch] = &Kubeflow{}
+	SupportedJobList[consts.JobKindPyTorch] = schema.GroupVersionKind{
 		Group:   "kubeflow.org",
 		Version: "v1",
 		Kind:    "PyTorchJob",
 	}
-	job.JobRoleMap[consts.JobKindPyTorch] = []string{"job-role", "pytorch-job-role"}
+	JobRoleMap[consts.JobKindPyTorch] = []string{"job-role", "pytorch-job-role"}
 }

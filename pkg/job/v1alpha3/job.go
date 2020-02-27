@@ -11,11 +11,10 @@ import (
 
 	"github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
-	job "github.com/kubeflow/katib/pkg/job/v1alpha3"
 )
 
 var (
-	log = logf.Log.WithName("provider-job")
+	jobLogger = logf.Log.WithName("provider-job")
 )
 
 // Job is the provider of Job kind.
@@ -30,12 +29,12 @@ func (j Job) GetDeployedJobStatus(
 	status, ok, unerr := unstructured.NestedFieldCopy(deployedJob.Object, "status")
 	if !ok {
 		if unerr != nil {
-			log.Error(unerr, "NestedFieldCopy unstructured to status error")
+			jobLogger.Error(unerr, "NestedFieldCopy unstructured to status error")
 			return nil, unerr
 		}
 		// Job does not have the running condition in status, thus we think
 		// the job is running when it is created.
-		log.Info("NestedFieldCopy", "err", "status cannot be found in job")
+		jobLogger.Info("NestedFieldCopy", "err", "status cannot be found in job")
 		return nil, nil
 	}
 
@@ -43,7 +42,7 @@ func (j Job) GetDeployedJobStatus(
 	jobStatus := batchv1.JobStatus{}
 	err := runtime.DefaultUnstructuredConverter.FromUnstructured(statusMap, &jobStatus)
 	if err != nil {
-		log.Error(err, "Convert unstructured to status error")
+		jobLogger.Error(err, "Convert unstructured to status error")
 		return nil, err
 	}
 	for _, cond := range jobStatus.Conditions {
@@ -74,16 +73,16 @@ func (j Job) MutateJob(*v1alpha3.Trial, *unstructured.Unstructured) error {
 	return nil
 }
 
-func (j *Job) Create(kind string) job.Provider {
+func (j *Job) Create(kind string) Provider {
 	return &Job{}
 }
 
 func init() {
-	job.ProviderRegistry[consts.JobKindJob] = &Job{}
-	job.SupportedJobList[consts.JobKindJob] = schema.GroupVersionKind{
+	ProviderRegistry[consts.JobKindJob] = &Job{}
+	SupportedJobList[consts.JobKindJob] = schema.GroupVersionKind{
 		Group:   "batch",
 		Version: "v1",
 		Kind:    "Job",
 	}
-	job.JobRoleMap[consts.JobKindJob] = []string{}
+	JobRoleMap[consts.JobKindJob] = []string{}
 }
