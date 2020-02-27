@@ -90,14 +90,14 @@ func init() {
 	SupportedJobList[consts.JobKindTF] = schema.GroupVersionKind{
 		Group:   "kubeflow.org",
 		Version: "v1",
-		Kind:    "TFJob",
+		Kind:    consts.JobKindTF,
 	}
-	JobRoleMap[consts.JobKindTF] = []string{"job-role", "tf-job-role"}
+	JobRoleMap[consts.JobKindTF] = []string{consts.JobRole, consts.JobRoleTF}
 	ProviderRegistry[consts.JobKindPyTorch] = &Kubeflow{}
 	SupportedJobList[consts.JobKindPyTorch] = schema.GroupVersionKind{
 		Group:   "kubeflow.org",
 		Version: "v1",
-		Kind:    "PyTorchJob",
+		Kind:    consts.JobKindPyTorch,
 	}
-	JobRoleMap[consts.JobKindPyTorch] = []string{"job-role", "pytorch-job-role"}
+	JobRoleMap[consts.JobKindPyTorch] = []string{consts.JobRole, consts.JobRolePyTorch}
 }

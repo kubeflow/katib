@@ -82,7 +82,7 @@ func init() {
 	SupportedJobList[consts.JobKindJob] = schema.GroupVersionKind{
 		Group:   "batch",
 		Version: "v1",
-		Kind:    "Job",
+		Kind:    consts.JobKindJob,
 	}
 	JobRoleMap[consts.JobKindJob] = []string{}
 }
