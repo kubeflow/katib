@@ -50,7 +50,7 @@ const initialState = {
     ],
     additionalMetricNames: [],
     algorithmName: "nasrl",
-    allAlgorithms: ["nasrl", "nasenvelopenet"],
+    allAlgorithms: ["nasrl"],
     algorithmSettings: [
         {
             name: "lstm_num_cells",
