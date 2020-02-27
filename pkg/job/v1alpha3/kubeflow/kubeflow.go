@@ -1,4 +1,4 @@
-package kubeflow
+package v1alpha3
 
 import (
 	pytorchv1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1"
@@ -86,7 +86,7 @@ func (k *Kubeflow) Create(kind string) job.Provider {
 	return &Kubeflow{Kind: kind}
 }
 
-func Register() {
+func init() {
 	job.ProviderRegistry[consts.JobKindTF] = &Kubeflow{}
 	job.SupportedJobList[consts.JobKindTF] = schema.GroupVersionKind{
 		Group:   "kubeflow.org",
@@ -101,8 +101,4 @@ func Register() {
 		Kind:    "PyTorchJob",
 	}
 	job.JobRoleMap[consts.JobKindPyTorch] = []string{"job-role", "pytorch-job-role"}
-}
-
-func init() {
-	Register()
 }

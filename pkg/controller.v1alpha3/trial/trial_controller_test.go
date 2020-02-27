@@ -22,7 +22,6 @@ import (
 	commonv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
-	"github.com/kubeflow/katib/pkg/job/v1alpha3/kubeflow"
 	managerclientmock "github.com/kubeflow/katib/pkg/mock/v1alpha3/trial/managerclient"
 )
 
@@ -39,7 +38,6 @@ var tfJobKey = types.NamespacedName{Name: "test", Namespace: namespace}
 
 func init() {
 	logf.SetLogger(logf.ZapLogger(true))
-	kubeflow.Register()
 }
 
 func TestCreateTFJobTrial(t *testing.T) {

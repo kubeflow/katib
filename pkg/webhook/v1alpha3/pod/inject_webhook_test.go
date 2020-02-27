@@ -1,17 +1,12 @@
 package pod
 
 import (
-	"github.com/kubeflow/katib/pkg/job/v1alpha3/kubeflow"
 	"testing"
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 )
-
-func init() {
-	kubeflow.Register()
-}
 
 func TestWrapWorkerContainer(t *testing.T) {
 	testCases := []struct {

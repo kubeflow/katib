@@ -6,12 +6,18 @@ import (
 	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 )
 
 var (
 	ProviderRegistry = make(map[string]Provider)
+	// JobRoleMap is the map which is used to determin if the replica is master.
+	// Katib will inject metrics collector into master replica.
+	JobRoleMap = make(map[string][]string)
+	// SupportedJobList returns the list of the supported jobs' GVK.
+	SupportedJobList = make(map[string]schema.GroupVersionKind)
 )
 
 // Provider provides utilities for different jobs.

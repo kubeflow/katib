@@ -1,9 +1,6 @@
-package job
+package v1alpha3
 
 import (
-	"github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
-	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
-	job "github.com/kubeflow/katib/pkg/job/v1alpha3"
 	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -11,6 +8,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+
+	"github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
+	job "github.com/kubeflow/katib/pkg/job/v1alpha3"
 )
 
 var (
@@ -77,7 +78,7 @@ func (j *Job) Create(kind string) job.Provider {
 	return &Job{}
 }
 
-func Register() {
+func init() {
 	job.ProviderRegistry[consts.JobKindJob] = &Job{}
 	job.SupportedJobList[consts.JobKindJob] = schema.GroupVersionKind{
 		Group:   "batch",
@@ -85,8 +86,4 @@ func Register() {
 		Kind:    "Job",
 	}
 	job.JobRoleMap[consts.JobKindJob] = []string{}
-}
-
-func init() {
-	Register()
 }
