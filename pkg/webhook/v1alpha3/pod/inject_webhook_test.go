@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 )
 

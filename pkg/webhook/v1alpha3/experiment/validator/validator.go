@@ -145,7 +145,7 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1alpha3.E
 
 func (g *DefaultValidator) validateSupportedJob(job *unstructured.Unstructured) error {
 	gvk := job.GroupVersionKind()
-	supportedJobs := jobv1alpha3.GetSupportedJobList()
+	supportedJobs := jobv1alpha3.SupportedJobList
 	for _, sJob := range supportedJobs {
 		if gvk == sJob {
 			return nil

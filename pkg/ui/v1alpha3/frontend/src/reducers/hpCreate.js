@@ -51,11 +51,11 @@ const initialState = {
     ],
     additionalMetricNames: [
         {
-            value: "accuracy"
+            value: "Train-accuracy"
         }
     ],
     algorithmName: "random",
-    allAlgorithms: ["grid", "random", "hyperband", "bayesianoptimization"],
+    allAlgorithms: ["grid", "random", "hyperband", "bayesianoptimization", "tpe"],
     algorithmSettings: [
 
     ],

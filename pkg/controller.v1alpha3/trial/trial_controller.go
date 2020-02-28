@@ -106,7 +106,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	for _, gvk := range jobv1alpha3.GetSupportedJobList() {
+	for _, gvk := range jobv1alpha3.SupportedJobList {
 		unstructuredJob := &unstructured.Unstructured{}
 		unstructuredJob.SetGroupVersionKind(gvk)
 		err = c.Watch(
@@ -273,6 +273,15 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1alpha3.Trial, desiredJob
 		if errors.IsNotFound(err) {
 			if instance.IsCompleted() {
 				return nil, nil
+			}
+			jobProvider, err := jobv1alpha3.New(desiredJob.GetKind())
+			if err != nil {
+				return nil, err
+			}
+			// mutate desiredJob according to provider
+			if err := jobProvider.MutateJob(instance, desiredJob); err != nil {
+				logger.Error(err, "Mutating desiredSpec of km.Training error")
+				return nil, err
 			}
 			logger.Info("Creating Job", "kind", kind,
 				"name", desiredJob.GetName())

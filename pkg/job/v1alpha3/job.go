@@ -1,4 +1,4 @@
-package job
+package v1alpha3
 
 import (
 	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
@@ -6,11 +6,15 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+
+	"github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 )
 
 var (
-	log = logf.Log.WithName("provider-job")
+	jobLogger = logf.Log.WithName("provider-job")
 )
 
 // Job is the provider of Job kind.
@@ -25,12 +29,12 @@ func (j Job) GetDeployedJobStatus(
 	status, ok, unerr := unstructured.NestedFieldCopy(deployedJob.Object, "status")
 	if !ok {
 		if unerr != nil {
-			log.Error(unerr, "NestedFieldCopy unstructured to status error")
+			jobLogger.Error(unerr, "NestedFieldCopy unstructured to status error")
 			return nil, unerr
 		}
 		// Job does not have the running condition in status, thus we think
 		// the job is running when it is created.
-		log.Info("NestedFieldCopy", "err", "status cannot be found in job")
+		jobLogger.Info("NestedFieldCopy", "err", "status cannot be found in job")
 		return nil, nil
 	}
 
@@ -38,7 +42,7 @@ func (j Job) GetDeployedJobStatus(
 	jobStatus := batchv1.JobStatus{}
 	err := runtime.DefaultUnstructuredConverter.FromUnstructured(statusMap, &jobStatus)
 	if err != nil {
-		log.Error(err, "Convert unstructured to status error")
+		jobLogger.Error(err, "Convert unstructured to status error")
 		return nil, err
 	}
 	for _, cond := range jobStatus.Conditions {
@@ -64,4 +68,21 @@ func (j Job) IsTrainingContainer(index int, c corev1.Container) bool {
 		return true
 	}
 	return false
+}
+func (j Job) MutateJob(*v1alpha3.Trial, *unstructured.Unstructured) error {
+	return nil
+}
+
+func (j *Job) Create(kind string) Provider {
+	return &Job{}
+}
+
+func init() {
+	ProviderRegistry[consts.JobKindJob] = &Job{}
+	SupportedJobList[consts.JobKindJob] = schema.GroupVersionKind{
+		Group:   "batch",
+		Version: "v1",
+		Kind:    consts.JobKindJob,
+	}
+	JobRoleMap[consts.JobKindJob] = []string{}
 }
