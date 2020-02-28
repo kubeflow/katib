@@ -11,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
@@ -28,11 +29,15 @@ const (
 	defaultGRPCHealthCheckProbe = "/bin/grpc_health_probe"
 )
 
-var log = logf.Log.WithName("suggestion-composer")
+var (
+	log              = logf.Log.WithName("suggestion-composer")
+	ComposerRegistry = make(map[string]Composer)
+)
 
 type Composer interface {
 	DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.Deployment, error)
 	DesiredService(s *suggestionsv1alpha3.Suggestion) (*corev1.Service, error)
+	CreateComposer(mgr manager.Manager) Composer
 }
 
 type General struct {
@@ -40,11 +45,10 @@ type General struct {
 	client.Client
 }
 
-func New(scheme *runtime.Scheme, client client.Client) Composer {
-	return &General{
-		scheme: scheme,
-		Client: client,
-	}
+func New(mgr manager.Manager) Composer {
+	// We assume DefaultComposer always exists in ComposerRegistry.
+	ptr, _ := ComposerRegistry[consts.DefaultComposer]
+	return ptr.CreateComposer(mgr)
 }
 
 func (g *General) DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.Deployment, error) {
@@ -207,4 +211,12 @@ func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.C
 		}
 	}
 	return c, nil
+}
+
+func (g *General) CreateComposer(mgr manager.Manager) Composer {
+	return &General{mgr.GetScheme(), mgr.GetClient()}
+}
+
+func init() {
+	ComposerRegistry[consts.DefaultComposer] = &General{}
 }

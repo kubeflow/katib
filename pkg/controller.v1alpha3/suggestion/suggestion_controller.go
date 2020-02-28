@@ -62,7 +62,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		Client:           mgr.GetClient(),
 		SuggestionClient: suggestionclient.New(),
 		scheme:           mgr.GetScheme(),
-		Composer:         composer.New(mgr.GetScheme(), mgr.GetClient()),
+		Composer:         composer.New(mgr),
 		recorder:         mgr.GetRecorder(ControllerName),
 	}
 }
