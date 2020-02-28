@@ -2,11 +2,16 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
+	health_pb "github.com/kubeflow/katib/pkg/apis/manager/health"
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
+	"github.com/kubeflow/katib/pkg/db/v1alpha3/common"
 	mockdb "github.com/kubeflow/katib/pkg/mock/v1alpha3/db"
 )
 
@@ -130,4 +135,45 @@ func TestDeleteObservationLog(t *testing.T) {
 	if err != nil {
 		t.Fatalf("DeleteExperiment Error %v", err)
 	}
+}
+
+func TestCheck(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	s := &server{}
+	mockDB := mockdb.NewMockKatibDBInterface(ctrl)
+	dbIf = mockDB
+	req := &health_pb.HealthCheckRequest{
+		Service: "grpc.health.v1.Health",
+	}
+	servingResp := &health_pb.HealthCheckResponse{
+		Status: health_pb.HealthCheckResponse_SERVING,
+	}
+
+	mockDB.EXPECT().SelectOne().Return(nil)
+
+	resp, err := s.Check(context.Background(), req)
+	if err != nil {
+		t.Fatalf("Check failed: %v", err)
+	}
+
+	if resp.Status != servingResp.Status {
+		t.Fatalf("Check must return serving status, but returned %v", resp.Status)
+	}
+}
+
+var mock sqlmock.Sqlmock
+
+func TestMain(m *testing.M) {
+
+	dbNameEnvName := common.DBNameEnvName
+	os.Setenv(dbNameEnvName, "mysql")
+	_, sm, err := sqlmock.New()
+	mock = sm
+	if err != nil {
+		fmt.Printf("error opening db: %v\n", err)
+		os.Exit(1)
+	}
+	main()
+	os.Exit(m.Run())
 }

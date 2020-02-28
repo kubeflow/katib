@@ -162,7 +162,7 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1alpha3.Ex
 			continue
 		}
 		if _, err := g.GetMetricsCollectorImage(mcKind); err != nil {
-			return fmt.Errorf("Don't support metrics collector kind %q: %v.", string(mcKind), err)
+			return fmt.Errorf("GetMetricsCollectorImage failed: %v.", err)
 		}
 		break
 	}

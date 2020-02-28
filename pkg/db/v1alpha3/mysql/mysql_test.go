@@ -112,14 +112,36 @@ func TestGetObservationLog(t *testing.T) {
 	)
 	obsLog, err := dbInterface.GetObservationLog(
 		"test1_trial1",
-		"",
+		"loss",
 		"2016-12-31T21:01:05.123456Z",
-		"",
+		"2016-12-31T22:10:20.123456Z",
 	)
 	if err != nil {
 		t.Errorf("GetObservationLog failed %v", err)
 	} else if len(obsLog.MetricLogs) != 2 {
 		t.Errorf("GetObservationLog incorrect return %v", obsLog)
+	}
+
+}
+
+func TestDeleteObservationLog(t *testing.T) {
+	trialName := "test1_trial1"
+
+	mock.ExpectExec(
+		"DELETE FROM observation_logs",
+	).WithArgs(trialName).WillReturnResult(sqlmock.NewResult(1, 1))
+
+	err := dbInterface.DeleteObservationLog(trialName)
+	if err != nil {
+		t.Errorf("DeleteObservationLog failed: %v", err)
+	}
+}
+
+func TestGetDbName(t *testing.T) {
+	dbName := "root:@tcp(katib-mysql:3306)/katib?timeout=5s"
+
+	if getDbName() != dbName {
+		t.Errorf("getDbName returns wrong value %v", getDbName())
 	}
 
 }
