@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 
+	health_pb "github.com/kubeflow/katib/pkg/apis/manager/health"
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 	mockdb "github.com/kubeflow/katib/pkg/mock/v1alpha3/db"
 )
@@ -129,5 +130,42 @@ func TestDeleteObservationLog(t *testing.T) {
 	_, err := s.DeleteObservationLog(context.Background(), req)
 	if err != nil {
 		t.Fatalf("DeleteExperiment Error %v", err)
+	}
+}
+
+func TestCheck(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	s := &server{}
+	mockDB := mockdb.NewMockKatibDBInterface(ctrl)
+	dbIf = mockDB
+	testCases := []struct {
+		Request        *health_pb.HealthCheckRequest
+		ExpectedStatus health_pb.HealthCheckResponse_ServingStatus
+		Name           string
+	}{
+		{
+			Request: &health_pb.HealthCheckRequest{
+				Service: "grpc.health.v1.Health",
+			},
+			ExpectedStatus: health_pb.HealthCheckResponse_SERVING,
+			Name:           "Valid Request",
+		},
+		{
+			Request: &health_pb.HealthCheckRequest{
+				Service: "grpc.health.v1.1.Health",
+			},
+			ExpectedStatus: health_pb.HealthCheckResponse_UNKNOWN,
+			Name:           "Invalid service name",
+		},
+	}
+
+	mockDB.EXPECT().SelectOne().Return(nil)
+
+	for _, tc := range testCases {
+		response, _ := s.Check(context.Background(), tc.Request)
+		if response.Status != tc.ExpectedStatus {
+			t.Fatalf("Case %v failed. ExpectedStatus %v, got %v", tc.Name, tc.ExpectedStatus, response.Status)
+		}
 	}
 }
