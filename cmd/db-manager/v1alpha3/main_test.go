@@ -2,16 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"os"
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	health_pb "github.com/kubeflow/katib/pkg/apis/manager/health"
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
-	"github.com/kubeflow/katib/pkg/db/v1alpha3/common"
 	mockdb "github.com/kubeflow/katib/pkg/mock/v1alpha3/db"
 )
 
@@ -160,20 +156,4 @@ func TestCheck(t *testing.T) {
 	if resp.Status != servingResp.Status {
 		t.Fatalf("Check must return serving status, but returned %v", resp.Status)
 	}
-}
-
-var mock sqlmock.Sqlmock
-
-func TestMain(m *testing.M) {
-
-	dbNameEnvName := common.DBNameEnvName
-	os.Setenv(dbNameEnvName, "mysql")
-	_, sm, err := sqlmock.New()
-	mock = sm
-	if err != nil {
-		fmt.Printf("error opening db: %v\n", err)
-		os.Exit(1)
-	}
-	main()
-	os.Exit(m.Run())
 }
