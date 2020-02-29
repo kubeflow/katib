@@ -139,21 +139,33 @@ func TestCheck(t *testing.T) {
 	s := &server{}
 	mockDB := mockdb.NewMockKatibDBInterface(ctrl)
 	dbIf = mockDB
-	req := &health_pb.HealthCheckRequest{
-		Service: "grpc.health.v1.Health",
-	}
-	servingResp := &health_pb.HealthCheckResponse{
-		Status: health_pb.HealthCheckResponse_SERVING,
+	testCases := []struct {
+		Request        *health_pb.HealthCheckRequest
+		ExpectedStatus health_pb.HealthCheckResponse_ServingStatus
+		Name           string
+	}{
+		{
+			Request: &health_pb.HealthCheckRequest{
+				Service: "grpc.health.v1.Health",
+			},
+			ExpectedStatus: health_pb.HealthCheckResponse_SERVING,
+			Name:           "Valid Request",
+		},
+		{
+			Request: &health_pb.HealthCheckRequest{
+				Service: "grpc.health.v1.1.Health",
+			},
+			ExpectedStatus: health_pb.HealthCheckResponse_UNKNOWN,
+			Name:           "Invalid service name",
+		},
 	}
 
 	mockDB.EXPECT().SelectOne().Return(nil)
 
-	resp, err := s.Check(context.Background(), req)
-	if err != nil {
-		t.Fatalf("Check failed: %v", err)
-	}
-
-	if resp.Status != servingResp.Status {
-		t.Fatalf("Check must return serving status, but returned %v", resp.Status)
+	for _, tc := range testCases {
+		response, _ := s.Check(context.Background(), tc.Request)
+		if response.Status != tc.ExpectedStatus {
+			t.Fatalf("Case %v failed. ExpectedStatus %v, got %v", tc.Name, tc.ExpectedStatus, response.Status)
+		}
 	}
 }
