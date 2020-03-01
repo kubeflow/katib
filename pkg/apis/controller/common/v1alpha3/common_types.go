@@ -23,7 +23,7 @@ import (
 type AlgorithmSpec struct {
 	AlgorithmName string `json:"algorithmName,omitempty"`
 	// Key-value pairs representing settings for suggestion algorithms.
-	AlgorithmSettings []AlgorithmSetting `json:"algorithmSettings"`
+	AlgorithmSettings []AlgorithmSetting `json:"algorithmSettings,omitempty"`
 	EarlyStopping     *EarlyStoppingSpec `json:"earlyStopping,omitempty"`
 }
 
