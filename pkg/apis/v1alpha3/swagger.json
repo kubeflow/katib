@@ -310,9 +310,6 @@
       }
     },
     "v1alpha3.AlgorithmSpec": {
-      "required": [
-        "algorithmSettings"
-      ],
       "properties": {
         "algorithmName": {
           "type": "string"
