@@ -203,43 +203,43 @@ const goFetchHPJobs = function* () {
     }
 }
 
-export const fetchHPJob = function* () {
+export const fetchExperiment = function* () {
     while (true) {
-        const action = yield take(hpMonitorActions.FETCH_HP_JOB_REQUEST);
+        const action = yield take(generalActions.FETCH_EXPERIMENT_REQUEST);
         try {
             const result = yield call(
-                goFetchHPJob,
+                goFetchExperiment,
                 action.name,
                 action.namespace
             )
             if (result.status === 200) {
                 yield put({
-                    type: hpMonitorActions.FETCH_HP_JOB_SUCCESS,
+                    type: generalActions.FETCH_EXPERIMENT_SUCCESS,
                     experiment: result.data
                 })
             } else {
                 yield put({
-                    type: hpMonitorActions.FETCH_HP_JOB_FAILURE,
+                    type: generalActions.FETCH_EXPERIMENT_FAILURE,
                 })
             }
         } catch (err) {
             yield put({
-                type: hpMonitorActions.FETCH_HP_JOB_FAILURE,
+                type: generalActions.FETCH_EXPERIMENT_FAILURE,
             })
         }
     }
 }
 
-const goFetchHPJob = function* (name, namespace) {
+const goFetchExperiment = function* (name, namespace) {
     try {
         const result = yield call(
             axios.get,
-            `/katib/fetch_hp_job/?experimentName=${name}&namespace=${namespace}`,
+            `/katib/fetch_experiment/?experimentName=${name}&namespace=${namespace}`,
         )
         return result
     } catch (err) {
         yield put({
-            type: hpMonitorActions.FETCH_HP_JOB_FAILURE,
+            type: generalActions.FETCH_EXPERIMENT_FAILURE,
         })
     }
 }
@@ -741,7 +741,7 @@ export default function* rootSaga() {
         fork(submitHPJob),
         fork(submitNASJob),
         fork(fetchHPJobInfo),
-        fork(fetchHPJob),
+        fork(fetchExperiment),
         fork(fetchHPJobTrialInfo),
         fork(fetchNASJobInfo),
         fork(fetchNamespaces)

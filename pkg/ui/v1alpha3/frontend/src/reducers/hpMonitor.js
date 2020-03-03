@@ -3,8 +3,6 @@ import * as actions from '../actions/hpMonitorActions';
 const initialState = {
     experimentName: '',
     experimentNamespace: '',
-    experiment: {
-    },
     filterType: {
         "Created": true,
         "Running": true,
@@ -21,7 +19,6 @@ const initialState = {
     trialData: [
     ],
     dialogTrialOpen: false,
-    dialogExperimentOpen: false,
     loading: false,
     trialName: ''
 };
@@ -110,7 +107,6 @@ const hpMonitorReducer = (state = initialState, action) => {
             return {
                 ...state,
                 loading: true,
-                dialogExperimentOpen: false,
                 dialogTrialOpen: false,
             }
         case actions.FETCH_HP_JOB_INFO_SUCCESS:
@@ -124,12 +120,6 @@ const hpMonitorReducer = (state = initialState, action) => {
                 ...state,
                 loading: false,
             }
-        case actions.FETCH_HP_JOB_SUCCESS:
-            return {
-                ...state,
-                experiment: action.experiment,
-                dialogExperimentOpen: true
-            }
         case actions.FETCH_HP_JOB_TRIAL_INFO_SUCCESS:
             return {
                 ...state,
@@ -141,11 +131,6 @@ const hpMonitorReducer = (state = initialState, action) => {
             return {
                 ...state,
                 dialogTrialOpen: false,
-            }
-        case actions.CLOSE_DIALOG_EXPERIMENT:
-            return {
-                ...state,
-                dialogExperimentOpen: false,
             }
         default:
             return state;

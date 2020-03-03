@@ -11,8 +11,10 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import LinearProgress from '@material-ui/core/LinearProgress';
 
 import { fetchNASJobInfo } from '../../../actions/nasMonitorActions';
+import { fetchExperiment } from "../../../actions/generalActions"
 
 import NASJobStepInfo from './NASJobStepInfo';
+import ExperimentInfoDialog from '../../Common/ExperimentInfoDialog'
 
 const module = "nasMonitor";
 
@@ -20,7 +22,10 @@ const styles = theme => ({
     root: {
         width: '90%',
         margin: '0 auto',
-        paddingTop: 20,
+        padding: 20,
+    },
+    loading: {
+        marginTop: 30,
     },
     heading: {
         fontSize: theme.typography.pxToRem(15),
@@ -30,8 +35,9 @@ const styles = theme => ({
         width: '100%',
     },
     header: {
-        marginTop: 30,
-        textAlign: "center"
+        marginTop: 10,
+        textAlign: "center",
+        marginBottom: 15
     }
 })
 
@@ -41,6 +47,10 @@ class NASJobInfo extends React.Component {
     componentDidMount() {
         this.props.fetchNASJobInfo(
             this.props.match.params.name, this.props.match.params.namespace);
+    }
+
+    fetchAndOpenDialogExperiment = (experimentName, experimentNamespace) => (event) => {
+        this.props.fetchExperiment(experimentName, experimentNamespace)
     }
 
     render() {
@@ -62,7 +72,17 @@ class NASJobInfo extends React.Component {
                         <Typography className={classes.header} variant={"h5"}>
                             Experiment Namespace: {this.props.match.params.namespace}
                         </Typography>
-                        <br />
+                        <div className = {classes.header}>
+                            <Button
+                              variant={"contained"}
+                              color={"primary"}
+                              onClick={this.fetchAndOpenDialogExperiment(
+                                  this.props.match.params.name,
+                                  this.props.match.params.namespace)}
+                            >
+                                View Experiment
+                            </Button>
+                        </div>
                         {this.props.steps.map((step, i) => {
                             return (
                                 <ExpansionPanel key={i} className={classes.panel}>
@@ -75,6 +95,7 @@ class NASJobInfo extends React.Component {
                                 </ExpansionPanel>
                             )
                         })}
+                        <ExperimentInfoDialog/>
                     </div>
                 }
 
@@ -91,4 +112,4 @@ const mapStateToProps = (state) => {
 }
 
 
-export default connect(mapStateToProps, { fetchNASJobInfo })(withStyles(styles)(NASJobInfo));
+export default connect(mapStateToProps, { fetchNASJobInfo, fetchExperiment })(withStyles(styles)(NASJobInfo));

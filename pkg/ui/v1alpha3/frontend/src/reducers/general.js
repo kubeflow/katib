@@ -1,6 +1,8 @@
 import * as actions from '../actions/generalActions';
 import * as nasCreateActions from '../actions/nasCreateActions';
 import * as hpCreateActions from '../actions/hpCreateActions';
+import * as hpMonitorActions from '../actions/hpMonitorActions';
+import * as nasMonitorActions from '../actions/nasMonitorActions'
 
 const initialState = {
     menuOpen: false,
@@ -10,7 +12,10 @@ const initialState = {
     deleteId: '',
     namespaces: [
     ],
-    globalNamespace: ""
+    globalNamespace: "",
+    experiment: {
+    },
+    dialogExperimentOpen: false
 };
 
 const generalReducer = (state = initialState, action) => {
@@ -111,6 +116,28 @@ const generalReducer = (state = initialState, action) => {
             return {
                 ...state,
                 globalNamespace: action.globalNamespace
+            }
+        case actions.FETCH_EXPERIMENT_SUCCESS:
+            return {
+                ...state,
+                experiment: action.experiment,
+                dialogExperimentOpen: true
+            }
+
+        case actions.CLOSE_DIALOG_EXPERIMENT:
+            return {
+                ...state,
+                dialogExperimentOpen: false
+            }
+        case hpMonitorActions.FETCH_HP_JOB_INFO_REQUEST:
+            return {
+                ...state,
+                dialogExperimentOpen: false
+            }
+        case nasMonitorActions.FETCH_NAS_JOB_INFO_REQUEST:
+            return {
+                ...state,
+                dialogExperimentOpen: false
             }
         default:
             return state;

@@ -192,3 +192,22 @@ func (k *KatibUIHandler) FetchNamespaces(w http.ResponseWriter, r *http.Request)
 	}
 	w.Write(response)
 }
+
+// FetchExperiment gets experiment in specific namespace.
+func (k *KatibUIHandler) FetchExperiment(w http.ResponseWriter, r *http.Request) {
+	experimentName := r.URL.Query()["experimentName"][0]
+	namespace := r.URL.Query()["namespace"][0]
+
+	experiment, err := k.katibClient.GetExperiment(experimentName, namespace)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	response, err := json.Marshal(experiment)
+	if err != nil {
+		log.Printf("Marshal Experiment failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
+}

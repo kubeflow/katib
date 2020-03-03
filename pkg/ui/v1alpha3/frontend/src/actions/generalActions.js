@@ -58,3 +58,19 @@ export const fetchNamespaces = () => ({
 })
 
 export const CHANGE_GLOBAL_NAMESPACE = "CHANGE_GLOBAL_NAMESPACE";
+
+export const FETCH_EXPERIMENT_REQUEST = "FETCH_EXPERIMENT_REQUEST";
+export const FETCH_EXPERIMENT_SUCCESS = "FETCH_EXPERIMENT_SUCCESS";
+export const FETCH_EXPERIMENT_FAILURE = "FETCH_EXPERIMENT_FAILURE";
+
+export const fetchExperiment = (name, namespace) => ({
+    type: FETCH_EXPERIMENT_REQUEST,
+    name,
+    namespace,
+})
+
+export const CLOSE_DIALOG_EXPERIMENT = "CLOSE_DIALOG_EXPERIMENT";
+
+export const closeDialogExperiment = () => ({
+    type: CLOSE_DIALOG_EXPERIMENT
+})
