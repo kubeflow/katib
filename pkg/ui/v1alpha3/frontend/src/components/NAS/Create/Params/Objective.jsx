@@ -16,163 +16,165 @@ import InputLabel from '@material-ui/core/InputLabel';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import { changeObjective, addMetrics, editMetrics, deleteMetrics } from '../../../../actions/nasCreateActions';
+import {
+  changeObjective,
+  addMetrics,
+  editMetrics,
+  deleteMetrics,
+} from '../../../../actions/nasCreateActions';
 
-
-const module = "nasCreate";
+const module = 'nasCreate';
 
 const useStyles = makeStyles({
-    textField: {
-        marginLeft: 4,
-        marginRight: 4,
-        width: '100%'
-    },
-    help: {
-        padding: 4 / 2,
-        verticalAlign: "middle",
-        marginRight: 5,
-    },
-    parameter: {
-        padding: 2,
-        marginBottom: 10,
-    },
-    selectBox: {
-        width: 150
-    }
-})
+  textField: {
+    marginLeft: 4,
+    marginRight: 4,
+    width: '100%',
+  },
+  help: {
+    padding: 4 / 2,
+    verticalAlign: 'middle',
+    marginRight: 5,
+  },
+  parameter: {
+    padding: 2,
+    marginBottom: 10,
+  },
+  selectBox: {
+    width: 150,
+  },
+});
 
-const Objective = (props) => {
-    
-    const classes = useStyles();
+const Objective = props => {
+  const classes = useStyles();
 
-    const onObjectiveChange = (name) => (event) => {
-        props.changeObjective(name, event.target.value);
-    }
+  const onObjectiveChange = name => event => {
+    props.changeObjective(name, event.target.value);
+  };
 
-    const onMetricsEdit = (index) => (event) => {
-        props.editMetrics(index, event.target.value);
-    }
+  const onMetricsEdit = index => event => {
+    props.editMetrics(index, event.target.value);
+  };
 
-    const onMetricsDelete = (index) => (event) => {
-        props.deleteMetrics(index);
-    }
+  const onMetricsDelete = index => event => {
+    props.deleteMetrics(index);
+  };
 
-    return (
-        <div>
-          {props.objective.map((param, i) => {
-                return (
-                    param.name === "Type" ?
-                        <div key={i} className={classes.parameter}>
-                            <Grid container alignItems={"center"}>
-                                <Grid item xs={12} sm={3}>
-                                    <Typography>
-                                        <Tooltip title={param.description}>
-                                            <HelpOutlineIcon className={classes.help} color={"primary"}/>
-                                        </Tooltip>
-                                        {param.name}
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={12} sm={8}>
-                                    <FormControl variant="outlined" className={classes.formControl}>
-                                        <InputLabel>
-                                            Objective Type
-                                        </InputLabel>
-                                        <Select
-                                            value={param.value}
-                                            onChange={onObjectiveChange(param.name)}
-                                            input={
-                                                <OutlinedInput labelWidth={160}/>
-                                            }
-                                            className={classes.selectBox}
-                                            >
-                                                {props.allObjectiveTypes.map((type, i) => {
-                                                    return (
-                                                            <MenuItem value={type} key={i}>{type}</MenuItem>
-                                                        )
-                                                })}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                            </Grid>
-                        </div>
-                    :
-                        <div key={i} className={classes.parameter}>
-                            <Grid container alignItems={"center"}>
-                                <Grid item xs={12} sm={3}>
-                                    <Typography variant={"subheading"}>
-                                        <Tooltip title={param.description}>
-                                            <HelpOutlineIcon className={classes.help} color={"primary"}/>
-                                        </Tooltip>
-                                        {param.name}
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={12} sm={8}>
-                                    <TextField
-                                        className={classes.textField}
-                                        value={param.value}
-                                        onChange={onObjectiveChange(param.name)}
-                                        />
-                                </Grid>
-                            </Grid>
-                        </div>
-                )
-            })}
-            <div className={classes.parameter}>
-                <Grid container alignItems={"center"}>
-                    <Grid item xs={12} sm={3}>
-                        <Typography variant={"subheading"}>
-                            <Tooltip title={"Additional metrics that you want to collect"}>
-                                <HelpOutlineIcon className={classes.help} color={"primary"}/>
-                            </Tooltip>
-                            AdditionalMetricNames
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={8}>
-                        {
-                            props.additionalMetricNames.map((metrics, mIndex) => {
-                                return (
-                                    <Grid container>
-                                        <Grid item xs={10}>
-                                            <TextField
-                                                className={classes.textField}
-                                                value={metrics.value}
-                                                onChange={onMetricsEdit(mIndex)}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={2}>
-                                            <IconButton
-                                                key="close"
-                                                aria-label="Close"
-                                                color={"primary"}
-                                                className={classes.icon}
-                                                onClick={onMetricsDelete(mIndex)}
-                                                >
-                                                    <DeleteIcon />
-                                            </IconButton>
-                                        </Grid>
-                                    </Grid>
-                                )
-                            })
-                        }
-                    </Grid>
-                    <Grid item xs={12} sm={1}>
-                        <Fab color={"primary"} className={classes.fab} onClick={props.addMetrics}>
-                            <AddIcon />
-                        </Fab>
-                    </Grid>
+  return (
+    <div>
+      {props.objective.map((param, i) => {
+        return param.name === 'Type' ? (
+          <div key={i} className={classes.parameter}>
+            <Grid container alignItems={'center'}>
+              <Grid item xs={12} sm={3}>
+                <Typography>
+                  <Tooltip title={param.description}>
+                    <HelpOutlineIcon className={classes.help} color={'primary'} />
+                  </Tooltip>
+                  {param.name}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={8}>
+                <FormControl variant="outlined" className={classes.formControl}>
+                  <InputLabel>Objective Type</InputLabel>
+                  <Select
+                    value={param.value}
+                    onChange={onObjectiveChange(param.name)}
+                    input={<OutlinedInput labelWidth={160} />}
+                    className={classes.selectBox}
+                  >
+                    {props.allObjectiveTypes.map((type, i) => {
+                      return (
+                        <MenuItem value={type} key={i}>
+                          {type}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </div>
+        ) : (
+          <div key={i} className={classes.parameter}>
+            <Grid container alignItems={'center'}>
+              <Grid item xs={12} sm={3}>
+                <Typography variant={'subheading'}>
+                  <Tooltip title={param.description}>
+                    <HelpOutlineIcon className={classes.help} color={'primary'} />
+                  </Tooltip>
+                  {param.name}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={8}>
+                <TextField
+                  className={classes.textField}
+                  value={param.value}
+                  onChange={onObjectiveChange(param.name)}
+                />
+              </Grid>
+            </Grid>
+          </div>
+        );
+      })}
+      <div className={classes.parameter}>
+        <Grid container alignItems={'center'}>
+          <Grid item xs={12} sm={3}>
+            <Typography variant={'subheading'}>
+              <Tooltip title={'Additional metrics that you want to collect'}>
+                <HelpOutlineIcon className={classes.help} color={'primary'} />
+              </Tooltip>
+              AdditionalMetricNames
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={8}>
+            {props.additionalMetricNames.map((metrics, mIndex) => {
+              return (
+                <Grid container>
+                  <Grid item xs={10}>
+                    <TextField
+                      className={classes.textField}
+                      value={metrics.value}
+                      onChange={onMetricsEdit(mIndex)}
+                    />
+                  </Grid>
+                  <Grid item xs={2}>
+                    <IconButton
+                      key="close"
+                      aria-label="Close"
+                      color={'primary'}
+                      className={classes.icon}
+                      onClick={onMetricsDelete(mIndex)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Grid>
                 </Grid>
-            </div>
-        </div>
-    )
-}
-
+              );
+            })}
+          </Grid>
+          <Grid item xs={12} sm={1}>
+            <Fab color={'primary'} className={classes.fab} onClick={props.addMetrics}>
+              <AddIcon />
+            </Fab>
+          </Grid>
+        </Grid>
+      </div>
+    </div>
+  );
+};
 
 const mapStateToProps = state => {
-    return {
-        allObjectiveTypes: state[module].allObjectiveTypes,
-        objective: state[module].objective,
-        additionalMetricNames: state[module].additionalMetricNames
-    }
-}
+  return {
+    allObjectiveTypes: state[module].allObjectiveTypes,
+    objective: state[module].objective,
+    additionalMetricNames: state[module].additionalMetricNames,
+  };
+};
 
-export default connect(mapStateToProps, {changeObjective, addMetrics, editMetrics, deleteMetrics })(Objective);
+export default connect(mapStateToProps, {
+  changeObjective,
+  addMetrics,
+  editMetrics,
+  deleteMetrics,
+})(Objective);
