@@ -1,11 +1,9 @@
-matrix:
+jobs:
   include:
-    - language: go
-
-      go: - "1.12.5"
-
+    - name: "Go unit tests, gofmt, golint and coveralls"
+      language: go
+      go: "1.12.5"
       go_import_path: github.com/kubeflow/katib
-
       install:
         - curl -L -O "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.7/kubebuilder_1.0.7_linux_amd64.tar.gz"
         - # extract the archive
@@ -14,18 +12,14 @@ matrix:
         - export PATH=$PATH:/usr/local/kubebuilder/bin
         # get coveralls.io support
         - go get github.com/mattn/goveralls
-
       script:
         - make check
         - make test
         - goveralls -coverprofile=coverage.out
-
-    - language: node_js
-
-      node_js: - "10.13.0"
-
+    - name: "Prettier frontend check"
+      language: node_js
+      node_js: "10.13.0"
       install:
         - npm install --global prettier
-
       script:
         - make prettier-check
