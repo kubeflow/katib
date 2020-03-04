@@ -43,7 +43,7 @@ You can serve Katib UI locally. To make it you need to follow these steps:
 
 1. Run `npm run build` under `/frontend` folder. It will create `/frontend/build` directory with optimized production build.
 
-2. Go to `cmd/ui/v1alpha3`
+2. Go to `cmd/ui/v1alpha3`.
 
 3. Run `main.go` file with appropriate flags. For example, if you clone Katib repository to `/home` folder, run this command:
 
@@ -51,7 +51,7 @@ You can serve Katib UI locally. To make it you need to follow these steps:
 go run main.go --build-dir=/home/katib/pkg/ui/v1alpha3/frontend/build --port=8080
 ```
 
-After that, you can access the UI using this URL: `http://localhost:8080/katib/
+After that, you can access the UI using this URL: `http://localhost:8080/katib/.
 
 ## Production
 
