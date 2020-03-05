@@ -51,7 +51,7 @@ You can serve Katib UI locally. To make it you need to follow these steps:
 go run main.go --build-dir=/home/katib/pkg/ui/v1alpha3/frontend/build --port=8080
 ```
 
-After that, you can access the UI using this URL: `http://localhost:8080/katib/.
+After that, you can access the UI using this URL: `http://localhost:8080/katib/`.
 
 ## Production
 
