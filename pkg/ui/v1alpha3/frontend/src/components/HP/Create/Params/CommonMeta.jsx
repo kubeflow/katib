@@ -9,96 +9,87 @@ import TextField from '@material-ui/core/TextField';
 import { changeMeta } from '../../../../actions/hpCreateActions';
 import { withStyles } from '@material-ui/core';
 
-
-const module = "hpCreate";
-const generalModule = "general";
+const module = 'hpCreate';
+const generalModule = 'general';
 
 const styles = () => ({
-    textField: {
-        marginLeft: 4,
-        marginRight: 4,
-        width: '100%'
-    },
-    help: {
-        padding: 4 / 2,
-        verticalAlign: "middle",
-        marginRight: 5,
-    },
-    parameter: {
-        padding: 2,
-        marginBottom: 10,
-    },
-})
+  textField: {
+    marginLeft: 4,
+    marginRight: 4,
+    width: '100%',
+  },
+  help: {
+    padding: 4 / 2,
+    verticalAlign: 'middle',
+    marginRight: 5,
+  },
+  parameter: {
+    padding: 2,
+    marginBottom: 10,
+  },
+});
 
 class CommonParametersMeta extends React.Component {
-
-    componentDidMount() {
-        if (this.props.globalNamespace != "") {
-            this.props.changeMeta("Namespace", this.props.globalNamespace)
-        }
+  componentDidMount() {
+    if (this.props.globalNamespace != '') {
+      this.props.changeMeta('Namespace', this.props.globalNamespace);
     }
+  }
 
-    onMetaChange = (param) => (event) => {
-        this.props.changeMeta(param, event.target.value);
-    }
+  onMetaChange = param => event => {
+    this.props.changeMeta(param, event.target.value);
+  };
 
-    render () {
+  render() {
+    const { classes } = this.props;
 
-        const { classes } = this.props;
-
-        return (
-            <div>
-                {this.props.commonParametersMetadata.map((param, i) => {
-                    return (
-                        <div key={i} className={classes.parameter}>
-                            <Grid container alignItems={"center"}>
-                                <Grid item xs={12} sm={3}>
-                                    <Typography variant={"subheading"}>
-                                        <Tooltip title={param.description}>
-                                            <HelpOutlineIcon className={classes.help} color={"primary"}/>
-                                        </Tooltip>
-                                        {param.name}
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={12} sm={8}>
-                                    {param.name == "Namespace" && this.props.globalNamespace == "" &&
-                                        <TextField
-                                            className={classes.textField}
-                                            value={param.value}
-                                            onChange={this.onMetaChange(param.name)}
-                                        />
-                                    }
-                                    {param.name == "Namespace" && this.props.globalNamespace != "" &&
-                                        <TextField
-                                            className={classes.textField}
-                                            value = {param.value}
-                                            disabled
-                                        />
-                                    }
-                                    {param.name != "Namespace" &&
-                                        <TextField
-                                            className={classes.textField}
-                                            value={param.value}
-                                            onChange={this.onMetaChange(param.name)}
-                                    />
-                                    }
-                                </Grid>
-                            </Grid>
-                        </div>
-                    )
-                })}
+    return (
+      <div>
+        {this.props.commonParametersMetadata.map((param, i) => {
+          return (
+            <div key={i} className={classes.parameter}>
+              <Grid container alignItems={'center'}>
+                <Grid item xs={12} sm={3}>
+                  <Typography variant={'subheading'}>
+                    <Tooltip title={param.description}>
+                      <HelpOutlineIcon className={classes.help} color={'primary'} />
+                    </Tooltip>
+                    {param.name}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={8}>
+                  {param.name == 'Namespace' && this.props.globalNamespace == '' && (
+                    <TextField
+                      className={classes.textField}
+                      value={param.value}
+                      onChange={this.onMetaChange(param.name)}
+                    />
+                  )}
+                  {param.name == 'Namespace' && this.props.globalNamespace != '' && (
+                    <TextField className={classes.textField} value={param.value} disabled />
+                  )}
+                  {param.name != 'Namespace' && (
+                    <TextField
+                      className={classes.textField}
+                      value={param.value}
+                      onChange={this.onMetaChange(param.name)}
+                    />
+                  )}
+                </Grid>
+              </Grid>
             </div>
-        )
-    }
-
+          );
+        })}
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = state => {
-    return {
-        commonParametersMetadata: state[module].commonParametersMetadata,
-        globalNamespace: state[generalModule].globalNamespace
-    }
-}
-
+  return {
+    commonParametersMetadata: state[module].commonParametersMetadata,
+    globalNamespace: state[generalModule].globalNamespace,
+  };
+};
 
 export default connect(mapStateToProps, { changeMeta })(withStyles(styles)(CommonParametersMeta));

@@ -50,3 +50,6 @@ endif
 
 build: depend generate
 	bash scripts/v1alpha3/build.sh
+
+prettier-check:
+	npm run format:check --prefix pkg/ui/v1alpha3/frontend

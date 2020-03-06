@@ -78,7 +78,9 @@
   "scripts": {
     "start": "node --max-old-space-size=4096 scripts/start.js",
     "build": "node --max-old-space-size=4096 scripts/build.js",
-    "test": "node --max-old-space-size=4096 scripts/test.js"
+    "test": "node --max-old-space-size=4096 scripts/test.js",
+    "format:check": "prettier --check 'src/**/*.{jsx,js}' || node scripts/check-format-error.js",
+    "format:write": "prettier --write 'src/**/*.{jsx,js}'"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -1,5 +1,5 @@
 import React from 'react';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -18,75 +18,81 @@ import DoneIcon from '@material-ui/icons/Done';
 import DeleteIcon from '@material-ui/icons/Delete';
 import HourglassFullIcon from '@material-ui/icons/HourglassFull';
 
-const module = "hpMonitor";
+const module = 'hpMonitor';
 
 const styles = theme => ({
-    created: {
-        color: theme.colors.created,
-    },
-    running: {
-        color: theme.colors.running,
-    },
-    restarting: {
-        color: theme.colors.restarting
-    },
-    succeeded: {
-        color: theme.colors.succeeded,
-    },
-    failed: {
-        color: theme.colors.failed,
-    },
+  created: {
+    color: theme.colors.created,
+  },
+  running: {
+    color: theme.colors.running,
+  },
+  restarting: {
+    color: theme.colors.restarting,
+  },
+  succeeded: {
+    color: theme.colors.succeeded,
+  },
+  failed: {
+    color: theme.colors.failed,
+  },
 });
 
+const HPJobList = props => {
+  const { classes } = props;
 
-const HPJobList = (props) => {
+  const onDeleteExperiment = (name, namespace) => event => {
+    props.openDeleteExperimentDialog(name, namespace);
+  };
 
-    const { classes } = props;
+  return (
+    <div>
+      <List component="nav">
+        {props.filteredJobsList.map((job, i) => {
+          let icon;
+          if (job.status === 'Created') {
+            icon = <HourglassFullIcon className={classes.created} />;
+          } else if (job.status === 'Running') {
+            icon = <ScheduleIcon className={classes.running} />;
+          } else if (job.status === 'Restarting') {
+            icon = <RestoreIcon className={classes.restarting} />;
+          } else if (job.status === 'Succeeded') {
+            icon = <DoneIcon className={classes.succeeded} />;
+          } else if (job.status === 'Failed') {
+            icon = <HighlightOffIcon className={classes.failed} />;
+          }
+          return (
+            <ListItem
+              button
+              key={i}
+              component={Link}
+              to={`/katib/hp_monitor/${job.namespace}/${job.name}`}
+            >
+              <ListItemIcon>{icon}</ListItemIcon>
+              <ListItemText inset primary={`${job.name}`} secondary={job.namespace} />
+              <ListItemSecondaryAction>
+                <IconButton
+                  aria-label={'Delete'}
+                  onClick={onDeleteExperiment(job.name, job.namespace)}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </ListItemSecondaryAction>
+            </ListItem>
+          );
+        })}
+      </List>
+      <DeleteDialog />
+    </div>
+  );
+};
 
-    const onDeleteExperiment = (name, namespace) => (event) => {
-        props.openDeleteExperimentDialog(name, namespace);
-    }
+const mapStateToProps = state => {
+  return {
+    filteredJobsList: state[module].filteredJobsList,
+  };
+};
 
-    return (
-        <div>
-            <List component="nav">
-                {props.filteredJobsList.map((job, i) => {
-                    let icon;
-                    if (job.status === 'Created') {
-                        icon = (<HourglassFullIcon className={classes.created}/>)
-                    } else if (job.status === 'Running') {
-                        icon = (<ScheduleIcon className={classes.running}/>)
-                    } else if (job.status === 'Restarting') {
-                        icon = (<RestoreIcon className={classes.restarting}/>)
-                    } else if (job.status === 'Succeeded') {
-                        icon = (<DoneIcon className={classes.succeeded}/>)
-                    } else if (job.status === 'Failed') {
-                        icon = (<HighlightOffIcon className={classes.failed}/>)
-                    }
-                    return (
-                        <ListItem button key={i} component={Link} to={`/katib/hp_monitor/${job.namespace}/${job.name}`}>
-                            <ListItemIcon>
-                                {icon}
-                            </ListItemIcon>
-                            <ListItemText inset primary={`${job.name}`} secondary={job.namespace} />
-                            <ListItemSecondaryAction>
-                                <IconButton aria-label={"Delete"} onClick={onDeleteExperiment(job.name, job.namespace)}>
-                                    <DeleteIcon />
-                                </IconButton>
-                            </ListItemSecondaryAction>
-                        </ListItem>
-                    );
-                 })}
-            </List>     
-            <DeleteDialog />  
-        </div>
-    )
-}
-
-const mapStateToProps = (state) => {
-    return {
-        filteredJobsList: state[module].filteredJobsList,
-    }
-}
-
-export default connect(mapStateToProps, { openDeleteExperimentDialog })(withStyles(styles)(HPJobList));
+export default connect(mapStateToProps, { openDeleteExperimentDialog })(
+  withStyles(styles)(HPJobList),
+);
