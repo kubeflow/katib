@@ -12,54 +12,50 @@ import DeleteDialog from './DeleteDialog';
 
 import { connect } from 'react-redux';
 
-const module = "template";
-
+const module = 'template';
 
 const styles = theme => ({
-    root: {
-        marginTop: 40,
-        width: '100%',
-    },
-    heading: {
-        fontSize: theme.typography.pxToRem(24),
-        fontWeight: theme.typography.fontWeightRegular,
-    },
+  root: {
+    marginTop: 40,
+    width: '100%',
+  },
+  heading: {
+    fontSize: theme.typography.pxToRem(24),
+    fontWeight: theme.typography.fontWeightRegular,
+  },
 });
 
 class TemplateList extends React.Component {
-
-
-    render () {
-        const { classes } = this.props;
-        const templates = (this.props.type === "trial" ? this.props.trialTemplates : this.props.collectorTemplates);
-        return (
-            <div className={classes.root}>
-                {templates.map((template, index) => {
-                    return (
-                        <ExpansionPanel key={index}>
-                            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                                <Typography className={classes.heading}>
-                                    {template.name}
-                                </Typography>
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails>
-                                <TemplatePanel type={this.props.type} text={template.yaml} index={index} />
-                            </ExpansionPanelDetails>
-                            <EditDialog type={this.props.type} />
-                            <DeleteDialog type={this.props.type} />
-                        </ExpansionPanel>
-                    )
-                })}
-            </div>
-        )
-    }
+  render() {
+    const { classes } = this.props;
+    const templates =
+      this.props.type === 'trial' ? this.props.trialTemplates : this.props.collectorTemplates;
+    return (
+      <div className={classes.root}>
+        {templates.map((template, index) => {
+          return (
+            <ExpansionPanel key={index}>
+              <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography className={classes.heading}>{template.name}</Typography>
+              </ExpansionPanelSummary>
+              <ExpansionPanelDetails>
+                <TemplatePanel type={this.props.type} text={template.yaml} index={index} />
+              </ExpansionPanelDetails>
+              <EditDialog type={this.props.type} />
+              <DeleteDialog type={this.props.type} />
+            </ExpansionPanel>
+          );
+        })}
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = (state) => {
-    return {
-        collectorTemplates: state[module].collectorTemplates,
-        trialTemplates: state[module].trialTemplates,
-    };
+const mapStateToProps = state => {
+  return {
+    collectorTemplates: state[module].collectorTemplates,
+    trialTemplates: state[module].trialTemplates,
+  };
 };
 
 export default connect(mapStateToProps, null)(withStyles(styles)(TemplateList));
