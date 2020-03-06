@@ -73,6 +73,10 @@ const hpMonitorReducer = (state = initialState, action) => {
       types = Object.assign({}, state.filterType);
       typeKeys = Object.keys(types);
 
+      filters = typeKeys.filter(key => {
+        return types[key];
+      });
+
       filteredJobs = jobs.filter(
         job =>
           filters.includes(job.status) &&
