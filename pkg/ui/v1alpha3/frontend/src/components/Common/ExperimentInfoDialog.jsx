@@ -6,9 +6,9 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import MonacoEditor from 'react-monaco-editor';
 
-import { closeDialogExperiment } from '../../../actions/hpMonitorActions';
+import { closeDialogExperiment } from '../../actions/generalActions';
 
-const module = 'hpMonitor';
+const module = 'general';
 
 const styles = theme => ({
   header: {

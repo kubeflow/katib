@@ -6,12 +6,13 @@ import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import LinearProgress from '@material-ui/core/LinearProgress';
 
-import { fetchHPJobInfo, fetchHPJob } from '../../../actions/hpMonitorActions';
+import { fetchHPJobInfo } from '../../../actions/hpMonitorActions';
+import { fetchExperiment } from '../../../actions/generalActions';
 
 import HPJobPlot from './HPJobPlot';
 import HPJobTable from './HPJobTable';
 import TrialInfoDialog from './TrialInfoDialog';
-import ExperimentInfoDialog from './ExperimentInfoDialog';
+import ExperimentInfoDialog from '../../Common/ExperimentInfoDialog';
 
 const module = 'hpMonitor';
 
@@ -37,7 +38,7 @@ class HPJobInfo extends React.Component {
   }
 
   fetchAndOpenDialogExperiment = (experimentName, experimentNamespace) => event => {
-    this.props.fetchHPJob(experimentName, experimentNamespace);
+    this.props.fetchExperiment(experimentName, experimentNamespace);
   };
 
   render() {
@@ -86,6 +87,6 @@ const mapStateToProps = state => ({
   loading: state[module].loading,
 });
 
-export default connect(mapStateToProps, { fetchHPJobInfo, fetchHPJob })(
+export default connect(mapStateToProps, { fetchHPJobInfo, fetchExperiment })(
   withStyles(styles)(HPJobInfo),
 );
