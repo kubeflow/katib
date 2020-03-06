@@ -168,6 +168,17 @@ export const fetchHPJobs = function*() {
   }
 };
 
+const goFetchHPJobs = function*() {
+  try {
+    const result = yield call(axios.get, '/katib/fetch_hp_jobs/');
+    return result;
+  } catch (err) {
+    yield put({
+      type: hpMonitorActions.FETCH_HP_JOBS_FAILURE,
+    });
+  }
+};
+
 export const fetchExperiment = function*() {
   while (true) {
     const action = yield take(generalActions.FETCH_EXPERIMENT_REQUEST);
@@ -201,20 +212,6 @@ const goFetchExperiment = function*(name, namespace) {
   } catch (err) {
     yield put({
       type: generalActions.FETCH_EXPERIMENT_FAILURE,
-    });
-  }
-};
-
-const goFetchHPJob = function*(name, namespace) {
-  try {
-    const result = yield call(
-      axios.get,
-      `/katib/fetch_hp_job/?experimentName=${name}&namespace=${namespace}`,
-    );
-    return result;
-  } catch (err) {
-    yield put({
-      type: hpMonitorActions.FETCH_HP_JOB_FAILURE,
     });
   }
 };
@@ -646,25 +643,16 @@ export const fetchNamespaces = function*() {
   }
 };
 
-export default function* rootSaga() {
-  yield all([
-    fork(fetchTrialTemplates),
-    fork(fetchHPJobs),
-    fork(fetchNASJobs),
-    fork(addTemplate),
-    fork(editTemplate),
-    fork(deleteTemplate),
-    fork(submitYaml),
-    fork(deleteExperiment),
-    fork(submitHPJob),
-    fork(submitNASJob),
-    fork(fetchHPJobInfo),
-    fork(fetchExperiment),
-    fork(fetchHPJobTrialInfo),
-    fork(fetchNASJobInfo),
-    fork(fetchNamespaces),
-  ]);
-}
+const goFetchNamespaces = function*() {
+  try {
+    const result = yield call(axios.get, '/katib/fetch_namespaces');
+    return result;
+  } catch (err) {
+    yield put({
+      type: generalActions.FETCH_NAMESPACES_FAILURE,
+    });
+  }
+};
 
 export default function* rootSaga() {
   yield all([
@@ -679,7 +667,7 @@ export default function* rootSaga() {
     fork(submitHPJob),
     fork(submitNASJob),
     fork(fetchHPJobInfo),
-    fork(fetchHPJob),
+    fork(fetchExperiment),
     fork(fetchHPJobTrialInfo),
     fork(fetchNASJobInfo),
     fork(fetchNamespaces),
