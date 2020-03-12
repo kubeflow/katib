@@ -112,7 +112,12 @@ func (k *KatibUIHandler) updateTrialTemplates(
 	}
 
 	if actionType == ActionTypeAdd {
-		templates[edittedName] = edittedYaml
+		if len(templates) == 0 {
+			templates = make(map[string]string)
+			templates[edittedName] = edittedYaml
+		} else {
+			templates[edittedName] = edittedYaml
+		}
 	} else if actionType == ActionTypeEdit {
 		delete(templates, currentName)
 		templates[edittedName] = edittedYaml

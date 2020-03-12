@@ -109,6 +109,9 @@ const rootReducer = (state = initialState, action) => {
         deleteOpen: false,
         editOpen: false,
         trialTemplatesList: action.trialTemplatesList,
+        filteredTrialTemplatesList: action.trialTemplatesList,
+        filteredNamespace: 'All namespaces',
+        filteredConfigMapName: '',
       };
 
     case actions.ADD_TEMPLATE_FAILURE:
