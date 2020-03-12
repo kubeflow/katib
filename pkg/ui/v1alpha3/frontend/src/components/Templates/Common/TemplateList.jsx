@@ -78,15 +78,13 @@ class TemplateList extends React.Component {
           <div>
             {this.props.trialTemplatesList.length != 0 ? (
               <div>
-                {/* Currently unavailable */}
-                {/* <FilterPanel /> */}
-
+                <FilterPanel />
                 <div className={classes.buttonAdd}>
                   <Button variant={'contained'} color={'primary'} onClick={this.openAddDialog}>
                     Add Template
                   </Button>
                 </div>
-                {this.props.trialTemplatesList.map((trialTemplate, nsIndex) => {
+                {this.props.filteredTrialTemplatesList.map((trialTemplate, nsIndex) => {
                   return (
                     <div>
                       <Grid key={nsIndex} container>
@@ -167,6 +165,7 @@ class TemplateList extends React.Component {
 
 const mapStateToProps = state => {
   return {
+    filteredTrialTemplatesList: state[module].filteredTrialTemplatesList,
     trialTemplatesList: state[module].trialTemplatesList,
     loading: state[module].loading,
   };

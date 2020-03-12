@@ -28,7 +28,7 @@ data:
             {{- end}}
             {{- end}}
           restartPolicy: Never
-  nasRLGPUTemplate: |-
+  nasRLCPUTemplate: |-
     apiVersion: batch/v1
     kind: Job
     metadata:
@@ -39,7 +39,7 @@ data:
         spec:
           containers:
           - name: {{.Trial}}
-            image: docker.io/kubeflowkatib/nasrl-cifar10-gpu
+            image: docker.io/kubeflowkatib/nasrl-cifar10-cpu
             command:
             - "python3.5"
             - "-u"
@@ -49,49 +49,47 @@ data:
             - "--{{.Name}}=\"{{.Value}}\""
             {{- end}}
             {{- end}}
-            resources:
-              limits:
-                nvidia.com/gpu: 1
+            - "--num_epochs=1"
           restartPolicy: Never
   pytorchJobTemplate: |-
     apiVersion: "kubeflow.org/v1"
-          kind: PyTorchJob
-          metadata:
-            name: {{.Trial}}
-            namespace: {{.NameSpace}}
+    kind: PyTorchJob
+    metadata:
+      name: {{.Trial}}
+      namespace: {{.NameSpace}}
+    spec:
+     pytorchReplicaSpecs:
+      Master:
+        replicas: 1
+        restartPolicy: OnFailure
+        template:
           spec:
-           pytorchReplicaSpecs:
-            Master:
-              replicas: 1
-              restartPolicy: OnFailure
-              template:
-                spec:
-                  containers:
-                    - name: pytorch
-                      image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
-                      imagePullPolicy: Always
-                      command:
-                        - "python"
-                        - "/var/mnist.py"
-                        {{- with .HyperParameters}}
-                        {{- range .}}
-                        - "{{.Name}}={{.Value}}"
-                        {{- end}}
-                        {{- end}}
-            Worker:
-              replicas: 2
-              restartPolicy: OnFailure
-              template:
-                spec:
-                  containers:
-                    - name: pytorch
-                      image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
-                      imagePullPolicy: Always
-                      command:
-                        - "python"
-                        - "/var/mnist.py"
-                        {{- with .HyperParameters}}
-                        {{- range .}}
-                        - "{{.Name}}={{.Value}}"
-                        {{- end}}
-                        {{- end}}
+            containers:
+              - name: pytorch
+                image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
+                imagePullPolicy: Always
+                command:
+                  - "python"
+                  - "/var/mnist.py"
+                  {{- with .HyperParameters}}
+                  {{- range .}}
+                  - "{{.Name}}={{.Value}}"
+                  {{- end}}
+                  {{- end}}
+      Worker:
+        replicas: 2
+        restartPolicy: OnFailure
+        template:
+          spec:
+            containers:
+              - name: pytorch
+                image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
+                imagePullPolicy: Always
+                command:
+                  - "python"
+                  - "/var/mnist.py"
+                  {{- with .HyperParameters}}
+                  {{- range .}}
+                  - "{{.Name}}={{.Value}}"
+                  {{- end}}
+                  {{- end}}

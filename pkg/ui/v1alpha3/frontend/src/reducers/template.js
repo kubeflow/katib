@@ -4,9 +4,8 @@ const initialState = {
   addOpen: false,
   editOpen: false,
   deleteOpen: false,
-  //TODO: Delete it
-  // trialTemplates: [],
   trialTemplatesList: [],
+  filteredTrialTemplatesList: [],
   currentTemplateName: '',
   edittedTemplateNamespace: '',
   edittedTemplateConfigMapName: '',
@@ -14,6 +13,8 @@ const initialState = {
   edittedTemplateYaml: '',
   loading: false,
   edittedTemplateConfigMapSelectList: [],
+  filteredNamespace: 'All namespaces',
+  filteredConfigMapName: '',
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -68,9 +69,35 @@ const rootReducer = (state = initialState, action) => {
         loading: false,
       };
     case actions.FETCH_TRIAL_TEMPLATES_SUCCESS:
+      let templates = state.trialTemplatesList;
+
+      //Filter ConfigMap
+      let filteredConfigMaps = [];
+      for (let i = 0; i < templates.length; i++) {
+        let configMapsList = [];
+        for (let j = 0; j < templates[i].ConfigMapsList.length; j++) {
+          if (templates[i].ConfigMapsList[j].ConfigMapName.includes(state.filteredConfigMapName)) {
+            configMapsList.push(templates[i].ConfigMapsList[j]);
+          }
+        }
+        if (configMapsList.length != 0) {
+          let newNamespaceBlock = {};
+          newNamespaceBlock.Namespace = templates[i].Namespace;
+          newNamespaceBlock.ConfigMapsList = configMapsList;
+          filteredConfigMaps.push(newNamespaceBlock);
+        }
+      }
+
+      // Filter Namespace
+      let filteredTemplates = filteredConfigMaps.filter(
+        template =>
+          template.Namespace == state.filteredNamespace ||
+          state.filteredNamespace == 'All namespaces',
+      );
       return {
         ...state,
         trialTemplatesList: action.trialTemplatesList,
+        filteredTrialTemplatesList: filteredTemplates,
         loading: false,
       };
     case actions.ADD_TEMPLATE_SUCCESS:
@@ -101,6 +128,39 @@ const rootReducer = (state = initialState, action) => {
         edittedTemplateName: action.edittedTemplateName,
         edittedTemplateYaml: action.edittedTemplateYaml,
         edittedTemplateConfigMapSelectList: action.edittedTemplateConfigMapSelectList,
+      };
+    case actions.FILTER_TEMPLATES:
+      templates = state.trialTemplatesList;
+
+      //Filter ConfigMap
+      filteredConfigMaps = [];
+      for (let i = 0; i < templates.length; i++) {
+        let configMapsList = [];
+        for (let j = 0; j < templates[i].ConfigMapsList.length; j++) {
+          if (templates[i].ConfigMapsList[j].ConfigMapName.includes(action.filteredConfigMapName)) {
+            configMapsList.push(templates[i].ConfigMapsList[j]);
+          }
+        }
+        if (configMapsList.length != 0) {
+          let newNamespaceBlock = {};
+          newNamespaceBlock.Namespace = templates[i].Namespace;
+          newNamespaceBlock.ConfigMapsList = configMapsList;
+          filteredConfigMaps.push(newNamespaceBlock);
+        }
+      }
+
+      //Filter Namespace
+      filteredTemplates = filteredConfigMaps.filter(
+        template =>
+          template.Namespace == action.filteredNamespace ||
+          action.filteredNamespace == 'All namespaces',
+      );
+
+      return {
+        ...state,
+        filteredNamespace: action.filteredNamespace,
+        filteredConfigMapName: action.filteredConfigMapName,
+        filteredTrialTemplatesList: filteredTemplates,
       };
     default:
       return state;

@@ -7,9 +7,9 @@ import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
-import FormGroup from '@material-ui/core/FormGroup';
 
 import { fetchNamespaces } from '../../../actions/generalActions';
+import { filterTemplates } from '../../../actions/templateActions';
 
 const module = 'template';
 const generalModule = 'general';
@@ -27,19 +27,18 @@ const styles = theme => ({
   },
 });
 
-//TODO: Enable Filter Pannel
 class FilterPanel extends React.Component {
   componentDidMount() {
     this.props.fetchNamespaces();
-    // this.props.filterTemplates(this.props.templatesNamespace, this.props.templatesConfigMapName);
+    this.props.filterTemplates(this.props.filteredNamespace, this.props.filteredConfigMapName);
   }
 
   onNamespaceChange = event => {
-    // this.props.filterTemplates(event.target.value, this.props.templatesNamespace);
+    this.props.filterTemplates(event.target.value, this.props.filteredConfigMapName);
   };
 
   onConfigMapNameChange = event => {
-    // this.props.filterTemplates(this.props.templatesConfigMapName, event.target.value);
+    this.props.filterTemplates(this.props.filteredNamespace, event.target.value);
   };
 
   render() {
@@ -50,7 +49,7 @@ class FilterPanel extends React.Component {
         <FormControl variant="outlined">
           <InputLabel>Namespace</InputLabel>
           <Select
-            value={this.props.templatesNamespace}
+            value={this.props.filteredNamespace}
             onChange={this.onNamespaceChange}
             className={classes.selectBox}
           >
@@ -66,8 +65,8 @@ class FilterPanel extends React.Component {
         <TextField
           label="ConfigMap Name"
           className={classes.textField}
-          value={this.props.templatesConfigMapName}
-          onChange={this.onNameChange}
+          value={this.props.filteredConfigMapName}
+          onChange={this.onConfigMapNameChange}
           margin="normal"
           variant="outlined"
         />
@@ -79,10 +78,11 @@ class FilterPanel extends React.Component {
 const mapStateToProps = state => {
   return {
     namespaces: state[generalModule].namespaces,
-    templatesNamespace: state[module].templatesNamespace,
-    templatesConfigMapName: state[module].templatesConfigMapName,
-    templatesConfigMapsList: state[module].templatesConfigMapsList,
+    filteredNamespace: state[module].filteredNamespace,
+    filteredConfigMapName: state[module].filteredConfigMapName,
   };
 };
 
-export default connect(mapStateToProps, { fetchNamespaces })(withStyles(styles)(FilterPanel));
+export default connect(mapStateToProps, { fetchNamespaces, filterTemplates })(
+  withStyles(styles)(FilterPanel),
+);

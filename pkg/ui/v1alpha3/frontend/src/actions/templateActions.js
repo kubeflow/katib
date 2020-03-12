@@ -87,3 +87,11 @@ export const changeTemplate = (
   edittedTemplateYaml,
   edittedTemplateConfigMapSelectList,
 });
+
+export const FILTER_TEMPLATES = 'FILTER_TEMPLATES';
+
+export const filterTemplates = (filteredNamespace, filteredConfigMapName) => ({
+  type: FILTER_TEMPLATES,
+  filteredNamespace,
+  filteredConfigMapName,
+});
