@@ -422,19 +422,11 @@ export const fetchTrialTemplates = function*() {
   while (true) {
     const action = yield take(templateActions.FETCH_TRIAL_TEMPLATES_REQUEST);
     try {
-      const result = yield call(goFetchTrialTemplates, action.namespace);
+      const result = yield call(goFetchTrialTemplates);
       if (result.status === 200) {
-        let data = Object.assign(result.data, {});
-        data.map((template, i) => {
-          Object.keys(template).forEach(key => {
-            const value = template[key];
-            delete template[key];
-            template[key.toLowerCase()] = value;
-          });
-        });
         yield put({
           type: templateActions.FETCH_TRIAL_TEMPLATES_SUCCESS,
-          templates: data,
+          trialTemplatesList: result.data.Data,
         });
       } else {
         yield put({
@@ -451,7 +443,7 @@ export const fetchTrialTemplates = function*() {
 
 const goFetchTrialTemplates = function*(namespace) {
   try {
-    const result = yield call(axios.get, `/katib/fetch_trial_templates/?namespace=${namespace}`);
+    const result = yield call(axios.get, `/katib/fetch_trial_templates`);
     return result;
   } catch (err) {
     yield put({
@@ -466,24 +458,15 @@ export const addTemplate = function*() {
     try {
       const result = yield call(
         goAddTemplate,
-        action.name,
-        action.yaml,
-        action.kind,
-        action.action,
+        action.edittedNamespace,
+        action.edittedConfigMapName,
+        action.edittedName,
+        action.edittedYaml,
       );
       if (result.status === 200) {
-        let data = Object.assign(result.data.Data, {});
-        data.map((template, i) => {
-          Object.keys(template).forEach(key => {
-            const value = template[key];
-            delete template[key];
-            template[key.toLowerCase()] = value;
-          });
-        });
         yield put({
           type: templateActions.ADD_TEMPLATE_SUCCESS,
-          templates: data,
-          templateType: result.data.TemplateType,
+          trialTemplatesList: result.data.Data,
         });
       } else {
         yield put({
@@ -498,15 +481,15 @@ export const addTemplate = function*() {
   }
 };
 
-const goAddTemplate = function*(name, yaml, kind, action) {
+const goAddTemplate = function*(edittedNamespace, edittedConfigMapName, edittedName, edittedYaml) {
   try {
     const data = {
-      name,
-      yaml,
-      kind,
-      action,
+      edittedNamespace,
+      edittedConfigMapName,
+      edittedName,
+      edittedYaml,
     };
-    const result = yield call(axios.post, '/katib/update_template/', data);
+    const result = yield call(axios.post, '/katib/add_template/', data);
     return result;
   } catch (err) {
     yield put({
@@ -521,24 +504,16 @@ export const editTemplate = function*() {
     try {
       const result = yield call(
         goEditTemplate,
-        action.name,
-        action.yaml,
-        action.kind,
-        action.action,
+        action.edittedNamespace,
+        action.edittedConfigMapName,
+        action.currentName,
+        action.edittedName,
+        action.edittedYaml,
       );
       if (result.status === 200) {
-        let data = Object.assign(result.data.Data, {});
-        data.map((template, i) => {
-          Object.keys(template).forEach(key => {
-            const value = template[key];
-            delete template[key];
-            template[key.toLowerCase()] = value;
-          });
-        });
         yield put({
           type: templateActions.EDIT_TEMPLATE_SUCCESS,
-          templates: data,
-          templateType: result.data.TemplateType,
+          trialTemplatesList: result.data.Data,
         });
       } else {
         yield put({
@@ -553,15 +528,22 @@ export const editTemplate = function*() {
   }
 };
 
-const goEditTemplate = function*(name, yaml, kind, action) {
+const goEditTemplate = function*(
+  edittedNamespace,
+  edittedConfigMapName,
+  currentName,
+  edittedName,
+  edittedYaml,
+) {
   try {
     const data = {
-      name,
-      yaml,
-      kind,
-      action,
+      edittedNamespace,
+      edittedConfigMapName,
+      currentName,
+      edittedName,
+      edittedYaml,
     };
-    const result = yield call(axios.post, '/katib/update_template/', data);
+    const result = yield call(axios.post, '/katib/edit_template/', data);
     return result;
   } catch (err) {
     yield put({
@@ -574,20 +556,16 @@ export const deleteTemplate = function*() {
   while (true) {
     const action = yield take(templateActions.DELETE_TEMPLATE_REQUEST);
     try {
-      const result = yield call(goDeleteTemplate, action.name, action.kind, action.action);
+      const result = yield call(
+        goDeleteTemplate,
+        action.edittedNamespace,
+        action.edittedConfigMapName,
+        action.edittedName,
+      );
       if (result.status === 200) {
-        let data = Object.assign(result.data.Data, {});
-        data.map((template, i) => {
-          Object.keys(template).forEach(key => {
-            const value = template[key];
-            delete template[key];
-            template[key.toLowerCase()] = value;
-          });
-        });
         yield put({
           type: templateActions.DELETE_TEMPLATE_SUCCESS,
-          templates: data,
-          templateType: result.data.TemplateType,
+          trialTemplatesList: result.data.Data,
         });
       } else {
         yield put({
@@ -602,14 +580,14 @@ export const deleteTemplate = function*() {
   }
 };
 
-const goDeleteTemplate = function*(name, kind, action) {
+const goDeleteTemplate = function*(edittedNamespace, edittedConfigMapName, edittedName) {
   try {
     const data = {
-      name,
-      kind,
-      action,
+      edittedNamespace,
+      edittedConfigMapName,
+      edittedName,
     };
-    const result = yield call(axios.post, '/katib/update_template/', data);
+    const result = yield call(axios.post, '/katib/delete_template/', data);
     return result;
   } catch (err) {
     yield put({

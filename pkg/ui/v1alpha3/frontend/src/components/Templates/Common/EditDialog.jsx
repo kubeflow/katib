@@ -1,5 +1,10 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import withStyles from '@material-ui/styles/withStyles';
+
+import AceEditor from 'react-ace';
+import 'ace-builds/src-noconflict/theme-sqlserver';
+import 'ace-builds/src-noconflict/mode-yaml';
 
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -7,95 +12,110 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import Slide from '@material-ui/core/Slide';
+import Typography from '@material-ui/core/Typography';
 
-import { connect } from 'react-redux';
-import { closeDialog, changeTemplate, editTemplate } from '../../../actions/templateActions';
+import { closeDialog, editTemplate, changeTemplate } from '../../../actions/templateActions';
 
 const module = 'template';
 
 const styles = theme => ({
+  header: {
+    textAlign: 'center',
+    width: 650,
+  },
+  headerTypography: {
+    textAlign: 'center',
+    marginTop: 5,
+    fontSize: 19,
+  },
   textField: {
-    margin: 10,
-    width: 400,
+    marginBottom: 10,
+    width: '100%',
   },
 });
 
-function Transition(props) {
-  return <Slide direction={'up'} {...props} />;
-}
-
-// FIX DIALOG TEXTFIELD SIZE
-
 class EditDialog extends React.Component {
-  state = {
-    name: '',
-    yaml: '',
+  onNameChange = event => {
+    this.props.changeTemplate(
+      this.props.edittedTemplateNamespace,
+      this.props.edittedTemplateConfigMapName,
+      event.target.value,
+      this.props.edittedTemplateYaml,
+      this.props.edittedTemplateConfigMapSelectList,
+    );
   };
 
-  componentDidMount() {
-    this.setState({
-      name: this.props.edittedTemplate.name,
-      yaml: this.props.edittedTemplate.yaml,
-    });
-  }
-
-  componentWillReceiveProps(newProps) {
-    this.setState({
-      name: newProps.edittedTemplate.name,
-      yaml: newProps.edittedTemplate.yaml,
-    });
-  }
+  onYamlChange = newTemplateYaml => {
+    this.props.changeTemplate(
+      this.props.edittedTemplateNamespace,
+      this.props.edittedTemplateConfigMapName,
+      this.props.edittedTemplateName,
+      newTemplateYaml,
+      this.props.edittedTemplateConfigMapSelectList,
+    );
+  };
 
   submitEditTemplate = () => {
-    this.props.editTemplate(this.state.name, this.state.yaml, this.props.type, 'edit');
+    this.props.editTemplate(
+      this.props.edittedTemplateNamespace,
+      this.props.edittedTemplateConfigMapName,
+      this.props.currentTemplateName,
+      this.props.edittedTemplateName,
+      this.props.edittedTemplateYaml,
+    );
   };
 
   render() {
     const { classes } = this.props;
     return (
-      <div>
-        <Dialog
-          open={this.props.editOpen}
-          TransitionComponent={Transition}
-          keepMounted
-          onClose={this.props.closeDialog}
-        >
-          <DialogTitle>{'Editing a template'}</DialogTitle>
-          <DialogContent>
-            <TextField
-              className={classes.textField}
-              value={this.state.name}
-              onChange={event =>
-                this.setState({
-                  name: event.target.value,
-                })
-              }
-            />
-            <br />
-            <TextField
-              multiline
-              className={classes.textField}
-              variant={'outlined'}
-              rows={'10'}
-              value={this.state.yaml}
-              onChange={event =>
-                this.setState({
-                  yaml: event.target.value,
-                })
-              }
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.submitEditTemplate} color={'primary'}>
-              Save
-            </Button>
-            <Button onClick={this.props.closeDialog} color={'primary'}>
-              Discard
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </div>
+      <Dialog open={this.props.editOpen} onClose={this.props.closeDialog} maxWidth={'xl'}>
+        <DialogTitle id="alert-dialog-title" className={classes.header}>
+          {'Template Editor'}
+          <Typography className={classes.headerTypography}>
+            {'Namespace: ' + this.props.edittedTemplateNamespace}
+          </Typography>
+
+          <Typography className={classes.headerTypography}>
+            {'ConfigMap: ' + this.props.edittedTemplateConfigMapName}
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            value={this.props.edittedTemplateName}
+            className={classes.textField}
+            onChange={this.onNameChange}
+            label="Template name"
+            placeholder="Template name"
+          />
+
+          <br />
+          <AceEditor
+            mode="yaml"
+            theme="sqlserver"
+            value={this.props.edittedTemplateYaml}
+            tabSize={2}
+            fontSize={13}
+            width={'100%'}
+            showPrintMargin={false}
+            autoScrollEditorIntoView={true}
+            maxLines={30}
+            minLines={10}
+            onChange={this.onYamlChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            disabled={!this.props.edittedTemplateName || !this.props.edittedTemplateYaml}
+            onClick={this.submitEditTemplate}
+            color={'primary'}
+          >
+            Save
+          </Button>
+          <Button onClick={this.props.closeDialog} color={'primary'}>
+            Discard
+          </Button>
+        </DialogActions>
+      </Dialog>
     );
   }
 }
@@ -103,11 +123,15 @@ class EditDialog extends React.Component {
 const mapStateToProps = state => {
   return {
     editOpen: state[module].editOpen,
-    currentTemplateIndex: state[module].currentTemplateIndex,
-    edittedTemplate: state[module].edittedTemplate,
+    edittedTemplateNamespace: state[module].edittedTemplateNamespace,
+    edittedTemplateConfigMapName: state[module].edittedTemplateConfigMapName,
+    currentTemplateName: state[module].currentTemplateName,
+    edittedTemplateName: state[module].edittedTemplateName,
+    edittedTemplateYaml: state[module].edittedTemplateYaml,
+    edittedTemplateConfigMapSelectList: state[module].edittedTemplateConfigMapSelectList,
   };
 };
 
-export default connect(mapStateToProps, { closeDialog, changeTemplate, editTemplate })(
+export default connect(mapStateToProps, { closeDialog, editTemplate, changeTemplate })(
   withStyles(styles)(EditDialog),
 );

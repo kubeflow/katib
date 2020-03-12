@@ -2,13 +2,14 @@ package v1alpha3
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
 	gographviz "github.com/awalterschulze/gographviz"
+	apiv1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func (k *KatibUIHandler) getExperimentList(namespace string, typ JobType) ([]JobView, error) {
@@ -46,42 +47,103 @@ func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
 }
 
-func getTemplatesView(templates map[string]string) []TemplateView {
-	templatesView := make([]TemplateView, 0)
+func (k *KatibUIHandler) getTrialTemplatesViewList() ([]TrialTemplatesView, error) {
+	trialTemplatesViewList := make([]TrialTemplatesView, 0)
 
-	for key := range templates {
-		templatesView = append(templatesView, TemplateView{Name: key, Yaml: templates[key]})
+	// Get all namespaces
+	namespaceList, err := k.katibClient.GetNamespaceList()
+	if err != nil {
+		log.Printf("GetNamespaceList failed: %v", err)
+		return nil, err
 	}
-	return templatesView
+
+	// Get Trial Template ConfigMap for each namespace
+	for _, namespace := range namespaceList.Items {
+		ns := namespace.ObjectMeta.Name
+		trialTemplatesConfigMapList, err := k.katibClient.GetTrialTemplates(ns)
+		if err != nil {
+			log.Printf("GetTrialTemplates failed: %v", err)
+			return nil, err
+		}
+
+		if len(trialTemplatesConfigMapList.Items) != 0 {
+			trialTemplatesViewList = append(trialTemplatesViewList, getTrialTemplatesView(trialTemplatesConfigMapList))
+		}
+	}
+	return trialTemplatesViewList, nil
+}
+func getTrialTemplatesView(templatesConfigMapList *apiv1.ConfigMapList) TrialTemplatesView {
+
+	trialTemplateView := TrialTemplatesView{
+		Namespace:      templatesConfigMapList.Items[0].ObjectMeta.Namespace,
+		ConfigMapsList: []ConfigMapsList{},
+	}
+	for _, configMap := range templatesConfigMapList.Items {
+		configMapList := ConfigMapsList{
+			ConfigMapName: configMap.ObjectMeta.Name,
+			TemplatesList: []TemplatesList{},
+		}
+		for key := range configMap.Data {
+			templatesList := TemplatesList{
+				Name: key,
+				Yaml: configMap.Data[key],
+			}
+			configMapList.TemplatesList = append(configMapList.TemplatesList, templatesList)
+		}
+
+		trialTemplateView.ConfigMapsList = append(trialTemplateView.ConfigMapsList, configMapList)
+	}
+
+	return trialTemplateView
 }
 
-func (k *KatibUIHandler) updateTemplates(newTemplate map[string]interface{}, isDelete bool) (TemplateResponse, error) {
-	var currentTemplates map[string]string
-	var err error
+func (k *KatibUIHandler) updateTrialTemplates(
+	edittedNamespace,
+	edittedConfigMapName,
+	edittedName,
+	edittedYaml,
+	currentName,
+	actionType string) ([]TrialTemplatesView, error) {
 
-	currentTemplates, err = k.katibClient.GetTrialTemplates()
+	templates, err := k.katibClient.GetConfigMap(edittedConfigMapName, edittedNamespace)
 	if err != nil {
-		return TemplateResponse{}, errors.New("GetTrialTemplates failed: " + err.Error())
+		log.Printf("GetConfigMap failed: %v", err)
+		return nil, err
 	}
 
-	if isDelete {
-		delete(currentTemplates, newTemplate["name"].(string))
-	} else {
-		currentTemplates[newTemplate["name"].(string)] = newTemplate["yaml"].(string)
+	if actionType == ActionTypeAdd {
+		templates[edittedName] = edittedYaml
+	} else if actionType == ActionTypeEdit {
+		delete(templates, currentName)
+		templates[edittedName] = edittedYaml
+	} else if actionType == ActionTypeDelete {
+		delete(templates, edittedName)
 	}
 
-	err = k.katibClient.UpdateTrialTemplates(currentTemplates)
+	templatesConfigMap := &apiv1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      edittedConfigMapName,
+			Namespace: edittedNamespace,
+			Labels:    TrialTemplateLabel,
+		},
+		Data: templates,
+	}
+
+	err = k.katibClient.UpdateConfigMap(templatesConfigMap)
 	if err != nil {
-		return TemplateResponse{}, errors.New("UpdateTrialTemplates failed: " + err.Error())
+		log.Printf("UpdateConfigMap failed: %v", err)
+		return nil, err
 	}
 
-	TemplateResponse := TemplateResponse{
-		Data:         getTemplatesView(currentTemplates),
-		TemplateType: newTemplate["kind"].(string),
+	newTemplates, err := k.getTrialTemplatesViewList()
+	if err != nil {
+		log.Printf("getTrialTemplatesViewList: %v", err)
+		return nil, err
 	}
-	return TemplateResponse, nil
+
+	return newTemplates, nil
+
 }
-
 func getNodeString(block *Block) string {
 	var nodeString string
 	switch block.Type {
