@@ -1,5 +1,6 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+
 import withStyles from '@material-ui/styles/withStyles';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -10,13 +11,12 @@ import CommonParametersSpec from './Params/CommonSpec';
 import Objective from './Params/Objective';
 import TrialSpecParam from './Params/Trial';
 import Parameters from './Params/Parameters';
+import Algorithm from './Params/Algorithm';
 
 import { submitHPJob } from '../../../actions/hpCreateActions';
 
-import { connect } from 'react-redux';
-import Algorithm from './Params/Algorithm';
-
 const module = 'hpCreate';
+const generalModule = 'general';
 
 const styles = theme => ({
   root: {
@@ -122,13 +122,12 @@ const HPParameters = props => {
     data.spec.parameters = [];
     addParameter(props.parameters, data.spec.parameters);
 
-    //TODO: Add support not only for default ConfigMap for Trial-Templates
     data.spec.trialTemplate = {
       goTemplate: {
         templateSpec: {
-          configMapName: 'trial-template',
-          configMapNamespace: props.trialNamespace,
-          templatePath: props.trial,
+          configMapName: props.templateConfigMapName,
+          configMapNamespace: props.templateNamespace,
+          templatePath: props.templateName,
         },
       },
     };
@@ -179,8 +178,9 @@ const mapStateToProps = state => ({
   algorithmName: state[module].algorithmName,
   algorithmSettings: state[module].algorithmSettings,
   parameters: state[module].parameters,
-  trial: state[module].trial,
-  trialNamespace: state[module].trialNamespace,
+  templateNamespace: state[generalModule].templateNamespace,
+  templateConfigMapName: state[generalModule].templateConfigMapName,
+  templateName: state[generalModule].templateName,
 });
 
 //TODO: Added validation and remove it

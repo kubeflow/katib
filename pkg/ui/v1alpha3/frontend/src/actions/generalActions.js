@@ -74,3 +74,18 @@ export const CLOSE_DIALOG_EXPERIMENT = 'CLOSE_DIALOG_EXPERIMENT';
 export const closeDialogExperiment = () => ({
   type: CLOSE_DIALOG_EXPERIMENT,
 });
+
+export const FILTER_TEMPLATES_EXPERIMENT = 'FILTER_TEMPLATES_EXPERIMENT';
+
+export const filterTemplatesExperiment = (trialNamespace, trialConfigMapName) => ({
+  type: FILTER_TEMPLATES_EXPERIMENT,
+  trialNamespace,
+  trialConfigMapName,
+});
+
+export const CHANGE_TEMPLATE_NAME = 'CHANGE_TEMPLATE_NAME';
+
+export const changeTemplateName = templateName => ({
+  type: CHANGE_TEMPLATE_NAME,
+  templateName,
+});

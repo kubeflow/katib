@@ -1,6 +1,6 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
-import PropTypes from 'prop-types';
 import withStyles from '@material-ui/styles/withStyles';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -14,7 +14,9 @@ import TrialSpecParam from './Params/Trial';
 
 import { submitNASJob } from '../../../actions/nasCreateActions';
 
-import { connect } from 'react-redux';
+const module = 'hpCreate';
+const generalModule = 'general';
+
 import NASConfig from './Params/NASConfig';
 
 const module = 'nasCreate';
@@ -137,13 +139,12 @@ const NASParameters = props => {
     data.spec.nasConfig.operations = [];
     addOperations(props.operations, data.spec.nasConfig.operations);
 
-    //TODO: Add support not only for default ConfigMap for Trial-Templates
     data.spec.trialTemplate = {
       goTemplate: {
         templateSpec: {
-          configMapName: 'trial-template',
-          configMapNamespace: props.trialNamespace,
-          templatePath: props.trial,
+          configMapName: props.templateConfigMapName,
+          configMapNamespace: props.templateNamespace,
+          templatePath: props.templateName,
         },
       },
     };
@@ -194,8 +195,9 @@ const mapStateToProps = state => ({
   inputSize: state[module].inputSize,
   outputSize: state[module].outputSize,
   operations: state[module].operations,
-  trial: state[module].trial,
-  trialNamespace: state[module].trialNamespace,
+  templateNamespace: state[generalModule].templateNamespace,
+  templateConfigMapName: state[generalModule].templateConfigMapName,
+  templateName: state[generalModule].templateName,
 });
 
 //TODO: Added validation and remove it
