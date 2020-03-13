@@ -137,7 +137,7 @@ func (k *KatibUIHandler) FetchTrialTemplates(w http.ResponseWriter, r *http.Requ
 	w.Write(response)
 }
 
-//AddTemplate adds template in ConfigMap
+//AddTemplate adds template to ConfigMap
 //TODO: Add functionality to create new ConfigMap
 func (k *KatibUIHandler) AddTemplate(w http.ResponseWriter, r *http.Request) {
 	var data map[string]interface{}
@@ -199,7 +199,7 @@ func (k *KatibUIHandler) EditTemplate(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-// DeleteTemplate edits template in ConfigMap
+// DeleteTemplate delete template in ConfigMap
 // TODO: Add functionality to delete configMap if there is no templates
 func (k *KatibUIHandler) DeleteTemplate(w http.ResponseWriter, r *http.Request) {
 

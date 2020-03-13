@@ -179,11 +179,6 @@ const generalReducer = (state = initialState, action) => {
           );
 
           // Get new Template Names List
-          console.log('nsIndex: ', nsIndex);
-          console.log(
-            'templates[nsIndex].ConfigMapsList[0]: ',
-            state.trialTemplatesList[nsIndex].ConfigMapsList[0],
-          );
           templateNames = state.trialTemplatesList[nsIndex].ConfigMapsList[0].TemplatesList.map(
             template => template.Name,
           );
