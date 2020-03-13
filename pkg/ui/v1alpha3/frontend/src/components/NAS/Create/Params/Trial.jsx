@@ -15,7 +15,7 @@ import Select from '@material-ui/core/Select';
 import { filterTemplatesExperiment, changeTemplateName } from '../../../../actions/generalActions';
 import { fetchTrialTemplates } from '../../../../actions/templateActions';
 
-const module = 'hpCreate';
+const module = 'nasCreate';
 const generalModule = 'general';
 
 const styles = theme => ({

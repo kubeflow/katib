@@ -11,15 +11,12 @@ import CommonParametersSpec from './Params/CommonSpec';
 import Objective from './Params/Objective';
 import Algorithm from './Params/Algorithm';
 import TrialSpecParam from './Params/Trial';
+import NASConfig from './Params/NASConfig';
 
 import { submitNASJob } from '../../../actions/nasCreateActions';
 
-const module = 'hpCreate';
-const generalModule = 'general';
-
-import NASConfig from './Params/NASConfig';
-
 const module = 'nasCreate';
+const generalModule = 'general';
 
 const styles = theme => ({
   root: {
