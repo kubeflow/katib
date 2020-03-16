@@ -18,7 +18,7 @@ type suggestionConfigJSON struct {
 	Image              string                      `json:"image"`
 	ImagePullPolicy    corev1.PullPolicy           `json:"imagePullPolicy"`
 	Resource           corev1.ResourceRequirements `json:"resources"`
-	ServiceAccountName string                      `json: "serviceAccountName"`
+	ServiceAccountName string                      `json:"serviceAccountName"`
 }
 
 type metricsCollectorConfigJSON struct {
