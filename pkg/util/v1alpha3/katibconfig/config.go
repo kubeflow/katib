@@ -15,9 +15,10 @@ import (
 )
 
 type suggestionConfigJSON struct {
-	Image           string                      `json:"image"`
-	ImagePullPolicy corev1.PullPolicy           `json:"imagePullPolicy"`
-	Resource        corev1.ResourceRequirements `json:"resources"`
+	Image              string                      `json:"image"`
+	ImagePullPolicy    corev1.PullPolicy           `json:"imagePullPolicy"`
+	Resource           corev1.ResourceRequirements `json:"resources"`
+	ServiceAccountName string                      `json: "serviceAccountName"`
 }
 
 type metricsCollectorConfigJSON struct {
@@ -58,6 +59,12 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (map[st
 				suggestionConfigData[consts.LabelSuggestionImagePullPolicy] = string(imagePullPolicy)
 			} else {
 				suggestionConfigData[consts.LabelSuggestionImagePullPolicy] = consts.DefaultImagePullPolicy
+			}
+
+			// Get Service Account Name
+			serviceAccountName := suggestionConfig.ServiceAccountName
+			if strings.TrimSpace(serviceAccountName) != "" {
+				suggestionConfigData[consts.LabelSuggestionServiceAccountName] = serviceAccountName
 			}
 
 			// Set default values for CPU, Memory and Disk
