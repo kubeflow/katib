@@ -146,3 +146,78 @@ export const submitHPJob = data => ({
   type: SUBMIT_HP_JOB_REQUEST,
   data,
 });
+
+export const CHANGE_MC_KIND_HP = 'CHANGE_MC_KIND_HP';
+
+export const changeMCKindHP = kind => ({
+  type: CHANGE_MC_KIND_HP,
+  kind,
+});
+
+export const CHANGE_MC_FILE_SYSTEM_HP = 'CHANGE_MC_FILE_SYSTEM_HP';
+
+export const changeMCFileSystemHP = (kind, path) => ({
+  type: CHANGE_MC_FILE_SYSTEM_HP,
+  kind,
+  path,
+});
+
+export const CHANGE_MC_HTTP_GET_HP = 'CHANGE_MC_HTTP_GET_HP';
+
+export const changeMCHttpGetHP = (port, path, scheme, host) => ({
+  type: CHANGE_MC_HTTP_GET_HP,
+  port,
+  path,
+  scheme,
+  host,
+});
+
+export const ADD_MC_HTTP_GET_HEADER_HP = 'ADD_MC_HTTP_GET_HEADER_HP';
+
+export const addMCHttpGetHeaderHP = () => ({
+  type: ADD_MC_HTTP_GET_HEADER_HP,
+});
+
+export const CHANGE_MC_HTTP_GET_HEADER_HP = 'CHANGE_MC_HTTP_GET_HEADER_HP';
+
+export const changeMCHttpGetHeaderHP = (fieldName, value, index) => ({
+  type: CHANGE_MC_HTTP_GET_HEADER_HP,
+  fieldName,
+  value,
+  index,
+});
+
+export const DELETE_MC_HTTP_GET_HEADER_HP = 'DELETE_MC_HTTP_GET_HEADER_HP';
+
+export const deleteMCHttpGetHeaderHP = index => ({
+  type: DELETE_MC_HTTP_GET_HEADER_HP,
+  index,
+});
+
+export const ADD_MC_METRICS_FORMAT_HP = 'ADD_MC_METRICS_FORMAT_HP';
+
+export const addMCMetricsFormatHP = () => ({
+  type: ADD_MC_METRICS_FORMAT_HP,
+});
+
+export const CHANGE_MC_METRIC_FORMAT_HP = 'CHANGE_MC_METRIC_FORMAT_HP';
+
+export const changeMCMetricsFormatHP = (format, index) => ({
+  type: CHANGE_MC_METRIC_FORMAT_HP,
+  format,
+  index,
+});
+
+export const DELETE_MC_METRIC_FORMAT_HP = 'DELETE_MC_METRIC_FORMAT_HP';
+
+export const deleteMCMetricsFormatHP = index => ({
+  type: DELETE_MC_METRIC_FORMAT_HP,
+  index,
+});
+
+export const CHANGE_MC_CUSTOM_CONTAINER_HP = 'CHANGE_MC_CUSTOM_CONTAINER_HP';
+
+export const changeMCCustomContainerHP = yamlContainer => ({
+  type: CHANGE_MC_CUSTOM_CONTAINER_HP,
+  yamlContainer,
+});

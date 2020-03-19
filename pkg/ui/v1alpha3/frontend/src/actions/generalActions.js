@@ -74,3 +74,10 @@ export const CLOSE_DIALOG_EXPERIMENT = 'CLOSE_DIALOG_EXPERIMENT';
 export const closeDialogExperiment = () => ({
   type: CLOSE_DIALOG_EXPERIMENT,
 });
+
+export const VALIDATION_ERROR = 'VALIDATION_ERROR';
+
+export const validationError = message => ({
+  type: VALIDATION_ERROR,
+  message,
+});

@@ -14,6 +14,9 @@ const initialState = {
   globalNamespace: '',
   experiment: {},
   dialogExperimentOpen: false,
+  mcKindsList: ['StdOut', 'File', 'TensorFlowEvent', 'PrometheusMetric', 'Custom', 'None'],
+  mcFileSystemKindsList: ['No File System', 'File', 'Directory'],
+  mcURISchemesList: ['HTTP', 'HTTPS'],
 };
 
 const generalReducer = (state = initialState, action) => {
@@ -136,6 +139,12 @@ const generalReducer = (state = initialState, action) => {
       return {
         ...state,
         dialogExperimentOpen: false,
+      };
+    case actions.VALIDATION_ERROR:
+      return {
+        ...state,
+        snackOpen: true,
+        snackText: action.message,
       };
     default:
       return state;
