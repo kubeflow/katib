@@ -567,7 +567,7 @@ class MetricsCollectorSpec extends React.Component {
                   <Grid item xs={3} />
                   <Grid item xs={6}>
                     <TextField
-                      label={'Metrics Format'}
+                      label={'Metrics Format regular expression'}
                       className={classes.textField}
                       value={format}
                       onChange={this.onMCMetricsFormatChange(index)}
