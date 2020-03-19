@@ -257,7 +257,7 @@ const hpCreateReducer = (state = initialState, action) => {
         ...state,
         trialNamespace: action.namespace,
       };
-    // Collector Kind change
+    // Metrics Collector Kind change
     case actions.CHANGE_MC_KIND_HP:
       let newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
       newMCSpec.collector.kind = action.kind;
@@ -280,16 +280,16 @@ const hpCreateReducer = (state = initialState, action) => {
           default:
             newKind = constants.MC_FILE_SYSTEM_NO_KIND;
         }
-        // File or TF Event collector Kind
+        // File or TF Event Kind
         newMCSpec.source.fileSystemPath = {
           kind: newKind,
           path: '',
         };
       } else if (action.kind === constants.MC_KIND_PROMETHEUS) {
-        // Prometheus collector Kind
+        // Prometheus Kind
         newMCSpec.source.httpGet = {
-          port: '',
-          path: '',
+          port: constants.MC_PROMETHEUS_DEFAULT_PORT,
+          path: constants.MC_PROMETHEUS_DEFAULT_PATH,
           scheme: constants.MC_HTTP_GET_HTTP_SCHEME,
           host: '',
           httpHeaders: [],
@@ -323,7 +323,7 @@ const hpCreateReducer = (state = initialState, action) => {
         ...state,
         mcSpec: newMCSpec,
       };
-    // HTTPGet Headers
+    // Collector HTTPGet Headers
     case actions.ADD_MC_HTTP_GET_HEADER_HP:
       newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
       let currentHeaders = newMCSpec.source.httpGet.httpHeaders.slice();
@@ -352,13 +352,13 @@ const hpCreateReducer = (state = initialState, action) => {
         ...state,
         mcSpec: newMCSpec,
       };
-    // Custom container
+    // Collector Custom container
     case actions.CHANGE_MC_CUSTOM_CONTAINER_HP:
       return {
         ...state,
         mcCustomContainerYaml: action.yamlContainer,
       };
-    // Metrics Format
+    // Collector Metrics Format
     case actions.ADD_MC_METRICS_FORMAT_HP:
       newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
       let currentFormats = newMCSpec.source.filter.metricsFormat.slice();

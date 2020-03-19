@@ -130,11 +130,17 @@ const HPParameters = props => {
     let newMCSpec = JSON.parse(JSON.stringify(props.mcSpec));
 
     // Delete empty metrics format
-    if (newMCSpec.source.filter.metricsFormat.length === 0) {
+    if (
+      newMCSpec.source.filter.metricsFormat.length === 0 ||
+      newMCSpec.collector.kind === constants.MC_KIND_NONE
+    ) {
       delete newMCSpec.source.filter;
     }
 
-    if (newMCSpec.collector.kind === constants.MC_KIND_STDOUT) {
+    if (
+      newMCSpec.collector.kind === constants.MC_KIND_STDOUT ||
+      newMCSpec.collector.kind === constants.MC_KIND_NONE
+    ) {
       // Delete fileSystemPath and httpGet
       delete newMCSpec.source.fileSystemPath;
       delete newMCSpec.source.httpGet;

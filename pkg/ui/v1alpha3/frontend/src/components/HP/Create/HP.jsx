@@ -20,8 +20,7 @@ const HP = props => {
 
   return (
     <div className={classes.root}>
-      <Tabs defaultActiveKey="2">
-        {/* TODO: CHANGE IT! */}
+      <Tabs defaultActiveKey="1">
         <TabPane tab="YAML File" key="1">
           <YAML />
         </TabPane>

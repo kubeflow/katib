@@ -190,7 +190,7 @@ export const changeTrial = trial => ({
   trial,
 });
 
-export const CHANGE_TRIAL_NAMESPACE_NAS = 'CHANGE_TRIAL_NAMESPACE_HP';
+export const CHANGE_TRIAL_NAMESPACE_NAS = 'CHANGE_TRIAL_NAMESPACE_NAS';
 
 export const changeTrialNamespace = namespace => ({
   type: CHANGE_TRIAL_NAMESPACE_NAS,
@@ -210,4 +210,79 @@ export const CLOSE_SNACKBAR = 'CLOSE_SNACKBAR';
 
 export const closeSnackbar = () => ({
   type: CLOSE_SNACKBAR,
+});
+
+export const CHANGE_MC_KIND_NAS = 'CHANGE_MC_KIND_NAS';
+
+export const changeMCKindNAS = kind => ({
+  type: CHANGE_MC_KIND_NAS,
+  kind,
+});
+
+export const CHANGE_MC_FILE_SYSTEM_NAS = 'CHANGE_MC_FILE_SYSTEM_NAS';
+
+export const changeMCFileSystemNAS = (kind, path) => ({
+  type: CHANGE_MC_FILE_SYSTEM_NAS,
+  kind,
+  path,
+});
+
+export const CHANGE_MC_HTTP_GET_NAS = 'CHANGE_MC_HTTP_GET_NAS';
+
+export const changeMCHttpGetNAS = (port, path, scheme, host) => ({
+  type: CHANGE_MC_HTTP_GET_NAS,
+  port,
+  path,
+  scheme,
+  host,
+});
+
+export const ADD_MC_HTTP_GET_HEADER_NAS = 'ADD_MC_HTTP_GET_HEADER_NAS';
+
+export const addMCHttpGetHeaderNAS = () => ({
+  type: ADD_MC_HTTP_GET_HEADER_NAS,
+});
+
+export const CHANGE_MC_HTTP_GET_HEADER_NAS = 'CHANGE_MC_HTTP_GET_HEADER_NAS';
+
+export const changeMCHttpGetHeaderNAS = (fieldName, value, index) => ({
+  type: CHANGE_MC_HTTP_GET_HEADER_NAS,
+  fieldName,
+  value,
+  index,
+});
+
+export const DELETE_MC_HTTP_GET_HEADER_NAS = 'DELETE_MC_HTTP_GET_HEADER_NAS';
+
+export const deleteMCHttpGetHeaderNAS = index => ({
+  type: DELETE_MC_HTTP_GET_HEADER_NAS,
+  index,
+});
+
+export const ADD_MC_METRICS_FORMAT_NAS = 'ADD_MC_METRICS_FORMAT_NAS';
+
+export const addMCMetricsFormatNAS = () => ({
+  type: ADD_MC_METRICS_FORMAT_NAS,
+});
+
+export const CHANGE_MC_METRIC_FORMAT_NAS = 'CHANGE_MC_METRIC_FORMAT_NAS';
+
+export const changeMCMetricsFormatNAS = (format, index) => ({
+  type: CHANGE_MC_METRIC_FORMAT_NAS,
+  format,
+  index,
+});
+
+export const DELETE_MC_METRIC_FORMAT_NAS = 'DELETE_MC_METRIC_FORMAT_NAS';
+
+export const deleteMCMetricsFormatNAS = index => ({
+  type: DELETE_MC_METRIC_FORMAT_NAS,
+  index,
+});
+
+export const CHANGE_MC_CUSTOM_CONTAINER_NAS = 'CHANGE_MC_CUSTOM_CONTAINER_NAS';
+
+export const changeMCCustomContainerNAS = yamlContainer => ({
+  type: CHANGE_MC_CUSTOM_CONTAINER_NAS,
+  yamlContainer,
 });

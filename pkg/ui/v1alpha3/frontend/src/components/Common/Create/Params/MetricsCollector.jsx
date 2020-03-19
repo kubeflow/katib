@@ -35,6 +35,19 @@ import {
   changeMCCustomContainerHP,
 } from '../../../../actions/hpCreateActions';
 
+import {
+  changeMCKindNAS,
+  changeMCFileSystemNAS,
+  addMCMetricsFormatNAS,
+  changeMCMetricsFormatNAS,
+  deleteMCMetricsFormatNAS,
+  changeMCHttpGetNAS,
+  addMCHttpGetHeaderNAS,
+  changeMCHttpGetHeaderNAS,
+  deleteMCHttpGetHeaderNAS,
+  changeMCCustomContainerNAS,
+} from '../../../../actions/nasCreateActions';
+
 const module = 'general';
 const hpModule = 'hpCreate';
 const nasModule = 'nasCreate';
@@ -67,7 +80,7 @@ class MetricsCollectorSpec extends React.Component {
   onMCKindChange = event => {
     this.props.jobType === constants.JOB_TYPE_HP
       ? this.props.changeMCKindHP(event.target.value)
-      : this.props.changeMCKindHP(event.target.value);
+      : this.props.changeMCKindNAS(event.target.value);
   };
 
   onMCFileSystemKindChange = event => {
@@ -76,9 +89,9 @@ class MetricsCollectorSpec extends React.Component {
           event.target.value,
           this.props.mcSpecHP.source.fileSystemPath.path,
         )
-      : this.props.changeMCFileSystemHP(
+      : this.props.changeMCFileSystemNAS(
           event.target.value,
-          this.props.mcSpecHP.source.fileSystemPath.path,
+          this.props.mcSpecNAS.source.fileSystemPath.path,
         );
   };
 
@@ -88,8 +101,8 @@ class MetricsCollectorSpec extends React.Component {
           this.props.mcSpecHP.source.fileSystemPath.kind,
           event.target.value,
         )
-      : this.props.changeMCFileSystemHP(
-          this.props.mcSpecHP.source.fileSystemPath.kind,
+      : this.props.changeMCFileSystemNAS(
+          this.props.mcSpecNAS.source.fileSystemPath.kind,
           event.target.value,
         );
   };
@@ -97,19 +110,19 @@ class MetricsCollectorSpec extends React.Component {
   onMCMetricsFormatAdd = () => {
     this.props.jobType === constants.JOB_TYPE_HP
       ? this.props.addMCMetricsFormatHP()
-      : this.props.addMCMetricsFormatHP();
+      : this.props.addMCMetricsFormatNAS();
   };
 
   onMCMetricsFormatChange = index => event => {
     this.props.jobType == constants.JOB_TYPE_HP
       ? this.props.changeMCMetricsFormatHP(event.target.value, index)
-      : this.props.changeMCMetricsFormatHP(event.target.value, index);
+      : this.props.changeMCMetricsFormatNAS(event.target.value, index);
   };
 
   onMCMetricsFormatDelete = index => event => {
     this.props.jobType === constants.JOB_TYPE_HP
       ? this.props.deleteMCMetricsFormatHP(index)
-      : this.props.deleteMCMetricsFormatHP(index);
+      : this.props.deleteMCMetricsFormatNAS(index);
   };
 
   onMCHttpGetPortChange = event => {
@@ -120,11 +133,11 @@ class MetricsCollectorSpec extends React.Component {
           this.props.mcSpecHP.source.httpGet.scheme,
           this.props.mcSpecHP.source.httpGet.host,
         )
-      : this.props.changeMCHttpGetHP(
+      : this.props.changeMCHttpGetNAS(
           event.target.value,
-          this.props.mcSpecHP.source.httpGet.path,
-          this.props.mcSpecHP.source.httpGet.scheme,
-          this.props.mcSpecHP.source.httpGet.host,
+          this.props.mcSpecNAS.source.httpGet.path,
+          this.props.mcSpecNAS.source.httpGet.scheme,
+          this.props.mcSpecNAS.source.httpGet.host,
         );
   };
 
@@ -136,11 +149,11 @@ class MetricsCollectorSpec extends React.Component {
           this.props.mcSpecHP.source.httpGet.scheme,
           this.props.mcSpecHP.source.httpGet.host,
         )
-      : this.props.changeMCHttpGetHP(
-          this.props.mcSpecHP.source.httpGet.port,
+      : this.props.changeMCHttpGetNAS(
+          this.props.mcSpecNAS.source.httpGet.port,
           event.target.value,
-          this.props.mcSpecHP.source.httpGet.scheme,
-          this.props.mcSpecHP.source.httpGet.host,
+          this.props.mcSpecNAS.source.httpGet.scheme,
+          this.props.mcSpecNAS.source.httpGet.host,
         );
   };
 
@@ -152,11 +165,11 @@ class MetricsCollectorSpec extends React.Component {
           event.target.value,
           this.props.mcSpecHP.source.httpGet.host,
         )
-      : this.props.changeMCHttpGetHP(
-          this.props.mcSpecHP.source.httpGet.port,
-          this.props.mcSpecHP.source.httpGet.path,
+      : this.props.changeMCHttpGetNAS(
+          this.props.mcSpecNAS.source.httpGet.port,
+          this.props.mcSpecNAS.source.httpGet.path,
           event.target.value,
-          this.props.mcSpecHP.source.httpGet.host,
+          this.props.mcSpecNAS.source.httpGet.host,
         );
   };
 
@@ -168,10 +181,10 @@ class MetricsCollectorSpec extends React.Component {
           this.props.mcSpecHP.source.httpGet.scheme,
           event.target.value,
         )
-      : this.props.changeMCHttpGetHP(
-          this.props.mcSpecHP.source.httpGet.port,
-          this.props.mcSpecHP.source.httpGet.path,
-          this.props.mcSpecHP.source.httpGet.scheme,
+      : this.props.changeMCHttpGetNAS(
+          this.props.mcSpecNAS.source.httpGet.port,
+          this.props.mcSpecNAS.source.httpGet.path,
+          this.props.mcSpecNAS.source.httpGet.scheme,
           event.target.value,
         );
   };
@@ -179,25 +192,25 @@ class MetricsCollectorSpec extends React.Component {
   onMCHttpGetHeaderAdd = () => {
     this.props.jobType === constants.JOB_TYPE_HP
       ? this.props.addMCHttpGetHeaderHP()
-      : this.props.addMCHttpGetHeaderHP();
+      : this.props.addMCHttpGetHeaderNAS();
   };
 
   onMCHttpGetHeaderChange = (fieldName, index) => event => {
     this.props.jobType === constants.JOB_TYPE_HP
       ? this.props.changeMCHttpGetHeaderHP(fieldName, event.target.value, index)
-      : this.props.changeMCHttpGetHeaderHP(fieldName, event.target.value, index);
+      : this.props.changeMCHttpGetHeaderNAS(fieldName, event.target.value, index);
   };
 
   onMCHttpGetHeaderDelete = index => event => {
     this.props.jobType === constants.JOB_TYPE_HP
       ? this.props.deleteMCHttpGetHeaderHP(index)
-      : this.props.deleteMCHttpGetHeaderHP(index);
+      : this.props.deleteMCHttpGetHeaderNAS(index);
   };
 
   onMCCustomContainerChange = yamlContainer => {
     this.props.jobType === constants.JOB_TYPE_HP
       ? this.props.changeMCCustomContainerHP(yamlContainer)
-      : this.props.changeMCCustomContainerHP(yamlContainer);
+      : this.props.changeMCCustomContainerNAS(yamlContainer);
   };
   render() {
     const { classes } = this.props;
@@ -303,7 +316,7 @@ class MetricsCollectorSpec extends React.Component {
             {((this.props.jobType === constants.JOB_TYPE_HP &&
               this.props.mcSpecHP.source.fileSystemPath.kind != constants.MC_FILE_SYSTEM_NO_KIND) ||
               (this.props.jobType === constants.JOB_TYPE_NAS &&
-                this.props.mcSpecHP.source.fileSystemPath.kind !=
+                this.props.mcSpecNAS.source.fileSystemPath.kind !=
                   constants.MC_FILE_SYSTEM_NO_KIND)) && (
               <Grid item xs={3}>
                 <TextField
@@ -583,7 +596,7 @@ class MetricsCollectorSpec extends React.Component {
                   <Grid item xs={3} />
                   <Grid item xs={6}>
                     <TextField
-                      label={'Metrics Format'}
+                      label={'Metrics Format regular expression'}
                       className={classes.textField}
                       value={format}
                       onChange={this.onMCMetricsFormatChange(index)}
@@ -630,4 +643,14 @@ export default connect(mapStateToProps, {
   changeMCHttpGetHeaderHP,
   deleteMCHttpGetHeaderHP,
   changeMCCustomContainerHP,
+  changeMCKindNAS,
+  changeMCFileSystemNAS,
+  addMCMetricsFormatNAS,
+  changeMCMetricsFormatNAS,
+  deleteMCMetricsFormatNAS,
+  changeMCHttpGetNAS,
+  addMCHttpGetHeaderNAS,
+  changeMCHttpGetHeaderNAS,
+  deleteMCHttpGetHeaderNAS,
+  changeMCCustomContainerNAS,
 })(withStyles(styles)(MetricsCollectorSpec));
