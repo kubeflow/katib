@@ -1,4 +1,5 @@
 import * as actions from '../actions/nasCreateActions';
+import * as constants from '../constants/constants';
 
 const initialState = {
   commonParametersMetadata: [
@@ -347,6 +348,17 @@ const initialState = {
   currentYaml: '',
   snackText: '',
   snackOpen: false,
+  mcSpec: {
+    collector: {
+      kind: 'StdOut',
+    },
+    source: {
+      filter: {
+        metricsFormat: [],
+      },
+    },
+  },
+  mcCustomContainerYaml: '',
 };
 
 const filterValue = (obj, key) => {
@@ -544,6 +556,135 @@ const nasCreateReducer = (state = initialState, action) => {
       return {
         ...state,
         snackOpen: false,
+      };
+    // Metrics Collector Kind change
+    case actions.CHANGE_MC_KIND_NAS:
+      let newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
+      newMCSpec.collector.kind = action.kind;
+
+      if (
+        action.kind === constants.MC_KIND_FILE ||
+        action.kind === constants.MC_KIND_TENSORFLOW_EVENT ||
+        action.kind === constants.MC_KIND_CUSTOM
+      ) {
+        let newKind;
+        switch (action.kind) {
+          case constants.MC_KIND_FILE:
+            newKind = constants.MC_FILE_SYSTEM_KIND_FILE;
+            break;
+
+          case constants.MC_KIND_TENSORFLOW_EVENT:
+            newKind = constants.MC_FILE_SYSTEM_KIND_DIRECTORY;
+            break;
+
+          default:
+            newKind = constants.MC_FILE_SYSTEM_NO_KIND;
+        }
+        // File or TF Event Kind
+        newMCSpec.source.fileSystemPath = {
+          kind: newKind,
+          path: '',
+        };
+      } else if (action.kind === constants.MC_KIND_PROMETHEUS) {
+        // Prometheus Kind
+        newMCSpec.source.httpGet = {
+          port: constants.MC_PROMETHEUS_DEFAULT_PORT,
+          path: constants.MC_PROMETHEUS_DEFAULT_PATH,
+          scheme: constants.MC_HTTP_GET_HTTP_SCHEME,
+          host: '',
+          httpHeaders: [],
+        };
+      }
+
+      return {
+        ...state,
+        mcSpec: newMCSpec,
+        mcCustomContainerYaml: '',
+      };
+    // File System Path change
+    case actions.CHANGE_MC_FILE_SYSTEM_NAS:
+      newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
+      newMCSpec.source.fileSystemPath.kind = action.kind;
+      newMCSpec.source.fileSystemPath.path = action.path;
+      return {
+        ...state,
+        mcSpec: newMCSpec,
+      };
+    // HTTPGet settings
+    case actions.CHANGE_MC_HTTP_GET_NAS:
+      newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
+
+      newMCSpec.source.httpGet.port = action.port;
+      newMCSpec.source.httpGet.path = action.path;
+      newMCSpec.source.httpGet.scheme = action.scheme;
+      newMCSpec.source.httpGet.host = action.host;
+
+      return {
+        ...state,
+        mcSpec: newMCSpec,
+      };
+    // Collector HTTPGet Headers
+    case actions.ADD_MC_HTTP_GET_HEADER_NAS:
+      newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
+      let currentHeaders = newMCSpec.source.httpGet.httpHeaders.slice();
+      let newHeader = { name: '', value: '' };
+      currentHeaders.push(newHeader);
+      newMCSpec.source.httpGet.httpHeaders = currentHeaders;
+      return {
+        ...state,
+        mcSpec: newMCSpec,
+      };
+    case actions.CHANGE_MC_HTTP_GET_HEADER_NAS:
+      newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
+      currentHeaders = newMCSpec.source.httpGet.httpHeaders.slice();
+      currentHeaders[action.index][action.fieldName] = action.value;
+      newMCSpec.source.httpGet.httpHeaders = currentHeaders;
+      return {
+        ...state,
+        mcSpec: newMCSpec,
+      };
+    case actions.DELETE_MC_HTTP_GET_HEADER_NAS:
+      newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
+      currentHeaders = newMCSpec.source.httpGet.httpHeaders.slice();
+      currentHeaders.splice(action.index, 1);
+      newMCSpec.source.httpGet.httpHeaders = currentHeaders;
+      return {
+        ...state,
+        mcSpec: newMCSpec,
+      };
+    // Collector Custom container
+    case actions.CHANGE_MC_CUSTOM_CONTAINER_NAS:
+      return {
+        ...state,
+        mcCustomContainerYaml: action.yamlContainer,
+      };
+    // Collector Metrics Format
+    case actions.ADD_MC_METRICS_FORMAT_NAS:
+      newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
+      let currentFormats = newMCSpec.source.filter.metricsFormat.slice();
+      currentFormats.push('');
+      newMCSpec.source.filter.metricsFormat = currentFormats;
+      return {
+        ...state,
+        mcSpec: newMCSpec,
+      };
+    case actions.CHANGE_MC_METRIC_FORMAT_NAS:
+      newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
+      currentFormats = newMCSpec.source.filter.metricsFormat.slice();
+      currentFormats[action.index] = action.format;
+      newMCSpec.source.filter.metricsFormat = currentFormats;
+      return {
+        ...state,
+        mcSpec: newMCSpec,
+      };
+    case actions.DELETE_MC_METRIC_FORMAT_NAS:
+      newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
+      currentFormats = newMCSpec.source.filter.metricsFormat.slice();
+      currentFormats.splice(action.index, 1);
+      newMCSpec.source.filter.metricsFormat = currentFormats;
+      return {
+        ...state,
+        mcSpec: newMCSpec,
       };
     default:
       return state;

@@ -89,3 +89,10 @@ export const changeTemplateName = templateName => ({
   type: CHANGE_TEMPLATE_NAME,
   templateName,
 });
+
+export const VALIDATION_ERROR = 'VALIDATION_ERROR';
+
+export const validationError = message => ({
+  type: VALIDATION_ERROR,
+  message,
+});

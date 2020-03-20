@@ -22,6 +22,9 @@ const initialState = {
   trialTemplatesList: [],
   currentTemplateConfigMapsList: [],
   currentTemplateNamesList: [],
+  mcKindsList: ['StdOut', 'File', 'TensorFlowEvent', 'PrometheusMetric', 'Custom', 'None'],
+  mcFileSystemKindsList: ['No File System', 'File', 'Directory'],
+  mcURISchemesList: ['HTTP', 'HTTPS'],
 };
 
 const generalReducer = (state = initialState, action) => {
@@ -223,6 +226,12 @@ const generalReducer = (state = initialState, action) => {
       return {
         ...state,
         templateName: action.templateName,
+      };
+    case actions.VALIDATION_ERROR:
+      return {
+        ...state,
+        snackOpen: true,
+        snackText: action.message,
       };
     default:
       return state;

@@ -1,6 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
+import jsyaml from 'js-yaml';
+
 import withStyles from '@material-ui/styles/withStyles';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -14,6 +16,10 @@ import Parameters from './Params/Parameters';
 import Algorithm from './Params/Algorithm';
 
 import { submitHPJob } from '../../../actions/hpCreateActions';
+import MetricsCollectorSpec from '../../Common/Create/Params/MetricsCollector';
+
+import { validationError } from '../../../actions/generalActions';
+import * as constants from '../../../constants/constants';
 
 const module = 'hpCreate';
 const generalModule = 'general';
@@ -122,6 +128,73 @@ const HPParameters = props => {
     data.spec.parameters = [];
     addParameter(props.parameters, data.spec.parameters);
 
+    // Metrics Collector
+    let newMCSpec = JSON.parse(JSON.stringify(props.mcSpec));
+
+    // Delete empty metrics format
+    if (
+      newMCSpec.source.filter.metricsFormat.length === 0 ||
+      newMCSpec.collector.kind === constants.MC_KIND_NONE
+    ) {
+      delete newMCSpec.source.filter;
+    }
+
+    if (
+      newMCSpec.collector.kind === constants.MC_KIND_STDOUT ||
+      newMCSpec.collector.kind === constants.MC_KIND_NONE
+    ) {
+      // Delete fileSystemPath and httpGet
+      delete newMCSpec.source.fileSystemPath;
+      delete newMCSpec.source.httpGet;
+    }
+
+    if (
+      newMCSpec.collector.kind === constants.MC_KIND_FILE ||
+      newMCSpec.collector.kind === constants.MC_KIND_TENSORFLOW_EVENT ||
+      newMCSpec.collector.kind === constants.MC_KIND_CUSTOM
+    ) {
+      // Delete httpGet
+      delete newMCSpec.source.httpGet;
+      // Delete empty fileSystemPath
+      if (newMCSpec.source.fileSystemPath.kind === constants.MC_FILE_SYSTEM_NO_KIND) {
+        delete newMCSpec.source.fileSystemPath;
+      }
+    }
+
+    if (newMCSpec.collector.kind === constants.MC_KIND_PROMETHEUS) {
+      // Delete file System Path
+      delete newMCSpec.source.fileSystemPath;
+      // Delete empty host
+      if (newMCSpec.source.httpGet.host === '') {
+        delete newMCSpec.source.httpGet.host;
+      }
+      // Delete empty headers
+      if (newMCSpec.source.httpGet.httpHeaders.length === 0) {
+        delete newMCSpec.source.httpGet.httpHeaders;
+      }
+    }
+
+    // Delete empty source
+    if (newMCSpec.source != undefined && Object.keys(newMCSpec.source).length === 0) {
+      delete newMCSpec.source;
+    }
+
+    // Add Custom Container YAML to the Metrics Collector
+    if (
+      newMCSpec.collector.kind === constants.MC_KIND_CUSTOM &&
+      props.mcCustomContainerYaml != ''
+    ) {
+      try {
+        let mcCustomContainerJson = jsyaml.load(props.mcCustomContainerYaml);
+        newMCSpec.collector.customCollector = mcCustomContainerJson;
+      } catch {
+        props.validationError('Metrics Collector Custom Container is not valid YAML!');
+        return;
+      }
+    }
+
+    data.spec.metricsCollectorSpec = newMCSpec;
+
     data.spec.trialTemplate = {
       goTemplate: {
         templateSpec: {
@@ -152,6 +225,8 @@ const HPParameters = props => {
 
       {SectionInTypography('Parameters', classes)}
       <Parameters />
+      {SectionInTypography('Metrics Collector Spec', classes)}
+      <MetricsCollectorSpec jobType={constants.JOB_TYPE_HP} />
       {SectionInTypography('Trial Spec', classes)}
       <TrialSpecParam />
 
@@ -181,6 +256,10 @@ const mapStateToProps = state => ({
   templateNamespace: state[generalModule].templateNamespace,
   templateConfigMapName: state[generalModule].templateConfigMapName,
   templateName: state[generalModule].templateName,
+  trial: state[module].trial,
+  trialNamespace: state[module].trialNamespace,
+  mcSpec: state[module].mcSpec,
+  mcCustomContainerYaml: state[module].mcCustomContainerYaml,
 });
 
 //TODO: Added validation and remove it
@@ -191,4 +270,6 @@ const mapStateToProps = state => ({
 //     metricsName: PropTypes.arrayOf(PropTypes.string),
 // }
 
-export default connect(mapStateToProps, { submitHPJob })(withStyles(styles)(HPParameters));
+export default connect(mapStateToProps, { submitHPJob, validationError })(
+  withStyles(styles)(HPParameters),
+);
