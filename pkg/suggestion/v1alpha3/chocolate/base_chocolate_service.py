@@ -54,7 +54,7 @@ class BaseChocolateService(object):
             sampler = choco.Bayes(conn, chocolate_search_space, clear_db=True)
         # elif self.algorithm_name == "chocolate-CMAES":
         #     sampler = choco.CMAES(conn, chocolate_search_space, clear_db=True)
-        elif self.algorithm_name == "chocolate-MOCMAES":
+        elif self.algorithm_name == "chocolate-mocmaes":
             mu = 1
             sampler = choco.MOCMAES(
                 conn, chocolate_search_space, mu=mu, clear_db=True)
