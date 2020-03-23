@@ -40,6 +40,13 @@ const (
 	// DefaultKatibComposerEnvName is the default env name of katib suggestion composer
 	DefaultKatibComposerEnvName = "KATIB_SUGGESTION_COMPOSER"
 
+	// DefaultKatibDBManagerNamespaceEnvName is the env name of Katib DB Manager namespace
+	DefaultKatibDBManagerNamespaceEnvName = "KATIB_DB_MANAGER_NAMESPACE"
+	// DefaultKatibDBManagerIPEnvName is the env name of Katib DB Manager IP
+	DefaultKatibDBManagerIPEnvName = "KATIB_DB_MANAGER_IP"
+	// DefaultKatibDBManagerPortEnvName is the env name of Katib DB Manager Port
+	DefaultKatibDBManagerPortEnvName = "KATIB_DB_MANAGER_PORT"
+
 	// KatibConfigMapName is the config map constants
 	// Configmap name which includes Katib's configuration
 	KatibConfigMapName = "katib-config"
@@ -115,7 +122,9 @@ const (
 	// AnnotationIstioSidecarInjectValue is the value of Istio Sidecar annotation
 	AnnotationIstioSidecarInjectValue = "false"
 
-	LabelTrialTemplateConfigMapName  = "app"
+	// LabelTrialTemplateConfigMapName is the label name for the Trial templates configMap
+	LabelTrialTemplateConfigMapName = "app"
+	// LabelTrialTemplateConfigMapValue is the label value for the Trial templates configMap
 	LabelTrialTemplateConfigMapValue = "katib-trial-templates"
 )
 
@@ -124,4 +133,11 @@ var (
 	DefaultKatibNamespace = env.GetEnvOrDefault(DefaultKatibNamespaceEnvName, "kubeflow")
 	// DefaultComposer is the default composer of katib suggestion.
 	DefaultComposer = env.GetEnvOrDefault(DefaultKatibComposerEnvName, "General")
+
+	// DefaultKatibDBManagerNamespace is the default namespace of Katib DB Manager
+	DefaultKatibDBManagerNamespace = env.GetEnvOrDefault(DefaultKatibDBManagerNamespaceEnvName, DefaultKatibNamespace)
+	// DefaultKatibDBManagerIP is the default IP of Katib DB Manager
+	DefaultKatibDBManagerIP = env.GetEnvOrDefault(DefaultKatibDBManagerIPEnvName, "katib-db-manager")
+	// DefaultKatibDBManagerPort is the default Port of Katib DB Manager
+	DefaultKatibDBManagerPort = env.GetEnvOrDefault(DefaultKatibDBManagerPortEnvName, "6789")
 )

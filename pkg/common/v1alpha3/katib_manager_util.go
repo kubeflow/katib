@@ -17,7 +17,6 @@ package v1alpha3
 
 import (
 	"context"
-	"os"
 
 	"google.golang.org/grpc"
 
@@ -25,32 +24,19 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 )
 
-const (
-	KatibDBManagerServiceIPEnvName   = "KATIB_DB_MANAGER_PORT_6789_TCP_ADDR"
-	KatibDBManagerServicePortEnvName = "KATIB_DB_MANAGER_PORT_6789_TCP_PORT"
-	KatibDBManagerService            = "katib-db-manager"
-	KatibDBManagerPort               = "6789"
-	KatibDBManagerAddr               = KatibDBManagerService + ":" + KatibDBManagerPort
-)
-
 type katibDBManagerClientAndConn struct {
 	Conn                 *grpc.ClientConn
 	KatibDBManagerClient api_pb.ManagerClient
 }
 
+// GetDBManagerAddr returns address of Katib DB Manager
 func GetDBManagerAddr() string {
-	ns := consts.DefaultKatibNamespace
-	if len(ns) == 0 {
-		addr := os.Getenv(KatibDBManagerServiceIPEnvName)
-		port := os.Getenv(KatibDBManagerServicePortEnvName)
-		if len(addr) > 0 && len(port) > 0 {
-			return addr + ":" + port
-		} else {
-			return KatibDBManagerAddr
-		}
-	} else {
-		return KatibDBManagerService + "." + ns + ":" + KatibDBManagerPort
+
+	if len(consts.DefaultKatibDBManagerNamespace) != 0 {
+		return consts.DefaultKatibDBManagerIP + "." + consts.DefaultKatibDBManagerNamespace + ":" + consts.DefaultKatibDBManagerPort
 	}
+
+	return consts.DefaultKatibDBManagerIP + ":" + consts.DefaultKatibDBManagerPort
 }
 
 func getKatibDBManagerClientAndConn() (*katibDBManagerClientAndConn, error) {
