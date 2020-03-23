@@ -31,12 +31,15 @@ type katibDBManagerClientAndConn struct {
 
 // GetDBManagerAddr returns address of Katib DB Manager
 func GetDBManagerAddr() string {
+	dbManagerNS := consts.DefaultKatibDBManagerServiceNamespace
+	dbManagerIP := consts.DefaultKatibDBManagerServiceIP
+	dbManagerPort := consts.DefaultKatibDBManagerServicePort
 
-	if len(consts.DefaultKatibDBManagerNamespace) != 0 {
-		return consts.DefaultKatibDBManagerIP + "." + consts.DefaultKatibDBManagerNamespace + ":" + consts.DefaultKatibDBManagerPort
+	if len(dbManagerNS) != 0 {
+		return dbManagerIP + "." + dbManagerNS + ":" + dbManagerPort
 	}
 
-	return consts.DefaultKatibDBManagerIP + ":" + consts.DefaultKatibDBManagerPort
+	return dbManagerIP + ":" + dbManagerPort
 }
 
 func getKatibDBManagerClientAndConn() (*katibDBManagerClientAndConn, error) {
