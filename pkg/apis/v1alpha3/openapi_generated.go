@@ -78,7 +78,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 							},
 						},
 					},
-					Required: []string{"algorithmSettings"},
 				},
 			},
 			Dependencies: []string{

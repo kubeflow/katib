@@ -1,4 +1,4 @@
-# Document about how to support a new Kubernetes resource in katib trial
+# Document about how to support a new Kubernetes resource in Katib trial
 
 ## Update the supported list
 
@@ -27,7 +27,7 @@ func GetSupportedJobList() []schema.GroupVersionKind {
 }
 ```
 
-In this function, we define the Kubernetes `GroupVersionKind` that are supported in katib. If you want to add a new kind, please append the `supportedJobList`.
+In this function, we define the Kubernetes `GroupVersionKind` that are supported in Katib. If you want to add a new kind, please append the `supportedJobList`.
 
 ## Update logic about status update
 
@@ -70,7 +70,7 @@ The function is used to determine which container in the job is the actual main 
 
 ### Add logic about how to determine the master pod
 
-In katib, we only inject metrics collector sidecar into the master pod (See [metrics-collector.md](./proposals/metrics-collector.md) for more details). Thus we need to update the `JobRoleMap` in [const.go](../pkg/webhook/v1alpha3/pod/const.go).
+In Katib, we only inject metrics collector sidecar into the master pod (See [metrics-collector.md](./proposals/metrics-collector.md) for more details). Thus we need to update the `JobRoleMap` in [const.go](../pkg/webhook/v1alpha3/pod/const.go).
 
 ```go
 var JobRoleMap = map[string][]string{

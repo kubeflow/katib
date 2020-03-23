@@ -1,4 +1,6 @@
 import React from 'react';
+import { connect } from 'react-redux';
+
 import withStyles from '@material-ui/styles/withStyles';
 import Grid from '@material-ui/core/Grid';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -9,124 +11,155 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import TextField from '@material-ui/core/TextField';
 
-import { connect } from 'react-redux';
-import { changeTrial, changeTrialNamespace } from '../../../../actions/nasCreateActions';
+import { filterTemplatesExperiment, changeTemplateName } from '../../../../actions/generalActions';
 import { fetchTrialTemplates } from '../../../../actions/templateActions';
 
-const module = "nasCreate";
-const templateModule = "template";
+const module = 'nasCreate';
+const generalModule = 'general';
 
 const styles = theme => ({
-    help: {
-        padding: 4 / 2,
-        verticalAlign: "middle",
-        marginRight: 5,
-    },
-    section: {
-        padding: 4,
-    },
-    parameter: {
-        padding: 2,
-        marginBottom: 10,
-    },
-    formControl: {
-        margin: 4,
-        width: '100%',
-    },
-    selectEmpty: {
-        marginTop: 10,
-    },
-})
-
+  help: {
+    padding: 4 / 2,
+    verticalAlign: 'middle',
+    marginRight: 5,
+  },
+  section: {
+    padding: 4,
+  },
+  parameter: {
+    padding: 2,
+    marginBottom: 10,
+  },
+  trialForm: {
+    margin: 4,
+    width: '100%',
+  },
+  selectForm: {
+    margin: 4,
+    width: '20%',
+  },
+  selectNS: {
+    marginRight: 10,
+  },
+});
 
 class TrialSpecParam extends React.Component {
+  componentDidMount() {
+    this.props.fetchTrialTemplates();
+  }
 
-    componentDidMount() {
-        this.props.fetchTrialTemplates(this.props.trialNamespace);
-        this.props.changeTrialNamespace(this.props.trialNamespace);
-    }
+  onTrialNamespaceChange = event => {
+    this.props.filterTemplatesExperiment(event.target.value, '');
+  };
 
-    onTrialNamespaceChange = (event) => {
-        this.props.fetchTrialTemplates(event.target.value);
-        this.props.changeTrialNamespace(event.target.value);
-    }
+  onTrialConfigMapChange = event => {
+    this.props.filterTemplatesExperiment(this.props.templateNamespace, event.target.value);
+  };
 
-    onTrialChange = (event) => {
-        this.props.changeTrial(event.target.value);
-    }
+  onTrialTemplateChange = event => {
+    this.props.changeTemplateName(event.target.value);
+  };
 
-    render() {
-        const names = this.props.templates.map((template, i) => template.name)
-
-        const { classes } = this.props
-        return (
-            <div>
-                <div className={classes.parameter}>
-                    <Grid container alignItems={"center"}>
-                        <Grid item xs={12} sm={3}>
-                            <Typography variant={"subheading"}>
-                                <Tooltip title={"Trial namespace"}>
-                                    <HelpOutlineIcon className={classes.help} color={"primary"} />
-                                </Tooltip>
-                                {"Namespace"}
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={12} sm={8}>
-                            <TextField
-                                className={"Trial Namespace"}
-                                value={this.props.trialNamespace}
-                                onChange={this.onTrialNamespaceChange}
-                            />
-                        </Grid>
-                    </Grid>
-                </div>
-                <div className={classes.parameter}>
-                    <Grid container alignItems={"center"}>
-                        <Grid item xs={12} sm={3}>
-                            <Typography variant={"subheading"}>
-                                <Tooltip title={"Trial spec template"}>
-                                    <HelpOutlineIcon className={classes.help} color={"primary"} />
-                                </Tooltip>
-                                {"TrialSpec"}
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={12} sm={8}>
-                            <FormControl variant="outlined" className={classes.formControl}>
-                                <InputLabel>
-                                    Trial Spec
-                                </InputLabel>
-                                <Select
-                                    value={this.props.trial}
-                                    onChange={this.onTrialChange}
-                                    input={
-                                        <OutlinedInput name={"TrialSpec"} labelWidth={100} />
-                                    }
-                                    className={classes.select}
-                                >
-                                    {names.map((spec, i) => {
-                                        return (
-                                            <MenuItem value={spec} key={i}>{spec}</MenuItem>
-                                        )
-                                    })}
-                                </Select>
-                            </FormControl>
-                        </Grid>
-                    </Grid>
-                </div>
-            </div>
-        )
-    }
+  render() {
+    const { classes } = this.props;
+    return (
+      <div>
+        <div className={classes.parameter}>
+          <Grid container alignItems={'center'}>
+            <Grid item xs={12} sm={3}>
+              <Typography variant={'subheading'}>
+                <Tooltip title={'Namespace and ConfigMap for Trial Template'}>
+                  <HelpOutlineIcon className={classes.help} color={'primary'} />
+                </Tooltip>
+                {'Namespace and ConfigMapName'}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={8}>
+              <FormControl variant="outlined" className={classes.selectForm}>
+                <InputLabel>Namespace</InputLabel>
+                <Select
+                  value={this.props.templateNamespace}
+                  onChange={this.onTrialNamespaceChange}
+                  className={classes.selectNS}
+                  input={<OutlinedInput labelWidth={120} />}
+                >
+                  {this.props.trialTemplatesList.map((trialTemplate, i) => {
+                    return (
+                      <MenuItem value={trialTemplate.Namespace} key={i}>
+                        {trialTemplate.Namespace}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+              <FormControl variant="outlined" className={classes.selectForm}>
+                <InputLabel>ConfigMap</InputLabel>
+                <Select
+                  value={this.props.templateConfigMapName}
+                  onChange={this.onTrialConfigMapChange}
+                  input={<OutlinedInput labelWidth={120} />}
+                >
+                  {this.props.currentTemplateConfigMapsList.map((name, i) => {
+                    return (
+                      <MenuItem value={name} key={i}>
+                        {name}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </div>
+        <div className={classes.parameter}>
+          <Grid container alignItems={'center'}>
+            <Grid item xs={12} sm={3}>
+              <Typography variant={'subheading'}>
+                <Tooltip title={'Trial Template Path in ConfigMap'}>
+                  <HelpOutlineIcon className={classes.help} color={'primary'} />
+                </Tooltip>
+                {'Trial Template Name'}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={8}>
+              <FormControl variant="outlined" className={classes.trialForm}>
+                <InputLabel>Trial Template</InputLabel>
+                <Select
+                  value={this.props.templateName}
+                  onChange={this.onTrialTemplateChange}
+                  input={<OutlinedInput name={'TrialSpec'} labelWidth={100} />}
+                >
+                  {this.props.currentTemplateNamesList.map((name, i) => {
+                    return (
+                      <MenuItem value={name} key={i}>
+                        {name}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </div>
+      </div>
+    );
+  }
 }
-
 
 const mapStateToProps = state => {
-    return {
-        trial: state[module].trial,
-        templates: state[templateModule].trialTemplates,
-        trialNamespace: state[module].trialNamespace,
-    }
-}
+  return {
+    trialTemplatesList: state[generalModule].trialTemplatesList,
+    templateNamespace: state[generalModule].templateNamespace,
+    templateConfigMapName: state[generalModule].templateConfigMapName,
+    currentTemplateConfigMapsList: state[generalModule].currentTemplateConfigMapsList,
+    templateName: state[generalModule].templateName,
+    currentTemplateNamesList: state[generalModule].currentTemplateNamesList,
+  };
+};
 
-export default connect(mapStateToProps, { changeTrialNamespace, changeTrial, fetchTrialTemplates })(withStyles(styles)(TrialSpecParam));
+export default connect(mapStateToProps, {
+  filterTemplatesExperiment,
+  changeTemplateName,
+  fetchTrialTemplates,
+})(withStyles(styles)(TrialSpecParam));

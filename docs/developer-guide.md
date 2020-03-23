@@ -6,7 +6,7 @@ Table of Contents
       * [Requirements](#requirements)
       * [Build from source code](#build-from-source-code)
       * [Workflow design](#workflow-design)
-      * [Implement a new algorithm and use it in katib](#implement-a-new-algorithm-and-use-it-in-katib)
+      * [Implement a new algorithm and use it in Katib](#implement-a-new-algorithm-and-use-it-in-katib)
       * [Create a new Trial kind](#create-a-new-trial-kind)
       * [Algorithm settings documentation](#algorithm-settings-documentation)
       * [Design proposals](#design-proposals)
@@ -39,13 +39,13 @@ Check source code as follows:
 make build
 ```
 
-You can deploy katib v1alpha3 manifests into a k8s cluster as follows:
+You can deploy Katib v1alpha3 manifests into a k8s cluster as follows:
 
 ```bash
 make deploy
 ```
 
-You can undeploy katib v1alpha3 manifests from a k8s cluster as follows:
+You can undeploy Katib v1alpha3 manifests from a k8s cluster as follows:
 
 ```bash
 make undeploy
@@ -55,7 +55,7 @@ make undeploy
 
 Please see [workflow-design.md](./workflow-design.md)
 
-## Implement a new algorithm and use it in katib
+## Implement a new algorithm and use it in Katib
 
 Please see [new-algorithm-service.md](./new-algorithm-service.md)
 

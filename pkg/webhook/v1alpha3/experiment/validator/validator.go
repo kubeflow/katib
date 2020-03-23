@@ -145,7 +145,7 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1alpha3.E
 
 func (g *DefaultValidator) validateSupportedJob(job *unstructured.Unstructured) error {
 	gvk := job.GroupVersionKind()
-	supportedJobs := jobv1alpha3.GetSupportedJobList()
+	supportedJobs := jobv1alpha3.SupportedJobList
 	for _, sJob := range supportedJobs {
 		if gvk == sJob {
 			return nil
@@ -162,7 +162,7 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1alpha3.Ex
 			continue
 		}
 		if _, err := g.GetMetricsCollectorImage(mcKind); err != nil {
-			return fmt.Errorf("Don't support metrics collector kind %q: %v.", string(mcKind), err)
+			return fmt.Errorf("GetMetricsCollectorImage failed: %v.", err)
 		}
 		break
 	}

@@ -1,6 +1,7 @@
 package v1alpha3
 
 import (
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibclient"
 )
 
@@ -9,6 +10,9 @@ const maxMsgSize = 1<<31 - 1
 var (
 	// namespace      = "default"
 	allowedHeaders = "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, X-CSRF-Token"
+
+	TrialTemplateLabel = map[string]string{
+		consts.LabelTrialTemplateConfigMapName: consts.LabelTrialTemplateConfigMapValue}
 )
 
 type Decoder struct {
@@ -36,18 +40,27 @@ type JobView struct {
 	Namespace string
 }
 
-type TemplateView struct {
+type TrialTemplatesView struct {
+	Namespace      string
+	ConfigMapsList []ConfigMapsList
+}
+
+type TrialTemplatesResponse struct {
+	Data []TrialTemplatesView
+}
+
+type ConfigMapsList struct {
+	ConfigMapName string
+	TemplatesList []TemplatesList
+}
+
+type TemplatesList struct {
 	Name string
 	Yaml string
 }
 
 type KatibUIHandler struct {
 	katibClient katibclient.Client
-}
-
-type TemplateResponse struct {
-	TemplateType string
-	Data         []TemplateView
 }
 
 type NNView struct {
@@ -61,6 +74,9 @@ type NNView struct {
 type JobType string
 
 const (
-	JobTypeHP  = "HP"
-	JobTypeNAS = "NAS"
+	JobTypeHP        = "HP"
+	JobTypeNAS       = "NAS"
+	ActionTypeAdd    = "add"
+	ActionTypeEdit   = "edit"
+	ActionTypeDelete = "delete"
 )

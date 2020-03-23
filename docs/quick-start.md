@@ -30,7 +30,7 @@ In this quick start guide, we demonstrate how to use TensorFlow in Katib, which 
 
 ### Package Training Code
 
-The first thing we need to do is to package the training code to a docker image. We use the [example code](../examples/v1alpha3/mnist-tensorflow/mnist_with_summaries.py), which builds a simple neural network, to train on MNIST. The code trains the network and outputs the TFEvents to `/tmp` by default.
+The first thing we need to do is to package the training code to a docker image. We use the [example code](https://github.com/kubeflow/tf-operator/blob/master/examples/v1/mnist_with_summaries/mnist_with_summaries.py), which builds a simple neural network, to train on MNIST. The code trains the network and outputs the TFEvents to `/tmp` by default.
 
 You can use our prebuilt image `gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0`. Thus we can skip it.
 
@@ -121,7 +121,7 @@ The experiment has two hyperparameters defined in `parameters`： `--learning_ra
 Or you could just run:
 
 ```bash
-kubectl apply -f ./examples/v1alpha3/tfjob-example.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1alpha3/tfjob-example.yaml
 ```
 
 ### Get trial results

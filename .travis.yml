@@ -1,20 +1,25 @@
-language: go
-
-go:
-  - "1.12.5"
-
-go_import_path: github.com/kubeflow/katib
-
-install:
-  - curl -L -O "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.7/kubebuilder_1.0.7_linux_amd64.tar.gz"
-  - # extract the archive
-  - tar -zxvf kubebuilder_1.0.7_linux_amd64.tar.gz
-  - sudo mv kubebuilder_1.0.7_linux_amd64 /usr/local/kubebuilder
-  - export PATH=$PATH:/usr/local/kubebuilder/bin
-  # get coveralls.io support
-  - go get github.com/mattn/goveralls
-
-script:
-  - make check
-  - make test
-  - goveralls -coverprofile=coverage.out
+jobs:
+  include:
+    - name: "Go unit tests, gofmt, golint and coveralls"
+      language: go
+      go: "1.12.5"
+      go_import_path: github.com/kubeflow/katib
+      install:
+        - curl -L -O "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.7/kubebuilder_1.0.7_linux_amd64.tar.gz"
+        - # extract the archive
+        - tar -zxvf kubebuilder_1.0.7_linux_amd64.tar.gz
+        - sudo mv kubebuilder_1.0.7_linux_amd64 /usr/local/kubebuilder
+        - export PATH=$PATH:/usr/local/kubebuilder/bin
+        # get coveralls.io support
+        - go get github.com/mattn/goveralls
+      script:
+        - make check
+        - make test
+        - goveralls -coverprofile=coverage.out
+    - name: "Prettier frontend check"
+      language: node_js
+      node_js: "10.13.0"
+      install:
+        - npm install --global prettier@1.19.1
+      script:
+        - make prettier-check

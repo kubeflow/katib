@@ -13,7 +13,6 @@ import (
 	experimentv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	api_pb_v1alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 	common_v1alpha3 "github.com/kubeflow/katib/pkg/common/v1alpha3"
-	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibclient"
 )
 
@@ -116,21 +115,20 @@ func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request
 	}
 }
 
-// FetchTrialTemplates gets the trial templates for the given namespace.
+// FetchTrialTemplates gets all trial templates in all namespaces
 func (k *KatibUIHandler) FetchTrialTemplates(w http.ResponseWriter, r *http.Request) {
-	//enableCors(&w)
-	namespace := r.URL.Query()["namespace"][0]
-	if namespace == "" {
-		namespace = consts.DefaultKatibNamespace
-	}
-	trialTemplates, err := k.katibClient.GetTrialTemplates(namespace)
+
+	trialTemplatesViewList, err := k.getTrialTemplatesViewList()
 	if err != nil {
-		log.Printf("GetTrialTemplate failed: %v", err)
+		log.Printf("getTrialTemplatesViewList failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	response, err := json.Marshal(getTemplatesView(trialTemplates))
+	TrialTemplatesResponse := TrialTemplatesResponse{
+		Data: trialTemplatesViewList,
+	}
+	response, err := json.Marshal(TrialTemplatesResponse)
 	if err != nil {
 		log.Printf("Marshal templates failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -139,29 +137,91 @@ func (k *KatibUIHandler) FetchTrialTemplates(w http.ResponseWriter, r *http.Requ
 	w.Write(response)
 }
 
-func (k *KatibUIHandler) AddEditDeleteTemplate(w http.ResponseWriter, r *http.Request) {
-	//enableCors(&w)
-	//TODO: need to delete?
-	if r.Method == "OPTIONS" {
-		return
-	}
+//AddTemplate adds template to ConfigMap
+//TODO: Add functionality to create new ConfigMap
+func (k *KatibUIHandler) AddTemplate(w http.ResponseWriter, r *http.Request) {
 	var data map[string]interface{}
-	var err error
-	var templateResponse TemplateResponse
-
 	json.NewDecoder(r.Body).Decode(&data)
-	if data["action"].(string) == "delete" {
-		templateResponse, err = k.updateTemplates(data, true)
-	} else {
-		templateResponse, err = k.updateTemplates(data, false)
-	}
+
+	edittedNamespace := data["edittedNamespace"].(string)
+	edittedConfigMapName := data["edittedConfigMapName"].(string)
+	edittedName := data["edittedName"].(string)
+	edittedYaml := data["edittedYaml"].(string)
+
+	newTemplates, err := k.updateTrialTemplates(edittedNamespace, edittedConfigMapName, edittedName, edittedYaml, "", ActionTypeAdd)
 	if err != nil {
-		log.Printf("updateTemplates failed: %v", err)
+		log.Printf("updateTrialTemplates failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	response, err := json.Marshal(templateResponse)
+	TrialTemplatesResponse := TrialTemplatesResponse{
+		Data: newTemplates,
+	}
+	response, err := json.Marshal(TrialTemplatesResponse)
+	if err != nil {
+		log.Printf("Marhal failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
+
+}
+
+// EditTemplate edits template in ConfigMap
+func (k *KatibUIHandler) EditTemplate(w http.ResponseWriter, r *http.Request) {
+
+	var data map[string]interface{}
+	json.NewDecoder(r.Body).Decode(&data)
+
+	edittedNamespace := data["edittedNamespace"].(string)
+	edittedConfigMapName := data["edittedConfigMapName"].(string)
+	edittedName := data["edittedName"].(string)
+	edittedYaml := data["edittedYaml"].(string)
+	currentName := data["currentName"].(string)
+
+	newTemplates, err := k.updateTrialTemplates(edittedNamespace, edittedConfigMapName, edittedName, edittedYaml, currentName, ActionTypeEdit)
+	if err != nil {
+		log.Printf("updateTrialTemplates failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	TrialTemplatesResponse := TrialTemplatesResponse{
+		Data: newTemplates,
+	}
+	response, err := json.Marshal(TrialTemplatesResponse)
+	if err != nil {
+		log.Printf("Marhal failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
+}
+
+// DeleteTemplate delete template in ConfigMap
+// TODO: Add functionality to delete configMap if there is no templates
+func (k *KatibUIHandler) DeleteTemplate(w http.ResponseWriter, r *http.Request) {
+
+	var data map[string]interface{}
+	json.NewDecoder(r.Body).Decode(&data)
+
+	edittedNamespace := data["edittedNamespace"].(string)
+	edittedConfigMapName := data["edittedConfigMapName"].(string)
+	edittedName := data["edittedName"].(string)
+
+	newTemplates, err := k.updateTrialTemplates(edittedNamespace, edittedConfigMapName, edittedName, "", "", ActionTypeDelete)
+	if err != nil {
+		log.Printf("updateTrialTemplates failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	TrialTemplatesResponse := TrialTemplatesResponse{
+		Data: newTemplates,
+	}
+
+	response, err := json.Marshal(TrialTemplatesResponse)
 	if err != nil {
 		log.Printf("Marhal failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -187,6 +247,25 @@ func (k *KatibUIHandler) FetchNamespaces(w http.ResponseWriter, r *http.Request)
 	response, err := json.Marshal(namespaces)
 	if err != nil {
 		log.Printf("Marshal namespaces failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
+}
+
+// FetchExperiment gets experiment in specific namespace.
+func (k *KatibUIHandler) FetchExperiment(w http.ResponseWriter, r *http.Request) {
+	experimentName := r.URL.Query()["experimentName"][0]
+	namespace := r.URL.Query()["namespace"][0]
+
+	experiment, err := k.katibClient.GetExperiment(experimentName, namespace)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	response, err := json.Marshal(experiment)
+	if err != nil {
+		log.Printf("Marshal Experiment failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

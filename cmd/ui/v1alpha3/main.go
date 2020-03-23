@@ -36,14 +36,15 @@ func main() {
 
 	http.HandleFunc("/katib/delete_experiment/", kuh.DeleteExperiment)
 
-	http.HandleFunc("/katib/fetch_hp_job/", kuh.FetchHPJob)
+	http.HandleFunc("/katib/fetch_experiment/", kuh.FetchExperiment)
 	http.HandleFunc("/katib/fetch_hp_job_info/", kuh.FetchHPJobInfo)
 	http.HandleFunc("/katib/fetch_hp_job_trial_info/", kuh.FetchHPJobTrialInfo)
 	http.HandleFunc("/katib/fetch_nas_job_info/", kuh.FetchNASJobInfo)
 
 	http.HandleFunc("/katib/fetch_trial_templates/", kuh.FetchTrialTemplates)
-	http.HandleFunc("/katib/update_template/", kuh.AddEditDeleteTemplate)
-
+	http.HandleFunc("/katib/add_template/", kuh.AddTemplate)
+	http.HandleFunc("/katib/edit_template/", kuh.EditTemplate)
+	http.HandleFunc("/katib/delete_template/", kuh.DeleteTemplate)
 	http.HandleFunc("/katib/fetch_namespaces", kuh.FetchNamespaces)
 
 	log.Printf("Serving at %s:%s", *host, *port)

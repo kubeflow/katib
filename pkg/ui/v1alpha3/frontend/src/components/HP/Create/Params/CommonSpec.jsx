@@ -9,68 +9,65 @@ import TextField from '@material-ui/core/TextField';
 
 import { changeSpec } from '../../../../actions/hpCreateActions';
 
-
-const module = "hpCreate";
+const module = 'hpCreate';
 
 const useStyles = makeStyles({
-    textField: {
-        marginLeft: 4,
-        marginRight: 4,
-        width: '100%'
-    },
-    help: {
-        padding: 4 / 2,
-        verticalAlign: "middle",
-        marginRight: 5,
-    },
-    parameter: {
-        padding: 2,
-        marginBottom: 10,
-    },
-})
+  textField: {
+    marginLeft: 4,
+    marginRight: 4,
+    width: '100%',
+  },
+  help: {
+    padding: 4 / 2,
+    verticalAlign: 'middle',
+    marginRight: 5,
+  },
+  parameter: {
+    padding: 2,
+    marginBottom: 10,
+  },
+});
 
-const CommonParametersSpec = (props) => {
-    
-    const classes = useStyles();
+const CommonParametersSpec = props => {
+  const classes = useStyles();
 
-    const onSpecChange = (name) => (event) => {
-        props.changeSpec(name, event.target.value);
-    }
+  const onSpecChange = name => event => {
+    props.changeSpec(name, event.target.value);
+  };
 
-    return (
-        <div>
-            {props.commonParametersSpec.map((param, i) => {
-                return (
-                    <div key={i} className={classes.parameter}>
-                        <Grid container alignItems={"center"}>
-                            <Grid item xs={12} sm={3}>
-                                <Typography variant={"subheading"}>
-                                    <Tooltip title={param.description}>
-                                        <HelpOutlineIcon className={classes.help} color={"primary"}/>
-                                    </Tooltip>
-                                    {param.name}
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={12} sm={8}>
-                                <TextField
-                                    className={classes.textField}
-                                    value={param.value}
-                                    onChange={onSpecChange(param.name)}
-                                    />
-                            </Grid>
-                        </Grid>
-                    </div>
-                )
-            })}
-        </div>
-    )
-}
-
+  return (
+    <div>
+      {props.commonParametersSpec.map((param, i) => {
+        return (
+          <div key={i} className={classes.parameter}>
+            <Grid container alignItems={'center'}>
+              <Grid item xs={12} sm={3}>
+                <Typography variant={'subheading'}>
+                  <Tooltip title={param.description}>
+                    <HelpOutlineIcon className={classes.help} color={'primary'} />
+                  </Tooltip>
+                  {param.name}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={8}>
+                <TextField
+                  className={classes.textField}
+                  value={param.value}
+                  onChange={onSpecChange(param.name)}
+                />
+              </Grid>
+            </Grid>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 const mapStateToProps = state => {
-    return {
-        commonParametersSpec: state[module].commonParametersSpec,
-    }
-}
+  return {
+    commonParametersSpec: state[module].commonParametersSpec,
+  };
+};
 
 export default connect(mapStateToProps, { changeSpec })(CommonParametersSpec);

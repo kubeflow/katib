@@ -4,15 +4,15 @@ import makeStyles from '@material-ui/styles/makeStyles';
 import { connect } from 'react-redux';
 import Plot from 'react-plotly.js';
 
-const module = "hpMonitor";
+const module = 'hpMonitor';
 
 const useStyles = makeStyles({
   root: {
     textAlign: 'center',
-  }
-})
+  },
+});
 
-const HPJobPlot = (props) => {
+const HPJobPlot = props => {
   const classes = useStyles();
   let dimensions = [];
   let isShowPlot = false;
@@ -21,78 +21,77 @@ const HPJobPlot = (props) => {
     // everything for the third column
     let header = props.jobData[0];
     let data = props.jobData.slice(1);
-    for(let i = 2; i < data[0].length; i++) {
+    for (let i = 2; i < data[0].length; i++) {
       if (header[i] !== '') {
         let track = {
           label: header[i],
-        }
-        let flag = "number";
+        };
+        let flag = 'number';
         let values = [];
         for (let j = 0; j < data.length; j++) {
-          if (data[j][1] == "Succeeded") {
-            isShowPlot = true
-            let number = Number(data[j][i])
+          if (data[j][1] == 'Succeeded') {
+            isShowPlot = true;
+            let number = Number(data[j][i]);
             if (isNaN(number)) {
-              flag = "string";
+              flag = 'string';
               values.push(data[j][i]);
             } else {
-              values.push(number)
+              values.push(number);
             }
           }
         }
         track.values = values;
-        if (flag === "number" && flag !== "string") {
+        if (flag === 'number' && flag !== 'string') {
           track.range = [Math.min.apply(null, values), Math.max.apply(null, values)];
           if (Math.min.apply(null, values) < 1) {
-            track.tickformat = ".3f"
+            track.tickformat = '.3f';
           } else {
-            track.tickformat = "d"
+            track.tickformat = 'd';
           }
         } else {
           // check logic
           // track.ticktext = values;
           let options = new Set(values);
-          options = [...options]
+          options = [...options];
           let mapping = {};
           for (let k = 0; k < options.length; k++) {
             mapping[options[k]] = k;
           }
           track.tickvals = options.map((option, index) => index);
           track.ticktext = options.map((option, index) => option);
-          track.values = values.map((value, index) => mapping[value])
+          track.values = values.map((value, index) => mapping[value]);
           track.constraintrange = [0, values.length];
         }
-        dimensions.push(track)
-        
+        dimensions.push(track);
       }
     }
   }
 
-
   return (
-      <div className={classes.root}>
-        {props.jobData.length > 1 && isShowPlot &&
-          <Plot
-            data={
-              [{
-                type: 'parcoords',
-                line: {
-                  color: "red",
-                },
-                dimensions: dimensions,
-              }]}
-            layout={ {
-              width: 1000,
-              height: 600
-            } }
-          />
-        }
-      </div>
-    )
-}
+    <div className={classes.root}>
+      {props.jobData.length > 1 && isShowPlot && (
+        <Plot
+          data={[
+            {
+              type: 'parcoords',
+              line: {
+                color: 'red',
+              },
+              dimensions: dimensions,
+            },
+          ]}
+          layout={{
+            width: 1000,
+            height: 600,
+          }}
+        />
+      )}
+    </div>
+  );
+};
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   jobData: state[module].jobData,
-})
+});
 
 export default connect(mapStateToProps, null)(HPJobPlot);
