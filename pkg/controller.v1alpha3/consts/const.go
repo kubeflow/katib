@@ -80,6 +80,8 @@ const (
 	DefaultDiskRequest = "500Mi"
 	// LabelSuggestionImagePullPolicy is the name of suggestion image pull policy in configmap.
 	LabelSuggestionImagePullPolicy = "imagePullPolicy"
+	// LabelSuggestionServiceAccountName is the name of suggestion service account in configmap.
+	LabelSuggestionServiceAccountName = "serviceAccountName"
 	// DefaultImagePullPolicy is the default value for image pull policy.
 	DefaultImagePullPolicy = "IfNotPresent"
 	// LabelMetricsCollectorSidecar is the name of metrics collector config in configmap.

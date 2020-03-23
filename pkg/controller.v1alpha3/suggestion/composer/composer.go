@@ -52,7 +52,13 @@ func New(mgr manager.Manager) Composer {
 }
 
 func (g *General) DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.Deployment, error) {
-	container, err := g.desiredContainer(s)
+
+	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.AlgorithmName, g.Client)
+	if err != nil {
+		return nil, err
+	}
+
+	container, err := g.desiredContainer(s, suggestionConfigData)
 	if err != nil {
 		log.Error(err, "Error in constructing container")
 		return nil, err
@@ -80,6 +86,11 @@ func (g *General) DesiredDeployment(s *suggestionsv1alpha3.Suggestion) (*appsv1.
 				},
 			},
 		},
+	}
+
+	// Get Suggestion Service Account Name from config
+	if suggestionConfigData[consts.LabelSuggestionServiceAccountName] != "" {
+		d.Spec.Template.Spec.ServiceAccountName = suggestionConfigData[consts.LabelSuggestionServiceAccountName]
 	}
 
 	if err := controllerutil.SetControllerReference(s, d, g.scheme); err != nil {
@@ -116,11 +127,8 @@ func (g *General) DesiredService(s *suggestionsv1alpha3.Suggestion) (*corev1.Ser
 	return service, nil
 }
 
-func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion) (*corev1.Container, error) {
-	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.AlgorithmName, g.Client)
-	if err != nil {
-		return nil, err
-	}
+func (g *General) desiredContainer(s *suggestionsv1alpha3.Suggestion, suggestionConfigData map[string]string) (*corev1.Container, error) {
+
 	// Get Suggestion data from config
 	suggestionContainerImage := suggestionConfigData[consts.LabelSuggestionImageTag]
 	suggestionImagePullPolicy := suggestionConfigData[consts.LabelSuggestionImagePullPolicy]
