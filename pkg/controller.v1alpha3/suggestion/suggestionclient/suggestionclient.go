@@ -155,12 +155,15 @@ func (g *General) ConvertExperiment(e *experimentsv1alpha3.Experiment) *suggesti
 		},
 		Objective: &suggestionapi.ObjectiveSpec{
 			Type:                convertObjectiveType(e.Spec.Objective.Type),
-			Goal:                *e.Spec.Objective.Goal,
 			ObjectiveMetricName: e.Spec.Objective.ObjectiveMetricName,
 		},
 		ParameterSpecs: &suggestionapi.ExperimentSpec_ParameterSpecs{
 			Parameters: convertParameters(e.Spec.Parameters),
 		},
+	}
+	// Set Goal if user defines it in Objective
+	if e.Spec.Objective.Goal != nil {
+		res.Spec.Objective.Goal = *e.Spec.Objective.Goal
 	}
 	// Set NasConfig if the user defines it in Spec.
 	if e.Spec.NasConfig != nil {
@@ -184,7 +187,6 @@ func (g *General) ConvertTrials(ts []trialsv1alpha3.Trial) []*suggestionapi.Tria
 			Spec: &suggestionapi.TrialSpec{
 				Objective: &suggestionapi.ObjectiveSpec{
 					Type:                  convertObjectiveType(t.Spec.Objective.Type),
-					Goal:                  *t.Spec.Objective.Goal,
 					ObjectiveMetricName:   t.Spec.Objective.ObjectiveMetricName,
 					AdditionalMetricNames: t.Spec.Objective.AdditionalMetricNames,
 				},
@@ -197,6 +199,9 @@ func (g *General) ConvertTrials(ts []trialsv1alpha3.Trial) []*suggestionapi.Tria
 				Observation: convertTrialObservation(
 					t.Status.Observation),
 			},
+		}
+		if t.Spec.Objective.Goal != nil {
+			trial.Spec.Objective.Goal = *t.Spec.Objective.Goal
 		}
 		if len(t.Status.Conditions) > 0 {
 			// We send only the latest condition of the Trial!
