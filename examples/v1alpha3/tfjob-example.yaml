@@ -9,6 +9,7 @@ spec:
   maxFailedTrialCount: 3
   objective:
     type: maximize
+    goal: 0.99
     objectiveMetricName: accuracy_1
   algorithm:
     algorithmName: random
