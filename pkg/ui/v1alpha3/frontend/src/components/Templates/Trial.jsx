@@ -1,51 +1,36 @@
 import React from 'react';
-import withStyles from '@material-ui/styles/withStyles';
+import { connect } from 'react-redux';
 
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import withStyles from '@material-ui/styles/withStyles';
 
 import TemplateList from './Common/TemplateList';
 
-import { connect } from 'react-redux';
-import { openDialog, fetchTrialTemplates } from '../../actions/templateActions';
-import AddDialog from './Common/AddDialog';
+import { fetchTrialTemplates } from '../../actions/templateActions';
+import { fetchNamespaces } from '../../actions/generalActions';
 
 const styles = theme => ({
   root: {
-    flexGrow: 1,
-    marginTop: 40,
+    width: '90%',
+    margin: '0 auto',
+    marginTop: 10,
   },
 });
 
 class Trial extends React.Component {
   componentDidMount() {
-    // TODO: Add possibility to change namespace in Trial Manifest form
-    // Right now we get templates only from kubeflow namespace
-    this.props.fetchTrialTemplates('');
+    this.props.fetchTrialTemplates();
   }
-
-  openAddDialog = () => {
-    this.props.openDialog('add');
-  };
 
   render() {
     const { classes } = this.props;
 
-    const type = 'trial';
-
     return (
       <div className={classes.root}>
-        <Typography variant={'headline'} color={'primary'}>
-          Trial Manifests
-        </Typography>
-        <Button variant={'contained'} color={'primary'} onClick={this.openAddDialog}>
-          Add
-        </Button>
+        <h1>Trial Templates</h1>
 
-        <TemplateList type={type} />
-        <AddDialog type={type} />
+        <TemplateList />
       </div>
     );
   }
 }
-export default connect(null, { openDialog, fetchTrialTemplates })(withStyles(styles)(Trial));
+export default connect(null, { fetchTrialTemplates, fetchNamespaces })(withStyles(styles)(Trial));

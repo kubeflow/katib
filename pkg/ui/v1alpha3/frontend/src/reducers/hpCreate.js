@@ -95,9 +95,7 @@ const initialState = {
     },
   ],
   allParameterTypes: ['int', 'double', 'categorical'],
-  trial: 'defaultTrialTemplate.yaml',
   currentYaml: '',
-  trialNamespace: 'kubeflow',
   mcSpec: {
     collector: {
       kind: 'StdOut',
@@ -246,16 +244,6 @@ const hpCreateReducer = (state = initialState, action) => {
       return {
         ...state,
         parameters: parameters,
-      };
-    case actions.CHANGE_TRIAL_HP:
-      return {
-        ...state,
-        trial: action.trial,
-      };
-    case actions.CHANGE_TRIAL_NAMESPACE_HP:
-      return {
-        ...state,
-        trialNamespace: action.namespace,
       };
     // Metrics Collector Kind change
     case actions.CHANGE_MC_KIND_HP:

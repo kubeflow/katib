@@ -14,13 +14,15 @@ import Objective from './Params/Objective';
 import Algorithm from './Params/Algorithm';
 import TrialSpecParam from './Params/Trial';
 import NASConfig from './Params/NASConfig';
-import MetricsCollectorSpec from '../../Common/Create/Params/MetricsCollector';
 
 import { submitNASJob } from '../../../actions/nasCreateActions';
+import MetricsCollectorSpec from '../../Common/Create/Params/MetricsCollector';
+
 import { validationError } from '../../../actions/generalActions';
 import * as constants from '../../../constants/constants';
 
 const module = 'nasCreate';
+const generalModule = 'general';
 
 const styles = theme => ({
   root: {
@@ -207,13 +209,12 @@ const NASParameters = props => {
 
     data.spec.metricsCollectorSpec = newMCSpec;
 
-    //TODO: Add support not only for default ConfigMap for Trial-Templates
     data.spec.trialTemplate = {
       goTemplate: {
         templateSpec: {
-          configMapName: 'trial-template',
-          configMapNamespace: props.trialNamespace,
-          templatePath: props.trial,
+          configMapName: props.templateConfigMapName,
+          configMapNamespace: props.templateNamespace,
+          templatePath: props.templateName,
         },
       },
     };
@@ -266,6 +267,9 @@ const mapStateToProps = state => ({
   inputSize: state[module].inputSize,
   outputSize: state[module].outputSize,
   operations: state[module].operations,
+  templateNamespace: state[generalModule].templateNamespace,
+  templateConfigMapName: state[generalModule].templateConfigMapName,
+  templateName: state[generalModule].templateName,
   trial: state[module].trial,
   trialNamespace: state[module].trialNamespace,
   mcSpec: state[module].mcSpec,

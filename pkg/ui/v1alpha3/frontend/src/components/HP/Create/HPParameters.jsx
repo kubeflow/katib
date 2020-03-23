@@ -14,13 +14,15 @@ import Objective from './Params/Objective';
 import TrialSpecParam from './Params/Trial';
 import Parameters from './Params/Parameters';
 import Algorithm from './Params/Algorithm';
-import MetricsCollectorSpec from '../../Common/Create/Params/MetricsCollector';
 
 import { submitHPJob } from '../../../actions/hpCreateActions';
+import MetricsCollectorSpec from '../../Common/Create/Params/MetricsCollector';
+
 import { validationError } from '../../../actions/generalActions';
 import * as constants from '../../../constants/constants';
 
 const module = 'hpCreate';
+const generalModule = 'general';
 
 const styles = theme => ({
   root: {
@@ -193,13 +195,12 @@ const HPParameters = props => {
 
     data.spec.metricsCollectorSpec = newMCSpec;
 
-    //TODO: Add support not only for default ConfigMap for Trial-Templates
     data.spec.trialTemplate = {
       goTemplate: {
         templateSpec: {
-          configMapName: 'trial-template',
-          configMapNamespace: props.trialNamespace,
-          templatePath: props.trial,
+          configMapName: props.templateConfigMapName,
+          configMapNamespace: props.templateNamespace,
+          templatePath: props.templateName,
         },
       },
     };
@@ -252,6 +253,9 @@ const mapStateToProps = state => ({
   algorithmName: state[module].algorithmName,
   algorithmSettings: state[module].algorithmSettings,
   parameters: state[module].parameters,
+  templateNamespace: state[generalModule].templateNamespace,
+  templateConfigMapName: state[generalModule].templateConfigMapName,
+  templateName: state[generalModule].templateName,
   trial: state[module].trial,
   trialNamespace: state[module].trialNamespace,
   mcSpec: state[module].mcSpec,

@@ -12,6 +12,7 @@ const styles = theme => ({
   root: {
     width: '90%',
     margin: '0 auto',
+    marginTop: 10,
   },
 });
 
@@ -24,7 +25,7 @@ class NASJobMonitor extends React.Component {
     const { classes } = this.props;
     return (
       <div className={classes.root}>
-        <h1>Monitor</h1>
+        <h1>Experiment Monitor</h1>
         <FilterPanel />
         <NASJobList />
       </div>

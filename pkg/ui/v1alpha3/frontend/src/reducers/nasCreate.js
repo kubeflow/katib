@@ -345,8 +345,6 @@ const initialState = {
     },
   ],
   allParameterTypes: ['int', 'double', 'categorical'],
-  trial: 'nasRLTrialTemplate.yaml',
-  trialNamespace: 'kubeflow',
   currentYaml: '',
   snackText: '',
   snackOpen: false,
@@ -553,16 +551,6 @@ const nasCreateReducer = (state = initialState, action) => {
       return {
         ...state,
         operations,
-      };
-    case actions.CHANGE_TRIAL_NAS:
-      return {
-        ...state,
-        trial: action.trial,
-      };
-    case actions.CHANGE_TRIAL_NAMESPACE_NAS:
-      return {
-        ...state,
-        trialNamespace: action.namespace,
       };
     case actions.CLOSE_SNACKBAR:
       return {

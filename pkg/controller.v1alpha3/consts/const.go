@@ -114,6 +114,9 @@ const (
 
 	// AnnotationIstioSidecarInjectValue is the value of Istio Sidecar annotation
 	AnnotationIstioSidecarInjectValue = "false"
+
+	LabelTrialTemplateConfigMapName  = "app"
+	LabelTrialTemplateConfigMapValue = "katib-trial-templates"
 )
 
 var (
