@@ -10,6 +10,7 @@ from pkg.suggestion.v1alpha3.nasrl_service import NasrlService
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 DEFAULT_PORT = "0.0.0.0:6789"
 
+
 def serve():
     print("NAS RL Suggestion Service")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
@@ -24,6 +25,7 @@ def serve():
             time.sleep(_ONE_DAY_IN_SECONDS)
     except KeyboardInterrupt:
         server.stop(0)
+
 
 if __name__ == "__main__":
     serve()
