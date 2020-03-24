@@ -1,10 +1,10 @@
 # Katib components environment variables
 
-Here you can find information about environment variables in each Katib component. If you want to deploy Katib not in default way, you can modify some of this variables.
+Here you can find information about environment variables for each Katib component. You can modify some of these variables, if you want to change Katib components.
 
 ## Katib Controller
 
-This is the list of environment variables for the [Katib controller](https://github.com/kubeflow/katib/blob/master/manifests/v1alpha3/katib-controller/katib-controller.yaml) deployment.
+This is the list of environment variables for the [Katib Controller](https://github.com/kubeflow/katib/blob/master/manifests/v1alpha3/katib-controller/katib-controller.yaml) deployment.
 
 | Variable                             | Description                                                       | Default Value                       |
 | ------------------------------------ | ----------------------------------------------------------------- | ----------------------------------- |
@@ -14,13 +14,13 @@ This is the list of environment variables for the [Katib controller](https://git
 | `KATIB_DB_MANAGER_SERVICE_IP`        | Katib DB Manager IP                                               | katib-db-manager                    |
 | `KATIB_DB_MANAGER_SERVICE_PORT`      | Katib DB Manager Port                                             | 6789                                |
 
-Katib DB Manager address is created by this expression:
+Katib Controller calls Katib DB Manager with this address expression:
 
-`KATIB_DB_MANAGER_SERVICE_IP` . `KATIB_DB_MANAGER_SERVICE_NAMESPACE` : `KATIB_DB_MANAGER_SERVICE_PORT`
+`KATIB_DB_MANAGER_SERVICE_IP`.`KATIB_DB_MANAGER_SERVICE_NAMESPACE`:`KATIB_DB_MANAGER_SERVICE_PORT`
 
-If you set `KATIB_DB_MANAGER_SERVICE_NAMESPACE=""`, Katib DB Manager address will be:
+If you set `KATIB_DB_MANAGER_SERVICE_NAMESPACE=""`, Katib Controller will call Katib DB Manager with this address:
 
-`KATIB_DB_MANAGER_SERVICE_IP` : `KATIB_DB_MANAGER_SERVICE_PORT`
+`KATIB_DB_MANAGER_SERVICE_IP`:`KATIB_DB_MANAGER_SERVICE_PORT`
 
 ## Katib UI
 
@@ -33,24 +33,24 @@ This is the list of environment variables for the [Katib UI](https://github.com/
 | `KATIB_DB_MANAGER_SERVICE_IP`        | Katib DB Manager IP                                            | katib-db-manager                    |
 | `KATIB_DB_MANAGER_SERVICE_PORT`      | Katib DB Manager Port                                          | 6789                                |
 
-Katib DB Manager address is created by above expression.
+Katib UI calls Katib DB Manager with above address expression.
 
 ## Katib DB Manager
 
-This is the list of environment variables for the [Katib DB manager](https://github.com/andreyvelich/katib/blob/doc-katib-config/manifests/v1alpha3/db-manager/deployment.yaml) deployment.
+This is the list of environment variables for the [Katib DB Manager](https://github.com/andreyvelich/katib/blob/doc-katib-config/manifests/v1alpha3/db-manager/deployment.yaml) deployment.
 
 | Variable                  | Description                    | Default Value    |
 | ------------------------- | ------------------------------ | ---------------- |
 | `DB_NAME`                 | Katib DB Name, must be `mysql` | No default value |
 | `DB_PASSWORD`             | Katib DB Password, must be set | No default value |
-| `DB_USER`                 | Katib DB user                  | root             |
-| `KATIB_MYSQL_DB_HOST`     | Katib MYSQL host               | katib-mysql      |
-| `KATIB_MYSQL_DB_PORT`     | Katib MYSQL port               | 3306             |
-| `KATIB_MYSQL_DB_DATABASE` | Katib MYSQL database name      | katib            |
+| `DB_USER`                 | Katib DB User                  | root             |
+| `KATIB_MYSQL_DB_HOST`     | Katib MYSQL Host               | katib-mysql      |
+| `KATIB_MYSQL_DB_PORT`     | Katib MYSQL Port               | 3306             |
+| `KATIB_MYSQL_DB_DATABASE` | Katib MYSQL Database name      | katib            |
 
-Katib DB manager creates connection to the DB, using `mysql` driver and this data source name:
+Katib DB Manager creates connection to the DB, using `mysql` driver and this data source name:
 
-`DB_USER` : `DB_PASSWORD`@tcp(`KATIB_MYSQL_DB_HOST` : `KATIB_MYSQL_DB_PORT`)/`KATIB_MYSQL_DB_DATABASE`?timeout=5s
+`DB_USER`:`DB_PASSWORD`@tcp(`KATIB_MYSQL_DB_HOST`:`KATIB_MYSQL_DB_PORT`)/`KATIB_MYSQL_DB_DATABASE`?timeout=5s
 
 ## Katib MySQL DB
 
@@ -58,4 +58,4 @@ For [Katib MySQL](https://github.com/kubeflow/katib/blob/master/manifests/v1alph
 
 Check [here](https://github.com/docker-library/docs/tree/master/mysql#environment-variables) about all environment variable for MySQL docker image.
 
-Katib MySQL env variables must be matched with Katib DB Manager env variables.
+Katib MySQL environment variables must be matched with Katib DB Manager environment variables.
