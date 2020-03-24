@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
+
 class ParameterConfig:
     """
     Class to hold the parameter configuration for an experiment.

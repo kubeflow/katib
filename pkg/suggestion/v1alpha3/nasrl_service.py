@@ -1,8 +1,7 @@
 import logging
-from logging import getLogger, StreamHandler, INFO, DEBUG
+from logging import getLogger, StreamHandler, INFO
 import json
 import os
-import time
 import tensorflow as tf
 import grpc
 
@@ -13,7 +12,8 @@ from pkg.suggestion.v1alpha3.NAS_Reinforcement_Learning.Operation import SearchS
 from pkg.suggestion.v1alpha3.NAS_Reinforcement_Learning.AlgorithmSettings import parseAlgorithmSettings
 from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
 
-class NAS_RL_Experiment(object):
+
+class NAS_RL_Experiment:
     def __init__(self, request, logger):
         self.logger = logger
         self.experiment_name = request.experiment.name

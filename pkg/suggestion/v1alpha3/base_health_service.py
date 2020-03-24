@@ -24,8 +24,7 @@ from pkg.apis.manager.health.python import health_pb2_grpc as _health_pb2_grpc
 SERVICE_NAME = _health_pb2.DESCRIPTOR.services_by_name['Health'].full_name
 
 
-class _Watcher():
-
+class _Watcher:
     def __init__(self):
         self._condition = threading.Condition()
         self._responses = collections.deque()
