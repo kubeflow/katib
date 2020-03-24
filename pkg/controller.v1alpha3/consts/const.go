@@ -40,6 +40,13 @@ const (
 	// DefaultKatibComposerEnvName is the default env name of katib suggestion composer
 	DefaultKatibComposerEnvName = "KATIB_SUGGESTION_COMPOSER"
 
+	// DefaultKatibDBManagerServiceNamespaceEnvName is the env name of Katib DB Manager namespace
+	DefaultKatibDBManagerServiceNamespaceEnvName = "KATIB_DB_MANAGER_SERVICE_NAMESPACE"
+	// DefaultKatibDBManagerServiceIPEnvName is the env name of Katib DB Manager IP
+	DefaultKatibDBManagerServiceIPEnvName = "KATIB_DB_MANAGER_SERVICE_IP"
+	// DefaultKatibDBManagerServicePortEnvName is the env name of Katib DB Manager Port
+	DefaultKatibDBManagerServicePortEnvName = "KATIB_DB_MANAGER_SERVICE_PORT"
+
 	// KatibConfigMapName is the config map constants
 	// Configmap name which includes Katib's configuration
 	KatibConfigMapName = "katib-config"
@@ -117,7 +124,9 @@ const (
 	// AnnotationIstioSidecarInjectValue is the value of Istio Sidecar annotation
 	AnnotationIstioSidecarInjectValue = "false"
 
-	LabelTrialTemplateConfigMapName  = "app"
+	// LabelTrialTemplateConfigMapName is the label name for the Trial templates configMap
+	LabelTrialTemplateConfigMapName = "app"
+	// LabelTrialTemplateConfigMapValue is the label value for the Trial templates configMap
 	LabelTrialTemplateConfigMapValue = "katib-trial-templates"
 )
 
@@ -126,4 +135,11 @@ var (
 	DefaultKatibNamespace = env.GetEnvOrDefault(DefaultKatibNamespaceEnvName, "kubeflow")
 	// DefaultComposer is the default composer of katib suggestion.
 	DefaultComposer = env.GetEnvOrDefault(DefaultKatibComposerEnvName, "General")
+
+	// DefaultKatibDBManagerServiceNamespace is the default namespace of Katib DB Manager
+	DefaultKatibDBManagerServiceNamespace = env.GetEnvOrDefault(DefaultKatibDBManagerServiceNamespaceEnvName, DefaultKatibNamespace)
+	// DefaultKatibDBManagerServiceIP is the default IP of Katib DB Manager
+	DefaultKatibDBManagerServiceIP = env.GetEnvOrDefault(DefaultKatibDBManagerServiceIPEnvName, "katib-db-manager")
+	// DefaultKatibDBManagerServicePort is the default Port of Katib DB Manager
+	DefaultKatibDBManagerServicePort = env.GetEnvOrDefault(DefaultKatibDBManagerServicePortEnvName, "6789")
 )
