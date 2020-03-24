@@ -2,13 +2,17 @@
 
 Here you can find information about [Katib config](https://github.com/kubeflow/katib/blob/master/manifests/v1alpha3/katib-controller/katib-config.yaml).
 
-Katib config is the Kubernetes [Config Map](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) that contains information about current [Metrics Collectors](https://github.com/kubeflow/katib/blob/master/docs/proposals/metrics-collector.md) (key = `metrics-collector-sidecar`) and current [Suggestions](https://github.com/kubeflow/katib/blob/master/docs/proposals/suggestion.md) (key = `suggestion`). Katib config must be deployed in [KATIB_CORE_NAMESPACE](TODO: Link to doc with env) with `katib-config` name. Katib controller parses Katib config when you submit Experiment.
+Katib config is the Kubernetes [Config Map](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) that contains information about current [Metrics Collectors](https://github.com/kubeflow/katib/blob/master/docs/proposals/metrics-collector.md) (`key = metrics-collector-sidecar`) and current [Suggestions](https://github.com/kubeflow/katib/blob/master/docs/proposals/suggestion.md) (`key = suggestion`).
 
-You can edit this Config Map even after deploying Katib. For example, if you deploy Katib in Kubeflow namespace: `kubectl edit configMap katib-config -n kubeflow`.
+Katib config map must be deployed in [KATIB_CORE_NAMESPACE](TODO: Link to doc with env) with `katib-config` name. Katib controller parses Katib config when you submit Experiment.
+
+You can edit this Config Map even after deploying Katib.
+
+For example, if you deploy Katib in Kubeflow namespace: `kubectl edit configMap katib-config -n kubeflow`.
 
 ## Metrics Collector Sidecar settings
 
-These settings related to Katib Metrics Collector, where key = `metrics-collector-sidecar` and value = corresponding settings JSON for each Metrics Collector.
+These settings related to Katib Metrics Collectors, where `key = metrics-collector-sidecar` and value = corresponding settings JSON for each Metrics Collector.
 
 Example for `File` Metrics Collector with all settings:
 
@@ -33,17 +37,17 @@ Example for `File` Metrics Collector with all settings:
 }
 ```
 
-All of these settings except `image` can be omitted. If you don't specify any settings, default value will be set.
+All of these settings except `image` can be omitted. If you don't specify any other settings, default value will be set.
 
 1. `image` - Docker image name for the `File` Metrics Collector.
 
    **Must be specified**.
 
-2. `imagePullPolicy` - File Metrics Collector container [image pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images).
+2. `imagePullPolicy` - `File` Metrics Collector container [image pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images).
 
    Default value is `IfNotPresent`.
 
-3. `resources` - File Metrics Collector [container resources](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#resource-requests-and-limits-of-pod-and-container). In above example you can see how to specify `limits` and `requests`. Currently, you can specify only `cpu`, `memory` and `ephemeral-storage`.
+3. `resources` - `File` Metrics Collector [container resources](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#resource-requests-and-limits-of-pod-and-container). In the above example you can see how to specify `limits` and `requests`. Currently, you can specify only `memory`, `cpu` and `ephemeral-storage`.
 
    Default values for `requests` are:
 
@@ -59,7 +63,7 @@ All of these settings except `image` can be omitted. If you don't specify any se
 
 ## Suggestion settings
 
-These settings related to Katib suggestions, where key = `suggestion` and value = corresponding settings JSON for each algorithm. If you want to use new algorithm, you must update Katib config with the new suggestion.
+These settings related to Katib suggestions, where `key = suggestion` and value = corresponding settings JSON for each algorithm. If you want to use new algorithm, you must update Katib config with the new suggestion.
 
 Example for `random` suggestion with all settings:
 
@@ -85,17 +89,17 @@ Example for `random` suggestion with all settings:
 }
 ```
 
-All of these settings except `image` can be omitted. If you don't specify any settings, default value will be set.
+All of these settings except `image` can be omitted. If you don't specify any other settings, default value will be set.
 
 1. `image` - Docker image name for the `random` suggestion.
 
    **Must be specified**.
 
-2. `imagePullPolicy` - Random suggestion container [image pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images).
+2. `imagePullPolicy` - `Random` suggestion container [image pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images).
 
    Default value is `IfNotPresent`.
 
-3. `resources` - Random suggestion [container resources](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#resource-requests-and-limits-of-pod-and-container). In above example you can see how to specify `limits` and `requests`. Currently, you can specify only `cpu`, `memory` and `ephemeral-storage`.
+3. `resources` - `Random` suggestion [container resources](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#resource-requests-and-limits-of-pod-and-container). In the above example you can see how to specify `limits` and `requests`. Currently, you can specify only `memory`, `cpu` and `ephemeral-storage`.
 
    Default values for `requests` are:
 
@@ -109,6 +113,6 @@ All of these settings except `image` can be omitted. If you don't specify any se
    - `cpu = 500m`.
    - `ephemeral-storage = 5Gi`.
 
-4. `serviceAccountName` - Random suggestion container [service account](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/). In above example, `suggestion-serviceaccount` service account will be used for each Experiment with `random` algorithm, until you change or delete this service account from Katib config.
+4. `serviceAccountName` - `Random` suggestion container [service account](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/). In the above example, `suggestion-serviceaccount` service account will be used for each Experiment with `random` algorithm, until you change or delete this service account from Katib config.
 
    By default suggestion pod will not have specific service account. Suggestion pod will use [default](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#use-the-default-service-account-to-access-the-api-server) service account.
