@@ -58,4 +58,4 @@ For the [Katib MySQL](https://github.com/kubeflow/katib/blob/master/manifests/v1
 
 Check [here](https://github.com/docker-library/docs/tree/master/mysql#environment-variables) about all environment variables for the MySQL docker image.
 
-Katib MySQL environment variables must be matched with Katib DB Manager environment variables.
+Katib MySQL environment variables must be matched with the Katib DB Manager environment variables.
