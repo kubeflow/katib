@@ -16,7 +16,7 @@ This is the list of environment variables for the [Katib Controller](https://git
 
 Katib Controller calls Katib DB Manager with this address expression:
 
-`KATIB_DB_MANAGER_SERVICE_IP`.`KATIB_DB_MANAGER_SERVICE_NAMESPACE`:`KATIB_DB_MANAGER_SERVICE_PORT`
+`KATIB_DB_MANAGER_SERVICE_IP`**.**`KATIB_DB_MANAGER_SERVICE_NAMESPACE`:`KATIB_DB_MANAGER_SERVICE_PORT`
 
 If you set `KATIB_DB_MANAGER_SERVICE_NAMESPACE=""`, Katib Controller will call Katib DB Manager with this address:
 
