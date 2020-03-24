@@ -5,7 +5,7 @@ import logging
 from pkg.suggestion.v1alpha3.internal.search_space import *
 from pkg.suggestion.v1alpha3.internal.trial import *
 
-logger = logging.getLogger("BaseHyperoptService")
+logger = logging.getLogger(__name__)
 
 TPE_ALGORITHM_NAME = "tpe"
 RANDOM_ALGORITHM_NAME = "random"

@@ -8,7 +8,7 @@ from pkg.suggestion.v1alpha3.internal.trial import Trial, Assignment
 from pkg.suggestion.v1alpha3.hyperopt.base_hyperopt_service import BaseHyperoptService
 from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
 
-logger = logging.getLogger("HyperoptRandomService")
+logger = logging.getLogger(__name__)
 
 
 class HyperoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):

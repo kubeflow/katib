@@ -3,7 +3,7 @@ from pkg.apis.manager.v1alpha3.python import api_pb2 as api
 
 
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("Trial")
+logger = logging.getLogger(__name__)
 
 
 class Trial(object):

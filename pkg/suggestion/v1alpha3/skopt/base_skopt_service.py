@@ -7,7 +7,7 @@ from pkg.suggestion.v1alpha3.internal.search_space import *
 from pkg.suggestion.v1alpha3.internal.trial import *
 import datetime
 
-logger = logging.getLogger("BaseSkoptService")
+logger = logging.getLogger(__name__)
 
 
 class BaseSkoptService(object):
