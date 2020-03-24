@@ -54,8 +54,8 @@ Katib DB Manager creates connection to the DB, using `mysql` driver and this dat
 
 ## Katib MySQL DB
 
-For [Katib MySQL](https://github.com/kubeflow/katib/blob/master/manifests/v1alpha3/mysql-db/deployment.yaml) we set `MYSQL_ROOT_PASSWORD` as value from [katib-mysql-secrets](https://github.com/kubeflow/katib/blob/master/manifests/v1alpha3/mysql-db/secret.yaml), `MYSQL_ALLOW_EMPTY_PASSWORD` as `true`, `MYSQL_DATABASE` as `katib`.
+For the [Katib MySQL](https://github.com/kubeflow/katib/blob/master/manifests/v1alpha3/mysql-db/deployment.yaml) we set `MYSQL_ROOT_PASSWORD` as value from [katib-mysql-secrets](https://github.com/kubeflow/katib/blob/master/manifests/v1alpha3/mysql-db/secret.yaml), `MYSQL_ALLOW_EMPTY_PASSWORD` as `true`, `MYSQL_DATABASE` as `katib`.
 
-Check [here](https://github.com/docker-library/docs/tree/master/mysql#environment-variables) about all environment variable for MySQL docker image.
+Check [here](https://github.com/docker-library/docs/tree/master/mysql#environment-variables) about all environment variables for the MySQL docker image.
 
 Katib MySQL environment variables must be matched with Katib DB Manager environment variables.
