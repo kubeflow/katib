@@ -50,12 +50,12 @@ class HyperParameterSearchSpace(object):
 
 
 class HyperParameter(object):
-    def __init__(self, name, type, min, max, list, step):
+    def __init__(self, name, type_, min_, max_, list_, step):
         self.name = name
-        self.type = type
-        self.min = min
-        self.max = max
-        self.list = list
+        self.type = type_
+        self.min = min_
+        self.max = max_
+        self.list = list_
         self.step = step
 
     def __str__(self):
@@ -67,12 +67,12 @@ class HyperParameter(object):
                 self.name, self.type, ", ".join(self.list))
 
     @staticmethod
-    def int(name, min, max):
-        return HyperParameter(name, INTEGER, min, max, [], 0)
+    def int(name, min_, max_):
+        return HyperParameter(name, INTEGER, min_, max_, [], 0)
 
     @staticmethod
-    def double(name, min, max, step):
-        return HyperParameter(name, DOUBLE, min, max, [], step)
+    def double(name, min_, max_, step):
+        return HyperParameter(name, DOUBLE, min_, max_, [], step)
 
     @staticmethod
     def categorical(name, lst):

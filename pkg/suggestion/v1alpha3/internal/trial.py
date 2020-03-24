@@ -20,7 +20,7 @@ class Trial(object):
         for trial in trials:
             if trial.status.condition == api.TrialStatus.TrialConditionType.SUCCEEDED:
                 new_trial = Trial.convertTrial(trial)
-                if new_trial != None:
+                if new_trial is not None:
                     res.append(Trial.convertTrial(trial))
         return res
 
@@ -33,14 +33,14 @@ class Trial(object):
         target_metric, additional_metrics = Metric.convert(
             trial.status.observation, metric_name)
         # If the target_metric is none, ignore the trial.
-        if target_metric != None:
+        if target_metric is not None:
             trial = Trial(trial.name, assignments, target_metric,
                       metric_name, additional_metrics)
             return trial
         return None
 
     def __str__(self):
-        if self.name == None:
+        if self.name is None:
             return "Trial(assignment: {})".format(", ".join([str(e) for e in self.assignments]))
         else:
             return "Trial(assignment: {}, metric_name: {}, metric: {}, additional_metrics: {})".format(
