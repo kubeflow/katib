@@ -10,7 +10,7 @@ from pkg.suggestion.v1alpha3.internal.trial import Trial, Assignment
 from pkg.suggestion.v1alpha3.chocolate.base_chocolate_service import BaseChocolateService
 from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
 
-logger = logging.getLogger("ChocolateService")
+logger = logging.getLogger(__name__)
 
 
 class ChocolateService(

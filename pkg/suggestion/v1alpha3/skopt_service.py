@@ -8,7 +8,7 @@ from pkg.suggestion.v1alpha3.skopt.base_skopt_service import BaseSkoptService
 from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
 
 
-logger = logging.getLogger("SkoptService")
+logger = logging.getLogger(__name__)
 
 
 class SkoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):

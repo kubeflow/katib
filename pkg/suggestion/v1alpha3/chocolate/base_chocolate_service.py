@@ -7,7 +7,7 @@ import base64
 from pkg.suggestion.v1alpha3.internal.search_space import *
 from pkg.suggestion.v1alpha3.internal.trial import *
 
-logger = logging.getLogger("BaseChocolateService")
+logger = logging.getLogger(__name__)
 
 
 class BaseChocolateService(object):

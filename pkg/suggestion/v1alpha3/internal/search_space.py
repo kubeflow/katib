@@ -10,7 +10,7 @@ CATEGORICAL = "CATEGORICAL"
 DISCRETE = "DISCRETE"
 
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("HyperParameterSearchSpace")
+logger = logging.getLogger(__name__)
 
 
 class HyperParameterSearchSpace(object):
