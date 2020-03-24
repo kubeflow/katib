@@ -4,11 +4,13 @@ Here you can find information about [Katib config](https://github.com/kubeflow/k
 
 Katib config is the Kubernetes [Config Map](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) that contains information about current [Metrics Collectors](https://github.com/kubeflow/katib/blob/master/docs/proposals/metrics-collector.md) (`key = metrics-collector-sidecar`) and current [Suggestions](https://github.com/kubeflow/katib/blob/master/docs/proposals/suggestion.md) (`key = suggestion`).
 
-Katib config map must be deployed in [KATIB_CORE_NAMESPACE](TODO: Link to doc with env) with `katib-config` name. Katib controller parses Katib config when you submit Experiment.
+Katib Config Map must be deployed in [KATIB_CORE_NAMESPACE](TODO: Link to doc with env) with `katib-config` name. Katib controller parses Katib config when you submit Experiment.
 
 You can edit this Config Map even after deploying Katib.
 
-For example, if you deploy Katib in Kubeflow namespace: `kubectl edit configMap katib-config -n kubeflow`.
+For example, if you deploy Katib in Kubeflow namespace, to edit Katib config run this:
+
+`kubectl edit configMap katib-config -n kubeflow`
 
 ## Metrics Collector Sidecar settings
 
