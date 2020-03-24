@@ -17,26 +17,21 @@ workflows:
     - pkg/common/v1alpha3/*
     - pkg/controller.v1alpha3/*
     - pkg/db/v1alpha3/*
-    - pkg/earlystopping/v1alpha3/*
-    - pkg/manager/v1alpha3/*
-    - pkg/manager/modelstore/*
     - pkg/job/v1alpha3/*
+    - pkg/metricscollector/v1alpha3/*
     - pkg/suggestion/v1alpha3/*
     - pkg/ui/v1alpha3/*
-    - pkg/webhook/v1alpha3/*
-    - cmd/earlystopping/medianstopping/v1alpha3/*
-    - cmd/katib-controller/v1alpha3/*
-    - cmd/db-manager/v1alpha3/*
-    - cmd/metricscollector/v1alpha3/*
-    - cmd/suggestion/bayesianoptimization/v1alpha3/*
-    - cmd/suggestion/grid/v1alpha3/*
-    - cmd/suggestion/hyperband/v1alpha3/*
-    - cmd/suggestion/nasenvelopenet/v1alpha3/*
-    - cmd/suggestion/nasrl/v1alpha3/*
-    - cmd/suggestion/random/v1alpha3/*
-    - cmd/ui/v1alpha3/*
     - pkg/util/v1alpha3/*
-    - pkg/metricscollector/v1alpha3/*
+    - pkg/webhook/v1alpha3/*
+    - cmd/db-manager/v1alpha3/*
+    - cmd/katib-controller/v1alpha3/*
+    - cmd/metricscollector/v1alpha3/*
+    - cmd/suggestion/chocolate/v1alpha3/*
+    - cmd/suggestion/hyperband/v1alpha3/*
+    - cmd/suggestion/hyperopt/v1alpha3/*
+    - cmd/suggestion/nasrl/v1alpha3/*
+    - cmd/suggestion/skopt/v1alpha3/*
+    - cmd/ui/v1alpha3/*
     - test/e2e/v1alpha3/*
     - test/scripts/v1alpha3/*
     - test/workflows/*
@@ -61,28 +56,26 @@ workflows:
     - pkg/common/v1alpha3/*
     - pkg/controller.v1alpha3/*
     - pkg/db/v1alpha3/*
-    - pkg/earlystopping/v1alpha3/*
-    - pkg/manager/v1alpha3/*
-    - pkg/manager/modelstore/*
     - pkg/job/v1alpha3/*
+    - pkg/metricscollector/v1alpha3/*
     - pkg/suggestion/v1alpha3/*
     - pkg/ui/v1alpha3/*
-    - pkg/webhook/v1alpha3/*
-    - cmd/earlystopping/medianstopping/v1alpha3/*
-    - cmd/katib-controller/v1alpha3/*
-    - cmd/db-manager/v1alpha3/*
-    - cmd/metricscollector/v1alpha3/*
-    - cmd/suggestion/bayesianoptimization/v1alpha3/*
-    - cmd/suggestion/grid/v1alpha3/*
-    - cmd/suggestion/hyperband/v1alpha3/*
-    - cmd/suggestion/nasenvelopenet/v1alpha3/*
-    - cmd/suggestion/nasrl/v1alpha3/*
-    - cmd/suggestion/random/v1alpha3/*
-    - cmd/ui/v1alpha3/*
-    - pkg/metricscollector/v1alpha3/*
     - pkg/util/v1alpha3/*
+    - pkg/webhook/v1alpha3/*
+    - cmd/db-manager/v1alpha3/*
+    - cmd/katib-controller/v1alpha3/*
+    - cmd/metricscollector/v1alpha3/*
+    - cmd/suggestion/chocolate/v1alpha3/*
+    - cmd/suggestion/hyperband/v1alpha3/*
+    - cmd/suggestion/hyperopt/v1alpha3/*
+    - cmd/suggestion/nasrl/v1alpha3/*
+    - cmd/suggestion/skopt/v1alpha3/*
+    - cmd/ui/v1alpha3/*
+    - test/e2e/v1alpha3/*
     - test/scripts/v1alpha3/*
     - test/workflows/*
+    - manifests/v1alpha3/*
+    - scripts/v1alpha3/*
     - vendor/*
     params:
       registry: "gcr.io/kubeflow-images-public"
