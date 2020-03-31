@@ -396,3 +396,7 @@ We can use [hyperopt](https://github.com/hyperopt/hyperopt) to run Anneal.
 ### SMAC
 
 We can use [SMAC3](https://github.com/automl/SMAC3) to run SMAC.
+
+### CMA-ES
+
+We can use [goptuna](https://github.com/c-bata/goptuna) to run CMA-ES.

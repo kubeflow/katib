@@ -38,6 +38,9 @@ data:
       "tpe": {
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
       },
+      "cmaes": {
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-goptuna"
+      },
       "nasrl": {
         "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-nasrl",
         "imagePullPolicy": "Always",
