@@ -13,8 +13,12 @@ from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
 logger = logging.getLogger(__name__)
 
 
-class ChocolateService(
-        api_pb2_grpc.SuggestionServicer, HealthServicer):
+class ChocolateService(api_pb2_grpc.SuggestionServicer, HealthServicer):
+    def __init__(self):
+        super(ChocolateService, self).__init__()
+        self.base_service = None
+        self.is_first_run = True
+
     def ValidateAlgorithmSettings(self, request, context):
         algorithm_name = request.experiment.spec.algorithm.algorithm_name
         if algorithm_name == "grid":
@@ -31,12 +35,18 @@ class ChocolateService(
         """
         Main function to provide suggestion.
         """
-        base_serice = BaseChocolateService(
-            algorithm_name=request.experiment.spec.algorithm.algorithm_name)
-        search_space = HyperParameterSearchSpace.convert(request.experiment)
+
+        if self.is_first_run:
+            search_space = HyperParameterSearchSpace.convert(
+                request.experiment)
+            self.base_serice = BaseChocolateService(
+                algorithm_name=request.experiment.spec.algorithm.algorithm_name,
+                search_space=search_space)
+            self.is_first_run = False
+
         trials = Trial.convert(request.trials)
-        new_assignments = base_serice.getSuggestions(
-            search_space, trials, request.request_number)
+        new_assignments = self.base_serice.getSuggestions(
+            trials, request.request_number)
         return api_pb2.GetSuggestionsReply(
             parameter_assignments=Assignment.generate(new_assignments)
         )
