@@ -29,10 +29,10 @@ const App = props => {
     <div className={classes.root}>
       <Header />
       <Route exact path="/" component={Main} />
-      <Route path={constants.ROUTE_HP_CREATE} component={TabPanel} />
+      <Route path={constants.LINK_HP_CREATE} component={TabPanel} />
       <Route exact path="/katib/hp_monitor" component={HPJobMonitor} />
       <Route path="/katib/hp_monitor/:namespace/:name" component={HPJobInfo} />
-      <Route path={constants.ROUTE_NAS_CREATE} component={TabPanel} />
+      <Route path={constants.LINK_NAS_CREATE} component={TabPanel} />
       <Route exact path="/katib/nas_monitor" component={NASJobMonitor} />
       <Route path="/katib/nas_monitor/:namespace/:name" component={NASJobInfo} />
       <Route path="/katib/trial" component={Trial} />

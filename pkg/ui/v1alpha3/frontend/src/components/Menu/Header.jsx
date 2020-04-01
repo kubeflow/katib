@@ -1,32 +1,35 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
+
 import makeStyles from '@material-ui/styles/makeStyles';
+import { withStyles } from '@material-ui/core/styles';
+
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
-import { Link } from 'react-router-dom';
 
 import Menu from './Menu';
 
-import { connect } from 'react-redux';
 import { toggleMenu } from '../../actions/generalActions';
 
 const useStyles = makeStyles({
-  root: {
-    flexGrow: 1,
-  },
-  grow: {
-    flexGrow: 1,
-  },
   menuButton: {
     marginLeft: -12,
     marginRight: 20,
   },
-  link: {
-    textDecoration: 'none',
-  },
 });
+
+const KatibLink = withStyles({
+  root: {
+    textDecoration: 'none',
+    '&:hover': {
+      color: '#40a9ff',
+    },
+  },
+})(Typography);
 
 const Header = props => {
   const classes = useStyles();
@@ -36,7 +39,7 @@ const Header = props => {
   };
 
   return (
-    <div className={classes.root}>
+    <div>
       <AppBar position={'static'} color={'primary'}>
         <Toolbar>
           <IconButton
@@ -47,15 +50,9 @@ const Header = props => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography
-            variant={'headline'}
-            color={'secondary'}
-            component={Link}
-            to="/"
-            classes={classes.link}
-          >
+          <KatibLink variant={'headline'} color={'secondary'} component={Link} to="/">
             Katib
-          </Typography>
+          </KatibLink>
         </Toolbar>
         <Menu />
       </AppBar>

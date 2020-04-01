@@ -63,7 +63,7 @@ const TabsPanel = props => {
         <MyTab label="YAML File" />
         <MyTab label="Parameters" />
       </MyTabs>
-      {props.match.path === constants.ROUTE_HP_CREATE ? (
+      {props.match.path === constants.LINK_HP_CREATE ? (
         tabIndex === 0 ? (
           <HPYAML />
         ) : (

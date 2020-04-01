@@ -1,10 +1,12 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+
 import { makeStyles } from '@material-ui/styles';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom';
+
+import * as constants from '../../constants/constants';
 
 const useStyles = makeStyles({
   root: {
@@ -17,6 +19,7 @@ const useStyles = makeStyles({
   },
   item: {
     padding: '40px !important',
+    textDecoration: 'none !important',
   },
   block: {
     backgroundColor: '#4e4e4e',
@@ -26,6 +29,10 @@ const useStyles = makeStyles({
     '&:hover': {
       backgroundColor: 'black',
     },
+  },
+  link: {
+    textDecoration: 'none',
+    color: '#1890ff',
   },
 });
 
@@ -38,14 +45,14 @@ const Main = props => {
       <Typography variant={'h6'}>Choose type of experiment</Typography>
       <br />
       <Grid container spacing={40} alignContent={'center'}>
-        <Grid item xs={6} className={classes.item} component={Link} to="/katib/hp/">
+        <Grid item xs={6} className={classes.item} component={Link} to={constants.LINK_HP_CREATE}>
           <Paper className={classes.block}>
             <Typography variant={'h6'} color={'secondary'}>
               Hyperparameter Tuning
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={6} className={classes.item} component={Link} to="/katib/nas/">
+        <Grid item xs={6} className={classes.item} component={Link} to={constants.LINK_NAS_CREATE}>
           <Paper className={classes.block}>
             <Typography variant={'h6'} color={'secondary'}>
               Neural Architecture Search
