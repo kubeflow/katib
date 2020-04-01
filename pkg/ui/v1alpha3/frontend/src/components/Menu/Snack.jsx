@@ -11,10 +11,6 @@ import { closeSnackbar } from '../../actions/generalActions';
 const module = 'general';
 
 const useStyles = makeStyles({
-  root: {
-    flexGrow: 1,
-    marginTop: 40,
-  },
   close: {
     padding: 4,
   },
@@ -32,8 +28,8 @@ const Snack = props => {
         horizontal: horizontal,
       }}
       open={props.snackOpen}
-      autoHideDuration={600}
-      onClose={props.handleClose}
+      autoHideDuration={6000}
+      onClose={props.closeSnackbar}
       ContentProps={{
         'aria-describedby': 'message-id',
       }}

@@ -3,6 +3,8 @@
 This is the source code for the Katib UI. Current version of Katib UI is v1alpha3. On the official Kubeflow website [here](https://www.kubeflow.org/docs/components/hyperparameter-tuning/experiment/#running-the-experiment-from-the-katib-ui) you can find information how to use Katib UI.
 We are using [React](https://reactjs.org/) framework to create frontend and Go as a backend.
 
+We are using [Material UI](https://material-ui.com/) to design frontend. Try to use Material UI components to implement new Katib UI features.
+
 ## Folder structure
 
 1. `Dockerfile` and file to serve the UI `main.go` you can find under [cmd/ui/v1alpha3](https://github.com/kubeflow/katib/tree/master/cmd/ui/v1alpha3).

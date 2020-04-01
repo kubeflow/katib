@@ -67,6 +67,10 @@ Please see [new-trial-kind.md](./new-trial-kind.md)
 
 Please see [algorithm-settings.md](./algorithm-settings.md)
 
+## Katib UI documentation
+
+Please see [Katib UI README](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1alpha3)
+
 ## Design proposals
 
 Please see [proposals](./proposals)
