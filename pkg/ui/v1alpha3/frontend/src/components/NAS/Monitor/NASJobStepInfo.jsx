@@ -44,11 +44,11 @@ class NASJobStepInfo extends React.Component {
         })}
         <br />
         {/* TODO: add link in backend */}
-        <a href={`${step.link}`} className={classes.link}>
+        {/* <a href={`${step.link}`} className={classes.link}>
           <Button variant={'contained'} color={'primary'}>
             Download
           </Button>
-        </a>
+        </a> */}
       </div>
     );
   }

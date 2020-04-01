@@ -15,7 +15,7 @@ const styles = theme => ({
     marginTop: 10,
   },
   text: {
-    marginBottom: 15,
+    marginBottom: 20,
   },
 });
 
