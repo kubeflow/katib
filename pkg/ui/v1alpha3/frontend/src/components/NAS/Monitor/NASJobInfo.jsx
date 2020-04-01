@@ -39,6 +39,9 @@ const styles = theme => ({
     textAlign: 'center',
     marginBottom: 15,
   },
+  link: {
+    textDecoration: 'none',
+  },
 });
 
 class NASJobInfo extends React.Component {
@@ -54,7 +57,7 @@ class NASJobInfo extends React.Component {
     const { classes } = this.props;
     return (
       <div className={classes.root}>
-        <Link to="/katib/nas_monitor">
+        <Link to="/katib/nas_monitor" className={classes.link}>
           <Button variant={'contained'} color={'primary'}>
             Back
           </Button>

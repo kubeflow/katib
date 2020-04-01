@@ -11,6 +11,9 @@ const styles = theme => ({
     margin: '0 auto',
     textAlign: 'center',
   },
+  link: {
+    textDecoration: 'none',
+  },
 });
 
 class NASJobStepInfo extends React.Component {
@@ -41,7 +44,7 @@ class NASJobStepInfo extends React.Component {
         })}
         <br />
         {/* TODO: add link in backend */}
-        <a href={`${step.link}`}>
+        <a href={`${step.link}`} className={classes.link}>
           <Button variant={'contained'} color={'primary'}>
             Download
           </Button>

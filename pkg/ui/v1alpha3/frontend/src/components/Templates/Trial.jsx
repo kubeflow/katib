@@ -15,7 +15,7 @@ const styles = theme => ({
     marginTop: 10,
   },
   text: {
-    fontSize: theme.typography.pxToRem(40),
+    marginBottom: 15,
   },
 });
 
@@ -29,7 +29,9 @@ class Trial extends React.Component {
 
     return (
       <div className={classes.root}>
-        <Typography variant={'h4'}>{'Trial Templates'}</Typography>
+        <Typography variant={'h4'} className={classes.text}>
+          {'Trial Templates'}
+        </Typography>
 
         <TemplateList />
       </div>
