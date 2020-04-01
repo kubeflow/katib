@@ -1,9 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import makeStyles from '@material-ui/styles/makeStyles';
-import 'brace/mode/javascript';
-import 'brace/theme/tomorrow';
+
 import AceEditor from 'react-ace';
+import 'ace-builds/src-noconflict/theme-sqlserver';
+import 'ace-builds/src-noconflict/mode-yaml';
+
 import Button from '@material-ui/core/Button';
 
 import { changeYaml } from '../../../actions/hpCreateActions';
@@ -13,9 +15,6 @@ const module = 'hpCreate';
 const generalModule = 'general';
 
 const useStyles = makeStyles({
-  root: {
-    flexGrow: 1,
-  },
   editor: {
     margin: '0 auto',
   },
@@ -23,12 +22,8 @@ const useStyles = makeStyles({
     textAlign: 'center',
     marginTop: 10,
   },
-  progress: {
-    height: 10,
-    margin: 10,
-  },
-  close: {
-    padding: 4,
+  button: {
+    margin: 15,
   },
 });
 
@@ -38,28 +33,27 @@ const YAML = props => {
   };
 
   const submitWholeYaml = () => {
-    props.submitYaml(props.yaml, props.globalNamespace);
+    props.submitYaml(props.currentYaml, props.globalNamespace);
   };
 
   const classes = useStyles();
   return (
-    <div className={classes.root}>
+    <div>
       <h1>Generate</h1>
       <hr />
-      {/* {props.loading && <LinearProgress className={classes.progress}/>} */}
       <div className={classes.editor}>
         <AceEditor
-          mode="text"
-          theme="tomorrow"
-          value={props.yaml}
-          onChange={onYamlChange}
-          name="yaml-editor"
-          editorProps={{ $blockScrolling: true }}
+          mode="yaml"
+          theme="sqlserver"
+          value={props.currentYaml}
           tabSize={2}
-          enableLiveAutocompletion={true}
           fontSize={14}
-          width={'100%'}
-          height={700}
+          width={'auto'}
+          showPrintMargin={false}
+          autoScrollEditorIntoView={true}
+          maxLines={32}
+          minLines={32}
+          onChange={onYamlChange}
         />
       </div>
       <div className={classes.submit}>
@@ -78,7 +72,7 @@ const YAML = props => {
 
 const mapStateToProps = state => {
   return {
-    yaml: state[module].currentYaml,
+    currentYaml: state[module].currentYaml,
     globalNamespace: state[generalModule].globalNamespace,
   };
 };
