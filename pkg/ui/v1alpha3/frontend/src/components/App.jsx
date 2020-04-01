@@ -1,19 +1,19 @@
 import React from 'react';
-
-import Header from './Menu/Header';
-import Snack from './Menu/Snack';
+import { Route } from 'react-router-dom';
 
 import { makeStyles } from '@material-ui/styles';
 
-import { Route } from 'react-router-dom';
 import Main from './Menu/Main';
-import HP from './HP/Create/HP';
 import HPJobMonitor from './HP/Monitor/HPJobMonitor';
 import HPJobInfo from './HP/Monitor/HPJobInfo';
-import NAS from './NAS/Create/NAS';
 import NASJobMonitor from './NAS/Monitor/NASJobMonitor';
 import NASJobInfo from './NAS/Monitor/NASJobInfo';
 import Trial from './Templates/Trial';
+import Header from './Menu/Header';
+import Snack from './Menu/Snack';
+import TabPanel from './Common/Create/TabPanel';
+
+import * as constants from '../constants/constants';
 
 const useStyles = makeStyles({
   root: {
@@ -29,10 +29,10 @@ const App = props => {
     <div className={classes.root}>
       <Header />
       <Route exact path="/" component={Main} />
-      <Route path="/katib/hp" component={HP} />
+      <Route path={constants.ROUTE_HP_CREATE} component={TabPanel} />
       <Route exact path="/katib/hp_monitor" component={HPJobMonitor} />
       <Route path="/katib/hp_monitor/:namespace/:name" component={HPJobInfo} />
-      <Route path="/katib/nas" component={NAS} />
+      <Route path={constants.ROUTE_NAS_CREATE} component={TabPanel} />
       <Route exact path="/katib/nas_monitor" component={NASJobMonitor} />
       <Route path="/katib/nas_monitor/:namespace/:name" component={NASJobInfo} />
       <Route path="/katib/trial" component={Trial} />

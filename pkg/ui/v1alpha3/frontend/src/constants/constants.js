@@ -18,3 +18,6 @@ export const MC_HTTP_GET_HTTP_SCHEME = 'HTTP';
 
 export const MC_PROMETHEUS_DEFAULT_PORT = 8080;
 export const MC_PROMETHEUS_DEFAULT_PATH = '/metrics';
+
+export const ROUTE_HP_CREATE = '/katib/hp';
+export const ROUTE_NAS_CREATE = '/katib/nas';
