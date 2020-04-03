@@ -24,8 +24,6 @@ set -o pipefail
 CLUSTER_NAME="${CLUSTER_NAME}"
 ZONE="${GCP_ZONE}"
 PROJECT="${GCP_PROJECT}"
-NAMESPACE="${DEPLOY_NAMESPACE}"
-REGISTRY="${GCP_REGISTRY}"
 GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
 
 echo "Activating service-account"
@@ -57,10 +55,10 @@ cd ${GO_DIR}/test/e2e/v1alpha3
 echo "Running e2e hyperopt random experiment"
 export KUBECONFIG=$HOME/.kube/config
 ./run-e2e-experiment ../../../examples/v1alpha3/random-example.yaml
+kubectl -n kubeflow describe experiment random-example
 echo "Resuming the completed random experiment"
 ./resume-e2e-experiment ../../../examples/v1alpha3/random-example.yaml
-kubectl -n kubeflow describe suggestion
+kubectl -n kubeflow describe experiment random-example
 kubectl -n kubeflow delete experiment random-example
-kubectl describe pods
-kubectl describe deploy
+
 exit 0
