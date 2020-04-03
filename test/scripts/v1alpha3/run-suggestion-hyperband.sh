@@ -24,7 +24,6 @@ set -o pipefail
 CLUSTER_NAME="${CLUSTER_NAME}"
 ZONE="${GCP_ZONE}"
 PROJECT="${GCP_PROJECT}"
-NAMESPACE="${DEPLOY_NAMESPACE}"
 GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
 
 echo "Activating service-account"
@@ -51,16 +50,12 @@ kubectl -n kubeflow get svc
 echo "Katib pods"
 kubectl -n kubeflow get pod
 
-mkdir -p ${GO_DIR}
-cp -r . ${GO_DIR}/
-cp -r pkg/apis/manager/v1alpha3/python/* ${GO_DIR}/test/e2e/v1alpha3
 cd ${GO_DIR}/test/e2e/v1alpha3
 
 echo "Running e2e hyperband experiment"
 export KUBECONFIG=$HOME/.kube/config
 ./run-e2e-experiment ../../../examples/v1alpha3/hyperband-example.yaml
-kubectl -n kubeflow describe suggestion
+kubectl -n kubeflow describe experiment hyperband-example
 kubectl -n kubeflow delete experiment hyperband-example
-kubectl describe pods
-kubectl describe deploy
+
 exit 0

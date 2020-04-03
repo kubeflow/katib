@@ -1,4 +1,7 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
+
 import makeStyles from '@material-ui/styles/makeStyles';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
@@ -8,19 +11,15 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Collapse from '@material-ui/core/Collapse';
-
 import TuneIcon from '@material-ui/icons/Tune';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import WatchLaterIcon from '@material-ui/icons/WatchLater';
 import SearchIcon from '@material-ui/icons/Search';
-import SetttingsIcon from '@material-ui/icons/Settings';
+import SettingsIcon from '@material-ui/icons/Settings';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import InfoIcon from '@material-ui/icons/Info';
 
-import { Link } from 'react-router-dom';
-
-import { connect } from 'react-redux';
 import { toggleMenu } from '../../actions/generalActions';
 
 const module = 'general';
@@ -48,7 +47,7 @@ const Menu = props => {
 
   const classes = useStyles();
 
-  const closeMenu = () => {
+  const onCloseMenu = () => {
     props.toggleMenu(false);
   };
 
@@ -58,7 +57,7 @@ const Menu = props => {
   const variant = 'title';
   return (
     <div>
-      <Drawer open={props.menuOpen} onClose={closeMenu}>
+      <Drawer open={props.menuOpen} onClose={onCloseMenu}>
         <List>
           {/* HP */}
           <ListItem button onClick={toggleHP}>
@@ -74,7 +73,13 @@ const Menu = props => {
           </ListItem>
           <Collapse in={hp} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              <ListItem button className={classes.nested} component={Link} to="/katib/hp">
+              <ListItem
+                button
+                className={classes.nested}
+                component={Link}
+                to="/katib/hp"
+                onClick={onCloseMenu}
+              >
                 <ListItemIcon>
                   <NoteAddIcon color={iconColor} />
                 </ListItemIcon>
@@ -84,7 +89,13 @@ const Menu = props => {
                   </Typography>
                 </ListItemText>
               </ListItem>
-              <ListItem button className={classes.nested} component={Link} to="/katib/hp_monitor">
+              <ListItem
+                button
+                className={classes.nested}
+                component={Link}
+                to="/katib/hp_monitor"
+                onClick={onCloseMenu}
+              >
                 <ListItemIcon>
                   <WatchLaterIcon color={iconColor} />
                 </ListItemIcon>
@@ -111,7 +122,13 @@ const Menu = props => {
           </ListItem>
           <Collapse in={nas} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              <ListItem button className={classes.nested} component={Link} to="/katib/nas">
+              <ListItem
+                button
+                className={classes.nested}
+                component={Link}
+                to="/katib/nas"
+                onClick={onCloseMenu}
+              >
                 <ListItemIcon>
                   <NoteAddIcon color={iconColor} />
                 </ListItemIcon>
@@ -121,7 +138,13 @@ const Menu = props => {
                   </Typography>
                 </ListItemText>
               </ListItem>
-              <ListItem button className={classes.nested} component={Link} to="/katib/nas_monitor">
+              <ListItem
+                button
+                className={classes.nested}
+                component={Link}
+                to="/katib/nas_monitor"
+                onClick={onCloseMenu}
+              >
                 <ListItemIcon>
                   <WatchLaterIcon color={iconColor} />
                 </ListItemIcon>
@@ -135,9 +158,9 @@ const Menu = props => {
           </Collapse>
           <Divider />
           {/* TRIAL MANIFESTS */}
-          <ListItem button component={Link} to="/katib/trial">
+          <ListItem button component={Link} to="/katib/trial" onClick={onCloseMenu}>
             <ListItemIcon>
-              <SetttingsIcon color={iconColor} />
+              <SettingsIcon color={iconColor} />
             </ListItemIcon>
             <ListItemText>
               <Typography variant={variant} color={color}>
@@ -146,17 +169,6 @@ const Menu = props => {
             </ListItemText>
           </ListItem>
           <Divider />
-          {/* ABOUT */}
-          <ListItem button component={Link} to="/katib/about">
-            <ListItemIcon>
-              <InfoIcon color={iconColor} />
-            </ListItemIcon>
-            <ListItemText>
-              <Typography variant={variant} color={color}>
-                About
-              </Typography>
-            </ListItemText>
-          </ListItem>
         </List>
       </Drawer>
     </div>
