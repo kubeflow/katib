@@ -30,7 +30,7 @@ class BaseChocolateService(object):
             key = BaseChocolateService.encode(param.name)
             if param.type == INTEGER:
                 chocolate_search_space[key] = choco.quantized_uniform(
-                    int(param.min), int(param.max), 1)
+                    int(param.min), int(param.max), int(param.step))
             elif param.type == DOUBLE:
                 chocolate_search_space[key] = choco.quantized_uniform(
                     float(param.min), float(param.max), float(param.step))
