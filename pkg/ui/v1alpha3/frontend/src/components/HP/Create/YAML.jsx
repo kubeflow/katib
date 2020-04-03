@@ -7,6 +7,7 @@ import 'ace-builds/src-noconflict/theme-sqlserver';
 import 'ace-builds/src-noconflict/mode-yaml';
 
 import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 
 import { changeYaml } from '../../../actions/hpCreateActions';
 import { submitYaml } from '../../../actions/generalActions';
@@ -39,7 +40,7 @@ const YAML = props => {
   const classes = useStyles();
   return (
     <div>
-      <h1>Generate</h1>
+      <Typography variant={'h5'}>{'Generate'}</Typography>
       <hr />
       <div className={classes.editor}>
         <AceEditor
