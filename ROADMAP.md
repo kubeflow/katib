@@ -27,5 +27,6 @@
 ### Neural Architecture Search
 
 - Refactor structure for NAS algorithms [#1125](https://github.com/kubeflow/katib/issues/1125)
-- Refactor the design for NAS model constructor[#1127](https://github.com/kubeflow/katib/issues/1127)
+- Refactor the design for NAS model constructor [#1127](https://github.com/kubeflow/katib/issues/1127)
 - Katib UI fixes and enhancements
+- ENAS enhancements such as micro mode, RNN support
