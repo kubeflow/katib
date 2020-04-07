@@ -37,7 +37,11 @@ class HyperParameterSearchSpace(object):
     @staticmethod
     def convertParameter(p):
         if p.parameter_type == api.INT:
-            return HyperParameter.int(p.name, p.feasible_space.min, p.feasible_space.max)
+            # Default value for INT parameter step is 1
+            step = 1
+            if p.feasible_space.step != None and p.feasible_space.step != "":
+                step = p.feasible_space.step
+            return HyperParameter.int(p.name, p.feasible_space.min, p.feasible_space.max, step)
         elif p.parameter_type == api.DOUBLE:
             return HyperParameter.double(p.name, p.feasible_space.min, p.feasible_space.max, p.feasible_space.step)
         elif p.parameter_type == api.CATEGORICAL:
@@ -67,8 +71,8 @@ class HyperParameter(object):
                 self.name, self.type, ", ".join(self.list))
 
     @staticmethod
-    def int(name, min_, max_):
-        return HyperParameter(name, INTEGER, min_, max_, [], 0)
+    def int(name, min_, max_, step):
+        return HyperParameter(name, INTEGER, min_, max_, [], step)
 
     @staticmethod
     def double(name, min_, max_, step):

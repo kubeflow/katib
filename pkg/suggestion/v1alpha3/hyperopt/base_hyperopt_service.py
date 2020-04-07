@@ -39,7 +39,8 @@ class BaseHyperoptService(object):
                 hyperopt_search_space[param.name] = hyperopt.hp.quniform(
                     param.name,
                     float(param.min),
-                    float(param.max), 1)
+                    float(param.max),
+                    float(param.step))
             elif param.type == DOUBLE:
                 hyperopt_search_space[param.name] = hyperopt.hp.uniform(
                     param.name,
