@@ -39,6 +39,9 @@ class HyperoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             parameter_assignments=Assignment.generate(new_assignments)
         )
 
+    def ValidateAlgorithmSettings(self, request, context):
+        return api_pb2.ValidateAlgorithmSettingsReply()
+
 
 class OptimizerConfiguration(object):
     def __init__(self, random_state=None):
