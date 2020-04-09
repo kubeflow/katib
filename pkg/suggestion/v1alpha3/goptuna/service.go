@@ -112,6 +112,15 @@ func (s *SuggestionService) ValidateAlgorithmSettings(ctx context.Context, req *
 	if algorithmName == AlgorithmCMAES && len(params) < 2 {
 		return nil, status.Error(codes.InvalidArgument, "CMA-ES only supports two or more dimensional continuous search space.")
 	}
+
+	paramSet := make(map[string]interface{}, len(params))
+	for _, p := range params {
+		if _, ok := paramSet[p.Name]; ok {
+			return nil, status.Errorf(codes.InvalidArgument, "Detect duplicated parameter name: %s", p.Name)
+		}
+		paramSet[p.Name] = nil
+	}
+
 	return &api_v1_alpha3.ValidateAlgorithmSettingsReply{}, nil
 }
 
