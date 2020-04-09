@@ -1,11 +1,11 @@
-import json
-import numpy as np
-import skopt
-import logging
-
-from pkg.suggestion.v1alpha3.internal.search_space import *
-from pkg.suggestion.v1alpha3.internal.trial import *
 import datetime
+import logging
+import skopt
+
+from pkg.suggestion.v1alpha3.internal.search_space import (
+    INTEGER, DOUBLE, CATEGORICAL, DISCRETE, MAX_GOAL,
+)
+from pkg.suggestion.v1alpha3.internal.trial import Assignment
 
 logger = logging.getLogger(__name__)
 
