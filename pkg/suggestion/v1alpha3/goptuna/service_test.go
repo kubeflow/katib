@@ -15,6 +15,147 @@ import (
 
 func TestSuggestionService_GetSuggestions(t *testing.T) {
 	ctx := context.TODO()
+	parameterSpecs := &api_v1_alpha3.ExperimentSpec_ParameterSpecs{
+		Parameters: []*api_v1_alpha3.ParameterSpec{
+			{
+				Name:          "param-1",
+				ParameterType: api_v1_alpha3.ParameterType_INT,
+				FeasibleSpace: &api_v1_alpha3.FeasibleSpace{
+					Max:  "10",
+					Min:  "-10",
+					List: nil,
+					Step: "",
+				},
+			},
+			{
+				Name:          "param-2",
+				ParameterType: api_v1_alpha3.ParameterType_CATEGORICAL,
+				FeasibleSpace: &api_v1_alpha3.FeasibleSpace{
+					List: []string{"cat1", "cat2", "cat3"},
+				},
+			},
+			{
+				Name:          "param-3",
+				ParameterType: api_v1_alpha3.ParameterType_DISCRETE,
+				FeasibleSpace: &api_v1_alpha3.FeasibleSpace{
+					List: []string{"3", "2", "6"},
+				},
+			},
+			{
+				Name:          "param-4",
+				ParameterType: api_v1_alpha3.ParameterType_DOUBLE,
+				FeasibleSpace: &api_v1_alpha3.FeasibleSpace{
+					Max: "5.5",
+					Min: "-1.5",
+				},
+			},
+		},
+	}
+	trials := []*api_v1_alpha3.Trial{
+		{
+			Name: "test-asfjh",
+			Spec: &api_v1_alpha3.TrialSpec{
+				ExperimentName: "",
+				Objective: &api_v1_alpha3.ObjectiveSpec{
+					Type:                  api_v1_alpha3.ObjectiveType_MAXIMIZE,
+					Goal:                  0.9,
+					ObjectiveMetricName:   "metric-2",
+					AdditionalMetricNames: nil,
+				},
+				ParameterAssignments: &api_v1_alpha3.TrialSpec_ParameterAssignments{
+					Assignments: []*api_v1_alpha3.ParameterAssignment{
+						{
+							Name:  "param-1",
+							Value: "2",
+						},
+						{
+							Name:  "param-2",
+							Value: "cat1",
+						},
+						{
+							Name:  "param-3",
+							Value: "2",
+						},
+						{
+							Name:  "param-4",
+							Value: "3.44",
+						},
+					},
+				},
+				RunSpec:              "",
+				MetricsCollectorSpec: "",
+			},
+			Status: &api_v1_alpha3.TrialStatus{
+				StartTime:      time.Now().Format(time.RFC3339Nano),
+				CompletionTime: time.Now().Format(time.RFC3339Nano),
+				Condition:      api_v1_alpha3.TrialStatus_SUCCEEDED,
+				Observation: &api_v1_alpha3.Observation{
+					Metrics: []*api_v1_alpha3.Metric{
+						{
+							Name:  "metric-1",
+							Value: "435",
+						},
+						{
+							Name:  "metric-2",
+							Value: "5643",
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "test-234hs",
+			Spec: &api_v1_alpha3.TrialSpec{
+				ExperimentName: "",
+				Objective: &api_v1_alpha3.ObjectiveSpec{
+					Type:                  api_v1_alpha3.ObjectiveType_MAXIMIZE,
+					Goal:                  0.9,
+					ObjectiveMetricName:   "metric-2",
+					AdditionalMetricNames: nil,
+				},
+				ParameterAssignments: &api_v1_alpha3.TrialSpec_ParameterAssignments{
+					Assignments: []*api_v1_alpha3.ParameterAssignment{
+						{
+							Name:  "param-1",
+							Value: "3",
+						},
+						{
+							Name:  "param-2",
+							Value: "cat2",
+						},
+						{
+							Name:  "param-3",
+							Value: "6",
+						},
+						{
+							Name:  "param-4",
+							Value: "4.44",
+						},
+					},
+				},
+				RunSpec:              "",
+				MetricsCollectorSpec: "",
+			},
+			Status: &api_v1_alpha3.TrialStatus{
+				StartTime:      time.Now().Format(time.RFC3339Nano),
+				CompletionTime: time.Now().Format(time.RFC3339Nano),
+				Condition:      api_v1_alpha3.TrialStatus_SUCCEEDED,
+				Observation: &api_v1_alpha3.Observation{
+					Metrics: []*api_v1_alpha3.Metric{
+						{
+							Name:  "metric-1",
+							Value: "123",
+						},
+						{
+							Name:  "metric-2",
+							Value: "3028",
+						},
+					},
+				},
+			},
+		},
+	}
+
 	for _, tt := range []struct {
 		name         string
 		req          *api_v1_alpha3.GetSuggestionsRequest
@@ -26,7 +167,7 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 			expectedCode: codes.InvalidArgument,
 		},
 		{
-			name: "cmaes request",
+			name: "CMA-ES request",
 			req: &api_v1_alpha3.GetSuggestionsRequest{
 				Experiment: &api_v1_alpha3.Experiment{
 					Name: "test",
@@ -47,42 +188,7 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 							ObjectiveMetricName:   "metric-1",
 							AdditionalMetricNames: nil,
 						},
-						ParameterSpecs: &api_v1_alpha3.ExperimentSpec_ParameterSpecs{
-							Parameters: []*api_v1_alpha3.ParameterSpec{
-								{
-									Name:          "param-1",
-									ParameterType: api_v1_alpha3.ParameterType_INT,
-									FeasibleSpace: &api_v1_alpha3.FeasibleSpace{
-										Max:  "10",
-										Min:  "-10",
-										List: nil,
-										Step: "",
-									},
-								},
-								{
-									Name:          "param-2",
-									ParameterType: api_v1_alpha3.ParameterType_CATEGORICAL,
-									FeasibleSpace: &api_v1_alpha3.FeasibleSpace{
-										List: []string{"cat1", "cat2", "cat3"},
-									},
-								},
-								{
-									Name:          "param-3",
-									ParameterType: api_v1_alpha3.ParameterType_DISCRETE,
-									FeasibleSpace: &api_v1_alpha3.FeasibleSpace{
-										List: []string{"3", "2", "6"},
-									},
-								},
-								{
-									Name:          "param-4",
-									ParameterType: api_v1_alpha3.ParameterType_DOUBLE,
-									FeasibleSpace: &api_v1_alpha3.FeasibleSpace{
-										Max: "5.5",
-										Min: "-1.5",
-									},
-								},
-							},
-						},
+						ParameterSpecs:       parameterSpecs,
 						TrialTemplate:        "",
 						MetricsCollectorSpec: "",
 						ParallelTrialCount:   0,
@@ -90,113 +196,78 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 						NasConfig:            nil,
 					},
 				},
-				Trials: []*api_v1_alpha3.Trial{
-					{
-						Name: "test-asfjh",
-						Spec: &api_v1_alpha3.TrialSpec{
-							ExperimentName: "",
-							Objective: &api_v1_alpha3.ObjectiveSpec{
-								Type:                  api_v1_alpha3.ObjectiveType_MAXIMIZE,
-								Goal:                  0.9,
-								ObjectiveMetricName:   "metric-2",
-								AdditionalMetricNames: nil,
-							},
-							ParameterAssignments: &api_v1_alpha3.TrialSpec_ParameterAssignments{
-								Assignments: []*api_v1_alpha3.ParameterAssignment{
-									{
-										Name:  "param-1",
-										Value: "2",
-									},
-									{
-										Name:  "param-2",
-										Value: "cat1",
-									},
-									{
-										Name:  "param-3",
-										Value: "2",
-									},
-									{
-										Name:  "param-4",
-										Value: "3.44",
-									},
-								},
-							},
-							RunSpec:              "",
-							MetricsCollectorSpec: "",
-						},
-						Status: &api_v1_alpha3.TrialStatus{
-							StartTime:      time.Now().Format(time.RFC3339Nano),
-							CompletionTime: time.Now().Format(time.RFC3339Nano),
-							Condition:      api_v1_alpha3.TrialStatus_SUCCEEDED,
-							Observation: &api_v1_alpha3.Observation{
-								Metrics: []*api_v1_alpha3.Metric{
-									{
-										Name:  "metric-1",
-										Value: "435",
-									},
-									{
-										Name:  "metric-2",
-										Value: "5643",
-									},
-								},
-							},
-						},
-					},
-					{
-						Name: "test-234hs",
-						Spec: &api_v1_alpha3.TrialSpec{
-							ExperimentName: "",
-							Objective: &api_v1_alpha3.ObjectiveSpec{
-								Type:                  api_v1_alpha3.ObjectiveType_MAXIMIZE,
-								Goal:                  0.9,
-								ObjectiveMetricName:   "metric-2",
-								AdditionalMetricNames: nil,
-							},
-							ParameterAssignments: &api_v1_alpha3.TrialSpec_ParameterAssignments{
-								Assignments: []*api_v1_alpha3.ParameterAssignment{
-									{
-										Name:  "param-1",
-										Value: "3",
-									},
-									{
-										Name:  "param-2",
-										Value: "cat2",
-									},
-									{
-										Name:  "param-3",
-										Value: "6",
-									},
-									{
-										Name:  "param-4",
-										Value: "4.44",
-									},
-								},
-							},
-							RunSpec:              "",
-							MetricsCollectorSpec: "",
-						},
-						Status: &api_v1_alpha3.TrialStatus{
-							StartTime:      time.Now().Format(time.RFC3339Nano),
-							CompletionTime: time.Now().Format(time.RFC3339Nano),
-							Condition:      api_v1_alpha3.TrialStatus_SUCCEEDED,
-							Observation: &api_v1_alpha3.Observation{
-								Metrics: []*api_v1_alpha3.Metric{
-									{
-										Name:  "metric-1",
-										Value: "123",
-									},
-									{
-										Name:  "metric-2",
-										Value: "3028",
-									},
-								},
-							},
-						},
-					},
-				},
+				Trials:        trials,
 				RequestNumber: 2,
 			},
 			expectedCode: codes.OK,
+		},
+		{
+			name: "TPE request",
+			req: &api_v1_alpha3.GetSuggestionsRequest{
+				Experiment: &api_v1_alpha3.Experiment{
+					Name: "test",
+					Spec: &api_v1_alpha3.ExperimentSpec{
+						Algorithm: &api_v1_alpha3.AlgorithmSpec{
+							AlgorithmName: "tpe",
+							AlgorithmSetting: []*api_v1_alpha3.AlgorithmSetting{
+								{
+									Name:  "random_state",
+									Value: "10",
+								},
+							},
+							EarlyStoppingSpec: nil,
+						},
+						Objective: &api_v1_alpha3.ObjectiveSpec{
+							Type:                  api_v1_alpha3.ObjectiveType_MINIMIZE,
+							Goal:                  0.1,
+							ObjectiveMetricName:   "metric-1",
+							AdditionalMetricNames: nil,
+						},
+						ParameterSpecs:       parameterSpecs,
+						TrialTemplate:        "",
+						MetricsCollectorSpec: "",
+						ParallelTrialCount:   0,
+						MaxTrialCount:        0,
+						NasConfig:            nil,
+					},
+				},
+				Trials:        trials,
+				RequestNumber: 2,
+			},
+		},
+		{
+			name: "Random request",
+			req: &api_v1_alpha3.GetSuggestionsRequest{
+				Experiment: &api_v1_alpha3.Experiment{
+					Name: "test",
+					Spec: &api_v1_alpha3.ExperimentSpec{
+						Algorithm: &api_v1_alpha3.AlgorithmSpec{
+							AlgorithmName: "random",
+							AlgorithmSetting: []*api_v1_alpha3.AlgorithmSetting{
+								{
+									Name:  "random_state",
+									Value: "10",
+								},
+							},
+							EarlyStoppingSpec: nil,
+						},
+						Objective: &api_v1_alpha3.ObjectiveSpec{
+							Type:                  api_v1_alpha3.ObjectiveType_MINIMIZE,
+							Goal:                  0.1,
+							ObjectiveMetricName:   "metric-1",
+							AdditionalMetricNames: nil,
+						},
+						ParameterSpecs:       parameterSpecs,
+						TrialTemplate:        "",
+						MetricsCollectorSpec: "",
+						ParallelTrialCount:   0,
+						MaxTrialCount:        0,
+						NasConfig:            nil,
+					},
+				},
+				Trials:        trials,
+				RequestNumber: 2,
+			},
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
