@@ -14,6 +14,8 @@ const (
 	AlgorithmCMAES  = "cmaes"
 	AlgorithmTPE    = "tpe"
 	AlgorithmRandom = "random"
+
+	defaultStudyName = "Katib"
 )
 
 func NewSuggestionService() *SuggestionService {
@@ -26,10 +28,6 @@ func (s *SuggestionService) GetSuggestions(
 	ctx context.Context,
 	req *api_v1_alpha3.GetSuggestionsRequest,
 ) (*api_v1_alpha3.GetSuggestionsReply, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "request is empty")
-	}
-
 	direction, err := toGoptunaDirection(req.GetExperiment().GetSpec().GetObjective().GetType())
 	if err != nil {
 		klog.Errorf("Failed to convert to Goptuna direction: %s", err)
@@ -56,12 +54,13 @@ func (s *SuggestionService) GetSuggestions(
 		studyOpts = append(studyOpts, goptuna.StudyOptionRelativeSampler(relativeSampler))
 	}
 
-	study, err := goptuna.CreateStudy("katib", studyOpts...)
+	study, err := goptuna.CreateStudy(defaultStudyName, studyOpts...)
 	if err != nil {
 		klog.Errorf("Failed to create Goptuna study: %s", err)
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	trials, err := toGoptunaTrials(req.GetTrials(), study, searchSpace)
+	objectMetricName := req.GetExperiment().GetSpec().GetObjective().GetObjectiveMetricName()
+	trials, err := toGoptunaTrials(req.GetTrials(), objectMetricName, study, searchSpace)
 	if err != nil {
 		klog.Errorf("Failed to convert to Goptuna trials: %s", err)
 		return nil, status.Error(codes.Internal, err.Error())

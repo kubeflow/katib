@@ -21,10 +21,6 @@ func toGoptunaDirection(t api_v1_alpha3.ObjectiveType) (goptuna.StudyDirection, 
 }
 
 func toGoptunaSampler(algorithm *api_v1_alpha3.AlgorithmSpec) (goptuna.Sampler, goptuna.RelativeSampler, error) {
-	if algorithm == nil {
-		return nil, nil, errors.New("empty algorithm spec")
-	}
-
 	name := algorithm.GetAlgorithmName()
 	if name == AlgorithmCMAES {
 		opts := make([]cmaes.SamplerOption, 0, len(algorithm.GetAlgorithmSetting()))
@@ -50,7 +46,7 @@ func toGoptunaSampler(algorithm *api_v1_alpha3.AlgorithmSpec) (goptuna.Sampler, 
 			}
 		}
 		return tpe.NewSampler(opts...), nil, nil
-	} else if name == AlgorithmRandom {
+	} else {
 		opts := make([]goptuna.RandomSearchSamplerOption, 0, len(algorithm.GetAlgorithmSetting()))
 		for _, s := range algorithm.GetAlgorithmSetting() {
 			if s.Name == "random_state" {
@@ -63,14 +59,9 @@ func toGoptunaSampler(algorithm *api_v1_alpha3.AlgorithmSpec) (goptuna.Sampler, 
 		}
 		return goptuna.NewRandomSearchSampler(opts...), nil, nil
 	}
-	return nil, nil, errors.New("invalid algorithm name")
 }
 
 func toGoptunaSearchSpace(parameters []*api_v1_alpha3.ParameterSpec) (map[string]interface{}, error) {
-	if parameters == nil {
-		return nil, errors.New("empty search space")
-	}
-
 	searchSpace := make(map[string]interface{}, len(parameters))
 	for _, p := range parameters {
 		if p.ParameterType == api_v1_alpha3.ParameterType_UNKNOWN_TYPE {
@@ -167,6 +158,7 @@ func toGoptunaState(condition api_v1_alpha3.TrialStatus_TrialConditionType) (gop
 
 func toGoptunaTrials(
 	ktrials []*api_v1_alpha3.Trial,
+	objectMetricName string,
 	study *goptuna.Study,
 	searchSpace map[string]interface{},
 ) ([]goptuna.FrozenTrial, error) {
@@ -186,17 +178,18 @@ func toGoptunaTrials(
 		}
 
 		metrics := kt.GetStatus().GetObservation().GetMetrics()
-		intermediateValues := make(map[int]float64, len(metrics))
 		var finalValue float64
-		for i, m := range metrics {
-			v, err := strconv.ParseFloat(m.GetValue(), 64)
-			if err != nil {
-				return nil, err
-			}
-			intermediateValues[i] = v
-
-			if state == goptuna.TrialStateComplete {
+		if state == goptuna.TrialStateComplete {
+			for i := len(metrics) - 1; i >= 0; i-- {
+				if metrics[i].GetName() != objectMetricName {
+					continue
+				}
+				v, err := strconv.ParseFloat(metrics[i].GetValue(), 64)
+				if err != nil {
+					return nil, err
+				}
 				finalValue = v
+				break
 			}
 		}
 
@@ -212,7 +205,7 @@ func toGoptunaTrials(
 			Number:             i, // dummy number
 			State:              state,
 			Value:              finalValue,
-			IntermediateValues: intermediateValues,
+			IntermediateValues: nil,
 			DatetimeStart:      datetimeStart,
 			DatetimeComplete:   datetimeComplete,
 			InternalParams:     internalParams,

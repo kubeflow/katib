@@ -38,5 +38,4 @@ func main() {
 	if err != nil {
 		klog.Fatalf("Failed to serve: %v", err)
 	}
-	return
 }
