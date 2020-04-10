@@ -12,9 +12,7 @@ import (
 )
 
 const (
-	address     = "0.0.0.0:6789"
-	recvMsgSize = 1<<31 - 1
-	sendMsgSize = 1<<31 - 1
+	address = "0.0.0.0:6789"
 )
 
 type healthService struct {
@@ -31,7 +29,7 @@ func main() {
 	if err != nil {
 		klog.Fatalf("Failed to listen: %v", err)
 	}
-	srv := grpc.NewServer(grpc.MaxRecvMsgSize(recvMsgSize), grpc.MaxSendMsgSize(sendMsgSize))
+	srv := grpc.NewServer()
 	api_v1_alpha3.RegisterSuggestionServer(srv, suggestion.NewSuggestionService())
 	health_pb.RegisterHealthServer(srv, &healthService{})
 
