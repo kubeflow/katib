@@ -117,6 +117,28 @@ func Test_toGoptunaSearchSpace(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "Int parameter type with step",
+			parameters: []*api_v1_alpha3.ParameterSpec{
+				{
+					Name:          "param-int",
+					ParameterType: api_v1_alpha3.ParameterType_INT,
+					FeasibleSpace: &api_v1_alpha3.FeasibleSpace{
+						Max:  "5",
+						Min:  "1",
+						Step: "2",
+					},
+				},
+			},
+			want: map[string]interface{}{
+				"param-int": goptuna.StepIntUniformDistribution{
+					High: 5,
+					Low:  1,
+					Step: 2,
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name: "Discrete parameter type",
 			parameters: []*api_v1_alpha3.ParameterSpec{
 				{
