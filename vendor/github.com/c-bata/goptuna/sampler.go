@@ -138,6 +138,13 @@ func (s *RandomSearchSampler) Sample(
 			return float64(d.Low), nil
 		}
 		return float64(s.rng.Intn(d.High-d.Low) + d.Low), nil
+	case StepIntUniformDistribution:
+		if d.Single() {
+			return float64(d.Low), nil
+		}
+		r := (d.High - d.Low) / d.Step
+		v := (s.rng.Intn(r) * d.Step) + d.Low
+		return float64(v), nil
 	case DiscreteUniformDistribution:
 		if d.Single() {
 			return d.Low, nil

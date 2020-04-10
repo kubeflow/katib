@@ -109,6 +109,43 @@ func (d *IntUniformDistribution) Contains(ir float64) bool {
 	return d.Low <= value && value < d.High
 }
 
+// StepIntUniformDistributionName is the identifier name of IntUniformDistribution
+const StepIntUniformDistributionName = "StepIntUniformDistribution"
+
+// StepIntUniformDistribution is a uniform distribution on integers.
+type StepIntUniformDistribution struct {
+	// High is higher endpoint of the range of the distribution (included in the range).
+	High int `json:"high"`
+	// Low is lower endpoint of the range of the distribution (included in the range).
+	Low int `json:"low"`
+	// Step is a spacing between values.
+	Step int `json:"step"`
+}
+
+// ToExternalRepr to convert internal representation of a parameter value into external representation.
+func (d *StepIntUniformDistribution) ToExternalRepr(ir float64) interface{} {
+	r := (ir - float64(d.Low)) / float64(d.Step) // shift to [0, (high-low)/step]
+	v := int(math.Round(r))*d.Step + d.Low
+	return v
+}
+
+// Single to test whether the range of this distribution contains just a single value.
+func (d *StepIntUniformDistribution) Single() bool {
+	if d.High == d.Low {
+		return true
+	}
+	return (d.High - d.Low) < d.Step
+}
+
+// Contains to check a parameter value is contained in the range of this distribution.
+func (d *StepIntUniformDistribution) Contains(ir float64) bool {
+	value := int(ir)
+	if d.Single() {
+		return value == d.Low
+	}
+	return d.Low <= value && value < d.High
+}
+
 var _ Distribution = &DiscreteUniformDistribution{}
 
 // DiscreteUniformDistribution is a discretized uniform distribution in the linear domain.
@@ -189,6 +226,8 @@ func ToExternalRepresentation(distribution interface{}, ir float64) (interface{}
 		return d.ToExternalRepr(ir), nil
 	case IntUniformDistribution:
 		return d.ToExternalRepr(ir), nil
+	case StepIntUniformDistribution:
+		return d.ToExternalRepr(ir), nil
 	case DiscreteUniformDistribution:
 		return d.ToExternalRepr(ir), nil
 	case CategoricalDistribution:
@@ -206,6 +245,8 @@ func DistributionIsSingle(distribution interface{}) (bool, error) {
 	case LogUniformDistribution:
 		return d.Single(), nil
 	case IntUniformDistribution:
+		return d.Single(), nil
+	case StepIntUniformDistribution:
 		return d.Single(), nil
 	case DiscreteUniformDistribution:
 		return d.Single(), nil
@@ -231,6 +272,8 @@ func DistributionToJSON(distribution interface{}) ([]byte, error) {
 		ir.Name = IntUniformDistributionName
 	case DiscreteUniformDistribution:
 		ir.Name = DiscreteUniformDistributionName
+	case StepIntUniformDistribution:
+		ir.Name = StepIntUniformDistributionName
 	case CategoricalDistribution:
 		ir.Name = CategoricalDistributionName
 	default:
@@ -280,6 +323,15 @@ func JSONToDistribution(jsonBytes []byte) (interface{}, error) {
 		return y, err
 	case DiscreteUniformDistributionName:
 		var y DiscreteUniformDistribution
+		var dbytes []byte
+		dbytes, err = json.Marshal(x.Attrs)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(dbytes, &y)
+		return y, err
+	case StepIntUniformDistributionName:
+		var y StepIntUniformDistribution
 		var dbytes []byte
 		dbytes, err = json.Marshal(x.Attrs)
 		if err != nil {
