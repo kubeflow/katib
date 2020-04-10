@@ -157,7 +157,7 @@ func Test_toGoptunaSearchSpace(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Categoriical parameter type",
+			name: "Categorical parameter type",
 			parameters: []*api_v1_alpha3.ParameterSpec{
 				{
 					Name:          "param-categorical",

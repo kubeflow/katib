@@ -42,7 +42,22 @@ func sampleNextParam(study *goptuna.Study, searchSpace map[string]interface{}) (
 			if internalParam, ok := relativeSampleParams[name]; ok {
 				p = internalParam
 			} else {
-				p, err = trial.SuggestUniform(name, distribution.Low, distribution.High)
+				p, err = trial.SuggestFloat(name, distribution.Low, distribution.High)
+				if err != nil {
+					klog.Errorf("Failed to get suggested param: %s", err)
+					return nil, err
+				}
+			}
+			assignments = append(assignments, &api_v1_alpha3.ParameterAssignment{
+				Name:  name,
+				Value: strconv.FormatFloat(p, 'f', -1, 64),
+			})
+		case goptuna.DiscreteUniformDistribution:
+			var p float64
+			if internalParam, ok := relativeSampleParams[name]; ok {
+				p = internalParam
+			} else {
+				p, err = trial.SuggestDiscreteFloat(name, distribution.Low, distribution.High, distribution.Q)
 				if err != nil {
 					klog.Errorf("Failed to get suggested param: %s", err)
 					return nil, err
@@ -67,12 +82,12 @@ func sampleNextParam(study *goptuna.Study, searchSpace map[string]interface{}) (
 				Name:  name,
 				Value: strconv.Itoa(p),
 			})
-		case goptuna.DiscreteUniformDistribution:
-			var p float64
+		case goptuna.StepIntUniformDistribution:
+			var p int
 			if internalParam, ok := relativeSampleParams[name]; ok {
-				p = internalParam
+				p = int(internalParam)
 			} else {
-				p, err = trial.SuggestDiscreteUniform(name, distribution.Low, distribution.High, distribution.Q)
+				p, err = trial.SuggestStepInt(name, distribution.Low, distribution.High, distribution.Step)
 				if err != nil {
 					klog.Errorf("Failed to get suggested param: %s", err)
 					return nil, err
@@ -80,7 +95,7 @@ func sampleNextParam(study *goptuna.Study, searchSpace map[string]interface{}) (
 			}
 			assignments = append(assignments, &api_v1_alpha3.ParameterAssignment{
 				Name:  name,
-				Value: strconv.FormatFloat(p, 'f', -1, 64),
+				Value: strconv.Itoa(p),
 			})
 		case goptuna.CategoricalDistribution:
 			var p string
