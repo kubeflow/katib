@@ -93,6 +93,10 @@ func (t FrozenTrial) validate() error {
 			if !typedDistribution.Contains(ir) {
 				return fmt.Errorf("internal param is out of the distribution range")
 			}
+		case StepIntUniformDistribution:
+			if !typedDistribution.Contains(ir) {
+				return fmt.Errorf("internal param is out of the distribution range")
+			}
 		case DiscreteUniformDistribution:
 			if !typedDistribution.Contains(ir) {
 				return fmt.Errorf("internal param is out of the distribution range")

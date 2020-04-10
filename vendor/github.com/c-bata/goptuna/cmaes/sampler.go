@@ -86,13 +86,7 @@ func (s *Sampler) SampleRelative(
 			if !ok {
 				return nil, errors.New("invalid internal params")
 			}
-
-			switch searchSpace[orderedKeys[j]].(type) {
-			case goptuna.LogUniformDistribution:
-				p = math.Log(p)
-			}
-
-			x[j] = p
+			x[j] = toCMAParam(searchSpace[orderedKeys[j]], p)
 		}
 		solutions = append(solutions, &Solution{
 			Params: x,
@@ -124,11 +118,7 @@ func (s *Sampler) SampleRelative(
 	params := make(map[string]float64, len(orderedKeys))
 	for i := range orderedKeys {
 		param := nextParams[i]
-		switch searchSpace[orderedKeys[i]].(type) {
-		case goptuna.LogUniformDistribution:
-			param = math.Exp(param)
-		}
-		params[orderedKeys[i]] = param
+		params[orderedKeys[i]] = toGoptunaInternalParam(searchSpace[orderedKeys[i]], param)
 	}
 	return params, nil
 }
@@ -192,9 +182,27 @@ func supportedSearchSpace(searchSpace map[string]interface{}) map[string]interfa
 			normalized[name] = searchSpace[name]
 		case goptuna.IntUniformDistribution:
 			normalized[name] = searchSpace[name]
+		case goptuna.StepIntUniformDistribution:
+			normalized[name] = searchSpace[name]
 		}
 	}
 	return normalized
+}
+
+func toCMAParam(distribution interface{}, goptunaParam float64) float64 {
+	switch distribution.(type) {
+	case goptuna.LogUniformDistribution:
+		return math.Log(goptunaParam)
+	}
+	return goptunaParam
+}
+
+func toGoptunaInternalParam(distribution interface{}, cmaParam float64) float64 {
+	switch distribution.(type) {
+	case goptuna.LogUniformDistribution:
+		return math.Exp(cmaParam)
+	}
+	return cmaParam
 }
 
 func initialParam(searchSpace map[string]interface{}) (map[string]float64, float64, error) {
@@ -214,6 +222,9 @@ func initialParam(searchSpace map[string]interface{}) (map[string]float64, float
 			x0[name] = (high + low) / 2
 			sigma0 = append(sigma0, (high-low)/6)
 		case goptuna.IntUniformDistribution:
+			x0[name] = float64(d.High+d.Low) / 2
+			sigma0 = append(sigma0, float64(d.High-d.Low)/6)
+		case goptuna.StepIntUniformDistribution:
 			x0[name] = float64(d.High+d.Low) / 2
 			sigma0 = append(sigma0, float64(d.High-d.Low)/6)
 		default:
@@ -240,6 +251,9 @@ func getSearchSpaceBounds(
 			bounds.Set(i, 0, math.Log(d.Low))
 			bounds.Set(i, 1, math.Log(d.High))
 		case goptuna.IntUniformDistribution:
+			bounds.Set(i, 0, float64(d.Low))
+			bounds.Set(i, 1, float64(d.High))
+		case goptuna.StepIntUniformDistribution:
 			bounds.Set(i, 0, float64(d.Low))
 			bounds.Set(i, 1, float64(d.High))
 		default:

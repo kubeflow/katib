@@ -402,6 +402,13 @@ func (s *Sampler) sampleInt(distribution goptuna.IntUniformDistribution, below, 
 	return s.sampleNumerical(low, high, below, above, q, false)
 }
 
+func (s *Sampler) sampleStepInt(distribution goptuna.StepIntUniformDistribution, below, above []float64) float64 {
+	q := 1.0
+	low := float64(distribution.Low) - 0.5*q
+	high := float64(distribution.High) + 0.5*q
+	return s.sampleNumerical(low, high, below, above, q, false)
+}
+
 func (s *Sampler) sampleDiscreteUniform(distribution goptuna.DiscreteUniformDistribution, below, above []float64) float64 {
 	q := distribution.Q
 	r := distribution.High - distribution.Low
@@ -501,6 +508,8 @@ func (s *Sampler) Sample(
 		return s.sampleLogUniform(d, belowParamValues, aboveParamValues), nil
 	case goptuna.IntUniformDistribution:
 		return s.sampleInt(d, belowParamValues, aboveParamValues), nil
+	case goptuna.StepIntUniformDistribution:
+		return s.sampleStepInt(d, belowParamValues, aboveParamValues), nil
 	case goptuna.DiscreteUniformDistribution:
 		return s.sampleDiscreteUniform(d, belowParamValues, aboveParamValues), nil
 	case goptuna.CategoricalDistribution:

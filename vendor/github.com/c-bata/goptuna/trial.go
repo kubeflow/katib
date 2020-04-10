@@ -83,6 +83,10 @@ func (t *Trial) isFixedParam(name string, distribution interface{}) (float64, bo
 		if !typedDistribution.Contains(internalParam) {
 			return 0, false, nil
 		}
+	case StepIntUniformDistribution:
+		if !typedDistribution.Contains(internalParam) {
+			return 0, false, nil
+		}
 	case CategoricalDistribution:
 		if !typedDistribution.Contains(internalParam) {
 			return 0, false, nil
@@ -163,7 +167,25 @@ func (t *Trial) Number() (int, error) {
 }
 
 // SuggestUniform suggests a value from a uniform distribution.
+// Deprecated: This method will be removed at v1.0.0. Please use SuggestFloat method.
 func (t *Trial) SuggestUniform(name string, low, high float64) (float64, error) {
+	return t.SuggestFloat(name, low, high)
+}
+
+// SuggestLogUniform suggests a value from a uniform distribution in the log domain.
+// Deprecated: This method will be removed at v1.0.0. Please use SuggestLogFloat method.
+func (t *Trial) SuggestLogUniform(name string, low, high float64) (float64, error) {
+	return t.SuggestLogFloat(name, low, high)
+}
+
+// SuggestDiscreteUniform suggests a value from a discrete uniform distribution.
+// Deprecated: This method will be removed at v1.0.0. Please use SuggestDiscreteFloat method.
+func (t *Trial) SuggestDiscreteUniform(name string, low, high, q float64) (float64, error) {
+	return t.SuggestDiscreteFloat(name, low, high, q)
+}
+
+// SuggestFloat suggests a value for the floating point parameter.
+func (t *Trial) SuggestFloat(name string, low, high float64) (float64, error) {
 	if low > high {
 		return 0, errors.New("'low' must be smaller than or equal to the 'high'")
 	}
@@ -172,30 +194,18 @@ func (t *Trial) SuggestUniform(name string, low, high float64) (float64, error) 
 	})
 }
 
-// SuggestLogUniform suggests a value from a uniform distribution in the log domain.
-func (t *Trial) SuggestLogUniform(name string, low, high float64) (float64, error) {
+// SuggestLogFloat suggests a value for the log-scale floating point parameter.
+func (t *Trial) SuggestLogFloat(name string, low, high float64) (float64, error) {
 	if low > high {
 		return 0, errors.New("'low' must be smaller than or equal to the 'high'")
 	}
-	v, err := t.suggest(name, LogUniformDistribution{
+	return t.suggest(name, LogUniformDistribution{
 		High: high, Low: low,
 	})
-	return v, err
 }
 
-// SuggestInt suggests an integer parameter.
-func (t *Trial) SuggestInt(name string, low, high int) (int, error) {
-	if low > high {
-		return 0, errors.New("'low' must be smaller than or equal to the 'high'")
-	}
-	v, err := t.suggest(name, IntUniformDistribution{
-		High: high, Low: low,
-	})
-	return int(v), err
-}
-
-// SuggestDiscreteUniform suggests a value from a discrete uniform distribution.
-func (t *Trial) SuggestDiscreteUniform(name string, low, high, q float64) (float64, error) {
+// SuggestDiscreteFloat suggests a value for the discrete floating point parameter.
+func (t *Trial) SuggestDiscreteFloat(name string, low, high, q float64) (float64, error) {
 	if low > high {
 		return 0, errors.New("'low' must be smaller than or equal to the 'high'")
 	}
@@ -207,6 +217,33 @@ func (t *Trial) SuggestDiscreteUniform(name string, low, high, q float64) (float
 		return 0, err
 	}
 	return d.ToExternalRepr(ir).(float64), err
+}
+
+// SuggestInt suggests an integer parameter.
+func (t *Trial) SuggestInt(name string, low, high int) (int, error) {
+	if low > high {
+		return 0, errors.New("'low' must be smaller than or equal to the 'high'")
+	}
+	d := IntUniformDistribution{
+		High: high, Low: low,
+	}
+	v, err := t.suggest(name, d)
+	return d.ToExternalRepr(v).(int), err
+}
+
+// SuggestStepInt suggests a step-interval integer parameter.
+func (t *Trial) SuggestStepInt(name string, low, high, step int) (int, error) {
+	if low > high {
+		return 0, errors.New("'low' must be smaller than or equal to the 'high'")
+	}
+	if step <= 0 {
+		return 0, errors.New("'step' must be larger than 0")
+	}
+	d := StepIntUniformDistribution{
+		High: high, Low: low, Step: step,
+	}
+	v, err := t.suggest(name, d)
+	return d.ToExternalRepr(v).(int), err
 }
 
 // SuggestCategorical suggests an categorical parameter.

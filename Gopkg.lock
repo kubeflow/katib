@@ -21,7 +21,7 @@
   version = "v33.2.0"
 
 [[projects]]
-  digest = "0:"
+  digest = "1:7dc53e012b9e58f6fc52dce9c201d38dbc3c0e573bad4a56fa0f861823934915"
   name = "github.com/Azure/go-autorest"
   packages = [
     "autorest",
@@ -120,7 +120,7 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:d47fd5a26ce62b94cb77cf7c10a39d1f4081d1fc1370cb286a6c3dff66997787"
+  digest = "1:aa4067177308aa34990c8ed7693d4071d9e1c23e98f97167be13a04ad222e047"
   name = "github.com/c-bata/goptuna"
   packages = [
     ".",
@@ -129,8 +129,8 @@
     "tpe",
   ]
   pruneopts = "NUT"
-  revision = "da19d8b3d72c4b1ec0af6fc1baac2bae5d6f56d2"
-  version = "v0.4.0"
+  revision = "ab8d4ca5cc5440557e4fd97121547efec3283359"
+  version = "v0.5.0"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -1291,7 +1291,7 @@
   revision = "39cb288412c48cb533ba4be5d6c28620b9a0c1b4"
 
 [[projects]]
-  digest = "0:"
+  digest = "1:ea0871075d014a0c553b8430c4b162f8dd6397bf25a4938cadcd56d3e05f7afe"
   name = "k8s.io/kubernetes"
   packages = [
     "pkg/cloudprovider/providers/azure/auth",
