@@ -295,11 +295,11 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                             feed_dict={controller_ops["child_val_accuracy"]: result})
 
                         controller_step = sess.run(controller_ops["train_step"])
-                        if controller_step % experiment.algorithm_settings["controller_log_every_steps"] == 0:
+                        if ctrl_step % log_every == 0:
                             log_string = ""
                             log_string += "Controller Step: {} - ".format(controller_step)
                             log_string += "Loss: {:.4f} - ".format(loss)
-                            log_string += "Entropy: {:.4f} - ".format(entropy)
+                            log_string += "Entropy: {:.9} - ".format(entropy)
                             log_string += "Gradient Norm: {:.7f} - ".format(grad_norm)
                             log_string += "Baseline={:.4f} - ".format(baseline)
                             log_string += "Skip Rate={:.4f}".format(skip_rate)
