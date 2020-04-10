@@ -20,11 +20,9 @@ class NAS_RL_Experiment:
         self.experiment = request.experiment
         self.num_trials = 1
         self.tf_graph = tf.Graph()
-        # self.prev_trial_ids = list()
-        # self.prev_trials = None
         self.ctrl_cache_file = "ctrl_cache/{}.ckpt".format(
             self.experiment_name)
-        self.ctrl_step = 0
+        self.suggestion_step = 0
         self.algorithm_settings = None
         self.controller = None
         self.num_layers = None
@@ -34,7 +32,6 @@ class NAS_RL_Experiment:
         self.search_space = None
         self.opt_direction = None
         self.objective_name = None
-        # self.respawn_count = 0
         self.logger.info("-" * 100 + "\nSetting Up Suggestion for Experiment {}\n".format(
             self.experiment_name) + "-" * 100)
         self._get_experiment_param()
@@ -82,20 +79,15 @@ class NAS_RL_Experiment:
             self.controller = Controller(
                 num_layers=self.num_layers,
                 num_operations=self.num_operations,
-                lstm_size=self.algorithm_settings['lstm_num_cells'],
-                lstm_num_layers=self.algorithm_settings['lstm_num_layers'],
-                lstm_keep_prob=self.algorithm_settings['lstm_keep_prob'],
-                lr_init=self.algorithm_settings['init_learning_rate'],
-                lr_dec_start=self.algorithm_settings['lr_decay_start'],
-                lr_dec_every=self.algorithm_settings['lr_decay_every'],
-                lr_dec_rate=self.algorithm_settings['lr_decay_rate'],
-                l2_reg=self.algorithm_settings['l2_reg'],
-                entropy_weight=self.algorithm_settings['entropy_weight'],
-                bl_dec=self.algorithm_settings['baseline_decay'],
-                optim_algo=self.algorithm_settings['optimizer'],
-                skip_target=self.algorithm_settings['skip-target'],
-                skip_weight=self.algorithm_settings['skip-weight'],
-                name="Ctrl_" + self.experiment_name,
+                controller_hidden_size=self.algorithm_settings['controller_hidden_size'],
+                controller_temperature=self.algorithm_settings['controller_temperature'],
+                controller_tanh_const=self.algorithm_settings['controller_tanh_const'],
+                controller_entropy_weight=self.algorithm_settings['controller_entropy_weight'],
+                controller_baseline_decay=self.algorithm_settings['controller_baseline_decay'],
+                controller_learning_rate=self.algorithm_settings["controller_learning_rate"],
+                controller_skip_target=self.algorithm_settings['controller_skip_target'],
+                controller_skip_weight=self.algorithm_settings['controller_skip_weight'],
+                controller_name="Ctrl_" + self.experiment_name,
                 logger=self.logger)
 
             self.controller.build_trainer()
@@ -119,16 +111,18 @@ class NAS_RL_Experiment:
                 "Error! The Suggestion has not yet been initialized!")
             return
 
-        self.logger.info(">>> Parameters of LSTM Controller for Experiment {}".format(
+        self.logger.info(">>> Parameters of LSTM Controller for Experiment {}\n".format(
             self.experiment_name))
         for spec in self.algorithm_settings:
-            if len(spec) > 13:
-                self.logger.info("{}: \t{}".format(
+            if len(spec) > 22:
+                self.logger.info("{}:\t{}".format(
                     spec, self.algorithm_settings[spec]))
             else:
-                self.logger.info("{}: \t\t{}".format(
+                self.logger.info("{}:\t\t{}".format(
                     spec, self.algorithm_settings[spec]))
-        self.logger.info("RequestNumber:\t\t{}".format(self.num_trials))
+
+        self.logger.info("")
+        self.logger.info("RequestNumber:\t\t\t{}".format(self.num_trials))
         self.logger.info("")
 
 
@@ -156,6 +150,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         self.logger.info("Validate Algorithm Settings start")
         graph_config = request.experiment.spec.nas_config.graph_config
 
+        # TODO: Refactor this since we validate it in Katib Controller
         # Validate GraphConfig
         # Check InputSize
         if not graph_config.input_sizes:
@@ -223,32 +218,24 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         if request.request_number > 0:
             experiment.num_trials = request.request_number
         self.logger.info("-" * 100 + "\nSuggestion Step {} for Experiment {}\n".format(
-            experiment.ctrl_step, experiment.experiment_name) + "-" * 100)
+            experiment.suggestion_step, experiment.experiment_name) + "-" * 100)
 
         with experiment.tf_graph.as_default():
             saver = tf.compat.v1.train.Saver()
             ctrl = experiment.controller
 
             controller_ops = {
-                "train_step": ctrl.train_step,
                 "loss": ctrl.loss,
-                "train_op": ctrl.train_op,
-                "lr": ctrl.lr,
-                "grad_norm": ctrl.grad_norm,
-                "optimizer": ctrl.optimizer,
-                "baseline": ctrl.baseline,
                 "entropy": ctrl.sample_entropy,
+                "grad_norm": ctrl.grad_norm,
+                "baseline": ctrl.baseline,
+                "skip_rate": ctrl.skip_rate,
+                "train_op": ctrl.train_op,
+                "train_step": ctrl.train_step,
                 "sample_arc": ctrl.sample_arc,
-                "skip_rate": ctrl.skip_rate}
+                "child_val_accuracy": ctrl.child_val_accuracy,
+            }
 
-            run_ops = [
-                controller_ops["loss"],
-                controller_ops["entropy"],
-                controller_ops["lr"],
-                controller_ops["grad_norm"],
-                controller_ops["baseline"],
-                controller_ops["skip_rate"],
-                controller_ops["train_op"]]
             if self.is_first_run:
                 self.logger.info(">>> First time running suggestion for {}. Random architecture will be given.".format(
                     experiment.experiment_name))
@@ -268,7 +255,6 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 with tf.compat.v1.Session() as sess:
                     saver.restore(sess, experiment.ctrl_cache_file)
 
-                    valid_acc = ctrl.reward
                     result = self.GetEvaluationResult(request.trials)
 
                     # TODO: (andreyvelich) I deleted this part, should it be handle by controller?
@@ -292,12 +278,32 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                     if experiment.opt_direction == api_pb2.MINIMIZE:
                         result = -result
 
-                    loss, entropy, lr, gn, bl, skip, _ = sess.run(
-                        fetches=run_ops,
-                        feed_dict={valid_acc: result})
+                    self.logger.info(">>> Suggestion updated. LSTM Controller Training\n")
+                    log_every = experiment.algorithm_settings["controller_log_every_steps"]
+                    for ctrl_step in range(1, experiment.algorithm_settings["controller_train_steps"]+1):
+                        run_ops = [
+                            controller_ops["loss"],
+                            controller_ops["entropy"],
+                            controller_ops["grad_norm"],
+                            controller_ops["baseline"],
+                            controller_ops["skip_rate"],
+                            controller_ops["train_op"]
+                        ]
 
-                    self.logger.info(
-                        ">>> Suggestion updated. LSTM Controller Reward: {}".format(loss))
+                        loss, entropy, grad_norm, baseline, skip_rate, _ = sess.run(
+                            fetches=run_ops,
+                            feed_dict={controller_ops["child_val_accuracy"]: result})
+
+                        controller_step = sess.run(controller_ops["train_step"])
+                        if controller_step % experiment.algorithm_settings["controller_log_every_steps"] == 0:
+                            log_string = ""
+                            log_string += "Controller Step: {} - ".format(controller_step)
+                            log_string += "Loss: {:.4f} - ".format(loss)
+                            log_string += "Entropy: {:.4f} - ".format(entropy)
+                            log_string += "Gradient Norm: {:.7f} - ".format(grad_norm)
+                            log_string += "Baseline={:.4f} - ".format(baseline)
+                            log_string += "Skip Rate={:.4f}".format(skip_rate)
+                            self.logger.info(log_string)
 
                     candidates = list()
                     for _ in range(experiment.num_trials):
@@ -359,7 +365,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             experiment.num_trials, experiment.experiment_name))
         self.logger.info("")
 
-        experiment.ctrl_step += 1
+        experiment.suggestion_step += 1
 
         return api_pb2.GetSuggestionsReply(parameter_assignments=parameter_assignments)
 
@@ -374,7 +380,8 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                         target_value = metric.value
                         break
 
-                # Take only the latest metric value
+                # Take only the first metric value
+                # In current cifar-10 training container this value is the latest
                 completed_trials[t.name] = float(target_value)
 
             if t.status.condition == api_pb2.TrialStatus.TrialConditionType.FAILED:
@@ -394,3 +401,170 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             self.logger.info("The average is {}\n".format(avg_metrics))
 
             return avg_metrics
+
+
+# if __name__ == "__main__":
+#     experiment = api_pb2.Experiment(
+#         name="nasrl-experiment",
+#         spec=api_pb2.ExperimentSpec(
+#             algorithm=api_pb2.AlgorithmSpec(
+#                 algorithm_name="nasrl",
+#             ),
+#             objective=api_pb2.ObjectiveSpec(
+#                 type=api_pb2.MAXIMIZE,
+#                 goal=0.9,
+#                 objective_metric_name="Validation-Accuracy"
+#             ),
+#             parallel_trial_count=2,
+#             max_trial_count=10,
+#             nas_config=api_pb2.NasConfig(
+#                 graph_config=api_pb2.GraphConfig(
+#                     num_layers=4,
+#                     input_sizes=[32, 32, 8],
+#                     output_sizes=[10]
+#                 ),
+#                 operations=api_pb2.NasConfig.Operations(
+#                     operation=[
+#                         api_pb2.Operation(
+#                             operation_type="convolution",
+#                             parameter_specs=api_pb2.Operation.ParameterSpecs(
+#                                 parameters=[
+#                                     api_pb2.ParameterSpec(
+#                                         name="filter_size",
+#                                         parameter_type=api_pb2.CATEGORICAL,
+#                                         feasible_space=api_pb2.FeasibleSpace(
+#                                             max=None, min=None, list=["5"])
+#                                     ),
+#                                     api_pb2.ParameterSpec(
+#                                         name="num_filter",
+#                                         parameter_type=api_pb2.CATEGORICAL,
+#                                         feasible_space=api_pb2.FeasibleSpace(
+#                                             max=None, min=None, list=["128"])
+#                                     ),
+#                                     api_pb2.ParameterSpec(
+#                                         name="stride",
+#                                         parameter_type=api_pb2.CATEGORICAL,
+#                                         feasible_space=api_pb2.FeasibleSpace(
+#                                             max=None, min=None, list=["1", "2"])
+#                                     ),
+#                                 ]
+#                             )
+#                         ),
+#                         api_pb2.Operation(
+#                             operation_type="reduction",
+#                             parameter_specs=api_pb2.Operation.ParameterSpecs(
+#                                 parameters=[
+#                                     api_pb2.ParameterSpec(
+#                                         name="reduction_type",
+#                                         parameter_type=api_pb2.CATEGORICAL,
+#                                         feasible_space=api_pb2.FeasibleSpace(
+#                                             max=None, min=None, list=["max_pooling"])
+#                                     ),
+#                                     api_pb2.ParameterSpec(
+#                                         name="pool_size",
+#                                         parameter_type=api_pb2.INT,
+#                                         feasible_space=api_pb2.FeasibleSpace(
+#                                             min="2", max="3", step="1", list=[])
+#                                     ),
+#                                 ]
+#                             )
+#                         ),
+#                     ],
+#                 )
+#             )
+#         )
+#     )
+
+#     request = api_pb2.GetSuggestionsRequest(
+#         experiment=experiment,
+#         request_number=2,
+#     )
+
+#     service = NasrlService()
+#     service.GetSuggestions(request, "")
+
+#     trials = [
+#         api_pb2.Trial(
+#             name="first-trial",
+#             spec=api_pb2.TrialSpec(
+#                  objective=api_pb2.ObjectiveSpec(
+#                      type=api_pb2.MAXIMIZE,
+#                      objective_metric_name="Validation-Accuracy",
+#                      goal=0.99
+#                  ),
+#                 parameter_assignments=api_pb2.TrialSpec.ParameterAssignments(
+#                      assignments=[
+#                          api_pb2.ParameterAssignment(
+#                              name="architecture",
+#                              value="[[3], [0, 1], [0, 0, 1], [2, 1, 0, 0]]",
+#                          ),
+#                          api_pb2.ParameterAssignment(
+#                              name="nn_config",
+#                              value="{'num_layers': 4}",
+#                          ),
+#                      ]
+#                  )
+#             ),
+#             status=api_pb2.TrialStatus(
+#                 observation=api_pb2.Observation(
+#                     metrics=[
+#                         api_pb2.Metric(
+#                             name="Validation-Accuracy",
+#                             value="0.88"
+#                         ),
+#                     ]
+#                 ),
+#                 condition=api_pb2.TrialStatus.TrialConditionType.SUCCEEDED,
+
+#             )
+#         ),
+#         api_pb2.Trial(
+#             name="second-trial",
+#             spec=api_pb2.TrialSpec(
+#                  objective=api_pb2.ObjectiveSpec(
+#                      type=api_pb2.MAXIMIZE,
+#                      objective_metric_name="Validation-Accuracy",
+#                      goal=0.99
+#                  ),
+#                 parameter_assignments=api_pb2.TrialSpec.ParameterAssignments(
+#                      assignments=[
+#                          api_pb2.ParameterAssignment(
+#                              name="architecture",
+#                              value="[[1], [0, 1], [2, 1, 1], [2, 1, 1, 0]]",
+#                          ),
+#                          api_pb2.ParameterAssignment(
+#                              name="nn_config",
+#                              value="{'num_layers': 4}",
+#                          ),
+#                      ],
+#                  )
+#             ),
+#             status=api_pb2.TrialStatus(
+#                 observation=api_pb2.Observation(
+#                     metrics=[
+#                         api_pb2.Metric(
+#                             name="Validation-Accuracy",
+#                             value="0.84"
+#                         ),
+#                     ]
+#                 ),
+#                 condition=api_pb2.TrialStatus.TrialConditionType.SUCCEEDED,
+#             )
+#         )
+#     ]
+
+#     request = api_pb2.GetSuggestionsRequest(
+#         experiment=experiment,
+#         trials=trials,
+#         request_number=1,
+#     )
+
+#     service.GetSuggestions(request, "")
+
+#     request = api_pb2.GetSuggestionsRequest(
+#         experiment=experiment,
+#         trials=trials,
+#         request_number=1,
+#     )
+
+#     service.GetSuggestions(request, "")

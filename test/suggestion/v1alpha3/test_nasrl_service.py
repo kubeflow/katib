@@ -21,31 +21,23 @@ class TestNasRL(unittest.TestCase):
     def test_get_suggestion(self):
         trials = [
             api_pb2.Trial(
-                name="test-asfjh",
+                name="first-trial",
                 spec=api_pb2.TrialSpec(
                     objective=api_pb2.ObjectiveSpec(
-                        type=api_pb2.MAXIMIZE,
-                        objective_metric_name="metric-2",
-                        goal=0.9
+                     type=api_pb2.MAXIMIZE,
+                     objective_metric_name="Validation-Accuracy",
+                     goal=0.99
                     ),
                     parameter_assignments=api_pb2.TrialSpec.ParameterAssignments(
                         assignments=[
                             api_pb2.ParameterAssignment(
-                                name="param-1",
-                                value="2",
+                                name="architecture",
+                                value="[[3], [0, 1], [0, 0, 1], [2, 1, 0, 0]]",
                             ),
                             api_pb2.ParameterAssignment(
-                                name="param-2",
-                                value="cat1",
+                                name="nn_config",
+                                value="{'num_layers': 4}",
                             ),
-                            api_pb2.ParameterAssignment(
-                                name="param-3",
-                                value="2",
-                            ),
-                            api_pb2.ParameterAssignment(
-                                name="param-4",
-                                value="3.44",
-                            )
                         ]
                     )
                 ),
@@ -53,81 +45,65 @@ class TestNasRL(unittest.TestCase):
                     observation=api_pb2.Observation(
                         metrics=[
                             api_pb2.Metric(
-                                name="metric=1",
-                                value="435"
-                            ),
-                            api_pb2.Metric(
-                                name="metric=2",
-                                value="5643"
+                                name="Validation-Accuracy",
+                                value="0.88"
                             ),
                         ]
-                    )
+                    ),
+                    condition=api_pb2.TrialStatus.TrialConditionType.SUCCEEDED,
+
                 )
             ),
             api_pb2.Trial(
-                name="test-234hs",
+                name="second-trial",
                 spec=api_pb2.TrialSpec(
                     objective=api_pb2.ObjectiveSpec(
-                        type=api_pb2.MAXIMIZE,
-                        objective_metric_name="metric-2",
-                        goal=0.9
+                     type=api_pb2.MAXIMIZE,
+                     objective_metric_name="Validation-Accuracy",
+                     goal=0.99
                     ),
                     parameter_assignments=api_pb2.TrialSpec.ParameterAssignments(
                         assignments=[
                             api_pb2.ParameterAssignment(
-                                name="param-1",
-                                value="3",
+                                name="architecture",
+                                value="[[1], [0, 1], [2, 1, 1], [2, 1, 1, 0]]",
                             ),
                             api_pb2.ParameterAssignment(
-                                name="param-2",
-                                value="cat2",
+                                name="nn_config",
+                                value="{'num_layers': 4}",
                             ),
-                            api_pb2.ParameterAssignment(
-                                name="param-3",
-                                value="6",
-                            ),
-                            api_pb2.ParameterAssignment(
-                                name="param-4",
-                                value="4.44",
-                            )
-                        ]
+                        ],
                     )
                 ),
                 status=api_pb2.TrialStatus(
                     observation=api_pb2.Observation(
                         metrics=[
                             api_pb2.Metric(
-                                name="metric=1",
-                                value="123"
-                            ),
-                            api_pb2.Metric(
-                                name="metric=2",
-                                value="3028"
+                                name="Validation-Accuracy",
+                                value="0.84"
                             ),
                         ]
-                    )
+                    ),
+                    condition=api_pb2.TrialStatus.TrialConditionType.SUCCEEDED,
                 )
             )
         ]
         experiment = api_pb2.Experiment(
-            name="test",
+            name="nasrl-experiment",
             spec=api_pb2.ExperimentSpec(
                 algorithm=api_pb2.AlgorithmSpec(
-                    algorithm_name="hyperopt-tpe",
-                    algorithm_setting=[
-                        api_pb2.AlgorithmSetting(
-                            name="random_state",
-                            value="10"
-                        )
-                    ],
+                    algorithm_name="nasrl",
                 ),
                 objective=api_pb2.ObjectiveSpec(
                     type=api_pb2.MAXIMIZE,
-                    goal=0.9
+                    goal=0.9,
+                    objective_metric_name="Validation-Accuracy"
                 ),
+                parallel_trial_count=2,
+                max_trial_count=10,
                 nas_config=api_pb2.NasConfig(
                     graph_config=api_pb2.GraphConfig(
-                        num_layers=8,
+                        num_layers=4,
                         input_sizes=[32, 32, 8],
                         output_sizes=[10]
                     ),
@@ -141,12 +117,43 @@ class TestNasRL(unittest.TestCase):
                                             name="filter_size",
                                             parameter_type=api_pb2.CATEGORICAL,
                                             feasible_space=api_pb2.FeasibleSpace(
-                                                max=None, min=None, list=["3", "5", "7"])
-                                        )
+                                                max=None, min=None, list=["5"])
+                                        ),
+                                        api_pb2.ParameterSpec(
+                                            name="num_filter",
+                                            parameter_type=api_pb2.CATEGORICAL,
+                                            feasible_space=api_pb2.FeasibleSpace(
+                                                max=None, min=None, list=["128"])
+                                        ),
+                                        api_pb2.ParameterSpec(
+                                            name="stride",
+                                            parameter_type=api_pb2.CATEGORICAL,
+                                            feasible_space=api_pb2.FeasibleSpace(
+                                                max=None, min=None, list=["1", "2"])
+                                        ),
                                     ]
                                 )
-                            )
-                        ]
+                            ),
+                            api_pb2.Operation(
+                                operation_type="reduction",
+                                parameter_specs=api_pb2.Operation.ParameterSpecs(
+                                    parameters=[
+                                        api_pb2.ParameterSpec(
+                                            name="reduction_type",
+                                            parameter_type=api_pb2.CATEGORICAL,
+                                            feasible_space=api_pb2.FeasibleSpace(
+                                                max=None, min=None, list=["max_pooling"])
+                                        ),
+                                        api_pb2.ParameterSpec(
+                                            name="pool_size",
+                                            parameter_type=api_pb2.INT,
+                                            feasible_space=api_pb2.FeasibleSpace(
+                                                min="2", max="3", step="1", list=[])
+                                        ),
+                                    ]
+                                )
+                            ),
+                        ],
                     )
                 )
             )
