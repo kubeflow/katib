@@ -183,8 +183,6 @@ class Controller(object):
 
     def build_trainer(self):
         """Build the train ops by connecting Controller with candidate."""
-        # TODO: Check loss instead of val acc
-
         self.child_val_accuracy = tf.compat.v1.placeholder(tf.float32, shape=())
 
         self.reward = self.child_val_accuracy
@@ -220,9 +218,8 @@ class Controller(object):
             train_step=self.train_step,
             learning_rate=self.controller_learning_rate)
 
+
 # TODO: will remove this function and use tf.nn.LSTMCell instead
-
-
 def _lstm(x, prev_c, prev_h, w_lstm):
     ifog = tf.matmul(tf.concat([x, prev_h], axis=1), w_lstm)
     i, f, o, g = tf.split(ifog, 4, axis=1)
@@ -237,7 +234,6 @@ def _lstm(x, prev_c, prev_h, w_lstm):
 
 def _build_train_op(loss, tf_variables, train_step, learning_rate):
     """Build training ops from `loss` tensor."""
-
     optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate)
     grads = tf.gradients(loss, tf_variables)
 
