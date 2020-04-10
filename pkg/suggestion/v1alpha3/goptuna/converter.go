@@ -113,9 +113,22 @@ func toGoptunaSearchSpace(parameters []*api_v1_alpha3.ParameterSpec) (map[string
 			if err != nil {
 				return nil, err
 			}
-			searchSpace[p.Name] = goptuna.IntUniformDistribution{
-				High: high,
-				Low:  low,
+			stepstr := p.GetFeasibleSpace().GetStep()
+			if stepstr == "" {
+				searchSpace[p.Name] = goptuna.IntUniformDistribution{
+					High: high,
+					Low:  low,
+				}
+			} else {
+				step, err := strconv.Atoi(stepstr)
+				if err != nil {
+					return nil, err
+				}
+				searchSpace[p.Name] = goptuna.StepIntUniformDistribution{
+					High: high,
+					Low:  low,
+					Step: step,
+				}
 			}
 		} else if p.ParameterType == api_v1_alpha3.ParameterType_CATEGORICAL {
 			choices := p.GetFeasibleSpace().GetList()
