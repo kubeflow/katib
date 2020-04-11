@@ -52,98 +52,104 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 	}
 
 	for _, tt := range []struct {
-		name         string
-		req          *api_v1_alpha3.GetSuggestionsRequest
-		expectedCode codes.Code
+		name          string
+		experiment    *api_v1_alpha3.Experiment
+		requestNumber int32
+		expectedCode  codes.Code
 	}{
 		{
 			name: "CMA-ES request",
-			req: &api_v1_alpha3.GetSuggestionsRequest{
-				Experiment: &api_v1_alpha3.Experiment{
-					Name: "test",
-					Spec: &api_v1_alpha3.ExperimentSpec{
-						Algorithm: &api_v1_alpha3.AlgorithmSpec{
-							AlgorithmName: "cmaes",
-							AlgorithmSetting: []*api_v1_alpha3.AlgorithmSetting{
-								{
-									Name:  "random_state",
-									Value: "10",
-								},
+			experiment: &api_v1_alpha3.Experiment{
+				Name: "test",
+				Spec: &api_v1_alpha3.ExperimentSpec{
+					Algorithm: &api_v1_alpha3.AlgorithmSpec{
+						AlgorithmName: "cmaes",
+						AlgorithmSetting: []*api_v1_alpha3.AlgorithmSetting{
+							{
+								Name:  "random_state",
+								Value: "10",
 							},
 						},
-						Objective: &api_v1_alpha3.ObjectiveSpec{
-							Type:                  api_v1_alpha3.ObjectiveType_MINIMIZE,
-							Goal:                  0.1,
-							ObjectiveMetricName:   "metric-1",
-							AdditionalMetricNames: nil,
-						},
-						ParameterSpecs: parameterSpecs,
 					},
+					Objective: &api_v1_alpha3.ObjectiveSpec{
+						Type:                  api_v1_alpha3.ObjectiveType_MINIMIZE,
+						Goal:                  0.1,
+						ObjectiveMetricName:   "metric-1",
+						AdditionalMetricNames: nil,
+					},
+					ParameterSpecs: parameterSpecs,
 				},
-				RequestNumber: 2,
 			},
-			expectedCode: codes.OK,
+			requestNumber: 2,
+			expectedCode:  codes.OK,
 		},
 		{
 			name: "TPE request",
-			req: &api_v1_alpha3.GetSuggestionsRequest{
-				Experiment: &api_v1_alpha3.Experiment{
-					Name: "test",
-					Spec: &api_v1_alpha3.ExperimentSpec{
-						Algorithm: &api_v1_alpha3.AlgorithmSpec{
-							AlgorithmName: "tpe",
-							AlgorithmSetting: []*api_v1_alpha3.AlgorithmSetting{
-								{
-									Name:  "random_state",
-									Value: "10",
-								},
+			experiment: &api_v1_alpha3.Experiment{
+				Name: "test",
+				Spec: &api_v1_alpha3.ExperimentSpec{
+					Algorithm: &api_v1_alpha3.AlgorithmSpec{
+						AlgorithmName: "tpe",
+						AlgorithmSetting: []*api_v1_alpha3.AlgorithmSetting{
+							{
+								Name:  "random_state",
+								Value: "10",
 							},
-							EarlyStoppingSpec: nil,
 						},
-						Objective: &api_v1_alpha3.ObjectiveSpec{
-							Type:                  api_v1_alpha3.ObjectiveType_MINIMIZE,
-							Goal:                  0.1,
-							ObjectiveMetricName:   "metric-1",
-							AdditionalMetricNames: nil,
-						},
-						ParameterSpecs: parameterSpecs,
 					},
+					Objective: &api_v1_alpha3.ObjectiveSpec{
+						Type:                  api_v1_alpha3.ObjectiveType_MINIMIZE,
+						Goal:                  0.1,
+						ObjectiveMetricName:   "metric-1",
+						AdditionalMetricNames: nil,
+					},
+					ParameterSpecs: parameterSpecs,
 				},
-				RequestNumber: 2,
 			},
+			requestNumber: 2,
 		},
 		{
 			name: "Random request",
-			req: &api_v1_alpha3.GetSuggestionsRequest{
-				Experiment: &api_v1_alpha3.Experiment{
-					Name: "test",
-					Spec: &api_v1_alpha3.ExperimentSpec{
-						Algorithm: &api_v1_alpha3.AlgorithmSpec{
-							AlgorithmName: "random",
-							AlgorithmSetting: []*api_v1_alpha3.AlgorithmSetting{
-								{
-									Name:  "random_state",
-									Value: "10",
-								},
+			experiment: &api_v1_alpha3.Experiment{
+				Name: "test",
+				Spec: &api_v1_alpha3.ExperimentSpec{
+					Algorithm: &api_v1_alpha3.AlgorithmSpec{
+						AlgorithmName: "tpe",
+						AlgorithmSetting: []*api_v1_alpha3.AlgorithmSetting{
+							{
+								Name:  "random_state",
+								Value: "10",
 							},
-							EarlyStoppingSpec: nil,
 						},
-						Objective: &api_v1_alpha3.ObjectiveSpec{
-							Type:                  api_v1_alpha3.ObjectiveType_MINIMIZE,
-							Goal:                  0.1,
-							ObjectiveMetricName:   "metric-1",
-							AdditionalMetricNames: nil,
-						},
-						ParameterSpecs: parameterSpecs,
 					},
+					Objective: &api_v1_alpha3.ObjectiveSpec{
+						Type:                  api_v1_alpha3.ObjectiveType_MINIMIZE,
+						Goal:                  0.1,
+						ObjectiveMetricName:   "metric-1",
+						AdditionalMetricNames: nil,
+					},
+					ParameterSpecs: parameterSpecs,
 				},
-				RequestNumber: 2,
 			},
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &suggestion_goptuna_v1alpha3.SuggestionService{}
-			reply, err := s.GetSuggestions(ctx, tt.req)
+			_, err := s.ValidateAlgorithmSettings(ctx, &api_v1_alpha3.ValidateAlgorithmSettingsRequest{
+				Experiment: tt.experiment,
+			})
+			if c, ok := status.FromError(err); !ok {
+				t.Errorf("ValidateAlgorithmSettingns() returns non-gRPC error")
+				return
+			} else if codes.OK != c.Code() {
+				t.Errorf("ValidateAlgorithmSettings() should return = OK, but got %v", c.Code())
+				return
+			}
+
+			reply, err := s.GetSuggestions(ctx, &api_v1_alpha3.GetSuggestionsRequest{
+				Experiment:    tt.experiment,
+				RequestNumber: tt.requestNumber,
+			})
 
 			c, ok := status.FromError(err)
 			if !ok {
@@ -153,16 +159,17 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 				t.Errorf("GetSuggestions() should return = %v, but got %v", tt.expectedCode, c.Code())
 			}
 
-			if tt.expectedCode != codes.OK {
+			if c.Code() != codes.OK {
 				return
 			}
 
-			if len(reply.ParameterAssignments) != int(tt.req.RequestNumber) {
-				t.Errorf("GetSuggestions() should return %d suggestions, but got %#v", tt.req.RequestNumber, reply.ParameterAssignments)
+			if len(reply.GetParameterAssignments()) != int(tt.requestNumber) {
+				t.Errorf("GetSuggestions() should return %d suggestions, but got %#v",
+					tt.requestNumber, reply.GetParameterAssignments())
 				return
 			}
 
-			params := tt.req.GetExperiment().GetSpec().GetParameterSpecs().GetParameters()
+			params := tt.experiment.GetSpec().GetParameterSpecs().GetParameters()
 			for i := range reply.ParameterAssignments {
 				assignments := reply.ParameterAssignments[i].Assignments
 				if len(assignments) != len(params) {
