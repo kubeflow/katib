@@ -12,11 +12,12 @@ func _() {
 	_ = x[TrialStateComplete-1]
 	_ = x[TrialStatePruned-2]
 	_ = x[TrialStateFail-3]
+	_ = x[TrialStateWaiting-4]
 }
 
-const _TrialState_name = "RunningCompletePrunedFail"
+const _TrialState_name = "RunningCompletePrunedFailWaiting"
 
-var _TrialState_index = [...]uint8{0, 7, 15, 21, 25}
+var _TrialState_index = [...]uint8{0, 7, 15, 21, 25, 32}
 
 func (i TrialState) String() string {
 	if i < 0 || i >= TrialState(len(_TrialState_index)-1) {

@@ -28,18 +28,19 @@ const (
 
 // Study corresponds to an optimization task, i.e., a set of trials.
 type Study struct {
-	ID                int
-	Storage           Storage
-	Sampler           Sampler
-	RelativeSampler   RelativeSampler
-	Pruner            Pruner
-	direction         StudyDirection
-	logger            Logger
-	ignoreErr         bool
-	trialNotification chan FrozenTrial
-	loadIfExists      bool
-	mu                sync.RWMutex
-	ctx               context.Context
+	ID                 int
+	Storage            Storage
+	Sampler            Sampler
+	RelativeSampler    RelativeSampler
+	Pruner             Pruner
+	definedSearchSpace map[string]interface{}
+	direction          StudyDirection
+	logger             Logger
+	ignoreErr          bool
+	trialNotification  chan FrozenTrial
+	loadIfExists       bool
+	mu                 sync.RWMutex
+	ctx                context.Context
 }
 
 // EnqueueTrial to enqueue a trial with given parameter values.
@@ -179,48 +180,6 @@ func (s *Study) WithContext(ctx context.Context) {
 	s.ctx = ctx
 }
 
-func (s *Study) callRelativeSampler(trialID int) (
-	map[string]interface{},
-	map[string]float64,
-	error,
-) {
-	if s.RelativeSampler == nil {
-		return nil, nil, nil
-	}
-
-	frozen, err := s.Storage.GetTrial(trialID)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	intersection, err := IntersectionSearchSpace(s)
-	if err != nil {
-		return nil, nil, err
-	}
-	if intersection == nil {
-		return nil, nil, nil
-	}
-
-	searchSpace := make(map[string]interface{}, len(intersection))
-	for paramName := range intersection {
-		distribution := intersection[paramName]
-		if yes, _ := DistributionIsSingle(distribution); yes {
-			continue
-		}
-		searchSpace[paramName] = intersection[paramName]
-	}
-	relativeParams, err := s.RelativeSampler.SampleRelative(s, frozen, searchSpace)
-	if err == ErrUnsupportedSearchSpace {
-		s.logger.Warn("Your objective function contains unsupported search space for RelativeSampler.",
-			fmt.Sprintf("trialID=%d", trialID),
-			fmt.Sprintf("searchSpace=%#v", searchSpace))
-		return nil, nil, nil
-	} else if err != nil {
-		return nil, nil, err
-	}
-	return searchSpace, relativeParams, nil
-}
-
 func (s *Study) runTrial(objective FuncObjective) (int, error) {
 	trialID, err := s.popWaitingTrialID()
 	if err != nil {
@@ -236,19 +195,18 @@ func (s *Study) runTrial(objective FuncObjective) (int, error) {
 			return -1, errCreateNewTrial
 		}
 	}
-	searchSpace, relativeParams, err := s.callRelativeSampler(trialID)
+
+	trial := Trial{
+		Study: s,
+		ID:    trialID,
+	}
+	err = trial.CallRelativeSampler()
 	if err != nil {
 		s.logger.Error("failed to call relative sampler",
 			fmt.Sprintf("err=%s", err))
 		return -1, err
 	}
 
-	trial := Trial{
-		Study:               s,
-		ID:                  trialID,
-		relativeParams:      relativeParams,
-		relativeSearchSpace: searchSpace,
-	}
 	evaluation, objerr := objective(trial)
 	var state TrialState
 	if objerr == ErrTrialPruned {
@@ -579,6 +537,15 @@ func StudyOptionSetTrialNotifyChannel(notify chan FrozenTrial) StudyOption {
 func StudyOptionLoadIfExists(loadIfExists bool) StudyOption {
 	return func(s *Study) error {
 		s.loadIfExists = loadIfExists
+		return nil
+	}
+}
+
+// StudyOptionInitialSearchSpace to use RelativeSampler from the first trial.
+// This option is useful for Define-and-Run interface.
+func StudyOptionDefineSearchSpace(space map[string]interface{}) StudyOption {
+	return func(s *Study) error {
+		s.definedSearchSpace = space
 		return nil
 	}
 }

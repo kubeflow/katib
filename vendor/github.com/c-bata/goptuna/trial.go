@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"reflect"
 )
 
@@ -95,6 +96,57 @@ func (t *Trial) isFixedParam(name string, distribution interface{}) (float64, bo
 		return 0, false, errors.New("unsupported distribution")
 	}
 	return internalParam, true, nil
+}
+
+// CallRelativeSampler should be called before evaluate an objective function only 1 time.
+// Please note that this method is public for third party libraries like "Kubeflow/Katib".
+// Goptuna users SHOULD NOT call this method.
+func (t *Trial) CallRelativeSampler() error {
+	if t.Study.RelativeSampler == nil {
+		return nil
+	}
+
+	var err error
+	var searchSpace map[string]interface{}
+	if t.Study.definedSearchSpace != nil {
+		searchSpace = t.Study.definedSearchSpace
+	} else {
+		searchSpace, err = IntersectionSearchSpace(t.Study)
+		if err != nil {
+			return err
+		}
+	}
+	if searchSpace == nil {
+		return nil
+	}
+
+	relativeSearchSpace := make(map[string]interface{}, len(searchSpace))
+	for paramName := range searchSpace {
+		distribution := searchSpace[paramName]
+		if yes, _ := DistributionIsSingle(distribution); yes {
+			continue
+		}
+		relativeSearchSpace[paramName] = distribution
+	}
+
+	frozen, err := t.Study.Storage.GetTrial(t.ID)
+	if err != nil {
+		return err
+	}
+
+	relativeParams, err := t.Study.RelativeSampler.SampleRelative(t.Study, frozen, searchSpace)
+	if err == ErrUnsupportedSearchSpace {
+		t.Study.logger.Warn("Your objective function contains unsupported search space for RelativeSampler.",
+			fmt.Sprintf("trialID=%d", t.ID),
+			fmt.Sprintf("searchSpace=%#v", searchSpace))
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	t.relativeSearchSpace = searchSpace
+	t.relativeParams = relativeParams
+	return nil
 }
 
 func (t *Trial) isRelativeParam(name string, distribution interface{}) bool {
