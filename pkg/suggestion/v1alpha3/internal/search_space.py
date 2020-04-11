@@ -39,7 +39,7 @@ class HyperParameterSearchSpace(object):
         if p.parameter_type == api.INT:
             # Default value for INT parameter step is 1
             step = 1
-            if p.feasible_space.step != None and p.feasible_space.step != "":
+            if p.feasible_space.step is not None and p.feasible_space.step != "":
                 step = p.feasible_space.step
             return HyperParameter.int(p.name, p.feasible_space.min, p.feasible_space.max, step)
         elif p.parameter_type == api.DOUBLE:
