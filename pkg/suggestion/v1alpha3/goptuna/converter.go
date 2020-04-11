@@ -30,6 +30,12 @@ func toGoptunaSampler(algorithm *api_v1_alpha3.AlgorithmSpec) (goptuna.Sampler, 
 					return nil, nil, err
 				}
 				opts = append(opts, cmaes.SamplerOptionSeed(int64(seed)))
+			} else if s.Name == "sigma" {
+				sigma, err := strconv.ParseFloat(s.Value, 64)
+				if err != nil {
+					return nil, nil, err
+				}
+				opts = append(opts, cmaes.SamplerOptionInitialSigma(sigma))
 			}
 		}
 		return nil, cmaes.NewSampler(opts...), nil
@@ -42,6 +48,18 @@ func toGoptunaSampler(algorithm *api_v1_alpha3.AlgorithmSpec) (goptuna.Sampler, 
 					return nil, nil, err
 				}
 				opts = append(opts, tpe.SamplerOptionSeed(int64(seed)))
+			} else if s.Name == "startup_trials" {
+				n, err := strconv.Atoi(s.Value)
+				if err != nil {
+					return nil, nil, err
+				}
+				opts = append(opts, tpe.SamplerOptionNumberOfStartupTrials(n))
+			} else if s.Name == "ei_candidates" {
+				n, err := strconv.Atoi(s.Value)
+				if err != nil {
+					return nil, nil, err
+				}
+				opts = append(opts, tpe.SamplerOptionNumberOfEICandidates(n))
 			}
 		}
 		return tpe.NewSampler(opts...), nil, nil
