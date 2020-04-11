@@ -3,7 +3,6 @@ package suggestion_goptuna_v1alpha3_test
 import (
 	"context"
 	"testing"
-	"time"
 
 	"google.golang.org/grpc/codes"
 
@@ -51,121 +50,12 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 			},
 		},
 	}
-	trials := []*api_v1_alpha3.Trial{
-		{
-			Name: "test-asfjh",
-			Spec: &api_v1_alpha3.TrialSpec{
-				ExperimentName: "",
-				Objective: &api_v1_alpha3.ObjectiveSpec{
-					Type:                  api_v1_alpha3.ObjectiveType_MAXIMIZE,
-					Goal:                  0.9,
-					ObjectiveMetricName:   "metric-2",
-					AdditionalMetricNames: nil,
-				},
-				ParameterAssignments: &api_v1_alpha3.TrialSpec_ParameterAssignments{
-					Assignments: []*api_v1_alpha3.ParameterAssignment{
-						{
-							Name:  "param-1",
-							Value: "2",
-						},
-						{
-							Name:  "param-2",
-							Value: "cat1",
-						},
-						{
-							Name:  "param-3",
-							Value: "2",
-						},
-						{
-							Name:  "param-4",
-							Value: "3.44",
-						},
-					},
-				},
-				RunSpec:              "",
-				MetricsCollectorSpec: "",
-			},
-			Status: &api_v1_alpha3.TrialStatus{
-				StartTime:      time.Now().Format(time.RFC3339Nano),
-				CompletionTime: time.Now().Format(time.RFC3339Nano),
-				Condition:      api_v1_alpha3.TrialStatus_SUCCEEDED,
-				Observation: &api_v1_alpha3.Observation{
-					Metrics: []*api_v1_alpha3.Metric{
-						{
-							Name:  "metric-1",
-							Value: "435",
-						},
-						{
-							Name:  "metric-2",
-							Value: "5643",
-						},
-					},
-				},
-			},
-		},
-		{
-			Name: "test-234hs",
-			Spec: &api_v1_alpha3.TrialSpec{
-				ExperimentName: "",
-				Objective: &api_v1_alpha3.ObjectiveSpec{
-					Type:                  api_v1_alpha3.ObjectiveType_MAXIMIZE,
-					Goal:                  0.9,
-					ObjectiveMetricName:   "metric-2",
-					AdditionalMetricNames: nil,
-				},
-				ParameterAssignments: &api_v1_alpha3.TrialSpec_ParameterAssignments{
-					Assignments: []*api_v1_alpha3.ParameterAssignment{
-						{
-							Name:  "param-1",
-							Value: "3",
-						},
-						{
-							Name:  "param-2",
-							Value: "cat2",
-						},
-						{
-							Name:  "param-3",
-							Value: "6",
-						},
-						{
-							Name:  "param-4",
-							Value: "4.44",
-						},
-					},
-				},
-				RunSpec:              "",
-				MetricsCollectorSpec: "",
-			},
-			Status: &api_v1_alpha3.TrialStatus{
-				StartTime:      time.Now().Format(time.RFC3339Nano),
-				CompletionTime: time.Now().Format(time.RFC3339Nano),
-				Condition:      api_v1_alpha3.TrialStatus_SUCCEEDED,
-				Observation: &api_v1_alpha3.Observation{
-					Metrics: []*api_v1_alpha3.Metric{
-						{
-							Name:  "metric-1",
-							Value: "123",
-						},
-						{
-							Name:  "metric-2",
-							Value: "3028",
-						},
-					},
-				},
-			},
-		},
-	}
 
 	for _, tt := range []struct {
 		name         string
 		req          *api_v1_alpha3.GetSuggestionsRequest
 		expectedCode codes.Code
 	}{
-		{
-			name:         "empty request",
-			req:          nil,
-			expectedCode: codes.InvalidArgument,
-		},
 		{
 			name: "CMA-ES request",
 			req: &api_v1_alpha3.GetSuggestionsRequest{
@@ -180,7 +70,6 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 									Value: "10",
 								},
 							},
-							EarlyStoppingSpec: nil,
 						},
 						Objective: &api_v1_alpha3.ObjectiveSpec{
 							Type:                  api_v1_alpha3.ObjectiveType_MINIMIZE,
@@ -188,15 +77,9 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 							ObjectiveMetricName:   "metric-1",
 							AdditionalMetricNames: nil,
 						},
-						ParameterSpecs:       parameterSpecs,
-						TrialTemplate:        "",
-						MetricsCollectorSpec: "",
-						ParallelTrialCount:   0,
-						MaxTrialCount:        0,
-						NasConfig:            nil,
+						ParameterSpecs: parameterSpecs,
 					},
 				},
-				Trials:        trials,
 				RequestNumber: 2,
 			},
 			expectedCode: codes.OK,
@@ -223,15 +106,9 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 							ObjectiveMetricName:   "metric-1",
 							AdditionalMetricNames: nil,
 						},
-						ParameterSpecs:       parameterSpecs,
-						TrialTemplate:        "",
-						MetricsCollectorSpec: "",
-						ParallelTrialCount:   0,
-						MaxTrialCount:        0,
-						NasConfig:            nil,
+						ParameterSpecs: parameterSpecs,
 					},
 				},
-				Trials:        trials,
 				RequestNumber: 2,
 			},
 		},
@@ -257,15 +134,9 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 							ObjectiveMetricName:   "metric-1",
 							AdditionalMetricNames: nil,
 						},
-						ParameterSpecs:       parameterSpecs,
-						TrialTemplate:        "",
-						MetricsCollectorSpec: "",
-						ParallelTrialCount:   0,
-						MaxTrialCount:        0,
-						NasConfig:            nil,
+						ParameterSpecs: parameterSpecs,
 					},
 				},
-				Trials:        trials,
 				RequestNumber: 2,
 			},
 		},
@@ -276,7 +147,7 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 
 			c, ok := status.FromError(err)
 			if !ok {
-				t.Errorf("GeteSuggestion() returns non-gRPC error")
+				t.Errorf("GetSuggestion() returns non-gRPC error")
 			}
 			if tt.expectedCode != c.Code() {
 				t.Errorf("GetSuggestions() should return = %v, but got %v", tt.expectedCode, c.Code())
