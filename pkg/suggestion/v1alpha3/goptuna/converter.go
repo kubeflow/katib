@@ -292,3 +292,35 @@ func toGoptunaParams(
 	}
 	return internalParams, externalParams, nil
 }
+
+func createStudyAndSearchSpace(
+	experiment *api_v1_alpha3.Experiment,
+) (*goptuna.Study, map[string]interface{}, error) {
+	direction := toGoptunaDirection(experiment.GetSpec().GetObjective().GetType())
+	independentSampler, relativeSampler, err := toGoptunaSampler(experiment.GetSpec().GetAlgorithm())
+	if err != nil {
+		return nil, nil, err
+	}
+	searchSpace, err := toGoptunaSearchSpace(experiment.GetSpec().GetParameterSpecs().GetParameters())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	studyOpts := make([]goptuna.StudyOption, 0, 5)
+	studyOpts = append(studyOpts, goptuna.StudyOptionSetDirection(direction))
+	studyOpts = append(studyOpts, goptuna.StudyOptionDefineSearchSpace(searchSpace))
+	studyOpts = append(studyOpts, goptuna.StudyOptionLogger(nil))
+	if independentSampler != nil {
+		studyOpts = append(studyOpts, goptuna.StudyOptionSampler(independentSampler))
+	}
+	if relativeSampler != nil {
+		studyOpts = append(studyOpts, goptuna.StudyOptionRelativeSampler(relativeSampler))
+	}
+
+	study, err := goptuna.CreateStudy(defaultStudyName, studyOpts...)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return study, searchSpace, nil
+}

@@ -104,7 +104,7 @@ func findGoptunaTrialIDByParam(study *goptuna.Study, trialMapping map[string]int
 		return false
 	}
 
-	minDiff := math.MaxFloat64
+	minManhattan := math.MaxFloat64
 	estimatedTrialID := -1
 	for i := range trials {
 		if trials[i].State != goptuna.TrialStateRunning {
@@ -116,18 +116,33 @@ func findGoptunaTrialIDByParam(study *goptuna.Study, trialMapping map[string]int
 			continue
 		}
 
-		var diff float64
+		// To understand how this function estimate the Goptuna trial ID from the parameters,
+		// you need to understand the 'internal representation' in Goptuna.
+		// Goptuna trials holds the parameters in two types of representations.
+		// To explain the representation format, please see the following example.
+		//
+		// * Search space: map[string]interface{}{"x1": Uniform{Min: -10, Max: 10}, "x2": Categorical{Choices: []string{"param-1", "param-2", "param-3"}}}
+		// * External representation: map[string]interface{}{"x1": 5.5, "x2": "param-2"}
+		// * Internal representation: map[string]float64{"x1": 5.5, "x2": 1.0}
+		//
+		// In the internal representation, all parameters are represented by `float64` to store the storage
+		// (because Goptuna supports not only in-memory but also RDB storage backend).
+		// To represent categorical parameters, Goptuna holds an index of the list in the database.
+		//
+		// This function calculates Manhattan distance of internal representation parameters.
+		// Then returns trialID which has the most 'similar' parameters.
+		var manhattan float64
 		for name := range trials[i].InternalParams {
 			gtrialParamValue := trials[i].InternalParams[name]
 			ktrialParamValue, ok := ktrial.InternalParams[name]
 			if !ok {
 				return -1, errors.New("must not reach here")
 			}
-			diff += math.Abs(gtrialParamValue - ktrialParamValue)
+			manhattan += math.Abs(gtrialParamValue - ktrialParamValue)
 		}
 
-		if diff < minDiff {
-			minDiff = diff
+		if manhattan < minManhattan {
+			minManhattan = manhattan
 			estimatedTrialID = trials[i].ID
 		}
 	}
