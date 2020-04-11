@@ -11,19 +11,18 @@ import (
 	api_v1_alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 )
 
-func toGoptunaDirection(t api_v1_alpha3.ObjectiveType) (goptuna.StudyDirection, error) {
+func toGoptunaDirection(t api_v1_alpha3.ObjectiveType) goptuna.StudyDirection {
 	if t == api_v1_alpha3.ObjectiveType_MINIMIZE {
-		return goptuna.StudyDirectionMinimize, nil
-	} else if t == api_v1_alpha3.ObjectiveType_MAXIMIZE {
-		return goptuna.StudyDirectionMaximize, nil
+		return goptuna.StudyDirectionMinimize
 	}
-	return "", errors.New("unexpected objective type")
+	return goptuna.StudyDirectionMaximize
 }
 
 func toGoptunaSampler(algorithm *api_v1_alpha3.AlgorithmSpec) (goptuna.Sampler, goptuna.RelativeSampler, error) {
 	name := algorithm.GetAlgorithmName()
 	if name == AlgorithmCMAES {
-		opts := make([]cmaes.SamplerOption, 0, len(algorithm.GetAlgorithmSetting()))
+		opts := make([]cmaes.SamplerOption, 0, len(algorithm.GetAlgorithmSetting())+1)
+		opts = append(opts, cmaes.SamplerOptionNStartupTrials(0))
 		for _, s := range algorithm.GetAlgorithmSetting() {
 			if s.Name == "random_state" {
 				seed, err := strconv.Atoi(s.Value)
@@ -143,7 +142,7 @@ func toGoptunaSearchSpace(parameters []*api_v1_alpha3.ParameterSpec) (map[string
 
 func toGoptunaState(condition api_v1_alpha3.TrialStatus_TrialConditionType) (goptuna.TrialState, error) {
 	if condition == api_v1_alpha3.TrialStatus_CREATED {
-		return goptuna.TrialStateWaiting, nil
+		return goptuna.TrialStateRunning, nil
 	} else if condition == api_v1_alpha3.TrialStatus_RUNNING {
 		return goptuna.TrialStateRunning, nil
 	} else if condition == api_v1_alpha3.TrialStatus_SUCCEEDED {
@@ -156,40 +155,53 @@ func toGoptunaState(condition api_v1_alpha3.TrialStatus_TrialConditionType) (gop
 	return goptuna.TrialStateFail, errors.New("unexpected trial condition")
 }
 
+func getFinalMetric(objectMetricName string, trial *api_v1_alpha3.Trial) (float64, error) {
+	metrics := trial.GetStatus().GetObservation().GetMetrics()
+	for i := len(metrics) - 1; i >= 0; i-- {
+		if metrics[i].GetName() != objectMetricName {
+			continue
+		}
+		v, err := strconv.ParseFloat(metrics[i].GetValue(), 64)
+		if err != nil {
+			return 0, err
+		}
+		return v, nil
+	}
+	return 0, errors.New("no objective metrics")
+}
+
 func toGoptunaTrials(
 	ktrials []*api_v1_alpha3.Trial,
 	objectMetricName string,
 	study *goptuna.Study,
 	searchSpace map[string]interface{},
-) ([]goptuna.FrozenTrial, error) {
-	gtrials := make([]goptuna.FrozenTrial, 0, len(ktrials))
+) (map[string]goptuna.FrozenTrial, error) {
+	gtrials := make(map[string]goptuna.FrozenTrial, len(ktrials))
 	for i, kt := range ktrials {
-		datetimeStart, err := time.Parse(time.RFC3339Nano, kt.GetStatus().GetStartTime())
-		if err != nil {
-			return nil, err
+		var err error
+		var datetimeStart, datetimeComplete time.Time
+		if kt.GetStatus().GetStartTime() != "" {
+			datetimeStart, err = time.Parse(time.RFC3339Nano, kt.GetStatus().GetStartTime())
+			if err != nil {
+				return nil, err
+			}
 		}
-		datetimeComplete, err := time.Parse(time.RFC3339Nano, kt.GetStatus().GetCompletionTime())
-		if err != nil {
-			return nil, err
+		if kt.GetStatus().GetCompletionTime() != "" {
+			datetimeComplete, err = time.Parse(time.RFC3339Nano, kt.GetStatus().GetCompletionTime())
+			if err != nil {
+				return nil, err
+			}
 		}
 		state, err := toGoptunaState(kt.GetStatus().GetCondition())
 		if err != nil {
 			return nil, err
 		}
 
-		metrics := kt.GetStatus().GetObservation().GetMetrics()
 		var finalValue float64
 		if state == goptuna.TrialStateComplete {
-			for i := len(metrics) - 1; i >= 0; i-- {
-				if metrics[i].GetName() != objectMetricName {
-					continue
-				}
-				v, err := strconv.ParseFloat(metrics[i].GetValue(), 64)
-				if err != nil {
-					return nil, err
-				}
-				finalValue = v
-				break
+			finalValue, err = getFinalMetric(objectMetricName, kt)
+			if err != nil {
+				return nil, err
 			}
 		}
 
@@ -214,7 +226,7 @@ func toGoptunaTrials(
 			UserAttrs:          nil,
 			SystemAttrs:        nil,
 		}
-		gtrials = append(gtrials, gt)
+		gtrials[kt.GetName()] = gt
 	}
 	return gtrials, nil
 }
@@ -250,6 +262,13 @@ func toGoptunaParams(
 			internalParams[name] = p
 			externalParams[name] = d.ToExternalRepr(p)
 		case goptuna.IntUniformDistribution:
+			p, err := strconv.ParseInt(valueStr, 10, 64)
+			if err != nil {
+				return nil, nil, err
+			}
+			internalParams[name] = float64(p)
+			externalParams[name] = p
+		case goptuna.StepIntUniformDistribution:
 			p, err := strconv.ParseInt(valueStr, 10, 64)
 			if err != nil {
 				return nil, nil, err
