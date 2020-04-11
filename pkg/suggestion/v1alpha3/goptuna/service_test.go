@@ -4,12 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"google.golang.org/grpc/codes"
-
-	"google.golang.org/grpc/status"
-
 	api_v1_alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 	suggestion_goptuna_v1alpha3 "github.com/kubeflow/katib/pkg/suggestion/v1alpha3/goptuna"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestSuggestionService_GetSuggestions(t *testing.T) {
