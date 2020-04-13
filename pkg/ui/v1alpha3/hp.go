@@ -18,8 +18,8 @@ import (
 
 // FetchAllHPJobs gets experiments in all namespaces.
 func (k *KatibUIHandler) FetchAllHPJobs(w http.ResponseWriter, r *http.Request) {
-	// Use "" to get experiments in all namespaces.
-	jobs, err := k.getExperimentList("", JobTypeHP)
+	// Get HP-related experiments in all available namespaces.
+	jobs, err := k.getExperimentList(availableNameSpaces, JobTypeHP)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

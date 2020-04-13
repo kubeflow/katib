@@ -12,10 +12,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (k *KatibUIHandler) getExperimentList(namespace string, typ JobType) ([]JobView, error) {
+func (k *KatibUIHandler) getExperimentList(namespace []string, typ JobType) ([]JobView, error) {
 	jobs := make([]JobView, 0)
 
-	el, err := k.katibClient.GetExperimentList(namespace)
+	el, err := k.katibClient.GetExperimentList(namespace...)
 	if err != nil {
 		log.Printf("GetExperimentList failed: %v", err)
 		return nil, err
@@ -50,16 +50,15 @@ func enableCors(w *http.ResponseWriter) {
 func (k *KatibUIHandler) getTrialTemplatesViewList() ([]TrialTemplatesView, error) {
 	trialTemplatesViewList := make([]TrialTemplatesView, 0)
 
-	// Get all namespaces
-	namespaceList, err := k.katibClient.GetNamespaceList()
+	// Get all available namespaces
+	namespaces, err := k.getAvailableNamespaces()
 	if err != nil {
 		log.Printf("GetNamespaceList failed: %v", err)
 		return nil, err
 	}
 
 	// Get Trial Template ConfigMap for each namespace
-	for _, namespace := range namespaceList.Items {
-		ns := namespace.ObjectMeta.Name
+	for _, ns := range namespaces {
 		trialTemplatesConfigMapList, err := k.katibClient.GetTrialTemplates(ns)
 		if err != nil {
 			log.Printf("GetTrialTemplates failed: %v", err)
@@ -72,6 +71,25 @@ func (k *KatibUIHandler) getTrialTemplatesViewList() ([]TrialTemplatesView, erro
 	}
 	return trialTemplatesViewList, nil
 }
+
+func (k *KatibUIHandler) getAvailableNamespaces() ([]string, error) {
+	var namespaces []string
+
+	if hasClusterRole {
+		namespaceList, err := k.katibClient.GetNamespaceList()
+		if err != nil {
+			return nil, err
+		}
+		for _, ns := range namespaceList.Items {
+			namespaces = append(namespaces, ns.ObjectMeta.Name)
+		}
+	} else {
+		namespaces = availableNameSpaces
+	}
+
+	return namespaces, nil
+}
+
 func getTrialTemplatesView(templatesConfigMapList *apiv1.ConfigMapList) TrialTemplatesView {
 
 	trialTemplateView := TrialTemplatesView{
