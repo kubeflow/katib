@@ -226,8 +226,9 @@ func getLatestObjectiveMetricValue(metricLogs []*api_pb.MetricLog, objectiveType
 			return nil, fmt.Errorf("failed to parse timestamp %s: %e", metricLogs[0].TimeStamp, err)
 		}
 		if latestTimestamp == nil || latestTimestamp.Before(ts) {
-			*latestTimestamp = ts
-			*objectiveValue, _ = strconv.ParseFloat(metricLog.Metric.Value, 64)
+			latestTimestamp = &ts
+			value, _ := strconv.ParseFloat(metricLog.Metric.Value, 64)
+			objectiveValue = &value
 		}
 	}
 	return objectiveValue, nil
