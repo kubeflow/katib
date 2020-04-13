@@ -53,14 +53,16 @@ import (
 	filemc "github.com/kubeflow/katib/pkg/metricscollector/v1alpha3/file-metricscollector"
 )
 
-var metricsFileName = flag.String("path", "", "Metrics File Path")
-var trialName = flag.String("t", "", "Trial Name")
-var managerService = flag.String("s", "", "Katib Manager service")
-var metricNames = flag.String("m", "", "Metric names")
-var filters = flag.String("f", "", "Metric filters")
-var pollInterval = flag.Duration("p", common.DefaultPollInterval, "Poll interval to check if main process of worker container exit")
-var timeout = flag.Duration("timeout", common.DefaultTimeout, "Timeout to check if main process of worker container exit")
-var waitAll = flag.Bool("w", common.DefaultWaitAll, "Whether wait for all other main process of container exiting")
+var (
+	metricsFileName = flag.String("path", "", "Metrics File Path")
+	trialName       = flag.String("t", "", "Trial Name")
+	managerService  = flag.String("s", "", "Katib Manager service")
+	metricNames     = flag.String("m", "", "Metric names")
+	filters         = flag.String("f", "", "Metric filters")
+	pollInterval    = flag.Duration("p", common.DefaultPollInterval, "Poll interval to check if main process of worker container exit")
+	timeout         = flag.Duration("timeout", common.DefaultTimeout, "Timeout to check if main process of worker container exit")
+	waitAll         = flag.Bool("w", common.DefaultWaitAll, "Whether wait for all other main process of container exiting")
+)
 
 func printMetricsFile(mFile string) {
 	for {
@@ -101,20 +103,16 @@ func main() {
 	}
 	defer conn.Close()
 	c := api.NewManagerClient(conn)
-	mc, err := filemc.NewFileMetricsCollector()
-	if err != nil {
-		klog.Fatalf("Failed to create MetricsCollector: %v", err)
-	}
 	ctx := context.Background()
-	metricList := []string{}
+	var metricList []string
 	if len(*metricNames) != 0 {
 		metricList = strings.Split(*metricNames, ";")
 	}
-	filterList := []string{}
+	var filterList []string
 	if len(*filters) != 0 {
 		filterList = strings.Split(*filters, ";")
 	}
-	olog, err := mc.CollectObservationLog(*metricsFileName, metricList, filterList)
+	olog, err := filemc.CollectObservationLog(*metricsFileName, metricList, filterList)
 	if err != nil {
 		klog.Fatalf("Failed to collect logs: %v", err)
 	}
@@ -127,5 +125,4 @@ func main() {
 		klog.Fatalf("Failed to Report logs: %v", err)
 	}
 	klog.Infof("Metrics reported. :\n%v", olog)
-	return
 }

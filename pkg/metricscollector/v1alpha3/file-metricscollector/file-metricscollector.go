@@ -12,14 +12,7 @@ import (
 	"k8s.io/klog"
 )
 
-type FileMetricsCollector struct {
-}
-
-func NewFileMetricsCollector() (*FileMetricsCollector, error) {
-	return &FileMetricsCollector{}, nil
-}
-
-func (d *FileMetricsCollector) CollectObservationLog(fileName string, metrics []string, filters []string) (*v1alpha3.ObservationLog, error) {
+func CollectObservationLog(fileName string, metrics []string, filters []string) (*v1alpha3.ObservationLog, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, err
@@ -27,15 +20,14 @@ func (d *FileMetricsCollector) CollectObservationLog(fileName string, metrics []
 	defer file.Close()
 	content, err := ioutil.ReadAll(file)
 	logs := string(content)
-	olog, err := d.parseLogs(strings.Split(logs, "\n"), metrics, filters)
+	olog, err := parseLogs(strings.Split(logs, "\n"), metrics, filters)
 	return olog, err
 }
 
-func (d *FileMetricsCollector) parseLogs(logs []string, metrics []string, filters []string) (*v1alpha3.ObservationLog, error) {
-	var lasterr error
+func parseLogs(logs []string, metrics []string, filters []string) (*v1alpha3.ObservationLog, error) {
 	olog := &v1alpha3.ObservationLog{}
-	mlogs := []*v1alpha3.MetricLog{}
 	metricRegList := getFilterRegexpList(filters)
+	mlogs := make([]*v1alpha3.MetricLog, 0, len(logs))
 
 	for _, logline := range logs {
 		// skip line which doesn't contain any metrics keywords, avoiding unnecessary pattern match
@@ -87,14 +79,11 @@ func (d *FileMetricsCollector) parseLogs(logs []string, metrics []string, filter
 		}
 	}
 	olog.MetricLogs = mlogs
-	if lasterr != nil {
-		return olog, lasterr
-	}
 	return olog, nil
 }
 
 func getFilterRegexpList(filters []string) []*regexp.Regexp {
-	regexpList := []*regexp.Regexp{}
+	regexpList := make([]*regexp.Regexp, 0, len(filters))
 	if len(filters) == 0 {
 		filters = append(filters, common.DefaultFilter)
 	}
