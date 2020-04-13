@@ -28,7 +28,7 @@ func NewSuggestionService() *SuggestionService {
 }
 
 type SuggestionService struct {
-	mu           sync.Mutex
+	mu           sync.RWMutex
 	searchSpace  map[string]interface{}
 	study        *goptuna.Study
 	trialMapping map[string]int // Katib trial name -> Goptuna trial id
@@ -38,8 +38,9 @@ func (s *SuggestionService) GetSuggestions(
 	ctx context.Context,
 	req *api_v1_alpha3.GetSuggestionsRequest,
 ) (*api_v1_alpha3.GetSuggestionsReply, error) {
-	if s.study == nil || s.searchSpace == nil {
-		return nil, status.Error(codes.Unavailable, "You need to call ValidateAlgorithmSettings before")
+	err := s.initStudyAndSearchSpaceAtFirstRun(req.GetExperiment())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to create goptuna study and search space: %s", err.Error())
 	}
 
 	objectMetricName := req.GetExperiment().GetSpec().GetObjective().GetObjectiveMetricName()
@@ -130,6 +131,26 @@ func (s *SuggestionService) syncTrials(ktrials map[string]goptuna.FrozenTrial) (
 	return nil
 }
 
+func (s *SuggestionService) initStudyAndSearchSpaceAtFirstRun(
+	experiment *api_v1_alpha3.Experiment,
+) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.study != nil && s.searchSpace != nil {
+		return nil
+	}
+
+	study, searchSpace, err := createStudyAndSearchSpace(experiment)
+	if err != nil {
+		return err
+	}
+
+	s.study = study
+	s.searchSpace = searchSpace
+	return nil
+}
+
 func (s *SuggestionService) ValidateAlgorithmSettings(
 	ctx context.Context,
 	req *api_v1_alpha3.ValidateAlgorithmSettingsRequest,
@@ -163,17 +184,10 @@ func (s *SuggestionService) ValidateAlgorithmSettings(
 		}
 		paramSet[p.Name] = nil
 	}
-
-	study, searchSpace, err := createStudyAndSearchSpace(req.GetExperiment())
+	_, _, err := createStudyAndSearchSpace(req.GetExperiment())
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Failed to create goptuna study: %s", err.Error())
+		return nil, status.Errorf(codes.Internal, "Failed to create goptuna study and search space: %s", err.Error())
 	}
-	klog.Infof("Goptuna search space: %#v", searchSpace)
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.study = study
-	s.searchSpace = searchSpace
 	return &api_v1_alpha3.ValidateAlgorithmSettingsReply{}, nil
 }
 
