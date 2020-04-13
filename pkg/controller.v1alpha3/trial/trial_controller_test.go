@@ -241,11 +241,11 @@ func TestReconcileCompletedTFJobTrial(t *testing.T) {
 func TestGetObjectiveMetricValue(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	metricLogs := []*api_pb.MetricLog{
-		{TimeStamp: "2006-01-02T15:04:05Z07:00", Metric: &api_pb.Metric{Name: "error", Value: "0.03"}},
-		{TimeStamp: "2006-01-02T15:05:05Z07:00", Metric: &api_pb.Metric{Name: "error", Value: "0.02"}},
-		{TimeStamp: "2006-01-02T15:06:05Z07:00", Metric: &api_pb.Metric{Name: "error", Value: "0.01"}},
-		{TimeStamp: "2006-01-02T15:07:05Z07:00", Metric: &api_pb.Metric{Name: "error", Value: "0.05"}},
-		{TimeStamp: "2006-01-02T14:08:05Z07:00", Metric: &api_pb.Metric{Name: "error", Value: "0.1"}},
+		{TimeStamp: "2020-04-13T14:47:38+08:00", Metric: &api_pb.Metric{Name: "error", Value: "0.03"}},
+		{TimeStamp: "2020-04-13T14:47:39+08:00", Metric: &api_pb.Metric{Name: "error", Value: "0.02"}},
+		{TimeStamp: "2020-04-13T14:47:40+08:00", Metric: &api_pb.Metric{Name: "error", Value: "0.01"}},
+		{TimeStamp: "2020-04-13T14:47:41+08:00", Metric: &api_pb.Metric{Name: "error", Value: "0.05"}},
+		{TimeStamp: "2020-04-12T14:47:42+08:00", Metric: &api_pb.Metric{Name: "error", Value: "0.1"}},
 	}
 	objectiveType := commonv1alpha3.ObjectiveType("minimize")
 	objectiveExtractType := trialsv1alpha3.ObjectiveExtractType("")
