@@ -2,13 +2,14 @@ import hyperopt
 import numpy as np
 import logging
 
-from pkg.suggestion.v1alpha3.internal.search_space import *
-from pkg.suggestion.v1alpha3.internal.trial import *
+from pkg.suggestion.v1alpha3.internal.constant import *
+from pkg.suggestion.v1alpha3.internal.trial import Assignment
 
 logger = logging.getLogger(__name__)
 
 TPE_ALGORITHM_NAME = "tpe"
 RANDOM_ALGORITHM_NAME = "random"
+
 
 class BaseHyperoptService(object):
     def __init__(self, algorithm_name=TPE_ALGORITHM_NAME, random_state=None, search_space=None):
@@ -63,7 +64,6 @@ class BaseHyperoptService(object):
             verbose=False)
 
         self.fmin.catch_eval_exceptions = False
-
 
     def getSuggestions(self, trials, request_number):
         """

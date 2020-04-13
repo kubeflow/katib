@@ -1,13 +1,8 @@
 import logging
 from pkg.apis.manager.v1alpha3.python import api_pb2 as api
 
-MAX_GOAL = "MAXIMIZE"
-MIN_GOAL = "MINIMIZE"
+from .constant import *
 
-INTEGER = "INTEGER"
-DOUBLE = "DOUBLE"
-CATEGORICAL = "CATEGORICAL"
-DISCRETE = "DISCRETE"
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)

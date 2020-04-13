@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     if num_gpus > 1:
         test_model = multi_gpu_model(test_model, gpus=num_gpus)
-    
+
     test_model.summary()
     test_model.compile(loss=keras.losses.categorical_crossentropy,
                        optimizer=keras.optimizers.Adam(lr=1e-3, decay=1e-4),
@@ -61,7 +61,8 @@ if __name__ == "__main__":
         width_shift_range=0.1,
         height_shift_range=0.1,
         horizontal_flip=True)
-    
+
+    # TODO: Add batch size to args
     aug_data_flow = augmentation.flow(x_train, y_train, batch_size=128)
 
     print(">>> Data Loaded. Training starts.")
