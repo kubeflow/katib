@@ -220,14 +220,14 @@ func getBestObjectiveMetricValue(metricLogs []*api_pb.MetricLog, objectiveType c
 func getLatestObjectiveMetricValue(metricLogs []*api_pb.MetricLog, objectiveType commonv1alpha3.ObjectiveType) (*float64, error) {
 	var objectiveValue *float64
 	var latestTimestamp *time.Time
-	for _, metricLog := range metricLogs {
-		ts, err := time.Parse(time.RFC3339Nano, metricLogs[0].TimeStamp)
+	for _, log := range metricLogs {
+		ts, err := time.Parse(time.RFC3339Nano, log.TimeStamp)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse timestamp %s: %e", metricLogs[0].TimeStamp, err)
+			return nil, fmt.Errorf("failed to parse timestamp %s: %e", log.TimeStamp, err)
 		}
 		if latestTimestamp == nil || latestTimestamp.Before(ts) {
 			latestTimestamp = &ts
-			value, _ := strconv.ParseFloat(metricLog.Metric.Value, 64)
+			value, _ := strconv.ParseFloat(log.Metric.Value, 64)
 			objectiveValue = &value
 		}
 	}
