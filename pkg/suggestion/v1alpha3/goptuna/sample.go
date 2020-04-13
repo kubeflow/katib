@@ -2,7 +2,6 @@ package suggestion_goptuna_v1alpha3
 
 import (
 	"errors"
-	"math"
 	"strconv"
 
 	"github.com/c-bata/goptuna"
@@ -89,6 +88,31 @@ func sampleNextParam(study *goptuna.Study, searchSpace map[string]interface{}) (
 	return assignments, nil
 }
 
+func isSameTrialParam(ktrial, gtrial goptuna.FrozenTrial) bool {
+	// Compare trial parameters by "internal representation".
+	// In the internal representation, all parameters are represented by `float64` to store the storage
+	// (because Goptuna supports not only in-memory but also RDB storage backend).
+	// To represent categorical parameters, Goptuna holds an index of the list in the database.
+	//
+	// SearchSpace: map[string]interface{}{"x1": Uniform{Min: -10, Max: 10}, "x2": Categorical{Choices: []string{"param-1", "param-2"}}}
+	// External representation: map[string]interface{}{"x1": 5.5, "x2": "param-2"}
+	// Internal representation: map[string]float64{"x1": 5.5, "x2": 1.0}
+	for name := range gtrial.InternalParams {
+		gtrialParamValue := gtrial.InternalParams[name]
+		ktrialParamValue, ok := ktrial.InternalParams[name]
+		if !ok {
+			// must not reach here
+			klog.Errorf("Detect inconsistent internal parameters: %v and %v",
+				ktrial.InternalParams, gtrial.InternalParams)
+			return false
+		}
+		if gtrialParamValue != ktrialParamValue {
+			return false
+		}
+	}
+	return true
+}
+
 func findGoptunaTrialIDByParam(study *goptuna.Study, trialMapping map[string]int, ktrial goptuna.FrozenTrial) (int, error) {
 	trials, err := study.GetTrials()
 	if err != nil {
@@ -104,9 +128,7 @@ func findGoptunaTrialIDByParam(study *goptuna.Study, trialMapping map[string]int
 		return false
 	}
 
-	minManhattan := math.MaxFloat64
-	estimatedTrialID := -1
-	for i := range trials {
+	for i := len(trials) - 1; i >= 0; i-- {
 		if trials[i].State != goptuna.TrialStateRunning {
 			continue
 		}
@@ -116,38 +138,9 @@ func findGoptunaTrialIDByParam(study *goptuna.Study, trialMapping map[string]int
 			continue
 		}
 
-		// To understand how this function estimate the Goptuna trial ID from the parameters,
-		// you need to understand the 'internal representation' in Goptuna.
-		// Goptuna trials holds the parameters in two types of representations.
-		// To explain the representation format, please see the following example.
-		//
-		// * Search space: map[string]interface{}{"x1": Uniform{Min: -10, Max: 10}, "x2": Categorical{Choices: []string{"param-1", "param-2", "param-3"}}}
-		// * External representation: map[string]interface{}{"x1": 5.5, "x2": "param-2"}
-		// * Internal representation: map[string]float64{"x1": 5.5, "x2": 1.0}
-		//
-		// In the internal representation, all parameters are represented by `float64` to store the storage
-		// (because Goptuna supports not only in-memory but also RDB storage backend).
-		// To represent categorical parameters, Goptuna holds an index of the list in the database.
-		//
-		// This function calculates Manhattan distance of internal representation parameters.
-		// Then returns trialID which has the most 'similar' parameters.
-		var manhattan float64
-		for name := range trials[i].InternalParams {
-			gtrialParamValue := trials[i].InternalParams[name]
-			ktrialParamValue, ok := ktrial.InternalParams[name]
-			if !ok {
-				return -1, errors.New("must not reach here")
-			}
-			manhattan += math.Abs(gtrialParamValue - ktrialParamValue)
-		}
-
-		if manhattan < minManhattan {
-			minManhattan = manhattan
-			estimatedTrialID = trials[i].ID
+		if isSameTrialParam(ktrial, trials[i]) {
+			return trials[i].ID, nil
 		}
 	}
-	if estimatedTrialID == -1 {
-		return -1, errors.New("goptuna trial is not found")
-	}
-	return estimatedTrialID, nil
+	return -1, errors.New("same trial parameter is not found")
 }

@@ -145,8 +145,8 @@ func toGoptunaSearchSpace(parameters []*api_v1_alpha3.ParameterSpec) (map[string
 			}
 		} else if p.ParameterType == api_v1_alpha3.ParameterType_DISCRETE {
 			// Use categorical distribution instead of goptuna.DiscreteUniformDistribution
-			// because goptuna.UniformDistributions needs to declare the parameter space
-			// with minimum value, maximum value and interval.
+			// because goptuna.DiscreteUniformDistributions needs to declare the parameter
+			// space with minimum value, maximum value and interval.
 			choices := p.GetFeasibleSpace().GetList()
 			searchSpace[p.Name] = goptuna.CategoricalDistribution{
 				Choices: choices,

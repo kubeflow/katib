@@ -88,8 +88,7 @@ func (s *SuggestionService) syncTrials(ktrials map[string]goptuna.FrozenTrial) (
 			//
 			// But suggestion service cannot know which Katib trial name corresponds to Goptuna trial ID.
 			// Because Katib's trial name is determined by Katib controller after finished this gRPC call.
-			// So `findGoptunaTrialIDByParam()` estimates the goptuna trial ID from the parameter values.
-			// See the code comment in `findGoptunaTrialIDByParam()` to understand how estimates Goptuna trial ID.
+			// So `findGoptunaTrialIDByParam()` returns the goptuna trial ID from the parameter values.
 			gtrialID, err = findGoptunaTrialIDByParam(s.study, s.trialMapping, ktrial)
 			if err != nil {
 				return err
