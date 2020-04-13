@@ -39,13 +39,13 @@ class ChocolateService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         if self.is_first_run:
             search_space = HyperParameterSearchSpace.convert(
                 request.experiment)
-            self.base_serice = BaseChocolateService(
+            self.base_service = BaseChocolateService(
                 algorithm_name=request.experiment.spec.algorithm.algorithm_name,
                 search_space=search_space)
             self.is_first_run = False
 
         trials = Trial.convert(request.trials)
-        new_assignments = self.base_serice.getSuggestions(
+        new_assignments = self.base_service.getSuggestions(
             trials, request.request_number)
         return api_pb2.GetSuggestionsReply(
             parameter_assignments=Assignment.generate(new_assignments)

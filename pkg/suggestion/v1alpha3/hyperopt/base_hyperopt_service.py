@@ -22,7 +22,7 @@ class BaseHyperoptService(object):
         # elif algorithm_name == 'hyperopt-mix':
         #     self.hyperopt_algorithm = hyperopt.mix.suggest
         else:
-            raise Exception('"Failed to create the algortihm: {}'.format(algorithm_name))
+            raise Exception('"Failed to create the algorithm: {}'.format(algorithm_name))
 
         self.search_space = search_space
         # New hyperopt variables

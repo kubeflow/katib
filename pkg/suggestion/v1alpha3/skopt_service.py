@@ -25,7 +25,7 @@ class SkoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         algorithm_name, config = OptimizerConfiguration.convertAlgorithmSpec(
             request.experiment.spec.algorithm)
         if algorithm_name != "bayesianoptimization":
-            raise Exception("Failed to create the algortihm: {}".format(algorithm_name))
+            raise Exception("Failed to create the algorithm: {}".format(algorithm_name))
 
         if self.is_first_run:
             search_space = HyperParameterSearchSpace.convert(request.experiment)
