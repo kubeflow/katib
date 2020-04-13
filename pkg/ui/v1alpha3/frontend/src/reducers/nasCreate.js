@@ -5,7 +5,7 @@ const initialState = {
   commonParametersMetadata: [
     {
       name: 'Name',
-      value: 'nasrl-example',
+      value: 'enas-example',
       description: 'A name of an experiment',
     },
     {
@@ -50,8 +50,8 @@ const initialState = {
     },
   ],
   additionalMetricNames: [],
-  algorithmName: 'nasrl',
-  allAlgorithms: ['nasrl'],
+  algorithmName: 'enas',
+  allAlgorithms: ['enas'],
   algorithmSettings: [
     {
       name: 'lstm_num_cells',

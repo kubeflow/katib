@@ -52,10 +52,10 @@ kubectl -n kubeflow get pod
 
 cd ${GO_DIR}/test/e2e/v1alpha3
 
-echo "Running e2e NASRL experiment"
+echo "Running e2e ENAS experiment"
 export KUBECONFIG=$HOME/.kube/config
-./run-e2e-experiment ../../../examples/v1alpha3/nasjob-example-RL-cpu.yaml
-kubectl -n kubeflow describe experiment nas-rl-example-cpu
-kubectl -n kubeflow delete experiment nas-rl-example-cpu
+./run-e2e-experiment ../../../examples/v1alpha3/nas/enas-example-cpu.yaml
+kubectl -n kubeflow describe experiment enas-example-cpu
+kubectl -n kubeflow delete experiment enas-example-cpu
 
 exit 0

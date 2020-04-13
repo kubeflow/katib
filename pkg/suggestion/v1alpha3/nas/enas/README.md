@@ -1,6 +1,8 @@
 # About the Efficient Neural Architecture Search
 
-The algorithm follows the idea proposed in _Neural Architecture Search with Reinforcement Learning_ by Zoph & Le (https://arxiv.org/abs/1611.01578), and the implementation is based on the github of _Efﬁcient Neural Architecture Search via Parameter Sharing_ (https://github.com/melodyguan/enas and https://github.com/google-research/google-research/tree/master/enas_lm). It uses a recurrent neural network with LSTM cells as controller to generate neural architecture candidates. And this controller network is updated by policy gradients. However, it currently does not support parameter sharing.
+The algorithm follows the idea proposed in _Efficient Neural Architecture Search via Parameter Sharing_ by Hieu Pham, Melody Y. Guan, Barret Zoph, Quoc V. Le and Jeff Dean (https://arxiv.org/abs/1802.03268) and _Neural Architecture Search with Reinforcement Learning_ by Barret Zoph and Quoc V. Le (https://arxiv.org/abs/1611.01578).
+
+The implementation is based on the github of _Efﬁcient Neural Architecture Search via Parameter Sharing_ (https://github.com/melodyguan/enas and https://github.com/google-research/google-research/tree/master/enas_lm). It uses a recurrent neural network with LSTM cells as controller to generate neural architecture candidates. And this controller network is updated by policy gradients. However, it currently does not support parameter sharing.
 
 ## Definition of a Neural Architecture
 
@@ -130,5 +132,5 @@ This neural architecture can be visualized as
 2. Add support for recurrent neural networks and build a training container for the Penn Treebank task.
 3. Add parameter sharing, if possible.
 4. Change LSTM cell from self defined functions in LSTM.py to `tf.nn.rnn_cell.LSTMCell`
-5. Store the suggestion checkpoint to PVC to protect against unexpected nasrl service pod restarts
+5. Store the suggestion checkpoint to PVC to protect against unexpected enas service pod restarts
 6. Add `RequestCount` into API so that the suggestion can clean the information of completed studies.

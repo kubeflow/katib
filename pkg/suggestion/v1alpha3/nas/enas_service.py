@@ -13,7 +13,7 @@ from pkg.suggestion.v1alpha3.nas.enas.AlgorithmSettings import parseAlgorithmSet
 from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
 
 
-class ENAS_Experiment:
+class EnasExperiment:
     def __init__(self, request, logger):
         self.logger = logger
         self.experiment_name = request.experiment.name
@@ -213,7 +213,7 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
     def GetSuggestions(self, request, context):
         if self.is_first_run:
-            self.experiment = ENAS_Experiment(request, self.logger)
+            self.experiment = EnasExperiment(request, self.logger)
         experiment = self.experiment
         if request.request_number > 0:
             experiment.num_trials = request.request_number

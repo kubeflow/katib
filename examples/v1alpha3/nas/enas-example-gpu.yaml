@@ -33,7 +33,7 @@ spec:
             spec:
               containers:
               - name: {{.Trial}}
-                image: docker.io/kubeflowkatib/enas-cifar10-gpu
+                image: docker.io/kubeflowkatib/enas-cnn-cifar10-gpu
                 command:
                 - "python3.5"
                 - "-u"

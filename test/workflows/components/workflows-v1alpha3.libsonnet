@@ -212,8 +212,8 @@
                     template: "python-tests",
                   },
                   {
-                    name: "build-suggestion-nasrl",
-                    template: "build-suggestion-nasrl",
+                    name: "build-suggestion-enas",
+                    template: "build-suggestion-enas",
                   },
                   {
                     name: "build-manager",
@@ -286,8 +286,8 @@
                     template: "run-bayesian-e2e-tests",
                   },
                   {
-                    name: "run-nasrl-e2e-tests",
-                    template: "run-nasrl-e2e-tests",
+                    name: "run-enas-e2e-tests",
+                    template: "run-enas-e2e-tests",
                   },
                   {
                     name: "run-hyperband-e2e-tests",
@@ -369,9 +369,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-grid-e2e-tests", testWorkerImage, [
               "test/scripts/v1alpha3/run-suggestion-grid.sh",
             ]),  // run grid algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-nasrl-e2e-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-suggestion-nasrl.sh",
-            ]),  // run nasrl algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-enas-e2e-tests", testWorkerImage, [
+              "test/scripts/v1alpha3/run-suggestion-enas.sh",
+            ]),  // run enas algorithm
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-bayesian-e2e-tests", testWorkerImage, [
               "test/scripts/v1alpha3/run-suggestion-bayesian.sh",
             ]),  // run bayesian algorithm
@@ -418,9 +418,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-chocolate", testWorkerImage, [
               "test/scripts/v1alpha3/build-suggestion-chocolate.sh",
             ]),  // build-suggestion-chocolate
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-nasrl", testWorkerImage, [
-              "test/scripts/v1alpha3/build-suggestion-nasrl.sh",
-            ]),  // build-suggestion-nasrl
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-enas", testWorkerImage, [
+              "test/scripts/v1alpha3/build-suggestion-enas.sh",
+            ]),  // build-suggestion-enas
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-earlystopping-median", testWorkerImage, [
               "test/scripts/v1alpha3/build-earlystopping-median.sh",
             ]),  // build-earlystopping-median
