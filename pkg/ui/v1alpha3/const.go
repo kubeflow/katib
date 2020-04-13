@@ -9,7 +9,7 @@ const (
 	// AvailableNameSpaceEnvName is the env name of available namespaces
 	AvailableNameSpaceEnvName = "KATIB_UI_AVAILABLE_NS"
 	// ClusterRoleKey is a key represents having access to cluster role
-	ClusterRoleKey            = "KATIB_UI_CLUSTER_ROLE"
+	ClusterRoleKey = "KATIB_UI_CLUSTER_ROLE"
 )
 
 var (
