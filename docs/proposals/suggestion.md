@@ -20,7 +20,6 @@ Table of Contents
          * [HyperBand](#hyperband)
          * [BOHB](#bohb)
          * [TPE](#tpe)
-         * [Anneal](#anneal)
          * [SMAC](#smac)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
@@ -388,10 +387,6 @@ We can use [HpBandSter](https://github.com/automl/HpBandSter) to run BOHB.
 ### TPE
 
 We can use [hyperopt](https://github.com/hyperopt/hyperopt) to run TPE.
-
-### Anneal
-
-We can use [hyperopt](https://github.com/hyperopt/hyperopt) to run Anneal.
 
 ### SMAC
 
