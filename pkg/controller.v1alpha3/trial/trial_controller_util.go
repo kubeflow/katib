@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,6 +29,7 @@ import (
 	commonv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
+	consts "github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 )
 
@@ -88,16 +90,20 @@ func (r *ReconcileTrial) UpdateTrialStatusObservation(instance *trialsv1alpha3.T
 		return err
 	}
 	if reply.ObservationLog != nil {
-		bestObjectiveValue := getBestObjectiveMetricValue(reply.ObservationLog.MetricLogs, instance.Spec.Objective.Type)
-		if bestObjectiveValue != nil {
+		objectiveValue, err := getObjectiveMetricValue(reply.ObservationLog.MetricLogs, instance.Spec.Objective.Type, instance.Spec.ObjectiveExtract)
+		if err != nil {
+			log.Error(err, "Extract objective metric value error")
+			return err
+		}
+		if objectiveValue != nil {
 			if instance.Status.Observation == nil {
 				instance.Status.Observation = &commonv1alpha3.Observation{}
-				metric := commonv1alpha3.Metric{Name: objectiveMetricName, Value: *bestObjectiveValue}
+				metric := commonv1alpha3.Metric{Name: objectiveMetricName, Value: *objectiveValue}
 				instance.Status.Observation.Metrics = []commonv1alpha3.Metric{metric}
 			} else {
 				for index, metric := range instance.Status.Observation.Metrics {
 					if metric.Name == objectiveMetricName {
-						instance.Status.Observation.Metrics[index].Value = *bestObjectiveValue
+						instance.Status.Observation.Metrics[index].Value = *objectiveValue
 					}
 				}
 			}
@@ -171,6 +177,23 @@ func isJobSucceeded(jobCondition *commonv1.JobCondition) bool {
 	return false
 }
 
+func getObjectiveMetricValue(
+	metricLogs []*api_pb.MetricLog,
+	objectiveType commonv1alpha3.ObjectiveType,
+	objectiveExtractType trialsv1alpha3.ObjectiveExtractType) (*float64, error) {
+	switch objectiveExtractType {
+	case trialsv1alpha3.ExtractBestObjective:
+		return getBestObjectiveMetricValue(metricLogs, objectiveType), nil
+	case trialsv1alpha3.ExtractLatestObjective:
+		return getLatestObjectiveMetricValue(metricLogs, objectiveType)
+	case "":
+		defaultType := trialsv1alpha3.ObjectiveExtractType(consts.DefaultObjectiveExtract)
+		return getObjectiveMetricValue(metricLogs, objectiveType, defaultType)
+	default:
+		return nil, fmt.Errorf("unknown objectiveExtractType %s", objectiveType)
+	}
+}
+
 func getBestObjectiveMetricValue(metricLogs []*api_pb.MetricLog, objectiveType commonv1alpha3.ObjectiveType) *float64 {
 	metricLogSize := len(metricLogs)
 	if metricLogSize == 0 {
@@ -192,6 +215,22 @@ func getBestObjectiveMetricValue(metricLogs []*api_pb.MetricLog, objectiveType c
 
 	}
 	return &bestObjectiveValue
+}
+
+func getLatestObjectiveMetricValue(metricLogs []*api_pb.MetricLog, objectiveType commonv1alpha3.ObjectiveType) (*float64, error) {
+	var objectiveValue *float64
+	var latestTimestamp *time.Time
+	for _, metricLog := range metricLogs {
+		ts, err := time.Parse(time.RFC3339Nano, metricLogs[0].TimeStamp)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse timestamp %s: %e", metricLogs[0].TimeStamp, err)
+		}
+		if latestTimestamp == nil || latestTimestamp.Before(ts) {
+			*latestTimestamp = ts
+			*objectiveValue, _ = strconv.ParseFloat(metricLog.Metric.Value, 64)
+		}
+	}
+	return objectiveValue, nil
 }
 
 func needUpdateFinalizers(trial *trialsv1alpha3.Trial) (bool, []string) {

@@ -255,6 +255,10 @@
           "description": "Describes the objective of the experiment.",
           "$ref": "#/definitions/v1alpha3.ObjectiveSpec"
         },
+        "objectiveExtract": {
+          "description": "Describes how objective value will be extracted from collected metrics",
+          "type": "string"
+        },
         "parameterAssignments": {
           "description": "Key-value pairs for hyperparameters and assignment values.",
           "type": "array",

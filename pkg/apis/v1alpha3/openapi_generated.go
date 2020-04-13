@@ -1432,6 +1432,13 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								Format:      "",
 							},
 						},
+						"objectiveExtract": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Describes how objective value will be extracted from collected metrics",
+								Type:        []string{"string"},
+								Format:      "",
+							},
+						},
 						"metricsCollector": {
 							SchemaProps: spec.SchemaProps{
 								Description: "Describes how metrics will be collected",

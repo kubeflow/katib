@@ -47,6 +47,8 @@ const (
 	// DefaultKatibDBManagerServicePortEnvName is the env name of Katib DB Manager Port
 	DefaultKatibDBManagerServicePortEnvName = "KATIB_DB_MANAGER_SERVICE_PORT"
 
+	DefaultObjectiveExtractEnvName = "KATIB_OBJECTIVE_EXTRACT"
+
 	// KatibConfigMapName is the config map constants
 	// Configmap name which includes Katib's configuration
 	KatibConfigMapName = "katib-config"
@@ -142,4 +144,6 @@ var (
 	DefaultKatibDBManagerServiceIP = env.GetEnvOrDefault(DefaultKatibDBManagerServiceIPEnvName, "katib-db-manager")
 	// DefaultKatibDBManagerServicePort is the default Port of Katib DB Manager
 	DefaultKatibDBManagerServicePort = env.GetEnvOrDefault(DefaultKatibDBManagerServicePortEnvName, "6789")
+	// DefaultObjectiveExtract is the default approach to extract objective value from observation logs
+	DefaultObjectiveExtract = env.GetEnvOrDefault(DefaultObjectiveExtractEnvName, "Best")
 )
