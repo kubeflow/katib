@@ -72,8 +72,8 @@ docker build -t ${REGISTRY}/${PREFIX}/suggestion-hyperopt:${TAG} -f ${CMD_PREFIX
 docker build -t ${REGISTRY}/${PREFIX}/suggestion-skopt:${TAG} -f ${CMD_PREFIX}/suggestion/skopt/v1alpha3/Dockerfile .
 docker build -t ${REGISTRY}/${PREFIX}/suggestion-chocolate:${TAG} -f ${CMD_PREFIX}/suggestion/chocolate/v1alpha3/Dockerfile .
 if [ $MACHINE_ARCH == "aarch64" ]; then
-	docker build -t ${REGISTRY}/${PREFIX}/suggestion-nasrl:${TAG} -f ${CMD_PREFIX}/suggestion/nasrl/v1alpha3/Dockerfile.aarch64 .
+	docker build -t ${REGISTRY}/${PREFIX}/suggestion-enas:${TAG} -f ${CMD_PREFIX}/suggestion/nas/enas/v1alpha3/Dockerfile.aarch64 .
 else
-	docker build -t ${REGISTRY}/${PREFIX}/suggestion-nasrl:${TAG} -f ${CMD_PREFIX}/suggestion/nasrl/v1alpha3/Dockerfile .
+	docker build -t ${REGISTRY}/${PREFIX}/suggestion-enas:${TAG} -f ${CMD_PREFIX}/suggestion/nas/enas/v1alpha3/Dockerfile .
 fi
 docker build -t ${REGISTRY}/${PREFIX}/suggestion-hyperband:${TAG} -f ${CMD_PREFIX}/suggestion/hyperband/v1alpha3/Dockerfile .

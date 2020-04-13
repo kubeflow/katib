@@ -8,7 +8,7 @@ The design of Katib follows the `ask-and-tell` pattern:
 
 > They often follow a pattern a bit like this: 1. ask for a new set of parameters 1. walk to the experiment and program in the new parameters 1. observe the outcome of running the experiment 1. walk back to your laptop and tell the optimizer about the outcome 1. go to step 1
 
-When an experiment is created, one algorithm service will be created. Then Katib asks for new sets of parameters via `GetSuggestions` GRPC call. After that, Katib creates new trials according to the sets and observe the outcome. When the trials are finished, Katib tells the metrics of the finished trials to the algorithm, and ask another new sets. 
+When an experiment is created, one algorithm service will be created. Then Katib asks for new sets of parameters via `GetSuggestions` GRPC call. After that, Katib creates new trials according to the sets and observe the outcome. When the trials are finished, Katib tells the metrics of the finished trials to the algorithm, and ask another new sets.
 
 The new algorithm needs to implement `Suggestion` service defined in [api.proto](../pkg/apis/manager/v1alpha3/api.proto). One sample algorithm looks like:
 
@@ -31,8 +31,8 @@ class HyperoptService(
         # Convert the experiment in GRPC request to the search space.
         # search_space example:
         #   HyperParameterSearchSpace(
-        #       goal: MAXIMIZE, 
-        #       params: [HyperParameter(name: param-1, type: INTEGER, min: 1, max: 5, step: 0), 
+        #       goal: MAXIMIZE,
+        #       params: [HyperParameter(name: param-1, type: INTEGER, min: 1, max: 5, step: 0),
         #                HyperParameter(name: param-2, type: CATEGORICAL, list: cat1, cat2, cat3),
         #                HyperParameter(name: param-3, type: DISCRETE, list: 3, 2, 6),
         #                HyperParameter(name: param-4, type: DOUBLE, min: 1, max: 5, step: )]
@@ -41,20 +41,20 @@ class HyperoptService(
         # Convert the trials in GRPC request to the trials in algorithm side.
         # trials example:
         #   [Trial(
-        #       assignment: [Assignment(name=param-1, value=2), 
-        #                    Assignment(name=param-2, value=cat1), 
-        #                    Assignment(name=param-3, value=2), 
+        #       assignment: [Assignment(name=param-1, value=2),
+        #                    Assignment(name=param-2, value=cat1),
+        #                    Assignment(name=param-3, value=2),
         #                    Assignment(name=param-4, value=3.44)],
-        #       target_metric: Metric(name="metric-2" value="5643"), 
-        #       additional_metrics: [Metric(name=metric-1, value=435), 
+        #       target_metric: Metric(name="metric-2" value="5643"),
+        #       additional_metrics: [Metric(name=metric-1, value=435),
         #                            Metric(name=metric-3, value=5643)],
         #   Trial(
         #       assignment: [Assignment(name=param-1, value=3),
         #                    Assignment(name=param-2, value=cat2),
         #                    Assignment(name=param-3, value=6),
         #                    Assignment(name=param-4, value=4.44)],
-        #       target_metric: Metric(name="metric-2" value="3242"), 
-        #       additional_metrics: [Metric(name=metric=1, value=123), 
+        #       target_metric: Metric(name="metric-2" value="3242"),
+        #       additional_metrics: [Metric(name=metric=1, value=123),
         #                            Metric(name=metric-3, value=543)],
         trials = Trial.convert(request.trials)
         #--------------------------------------------------------------
@@ -62,20 +62,20 @@ class HyperoptService(
         # Implment the logic to generate new assignments for the given request number.
         # For example, if request.request_number is 2, you should return:
         # [
-        #   [Assignment(name=param-1, value=3), 
-        #    Assignment(name=param-2, value=cat2), 
-        #    Assignment(name=param-3, value=3), 
+        #   [Assignment(name=param-1, value=3),
+        #    Assignment(name=param-2, value=cat2),
+        #    Assignment(name=param-3, value=3),
         #    Assignment(name=param-4, value=3.22)
         #   ],
-        #   [Assignment(name=param-1, value=4), 
-        #    Assignment(name=param-2, value=cat4), 
-        #    Assignment(name=param-3, value=2), 
+        #   [Assignment(name=param-1, value=4),
+        #    Assignment(name=param-2, value=cat4),
+        #    Assignment(name=param-3, value=2),
         #    Assignment(name=param-4, value=4.32)
         #   ],
         # ]
         list_of_assignments = your_logic(search_space, trials, request.request_number)
         #--------------------------------------------------------------
-        # Convert list_of_assignments to 
+        # Convert list_of_assignments to
         return api_pb2.GetSuggestionsReply(
             trials=Assignment.generate(list_of_assignments)
         )
@@ -223,8 +223,8 @@ Then add a new step in our CI to run the new e2e test case in [test/workflows/co
 ```diff
 // ...
                   {
-                    name: "run-nasrl-e2e-tests",
-                    template: "run-nasrl-e2e-tests",
+                    name: "run-enas-e2e-tests",
+                    template: "run-enas-e2e-tests",
                   },
                   {
                     name: "run-hyperband-e2e-tests",

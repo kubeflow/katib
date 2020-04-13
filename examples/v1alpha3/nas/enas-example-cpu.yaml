@@ -12,7 +12,7 @@ apiVersion: "kubeflow.org/v1alpha3"
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: nas-rl-example-cpu
+  name: enas-example-cpu
 spec:
   parallelTrialCount: 2
   maxTrialCount: 3
@@ -22,7 +22,7 @@ spec:
     goal: 0.99
     objectiveMetricName: Validation-Accuracy
   algorithm:
-    algorithmName: nasrl
+    algorithmName: enas
   trialTemplate:
     goTemplate:
       rawTemplate: |-
@@ -36,7 +36,7 @@ spec:
             spec:
               containers:
               - name: {{.Trial}}
-                image: docker.io/kubeflowkatib/nasrl-cifar10-cpu
+                image: docker.io/kubeflowkatib/enas-cifar10-cpu
                 command:
                 - "python3.5"
                 - "-u"

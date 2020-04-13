@@ -1,4 +1,4 @@
-# About the Neural Architecture Search with Reinforcement Learning Suggestion
+# About the Efficient Neural Architecture Search
 
 The algorithm follows the idea proposed in _Neural Architecture Search with Reinforcement Learning_ by Zoph & Le (https://arxiv.org/abs/1611.01578), and the implementation is based on the github of _Efﬁcient Neural Architecture Search via Parameter Sharing_ (https://github.com/melodyguan/enas and https://github.com/google-research/google-research/tree/master/enas_lm). It uses a recurrent neural network with LSTM cells as controller to generate neural architecture candidates. And this controller network is updated by policy gradients. However, it currently does not support parameter sharing.
 

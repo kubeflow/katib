@@ -22,7 +22,7 @@ const nasMonitorReducer = (state = initialState, action) => {
     case actions.FILTER_JOBS:
       let jobs = state.jobsList.slice();
       let newList = jobs.filter(
-        job =>
+        (job) =>
           job.name.includes(action.experimentName) &&
           (job.namespace == action.experimentNamespace ||
             action.experimentNamespace == 'All namespaces' ||
@@ -31,11 +31,11 @@ const nasMonitorReducer = (state = initialState, action) => {
       let types = Object.assign({}, state.filterType);
       var typeKeys = Object.keys(types);
 
-      var filters = typeKeys.filter(key => {
+      var filters = typeKeys.filter((key) => {
         return types[key];
       });
 
-      let filteredJobs = newList.filter(job => filters.includes(job.status));
+      let filteredJobs = newList.filter((job) => filters.includes(job.status));
 
       return {
         ...state,
@@ -46,7 +46,7 @@ const nasMonitorReducer = (state = initialState, action) => {
     case actions.CHANGE_TYPE:
       jobs = state.jobsList.slice();
       newList = jobs.filter(
-        job =>
+        (job) =>
           job.name.includes(state.experimentName) &&
           (job.namespace == state.experimentNamespace ||
             state.experimentNamespace == 'All namespaces' ||
@@ -56,10 +56,10 @@ const nasMonitorReducer = (state = initialState, action) => {
       types[action.filter] = action.checked;
       typeKeys = Object.keys(types);
 
-      filters = typeKeys.filter(key => {
+      filters = typeKeys.filter((key) => {
         return types[key];
       });
-      filteredJobs = newList.filter(job => filters.includes(job.status));
+      filteredJobs = newList.filter((job) => filters.includes(job.status));
 
       return {
         ...state,
@@ -71,12 +71,12 @@ const nasMonitorReducer = (state = initialState, action) => {
       types = Object.assign({}, state.filterType);
       typeKeys = Object.keys(types);
 
-      filters = typeKeys.filter(key => {
+      filters = typeKeys.filter((key) => {
         return types[key];
       });
 
       filteredJobs = jobs.filter(
-        job =>
+        (job) =>
           filters.includes(job.status) &&
           job.name.includes(state.experimentName) &&
           (job.namespace == state.experimentNamespace ||
