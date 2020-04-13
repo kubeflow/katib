@@ -326,13 +326,13 @@ docker.io/kubeflowkatib/pytorch-mnist
 - Keras cifar10 CNN example for ENAS with gpu support, [source](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/nas/enas-cnn-cifar10/Dockerfile.gpu).
 
 ```
-docker.io/kubeflowkatib/enas-cifar10-gpu
+docker.io/kubeflowkatib/enas-cnn-cifar10-gpu
 ```
 
 - Keras cifar10 CNN example for ENAS with cpu support, [source](https://github.com/kubeflow/katib/blob/master/examples/v1alpha3/nas/enas-cnn-cifar10/Dockerfile.cpu).
 
 ```
-docker.io/kubeflowkatib/enas-cifar10-cpu
+docker.io/kubeflowkatib/enas-cnn-cifar10-cpu
 ```
 
 - Pytorch operator mnist example, [source](https://github.com/kubeflow/pytorch-operator/blob/master/examples/mnist/mnist.py).

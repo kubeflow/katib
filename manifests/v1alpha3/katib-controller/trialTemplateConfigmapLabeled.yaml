@@ -28,7 +28,7 @@ data:
             {{- end}}
             {{- end}}
           restartPolicy: Never
-  EnasCPUTemplate: |-
+  enasCPUTemplate: |-
     apiVersion: batch/v1
     kind: Job
     metadata:
@@ -39,7 +39,7 @@ data:
         spec:
           containers:
           - name: {{.Trial}}
-            image: docker.io/kubeflowkatib/enas-cifar10-cpu
+            image: docker.io/kubeflowkatib/enas-cnn-cifar10-cpu
             command:
             - "python3.5"
             - "-u"
