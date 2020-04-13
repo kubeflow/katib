@@ -1,11 +1,9 @@
-import json
-import numpy as np
 import chocolate as choco
 import logging
 import base64
 
-from pkg.suggestion.v1alpha3.internal.search_space import *
-from pkg.suggestion.v1alpha3.internal.trial import *
+from pkg.suggestion.v1alpha3.internal.constant import *
+from pkg.suggestion.v1alpha3.internal.trial import Assignment
 
 logger = logging.getLogger(__name__)
 
