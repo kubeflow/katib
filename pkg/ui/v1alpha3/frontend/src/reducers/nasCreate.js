@@ -350,7 +350,7 @@ const initialState = {
 };
 
 const filterValue = (obj, key) => {
-  return obj.findIndex((p) => p.name === key);
+  return obj.findIndex(p => p.name === key);
 };
 
 const nasCreateReducer = (state = initialState, action) => {
