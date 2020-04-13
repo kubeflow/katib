@@ -8,7 +8,7 @@ class Operation(object):
         self.opt_id = opt_id
         self.opt_type = opt_type
         self.opt_params = opt_params
-    
+
     def get_dict(self):
         opt_dict = dict()
         opt_dict['opt_id'] = self.opt_id
@@ -30,9 +30,8 @@ class SearchSpace(object):
         self.operation_list = list(operations.operation)
         self.search_space = list()
         self._parse_operations()
-        print()
         self.num_operations = len(self.search_space)
-    
+
     def _parse_operations(self):
         # search_sapce is a list of Operation class
 
@@ -53,12 +52,14 @@ class SearchSpace(object):
                     spec_min = int(ispec.feasible_space.min)
                     spec_max = int(ispec.feasible_space.max)
                     spec_step = int(ispec.feasible_space.step)
-                    avail_space[spec_name] = range(spec_min, spec_max+1, spec_step)
+                    avail_space[spec_name] = range(
+                        spec_min, spec_max+1, spec_step)
                 elif ispec.parameter_type == api_pb2.DOUBLE:
                     spec_min = float(ispec.feasible_space.min)
                     spec_max = float(ispec.feasible_space.max)
                     spec_step = float(ispec.feasible_space.step)
-                    double_list = np.arange(spec_min, spec_max+spec_step, spec_step)
+                    double_list = np.arange(
+                        spec_min, spec_max+spec_step, spec_step)
                     if double_list[-1] > spec_max:
                         del double_list[-1]
                     avail_space[spec_name] = double_list
