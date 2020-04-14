@@ -54,56 +54,44 @@ const initialState = {
   allAlgorithms: ['nasrl'],
   algorithmSettings: [
     {
-      name: 'lstm_num_cells',
+      name: 'controller_hidden_size',
       value: '64',
     },
     {
-      name: 'lstm_num_layers',
-      value: '1',
+      name: 'controller_temperature',
+      value: '5',
     },
     {
-      name: 'lstm_keep_prob',
-      value: '1.0',
+      name: 'controller_tanh_const',
+      value: '2.25',
     },
     {
-      name: 'optimizer',
-      value: 'adam',
+      name: 'controller_entropy_weight',
+      value: '1e-5',
     },
     {
-      name: 'init_learning_rate',
-      value: '1e-3',
+      name: 'controller_baseline_decay',
+      value: '0.999',
     },
     {
-      name: 'lr_decay_start',
-      value: '0',
+      name: 'controller_learning_rate',
+      value: '5e-5',
     },
     {
-      name: 'lr_decay_every',
-      value: '1000',
-    },
-    {
-      name: 'lr_decay_rate',
-      value: '0.9',
-    },
-    {
-      name: 'skip-target',
+      name: 'controller_skip_target',
       value: '0.4',
     },
     {
-      name: 'skip-weight',
+      name: 'controller_skip_weight',
       value: '0.8',
     },
     {
-      name: 'l2_reg',
-      value: '0',
+      name: 'controller_train_steps',
+      value: '50',
     },
     {
-      name: 'entropy_weight',
-      value: '1e-4',
-    },
-    {
-      name: 'baseline_decay',
-      value: '0.9999',
+      name: 'controller_log_every_steps',
+      value: '10',
     },
   ],
   //Graph Config
