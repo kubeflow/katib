@@ -284,15 +284,21 @@ func toGoptunaParams(
 			if err != nil {
 				return nil, nil, err
 			}
-			internalParams[name] = float64(p)
-			externalParams[name] = p
+			ir := float64(p)
+			internalParams[name] = ir
+			// externalParams[name] = p is prohibited because of reflect.DeepEqual() will be false
+			// at findGoptunaTrialIDByParam() function.
+			externalParams[name] = d.ToExternalRepr(ir)
 		case goptuna.StepIntUniformDistribution:
 			p, err := strconv.ParseInt(valueStr, 10, 64)
 			if err != nil {
 				return nil, nil, err
 			}
-			internalParams[name] = float64(p)
-			externalParams[name] = p
+			ir := float64(p)
+			internalParams[name] = ir
+			// externalParams[name] = p is prohibited because of reflect.DeepEqual() will be false
+			// at findGoptunaTrialIDByParam() function.
+			externalParams[name] = d.ToExternalRepr(ir)
 		case goptuna.CategoricalDistribution:
 			internalRepr := -1.0
 			for i := range d.Choices {

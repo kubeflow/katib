@@ -2,28 +2,27 @@ package suggestion_goptuna_v1alpha3
 
 import (
 	"errors"
+	"reflect"
 	"strconv"
 
 	"github.com/c-bata/goptuna"
 	api_v1_alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
-	"k8s.io/klog"
 )
 
-func sampleNextParam(study *goptuna.Study, searchSpace map[string]interface{}) ([]*api_v1_alpha3.ParameterAssignment, error) {
+func sampleNextParam(study *goptuna.Study, searchSpace map[string]interface{}) (int, []*api_v1_alpha3.ParameterAssignment, error) {
 	nextTrialID, err := study.Storage.CreateNewTrial(study.ID)
 	if err != nil {
-		klog.Errorf("Failed to create a new trial: %s", err)
-		return nil, err
+		return -1, nil, err
 	}
 	trial := goptuna.Trial{
 		Study: study,
 		ID:    nextTrialID,
 	}
 
+	// Sample parameters and stored in Goptuna storage.
 	err = trial.CallRelativeSampler()
 	if err != nil {
-		klog.Errorf("Failed to sample relative parameters: %s", err)
-		return nil, err
+		return nextTrialID, nil, err
 	}
 
 	assignments := make([]*api_v1_alpha3.ParameterAssignment, 0, len(searchSpace))
@@ -32,8 +31,7 @@ func sampleNextParam(study *goptuna.Study, searchSpace map[string]interface{}) (
 		case goptuna.UniformDistribution:
 			p, err := trial.SuggestFloat(name, distribution.Low, distribution.High)
 			if err != nil {
-				klog.Errorf("Failed to get suggested param: %s", err)
-				return nil, err
+				return nextTrialID, nil, err
 			}
 			assignments = append(assignments, &api_v1_alpha3.ParameterAssignment{
 				Name:  name,
@@ -42,8 +40,7 @@ func sampleNextParam(study *goptuna.Study, searchSpace map[string]interface{}) (
 		case goptuna.DiscreteUniformDistribution:
 			p, err := trial.SuggestDiscreteFloat(name, distribution.Low, distribution.High, distribution.Q)
 			if err != nil {
-				klog.Errorf("Failed to get suggested param: %s", err)
-				return nil, err
+				return nextTrialID, nil, err
 			}
 			assignments = append(assignments, &api_v1_alpha3.ParameterAssignment{
 				Name:  name,
@@ -52,8 +49,7 @@ func sampleNextParam(study *goptuna.Study, searchSpace map[string]interface{}) (
 		case goptuna.IntUniformDistribution:
 			p, err := trial.SuggestInt(name, distribution.Low, distribution.High)
 			if err != nil {
-				klog.Errorf("Failed to get suggested param: %s", err)
-				return nil, err
+				return nextTrialID, nil, err
 			}
 			assignments = append(assignments, &api_v1_alpha3.ParameterAssignment{
 				Name:  name,
@@ -62,8 +58,7 @@ func sampleNextParam(study *goptuna.Study, searchSpace map[string]interface{}) (
 		case goptuna.StepIntUniformDistribution:
 			p, err := trial.SuggestStepInt(name, distribution.Low, distribution.High, distribution.Step)
 			if err != nil {
-				klog.Errorf("Failed to get suggested param: %s", err)
-				return nil, err
+				return nextTrialID, nil, err
 			}
 			assignments = append(assignments, &api_v1_alpha3.ParameterAssignment{
 				Name:  name,
@@ -72,8 +67,7 @@ func sampleNextParam(study *goptuna.Study, searchSpace map[string]interface{}) (
 		case goptuna.CategoricalDistribution:
 			p, err := trial.SuggestCategorical(name, distribution.Choices)
 			if err != nil {
-				klog.Errorf("Failed to get suggested param: %s", err)
-				return nil, err
+				return nextTrialID, nil, err
 			}
 			assignments = append(assignments, &api_v1_alpha3.ParameterAssignment{
 				Name:  name,
@@ -81,36 +75,7 @@ func sampleNextParam(study *goptuna.Study, searchSpace map[string]interface{}) (
 			})
 		}
 	}
-
-	if t, err := study.Storage.GetTrial(trial.ID); err == nil {
-		klog.Infof("Success to sample new trial: trialID=%d, params=%v", t.ID, t.Params)
-	}
-	return assignments, nil
-}
-
-func isSameTrialParam(ktrial, gtrial goptuna.FrozenTrial) bool {
-	// Compare trial parameters by "internal representation".
-	// In the internal representation, all parameters are represented by `float64` to store the storage
-	// (because Goptuna supports not only in-memory but also RDB storage backend).
-	// To represent categorical parameters, Goptuna holds an index of the list in the database.
-	//
-	// SearchSpace: map[string]interface{}{"x1": Uniform{Min: -10, Max: 10}, "x2": Categorical{Choices: []string{"param-1", "param-2"}}}
-	// External representation: map[string]interface{}{"x1": 5.5, "x2": "param-2"}
-	// Internal representation: map[string]float64{"x1": 5.5, "x2": 1.0}
-	for name := range gtrial.InternalParams {
-		gtrialParamValue := gtrial.InternalParams[name]
-		ktrialParamValue, ok := ktrial.InternalParams[name]
-		if !ok {
-			// must not reach here
-			klog.Errorf("Detect inconsistent internal parameters: %v and %v",
-				ktrial.InternalParams, gtrial.InternalParams)
-			return false
-		}
-		if gtrialParamValue != ktrialParamValue {
-			return false
-		}
-	}
-	return true
+	return nextTrialID, assignments, nil
 }
 
 func findGoptunaTrialIDByParam(study *goptuna.Study, trialMapping map[string]int, ktrial goptuna.FrozenTrial) (int, error) {
@@ -138,7 +103,7 @@ func findGoptunaTrialIDByParam(study *goptuna.Study, trialMapping map[string]int
 			continue
 		}
 
-		if isSameTrialParam(ktrial, trials[i]) {
+		if reflect.DeepEqual(ktrial.Params, trials[i].Params) {
 			return trials[i].ID, nil
 		}
 	}

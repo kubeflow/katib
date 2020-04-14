@@ -58,11 +58,13 @@ func (s *SuggestionService) GetSuggestions(
 	requestNumber := int(req.GetRequestNumber())
 	parameterAssignments := make([]*api_v1_alpha3.GetSuggestionsReply_ParameterAssignments, requestNumber)
 	for i := 0; i < requestNumber; i++ {
-		assignments, err := sampleNextParam(s.study, s.searchSpace)
+		trialID, assignments, err := sampleNextParam(s.study, s.searchSpace)
 		if err != nil {
-			klog.Errorf("Failed to sample next param: %s", err)
+			klog.Errorf("Failed to sample next param: trialID=%d, err=%s", trialID, err)
 			return nil, status.Error(codes.Internal, err.Error())
 		}
+
+		klog.Infof("Success to sample new trial: trialID=%d, assignments=%v", trialID, assignments)
 		parameterAssignments[i] = &api_v1_alpha3.GetSuggestionsReply_ParameterAssignments{
 			Assignments: assignments,
 		}
@@ -91,6 +93,7 @@ func (s *SuggestionService) syncTrials(ktrials map[string]goptuna.FrozenTrial) (
 			// So `findGoptunaTrialIDByParam()` returns the goptuna trial ID from the parameter values.
 			gtrialID, err = findGoptunaTrialIDByParam(s.study, s.trialMapping, ktrial)
 			if err != nil {
+				klog.Errorf("Failed to find Goptuna Trial ID: trialName=%s, err=%s", katibTrialName, err)
 				return err
 			}
 			s.trialMapping[katibTrialName] = gtrialID
