@@ -25,6 +25,7 @@
 - Support new Kubeflow operators (MXNet, XGBoost, MPI)
 - Add validation for algorithms (a.k.a suggestions) [#1126](https://github.com/kubeflow/katib/issues/1126)
 - Katib UI fixes and enhancements
+- Investigate Kubeflow Metadata integration
 
 ### Neural Architecture Search
 
