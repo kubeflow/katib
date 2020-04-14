@@ -18,8 +18,13 @@ import (
 
 // FetchAllHPJobs gets experiments in all namespaces.
 func (k *KatibUIHandler) FetchAllHPJobs(w http.ResponseWriter, r *http.Request) {
-	// Get HP-related experiments in all available namespaces.
-	jobs, err := k.getExperimentList(availableNameSpaces, JobTypeHP)
+	// If hasClusterRole pass empty string to ns, there exists no ns restrictions when listing experiments.
+	// Otherwise, pass empty slice to ns, which will use default ns in alternative.
+	var ns []string
+	if hasClusterRole {
+		ns = []string{""}
+	}
+	jobs, err := k.getExperimentList(ns, JobTypeHP)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

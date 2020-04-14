@@ -2,6 +2,7 @@ package v1alpha3
 
 import (
 	"encoding/json"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 	"log"
 	"net/http"
 	"strconv"
@@ -84,7 +85,7 @@ func (k *KatibUIHandler) getAvailableNamespaces() ([]string, error) {
 			namespaces = append(namespaces, ns.ObjectMeta.Name)
 		}
 	} else {
-		namespaces = availableNameSpaces
+		namespaces = append(namespaces, consts.DefaultKatibNamespace)
 	}
 
 	return namespaces, nil
