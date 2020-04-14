@@ -5,7 +5,7 @@ def parseAlgorithmSettings(params_raw, logger):
         "controller_temperature":       ['value', float, [0, 'inf']],
         "controller_tanh_const":        ['value', float, [0, 'inf']],
         "controller_entropy_weight":    ['value', float, [0.0, 'inf']],
-        "controller_baseline_dec":      ['value', float, [0.0, 1.0]],
+        "controller_baseline_decay":    ['value', float, [0.0, 1.0]],
         "controller_learning_rate":     ['value', float, [0.0, 1.0]],
         "controller_skip_target":       ['value', float, [0.0, 1.0]],
         "controller_skip_weight":       ['value', float, [0.0, 'inf']],
