@@ -235,7 +235,7 @@ func (k *KatibUIHandler) FetchNamespaces(w http.ResponseWriter, r *http.Request)
 	// Get all available namespaces
 	namespaces, err := k.getAvailableNamespaces()
 	if err != nil {
-		log.Printf("GetNamespaceList failed: %v", err)
+		log.Printf("GetAvailableNamespaces failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

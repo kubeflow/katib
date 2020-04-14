@@ -54,7 +54,7 @@ func (k *KatibUIHandler) getTrialTemplatesViewList() ([]TrialTemplatesView, erro
 	// Get all available namespaces
 	namespaces, err := k.getAvailableNamespaces()
 	if err != nil {
-		log.Printf("GetNamespaceList failed: %v", err)
+		log.Printf("GetAvailableNamespaces failed: %v", err)
 		return nil, err
 	}
 
