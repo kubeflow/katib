@@ -44,7 +44,7 @@ RUN pip install 'grpcio==1.23.0' 'protobuf==3.9.1' 'googleapis-common-protos==1.
 COPY --from=build-env /bin/grpc_health_probe /bin/
 
 ADD . /usr/src/app/github.com/kubeflow/katib
-WORKDIR /usr/src/app/github.com/kubeflow/katib/cmd/suggestion/nasrl/v1alpha3
+WORKDIR /usr/src/app/github.com/kubeflow/katib/cmd/suggestion/nas/enas/v1alpha3
 
 ENV PYTHONPATH /usr/src/app/github.com/kubeflow/katib:/usr/src/app/github.com/kubeflow/katib/pkg/apis/manager/v1alpha3/python:/usr/src/app/github.com/kubeflow/katib/pkg/apis/manager/health/python
 

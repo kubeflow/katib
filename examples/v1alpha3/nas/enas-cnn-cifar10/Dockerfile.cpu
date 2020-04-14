@@ -13,10 +13,10 @@ RUN apt-get update && apt-get install -y software-properties-common && \
       wget
 
 ADD . /usr/src/app/github.com/kubeflow/katib
-WORKDIR /usr/src/app/github.com/kubeflow/katib/examples/v1alpha3/NAS-training-containers/RL-cifar10
+WORKDIR /usr/src/app/github.com/kubeflow/katib/examples/v1alpha3/nas/enas-cnn-cifar10
 
 RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade --no-cache-dir -r requirements-cpu.txt
-ENV PYTHONPATH /usr/src/app/github.com/kubeflow/katib/examples/v1alpha3/NAS-training-containers/RL-cifar10
+ENV PYTHONPATH /usr/src/app/github.com/kubeflow/katib/examples/v1alpha3/nas/enas-cnn-cifar10
 
 ENTRYPOINT ["python3", "-u", "RunTrial.py"]

@@ -4,7 +4,7 @@ import time
 
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
 from pkg.apis.manager.health.python import health_pb2_grpc
-from pkg.suggestion.v1alpha3.nasrl_service import NasrlService
+from pkg.suggestion.v1alpha3.nas.enas_service import EnasService
 
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
@@ -12,9 +12,9 @@ DEFAULT_PORT = "0.0.0.0:6789"
 
 
 def serve():
-    print("NAS RL Suggestion Service")
+    print("ENAS Suggestion Service")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    service = NasrlService()
+    service = EnasService()
     api_pb2_grpc.add_SuggestionServicer_to_server(service, server)
     health_pb2_grpc.add_HealthServicer_to_server(service, server)
     server.add_insecure_port(DEFAULT_PORT)

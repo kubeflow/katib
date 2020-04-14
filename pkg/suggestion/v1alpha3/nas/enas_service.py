@@ -7,13 +7,13 @@ import grpc
 
 from pkg.apis.manager.v1alpha3.python import api_pb2
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
-from pkg.suggestion.v1alpha3.NAS_Reinforcement_Learning.Controller import Controller
-from pkg.suggestion.v1alpha3.NAS_Reinforcement_Learning.Operation import SearchSpace
-from pkg.suggestion.v1alpha3.NAS_Reinforcement_Learning.AlgorithmSettings import parseAlgorithmSettings
+from pkg.suggestion.v1alpha3.nas.enas.Controller import Controller
+from pkg.suggestion.v1alpha3.nas.enas.Operation import SearchSpace
+from pkg.suggestion.v1alpha3.nas.enas.AlgorithmSettings import parseAlgorithmSettings
 from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
 
 
-class NAS_RL_Experiment:
+class EnasExperiment:
     def __init__(self, request, logger):
         self.logger = logger
         self.experiment_name = request.experiment.name
@@ -126,9 +126,9 @@ class NAS_RL_Experiment:
         self.logger.info("")
 
 
-class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
+class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
     def __init__(self, logger=None):
-        super(NasrlService, self).__init__()
+        super(EnasService, self).__init__()
         self.is_first_run = True
         self.experiment = None
         if logger == None:
@@ -213,7 +213,7 @@ class NasrlService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
     def GetSuggestions(self, request, context):
         if self.is_first_run:
-            self.experiment = NAS_RL_Experiment(request, self.logger)
+            self.experiment = EnasExperiment(request, self.logger)
         experiment = self.experiment
         if request.request_number > 0:
             experiment.num_trials = request.request_number

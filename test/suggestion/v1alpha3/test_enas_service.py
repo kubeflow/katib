@@ -5,13 +5,13 @@ import unittest
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
 from pkg.apis.manager.v1alpha3.python import api_pb2
 
-from pkg.suggestion.v1alpha3.nasrl_service import NasrlService
+from pkg.suggestion.v1alpha3.nas.enas_service import EnasService
 
 
-class TestNasRL(unittest.TestCase):
+class TestEnas(unittest.TestCase):
     def setUp(self):
         servicers = {
-            api_pb2.DESCRIPTOR.services_by_name['Suggestion']: NasrlService(
+            api_pb2.DESCRIPTOR.services_by_name['Suggestion']: EnasService(
             )
         }
 
@@ -89,10 +89,10 @@ class TestNasRL(unittest.TestCase):
             )
         ]
         experiment = api_pb2.Experiment(
-            name="nasrl-experiment",
+            name="enas-experiment",
             spec=api_pb2.ExperimentSpec(
                 algorithm=api_pb2.AlgorithmSpec(
-                    algorithm_name="nasrl",
+                    algorithm_name="enas",
                 ),
                 objective=api_pb2.ObjectiveSpec(
                     type=api_pb2.MAXIMIZE,

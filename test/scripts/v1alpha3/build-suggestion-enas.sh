@@ -23,7 +23,7 @@ set -o pipefail
 export PATH=${GOPATH}/bin:/usr/local/go/bin:${PATH}
 REGISTRY="${GCP_REGISTRY}"
 PROJECT="${GCP_PROJECT}"
-GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-suggestion-nasrl
+GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-suggestion-enas
 VERSION=$(git describe --tags --always --dirty)
 
 echo "Activating service-account"
@@ -37,6 +37,6 @@ cp -r vendor ${GO_DIR}/vendor
 
 cd ${GO_DIR}
 
-cp cmd/suggestion/nasrl/v1alpha3/Dockerfile .
-gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha3/suggestion-nasrl:${VERSION} --project=${PROJECT}
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha3/suggestion-nasrl:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha3/suggestion-nasrl:latest --verbosity=info
+cp cmd/suggestion/nas/enas/v1alpha3/Dockerfile .
+gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha3/suggestion-enas:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha3/suggestion-enas:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha3/suggestion-enas:latest --verbosity=info

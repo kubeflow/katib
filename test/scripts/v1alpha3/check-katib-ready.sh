@@ -73,7 +73,7 @@ sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-db-ma
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1alpha3\/katib-ui:${VERSION}@" manifests/v1alpha3/ui/deployment.yaml
 
 # Suggestion algorithms
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-nasrl@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-nasrl@" manifests/v1alpha3/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-enas@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-enas@" manifests/v1alpha3/katib-controller/katib-config.yaml
 sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-hyperband@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-hyperband@" manifests/v1alpha3/katib-controller/katib-config.yaml
 sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-chocolate@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-chocolate@" manifests/v1alpha3/katib-controller/katib-config.yaml
 sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-hyperopt@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-hyperopt@" manifests/v1alpha3/katib-controller/katib-config.yaml
