@@ -2,7 +2,7 @@ import chocolate as choco
 import logging
 import base64
 
-from pkg.suggestion.v1alpha3.internal.constant import *
+from pkg.suggestion.v1alpha3.internal.constant import MAX_GOAL, INTEGER, DOUBLE, CATEGORICAL, DISCRETE
 from pkg.suggestion.v1alpha3.internal.trial import Assignment
 
 logger = logging.getLogger(__name__)
@@ -43,11 +43,10 @@ class BaseChocolateService(object):
             elif param.type == DOUBLE:
                 chocolate_search_space[key] = choco.quantized_uniform(
                     float(param.min), float(param.max), float(param.step))
-            elif param.type == CATEGORICAL:
-                chocolate_search_space[key] = choco.choice(param.list)
-            else:
+            # For Categorical and Discrete insert indexes to DB from list of values
+            elif param.type == CATEGORICAL or param.type == DISCRETE:
                 chocolate_search_space[key] = choco.choice(
-                    [float(e) for e in param.list])
+                    [idx for idx, _ in enumerate(param.list)])
 
         # Refer to https://chocolate.readthedocs.io/tutorials/algo.html
         if algorithm_name == "grid":
@@ -96,6 +95,8 @@ class BaseChocolateService(object):
                         param_assignment = int(param_assignment)
                     elif param.type == DOUBLE:
                         param_assignment = float(param_assignment)
+                    elif param.type == CATEGORICAL or param.type == DISCRETE:
+                        param_assignment = param.list.index(param_assignment)
                     trial_assignments_dict.update({BaseChocolateService.encode(
                         param.name): param_assignment})
 
@@ -157,8 +158,7 @@ class BaseChocolateService(object):
     @staticmethod
     def convert(search_space, chocolate_params):
         assignments = []
-        for i in range(len(search_space.params)):
-            param = search_space.params[i]
+        for param in search_space.params:
             key = BaseChocolateService.encode(param.name)
             if param.type == INTEGER:
                 assignments.append(Assignment(
@@ -168,7 +168,7 @@ class BaseChocolateService(object):
                     param.name, chocolate_params[key]))
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 assignments.append(Assignment(
-                    param.name, chocolate_params[key]))
+                    param.name, param.list[chocolate_params[key]]))
         return assignments
 
     @staticmethod
