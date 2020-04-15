@@ -76,16 +76,13 @@ func (k *KatibUIHandler) getTrialTemplatesViewList() ([]TrialTemplatesView, erro
 func (k *KatibUIHandler) getAvailableNamespaces() ([]string, error) {
 	var namespaces []string
 
-	if hasClusterRole {
-		namespaceList, err := k.katibClient.GetNamespaceList()
-		if err != nil {
-			return nil, err
-		}
-		for _, ns := range namespaceList.Items {
-			namespaces = append(namespaces, ns.ObjectMeta.Name)
-		}
-	} else {
+	namespaceList, err := k.katibClient.GetNamespaceList()
+	if err != nil {
 		namespaces = append(namespaces, consts.DefaultKatibNamespace)
+		return namespaces, nil
+	}
+	for _, ns := range namespaceList.Items {
+		namespaces = append(namespaces, ns.ObjectMeta.Name)
 	}
 
 	return namespaces, nil

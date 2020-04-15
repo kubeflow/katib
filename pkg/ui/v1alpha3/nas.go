@@ -12,13 +12,12 @@ import (
 )
 
 func (k *KatibUIHandler) FetchAllNASJobs(w http.ResponseWriter, r *http.Request) {
-	// If hasClusterRole pass empty string to ns, there exists no ns restrictions when listing experiments.
-	// Otherwise, pass empty slice to ns, which will use default ns in alternative.
-	var ns []string
-	if hasClusterRole {
-		ns = []string{""}
+	// At first, try to list experiments in cluster scope
+	jobs, err := k.getExperimentList([]string{""}, JobTypeHP)
+	if err != nil {
+		// If failed, just try to list experiments from own namespace
+		jobs, err = k.getExperimentList([]string{}, JobTypeHP)
 	}
-	jobs, err := k.getExperimentList(ns, JobTypeNAS)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
