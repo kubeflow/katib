@@ -45,7 +45,7 @@ func (d *DefaultClient) GetTrialObservationLog(
 	metricLogs := reply.ObservationLog.MetricLogs
 	for _, metricName := range instance.Spec.Objective.AdditionalMetricNames {
 		request := &api_pb.GetObservationLogRequest{
-			TrialName:  instance.Name, MetricName: metricName,
+			TrialName: instance.Name, MetricName: metricName,
 		}
 		reply, err := common.GetObservationLog(request)
 		if err != nil {
@@ -58,6 +58,7 @@ func (d *DefaultClient) GetTrialObservationLog(
 			metricLogs = append(metricLogs, log)
 		}
 	}
+	reply.ObservationLog.MetricLogs = metricLogs
 
 	return reply, nil
 }
