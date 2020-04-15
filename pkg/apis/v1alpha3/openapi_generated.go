@@ -210,7 +210,19 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								Format: "",
 							},
 						},
-						"value": {
+						"min": {
+							SchemaProps: spec.SchemaProps{
+								Type:   []string{"number"},
+								Format: "double",
+							},
+						},
+						"max": {
+							SchemaProps: spec.SchemaProps{
+								Type:   []string{"number"},
+								Format: "double",
+							},
+						},
+						"latest": {
 							SchemaProps: spec.SchemaProps{
 								Type:   []string{"number"},
 								Format: "double",
@@ -268,6 +280,19 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								Description: "This can be empty if we only care about the objective metric. Note: If we adopt a push instead of pull mechanism, this can be omitted completely.",
 								Type:        []string{"array"},
 								Items: &spec.SchemaOrArray{
+									Schema: &spec.Schema{
+										SchemaProps: spec.SchemaProps{
+											Type:   []string{"string"},
+											Format: "",
+										},
+									},
+								},
+							},
+						},
+						"metricStrategies": {
+							SchemaProps: spec.SchemaProps{
+								Type: []string{"object"},
+								AdditionalProperties: &spec.SchemaOrBool{
 									Schema: &spec.Schema{
 										SchemaProps: spec.SchemaProps{
 											Type:   []string{"string"},
@@ -1429,13 +1454,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 							SchemaProps: spec.SchemaProps{
 								Description: "Whether to retain the trial run object after completed.",
 								Type:        []string{"boolean"},
-								Format:      "",
-							},
-						},
-						"objectiveExtract": {
-							SchemaProps: spec.SchemaProps{
-								Description: "Describes how objective value will be extracted from collected metrics",
-								Type:        []string{"string"},
 								Format:      "",
 							},
 						},

@@ -255,10 +255,6 @@
           "description": "Describes the objective of the experiment.",
           "$ref": "#/definitions/v1alpha3.ObjectiveSpec"
         },
-        "objectiveExtract": {
-          "description": "Describes how objective value will be extracted from collected metrics",
-          "type": "string"
-        },
         "parameterAssignments": {
           "description": "Key-value pairs for hyperparameters and assignment values.",
           "type": "array",
@@ -662,12 +658,20 @@
     },
     "v1alpha3.Metric": {
       "properties": {
-        "name": {
-          "type": "string"
-        },
-        "value": {
+        "latest": {
           "type": "number",
           "format": "double"
+        },
+        "max": {
+          "type": "number",
+          "format": "double"
+        },
+        "min": {
+          "type": "number",
+          "format": "double"
+        },
+        "name": {
+          "type": "string"
         }
       }
     },
@@ -707,6 +711,12 @@
         "goal": {
           "type": "number",
           "format": "double"
+        },
+        "metricStrategies": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "objectiveMetricName": {
           "type": "string"

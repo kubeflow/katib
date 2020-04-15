@@ -215,6 +215,13 @@ func (in *ObjectiveSpec) DeepCopyInto(out *ObjectiveSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.MetricStrategies != nil {
+		in, out := &in.MetricStrategies, &out.MetricStrategies
+		*out = make(map[string]MetricStrategy, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 
