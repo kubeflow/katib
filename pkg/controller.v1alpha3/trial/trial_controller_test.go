@@ -263,11 +263,11 @@ func TestGetObjectiveMetricValue(t *testing.T) {
 			return nil, nil, err
 		}
 		var errMetric, accMetric *commonv1alpha3.Metric
-		for _, metric := range observation.Metrics {
+		for index, metric := range observation.Metrics {
 			if metric.Name == "error" {
-				errMetric = &metric
+				errMetric = &observation.Metrics[index]
 			} else if metric.Name == "accuracy" {
-				accMetric = &metric
+				accMetric = &observation.Metrics[index]
 			}
 		}
 		return errMetric, accMetric, nil

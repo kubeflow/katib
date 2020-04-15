@@ -4,6 +4,7 @@ import (
 	commonv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	"github.com/onsi/gomega"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	"strconv"
 	"testing"
 )
 
@@ -27,9 +28,12 @@ func TestConvertTrialObservation(t *testing.T) {
 	}
 	obsPb := convertTrialObservation(strategies, observation)
 	g.Expect(obsPb.Metrics[0].Name).To(gomega.Equal("error"))
-	g.Expect(obsPb.Metrics[0].Value).To(gomega.Equal(0.01))
+	value, _ := strconv.ParseFloat(obsPb.Metrics[0].Value, 64)
+	g.Expect(value).To(gomega.Equal(0.01))
 	g.Expect(obsPb.Metrics[1].Name).To(gomega.Equal("auc"))
-	g.Expect(obsPb.Metrics[1].Value).To(gomega.Equal(0.95))
+	value, _ = strconv.ParseFloat(obsPb.Metrics[1].Value, 64)
+	g.Expect(value).To(gomega.Equal(0.95))
 	g.Expect(obsPb.Metrics[2].Name).To(gomega.Equal("accuracy"))
-	g.Expect(obsPb.Metrics[2].Value).To(gomega.Equal(0.93))
+	value, _ = strconv.ParseFloat(obsPb.Metrics[2].Value, 64)
+	g.Expect(value).To(gomega.Equal(0.93))
 }

@@ -168,7 +168,7 @@ func isJobSucceeded(jobCondition *commonv1.JobCondition) bool {
 func getMetrics(metricLogs []*api_pb.MetricLog, strategies map[string]commonv1alpha3.MetricStrategy) (*commonv1alpha3.Observation, error) {
 	metrics := make(map[string]*commonv1alpha3.Metric)
 	timestamps := make(map[string]*time.Time)
-	for name, _ := range strategies {
+	for name := range strategies {
 		timestamps[name] = nil
 		metrics[name] = &commonv1alpha3.Metric{
 			Name:   name,
