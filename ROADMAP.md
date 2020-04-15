@@ -22,7 +22,7 @@
 - Delete Suggestion deployment after Experiment is finished [#1061](https://github.com/kubeflow/katib/issues/1061)
 - Save Suggestion state after deployment is deleted [#1062](https://github.com/kubeflow/katib/issues/1062)
 - Reconsider the design of Trial Template [#906](https://github.com/kubeflow/katib/issues/906)
-- Support new Kubeflow operators (MXNet, XGBoost, MPI)
+- Design an extensible model for integrating with custom resources.
 - Add validation for algorithms (a.k.a suggestions) [#1126](https://github.com/kubeflow/katib/issues/1126)
 - Katib UI fixes and enhancements
 - Investigate Kubeflow Metadata integration
