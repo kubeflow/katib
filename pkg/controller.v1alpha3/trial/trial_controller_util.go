@@ -184,10 +184,10 @@ func getMetrics(metricLogs []*api_pb.MetricLog, strategies map[string]commonv1al
 			continue
 		}
 		currentValue, _ := strconv.ParseFloat(metricLog.Metric.Value, 64)
-		if metric.Min == math.NaN() || currentValue < metric.Min {
+		if math.IsNaN(metric.Min) || currentValue < metric.Min {
 			metric.Min = currentValue
 		}
-		if metric.Max == math.NaN() || currentValue > metric.Max {
+		if math.IsNaN(metric.Max) || currentValue > metric.Max {
 			metric.Max = currentValue
 		}
 		currentTime, err := time.Parse(time.RFC3339Nano, metricLog.TimeStamp)
