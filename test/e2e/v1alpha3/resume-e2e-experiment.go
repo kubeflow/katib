@@ -30,11 +30,13 @@ func verifyResult(exp *experimentsv1alpha3.Experiment) (*commonv1alpha3.Metric, 
 		return nil, fmt.Errorf("Best metrics not updated in status")
 	}
 
-	metric := exp.Status.CurrentOptimalTrial.Observation.Metrics[0]
-	if metric.Name != exp.Spec.Objective.ObjectiveMetricName {
-		return nil, fmt.Errorf("Best objective metric not updated in status")
+	for _, metric := range exp.Status.CurrentOptimalTrial.Observation.Metrics {
+		if metric.Name == exp.Spec.Objective.ObjectiveMetricName {
+			return &metric, nil
+		}
 	}
-	return &metric, nil
+
+	return nil, fmt.Errorf("Best objective metric not updated in status")
 }
 
 func main() {
