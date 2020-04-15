@@ -51,6 +51,7 @@ type ObjectiveSpec struct {
 	// This can be empty if we only care about the objective metric.
 	// Note: If we adopt a push instead of pull mechanism, this can be omitted completely.
 	AdditionalMetricNames []string                  `json:"additionalMetricNames,omitempty"`
+	// This field is allowed to missing, experiment defaulter (webhook) will fill it.
 	MetricStrategies      map[string]MetricStrategy `json:"metricStrategies,omitempty"`
 }
 
