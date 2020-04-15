@@ -10,8 +10,8 @@ spec:
     type: maximize
     goal: 0.99
     objectiveMetricName: Validation-accuracy
-#    additionalMetricNames:
-#      - Train-accuracy
+    additionalMetricNames:
+      - Train-accuracy
   algorithm:
     algorithmName: bayesianoptimization
     algorithmSettings:

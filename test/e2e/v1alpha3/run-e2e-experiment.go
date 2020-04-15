@@ -73,6 +73,7 @@ func main() {
 		if err != nil {
 			log.Fatal("Get Experiment error ", err)
 		}
+		log.Println(exp)
 		log.Printf("Waiting for Experiment %s to finish.", exp.Name)
 		log.Printf(`Experiment %s's trials: %d trials, %d pending trials,
 %d running trials, %d killed trials, %d succeeded trials, %d failed trials.`,
