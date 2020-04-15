@@ -73,13 +73,6 @@ func main() {
 		if err != nil {
 			log.Fatal("Get Experiment error ", err)
 		}
-		log.Println(exp.Spec.Objective)
-		log.Println(exp.Spec.Algorithm)
-		for _, name := range exp.Status.RunningTrialList {
-			trial, _ := kclient.GetTrial(name, exp.Namespace)
-			log.Println(trial.Spec.Objective)
-			log.Println(trial.Status.Observation)
-		}
 		log.Printf("Waiting for Experiment %s to finish.", exp.Name)
 		log.Printf(`Experiment %s's trials: %d trials, %d pending trials,
 %d running trials, %d killed trials, %d succeeded trials, %d failed trials.`,

@@ -201,12 +201,12 @@ func getMetrics(metricLogs []*api_pb.MetricLog, strategies map[string]commonv1al
 		}
 	}
 
-	observation := commonv1alpha3.Observation{}
+	observation := &commonv1alpha3.Observation{}
 	for _, metric := range metrics {
 		observation.Metrics = append(observation.Metrics, *metric)
 	}
 
-	return &observation, nil
+	return observation, nil
 }
 
 func needUpdateFinalizers(trial *trialsv1alpha3.Trial) (bool, []string) {

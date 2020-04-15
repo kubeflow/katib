@@ -35,6 +35,30 @@ func (d *DefaultClient) GetTrialObservationLog(
 	if err != nil {
 		return nil, err
 	}
+	if reply.ObservationLog == nil {
+		reply.ObservationLog = &api_pb.ObservationLog{}
+	}
+	if reply.ObservationLog.MetricLogs == nil {
+		reply.ObservationLog.MetricLogs = []*api_pb.MetricLog{}
+	}
+
+	metricLogs := reply.ObservationLog.MetricLogs
+	for _, metricName := range instance.Spec.Objective.AdditionalMetricNames {
+		request := &api_pb.GetObservationLogRequest{
+			TrialName:  instance.Name, MetricName: metricName,
+		}
+		reply, err := common.GetObservationLog(request)
+		if err != nil {
+			return nil, err
+		}
+		if reply.ObservationLog == nil || reply.ObservationLog.MetricLogs == nil {
+			continue
+		}
+		for _, log := range reply.ObservationLog.MetricLogs {
+			metricLogs = append(metricLogs, log)
+		}
+	}
+
 	return reply, nil
 }
 
