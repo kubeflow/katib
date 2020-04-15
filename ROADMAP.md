@@ -26,6 +26,7 @@
 - Add validation for algorithms (a.k.a suggestions) [#1126](https://github.com/kubeflow/katib/issues/1126)
 - Katib UI fixes and enhancements
 - Investigate Kubeflow Metadata integration
+- Investigate the alignment with concept and implementation of "experiments" and "jobs/runs" in KFP
 
 ### Neural Architecture Search
 
