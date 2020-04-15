@@ -43,6 +43,9 @@ func (e *Experiment) setDefaultParallelTrialCount() {
 
 func (e *Experiment) setDefaultObjective() {
 	obj := e.Spec.Objective
+	if obj.MetricStrategies == nil {
+		obj.MetricStrategies = make(map[string]common.MetricStrategy)
+	}
 	// set default strategy of objective according to ObjectiveType
 	if _, ok := obj.MetricStrategies[obj.ObjectiveMetricName]; !ok {
 		switch e.Spec.Objective.Type {
