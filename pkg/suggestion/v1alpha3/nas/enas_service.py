@@ -9,7 +9,7 @@ from pkg.apis.manager.v1alpha3.python import api_pb2
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
 from pkg.suggestion.v1alpha3.nas.enas.Controller import Controller
 from pkg.suggestion.v1alpha3.nas.enas.Operation import SearchSpace
-from pkg.suggestion.v1alpha3.nas.enas.AlgorithmSettings import parseAlgorithmSettings
+from pkg.suggestion.v1alpha3.nas.enas.AlgorithmSettings import parseAlgorithmSettings, algorithmSettingsValidator
 from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
 
 
@@ -66,9 +66,9 @@ class EnasExperiment:
 
         self.print_search_space()
 
-        # Get Experiment Parameters
-        params_raw = self.experiment.spec.algorithm.algorithm_setting
-        self.algorithm_settings = parseAlgorithmSettings(params_raw, self.logger)
+        # Get Experiment Algorithm Settings
+        settings_raw = self.experiment.spec.algorithm.algorithm_setting
+        self.algorithm_settings = parseAlgorithmSettings(settings_raw)
 
         self.print_algorithm_settings()
 
@@ -150,7 +150,6 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         self.logger.info("Validate Algorithm Settings start")
         graph_config = request.experiment.spec.nas_config.graph_config
 
-        # TODO: Refactor this since we validate it in Katib Controller
         # Validate GraphConfig
         # Check InputSize
         if not graph_config.input_sizes:
@@ -201,6 +200,30 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
                     if parameter.parameter_type == api_pb2.DOUBLE and (not parameter.feasible_space.step or float(parameter.feasible_space.step) <= 0):
                         return self.SetValidateContextError(context, "Step parameter should be > 0 in ParameterConfig.feasibleSpace:\n{}".format(parameter))
+
+        # Validate Algorithm Settings
+        settings_raw = request.experiment.spec.algorithm.algorithm_setting
+        for setting in settings_raw:
+            if setting.name in algorithmSettingsValidator.keys():
+                setting_type = algorithmSettingsValidator[setting.name][0]
+                setting_range = algorithmSettingsValidator[setting.name][1]
+                try:
+                    converted_value = setting_type(setting.value)
+                except:
+                    return self.SetValidateContextError(context, "Algorithm Setting {} must be {} type".format(setting.name, setting_type.__name__))
+
+                if setting_type == float:
+                    if converted_value <= setting_range[0] or (setting_range[1] != 'inf' and converted_value > setting_range[1]):
+                        return self.SetValidateContextError(context, "Algorithm Setting {}: {} with {} type must be in range ({}, {}]".format(
+                            setting.name, converted_value, setting_type.__name__, setting_range[0], setting_range[1]
+                        ))
+
+                elif converted_value < setting_range[0]:
+                    return self.SetValidateContextError(context, "Algorithm Setting {}: {} with {} type must be in range [{}, {})".format(
+                        setting.name, converted_value, setting_type.__name__, setting_range[0], setting_range[1]
+                    ))
+            else:
+                return self.SetValidateContextError(context, "Unknown Algorithm Setting name: {}".format(setting.name))
 
         self.logger.info("All Experiment Settings are Valid")
         return api_pb2.ValidateAlgorithmSettingsReply()
