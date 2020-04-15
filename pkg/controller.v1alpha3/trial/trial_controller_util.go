@@ -166,11 +166,11 @@ func isJobSucceeded(jobCondition *commonv1.JobCondition) bool {
 }
 
 func getMetrics(metricLogs []*api_pb.MetricLog, strategies map[string]commonv1alpha3.MetricStrategy) (*commonv1alpha3.Observation, error) {
-	metrics := make(map[string]commonv1alpha3.Metric)
+	metrics := make(map[string]*commonv1alpha3.Metric)
 	timestamps := make(map[string]*time.Time)
 	for name, _ := range strategies {
 		timestamps[name] = nil
-		metrics[name] = commonv1alpha3.Metric{
+		metrics[name] = &commonv1alpha3.Metric{
 			Name:   name,
 			Min:    math.NaN(),
 			Max:    math.NaN(),
@@ -203,7 +203,7 @@ func getMetrics(metricLogs []*api_pb.MetricLog, strategies map[string]commonv1al
 
 	observation := commonv1alpha3.Observation{}
 	for _, metric := range metrics {
-		observation.Metrics = append(observation.Metrics, metric)
+		observation.Metrics = append(observation.Metrics, *metric)
 	}
 
 	return &observation, nil
