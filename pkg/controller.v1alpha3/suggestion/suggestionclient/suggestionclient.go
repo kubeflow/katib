@@ -196,8 +196,7 @@ func (g *General) ConvertTrials(ts []trialsv1alpha3.Trial) []*suggestionapi.Tria
 			Status: &suggestionapi.TrialStatus{
 				StartTime:      convertTrialStatusTime(t.Status.StartTime),
 				CompletionTime: convertTrialStatusTime(t.Status.CompletionTime),
-				Observation: convertTrialObservation(
-					t.Status.Observation),
+				Observation:    convertTrialObservation(t.Spec.Objective.MetricStrategies, t.Status.Observation),
 			},
 		}
 		if t.Spec.Objective.Goal != nil {
@@ -248,15 +247,26 @@ func convertTrialConditionType(conditionType trialsv1alpha3.TrialConditionType) 
 }
 
 // convertTrialObservation convert Trial Observation Metrics CRD to the GRPC definition
-func convertTrialObservation(observation *commonapiv1alpha3.Observation) *suggestionapi.Observation {
+func convertTrialObservation(strategies map[string]commonapiv1alpha3.MetricStrategy, observation *commonapiv1alpha3.Observation) *suggestionapi.Observation {
 	resObservation := &suggestionapi.Observation{
 		Metrics: make([]*suggestionapi.Metric, 0),
 	}
 	if observation != nil && observation.Metrics != nil {
 		for _, m := range observation.Metrics {
+			var value float64
+			switch strategy, _ := strategies[m.Name]; strategy {
+			case commonapiv1alpha3.ExtractByMin:
+				value = m.Min
+			case commonapiv1alpha3.ExtractByMax:
+				value = m.Max
+			case commonapiv1alpha3.ExtractByLatest:
+				value = m.Latest
+			default:
+				value = m.Latest
+			}
 			resObservation.Metrics = append(resObservation.Metrics, &suggestionapi.Metric{
 				Name:  m.Name,
-				Value: fmt.Sprintf("%f", m.Value),
+				Value: fmt.Sprintf("%f", value),
 			})
 		}
 	}

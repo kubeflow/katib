@@ -21,7 +21,7 @@ const (
 	timeout = 30 * time.Minute
 )
 
-func verifyResult(exp *experimentsv1alpha3.Experiment) (*float64, error) {
+func verifyResult(exp *experimentsv1alpha3.Experiment) (*commonv1alpha3.Metric, error) {
 	if len(exp.Status.CurrentOptimalTrial.ParameterAssignments) == 0 {
 		return nil, fmt.Errorf("Best parameter assignments not updated in status")
 	}
@@ -34,7 +34,7 @@ func verifyResult(exp *experimentsv1alpha3.Experiment) (*float64, error) {
 	if metric.Name != exp.Spec.Objective.ObjectiveMetricName {
 		return nil, fmt.Errorf("Best objective metric not updated in status")
 	}
-	return &metric.Value, nil
+	return &metric, nil
 }
 
 func main() {
@@ -120,11 +120,11 @@ func main() {
 		log.Fatal("Experiment run timed out")
 	}
 
-	metricVal, err := verifyResult(exp)
+	metric, err := verifyResult(exp)
 	if err != nil {
 		log.Fatal(err)
 	}
-	if metricVal == nil {
+	if metric == nil {
 		log.Fatal("Metric value in CurrentOptimalTrial not populated")
 	}
 
@@ -133,8 +133,8 @@ func main() {
 	if exp.Spec.Objective.Goal != nil {
 		goal = *exp.Spec.Objective.Goal
 	}
-	if (exp.Spec.Objective.Goal != nil && objectiveType == commonv1alpha3.ObjectiveTypeMinimize && *metricVal < goal) ||
-		(exp.Spec.Objective.Goal != nil && objectiveType == commonv1alpha3.ObjectiveTypeMaximize && *metricVal > goal) {
+	if (exp.Spec.Objective.Goal != nil && objectiveType == commonv1alpha3.ObjectiveTypeMinimize && metric.Min < goal) ||
+		(exp.Spec.Objective.Goal != nil && objectiveType == commonv1alpha3.ObjectiveTypeMaximize && metric.Max > goal) {
 		log.Print("Objective Goal reached")
 	} else {
 

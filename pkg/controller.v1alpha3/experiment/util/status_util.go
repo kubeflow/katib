@@ -61,7 +61,6 @@ func updateTrialsSummary(instance *experimentsv1alpha3.Experiment, trials *trial
 		objectiveValueGoal = *instance.Spec.Objective.Goal
 	}
 	objectiveType := instance.Spec.Objective.Type
-	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
 
 	for index, trial := range trials.Items {
 		sts.Trials++
@@ -77,7 +76,7 @@ func updateTrialsSummary(instance *experimentsv1alpha3.Experiment, trials *trial
 			sts.PendingTrialList = append(sts.PendingTrialList, trial.Name)
 		}
 
-		objectiveMetricValue := getObjectiveMetricValue(trial, objectiveMetricName)
+		objectiveMetricValue := getObjectiveMetricValue(trial)
 		if objectiveMetricValue == nil {
 			continue
 		}
@@ -131,13 +130,24 @@ func updateTrialsSummary(instance *experimentsv1alpha3.Experiment, trials *trial
 	return isObjectiveGoalReached
 }
 
-func getObjectiveMetricValue(trial trialsv1alpha3.Trial, objectiveMetricName string) *float64 {
+func getObjectiveMetricValue(trial trialsv1alpha3.Trial) *float64 {
 	if trial.Status.Observation == nil {
 		return nil
 	}
+	objectiveMetricName := trial.Spec.Objective.ObjectiveMetricName
+	objectiveStrategy, _ := trial.Spec.Objective.MetricStrategies[objectiveMetricName]
 	for _, metric := range trial.Status.Observation.Metrics {
 		if objectiveMetricName == metric.Name {
-			return &metric.Value
+			switch objectiveStrategy {
+			case commonv1alpha3.ExtractByMin:
+				return &metric.Min
+			case commonv1alpha3.ExtractByMax:
+				return &metric.Max
+			case commonv1alpha3.ExtractByLatest:
+				return &metric.Latest
+			default:
+				return nil
+			}
 		}
 	}
 	return nil

@@ -36,20 +36,9 @@ type TrialSpec struct {
 	// Whether to retain the trial run object after completed.
 	RetainRun bool `json:"retainRun,omitempty"`
 
-	// Describes how objective value will be extracted from collected metrics
-	ObjectiveExtract ObjectiveExtractType `json:"objectiveExtract,omitempty"`
-
 	// Describes how metrics will be collected
 	MetricsCollector common.MetricsCollectorSpec `json:"metricsCollector,omitempty"`
 }
-
-// ObjectiveExtractType describes the various approaches to extract objective value from metrics.
-type ObjectiveExtractType string
-
-const (
-	ExtractBestObjective   ObjectiveExtractType = "Best"
-	ExtractLatestObjective ObjectiveExtractType = "Latest"
-)
 
 type TrialStatus struct {
 	// Represents time when the Trial was acknowledged by the Trial controller.

@@ -29,6 +29,7 @@ import (
 
 func (e *Experiment) SetDefault() {
 	e.setDefaultParallelTrialCount()
+	e.setDefaultObjective()
 	e.setDefaultTrialTemplate()
 	e.setDefaultMetricsCollector()
 }
@@ -37,6 +38,29 @@ func (e *Experiment) setDefaultParallelTrialCount() {
 	if e.Spec.ParallelTrialCount == nil {
 		e.Spec.ParallelTrialCount = new(int32)
 		*e.Spec.ParallelTrialCount = DefaultTrialParallelCount
+	}
+}
+
+func (e *Experiment) setDefaultObjective() {
+	obj := e.Spec.Objective
+	// set default strategy of objective according to ObjectiveType
+	if _, ok := obj.MetricStrategies[obj.ObjectiveMetricName]; !ok {
+		switch e.Spec.Objective.Type {
+		case common.ObjectiveTypeMinimize:
+			obj.MetricStrategies[obj.ObjectiveMetricName] = common.ExtractByMin
+		case common.ObjectiveTypeMaximize:
+			obj.MetricStrategies[obj.ObjectiveMetricName] = common.ExtractByMax
+		case common.ObjectiveTypeUnknown:
+			obj.MetricStrategies[obj.ObjectiveMetricName] = common.ExtractByLatest
+		default:
+			obj.MetricStrategies[obj.ObjectiveMetricName] = common.ExtractByLatest
+		}
+	}
+	// set default strategy of additional metrics to ExtractByLatest
+	for _, name := range obj.AdditionalMetricNames {
+		if _, ok := obj.MetricStrategies[name]; !ok {
+			obj.MetricStrategies[name] = common.ExtractByLatest
+		}
 	}
 }
 
