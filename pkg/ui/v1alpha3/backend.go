@@ -232,16 +232,12 @@ func (k *KatibUIHandler) DeleteTemplate(w http.ResponseWriter, r *http.Request) 
 
 func (k *KatibUIHandler) FetchNamespaces(w http.ResponseWriter, r *http.Request) {
 
-	namespaceList, err := k.katibClient.GetNamespaceList()
+	// Get all available namespaces
+	namespaces, err := k.getAvailableNamespaces()
 	if err != nil {
-		log.Printf("GetNamespaceList failed: %v", err)
+		log.Printf("GetAvailableNamespaces failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-	var namespaces []string
-
-	for _, namespace := range namespaceList.Items {
-		namespaces = append(namespaces, namespace.ObjectMeta.Name)
 	}
 
 	response, err := json.Marshal(namespaces)
