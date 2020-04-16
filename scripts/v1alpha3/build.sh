@@ -77,3 +77,4 @@ else
 	docker build -t ${REGISTRY}/${PREFIX}/suggestion-enas:${TAG} -f ${CMD_PREFIX}/suggestion/nas/enas/v1alpha3/Dockerfile .
 fi
 docker build -t ${REGISTRY}/${PREFIX}/suggestion-hyperband:${TAG} -f ${CMD_PREFIX}/suggestion/hyperband/v1alpha3/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/suggestion-goptuna:${TAG} -f ${CMD_PREFIX}/suggestion/goptuna/v1alpha3/Dockerfile .

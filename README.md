@@ -92,6 +92,7 @@ Currently Katib supports the following exploration algorithms:
 * [Grid Search](https://en.wikipedia.org/wiki/Hyperparameter_optimization#Grid_search)
 * [Hyperband](https://arxiv.org/pdf/1603.06560.pdf)
 * [Bayesian Optimization](https://arxiv.org/pdf/1012.2599.pdf)
+* [CMA Evolution Strategy](https://arxiv.org/abs/1604.00772)
 
 #### Neural Architecture Search
 

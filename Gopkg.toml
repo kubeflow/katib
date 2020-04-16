@@ -98,6 +98,10 @@ required = [
   name = "github.com/awalterschulze/gographviz"
   branch = "master"
 
+[[constraint]]
+  name = "github.com/c-bata/goptuna"
+  version = "v0.5.1"
+
 [[prune.project]]
   name = "github.com/kubeflow/katib"
   unused-packages = false

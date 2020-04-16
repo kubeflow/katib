@@ -120,6 +120,19 @@
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:2f5400f2d51b82c2033d09bd3cbaf6bd2f98c6b089127d56c9f7ea5abd3195cc"
+  name = "github.com/c-bata/goptuna"
+  packages = [
+    ".",
+    "cmaes",
+    "internal/random",
+    "tpe",
+  ]
+  pruneopts = "NUT"
+  revision = "dbfe7f33cdba8470ac2d9a742c49a2e37fd3d01c"
+  version = "v0.5.1"
+
+[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -905,6 +918,30 @@
   revision = "508f945e1a9bd8b5e3a9444bb2cdd13d0896132e"
 
 [[projects]]
+  digest = "1:c14aa22dfbfc27f2245c8e5abe765d18da303141dcbe170f65d451fd11f47eda"
+  name = "gonum.org/v1/gonum"
+  packages = [
+    "blas",
+    "blas/blas64",
+    "blas/cblas128",
+    "blas/gonum",
+    "floats",
+    "internal/asm/c128",
+    "internal/asm/c64",
+    "internal/asm/f32",
+    "internal/asm/f64",
+    "internal/cmplx64",
+    "internal/math32",
+    "lapack",
+    "lapack/gonum",
+    "lapack/lapack64",
+    "mat",
+  ]
+  pruneopts = "NUT"
+  revision = "960a37950cca5ec8d1efe76ed4eec9dfe3065bd6"
+  version = "v0.7.0"
+
+[[projects]]
   digest = "1:55c735e000d1eef22b3c2f3226447489bafa33f0159dfece150279d2f9e25f7c"
   name = "google.golang.org/appengine"
   packages = [
@@ -1366,8 +1403,12 @@
   analyzer-version = 1
   input-imports = [
     "github.com/awalterschulze/gographviz",
+    "github.com/c-bata/goptuna",
+    "github.com/c-bata/goptuna/cmaes",
+    "github.com/c-bata/goptuna/tpe",
     "github.com/emicklei/go-restful",
     "github.com/ghodss/yaml",
+    "github.com/go-openapi/spec",
     "github.com/go-sql-driver/mysql",
     "github.com/golang/mock/gomock",
     "github.com/golang/protobuf/proto",
@@ -1424,6 +1465,7 @@
     "k8s.io/code-generator/cmd/deepcopy-gen",
     "k8s.io/code-generator/cmd/openapi-gen",
     "k8s.io/klog",
+    "k8s.io/kube-openapi/pkg/common",
     "k8s.io/utils/pointer",
     "sigs.k8s.io/controller-runtime/pkg/cache",
     "sigs.k8s.io/controller-runtime/pkg/client",
