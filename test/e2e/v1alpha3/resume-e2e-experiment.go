@@ -146,5 +146,13 @@ func main() {
 			log.Fatal("All trials are not successful ", exp.Status.TrialsSucceeded, *exp.Spec.MaxTrialCount)
 		}
 	}
+
+	sug, err := kclient.GetSuggestion(exp.Name, exp.Namespace)
+	if sug == nil && exp.Spec.ResumeExperiment {
+		log.Fatal("Suggestion has been deleted while ResumeExperiment variable is true")
+	} else if sug != nil && !exp.Spec.ResumeExperiment {
+		log.Fatal("Suggestion is still alive while ResumeExperiment variable is false")
+	}
+
 	log.Printf("Experiment has recorded best current Optimal Trial %v", exp.Status.CurrentOptimalTrial)
 }

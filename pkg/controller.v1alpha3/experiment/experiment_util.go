@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"k8s.io/apimachinery/pkg/api/errors"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
@@ -108,4 +109,26 @@ func (r *ReconcileExperiment) updateFinalizers(instance *experimentsv1alpha3.Exp
 		// Need to requeue because finalizer update does not change metadata.generation
 		return reconcile.Result{Requeue: true}, err
 	}
+}
+
+func (r *ReconcileExperiment) shutdownSuggestionServer(instance *experimentsv1alpha3.Experiment) error {
+	if instance.Spec.ResumeExperiment {
+		return nil
+	}
+	suggestionToDelete := &suggestionsv1alpha3.Suggestion{}
+	err := r.Get(context.TODO(), types.NamespacedName{
+		Namespace: instance.Namespace,
+		Name:      instance.Name,
+	}, suggestionToDelete)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+	err = r.Delete(context.TODO(), suggestionToDelete)
+	if err != nil {
+		return err
+	}
+	return nil
 }

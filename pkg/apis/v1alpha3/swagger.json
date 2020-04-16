@@ -485,6 +485,10 @@
             "$ref": "#/definitions/v1alpha3.ParameterSpec"
           }
         },
+        "resumeExperiment": {
+          "description": "If false/true, which means delete/resume Suggestion after experiment is finished",
+          "type": "boolean"
+        },
         "trialTemplate": {
           "description": "Template for each run of the trial.",
           "$ref": "#/definitions/v1alpha3.TrialTemplate"
