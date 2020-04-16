@@ -15,7 +15,6 @@ enableNoneSettingsList = [
     "controller_temperature", "controller_tanh_const", "controller_entropy_weight", "controller_skip_weight"]
 
 
-# TODO: Enable to add None values, e.g in controller_temperature parameter
 def parseAlgorithmSettings(settings_raw):
 
     algorithm_settings_default = {
