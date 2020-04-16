@@ -204,11 +204,6 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		} else {
 			// If experiment is completed with no running trials, stop reconcile
 			if !instance.HasRunningTrials() {
-				err := r.shutdownSuggestionServer(instance)
-				if err != nil {
-					// Need to requeue if failed to delete suggestion on requirement
-					return reconcile.Result{Requeue: true}, err
-				}
 				return reconcile.Result{}, nil
 			}
 		}
@@ -267,6 +262,8 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha3.
 	reconcileRequired := !instance.IsCompleted()
 	if reconcileRequired {
 		r.ReconcileTrials(instance, trials.Items)
+	} else {
+		return r.shutdownSuggestionServer(instance)
 	}
 	return nil
 }
