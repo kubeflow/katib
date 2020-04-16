@@ -31,6 +31,7 @@ workflows:
     - cmd/suggestion/hyperopt/v1alpha3/*
     - cmd/suggestion/nas/enas/v1alpha3/*
     - cmd/suggestion/skopt/v1alpha3/*
+    - cmd/suggestion/goptuna/v1alpha3/*
     - cmd/ui/v1alpha3/*
     - examples/v1alpha3/*.yaml
     - test/e2e/v1alpha3/*
@@ -71,6 +72,7 @@ workflows:
     - cmd/suggestion/hyperopt/v1alpha3/*
     - cmd/suggestion/nas/enas/v1alpha3/*
     - cmd/suggestion/skopt/v1alpha3/*
+    - cmd/suggestion/goptuna/v1alpha3/*
     - cmd/ui/v1alpha3/*
     - examples/v1alpha3/*.yaml
     - test/e2e/v1alpha3/*
