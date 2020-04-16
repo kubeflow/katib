@@ -49,9 +49,11 @@ type ExperimentSpec struct {
 
 	NasConfig *NasConfig `json:"nasConfig,omitempty"`
 
+	// If false/true, which means delete/resume Suggestion after experiment is finished
+	ResumeExperiment bool `json:"resumeExperiment,omitempty"`
+
 	// TODO - Other fields, exact format is TBD. Will add these back during implementation.
 	// - Early stopping
-	// - Resume experiment
 }
 
 type ExperimentStatus struct {
