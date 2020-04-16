@@ -190,7 +190,7 @@ class Controller(object):
         normalize = tf.dtypes.cast((self.num_layers * (self.num_layers - 1) / 2), tf.float32)
         self.skip_rate = tf.dtypes.cast((self.skip_count / normalize), tf.float32)
 
-        if self.controller_entropy_weight:
+        if self.controller_entropy_weight is not None:
             self.reward += self.controller_entropy_weight * self.sample_entropy
 
         self.sample_log_probs = tf.reduce_sum(self.sample_log_probs)
