@@ -240,6 +240,10 @@
                     template: "build-suggestion-skopt",
                   },
                   {
+                    name: "build-suggestion-goptuna",
+                    template: "build-suggestion-goptuna",
+                  },
+                  {
                     name: "build-earlystopping-median",
                     template: "build-earlystopping-median",
                   },
@@ -420,6 +424,9 @@
             ]),  // build-suggestion-chocolate
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-enas", testWorkerImage, [
               "test/scripts/v1alpha3/build-suggestion-enas.sh",
+            ]),  // build-suggestion-enas
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-goptuna", testWorkerImage, [
+              "test/scripts/v1alpha3/build-suggestion-goptuna.sh",
             ]),  // build-suggestion-enas
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-earlystopping-median", testWorkerImage, [
               "test/scripts/v1alpha3/build-earlystopping-median.sh",
