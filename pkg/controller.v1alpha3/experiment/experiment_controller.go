@@ -202,6 +202,9 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 				instance.MarkExperimentStatusRestarting(util.ExperimentRestartingReason, msg)
 			}
 		} else {
+			if instance.Spec.ResumePolicy != experimentsv1alpha3.LongRunning {
+				return r.terminateSuggestion(instance)
+			}
 			// If experiment is completed with no running trials, stop reconcile
 			if !instance.HasRunningTrials() {
 				return reconcile.Result{}, nil
@@ -262,9 +265,8 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha3.
 	reconcileRequired := !instance.IsCompleted()
 	if reconcileRequired {
 		r.ReconcileTrials(instance, trials.Items)
-	} else if instance.Spec.ResumePolicy != experimentsv1alpha3.LongRunning {
-		return r.terminateSuggestion(instance)
 	}
+
 	return nil
 }
 
