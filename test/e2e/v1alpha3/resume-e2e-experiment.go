@@ -5,14 +5,14 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"log"
 	"os"
 	"time"
 
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -164,7 +164,7 @@ func main() {
 			log.Fatal("Suggestion is still running while ResumePolicy = NeverResume")
 		}
 		namespacedName := types.NamespacedName{Name: controllerUtil.GetAlgorithmServiceName(sug), Namespace: sug.Namespace}
-		service := &v1.Service{}
+		service := &corev1.Service{}
 		err := kclient.GetClient().Get(context.TODO(), namespacedName, service)
 		if err == nil || !errors.IsNotFound(err) {
 			log.Fatal("Suggestion service is still alive while ResumePolicy = NeverResume")
