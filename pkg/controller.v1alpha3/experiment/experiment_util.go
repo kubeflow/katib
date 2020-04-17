@@ -113,6 +113,7 @@ func (r *ReconcileExperiment) updateFinalizers(instance *experimentsv1alpha3.Exp
 }
 
 func (r *ReconcileExperiment) terminateSuggestion(instance *experimentsv1alpha3.Experiment) error {
+	log.Info("Start terminating suggestion...")
 	suggestion := &suggestionsv1alpha3.Suggestion{}
 	err := r.Get(context.TODO(), types.NamespacedName{
 		Namespace: instance.Namespace,
@@ -129,6 +130,7 @@ func (r *ReconcileExperiment) terminateSuggestion(instance *experimentsv1alpha3.
 	}
 	msg := "Suggestion is succeeded"
 	suggestion.MarkSuggestionStatusSucceeded(suggestionController.SuggestionSucceededReason, msg)
+	log.Info("Mark suggestion succeeded...")
 
-	return r.UpdateSuggestion(suggestion, 0)
+	return r.Client.Update(context.TODO(), suggestion)
 }
