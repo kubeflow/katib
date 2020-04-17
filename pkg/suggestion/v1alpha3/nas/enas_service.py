@@ -9,7 +9,8 @@ from pkg.apis.manager.v1alpha3.python import api_pb2
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
 from pkg.suggestion.v1alpha3.nas.enas.Controller import Controller
 from pkg.suggestion.v1alpha3.nas.enas.Operation import SearchSpace
-from pkg.suggestion.v1alpha3.nas.enas.AlgorithmSettings import parseAlgorithmSettings, algorithmSettingsValidator
+from pkg.suggestion.v1alpha3.nas.enas.AlgorithmSettings import (
+    parseAlgorithmSettings, algorithmSettingsValidator, enableNoneSettingsList)
 from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
 
 
@@ -122,8 +123,6 @@ class EnasExperiment:
                     spec, self.algorithm_settings[spec]))
 
         self.logger.info("")
-        self.logger.info("RequestNumber:\t\t\t{}".format(self.num_trials))
-        self.logger.info("")
 
 
 class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
@@ -205,6 +204,8 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         settings_raw = request.experiment.spec.algorithm.algorithm_setting
         for setting in settings_raw:
             if setting.name in algorithmSettingsValidator.keys():
+                if setting.name in enableNoneSettingsList and setting.value == "None":
+                    continue
                 setting_type = algorithmSettingsValidator[setting.name][0]
                 setting_range = algorithmSettingsValidator[setting.name][1]
                 try:
@@ -242,6 +243,10 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             experiment.num_trials = request.request_number
         self.logger.info("-" * 100 + "\nSuggestion Step {} for Experiment {}\n".format(
             experiment.suggestion_step, experiment.experiment_name) + "-" * 100)
+
+        self.logger.info("")
+        self.logger.info(">>> RequestNumber:\t\t{}".format(experiment.num_trials))
+        self.logger.info("")
 
         with experiment.tf_graph.as_default():
             saver = tf.compat.v1.train.Saver()

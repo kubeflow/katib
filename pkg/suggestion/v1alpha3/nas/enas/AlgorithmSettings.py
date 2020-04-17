@@ -11,9 +11,10 @@ algorithmSettingsValidator = {
     "controller_train_steps":       [int, [1, 'inf']],
     "controller_log_every_steps":   [int, [1, 'inf']],
 }
+enableNoneSettingsList = [
+    "controller_temperature", "controller_tanh_const", "controller_entropy_weight", "controller_skip_weight"]
 
 
-# TODO: Enable to add None values, e.g in controller_temperature parameter
 def parseAlgorithmSettings(settings_raw):
 
     algorithm_settings_default = {
@@ -32,7 +33,10 @@ def parseAlgorithmSettings(settings_raw):
     for setting in settings_raw:
         s_name = setting.name
         s_value = setting.value
-        s_type = algorithmSettingsValidator[s_name][0]
-        algorithm_settings_default[s_name] = s_type(s_value)
+        if s_value == "None":
+            algorithm_settings_default[s_name] = None
+        else:
+            s_type = algorithmSettingsValidator[s_name][0]
+            algorithm_settings_default[s_name] = s_type(s_value)
 
     return algorithm_settings_default
