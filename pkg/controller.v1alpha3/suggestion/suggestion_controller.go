@@ -135,7 +135,7 @@ func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 	instance := oldS.DeepCopy()
 	// If ResumePolicyType is LongRunning, suggestion status will never be succeeded.
-	if instance.IsCompleted() {
+	if instance.IsSucceeded() {
 		err = r.deleteDeployment(instance)
 		if err != nil {
 			return reconcile.Result{}, err

@@ -26,5 +26,5 @@ const (
 	DefaultTrialTemplatePath = "defaultTrialTemplate.yaml"
 
 	// Default value of Spec.DefaultResumePolicy
-	DefaultResumePolicy = NeverResume
+	DefaultResumePolicy = LongRunning
 )
