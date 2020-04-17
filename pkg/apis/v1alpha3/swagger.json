@@ -485,9 +485,9 @@
             "$ref": "#/definitions/v1alpha3.ParameterSpec"
           }
         },
-        "resumeExperiment": {
-          "description": "If false/true, which means delete/resume Suggestion after experiment is finished",
-          "type": "boolean"
+        "resumePolicy": {
+          "description": "Describes resuming policy which usually take effect after experiment terminated.",
+          "type": "string"
         },
         "trialTemplate": {
           "description": "Template for each run of the trial.",
