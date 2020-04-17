@@ -129,5 +129,6 @@ func (r *ReconcileExperiment) terminateSuggestion(instance *experimentsv1alpha3.
 	}
 	msg := "Suggestion is succeeded"
 	suggestion.MarkSuggestionStatusSucceeded(suggestionController.SuggestionSucceededReason, msg)
-	return nil
+
+	return r.UpdateSuggestion(suggestion, 0)
 }

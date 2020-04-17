@@ -53,6 +53,8 @@ func (r *ReconcileSuggestion) deleteDeployment(instance *v1alpha3.Suggestion) er
 	if err != nil {
 		return err
 	}
+	log.Info("suggestion deployment %s has been deleted", realDeploy.Name)
+
 	return nil
 }
 
@@ -73,5 +75,7 @@ func (r *ReconcileSuggestion) deleteService(instance *v1alpha3.Suggestion) error
 	if err != nil {
 		return err
 	}
+	log.Info("suggestion service %s has been deleted", realService.Name)
+
 	return nil
 }
