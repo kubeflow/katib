@@ -17,6 +17,6 @@ func (f *Fake) GetOrCreateSuggestion(instance *experimentsv1alpha3.Experiment, s
 	return nil, nil
 }
 
-func (f *Fake) UpdateSuggestion(suggestion *suggestionsv1alpha3.Suggestion, suggestionRequests int32) error {
+func (f *Fake) UpdateSuggestion(suggestion *suggestionsv1alpha3.Suggestion) error {
 	return nil
 }

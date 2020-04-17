@@ -388,7 +388,7 @@ func (r *ReconcileExperiment) ReconcileSuggestions(instance *experimentsv1alpha3
 				}
 				if suggestion.Spec.Requests != suggestionRequestsCount {
 					suggestion.Spec.Requests = suggestionRequestsCount
-					if err := r.UpdateSuggestion(suggestion, suggestionRequestsCount); err != nil {
+					if err := r.UpdateSuggestion(suggestion); err != nil {
 						return nil, err
 					}
 				}

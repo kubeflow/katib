@@ -50,15 +50,15 @@ func (mr *MockSuggestionMockRecorder) GetOrCreateSuggestion(arg0, arg1 interface
 }
 
 // UpdateSuggestion mocks base method
-func (m *MockSuggestion) UpdateSuggestion(arg0 *v1alpha30.Suggestion, arg1 int32) error {
+func (m *MockSuggestion) UpdateSuggestion(arg0 *v1alpha30.Suggestion) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateSuggestion", arg0, arg1)
+	ret := m.ctrl.Call(m, "UpdateSuggestion", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateSuggestion indicates an expected call of UpdateSuggestion
-func (mr *MockSuggestionMockRecorder) UpdateSuggestion(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockSuggestionMockRecorder) UpdateSuggestion(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSuggestion", reflect.TypeOf((*MockSuggestion)(nil).UpdateSuggestion), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSuggestion", reflect.TypeOf((*MockSuggestion)(nil).UpdateSuggestion), arg0)
 }
