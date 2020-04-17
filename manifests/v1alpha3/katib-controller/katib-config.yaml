@@ -48,7 +48,6 @@ data:
         }
       },
       "cmaes": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-goptuna",
-        "imagePullPolicy": "Always"
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-goptuna"
       }
     }
