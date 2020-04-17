@@ -252,6 +252,15 @@ metadata:
 			}(),
 		},
 		{
+			Instance: newFakeInstance(),
+			Err:      true,
+			oldInstance: func() *experimentsv1alpha3.Experiment {
+				i := newFakeInstance()
+				i.Spec.ResumePolicy = "invalid-policy"
+				return i
+			}(),
+		},
+		{
 			Instance: func() *experimentsv1alpha3.Experiment {
 				i := newFakeInstance()
 				i.Spec.Parameters = []experimentsv1alpha3.ParameterSpec{}

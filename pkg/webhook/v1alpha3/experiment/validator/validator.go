@@ -120,6 +120,7 @@ func (g *DefaultValidator) validateAlgorithm(ag *commonapiv1alpha3.AlgorithmSpec
 
 func (g *DefaultValidator) validateResumePolicy(resume experimentsv1alpha3.ResumePolicyType) error {
 	validTypes := map[experimentsv1alpha3.ResumePolicyType]string{
+		"":                              "",
 		experimentsv1alpha3.NeverResume: "",
 		experimentsv1alpha3.LongRunning: "",
 	}
