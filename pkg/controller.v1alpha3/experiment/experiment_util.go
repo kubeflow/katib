@@ -15,6 +15,7 @@ import (
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
+	suggestionController "github.com/kubeflow/katib/pkg/controller.v1alpha3/suggestion"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/util"
 )
 
@@ -111,24 +112,22 @@ func (r *ReconcileExperiment) updateFinalizers(instance *experimentsv1alpha3.Exp
 	}
 }
 
-func (r *ReconcileExperiment) shutdownSuggestionServer(instance *experimentsv1alpha3.Experiment) error {
-	if instance.Spec.ResumeExperiment {
-		return nil
-	}
-	suggestionToDelete := &suggestionsv1alpha3.Suggestion{}
+func (r *ReconcileExperiment) terminateSuggestion(instance *experimentsv1alpha3.Experiment) error {
+	suggestion := &suggestionsv1alpha3.Suggestion{}
 	err := r.Get(context.TODO(), types.NamespacedName{
 		Namespace: instance.Namespace,
 		Name:      instance.Name,
-	}, suggestionToDelete)
+	}, suggestion)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return nil
 		}
 		return err
 	}
-	err = r.Delete(context.TODO(), suggestionToDelete)
-	if err != nil {
-		return err
+	if suggestion.IsCompleted() {
+		return nil
 	}
+	msg := "Suggestion is succeeded"
+	suggestion.MarkSuggestionStatusSucceeded(suggestionController.SuggestionSucceededReason, msg)
 	return nil
 }

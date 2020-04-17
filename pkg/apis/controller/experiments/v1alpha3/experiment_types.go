@@ -49,8 +49,8 @@ type ExperimentSpec struct {
 
 	NasConfig *NasConfig `json:"nasConfig,omitempty"`
 
-	// If false/true, which means delete/resume Suggestion after experiment is finished
-	ResumeExperiment bool `json:"resumeExperiment,omitempty"`
+	// Describes resuming policy which usually take effect after experiment terminated.
+	ResumePolicy ResumePolicyType `json:"resumePolicy,omitempty"`
 
 	// TODO - Other fields, exact format is TBD. Will add these back during implementation.
 	// - Early stopping
@@ -154,6 +154,13 @@ const (
 	ExperimentRestarting ExperimentConditionType = "Restarting"
 	ExperimentSucceeded  ExperimentConditionType = "Succeeded"
 	ExperimentFailed     ExperimentConditionType = "Failed"
+)
+
+type ResumePolicyType string
+
+const (
+	NeverResume ResumePolicyType = "Never"
+	LongRunning ResumePolicyType = "LongRunning"
 )
 
 type ParameterSpec struct {

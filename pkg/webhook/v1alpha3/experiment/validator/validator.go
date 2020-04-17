@@ -68,6 +68,9 @@ func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1al
 	if err := g.validateAlgorithm(instance.Spec.Algorithm); err != nil {
 		return err
 	}
+	if err := g.validateResumePolicy(instance.Spec.ResumePolicy); err != nil {
+		return err
+	}
 
 	if err := g.validateTrialTemplate(instance); err != nil {
 		return err
@@ -112,6 +115,17 @@ func (g *DefaultValidator) validateAlgorithm(ag *commonapiv1alpha3.AlgorithmSpec
 		return fmt.Errorf("Don't support algorithm %s: %v.", ag.AlgorithmName, err)
 	}
 
+	return nil
+}
+
+func (g *DefaultValidator) validateResumePolicy(resume experimentsv1alpha3.ResumePolicyType) error {
+	validTypes := map[experimentsv1alpha3.ResumePolicyType]string{
+		experimentsv1alpha3.NeverResume: "",
+		experimentsv1alpha3.LongRunning: "",
+	}
+	if _, ok := validTypes[resume]; !ok {
+		return fmt.Errorf("invalid ResumePolicyType %s", resume)
+	}
 	return nil
 }
 

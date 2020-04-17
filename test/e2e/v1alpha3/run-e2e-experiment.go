@@ -2,8 +2,13 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
+	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 	"log"
 	"os"
 	"time"
@@ -14,6 +19,7 @@ import (
 
 	commonv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
+	controllerUtil "github.com/kubeflow/katib/pkg/controller.v1alpha3/util"
 	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibclient"
 )
 
@@ -131,10 +137,27 @@ func main() {
 	}
 
 	sug, err := kclient.GetSuggestion(exp.Name, exp.Namespace)
-	if sug == nil && exp.Spec.ResumeExperiment {
-		log.Fatal("Suggestion has been deleted while ResumeExperiment variable is true")
-	} else if sug != nil && !exp.Spec.ResumeExperiment {
-		log.Fatal("Suggestion is still alive while ResumeExperiment variable is false")
+	if exp.Spec.ResumePolicy == experimentsv1alpha3.LongRunning {
+		if sug.IsSucceeded() {
+			log.Fatal("Suggestion is terminated while ResumePolicy = LongRunning")
+		}
+	}
+	if exp.Spec.ResumePolicy == experimentsv1alpha3.NeverResume {
+		if sug.IsRunning() {
+			log.Fatal("Suggestion is still running while ResumePolicy = NeverResume")
+		}
+		namespacedName := types.NamespacedName{Name: controllerUtil.GetAlgorithmServiceName(sug), Namespace: sug.Namespace}
+		service := &v1.Service{}
+		err := kclient.GetClient().Get(context.TODO(), namespacedName, service)
+		if err == nil || !errors.IsNotFound(err) {
+			log.Fatal("Suggestion service is still alive while ResumePolicy = NeverResume")
+		}
+		namespacedName = types.NamespacedName{Name: controllerUtil.GetAlgorithmDeploymentName(sug), Namespace: sug.Namespace}
+		deployment := &appsv1.Deployment{}
+		err = kclient.GetClient().Get(context.TODO(), namespacedName, deployment)
+		if err == nil || !errors.IsNotFound(err) {
+			log.Fatal("Suggestion deployment is still alive while ResumePolicy = NeverResume")
+		}
 	}
 
 	log.Printf("Experiment has recorded best current Optimal Trial %v", exp.Status.CurrentOptimalTrial)

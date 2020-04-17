@@ -2,6 +2,7 @@ package suggestion
 
 import (
 	"context"
+	"github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -33,4 +34,44 @@ func (r *ReconcileSuggestion) reconcileService(service *corev1.Service) (*corev1
 		return nil, err
 	}
 	return foundService, nil
+}
+
+func (r *ReconcileSuggestion) deleteDeployment(instance *v1alpha3.Suggestion) error {
+	deploy, err := r.DesiredDeployment(instance)
+	if err != nil {
+		return err
+	}
+	realDeploy := &appsv1.Deployment{}
+	err = r.Get(context.TODO(), types.NamespacedName{Name: deploy.Name, Namespace: deploy.Namespace}, realDeploy)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+	err = r.Delete(context.TODO(), realDeploy)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *ReconcileSuggestion) deleteService(instance *v1alpha3.Suggestion) error {
+	service, err := r.DesiredService(instance)
+	if err != nil {
+		return err
+	}
+	realService := &corev1.Service{}
+	err = r.Get(context.TODO(), types.NamespacedName{Name: service.Name, Namespace: service.Namespace}, realService)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+	err = r.Delete(context.TODO(), realService)
+	if err != nil {
+		return err
+	}
+	return nil
 }
