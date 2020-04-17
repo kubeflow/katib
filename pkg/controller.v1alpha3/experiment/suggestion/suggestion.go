@@ -21,7 +21,7 @@ var log = logf.Log.WithName("experiment-suggestion-client")
 
 type Suggestion interface {
 	GetOrCreateSuggestion(instance *experimentsv1alpha3.Experiment, suggestionRequests int32) (*suggestionsv1alpha3.Suggestion, error)
-	UpdateSuggestion(suggestion *suggestionsv1alpha3.Suggestion, suggestionRequests int32) error
+	UpdateSuggestion(suggestion *suggestionsv1alpha3.Suggestion) error
 }
 
 type General struct {
@@ -79,7 +79,7 @@ func (g *General) createSuggestion(instance *experimentsv1alpha3.Experiment, sug
 	return nil
 }
 
-func (g *General) UpdateSuggestion(suggestion *suggestionsv1alpha3.Suggestion, suggestionRequests int32) error {
+func (g *General) UpdateSuggestion(suggestion *suggestionsv1alpha3.Suggestion) error {
 	if err := g.Update(context.TODO(), suggestion); err != nil {
 		return err
 	}

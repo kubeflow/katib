@@ -133,7 +133,7 @@ func TestReconcileExperiment(t *testing.T) {
 				},
 			},
 		}, nil).AnyTimes()
-	suggestion.EXPECT().UpdateSuggestion(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	suggestion.EXPECT().UpdateSuggestion(gomock.Any()).Return(nil).AnyTimes()
 	mockCtrl3 := gomock.NewController(t)
 	defer mockCtrl3.Finish()
 	generator := manifestmock.NewMockGenerator(mockCtrl)
