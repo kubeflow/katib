@@ -46,5 +46,8 @@ data:
             "memory": "200Mi"
           }
         }
+      },
+      "cmaes": {
+        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-goptuna"
       }
     }
