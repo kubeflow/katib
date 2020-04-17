@@ -262,8 +262,8 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1alpha3.
 	reconcileRequired := !instance.IsCompleted()
 	if reconcileRequired {
 		r.ReconcileTrials(instance, trials.Items)
-	} else {
-		return r.shutdownSuggestionServer(instance)
+	} else if instance.Spec.ResumePolicy != experimentsv1alpha3.LongRunning {
+		return r.terminateSuggestion(instance)
 	}
 	return nil
 }
