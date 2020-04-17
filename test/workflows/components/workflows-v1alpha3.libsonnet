@@ -309,6 +309,10 @@
                     name: "run-pytorchjob-e2e-tests",
                     template: "run-pytorchjob-e2e-tests",
                   },
+                  {
+                    name: "run-cmaes-e2e-tests",
+                    template: "run-cmaes-e2e-tests",
+                  },
                 ],
               ],
             },
@@ -385,6 +389,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-custom-metricscollector-e2e-tests", testWorkerImage, [
               "test/scripts/v1alpha3/run-custom-metricscollector.sh",
             ]),  // run custom metrics collector test
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-cmaes-e2e-tests", testWorkerImage, [
+              "test/scripts/v1alpha3/run-suggestion-cmaes.sh",
+            ]),  // run cmaes algorithm
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
               "python",
               "-m",
