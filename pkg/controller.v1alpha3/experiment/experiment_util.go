@@ -113,21 +113,22 @@ func (r *ReconcileExperiment) updateFinalizers(instance *experimentsv1alpha3.Exp
 }
 
 func (r *ReconcileExperiment) terminateSuggestion(instance *experimentsv1alpha3.Experiment) (reconcile.Result, error) {
-	log.Info("Start terminating suggestion...")
-	suggestion := &suggestionsv1alpha3.Suggestion{}
+	log.Info("Start terminating original...")
+	original := &suggestionsv1alpha3.Suggestion{}
 	err := r.Get(context.TODO(), types.NamespacedName{
 		Namespace: instance.Namespace,
 		Name:      instance.Name,
-	}, suggestion)
+	}, original)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return reconcile.Result{}, nil
 		}
 		return reconcile.Result{}, err
 	}
-	if suggestion.IsCompleted() {
+	if original.IsCompleted() {
 		return reconcile.Result{}, nil
 	}
+	suggestion := original.DeepCopy()
 	msg := "Suggestion is succeeded"
 	suggestion.MarkSuggestionStatusSucceeded(suggestionController.SuggestionSucceededReason, msg)
 	log.Info("Mark suggestion succeeded...")
