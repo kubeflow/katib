@@ -133,7 +133,7 @@ func (r *ReconcileExperiment) terminateSuggestion(instance *experimentsv1alpha3.
 	suggestion.MarkSuggestionStatusSucceeded(suggestionController.SuggestionSucceededReason, msg)
 	log.Info("Mark suggestion succeeded...")
 
-	if err := r.UpdateSuggestion(suggestion, 0); err != nil {
+	if err := r.UpdateSuggestion(suggestion); err != nil {
 		return reconcile.Result{}, err
 	} else {
 		return reconcile.Result{Requeue: true}, nil
