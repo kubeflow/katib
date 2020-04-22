@@ -36,6 +36,9 @@ const styles = theme => ({
   link: {
     textDecoration: 'none',
   },
+  grid: {
+    marginBottom: 15,
+  }
 });
 
 class HPJobInfo extends React.Component {
@@ -70,7 +73,7 @@ class HPJobInfo extends React.Component {
             <Typography className={classes.header} variant={'h5'}>
               Experiment Namespace: {this.props.match.params.namespace}
             </Typography>
-            <Grid container justify="center" spacing={24}>
+            <Grid container className={classes.grid} justify="center" spacing={24}>
               <Grid item>
                 <Button
                   variant={'contained'}
