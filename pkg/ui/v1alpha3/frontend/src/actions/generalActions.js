@@ -75,6 +75,22 @@ export const closeDialogExperiment = () => ({
   type: CLOSE_DIALOG_EXPERIMENT,
 });
 
+export const FETCH_SUGGESTION_REQUEST = 'FETCH_SUGGESTION_REQUEST';
+export const FETCH_SUGGESTION_SUCCESS = 'FETCH_SUGGESTION_SUCCESS';
+export const FETCH_SUGGESTION_FAILURE = 'FETCH_SUGGESTION_FAILURE';
+
+export const fetchSuggestion = (name, namespace) => ({
+  type: FETCH_SUGGESTION_REQUEST,
+  name,
+  namespace,
+});
+
+export const CLOSE_DIALOG_SUGGESTION = 'CLOSE_DIALOG_SUGGESTION';
+
+export const closeDialogSuggestion = () => ({
+  type: CLOSE_DIALOG_SUGGESTION,
+});
+
 export const FILTER_TEMPLATES_EXPERIMENT = 'FILTER_TEMPLATES_EXPERIMENT';
 
 export const filterTemplatesExperiment = (trialNamespace, trialConfigMapName) => ({

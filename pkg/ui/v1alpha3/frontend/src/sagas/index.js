@@ -216,6 +216,43 @@ const goFetchExperiment = function*(name, namespace) {
   }
 };
 
+export const fetchSuggestion = function*() {
+  while (true) {
+    const action = yield take(generalActions.FETCH_SUGGESTION_REQUEST);
+    try {
+      const result = yield call(goFetchSuggestion, action.name, action.namespace);
+      if (result.status === 200) {
+        yield put({
+          type: generalActions.FETCH_SUGGESTION_SUCCESS,
+          suggestion: result.data,
+        });
+      } else {
+        yield put({
+          type: generalActions.FETCH_SUGGESTION_FAILURE,
+        });
+      }
+    } catch (err) {
+      yield put({
+        type: generalActions.FETCH_SUGGESTION_FAILURE,
+      });
+    }
+  }
+};
+
+const goFetchSuggestion = function*(name, namespace) {
+  try {
+    const result = yield call(
+      axios.get,
+      `/katib/fetch_suggestion/?suggestionName=${name}&namespace=${namespace}`,
+    );
+    return result;
+  } catch (err) {
+    yield put({
+      type: generalActions.FETCH_SUGGESTION_FAILURE,
+    });
+  }
+};
+
 export const fetchHPJobInfo = function*() {
   while (true) {
     const action = yield take(hpMonitorActions.FETCH_HP_JOB_INFO_REQUEST);
@@ -646,6 +683,7 @@ export default function* rootSaga() {
     fork(submitNASJob),
     fork(fetchHPJobInfo),
     fork(fetchExperiment),
+    fork(fetchSuggestion),
     fork(fetchHPJobTrialInfo),
     fork(fetchNASJobInfo),
     fork(fetchNamespaces),

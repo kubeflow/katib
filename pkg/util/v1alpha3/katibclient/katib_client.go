@@ -94,6 +94,7 @@ func (k *KatibClient) GetExperimentList(namespace ...string) (*experimentsv1alph
 
 }
 
+// GetSuggestion returns the Suggestion CR for the given name and namespace
 func (k *KatibClient) GetSuggestion(name string, namespace ...string) (
 	*suggestionsv1alpha3.Suggestion, error) {
 	ns := getNamespace(namespace...)
