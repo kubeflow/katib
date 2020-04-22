@@ -1,4 +1,5 @@
 import logging
+import grpc
 
 from pkg.apis.manager.v1alpha3.python import api_pb2
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
@@ -22,14 +23,14 @@ class HyperoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         """
         Main function to provide suggestion.
         """
-        name, config = OptimizerConfiguration.convertAlgorithmSpec(
+        name, config = OptimizerConfiguration.convert_algorithm_spec(
             request.experiment.spec.algorithm)
 
         if self.is_first_run:
             search_space = HyperParameterSearchSpace.convert(request.experiment)
             self.base_service = BaseHyperoptService(
                 algorithm_name=name,
-                random_state=config.random_state,
+                algorithm_conf=config,
                 search_space=search_space)
             self.is_first_run = False
 
@@ -40,17 +41,53 @@ class HyperoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         )
 
     def ValidateAlgorithmSettings(self, request, context):
+        is_valid, message = OptimizerConfiguration.validate_algorithm_spec(
+            request.experiment.spec.algorithm)
+        if not is_valid:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details(message)
+            logger.error(message)
         return api_pb2.ValidateAlgorithmSettingsReply()
 
 
-class OptimizerConfiguration(object):
-    def __init__(self, random_state=None):
-        self.random_state = random_state
+class OptimizerConfiguration:
+    __schema_dict = {
+        'tpe': {
+            'gamma': (lambda x: float(x), lambda x: 1 > float(x) > 0),
+            'prior_weight': (lambda x: float(x), lambda x: float(x) > 0),
+            'n_EI_candidates': (lambda x: int(x),
+                                lambda x: float(x).is_integer() and int(x) > 0),
+            "random_state": (lambda x: int(x), lambda x: x.isdigit()),
+        },
+        "random": {
+            "random_state": (lambda x: int(x), lambda x: x.isdigit())
+        }
+    }
 
-    @staticmethod
-    def convertAlgorithmSpec(algorithm_spec):
-        optimizer = OptimizerConfiguration()
+    @classmethod
+    def convert_algorithm_spec(cls, algorithm_spec):
+        ret = {}
+        setting_schema = cls.__schema_dict[algorithm_spec.algorithm_name]
         for s in algorithm_spec.algorithm_setting:
-            if s.name == "random_state":
-                optimizer.random_state = int(s.value)
-        return algorithm_spec.algorithm_name, optimizer
+            if s.name in setting_schema:
+                ret[s.name] = setting_schema[s.name][0](s.value)
+
+        return algorithm_spec.algorithm_name, ret
+
+    @classmethod
+    def validate_algorithm_spec(cls, algorithm_spec):
+        algo_name = algorithm_spec.algorithm_name
+        if algo_name not in cls.__schema_dict:
+            return False, "unknown algorithm name %s" % algo_name
+
+        setting_schema = cls.__schema_dict[algo_name]
+        for s in algorithm_spec.algorithm_setting:
+            if s.name not in setting_schema:
+                return False, "unknown setting %s for algorithm %s" % (s.name, algo_name)
+            try:
+                if not setting_schema[s.name][1](s.value):
+                    return False, "invalid value %s for setting %s" % (s.value, s.name)
+            except Exception as e:
+                return False, "invalid value %s for setting %s" % (s.value, s.name)
+
+        return True, ""
