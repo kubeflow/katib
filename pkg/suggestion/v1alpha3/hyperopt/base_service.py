@@ -12,8 +12,15 @@ RANDOM_ALGORITHM_NAME = "random"
 
 
 class BaseHyperoptService(object):
-    def __init__(self, algorithm_name=TPE_ALGORITHM_NAME, random_state=None, search_space=None):
+    def __init__(self,
+                 algorithm_name=TPE_ALGORITHM_NAME,
+                 algorithm_conf=None,
+                 search_space=None):
         self.algorithm_name = algorithm_name
+        self.algorithm_conf = algorithm_conf or {}
+        # pop common configurations
+        random_state = self.algorithm_conf.pop('random_state', None)
+
         if self.algorithm_name == TPE_ALGORITHM_NAME:
             self.hyperopt_algorithm = hyperopt.tpe.suggest
         elif self.algorithm_name == RANDOM_ALGORITHM_NAME:
@@ -194,7 +201,8 @@ class BaseHyperoptService(object):
                     domain=self.fmin.domain,
                     trials=self.fmin.trials,
                     seed=random_state,
-                    n_startup_jobs=request_number)
+                    n_startup_jobs=request_number,
+                    **self.algorithm_conf)
                 self.is_first_run = False
             else:
                 new_trials = []
@@ -205,7 +213,8 @@ class BaseHyperoptService(object):
                         domain=self.fmin.domain,
                         trials=self.fmin.trials,
                         seed=random_state,
-                        n_startup_jobs=request_number)[0])
+                        n_startup_jobs=request_number,
+                        **self.algorithm_conf)[0])
 
         # Construct return advisor Trials from new hyperopt Trials
         list_of_assignments = []
