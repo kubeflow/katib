@@ -38,7 +38,7 @@ const styles = theme => ({
   },
   grid: {
     marginBottom: 10,
-  }
+  },
 });
 
 class HPJobInfo extends React.Component {

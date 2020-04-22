@@ -47,7 +47,7 @@ const styles = theme => ({
   },
   grid: {
     marginBottom: 10,
-  }
+  },
 });
 
 class NASJobInfo extends React.Component {
