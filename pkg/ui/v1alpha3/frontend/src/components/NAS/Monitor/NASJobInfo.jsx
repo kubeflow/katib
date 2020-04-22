@@ -45,6 +45,9 @@ const styles = theme => ({
   link: {
     textDecoration: 'none',
   },
+  grid: {
+    marginBottom: 10,
+  }
 });
 
 class NASJobInfo extends React.Component {
@@ -80,7 +83,7 @@ class NASJobInfo extends React.Component {
               Experiment Namespace: {this.props.match.params.namespace}
             </Typography>
 
-            <Grid container justify="center" spacing={24}>
+            <Grid container className={classes.grid} justify="center" spacing={24}>
               <Grid item>
                 <Button
                   variant={'contained'}

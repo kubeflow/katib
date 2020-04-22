@@ -37,7 +37,7 @@ const styles = theme => ({
     textDecoration: 'none',
   },
   grid: {
-    marginBottom: 15,
+    marginBottom: 10,
   }
 });
 
