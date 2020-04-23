@@ -1,6 +1,7 @@
 import chocolate as choco
 import logging
 import base64
+import warnings
 
 from pkg.suggestion.v1alpha3.internal.constant import MAX_GOAL, INTEGER, DOUBLE, CATEGORICAL, DISCRETE
 from pkg.suggestion.v1alpha3.internal.trial import Assignment
@@ -11,6 +12,13 @@ DB_ADDRESS = "sqlite:///my_db.db?check_same_thread=False"
 DB_FIELD_LOSS = "_loss"
 DB_FIELD_CHOCOLATE_ID = "_chocolate_id"
 DB_FIELD_TRIAL_NAME = "_trial_name"
+
+DEPRECATED_ALGORITHM_NAME = {
+    "chocolate-random": "random",
+    "chocolate-quasirandom": "quasirandom",
+    "chocolate-bayesian-optimization": "bayesian-optimization",
+    "chocolate-mocmaes": "mocmaes",
+}
 
 
 class BaseChocolateService(object):
@@ -48,23 +56,32 @@ class BaseChocolateService(object):
                 chocolate_search_space[key] = choco.choice(
                     [idx for idx, _ in enumerate(param.list)])
 
+        if algorithm_name in DEPRECATED_ALGORITHM_NAME:
+            warnings.warn(
+                "Algorithm name '{}' is deprecated. Please use '{}'.".format(
+                    algorithm_name, DEPRECATED_ALGORITHM_NAME[algorithm_name],
+                ),
+                DeprecationWarning,
+            )
+            algorithm_name = DEPRECATED_ALGORITHM_NAME[algorithm_name]
+
         # Refer to https://chocolate.readthedocs.io/tutorials/algo.html
         if algorithm_name == "grid":
             self.chocolate_optimizer = choco.Grid(
                 self.conn, chocolate_search_space, clear_db=True)
         # hyperopt-random is the default option in katib.
-        elif algorithm_name == "chocolate-random":
+        elif algorithm_name == "random":
             self.chocolate_optimizer = choco.Random(
                 self.conn, chocolate_search_space, clear_db=True)
-        elif algorithm_name == "chocolate-quasirandom":
+        elif algorithm_name == "quasirandom":
             self.chocolate_optimizer = choco.QuasiRandom(
                 self.conn, chocolate_search_space, clear_db=True)
-        elif algorithm_name == "chocolate-bayesian-optimization":
+        elif algorithm_name == "bayesian-optimization":
             self.chocolate_optimizer = choco.Bayes(
                 self.conn, chocolate_search_space, clear_db=True)
         # elif self.algorithm_name == "chocolate-CMAES":
         #     self.chocolate_optimizer = choco.CMAES(self.conn, chocolate_search_space, clear_db=True)
-        elif algorithm_name == "chocolate-mocmaes":
+        elif algorithm_name == "mocmaes":
             mu = 1
             self.chocolate_optimizer = choco.MOCMAES(
                 self.conn, chocolate_search_space, mu=mu, clear_db=True)

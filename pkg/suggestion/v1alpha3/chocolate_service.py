@@ -26,7 +26,7 @@ class ChocolateService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 request.experiment)
             for param in search_space.params:
                 if param.type == DOUBLE:
-                    if param.step == "" or param.step == None:
+                    if param.step == "" or param.step is None:
                         return self._set_validate_context_error(
                             context, "param {} step is nil".format(param.name))
         return api_pb2.ValidateAlgorithmSettingsReply()
