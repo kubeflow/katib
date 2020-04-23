@@ -257,11 +257,11 @@ class TestHyperopt(unittest.TestCase):
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
                 algorithm_setting=[
-                    api_pb2.AlgorithmSetting(name="n_EI_candidates", value="10.1")]
+                    api_pb2.AlgorithmSetting(name="n_EI_candidates", value="-1")]
             ))
         _, _, code, details = call_validate()
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
-        self.assertEqual(details, 'invalid value 10.1 for setting n_EI_candidates')
+        self.assertEqual(details, 'invalid value -1 for setting n_EI_candidates')
 
         experiment_spec[0] = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
