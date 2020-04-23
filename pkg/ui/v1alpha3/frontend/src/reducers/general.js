@@ -15,6 +15,8 @@ const initialState = {
   globalNamespace: '',
   experiment: {},
   dialogExperimentOpen: false,
+  suggestion: {},
+  dialogSuggestionOpen: false,
 
   templateNamespace: '',
   templateConfigMapName: '',
@@ -132,21 +134,33 @@ const generalReducer = (state = initialState, action) => {
         experiment: action.experiment,
         dialogExperimentOpen: true,
       };
-
     case actions.CLOSE_DIALOG_EXPERIMENT:
       return {
         ...state,
         dialogExperimentOpen: false,
       };
+    case actions.FETCH_SUGGESTION_SUCCESS:
+      return {
+        ...state,
+        suggestion: action.suggestion,
+        dialogSuggestionOpen: true,
+      };
+    case actions.CLOSE_DIALOG_SUGGESTION:
+      return {
+        ...state,
+        dialogSuggestionOpen: false,
+      };
     case hpMonitorActions.FETCH_HP_JOB_INFO_REQUEST:
       return {
         ...state,
         dialogExperimentOpen: false,
+        dialogSuggestionOpen: false,
       };
     case nasMonitorActions.FETCH_NAS_JOB_INFO_REQUEST:
       return {
         ...state,
         dialogExperimentOpen: false,
+        dialogSuggestionOpen: false,
       };
     case templateActions.FETCH_TRIAL_TEMPLATES_SUCCESS:
       let templates = action.trialTemplatesList;
@@ -176,7 +190,7 @@ const generalReducer = (state = initialState, action) => {
             return trialTemplate.Namespace === action.trialNamespace;
           });
 
-          // Get new ConifgMapNames List
+          // Get new ConfigMapNames List
           configMapNames = state.trialTemplatesList[nsIndex].ConfigMapsList.map(
             configMap => configMap.ConfigMapName,
           );

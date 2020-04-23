@@ -256,12 +256,34 @@ func (k *KatibUIHandler) FetchExperiment(w http.ResponseWriter, r *http.Request)
 
 	experiment, err := k.katibClient.GetExperiment(experimentName, namespace)
 	if err != nil {
+		log.Printf("GetExperiment failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	response, err := json.Marshal(experiment)
 	if err != nil {
 		log.Printf("Marshal Experiment failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
+}
+
+// FetchSuggestion gets suggestion in specific namespace
+func (k *KatibUIHandler) FetchSuggestion(w http.ResponseWriter, r *http.Request) {
+	suggestionName := r.URL.Query()["suggestionName"][0]
+	namespace := r.URL.Query()["namespace"][0]
+
+	suggestion, err := k.katibClient.GetSuggestion(suggestionName, namespace)
+	if err != nil {
+		log.Printf("GetSuggestion failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response, err := json.Marshal(suggestion)
+	if err != nil {
+		log.Printf("Marshal Suggestion failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

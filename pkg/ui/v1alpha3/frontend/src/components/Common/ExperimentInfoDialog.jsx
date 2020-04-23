@@ -1,10 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
+
 import { withStyles } from '@material-ui/styles';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
-import MonacoEditor from 'react-monaco-editor';
+
+import AceEditor from 'react-ace';
+import 'ace-builds/src-noconflict/theme-xcode';
+import 'ace-builds/src-noconflict/mode-json';
 
 import { closeDialogExperiment } from '../../actions/generalActions';
 
@@ -13,6 +17,7 @@ const module = 'general';
 const styles = theme => ({
   header: {
     textAlign: 'center',
+    width: 900,
   },
 });
 
@@ -21,7 +26,7 @@ const ExperimentInfoDialog = props => {
 
   return (
     <Dialog
-      open={props.open}
+      open={props.dialogExperimentOpen}
       onClose={props.closeDialogExperiment}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
@@ -33,14 +38,19 @@ const ExperimentInfoDialog = props => {
           : ''}
       </DialogTitle>
       <DialogContent>
-        <MonacoEditor
+        <AceEditor
+          mode="json"
+          theme="xcode"
           value={JSON.stringify(props.experiment, null, 2)}
-          width="900"
-          height="650"
-          language="json"
-          options={{
-            readOnly: true,
-          }}
+          tabSize={2}
+          fontSize={13}
+          width={'100%'}
+          showPrintMargin={false}
+          autoScrollEditorIntoView={true}
+          maxLines={40}
+          minLines={10}
+          readOnly={true}
+          setOptions={{ useWorker: false }}
         />
       </DialogContent>
     </Dialog>
@@ -49,7 +59,7 @@ const ExperimentInfoDialog = props => {
 
 const mapStateToProps = state => {
   return {
-    open: state[module].dialogExperimentOpen,
+    dialogExperimentOpen: state[module].dialogExperimentOpen,
     experiment: state[module].experiment,
   };
 };

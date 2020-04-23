@@ -1,18 +1,21 @@
 import React from 'react';
 import { connect } from 'react-redux';
+
 import { withStyles } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import Grid from '@material-ui/core/Grid';
 
 import { fetchHPJobInfo } from '../../../actions/hpMonitorActions';
-import { fetchExperiment } from '../../../actions/generalActions';
+import { fetchExperiment, fetchSuggestion } from '../../../actions/generalActions';
 
 import HPJobPlot from './HPJobPlot';
 import HPJobTable from './HPJobTable';
 import TrialInfoDialog from './TrialInfoDialog';
 import ExperimentInfoDialog from '../../Common/ExperimentInfoDialog';
+import SuggestionInfoDialog from '../../Common/SuggestionInfoDialog';
 
 const module = 'hpMonitor';
 
@@ -33,6 +36,9 @@ const styles = theme => ({
   link: {
     textDecoration: 'none',
   },
+  grid: {
+    marginBottom: 10,
+  },
 });
 
 class HPJobInfo extends React.Component {
@@ -42,6 +48,10 @@ class HPJobInfo extends React.Component {
 
   fetchAndOpenDialogExperiment = (experimentName, experimentNamespace) => event => {
     this.props.fetchExperiment(experimentName, experimentNamespace);
+  };
+
+  fetchAndOpenDialogSuggestion = (suggestionName, suggestionNamespace) => event => {
+    this.props.fetchSuggestion(suggestionName, suggestionNamespace);
   };
 
   render() {
@@ -63,21 +73,36 @@ class HPJobInfo extends React.Component {
             <Typography className={classes.header} variant={'h5'}>
               Experiment Namespace: {this.props.match.params.namespace}
             </Typography>
-            <div className={classes.header}>
-              <Button
-                variant={'contained'}
-                color={'primary'}
-                onClick={this.fetchAndOpenDialogExperiment(
-                  this.props.match.params.name,
-                  this.props.match.params.namespace,
-                )}
-              >
-                View Experiment
-              </Button>
-            </div>
+            <Grid container className={classes.grid} justify="center" spacing={24}>
+              <Grid item>
+                <Button
+                  variant={'contained'}
+                  color={'primary'}
+                  onClick={this.fetchAndOpenDialogExperiment(
+                    this.props.match.params.name,
+                    this.props.match.params.namespace,
+                  )}
+                >
+                  View Experiment
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  variant={'contained'}
+                  color={'primary'}
+                  onClick={this.fetchAndOpenDialogSuggestion(
+                    this.props.match.params.name,
+                    this.props.match.params.namespace,
+                  )}
+                >
+                  View Suggestion
+                </Button>
+              </Grid>
+            </Grid>
             <HPJobPlot name={this.props.match.params.name} />
             <HPJobTable namespace={this.props.match.params.namespace} />
             <ExperimentInfoDialog />
+            <SuggestionInfoDialog />
             <TrialInfoDialog />
           </div>
         )}
@@ -90,6 +115,6 @@ const mapStateToProps = state => ({
   loading: state[module].loading,
 });
 
-export default connect(mapStateToProps, { fetchHPJobInfo, fetchExperiment })(
+export default connect(mapStateToProps, { fetchHPJobInfo, fetchExperiment, fetchSuggestion })(
   withStyles(styles)(HPJobInfo),
 );

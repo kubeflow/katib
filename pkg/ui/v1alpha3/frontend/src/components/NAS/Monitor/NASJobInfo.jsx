@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+
 import { withStyles } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
@@ -9,12 +10,14 @@ import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import Grid from '@material-ui/core/Grid';
 
 import { fetchNASJobInfo } from '../../../actions/nasMonitorActions';
-import { fetchExperiment } from '../../../actions/generalActions';
+import { fetchExperiment, fetchSuggestion } from '../../../actions/generalActions';
 
 import NASJobStepInfo from './NASJobStepInfo';
 import ExperimentInfoDialog from '../../Common/ExperimentInfoDialog';
+import SuggestionInfoDialog from '../../Common/SuggestionInfoDialog';
 
 const module = 'nasMonitor';
 
@@ -42,6 +45,9 @@ const styles = theme => ({
   link: {
     textDecoration: 'none',
   },
+  grid: {
+    marginBottom: 10,
+  },
 });
 
 class NASJobInfo extends React.Component {
@@ -51,6 +57,10 @@ class NASJobInfo extends React.Component {
 
   fetchAndOpenDialogExperiment = (experimentName, experimentNamespace) => event => {
     this.props.fetchExperiment(experimentName, experimentNamespace);
+  };
+
+  fetchAndOpenDialogSuggestion = (suggestionName, suggestionNamespace) => event => {
+    this.props.fetchSuggestion(suggestionName, suggestionNamespace);
   };
 
   render() {
@@ -72,18 +82,33 @@ class NASJobInfo extends React.Component {
             <Typography className={classes.header} variant={'h5'}>
               Experiment Namespace: {this.props.match.params.namespace}
             </Typography>
-            <div className={classes.header}>
-              <Button
-                variant={'contained'}
-                color={'primary'}
-                onClick={this.fetchAndOpenDialogExperiment(
-                  this.props.match.params.name,
-                  this.props.match.params.namespace,
-                )}
-              >
-                View Experiment
-              </Button>
-            </div>
+
+            <Grid container className={classes.grid} justify="center" spacing={24}>
+              <Grid item>
+                <Button
+                  variant={'contained'}
+                  color={'primary'}
+                  onClick={this.fetchAndOpenDialogExperiment(
+                    this.props.match.params.name,
+                    this.props.match.params.namespace,
+                  )}
+                >
+                  View Experiment
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  variant={'contained'}
+                  color={'primary'}
+                  onClick={this.fetchAndOpenDialogSuggestion(
+                    this.props.match.params.name,
+                    this.props.match.params.namespace,
+                  )}
+                >
+                  View Suggestion
+                </Button>
+              </Grid>
+            </Grid>
             {this.props.steps.map((step, i) => {
               return (
                 <ExpansionPanel key={i} className={classes.panel}>
@@ -97,6 +122,7 @@ class NASJobInfo extends React.Component {
               );
             })}
             <ExperimentInfoDialog />
+            <SuggestionInfoDialog />
           </div>
         )}
       </div>
@@ -111,6 +137,6 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps, { fetchNASJobInfo, fetchExperiment })(
+export default connect(mapStateToProps, { fetchNASJobInfo, fetchExperiment, fetchSuggestion })(
   withStyles(styles)(NASJobInfo),
 );

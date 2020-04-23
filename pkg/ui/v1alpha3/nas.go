@@ -13,10 +13,10 @@ import (
 
 func (k *KatibUIHandler) FetchAllNASJobs(w http.ResponseWriter, r *http.Request) {
 	// At first, try to list experiments in cluster scope
-	jobs, err := k.getExperimentList([]string{""}, JobTypeHP)
+	jobs, err := k.getExperimentList([]string{""}, JobTypeNAS)
 	if err != nil {
 		// If failed, just try to list experiments from own namespace
-		jobs, err = k.getExperimentList([]string{}, JobTypeHP)
+		jobs, err = k.getExperimentList([]string{}, JobTypeNAS)
 	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
