@@ -55,8 +55,7 @@ class OptimizerConfiguration:
         'tpe': {
             'gamma': (lambda x: float(x), lambda x: 1 > float(x) > 0),
             'prior_weight': (lambda x: float(x), lambda x: float(x) > 0),
-            'n_EI_candidates': (lambda x: int(x),
-                                lambda x: float(x).is_integer() and int(x) > 0),
+            'n_EI_candidates': (lambda x: int(x), lambda x: int(x) > 0),
             "random_state": (lambda x: int(x), lambda x: x.isdigit()),
         },
         "random": {
