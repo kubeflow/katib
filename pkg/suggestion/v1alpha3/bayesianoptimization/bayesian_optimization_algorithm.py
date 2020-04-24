@@ -2,7 +2,7 @@
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
-from .global_optimizer import GlobalOptimizer
+from pkg.suggestion.v1alpha3.bayesianoptimization.global_optimizer import GlobalOptimizer
 
 
 class BOAlgorithm:
@@ -31,7 +31,7 @@ class BOAlgorithm:
         else:
             self.current_optimal = max(self.y_train)
             self.logger.debug("create optimizer", extra={
-            "Experiment": self._experiment_name})
+                "Experiment": self._experiment_name})
             # initialize the global optimizer
             self.optimizer = GlobalOptimizer(
                 N,

@@ -6,7 +6,7 @@ suggestion generation algorithms.
 from collections.abc import Iterable
 from pkg.apis.manager.v1alpha3.python import api_pb2
 import numpy as np
-from .parameter import ParameterConfig
+from pkg.suggestion.v1alpha3.hyperband.parameter import ParameterConfig
 
 
 def _deal_with_discrete(feasible_values, current_value):

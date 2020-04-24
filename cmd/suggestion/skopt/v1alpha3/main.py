@@ -2,7 +2,7 @@ import grpc
 import time
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
 from pkg.apis.manager.health.python import health_pb2_grpc
-from pkg.suggestion.v1alpha3.skopt_service import SkoptService
+from pkg.suggestion.v1alpha3.skopt.skopt_service import SkoptService
 from concurrent import futures
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24

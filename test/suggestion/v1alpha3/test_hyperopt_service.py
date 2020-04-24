@@ -5,7 +5,7 @@ import unittest
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
 from pkg.apis.manager.v1alpha3.python import api_pb2
 
-from pkg.suggestion.v1alpha3.hyperopt_service import HyperoptService
+from pkg.suggestion.v1alpha3.hyperopt.hyperopt_service import HyperoptService
 
 
 class TestHyperopt(unittest.TestCase):
