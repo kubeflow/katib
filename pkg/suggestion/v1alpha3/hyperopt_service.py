@@ -51,42 +51,71 @@ class HyperoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
 
 class OptimizerConfiguration:
-    __schema_dict = {
+    __conversion_dict = {
         'tpe': {
-            'gamma': (lambda x: float(x), lambda x: 1 > float(x) > 0),
-            'prior_weight': (lambda x: float(x), lambda x: float(x) > 0),
-            'n_EI_candidates': (lambda x: int(x), lambda x: int(x) > 0),
-            "random_state": (lambda x: int(x), lambda x: int(x) >= 0),
+            'gamma': lambda x: float(x),
+            'prior_weight': lambda x: float(x),
+            'n_EI_candidates': lambda x: int(x),
+            "random_state": lambda x: int(x),
         },
         "random": {
-            "random_state": (lambda x: int(x), lambda x: int(x) >= 0)
+            "random_state": lambda x: int(x),
         }
     }
 
     @classmethod
     def convert_algorithm_spec(cls, algorithm_spec):
         ret = {}
-        setting_schema = cls.__schema_dict[algorithm_spec.algorithm_name]
+        setting_schema = cls.__conversion_dict[algorithm_spec.algorithm_name]
         for s in algorithm_spec.algorithm_setting:
             if s.name in setting_schema:
-                ret[s.name] = setting_schema[s.name][0](s.value)
+                ret[s.name] = setting_schema[s.name](s.value)
 
         return algorithm_spec.algorithm_name, ret
 
     @classmethod
     def validate_algorithm_spec(cls, algorithm_spec):
         algo_name = algorithm_spec.algorithm_name
-        if algo_name not in cls.__schema_dict:
+        if algo_name == 'tpe':
+            return cls._validate_tpe_setting(algorithm_spec.algorithm_setting)
+        elif algo_name == 'random':
+            return cls._validate_random_setting(algorithm_spec.algorithm_setting)
+        else:
             return False, "unknown algorithm name %s" % algo_name
 
-        setting_schema = cls.__schema_dict[algo_name]
-        for s in algorithm_spec.algorithm_setting:
-            if s.name not in setting_schema:
-                return False, "unknown setting %s for algorithm %s" % (s.name, algo_name)
+    @classmethod
+    def _validate_tpe_setting(cls, algorithm_settings):
+        for s in algorithm_settings:
             try:
-                if not setting_schema[s.name][1](s.value):
-                    return False, "invalid value %s for setting %s" % (s.value, s.name)
+                if s.name == 'gamma':
+                    if not (1 > float(s.value) > 0):
+                        return False, "gamma should be in the range of (0, 1)"
+                elif s.name == 'prior_weight':
+                    if not (float(s.value) > 0):
+                        return False, "prior_weight should be great than zero"
+                elif s.name == 'n_EI_candidates':
+                    if not (int(s.value) > 0):
+                        return False, "n_EI_candidates should be great than zero"
+                elif s.name == 'random_state':
+                    if not (int(s.value) >= 0):
+                        return False, "random_state should be great or equal than zero"
+                else:
+                    return False, "unknown setting %s for algorithm tpe" % s.name
             except Exception as e:
-                return False, "invalid value %s for setting %s" % (s.value, s.name)
+                return False, "failed to validate %s(%s): %s" % (s.name, s.value, e)
+
+        return True, ""
+
+    @classmethod
+    def _validate_random_setting(cls, algorithm_settings):
+        for s in algorithm_settings:
+            try:
+                if s.name == 'random_state':
+                    if not (int(s.value) >= 0):
+                        return False, "random_state should be great or equal than zero"
+                else:
+                    return False, "unknown setting %s for algorithm random" % s.name
+            except Exception as e:
+                return False, "failed to validate %s(%s): %s" % (s.name, s.value, e)
 
         return True, ""

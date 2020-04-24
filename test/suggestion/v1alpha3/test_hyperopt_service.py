@@ -251,17 +251,27 @@ class TestHyperopt(unittest.TestCase):
             ))
         _, _, code, details = call_validate()
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
-        self.assertEqual(details, 'invalid value 1.5 for setting gamma')
+        self.assertEqual(details, 'gamma should be in the range of (0, 1)')
 
         experiment_spec[0] = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
                 algorithm_setting=[
-                    api_pb2.AlgorithmSetting(name="n_EI_candidates", value="-1")]
+                    api_pb2.AlgorithmSetting(name="n_EI_candidates", value="0")]
             ))
         _, _, code, details = call_validate()
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
-        self.assertEqual(details, 'invalid value -1 for setting n_EI_candidates')
+        self.assertEqual(details, 'n_EI_candidates should be great than zero')
+
+        experiment_spec[0] = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="tpe",
+                algorithm_setting=[
+                    api_pb2.AlgorithmSetting(name="random_state", value="-1")]
+            ))
+        _, _, code, details = call_validate()
+        self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
+        self.assertEqual(details, 'random_state should be great or equal than zero')
 
         experiment_spec[0] = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
@@ -271,7 +281,7 @@ class TestHyperopt(unittest.TestCase):
             ))
         _, _, code, details = call_validate()
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
-        self.assertEqual(details, 'invalid value aaa for setting prior_weight')
+        self.assertTrue(details.startswith('failed to validate prior_weight(aaa)'))
 
 
 if __name__ == '__main__':
