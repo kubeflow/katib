@@ -5,7 +5,7 @@ import unittest
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
 from pkg.apis.manager.v1alpha3.python import api_pb2
 
-from pkg.suggestion.v1alpha3.hyperband.hyperband_service import HyperbandService
+from pkg.suggestion.v1alpha3.hyperband.service import HyperbandService
 
 
 class TestHyperband(unittest.TestCase):

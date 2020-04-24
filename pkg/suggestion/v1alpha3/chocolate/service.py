@@ -7,7 +7,7 @@ from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
 from pkg.suggestion.v1alpha3.internal.constant import DOUBLE
 from pkg.suggestion.v1alpha3.internal.search_space import HyperParameterSearchSpace
 from pkg.suggestion.v1alpha3.internal.trial import Trial, Assignment
-from pkg.suggestion.v1alpha3.chocolate.base_chocolate_service import BaseChocolateService
+from pkg.suggestion.v1alpha3.chocolate.base_service import BaseChocolateService
 from pkg.suggestion.v1alpha3.internal.base_health_service import HealthServicer
 
 logger = logging.getLogger(__name__)
