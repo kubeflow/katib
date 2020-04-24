@@ -88,16 +88,16 @@ class OptimizerConfiguration:
         for s in algorithm_settings:
             try:
                 if s.name == 'gamma':
-                    if not (1 > float(s.value) > 0):
+                    if not 1 > float(s.value) > 0:
                         return False, "gamma should be in the range of (0, 1)"
                 elif s.name == 'prior_weight':
-                    if not (float(s.value) > 0):
+                    if not float(s.value) > 0:
                         return False, "prior_weight should be great than zero"
                 elif s.name == 'n_EI_candidates':
-                    if not (int(s.value) > 0):
+                    if not int(s.value) > 0:
                         return False, "n_EI_candidates should be great than zero"
                 elif s.name == 'random_state':
-                    if not (int(s.value) >= 0):
+                    if not int(s.value) >= 0:
                         return False, "random_state should be great or equal than zero"
                 else:
                     return False, "unknown setting %s for algorithm tpe" % s.name
