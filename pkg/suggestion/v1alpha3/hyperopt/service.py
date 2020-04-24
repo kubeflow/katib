@@ -81,7 +81,7 @@ class OptimizerConfiguration:
         elif algo_name == 'random':
             return cls._validate_random_setting(algorithm_spec.algorithm_setting)
         else:
-            return False, "unknown algorithm name %s" % algo_name
+            return False, "unknown algorithm name {}".format(algo_name)
 
     @classmethod
     def _validate_tpe_setting(cls, algorithm_settings):
@@ -100,9 +100,10 @@ class OptimizerConfiguration:
                     if not int(s.value) >= 0:
                         return False, "random_state should be great or equal than zero"
                 else:
-                    return False, "unknown setting %s for algorithm tpe" % s.name
+                    return False, "unknown setting {} for algorithm tpe".format(s.name)
             except Exception as e:
-                return False, "failed to validate %s(%s): %s" % (s.name, s.value, e)
+                return False, "failed to validate {name}({value}): {exception}".format(
+                    name=s.name, value=s.value, exception=e)
 
         return True, ""
 
@@ -114,8 +115,9 @@ class OptimizerConfiguration:
                     if not (int(s.value) >= 0):
                         return False, "random_state should be great or equal than zero"
                 else:
-                    return False, "unknown setting %s for algorithm random" % s.name
+                    return False, "unknown setting {} for algorithm random".format(s.name)
             except Exception as e:
-                return False, "failed to validate %s(%s): %s" % (s.name, s.value, e)
+                return False, "failed to validate {name}({value}): {exception}".format(
+                    name=s.name, value=s.value, exception=e)
 
         return True, ""
