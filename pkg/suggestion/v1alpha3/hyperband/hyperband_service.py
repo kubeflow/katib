@@ -7,7 +7,7 @@ from logging import getLogger, StreamHandler, DEBUG
 from pkg.apis.manager.v1alpha3.python import api_pb2
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
 from pkg.suggestion.v1alpha3.hyperband import parsing_util
-from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
+from pkg.suggestion.v1alpha3.internal.base_health_service import HealthServicer
 
 logger = getLogger(__name__)
 FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
