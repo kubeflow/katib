@@ -6,8 +6,8 @@ from logging import getLogger, StreamHandler, DEBUG
 
 from pkg.apis.manager.v1alpha3.python import api_pb2
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
-from pkg.suggestion.v1alpha3 import parsing_util
-from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
+from pkg.suggestion.v1alpha3.hyperband import parsing_util
+from pkg.suggestion.v1alpha3.internal.base_health_service import HealthServicer
 
 logger = getLogger(__name__)
 FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
@@ -43,7 +43,7 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             return reply
         except Exception as e:
             logger.error("Fail to generate trials: \n%s",
-                              traceback.format_exc(), extra={"experiment_name": experiment.name})
+                         traceback.format_exc(), extra={"experiment_name": experiment.name})
             raise e
 
     def _update_hbParameters(self, param):
@@ -72,25 +72,25 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             param.evaluating_trials = 0
 
         logger.info("HyperBand Param eta %d.",
-                         param.eta, extra={"experiment_name": experiment.name})
+                    param.eta, extra={"experiment_name": experiment.name})
         logger.info("HyperBand Param R %d.",
-                         param.r_l, extra={"experiment_name": experiment.name})
+                    param.r_l, extra={"experiment_name": experiment.name})
         logger.info("HyperBand Param sMax %d.",
-                         param.s_max, extra={"experiment_name": experiment.name})
+                    param.s_max, extra={"experiment_name": experiment.name})
         logger.info("HyperBand Param B %d.",
-                         param.b_l, extra={"experiment_name": experiment.name})
+                    param.b_l, extra={"experiment_name": experiment.name})
         logger.info("HyperBand Param n %d.",
-                         param.n, extra={"experiment_name": experiment.name})
+                    param.n, extra={"experiment_name": experiment.name})
         logger.info("HyperBand Param r %d.",
-                         param.r, extra={"experiment_name": experiment.name})
+                    param.r, extra={"experiment_name": experiment.name})
         logger.info("HyperBand Param s %d.",
-                         param.current_s, extra={"experiment_name": experiment.name})
+                    param.current_s, extra={"experiment_name": experiment.name})
         logger.info("HyperBand Param i %d.",
-                         param.current_i, extra={"experiment_name": experiment.name})
+                    param.current_i, extra={"experiment_name": experiment.name})
         logger.info("HyperBand evaluating trials count %d.",
-                         param.evaluating_trials, extra={"experiment_name": experiment.name})
+                    param.evaluating_trials, extra={"experiment_name": experiment.name})
         logger.info("HyperBand budget resource name %s.",
-                         param.resource_name, extra={"experiment_name": experiment.name})
+                    param.resource_name, extra={"experiment_name": experiment.name})
         if param.evaluating_trials == 0:
             self._new_hbParameters(param)
 
@@ -107,7 +107,7 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             last_trials, r_i, param.resource_name)
 
         logger.info("Generate %d trials by child bracket.",
-                         top_trials_num, extra={"experiment_name": experiment.name})
+                    top_trials_num, extra={"experiment_name": experiment.name})
         return trialSpecs
 
     def _get_last_trials(self, all_trials, latest_trials_num):
@@ -180,7 +180,7 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                                                                  value=str(hp['value']))
             trial_specs.append(trial_spec)
         logger.info("Generate %d trials by master bracket.",
-                         n, extra={"experiment_name": experiment.name})
+                    n, extra={"experiment_name": experiment.name})
         return trial_specs
 
     def _set_validate_context_error(self, context, error_message):

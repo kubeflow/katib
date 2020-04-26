@@ -11,7 +11,7 @@ from pkg.suggestion.v1alpha3.nas.enas.Controller import Controller
 from pkg.suggestion.v1alpha3.nas.enas.Operation import SearchSpace
 from pkg.suggestion.v1alpha3.nas.enas.AlgorithmSettings import (
     parseAlgorithmSettings, algorithmSettingsValidator, enableNoneSettingsList)
-from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
+from pkg.suggestion.v1alpha3.internal.base_health_service import HealthServicer
 
 
 class EnasExperiment:

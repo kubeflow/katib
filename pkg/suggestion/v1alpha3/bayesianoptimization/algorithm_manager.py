@@ -3,7 +3,7 @@ import numpy as np
 
 from pkg.apis.manager.v1alpha3.python import api_pb2
 
-from .utils import get_logger
+from pkg.suggestion.v1alpha3.bayesianoptimization.utils import get_logger
 
 
 def deal_with_discrete(feasible_values, current_value):

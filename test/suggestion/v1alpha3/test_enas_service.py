@@ -5,7 +5,7 @@ import unittest
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
 from pkg.apis.manager.v1alpha3.python import api_pb2
 
-from pkg.suggestion.v1alpha3.nas.enas_service import EnasService
+from pkg.suggestion.v1alpha3.nas.enas.service import EnasService
 
 
 class TestEnas(unittest.TestCase):

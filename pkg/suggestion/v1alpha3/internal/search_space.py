@@ -1,7 +1,7 @@
 import logging
 from pkg.apis.manager.v1alpha3.python import api_pb2 as api
 
-from .constant import *
+from pkg.suggestion.v1alpha3.internal.constant import *
 
 
 logging.basicConfig(level=logging.DEBUG)

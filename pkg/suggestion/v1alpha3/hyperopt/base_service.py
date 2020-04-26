@@ -2,7 +2,7 @@ import hyperopt
 import numpy as np
 import logging
 
-from pkg.suggestion.v1alpha3.internal.constant import *
+from pkg.suggestion.v1alpha3.internal.constant import INTEGER, DOUBLE, CATEGORICAL, DISCRETE, MAX_GOAL
 from pkg.suggestion.v1alpha3.internal.trial import Assignment
 
 logger = logging.getLogger(__name__)
@@ -72,14 +72,13 @@ class BaseHyperoptService(object):
 
         recorded_trials_names = self.fmin.trials.specs
 
-
         hyperopt_trial_new_ids = []
         hyperopt_trial_specs = []
         hyperopt_trial_results = []
         hyperopt_trial_miscs = []
         # Update hyperopt FMin with new completed Trials
         for trial in trials:
-            if {"trial-name":trial.name} not in recorded_trials_names:
+            if {"trial-name": trial.name} not in recorded_trials_names:
                 # Produce new id for the new Trial
                 new_id = self.fmin.trials.new_trial_ids(1)
                 hyperopt_trial_new_ids.append(new_id[0])
@@ -106,7 +105,6 @@ class BaseHyperoptService(object):
                         index_of_value_in_list = param.list.index(parameter_value)
                         hyperopt_trial_miscs_idxs[param.name] = new_id
                         hyperopt_trial_miscs_vals[param.name] = [index_of_value_in_list]
-
 
                 hyperopt_trial_misc["idxs"] = hyperopt_trial_miscs_idxs
                 hyperopt_trial_misc["vals"] = hyperopt_trial_miscs_vals

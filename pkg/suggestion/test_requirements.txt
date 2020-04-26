@@ -1,5 +1,0 @@
-pylint
-pytest
-pytest-cov
-pyyaml
-python-box

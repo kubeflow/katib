@@ -4,8 +4,8 @@ from pkg.apis.manager.v1alpha3.python import api_pb2
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
 from pkg.suggestion.v1alpha3.internal.search_space import HyperParameterSearchSpace
 from pkg.suggestion.v1alpha3.internal.trial import Trial, Assignment
-from pkg.suggestion.v1alpha3.skopt.base_skopt_service import BaseSkoptService
-from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
+from pkg.suggestion.v1alpha3.skopt.base_service import BaseSkoptService
+from pkg.suggestion.v1alpha3.internal.base_health_service import HealthServicer
 
 
 logger = logging.getLogger(__name__)

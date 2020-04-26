@@ -5,10 +5,10 @@ import copy
 
 import numpy as np
 
-from .acquisition_func import AcquisitionFunc
-from .model.gp import GaussianProcessModel
-from .model.rf import RandomForestModel
-from .utils import get_logger
+from pkg.suggestion.v1alpha3.bayesianoptimization.acquisition_func import AcquisitionFunc
+from pkg.suggestion.v1alpha3.bayesianoptimization.model.gp import GaussianProcessModel
+from pkg.suggestion.v1alpha3.bayesianoptimization.model.rf import RandomForestModel
+from pkg.suggestion.v1alpha3.bayesianoptimization.utils import get_logger
 
 
 class RectPack:
