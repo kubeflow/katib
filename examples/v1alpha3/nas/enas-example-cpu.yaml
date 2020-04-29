@@ -38,7 +38,7 @@ spec:
               - name: {{.Trial}}
                 image: docker.io/kubeflowkatib/enas-cnn-cifar10-cpu
                 command:
-                - "python3.5"
+                - "python3"
                 - "-u"
                 - "RunTrial.py"
                 {{- with .HyperParameters}}

@@ -1,4 +1,4 @@
-ARG cuda_version=9.0
+ARG cuda_version=10.0
 ARG cudnn_version=7
 FROM nvidia/cuda:${cuda_version}-cudnn${cudnn_version}-devel
 
@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y software-properties-common && \
       libgl1-mesa-glx \
       libhdf5-dev \
       openmpi-bin \
-      python3.5 \
+      python3 \
       python3-pip \
       python3-setuptools \
       python3-dev \
@@ -29,4 +29,4 @@ RUN pip3 install --upgrade pip
 RUN pip3 install --no-cache-dir -r requirements-gpu.txt
 ENV PYTHONPATH /usr/src/app/github.com/kubeflow/katib/examples/v1alpha3/nas/enas-cnn-cifar10
 
-ENTRYPOINT ["python3.5", "-u", "RunTrial.py"]
+ENTRYPOINT ["python3", "-u", "RunTrial.py"]
