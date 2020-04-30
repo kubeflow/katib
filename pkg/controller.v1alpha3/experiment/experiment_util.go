@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"k8s.io/apimachinery/pkg/api/errors"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
@@ -14,6 +15,7 @@ import (
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
+	suggestionController "github.com/kubeflow/katib/pkg/controller.v1alpha3/suggestion"
 	"github.com/kubeflow/katib/pkg/controller.v1alpha3/util"
 )
 
@@ -107,5 +109,33 @@ func (r *ReconcileExperiment) updateFinalizers(instance *experimentsv1alpha3.Exp
 		}
 		// Need to requeue because finalizer update does not change metadata.generation
 		return reconcile.Result{Requeue: true}, err
+	}
+}
+
+func (r *ReconcileExperiment) terminateSuggestion(instance *experimentsv1alpha3.Experiment) (reconcile.Result, error) {
+	log.Info("Start terminating original...")
+	original := &suggestionsv1alpha3.Suggestion{}
+	err := r.Get(context.TODO(), types.NamespacedName{
+		Namespace: instance.Namespace,
+		Name:      instance.Name,
+	}, original)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return reconcile.Result{}, nil
+		}
+		return reconcile.Result{}, err
+	}
+	if original.IsCompleted() {
+		return reconcile.Result{}, nil
+	}
+	suggestion := original.DeepCopy()
+	msg := "Suggestion is succeeded"
+	suggestion.MarkSuggestionStatusSucceeded(suggestionController.SuggestionSucceededReason, msg)
+	log.Info("Mark suggestion succeeded...")
+
+	if err := r.UpdateSuggestion(suggestion); err != nil {
+		return reconcile.Result{}, err
+	} else {
+		return reconcile.Result{Requeue: true}, nil
 	}
 }

@@ -29,6 +29,7 @@ import (
 
 func (e *Experiment) SetDefault() {
 	e.setDefaultParallelTrialCount()
+	e.setDefaultResumePolicy()
 	e.setDefaultTrialTemplate()
 	e.setDefaultMetricsCollector()
 }
@@ -37,6 +38,12 @@ func (e *Experiment) setDefaultParallelTrialCount() {
 	if e.Spec.ParallelTrialCount == nil {
 		e.Spec.ParallelTrialCount = new(int32)
 		*e.Spec.ParallelTrialCount = DefaultTrialParallelCount
+	}
+}
+
+func (e *Experiment) setDefaultResumePolicy() {
+	if e.Spec.ResumePolicy == "" {
+		e.Spec.ResumePolicy = DefaultResumePolicy
 	}
 }
 

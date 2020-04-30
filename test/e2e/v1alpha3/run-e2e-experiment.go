@@ -2,18 +2,24 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 	"log"
 	"os"
 	"time"
 
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	commonv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	experimentsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
+	controllerUtil "github.com/kubeflow/katib/pkg/controller.v1alpha3/util"
 	"github.com/kubeflow/katib/pkg/util/v1alpha3/katibclient"
 )
 
@@ -129,5 +135,30 @@ func main() {
 			log.Fatal("All trials are not successful ", exp.Status.TrialsSucceeded, *exp.Spec.MaxTrialCount)
 		}
 	}
+
+	sug, err := kclient.GetSuggestion(exp.Name, exp.Namespace)
+	if exp.Spec.ResumePolicy == experimentsv1alpha3.LongRunning {
+		if sug.IsSucceeded() {
+			log.Fatal("Suggestion is terminated while ResumePolicy = LongRunning")
+		}
+	}
+	if exp.Spec.ResumePolicy == experimentsv1alpha3.NeverResume {
+		if sug.IsRunning() {
+			log.Fatal("Suggestion is still running while ResumePolicy = NeverResume")
+		}
+		namespacedName := types.NamespacedName{Name: controllerUtil.GetAlgorithmServiceName(sug), Namespace: sug.Namespace}
+		service := &corev1.Service{}
+		err := kclient.GetClient().Get(context.TODO(), namespacedName, service)
+		if err == nil || !errors.IsNotFound(err) {
+			log.Fatal("Suggestion service is still alive while ResumePolicy = NeverResume")
+		}
+		namespacedName = types.NamespacedName{Name: controllerUtil.GetAlgorithmDeploymentName(sug), Namespace: sug.Namespace}
+		deployment := &appsv1.Deployment{}
+		err = kclient.GetClient().Get(context.TODO(), namespacedName, deployment)
+		if err == nil || !errors.IsNotFound(err) {
+			log.Fatal("Suggestion deployment is still alive while ResumePolicy = NeverResume")
+		}
+	}
+
 	log.Printf("Experiment has recorded best current Optimal Trial %v", exp.Status.CurrentOptimalTrial)
 }

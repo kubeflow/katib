@@ -557,6 +557,13 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								Ref: ref("github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3.NasConfig"),
 							},
 						},
+						"resumePolicy": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Describes resuming policy which usually take effect after experiment terminated.",
+								Type:        []string{"string"},
+								Format:      "",
+							},
+						},
 					},
 				},
 			},

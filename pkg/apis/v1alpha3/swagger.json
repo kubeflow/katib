@@ -485,6 +485,10 @@
             "$ref": "#/definitions/v1alpha3.ParameterSpec"
           }
         },
+        "resumePolicy": {
+          "description": "Describes resuming policy which usually take effect after experiment terminated.",
+          "type": "string"
+        },
         "trialTemplate": {
           "description": "Template for each run of the trial.",
           "$ref": "#/definitions/v1alpha3.TrialTemplate"
