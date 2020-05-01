@@ -1,3 +1,6 @@
+import torchvision.datasets as dset
+import torchvision.transforms as transforms
+
 
 class AverageMeter():
     """ Computes and stores the average and current value """
@@ -40,3 +43,28 @@ def accuracy(output, target, topk=(1,)):
         res.append(correct_k.mul_(1.0 / batch_size))
 
     return res
+
+
+def get_dataset():
+    dataset_cls = dset.CIFAR10
+    num_classes = 10
+    input_channels = 3
+
+    # Do preprocessing
+    MEAN = [0.49139968, 0.48215827, 0.44653124]
+    STD = [0.24703233, 0.24348505, 0.26158768]
+    transf = [
+        transforms.RandomCrop(32, padding=4),
+        transforms.RandomHorizontalFlip()
+    ]
+
+    normalize = [
+        transforms.ToTensor(),
+        transforms.Normalize(MEAN, STD)
+    ]
+
+    train_transform = transforms.Compose(transf + normalize)
+
+    train_data = dataset_cls(root="./data", train=True, download=True, transform=train_transform)
+
+    return input_channels, num_classes, train_data

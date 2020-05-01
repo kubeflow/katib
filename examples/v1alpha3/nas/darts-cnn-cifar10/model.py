@@ -1,8 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from pkg.suggestion.v1alpha3.nas.darts.operations import FactorizedReduce, StdConv, MixedOp
-from pkg.suggestion.v1alpha3.nas.darts.genotype import PRIMITIVES, parse, Genotype
+from operations import FactorizedReduce, StdConv, MixedOp
 
 
 class Cell(nn.Module):
@@ -10,7 +9,7 @@ class Cell(nn.Module):
     Each edge is mixed and continuous relaxed.
     """
 
-    def __init__(self, num_nodes, c_prev_prev, c_prev, c_cur, reduction_prev, reduction_cur):
+    def __init__(self, num_nodes, c_prev_prev, c_prev, c_cur, reduction_prev, reduction_cur, search_space):
         """
         Args:
             num_nodes: Number of intermediate cell nodes
@@ -42,7 +41,7 @@ class Cell(nn.Module):
             for j in range(2+i):
                 # Reduction with stride = 2 must be only for the input node
                 stride = 2 if reduction_cur and j < 2 else 1
-                op = MixedOp(c_cur, stride)
+                op = MixedOp(c_cur, stride, search_space)
                 self.dag_ops[i].append(op)
 
     def forward(self, s0, s1, w_dag):
@@ -60,7 +59,7 @@ class Cell(nn.Module):
 
 class NetworkCNN(nn.Module):
 
-    def __init__(self, init_channels, input_channels, num_classes, num_layers, criterion):
+    def __init__(self, init_channels, input_channels, num_classes, num_layers, criterion, search_space):
         super(NetworkCNN, self).__init__()
 
         self.init_channels = init_channels
@@ -69,7 +68,7 @@ class NetworkCNN(nn.Module):
         self.criterion = criterion
 
         # TODO: Algorithm settings?
-        self.num_nodes = 4
+        self.num_nodes = 3
         self.stem_multiplier = 3
 
         c_cur = self.stem_multiplier*self.init_channels
@@ -96,7 +95,7 @@ class NetworkCNN(nn.Module):
             else:
                 reduction_cur = False
 
-            cell = Cell(self.num_nodes, c_prev_prev, c_prev, c_cur, reduction_prev, reduction_cur)
+            cell = Cell(self.num_nodes, c_prev_prev, c_prev, c_cur, reduction_prev, reduction_cur, search_space)
             reduction_prev = reduction_cur
             self.cells.append(cell)
 
@@ -107,7 +106,7 @@ class NetworkCNN(nn.Module):
         self.classifier = nn.Linear(c_prev, self.num_classes)
 
         # Initialize alphas parameters
-        num_ops = len(PRIMITIVES)
+        num_ops = len(search_space.primitives)
 
         self.alpha_normal = nn.ParameterList()
         self.alpha_reduce = nn.ParameterList()
@@ -143,19 +142,19 @@ class NetworkCNN(nn.Module):
 
     def print_alphas(self):
 
-        print("########## ALPHA ###########")
-        print("- Alpha Normal -")
+        print("\n>>> Alphas Normal <<<")
         for alpha in self.alpha_normal:
             print(F.softmax(alpha, dim=-1))
 
-        print("- Alpha Reduce -")
+        print("\n>>> Alpha Reduce <<<")
         for alpha in self.alpha_reduce:
             print(F.softmax(alpha, dim=-1))
+        print("\n")
 
-    def weights(self):
+    def getWeights(self):
         return self.parameters()
 
-    def alphas(self):
+    def getAlphas(self):
         for _, parameter in self.alphas:
             yield parameter
 
@@ -163,11 +162,11 @@ class NetworkCNN(nn.Module):
         logits = self.forward(x)
         return self.criterion(logits, y)
 
-    def genotype(self):
-        gene_normal = parse(self.alpha_normal, k=2)
-        gene_reduce = parse(self.alpha_reduce, k=2)
+    def genotype(self, search_space):
+        gene_normal = search_space.parse(self.alpha_normal, k=2)
+        gene_reduce = search_space.parse(self.alpha_reduce, k=2)
         # concat all intermediate nodes
         concat = range(2, 2 + self.num_nodes)
 
-        return Genotype(normal=gene_normal, normal_concat=concat,
-                        reduce=gene_reduce, reduce_concat=concat)
+        return search_space.genotype(normal=gene_normal, normal_concat=concat,
+                                     reduce=gene_reduce, reduce_concat=concat)

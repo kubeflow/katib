@@ -1,19 +1,19 @@
 import torch.nn as nn
 import torch
 
-from pkg.suggestion.v1alpha3.nas.darts.genotype import PRIMITIVES
-
 OPS = {
     'none': lambda channels, stride: Zero(stride),
-    'avg_pool_3x3': lambda channels, stride: PoolBN('avg', channels, kernel_size=3, stride=stride, padding=1),
-    'max_pool_3x3': lambda channels, stride: PoolBN('max', channels, kernel_size=3, stride=stride, padding=1),
-    'skip_connect': lambda channels, stride: Identity() if stride == 1 else FactorizedReduce(channels, channels),
-    'sep_conv_3x3': lambda channels, stride: SepConv(channels, kernel_size=3, stride=stride, padding=1),
-    'sep_conv_5x5': lambda channels, stride: SepConv(channels, kernel_size=5, stride=stride, padding=2),
+    'avg_pooling_3x3': lambda channels, stride: PoolBN('avg', channels, kernel_size=3, stride=stride, padding=1),
+    'max_pooling_3x3': lambda channels, stride: PoolBN('max', channels, kernel_size=3, stride=stride, padding=1),
+    'skip_connection': lambda channels, stride: Identity() if stride == 1 else FactorizedReduce(channels, channels),
+    'separable_convolution_3x3': lambda channels, stride: SepConv(channels, kernel_size=3, stride=stride, padding=1),
+    'separable_convolution_5x5': lambda channels, stride: SepConv(channels, kernel_size=5, stride=stride, padding=2),
     # 3x3 -> 5x5
-    'dil_conv_3x3': lambda channels, stride: DilConv(channels, kernel_size=3, stride=stride, padding=2, dilation=2),
+    'dilated_convolution_3x3': lambda channels, stride: DilConv(channels,
+                                                                kernel_size=3, stride=stride, padding=2, dilation=2),
     # 5x5 -> 9x9
-    'dil_conv_5x5': lambda channels, stride: DilConv(channels, kernel_size=5, stride=stride, padding=4, dilation=2),
+    'dilated_convolution_5x5': lambda channels, stride: DilConv(channels,
+                                                                kernel_size=5, stride=stride, padding=4, dilation=2),
 }
 
 
@@ -46,11 +46,17 @@ class PoolBN(nn.Module):
             self.pool = nn.MaxPool2d(kernel_size, stride, padding)
 
         self.bn = nn.BatchNorm2d(channels, affine=False)
+        self.net = nn.Sequential(
+            self.pool,
+            self.bn
+        )
 
     def forward(self, x):
-        out = self.pool(x),
-        out = self.bn(out)
-        return out
+        # out = self.pool(x),
+        # print(out)
+        # out = self.bn(out)
+        # print(out)
+        return self.net(x)
 
 
 class Identity(nn.Module):
@@ -143,11 +149,11 @@ class MixedOp(nn.Module):
     """ Mixed operation
     """
 
-    def __init__(self, channels, stride):
+    def __init__(self, channels, stride, search_space):
         super(MixedOp, self).__init__()
         self.ops = nn.ModuleList()
 
-        for primitive in PRIMITIVES:
+        for primitive in search_space.primitives:
             op = OPS[primitive](channels, stride)
             self.ops.append(op)
 

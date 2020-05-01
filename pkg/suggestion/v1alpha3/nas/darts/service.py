@@ -1,203 +1,112 @@
+import logging
+from logging import getLogger, StreamHandler, INFO
+import json
 
-import torch.nn as nn
-import torchvision.datasets as dset
-import torchvision.transforms as transforms
-import torch
-from pkg.suggestion.v1alpha3.nas.darts.darts_model import NetworkCNN
-from pkg.suggestion.v1alpha3.nas.darts.architect import Architect
-from pkg.suggestion.v1alpha3.nas.darts.utils import AverageMeter, accuracy
+from pkg.suggestion.v1alpha3.internal.base_health_service import HealthServicer
+from pkg.apis.manager.v1alpha3.python import api_pb2
+from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
 
-w_lr = 0.025
-w_lr_min = 0.001
-w_momentum = 0.9
-w_weight_decay = 3e-4
-w_grad_clip = 5.
-
-alpha_lr = 3e-4
-alpha_weight_decay = 1e-3
-
-batch_size = 64
-num_workers = 4
-
-epochs = 50
+logger = logging.getLogger(__name__)
 
 
-def main():
-    init_channels = 16
-    num_layers = 8
+class DartsService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
-    # Get dataset with meta information
-    input_channels, num_classes, train_data = get_dataset()
+    def __init__(self):
+        super(DartsService, self).__init__()
+        self.is_first_run = True
 
-    criterion = nn.CrossEntropyLoss()
+        self.logger = getLogger(__name__)
+        FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
+        logging.basicConfig(format=FORMAT)
+        handler = StreamHandler()
+        handler.setLevel(INFO)
+        self.logger.setLevel(INFO)
+        self.logger.addHandler(handler)
+        self.logger.propagate = False
 
-    model = NetworkCNN(init_channels, input_channels,  num_layers, num_classes, criterion)
+    # TODO: Add validation
+    def ValidateAlgorithmSettings(self, request, context):
+        return api_pb2.ValidateAlgorithmSettingsReply()
 
-    # Weights optimizer
-    w_optim = torch.optim.SGD(model.weights(), w_lr,  momentum=w_momentum, weight_decay=w_weight_decay)
+    def GetSuggestions(self, request, context):
+        if self.is_first_run:
+            nas_config = request.experiment.spec.nas_config
+            num_layers = str(nas_config.graph_config.num_layers)
 
-    # Alphas optimizer
-    alpha_optim = torch.optim.Adam(model.alphas(), alpha_lr, betas=(0.5, 0.999), weight_decay=alpha_weight_decay)
+            search_space = get_search_space(nas_config.operations, logger)
 
-    # Split data to train/validation
+            settings_raw = request.experiment.spec.algorithm.algorithm_setting
+            algorithm_settings = get_algorithm_settings(settings_raw)
 
-    num_train = len(train_data)
-    split = num_train // 2
-    indices = list(range(num_train))
+            search_space_json = json.dumps(search_space)
+            algorithm_settings_json = json.dumps(algorithm_settings)
 
-    train_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[:split])
-    valid_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[split:])
+            search_space_str = str(search_space_json).replace('\"', '\'')
+            algorithm_settings_str = str(algorithm_settings_json).replace('\"', '\'')
 
-    train_loader = torch.utils.data.DataLoader(train_data,
-                                               batch_size=batch_size,
-                                               sampler=train_sampler,
-                                               num_workers=num_workers,
-                                               pin_memory=True)
+            self.is_first_run = False
 
-    valid_loader = torch.utils.data.DataLoader(train_data,
-                                               batch_size=batch_size,
-                                               sampler=valid_sampler,
-                                               num_workers=num_workers,
-                                               pin_memory=True)
+        parameter_assignments = []
+        for i in range(request.request_number):
 
-    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        w_optim,
-        epochs,
-        eta_min=w_lr_min)
+            self.logger.info(">>> Generate new Darts Trial Job")
 
-    architect = Architect(model, w_momentum, w_weight_decay)
+            self.logger.info(">>> Number of layers {}\n".format(num_layers))
 
-    # Start training
-    best_top1 = 0.
+            self.logger.info(">>> Search Space")
+            self.logger.info("{}\n".format(search_space_str))
 
-    for epoch in range(epochs):
-        lr_scheduler.step()
-        lr = lr_scheduler.get_lr()[0]
+            self.logger.info(">>> Algorithm Settings")
+            self.logger.info("{}\n\n".format(algorithm_settings_str))
 
-        model.print_alphas()
+            parameter_assignments.append(
+                api_pb2.GetSuggestionsReply.ParameterAssignments(
+                    assignments=[
+                        api_pb2.ParameterAssignment(
+                            name="algorithm-settings",
+                            value=algorithm_settings_str
+                        ),
+                        api_pb2.ParameterAssignment(
+                            name="search-space",
+                            value=search_space_str
+                        ),
+                        api_pb2.ParameterAssignment(
+                            name="num-layers",
+                            value=num_layers
+                        )
+                    ]
+                )
+            )
 
-        # Training
-        train(train_loader, valid_loader, model, architect, w_optim, alpha_optim, lr, epoch)
-
-        # Validation
-        cur_step = (epoch + 1) * len(train_loader)
-        top1 = validate(valid_loader, model, epoch, cur_step)
-
-        # Print genotype
-        genotype = model.genotype()
-        print("Model genotype = {}".format(genotype))
-
-        # Modify best top1
-        if top1 > best_top1:
-            best_top1 = top1
-            best_genotype = genotype
-
-    print("Final best Prec@1 = {:.4%}".format(best_top1))
-    print("Best Genotype = {}".format(best_genotype))
+        return api_pb2.GetSuggestionsReply(parameter_assignments=parameter_assignments)
 
 
-def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim, lr, epoch):
-    top1 = AverageMeter()
-    top5 = AverageMeter()
-    losses = AverageMeter()
+def get_search_space(operations, logger):
+    search_space = []
 
-    cur_step = epoch * len(train_loader)
+    for operation in list(operations.operation):
+        opt_type = operation.operation_type
 
-    model.train()
-
-    for step, ((train_x, train_y), (val_x, val_y)) in enumerate(zip(train_loader, valid_loader)):
-
-        train_size = train_x.size(0)
-
-        # Phase 2. Architect step (Alpha)
-        alpha_optim.zero_grad()
-        architect.unrolled_backward(train_x, train_y, val_x, val_y, lr, w_optim)
-        alpha_optim.step()
-
-        # Phase 1. Child network step (W)
-        w_optim.zero_grad()
-        logits = model(train_x)
-        loss = model.criterion(logits, train_y)
-
-        loss.backward()
-
-        # Gradient clipping
-        nn.utils.clip_grad_norm_(model.weights(), w_grad_clip)
-        w_optim.step()
-
-        prec1, prec5 = accuracy(logits, train_y, topk=(1, 5))
-
-        losses.update(loss.item(), train_size)
-        top1.update(prec1.item(), train_size)
-        top5.update(prec5.item(), train_size)
-
-        if step % 50 == 0 or step == len(train_loader) - 1:
-            print(
-                "Train: [{:2d}/{}] Step {:03d}/{:03d} Loss {losses.avg:.3f} "
-                "Prec@(1,5) ({top1.avg:.1%}, {top5.avg:.1%})".format(
-                    epoch+1, epochs, step, len(train_loader)-1, losses=losses,
-                    top1=top1, top5=top5))
-
-        cur_step += 1
-
-    print("Train: [{:2d}/{}] Final Prec@1 {:.4%}".format(epoch+1, epochs, top1.avg))
+        if opt_type == "skip_connection":
+            search_space.append(opt_type)
+        else:
+            # Currently support only one Categorical parameter - filter size
+            opt_spec = list(operation.parameter_specs.parameters)[0]
+            for filter_size in list(opt_spec.feasible_space.list):
+                search_space.append(opt_type+"_{}x{}".format(filter_size, filter_size))
+    return search_space
 
 
-def validate(valid_loader, model, epoch, cur_step):
-    top1 = AverageMeter()
-    top5 = AverageMeter()
-    losses = AverageMeter()
+# TODO: Add more algorithm settings
+def get_algorithm_settings(settings_raw):
 
-    model.eval()
+    algorithm_settings_default = {
+        "num_epoch": 50
+    }
 
-    with torch.no_grad:
-        for step, (valid_x, valid_y) in enumerate(valid_loader):
-            valid_size = valid_x.size(0)
+    for setting in settings_raw:
+        s_name = setting.name
+        s_value = setting.value
+        algorithm_settings_default[s_name] = s_value
 
-            logits = model(valid_x)
-            loss = model.criterion(logits, valid_y)
-
-            prec1, prec5 = accuracy(logits, valid_y, topk=(1, 5))
-            losses.update(loss.item(), valid_size)
-            top1.update(prec1.item(), valid_size)
-            top5.update(prec5.item(), valid_size)
-
-            if step % 50 == 0 or step == len(valid_loader) - 1:
-                print(
-                    "Train: [{:2d}/{}] Step {:03d}/{:03d} Loss {losses.avg:.3f} "
-                    "Prec@(1,5) ({top1.avg:.1%}, {top5.avg:.1%})".format(
-                        epoch+1, epochs, step, len(valid_loader)-1, losses=losses,
-                        top1=top1, top5=top5))
-
-    print("Valid: [{:2d}/{}] Final Prec@1 {:.4%}".format(epoch+1, epochs, top1.avg))
-
-    return top1.avg
-
-
-def get_dataset():
-    dataset_cls = dset.CIFAR10
-    num_classes = 10
-    input_channels = 3
-
-    # Do preprocessing
-    MEAN = [0.49139968, 0.48215827, 0.44653124]
-    STD = [0.24703233, 0.24348505, 0.26158768]
-    transf = [
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip()
-    ]
-
-    normalize = [
-        transforms.ToTensor(),
-        transforms.Normalize(MEAN, STD)
-    ]
-
-    train_transform = transforms.Compose(transf + normalize)
-
-    train_data = dataset_cls(root="./data", train=True, download=True, transform=train_transform)
-
-    return input_channels, num_classes, train_data
-
-
-if __name__ == '__main__':
-    main()
+    return algorithm_settings_default
