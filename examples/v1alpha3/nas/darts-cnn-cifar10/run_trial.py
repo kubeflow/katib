@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch
 import argparse
 import json
+import numpy as np
 
 from model import NetworkCNN
 from architect import Architect
@@ -12,8 +13,7 @@ from search_space import SearchSpace
 
 
 # TODO: Move to the algorithm settings
-# w_lr = 0.025
-w_lr = 0.001
+w_lr = 0.025
 w_lr_min = 0.001
 w_momentum = 0.9
 w_weight_decay = 3e-4
@@ -22,28 +22,12 @@ w_grad_clip = 5.
 alpha_lr = 3e-4
 alpha_weight_decay = 1e-3
 
-batch_size = 64
-# num_workers = 4
-num_workers = 1
+batch_size = 128
+num_workers = 4
 
 init_channels = 16
 
-print_step = 1
-
-# Set GPU Device
-# Currently use only first available GPU
-# TODO: Add multi GPU support
-# TODO: Add functionality to select GPU
-use_gpu = False
-device = torch.device("cuda")
-all_gpus = list(range(torch.cuda.device_count()))
-if len(all_gpus) > 0:
-    torch.cuda.set_device(all_gpus[0])
-    use_gpu = True
-    print(">>> Use GPU for Training <<<")
-    print(torch.cuda.current_device())
-    print(torch.cuda.get_device_name(0))
-    print(torch.cuda.is_available())
+print_step = 50
 
 
 def main():
@@ -68,19 +52,35 @@ def main():
     num_layers = int(args.num_layers)
     print("Number of layers {}\n".format(num_layers))
 
+    # Set GPU Device
+    # Currently use only first available GPU
+    # TODO: Add multi GPU support
+    # TODO: Add functionality to select GPU
+    all_gpus = list(range(torch.cuda.device_count()))
+    if len(all_gpus) > 0:
+        device = torch.device("cuda")
+        torch.cuda.set_device(all_gpus[0])
+        np.random.seed(2)
+        torch.manual_seed(2)
+        torch.cuda.manual_seed_all(2)
+        torch.backends.cudnn.benchmark = True
+        print(">>> Use GPU for Training <<<")
+        print("Device ID: {}".format(torch.cuda.current_device()))
+        print("Device name: {}".format(torch.cuda.get_device_name(0)))
+        print("Device availability: {}\n".format(torch.cuda.is_available()))
+    else:
+        device = torch.device("cpu")
+        print(">>> Use CPU for Training <<<")
+
     # Get dataset with meta information
     # TODO: Add support for more dataset
     input_channels, num_classes, train_data = utils.get_dataset()
 
-    if use_gpu:
-        criterion = nn.CrossEntropyLoss().to(device)
-    else:
-        criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss().to(device)
 
     model = NetworkCNN(init_channels, input_channels,  num_classes, num_layers, criterion, search_space)
 
-    if use_gpu:
-        model = model.to(device)
+    model = model.to(device)
 
     # Weights optimizer
     w_optim = torch.optim.SGD(model.getWeights(), w_lr,  momentum=w_momentum, weight_decay=w_weight_decay)
@@ -125,12 +125,14 @@ def main():
         model.print_alphas()
 
         # Training
-        print("Training start")
-        train(train_loader, valid_loader, model, architect, w_optim, alpha_optim, lr, epoch, num_epochs)
+        print(">>> Training")
+        train(train_loader, valid_loader, model, architect, w_optim,
+              alpha_optim, lr, epoch, num_epochs, device)
 
         # Validation
+        print("\n>>> Validation")
         cur_step = (epoch + 1) * len(train_loader)
-        top1 = validate(valid_loader, model, epoch, cur_step, num_epochs)
+        top1 = validate(valid_loader, model, epoch, cur_step, num_epochs, device)
 
         # Print genotype
         genotype = model.genotype(search_space)
@@ -142,20 +144,20 @@ def main():
             best_genotype = genotype
 
     print("Final best Prec@1 = {:.4%}".format(best_top1))
-    print("\nBest-Genotype={}".format(best_genotype))
+    print("\nBest-Genotype={}".format(str(best_genotype).replace(" ", "")))
 
 
-def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim, lr, epoch, num_epochs):
+def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim, lr, epoch, num_epochs, device):
     top1 = utils.AverageMeter()
     top5 = utils.AverageMeter()
     losses = utils.AverageMeter()
     cur_step = epoch * len(train_loader)
-    model.train()
 
+    model.train()
     for step, ((train_x, train_y), (valid_x, valid_y)) in enumerate(zip(train_loader, valid_loader)):
-        if use_gpu:
-            train_x, train_y = train_x.to(device), train_y.to(device)
-            valid_x, valid_y = valid_x.to(device), valid_y.to(device)
+
+        train_x, train_y = train_x.to(device, non_blocking=True), train_y.to(device, non_blocking=True)
+        valid_x, valid_y = valid_x.to(device, non_blocking=True), valid_y.to(device, non_blocking=True)
 
         train_size = train_x.size(0)
 
@@ -186,13 +188,13 @@ def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim, lr
                 "Prec@(1,5) ({top1.avg:.1%}, {top5.avg:.1%})".format(
                     epoch+1, num_epochs, step, len(train_loader)-1, losses=losses,
                     top1=top1, top5=top5))
-        print("STEP IS {}".format(step))
+
         cur_step += 1
 
     print("Train: [{:2d}/{}] Final Prec@1 {:.4%}".format(epoch+1, num_epochs, top1.avg))
 
 
-def validate(valid_loader, model, epoch, cur_step, num_epochs):
+def validate(valid_loader, model, epoch, cur_step, num_epochs, device):
     top1 = utils.AverageMeter()
     top5 = utils.AverageMeter()
     losses = utils.AverageMeter()
@@ -201,8 +203,7 @@ def validate(valid_loader, model, epoch, cur_step, num_epochs):
 
     with torch.no_grad():
         for step, (valid_x, valid_y) in enumerate(valid_loader):
-            if use_gpu:
-                valid_x, valid_y = valid_x.to(device), valid_y.to(device)
+            valid_x, valid_y = valid_x.to(device, non_blocking=True), valid_y.to(device, non_blocking=True)
 
             valid_size = valid_x.size(0)
 
@@ -216,7 +217,7 @@ def validate(valid_loader, model, epoch, cur_step, num_epochs):
 
             if step % print_step == 0 or step == len(valid_loader) - 1:
                 print(
-                    "Train: [{:2d}/{}] Step {:03d}/{:03d} Loss {losses.avg:.3f} "
+                    "Validation: [{:2d}/{}] Step {:03d}/{:03d} Loss {losses.avg:.3f} "
                     "Prec@(1,5) ({top1.avg:.1%}, {top5.avg:.1%})".format(
                         epoch+1, num_epochs, step, len(valid_loader)-1, losses=losses,
                         top1=top1, top5=top5))
