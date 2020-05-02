@@ -68,7 +68,7 @@ class NetworkCNN(nn.Module):
         self.criterion = criterion
 
         # TODO: Algorithm settings?
-        self.num_nodes = 3
+        self.num_nodes = 4
         self.stem_multiplier = 3
 
         c_cur = self.stem_multiplier*self.init_channels

@@ -6,8 +6,6 @@ from pkg.suggestion.v1alpha3.internal.base_health_service import HealthServicer
 from pkg.apis.manager.v1alpha3.python import api_pb2
 from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
 
-logger = logging.getLogger(__name__)
-
 
 class DartsService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
@@ -33,7 +31,7 @@ class DartsService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             nas_config = request.experiment.spec.nas_config
             num_layers = str(nas_config.graph_config.num_layers)
 
-            search_space = get_search_space(nas_config.operations, logger)
+            search_space = get_search_space(nas_config.operations)
 
             settings_raw = request.experiment.spec.algorithm.algorithm_setting
             algorithm_settings = get_algorithm_settings(settings_raw)
@@ -81,7 +79,7 @@ class DartsService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         return api_pb2.GetSuggestionsReply(parameter_assignments=parameter_assignments)
 
 
-def get_search_space(operations, logger):
+def get_search_space(operations):
     search_space = []
 
     for operation in list(operations.operation):
