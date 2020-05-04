@@ -16,6 +16,8 @@ limitations under the License.
 package util
 
 import (
+	"strconv"
+
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	commonv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
@@ -77,28 +79,35 @@ func updateTrialsSummary(instance *experimentsv1alpha3.Experiment, trials *trial
 			sts.PendingTrialList = append(sts.PendingTrialList, trial.Name)
 		}
 
-		objectiveMetricValue := getObjectiveMetricValue(trial, objectiveMetricName)
-		if objectiveMetricValue == nil {
+		objectiveMetricValueStr := getObjectiveMetricValue(trial, objectiveMetricName)
+		if objectiveMetricValueStr == nil {
+			continue
+		}
+		objectiveMetricValue, err := strconv.ParseFloat(*objectiveMetricValueStr, 64)
+
+		// For string metrics values best trial is the latest
+		if err != nil {
+			bestTrialIndex = index
 			continue
 		}
 
-		//intialize vars to objective metric value of the first trial
+		//initialize vars to objective metric value of the first trial
 		if bestTrialIndex == -1 {
-			bestTrialValue = *objectiveMetricValue
+			bestTrialValue = objectiveMetricValue
 			bestTrialIndex = index
 		}
 
 		if objectiveType == commonv1alpha3.ObjectiveTypeMinimize {
-			if *objectiveMetricValue < bestTrialValue {
-				bestTrialValue = *objectiveMetricValue
+			if objectiveMetricValue < bestTrialValue {
+				bestTrialValue = objectiveMetricValue
 				bestTrialIndex = index
 			}
 			if instance.Spec.Objective.Goal != nil && bestTrialValue <= objectiveValueGoal {
 				isObjectiveGoalReached = true
 			}
 		} else if objectiveType == commonv1alpha3.ObjectiveTypeMaximize {
-			if *objectiveMetricValue > bestTrialValue {
-				bestTrialValue = *objectiveMetricValue
+			if objectiveMetricValue > bestTrialValue {
+				bestTrialValue = objectiveMetricValue
 				bestTrialIndex = index
 			}
 			if instance.Spec.Objective.Goal != nil && bestTrialValue >= objectiveValueGoal {
@@ -131,7 +140,7 @@ func updateTrialsSummary(instance *experimentsv1alpha3.Experiment, trials *trial
 	return isObjectiveGoalReached
 }
 
-func getObjectiveMetricValue(trial trialsv1alpha3.Trial, objectiveMetricName string) *float64 {
+func getObjectiveMetricValue(trial trialsv1alpha3.Trial, objectiveMetricName string) *string {
 	if trial.Status.Observation == nil {
 		return nil
 	}

@@ -67,8 +67,8 @@ type ParameterAssignment struct {
 }
 
 type Metric struct {
-	Name  string  `json:"name,omitempty"`
-	Value float64 `json:"value,omitempty"`
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true
