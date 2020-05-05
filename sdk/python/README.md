@@ -18,7 +18,7 @@ python setup.py install --user
 
 Then import the package:
 ```python
-import katib
+from kubeflow import katib
 ```
 
 ## Getting Started
