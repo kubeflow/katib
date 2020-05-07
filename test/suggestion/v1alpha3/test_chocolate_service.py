@@ -174,7 +174,6 @@ class TestHyperopt(unittest.TestCase):
         self.assertEqual(code, grpc.StatusCode.OK)
         self.assertEqual(2, len(response.parameter_assignments))
 
-# TODO(gaocegege): sqlite3.ProgrammingError in CI, fix it.
-# sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread.
+
 if __name__ == '__main__':
     unittest.main()
