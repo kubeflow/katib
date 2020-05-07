@@ -30,6 +30,7 @@ workflows:
     - cmd/suggestion/hyperband/v1alpha3/*
     - cmd/suggestion/hyperopt/v1alpha3/*
     - cmd/suggestion/nas/enas/v1alpha3/*
+    - cmd/suggestion/nas/darts/v1alpha3/*
     - cmd/suggestion/skopt/v1alpha3/*
     - cmd/suggestion/goptuna/v1alpha3/*
     - cmd/ui/v1alpha3/*
@@ -71,6 +72,7 @@ workflows:
     - cmd/suggestion/hyperband/v1alpha3/*
     - cmd/suggestion/hyperopt/v1alpha3/*
     - cmd/suggestion/nas/enas/v1alpha3/*
+    - cmd/suggestion/nas/darts/v1alpha3/*
     - cmd/suggestion/skopt/v1alpha3/*
     - cmd/suggestion/goptuna/v1alpha3/*
     - cmd/ui/v1alpha3/*
