@@ -8,7 +8,7 @@ from pkg.apis.manager.v1alpha3.python import api_pb2
 from pkg.suggestion.v1alpha3.chocolate.service import ChocolateService
 
 
-class TestHyperopt(unittest.TestCase):
+class TestChocolate(unittest.TestCase):
     def setUp(self):
         servicers = {
             api_pb2.DESCRIPTOR.services_by_name['Suggestion']: ChocolateService(
@@ -114,12 +114,6 @@ class TestHyperopt(unittest.TestCase):
             spec=api_pb2.ExperimentSpec(
                 algorithm=api_pb2.AlgorithmSpec(
                     algorithm_name="grid",
-                    algorithm_setting=[
-                        api_pb2.AlgorithmSetting(
-                            name="random_state",
-                            value="10"
-                        )
-                    ],
                 ),
                 objective=api_pb2.ObjectiveSpec(
                     type=api_pb2.MAXIMIZE,
@@ -167,7 +161,7 @@ class TestHyperopt(unittest.TestCase):
                                .services_by_name['Suggestion']
                                .methods_by_name['GetSuggestions']),
             invocation_metadata={},
-            request=request, timeout=1)
+            request=request, timeout=100)
 
         response, metadata, code, details = get_suggestion.termination()
         print(response.parameter_assignments)
