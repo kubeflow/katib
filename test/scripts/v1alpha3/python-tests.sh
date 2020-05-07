@@ -27,5 +27,5 @@ pip install -r cmd/suggestion/hyperopt/v1alpha3/requirements.txt
 pip install -r cmd/suggestion/skopt/v1alpha3/requirements.txt
 pip install -r cmd/suggestion/nas/enas/v1alpha3/requirements.txt
 pip install -r cmd/suggestion/hyperband/v1alpha3/requirements.txt
-pop install -r cmd/suggestion/nas/darts/v1alpha3/requirements.txt
+pip install -r cmd/suggestion/nas/darts/v1alpha3/requirements.txt
 pytest -s ./test
