@@ -28,6 +28,7 @@ Table of Contents
       * [Katib](#katib)
       * [Running examples](#running-examples)
       * [Cleanups](#cleanups)
+  * [Katib SDK](#katib-sdk)      
   * [Quick Start](#quick-start)
   * [Who are using Katib?](#who-are-using-katib)
   * [CONTRIBUTING](#contributing)
@@ -338,6 +339,15 @@ kubectl -n kubeflow port-forward svc/katib-ui 8080:80
 ```
 
 You can access the Katib UI using this URL: ```http://localhost:8080/katib/```.
+
+### Use Katib SDK
+* Install the SDK
+  ```
+  TO DO
+  ```
+* Get the Katib SDK documents from [here](sdk/python/README.md).
+
+* Follow the [example here](sdk/python/examples/bayesianoptimization-katib-sdk.ipynb) to use the Katib SDK to create, delete and get Hyperparameter values of experiment.
 
 ### Cleanups
 
