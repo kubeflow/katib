@@ -97,6 +97,7 @@ Currently Katib supports the following exploration algorithms:
 #### Neural Architecture Search
 
 * [Efficient Neural Architecture Search (ENAS)](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1alpha3/nas/enas)
+* [Differentiable Architecture Search (DARTS)](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1alpha3/nas/darts)
 
 
 ## Components in Katib
