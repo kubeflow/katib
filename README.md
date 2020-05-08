@@ -339,7 +339,7 @@ kubectl -n kubeflow port-forward svc/katib-ui 8080:80
 
 You can access the Katib UI using this URL: ```http://localhost:8080/katib/```.
 
-### Use Katib SDK
+### Katib SDK
 * Install the SDK
   ```
   TO DO
