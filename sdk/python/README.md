@@ -23,8 +23,7 @@ from kubeflow import katib
 
 ## Getting Started
 
-Please follow the [examples](examples/bayesianoptimization-katib-sdk.ipynb) and then run the following:
-
+Please follow the [samples](examples/bayesianoptimization-katib-sdk.ipynb) to create, update, delete and get hyperparamaters of  Katib Experiment.
 
 ## Documentation for API Endpoints
 
