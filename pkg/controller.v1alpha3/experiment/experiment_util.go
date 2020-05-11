@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -112,30 +113,28 @@ func (r *ReconcileExperiment) updateFinalizers(instance *experimentsv1alpha3.Exp
 	}
 }
 
-func (r *ReconcileExperiment) terminateSuggestion(instance *experimentsv1alpha3.Experiment) (reconcile.Result, error) {
-	log.Info("Start terminating original...")
+func (r *ReconcileExperiment) terminateSuggestion(instance *experimentsv1alpha3.Experiment) error {
 	original := &suggestionsv1alpha3.Suggestion{}
-	err := r.Get(context.TODO(), types.NamespacedName{
-		Namespace: instance.Namespace,
-		Name:      instance.Name,
-	}, original)
+	err := r.Get(context.TODO(),
+		types.NamespacedName{Namespace: instance.GetNamespace(), Name: instance.GetName()}, original)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			return reconcile.Result{}, nil
+			return nil
 		}
-		return reconcile.Result{}, err
+		return err
 	}
-	if original.IsCompleted() {
-		return reconcile.Result{}, nil
+	// If Suggestion is failed or Suggestion is Succeeded, not needed to terminate Suggestion
+	if original.IsFailed() || original.IsSucceeded() {
+		return nil
 	}
+	log.Info("Start terminating suggestion")
 	suggestion := original.DeepCopy()
 	msg := "Suggestion is succeeded"
 	suggestion.MarkSuggestionStatusSucceeded(suggestionController.SuggestionSucceededReason, msg)
-	log.Info("Mark suggestion succeeded...")
+	log.Info("Mark suggestion succeeded")
 
-	if err := r.UpdateSuggestion(suggestion); err != nil {
-		return reconcile.Result{}, err
-	} else {
-		return reconcile.Result{Requeue: true}, nil
+	if err := r.UpdateSuggestionStatus(suggestion); err != nil {
+		return err
 	}
+	return nil
 }

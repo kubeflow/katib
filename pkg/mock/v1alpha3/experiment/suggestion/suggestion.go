@@ -62,3 +62,17 @@ func (mr *MockSuggestionMockRecorder) UpdateSuggestion(arg0 interface{}) *gomock
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSuggestion", reflect.TypeOf((*MockSuggestion)(nil).UpdateSuggestion), arg0)
 }
+
+// UpdateSuggestionStatus mocks base method
+func (m *MockSuggestion) UpdateSuggestionStatus(arg0 *v1alpha30.Suggestion) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateSuggestionStatus", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateSuggestionStatus indicates an expected call of UpdateSuggestionStatus
+func (mr *MockSuggestionMockRecorder) UpdateSuggestionStatus(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSuggestionStatus", reflect.TypeOf((*MockSuggestion)(nil).UpdateSuggestionStatus), arg0)
+}

@@ -317,6 +317,10 @@
                     name: "run-cmaes-e2e-tests",
                     template: "run-cmaes-e2e-tests",
                   },
+                  {
+                    name: "run-never-resume-e2e-tests",
+                    template: "run-never-resume-e2e-tests",
+                  },
                 ],
               ],
             },
@@ -396,6 +400,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-cmaes-e2e-tests", testWorkerImage, [
               "test/scripts/v1alpha3/run-suggestion-cmaes.sh",
             ]),  // run cmaes algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-never-resume-e2e-tests", testWorkerImage, [
+              "test/scripts/v1alpha3/run-never-resume.sh",
+            ]),  // run never resume suggestion test
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
               "python",
               "-m",
