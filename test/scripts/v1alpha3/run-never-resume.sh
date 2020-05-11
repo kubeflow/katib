@@ -56,9 +56,9 @@ echo "Running e2e test for never resume experiment"
 export KUBECONFIG=$HOME/.kube/config
 ./run-e2e-experiment ../../../examples/v1alpha3/never-resume-example.yaml
 
-kubectl -n kubeflow describe suggestion never-resume
+kubectl -n kubeflow describe suggestion never-resume-example
 
-kubectl -n kubeflow describe experiment never-resume
-kubectl -n kubeflow delete experiment never-resume
+kubectl -n kubeflow describe experiment never-resume-example
+kubectl -n kubeflow delete experiment never-resume-example
 
 exit 0
