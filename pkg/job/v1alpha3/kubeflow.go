@@ -100,4 +100,11 @@ func init() {
 		Kind:    consts.JobKindPyTorch,
 	}
 	JobRoleMap[consts.JobKindPyTorch] = []string{consts.JobRole, consts.JobRolePyTorch}
+	ProviderRegistry[consts.JobKindMpi] = &Kubeflow{}
+	SupportedJobList[consts.JobKindMpi] = schema.GroupVersionKind{
+		Group:   "kubeflow.org",
+		Version: "v1alpha2",
+		Kind:    consts.JobKindMpi,
+	}
+	JobRoleMap[consts.JobKindMpi] = []string{consts.JobRole, consts.JobRoleMpi}
 }

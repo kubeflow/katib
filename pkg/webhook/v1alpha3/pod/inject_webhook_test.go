@@ -480,6 +480,23 @@ func TestGetKatibJob(t *testing.T) {
 			Err:  true,
 			Name: "Invalid Kind",
 		},
+		{
+			Pod: v1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					OwnerReferences: []metav1.OwnerReference{
+						{
+							APIVersion: "batch/v1",
+							Kind:       "Job",
+							Name:       "OwnerName-launcher",
+						},
+					},
+				},
+			},
+			ExpectedJobKind: "Job",
+			ExpectedJobName: "OwnerName",
+			Err:             false,
+			Name:            "Valid Pod",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -498,6 +515,7 @@ func TestGetKatibJob(t *testing.T) {
 func TestIsMasterRole(t *testing.T) {
 	masterRoleLabel := make(map[string]string)
 	masterRoleLabel[consts.JobRole] = MasterRole
+	masterRoleLabel[consts.JobRoleMpi] = LanucherRole
 	invalidLabel := make(map[string]string)
 	invalidLabel["invalid-label"] = "invalid"
 	testCases := []struct {
@@ -520,6 +538,16 @@ func TestIsMasterRole(t *testing.T) {
 			JobKind:  "PyTorchJob",
 			IsMaster: true,
 			Name:     "Pytorch Master Pod",
+		},
+		{
+			Pod: v1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: masterRoleLabel,
+				},
+			},
+			JobKind:  "MPIJob",
+			IsMaster: true,
+			Name:     "MPI Launcher Pod",
 		},
 		{
 			Pod: v1.Pod{

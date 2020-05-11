@@ -19,6 +19,7 @@ package pod
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/authn/k8schain"
@@ -37,6 +38,15 @@ func getKatibJob(pod *v1.Pod) (string, string, error) {
 		owners := pod.GetOwnerReferences()
 		for _, owner := range owners {
 			if isMatchGVK(owner, gvk) {
+				if strings.Contains(owner.Name, LanucherRole) {
+					// in fact, launcher pod is owned by job not mpijob directly,
+					// whose name is like "mpi-example-wf2hx8lr-launcher",
+					// consists of "mpiJobName" and "-launcher",
+					// thus its related trialName should git rid of "-launcher".
+					tn := strings.Split(owner.Name, "-")
+					trialName := strings.Join(tn[:len(tn)-1], "-")
+					return owner.Kind, trialName, nil
+				}
 				return owner.Kind, owner.Name, nil
 			}
 		}
@@ -62,7 +72,7 @@ func isMasterRole(pod *v1.Pod, jobKind string) bool {
 		}
 		for _, label := range labels {
 			if v, err := getLabel(pod, label); err == nil {
-				if v == MasterRole {
+				if v == MasterRole || v == LanucherRole {
 					return true
 				}
 			}

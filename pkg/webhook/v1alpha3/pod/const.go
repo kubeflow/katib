@@ -21,8 +21,9 @@ import (
 )
 
 const (
-	MasterRole = "master"
-	BatchJob   = "Job"
+	MasterRole   = "master"
+	LanucherRole = "launcher"
+	BatchJob     = "Job"
 )
 
 var (

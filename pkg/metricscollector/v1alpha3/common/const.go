@@ -30,7 +30,7 @@ const (
 
 	TrainingCompleted = "completed"
 
-	DefaultFilter = `([\w|-]+)\s*=\s*((-?\d+)(\.\d+)?)`
+	DefaultFilter = `([\w|-]+)\s*[:=]\s*((-?\d+)(\.\d+)?)`
 )
 
 var (
