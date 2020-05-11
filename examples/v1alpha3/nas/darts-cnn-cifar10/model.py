@@ -87,13 +87,19 @@ class NetworkCNN(nn.Module):
 
         reduction_prev = False
         for i in range(self.num_layers):
-            # For [1/3, 2/3] Layers - Reduction cell with double channels
-            # Others - Normal cell
-            if i in [self.num_layers//3, 2*self.num_layers//3]:
-                c_cur *= 2
-                reduction_cur = True
-            else:
+            # For Network with 1 layer: Only Normal Cell
+            if self.num_layers == 1:
                 reduction_cur = False
+            else:
+                # For Network with two layers: First layer - Normal, Second - Reduction
+                # For Other Networks: [1/3, 2/3] Layers - Reduction cell with double channels
+                # Others - Normal cell
+                if ((self.num_layers == 2 and i == 1) or
+                        (self.num_layers > 2 and i in [self.num_layers//3, 2*self.num_layers//3])):
+                    c_cur *= 2
+                    reduction_cur = True
+                else:
+                    reduction_cur = False
 
             cell = Cell(self.num_nodes, c_prev_prev, c_prev, c_cur, reduction_prev, reduction_cur, search_space)
             reduction_prev = reduction_cur
@@ -113,7 +119,8 @@ class NetworkCNN(nn.Module):
 
         for i in range(self.num_nodes):
             self.alpha_normal.append(nn.Parameter(1e-3*torch.randn(i+2, num_ops)))
-            self.alpha_reduce.append(nn.Parameter(1e-3*torch.randn(i+2, num_ops)))
+            if self.num_layers > 1:
+                self.alpha_reduce.append(nn.Parameter(1e-3*torch.randn(i+2, num_ops)))
 
         # Setup alphas list
         self.alphas = []
@@ -146,9 +153,10 @@ class NetworkCNN(nn.Module):
         for alpha in self.alpha_normal:
             print(F.softmax(alpha, dim=-1))
 
-        print("\n>>> Alpha Reduce <<<")
-        for alpha in self.alpha_reduce:
-            print(F.softmax(alpha, dim=-1))
+        if self.num_layers > 1:
+            print("\n>>> Alpha Reduce <<<")
+            for alpha in self.alpha_reduce:
+                print(F.softmax(alpha, dim=-1))
         print("\n")
 
     def getWeights(self):
