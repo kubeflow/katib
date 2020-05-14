@@ -2,6 +2,7 @@ package suggestion
 
 import (
 	"context"
+
 	"github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -49,11 +50,12 @@ func (r *ReconcileSuggestion) deleteDeployment(instance *v1alpha3.Suggestion) er
 		}
 		return err
 	}
+	log.Info("Deleting Suggestion Deployment", "namespace", realDeploy.Namespace, "name", realDeploy.Name)
+
 	err = r.Delete(context.TODO(), realDeploy)
 	if err != nil {
 		return err
 	}
-	log.Info("suggestion deployment %s has been deleted", realDeploy.Name)
 
 	return nil
 }
@@ -71,11 +73,12 @@ func (r *ReconcileSuggestion) deleteService(instance *v1alpha3.Suggestion) error
 		}
 		return err
 	}
+	log.Info("Deleting Suggestion Service", "namespace", realService.Namespace, "name", realService.Name)
+
 	err = r.Delete(context.TODO(), realService)
 	if err != nil {
 		return err
 	}
-	log.Info("suggestion service %s has been deleted", realService.Name)
 
 	return nil
 }

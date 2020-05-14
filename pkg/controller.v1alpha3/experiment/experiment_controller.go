@@ -193,17 +193,24 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	if instance.IsCompleted() {
 		// Check if completed instance is restartable
 		// Experiment is restartable only if it is in succeeded state by reaching max trials
+		// And Resume Policy is LongRunning
 		if util.IsCompletedExperimentRestartable(instance) {
 			// Check if max trials is reconfigured
 			if (instance.Spec.MaxTrialCount != nil &&
 				*instance.Spec.MaxTrialCount != instance.Status.Trials) ||
 				(instance.Spec.MaxTrialCount == nil && instance.Status.Trials != 0) {
+				logger.Info("Experiment is restarting")
 				msg := "Experiment is restarted"
 				instance.MarkExperimentStatusRestarting(util.ExperimentRestartingReason, msg)
 			}
 		} else {
-			if instance.Spec.ResumePolicy != experimentsv1alpha3.LongRunning {
-				return r.terminateSuggestion(instance)
+			// Terminate Suggestion after Experiment is finished if Resume Policy is Never
+			if instance.Spec.ResumePolicy == experimentsv1alpha3.NeverResume {
+				err := r.terminateSuggestion(instance)
+				if err != nil {
+					logger.Error(err, "Terminate Suggestion error")
+				}
+				return reconcile.Result{}, err
 			}
 			// If experiment is completed with no running trials, stop reconcile
 			if !instance.HasRunningTrials() {

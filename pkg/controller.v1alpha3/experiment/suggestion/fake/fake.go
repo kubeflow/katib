@@ -20,3 +20,7 @@ func (f *Fake) GetOrCreateSuggestion(instance *experimentsv1alpha3.Experiment, s
 func (f *Fake) UpdateSuggestion(suggestion *suggestionsv1alpha3.Suggestion) error {
 	return nil
 }
+
+func (f *Fake) UpdateSuggestionStatus(suggestion *suggestionsv1alpha3.Suggestion) error {
+	return nil
+}
