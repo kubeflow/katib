@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strconv"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -29,7 +28,7 @@ const (
 	timeout = 30 * time.Minute
 )
 
-func verifyResult(exp *experimentsv1alpha3.Experiment) (*string, error) {
+func verifyResult(exp *experimentsv1alpha3.Experiment) (*float64, error) {
 	if len(exp.Status.CurrentOptimalTrial.ParameterAssignments) == 0 {
 		return nil, fmt.Errorf("Best parameter assignments not updated in status")
 	}
@@ -128,11 +127,11 @@ func main() {
 		log.Fatal("Experiment run timed out")
 	}
 
-	metricValStr, err := verifyResult(exp)
+	metricVal, err := verifyResult(exp)
 	if err != nil {
 		log.Fatal(err)
 	}
-	if metricValStr == nil {
+	if metricVal == nil {
 		log.Fatal("Metric value in CurrentOptimalTrial not populated")
 	}
 
@@ -141,11 +140,8 @@ func main() {
 	if exp.Spec.Objective.Goal != nil {
 		goal = *exp.Spec.Objective.Goal
 	}
-
-	metricVal, err := strconv.ParseFloat(*metricValStr, 64)
-	if err == nil &&
-		((exp.Spec.Objective.Goal != nil && objectiveType == commonv1alpha3.ObjectiveTypeMinimize && metricVal < goal) ||
-			(exp.Spec.Objective.Goal != nil && objectiveType == commonv1alpha3.ObjectiveTypeMaximize && metricVal > goal)) {
+	if (exp.Spec.Objective.Goal != nil && objectiveType == commonv1alpha3.ObjectiveTypeMinimize && *metricVal < goal) ||
+		(exp.Spec.Objective.Goal != nil && objectiveType == commonv1alpha3.ObjectiveTypeMaximize && *metricVal > goal) {
 		log.Print("Objective Goal reached")
 	} else {
 
