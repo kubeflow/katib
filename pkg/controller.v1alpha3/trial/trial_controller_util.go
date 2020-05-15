@@ -171,36 +171,27 @@ func isJobSucceeded(jobCondition *commonv1.JobCondition) bool {
 	return false
 }
 
-func getBestObjectiveMetricValue(metricLogs []*api_pb.MetricLog, objectiveType commonv1alpha3.ObjectiveType) *string {
+func getBestObjectiveMetricValue(metricLogs []*api_pb.MetricLog, objectiveType commonv1alpha3.ObjectiveType) *float64 {
 	metricLogSize := len(metricLogs)
 	if metricLogSize == 0 {
 		return nil
 	}
 
-	bestObjectiveValue, err := strconv.ParseFloat(metricLogs[0].Metric.Value, 64)
-	bestIndex := 0
-
-	if err != nil {
-		// If metrics are string values return the latest value
-		return &metricLogs[len(metricLogs)-1].Metric.Value
-	}
-
-	for idx, metricLog := range metricLogs[1:] {
+	bestObjectiveValue, _ := strconv.ParseFloat(metricLogs[0].Metric.Value, 64)
+	for _, metricLog := range metricLogs[1:] {
 		objectiveMetricValue, _ := strconv.ParseFloat(metricLog.Metric.Value, 64)
 		if objectiveType == commonv1alpha3.ObjectiveTypeMinimize {
 			if objectiveMetricValue < bestObjectiveValue {
 				bestObjectiveValue = objectiveMetricValue
-				bestIndex = idx + 1
 			}
 		} else if objectiveType == commonv1alpha3.ObjectiveTypeMaximize {
 			if objectiveMetricValue > bestObjectiveValue {
 				bestObjectiveValue = objectiveMetricValue
-				bestIndex = idx + 1
 			}
 		}
 
 	}
-	return &metricLogs[bestIndex].Metric.Value
+	return &bestObjectiveValue
 }
 
 func needUpdateFinalizers(trial *trialsv1alpha3.Trial) (bool, []string) {
