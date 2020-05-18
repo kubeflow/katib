@@ -182,11 +182,29 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 			prevMetricTimeValue[m.Metric.Name] = []string{"", ""}
 
 		}
+
+		newMetricValue, err := strconv.ParseFloat(m.Metric.Value, 64)
+		if err != nil {
+			log.Printf("ParseFloat for new metric value: %v failed: %v", m.Metric.Value, err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		var prevMetricValue float64
+		if prevMetricTimeValue[m.Metric.Name][1] != "" {
+			prevMetricValue, err = strconv.ParseFloat(prevMetricTimeValue[m.Metric.Name][1], 64)
+			if err != nil {
+				log.Printf("ParseFloat for prev metric value: %v failed: %v", prevMetricTimeValue[m.Metric.Name][1], err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+
 		if formatCurrentTime == prevMetricTimeValue[m.Metric.Name][0] &&
 			((objectiveType == commonv1alpha3.ObjectiveTypeMinimize &&
-				m.Metric.Value < prevMetricTimeValue[m.Metric.Name][1]) ||
+				(newMetricValue < prevMetricValue)) ||
 				(objectiveType == commonv1alpha3.ObjectiveTypeMaximize &&
-					m.Metric.Value > prevMetricTimeValue[m.Metric.Name][1])) {
+					(newMetricValue > prevMetricValue))) {
 
 			prevMetricTimeValue[m.Metric.Name][1] = m.Metric.Value
 			for i := len(resultArray) - 1; i >= 0; i-- {
