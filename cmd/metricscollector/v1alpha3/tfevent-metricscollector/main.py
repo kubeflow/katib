@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     WaitOtherMainProcesses(completed_marked_dir=opt.dir_path)
 
-    mc = MetricsCollector(opt.metric_names.split(','))
+    mc = MetricsCollector(opt.metric_names.split(';'))
     observation_log = mc.parse_file(opt.dir_path)
 
     channel = grpc.beta.implementations.insecure_channel(
