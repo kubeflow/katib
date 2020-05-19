@@ -202,9 +202,9 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 
 		if formatCurrentTime == prevMetricTimeValue[m.Metric.Name][0] &&
 			((objectiveType == commonv1alpha3.ObjectiveTypeMinimize &&
-				(newMetricValue < prevMetricValue)) ||
+				newMetricValue < prevMetricValue) ||
 				(objectiveType == commonv1alpha3.ObjectiveTypeMaximize &&
-					(newMetricValue > prevMetricValue))) {
+					newMetricValue > prevMetricValue)) {
 
 			prevMetricTimeValue[m.Metric.Name][1] = m.Metric.Value
 			for i := len(resultArray) - 1; i >= 0; i-- {
