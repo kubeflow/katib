@@ -59,7 +59,8 @@ class Cell(nn.Module):
 
 class NetworkCNN(nn.Module):
 
-    def __init__(self, init_channels, input_channels, num_classes, num_layers, criterion, search_space):
+    def __init__(self, init_channels, input_channels, num_classes,
+                 num_layers, criterion, search_space, num_nodes, stem_multiplier):
         super(NetworkCNN, self).__init__()
 
         self.init_channels = init_channels
@@ -68,8 +69,8 @@ class NetworkCNN(nn.Module):
         self.criterion = criterion
 
         # TODO: Algorithm settings?
-        self.num_nodes = 4
-        self.stem_multiplier = 3
+        self.num_nodes = num_nodes
+        self.stem_multiplier = stem_multiplier
 
         c_cur = self.stem_multiplier*self.init_channels
 

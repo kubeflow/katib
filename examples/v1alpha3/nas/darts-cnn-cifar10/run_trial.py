@@ -12,24 +12,6 @@ import utils
 from search_space import SearchSpace
 
 
-# TODO: Move to the algorithm settings
-w_lr = 0.025
-w_lr_min = 0.001
-w_momentum = 0.9
-w_weight_decay = 3e-4
-w_grad_clip = 5.
-
-alpha_lr = 3e-4
-alpha_weight_decay = 1e-3
-
-batch_size = 128
-num_workers = 4
-
-init_channels = 16
-
-print_step = 50
-
-
 def main():
 
     parser = argparse.ArgumentParser(description='TrainingContainer')
@@ -39,16 +21,46 @@ def main():
 
     args = parser.parse_args()
 
+    # Get Algorithm Settings
     algorithm_settings = args.algorithm_settings.replace("\'", "\"")
     algorithm_settings = json.loads(algorithm_settings)
-    print("Algorithm settings")
-    print("{}\n".format(algorithm_settings))
-    num_epochs = int(algorithm_settings["num_epoch"])
+    print(">>> Algorithm settings")
+    for key, value in algorithm_settings.items():
+        if len(key) > 13:
+            print("{}\t{}".format(key, value))
+        elif len(key) < 5:
+            print("{}\t\t\t{}".format(key, value))
+        else:
+            print("{}\t\t{}".format(key, value))
+    print()
 
+    num_epochs = int(algorithm_settings["num_epochs"])
+
+    w_lr = float(algorithm_settings["w_lr"])
+    w_lr_min = float(algorithm_settings["w_lr_min"])
+    w_momentum = float(algorithm_settings["w_momentum"])
+    w_weight_decay = float(algorithm_settings["w_weight_decay"])
+    w_grad_clip = float(algorithm_settings["w_grad_clip"])
+
+    alpha_lr = float(algorithm_settings["alpha_lr"])
+    alpha_weight_decay = float(algorithm_settings["alpha_weight_decay"])
+
+    batch_size = int(algorithm_settings["batch_size"])
+    num_workers = int(algorithm_settings["num_workers"])
+
+    init_channels = int(algorithm_settings["init_channels"])
+
+    print_step = int(algorithm_settings["print_step"])
+
+    num_nodes = int(algorithm_settings["num_nodes"])
+    stem_multiplier = int(algorithm_settings["stem_multiplier"])
+
+    # Get Search Space
     search_space = args.search_space.replace("\'", "\"")
     search_space = json.loads(search_space)
     search_space = SearchSpace(search_space)
 
+    # Get Num Layers
     num_layers = int(args.num_layers)
     print("Number of layers {}\n".format(num_layers))
 
@@ -78,7 +90,8 @@ def main():
 
     criterion = nn.CrossEntropyLoss().to(device)
 
-    model = NetworkCNN(init_channels, input_channels,  num_classes, num_layers, criterion, search_space)
+    model = NetworkCNN(init_channels, input_channels,  num_classes, num_layers,
+                       criterion, search_space, num_nodes, stem_multiplier)
 
     model = model.to(device)
 
@@ -126,13 +139,13 @@ def main():
 
         # Training
         print(">>> Training")
-        train(train_loader, valid_loader, model, architect, w_optim,
-              alpha_optim, lr, epoch, num_epochs, device)
+        train(train_loader, valid_loader, model, architect, w_optim, alpha_optim,
+              lr, epoch, num_epochs, device, w_grad_clip, print_step)
 
         # Validation
         print("\n>>> Validation")
         cur_step = (epoch + 1) * len(train_loader)
-        top1 = validate(valid_loader, model, epoch, cur_step, num_epochs, device)
+        top1 = validate(valid_loader, model, epoch, cur_step, num_epochs, device, print_step)
 
         # Print genotype
         genotype = model.genotype(search_space)
@@ -147,7 +160,8 @@ def main():
     print("\nBest-Genotype={}".format(str(best_genotype).replace(" ", "")))
 
 
-def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim, lr, epoch, num_epochs, device):
+def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim,
+          lr, epoch, num_epochs, device, w_grad_clip, print_step):
     top1 = utils.AverageMeter()
     top5 = utils.AverageMeter()
     losses = utils.AverageMeter()
@@ -194,7 +208,7 @@ def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim, lr
     print("Train: [{:2d}/{}] Final Prec@1 {:.4%}".format(epoch+1, num_epochs, top1.avg))
 
 
-def validate(valid_loader, model, epoch, cur_step, num_epochs, device):
+def validate(valid_loader, model, epoch, cur_step, num_epochs, device, print_step):
     top1 = utils.AverageMeter()
     top5 = utils.AverageMeter()
     losses = utils.AverageMeter()

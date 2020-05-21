@@ -20,7 +20,7 @@ spec:
   algorithm:
     algorithmName: darts
     algorithmSettings:
-      - name: num_epoch
+      - name: num_epochs
         value: "3"
   nasConfig:
     graphConfig:
