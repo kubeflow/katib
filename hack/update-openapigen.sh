@@ -22,10 +22,10 @@ if [[ -z "${GOPATH:-}" ]]; then
     export GOPATH=$(go env GOPATH)
 fi
 
-PROJECT_ROOT=$(pwd)
-CODEGEN_PKG=$(pwd)/vendor/k8s.io/code-generator
+PROJECT_ROOT=${GOPATH}/src/github.com/kubeflow/katib
+CODEGEN_PKG=${PROJECT_ROOT}/vendor/k8s.io/code-generator
 VERSION="v1alpha3"
-SWAGGER_CODEGEN_FILE="pkg/apis/v1alpha3/swagger.json"
+SWAGGER_CODEGEN_FILE=${PROJECT_ROOT}/pkg/apis/v1alpha3/swagger.json
 SWAGGER_VERSION="0.1"
 
 echo "Generating OpenAPI specification ..."
@@ -36,4 +36,4 @@ go run ${CODEGEN_PKG}/cmd/openapi-gen/main.go \
   $@
 
 echo "Generating swagger file ..."
-go run hack/swagger/main.go ${SWAGGER_VERSION} > ${SWAGGER_CODEGEN_FILE}
+go run ${PROJECT_ROOT}/hack/swagger/main.go ${SWAGGER_VERSION} > ${SWAGGER_CODEGEN_FILE}

@@ -21,7 +21,7 @@
   version = "v33.2.0"
 
 [[projects]]
-  digest = "0:"
+  digest = "1:7dc53e012b9e58f6fc52dce9c201d38dbc3c0e573bad4a56fa0f861823934915"
   name = "github.com/Azure/go-autorest"
   packages = [
     "autorest",
@@ -1241,7 +1241,7 @@
   version = "kubernetes-1.12.9"
 
 [[projects]]
-  digest = "1:8e2ccff95275980bd6b21ab6b15f07e8073204d793e3e8af45770cd710a87a8d"
+  digest = "1:26b81b5e76e3f84ea5140da4f74649576e470f79091d2ef8e0d1b5000bc636ca"
   name = "k8s.io/code-generator"
   packages = [
     "cmd/deepcopy-gen",
@@ -1250,13 +1250,13 @@
     "cmd/openapi-gen/args",
     "pkg/util",
   ]
-  pruneopts = "NUT"
+  pruneopts = "T"
   revision = "b1289fc74931d4b6b04bd1a259acfc88a2cb0a66"
   version = "kubernetes-1.12.9"
 
 [[projects]]
   branch = "master"
-  digest = "1:28514fabca4356625720ffb012408790a9d00d31963a9bd9daf7b5ccd894c301"
+  digest = "1:4e07c417d966628ee9e471354ad5e311c9c25ff357d42fd0dd2f81a40caf6aad"
   name = "k8s.io/gengo"
   packages = [
     "args",
@@ -1267,7 +1267,7 @@
     "parser",
     "types",
   ]
-  pruneopts = "NUT"
+  pruneopts = "NT"
   revision = "0689ccc1d7d65d9dd1bedcc3b0b1ed7df91ba266"
 
 [[projects]]
@@ -1291,7 +1291,7 @@
   revision = "39cb288412c48cb533ba4be5d6c28620b9a0c1b4"
 
 [[projects]]
-  digest = "0:"
+  digest = "1:ea0871075d014a0c553b8430c4b162f8dd6397bf25a4938cadcd56d3e05f7afe"
   name = "k8s.io/kubernetes"
   packages = [
     "pkg/cloudprovider/providers/azure/auth",
