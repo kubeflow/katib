@@ -16,6 +16,7 @@
 
 set -o errexit
 set -o nounset
+set -o pipefail
 
 if [[ -z "${GOPATH:-}" ]]; then
     export GOPATH=$(go env GOPATH)

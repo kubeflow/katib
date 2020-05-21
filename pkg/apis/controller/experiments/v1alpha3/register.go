@@ -40,3 +40,8 @@ var (
 	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
 	AddToScheme   = SchemeBuilder.AddToScheme
 )
+
+// Resource is required by pkg/client/listers/...
+func Resource(resource string) schema.GroupResource {
+	return SchemeGroupVersion.WithResource(resource).GroupResource()
+}
