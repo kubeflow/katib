@@ -67,8 +67,6 @@ Currently, it supports running only on single GPU and second-order approximation
 
 ## TODO list
 
-- Extend algorithm settings with algorithm parameters.
-
 - Integrate E2E test in CI. Create simple example, which can run on CPU.
 
 - Add validation to Suggestion service.

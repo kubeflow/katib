@@ -99,7 +99,20 @@ def get_search_space(operations):
 def get_algorithm_settings(settings_raw):
 
     algorithm_settings_default = {
-        "num_epoch": 50
+        "num_epochs":           50,
+        "w_lr":                 0.025,
+        "w_lr_min":             0.001,
+        "w_momentum":           0.9,
+        "w_weight_decay":       3e-4,
+        "w_grad_clip":          5.,
+        "alpha_lr":             3e-4,
+        "alpha_weight_decay":   1e-3,
+        "batch_size":           128,
+        "num_workers":          4,
+        "init_channels":        16,
+        "print_step":           50,
+        "num_nodes":            4,
+        "stem_multiplier":      3,
     }
 
     for setting in settings_raw:
