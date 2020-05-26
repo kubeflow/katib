@@ -1,0 +1,138 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "api.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {},
+  "definitions": {
+    "beta1AlgorithmSetting": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "beta1AlgorithmSpec": {
+      "type": "object",
+      "properties": {
+        "algorithm_name": {
+          "type": "string"
+        },
+        "algorithm_setting": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/beta1AlgorithmSetting"
+          }
+        },
+        "early_stopping_spec": {
+          "$ref": "#/definitions/beta1EarlyStoppingSpec"
+        }
+      }
+    },
+    "beta1DeleteObservationLogReply": {
+      "type": "object"
+    },
+    "beta1EarlyStoppingSpec": {
+      "type": "object"
+    },
+    "beta1GetObservationLogReply": {
+      "type": "object",
+      "properties": {
+        "observation_log": {
+          "$ref": "#/definitions/beta1ObservationLog"
+        }
+      }
+    },
+    "beta1GetSuggestionsReply": {
+      "type": "object",
+      "properties": {
+        "parameter_assignments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/beta1GetSuggestionsReplyParameterAssignments"
+          }
+        },
+        "algorithm": {
+          "$ref": "#/definitions/beta1AlgorithmSpec"
+        }
+      }
+    },
+    "beta1GetSuggestionsReplyParameterAssignments": {
+      "type": "object",
+      "properties": {
+        "assignments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/beta1ParameterAssignment"
+          }
+        }
+      }
+    },
+    "beta1Metric": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "beta1MetricLog": {
+      "type": "object",
+      "properties": {
+        "time_stamp": {
+          "type": "string"
+        },
+        "metric": {
+          "$ref": "#/definitions/beta1Metric"
+        }
+      }
+    },
+    "beta1ObservationLog": {
+      "type": "object",
+      "properties": {
+        "metric_logs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/beta1MetricLog"
+          }
+        }
+      }
+    },
+    "beta1ParameterAssignment": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "beta1ReportObservationLogReply": {
+      "type": "object"
+    },
+    "beta1ValidateAlgorithmSettingsReply": {
+      "type": "object",
+      "title": "*\nReturn INVALID_ARGUMENT Error if Algorithm Settings are not Valid"
+    }
+  }
+}

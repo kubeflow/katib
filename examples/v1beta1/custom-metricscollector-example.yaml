@@ -1,0 +1,76 @@
+apiVersion: "kubeflow.org/v1beta1"
+kind: Experiment
+metadata:
+  namespace: kubeflow
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: custom-metricscollector-example
+spec:
+  objective:
+    type: maximize
+    goal: 0.99
+    objectiveMetricName: accuracy
+  metricsCollectorSpec:
+    source:
+      fileSystemPath:
+        path: "/katib/mnist.log"
+        kind: File
+    collector:
+      kind: Custom
+      customCollector:
+        args:
+          - -m
+          - accuracy
+          - -s
+          - katib-db-manager.kubeflow:6789
+          - -path
+          - /katib/mnist.log
+        image: kubeflowkatib/custom-metrics-collector:latest
+        imagePullPolicy: Always
+        name: custom-metrics-logger-and-collector
+        env:
+          - name: TrialNamePrefix
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+  algorithm:
+    algorithmName: random
+  parallelTrialCount: 3
+  maxTrialCount: 12
+  maxFailedTrialCount: 3
+  parameters:
+    - name: --lr
+      parameterType: double
+      feasibleSpace:
+        min: "0.01"
+        max: "0.03"
+    - name: --momentum
+      parameterType: double
+      feasibleSpace:
+        min: "0.3"
+        max: "0.7"
+  trialTemplate:
+    goTemplate:
+      rawTemplate: |-
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          name: {{.Trial}}
+          namespace: {{.NameSpace}}
+        spec:
+          template:
+            spec:
+              containers:
+              - name: {{.Trial}}
+                image: docker.io/kubeflowkatib/pytorch-mnist
+                imagePullPolicy: Always
+                command:
+                - "python"
+                - "/var/mnist.py"
+                - "--epochs=1"
+                {{- with .HyperParameters}}
+                {{- range .}}
+                - "{{.Name}}={{.Value}}"
+                {{- end}}
+                {{- end}}
+              restartPolicy: Never

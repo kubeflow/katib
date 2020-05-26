@@ -1,0 +1,22 @@
+FROM tensorflow/tensorflow:1.12.0
+
+# Install system packages
+RUN apt-get update && apt-get install -y software-properties-common && \
+      add-apt-repository ppa:deadsnakes/ppa && \
+      apt-get update && \
+      apt-get install -y --no-install-recommends \      
+      python3-setuptools \
+      python3-dev \      
+      python3-pip \
+      git \
+      graphviz \
+      wget
+
+ADD . /usr/src/app/github.com/kubeflow/katib
+WORKDIR /usr/src/app/github.com/kubeflow/katib/examples/v1beta1/nas/enas-cnn-cifar10
+
+RUN pip3 install --upgrade pip
+RUN pip3 install --upgrade --no-cache-dir -r requirements-cpu.txt
+ENV PYTHONPATH /usr/src/app/github.com/kubeflow/katib/examples/v1beta1/nas/enas-cnn-cifar10
+
+ENTRYPOINT ["python3", "-u", "RunTrial.py"]

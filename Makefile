@@ -33,13 +33,21 @@ vet: depend generate
 update:
 	hack/update-gofmt.sh
 
-# Deploy katib v1alpha3 manifests into a k8s cluster
-deploy: 
+# Deploy Katib v1alpha3 manifests into a k8s cluster
+deployv1alpha3:
 	bash scripts/v1alpha3/deploy.sh
 
-# Undeploy katib v1alpha3 manifests into a k8s cluster
-undeploy:
+# Deploy Katib v1beta1 manifests into a k8s cluster
+deploy:
+	bash scripts/v1beta1/deploy.sh
+
+# Undeploy Katib v1alpha3 manifests from a k8s cluster
+undeployv1alpha3:
 	bash scripts/v1alpha3/undeploy.sh
+
+# Undeploy Katib v1beta1 manifests from a k8s cluster
+undeploy:
+	bash scripts/v1beta1/undeploy.sh
 
 # Generate code
 generate:
@@ -48,8 +56,18 @@ ifndef GOPATH
 endif
 	go generate ./pkg/... ./cmd/...
 
-build: depend generate
+# Build images for Katib v1alpha3 components
+buildv1alpha3: depend generate
 	bash scripts/v1alpha3/build.sh
 
-prettier-check:
+# Build images for Katib v1beta1 components
+build: depend generate
+	bash scripts/v1beta1/build.sh
+
+# Prettier UI format check for Katib v1alpha3
+prettier-check-v1alpha3:
 	npm run format:check --prefix pkg/ui/v1alpha3/frontend
+
+# Prettier UI format check for Katib v1beta1
+prettier-check:
+	npm run format:check --prefix pkg/ui/v1beta1/frontend

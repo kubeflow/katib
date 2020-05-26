@@ -1,0 +1,278 @@
+/**
+ * Katib API v1beta1
+ */
+syntax = "proto3";
+
+package api.v1.beta1;
+
+import "google/api/annotations.proto";
+
+/**
+ * Service for Main API for Katib
+ * For each RPC service, we define mapping to HTTP REST API method.
+ * The mapping includes the URL path, query parameters and request body.
+ * https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http
+ */
+service Manager {
+    /** 
+     * Report a log of Observations for a Trial.
+     * The log consists of timestamp and value of metric.
+     * Katib store every log of metrics.
+     * You can see accuracy curve or other metric logs on UI.
+     */
+    rpc ReportObservationLog(ReportObservationLogRequest) returns (ReportObservationLogReply);
+
+    /**
+     * Get all log of Observations for a Trial.
+     */
+    rpc GetObservationLog(GetObservationLogRequest) returns (GetObservationLogReply);
+
+    /**
+     * Delete all log of Observations for a Trial.
+     */
+    rpc DeleteObservationLog(DeleteObservationLogRequest) returns (DeleteObservationLogReply);
+}
+
+service Suggestion {
+    rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply);
+    rpc ValidateAlgorithmSettings(ValidateAlgorithmSettingsRequest) returns (ValidateAlgorithmSettingsReply);
+}
+
+service EarlyStopping {
+//TODO: This feature is not yet fully implemented.
+}
+
+/**
+ * Types of value for HyperParameter.
+ */
+enum ParameterType {
+    UNKNOWN_TYPE = 0; /// Undefined type and not used.
+    DOUBLE = 1; /// Double float type. Use "Max/Min".
+    INT = 2; /// Int type. Use "Max/Min".
+    DISCRETE = 3; /// Discrete number type. Use "List" as float.
+    CATEGORICAL = 4; /// Categorical type. Use "List" as string.
+}
+
+
+/**
+ * Feasible space for optimization.
+ * Int and Double type use Max/Min.
+ * Discrete and Categorical type use List.
+ */
+message FeasibleSpace {
+    string max = 1; /// Max Value
+    string min = 2; /// Minimum Value
+    repeated string list = 3; /// List of Values.
+    string step = 4; /// Step for double or int parameter
+}
+
+/**
+ * Config for a Hyper parameter.
+ * Katib will create each Hyper parameter from this config.
+ */
+message ParameterSpec {
+    string name = 1; /// Name of the parameter.
+    ParameterType parameter_type = 2; /// Type of the parameter.
+    FeasibleSpace feasible_space = 3; /// FeasibleSpace for the parameter.
+}
+
+/**
+ * Direction of optimization. Minimize or Maximize.
+ */
+enum ObjectiveType {
+    UNKNOWN = 0; /// Undefined type and not used.
+    MINIMIZE = 1; /// Minimize
+    MAXIMIZE = 2; /// Maximize
+}
+
+message ObjectiveSpec{
+    ObjectiveType type = 1;
+    double goal = 2;
+    string objective_metric_name = 3;
+    repeated string additional_metric_names = 4; 
+    /// This can be empty if we only care about the objective metric.
+}
+
+message AlgorithmSetting {
+    string name = 1;
+    string value = 2;
+}
+
+message EarlyStoppingSpec {
+//TODO: This feature is not yet fully implemented.
+}
+
+message AlgorithmSpec {
+    string algorithm_name = 1;
+    repeated AlgorithmSetting algorithm_setting = 2;
+    EarlyStoppingSpec early_stopping_spec = 3;
+}
+
+/**
+ * NasConfig contains a config of NAS job
+ */
+ message NasConfig {
+    GraphConfig graph_config = 1; /// Config of DAG
+    message Operations {
+        repeated Operation operation = 1;
+    }
+    Operations operations = 2; /// List of Operation
+}
+
+/**
+ * GraphConfig contains a config of DAG
+ */
+ message GraphConfig {
+    int32 num_layers = 1; /// Number of layers
+    repeated int32 input_sizes = 2; /// Dimensions of input size
+    repeated int32 output_sizes = 3; /// Dimensions of output size
+}
+
+/**
+ * Config for operations in DAG
+ */
+ message Operation {
+     string operation_type = 1; /// Type of operation in DAG
+      /** 
+     * List of ParameterSpec
+     */
+     message ParameterSpecs {
+        repeated ParameterSpec parameters = 1; 
+    }
+    ParameterSpecs parameter_specs = 2;
+}
+
+/**
+ * Spec of a Experiment. Experiment represents a single optimization run over a feasible space. 
+ * Each Experiment contains a configuration describing the feasible space, as well as a set of Trials.
+ * It is assumed that objective function f(x) does not change in the course of a Experiment.
+ */
+message ExperimentSpec {
+     /** 
+     * List of ParameterSpec
+     */
+    message ParameterSpecs {
+        repeated ParameterSpec parameters = 1; 
+    }
+    ParameterSpecs parameter_specs = 1;
+    ObjectiveSpec objective = 2; 
+    AlgorithmSpec algorithm = 3;
+    string trial_template = 4;
+    string metrics_collector_spec = 5;
+    int32 parallel_trial_count = 6;
+    int32 max_trial_count = 7;
+    NasConfig nas_config = 8;
+}
+
+message Experiment {
+    string name = 1; /// Name of Experiment. This is unique in DB.
+    ExperimentSpec spec = 2;
+}
+
+message ParameterAssignment {
+    string name = 1;
+    string value = 2;
+}
+
+message Metric {
+    string name = 1;
+    string value = 2;
+}
+
+message MetricLog {
+    string time_stamp = 1; /// RFC3339 format
+    Metric metric = 2;
+}
+
+message Observation {
+    repeated Metric metrics = 1;
+}
+
+message ObservationLog {
+    repeated MetricLog metric_logs = 1;
+}
+
+message TrialSpec {
+     /** 
+     * List of ParameterAssignment
+     */
+    message ParameterAssignments{
+        repeated ParameterAssignment assignments = 1;
+    }
+    string experiment_name = 1;
+    ObjectiveSpec objective = 2;
+    ParameterAssignments parameter_assignments = 3;
+    string run_spec = 4;
+    string metrics_collector_spec = 5;
+}
+
+message TrialStatus {
+    enum TrialConditionType {
+        CREATED = 0;
+        RUNNING = 1;
+        SUCCEEDED = 2;
+        KILLED = 3;
+        FAILED = 4;
+        UNKNOWN = 5;
+    }
+    string start_time = 1; /// RFC3339 format
+    string completion_time = 2; /// RFC3339 format
+    TrialConditionType condition = 3;
+    Observation observation = 4; /// The best observation in logs.
+}
+
+message Trial {
+    string name = 1;
+    TrialSpec spec = 2;
+    TrialStatus status = 3;
+}
+
+message ReportObservationLogRequest {
+    string trial_name = 1;
+    ObservationLog observation_log = 2;
+}
+
+message ReportObservationLogReply {
+}
+
+message DeleteObservationLogRequest {
+    string trial_name = 1;
+}
+
+message DeleteObservationLogReply {
+}
+
+message GetObservationLogRequest {
+    string trial_name = 1;
+    string metric_name = 2;
+    string start_time = 3; ///The start of the time range. RFC3339 format
+    string end_time = 4; ///The end of the time range. RFC3339 format
+}
+
+message GetObservationLogReply {
+    ObservationLog observation_log = 1;
+}
+
+message GetSuggestionsRequest {
+    Experiment experiment = 1;
+    repeated Trial trials = 2; // all completed trials owned by the experiment.
+    int32 request_number = 3; ///The number of Suggestion you request at one time. When you set 3 to request_number, you can get three Suggestions at one time.
+}
+
+message GetSuggestionsReply {
+    message ParameterAssignments{
+        repeated ParameterAssignment assignments = 1;
+    }
+    repeated ParameterAssignments parameter_assignments = 1;
+    AlgorithmSpec algorithm = 2;
+}
+
+message ValidateAlgorithmSettingsRequest {
+    Experiment experiment = 1;
+}
+
+/**
+ * Return INVALID_ARGUMENT Error if Algorithm Settings are not Valid
+ */
+message ValidateAlgorithmSettingsReply {
+}
