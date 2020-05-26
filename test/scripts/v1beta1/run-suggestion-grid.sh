@@ -38,7 +38,7 @@ echo "PROJECT: ${GCP_PROJECT}"
 gcloud --project ${PROJECT} container clusters get-credentials ${CLUSTER_NAME} \
   --zone ${ZONE}
 kubectl config set-context $(kubectl config current-context) --namespace=default
-USER=`gcloud config get-value account`
+USER=$(gcloud config get-value account)
 
 echo "All Katib components are running."
 kubectl version

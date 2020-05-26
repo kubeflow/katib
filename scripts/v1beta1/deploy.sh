@@ -30,4 +30,4 @@ kubectl apply -f manifests/v1beta1/db-manager
 kubectl apply -f manifests/v1beta1/pv
 kubectl apply -f manifests/v1beta1/mysql-db
 kubectl apply -f manifests/v1beta1/ui
-cd - > /dev/null
+cd - >/dev/null

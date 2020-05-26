@@ -22,28 +22,31 @@ REGISTRY="gcr.io/kubeflow-images-public"
 TAG="latest"
 PREFIX="katib/v1beta1"
 CMD_PREFIX="cmd"
-MACHINE_ARCH=`uname -m`
+MACHINE_ARCH=$(uname -m)
 
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
 cd ${SCRIPT_ROOT}
 
-usage() { echo "Usage: $0 [-t <tag>] [-r <registry>] [-p <prefix>]" 1>&2; exit 1; }
+usage() {
+    echo "Usage: $0 [-t <tag>] [-r <registry>] [-p <prefix>]" 1>&2
+    exit 1
+}
 
 while getopts ":t::r::p:" opt; do
     case $opt in
-        t)
-            TAG=${OPTARG}
-            ;;
-        r)
-            REGISTRY=${OPTARG}
-            ;;
-        p)
-            PREFIX=${OPTARG}
-            ;;
-        *)
-            usage
-            ;;
+    t)
+        TAG=${OPTARG}
+        ;;
+    r)
+        REGISTRY=${OPTARG}
+        ;;
+    p)
+        PREFIX=${OPTARG}
+        ;;
+    *)
+        usage
+        ;;
     esac
 done
 echo "Registry: ${REGISTRY}, tag: ${TAG}, prefix: ${PREFIX}"
@@ -60,11 +63,11 @@ docker build -t ${REGISTRY}/${PREFIX}/file-metrics-collector:${TAG} -f ${CMD_PRE
 
 echo "Building TF Event metrics collector image..."
 if [ $MACHINE_ARCH == "aarch64" ]; then
-        docker build -t ${REGISTRY}/${PREFIX}/tfevent-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile.aarch64 .
+    docker build -t ${REGISTRY}/${PREFIX}/tfevent-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile.aarch64 .
 elif [ $MACHINE_ARCH == "ppc64le" ]; then
-	docker build -t ${REGISTRY}/${PREFIX}/tfevent-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile.ppc64le .
+    docker build -t ${REGISTRY}/${PREFIX}/tfevent-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile.ppc64le .
 else
-        docker build -t ${REGISTRY}/${PREFIX}/tfevent-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile .
+    docker build -t ${REGISTRY}/${PREFIX}/tfevent-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile .
 fi
 
 echo "Building suggestion images..."
@@ -72,9 +75,9 @@ docker build -t ${REGISTRY}/${PREFIX}/suggestion-hyperopt:${TAG} -f ${CMD_PREFIX
 docker build -t ${REGISTRY}/${PREFIX}/suggestion-skopt:${TAG} -f ${CMD_PREFIX}/suggestion/skopt/v1beta1/Dockerfile .
 docker build -t ${REGISTRY}/${PREFIX}/suggestion-chocolate:${TAG} -f ${CMD_PREFIX}/suggestion/chocolate/v1beta1/Dockerfile .
 if [ $MACHINE_ARCH == "aarch64" ]; then
-	docker build -t ${REGISTRY}/${PREFIX}/suggestion-enas:${TAG} -f ${CMD_PREFIX}/suggestion/nas/enas/v1beta1/Dockerfile.aarch64 .
+    docker build -t ${REGISTRY}/${PREFIX}/suggestion-enas:${TAG} -f ${CMD_PREFIX}/suggestion/nas/enas/v1beta1/Dockerfile.aarch64 .
 else
-	docker build -t ${REGISTRY}/${PREFIX}/suggestion-enas:${TAG} -f ${CMD_PREFIX}/suggestion/nas/enas/v1beta1/Dockerfile .
+    docker build -t ${REGISTRY}/${PREFIX}/suggestion-enas:${TAG} -f ${CMD_PREFIX}/suggestion/nas/enas/v1beta1/Dockerfile .
 fi
 docker build -t ${REGISTRY}/${PREFIX}/suggestion-hyperband:${TAG} -f ${CMD_PREFIX}/suggestion/hyperband/v1beta1/Dockerfile .
 docker build -t ${REGISTRY}/${PREFIX}/suggestion-goptuna:${TAG} -f ${CMD_PREFIX}/suggestion/goptuna/v1beta1/Dockerfile .

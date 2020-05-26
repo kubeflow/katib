@@ -40,7 +40,6 @@ cp cmd/katib-controller/v1beta1/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1beta1/katib-controller:${VERSION} --project=${PROJECT}
 gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1beta1/katib-controller:${VERSION} ${REGISTRY}/${REPO_NAME}/v1beta1/katib-controller:latest --verbosity=info
 
-
 cd ${GO_DIR}
 cp cmd/metricscollector/v1beta1/file-metricscollector/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1beta1/file-metrics-collector:${VERSION} --project=${PROJECT}

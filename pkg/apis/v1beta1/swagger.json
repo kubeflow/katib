@@ -7,7 +7,7 @@
   },
   "paths": {},
   "definitions": {
-    ".v1alpha3.Suggestion": {
+    ".v1beta1.Suggestion": {
       "description": "Suggestion represents the structure of a Suggestion resource.",
       "properties": {
         "apiVersion": {
@@ -22,14 +22,14 @@
           "$ref": "#/definitions/v1.ObjectMeta"
         },
         "spec": {
-          "$ref": "#/definitions/.v1alpha3.SuggestionSpec"
+          "$ref": "#/definitions/.v1beta1.SuggestionSpec"
         },
         "status": {
-          "$ref": "#/definitions/.v1alpha3.SuggestionStatus"
+          "$ref": "#/definitions/.v1beta1.SuggestionStatus"
         }
       }
     },
-    ".v1alpha3.SuggestionCondition": {
+    ".v1beta1.SuggestionCondition": {
       "description": "SuggestionCondition describes the state of the Suggestion at a certain point.",
       "required": [
         "type",
@@ -62,7 +62,7 @@
         }
       }
     },
-    ".v1alpha3.SuggestionList": {
+    ".v1beta1.SuggestionList": {
       "description": "SuggestionList contains a list of Suggestion",
       "required": [
         "items"
@@ -75,7 +75,7 @@
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/.v1alpha3.Suggestion"
+            "$ref": "#/definitions/.v1beta1.Suggestion"
           }
         },
         "kind": {
@@ -87,7 +87,7 @@
         }
       }
     },
-    ".v1alpha3.SuggestionSpec": {
+    ".v1beta1.SuggestionSpec": {
       "description": "SuggestionSpec defines the desired state of Suggestion",
       "required": [
         "algorithmName"
@@ -103,14 +103,14 @@
         }
       }
     },
-    ".v1alpha3.SuggestionStatus": {
+    ".v1beta1.SuggestionStatus": {
       "description": "SuggestionStatus defines the observed state of Suggestion",
       "properties": {
         "algorithmSettings": {
           "description": "Algorithmsettings set by the algorithm services.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/v1alpha3.AlgorithmSetting"
+            "$ref": "#/definitions/v1beta1.AlgorithmSetting"
           }
         },
         "completionTime": {
@@ -121,7 +121,7 @@
           "description": "List of observed runtime conditions for this Suggestion.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/.v1alpha3.SuggestionCondition"
+            "$ref": "#/definitions/.v1beta1.SuggestionCondition"
           }
         },
         "lastReconcileTime": {
@@ -141,12 +141,12 @@
           "description": "Suggestion results",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/.v1alpha3.TrialAssignment"
+            "$ref": "#/definitions/.v1beta1.TrialAssignment"
           }
         }
       }
     },
-    ".v1alpha3.Trial": {
+    ".v1beta1.Trial": {
       "description": "Represents the structure of a Trial resource.",
       "properties": {
         "apiVersion": {
@@ -161,14 +161,14 @@
           "$ref": "#/definitions/v1.ObjectMeta"
         },
         "spec": {
-          "$ref": "#/definitions/.v1alpha3.TrialSpec"
+          "$ref": "#/definitions/.v1beta1.TrialSpec"
         },
         "status": {
-          "$ref": "#/definitions/.v1alpha3.TrialStatus"
+          "$ref": "#/definitions/.v1beta1.TrialStatus"
         }
       }
     },
-    ".v1alpha3.TrialAssignment": {
+    ".v1beta1.TrialAssignment": {
       "description": "TrialAssignment is the assignment for one trial.",
       "properties": {
         "name": {
@@ -179,12 +179,12 @@
           "description": "Suggestion results",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/v1alpha3.ParameterAssignment"
+            "$ref": "#/definitions/v1beta1.ParameterAssignment"
           }
         }
       }
     },
-    ".v1alpha3.TrialCondition": {
+    ".v1beta1.TrialCondition": {
       "description": "TrialCondition describes the state of the trial at a certain point.",
       "required": [
         "type",
@@ -217,7 +217,7 @@
         }
       }
     },
-    ".v1alpha3.TrialList": {
+    ".v1beta1.TrialList": {
       "description": "TrialList contains a list of Trials",
       "required": [
         "items"
@@ -230,7 +230,7 @@
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/.v1alpha3.Trial"
+            "$ref": "#/definitions/.v1beta1.Trial"
           }
         },
         "kind": {
@@ -242,24 +242,24 @@
         }
       }
     },
-    ".v1alpha3.TrialSpec": {
+    ".v1beta1.TrialSpec": {
       "required": [
         "parameterAssignments"
       ],
       "properties": {
         "metricsCollector": {
           "description": "Describes how metrics will be collected",
-          "$ref": "#/definitions/v1alpha3.MetricsCollectorSpec"
+          "$ref": "#/definitions/v1beta1.MetricsCollectorSpec"
         },
         "objective": {
           "description": "Describes the objective of the experiment.",
-          "$ref": "#/definitions/v1alpha3.ObjectiveSpec"
+          "$ref": "#/definitions/v1beta1.ObjectiveSpec"
         },
         "parameterAssignments": {
           "description": "Key-value pairs for hyperparameters and assignment values.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/v1alpha3.ParameterAssignment"
+            "$ref": "#/definitions/v1beta1.ParameterAssignment"
           }
         },
         "retainRun": {
@@ -272,7 +272,7 @@
         }
       }
     },
-    ".v1alpha3.TrialStatus": {
+    ".v1beta1.TrialStatus": {
       "properties": {
         "completionTime": {
           "description": "Represents time when the Trial was completed. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC",
@@ -282,7 +282,7 @@
           "description": "List of observed runtime conditions for this Trial.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/.v1alpha3.TrialCondition"
+            "$ref": "#/definitions/.v1beta1.TrialCondition"
           }
         },
         "lastReconcileTime": {
@@ -291,7 +291,7 @@
         },
         "observation": {
           "description": "Results of the Trial - objectives and other metrics values.",
-          "$ref": "#/definitions/v1alpha3.Observation"
+          "$ref": "#/definitions/v1beta1.Observation"
         },
         "startTime": {
           "description": "Represents time when the Trial was acknowledged by the Trial controller. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC",
@@ -299,7 +299,7 @@
         }
       }
     },
-    "v1alpha3.AlgorithmSetting": {
+    "v1beta1.AlgorithmSetting": {
       "properties": {
         "name": {
           "type": "string"
@@ -309,7 +309,7 @@
         }
       }
     },
-    "v1alpha3.AlgorithmSpec": {
+    "v1beta1.AlgorithmSpec": {
       "properties": {
         "algorithmName": {
           "type": "string"
@@ -318,15 +318,15 @@
           "description": "Key-value pairs representing settings for suggestion algorithms.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/v1alpha3.AlgorithmSetting"
+            "$ref": "#/definitions/v1beta1.AlgorithmSetting"
           }
         },
         "earlyStopping": {
-          "$ref": "#/definitions/v1alpha3.EarlyStoppingSpec"
+          "$ref": "#/definitions/v1beta1.EarlyStoppingSpec"
         }
       }
     },
-    "v1alpha3.CollectorSpec": {
+    "v1beta1.CollectorSpec": {
       "required": [
         "kind"
       ],
@@ -340,7 +340,7 @@
         }
       }
     },
-    "v1alpha3.EarlyStoppingSetting": {
+    "v1beta1.EarlyStoppingSetting": {
       "properties": {
         "name": {
           "type": "string"
@@ -350,7 +350,7 @@
         }
       }
     },
-    "v1alpha3.EarlyStoppingSpec": {
+    "v1beta1.EarlyStoppingSpec": {
       "required": [
         "earlyStoppingSettings"
       ],
@@ -361,12 +361,12 @@
         "earlyStoppingSettings": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/v1alpha3.EarlyStoppingSetting"
+            "$ref": "#/definitions/v1beta1.EarlyStoppingSetting"
           }
         }
       }
     },
-    "v1alpha3.Experiment": {
+    "v1beta1.Experiment": {
       "description": "Structure of the Experiment custom resource.",
       "properties": {
         "apiVersion": {
@@ -381,14 +381,14 @@
           "$ref": "#/definitions/v1.ObjectMeta"
         },
         "spec": {
-          "$ref": "#/definitions/v1alpha3.ExperimentSpec"
+          "$ref": "#/definitions/v1beta1.ExperimentSpec"
         },
         "status": {
-          "$ref": "#/definitions/v1alpha3.ExperimentStatus"
+          "$ref": "#/definitions/v1beta1.ExperimentStatus"
         }
       }
     },
-    "v1alpha3.ExperimentCondition": {
+    "v1beta1.ExperimentCondition": {
       "description": "ExperimentCondition describes the state of the experiment at a certain point.",
       "required": [
         "type",
@@ -421,7 +421,7 @@
         }
       }
     },
-    "v1alpha3.ExperimentList": {
+    "v1beta1.ExperimentList": {
       "description": "ExperimentList contains a list of Experiments",
       "required": [
         "items"
@@ -434,7 +434,7 @@
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/v1alpha3.Experiment"
+            "$ref": "#/definitions/v1beta1.Experiment"
           }
         },
         "kind": {
@@ -446,11 +446,11 @@
         }
       }
     },
-    "v1alpha3.ExperimentSpec": {
+    "v1beta1.ExperimentSpec": {
       "properties": {
         "algorithm": {
           "description": "Describes the suggestion algorithm.",
-          "$ref": "#/definitions/v1alpha3.AlgorithmSpec"
+          "$ref": "#/definitions/v1beta1.AlgorithmSpec"
         },
         "maxFailedTrialCount": {
           "description": "Max failed trials to mark experiment as failed.",
@@ -463,15 +463,15 @@
           "format": "int32"
         },
         "metricsCollectorSpec": {
-          "description": "For v1alpha3 we will keep the metrics collector implementation same as v1alpha1.",
-          "$ref": "#/definitions/v1alpha3.MetricsCollectorSpec"
+          "description": "Describes the specification of the metrics collector",
+          "$ref": "#/definitions/v1beta1.MetricsCollectorSpec"
         },
         "nasConfig": {
-          "$ref": "#/definitions/v1alpha3.NasConfig"
+          "$ref": "#/definitions/v1beta1.NasConfig"
         },
         "objective": {
           "description": "Describes the objective of the experiment.",
-          "$ref": "#/definitions/v1alpha3.ObjectiveSpec"
+          "$ref": "#/definitions/v1beta1.ObjectiveSpec"
         },
         "parallelTrialCount": {
           "description": "How many trials can be processed in parallel. Defaults to 3",
@@ -482,7 +482,7 @@
           "description": "List of hyperparameter configurations.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/v1alpha3.ParameterSpec"
+            "$ref": "#/definitions/v1beta1.ParameterSpec"
           }
         },
         "resumePolicy": {
@@ -491,11 +491,11 @@
         },
         "trialTemplate": {
           "description": "Template for each run of the trial.",
-          "$ref": "#/definitions/v1alpha3.TrialTemplate"
+          "$ref": "#/definitions/v1beta1.TrialTemplate"
         }
       }
     },
-    "v1alpha3.ExperimentStatus": {
+    "v1beta1.ExperimentStatus": {
       "properties": {
         "completionTime": {
           "description": "Represents time when the Experiment was completed. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.",
@@ -505,12 +505,12 @@
           "description": "List of observed runtime conditions for this Experiment.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/v1alpha3.ExperimentCondition"
+            "$ref": "#/definitions/v1beta1.ExperimentCondition"
           }
         },
         "currentOptimalTrial": {
           "description": "Current optimal trial parameters and observations.",
-          "$ref": "#/definitions/v1alpha3.OptimalTrial"
+          "$ref": "#/definitions/v1beta1.OptimalTrial"
         },
         "failedTrialList": {
           "description": "List of trial names which have already failed.",
@@ -587,7 +587,7 @@
         }
       }
     },
-    "v1alpha3.FeasibleSpace": {
+    "v1beta1.FeasibleSpace": {
       "properties": {
         "list": {
           "type": "array",
@@ -606,7 +606,7 @@
         }
       }
     },
-    "v1alpha3.FileSystemPath": {
+    "v1beta1.FileSystemPath": {
       "properties": {
         "kind": {
           "type": "string"
@@ -616,7 +616,7 @@
         }
       }
     },
-    "v1alpha3.FilterSpec": {
+    "v1beta1.FilterSpec": {
       "properties": {
         "metricsFormat": {
           "description": "When the metrics output follows format as this field specified, metricsCollector collects it and reports to metrics server, it can be \"\u003cmetric_name\u003e: \u003cfloat\u003e\" or else",
@@ -627,17 +627,17 @@
         }
       }
     },
-    "v1alpha3.GoTemplate": {
+    "v1beta1.GoTemplate": {
       "properties": {
         "rawTemplate": {
           "type": "string"
         },
         "templateSpec": {
-          "$ref": "#/definitions/v1alpha3.TemplateSpec"
+          "$ref": "#/definitions/v1beta1.TemplateSpec"
         }
       }
     },
-    "v1alpha3.GraphConfig": {
+    "v1beta1.GraphConfig": {
       "description": "GraphConfig contains a config of DAG",
       "properties": {
         "inputSizes": {
@@ -660,7 +660,7 @@
         }
       }
     },
-    "v1alpha3.Metric": {
+    "v1beta1.Metric": {
       "properties": {
         "name": {
           "type": "string"
@@ -671,31 +671,31 @@
         }
       }
     },
-    "v1alpha3.MetricsCollectorSpec": {
+    "v1beta1.MetricsCollectorSpec": {
       "properties": {
         "collector": {
-          "$ref": "#/definitions/v1alpha3.CollectorSpec"
+          "$ref": "#/definitions/v1beta1.CollectorSpec"
         },
         "source": {
-          "$ref": "#/definitions/v1alpha3.SourceSpec"
+          "$ref": "#/definitions/v1beta1.SourceSpec"
         }
       }
     },
-    "v1alpha3.NasConfig": {
+    "v1beta1.NasConfig": {
       "description": "NasConfig contains config for NAS job",
       "properties": {
         "graphConfig": {
-          "$ref": "#/definitions/v1alpha3.GraphConfig"
+          "$ref": "#/definitions/v1beta1.GraphConfig"
         },
         "operations": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/v1alpha3.Operation"
+            "$ref": "#/definitions/v1beta1.Operation"
           }
         }
       }
     },
-    "v1alpha3.ObjectiveSpec": {
+    "v1beta1.ObjectiveSpec": {
       "properties": {
         "additionalMetricNames": {
           "description": "This can be empty if we only care about the objective metric. Note: If we adopt a push instead of pull mechanism, this can be omitted completely.",
@@ -716,7 +716,7 @@
         }
       }
     },
-    "v1alpha3.Observation": {
+    "v1beta1.Observation": {
       "required": [
         "metrics"
       ],
@@ -725,12 +725,12 @@
           "description": "Key-value pairs for metric names and values",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/v1alpha3.Metric"
+            "$ref": "#/definitions/v1beta1.Metric"
           }
         }
       }
     },
-    "v1alpha3.Operation": {
+    "v1beta1.Operation": {
       "description": "Operation contains type of operation in DAG",
       "properties": {
         "operationType": {
@@ -739,12 +739,12 @@
         "parameters": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/v1alpha3.ParameterSpec"
+            "$ref": "#/definitions/v1beta1.ParameterSpec"
           }
         }
       }
     },
-    "v1alpha3.OptimalTrial": {
+    "v1beta1.OptimalTrial": {
       "description": "OptimalTrial is the metrics and assignments of the best trial.",
       "required": [
         "bestTrialName",
@@ -757,18 +757,18 @@
         },
         "observation": {
           "description": "Observation for this trial",
-          "$ref": "#/definitions/v1alpha3.Observation"
+          "$ref": "#/definitions/v1beta1.Observation"
         },
         "parameterAssignments": {
           "description": "Key-value pairs for hyperparameters and assignment values.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/v1alpha3.ParameterAssignment"
+            "$ref": "#/definitions/v1beta1.ParameterAssignment"
           }
         }
       }
     },
-    "v1alpha3.ParameterAssignment": {
+    "v1beta1.ParameterAssignment": {
       "properties": {
         "name": {
           "type": "string"
@@ -778,10 +778,10 @@
         }
       }
     },
-    "v1alpha3.ParameterSpec": {
+    "v1beta1.ParameterSpec": {
       "properties": {
         "feasibleSpace": {
-          "$ref": "#/definitions/v1alpha3.FeasibleSpace"
+          "$ref": "#/definitions/v1beta1.FeasibleSpace"
         },
         "name": {
           "type": "string"
@@ -791,15 +791,15 @@
         }
       }
     },
-    "v1alpha3.SourceSpec": {
+    "v1beta1.SourceSpec": {
       "properties": {
         "fileSystemPath": {
           "description": "During training model, metrics may be persisted into local file in source code, such as tfEvent use case",
-          "$ref": "#/definitions/v1alpha3.FileSystemPath"
+          "$ref": "#/definitions/v1beta1.FileSystemPath"
         },
         "filter": {
           "description": "Default metric output format is {\"metric\": \"\u003cmetric_name\u003e\", \"value\": \u003cint_or_float\u003e, \"epoch\": \u003cint\u003e, \"step\": \u003cint\u003e}, but if the output doesn't follow default format, please extend it here",
-          "$ref": "#/definitions/v1alpha3.FilterSpec"
+          "$ref": "#/definitions/v1beta1.FilterSpec"
         },
         "httpGet": {
           "description": "Model-train source code can expose metrics by http, such as HTTP endpoint in prometheus metric format",
@@ -807,7 +807,7 @@
         }
       }
     },
-    "v1alpha3.TemplateSpec": {
+    "v1beta1.TemplateSpec": {
       "properties": {
         "configMapName": {
           "type": "string"
@@ -820,10 +820,10 @@
         }
       }
     },
-    "v1alpha3.TrialTemplate": {
+    "v1beta1.TrialTemplate": {
       "properties": {
         "goTemplate": {
-          "$ref": "#/definitions/v1alpha3.GoTemplate"
+          "$ref": "#/definitions/v1beta1.GoTemplate"
         },
         "retain": {
           "type": "boolean"

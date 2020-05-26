@@ -19,11 +19,10 @@ set -o pipefail
 set -o xtrace
 
 # Delete CR first
-experiments=`kubectl get experiments --all-namespaces | awk '{if (NR>1) {print $1"/"$2}}'`
-for s in $experiments
-do
-  ns=`echo $s|cut -d "/" -f 1`
-  exp=`echo $s|cut -d "/" -f 2`
+experiments=$(kubectl get experiments --all-namespaces | awk '{if (NR>1) {print $1"/"$2}}')
+for s in $experiments; do
+  ns=$(echo $s | cut -d "/" -f 1)
+  exp=$(echo $s | cut -d "/" -f 2)
   kubectl delete experiments $exp -n $ns
 done
 
@@ -38,4 +37,4 @@ kubectl delete -f manifests/v1beta1/pv
 kubectl delete -f manifests/v1beta1
 kubectl get mutatingwebhookconfigurations katib-mutating-webhook-config && kubectl delete mutatingwebhookconfigurations katib-mutating-webhook-config
 kubectl get validatingwebhookconfigurations katib-validating-webhook-config && kubectl delete validatingwebhookconfigurations katib-validating-webhook-config
-cd - > /dev/null
+cd - >/dev/null
