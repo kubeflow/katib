@@ -35,7 +35,7 @@ see the following user guides:
 Check source code as follows:
 
 ```bash
-make build
+make buildv1alpha3
 ```
 
 You can deploy Katib v1alpha3 manifests into a k8s cluster as follows:
