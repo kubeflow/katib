@@ -17,6 +17,11 @@
 # This shell script is used to build a cluster and create a namespace from our
 # argo workflow
 
+# TODO(andreyvelich) I disabled custom metrics collector in v1beta1 version.
+# To support running image kubeflowkatib/custom-metrics-collector in v1beta1 we need to modify the source code.
+# It is currently using api.v1.alpha3.Manager instead of api.v1.beta1.Manager.
+exit 0
+
 set -o errexit
 set -o nounset
 set -o pipefail
