@@ -149,7 +149,7 @@ To add a e2e test for the new algorithm, in [test/scripts/v1alpha3](../test/scri
 
 2. Create a new script `build-suggestion-xxx.sh` to build new suggestion. Here is an example [test/scripts/v1alpha3/build-suggestion-hyperopt.sh](../test/scripts/v1alpha3/build-suggestion-hyperopt.sh).
 
-3. Update `check-katib-ready.sh`(../test/scripts/v1alpha3/check-katib-ready.sh) script to modify `katib-config.yaml` with new test suggestion image name. For example (Replace `<name>` with new suggestion name):
+3. Update [`check-katib-ready.sh`](../test/scripts/v1alpha3/check-katib-ready.sh) script to modify `katib-config.yaml` with the new test suggestion image name. We use `gcr.io/kubeflow-ci` registry to run presubmit tests. For example (Replace `<name>` with the new suggestion name):
 
 ```
 sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-<name>@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-<name>@" manifests/v1alpha3/katib-controller/katib-config.yaml
