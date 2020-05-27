@@ -78,14 +78,14 @@ sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-hyperba
 sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-chocolate@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-chocolate@" manifests/v1alpha3/katib-controller/katib-config.yaml
 sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-hyperopt@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-hyperopt@" manifests/v1alpha3/katib-controller/katib-config.yaml
 sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-skopt@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-skopt@" manifests/v1alpha3/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-goptuna@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-goptuna@" manifests/v1alpha3/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-darts@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-darts@" manifests/v1alpha3/katib-controller/katib-config.yaml
 
 cat manifests/v1alpha3/katib-controller/katib-config.yaml
-
 
 mkdir -p ${GO_DIR}
 cp -r . ${GO_DIR}/
 cp -r pkg/apis/manager/v1alpha3/python/* ${GO_DIR}/test/e2e/v1alpha3
-
 
 echo "Deploying tf-operator crds from kubeflow/manifests master"
 cd "${MANIFESTS_DIR}/tf-training/tf-job-crds/base"
@@ -106,19 +106,18 @@ echo "Deploying pytorch-operator from kubeflow/manifests master"
 cd "${MANIFESTS_DIR}/pytorch-job/pytorch-operator/base/"
 kustomize build . | kubectl apply -n kubeflow -f - --validate=false
 
-
 TIMEOUT=120
 PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
 until kubectl get pods -n kubeflow | grep Running | [[ $(wc -l) -eq $PODNUM ]]; do
-    echo Pod Status $(kubectl get pods -n kubeflow | grep "1/1" | wc -l)/$PODNUM
+  echo Pod Status $(kubectl get pods -n kubeflow | grep "1/1" | wc -l)/$PODNUM
 
-    sleep 10
-    TIMEOUT=$(( TIMEOUT - 1 ))
-    if [[ $TIMEOUT -eq 0 ]];then
-        echo "NG"
-        kubectl get pods -n kubeflow
-        exit 1
-    fi
+  sleep 10
+  TIMEOUT=$((TIMEOUT - 1))
+  if [[ $TIMEOUT -eq 0 ]]; then
+    echo "NG"
+    kubectl get pods -n kubeflow
+    exit 1
+  fi
 done
 
 echo "All Katib components are running."
@@ -146,13 +145,13 @@ if [ $? -ne 1 ]; then
   exit 1
 fi
 set -o errexit
-kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-db-manager |sed -e "s@pods\/@@") 6789:6789 &
+kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-db-manager | sed -e "s@pods\/@@") 6789:6789 &
 echo "kubectl port-forward start"
 sleep 5
 TIMEOUT=120
 until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
-    sleep 5
-    TIMEOUT=$(( TIMEOUT - 1 ))
+  sleep 5
+  TIMEOUT=$((TIMEOUT - 1))
 done
 
 exit 0
