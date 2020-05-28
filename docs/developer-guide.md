@@ -1,28 +1,27 @@
-Table of Contents
-=================
+# Table of Contents
 
-   * [Table of Contents](#table-of-contents)
-   * [Developer Guide](#developer-guide)
-      * [Requirements](#requirements)
-      * [Build from source code](#build-from-source-code)
-      * [Workflow design](#workflow-design)
-      * [Implement a new algorithm and use it in Katib](#implement-a-new-algorithm-and-use-it-in-katib)
-      * [Create a new Trial kind](#create-a-new-trial-kind)
-      * [Algorithm settings documentation](#algorithm-settings-documentation)
-      * [Design proposals](#design-proposals)
+- [Table of Contents](#table-of-contents)
+- [Developer Guide](#developer-guide)
+  - [Requirements](#requirements)
+  - [Build from source code](#build-from-source-code)
+  - [Workflow design](#workflow-design)
+  - [Implement a new algorithm and use it in Katib](#implement-a-new-algorithm-and-use-it-in-katib)
+  - [Create a new Trial kind](#create-a-new-trial-kind)
+  - [Algorithm settings documentation](#algorithm-settings-documentation)
+  - [Design proposals](#design-proposals)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 # Developer Guide
 
-This developer guide is for people who want to contribute to the Katib project. 
-If you're interesting in using Katib in your machine learning project, 
+This developer guide is for people who want to contribute to the Katib project.
+If you're interesting in using Katib in your machine learning project,
 see the following user guides:
 
-* [Concepts](https://www.kubeflow.org/docs/components/hyperparameter-tuning/overview/) 
+- [Concepts](https://www.kubeflow.org/docs/components/hyperparameter-tuning/overview/)
   in Katib, hyperparameter tuning, and neural architecture search.
-* [Getting started with Katib](https://kubeflow.org/docs/components/hyperparameter-tuning/hyperparameter/).
-* Detailed guide to [configuring and running a Katib 
+- [Getting started with Katib](https://kubeflow.org/docs/components/hyperparameter-tuning/hyperparameter/).
+- Detailed guide to [configuring and running a Katib
   experiment](https://kubeflow.org/docs/components/hyperparameter-tuning/experiment/).
 
 ## Requirements
@@ -36,19 +35,19 @@ see the following user guides:
 Check source code as follows:
 
 ```bash
-make build
+make buildv1alpha3
 ```
 
 You can deploy Katib v1alpha3 manifests into a k8s cluster as follows:
 
 ```bash
-make deploy
+make deployv1alpha3
 ```
 
 You can undeploy Katib v1alpha3 manifests from a k8s cluster as follows:
 
 ```bash
-make undeploy
+make undeployv1alpha3
 ```
 
 ## Workflow design

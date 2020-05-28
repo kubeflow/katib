@@ -21,14 +21,15 @@ import (
 
 	"github.com/go-openapi/spec"
 	"github.com/kubeflow/katib/pkg/apis/v1alpha3"
+	"github.com/kubeflow/katib/pkg/apis/v1beta1"
 	"k8s.io/klog"
 	"k8s.io/kube-openapi/pkg/common"
 )
 
 // Generate OpenAPI spec definitions for Katib Resource
 func main() {
-	if len(os.Args) <= 1 {
-		klog.Fatal("Supply a version")
+	if len(os.Args) <= 2 {
+		klog.Fatal("Supply Swagger version and Katib Version")
 	}
 	version := os.Args[1]
 	if !strings.HasPrefix(version, "v") {
@@ -37,7 +38,17 @@ func main() {
 	refCallback := func(name string) spec.Ref {
 		return spec.MustCreateRef("#/definitions/" + common.EscapeJsonPointer(swaggify(name)))
 	}
-	oAPIDefs := v1alpha3.GetOpenAPIDefinitions(refCallback)
+
+	katibVersion := os.Args[2]
+	oAPIDefs := make(map[string]common.OpenAPIDefinition)
+	if katibVersion == "v1alpha3" {
+		oAPIDefs = v1alpha3.GetOpenAPIDefinitions(refCallback)
+	} else if katibVersion == "v1beta1" {
+		oAPIDefs = v1beta1.GetOpenAPIDefinitions(refCallback)
+	} else {
+		klog.Fatalf("Katib version %v is not supported", katibVersion)
+	}
+
 	defs := spec.Definitions{}
 	for defName, val := range oAPIDefs {
 		defs[swaggify(defName)] = val.Schema
@@ -49,8 +60,8 @@ func main() {
 			Paths:       &spec.Paths{Paths: map[string]spec.PathItem{}},
 			Info: &spec.Info{
 				InfoProps: spec.InfoProps{
-					Title:       "katib",
-					Description: "swagger description for katib",
+					Title:       "Katib",
+					Description: "Swagger description for Katib",
 					Version:     version,
 				},
 			},

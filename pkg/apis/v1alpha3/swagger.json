@@ -1,8 +1,8 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "swagger description for katib",
-    "title": "katib",
+    "description": "Swagger description for Katib",
+    "title": "Katib",
     "version": "v0.1"
   },
   "paths": {},
