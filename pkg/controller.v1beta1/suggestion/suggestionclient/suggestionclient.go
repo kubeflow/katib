@@ -256,7 +256,7 @@ func convertTrialObservation(observation *commonapiv1beta1.Observation) *suggest
 		for _, m := range observation.Metrics {
 			resObservation.Metrics = append(resObservation.Metrics, &suggestionapi.Metric{
 				Name:  m.Name,
-				Value: fmt.Sprintf("%f", m.Value),
+				Value: m.Value,
 			})
 		}
 	}
