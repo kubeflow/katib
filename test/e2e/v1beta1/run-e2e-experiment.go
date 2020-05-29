@@ -126,7 +126,7 @@ func main() {
 	}
 
 	metricVal, err := strconv.ParseFloat(*metricValStr, 64)
-	if err != nil &&
+	if err == nil &&
 		((exp.Spec.Objective.Goal != nil && objectiveType == commonv1beta1.ObjectiveTypeMinimize && metricVal < goal) ||
 			(exp.Spec.Objective.Goal != nil && objectiveType == commonv1beta1.ObjectiveTypeMaximize && metricVal > goal)) {
 		log.Print("Objective Goal reached")
