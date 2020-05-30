@@ -51,6 +51,8 @@ type ObjectiveSpec struct {
 	// This can be empty if we only care about the objective metric.
 	// Note: If we adopt a push instead of pull mechanism, this can be omitted completely.
 	AdditionalMetricNames []string `json:"additionalMetricNames,omitempty"`
+	// This field is allowed to missing, experiment defaulter (webhook) will fill it.
+	MetricStrategies map[string]MetricStrategy `json:"metricStrategies,omitempty"`
 }
 
 type ObjectiveType string
@@ -61,14 +63,25 @@ const (
 	ObjectiveTypeMaximize ObjectiveType = "maximize"
 )
 
+// ObjectiveExtractType describes the various approaches to extract objective value from metrics.
+type MetricStrategy string
+
+const (
+	ExtractByMin    MetricStrategy = "min"
+	ExtractByMax    MetricStrategy = "max"
+	ExtractByLatest MetricStrategy = "latest"
+)
+
 type ParameterAssignment struct {
 	Name  string `json:"name,omitempty"`
 	Value string `json:"value,omitempty"`
 }
 
 type Metric struct {
-	Name  string `json:"name,omitempty"`
-	Value string `json:"value,omitempty"`
+	Name   string  `json:"name,omitempty"`
+	Min    float64 `json:"min,omitempty"`
+	Max    float64 `json:"max,omitempty"`
+	Latest string  `json:"latest,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true
