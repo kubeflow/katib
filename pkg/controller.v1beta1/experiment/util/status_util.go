@@ -16,6 +16,8 @@ limitations under the License.
 package util
 
 import (
+	"fmt"
+	"math"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"strconv"
 
@@ -148,9 +150,17 @@ func getObjectiveMetricValue(trial trialsv1beta1.Trial) *string {
 		if objectiveMetricName == metric.Name {
 			switch objectiveStrategy {
 			case commonv1beta1.ExtractByMin:
-				return &metric.Min
+				if math.IsNaN(metric.Min) {
+					return &metric.Latest
+				}
+				value := fmt.Sprintf("%f", metric.Min)
+				return &value
 			case commonv1beta1.ExtractByMax:
-				return &metric.Max
+				if math.IsNaN(metric.Max) {
+					return &metric.Latest
+				}
+				value := fmt.Sprintf("%f", metric.Max)
+				return &value
 			case commonv1beta1.ExtractByLatest:
 				return &metric.Latest
 			default:
