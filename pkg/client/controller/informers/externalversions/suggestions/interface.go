@@ -19,11 +19,14 @@ package suggestion
 
 import (
 	internalinterfaces "github.com/kubeflow/katib/pkg/client/controller/informers/externalversions/internalinterfaces"
+	v1alpha3 "github.com/kubeflow/katib/pkg/client/controller/informers/externalversions/suggestions/v1alpha3"
 	v1beta1 "github.com/kubeflow/katib/pkg/client/controller/informers/externalversions/suggestions/v1beta1"
 )
 
 // Interface provides access to each of this group's versions.
 type Interface interface {
+	// V1alpha3 provides access to shared informers for resources in V1alpha3.
+	V1alpha3() v1alpha3.Interface
 	// V1beta1 provides access to shared informers for resources in V1beta1.
 	V1beta1() v1beta1.Interface
 }
@@ -37,6 +40,11 @@ type group struct {
 // New returns a new Interface.
 func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakListOptions internalinterfaces.TweakListOptionsFunc) Interface {
 	return &group{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
+}
+
+// V1alpha3 returns a new v1alpha3.Interface.
+func (g *group) V1alpha3() v1alpha3.Interface {
+	return v1alpha3.New(g.factory, g.namespace, g.tweakListOptions)
 }
 
 // V1beta1 returns a new v1beta1.Interface.

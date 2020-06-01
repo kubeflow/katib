@@ -25,12 +25,19 @@ fi
 VERSION_LIST=(v1alpha3 v1beta1)
 PROJECT_ROOT=${GOPATH}/src/github.com/kubeflow/katib
 
-for VERSION in ${VERSION_LIST[@]}; do
-    echo "Generating clients for ${VERSION} ..."
-    ${PROJECT_ROOT}/vendor/k8s.io/code-generator/generate-groups.sh \
-        all \
-        github.com/kubeflow/katib/pkg/client/controller \
-        github.com/kubeflow/katib/pkg/apis/controller \
-        "common:${VERSION} experiments:${VERSION} suggestions:${VERSION} trials:${VERSION}" \
-        --go-header-file ${PROJECT_ROOT}/hack/boilerplate.go.txt
+modules=(experiments suggestions trials common)
+versions=(v1alpha3 v1beta1)
+versionStr=$(printf ",%s" "${versions[@]}")
+versionStr=${versionStr:1}
+GROUP_VERSIONS=''
+for module in ${modules[@]}; do
+    GROUP_VERSIONS=${GROUP_VERSIONS}"${module}:${versionStr} "
 done
+
+echo "Generating clients for ${GROUP_VERSIONS} ..."
+${PROJECT_ROOT}/vendor/k8s.io/code-generator/generate-groups.sh \
+    all \
+    github.com/kubeflow/katib/pkg/client/controller \
+    github.com/kubeflow/katib/pkg/apis/controller \
+    "${GROUP_VERSIONS}" \
+    --go-header-file ${PROJECT_ROOT}/hack/boilerplate.go.txt

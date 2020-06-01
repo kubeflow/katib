@@ -20,8 +20,11 @@ package externalversions
 import (
 	"fmt"
 
+	v1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	suggestionsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
+	trialsv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
@@ -53,13 +56,25 @@ func (f *genericInformer) Lister() cache.GenericLister {
 // TODO extend this to unknown resources with a client pool
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
-	// Group=experiment.kubeflow.org, Version=v1beta1
+	// Group=experiment.kubeflow.org, Version=v1alpha3
+	case v1alpha3.SchemeGroupVersion.WithResource("experiments"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Experiment().V1alpha3().Experiments().Informer()}, nil
+
+		// Group=experiment.kubeflow.org, Version=v1beta1
 	case v1beta1.SchemeGroupVersion.WithResource("experiments"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Experiment().V1beta1().Experiments().Informer()}, nil
+
+		// Group=suggestion.kubeflow.org, Version=v1alpha3
+	case suggestionsv1alpha3.SchemeGroupVersion.WithResource("suggestions"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Suggestion().V1alpha3().Suggestions().Informer()}, nil
 
 		// Group=suggestion.kubeflow.org, Version=v1beta1
 	case suggestionsv1beta1.SchemeGroupVersion.WithResource("suggestions"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Suggestion().V1beta1().Suggestions().Informer()}, nil
+
+		// Group=trial.kubeflow.org, Version=v1alpha3
+	case trialsv1alpha3.SchemeGroupVersion.WithResource("trials"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Trial().V1alpha3().Trials().Informer()}, nil
 
 		// Group=trial.kubeflow.org, Version=v1beta1
 	case trialsv1beta1.SchemeGroupVersion.WithResource("trials"):
