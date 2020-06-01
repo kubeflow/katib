@@ -28,11 +28,7 @@ PROJECT_ROOT=${GOPATH}/src/github.com/kubeflow/katib
 modules=(experiments suggestions trials common)
 versions=(v1alpha3 v1beta1)
 versionStr=$(printf ",%s" "${versions[@]}")
-versionStr=${versionStr:1}
-GROUP_VERSIONS=''
-for module in ${modules[@]}; do
-    GROUP_VERSIONS=${GROUP_VERSIONS}"${module}:${versionStr} "
-done
+GROUP_VERSIONS=$(printf "%s:${versionStr:1} " "${modules[@]}")
 
 echo "Generating clients for ${GROUP_VERSIONS} ..."
 ${PROJECT_ROOT}/vendor/k8s.io/code-generator/generate-groups.sh \
