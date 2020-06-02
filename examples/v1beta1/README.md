@@ -365,6 +365,12 @@ docker.io/kubeflowkatib/enas-cnn-cifar10-gpu
 docker.io/kubeflowkatib/enas-cnn-cifar10-cpu
 ```
 
+- Pytorch cifar10 CNN example for DARTS, [source](https://github.com/kubeflow/katib/blob/master/examples/v1beta1/nas/darts-cnn-cifar10/Dockerfile)
+
+```
+docker.io/kubeflowkatib/darts-cnn-cifar10
+```
+
 - Pytorch operator mnist example, [source](https://github.com/kubeflow/pytorch-operator/blob/master/examples/mnist/mnist.py).
 
 ```
