@@ -7,6 +7,19 @@ Python SDK for Kubeflow Katib
 Python 2.7 and 3.4+
 
 ## Installation & Usage
+
+### pip install
+
+```sh
+pip install kubeflow-katib
+```
+
+Then import package:
+
+```python
+from kubeflow import katib
+```
+
 ### Setuptools
 
 Install via [Setuptools](http://pypi.python.org/pypi/setuptools).
@@ -15,11 +28,6 @@ Install via [Setuptools](http://pypi.python.org/pypi/setuptools).
 python setup.py install --user
 ```
 (or `sudo python setup.py install` to install the package for all users)
-
-Then import the package:
-```python
-from kubeflow import katib
-```
 
 ## Getting Started
 
@@ -36,7 +44,7 @@ Class | Method | Description
 [KatibClient](docs/KatibClient.md) | [get_experiment_status](docs/KatibClient.md#get_experiment_status) | Get Experiment status|
 [KatibClient](docs/KatibClient.md) | [is_experiment_succeeded](docs/KatibClient.md#is_experiment_succeeded) | Check if Experiment status is Succeeded |
 [KatibClient](docs/KatibClient.md) | [list_trials](docs/KatibClient.md#list_trials) | List all trials of specified Experiment |
-[KatibClient](docs/KatibClient.md) | [get_optimal_hyperparmeters](docs/KatibClient.md#get_optimal_hyperparmeters) | Get status, currentOptimalTrial with paramaterAssignments of an Experiment|
+[KatibClient](docs/KatibClient.md) | [get_optimal_hyperparmeters](docs/KatibClient.md#get_optimal_hyperparmeters) | Get currentOptimalTrial with paramaterAssignments of an Experiment|
 
 
 ## Documentation For Models
