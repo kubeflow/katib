@@ -283,8 +283,6 @@ class KatibClient(object):
 
         katibexp = self.get_experiment(name, namespace=namespace)
         result = {}
-        result["status"] = katibexp.get("status", {}).get(
-            "conditions", [])[-1].get("type")
         result["currentOptimalTrial"] = katibexp.get(
             "status", {}).get("currentOptimalTrial")
 
