@@ -343,7 +343,7 @@ You can access the Katib UI using this URL: ```http://localhost:8080/katib/```.
 ### Katib SDK
 * Install the SDK
   ```
-  TO DO
+  pip install kubeflow-katib
   ```
 * Get the Katib SDK documents from [here](sdk/python/README.md).
 
