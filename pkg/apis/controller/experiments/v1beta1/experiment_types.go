@@ -19,6 +19,7 @@ import (
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 type ExperimentSpec struct {
@@ -187,8 +188,36 @@ type FeasibleSpace struct {
 }
 
 type TrialTemplate struct {
-	Retain     bool        `json:"retain,omitempty"`
+	// Retain indicates that Trial resources must be not cleanup
+	Retain bool `json:"retain,omitempty"`
+
 	GoTemplate *GoTemplate `json:"goTemplate,omitempty"`
+
+	// List of parameres that are used in Trial template
+	TrialParameters []TrialParameterSpec `json:"trialParameters,omitempty"`
+
+	// Trial spec contains Trial template in unstructured format
+	TrialSpec *unstructured.Unstructured `json:"trialSpec,omitempty"`
+
+	// Name of config map where Trial template is located
+	ConfigMapName string `json:"configMapName,omitempty"`
+
+	// Namespace of config map where Trial template is located
+	ConfigMapNamespace string `json:"configMapNamespace,omitempty"`
+
+	// Path in config map where Trial template is located
+	TemplatePath string `json:"templatePath,omitempty"`
+}
+
+type TrialParameterSpec struct {
+	// Name of the parameter that must be replaced in Trial template
+	Name string `json:"name,omitempty"`
+
+	// Description of the parameter
+	Description string `json:"description,omitempty"`
+
+	// Reference to the parameter in search space
+	Reference string `json:"reference,omitempty"`
 }
 
 type TemplateSpec struct {
