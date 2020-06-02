@@ -38,5 +38,5 @@ for VERSION in ${VERSION_LIST[@]}; do
       $@
 
     echo "Generating swagger file for ${VERSION} ..."
-    go run ${PROJECT_ROOT}/hack/swagger/main.go ${SWAGGER_VERSION} ${VERSION} > ${SWAGGER_CODEGEN_FILE}
+    go run ${PROJECT_ROOT}/hack/swagger/main.go ${VERSION}-${SWAGGER_VERSION} ${VERSION} > ${SWAGGER_CODEGEN_FILE}
 done

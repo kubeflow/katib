@@ -3,7 +3,7 @@
   "info": {
     "description": "Swagger description for Katib",
     "title": "Katib",
-    "version": "v0.1"
+    "version": "v1beta1-0.1"
   },
   "paths": {},
   "definitions": {
