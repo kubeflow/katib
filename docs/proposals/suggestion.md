@@ -121,7 +121,7 @@ message ParameterSpecs {
 
 message AlgorithmSpec {
     string algorithm_name = 1;
-    repeated AlgorithmSetting algorithm_setting = 2;
+    repeated AlgorithmSetting algorithm_settings = 2;
 }
 
 message AlgorithmSetting {
