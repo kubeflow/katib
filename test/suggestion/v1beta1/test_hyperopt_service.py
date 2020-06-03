@@ -6,6 +6,8 @@ import grpc_testing
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.suggestion.v1beta1.hyperopt.service import HyperoptService
 
+import utils
+
 
 class TestHyperopt(unittest.TestCase):
     def setUp(self):
@@ -186,100 +188,101 @@ class TestHyperopt(unittest.TestCase):
         self.assertEqual(2, len(response.parameter_assignments))
 
     def test_validate_algorithm_settings(self):
-        experiment_spec = [None]
-
-        def call_validate():
-            experiment = api_pb2.Experiment(name="test", spec=experiment_spec[0])
-            request = api_pb2.ValidateAlgorithmSettingsRequest(experiment=experiment)
-
-            validate_algorithm_settings = self.test_server.invoke_unary_unary(
-                method_descriptor=(api_pb2.DESCRIPTOR
-                                   .services_by_name['Suggestion']
-                                   .methods_by_name['ValidateAlgorithmSettings']),
-                invocation_metadata={},
-                request=request, timeout=1)
-
-            return validate_algorithm_settings.termination()
-
         # valid cases
-        algorithm_spec = api_pb2.AlgorithmSpec(
-            algorithm_name="tpe",
-            algorithm_setting=[
-                api_pb2.AlgorithmSetting(
-                    name="random_state",
-                    value="10"
-                ),
-                api_pb2.AlgorithmSetting(
-                    name="gamma",
-                    value="0.25"
-                ),
-                api_pb2.AlgorithmSetting(
-                    name="prior_weight",
-                    value="1.0"
-                ),
-                api_pb2.AlgorithmSetting(
-                    name="n_EI_candidates",
-                    value="24"
-                ),
-            ],
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="tpe",
+                algorithm_setting=[
+                    api_pb2.AlgorithmSetting(
+                        name="random_state",
+                        value="10"
+                    ),
+                    api_pb2.AlgorithmSetting(
+                        name="gamma",
+                        value="0.25"
+                    ),
+                    api_pb2.AlgorithmSetting(
+                        name="prior_weight",
+                        value="1.0"
+                    ),
+                    api_pb2.AlgorithmSetting(
+                        name="n_EI_candidates",
+                        value="24"
+                    ),
+                ]
+            )
         )
-        experiment_spec[0] = api_pb2.ExperimentSpec(algorithm=algorithm_spec)
-        self.assertEqual(call_validate()[2], grpc.StatusCode.OK)
+
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        self.assertEqual(code, grpc.StatusCode.OK)
 
         # invalid cases
-        experiment_spec[0] = api_pb2.ExperimentSpec(
-            algorithm=api_pb2.AlgorithmSpec(algorithm_name="unknown"))
-        _, _, code, details = call_validate()
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="unknown"
+            )
+        )
+        _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details, 'unknown algorithm name unknown')
 
-        experiment_spec[0] = api_pb2.ExperimentSpec(
+        experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="random",
                 algorithm_setting=[
-                    api_pb2.AlgorithmSetting(name="unknown_conf", value="1111")]
-            ))
-        _, _, code, details = call_validate()
+                    api_pb2.AlgorithmSetting(name="unknown_conf", value="1111")
+                ]
+            )
+        )
+        _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details, 'unknown setting unknown_conf for algorithm random')
 
-        experiment_spec[0] = api_pb2.ExperimentSpec(
+        experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
                 algorithm_setting=[
-                    api_pb2.AlgorithmSetting(name="gamma", value="1.5")]
-            ))
-        _, _, code, details = call_validate()
+                    api_pb2.AlgorithmSetting(name="gamma", value="1.5")
+                ]
+            )
+        )
+        _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details, 'gamma should be in the range of (0, 1)')
 
-        experiment_spec[0] = api_pb2.ExperimentSpec(
+        experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
                 algorithm_setting=[
-                    api_pb2.AlgorithmSetting(name="n_EI_candidates", value="0")]
-            ))
-        _, _, code, details = call_validate()
+                    api_pb2.AlgorithmSetting(name="n_EI_candidates", value="0")
+                ]
+            )
+        )
+        _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details, 'n_EI_candidates should be great than zero')
 
-        experiment_spec[0] = api_pb2.ExperimentSpec(
+        experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
                 algorithm_setting=[
-                    api_pb2.AlgorithmSetting(name="random_state", value="-1")]
-            ))
-        _, _, code, details = call_validate()
+                    api_pb2.AlgorithmSetting(name="random_state", value="-1")
+                ]
+            )
+        )
+        _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details, 'random_state should be great or equal than zero')
 
-        experiment_spec[0] = api_pb2.ExperimentSpec(
+        experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
                 algorithm_setting=[
-                    api_pb2.AlgorithmSetting(name="prior_weight", value="aaa")]
-            ))
-        _, _, code, details = call_validate()
+                    api_pb2.AlgorithmSetting(name="prior_weight", value="aaa")
+                ]
+            )
+        )
+        _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertTrue(details.startswith('failed to validate prior_weight(aaa)'))
 
