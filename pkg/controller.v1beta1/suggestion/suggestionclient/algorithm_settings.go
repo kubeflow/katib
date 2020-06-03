@@ -26,7 +26,7 @@ func appendAlgorithmSettingsFromSuggestion(experiment *experimentsv1beta1.Experi
 }
 
 func updateAlgorithmSettings(suggestion *suggestionsv1beta1.Suggestion, algorithm *suggestionapi.AlgorithmSpec) {
-	for _, setting := range algorithm.AlgorithmSetting {
+	for _, setting := range algorithm.AlgorithmSettings {
 		if setting != nil {
 			if index, found := contains(suggestion.Status.AlgorithmSettings, setting.Name); found {
 				// If the setting is found in Suggestion, update it.

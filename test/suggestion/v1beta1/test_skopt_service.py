@@ -114,7 +114,7 @@ class TestSkopt(unittest.TestCase):
             spec=api_pb2.ExperimentSpec(
                 algorithm=api_pb2.AlgorithmSpec(
                     algorithm_name="bayesianoptimization",
-                    algorithm_setting=[
+                    algorithm_settings=[
                         api_pb2.AlgorithmSetting(
                             name="random_state",
                             value="10"

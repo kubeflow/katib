@@ -27,7 +27,7 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             reply = api_pb2.GetSuggestionsReply()
             experiment = request.experiment
             self.all_trials = request.trials
-            alg_settings = experiment.spec.algorithm.algorithm_setting
+            alg_settings = experiment.spec.algorithm.algorithm_settings
 
             param = HyperBandParam.convert(alg_settings)
             if param.current_s < 0:
@@ -191,7 +191,7 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
     def ValidateAlgorithmSettings(self, request, context):
         params = request.experiment.spec.parameter_specs.parameters
-        settings = request.experiment.spec.algorithm.algorithm_setting
+        settings = request.experiment.spec.algorithm.algorithm_settings
         setting_dict = {}
         for setting in settings:
             setting_dict[setting.name] = setting.value
@@ -281,7 +281,7 @@ class HyperBandParam(object):
                 value=str(param.evaluating_trials)
             )]
         return api_pb2.AlgorithmSpec(
-            algorithm_setting=algorithm_settings
+            algorithm_settings=algorithm_settings
         )
 
     @staticmethod

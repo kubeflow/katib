@@ -150,8 +150,8 @@ func (g *General) ConvertExperiment(e *experimentsv1beta1.Experiment) *suggestio
 	res.Name = e.Name
 	res.Spec = &suggestionapi.ExperimentSpec{
 		Algorithm: &suggestionapi.AlgorithmSpec{
-			AlgorithmName:    e.Spec.Algorithm.AlgorithmName,
-			AlgorithmSetting: convertAlgorithmSettings(e.Spec.Algorithm.AlgorithmSettings),
+			AlgorithmName:     e.Spec.Algorithm.AlgorithmName,
+			AlgorithmSettings: convertAlgorithmSettings(e.Spec.Algorithm.AlgorithmSettings),
 		},
 		Objective: &suggestionapi.ObjectiveSpec{
 			Type:                convertObjectiveType(e.Spec.Objective.Type),

@@ -68,7 +68,7 @@ class EnasExperiment:
         self.print_search_space()
 
         # Get Experiment Algorithm Settings
-        settings_raw = self.experiment.spec.algorithm.algorithm_setting
+        settings_raw = self.experiment.spec.algorithm.algorithm_settings
         self.algorithm_settings = parseAlgorithmSettings(settings_raw)
 
         self.print_algorithm_settings()
@@ -201,7 +201,7 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                         return self.SetValidateContextError(context, "Step parameter should be > 0 in ParameterConfig.feasibleSpace:\n{}".format(parameter))
 
         # Validate Algorithm Settings
-        settings_raw = request.experiment.spec.algorithm.algorithm_setting
+        settings_raw = request.experiment.spec.algorithm.algorithm_settings
         for setting in settings_raw:
             if setting.name in algorithmSettingsValidator.keys():
                 if setting.name in enableNoneSettingsList and setting.value == "None":
