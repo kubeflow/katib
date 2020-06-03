@@ -20,6 +20,8 @@ from pkg.apis.manager.v1beta1.python import api_pb2
 
 from pkg.suggestion.v1beta1.chocolate.service import ChocolateService
 
+import utils
+
 
 class TestChocolate(unittest.TestCase):
     def setUp(self):
@@ -180,6 +182,103 @@ class TestChocolate(unittest.TestCase):
         print(response.parameter_assignments)
         self.assertEqual(code, grpc.StatusCode.OK)
         self.assertEqual(2, len(response.parameter_assignments))
+
+    def test_validate_algorithm_settings(self):
+        # Valid case
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="grid",
+            ),
+            parameter_specs=api_pb2.ExperimentSpec.ParameterSpecs(
+                parameters=[
+                    api_pb2.ParameterSpec(
+                        name="param-1",
+                        parameter_type=api_pb2.INT,
+                        feasible_space=api_pb2.FeasibleSpace(
+                            max="5", min="1", list=[]),
+                    ),
+                    api_pb2.ParameterSpec(
+                        name="param-2",
+                        parameter_type=api_pb2.CATEGORICAL,
+                        feasible_space=api_pb2.FeasibleSpace(
+                            max=None, min=None, list=["cat1", "cat2", "cat3"])
+                    ),
+                    api_pb2.ParameterSpec(
+                        name="param-3",
+                        parameter_type=api_pb2.DISCRETE,
+                        feasible_space=api_pb2.FeasibleSpace(
+                            max=None, min=None, list=["3", "2", "6"])
+                    ),
+                    api_pb2.ParameterSpec(
+                        name="param-4",
+                        parameter_type=api_pb2.DOUBLE,
+                        feasible_space=api_pb2.FeasibleSpace(
+                            max="2.9", min="1", list=[], step="0.5")
+                    )
+                ]
+            ),
+            max_trial_count=12,
+            parallel_trial_count=3,
+        )
+
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        self.assertEqual(code, grpc.StatusCode.OK)
+
+        # Invalid cases
+        # Empty step
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="grid",
+            ),
+            parameter_specs=api_pb2.ExperimentSpec.ParameterSpecs(
+                parameters=[
+                    api_pb2.ParameterSpec(
+                        name="param-1",
+                        parameter_type=api_pb2.DOUBLE,
+                        feasible_space=api_pb2.FeasibleSpace(
+                            max="3", min="1", list=[])
+                    )
+                ]
+            ),
+        )
+
+        _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
+        self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
+        self.assertEqual(details, 'Param: param-1 step is nil')
+
+        # Max trial count > search space combinations
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="grid",
+            ),
+            parameter_specs=api_pb2.ExperimentSpec.ParameterSpecs(
+                parameters=[
+                    api_pb2.ParameterSpec(
+                        name="param-1",
+                        parameter_type=api_pb2.INT,
+                        feasible_space=api_pb2.FeasibleSpace(
+                            max="2", min="1", list=[]),
+                    ),
+                    api_pb2.ParameterSpec(
+                        name="param-2",
+                        parameter_type=api_pb2.CATEGORICAL,
+                        feasible_space=api_pb2.FeasibleSpace(
+                            max=None, min=None, list=["cat1", "cat2"])
+                    ),
+                    api_pb2.ParameterSpec(
+                        name="param-4",
+                        parameter_type=api_pb2.DOUBLE,
+                        feasible_space=api_pb2.FeasibleSpace(
+                            max="2", min="1", list=[], step="0.5")
+                    )
+                ]
+            ),
+            max_trial_count=15,
+        )
+
+        _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
+        self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
+        self.assertEqual(details, 'Max Trial Count: 15 > all possible search space combinations: 12')
 
 
 if __name__ == '__main__':
