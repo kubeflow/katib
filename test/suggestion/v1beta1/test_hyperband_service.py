@@ -114,7 +114,7 @@ class TestHyperband(unittest.TestCase):
             spec=api_pb2.ExperimentSpec(
                 algorithm=api_pb2.AlgorithmSpec(
                     algorithm_name="hyperband",
-                    algorithm_setting=[
+                    algorithm_settings=[
                         api_pb2.AlgorithmSetting(
                             name="r_l",
                             value="10"

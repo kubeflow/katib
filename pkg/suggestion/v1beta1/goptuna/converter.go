@@ -21,9 +21,9 @@ func toGoptunaDirection(t api_v1_beta1.ObjectiveType) goptuna.StudyDirection {
 func toGoptunaSampler(algorithm *api_v1_beta1.AlgorithmSpec) (goptuna.Sampler, goptuna.RelativeSampler, error) {
 	name := algorithm.GetAlgorithmName()
 	if name == AlgorithmCMAES {
-		opts := make([]cmaes.SamplerOption, 0, len(algorithm.GetAlgorithmSetting())+1)
+		opts := make([]cmaes.SamplerOption, 0, len(algorithm.GetAlgorithmSettings())+1)
 		opts = append(opts, cmaes.SamplerOptionNStartupTrials(0))
-		for _, s := range algorithm.GetAlgorithmSetting() {
+		for _, s := range algorithm.GetAlgorithmSettings() {
 			if s.Name == "random_state" {
 				seed, err := strconv.Atoi(s.Value)
 				if err != nil {
@@ -40,8 +40,8 @@ func toGoptunaSampler(algorithm *api_v1_beta1.AlgorithmSpec) (goptuna.Sampler, g
 		}
 		return nil, cmaes.NewSampler(opts...), nil
 	} else if name == AlgorithmTPE {
-		opts := make([]tpe.SamplerOption, 0, len(algorithm.GetAlgorithmSetting()))
-		for _, s := range algorithm.GetAlgorithmSetting() {
+		opts := make([]tpe.SamplerOption, 0, len(algorithm.GetAlgorithmSettings()))
+		for _, s := range algorithm.GetAlgorithmSettings() {
 			if s.Name == "random_state" {
 				seed, err := strconv.Atoi(s.Value)
 				if err != nil {
@@ -64,8 +64,8 @@ func toGoptunaSampler(algorithm *api_v1_beta1.AlgorithmSpec) (goptuna.Sampler, g
 		}
 		return tpe.NewSampler(opts...), nil, nil
 	} else {
-		opts := make([]goptuna.RandomSearchSamplerOption, 0, len(algorithm.GetAlgorithmSetting()))
-		for _, s := range algorithm.GetAlgorithmSetting() {
+		opts := make([]goptuna.RandomSearchSamplerOption, 0, len(algorithm.GetAlgorithmSettings()))
+		for _, s := range algorithm.GetAlgorithmSettings() {
 			if s.Name == "random_state" {
 				seed, err := strconv.Atoi(s.Value)
 				if err != nil {

@@ -33,7 +33,7 @@
         "algorithm_name": {
           "type": "string"
         },
-        "algorithm_setting": {
+        "algorithm_settings": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/beta1AlgorithmSetting"

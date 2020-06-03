@@ -62,7 +62,7 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 					Spec: &api_v1_beta1.ExperimentSpec{
 						Algorithm: &api_v1_beta1.AlgorithmSpec{
 							AlgorithmName: "cmaes",
-							AlgorithmSetting: []*api_v1_beta1.AlgorithmSetting{
+							AlgorithmSettings: []*api_v1_beta1.AlgorithmSetting{
 								{
 									Name:  "random_state",
 									Value: "10",
@@ -90,7 +90,7 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 					Spec: &api_v1_beta1.ExperimentSpec{
 						Algorithm: &api_v1_beta1.AlgorithmSpec{
 							AlgorithmName: "tpe",
-							AlgorithmSetting: []*api_v1_beta1.AlgorithmSetting{
+							AlgorithmSettings: []*api_v1_beta1.AlgorithmSetting{
 								{
 									Name:  "random_state",
 									Value: "10",
@@ -118,7 +118,7 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 					Spec: &api_v1_beta1.ExperimentSpec{
 						Algorithm: &api_v1_beta1.AlgorithmSpec{
 							AlgorithmName: "random",
-							AlgorithmSetting: []*api_v1_beta1.AlgorithmSetting{
+							AlgorithmSettings: []*api_v1_beta1.AlgorithmSetting{
 								{
 									Name:  "random_state",
 									Value: "10",

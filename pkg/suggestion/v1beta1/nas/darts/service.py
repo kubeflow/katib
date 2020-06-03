@@ -33,7 +33,7 @@ class DartsService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
             search_space = get_search_space(nas_config.operations)
 
-            settings_raw = request.experiment.spec.algorithm.algorithm_setting
+            settings_raw = request.experiment.spec.algorithm.algorithm_settings
             algorithm_settings = get_algorithm_settings(settings_raw)
 
             search_space_json = json.dumps(search_space)

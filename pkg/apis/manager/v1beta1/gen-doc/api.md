@@ -83,7 +83,7 @@ Katib API v1beta1
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | algorithm_name | [string](#string) |  |  |
-| algorithm_setting | [AlgorithmSetting](#api.v1.beta1.AlgorithmSetting) | repeated |  |
+| algorithm_settings | [AlgorithmSetting](#api.v1.beta1.AlgorithmSetting) | repeated |  |
 | early_stopping_spec | [EarlyStoppingSpec](#api.v1.beta1.EarlyStoppingSpec) |  |  |
 
 

@@ -60,7 +60,7 @@ class OptimizerConfiguration(object):
     @staticmethod
     def convertAlgorithmSpec(algorithm_spec):
         optimizer = OptimizerConfiguration()
-        for s in algorithm_spec.algorithm_setting:
+        for s in algorithm_spec.algorithm_settings:
             if s.name == "base_estimator":
                 optimizer.base_estimator = s.value
             elif s.name == "n_initial_points":

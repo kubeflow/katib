@@ -25,7 +25,7 @@ class TestDarts(unittest.TestCase):
             spec=api_pb2.ExperimentSpec(
                 algorithm=api_pb2.AlgorithmSpec(
                     algorithm_name="darts",
-                    algorithm_setting=[
+                    algorithm_settings=[
                         api_pb2.AlgorithmSetting(
                             name="num_epoch",
                             value="10"
@@ -82,7 +82,7 @@ class TestDarts(unittest.TestCase):
         self.assertEqual(1, len(response.parameter_assignments))
 
         exp_algorithm_settings = {}
-        for setting in experiment.spec.algorithm.algorithm_setting:
+        for setting in experiment.spec.algorithm.algorithm_settings:
             exp_algorithm_settings[setting.name] = setting.value
 
         exp_num_layers = experiment.spec.nas_config.graph_config.num_layers

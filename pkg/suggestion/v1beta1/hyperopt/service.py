@@ -67,7 +67,7 @@ class OptimizerConfiguration:
     def convert_algorithm_spec(cls, algorithm_spec):
         ret = {}
         setting_schema = cls.__conversion_dict[algorithm_spec.algorithm_name]
-        for s in algorithm_spec.algorithm_setting:
+        for s in algorithm_spec.algorithm_settings:
             if s.name in setting_schema:
                 ret[s.name] = setting_schema[s.name](s.value)
 
@@ -77,9 +77,9 @@ class OptimizerConfiguration:
     def validate_algorithm_spec(cls, algorithm_spec):
         algo_name = algorithm_spec.algorithm_name
         if algo_name == 'tpe':
-            return cls._validate_tpe_setting(algorithm_spec.algorithm_setting)
+            return cls._validate_tpe_setting(algorithm_spec.algorithm_settings)
         elif algo_name == 'random':
-            return cls._validate_random_setting(algorithm_spec.algorithm_setting)
+            return cls._validate_random_setting(algorithm_spec.algorithm_settings)
         else:
             return False, "unknown algorithm name {}".format(algo_name)
 

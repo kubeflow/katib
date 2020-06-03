@@ -115,7 +115,7 @@ class TestHyperopt(unittest.TestCase):
             spec=api_pb2.ExperimentSpec(
                 algorithm=api_pb2.AlgorithmSpec(
                     algorithm_name="tpe",
-                    algorithm_setting=[
+                    algorithm_settings=[
                         api_pb2.AlgorithmSetting(
                             name="random_state",
                             value="10"
@@ -192,7 +192,7 @@ class TestHyperopt(unittest.TestCase):
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
-                algorithm_setting=[
+                algorithm_settings=[
                     api_pb2.AlgorithmSetting(
                         name="random_state",
                         value="10"
@@ -229,7 +229,7 @@ class TestHyperopt(unittest.TestCase):
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="random",
-                algorithm_setting=[
+                algorithm_settings=[
                     api_pb2.AlgorithmSetting(name="unknown_conf", value="1111")
                 ]
             )
@@ -241,7 +241,7 @@ class TestHyperopt(unittest.TestCase):
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
-                algorithm_setting=[
+                algorithm_settings=[
                     api_pb2.AlgorithmSetting(name="gamma", value="1.5")
                 ]
             )
@@ -253,7 +253,7 @@ class TestHyperopt(unittest.TestCase):
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
-                algorithm_setting=[
+                algorithm_settings=[
                     api_pb2.AlgorithmSetting(name="n_EI_candidates", value="0")
                 ]
             )
@@ -265,7 +265,7 @@ class TestHyperopt(unittest.TestCase):
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
-                algorithm_setting=[
+                algorithm_settings=[
                     api_pb2.AlgorithmSetting(name="random_state", value="-1")
                 ]
             )
@@ -277,7 +277,7 @@ class TestHyperopt(unittest.TestCase):
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
-                algorithm_setting=[
+                algorithm_settings=[
                     api_pb2.AlgorithmSetting(name="prior_weight", value="aaa")
                 ]
             )
