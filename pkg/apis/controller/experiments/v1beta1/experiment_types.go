@@ -187,18 +187,31 @@ type FeasibleSpace struct {
 	Step string   `json:"step,omitempty"`
 }
 
+// TrialTemplate describes structure of Trial template
 type TrialTemplate struct {
 	// Retain indicates that Trial resources must be not cleanup
 	Retain bool `json:"retain,omitempty"`
 
-	GoTemplate *GoTemplate `json:"goTemplate,omitempty"`
+	// Source for Trial template (unstructured structure or config map)
+	TrialSource `json:",inline"`
 
 	// List of parameres that are used in Trial template
 	TrialParameters []TrialParameterSpec `json:"trialParameters,omitempty"`
+}
 
-	// Trial spec contains Trial template in unstructured format
+// TrialSource represent the source for Trial template
+// Only one source can be specified
+type TrialSource struct {
+
+	// TrialSpec represents Trial template in unstructured format
 	TrialSpec *unstructured.Unstructured `json:"trialSpec,omitempty"`
 
+	// ConfigMap spec represents a reference to ConfigMap
+	ConfigMap *ConfigMapSource `json:"configMap,omitempty"`
+}
+
+// ConfigMapSource references the config map where Trial template is located
+type ConfigMapSource struct {
 	// Name of config map where Trial template is located
 	ConfigMapName string `json:"configMapName,omitempty"`
 
@@ -209,6 +222,7 @@ type TrialTemplate struct {
 	TemplatePath string `json:"templatePath,omitempty"`
 }
 
+// TrialParameterSpec describes parameters that must be replaced in Trial template
 type TrialParameterSpec struct {
 	// Name of the parameter that must be replaced in Trial template
 	Name string `json:"name,omitempty"`
@@ -218,17 +232,6 @@ type TrialParameterSpec struct {
 
 	// Reference to the parameter in search space
 	Reference string `json:"reference,omitempty"`
-}
-
-type TemplateSpec struct {
-	ConfigMapName      string `json:"configMapName,omitempty"`
-	ConfigMapNamespace string `json:"configMapNamespace,omitempty"`
-	TemplatePath       string `json:"templatePath,omitempty"`
-}
-
-type GoTemplate struct {
-	TemplateSpec *TemplateSpec `json:"templateSpec,omitempty"`
-	RawTemplate  string        `json:"rawTemplate,omitempty"`
 }
 
 // +genclient
