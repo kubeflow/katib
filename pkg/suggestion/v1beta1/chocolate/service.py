@@ -18,7 +18,7 @@ import grpc
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.apis.manager.v1beta1.python import api_pb2_grpc
 
-from pkg.suggestion.v1beta1.internal.constant import (INTEGER, DOUBLE, CATEGORICAL, DISCRETE)
+from pkg.suggestion.v1beta1.internal.constant import INTEGER, DOUBLE, CATEGORICAL, DISCRETE
 from pkg.suggestion.v1beta1.internal.search_space import HyperParameterSearchSpace
 from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment
 from pkg.suggestion.v1beta1.chocolate.base_service import BaseChocolateService
