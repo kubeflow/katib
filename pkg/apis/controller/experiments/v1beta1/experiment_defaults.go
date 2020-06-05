@@ -47,6 +47,7 @@ func (e *Experiment) setDefaultResumePolicy() {
 	}
 }
 
+// TODO: Verify it
 func (e *Experiment) setDefaultTrialTemplate() {
 	t := e.Spec.TrialTemplate
 	if t == nil {
@@ -54,14 +55,13 @@ func (e *Experiment) setDefaultTrialTemplate() {
 			Retain: true,
 		}
 	}
-	if t.GoTemplate == nil {
-		t.GoTemplate = &GoTemplate{}
-	}
-	if t.GoTemplate.RawTemplate == "" && t.GoTemplate.TemplateSpec == nil {
-		t.GoTemplate.TemplateSpec = &TemplateSpec{
-			ConfigMapNamespace: consts.DefaultKatibNamespace,
-			ConfigMapName:      DefaultTrialConfigMapName,
-			TemplatePath:       DefaultTrialTemplatePath,
+	if t.TrialSource.TrialSpec == nil && t.TrialSource.ConfigMap == nil {
+		t.TrialSource = TrialSource{
+			ConfigMap: &ConfigMapSource{
+				ConfigMapNamespace: consts.DefaultKatibNamespace,
+				ConfigMapName:      DefaultTrialConfigMapName,
+				TemplatePath:       DefaultTrialTemplatePath,
+			},
 		}
 	}
 	e.Spec.TrialTemplate = t

@@ -17,7 +17,6 @@ limitations under the License.
 package trial
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 
@@ -31,7 +30,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -228,6 +226,7 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 			logger.Error(err, "Failed to create the provider")
 			return err
 		}
+		// Currently jobCondition - part of commonv1 TF package for all jobs
 		jobCondition, err := jobProvider.GetDeployedJobStatus(deployedJob)
 		if err != nil {
 			logger.Error(err, "Get deployed status error")
@@ -259,7 +258,7 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 	kind := desiredJob.GetKind()
 	gvk := schema.FromAPIVersionAndKind(apiVersion, kind)
 
-	// Add annotation to desired Job
+	// Add annotation to desired Job to disable istio sidecar
 	err = util.TrainingJobAnnotations(desiredJob)
 	if err != nil {
 		logger.Error(err, "TrainingJobAnnotations error")
@@ -314,15 +313,10 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 
 func (r *ReconcileTrial) getDesiredJobSpec(instance *trialsv1beta1.Trial) (*unstructured.Unstructured, error) {
 
-	bufSize := 1024
 	logger := log.WithValues("Trial", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	buf := bytes.NewBufferString(instance.Spec.RunSpec)
 
-	desiredJobSpec := &unstructured.Unstructured{}
-	if err := k8syaml.NewYAMLOrJSONDecoder(buf, bufSize).Decode(desiredJobSpec); err != nil {
-		logger.Error(err, "Yaml decode error")
-		return nil, err
-	}
+	desiredJobSpec := instance.Spec.RunSpec
+
 	if err := controllerutil.SetControllerReference(instance, desiredJobSpec, r.scheme); err != nil {
 		logger.Error(err, "Set controller reference error")
 		return nil, err

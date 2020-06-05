@@ -19,6 +19,7 @@ import (
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 type TrialSpec struct {
@@ -32,7 +33,7 @@ type TrialSpec struct {
 	// runtime object. The trial operator should create the resource as written,
 	// and let the corresponding resource controller (e.g. tf-operator) handle
 	// the rest.
-	RunSpec string `json:"runSpec,omitempty"`
+	RunSpec *unstructured.Unstructured `json:"runSpec,omitempty"`
 	// Whether to retain the trial run object after completed.
 	RetainRun bool `json:"retainRun,omitempty"`
 
