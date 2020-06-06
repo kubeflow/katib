@@ -378,7 +378,7 @@ citations to the following paper:
 
 [A Scalable and Cloud-Native Hyperparameter Tuning System](https://arxiv.org/abs/2006.02085), George *et al.*, arXiv:2006.02085, 2020.
 
-Bibtex entry
+Bibtex entry:
 
 ```
 @misc{george2020katib,
