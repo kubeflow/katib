@@ -31,6 +31,7 @@ Table of Contents
   * [Katib SDK](#katib-sdk)      
   * [Quick Start](#quick-start)
   * [Who are using Katib?](#who-are-using-katib)
+  * [Citation](#citation)
   * [CONTRIBUTING](#contributing)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
@@ -368,3 +369,24 @@ Please feel free to test the system! [developer-guide.md](./docs/developer-guide
 [1]: https://en.wikipedia.org/wiki/Hyperparameter_optimization
 [2]: https://en.wikipedia.org/wiki/Neural_architecture_search
 [3]: https://static.googleusercontent.com/media/research.google.com/ja//pubs/archive/bcb15507f4b52991a0783013df4222240e942381.pdf
+
+## Citation
+
+
+If you use Katib in a scientific publication, we would appreciate
+citations to the following paper:
+
+[A Scalable and Cloud-Native Hyperparameter Tuning System](https://arxiv.org/abs/2006.02085), George *et al.*, arXiv:2006.02085, 2020.
+
+Bibtex entry:
+
+```
+@misc{george2020katib,
+    title={A Scalable and Cloud-Native Hyperparameter Tuning System},
+    author={Johnu George and Ce Gao and Richard Liu and Hou Gang Liu and Yuan Tang and Ramdoot Pydipaty and Amit Kumar Saha},
+    year={2020},
+    eprint={2006.02085},
+    archivePrefix={arXiv},
+    primaryClass={cs.DC}
+}
+```
