@@ -13,16 +13,30 @@ spec:
     objectiveMetricName: accuracy
   algorithm:
     algorithmName: random
+  parameters:
+    - name: lr
+      parameterType: double
+      feasibleSpace:
+        min: "0.01"
+        max: "0.05"
+    - name: momentum
+      parameterType: double
+      feasibleSpace:
+        min: "0.5"
+        max: "0.9"
   trialTemplate:
-    goTemplate:
-      rawTemplate: |-
-        apiVersion: "kubeflow.org/v1"
-        kind: PyTorchJob
-        metadata:
-          name: {{.Trial}}
-          namespace: {{.NameSpace}}
-        spec:
-         pytorchReplicaSpecs:
+    trialParameters:
+      - name: learningRate
+        description: Learning rate for the training model
+        reference: lr
+      - name: momentum
+        description: Momentum for the training model
+        reference: momentum
+    trialSpec:
+      apiVersion: "kubeflow.org/v1"
+      kind: PyTorchJob
+      spec:
+        pytorchReplicaSpecs:
           Master:
             replicas: 1
             restartPolicy: OnFailure
@@ -35,11 +49,8 @@ spec:
                     command:
                       - "python"
                       - "/var/mnist.py"
-                      {{- with .HyperParameters}}
-                      {{- range .}}
-                      - "{{.Name}}={{.Value}}"
-                      {{- end}}
-                      {{- end}}
+                      - "--lr=${trialParameters.learningRate}"
+                      - "--momentum=${trialParameters.momentum}"
           Worker:
             replicas: 2
             restartPolicy: OnFailure
@@ -52,19 +63,5 @@ spec:
                     command:
                       - "python"
                       - "/var/mnist.py"
-                      {{- with .HyperParameters}}
-                      {{- range .}}
-                      - "{{.Name}}={{.Value}}"
-                      {{- end}}
-                      {{- end}}
-  parameters:
-    - name: --lr
-      parameterType: double
-      feasibleSpace:
-        min: "0.01"
-        max: "0.05"
-    - name: --momentum
-      parameterType: double
-      feasibleSpace:
-        min: "0.5"
-        max: "0.9"
+                      - "--lr=${trialParameters.learningRate}"
+                      - "--momentum=${trialParameters.momentum}"

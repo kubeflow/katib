@@ -325,7 +325,6 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1beta1.Exper
 		//skip if no trials need to be created
 		if addCount > 0 {
 			//create "addCount" number of trials
-			logger.Info("CreateTrials", "addCount", addCount)
 			if err := r.createTrials(instance, trials, addCount); err != nil {
 				logger.Error(err, "Create trials error")
 				return err
@@ -341,15 +340,24 @@ func (r *ReconcileExperiment) createTrials(instance *experimentsv1beta1.Experime
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	currentCount := int32(len(trialList))
+	logger.Info("Reconcile Suggestion", "addCount", addCount)
 	trials, err := r.ReconcileSuggestions(instance, currentCount, addCount)
 	if err != nil {
 		logger.Error(err, "Get suggestions error")
 		return err
 	}
+	var trialNames []string
 	for _, trial := range trials {
-		if err = r.createTrialInstance(instance, &trial); err != nil {
-			logger.Error(err, "Create trial instance error", "trial", trial)
-			continue
+		trialNames = append(trialNames, trial.Name)
+	}
+	// If Trial Assignment is not ready we don't need to create Trials
+	if len(trialNames) != 0 {
+		logger.Info("Create Trials", "trialNames", trialNames)
+		for _, trial := range trials {
+			if err = r.createTrialInstance(instance, &trial); err != nil {
+				logger.Error(err, "Create trial instance error", "trial", trial)
+				continue
+			}
 		}
 	}
 	return nil

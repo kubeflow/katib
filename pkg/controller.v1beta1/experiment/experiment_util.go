@@ -39,6 +39,7 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1beta
 	trial.Spec.ParameterAssignments = trialAssignment.ParameterAssignments
 
 	runSpec, err := r.GetRunSpecWithHyperParameters(expInstance, trial.Name, trial.Namespace, hps)
+	logger.Info("RUN SPEC-------------", "runSpec", runSpec)
 	if err != nil {
 		logger.Error(err, "Fail to get RunSpec from experiment", expInstance.Name)
 		return err

@@ -34,7 +34,7 @@ func (j Job) GetDeployedJobStatus(
 		}
 		// Job does not have the running condition in status, thus we think
 		// the job is running when it is created.
-		jobLogger.Info("NestedFieldCopy", "err", "status cannot be found in job")
+		jobLogger.Info("NestedFieldCopy", "Info", "Job doesn't have status yet")
 		return nil, nil
 	}
 

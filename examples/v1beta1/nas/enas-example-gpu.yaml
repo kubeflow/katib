@@ -20,33 +20,6 @@ spec:
     objectiveMetricName: Validation-Accuracy
   algorithm:
     algorithmName: enas
-  trialTemplate:
-    goTemplate:
-      rawTemplate: |-
-        apiVersion: batch/v1
-        kind: Job
-        metadata:
-          name: {{.Trial}}
-          namespace: {{.NameSpace}}
-        spec:
-          template:
-            spec:
-              containers:
-              - name: {{.Trial}}
-                image: docker.io/kubeflowkatib/enas-cnn-cifar10-gpu
-                command:
-                - "python3"
-                - "-u"
-                - "RunTrial.py"
-                {{- with .HyperParameters}}
-                {{- range .}}
-                - "--{{.Name}}=\"{{.Value}}\""
-                {{- end}}
-                {{- end}}
-                resources:
-                  limits:
-                    nvidia.com/gpu: 1
-              restartPolicy: Never
   nasConfig:
     graphConfig:
       numLayers: 8
@@ -146,3 +119,30 @@ spec:
               min: "2"
               max: "3"
               step: "1"
+  trialTemplate:
+    trialParameters:
+      - name: neuralNetworkArchitecture
+        description: NN architecture contains operations ID on each NN layer and skip connections between layers
+        reference: architecture
+      - name: neuralNetworkConfig
+        description: Configuration contains NN number of layers, input and output sizes, description what each operation ID means
+        reference: nn_config
+    trialSpec:
+      apiVersion: batch/v1
+      kind: Job
+      spec:
+        template:
+          spec:
+            containers:
+              - name: training-container
+                image: docker.io/kubeflowkatib/enas-cnn-cifar10-gpu
+                command:
+                  - python3
+                  - -u
+                  - RunTrial.py
+                  - --architecture="${trialParameters.neuralNetworkArchitecture}"
+                  - --nn_config="${trialParameters.neuralNetworkConfig}"
+                resources:
+                  limits:
+                    nvidia.com/gpu: 1
+            restartPolicy: Never

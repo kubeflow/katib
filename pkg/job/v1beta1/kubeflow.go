@@ -36,7 +36,7 @@ func (k Kubeflow) GetDeployedJobStatus(
 			return nil, unerr
 		}
 		kfLogger.Info("NestedFieldCopy unstructured to status error",
-			"err", "Status is not found in job")
+			"Info", "Kubeflow Job doesn't have status yet")
 		return nil, nil
 	}
 

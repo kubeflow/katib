@@ -1,7 +1,6 @@
 package manifest
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"strings"
@@ -13,9 +12,9 @@ import (
 	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
+	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
-	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
 const (
@@ -25,6 +24,7 @@ const (
 // Generator is the type for manifests Generator.
 type Generator interface {
 	InjectClient(c client.Client)
+	// TODO (andreyvelich): Add this after changing validation for new Trial Template
 	// GetRunSpec(e *experimentsv1beta1.Experiment, experiment, trial, namespace string) (string, error)
 	GetRunSpecWithHyperParameters(experiment *experimentsv1beta1.Experiment, trialName, trialNamespace string, assignments []commonapiv1beta1.ParameterAssignment) (*unstructured.Unstructured, error)
 	GetSuggestionConfigData(algorithmName string) (map[string]string, error)
@@ -75,11 +75,9 @@ func (g *DefaultGenerator) GetRunSpecWithHyperParameters(experiment *experiments
 		return nil, err
 	}
 	// Convert Trial template to unstructured
-	replacedTemplateBytes := bytes.NewBufferString(replacedTemplate)
-	runSpec := &unstructured.Unstructured{}
-	err = k8syaml.NewYAMLOrJSONDecoder(replacedTemplateBytes, 1024).Decode(runSpec)
+	runSpec, err := util.ConvertStringToUnstructured(replacedTemplate)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ConvertStringToUnstructured failed: %v", err)
 	}
 
 	// Set name and namespace for Run Spec
@@ -114,13 +112,14 @@ func (g *DefaultGenerator) applyParameters(trialTemplate string, trialParams []e
 
 func (g *DefaultGenerator) getTrialTemplate(instance *experimentsv1beta1.Experiment) (string, error) {
 	var trialTemplateString string
+	var err error
+
 	trialSource := instance.Spec.TrialTemplate.TrialSource
 	if trialSource.TrialSpec != nil {
-		trialTemplateByte, err := trialSource.TrialSpec.MarshalJSON()
+		trialTemplateString, err = util.ConvertUnstructuredToString(trialSource.TrialSpec)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("ConvertUnstructuredToString failed: %v", err)
 		}
-		trialTemplateString = string(trialTemplateByte)
 	} else {
 		configMapNS := trialSource.ConfigMap.ConfigMapNamespace
 		configMapName := trialSource.ConfigMap.ConfigMapName

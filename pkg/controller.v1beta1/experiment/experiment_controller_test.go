@@ -23,9 +23,13 @@ import (
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/util"
+	experimentUtil "github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/util"
+	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1beta1/experiment/manifest"
 	suggestionmock "github.com/kubeflow/katib/pkg/mock/v1beta1/experiment/suggestion"
+	kubeflowcommonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
+	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
+	v1 "k8s.io/api/core/v1"
 )
 
 const (
@@ -125,8 +129,12 @@ func TestReconcileExperiment(t *testing.T) {
 						Name: trialKey.Name,
 						ParameterAssignments: []commonapiv1beta1.ParameterAssignment{
 							{
-								Name:  "--lr",
-								Value: "0.5",
+								Name:  "lr",
+								Value: "0.01",
+							},
+							{
+								Name:  "num-layers",
+								Value: "5",
 							},
 						},
 					},
@@ -137,30 +145,66 @@ func TestReconcileExperiment(t *testing.T) {
 	mockCtrl3 := gomock.NewController(t)
 	defer mockCtrl3.Finish()
 	generator := manifestmock.NewMockGenerator(mockCtrl)
+
+	returnedTFJob := &tfv1.TFJob{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "kubeflow.org/v1",
+			Kind:       "TFJob",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "trial-name",
+			Namespace: "trial-namespace",
+		},
+		Spec: tfv1.TFJobSpec{
+			TFReplicaSpecs: map[tfv1.TFReplicaType]*kubeflowcommonv1.ReplicaSpec{
+				tfv1.TFReplicaTypePS: &kubeflowcommonv1.ReplicaSpec{
+					Replicas:      func() *int32 { i := int32(1); return &i }(),
+					RestartPolicy: kubeflowcommonv1.RestartPolicyOnFailure,
+					Template: v1.PodTemplateSpec{
+						Spec: v1.PodSpec{
+							Containers: []v1.Container{
+								v1.Container{
+									Name:  "tensorflow",
+									Image: "gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0",
+									Command: []string{
+										"python",
+										"/var/tf_mnist/mnist_with_summaries.py",
+										"--log_dir=/train/metrics",
+										"--lr=0.01",
+										"--num-layers=5",
+									},
+									VolumeMounts: []v1.VolumeMount{
+										v1.VolumeMount{
+											Name:      "train",
+											MountPath: "/train",
+										},
+									},
+								},
+							},
+							Volumes: []v1.Volume{
+								v1.Volume{
+									Name: "train",
+									VolumeSource: v1.VolumeSource{
+										PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
+											ClaimName: "tfevent-volume",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	returnedUnstructured, err := util.ConvertObjectToUnstructured(returnedTFJob)
+	if err != nil {
+		t.Errorf("ConvertObjectToUnstructured failed: %v", err)
+	}
 	generator.EXPECT().GetRunSpecWithHyperParameters(gomock.Any(), gomock.Any(),
-		gomock.Any(), gomock.Any(), gomock.Any()).Return(`apiVersion: "kubeflow.org/v1"
-kind: "TFJob"
-metadata:
-  name: "test"
-  namespace: "default"
-spec:
-  tfReplicaSpecs:
-    PS:
-      replicas: 2
-      restartPolicy: Never
-      template:
-        spec:
-          containers:
-            - name: tensorflow
-              image: kubeflow/tf-dist-mnist-test:1.0
-    Worker:
-      replicas: 4
-      restartPolicy: Never
-      template:
-        spec:
-          containers:
-            - name: tensorflow
-              image: kubeflow/tf-dist-mnist-test:1.0`, nil).AnyTimes()
+		gomock.Any(), gomock.Any()).Return(
+		returnedUnstructured,
+		nil).AnyTimes()
 
 	mgr, err := manager.New(cfg, manager.Options{})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
@@ -171,7 +215,7 @@ spec:
 		scheme:     mgr.GetScheme(),
 		Suggestion: suggestion,
 		Generator:  generator,
-		collector:  util.NewExpsCollector(mgr.GetCache(), prometheus.NewRegistry()),
+		collector:  experimentUtil.NewExpsCollector(mgr.GetCache(), prometheus.NewRegistry()),
 	}
 	r.updateStatusHandler = func(instance *experimentsv1beta1.Experiment) error {
 		if !instance.IsCreated() {
@@ -222,6 +266,57 @@ spec:
 func newFakeInstance() *experimentsv1beta1.Experiment {
 	var parallelCount int32 = 1
 	var goal float64 = 99.9
+
+	trialTemplateJob := &tfv1.TFJob{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "kubeflow.org/v1",
+			Kind:       "TFJob",
+		},
+		Spec: tfv1.TFJobSpec{
+			TFReplicaSpecs: map[tfv1.TFReplicaType]*kubeflowcommonv1.ReplicaSpec{
+				tfv1.TFReplicaTypePS: &kubeflowcommonv1.ReplicaSpec{
+					Replicas:      func() *int32 { i := int32(1); return &i }(),
+					RestartPolicy: kubeflowcommonv1.RestartPolicyOnFailure,
+					Template: v1.PodTemplateSpec{
+						Spec: v1.PodSpec{
+							Containers: []v1.Container{
+								v1.Container{
+									Name:  "tensorflow",
+									Image: "gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0",
+									Command: []string{
+										"python",
+										"/var/tf_mnist/mnist_with_summaries.py",
+										"--log_dir=/train/metrics",
+										"--lr=${trialParameters.learningRate}",
+										"--num-layers=${trialParameters.numberLayers}",
+									},
+									VolumeMounts: []v1.VolumeMount{
+										v1.VolumeMount{
+											Name:      "train",
+											MountPath: "/train",
+										},
+									},
+								},
+							},
+							Volumes: []v1.Volume{
+								v1.Volume{
+									Name: "train",
+									VolumeSource: v1.VolumeSource{
+										PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
+											ClaimName: "tfevent-volume",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	trialSpec, _ := util.ConvertObjectToUnstructured(trialTemplateJob)
+
 	return &experimentsv1beta1.Experiment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      experimentName,
@@ -236,39 +331,20 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 				ObjectiveMetricName: "accuracy",
 			},
 			TrialTemplate: &experimentsv1beta1.TrialTemplate{
-				GoTemplate: &experimentsv1beta1.GoTemplate{
-					RawTemplate: `apiVersion: "kubeflow.org/v1"
-kind: TFJob
-metadata:
-  name: {{.Trial}}
-  namespace: {{.NameSpace}}
-spec:
-  tfReplicaSpecs:
-  Worker:
-    replicas: 1 
-    restartPolicy: OnFailure
-    template:
-      spec:
-        containers:
-          - name: tensorflow 
-            image: gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0
-            imagePullPolicy: Always
-            command:
-              - "python"
-              - "/var/tf_mnist/mnist_with_summaries.py"
-              - "--log_dir=/train/{{.Trial}}"
-              {{- with .HyperParameters}}
-              {{- range .}}
-              - "{{.Name}}={{.Value}}"
-              {{- end}}
-              {{- end}}
-            volumeMounts:
-              - mountPath: "/train"
-                name: "train"
-        volumes:
-          - name: "train"
-            persistentVolumeClaim:
-              claimName: "tfevent-volume"`,
+				TrialParameters: []experimentsv1beta1.TrialParameterSpec{
+					experimentsv1beta1.TrialParameterSpec{
+						Name:        "learningRate",
+						Description: "Learning Rate",
+						Reference:   "lr",
+					},
+					experimentsv1beta1.TrialParameterSpec{
+						Name:        "numberLayers",
+						Description: "Number of layers",
+						Reference:   "num-layers",
+					},
+				},
+				TrialSource: experimentsv1beta1.TrialSource{
+					TrialSpec: trialSpec,
 				},
 			},
 		},

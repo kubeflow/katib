@@ -1,20 +1,17 @@
 package manifest
 
 import (
-	"bytes"
 	"reflect"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	katibclientmock "github.com/kubeflow/katib/pkg/mock/v1beta1/util/katibclient"
 	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
-	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
 func TestGetRunSpecWithHP(t *testing.T) {
@@ -74,11 +71,9 @@ func TestGetRunSpecWithHP(t *testing.T) {
 		},
 	}
 
-	expected := &unstructured.Unstructured{}
-
-	expected.Object, err = runtime.DefaultUnstructuredConverter.ToUnstructured(&expectedJob)
+	expected, err := util.ConvertObjectToUnstructured(expectedJob)
 	if err != nil {
-		t.Errorf("ToUnstructured failed: %v", err)
+		t.Errorf("ConvertObjectToUnstructured failed: %v", err)
 	}
 
 	if !reflect.DeepEqual(expected.Object, actual.Object) {
@@ -152,11 +147,9 @@ spec:
             - "--lr=0.05"
             - "--num-layers=5"`
 
-	expectedBytes := bytes.NewBufferString(expectedJob)
-	expected := &unstructured.Unstructured{}
-	err = k8syaml.NewYAMLOrJSONDecoder(expectedBytes, 1024).Decode(expected)
+	expected, err := util.ConvertStringToUnstructured(expectedJob)
 	if err != nil {
-		t.Errorf("NewYAMLOrJSONDecoder failed: %v", err)
+		t.Errorf("ConvertStringToUnstructured failed: %v", err)
 	}
 	if !reflect.DeepEqual(expected, actual) {
 		t.Errorf("Expected %s\n got %s", expected.Object, actual.Object)
@@ -189,9 +182,7 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 			},
 		},
 	}
-
-	trialSpec := &unstructured.Unstructured{}
-	trialSpec.Object, _ = runtime.DefaultUnstructuredConverter.ToUnstructured(trialTemplateJob)
+	trialSpec, _ := util.ConvertObjectToUnstructured(trialTemplateJob)
 
 	return &experimentsv1beta1.Experiment{
 		Spec: experimentsv1beta1.ExperimentSpec{
