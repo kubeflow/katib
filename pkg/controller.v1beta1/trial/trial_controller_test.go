@@ -251,13 +251,13 @@ func newFakeTrialWithTFJob() *trialsv1beta1.Trial {
 		},
 		Spec: tfv1.TFJobSpec{
 			TFReplicaSpecs: map[tfv1.TFReplicaType]*kubeflowcommonv1.ReplicaSpec{
-				tfv1.TFReplicaTypePS: &kubeflowcommonv1.ReplicaSpec{
+				tfv1.TFReplicaTypePS: {
 					Replicas:      func() *int32 { i := int32(2); return &i }(),
 					RestartPolicy: kubeflowcommonv1.RestartPolicyNever,
 					Template: v1.PodTemplateSpec{
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{
-								v1.Container{
+								{
 									Name:  "tensorflow",
 									Image: "gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0",
 									Command: []string{
@@ -272,13 +272,13 @@ func newFakeTrialWithTFJob() *trialsv1beta1.Trial {
 						},
 					},
 				},
-				tfv1.TFReplicaTypeWorker: &kubeflowcommonv1.ReplicaSpec{
+				tfv1.TFReplicaTypeWorker: {
 					Replicas:      func() *int32 { i := int32(4); return &i }(),
 					RestartPolicy: kubeflowcommonv1.RestartPolicyNever,
 					Template: v1.PodTemplateSpec{
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{
-								v1.Container{
+								{
 									Name:  "tensorflow",
 									Image: "gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0",
 									Command: []string{

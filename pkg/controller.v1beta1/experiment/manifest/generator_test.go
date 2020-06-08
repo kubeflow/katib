@@ -55,7 +55,7 @@ func TestGetRunSpecWithHP(t *testing.T) {
 			Template: v1.PodTemplateSpec{
 				Spec: v1.PodSpec{
 					Containers: []v1.Container{
-						v1.Container{
+						{
 							Name:  "training-container",
 							Image: "docker.io/kubeflowkatib/mxnet-mnist",
 							Command: []string{
@@ -167,7 +167,7 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 			Template: v1.PodTemplateSpec{
 				Spec: v1.PodSpec{
 					Containers: []v1.Container{
-						v1.Container{
+						{
 							Name:  "training-container",
 							Image: "docker.io/kubeflowkatib/mxnet-mnist",
 							Command: []string{
@@ -191,12 +191,12 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 					TrialSpec: trialSpec,
 				},
 				TrialParameters: []experimentsv1beta1.TrialParameterSpec{
-					experimentsv1beta1.TrialParameterSpec{
+					{
 						Name:        "learningRate",
 						Description: "Learning Rate",
 						Reference:   "lr",
 					},
-					experimentsv1beta1.TrialParameterSpec{
+					{
 						Name:        "numberLayers",
 						Description: "Number of layers",
 						Reference:   "num-layers",

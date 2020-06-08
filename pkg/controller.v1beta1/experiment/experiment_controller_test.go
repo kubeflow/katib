@@ -157,13 +157,13 @@ func TestReconcileExperiment(t *testing.T) {
 		},
 		Spec: tfv1.TFJobSpec{
 			TFReplicaSpecs: map[tfv1.TFReplicaType]*kubeflowcommonv1.ReplicaSpec{
-				tfv1.TFReplicaTypePS: &kubeflowcommonv1.ReplicaSpec{
+				tfv1.TFReplicaTypePS: {
 					Replicas:      func() *int32 { i := int32(1); return &i }(),
 					RestartPolicy: kubeflowcommonv1.RestartPolicyOnFailure,
 					Template: v1.PodTemplateSpec{
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{
-								v1.Container{
+								{
 									Name:  "tensorflow",
 									Image: "gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0",
 									Command: []string{
@@ -174,7 +174,7 @@ func TestReconcileExperiment(t *testing.T) {
 										"--num-layers=5",
 									},
 									VolumeMounts: []v1.VolumeMount{
-										v1.VolumeMount{
+										{
 											Name:      "train",
 											MountPath: "/train",
 										},
@@ -182,7 +182,7 @@ func TestReconcileExperiment(t *testing.T) {
 								},
 							},
 							Volumes: []v1.Volume{
-								v1.Volume{
+								{
 									Name: "train",
 									VolumeSource: v1.VolumeSource{
 										PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
@@ -274,13 +274,13 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 		},
 		Spec: tfv1.TFJobSpec{
 			TFReplicaSpecs: map[tfv1.TFReplicaType]*kubeflowcommonv1.ReplicaSpec{
-				tfv1.TFReplicaTypePS: &kubeflowcommonv1.ReplicaSpec{
+				tfv1.TFReplicaTypePS: {
 					Replicas:      func() *int32 { i := int32(1); return &i }(),
 					RestartPolicy: kubeflowcommonv1.RestartPolicyOnFailure,
 					Template: v1.PodTemplateSpec{
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{
-								v1.Container{
+								{
 									Name:  "tensorflow",
 									Image: "gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0",
 									Command: []string{
@@ -291,7 +291,7 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 										"--num-layers=${trialParameters.numberLayers}",
 									},
 									VolumeMounts: []v1.VolumeMount{
-										v1.VolumeMount{
+										{
 											Name:      "train",
 											MountPath: "/train",
 										},
@@ -299,7 +299,7 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 								},
 							},
 							Volumes: []v1.Volume{
-								v1.Volume{
+								{
 									Name: "train",
 									VolumeSource: v1.VolumeSource{
 										PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
@@ -332,12 +332,12 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 			},
 			TrialTemplate: &experimentsv1beta1.TrialTemplate{
 				TrialParameters: []experimentsv1beta1.TrialParameterSpec{
-					experimentsv1beta1.TrialParameterSpec{
+					{
 						Name:        "learningRate",
 						Description: "Learning Rate",
 						Reference:   "lr",
 					},
-					experimentsv1beta1.TrialParameterSpec{
+					{
 						Name:        "numberLayers",
 						Description: "Number of layers",
 						Reference:   "num-layers",

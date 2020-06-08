@@ -63,17 +63,17 @@ func (e *Experiment) setDefaultTrialTemplate() {
 			},
 		}
 		t.TrialParameters = []TrialParameterSpec{
-			TrialParameterSpec{
+			{
 				Name:        "learningRate",
 				Description: "Learning rate for the training model",
 				Reference:   "lr",
 			},
-			TrialParameterSpec{
+			{
 				Name:        "numberLayers",
 				Description: "Number of training model layers",
 				Reference:   "num-layers",
 			},
-			TrialParameterSpec{
+			{
 				Name:        "optimizer",
 				Description: "Training model optimizer (sdg, adam or ftrl)",
 				Reference:   "optimizer",
