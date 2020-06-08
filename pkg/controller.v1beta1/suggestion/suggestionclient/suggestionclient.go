@@ -248,14 +248,18 @@ func convertTrialConditionType(conditionType trialsv1beta1.TrialConditionType) s
 }
 
 // convertTrialObservation convert Trial Observation Metrics CRD to the GRPC definition
-func convertTrialObservation(strategies map[string]commonapiv1beta1.MetricStrategy, observation *commonapiv1beta1.Observation) *suggestionapi.Observation {
+func convertTrialObservation(strategies []commonapiv1beta1.MetricStrategy, observation *commonapiv1beta1.Observation) *suggestionapi.Observation {
 	resObservation := &suggestionapi.Observation{
 		Metrics: make([]*suggestionapi.Metric, 0),
+	}
+	strategyMap := make(map[string]commonapiv1beta1.MetricStrategyType)
+	for _, strategy := range strategies {
+		strategyMap[strategy.Name] = strategy.Value
 	}
 	if observation != nil && observation.Metrics != nil {
 		for _, m := range observation.Metrics {
 			var value string
-			switch strategy, _ := strategies[m.Name]; strategy {
+			switch strategy, _ := strategyMap[m.Name]; strategy {
 			case commonapiv1beta1.ExtractByMin:
 				if math.IsNaN(m.Min) {
 					value = m.Latest
@@ -279,8 +283,8 @@ func convertTrialObservation(strategies map[string]commonapiv1beta1.MetricStrate
 			})
 		}
 	}
-	return resObservation
 
+	return resObservation
 }
 
 // convertTrialStatusTime convert Trial Status Time CRD to the GRPC definition

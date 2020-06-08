@@ -144,8 +144,14 @@ func getObjectiveMetricValue(trial trialsv1beta1.Trial) *string {
 	if trial.Status.Observation == nil {
 		return nil
 	}
+	var objectiveStrategy commonv1beta1.MetricStrategyType
 	objectiveMetricName := trial.Spec.Objective.ObjectiveMetricName
-	objectiveStrategy, _ := trial.Spec.Objective.MetricStrategies[objectiveMetricName]
+	for _, strategy := range trial.Spec.Objective.MetricStrategies {
+		if strategy.Name == objectiveMetricName {
+			objectiveStrategy = strategy.Value
+			break
+		}
+	}
 	for _, metric := range trial.Status.Observation.Metrics {
 		if objectiveMetricName == metric.Name {
 			switch objectiveStrategy {

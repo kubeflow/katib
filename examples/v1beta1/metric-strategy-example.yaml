@@ -10,11 +10,12 @@ spec:
     type: maximize
     goal: 0.99
     objectiveMetricName: Validation-accuracy
-    additionalMetricNames:
-      - Train-accuracy
+    additionalMetricNames: [Train-accuracy]
     metricStrategies:
-      Validation-accuracy: "max"
-      Train-accuracy: "latest"
+      - name: Train-accuracy
+        value: "latest"
+      - name: Validation-accuracy
+        value: "max"
   algorithm:
     algorithmName: tpe
   parallelTrialCount: 3

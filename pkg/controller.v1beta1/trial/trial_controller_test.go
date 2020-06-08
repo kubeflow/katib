@@ -257,7 +257,7 @@ func TestGetObjectiveMetricValue(t *testing.T) {
 		{TimeStamp: "2020-04-12T14:47:42+08:00", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.6"}},
 	}
 
-	getMetricsFromLogs := func(strategies map[string]commonv1beta1.MetricStrategy) (*commonv1beta1.Metric, *commonv1beta1.Metric, error) {
+	getMetricsFromLogs := func(strategies []commonv1beta1.MetricStrategy) (*commonv1beta1.Metric, *commonv1beta1.Metric, error) {
 		observation, err := getMetrics(metricLogs, strategies)
 		if err != nil {
 			return nil, nil, err
@@ -273,9 +273,9 @@ func TestGetObjectiveMetricValue(t *testing.T) {
 		return errMetric, accMetric, nil
 	}
 
-	metricStrategies := map[string]commonv1beta1.MetricStrategy{
-		"error":    commonv1beta1.ExtractByMin,
-		"accuracy": commonv1beta1.ExtractByMax,
+	metricStrategies := []commonv1beta1.MetricStrategy{
+		{Name: "error", Value: commonv1beta1.ExtractByMin},
+		{Name: "accuracy", Value: commonv1beta1.ExtractByMax},
 	}
 	errMetric, accMetric, err := getMetricsFromLogs(metricStrategies)
 	g.Expect(err).ShouldNot(gomega.HaveOccurred())

@@ -51,25 +51,37 @@ func (e *Experiment) setDefaultResumePolicy() {
 func (e *Experiment) setDefaultObjective() {
 	obj := e.Spec.Objective
 	if obj.MetricStrategies == nil {
-		obj.MetricStrategies = make(map[string]common.MetricStrategy)
+		obj.MetricStrategies = make([]common.MetricStrategy, 0)
+	}
+	objectiveHasDefault := false
+	metricsWithDefault := make(map[string]int)
+	for _, strategy := range obj.MetricStrategies {
+		if strategy.Name == obj.ObjectiveMetricName {
+			objectiveHasDefault = true
+			continue
+		}
+		metricsWithDefault[strategy.Name] = 1
 	}
 	// set default strategy of objective according to ObjectiveType
-	if _, ok := obj.MetricStrategies[obj.ObjectiveMetricName]; !ok {
+	if !objectiveHasDefault {
+		var strategy common.MetricStrategy
 		switch e.Spec.Objective.Type {
 		case common.ObjectiveTypeMinimize:
-			obj.MetricStrategies[obj.ObjectiveMetricName] = common.ExtractByMin
+			strategy = common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByMin}
 		case common.ObjectiveTypeMaximize:
-			obj.MetricStrategies[obj.ObjectiveMetricName] = common.ExtractByMax
+			strategy = common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByMax}
 		case common.ObjectiveTypeUnknown:
-			obj.MetricStrategies[obj.ObjectiveMetricName] = common.ExtractByLatest
+			strategy = common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByLatest}
 		default:
-			obj.MetricStrategies[obj.ObjectiveMetricName] = common.ExtractByLatest
+			strategy = common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByLatest}
 		}
+		obj.MetricStrategies = append(obj.MetricStrategies, strategy)
 	}
 	// set default strategy of additional metrics to ExtractByLatest
 	for _, name := range obj.AdditionalMetricNames {
-		if _, ok := obj.MetricStrategies[name]; !ok {
-			obj.MetricStrategies[name] = common.ExtractByLatest
+		if _, ok := metricsWithDefault[name]; !ok {
+			strategy := common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByLatest}
+			obj.MetricStrategies = append(obj.MetricStrategies, strategy)
 		}
 	}
 }

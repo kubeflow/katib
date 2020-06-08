@@ -165,13 +165,13 @@ func isJobSucceeded(jobCondition *commonv1.JobCondition) bool {
 	return false
 }
 
-func getMetrics(metricLogs []*api_pb.MetricLog, strategies map[string]commonv1beta1.MetricStrategy) (*commonv1beta1.Observation, error) {
+func getMetrics(metricLogs []*api_pb.MetricLog, strategies []commonv1beta1.MetricStrategy) (*commonv1beta1.Observation, error) {
 	metrics := make(map[string]*commonv1beta1.Metric)
 	timestamps := make(map[string]*time.Time)
-	for name := range strategies {
-		timestamps[name] = nil
-		metrics[name] = &commonv1beta1.Metric{
-			Name:   name,
+	for _, strategy := range strategies {
+		timestamps[strategy.Name] = nil
+		metrics[strategy.Name] = &commonv1beta1.Metric{
+			Name:   strategy.Name,
 			Min:    math.NaN(),
 			Max:    math.NaN(),
 			Latest: "",

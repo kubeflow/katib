@@ -14,7 +14,7 @@ func init() {
 
 func TestConvertTrialObservation(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
-	var strategies = map[string]commonv1beta1.MetricStrategy{
+	var strategies = map[string]commonv1beta1.MetricStrategyType{
 		"error":    commonv1beta1.ExtractByMin,
 		"auc":      commonv1beta1.ExtractByMax,
 		"accuracy": commonv1beta1.ExtractByLatest,
