@@ -47,7 +47,6 @@ func (e *Experiment) setDefaultResumePolicy() {
 	}
 }
 
-// TODO: Verify it
 func (e *Experiment) setDefaultTrialTemplate() {
 	t := e.Spec.TrialTemplate
 	if t == nil {
@@ -55,12 +54,29 @@ func (e *Experiment) setDefaultTrialTemplate() {
 			Retain: true,
 		}
 	}
-	if t.TrialSource.TrialSpec == nil && t.TrialSource.ConfigMap == nil {
+	if t.TrialSource.TrialSpec == nil && t.TrialSource.ConfigMap == nil && t.TrialParameters == nil {
 		t.TrialSource = TrialSource{
 			ConfigMap: &ConfigMapSource{
 				ConfigMapNamespace: consts.DefaultKatibNamespace,
 				ConfigMapName:      DefaultTrialConfigMapName,
 				TemplatePath:       DefaultTrialTemplatePath,
+			},
+		}
+		t.TrialParameters = []TrialParameterSpec{
+			TrialParameterSpec{
+				Name:        "learningRate",
+				Description: "Learning rate for the training model",
+				Reference:   "lr",
+			},
+			TrialParameterSpec{
+				Name:        "numberLayers",
+				Description: "Number of training model layers",
+				Reference:   "num-layers",
+			},
+			TrialParameterSpec{
+				Name:        "optimizer",
+				Description: "Training model optimizer (sdg, adam or ftrl)",
+				Reference:   "optimizer",
 			},
 		}
 	}
