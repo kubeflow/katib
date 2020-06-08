@@ -29,11 +29,6 @@ spec:
       feasibleSpace:
         min: "2"
         max: "5"
-    - name: num-epochs
-      parameterType: int
-      feasibleSpace:
-        min: "10"
-        max: "15"
     - name: optimizer
       parameterType: categorical
       feasibleSpace:
