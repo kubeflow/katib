@@ -16,7 +16,7 @@ spec:
     algorithmName: hyperband
     algorithmSettings:
       - name: "resource_name"
-        value: "--num-epochs"
+        value: "num-epochs"
       - name: "eta"
         value: "3"
       - name: "r_l"
