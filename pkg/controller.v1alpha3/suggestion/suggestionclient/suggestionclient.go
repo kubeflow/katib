@@ -81,18 +81,18 @@ func (g *General) SyncAssignments(
 		return err
 	}
 	logger.V(0).Info("Getting suggestions", "endpoint", endpoint, "response", response, "request", request)
-	if len(response.ParameterAssignments) != requestNum {
-		err := fmt.Errorf("The response contains unexpected trials")
-		logger.Error(err, "The response contains unexpected trials", "requestNum", requestNum, "response", response)
-		return err
+
+	trialAssignments := composeTrialAssignments(response.ParameterAssignments, instance.Name)
+	if len(trialAssignments) != requestNum {
+		logger.Error(
+			err,
+			"The response contains unexpected trials",
+			"requestNum", requestNum,
+			"trialAssignmentsNum", len(trialAssignments),
+			"trialAssignments", trialAssignments,
+		)
 	}
-	for _, t := range response.ParameterAssignments {
-		instance.Status.Suggestions = append(instance.Status.Suggestions,
-			suggestionsv1alpha3.TrialAssignment{
-				Name:                 fmt.Sprintf("%s-%s", instance.Name, utilrand.String(8)),
-				ParameterAssignments: composeParameterAssignments(t.Assignments),
-			})
-	}
+	instance.Status.Suggestions = append(instance.Status.Suggestions, trialAssignments...)
 	instance.Status.SuggestionCount = int32(len(instance.Status.Suggestions))
 
 	if response.Algorithm != nil {
@@ -354,4 +354,18 @@ func convertFeasibleSpace(fs experimentsv1alpha3.FeasibleSpace) *suggestionapi.F
 		Step: fs.Step,
 	}
 	return res
+}
+
+func composeTrialAssignments(parameterAssignments []*suggestionapi.GetSuggestionsReply_ParameterAssignments, name string) []suggestionsv1alpha3.TrialAssignment {
+	trialAssignments := make([]suggestionsv1alpha3.TrialAssignment, 0)
+	for _, t := range parameterAssignments {
+		trialAssignments = append(
+			trialAssignments,
+			suggestionsv1alpha3.TrialAssignment{
+				Name:                 fmt.Sprintf("%s-%s", name, utilrand.String(8)),
+				ParameterAssignments: composeParameterAssignments(t.Assignments),
+			},
+		)
+	}
+	return trialAssignments
 }
