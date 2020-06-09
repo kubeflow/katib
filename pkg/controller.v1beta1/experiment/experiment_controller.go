@@ -348,18 +348,17 @@ func (r *ReconcileExperiment) createTrials(instance *experimentsv1beta1.Experime
 	}
 	var trialNames []string
 	for _, trial := range trials {
+		if err = r.createTrialInstance(instance, &trial); err != nil {
+			logger.Error(err, "Create trial instance error", "trial", trial)
+			continue
+		}
 		trialNames = append(trialNames, trial.Name)
 	}
-	// If Trial Assignment is not ready we don't need to create Trials
+	// Print created Trial names
 	if len(trialNames) != 0 {
-		logger.Info("Create Trials", "trialNames", trialNames)
-		for _, trial := range trials {
-			if err = r.createTrialInstance(instance, &trial); err != nil {
-				logger.Error(err, "Create trial instance error", "trial", trial)
-				continue
-			}
-		}
+		logger.Info("Created Trials", "trialNames", trialNames)
 	}
+
 	return nil
 }
 
