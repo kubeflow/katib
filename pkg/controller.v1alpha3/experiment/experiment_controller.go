@@ -389,16 +389,25 @@ func (r *ReconcileExperiment) ReconcileSuggestions(instance *experimentsv1alpha3
 	} else {
 		if original != nil {
 			activeTrials := instance.Status.TrialsPending + instance.Status.TrialsRunning
-			if original.IsFailed() && activeTrials == 0 {
-				msg := "Suggestion has failed"
-				instance.MarkExperimentStatusFailed(util.ExperimentFailedReason, msg)
-			} else if !original.IsFailed() {
+			// If Suggestion is in failed/exhausted state, wait for active trials and use all produced suggestions
+			if (original.IsFailed() || original.IsExhausted()) && activeTrials == 0 && len(original.Status.Suggestions) == int(currentCount) {
+				if original.IsFailed() {
+					instance.MarkExperimentStatusFailed(util.ExperimentFailedReason, "Suggestion has failed")
+				} else {
+					msg := "Suggestion is exhausted"
+					if instance.Spec.Objective.Goal != nil {
+						instance.MarkExperimentStatusFailed(util.ExperimentFailedReason, msg)
+					} else {
+						instance.MarkExperimentStatusSucceeded(util.ExperimentSuggestionEndReachedReason, msg)
+					}
+				}
+			} else {
 				suggestion := original.DeepCopy()
 				if len(suggestion.Status.Suggestions) > int(currentCount) {
 					suggestions := suggestion.Status.Suggestions
 					assignments = suggestions[currentCount:]
 				}
-				if suggestion.Spec.Requests != suggestionRequestsCount {
+				if !original.IsCompleted() && suggestion.Spec.Requests != suggestionRequestsCount {
 					suggestion.Spec.Requests = suggestionRequestsCount
 					if err := r.UpdateSuggestion(suggestion); err != nil {
 						return nil, err
