@@ -15,6 +15,7 @@ const (
 	SuggestionSucceededReason    = "SuggestionSucceeded"
 	SuggestionFailedReason       = "SuggestionFailed"
 	SuggestionKilledReason       = "SuggestionKilled"
+	SuggestionExhaustedReason    = "SuggestionExhausted"
 )
 
 func (r *ReconcileSuggestion) updateStatus(s *suggestionsv1alpha3.Suggestion, oldS *suggestionsv1alpha3.Suggestion) error {

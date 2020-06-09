@@ -64,8 +64,12 @@ func (suggestion *Suggestion) IsRunning() bool {
 	return hasCondition(suggestion, SuggestionRunning)
 }
 
+func (suggestion *Suggestion) IsExhausted() bool {
+	return hasCondition(suggestion, SuggestionExhausted)
+}
+
 func (suggestion *Suggestion) IsCompleted() bool {
-	return suggestion.IsSucceeded() || suggestion.IsFailed()
+	return suggestion.IsSucceeded() || suggestion.IsFailed() || suggestion.IsExhausted()
 }
 
 func (suggestion *Suggestion) setCondition(conditionType SuggestionConditionType, status v1.ConditionStatus, reason, message string) {
@@ -110,6 +114,14 @@ func (suggestion *Suggestion) MarkSuggestionStatusFailed(reason, message string)
 		suggestion.setCondition(SuggestionRunning, v1.ConditionFalse, currentCond.Reason, currentCond.Message)
 	}
 	suggestion.setCondition(SuggestionFailed, v1.ConditionTrue, reason, message)
+}
+
+func (suggestion *Suggestion) MarkSuggestionStatusExhausted(reason, message string) {
+	currentCond := getCondition(suggestion, SuggestionRunning)
+	if currentCond != nil {
+		suggestion.setCondition(SuggestionRunning, v1.ConditionFalse, currentCond.Reason, currentCond.Message)
+	}
+	suggestion.setCondition(SuggestionExhausted, v1.ConditionTrue, reason, message)
 }
 
 func (suggestion *Suggestion) MarkSuggestionStatusDeploymentReady(status v1.ConditionStatus, reason, message string) {

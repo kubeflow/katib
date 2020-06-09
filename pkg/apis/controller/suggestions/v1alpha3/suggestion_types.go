@@ -100,6 +100,7 @@ const (
 	SuggestionRunning         SuggestionConditionType = "Running"
 	SuggestionSucceeded       SuggestionConditionType = "Succeeded"
 	SuggestionFailed          SuggestionConditionType = "Failed"
+	SuggestionExhausted       SuggestionConditionType = "Exhausted"
 )
 
 // +genclient
