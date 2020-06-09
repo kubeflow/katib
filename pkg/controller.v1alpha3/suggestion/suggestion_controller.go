@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"google.golang.org/grpc/status"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -230,6 +231,10 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1alpha3.
 	}
 	logger.Info("Sync assignments", "suggestions", instance.Spec.Requests)
 	if err = r.SyncAssignments(instance, experiment, trials.Items); err != nil {
+		if statusCode, ok := status.FromError(err); ok {
+			logger.Error(err, "Marking suggestion failed as get suggestions rpc failed")
+			instance.MarkSuggestionStatusFailed(SuggestionFailedReason, statusCode.Message())
+		}
 		return err
 	}
 
