@@ -388,10 +388,11 @@ func (r *ReconcileExperiment) ReconcileSuggestions(instance *experimentsv1alpha3
 		return nil, err
 	} else {
 		if original != nil {
-			if original.IsFailed() {
+			activeTrials := instance.Status.TrialsPending + instance.Status.TrialsRunning
+			if original.IsFailed() && activeTrials == 0 {
 				msg := "Suggestion has failed"
 				instance.MarkExperimentStatusFailed(util.ExperimentFailedReason, msg)
-			} else {
+			} else if !original.IsFailed() {
 				suggestion := original.DeepCopy()
 				if len(suggestion.Status.Suggestions) > int(currentCount) {
 					suggestions := suggestion.Status.Suggestions
