@@ -168,7 +168,10 @@ class BaseChocolateService(object):
 
         if len(list_of_assignments) > 0:
             logger.info(
-                "GetSuggestions returns {} new Trials\n\n".format(request_number))
+                "GetSuggestions returns {} new Trials\n\n".format(
+                    len(list_of_assignments)))
+        elif request_number > 0:  # Raise nothing if requested_number == 0
+            raise StopIteration("Run out of assignments")
 
         return list_of_assignments
 

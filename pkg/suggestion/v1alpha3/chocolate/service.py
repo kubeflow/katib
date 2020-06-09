@@ -45,8 +45,12 @@ class ChocolateService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             self.is_first_run = False
 
         trials = Trial.convert(request.trials)
-        new_assignments = self.base_service.getSuggestions(
-            trials, request.request_number)
+        try:
+            new_assignments = self.base_service.getSuggestions(
+                trials, request.request_number)
+        except StopIteration as e:
+            return self._set_get_suggestions_context_error(
+                context, grpc.StatusCode.NOT_FOUND, str(e))
         return api_pb2.GetSuggestionsReply(
             parameter_assignments=Assignment.generate(new_assignments)
         )
@@ -56,3 +60,10 @@ class ChocolateService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         context.set_details(error_message)
         logger.info(error_message)
         return api_pb2.ValidateAlgorithmSettingsReply()
+
+    def _set_get_suggestions_context_error(self, context, code, details):
+        context.set_code(code)
+        context.set_details(details)
+        logger.info("GetSuggestions raised an error: (%s, %s) %s",
+                    code.value[0], code.value[1], details)
+        return api_pb2.GetSuggestionsReply()
