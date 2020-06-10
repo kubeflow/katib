@@ -19,40 +19,24 @@ set -o nounset
 set -o pipefail
 
 if [[ -z "${GOPATH:-}" ]]; then
-  export GOPATH=$(go env GOPATH)
+    export GOPATH=$(go env GOPATH)
 fi
 
-PROJECT_ROOT=$(pwd)
-CODEGEN_PKG=$(pwd)/vendor/k8s.io/code-generator
-
-KATIB_VERSION_V1ALPHA3="v1alpha3"
-SWAGGER_CODEGEN_FILE_V1ALPHA3="pkg/apis/v1alpha3/swagger.json"
-
-KATIB_VERSION_V1BETA1="v1beta1"
-SWAGGER_CODEGEN_FILE_V1BETA1="pkg/apis/v1beta1/swagger.json"
-
+PROJECT_ROOT=${GOPATH}/src/github.com/kubeflow/katib
+CODEGEN_PKG=${PROJECT_ROOT}/vendor/k8s.io/code-generator
+VERSION_LIST=(v1alpha3 v1beta1)
 SWAGGER_VERSION="0.1"
 
-# OpenAPI for v1alpha3 Katib version
-echo "Generating OpenAPI specification for v1alpha3..."
-go run ${CODEGEN_PKG}/cmd/openapi-gen/main.go \
-  --go-header-file ${PROJECT_ROOT}/hack/boilerplate.go.txt \
-  --input-dirs github.com/kubeflow/katib/pkg/apis/controller/common/${KATIB_VERSION_V1ALPHA3},github.com/kubeflow/katib/pkg/apis/controller/experiments/${KATIB_VERSION_V1ALPHA3},github.com/kubeflow/katib/pkg/apis/controller/suggestions/${KATIB_VERSION_V1ALPHA3},github.com/kubeflow/katib/pkg/apis/controller/trials/${KATIB_VERSION_V1ALPHA3} \
-  --output-package github.com/kubeflow/katib/pkg/apis/${KATIB_VERSION_V1ALPHA3} \
-  $@
+for VERSION in ${VERSION_LIST[@]}; do
+    SWAGGER_CODEGEN_FILE=${PROJECT_ROOT}/pkg/apis/${VERSION}/swagger.json
 
-# Swagger file for v1alpha3 Katib version
-echo "Generating Swagger file for v1alpha3..."
-go run hack/swagger/main.go ${SWAGGER_VERSION} ${KATIB_VERSION_V1ALPHA3} >${SWAGGER_CODEGEN_FILE_V1ALPHA3}
+    echo "Generating OpenAPI specification for ${VERSION} ..."
+    go run ${CODEGEN_PKG}/cmd/openapi-gen/main.go \
+      --go-header-file ${PROJECT_ROOT}/hack/boilerplate.go.txt \
+      --input-dirs github.com/kubeflow/katib/pkg/apis/controller/common/${VERSION},github.com/kubeflow/katib/pkg/apis/controller/experiments/${VERSION},github.com/kubeflow/katib/pkg/apis/controller/suggestions/${VERSION},github.com/kubeflow/katib/pkg/apis/controller/trials/${VERSION} \
+      --output-package github.com/kubeflow/katib/pkg/apis/${VERSION} \
+      $@
 
-# OpenAPI for v1beta1 Katib version
-echo "Generating OpenAPI specification for v1beta1..."
-go run ${CODEGEN_PKG}/cmd/openapi-gen/main.go \
-  --go-header-file ${PROJECT_ROOT}/hack/boilerplate.go.txt \
-  --input-dirs github.com/kubeflow/katib/pkg/apis/controller/common/${KATIB_VERSION_V1BETA1},github.com/kubeflow/katib/pkg/apis/controller/experiments/${KATIB_VERSION_V1BETA1},github.com/kubeflow/katib/pkg/apis/controller/suggestions/${KATIB_VERSION_V1BETA1},github.com/kubeflow/katib/pkg/apis/controller/trials/${KATIB_VERSION_V1BETA1} \
-  --output-package github.com/kubeflow/katib/pkg/apis/${KATIB_VERSION_V1BETA1} \
-  $@
-
-# Swagger file for v1beta1 Katib version
-echo "Generating Swagger file for v1beta1..."
-go run hack/swagger/main.go ${SWAGGER_VERSION} ${KATIB_VERSION_V1BETA1} >${SWAGGER_CODEGEN_FILE_V1BETA1}
+    echo "Generating swagger file for ${VERSION} ..."
+    go run ${PROJECT_ROOT}/hack/swagger/main.go ${VERSION}-${SWAGGER_VERSION} ${VERSION} > ${SWAGGER_CODEGEN_FILE}
+done

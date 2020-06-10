@@ -212,8 +212,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 						},
 						"value": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"number"},
-								Format: "double",
+								Type:   []string{"string"},
+								Format: "",
 							},
 						},
 					},

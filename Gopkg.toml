@@ -106,3 +106,12 @@ required = [
   name = "github.com/kubeflow/katib"
   unused-packages = false
   non-go = false
+
+[[prune.project]]
+  name = "k8s.io/code-generator"
+  unused-packages = false
+  non-go = false
+
+[[prune.project]]
+  name = "k8s.io/gengo"
+  unused-packages = false
