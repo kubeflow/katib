@@ -1,15 +1,11 @@
 package experiment
 
 import (
-	"bytes"
 	"context"
-	"fmt"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
-	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -25,7 +21,6 @@ const (
 )
 
 func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1beta1.Experiment, trialAssignment *suggestionsv1beta1.TrialAssignment) error {
-	BUFSIZE := 1024
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: expInstance.GetName(), Namespace: expInstance.GetNamespace()})
 
 	trial := &trialsv1beta1.Trial{}
@@ -42,7 +37,8 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1beta
 
 	hps := trialAssignment.ParameterAssignments
 	trial.Spec.ParameterAssignments = trialAssignment.ParameterAssignments
-	runSpec, err := r.GetRunSpecWithHyperParameters(expInstance, expInstance.GetName(), trial.Name, trial.Namespace, hps)
+
+	runSpec, err := r.GetRunSpecWithHyperParameters(expInstance, trial.Name, trial.Namespace, hps)
 	if err != nil {
 		logger.Error(err, "Fail to get RunSpec from experiment", expInstance.Name)
 		return err
@@ -51,12 +47,6 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1beta
 	trial.Spec.RunSpec = runSpec
 	if expInstance.Spec.TrialTemplate != nil {
 		trial.Spec.RetainRun = expInstance.Spec.TrialTemplate.Retain
-	}
-
-	buf := bytes.NewBufferString(runSpec)
-	job := &unstructured.Unstructured{}
-	if err := k8syaml.NewYAMLOrJSONDecoder(buf, BUFSIZE).Decode(job); err != nil {
-		return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
 	}
 
 	if expInstance.Spec.MetricsCollectorSpec != nil {

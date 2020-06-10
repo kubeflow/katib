@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"bytes"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -10,7 +9,6 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
@@ -130,31 +128,32 @@ func (g *DefaultValidator) validateResumePolicy(resume experimentsv1beta1.Resume
 	return nil
 }
 
+//TODO: Add Validation for new Trial Template
 func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Experiment) error {
-	trialName := fmt.Sprintf("%s-trial", instance.GetName())
-	runSpec, err := g.GetRunSpec(instance, instance.GetName(), trialName, instance.GetNamespace())
-	if err != nil {
-		return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
-	}
+	// trialName := fmt.Sprintf("%s-trial", instance.GetName())
+	// runSpec, err := g.GetRunSpec(instance, instance.GetName(), trialName, instance.GetNamespace())
+	// if err != nil {
+	// 	return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
+	// }
 
-	bufSize := 1024
-	buf := bytes.NewBufferString(runSpec)
+	// bufSize := 1024
+	// buf := bytes.NewBufferString(runSpec)
 
-	job := &unstructured.Unstructured{}
-	if err := k8syaml.NewYAMLOrJSONDecoder(buf, bufSize).Decode(job); err != nil {
-		return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
-	}
+	// job := &unstructured.Unstructured{}
+	// if err := k8syaml.NewYAMLOrJSONDecoder(buf, bufSize).Decode(job); err != nil {
+	// 	return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
+	// }
 
-	if err := g.validateSupportedJob(job); err != nil {
-		return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
-	}
+	// if err := g.validateSupportedJob(job); err != nil {
+	// 	return fmt.Errorf("Invalid spec.trialTemplate: %v.", err)
+	// }
 
-	if job.GetNamespace() != instance.GetNamespace() {
-		return fmt.Errorf("Invalid spec.trialTemplate: metadata.namespace should be %s or {{.NameSpace}}", instance.GetNamespace())
-	}
-	if job.GetName() != trialName {
-		return fmt.Errorf("Invalid spec.trialTemplate: metadata.name should be {{.Trial}}")
-	}
+	// if job.GetNamespace() != instance.GetNamespace() {
+	// 	return fmt.Errorf("Invalid spec.trialTemplate: metadata.namespace should be %s or {{.NameSpace}}", instance.GetNamespace())
+	// }
+	// if job.GetName() != trialName {
+	// 	return fmt.Errorf("Invalid spec.trialTemplate: metadata.name should be {{.Trial}}")
+	// }
 	return nil
 }
 

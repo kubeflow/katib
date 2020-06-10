@@ -57,29 +57,33 @@ spec:
                 - "3"
       - operationType: skip_connection
   trialTemplate:
-    goTemplate:
-      rawTemplate: |-
-        apiVersion: batch/v1
-        kind: Job
-        metadata:
-          name: {{.Trial}}
-          namespace: {{.NameSpace}}
-        spec:
-          template:
-            spec:
-              containers:
-              - name: {{.Trial}}
+    trialParameters:
+      - name: algorithmSettings
+        description: Algorithm settings of DARTS Experiment
+        reference: algorithm-settings
+      - name: searchSpace
+        description: Search Space of DARTS Experiment
+        reference: search-space
+      - name: num-layers
+        description: Number of layers of Neural Network
+        reference: numberLayers
+    trialSpec:
+      apiVersion: batch/v1
+      kind: Job
+      spec:
+        template:
+          spec:
+            containers:
+              - name: training-container
                 image: docker.io/kubeflowkatib/darts-cnn-cifar10
                 imagePullPolicy: Always
                 command:
-                - "python3"
-                - "run_trial.py"
-                {{- with .HyperParameters}}
-                {{- range .}}
-                - "--{{.Name}}=\"{{.Value}}\""
-                {{- end}}
-                {{- end}}
+                  - python3
+                  - run_trial.py
+                  - --algorithm-settings="${trialParameters.algorithmSettings}"
+                  - --search-space="${trialParameters.searchSpace}"
+                  - --num-layers="${trialParameters.numberLayers}"
                 resources:
                   limits:
                     nvidia.com/gpu: 1
-              restartPolicy: Never
+            restartPolicy: Never

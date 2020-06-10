@@ -54,14 +54,30 @@ func (e *Experiment) setDefaultTrialTemplate() {
 			Retain: true,
 		}
 	}
-	if t.GoTemplate == nil {
-		t.GoTemplate = &GoTemplate{}
-	}
-	if t.GoTemplate.RawTemplate == "" && t.GoTemplate.TemplateSpec == nil {
-		t.GoTemplate.TemplateSpec = &TemplateSpec{
-			ConfigMapNamespace: consts.DefaultKatibNamespace,
-			ConfigMapName:      DefaultTrialConfigMapName,
-			TemplatePath:       DefaultTrialTemplatePath,
+	if t.TrialSource.TrialSpec == nil && t.TrialSource.ConfigMap == nil && t.TrialParameters == nil {
+		t.TrialSource = TrialSource{
+			ConfigMap: &ConfigMapSource{
+				ConfigMapNamespace: consts.DefaultKatibNamespace,
+				ConfigMapName:      DefaultTrialConfigMapName,
+				TemplatePath:       DefaultTrialTemplatePath,
+			},
+		}
+		t.TrialParameters = []TrialParameterSpec{
+			{
+				Name:        "learningRate",
+				Description: "Learning rate for the training model",
+				Reference:   "lr",
+			},
+			{
+				Name:        "numberLayers",
+				Description: "Number of training model layers",
+				Reference:   "num-layers",
+			},
+			{
+				Name:        "optimizer",
+				Description: "Training model optimizer (sdg, adam or ftrl)",
+				Reference:   "optimizer",
+			},
 		}
 	}
 	e.Spec.TrialTemplate = t

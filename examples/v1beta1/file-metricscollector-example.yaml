@@ -28,38 +28,38 @@ spec:
   maxTrialCount: 12
   maxFailedTrialCount: 3
   parameters:
-    - name: --lr
+    - name: lr
       parameterType: double
       feasibleSpace:
         min: "0.01"
         max: "0.03"
-    - name: --momentum
+    - name: momentum
       parameterType: double
       feasibleSpace:
         min: "0.3"
         max: "0.7"
   trialTemplate:
-    goTemplate:
-      rawTemplate: |-
-        apiVersion: batch/v1
-        kind: Job
-        metadata:
-          name: {{.Trial}}
-          namespace: {{.NameSpace}}
-        spec:
-          template:
-            spec:
-              containers:
-              - name: {{.Trial}}
+    trialParameters:
+      - name: learningRate
+        description: Learning rate for the training model
+        reference: lr
+      - name: momentum
+        description: Momentum for the training model
+        reference: momentum
+    trialSpec:
+      apiVersion: batch/v1
+      kind: Job
+      spec:
+        template:
+          spec:
+            containers:
+              - name: training-container
                 image: docker.io/kubeflowkatib/pytorch-mnist:1.0
                 imagePullPolicy: Always
                 command:
-                - "python"
-                - "/var/mnist.py"
-                - "--epochs=1"
-                {{- with .HyperParameters}}
-                {{- range .}}
-                - "{{.Name}}={{.Value}}"
-                {{- end}}
-                {{- end}}
-              restartPolicy: Never
+                  - "python"
+                  - "/var/mnist.py"
+                  - "--epochs=1"
+                  - "--lr=${trialParameters.learningRate}"
+                  - "--momentum=${trialParameters.momentum}"
+            restartPolicy: Never
