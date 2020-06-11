@@ -44,7 +44,8 @@ spec:
         description: Training model optimizer (sdg, adam or ftrl)
         reference: optimizer
     trialSpec:
-      apiVersion: batch/v1 # Invalid, Kind must be specified
+      apiVersion: batch/v1
+      kind: InvalidKind # Invalid Kind to check validation webhook
       spec:
         template:
           spec:

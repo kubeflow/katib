@@ -1,16 +1,22 @@
 package validator
 
 import (
+	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
+	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1beta1/experiment/manifest"
+	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -18,281 +24,476 @@ func init() {
 	logf.SetLogger(logf.ZapLogger(false))
 }
 
-// TODO (andreyvelich): Refactor this test after changing validation for new Trial Template
-// func TestValidateTFJobTrialTemplate(t *testing.T) {
-// 	trialTFJobTemplate := `apiVersion: "kubeflow.org/v1"
-// kind: "TFJob"
-// metadata:
-//     name: "dist-mnist-for-e2e-test"
-// spec:
-//     tfReplicaSpecs:
-//         Worker:
-//             template:
-//                 spec:
-//                     containers:
-//                       - name: tensorflow
-//                         image: gaocegege/mnist:1`
+func TestValidateExperiment(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
 
-// 	mockCtrl := gomock.NewController(t)
-// 	defer mockCtrl.Finish()
+	p := manifestmock.NewMockGenerator(mockCtrl)
+	g := New(p)
 
-// 	p := manifestmock.NewMockGenerator(mockCtrl)
-// 	g := New(p)
+	suggestionConfigData := map[string]string{}
+	suggestionConfigData[consts.LabelSuggestionImageTag] = "algorithmImage"
+	fakeNegativeInt := int32(-1)
 
-// 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialTFJobTemplate, nil)
+	p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(suggestionConfigData, nil).AnyTimes()
+	p.EXPECT().GetMetricsCollectorImage(gomock.Any()).Return("metricsCollectorImage", nil).AnyTimes()
 
-// 	instance := newFakeInstance()
-// 	if err := g.(*DefaultValidator).validateTrialTemplate(instance); err == nil {
-// 		t.Errorf("Expected error, got nil")
-// 	}
-// }
+	batchJobStr := convertBatchJobToString(newFakeBatchJob())
+	p.EXPECT().GetTrialTemplate(gomock.Any()).Return(batchJobStr, nil).AnyTimes()
 
-// func TestValidateJobTrialTemplate(t *testing.T) {
-// 	trialJobTemplate := `apiVersion: batch/v1
-// kind: Job
-// metadata:
-//   name: fake-trial
-//   namespace: fakens
-// spec:
-//   template:
-//     spec:
-//       containers:
-//       - name: fake-trial
-//         image: test-image`
+	tcs := []struct {
+		Instance    *experimentsv1beta1.Experiment
+		Err         bool
+		oldInstance *experimentsv1beta1.Experiment
+	}{
+		//Objective
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.Objective = nil
+				return i
+			}(),
+			Err: true,
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.Objective.Type = commonv1beta1.ObjectiveTypeUnknown
+				return i
+			}(),
+			Err: true,
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.Objective.ObjectiveMetricName = ""
+				return i
+			}(),
+			Err: true,
+		},
+		//Algorithm
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.Algorithm = nil
+				return i
+			}(),
+			Err: true,
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.Algorithm.AlgorithmName = ""
+				return i
+			}(),
+			Err: true,
+		},
+		// Valid Experiment
+		{
+			Instance: newFakeInstance(),
+			Err:      false,
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.MaxFailedTrialCount = &fakeNegativeInt
+				return i
+			}(),
+			Err: true,
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.MaxTrialCount = &fakeNegativeInt
+				return i
+			}(),
+			Err: true,
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.ParallelTrialCount = &fakeNegativeInt
+				return i
+			}(),
+			Err: true,
+		},
+		// Valid Resume Experiment
+		{
+			Instance:    newFakeInstance(),
+			Err:         false,
+			oldInstance: newFakeInstance(),
+		},
+		{
+			Instance: newFakeInstance(),
+			Err:      true,
+			oldInstance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.Algorithm.AlgorithmName = "not-test"
+				return i
+			}(),
+		},
+		{
+			Instance: newFakeInstance(),
+			Err:      true,
+			oldInstance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.ResumePolicy = "invalid-policy"
+				return i
+			}(),
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.Parameters = []experimentsv1beta1.ParameterSpec{}
+				i.Spec.NasConfig = nil
+				return i
+			}(),
+			Err: true,
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.NasConfig = &experimentsv1beta1.NasConfig{
+					Operations: []experimentsv1beta1.Operation{
+						{
+							OperationType: "op1",
+						},
+					},
+				}
+				return i
+			}(),
+			Err: true,
+		},
+	}
 
-// 	mockCtrl := gomock.NewController(t)
-// 	defer mockCtrl.Finish()
+	for _, tc := range tcs {
+		err := g.ValidateExperiment(tc.Instance, tc.oldInstance)
+		if !tc.Err && err != nil {
+			t.Errorf("Expected nil, got %v", err)
+		} else if tc.Err && err == nil {
+			t.Errorf("Expected err, got nil")
+		}
+	}
+}
 
-// 	p := manifestmock.NewMockGenerator(mockCtrl)
-// 	g := New(p)
+func TestValidateTrialTemplate(t *testing.T) {
 
-// 	invalidYaml := strings.Replace(trialJobTemplate, "- name", "- * -", -1)
-// 	invalidJobType := strings.Replace(trialJobTemplate, "Job", "NewJobType", -1)
-// 	invalidNamespace := strings.Replace(trialJobTemplate, "fakens", "not-fakens", -1)
-// 	invalidJobName := strings.Replace(trialJobTemplate, "fake-trial", "new-name", -1)
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
 
-// 	validRun := p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialJobTemplate, nil)
-// 	invalidYamlRun := p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(invalidYaml, nil)
-// 	invalidJobTypeRun := p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(invalidJobType, nil)
-// 	invalidNamespaceRun := p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(invalidNamespace, nil)
-// 	invalidJobNameRun := p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(invalidJobName, nil)
+	p := manifestmock.NewMockGenerator(mockCtrl)
+	g := New(p)
 
-// 	gomock.InOrder(
-// 		validRun,
-// 		invalidYamlRun,
-// 		invalidJobTypeRun,
-// 		invalidNamespaceRun,
-// 		invalidJobNameRun,
-// 	)
+	validJobStr := convertBatchJobToString(newFakeBatchJob())
 
-// 	tcs := []struct {
-// 		Instance *experimentsv1beta1.Experiment
-// 		Err      bool
-// 	}{
-// 		{
-// 			Instance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.TrialTemplate = newFakeTrialTemplate(trialJobTemplate)
-// 				return i
-// 			}(),
-// 			Err: false,
-// 		},
-// 		{
-// 			Instance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.TrialTemplate = newFakeTrialTemplate(invalidYaml)
-// 				return i
-// 			}(),
-// 			Err: true,
-// 		},
-// 		{
-// 			Instance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.TrialTemplate = newFakeTrialTemplate(invalidJobType)
-// 				return i
-// 			}(),
-// 			Err: true,
-// 		},
-// 		{
-// 			Instance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.TrialTemplate = newFakeTrialTemplate(invalidNamespace)
-// 				return i
-// 			}(),
-// 			Err: true,
-// 		},
-// 		{
-// 			Instance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.TrialTemplate = newFakeTrialTemplate(invalidJobName)
-// 				return i
-// 			}(),
-// 			Err: true,
-// 		},
-// 	}
-// 	for _, tc := range tcs {
-// 		err := g.(*DefaultValidator).validateTrialTemplate(tc.Instance)
-// 		if !tc.Err && err != nil {
-// 			t.Errorf("Expected nil, got %v", err)
-// 		} else if tc.Err && err == nil {
-// 			t.Errorf("Expected err, got nil")
-// 		}
-// 	}
-// }
+	missedParameterJob := newFakeBatchJob()
+	missedParameterJob.Spec.Template.Spec.Containers[0].Command[2] = "--lr=${trialParameters.invalidParameter}"
+	missedParameterJobStr := convertBatchJobToString(missedParameterJob)
 
-// func TestValidateExperiment(t *testing.T) {
-// 	mockCtrl := gomock.NewController(t)
-// 	defer mockCtrl.Finish()
+	oddParameterJob := newFakeBatchJob()
+	oddParameterJob.Spec.Template.Spec.Containers[0].Command = append(
+		oddParameterJob.Spec.Template.Spec.Containers[0].Command,
+		"--extra-parameter=${trialParameters.extraParameter}")
+	oddParameterJobStr := convertBatchJobToString(oddParameterJob)
 
-// 	p := manifestmock.NewMockGenerator(mockCtrl)
-// 	g := New(p)
+	invalidParameterJobStr := `apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    spec:
+      containers:
+        - name: fake-trial
+          image: test-image
+          command:
+            - --invalidParameter={'num_layers': 2, 'input_sizes': [32, 32, 3]}
+            - --lr=${trialParameters.learningRate}"
+            - --num-layers=${trialParameters.numberLayers}`
 
-// 	trialJobTemplate := `apiVersion: "batch/v1"
-// kind: "Job"
-// metadata:
-//   name: "fake-trial"
-//   namespace: fakens`
+	notEmptyMetadataJob := newFakeBatchJob()
+	notEmptyMetadataJob.ObjectMeta = metav1.ObjectMeta{
+		Name:      "trial-name",
+		Namespace: "trial-namespace",
+	}
+	notEmptyMetadataStr := convertBatchJobToString(notEmptyMetadataJob)
 
-// 	suggestionConfigData := map[string]string{}
-// 	suggestionConfigData[consts.LabelSuggestionImageTag] = "algorithmImage"
-// 	fakeNegativeInt := int32(-1)
+	emptyAPIVersionJob := newFakeBatchJob()
+	emptyAPIVersionJob.TypeMeta.APIVersion = ""
+	emptyAPIVersionStr := convertBatchJobToString(emptyAPIVersionJob)
 
-// 	p.EXPECT().GetRunSpec(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(trialJobTemplate, nil).AnyTimes()
-// 	p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(suggestionConfigData, nil).AnyTimes()
-// 	p.EXPECT().GetMetricsCollectorImage(gomock.Any()).Return("metricsCollectorImage", nil).AnyTimes()
+	invalidJobType := newFakeBatchJob()
+	invalidJobType.TypeMeta.Kind = "InvalidKind"
+	invalidJobTypeStr := convertBatchJobToString(invalidJobType)
 
-// 	tcs := []struct {
-// 		Instance    *experimentsv1beta1.Experiment
-// 		Err         bool
-// 		oldInstance *experimentsv1beta1.Experiment
-// 	}{
-// 		//Objective
-// 		{
-// 			Instance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.Objective = nil
-// 				return i
-// 			}(),
-// 			Err: true,
-// 		},
-// 		{
-// 			Instance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.Objective.Type = commonv1beta1.ObjectiveTypeUnknown
-// 				return i
-// 			}(),
-// 			Err: true,
-// 		},
-// 		{
-// 			Instance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.Objective.ObjectiveMetricName = ""
-// 				return i
-// 			}(),
-// 			Err: true,
-// 		},
-// 		//Algorithm
-// 		{
-// 			Instance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.Algorithm = nil
-// 				return i
-// 			}(),
-// 			Err: true,
-// 		},
-// 		{
-// 			Instance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.Algorithm.AlgorithmName = ""
-// 				return i
-// 			}(),
-// 			Err: true,
-// 		},
-// 		{
-// 			Instance: newFakeInstance(),
-// 			Err:      false,
-// 		},
-// 		{
-// 			Instance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.MaxFailedTrialCount = &fakeNegativeInt
-// 				return i
-// 			}(),
-// 			Err: true,
-// 		},
-// 		{
-// 			Instance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.MaxTrialCount = &fakeNegativeInt
-// 				return i
-// 			}(),
-// 			Err: true,
-// 		},
-// 		{
-// 			Instance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.ParallelTrialCount = &fakeNegativeInt
-// 				return i
-// 			}(),
-// 			Err: true,
-// 		},
-// 		{
-// 			Instance:    newFakeInstance(),
-// 			Err:         false,
-// 			oldInstance: newFakeInstance(),
-// 		},
-// 		{
-// 			Instance: newFakeInstance(),
-// 			Err:      true,
-// 			oldInstance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.Algorithm.AlgorithmName = "not-test"
-// 				return i
-// 			}(),
-// 		},
-// 		{
-// 			Instance: newFakeInstance(),
-// 			Err:      true,
-// 			oldInstance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.ResumePolicy = "invalid-policy"
-// 				return i
-// 			}(),
-// 		},
-// 		{
-// 			Instance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.Parameters = []experimentsv1beta1.ParameterSpec{}
-// 				i.Spec.NasConfig = nil
-// 				return i
-// 			}(),
-// 			Err: true,
-// 		},
-// 		{
-// 			Instance: func() *experimentsv1beta1.Experiment {
-// 				i := newFakeInstance()
-// 				i.Spec.NasConfig = &experimentsv1beta1.NasConfig{
-// 					Operations: []experimentsv1beta1.Operation{
-// 						{
-// 							OperationType: "op1",
-// 						},
-// 					},
-// 				}
-// 				return i
-// 			}(),
-// 			Err: true,
-// 		},
-// 	}
+	emptyConfigMap := p.EXPECT().GetTrialTemplate(gomock.Any()).Return("", errors.New(string(metav1.StatusReasonNotFound)))
 
-// 	for _, tc := range tcs {
-// 		err := g.ValidateExperiment(tc.Instance, tc.oldInstance)
-// 		if !tc.Err && err != nil {
-// 			t.Errorf("Expected nil, got %v", err)
-// 		} else if tc.Err && err == nil {
-// 			t.Errorf("Expected err, got nil")
-// 		}
-// 	}
-// }
+	validTemplate1 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
+	validTemplate2 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
+	validTemplate3 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
+	validTemplate4 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
+
+	missedParameterTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(missedParameterJobStr, nil)
+	oddParameterTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(oddParameterJobStr, nil)
+	invalidParameterTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(invalidParameterJobStr, nil)
+	notEmptyMetadataTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(notEmptyMetadataStr, nil)
+	emptyAPIVersionTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(emptyAPIVersionStr, nil)
+	invalidJobTypeTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(invalidJobTypeStr, nil)
+
+	gomock.InOrder(
+		emptyConfigMap,
+		validTemplate1,
+		validTemplate2,
+		validTemplate3,
+		validTemplate4,
+		missedParameterTemplate,
+		oddParameterTemplate,
+		invalidParameterTemplate,
+		notEmptyMetadataTemplate,
+		emptyAPIVersionTemplate,
+		invalidJobTypeTemplate,
+	)
+
+	tcs := []struct {
+		Instance *experimentsv1beta1.Experiment
+		Err      bool
+	}{
+		// TrialParamters is nil
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialParameters = nil
+				return i
+			}(),
+			Err: true,
+		},
+		// TrialSpec and ConfigMap is nil
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialSpec = nil
+				return i
+			}(),
+			Err: true,
+		},
+		// TrialSpec and ConfigMap is not nil
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialSource.ConfigMap = &experimentsv1beta1.ConfigMapSource{
+					ConfigMapName: "config-map-name",
+				}
+				return i
+			}(),
+			Err: true,
+		},
+		// ConfigMap missed template path
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
+					ConfigMap: &experimentsv1beta1.ConfigMapSource{
+						ConfigMapName:      "config-map-name",
+						ConfigMapNamespace: "config-map-namespace",
+					},
+				}
+				return i
+			}(),
+			Err: true,
+		},
+		// Wrong path in configMap
+		// emptyConfigMap case
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialSpec = nil
+				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
+					ConfigMap: &experimentsv1beta1.ConfigMapSource{
+						ConfigMapName:      "config-map-name",
+						ConfigMapNamespace: "config-map-namespace",
+						TemplatePath:       "wrong-path",
+					},
+				}
+				return i
+			}(),
+			Err: true,
+		},
+		// Empty Reference or Name in trialParameters
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialParameters[0].Reference = ""
+				return i
+			}(),
+			Err: true,
+		},
+		// Wrong Name in trialParameters
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialParameters[0].Name = "{invalid-name}"
+				return i
+			}(),
+			Err: true,
+		},
+		// Duplicate Name in trialParameters
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialParameters[1].Name = i.Spec.TrialTemplate.TrialParameters[0].Name
+				return i
+			}(),
+			Err: true,
+		},
+		// Duplicate Reference in trialParameters
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialParameters[1].Reference = i.Spec.TrialTemplate.TrialParameters[0].Reference
+				return i
+			}(),
+			Err: true,
+		},
+		// Trial Template doesn't contain parameter from trialParameters
+		// missedParameterTemplate case
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				return i
+			}(),
+			Err: true,
+		},
+		// Trial Template contains extra parameter
+		// oddParameterTemplate case
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				return i
+			}(),
+			Err: true,
+		},
+		// Trial Template parameter is invalid after substitution
+		// Unable convert string to unstructured
+		// invalidParameterTemplate case
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				return i
+			}(),
+			Err: true,
+		},
+		// Trial Template contains Name and Namespace
+		// notEmptyMetadataTemplate case
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialSpec.SetName("trial-name")
+				i.Spec.TrialTemplate.TrialSpec.SetNamespace("trial-namespace")
+				return i
+			}(),
+			Err: true,
+		},
+		// Trial Template doesn't contain ApiVersion or Kind
+		// emptyAPIVersionTemplate case
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				return i
+			}(),
+			Err: true,
+		},
+		// Trial Template has invalid Kind
+		// invalidJobTypeTemplate case
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				return i
+			}(),
+			Err: true,
+		},
+	}
+	for _, tc := range tcs {
+		err := g.(*DefaultValidator).validateTrialTemplate(tc.Instance)
+		if !tc.Err && err != nil {
+			t.Errorf("Expected nil, got %v", err)
+		} else if tc.Err && err == nil {
+			t.Errorf("Expected err, got nil")
+		}
+	}
+}
+
+func TestValidateSupportedJob(t *testing.T) {
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	p := manifestmock.NewMockGenerator(mockCtrl)
+	g := New(p)
+
+	invalidBatchJob := `apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    spec:
+      containers:
+        name: invalid-list`
+
+	invalidBatchJobUnstr, err := util.ConvertStringToUnstructured(invalidBatchJob)
+	if err != nil {
+		t.Errorf("ConvertStringToUnstructured failed: %v", err)
+	}
+
+	invalidTFJob := `apiVersion: kubeflow.org/v1
+kind: TFJob
+spec:
+  tfReplicaSpecs:
+    Worker: InvalidWorker`
+
+	invalidTFJobUnstr, err := util.ConvertStringToUnstructured(invalidTFJob)
+	if err != nil {
+		t.Errorf("ConvertStringToUnstructured failed: %v", err)
+	}
+
+	invalidPyTorchJob := `apiVersion: kubeflow.org/v1
+kind: PyTorchJob
+spec:
+  pytorchReplicaSpecs:
+    Master: InvalidMaster`
+
+	invalidPyTorchJobUnstr, err := util.ConvertStringToUnstructured(invalidPyTorchJob)
+	if err != nil {
+		t.Errorf("ConvertStringToUnstructured failed: %v", err)
+	}
+
+	tcs := []struct {
+		RunSpec *unstructured.Unstructured
+		Err     bool
+	}{
+		// Invalid Batch Job
+		{
+			RunSpec: invalidBatchJobUnstr,
+			Err:     true,
+		},
+		// Invalid TF Job
+		{
+			RunSpec: invalidTFJobUnstr,
+			Err:     true,
+		},
+		// Invalid PyTorch Job
+		{
+			RunSpec: invalidPyTorchJobUnstr,
+			Err:     true,
+		},
+	}
+
+	for _, tc := range tcs {
+		err := g.(*DefaultValidator).validateSupportedJob(tc.RunSpec)
+		if !tc.Err && err != nil {
+			t.Errorf("Expected nil, got %v", err)
+		} else if tc.Err && err == nil {
+			t.Errorf("Expected err, got nil")
+		}
+	}
+
+}
 
 func TestValidateMetricsCollector(t *testing.T) {
 
@@ -548,15 +749,80 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 					},
 				},
 			},
+			TrialTemplate: newFakeTrialTemplate(newFakeBatchJob(), newFakeTrialParamters()),
 		},
 	}
 }
 
-// func newFakeTrialTemplate(template string) *experimentsv1beta1.TrialTemplate {
-// 	return &experimentsv1beta1.TrialTemplate{
-// 		Retain: false,
-// 		GoTemplate: &experimentsv1beta1.GoTemplate{
-// 			RawTemplate: template,
-// 		},
-// 	}
-// }
+func newFakeBatchJob() *batchv1.Job {
+
+	return &batchv1.Job{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "batch/v1",
+			Kind:       "Job",
+		},
+		Spec: batchv1.JobSpec{
+			Template: v1.PodTemplateSpec{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Name:  "training-container",
+							Image: "docker.io/kubeflowkatib/mxnet-mnist",
+							Command: []string{
+								"python3",
+								"/opt/mxnet-mnist/mnist.py",
+								"--lr=${trialParameters.learningRate}",
+								"--num-layers=${trialParameters.numberLayers}",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func newFakeTrialParamters() []experimentsv1beta1.TrialParameterSpec {
+	return []experimentsv1beta1.TrialParameterSpec{
+		{
+			Name:        "learningRate",
+			Description: "Learning rate",
+			Reference:   "lr",
+		},
+		{
+			Name:        "numberLayers",
+			Description: "Number of layers",
+			Reference:   "num-layers",
+		},
+	}
+}
+
+func newFakeTrialTemplate(trialJob interface{}, trialParameters []experimentsv1beta1.TrialParameterSpec) *experimentsv1beta1.TrialTemplate {
+
+	trialSpec, err := util.ConvertObjectToUnstructured(trialJob)
+	if err != nil {
+		fmt.Errorf("ConvertObjectToUnstructured error: %v", err)
+	}
+
+	return &experimentsv1beta1.TrialTemplate{
+		TrialSource: experimentsv1beta1.TrialSource{
+			TrialSpec: trialSpec,
+		},
+		TrialParameters: trialParameters,
+	}
+}
+
+func convertBatchJobToString(batchJob *batchv1.Job) string {
+
+	batchJobUnstr, err := util.ConvertObjectToUnstructured(batchJob)
+	if err != nil {
+		fmt.Errorf("ConvertObjectToUnstructured error: %v", err)
+	}
+
+	batchJobStr, err := util.ConvertUnstructuredToString(batchJobUnstr)
+	if err != nil {
+		fmt.Errorf("ConvertUnstructuredToString error: %v", err)
+	}
+
+	return batchJobStr
+}
