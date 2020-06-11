@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -20,10 +21,11 @@ import (
 	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	jobv1beta1 "github.com/kubeflow/katib/pkg/job/v1beta1"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
-	batchv1 "k8s.io/api/batch/v1"
 
 	pytorchv1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1"
 	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
+	jsonPatch "github.com/mattbaird/jsonpatch"
+	batchv1 "k8s.io/api/batch/v1"
 )
 
 var log = logf.Log.WithName("experiment-validating-webhook")
@@ -217,7 +219,7 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 
 	// Check if ApiVersion and Kind is specified
 	if runSpec.GetAPIVersion() == "" || runSpec.GetKind() == "" {
-		return fmt.Errorf("apiVersion and kind in spec.trialTemplate must be specified")
+		return fmt.Errorf("APIVersion and Kind in spec.trialTemplate must be specified")
 	}
 
 	// Check if Job is supported
@@ -237,28 +239,68 @@ func (g *DefaultValidator) validateSupportedJob(runSpec *unstructured.Unstructur
 		if gvk == sJob {
 			switch gvk.Kind {
 			case consts.JobKindJob:
-				batchJob := &batchv1.Job{}
+				batchJob := batchv1.Job{}
+
+				// Validate that RunSpec can be converted to Batch Job
 				err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &batchJob)
 				if err != nil {
-					return fmt.Errorf("Unable to convert spec.TrialTemplate to BatchJob: %v", err)
+					return fmt.Errorf("Unable to convert spec.TrialTemplate: %v to %v: %v", runSpec.Object, gvk.Kind, err)
+				}
+
+				err = validatePatchJob(runSpec, batchJob, gvk.Kind)
+				if err != nil {
+					return err
 				}
 			case consts.JobKindTF:
 				tfJob := &tfv1.TFJob{}
 				err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &tfJob)
 				if err != nil {
-					return fmt.Errorf("Unable to convert spec.TrialTemplate to TFJob: %v", err)
+					return fmt.Errorf("Unable to convert spec.TrialTemplate to %v: %v", gvk.Kind, err)
+				}
+				err = validatePatchJob(runSpec, tfJob, gvk.Kind)
+				if err != nil {
+					return err
 				}
 			case consts.JobKindPyTorch:
 				pytorchJob := &pytorchv1.PyTorchJob{}
 				err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &pytorchJob)
 				if err != nil {
-					return fmt.Errorf("Unable to convert spec.TrialTemplate to PyTorchJob: %v", err)
+					return fmt.Errorf("Unable to convert spec.TrialTemplate to %v: %v", gvk.Kind, err)
 				}
+				err = validatePatchJob(runSpec, pytorchJob, gvk.Kind)
+				if err != nil {
+					return err
+				}
+
 			}
 			return nil
 		}
 	}
-	return fmt.Errorf("Job type %v not supported", gvk)
+	return fmt.Errorf("Invalid spec.TrialTemplate. Job type %v not supported", gvk)
+}
+
+func validatePatchJob(runSpec *unstructured.Unstructured, job interface{}, jobType string) error {
+
+	// Not necessary to check error runSpec.Object must be valid JSON
+	runSpecBefore, _ := json.Marshal(runSpec.Object)
+
+	// Not necessary to check error job must be valid JSON
+	runSpecAfter, _ := json.Marshal(job)
+
+	// Create Patch on tranformed Job (e.g: Job, TFJob) using unstructured JSON
+	runSpecPatchOperations, err := jsonPatch.CreatePatch(runSpecAfter, runSpecBefore)
+	if err != nil {
+		return fmt.Errorf("Invalid spec.TrialTemplate. Create patch error: %v", err)
+	}
+
+	for _, operation := range runSpecPatchOperations {
+		// If operation != "remove" some values from trialTemplate were not converted
+		if operation.Operation != "remove" {
+			return fmt.Errorf("Invalid spec.TrialTemplate. Unable to convert: %v - %v to %v, converted template: %v", operation.Path, operation.Value, jobType, string(runSpecAfter))
+		}
+	}
+
+	return nil
 }
 
 func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1beta1.Experiment) error {

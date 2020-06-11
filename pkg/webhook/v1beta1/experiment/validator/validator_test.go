@@ -428,37 +428,82 @@ func TestValidateSupportedJob(t *testing.T) {
 	p := manifestmock.NewMockGenerator(mockCtrl)
 	g := New(p)
 
-	invalidBatchJob := `apiVersion: batch/v1
+	invalidFieldBatchJob := `apiVersion: batch/v1
 kind: Job
 spec:
   template:
     spec:
       containers:
-        name: invalid-list`
+        name: container-must-be-list`
 
-	invalidBatchJobUnstr, err := util.ConvertStringToUnstructured(invalidBatchJob)
+	invalidFieldBatchJobUnstr, err := util.ConvertStringToUnstructured(invalidFieldBatchJob)
 	if err != nil {
 		t.Errorf("ConvertStringToUnstructured failed: %v", err)
 	}
 
-	invalidTFJob := `apiVersion: kubeflow.org/v1
+	invalidStructureBatchJob := `apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    invalidSpec: not-job-format
+    spec:
+      containers:
+        - name: invalid-list`
+
+	invalidStructureBatchJobUnstr, err := util.ConvertStringToUnstructured(invalidStructureBatchJob)
+	if err != nil {
+		t.Errorf("ConvertStringToUnstructured failed: %v", err)
+	}
+
+	invalidFieldTFJob := `apiVersion: kubeflow.org/v1
 kind: TFJob
 spec:
   tfReplicaSpecs:
     Worker: InvalidWorker`
 
-	invalidTFJobUnstr, err := util.ConvertStringToUnstructured(invalidTFJob)
+	invalidFieldTFJobUnstr, err := util.ConvertStringToUnstructured(invalidFieldTFJob)
 	if err != nil {
 		t.Errorf("ConvertStringToUnstructured failed: %v", err)
 	}
 
-	invalidPyTorchJob := `apiVersion: kubeflow.org/v1
+	invalidStructureTFJob := `apiVersion: kubeflow.org/v1
+kind: TFJob
+spec:
+  tfReplicaSpecs:
+    Worker:
+      replicas: 2
+    InvalidWorker:
+      InvalidContainer:
+        - Name: invalidName1`
+
+	invalidStructureTFJobUnstr, err := util.ConvertStringToUnstructured(invalidStructureTFJob)
+	if err != nil {
+		t.Errorf("ConvertStringToUnstructured failed: %v", err)
+	}
+
+	invalidFieldPyTorchJob := `apiVersion: kubeflow.org/v1
 kind: PyTorchJob
 spec:
   pytorchReplicaSpecs:
     Master: InvalidMaster`
 
-	invalidPyTorchJobUnstr, err := util.ConvertStringToUnstructured(invalidPyTorchJob)
+	invalidFieldPyTorchJobUnstr, err := util.ConvertStringToUnstructured(invalidFieldPyTorchJob)
+	if err != nil {
+		t.Errorf("ConvertStringToUnstructured failed: %v", err)
+	}
+
+	invalidStructurePyTorchJob := `apiVersion: kubeflow.org/v1
+kind: PyTorchJob
+spec:
+  pytorchReplicaSpecs:
+    Master:
+      template:
+        spec:
+          containers:
+            - name: pytorch
+            - invalidName: invalidName`
+
+	invalidStructurePyTorchJobUnstr, err := util.ConvertStringToUnstructured(invalidStructurePyTorchJob)
 	if err != nil {
 		t.Errorf("ConvertStringToUnstructured failed: %v", err)
 	}
@@ -467,19 +512,37 @@ spec:
 		RunSpec *unstructured.Unstructured
 		Err     bool
 	}{
-		// Invalid Batch Job
+		// Invalid Field Batch Job
 		{
-			RunSpec: invalidBatchJobUnstr,
+			RunSpec: invalidFieldBatchJobUnstr,
 			Err:     true,
 		},
-		// Invalid TF Job
+		// Invalid Structure Batch Job
+		// Try to patch new runSpec with old Trial template
+		// Patch must have only "remove" operations
+		// Then all parameters from trial Template were correctly merged
 		{
-			RunSpec: invalidTFJobUnstr,
+			RunSpec: invalidStructureBatchJobUnstr,
 			Err:     true,
 		},
-		// Invalid PyTorch Job
+		// Invalid Field TF Job
 		{
-			RunSpec: invalidPyTorchJobUnstr,
+			RunSpec: invalidFieldTFJobUnstr,
+			Err:     true,
+		},
+		// Invalid Structure TF Job
+		{
+			RunSpec: invalidStructureTFJobUnstr,
+			Err:     true,
+		},
+		// Invalid Field PyTorch Job
+		{
+			RunSpec: invalidFieldPyTorchJobUnstr,
+			Err:     true,
+		},
+		// Invalid Structure PyTorch Job
+		{
+			RunSpec: invalidStructurePyTorchJobUnstr,
 			Err:     true,
 		},
 	}

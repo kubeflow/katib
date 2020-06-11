@@ -79,9 +79,11 @@ func (g *DefaultGenerator) GetRunSpecWithHyperParameters(experiment *experiments
 		return nil, fmt.Errorf("ConvertStringToUnstructured failed: %v", err)
 	}
 
+	fmt.Printf("-------------------runSpec2-------------%v", runSpec.Object)
 	// Set name and namespace for Run Spec
 	runSpec.SetName(trialName)
 	runSpec.SetNamespace(trialNamespace)
+	fmt.Printf("-------------------runSpec2-------------%v", runSpec.Object)
 
 	return runSpec, nil
 }
