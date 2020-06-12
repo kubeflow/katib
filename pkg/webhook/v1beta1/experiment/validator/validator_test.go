@@ -2,7 +2,6 @@ package validator
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -864,7 +863,7 @@ func newFakeTrialTemplate(trialJob interface{}, trialParameters []experimentsv1b
 
 	trialSpec, err := util.ConvertObjectToUnstructured(trialJob)
 	if err != nil {
-		fmt.Errorf("ConvertObjectToUnstructured error: %v", err)
+		log.Error(err, "ConvertObjectToUnstructured error")
 	}
 
 	return &experimentsv1beta1.TrialTemplate{
@@ -879,12 +878,12 @@ func convertBatchJobToString(batchJob *batchv1.Job) string {
 
 	batchJobUnstr, err := util.ConvertObjectToUnstructured(batchJob)
 	if err != nil {
-		fmt.Errorf("ConvertObjectToUnstructured error: %v", err)
+		log.Error(err, "ConvertObjectToUnstructured error")
 	}
 
 	batchJobStr, err := util.ConvertUnstructuredToString(batchJobUnstr)
 	if err != nil {
-		fmt.Errorf("ConvertUnstructuredToString error: %v", err)
+		log.Error(err, "ConvertUnstructuredToString error")
 	}
 
 	return batchJobStr
