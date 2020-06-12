@@ -276,7 +276,7 @@ func (g *DefaultValidator) validateSupportedJob(runSpec *unstructured.Unstructur
 			return nil
 		}
 	}
-	return fmt.Errorf("Invalid spec.TrialTemplate. Job type %v not supported", gvk)
+	return fmt.Errorf("Job type %v not supported", gvk)
 }
 
 func validatePatchJob(runSpec *unstructured.Unstructured, job interface{}, jobType string) error {
@@ -290,13 +290,13 @@ func validatePatchJob(runSpec *unstructured.Unstructured, job interface{}, jobTy
 	// Create Patch on tranformed Job (e.g: Job, TFJob) using unstructured JSON
 	runSpecPatchOperations, err := jsonPatch.CreatePatch(runSpecAfter, runSpecBefore)
 	if err != nil {
-		return fmt.Errorf("Invalid spec.TrialTemplate. Create patch error: %v", err)
+		return fmt.Errorf("Create patch error: %v", err)
 	}
 
 	for _, operation := range runSpecPatchOperations {
 		// If operation != "remove" some values from trialTemplate were not converted
 		if operation.Operation != "remove" {
-			return fmt.Errorf("Invalid spec.TrialTemplate. Unable to convert: %v - %v to %v, converted template: %v", operation.Path, operation.Value, jobType, string(runSpecAfter))
+			return fmt.Errorf("Unable to convert: %v - %v to %v, converted template: %v", operation.Path, operation.Value, jobType, string(runSpecAfter))
 		}
 	}
 
