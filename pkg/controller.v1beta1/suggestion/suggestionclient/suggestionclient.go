@@ -3,6 +3,7 @@ package suggestionclient
 import (
 	"context"
 	"fmt"
+	"math"
 	"time"
 
 	"google.golang.org/grpc"
@@ -196,8 +197,7 @@ func (g *General) ConvertTrials(ts []trialsv1beta1.Trial) []*suggestionapi.Trial
 			Status: &suggestionapi.TrialStatus{
 				StartTime:      convertTrialStatusTime(t.Status.StartTime),
 				CompletionTime: convertTrialStatusTime(t.Status.CompletionTime),
-				Observation: convertTrialObservation(
-					t.Status.Observation),
+				Observation:    convertTrialObservation(t.Spec.Objective.MetricStrategies, t.Status.Observation),
 			},
 		}
 		if t.Spec.Objective.Goal != nil {
@@ -248,20 +248,43 @@ func convertTrialConditionType(conditionType trialsv1beta1.TrialConditionType) s
 }
 
 // convertTrialObservation convert Trial Observation Metrics CRD to the GRPC definition
-func convertTrialObservation(observation *commonapiv1beta1.Observation) *suggestionapi.Observation {
+func convertTrialObservation(strategies []commonapiv1beta1.MetricStrategy, observation *commonapiv1beta1.Observation) *suggestionapi.Observation {
 	resObservation := &suggestionapi.Observation{
 		Metrics: make([]*suggestionapi.Metric, 0),
 	}
+	strategyMap := make(map[string]commonapiv1beta1.MetricStrategyType)
+	for _, strategy := range strategies {
+		strategyMap[strategy.Name] = strategy.Value
+	}
 	if observation != nil && observation.Metrics != nil {
 		for _, m := range observation.Metrics {
+			var value string
+			switch strategy, _ := strategyMap[m.Name]; strategy {
+			case commonapiv1beta1.ExtractByMin:
+				if math.IsNaN(m.Min) {
+					value = m.Latest
+				} else {
+					value = fmt.Sprintf("%f", m.Min)
+				}
+			case commonapiv1beta1.ExtractByMax:
+				if math.IsNaN(m.Max) {
+					value = m.Latest
+				} else {
+					value = fmt.Sprintf("%f", m.Max)
+				}
+			case commonapiv1beta1.ExtractByLatest:
+				value = m.Latest
+			default:
+				value = m.Latest
+			}
 			resObservation.Metrics = append(resObservation.Metrics, &suggestionapi.Metric{
 				Name:  m.Name,
-				Value: m.Value,
+				Value: value,
 			})
 		}
 	}
-	return resObservation
 
+	return resObservation
 }
 
 // convertTrialStatusTime convert Trial Status Time CRD to the GRPC definition

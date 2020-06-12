@@ -16,9 +16,10 @@ limitations under the License.
 package util
 
 import (
-	"strconv"
-
+	"fmt"
+	"math"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	"strconv"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -63,7 +64,6 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 		objectiveValueGoal = *instance.Spec.Objective.Goal
 	}
 	objectiveType := instance.Spec.Objective.Type
-	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
 
 	for index, trial := range trials.Items {
 		sts.Trials++
@@ -79,7 +79,7 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 			sts.PendingTrialList = append(sts.PendingTrialList, trial.Name)
 		}
 
-		objectiveMetricValueStr := getObjectiveMetricValue(trial, objectiveMetricName)
+		objectiveMetricValueStr := getObjectiveMetricValue(trial)
 		if objectiveMetricValueStr == nil {
 			continue
 		}
@@ -140,13 +140,38 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 	return isObjectiveGoalReached
 }
 
-func getObjectiveMetricValue(trial trialsv1beta1.Trial, objectiveMetricName string) *string {
+func getObjectiveMetricValue(trial trialsv1beta1.Trial) *string {
 	if trial.Status.Observation == nil {
 		return nil
 	}
+	var objectiveStrategy commonv1beta1.MetricStrategyType
+	objectiveMetricName := trial.Spec.Objective.ObjectiveMetricName
+	for _, strategy := range trial.Spec.Objective.MetricStrategies {
+		if strategy.Name == objectiveMetricName {
+			objectiveStrategy = strategy.Value
+			break
+		}
+	}
 	for _, metric := range trial.Status.Observation.Metrics {
 		if objectiveMetricName == metric.Name {
-			return &metric.Value
+			switch objectiveStrategy {
+			case commonv1beta1.ExtractByMin:
+				if math.IsNaN(metric.Min) {
+					return &metric.Latest
+				}
+				value := fmt.Sprintf("%f", metric.Min)
+				return &value
+			case commonv1beta1.ExtractByMax:
+				if math.IsNaN(metric.Max) {
+					return &metric.Latest
+				}
+				value := fmt.Sprintf("%f", metric.Max)
+				return &value
+			case commonv1beta1.ExtractByLatest:
+				return &metric.Latest
+			default:
+				return nil
+			}
 		}
 	}
 	return nil

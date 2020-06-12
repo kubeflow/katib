@@ -238,6 +238,55 @@ func TestReconcileCompletedTFJobTrial(t *testing.T) {
 		Should(gomega.BeTrue())
 }
 
+func TestGetObjectiveMetricValue(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	metricLogs := []*api_pb.MetricLog{
+		{TimeStamp: "2020-04-13T14:47:38+08:00", Metric: &api_pb.Metric{Name: "error", Value: "0.03"}},
+		{TimeStamp: "2020-04-13T14:47:39+08:00", Metric: &api_pb.Metric{Name: "error", Value: "0.02"}},
+		{TimeStamp: "2020-04-13T14:47:40+08:00", Metric: &api_pb.Metric{Name: "error", Value: "0.01"}},
+		{TimeStamp: "2020-04-13T14:47:41+08:00", Metric: &api_pb.Metric{Name: "error", Value: "0.05"}},
+		{TimeStamp: "2020-04-13T14:47:41+08:00", Metric: &api_pb.Metric{Name: "error", Value: "0.06"}},
+		{TimeStamp: "2020-04-13T14:47:41+08:00", Metric: &api_pb.Metric{Name: "error", Value: "0.07"}},
+		{TimeStamp: "2020-04-12T14:47:42+08:00", Metric: &api_pb.Metric{Name: "error", Value: "0.1"}},
+		{TimeStamp: "2020-04-13T14:47:38+08:00", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.7"}},
+		{TimeStamp: "2020-04-13T14:47:39+08:00", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.71"}},
+		{TimeStamp: "2020-04-13T14:47:40+08:00", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.72"}},
+		{TimeStamp: "2020-04-13T14:47:41+08:00", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.68"}},
+		{TimeStamp: "2020-04-13T14:47:41+08:00", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.69"}},
+		{TimeStamp: "2020-04-13T14:47:41+08:00", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.67"}},
+		{TimeStamp: "2020-04-12T14:47:42+08:00", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.6"}},
+	}
+
+	getMetricsFromLogs := func(strategies []commonv1beta1.MetricStrategy) (*commonv1beta1.Metric, *commonv1beta1.Metric, error) {
+		observation, err := getMetrics(metricLogs, strategies)
+		if err != nil {
+			return nil, nil, err
+		}
+		var errMetric, accMetric *commonv1beta1.Metric
+		for index, metric := range observation.Metrics {
+			if metric.Name == "error" {
+				errMetric = &observation.Metrics[index]
+			} else if metric.Name == "accuracy" {
+				accMetric = &observation.Metrics[index]
+			}
+		}
+		return errMetric, accMetric, nil
+	}
+
+	metricStrategies := []commonv1beta1.MetricStrategy{
+		{Name: "error", Value: commonv1beta1.ExtractByMin},
+		{Name: "accuracy", Value: commonv1beta1.ExtractByMax},
+	}
+	errMetric, accMetric, err := getMetricsFromLogs(metricStrategies)
+	g.Expect(err).ShouldNot(gomega.HaveOccurred())
+	g.Expect(errMetric.Latest).To(gomega.Equal("0.07"))
+	g.Expect(errMetric.Max).To(gomega.Equal(0.1))
+	g.Expect(errMetric.Min).To(gomega.Equal(0.01))
+	g.Expect(accMetric.Latest).To(gomega.Equal("0.67"))
+	g.Expect(accMetric.Max).To(gomega.Equal(0.72))
+	g.Expect(accMetric.Min).To(gomega.Equal(0.6))
+}
+
 func newFakeTrialWithTFJob() *trialsv1beta1.Trial {
 	objectiveSpec := commonv1beta1.ObjectiveSpec{ObjectiveMetricName: "test"}
 	runSpecTFJob := &tfv1.TFJob{

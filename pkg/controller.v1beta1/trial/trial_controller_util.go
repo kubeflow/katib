@@ -18,7 +18,9 @@ package trial
 import (
 	"context"
 	"fmt"
+	"math"
 	"strconv"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -81,27 +83,19 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 }
 
 func (r *ReconcileTrial) UpdateTrialStatusObservation(instance *trialsv1beta1.Trial, deployedJob *unstructured.Unstructured) error {
-	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
 	reply, err := r.GetTrialObservationLog(instance)
 	if err != nil {
 		log.Error(err, "Get trial observation log error")
 		return err
 	}
+	metricStrategies := instance.Spec.Objective.MetricStrategies
 	if reply.ObservationLog != nil {
-		bestObjectiveValue := getBestObjectiveMetricValue(reply.ObservationLog.MetricLogs, instance.Spec.Objective.Type)
-		if bestObjectiveValue != nil {
-			if instance.Status.Observation == nil {
-				instance.Status.Observation = &commonv1beta1.Observation{}
-				metric := commonv1beta1.Metric{Name: objectiveMetricName, Value: *bestObjectiveValue}
-				instance.Status.Observation.Metrics = []commonv1beta1.Metric{metric}
-			} else {
-				for index, metric := range instance.Status.Observation.Metrics {
-					if metric.Name == objectiveMetricName {
-						instance.Status.Observation.Metrics[index].Value = *bestObjectiveValue
-					}
-				}
-			}
+		observation, err := getMetrics(reply.ObservationLog.MetricLogs, metricStrategies)
+		if err != nil {
+			log.Error(err, "Get metrics from logs error")
+			return err
 		}
+		instance.Status.Observation = observation
 	}
 	return nil
 }
@@ -171,34 +165,51 @@ func isJobSucceeded(jobCondition *commonv1.JobCondition) bool {
 	return false
 }
 
-func getBestObjectiveMetricValue(metricLogs []*api_pb.MetricLog, objectiveType commonv1beta1.ObjectiveType) *string {
-	metricLogSize := len(metricLogs)
-	if metricLogSize == 0 {
-		return nil
-	}
-
-	bestObjectiveValue, err := strconv.ParseFloat(metricLogs[0].Metric.Value, 64)
-	if err != nil {
-		// If metrics are string values return the latest value
-		return &metricLogs[len(metricLogs)-1].Metric.Value
-	}
-	bestIndex := 0
-
-	for idx, metricLog := range metricLogs[1:] {
-		objectiveMetricValue, _ := strconv.ParseFloat(metricLog.Metric.Value, 64)
-		if objectiveType == commonv1beta1.ObjectiveTypeMinimize {
-			if objectiveMetricValue < bestObjectiveValue {
-				bestObjectiveValue = objectiveMetricValue
-				bestIndex = idx + 1
-			}
-		} else if objectiveType == commonv1beta1.ObjectiveTypeMaximize {
-			if objectiveMetricValue > bestObjectiveValue {
-				bestObjectiveValue = objectiveMetricValue
-				bestIndex = idx + 1
-			}
+func getMetrics(metricLogs []*api_pb.MetricLog, strategies []commonv1beta1.MetricStrategy) (*commonv1beta1.Observation, error) {
+	metrics := make(map[string]*commonv1beta1.Metric)
+	timestamps := make(map[string]*time.Time)
+	for _, strategy := range strategies {
+		timestamps[strategy.Name] = nil
+		metrics[strategy.Name] = &commonv1beta1.Metric{
+			Name:   strategy.Name,
+			Min:    math.NaN(),
+			Max:    math.NaN(),
+			Latest: "",
 		}
 	}
-	return &metricLogs[bestIndex].Metric.Value
+
+	for _, metricLog := range metricLogs {
+		metric, ok := metrics[metricLog.Metric.Name]
+		if !ok {
+			continue
+		}
+		strValue := metricLog.Metric.Value
+		floatValue, err := strconv.ParseFloat(strValue, 64)
+		if err == nil {
+			if math.IsNaN(metric.Min) || floatValue < metric.Min {
+				metric.Min = floatValue
+			}
+			if math.IsNaN(metric.Max) || floatValue > metric.Max {
+				metric.Max = floatValue
+			}
+		}
+		currentTime, err := time.Parse(time.RFC3339Nano, metricLog.TimeStamp)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse timestamps %s: %e", metricLog.TimeStamp, err)
+		}
+		timestamp, _ := timestamps[metricLog.Metric.Name]
+		if timestamp == nil || !timestamp.After(currentTime) {
+			timestamps[metricLog.Metric.Name] = &currentTime
+			metric.Latest = strValue
+		}
+	}
+
+	observation := &commonv1beta1.Observation{}
+	for _, metric := range metrics {
+		observation.Metrics = append(observation.Metrics, *metric)
+	}
+
+	return observation, nil
 }
 
 func needUpdateFinalizers(trial *trialsv1beta1.Trial) (bool, []string) {

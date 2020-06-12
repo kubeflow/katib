@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strconv"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -29,7 +28,7 @@ const (
 	timeout = 30 * time.Minute
 )
 
-func verifyResult(exp *experimentsv1beta1.Experiment) (*string, error) {
+func verifyResult(exp *experimentsv1beta1.Experiment) (*commonv1beta1.Metric, error) {
 	if len(exp.Status.CurrentOptimalTrial.ParameterAssignments) == 0 {
 		return nil, fmt.Errorf("Best parameter assignments not updated in status")
 	}
@@ -38,11 +37,13 @@ func verifyResult(exp *experimentsv1beta1.Experiment) (*string, error) {
 		return nil, fmt.Errorf("Best metrics not updated in status")
 	}
 
-	metric := exp.Status.CurrentOptimalTrial.Observation.Metrics[0]
-	if metric.Name != exp.Spec.Objective.ObjectiveMetricName {
-		return nil, fmt.Errorf("Best objective metric not updated in status")
+	for _, metric := range exp.Status.CurrentOptimalTrial.Observation.Metrics {
+		if metric.Name == exp.Spec.Objective.ObjectiveMetricName {
+			return &metric, nil
+		}
 	}
-	return &metric.Value, nil
+
+	return nil, fmt.Errorf("Best objective metric not updated in status")
 }
 
 func main() {
@@ -111,11 +112,11 @@ func main() {
 		log.Fatal("Experiment run timed out")
 	}
 
-	metricValStr, err := verifyResult(exp)
+	metric, err := verifyResult(exp)
 	if err != nil {
 		log.Fatal(err)
 	}
-	if metricValStr == nil {
+	if metric == nil {
 		log.Fatal("Metric value in CurrentOptimalTrial not populated")
 	}
 
@@ -124,11 +125,8 @@ func main() {
 	if exp.Spec.Objective.Goal != nil {
 		goal = *exp.Spec.Objective.Goal
 	}
-
-	metricVal, err := strconv.ParseFloat(*metricValStr, 64)
-	if err == nil &&
-		((exp.Spec.Objective.Goal != nil && objectiveType == commonv1beta1.ObjectiveTypeMinimize && metricVal < goal) ||
-			(exp.Spec.Objective.Goal != nil && objectiveType == commonv1beta1.ObjectiveTypeMaximize && metricVal > goal)) {
+	if (exp.Spec.Objective.Goal != nil && objectiveType == commonv1beta1.ObjectiveTypeMinimize && metric.Min < goal) ||
+		(exp.Spec.Objective.Goal != nil && objectiveType == commonv1beta1.ObjectiveTypeMaximize && metric.Max > goal) {
 		log.Print("Objective Goal reached")
 	} else {
 
