@@ -1,6 +1,7 @@
 package manifest
 
 import (
+	"math"
 	"reflect"
 	"testing"
 
@@ -65,12 +66,54 @@ func TestGetRunSpecWithHP(t *testing.T) {
 		ParameterAssignment []commonapiv1beta1.ParameterAssignment
 		expectedRunSpec     *unstructured.Unstructured
 		Err                 bool
+		testDescription     string
 	}{
+		// Valid run
 		{
 			Instance:            newFakeInstance(),
 			ParameterAssignment: newFakeParameterAssignment(),
 			expectedRunSpec:     expectedRunSpec,
+			Err:                 false,
+			testDescription:     "Run with valid parameters",
+		},
+		// Invalid JSON in unstructured
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				trialSpec := i.Spec.TrialTemplate.TrialSource.TrialSpec
+				trialSpec.Object = map[string]interface{}{
+					"invalidJSON": math.NaN(),
+				}
+				return i
+			}(),
+			ParameterAssignment: newFakeParameterAssignment(),
 			Err:                 true,
+			testDescription:     "Invalid JSON in Trial template",
+		},
+		// len(parameterAssignment) != len(trialParameters)
+		{
+			Instance: newFakeInstance(),
+			ParameterAssignment: func() []commonapiv1beta1.ParameterAssignment {
+				pa := newFakeParameterAssignment()
+				pa = pa[1:]
+				return pa
+			}(),
+			Err:             true,
+			testDescription: "Number of parameter assignments is not equal to number of Trial parameters",
+		},
+		// Parameter from assignments not found in Trial paramters
+		{
+			Instance: newFakeInstance(),
+			ParameterAssignment: func() []commonapiv1beta1.ParameterAssignment {
+				pa := newFakeParameterAssignment()
+				pa[0] = commonapiv1beta1.ParameterAssignment{
+					Name:  "invalid-name",
+					Value: "invalid-value",
+				}
+				return pa
+			}(),
+			Err:             false,
+			testDescription: "Trial parameters don't have parameter from assignments",
 		},
 	}
 
@@ -78,12 +121,12 @@ func TestGetRunSpecWithHP(t *testing.T) {
 		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.Instance, "trial-name", "trial-namespace", tc.ParameterAssignment)
 
 		if tc.Err && err == nil {
-			t.Errorf("Expected err, got nil")
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		} else if !tc.Err {
 			if err != nil {
-				t.Errorf("Expected nil, got %v", err)
+				t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
 			} else if !reflect.DeepEqual(tc.expectedRunSpec, actualRunSpec) {
-				t.Errorf("Expected %v\n got %v", tc.expectedRunSpec.Object, actualRunSpec.Object)
+				t.Errorf("Case: %v failed. Expected %v\n got %v", tc.testDescription, tc.expectedRunSpec.Object, actualRunSpec.Object)
 			}
 		}
 	}
@@ -217,7 +260,6 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 
 func newFakeParameterAssignment() []commonapiv1beta1.ParameterAssignment {
 	return []commonapiv1beta1.ParameterAssignment{
-
 		{
 			Name:  "lr",
 			Value: "0.05",
