@@ -12,10 +12,10 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 func TestGetRunSpecWithHP(t *testing.T) {
-	tc := newFakeInstance()
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -24,22 +24,6 @@ func TestGetRunSpecWithHP(t *testing.T) {
 
 	p := &DefaultGenerator{
 		client: c,
-	}
-
-	// TODO: Add more test cases
-	actual, err := p.GetRunSpecWithHyperParameters(tc, "trial-name", "trial-namespace", []commonapiv1beta1.ParameterAssignment{
-		{
-			Name:  "lr",
-			Value: "0.05",
-		},
-		{
-			Name:  "num-layers",
-			Value: "5",
-		},
-	})
-
-	if err != nil {
-		t.Errorf("Expected nil, got %v", err)
 	}
 
 	expectedJob := batchv1.Job{
@@ -71,13 +55,37 @@ func TestGetRunSpecWithHP(t *testing.T) {
 		},
 	}
 
-	expected, err := util.ConvertObjectToUnstructured(expectedJob)
+	expectedRunSpec, err := util.ConvertObjectToUnstructured(expectedJob)
 	if err != nil {
-		t.Errorf("ConvertObjectToUnstructured failed: %v", err)
+		t.Errorf("ConvertStringToUnstructured failed: %v", err)
 	}
 
-	if !reflect.DeepEqual(expected.Object, actual.Object) {
-		t.Errorf("Expected %v\n got %v", expected.Object, actual.Object)
+	tcs := []struct {
+		Instance            *experimentsv1beta1.Experiment
+		ParameterAssignment []commonapiv1beta1.ParameterAssignment
+		expectedRunSpec     *unstructured.Unstructured
+		Err                 bool
+	}{
+		{
+			Instance:            newFakeInstance(),
+			ParameterAssignment: newFakeParameterAssignment(),
+			expectedRunSpec:     expectedRunSpec,
+			Err:                 true,
+		},
+	}
+
+	for _, tc := range tcs {
+		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.Instance, "trial-name", "trial-namespace", tc.ParameterAssignment)
+
+		if tc.Err && err == nil {
+			t.Errorf("Expected err, got nil")
+		} else if !tc.Err {
+			if err != nil {
+				t.Errorf("Expected nil, got %v", err)
+			} else if !reflect.DeepEqual(tc.expectedRunSpec, actualRunSpec) {
+				t.Errorf("Expected %v\n got %v", tc.expectedRunSpec.Object, actualRunSpec.Object)
+			}
+		}
 	}
 }
 
@@ -203,6 +211,20 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 					},
 				},
 			},
+		},
+	}
+}
+
+func newFakeParameterAssignment() []commonapiv1beta1.ParameterAssignment {
+	return []commonapiv1beta1.ParameterAssignment{
+
+		{
+			Name:  "lr",
+			Value: "0.05",
+		},
+		{
+			Name:  "num-layers",
+			Value: "5",
 		},
 	}
 }
