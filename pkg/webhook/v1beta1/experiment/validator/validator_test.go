@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	batchv1 "k8s.io/api/batch/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -15,8 +17,6 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1beta1/experiment/manifest"
-	batchv1 "k8s.io/api/batch/v1"
-	v1 "k8s.io/api/core/v1"
 )
 
 func init() {

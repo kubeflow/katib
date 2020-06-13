@@ -8,6 +8,10 @@ import (
 	"strconv"
 	"strings"
 
+	pytorchv1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1"
+	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
+	jsonPatch "github.com/mattbaird/jsonpatch"
+	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -21,11 +25,6 @@ import (
 	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	jobv1beta1 "github.com/kubeflow/katib/pkg/job/v1beta1"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
-
-	pytorchv1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1"
-	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
-	jsonPatch "github.com/mattbaird/jsonpatch"
-	batchv1 "k8s.io/api/batch/v1"
 )
 
 var log = logf.Log.WithName("experiment-validating-webhook")
