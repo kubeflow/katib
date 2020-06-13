@@ -41,9 +41,10 @@ func TestValidateExperiment(t *testing.T) {
 	p.EXPECT().GetTrialTemplate(gomock.Any()).Return(batchJobStr, nil).AnyTimes()
 
 	tcs := []struct {
-		Instance    *experimentsv1beta1.Experiment
-		Err         bool
-		oldInstance *experimentsv1beta1.Experiment
+		Instance        *experimentsv1beta1.Experiment
+		Err             bool
+		oldInstance     *experimentsv1beta1.Experiment
+		testDescription string
 	}{
 		//Objective
 		{
@@ -52,7 +53,8 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.Objective = nil
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Objective is nil",
 		},
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
@@ -60,7 +62,8 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.Objective.Type = commonv1beta1.ObjectiveTypeUnknown
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Objective type is unknown",
 		},
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
@@ -68,7 +71,8 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.Objective.ObjectiveMetricName = ""
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Objective metric name is empty",
 		},
 		//Algorithm
 		{
@@ -77,7 +81,8 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.Algorithm = nil
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Algorithm is nil",
 		},
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
@@ -85,12 +90,14 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.Algorithm.AlgorithmName = ""
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Algorithm name is empty",
 		},
 		// Valid Experiment
 		{
-			Instance: newFakeInstance(),
-			Err:      false,
+			Instance:        newFakeInstance(),
+			Err:             false,
+			testDescription: "Run validator for correct experiment",
 		},
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
@@ -98,7 +105,8 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.MaxFailedTrialCount = &fakeNegativeInt
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Max failed trial count is negative",
 		},
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
@@ -106,7 +114,8 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.MaxTrialCount = &fakeNegativeInt
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Max trial count is negative",
 		},
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
@@ -114,13 +123,15 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.ParallelTrialCount = &fakeNegativeInt
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Parallel trial count is negative",
 		},
 		// Valid Resume Experiment
 		{
-			Instance:    newFakeInstance(),
-			Err:         false,
-			oldInstance: newFakeInstance(),
+			Instance:        newFakeInstance(),
+			Err:             false,
+			oldInstance:     newFakeInstance(),
+			testDescription: "Run validator to correct resume experiment",
 		},
 		{
 			Instance: newFakeInstance(),
@@ -130,15 +141,16 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.Algorithm.AlgorithmName = "not-test"
 				return i
 			}(),
+			testDescription: "Change algorithm name when resuming experiment",
 		},
 		{
-			Instance: newFakeInstance(),
-			Err:      true,
-			oldInstance: func() *experimentsv1beta1.Experiment {
+			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.ResumePolicy = "invalid-policy"
 				return i
 			}(),
+			Err:             true,
+			testDescription: "Invalid resume policy",
 		},
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
@@ -147,7 +159,8 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.NasConfig = nil
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Parameters and NAS config is nil",
 		},
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
@@ -161,16 +174,17 @@ func TestValidateExperiment(t *testing.T) {
 				}
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Operation type in NAS config is invalid",
 		},
 	}
 
 	for _, tc := range tcs {
 		err := g.ValidateExperiment(tc.Instance, tc.oldInstance)
 		if !tc.Err && err != nil {
-			t.Errorf("Expected nil, got %v", err)
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
 		} else if tc.Err && err == nil {
-			t.Errorf("Expected err, got nil")
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		}
 	}
 }
@@ -252,8 +266,9 @@ spec:
 	)
 
 	tcs := []struct {
-		Instance *experimentsv1beta1.Experiment
-		Err      bool
+		Instance        *experimentsv1beta1.Experiment
+		Err             bool
+		testDescription string
 	}{
 		// TrialParamters is nil
 		{
@@ -262,7 +277,8 @@ spec:
 				i.Spec.TrialTemplate.TrialParameters = nil
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Trial parameters is nil",
 		},
 		// TrialSpec and ConfigMap is nil
 		{
@@ -271,7 +287,8 @@ spec:
 				i.Spec.TrialTemplate.TrialSpec = nil
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Trial spec nil",
 		},
 		// TrialSpec and ConfigMap is not nil
 		{
@@ -282,7 +299,8 @@ spec:
 				}
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Trial spec and ConfigMap is not nil",
 		},
 		// ConfigMap missed template path
 		{
@@ -296,7 +314,8 @@ spec:
 				}
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Missed template path in ConfigMap",
 		},
 		// Wrong path in configMap
 		// emptyConfigMap case
@@ -313,7 +332,8 @@ spec:
 				}
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Wrong template path in ConfigMap",
 		},
 		// Empty Reference or Name in trialParameters
 		{
@@ -322,7 +342,8 @@ spec:
 				i.Spec.TrialTemplate.TrialParameters[0].Reference = ""
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Empty reference or name in Trial parameters",
 		},
 		// Wrong Name in trialParameters
 		{
@@ -331,7 +352,8 @@ spec:
 				i.Spec.TrialTemplate.TrialParameters[0].Name = "{invalid-name}"
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Wrong name in Trial parameters",
 		},
 		// Duplicate Name in trialParameters
 		{
@@ -340,7 +362,8 @@ spec:
 				i.Spec.TrialTemplate.TrialParameters[1].Name = i.Spec.TrialTemplate.TrialParameters[0].Name
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Duplicate name in Trial parameters",
 		},
 		// Duplicate Reference in trialParameters
 		{
@@ -349,7 +372,8 @@ spec:
 				i.Spec.TrialTemplate.TrialParameters[1].Reference = i.Spec.TrialTemplate.TrialParameters[0].Reference
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Duplicate reference in Trial parameters",
 		},
 		// Trial Template doesn't contain parameter from trialParameters
 		// missedParameterTemplate case
@@ -358,7 +382,8 @@ spec:
 				i := newFakeInstance()
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Trial template doesn't contain parameter from Trial parameters",
 		},
 		// Trial Template contains extra parameter
 		// oddParameterTemplate case
@@ -367,7 +392,8 @@ spec:
 				i := newFakeInstance()
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Trial template contains extra parameter",
 		},
 		// Trial Template parameter is invalid after substitution
 		// Unable convert string to unstructured
@@ -377,7 +403,8 @@ spec:
 				i := newFakeInstance()
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Trial template is unable to convert to unstructured after substitution",
 		},
 		// Trial Template contains Name and Namespace
 		// notEmptyMetadataTemplate case
@@ -388,16 +415,18 @@ spec:
 				i.Spec.TrialTemplate.TrialSpec.SetNamespace("trial-namespace")
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Trial template contains metadata.name or metadata.namespace",
 		},
-		// Trial Template doesn't contain ApiVersion or Kind
+		// Trial Template doesn't contain APIVersion or Kind
 		// emptyAPIVersionTemplate case
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Trial template doesn't contain APIVersion or Kind",
 		},
 		// Trial Template has invalid Kind
 		// invalidJobTypeTemplate case
@@ -406,15 +435,16 @@ spec:
 				i := newFakeInstance()
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Trial template has invalid Kind",
 		},
 	}
 	for _, tc := range tcs {
 		err := g.(*DefaultValidator).validateTrialTemplate(tc.Instance)
 		if !tc.Err && err != nil {
-			t.Errorf("Expected nil, got %v", err)
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
 		} else if tc.Err && err == nil {
-			t.Errorf("Expected err, got nil")
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		}
 	}
 }
@@ -508,50 +538,57 @@ spec:
 	}
 
 	tcs := []struct {
-		RunSpec *unstructured.Unstructured
-		Err     bool
+		RunSpec         *unstructured.Unstructured
+		Err             bool
+		testDescription string
 	}{
 		// Invalid Field Batch Job
 		{
-			RunSpec: invalidFieldBatchJobUnstr,
-			Err:     true,
+			RunSpec:         invalidFieldBatchJobUnstr,
+			Err:             true,
+			testDescription: "Trial template has invalid Batch Job parameter",
 		},
 		// Invalid Structure Batch Job
 		// Try to patch new runSpec with old Trial template
 		// Patch must have only "remove" operations
 		// Then all parameters from trial Template were correctly merged
 		{
-			RunSpec: invalidStructureBatchJobUnstr,
-			Err:     true,
+			RunSpec:         invalidStructureBatchJobUnstr,
+			Err:             true,
+			testDescription: "Trial template has invalid Batch Job structure",
 		},
 		// Invalid Field TF Job
 		{
-			RunSpec: invalidFieldTFJobUnstr,
-			Err:     true,
+			RunSpec:         invalidFieldTFJobUnstr,
+			Err:             true,
+			testDescription: "Trial template has invalid TF Job parameter",
 		},
 		// Invalid Structure TF Job
 		{
-			RunSpec: invalidStructureTFJobUnstr,
-			Err:     true,
+			RunSpec:         invalidStructureTFJobUnstr,
+			Err:             true,
+			testDescription: "Trial template has invalid TF Job structure",
 		},
 		// Invalid Field PyTorch Job
 		{
-			RunSpec: invalidFieldPyTorchJobUnstr,
-			Err:     true,
+			RunSpec:         invalidFieldPyTorchJobUnstr,
+			Err:             true,
+			testDescription: "Trial template has invalid PyTorch Job parameter",
 		},
 		// Invalid Structure PyTorch Job
 		{
-			RunSpec: invalidStructurePyTorchJobUnstr,
-			Err:     true,
+			RunSpec:         invalidStructurePyTorchJobUnstr,
+			Err:             true,
+			testDescription: "Trial template has invalid PyTorch Job structure",
 		},
 	}
 
 	for _, tc := range tcs {
 		err := g.(*DefaultValidator).validateSupportedJob(tc.RunSpec)
 		if !tc.Err && err != nil {
-			t.Errorf("Expected nil, got %v", err)
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
 		} else if tc.Err && err == nil {
-			t.Errorf("Expected err, got nil")
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		}
 	}
 
@@ -568,8 +605,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 	p.EXPECT().GetMetricsCollectorImage(gomock.Any()).Return("metricsCollectorImage", nil).AnyTimes()
 
 	tcs := []struct {
-		Instance *experimentsv1beta1.Experiment
-		Err      bool
+		Instance        *experimentsv1beta1.Experiment
+		Err             bool
+		testDescription string
 	}{
 		// Invalid Metrics Collector Kind
 		{
@@ -582,7 +620,8 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Invalid metrics collector Kind",
 		},
 		// FileCollector invalid Path
 		{
@@ -600,7 +639,8 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Invalid path for File metrics collector",
 		},
 		// TfEventCollector invalid Path
 		{
@@ -618,7 +658,8 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Invalid path for TF event metrics collector",
 		},
 		// PrometheusMetricCollector invalid Port
 		{
@@ -638,7 +679,8 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Invalid port for Prometheus metrics collector",
 		},
 		// PrometheusMetricCollector invalid Path
 		{
@@ -659,7 +701,8 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Invalid path for Prometheus metrics collector",
 		},
 		//  CustomCollector empty CustomCollector
 		{
@@ -672,7 +715,8 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Empty container for Custom metrics collector",
 		},
 		//  CustomCollector invalid Path
 		{
@@ -693,7 +737,8 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Invalid path for Custom metrics collector",
 		},
 		// FileMetricCollector invalid regexp in metrics format
 		{
@@ -717,7 +762,8 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "Invalid metrics format regex for File metrics collector",
 		},
 		// FileMetricCollector one subexpression in metrics format
 		{
@@ -741,7 +787,8 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err: true,
+			Err:             true,
+			testDescription: "One subexpression in metrics format",
 		},
 		// Valid FileMetricCollector
 		{
@@ -760,16 +807,17 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err: false,
+			Err:             false,
+			testDescription: "Run validator for correct File metrics collector",
 		},
 	}
 
 	for _, tc := range tcs {
 		err := g.(*DefaultValidator).validateMetricsCollector(tc.Instance)
 		if !tc.Err && err != nil {
-			t.Errorf("Expected nil, got %v", err)
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
 		} else if tc.Err && err == nil {
-			t.Errorf("Expected err, got nil")
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		}
 	}
 
