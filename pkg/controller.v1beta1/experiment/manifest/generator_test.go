@@ -223,7 +223,7 @@ spec:
 		testDescription      string
 	}{
 		// Valid run
-		// validGetConfigMap case
+		// validGetConfigMap1 case
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
@@ -241,6 +241,7 @@ spec:
 			testDescription:      "Run with valid parameters",
 		},
 		// Invalid ConfigMap name
+		// invalidConfigMapName case
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
@@ -256,6 +257,7 @@ spec:
 			testDescription:      "Invalid ConfigMap name",
 		},
 		// Invalid template path in ConfigMap name
+		// validGetConfigMap3 case
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
