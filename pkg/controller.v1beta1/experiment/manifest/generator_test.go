@@ -1,6 +1,7 @@
 package manifest
 
 import (
+	"errors"
 	"math"
 	"reflect"
 	"testing"
@@ -62,19 +63,19 @@ func TestGetRunSpecWithHP(t *testing.T) {
 	}
 
 	tcs := []struct {
-		Instance            *experimentsv1beta1.Experiment
-		ParameterAssignment []commonapiv1beta1.ParameterAssignment
-		expectedRunSpec     *unstructured.Unstructured
-		Err                 bool
-		testDescription     string
+		Instance             *experimentsv1beta1.Experiment
+		ParameterAssignments []commonapiv1beta1.ParameterAssignment
+		expectedRunSpec      *unstructured.Unstructured
+		Err                  bool
+		testDescription      string
 	}{
 		// Valid run
 		{
-			Instance:            newFakeInstance(),
-			ParameterAssignment: newFakeParameterAssignment(),
-			expectedRunSpec:     expectedRunSpec,
-			Err:                 false,
-			testDescription:     "Run with valid parameters",
+			Instance:             newFakeInstance(),
+			ParameterAssignments: newFakeParameterAssignment(),
+			expectedRunSpec:      expectedRunSpec,
+			Err:                  false,
+			testDescription:      "Run with valid parameters",
 		},
 		// Invalid JSON in unstructured
 		{
@@ -86,14 +87,14 @@ func TestGetRunSpecWithHP(t *testing.T) {
 				}
 				return i
 			}(),
-			ParameterAssignment: newFakeParameterAssignment(),
-			Err:                 true,
-			testDescription:     "Invalid JSON in Trial template",
+			ParameterAssignments: newFakeParameterAssignment(),
+			Err:                  true,
+			testDescription:      "Invalid JSON in Trial template",
 		},
 		// len(parameterAssignment) != len(trialParameters)
 		{
 			Instance: newFakeInstance(),
-			ParameterAssignment: func() []commonapiv1beta1.ParameterAssignment {
+			ParameterAssignments: func() []commonapiv1beta1.ParameterAssignment {
 				pa := newFakeParameterAssignment()
 				pa = pa[1:]
 				return pa
@@ -104,7 +105,7 @@ func TestGetRunSpecWithHP(t *testing.T) {
 		// Parameter from assignments not found in Trial paramters
 		{
 			Instance: newFakeInstance(),
-			ParameterAssignment: func() []commonapiv1beta1.ParameterAssignment {
+			ParameterAssignments: func() []commonapiv1beta1.ParameterAssignment {
 				pa := newFakeParameterAssignment()
 				pa[0] = commonapiv1beta1.ParameterAssignment{
 					Name:  "invalid-name",
@@ -112,13 +113,13 @@ func TestGetRunSpecWithHP(t *testing.T) {
 				}
 				return pa
 			}(),
-			Err:             false,
+			Err:             true,
 			testDescription: "Trial parameters don't have parameter from assignments",
 		},
 	}
 
 	for _, tc := range tcs {
-		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.Instance, "trial-name", "trial-namespace", tc.ParameterAssignment)
+		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.Instance, "trial-name", "trial-namespace", tc.ParameterAssignments)
 
 		if tc.Err && err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
@@ -142,7 +143,7 @@ func TestGetRunSpecWithHPConfigMap(t *testing.T) {
 		client: c,
 	}
 
-	templatePath := "trial-template.yaml"
+	templatePath := "trial-template-path"
 
 	trialSpec := `apiVersion: batch/v1
 kind: Job
@@ -158,30 +159,42 @@ spec:
             - "--lr=${trialParameters.learningRate}"
             - "--num-layers=${trialParameters.numberLayers}"`
 
-	c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(map[string]string{
-		templatePath: trialSpec,
-	}, nil)
+	invalidTrialSpec := `apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    spec:
+      containers:
+        - name: training-container
+          image: docker.io/kubeflowkatib/mxnet-mnist
+          command:
+            - python3
+            - /opt/mxnet-mnist/mnist.py
+            - --lr=${trialParameters.learningRate}
+            - --num-layers=${trialParameters.numberLayers}
+            - --invalidParameter={'num_layers': 2, 'input_sizes': [32, 32, 3]}`
 
-	instance := newFakeInstance()
-	instance.Spec.TrialTemplate.TrialSource.ConfigMap = &experimentsv1beta1.ConfigMapSource{
-		TemplatePath: templatePath,
-	}
-	instance.Spec.TrialTemplate.TrialSource.TrialSpec = nil
-	actual, err := p.GetRunSpecWithHyperParameters(instance, "trial-name", "trial-namespace", []commonapiv1beta1.ParameterAssignment{
-		{
-			Name:  "lr",
-			Value: "0.05",
-		},
-		{
-			Name:  "num-layers",
-			Value: "5",
-		},
-	})
-	if err != nil {
-		t.Errorf("Expected nil, got %v", err)
-	}
-	// We can't compare structures, because trialSpec is a string and creationTimestamp was not added
-	expectedJob := `apiVersion: batch/v1
+	validGetConfigMap1 := c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
+		map[string]string{templatePath: trialSpec}, nil)
+
+	invalidConfigMapName := c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
+		nil, errors.New("Unable to get ConfigMap"))
+
+	validGetConfigMap3 := c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
+		map[string]string{templatePath: trialSpec}, nil)
+
+	invalidTemplate := c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
+		map[string]string{templatePath: invalidTrialSpec}, nil)
+
+	gomock.InOrder(
+		validGetConfigMap1,
+		invalidConfigMapName,
+		validGetConfigMap3,
+		invalidTemplate,
+	)
+
+	// We can't compare structures, because in ConfigMap trialSpec is a string and creationTimestamp was not added
+	expectedStr := `apiVersion: batch/v1
 kind: Job
 metadata:
   name: trial-name
@@ -198,12 +211,100 @@ spec:
             - "--lr=0.05"
             - "--num-layers=5"`
 
-	expected, err := util.ConvertStringToUnstructured(expectedJob)
+	expectedRunSpec, err := util.ConvertStringToUnstructured(expectedStr)
 	if err != nil {
 		t.Errorf("ConvertStringToUnstructured failed: %v", err)
 	}
-	if !reflect.DeepEqual(expected, actual) {
-		t.Errorf("Expected %s\n got %s", expected.Object, actual.Object)
+
+	tcs := []struct {
+		Instance             *experimentsv1beta1.Experiment
+		ParameterAssignments []commonapiv1beta1.ParameterAssignment
+		Err                  bool
+		testDescription      string
+	}{
+		// Valid run
+		// validGetConfigMap case
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
+					ConfigMap: &experimentsv1beta1.ConfigMapSource{
+						ConfigMapName:      "config-map-name",
+						ConfigMapNamespace: "config-map-namespace",
+						TemplatePath:       "trial-template-path",
+					},
+				}
+				return i
+			}(),
+			ParameterAssignments: newFakeParameterAssignment(),
+			Err:                  false,
+			testDescription:      "Run with valid parameters",
+		},
+		// Invalid ConfigMap name
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
+					ConfigMap: &experimentsv1beta1.ConfigMapSource{
+						ConfigMapName: "invalid-name",
+					},
+				}
+				return i
+			}(),
+			ParameterAssignments: newFakeParameterAssignment(),
+			Err:                  true,
+			testDescription:      "Invalid ConfigMap name",
+		},
+		// Invalid template path in ConfigMap name
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
+					ConfigMap: &experimentsv1beta1.ConfigMapSource{
+						ConfigMapName:      "config-map-name",
+						ConfigMapNamespace: "config-map-namespace",
+						TemplatePath:       "invalid-path",
+					},
+				}
+				return i
+			}(),
+			ParameterAssignments: newFakeParameterAssignment(),
+			Err:                  true,
+			testDescription:      "Invalid template path in ConfigMap",
+		},
+		// Invalid Trial template spec in ConfigMap
+		// Trial template is a string in ConfigMap
+		// Because of that, user can specify not valid unstructured template
+		// invalidTemplate case
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
+					ConfigMap: &experimentsv1beta1.ConfigMapSource{
+						ConfigMapName:      "config-map-name",
+						ConfigMapNamespace: "config-map-namespace",
+						TemplatePath:       "trial-template-path",
+					},
+				}
+				return i
+			}(),
+			ParameterAssignments: newFakeParameterAssignment(),
+			Err:                  true,
+			testDescription:      "Invalid Trial spec in ConfigMap",
+		},
+	}
+
+	for _, tc := range tcs {
+		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.Instance, "trial-name", "trial-namespace", tc.ParameterAssignments)
+		if tc.Err && err == nil {
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
+		} else if !tc.Err {
+			if err != nil {
+				t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
+			} else if !reflect.DeepEqual(expectedRunSpec, actualRunSpec) {
+				t.Errorf("Case: %v failed. Expected %v\n got %v", tc.testDescription, expectedRunSpec.Object, actualRunSpec.Object)
+			}
+		}
 	}
 }
 
