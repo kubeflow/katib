@@ -59,7 +59,7 @@ func TestGetRunSpecWithHP(t *testing.T) {
 
 	expectedRunSpec, err := util.ConvertObjectToUnstructured(expectedJob)
 	if err != nil {
-		t.Errorf("ConvertStringToUnstructured failed: %v", err)
+		t.Errorf("ConvertObjectToUnstructured failed: %v", err)
 	}
 
 	tcs := []struct {
