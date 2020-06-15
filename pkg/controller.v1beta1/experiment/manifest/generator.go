@@ -24,8 +24,7 @@ const (
 // Generator is the type for manifests Generator.
 type Generator interface {
 	InjectClient(c client.Client)
-	// TODO (andreyvelich): Add this after changing validation for new Trial Template
-	// GetRunSpec(e *experimentsv1beta1.Experiment, experiment, trial, namespace string) (string, error)
+	GetTrialTemplate(instance *experimentsv1beta1.Experiment) (string, error)
 	GetRunSpecWithHyperParameters(experiment *experimentsv1beta1.Experiment, trialName, trialNamespace string, assignments []commonapiv1beta1.ParameterAssignment) (*unstructured.Unstructured, error)
 	GetSuggestionConfigData(algorithmName string) (map[string]string, error)
 	GetMetricsCollectorImage(cKind commonapiv1beta1.CollectorKind) (string, error)
@@ -60,11 +59,11 @@ func (g *DefaultGenerator) GetSuggestionConfigData(algorithmName string) (map[st
 	return katibconfig.GetSuggestionConfigData(algorithmName, g.client.GetClient())
 }
 
-// GetRunSpecWithHyperParameters get the specification for trial with hyperparameters.
+// GetRunSpecWithHyperParameters returns the specification for trial with hyperparameters.
 func (g *DefaultGenerator) GetRunSpecWithHyperParameters(experiment *experimentsv1beta1.Experiment, trialName, trialNamespace string, assignments []commonapiv1beta1.ParameterAssignment) (*unstructured.Unstructured, error) {
 
 	// Get string Trial template from Experiment spec
-	trialTemplate, err := g.getTrialTemplate(experiment)
+	trialTemplate, err := g.GetTrialTemplate(experiment)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +101,7 @@ func (g *DefaultGenerator) applyParameters(trialTemplate string, trialParams []e
 	for _, parameter := range trialParams {
 
 		if parameterValue, ok := assignmentsMap[parameter.Reference]; ok {
-			trialTemplate = strings.Replace(trialTemplate, fmt.Sprintf("${trialParameters.%v}", parameter.Name), parameterValue, -1)
+			trialTemplate = strings.Replace(trialTemplate, fmt.Sprintf(consts.TrialTemplateReplaceFormat, parameter.Name), parameterValue, -1)
 		} else {
 			return "", fmt.Errorf("Unable to find parameter: %v in parameter assignment %v", parameter.Reference, assignmentsMap)
 		}
@@ -110,7 +109,8 @@ func (g *DefaultGenerator) applyParameters(trialTemplate string, trialParams []e
 	return trialTemplate, nil
 }
 
-func (g *DefaultGenerator) getTrialTemplate(instance *experimentsv1beta1.Experiment) (string, error) {
+// GetTrialTemplate returns string Trial template from experiment
+func (g *DefaultGenerator) GetTrialTemplate(instance *experimentsv1beta1.Experiment) (string, error) {
 	var trialTemplateString string
 	var err error
 
@@ -126,13 +126,13 @@ func (g *DefaultGenerator) getTrialTemplate(instance *experimentsv1beta1.Experim
 		templatePath := trialSource.ConfigMap.TemplatePath
 		configMap, err := g.client.GetConfigMap(configMapName, configMapNS)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("GetConfigMap failed: %v", err)
 		}
 		var ok bool
 		trialTemplateString, ok = configMap[templatePath]
 		if !ok {
 			err = errors.New(string(metav1.StatusReasonNotFound))
-			return "", err
+			return "", fmt.Errorf("TemplatePath: %v not found in configMap: %v", templatePath, configMap)
 		}
 	}
 

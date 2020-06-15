@@ -81,6 +81,21 @@ func (mr *MockGeneratorMockRecorder) GetSuggestionConfigData(arg0 interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestionConfigData", reflect.TypeOf((*MockGenerator)(nil).GetSuggestionConfigData), arg0)
 }
 
+// GetTrialTemplate mocks base method
+func (m *MockGenerator) GetTrialTemplate(arg0 *v1beta10.Experiment) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTrialTemplate", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTrialTemplate indicates an expected call of GetTrialTemplate
+func (mr *MockGeneratorMockRecorder) GetTrialTemplate(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialTemplate", reflect.TypeOf((*MockGenerator)(nil).GetTrialTemplate), arg0)
+}
+
 // InjectClient mocks base method
 func (m *MockGenerator) InjectClient(arg0 client.Client) {
 	m.ctrl.T.Helper()
