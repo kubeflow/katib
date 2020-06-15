@@ -128,6 +128,13 @@ const (
 	LabelTrialTemplateConfigMapName = "app"
 	// LabelTrialTemplateConfigMapValue is the label value for the Trial templates configMap
 	LabelTrialTemplateConfigMapValue = "katib-trial-templates"
+
+	// TrialTemplateReplaceFormat is the format to make substitution in Trial template from Names in TrialParameters
+	// E.g if Name = learningRate, according value in Trial template must be ${trialParameters.learningRate}
+	TrialTemplateReplaceFormat = "${trialParameters.%v}"
+
+	// TrialTemplateReplaceFormatRegex is the regex for Trial template format
+	TrialTemplateReplaceFormatRegex = "\\{trialParameters\\..+?\\}"
 )
 
 var (
