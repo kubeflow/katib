@@ -10,7 +10,8 @@ spec:
     type: maximize
     goal: 0.99
     objectiveMetricName: Validation-accuracy
-    additionalMetricNames: [Train-accuracy]
+    additionalMetricNames:
+      - Train-accuracy
     metricStrategies:
       - name: Train-accuracy
         value: "latest"
@@ -22,17 +23,17 @@ spec:
   maxTrialCount: 12
   maxFailedTrialCount: 3
   parameters:
-    - name: --lr
+    - name: lr
       parameterType: double
       feasibleSpace:
         min: "0.01"
         max: "0.03"
-    - name: --num-layers
+    - name: num-layers
       parameterType: int
       feasibleSpace:
         min: "2"
         max: "5"
-    - name: --optimizer
+    - name: optimizer
       parameterType: categorical
       feasibleSpace:
         list:
@@ -40,26 +41,30 @@ spec:
           - adam
           - ftrl
   trialTemplate:
-    goTemplate:
-      rawTemplate: |-
-        apiVersion: batch/v1
-        kind: Job
-        metadata:
-          name: {{.Trial}}
-          namespace: {{.NameSpace}}
-        spec:
-          template:
-            spec:
-              containers:
-              - name: {{.Trial}}
+    trialParameters:
+      - name: learningRate
+        description: Learning rate for the training model
+        reference: lr
+      - name: numberLayers
+        description: Number of training model layers
+        reference: num-layers
+      - name: optimizer
+        description: Training model optimizer (sdg, adam or ftrl)
+        reference: optimizer
+    trialSpec:
+      apiVersion: batch/v1
+      kind: Job
+      spec:
+        template:
+          spec:
+            containers:
+              - name: training-container
                 image: docker.io/kubeflowkatib/mxnet-mnist
                 command:
-                - "python3"
-                - "/opt/mxnet-mnist/mnist.py"
-                - "--batch-size=64"
-                {{- with .HyperParameters}}
-                {{- range .}}
-                - "{{.Name}}={{.Value}}"
-                {{- end}}
-                {{- end}}
-              restartPolicy: Never
+                  - "python3"
+                  - "/opt/mxnet-mnist/mnist.py"
+                  - "--batch-size=64"
+                  - "--lr=${trialParameters.learningRate}"
+                  - "--num-layers=${trialParameters.numberLayers}"
+                  - "--optimizer=${trialParameters.optimizer}"
+            restartPolicy: Never
