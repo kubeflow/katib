@@ -2,7 +2,7 @@ import * as actions from '../actions/hpMonitorActions';
 
 const initialState = {
   experimentName: '',
-  experimentNamespace: '',
+  experimentNamespace: 'All namespaces',
   filterType: {
     Created: true,
     Running: true,
@@ -27,8 +27,7 @@ const hpMonitorReducer = (state = initialState, action) => {
         job =>
           job.name.includes(action.experimentName) &&
           (job.namespace == action.experimentNamespace ||
-            action.experimentNamespace == 'All namespaces' ||
-            action.experimentNamespace.length == 0),
+            action.experimentNamespace == 'All namespaces'),
       );
       let types = Object.assign({}, state.filterType);
       var typeKeys = Object.keys(types);
@@ -51,8 +50,7 @@ const hpMonitorReducer = (state = initialState, action) => {
         job =>
           job.name.includes(state.experimentName) &&
           (job.namespace == state.experimentNamespace ||
-            state.experimentNamespace == 'All namespaces' ||
-            state.experimentNamespace.length == 0),
+            state.experimentNamespace == 'All namespaces'),
       );
       types = Object.assign({}, state.filterType);
       types[action.filter] = action.checked;
@@ -82,8 +80,7 @@ const hpMonitorReducer = (state = initialState, action) => {
           filters.includes(job.status) &&
           job.name.includes(state.experimentName) &&
           (job.namespace == state.experimentNamespace ||
-            state.experimentNamespace == 'All namespaces' ||
-            state.experimentNamespace.length == 0),
+            state.experimentNamespace == 'All namespaces'),
       );
       return {
         ...state,
