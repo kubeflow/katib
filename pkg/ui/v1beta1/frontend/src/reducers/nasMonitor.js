@@ -2,7 +2,7 @@ import * as actions from '../actions/nasMonitorActions';
 
 const initialState = {
   experimentName: '',
-  experimentNamespace: '',
+  experimentNamespace: 'All namespaces',
   filter: '',
   filterType: {
     Created: true,
@@ -25,8 +25,7 @@ const nasMonitorReducer = (state = initialState, action) => {
         job =>
           job.name.includes(action.experimentName) &&
           (job.namespace == action.experimentNamespace ||
-            action.experimentNamespace == 'All namespaces' ||
-            action.experimentNamespace.length == 0),
+            action.experimentNamespace == 'All namespaces'),
       );
       let types = Object.assign({}, state.filterType);
       var typeKeys = Object.keys(types);
@@ -80,8 +79,7 @@ const nasMonitorReducer = (state = initialState, action) => {
           filters.includes(job.status) &&
           job.name.includes(state.experimentName) &&
           (job.namespace == state.experimentNamespace ||
-            state.experimentNamespace == 'All namespaces' ||
-            state.experimentNamespace.length == 0),
+            state.experimentNamespace == 'All namespaces'),
       );
       return {
         ...state,
