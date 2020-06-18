@@ -93,17 +93,15 @@ export const closeDialogSuggestion = () => ({
 
 export const FILTER_TEMPLATES_EXPERIMENT = 'FILTER_TEMPLATES_EXPERIMENT';
 
-export const filterTemplatesExperiment = (trialNamespace, trialConfigMapName) => ({
+export const filterTemplatesExperiment = (
+  configMapNamespaceIndex,
+  configMapNameIndex,
+  configMapPathIndex,
+) => ({
   type: FILTER_TEMPLATES_EXPERIMENT,
-  trialNamespace,
-  trialConfigMapName,
-});
-
-export const CHANGE_TEMPLATE_NAME = 'CHANGE_TEMPLATE_NAME';
-
-export const changeTemplateName = templateName => ({
-  type: CHANGE_TEMPLATE_NAME,
-  templateName,
+  configMapNamespaceIndex,
+  configMapNameIndex,
+  configMapPathIndex,
 });
 
 export const VALIDATION_ERROR = 'VALIDATION_ERROR';

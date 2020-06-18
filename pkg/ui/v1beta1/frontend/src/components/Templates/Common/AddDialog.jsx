@@ -50,97 +50,73 @@ const styles = theme => ({
 
 //TODO: Add functionality to create new ConfigMap with Trial Template
 class AddDialog extends React.Component {
-  componentDidMount() {
-    if (this.props.trialTemplatesList.length != 0) {
-      let configMaps = this.props.trialTemplatesList[0].ConfigMapsList;
-      if (configMaps.length != 0) {
-        let configMapsList = [];
-        configMaps.forEach(configMap => configMapsList.push(configMap.ConfigMapName));
-        this.props.changeTemplate(
-          this.props.edittedTemplateNamespace,
-          this.props.edittedTemplateConfigMapName,
-          this.props.edittedTemplateName,
-          this.props.edittedTemplateYaml,
-          configMapsList,
-        );
-      }
+  onConfigMapNamespaceChange = event => {
+    let templateData = this.props.trialTemplatesData;
+    let newConfigMapNamespace = event.target.value;
+    let newConfigMapName = this.props.updatedConfigMapName;
+
+    if (newConfigMapNamespace !== this.props.updatedConfigMapNamespace) {
+      let namespaceIndex = templateData.findIndex(function(trialTemplate, i) {
+        return trialTemplate.ConfigMapNamespace === newConfigMapNamespace;
+      });
+
+      newConfigMapName = templateData[namespaceIndex].ConfigMaps[0].ConfigMapName;
     }
-  }
 
-  onNamespaceChange = event => {
-    let newNamespace = event.target.value;
-
-    let namespaceIndex = this.props.trialTemplatesList.findIndex(function(trialTemplate, i) {
-      return trialTemplate.Namespace === newNamespace;
-    });
-
-    if (this.props.trialTemplatesList.length != 0) {
-      let configMaps = this.props.trialTemplatesList[namespaceIndex].ConfigMapsList;
-      //TODO: add logic when configMapsList is empty
-      if (configMaps.length != 0) {
-        let configMapsList = [];
-        configMaps.forEach(configMap => configMapsList.push(configMap.ConfigMapName));
-
-        this.props.changeTemplate(
-          newNamespace,
-          configMapsList[0],
-          this.props.edittedTemplateName,
-          this.props.edittedTemplateYaml,
-          configMapsList,
-        );
-      }
-    }
+    this.props.changeTemplate(
+      newConfigMapNamespace,
+      newConfigMapName,
+      this.props.updatedConfigMapPath,
+      this.props.updatedTemplateYaml,
+    );
   };
 
   onConfigMapNameChange = event => {
     this.props.changeTemplate(
-      this.props.edittedTemplateNamespace,
+      this.props.updatedConfigMapNamespace,
       event.target.value,
-      this.props.edittedTemplateName,
-      this.props.edittedTemplateYaml,
-      this.props.edittedTemplateConfigMapSelectList,
+      this.props.updatedConfigMapPath,
+      this.props.updatedTemplateYaml,
     );
   };
 
-  onNameChange = event => {
+  onConfigMapPathChange = event => {
     this.props.changeTemplate(
-      this.props.edittedTemplateNamespace,
-      this.props.edittedTemplateConfigMapName,
+      this.props.updatedConfigMapNamespace,
+      this.props.updatedConfigMapName,
       event.target.value,
-      this.props.edittedTemplateYaml,
-      this.props.edittedTemplateConfigMapSelectList,
+      this.props.updatedTemplateYaml,
     );
   };
 
-  onYamlChange = newTemplateYaml => {
+  onTemplateYamlChange = newTemplateYaml => {
     this.props.changeTemplate(
-      this.props.edittedTemplateNamespace,
-      this.props.edittedTemplateConfigMapName,
-      this.props.edittedTemplateName,
+      this.props.updatedConfigMapNamespace,
+      this.props.updatedConfigMapName,
+      this.props.updatedConfigMapPath,
       newTemplateYaml,
-      this.props.edittedTemplateConfigMapSelectList,
     );
   };
 
   submitAddTemplate = () => {
     this.props.addTemplate(
-      this.props.edittedTemplateNamespace,
-      this.props.edittedTemplateConfigMapName,
-      this.props.edittedTemplateName,
-      this.props.edittedTemplateYaml,
+      this.props.updatedConfigMapNamespace,
+      this.props.updatedConfigMapName,
+      this.props.updatedConfigMapPath,
+      this.props.updatedTemplateYaml,
     );
   };
 
   render() {
     const { classes } = this.props;
 
-    return (
+    return this.props.configMapNamespaceIndex !== -1 ? (
       <div>
         <Dialog open={this.props.addOpen} onClose={this.props.closeDialog}>
           <DialogTitle id="alert-dialog-title" className={classes.header}>
             {'Template Creator'}
             <Typography className={classes.headerTypography}>
-              {'Select Namespace and ConfigMap'}
+              {'Select ConfigMap Namespace and Name'}
             </Typography>
           </DialogTitle>
           <DialogContent>
@@ -148,50 +124,52 @@ class AddDialog extends React.Component {
               <FormControl variant="outlined" className={classes.selectForm}>
                 <InputLabel>Namespace</InputLabel>
                 <Select
-                  value={this.props.edittedTemplateNamespace}
-                  onChange={this.onNamespaceChange}
+                  value={this.props.updatedConfigMapNamespace}
+                  onChange={this.onConfigMapNamespaceChange}
                   className={classes.selectBox}
-                  input={<OutlinedInput labelWidth={160} />}
+                  input={<OutlinedInput labelWidth={90} />}
                 >
-                  {this.props.trialTemplatesList.map((trialTemplate, i) => {
+                  {this.props.trialTemplatesData.map((trialTemplate, i) => {
                     return (
-                      <MenuItem value={trialTemplate.Namespace} key={i}>
-                        {trialTemplate.Namespace}
+                      <MenuItem value={trialTemplate.ConfigMapNamespace} key={i}>
+                        {trialTemplate.ConfigMapNamespace}
                       </MenuItem>
                     );
                   })}
                 </Select>
               </FormControl>
               <FormControl variant="outlined" className={classes.selectForm}>
-                <InputLabel>ConfigMap</InputLabel>
+                <InputLabel>Name</InputLabel>
                 <Select
-                  value={this.props.edittedTemplateConfigMapName}
+                  value={this.props.updatedConfigMapName}
                   onChange={this.onConfigMapNameChange}
                   className={classes.selectBox}
-                  input={<OutlinedInput labelWidth={160} />}
+                  input={<OutlinedInput labelWidth={50} />}
                 >
-                  {this.props.edittedTemplateConfigMapSelectList.map((configMap, i) => {
-                    return (
-                      <MenuItem value={configMap} key={i}>
-                        {configMap}
-                      </MenuItem>
-                    );
-                  })}
+                  {this.props.trialTemplatesData[this.props.configMapNamespaceIndex].ConfigMaps.map(
+                    (configMap, i) => {
+                      return (
+                        <MenuItem value={configMap.ConfigMapName} key={i}>
+                          {configMap.ConfigMapName}
+                        </MenuItem>
+                      );
+                    },
+                  )}
                 </Select>
               </FormControl>
             </div>
             <TextField
               className={classes.textField}
-              value={this.props.edittedTemplateName}
-              onChange={this.onNameChange}
-              label="Template name"
-              placeholder="Template name"
+              value={this.props.updatedConfigMapPath}
+              onChange={this.onConfigMapPathChange}
+              label="Template ConfigMap Path"
+              placeholder="Template ConfigMap Path"
             />
             <br />
             <AceEditor
               mode="yaml"
               theme="sqlserver"
-              value={this.props.edittedTemplateYaml}
+              value={this.props.updatedTemplateYaml}
               tabSize={2}
               fontSize={13}
               width={'100%'}
@@ -199,12 +177,17 @@ class AddDialog extends React.Component {
               autoScrollEditorIntoView={true}
               maxLines={30}
               minLines={10}
-              onChange={this.onYamlChange}
+              onChange={this.onTemplateYamlChange}
             />
           </DialogContent>
           <DialogActions>
             <Button
-              disabled={!this.props.edittedTemplateName || !this.props.edittedTemplateYaml}
+              disabled={
+                !this.props.updatedConfigMapPath ||
+                !this.props.updatedTemplateYaml ||
+                // Path can't contain spaces
+                this.props.updatedConfigMapPath.indexOf(' ') > 0
+              }
               onClick={this.submitAddTemplate}
               color={'primary'}
             >
@@ -216,19 +199,28 @@ class AddDialog extends React.Component {
           </DialogActions>
         </Dialog>
       </div>
+    ) : (
+      <div></div>
     );
   }
 }
 
 const mapStateToProps = state => {
+  let templatesData = state[module].trialTemplatesData;
+
+  let nsIndex = templatesData.findIndex(function(trialTemplate, i) {
+    return trialTemplate.ConfigMapNamespace === state[module].updatedConfigMapNamespace;
+  });
+
   return {
     addOpen: state[module].addOpen,
-    trialTemplatesList: state[module].trialTemplatesList,
-    edittedTemplateNamespace: state[module].edittedTemplateNamespace,
-    edittedTemplateConfigMapName: state[module].edittedTemplateConfigMapName,
-    edittedTemplateName: state[module].edittedTemplateName,
-    edittedTemplateYaml: state[module].edittedTemplateYaml,
-    edittedTemplateConfigMapSelectList: state[module].edittedTemplateConfigMapSelectList,
+    trialTemplatesData: state[module].trialTemplatesData,
+    configMapNamespaceIndex: nsIndex,
+    updatedConfigMapNamespace: state[module].updatedConfigMapNamespace,
+    updatedConfigMapName: state[module].updatedConfigMapName,
+    updatedConfigMapPath: state[module].updatedConfigMapPath,
+    updatedTemplateYaml: state[module].updatedTemplateYaml,
+    // edittedTemplateConfigMapSelectList: state[module].edittedTemplateConfigMapSelectList,
   };
 };
 

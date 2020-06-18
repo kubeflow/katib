@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import withStyles from '@material-ui/styles/withStyles';
 
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -16,9 +15,9 @@ const module = 'template';
 const DeleteDialog = props => {
   const submitDeleteTemplate = () => {
     props.deleteTemplate(
-      props.edittedTemplateNamespace,
-      props.edittedTemplateConfigMapName,
-      props.edittedTemplateName,
+      props.updatedConfigMapNamespace,
+      props.updatedConfigMapName,
+      props.updatedConfigMapPath,
     );
   };
 
@@ -45,9 +44,9 @@ const DeleteDialog = props => {
 const mapStateToProps = state => {
   return {
     deleteOpen: state[module].deleteOpen,
-    edittedTemplateNamespace: state[module].edittedTemplateNamespace,
-    edittedTemplateConfigMapName: state[module].edittedTemplateConfigMapName,
-    edittedTemplateName: state[module].edittedTemplateName,
+    updatedConfigMapNamespace: state[module].updatedConfigMapNamespace,
+    updatedConfigMapName: state[module].updatedConfigMapName,
+    updatedConfigMapPath: state[module].updatedConfigMapPath,
   };
 };
 

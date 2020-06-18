@@ -12,7 +12,7 @@ import CommonParametersMeta from './Params/CommonMeta';
 import CommonParametersSpec from './Params/CommonSpec';
 import Objective from './Params/Objective';
 import Algorithm from './Params/Algorithm';
-import TrialSpecParam from './Params/Trial';
+import TrialSpecParam from '../../Common/Create/Params/Trial';
 import NASConfig from './Params/NASConfig';
 
 import { submitNASJob } from '../../../actions/nasCreateActions';
@@ -239,7 +239,7 @@ const NASParameters = props => {
       <NASConfig />
       {SectionInTypography('Metrics Collector Spec', classes)}
       <MetricsCollectorSpec jobType={constants.JOB_TYPE_NAS} />
-      {SectionInTypography('Trial Spec', classes)}
+      {SectionInTypography('Trial Template', classes)}
       <TrialSpecParam />
       <div className={classes.submit}>
         <Button

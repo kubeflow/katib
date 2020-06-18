@@ -130,7 +130,7 @@ const Objective = props => {
           <Grid item xs={12} sm={8}>
             {props.additionalMetricNames.map((metrics, mIndex) => {
               return (
-                <Grid container>
+                <Grid container key={mIndex}>
                   <Grid item xs={10}>
                     <TextField
                       className={classes.textField}

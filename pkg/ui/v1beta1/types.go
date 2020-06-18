@@ -40,22 +40,22 @@ type JobView struct {
 	Namespace string
 }
 
-type TrialTemplatesView struct {
-	Namespace      string
-	ConfigMapsList []ConfigMapsList
+type TrialTemplatesDataView struct {
+	ConfigMapNamespace string
+	ConfigMaps         []ConfigMap
 }
 
 type TrialTemplatesResponse struct {
-	Data []TrialTemplatesView
+	Data []TrialTemplatesDataView
 }
 
-type ConfigMapsList struct {
+type ConfigMap struct {
 	ConfigMapName string
-	TemplatesList []TemplatesList
+	Templates     []Template
 }
 
-type TemplatesList struct {
-	Name string
+type Template struct {
+	Path string
 	Yaml string
 }
 

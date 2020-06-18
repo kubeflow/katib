@@ -8,16 +8,16 @@ export const OPEN_DIALOG = 'OPEN_DIALOG';
 
 export const openDialog = (
   dialogType,
-  namespace = '',
+  configMapNamespace = '',
   configMapName = '',
-  templateName = '',
+  configMapPath = '',
   templateYaml = '',
 ) => ({
   type: OPEN_DIALOG,
   dialogType,
-  namespace,
+  configMapNamespace,
   configMapName,
-  templateName,
+  configMapPath,
   templateYaml,
 });
 
@@ -33,12 +33,17 @@ export const ADD_TEMPLATE_REQUEST = 'ADD_TEMPLATE_REQUEST';
 export const ADD_TEMPLATE_SUCCESS = 'ADD_TEMPLATE_SUCCESS';
 export const ADD_TEMPLATE_FAILURE = 'ADD_TEMPLATE_FAILURE';
 
-export const addTemplate = (edittedNamespace, edittedConfigMapName, edittedName, edittedYaml) => ({
+export const addTemplate = (
+  updatedConfigMapNamespace,
+  updatedConfigMapName,
+  updatedConfigMapPath,
+  updatedTemplateYaml,
+) => ({
   type: ADD_TEMPLATE_REQUEST,
-  edittedNamespace,
-  edittedConfigMapName,
-  edittedName,
-  edittedYaml,
+  updatedConfigMapNamespace,
+  updatedConfigMapName,
+  updatedConfigMapPath,
+  updatedTemplateYaml,
 });
 
 export const EDIT_TEMPLATE_REQUEST = 'EDIT_TEMPLATE_REQUEST';
@@ -46,52 +51,54 @@ export const EDIT_TEMPLATE_SUCCESS = 'EDIT_TEMPLATE_SUCCESS';
 export const EDIT_TEMPLATE_FAILURE = 'EDIT_TEMPLATE_FAILURE';
 
 export const editTemplate = (
-  edittedNamespace,
-  edittedConfigMapName,
-  currentName,
-  edittedName,
-  edittedYaml,
+  updatedConfigMapNamespace,
+  updatedConfigMapName,
+  configMapPath,
+  updatedConfigMapPath,
+  updatedTemplateYaml,
 ) => ({
   type: EDIT_TEMPLATE_REQUEST,
-  edittedNamespace,
-  edittedConfigMapName,
-  currentName,
-  edittedName,
-  edittedYaml,
+  updatedConfigMapNamespace,
+  updatedConfigMapName,
+  configMapPath,
+  updatedConfigMapPath,
+  updatedTemplateYaml,
 });
 
 export const DELETE_TEMPLATE_REQUEST = 'DELETE_TEMPLATE_REQUEST';
 export const DELETE_TEMPLATE_SUCCESS = 'DELETE_TEMPLATE_SUCCESS';
 export const DELETE_TEMPLATE_FAILURE = 'DELETE_TEMPLATE_FAILURE';
 
-export const deleteTemplate = (edittedNamespace, edittedConfigMapName, edittedName) => ({
+export const deleteTemplate = (
+  updatedConfigMapNamespace,
+  updatedConfigMapName,
+  updatedConfigMapPath,
+) => ({
   type: DELETE_TEMPLATE_REQUEST,
-  edittedNamespace,
-  edittedConfigMapName,
-  edittedName,
+  updatedConfigMapNamespace,
+  updatedConfigMapName,
+  updatedConfigMapPath,
 });
 
 export const CHANGE_TEMPLATE = 'CHANGE_TEMPLATE';
 
 export const changeTemplate = (
-  edittedTemplateNamespace,
-  edittedTemplateConfigMapName,
-  edittedTemplateName,
-  edittedTemplateYaml,
-  edittedTemplateConfigMapSelectList,
+  updatedConfigMapNamespace,
+  updatedConfigMapName,
+  updatedConfigMapPath,
+  updatedTemplateYaml,
 ) => ({
   type: CHANGE_TEMPLATE,
-  edittedTemplateNamespace,
-  edittedTemplateConfigMapName,
-  edittedTemplateName,
-  edittedTemplateYaml,
-  edittedTemplateConfigMapSelectList,
+  updatedConfigMapNamespace,
+  updatedConfigMapName,
+  updatedConfigMapPath,
+  updatedTemplateYaml,
 });
 
 export const FILTER_TEMPLATES = 'FILTER_TEMPLATES';
 
-export const filterTemplates = (filteredNamespace, filteredConfigMapName) => ({
+export const filterTemplates = (filteredConfigMapNamespace, filteredConfigMapName) => ({
   type: FILTER_TEMPLATES,
-  filteredNamespace,
+  filteredConfigMapNamespace,
   filteredConfigMapName,
 });

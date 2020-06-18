@@ -11,7 +11,7 @@ import Typography from '@material-ui/core/Typography';
 import CommonParametersMeta from './Params/CommonMeta';
 import CommonParametersSpec from './Params/CommonSpec';
 import Objective from './Params/Objective';
-import TrialSpecParam from './Params/Trial';
+import TrialSpecParam from '../../Common/Create/Params/Trial';
 import Parameters from './Params/Parameters';
 import Algorithm from './Params/Algorithm';
 
@@ -196,14 +196,15 @@ const HPParameters = props => {
     data.spec.metricsCollectorSpec = newMCSpec;
 
     data.spec.trialTemplate = {
-      goTemplate: {
-        templateSpec: {
+      trialSource: {
+        configMap: {
+          configMapNamespace: props.templateConfigMapNamespace,
           configMapName: props.templateConfigMapName,
-          configMapNamespace: props.templateNamespace,
-          templatePath: props.templateName,
+          templatePath: props.templateConfigMapPath,
         },
       },
     };
+    console.log('DATA OS', data);
 
     props.submitHPJob(data);
   };
@@ -227,7 +228,7 @@ const HPParameters = props => {
       <Parameters />
       {SectionInTypography('Metrics Collector Spec', classes)}
       <MetricsCollectorSpec jobType={constants.JOB_TYPE_HP} />
-      {SectionInTypography('Trial Spec', classes)}
+      {SectionInTypography('Trial Template', classes)}
       <TrialSpecParam />
 
       <div className={classes.submit}>
@@ -245,30 +246,35 @@ const HPParameters = props => {
 };
 
 // TODO: think of a better way of passing those
-const mapStateToProps = state => ({
-  commonParametersMetadata: state[module].commonParametersMetadata,
-  commonParametersSpec: state[module].commonParametersSpec,
-  objective: state[module].objective,
-  additionalMetricNames: state[module].additionalMetricNames,
-  algorithmName: state[module].algorithmName,
-  algorithmSettings: state[module].algorithmSettings,
-  parameters: state[module].parameters,
-  templateNamespace: state[generalModule].templateNamespace,
-  templateConfigMapName: state[generalModule].templateConfigMapName,
-  templateName: state[generalModule].templateName,
-  trial: state[module].trial,
-  trialNamespace: state[module].trialNamespace,
-  mcSpec: state[module].mcSpec,
-  mcCustomContainerYaml: state[module].mcCustomContainerYaml,
-});
+const mapStateToProps = state => {
+  let templatesData = state[generalModule].trialTemplatesData;
+  let templateCMNamespace = '';
+  let templateCMName = '';
+  let templateCMPath = '';
+  if (state[generalModule].configMapNamespaceIndex !== -1) {
+    let nsData = templatesData[state[generalModule].configMapNamespaceIndex];
+    let nameData = nsData.ConfigMaps[state[generalModule].configMapNameIndex];
+    let pathData = nameData.Templates[state[generalModule].configMapPathIndex];
 
-//TODO: Added validation and remove it
-// HPParameters.propTypes = {
-//     trial: PropTypes.string,
-//     requestNumber: PropTypes.number,
-//     suggestionAlgorithm: PropTypes.string,
-//     metricsName: PropTypes.arrayOf(PropTypes.string),
-// }
+    templateCMNamespace = nsData.ConfigMapNamespace;
+    templateCMName = nameData.ConfigMapName;
+    templateCMPath = pathData.Path;
+  }
+  return {
+    commonParametersMetadata: state[module].commonParametersMetadata,
+    commonParametersSpec: state[module].commonParametersSpec,
+    objective: state[module].objective,
+    additionalMetricNames: state[module].additionalMetricNames,
+    algorithmName: state[module].algorithmName,
+    algorithmSettings: state[module].algorithmSettings,
+    parameters: state[module].parameters,
+    templateConfigMapNamespace: templateCMNamespace,
+    templateConfigMapName: templateCMName,
+    templateConfigMapPath: templateCMPath,
+    mcSpec: state[module].mcSpec,
+    mcCustomContainerYaml: state[module].mcCustomContainerYaml,
+  };
+};
 
 export default connect(mapStateToProps, { submitHPJob, validationError })(
   withStyles(styles)(HPParameters),
