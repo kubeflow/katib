@@ -110,3 +110,13 @@ export const validationError = message => ({
   type: VALIDATION_ERROR,
   message,
 });
+
+export const EDIT_TRIAL_PARAMETERS = 'EDIT_TRIAL_PARAMETERS';
+
+export const editTrialParameters = (index, name, reference, description) => ({
+  type: EDIT_TRIAL_PARAMETERS,
+  index,
+  name,
+  reference,
+  description,
+});

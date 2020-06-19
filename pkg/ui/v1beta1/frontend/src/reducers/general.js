@@ -5,8 +5,6 @@ import * as hpMonitorActions from '../actions/hpMonitorActions';
 import * as nasMonitorActions from '../actions/nasMonitorActions';
 import * as templateActions from '../actions/templateActions';
 
-import * as templateState from './template';
-
 const initialState = {
   menuOpen: false,
   snackOpen: false,
@@ -20,17 +18,20 @@ const initialState = {
   suggestion: {},
   dialogSuggestionOpen: false,
 
-  // trialTemplatesData: [],
   trialTemplatesData: [],
 
   configMapNamespaceIndex: -1,
   configMapNameIndex: -1,
   configMapPathIndex: -1,
 
+  trialParameters: [],
+
   mcKindsList: ['StdOut', 'File', 'TensorFlowEvent', 'PrometheusMetric', 'Custom', 'None'],
   mcFileSystemKindsList: ['No File System', 'File', 'Directory'],
   mcURISchemesList: ['HTTP', 'HTTPS'],
 };
+
+const templateParameterRegex = '\\{trialParameters\\..+?\\}';
 
 const generalReducer = (state = initialState, action) => {
   switch (action.type) {
@@ -180,12 +181,32 @@ const generalReducer = (state = initialState, action) => {
         configMapNameIndex = 0;
         configMapPathIndex = 0;
       }
+
+      // Get Parameter names from ConfigMap for Trial parameters
+      let yaml = trialTemplatesData[0].ConfigMaps[0].Templates[0].Yaml;
+      let trialParameters = [];
+      let trialParameterNames = [];
+
+      let matchStr = [...yaml.matchAll(templateParameterRegex)];
+      matchStr.forEach(param => {
+        let newParameter = param[0].slice(param[0].indexOf('.') + 1, param[0].indexOf('}'));
+        if (!trialParameterNames.includes(newParameter)) {
+          trialParameterNames.push(newParameter);
+          trialParameters.push({
+            name: newParameter,
+            reference: '',
+            description: '',
+          });
+        }
+      });
+
       return {
         ...state,
         trialTemplatesData: trialTemplatesData,
         configMapNamespaceIndex: configMapNamespaceIndex,
         configMapNameIndex: configMapNameIndex,
         configMapPathIndex: configMapPathIndex,
+        trialParameters: trialParameters,
       };
     case actions.FILTER_TEMPLATES_EXPERIMENT:
       let newNamespaceIndex = 0;
@@ -202,17 +223,47 @@ const generalReducer = (state = initialState, action) => {
         newNameIndex = action.configMapNameIndex;
         newPathIndex = action.configMapPathIndex;
       }
+
+      // Get Parameter names from ConfigMap for Trial parameters
+      trialTemplatesData = state.trialTemplatesData;
+      yaml =
+        trialTemplatesData[newNamespaceIndex].ConfigMaps[newNameIndex].Templates[newPathIndex].Yaml;
+      trialParameters = [];
+      trialParameterNames = [];
+
+      matchStr = [...yaml.matchAll(templateParameterRegex)];
+      matchStr.forEach(param => {
+        let newParameter = param[0].slice(param[0].indexOf('.') + 1, param[0].indexOf('}'));
+        if (!trialParameterNames.includes(newParameter)) {
+          trialParameterNames.push(newParameter);
+          trialParameters.push({
+            name: newParameter,
+            reference: '',
+            description: '',
+          });
+        }
+      });
       return {
         ...state,
         configMapNamespaceIndex: newNamespaceIndex,
         configMapNameIndex: newNameIndex,
         configMapPathIndex: newPathIndex,
+        trialParameters: trialParameters,
       };
     case actions.VALIDATION_ERROR:
       return {
         ...state,
         snackOpen: true,
         snackText: action.message,
+      };
+    case actions.EDIT_TRIAL_PARAMETERS:
+      let newParams = state.trialParameters.slice();
+      newParams[action.index].name = action.name;
+      newParams[action.index].reference = action.reference;
+      newParams[action.index].description = action.description;
+      return {
+        ...state,
+        trialParameters: newParams,
       };
     default:
       return state;

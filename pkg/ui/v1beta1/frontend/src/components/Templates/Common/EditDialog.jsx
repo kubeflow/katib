@@ -103,7 +103,12 @@ class EditDialog extends React.Component {
         </DialogContent>
         <DialogActions>
           <Button
-            disabled={!this.props.updatedConfigMapPath || !this.props.updatedTemplateYaml}
+            disabled={
+              !this.props.updatedConfigMapPath ||
+              !this.props.updatedTemplateYaml ||
+              // Path can't contain spaces
+              this.props.updatedConfigMapPath.indexOf(' ') !== -1
+            }
             onClick={this.submitEditTemplate}
             color={'primary'}
           >

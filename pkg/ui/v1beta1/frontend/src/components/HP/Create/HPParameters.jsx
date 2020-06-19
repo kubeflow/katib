@@ -11,7 +11,7 @@ import Typography from '@material-ui/core/Typography';
 import CommonParametersMeta from './Params/CommonMeta';
 import CommonParametersSpec from './Params/CommonSpec';
 import Objective from './Params/Objective';
-import TrialSpecParam from '../../Common/Create/Params/Trial';
+import TrialTemplate from '../../Common/Create/Params/Trial/TrialTemplate';
 import Parameters from './Params/Parameters';
 import Algorithm from './Params/Algorithm';
 
@@ -196,15 +196,13 @@ const HPParameters = props => {
     data.spec.metricsCollectorSpec = newMCSpec;
 
     data.spec.trialTemplate = {
-      trialSource: {
-        configMap: {
-          configMapNamespace: props.templateConfigMapNamespace,
-          configMapName: props.templateConfigMapName,
-          templatePath: props.templateConfigMapPath,
-        },
+      configMap: {
+        configMapNamespace: props.templateConfigMapNamespace,
+        configMapName: props.templateConfigMapName,
+        templatePath: props.templateConfigMapPath,
       },
+      trialParameters: props.trialParameters,
     };
-    console.log('DATA OS', data);
 
     props.submitHPJob(data);
   };
@@ -228,8 +226,8 @@ const HPParameters = props => {
       <Parameters />
       {SectionInTypography('Metrics Collector Spec', classes)}
       <MetricsCollectorSpec jobType={constants.JOB_TYPE_HP} />
-      {SectionInTypography('Trial Template', classes)}
-      <TrialSpecParam />
+      {SectionInTypography('Trial Template Spec', classes)}
+      <TrialTemplate jobType={constants.JOB_TYPE_HP} />
 
       <div className={classes.submit}>
         <Button
@@ -251,6 +249,7 @@ const mapStateToProps = state => {
   let templateCMNamespace = '';
   let templateCMName = '';
   let templateCMPath = '';
+
   if (state[generalModule].configMapNamespaceIndex !== -1) {
     let nsData = templatesData[state[generalModule].configMapNamespaceIndex];
     let nameData = nsData.ConfigMaps[state[generalModule].configMapNameIndex];
@@ -271,6 +270,7 @@ const mapStateToProps = state => {
     templateConfigMapNamespace: templateCMNamespace,
     templateConfigMapName: templateCMName,
     templateConfigMapPath: templateCMPath,
+    trialParameters: state[generalModule].trialParameters,
     mcSpec: state[module].mcSpec,
     mcCustomContainerYaml: state[module].mcCustomContainerYaml,
   };

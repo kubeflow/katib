@@ -186,7 +186,7 @@ class AddDialog extends React.Component {
                 !this.props.updatedConfigMapPath ||
                 !this.props.updatedTemplateYaml ||
                 // Path can't contain spaces
-                this.props.updatedConfigMapPath.indexOf(' ') > 0
+                this.props.updatedConfigMapPath.indexOf(' ') !== -1
               }
               onClick={this.submitAddTemplate}
               color={'primary'}
