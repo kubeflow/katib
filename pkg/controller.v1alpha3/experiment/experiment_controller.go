@@ -18,6 +18,7 @@ package experiment
 
 import (
 	"context"
+	"fmt"
 	"sort"
 
 	"github.com/spf13/viper"
@@ -357,7 +358,7 @@ func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha3.Experim
 
 func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha3.Experiment,
 	trials []trialsv1alpha3.Trial,
-	deleteCount int32) error {
+	expectedDeletions int32) error {
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 
 	trialSlice := trials
@@ -366,7 +367,12 @@ func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha3.Experim
 			After(trialSlice[j].CreationTimestamp.Time)
 	})
 
-	for i := 0; i < int(deleteCount); i++ {
+	expected := int(expectedDeletions)
+	if len(trialSlice) < expected {
+		return fmt.Errorf("Expected to delete %d trials, but got %d trials",
+			expected, len(trialSlice))
+	}
+	for i := 0; i < expected; i++ {
 		if err := r.Delete(context.TODO(), &trialSlice[i]); err != nil {
 			logger.Error(err, "Trial Delete error")
 			return err
