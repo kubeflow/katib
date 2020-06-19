@@ -200,7 +200,7 @@ class AddDialog extends React.Component {
         </Dialog>
       </div>
     ) : (
-      <div></div>
+      <div />
     );
   }
 }
@@ -220,7 +220,6 @@ const mapStateToProps = state => {
     updatedConfigMapName: state[module].updatedConfigMapName,
     updatedConfigMapPath: state[module].updatedConfigMapPath,
     updatedTemplateYaml: state[module].updatedTemplateYaml,
-    // edittedTemplateConfigMapSelectList: state[module].edittedTemplateConfigMapSelectList,
   };
 };
 
