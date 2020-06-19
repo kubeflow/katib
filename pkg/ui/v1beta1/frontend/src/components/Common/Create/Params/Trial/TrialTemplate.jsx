@@ -11,7 +11,7 @@ class TrialTemplate extends React.Component {
       <div>
         <TrialConfigMap></TrialConfigMap>
         <Divider />
-        <TrialParameters jobType={this.props.jobType}></TrialParameters>
+        <TrialParameters></TrialParameters>
       </div>
     );
   }

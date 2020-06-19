@@ -225,24 +225,32 @@ const generalReducer = (state = initialState, action) => {
       }
 
       // Get Parameter names from ConfigMap for Trial parameters
-      trialTemplatesData = state.trialTemplatesData;
-      yaml =
-        trialTemplatesData[newNamespaceIndex].ConfigMaps[newNameIndex].Templates[newPathIndex].Yaml;
-      trialParameters = [];
-      trialParameterNames = [];
-
-      matchStr = [...yaml.matchAll(templateParameterRegex)];
-      matchStr.forEach(param => {
-        let newParameter = param[0].slice(param[0].indexOf('.') + 1, param[0].indexOf('}'));
-        if (!trialParameterNames.includes(newParameter)) {
-          trialParameterNames.push(newParameter);
-          trialParameters.push({
-            name: newParameter,
-            reference: '',
-            description: '',
-          });
-        }
-      });
+      // Change only if any ConfigMap information has been changed
+      trialParameters = state.trialParameters.slice();
+      if (
+        newNamespaceIndex !== state.configMapNamespaceIndex ||
+        newNameIndex !== state.configMapNameIndex ||
+        newPathIndex !== state.configMapPathIndex
+      ) {
+        trialTemplatesData = state.trialTemplatesData;
+        yaml =
+          trialTemplatesData[newNamespaceIndex].ConfigMaps[newNameIndex].Templates[newPathIndex]
+            .Yaml;
+        trialParameterNames = [];
+        trialParameters = [];
+        matchStr = [...yaml.matchAll(templateParameterRegex)];
+        matchStr.forEach(param => {
+          let newParameter = param[0].slice(param[0].indexOf('.') + 1, param[0].indexOf('}'));
+          if (!trialParameterNames.includes(newParameter)) {
+            trialParameterNames.push(newParameter);
+            trialParameters.push({
+              name: newParameter,
+              reference: '',
+              description: '',
+            });
+          }
+        });
+      }
       return {
         ...state,
         configMapNamespaceIndex: newNamespaceIndex,

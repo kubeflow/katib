@@ -227,7 +227,7 @@ const HPParameters = props => {
       {SectionInTypography('Metrics Collector Spec', classes)}
       <MetricsCollectorSpec jobType={constants.JOB_TYPE_HP} />
       {SectionInTypography('Trial Template Spec', classes)}
-      <TrialTemplate jobType={constants.JOB_TYPE_HP} />
+      <TrialTemplate />
 
       <div className={classes.submit}>
         <Button
