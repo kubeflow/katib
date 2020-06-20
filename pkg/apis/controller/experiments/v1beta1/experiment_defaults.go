@@ -62,6 +62,7 @@ func (e *Experiment) setDefaultObjective() {
 		}
 		metricsWithDefault[strategy.Name] = 1
 	}
+
 	// set default strategy of objective according to ObjectiveType
 	if !objectiveHasDefault {
 		var strategy common.MetricStrategy
@@ -70,17 +71,24 @@ func (e *Experiment) setDefaultObjective() {
 			strategy = common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByMin}
 		case common.ObjectiveTypeMaximize:
 			strategy = common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByMax}
-		case common.ObjectiveTypeUnknown:
-			strategy = common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByLatest}
 		default:
 			strategy = common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByLatest}
 		}
 		obj.MetricStrategies = append(obj.MetricStrategies, strategy)
 	}
+
 	// set default strategy of additional metrics to ExtractByLatest
-	for _, name := range obj.AdditionalMetricNames {
-		if _, ok := metricsWithDefault[name]; !ok {
-			strategy := common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByLatest}
+	for _, metricName := range obj.AdditionalMetricNames {
+		if _, ok := metricsWithDefault[metricName]; !ok {
+			var strategy common.MetricStrategy
+			switch e.Spec.Objective.Type {
+			case common.ObjectiveTypeMinimize:
+				strategy = common.MetricStrategy{Name: metricName, Value: common.ExtractByMin}
+			case common.ObjectiveTypeMaximize:
+				strategy = common.MetricStrategy{Name: metricName, Value: common.ExtractByMax}
+			default:
+				strategy = common.MetricStrategy{Name: metricName, Value: common.ExtractByLatest}
+			}
 			obj.MetricStrategies = append(obj.MetricStrategies, strategy)
 		}
 	}
