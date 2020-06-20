@@ -35,33 +35,31 @@ const styles = theme => ({
 });
 
 class EditDialog extends React.Component {
-  onNameChange = event => {
+  onConfigMapPathChange = event => {
     this.props.changeTemplate(
-      this.props.edittedTemplateNamespace,
-      this.props.edittedTemplateConfigMapName,
+      this.props.updatedConfigMapNamespace,
+      this.props.updatedConfigMapName,
       event.target.value,
-      this.props.edittedTemplateYaml,
-      this.props.edittedTemplateConfigMapSelectList,
+      this.props.updatedTemplateYaml,
     );
   };
 
-  onYamlChange = newTemplateYaml => {
+  onTemplateYamlChange = newTemplateYaml => {
     this.props.changeTemplate(
-      this.props.edittedTemplateNamespace,
-      this.props.edittedTemplateConfigMapName,
-      this.props.edittedTemplateName,
+      this.props.updatedConfigMapNamespace,
+      this.props.updatedConfigMapName,
+      this.props.updatedConfigMapPath,
       newTemplateYaml,
-      this.props.edittedTemplateConfigMapSelectList,
     );
   };
 
   submitEditTemplate = () => {
     this.props.editTemplate(
-      this.props.edittedTemplateNamespace,
-      this.props.edittedTemplateConfigMapName,
-      this.props.currentTemplateName,
-      this.props.edittedTemplateName,
-      this.props.edittedTemplateYaml,
+      this.props.updatedConfigMapNamespace,
+      this.props.updatedConfigMapName,
+      this.props.configMapPath,
+      this.props.updatedConfigMapPath,
+      this.props.updatedTemplateYaml,
     );
   };
 
@@ -72,27 +70,27 @@ class EditDialog extends React.Component {
         <DialogTitle id="alert-dialog-title" className={classes.header}>
           {'Template Editor'}
           <Typography className={classes.headerTypography}>
-            {'Namespace: ' + this.props.edittedTemplateNamespace}
+            {'ConfigMap Namespace: ' + this.props.updatedConfigMapNamespace}
           </Typography>
 
           <Typography className={classes.headerTypography}>
-            {'ConfigMap: ' + this.props.edittedTemplateConfigMapName}
+            {'ConfigMap Name: ' + this.props.updatedConfigMapName}
           </Typography>
         </DialogTitle>
         <DialogContent>
           <TextField
-            value={this.props.edittedTemplateName}
+            value={this.props.updatedConfigMapPath}
             className={classes.textField}
-            onChange={this.onNameChange}
-            label="Template name"
-            placeholder="Template name"
+            onChange={this.onConfigMapPathChange}
+            label="Template Config Map Path"
+            placeholder="Template ConfigMap Path"
           />
 
           <br />
           <AceEditor
             mode="yaml"
             theme="sqlserver"
-            value={this.props.edittedTemplateYaml}
+            value={this.props.updatedTemplateYaml}
             tabSize={2}
             fontSize={13}
             width={'100%'}
@@ -100,12 +98,17 @@ class EditDialog extends React.Component {
             autoScrollEditorIntoView={true}
             maxLines={30}
             minLines={10}
-            onChange={this.onYamlChange}
+            onChange={this.onTemplateYamlChange}
           />
         </DialogContent>
         <DialogActions>
           <Button
-            disabled={!this.props.edittedTemplateName || !this.props.edittedTemplateYaml}
+            disabled={
+              !this.props.updatedConfigMapPath ||
+              !this.props.updatedTemplateYaml ||
+              // Path can't contain spaces
+              this.props.updatedConfigMapPath.indexOf(' ') !== -1
+            }
             onClick={this.submitEditTemplate}
             color={'primary'}
           >
@@ -123,12 +126,11 @@ class EditDialog extends React.Component {
 const mapStateToProps = state => {
   return {
     editOpen: state[module].editOpen,
-    edittedTemplateNamespace: state[module].edittedTemplateNamespace,
-    edittedTemplateConfigMapName: state[module].edittedTemplateConfigMapName,
-    currentTemplateName: state[module].currentTemplateName,
-    edittedTemplateName: state[module].edittedTemplateName,
-    edittedTemplateYaml: state[module].edittedTemplateYaml,
-    edittedTemplateConfigMapSelectList: state[module].edittedTemplateConfigMapSelectList,
+    updatedConfigMapNamespace: state[module].updatedConfigMapNamespace,
+    updatedConfigMapName: state[module].updatedConfigMapName,
+    configMapPath: state[module].configMapPath,
+    updatedConfigMapPath: state[module].updatedConfigMapPath,
+    updatedTemplateYaml: state[module].updatedTemplateYaml,
   };
 };
 

@@ -309,7 +309,6 @@ class MetricsCollectorSpec extends React.Component {
                         </MenuItem>
                       );
                     })}
-                  )}
                 </Select>
               </FormControl>
             </Grid>

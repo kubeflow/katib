@@ -143,12 +143,12 @@ func (k *KatibUIHandler) AddTemplate(w http.ResponseWriter, r *http.Request) {
 	var data map[string]interface{}
 	json.NewDecoder(r.Body).Decode(&data)
 
-	edittedNamespace := data["edittedNamespace"].(string)
-	edittedConfigMapName := data["edittedConfigMapName"].(string)
-	edittedName := data["edittedName"].(string)
-	edittedYaml := data["edittedYaml"].(string)
+	updatedConfigMapNamespace := data["updatedConfigMapNamespace"].(string)
+	updatedConfigMapName := data["updatedConfigMapName"].(string)
+	updatedConfigMapPath := data["updatedConfigMapPath"].(string)
+	updatedTemplateYaml := data["updatedTemplateYaml"].(string)
 
-	newTemplates, err := k.updateTrialTemplates(edittedNamespace, edittedConfigMapName, edittedName, edittedYaml, "", ActionTypeAdd)
+	newTemplates, err := k.updateTrialTemplates(updatedConfigMapNamespace, updatedConfigMapName, "", updatedConfigMapPath, updatedTemplateYaml, ActionTypeAdd)
 	if err != nil {
 		log.Printf("updateTrialTemplates failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -174,13 +174,13 @@ func (k *KatibUIHandler) EditTemplate(w http.ResponseWriter, r *http.Request) {
 	var data map[string]interface{}
 	json.NewDecoder(r.Body).Decode(&data)
 
-	edittedNamespace := data["edittedNamespace"].(string)
-	edittedConfigMapName := data["edittedConfigMapName"].(string)
-	edittedName := data["edittedName"].(string)
-	edittedYaml := data["edittedYaml"].(string)
-	currentName := data["currentName"].(string)
+	updatedConfigMapNamespace := data["updatedConfigMapNamespace"].(string)
+	updatedConfigMapName := data["updatedConfigMapName"].(string)
+	configMapPath := data["configMapPath"].(string)
+	updatedConfigMapPath := data["updatedConfigMapPath"].(string)
+	updatedTemplateYaml := data["updatedTemplateYaml"].(string)
 
-	newTemplates, err := k.updateTrialTemplates(edittedNamespace, edittedConfigMapName, edittedName, edittedYaml, currentName, ActionTypeEdit)
+	newTemplates, err := k.updateTrialTemplates(updatedConfigMapNamespace, updatedConfigMapName, configMapPath, updatedConfigMapPath, updatedTemplateYaml, ActionTypeEdit)
 	if err != nil {
 		log.Printf("updateTrialTemplates failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -206,11 +206,11 @@ func (k *KatibUIHandler) DeleteTemplate(w http.ResponseWriter, r *http.Request) 
 	var data map[string]interface{}
 	json.NewDecoder(r.Body).Decode(&data)
 
-	edittedNamespace := data["edittedNamespace"].(string)
-	edittedConfigMapName := data["edittedConfigMapName"].(string)
-	edittedName := data["edittedName"].(string)
+	updatedConfigMapNamespace := data["updatedConfigMapNamespace"].(string)
+	updatedConfigMapName := data["updatedConfigMapName"].(string)
+	updatedConfigMapPath := data["updatedConfigMapPath"].(string)
 
-	newTemplates, err := k.updateTrialTemplates(edittedNamespace, edittedConfigMapName, edittedName, "", "", ActionTypeDelete)
+	newTemplates, err := k.updateTrialTemplates(updatedConfigMapNamespace, updatedConfigMapName, "", updatedConfigMapPath, "", ActionTypeDelete)
 	if err != nil {
 		log.Printf("updateTrialTemplates failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

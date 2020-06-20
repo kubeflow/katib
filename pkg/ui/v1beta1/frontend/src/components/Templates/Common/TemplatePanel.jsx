@@ -32,12 +32,18 @@ const dialogTypeDelete = 'delete';
 const TemplatePanel = props => {
   const classes = useStyles();
 
-  const openEditDialog = (namespace, configMapName, templateName, templateYaml) => event => {
-    props.openDialog(dialogTypeEdit, namespace, configMapName, templateName, templateYaml);
+  const openEditDialog = (configMapNamespace, configMapName, configMapPath, templateYaml) => () => {
+    props.openDialog(
+      dialogTypeEdit,
+      configMapNamespace,
+      configMapName,
+      configMapPath,
+      templateYaml,
+    );
   };
 
-  const openDeleteDialog = (namespace, configMapName, templateName) => event => {
-    props.openDialog(dialogTypeDelete, namespace, configMapName, templateName);
+  const openDeleteDialog = (configMapNamespace, configMapName, configMapPath) => () => {
+    props.openDialog(dialogTypeDelete, configMapNamespace, configMapName, configMapPath);
   };
 
   return (
@@ -60,9 +66,9 @@ const TemplatePanel = props => {
         variant={'contained'}
         color={'primary'}
         onClick={openEditDialog(
-          props.namespace,
+          props.configMapNamespace,
           props.configMapName,
-          props.templateName,
+          props.configMapPath,
           props.templateYaml,
         )}
       >
@@ -74,7 +80,11 @@ const TemplatePanel = props => {
         className={classes.buttons}
         variant={'contained'}
         color={'primary'}
-        onClick={openDeleteDialog(props.namespace, props.configMapName, props.templateName)}
+        onClick={openDeleteDialog(
+          props.configMapNamespace,
+          props.configMapName,
+          props.configMapPath,
+        )}
       >
         <DeleteIcon color={'secondary'} className={classes.icon} />
         Delete
@@ -83,7 +93,7 @@ const TemplatePanel = props => {
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = () => {
   return {};
 };
 

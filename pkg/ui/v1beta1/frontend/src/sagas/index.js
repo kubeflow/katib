@@ -1,4 +1,4 @@
-import { take, put, call, fork, select, all, takeEvery } from 'redux-saga/effects';
+import { take, put, call, fork, all } from 'redux-saga/effects';
 import axios from 'axios';
 import * as templateActions from '../actions/templateActions';
 import * as hpMonitorActions from '../actions/hpMonitorActions';
@@ -14,10 +14,13 @@ export const submitYaml = function*() {
       let isRightNamespace = false;
       for (const [index, value] of Object.entries(action.yaml.split('\n'))) {
         const noSpaceLine = value.replace(/\s/g, '');
-        if (noSpaceLine == 'trialTemplate:') {
+        if (noSpaceLine === 'trialTemplate:') {
           break;
         }
-        if (action.globalNamespace == '' || noSpaceLine == 'namespace:' + action.globalNamespace) {
+        if (
+          action.globalNamespace === '' ||
+          noSpaceLine === 'namespace:' + action.globalNamespace
+        ) {
           isRightNamespace = true;
           break;
         }
@@ -463,7 +466,7 @@ export const fetchTrialTemplates = function*() {
       if (result.status === 200) {
         yield put({
           type: templateActions.FETCH_TRIAL_TEMPLATES_SUCCESS,
-          trialTemplatesList: result.data.Data,
+          trialTemplatesData: result.data.Data,
         });
       } else {
         yield put({
@@ -495,15 +498,15 @@ export const addTemplate = function*() {
     try {
       const result = yield call(
         goAddTemplate,
-        action.edittedNamespace,
-        action.edittedConfigMapName,
-        action.edittedName,
-        action.edittedYaml,
+        action.updatedConfigMapNamespace,
+        action.updatedConfigMapName,
+        action.updatedConfigMapPath,
+        action.updatedTemplateYaml,
       );
       if (result.status === 200) {
         yield put({
           type: templateActions.ADD_TEMPLATE_SUCCESS,
-          trialTemplatesList: result.data.Data,
+          trialTemplatesData: result.data.Data,
         });
       } else {
         yield put({
@@ -518,13 +521,18 @@ export const addTemplate = function*() {
   }
 };
 
-const goAddTemplate = function*(edittedNamespace, edittedConfigMapName, edittedName, edittedYaml) {
+const goAddTemplate = function*(
+  updatedConfigMapNamespace,
+  updatedConfigMapName,
+  updatedConfigMapPath,
+  updatedTemplateYaml,
+) {
   try {
     const data = {
-      edittedNamespace,
-      edittedConfigMapName,
-      edittedName,
-      edittedYaml,
+      updatedConfigMapNamespace,
+      updatedConfigMapName,
+      updatedConfigMapPath,
+      updatedTemplateYaml,
     };
     const result = yield call(axios.post, '/katib/add_template/', data);
     return result;
@@ -541,16 +549,16 @@ export const editTemplate = function*() {
     try {
       const result = yield call(
         goEditTemplate,
-        action.edittedNamespace,
-        action.edittedConfigMapName,
-        action.currentName,
-        action.edittedName,
-        action.edittedYaml,
+        action.updatedConfigMapNamespace,
+        action.updatedConfigMapName,
+        action.configMapPath,
+        action.updatedConfigMapPath,
+        action.updatedTemplateYaml,
       );
       if (result.status === 200) {
         yield put({
           type: templateActions.EDIT_TEMPLATE_SUCCESS,
-          trialTemplatesList: result.data.Data,
+          trialTemplatesData: result.data.Data,
         });
       } else {
         yield put({
@@ -566,19 +574,19 @@ export const editTemplate = function*() {
 };
 
 const goEditTemplate = function*(
-  edittedNamespace,
-  edittedConfigMapName,
-  currentName,
-  edittedName,
-  edittedYaml,
+  updatedConfigMapNamespace,
+  updatedConfigMapName,
+  configMapPath,
+  updatedConfigMapPath,
+  updatedTemplateYaml,
 ) {
   try {
     const data = {
-      edittedNamespace,
-      edittedConfigMapName,
-      currentName,
-      edittedName,
-      edittedYaml,
+      updatedConfigMapNamespace,
+      updatedConfigMapName,
+      configMapPath,
+      updatedConfigMapPath,
+      updatedTemplateYaml,
     };
     const result = yield call(axios.post, '/katib/edit_template/', data);
     return result;
@@ -595,14 +603,14 @@ export const deleteTemplate = function*() {
     try {
       const result = yield call(
         goDeleteTemplate,
-        action.edittedNamespace,
-        action.edittedConfigMapName,
-        action.edittedName,
+        action.updatedConfigMapNamespace,
+        action.updatedConfigMapName,
+        action.updatedConfigMapPath,
       );
       if (result.status === 200) {
         yield put({
           type: templateActions.DELETE_TEMPLATE_SUCCESS,
-          trialTemplatesList: result.data.Data,
+          trialTemplatesData: result.data.Data,
         });
       } else {
         yield put({
@@ -617,12 +625,16 @@ export const deleteTemplate = function*() {
   }
 };
 
-const goDeleteTemplate = function*(edittedNamespace, edittedConfigMapName, edittedName) {
+const goDeleteTemplate = function*(
+  updatedConfigMapNamespace,
+  updatedConfigMapName,
+  updatedConfigMapPath,
+) {
   try {
     const data = {
-      edittedNamespace,
-      edittedConfigMapName,
-      edittedName,
+      updatedConfigMapNamespace,
+      updatedConfigMapName,
+      updatedConfigMapPath,
     };
     const result = yield call(axios.post, '/katib/delete_template/', data);
     return result;

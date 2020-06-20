@@ -60,7 +60,7 @@ const initialState = {
   algorithmSettings: [],
   parameters: [
     {
-      name: '--lr',
+      name: 'lr',
       parameterType: 'double',
       feasibleSpace: 'feasibleSpace',
       min: '0.01',
@@ -68,7 +68,7 @@ const initialState = {
       list: [],
     },
     {
-      name: '--num-layers',
+      name: 'num-layers',
       parameterType: 'int',
       feasibleSpace: 'feasibleSpace',
       min: '2',
@@ -76,7 +76,7 @@ const initialState = {
       list: [],
     },
     {
-      name: '--optimizer',
+      name: 'optimizer',
       parameterType: 'categorical',
       feasibleSpace: 'list',
       min: '',

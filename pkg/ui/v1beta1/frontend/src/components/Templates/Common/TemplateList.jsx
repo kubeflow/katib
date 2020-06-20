@@ -63,8 +63,8 @@ class TemplateList extends React.Component {
   openAddDialog = () => {
     this.props.openDialog(
       dialogTypeAdd,
-      this.props.trialTemplatesList[0].Namespace,
-      this.props.trialTemplatesList[0].ConfigMapsList[0].ConfigMapName,
+      this.props.trialTemplatesData[0].ConfigMapNamespace,
+      this.props.trialTemplatesData[0].ConfigMaps[0].ConfigMapName,
     );
   };
 
@@ -76,7 +76,7 @@ class TemplateList extends React.Component {
           <LinearProgress color={'primary'} className={classes.loading} />
         ) : (
           <div>
-            {this.props.trialTemplatesList.length != 0 ? (
+            {this.props.trialTemplatesData.length !== 0 ? (
               <div>
                 <FilterPanel />
                 <div className={classes.buttonAdd}>
@@ -84,7 +84,7 @@ class TemplateList extends React.Component {
                     Add Template
                   </Button>
                 </div>
-                {this.props.filteredTrialTemplatesList.map((trialTemplate, nsIndex) => {
+                {this.props.filteredTrialTemplatesData.map((trialTemplate, nsIndex) => {
                   return (
                     <div>
                       <Grid key={nsIndex} container>
@@ -93,7 +93,7 @@ class TemplateList extends React.Component {
                         </Grid>
                         <Grid item>
                           <Typography className={classes.namespace} style={{ fontWeight: 'bold' }}>
-                            {trialTemplate.Namespace}
+                            {trialTemplate.ConfigMapNamespace}
                           </Typography>
                         </Grid>
                         <Grid item xs={12}>
@@ -101,7 +101,7 @@ class TemplateList extends React.Component {
                         </Grid>
                       </Grid>
 
-                      {trialTemplate.ConfigMapsList.map((configMap, cmIndex) => {
+                      {trialTemplate.ConfigMaps.map((configMap, cmIndex) => {
                         return (
                           <div>
                             <Grid key={cmIndex} container>
@@ -118,20 +118,20 @@ class TemplateList extends React.Component {
                               </Grid>
                             </Grid>
 
-                            {configMap.TemplatesList.map((template, templateIndex) => {
+                            {configMap.Templates.map((template, templateIndex) => {
                               return (
                                 <div className={classes.templatesBlock}>
                                   <ExpansionPanel key={templateIndex}>
                                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                                       <Typography className={classes.template}>
-                                        {template.Name}
+                                        {template.Path}
                                       </Typography>
                                     </ExpansionPanelSummary>
                                     <ExpansionPanelDetails>
                                       <TemplatePanel
-                                        namespace={trialTemplate.Namespace}
+                                        configMapNamespace={trialTemplate.ConfigMapNamespace}
                                         configMapName={configMap.ConfigMapName}
-                                        templateName={template.Name}
+                                        configMapPath={template.Path}
                                         templateYaml={template.Yaml}
                                       />
                                     </ExpansionPanelDetails>
@@ -153,7 +153,9 @@ class TemplateList extends React.Component {
               </div>
             ) : (
               <div>
-                <Typography className={classes.namespace}>No Katib Trial Templates</Typography>
+                <Typography className={classes.namespace}>
+                  No ConfigMaps with Katib Trial Templates
+                </Typography>
               </div>
             )}
           </div>
@@ -165,8 +167,8 @@ class TemplateList extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    filteredTrialTemplatesList: state[module].filteredTrialTemplatesList,
-    trialTemplatesList: state[module].trialTemplatesList,
+    filteredTrialTemplatesData: state[module].filteredTrialTemplatesData,
+    trialTemplatesData: state[module].trialTemplatesData,
     loading: state[module].loading,
   };
 };

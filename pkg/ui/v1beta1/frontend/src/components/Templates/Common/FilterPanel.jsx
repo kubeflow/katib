@@ -30,15 +30,18 @@ const styles = theme => ({
 class FilterPanel extends React.Component {
   componentDidMount() {
     this.props.fetchNamespaces();
-    this.props.filterTemplates(this.props.filteredNamespace, this.props.filteredConfigMapName);
+    this.props.filterTemplates(
+      this.props.filteredConfigMapNamespace,
+      this.props.filteredConfigMapName,
+    );
   }
 
-  onNamespaceChange = event => {
+  onConfigMapNamespaceChange = event => {
     this.props.filterTemplates(event.target.value, this.props.filteredConfigMapName);
   };
 
   onConfigMapNameChange = event => {
-    this.props.filterTemplates(this.props.filteredNamespace, event.target.value);
+    this.props.filterTemplates(this.props.filteredConfigMapNamespace, event.target.value);
   };
 
   render() {
@@ -47,10 +50,10 @@ class FilterPanel extends React.Component {
     return (
       <div>
         <FormControl variant="outlined">
-          <InputLabel>Namespace</InputLabel>
+          <InputLabel>ConfigMap Namespace</InputLabel>
           <Select
-            value={this.props.filteredNamespace}
-            onChange={this.onNamespaceChange}
+            value={this.props.filteredConfigMapNamespace}
+            onChange={this.onConfigMapNamespaceChange}
             className={classes.selectBox}
           >
             {this.props.namespaces.map((namespace, i) => {
@@ -78,7 +81,7 @@ class FilterPanel extends React.Component {
 const mapStateToProps = state => {
   return {
     namespaces: state[generalModule].namespaces,
-    filteredNamespace: state[module].filteredNamespace,
+    filteredConfigMapNamespace: state[module].filteredConfigMapNamespace,
     filteredConfigMapName: state[module].filteredConfigMapName,
   };
 };

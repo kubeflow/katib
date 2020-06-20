@@ -49,8 +49,8 @@ func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
 }
 
-func (k *KatibUIHandler) getTrialTemplatesViewList() ([]TrialTemplatesView, error) {
-	trialTemplatesViewList := make([]TrialTemplatesView, 0)
+func (k *KatibUIHandler) getTrialTemplatesViewList() ([]TrialTemplatesDataView, error) {
+	trialTemplatesDataView := make([]TrialTemplatesDataView, 0)
 
 	// Get all available namespaces
 	namespaces, err := k.getAvailableNamespaces()
@@ -68,10 +68,10 @@ func (k *KatibUIHandler) getTrialTemplatesViewList() ([]TrialTemplatesView, erro
 		}
 
 		if len(trialTemplatesConfigMapList.Items) != 0 {
-			trialTemplatesViewList = append(trialTemplatesViewList, getTrialTemplatesView(trialTemplatesConfigMapList))
+			trialTemplatesDataView = append(trialTemplatesDataView, getTrialTemplatesView(trialTemplatesConfigMapList))
 		}
 	}
-	return trialTemplatesViewList, nil
+	return trialTemplatesDataView, nil
 }
 
 func (k *KatibUIHandler) getAvailableNamespaces() ([]string, error) {
@@ -89,40 +89,40 @@ func (k *KatibUIHandler) getAvailableNamespaces() ([]string, error) {
 	return namespaces, nil
 }
 
-func getTrialTemplatesView(templatesConfigMapList *apiv1.ConfigMapList) TrialTemplatesView {
+func getTrialTemplatesView(templatesConfigMapList *apiv1.ConfigMapList) TrialTemplatesDataView {
 
-	trialTemplateView := TrialTemplatesView{
-		Namespace:      templatesConfigMapList.Items[0].ObjectMeta.Namespace,
-		ConfigMapsList: []ConfigMapsList{},
+	trialTemplatesDataView := TrialTemplatesDataView{
+		ConfigMapNamespace: templatesConfigMapList.Items[0].ObjectMeta.Namespace,
+		ConfigMaps:         []ConfigMap{},
 	}
 	for _, configMap := range templatesConfigMapList.Items {
-		configMapList := ConfigMapsList{
+		newConfigMap := ConfigMap{
 			ConfigMapName: configMap.ObjectMeta.Name,
-			TemplatesList: []TemplatesList{},
+			Templates:     []Template{},
 		}
 		for key := range configMap.Data {
-			templatesList := TemplatesList{
-				Name: key,
+			newTemplate := Template{
+				Path: key,
 				Yaml: configMap.Data[key],
 			}
-			configMapList.TemplatesList = append(configMapList.TemplatesList, templatesList)
+			newConfigMap.Templates = append(newConfigMap.Templates, newTemplate)
 		}
 
-		trialTemplateView.ConfigMapsList = append(trialTemplateView.ConfigMapsList, configMapList)
+		trialTemplatesDataView.ConfigMaps = append(trialTemplatesDataView.ConfigMaps, newConfigMap)
 	}
 
-	return trialTemplateView
+	return trialTemplatesDataView
 }
 
 func (k *KatibUIHandler) updateTrialTemplates(
-	edittedNamespace,
-	edittedConfigMapName,
-	edittedName,
-	edittedYaml,
-	currentName,
-	actionType string) ([]TrialTemplatesView, error) {
+	updatedConfigMapNamespace,
+	updatedConfigMapName,
+	configMapPath,
+	updatedConfigMapPath,
+	updatedTemplateYaml,
+	actionType string) ([]TrialTemplatesDataView, error) {
 
-	templates, err := k.katibClient.GetConfigMap(edittedConfigMapName, edittedNamespace)
+	templates, err := k.katibClient.GetConfigMap(updatedConfigMapName, updatedConfigMapNamespace)
 	if err != nil {
 		log.Printf("GetConfigMap failed: %v", err)
 		return nil, err
@@ -131,21 +131,21 @@ func (k *KatibUIHandler) updateTrialTemplates(
 	if actionType == ActionTypeAdd {
 		if len(templates) == 0 {
 			templates = make(map[string]string)
-			templates[edittedName] = edittedYaml
+			templates[updatedConfigMapPath] = updatedTemplateYaml
 		} else {
-			templates[edittedName] = edittedYaml
+			templates[updatedConfigMapPath] = updatedTemplateYaml
 		}
 	} else if actionType == ActionTypeEdit {
-		delete(templates, currentName)
-		templates[edittedName] = edittedYaml
+		delete(templates, configMapPath)
+		templates[updatedConfigMapPath] = updatedTemplateYaml
 	} else if actionType == ActionTypeDelete {
-		delete(templates, edittedName)
+		delete(templates, updatedConfigMapPath)
 	}
 
 	templatesConfigMap := &apiv1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      edittedConfigMapName,
-			Namespace: edittedNamespace,
+			Name:      updatedConfigMapName,
+			Namespace: updatedConfigMapNamespace,
 			Labels:    TrialTemplateLabel,
 		},
 		Data: templates,

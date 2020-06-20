@@ -12,7 +12,7 @@ import CommonParametersMeta from './Params/CommonMeta';
 import CommonParametersSpec from './Params/CommonSpec';
 import Objective from './Params/Objective';
 import Algorithm from './Params/Algorithm';
-import TrialSpecParam from './Params/Trial';
+import TrialTemplate from '../../Common/Create/Params/Trial/TrialTemplate';
 import NASConfig from './Params/NASConfig';
 
 import { submitNASJob } from '../../../actions/nasCreateActions';
@@ -210,13 +210,12 @@ const NASParameters = props => {
     data.spec.metricsCollectorSpec = newMCSpec;
 
     data.spec.trialTemplate = {
-      goTemplate: {
-        templateSpec: {
-          configMapName: props.templateConfigMapName,
-          configMapNamespace: props.templateNamespace,
-          templatePath: props.templateName,
-        },
+      configMap: {
+        configMapNamespace: props.templateConfigMapNamespace,
+        configMapName: props.templateConfigMapName,
+        templatePath: props.templateConfigMapPath,
       },
+      trialParameters: props.trialParameters,
     };
 
     props.submitNASJob(data);
@@ -239,8 +238,8 @@ const NASParameters = props => {
       <NASConfig />
       {SectionInTypography('Metrics Collector Spec', classes)}
       <MetricsCollectorSpec jobType={constants.JOB_TYPE_NAS} />
-      {SectionInTypography('Trial Spec', classes)}
-      <TrialSpecParam />
+      {SectionInTypography('Trial Template Spec', classes)}
+      <TrialTemplate />
       <div className={classes.submit}>
         <Button
           variant="contained"
@@ -256,34 +255,40 @@ const NASParameters = props => {
 };
 
 // TODO: think of a better way of passing those
-const mapStateToProps = state => ({
-  commonParametersMetadata: state[module].commonParametersMetadata,
-  commonParametersSpec: state[module].commonParametersSpec,
-  objective: state[module].objective,
-  additionalMetricNames: state[module].additionalMetricNames,
-  algorithmName: state[module].algorithmName,
-  algorithmSettings: state[module].algorithmSettings,
-  numLayers: state[module].numLayers,
-  inputSize: state[module].inputSize,
-  outputSize: state[module].outputSize,
-  operations: state[module].operations,
-  templateNamespace: state[generalModule].templateNamespace,
-  templateConfigMapName: state[generalModule].templateConfigMapName,
-  templateName: state[generalModule].templateName,
-  trial: state[module].trial,
-  trialNamespace: state[module].trialNamespace,
-  mcSpec: state[module].mcSpec,
-  mcCustomContainerYaml: state[module].mcCustomContainerYaml,
-});
+const mapStateToProps = state => {
+  let templatesData = state[generalModule].trialTemplatesData;
+  let templateCMNamespace = '';
+  let templateCMName = '';
+  let templateCMPath = '';
 
-//TODO: Added validation and remove it
-// NASParameters.propTypes = {
-//     numLayers: PropTypes.number,
-//     trial: PropTypes.string,
-//     requestNumber: PropTypes.number,
-//     suggestionAlgorithm: PropTypes.string,
-//     metricsName: PropTypes.arrayOf(PropTypes.string),
-// }
+  if (state[generalModule].configMapNamespaceIndex !== -1) {
+    let nsData = templatesData[state[generalModule].configMapNamespaceIndex];
+    let nameData = nsData.ConfigMaps[state[generalModule].configMapNameIndex];
+    let pathData = nameData.Templates[state[generalModule].configMapPathIndex];
+
+    templateCMNamespace = nsData.ConfigMapNamespace;
+    templateCMName = nameData.ConfigMapName;
+    templateCMPath = pathData.Path;
+  }
+  return {
+    commonParametersMetadata: state[module].commonParametersMetadata,
+    commonParametersSpec: state[module].commonParametersSpec,
+    objective: state[module].objective,
+    additionalMetricNames: state[module].additionalMetricNames,
+    algorithmName: state[module].algorithmName,
+    algorithmSettings: state[module].algorithmSettings,
+    numLayers: state[module].numLayers,
+    inputSize: state[module].inputSize,
+    outputSize: state[module].outputSize,
+    operations: state[module].operations,
+    templateConfigMapNamespace: templateCMNamespace,
+    templateConfigMapName: templateCMName,
+    templateConfigMapPath: templateCMPath,
+    trialParameters: state[generalModule].trialParameters,
+    mcSpec: state[module].mcSpec,
+    mcCustomContainerYaml: state[module].mcCustomContainerYaml,
+  };
+};
 
 export default connect(mapStateToProps, { submitNASJob, validationError })(
   withStyles(styles)(NASParameters),

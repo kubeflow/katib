@@ -18,16 +18,20 @@ const initialState = {
   suggestion: {},
   dialogSuggestionOpen: false,
 
-  templateNamespace: '',
-  templateConfigMapName: '',
-  templateName: '',
-  trialTemplatesList: [],
-  currentTemplateConfigMapsList: [],
-  currentTemplateNamesList: [],
+  trialTemplatesData: [],
+
+  configMapNamespaceIndex: -1,
+  configMapNameIndex: -1,
+  configMapPathIndex: -1,
+
+  trialParameters: [],
+
   mcKindsList: ['StdOut', 'File', 'TensorFlowEvent', 'PrometheusMetric', 'Custom', 'None'],
   mcFileSystemKindsList: ['No File System', 'File', 'Directory'],
   mcURISchemesList: ['HTTP', 'HTTPS'],
 };
+
+const templateParameterRegex = '\\{trialParameters\\..+?\\}';
 
 const generalReducer = (state = initialState, action) => {
   switch (action.type) {
@@ -163,89 +167,111 @@ const generalReducer = (state = initialState, action) => {
         dialogSuggestionOpen: false,
       };
     case templateActions.FETCH_TRIAL_TEMPLATES_SUCCESS:
-      let templates = action.trialTemplatesList;
+      let trialTemplatesData = action.trialTemplatesData;
 
-      let configMapNames = templates[0].ConfigMapsList.map(configMap => configMap.ConfigMapName);
+      let configMapNamespaceIndex = -1;
+      let configMapNameIndex = -1;
+      let configMapPathIndex = -1;
 
-      let templateNames = templates[0].ConfigMapsList[0].TemplatesList.map(
-        template => template.Name,
-      );
-
-      return {
-        ...state,
-        trialTemplatesList: templates,
-        templateNamespace: templates[0].Namespace,
-        templateConfigMapName: templates[0].ConfigMapsList[0].ConfigMapName,
-        templateName: templates[0].ConfigMapsList[0].TemplatesList[0].Name,
-        currentTemplateConfigMapsList: configMapNames,
-        currentTemplateNamesList: templateNames,
-      };
-
-    case actions.FILTER_TEMPLATES_EXPERIMENT:
-      switch (action.trialConfigMapName) {
-        // Case when we change namespace
-        case '':
-          // Get Namespace index
-          let nsIndex = state.trialTemplatesList.findIndex(function(trialTemplate, i) {
-            return trialTemplate.Namespace === action.trialNamespace;
-          });
-
-          // Get new ConfigMapNames List
-          configMapNames = state.trialTemplatesList[nsIndex].ConfigMapsList.map(
-            configMap => configMap.ConfigMapName,
-          );
-
-          // Get new Template Names List
-          templateNames = state.trialTemplatesList[nsIndex].ConfigMapsList[0].TemplatesList.map(
-            template => template.Name,
-          );
-
-          return {
-            ...state,
-            templateNamespace: action.trialNamespace,
-            templateConfigMapName: configMapNames[0],
-            templateName: templateNames[0],
-            currentTemplateConfigMapsList: configMapNames,
-            currentTemplateNamesList: templateNames,
-          };
-        // Case when we change configMap
-        default:
-          // Get Namespace index
-          nsIndex = state.trialTemplatesList.findIndex(function(trialTemplate, i) {
-            return trialTemplate.Namespace === action.trialNamespace;
-          });
-
-          // Get ConfigMap index
-          let cmIndex = state.trialTemplatesList[nsIndex].ConfigMapsList.findIndex(function(
-            configMap,
-            i,
-          ) {
-            return configMap.ConfigMapName === action.trialConfigMapName;
-          });
-
-          // Get new Template Names List
-          templateNames = state.trialTemplatesList[nsIndex].ConfigMapsList[
-            cmIndex
-          ].TemplatesList.map(template => template.Name);
-
-          return {
-            ...state,
-            templateNamespace: action.trialNamespace,
-            templateConfigMapName: action.trialConfigMapName,
-            templateName: templateNames[0],
-            currentTemplateNamesList: templateNames,
-          };
+      if (
+        trialTemplatesData.length > 0 &&
+        trialTemplatesData[0].ConfigMaps[0].Templates.length > 0
+      ) {
+        configMapNamespaceIndex = 0;
+        configMapNameIndex = 0;
+        configMapPathIndex = 0;
       }
-    case actions.CHANGE_TEMPLATE_NAME:
+
+      // Get Parameter names from ConfigMap for Trial parameters
+      let yaml = trialTemplatesData[0].ConfigMaps[0].Templates[0].Yaml;
+      let trialParameters = [];
+      let trialParameterNames = [];
+
+      let matchStr = [...yaml.matchAll(templateParameterRegex)];
+      matchStr.forEach(param => {
+        let newParameter = param[0].slice(param[0].indexOf('.') + 1, param[0].indexOf('}'));
+        if (!trialParameterNames.includes(newParameter)) {
+          trialParameterNames.push(newParameter);
+          trialParameters.push({
+            name: newParameter,
+            reference: '',
+            description: '',
+          });
+        }
+      });
+
       return {
         ...state,
-        templateName: action.templateName,
+        trialTemplatesData: trialTemplatesData,
+        configMapNamespaceIndex: configMapNamespaceIndex,
+        configMapNameIndex: configMapNameIndex,
+        configMapPathIndex: configMapPathIndex,
+        trialParameters: trialParameters,
+      };
+    case actions.FILTER_TEMPLATES_EXPERIMENT:
+      let newNamespaceIndex = 0;
+      let newNameIndex = 0;
+      let newPathIndex = 0;
+
+      if (action.configMapNamespaceIndex !== state.configMapNamespaceIndex) {
+        newNamespaceIndex = action.configMapNamespaceIndex;
+      } else if (action.configMapNameIndex !== state.configMapNameIndex) {
+        newNamespaceIndex = action.configMapNamespaceIndex;
+        newNameIndex = action.configMapNameIndex;
+      } else {
+        newNamespaceIndex = action.configMapNamespaceIndex;
+        newNameIndex = action.configMapNameIndex;
+        newPathIndex = action.configMapPathIndex;
+      }
+
+      // Get Parameter names from ConfigMap for Trial parameters
+      // Change only if any ConfigMap information has been changed
+      trialParameters = state.trialParameters.slice();
+      if (
+        newNamespaceIndex !== state.configMapNamespaceIndex ||
+        newNameIndex !== state.configMapNameIndex ||
+        newPathIndex !== state.configMapPathIndex
+      ) {
+        trialTemplatesData = state.trialTemplatesData;
+        yaml =
+          trialTemplatesData[newNamespaceIndex].ConfigMaps[newNameIndex].Templates[newPathIndex]
+            .Yaml;
+        trialParameterNames = [];
+        trialParameters = [];
+        matchStr = [...yaml.matchAll(templateParameterRegex)];
+        matchStr.forEach(param => {
+          let newParameter = param[0].slice(param[0].indexOf('.') + 1, param[0].indexOf('}'));
+          if (!trialParameterNames.includes(newParameter)) {
+            trialParameterNames.push(newParameter);
+            trialParameters.push({
+              name: newParameter,
+              reference: '',
+              description: '',
+            });
+          }
+        });
+      }
+      return {
+        ...state,
+        configMapNamespaceIndex: newNamespaceIndex,
+        configMapNameIndex: newNameIndex,
+        configMapPathIndex: newPathIndex,
+        trialParameters: trialParameters,
       };
     case actions.VALIDATION_ERROR:
       return {
         ...state,
         snackOpen: true,
         snackText: action.message,
+      };
+    case actions.EDIT_TRIAL_PARAMETERS:
+      let newParams = state.trialParameters.slice();
+      newParams[action.index].name = action.name;
+      newParams[action.index].reference = action.reference;
+      newParams[action.index].description = action.description;
+      return {
+        ...state,
+        trialParameters: newParams,
       };
     default:
       return state;
