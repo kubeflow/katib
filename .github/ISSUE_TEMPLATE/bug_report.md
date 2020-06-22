@@ -19,7 +19,7 @@ about: Tell us about a problem you are experiencing
 
 **Environment:**
 
-- Kubeflow version:
-- Minikube version:
+- Kubeflow version (`kfctl version`):
+- Minikube version (`minikube version`):
 - Kubernetes version: (use `kubectl version`):
 - OS (e.g. from `/etc/os-release`):
