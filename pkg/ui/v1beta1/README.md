@@ -10,9 +10,9 @@ We are using [Material UI](https://material-ui.com/) to design frontend. Try to 
 
 1. You can find `Dockerfile` and file to serve the UI: `main.go` under [cmd/ui/v1beta1](https://github.com/kubeflow/katib/tree/master/cmd/ui/v1beta1).
 
-2. You can Go backend find under [pkg/ui/v1beta1](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1).
+1. You can Go backend find under [pkg/ui/v1beta1](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1).
 
-3. You can find React frontend under [pkg/ui/v1beta1/frontend](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1/frontend).
+1. You can find React frontend under [pkg/ui/v1beta1/frontend](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1/frontend).
 
 ## Requirements
 
@@ -30,9 +30,9 @@ While development you have different ways to run Katib UI.
 
 1. Clone the repository.
 
-2. Go to `/frontend` folder.
+1. Go to `/frontend` folder.
 
-3. Run `npm install` to install all dependencies.
+1. Run `npm install` to install all dependencies.
 
 It will create `/frontend/node_modules` folder with all dependencies from `package.json`. If you want to add new package, edit `/frontend/package.json` file with new dependency.
 
@@ -48,19 +48,29 @@ You can serve Katib UI locally. To make it you need to follow these steps:
 
    If your `node` memory limit is not enough to build the frontend, you may see this error while building: `FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory`. To fix it, you can try to increase `node` memory limit. For that, under `/frontend` folder run `node ./node_modules/.bin/react-scripts --max-old-space-size=4096 build` to increase memory limit up to 4 Gb and generate `/frontend/build`.
 
-2. Go to `cmd/ui/v1beta1`.
+1. Run `kubectl port-forward svc/katib-db-manager 6789 -n kubeflow` to expose `katib-db-manager` service to external access. You can use [different ways](https://kubernetes.io/docs/tasks/access-application-cluster/) to get access to Kubernetes service. After exposing service, you should be able to receive information by running `wget <external-ip>:6789`. In case of port-forwarding, you can run `wget localhost:6789`.
 
-3. Run `main.go` file with appropriate flags. For example, if you clone Katib repository to `/home` folder, run this command:
+1. Go to `cmd/ui/v1beta1`.
 
-```
-go run main.go --build-dir=/home/katib/pkg/ui/v1beta1/frontend/build --port=8080
-```
+1. Run `main.go` file with appropriate flags, where:
+
+   - `--build-dir` - builded frontend directory.
+   - `--port` - port to access Katib UI.
+   - `--db-manager-address` - Katib DB manager external IP address.
+
+   For example, if you clone Katib repository to `/home` folder and use port-forwarding to expose `katib-db-manager`, run this command:
+
+   ```
+   go run main.go --build-dir=/home/katib/pkg/ui/v1beta1/frontend/build --port=8080 --db-manager-address=localhost:6789
+   ```
 
 After that, you can access the UI using this URL: `http://localhost:8080/katib/`.
 
 ## Production
 
-To run Katib UI in Production, after all changes in frontend and backend, you need to create an image for the UI. Under `katib` repository run this: `docker build . -f cmd/ui/v1beta1/Dockerfile -t <name of your image>` to build image. You can modify UI [deployment](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/ui/deployment.yaml#L24) with your new image. After this, follow [these steps](https://www.kubeflow.org/docs/components/hyperparameter-tuning/hyperparameter/#accessing-the-katib-ui) to access Katib UI.
+To run Katib UI in Production, after all changes in frontend and backend, you need to create an image for the UI. Under `katib` repository run this: `docker build . -f cmd/ui/v1beta1/Dockerfile -t <name of your image>` to build image. If Docker resources are not enough to build the frontend, you can have `node` out of memory error. You can increase Docker resources or modify [`npm run build`](https://github.com/kubeflow/katib/blob/master/cmd/ui/v1beta1/Dockerfile#L5) command as detailed [above](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1#serve-ui-frontend-and-backend) at step 1.
+
+After that, you can modify UI [deployment](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/ui/deployment.yaml#L24) with your new image. Then, follow [these steps](https://www.kubeflow.org/docs/components/hyperparameter-tuning/hyperparameter/#accessing-the-katib-ui) to access Katib UI.
 
 ## Code style
 

@@ -12,23 +12,24 @@ import (
 
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
-	common_v1beta1 "github.com/kubeflow/katib/pkg/common/v1beta1"
+
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
 )
 
-func NewKatibUIHandler() *KatibUIHandler {
+func NewKatibUIHandler(dbManagerAddr string) *KatibUIHandler {
 	kclient, err := katibclient.NewClient(client.Options{})
 	if err != nil {
 		log.Printf("NewClient for Katib failed: %v", err)
 		panic(err)
 	}
 	return &KatibUIHandler{
-		katibClient: kclient,
+		katibClient:   kclient,
+		dbManagerAddr: dbManagerAddr,
 	}
 }
 
 func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1beta1.ManagerClient) {
-	conn, err := grpc.Dial(common_v1beta1.GetDBManagerAddr(), grpc.WithInsecure())
+	conn, err := grpc.Dial(k.dbManagerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Dial to GRPC failed: %v", err)
 		return nil, nil
