@@ -16,7 +16,7 @@ import Typography from '@material-ui/core/Typography';
 
 import { closeDialog, editTemplate, changeTemplate } from '../../../actions/templateActions';
 
-const module = 'template';
+import { TEMPLATE_MODULE } from '../../../constants/constants';
 
 const styles = theme => ({
   header: {
@@ -125,12 +125,12 @@ class EditDialog extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    editOpen: state[module].editOpen,
-    updatedConfigMapNamespace: state[module].updatedConfigMapNamespace,
-    updatedConfigMapName: state[module].updatedConfigMapName,
-    configMapPath: state[module].configMapPath,
-    updatedConfigMapPath: state[module].updatedConfigMapPath,
-    updatedTemplateYaml: state[module].updatedTemplateYaml,
+    editOpen: state[TEMPLATE_MODULE].editOpen,
+    updatedConfigMapNamespace: state[TEMPLATE_MODULE].updatedConfigMapNamespace,
+    updatedConfigMapName: state[TEMPLATE_MODULE].updatedConfigMapName,
+    configMapPath: state[TEMPLATE_MODULE].configMapPath,
+    updatedConfigMapPath: state[TEMPLATE_MODULE].updatedConfigMapPath,
+    updatedTemplateYaml: state[TEMPLATE_MODULE].updatedTemplateYaml,
   };
 };
 

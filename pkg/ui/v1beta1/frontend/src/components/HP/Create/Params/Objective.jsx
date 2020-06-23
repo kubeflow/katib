@@ -23,7 +23,7 @@ import {
   deleteMetrics,
 } from '../../../../actions/hpCreateActions';
 
-const module = 'hpCreate';
+import { HP_CREATE_MODULE } from '../../../../constants/constants';
 
 const useStyles = makeStyles({
   textField: {
@@ -166,9 +166,9 @@ const Objective = props => {
 
 const mapStateToProps = state => {
   return {
-    allObjectiveTypes: state[module].allObjectiveTypes,
-    objective: state[module].objective,
-    additionalMetricNames: state[module].additionalMetricNames,
+    allObjectiveTypes: state[HP_CREATE_MODULE].allObjectiveTypes,
+    objective: state[HP_CREATE_MODULE].objective,
+    additionalMetricNames: state[HP_CREATE_MODULE].additionalMetricNames,
   };
 };
 

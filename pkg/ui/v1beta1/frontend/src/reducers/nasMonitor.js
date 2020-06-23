@@ -20,21 +20,21 @@ const initialState = {
 const nasMonitorReducer = (state = initialState, action) => {
   switch (action.type) {
     case actions.FILTER_JOBS:
-      let jobs = state.jobsList.slice();
-      let newList = jobs.filter(
+      var jobs = state.jobsList.slice();
+      var newList = jobs.filter(
         job =>
           job.name.includes(action.experimentName) &&
-          (job.namespace == action.experimentNamespace ||
-            action.experimentNamespace == 'All namespaces'),
+          (job.namespace === action.experimentNamespace ||
+            action.experimentNamespace === 'All namespaces'),
       );
-      let types = Object.assign({}, state.filterType);
+      var types = Object.assign({}, state.filterType);
       var typeKeys = Object.keys(types);
 
       var filters = typeKeys.filter(key => {
         return types[key];
       });
 
-      let filteredJobs = newList.filter(job => filters.includes(job.status));
+      var filteredJobs = newList.filter(job => filters.includes(job.status));
 
       return {
         ...state,
@@ -47,9 +47,9 @@ const nasMonitorReducer = (state = initialState, action) => {
       newList = jobs.filter(
         job =>
           job.name.includes(state.experimentName) &&
-          (job.namespace == state.experimentNamespace ||
-            state.experimentNamespace == 'All namespaces' ||
-            state.experimentNamespace.length == 0),
+          (job.namespace === state.experimentNamespace ||
+            state.experimentNamespace === 'All namespaces' ||
+            state.experimentNamespace.length === 0),
       );
       types = Object.assign({}, state.filterType);
       types[action.filter] = action.checked;
@@ -78,8 +78,8 @@ const nasMonitorReducer = (state = initialState, action) => {
         job =>
           filters.includes(job.status) &&
           job.name.includes(state.experimentName) &&
-          (job.namespace == state.experimentNamespace ||
-            state.experimentNamespace == 'All namespaces'),
+          (job.namespace === state.experimentNamespace ||
+            state.experimentNamespace === 'All namespaces'),
       );
       return {
         ...state,

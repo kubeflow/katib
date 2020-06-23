@@ -23,7 +23,7 @@ import {
   deleteAlgorithmSetting,
 } from '../../../../actions/nasCreateActions';
 
-const module = 'nasCreate';
+import { NAS_CREATE_MODULE } from '../../../../constants/constants';
 
 const useStyles = makeStyles({
   textField: {
@@ -157,9 +157,9 @@ const Algorithm = props => {
 
 const mapStateToProps = state => {
   return {
-    algorithmName: state[module].algorithmName,
-    allAlgorithms: state[module].allAlgorithms,
-    algorithmSettings: state[module].algorithmSettings,
+    algorithmName: state[NAS_CREATE_MODULE].algorithmName,
+    allAlgorithms: state[NAS_CREATE_MODULE].allAlgorithms,
+    algorithmSettings: state[NAS_CREATE_MODULE].algorithmSettings,
   };
 };
 

@@ -18,11 +18,10 @@ import SearchIcon from '@material-ui/icons/Search';
 import SettingsIcon from '@material-ui/icons/Settings';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import InfoIcon from '@material-ui/icons/Info';
 
 import { toggleMenu } from '../../actions/generalActions';
 
-const module = 'general';
+const generalModule = 'general';
 
 const useStyles = makeStyles({
   list: {
@@ -177,7 +176,7 @@ const Menu = props => {
 
 const mapStateToProps = state => {
   return {
-    menuOpen: state[module].menuOpen,
+    menuOpen: state[generalModule].menuOpen,
   };
 };
 

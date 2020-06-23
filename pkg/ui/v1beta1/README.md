@@ -1,5 +1,6 @@
 # Katib User Interface
 
+`FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory`
 This is the source code for the Katib UI. Current version of Katib UI is v1beta1. On the official Kubeflow website [here](https://www.kubeflow.org/docs/components/hyperparameter-tuning/experiment/#running-the-experiment-from-the-katib-ui) you can find information how to use Katib UI.
 We are using [React](https://reactjs.org/) framework to create frontend and Go as a backend.
 
@@ -7,11 +8,11 @@ We are using [Material UI](https://material-ui.com/) to design frontend. Try to 
 
 ## Folder structure
 
-1. `Dockerfile` and file to serve the UI `main.go` you can find under [cmd/ui/v1beta1](https://github.com/kubeflow/katib/tree/master/cmd/ui/v1beta1).
+1. You can find `Dockerfile` and file to serve the UI: `main.go` under [cmd/ui/v1beta1](https://github.com/kubeflow/katib/tree/master/cmd/ui/v1beta1).
 
-2. Go backend you can find under [pkg/ui/v1beta1](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1).
+2. You can Go backend find under [pkg/ui/v1beta1](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1).
 
-3. React frontend you can find under [pkg/ui/v1beta1/frontend](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1/frontend).
+3. You can find React frontend under [pkg/ui/v1beta1/frontend](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1/frontend).
 
 ## Requirements
 
@@ -19,7 +20,7 @@ To make changes to the UI you need to install:
 
 - Tools, defined [here](https://github.com/kubeflow/katib/blob/master/docs/developer-guide.md#requirements).
 
-- `Node` (10.13 or later) and `npm` (6.13 or later). You can find [here](https://nodejs.org/en/download/) how to download it.
+- `node` (v12 or later) and `npm`. Recommended to install `node` and `npm` using [`nvm`](https://github.com/nvm-sh/nvm). After installing `nvm`, you can run `nvm install 12.18.1` to install `node` version 12.18.1 and `nvm use 12.18.1` to use that version.
 
 ## Development
 
@@ -44,6 +45,8 @@ If you want to edit only frontend without connection to the backend, you can sta
 You can serve Katib UI locally. To make it you need to follow these steps:
 
 1. Run `npm run build` under `/frontend` folder. It will create `/frontend/build` directory with optimized production build.
+
+   If your `node` memory limit is not enough to build the frontend, you may see this error while building: `FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory`. To fix it, you can try to increase `node` memory limit. For that, under `/frontend` folder run `node ./node_modules/.bin/react-scripts --max-old-space-size=4096 build` to increase memory limit up to 4 Gb and generate `/frontend/build`.
 
 2. Go to `cmd/ui/v1beta1`.
 

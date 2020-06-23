@@ -20,7 +20,7 @@ import AceEditor from 'react-ace';
 import { filterTemplatesExperiment } from '../../../../../actions/generalActions';
 import { fetchTrialTemplates } from '../../../../../actions/templateActions';
 
-const module = 'general';
+import { GENERAL_MODULE } from '../../../../../constants/constants';
 
 const styles = theme => ({
   help: {
@@ -229,10 +229,10 @@ class TrialConfigMap extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    configMapNamespaceIndex: state[module].configMapNamespaceIndex,
-    configMapNameIndex: state[module].configMapNameIndex,
-    configMapPathIndex: state[module].configMapPathIndex,
-    trialTemplatesData: state[module].trialTemplatesData,
+    configMapNamespaceIndex: state[GENERAL_MODULE].configMapNamespaceIndex,
+    configMapNameIndex: state[GENERAL_MODULE].configMapNameIndex,
+    configMapPathIndex: state[GENERAL_MODULE].configMapPathIndex,
+    trialTemplatesData: state[GENERAL_MODULE].trialTemplatesData,
   };
 };
 

@@ -20,7 +20,7 @@ import DeleteDialog from './DeleteDialog';
 
 import { openDialog } from '../../../actions/templateActions';
 
-const module = 'template';
+import { TEMPLATE_MODULE } from '../../../constants/constants';
 
 const styles = theme => ({
   namespace: {
@@ -167,9 +167,9 @@ class TemplateList extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    filteredTrialTemplatesData: state[module].filteredTrialTemplatesData,
-    trialTemplatesData: state[module].trialTemplatesData,
-    loading: state[module].loading,
+    filteredTrialTemplatesData: state[TEMPLATE_MODULE].filteredTrialTemplatesData,
+    trialTemplatesData: state[TEMPLATE_MODULE].trialTemplatesData,
+    loading: state[TEMPLATE_MODULE].loading,
   };
 };
 

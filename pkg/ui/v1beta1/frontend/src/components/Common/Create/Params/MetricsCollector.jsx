@@ -48,9 +48,11 @@ import {
   changeMCCustomContainerNAS,
 } from '../../../../actions/nasCreateActions';
 
-const module = 'general';
-const hpModule = 'hpCreate';
-const nasModule = 'nasCreate';
+import {
+  GENERAL_MODULE,
+  HP_CREATE_MODULE,
+  NAS_CREATE_MODULE,
+} from '../../../../constants/constants';
 
 const styles = theme => ({
   help: {
@@ -114,7 +116,7 @@ class MetricsCollectorSpec extends React.Component {
   };
 
   onMCMetricsFormatChange = index => event => {
-    this.props.jobType == constants.JOB_TYPE_HP
+    this.props.jobType === constants.JOB_TYPE_HP
       ? this.props.changeMCMetricsFormatHP(event.target.value, index)
       : this.props.changeMCMetricsFormatNAS(event.target.value, index);
   };
@@ -313,9 +315,10 @@ class MetricsCollectorSpec extends React.Component {
               </FormControl>
             </Grid>
             {((this.props.jobType === constants.JOB_TYPE_HP &&
-              this.props.mcSpecHP.source.fileSystemPath.kind != constants.MC_FILE_SYSTEM_NO_KIND) ||
+              this.props.mcSpecHP.source.fileSystemPath.kind !==
+                constants.MC_FILE_SYSTEM_NO_KIND) ||
               (this.props.jobType === constants.JOB_TYPE_NAS &&
-                this.props.mcSpecNAS.source.fileSystemPath.kind !=
+                this.props.mcSpecNAS.source.fileSystemPath.kind !==
                   constants.MC_FILE_SYSTEM_NO_KIND)) && (
               <Grid item xs={3}>
                 <TextField
@@ -557,8 +560,8 @@ class MetricsCollectorSpec extends React.Component {
           </Grid>
         </Grid>
         {this.props.jobType === constants.JOB_TYPE_HP &&
-          this.props.mcSpecHP.source != undefined &&
-          this.props.mcSpecHP.source.filter != undefined &&
+          this.props.mcSpecHP.source !== undefined &&
+          this.props.mcSpecHP.source.filter !== undefined &&
           this.props.mcSpecHP.source.filter.metricsFormat.map((format, index) => {
             return (
               <div key={index} className={classes.textsList}>
@@ -586,8 +589,8 @@ class MetricsCollectorSpec extends React.Component {
             );
           })}
         {this.props.jobType === constants.JOB_TYPE_NAS &&
-          this.props.mcSpecNAS.source != undefined &&
-          this.props.mcSpecNAS.source.filter != undefined &&
+          this.props.mcSpecNAS.source !== undefined &&
+          this.props.mcSpecNAS.source.filter !== undefined &&
           this.props.mcSpecNAS.source.filter.metricsFormat.map((format, index) => {
             return (
               <div key={index} className={classes.textsList}>
@@ -621,13 +624,13 @@ class MetricsCollectorSpec extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    mcSpecHP: state[hpModule].mcSpec,
-    mcSpecNAS: state[nasModule].mcSpec,
-    mcCustomContainerYamlHP: state[hpModule].mcCustomContainerYaml,
-    mcCustomContainerYamlNAS: state[nasModule].mcCustomContainerYaml,
-    mcKindsList: state[module].mcKindsList,
-    mcFileSystemKindsList: state[module].mcFileSystemKindsList,
-    mcURISchemesList: state[module].mcURISchemesList,
+    mcSpecHP: state[HP_CREATE_MODULE].mcSpec,
+    mcSpecNAS: state[NAS_CREATE_MODULE].mcSpec,
+    mcCustomContainerYamlHP: state[HP_CREATE_MODULE].mcCustomContainerYaml,
+    mcCustomContainerYamlNAS: state[NAS_CREATE_MODULE].mcCustomContainerYaml,
+    mcKindsList: state[GENERAL_MODULE].mcKindsList,
+    mcFileSystemKindsList: state[GENERAL_MODULE].mcFileSystemKindsList,
+    mcURISchemesList: state[GENERAL_MODULE].mcURISchemesList,
   };
 };
 

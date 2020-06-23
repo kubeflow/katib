@@ -4,7 +4,7 @@ import makeStyles from '@material-ui/styles/makeStyles';
 import { connect } from 'react-redux';
 import Plot from 'react-plotly.js';
 
-const module = 'hpMonitor';
+import { HP_MONITOR_MODULE } from '../../../constants/constants';
 
 const useStyles = makeStyles({
   root: {
@@ -29,7 +29,7 @@ const HPJobPlot = props => {
         let flag = 'number';
         let values = [];
         for (let j = 0; j < data.length; j++) {
-          if (data[j][1] == 'Succeeded') {
+          if (data[j][1] === 'Succeeded') {
             isShowPlot = true;
             let number = Number(data[j][i]);
             if (isNaN(number)) {
@@ -91,7 +91,7 @@ const HPJobPlot = props => {
 };
 
 const mapStateToProps = state => ({
-  jobData: state[module].jobData,
+  jobData: state[HP_MONITOR_MODULE].jobData,
 });
 
 export default connect(mapStateToProps, null)(HPJobPlot);

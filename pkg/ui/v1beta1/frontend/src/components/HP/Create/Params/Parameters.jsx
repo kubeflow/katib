@@ -27,7 +27,7 @@ import {
   deleteListParameter,
 } from '../../../../actions/hpCreateActions';
 
-const module = 'hpCreate';
+import { HP_CREATE_MODULE } from '../../../../constants/constants';
 
 const useStyles = makeStyles({
   textField: {
@@ -226,9 +226,9 @@ const Parameters = props => {
 
 const mapStateToProps = state => {
   return {
-    parameters: state[module].parameters,
-    allParameterTypes: state[module].allParameterTypes,
-    algorithmName: state[module].algorithmName,
+    parameters: state[HP_CREATE_MODULE].parameters,
+    allParameterTypes: state[HP_CREATE_MODULE].allParameterTypes,
+    algorithmName: state[HP_CREATE_MODULE].algorithmName,
   };
 };
 

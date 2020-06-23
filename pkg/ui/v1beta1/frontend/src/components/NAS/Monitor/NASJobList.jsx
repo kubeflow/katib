@@ -17,7 +17,7 @@ import DoneIcon from '@material-ui/icons/Done';
 import DeleteIcon from '@material-ui/icons/Delete';
 import HourglassFullIcon from '@material-ui/icons/HourglassFull';
 
-const module = 'nasMonitor';
+import { NAS_MONITOR_MODULE } from '../../../constants/constants';
 
 const styles = theme => ({
   created: {
@@ -88,7 +88,7 @@ const NASJobList = props => {
 
 const mapStateToProps = state => {
   return {
-    filteredJobsList: state[module].filteredJobsList,
+    filteredJobsList: state[NAS_MONITOR_MODULE].filteredJobsList,
   };
 };
 

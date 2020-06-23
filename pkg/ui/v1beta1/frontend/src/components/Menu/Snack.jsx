@@ -8,7 +8,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { connect } from 'react-redux';
 import { closeSnackbar } from '../../actions/generalActions';
 
-const module = 'general';
+import { GENERAL_MODULE } from '../../constants/constants';
 
 const useStyles = makeStyles({
   close: {
@@ -51,8 +51,8 @@ const Snack = props => {
 
 const mapStateToProps = state => {
   return {
-    snackText: state[module].snackText,
-    snackOpen: state[module].snackOpen,
+    snackText: state[GENERAL_MODULE].snackText,
+    snackOpen: state[GENERAL_MODULE].snackOpen,
   };
 };
 

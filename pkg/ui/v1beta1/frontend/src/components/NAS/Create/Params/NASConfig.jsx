@@ -38,7 +38,7 @@ import {
   deleteListParameter,
 } from '../../../../actions/nasCreateActions';
 
-const module = 'nasCreate';
+import { NAS_CREATE_MODULE } from '../../../../constants/constants';
 
 const useStyles = makeStyles({
   textField: {
@@ -272,7 +272,7 @@ const NASConfig = props => {
                 <Grid item xs={7}>
                   <TextField
                     value={operation.operationType}
-                    classes={classes.textField}
+                    className={classes.textField}
                     onChange={onChangeOperation(opIndex)}
                   />
                 </Grid>
@@ -432,11 +432,11 @@ const NASConfig = props => {
 
 const mapStateToProps = state => {
   return {
-    numLayers: state[module].numLayers,
-    inputSize: state[module].inputSize,
-    outputSize: state[module].outputSize,
-    operations: state[module].operations,
-    allParameterTypes: state[module].allParameterTypes,
+    numLayers: state[NAS_CREATE_MODULE].numLayers,
+    inputSize: state[NAS_CREATE_MODULE].inputSize,
+    outputSize: state[NAS_CREATE_MODULE].outputSize,
+    operations: state[NAS_CREATE_MODULE].operations,
+    allParameterTypes: state[NAS_CREATE_MODULE].allParameterTypes,
   };
 };
 

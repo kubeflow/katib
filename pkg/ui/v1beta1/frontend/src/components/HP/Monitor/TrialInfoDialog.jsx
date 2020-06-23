@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { closeDialogTrial } from '../../../actions/hpMonitorActions';
 import Plot from 'react-plotly.js';
 
-const module = 'hpMonitor';
+import { HP_MONITOR_MODULE } from '../../../constants/constants';
 
 const styles = theme => ({
   header: {
@@ -25,7 +25,7 @@ const TrialInfoDialog = props => {
     let tracks = {};
     for (let i = 0; i < data.length; i++) {
       // Data format should be ["metricName", "time", "value"]
-      if (data[i].length == 3) {
+      if (data[i].length === 3) {
         if (typeof tracks[data[i][0]] !== 'undefined') {
           tracks[data[i][0]].x.push(data[i][1]);
           tracks[data[i][0]].y.push(Number(data[i][2]));
@@ -51,6 +51,7 @@ const TrialInfoDialog = props => {
           hoverinfo: 'x+y',
         });
       }
+      return dataToPlot;
     });
   }
   return (
@@ -85,9 +86,9 @@ const TrialInfoDialog = props => {
 
 const mapStateToProps = state => {
   return {
-    open: state[module].dialogTrialOpen,
-    trialData: state[module].trialData,
-    trialName: state[module].trialName,
+    open: state[HP_MONITOR_MODULE].dialogTrialOpen,
+    trialData: state[HP_MONITOR_MODULE].trialData,
+    trialName: state[HP_MONITOR_MODULE].trialName,
   };
 };
 

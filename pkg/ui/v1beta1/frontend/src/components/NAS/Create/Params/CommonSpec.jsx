@@ -9,7 +9,7 @@ import TextField from '@material-ui/core/TextField';
 
 import { changeSpec } from '../../../../actions/nasCreateActions';
 
-const module = 'nasCreate';
+import { NAS_CREATE_MODULE } from '../../../../constants/constants';
 
 const useStyles = makeStyles({
   textField: {
@@ -66,7 +66,7 @@ const CommonParametersSpec = props => {
 
 const mapStateToProps = state => {
   return {
-    commonParametersSpec: state[module].commonParametersSpec,
+    commonParametersSpec: state[NAS_CREATE_MODULE].commonParametersSpec,
   };
 };
 

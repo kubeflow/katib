@@ -10,7 +10,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 
 import { closeDialog, deleteTemplate } from '../../../actions/templateActions';
 
-const module = 'template';
+import { TEMPLATE_MODULE } from '../../../constants/constants';
 
 const DeleteDialog = props => {
   const submitDeleteTemplate = () => {
@@ -43,10 +43,10 @@ const DeleteDialog = props => {
 
 const mapStateToProps = state => {
   return {
-    deleteOpen: state[module].deleteOpen,
-    updatedConfigMapNamespace: state[module].updatedConfigMapNamespace,
-    updatedConfigMapName: state[module].updatedConfigMapName,
-    updatedConfigMapPath: state[module].updatedConfigMapPath,
+    deleteOpen: state[TEMPLATE_MODULE].deleteOpen,
+    updatedConfigMapNamespace: state[TEMPLATE_MODULE].updatedConfigMapNamespace,
+    updatedConfigMapName: state[TEMPLATE_MODULE].updatedConfigMapName,
+    updatedConfigMapPath: state[TEMPLATE_MODULE].updatedConfigMapPath,
   };
 };
 

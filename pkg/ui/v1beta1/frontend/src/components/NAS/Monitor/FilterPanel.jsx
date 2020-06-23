@@ -15,8 +15,7 @@ import FormControl from '@material-ui/core/FormControl';
 import { filterJobs, changeType, fetchNASJobs } from '../../../actions/nasMonitorActions';
 import { fetchNamespaces } from '../../../actions/generalActions';
 
-const module = 'nasMonitor';
-const generalModule = 'general';
+import { GENERAL_MODULE, NAS_MONITOR_MODULE } from '../../../constants/constants';
 
 const styles = theme => ({
   textField: {
@@ -38,7 +37,7 @@ const styles = theme => ({
 
 class FilterPanel extends React.Component {
   componentDidMount() {
-    if (this.props.globalNamespace != '') {
+    if (this.props.globalNamespace !== '') {
       this.props.filterJobs(this.props.experimentName, this.props.globalNamespace);
     } else {
       this.props.fetchNamespaces();
@@ -124,11 +123,11 @@ class FilterPanel extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    experimentName: state[module].experimentName,
-    experimentNamespace: state[module].experimentNamespace,
-    filterType: state[module].filterType,
-    namespaces: state[generalModule].namespaces,
-    globalNamespace: state[generalModule].globalNamespace,
+    experimentName: state[NAS_MONITOR_MODULE].experimentName,
+    experimentNamespace: state[NAS_MONITOR_MODULE].experimentNamespace,
+    filterType: state[NAS_MONITOR_MODULE].filterType,
+    namespaces: state[GENERAL_MODULE].namespaces,
+    globalNamespace: state[GENERAL_MODULE].globalNamespace,
   };
 };
 

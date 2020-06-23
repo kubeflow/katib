@@ -12,7 +12,7 @@ export const submitYaml = function*() {
     const action = yield take(generalActions.SUBMIT_YAML_REQUEST);
     try {
       let isRightNamespace = false;
-      for (const [index, value] of Object.entries(action.yaml.split('\n'))) {
+      for (const [, value] of Object.entries(action.yaml.split('\n'))) {
         const noSpaceLine = value.replace(/\s/g, '');
         if (noSpaceLine === 'trialTemplate:') {
           break;
@@ -142,13 +142,13 @@ const goSubmitHPJob = function*(postData) {
 
 export const fetchHPJobs = function*() {
   while (true) {
-    const action = yield take(hpMonitorActions.FETCH_HP_JOBS_REQUEST);
+    yield take(hpMonitorActions.FETCH_HP_JOBS_REQUEST);
     try {
       const result = yield call(goFetchHPJobs);
       if (result.status === 200) {
         let data = Object.assign(result.data, {});
         data.map((template, i) => {
-          Object.keys(template).forEach(key => {
+          return Object.keys(template).forEach(key => {
             const value = template[key];
             delete template[key];
             template[key.toLowerCase()] = value;
@@ -373,13 +373,13 @@ const goSubmitNASJob = function*(postData) {
 
 export const fetchNASJobs = function*() {
   while (true) {
-    const action = yield take(nasMonitorActions.FETCH_NAS_JOBS_REQUEST);
+    yield take(nasMonitorActions.FETCH_NAS_JOBS_REQUEST);
     try {
       const result = yield call(goFetchNASJobs);
       if (result.status === 200) {
         let data = Object.assign(result.data, {});
         data.map((template, i) => {
-          Object.keys(template).forEach(key => {
+          return Object.keys(template).forEach(key => {
             const value = template[key];
             delete template[key];
             template[key.toLowerCase()] = value;
@@ -421,7 +421,7 @@ export const fetchNASJobInfo = function*() {
       if (result.status === 200) {
         let data = Object.assign(result.data, {});
         data.map((template, i) => {
-          Object.keys(template).forEach(key => {
+          return Object.keys(template).forEach(key => {
             const value = template[key];
             delete template[key];
             template[key.toLowerCase()] = value;
@@ -460,7 +460,7 @@ const goFetchNASJobInfo = function*(experimentName, namespace) {
 
 export const fetchTrialTemplates = function*() {
   while (true) {
-    const action = yield take(templateActions.FETCH_TRIAL_TEMPLATES_REQUEST);
+    yield take(templateActions.FETCH_TRIAL_TEMPLATES_REQUEST);
     try {
       const result = yield call(goFetchTrialTemplates);
       if (result.status === 200) {
@@ -647,7 +647,7 @@ const goDeleteTemplate = function*(
 
 export const fetchNamespaces = function*() {
   while (true) {
-    const action = yield take(generalActions.FETCH_NAMESPACES_REQUEST);
+    yield take(generalActions.FETCH_NAMESPACES_REQUEST);
     try {
       const result = yield call(goFetchNamespaces);
       if (result.status === 200) {

@@ -13,7 +13,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 
 import { closeDialogSuggestion } from '../../actions/generalActions';
 
-const module = 'general';
+import { GENERAL_MODULE } from '../../constants/constants';
 
 const styles = theme => ({
   header: {
@@ -82,8 +82,8 @@ const SuggestionInfoDialog = props => {
 
 const mapStateToProps = state => {
   return {
-    dialogSuggestionOpen: state[module].dialogSuggestionOpen,
-    suggestion: state[module].suggestion,
+    dialogSuggestionOpen: state[GENERAL_MODULE].dialogSuggestionOpen,
+    suggestion: state[GENERAL_MODULE].suggestion,
   };
 };
 

@@ -10,7 +10,7 @@ import Paper from '@material-ui/core/Paper';
 import { connect } from 'react-redux';
 import { fetchHPJobTrialInfo } from '../../../actions/hpMonitorActions';
 
-const module = 'hpMonitor';
+import { HP_MONITOR_MODULE } from '../../../constants/constants';
 
 const styles = theme => ({
   root: {
@@ -82,7 +82,7 @@ class HPJobTable extends React.Component {
               {data.map((row, id) => (
                 <TableRow key={id}>
                   {row.map((element, index) => {
-                    if (index === 0 && row[1] == 'Succeeded') {
+                    if (index === 0 && row[1] === 'Succeeded') {
                       return (
                         <TableCell
                           className={classes.hover}
@@ -106,9 +106,8 @@ class HPJobTable extends React.Component {
                       } else if (element === 'Failed') {
                         return <TableCell className={classes.failed}>{element}</TableCell>;
                       }
-                    } else {
-                      return <TableCell>{element}</TableCell>;
                     }
+                    return <TableCell>{element}</TableCell>;
                   })}
                 </TableRow>
               ))}
@@ -121,7 +120,7 @@ class HPJobTable extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  jobData: state[module].jobData,
+  jobData: state[HP_MONITOR_MODULE].jobData,
 });
 
 export default connect(mapStateToProps, { fetchHPJobTrialInfo })(withStyles(styles)(HPJobTable));

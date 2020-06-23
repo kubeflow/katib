@@ -167,7 +167,7 @@ const generalReducer = (state = initialState, action) => {
         dialogSuggestionOpen: false,
       };
     case templateActions.FETCH_TRIAL_TEMPLATES_SUCCESS:
-      let trialTemplatesData = action.trialTemplatesData;
+      var trialTemplatesData = action.trialTemplatesData;
 
       let configMapNamespaceIndex = -1;
       let configMapNameIndex = -1;
@@ -183,11 +183,11 @@ const generalReducer = (state = initialState, action) => {
       }
 
       // Get Parameter names from ConfigMap for Trial parameters
-      let yaml = trialTemplatesData[0].ConfigMaps[0].Templates[0].Yaml;
-      let trialParameters = [];
-      let trialParameterNames = [];
+      var yaml = trialTemplatesData[0].ConfigMaps[0].Templates[0].Yaml;
+      var trialParameters = [];
+      var trialParameterNames = [];
 
-      let matchStr = [...yaml.matchAll(templateParameterRegex)];
+      var matchStr = [...yaml.matchAll(templateParameterRegex)];
       matchStr.forEach(param => {
         let newParameter = param[0].slice(param[0].indexOf('.') + 1, param[0].indexOf('}'));
         if (!trialParameterNames.includes(newParameter)) {
