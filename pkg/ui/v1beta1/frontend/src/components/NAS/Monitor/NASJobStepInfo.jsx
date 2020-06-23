@@ -22,7 +22,7 @@ class NASJobStepInfo extends React.Component {
     return (
       <div className={classes.root}>
         <Typography variant={'h5'}>Architecture for Trial: {step.trialname}</Typography>
-        <Graphviz dot={this.props.step.architecture} />
+        <Graphviz dot={this.props.step.architecture} options={{ zoom: true }} />
         <br />
         {step.metricsname.map((metrics, index) => {
           return (
