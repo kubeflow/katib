@@ -18,14 +18,14 @@
     "react-plotly.js": "^2.3.0",
     "react-redux": "^6.0.1",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "^3.4.1",
+    "react-scripts": "3.2.0",
     "redux": "^4.0.1",
     "redux-logger": "^3.0.6",
     "redux-saga": "^1.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts --max_old_space_size=6144 build",
+    "build": "react-scripts build",
     "format:check": "prettier --check 'src/**/*.{jsx,js}' || node scripts/check-format-error.js",
     "format:write": "prettier --write 'src/**/*.{jsx,js}'"
   },
