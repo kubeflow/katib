@@ -25,7 +25,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts --max_old_space_size=4096 build",
+    "build": "react-scripts --max_old_space_size=6144 build",
     "format:check": "prettier --check 'src/**/*.{jsx,js}' || node scripts/check-format-error.js",
     "format:write": "prettier --write 'src/**/*.{jsx,js}'"
   },
