@@ -19,7 +19,6 @@ const styles = theme => ({
 class NASJobStepInfo extends React.Component {
   render() {
     const { step, classes } = this.props;
-    const id = `graph${this.props.id}`;
     return (
       <div className={classes.root}>
         <Typography variant={'h5'}>Architecture for Trial: {step.trialname}</Typography>
