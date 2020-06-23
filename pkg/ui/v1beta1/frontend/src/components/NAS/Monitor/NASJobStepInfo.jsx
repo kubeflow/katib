@@ -2,7 +2,7 @@ import React from 'react';
 import { withStyles } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 
-import * as d3 from 'd3';
+import { Graphviz } from 'graphviz-react';
 
 const styles = theme => ({
   root: {
@@ -15,23 +15,13 @@ const styles = theme => ({
 });
 
 class NASJobStepInfo extends React.Component {
-  componentDidMount() {
-    const id = `graph${this.props.id}`;
-    d3.select(`#${id}`)
-      .graphviz()
-      .renderDot(this.props.step.architecture)
-      .width(640)
-      .height(480)
-      .fit(true);
-  }
-
   render() {
     const { step, classes } = this.props;
     const id = `graph${this.props.id}`;
     return (
       <div className={classes.root}>
         <Typography variant={'h5'}>Architecture for Trial: {step.trialname}</Typography>
-        <div id={id} className={classes.root} />
+        <Graphviz dot={this.props.step.architecture} />
         <br />
         {step.metricsname.map((metrics, index) => {
           return (
