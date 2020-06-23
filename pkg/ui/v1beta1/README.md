@@ -33,7 +33,7 @@ While development you have different ways to run Katib UI.
 
 1. Run `npm install` to install all dependencies.
 
-It creates `/frontend/node_modules` folder with all dependencies from `package.json`. If you want to add new package, run `npm install <package>@<version>`. That should update `/frontend/package.json` and `/frontend/package-lock.json` with the new dependency.
+It creates `/frontend/node_modules` folder with all dependencies from [`package.json`](https://github.com/kubeflow/katib/blob/master/pkg/ui/v1beta1/frontend/package.json). If you want to add new package, run `npm install <package>@<version>`. That should update `/frontend/package.json` and `/frontend/package-lock.json` with the new dependency.
 
 ### Start frontend server
 
@@ -45,7 +45,7 @@ You can serve Katib UI locally. To make it you need to follow these steps:
 
 1. Run `npm run build` under `/frontend` folder. It creates `/frontend/build` directory with optimized production build.
 
-   If your `node` memory limit is not enough to build the frontend, you may see this error while building: `FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory`. To fix it, you can try to increase `node` memory limit. For that, modify [`--max_old_space_size`](https://github.com/kubeflow/katib/blob/master/pkg/ui/v1beta1/frontend/package.json#L28) in `package.json`.
+   If your `node` memory limit is not enough to build the frontend, you may see this error while building: `FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory`. To fix it, you can try to increase `node` memory limit. For that, change [`build`](https://github.com/kubeflow/katib/blob/master/pkg/ui/v1beta1/frontend/package.json#L28) script to `react-scripts --max_old_space_size=4096 build` to increase `node` memory up to 4 Gb.
 
 1. Run `kubectl port-forward svc/katib-db-manager 6789 -n kubeflow` to expose `katib-db-manager` service for external access. You can use [different ways](https://kubernetes.io/docs/tasks/access-application-cluster/) to get external address for Kubernetes service. After exposing service, you should be able to receive information by running `wget <external-ip>:<service-port>`. In case of port-forwarding above, you have to run `wget localhost:6789`.
 
@@ -67,7 +67,7 @@ After that, you can access the UI using this URL: `http://localhost:8080/katib/`
 
 ## Production
 
-To run Katib UI in Production, after all changes in frontend and backend, you need to create an image for the UI. Under `/katib` directory run this: `docker build . -f cmd/ui/v1beta1/Dockerfile -t <name of your image>` to build the image. If Docker resources are not enough to build the frontend, you get `node` out of memory error. You can try to increase Docker resources or modify [`package.json`](https://github.com/kubeflow/katib/blob/master/pkg/ui/v1beta1/frontend/package.json) as detailed [above](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1#serve-ui-frontend-and-backend) at step 1.
+To run Katib UI in Production, after all changes in frontend and backend, you need to create an image for the UI. Under `/katib` directory run this: `docker build . -f cmd/ui/v1beta1/Dockerfile -t <name of your image>` to build the image. If Docker resources are not enough to build the frontend, you get `node` out of memory error. You can try to increase Docker resources or modify `package.json` as detailed [above](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1#serve-ui-frontend-and-backend) at step 1.
 
 After that, you can modify UI [deployment](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/ui/deployment.yaml#L24) with your new image. Then, follow [these steps](https://www.kubeflow.org/docs/components/hyperparameter-tuning/hyperparameter/#accessing-the-katib-ui) to access Katib UI.
 
