@@ -1,11 +1,8 @@
 approvers:
-    - YujiOshima
     - gaocegege
-    - richardsliu
     - hougangliu
     - johnugeorge
     - andreyvelich
 reviewers:
-    - DeeperMind
-    - Akado2009
-    - garganubhav
+    - sperlingxx
+    - c-bata
