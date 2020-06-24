@@ -537,6 +537,23 @@ spec:
 		t.Errorf("ConvertStringToUnstructured failed: %v", err)
 	}
 
+	notDefaultResourceBatchJob := `apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    spec:
+      containers:
+        - resources:
+            limits:
+              nvidia.com/gpu: 1
+            requests:
+              nvidia.com/gpu: 1`
+
+	notDefaultResourceBatchUnstr, err := util.ConvertStringToUnstructured(notDefaultResourceBatchJob)
+	if err != nil {
+		t.Errorf("ConvertStringToUnstructured failed: %v", err)
+	}
+
 	tcs := []struct {
 		RunSpec         *unstructured.Unstructured
 		Err             bool
@@ -580,6 +597,12 @@ spec:
 			RunSpec:         invalidStructurePyTorchJobUnstr,
 			Err:             true,
 			testDescription: "Trial template has invalid PyTorch Job structure",
+		},
+		// Valid case with not default Kubernetes resource (nvidia.com/gpu: 1)
+		{
+			RunSpec:         notDefaultResourceBatchUnstr,
+			Err:             false,
+			testDescription: "Valid case with nvidia.com/gpu resource in Trial template",
 		},
 	}
 
