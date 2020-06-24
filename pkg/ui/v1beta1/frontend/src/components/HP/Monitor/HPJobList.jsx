@@ -18,7 +18,7 @@ import DoneIcon from '@material-ui/icons/Done';
 import DeleteIcon from '@material-ui/icons/Delete';
 import HourglassFullIcon from '@material-ui/icons/HourglassFull';
 
-const module = 'hpMonitor';
+import { HP_MONITOR_MODULE } from '../../../constants/constants';
 
 const styles = theme => ({
   created: {
@@ -89,7 +89,7 @@ const HPJobList = props => {
 
 const mapStateToProps = state => {
   return {
-    filteredJobsList: state[module].filteredJobsList,
+    filteredJobsList: state[HP_MONITOR_MODULE].filteredJobsList,
   };
 };
 

@@ -6,7 +6,7 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 
-import * as constants from '../../constants/constants';
+import { LINK_HP_CREATE, LINK_NAS_CREATE } from '../../constants/constants';
 
 const useStyles = makeStyles({
   root: {
@@ -45,14 +45,14 @@ const Main = props => {
       <Typography variant={'h6'}>Choose type of experiment</Typography>
       <br />
       <Grid container spacing={40} alignContent={'center'}>
-        <Grid item xs={6} className={classes.item} component={Link} to={constants.LINK_HP_CREATE}>
+        <Grid item xs={6} className={classes.item} component={Link} to={LINK_HP_CREATE}>
           <Paper className={classes.block}>
             <Typography variant={'h6'} color={'secondary'}>
               Hyperparameter Tuning
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={6} className={classes.item} component={Link} to={constants.LINK_NAS_CREATE}>
+        <Grid item xs={6} className={classes.item} component={Link} to={LINK_NAS_CREATE}>
           <Paper className={classes.block}>
             <Typography variant={'h6'} color={'secondary'}>
               Neural Architecture Search
@@ -66,6 +66,7 @@ const Main = props => {
         <a
           href="https://www.kubeflow.org/docs/components/hyperparameter-tuning/"
           target="_blank"
+          rel="noopener noreferrer"
           className={classes.link}
         >
           Kubeflow docs
@@ -73,7 +74,12 @@ const Main = props => {
       </Typography>
       <Typography variant={'h6'}>
         To contribute to Katib, visit{' '}
-        <a href="https://github.com/kubeflow/katib/" target="_blank" className={classes.link}>
+        <a
+          href="https://github.com/kubeflow/katib/"
+          rel="noopener noreferrer"
+          target="_blank"
+          className={classes.link}
+        >
           GitHub
         </a>
       </Typography>

@@ -11,8 +11,7 @@ import FormControl from '@material-ui/core/FormControl';
 import { fetchNamespaces } from '../../../actions/generalActions';
 import { filterTemplates } from '../../../actions/templateActions';
 
-const module = 'template';
-const generalModule = 'general';
+import { GENERAL_MODULE, TEMPLATE_MODULE } from '../../../constants/constants';
 
 const styles = theme => ({
   selectBox: {
@@ -80,9 +79,9 @@ class FilterPanel extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    namespaces: state[generalModule].namespaces,
-    filteredConfigMapNamespace: state[module].filteredConfigMapNamespace,
-    filteredConfigMapName: state[module].filteredConfigMapName,
+    namespaces: state[GENERAL_MODULE].namespaces,
+    filteredConfigMapNamespace: state[TEMPLATE_MODULE].filteredConfigMapNamespace,
+    filteredConfigMapName: state[TEMPLATE_MODULE].filteredConfigMapName,
   };
 };
 

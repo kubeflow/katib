@@ -8,21 +8,24 @@ import (
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
+	common_v1beta1 "github.com/kubeflow/katib/pkg/common/v1beta1"
 	ui "github.com/kubeflow/katib/pkg/ui/v1beta1"
 )
 
 var (
-	port, host, buildDir *string
+	port, host, buildDir, dbManagerAddr *string
 )
 
 func init() {
-	port = flag.String("port", "80", "the port to listen to for incoming HTTP connections")
-	host = flag.String("host", "0.0.0.0", "the host to listen to for incoming HTTP connections")
-	buildDir = flag.String("build-dir", "/app/build", "the dir of frontend")
+	port = flag.String("port", "80", "The port to listen to for incoming HTTP connections")
+	host = flag.String("host", "0.0.0.0", "The host to listen to for incoming HTTP connections")
+	buildDir = flag.String("build-dir", "/app/build", "The dir of frontend")
+	dbManagerAddr = flag.String("db-manager-address", common_v1beta1.GetDBManagerAddr(), "The address of Katib DB manager")
 }
+
 func main() {
 	flag.Parse()
-	kuh := ui.NewKatibUIHandler()
+	kuh := ui.NewKatibUIHandler(*dbManagerAddr)
 
 	log.Printf("Serving the frontend dir %s", *buildDir)
 	frontend := http.FileServer(http.Dir(*buildDir))

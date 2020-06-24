@@ -12,8 +12,7 @@ import Typography from '@material-ui/core/Typography';
 import { changeYaml } from '../../../actions/hpCreateActions';
 import { submitYaml } from '../../../actions/generalActions';
 
-const module = 'hpCreate';
-const generalModule = 'general';
+import { GENERAL_MODULE, HP_CREATE_MODULE } from '../../../constants/constants';
 
 const useStyles = makeStyles({
   editor: {
@@ -73,8 +72,8 @@ const YAML = props => {
 
 const mapStateToProps = state => {
   return {
-    currentYaml: state[module].currentYaml,
-    globalNamespace: state[generalModule].globalNamespace,
+    currentYaml: state[HP_CREATE_MODULE].currentYaml,
+    globalNamespace: state[GENERAL_MODULE].globalNamespace,
   };
 };
 

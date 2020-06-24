@@ -23,7 +23,7 @@ import {
   deleteAlgorithmSetting,
 } from '../../../../actions/hpCreateActions';
 
-const module = 'hpCreate';
+import { HP_CREATE_MODULE } from '../../../../constants/constants';
 
 const useStyles = makeStyles({
   textField: {
@@ -156,9 +156,9 @@ const Algorithm = props => {
 
 const mapStateToProps = state => {
   return {
-    algorithmName: state[module].algorithmName,
-    allAlgorithms: state[module].allAlgorithms,
-    algorithmSettings: state[module].algorithmSettings,
+    algorithmName: state[HP_CREATE_MODULE].algorithmName,
+    allAlgorithms: state[HP_CREATE_MODULE].allAlgorithms,
+    algorithmSettings: state[HP_CREATE_MODULE].algorithmSettings,
   };
 };
 

@@ -21,3 +21,10 @@ export const MC_PROMETHEUS_DEFAULT_PATH = '/metrics';
 
 export const LINK_HP_CREATE = '/katib/hp';
 export const LINK_NAS_CREATE = '/katib/nas';
+
+export const GENERAL_MODULE = 'general';
+export const HP_CREATE_MODULE = 'hpCreate';
+export const HP_MONITOR_MODULE = 'hpMonitor';
+export const NAS_CREATE_MODULE = 'nasCreate';
+export const NAS_MONITOR_MODULE = 'nasMonitor';
+export const TEMPLATE_MODULE = 'template';

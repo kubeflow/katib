@@ -17,7 +17,7 @@ import TrialInfoDialog from './TrialInfoDialog';
 import ExperimentInfoDialog from '../../Common/ExperimentInfoDialog';
 import SuggestionInfoDialog from '../../Common/SuggestionInfoDialog';
 
-const module = 'hpMonitor';
+import { HP_MONITOR_MODULE } from '../../../constants/constants';
 
 const styles = theme => ({
   root: {
@@ -112,7 +112,7 @@ class HPJobInfo extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  loading: state[module].loading,
+  loading: state[HP_MONITOR_MODULE].loading,
 });
 
 export default connect(mapStateToProps, { fetchHPJobInfo, fetchExperiment, fetchSuggestion })(

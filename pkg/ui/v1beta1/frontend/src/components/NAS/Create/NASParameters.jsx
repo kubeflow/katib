@@ -21,9 +21,6 @@ import MetricsCollectorSpec from '../../Common/Create/Params/MetricsCollector';
 import { validationError } from '../../../actions/generalActions';
 import * as constants from '../../../constants/constants';
 
-const module = 'nasCreate';
-const generalModule = 'general';
-
 const styles = theme => ({
   root: {
     width: '90%',
@@ -78,13 +75,13 @@ const deCapitalizeFirstLetterAndAppend = (source, destination) => {
   source.map((parameter, i) => {
     let value = Number(parameter.value);
     let name = parameter.name.charAt(0).toLowerCase() + parameter.name.slice(1);
-    destination[name] = isNaN(value) ? parameter.value : value;
+    return (destination[name] = isNaN(value) ? parameter.value : value);
   });
 };
 
 const addAlgorithmSettings = (spec, destination) => {
   spec.map((parameter, i) => {
-    destination.push(parameter);
+    return destination.push(parameter);
   });
 };
 
@@ -103,9 +100,9 @@ const addOperations = (source, destination) => {
         tempParam.feasibleSpace.max = param.max;
         tempParam.feasibleSpace.step = param.step;
       }
-      parameters.push(tempParam);
+      return parameters.push(tempParam);
     });
-    destination.push({
+    return destination.push({
       operationType: operation.operationType,
       parameters: parameters,
     });
@@ -189,14 +186,14 @@ const NASParameters = props => {
     }
 
     // Delete empty source
-    if (newMCSpec.source != undefined && Object.keys(newMCSpec.source).length === 0) {
+    if (newMCSpec.source !== undefined && Object.keys(newMCSpec.source).length === 0) {
       delete newMCSpec.source;
     }
 
     // Add Custom Container YAML to the Metrics Collector
     if (
       newMCSpec.collector.kind === constants.MC_KIND_CUSTOM &&
-      props.mcCustomContainerYaml != ''
+      props.mcCustomContainerYaml !== ''
     ) {
       try {
         let mcCustomContainerJson = jsyaml.load(props.mcCustomContainerYaml);
@@ -256,37 +253,37 @@ const NASParameters = props => {
 
 // TODO: think of a better way of passing those
 const mapStateToProps = state => {
-  let templatesData = state[generalModule].trialTemplatesData;
+  let templatesData = state[constants.GENERAL_MODULE].trialTemplatesData;
   let templateCMNamespace = '';
   let templateCMName = '';
   let templateCMPath = '';
 
-  if (state[generalModule].configMapNamespaceIndex !== -1) {
-    let nsData = templatesData[state[generalModule].configMapNamespaceIndex];
-    let nameData = nsData.ConfigMaps[state[generalModule].configMapNameIndex];
-    let pathData = nameData.Templates[state[generalModule].configMapPathIndex];
+  if (state[constants.GENERAL_MODULE].configMapNamespaceIndex !== -1) {
+    let nsData = templatesData[state[constants.GENERAL_MODULE].configMapNamespaceIndex];
+    let nameData = nsData.ConfigMaps[state[constants.GENERAL_MODULE].configMapNameIndex];
+    let pathData = nameData.Templates[state[constants.GENERAL_MODULE].configMapPathIndex];
 
     templateCMNamespace = nsData.ConfigMapNamespace;
     templateCMName = nameData.ConfigMapName;
     templateCMPath = pathData.Path;
   }
   return {
-    commonParametersMetadata: state[module].commonParametersMetadata,
-    commonParametersSpec: state[module].commonParametersSpec,
-    objective: state[module].objective,
-    additionalMetricNames: state[module].additionalMetricNames,
-    algorithmName: state[module].algorithmName,
-    algorithmSettings: state[module].algorithmSettings,
-    numLayers: state[module].numLayers,
-    inputSize: state[module].inputSize,
-    outputSize: state[module].outputSize,
-    operations: state[module].operations,
+    commonParametersMetadata: state[constants.NAS_CREATE_MODULE].commonParametersMetadata,
+    commonParametersSpec: state[constants.NAS_CREATE_MODULE].commonParametersSpec,
+    objective: state[constants.NAS_CREATE_MODULE].objective,
+    additionalMetricNames: state[constants.NAS_CREATE_MODULE].additionalMetricNames,
+    algorithmName: state[constants.NAS_CREATE_MODULE].algorithmName,
+    algorithmSettings: state[constants.NAS_CREATE_MODULE].algorithmSettings,
+    numLayers: state[constants.NAS_CREATE_MODULE].numLayers,
+    inputSize: state[constants.NAS_CREATE_MODULE].inputSize,
+    outputSize: state[constants.NAS_CREATE_MODULE].outputSize,
+    operations: state[constants.NAS_CREATE_MODULE].operations,
     templateConfigMapNamespace: templateCMNamespace,
     templateConfigMapName: templateCMName,
     templateConfigMapPath: templateCMPath,
-    trialParameters: state[generalModule].trialParameters,
-    mcSpec: state[module].mcSpec,
-    mcCustomContainerYaml: state[module].mcCustomContainerYaml,
+    trialParameters: state[constants.GENERAL_MODULE].trialParameters,
+    mcSpec: state[constants.NAS_CREATE_MODULE].mcSpec,
+    mcCustomContainerYaml: state[constants.NAS_CREATE_MODULE].mcCustomContainerYaml,
   };
 };
 

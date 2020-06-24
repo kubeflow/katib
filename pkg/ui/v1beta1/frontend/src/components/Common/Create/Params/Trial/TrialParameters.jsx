@@ -9,6 +9,7 @@ import TextField from '@material-ui/core/TextField';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 
 import { editTrialParameters } from '../../../../../actions/generalActions';
+import { GENERAL_MODULE } from '../../../../../constants/constants';
 
 const useStyles = makeStyles({
   help: {
@@ -27,8 +28,6 @@ const useStyles = makeStyles({
     marginBottom: 10,
   },
 });
-
-const module = 'general';
 
 const TrialParameters = props => {
   const classes = useStyles();
@@ -118,7 +117,7 @@ const TrialParameters = props => {
 
 const mapStateToProps = state => {
   return {
-    trialParameters: state[module].trialParameters,
+    trialParameters: state[GENERAL_MODULE].trialParameters,
   };
 };
 

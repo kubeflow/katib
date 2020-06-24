@@ -122,7 +122,7 @@ const hpCreateReducer = (state = initialState, action) => {
       };
     case actions.CHANGE_META_HP:
       let meta = state.commonParametersMetadata.slice();
-      let index = filterValue(meta, action.name);
+      var index = filterValue(meta, action.name);
       meta[index].value = action.value;
       return {
         ...state,
@@ -145,7 +145,7 @@ const hpCreateReducer = (state = initialState, action) => {
         objective: obj,
       };
     case actions.ADD_METRICS_HP:
-      let additionalMetricNames = state.additionalMetricNames.slice();
+      var additionalMetricNames = state.additionalMetricNames.slice();
       additionalMetricNames.push({
         value: '',
       });
@@ -173,7 +173,7 @@ const hpCreateReducer = (state = initialState, action) => {
         algorithmName: action.algorithmName,
       };
     case actions.ADD_ALGORITHM_SETTING_HP:
-      let algorithmSettings = state.algorithmSettings.slice();
+      var algorithmSettings = state.algorithmSettings.slice();
       let setting = { name: '', value: '' };
       algorithmSettings.push(setting);
       return {
@@ -195,7 +195,7 @@ const hpCreateReducer = (state = initialState, action) => {
         algorithmSettings: algorithmSettings,
       };
     case actions.ADD_PARAMETER_HP:
-      let parameters = state.parameters.slice();
+      var parameters = state.parameters.slice();
       parameters.push({
         name: '',
         parameterType: '',
@@ -247,7 +247,7 @@ const hpCreateReducer = (state = initialState, action) => {
       };
     // Metrics Collector Kind change
     case actions.CHANGE_MC_KIND_HP:
-      let newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
+      var newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
       newMCSpec.collector.kind = action.kind;
 
       if (
@@ -314,7 +314,7 @@ const hpCreateReducer = (state = initialState, action) => {
     // Collector HTTPGet Headers
     case actions.ADD_MC_HTTP_GET_HEADER_HP:
       newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
-      let currentHeaders = newMCSpec.source.httpGet.httpHeaders.slice();
+      var currentHeaders = newMCSpec.source.httpGet.httpHeaders.slice();
       let newHeader = { name: '', value: '' };
       currentHeaders.push(newHeader);
       newMCSpec.source.httpGet.httpHeaders = currentHeaders;
@@ -349,7 +349,7 @@ const hpCreateReducer = (state = initialState, action) => {
     // Collector Metrics Format
     case actions.ADD_MC_METRICS_FORMAT_HP:
       newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
-      let currentFormats = newMCSpec.source.filter.metricsFormat.slice();
+      var currentFormats = newMCSpec.source.filter.metricsFormat.slice();
       currentFormats.push('');
       newMCSpec.source.filter.metricsFormat = currentFormats;
       return {

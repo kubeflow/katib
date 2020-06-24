@@ -19,7 +19,7 @@ import NASJobStepInfo from './NASJobStepInfo';
 import ExperimentInfoDialog from '../../Common/ExperimentInfoDialog';
 import SuggestionInfoDialog from '../../Common/SuggestionInfoDialog';
 
-const module = 'nasMonitor';
+import { NAS_MONITOR_MODULE } from '../../../constants/constants';
 
 const styles = theme => ({
   root: {
@@ -132,8 +132,8 @@ class NASJobInfo extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    steps: state[module].steps,
-    loading: state[module].loading,
+    steps: state[NAS_MONITOR_MODULE].steps,
+    loading: state[NAS_MONITOR_MODULE].loading,
   };
 };
 

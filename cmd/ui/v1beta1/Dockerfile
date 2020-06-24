@@ -1,7 +1,7 @@
-FROM node:10.16.2-alpine AS npm-build
+FROM node:12.18.1 AS npm-build
 
 ADD /pkg/ui/v1beta1/frontend /frontend
-RUN cd /frontend && npm install
+RUN cd /frontend && npm ci
 RUN cd /frontend && npm run build
 RUN rm -rf /frontend/node_modules
 

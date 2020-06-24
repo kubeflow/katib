@@ -362,7 +362,7 @@ const nasCreateReducer = (state = initialState, action) => {
       };
     case actions.CHANGE_META_NAS:
       let meta = state.commonParametersMetadata.slice();
-      let index = filterValue(meta, action.name);
+      var index = filterValue(meta, action.name);
       meta[index].value = action.value;
       return {
         ...state,
@@ -385,7 +385,7 @@ const nasCreateReducer = (state = initialState, action) => {
         objective: obj,
       };
     case actions.ADD_METRICS_NAS:
-      let additionalMetricNames = state.additionalMetricNames.slice();
+      var additionalMetricNames = state.additionalMetricNames.slice();
       additionalMetricNames.push({
         value: '',
       });
@@ -413,7 +413,7 @@ const nasCreateReducer = (state = initialState, action) => {
         algorithmName: action.algorithmName,
       };
     case actions.ADD_ALGORITHM_SETTING_NAS:
-      let algorithmSettings = state.algorithmSettings.slice();
+      var algorithmSettings = state.algorithmSettings.slice();
       let setting = { name: '', value: '' };
       algorithmSettings.push(setting);
       return {
@@ -441,7 +441,7 @@ const nasCreateReducer = (state = initialState, action) => {
         numLayers: numLayers,
       };
     case actions.ADD_SIZE:
-      let size = state[action.sizeType].slice();
+      var size = state[action.sizeType].slice();
       size.push('0');
       return {
         ...state,
@@ -462,7 +462,7 @@ const nasCreateReducer = (state = initialState, action) => {
         [action.sizeType]: size,
       };
     case actions.ADD_OPERATION:
-      let operations = state.operations.slice();
+      var operations = state.operations.slice();
       operations.push({
         operationType: '',
         parameters: [],
@@ -547,7 +547,7 @@ const nasCreateReducer = (state = initialState, action) => {
       };
     // Metrics Collector Kind change
     case actions.CHANGE_MC_KIND_NAS:
-      let newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
+      var newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
       newMCSpec.collector.kind = action.kind;
 
       if (
@@ -614,7 +614,7 @@ const nasCreateReducer = (state = initialState, action) => {
     // Collector HTTPGet Headers
     case actions.ADD_MC_HTTP_GET_HEADER_NAS:
       newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
-      let currentHeaders = newMCSpec.source.httpGet.httpHeaders.slice();
+      var currentHeaders = newMCSpec.source.httpGet.httpHeaders.slice();
       let newHeader = { name: '', value: '' };
       currentHeaders.push(newHeader);
       newMCSpec.source.httpGet.httpHeaders = currentHeaders;
@@ -649,7 +649,7 @@ const nasCreateReducer = (state = initialState, action) => {
     // Collector Metrics Format
     case actions.ADD_MC_METRICS_FORMAT_NAS:
       newMCSpec = JSON.parse(JSON.stringify(state.mcSpec));
-      let currentFormats = newMCSpec.source.filter.metricsFormat.slice();
+      var currentFormats = newMCSpec.source.filter.metricsFormat.slice();
       currentFormats.push('');
       newMCSpec.source.filter.metricsFormat = currentFormats;
       return {

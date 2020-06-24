@@ -21,7 +21,7 @@ import OutlinedInput from '@material-ui/core/OutlinedInput';
 
 import { closeDialog, addTemplate, changeTemplate } from '../../../actions/templateActions';
 
-const module = 'template';
+import { TEMPLATE_MODULE } from '../../../constants/constants';
 
 const styles = theme => ({
   header: {
@@ -206,20 +206,20 @@ class AddDialog extends React.Component {
 }
 
 const mapStateToProps = state => {
-  let templatesData = state[module].trialTemplatesData;
+  let templatesData = state[TEMPLATE_MODULE].trialTemplatesData;
 
   let nsIndex = templatesData.findIndex(function(trialTemplate, i) {
-    return trialTemplate.ConfigMapNamespace === state[module].updatedConfigMapNamespace;
+    return trialTemplate.ConfigMapNamespace === state[TEMPLATE_MODULE].updatedConfigMapNamespace;
   });
 
   return {
-    addOpen: state[module].addOpen,
-    trialTemplatesData: state[module].trialTemplatesData,
+    addOpen: state[TEMPLATE_MODULE].addOpen,
+    trialTemplatesData: state[TEMPLATE_MODULE].trialTemplatesData,
     configMapNamespaceIndex: nsIndex,
-    updatedConfigMapNamespace: state[module].updatedConfigMapNamespace,
-    updatedConfigMapName: state[module].updatedConfigMapName,
-    updatedConfigMapPath: state[module].updatedConfigMapPath,
-    updatedTemplateYaml: state[module].updatedTemplateYaml,
+    updatedConfigMapNamespace: state[TEMPLATE_MODULE].updatedConfigMapNamespace,
+    updatedConfigMapName: state[TEMPLATE_MODULE].updatedConfigMapName,
+    updatedConfigMapPath: state[TEMPLATE_MODULE].updatedConfigMapPath,
+    updatedTemplateYaml: state[TEMPLATE_MODULE].updatedTemplateYaml,
   };
 };
 

@@ -9,8 +9,7 @@ import TextField from '@material-ui/core/TextField';
 import { changeMeta } from '../../../../actions/hpCreateActions';
 import { withStyles } from '@material-ui/core';
 
-const module = 'hpCreate';
-const generalModule = 'general';
+import { GENERAL_MODULE, HP_CREATE_MODULE } from '../../../../constants/constants';
 
 const styles = () => ({
   textField: {
@@ -31,7 +30,7 @@ const styles = () => ({
 
 class CommonParametersMeta extends React.Component {
   componentDidMount() {
-    if (this.props.globalNamespace != '') {
+    if (this.props.globalNamespace !== '') {
       this.props.changeMeta('Namespace', this.props.globalNamespace);
     }
   }
@@ -58,17 +57,17 @@ class CommonParametersMeta extends React.Component {
                   </Typography>
                 </Grid>
                 <Grid item xs={12} sm={8}>
-                  {param.name == 'Namespace' && this.props.globalNamespace == '' && (
+                  {param.name === 'Namespace' && this.props.globalNamespace === '' && (
                     <TextField
                       className={classes.textField}
                       value={param.value}
                       onChange={this.onMetaChange(param.name)}
                     />
                   )}
-                  {param.name == 'Namespace' && this.props.globalNamespace != '' && (
+                  {param.name === 'Namespace' && this.props.globalNamespace !== '' && (
                     <TextField className={classes.textField} value={param.value} disabled />
                   )}
-                  {param.name != 'Namespace' && (
+                  {param.name !== 'Namespace' && (
                     <TextField
                       className={classes.textField}
                       value={param.value}
@@ -87,8 +86,8 @@ class CommonParametersMeta extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    commonParametersMetadata: state[module].commonParametersMetadata,
-    globalNamespace: state[generalModule].globalNamespace,
+    commonParametersMetadata: state[HP_CREATE_MODULE].commonParametersMetadata,
+    globalNamespace: state[GENERAL_MODULE].globalNamespace,
   };
 };
 

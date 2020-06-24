@@ -60,7 +60,8 @@ type Template struct {
 }
 
 type KatibUIHandler struct {
-	katibClient katibclient.Client
+	katibClient   katibclient.Client
+	dbManagerAddr string
 }
 
 type NNView struct {

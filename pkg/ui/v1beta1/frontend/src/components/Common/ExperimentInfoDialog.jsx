@@ -12,7 +12,7 @@ import 'ace-builds/src-noconflict/mode-json';
 
 import { closeDialogExperiment } from '../../actions/generalActions';
 
-const module = 'general';
+import { GENERAL_MODULE } from '../../constants/constants';
 
 const styles = theme => ({
   header: {
@@ -59,8 +59,8 @@ const ExperimentInfoDialog = props => {
 
 const mapStateToProps = state => {
   return {
-    dialogExperimentOpen: state[module].dialogExperimentOpen,
-    experiment: state[module].experiment,
+    dialogExperimentOpen: state[GENERAL_MODULE].dialogExperimentOpen,
+    experiment: state[GENERAL_MODULE].experiment,
   };
 };
 

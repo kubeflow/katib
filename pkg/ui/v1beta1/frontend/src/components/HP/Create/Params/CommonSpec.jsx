@@ -9,7 +9,7 @@ import TextField from '@material-ui/core/TextField';
 
 import { changeSpec } from '../../../../actions/hpCreateActions';
 
-const module = 'hpCreate';
+import { HP_CREATE_MODULE } from '../../../../constants/constants';
 
 const useStyles = makeStyles({
   textField: {
@@ -66,7 +66,7 @@ const CommonParametersSpec = props => {
 
 const mapStateToProps = state => {
   return {
-    commonParametersSpec: state[module].commonParametersSpec,
+    commonParametersSpec: state[HP_CREATE_MODULE].commonParametersSpec,
   };
 };
 
