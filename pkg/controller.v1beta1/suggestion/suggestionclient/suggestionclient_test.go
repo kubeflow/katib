@@ -38,6 +38,13 @@ func (k8s k8sMatcher) String() string {
 	return fmt.Sprintf("is equal to %v", k8s.x)
 }
 
+func TestGetRPCClient(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	fakeConn := &grpc.ClientConn{}
+	actualClient := getRPCClient(fakeConn)
+	g.Expect(actualClient).To(gomega.Equal(suggestionapi.NewSuggestionClient(fakeConn)))
+}
+
 func TestSyncAssignments(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
