@@ -36,9 +36,7 @@ mockgen -package mock -destination pkg/mock/v1alpha3/trial/managerclient/katibma
 echo "Generating v1alpha3 Suggestion in Experiment Controller..."
 mockgen -package mock -destination pkg/mock/v1alpha3/experiment/suggestion/suggestion.go github.com/kubeflow/katib/pkg/controller.v1alpha3/experiment/suggestion Suggestion
 
-echo "Generating v1beta1 ManagerClient..."
-mockgen -package mock -destination pkg/mock/v1beta1/api/manager.go github.com/kubeflow/katib/pkg/apis/manager/v1beta1 ManagerClient
-echo "Generating v1beta1 SuggestionClient..."
+echo "Generating v1beta1 Suggestion RPC Client..."
 mockgen -package mock -destination pkg/mock/v1beta1/api/suggestion.go github.com/kubeflow/katib/pkg/apis/manager/v1beta1 SuggestionClient
 echo "Generating v1beta1 KatibDBInterface..."
 mockgen -package mock -destination pkg/mock/v1beta1/db/db.go github.com/kubeflow/katib/pkg/db/v1beta1/common KatibDBInterface
