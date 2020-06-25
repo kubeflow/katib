@@ -46,7 +46,7 @@ func main() {
 	var enableGRPCProbeInSuggestion bool
 
 	flag.StringVar(&experimentSuggestionName, "experiment-suggestion-name",
-		"default", "The implementation of suggestion interface in experiment controller (default|fake)")
+		"default", "The implementation of suggestion interface in experiment controller (default)")
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.IntVar(&webhookPort, "webhook-port", 8443, "The port number to be used for admission webhook server.")
 	flag.BoolVar(&certLocalFS, "cert-localfs", false, "Store the webhook cert in local file system")

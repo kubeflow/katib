@@ -43,7 +43,6 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/manifest"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/suggestion"
-	suggestionfake "github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/suggestion/fake"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/util"
 )
 
@@ -82,9 +81,6 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 func newSuggestion(config string, scheme *runtime.Scheme, client client.Client) suggestion.Suggestion {
 	// Use different implementation according to the configuration.
 	switch config {
-	case "fake":
-		log.Info("Using the fake suggestion implementation")
-		return suggestionfake.New()
 	case "default":
 		log.Info("Using the default suggestion implementation")
 		return suggestion.New(scheme, client)
