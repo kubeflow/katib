@@ -65,7 +65,7 @@ spec:
         description: Search Space of DARTS Experiment
         reference: search-space
       - name: numberLayers
-        description: Number of layers of Neural Network
+        description: Number of Neural Network layers
         reference: num-layers
     trialSpec:
       apiVersion: batch/v1
