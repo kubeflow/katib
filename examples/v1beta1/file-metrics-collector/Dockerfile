@@ -1,6 +1,13 @@
 FROM pytorch/pytorch:1.0-cuda10.0-cudnn7-runtime
 
-WORKDIR /var
-ADD mnist.py /var
+RUN mkdir -p /katib /opt/mnist/src
 
-ENTRYPOINT ["python", "/var/mnist.py"]
+WORKDIR /opt/mnist/src
+ADD mnist.py /opt/mnist/src
+
+RUN chgrp -R 0 /opt/mnist \
+  && chmod -R g+rwX /opt/mnist \
+  && chgrp -R 0 /katib \
+  && chmod -R g+rwX /katib
+
+ENTRYPOINT ["python", "/opt/mnist/src/mnist.py"]

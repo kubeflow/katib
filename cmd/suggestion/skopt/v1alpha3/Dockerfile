@@ -1,5 +1,8 @@
 FROM python:3.6
 
+ENV TARGET_DIR /opt/katib
+ENV SUGGESTION_DIR cmd/suggestion/skopt/v1alpha3
+
 RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
         apt-get -y update && \
         apt-get -y install gfortran libopenblas-dev liblapack-dev && \
@@ -16,10 +19,14 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.1 && \
     fi && \
     chmod +x /bin/grpc_health_probe
 
-ADD . /usr/src/app/github.com/kubeflow/katib
-WORKDIR /usr/src/app/github.com/kubeflow/katib/cmd/suggestion/skopt/v1alpha3
+ADD ./pkg/ ${TARGET_DIR}/pkg/
+ADD ./${SUGGESTION_DIR}/ ${TARGET_DIR}/${SUGGESTION_DIR}/
+WORKDIR  ${TARGET_DIR}/${SUGGESTION_DIR}
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENV PYTHONPATH /usr/src/app/github.com/kubeflow/katib:/usr/src/app/github.com/kubeflow/katib/pkg/apis/manager/v1alpha3/python:/usr/src/app/github.com/kubeflow/katib/pkg/apis/manager/health/python
+RUN chgrp -R 0 ${TARGET_DIR} \
+  && chmod -R g+rwX ${TARGET_DIR}
+
+ENV PYTHONPATH ${TARGET_DIR}:${TARGET_DIR}/pkg/apis/manager/v1alpha3/python:${TARGET_DIR}/pkg/apis/manager/health/python
 
 ENTRYPOINT ["python", "main.py"]

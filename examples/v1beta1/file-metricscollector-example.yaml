@@ -54,11 +54,11 @@ spec:
           spec:
             containers:
               - name: training-container
-                image: docker.io/kubeflowkatib/pytorch-mnist:1.0
+                image: docker.io/kubeflowkatib/pytorch-mnist:latest
                 imagePullPolicy: Always
                 command:
                   - "python"
-                  - "/var/mnist.py"
+                  - "/opt/mnist/src/mnist.py"
                   - "--epochs=1"
                   - "--lr=${trialParameters.learningRate}"
                   - "--momentum=${trialParameters.momentum}"
