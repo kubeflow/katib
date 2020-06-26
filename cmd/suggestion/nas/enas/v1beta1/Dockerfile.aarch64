@@ -14,6 +14,9 @@ RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
 
 FROM python:3.7-slim-buster
 
+ENV TARGET_DIR /opt/katib
+ENV SUGGESTION_DIR cmd/suggestion/nas/enas/v1beta1
+
 RUN apt-get update \
     && apt-get -y install software-properties-common \
     autoconf \
@@ -43,9 +46,13 @@ RUN pip install 'grpcio==1.23.0' 'protobuf==3.9.1' 'googleapis-common-protos==1.
 
 COPY --from=build-env /bin/grpc_health_probe /bin/
 
-ADD . /usr/src/app/github.com/kubeflow/katib
-WORKDIR /usr/src/app/github.com/kubeflow/katib/cmd/suggestion/nas/enas/v1beta1
+ADD ./pkg/ ${TARGET_DIR}/pkg/
+ADD ./${SUGGESTION_DIR}/ ${TARGET_DIR}/${SUGGESTION_DIR}/
+WORKDIR  ${TARGET_DIR}/${SUGGESTION_DIR}
 
-ENV PYTHONPATH /usr/src/app/github.com/kubeflow/katib:/usr/src/app/github.com/kubeflow/katib/pkg/apis/manager/v1beta1/python:/usr/src/app/github.com/kubeflow/katib/pkg/apis/manager/health/python
+RUN chgrp -R 0 ${TARGET_DIR} \
+  && chmod -R g+rwX ${TARGET_DIR}
+
+ENV PYTHONPATH ${TARGET_DIR}:${TARGET_DIR}/pkg/apis/manager/v1alpha3/python:${TARGET_DIR}/pkg/apis/manager/health/python
 
 ENTRYPOINT ["python", "main.py"]
