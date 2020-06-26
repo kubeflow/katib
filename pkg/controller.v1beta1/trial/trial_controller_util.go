@@ -18,7 +18,6 @@ package trial
 import (
 	"context"
 	"fmt"
-	"math"
 	"strconv"
 	"time"
 
@@ -30,6 +29,7 @@ import (
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 )
 
@@ -172,9 +172,9 @@ func getMetrics(metricLogs []*api_pb.MetricLog, strategies []commonv1beta1.Metri
 		timestamps[strategy.Name] = nil
 		metrics[strategy.Name] = &commonv1beta1.Metric{
 			Name:   strategy.Name,
-			Min:    math.NaN(),
-			Max:    math.NaN(),
-			Latest: "",
+			Min:    consts.UnavailableMetricValue,
+			Max:    consts.UnavailableMetricValue,
+			Latest: consts.UnavailableMetricValue,
 		}
 	}
 
@@ -186,11 +186,18 @@ func getMetrics(metricLogs []*api_pb.MetricLog, strategies []commonv1beta1.Metri
 		strValue := metricLog.Metric.Value
 		floatValue, err := strconv.ParseFloat(strValue, 64)
 		if err == nil {
-			if math.IsNaN(metric.Min) || floatValue < metric.Min {
-				metric.Min = floatValue
-			}
-			if math.IsNaN(metric.Max) || floatValue > metric.Max {
-				metric.Max = floatValue
+			if metric.Min == consts.UnavailableMetricValue {
+				metric.Min = strValue
+				metric.Max = strValue
+			} else {
+				// We can't get error here, because we parsed this value before
+				minMetric, _ := strconv.ParseFloat(metric.Min, 64)
+				maxMetric, _ := strconv.ParseFloat(metric.Max, 64)
+				if floatValue < minMetric {
+					metric.Min = strValue
+				} else if floatValue > maxMetric {
+					metric.Max = strValue
+				}
 			}
 		}
 		currentTime, err := time.Parse(time.RFC3339Nano, metricLog.TimeStamp)

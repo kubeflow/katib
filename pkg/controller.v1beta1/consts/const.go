@@ -135,6 +135,9 @@ const (
 
 	// TrialTemplateReplaceFormatRegex is the regex for Trial template format
 	TrialTemplateReplaceFormatRegex = "\\{trialParameters\\..+?\\}"
+
+	// UnavailableMetricValue is the value when metric was not reported or metric value can't be converted to float64
+	UnavailableMetricValue = "unavailable"
 )
 
 var (

@@ -3,7 +3,7 @@ package suggestionclient
 import (
 	"errors"
 	"fmt"
-	"strconv"
+	"reflect"
 	"testing"
 	"time"
 
@@ -21,6 +21,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -385,29 +386,91 @@ func TestConvertParameterType(t *testing.T) {
 }
 
 func TestConvertTrialObservation(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
-	var strategies = []commonv1beta1.MetricStrategy{
+
+	tcs := []struct {
+		strategies          []commonv1beta1.MetricStrategy
+		inObservation       *commonv1beta1.Observation
+		expectedObservation *suggestionapi.Observation
+		testDescription     string
+	}{
+		{
+			strategies:          newFakeStrategies(),
+			inObservation:       newFakeTrialObservation(),
+			expectedObservation: newFakeRequestObservation(),
+			testDescription:     "Run with min, max and latest metrics extract",
+		},
+		{
+			strategies: newFakeStrategies(),
+			inObservation: func() *commonapiv1beta1.Observation {
+				obsIn := newFakeTrialObservation()
+				obsIn.Metrics[0].Min = consts.UnavailableMetricValue
+				return obsIn
+			}(),
+			expectedObservation: func() *suggestionapi.Observation {
+				obsOut := newFakeRequestObservation()
+				obsOut.Metrics[0].Value = "0.05"
+				return obsOut
+			}(),
+			testDescription: "Observation doesn't have min metric, latest is assigned",
+		},
+		{
+			strategies: newFakeStrategies(),
+			inObservation: func() *commonapiv1beta1.Observation {
+				obsIn := newFakeTrialObservation()
+				obsIn.Metrics[1].Max = consts.UnavailableMetricValue
+				return obsIn
+			}(),
+			expectedObservation: func() *suggestionapi.Observation {
+				obsOut := newFakeRequestObservation()
+				obsOut.Metrics[1].Value = "0.90"
+				return obsOut
+			}(),
+			testDescription: "Observation doesn't have max metric, latest is assigned",
+		},
+	}
+	for _, tc := range tcs {
+		actualObservation := convertTrialObservation(tc.strategies, tc.inObservation)
+		if !reflect.DeepEqual(actualObservation, tc.expectedObservation) {
+			t.Errorf("Case: %v failed.\nExpected observation: %v \ngot: %v", tc.testDescription, tc.expectedObservation, actualObservation)
+		}
+	}
+}
+
+func newFakeStrategies() []commonv1beta1.MetricStrategy {
+	return []commonv1beta1.MetricStrategy{
 		{Name: "error", Value: commonv1beta1.ExtractByMin},
 		{Name: "auc", Value: commonv1beta1.ExtractByMax},
 		{Name: "accuracy", Value: commonv1beta1.ExtractByLatest},
 	}
-	var observation = &commonv1beta1.Observation{
+}
+
+func newFakeTrialObservation() *commonv1beta1.Observation {
+	return &commonv1beta1.Observation{
 		Metrics: []commonv1beta1.Metric{
-			{Name: "error", Min: 0.01, Max: 0.08, Latest: "0.05"},
-			{Name: "auc", Min: 0.70, Max: 0.95, Latest: "0.90"},
-			{Name: "accuracy", Min: 0.8, Max: 0.94, Latest: "0.93"},
+			{Name: "error", Min: "0.01", Max: "0.08", Latest: "0.05"},
+			{Name: "auc", Min: "0.70", Max: "0.95", Latest: "0.90"},
+			{Name: "accuracy", Min: "0.8", Max: "0.94", Latest: "0.93"},
 		},
 	}
-	obsPb := convertTrialObservation(strategies, observation)
-	g.Expect(obsPb.Metrics[0].Name).To(gomega.Equal("error"))
-	value, _ := strconv.ParseFloat(obsPb.Metrics[0].Value, 64)
-	g.Expect(value).To(gomega.Equal(0.01))
-	g.Expect(obsPb.Metrics[1].Name).To(gomega.Equal("auc"))
-	value, _ = strconv.ParseFloat(obsPb.Metrics[1].Value, 64)
-	g.Expect(value).To(gomega.Equal(0.95))
-	g.Expect(obsPb.Metrics[2].Name).To(gomega.Equal("accuracy"))
-	value, _ = strconv.ParseFloat(obsPb.Metrics[2].Value, 64)
-	g.Expect(value).To(gomega.Equal(0.93))
+}
+
+func newFakeRequestObservation() *suggestionapi.Observation {
+	return &suggestionapi.Observation{
+		Metrics: []*suggestionapi.Metric{
+			{
+				Name:  "error",
+				Value: "0.01",
+			},
+			{
+				Name:  "auc",
+				Value: "0.95",
+			},
+			{
+				Name:  "accuracy",
+				Value: "0.93",
+			},
+		},
+	}
 }
 
 func newFakeObjective() *commonapiv1beta1.ObjectiveSpec {

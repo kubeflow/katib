@@ -268,7 +268,7 @@
         },
         "runSpec": {
           "description": "Raw text for the trial run spec. This can be any generic Kubernetes runtime object. The trial operator should create the resource as written, and let the corresponding resource controller (e.g. tf-operator) handle the rest.",
-          "type": "string"
+          "$ref": "#/definitions/v1.unstructured.Unstructured"
         }
       }
     },
@@ -336,6 +336,23 @@
           "$ref": "#/definitions/v1.Container"
         },
         "kind": {
+          "type": "string"
+        }
+      }
+    },
+    "v1beta1.ConfigMapSource": {
+      "description": "ConfigMapSource references the config map where Trial template is located",
+      "properties": {
+        "configMapName": {
+          "description": "Name of config map where Trial template is located",
+          "type": "string"
+        },
+        "configMapNamespace": {
+          "description": "Namespace of config map where Trial template is located",
+          "type": "string"
+        },
+        "templatePath": {
+          "description": "Path in config map where Trial template is located",
           "type": "string"
         }
       }
@@ -627,16 +644,6 @@
         }
       }
     },
-    "v1beta1.GoTemplate": {
-      "properties": {
-        "rawTemplate": {
-          "type": "string"
-        },
-        "templateSpec": {
-          "$ref": "#/definitions/v1beta1.TemplateSpec"
-        }
-      }
-    },
     "v1beta1.GraphConfig": {
       "description": "GraphConfig contains a config of DAG",
       "properties": {
@@ -666,14 +673,22 @@
           "type": "string"
         },
         "max": {
-          "type": "number",
-          "format": "double"
+          "type": "string"
         },
         "min": {
-          "type": "number",
-          "format": "double"
+          "type": "string"
         },
         "name": {
+          "type": "string"
+        }
+      }
+    },
+    "v1beta1.MetricStrategy": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
           "type": "string"
         }
       }
@@ -717,9 +732,9 @@
         },
         "metricStrategies": {
           "description": "This field is allowed to missing, experiment defaulter (webhook) will fill it.",
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1beta1.MetricStrategy"
           }
         },
         "objectiveMetricName": {
@@ -821,26 +836,57 @@
         }
       }
     },
-    "v1beta1.TemplateSpec": {
+    "v1beta1.TrialParameterSpec": {
+      "description": "TrialParameterSpec describes parameters that must be replaced in Trial template",
       "properties": {
-        "configMapName": {
+        "description": {
+          "description": "Description of the parameter",
           "type": "string"
         },
-        "configMapNamespace": {
+        "name": {
+          "description": "Name of the parameter that must be replaced in Trial template",
           "type": "string"
         },
-        "templatePath": {
+        "reference": {
+          "description": "Reference to the parameter in search space",
           "type": "string"
         }
       }
     },
-    "v1beta1.TrialTemplate": {
+    "v1beta1.TrialSource": {
+      "description": "TrialSource represent the source for Trial template Only one source can be specified",
       "properties": {
-        "goTemplate": {
-          "$ref": "#/definitions/v1beta1.GoTemplate"
+        "configMap": {
+          "description": "ConfigMap spec represents a reference to ConfigMap",
+          "$ref": "#/definitions/v1beta1.ConfigMapSource"
+        },
+        "trialSpec": {
+          "description": "TrialSpec represents Trial template in unstructured format",
+          "$ref": "#/definitions/v1.unstructured.Unstructured"
+        }
+      }
+    },
+    "v1beta1.TrialTemplate": {
+      "description": "TrialTemplate describes structure of Trial template",
+      "properties": {
+        "configMap": {
+          "description": "ConfigMap spec represents a reference to ConfigMap",
+          "$ref": "#/definitions/v1beta1.ConfigMapSource"
         },
         "retain": {
+          "description": "Retain indicates that Trial resources must be not cleanup",
           "type": "boolean"
+        },
+        "trialParameters": {
+          "description": "List of parameres that are used in Trial template",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1beta1.TrialParameterSpec"
+          }
+        },
+        "trialSpec": {
+          "description": "TrialSpec represents Trial template in unstructured format",
+          "$ref": "#/definitions/v1.unstructured.Unstructured"
         }
       }
     }
