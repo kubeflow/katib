@@ -20,8 +20,14 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.1 && \
     chmod +x /bin/grpc_health_probe
 
 FROM alpine:3.7
-WORKDIR /app
+
+ENV TARGET_DIR /opt/katib
+
+WORKDIR ${TARGET_DIR}
 COPY --from=go-build /bin/grpc_health_probe /bin/
-COPY --from=go-build /go/src/github.com/kubeflow/katib/cmd/suggestion/goptuna/goptuna-suggestion /app/
+COPY --from=go-build /go/src/github.com/kubeflow/katib/cmd/suggestion/goptuna/goptuna-suggestion ${TARGET_DIR}/
+
+RUN chgrp -R 0 ${TARGET_DIR} \
+  && chmod -R g+rwX ${TARGET_DIR}
 
 ENTRYPOINT ["./goptuna-suggestion"]

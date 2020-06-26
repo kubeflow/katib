@@ -58,7 +58,7 @@ spec:
                 imagePullPolicy: Always
                 command:
                   - "python"
-                  - "/var/mnist.py"
+                  - "/opt/mnist/src/mnist.py"
                   - "--epochs=1"
                   - "--lr=${trialParameters.learningRate}"
                   - "--momentum=${trialParameters.momentum}"
