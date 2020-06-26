@@ -189,7 +189,7 @@ func TestValidateExperiment(t *testing.T) {
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
-				i.Spec.Parameters[0].FeasibleSpace.Max = "5"
+				i.Spec.Parameters[1].FeasibleSpace.Max = "5"
 				return i
 			}(),
 			Err:             true,
