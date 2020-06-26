@@ -130,7 +130,7 @@ func isTrialObservationAvailable(instance *trialsv1beta1.Trial) bool {
 	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
 	if instance.Status.Observation != nil && instance.Status.Observation.Metrics != nil {
 		for _, metric := range instance.Status.Observation.Metrics {
-			if metric.Name == objectiveMetricName {
+			if metric.Name == objectiveMetricName && metric.Latest != consts.UnavailableMetricValue {
 				return true
 			}
 		}
