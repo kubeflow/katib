@@ -175,7 +175,25 @@ func TestValidateExperiment(t *testing.T) {
 				return i
 			}(),
 			Err:             true,
-			testDescription: "Operation type in NAS config is invalid",
+			testDescription: "Parameters and NAS config is not nil",
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialParameters[0].Name = "Invalid"
+				return i
+			}(),
+			Err:             true,
+			testDescription: "Invalid Trial parameter name",
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.Parameters[0].FeasibleSpace.Max = "5"
+				return i
+			}(),
+			Err:             true,
+			testDescription: "Invalid feasible space in parameters",
 		},
 	}
 
@@ -184,6 +202,88 @@ func TestValidateExperiment(t *testing.T) {
 		if !tc.Err && err != nil {
 			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
 		} else if tc.Err && err == nil {
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
+		}
+	}
+}
+
+func TestValidateParameters(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	p := manifestmock.NewMockGenerator(mockCtrl)
+	g := New(p)
+
+	tcs := []struct {
+		parameters      []experimentsv1beta1.ParameterSpec
+		err             bool
+		testDescription string
+	}{
+		{
+			parameters: func() []experimentsv1beta1.ParameterSpec {
+				ps := newFakeInstance().Spec.Parameters
+				ps[0].ParameterType = "invalid-type"
+				return ps
+			}(),
+			err:             true,
+			testDescription: "Invalid parameter type",
+		},
+		{
+			parameters: func() []experimentsv1beta1.ParameterSpec {
+				ps := newFakeInstance().Spec.Parameters
+				ps[0].FeasibleSpace = experimentsv1beta1.FeasibleSpace{}
+				return ps
+			}(),
+			err:             true,
+			testDescription: "Feasible space is nil",
+		},
+		{
+			parameters: func() []experimentsv1beta1.ParameterSpec {
+				ps := newFakeInstance().Spec.Parameters
+				ps[0].FeasibleSpace.List = []string{"invalid-list"}
+				return ps
+			}(),
+			err:             true,
+			testDescription: "Not empty list for int parameter type",
+		},
+		{
+			parameters: func() []experimentsv1beta1.ParameterSpec {
+				ps := newFakeInstance().Spec.Parameters
+				ps[0].FeasibleSpace = experimentsv1beta1.FeasibleSpace{
+					Max:  "",
+					Min:  "",
+					Step: "1",
+				}
+				return ps
+			}(),
+			err:             true,
+			testDescription: "Empty max and min for int parameter type",
+		},
+		{
+			parameters: func() []experimentsv1beta1.ParameterSpec {
+				ps := newFakeInstance().Spec.Parameters
+				ps[1].FeasibleSpace.Max = "1"
+				return ps
+			}(),
+			err:             true,
+			testDescription: "Not empty max for categorical parameter type",
+		},
+		{
+			parameters: func() []experimentsv1beta1.ParameterSpec {
+				ps := newFakeInstance().Spec.Parameters
+				ps[1].FeasibleSpace.List = []string{}
+				return ps
+			}(),
+			err:             true,
+			testDescription: "Empty list for categorical parameter type",
+		},
+	}
+
+	for _, tc := range tcs {
+		err := g.(*DefaultValidator).validateParameters(tc.parameters)
+		if !tc.err && err != nil {
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
+		} else if tc.err && err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		}
 	}
@@ -875,10 +975,16 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 			},
 			Parameters: []experimentsv1beta1.ParameterSpec{
 				{
-					Name:          "test",
+					ParameterType: experimentsv1beta1.ParameterTypeInt,
+					FeasibleSpace: experimentsv1beta1.FeasibleSpace{
+						Max: "5",
+						Min: "1",
+					},
+				},
+				{
 					ParameterType: experimentsv1beta1.ParameterTypeCategorical,
 					FeasibleSpace: experimentsv1beta1.FeasibleSpace{
-						List: []string{"1", "2"},
+						List: []string{"1", "2", "3"},
 					},
 				},
 			},

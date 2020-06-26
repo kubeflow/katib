@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -83,11 +84,17 @@ func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1be
 	}
 
 	if len(instance.Spec.Parameters) == 0 && instance.Spec.NasConfig == nil {
-		return fmt.Errorf("spec.parameters or spec.nasConfig must be specified.")
+		return fmt.Errorf("spec.parameters or spec.nasConfig must be specified")
 	}
 
 	if len(instance.Spec.Parameters) > 0 && instance.Spec.NasConfig != nil {
-		return fmt.Errorf("Only one of spec.parameters and spec.nasConfig can be specified.")
+		return fmt.Errorf("Only one of spec.parameters and spec.nasConfig can be specified")
+	}
+
+	if len(instance.Spec.Parameters) > 0 {
+		if err := g.validateParameters(instance.Spec.Parameters); err != nil {
+			return err
+		}
 	}
 
 	if err := g.validateMetricsCollector(instance); err != nil {
@@ -133,6 +140,42 @@ func (g *DefaultValidator) validateResumePolicy(resume experimentsv1beta1.Resume
 	if _, ok := validTypes[resume]; !ok {
 		return fmt.Errorf("invalid ResumePolicyType %s", resume)
 	}
+	return nil
+}
+
+func (g *DefaultValidator) validateParameters(parameters []experimentsv1beta1.ParameterSpec) error {
+	for i, param := range parameters {
+
+		if param.ParameterType != experimentsv1beta1.ParameterTypeInt &&
+			param.ParameterType != experimentsv1beta1.ParameterTypeDouble &&
+			param.ParameterType != experimentsv1beta1.ParameterTypeCategorical &&
+			param.ParameterType != experimentsv1beta1.ParameterTypeDiscrete &&
+			param.ParameterType != experimentsv1beta1.ParameterTypeUnknown {
+			return fmt.Errorf("parameterType: %v is not supported in spec.parameters[%v]: %v", param.ParameterType, i, param)
+		}
+
+		if reflect.DeepEqual(param.FeasibleSpace, experimentsv1beta1.FeasibleSpace{}) {
+			return fmt.Errorf("feasibleSpace must be specified in spec.parameters[%v]: %v", i, param)
+		}
+
+		if param.ParameterType == experimentsv1beta1.ParameterTypeDouble || param.ParameterType == experimentsv1beta1.ParameterTypeInt {
+			if len(param.FeasibleSpace.List) > 0 {
+				return fmt.Errorf("feasibleSpace.list is not supported for parameterType: %v in spec.parameters[%v]: %v", param.ParameterType, i, param)
+			}
+			if param.FeasibleSpace.Max == "" && param.FeasibleSpace.Min == "" {
+				return fmt.Errorf("feasibleSpace.max or feasibleSpace.min must be specified for parameterType: %v in spec.parameters[%v]: %v", param.ParameterType, i, param)
+			}
+
+		} else if param.ParameterType == experimentsv1beta1.ParameterTypeCategorical || param.ParameterType == experimentsv1beta1.ParameterTypeDiscrete {
+			if param.FeasibleSpace.Max != "" || param.FeasibleSpace.Min != "" || param.FeasibleSpace.Step != "" {
+				return fmt.Errorf("feasibleSpace .max, .min and .step is supported for parameterType: %v in spec.parameters[%v]: %v", param.ParameterType, i, param)
+			}
+			if len(param.FeasibleSpace.List) == 0 {
+				return fmt.Errorf("feasibleSpace.list must be specified for parameterType: %v in spec.parameters[%v]: %v", param.ParameterType, i, param)
+			}
+		}
+	}
+
 	return nil
 }
 
