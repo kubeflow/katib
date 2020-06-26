@@ -23,9 +23,12 @@ import (
 )
 
 var (
-	log        = logf.Log.WithName("suggestion-client")
-	timeout    = 60 * time.Second
-	timeFormat = "2006-01-02T15:04:05Z"
+	log          = logf.Log.WithName("suggestion-client")
+	timeout      = 60 * time.Second
+	timeFormat   = "2006-01-02T15:04:05Z"
+	getRPCClient = func(conn *grpc.ClientConn) suggestionapi.SuggestionClient {
+		return suggestionapi.NewSuggestionClient(conn)
+	}
 )
 
 // SuggestionClient is the interface to communicate with algorithm services.
@@ -63,7 +66,7 @@ func (g *General) SyncAssignments(
 	}
 	defer conn.Close()
 
-	client := suggestionapi.NewSuggestionClient(conn)
+	rpcClient := getRPCClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
@@ -77,7 +80,8 @@ func (g *General) SyncAssignments(
 		Trials:        g.ConvertTrials(ts),
 		RequestNumber: int32(requestNum),
 	}
-	response, err := client.GetSuggestions(ctx, request)
+
+	response, err := rpcClient.GetSuggestions(ctx, request)
 	if err != nil {
 		return err
 	}
@@ -112,16 +116,17 @@ func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1beta1.Suggest
 	}
 	defer conn.Close()
 
-	client := suggestionapi.NewSuggestionClient(conn)
+	rpcClient := getRPCClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	request := &suggestionapi.ValidateAlgorithmSettingsRequest{
 		Experiment: g.ConvertExperiment(e),
 	}
+
 	// See https://github.com/grpc/grpc-go/issues/2636
 	// See https://github.com/grpc/grpc-go/pull/2503
-	_, err = client.ValidateAlgorithmSettings(ctx, request, grpc.WaitForReady(true))
+	_, err = rpcClient.ValidateAlgorithmSettings(ctx, request, grpc.WaitForReady(true))
 	statusCode, _ := status.FromError(err)
 
 	// validation error
@@ -155,8 +160,9 @@ func (g *General) ConvertExperiment(e *experimentsv1beta1.Experiment) *suggestio
 			AlgorithmSettings: convertAlgorithmSettings(e.Spec.Algorithm.AlgorithmSettings),
 		},
 		Objective: &suggestionapi.ObjectiveSpec{
-			Type:                convertObjectiveType(e.Spec.Objective.Type),
-			ObjectiveMetricName: e.Spec.Objective.ObjectiveMetricName,
+			Type:                  convertObjectiveType(e.Spec.Objective.Type),
+			ObjectiveMetricName:   e.Spec.Objective.ObjectiveMetricName,
+			AdditionalMetricNames: e.Spec.Objective.AdditionalMetricNames,
 		},
 		ParameterSpecs: &suggestionapi.ExperimentSpec_ParameterSpecs{
 			Parameters: convertParameters(e.Spec.Parameters),
@@ -296,6 +302,7 @@ func convertTrialStatusTime(time *metav1.Time) string {
 }
 
 // ComposeTrialsTemplate composes trials with raw template from the GRPC response.
+// TODO (andreyvelich): Do we need it ?
 func (g *General) ComposeTrialsTemplate(ts []*suggestionapi.Trial) []trialsv1beta1.Trial {
 	res := make([]trialsv1beta1.Trial, 0)
 	for _, t := range ts {
