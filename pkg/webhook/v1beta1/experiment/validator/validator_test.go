@@ -268,15 +268,6 @@ func TestValidateParameters(t *testing.T) {
 			err:             true,
 			testDescription: "Not empty max for categorical parameter type",
 		},
-		{
-			parameters: func() []experimentsv1beta1.ParameterSpec {
-				ps := newFakeInstance().Spec.Parameters
-				ps[1].FeasibleSpace.List = []string{}
-				return ps
-			}(),
-			err:             true,
-			testDescription: "Empty list for categorical parameter type",
-		},
 	}
 
 	for _, tc := range tcs {

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
-	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -154,7 +153,7 @@ func (g *DefaultValidator) validateParameters(parameters []experimentsv1beta1.Pa
 			return fmt.Errorf("parameterType: %v is not supported in spec.parameters[%v]: %v", param.ParameterType, i, param)
 		}
 
-		if reflect.DeepEqual(param.FeasibleSpace, experimentsv1beta1.FeasibleSpace{}) {
+		if equality.Semantic.DeepEqual(param.FeasibleSpace, experimentsv1beta1.FeasibleSpace{}) {
 			return fmt.Errorf("feasibleSpace must be specified in spec.parameters[%v]: %v", i, param)
 		}
 
@@ -169,9 +168,6 @@ func (g *DefaultValidator) validateParameters(parameters []experimentsv1beta1.Pa
 		} else if param.ParameterType == experimentsv1beta1.ParameterTypeCategorical || param.ParameterType == experimentsv1beta1.ParameterTypeDiscrete {
 			if param.FeasibleSpace.Max != "" || param.FeasibleSpace.Min != "" || param.FeasibleSpace.Step != "" {
 				return fmt.Errorf("feasibleSpace .max, .min and .step is not supported for parameterType: %v in spec.parameters[%v]: %v", param.ParameterType, i, param)
-			}
-			if len(param.FeasibleSpace.List) == 0 {
-				return fmt.Errorf("feasibleSpace.list must be specified for parameterType: %v in spec.parameters[%v]: %v", param.ParameterType, i, param)
 			}
 		}
 	}
