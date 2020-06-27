@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -20,6 +21,7 @@ import (
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	controllerUtil "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
 )
@@ -125,8 +127,12 @@ func main() {
 	if exp.Spec.Objective.Goal != nil {
 		goal = *exp.Spec.Objective.Goal
 	}
-	if (exp.Spec.Objective.Goal != nil && objectiveType == commonv1beta1.ObjectiveTypeMinimize && metric.Min < goal) ||
-		(exp.Spec.Objective.Goal != nil && objectiveType == commonv1beta1.ObjectiveTypeMaximize && metric.Max > goal) {
+	// If min metric is set, max be set also
+	minMetric, err := strconv.ParseFloat(metric.Min, 64)
+	maxMetric, _ := strconv.ParseFloat(metric.Max, 64)
+	if err == nil &&
+		((exp.Spec.Objective.Goal != nil && objectiveType == commonv1beta1.ObjectiveTypeMinimize && metric.Min != consts.UnavailableMetricValue && minMetric < goal) ||
+			(exp.Spec.Objective.Goal != nil && objectiveType == commonv1beta1.ObjectiveTypeMaximize && metric.Max != consts.UnavailableMetricValue && maxMetric > goal)) {
 		log.Print("Objective Goal reached")
 	} else {
 
