@@ -115,3 +115,7 @@ required = [
 [[prune.project]]
   name = "k8s.io/gengo"
   unused-packages = false
+
+[[constraint]]
+  name = "github.com/grpc-ecosystem/go-grpc-middleware"
+  version = "1.2.0"

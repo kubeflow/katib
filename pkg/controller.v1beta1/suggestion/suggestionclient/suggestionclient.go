@@ -3,6 +3,8 @@ package suggestionclient
 import (
 	"context"
 	"fmt"
+	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 	"math"
 	"time"
 
@@ -110,7 +112,15 @@ func (g *General) SyncAssignments(
 func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1beta1.Suggestion, e *experimentsv1beta1.Experiment) error {
 	logger := log.WithValues("Suggestion", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	endpoint := util.GetAlgorithmEndpoint(instance)
-	conn, err := grpc.Dial(endpoint, grpc.WithInsecure())
+
+	callOpts := []grpc_retry.CallOption{
+		grpc_retry.WithBackoff(grpc_retry.BackoffLinear(consts.DefaultGRPCRetryPeriod)),
+		grpc_retry.WithMax(consts.DefaultGRPCRetryAttempts),
+	}
+	conn, err := grpc.Dial(endpoint, grpc.WithInsecure(),
+		grpc.WithStreamInterceptor(grpc_retry.StreamClientInterceptor(callOpts...)),
+		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(callOpts...)),
+	)
 	if err != nil {
 		return err
 	}
