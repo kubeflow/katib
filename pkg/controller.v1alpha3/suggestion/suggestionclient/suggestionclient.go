@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
+
+	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -105,7 +108,15 @@ func (g *General) SyncAssignments(
 func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1alpha3.Suggestion, e *experimentsv1alpha3.Experiment) error {
 	logger := log.WithValues("Suggestion", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	endpoint := util.GetAlgorithmEndpoint(instance)
-	conn, err := grpc.Dial(endpoint, grpc.WithInsecure())
+
+	callOpts := []grpc_retry.CallOption{
+		grpc_retry.WithBackoff(grpc_retry.BackoffLinear(consts.DefaultGRPCRetryPeriod)),
+		grpc_retry.WithMax(consts.DefaultGRPCRetryAttempts),
+	}
+	conn, err := grpc.Dial(endpoint, grpc.WithInsecure(),
+		grpc.WithStreamInterceptor(grpc_retry.StreamClientInterceptor(callOpts...)),
+		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(callOpts...)),
+	)
 	if err != nil {
 		return err
 	}
@@ -118,6 +129,7 @@ func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1alpha3.Sugges
 	request := &suggestionapi.ValidateAlgorithmSettingsRequest{
 		Experiment: g.ConvertExperiment(e),
 	}
+
 	// See https://github.com/grpc/grpc-go/issues/2636
 	// See https://github.com/grpc/grpc-go/pull/2503
 	_, err = client.ValidateAlgorithmSettings(ctx, request, grpc.WaitForReady(true))
