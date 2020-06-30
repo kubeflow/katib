@@ -280,11 +280,11 @@ func TestGetObjectiveMetricValue(t *testing.T) {
 	errMetric, accMetric, err := getMetricsFromLogs(metricStrategies)
 	g.Expect(err).ShouldNot(gomega.HaveOccurred())
 	g.Expect(errMetric.Latest).To(gomega.Equal("0.07"))
-	g.Expect(errMetric.Max).To(gomega.Equal(0.1))
-	g.Expect(errMetric.Min).To(gomega.Equal(0.01))
+	g.Expect(errMetric.Max).To(gomega.Equal("0.1"))
+	g.Expect(errMetric.Min).To(gomega.Equal("0.01"))
 	g.Expect(accMetric.Latest).To(gomega.Equal("0.67"))
-	g.Expect(accMetric.Max).To(gomega.Equal(0.72))
-	g.Expect(accMetric.Min).To(gomega.Equal(0.6))
+	g.Expect(accMetric.Max).To(gomega.Equal("0.72"))
+	g.Expect(accMetric.Min).To(gomega.Equal("0.6"))
 }
 
 func newFakeTrialWithTFJob() *trialsv1beta1.Trial {

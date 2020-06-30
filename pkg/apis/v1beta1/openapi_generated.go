@@ -212,8 +212,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 						},
 						"min": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"number"},
-								Format: "double",
+								Type:   []string{"string"},
+								Format: "",
 							},
 						},
 						"max": {
@@ -223,6 +223,27 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 							},
 						},
 						"latest": {
+							SchemaProps: spec.SchemaProps{
+								Type:   []string{"string"},
+								Format: "",
+							},
+						},
+					},
+				},
+			},
+			Dependencies: []string{},
+		},
+		"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.MetricStrategy": {
+			Schema: spec.Schema{
+				SchemaProps: spec.SchemaProps{
+					Properties: map[string]spec.Schema{
+						"name": {
+							SchemaProps: spec.SchemaProps{
+								Type:   []string{"string"},
+								Format: "",
+							},
+						},
+						"value": {
 							SchemaProps: spec.SchemaProps{
 								Type:   []string{"string"},
 								Format: "",
@@ -292,12 +313,11 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 						"metricStrategies": {
 							SchemaProps: spec.SchemaProps{
 								Description: "This field is allowed to missing, experiment defaulter (webhook) will fill it.",
-								Type:        []string{"object"},
-								AdditionalProperties: &spec.SchemaOrBool{
+								Type:        []string{"array"},
+								Items: &spec.SchemaOrArray{
 									Schema: &spec.Schema{
 										SchemaProps: spec.SchemaProps{
-											Type:   []string{"string"},
-											Format: "",
+											Ref: ref("github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.MetricStrategy"),
 										},
 									},
 								},
@@ -306,7 +326,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 					},
 				},
 			},
-			Dependencies: []string{},
+			Dependencies: []string{
+				"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.MetricStrategy"},
 		},
 		"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.Observation": {
 			Schema: spec.Schema{
@@ -380,6 +401,37 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 			},
 			Dependencies: []string{
 				"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.FileSystemPath", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.FilterSpec", "k8s.io/api/core/v1.HTTPGetAction"},
+		},
+		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.ConfigMapSource": {
+			Schema: spec.Schema{
+				SchemaProps: spec.SchemaProps{
+					Description: "ConfigMapSource references the config map where Trial template is located",
+					Properties: map[string]spec.Schema{
+						"configMapName": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Name of config map where Trial template is located",
+								Type:        []string{"string"},
+								Format:      "",
+							},
+						},
+						"configMapNamespace": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Namespace of config map where Trial template is located",
+								Type:        []string{"string"},
+								Format:      "",
+							},
+						},
+						"templatePath": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Path in config map where Trial template is located",
+								Type:        []string{"string"},
+								Format:      "",
+							},
+						},
+					},
+				},
+			},
+			Dependencies: []string{},
 		},
 		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.Experiment": {
 			Schema: spec.Schema{
@@ -795,27 +847,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 			},
 			Dependencies: []string{},
 		},
-		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.GoTemplate": {
-			Schema: spec.Schema{
-				SchemaProps: spec.SchemaProps{
-					Properties: map[string]spec.Schema{
-						"templateSpec": {
-							SchemaProps: spec.SchemaProps{
-								Ref: ref("github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.TemplateSpec"),
-							},
-						},
-						"rawTemplate": {
-							SchemaProps: spec.SchemaProps{
-								Type:   []string{"string"},
-								Format: "",
-							},
-						},
-					},
-				},
-			},
-			Dependencies: []string{
-				"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.TemplateSpec"},
-		},
 		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.GraphConfig": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
@@ -980,26 +1011,30 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 			Dependencies: []string{
 				"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.FeasibleSpace"},
 		},
-		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.TemplateSpec": {
+		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.TrialParameterSpec": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
+					Description: "TrialParameterSpec describes parameters that must be replaced in Trial template",
 					Properties: map[string]spec.Schema{
-						"configMapName": {
+						"name": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"string"},
-								Format: "",
+								Description: "Name of the parameter that must be replaced in Trial template",
+								Type:        []string{"string"},
+								Format:      "",
 							},
 						},
-						"configMapNamespace": {
+						"description": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"string"},
-								Format: "",
+								Description: "Description of the parameter",
+								Type:        []string{"string"},
+								Format:      "",
 							},
 						},
-						"templatePath": {
+						"reference": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"string"},
-								Format: "",
+								Description: "Reference to the parameter in search space",
+								Type:        []string{"string"},
+								Format:      "",
 							},
 						},
 					},
@@ -1007,26 +1042,71 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 			},
 			Dependencies: []string{},
 		},
-		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.TrialTemplate": {
+		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.TrialSource": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
+					Description: "TrialSource represent the source for Trial template Only one source can be specified",
 					Properties: map[string]spec.Schema{
-						"retain": {
+						"trialSpec": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"boolean"},
-								Format: "",
+								Description: "TrialSpec represents Trial template in unstructured format",
+								Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"),
 							},
 						},
-						"goTemplate": {
+						"configMap": {
 							SchemaProps: spec.SchemaProps{
-								Ref: ref("github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.GoTemplate"),
+								Description: "ConfigMap spec represents a reference to ConfigMap",
+								Ref:         ref("github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.ConfigMapSource"),
 							},
 						},
 					},
 				},
 			},
 			Dependencies: []string{
-				"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.GoTemplate"},
+				"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.ConfigMapSource", "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"},
+		},
+		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.TrialTemplate": {
+			Schema: spec.Schema{
+				SchemaProps: spec.SchemaProps{
+					Description: "TrialTemplate describes structure of Trial template",
+					Properties: map[string]spec.Schema{
+						"retain": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Retain indicates that Trial resources must be not cleanup",
+								Type:        []string{"boolean"},
+								Format:      "",
+							},
+						},
+						"trialSpec": {
+							SchemaProps: spec.SchemaProps{
+								Description: "TrialSpec represents Trial template in unstructured format",
+								Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"),
+							},
+						},
+						"configMap": {
+							SchemaProps: spec.SchemaProps{
+								Description: "ConfigMap spec represents a reference to ConfigMap",
+								Ref:         ref("github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.ConfigMapSource"),
+							},
+						},
+						"trialParameters": {
+							SchemaProps: spec.SchemaProps{
+								Description: "List of parameres that are used in Trial template",
+								Type:        []string{"array"},
+								Items: &spec.SchemaOrArray{
+									Schema: &spec.Schema{
+										SchemaProps: spec.SchemaProps{
+											Ref: ref("github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.TrialParameterSpec"),
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			Dependencies: []string{
+				"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.ConfigMapSource", "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.TrialParameterSpec", "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"},
 		},
 		"github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1.Suggestion": {
 			Schema: spec.Schema{
@@ -1454,8 +1534,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 						"runSpec": {
 							SchemaProps: spec.SchemaProps{
 								Description: "Raw text for the trial run spec. This can be any generic Kubernetes runtime object. The trial operator should create the resource as written, and let the corresponding resource controller (e.g. tf-operator) handle the rest.",
-								Type:        []string{"string"},
-								Format:      "",
+								Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"),
 							},
 						},
 						"retainRun": {
@@ -1476,7 +1555,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 				},
 			},
 			Dependencies: []string{
-				"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.MetricsCollectorSpec", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.ObjectiveSpec", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.ParameterAssignment"},
+				"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.MetricsCollectorSpec", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.ObjectiveSpec", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.ParameterAssignment", "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"},
 		},
 		"github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1.TrialStatus": {
 			Schema: spec.Schema{

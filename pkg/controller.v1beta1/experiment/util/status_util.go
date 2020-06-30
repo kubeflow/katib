@@ -16,14 +16,14 @@ limitations under the License.
 package util
 
 import (
-	"fmt"
-	"math"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"strconv"
+
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -80,11 +80,11 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 		}
 
 		objectiveMetricValueStr := getObjectiveMetricValue(trial)
-		if objectiveMetricValueStr == nil {
+		if objectiveMetricValueStr == consts.UnavailableMetricValue {
 			continue
 		}
 
-		objectiveMetricValue, err := strconv.ParseFloat(*objectiveMetricValueStr, 64)
+		objectiveMetricValue, err := strconv.ParseFloat(objectiveMetricValueStr, 64)
 		// For string metrics values best trial is the latest
 		if err != nil {
 			bestTrialIndex = index
@@ -140,9 +140,9 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 	return isObjectiveGoalReached
 }
 
-func getObjectiveMetricValue(trial trialsv1beta1.Trial) *string {
+func getObjectiveMetricValue(trial trialsv1beta1.Trial) string {
 	if trial.Status.Observation == nil {
-		return nil
+		return consts.UnavailableMetricValue
 	}
 	var objectiveStrategy commonv1beta1.MetricStrategyType
 	objectiveMetricName := trial.Spec.Objective.ObjectiveMetricName
@@ -156,25 +156,21 @@ func getObjectiveMetricValue(trial trialsv1beta1.Trial) *string {
 		if objectiveMetricName == metric.Name {
 			switch objectiveStrategy {
 			case commonv1beta1.ExtractByMin:
-				if math.IsNaN(metric.Min) {
-					return &metric.Latest
+				if metric.Min == consts.UnavailableMetricValue {
+					return metric.Latest
 				}
-				value := fmt.Sprintf("%f", metric.Min)
-				return &value
+				return metric.Min
 			case commonv1beta1.ExtractByMax:
-				if math.IsNaN(metric.Max) {
-					return &metric.Latest
+				if metric.Max == consts.UnavailableMetricValue {
+					return metric.Latest
 				}
-				value := fmt.Sprintf("%f", metric.Max)
-				return &value
+				return metric.Max
 			case commonv1beta1.ExtractByLatest:
-				return &metric.Latest
-			default:
-				return nil
+				return metric.Latest
 			}
 		}
 	}
-	return nil
+	return consts.UnavailableMetricValue
 }
 
 // UpdateExperimentStatusCondition updates the experiment status.

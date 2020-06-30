@@ -3,7 +3,6 @@ package suggestionclient
 import (
 	"context"
 	"fmt"
-	"math"
 	"time"
 
 	"google.golang.org/grpc"
@@ -18,6 +17,7 @@ import (
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	suggestionapi "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -267,20 +267,18 @@ func convertTrialObservation(strategies []commonapiv1beta1.MetricStrategy, obser
 			var value string
 			switch strategy, _ := strategyMap[m.Name]; strategy {
 			case commonapiv1beta1.ExtractByMin:
-				if math.IsNaN(m.Min) {
+				if m.Min == consts.UnavailableMetricValue {
 					value = m.Latest
 				} else {
-					value = fmt.Sprintf("%f", m.Min)
+					value = m.Min
 				}
 			case commonapiv1beta1.ExtractByMax:
-				if math.IsNaN(m.Max) {
+				if m.Max == consts.UnavailableMetricValue {
 					value = m.Latest
 				} else {
-					value = fmt.Sprintf("%f", m.Max)
+					value = m.Max
 				}
 			case commonapiv1beta1.ExtractByLatest:
-				value = m.Latest
-			default:
 				value = m.Latest
 			}
 			resObservation.Metrics = append(resObservation.Metrics, &suggestionapi.Metric{
@@ -289,7 +287,6 @@ func convertTrialObservation(strategies []commonapiv1beta1.MetricStrategy, obser
 			})
 		}
 	}
-
 	return resObservation
 }
 

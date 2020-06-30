@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -142,9 +143,12 @@ func main() {
 	if exp.Spec.Objective.Goal != nil {
 		goal = *exp.Spec.Objective.Goal
 	}
-	if (exp.Spec.Objective.Goal != nil && objectiveType == commonv1beta1.ObjectiveTypeMinimize && metric.Min < goal) ||
-		(exp.Spec.Objective.Goal != nil && objectiveType == commonv1beta1.ObjectiveTypeMaximize && metric.Max > goal) {
-		log.Print("Objective Goal reached")
+	// If min metric is set, max be set also
+	minMetric, err := strconv.ParseFloat(metric.Min, 64)
+	maxMetric, _ := strconv.ParseFloat(metric.Max, 64)
+	if err == nil &&
+		((exp.Spec.Objective.Goal != nil && objectiveType == commonv1beta1.ObjectiveTypeMinimize && minMetric < goal) ||
+			(exp.Spec.Objective.Goal != nil && objectiveType == commonv1beta1.ObjectiveTypeMaximize && maxMetric > goal)) {
 	} else {
 
 		if exp.Status.Trials != *exp.Spec.MaxTrialCount {

@@ -83,10 +83,10 @@ type MetricStrategy struct {
 }
 
 type Metric struct {
-	Name   string  `json:"name,omitempty"`
-	Min    float64 `json:"min,omitempty"`
-	Max    float64 `json:"max,omitempty"`
-	Latest string  `json:"latest,omitempty"`
+	Name   string `json:"name,omitempty"`
+	Min    string `json:"min,omitempty"`
+	Max    string `json:"max,omitempty"`
+	Latest string `json:"latest,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true
