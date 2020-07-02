@@ -26,7 +26,7 @@ const styles = theme => ({
     '&:hover': {
       cursor: 'pointer',
     },
-    width: '20%',
+    width: 300,
   },
   created: {
     color: theme.colors.created,
