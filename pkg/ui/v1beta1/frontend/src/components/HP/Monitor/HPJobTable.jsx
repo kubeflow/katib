@@ -1,4 +1,6 @@
 import React from 'react';
+import { connect } from 'react-redux';
+
 import { withStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -8,9 +10,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 
-import { connect } from 'react-redux';
 import { fetchHPJobTrialInfo } from '../../../actions/hpMonitorActions';
-
 import { HP_MONITOR_MODULE } from '../../../constants/constants';
 
 const styles = theme => ({
@@ -82,7 +82,6 @@ class HPJobTable extends React.Component {
   stableSort = (data, comparator) => {
     const stabilizedData = data.map((el, index) => [el, index]);
     stabilizedData.sort((a, b) => {
-      console.log(comparator);
       const order = comparator(a[0], b[0]);
       if (order !== 0) return order;
       return a[1] - b[1];
