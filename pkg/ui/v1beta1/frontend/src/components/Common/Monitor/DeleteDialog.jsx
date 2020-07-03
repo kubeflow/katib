@@ -7,9 +7,9 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
 import { connect } from 'react-redux';
-import { deleteExperiment, closeDeleteExperimentDialog } from '../../actions/generalActions';
+import { deleteExperiment, closeDeleteExperimentDialog } from '../../../actions/generalActions';
 
-import { GENERAL_MODULE } from '../../constants/constants';
+import { GENERAL_MODULE } from '../../../constants/constants';
 
 const DeleteDialog = props => {
   const onDelete = () => {

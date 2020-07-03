@@ -6,6 +6,7 @@ import * as hpCreateActions from '../actions/hpCreateActions';
 import * as nasMonitorActions from '../actions/nasMonitorActions';
 import * as nasCreateActions from '../actions/nasCreateActions';
 import * as generalActions from '../actions/generalActions';
+import { JOB_TYPE_HP, JOB_TYPE_NAS } from '../constants/constants';
 
 export const submitYaml = function*() {
   while (true) {
@@ -72,8 +73,34 @@ export const deleteExperiment = function*() {
     try {
       const result = yield call(goDeleteExperiment, action.name, action.namespace);
       if (result.status === 200) {
+        // Lower case json keys for HP Jobs
+        let hpJobs = Object.assign(result.data[JOB_TYPE_HP], {});
+        hpJobs.map((template, i) => {
+          return Object.keys(template).forEach(key => {
+            const value = template[key];
+            delete template[key];
+            template[key.toLowerCase()] = value;
+          });
+        });
+        // Lower case json keys for NAS Jobs
+        let nasJobs = Object.assign(result.data[JOB_TYPE_NAS], {});
+        nasJobs.map((template, i) => {
+          return Object.keys(template).forEach(key => {
+            const value = template[key];
+            delete template[key];
+            template[key.toLowerCase()] = value;
+          });
+        });
         yield put({
           type: generalActions.DELETE_EXPERIMENT_SUCCESS,
+        });
+        yield put({
+          type: hpMonitorActions.FETCH_HP_JOBS_SUCCESS,
+          jobs: hpJobs,
+        });
+        yield put({
+          type: nasMonitorActions.FETCH_NAS_JOBS_SUCCESS,
+          jobs: nasJobs,
         });
       } else {
         yield put({

@@ -114,6 +114,56 @@ func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	isExperimentDeleted := false
+
+	var hpJobs, nasJobs []JobView
+	var errHP, errNAS error
+
+	// Waiting until experiment will be deleted
+	for !isExperimentDeleted {
+		// At first, try to list experiments in cluster scope
+		hpJobs, errHP = k.getExperimentList([]string{""}, JobTypeHP)
+		nasJobs, errNAS = k.getExperimentList([]string{""}, JobTypeNAS)
+		if errHP != nil || errNAS != nil {
+			// If failed, just try to list experiments from own namespace
+			hpJobs, errHP = k.getExperimentList([]string{}, JobTypeHP)
+			nasJobs, errNAS = k.getExperimentList([]string{}, JobTypeNAS)
+		}
+		if errHP != nil || errNAS != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		isExperimentDeleted = true
+		for _, job := range hpJobs {
+			if job.Name == experimentName {
+				isExperimentDeleted = false
+				break
+			}
+		}
+		if isExperimentDeleted {
+			for _, job := range nasJobs {
+				if job.Name == experimentName {
+					isExperimentDeleted = false
+					break
+				}
+			}
+		}
+	}
+
+	jobs := map[string]interface{}{
+		JobTypeHP:  hpJobs,
+		JobTypeNAS: nasJobs,
+	}
+
+	response, err := json.Marshal(jobs)
+	if err != nil {
+		log.Printf("Marshal HP and NAS jobs failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
 }
 
 // FetchTrialTemplates gets all trial templates in all namespaces

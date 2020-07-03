@@ -5,11 +5,13 @@ import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 
 import FilterPanel from './FilterPanel';
-import NASJobList from './NASJobList';
+import ExperimentList from './ExperimentList';
 
+import { fetchHPJobs } from '../../../actions/hpMonitorActions';
 import { fetchNASJobs } from '../../../actions/nasMonitorActions';
+import { LINK_HP_MONITOR, JOB_TYPE_HP, JOB_TYPE_NAS } from '../../../constants/constants';
 
-const styles = theme => ({
+const styles = () => ({
   root: {
     width: '90%',
     margin: '0 auto',
@@ -20,23 +22,28 @@ const styles = theme => ({
   },
 });
 
-class NASJobMonitor extends React.Component {
+class ExperimentMonitor extends React.Component {
   componentDidMount() {
-    this.props.fetchNASJobs();
+    this.props.match.path === LINK_HP_MONITOR
+      ? this.props.fetchHPJobs()
+      : this.props.fetchNASJobs();
   }
 
   render() {
     const { classes } = this.props;
+
     return (
       <div className={classes.root}>
         <Typography variant={'h5'} className={classes.text}>
           {'Experiment Monitor'}
         </Typography>
         <FilterPanel />
-        <NASJobList />
+        <ExperimentList
+          jobType={this.props.match.path === LINK_HP_MONITOR ? JOB_TYPE_HP : JOB_TYPE_NAS}
+        />
       </div>
     );
   }
 }
 
-export default connect(null, { fetchNASJobs })(withStyles(styles)(NASJobMonitor));
+export default connect(null, { fetchHPJobs, fetchNASJobs })(withStyles(styles)(ExperimentMonitor));

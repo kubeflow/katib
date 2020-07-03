@@ -120,3 +120,19 @@ export const editTrialParameters = (index, name, reference, description) => ({
   reference,
   description,
 });
+
+export const FILTER_EXPERIMENTS = 'FILTER_EXPERIMENTS';
+
+export const filterExperiments = (experimentName, experimentNamespace) => ({
+  type: FILTER_EXPERIMENTS,
+  experimentName,
+  experimentNamespace,
+});
+
+export const CHANGE_TYPE = 'CHANGE_TYPE';
+
+export const changeType = (filter, checked) => ({
+  type: CHANGE_TYPE,
+  filter,
+  checked,
+});

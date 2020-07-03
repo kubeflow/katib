@@ -1,15 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
+
 import { withStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import { Link } from 'react-router-dom';
 import { ListItemSecondaryAction, IconButton } from '@material-ui/core';
-
-import { openDeleteExperimentDialog } from '../../../actions/generalActions';
-import DeleteDialog from '../../Menu/DeleteDialog';
 import ScheduleIcon from '@material-ui/icons/Schedule';
 import RestoreIcon from '@material-ui/icons/Restore';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
@@ -17,7 +15,15 @@ import DoneIcon from '@material-ui/icons/Done';
 import DeleteIcon from '@material-ui/icons/Delete';
 import HourglassFullIcon from '@material-ui/icons/HourglassFull';
 
-import { NAS_MONITOR_MODULE } from '../../../constants/constants';
+import DeleteDialog from './DeleteDialog';
+
+import { openDeleteExperimentDialog } from '../../../actions/generalActions';
+import {
+  GENERAL_MODULE,
+  JOB_TYPE_HP,
+  LINK_HP_MONITOR,
+  LINK_NAS_MONITOR,
+} from '../../../constants/constants';
 
 const styles = theme => ({
   created: {
@@ -37,7 +43,7 @@ const styles = theme => ({
   },
 });
 
-const NASJobList = props => {
+const ExperimentList = props => {
   const { classes } = props;
 
   const onDeleteExperiment = (name, namespace) => event => {
@@ -65,7 +71,11 @@ const NASJobList = props => {
               button
               key={i}
               component={Link}
-              to={`/katib/nas_monitor/${job.namespace}/${job.name}`}
+              to={
+                props.jobType === JOB_TYPE_HP
+                  ? LINK_HP_MONITOR + '/' + job.namespace + '/' + job.name
+                  : LINK_NAS_MONITOR + '/' + job.namespace + '/' + job.name
+              }
             >
               <ListItemIcon>{icon}</ListItemIcon>
               <ListItemText inset primary={`${job.name}`} secondary={job.namespace} />
@@ -88,10 +98,10 @@ const NASJobList = props => {
 
 const mapStateToProps = state => {
   return {
-    filteredJobsList: state[NAS_MONITOR_MODULE].filteredJobsList,
+    filteredJobsList: state[GENERAL_MODULE].filteredJobsList,
   };
 };
 
 export default connect(mapStateToProps, { openDeleteExperimentDialog })(
-  withStyles(styles)(NASJobList),
+  withStyles(styles)(ExperimentList),
 );

@@ -75,8 +75,8 @@ type NNView struct {
 type JobType string
 
 const (
-	JobTypeHP        = "HP"
-	JobTypeNAS       = "NAS"
+	JobTypeHP        = "hp"
+	JobTypeNAS       = "nas"
 	ActionTypeAdd    = "add"
 	ActionTypeEdit   = "edit"
 	ActionTypeDelete = "delete"
