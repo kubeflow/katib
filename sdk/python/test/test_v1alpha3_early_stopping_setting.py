@@ -15,9 +15,9 @@ from __future__ import absolute_import
 
 import unittest
 
-import katib
-from katib.models.v1alpha3_early_stopping_setting import V1alpha3EarlyStoppingSetting  # noqa: E501
-from katib.rest import ApiException
+from kubeflow import katib
+from kubeflow.katib.models.v1alpha3_early_stopping_setting import V1alpha3EarlyStoppingSetting  # noqa: E501
+from kubeflow.katib.rest import ApiException
 
 
 class TestV1alpha3EarlyStoppingSetting(unittest.TestCase):

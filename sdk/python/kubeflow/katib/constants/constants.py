@@ -18,12 +18,12 @@ import os
 EXPERIMENT_GROUP = 'kubeflow.org'
 EXPERIMENT_KIND = 'experiment'
 EXPERIMENT_PLURAL = 'experiments'
-EXPERIMENT_VERSION = os.environ.get('EXPERIMENT_VERSION', 'v1alpha3')
+EXPERIMENT_VERSION = os.environ.get('EXPERIMENT_VERSION', 'v1beta1')
 EXPERIMENT_LOGLEVEL = os.environ.get('EXPERIMENT_LOGLEVEL', 'INFO').upper()
 
 TRIAL_KIND = 'trial'
 TRIAL_PLURAL = 'trials'
-TRIAL_VERSION = os.environ.get('EXPERIMENT_VERSION', 'v1alpha3')
+TRIAL_VERSION = os.environ.get('EXPERIMENT_VERSION', 'v1beta1')
 
 # How long to wait in seconds for requests to the ApiServer
 APISERVER_TIMEOUT = 120
