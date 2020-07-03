@@ -287,16 +287,16 @@ const generalReducer = (state = initialState, action) => {
       };
     case actions.FETCH_EXPERIMENTS_SUCCESS:
       var experiments = action.experiments;
+
       var statuses = Object.assign({}, state.filterStatus);
       var statusKeys = Object.keys(statuses);
-
-      var filters = statusKeys.filter(key => {
+      var newFilterStatus = statusKeys.filter(key => {
         return statuses[key];
       });
 
       var filteredExperiments = experiments.filter(
         experiment =>
-          filters.includes(experiment.status) &&
+          newFilterStatus.includes(experiment.status) &&
           experiment.name.includes(state.experimentName) &&
           (experiment.namespace === state.experimentNamespace ||
             state.experimentNamespace === 'All namespaces'),
@@ -308,23 +308,20 @@ const generalReducer = (state = initialState, action) => {
       };
     case actions.FILTER_EXPERIMENTS:
       experiments = state.experiments.slice();
-      var newExperiments = experiments.filter(
+
+      statuses = Object.assign({}, state.filterStatus);
+      statusKeys = Object.keys(statuses);
+      newFilterStatus = statusKeys.filter(key => {
+        return statuses[key];
+      });
+
+      var filteredExperiments = experiments.filter(
         experiment =>
+          newFilterStatus.includes(experiment.status) &&
           experiment.name.includes(action.experimentName) &&
           (experiment.namespace === action.experimentNamespace ||
             action.experimentNamespace === 'All namespaces'),
       );
-      statuses = Object.assign({}, state.filterStatus);
-      statusKeys = Object.keys(statuses);
-
-      filters = statusKeys.filter(key => {
-        return statuses[key];
-      });
-
-      filteredExperiments = newExperiments.filter(experiment =>
-        filters.includes(experiment.status),
-      );
-
       return {
         ...state,
         filteredExperiments: filteredExperiments,
@@ -333,24 +330,21 @@ const generalReducer = (state = initialState, action) => {
       };
     case actions.CHANGE_STATUS:
       experiments = state.experiments.slice();
-      newExperiments = experiments.filter(
+
+      statuses = Object.assign({}, state.filterStatus);
+      statuses[action.filter] = action.checked;
+      statusKeys = Object.keys(statuses);
+      newFilterStatus = statusKeys.filter(key => {
+        return statuses[key];
+      });
+
+      filteredExperiments = experiments.filter(
         experiment =>
+          newFilterStatus.includes(experiment.status) &&
           experiment.name.includes(state.experimentName) &&
           (experiment.namespace === state.experimentNamespace ||
             state.experimentNamespace === 'All namespaces'),
       );
-      statuses = Object.assign({}, state.filterStatus);
-      statuses[action.filter] = action.checked;
-      statusKeys = Object.keys(statuses);
-
-      filters = statusKeys.filter(key => {
-        return statuses[key];
-      });
-
-      filteredExperiments = newExperiments.filter(experiment =>
-        filters.includes(experiment.status),
-      );
-
       return {
         ...state,
         filterStatus: statuses,
