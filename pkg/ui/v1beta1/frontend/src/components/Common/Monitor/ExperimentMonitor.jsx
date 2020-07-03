@@ -7,9 +7,12 @@ import Typography from '@material-ui/core/Typography';
 import FilterPanel from './FilterPanel';
 import ExperimentList from './ExperimentList';
 
-import { fetchHPJobs } from '../../../actions/hpMonitorActions';
-import { fetchNASJobs } from '../../../actions/nasMonitorActions';
-import { LINK_HP_MONITOR, JOB_TYPE_HP, JOB_TYPE_NAS } from '../../../constants/constants';
+import { fetchExperiments } from '../../../actions/generalActions';
+import {
+  LINK_HP_MONITOR,
+  EXPERIMENT_TYPE_HP,
+  EXPERIMENT_TYPE_NAS,
+} from '../../../constants/constants';
 
 const styles = () => ({
   root: {
@@ -24,9 +27,7 @@ const styles = () => ({
 
 class ExperimentMonitor extends React.Component {
   componentDidMount() {
-    this.props.match.path === LINK_HP_MONITOR
-      ? this.props.fetchHPJobs()
-      : this.props.fetchNASJobs();
+    this.props.fetchExperiments();
   }
 
   render() {
@@ -39,11 +40,13 @@ class ExperimentMonitor extends React.Component {
         </Typography>
         <FilterPanel />
         <ExperimentList
-          jobType={this.props.match.path === LINK_HP_MONITOR ? JOB_TYPE_HP : JOB_TYPE_NAS}
+          experimentType={
+            this.props.match.path === LINK_HP_MONITOR ? EXPERIMENT_TYPE_HP : EXPERIMENT_TYPE_NAS
+          }
         />
       </div>
     );
   }
 }
 
-export default connect(null, { fetchHPJobs, fetchNASJobs })(withStyles(styles)(ExperimentMonitor));
+export default connect(null, { fetchExperiments })(withStyles(styles)(ExperimentMonitor));

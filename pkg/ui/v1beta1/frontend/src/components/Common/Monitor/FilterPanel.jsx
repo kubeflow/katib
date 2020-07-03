@@ -11,7 +11,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 
-import { fetchNamespaces, filterExperiments, changeType } from '../../../actions/generalActions';
+import { fetchNamespaces, filterExperiments, changeStatus } from '../../../actions/generalActions';
 
 import { GENERAL_MODULE } from '../../../constants/constants';
 
@@ -43,8 +43,8 @@ class FilterPanel extends React.Component {
     }
   }
 
-  handleType = name => event => {
-    this.props.changeType(name, event.target.checked);
+  handleStatus = name => event => {
+    this.props.changeStatus(name, event.target.checked);
   };
 
   onNameChange = event => {
@@ -94,14 +94,14 @@ class FilterPanel extends React.Component {
             margin="normal"
             variant="outlined"
           />
-          {Object.keys(this.props.filterType).map((filter, i) => {
+          {Object.keys(this.props.filterStatus).map((filter, i) => {
             return (
               <FormControlLabel
                 key={i}
                 control={
                   <Switch
-                    checked={this.props.filterType[filter]}
-                    onChange={this.handleType(filter)}
+                    checked={this.props.filterStatus[filter]}
+                    onChange={this.handleStatus(filter)}
                     value={filter}
                     color={'primary'}
                   />
@@ -120,12 +120,12 @@ const mapStateToProps = state => {
   return {
     experimentName: state[GENERAL_MODULE].experimentName,
     experimentNamespace: state[GENERAL_MODULE].experimentNamespace,
-    filterType: state[GENERAL_MODULE].filterType,
+    filterStatus: state[GENERAL_MODULE].filterStatus,
     namespaces: state[GENERAL_MODULE].namespaces,
     globalNamespace: state[GENERAL_MODULE].globalNamespace,
   };
 };
 
-export default connect(mapStateToProps, { filterExperiments, changeType, fetchNamespaces })(
+export default connect(mapStateToProps, { filterExperiments, changeStatus, fetchNamespaces })(
   withStyles(styles)(FilterPanel),
 );

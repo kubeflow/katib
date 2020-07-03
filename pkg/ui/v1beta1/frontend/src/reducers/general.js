@@ -15,15 +15,15 @@ const initialState = {
 
   experimentName: '',
   experimentNamespace: 'All namespaces',
-  filterType: {
+  filterStatus: {
     Created: true,
     Running: true,
     Restarting: true,
     Succeeded: true,
     Failed: true,
   },
-  jobsList: [],
-  filteredJobsList: [],
+  experiments: [],
+  filteredExperiments: [],
 
   experiment: {},
   dialogExperimentOpen: false,
@@ -285,72 +285,76 @@ const generalReducer = (state = initialState, action) => {
         ...state,
         trialParameters: newParams,
       };
-    case hpMonitorActions.FETCH_HP_JOBS_SUCCESS:
-    case nasMonitorActions.FETCH_NAS_JOBS_SUCCESS:
-      var jobs = action.jobs;
-      var types = Object.assign({}, state.filterType);
-      var typeKeys = Object.keys(types);
+    case actions.FETCH_EXPERIMENTS_SUCCESS:
+      var experiments = action.experiments;
+      var statuses = Object.assign({}, state.filterStatus);
+      var statusKeys = Object.keys(statuses);
 
-      var filters = typeKeys.filter(key => {
-        return types[key];
+      var filters = statusKeys.filter(key => {
+        return statuses[key];
       });
 
-      var filteredJobs = jobs.filter(
-        job =>
-          filters.includes(job.status) &&
-          job.name.includes(state.experimentName) &&
-          (job.namespace === state.experimentNamespace ||
+      var filteredExperiments = experiments.filter(
+        experiment =>
+          filters.includes(experiment.status) &&
+          experiment.name.includes(state.experimentName) &&
+          (experiment.namespace === state.experimentNamespace ||
             state.experimentNamespace === 'All namespaces'),
       );
       return {
         ...state,
-        jobsList: action.jobs,
-        filteredJobsList: filteredJobs,
+        experiments: action.experiments,
+        filteredExperiments: filteredExperiments,
       };
     case actions.FILTER_EXPERIMENTS:
-      jobs = state.jobsList.slice();
-      var newList = jobs.filter(
-        job =>
-          job.name.includes(action.experimentName) &&
-          (job.namespace === action.experimentNamespace ||
+      experiments = state.experiments.slice();
+      var newExperiments = experiments.filter(
+        experiment =>
+          experiment.name.includes(action.experimentName) &&
+          (experiment.namespace === action.experimentNamespace ||
             action.experimentNamespace === 'All namespaces'),
       );
-      types = Object.assign({}, state.filterType);
-      typeKeys = Object.keys(types);
+      statuses = Object.assign({}, state.filterStatus);
+      statusKeys = Object.keys(statuses);
 
-      filters = typeKeys.filter(key => {
-        return types[key];
+      filters = statusKeys.filter(key => {
+        return statuses[key];
       });
 
-      filteredJobs = newList.filter(job => filters.includes(job.status));
+      filteredExperiments = newExperiments.filter(experiment =>
+        filters.includes(experiment.status),
+      );
 
       return {
         ...state,
-        filteredJobsList: filteredJobs,
+        filteredExperiments: filteredExperiments,
         experimentName: action.experimentName,
         experimentNamespace: action.experimentNamespace,
       };
-    case actions.CHANGE_TYPE:
-      jobs = state.jobsList.slice();
-      newList = jobs.filter(
-        job =>
-          job.name.includes(state.experimentName) &&
-          (job.namespace === state.experimentNamespace ||
+    case actions.CHANGE_STATUS:
+      experiments = state.experiments.slice();
+      newExperiments = experiments.filter(
+        experiment =>
+          experiment.name.includes(state.experimentName) &&
+          (experiment.namespace === state.experimentNamespace ||
             state.experimentNamespace === 'All namespaces'),
       );
-      types = Object.assign({}, state.filterType);
-      types[action.filter] = action.checked;
-      typeKeys = Object.keys(types);
+      statuses = Object.assign({}, state.filterStatus);
+      statuses[action.filter] = action.checked;
+      statusKeys = Object.keys(statuses);
 
-      filters = typeKeys.filter(key => {
-        return types[key];
+      filters = statusKeys.filter(key => {
+        return statuses[key];
       });
-      filteredJobs = newList.filter(job => filters.includes(job.status));
+
+      filteredExperiments = newExperiments.filter(experiment =>
+        filters.includes(experiment.status),
+      );
 
       return {
         ...state,
-        filterType: types,
-        filteredJobsList: filteredJobs,
+        filterStatus: statuses,
+        filteredExperiments: filteredExperiments,
       };
     default:
       return state;

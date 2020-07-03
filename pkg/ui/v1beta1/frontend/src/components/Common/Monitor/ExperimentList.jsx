@@ -20,9 +20,10 @@ import DeleteDialog from './DeleteDialog';
 import { openDeleteExperimentDialog } from '../../../actions/generalActions';
 import {
   GENERAL_MODULE,
-  JOB_TYPE_HP,
+  EXPERIMENT_TYPE_HP,
   LINK_HP_MONITOR,
   LINK_NAS_MONITOR,
+  EXPERIMENT_TYPE_NAS,
 } from '../../../constants/constants';
 
 const styles = theme => ({
@@ -53,43 +54,53 @@ const ExperimentList = props => {
   return (
     <div>
       <List component="nav">
-        {props.filteredJobsList.map((job, i) => {
-          let icon;
-          if (job.status === 'Created') {
-            icon = <HourglassFullIcon className={classes.created} />;
-          } else if (job.status === 'Running') {
-            icon = <ScheduleIcon className={classes.running} />;
-          } else if (job.status === 'Restarting') {
-            icon = <RestoreIcon className={classes.restarting} />;
-          } else if (job.status === 'Succeeded') {
-            icon = <DoneIcon className={classes.succeeded} />;
-          } else if (job.status === 'Failed') {
-            icon = <HighlightOffIcon className={classes.failed} />;
-          }
-          return (
-            <ListItem
-              button
-              key={i}
-              component={Link}
-              to={
-                props.jobType === JOB_TYPE_HP
-                  ? LINK_HP_MONITOR + '/' + job.namespace + '/' + job.name
-                  : LINK_NAS_MONITOR + '/' + job.namespace + '/' + job.name
-              }
-            >
-              <ListItemIcon>{icon}</ListItemIcon>
-              <ListItemText inset primary={`${job.name}`} secondary={job.namespace} />
-              <ListItemSecondaryAction>
-                <IconButton
-                  aria-label={'Delete'}
-                  onClick={onDeleteExperiment(job.name, job.namespace)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-          );
-        })}
+        {props.filteredExperiments
+          .filter(experiment =>
+            props.experimentType === EXPERIMENT_TYPE_HP
+              ? experiment.type === EXPERIMENT_TYPE_HP
+              : experiment.type === EXPERIMENT_TYPE_NAS,
+          )
+          .map((experiment, i) => {
+            let icon;
+            if (experiment.status === 'Created') {
+              icon = <HourglassFullIcon className={classes.created} />;
+            } else if (experiment.status === 'Running') {
+              icon = <ScheduleIcon className={classes.running} />;
+            } else if (experiment.status === 'Restarting') {
+              icon = <RestoreIcon className={classes.restarting} />;
+            } else if (experiment.status === 'Succeeded') {
+              icon = <DoneIcon className={classes.succeeded} />;
+            } else if (experiment.status === 'Failed') {
+              icon = <HighlightOffIcon className={classes.failed} />;
+            }
+            return (
+              <ListItem
+                button
+                key={i}
+                component={Link}
+                to={
+                  props.experimentType === EXPERIMENT_TYPE_HP
+                    ? LINK_HP_MONITOR + '/' + experiment.namespace + '/' + experiment.name
+                    : LINK_NAS_MONITOR + '/' + experiment.namespace + '/' + experiment.name
+                }
+              >
+                <ListItemIcon>{icon}</ListItemIcon>
+                <ListItemText
+                  inset
+                  primary={`${experiment.name}`}
+                  secondary={experiment.namespace}
+                />
+                <ListItemSecondaryAction>
+                  <IconButton
+                    aria-label={'Delete'}
+                    onClick={onDeleteExperiment(experiment.name, experiment.namespace)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            );
+          })}
       </List>
       <DeleteDialog />
     </div>
@@ -98,7 +109,7 @@ const ExperimentList = props => {
 
 const mapStateToProps = state => {
   return {
-    filteredJobsList: state[GENERAL_MODULE].filteredJobsList,
+    filteredExperiments: state[GENERAL_MODULE].filteredExperiments,
   };
 };
 

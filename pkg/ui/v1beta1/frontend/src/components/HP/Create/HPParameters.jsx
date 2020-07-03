@@ -222,7 +222,7 @@ const HPParameters = props => {
       {SectionInTypography('Parameters', classes)}
       <Parameters />
       {SectionInTypography('Metrics Collector Spec', classes)}
-      <MetricsCollectorSpec jobType={constants.JOB_TYPE_HP} />
+      <MetricsCollectorSpec jobType={constants.EXPERIMENT_TYPE_HP} />
       {SectionInTypography('Trial Template Spec', classes)}
       <TrialTemplate />
 

@@ -1,7 +1,7 @@
 // Here we store global constants for React frontend
 
-export const JOB_TYPE_HP = 'hp';
-export const JOB_TYPE_NAS = 'nas';
+export const EXPERIMENT_TYPE_HP = 'hp';
+export const EXPERIMENT_TYPE_NAS = 'nas';
 
 export const MC_KIND_STDOUT = 'StdOut';
 export const MC_KIND_FILE = 'File';

@@ -6,7 +6,6 @@ import * as hpCreateActions from '../actions/hpCreateActions';
 import * as nasMonitorActions from '../actions/nasMonitorActions';
 import * as nasCreateActions from '../actions/nasCreateActions';
 import * as generalActions from '../actions/generalActions';
-import { JOB_TYPE_HP, JOB_TYPE_NAS } from '../constants/constants';
 
 export const submitYaml = function*() {
   while (true) {
@@ -73,18 +72,9 @@ export const deleteExperiment = function*() {
     try {
       const result = yield call(goDeleteExperiment, action.name, action.namespace);
       if (result.status === 200) {
-        // Lower case json keys for HP Jobs
-        let hpJobs = Object.assign(result.data[JOB_TYPE_HP], {});
-        hpJobs.map((template, i) => {
-          return Object.keys(template).forEach(key => {
-            const value = template[key];
-            delete template[key];
-            template[key.toLowerCase()] = value;
-          });
-        });
-        // Lower case json keys for NAS Jobs
-        let nasJobs = Object.assign(result.data[JOB_TYPE_NAS], {});
-        nasJobs.map((template, i) => {
+        // Lower case json keys for all experiments
+        let experiments = Object.assign(result.data, {});
+        experiments.map((template, i) => {
           return Object.keys(template).forEach(key => {
             const value = template[key];
             delete template[key];
@@ -95,12 +85,8 @@ export const deleteExperiment = function*() {
           type: generalActions.DELETE_EXPERIMENT_SUCCESS,
         });
         yield put({
-          type: hpMonitorActions.FETCH_HP_JOBS_SUCCESS,
-          jobs: hpJobs,
-        });
-        yield put({
-          type: nasMonitorActions.FETCH_NAS_JOBS_SUCCESS,
-          jobs: nasJobs,
+          type: generalActions.FETCH_EXPERIMENTS_SUCCESS,
+          experiments: experiments,
         });
       } else {
         yield put({
@@ -167,11 +153,11 @@ const goSubmitHPJob = function*(postData) {
   }
 };
 
-export const fetchHPJobs = function*() {
+export const fetchExperiments = function*() {
   while (true) {
-    yield take(hpMonitorActions.FETCH_HP_JOBS_REQUEST);
+    yield take(generalActions.FETCH_EXPERIMENTS_REQUEST);
     try {
-      const result = yield call(goFetchHPJobs);
+      const result = yield call(goFetchExperiments);
       if (result.status === 200) {
         let data = Object.assign(result.data, {});
         data.map((template, i) => {
@@ -182,29 +168,29 @@ export const fetchHPJobs = function*() {
           });
         });
         yield put({
-          type: hpMonitorActions.FETCH_HP_JOBS_SUCCESS,
-          jobs: data,
+          type: generalActions.FETCH_EXPERIMENTS_SUCCESS,
+          experiments: data,
         });
       } else {
         yield put({
-          type: hpMonitorActions.FETCH_HP_JOBS_FAILURE,
+          type: generalActions.FETCH_EXPERIMENTS_FAILURE,
         });
       }
     } catch (err) {
       yield put({
-        type: hpMonitorActions.FETCH_HP_JOBS_FAILURE,
+        type: generalActions.FETCH_EXPERIMENTS_FAILURE,
       });
     }
   }
 };
 
-const goFetchHPJobs = function*() {
+const goFetchExperiments = function*() {
   try {
-    const result = yield call(axios.get, '/katib/fetch_hp_jobs/');
+    const result = yield call(axios.get, '/katib/fetch_experiments/');
     return result;
   } catch (err) {
     yield put({
-      type: hpMonitorActions.FETCH_HP_JOBS_FAILURE,
+      type: generalActions.FETCH_EXPERIMENTS_FAILURE,
     });
   }
 };
@@ -395,48 +381,6 @@ const goSubmitNASJob = function*(postData) {
       status: 500,
       message: err.response.data,
     };
-  }
-};
-
-export const fetchNASJobs = function*() {
-  while (true) {
-    yield take(nasMonitorActions.FETCH_NAS_JOBS_REQUEST);
-    try {
-      const result = yield call(goFetchNASJobs);
-      if (result.status === 200) {
-        let data = Object.assign(result.data, {});
-        data.map((template, i) => {
-          return Object.keys(template).forEach(key => {
-            const value = template[key];
-            delete template[key];
-            template[key.toLowerCase()] = value;
-          });
-        });
-        yield put({
-          type: nasMonitorActions.FETCH_NAS_JOBS_SUCCESS,
-          jobs: data,
-        });
-      } else {
-        yield put({
-          type: nasMonitorActions.FETCH_NAS_JOBS_FAILURE,
-        });
-      }
-    } catch (err) {
-      yield put({
-        type: nasMonitorActions.FETCH_NAS_JOBS_FAILURE,
-      });
-    }
-  }
-};
-
-const goFetchNASJobs = function*() {
-  try {
-    const result = yield call(axios.get, '/katib/fetch_nas_jobs/');
-    return result;
-  } catch (err) {
-    yield put({
-      type: nasMonitorActions.FETCH_NAS_JOBS_FAILURE,
-    });
   }
 };
 
@@ -711,8 +655,7 @@ const goFetchNamespaces = function*() {
 export default function* rootSaga() {
   yield all([
     fork(fetchTrialTemplates),
-    fork(fetchHPJobs),
-    fork(fetchNASJobs),
+    fork(fetchExperiments),
     fork(addTemplate),
     fork(editTemplate),
     fork(deleteTemplate),

@@ -98,6 +98,27 @@ func (k *KatibUIHandler) SubmitParamsJob(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+// FetchAllExperiments gets HP and NAS experiments in all namespaces.
+func (k *KatibUIHandler) FetchAllExperiments(w http.ResponseWriter, r *http.Request) {
+	// At first, try to list experiments in cluster scope
+	experiments, err := k.getExperiments([]string{""})
+	if err != nil {
+		// If failed, just try to list experiments from own namespace
+		experiments, err = k.getExperiments([]string{})
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	response, err := json.Marshal(experiments)
+	if err != nil {
+		log.Printf("Marshal experiments failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
+}
+
 func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request) {
 	experimentName := r.URL.Query()["experimentName"][0]
 	namespace := r.URL.Query()["namespace"][0]
@@ -117,49 +138,33 @@ func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request
 
 	isExperimentDeleted := false
 
-	var hpJobs, nasJobs []JobView
-	var errHP, errNAS error
+	var experiments []ExperimentView
 
 	// Waiting until experiment will be deleted
 	for !isExperimentDeleted {
 		// At first, try to list experiments in cluster scope
-		hpJobs, errHP = k.getExperimentList([]string{""}, JobTypeHP)
-		nasJobs, errNAS = k.getExperimentList([]string{""}, JobTypeNAS)
-		if errHP != nil || errNAS != nil {
+		experiments, err = k.getExperiments([]string{""})
+		if err != nil {
 			// If failed, just try to list experiments from own namespace
-			hpJobs, errHP = k.getExperimentList([]string{}, JobTypeHP)
-			nasJobs, errNAS = k.getExperimentList([]string{}, JobTypeNAS)
+			experiments, err = k.getExperiments([]string{})
 		}
-		if errHP != nil || errNAS != nil {
+		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		isExperimentDeleted = true
-		for _, job := range hpJobs {
-			if job.Name == experimentName {
+		for _, experiment := range experiments {
+			if experiment.Name == experimentName {
 				isExperimentDeleted = false
 				break
 			}
 		}
-		if isExperimentDeleted {
-			for _, job := range nasJobs {
-				if job.Name == experimentName {
-					isExperimentDeleted = false
-					break
-				}
-			}
-		}
 	}
 
-	jobs := map[string]interface{}{
-		JobTypeHP:  hpJobs,
-		JobTypeNAS: nasJobs,
-	}
-
-	response, err := json.Marshal(jobs)
+	response, err := json.Marshal(experiments)
 	if err != nil {
-		log.Printf("Marshal HP and NAS jobs failed: %v", err)
+		log.Printf("Marshal HP and NAS experiments failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
