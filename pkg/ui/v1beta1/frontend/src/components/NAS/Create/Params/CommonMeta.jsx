@@ -1,5 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
+
+import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
@@ -7,7 +9,6 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 
 import { changeMeta } from '../../../../actions/nasCreateActions';
-import { withStyles } from '@material-ui/core';
 
 import { GENERAL_MODULE, NAS_CREATE_MODULE } from '../../../../constants/constants';
 
@@ -49,7 +50,7 @@ class CommonParametersMeta extends React.Component {
             <div key={i} className={classes.parameter}>
               <Grid container alignItems={'center'}>
                 <Grid item xs={12} sm={3}>
-                  <Typography variant={'subheading'}>
+                  <Typography variant={'subtitle1'}>
                     <Tooltip title={param.description}>
                       <HelpOutlineIcon className={classes.help} color={'primary'} />
                     </Tooltip>

@@ -315,7 +315,7 @@ const generalReducer = (state = initialState, action) => {
         return statuses[key];
       });
 
-      var filteredExperiments = experiments.filter(
+      filteredExperiments = experiments.filter(
         experiment =>
           newFilterStatus.includes(experiment.status) &&
           experiment.name.includes(action.experimentName) &&

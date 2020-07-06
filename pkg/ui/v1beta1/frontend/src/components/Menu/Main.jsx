@@ -1,7 +1,8 @@
 import React from 'react';
+
 import { Link } from 'react-router-dom';
 
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
@@ -44,7 +45,7 @@ const Main = props => {
       <Typography variant={'h4'}>Welcome to Katib</Typography>
       <Typography variant={'h6'}>Choose type of experiment</Typography>
       <br />
-      <Grid container spacing={40} alignContent={'center'}>
+      <Grid container spacing={5} alignContent={'center'}>
         <Grid item xs={6} className={classes.item} component={Link} to={LINK_HP_CREATE}>
           <Paper className={classes.block}>
             <Typography variant={'h6'} color={'secondary'}>

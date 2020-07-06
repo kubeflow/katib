@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { withStyles } from '@material-ui/core/styles';
 
+import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -30,6 +30,9 @@ const styles = theme => ({
     width: 200,
     height: 56,
     textAlign: 'left',
+  },
+  selectLabel: {
+    marginLeft: '8px',
   },
 });
 
@@ -62,12 +65,13 @@ class FilterPanel extends React.Component {
       <div className={classes.filter}>
         <FormGroup row>
           <FormControl variant="outlined">
-            <InputLabel>Namespace</InputLabel>
+            <InputLabel className={classes.selectLabel}>Namespace</InputLabel>
             {this.props.globalNamespace === '' ? (
               <Select
                 value={this.props.experimentNamespace}
                 onChange={this.onNamespaceChange}
                 className={classes.selectBox}
+                label="Namespace"
               >
                 {this.props.namespaces.map((namespace, i) => {
                   return (
@@ -78,7 +82,12 @@ class FilterPanel extends React.Component {
                 })}
               </Select>
             ) : (
-              <Select value={this.props.experimentNamespace} className={classes.selectBox} disabled>
+              <Select
+                value={this.props.experimentNamespace}
+                className={classes.selectBox}
+                disabled
+                label="Namespace"
+              >
                 <MenuItem value={this.props.experimentNamespace}>
                   {this.props.experimentNamespace}
                 </MenuItem>
@@ -91,7 +100,6 @@ class FilterPanel extends React.Component {
             className={classes.textField}
             value={this.props.experimentName}
             onChange={this.onNameChange}
-            margin="normal"
             variant="outlined"
           />
           {Object.keys(this.props.filterStatus).map((filter, i) => {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import makeStyles from '@material-ui/styles/makeStyles';
 
+import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
@@ -58,7 +58,7 @@ const TrialParameters = props => {
       {props.trialParameters.length > 0 ? (
         <Grid container alignItems={'center'}>
           <Grid item xs={3}>
-            <Typography variant={'subheading'}>
+            <Typography variant={'subtitle1'}>
               <Tooltip
                 title={
                   'Parameters for the Trial Template. Name - parameter that must be replaced in Template, Reference - parameter from Suggestion assignments'

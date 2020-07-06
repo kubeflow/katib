@@ -1,16 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
+
+import { Link } from 'react-router-dom';
+
 import { withStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import { Link } from 'react-router-dom';
 import { ListItemSecondaryAction, IconButton } from '@material-ui/core';
-
-import { openDeleteExperimentDialog } from '../../../actions/generalActions';
-import DeleteDialog from '../../Menu/DeleteDialog';
-
 import ScheduleIcon from '@material-ui/icons/Schedule';
 import RestoreIcon from '@material-ui/icons/Restore';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
