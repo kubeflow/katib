@@ -1,6 +1,9 @@
 package consts
 
-import "github.com/kubeflow/katib/pkg/util/v1beta1/env"
+import (
+	"github.com/kubeflow/katib/pkg/util/v1beta1/env"
+	"time"
+)
 
 const (
 	// ConfigExperimentSuggestionName is the config name of the
@@ -34,6 +37,11 @@ const (
 	// DefaultGRPCService is the default service name in Suggestion,
 	// which is used to run healthz check using grpc probe.
 	DefaultGRPCService = "manager.v1beta1.Suggestion"
+
+	// DefaultGRPCRetryAttempts is the the maximum number of retries for gRPC calls
+	DefaultGRPCRetryAttempts = 10
+	// DefaultGRPCRetryPeriod is a fixed period of time between gRPC call retries
+	DefaultGRPCRetryPeriod = 3 * time.Second
 
 	// DefaultKatibNamespaceEnvName is the default env name of katib namespace
 	DefaultKatibNamespaceEnvName = "KATIB_CORE_NAMESPACE"

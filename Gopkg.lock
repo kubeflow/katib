@@ -21,7 +21,7 @@
   version = "v33.2.0"
 
 [[projects]]
-  digest = "1:7dc53e012b9e58f6fc52dce9c201d38dbc3c0e573bad4a56fa0f861823934915"
+  digest = "0:"
   name = "github.com/Azure/go-autorest"
   packages = [
     "autorest",
@@ -360,6 +360,18 @@
   ]
   pruneopts = "NUT"
   revision = "3befbb6ad0cc97d4c25d851e9528915809e1a22f"
+
+[[projects]]
+  digest = "1:565241cb2792bb47f174ca83a7b889a2c085d56837e8e60bfeffe00e1419f76f"
+  name = "github.com/grpc-ecosystem/go-grpc-middleware"
+  packages = [
+    "retry",
+    "util/backoffutils",
+    "util/metautils",
+  ]
+  pruneopts = "NUT"
+  revision = "3c51f7f332123e8be5a157c0802a228ac85bf9db"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:7ad601623f5af048e72d0c712e2ce6647dbbd14d9e18c31e3464156de8c567ee"
@@ -1165,10 +1177,11 @@
   version = "kubernetes-1.12.9"
 
 [[projects]]
-  digest = "1:3eddbb7af5a4d40c8cbd3b43f1b1d3ac884150612e27f1a618118af08141408a"
+  digest = "1:04624b2578bd24097709f6d78bec8e648260fc29330c8a9e5a4b3eee57bf6296"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
+    "discovery/fake",
     "dynamic",
     "kubernetes",
     "kubernetes/scheme",
@@ -1212,6 +1225,7 @@
     "rest",
     "rest/watch",
     "restmapper",
+    "testing",
     "third_party/forked/golang/template",
     "tools/auth",
     "tools/cache",
@@ -1291,7 +1305,7 @@
   revision = "39cb288412c48cb533ba4be5d6c28620b9a0c1b4"
 
 [[projects]]
-  digest = "1:ea0871075d014a0c553b8430c4b162f8dd6397bf25a4938cadcd56d3e05f7afe"
+  digest = "0:"
   name = "k8s.io/kubernetes"
   packages = [
     "pkg/cloudprovider/providers/azure/auth",
@@ -1418,6 +1432,7 @@
     "github.com/google/go-containerregistry/pkg/name",
     "github.com/google/go-containerregistry/pkg/v1",
     "github.com/google/go-containerregistry/pkg/v1/remote",
+    "github.com/grpc-ecosystem/go-grpc-middleware/retry",
     "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway",
     "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger",
     "github.com/grpc-ecosystem/grpc-gateway/runtime",
@@ -1426,6 +1441,7 @@
     "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1",
     "github.com/kubeflow/tf-operator/pkg/apis/common/v1",
     "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1",
+    "github.com/mattbaird/jsonpatch",
     "github.com/mitchellh/go-ps",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
@@ -1454,14 +1470,22 @@
     "k8s.io/apimachinery/pkg/labels",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
+    "k8s.io/apimachinery/pkg/runtime/serializer",
     "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apimachinery/pkg/util/rand",
+    "k8s.io/apimachinery/pkg/util/runtime",
     "k8s.io/apimachinery/pkg/util/yaml",
+    "k8s.io/apimachinery/pkg/watch",
+    "k8s.io/client-go/discovery",
+    "k8s.io/client-go/discovery/fake",
     "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
+    "k8s.io/client-go/testing",
+    "k8s.io/client-go/tools/cache",
     "k8s.io/client-go/tools/record",
+    "k8s.io/client-go/util/flowcontrol",
     "k8s.io/code-generator/cmd/deepcopy-gen",
     "k8s.io/code-generator/cmd/openapi-gen",
     "k8s.io/klog",
