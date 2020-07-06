@@ -1,7 +1,7 @@
 // Here we store global constants for React frontend
 
-export const JOB_TYPE_HP = 'hp';
-export const JOB_TYPE_NAS = 'nas';
+export const EXPERIMENT_TYPE_HP = 'hp';
+export const EXPERIMENT_TYPE_NAS = 'nas';
 
 export const MC_KIND_STDOUT = 'StdOut';
 export const MC_KIND_FILE = 'File';
@@ -20,7 +20,10 @@ export const MC_PROMETHEUS_DEFAULT_PORT = 8080;
 export const MC_PROMETHEUS_DEFAULT_PATH = '/metrics';
 
 export const LINK_HP_CREATE = '/katib/hp';
+export const LINK_HP_MONITOR = '/katib/hp_monitor';
 export const LINK_NAS_CREATE = '/katib/nas';
+export const LINK_NAS_MONITOR = '/katib/nas_monitor';
+export const LINK_TRIAL_TEMPLATE = '/katib/trial';
 
 export const GENERAL_MODULE = 'general';
 export const HP_CREATE_MODULE = 'hpCreate';

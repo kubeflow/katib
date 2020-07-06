@@ -80,13 +80,13 @@ const styles = theme => ({
 
 class MetricsCollectorSpec extends React.Component {
   onMCKindChange = event => {
-    this.props.jobType === constants.JOB_TYPE_HP
+    this.props.jobType === constants.EXPERIMENT_TYPE_HP
       ? this.props.changeMCKindHP(event.target.value)
       : this.props.changeMCKindNAS(event.target.value);
   };
 
   onMCFileSystemKindChange = event => {
-    this.props.jobType === constants.JOB_TYPE_HP
+    this.props.jobType === constants.EXPERIMENT_TYPE_HP
       ? this.props.changeMCFileSystemHP(
           event.target.value,
           this.props.mcSpecHP.source.fileSystemPath.path,
@@ -98,7 +98,7 @@ class MetricsCollectorSpec extends React.Component {
   };
 
   onMCFileSystemPathChange = event => {
-    this.props.jobType === constants.JOB_TYPE_HP
+    this.props.jobType === constants.EXPERIMENT_TYPE_HP
       ? this.props.changeMCFileSystemHP(
           this.props.mcSpecHP.source.fileSystemPath.kind,
           event.target.value,
@@ -110,25 +110,25 @@ class MetricsCollectorSpec extends React.Component {
   };
 
   onMCMetricsFormatAdd = () => {
-    this.props.jobType === constants.JOB_TYPE_HP
+    this.props.jobType === constants.EXPERIMENT_TYPE_HP
       ? this.props.addMCMetricsFormatHP()
       : this.props.addMCMetricsFormatNAS();
   };
 
   onMCMetricsFormatChange = index => event => {
-    this.props.jobType === constants.JOB_TYPE_HP
+    this.props.jobType === constants.EXPERIMENT_TYPE_HP
       ? this.props.changeMCMetricsFormatHP(event.target.value, index)
       : this.props.changeMCMetricsFormatNAS(event.target.value, index);
   };
 
   onMCMetricsFormatDelete = index => event => {
-    this.props.jobType === constants.JOB_TYPE_HP
+    this.props.jobType === constants.EXPERIMENT_TYPE_HP
       ? this.props.deleteMCMetricsFormatHP(index)
       : this.props.deleteMCMetricsFormatNAS(index);
   };
 
   onMCHttpGetPortChange = event => {
-    this.props.jobType === constants.JOB_TYPE_HP
+    this.props.jobType === constants.EXPERIMENT_TYPE_HP
       ? this.props.changeMCHttpGetHP(
           event.target.value,
           this.props.mcSpecHP.source.httpGet.path,
@@ -144,7 +144,7 @@ class MetricsCollectorSpec extends React.Component {
   };
 
   onMCHttpGetPathChange = event => {
-    this.props.jobType === constants.JOB_TYPE_HP
+    this.props.jobType === constants.EXPERIMENT_TYPE_HP
       ? this.props.changeMCHttpGetHP(
           this.props.mcSpecHP.source.httpGet.port,
           event.target.value,
@@ -160,7 +160,7 @@ class MetricsCollectorSpec extends React.Component {
   };
 
   onMCHttpGetSchemeChange = event => {
-    this.props.jobType === constants.JOB_TYPE_HP
+    this.props.jobType === constants.EXPERIMENT_TYPE_HP
       ? this.props.changeMCHttpGetHP(
           this.props.mcSpecHP.source.httpGet.port,
           this.props.mcSpecHP.source.httpGet.path,
@@ -176,7 +176,7 @@ class MetricsCollectorSpec extends React.Component {
   };
 
   onMCHttpGetHostChange = event => {
-    this.props.jobType === constants.JOB_TYPE_HP
+    this.props.jobType === constants.EXPERIMENT_TYPE_HP
       ? this.props.changeMCHttpGetHP(
           this.props.mcSpecHP.source.httpGet.port,
           this.props.mcSpecHP.source.httpGet.path,
@@ -192,25 +192,25 @@ class MetricsCollectorSpec extends React.Component {
   };
 
   onMCHttpGetHeaderAdd = () => {
-    this.props.jobType === constants.JOB_TYPE_HP
+    this.props.jobType === constants.EXPERIMENT_TYPE_HP
       ? this.props.addMCHttpGetHeaderHP()
       : this.props.addMCHttpGetHeaderNAS();
   };
 
   onMCHttpGetHeaderChange = (fieldName, index) => event => {
-    this.props.jobType === constants.JOB_TYPE_HP
+    this.props.jobType === constants.EXPERIMENT_TYPE_HP
       ? this.props.changeMCHttpGetHeaderHP(fieldName, event.target.value, index)
       : this.props.changeMCHttpGetHeaderNAS(fieldName, event.target.value, index);
   };
 
   onMCHttpGetHeaderDelete = index => event => {
-    this.props.jobType === constants.JOB_TYPE_HP
+    this.props.jobType === constants.EXPERIMENT_TYPE_HP
       ? this.props.deleteMCHttpGetHeaderHP(index)
       : this.props.deleteMCHttpGetHeaderNAS(index);
   };
 
   onMCCustomContainerChange = yamlContainer => {
-    this.props.jobType === constants.JOB_TYPE_HP
+    this.props.jobType === constants.EXPERIMENT_TYPE_HP
       ? this.props.changeMCCustomContainerHP(yamlContainer)
       : this.props.changeMCCustomContainerNAS(yamlContainer);
   };
@@ -232,7 +232,7 @@ class MetricsCollectorSpec extends React.Component {
               <InputLabel>Kind</InputLabel>
               <Select
                 value={
-                  this.props.jobType === constants.JOB_TYPE_HP
+                  this.props.jobType === constants.EXPERIMENT_TYPE_HP
                     ? this.props.mcSpecHP.collector.kind
                     : this.props.mcSpecNAS.collector.kind
                 }
@@ -250,11 +250,11 @@ class MetricsCollectorSpec extends React.Component {
             </FormControl>
           </Grid>
         </Grid>
-        {((this.props.jobType === constants.JOB_TYPE_HP &&
+        {((this.props.jobType === constants.EXPERIMENT_TYPE_HP &&
           (this.props.mcSpecHP.collector.kind === constants.MC_KIND_FILE ||
             this.props.mcSpecHP.collector.kind === constants.MC_KIND_TENSORFLOW_EVENT ||
             this.props.mcSpecHP.collector.kind === constants.MC_KIND_CUSTOM)) ||
-          (this.props.jobType === constants.JOB_TYPE_NAS &&
+          (this.props.jobType === constants.EXPERIMENT_TYPE_NAS &&
             (this.props.mcSpecNAS.collector.kind === constants.MC_KIND_FILE ||
               this.props.mcSpecNAS.collector.kind === constants.MC_KIND_TENSORFLOW_EVENT ||
               this.props.mcSpecNAS.collector.kind === constants.MC_KIND_CUSTOM))) && (
@@ -276,33 +276,33 @@ class MetricsCollectorSpec extends React.Component {
                 <InputLabel>File System Kind</InputLabel>
                 <Select
                   value={
-                    this.props.jobType === constants.JOB_TYPE_HP
+                    this.props.jobType === constants.EXPERIMENT_TYPE_HP
                       ? this.props.mcSpecHP.source.fileSystemPath.kind
                       : this.props.mcSpecNAS.source.fileSystemPath.kind
                   }
                   onChange={this.onMCFileSystemKindChange}
                   input={<OutlinedInput labelWidth={120} />}
                 >
-                  {((this.props.jobType === constants.JOB_TYPE_HP &&
+                  {((this.props.jobType === constants.EXPERIMENT_TYPE_HP &&
                     this.props.mcSpecHP.collector.kind === constants.MC_KIND_FILE) ||
-                    (this.props.jobType === constants.JOB_TYPE_NAS &&
+                    (this.props.jobType === constants.EXPERIMENT_TYPE_NAS &&
                       this.props.mcSpecNAS.collector.kind === constants.MC_KIND_FILE)) && (
                     <MenuItem value={constants.MC_FILE_SYSTEM_KIND_FILE} key={0}>
                       {constants.MC_FILE_SYSTEM_KIND_FILE}
                     </MenuItem>
                   )}
-                  {((this.props.jobType === constants.JOB_TYPE_HP &&
+                  {((this.props.jobType === constants.EXPERIMENT_TYPE_HP &&
                     this.props.mcSpecHP.collector.kind === constants.MC_KIND_TENSORFLOW_EVENT) ||
-                    (this.props.jobType === constants.JOB_TYPE_NAS &&
+                    (this.props.jobType === constants.EXPERIMENT_TYPE_NAS &&
                       this.props.mcSpecNAS.collector.kind ===
                         constants.MC_KIND_TENSORFLOW_EVENT)) && (
                     <MenuItem value={constants.MC_FILE_SYSTEM_KIND_DIRECTORY} key={0}>
                       {constants.MC_FILE_SYSTEM_KIND_DIRECTORY}
                     </MenuItem>
                   )}
-                  {((this.props.jobType === constants.JOB_TYPE_HP &&
+                  {((this.props.jobType === constants.EXPERIMENT_TYPE_HP &&
                     this.props.mcSpecHP.collector.kind === constants.MC_KIND_CUSTOM) ||
-                    (this.props.jobType === constants.JOB_TYPE_NAS &&
+                    (this.props.jobType === constants.EXPERIMENT_TYPE_NAS &&
                       this.props.mcSpecNAS.collector.kind === constants.MC_KIND_CUSTOM)) &&
                     this.props.mcFileSystemKindsList.map((kind, i) => {
                       return (
@@ -314,10 +314,10 @@ class MetricsCollectorSpec extends React.Component {
                 </Select>
               </FormControl>
             </Grid>
-            {((this.props.jobType === constants.JOB_TYPE_HP &&
+            {((this.props.jobType === constants.EXPERIMENT_TYPE_HP &&
               this.props.mcSpecHP.source.fileSystemPath.kind !==
                 constants.MC_FILE_SYSTEM_NO_KIND) ||
-              (this.props.jobType === constants.JOB_TYPE_NAS &&
+              (this.props.jobType === constants.EXPERIMENT_TYPE_NAS &&
                 this.props.mcSpecNAS.source.fileSystemPath.kind !==
                   constants.MC_FILE_SYSTEM_NO_KIND)) && (
               <Grid item xs={3}>
@@ -325,7 +325,7 @@ class MetricsCollectorSpec extends React.Component {
                   label={'File System Path'}
                   className={classes.textField}
                   value={
-                    this.props.jobType === constants.JOB_TYPE_HP
+                    this.props.jobType === constants.EXPERIMENT_TYPE_HP
                       ? this.props.mcSpecHP.source.fileSystemPath.path
                       : this.props.mcSpecNAS.source.fileSystemPath.path
                   }
@@ -335,9 +335,9 @@ class MetricsCollectorSpec extends React.Component {
             )}
           </Grid>
         )}
-        {((this.props.jobType === constants.JOB_TYPE_HP &&
+        {((this.props.jobType === constants.EXPERIMENT_TYPE_HP &&
           this.props.mcSpecHP.collector.kind === constants.MC_KIND_PROMETHEUS) ||
-          (this.props.jobType === constants.JOB_TYPE_NAS &&
+          (this.props.jobType === constants.EXPERIMENT_TYPE_NAS &&
             this.props.mcSpecNAS.collector.kind === constants.MC_KIND_PROMETHEUS)) && (
           <div>
             <Grid container alignItems={'center'} className={classes.grid}>
@@ -359,7 +359,7 @@ class MetricsCollectorSpec extends React.Component {
                   className={classes.textField}
                   type="number"
                   value={
-                    this.props.jobType === constants.JOB_TYPE_HP
+                    this.props.jobType === constants.EXPERIMENT_TYPE_HP
                       ? this.props.mcSpecHP.source.httpGet.port
                       : this.props.mcSpecNAS.source.httpGet.port
                   }
@@ -371,7 +371,7 @@ class MetricsCollectorSpec extends React.Component {
                   label={'HttpGet Path'}
                   className={classes.textField}
                   value={
-                    this.props.jobType === constants.JOB_TYPE_HP
+                    this.props.jobType === constants.EXPERIMENT_TYPE_HP
                       ? this.props.mcSpecHP.source.httpGet.path
                       : this.props.mcSpecNAS.source.httpGet.path
                   }
@@ -397,7 +397,7 @@ class MetricsCollectorSpec extends React.Component {
                   <InputLabel>Scheme</InputLabel>
                   <Select
                     value={
-                      this.props.jobType === constants.JOB_TYPE_HP
+                      this.props.jobType === constants.EXPERIMENT_TYPE_HP
                         ? this.props.mcSpecHP.source.httpGet.scheme
                         : this.props.mcSpecNAS.source.httpGet.scheme
                     }
@@ -419,7 +419,7 @@ class MetricsCollectorSpec extends React.Component {
                   label={'Host name'}
                   className={classes.textField}
                   value={
-                    this.props.jobType === constants.JOB_TYPE_HP
+                    this.props.jobType === constants.EXPERIMENT_TYPE_HP
                       ? this.props.mcSpecHP.source.httpGet.host
                       : this.props.mcSpecNAS.source.httpGet.host
                   }
@@ -445,7 +445,7 @@ class MetricsCollectorSpec extends React.Component {
                 </Button>
               </Grid>
             </Grid>
-            {this.props.jobType === constants.JOB_TYPE_HP
+            {this.props.jobType === constants.EXPERIMENT_TYPE_HP
               ? this.props.mcSpecHP.source.httpGet.httpHeaders.map((header, index) => {
                   return (
                     <div key={index} className={classes.textsList}>
@@ -516,9 +516,9 @@ class MetricsCollectorSpec extends React.Component {
                 })}
           </div>
         )}
-        {((this.props.jobType === constants.JOB_TYPE_HP &&
+        {((this.props.jobType === constants.EXPERIMENT_TYPE_HP &&
           this.props.mcSpecHP.collector.kind === constants.MC_KIND_CUSTOM) ||
-          (this.props.jobType === constants.JOB_TYPE_NAS &&
+          (this.props.jobType === constants.EXPERIMENT_TYPE_NAS &&
             this.props.mcSpecNAS.collector.kind === constants.MC_KIND_CUSTOM)) && (
           <Grid container alignItems={'center'} className={classes.grid}>
             <Grid item xs={3}>
@@ -534,7 +534,7 @@ class MetricsCollectorSpec extends React.Component {
                 mode="yaml"
                 theme="sqlserver"
                 value={
-                  this.props.jobType === constants.JOB_TYPE_HP
+                  this.props.jobType === constants.EXPERIMENT_TYPE_HP
                     ? this.props.mcCustomContainerYamlHP
                     : this.props.mcCustomContainerYamlNAS
                 }
@@ -559,7 +559,7 @@ class MetricsCollectorSpec extends React.Component {
             </Button>
           </Grid>
         </Grid>
-        {this.props.jobType === constants.JOB_TYPE_HP &&
+        {this.props.jobType === constants.EXPERIMENT_TYPE_HP &&
           this.props.mcSpecHP.source !== undefined &&
           this.props.mcSpecHP.source.filter !== undefined &&
           this.props.mcSpecHP.source.filter.metricsFormat.map((format, index) => {
@@ -588,7 +588,7 @@ class MetricsCollectorSpec extends React.Component {
               </div>
             );
           })}
-        {this.props.jobType === constants.JOB_TYPE_NAS &&
+        {this.props.jobType === constants.EXPERIMENT_TYPE_NAS &&
           this.props.mcSpecNAS.source !== undefined &&
           this.props.mcSpecNAS.source.filter !== undefined &&
           this.props.mcSpecNAS.source.filter.metricsFormat.map((format, index) => {

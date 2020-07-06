@@ -34,10 +34,11 @@ type Option struct {
 	Stride       string `json:"stride"`
 }
 
-type JobView struct {
+type ExperimentView struct {
 	Name      string
 	Status    string
 	Namespace string
+	Type      string
 }
 
 type TrialTemplatesDataView struct {
@@ -75,9 +76,9 @@ type NNView struct {
 type JobType string
 
 const (
-	JobTypeHP        = "HP"
-	JobTypeNAS       = "NAS"
-	ActionTypeAdd    = "add"
-	ActionTypeEdit   = "edit"
-	ActionTypeDelete = "delete"
+	ExperimentTypeHP  = "hp"
+	ExperimentTypeNAS = "nas"
+	ActionTypeAdd     = "add"
+	ActionTypeEdit    = "edit"
+	ActionTypeDelete  = "delete"
 )

@@ -6,16 +6,14 @@ import TextField from '@material-ui/core/TextField';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
-import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 
-import { filterJobs, changeType, fetchNASJobs } from '../../../actions/nasMonitorActions';
-import { fetchNamespaces } from '../../../actions/generalActions';
+import { fetchNamespaces, filterExperiments, changeStatus } from '../../../actions/generalActions';
 
-import { GENERAL_MODULE, NAS_MONITOR_MODULE } from '../../../constants/constants';
+import { GENERAL_MODULE } from '../../../constants/constants';
 
 const styles = theme => ({
   textField: {
@@ -38,23 +36,23 @@ const styles = theme => ({
 class FilterPanel extends React.Component {
   componentDidMount() {
     if (this.props.globalNamespace !== '') {
-      this.props.filterJobs(this.props.experimentName, this.props.globalNamespace);
+      this.props.filterExperiments(this.props.experimentName, this.props.globalNamespace);
     } else {
       this.props.fetchNamespaces();
-      this.props.filterJobs(this.props.experimentName, this.props.experimentNamespace);
+      this.props.filterExperiments(this.props.experimentName, this.props.experimentNamespace);
     }
   }
 
-  handleType = name => event => {
-    this.props.changeType(name, event.target.checked);
+  handleStatus = name => event => {
+    this.props.changeStatus(name, event.target.checked);
   };
 
   onNameChange = event => {
-    this.props.filterJobs(event.target.value, this.props.experimentNamespace);
+    this.props.filterExperiments(event.target.value, this.props.experimentNamespace);
   };
 
   onNamespaceChange = event => {
-    this.props.filterJobs(this.props.experimentName, event.target.value);
+    this.props.filterExperiments(this.props.experimentName, event.target.value);
   };
 
   render() {
@@ -96,14 +94,14 @@ class FilterPanel extends React.Component {
             margin="normal"
             variant="outlined"
           />
-          {Object.keys(this.props.filterType).map((filter, i) => {
+          {Object.keys(this.props.filterStatus).map((filter, i) => {
             return (
               <FormControlLabel
                 key={i}
                 control={
                   <Switch
-                    checked={this.props.filterType[filter]}
-                    onChange={this.handleType(filter)}
+                    checked={this.props.filterStatus[filter]}
+                    onChange={this.handleStatus(filter)}
                     value={filter}
                     color={'primary'}
                   />
@@ -113,9 +111,6 @@ class FilterPanel extends React.Component {
             );
           })}
         </FormGroup>
-        <Button color={'secondary'} variant={'raised'} onClick={this.props.fetchNASJobs}>
-          Update
-        </Button>
       </div>
     );
   }
@@ -123,14 +118,14 @@ class FilterPanel extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    experimentName: state[NAS_MONITOR_MODULE].experimentName,
-    experimentNamespace: state[NAS_MONITOR_MODULE].experimentNamespace,
-    filterType: state[NAS_MONITOR_MODULE].filterType,
+    experimentName: state[GENERAL_MODULE].experimentName,
+    experimentNamespace: state[GENERAL_MODULE].experimentNamespace,
+    filterStatus: state[GENERAL_MODULE].filterStatus,
     namespaces: state[GENERAL_MODULE].namespaces,
     globalNamespace: state[GENERAL_MODULE].globalNamespace,
   };
 };
 
-export default connect(mapStateToProps, { filterJobs, changeType, fetchNASJobs, fetchNamespaces })(
+export default connect(mapStateToProps, { filterExperiments, changeStatus, fetchNamespaces })(
   withStyles(styles)(FilterPanel),
 );
