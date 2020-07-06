@@ -14,7 +14,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import Fab from '@material-ui/core/Fab';
 import Divider from '@material-ui/core/Divider';
 import Select from '@material-ui/core/Select';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
@@ -318,7 +317,7 @@ const NASConfig = props => {
                         <Select
                           onChange={onChangeParameter(opIndex, paramIndex, 'parameterType')}
                           value={param.parameterType}
-                          input={<OutlinedInput name={'paramType'} labelWidth={120} />}
+                          label="Parameter Type"
                           className={classes.select}
                         >
                           {props.allParameterTypes.map((type, i) => {

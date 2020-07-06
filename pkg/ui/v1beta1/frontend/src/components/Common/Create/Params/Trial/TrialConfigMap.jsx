@@ -8,7 +8,6 @@ import Grid from '@material-ui/core/Grid';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Typography from '@material-ui/core/Typography';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
@@ -113,7 +112,7 @@ class TrialConfigMap extends React.Component {
                           .ConfigMapNamespace
                       }
                       onChange={this.onTemplateConfigMapNamespaceChange}
-                      input={<OutlinedInput labelWidth={90} />}
+                      label="Namespace"
                     >
                       {this.props.trialTemplatesData.map((trialTemplate, i) => {
                         return (
@@ -134,7 +133,7 @@ class TrialConfigMap extends React.Component {
                           .ConfigMaps[this.props.configMapNameIndex].ConfigMapName
                       }
                       onChange={this.onTemplateConfigMapNameChange}
-                      input={<OutlinedInput labelWidth={50} />}
+                      label="Name"
                     >
                       {this.props.trialTemplatesData[
                         this.props.configMapNamespaceIndex
@@ -175,7 +174,7 @@ class TrialConfigMap extends React.Component {
                         ].Path
                       }
                       onChange={this.onTemplateConfigMapPathChange}
-                      input={<OutlinedInput labelWidth={110} />}
+                      label="Template Path"
                     >
                       {this.props.trialTemplatesData[this.props.configMapNamespaceIndex].ConfigMaps[
                         this.props.configMapNameIndex

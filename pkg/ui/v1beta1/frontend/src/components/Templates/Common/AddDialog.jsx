@@ -17,7 +17,6 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
 
 import { closeDialog, addTemplate, changeTemplate } from '../../../actions/templateActions';
 
@@ -127,7 +126,7 @@ class AddDialog extends React.Component {
                   value={this.props.updatedConfigMapNamespace}
                   onChange={this.onConfigMapNamespaceChange}
                   className={classes.selectBox}
-                  input={<OutlinedInput labelWidth={90} />}
+                  label="Namespace"
                 >
                   {this.props.trialTemplatesData.map((trialTemplate, i) => {
                     return (
@@ -144,7 +143,7 @@ class AddDialog extends React.Component {
                   value={this.props.updatedConfigMapName}
                   onChange={this.onConfigMapNameChange}
                   className={classes.selectBox}
-                  input={<OutlinedInput labelWidth={50} />}
+                  label="Name"
                 >
                   {this.props.trialTemplatesData[this.props.configMapNamespaceIndex].ConfigMaps.map(
                     (configMap, i) => {

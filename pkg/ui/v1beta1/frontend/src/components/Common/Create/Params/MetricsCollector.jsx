@@ -13,7 +13,6 @@ import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
@@ -237,7 +236,7 @@ class MetricsCollectorSpec extends React.Component {
                     : this.props.mcSpecNAS.collector.kind
                 }
                 onChange={this.onMCKindChange}
-                input={<OutlinedInput labelWidth={35} />}
+                label="Kind"
               >
                 {this.props.mcKindsList.map((kind, i) => {
                   return (
@@ -281,7 +280,7 @@ class MetricsCollectorSpec extends React.Component {
                       : this.props.mcSpecNAS.source.fileSystemPath.kind
                   }
                   onChange={this.onMCFileSystemKindChange}
-                  input={<OutlinedInput labelWidth={120} />}
+                  label="File System Kind"
                 >
                   {((this.props.jobType === constants.EXPERIMENT_TYPE_HP &&
                     this.props.mcSpecHP.collector.kind === constants.MC_KIND_FILE) ||
@@ -402,7 +401,7 @@ class MetricsCollectorSpec extends React.Component {
                         : this.props.mcSpecNAS.source.httpGet.scheme
                     }
                     onChange={this.onMCHttpGetSchemeChange}
-                    input={<OutlinedInput labelWidth={60} />}
+                    label="Scheme"
                   >
                     {this.props.mcURISchemesList.map((scheme, i) => {
                       return (
