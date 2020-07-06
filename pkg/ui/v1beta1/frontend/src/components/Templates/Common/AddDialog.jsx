@@ -1,11 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import withStyles from '@material-ui/styles/withStyles';
 
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/theme-sqlserver';
 import 'ace-builds/src-noconflict/mode-yaml';
 
+import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';

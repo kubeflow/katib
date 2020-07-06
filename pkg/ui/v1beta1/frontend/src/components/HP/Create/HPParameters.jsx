@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 
 import jsyaml from 'js-yaml';
 
-import withStyles from '@material-ui/styles/withStyles';
+import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -14,9 +14,9 @@ import Objective from './Params/Objective';
 import TrialTemplate from '../../Common/Create/Params/Trial/TrialTemplate';
 import Parameters from './Params/Parameters';
 import Algorithm from './Params/Algorithm';
+import MetricsCollectorSpec from '../../Common/Create/Params/MetricsCollector';
 
 import { submitHPJob } from '../../../actions/hpCreateActions';
-import MetricsCollectorSpec from '../../Common/Create/Params/MetricsCollector';
 
 import { validationError } from '../../../actions/generalActions';
 import * as constants from '../../../constants/constants';

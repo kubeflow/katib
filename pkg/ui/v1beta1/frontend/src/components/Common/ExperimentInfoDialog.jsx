@@ -1,14 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { withStyles } from '@material-ui/styles';
-import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/theme-xcode';
 import 'ace-builds/src-noconflict/mode-json';
+
+import { withStyles } from '@material-ui/core/styles';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
 
 import { closeDialogExperiment } from '../../actions/generalActions';
 

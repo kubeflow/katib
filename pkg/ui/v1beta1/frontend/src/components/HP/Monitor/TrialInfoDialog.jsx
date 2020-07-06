@@ -1,12 +1,14 @@
 import React from 'react';
-import { withStyles } from '@material-ui/styles';
+
+import Plot from 'react-plotly.js';
+
+import { withStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { connect } from 'react-redux';
 
 import { closeDialogTrial } from '../../../actions/hpMonitorActions';
-import Plot from 'react-plotly.js';
 
 import { HP_MONITOR_MODULE } from '../../../constants/constants';
 

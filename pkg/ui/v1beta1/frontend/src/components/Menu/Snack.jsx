@@ -1,11 +1,11 @@
 import React from 'react';
-import makeStyles from '@material-ui/styles/makeStyles';
+import { connect } from 'react-redux';
+
+import { makeStyles } from '@material-ui/core/styles';
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
-
 import CloseIcon from '@material-ui/icons/Close';
 
-import { connect } from 'react-redux';
 import { closeSnackbar } from '../../actions/generalActions';
 
 import { GENERAL_MODULE } from '../../constants/constants';

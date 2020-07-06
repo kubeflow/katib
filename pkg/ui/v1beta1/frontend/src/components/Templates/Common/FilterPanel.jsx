@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { withStyles } from '@material-ui/core/styles';
 
+import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -23,6 +23,9 @@ const styles = theme => ({
   textField: {
     marginLeft: theme.spacing.unit,
     marginRight: theme.spacing.unit,
+  },
+  selectLabel: {
+    marginLeft: '8px',
   },
 });
 
@@ -49,11 +52,12 @@ class FilterPanel extends React.Component {
     return (
       <div>
         <FormControl variant="outlined">
-          <InputLabel>ConfigMap Namespace</InputLabel>
+          <InputLabel className={classes.selectLabel}>ConfigMap Namespace</InputLabel>
           <Select
             value={this.props.filteredConfigMapNamespace}
             onChange={this.onConfigMapNamespaceChange}
             className={classes.selectBox}
+            label="ConfigMap Namespace"
           >
             {this.props.namespaces.map((namespace, i) => {
               return (
@@ -69,7 +73,6 @@ class FilterPanel extends React.Component {
           className={classes.textField}
           value={this.props.filteredConfigMapName}
           onChange={this.onConfigMapNameChange}
-          margin="normal"
           variant="outlined"
         />
       </div>
