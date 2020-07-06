@@ -234,7 +234,7 @@ const NASParameters = props => {
       {SectionInTypography('NAS Config', classes)}
       <NASConfig />
       {SectionInTypography('Metrics Collector Spec', classes)}
-      <MetricsCollectorSpec jobType={constants.JOB_TYPE_NAS} />
+      <MetricsCollectorSpec jobType={constants.EXPERIMENT_TYPE_NAS} />
       {SectionInTypography('Trial Template Spec', classes)}
       <TrialTemplate />
       <div className={classes.submit}>

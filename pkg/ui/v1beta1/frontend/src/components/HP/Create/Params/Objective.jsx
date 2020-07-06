@@ -14,7 +14,6 @@ import AddIcon from '@material-ui/icons/Add';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import {
@@ -81,8 +80,8 @@ const Objective = props => {
                   <Select
                     value={param.value}
                     onChange={onObjectiveChange(param.name)}
-                    input={<OutlinedInput labelWidth={160} />}
                     className={classes.selectBox}
+                    label="Objective Type"
                   >
                     {props.allObjectiveTypes.map((type, i) => {
                       return (

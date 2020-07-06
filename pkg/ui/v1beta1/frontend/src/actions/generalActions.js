@@ -120,3 +120,27 @@ export const editTrialParameters = (index, name, reference, description) => ({
   reference,
   description,
 });
+
+export const FETCH_EXPERIMENTS_REQUEST = 'FETCH_EXPERIMENTS_REQUEST';
+export const FETCH_EXPERIMENTS_SUCCESS = 'FETCH_EXPERIMENTS_SUCCESS';
+export const FETCH_EXPERIMENTS_FAILURE = 'FETCH_EXPERIMENTS_FAILURE';
+
+export const fetchExperiments = () => ({
+  type: FETCH_EXPERIMENTS_REQUEST,
+});
+
+export const FILTER_EXPERIMENTS = 'FILTER_EXPERIMENTS';
+
+export const filterExperiments = (experimentName, experimentNamespace) => ({
+  type: FILTER_EXPERIMENTS,
+  experimentName,
+  experimentNamespace,
+});
+
+export const CHANGE_STATUS = 'CHANGE_STATUS';
+
+export const changeStatus = (filter, checked) => ({
+  type: CHANGE_STATUS,
+  filter,
+  checked,
+});

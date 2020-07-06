@@ -22,7 +22,14 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 
 import { toggleMenu } from '../../actions/generalActions';
 
-const generalModule = 'general';
+import {
+  GENERAL_MODULE,
+  LINK_HP_CREATE,
+  LINK_HP_MONITOR,
+  LINK_NAS_CREATE,
+  LINK_NAS_MONITOR,
+  LINK_TRIAL_TEMPLATE,
+} from '../../constants/constants';
 
 const useStyles = makeStyles({
   list: {
@@ -77,7 +84,7 @@ const Menu = props => {
                 button
                 className={classes.nested}
                 component={Link}
-                to="/katib/hp"
+                to={LINK_HP_CREATE}
                 onClick={onCloseMenu}
               >
                 <ListItemIcon>
@@ -93,7 +100,7 @@ const Menu = props => {
                 button
                 className={classes.nested}
                 component={Link}
-                to="/katib/hp_monitor"
+                to={LINK_HP_MONITOR}
                 onClick={onCloseMenu}
               >
                 <ListItemIcon>
@@ -126,7 +133,7 @@ const Menu = props => {
                 button
                 className={classes.nested}
                 component={Link}
-                to="/katib/nas"
+                to={LINK_NAS_CREATE}
                 onClick={onCloseMenu}
               >
                 <ListItemIcon>
@@ -142,7 +149,7 @@ const Menu = props => {
                 button
                 className={classes.nested}
                 component={Link}
-                to="/katib/nas_monitor"
+                to={LINK_NAS_MONITOR}
                 onClick={onCloseMenu}
               >
                 <ListItemIcon>
@@ -158,7 +165,7 @@ const Menu = props => {
           </Collapse>
           <Divider />
           {/* TRIAL MANIFESTS */}
-          <ListItem button component={Link} to="/katib/trial" onClick={onCloseMenu}>
+          <ListItem button component={Link} to={LINK_TRIAL_TEMPLATE} onClick={onCloseMenu}>
             <ListItemIcon>
               <SettingsIcon color={iconColor} />
             </ListItemIcon>
@@ -177,7 +184,7 @@ const Menu = props => {
 
 const mapStateToProps = state => {
   return {
-    menuOpen: state[generalModule].menuOpen,
+    menuOpen: state[GENERAL_MODULE].menuOpen,
   };
 };
 

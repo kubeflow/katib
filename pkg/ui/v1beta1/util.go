@@ -14,8 +14,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (k *KatibUIHandler) getExperimentList(namespace []string, typ JobType) ([]JobView, error) {
-	jobs := make([]JobView, 0)
+func (k *KatibUIHandler) getExperiments(namespace []string) ([]ExperimentView, error) {
+	experiments := []ExperimentView{}
 
 	el, err := k.katibClient.GetExperimentList(namespace...)
 	if err != nil {
@@ -23,21 +23,27 @@ func (k *KatibUIHandler) getExperimentList(namespace []string, typ JobType) ([]J
 		return nil, err
 	}
 	for _, experiment := range el.Items {
-		if (typ == JobTypeNAS && experiment.Spec.NasConfig != nil) ||
-			(typ == JobTypeHP && experiment.Spec.NasConfig == nil) {
-			experimentLastCondition, err := experiment.GetLastConditionType()
-			if err != nil {
-				log.Printf("GetLastConditionType failed: %v", err)
-				return nil, err
-			}
-			jobs = append(jobs, JobView{
-				Name:      experiment.Name,
-				Namespace: experiment.Namespace,
-				Status:    string(experimentLastCondition),
-			})
+		experimentLastCondition, err := experiment.GetLastConditionType()
+		if err != nil {
+			log.Printf("GetLastConditionType failed: %v", err)
+			return nil, err
 		}
+		newExperiment := ExperimentView{
+			Name:      experiment.Name,
+			Namespace: experiment.Namespace,
+			Status:    string(experimentLastCondition),
+		}
+
+		if experiment.Spec.NasConfig == nil {
+			newExperiment.Type = ExperimentTypeHP
+		} else {
+			newExperiment.Type = ExperimentTypeNAS
+		}
+
+		experiments = append(experiments, newExperiment)
 	}
-	return jobs, nil
+
+	return experiments, nil
 }
 
 func enableCors(w *http.ResponseWriter) {

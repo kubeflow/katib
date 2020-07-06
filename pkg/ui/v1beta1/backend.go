@@ -98,6 +98,27 @@ func (k *KatibUIHandler) SubmitParamsJob(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+// FetchAllExperiments gets HP and NAS experiments in all namespaces.
+func (k *KatibUIHandler) FetchAllExperiments(w http.ResponseWriter, r *http.Request) {
+	// At first, try to list experiments in cluster scope
+	experiments, err := k.getExperiments([]string{""})
+	if err != nil {
+		// If failed, just try to list experiments from own namespace
+		experiments, err = k.getExperiments([]string{})
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	response, err := json.Marshal(experiments)
+	if err != nil {
+		log.Printf("Marshal experiments failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
+}
+
 func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request) {
 	experimentName := r.URL.Query()["experimentName"][0]
 	namespace := r.URL.Query()["namespace"][0]
@@ -114,6 +135,40 @@ func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	isExperimentDeleted := false
+
+	var experiments []ExperimentView
+
+	// Waiting until experiment will be deleted
+	for !isExperimentDeleted {
+		// At first, try to list experiments in cluster scope
+		experiments, err = k.getExperiments([]string{""})
+		if err != nil {
+			// If failed, just try to list experiments from own namespace
+			experiments, err = k.getExperiments([]string{})
+		}
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		isExperimentDeleted = true
+		for _, experiment := range experiments {
+			if experiment.Name == experimentName {
+				isExperimentDeleted = false
+				break
+			}
+		}
+	}
+
+	response, err := json.Marshal(experiments)
+	if err != nil {
+		log.Printf("Marshal HP and NAS experiments failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
 }
 
 // FetchTrialTemplates gets all trial templates in all namespaces

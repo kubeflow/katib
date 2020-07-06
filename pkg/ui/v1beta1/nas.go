@@ -11,27 +11,6 @@ import (
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 )
 
-func (k *KatibUIHandler) FetchAllNASJobs(w http.ResponseWriter, r *http.Request) {
-	// At first, try to list experiments in cluster scope
-	jobs, err := k.getExperimentList([]string{""}, JobTypeNAS)
-	if err != nil {
-		// If failed, just try to list experiments from own namespace
-		jobs, err = k.getExperimentList([]string{}, JobTypeNAS)
-	}
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	response, err := json.Marshal(jobs)
-	if err != nil {
-		log.Printf("Marshal NAS jobs failed: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Write(response)
-}
-
 func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	experimentName := r.URL.Query()["experimentName"][0]
