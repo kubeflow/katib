@@ -1,16 +1,16 @@
 import React from 'react';
 import { connect } from 'react-redux';
-
 import { withStyles } from '@material-ui/core/styles';
+
 import TextField from '@material-ui/core/TextField';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
+import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
 
 import { filterJobs, changeType, fetchHPJobs } from '../../../actions/hpMonitorActions';
 import { fetchNamespaces } from '../../../actions/generalActions';
@@ -33,9 +33,6 @@ const styles = theme => ({
     width: 200,
     height: 56,
     textAlign: 'left',
-  },
-  selectLabel: {
-    marginLeft: '8px',
   },
 });
 
@@ -68,13 +65,12 @@ class FilterPanel extends React.Component {
       <div className={classes.filter}>
         <FormGroup row>
           <FormControl variant="outlined">
-            <InputLabel className={classes.selectLabel}>Namespace</InputLabel>
+            <InputLabel>Namespace</InputLabel>
             {this.props.globalNamespace === '' ? (
               <Select
                 value={this.props.experimentNamespace}
                 onChange={this.onNamespaceChange}
                 className={classes.selectBox}
-                label="Namespace"
               >
                 {this.props.namespaces.map((namespace, i) => {
                   return (
@@ -85,12 +81,7 @@ class FilterPanel extends React.Component {
                 })}
               </Select>
             ) : (
-              <Select
-                value={this.props.experimentNamespace}
-                className={classes.selectBox}
-                disabled
-                input={<OutlinedInput labelWidth={90} />}
-              >
+              <Select value={this.props.experimentNamespace} className={classes.selectBox} disabled>
                 <MenuItem value={this.props.experimentNamespace}>
                   {this.props.experimentNamespace}
                 </MenuItem>
@@ -103,6 +94,7 @@ class FilterPanel extends React.Component {
             className={classes.textField}
             value={this.props.experimentName}
             onChange={this.onNameChange}
+            margin="normal"
             variant="outlined"
           />
           {Object.keys(this.props.filterType).map((filter, i) => {
@@ -122,6 +114,9 @@ class FilterPanel extends React.Component {
             );
           })}
         </FormGroup>
+        <Button color={'secondary'} variant={'raised'} onClick={this.props.fetchHPJobs}>
+          Update
+        </Button>
       </div>
     );
   }
