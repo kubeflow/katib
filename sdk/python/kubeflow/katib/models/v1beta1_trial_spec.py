@@ -16,6 +16,7 @@ import re  # noqa: F401
 
 import six
 
+from kubeflow.katib.models.v1_unstructured_unstructured import V1UnstructuredUnstructured  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_metrics_collector_spec import V1beta1MetricsCollectorSpec  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_objective_spec import V1beta1ObjectiveSpec  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_parameter_assignment import V1beta1ParameterAssignment  # noqa: F401,E501

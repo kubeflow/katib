@@ -16,6 +16,7 @@ import re  # noqa: F401
 
 import six
 
+from kubeflow.katib.models.v1_time import V1Time  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_observation import V1beta1Observation  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_trial_condition import V1beta1TrialCondition  # noqa: F401,E501
 

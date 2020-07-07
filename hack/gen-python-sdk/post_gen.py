@@ -23,7 +23,6 @@ def update_python_sdk(src, dest, version='v1beta1'):
     rewrite_rules = [
         lambda l: l.replace('import katib', 'from kubeflow import katib'),
         lambda l: l.replace('from katib', 'from kubeflow.katib'),
-        lambda l: "" if l.lstrip().startswith('# noqa') else l
     ]
 
     src_dirs = [

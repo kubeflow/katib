@@ -16,6 +16,7 @@ import re  # noqa: F401
 
 import six
 
+from kubeflow.katib.models.v1_unstructured_unstructured import V1UnstructuredUnstructured  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_config_map_source import V1beta1ConfigMapSource  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_trial_parameter_spec import V1beta1TrialParameterSpec  # noqa: F401,E501
 

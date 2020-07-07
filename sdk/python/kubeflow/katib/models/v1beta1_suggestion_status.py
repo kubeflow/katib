@@ -16,6 +16,7 @@ import re  # noqa: F401
 
 import six
 
+from kubeflow.katib.models.v1_time import V1Time  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_algorithm_setting import V1beta1AlgorithmSetting  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_suggestion_condition import V1beta1SuggestionCondition  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_trial_assignment import V1beta1TrialAssignment  # noqa: F401,E501
