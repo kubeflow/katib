@@ -32,8 +32,8 @@ class V1beta1Metric(object):
     """
     swagger_types = {
         'latest': 'str',
-        'max': 'float',
-        'min': 'float',
+        'max': 'str',
+        'min': 'str',
         'name': 'str'
     }
 
@@ -89,7 +89,7 @@ class V1beta1Metric(object):
 
 
         :return: The max of this V1beta1Metric.  # noqa: E501
-        :rtype: float
+        :rtype: str
         """
         return self._max
 
@@ -99,7 +99,7 @@ class V1beta1Metric(object):
 
 
         :param max: The max of this V1beta1Metric.  # noqa: E501
-        :type: float
+        :type: str
         """
 
         self._max = max
@@ -110,7 +110,7 @@ class V1beta1Metric(object):
 
 
         :return: The min of this V1beta1Metric.  # noqa: E501
-        :rtype: float
+        :rtype: str
         """
         return self._min
 
@@ -120,7 +120,7 @@ class V1beta1Metric(object):
 
 
         :param min: The min of this V1beta1Metric.  # noqa: E501
-        :type: float
+        :type: str
         """
 
         self._min = min
@@ -167,6 +167,9 @@ class V1beta1Metric(object):
                 ))
             else:
                 result[attr] = value
+        if issubclass(V1beta1Metric, dict):
+            for key, value in self.items():
+                result[key] = value
 
         return result
 

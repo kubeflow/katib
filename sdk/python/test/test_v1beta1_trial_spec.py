@@ -32,7 +32,7 @@ class TestV1beta1TrialSpec(unittest.TestCase):
     def testV1beta1TrialSpec(self):
         """Test V1beta1TrialSpec"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = katib.models._v1beta1_trial_spec.V1beta1TrialSpec()  # noqa: E501
+        # model = katib.models.v1beta1_trial_spec.V1beta1TrialSpec()  # noqa: E501
         pass
 
 

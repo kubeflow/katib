@@ -32,7 +32,7 @@ class TestV1beta1SuggestionSpec(unittest.TestCase):
     def testV1beta1SuggestionSpec(self):
         """Test V1beta1SuggestionSpec"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = katib.models._v1beta1_suggestion_spec.V1beta1SuggestionSpec()  # noqa: E501
+        # model = katib.models.v1beta1_suggestion_spec.V1beta1SuggestionSpec()  # noqa: E501
         pass
 
 

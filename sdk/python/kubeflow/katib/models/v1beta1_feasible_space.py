@@ -167,6 +167,9 @@ class V1beta1FeasibleSpace(object):
                 ))
             else:
                 result[attr] = value
+        if issubclass(V1beta1FeasibleSpace, dict):
+            for key, value in self.items():
+                result[key] = value
 
         return result
 
