@@ -1,11 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import makeStyles from '@material-ui/styles/makeStyles';
 
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/theme-sqlserver';
 import 'ace-builds/src-noconflict/mode-yaml';
 
+import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 

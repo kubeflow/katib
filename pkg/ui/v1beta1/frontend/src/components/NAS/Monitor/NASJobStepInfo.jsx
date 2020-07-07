@@ -1,10 +1,11 @@
 import React from 'react';
-import { withStyles } from '@material-ui/core';
-import Typography from '@material-ui/core/Typography';
 
 // TODO: graphviz-react requires --max_old_space_size=4096
 // Think about switching to a different lib
 import { Graphviz } from 'graphviz-react';
+
+import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
 
 const styles = theme => ({
   root: {

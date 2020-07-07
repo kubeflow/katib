@@ -5,7 +5,7 @@ import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/theme-sqlserver';
 import 'ace-builds/src-noconflict/mode-yaml';
 
-import withStyles from '@material-ui/styles/withStyles';
+import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -13,7 +13,6 @@ import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
@@ -220,7 +219,7 @@ class MetricsCollectorSpec extends React.Component {
       <div>
         <Grid container alignItems={'center'} className={classes.grid}>
           <Grid item xs={3}>
-            <Typography variant={'subheading'}>
+            <Typography variant={'subtitle1'}>
               <Tooltip title={'Kind for the Metrics Collector Spec'}>
                 <HelpOutlineIcon className={classes.help} color={'primary'} />
               </Tooltip>
@@ -237,7 +236,7 @@ class MetricsCollectorSpec extends React.Component {
                     : this.props.mcSpecNAS.collector.kind
                 }
                 onChange={this.onMCKindChange}
-                input={<OutlinedInput labelWidth={35} />}
+                label="Kind"
               >
                 {this.props.mcKindsList.map((kind, i) => {
                   return (
@@ -260,7 +259,7 @@ class MetricsCollectorSpec extends React.Component {
               this.props.mcSpecNAS.collector.kind === constants.MC_KIND_CUSTOM))) && (
           <Grid container alignItems={'center'} className={classes.grid}>
             <Grid item xs={3}>
-              <Typography variant={'subheading'}>
+              <Typography variant={'subtitle1'}>
                 <Tooltip
                   title={
                     'Kind of the file path and path to the metrics file, path must be absolute'
@@ -281,7 +280,7 @@ class MetricsCollectorSpec extends React.Component {
                       : this.props.mcSpecNAS.source.fileSystemPath.kind
                   }
                   onChange={this.onMCFileSystemKindChange}
-                  input={<OutlinedInput labelWidth={120} />}
+                  label="File System Kind"
                 >
                   {((this.props.jobType === constants.EXPERIMENT_TYPE_HP &&
                     this.props.mcSpecHP.collector.kind === constants.MC_KIND_FILE) ||
@@ -342,7 +341,7 @@ class MetricsCollectorSpec extends React.Component {
           <div>
             <Grid container alignItems={'center'} className={classes.grid}>
               <Grid item xs={3}>
-                <Typography variant={'subheading'}>
+                <Typography variant={'subtitle1'}>
                   <Tooltip
                     title={
                       'Port and Path to access on the HTTP server. Port must be a positive integer value. Path must start with "/"'
@@ -381,7 +380,7 @@ class MetricsCollectorSpec extends React.Component {
             </Grid>
             <Grid container alignItems={'center'} className={classes.grid}>
               <Grid item xs={3}>
-                <Typography variant={'subheading'}>
+                <Typography variant={'subtitle1'}>
                   <Tooltip
                     title={
                       'Scheme to use for connecting to the host. Host name to make connection, defaults to the pod IP'
@@ -402,7 +401,7 @@ class MetricsCollectorSpec extends React.Component {
                         : this.props.mcSpecNAS.source.httpGet.scheme
                     }
                     onChange={this.onMCHttpGetSchemeChange}
-                    input={<OutlinedInput labelWidth={60} />}
+                    label="Scheme"
                   >
                     {this.props.mcURISchemesList.map((scheme, i) => {
                       return (
@@ -429,7 +428,7 @@ class MetricsCollectorSpec extends React.Component {
             </Grid>
             <Grid container alignItems={'center'} className={classes.grid}>
               <Grid item xs={3}>
-                <Typography variant={'subheading'}>
+                <Typography variant={'subtitle1'}>
                   <Tooltip title={'Custom headers to set in the request'}>
                     <HelpOutlineIcon className={classes.help} color={'primary'} />
                   </Tooltip>
@@ -522,7 +521,7 @@ class MetricsCollectorSpec extends React.Component {
             this.props.mcSpecNAS.collector.kind === constants.MC_KIND_CUSTOM)) && (
           <Grid container alignItems={'center'} className={classes.grid}>
             <Grid item xs={3}>
-              <Typography variant={'subheading'}>
+              <Typography variant={'subtitle1'}>
                 <Tooltip title={'Yaml structure for the custom metrics collector container'}>
                   <HelpOutlineIcon className={classes.help} color={'primary'} />
                 </Tooltip>

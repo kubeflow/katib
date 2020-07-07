@@ -1,15 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { withStyles } from '@material-ui/core';
+import { Link } from 'react-router-dom';
+
+import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Grid from '@material-ui/core/Grid';
-
-import { fetchHPJobInfo } from '../../../actions/hpMonitorActions';
-import { fetchExperiment, fetchSuggestion } from '../../../actions/generalActions';
 
 import HPJobPlot from './HPJobPlot';
 import HPJobTable from './HPJobTable';
@@ -17,6 +15,8 @@ import TrialInfoDialog from './TrialInfoDialog';
 import ExperimentInfoDialog from '../../Common/ExperimentInfoDialog';
 import SuggestionInfoDialog from '../../Common/SuggestionInfoDialog';
 
+import { fetchHPJobInfo } from '../../../actions/hpMonitorActions';
+import { fetchExperiment, fetchSuggestion } from '../../../actions/generalActions';
 import { HP_MONITOR_MODULE } from '../../../constants/constants';
 
 const styles = theme => ({
@@ -73,7 +73,7 @@ class HPJobInfo extends React.Component {
             <Typography className={classes.header} variant={'h5'}>
               Experiment Namespace: {this.props.match.params.namespace}
             </Typography>
-            <Grid container className={classes.grid} justify="center" spacing={24}>
+            <Grid container className={classes.grid} justify="center" spacing={3}>
               <Grid item>
                 <Button
                   variant={'contained'}

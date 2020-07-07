@@ -1,21 +1,20 @@
 import React from 'react';
-import makeStyles from '@material-ui/styles/makeStyles';
+import { connect } from 'react-redux';
+
+import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Typography from '@material-ui/core/Typography';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
-
 import DeleteIcon from '@material-ui/icons/Delete';
 
-import { connect } from 'react-redux';
 import {
   changeAlgorithmName,
   addAlgorithmSetting,
@@ -98,7 +97,7 @@ const Algorithm = props => {
               <Select
                 value={props.algorithmName}
                 onChange={onAlgorithmNameChange}
-                input={<OutlinedInput labelWidth={160} />}
+                label="Algorithm Name"
                 className={classes.select}
               >
                 {props.allAlgorithms.map((algorithm, i) => {

@@ -1,12 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import withStyles from '@material-ui/styles/withStyles';
+import AceEditor from 'react-ace';
+
+import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Typography from '@material-ui/core/Typography';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
@@ -15,11 +16,9 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import AceEditor from 'react-ace';
 
 import { filterTemplatesExperiment } from '../../../../../actions/generalActions';
 import { fetchTrialTemplates } from '../../../../../actions/templateActions';
-
 import { GENERAL_MODULE } from '../../../../../constants/constants';
 
 const styles = theme => ({
@@ -95,7 +94,7 @@ class TrialConfigMap extends React.Component {
         <div className={classes.parameter}>
           <Grid container alignItems={'center'}>
             <Grid item xs={3}>
-              <Typography variant={'subheading'}>
+              <Typography variant={'subtitle1'}>
                 <Tooltip title={'Trial Template ConfigMap Namespace and Name'}>
                   <HelpOutlineIcon className={classes.help} color={'primary'} />
                 </Tooltip>
@@ -113,7 +112,7 @@ class TrialConfigMap extends React.Component {
                           .ConfigMapNamespace
                       }
                       onChange={this.onTemplateConfigMapNamespaceChange}
-                      input={<OutlinedInput labelWidth={90} />}
+                      label="Namespace"
                     >
                       {this.props.trialTemplatesData.map((trialTemplate, i) => {
                         return (
@@ -134,7 +133,7 @@ class TrialConfigMap extends React.Component {
                           .ConfigMaps[this.props.configMapNameIndex].ConfigMapName
                       }
                       onChange={this.onTemplateConfigMapNameChange}
-                      input={<OutlinedInput labelWidth={50} />}
+                      label="Name"
                     >
                       {this.props.trialTemplatesData[
                         this.props.configMapNamespaceIndex
@@ -155,7 +154,7 @@ class TrialConfigMap extends React.Component {
         <div className={classes.parameter}>
           <Grid container alignItems={'center'}>
             <Grid item xs={3}>
-              <Typography variant={'subheading'}>
+              <Typography variant={'subtitle1'}>
                 <Tooltip title={'Trial Template Path in ConfigMap'}>
                   <HelpOutlineIcon className={classes.help} color={'primary'} />
                 </Tooltip>
@@ -175,7 +174,7 @@ class TrialConfigMap extends React.Component {
                         ].Path
                       }
                       onChange={this.onTemplateConfigMapPathChange}
-                      input={<OutlinedInput labelWidth={110} />}
+                      label="Template Path"
                     >
                       {this.props.trialTemplatesData[this.props.configMapNamespaceIndex].ConfigMaps[
                         this.props.configMapNameIndex

@@ -1,11 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import withStyles from '@material-ui/styles/withStyles';
 
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/theme-sqlserver';
 import 'ace-builds/src-noconflict/mode-yaml';
 
+import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -17,7 +17,6 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
 
 import { closeDialog, addTemplate, changeTemplate } from '../../../actions/templateActions';
 
@@ -127,7 +126,7 @@ class AddDialog extends React.Component {
                   value={this.props.updatedConfigMapNamespace}
                   onChange={this.onConfigMapNamespaceChange}
                   className={classes.selectBox}
-                  input={<OutlinedInput labelWidth={90} />}
+                  label="Namespace"
                 >
                   {this.props.trialTemplatesData.map((trialTemplate, i) => {
                     return (
@@ -144,7 +143,7 @@ class AddDialog extends React.Component {
                   value={this.props.updatedConfigMapName}
                   onChange={this.onConfigMapNameChange}
                   className={classes.selectBox}
-                  input={<OutlinedInput labelWidth={50} />}
+                  label="Name"
                 >
                   {this.props.trialTemplatesData[this.props.configMapNamespaceIndex].ConfigMaps.map(
                     (configMap, i) => {

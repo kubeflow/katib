@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { CHANGE_GLOBAL_NAMESPACE } from '../actions/generalActions';
 import generalReducer from '../reducers/general';
 

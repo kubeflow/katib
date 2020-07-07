@@ -1,10 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
+
 import { Link } from 'react-router-dom';
 
-import makeStyles from '@material-ui/styles/makeStyles';
-import { withStyles } from '@material-ui/core/styles';
-
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -50,7 +49,7 @@ const Header = props => {
           >
             <MenuIcon />
           </IconButton>
-          <KatibLink variant={'headline'} color={'secondary'} component={Link} to="/">
+          <KatibLink variant={'h5'} color={'secondary'} component={Link} to="/">
             Katib
           </KatibLink>
         </Toolbar>

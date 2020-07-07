@@ -1,8 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
+
 import { Link } from 'react-router-dom';
 
-import makeStyles from '@material-ui/styles/makeStyles';
+import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
@@ -60,11 +61,11 @@ const Menu = props => {
   // Add links
   const color = 'primary';
   const iconColor = 'primary';
-  const variant = 'title';
+  const variant = 'h6';
   return (
     <div>
       <Drawer open={props.menuOpen} onClose={onCloseMenu}>
-        <List>
+        <List className={classes.list}>
           {/* HP */}
           <ListItem button onClick={toggleHP}>
             <ListItemIcon>

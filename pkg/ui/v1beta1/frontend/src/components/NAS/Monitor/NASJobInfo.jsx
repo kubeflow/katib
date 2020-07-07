@@ -1,9 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { withStyles } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
+
+import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
@@ -12,12 +13,12 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Grid from '@material-ui/core/Grid';
 
-import { fetchNASJobInfo } from '../../../actions/nasMonitorActions';
-import { fetchExperiment, fetchSuggestion } from '../../../actions/generalActions';
-
 import NASJobStepInfo from './NASJobStepInfo';
 import ExperimentInfoDialog from '../../Common/ExperimentInfoDialog';
 import SuggestionInfoDialog from '../../Common/SuggestionInfoDialog';
+
+import { fetchNASJobInfo } from '../../../actions/nasMonitorActions';
+import { fetchExperiment, fetchSuggestion } from '../../../actions/generalActions';
 
 import { NAS_MONITOR_MODULE } from '../../../constants/constants';
 
@@ -83,7 +84,7 @@ class NASJobInfo extends React.Component {
               Experiment Namespace: {this.props.match.params.namespace}
             </Typography>
 
-            <Grid container className={classes.grid} justify="center" spacing={24}>
+            <Grid container className={classes.grid} justify="center" spacing={3}>
               <Grid item>
                 <Button
                   variant={'contained'}

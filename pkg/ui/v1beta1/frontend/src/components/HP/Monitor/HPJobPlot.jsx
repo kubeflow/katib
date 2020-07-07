@@ -1,8 +1,9 @@
 import React from 'react';
-import makeStyles from '@material-ui/styles/makeStyles';
-
 import { connect } from 'react-redux';
+
 import Plot from 'react-plotly.js';
+
+import { makeStyles } from '@material-ui/core/styles';
 
 import { HP_MONITOR_MODULE } from '../../../constants/constants';
 

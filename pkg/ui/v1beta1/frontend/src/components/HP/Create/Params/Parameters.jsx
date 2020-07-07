@@ -1,10 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import makeStyles from '@material-ui/styles/makeStyles';
+
+import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
@@ -117,7 +117,7 @@ const Parameters = props => {
                   <Select
                     value={param.parameterType}
                     onChange={onGeneralEdit(i, 'parameterType')}
-                    input={<OutlinedInput name={'paramType'} labelWidth={120} />}
+                    label="Parameter Type"
                     className={classes.select}
                   >
                     {props.allParameterTypes.map((type, i) => {

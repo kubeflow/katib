@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import makeStyles from '@material-ui/styles/makeStyles';
+
+import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
@@ -13,7 +14,6 @@ import AddIcon from '@material-ui/icons/Add';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import {
@@ -80,8 +80,8 @@ const Objective = props => {
                   <Select
                     value={param.value}
                     onChange={onObjectiveChange(param.name)}
-                    input={<OutlinedInput labelWidth={160} />}
                     className={classes.selectBox}
+                    label="Objective Type"
                   >
                     {props.allObjectiveTypes.map((type, i) => {
                       return (
@@ -99,7 +99,7 @@ const Objective = props => {
           <div key={i} className={classes.parameter}>
             <Grid container alignItems={'center'}>
               <Grid item xs={12} sm={3}>
-                <Typography variant={'subheading'}>
+                <Typography variant={'subtitle1'}>
                   <Tooltip title={param.description}>
                     <HelpOutlineIcon className={classes.help} color={'primary'} />
                   </Tooltip>
@@ -120,7 +120,7 @@ const Objective = props => {
       <div className={classes.parameter}>
         <Grid container alignItems={'center'}>
           <Grid item xs={12} sm={3}>
-            <Typography variant={'subheading'}>
+            <Typography variant={'subtitle1'}>
               <Tooltip title={'Additional metrics that you want to collect'}>
                 <HelpOutlineIcon className={classes.help} color={'primary'} />
               </Tooltip>
