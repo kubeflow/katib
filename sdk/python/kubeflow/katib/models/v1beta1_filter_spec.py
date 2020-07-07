@@ -91,6 +91,9 @@ class V1beta1FilterSpec(object):
                 ))
             else:
                 result[attr] = value
+        if issubclass(V1beta1FilterSpec, dict):
+            for key, value in self.items():
+                result[key] = value
 
         return result
 

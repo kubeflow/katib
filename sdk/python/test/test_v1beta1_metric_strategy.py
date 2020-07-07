@@ -16,12 +16,12 @@ from __future__ import absolute_import
 import unittest
 
 from kubeflow import katib
-from kubeflow.katib.models.v1beta1_trial_list import V1beta1TrialList  # noqa: E501
+from kubeflow.katib.models.v1beta1_metric_strategy import V1beta1MetricStrategy  # noqa: E501
 from kubeflow.katib.rest import ApiException
 
 
-class TestV1beta1TrialList(unittest.TestCase):
-    """V1beta1TrialList unit test stubs"""
+class TestV1beta1MetricStrategy(unittest.TestCase):
+    """V1beta1MetricStrategy unit test stubs"""
 
     def setUp(self):
         pass
@@ -29,10 +29,10 @@ class TestV1beta1TrialList(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def testV1beta1TrialList(self):
-        """Test V1beta1TrialList"""
+    def testV1beta1MetricStrategy(self):
+        """Test V1beta1MetricStrategy"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = katib.models.v1beta1_trial_list.V1beta1TrialList()  # noqa: E501
+        # model = katib.models.v1beta1_metric_strategy.V1beta1MetricStrategy()  # noqa: E501
         pass
 
 
