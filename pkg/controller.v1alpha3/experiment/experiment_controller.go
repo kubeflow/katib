@@ -115,8 +115,15 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 // addWatch adds a new Controller to mgr with r as the reconcile.Reconciler
 func addWatch(mgr manager.Manager, c controller.Controller) error {
+	experimentType := experimentsv1alpha3.Experiment{}
+	experimentType.APIVersion = consts.APIVersionToWatch
+	trialType := trialsv1alpha3.Trial{}
+	trialType.APIVersion = consts.APIVersionToWatch
+	suggestionType := suggestionsv1alpha3.Suggestion{}
+	suggestionType.APIVersion = consts.APIVersionToWatch
+
 	// Watch for changes to Experiment
-	err := c.Watch(&source.Kind{Type: &experimentsv1alpha3.Experiment{}}, &handler.EnqueueRequestForObject{})
+	err := c.Watch(&source.Kind{Type: &experimentType}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		log.Error(err, "Experiment watch failed")
 		return err
@@ -124,10 +131,10 @@ func addWatch(mgr manager.Manager, c controller.Controller) error {
 
 	// Watch for trials for the experiments
 	err = c.Watch(
-		&source.Kind{Type: &trialsv1alpha3.Trial{}},
+		&source.Kind{Type: &trialType},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
-			OwnerType:    &experimentsv1alpha3.Experiment{},
+			OwnerType:    &experimentType,
 		})
 
 	if err != nil {
@@ -136,10 +143,10 @@ func addWatch(mgr manager.Manager, c controller.Controller) error {
 	}
 
 	err = c.Watch(
-		&source.Kind{Type: &suggestionsv1alpha3.Suggestion{}},
+		&source.Kind{Type: &suggestionType},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
-			OwnerType:    &experimentsv1alpha3.Experiment{},
+			OwnerType:    &experimentType,
 		})
 
 	if err != nil {

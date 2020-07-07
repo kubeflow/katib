@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/kubeflow/katib/pkg/controller.v1alpha3/consts"
 
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -86,8 +87,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	trialType := trialsv1alpha3.Trial{}
+	trialType.APIVersion = consts.APIVersionToWatch
+
 	// Watch for changes to Trial
-	err = c.Watch(&source.Kind{Type: &trialsv1alpha3.Trial{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &trialType}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		log.Error(err, "Trial watch error")
 		return err
@@ -98,7 +102,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		&source.Kind{Type: &batchv1beta.CronJob{}},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
-			OwnerType:    &trialsv1alpha3.Trial{},
+			OwnerType:    &trialType,
 		})
 
 	if err != nil {
@@ -113,7 +117,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			&source.Kind{Type: unstructuredJob},
 			&handler.EnqueueRequestForOwner{
 				IsController: true,
-				OwnerType:    &trialsv1alpha3.Trial{},
+				OwnerType:    &trialType,
 			})
 		if err != nil {
 			if meta.IsNoMatchError(err) {

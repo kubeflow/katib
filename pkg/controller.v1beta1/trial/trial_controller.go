@@ -42,6 +42,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/trial/managerclient"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	jobv1beta1 "github.com/kubeflow/katib/pkg/job/v1beta1"
@@ -84,8 +85,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	trialType := trialsv1beta1.Trial{}
+	trialType.APIVersion = consts.APIVersionToWatch
+
 	// Watch for changes to Trial
-	err = c.Watch(&source.Kind{Type: &trialsv1beta1.Trial{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &trialType}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		log.Error(err, "Trial watch error")
 		return err
@@ -96,7 +100,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		&source.Kind{Type: &batchv1beta.CronJob{}},
 		&handler.EnqueueRequestForOwner{
 			IsController: true,
-			OwnerType:    &trialsv1beta1.Trial{},
+			OwnerType:    &trialType,
 		})
 
 	if err != nil {
@@ -111,7 +115,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			&source.Kind{Type: unstructuredJob},
 			&handler.EnqueueRequestForOwner{
 				IsController: true,
-				OwnerType:    &trialsv1beta1.Trial{},
+				OwnerType:    &trialType,
 			})
 		if err != nil {
 			if meta.IsNoMatchError(err) {
@@ -123,7 +127,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			log.Info("Job watch added successfully", "CRD Kind", gvk.Kind)
 		}
 	}
-	log.Info("Trial  controller created")
+	log.Info("Trial controller created")
 	return nil
 }
 

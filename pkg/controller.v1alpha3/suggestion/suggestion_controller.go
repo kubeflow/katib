@@ -75,6 +75,9 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	suggestionType := suggestionsv1alpha3.Suggestion{}
+	suggestionType.APIVersion = consts.APIVersionToWatch
+
 	err = c.Watch(&source.Kind{Type: &suggestionsv1alpha3.Suggestion{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
@@ -82,7 +85,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &suggestionsv1alpha3.Suggestion{},
+		OwnerType:    &suggestionType,
 	})
 	if err != nil {
 		return err
@@ -90,7 +93,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	err = c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &suggestionsv1alpha3.Suggestion{},
+		OwnerType:    &suggestionType,
 	})
 	if err != nil {
 		return err

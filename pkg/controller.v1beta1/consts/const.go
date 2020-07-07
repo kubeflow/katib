@@ -146,6 +146,9 @@ const (
 
 	// UnavailableMetricValue is the value when metric was not reported or metric value can't be converted to float64
 	UnavailableMetricValue = "unavailable"
+
+	// APIVersion of katib CRD which controllers watch, to avoid controllers watching objects with wrong version.
+	APIVersionToWatch = "kubeflow.org/v1beta1"
 )
 
 var (

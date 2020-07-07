@@ -136,6 +136,9 @@ const (
 	LabelTrialTemplateConfigMapName = "app"
 	// LabelTrialTemplateConfigMapValue is the label value for the Trial templates configMap
 	LabelTrialTemplateConfigMapValue = "katib-trial-templates"
+
+	// APIVersion of katib CRD which controllers watch, to avoid controllers watching objects with wrong version.
+	APIVersionToWatch = "kubeflow.org/v1alpha3"
 )
 
 var (
