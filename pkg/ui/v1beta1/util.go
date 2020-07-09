@@ -75,7 +75,11 @@ func (k *KatibUIHandler) getTrialTemplatesViewList() ([]TrialTemplatesDataView, 
 		}
 
 		if len(trialTemplatesConfigMapList.Items) != 0 {
-			trialTemplatesDataView = append(trialTemplatesDataView, getTrialTemplatesView(trialTemplatesConfigMapList))
+			newTrialTemplatesView := getTrialTemplatesView(trialTemplatesConfigMapList)
+			// ConfigMap with templates must exists in namespace
+			if len(newTrialTemplatesView.ConfigMaps) > 0 {
+				trialTemplatesDataView = append(trialTemplatesDataView, newTrialTemplatesView)
+			}
 		}
 	}
 	return trialTemplatesDataView, nil
@@ -120,9 +124,12 @@ func getTrialTemplatesView(templatesConfigMapList *apiv1.ConfigMapList) TrialTem
 			return newConfigMap.Templates[i].Path <= newConfigMap.Templates[j].Path
 		})
 
-		trialTemplatesDataView.ConfigMaps = append(trialTemplatesDataView.ConfigMaps, newConfigMap)
-	}
+		// Templates with data must exists in ConfigMap
+		if len(newConfigMap.Templates) > 0 {
+			trialTemplatesDataView.ConfigMaps = append(trialTemplatesDataView.ConfigMaps, newConfigMap)
+		}
 
+	}
 	return trialTemplatesDataView
 }
 
