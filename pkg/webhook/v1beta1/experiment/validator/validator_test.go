@@ -6,7 +6,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	batchv1 "k8s.io/api/batch/v1"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -15,7 +15,7 @@ import (
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
-	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1beta1/experiment/manifest"
 )
 
@@ -361,7 +361,7 @@ spec:
 		Err             bool
 		testDescription string
 	}{
-		// TrialParamters is nil
+		// TrialParameters is nil
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
@@ -370,6 +370,20 @@ spec:
 			}(),
 			Err:             true,
 			testDescription: "Trial parameters is nil",
+		},
+		// TrialParameters should not be equal to preserved trial information
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				trialParameters := append(
+					i.Spec.TrialTemplate.TrialParameters, experimentsv1beta1.TrialParameterSpec{Name: consts.TrialTemplateTrialName})
+				trialParameters = append(
+					trialParameters, experimentsv1beta1.TrialParameterSpec{Name: consts.TrialTemplateTrialNamespace})
+				i.Spec.TrialTemplate.TrialParameters = trialParameters
+				return i
+			}(),
+			Err:             true,
+			testDescription: "TrialParameters should not be equal to preserved trial information",
 		},
 		// TrialSpec and ConfigMap is nil
 		{

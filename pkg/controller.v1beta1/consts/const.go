@@ -144,6 +144,11 @@ const (
 	// TrialTemplateReplaceFormatRegex is the regex for Trial template format
 	TrialTemplateReplaceFormatRegex = "\\{trialParameters\\..+?\\}"
 
+	// TrialTemplateTrialName is the placeholder of trial name in trial template
+	TrialTemplateTrialName = "Name"
+	// TrialTemplateTrialNamespace is the placeholder of trial's namespace in trial template
+	TrialTemplateTrialNamespace = "Namespace"
+
 	// UnavailableMetricValue is the value when metric was not reported or metric value can't be converted to float64
 	UnavailableMetricValue = "unavailable"
 )

@@ -50,6 +50,10 @@ func TestGetRunSpecWithHP(t *testing.T) {
 								"--lr=0.05",
 								"--num-layers=5",
 							},
+							Env: []v1.EnvVar{
+								{Name: "trial_name", Value: "trial-name"},
+								{Name: "trial_ns", Value: "trial-namespace"},
+							},
 						},
 					},
 				},
@@ -329,6 +333,10 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 								"/opt/mxnet-mnist/mnist.py",
 								"--lr=${trialParameters.learningRate}",
 								"--num-layers=${trialParameters.numberLayers}",
+							},
+							Env: []v1.EnvVar{
+								{Name: "trial_name", Value: "${trialParameters.Name}"},
+								{Name: "trial_ns", Value: "${trialParameters.Namespace}"},
 							},
 						},
 					},

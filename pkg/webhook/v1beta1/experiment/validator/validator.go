@@ -184,6 +184,13 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 		return fmt.Errorf("spec.trialTemplate.trialParameters must be specified")
 	}
 
+	// Check if parameter names conflict with preserved names
+	for _, parameter := range trialTemplate.TrialParameters {
+		if parameter.Name == consts.TrialTemplateTrialName || parameter.Name == consts.TrialTemplateTrialNamespace {
+			return fmt.Errorf("Name of trialParameters should not be %s or %s", consts.TrialTemplateTrialName, consts.TrialTemplateTrialNamespace)
+		}
+	}
+
 	// Check if trialSpec or configMap exists
 	if trialTemplate.TrialSource.TrialSpec == nil && trialTemplate.TrialSource.ConfigMap == nil {
 		return fmt.Errorf("spec.trialTemplate.trialSpec or spec.trialTemplate.configMap must be specified")

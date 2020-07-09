@@ -68,8 +68,14 @@ func (g *DefaultGenerator) GetRunSpecWithHyperParameters(experiment *experiments
 		return nil, err
 	}
 
+	// Trial meta data which may be required by TrialTemplate
+	trialMeta := map[string]string{
+		consts.TrialTemplateTrialName:      trialName,
+		consts.TrialTemplateTrialNamespace: trialNamespace,
+	}
+
 	// Apply parameters to Trial Template from assignment
-	replacedTemplate, err := g.applyParameters(trialTemplate, experiment.Spec.TrialTemplate.TrialParameters, assignments)
+	replacedTemplate, err := g.applyParameters(trialTemplate, experiment.Spec.TrialTemplate.TrialParameters, assignments, trialMeta)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +92,7 @@ func (g *DefaultGenerator) GetRunSpecWithHyperParameters(experiment *experiments
 	return runSpec, nil
 }
 
-func (g *DefaultGenerator) applyParameters(trialTemplate string, trialParams []experimentsv1beta1.TrialParameterSpec, assignments []commonapiv1beta1.ParameterAssignment) (string, error) {
+func (g *DefaultGenerator) applyParameters(trialTemplate string, trialParams []experimentsv1beta1.TrialParameterSpec, assignments []commonapiv1beta1.ParameterAssignment, trialMeta map[string]string) (string, error) {
 	// Number of parameters must be equal
 	if len(assignments) != len(trialParams) {
 		return "", fmt.Errorf("Number of Trial assignment from Suggestion: %v not equal to number Trial parameters from Experiment: %v", len(assignments), len(trialParams))
@@ -106,6 +112,13 @@ func (g *DefaultGenerator) applyParameters(trialTemplate string, trialParams []e
 			return "", fmt.Errorf("Unable to find parameter: %v in parameter assignment %v", parameter.Reference, assignmentsMap)
 		}
 	}
+	// Inject TrialMeta if needed
+	for key, value := range trialMeta {
+		if strings.Contains(trialTemplate, fmt.Sprintf(consts.TrialTemplateReplaceFormat, key)) {
+			trialTemplate = strings.Replace(trialTemplate, fmt.Sprintf(consts.TrialTemplateReplaceFormat, key), value, -1)
+		}
+	}
+
 	return trialTemplate, nil
 }
 
