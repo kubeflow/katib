@@ -12,12 +12,14 @@ import TableSortLabel from '@material-ui/core/TableSortLabel';
 
 import { fetchHPJobTrialInfo } from '../../../actions/hpMonitorActions';
 import { HP_MONITOR_MODULE } from '../../../constants/constants';
+import TablePagination from '@material-ui/core/TablePagination';
 
 const styles = theme => ({
   root: {
     width: '100%',
     marginTop: theme.spacing.unit * 3,
     overflowX: 'auto',
+    marginBottom: theme.spacing.unit * 3,
   },
   table: {
     minWidth: 700,
@@ -52,7 +54,7 @@ class HPJobTable extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { orderByIdx: 1, order: 'asc' };
+    this.state = { orderByIdx: 1, order: 'asc', rowsPerPage: 10, page: 0 };
   }
 
   onChangeSortHeaderIndex = headerIndex => () => {
@@ -89,86 +91,123 @@ class HPJobTable extends React.Component {
     return stabilizedData.map(el => el[0]);
   };
 
+  onChangePage = (event, newPage) => {
+    this.setState({ page: newPage });
+  };
+
+  onChangeRowsPerPage = event => {
+    this.setState({ rowsPerPage: parseInt(event.target.value, 10), page: 0 });
+  };
+
   render() {
     const { classes } = this.props;
 
+    const emptyRows =
+      this.state.rowsPerPage -
+      Math.min(
+        this.state.rowsPerPage,
+        this.props.data.length - this.state.page * this.state.rowsPerPage,
+      );
+
     return (
       <Paper className={classes.root}>
-        {this.props.jobData.length > 1 && (
-          <Table className={classes.table}>
-            <TableHead>
-              <TableRow>
-                {this.props.headers.map((header, idx) => (
-                  <TableCell
-                    sortDirection={this.state.orderByIdx === idx ? this.state.order : false}
-                    key={idx}
-                  >
-                    <TableSortLabel
-                      active={this.state.orderByIdx === idx}
-                      direction={this.state.orderByIdx === idx ? this.state.order : 'asc'}
-                      onClick={this.onChangeSortHeaderIndex(idx)}
+        {this.props.data.length > 1 && (
+          <div>
+            <Table className={classes.table}>
+              <TableHead>
+                <TableRow>
+                  {this.props.headers.map((header, idx) => (
+                    <TableCell
+                      sortDirection={this.state.orderByIdx === idx ? this.state.order : false}
+                      key={idx}
                     >
-                      {header}
-                    </TableSortLabel>
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {this.stableSort(this.props.data, this.getComparator()).map((row, idx) => (
-                <TableRow key={idx}>
-                  {row.map((element, index) => {
-                    if (index === 0 && row[1] === 'Succeeded') {
-                      return (
-                        <TableCell
-                          className={classes.trialName}
-                          component="th"
-                          scope="row"
-                          onClick={this.fetchAndOpenDialogTrial(element)}
-                          key={index}
-                        >
-                          {element}
-                        </TableCell>
-                      );
-                    } else if (index === 1) {
-                      if (element === 'Created') {
-                        return (
-                          <TableCell className={classes.created} key={index}>
-                            {element}
-                          </TableCell>
-                        );
-                      } else if (element === 'Running') {
-                        return (
-                          <TableCell className={classes.running} key={index}>
-                            {element}
-                          </TableCell>
-                        );
-                      } else if (element === 'Succeeded') {
-                        return (
-                          <TableCell className={classes.succeeded} key={index}>
-                            {element}
-                          </TableCell>
-                        );
-                      } else if (element === 'Killed') {
-                        return (
-                          <TableCell className={classes.killed} key={index}>
-                            {element}
-                          </TableCell>
-                        );
-                      } else if (element === 'Failed') {
-                        return (
-                          <TableCell className={classes.failed} key={index}>
-                            {element}
-                          </TableCell>
-                        );
-                      }
-                    }
-                    return <TableCell key={index}>{element}</TableCell>;
-                  })}
+                      <TableSortLabel
+                        active={this.state.orderByIdx === idx}
+                        direction={this.state.orderByIdx === idx ? this.state.order : 'asc'}
+                        onClick={this.onChangeSortHeaderIndex(idx)}
+                      >
+                        {header}
+                      </TableSortLabel>
+                    </TableCell>
+                  ))}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                {this.stableSort(this.props.data, this.getComparator())
+                  .slice(
+                    this.state.page * this.state.rowsPerPage,
+                    this.state.page * this.state.rowsPerPage + this.state.rowsPerPage,
+                  )
+                  .map((row, idx) => (
+                    <TableRow key={idx}>
+                      {row.map((element, index) => {
+                        if (index === 0 && row[1] === 'Succeeded') {
+                          return (
+                            <TableCell
+                              className={classes.trialName}
+                              component="th"
+                              scope="row"
+                              onClick={this.fetchAndOpenDialogTrial(element)}
+                              key={index}
+                            >
+                              {element}
+                            </TableCell>
+                          );
+                        } else if (index === 1) {
+                          if (element === 'Created') {
+                            return (
+                              <TableCell className={classes.created} key={index}>
+                                {element}
+                              </TableCell>
+                            );
+                          } else if (element === 'Running') {
+                            return (
+                              <TableCell className={classes.running} key={index}>
+                                {element}
+                              </TableCell>
+                            );
+                          } else if (element === 'Succeeded') {
+                            return (
+                              <TableCell className={classes.succeeded} key={index}>
+                                {element}
+                              </TableCell>
+                            );
+                          } else if (element === 'Killed') {
+                            return (
+                              <TableCell className={classes.killed} key={index}>
+                                {element}
+                              </TableCell>
+                            );
+                          } else if (element === 'Failed') {
+                            return (
+                              <TableCell className={classes.failed} key={index}>
+                                {element}
+                              </TableCell>
+                            );
+                          }
+                        }
+                        return <TableCell key={index}>{element}</TableCell>;
+                      })}
+                    </TableRow>
+                  ))}
+
+                {emptyRows > 0 && (
+                  <TableRow style={{ height: 53 * emptyRows }}>
+                    <TableCell colSpan={this.props.headers.length} />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+            <TablePagination
+              rowsPerPageOptions={[10, 20, 50, 100]}
+              component="div"
+              count={this.props.data.length}
+              rowsPerPage={this.state.rowsPerPage}
+              page={this.state.page}
+              onChangePage={this.onChangePage}
+              onChangeRowsPerPage={this.onChangeRowsPerPage}
+            />
+          </div>
         )}
       </Paper>
     );
@@ -177,7 +216,6 @@ class HPJobTable extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    jobData: state[HP_MONITOR_MODULE].jobData,
     headers: state[HP_MONITOR_MODULE].jobData[0],
     data: state[HP_MONITOR_MODULE].jobData.slice(1),
   };
