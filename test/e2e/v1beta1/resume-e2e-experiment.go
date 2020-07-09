@@ -77,9 +77,9 @@ func main() {
 		exp.Spec.MaxTrialCount = &maxtrials
 		exp.Spec.ParallelTrialCount = &paralleltrials
 	}
-	err = kclient.UpdateExperiment(exp)
+	err = kclient.UpdateRuntimeObject(exp)
 	if err != nil {
-		log.Fatal("UpdateExperiment from YAML failed: ", err)
+		log.Fatal("UpdateRuntimeObject failed: ", err)
 	}
 	endTime := time.Now().Add(timeout)
 	for time.Now().Before(endTime) {
