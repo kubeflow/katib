@@ -89,8 +89,9 @@ const rootReducer = (state = initialState, action) => {
         editOpen: false,
         trialTemplatesData: action.trialTemplatesData,
         filteredTrialTemplatesData: action.trialTemplatesData,
+        filteredConfigMapNamespace: 'All namespaces',
+        filteredConfigMapName: '',
       };
-
     case actions.ADD_TEMPLATE_FAILURE:
     case actions.EDIT_TEMPLATE_FAILURE:
     case actions.DELETE_TEMPLATE_FAILURE:

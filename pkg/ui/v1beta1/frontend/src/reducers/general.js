@@ -350,6 +350,42 @@ const generalReducer = (state = initialState, action) => {
         filterStatus: statuses,
         filteredExperiments: filteredExperiments,
       };
+    case templateActions.ADD_TEMPLATE_SUCCESS:
+      return {
+        ...state,
+        snackOpen: true,
+        snackText: 'Successfully added new Template',
+      };
+    case templateActions.DELETE_TEMPLATE_SUCCESS:
+      return {
+        ...state,
+        snackOpen: true,
+        snackText: 'Successfully deleted Template',
+      };
+    case templateActions.EDIT_TEMPLATE_SUCCESS:
+      return {
+        ...state,
+        snackOpen: true,
+        snackText: 'Successfully edited Template',
+      };
+    case templateActions.ADD_TEMPLATE_FAILURE:
+      return {
+        ...state,
+        snackOpen: true,
+        snackText: 'Add Template failed: ' + action.error,
+      };
+    case templateActions.EDIT_TEMPLATE_FAILURE:
+      return {
+        ...state,
+        snackOpen: true,
+        snackText: 'Edit Template failed: ' + action.error,
+      };
+    case templateActions.DELETE_TEMPLATE_FAILURE:
+      return {
+        ...state,
+        snackOpen: true,
+        snackText: 'Delete Template failed: ' + action.error,
+      };
     default:
       return state;
   }

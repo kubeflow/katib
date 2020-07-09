@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -114,6 +115,11 @@ func getTrialTemplatesView(templatesConfigMapList *apiv1.ConfigMapList) TrialTem
 			newConfigMap.Templates = append(newConfigMap.Templates, newTemplate)
 		}
 
+		// Sort Trial Templates by Path
+		sort.SliceStable(newConfigMap.Templates, func(i, j int) bool {
+			return newConfigMap.Templates[i].Path <= newConfigMap.Templates[j].Path
+		})
+
 		trialTemplatesDataView.ConfigMaps = append(trialTemplatesDataView.ConfigMaps, newConfigMap)
 	}
 
@@ -157,10 +163,19 @@ func (k *KatibUIHandler) updateTrialTemplates(
 		Data: templates,
 	}
 
-	err = k.katibClient.UpdateConfigMap(templatesConfigMap)
-	if err != nil {
-		log.Printf("UpdateConfigMap failed: %v", err)
-		return nil, err
+	// If templates is empty delete Trial template configMap
+	if len(templates) == 0 {
+		err = k.katibClient.DeleteRuntimeObject(templatesConfigMap)
+		if err != nil {
+			log.Printf("DeleteRuntimeObject failed: %v", err)
+			return nil, err
+		}
+	} else {
+		err = k.katibClient.UpdateRuntimeObject(templatesConfigMap)
+		if err != nil {
+			log.Printf("UpdateRuntimeObject failed: %v", err)
+			return nil, err
+		}
 	}
 
 	newTemplates, err := k.getTrialTemplatesViewList()

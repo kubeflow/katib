@@ -22,7 +22,7 @@ import { closeDialog, addTemplate, changeTemplate } from '../../../actions/templ
 
 import { TEMPLATE_MODULE } from '../../../constants/constants';
 
-const styles = theme => ({
+const styles = () => ({
   header: {
     textAlign: 'center',
     width: 650,
@@ -185,7 +185,11 @@ class AddDialog extends React.Component {
                 !this.props.updatedConfigMapPath ||
                 !this.props.updatedTemplateYaml ||
                 // Path can't contain spaces
-                this.props.updatedConfigMapPath.indexOf(' ') !== -1
+                this.props.updatedConfigMapPath.indexOf(' ') !== -1 ||
+                // Path in ConfigMap must be unique
+                this.props.trialTemplatesData[this.props.configMapNamespaceIndex].ConfigMaps[
+                  this.props.configMapNameIndex
+                ].Templates.some(t => t.Path === this.props.updatedConfigMapPath)
               }
               onClick={this.submitAddTemplate}
               color={'primary'}
@@ -211,10 +215,18 @@ const mapStateToProps = state => {
     return trialTemplate.ConfigMapNamespace === state[TEMPLATE_MODULE].updatedConfigMapNamespace;
   });
 
+  let cmIndex;
+  if (nsIndex !== -1) {
+    cmIndex = templatesData[nsIndex].ConfigMaps.findIndex(function(configMap, i) {
+      return configMap.ConfigMapName === state[TEMPLATE_MODULE].updatedConfigMapName;
+    });
+  }
+
   return {
     addOpen: state[TEMPLATE_MODULE].addOpen,
-    trialTemplatesData: state[TEMPLATE_MODULE].trialTemplatesData,
+    trialTemplatesData: templatesData,
     configMapNamespaceIndex: nsIndex,
+    configMapNameIndex: cmIndex,
     updatedConfigMapNamespace: state[TEMPLATE_MODULE].updatedConfigMapNamespace,
     updatedConfigMapName: state[TEMPLATE_MODULE].updatedConfigMapName,
     updatedConfigMapPath: state[TEMPLATE_MODULE].updatedConfigMapPath,
