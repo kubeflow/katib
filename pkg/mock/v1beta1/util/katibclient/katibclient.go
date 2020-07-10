@@ -10,6 +10,7 @@ import (
 	v1beta10 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	v1beta11 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	v1 "k8s.io/api/core/v1"
+	runtime "k8s.io/apimachinery/pkg/runtime"
 	reflect "reflect"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -37,42 +38,32 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
-// CreateExperiment mocks base method
-func (m *MockClient) CreateExperiment(arg0 *v1beta1.Experiment, arg1 ...string) error {
+// CreateRuntimeObject mocks base method
+func (m *MockClient) CreateRuntimeObject(arg0 runtime.Object) error {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0}
-	for _, a := range arg1 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "CreateExperiment", varargs...)
+	ret := m.ctrl.Call(m, "CreateRuntimeObject", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// CreateExperiment indicates an expected call of CreateExperiment
-func (mr *MockClientMockRecorder) CreateExperiment(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+// CreateRuntimeObject indicates an expected call of CreateRuntimeObject
+func (mr *MockClientMockRecorder) CreateRuntimeObject(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0}, arg1...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateExperiment", reflect.TypeOf((*MockClient)(nil).CreateExperiment), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRuntimeObject", reflect.TypeOf((*MockClient)(nil).CreateRuntimeObject), arg0)
 }
 
-// DeleteExperiment mocks base method
-func (m *MockClient) DeleteExperiment(arg0 *v1beta1.Experiment, arg1 ...string) error {
+// DeleteRuntimeObject mocks base method
+func (m *MockClient) DeleteRuntimeObject(arg0 runtime.Object) error {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0}
-	for _, a := range arg1 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "DeleteExperiment", varargs...)
+	ret := m.ctrl.Call(m, "DeleteRuntimeObject", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteExperiment indicates an expected call of DeleteExperiment
-func (mr *MockClientMockRecorder) DeleteExperiment(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+// DeleteRuntimeObject indicates an expected call of DeleteRuntimeObject
+func (mr *MockClientMockRecorder) DeleteRuntimeObject(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0}, arg1...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteExperiment", reflect.TypeOf((*MockClient)(nil).DeleteExperiment), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteRuntimeObject", reflect.TypeOf((*MockClient)(nil).DeleteRuntimeObject), arg0)
 }
 
 // GetClient mocks base method
@@ -254,35 +245,16 @@ func (mr *MockClientMockRecorder) InjectClient(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InjectClient", reflect.TypeOf((*MockClient)(nil).InjectClient), arg0)
 }
 
-// UpdateConfigMap mocks base method
-func (m *MockClient) UpdateConfigMap(arg0 *v1.ConfigMap) error {
+// UpdateRuntimeObject mocks base method
+func (m *MockClient) UpdateRuntimeObject(arg0 runtime.Object) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateConfigMap", arg0)
+	ret := m.ctrl.Call(m, "UpdateRuntimeObject", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// UpdateConfigMap indicates an expected call of UpdateConfigMap
-func (mr *MockClientMockRecorder) UpdateConfigMap(arg0 interface{}) *gomock.Call {
+// UpdateRuntimeObject indicates an expected call of UpdateRuntimeObject
+func (mr *MockClientMockRecorder) UpdateRuntimeObject(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateConfigMap", reflect.TypeOf((*MockClient)(nil).UpdateConfigMap), arg0)
-}
-
-// UpdateExperiment mocks base method
-func (m *MockClient) UpdateExperiment(arg0 *v1beta1.Experiment, arg1 ...string) error {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0}
-	for _, a := range arg1 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "UpdateExperiment", varargs...)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateExperiment indicates an expected call of UpdateExperiment
-func (mr *MockClientMockRecorder) UpdateExperiment(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0}, arg1...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateExperiment", reflect.TypeOf((*MockClient)(nil).UpdateExperiment), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRuntimeObject", reflect.TypeOf((*MockClient)(nil).UpdateRuntimeObject), arg0)
 }

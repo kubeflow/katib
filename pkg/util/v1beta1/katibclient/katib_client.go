@@ -19,6 +19,7 @@ import (
 	"context"
 
 	apiv1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -34,17 +35,16 @@ type Client interface {
 	InjectClient(c client.Client)
 	GetClient() client.Client
 	GetExperimentList(namespace ...string) (*experimentsv1beta1.ExperimentList, error)
-	CreateExperiment(experiment *experimentsv1beta1.Experiment, namespace ...string) error
-	UpdateExperiment(experiment *experimentsv1beta1.Experiment, namespace ...string) error
-	DeleteExperiment(experiment *experimentsv1beta1.Experiment, namespace ...string) error
 	GetExperiment(name string, namespace ...string) (*experimentsv1beta1.Experiment, error)
 	GetConfigMap(name string, namespace ...string) (map[string]string, error)
 	GetTrial(name string, namespace ...string) (*trialsv1beta1.Trial, error)
 	GetTrialList(name string, namespace ...string) (*trialsv1beta1.TrialList, error)
 	GetTrialTemplates(namespace ...string) (*apiv1.ConfigMapList, error)
 	GetSuggestion(name string, namespace ...string) (*suggestionsv1beta1.Suggestion, error)
-	UpdateConfigMap(newConfigMap *apiv1.ConfigMap) error
 	GetNamespaceList() (*apiv1.NamespaceList, error)
+	CreateRuntimeObject(object runtime.Object) error
+	DeleteRuntimeObject(object runtime.Object) error
+	UpdateRuntimeObject(object runtime.Object) error
 }
 
 type KatibClient struct {
@@ -133,30 +133,6 @@ func (k *KatibClient) GetTrialList(name string, namespace ...string) (*trialsv1b
 
 }
 
-func (k *KatibClient) CreateExperiment(experiment *experimentsv1beta1.Experiment, namespace ...string) error {
-
-	if err := k.client.Create(context.Background(), experiment); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (k *KatibClient) UpdateExperiment(experiment *experimentsv1beta1.Experiment, namespace ...string) error {
-
-	if err := k.client.Update(context.Background(), experiment); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (k *KatibClient) DeleteExperiment(experiment *experimentsv1beta1.Experiment, namespace ...string) error {
-
-	if err := k.client.Delete(context.Background(), experiment); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (k *KatibClient) GetExperiment(name string, namespace ...string) (*experimentsv1beta1.Experiment, error) {
 	ns := getNamespace(namespace...)
 	exp := &experimentsv1beta1.Experiment{}
@@ -196,14 +172,6 @@ func (k *KatibClient) GetTrialTemplates(namespace ...string) (*apiv1.ConfigMapLi
 
 }
 
-func (k *KatibClient) UpdateConfigMap(newConfigMap *apiv1.ConfigMap) error {
-
-	if err := k.client.Update(context.Background(), newConfigMap); err != nil {
-		return err
-	}
-	return nil
-}
-
 func getNamespace(namespace ...string) string {
 	if len(namespace) == 0 {
 		return consts.DefaultKatibNamespace
@@ -220,4 +188,31 @@ func (k *KatibClient) GetNamespaceList() (*apiv1.NamespaceList, error) {
 		return namespaceList, err
 	}
 	return namespaceList, nil
+}
+
+//CreateRuntimeObject creates the given runtime object in Kubernetes cluster
+func (k *KatibClient) CreateRuntimeObject(object runtime.Object) error {
+
+	if err := k.client.Create(context.Background(), object); err != nil {
+		return err
+	}
+	return nil
+}
+
+//DeleteRuntimeObject deletes the given runtime object in Kubernetes cluster
+func (k *KatibClient) DeleteRuntimeObject(object runtime.Object) error {
+
+	if err := k.client.Delete(context.Background(), object); err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpdateRuntimeObject updates the given runtime object in Kubernetes cluster
+func (k *KatibClient) UpdateRuntimeObject(object runtime.Object) error {
+
+	if err := k.client.Update(context.Background(), object); err != nil {
+		return err
+	}
+	return nil
 }

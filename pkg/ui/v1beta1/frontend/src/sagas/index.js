@@ -482,6 +482,7 @@ export const addTemplate = function*() {
       } else {
         yield put({
           type: templateActions.ADD_TEMPLATE_FAILURE,
+          error: result.error,
         });
       }
     } catch (err) {
@@ -508,9 +509,10 @@ const goAddTemplate = function*(
     const result = yield call(axios.post, '/katib/add_template/', data);
     return result;
   } catch (err) {
-    yield put({
-      type: templateActions.ADD_TEMPLATE_FAILURE,
-    });
+    return {
+      status: 500,
+      error: err.response.data,
+    };
   }
 };
 
@@ -534,6 +536,7 @@ export const editTemplate = function*() {
       } else {
         yield put({
           type: templateActions.EDIT_TEMPLATE_FAILURE,
+          error: result.error,
         });
       }
     } catch (err) {
@@ -562,9 +565,10 @@ const goEditTemplate = function*(
     const result = yield call(axios.post, '/katib/edit_template/', data);
     return result;
   } catch (err) {
-    yield put({
-      type: templateActions.EDIT_TEMPLATE_FAILURE,
-    });
+    return {
+      status: 500,
+      error: err.response.data,
+    };
   }
 };
 
@@ -586,6 +590,7 @@ export const deleteTemplate = function*() {
       } else {
         yield put({
           type: templateActions.DELETE_TEMPLATE_FAILURE,
+          error: result.error,
         });
       }
     } catch (err) {
@@ -610,9 +615,10 @@ const goDeleteTemplate = function*(
     const result = yield call(axios.post, '/katib/delete_template/', data);
     return result;
   } catch (err) {
-    yield put({
-      type: templateActions.DELETE_TEMPLATE_FAILURE,
-    });
+    return {
+      status: 500,
+      error: err.response.data,
+    };
   }
 };
 

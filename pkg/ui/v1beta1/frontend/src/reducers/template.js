@@ -27,8 +27,6 @@ const rootReducer = (state = initialState, action) => {
         editOpen: false,
         addOpen: false,
         deleteOpen: false,
-        filteredConfigMapNamespace: 'All namespaces',
-        filteredConfigMapName: '',
       };
     case actions.OPEN_DIALOG:
       switch (action.dialogType) {
@@ -89,8 +87,9 @@ const rootReducer = (state = initialState, action) => {
         editOpen: false,
         trialTemplatesData: action.trialTemplatesData,
         filteredTrialTemplatesData: action.trialTemplatesData,
+        filteredConfigMapNamespace: 'All namespaces',
+        filteredConfigMapName: '',
       };
-
     case actions.ADD_TEMPLATE_FAILURE:
     case actions.EDIT_TEMPLATE_FAILURE:
     case actions.DELETE_TEMPLATE_FAILURE:
@@ -99,6 +98,8 @@ const rootReducer = (state = initialState, action) => {
         addOpen: false,
         deleteOpen: false,
         editOpen: false,
+        filteredConfigMapNamespace: 'All namespaces',
+        filteredConfigMapName: '',
       };
     case actions.CHANGE_TEMPLATE:
       return {

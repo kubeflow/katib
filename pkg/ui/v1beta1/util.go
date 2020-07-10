@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -74,7 +75,11 @@ func (k *KatibUIHandler) getTrialTemplatesViewList() ([]TrialTemplatesDataView, 
 		}
 
 		if len(trialTemplatesConfigMapList.Items) != 0 {
-			trialTemplatesDataView = append(trialTemplatesDataView, getTrialTemplatesView(trialTemplatesConfigMapList))
+			newTrialTemplatesView := getTrialTemplatesView(trialTemplatesConfigMapList)
+			// ConfigMap with templates must exists in namespace
+			if len(newTrialTemplatesView.ConfigMaps) > 0 {
+				trialTemplatesDataView = append(trialTemplatesDataView, newTrialTemplatesView)
+			}
 		}
 	}
 	return trialTemplatesDataView, nil
@@ -114,9 +119,17 @@ func getTrialTemplatesView(templatesConfigMapList *apiv1.ConfigMapList) TrialTem
 			newConfigMap.Templates = append(newConfigMap.Templates, newTemplate)
 		}
 
-		trialTemplatesDataView.ConfigMaps = append(trialTemplatesDataView.ConfigMaps, newConfigMap)
-	}
+		// Sort Trial Templates by Path
+		sort.SliceStable(newConfigMap.Templates, func(i, j int) bool {
+			return newConfigMap.Templates[i].Path <= newConfigMap.Templates[j].Path
+		})
 
+		// Templates with data must exists in ConfigMap
+		if len(newConfigMap.Templates) > 0 {
+			trialTemplatesDataView.ConfigMaps = append(trialTemplatesDataView.ConfigMaps, newConfigMap)
+		}
+
+	}
 	return trialTemplatesDataView
 }
 
@@ -157,10 +170,19 @@ func (k *KatibUIHandler) updateTrialTemplates(
 		Data: templates,
 	}
 
-	err = k.katibClient.UpdateConfigMap(templatesConfigMap)
-	if err != nil {
-		log.Printf("UpdateConfigMap failed: %v", err)
-		return nil, err
+	// If templates is empty delete Trial template configMap
+	if len(templates) == 0 {
+		err = k.katibClient.DeleteRuntimeObject(templatesConfigMap)
+		if err != nil {
+			log.Printf("DeleteRuntimeObject failed: %v", err)
+			return nil, err
+		}
+	} else {
+		err = k.katibClient.UpdateRuntimeObject(templatesConfigMap)
+		if err != nil {
+			log.Printf("UpdateRuntimeObject failed: %v", err)
+			return nil, err
+		}
 	}
 
 	newTemplates, err := k.getTrialTemplatesViewList()

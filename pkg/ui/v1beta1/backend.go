@@ -52,9 +52,9 @@ func (k *KatibUIHandler) SubmitYamlJob(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		err = k.katibClient.CreateExperiment(&job)
+		err = k.katibClient.CreateRuntimeObject(&job)
 		if err != nil {
-			log.Printf("CreateExperiment from YAML failed: %v", err)
+			log.Printf("CreateRuntimeObject from YAML failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -70,13 +70,13 @@ func (k *KatibUIHandler) SubmitParamsJob(w http.ResponseWriter, r *http.Request)
 	if data, ok := data["postData"]; ok {
 		jsonbody, err := json.Marshal(data)
 		if err != nil {
-			log.Printf("Marshal data for HP job failed: %v", err)
+			log.Printf("Marshal data for experiment failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		job := experimentv1beta1.Experiment{}
 		if err := json.Unmarshal(jsonbody, &job); err != nil {
-			log.Printf("Unmarshal HP job failed: %v", err)
+			log.Printf("Unmarshal experiment failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -89,9 +89,9 @@ func (k *KatibUIHandler) SubmitParamsJob(w http.ResponseWriter, r *http.Request)
 			Name:      dataMap["metadata"].(map[string]interface{})["name"].(string),
 			Namespace: dataMap["metadata"].(map[string]interface{})["namespace"].(string),
 		}
-		err = k.katibClient.CreateExperiment(&job)
+		err = k.katibClient.CreateRuntimeObject(&job)
 		if err != nil {
-			log.Printf("CreateExperiment for HP failed: %v", err)
+			log.Printf("CreateRuntimeObject from parameters failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -129,9 +129,9 @@ func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = k.katibClient.DeleteExperiment(experiment)
+	err = k.katibClient.DeleteRuntimeObject(experiment)
 	if err != nil {
-		log.Printf("DeleteExperiment failed: %v", err)
+		log.Printf("DeleteRuntimeObject failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -255,8 +255,7 @@ func (k *KatibUIHandler) EditTemplate(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-// DeleteTemplate delete template in ConfigMap
-// TODO: Add functionality to delete configMap if there is no templates
+// DeleteTemplate deletes template in ConfigMap
 func (k *KatibUIHandler) DeleteTemplate(w http.ResponseWriter, r *http.Request) {
 
 	var data map[string]interface{}

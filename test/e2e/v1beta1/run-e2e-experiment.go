@@ -73,9 +73,9 @@ func main() {
 		exp.Spec.MaxTrialCount = &maxtrials
 		exp.Spec.ParallelTrialCount = &paralleltrials
 	}
-	err = kclient.CreateExperiment(exp)
+	err = kclient.CreateRuntimeObject(exp)
 	if err != nil {
-		log.Fatal("CreateExperiment from YAML failed: ", err)
+		log.Fatal("CreateRuntimeObject failed: ", err)
 	}
 
 	for endTime := time.Now().Add(timeout); time.Now().Before(endTime); {
