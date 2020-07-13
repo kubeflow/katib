@@ -51,11 +51,11 @@ spec:
               spec:
                 containers:
                 - name: {{.Trial}}
-                  image: docker.io/kubeflowkatib/pytorch-mnist:1.0
+                  image: docker.io/kubeflowkatib/pytorch-mnist:latest
                   imagePullPolicy: Always
                   command:
                   - "python"
-                  - "/var/mnist.py"
+                  - "/opt/mnist/src/mnist.py"
                   - "--epochs=1"
                   {{- with .HyperParameters}}
                   {{- range .}}
