@@ -8,7 +8,6 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 
-import { fetchNamespaces } from '../../../actions/generalActions';
 import { filterTemplates } from '../../../actions/templateActions';
 
 import { GENERAL_MODULE, TEMPLATE_MODULE } from '../../../constants/constants';
@@ -31,7 +30,6 @@ const styles = theme => ({
 
 class FilterPanel extends React.Component {
   componentDidMount() {
-    this.props.fetchNamespaces();
     this.props.filterTemplates(
       this.props.filteredConfigMapNamespace,
       this.props.filteredConfigMapName,
@@ -88,6 +86,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps, { fetchNamespaces, filterTemplates })(
-  withStyles(styles)(FilterPanel),
-);
+export default connect(mapStateToProps, { filterTemplates })(withStyles(styles)(FilterPanel));

@@ -20,7 +20,7 @@ import DeleteDialog from './DeleteDialog';
 
 import { openDialog } from '../../../actions/templateActions';
 
-import { TEMPLATE_MODULE } from '../../../constants/constants';
+import { TEMPLATE_MODULE, GENERAL_MODULE } from '../../../constants/constants';
 
 const styles = theme => ({
   namespace: {
@@ -58,14 +58,17 @@ const styles = theme => ({
 
 const dialogTypeAdd = 'add';
 
-//TODO: Add functionality to create new ConfigMap with Trial Template
 class TemplateList extends React.Component {
-  openAddDialog = () => {
-    this.props.openDialog(
-      dialogTypeAdd,
-      this.props.trialTemplatesData[0].ConfigMapNamespace,
-      this.props.trialTemplatesData[0].ConfigMaps[0].ConfigMapName,
-    );
+  openAddDialog = noTrialTemplates => () => {
+    if (noTrialTemplates) {
+      this.props.openDialog(dialogTypeAdd, this.props.namespaces[1]);
+    } else {
+      this.props.openDialog(
+        dialogTypeAdd,
+        this.props.trialTemplatesData[0].ConfigMapNamespace,
+        this.props.trialTemplatesData[0].ConfigMaps[0].ConfigMapName,
+      );
+    }
   };
 
   render() {
@@ -80,13 +83,17 @@ class TemplateList extends React.Component {
               <div>
                 <FilterPanel />
                 <div className={classes.buttonAdd}>
-                  <Button variant={'contained'} color={'primary'} onClick={this.openAddDialog}>
+                  <Button
+                    variant={'contained'}
+                    color={'primary'}
+                    onClick={this.openAddDialog(false)}
+                  >
                     Add Template
                   </Button>
                 </div>
                 {this.props.filteredTrialTemplatesData.map((trialTemplate, nsIndex) => {
                   return (
-                    <div>
+                    <div key={nsIndex}>
                       <Grid key={nsIndex} container>
                         <Grid item>
                           <Typography className={classes.namespace}>Namespace:</Typography>
@@ -103,8 +110,8 @@ class TemplateList extends React.Component {
 
                       {trialTemplate.ConfigMaps.map((configMap, cmIndex) => {
                         return (
-                          <div>
-                            <Grid key={cmIndex} container>
+                          <div key={cmIndex}>
+                            <Grid container>
                               <Grid item>
                                 <Typography className={classes.configMap}>ConfigMap:</Typography>
                               </Grid>
@@ -120,8 +127,8 @@ class TemplateList extends React.Component {
 
                             {configMap.Templates.map((template, templateIndex) => {
                               return (
-                                <div className={classes.templatesBlock}>
-                                  <ExpansionPanel key={templateIndex}>
+                                <div className={classes.templatesBlock} key={templateIndex}>
+                                  <ExpansionPanel>
                                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                                       <Typography className={classes.template}>
                                         {template.Path}
@@ -147,7 +154,6 @@ class TemplateList extends React.Component {
                   );
                 })}
 
-                <AddDialog />
                 <EditDialog />
                 <DeleteDialog />
               </div>
@@ -156,8 +162,18 @@ class TemplateList extends React.Component {
                 <Typography className={classes.namespace}>
                   No ConfigMaps with Katib Trial Templates
                 </Typography>
+                <div className={classes.buttonAdd}>
+                  <Button
+                    variant={'contained'}
+                    color={'primary'}
+                    onClick={this.openAddDialog(true)}
+                  >
+                    Add Template
+                  </Button>
+                </div>
               </div>
             )}
+            <AddDialog />
           </div>
         )}
       </div>
@@ -170,6 +186,7 @@ const mapStateToProps = state => {
     filteredTrialTemplatesData: state[TEMPLATE_MODULE].filteredTrialTemplatesData,
     trialTemplatesData: state[TEMPLATE_MODULE].trialTemplatesData,
     loading: state[TEMPLATE_MODULE].loading,
+    namespaces: state[GENERAL_MODULE].namespaces,
   };
 };
 

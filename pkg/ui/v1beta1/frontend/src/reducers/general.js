@@ -184,6 +184,7 @@ const generalReducer = (state = initialState, action) => {
       let configMapNamespaceIndex = -1;
       let configMapNameIndex = -1;
       let configMapPathIndex = -1;
+      var trialParameters = [];
 
       if (
         trialTemplatesData.length > 0 &&
@@ -192,25 +193,23 @@ const generalReducer = (state = initialState, action) => {
         configMapNamespaceIndex = 0;
         configMapNameIndex = 0;
         configMapPathIndex = 0;
+        // Get Parameter names from ConfigMap for Trial parameters
+        var yaml = trialTemplatesData[0].ConfigMaps[0].Templates[0].Yaml;
+        var trialParameterNames = [];
+
+        var matchStr = [...yaml.matchAll(templateParameterRegex)];
+        matchStr.forEach(param => {
+          let newParameter = param[0].slice(param[0].indexOf('.') + 1, param[0].indexOf('}'));
+          if (!trialParameterNames.includes(newParameter)) {
+            trialParameterNames.push(newParameter);
+            trialParameters.push({
+              name: newParameter,
+              reference: '',
+              description: '',
+            });
+          }
+        });
       }
-
-      // Get Parameter names from ConfigMap for Trial parameters
-      var yaml = trialTemplatesData[0].ConfigMaps[0].Templates[0].Yaml;
-      var trialParameters = [];
-      var trialParameterNames = [];
-
-      var matchStr = [...yaml.matchAll(templateParameterRegex)];
-      matchStr.forEach(param => {
-        let newParameter = param[0].slice(param[0].indexOf('.') + 1, param[0].indexOf('}'));
-        if (!trialParameterNames.includes(newParameter)) {
-          trialParameterNames.push(newParameter);
-          trialParameters.push({
-            name: newParameter,
-            reference: '',
-            description: '',
-          });
-        }
-      });
 
       return {
         ...state,

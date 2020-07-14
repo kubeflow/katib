@@ -17,10 +17,13 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import Grid from '@material-ui/core/Grid';
 
 import { closeDialog, addTemplate, changeTemplate } from '../../../actions/templateActions';
 
-import { TEMPLATE_MODULE } from '../../../constants/constants';
+import { TEMPLATE_MODULE, GENERAL_MODULE } from '../../../constants/constants';
 
 const styles = () => ({
   header: {
@@ -39,22 +42,34 @@ const styles = () => ({
   selectBox: {
     width: 200,
   },
+  textFieldConfigMap: {
+    marginLeft: 10,
+    marginRight: 10,
+  },
   selectForm: {
     margin: 10,
   },
-  selectDiv: {
-    textAlign: 'center',
+  checkBox: {
+    marginLeft: 'auto',
   },
 });
 
-//TODO: Add functionality to create new ConfigMap with Trial Template
 class AddDialog extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { checkedNewName: false };
+  }
+
   onConfigMapNamespaceChange = event => {
     let templateData = this.props.trialTemplatesData;
     let newConfigMapNamespace = event.target.value;
     let newConfigMapName = this.props.updatedConfigMapName;
 
-    if (newConfigMapNamespace !== this.props.updatedConfigMapNamespace) {
+    if (
+      newConfigMapNamespace !== this.props.updatedConfigMapNamespace &&
+      !this.state.checkedNewName &&
+      this.props.configMapNamespaceIndex !== -1
+    ) {
       let namespaceIndex = templateData.findIndex(function(trialTemplate, i) {
         return trialTemplate.ConfigMapNamespace === newConfigMapNamespace;
       });
@@ -104,14 +119,40 @@ class AddDialog extends React.Component {
       this.props.updatedConfigMapPath,
       this.props.updatedTemplateYaml,
     );
+    this.setState({ checkedNewName: false });
+  };
+
+  onCheckBoxChange = event => {
+    this.setState({ checkedNewName: event.target.checked });
+    if (event.target.checked) {
+      this.props.changeTemplate(
+        this.props.updatedConfigMapNamespace,
+        '',
+        this.props.updatedConfigMapPath,
+        this.props.updatedTemplateYaml,
+      );
+    } else {
+      this.props.changeTemplate(
+        this.props.updatedConfigMapNamespace,
+        this.props.trialTemplatesData[this.props.configMapNamespaceIndex].ConfigMaps[0]
+          .ConfigMapName,
+        this.props.updatedConfigMapPath,
+        this.props.updatedTemplateYaml,
+      );
+    }
+  };
+
+  onDialogClose = () => {
+    this.props.closeDialog();
+    this.setState({ checkedNewName: false });
   };
 
   render() {
     const { classes } = this.props;
 
-    return this.props.configMapNamespaceIndex !== -1 ? (
+    return (
       <div>
-        <Dialog open={this.props.addOpen} onClose={this.props.closeDialog}>
+        <Dialog open={this.props.addOpen} onClose={this.onDialogClose} maxWidth="md">
           <DialogTitle id="alert-dialog-title" className={classes.header}>
             {'Template Creator'}
             <Typography className={classes.headerTypography}>
@@ -119,44 +160,85 @@ class AddDialog extends React.Component {
             </Typography>
           </DialogTitle>
           <DialogContent>
-            <div className={classes.selectDiv}>
-              <FormControl variant="outlined" className={classes.selectForm}>
-                <InputLabel>Namespace</InputLabel>
-                <Select
-                  value={this.props.updatedConfigMapNamespace}
-                  onChange={this.onConfigMapNamespaceChange}
-                  className={classes.selectBox}
-                  label="Namespace"
-                >
-                  {this.props.trialTemplatesData.map((trialTemplate, i) => {
-                    return (
-                      <MenuItem value={trialTemplate.ConfigMapNamespace} key={i}>
-                        {trialTemplate.ConfigMapNamespace}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </FormControl>
-              <FormControl variant="outlined" className={classes.selectForm}>
-                <InputLabel>Name</InputLabel>
-                <Select
-                  value={this.props.updatedConfigMapName}
-                  onChange={this.onConfigMapNameChange}
-                  className={classes.selectBox}
-                  label="Name"
-                >
-                  {this.props.trialTemplatesData[this.props.configMapNamespaceIndex].ConfigMaps.map(
-                    (configMap, i) => {
-                      return (
-                        <MenuItem value={configMap.ConfigMapName} key={i}>
-                          {configMap.ConfigMapName}
-                        </MenuItem>
-                      );
-                    },
-                  )}
-                </Select>
-              </FormControl>
-            </div>
+            <Grid container alignItems="center">
+              <Grid item>
+                <FormControl variant="outlined" className={classes.selectForm}>
+                  <InputLabel>Namespace</InputLabel>
+                  <Select
+                    value={this.props.updatedConfigMapNamespace}
+                    onChange={this.onConfigMapNamespaceChange}
+                    className={classes.selectBox}
+                    label="Namespace"
+                  >
+                    {this.props.configMapNamespaceIndex !== -1 &&
+                      this.props.trialTemplatesData.map((trialTemplate, i) => {
+                        return (
+                          <MenuItem value={trialTemplate.ConfigMapNamespace} key={i}>
+                            {trialTemplate.ConfigMapNamespace}
+                          </MenuItem>
+                        );
+                      })}
+
+                    {this.props.configMapNamespaceIndex === -1 &&
+                      this.props.namespaces
+                        .filter(namespace => namespace !== 'All namespaces')
+                        .map((namespace, i) => {
+                          return (
+                            <MenuItem value={namespace} key={i}>
+                              {namespace}
+                            </MenuItem>
+                          );
+                        })}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item>
+                {!this.state.checkedNewName && this.props.configMapNamespaceIndex !== -1 ? (
+                  <FormControl variant="outlined" className={classes.selectForm}>
+                    <InputLabel>Name</InputLabel>
+                    <Select
+                      value={this.props.updatedConfigMapName}
+                      onChange={this.onConfigMapNameChange}
+                      className={classes.selectBox}
+                      label="Name"
+                    >
+                      {this.props.trialTemplatesData[
+                        this.props.configMapNamespaceIndex
+                      ].ConfigMaps.map((configMap, i) => {
+                        return (
+                          <MenuItem value={configMap.ConfigMapName} key={i}>
+                            {configMap.ConfigMapName}
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                  </FormControl>
+                ) : (
+                  <TextField
+                    variant="outlined"
+                    label="Name"
+                    className={classes.textFieldConfigMap}
+                    value={this.props.updatedConfigMapName}
+                    onChange={this.onConfigMapNameChange}
+                  />
+                )}
+              </Grid>
+              {this.props.configMapNamespaceIndex !== -1 && (
+                <Grid item>
+                  <FormControlLabel
+                    className={classes.checkBox}
+                    control={
+                      <Checkbox
+                        checked={this.state.checkedNewName}
+                        onChange={this.onCheckBoxChange}
+                        color="primary"
+                      />
+                    }
+                    label="New ConfigMap"
+                  />
+                </Grid>
+              )}
+            </Grid>
             <TextField
               className={classes.textField}
               value={this.props.updatedConfigMapPath}
@@ -182,28 +264,36 @@ class AddDialog extends React.Component {
           <DialogActions>
             <Button
               disabled={
+                // Config Map name can't contain spaces and must exists
+                !this.props.updatedConfigMapName ||
+                this.props.updatedConfigMapName.indexOf(' ') !== -1 ||
+                // ConfigMap name must be unique, when state.checkedNewName = true
+                (this.state.checkedNewName &&
+                  this.props.trialTemplatesData[this.props.configMapNamespaceIndex].ConfigMaps.some(
+                    t => t.ConfigMapName === this.props.updatedConfigMapName,
+                  )) ||
+                // Path can't contain spaces and must exists
                 !this.props.updatedConfigMapPath ||
-                !this.props.updatedTemplateYaml ||
-                // Path can't contain spaces
                 this.props.updatedConfigMapPath.indexOf(' ') !== -1 ||
-                // Path in ConfigMap must be unique
-                this.props.trialTemplatesData[this.props.configMapNamespaceIndex].ConfigMaps[
-                  this.props.configMapNameIndex
-                ].Templates.some(t => t.Path === this.props.updatedConfigMapPath)
+                // Path in ConfigMap must be unique, when configMapNameIndex !== -1
+                (this.props.configMapNameIndex !== -1 &&
+                  this.props.trialTemplatesData[this.props.configMapNamespaceIndex].ConfigMaps[
+                    this.props.configMapNameIndex
+                  ].Templates.some(t => t.Path === this.props.updatedConfigMapPath)) ||
+                // Yaml must exists
+                !this.props.updatedTemplateYaml
               }
               onClick={this.submitAddTemplate}
               color={'primary'}
             >
               Save
             </Button>
-            <Button onClick={this.props.closeDialog} color={'primary'}>
+            <Button onClick={this.onDialogClose} color={'primary'}>
               Discard
             </Button>
           </DialogActions>
         </Dialog>
       </div>
-    ) : (
-      <div />
     );
   }
 }
@@ -215,7 +305,7 @@ const mapStateToProps = state => {
     return trialTemplate.ConfigMapNamespace === state[TEMPLATE_MODULE].updatedConfigMapNamespace;
   });
 
-  let cmIndex;
+  let cmIndex = -1;
   if (nsIndex !== -1) {
     cmIndex = templatesData[nsIndex].ConfigMaps.findIndex(function(configMap, i) {
       return configMap.ConfigMapName === state[TEMPLATE_MODULE].updatedConfigMapName;
@@ -231,6 +321,7 @@ const mapStateToProps = state => {
     updatedConfigMapName: state[TEMPLATE_MODULE].updatedConfigMapName,
     updatedConfigMapPath: state[TEMPLATE_MODULE].updatedConfigMapPath,
     updatedTemplateYaml: state[TEMPLATE_MODULE].updatedTemplateYaml,
+    namespaces: state[GENERAL_MODULE].namespaces,
   };
 };
 

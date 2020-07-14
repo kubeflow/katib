@@ -7,8 +7,9 @@ import Typography from '@material-ui/core/Typography';
 import TemplateList from './Common/TemplateList';
 
 import { fetchTrialTemplates } from '../../actions/templateActions';
+import { fetchNamespaces } from '../../actions/generalActions';
 
-const styles = theme => ({
+const styles = () => ({
   root: {
     width: '90%',
     margin: '0 auto',
@@ -22,6 +23,7 @@ const styles = theme => ({
 class Trial extends React.Component {
   componentDidMount() {
     this.props.fetchTrialTemplates();
+    this.props.fetchNamespaces();
   }
 
   render() {
@@ -38,4 +40,4 @@ class Trial extends React.Component {
     );
   }
 }
-export default connect(null, { fetchTrialTemplates })(withStyles(styles)(Trial));
+export default connect(null, { fetchTrialTemplates, fetchNamespaces })(withStyles(styles)(Trial));
