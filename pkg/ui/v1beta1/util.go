@@ -182,7 +182,7 @@ func (k *KatibUIHandler) updateTrialTemplates(
 	} else if len(templates) == 1 && actionType == ActionTypeAdd {
 		err = k.katibClient.CreateRuntimeObject(templatesConfigMap)
 		if err != nil {
-			log.Printf("DeleteRuntimeObject failed: %v", err)
+			log.Printf("CreateRuntimeObject failed: %v", err)
 			return nil, err
 		}
 		// Otherwise updating configMap
