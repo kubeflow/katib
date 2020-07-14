@@ -63,17 +63,14 @@ class AddDialog extends React.Component {
   onConfigMapNamespaceChange = event => {
     let templateData = this.props.trialTemplatesData;
     let newConfigMapNamespace = event.target.value;
-    let newConfigMapName = this.props.updatedConfigMapName;
+    let newConfigMapName = '';
 
-    if (
-      newConfigMapNamespace !== this.props.updatedConfigMapNamespace &&
-      !this.state.checkedNewName &&
-      this.props.configMapNamespaceIndex !== -1
-    ) {
-      let namespaceIndex = templateData.findIndex(function(trialTemplate, i) {
-        return trialTemplate.ConfigMapNamespace === newConfigMapNamespace;
-      });
+    let namespaceIndex = templateData.findIndex(function(trialTemplate, i) {
+      return trialTemplate.ConfigMapNamespace === newConfigMapNamespace;
+    });
 
+    // Assign new ConfigMap name only if namespace exists in Template data
+    if (newConfigMapNamespace !== this.props.updatedConfigMapNamespace && namespaceIndex !== -1) {
       newConfigMapName = templateData[namespaceIndex].ConfigMaps[0].ConfigMapName;
     }
 
@@ -83,6 +80,9 @@ class AddDialog extends React.Component {
       this.props.updatedConfigMapPath,
       this.props.updatedTemplateYaml,
     );
+
+    // Reset check box when changing namespace
+    this.setState({ checkedNewName: false });
   };
 
   onConfigMapNameChange = event => {
@@ -170,25 +170,15 @@ class AddDialog extends React.Component {
                     className={classes.selectBox}
                     label="Namespace"
                   >
-                    {this.props.configMapNamespaceIndex !== -1 &&
-                      this.props.trialTemplatesData.map((trialTemplate, i) => {
+                    {this.props.namespaces
+                      .filter(namespace => namespace !== 'All namespaces')
+                      .map((namespace, i) => {
                         return (
-                          <MenuItem value={trialTemplate.ConfigMapNamespace} key={i}>
-                            {trialTemplate.ConfigMapNamespace}
+                          <MenuItem value={namespace} key={i}>
+                            {namespace}
                           </MenuItem>
                         );
                       })}
-
-                    {this.props.configMapNamespaceIndex === -1 &&
-                      this.props.namespaces
-                        .filter(namespace => namespace !== 'All namespaces')
-                        .map((namespace, i) => {
-                          return (
-                            <MenuItem value={namespace} key={i}>
-                              {namespace}
-                            </MenuItem>
-                          );
-                        })}
                   </Select>
                 </FormControl>
               </Grid>
@@ -267,15 +257,16 @@ class AddDialog extends React.Component {
                 // Config Map name can't contain spaces and must exists
                 !this.props.updatedConfigMapName ||
                 this.props.updatedConfigMapName.indexOf(' ') !== -1 ||
-                // ConfigMap name must be unique, when state.checkedNewName = true
+                // ConfigMap name must be unique, when state.checkedNewName = true and configMapNamespaceIndex != -1
                 (this.state.checkedNewName &&
+                  this.props.configMapNamespaceIndex !== -1 &&
                   this.props.trialTemplatesData[this.props.configMapNamespaceIndex].ConfigMaps.some(
                     t => t.ConfigMapName === this.props.updatedConfigMapName,
                   )) ||
                 // Path can't contain spaces and must exists
                 !this.props.updatedConfigMapPath ||
                 this.props.updatedConfigMapPath.indexOf(' ') !== -1 ||
-                // Path in ConfigMap must be unique, when configMapNameIndex !== -1
+                // Path in ConfigMap must be unique, when configMapNameIndex != -1
                 (this.props.configMapNameIndex !== -1 &&
                   this.props.trialTemplatesData[this.props.configMapNamespaceIndex].ConfigMaps[
                     this.props.configMapNameIndex
