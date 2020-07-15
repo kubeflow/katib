@@ -94,6 +94,7 @@ status:
   ...
 ```
 #### Experiment
+
 When you want to tune hyperparameters for your machine learning model before 
 training it further, you just need to create an `Experiment` CR like above. To
 learn what fields are included in the `Experiment.spec`, see
@@ -101,6 +102,7 @@ the detailed guide to [configuring and running a Katib
 experiment](https://kubeflow.org/docs/components/hyperparameter-tuning/experiment/).
 
 #### Trial
+
 For each set of hyperparameters, Katib will internally generate a `Trial` CR with the hyperparameters key-value pairs, job manifest string with parameters instantiated and some other fields like below. `Trial` CR is used for internal logic control, and end user can even ignore it.
 
 ```yaml
@@ -268,6 +270,7 @@ status:
 ```
 
 ## What happens after an `Experiment` CR created
+
 When a user created an `Experiment` CR, Katib controllers including experiment controller, trial controller and suggestion controller will work together to achieve hyperparameters tuning for user Machine learning model.
 <center>
 <img width="100%" alt="image" src="images/katib-workflow.png">

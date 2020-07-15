@@ -14,13 +14,13 @@ A Minikube cluster and Katib components will be deployed! You can check them wit
 
 Then, start port-forward for katib UI `8080 -> UI`.
 
-kubectl v1.10~
+kubectl v1.10~:
 
 ```
 $ kubectl -n kubeflow port-forward svc/katib-ui 8080:80
 ```
 
-kubectl ~v1.9
+kubectl ~v1.9:
 
 ```
 & kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-ui | sed -e "s@pods\/@@") 8080:80
@@ -74,8 +74,8 @@ List experiments:
 ```
 # kubectl get experiment -n kubeflow
 
-NAME                STATUS      AGE
-random-example   Succeeded   25m
+NAME             STATUS      AGE
+random-example   Succeeded   3h
 ```
 
 Check experiment result:
@@ -219,6 +219,7 @@ List trials:
 
 ```
 # kubectl get trials -n kubeflow
+
 NAME                      TYPE        STATUS   AGE
 random-example-58tbx6xc   Succeeded   True     48m
 random-example-5nkb2gz2   Succeeded   True     54m

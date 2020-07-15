@@ -125,13 +125,14 @@ You can visualize general trend of Hyper parameter space and each training histo
 
 ## GRPC API documentation
 
-See the [Katib v1beta1 API reference docs](https://github.com/kubeflow/katib/blob/master/pkg/apis/manager/v1beta1/gen-doc/api.md)
+See the [Katib v1beta1 API reference docs](https://github.com/kubeflow/katib/blob/master/pkg/apis/manager/v1beta1/gen-doc/api.md).
+
 See the [Katib v1alpha3 API reference docs](https://www.kubeflow.org/docs/reference/katib/).
 
 ## Installation
 
 For standard installation of Katib with support for all job operators, 
-install Kubeflow. Current official Katib version in Kubeflow release is v1alpha3.
+install Kubeflow. Current official Katib version in Kubeflow latest release is v1alpha3.
 See the documentation:
 
 * [Kubeflow installation 
