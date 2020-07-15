@@ -65,9 +65,10 @@ func main() {
 	if err != nil {
 		log.Fatal("NewClient for Katib failed: ", err)
 	}
-	if exp.Spec.Algorithm.AlgorithmName != "hyperband" {
+	if exp.Spec.Algorithm.AlgorithmName != "hyperband" && exp.Spec.Algorithm.AlgorithmName != "darts" {
 		// Hyperband will validate the parallel trial count,
 		// thus we should not change it.
+		// Not necessary to test parallel Trials for Darts
 		var maxtrials int32 = 3
 		var paralleltrials int32 = 2
 		exp.Spec.MaxTrialCount = &maxtrials
