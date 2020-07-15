@@ -10,18 +10,18 @@ The design of Katib follows the `ask-and-tell` pattern:
 
 When an experiment is created, one algorithm service will be created. Then Katib asks for new sets of parameters via `GetSuggestions` GRPC call. After that, Katib creates new trials according to the sets and observe the outcome. When the trials are finished, Katib tells the metrics of the finished trials to the algorithm, and ask another new sets.
 
-The new algorithm needs to implement `Suggestion` service defined in [api.proto](../pkg/apis/manager/v1alpha3/api.proto). One sample algorithm looks like:
+The new algorithm needs to implement `Suggestion` service defined in [api.proto](../pkg/apis/manager/v1beta1/api.proto). One sample algorithm looks like:
 
 ```python
-from pkg.apis.manager.v1alpha3.python import api_pb2
-from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
-from pkg.suggestion.v1alpha3.internal.search_space import HyperParameter, HyperParameterSearchSpace
-from pkg.suggestion.v1alpha3.internal.trial import Trial, Assignment
-from pkg.suggestion.v1alpha3.hyperopt.base_service import BaseHyperoptService
-from pkg.suggestion.v1alpha3.base_health_service import HealthServicer
+from pkg.apis.manager.v1beta1.python import api_pb2
+from pkg.apis.manager.v1beta1.python import api_pb2_grpc
+from pkg.suggestion.v1beta1.internal.search_space import HyperParameter, HyperParameterSearchSpace
+from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment
+from pkg.suggestion.v1beta1.hyperopt.base_service import BaseHyperoptService
+from pkg.suggestion.v1beta1.base_health_service import HealthServicer
 
 
-# Inherit SuggestionServicer and implement GetSuggestions
+# Inherit SuggestionServicer and implement GetSuggestions.
 class HyperoptService(
         api_pb2_grpc.SuggestionServicer, HealthServicer):
     def ValidateAlgorithmSettings(self, request, context):
@@ -59,7 +59,7 @@ class HyperoptService(
         trials = Trial.convert(request.trials)
         #--------------------------------------------------------------
         # Your code here
-        # Implment the logic to generate new assignments for the given request number.
+        # Implement the logic to generate new assignments for the given request number.
         # For example, if request.request_number is 2, you should return:
         # [
         #   [Assignment(name=param-1, value=3),
@@ -89,16 +89,16 @@ Here is an example: [cmd/suggestion/hyperopt](../cmd/suggestion/hyperopt). Then 
 
 ### Use the algorithm in Katib.
 
-Update the [katib-config](../manifests/v1alpha3/katib-controller/katib-config.yaml), add a new object:
+Update the [katib-config](../manifests/v1beta1/katib-controller/katib-config.yaml), add a new object:
 
 ```json
   suggestion: |-
     {
       "tpe": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
+        "image": "gcr.io/kubeflow-images-public/katib/v1beta1/suggestion-hyperopt"
       },
       "random": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1alpha3/suggestion-hyperopt"
+        "image": "gcr.io/kubeflow-images-public/katib/v1beta1/suggestion-hyperopt"
       },
       "<new-algorithm-name>": {
         "image": "image built in the previous stage"
@@ -112,17 +112,17 @@ If you want to contribute the algorithm to Katib, you could add unit test or e2e
 
 #### Unit Test
 
-Here is an example [test_hyperopt_service.py](../test/suggestion/v1alpha3/test_hyperopt_service.py):
+Here is an example [test_hyperopt_service.py](../test/suggestion/v1beta1/test_hyperopt_service.py):
 
 ```python
 import grpc
 import grpc_testing
 import unittest
 
-from pkg.apis.manager.v1alpha3.python import api_pb2_grpc
-from pkg.apis.manager.v1alpha3.python import api_pb2
+from pkg.apis.manager.v1beta1.python import api_pb2_grpc
+from pkg.apis.manager.v1beta1.python import api_pb2
 
-from pkg.suggestion.v1alpha3.hyperopt.service import HyperoptService
+from pkg.suggestion.v1beta1.hyperopt.service import HyperoptService
 
 class TestHyperopt(unittest.TestCase):
     def setUp(self):
@@ -143,36 +143,22 @@ You can setup the GRPC server using `grpc_testing`, then define you own test cas
 #### E2E Test (Optional)
 
 E2e tests help Katib verify that the algorithm works well.
-To add a e2e test for the new algorithm, in [test/scripts/v1alpha3](../test/scripts/v1alpha3) you need to:
+To add a e2e test for the new algorithm, in [test/scripts/v1beta1](../test/scripts/v1beta1) you need to:
 
-1. Create a new Experiment yaml file in [examples/v1alpha3](../examples/v1alpha3) with the new algorithm.
+1. Create a new Experiment yaml file in [examples/v1beta1](../examples/v1beta1) with the new algorithm.
 
-2. Create a new script `build-suggestion-xxx.sh` to build new suggestion. Here is an example [test/scripts/v1alpha3/build-suggestion-hyperopt.sh](../test/scripts/v1alpha3/build-suggestion-hyperopt.sh).
+2. Create a new script `build-suggestion-xxx.sh` to build new suggestion. Here is an example [test/scripts/v1beta1/build-suggestion-hyperopt.sh](../test/scripts/v1beta1/build-suggestion-hyperopt.sh).
 
-3. Update [`check-katib-ready.sh`](../test/scripts/v1alpha3/check-katib-ready.sh) script to modify `katib-config.yaml` with the new test suggestion image name. We use `gcr.io/kubeflow-ci` registry to run presubmit tests. For example (Replace `<name>` with the new suggestion name):
+3. Update [`check-katib-ready.sh`](../test/scripts/v1beta1/check-katib-ready.sh) script to modify `katib-config.yaml` with the new test suggestion image name. We use `gcr.io/kubeflow-ci` registry to run presubmit tests. For example (Replace `<name>` with the new suggestion name):
 
 ```
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1alpha3\/suggestion-<name>@${REGISTRY}\/${REPO_NAME}\/v1alpha3\/suggestion-<name>@" manifests/v1alpha3/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-<name>@${REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-<name>@" manifests/v1beta1/katib-controller/katib-config.yaml
 ```
 
 4. Create a new script `run-suggestion-xxx.sh` to run new suggestion. Below is an example (Replace `<name>` with the new algorithm name):
 
 ```bash
 #!/bin/bash
-
-# Copyright 2018 The Kubernetes Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
 # This shell script is used to build a cluster and create a namespace from our
 # argo workflow
@@ -213,18 +199,18 @@ kubectl -n kubeflow get pod
 
 mkdir -p ${GO_DIR}
 cp -r . ${GO_DIR}/
-cp -r pkg/apis/manager/v1alpha3/python/* ${GO_DIR}/test/e2e/v1alpha3
-cd ${GO_DIR}/test/e2e/v1alpha3
+cp -r pkg/apis/manager/v1beta1/python/* ${GO_DIR}/test/e2e/v1beta1
+cd ${GO_DIR}/test/e2e/v1beta1
 
 echo "Running e2e <name> experiment"
 export KUBECONFIG=$HOME/.kube/config
-go run run-e2e-experiment.go ../../../examples/v1alpha3/<name>-example.yaml
+go run run-e2e-experiment.go ../../../examples/v1beta1/<name>-example.yaml
 kubectl -n kubeflow describe suggestion
 kubectl -n kubeflow delete experiment <name>-example
 exit 0
 ```
 
-Then add a new step in our CI to run the new e2e test case in [test/workflows/components/workflows-v1alpha3.libsonnet](../test/workflows/components/workflows-v1alpha3.libsonnet) (Replace `<name>` with the new algorithm name):
+Then add a new step in our CI to run the new e2e test case in [test/workflows/components/workflows-v1beta1.libsonnet](../test/workflows/components/workflows-v1beta1.libsonnet) (Replace `<name>` with the new algorithm name):
 
 ```diff
 // ...
@@ -246,12 +232,12 @@ Then add a new step in our CI to run the new e2e test case in [test/workflows/co
 +                  },
 // ...
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tpe-e2e-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-suggestion-tpe.sh",
+              "test/scripts/v1beta1/run-suggestion-tpe.sh",
             ]),  // run tpe algorithm
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-hyperband-e2e-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-suggestion-hyperband.sh",
+              "test/scripts/v1beta1/run-suggestion-hyperband.sh",
             ]),  // run hyperband algorithm
 +            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-<name>-e2e-tests", testWorkerImage, [
-+              "test/scripts/v1alpha3/run-suggestion-<name>.sh",
++              "test/scripts/v1beta1/run-suggestion-<name>.sh",
 +            ]),  // run <name> algorithm
 ```

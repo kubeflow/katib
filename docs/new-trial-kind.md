@@ -1,5 +1,7 @@
 # Document about how to support a new Kubernetes resource in Katib trial
 
+TODO (andreyvelich): Needs to be updated for v1beta1.
+
 ## Update the supported list
 
 First, `GetSupportedJobList` in [common.go](../pkg/common/v1alpha3/common.go) needs to be updated.

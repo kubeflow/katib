@@ -37,3 +37,4 @@ For information about the hyperparameter tuning algorithms and neural
 architecture search implemented or integrated in Katib, see the detailed guide
 to [configuring and running a Katib 
 experiment](https://kubeflow.org/docs/components/hyperparameter-tuning/experiment/).
+For information about supported algorithms in Katib, see the [Katib configuration settings](https://kubeflow.org/docs/components/hyperparameter-tuning/katib-config/#suggestion-settings).
