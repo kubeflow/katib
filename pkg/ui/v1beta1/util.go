@@ -12,6 +12,7 @@ import (
 
 	gographviz "github.com/awalterschulze/gographviz"
 	apiv1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -142,7 +143,7 @@ func (k *KatibUIHandler) updateTrialTemplates(
 	actionType string) ([]TrialTemplatesDataView, error) {
 
 	templates, err := k.katibClient.GetConfigMap(updatedConfigMapName, updatedConfigMapNamespace)
-	if err != nil {
+	if err != nil && !(errors.IsNotFound(err) && actionType == ActionTypeAdd) {
 		log.Printf("GetConfigMap failed: %v", err)
 		return nil, err
 	}
@@ -177,6 +178,14 @@ func (k *KatibUIHandler) updateTrialTemplates(
 			log.Printf("DeleteRuntimeObject failed: %v", err)
 			return nil, err
 		}
+		// If len(templates) == 1 and adding template, we must create new ConfigMap
+	} else if len(templates) == 1 && actionType == ActionTypeAdd {
+		err = k.katibClient.CreateRuntimeObject(templatesConfigMap)
+		if err != nil {
+			log.Printf("CreateRuntimeObject failed: %v", err)
+			return nil, err
+		}
+		// Otherwise updating configMap
 	} else {
 		err = k.katibClient.UpdateRuntimeObject(templatesConfigMap)
 		if err != nil {
