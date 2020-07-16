@@ -11,9 +11,6 @@ spec:
     algorithmName: random
   maxFailedTrialCount: 3
   maxTrialCount: 10
-  metricsCollectorSpec:
-    collector:
-      kind: StdOut
   objective:
     additionalMetricNames:
       - time
