@@ -95,7 +95,6 @@ def get_search_space(operations):
     return search_space
 
 
-# TODO: Add more algorithm settings
 def get_algorithm_settings(settings_raw):
 
     algorithm_settings_default = {

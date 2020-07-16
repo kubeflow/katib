@@ -68,7 +68,6 @@ class NetworkCNN(nn.Module):
         self.num_layers = num_layers
         self.criterion = criterion
 
-        # TODO: Algorithm settings?
         self.num_nodes = num_nodes
         self.stem_multiplier = stem_multiplier
 
