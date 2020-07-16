@@ -35,41 +35,41 @@ see the following user guides:
 Check source code as follows:
 
 ```bash
-make buildv1alpha3
+make build
 ```
 
-You can deploy Katib v1alpha3 manifests into a k8s cluster as follows:
+You can deploy Katib v1beta1 manifests into a k8s cluster as follows:
 
 ```bash
-make deployv1alpha3
+make deploy
 ```
 
-You can undeploy Katib v1alpha3 manifests from a k8s cluster as follows:
+You can undeploy Katib v1beta1 manifests from a k8s cluster as follows:
 
 ```bash
-make undeployv1alpha3
+make undeploy
 ```
 
 ## Workflow design
 
-Please see [workflow-design.md](./workflow-design.md)
+Please see [workflow-design.md](./workflow-design.md).
 
 ## Implement a new algorithm and use it in Katib
 
-Please see [new-algorithm-service.md](./new-algorithm-service.md)
+Please see [new-algorithm-service.md](./new-algorithm-service.md).
 
 ## Create a new Trial kind
 
-Please see [new-trial-kind.md](./new-trial-kind.md)
+Please see [new-trial-kind.md](./new-trial-kind.md).
 
 ## Algorithm settings documentation
 
-Please see [algorithm-settings.md](./algorithm-settings.md)
+Please see [algorithm-settings.md](./algorithm-settings.md).
 
 ## Katib UI documentation
 
-Please see [Katib UI README](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1alpha3)
+Please see [Katib UI README](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1).
 
 ## Design proposals
 
-Please see [proposals](./proposals)
+Please see [proposals](./proposals).

@@ -12,18 +12,18 @@ You can deploy katib components and try a simple mnist demo on your laptop!
 Start Katib on Minikube with [deploy.sh](./MinikubeDemo/deploy.sh).
 A Minikube cluster and Katib components will be deployed! You can check them with `kubectl -n kubeflow get pods`.
 
-Then, start port-forward for katib UI `8000 -> UI`.
+Then, start port-forward for katib UI `8080 -> UI`.
 
-kubectl v1.10~
-
-```
-$ kubectl -n kubeflow port-forward svc/katib-ui 8000:80 &
-```
-
-kubectl ~v1.9
+kubectl v1.10~:
 
 ```
-& kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-ui | sed -e "s@pods\/@@") 8000:80 &
+$ kubectl -n kubeflow port-forward svc/katib-ui 8080:80
+```
+
+kubectl ~v1.9:
+
+```
+& kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-ui | sed -e "s@pods\/@@") 8080:80
 ```
 
 ## Create Experiment
@@ -61,7 +61,6 @@ $ kubectl apply -f pytorchjob-example.yaml
 #### Run trial evaluation job by [TFJob](https://github.com/kubeflow/tf-operator)
 
 ```
-$ kubectl apply -f tfevent-volume/
 $ kubectl apply -f tfjob-example.yaml
 ```
 
@@ -70,42 +69,44 @@ $ kubectl apply -f tfjob-example.yaml
 #### CLI
 
 You can submit a new Experiment or check your Experiment results with `kubectl` CLI.  
-List experiments
+List experiments:
 
 ```
 # kubectl get experiment -n kubeflow
-NAME                STATUS      AGE
-random-experiment   Succeeded   25m
+
+NAME             STATUS      AGE
+random-example   Succeeded   3h
 ```
 
-Check experiment result
+Check experiment result:
 
-```
-# kubectl get experiment random-experiment -n kubeflow -oyaml
+```yaml
+$ kubectl get experiment random-experiment -n kubeflow -o yaml
+
 apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
-  annotations:
-    kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"kubeflow.org/v1beta1","kind":"Experiment","metadata":{"annotations":{},"name":"random-experiment","namespace":"kubeflow"},"spec":{"algorithm":{"algorithmName":"random"},"maxFailedTrialCount":3,"maxTrialCount":12,"objective":{"additionalMetricNames":["accuracy"],"goal":0.99,"objectiveMetricName":"Validation-accuracy","type":"maximize"},"parallelTrialCount":3,"parameters":[{"feasibleSpace":{"max":"0.03","min":"0.01"},"name":"--lr","parameterType":"double"},{"feasibleSpace":{"max":"5","min":"2"},"name":"--num-layers","parameterType":"int"},{"feasibleSpace":{"list":["sgd","adam","ftrl"]},"name":"--optimizer","parameterType":"categorical"}],"trialTemplate":{"goTemplate":{"rawTemplate":"apiVersion: batch/v1\nkind: Job\nmetadata:\n  name: {{.Trial}}\n  namespace: {{.NameSpace}}\nspec:\n  template:\n    spec:\n      containers:\n      - name: {{.Trial}}\n        image: katib/mxnet-mnist-example\n        command:\n        - \"python\"\n        - \"/mxnet/example/image-classification/train_mnist.py\"\n        - \"--batch-size=64\"\n        {{- with .HyperParameters}}\n        {{- range .}}\n        - \"{{.Name}}={{.Value}}\"\n        {{- end}}\n        {{- end}}\n      restartPolicy: Never"}}}}
-  creationTimestamp: 2019-07-15T07:37:40Z
-  finalizers:
-  - clean-data-in-db
-  name: random-experiment
+  ...
+  name: random-example
   namespace: kubeflow
-  resourceVersion: "22147879"
-  selfLink: /apis/kubeflow.org/v1beta1/namespaces/kubeflow/experiments/random-experiment
-  uid: 6c8896db-a6d3-11e9-b55b-00163e01b303
+  ...
 spec:
   algorithm:
     algorithmName: random
-    algorithmSettings: null
   maxFailedTrialCount: 3
   maxTrialCount: 12
+  metricsCollectorSpec:
+    collector:
+      kind: StdOut
   objective:
     additionalMetricNames:
-    - accuracy
+    - Train-accuracy
     goal: 0.99
+    metricStrategies:
+    - name: Validation-accuracy
+      value: max
+    - name: Train-accuracy
+      value: max
     objectiveMetricName: Validation-accuracy
     type: maximize
   parallelTrialCount: 3
@@ -113,226 +114,226 @@ spec:
   - feasibleSpace:
       max: "0.03"
       min: "0.01"
-    name: --lr
+    name: lr
     parameterType: double
   - feasibleSpace:
       max: "5"
       min: "2"
-    name: --num-layers
+    name: num-layers
     parameterType: int
   - feasibleSpace:
       list:
       - sgd
       - adam
       - ftrl
-    name: --optimizer
+    name: optimizer
     parameterType: categorical
+  resumePolicy: LongRunning
   trialTemplate:
-    goTemplate:
-      rawTemplate: |-
-        apiVersion: batch/v1
-        kind: Job
-        metadata:
-          name: {{.Trial}}
-          namespace: {{.NameSpace}}
-        spec:
-          template:
-            spec:
-              containers:
-              - name: {{.Trial}}
-                image: katib/mxnet-mnist-example
-                command:
-                - "python"
-                - "/mxnet/example/image-classification/train_mnist.py"
-                - "--batch-size=64"
-                {{- with .HyperParameters}}
-                {{- range .}}
-                - "{{.Name}}={{.Value}}"
-                {{- end}}
-                {{- end}}
-              restartPolicy: Never
+    trialParameters:
+    - description: Learning rate for the training model
+      name: learningRate
+      reference: lr
+    - description: Number of training model layers
+      name: numberLayers
+      reference: num-layers
+    - description: Training model optimizer (sdg, adam or ftrl)
+      name: optimizer
+      reference: optimizer
+    trialSpec:
+      apiVersion: batch/v1
+      kind: Job
+      spec:
+        template:
+          spec:
+            containers:
+            - command:
+              - python3
+              - /opt/mxnet-mnist/mnist.py
+              - --batch-size=64
+              - --lr=${trialParameters.learningRate}
+              - --num-layers=${trialParameters.numberLayers}
+              - --optimizer=${trialParameters.optimizer}
+              image: docker.io/kubeflowkatib/mxnet-mnist
+              name: training-container
+            restartPolicy: Never
 status:
-  completionTime: 2019-07-15T07:45:56Z
+  completionTime: "2020-07-15T15:32:56Z"
   conditions:
-  - lastTransitionTime: 2019-07-15T07:37:29Z
-    lastUpdateTime: 2019-07-15T07:37:29Z
+  - lastTransitionTime: "2020-07-15T15:23:58Z"
+    lastUpdateTime: "2020-07-15T15:23:58Z"
     message: Experiment is created
     reason: ExperimentCreated
     status: "True"
     type: Created
-  - lastTransitionTime: 2019-07-15T07:45:56Z
-    lastUpdateTime: 2019-07-15T07:45:56Z
+  - lastTransitionTime: "2020-07-15T15:32:56Z"
+    lastUpdateTime: "2020-07-15T15:32:56Z"
     message: Experiment is running
     reason: ExperimentRunning
     status: "False"
     type: Running
-  - lastTransitionTime: 2019-07-15T07:45:56Z
-    lastUpdateTime: 2019-07-15T07:45:56Z
+  - lastTransitionTime: "2020-07-15T15:32:56Z"
+    lastUpdateTime: "2020-07-15T15:32:56Z"
     message: Experiment has succeeded because max trial count has reached
-    reason: ExperimentSucceeded
+    reason: ExperimentMaxTrialsReached
     status: "True"
     type: Succeeded
   currentOptimalTrial:
+    bestTrialName: random-example-tvxz667x
     observation:
       metrics:
-      - name: Validation-accuracy
-        value: 0.98119
+      - latest: "0.975816"
+        max: "0.978901"
+        min: "0.955812"
+        name: Validation-accuracy
+      - latest: "0.993970"
+        max: "0.993970"
+        min: "0.913713"
+        name: Train-accuracy
     parameterAssignments:
-    - name: --lr
-      value: "0.01178778887185771"
-    - name: --num-layers
-      value: "4"
-    - name: --optimizer
+    - name: lr
+      value: "0.021031758718972005"
+    - name: num-layers
+      value: "2"
+    - name: optimizer
       value: sgd
-  startTime: 2019-07-15T07:37:29Z
+  startTime: "2020-07-15T15:23:58Z"
+  succeededTrialList:
+  - random-example-58tbx6xc
+  - random-example-5nkb2gz2
+  - random-example-88bdbkzr
+  - random-example-9tgjl9nt
+  - random-example-dqzjb2r9
+  - random-example-gjfdgxxn
+  - random-example-nhrx8tb8
+  - random-example-nkv76z8z
+  - random-example-pcnmzl76
+  - random-example-spmk57dw
+  - random-example-tvxz667x
+  - random-example-xpw8wnjc
   trials: 12
   trialsSucceeded: 12
 ```
 
-List trials
+List trials:
 
 ```
 # kubectl get trials -n kubeflow
-NAME                         STATUS      AGE
-random-experiment-24lgqghm   Succeeded   26m
-random-experiment-2vdqlqfm   Succeeded   28m
-random-experiment-4xg8n48f   Succeeded   30m
-random-experiment-64stflgp   Succeeded   29m
-random-experiment-d9jgsm96   Succeeded   29m
-random-experiment-pnrqmqdm   Succeeded   27m
-random-experiment-qvcdfppz   Succeeded   27m
-random-experiment-r49pflgp   Succeeded   30m
-random-experiment-r7d7mcbx   Succeeded   29m
-random-experiment-rwbf62k5   Succeeded   26m
-random-experiment-vs8pmh2m   Succeeded   27m
-random-experiment-wmnlq972   Succeeded   30m
+
+NAME                      TYPE        STATUS   AGE
+random-example-58tbx6xc   Succeeded   True     48m
+random-example-5nkb2gz2   Succeeded   True     54m
+random-example-88bdbkzr   Succeeded   True     53m
+random-example-9tgjl9nt   Succeeded   True     50m
+random-example-dqzjb2r9   Succeeded   True     52m
+random-example-gjfdgxxn   Succeeded   True     53m
+random-example-nhrx8tb8   Succeeded   True     49m
+random-example-nkv76z8z   Succeeded   True     51m
+random-example-pcnmzl76   Succeeded   True     54m
+random-example-spmk57dw   Succeeded   True     48m
+random-example-tvxz667x   Succeeded   True     49m
+random-example-xpw8wnjc   Succeeded   True     54m
 ```
 
-Check trial detail
+Check trial details:
 
-```
-# kubectl get trials random-experiment-24lgqghm -oyaml -n kubeflow
+```yaml
+$ kubectl get trials random-example-58tbx6xc -o yaml -n kubeflow
+
 apiVersion: kubeflow.org/v1beta1
 kind: Trial
 metadata:
-  creationTimestamp: 2019-07-15T07:41:38Z
-  generation: 1
-  labels:
-    experiment: random-experiment
-  name: random-experiment-24lgqghm
+  ...
+  name: random-example-58tbx6xc
   namespace: kubeflow
   ownerReferences:
   - apiVersion: kubeflow.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: Experiment
-    name: random-experiment
-    uid: 6c8896db-a6d3-11e9-b55b-00163e01b303
-  resourceVersion: "22147830"
-  selfLink: /apis/kubeflow.org/v1beta1/namespaces/kubeflow/trials/random-experiment-24lgqghm
-  uid: fad59cb8-a6d3-11e9-b55b-00163e01b303
+    name: random-example
+    uid: 34349cb7-c6af-11ea-90dd-42010a9a0020
+  ...
 spec:
-  metricsCollectorSpec: |-
-    apiVersion: batch/v1beta1
-    kind: CronJob
-    metadata:
-      name: random-experiment-24lgqghm
-      namespace: kubeflow
-    spec:
-      schedule: "*/1 * * * *"
-      successfulJobsHistoryLimit: 0
-      failedJobsHistoryLimit: 1
-      concurrencyPolicy: Forbid
-      jobTemplate:
-        spec:
-          backoffLimit: 0
-          template:
-            spec:
-              serviceAccountName: metrics-collector
-              containers:
-              - name: random-experiment-24lgqghm
-                image: gcr.io/kubeflow-images-public/katib/v1beta1/metrics-collector
-                imagePullPolicy: IfNotPresent
-                command: ["./metricscollector"]
-                args:
-                - "-e"
-                - "random-experiment"
-                - "-t"
-                - "random-experiment-24lgqghm"
-                - "-k"
-                - "Job"
-                - "-n"
-                - "kubeflow"
-                - "-m"
-                - "katib-db-manager.kubeflow:6789"
-                - "-mn"
-                - "Validation-accuracy;accuracy"
-              restartPolicy: Never
+  metricsCollector:
+    collector:
+      kind: StdOut
   objective:
     additionalMetricNames:
-    - accuracy
+    - Train-accuracy
     goal: 0.99
+    metricStrategies:
+    - name: Validation-accuracy
+      value: max
+    - name: Train-accuracy
+      value: max
     objectiveMetricName: Validation-accuracy
     type: maximize
   parameterAssignments:
-  - name: --lr
-    value: "0.017151855585117313"
-  - name: --num-layers
-    value: "5"
-  - name: --optimizer
-    value: adam
-  runSpec: |-
+  - name: lr
+    value: "0.011911183432583596"
+  - name: num-layers
+    value: "3"
+  - name: optimizer
+    value: ftrl
+  runSpec:
     apiVersion: batch/v1
     kind: Job
     metadata:
-      name: random-experiment-24lgqghm
+      name: random-example-58tbx6xc
       namespace: kubeflow
     spec:
       template:
         spec:
           containers:
-          - name: random-experiment-24lgqghm
-            image: katib/mxnet-mnist-example
-            command:
-            - "python"
-            - "/mxnet/example/image-classification/train_mnist.py"
-            - "--batch-size=64"
-            - "--lr=0.017151855585117313"
-            - "--num-layers=5"
-            - "--optimizer=adam"
+          - command:
+            - python3
+            - /opt/mxnet-mnist/mnist.py
+            - --batch-size=64
+            - --lr=0.011911183432583596
+            - --num-layers=3
+            - --optimizer=ftrl
+            image: docker.io/kubeflowkatib/mxnet-mnist
+            name: training-container
           restartPolicy: Never
 status:
-  completionTime: 2019-07-15T07:45:42Z
+  completionTime: "2020-07-15T15:32:12Z"
   conditions:
-  - lastTransitionTime: 2019-07-15T07:41:29Z
-    lastUpdateTime: 2019-07-15T07:41:29Z
+  - lastTransitionTime: "2020-07-15T15:30:42Z"
+    lastUpdateTime: "2020-07-15T15:30:42Z"
     message: Trial is created
     reason: TrialCreated
     status: "True"
     type: Created
-  - lastTransitionTime: 2019-07-15T07:45:42Z
-    lastUpdateTime: 2019-07-15T07:45:42Z
+  - lastTransitionTime: "2020-07-15T15:32:12Z"
+    lastUpdateTime: "2020-07-15T15:32:12Z"
     message: Trial is running
     reason: TrialRunning
     status: "False"
     type: Running
-  - lastTransitionTime: 2019-07-15T07:45:42Z
-    lastUpdateTime: 2019-07-15T07:45:42Z
+  - lastTransitionTime: "2020-07-15T15:32:12Z"
+    lastUpdateTime: "2020-07-15T15:32:12Z"
     message: Trial has succeeded
     reason: TrialSucceeded
     status: "True"
     type: Succeeded
   observation:
     metrics:
-    - name: Validation-accuracy
-      value: 0.969347
-  startTime: 2019-07-15T07:41:29Z
+    - latest: "0.113854"
+      max: "0.113854"
+      min: "0.113854"
+      name: Validation-accuracy
+    - latest: "0.112390"
+      max: "0.112423"
+      min: "0.111907"
+      name: Train-accuracy
+  startTime: "2020-07-15T15:30:42Z"
 ```
 
 #### UI
 
 You can submit a new Experiment or check your Experiment results with Web UI.
-Acsess to `http://127.0.0.1:8000/katib`
+Access to `http://127.0.0.1:8080/katib`.
 
 ## Clean
 

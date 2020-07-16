@@ -10,7 +10,7 @@ Katib is a Kubernetes Native System for [Hyperparameter Tuning][1] and [Neural A
 
 Before you run the hyperparameter tuning experiment, you need to have:
 
-- A Kubernetes cluster with Kubeflow 0.7
+- A Kubernetes cluster with [installed TF operator and Katib](https://github.com/kubeflow/katib#installation)
 
 ## Katib in Kubeflow
 
@@ -51,7 +51,7 @@ The `Experiment`'s definition is defined here:
   <summary>Click here to get YAML configuration</summary>
 
 ```yaml
-apiVersion: "kubeflow.org/v1alpha3"
+apiVersion: "kubeflow.org/v1beta1"
 kind: Experiment
 metadata:
   namespace: kubeflow
@@ -74,54 +74,55 @@ spec:
     collector:
       kind: TensorFlowEvent
   parameters:
-    - name: --learning_rate
+    - name: learning_rate
       parameterType: double
       feasibleSpace:
         min: "0.01"
         max: "0.05"
-    - name: --batch_size
+    - name: batch_size
       parameterType: int
       feasibleSpace:
         min: "100"
         max: "200"
   trialTemplate:
-    goTemplate:
-        rawTemplate: |-
-          apiVersion: "kubeflow.org/v1"
-          kind: TFJob
-          metadata:
-            name: {{.Trial}}
-            namespace: {{.NameSpace}}
-          spec:
-           tfReplicaSpecs:
-            Worker:
-              replicas: 1 
-              restartPolicy: OnFailure
-              template:
-                spec:
-                  containers:
-                    - name: tensorflow 
-                      image: gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0
-                      imagePullPolicy: Always
-                      command:
-                        - "python"
-                        - "/var/tf_mnist/mnist_with_summaries.py"
-                        - "--log_dir=/train/metrics"
-                        {{- with .HyperParameters}}
-                        {{- range .}}
-                        - "{{.Name}}={{.Value}}"
-                        {{- end}}
-                        {{- end}}
+    trialParameters:
+      - name: learningRate
+        description: Learning rate for the training model
+        reference: learning_rate
+      - name: batchSize
+        description: Batch Size
+        reference: batch_size
+    trialSpec:
+      apiVersion: "kubeflow.org/v1"
+      kind: TFJob
+      spec:
+        tfReplicaSpecs:
+          Worker:
+            replicas: 2
+            restartPolicy: OnFailure
+            template:
+              spec:
+                containers:
+                  - name: tensorflow
+                    image: gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0
+                    imagePullPolicy: Always
+                    command:
+                      - "python"
+                      - "/var/tf_mnist/mnist_with_summaries.py"
+                      - "--log_dir=/train/metrics"
+                      - "--learning_rate=${trialParameters.learningRate}"
+                      - "--batch_size=${trialParameters.batchSize}"
+
 ```
 
-The experiment has two hyperparameters defined in `parameters`： `--learning_rate` and `--batch_size`. We decide to use random search algorithm, and collect metrics from the TF Events.
+The experiment has two hyperparameters defined in `parameters`： `learning_rate` and `batch_size`. We decide to use random search algorithm, and collect metrics from the TF Events.
 
 </details>
 
 Or you could just run:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1alpha3/tfjob-example.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1beta1/tfjob-example.yaml
 ```
 
 ### Get trial results
@@ -135,29 +136,33 @@ kubectl -n kubeflow get trials -o json | jq ".items[] | {assignments: .spec.para
 You should get the output:
 
 ```json
+...
 {
   "assignments": [
     {
-      "name": "--learning_rate",
-      "value": "0.02722446089467028"
+      "name": "learning_rate",
+      "value": "0.01156268890324629"
     },
     {
-      "name": "--batch_size",
-      "value": "115"
+      "name": "batch_size",
+      "value": "196"
     }
   ],
   "observation": {
-      "metrics": [
-          {
-            "name": "accuracy_1",
-            "value": "0.987",
-          },
-      ],
-  },
+    "metrics": [
+      {
+        "latest": "0.968200027943",
+        "max": "1.0",
+        "min": "0.0714285746217",
+        "name": "accuracy_1"
+      }
+    ]
+  }
 }
+...
 ```
 
-Or you could get the result in UI: `<Katib-URL>/katib/#/katib/hp_monitor/kubeflow/quick-start-example`.
+Or you could get the result in UI: `<Katib-URL>/katib/#/katib/hp_monitor/kubeflow/tfjob-example`.
 
 ![](./images/quickstart.png)
 
