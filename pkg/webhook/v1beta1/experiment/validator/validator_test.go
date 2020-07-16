@@ -328,8 +328,14 @@ spec:
 	invalidJobType.TypeMeta.Kind = "InvalidKind"
 	invalidJobTypeStr := convertBatchJobToString(invalidJobType)
 
-	emptyConfigMap := p.EXPECT().GetTrialTemplate(gomock.Any()).Return("", errors.New(string(metav1.StatusReasonNotFound)))
+	invalidRefMetaType := newFakeBatchJob()
+	cmd := invalidRefMetaType.Spec.Template.Spec.Containers[0].Command
+	cmd = append(cmd, "--${trialSpec.metadata.name}")
+	cmd = append(cmd, "--${trialSpec.metadata.xxxx}") // invalid reference
+	invalidRefMetaType.Spec.Template.Spec.Containers[0].Command = cmd
+	invalidRefMetaTypeStr := convertBatchJobToString(invalidRefMetaType)
 
+	emptyConfigMap := p.EXPECT().GetTrialTemplate(gomock.Any()).Return("", errors.New(string(metav1.StatusReasonNotFound)))
 	validTemplate1 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 	validTemplate2 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 	validTemplate3 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
@@ -341,6 +347,7 @@ spec:
 	notEmptyMetadataTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(notEmptyMetadataStr, nil)
 	emptyAPIVersionTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(emptyAPIVersionStr, nil)
 	invalidJobTypeTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(invalidJobTypeStr, nil)
+	invalidRefMetaTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(invalidRefMetaTypeStr, nil)
 
 	gomock.InOrder(
 		emptyConfigMap,
@@ -354,6 +361,7 @@ spec:
 		notEmptyMetadataTemplate,
 		emptyAPIVersionTemplate,
 		invalidJobTypeTemplate,
+		invalidRefMetaTemplate,
 	)
 
 	tcs := []struct {
@@ -370,20 +378,6 @@ spec:
 			}(),
 			Err:             true,
 			testDescription: "Trial parameters is nil",
-		},
-		// TrialParameters should not be equal to preserved trial information
-		{
-			Instance: func() *experimentsv1beta1.Experiment {
-				i := newFakeInstance()
-				trialParameters := append(
-					i.Spec.TrialTemplate.TrialParameters, experimentsv1beta1.TrialParameterSpec{Name: consts.TrialTemplateTrialName})
-				trialParameters = append(
-					trialParameters, experimentsv1beta1.TrialParameterSpec{Name: consts.TrialTemplateTrialNamespace})
-				i.Spec.TrialTemplate.TrialParameters = trialParameters
-				return i
-			}(),
-			Err:             true,
-			testDescription: "TrialParameters should not be equal to preserved trial information",
 		},
 		// TrialSpec and ConfigMap is nil
 		{
@@ -542,6 +536,15 @@ spec:
 			}(),
 			Err:             true,
 			testDescription: "Trial template has invalid Kind",
+		},
+		// TrialParameters should not be equal to preserved trial information
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				return i
+			}(),
+			Err:             true,
+			testDescription: "Check invalid reference of trialMeta",
 		},
 	}
 	for _, tc := range tcs {

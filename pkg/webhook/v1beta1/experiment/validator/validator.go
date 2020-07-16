@@ -184,13 +184,6 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 		return fmt.Errorf("spec.trialTemplate.trialParameters must be specified")
 	}
 
-	// Check if parameter names conflict with preserved names
-	for _, parameter := range trialTemplate.TrialParameters {
-		if parameter.Name == consts.TrialTemplateTrialName || parameter.Name == consts.TrialTemplateTrialNamespace {
-			return fmt.Errorf("Name of trialParameters should not be %s or %s", consts.TrialTemplateTrialName, consts.TrialTemplateTrialNamespace)
-		}
-	}
-
 	// Check if trialSpec or configMap exists
 	if trialTemplate.TrialSource.TrialSpec == nil && trialTemplate.TrialSource.ConfigMap == nil {
 		return fmt.Errorf("spec.trialTemplate.trialSpec or spec.trialTemplate.configMap must be specified")
@@ -237,18 +230,34 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 		trialParametersRefs[parameter.Reference] = true
 
 		// Check if trialParameters contains all substitution for Trial template
-		if strings.Index(trialTemplateStr, fmt.Sprintf(consts.TrialTemplateReplaceFormat, parameter.Name)) == -1 {
+		if strings.Index(trialTemplateStr, fmt.Sprintf(consts.TrialTemplateParamReplaceFormat, parameter.Name)) == -1 {
 			return fmt.Errorf("Parameter name: %v in spec.trialParameters not found in spec.trialTemplate: %v", parameter.Name, trialTemplateStr)
 		}
 
-		trialTemplateStr = strings.Replace(trialTemplateStr, fmt.Sprintf(consts.TrialTemplateReplaceFormat, parameter.Name), "test-value", -1)
+		trialTemplateStr = strings.Replace(trialTemplateStr, fmt.Sprintf(consts.TrialTemplateParamReplaceFormat, parameter.Name), "test-value", -1)
 	}
 
 	// Check if Trial template contains all substitution for trialParameters
-	substitutionRegex := regexp.MustCompile(consts.TrialTemplateReplaceFormatRegex)
+	substitutionRegex := regexp.MustCompile(consts.TrialTemplateParamReplaceFormatRegex)
 	notReplacedParams := substitutionRegex.FindAllString(trialTemplateStr, -1)
 	if len(notReplacedParams) != 0 {
 		return fmt.Errorf("Parameters: %v in spec.trialTemplate not found in spec.trialParameters: %v", notReplacedParams, trialTemplate.TrialParameters)
+	}
+
+	// Build a mock trial meta map, because we can't access `buildTrialMetaForRunSpec` function here
+	mockTrialMeta := map[string]string{
+		consts.TrialTemplateMetaKeyOfName:       "",
+		consts.TrialTemplateMetaKeyOfNamespace:  "",
+		consts.TrialTemplateMetaKeyOfKind:       "",
+		consts.TrialTemplateMetaKeyOfAPIVersion: "",
+	}
+	// Check if Trial template contains invalid reference of trial metadata
+	regex := regexp.MustCompile(consts.TrialTemplateMetaReplaceFormatRegex)
+	for _, repr := range regex.FindAllString(trialTemplateStr, -1) {
+		repr = repr[len("{trialSpec.metadata.") : len(repr)-1]
+		if _, contains := mockTrialMeta[repr]; !contains {
+			return fmt.Errorf("Metadata: found invalid reference of trial metadata %v", repr)
+		}
 	}
 
 	// Check if Trial template can be converted to unstructured

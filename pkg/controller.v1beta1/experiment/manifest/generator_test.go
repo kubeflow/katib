@@ -2,6 +2,7 @@ package manifest
 
 import (
 	"errors"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"math"
 	"reflect"
 	"testing"
@@ -9,10 +10,10 @@ import (
 	"github.com/golang/mock/gomock"
 	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
-	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	katibclientmock "github.com/kubeflow/katib/pkg/mock/v1beta1/util/katibclient"
 	batchv1 "k8s.io/api/batch/v1"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
@@ -51,8 +52,10 @@ func TestGetRunSpecWithHP(t *testing.T) {
 								"--num-layers=5",
 							},
 							Env: []v1.EnvVar{
-								{Name: "trial_name", Value: "trial-name"},
-								{Name: "trial_ns", Value: "trial-namespace"},
+								{Name: consts.TrialTemplateMetaKeyOfName, Value: "trial-name"},
+								{Name: consts.TrialTemplateMetaKeyOfNamespace, Value: "trial-namespace"},
+								{Name: consts.TrialTemplateMetaKeyOfKind, Value: "Job"},
+								{Name: consts.TrialTemplateMetaKeyOfAPIVersion, Value: "batch/v1"},
 							},
 						},
 					},
@@ -122,8 +125,14 @@ func TestGetRunSpecWithHP(t *testing.T) {
 		},
 	}
 
+	mockMetadata := map[string]string{
+		"name":       "trial-name",
+		"namespace":  "trial-namespace",
+		"kind":       "Job",
+		"apiVersion": "batch/v1",
+	}
 	for _, tc := range tcs {
-		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.Instance, "trial-name", "trial-namespace", tc.ParameterAssignments)
+		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.Instance, "trial-name", "trial-namespace", tc.ParameterAssignments, mockMetadata)
 
 		if tc.Err && err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
@@ -300,8 +309,14 @@ spec:
 		},
 	}
 
+	mockMetadata := map[string]string{
+		"name":       "trial-name",
+		"namespace":  "trial-namespace",
+		"kind":       "Job",
+		"apiVersion": "batch/v1",
+	}
 	for _, tc := range tcs {
-		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.Instance, "trial-name", "trial-namespace", tc.ParameterAssignments)
+		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.Instance, "trial-name", "trial-namespace", tc.ParameterAssignments, mockMetadata)
 		if tc.Err && err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		} else if !tc.Err {
@@ -335,8 +350,10 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 								"--num-layers=${trialParameters.numberLayers}",
 							},
 							Env: []v1.EnvVar{
-								{Name: "trial_name", Value: "${trialParameters.Name}"},
-								{Name: "trial_ns", Value: "${trialParameters.Namespace}"},
+								{Name: consts.TrialTemplateMetaKeyOfName, Value: "${trialSpec.metadata.name}"},
+								{Name: consts.TrialTemplateMetaKeyOfNamespace, Value: "${trialSpec.metadata.namespace}"},
+								{Name: consts.TrialTemplateMetaKeyOfKind, Value: "${trialSpec.metadata.kind}"},
+								{Name: consts.TrialTemplateMetaKeyOfAPIVersion, Value: "${trialSpec.metadata.apiVersion}"},
 							},
 						},
 					},

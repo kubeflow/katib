@@ -137,17 +137,21 @@ const (
 	// LabelTrialTemplateConfigMapValue is the label value for the Trial templates configMap
 	LabelTrialTemplateConfigMapValue = "katib-trial-templates"
 
-	// TrialTemplateReplaceFormat is the format to make substitution in Trial template from Names in TrialParameters
+	// TrialTemplateParamReplaceFormat is the format to make substitution in Trial template from Names in TrialParameters
 	// E.g if Name = learningRate, according value in Trial template must be ${trialParameters.learningRate}
-	TrialTemplateReplaceFormat = "${trialParameters.%v}"
+	TrialTemplateParamReplaceFormat = "${trialParameters.%v}"
 
-	// TrialTemplateReplaceFormatRegex is the regex for Trial template format
-	TrialTemplateReplaceFormatRegex = "\\{trialParameters\\..+?\\}"
+	// TrialTemplateParamReplaceFormatRegex is the regex for Trial template format
+	TrialTemplateParamReplaceFormatRegex = "\\{trialParameters\\..+?\\}"
 
-	// TrialTemplateTrialName is the placeholder of trial name in trial template
-	TrialTemplateTrialName = "Name"
-	// TrialTemplateTrialNamespace is the placeholder of trial's namespace in trial template
-	TrialTemplateTrialNamespace = "Namespace"
+	TrialTemplateMetaReplaceFormat = "${trialSpec.metadata.%v}"
+
+	TrialTemplateMetaReplaceFormatRegex = "\\{trialSpec\\.metadata\\..+?\\}"
+
+	TrialTemplateMetaKeyOfName = "name"
+	TrialTemplateMetaKeyOfNamespace = "namespace"
+	TrialTemplateMetaKeyOfKind = "kind"
+	TrialTemplateMetaKeyOfAPIVersion = "apiVersion"
 
 	// UnavailableMetricValue is the value when metric was not reported or metric value can't be converted to float64
 	UnavailableMetricValue = "unavailable"

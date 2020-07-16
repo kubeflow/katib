@@ -25,7 +25,7 @@ const (
 type Generator interface {
 	InjectClient(c client.Client)
 	GetTrialTemplate(instance *experimentsv1beta1.Experiment) (string, error)
-	GetRunSpecWithHyperParameters(experiment *experimentsv1beta1.Experiment, trialName, trialNamespace string, assignments []commonapiv1beta1.ParameterAssignment) (*unstructured.Unstructured, error)
+	GetRunSpecWithHyperParameters(experiment *experimentsv1beta1.Experiment, trialName, trialNamespace string, assignments []commonapiv1beta1.ParameterAssignment, trialMeta map[string]string) (*unstructured.Unstructured, error)
 	GetSuggestionConfigData(algorithmName string) (map[string]string, error)
 	GetMetricsCollectorImage(cKind commonapiv1beta1.CollectorKind) (string, error)
 }
@@ -60,7 +60,7 @@ func (g *DefaultGenerator) GetSuggestionConfigData(algorithmName string) (map[st
 }
 
 // GetRunSpecWithHyperParameters returns the specification for trial with hyperparameters.
-func (g *DefaultGenerator) GetRunSpecWithHyperParameters(experiment *experimentsv1beta1.Experiment, trialName, trialNamespace string, assignments []commonapiv1beta1.ParameterAssignment) (*unstructured.Unstructured, error) {
+func (g *DefaultGenerator) GetRunSpecWithHyperParameters(experiment *experimentsv1beta1.Experiment, trialName, trialNamespace string, assignments []commonapiv1beta1.ParameterAssignment, trialMeta map[string]string) (*unstructured.Unstructured, error) {
 
 	// Get string Trial template from Experiment spec
 	trialTemplate, err := g.GetTrialTemplate(experiment)
@@ -68,14 +68,13 @@ func (g *DefaultGenerator) GetRunSpecWithHyperParameters(experiment *experiments
 		return nil, err
 	}
 
-	// Trial meta data which may be required by TrialTemplate
-	trialMeta := map[string]string{
-		consts.TrialTemplateTrialName:      trialName,
-		consts.TrialTemplateTrialNamespace: trialNamespace,
-	}
-
 	// Apply parameters to Trial Template from assignment
-	replacedTemplate, err := g.applyParameters(trialTemplate, experiment.Spec.TrialTemplate.TrialParameters, assignments, trialMeta)
+	replacedTemplate, err := g.applyParameters(trialTemplate, experiment.Spec.TrialTemplate.TrialParameters, assignments)
+	if err != nil {
+		return nil, err
+	}
+	// Apply metadata to Trial Template from assignment
+	replacedTemplate, err = g.applyMetadata(replacedTemplate, trialMeta)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +91,7 @@ func (g *DefaultGenerator) GetRunSpecWithHyperParameters(experiment *experiments
 	return runSpec, nil
 }
 
-func (g *DefaultGenerator) applyParameters(trialTemplate string, trialParams []experimentsv1beta1.TrialParameterSpec, assignments []commonapiv1beta1.ParameterAssignment, trialMeta map[string]string) (string, error) {
+func (g *DefaultGenerator) applyParameters(trialTemplate string, trialParams []experimentsv1beta1.TrialParameterSpec, assignments []commonapiv1beta1.ParameterAssignment) (string, error) {
 	// Number of parameters must be equal
 	if len(assignments) != len(trialParams) {
 		return "", fmt.Errorf("Number of Trial assignment from Suggestion: %v not equal to number Trial parameters from Experiment: %v", len(assignments), len(trialParams))
@@ -107,15 +106,22 @@ func (g *DefaultGenerator) applyParameters(trialTemplate string, trialParams []e
 	for _, parameter := range trialParams {
 
 		if parameterValue, ok := assignmentsMap[parameter.Reference]; ok {
-			trialTemplate = strings.Replace(trialTemplate, fmt.Sprintf(consts.TrialTemplateReplaceFormat, parameter.Name), parameterValue, -1)
+			trialTemplate = strings.Replace(trialTemplate, fmt.Sprintf(consts.TrialTemplateParamReplaceFormat, parameter.Name), parameterValue, -1)
 		} else {
 			return "", fmt.Errorf("Unable to find parameter: %v in parameter assignment %v", parameter.Reference, assignmentsMap)
 		}
 	}
+
+	return trialTemplate, nil
+}
+
+func (g *DefaultGenerator) applyMetadata(trialTemplate string, trialMeta map[string]string) (string, error) {
+	var tempMatchKey string
 	// Inject TrialMeta if needed
 	for key, value := range trialMeta {
-		if strings.Contains(trialTemplate, fmt.Sprintf(consts.TrialTemplateReplaceFormat, key)) {
-			trialTemplate = strings.Replace(trialTemplate, fmt.Sprintf(consts.TrialTemplateReplaceFormat, key), value, -1)
+		tempMatchKey = fmt.Sprintf(consts.TrialTemplateMetaReplaceFormat, key)
+		if strings.Contains(trialTemplate, tempMatchKey) {
+			trialTemplate = strings.Replace(trialTemplate, tempMatchKey, value, -1)
 		}
 	}
 
