@@ -40,13 +40,13 @@ spec:
   trialTemplate:
     trialParameters:
       - name: alpha
-        description: "L1 regularization term on weights"
+        description: L1 regularization term on weights
         reference: alpha
       - name: eta
-        description: "Step size shrinkage used in update to prevent overfitting"
+        description: Step size shrinkage used in update to prevent overfitting
         reference: eta
       - name: subsample
-        description: "Subsample ratio of the training instances"
+        description: Subsample ratio of the training instances
         reference: subsample
     trialSpec:
       apiVersion: batch/v1
