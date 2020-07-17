@@ -152,9 +152,9 @@ const (
 	TrialTemplateMetaReplaceFormatRegex = "\\{trialSpec\\.metadata\\..+?\\}"
 
 	// valid keys of trial metadata which are used to make substitution in Trial template
-	TrialTemplateMetaKeyOfName = "name"
-	TrialTemplateMetaKeyOfNamespace = "namespace"
-	TrialTemplateMetaKeyOfKind = "kind"
+	TrialTemplateMetaKeyOfName       = "name"
+	TrialTemplateMetaKeyOfNamespace  = "namespace"
+	TrialTemplateMetaKeyOfKind       = "kind"
 	TrialTemplateMetaKeyOfAPIVersion = "apiVersion"
 
 	// UnavailableMetricValue is the value when metric was not reported or metric value can't be converted to float64
