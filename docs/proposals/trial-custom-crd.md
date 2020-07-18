@@ -116,7 +116,7 @@ args:
 Right now, we [inject](https://github.com/kubeflow/katib/blob/master/pkg/webhook/v1beta1/pod/utils.go#L58-L72)
 metrics collector for TFJob and PyTorchJob only for _master_ pods with labels previously saved in controller constants.
 
-We added a new `PrimaryPodLabel` parameter in `TrialTemplate` API, to find primary pod that needs to be injected by Katib sidecar container.
+We added a new `PrimaryPodLabel` parameter in `TrialTemplate` API to find primary pod that needs to be injected by Katib sidecar container.
 User can define the key and value of the pod label which Katib must inject with sidecar container.
 
 For example, for TFJob:
@@ -130,11 +130,11 @@ PrimaryPodLabel:
 
 ### Training container name
 
-In the current design, we compare container name with
-[default value](https://github.com/kubeflow/katib/blob/master/pkg/job/v1beta1/kubeflow.go#L63-L78) for TFJob and PyTorchJob,
+In the current design we compare container name with
+[default value](https://github.com/kubeflow/katib/blob/master/pkg/job/v1beta1/kubeflow.go#L63-L78) for TFJob and PyTorchJob
 to find pod container where actual training is happening and metrics collector must parse metrics.
 
-We introduce new `PrimaryContainerName` field, where user can set container name with running training program, to find proper training container.
+We introduce new `PrimaryContainerName` field, where user can set container name with running training program to find proper training container.
 
 For example, if training is running on container with `pytorch` name:
 
@@ -162,10 +162,10 @@ to check succeeded status for TFJob and PyTorchJob as `unstructured` objects by
 
 Different CRD can have unique status design (e.g, Kubernetes batch job succeeded status is
 [`Complete`](https://github.com/kubernetes/api/blob/master/batch/v1/types.go#L167-L173)).
-We add new parameters `SucceededCondition`, to get CRD succeeded status value and trigger trial controller.
+We add new parameters `SucceededCondition` to get CRD succeeded status value and trigger trial controller.
 Trial controller checks all running job conditions and verifies that running job has appropriate `type`
 in `.status.conditions` with `status=True`.
-We also should transform `reason` and `message`, if it is available, to trial conditions.
+We also should transform `reason` and `message`, if it is available to trial conditions.
 
 For example for TFJob:
 
