@@ -94,8 +94,8 @@ type TrialTemplate struct {
 
 In the current design trial controller watches
 [three supported resource](https://github.com/kubeflow/katib/blob/master/pkg/controller.v1beta1/trial/trial_controller.go#L94-L125).
-We add additional flag (`-trial-resource`)
-to Katib controller, which represents resources that can be used in trial template, to generate these parameters dynamically when Katib starts.
+To generate these parameters dynamically when Katib starts, we add additional flag (`-trial-resource`)
+to Katib controller, which represents resources that can be used in trial template.
 This flag contains custom CRD's `Group`, `Version`, `Kind` in `kind.version.group` format which needs to create controller watchers.
 Trial controller iterates over these parameters and creates watchers.
 
@@ -130,8 +130,9 @@ PrimaryPodLabel:
 
 ### Training container name
 
-In the current design, to find pod container where actual training is happening and metrics collector must parse metrics, we compare container name with
-[default value](https://github.com/kubeflow/katib/blob/master/pkg/job/v1beta1/kubeflow.go#L63-L78) for TFJob and PyTorchJob.
+In the current design, we compare container name with
+[default value](https://github.com/kubeflow/katib/blob/master/pkg/job/v1beta1/kubeflow.go#L63-L78) for TFJob and PyTorchJob,
+to find pod container where actual training is happening and metrics collector must parse metrics.
 
 We introduce new `PrimaryContainerName` field, where user can set container name with running training program, to find proper training container.
 
