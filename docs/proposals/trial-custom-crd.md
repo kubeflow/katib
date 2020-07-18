@@ -2,6 +2,7 @@
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 ## Table of Contents
 
 - [Motivation](#motivation)
@@ -18,33 +19,34 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-Created by [doctoc](https://github.com/thlorenz/doctoc)
+Created by [doctoc](https://github.com/thlorenz/doctoc).
 
 ## Motivation
 
 Running trial is one of the essential step of running Katib experiments.
 We implemented new trial template design in Katib v1beta1 ([katib/pull#1202](https://github.com/kubeflow/katib/pull/1202)
 and [katib/pull#1215](https://github.com/kubeflow/katib/pull/1215)) to make
-experiments valid YAMLand make Katib more Kubernetes native.
+experiments valid YAML and make Katib more Kubernetes native.
 After migrating to the new API, users still can run only [BatchJob](https://kubernetes.io/docs/concepts/workloads/controllers/job/),
 [TFJob](https://github.com/kubeflow/tf-operator) or [PyTorchJob](https://github.com/kubeflow/pytorch-operator) as a trial job.
-If we want to support new CRD, we need to manually change Katib controller source code.
-This approach makes impossible to use other CRDs in trial template, even if they can be used in trial design.
-Number of various Kubernetes CRDs grows significantly and many users wants to use them in Katib
-(e.g, [katib/issue#1081 (Support Argo Workflow)](https://github.com/kubeflow/katib/issues/1081)).
-Another reason to design unify approach is that CRD controller can have go package dependencies versions
+If we would like to support new CRD, we need to manually change Katib controller source code.
+
+This approach makes impossible to use other CRDs in trial template, even if they can satisfies trial job design.
+Number of various Kubernetes CRDs grows significantly and many users would like to use them in Katib
+(e.g, [katib/issue#1081, support Argo Workflow)](https://github.com/kubeflow/katib/issues/1081)).
+Another reason to design unify approach, is that CRD controller can have go package dependencies versions
 that Katib controller doesn't support and make it not possible to build the controller
 (e.g, [katib/issue#1081](https://github.com/kubeflow/katib/issues/1081#issuecomment-635338276)).
 
-Thus we propose new design to support custom CRDs in template and make Katib usable for various Kubernetes resources.
-To make this possible we make changes in API, trial controller, job provider, mutation webhook, metrics collector.
+Thus we propose new controller design to support custom CRD as Trial job and make Katib usable for various Kubernetes resources.
+To make this possible, we make changes in API, trial controller, job provider, mutation webhook, metrics collector.
 
 ## Goals
 
-1. Setup trial controller to watch for the custom CRD changes.
+1. Watch for the custom CRD in trial controller.
 2. Inject Katib sidecar container on training pod.
-3. Find the container for Katib injection in list of training pod containers.
-4. Run metrics collector parser after completion of all pod processes.
+3. Indicate training container for metrics collector execution.
+4. Run metrics collector parser after all pod processes completion.
 5. Get succeeded status of running CRD.
 6. Verify that `sidecar.istio.io/inject: false` label is added.
 
@@ -56,8 +58,8 @@ To make this possible we make changes in API, trial controller, job provider, mu
 
 ## Implementation
 
-During implementation this feature we should not brake current Katib controller logic to
-make sure that CI is stable and it not blocks other Katib related tasks.
+During implementation this feature, we should not brake current Katib controller logic.
+And we need to make sure that CI is stable and it not blocks other Katib work tasks.
 After completion, we can clean-up redundant code.
 
 ### API
@@ -68,20 +70,17 @@ To achieve above goals, we introduce these `TrialTemplate` API changes.
 
 // TrialTemplate describes structure of Trial template
 type TrialTemplate struct {
-	// Retain indicates that Trial resources must be not cleanup
-	Retain bool `json:"retain,omitempty"`
+  // Retain indicates that Trial resources must be not cleanup
+  Retain bool `json:"retain,omitempty"`
 
-	// Source for Trial template (unstructured structure or config map)
-	TrialSource `json:",inline"`
+  // Source for Trial template (unstructured structure or config map)
+  TrialSource `json:",inline"`
 
-	// List of parameters that are used in Trial template
+  // List of parameters that are used in Trial template
   TrialParameters []TrialParameterSpec `json:"trialParameters,omitempty"`
 
   // Label that determines if pod needs to be injected by Katib sidecar container
   PrimaryPodLabel map[string]string `json:"primaryPodLabel,omitempty"`
-
-  // Name of training container where training is running
-  PrimaryContainerName string `json:"primaryContainerName,omitempty"`
 
   // Name of training container where training is running
   PrimaryContainerName string `json:"primaryContainerName,omitempty"`
@@ -94,14 +93,14 @@ type TrialTemplate struct {
 
 ### Trial controller watchers
 
-Currently, trial controller watches for
-[the three supported resource](https://github.com/kubeflow/katib/blob/master/pkg/controller.v1beta1/trial/trial_controller.go#L94-L125).
+Currently, trial controller watches for the
+[three supported resource](https://github.com/kubeflow/katib/blob/master/pkg/controller.v1beta1/trial/trial_controller.go#L94-L125).
 To generate these parameters dynamically when Katib starts, we add additional flag (`-trial-resource`)
 to Katib controller, which represents resources that can be used in Trial template.
-This flag contains `Group`, `Version`, `Kind` of custom CRD which needs to create controller watchers.
+This flag contains custom CRD `Group`, `Version`, `Kind` in format `kind.version.group` which needs to create controller watchers.
 Trial controller iterates over these params and create watchers.
 
-For example, if Trial can run TFJob, Argo Workflow and k8s Batch Jobs, Katib controller flags must be:
+For example, if Trial can run TFJob, Argo Workflow and Kubernetes Batch Jobs, Katib controller flags must be:
 
 ```yaml
 . . .
@@ -116,10 +115,11 @@ args:
 ### Primary pod label location
 
 Right now, we [inject](https://github.com/kubeflow/katib/blob/master/pkg/webhook/v1beta1/pod/utils.go#L58-L72)
-metrics collector for TFJob and PyTorchJob only for master pods with labels previously saved in controller constants.
+metrics collector for TFJob and PyTorchJob only for _master_ pods with labels previously saved in controller constants.
+
 To find primary pod that needs to be injected by Katib sidecar container,
 we added new `PrimaryPodLabel` parameter in `TrialTemplate` API.
-User can define the key and value of the pod label where Katib must inject sidecar container.
+User can define the key and value of the pod label which Katib must inject with sidecar container.
 
 For example, for TFJob:
 
@@ -132,12 +132,12 @@ PrimaryPodLabel:
 
 ### Training container name
 
-In current design, we compare compare name with
-[default value](https://github.com/kubeflow/katib/blob/master/pkg/job/v1beta1/kubeflow.go#L63-L78) for TFJob and PyTorchJob,
-to find pod container where actual training is happening and metrics collector must parse metrics.
-To find training container, we introduce new `PrimaryContainerName` field, where user can set container name with running training program.
+In current design, to find pod container where actual training is happening and metrics collector must parse metrics, we compare container name with
+[default value](https://github.com/kubeflow/katib/blob/master/pkg/job/v1beta1/kubeflow.go#L63-L78) for TFJob and PyTorchJob.
 
-For example, in training is running on container with "pytorch" name:
+To find proper training container, we introduce new `PrimaryContainerName` field, where user can set container name with running training program.
+
+For example, if training is running on container with `pytorch` name:
 
 ```yaml
 . . .
@@ -158,17 +158,17 @@ with more than one active process also works with this approach.
 
 We have already [designed Kubeflow provider](https://github.com/kubeflow/katib/blob/master/pkg/job/v1alpha3/kubeflow.go#L27-L60)
 to check succeeded status for TFJob and PyTorchJob as `unstructured` objects by
-[compare](https://github.com/kubeflow/katib/blob/master/pkg/controller.v1beta1/trial/trial_controller_util.go#L161)
-`.status` value with `succeeded` value.
+[comparing](https://github.com/kubeflow/katib/blob/master/pkg/controller.v1beta1/trial/trial_controller_util.go#L161)
+`.status.conditions[x].type` value with `Succeeded` value.
 
 Different CRD can have unique status design (e.g, Kubernetes batch job succeeded status is
 [`Complete`](https://github.com/kubernetes/api/blob/master/batch/v1/types.go#L167-L173)).
 To get CRD succeeded status value and trigger trial controller, we add new parameters `SucceededCondition`.
 Trial controller checks all running job conditions and verifies that running job has appropriate `type`
 in `.status.conditions` with `status=True`.
-We also should transform `reason` and `message`, if it is available` to trial conditions.
+We also should transform `reason` and `message`, if it is available, to trial conditions.
 
-For example for TFJob
+For example for TFJob:
 
 ```yaml
 . . .
@@ -181,10 +181,10 @@ SucceededCondition: Succeeded
 Previously, we had problems with Istio sidecar containers,
 see [kubeflow/issue#1081](https://github.com/kubeflow/kubeflow/issues/4742).
 In some cases, it is unable to properly download datasets in training pod.
-It was fixed by adding annotation `sidecar.istio.io/inject: false` to appropriate Trial job.
+It was fixed by adding annotation `sidecar.istio.io/inject: false` to appropriate Trial job in Katib controller.
 
-Various CRD can have unify design and it is hard to understand where annotation must be set
+Various CRD can have unify design and it is hard to understand where annotation must be specified
 to disable Istio injection for the running pods.
 We should manually update all Katib examples and add this annotation to every trial template.
 
-This exception must be documented and new Katib examples must have this annotation in templates.
+This exception must be documented and new Katib examples must include this annotation in templates.
