@@ -134,7 +134,7 @@ In the current design we compare container name with
 [default value](https://github.com/kubeflow/katib/blob/master/pkg/job/v1beta1/kubeflow.go#L63-L78) for TFJob and PyTorchJob
 to find pod container where actual training is happening and metrics collector must parse metrics.
 
-We introduce new `PrimaryContainerName` field, where user can set container name with running training program to find proper training container.
+We introduce a new `PrimaryContainerName` field, where user can set container name with running training program to find proper training container.
 
 For example, if training is running on container with `pytorch` name:
 
@@ -147,7 +147,7 @@ PrimaryContainerName: "pytorch"
 ### Start metrics collector parser
 
 As discussed in [katib/issue#1214](https://github.com/kubeflow/katib/issues/1214#issuecomment-642168716),
-metrics collector must start parsing metrics only after all injected pod processes are finished.
+metrics collector starts parsing metrics only after all injected pod processes were finished.
 That can avoid problems with other sidecar containers that various CRD can have.
 
 We need to verify that [distributive training](https://docs.fast.ai/distributed.html#launch-your-training)
@@ -156,18 +156,18 @@ with more than one active process also works with this approach.
 ### Succeeded condition of running CRD
 
 We have already [designed Kubeflow provider](https://github.com/kubeflow/katib/blob/master/pkg/job/v1alpha3/kubeflow.go#L27-L60)
-to check succeeded status for TFJob and PyTorchJob as `unstructured` objects by
+to check succeeded conditions for the TFJob and PyTorchJob as `unstructured` objects by
 [comparing](https://github.com/kubeflow/katib/blob/master/pkg/controller.v1beta1/trial/trial_controller_util.go#L161)
 `.status.conditions[x].type` value with `Succeeded` value.
 
-Different CRD can have unique status design (e.g, Kubernetes batch job succeeded status is
+Different CRD can have unique status design (e.g, Kubernetes batch job succeeded condition is
 [`Complete`](https://github.com/kubernetes/api/blob/master/batch/v1/types.go#L167-L173)).
-We add new parameters `SucceededCondition` to get CRD succeeded status value and trigger trial controller.
+We add a new parameter `SucceededCondition` to get CRD succeeded condition value and trigger trial controller.
 Trial controller checks all running job conditions and verifies that running job has appropriate `type`
 in `.status.conditions` with `status=True`.
-We also should transform `reason` and `message`, if it is available to trial conditions.
+We also should transform `reason` and `message` from custom CRD to the trial conditions, if it is available.
 
-For example for TFJob:
+For example, for TFJob:
 
 ```yaml
 . . .
@@ -178,12 +178,12 @@ SucceededCondition: Succeeded
 ### Istio sidecar container
 
 Previously, we had problems with Istio sidecar containers,
-see [kubeflow/issue#1081](https://github.com/kubeflow/kubeflow/issues/4742).
+check [kubeflow/issue#1081](https://github.com/kubeflow/kubeflow/issues/4742).
 In some cases, it is unable to properly download datasets in training pod.
 It was fixed by adding annotation `sidecar.istio.io/inject: false` to appropriate Trial job in Katib controller.
 
-Various CRD can have unify design and it is hard to understand where annotation must be specified
+Various CRD can have unified design and it is hard to understand where annotation must be specified
 to disable Istio injection for the running pods.
-We should manually update all Katib examples and add this annotation to every trial template.
+We need to update all Katib examples manually and add this annotation to every trial template.
 
-This exception must be documented and new Katib examples must include this annotation in templates.
+This exception has to be documented and new Katib examples have to include this annotation in templates.
