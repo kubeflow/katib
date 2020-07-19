@@ -341,18 +341,18 @@
       }
     },
     "v1beta1.ConfigMapSource": {
-      "description": "ConfigMapSource references the config map where Trial template is located",
+      "description": "ConfigMapSource references the config map where trial template is located",
       "properties": {
         "configMapName": {
-          "description": "Name of config map where Trial template is located",
+          "description": "Name of config map where trial template is located",
           "type": "string"
         },
         "configMapNamespace": {
-          "description": "Namespace of config map where Trial template is located",
+          "description": "Namespace of config map where trial template is located",
           "type": "string"
         },
         "templatePath": {
-          "description": "Path in config map where Trial template is located",
+          "description": "Path in config map where trial template is located",
           "type": "string"
         }
       }
@@ -837,14 +837,14 @@
       }
     },
     "v1beta1.TrialParameterSpec": {
-      "description": "TrialParameterSpec describes parameters that must be replaced in Trial template",
+      "description": "TrialParameterSpec describes parameters that must be replaced in trial template",
       "properties": {
         "description": {
           "description": "Description of the parameter",
           "type": "string"
         },
         "name": {
-          "description": "Name of the parameter that must be replaced in Trial template",
+          "description": "Name of the parameter that must be replaced in trial template",
           "type": "string"
         },
         "reference": {
@@ -854,38 +854,38 @@
       }
     },
     "v1beta1.TrialSource": {
-      "description": "TrialSource represent the source for Trial template Only one source can be specified",
+      "description": "TrialSource represent the source for trial template Only one source can be specified",
       "properties": {
         "configMap": {
           "description": "ConfigMap spec represents a reference to ConfigMap",
           "$ref": "#/definitions/v1beta1.ConfigMapSource"
         },
         "trialSpec": {
-          "description": "TrialSpec represents Trial template in unstructured format",
+          "description": "TrialSpec represents trial template in unstructured format",
           "$ref": "#/definitions/v1.unstructured.Unstructured"
         }
       }
     },
     "v1beta1.TrialTemplate": {
-      "description": "TrialTemplate describes structure of Trial template",
+      "description": "TrialTemplate describes structure of trial template",
       "properties": {
         "configMap": {
           "description": "ConfigMap spec represents a reference to ConfigMap",
           "$ref": "#/definitions/v1beta1.ConfigMapSource"
         },
         "retain": {
-          "description": "Retain indicates that Trial resources must be not cleanup",
+          "description": "Retain indicates that trial resources must be not cleanup",
           "type": "boolean"
         },
         "trialParameters": {
-          "description": "List of parameres that are used in Trial template",
+          "description": "List of parameters that are used in trial template",
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1beta1.TrialParameterSpec"
           }
         },
         "trialSpec": {
-          "description": "TrialSpec represents Trial template in unstructured format",
+          "description": "TrialSpec represents trial template in unstructured format",
           "$ref": "#/definitions/v1.unstructured.Unstructured"
         }
       }
