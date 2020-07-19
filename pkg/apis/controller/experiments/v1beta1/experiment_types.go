@@ -187,44 +187,44 @@ type FeasibleSpace struct {
 	Step string   `json:"step,omitempty"`
 }
 
-// TrialTemplate describes structure of Trial template
+// TrialTemplate describes structure of trial template
 type TrialTemplate struct {
-	// Retain indicates that Trial resources must be not cleanup
+	// Retain indicates that trial resources must be not cleanup
 	Retain bool `json:"retain,omitempty"`
 
-	// Source for Trial template (unstructured structure or config map)
+	// Source for trial template (unstructured structure or config map)
 	TrialSource `json:",inline"`
 
-	// List of parameres that are used in Trial template
+	// List of parameters that are used in trial template
 	TrialParameters []TrialParameterSpec `json:"trialParameters,omitempty"`
 }
 
-// TrialSource represent the source for Trial template
+// TrialSource represent the source for trial template
 // Only one source can be specified
 type TrialSource struct {
 
-	// TrialSpec represents Trial template in unstructured format
+	// TrialSpec represents trial template in unstructured format
 	TrialSpec *unstructured.Unstructured `json:"trialSpec,omitempty"`
 
 	// ConfigMap spec represents a reference to ConfigMap
 	ConfigMap *ConfigMapSource `json:"configMap,omitempty"`
 }
 
-// ConfigMapSource references the config map where Trial template is located
+// ConfigMapSource references the config map where trial template is located
 type ConfigMapSource struct {
-	// Name of config map where Trial template is located
+	// Name of config map where trial template is located
 	ConfigMapName string `json:"configMapName,omitempty"`
 
-	// Namespace of config map where Trial template is located
+	// Namespace of config map where trial template is located
 	ConfigMapNamespace string `json:"configMapNamespace,omitempty"`
 
-	// Path in config map where Trial template is located
+	// Path in config map where trial template is located
 	TemplatePath string `json:"templatePath,omitempty"`
 }
 
-// TrialParameterSpec describes parameters that must be replaced in Trial template
+// TrialParameterSpec describes parameters that must be replaced in trial template
 type TrialParameterSpec struct {
-	// Name of the parameter that must be replaced in Trial template
+	// Name of the parameter that must be replaced in trial template
 	Name string `json:"name,omitempty"`
 
 	// Description of the parameter
