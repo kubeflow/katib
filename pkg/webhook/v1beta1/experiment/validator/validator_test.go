@@ -6,7 +6,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	batchv1 "k8s.io/api/batch/v1"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -15,7 +15,7 @@ import (
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
+	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1beta1/experiment/manifest"
 )
 
@@ -328,14 +328,8 @@ spec:
 	invalidJobType.TypeMeta.Kind = "InvalidKind"
 	invalidJobTypeStr := convertBatchJobToString(invalidJobType)
 
-	invalidRefMetaType := newFakeBatchJob()
-	cmd := invalidRefMetaType.Spec.Template.Spec.Containers[0].Command
-	cmd = append(cmd, "--${trialSpec.metadata.name}")
-	cmd = append(cmd, "--${trialSpec.metadata.xxxx}") // invalid reference
-	invalidRefMetaType.Spec.Template.Spec.Containers[0].Command = cmd
-	invalidRefMetaTypeStr := convertBatchJobToString(invalidRefMetaType)
-
 	emptyConfigMap := p.EXPECT().GetTrialTemplate(gomock.Any()).Return("", errors.New(string(metav1.StatusReasonNotFound)))
+
 	validTemplate1 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 	validTemplate2 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 	validTemplate3 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
@@ -347,7 +341,6 @@ spec:
 	notEmptyMetadataTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(notEmptyMetadataStr, nil)
 	emptyAPIVersionTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(emptyAPIVersionStr, nil)
 	invalidJobTypeTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(invalidJobTypeStr, nil)
-	invalidRefMetaTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(invalidRefMetaTypeStr, nil)
 
 	gomock.InOrder(
 		emptyConfigMap,
@@ -361,7 +354,6 @@ spec:
 		notEmptyMetadataTemplate,
 		emptyAPIVersionTemplate,
 		invalidJobTypeTemplate,
-		invalidRefMetaTemplate,
 	)
 
 	tcs := []struct {
@@ -369,7 +361,7 @@ spec:
 		Err             bool
 		testDescription string
 	}{
-		// TrialParameters is nil
+		// TrialParamters is nil
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
@@ -536,15 +528,6 @@ spec:
 			}(),
 			Err:             true,
 			testDescription: "Trial template has invalid Kind",
-		},
-		// TrialParameters should not be equal to preserved trial information
-		{
-			Instance: func() *experimentsv1beta1.Experiment {
-				i := newFakeInstance()
-				return i
-			}(),
-			Err:             true,
-			testDescription: "Check invalid reference of trialMeta",
 		},
 	}
 	for _, tc := range tcs {

@@ -125,14 +125,8 @@ func TestGetRunSpecWithHP(t *testing.T) {
 		},
 	}
 
-	mockMetadata := map[string]string{
-		"name":       "trial-name",
-		"namespace":  "trial-namespace",
-		"kind":       "Job",
-		"apiVersion": "batch/v1",
-	}
 	for _, tc := range tcs {
-		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.Instance, "trial-name", "trial-namespace", tc.ParameterAssignments, mockMetadata)
+		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.Instance, "trial-name", "trial-namespace", tc.ParameterAssignments)
 
 		if tc.Err && err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
@@ -309,14 +303,8 @@ spec:
 		},
 	}
 
-	mockMetadata := map[string]string{
-		"name":       "trial-name",
-		"namespace":  "trial-namespace",
-		"kind":       "Job",
-		"apiVersion": "batch/v1",
-	}
 	for _, tc := range tcs {
-		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.Instance, "trial-name", "trial-namespace", tc.ParameterAssignments, mockMetadata)
+		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.Instance, "trial-name", "trial-namespace", tc.ParameterAssignments)
 		if tc.Err && err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		} else if !tc.Err {
@@ -350,10 +338,10 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 								"--num-layers=${trialParameters.numberLayers}",
 							},
 							Env: []v1.EnvVar{
-								{Name: consts.TrialTemplateMetaKeyOfName, Value: "${trialSpec.metadata.name}"},
-								{Name: consts.TrialTemplateMetaKeyOfNamespace, Value: "${trialSpec.metadata.namespace}"},
-								{Name: consts.TrialTemplateMetaKeyOfKind, Value: "${trialSpec.metadata.kind}"},
-								{Name: consts.TrialTemplateMetaKeyOfAPIVersion, Value: "${trialSpec.metadata.apiVersion}"},
+								{Name: consts.TrialTemplateMetaKeyOfName, Value: "${trialParameters.trialName}"},
+								{Name: consts.TrialTemplateMetaKeyOfNamespace, Value: "${trialParameters.trialNamespace}"},
+								{Name: consts.TrialTemplateMetaKeyOfKind, Value: "${trialParameters.jobKind}"},
+								{Name: consts.TrialTemplateMetaKeyOfAPIVersion, Value: "${trialParameters.jobAPIVersion}"},
 							},
 						},
 					},
@@ -379,6 +367,26 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 						Name:        "numberLayers",
 						Description: "Number of layers",
 						Reference:   "num-layers",
+					},
+					{
+						Name:        "trialName",
+						Description: "name of current trial",
+						Reference:   "${trialSpec.Name}",
+					},
+					{
+						Name:        "trialNamespace",
+						Description: "namespace of current trial",
+						Reference:   "${trialSpec.Namespace}",
+					},
+					{
+						Name:        "jobKind",
+						Description: "job kind of current trial",
+						Reference:   "${trialSpec.Kind}",
+					},
+					{
+						Name:        "jobAPIVersion",
+						Description: "job API Version of current trial",
+						Reference:   "${trialSpec.APIVersion}",
 					},
 				},
 			},

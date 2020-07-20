@@ -52,18 +52,18 @@ func (mr *MockGeneratorMockRecorder) GetMetricsCollectorImage(arg0 interface{}) 
 }
 
 // GetRunSpecWithHyperParameters mocks base method.
-func (m *MockGenerator) GetRunSpecWithHyperParameters(arg0 *v1beta10.Experiment, arg1, arg2 string, arg3 []v1beta1.ParameterAssignment, arg4 map[string]string) (*unstructured.Unstructured, error) {
+func (m *MockGenerator) GetRunSpecWithHyperParameters(arg0 *v1beta10.Experiment, arg1, arg2 string, arg3 []v1beta1.ParameterAssignment) (*unstructured.Unstructured, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetRunSpecWithHyperParameters", arg0, arg1, arg2, arg3, arg4)
+	ret := m.ctrl.Call(m, "GetRunSpecWithHyperParameters", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(*unstructured.Unstructured)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetRunSpecWithHyperParameters indicates an expected call of GetRunSpecWithHyperParameters.
-func (mr *MockGeneratorMockRecorder) GetRunSpecWithHyperParameters(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+func (mr *MockGeneratorMockRecorder) GetRunSpecWithHyperParameters(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRunSpecWithHyperParameters", reflect.TypeOf((*MockGenerator)(nil).GetRunSpecWithHyperParameters), arg0, arg1, arg2, arg3, arg4)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRunSpecWithHyperParameters", reflect.TypeOf((*MockGenerator)(nil).GetRunSpecWithHyperParameters), arg0, arg1, arg2, arg3)
 }
 
 // GetSuggestionConfigData mocks base method.

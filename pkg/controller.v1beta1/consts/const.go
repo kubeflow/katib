@@ -142,20 +142,18 @@ const (
 	TrialTemplateParamReplaceFormat = "${trialParameters.%v}"
 
 	// TrialTemplateParamReplaceFormatRegex is the regex for TrialParameters format in Trial template
-	TrialTemplateParamReplaceFormatRegex = "\\{trialParameters\\..+?\\}"
-
-	// TrialTemplateMetaReplaceFormat is the format to make substitution in Trial template from metadata of Trial
-	// E.g if we want to fetch name of current trial, according value in Trial template must be ${trialSpec.metadata.name}
-	TrialTemplateMetaReplaceFormat = "${trialSpec.metadata.%v}"
+	TrialTemplateParamReplaceFormatRegex = "\\$\\{trialParameters\\..+?\\}"
 
 	// TrialTemplateMetaReplaceFormatRegex is the regex for TrialMetadata format in Trial template
-	TrialTemplateMetaReplaceFormatRegex = "\\{trialSpec\\.metadata\\..+?\\}"
+	TrialTemplateMetaReplaceFormatRegex = "\\$\\{trialSpec\\.(.+?)\\}"
 
 	// valid keys of trial metadata which are used to make substitution in Trial template
-	TrialTemplateMetaKeyOfName       = "name"
-	TrialTemplateMetaKeyOfNamespace  = "namespace"
-	TrialTemplateMetaKeyOfKind       = "kind"
-	TrialTemplateMetaKeyOfAPIVersion = "apiVersion"
+	TrialTemplateMetaKeyOfName        = "Name"
+	TrialTemplateMetaKeyOfNamespace   = "Namespace"
+	TrialTemplateMetaKeyOfKind        = "Kind"
+	TrialTemplateMetaKeyOfAPIVersion  = "APIVersion"
+	TrialTemplateMetaKeyOfAnnotations = "Annotations"
+	TrialTemplateMetaKeyOfLabels      = "Labels"
 
 	// UnavailableMetricValue is the value when metric was not reported or metric value can't be converted to float64
 	UnavailableMetricValue = "unavailable"

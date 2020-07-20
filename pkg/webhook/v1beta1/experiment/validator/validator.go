@@ -244,22 +244,6 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 		return fmt.Errorf("Parameters: %v in spec.trialTemplate not found in spec.trialParameters: %v", notReplacedParams, trialTemplate.TrialParameters)
 	}
 
-	// Build a mock trial meta map, because we can't access `buildTrialMetaForRunSpec` function here
-	mockTrialMeta := map[string]string{
-		consts.TrialTemplateMetaKeyOfName:       "",
-		consts.TrialTemplateMetaKeyOfNamespace:  "",
-		consts.TrialTemplateMetaKeyOfKind:       "",
-		consts.TrialTemplateMetaKeyOfAPIVersion: "",
-	}
-	// Check if Trial template contains invalid reference of trial metadata
-	regex := regexp.MustCompile(consts.TrialTemplateMetaReplaceFormatRegex)
-	for _, repr := range regex.FindAllString(trialTemplateStr, -1) {
-		repr = repr[len("{trialSpec.metadata.") : len(repr)-1]
-		if _, contains := mockTrialMeta[repr]; !contains {
-			return fmt.Errorf("Metadata: found invalid reference of trial metadata %v", repr)
-		}
-	}
-
 	// Check if Trial template can be converted to unstructured
 	runSpec, err := util.ConvertStringToUnstructured(trialTemplateStr)
 	if err != nil {
