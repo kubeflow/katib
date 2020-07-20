@@ -201,8 +201,7 @@ func TestReconcileExperiment(t *testing.T) {
 	if err != nil {
 		t.Errorf("ConvertObjectToUnstructured failed: %v", err)
 	}
-	generator.EXPECT().GetRunSpecWithHyperParameters(gomock.Any(), gomock.Any(),
-		gomock.Any(), gomock.Any(), gomock.Any()).Return(
+	generator.EXPECT().GetRunSpecWithHyperParameters(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 		returnedUnstructured,
 		nil).AnyTimes()
 
