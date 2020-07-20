@@ -405,25 +405,25 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.ConfigMapSource": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
-					Description: "ConfigMapSource references the config map where Trial template is located",
+					Description: "ConfigMapSource references the config map where trial template is located",
 					Properties: map[string]spec.Schema{
 						"configMapName": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Name of config map where Trial template is located",
+								Description: "Name of config map where trial template is located",
 								Type:        []string{"string"},
 								Format:      "",
 							},
 						},
 						"configMapNamespace": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Namespace of config map where Trial template is located",
+								Description: "Namespace of config map where trial template is located",
 								Type:        []string{"string"},
 								Format:      "",
 							},
 						},
 						"templatePath": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Path in config map where Trial template is located",
+								Description: "Path in config map where trial template is located",
 								Type:        []string{"string"},
 								Format:      "",
 							},
@@ -1014,11 +1014,11 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.TrialParameterSpec": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
-					Description: "TrialParameterSpec describes parameters that must be replaced in Trial template",
+					Description: "TrialParameterSpec describes parameters that must be replaced in trial template",
 					Properties: map[string]spec.Schema{
 						"name": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Name of the parameter that must be replaced in Trial template",
+								Description: "Name of the parameter that must be replaced in trial template",
 								Type:        []string{"string"},
 								Format:      "",
 							},
@@ -1045,11 +1045,11 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.TrialSource": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
-					Description: "TrialSource represent the source for Trial template Only one source can be specified",
+					Description: "TrialSource represent the source for trial template Only one source can be specified",
 					Properties: map[string]spec.Schema{
 						"trialSpec": {
 							SchemaProps: spec.SchemaProps{
-								Description: "TrialSpec represents Trial template in unstructured format",
+								Description: "TrialSpec represents trial template in unstructured format",
 								Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"),
 							},
 						},
@@ -1068,18 +1068,18 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.TrialTemplate": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
-					Description: "TrialTemplate describes structure of Trial template",
+					Description: "TrialTemplate describes structure of trial template",
 					Properties: map[string]spec.Schema{
 						"retain": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Retain indicates that Trial resources must be not cleanup",
+								Description: "Retain indicates that trial resources must be not cleanup",
 								Type:        []string{"boolean"},
 								Format:      "",
 							},
 						},
 						"trialSpec": {
 							SchemaProps: spec.SchemaProps{
-								Description: "TrialSpec represents Trial template in unstructured format",
+								Description: "TrialSpec represents trial template in unstructured format",
 								Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"),
 							},
 						},
@@ -1091,7 +1091,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 						},
 						"trialParameters": {
 							SchemaProps: spec.SchemaProps{
-								Description: "List of parameres that are used in Trial template",
+								Description: "List of parameters that are used in trial template",
 								Type:        []string{"array"},
 								Items: &spec.SchemaOrArray{
 									Schema: &spec.Schema{

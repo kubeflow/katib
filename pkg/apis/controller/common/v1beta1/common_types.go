@@ -68,7 +68,7 @@ type ParameterAssignment struct {
 	Value string `json:"value,omitempty"`
 }
 
-// ObjectiveExtractType describes the various approaches to extract objective value from metrics.
+// MetricStrategyType describes the various approaches to extract objective value from metrics.
 type MetricStrategyType string
 
 const (
