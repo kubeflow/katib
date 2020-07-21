@@ -70,21 +70,6 @@ func (g *General) createSuggestion(instance *experimentsv1beta1.Experiment, sugg
 		},
 	}
 
-	// // If ResumePolicy = FromVolume volume info is attached to suggestion
-	// if instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
-	// 	volumeName := instance.Name + "-" + instance.Namespace
-	// 	suggestion.Spec.VolumeSpec = &suggestionsv1beta1.VolumeSpec{
-	// 		StorageClassName: consts.DefaultSuggestionStorageClass,
-	// 		VolumeName:       volumeName,
-	// 		MountPath:        consts.DefaultSuggestionVolumePath,
-	// 		VolumeSource: v1.VolumeSource{
-	// 			PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
-	// 				ClaimName: volumeName,
-	// 			},
-	// 		},
-	// 	}
-	// }
-
 	if err := controllerutil.SetControllerReference(instance, suggestion, g.scheme); err != nil {
 		logger.Error(err, "Error in setting controller reference")
 		return err
