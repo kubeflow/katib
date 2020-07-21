@@ -187,27 +187,39 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 
 	if instance.IsCompleted() {
+		// Cleanup suggestion after Experiment is finished.
+		// If ResumePolicy = Never or ResumePolicy = FromVolume, delete suggestion deployment, service and mark suggestion status succeeded.
+		if instance.Spec.ResumePolicy == experimentsv1beta1.NeverResume || instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
+			err := r.cleanupSuggestionResources(instance)
+			if err != nil {
+				logger.Error(err, "cleanupSuggestionResources error")
+				return reconcile.Result{}, err
+			}
+		}
 		// Check if completed instance is restartable
-		// Experiment is restartable only if it is in succeeded state by reaching max trials
-		// And Resume Policy is LongRunning
+		// Experiment is restartable only if it is in succeeded state by reaching max trials and
+		// ResumePolicy = LongRunning or ResumePolicy = FromVolume
 		if util.IsCompletedExperimentRestartable(instance) {
 			// Check if max trials is reconfigured
 			if (instance.Spec.MaxTrialCount != nil &&
 				*instance.Spec.MaxTrialCount != instance.Status.Trials) ||
 				(instance.Spec.MaxTrialCount == nil && instance.Status.Trials != 0) {
-				logger.Info("Experiment is restarting")
+				logger.Info("Experiment is restarting",
+					"MaxTrialCount", instance.Spec.MaxTrialCount,
+					"ParallelTrialCount", instance.Spec.ParallelTrialCount,
+					"MaxFailedTrialCount", instance.Spec.MaxFailedTrialCount)
 				msg := "Experiment is restarted"
 				instance.MarkExperimentStatusRestarting(util.ExperimentRestartingReason, msg)
+				// If ResumePolicy = FromVolume, suggestion must remove succeeded status and add running status when restarting
+				if instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
+					err := r.restartSuggestion(instance)
+					if err != nil {
+						logger.Error(err, "restartSuggestion error")
+						return reconcile.Result{}, err
+					}
+				}
 			}
 		} else {
-			// Terminate Suggestion after Experiment is finished if Resume Policy is Never
-			if instance.Spec.ResumePolicy == experimentsv1beta1.NeverResume {
-				err := r.terminateSuggestion(instance)
-				if err != nil {
-					logger.Error(err, "Terminate Suggestion error")
-				}
-				return reconcile.Result{}, err
-			}
 			// If experiment is completed with no running trials, stop reconcile
 			if !instance.HasRunningTrials() {
 				return reconcile.Result{}, nil

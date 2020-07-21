@@ -21,14 +21,37 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
+
+	experiment "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 )
 
-// SuggestionSpec defines the desired state of Suggestion
+// SuggestionSpec defines the desired state of suggestion.
 type SuggestionSpec struct {
+	// Name of the algorithm that suggestion is used.
 	AlgorithmName string `json:"algorithmName"`
 	// Number of suggestions requested
 	Requests int32 `json:"requests,omitempty"`
+	// Describes resuming policy which usually take effect after experiment terminated.
+	// Default value is LongRunning.
+	ResumePolicy experiment.ResumePolicyType `json:"resumePolicy,omitempty"`
+	// // VolumeSpec describes volume that attached to a suggestion deployment
+	// // and where suggestion data can be saved.
+	// VolumeSpec *VolumeSpec `json:"volumeSpec,omitempty"`
 }
+
+// // VolumeSpec represents volume that mounted to a suggestion's container.
+// type VolumeSpec struct {
+// 	// Name of StorageClass to which suggestion's persistent volume belongs.
+// 	// Empty value means that controller creates pv and pvc using hostPath.
+// 	// Value can be set in Katib config.
+// 	StorageClassName string `json:"storageClass,omitempty"`
+// 	// Name of the volume.
+// 	VolumeName string `json:"volumeName,omitempty"`
+// 	// Suggestion's container path where volume is mounted.
+// 	MountPath string `json:"mountPath,omitempty"`
+// 	// Represents the source of a suggestion volume to mount.
+// 	VolumeSource v1.VolumeSource `json:",inline"`
+// }
 
 // SuggestionStatus defines the observed state of Suggestion
 type SuggestionStatus struct {

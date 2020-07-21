@@ -24,6 +24,7 @@ import (
 	"net/http"
 
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	ktypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
@@ -89,6 +90,24 @@ func (v *experimentValidator) Handle(ctx context.Context, req types.Request) typ
 	if err != nil {
 		return admission.ErrorResponse(http.StatusBadRequest, err)
 	}
+
+	// By default we create PV with cluster local host path for each experiment with ResumePolicy = FromVolume.
+	// User should not submit new experiment if previous PV for the same experiment was not deleted.
+	// We unable to watch for the PV events in controller.
+	// Webhook forbids experiment creation until coresponding PV will be deleted.
+	if inst.Spec.ResumePolicy == experimentsv1beta1.FromVolume && oldInst == nil {
+		foundPV := &v1.PersistentVolume{}
+		PVName := inst.Name + "-" + inst.Namespace
+		err := v.client.Get(context.TODO(), ktypes.NamespacedName{Name: PVName}, foundPV)
+		if !errors.IsNotFound(err) {
+			returnError := fmt.Errorf("Cannot create the Experiment: %v in namespace: %v, PV: %v is not deleted", inst.Name, inst.Namespace, PVName)
+			if err != nil {
+				returnError = fmt.Errorf("Cannot create the Experiment: %v in namespace: %v, error: %v", inst.Name, inst.Namespace, err)
+			}
+			return admission.ErrorResponse(http.StatusBadRequest, returnError)
+		}
+	}
+
 	return admission.ValidationResponse(true, "")
 }
 

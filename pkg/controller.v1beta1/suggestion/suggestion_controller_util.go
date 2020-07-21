@@ -11,6 +11,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
+// TODO (andreyvelich): Setup logger with suggestion name/namespace here
+
 func (r *ReconcileSuggestion) reconcileDeployment(deploy *appsv1.Deployment) (*appsv1.Deployment, error) {
 	foundDeploy := &appsv1.Deployment{}
 	err := r.Get(context.TODO(), types.NamespacedName{Name: deploy.Name, Namespace: deploy.Namespace}, foundDeploy)
@@ -35,6 +37,37 @@ func (r *ReconcileSuggestion) reconcileService(service *corev1.Service) (*corev1
 		return nil, err
 	}
 	return foundService, nil
+}
+
+func (r *ReconcileSuggestion) reconcileVolume(pvc *corev1.PersistentVolumeClaim, pv *corev1.PersistentVolume) (*corev1.PersistentVolumeClaim, *corev1.PersistentVolume, error) {
+	foundPVC := &corev1.PersistentVolumeClaim{}
+	foundPV := &corev1.PersistentVolume{}
+
+	// Try to find/create PV, if PV has to be created
+	if pv != nil {
+		err := r.Get(context.TODO(), types.NamespacedName{Name: pv.Name}, foundPV)
+		if err != nil && errors.IsNotFound(err) {
+			log.Info("Creating Persistent Volume", "name", pv.Name)
+			err = r.Create(context.TODO(), pv)
+			// Return only if Create was failed, otherwise try to find/create PVC
+			if err != nil {
+				return nil, nil, err
+			}
+		} else if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	// Try to find/create PVC
+	err := r.Get(context.TODO(), types.NamespacedName{Name: pvc.Name, Namespace: pvc.Namespace}, foundPVC)
+	if err != nil && errors.IsNotFound(err) {
+		log.Info("Creating Persistent Volume Claim", "namespace", pvc.Namespace, "name", pvc.Name)
+		err = r.Create(context.TODO(), pvc)
+		return nil, nil, err
+	} else if err != nil {
+		return nil, nil, err
+	}
+	return foundPVC, foundPV, nil
 }
 
 func (r *ReconcileSuggestion) deleteDeployment(instance *v1beta1.Suggestion) error {

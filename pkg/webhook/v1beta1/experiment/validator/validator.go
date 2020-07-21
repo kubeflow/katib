@@ -135,6 +135,7 @@ func (g *DefaultValidator) validateResumePolicy(resume experimentsv1beta1.Resume
 		"":                             "",
 		experimentsv1beta1.NeverResume: "",
 		experimentsv1beta1.LongRunning: "",
+		experimentsv1beta1.FromVolume:  "",
 	}
 	if _, ok := validTypes[resume]; !ok {
 		return fmt.Errorf("invalid ResumePolicyType %s", resume)
