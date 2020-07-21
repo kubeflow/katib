@@ -18,6 +18,7 @@ package util
 import (
 	"strconv"
 
+	"k8s.io/apimachinery/pkg/types"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
@@ -175,6 +176,7 @@ func getObjectiveMetricValue(trial trialsv1beta1.Trial) string {
 
 // UpdateExperimentStatusCondition updates the experiment status.
 func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *experimentsv1beta1.Experiment, isObjectiveGoalReached bool, getSuggestionDone bool) {
+	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	completedTrialsCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled
 	failedTrialsCount := instance.Status.TrialsFailed
 	activeTrialsCount := instance.Status.TrialsPending + instance.Status.TrialsRunning
@@ -185,6 +187,7 @@ func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *
 		instance.MarkExperimentStatusSucceeded(ExperimentGoalReachedReason, msg)
 		instance.Status.CompletionTime = &now
 		collector.IncreaseExperimentsSucceededCount(instance.Namespace)
+		logger.Info(msg)
 		return
 	}
 
@@ -194,6 +197,7 @@ func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *
 		instance.MarkExperimentStatusFailed(ExperimentFailedReason, msg)
 		instance.Status.CompletionTime = &now
 		collector.IncreaseExperimentsFailedCount(instance.Namespace)
+		logger.Info(msg)
 		return
 	}
 
@@ -203,6 +207,7 @@ func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *
 		instance.MarkExperimentStatusSucceeded(ExperimentMaxTrialsReachedReason, msg)
 		instance.Status.CompletionTime = &now
 		collector.IncreaseExperimentsSucceededCount(instance.Namespace)
+		logger.Info(msg)
 		return
 	}
 
@@ -211,6 +216,7 @@ func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *
 		instance.MarkExperimentStatusSucceeded(ExperimentSuggestionEndReachedReason, msg)
 		instance.Status.CompletionTime = &now
 		collector.IncreaseExperimentsSucceededCount(instance.Namespace)
+		logger.Info(msg)
 		return
 	}
 
@@ -218,8 +224,10 @@ func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *
 	instance.MarkExperimentStatusRunning(ExperimentRunningReason, msg)
 }
 
+// IsCompletedExperimentRestartable returns whether experiment is restartable or not
 func IsCompletedExperimentRestartable(instance *experimentsv1beta1.Experiment) bool {
-	if instance.IsSucceeded() && instance.IsCompletedReason(ExperimentMaxTrialsReachedReason) && instance.Spec.ResumePolicy == experimentsv1beta1.LongRunning {
+	if instance.IsSucceeded() && instance.IsCompletedReason(ExperimentMaxTrialsReachedReason) &&
+		(instance.Spec.ResumePolicy == experimentsv1beta1.LongRunning || instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume) {
 		return true
 	}
 	return false

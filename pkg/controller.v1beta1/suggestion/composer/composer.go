@@ -14,7 +14,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
+	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
+
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
@@ -37,6 +39,7 @@ var (
 type Composer interface {
 	DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.Deployment, error)
 	DesiredService(s *suggestionsv1beta1.Suggestion) (*corev1.Service, error)
+	DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.PersistentVolumeClaim, *corev1.PersistentVolume, error)
 	CreateComposer(mgr manager.Manager) Composer
 }
 
@@ -51,6 +54,7 @@ func New(mgr manager.Manager) Composer {
 	return ptr.CreateComposer(mgr)
 }
 
+// DesiredDeployment returns desired deployment for suggestion
 func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.Deployment, error) {
 
 	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.AlgorithmName, g.Client)
@@ -93,12 +97,28 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 		d.Spec.Template.Spec.ServiceAccountName = suggestionConfigData[consts.LabelSuggestionServiceAccountName]
 	}
 
+	// Attach volume to the suggestion pod spec if ResumePolicy = FromVolume
+	if s.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
+		d.Spec.Template.Spec.Volumes = []corev1.Volume{
+			{
+				Name: consts.ContainerSuggestionVolumeName,
+				VolumeSource: corev1.VolumeSource{
+					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+						ClaimName: s.Name,
+					},
+				},
+			},
+		}
+	}
+
 	if err := controllerutil.SetControllerReference(s, d, g.scheme); err != nil {
 		return nil, err
 	}
+
 	return d, nil
 }
 
+// DesiredService returns desired service for suggestion
 func (g *General) DesiredService(s *suggestionsv1beta1.Suggestion) (*corev1.Service, error) {
 	ports := []corev1.ServicePort{
 		{
@@ -218,7 +238,91 @@ func (g *General) desiredContainer(s *suggestionsv1beta1.Suggestion, suggestionC
 			FailureThreshold:    defaultFailureThreshold,
 		}
 	}
+
+	// Attach volume mounts to the suggestion container if ResumePolicy = FromVolume
+	if s.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
+		c.VolumeMounts = []corev1.VolumeMount{
+			{
+				Name:      consts.ContainerSuggestionVolumeName,
+				MountPath: consts.DefaultContainerSuggestionVolumeMountPath,
+			},
+		}
+	}
 	return c, nil
+}
+
+// DesiredVolume returns desired PVC and PV for suggestion.
+// If StorageClassName != DefaultSuggestionStorageClass returns only PVC.
+func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.PersistentVolumeClaim, *corev1.PersistentVolume, error) {
+	persistentVolumeName := s.Name + "-" + s.Namespace
+
+	// TODO (andreyvelich): Enable to specify these values from Katib config
+	storageClassName := consts.DefaultSuggestionStorageClass
+	persistentVolumePath := consts.DefaultSuggestionVolumeLocalPathPrefix + persistentVolumeName
+	volumeAccessModes := consts.DefaultSuggestionVolumeAccessMode
+
+	volumeStorage, err := resource.ParseQuantity(consts.DefaultSuggestionVolumeStorage)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	pvc := &corev1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      s.Name,
+			Namespace: s.Namespace,
+		},
+		Spec: corev1.PersistentVolumeClaimSpec{
+			StorageClassName: &storageClassName,
+			AccessModes: []corev1.PersistentVolumeAccessMode{
+				volumeAccessModes,
+			},
+			Resources: corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceStorage: volumeStorage,
+				},
+			},
+		},
+	}
+
+	// Add owner reference to the pvc so that it could be GC after the suggestion is deleted
+	if err := controllerutil.SetControllerReference(s, pvc, g.scheme); err != nil {
+		return nil, nil, err
+	}
+
+	var pv *corev1.PersistentVolume
+	// Create PV with local hostPath by default
+	if storageClassName == consts.DefaultSuggestionStorageClass {
+		localLabel := map[string]string{"type": "local"}
+
+		pv = &corev1.PersistentVolume{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:   persistentVolumeName,
+				Labels: localLabel,
+			},
+			Spec: corev1.PersistentVolumeSpec{
+				StorageClassName: consts.DefaultSuggestionStorageClass,
+				AccessModes: []corev1.PersistentVolumeAccessMode{
+					volumeAccessModes,
+				},
+				PersistentVolumeSource: corev1.PersistentVolumeSource{
+					HostPath: &corev1.HostPathVolumeSource{
+						Path: persistentVolumePath,
+					},
+				},
+				Capacity: corev1.ResourceList{
+					corev1.ResourceStorage: volumeStorage,
+				},
+			},
+		}
+
+		// Add owner reference to the pv so that it could be GC after the suggestion is deleted
+		if err := controllerutil.SetControllerReference(s, pv, g.scheme); err != nil {
+			return nil, nil, err
+		}
+
+	}
+
+	return pvc, pv, nil
 }
 
 func (g *General) CreateComposer(mgr manager.Manager) Composer {

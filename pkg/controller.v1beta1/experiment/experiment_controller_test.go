@@ -88,7 +88,7 @@ func TestCreateExperiment(t *testing.T) {
 		mgrStopped.Wait()
 	}()
 
-	// Create the Trial object and expect the Reconcile and Deployment to be created
+	// Create the experiment object and expect the Reconcile and Deployment to be created
 	err = c.Create(context.TODO(), instance)
 	// The instance object may not be a valid object because it might be missing some required fields.
 	// Please modify the instance object by adding required fields and then remove the following if statement.
@@ -234,7 +234,7 @@ func TestReconcileExperiment(t *testing.T) {
 		mgrStopped.Wait()
 	}()
 
-	// Create the Trial object and expect the Reconcile and Deployment to be created
+	// Create the Experiment object and expect the Reconcile and Deployment to be created
 	err = c.Create(context.TODO(), instance)
 	// The instance object may not be a valid object because it might be missing some required fields.
 	// Please modify the instance object by adding required fields and then remove the following if statement.

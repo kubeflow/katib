@@ -4,7 +4,7 @@ metadata:
   namespace: kubeflow
   labels:
     controller-tools.k8s.io: "1.0"
-  name: never-resume-example
+  name: from-volume-resume
 spec:
   objective:
     type: maximize
@@ -17,7 +17,7 @@ spec:
   parallelTrialCount: 3
   maxTrialCount: 12
   maxFailedTrialCount: 3
-  resumePolicy: Never
+  resumePolicy: FromVolume
   parameters:
     - name: lr
       parameterType: double
