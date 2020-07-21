@@ -243,6 +243,8 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 		client.MatchingLabels(util.TrialLabels(experiment)), trials); err != nil {
 		return err
 	}
+	// TODO (andreyvelich): Do we need to run ValidateAlgorithmSettings when Experiment is restarting?
+	// Currently it is running.
 	if !instance.IsRunning() {
 		if err = r.ValidateAlgorithmSettings(instance, experiment); err != nil {
 			logger.Error(err, "Marking suggestion failed as algorithm settings validation failed")
