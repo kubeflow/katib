@@ -149,12 +149,12 @@ const (
 	// UnavailableMetricValue is the value when metric was not reported or metric value can't be converted to float64
 	UnavailableMetricValue = "unavailable"
 
-	// DefaultSuggestionVolumeLocalPathPrefix is the default cluster local path for suggestion volume
-	// Whole local path = /tmp/katib/suggestions/<suggestion-name>-<suggestion-namespace>
+	// DefaultSuggestionVolumeLocalPathPrefix is the default cluster local path prefix for suggestion volume
+	// Full local path = /tmp/katib/suggestions/<suggestion-name>-<suggestion-namespace>
 	DefaultSuggestionVolumeLocalPathPrefix = "/tmp/katib/suggestions/"
 
-	// DefaultSuggestionStorageClass is the default value for suggestion's volume storage class
-	DefaultSuggestionStorageClass = "katib-suggestion"
+	// DefaultSuggestionStorageClassName is the default value for suggestion's volume storage class name
+	DefaultSuggestionStorageClassName = "katib-suggestion"
 
 	// DefaultSuggestionVolumeAccessMode is the default value for suggestion's volume access mode
 	DefaultSuggestionVolumeAccessMode = corev1.ReadWriteOnce
@@ -162,7 +162,7 @@ const (
 	// DefaultSuggestionVolumeStorage is the default value for suggestion's volume storage
 	DefaultSuggestionVolumeStorage = "1Gi"
 
-	// ContainerSuggestionVolumeName is the name of volume that mounted on suggestion container
+	// ContainerSuggestionVolumeName is the volume name that mounted on suggestion container
 	ContainerSuggestionVolumeName = "suggestion-volume"
 
 	// DefaultContainerSuggestionVolumeMountPath is the default mount path in suggestion container
