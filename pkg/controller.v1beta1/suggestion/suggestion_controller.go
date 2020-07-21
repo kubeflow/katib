@@ -254,8 +254,7 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 			return nil
 		}
 		msg := "Suggestion is running"
-		reason := "Experiment is restarting, suggestion deployment is ready"
-		instance.MarkSuggestionStatusRunning(corev1.ConditionTrue, reason, msg)
+		instance.MarkSuggestionStatusRunning(corev1.ConditionTrue, SuggestionRunningReason, msg)
 	}
 	logger.Info("Sync assignments", "suggestions", instance.Spec.Requests)
 	if err = r.SyncAssignments(instance, experiment, trials.Items); err != nil {
