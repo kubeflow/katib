@@ -155,11 +155,11 @@ func (r *ReconcileExperiment) restartSuggestion(instance *experimentsv1beta1.Exp
 		return err
 	}
 
-	logger.Info("Suggestion is restarting, suggestion status is not running")
+	logger.Info("Suggestion is restarting, suggestion Running status is false")
 	suggestion := original.DeepCopy()
-	reason := "Experiment is restarting, suggestion deployment is not ready"
+	reason := "Experiment is restarting"
 	msg := "Suggestion is not running"
-	// Mark suggestion status not running because deployment is not ready
+	// Mark suggestion status not running because experiment is restarting and suggestion deployment is not ready
 	suggestion.MarkSuggestionStatusRunning(corev1.ConditionFalse, reason, msg)
 
 	if err := r.UpdateSuggestionStatus(suggestion); err != nil {

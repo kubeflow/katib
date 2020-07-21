@@ -90,26 +90,34 @@ func (suggestion *Suggestion) MarkSuggestionStatusCreated(reason, message string
 	suggestion.setCondition(SuggestionCreated, v1.ConditionTrue, reason, message)
 }
 
+// MarkSuggestionStatusRunning sets suggestion Running status.
 func (suggestion *Suggestion) MarkSuggestionStatusRunning(status v1.ConditionStatus, reason, message string) {
-	//suggestion.removeCondition(SuggestionRestarting)
 	// When suggestion is restrating we need to remove succeeded status from suggestion.
 	// That should happen only when ResumePolicy = FromVolume
 	suggestion.removeCondition(SuggestionSucceeded)
 	suggestion.setCondition(SuggestionRunning, status, reason, message)
 }
 
+// MarkSuggestionStatusSucceeded sets suggestion Succeeded status to true.
+// Suggestion can be succeeded only if ResumeExperiment = Never or ResumeExperiment = FromVolume
 func (suggestion *Suggestion) MarkSuggestionStatusSucceeded(reason, message string) {
+
+	// When suggestion is Succeeded suggestion Running status is false
 	runningCond := getCondition(suggestion, SuggestionRunning)
+	succeededReason := "Suggestion is succeeded"
 	if runningCond != nil {
-		suggestion.setCondition(SuggestionRunning, v1.ConditionFalse, runningCond.Reason, runningCond.Message)
+		msg := "Suggestion is not running"
+		suggestion.setCondition(SuggestionRunning, v1.ConditionFalse, succeededReason, msg)
 	}
-	// When suggestion is Succeeded deployment must be not ready
+
+	// When suggestion is Succeeded suggestion DeploymentReady status is false
 	deploymentReadyCond := getCondition(suggestion, SuggestionDeploymentReady)
 	if deploymentReadyCond != nil {
-		suggestion.setCondition(SuggestionDeploymentReady, v1.ConditionFalse, deploymentReadyCond.Reason, deploymentReadyCond.Message)
+		msg := "Deployment is not ready"
+		suggestion.setCondition(SuggestionDeploymentReady, v1.ConditionFalse, succeededReason, msg)
 	}
-	suggestion.setCondition(SuggestionSucceeded, v1.ConditionTrue, reason, message)
 
+	suggestion.setCondition(SuggestionSucceeded, v1.ConditionTrue, reason, message)
 }
 
 func (suggestion *Suggestion) MarkSuggestionStatusFailed(reason, message string) {

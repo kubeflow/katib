@@ -252,12 +252,12 @@ func (g *General) desiredContainer(s *suggestionsv1beta1.Suggestion, suggestionC
 }
 
 // DesiredVolume returns desired PVC and PV for suggestion.
-// If StorageClassName != DefaultSuggestionStorageClass returns only PVC.
+// If StorageClassName != DefaultSuggestionStorageClassName returns only PVC.
 func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.PersistentVolumeClaim, *corev1.PersistentVolume, error) {
 	persistentVolumeName := s.Name + "-" + s.Namespace
 
 	// TODO (andreyvelich): Enable to specify these values from Katib config
-	storageClassName := consts.DefaultSuggestionStorageClass
+	storageClassName := consts.DefaultSuggestionStorageClassName
 	persistentVolumePath := consts.DefaultSuggestionVolumeLocalPathPrefix + persistentVolumeName
 	volumeAccessModes := consts.DefaultSuggestionVolumeAccessMode
 
@@ -291,7 +291,7 @@ func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.Persi
 
 	var pv *corev1.PersistentVolume
 	// Create PV with local hostPath by default
-	if storageClassName == consts.DefaultSuggestionStorageClass {
+	if storageClassName == consts.DefaultSuggestionStorageClassName {
 		localLabel := map[string]string{"type": "local"}
 
 		pv = &corev1.PersistentVolume{
@@ -300,7 +300,7 @@ func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.Persi
 				Labels: localLabel,
 			},
 			Spec: corev1.PersistentVolumeSpec{
-				StorageClassName: consts.DefaultSuggestionStorageClass,
+				StorageClassName: consts.DefaultSuggestionStorageClassName,
 				AccessModes: []corev1.PersistentVolumeAccessMode{
 					volumeAccessModes,
 				},

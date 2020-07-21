@@ -170,6 +170,7 @@ const (
 	LongRunning ResumePolicyType = "LongRunning"
 	// FromVolume indicates that volume is attached to experiment's
 	// suggestion. Suggestion data can be retained in the volume.
+	// When experiment is succeeded suggestion deployment and service are deleted.
 	FromVolume ResumePolicyType = "FromVolume"
 )
 
