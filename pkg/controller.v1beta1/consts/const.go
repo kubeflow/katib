@@ -146,6 +146,8 @@ const (
 
 	// TrialTemplateMetaReplaceFormatRegex is the regex for TrialMetadata format in Trial template
 	TrialTemplateMetaReplaceFormatRegex = "\\$\\{trialSpec\\.(.+?)\\}"
+	// TrialTemplateMetaParseFormatRegex is the regex to parse the index of Annotations and Labels from meta key
+	TrialTemplateMetaParseFormatRegex = "(.+)\\[(.+)]"
 
 	// valid keys of trial metadata which are used to make substitution in Trial template
 	TrialTemplateMetaKeyOfName        = "Name"

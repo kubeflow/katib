@@ -104,37 +104,34 @@ func (g *DefaultGenerator) applyParameters(experiment *experimentsv1beta1.Experi
 	}
 
 	placeHolderToValueMap := make(map[string]string)
-	var metaRefKey []string
-	var metaKey, metaIndex string
+	var metaRefKey, metaRefIndex string
 	nonMetaParamCount := 0
 	for _, param := range experiment.Spec.TrialTemplate.TrialParameters {
 		metaMatchRegex := regexp.MustCompile(consts.TrialTemplateMetaReplaceFormatRegex)
-		metaRefKey = metaMatchRegex.FindStringSubmatch(param.Reference)
+		sub := metaMatchRegex.FindStringSubmatch(param.Reference)
 		// handle trial parameters which consume trial assignments
-		if len(metaRefKey) == 0 {
+		if len(sub) == 0 {
 			if value, ok := assignmentsMap[param.Reference]; ok {
 				placeHolderToValueMap[param.Name] = value
 				nonMetaParamCount += 1
 				continue
 			} else {
-				return "", fmt.Errorf("illegal reference of trial metadata: %v", param.Reference)
+				return "", fmt.Errorf("Unable to find parameter: %v in parameter assignment %v", param.Reference, assignmentsMap)
 			}
 		}
+		metaRefKey = sub[1]
 
 		// handle trial parameters which consume trial meta data
 		// extract index (key) of Labels and Annotations if exists
-		if sub := regexp.MustCompile("(.+)\\[(.+)]").FindStringSubmatch(metaRefKey[1]); len(sub) > 0 {
+		if sub := regexp.MustCompile(consts.TrialTemplateMetaParseFormatRegex).FindStringSubmatch(metaRefKey); len(sub) > 0 {
 			if len(sub) != 3 {
 				return "", fmt.Errorf("illegal reference of trial metadata: %v", param.Reference)
 			}
-			metaKey = sub[1]
-			metaIndex = sub[2]
-		} else {
-			metaKey = metaRefKey[1]
-			metaIndex = ""
+			metaRefKey = sub[1]
+			metaRefIndex = sub[2]
 		}
 		// fetch metadata value
-		switch metaKey {
+		switch metaRefKey {
 		case consts.TrialTemplateMetaKeyOfName:
 			placeHolderToValueMap[param.Name] = trialName
 		case consts.TrialTemplateMetaKeyOfNamespace:
@@ -144,14 +141,14 @@ func (g *DefaultGenerator) applyParameters(experiment *experimentsv1beta1.Experi
 		case consts.TrialTemplateMetaKeyOfAPIVersion:
 			placeHolderToValueMap[param.Name] = trialSpec.GetAPIVersion()
 		case consts.TrialTemplateMetaKeyOfAnnotations:
-			if value, ok := trialSpec.GetAnnotations()[metaIndex]; !ok {
-				return "", fmt.Errorf("illegal reference of trial metadata: %v; failed to fetch Annotation: %v", param.Reference, metaIndex)
+			if value, ok := trialSpec.GetAnnotations()[metaRefIndex]; !ok {
+				return "", fmt.Errorf("illegal reference of trial metadata: %v; failed to fetch Annotation: %v", param.Reference, metaRefIndex)
 			} else {
 				placeHolderToValueMap[param.Name] = value
 			}
 		case consts.TrialTemplateMetaKeyOfLabels:
-			if value, ok := trialSpec.GetLabels()[metaIndex]; !ok {
-				return "", fmt.Errorf("illegal reference of trial metadata: %v; failed to fetch Label: %v", param.Reference, metaIndex)
+			if value, ok := trialSpec.GetLabels()[metaRefIndex]; !ok {
+				return "", fmt.Errorf("illegal reference of trial metadata: %v; failed to fetch Label: %v", param.Reference, metaRefIndex)
 			} else {
 				placeHolderToValueMap[param.Name] = value
 			}
