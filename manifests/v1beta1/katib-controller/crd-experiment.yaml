@@ -7,6 +7,9 @@ spec:
     - JSONPath: .status.conditions[-1:].type
       name: Status
       type: string
+    - JSONPath: .status.conditions[-1:].status
+      name: Status
+      type: string
     - JSONPath: .metadata.creationTimestamp
       name: Age
       type: date
