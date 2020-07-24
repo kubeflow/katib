@@ -104,7 +104,7 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 				Name: consts.ContainerSuggestionVolumeName,
 				VolumeSource: corev1.VolumeSource{
 					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-						ClaimName: s.Name,
+						ClaimName: util.GetAlgorithmPersistentVolumeClaimName(s),
 					},
 				},
 			},
@@ -254,7 +254,7 @@ func (g *General) desiredContainer(s *suggestionsv1beta1.Suggestion, suggestionC
 // DesiredVolume returns desired PVC and PV for suggestion.
 // If StorageClassName != DefaultSuggestionStorageClassName returns only PVC.
 func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.PersistentVolumeClaim, *corev1.PersistentVolume, error) {
-	persistentVolumeName := s.Name + "-" + s.Namespace
+	persistentVolumeName := util.GetAlgorithmPersistentVolumeName(s)
 
 	// TODO (andreyvelich): Enable to specify these values from Katib config
 	storageClassName := consts.DefaultSuggestionStorageClassName
@@ -268,7 +268,7 @@ func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.Persi
 
 	pvc := &corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      s.Name,
+			Name:      util.GetAlgorithmPersistentVolumeClaimName(s),
 			Namespace: s.Namespace,
 		},
 		Spec: corev1.PersistentVolumeClaimSpec{

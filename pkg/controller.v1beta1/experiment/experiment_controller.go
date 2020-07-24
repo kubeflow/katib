@@ -101,7 +101,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	if err = addWatch(mgr, c); err != nil {
-		log.Error(err, "Trial watch failed")
+		log.Error(err, "addWatch failed")
 		return err
 	}
 
