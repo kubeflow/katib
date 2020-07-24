@@ -1,8 +1,9 @@
 package consts
 
 import (
-	"github.com/kubeflow/katib/pkg/util/v1beta1/env"
 	"time"
+
+	"github.com/kubeflow/katib/pkg/util/v1beta1/env"
 )
 
 const (

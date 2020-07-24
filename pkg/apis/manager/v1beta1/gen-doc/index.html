@@ -330,11 +330,11 @@
               
               
                 <li>
-                  <a href="#api.v1.beta1.EarlyStopping"><span class="badge">S</span>EarlyStopping</a>
+                  <a href="#api.v1.beta1.DBManager"><span class="badge">S</span>DBManager</a>
                 </li>
               
                 <li>
-                  <a href="#api.v1.beta1.Manager"><span class="badge">S</span>Manager</a>
+                  <a href="#api.v1.beta1.EarlyStopping"><span class="badge">S</span>EarlyStopping</a>
                 </li>
               
                 <li>
@@ -353,7 +353,7 @@
       <div class="file-heading">
         <h2 id="api.proto">api.proto</h2><a href="#title">Top</a>
       </div>
-      <p>Katib API v1beta1</p>
+      <p>Katib GRPC API v1beta1</p>
 
       
         <h3 id="api.v1.beta1.AlgorithmSetting">AlgorithmSetting</h3>
@@ -1521,20 +1521,8 @@
       
 
       
-        <h3 id="api.v1.beta1.EarlyStopping">EarlyStopping</h3>
-        <p>TODO: This feature is not yet fully implemented.</p>
-        <table class="enum-table">
-          <thead>
-            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
-          </thead>
-          <tbody>
-            
-          </tbody>
-        </table>
-
-        
-        <h3 id="api.v1.beta1.Manager">Manager</h3>
-        <p>Service for Main API for Katib</p><p>For each RPC service, we define mapping to HTTP REST API method.</p><p>The mapping includes the URL path, query parameters and request body.</p><p>https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http</p>
+        <h3 id="api.v1.beta1.DBManager">DBManager</h3>
+        <p>DBManager service defines APIs to manage Katib database.</p>
         <table class="enum-table">
           <thead>
             <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
@@ -1569,8 +1557,20 @@ You can see accuracy curve or other metric logs on UI.</p></td>
         </table>
 
         
+        <h3 id="api.v1.beta1.EarlyStopping">EarlyStopping</h3>
+        <p>TODO: This feature is not yet fully implemented.</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+          </tbody>
+        </table>
+
+        
         <h3 id="api.v1.beta1.Suggestion">Suggestion</h3>
-        <p></p>
+        <p>Suggestion service defines APIs to manage Katib Suggestion objects.</p>
         <table class="enum-table">
           <thead>
             <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>

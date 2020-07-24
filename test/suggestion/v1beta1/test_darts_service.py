@@ -3,7 +3,6 @@ import grpc_testing
 import unittest
 import json
 
-from pkg.apis.manager.v1beta1.python import api_pb2_grpc
 from pkg.apis.manager.v1beta1.python import api_pb2
 
 from pkg.suggestion.v1beta1.nas.darts.service import DartsService

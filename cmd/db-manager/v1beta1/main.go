@@ -91,7 +91,7 @@ func main() {
 	size := 1<<31 - 1
 	klog.Infof("Start Katib manager: %s", port)
 	s := grpc.NewServer(grpc.MaxRecvMsgSize(size), grpc.MaxSendMsgSize(size))
-	api_pb.RegisterManagerServer(s, &server{})
+	api_pb.RegisterDBManagerServer(s, &server{})
 	health_pb.RegisterHealthServer(s, &server{})
 	reflection.Register(s)
 	if err = s.Serve(listener); err != nil {

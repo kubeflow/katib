@@ -1,5 +1,5 @@
 /**
- * Katib API v1beta1
+ * Katib GRPC API v1beta1
  */
 syntax = "proto3";
 
@@ -8,12 +8,9 @@ package api.v1.beta1;
 import "google/api/annotations.proto";
 
 /**
- * Service for Main API for Katib
- * For each RPC service, we define mapping to HTTP REST API method.
- * The mapping includes the URL path, query parameters and request body.
- * https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http
+ * DBManager service defines APIs to manage Katib database.
  */
-service Manager {
+service DBManager {
     /** 
      * Report a log of Observations for a Trial.
      * The log consists of timestamp and value of metric.
@@ -33,6 +30,9 @@ service Manager {
     rpc DeleteObservationLog(DeleteObservationLogRequest) returns (DeleteObservationLogReply);
 }
 
+/**
+ * Suggestion service defines APIs to manage Katib Suggestion objects.
+ */
 service Suggestion {
     rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply);
     rpc ValidateAlgorithmSettings(ValidateAlgorithmSettingsRequest) returns (ValidateAlgorithmSettingsReply);

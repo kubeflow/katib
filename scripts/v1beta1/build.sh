@@ -81,3 +81,4 @@ else
 fi
 docker build -t ${REGISTRY}/${PREFIX}/suggestion-hyperband:${TAG} -f ${CMD_PREFIX}/suggestion/hyperband/v1beta1/Dockerfile .
 docker build -t ${REGISTRY}/${PREFIX}/suggestion-goptuna:${TAG} -f ${CMD_PREFIX}/suggestion/goptuna/v1beta1/Dockerfile .
+docker build -t ${REGISTRY}/${PREFIX}/suggestion-darts:${TAG} -f ${CMD_PREFIX}/suggestion/nas/darts/v1beta1/Dockerfile .
