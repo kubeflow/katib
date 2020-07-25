@@ -28,13 +28,13 @@ func NewKatibUIHandler(dbManagerAddr string) *KatibUIHandler {
 	}
 }
 
-func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1beta1.ManagerClient) {
+func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1beta1.DBManagerClient) {
 	conn, err := grpc.Dial(k.dbManagerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Dial to GRPC failed: %v", err)
 		return nil, nil
 	}
-	c := api_pb_v1beta1.NewManagerClient(conn)
+	c := api_pb_v1beta1.NewDBManagerClient(conn)
 	return conn, c
 }
 

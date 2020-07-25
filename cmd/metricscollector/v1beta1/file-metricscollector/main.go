@@ -102,7 +102,7 @@ func main() {
 		klog.Fatalf("could not connect: %v", err)
 	}
 	defer conn.Close()
-	c := api.NewManagerClient(conn)
+	c := api.NewDBManagerClient(conn)
 	ctx := context.Background()
 	var metricList []string
 	if len(*metricNames) != 0 {

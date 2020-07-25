@@ -2,10 +2,7 @@ import tensorflow as tf
 import os
 from datetime import datetime
 import rfc3339
-import grpc
 import api_pb2
-import api_pb2_grpc
-import sys
 from logging import getLogger, StreamHandler, INFO
 
 # TFEventFileParser parses tfevent files and returns an ObservationLog of the metrics specified.

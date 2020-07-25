@@ -4,12 +4,9 @@ import grpc
 import api_pb2 as api__pb2
 
 
-class ManagerStub(object):
+class DBManagerStub(object):
   """*
-  Service for Main API for Katib
-  For each RPC service, we define mapping to HTTP REST API method.
-  The mapping includes the URL path, query parameters and request body.
-  https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http
+  DBManager service defines APIs to manage Katib database.
   """
 
   def __init__(self, channel):
@@ -19,28 +16,25 @@ class ManagerStub(object):
       channel: A grpc.Channel.
     """
     self.ReportObservationLog = channel.unary_unary(
-        '/api.v1.beta1.Manager/ReportObservationLog',
+        '/api.v1.beta1.DBManager/ReportObservationLog',
         request_serializer=api__pb2.ReportObservationLogRequest.SerializeToString,
         response_deserializer=api__pb2.ReportObservationLogReply.FromString,
         )
     self.GetObservationLog = channel.unary_unary(
-        '/api.v1.beta1.Manager/GetObservationLog',
+        '/api.v1.beta1.DBManager/GetObservationLog',
         request_serializer=api__pb2.GetObservationLogRequest.SerializeToString,
         response_deserializer=api__pb2.GetObservationLogReply.FromString,
         )
     self.DeleteObservationLog = channel.unary_unary(
-        '/api.v1.beta1.Manager/DeleteObservationLog',
+        '/api.v1.beta1.DBManager/DeleteObservationLog',
         request_serializer=api__pb2.DeleteObservationLogRequest.SerializeToString,
         response_deserializer=api__pb2.DeleteObservationLogReply.FromString,
         )
 
 
-class ManagerServicer(object):
+class DBManagerServicer(object):
   """*
-  Service for Main API for Katib
-  For each RPC service, we define mapping to HTTP REST API method.
-  The mapping includes the URL path, query parameters and request body.
-  https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http
+  DBManager service defines APIs to manage Katib database.
   """
 
   def ReportObservationLog(self, request, context):
@@ -71,7 +65,7 @@ class ManagerServicer(object):
     raise NotImplementedError('Method not implemented!')
 
 
-def add_ManagerServicer_to_server(servicer, server):
+def add_DBManagerServicer_to_server(servicer, server):
   rpc_method_handlers = {
       'ReportObservationLog': grpc.unary_unary_rpc_method_handler(
           servicer.ReportObservationLog,
@@ -90,13 +84,14 @@ def add_ManagerServicer_to_server(servicer, server):
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
-      'api.v1.beta1.Manager', rpc_method_handlers)
+      'api.v1.beta1.DBManager', rpc_method_handlers)
   server.add_generic_rpc_handlers((generic_handler,))
 
 
 class SuggestionStub(object):
-  # missing associated documentation comment in .proto file
-  pass
+  """*
+  Suggestion service defines APIs to manage Katib Suggestion objects.
+  """
 
   def __init__(self, channel):
     """Constructor.
@@ -117,8 +112,9 @@ class SuggestionStub(object):
 
 
 class SuggestionServicer(object):
-  # missing associated documentation comment in .proto file
-  pass
+  """*
+  Suggestion service defines APIs to manage Katib Suggestion objects.
+  """
 
   def GetSuggestions(self, request, context):
     # missing associated documentation comment in .proto file

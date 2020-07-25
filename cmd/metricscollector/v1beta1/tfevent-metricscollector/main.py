@@ -1,7 +1,6 @@
 import grpc
 import argparse
 import api_pb2
-import api_pb2_grpc
 from pns import WaitOtherMainProcesses
 from tfevent_loader import MetricsCollector
 from logging import getLogger, StreamHandler, INFO
@@ -45,7 +44,7 @@ if __name__ == '__main__':
     channel = grpc.beta.implementations.insecure_channel(
         manager_server[0], int(manager_server[1]))
 
-    with api_pb2.beta_create_Manager_stub(channel) as client:
+    with api_pb2.beta_create_DBManager_stub(channel) as client:
         logger.info("In " + opt.trial_name + " " +
                     str(len(observation_log.metric_logs)) + " metrics will be reported.")
         client.ReportObservationLog(api_pb2.ReportObservationLogRequest(

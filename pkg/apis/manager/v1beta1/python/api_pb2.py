@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='api.proto',
   package='api.v1.beta1',
   syntax='proto3',
-  serialized_pb=_b('\n\tapi.proto\x12\x0c\x61pi.v1.beta1\x1a\x1cgoogle/api/annotations.proto\"E\n\rFeasibleSpace\x12\x0b\n\x03max\x18\x01 \x01(\t\x12\x0b\n\x03min\x18\x02 \x01(\t\x12\x0c\n\x04list\x18\x03 \x03(\t\x12\x0c\n\x04step\x18\x04 \x01(\t\"\x87\x01\n\rParameterSpec\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x33\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x1b.api.v1.beta1.ParameterType\x12\x33\n\x0e\x66\x65\x61sible_space\x18\x03 \x01(\x0b\x32\x1b.api.v1.beta1.FeasibleSpace\"\x88\x01\n\rObjectiveSpec\x12)\n\x04type\x18\x01 \x01(\x0e\x32\x1b.api.v1.beta1.ObjectiveType\x12\x0c\n\x04goal\x18\x02 \x01(\x01\x12\x1d\n\x15objective_metric_name\x18\x03 \x01(\t\x12\x1f\n\x17\x61\x64\x64itional_metric_names\x18\x04 \x03(\t\"/\n\x10\x41lgorithmSetting\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\x13\n\x11\x45\x61rlyStoppingSpec\"\xa1\x01\n\rAlgorithmSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x01 \x01(\t\x12:\n\x12\x61lgorithm_settings\x18\x02 \x03(\x0b\x32\x1e.api.v1.beta1.AlgorithmSetting\x12<\n\x13\x65\x61rly_stopping_spec\x18\x03 \x01(\x0b\x32\x1f.api.v1.beta1.EarlyStoppingSpec\"\xae\x01\n\tNasConfig\x12/\n\x0cgraph_config\x18\x01 \x01(\x0b\x32\x19.api.v1.beta1.GraphConfig\x12\x36\n\noperations\x18\x02 \x01(\x0b\x32\".api.v1.beta1.NasConfig.Operations\x1a\x38\n\nOperations\x12*\n\toperation\x18\x01 \x03(\x0b\x32\x17.api.v1.beta1.Operation\"L\n\x0bGraphConfig\x12\x12\n\nnum_layers\x18\x01 \x01(\x05\x12\x13\n\x0binput_sizes\x18\x02 \x03(\x05\x12\x14\n\x0coutput_sizes\x18\x03 \x03(\x05\"\xa7\x01\n\tOperation\x12\x16\n\x0eoperation_type\x18\x01 \x01(\t\x12?\n\x0fparameter_specs\x18\x02 \x01(\x0b\x32&.api.v1.beta1.Operation.ParameterSpecs\x1a\x41\n\x0eParameterSpecs\x12/\n\nparameters\x18\x01 \x03(\x0b\x32\x1b.api.v1.beta1.ParameterSpec\"\x95\x03\n\x0e\x45xperimentSpec\x12\x44\n\x0fparameter_specs\x18\x01 \x01(\x0b\x32+.api.v1.beta1.ExperimentSpec.ParameterSpecs\x12.\n\tobjective\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.ObjectiveSpec\x12.\n\talgorithm\x18\x03 \x01(\x0b\x32\x1b.api.v1.beta1.AlgorithmSpec\x12\x16\n\x0etrial_template\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x12\x1c\n\x14parallel_trial_count\x18\x06 \x01(\x05\x12\x17\n\x0fmax_trial_count\x18\x07 \x01(\x05\x12+\n\nnas_config\x18\x08 \x01(\x0b\x32\x17.api.v1.beta1.NasConfig\x1a\x41\n\x0eParameterSpecs\x12/\n\nparameters\x18\x01 \x03(\x0b\x32\x1b.api.v1.beta1.ParameterSpec\"F\n\nExperiment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12*\n\x04spec\x18\x02 \x01(\x0b\x32\x1c.api.v1.beta1.ExperimentSpec\"2\n\x13ParameterAssignment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"%\n\x06Metric\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"E\n\tMetricLog\x12\x12\n\ntime_stamp\x18\x01 \x01(\t\x12$\n\x06metric\x18\x02 \x01(\x0b\x32\x14.api.v1.beta1.Metric\"4\n\x0bObservation\x12%\n\x07metrics\x18\x01 \x03(\x0b\x32\x14.api.v1.beta1.Metric\">\n\x0eObservationLog\x12,\n\x0bmetric_logs\x18\x01 \x03(\x0b\x32\x17.api.v1.beta1.MetricLog\"\xa3\x02\n\tTrialSpec\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12.\n\tobjective\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.ObjectiveSpec\x12K\n\x15parameter_assignments\x18\x03 \x01(\x0b\x32,.api.v1.beta1.TrialSpec.ParameterAssignments\x12\x10\n\x08run_spec\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x1aN\n\x14ParameterAssignments\x12\x36\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32!.api.v1.beta1.ParameterAssignment\"\x8f\x02\n\x0bTrialStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12?\n\tcondition\x18\x03 \x01(\x0e\x32,.api.v1.beta1.TrialStatus.TrialConditionType\x12.\n\x0bobservation\x18\x04 \x01(\x0b\x32\x19.api.v1.beta1.Observation\"b\n\x12TrialConditionType\x12\x0b\n\x07\x43REATED\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tSUCCEEDED\x10\x02\x12\n\n\x06KILLED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x12\x0b\n\x07UNKNOWN\x10\x05\"g\n\x05Trial\x12\x0c\n\x04name\x18\x01 \x01(\t\x12%\n\x04spec\x18\x02 \x01(\x0b\x32\x17.api.v1.beta1.TrialSpec\x12)\n\x06status\x18\x03 \x01(\x0b\x32\x19.api.v1.beta1.TrialStatus\"h\n\x1bReportObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x35\n\x0fobservation_log\x18\x02 \x01(\x0b\x32\x1c.api.v1.beta1.ObservationLog\"\x1b\n\x19ReportObservationLogReply\"1\n\x1b\x44\x65leteObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x1b\n\x19\x44\x65leteObservationLogReply\"i\n\x18GetObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x13\n\x0bmetric_name\x18\x02 \x01(\t\x12\x12\n\nstart_time\x18\x03 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\t\"O\n\x16GetObservationLogReply\x12\x35\n\x0fobservation_log\x18\x01 \x01(\x0b\x32\x1c.api.v1.beta1.ObservationLog\"\x82\x01\n\x15GetSuggestionsRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\x12#\n\x06trials\x18\x02 \x03(\x0b\x32\x13.api.v1.beta1.Trial\x12\x16\n\x0erequest_number\x18\x03 \x01(\x05\"\xec\x01\n\x13GetSuggestionsReply\x12U\n\x15parameter_assignments\x18\x01 \x03(\x0b\x32\x36.api.v1.beta1.GetSuggestionsReply.ParameterAssignments\x12.\n\talgorithm\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.AlgorithmSpec\x1aN\n\x14ParameterAssignments\x12\x36\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32!.api.v1.beta1.ParameterAssignment\"P\n ValidateAlgorithmSettingsRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\" \n\x1eValidateAlgorithmSettingsReply*U\n\rParameterType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\n\n\x06\x44OUBLE\x10\x01\x12\x07\n\x03INT\x10\x02\x12\x0c\n\x08\x44ISCRETE\x10\x03\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x04*8\n\rObjectiveType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0c\n\x08MINIMIZE\x10\x01\x12\x0c\n\x08MAXIMIZE\x10\x02\x32\xc4\x02\n\x07Manager\x12j\n\x14ReportObservationLog\x12).api.v1.beta1.ReportObservationLogRequest\x1a\'.api.v1.beta1.ReportObservationLogReply\x12\x61\n\x11GetObservationLog\x12&.api.v1.beta1.GetObservationLogRequest\x1a$.api.v1.beta1.GetObservationLogReply\x12j\n\x14\x44\x65leteObservationLog\x12).api.v1.beta1.DeleteObservationLogRequest\x1a\'.api.v1.beta1.DeleteObservationLogReply2\xe1\x01\n\nSuggestion\x12X\n\x0eGetSuggestions\x12#.api.v1.beta1.GetSuggestionsRequest\x1a!.api.v1.beta1.GetSuggestionsReply\x12y\n\x19ValidateAlgorithmSettings\x12..api.v1.beta1.ValidateAlgorithmSettingsRequest\x1a,.api.v1.beta1.ValidateAlgorithmSettingsReply2\x0f\n\rEarlyStoppingb\x06proto3')
+  serialized_pb=_b('\n\tapi.proto\x12\x0c\x61pi.v1.beta1\x1a\x1cgoogle/api/annotations.proto\"E\n\rFeasibleSpace\x12\x0b\n\x03max\x18\x01 \x01(\t\x12\x0b\n\x03min\x18\x02 \x01(\t\x12\x0c\n\x04list\x18\x03 \x03(\t\x12\x0c\n\x04step\x18\x04 \x01(\t\"\x87\x01\n\rParameterSpec\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x33\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x1b.api.v1.beta1.ParameterType\x12\x33\n\x0e\x66\x65\x61sible_space\x18\x03 \x01(\x0b\x32\x1b.api.v1.beta1.FeasibleSpace\"\x88\x01\n\rObjectiveSpec\x12)\n\x04type\x18\x01 \x01(\x0e\x32\x1b.api.v1.beta1.ObjectiveType\x12\x0c\n\x04goal\x18\x02 \x01(\x01\x12\x1d\n\x15objective_metric_name\x18\x03 \x01(\t\x12\x1f\n\x17\x61\x64\x64itional_metric_names\x18\x04 \x03(\t\"/\n\x10\x41lgorithmSetting\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\x13\n\x11\x45\x61rlyStoppingSpec\"\xa1\x01\n\rAlgorithmSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x01 \x01(\t\x12:\n\x12\x61lgorithm_settings\x18\x02 \x03(\x0b\x32\x1e.api.v1.beta1.AlgorithmSetting\x12<\n\x13\x65\x61rly_stopping_spec\x18\x03 \x01(\x0b\x32\x1f.api.v1.beta1.EarlyStoppingSpec\"\xae\x01\n\tNasConfig\x12/\n\x0cgraph_config\x18\x01 \x01(\x0b\x32\x19.api.v1.beta1.GraphConfig\x12\x36\n\noperations\x18\x02 \x01(\x0b\x32\".api.v1.beta1.NasConfig.Operations\x1a\x38\n\nOperations\x12*\n\toperation\x18\x01 \x03(\x0b\x32\x17.api.v1.beta1.Operation\"L\n\x0bGraphConfig\x12\x12\n\nnum_layers\x18\x01 \x01(\x05\x12\x13\n\x0binput_sizes\x18\x02 \x03(\x05\x12\x14\n\x0coutput_sizes\x18\x03 \x03(\x05\"\xa7\x01\n\tOperation\x12\x16\n\x0eoperation_type\x18\x01 \x01(\t\x12?\n\x0fparameter_specs\x18\x02 \x01(\x0b\x32&.api.v1.beta1.Operation.ParameterSpecs\x1a\x41\n\x0eParameterSpecs\x12/\n\nparameters\x18\x01 \x03(\x0b\x32\x1b.api.v1.beta1.ParameterSpec\"\x95\x03\n\x0e\x45xperimentSpec\x12\x44\n\x0fparameter_specs\x18\x01 \x01(\x0b\x32+.api.v1.beta1.ExperimentSpec.ParameterSpecs\x12.\n\tobjective\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.ObjectiveSpec\x12.\n\talgorithm\x18\x03 \x01(\x0b\x32\x1b.api.v1.beta1.AlgorithmSpec\x12\x16\n\x0etrial_template\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x12\x1c\n\x14parallel_trial_count\x18\x06 \x01(\x05\x12\x17\n\x0fmax_trial_count\x18\x07 \x01(\x05\x12+\n\nnas_config\x18\x08 \x01(\x0b\x32\x17.api.v1.beta1.NasConfig\x1a\x41\n\x0eParameterSpecs\x12/\n\nparameters\x18\x01 \x03(\x0b\x32\x1b.api.v1.beta1.ParameterSpec\"F\n\nExperiment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12*\n\x04spec\x18\x02 \x01(\x0b\x32\x1c.api.v1.beta1.ExperimentSpec\"2\n\x13ParameterAssignment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"%\n\x06Metric\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"E\n\tMetricLog\x12\x12\n\ntime_stamp\x18\x01 \x01(\t\x12$\n\x06metric\x18\x02 \x01(\x0b\x32\x14.api.v1.beta1.Metric\"4\n\x0bObservation\x12%\n\x07metrics\x18\x01 \x03(\x0b\x32\x14.api.v1.beta1.Metric\">\n\x0eObservationLog\x12,\n\x0bmetric_logs\x18\x01 \x03(\x0b\x32\x17.api.v1.beta1.MetricLog\"\xa3\x02\n\tTrialSpec\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12.\n\tobjective\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.ObjectiveSpec\x12K\n\x15parameter_assignments\x18\x03 \x01(\x0b\x32,.api.v1.beta1.TrialSpec.ParameterAssignments\x12\x10\n\x08run_spec\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x1aN\n\x14ParameterAssignments\x12\x36\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32!.api.v1.beta1.ParameterAssignment\"\x8f\x02\n\x0bTrialStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12?\n\tcondition\x18\x03 \x01(\x0e\x32,.api.v1.beta1.TrialStatus.TrialConditionType\x12.\n\x0bobservation\x18\x04 \x01(\x0b\x32\x19.api.v1.beta1.Observation\"b\n\x12TrialConditionType\x12\x0b\n\x07\x43REATED\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tSUCCEEDED\x10\x02\x12\n\n\x06KILLED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x12\x0b\n\x07UNKNOWN\x10\x05\"g\n\x05Trial\x12\x0c\n\x04name\x18\x01 \x01(\t\x12%\n\x04spec\x18\x02 \x01(\x0b\x32\x17.api.v1.beta1.TrialSpec\x12)\n\x06status\x18\x03 \x01(\x0b\x32\x19.api.v1.beta1.TrialStatus\"h\n\x1bReportObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x35\n\x0fobservation_log\x18\x02 \x01(\x0b\x32\x1c.api.v1.beta1.ObservationLog\"\x1b\n\x19ReportObservationLogReply\"1\n\x1b\x44\x65leteObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x1b\n\x19\x44\x65leteObservationLogReply\"i\n\x18GetObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x13\n\x0bmetric_name\x18\x02 \x01(\t\x12\x12\n\nstart_time\x18\x03 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\t\"O\n\x16GetObservationLogReply\x12\x35\n\x0fobservation_log\x18\x01 \x01(\x0b\x32\x1c.api.v1.beta1.ObservationLog\"\x82\x01\n\x15GetSuggestionsRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\x12#\n\x06trials\x18\x02 \x03(\x0b\x32\x13.api.v1.beta1.Trial\x12\x16\n\x0erequest_number\x18\x03 \x01(\x05\"\xec\x01\n\x13GetSuggestionsReply\x12U\n\x15parameter_assignments\x18\x01 \x03(\x0b\x32\x36.api.v1.beta1.GetSuggestionsReply.ParameterAssignments\x12.\n\talgorithm\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.AlgorithmSpec\x1aN\n\x14ParameterAssignments\x12\x36\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32!.api.v1.beta1.ParameterAssignment\"P\n ValidateAlgorithmSettingsRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\" \n\x1eValidateAlgorithmSettingsReply*U\n\rParameterType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\n\n\x06\x44OUBLE\x10\x01\x12\x07\n\x03INT\x10\x02\x12\x0c\n\x08\x44ISCRETE\x10\x03\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x04*8\n\rObjectiveType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0c\n\x08MINIMIZE\x10\x01\x12\x0c\n\x08MAXIMIZE\x10\x02\x32\xc6\x02\n\tDBManager\x12j\n\x14ReportObservationLog\x12).api.v1.beta1.ReportObservationLogRequest\x1a\'.api.v1.beta1.ReportObservationLogReply\x12\x61\n\x11GetObservationLog\x12&.api.v1.beta1.GetObservationLogRequest\x1a$.api.v1.beta1.GetObservationLogReply\x12j\n\x14\x44\x65leteObservationLog\x12).api.v1.beta1.DeleteObservationLogRequest\x1a\'.api.v1.beta1.DeleteObservationLogReply2\xe1\x01\n\nSuggestion\x12X\n\x0eGetSuggestions\x12#.api.v1.beta1.GetSuggestionsRequest\x1a!.api.v1.beta1.GetSuggestionsReply\x12y\n\x19ValidateAlgorithmSettings\x12..api.v1.beta1.ValidateAlgorithmSettingsRequest\x1a,.api.v1.beta1.ValidateAlgorithmSettingsReply2\x0f\n\rEarlyStoppingb\x06proto3')
   ,
   dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,])
 
@@ -1769,18 +1769,18 @@ _sym_db.RegisterMessage(ValidateAlgorithmSettingsReply)
 
 
 
-_MANAGER = _descriptor.ServiceDescriptor(
-  name='Manager',
-  full_name='api.v1.beta1.Manager',
+_DBMANAGER = _descriptor.ServiceDescriptor(
+  name='DBManager',
+  full_name='api.v1.beta1.DBManager',
   file=DESCRIPTOR,
   index=0,
   options=None,
   serialized_start=3534,
-  serialized_end=3858,
+  serialized_end=3860,
   methods=[
   _descriptor.MethodDescriptor(
     name='ReportObservationLog',
-    full_name='api.v1.beta1.Manager.ReportObservationLog',
+    full_name='api.v1.beta1.DBManager.ReportObservationLog',
     index=0,
     containing_service=None,
     input_type=_REPORTOBSERVATIONLOGREQUEST,
@@ -1789,7 +1789,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='GetObservationLog',
-    full_name='api.v1.beta1.Manager.GetObservationLog',
+    full_name='api.v1.beta1.DBManager.GetObservationLog',
     index=1,
     containing_service=None,
     input_type=_GETOBSERVATIONLOGREQUEST,
@@ -1798,7 +1798,7 @@ _MANAGER = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='DeleteObservationLog',
-    full_name='api.v1.beta1.Manager.DeleteObservationLog',
+    full_name='api.v1.beta1.DBManager.DeleteObservationLog',
     index=2,
     containing_service=None,
     input_type=_DELETEOBSERVATIONLOGREQUEST,
@@ -1806,9 +1806,9 @@ _MANAGER = _descriptor.ServiceDescriptor(
     options=None,
   ),
 ])
-_sym_db.RegisterServiceDescriptor(_MANAGER)
+_sym_db.RegisterServiceDescriptor(_DBMANAGER)
 
-DESCRIPTOR.services_by_name['Manager'] = _MANAGER
+DESCRIPTOR.services_by_name['DBManager'] = _DBMANAGER
 
 
 _SUGGESTION = _descriptor.ServiceDescriptor(
@@ -1817,8 +1817,8 @@ _SUGGESTION = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=1,
   options=None,
-  serialized_start=3861,
-  serialized_end=4086,
+  serialized_start=3863,
+  serialized_end=4088,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetSuggestions',
@@ -1850,8 +1850,8 @@ _EARLYSTOPPING = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=2,
   options=None,
-  serialized_start=4088,
-  serialized_end=4103,
+  serialized_start=4090,
+  serialized_end=4105,
   methods=[
 ])
 _sym_db.RegisterServiceDescriptor(_EARLYSTOPPING)
@@ -1868,12 +1868,9 @@ try:
   from grpc.framework.interfaces.face import utilities as face_utilities
 
 
-  class ManagerStub(object):
+  class DBManagerStub(object):
     """*
-    Service for Main API for Katib
-    For each RPC service, we define mapping to HTTP REST API method.
-    The mapping includes the URL path, query parameters and request body.
-    https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http
+    DBManager service defines APIs to manage Katib database.
     """
 
     def __init__(self, channel):
@@ -1883,28 +1880,25 @@ try:
         channel: A grpc.Channel.
       """
       self.ReportObservationLog = channel.unary_unary(
-          '/api.v1.beta1.Manager/ReportObservationLog',
+          '/api.v1.beta1.DBManager/ReportObservationLog',
           request_serializer=ReportObservationLogRequest.SerializeToString,
           response_deserializer=ReportObservationLogReply.FromString,
           )
       self.GetObservationLog = channel.unary_unary(
-          '/api.v1.beta1.Manager/GetObservationLog',
+          '/api.v1.beta1.DBManager/GetObservationLog',
           request_serializer=GetObservationLogRequest.SerializeToString,
           response_deserializer=GetObservationLogReply.FromString,
           )
       self.DeleteObservationLog = channel.unary_unary(
-          '/api.v1.beta1.Manager/DeleteObservationLog',
+          '/api.v1.beta1.DBManager/DeleteObservationLog',
           request_serializer=DeleteObservationLogRequest.SerializeToString,
           response_deserializer=DeleteObservationLogReply.FromString,
           )
 
 
-  class ManagerServicer(object):
+  class DBManagerServicer(object):
     """*
-    Service for Main API for Katib
-    For each RPC service, we define mapping to HTTP REST API method.
-    The mapping includes the URL path, query parameters and request body.
-    https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http
+    DBManager service defines APIs to manage Katib database.
     """
 
     def ReportObservationLog(self, request, context):
@@ -1935,7 +1929,7 @@ try:
       raise NotImplementedError('Method not implemented!')
 
 
-  def add_ManagerServicer_to_server(servicer, server):
+  def add_DBManagerServicer_to_server(servicer, server):
     rpc_method_handlers = {
         'ReportObservationLog': grpc.unary_unary_rpc_method_handler(
             servicer.ReportObservationLog,
@@ -1954,13 +1948,14 @@ try:
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        'api.v1.beta1.Manager', rpc_method_handlers)
+        'api.v1.beta1.DBManager', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
   class SuggestionStub(object):
-    # missing associated documentation comment in .proto file
-    pass
+    """*
+    Suggestion service defines APIs to manage Katib Suggestion objects.
+    """
 
     def __init__(self, channel):
       """Constructor.
@@ -1981,8 +1976,9 @@ try:
 
 
   class SuggestionServicer(object):
-    # missing associated documentation comment in .proto file
-    pass
+    """*
+    Suggestion service defines APIs to manage Katib Suggestion objects.
+    """
 
     def GetSuggestions(self, request, context):
       # missing associated documentation comment in .proto file
@@ -2042,17 +2038,14 @@ try:
     server.add_generic_rpc_handlers((generic_handler,))
 
 
-  class BetaManagerServicer(object):
+  class BetaDBManagerServicer(object):
     """The Beta API is deprecated for 0.15.0 and later.
 
     It is recommended to use the GA API (classes and functions in this
     file not marked beta) for all further purposes. This class was generated
     only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
     """*
-    Service for Main API for Katib
-    For each RPC service, we define mapping to HTTP REST API method.
-    The mapping includes the URL path, query parameters and request body.
-    https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http
+    DBManager service defines APIs to manage Katib database.
     """
     def ReportObservationLog(self, request, context):
       """* 
@@ -2074,17 +2067,14 @@ try:
       context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
 
 
-  class BetaManagerStub(object):
+  class BetaDBManagerStub(object):
     """The Beta API is deprecated for 0.15.0 and later.
 
     It is recommended to use the GA API (classes and functions in this
     file not marked beta) for all further purposes. This class was generated
     only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
     """*
-    Service for Main API for Katib
-    For each RPC service, we define mapping to HTTP REST API method.
-    The mapping includes the URL path, query parameters and request body.
-    https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http
+    DBManager service defines APIs to manage Katib database.
     """
     def ReportObservationLog(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
       """* 
@@ -2109,46 +2099,46 @@ try:
     DeleteObservationLog.future = None
 
 
-  def beta_create_Manager_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
+  def beta_create_DBManager_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
     """The Beta API is deprecated for 0.15.0 and later.
 
     It is recommended to use the GA API (classes and functions in this
     file not marked beta) for all further purposes. This function was
     generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
     request_deserializers = {
-      ('api.v1.beta1.Manager', 'DeleteObservationLog'): DeleteObservationLogRequest.FromString,
-      ('api.v1.beta1.Manager', 'GetObservationLog'): GetObservationLogRequest.FromString,
-      ('api.v1.beta1.Manager', 'ReportObservationLog'): ReportObservationLogRequest.FromString,
+      ('api.v1.beta1.DBManager', 'DeleteObservationLog'): DeleteObservationLogRequest.FromString,
+      ('api.v1.beta1.DBManager', 'GetObservationLog'): GetObservationLogRequest.FromString,
+      ('api.v1.beta1.DBManager', 'ReportObservationLog'): ReportObservationLogRequest.FromString,
     }
     response_serializers = {
-      ('api.v1.beta1.Manager', 'DeleteObservationLog'): DeleteObservationLogReply.SerializeToString,
-      ('api.v1.beta1.Manager', 'GetObservationLog'): GetObservationLogReply.SerializeToString,
-      ('api.v1.beta1.Manager', 'ReportObservationLog'): ReportObservationLogReply.SerializeToString,
+      ('api.v1.beta1.DBManager', 'DeleteObservationLog'): DeleteObservationLogReply.SerializeToString,
+      ('api.v1.beta1.DBManager', 'GetObservationLog'): GetObservationLogReply.SerializeToString,
+      ('api.v1.beta1.DBManager', 'ReportObservationLog'): ReportObservationLogReply.SerializeToString,
     }
     method_implementations = {
-      ('api.v1.beta1.Manager', 'DeleteObservationLog'): face_utilities.unary_unary_inline(servicer.DeleteObservationLog),
-      ('api.v1.beta1.Manager', 'GetObservationLog'): face_utilities.unary_unary_inline(servicer.GetObservationLog),
-      ('api.v1.beta1.Manager', 'ReportObservationLog'): face_utilities.unary_unary_inline(servicer.ReportObservationLog),
+      ('api.v1.beta1.DBManager', 'DeleteObservationLog'): face_utilities.unary_unary_inline(servicer.DeleteObservationLog),
+      ('api.v1.beta1.DBManager', 'GetObservationLog'): face_utilities.unary_unary_inline(servicer.GetObservationLog),
+      ('api.v1.beta1.DBManager', 'ReportObservationLog'): face_utilities.unary_unary_inline(servicer.ReportObservationLog),
     }
     server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
     return beta_implementations.server(method_implementations, options=server_options)
 
 
-  def beta_create_Manager_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
+  def beta_create_DBManager_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
     """The Beta API is deprecated for 0.15.0 and later.
 
     It is recommended to use the GA API (classes and functions in this
     file not marked beta) for all further purposes. This function was
     generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
     request_serializers = {
-      ('api.v1.beta1.Manager', 'DeleteObservationLog'): DeleteObservationLogRequest.SerializeToString,
-      ('api.v1.beta1.Manager', 'GetObservationLog'): GetObservationLogRequest.SerializeToString,
-      ('api.v1.beta1.Manager', 'ReportObservationLog'): ReportObservationLogRequest.SerializeToString,
+      ('api.v1.beta1.DBManager', 'DeleteObservationLog'): DeleteObservationLogRequest.SerializeToString,
+      ('api.v1.beta1.DBManager', 'GetObservationLog'): GetObservationLogRequest.SerializeToString,
+      ('api.v1.beta1.DBManager', 'ReportObservationLog'): ReportObservationLogRequest.SerializeToString,
     }
     response_deserializers = {
-      ('api.v1.beta1.Manager', 'DeleteObservationLog'): DeleteObservationLogReply.FromString,
-      ('api.v1.beta1.Manager', 'GetObservationLog'): GetObservationLogReply.FromString,
-      ('api.v1.beta1.Manager', 'ReportObservationLog'): ReportObservationLogReply.FromString,
+      ('api.v1.beta1.DBManager', 'DeleteObservationLog'): DeleteObservationLogReply.FromString,
+      ('api.v1.beta1.DBManager', 'GetObservationLog'): GetObservationLogReply.FromString,
+      ('api.v1.beta1.DBManager', 'ReportObservationLog'): ReportObservationLogReply.FromString,
     }
     cardinalities = {
       'DeleteObservationLog': cardinality.Cardinality.UNARY_UNARY,
@@ -2156,7 +2146,7 @@ try:
       'ReportObservationLog': cardinality.Cardinality.UNARY_UNARY,
     }
     stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
-    return beta_implementations.dynamic_stub(channel, 'api.v1.beta1.Manager', cardinalities, options=stub_options)
+    return beta_implementations.dynamic_stub(channel, 'api.v1.beta1.DBManager', cardinalities, options=stub_options)
 
 
   class BetaSuggestionServicer(object):
@@ -2165,8 +2155,9 @@ try:
     It is recommended to use the GA API (classes and functions in this
     file not marked beta) for all further purposes. This class was generated
     only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    # missing associated documentation comment in .proto file
-    pass
+    """*
+    Suggestion service defines APIs to manage Katib Suggestion objects.
+    """
     def GetSuggestions(self, request, context):
       # missing associated documentation comment in .proto file
       pass
@@ -2183,8 +2174,9 @@ try:
     It is recommended to use the GA API (classes and functions in this
     file not marked beta) for all further purposes. This class was generated
     only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    # missing associated documentation comment in .proto file
-    pass
+    """*
+    Suggestion service defines APIs to manage Katib Suggestion objects.
+    """
     def GetSuggestions(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
       # missing associated documentation comment in .proto file
       pass

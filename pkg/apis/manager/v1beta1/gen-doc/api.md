@@ -43,8 +43,8 @@
     - [ParameterType](#api.v1.beta1.ParameterType)
     - [TrialStatus.TrialConditionType](#api.v1.beta1.TrialStatus.TrialConditionType)
   
+    - [DBManager](#api.v1.beta1.DBManager)
     - [EarlyStopping](#api.v1.beta1.EarlyStopping)
-    - [Manager](#api.v1.beta1.Manager)
     - [Suggestion](#api.v1.beta1.Suggestion)
   
 - [Scalar Value Types](#scalar-value-types)
@@ -55,7 +55,7 @@
 <p align="right"><a href="#top">Top</a></p>
 
 ## api.proto
-Katib API v1beta1
+Katib GRPC API v1beta1
 
 
 <a name="api.v1.beta1.AlgorithmSetting"></a>
@@ -645,6 +645,18 @@ Types of value for HyperParameter.
  
 
 
+<a name="api.v1.beta1.DBManager"></a>
+
+### DBManager
+DBManager service defines APIs to manage Katib database.
+
+| Method Name | Request Type | Response Type | Description |
+| ----------- | ------------ | ------------- | ------------|
+| ReportObservationLog | [ReportObservationLogRequest](#api.v1.beta1.ReportObservationLogRequest) | [ReportObservationLogReply](#api.v1.beta1.ReportObservationLogReply) | Report a log of Observations for a Trial. The log consists of timestamp and value of metric. Katib store every log of metrics. You can see accuracy curve or other metric logs on UI. |
+| GetObservationLog | [GetObservationLogRequest](#api.v1.beta1.GetObservationLogRequest) | [GetObservationLogReply](#api.v1.beta1.GetObservationLogReply) | Get all log of Observations for a Trial. |
+| DeleteObservationLog | [DeleteObservationLogRequest](#api.v1.beta1.DeleteObservationLogRequest) | [DeleteObservationLogReply](#api.v1.beta1.DeleteObservationLogReply) | Delete all log of Observations for a Trial. |
+
+
 <a name="api.v1.beta1.EarlyStopping"></a>
 
 ### EarlyStopping
@@ -654,25 +666,10 @@ TODO: This feature is not yet fully implemented.
 | ----------- | ------------ | ------------- | ------------|
 
 
-<a name="api.v1.beta1.Manager"></a>
-
-### Manager
-Service for Main API for Katib
-For each RPC service, we define mapping to HTTP REST API method.
-The mapping includes the URL path, query parameters and request body.
-https://cloud.google.com/service-infrastructure/docs/service-management/reference/rpc/google.api#http
-
-| Method Name | Request Type | Response Type | Description |
-| ----------- | ------------ | ------------- | ------------|
-| ReportObservationLog | [ReportObservationLogRequest](#api.v1.beta1.ReportObservationLogRequest) | [ReportObservationLogReply](#api.v1.beta1.ReportObservationLogReply) | Report a log of Observations for a Trial. The log consists of timestamp and value of metric. Katib store every log of metrics. You can see accuracy curve or other metric logs on UI. |
-| GetObservationLog | [GetObservationLogRequest](#api.v1.beta1.GetObservationLogRequest) | [GetObservationLogReply](#api.v1.beta1.GetObservationLogReply) | Get all log of Observations for a Trial. |
-| DeleteObservationLog | [DeleteObservationLogRequest](#api.v1.beta1.DeleteObservationLogRequest) | [DeleteObservationLogReply](#api.v1.beta1.DeleteObservationLogReply) | Delete all log of Observations for a Trial. |
-
-
 <a name="api.v1.beta1.Suggestion"></a>
 
 ### Suggestion
-
+Suggestion service defines APIs to manage Katib Suggestion objects.
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|

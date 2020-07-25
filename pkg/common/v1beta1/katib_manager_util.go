@@ -26,7 +26,7 @@ import (
 
 type katibDBManagerClientAndConn struct {
 	Conn                 *grpc.ClientConn
-	KatibDBManagerClient api_pb.ManagerClient
+	KatibDBManagerClient api_pb.DBManagerClient
 }
 
 // GetDBManagerAddr returns address of Katib DB Manager
@@ -50,7 +50,7 @@ func getKatibDBManagerClientAndConn() (*katibDBManagerClientAndConn, error) {
 	}
 	kcc := &katibDBManagerClientAndConn{
 		Conn:                 conn,
-		KatibDBManagerClient: api_pb.NewManagerClient(conn),
+		KatibDBManagerClient: api_pb.NewDBManagerClient(conn),
 	}
 	return kcc, nil
 }

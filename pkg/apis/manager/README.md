@@ -1,8 +1,8 @@
-# Katib API
+# Katib GRPC API
 
 Katib offers the following APIs:
 
-- Manager service is an API for core component.
+- DBManager service is an API for DB services (in v1alpha3 named Manager service).
 - Suggestion service is an API for Suggestion services.
 - EarlyStopping service is an API for EarlyStopping services.
 
