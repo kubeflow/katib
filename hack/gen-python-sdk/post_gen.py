@@ -18,7 +18,7 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
         f.writelines(lines)
 
 
-def update_python_sdk(src, dest, version='v1beta1'):
+def update_python_sdk(src, dest, versions=('v1alpha3', 'v1beta1')):
     # tiny transformers to refine generated codes
     rewrite_rules = [
         lambda l: l.replace('import katib', 'from kubeflow import katib'),
@@ -39,8 +39,10 @@ def update_python_sdk(src, dest, version='v1beta1'):
     for src_dir, dest_dir in zip(src_dirs, dest_dirs):
         # remove previous generated files explicitly, in case of deprecated instances
         for file in os.listdir(dest_dir):
-            if version in file.lower():
-                os.remove(os.path.join(dest_dir, file))
+            for v in versions:
+                if v in file.lower():
+                    os.remove(os.path.join(dest_dir, file))
+                    break
         # fill latest generated files
         for file in os.listdir(src_dir):
             in_file = os.path.join(src_dir, file)
@@ -51,6 +53,4 @@ def update_python_sdk(src, dest, version='v1beta1'):
 
 
 if __name__ == '__main__':
-    update_python_sdk(src=sys.argv[1],
-                      dest=sys.argv[2],
-                      version='v1beta1' if len(sys.argv) < 4 else sys.argv[3])
+    update_python_sdk(src=sys.argv[1], dest=sys.argv[2])
