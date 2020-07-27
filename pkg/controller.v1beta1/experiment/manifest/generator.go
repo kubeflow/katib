@@ -3,6 +3,7 @@ package manifest
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,7 +13,7 @@ import (
 	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
-	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
 )
@@ -62,14 +63,8 @@ func (g *DefaultGenerator) GetSuggestionConfigData(algorithmName string) (map[st
 // GetRunSpecWithHyperParameters returns the specification for trial with hyperparameters.
 func (g *DefaultGenerator) GetRunSpecWithHyperParameters(experiment *experimentsv1beta1.Experiment, trialName, trialNamespace string, assignments []commonapiv1beta1.ParameterAssignment) (*unstructured.Unstructured, error) {
 
-	// Get string Trial template from Experiment spec
-	trialTemplate, err := g.GetTrialTemplate(experiment)
-	if err != nil {
-		return nil, err
-	}
-
 	// Apply parameters to Trial Template from assignment
-	replacedTemplate, err := g.applyParameters(trialTemplate, experiment.Spec.TrialTemplate.TrialParameters, assignments)
+	replacedTemplate, err := g.applyParameters(experiment, trialName, trialNamespace, assignments)
 	if err != nil {
 		return nil, err
 	}
@@ -86,26 +81,92 @@ func (g *DefaultGenerator) GetRunSpecWithHyperParameters(experiment *experiments
 	return runSpec, nil
 }
 
-func (g *DefaultGenerator) applyParameters(trialTemplate string, trialParams []experimentsv1beta1.TrialParameterSpec, assignments []commonapiv1beta1.ParameterAssignment) (string, error) {
-	// Number of parameters must be equal
-	if len(assignments) != len(trialParams) {
-		return "", fmt.Errorf("Number of Trial assignment from Suggestion: %v not equal to number Trial parameters from Experiment: %v", len(assignments), len(trialParams))
+func (g *DefaultGenerator) applyParameters(experiment *experimentsv1beta1.Experiment, trialName, trialNamespace string, assignments []commonapiv1beta1.ParameterAssignment) (string, error) {
+	// Get string Trial template from Experiment spec
+	trialTemplate, err := g.GetTrialTemplate(experiment)
+	if err != nil {
+		return "", err
 	}
+
+	trialSpec := experiment.Spec.TrialTemplate.TrialSpec
+	// If trialSpec is not defined in TrialTemplate, deserialize templateString to fetch it
+	if trialSpec == nil {
+		trialSpec, err = util.ConvertStringToUnstructured(trialTemplate)
+		if err != nil {
+			return "", fmt.Errorf("ConvertStringToUnstructured failed: %v", err)
+		}
+	}
+
 	// Convert parameter assignment to map key = parameter name, value = parameter value
 	assignmentsMap := make(map[string]string)
 	for _, assignment := range assignments {
 		assignmentsMap[assignment.Name] = assignment.Value
 	}
 
-	// Replacing parameters from Trial parameters
-	for _, parameter := range trialParams {
+	placeHolderToValueMap := make(map[string]string)
+	var metaRefKey, metaRefIndex string
+	nonMetaParamCount := 0
+	for _, param := range experiment.Spec.TrialTemplate.TrialParameters {
+		metaMatchRegex := regexp.MustCompile(consts.TrialTemplateMetaReplaceFormatRegex)
+		sub := metaMatchRegex.FindStringSubmatch(param.Reference)
+		// handle trial parameters which consume trial assignments
+		if len(sub) == 0 {
+			if value, ok := assignmentsMap[param.Reference]; ok {
+				placeHolderToValueMap[param.Name] = value
+				nonMetaParamCount += 1
+				continue
+			} else {
+				return "", fmt.Errorf("Unable to find parameter: %v in parameter assignment %v", param.Reference, assignmentsMap)
+			}
+		}
+		metaRefKey = sub[1]
 
-		if parameterValue, ok := assignmentsMap[parameter.Reference]; ok {
-			trialTemplate = strings.Replace(trialTemplate, fmt.Sprintf(consts.TrialTemplateReplaceFormat, parameter.Name), parameterValue, -1)
-		} else {
-			return "", fmt.Errorf("Unable to find parameter: %v in parameter assignment %v", parameter.Reference, assignmentsMap)
+		// handle trial parameters which consume trial meta data
+		// extract index (key) of Labels and Annotations if exists
+		if sub := regexp.MustCompile(consts.TrialTemplateMetaParseFormatRegex).FindStringSubmatch(metaRefKey); len(sub) > 0 {
+			if len(sub) != 3 {
+				return "", fmt.Errorf("illegal reference of trial metadata: %v", param.Reference)
+			}
+			metaRefKey = sub[1]
+			metaRefIndex = sub[2]
+		}
+		// fetch metadata value
+		switch metaRefKey {
+		case consts.TrialTemplateMetaKeyOfName:
+			placeHolderToValueMap[param.Name] = trialName
+		case consts.TrialTemplateMetaKeyOfNamespace:
+			placeHolderToValueMap[param.Name] = trialNamespace
+		case consts.TrialTemplateMetaKeyOfKind:
+			placeHolderToValueMap[param.Name] = trialSpec.GetKind()
+		case consts.TrialTemplateMetaKeyOfAPIVersion:
+			placeHolderToValueMap[param.Name] = trialSpec.GetAPIVersion()
+		case consts.TrialTemplateMetaKeyOfAnnotations:
+			if value, ok := trialSpec.GetAnnotations()[metaRefIndex]; !ok {
+				return "", fmt.Errorf("illegal reference of trial metadata: %v; failed to fetch Annotation: %v", param.Reference, metaRefIndex)
+			} else {
+				placeHolderToValueMap[param.Name] = value
+			}
+		case consts.TrialTemplateMetaKeyOfLabels:
+			if value, ok := trialSpec.GetLabels()[metaRefIndex]; !ok {
+				return "", fmt.Errorf("illegal reference of trial metadata: %v; failed to fetch Label: %v", param.Reference, metaRefIndex)
+			} else {
+				placeHolderToValueMap[param.Name] = value
+			}
+		default:
+			return "", fmt.Errorf("illegal reference of trial metadata: %v", param.Reference)
 		}
 	}
+
+	// Number of parameters must be equal
+	if len(assignments) != nonMetaParamCount {
+		return "", fmt.Errorf("Number of TrialAssignment: %v != number of nonMetaTrialParameters in TrialSpec: %v", len(assignments), nonMetaParamCount)
+	}
+
+	// Replacing placeholders with parameter values
+	for placeHolder, paramValue := range placeHolderToValueMap {
+		trialTemplate = strings.Replace(trialTemplate, fmt.Sprintf(consts.TrialTemplateParamReplaceFormat, placeHolder), paramValue, -1)
+	}
+
 	return trialTemplate, nil
 }
 

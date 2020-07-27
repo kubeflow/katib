@@ -231,15 +231,15 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 		trialParametersRefs[parameter.Reference] = true
 
 		// Check if trialParameters contains all substitution for Trial template
-		if strings.Index(trialTemplateStr, fmt.Sprintf(consts.TrialTemplateReplaceFormat, parameter.Name)) == -1 {
+		if strings.Index(trialTemplateStr, fmt.Sprintf(consts.TrialTemplateParamReplaceFormat, parameter.Name)) == -1 {
 			return fmt.Errorf("Parameter name: %v in spec.trialParameters not found in spec.trialTemplate: %v", parameter.Name, trialTemplateStr)
 		}
 
-		trialTemplateStr = strings.Replace(trialTemplateStr, fmt.Sprintf(consts.TrialTemplateReplaceFormat, parameter.Name), "test-value", -1)
+		trialTemplateStr = strings.Replace(trialTemplateStr, fmt.Sprintf(consts.TrialTemplateParamReplaceFormat, parameter.Name), "test-value", -1)
 	}
 
 	// Check if Trial template contains all substitution for trialParameters
-	substitutionRegex := regexp.MustCompile(consts.TrialTemplateReplaceFormatRegex)
+	substitutionRegex := regexp.MustCompile(consts.TrialTemplateParamReplaceFormatRegex)
 	notReplacedParams := substitutionRegex.FindAllString(trialTemplateStr, -1)
 	if len(notReplacedParams) != 0 {
 		return fmt.Errorf("Parameters: %v in spec.trialTemplate not found in spec.trialParameters: %v", notReplacedParams, trialTemplate.TrialParameters)

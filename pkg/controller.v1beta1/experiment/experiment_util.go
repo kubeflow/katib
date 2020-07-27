@@ -2,6 +2,7 @@ package experiment
 
 import (
 	"context"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 
@@ -59,6 +60,15 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1beta
 	}
 	return nil
 
+}
+
+func buildTrialMetaForRunSpec(trial *trialsv1beta1.Trial) map[string]string {
+	return map[string]string{
+		consts.TrialTemplateMetaKeyOfName:       trial.Name,
+		consts.TrialTemplateMetaKeyOfNamespace:  trial.Namespace,
+		consts.TrialTemplateMetaKeyOfKind:       trial.Kind,
+		consts.TrialTemplateMetaKeyOfAPIVersion: trial.APIVersion,
+	}
 }
 
 func needUpdateFinalizers(exp *experimentsv1beta1.Experiment) (bool, []string) {

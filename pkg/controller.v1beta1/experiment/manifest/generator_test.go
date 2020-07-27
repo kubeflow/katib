@@ -2,6 +2,7 @@ package manifest
 
 import (
 	"errors"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"math"
 	"reflect"
 	"testing"
@@ -9,10 +10,10 @@ import (
 	"github.com/golang/mock/gomock"
 	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
-	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	katibclientmock "github.com/kubeflow/katib/pkg/mock/v1beta1/util/katibclient"
 	batchv1 "k8s.io/api/batch/v1"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
@@ -49,6 +50,12 @@ func TestGetRunSpecWithHP(t *testing.T) {
 								"/opt/mxnet-mnist/mnist.py",
 								"--lr=0.05",
 								"--num-layers=5",
+							},
+							Env: []v1.EnvVar{
+								{Name: consts.TrialTemplateMetaKeyOfName, Value: "trial-name"},
+								{Name: consts.TrialTemplateMetaKeyOfNamespace, Value: "trial-namespace"},
+								{Name: consts.TrialTemplateMetaKeyOfKind, Value: "Job"},
+								{Name: consts.TrialTemplateMetaKeyOfAPIVersion, Value: "batch/v1"},
 							},
 						},
 					},
@@ -330,6 +337,12 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 								"--lr=${trialParameters.learningRate}",
 								"--num-layers=${trialParameters.numberLayers}",
 							},
+							Env: []v1.EnvVar{
+								{Name: consts.TrialTemplateMetaKeyOfName, Value: "${trialParameters.trialName}"},
+								{Name: consts.TrialTemplateMetaKeyOfNamespace, Value: "${trialParameters.trialNamespace}"},
+								{Name: consts.TrialTemplateMetaKeyOfKind, Value: "${trialParameters.jobKind}"},
+								{Name: consts.TrialTemplateMetaKeyOfAPIVersion, Value: "${trialParameters.jobAPIVersion}"},
+							},
 						},
 					},
 				},
@@ -354,6 +367,26 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 						Name:        "numberLayers",
 						Description: "Number of layers",
 						Reference:   "num-layers",
+					},
+					{
+						Name:        "trialName",
+						Description: "name of current trial",
+						Reference:   "${trialSpec.Name}",
+					},
+					{
+						Name:        "trialNamespace",
+						Description: "namespace of current trial",
+						Reference:   "${trialSpec.Namespace}",
+					},
+					{
+						Name:        "jobKind",
+						Description: "job kind of current trial",
+						Reference:   "${trialSpec.Kind}",
+					},
+					{
+						Name:        "jobAPIVersion",
+						Description: "job API Version of current trial",
+						Reference:   "${trialSpec.APIVersion}",
 					},
 				},
 			},

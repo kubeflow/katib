@@ -140,12 +140,25 @@ const (
 	// LabelTrialTemplateConfigMapValue is the label value for the Trial templates configMap
 	LabelTrialTemplateConfigMapValue = "katib-trial-templates"
 
-	// TrialTemplateReplaceFormat is the format to make substitution in Trial template from Names in TrialParameters
+	// TrialTemplateParamReplaceFormat is the format to make substitution in Trial template from Names in TrialParameters
 	// E.g if Name = learningRate, according value in Trial template must be ${trialParameters.learningRate}
-	TrialTemplateReplaceFormat = "${trialParameters.%v}"
+	TrialTemplateParamReplaceFormat = "${trialParameters.%v}"
 
-	// TrialTemplateReplaceFormatRegex is the regex for Trial template format
-	TrialTemplateReplaceFormatRegex = "\\{trialParameters\\..+?\\}"
+	// TrialTemplateParamReplaceFormatRegex is the regex for TrialParameters format in Trial template
+	TrialTemplateParamReplaceFormatRegex = "\\$\\{trialParameters\\..+?\\}"
+
+	// TrialTemplateMetaReplaceFormatRegex is the regex for TrialMetadata format in Trial template
+	TrialTemplateMetaReplaceFormatRegex = "\\$\\{trialSpec\\.(.+?)\\}"
+	// TrialTemplateMetaParseFormatRegex is the regex to parse the index of Annotations and Labels from meta key
+	TrialTemplateMetaParseFormatRegex = "(.+)\\[(.+)]"
+
+	// valid keys of trial metadata which are used to make substitution in Trial template
+	TrialTemplateMetaKeyOfName        = "Name"
+	TrialTemplateMetaKeyOfNamespace   = "Namespace"
+	TrialTemplateMetaKeyOfKind        = "Kind"
+	TrialTemplateMetaKeyOfAPIVersion  = "APIVersion"
+	TrialTemplateMetaKeyOfAnnotations = "Annotations"
+	TrialTemplateMetaKeyOfLabels      = "Labels"
 
 	// UnavailableMetricValue is the value when metric was not reported or metric value can't be converted to float64
 	UnavailableMetricValue = "unavailable"
