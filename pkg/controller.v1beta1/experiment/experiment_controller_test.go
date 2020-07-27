@@ -158,12 +158,9 @@ func TestReconcile(t *testing.T) {
 		consts.LabelExperimentName: experimentName,
 	}
 	g.Eventually(func() int {
-		c.List(context.TODO(), &client.ListOptions{
-			LabelSelector: label.AsSelector(),
-		}, trials)
+		c.List(context.TODO(), &client.ListOptions{LabelSelector: label.AsSelector()}, trials)
 		return len(trials.Items)
-	}, timeout).
-		Should(gomega.Equal(2))
+	}, timeout).Should(gomega.Equal(2))
 
 	// Delete the experiment object
 	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())

@@ -141,7 +141,8 @@ func TestReconcile(t *testing.T) {
 	// Expect that deployment with appropriate name and image is created
 	g.Eventually(func() bool {
 		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, suggestionDeploy)
-		return len(suggestionDeploy.Spec.Template.Spec.Containers) > 0 && suggestionDeploy.Spec.Template.Spec.Containers[0].Image == suggestionImage
+		return len(suggestionDeploy.Spec.Template.Spec.Containers) > 0 &&
+			suggestionDeploy.Spec.Template.Spec.Containers[0].Image == suggestionImage
 	}, timeout).Should(gomega.BeTrue())
 
 	// Expect that service with appropriate name is created
