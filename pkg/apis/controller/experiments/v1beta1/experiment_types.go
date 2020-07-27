@@ -157,11 +157,21 @@ const (
 	ExperimentFailed     ExperimentConditionType = "Failed"
 )
 
+// ResumePolicyType describes how the experiment should be resumed.
+// Only one of the following resume policies may be specified.
+// If none of the following policies is specified, the default one is LongRunning.
 type ResumePolicyType string
 
 const (
+	// NeverResume indicates that experiment can't be resumed.
 	NeverResume ResumePolicyType = "Never"
+	// LongRunning indicates that experiment's suggestion resources
+	// (deployment and service) are always running.
 	LongRunning ResumePolicyType = "LongRunning"
+	// FromVolume indicates that volume is attached to experiment's
+	// suggestion. Suggestion data can be retained in the volume.
+	// When experiment is succeeded suggestion deployment and service are deleted.
+	FromVolume ResumePolicyType = "FromVolume"
 )
 
 type ParameterSpec struct {

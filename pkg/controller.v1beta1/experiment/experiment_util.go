@@ -5,6 +5,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/errors"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -12,7 +13,6 @@ import (
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
-	suggestionController "github.com/kubeflow/katib/pkg/controller.v1beta1/suggestion"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 )
 
@@ -103,7 +103,8 @@ func (r *ReconcileExperiment) updateFinalizers(instance *experimentsv1beta1.Expe
 	}
 }
 
-func (r *ReconcileExperiment) terminateSuggestion(instance *experimentsv1beta1.Experiment) error {
+func (r *ReconcileExperiment) cleanupSuggestionResources(instance *experimentsv1beta1.Experiment) error {
+	logger := log.WithValues("Suggestion", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	original := &suggestionsv1beta1.Suggestion{}
 	err := r.Get(context.TODO(),
 		types.NamespacedName{Namespace: instance.GetNamespace(), Name: instance.GetName()}, original)
@@ -113,15 +114,53 @@ func (r *ReconcileExperiment) terminateSuggestion(instance *experimentsv1beta1.E
 		}
 		return err
 	}
+
 	// If Suggestion is failed or Suggestion is Succeeded, not needed to terminate Suggestion
 	if original.IsFailed() || original.IsSucceeded() {
 		return nil
 	}
-	log.Info("Start terminating suggestion")
+
+	logger.Info("Start cleanup suggestion resources")
 	suggestion := original.DeepCopy()
-	msg := "Suggestion is succeeded"
-	suggestion.MarkSuggestionStatusSucceeded(suggestionController.SuggestionSucceededReason, msg)
-	log.Info("Mark suggestion succeeded")
+
+	reason := "Experiment is succeeded"
+	// If ResumePolicy = Never, mark suggestion status succeeded, can't be restarted
+	if instance.Spec.ResumePolicy == experimentsv1beta1.NeverResume {
+		msg := "Suggestion is succeeded, can't be restarted"
+		suggestion.MarkSuggestionStatusSucceeded(reason, msg)
+		logger.Info("Mark suggestion succeeded, can't be restarted")
+
+		// If ResumePolicy = FromVolume, mark suggestion status succeeded, can be restarted
+	} else if instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
+		msg := "Suggestion is succeeded, suggestion volume is not deleted, can be restarted"
+		suggestion.MarkSuggestionStatusSucceeded(reason, msg)
+		logger.Info("Mark suggestion succeeded, can be restarted")
+	}
+
+	if err := r.UpdateSuggestionStatus(suggestion); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *ReconcileExperiment) restartSuggestion(instance *experimentsv1beta1.Experiment) error {
+	logger := log.WithValues("Suggestion", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+	original := &suggestionsv1beta1.Suggestion{}
+	err := r.Get(context.TODO(),
+		types.NamespacedName{Namespace: instance.GetNamespace(), Name: instance.GetName()}, original)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+
+	logger.Info("Suggestion is restarting, suggestion Running status is false")
+	suggestion := original.DeepCopy()
+	reason := "Experiment is restarting"
+	msg := "Suggestion is not running"
+	// Mark suggestion status not running because experiment is restarting and suggestion deployment is not ready
+	suggestion.MarkSuggestionStatusRunning(corev1.ConditionFalse, reason, msg)
 
 	if err := r.UpdateSuggestionStatus(suggestion); err != nil {
 		return err

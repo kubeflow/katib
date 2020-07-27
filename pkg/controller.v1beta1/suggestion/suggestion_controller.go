@@ -95,6 +95,15 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	if err != nil {
 		return err
 	}
+
+	err = c.Watch(&source.Kind{Type: &corev1.PersistentVolumeClaim{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &suggestionsv1beta1.Suggestion{},
+	})
+	if err != nil {
+		return err
+	}
+
 	log.Info("Suggestion controller created")
 	return nil
 }
@@ -134,7 +143,7 @@ func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{}, err
 	}
 	instance := oldS.DeepCopy()
-	// If ResumePolicyType is LongRunning, suggestion status will never be succeeded.
+	// Suggestion will be succeeded if ResumePolicy = Never or ResumePolicy = FromVolume
 	if instance.IsSucceeded() {
 		err = r.deleteDeployment(instance)
 		if err != nil {
@@ -160,7 +169,7 @@ func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Re
 				consts.ReconcileErrorReason, err.Error())
 
 			// Try updating just the status condition when possible
-			// Status conditions might need to be  updated even in error
+			// Status conditions might need to be updated even in error
 			// Ignore all other status fields else it will be inconsistent during retry
 			_ = r.updateStatusCondition(instance, oldS)
 			logger.Error(err, "Reconcile Suggestion error")
@@ -174,8 +183,25 @@ func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Re
 	return reconcile.Result{}, nil
 }
 
+// ReconcileSuggestion is the main reconcile loop for suggestion CR.
 func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.Suggestion) error {
 	logger := log.WithValues("Suggestion", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+
+	// If ResumePolicy = FromVolume volume is reconciled for suggestion
+	if instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
+		pvc, pv, err := r.DesiredVolume(instance)
+		if err != nil {
+			return err
+		}
+
+		// Reconcile PVC and PV
+		_, _, err = r.reconcileVolume(pvc, pv)
+		if err != nil {
+			return err
+		}
+
+	}
+
 	service, err := r.DesiredService(instance)
 	if err != nil {
 		return err
@@ -217,6 +243,8 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 		client.MatchingLabels(util.TrialLabels(experiment)), trials); err != nil {
 		return err
 	}
+	// TODO (andreyvelich): Do we want to run ValidateAlgorithmSettings when Experiment is restarting?
+	// Currently it is running.
 	if !instance.IsRunning() {
 		if err = r.ValidateAlgorithmSettings(instance, experiment); err != nil {
 			logger.Error(err, "Marking suggestion failed as algorithm settings validation failed")
@@ -226,7 +254,7 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 			return nil
 		}
 		msg := "Suggestion is running"
-		instance.MarkSuggestionStatusRunning(SuggestionRunningReason, msg)
+		instance.MarkSuggestionStatusRunning(corev1.ConditionTrue, SuggestionRunningReason, msg)
 	}
 	logger.Info("Sync assignments", "suggestions", instance.Spec.Requests)
 	if err = r.SyncAssignments(instance, experiment, trials.Items); err != nil {

@@ -12,6 +12,8 @@ rules:
       - secrets
       - events
       - namespaces
+      - persistentvolumes
+      - persistentvolumeclaims
     verbs:
       - "*"
   - apiGroups:

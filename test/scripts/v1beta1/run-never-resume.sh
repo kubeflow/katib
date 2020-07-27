@@ -54,11 +54,11 @@ cd ${GO_DIR}/test/e2e/v1beta1
 
 echo "Running e2e test for never resume experiment"
 export KUBECONFIG=$HOME/.kube/config
-./run-e2e-experiment ../../../examples/v1beta1/never-resume-example.yaml
+./run-e2e-experiment ../../../examples/v1beta1/resume-experiment/never-resume.yaml
 
-kubectl -n kubeflow describe suggestion never-resume-example
+kubectl -n kubeflow describe suggestion never-resume
 
-kubectl -n kubeflow describe experiment never-resume-example
-kubectl -n kubeflow delete experiment never-resume-example
+kubectl -n kubeflow describe experiment never-resume
+kubectl -n kubeflow delete experiment never-resume
 
 exit 0

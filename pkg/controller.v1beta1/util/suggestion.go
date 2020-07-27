@@ -7,11 +7,23 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
+// GetAlgorithmDeploymentName returns name for the suggestion's deployment
 func GetAlgorithmDeploymentName(s *suggestionsv1beta1.Suggestion) string {
 	return s.Name + "-" + s.Spec.AlgorithmName
 }
 
+// GetAlgorithmServiceName returns name for the suggestion's service
 func GetAlgorithmServiceName(s *suggestionsv1beta1.Suggestion) string {
+	return s.Name + "-" + s.Spec.AlgorithmName
+}
+
+// GetAlgorithmPersistentVolumeName returns name for the suggestion's PV
+func GetAlgorithmPersistentVolumeName(s *suggestionsv1beta1.Suggestion) string {
+	return s.Name + "-" + s.Spec.AlgorithmName + "-" + s.Namespace
+}
+
+// GetAlgorithmPersistentVolumeClaimName returns name for the suggestion's PVC
+func GetAlgorithmPersistentVolumeClaimName(s *suggestionsv1beta1.Suggestion) string {
 	return s.Name + "-" + s.Spec.AlgorithmName
 }
 

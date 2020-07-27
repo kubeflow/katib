@@ -3,6 +3,8 @@ package consts
 import (
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
+
 	"github.com/kubeflow/katib/pkg/util/v1beta1/env"
 )
 
@@ -147,6 +149,25 @@ const (
 
 	// UnavailableMetricValue is the value when metric was not reported or metric value can't be converted to float64
 	UnavailableMetricValue = "unavailable"
+
+	// DefaultSuggestionVolumeLocalPathPrefix is the default cluster local path prefix for suggestion volume
+	// Full local path = /tmp/katib/suggestions/<suggestion-name>-<suggestion-namespace>
+	DefaultSuggestionVolumeLocalPathPrefix = "/tmp/katib/suggestions/"
+
+	// DefaultSuggestionStorageClassName is the default value for suggestion's volume storage class name
+	DefaultSuggestionStorageClassName = "katib-suggestion"
+
+	// DefaultSuggestionVolumeAccessMode is the default value for suggestion's volume access mode
+	DefaultSuggestionVolumeAccessMode = corev1.ReadWriteOnce
+
+	// DefaultSuggestionVolumeStorage is the default value for suggestion's volume storage
+	DefaultSuggestionVolumeStorage = "1Gi"
+
+	// ContainerSuggestionVolumeName is the volume name that mounted on suggestion container
+	ContainerSuggestionVolumeName = "suggestion-volume"
+
+	// DefaultContainerSuggestionVolumeMountPath is the default mount path in suggestion container
+	DefaultContainerSuggestionVolumeMountPath = "/opt/katib/data"
 )
 
 var (

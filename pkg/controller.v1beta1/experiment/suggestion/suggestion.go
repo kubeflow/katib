@@ -66,6 +66,7 @@ func (g *General) createSuggestion(instance *experimentsv1beta1.Experiment, sugg
 		Spec: suggestionsv1beta1.SuggestionSpec{
 			AlgorithmName: instance.Spec.Algorithm.AlgorithmName,
 			Requests:      suggestionRequests,
+			ResumePolicy:  instance.Spec.ResumePolicy,
 		},
 	}
 

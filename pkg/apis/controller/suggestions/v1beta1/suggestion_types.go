@@ -21,13 +21,19 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
+
+	experiment "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 )
 
-// SuggestionSpec defines the desired state of Suggestion
+// SuggestionSpec defines the desired state of suggestion.
 type SuggestionSpec struct {
+	// Name of the algorithm that suggestion is used.
 	AlgorithmName string `json:"algorithmName"`
 	// Number of suggestions requested
 	Requests int32 `json:"requests,omitempty"`
+	// Describes resuming policy which usually take effect after experiment terminated.
+	// Default value is LongRunning.
+	ResumePolicy experiment.ResumePolicyType `json:"resumePolicy,omitempty"`
 }
 
 // SuggestionStatus defines the observed state of Suggestion
