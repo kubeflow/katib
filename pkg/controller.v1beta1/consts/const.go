@@ -3,6 +3,8 @@ package consts
 import (
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
+
 	"github.com/kubeflow/katib/pkg/util/v1beta1/env"
 )
 
