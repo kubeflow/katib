@@ -21,53 +21,68 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
+
 	"github.com/onsi/gomega"
 	"golang.org/x/net/context"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
+	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
+	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/suggestion/composer"
+	suggestionclientmock "github.com/kubeflow/katib/pkg/mock/v1beta1/suggestion/suggestionclient"
 )
 
-var c client.Client
-
-var expectedRequest = reconcile.Request{NamespacedName: types.NamespacedName{Name: "foo", Namespace: "default"}}
-var depKey = types.NamespacedName{Name: "foo-random", Namespace: "default"}
-
-const timeout = time.Second * 5
+const (
+	suggestionName  = "test-suggestion"
+	resourceName    = "test-suggestion-random"
+	namespace       = "default"
+	suggestionImage = "test-image"
+	timeout         = time.Second * 40
+)
 
 func init() {
 	logf.SetLogger(logf.ZapLogger(true))
 }
 
+func TestAdd(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	mgr, err := manager.New(cfg, manager.Options{})
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// Test - Try to add suggestion controller to the manager
+	g.Expect(Add(mgr)).NotTo(gomega.HaveOccurred())
+}
+
 func TestReconcile(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
-	instance := &suggestionsv1beta1.Suggestion{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "foo",
-			Namespace: "default",
-		},
-		Spec: suggestionsv1beta1.SuggestionSpec{
-			Requests:      1,
-			AlgorithmName: "random",
-		},
-	}
-	configMap := newKatibConfigMapInstance()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockSuggestionClient := suggestionclientmock.NewMockSuggestionClient(mockCtrl)
 
 	// Setup the Manager and Controller.  Wrap the Controller Reconcile function so it writes each request to a
 	// channel when it is finished.
 	mgr, err := manager.New(cfg, manager.Options{})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	c = mgr.GetClient()
+	c := mgr.GetClient()
 
-	recFn, requests := SetupTestReconcile(newReconciler(mgr))
+	r := &ReconcileSuggestion{
+		Client:           mgr.GetClient(),
+		scheme:           mgr.GetScheme(),
+		SuggestionClient: mockSuggestionClient,
+		Composer:         composer.New(mgr),
+	}
+
+	recFn := SetupTestReconcile(r)
 	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
 
 	stopMgr, mgrStopped := StartTestManager(mgr, g)
@@ -77,40 +92,158 @@ func TestReconcile(t *testing.T) {
 		mgrStopped.Wait()
 	}()
 
-	// Create the Suggestion object and expect the Reconcile and Deployment to be created
-	err = c.Create(context.TODO(), instance)
-	g.Expect(err).NotTo(gomega.HaveOccurred())
-	err = c.Create(context.TODO(), configMap)
-	g.Expect(err).NotTo(gomega.HaveOccurred())
-	// The instance object may not be a valid object because it might be missing some required fields.
-	// Please modify the instance object by adding required fields and then remove the following if statement.
-	if apierrors.IsInvalid(err) {
-		t.Logf("failed to create object, got an invalid object error: %v", err)
-		return
+	mockSuggestionClient.EXPECT().ValidateAlgorithmSettings(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockSuggestionClient.EXPECT().SyncAssignments(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+
+	instance := &suggestionsv1beta1.Suggestion{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      suggestionName,
+			Namespace: namespace,
+		},
+		Spec: suggestionsv1beta1.SuggestionSpec{
+			Requests:      1,
+			AlgorithmName: "random",
+			ResumePolicy:  experimentsv1beta1.FromVolume,
+		},
 	}
-	g.Expect(err).NotTo(gomega.HaveOccurred())
-	defer c.Delete(context.TODO(), instance)
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 
-	deploy := &appsv1.Deployment{}
-	g.Eventually(func() error { return c.Get(context.TODO(), depKey, deploy) }, timeout).
-		Should(gomega.Succeed())
+	trial := &trialsv1beta1.Trial{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "trial",
+			Namespace: namespace,
+			Labels: map[string]string{
+				consts.LabelExperimentName: suggestionName,
+			},
+		},
+	}
 
-	// Delete the Deployment and expect Reconcile to be called for Deployment deletion
-	g.Expect(c.Delete(context.TODO(), deploy)).NotTo(gomega.HaveOccurred())
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
-	g.Eventually(func() error { return c.Get(context.TODO(), depKey, deploy) }, timeout).
-		Should(gomega.Succeed())
+	experiment := &experimentsv1beta1.Experiment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      suggestionName,
+			Namespace: namespace,
+		},
+	}
 
-	// Manually delete Deployment since GC isn't enabled in the test control plane
-	g.Eventually(func() error { return c.Delete(context.TODO(), deploy) }, timeout).
-		Should(gomega.MatchError("deployments.apps \"foo-random\" not found"))
+	configMap := newKatibConfigMapInstance()
+
+	// Test 1 - Regural suggestion run
+	// Create the suggestion object and expect the service, deployment, pvc and pv is created
+	g.Expect(c.Create(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+	// Create ConfigMap with suggestion data
+	g.Expect(c.Create(context.TODO(), configMap)).NotTo(gomega.HaveOccurred())
+	// Create experiment object
+	g.Expect(c.Create(context.TODO(), experiment)).NotTo(gomega.HaveOccurred())
+	// Create trial object
+	g.Expect(c.Create(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
+
+	suggestionDeploy := &appsv1.Deployment{}
+
+	// Expect that deployment with appropriate name and image is created
+	g.Eventually(func() bool {
+		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, suggestionDeploy)
+		return len(suggestionDeploy.Spec.Template.Spec.Containers) > 0 && suggestionDeploy.Spec.Template.Spec.Containers[0].Image == suggestionImage
+	}, timeout).Should(gomega.BeTrue())
+
+	// Expect that service with appropriate name is created
+	g.Eventually(func() error {
+		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, &corev1.Service{})
+	}, timeout).Should(gomega.Succeed())
+
+	// Expect that PV with appropriate name is created
+	g.Eventually(func() error {
+		return c.Get(context.TODO(), types.NamespacedName{Name: resourceName + "-" + namespace}, &corev1.PersistentVolume{})
+	}, timeout).Should(gomega.Succeed())
+
+	// Expect that PVC with appropriate name is created
+	g.Eventually(func() error {
+		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, &corev1.PersistentVolumeClaim{})
+	}, timeout).Should(gomega.Succeed())
+
+	// Manually change ready deployment status
+	suggestionDeploy.Status = appsv1.DeploymentStatus{
+		Conditions: []appsv1.DeploymentCondition{
+			{
+				Type:   appsv1.DeploymentAvailable,
+				Status: corev1.ConditionTrue,
+			},
+		},
+	}
+
+	g.Expect(c.Status().Update(context.TODO(), suggestionDeploy)).NotTo(gomega.HaveOccurred())
+
+	// Expect that suggestion status is running
+	suggestion := &suggestionsv1beta1.Suggestion{}
+	g.Eventually(func() bool {
+		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, suggestion)
+		return len(suggestion.Status.Conditions) > 0 && suggestion.IsRunning()
+	}, timeout).Should(gomega.BeTrue())
+
+	// Manually update suggestion status to succeeded
+	suggestion.MarkSuggestionStatusSucceeded("test-reason", "test-message")
+	g.Expect(c.Status().Update(context.TODO(), suggestion)).NotTo(gomega.HaveOccurred())
+
+	// Expect that suggestion status is succeeded, is not running and deployment is not ready
+	g.Eventually(func() bool {
+		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, suggestion)
+		return len(suggestion.Status.Conditions) > 0 && !suggestion.IsRunning() && !suggestion.IsDeploymentReady() && suggestion.IsSucceeded()
+	}, timeout).Should(gomega.BeTrue())
+
+	// Expect that deployment and service is deleted
+	g.Eventually(func() bool {
+		return errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, &appsv1.Deployment{})) &&
+			errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, &corev1.Service{}))
+	}, timeout).Should(gomega.BeTrue())
+
+	// Delete the suggestion object
+	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+
+	// Expect that suggestion is deleted
+	g.Eventually(func() bool {
+		return errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, &suggestionsv1beta1.Suggestion{}))
+	}, timeout).Should(gomega.BeTrue())
+
+	oldS := &suggestionsv1beta1.Suggestion{
+		Status: suggestionsv1beta1.SuggestionStatus{
+			SuggestionCount: 1,
+			Conditions: []suggestionsv1beta1.SuggestionCondition{
+				{
+					Type:   suggestionsv1beta1.SuggestionFailed,
+					Status: corev1.ConditionTrue,
+				},
+			},
+		},
+	}
+
+	newS := &suggestionsv1beta1.Suggestion{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "status-test",
+			Namespace: namespace,
+		},
+		Status: suggestionsv1beta1.SuggestionStatus{
+			SuggestionCount: 1,
+			Conditions: []suggestionsv1beta1.SuggestionCondition{
+				{
+					Type:   suggestionsv1beta1.SuggestionFailed,
+					Status: corev1.ConditionTrue,
+				},
+			},
+		},
+	}
+
+	// Test 2 - Update status for empty experiment object
+	g.Expect(r.updateStatus(&suggestionsv1beta1.Suggestion{}, oldS)).To(gomega.HaveOccurred())
+
+	// Test 3 - Update status condition
+	g.Expect(r.updateStatusCondition(newS, oldS)).NotTo(gomega.HaveOccurred())
+
+	// Test 4 - Update status condition for empty experiment object
+	g.Expect(r.updateStatusCondition(&suggestionsv1beta1.Suggestion{}, oldS)).To(gomega.HaveOccurred())
 
 }
 
 func newKatibConfigMapInstance() *corev1.ConfigMap {
 	suggestionConfig := map[string]map[string]string{
-		"random": {"image": "test"},
+		"random": {"image": suggestionImage},
 	}
 	b, _ := json.Marshal(suggestionConfig)
 	return &corev1.ConfigMap{

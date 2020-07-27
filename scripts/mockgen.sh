@@ -48,3 +48,5 @@ echo "Generating v1beta1 ManagerClient in Trial Controller..."
 mockgen -package mock -destination pkg/mock/v1beta1/trial/managerclient/katibmanager.go github.com/kubeflow/katib/pkg/controller.v1beta1/trial/managerclient ManagerClient
 echo "Generating v1beta1 Suggestion in Experiment Controller..."
 mockgen -package mock -destination pkg/mock/v1beta1/experiment/suggestion/suggestion.go github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/suggestion Suggestion
+echo "Generating v1beta1 SuggestionClient in Suggestion Controller..."
+mockgen -package mock -destination pkg/mock/v1beta1/suggestion/suggestionclient/suggestionclient.go github.com/kubeflow/katib/pkg/controller.v1beta1/suggestion/suggestionclient SuggestionClient
