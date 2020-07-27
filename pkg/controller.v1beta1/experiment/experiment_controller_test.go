@@ -51,10 +51,19 @@ type statusMatcher struct {
 func (statusM statusMatcher) Matches(x interface{}) bool {
 	// Cast interface to suggestion object
 	s := x.(*suggestionsv1beta1.Suggestion)
+
+	isMatch := false
 	// Verify that status is correct
-	return (s.Status.Conditions[0].Type == statusM.x.Status.Conditions[0].Type &&
-		s.Status.Conditions[0].Reason == statusM.x.Status.Conditions[0].Reason &&
-		s.Status.Conditions[0].Message == statusM.x.Status.Conditions[0].Message)
+	// statusM.x contains condition on 0 element that s must have
+	for _, cond := range s.Status.Conditions {
+		if cond.Type == statusM.x.Status.Conditions[0].Type &&
+			cond.Reason == statusM.x.Status.Conditions[0].Reason &&
+			cond.Message == statusM.x.Status.Conditions[0].Message {
+			isMatch = true
+		}
+	}
+
+	return isMatch
 }
 
 func (statusM statusMatcher) String() string {
@@ -263,21 +272,21 @@ func TestCompleteExperiment(t *testing.T) {
 	g.Eventually(func() bool {
 		experiment := &experimentsv1beta1.Experiment{}
 		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: nameRestartNo}, experiment)
-		return len(experiment.Status.Conditions) > 1 && experiment.Status.Conditions[1].Type == experimentsv1beta1.ExperimentSucceeded
+		return experiment.IsSucceeded()
 	}, timeout).Should(gomega.BeTrue())
 
 	// Check that experiment with FromVolume is succeeded
 	g.Eventually(func() bool {
 		experiment := &experimentsv1beta1.Experiment{}
 		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: nameRestartYes}, experiment)
-		return len(experiment.Status.Conditions) > 1 && experiment.Status.Conditions[1].Type == experimentsv1beta1.ExperimentSucceeded
+		return experiment.IsSucceeded()
 	}, timeout).Should(gomega.BeTrue())
 
 	// Check that experiment with FromVolume is restarting
 	g.Eventually(func() bool {
 		experiment := &experimentsv1beta1.Experiment{}
 		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: nameRestartYes}, experiment)
-		return len(experiment.Status.Conditions) > 1 && experiment.Status.Conditions[1].Type == experimentsv1beta1.ExperimentRestarting
+		return experiment.IsRestarting()
 	}, timeout).Should(gomega.BeTrue())
 
 }

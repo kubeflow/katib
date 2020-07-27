@@ -175,7 +175,7 @@ func TestReconcile(t *testing.T) {
 	suggestion := &suggestionsv1beta1.Suggestion{}
 	g.Eventually(func() bool {
 		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, suggestion)
-		return len(suggestion.Status.Conditions) > 0 && suggestion.IsRunning()
+		return suggestion.IsRunning()
 	}, timeout).Should(gomega.BeTrue())
 
 	// Manually update suggestion status to succeeded
@@ -185,7 +185,7 @@ func TestReconcile(t *testing.T) {
 	// Expect that suggestion status is succeeded, is not running and deployment is not ready
 	g.Eventually(func() bool {
 		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, suggestion)
-		return len(suggestion.Status.Conditions) > 0 && !suggestion.IsRunning() && !suggestion.IsDeploymentReady() && suggestion.IsSucceeded()
+		return !suggestion.IsRunning() && !suggestion.IsDeploymentReady() && suggestion.IsSucceeded()
 	}, timeout).Should(gomega.BeTrue())
 
 	// Expect that deployment and service is deleted
