@@ -47,13 +47,13 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 		return SuggestionConfig{}, errors.New("Failed to find suggestions config in configmap " + consts.KatibConfigMapName)
 	}
 
-	// Parse suggestion data to Suggestion Config
+	// Parse suggestion data to map where key = algorithm name, value = SuggestionConfig
 	suggestionsConfig := map[string]SuggestionConfig{}
 	if err := json.Unmarshal([]byte(config), &suggestionsConfig); err != nil {
 		return SuggestionConfig{}, err
 	}
 
-	// Try to find suggestion algorithm in suggestion data
+	// Try to find SuggestionConfig for the algorithm
 	suggestionConfigData, ok = suggestionsConfig[algorithmName]
 	if !ok {
 		return SuggestionConfig{}, errors.New("Failed to find algorithm " + algorithmName + " config in configmap " + consts.KatibConfigMapName)
@@ -72,34 +72,33 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 		suggestionConfigData.ImagePullPolicy = corev1.PullIfNotPresent
 	}
 
-	// Set default values for CPU, Memory and Disk
-	defaultCPURequest, _ := resource.ParseQuantity(consts.DefaultCPURequest)
-	defaultMemRequest, _ := resource.ParseQuantity(consts.DefaultMemRequest)
-	defaultDiskRequest, _ := resource.ParseQuantity(consts.DefaultDiskRequest)
-
-	defaultCPULimit, _ := resource.ParseQuantity(consts.DefaultCPULimit)
-	defaultMemLimit, _ := resource.ParseQuantity(consts.DefaultMemLimit)
-	defaultDiskLimit, _ := resource.ParseQuantity(consts.DefaultDiskLimit)
+	// If requests are empty create new map
+	if len(suggestionConfigData.Resource.Requests) == 0 {
+		suggestionConfigData.Resource.Requests = make(map[corev1.ResourceName]resource.Quantity)
+	}
 
 	// Get CPU, Memory and Disk Requests from config
 	cpuRequest := suggestionConfigData.Resource.Requests[corev1.ResourceCPU]
 	memRequest := suggestionConfigData.Resource.Requests[corev1.ResourceMemory]
 	diskRequest := suggestionConfigData.Resource.Requests[corev1.ResourceEphemeralStorage]
 
-	// If requests are empty create new map
-	if len(suggestionConfigData.Resource.Requests) == 0 {
-		suggestionConfigData.Resource.Requests = make(map[corev1.ResourceName]resource.Quantity)
-	}
-	// If resource is empty set default value
+	// If resource is empty set default value for CPU, Memory, Disk
 	if cpuRequest.IsZero() {
+		defaultCPURequest, _ := resource.ParseQuantity(consts.DefaultCPURequest)
 		suggestionConfigData.Resource.Requests[corev1.ResourceCPU] = defaultCPURequest
 	}
 	if memRequest.IsZero() {
+		defaultMemRequest, _ := resource.ParseQuantity(consts.DefaultMemRequest)
 		suggestionConfigData.Resource.Requests[corev1.ResourceMemory] = defaultMemRequest
-
 	}
 	if diskRequest.IsZero() {
+		defaultDiskRequest, _ := resource.ParseQuantity(consts.DefaultDiskRequest)
 		suggestionConfigData.Resource.Requests[corev1.ResourceEphemeralStorage] = defaultDiskRequest
+	}
+
+	// If limits are empty create new map
+	if len(suggestionConfigData.Resource.Limits) == 0 {
+		suggestionConfigData.Resource.Limits = make(map[corev1.ResourceName]resource.Quantity)
 	}
 
 	// Get CPU, Memory and Disk Limits from config
@@ -107,18 +106,17 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 	memLimit := suggestionConfigData.Resource.Limits[corev1.ResourceMemory]
 	diskLimit := suggestionConfigData.Resource.Limits[corev1.ResourceEphemeralStorage]
 
-	// If limits are empty create new map
-	if len(suggestionConfigData.Resource.Limits) == 0 {
-		suggestionConfigData.Resource.Limits = make(map[corev1.ResourceName]resource.Quantity)
-	}
-
+	// If limit is empty set default value for CPU, Memory, Disk
 	if cpuLimit.IsZero() {
+		defaultCPULimit, _ := resource.ParseQuantity(consts.DefaultCPULimit)
 		suggestionConfigData.Resource.Limits[corev1.ResourceCPU] = defaultCPULimit
 	}
 	if memLimit.IsZero() {
+		defaultMemLimit, _ := resource.ParseQuantity(consts.DefaultMemLimit)
 		suggestionConfigData.Resource.Limits[corev1.ResourceMemory] = defaultMemLimit
 	}
 	if diskLimit.IsZero() {
+		defaultDiskLimit, _ := resource.ParseQuantity(consts.DefaultDiskLimit)
 		suggestionConfigData.Resource.Limits[corev1.ResourceEphemeralStorage] = defaultDiskLimit
 	}
 
