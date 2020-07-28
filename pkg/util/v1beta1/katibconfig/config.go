@@ -86,6 +86,10 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 	memRequest := suggestionConfigData.Resource.Requests[corev1.ResourceMemory]
 	diskRequest := suggestionConfigData.Resource.Requests[corev1.ResourceEphemeralStorage]
 
+	// If requests are empty create new map
+	if len(suggestionConfigData.Resource.Requests) == 0 {
+		suggestionConfigData.Resource.Requests = make(map[corev1.ResourceName]resource.Quantity)
+	}
 	// If resource is empty set default value
 	if cpuRequest.IsZero() {
 		suggestionConfigData.Resource.Requests[corev1.ResourceCPU] = defaultCPURequest
@@ -102,6 +106,12 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 	cpuLimit := suggestionConfigData.Resource.Limits[corev1.ResourceCPU]
 	memLimit := suggestionConfigData.Resource.Limits[corev1.ResourceMemory]
 	diskLimit := suggestionConfigData.Resource.Limits[corev1.ResourceEphemeralStorage]
+
+	// If limits are empty create new map
+	if len(suggestionConfigData.Resource.Limits) == 0 {
+		suggestionConfigData.Resource.Limits = make(map[corev1.ResourceName]resource.Quantity)
+	}
+
 	if cpuLimit.IsZero() {
 		suggestionConfigData.Resource.Limits[corev1.ResourceCPU] = defaultCPULimit
 	}
