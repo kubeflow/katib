@@ -383,7 +383,7 @@ func newFakeKatibConfig() *corev1.ConfigMap {
 		ServiceAccountName string                      `json:"serviceAccountName"`
 	}
 	jsonConfig := map[string]suggestionConfigJSON{
-		"random": suggestionConfigJSON{
+		"random": {
 			Image:           image,
 			ImagePullPolicy: imagePullPolicy,
 			Resource: corev1.ResourceRequirements{
