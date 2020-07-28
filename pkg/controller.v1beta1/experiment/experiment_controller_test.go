@@ -152,10 +152,6 @@ func TestReconcile(t *testing.T) {
 	msg = "Suggestion is not running"
 	suggestionRestarting.MarkSuggestionStatusRunning(corev1.ConditionFalse, reason, msg)
 
-	// updateFunc := func(arg0 interface{}) {
-	// 	c.Status().Update(context.TODO(), suggestionRestartNo)
-	// }
-
 	// Manually update suggestion status after UpdateSuggestionStatus is called
 	mockSuggestion.EXPECT().UpdateSuggestionStatus(statusMatcher{suggestionRestartNo}).Return(nil).MinTimes(1).Do(
 		func(arg0 interface{}) {
@@ -192,7 +188,7 @@ func TestReconcile(t *testing.T) {
 
 	// Create the suggestion object with NeverResume
 	g.Expect(c.Create(context.TODO(), suggestionRestartNo)).NotTo(gomega.HaveOccurred())
-	// Check that suggestion is created
+	// Expect that suggestion is created
 	g.Eventually(func() bool {
 		test := &suggestionsv1beta1.Suggestion{}
 		c.Get(context.TODO(),
@@ -202,7 +198,7 @@ func TestReconcile(t *testing.T) {
 	}, timeout).ShouldNot(gomega.BeTrue())
 
 	// Manually update suggestion status to failed to make experiment completed
-	// Check that suggestion is updated
+	// Expect that suggestion is updated
 	g.Eventually(func() error {
 		experiment = &experimentsv1beta1.Experiment{}
 		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment)
@@ -210,7 +206,7 @@ func TestReconcile(t *testing.T) {
 		return c.Status().Update(context.TODO(), experiment)
 	}, timeout).ShouldNot(gomega.HaveOccurred())
 
-	// Check that suggestion with ResumePolicy = NeverResume is succeeded
+	// Expect that suggestion with ResumePolicy = NeverResume is succeeded
 	// UpdateSuggestionStatus is executing with suggestionRestartNo
 	g.Eventually(func() bool {
 		suggestion := &suggestionsv1beta1.Suggestion{}
@@ -220,7 +216,7 @@ func TestReconcile(t *testing.T) {
 
 	// Delete the suggestion object with ResumePolicy = NeverResume
 	g.Expect(c.Delete(context.TODO(), suggestionRestartNo)).NotTo(gomega.HaveOccurred())
-	// Check that suggestion is deleted
+	// Expect that suggestion is deleted
 	g.Eventually(func() bool {
 		return errors.IsNotFound(c.Get(context.TODO(),
 			types.NamespacedName{Namespace: namespace, Name: experimentName}, &suggestionsv1beta1.Suggestion{}))
@@ -228,14 +224,14 @@ func TestReconcile(t *testing.T) {
 
 	// Create the suggestion object with ResumePolicy = FromVolume
 	g.Expect(c.Create(context.TODO(), suggestionRestartYes)).NotTo(gomega.HaveOccurred())
-	// Check that suggestion is created
+	// Expect that suggestion is created
 	g.Eventually(func() bool {
 		return errors.IsNotFound(c.Get(context.TODO(),
 			types.NamespacedName{Namespace: namespace, Name: experimentName}, &suggestionsv1beta1.Suggestion{}))
 	}, timeout).ShouldNot(gomega.BeTrue())
 
 	// Manually update suggestion ResumePolicy to FromVolume and mark experiment succeeded to test resume experiment.
-	// Check that suggestion is updated
+	// Expect that suggestion is updated
 	g.Eventually(func() bool {
 		experiment = &experimentsv1beta1.Experiment{}
 		// Update ResumePolicy and maxTrialCount for resume
@@ -251,7 +247,7 @@ func TestReconcile(t *testing.T) {
 		return errUpdate == nil && errStatus == nil
 	}, timeout).Should(gomega.BeTrue())
 
-	// Check that suggestion with ResumePolicy = FromVolume is succeeded
+	// Expect that suggestion with ResumePolicy = FromVolume is succeeded
 	// UpdateSuggestionStatus is executing with suggestionRestartYes
 	g.Eventually(func() bool {
 		suggestion := &suggestionsv1beta1.Suggestion{}
@@ -259,7 +255,7 @@ func TestReconcile(t *testing.T) {
 		return suggestion.IsSucceeded()
 	}, timeout).Should(gomega.BeTrue())
 
-	// Check that experiment with FromVolume is restarting.
+	// Expect that experiment with FromVolume is restarting.
 	// Experiment should be not succeeded and not failed.
 	// UpdateSuggestionStatus is executing with suggestionRestarting
 	g.Eventually(func() bool {
@@ -270,7 +266,7 @@ func TestReconcile(t *testing.T) {
 
 	// Delete the suggestion object with ResumePolicy = FromVolume
 	g.Expect(c.Delete(context.TODO(), suggestionRestartYes)).NotTo(gomega.HaveOccurred())
-	// Check that suggestion is deleted
+	// Expect that suggestion is deleted
 	g.Eventually(func() bool {
 		return errors.IsNotFound(c.Get(context.TODO(),
 			types.NamespacedName{Namespace: namespace, Name: experimentName}, &suggestionsv1beta1.Suggestion{}))
