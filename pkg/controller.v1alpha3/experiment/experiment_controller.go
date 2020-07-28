@@ -18,7 +18,6 @@ package experiment
 
 import (
 	"context"
-	"fmt"
 	"sort"
 
 	"github.com/spf13/viper"
@@ -368,9 +367,12 @@ func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha3.Experim
 	})
 
 	expected := int(expectedDeletions)
-	if len(trialSlice) < expected {
-		return fmt.Errorf("Expected to delete %d trials, but got %d trials",
-			expected, len(trialSlice))
+	actual := len(trialSlice)
+	// If the number of trials < expected, we delete all we have.
+	if actual < expected {
+		logger.Info("deleteTrials does not find enough trials, we will delete all trials instead",
+			"expectedDeletions", expected, "trials", actual)
+		expected = actual
 	}
 	for i := 0; i < expected; i++ {
 		if err := r.Delete(context.TODO(), &trialSlice[i]); err != nil {
