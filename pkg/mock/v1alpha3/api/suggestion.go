@@ -7,68 +7,68 @@ package mock
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	api_v1_alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
+	v1alpha3 "github.com/kubeflow/katib/pkg/apis/manager/v1alpha3"
 	grpc "google.golang.org/grpc"
 	reflect "reflect"
 )
 
-// MockSuggestionClient is a mock of SuggestionClient interface.
+// MockSuggestionClient is a mock of SuggestionClient interface
 type MockSuggestionClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockSuggestionClientMockRecorder
 }
 
-// MockSuggestionClientMockRecorder is the mock recorder for MockSuggestionClient.
+// MockSuggestionClientMockRecorder is the mock recorder for MockSuggestionClient
 type MockSuggestionClientMockRecorder struct {
 	mock *MockSuggestionClient
 }
 
-// NewMockSuggestionClient creates a new mock instance.
+// NewMockSuggestionClient creates a new mock instance
 func NewMockSuggestionClient(ctrl *gomock.Controller) *MockSuggestionClient {
 	mock := &MockSuggestionClient{ctrl: ctrl}
 	mock.recorder = &MockSuggestionClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockSuggestionClient) EXPECT() *MockSuggestionClientMockRecorder {
 	return m.recorder
 }
 
-// GetSuggestions mocks base method.
-func (m *MockSuggestionClient) GetSuggestions(arg0 context.Context, arg1 *api_v1_alpha3.GetSuggestionsRequest, arg2 ...grpc.CallOption) (*api_v1_alpha3.GetSuggestionsReply, error) {
+// GetSuggestions mocks base method
+func (m *MockSuggestionClient) GetSuggestions(arg0 context.Context, arg1 *v1alpha3.GetSuggestionsRequest, arg2 ...grpc.CallOption) (*v1alpha3.GetSuggestionsReply, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetSuggestions", varargs...)
-	ret0, _ := ret[0].(*api_v1_alpha3.GetSuggestionsReply)
+	ret0, _ := ret[0].(*v1alpha3.GetSuggestionsReply)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetSuggestions indicates an expected call of GetSuggestions.
+// GetSuggestions indicates an expected call of GetSuggestions
 func (mr *MockSuggestionClientMockRecorder) GetSuggestions(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestions", reflect.TypeOf((*MockSuggestionClient)(nil).GetSuggestions), varargs...)
 }
 
-// ValidateAlgorithmSettings mocks base method.
-func (m *MockSuggestionClient) ValidateAlgorithmSettings(arg0 context.Context, arg1 *api_v1_alpha3.ValidateAlgorithmSettingsRequest, arg2 ...grpc.CallOption) (*api_v1_alpha3.ValidateAlgorithmSettingsReply, error) {
+// ValidateAlgorithmSettings mocks base method
+func (m *MockSuggestionClient) ValidateAlgorithmSettings(arg0 context.Context, arg1 *v1alpha3.ValidateAlgorithmSettingsRequest, arg2 ...grpc.CallOption) (*v1alpha3.ValidateAlgorithmSettingsReply, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "ValidateAlgorithmSettings", varargs...)
-	ret0, _ := ret[0].(*api_v1_alpha3.ValidateAlgorithmSettingsReply)
+	ret0, _ := ret[0].(*v1alpha3.ValidateAlgorithmSettingsReply)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ValidateAlgorithmSettings indicates an expected call of ValidateAlgorithmSettings.
+// ValidateAlgorithmSettings indicates an expected call of ValidateAlgorithmSettings
 func (mr *MockSuggestionClientMockRecorder) ValidateAlgorithmSettings(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)

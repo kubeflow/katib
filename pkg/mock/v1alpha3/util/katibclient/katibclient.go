@@ -14,30 +14,30 @@ import (
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// MockClient is a mock of Client interface.
+// MockClient is a mock of Client interface
 type MockClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockClientMockRecorder
 }
 
-// MockClientMockRecorder is the mock recorder for MockClient.
+// MockClientMockRecorder is the mock recorder for MockClient
 type MockClientMockRecorder struct {
 	mock *MockClient
 }
 
-// NewMockClient creates a new mock instance.
+// NewMockClient creates a new mock instance
 func NewMockClient(ctrl *gomock.Controller) *MockClient {
 	mock := &MockClient{ctrl: ctrl}
 	mock.recorder = &MockClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
-// CreateExperiment mocks base method.
+// CreateExperiment mocks base method
 func (m *MockClient) CreateExperiment(arg0 *v1alpha3.Experiment, arg1 ...string) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
@@ -49,14 +49,14 @@ func (m *MockClient) CreateExperiment(arg0 *v1alpha3.Experiment, arg1 ...string)
 	return ret0
 }
 
-// CreateExperiment indicates an expected call of CreateExperiment.
+// CreateExperiment indicates an expected call of CreateExperiment
 func (mr *MockClientMockRecorder) CreateExperiment(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateExperiment", reflect.TypeOf((*MockClient)(nil).CreateExperiment), varargs...)
 }
 
-// DeleteExperiment mocks base method.
+// DeleteExperiment mocks base method
 func (m *MockClient) DeleteExperiment(arg0 *v1alpha3.Experiment, arg1 ...string) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
@@ -68,14 +68,14 @@ func (m *MockClient) DeleteExperiment(arg0 *v1alpha3.Experiment, arg1 ...string)
 	return ret0
 }
 
-// DeleteExperiment indicates an expected call of DeleteExperiment.
+// DeleteExperiment indicates an expected call of DeleteExperiment
 func (mr *MockClientMockRecorder) DeleteExperiment(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteExperiment", reflect.TypeOf((*MockClient)(nil).DeleteExperiment), varargs...)
 }
 
-// GetClient mocks base method.
+// GetClient mocks base method
 func (m *MockClient) GetClient() client.Client {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetClient")
@@ -83,13 +83,13 @@ func (m *MockClient) GetClient() client.Client {
 	return ret0
 }
 
-// GetClient indicates an expected call of GetClient.
+// GetClient indicates an expected call of GetClient
 func (mr *MockClientMockRecorder) GetClient() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClient", reflect.TypeOf((*MockClient)(nil).GetClient))
 }
 
-// GetConfigMap mocks base method.
+// GetConfigMap mocks base method
 func (m *MockClient) GetConfigMap(arg0 string, arg1 ...string) (map[string]string, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
@@ -102,14 +102,14 @@ func (m *MockClient) GetConfigMap(arg0 string, arg1 ...string) (map[string]strin
 	return ret0, ret1
 }
 
-// GetConfigMap indicates an expected call of GetConfigMap.
+// GetConfigMap indicates an expected call of GetConfigMap
 func (mr *MockClientMockRecorder) GetConfigMap(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConfigMap", reflect.TypeOf((*MockClient)(nil).GetConfigMap), varargs...)
 }
 
-// GetExperiment mocks base method.
+// GetExperiment mocks base method
 func (m *MockClient) GetExperiment(arg0 string, arg1 ...string) (*v1alpha3.Experiment, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
@@ -122,14 +122,14 @@ func (m *MockClient) GetExperiment(arg0 string, arg1 ...string) (*v1alpha3.Exper
 	return ret0, ret1
 }
 
-// GetExperiment indicates an expected call of GetExperiment.
+// GetExperiment indicates an expected call of GetExperiment
 func (mr *MockClientMockRecorder) GetExperiment(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExperiment", reflect.TypeOf((*MockClient)(nil).GetExperiment), varargs...)
 }
 
-// GetExperimentList mocks base method.
+// GetExperimentList mocks base method
 func (m *MockClient) GetExperimentList(arg0 ...string) (*v1alpha3.ExperimentList, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{}
@@ -142,13 +142,13 @@ func (m *MockClient) GetExperimentList(arg0 ...string) (*v1alpha3.ExperimentList
 	return ret0, ret1
 }
 
-// GetExperimentList indicates an expected call of GetExperimentList.
+// GetExperimentList indicates an expected call of GetExperimentList
 func (mr *MockClientMockRecorder) GetExperimentList(arg0 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExperimentList", reflect.TypeOf((*MockClient)(nil).GetExperimentList), arg0...)
 }
 
-// GetNamespaceList mocks base method.
+// GetNamespaceList mocks base method
 func (m *MockClient) GetNamespaceList() (*v1.NamespaceList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetNamespaceList")
@@ -157,13 +157,13 @@ func (m *MockClient) GetNamespaceList() (*v1.NamespaceList, error) {
 	return ret0, ret1
 }
 
-// GetNamespaceList indicates an expected call of GetNamespaceList.
+// GetNamespaceList indicates an expected call of GetNamespaceList
 func (mr *MockClientMockRecorder) GetNamespaceList() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaceList", reflect.TypeOf((*MockClient)(nil).GetNamespaceList))
 }
 
-// GetSuggestion mocks base method.
+// GetSuggestion mocks base method
 func (m *MockClient) GetSuggestion(arg0 string, arg1 ...string) (*v1alpha30.Suggestion, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
@@ -176,14 +176,14 @@ func (m *MockClient) GetSuggestion(arg0 string, arg1 ...string) (*v1alpha30.Sugg
 	return ret0, ret1
 }
 
-// GetSuggestion indicates an expected call of GetSuggestion.
+// GetSuggestion indicates an expected call of GetSuggestion
 func (mr *MockClientMockRecorder) GetSuggestion(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestion", reflect.TypeOf((*MockClient)(nil).GetSuggestion), varargs...)
 }
 
-// GetTrial mocks base method.
+// GetTrial mocks base method
 func (m *MockClient) GetTrial(arg0 string, arg1 ...string) (*v1alpha31.Trial, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
@@ -196,14 +196,14 @@ func (m *MockClient) GetTrial(arg0 string, arg1 ...string) (*v1alpha31.Trial, er
 	return ret0, ret1
 }
 
-// GetTrial indicates an expected call of GetTrial.
+// GetTrial indicates an expected call of GetTrial
 func (mr *MockClientMockRecorder) GetTrial(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrial", reflect.TypeOf((*MockClient)(nil).GetTrial), varargs...)
 }
 
-// GetTrialList mocks base method.
+// GetTrialList mocks base method
 func (m *MockClient) GetTrialList(arg0 string, arg1 ...string) (*v1alpha31.TrialList, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
@@ -216,14 +216,14 @@ func (m *MockClient) GetTrialList(arg0 string, arg1 ...string) (*v1alpha31.Trial
 	return ret0, ret1
 }
 
-// GetTrialList indicates an expected call of GetTrialList.
+// GetTrialList indicates an expected call of GetTrialList
 func (mr *MockClientMockRecorder) GetTrialList(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialList", reflect.TypeOf((*MockClient)(nil).GetTrialList), varargs...)
 }
 
-// GetTrialTemplates mocks base method.
+// GetTrialTemplates mocks base method
 func (m *MockClient) GetTrialTemplates(arg0 ...string) (*v1.ConfigMapList, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{}
@@ -236,25 +236,25 @@ func (m *MockClient) GetTrialTemplates(arg0 ...string) (*v1.ConfigMapList, error
 	return ret0, ret1
 }
 
-// GetTrialTemplates indicates an expected call of GetTrialTemplates.
+// GetTrialTemplates indicates an expected call of GetTrialTemplates
 func (mr *MockClientMockRecorder) GetTrialTemplates(arg0 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialTemplates", reflect.TypeOf((*MockClient)(nil).GetTrialTemplates), arg0...)
 }
 
-// InjectClient mocks base method.
+// InjectClient mocks base method
 func (m *MockClient) InjectClient(arg0 client.Client) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "InjectClient", arg0)
 }
 
-// InjectClient indicates an expected call of InjectClient.
+// InjectClient indicates an expected call of InjectClient
 func (mr *MockClientMockRecorder) InjectClient(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InjectClient", reflect.TypeOf((*MockClient)(nil).InjectClient), arg0)
 }
 
-// UpdateConfigMap mocks base method.
+// UpdateConfigMap mocks base method
 func (m *MockClient) UpdateConfigMap(arg0 *v1.ConfigMap) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateConfigMap", arg0)
@@ -262,13 +262,13 @@ func (m *MockClient) UpdateConfigMap(arg0 *v1.ConfigMap) error {
 	return ret0
 }
 
-// UpdateConfigMap indicates an expected call of UpdateConfigMap.
+// UpdateConfigMap indicates an expected call of UpdateConfigMap
 func (mr *MockClientMockRecorder) UpdateConfigMap(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateConfigMap", reflect.TypeOf((*MockClient)(nil).UpdateConfigMap), arg0)
 }
 
-// UpdateExperiment mocks base method.
+// UpdateExperiment mocks base method
 func (m *MockClient) UpdateExperiment(arg0 *v1alpha3.Experiment, arg1 ...string) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
@@ -280,7 +280,7 @@ func (m *MockClient) UpdateExperiment(arg0 *v1alpha3.Experiment, arg1 ...string)
 	return ret0
 }
 
-// UpdateExperiment indicates an expected call of UpdateExperiment.
+// UpdateExperiment indicates an expected call of UpdateExperiment
 func (mr *MockClientMockRecorder) UpdateExperiment(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)

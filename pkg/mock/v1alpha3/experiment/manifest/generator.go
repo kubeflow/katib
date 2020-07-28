@@ -12,30 +12,30 @@ import (
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// MockGenerator is a mock of Generator interface.
+// MockGenerator is a mock of Generator interface
 type MockGenerator struct {
 	ctrl     *gomock.Controller
 	recorder *MockGeneratorMockRecorder
 }
 
-// MockGeneratorMockRecorder is the mock recorder for MockGenerator.
+// MockGeneratorMockRecorder is the mock recorder for MockGenerator
 type MockGeneratorMockRecorder struct {
 	mock *MockGenerator
 }
 
-// NewMockGenerator creates a new mock instance.
+// NewMockGenerator creates a new mock instance
 func NewMockGenerator(ctrl *gomock.Controller) *MockGenerator {
 	mock := &MockGenerator{ctrl: ctrl}
 	mock.recorder = &MockGeneratorMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockGenerator) EXPECT() *MockGeneratorMockRecorder {
 	return m.recorder
 }
 
-// GetMetricsCollectorImage mocks base method.
+// GetMetricsCollectorImage mocks base method
 func (m *MockGenerator) GetMetricsCollectorImage(arg0 v1alpha3.CollectorKind) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetMetricsCollectorImage", arg0)
@@ -44,13 +44,13 @@ func (m *MockGenerator) GetMetricsCollectorImage(arg0 v1alpha3.CollectorKind) (s
 	return ret0, ret1
 }
 
-// GetMetricsCollectorImage indicates an expected call of GetMetricsCollectorImage.
+// GetMetricsCollectorImage indicates an expected call of GetMetricsCollectorImage
 func (mr *MockGeneratorMockRecorder) GetMetricsCollectorImage(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMetricsCollectorImage", reflect.TypeOf((*MockGenerator)(nil).GetMetricsCollectorImage), arg0)
 }
 
-// GetRunSpec mocks base method.
+// GetRunSpec mocks base method
 func (m *MockGenerator) GetRunSpec(arg0 *v1alpha30.Experiment, arg1, arg2, arg3 string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRunSpec", arg0, arg1, arg2, arg3)
@@ -59,13 +59,13 @@ func (m *MockGenerator) GetRunSpec(arg0 *v1alpha30.Experiment, arg1, arg2, arg3 
 	return ret0, ret1
 }
 
-// GetRunSpec indicates an expected call of GetRunSpec.
+// GetRunSpec indicates an expected call of GetRunSpec
 func (mr *MockGeneratorMockRecorder) GetRunSpec(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRunSpec", reflect.TypeOf((*MockGenerator)(nil).GetRunSpec), arg0, arg1, arg2, arg3)
 }
 
-// GetRunSpecWithHyperParameters mocks base method.
+// GetRunSpecWithHyperParameters mocks base method
 func (m *MockGenerator) GetRunSpecWithHyperParameters(arg0 *v1alpha30.Experiment, arg1, arg2, arg3 string, arg4 []v1alpha3.ParameterAssignment) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRunSpecWithHyperParameters", arg0, arg1, arg2, arg3, arg4)
@@ -74,13 +74,13 @@ func (m *MockGenerator) GetRunSpecWithHyperParameters(arg0 *v1alpha30.Experiment
 	return ret0, ret1
 }
 
-// GetRunSpecWithHyperParameters indicates an expected call of GetRunSpecWithHyperParameters.
+// GetRunSpecWithHyperParameters indicates an expected call of GetRunSpecWithHyperParameters
 func (mr *MockGeneratorMockRecorder) GetRunSpecWithHyperParameters(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRunSpecWithHyperParameters", reflect.TypeOf((*MockGenerator)(nil).GetRunSpecWithHyperParameters), arg0, arg1, arg2, arg3, arg4)
 }
 
-// GetSuggestionConfigData mocks base method.
+// GetSuggestionConfigData mocks base method
 func (m *MockGenerator) GetSuggestionConfigData(arg0 string) (map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSuggestionConfigData", arg0)
@@ -89,19 +89,19 @@ func (m *MockGenerator) GetSuggestionConfigData(arg0 string) (map[string]string,
 	return ret0, ret1
 }
 
-// GetSuggestionConfigData indicates an expected call of GetSuggestionConfigData.
+// GetSuggestionConfigData indicates an expected call of GetSuggestionConfigData
 func (mr *MockGeneratorMockRecorder) GetSuggestionConfigData(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestionConfigData", reflect.TypeOf((*MockGenerator)(nil).GetSuggestionConfigData), arg0)
 }
 
-// InjectClient mocks base method.
+// InjectClient mocks base method
 func (m *MockGenerator) InjectClient(arg0 client.Client) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "InjectClient", arg0)
 }
 
-// InjectClient indicates an expected call of InjectClient.
+// InjectClient indicates an expected call of InjectClient
 func (mr *MockGeneratorMockRecorder) InjectClient(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InjectClient", reflect.TypeOf((*MockGenerator)(nil).InjectClient), arg0)

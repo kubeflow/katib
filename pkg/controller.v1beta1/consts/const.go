@@ -63,36 +63,18 @@ const (
 	KatibConfigMapName = "katib-config"
 	// LabelSuggestionTag is the name of suggestion config in configmap.
 	LabelSuggestionTag = "suggestion"
-	// LabelSuggestionImageTag is the name of suggestion image config in configmap.
-	LabelSuggestionImageTag = "image"
-	// LabelSuggestionCPULimitTag is the name of suggestion CPU Limit config in configmap.
-	LabelSuggestionCPULimitTag = "cpuLimit"
 	// DefaultCPULimit is the default value for CPU Limit
 	DefaultCPULimit = "500m"
-	// LabelSuggestionCPURequestTag is the name of suggestion CPU Request config in configmap.
-	LabelSuggestionCPURequestTag = "cpuRequest"
 	// DefaultCPURequest is the default value for CPU Request
 	DefaultCPURequest = "50m"
-	// LabelSuggestionMemLimitTag is the name of suggestion Mem Limit config in configmap.
-	LabelSuggestionMemLimitTag = "memLimit"
 	// DefaultMemLimit is the default value for mem Limit
 	DefaultMemLimit = "100Mi"
-	// LabelSuggestionMemRequestTag is the name of suggestion Mem Request config in configmap.
-	LabelSuggestionMemRequestTag = "memRequest"
 	// DefaultMemRequest is the default value for mem Request
 	DefaultMemRequest = "10Mi"
-	// LabelSuggestionDiskLimitTag is the name of suggestion Disk Limit config in configmap.
-	LabelSuggestionDiskLimitTag = "diskLimit"
 	// DefaultDiskLimit is the default value for disk limit.
 	DefaultDiskLimit = "5Gi"
-	// LabelSuggestionDiskRequestTag is the name of suggestion Disk Request config in configmap.
-	LabelSuggestionDiskRequestTag = "diskRequest"
 	// DefaultDiskRequest is the default value for disk request.
 	DefaultDiskRequest = "500Mi"
-	// LabelSuggestionImagePullPolicy is the name of suggestion image pull policy in configmap.
-	LabelSuggestionImagePullPolicy = "imagePullPolicy"
-	// LabelSuggestionServiceAccountName is the name of suggestion service account in configmap.
-	LabelSuggestionServiceAccountName = "serviceAccountName"
 	// DefaultImagePullPolicy is the default value for image pull policy.
 	DefaultImagePullPolicy = "IfNotPresent"
 	// LabelMetricsCollectorSidecar is the name of metrics collector config in configmap.
