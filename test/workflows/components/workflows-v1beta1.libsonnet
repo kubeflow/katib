@@ -325,6 +325,10 @@
                     name: "run-darts-e2e-tests",
                     template: "run-darts-e2e-tests",
                   },
+                  {
+                    name: "run-from-volume-e2e-tests",
+                    template: "run-from-volume-e2e-tests",
+                  },
                 ],
               ],
             },
@@ -410,6 +414,9 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-darts-e2e-tests", testWorkerImage, [
               "test/scripts/v1beta1/run-suggestion-darts.sh",
             ]),  // run darts algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-from-volume-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-from-volume.sh",
+            ]),  // run resume from volume suggestion test
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
               "python",
               "-m",
