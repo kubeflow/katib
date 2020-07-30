@@ -14,9 +14,9 @@ import (
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1beta1/experiment/manifest"
+	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
 )
 
 func init() {
@@ -30,8 +30,8 @@ func TestValidateExperiment(t *testing.T) {
 	p := manifestmock.NewMockGenerator(mockCtrl)
 	g := New(p)
 
-	suggestionConfigData := map[string]string{}
-	suggestionConfigData[consts.LabelSuggestionImageTag] = "algorithmImage"
+	suggestionConfigData := katibconfig.SuggestionConfig{}
+	suggestionConfigData.Image = "algorithmImage"
 	fakeNegativeInt := int32(-1)
 
 	p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(suggestionConfigData, nil).AnyTimes()

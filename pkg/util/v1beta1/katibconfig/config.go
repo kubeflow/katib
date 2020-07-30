@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	apitypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -14,7 +15,8 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
-type suggestionConfigJSON struct {
+// SuggestionConfig is the JSON suggestion structure in Katib config
+type SuggestionConfig struct {
 	Image              string                      `json:"image"`
 	ImagePullPolicy    corev1.PullPolicy           `json:"imagePullPolicy"`
 	Resource           corev1.ResourceRequirements `json:"resources"`
@@ -28,87 +30,96 @@ type metricsCollectorConfigJSON struct {
 }
 
 // GetSuggestionConfigData gets the config data for the given algorithm name.
-func GetSuggestionConfigData(algorithmName string, client client.Client) (map[string]string, error) {
+func GetSuggestionConfigData(algorithmName string, client client.Client) (SuggestionConfig, error) {
 	configMap := &corev1.ConfigMap{}
-	suggestionConfigData := map[string]string{}
+	suggestionConfigData := SuggestionConfig{}
 	err := client.Get(
 		context.TODO(),
 		apitypes.NamespacedName{Name: consts.KatibConfigMapName, Namespace: consts.DefaultKatibNamespace},
 		configMap)
 	if err != nil {
-		return map[string]string{}, err
+		return SuggestionConfig{}, err
 	}
 
-	if config, ok := configMap.Data[consts.LabelSuggestionTag]; ok {
-		suggestionsConfig := map[string]suggestionConfigJSON{}
-		if err := json.Unmarshal([]byte(config), &suggestionsConfig); err != nil {
-			return map[string]string{}, err
-		}
-		if suggestionConfig, ok := suggestionsConfig[algorithmName]; ok {
-			// Get image from config
-			image := suggestionConfig.Image
-			if strings.TrimSpace(image) != "" {
-				suggestionConfigData[consts.LabelSuggestionImageTag] = image
-			} else {
-				return map[string]string{}, errors.New("Required value for " + consts.LabelSuggestionImageTag + " configuration of algorithm name " + algorithmName)
-			}
-
-			// Get Image Pull Policy
-			imagePullPolicy := suggestionConfig.ImagePullPolicy
-			if imagePullPolicy == corev1.PullAlways || imagePullPolicy == corev1.PullIfNotPresent || imagePullPolicy == corev1.PullNever {
-				suggestionConfigData[consts.LabelSuggestionImagePullPolicy] = string(imagePullPolicy)
-			} else {
-				suggestionConfigData[consts.LabelSuggestionImagePullPolicy] = consts.DefaultImagePullPolicy
-			}
-
-			// Get Service Account Name
-			serviceAccountName := suggestionConfig.ServiceAccountName
-			if strings.TrimSpace(serviceAccountName) != "" {
-				suggestionConfigData[consts.LabelSuggestionServiceAccountName] = serviceAccountName
-			}
-
-			// Set default values for CPU, Memory and Disk
-			suggestionConfigData[consts.LabelSuggestionCPURequestTag] = consts.DefaultCPURequest
-			suggestionConfigData[consts.LabelSuggestionMemRequestTag] = consts.DefaultMemRequest
-			suggestionConfigData[consts.LabelSuggestionDiskRequestTag] = consts.DefaultDiskRequest
-			suggestionConfigData[consts.LabelSuggestionCPULimitTag] = consts.DefaultCPULimit
-			suggestionConfigData[consts.LabelSuggestionMemLimitTag] = consts.DefaultMemLimit
-			suggestionConfigData[consts.LabelSuggestionDiskLimitTag] = consts.DefaultDiskLimit
-
-			// Get CPU, Memory and Disk Requests from config
-			cpuRequest := suggestionConfig.Resource.Requests[corev1.ResourceCPU]
-			memRequest := suggestionConfig.Resource.Requests[corev1.ResourceMemory]
-			diskRequest := suggestionConfig.Resource.Requests[corev1.ResourceEphemeralStorage]
-			if !cpuRequest.IsZero() {
-				suggestionConfigData[consts.LabelSuggestionCPURequestTag] = cpuRequest.String()
-			}
-			if !memRequest.IsZero() {
-				suggestionConfigData[consts.LabelSuggestionMemRequestTag] = memRequest.String()
-			}
-			if !diskRequest.IsZero() {
-				suggestionConfigData[consts.LabelSuggestionDiskRequestTag] = diskRequest.String()
-			}
-
-			// Get CPU, Memory and Disk Limits from config
-			cpuLimit := suggestionConfig.Resource.Limits[corev1.ResourceCPU]
-			memLimit := suggestionConfig.Resource.Limits[corev1.ResourceMemory]
-			diskLimit := suggestionConfig.Resource.Limits[corev1.ResourceEphemeralStorage]
-			if !cpuLimit.IsZero() {
-				suggestionConfigData[consts.LabelSuggestionCPULimitTag] = cpuLimit.String()
-			}
-			if !memLimit.IsZero() {
-				suggestionConfigData[consts.LabelSuggestionMemLimitTag] = memLimit.String()
-			}
-			if !diskLimit.IsZero() {
-				suggestionConfigData[consts.LabelSuggestionDiskLimitTag] = diskLimit.String()
-			}
-
-		} else {
-			return map[string]string{}, errors.New("Failed to find algorithm " + algorithmName + " config in configmap " + consts.KatibConfigMapName)
-		}
-	} else {
-		return map[string]string{}, errors.New("Failed to find suggestions config in configmap " + consts.KatibConfigMapName)
+	// Try to find suggestion data in config map
+	config, ok := configMap.Data[consts.LabelSuggestionTag]
+	if !ok {
+		return SuggestionConfig{}, errors.New("Failed to find suggestions config in configmap " + consts.KatibConfigMapName)
 	}
+
+	// Parse suggestion data to map where key = algorithm name, value = SuggestionConfig
+	suggestionsConfig := map[string]SuggestionConfig{}
+	if err := json.Unmarshal([]byte(config), &suggestionsConfig); err != nil {
+		return SuggestionConfig{}, err
+	}
+
+	// Try to find SuggestionConfig for the algorithm
+	suggestionConfigData, ok = suggestionsConfig[algorithmName]
+	if !ok {
+		return SuggestionConfig{}, errors.New("Failed to find algorithm " + algorithmName + " config in configmap " + consts.KatibConfigMapName)
+	}
+
+	// Get image from config
+	image := suggestionConfigData.Image
+	if strings.TrimSpace(image) == "" {
+		return SuggestionConfig{}, errors.New("Required value for image configuration of algorithm name " + algorithmName)
+	}
+
+	// Get Image Pull Policy
+	imagePullPolicy := suggestionConfigData.ImagePullPolicy
+	if imagePullPolicy != corev1.PullAlways && imagePullPolicy != corev1.PullIfNotPresent && imagePullPolicy != corev1.PullNever {
+		// TODO (andreyvelich): Change it to consts once metrics collector config is refactored
+		suggestionConfigData.ImagePullPolicy = corev1.PullIfNotPresent
+	}
+
+	// If requests are empty create new map
+	if len(suggestionConfigData.Resource.Requests) == 0 {
+		suggestionConfigData.Resource.Requests = make(map[corev1.ResourceName]resource.Quantity)
+	}
+
+	// Get CPU, Memory and Disk Requests from config
+	cpuRequest := suggestionConfigData.Resource.Requests[corev1.ResourceCPU]
+	memRequest := suggestionConfigData.Resource.Requests[corev1.ResourceMemory]
+	diskRequest := suggestionConfigData.Resource.Requests[corev1.ResourceEphemeralStorage]
+
+	// If resource is empty set default value for CPU, Memory, Disk
+	if cpuRequest.IsZero() {
+		defaultCPURequest, _ := resource.ParseQuantity(consts.DefaultCPURequest)
+		suggestionConfigData.Resource.Requests[corev1.ResourceCPU] = defaultCPURequest
+	}
+	if memRequest.IsZero() {
+		defaultMemRequest, _ := resource.ParseQuantity(consts.DefaultMemRequest)
+		suggestionConfigData.Resource.Requests[corev1.ResourceMemory] = defaultMemRequest
+	}
+	if diskRequest.IsZero() {
+		defaultDiskRequest, _ := resource.ParseQuantity(consts.DefaultDiskRequest)
+		suggestionConfigData.Resource.Requests[corev1.ResourceEphemeralStorage] = defaultDiskRequest
+	}
+
+	// If limits are empty create new map
+	if len(suggestionConfigData.Resource.Limits) == 0 {
+		suggestionConfigData.Resource.Limits = make(map[corev1.ResourceName]resource.Quantity)
+	}
+
+	// Get CPU, Memory and Disk Limits from config
+	cpuLimit := suggestionConfigData.Resource.Limits[corev1.ResourceCPU]
+	memLimit := suggestionConfigData.Resource.Limits[corev1.ResourceMemory]
+	diskLimit := suggestionConfigData.Resource.Limits[corev1.ResourceEphemeralStorage]
+
+	// If limit is empty set default value for CPU, Memory, Disk
+	if cpuLimit.IsZero() {
+		defaultCPULimit, _ := resource.ParseQuantity(consts.DefaultCPULimit)
+		suggestionConfigData.Resource.Limits[corev1.ResourceCPU] = defaultCPULimit
+	}
+	if memLimit.IsZero() {
+		defaultMemLimit, _ := resource.ParseQuantity(consts.DefaultMemLimit)
+		suggestionConfigData.Resource.Limits[corev1.ResourceMemory] = defaultMemLimit
+	}
+	if diskLimit.IsZero() {
+		defaultDiskLimit, _ := resource.ParseQuantity(consts.DefaultDiskLimit)
+		suggestionConfigData.Resource.Limits[corev1.ResourceEphemeralStorage] = defaultDiskLimit
+	}
+
 	return suggestionConfigData, nil
 }
 
@@ -161,13 +172,13 @@ func GetMetricsCollectorConfigData(cKind common.CollectorKind, client client.Cli
 			memRequest := metricsCollectorConfig.Resource.Requests[corev1.ResourceMemory]
 			diskRequest := metricsCollectorConfig.Resource.Requests[corev1.ResourceEphemeralStorage]
 			if !cpuRequest.IsZero() {
-				metricsCollectorConfigData[consts.LabelSuggestionCPURequestTag] = cpuRequest.String()
+				metricsCollectorConfigData[consts.LabelMetricsCollectorCPURequestTag] = cpuRequest.String()
 			}
 			if !memRequest.IsZero() {
-				metricsCollectorConfigData[consts.LabelSuggestionMemRequestTag] = memRequest.String()
+				metricsCollectorConfigData[consts.LabelMetricsCollectorMemRequestTag] = memRequest.String()
 			}
 			if !diskRequest.IsZero() {
-				metricsCollectorConfigData[consts.LabelSuggestionDiskRequestTag] = diskRequest.String()
+				metricsCollectorConfigData[consts.LabelMetricsCollectorDiskRequestTag] = diskRequest.String()
 			}
 
 			// Get CPU, Memory and Disk Limits from config
@@ -175,13 +186,13 @@ func GetMetricsCollectorConfigData(cKind common.CollectorKind, client client.Cli
 			memLimit := metricsCollectorConfig.Resource.Limits[corev1.ResourceMemory]
 			diskLimit := metricsCollectorConfig.Resource.Limits[corev1.ResourceEphemeralStorage]
 			if !cpuLimit.IsZero() {
-				metricsCollectorConfigData[consts.LabelSuggestionCPULimitTag] = cpuLimit.String()
+				metricsCollectorConfigData[consts.LabelMetricsCollectorCPULimitTag] = cpuLimit.String()
 			}
 			if !memLimit.IsZero() {
-				metricsCollectorConfigData[consts.LabelSuggestionMemLimitTag] = memLimit.String()
+				metricsCollectorConfigData[consts.LabelMetricsCollectorMemLimitTag] = memLimit.String()
 			}
 			if !diskLimit.IsZero() {
-				metricsCollectorConfigData[consts.LabelSuggestionDiskLimitTag] = diskLimit.String()
+				metricsCollectorConfigData[consts.LabelMetricsCollectorDiskLimitTag] = diskLimit.String()
 			}
 
 		} else {

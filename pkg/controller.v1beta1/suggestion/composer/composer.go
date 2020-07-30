@@ -62,11 +62,6 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 		return nil, err
 	}
 
-	container, err := g.desiredContainer(s, suggestionConfigData)
-	if err != nil {
-		log.Error(err, "Error in constructing container")
-		return nil, err
-	}
 	d := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        util.GetAlgorithmDeploymentName(s),
@@ -85,7 +80,7 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
-						*container,
+						*g.desiredContainer(s, suggestionConfigData),
 					},
 				},
 			},
@@ -93,8 +88,8 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 	}
 
 	// Get Suggestion Service Account Name from config
-	if suggestionConfigData[consts.LabelSuggestionServiceAccountName] != "" {
-		d.Spec.Template.Spec.ServiceAccountName = suggestionConfigData[consts.LabelSuggestionServiceAccountName]
+	if suggestionConfigData.ServiceAccountName != "" {
+		d.Spec.Template.Spec.ServiceAccountName = suggestionConfigData.ServiceAccountName
 	}
 
 	// Attach volume to the suggestion pod spec if ResumePolicy = FromVolume
@@ -147,64 +142,29 @@ func (g *General) DesiredService(s *suggestionsv1beta1.Suggestion) (*corev1.Serv
 	return service, nil
 }
 
-func (g *General) desiredContainer(s *suggestionsv1beta1.Suggestion, suggestionConfigData map[string]string) (*corev1.Container, error) {
+func (g *General) desiredContainer(s *suggestionsv1beta1.Suggestion, suggestionConfigData katibconfig.SuggestionConfig) *corev1.Container {
 
-	// Get Suggestion data from config
-	suggestionContainerImage := suggestionConfigData[consts.LabelSuggestionImageTag]
-	suggestionImagePullPolicy := suggestionConfigData[consts.LabelSuggestionImagePullPolicy]
-	suggestionCPULimit := suggestionConfigData[consts.LabelSuggestionCPULimitTag]
-	suggestionCPURequest := suggestionConfigData[consts.LabelSuggestionCPURequestTag]
-	suggestionMemLimit := suggestionConfigData[consts.LabelSuggestionMemLimitTag]
-	suggestionMemRequest := suggestionConfigData[consts.LabelSuggestionMemRequestTag]
-	suggestionDiskLimit := suggestionConfigData[consts.LabelSuggestionDiskLimitTag]
-	suggestionDiskRequest := suggestionConfigData[consts.LabelSuggestionDiskRequestTag]
 	c := &corev1.Container{
-		Name: consts.ContainerSuggestion,
-	}
-	c.Image = suggestionContainerImage
-	c.ImagePullPolicy = corev1.PullPolicy(suggestionImagePullPolicy)
-	c.Ports = []corev1.ContainerPort{
-		{
-			Name:          consts.DefaultSuggestionPortName,
-			ContainerPort: consts.DefaultSuggestionPort,
+		Name:            consts.ContainerSuggestion,
+		Image:           suggestionConfigData.Image,
+		ImagePullPolicy: suggestionConfigData.ImagePullPolicy,
+		Ports: []corev1.ContainerPort{
+			{
+				Name:          consts.DefaultSuggestionPortName,
+				ContainerPort: consts.DefaultSuggestionPort,
+			},
 		},
-	}
-
-	cpuLimitQuantity, err := resource.ParseQuantity(suggestionCPULimit)
-	if err != nil {
-		return nil, err
-	}
-	cpuRequestQuantity, err := resource.ParseQuantity(suggestionCPURequest)
-	if err != nil {
-		return nil, err
-	}
-	memLimitQuantity, err := resource.ParseQuantity(suggestionMemLimit)
-	if err != nil {
-		return nil, err
-	}
-	memRequestQuantity, err := resource.ParseQuantity(suggestionMemRequest)
-	if err != nil {
-		return nil, err
-	}
-	diskLimitQuantity, err := resource.ParseQuantity(suggestionDiskLimit)
-	if err != nil {
-		return nil, err
-	}
-	diskRequestQuantity, err := resource.ParseQuantity(suggestionDiskRequest)
-	if err != nil {
-		return nil, err
-	}
-
-	c.Resources = corev1.ResourceRequirements{
-		Limits: corev1.ResourceList{
-			corev1.ResourceCPU:              cpuLimitQuantity,
-			corev1.ResourceMemory:           memLimitQuantity,
-			corev1.ResourceEphemeralStorage: diskLimitQuantity,
-		},
-		Requests: corev1.ResourceList{
-			corev1.ResourceCPU:              cpuRequestQuantity,
-			corev1.ResourceMemory:           memRequestQuantity,
-			corev1.ResourceEphemeralStorage: diskRequestQuantity,
+		Resources: corev1.ResourceRequirements{
+			Limits: corev1.ResourceList{
+				corev1.ResourceCPU:              suggestionConfigData.Resource.Limits[corev1.ResourceCPU],
+				corev1.ResourceMemory:           suggestionConfigData.Resource.Limits[corev1.ResourceMemory],
+				corev1.ResourceEphemeralStorage: suggestionConfigData.Resource.Limits[corev1.ResourceEphemeralStorage],
+			},
+			Requests: corev1.ResourceList{
+				corev1.ResourceCPU:              suggestionConfigData.Resource.Requests[corev1.ResourceCPU],
+				corev1.ResourceMemory:           suggestionConfigData.Resource.Requests[corev1.ResourceMemory],
+				corev1.ResourceEphemeralStorage: suggestionConfigData.Resource.Requests[corev1.ResourceEphemeralStorage],
+			},
 		},
 	}
 
@@ -248,7 +208,7 @@ func (g *General) desiredContainer(s *suggestionsv1beta1.Suggestion, suggestionC
 			},
 		}
 	}
-	return c, nil
+	return c
 }
 
 // DesiredVolume returns desired PVC and PV for suggestion.
@@ -261,10 +221,7 @@ func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.Persi
 	persistentVolumePath := consts.DefaultSuggestionVolumeLocalPathPrefix + persistentVolumeName
 	volumeAccessModes := consts.DefaultSuggestionVolumeAccessMode
 
-	volumeStorage, err := resource.ParseQuantity(consts.DefaultSuggestionVolumeStorage)
-	if err != nil {
-		return nil, nil, err
-	}
+	volumeStorage, _ := resource.ParseQuantity(consts.DefaultSuggestionVolumeStorage)
 
 	pvc := &corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{

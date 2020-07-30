@@ -8,6 +8,7 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	v1beta10 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	katibconfig "github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
 	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	reflect "reflect"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
@@ -67,10 +68,10 @@ func (mr *MockGeneratorMockRecorder) GetRunSpecWithHyperParameters(arg0, arg1, a
 }
 
 // GetSuggestionConfigData mocks base method.
-func (m *MockGenerator) GetSuggestionConfigData(arg0 string) (map[string]string, error) {
+func (m *MockGenerator) GetSuggestionConfigData(arg0 string) (katibconfig.SuggestionConfig, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSuggestionConfigData", arg0)
-	ret0, _ := ret[0].(map[string]string)
+	ret0, _ := ret[0].(katibconfig.SuggestionConfig)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

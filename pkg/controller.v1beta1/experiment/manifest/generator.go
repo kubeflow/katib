@@ -27,7 +27,7 @@ type Generator interface {
 	InjectClient(c client.Client)
 	GetTrialTemplate(instance *experimentsv1beta1.Experiment) (string, error)
 	GetRunSpecWithHyperParameters(experiment *experimentsv1beta1.Experiment, trialName, trialNamespace string, assignments []commonapiv1beta1.ParameterAssignment) (*unstructured.Unstructured, error)
-	GetSuggestionConfigData(algorithmName string) (map[string]string, error)
+	GetSuggestionConfigData(algorithmName string) (katibconfig.SuggestionConfig, error)
 	GetMetricsCollectorImage(cKind commonapiv1beta1.CollectorKind) (string, error)
 }
 
@@ -56,7 +56,7 @@ func (g *DefaultGenerator) GetMetricsCollectorImage(cKind commonapiv1beta1.Colle
 	return configData[consts.LabelMetricsCollectorSidecarImage], nil
 }
 
-func (g *DefaultGenerator) GetSuggestionConfigData(algorithmName string) (map[string]string, error) {
+func (g *DefaultGenerator) GetSuggestionConfigData(algorithmName string) (katibconfig.SuggestionConfig, error) {
 	return katibconfig.GetSuggestionConfigData(algorithmName, g.client.GetClient())
 }
 
