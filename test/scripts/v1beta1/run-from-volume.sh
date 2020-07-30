@@ -57,8 +57,14 @@ export KUBECONFIG=$HOME/.kube/config
 ./run-e2e-experiment ../../../examples/v1beta1/resume-experiment/from-volume-resume.yaml
 
 kubectl -n kubeflow describe suggestion from-volume-resume
-
 kubectl -n kubeflow describe experiment from-volume-resume
+
+echo "Resuming the completed experiment with resume from volume"
+./resume-e2e-experiment ../../../examples/v1beta1/resume-experiment/from-volume-resume.yaml
+
+kubectl -n kubeflow describe suggestion from-volume-resume
+kubectl -n kubeflow describe experiment from-volume-resume
+
 kubectl -n kubeflow delete experiment from-volume-resume
 
 exit 0
