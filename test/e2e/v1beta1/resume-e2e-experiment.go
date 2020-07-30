@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -69,17 +68,6 @@ func main() {
 	exp, err = kclient.GetExperiment(exp.Name, exp.Namespace)
 	if err != nil {
 		log.Fatal("Get Experiment error. Experiment not created yet ", err)
-	}
-
-	podList := &corev1.PodList{}
-	listOpt := client.InNamespace("kubeflow")
-	kclient.GetClient().List(context.TODO(), listOpt, podList)
-	var controllerPodName string
-	for _, pod := range podList.Items {
-		log.Println(pod.Name)
-		if strings.Index(pod.Name, "katib-controller") != -1 {
-			controllerPodName = pod.Name
-		}
 	}
 
 	var maxtrials int32 = 7
