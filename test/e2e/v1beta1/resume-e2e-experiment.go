@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -108,23 +107,6 @@ func main() {
 			break
 		}
 
-		// Test
-		log.Println("----------------------- Print log -----------------------")
-		podLogOpts := corev1.PodLogOptions{}
-		req := kclient.GetClientSet().CoreV1().Pods("kubeflow").GetLogs(controllerPodName, &podLogOpts)
-		podLogs, err := req.Stream()
-		if err != nil {
-			log.Fatal("error in opening stream")
-		}
-		defer podLogs.Close()
-
-		logbuffer := new(bytes.Buffer)
-		_, err = io.Copy(logbuffer, podLogs)
-		if err != nil {
-			log.Fatal("error in copy information from podLogs to buf")
-		}
-		log.Println(logbuffer.String())
-		log.Println("----------------------------------------------")
 		time.Sleep(5 * time.Second)
 	}
 
@@ -156,24 +138,6 @@ func main() {
 			log.Printf("Experiment %v finished", exp.Name)
 			break
 		}
-
-		// Test
-		log.Println("----------------------- Print log -----------------------")
-		podLogOpts := corev1.PodLogOptions{}
-		req := kclient.GetClientSet().CoreV1().Pods("kubeflow").GetLogs(controllerPodName, &podLogOpts)
-		podLogs, err := req.Stream()
-		if err != nil {
-			log.Fatal("error in opening stream")
-		}
-		defer podLogs.Close()
-
-		logbuffer := new(bytes.Buffer)
-		_, err = io.Copy(logbuffer, podLogs)
-		if err != nil {
-			log.Fatal("error in copy information from podLogs to buf")
-		}
-		log.Println(logbuffer.String())
-		log.Println("----------------------------------------------")
 
 		time.Sleep(20 * time.Second)
 	}
