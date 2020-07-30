@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -69,12 +71,24 @@ func main() {
 	if err != nil {
 		log.Fatal("Get Experiment error. Experiment not created yet ", err)
 	}
+
+	podList := &corev1.PodList{}
+	listOpt := client.InNamespace("kubeflow")
+	kclient.GetClient().List(context.TODO(), listOpt, podList)
+	var controllerPodName string
+	for _, pod := range podList.Items {
+		log.Println(pod.Name)
+		if strings.Index(pod.Name, "katib-controller") != -1 {
+			controllerPodName = pod.Name
+		}
+	}
+
+	var maxtrials int32 = 7
+	var paralleltrials int32 = 3
 	if exp.Spec.Algorithm.AlgorithmName != "hyperband" && exp.Spec.Algorithm.AlgorithmName != "darts" {
 		// Hyperband will validate the parallel trial count,
 		// thus we should not change it.
 		// Not necessary to test parallel Trials for Darts
-		var maxtrials int32 = 7
-		var paralleltrials int32 = 3
 		exp.Spec.MaxTrialCount = &maxtrials
 		exp.Spec.ParallelTrialCount = &paralleltrials
 	}
@@ -89,10 +103,28 @@ func main() {
 		if err != nil {
 			log.Fatal("Get Experiment error ", err)
 		}
-		if exp.IsRunning() {
-			log.Printf("Experiment %v started running", exp.Name)
+		if exp.IsRunning() && exp.Status.Trials == maxtrials {
+			log.Printf("Experiment %v started running with %v MaxTrialCount", exp.Name, maxtrials)
 			break
 		}
+
+		// Test
+		log.Println("----------------------- Print log -----------------------")
+		podLogOpts := corev1.PodLogOptions{}
+		req := kclient.GetClientSet().CoreV1().Pods("kubeflow").GetLogs(controllerPodName, &podLogOpts)
+		podLogs, err := req.Stream()
+		if err != nil {
+			log.Fatal("error in opening stream")
+		}
+		defer podLogs.Close()
+
+		logbuffer := new(bytes.Buffer)
+		_, err = io.Copy(logbuffer, podLogs)
+		if err != nil {
+			log.Fatal("error in copy information from podLogs to buf")
+		}
+		log.Println(logbuffer.String())
+		log.Println("----------------------------------------------")
 		time.Sleep(5 * time.Second)
 	}
 
@@ -124,6 +156,25 @@ func main() {
 			log.Printf("Experiment %v finished", exp.Name)
 			break
 		}
+
+		// Test
+		log.Println("----------------------- Print log -----------------------")
+		podLogOpts := corev1.PodLogOptions{}
+		req := kclient.GetClientSet().CoreV1().Pods("kubeflow").GetLogs(controllerPodName, &podLogOpts)
+		podLogs, err := req.Stream()
+		if err != nil {
+			log.Fatal("error in opening stream")
+		}
+		defer podLogs.Close()
+
+		logbuffer := new(bytes.Buffer)
+		_, err = io.Copy(logbuffer, podLogs)
+		if err != nil {
+			log.Fatal("error in copy information from podLogs to buf")
+		}
+		log.Println(logbuffer.String())
+		log.Println("----------------------------------------------")
+
 		time.Sleep(20 * time.Second)
 	}
 

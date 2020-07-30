@@ -17,10 +17,12 @@ package katibclient
 
 import (
 	"context"
+	"log"
 
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -34,6 +36,7 @@ import (
 type Client interface {
 	InjectClient(c client.Client)
 	GetClient() client.Client
+	GetClientSet() *kubernetes.Clientset
 	GetExperimentList(namespace ...string) (*experimentsv1beta1.ExperimentList, error)
 	GetExperiment(name string, namespace ...string) (*experimentsv1beta1.Experiment, error)
 	GetConfigMap(name string, namespace ...string) (map[string]string, error)
@@ -48,12 +51,14 @@ type Client interface {
 }
 
 type KatibClient struct {
-	client client.Client
+	client    client.Client
+	clientset *kubernetes.Clientset
 }
 
 func NewWithGivenClient(c client.Client) Client {
 	return &KatibClient{
-		client: c,
+		client:    c,
+		clientset: &kubernetes.Clientset{},
 	}
 }
 
@@ -69,8 +74,13 @@ func NewClient(options client.Options) (Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	cs, err := kubernetes.NewForConfig(cfg)
+	if err != nil {
+		log.Fatal("error in getting access to K8S")
+	}
 	return &KatibClient{
-		client: cl,
+		client:    cl,
+		clientset: cs,
 	}, nil
 }
 
@@ -80,6 +90,10 @@ func (k *KatibClient) InjectClient(c client.Client) {
 
 func (k *KatibClient) GetClient() client.Client {
 	return k.client
+}
+
+func (k *KatibClient) GetClientSet() *kubernetes.Clientset {
+	return k.clientset
 }
 
 func (k *KatibClient) GetExperimentList(namespace ...string) (*experimentsv1beta1.ExperimentList, error) {
