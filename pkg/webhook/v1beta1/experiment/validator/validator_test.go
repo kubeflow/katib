@@ -34,13 +34,14 @@ func TestValidateExperiment(t *testing.T) {
 	suggestionConfigData.Image = "algorithmImage"
 	metricsCollectorConfigData := katibconfig.MetricsCollectorConfig{}
 	metricsCollectorConfigData.Image = "metricsCollectorImage"
-	fakeNegativeInt := int32(-1)
 
 	p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(suggestionConfigData, nil).AnyTimes()
 	p.EXPECT().GetMetricsCollectorConfigData(gomock.Any()).Return(metricsCollectorConfigData, nil).AnyTimes()
 
 	batchJobStr := convertBatchJobToString(newFakeBatchJob())
 	p.EXPECT().GetTrialTemplate(gomock.Any()).Return(batchJobStr, nil).AnyTimes()
+
+	fakeNegativeInt := int32(-1)
 
 	tcs := []struct {
 		Instance        *experimentsv1beta1.Experiment
@@ -718,7 +719,10 @@ func TestValidateMetricsCollector(t *testing.T) {
 	p := manifestmock.NewMockGenerator(mockCtrl)
 	g := New(p)
 
-	p.EXPECT().GetMetricsCollectorImage(gomock.Any()).Return("metricsCollectorImage", nil).AnyTimes()
+	metricsCollectorConfigData := katibconfig.MetricsCollectorConfig{}
+	metricsCollectorConfigData.Image = "metricsCollectorImage"
+
+	p.EXPECT().GetMetricsCollectorConfigData(gomock.Any()).Return(metricsCollectorConfigData, nil).AnyTimes()
 
 	tcs := []struct {
 		Instance        *experimentsv1beta1.Experiment
@@ -937,6 +941,51 @@ func TestValidateMetricsCollector(t *testing.T) {
 		}
 	}
 
+}
+
+func TestValidateConfigData(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	p := manifestmock.NewMockGenerator(mockCtrl)
+	g := New(p)
+
+	suggestionConfigData := katibconfig.SuggestionConfig{}
+	suggestionConfigData.Image = "algorithmImage"
+
+	validConfigCall := p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(suggestionConfigData, nil)
+	invalidConfigCall := p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(katibconfig.SuggestionConfig{}, errors.New("GetSuggestionConfigData failed"))
+
+	gomock.InOrder(
+		invalidConfigCall,
+		validConfigCall,
+	)
+
+	p.EXPECT().GetMetricsCollectorConfigData(gomock.Any()).Return(katibconfig.MetricsCollectorConfig{}, errors.New("GetMetricsCollectorConfigData failed"))
+
+	batchJobStr := convertBatchJobToString(newFakeBatchJob())
+	p.EXPECT().GetTrialTemplate(gomock.Any()).Return(batchJobStr, nil).AnyTimes()
+
+	tcs := []struct {
+		Instance        *experimentsv1beta1.Experiment
+		testDescription string
+	}{
+		{
+			Instance:        newFakeInstance(),
+			testDescription: "Get suggestion config data error",
+		},
+		{
+			Instance:        newFakeInstance(),
+			testDescription: "Get metrics collector config data error",
+		},
+	}
+
+	for _, tc := range tcs {
+		err := g.ValidateExperiment(tc.Instance, nil)
+		if err == nil {
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
+		}
+	}
 }
 
 func newFakeInstance() *experimentsv1beta1.Experiment {
