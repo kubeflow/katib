@@ -25,6 +25,7 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ktypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
@@ -32,7 +33,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/manifest"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	"github.com/kubeflow/katib/pkg/webhook/v1beta1/common"
 	"github.com/kubeflow/katib/pkg/webhook/v1beta1/experiment/validator"
 )
@@ -96,9 +99,20 @@ func (v *experimentValidator) Handle(ctx context.Context, req types.Request) typ
 	// We unable to watch for the PV events in controller.
 	// Webhook forbids experiment creation until coresponding PV will be deleted.
 	if inst.Spec.ResumePolicy == experimentsv1beta1.FromVolume && oldInst == nil {
-		foundPV := &v1.PersistentVolume{}
-		PVName := inst.Name + "-" + inst.Namespace
-		err := v.client.Get(context.TODO(), ktypes.NamespacedName{Name: PVName}, foundPV)
+		// Create suggestion with name, namespace and algorithm name to get appropriate PV
+		suggestion := &suggestionsv1beta1.Suggestion{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      inst.Name,
+				Namespace: inst.Namespace,
+			},
+			Spec: suggestionsv1beta1.SuggestionSpec{
+				AlgorithmName: inst.Spec.Algorithm.AlgorithmName,
+			},
+		}
+
+		// Get PV name from Suggestion
+		PVName := util.GetAlgorithmPersistentVolumeName(suggestion)
+		err := v.client.Get(context.TODO(), ktypes.NamespacedName{Name: PVName}, &v1.PersistentVolume{})
 		if !errors.IsNotFound(err) {
 			returnError := fmt.Errorf("Cannot create the Experiment: %v in namespace: %v, PV: %v is not deleted", inst.Name, inst.Namespace, PVName)
 			if err != nil {

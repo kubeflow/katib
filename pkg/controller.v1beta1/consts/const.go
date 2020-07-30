@@ -58,43 +58,26 @@ const (
 	// DefaultKatibDBManagerServicePortEnvName is the env name of Katib DB Manager Port
 	DefaultKatibDBManagerServicePortEnvName = "KATIB_DB_MANAGER_SERVICE_PORT"
 
-	// KatibConfigMapName is the config map constants
-	// Configmap name which includes Katib's configuration
+	// KatibConfigMapName is the configmap name which includes Katib's configuration.
 	KatibConfigMapName = "katib-config"
 	// LabelSuggestionTag is the name of suggestion config in configmap.
 	LabelSuggestionTag = "suggestion"
-	// DefaultCPULimit is the default value for CPU Limit
+	// LabelMetricsCollectorSidecar is the name of metrics collector config in configmap.
+	LabelMetricsCollectorSidecar = "metrics-collector-sidecar"
+	// DefaultImagePullPolicy is the default value for image pull policy.
+	DefaultImagePullPolicy = corev1.PullIfNotPresent
+	// DefaultCPULimit is the default value for CPU limit.
 	DefaultCPULimit = "500m"
-	// DefaultCPURequest is the default value for CPU Request
+	// DefaultCPURequest is the default value for CPU request.
 	DefaultCPURequest = "50m"
-	// DefaultMemLimit is the default value for mem Limit
+	// DefaultMemLimit is the default value for memory limit.
 	DefaultMemLimit = "100Mi"
-	// DefaultMemRequest is the default value for mem Request
+	// DefaultMemRequest is the default value for memory request.
 	DefaultMemRequest = "10Mi"
 	// DefaultDiskLimit is the default value for disk limit.
 	DefaultDiskLimit = "5Gi"
 	// DefaultDiskRequest is the default value for disk request.
 	DefaultDiskRequest = "500Mi"
-	// DefaultImagePullPolicy is the default value for image pull policy.
-	DefaultImagePullPolicy = "IfNotPresent"
-	// LabelMetricsCollectorSidecar is the name of metrics collector config in configmap.
-	LabelMetricsCollectorSidecar = "metrics-collector-sidecar"
-	// LabelMetricsCollectorSidecarImage is the name of metrics collector image config in configmap.
-	LabelMetricsCollectorSidecarImage = "image"
-	// LabelMetricsCollectorCPULimitTag is the name of metrics collector CPU Limit config in configmap.
-	LabelMetricsCollectorCPULimitTag = "cpuLimit"
-	// LabelMetricsCollectorCPURequestTag is the name of metrics collector CPU Request config in configmap.
-	LabelMetricsCollectorCPURequestTag = "cpuRequest"
-	// LabelMetricsCollectorMemLimitTag is the name of metrics collector Mem Limit config in configmap.
-	LabelMetricsCollectorMemLimitTag = "memLimit"
-	// LabelMetricsCollectorMemRequestTag is the name of metrics collector Mem Request config in configmap.
-	LabelMetricsCollectorMemRequestTag = "memRequest"
-	// LabelMetricsCollectorDiskLimitTag is the name of metrics collector Disk Limit config in configmap.
-	LabelMetricsCollectorDiskLimitTag = "diskLimit"
-	// LabelMetricsCollectorDiskRequestTag is the name of metrics collector Disk Request config in configmap.
-	LabelMetricsCollectorDiskRequestTag = "diskRequest"
-	// LabelMetricsCollectorImagePullPolicy is the name of metrics collector image pull policy in configmap.
-	LabelMetricsCollectorImagePullPolicy = "imagePullPolicy"
 
 	// ReconcileErrorReason is the reason when there is a reconcile error.
 	ReconcileErrorReason = "ReconcileError"

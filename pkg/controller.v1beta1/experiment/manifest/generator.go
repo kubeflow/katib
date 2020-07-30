@@ -28,7 +28,7 @@ type Generator interface {
 	GetTrialTemplate(instance *experimentsv1beta1.Experiment) (string, error)
 	GetRunSpecWithHyperParameters(experiment *experimentsv1beta1.Experiment, trialName, trialNamespace string, assignments []commonapiv1beta1.ParameterAssignment) (*unstructured.Unstructured, error)
 	GetSuggestionConfigData(algorithmName string) (katibconfig.SuggestionConfig, error)
-	GetMetricsCollectorImage(cKind commonapiv1beta1.CollectorKind) (string, error)
+	GetMetricsCollectorConfigData(cKind commonapiv1beta1.CollectorKind) (katibconfig.MetricsCollectorConfig, error)
 }
 
 // DefaultGenerator is the default implementation of Generator.
@@ -48,14 +48,12 @@ func (g *DefaultGenerator) InjectClient(c client.Client) {
 	g.client.InjectClient(c)
 }
 
-func (g *DefaultGenerator) GetMetricsCollectorImage(cKind commonapiv1beta1.CollectorKind) (string, error) {
-	configData, err := katibconfig.GetMetricsCollectorConfigData(cKind, g.client.GetClient())
-	if err != nil {
-		return "", nil
-	}
-	return configData[consts.LabelMetricsCollectorSidecarImage], nil
+// GetMetricsCollectorConfigData returns metrics collector configuration for a given collector kind.
+func (g *DefaultGenerator) GetMetricsCollectorConfigData(cKind commonapiv1beta1.CollectorKind) (katibconfig.MetricsCollectorConfig, error) {
+	return katibconfig.GetMetricsCollectorConfigData(cKind, g.client.GetClient())
 }
 
+// GetSuggestionConfigData returns suggestion configuration for a given algorithm name.
 func (g *DefaultGenerator) GetSuggestionConfigData(algorithmName string) (katibconfig.SuggestionConfig, error) {
 	return katibconfig.GetSuggestionConfigData(algorithmName, g.client.GetClient())
 }
