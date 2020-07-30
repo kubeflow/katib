@@ -32,10 +32,12 @@ func TestValidateExperiment(t *testing.T) {
 
 	suggestionConfigData := katibconfig.SuggestionConfig{}
 	suggestionConfigData.Image = "algorithmImage"
+	metricsCollectorConfigData := katibconfig.MetricsCollectorConfig{}
+	metricsCollectorConfigData.Image = "metricsCollectorImage"
 	fakeNegativeInt := int32(-1)
 
 	p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(suggestionConfigData, nil).AnyTimes()
-	p.EXPECT().GetMetricsCollectorImage(gomock.Any()).Return("metricsCollectorImage", nil).AnyTimes()
+	p.EXPECT().GetMetricsCollectorConfigData(gomock.Any()).Return(metricsCollectorConfigData, nil).AnyTimes()
 
 	batchJobStr := convertBatchJobToString(newFakeBatchJob())
 	p.EXPECT().GetTrialTemplate(gomock.Any()).Return(batchJobStr, nil).AnyTimes()

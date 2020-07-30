@@ -351,8 +351,8 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1beta1.Exp
 		if mcKind != mc {
 			continue
 		}
-		if _, err := g.GetMetricsCollectorImage(mcKind); err != nil {
-			return fmt.Errorf("GetMetricsCollectorImage failed: %v.", err)
+		if _, err := g.GetMetricsCollectorConfigData(mcKind); err != nil {
+			return fmt.Errorf("GetMetricsCollectorConfigData failed: %v", err)
 		}
 		break
 	}
