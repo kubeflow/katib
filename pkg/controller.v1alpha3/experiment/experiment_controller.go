@@ -357,7 +357,7 @@ func (r *ReconcileExperiment) createTrials(instance *experimentsv1alpha3.Experim
 
 func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha3.Experiment,
 	trials []trialsv1alpha3.Trial,
-	deleteCount int32) error {
+	expectedDeletions int32) error {
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 
 	trialSlice := trials
@@ -366,7 +366,15 @@ func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1alpha3.Experim
 			After(trialSlice[j].CreationTimestamp.Time)
 	})
 
-	for i := 0; i < int(deleteCount); i++ {
+	expected := int(expectedDeletions)
+	actual := len(trialSlice)
+	// If the number of trials < expected, we delete all we have.
+	if actual < expected {
+		logger.Info("deleteTrials does not find enough trials, we will delete all trials instead",
+			"expectedDeletions", expected, "trials", actual)
+		expected = actual
+	}
+	for i := 0; i < expected; i++ {
 		if err := r.Delete(context.TODO(), &trialSlice[i]); err != nil {
 			logger.Error(err, "Trial Delete error")
 			return err
