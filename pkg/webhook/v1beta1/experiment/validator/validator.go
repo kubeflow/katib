@@ -65,9 +65,7 @@ func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1be
 		// We should validate restart only if appropriate fields are changed.
 		// Otherwise check below is triggered when experiment is deleted.
 		isRestarting := false
-		if *oldInst.Spec.MaxFailedTrialCount != *instance.Spec.MaxFailedTrialCount ||
-			*oldInst.Spec.MaxTrialCount != *instance.Spec.MaxTrialCount ||
-			*oldInst.Spec.ParallelTrialCount != *instance.Spec.ParallelTrialCount {
+		if !equality.Semantic.DeepEqual(instance.Spec, oldInst.Spec) {
 			isRestarting = true
 		}
 
