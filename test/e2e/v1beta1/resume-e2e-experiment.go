@@ -69,11 +69,13 @@ func main() {
 	if err != nil {
 		log.Fatal("Get Experiment error. Experiment not created yet ", err)
 	}
-	if exp.Spec.Algorithm.AlgorithmName != "hyperband" {
+
+	var maxtrials int32 = 7
+	var paralleltrials int32 = 3
+	if exp.Spec.Algorithm.AlgorithmName != "hyperband" && exp.Spec.Algorithm.AlgorithmName != "darts" {
 		// Hyperband will validate the parallel trial count,
 		// thus we should not change it.
-		var maxtrials int32 = 7
-		var paralleltrials int32 = 3
+		// Not necessary to test parallel Trials for Darts
 		exp.Spec.MaxTrialCount = &maxtrials
 		exp.Spec.ParallelTrialCount = &paralleltrials
 	}
@@ -88,10 +90,11 @@ func main() {
 		if err != nil {
 			log.Fatal("Get Experiment error ", err)
 		}
-		if exp.IsRunning() {
-			log.Printf("Experiment %v started running", exp.Name)
+		if exp.IsRunning() && exp.Status.Trials == maxtrials {
+			log.Printf("Experiment %v started running with %v MaxTrialCount", exp.Name, maxtrials)
 			break
 		}
+
 		time.Sleep(5 * time.Second)
 	}
 
@@ -123,6 +126,7 @@ func main() {
 			log.Printf("Experiment %v finished", exp.Name)
 			break
 		}
+
 		time.Sleep(20 * time.Second)
 	}
 
@@ -163,24 +167,40 @@ func main() {
 	sug, err := kclient.GetSuggestion(exp.Name, exp.Namespace)
 	if exp.Spec.ResumePolicy == experimentsv1beta1.LongRunning {
 		if sug.IsSucceeded() {
-			log.Fatal("Suggestion is terminated while ResumePolicy = LongRunning")
+			log.Fatal("Suggestion is succeeded while ResumePolicy = LongRunning")
 		}
 	}
-	if exp.Spec.ResumePolicy == experimentsv1beta1.NeverResume {
+	if exp.Spec.ResumePolicy == experimentsv1beta1.NeverResume || exp.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
 		if sug.IsRunning() {
-			log.Fatal("Suggestion is still running while ResumePolicy = NeverResume")
+			log.Fatalf("Suggestion is still running while ResumePolicy = %v", exp.Spec.ResumePolicy)
 		}
+
 		namespacedName := types.NamespacedName{Name: controllerUtil.GetAlgorithmServiceName(sug), Namespace: sug.Namespace}
-		service := &corev1.Service{}
-		err := kclient.GetClient().Get(context.TODO(), namespacedName, service)
+		err := kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.Service{})
 		if err == nil || !errors.IsNotFound(err) {
-			log.Fatal("Suggestion service is still alive while ResumePolicy = NeverResume")
+			log.Fatalf("Suggestion service is still alive while ResumePolicy = %v", exp.Spec.ResumePolicy)
 		}
+		log.Printf("Suggestion service %v has been deleted", controllerUtil.GetAlgorithmServiceName(sug))
+
 		namespacedName = types.NamespacedName{Name: controllerUtil.GetAlgorithmDeploymentName(sug), Namespace: sug.Namespace}
-		deployment := &appsv1.Deployment{}
-		err = kclient.GetClient().Get(context.TODO(), namespacedName, deployment)
+		err = kclient.GetClient().Get(context.TODO(), namespacedName, &appsv1.Deployment{})
 		if err == nil || !errors.IsNotFound(err) {
-			log.Fatal("Suggestion deployment is still alive while ResumePolicy = NeverResume")
+			log.Fatalf("Suggestion deployment is still alive while ResumePolicy = %v", exp.Spec.ResumePolicy)
+		}
+		log.Printf("Suggestion deployment %v has been deleted", controllerUtil.GetAlgorithmDeploymentName(sug))
+
+		if exp.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
+			namespacedName = types.NamespacedName{Name: controllerUtil.GetAlgorithmPersistentVolumeClaimName(sug), Namespace: sug.Namespace}
+			err = kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.PersistentVolumeClaim{})
+			if err != nil {
+				log.Fatalf("Suggestion persistent volume claim is not alive while ResumePolicy = %v, error: %v", experimentsv1beta1.FromVolume, err)
+			}
+
+			namespacedName = types.NamespacedName{Name: controllerUtil.GetAlgorithmPersistentVolumeName(sug)}
+			err = kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.PersistentVolume{})
+			if err != nil {
+				log.Fatalf("Suggestion persistent volume is not alive while ResumePolicy = %v, error: %v", experimentsv1beta1.FromVolume, err)
+			}
 		}
 	}
 
