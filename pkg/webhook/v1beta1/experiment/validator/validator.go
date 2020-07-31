@@ -22,6 +22,7 @@ import (
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/manifest"
+	experimentutil "github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/util"
 	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	jobv1beta1 "github.com/kubeflow/katib/pkg/job/v1beta1"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
@@ -48,6 +49,8 @@ func (g *DefaultValidator) InjectClient(c client.Client) {
 	g.Generator.InjectClient(c)
 }
 
+// ValidateExperiment validates experiment for the given instance.
+// oldInst is specified when experiment is edited.
 func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1beta1.Experiment) error {
 	if instance.Spec.MaxFailedTrialCount != nil && *instance.Spec.MaxFailedTrialCount < 0 {
 		return fmt.Errorf("spec.maxFailedTrialCount should not be less than 0")
@@ -59,14 +62,34 @@ func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1be
 		return fmt.Errorf("spec.parallelTrialCount must be greater than 0")
 	}
 	if oldInst != nil {
+		// We should validate restart only if appropriate fields are changed.
+		// Otherwise check below is triggered when experiment is deleted.
+		isRestarting := false
+		if *oldInst.Spec.MaxFailedTrialCount != *instance.Spec.MaxFailedTrialCount ||
+			*oldInst.Spec.MaxTrialCount != *instance.Spec.MaxTrialCount ||
+			*oldInst.Spec.ParallelTrialCount != *instance.Spec.ParallelTrialCount {
+			isRestarting = true
+		}
+
+		// When experiment is completed IsCompletedExperimentRestartable must return true
+		if isRestarting && oldInst.IsCompleted() && !experimentutil.IsCompletedExperimentRestartable(oldInst) {
+			msg := fmt.Sprintf("Experiment can be restarted if it is in succeeded state by reaching max trials and "+
+				"spec.resumePolicy = %v or spec.resumePolicy = %v, when experiment is completed",
+				experimentsv1beta1.LongRunning, experimentsv1beta1.FromVolume)
+			return fmt.Errorf(msg)
+		}
+
+		if isRestarting && instance.Spec.MaxTrialCount != nil && *instance.Spec.MaxTrialCount <= oldInst.Status.Trials {
+			return fmt.Errorf("spec.maxTrialCount: %v must be greater than status.trials count: %v",
+				*instance.Spec.MaxTrialCount, oldInst.Status.Trials)
+		}
 		oldInst.Spec.MaxFailedTrialCount = instance.Spec.MaxFailedTrialCount
 		oldInst.Spec.MaxTrialCount = instance.Spec.MaxTrialCount
 		oldInst.Spec.ParallelTrialCount = instance.Spec.ParallelTrialCount
-		if equality.Semantic.DeepEqual(instance.Spec, oldInst.Spec) {
-			return nil
-		} else {
-			return fmt.Errorf("Only spec.parallelTrialCount, spec.maxTrialCount and spec.maxFailedTrialCount are editable.")
+		if !equality.Semantic.DeepEqual(instance.Spec, oldInst.Spec) {
+			return fmt.Errorf("Only spec.parallelTrialCount, spec.maxTrialCount and spec.maxFailedTrialCount are editable")
 		}
+		return nil
 	}
 	if err := g.validateObjective(instance.Spec.Objective); err != nil {
 		return err

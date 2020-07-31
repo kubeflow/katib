@@ -14,7 +14,9 @@ import (
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	experimentutil "github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/util"
 	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
+
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1beta1/experiment/manifest"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
 )
@@ -126,12 +128,35 @@ func TestValidateExperiment(t *testing.T) {
 			Err:             true,
 			testDescription: "Parallel trial count is negative",
 		},
-		// Valid Resume Experiment
+		// Validate Resume Experiment
 		{
 			Instance:        newFakeInstance(),
 			Err:             false,
 			oldInstance:     newFakeInstance(),
 			testDescription: "Run validator to correct resume experiment",
+		},
+		{
+			Instance: newFakeInstance(),
+			Err:      true,
+			oldInstance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.MarkExperimentStatusSucceeded(experimentutil.ExperimentMaxTrialsReachedReason, "Experiment is succeeded")
+				i.Spec.ResumePolicy = experimentsv1beta1.NeverResume
+				return i
+			}(),
+			testDescription: "Resume succeeded experiment with ResumePolicy = NeverResume",
+		},
+		{
+			Instance: newFakeInstance(),
+			Err:      true,
+			oldInstance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Status = experimentsv1beta1.ExperimentStatus{
+					Trials: *i.Spec.MaxTrialCount,
+				}
+				return i
+			}(),
+			testDescription: "Resume experiment with MaxTrialCount <= Status.Trials",
 		},
 		{
 			Instance: newFakeInstance(),
@@ -152,6 +177,7 @@ func TestValidateExperiment(t *testing.T) {
 			Err:             true,
 			testDescription: "Invalid resume policy",
 		},
+		// Validate NAS Config
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
@@ -939,12 +965,15 @@ func TestValidateMetricsCollector(t *testing.T) {
 
 func newFakeInstance() *experimentsv1beta1.Experiment {
 	goal := 0.11
+	var maxTrialCount int32 = 6
+
 	return &experimentsv1beta1.Experiment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "fake",
 			Namespace: "fakens",
 		},
 		Spec: experimentsv1beta1.ExperimentSpec{
+			MaxTrialCount: &maxTrialCount,
 			MetricsCollectorSpec: &commonv1beta1.MetricsCollectorSpec{
 				Collector: &commonv1beta1.CollectorSpec{
 					Kind: commonv1beta1.StdOutCollector,
