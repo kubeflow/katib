@@ -37,19 +37,19 @@ func (m *MockGenerator) EXPECT() *MockGeneratorMockRecorder {
 	return m.recorder
 }
 
-// GetMetricsCollectorImage mocks base method.
-func (m *MockGenerator) GetMetricsCollectorImage(arg0 v1beta1.CollectorKind) (string, error) {
+// GetMetricsCollectorConfigData mocks base method.
+func (m *MockGenerator) GetMetricsCollectorConfigData(arg0 v1beta1.CollectorKind) (katibconfig.MetricsCollectorConfig, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMetricsCollectorImage", arg0)
-	ret0, _ := ret[0].(string)
+	ret := m.ctrl.Call(m, "GetMetricsCollectorConfigData", arg0)
+	ret0, _ := ret[0].(katibconfig.MetricsCollectorConfig)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetMetricsCollectorImage indicates an expected call of GetMetricsCollectorImage.
-func (mr *MockGeneratorMockRecorder) GetMetricsCollectorImage(arg0 interface{}) *gomock.Call {
+// GetMetricsCollectorConfigData indicates an expected call of GetMetricsCollectorConfigData.
+func (mr *MockGeneratorMockRecorder) GetMetricsCollectorConfigData(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMetricsCollectorImage", reflect.TypeOf((*MockGenerator)(nil).GetMetricsCollectorImage), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMetricsCollectorConfigData", reflect.TypeOf((*MockGenerator)(nil).GetMetricsCollectorConfigData), arg0)
 }
 
 // GetRunSpecWithHyperParameters mocks base method.

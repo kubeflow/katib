@@ -154,18 +154,7 @@ func (g *General) desiredContainer(s *suggestionsv1beta1.Suggestion, suggestionC
 				ContainerPort: consts.DefaultSuggestionPort,
 			},
 		},
-		Resources: corev1.ResourceRequirements{
-			Limits: corev1.ResourceList{
-				corev1.ResourceCPU:              suggestionConfigData.Resource.Limits[corev1.ResourceCPU],
-				corev1.ResourceMemory:           suggestionConfigData.Resource.Limits[corev1.ResourceMemory],
-				corev1.ResourceEphemeralStorage: suggestionConfigData.Resource.Limits[corev1.ResourceEphemeralStorage],
-			},
-			Requests: corev1.ResourceList{
-				corev1.ResourceCPU:              suggestionConfigData.Resource.Requests[corev1.ResourceCPU],
-				corev1.ResourceMemory:           suggestionConfigData.Resource.Requests[corev1.ResourceMemory],
-				corev1.ResourceEphemeralStorage: suggestionConfigData.Resource.Requests[corev1.ResourceEphemeralStorage],
-			},
-		},
+		Resources: suggestionConfigData.Resource,
 	}
 
 	if viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion) {
