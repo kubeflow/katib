@@ -154,6 +154,8 @@ func TestValidateExperiment(t *testing.T) {
 				i.Status = experimentsv1beta1.ExperimentStatus{
 					Trials: *i.Spec.MaxTrialCount,
 				}
+				var failed int32 = 2
+				i.Spec.MaxFailedTrialCount = &failed
 				return i
 			}(),
 			testDescription: "Resume experiment with MaxTrialCount <= Status.Trials",
