@@ -154,7 +154,7 @@ func (r *ReconcileExperiment) restartSuggestion(instance *experimentsv1beta1.Exp
 		}
 		return err
 	}
-	// If Suggestion running status is false, not needed to restart Suggestion
+	// If Suggestion running status is false not needed to restart Suggestion
 	if original.IsNotRunning() {
 		return nil
 	}
