@@ -225,6 +225,8 @@ func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *
 }
 
 // IsCompletedExperimentRestartable returns whether experiment is restartable or not
+// Experiment is restartable only if it is in succeeded state by reaching max trials and
+// ResumePolicy = LongRunning or ResumePolicy = FromVolume
 func IsCompletedExperimentRestartable(instance *experimentsv1beta1.Experiment) bool {
 	if instance.IsSucceeded() && instance.IsCompletedReason(ExperimentMaxTrialsReachedReason) &&
 		(instance.Spec.ResumePolicy == experimentsv1beta1.LongRunning || instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume) {

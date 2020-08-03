@@ -196,27 +196,23 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 				return reconcile.Result{}, err
 			}
 		}
-		// Check if completed instance is restartable
-		// Experiment is restartable only if it is in succeeded state by reaching max trials and
-		// ResumePolicy = LongRunning or ResumePolicy = FromVolume
-		if util.IsCompletedExperimentRestartable(instance) {
-			// Check if max trials is reconfigured
-			if (instance.Spec.MaxTrialCount != nil &&
-				*instance.Spec.MaxTrialCount != instance.Status.Trials) ||
-				(instance.Spec.MaxTrialCount == nil && instance.Status.Trials != 0) {
-				logger.Info("Experiment is restarting",
-					"MaxTrialCount", instance.Spec.MaxTrialCount,
-					"ParallelTrialCount", instance.Spec.ParallelTrialCount,
-					"MaxFailedTrialCount", instance.Spec.MaxFailedTrialCount)
-				msg := "Experiment is restarted"
-				instance.MarkExperimentStatusRestarting(util.ExperimentRestartingReason, msg)
-				// If ResumePolicy = FromVolume, suggestion must remove succeeded status and add running status when restarting
-				if instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
-					err := r.restartSuggestion(instance)
-					if err != nil {
-						logger.Error(err, "restartSuggestion error")
-						return reconcile.Result{}, err
-					}
+		// Check if max trials is reconfigured
+		// That means experiment is restarting
+		if (instance.Spec.MaxTrialCount != nil &&
+			*instance.Spec.MaxTrialCount > instance.Status.Trials) ||
+			(instance.Spec.MaxTrialCount == nil && instance.Status.Trials != 0) {
+			logger.Info("Experiment is restarting",
+				"MaxTrialCount", instance.Spec.MaxTrialCount,
+				"ParallelTrialCount", instance.Spec.ParallelTrialCount,
+				"MaxFailedTrialCount", instance.Spec.MaxFailedTrialCount)
+			msg := "Experiment is restarted"
+			instance.MarkExperimentStatusRestarting(util.ExperimentRestartingReason, msg)
+			// If ResumePolicy = FromVolume, suggestion must remove succeeded status and add running status when restarting
+			if instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
+				err := r.restartSuggestion(instance)
+				if err != nil {
+					logger.Error(err, "restartSuggestion error")
+					return reconcile.Result{}, err
 				}
 			}
 		} else {
