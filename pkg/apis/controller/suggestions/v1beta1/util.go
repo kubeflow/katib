@@ -64,6 +64,10 @@ func (suggestion *Suggestion) IsRunning() bool {
 	return hasCondition(suggestion, SuggestionRunning)
 }
 
+func (suggestion *Suggestion) IsDeploymentReady() bool {
+	return hasCondition(suggestion, SuggestionDeploymentReady)
+}
+
 func (suggestion *Suggestion) IsCompleted() bool {
 	return suggestion.IsSucceeded() || suggestion.IsFailed()
 }

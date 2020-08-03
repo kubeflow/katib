@@ -27,7 +27,6 @@ import (
 	"github.com/onsi/gomega"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -81,22 +80,4 @@ func StartTestManager(mgr manager.Manager, g *gomega.GomegaWithT) (chan struct{}
 		g.Expect(mgr.Start(stop)).NotTo(gomega.HaveOccurred())
 	}()
 	return stop, wg
-}
-
-// addForTestPurpose adds a new Controller to mgr with r as the reconcile.Reconciler.
-func addForTestPurpose(mgr manager.Manager, r reconcile.Reconciler) error {
-	// Create a new controller
-	c, err := controller.New("test-experiment-controller", mgr, controller.Options{Reconciler: r})
-	if err != nil {
-		log.Error(err, "Failed to create experiment controller for test purpose.")
-		return err
-	}
-
-	if err = addWatch(mgr, c); err != nil {
-		log.Error(err, "Trial watch failed")
-		return err
-	}
-
-	log.Info("Experiment controller created")
-	return nil
 }
