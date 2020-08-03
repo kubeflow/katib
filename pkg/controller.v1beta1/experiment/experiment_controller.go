@@ -430,10 +430,17 @@ func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1beta1.Experime
 			newTrialAssignment = append(newTrialAssignment, ta)
 		}
 	}
-	suggestion.Status.Suggestions = newTrialAssignment
-	suggestion.Status.SuggestionCount = int32(len(newTrialAssignment))
+
+	// Update suggestion spec first.
+	// If Requests <= SuggestionCount suggestion controller returns nil.
+	suggestion.Spec.Requests = int32(len(newTrialAssignment))
+	if err := r.UpdateSuggestion(suggestion); err != nil {
+		return err
+	}
 
 	// Update suggestion status
+	suggestion.Status.Suggestions = newTrialAssignment
+	suggestion.Status.SuggestionCount = int32(len(newTrialAssignment))
 	if err := r.UpdateSuggestionStatus(suggestion); err != nil {
 		return err
 	}
