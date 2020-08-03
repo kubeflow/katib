@@ -18,7 +18,9 @@ package experiment
 
 import (
 	"context"
+	"fmt"
 	"sort"
+	"time"
 
 	"github.com/spf13/viper"
 	corev1 "k8s.io/api/core/v1"
@@ -385,12 +387,59 @@ func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1beta1.Experime
 			"expectedDeletions", expected, "trials", actual)
 		expected = actual
 	}
+	deletedNames := []string{}
 	for i := 0; i < expected; i++ {
 		if err := r.Delete(context.TODO(), &trialSlice[i]); err != nil {
 			logger.Error(err, "Trial Delete error")
 			return err
 		}
+		deletedNames = append(deletedNames, trialSlice[i].Name)
 	}
+
+	// Check if trials were deleted
+	timeout := 60 * time.Second
+	endTime := time.Now().Add(timeout)
+
+	for _, name := range deletedNames {
+		var err error
+		for !errors.IsNotFound(err) && time.Now().Before(endTime) {
+			err = r.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: instance.GetNamespace()}, &trialsv1beta1.Trial{})
+		}
+		// If trials were deleted, err == IsNotFound, return error if timeout is out
+		if !errors.IsNotFound(err) {
+			return fmt.Errorf("Unable to delete trials %v, error: %v", deletedNames, err)
+		}
+	}
+
+	// We have to delete trials from suggestion status and update SuggestionCount
+	suggestion := &suggestionsv1beta1.Suggestion{}
+	err := r.Get(context.TODO(), types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}, suggestion)
+	if err != nil {
+		logger.Error(err, "Suggestion Get error")
+		return err
+	}
+
+	deletedNamesMap := make(map[string]bool)
+	for _, name := range deletedNames {
+		deletedNamesMap[name] = true
+	}
+	// Create new Trial Assignment without deleted trials
+	newTrialAssignment := []suggestionsv1beta1.TrialAssignment{}
+	for _, ta := range suggestion.Status.Suggestions {
+		if _, ok := deletedNamesMap[ta.Name]; !ok {
+			newTrialAssignment = append(newTrialAssignment, ta)
+		}
+	}
+	suggestion.Status.Suggestions = newTrialAssignment
+	suggestion.Status.SuggestionCount = int32(len(newTrialAssignment))
+
+	// Update suggestion status
+	if err := r.UpdateSuggestionStatus(suggestion); err != nil {
+		return err
+	}
+
+	logger.Info("Trials were successfully deleted", "trialNames", deletedNames)
+
 	return nil
 }
 
