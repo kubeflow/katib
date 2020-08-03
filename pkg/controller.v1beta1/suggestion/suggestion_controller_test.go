@@ -80,6 +80,7 @@ func TestReconcile(t *testing.T) {
 		scheme:           mgr.GetScheme(),
 		SuggestionClient: mockSuggestionClient,
 		Composer:         composer.New(mgr),
+		recorder:         mgr.GetRecorder(ControllerName),
 	}
 
 	recFn := SetupTestReconcile(r)

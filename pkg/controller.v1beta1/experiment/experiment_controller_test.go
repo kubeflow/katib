@@ -102,6 +102,7 @@ func TestReconcile(t *testing.T) {
 		Suggestion: mockSuggestion,
 		Generator:  mockGenerator,
 		collector:  experimentUtil.NewExpsCollector(mgr.GetCache(), prometheus.NewRegistry()),
+		recorder:   mgr.GetRecorder(ControllerName),
 	}
 	r.updateStatusHandler = func(instance *experimentsv1beta1.Experiment) error {
 		var err error = errors.NewBadRequest("fake-error")
