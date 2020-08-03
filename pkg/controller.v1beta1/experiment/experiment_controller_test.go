@@ -49,7 +49,7 @@ type statusMatcher struct {
 }
 
 func (statusM statusMatcher) Matches(x interface{}) bool {
-	// Cast interface to suggestion object
+	// Cast interface to suggestion
 	s := x.(*suggestionsv1beta1.Suggestion)
 
 	isMatch := false
@@ -104,7 +104,15 @@ func TestReconcile(t *testing.T) {
 		collector:  experimentUtil.NewExpsCollector(mgr.GetCache(), prometheus.NewRegistry()),
 	}
 	r.updateStatusHandler = func(instance *experimentsv1beta1.Experiment) error {
-		return r.updateStatus(instance)
+		var err error = errors.NewBadRequest("fake-error")
+		// Try to update status until it be succeeded
+		for err != nil {
+			updatedInstance := &experimentsv1beta1.Experiment{}
+			c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, updatedInstance)
+			updatedInstance.Status = instance.Status
+			err = r.updateStatus(updatedInstance)
+		}
+		return err
 	}
 
 	recFn := SetupTestReconcile(r)
@@ -129,44 +137,102 @@ func TestReconcile(t *testing.T) {
 		returnedUnstructured,
 		nil).AnyTimes()
 
-	suggestion := newFakeSuggestion()
+	suggestionRestartNo := newFakeSuggestion()
 
 	mockSuggestion.EXPECT().GetOrCreateSuggestion(gomock.Any(), gomock.Any()).Return(
-		suggestion, nil).AnyTimes()
+		suggestionRestartNo, nil).AnyTimes()
 
 	mockSuggestion.EXPECT().UpdateSuggestion(gomock.Any()).Return(nil).AnyTimes()
 
-	suggestionRestartNo := newFakeSuggestion()
+	reason := "Experiment is succeeded"
+	msgRestartNo := "Suggestion is succeeded, can't be restarted"
+	suggestionRestartNo.MarkSuggestionStatusSucceeded(reason, msgRestartNo)
+
 	suggestionRestartYes := newFakeSuggestion()
 	suggestionRestartYes.Spec.ResumePolicy = experimentsv1beta1.FromVolume
+
+	msgRestartYes := "Suggestion is succeeded, suggestion volume is not deleted, can be restarted"
+	suggestionRestartYes.MarkSuggestionStatusSucceeded(reason, msgRestartYes)
+
 	suggestionRestarting := newFakeSuggestion()
 
-	reason := "Experiment is succeeded"
-	msg := "Suggestion is succeeded, can't be restarted"
-	suggestionRestartNo.MarkSuggestionStatusSucceeded(reason, msg)
-
-	msg = "Suggestion is succeeded, suggestion volume is not deleted, can be restarted"
-	suggestionRestartYes.MarkSuggestionStatusSucceeded(reason, msg)
-
 	reason = "Experiment is restarting"
-	msg = "Suggestion is not running"
-	suggestionRestarting.MarkSuggestionStatusRunning(corev1.ConditionFalse, reason, msg)
+	msgRestarting := "Suggestion is not running"
+	suggestionRestarting.MarkSuggestionStatusRunning(corev1.ConditionFalse, reason, msgRestarting)
 
 	// Manually update suggestion status after UpdateSuggestionStatus is called
-	mockSuggestion.EXPECT().UpdateSuggestionStatus(statusMatcher{suggestionRestartNo}).Return(nil).MinTimes(1).Do(
+	// Call when Trials are being deleted
+	deleteTrialsCall := mockSuggestion.EXPECT().UpdateSuggestionStatus(gomock.Any()).Return(nil).Do(
 		func(arg0 interface{}) {
-			c.Status().Update(context.TODO(), suggestionRestartNo)
+			var err error = errors.NewBadRequest("fake-error")
+			suggestion := &suggestionsv1beta1.Suggestion{}
+			// We should Get suggestion because resource version can be modified
+			for err != nil {
+				c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
+				suggestion.Status.Suggestions = suggestion.Status.Suggestions[1:]
+				err = c.Status().Update(context.TODO(), suggestion)
+			}
 		})
-	mockSuggestion.EXPECT().UpdateSuggestionStatus(statusMatcher{suggestionRestartYes}).Return(nil).MinTimes(1).Do(
+
+	// Call when experiment is completed with ResumePolicy = NeverResume
+	restartNoCall := mockSuggestion.EXPECT().UpdateSuggestionStatus(statusMatcher{suggestionRestartNo}).Return(nil).Do(
 		func(arg0 interface{}) {
-			c.Status().Update(context.TODO(), suggestionRestartYes)
+			var err error = errors.NewBadRequest("fake-error")
+			suggestion := &suggestionsv1beta1.Suggestion{}
+			for err != nil {
+				c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
+				suggestion.MarkSuggestionStatusSucceeded(reason, msgRestartNo)
+				err = c.Status().Update(context.TODO(), suggestion)
+			}
 		})
-	mockSuggestion.EXPECT().UpdateSuggestionStatus(statusMatcher{suggestionRestarting}).Return(nil).MinTimes(1)
+
+	// Call when experiment is completed with ResumePolicy = FromVolume
+	restartYesCall := mockSuggestion.EXPECT().UpdateSuggestionStatus(statusMatcher{suggestionRestartYes}).Return(nil).Do(
+		func(arg0 interface{}) {
+			var err error = errors.NewBadRequest("fake-error")
+			suggestion := &suggestionsv1beta1.Suggestion{}
+			for err != nil {
+				c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
+				suggestion.MarkSuggestionStatusSucceeded(reason, msgRestartYes)
+				err = c.Status().Update(context.TODO(), suggestion)
+			}
+		})
+
+	// Call when experiment is restarting
+	experimentRestartingCall := mockSuggestion.EXPECT().UpdateSuggestionStatus(statusMatcher{suggestionRestarting}).Return(nil).Do(
+		func(arg0 interface{}) {
+			suggestion := &suggestionsv1beta1.Suggestion{}
+			var err error = errors.NewBadRequest("fake-error")
+			for err != nil {
+				c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
+				suggestion.MarkSuggestionStatusRunning(corev1.ConditionFalse, reason, msgRestarting)
+				err = c.Status().Update(context.TODO(), suggestion)
+			}
+		})
+
+	gomock.InOrder(
+		deleteTrialsCall,
+		restartNoCall,
+		restartYesCall,
+		experimentRestartingCall,
+	)
 
 	// Test 1 - Regural experiment run
 	instance := newFakeInstance()
 
-	// Create the experiment object
+	// Create the suggestion with NeverResume
+	g.Expect(c.Create(context.TODO(), suggestionRestartNo)).NotTo(gomega.HaveOccurred())
+	// Manually update suggestion's status with 3 suggestions
+	// Ones redundant trial is deleted, suggestion status must be updated
+	g.Eventually(func() error {
+		suggestion := &suggestionsv1beta1.Suggestion{}
+		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
+		suggestion.Status.Suggestions = newFakeSuggestion().Status.Suggestions
+		errStatus := c.Status().Update(context.TODO(), suggestion)
+		return errStatus
+	}, timeout).ShouldNot(gomega.HaveOccurred())
+
+	// Create the experiment
 	g.Expect(c.Create(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
 
 	// Expect that experiment status is running
@@ -177,28 +243,32 @@ func TestReconcile(t *testing.T) {
 	}, timeout).Should(gomega.BeTrue())
 
 	// Expect that 2 trials are created, 1 should be deleted because ParallelTrialCount=2
-	trials := &trialsv1beta1.TrialList{}
-	label := labels.Set{
-		consts.LabelExperimentName: experimentName,
-	}
 	g.Eventually(func() int {
+		trials := &trialsv1beta1.TrialList{}
+		label := labels.Set{
+			consts.LabelExperimentName: experimentName,
+		}
 		c.List(context.TODO(), &client.ListOptions{LabelSelector: label.AsSelector()}, trials)
 		return len(trials.Items)
 	}, timeout).Should(gomega.Equal(2))
 
-	// Create the suggestion object with NeverResume
-	g.Expect(c.Create(context.TODO(), suggestionRestartNo)).NotTo(gomega.HaveOccurred())
-	// Expect that suggestion is created
+	// Expect that suggestion status doesn't have first deleted trial
+	// test-trial-1 must be deleted from suggestion status
+	// UpdateSuggestionStatus with deleteTrialsCall call
 	g.Eventually(func() bool {
-		test := &suggestionsv1beta1.Suggestion{}
-		c.Get(context.TODO(),
-			types.NamespacedName{Namespace: namespace, Name: experimentName}, test)
-		return errors.IsNotFound(c.Get(context.TODO(),
-			types.NamespacedName{Namespace: namespace, Name: experimentName}, &suggestionsv1beta1.Suggestion{}))
-	}, timeout).ShouldNot(gomega.BeTrue())
+		suggestion := &suggestionsv1beta1.Suggestion{}
+		isDeleted := true
+		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
+		for _, s := range suggestion.Status.Suggestions {
+			if s.Name == trialName+"-1" {
+				isDeleted = false
+			}
+		}
+		return isDeleted
+	}, timeout).Should(gomega.BeTrue())
 
-	// Manually update suggestion status to failed to make experiment completed
-	// Expect that suggestion is updated
+	// Manually update experiment status to failed to make experiment completed
+	// Expect that experiment is updated
 	g.Eventually(func() error {
 		experiment = &experimentsv1beta1.Experiment{}
 		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment)
@@ -207,22 +277,22 @@ func TestReconcile(t *testing.T) {
 	}, timeout).ShouldNot(gomega.HaveOccurred())
 
 	// Expect that suggestion with ResumePolicy = NeverResume is succeeded
-	// UpdateSuggestionStatus is executing with suggestionRestartNo
+	// UpdateSuggestionStatus with restartNoCall call
 	g.Eventually(func() bool {
 		suggestion := &suggestionsv1beta1.Suggestion{}
 		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
 		return suggestion.IsSucceeded()
 	}, timeout).Should(gomega.BeTrue())
 
-	// Delete the suggestion object with ResumePolicy = NeverResume
-	g.Expect(c.Delete(context.TODO(), suggestionRestartNo)).NotTo(gomega.HaveOccurred())
-	// Expect that suggestion is deleted
+	// Expect that suggestion with ResumePolicy = NeverResume is deleted
 	g.Eventually(func() bool {
+		// Delete the suggestion
+		c.Delete(context.TODO(), suggestionRestartNo)
 		return errors.IsNotFound(c.Get(context.TODO(),
 			types.NamespacedName{Namespace: namespace, Name: experimentName}, &suggestionsv1beta1.Suggestion{}))
 	}, timeout).Should(gomega.BeTrue())
 
-	// Create the suggestion object with ResumePolicy = FromVolume
+	// Create the suggestion with ResumePolicy = FromVolume
 	g.Expect(c.Create(context.TODO(), suggestionRestartYes)).NotTo(gomega.HaveOccurred())
 	// Expect that suggestion is created
 	g.Eventually(func() bool {
@@ -231,57 +301,54 @@ func TestReconcile(t *testing.T) {
 	}, timeout).ShouldNot(gomega.BeTrue())
 
 	// Manually update suggestion ResumePolicy to FromVolume and mark experiment succeeded to test resume experiment.
-	// Expect that suggestion is updated
+	// Expect that suggestion spec is updated.
 	g.Eventually(func() bool {
-		experiment = &experimentsv1beta1.Experiment{}
+		experiment := &experimentsv1beta1.Experiment{}
 		// Update ResumePolicy and maxTrialCount for resume
 		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment)
 		experiment.Spec.ResumePolicy = experimentsv1beta1.FromVolume
 		var max int32 = 5
 		experiment.Spec.MaxTrialCount = &max
 		errUpdate := c.Update(context.TODO(), experiment)
-		// Update status
+		return errUpdate == nil
+	}, timeout).Should(gomega.BeTrue())
+
+	// Expect that experiment status is updated
+	g.Eventually(func() bool {
+		experiment := &experimentsv1beta1.Experiment{}
+		// Update status to succeeded
 		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment)
 		experiment.MarkExperimentStatusSucceeded(experimentUtil.ExperimentMaxTrialsReachedReason, "Experiment is succeeded")
 		errStatus := c.Status().Update(context.TODO(), experiment)
-		return errUpdate == nil && errStatus == nil
-	}, timeout).Should(gomega.BeTrue())
-
-	// Expect that suggestion with ResumePolicy = FromVolume is succeeded
-	// UpdateSuggestionStatus is executing with suggestionRestartYes
-	g.Eventually(func() bool {
-		suggestion := &suggestionsv1beta1.Suggestion{}
-		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
-		return suggestion.IsSucceeded()
+		return errStatus == nil
 	}, timeout).Should(gomega.BeTrue())
 
 	// Expect that experiment with FromVolume is restarting.
 	// Experiment should be not succeeded and not failed.
-	// UpdateSuggestionStatus is executing with suggestionRestarting
+	// UpdateSuggestionStatus with restartYesCall call and UpdateSuggestionStatus with experimentRestartingCall call.
 	g.Eventually(func() bool {
 		experiment := &experimentsv1beta1.Experiment{}
 		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment)
 		return experiment.IsRestarting() && !experiment.IsSucceeded() && !experiment.IsFailed()
 	}, timeout).Should(gomega.BeTrue())
 
-	// Delete the suggestion object with ResumePolicy = FromVolume
-	g.Expect(c.Delete(context.TODO(), suggestionRestartYes)).NotTo(gomega.HaveOccurred())
-	// Expect that suggestion is deleted
+	// Expect that suggestion with ResumePolicy = FromVolume is deleted
 	g.Eventually(func() bool {
+		// Delete the suggestion
+		c.Delete(context.TODO(), suggestionRestartYes)
 		return errors.IsNotFound(c.Get(context.TODO(),
 			types.NamespacedName{Namespace: namespace, Name: experimentName}, &suggestionsv1beta1.Suggestion{}))
 	}, timeout).Should(gomega.BeTrue())
 
-	// Delete the experiment object
-	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
-
 	// Expect that experiment is deleted
 	g.Eventually(func() bool {
+		// Delete the experiment
+		c.Delete(context.TODO(), instance)
 		return errors.IsNotFound(c.Get(context.TODO(),
 			types.NamespacedName{Namespace: namespace, Name: experimentName}, &experimentsv1beta1.Experiment{}))
 	}, timeout).Should(gomega.BeTrue())
 
-	// Test 2 - Update status for empty experiment object
+	// Test 2 - Update status for empty experiment
 	g.Expect(r.updateStatus(&experimentsv1beta1.Experiment{})).To(gomega.HaveOccurred())
 
 	// Test 3 - Cleanup suggestion resources without deployed suggestion

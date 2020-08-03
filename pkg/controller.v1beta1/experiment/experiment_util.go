@@ -115,8 +115,8 @@ func (r *ReconcileExperiment) cleanupSuggestionResources(instance *experimentsv1
 		return err
 	}
 
-	// If Suggestion is failed or Suggestion is Succeeded, not needed to terminate Suggestion
-	if original.IsFailed() || original.IsSucceeded() {
+	// If Suggestion is completed or Suggestion running status is false not needed to terminate Suggestion
+	if original.IsCompleted() || original.IsNotRunning() {
 		return nil
 	}
 
@@ -153,6 +153,10 @@ func (r *ReconcileExperiment) restartSuggestion(instance *experimentsv1beta1.Exp
 			return nil
 		}
 		return err
+	}
+	// If Suggestion running status is false, not needed to restart Suggestion
+	if original.IsNotRunning() {
+		return nil
 	}
 
 	logger.Info("Suggestion is restarting, suggestion Running status is false")

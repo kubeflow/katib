@@ -64,6 +64,15 @@ func (suggestion *Suggestion) IsRunning() bool {
 	return hasCondition(suggestion, SuggestionRunning)
 }
 
+// IsNotRunning returns true if suggestion running status is false
+func (suggestion *Suggestion) IsNotRunning() bool {
+	cond := getCondition(suggestion, SuggestionRunning)
+	if cond != nil && cond.Status == v1.ConditionFalse {
+		return true
+	}
+	return false
+}
+
 func (suggestion *Suggestion) IsDeploymentReady() bool {
 	return hasCondition(suggestion, SuggestionDeploymentReady)
 }

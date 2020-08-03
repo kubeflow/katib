@@ -127,13 +127,13 @@ func TestReconcile(t *testing.T) {
 	configMap := newKatibConfigMapInstance()
 
 	// Test 1 - Regural suggestion run
-	// Create the suggestion object and expect the service, deployment, pvc and pv is created
+	// Create the suggestion and expect the service, deployment, pvc and pv is created
 	g.Expect(c.Create(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
 	// Create ConfigMap with suggestion data
 	g.Expect(c.Create(context.TODO(), configMap)).NotTo(gomega.HaveOccurred())
-	// Create experiment object
+	// Create experiment
 	g.Expect(c.Create(context.TODO(), experiment)).NotTo(gomega.HaveOccurred())
-	// Create trial object
+	// Create trial
 	g.Expect(c.Create(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
 
 	suggestionDeploy := &appsv1.Deployment{}
@@ -195,11 +195,10 @@ func TestReconcile(t *testing.T) {
 			errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, &corev1.Service{}))
 	}, timeout).Should(gomega.BeTrue())
 
-	// Delete the suggestion object
-	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
-
 	// Expect that suggestion is deleted
 	g.Eventually(func() bool {
+		// Delete the suggestion
+		c.Delete(context.TODO(), instance)
 		return errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, &suggestionsv1beta1.Suggestion{}))
 	}, timeout).Should(gomega.BeTrue())
 
@@ -231,13 +230,13 @@ func TestReconcile(t *testing.T) {
 		},
 	}
 
-	// Test 2 - Update status for empty experiment object
+	// Test 2 - Update status for empty experiment
 	g.Expect(r.updateStatus(&suggestionsv1beta1.Suggestion{}, oldS)).To(gomega.HaveOccurred())
 
 	// Test 3 - Update status condition
 	g.Expect(r.updateStatusCondition(newS, oldS)).NotTo(gomega.HaveOccurred())
 
-	// Test 4 - Update status condition for empty experiment object
+	// Test 4 - Update status condition for empty experiment
 	g.Expect(r.updateStatusCondition(&suggestionsv1beta1.Suggestion{}, oldS)).To(gomega.HaveOccurred())
 
 }
