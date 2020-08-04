@@ -158,17 +158,19 @@ func main() {
 
 		namespacedName := types.NamespacedName{Name: controllerUtil.GetAlgorithmServiceName(sug), Namespace: sug.Namespace}
 		err := kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.Service{})
-		if err == nil || !errors.IsNotFound(err) {
+		if errors.IsNotFound(err) {
+			log.Printf("Suggestion service %v has been deleted", controllerUtil.GetAlgorithmServiceName(sug))
+		} else {
 			log.Fatalf("Suggestion service is still alive while ResumePolicy = %v", exp.Spec.ResumePolicy)
 		}
-		log.Printf("Suggestion service %v has been deleted", controllerUtil.GetAlgorithmServiceName(sug))
 
 		namespacedName = types.NamespacedName{Name: controllerUtil.GetAlgorithmDeploymentName(sug), Namespace: sug.Namespace}
 		err = kclient.GetClient().Get(context.TODO(), namespacedName, &appsv1.Deployment{})
-		if err == nil || !errors.IsNotFound(err) {
+		if errors.IsNotFound(err) {
+			log.Printf("Suggestion deployment %v has been deleted", controllerUtil.GetAlgorithmDeploymentName(sug))
+		} else {
 			log.Fatalf("Suggestion deployment is still alive while ResumePolicy = %v", exp.Spec.ResumePolicy)
 		}
-		log.Printf("Suggestion deployment %v has been deleted", controllerUtil.GetAlgorithmDeploymentName(sug))
 
 		if exp.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
 			namespacedName = types.NamespacedName{Name: controllerUtil.GetAlgorithmPersistentVolumeClaimName(sug), Namespace: sug.Namespace}
