@@ -49,6 +49,7 @@ spec:
                     command:
                       - "python"
                       - "/var/mnist.py"
+                      - "--batch-size=64"
                       - "--lr=${trialParameters.learningRate}"
                       - "--momentum=${trialParameters.momentum}"
           Worker:
@@ -63,5 +64,6 @@ spec:
                     command:
                       - "python"
                       - "/var/mnist.py"
+                      - "--batch-size=64"
                       - "--lr=${trialParameters.learningRate}"
                       - "--momentum=${trialParameters.momentum}"

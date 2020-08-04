@@ -53,7 +53,7 @@ kubectl -n kubeflow get pod
 cd ${GO_DIR}/test/e2e/v1beta1
 
 # Set number of epochs to 2 for faster execution
-sed -i -e "s@/opt/mxnet-mnist/mnist.py@/opt/mxnet-mnist/mnist.py --num-epochs=2@" ../../../examples/v1beta1/resume-experiment/from-volume-resume.yaml
+sed -i -e "s@--batch-size=64@--num-epochs=2@" ../../../examples/v1beta1/resume-experiment/from-volume-resume.yaml
 
 echo "Running e2e test for resume from volume experiment"
 export KUBECONFIG=$HOME/.kube/config
