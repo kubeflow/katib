@@ -115,7 +115,7 @@ func (r *ReconcileExperiment) cleanupSuggestionResources(instance *experimentsv1
 		return err
 	}
 
-	// If Suggestion is completed or Suggestion restarting not needed to terminate Suggestion
+	// If Suggestion is completed or Suggestion is restarting not needed to terminate Suggestion
 	if original.IsCompleted() || original.IsRestarting() {
 		return nil
 	}
