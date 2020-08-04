@@ -145,21 +145,20 @@ func TestReconcile(t *testing.T) {
 
 	mockSuggestion.EXPECT().UpdateSuggestion(gomock.Any()).Return(nil).AnyTimes()
 
-	reason := "Experiment is succeeded"
+	reasonRestart := "Experiment is succeeded"
 	msgRestartNo := "Suggestion is succeeded, can't be restarted"
-	suggestionRestartNo.MarkSuggestionStatusSucceeded(reason, msgRestartNo)
+	suggestionRestartNo.MarkSuggestionStatusSucceeded(reasonRestart, msgRestartNo)
 
 	suggestionRestartYes := newFakeSuggestion()
 	suggestionRestartYes.Spec.ResumePolicy = experimentsv1beta1.FromVolume
 
 	msgRestartYes := "Suggestion is succeeded, suggestion volume is not deleted, can be restarted"
-	suggestionRestartYes.MarkSuggestionStatusSucceeded(reason, msgRestartYes)
+	suggestionRestartYes.MarkSuggestionStatusSucceeded(reasonRestart, msgRestartYes)
 
 	suggestionRestarting := newFakeSuggestion()
 
-	reason = "Experiment is restarting"
 	msgRestarting := "Suggestion is not running"
-	suggestionRestarting.MarkSuggestionStatusRunning(corev1.ConditionFalse, reason, msgRestarting)
+	suggestionRestarting.MarkSuggestionStatusRunning(corev1.ConditionFalse, suggestionsv1beta1.SuggestionRestartReason, msgRestarting)
 
 	// Manually update suggestion status after UpdateSuggestionStatus is called
 	// Call when Trials are being deleted
@@ -182,7 +181,7 @@ func TestReconcile(t *testing.T) {
 			suggestion := &suggestionsv1beta1.Suggestion{}
 			for err != nil {
 				c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
-				suggestion.MarkSuggestionStatusSucceeded(reason, msgRestartNo)
+				suggestion.MarkSuggestionStatusSucceeded(reasonRestart, msgRestartNo)
 				err = c.Status().Update(context.TODO(), suggestion)
 			}
 		})
@@ -194,7 +193,7 @@ func TestReconcile(t *testing.T) {
 			suggestion := &suggestionsv1beta1.Suggestion{}
 			for err != nil {
 				c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
-				suggestion.MarkSuggestionStatusSucceeded(reason, msgRestartYes)
+				suggestion.MarkSuggestionStatusSucceeded(reasonRestart, msgRestartYes)
 				err = c.Status().Update(context.TODO(), suggestion)
 			}
 		})
@@ -206,7 +205,7 @@ func TestReconcile(t *testing.T) {
 			var err error = errors.NewBadRequest("fake-error")
 			for err != nil {
 				c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
-				suggestion.MarkSuggestionStatusRunning(corev1.ConditionFalse, reason, msgRestarting)
+				suggestion.MarkSuggestionStatusRunning(corev1.ConditionFalse, suggestionsv1beta1.SuggestionRestartReason, msgRestarting)
 				err = c.Status().Update(context.TODO(), suggestion)
 			}
 		})

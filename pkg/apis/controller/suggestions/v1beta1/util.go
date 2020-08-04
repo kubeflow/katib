@@ -5,6 +5,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	// SuggestionRestartReason is the reason for suggestion status when experiment is restarting
+	SuggestionRestartReason = "Experiment is restarting"
+)
+
 func getCondition(suggestion *Suggestion, condType SuggestionConditionType) *SuggestionCondition {
 	if suggestion.Status.Conditions != nil {
 		for _, condition := range suggestion.Status.Conditions {
@@ -64,10 +69,10 @@ func (suggestion *Suggestion) IsRunning() bool {
 	return hasCondition(suggestion, SuggestionRunning)
 }
 
-// IsNotRunning returns true if suggestion running status is false
-func (suggestion *Suggestion) IsNotRunning() bool {
+// IsRestarting returns true if suggestion running status is false and reason = SuggestionRestartReason
+func (suggestion *Suggestion) IsRestarting() bool {
 	cond := getCondition(suggestion, SuggestionRunning)
-	if cond != nil && cond.Status == v1.ConditionFalse {
+	if cond != nil && cond.Status == v1.ConditionFalse && cond.Reason == SuggestionRestartReason {
 		return true
 	}
 	return false
