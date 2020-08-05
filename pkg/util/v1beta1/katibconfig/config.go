@@ -134,6 +134,11 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 			}
 		}
 
+		// Set default local path if it is empty
+		if pvSpec.PersistentVolumeSource.HostPath != nil && pvSpec.PersistentVolumeSource.HostPath.Path == "" {
+			pvSpec.PersistentVolumeSource.HostPath.Path = consts.DefaultSuggestionVolumeLocalPathPrefix
+		}
+
 		// Set default capacity
 		if len(pvSpec.Capacity) == 0 {
 			pvSpec.Capacity = make(map[corev1.ResourceName]resource.Quantity)
