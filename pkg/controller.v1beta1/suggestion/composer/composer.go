@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/viper"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -193,7 +192,7 @@ func (g *General) desiredContainer(s *suggestionsv1beta1.Suggestion, suggestionC
 		c.VolumeMounts = []corev1.VolumeMount{
 			{
 				Name:      consts.ContainerSuggestionVolumeName,
-				MountPath: consts.DefaultContainerSuggestionVolumeMountPath,
+				MountPath: suggestionConfigData.VolumeMountPath,
 			},
 		}
 	}
@@ -203,31 +202,20 @@ func (g *General) desiredContainer(s *suggestionsv1beta1.Suggestion, suggestionC
 // DesiredVolume returns desired PVC and PV for suggestion.
 // If StorageClassName != DefaultSuggestionStorageClassName returns only PVC.
 func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.PersistentVolumeClaim, *corev1.PersistentVolume, error) {
+
+	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.AlgorithmName, g.Client)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	persistentVolumeName := util.GetAlgorithmPersistentVolumeName(s)
-
-	// TODO (andreyvelich): Enable to specify these values from Katib config
-	storageClassName := consts.DefaultSuggestionStorageClassName
-	persistentVolumePath := consts.DefaultSuggestionVolumeLocalPathPrefix + persistentVolumeName
-	volumeAccessModes := consts.DefaultSuggestionVolumeAccessMode
-
-	volumeStorage, _ := resource.ParseQuantity(consts.DefaultSuggestionVolumeStorage)
 
 	pvc := &corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      util.GetAlgorithmPersistentVolumeClaimName(s),
 			Namespace: s.Namespace,
 		},
-		Spec: corev1.PersistentVolumeClaimSpec{
-			StorageClassName: &storageClassName,
-			AccessModes: []corev1.PersistentVolumeAccessMode{
-				volumeAccessModes,
-			},
-			Resources: corev1.ResourceRequirements{
-				Requests: corev1.ResourceList{
-					corev1.ResourceStorage: volumeStorage,
-				},
-			},
-		},
+		Spec: suggestionConfigData.PersistentVolumeClaimSpec,
 	}
 
 	// Add owner reference to the pvc so that it could be GC after the suggestion is deleted
@@ -237,7 +225,7 @@ func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.Persi
 
 	var pv *corev1.PersistentVolume
 	// Create PV with local hostPath by default
-	if storageClassName == consts.DefaultSuggestionStorageClassName {
+	if *pvc.Spec.StorageClassName == consts.DefaultSuggestionStorageClassName {
 		localLabel := map[string]string{"type": "local"}
 
 		pv = &corev1.PersistentVolume{
@@ -245,20 +233,14 @@ func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.Persi
 				Name:   persistentVolumeName,
 				Labels: localLabel,
 			},
-			Spec: corev1.PersistentVolumeSpec{
-				StorageClassName: consts.DefaultSuggestionStorageClassName,
-				AccessModes: []corev1.PersistentVolumeAccessMode{
-					volumeAccessModes,
-				},
-				PersistentVolumeSource: corev1.PersistentVolumeSource{
-					HostPath: &corev1.HostPathVolumeSource{
-						Path: persistentVolumePath,
-					},
-				},
-				Capacity: corev1.ResourceList{
-					corev1.ResourceStorage: volumeStorage,
-				},
-			},
+			Spec: suggestionConfigData.PersistentVolumeSpec,
+		}
+
+		// If default host path is specified attach pv name to the path.
+		// Full default local path = DefaultSuggestionVolumeLocalPathPrefix<suggestion-name>-<suggestion-algorithm>-<suggestion-namespace>
+		if pv.Spec.PersistentVolumeSource.HostPath != nil &&
+			pv.Spec.PersistentVolumeSource.HostPath.Path == consts.DefaultSuggestionVolumeLocalPathPrefix {
+			pv.Spec.PersistentVolumeSource.HostPath.Path = pv.Spec.PersistentVolumeSource.HostPath.Path + persistentVolumeName
 		}
 
 		// Add owner reference to the pv so that it could be GC after the suggestion is deleted

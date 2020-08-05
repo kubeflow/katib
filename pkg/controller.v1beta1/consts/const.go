@@ -32,6 +32,8 @@ const (
 
 	// ContainerSuggestion is the container name in Suggestion.
 	ContainerSuggestion = "suggestion"
+	// ContainerSuggestionVolumeName is the volume name that mounted on suggestion container
+	ContainerSuggestionVolumeName = "suggestion-volume"
 
 	// DefaultSuggestionPort is the default port of suggestion service.
 	DefaultSuggestionPort = 6789
@@ -78,6 +80,22 @@ const (
 	DefaultDiskLimit = "5Gi"
 	// DefaultDiskRequest is the default value for disk request.
 	DefaultDiskRequest = "500Mi"
+
+	// DefaultContainerSuggestionVolumeMountPath is the default mount path in suggestion container
+	DefaultContainerSuggestionVolumeMountPath = "/opt/katib/data"
+
+	// DefaultSuggestionStorageClassName is the default value for suggestion's volume storage class name
+	DefaultSuggestionStorageClassName = "katib-suggestion"
+
+	// DefaultSuggestionVolumeStorage is the default value for suggestion's volume storage
+	DefaultSuggestionVolumeStorage = "1Gi"
+
+	// DefaultSuggestionVolumeAccessMode is the default value for suggestion's volume access mode
+	DefaultSuggestionVolumeAccessMode = corev1.ReadWriteOnce
+
+	// DefaultSuggestionVolumeLocalPathPrefix is the default cluster local path prefix for suggestion volume
+	// Full default local path = /tmp/katib/suggestions/<suggestion-name>-<suggestion-algorithm>-<suggestion-namespace>
+	DefaultSuggestionVolumeLocalPathPrefix = "/tmp/katib/suggestions/"
 
 	// ReconcileErrorReason is the reason when there is a reconcile error.
 	ReconcileErrorReason = "ReconcileError"
@@ -127,25 +145,6 @@ const (
 
 	// UnavailableMetricValue is the value when metric was not reported or metric value can't be converted to float64
 	UnavailableMetricValue = "unavailable"
-
-	// DefaultSuggestionVolumeLocalPathPrefix is the default cluster local path prefix for suggestion volume
-	// Full local path = /tmp/katib/suggestions/<suggestion-name>-<suggestion-namespace>
-	DefaultSuggestionVolumeLocalPathPrefix = "/tmp/katib/suggestions/"
-
-	// DefaultSuggestionStorageClassName is the default value for suggestion's volume storage class name
-	DefaultSuggestionStorageClassName = "katib-suggestion"
-
-	// DefaultSuggestionVolumeAccessMode is the default value for suggestion's volume access mode
-	DefaultSuggestionVolumeAccessMode = corev1.ReadWriteOnce
-
-	// DefaultSuggestionVolumeStorage is the default value for suggestion's volume storage
-	DefaultSuggestionVolumeStorage = "1Gi"
-
-	// ContainerSuggestionVolumeName is the volume name that mounted on suggestion container
-	ContainerSuggestionVolumeName = "suggestion-volume"
-
-	// DefaultContainerSuggestionVolumeMountPath is the default mount path in suggestion container
-	DefaultContainerSuggestionVolumeMountPath = "/opt/katib/data"
 )
 
 var (
