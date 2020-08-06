@@ -256,7 +256,8 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 		msg := "Suggestion is running"
 		instance.MarkSuggestionStatusRunning(corev1.ConditionTrue, SuggestionRunningReason, msg)
 	}
-	logger.Info("Sync assignments", "suggestions", instance.Spec.Requests)
+	logger.Info("Sync assignments", "Suggestion Requests", instance.Spec.Requests,
+		"Suggestion Count", instance.Status.SuggestionCount)
 	if err = r.SyncAssignments(instance, experiment, trials.Items); err != nil {
 		return err
 	}

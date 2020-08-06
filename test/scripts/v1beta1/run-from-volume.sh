@@ -62,6 +62,10 @@ export KUBECONFIG=$HOME/.kube/config
 kubectl -n kubeflow describe suggestion from-volume-resume
 kubectl -n kubeflow describe experiment from-volume-resume
 
+echo "Available volumes"
+kubectl get pvc -n kubeflow
+kubectl get pv
+
 echo "Resuming the completed experiment with resume from volume"
 ./resume-e2e-experiment ../../../examples/v1beta1/resume-experiment/from-volume-resume.yaml
 

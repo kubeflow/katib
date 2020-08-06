@@ -115,8 +115,8 @@ func (r *ReconcileExperiment) cleanupSuggestionResources(instance *experimentsv1
 		return err
 	}
 
-	// If Suggestion is failed or Suggestion is Succeeded, not needed to terminate Suggestion
-	if original.IsFailed() || original.IsSucceeded() {
+	// If Suggestion is completed or Suggestion is restarting not needed to terminate Suggestion
+	if original.IsCompleted() || original.IsRestarting() {
 		return nil
 	}
 
@@ -154,13 +154,16 @@ func (r *ReconcileExperiment) restartSuggestion(instance *experimentsv1beta1.Exp
 		}
 		return err
 	}
+	// If Suggestion is restarting not needed to restart Suggestion
+	if original.IsRestarting() {
+		return nil
+	}
 
 	logger.Info("Suggestion is restarting, suggestion Running status is false")
 	suggestion := original.DeepCopy()
-	reason := "Experiment is restarting"
 	msg := "Suggestion is not running"
 	// Mark suggestion status not running because experiment is restarting and suggestion deployment is not ready
-	suggestion.MarkSuggestionStatusRunning(corev1.ConditionFalse, reason, msg)
+	suggestion.MarkSuggestionStatusRunning(corev1.ConditionFalse, suggestionsv1beta1.SuggestionRestartReason, msg)
 
 	if err := r.UpdateSuggestionStatus(suggestion); err != nil {
 		return err

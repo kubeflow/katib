@@ -90,7 +90,7 @@ func main() {
 		if err != nil {
 			log.Fatal("Get Experiment error ", err)
 		}
-		if exp.IsRunning() && exp.Status.Trials == maxtrials {
+		if exp.IsRunning() {
 			log.Printf("Experiment %v started running with %v MaxTrialCount", exp.Name, maxtrials)
 			break
 		}
