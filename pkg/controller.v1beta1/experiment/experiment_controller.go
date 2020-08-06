@@ -249,7 +249,7 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		//assuming that only status change
 		err = r.updateStatusHandler(instance)
 		if err != nil {
-			logger.Info("Update experiment instance status failed, reconcile requeued", "err", err)
+			logger.Info("Update experiment instance status failed, reconciler requeued", "err", err)
 			return reconcile.Result{
 				Requeue: true,
 			}, nil

@@ -178,7 +178,7 @@ func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 
 	if err := r.updateStatus(instance, oldS); err != nil {
-		logger.Info("Update suggestion instance status failed, reconcile requeued", "err", err)
+		logger.Info("Update suggestion instance status failed, reconciler requeued", "err", err)
 		return reconcile.Result{
 			Requeue: true,
 		}, nil

@@ -193,7 +193,7 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 		//assuming that only status change
 		err = r.updateStatusHandler(instance)
 		if err != nil {
-			logger.Info("Update trial instance status failed, reconcile requeued", "err", err)
+			logger.Info("Update trial instance status failed, reconciler requeued", "err", err)
 			return reconcile.Result{
 				Requeue: true,
 			}, nil
