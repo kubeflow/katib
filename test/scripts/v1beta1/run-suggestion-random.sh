@@ -54,6 +54,10 @@ cd ${GO_DIR}/test/e2e/v1beta1
 
 echo "Running e2e hyperopt random experiment"
 export KUBECONFIG=$HOME/.kube/config
+
+# Set number of epochs to 2 for faster execution
+sed -i -e "s@--batch-size=64@--num-epochs=2@" ../../../examples/v1beta1/random-example.yaml
+
 ./run-e2e-experiment ../../../examples/v1beta1/random-example.yaml
 kubectl -n kubeflow describe experiment random-example
 echo "Resuming the completed random experiment"
