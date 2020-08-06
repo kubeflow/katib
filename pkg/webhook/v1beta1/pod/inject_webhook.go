@@ -161,8 +161,7 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 			return nil, err
 		}
 	}
-
-	log.Info("Inject metrics collector sidecar container", "Pod", pod.Name, "Trial", trialName)
+	log.Info("Inject metrics collector sidecar container", "Pod Generate Name", mutatedPod.GenerateName, "Trial", trialName)
 	return mutatedPod, nil
 }
 

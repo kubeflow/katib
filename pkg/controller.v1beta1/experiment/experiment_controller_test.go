@@ -268,17 +268,16 @@ func TestReconcile(t *testing.T) {
 	}, timeout).Should(gomega.BeTrue())
 
 	// Manually update experiment status to failed to make experiment completed
-	// Expect that experiment is updated
-	g.Eventually(func() error {
-		experiment = &experimentsv1beta1.Experiment{}
-		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment)
-		experiment.MarkExperimentStatusFailed(experimentUtil.ExperimentMaxTrialsReachedReason, "Experiment is failed")
-		return c.Status().Update(context.TODO(), experiment)
-	}, timeout).ShouldNot(gomega.HaveOccurred())
-
 	// Expect that suggestion with ResumePolicy = NeverResume is succeeded
 	// UpdateSuggestionStatus with restartNoCall call
 	g.Eventually(func() bool {
+		// Update experiment
+		experiment = &experimentsv1beta1.Experiment{}
+		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment)
+		experiment.MarkExperimentStatusFailed(experimentUtil.ExperimentMaxTrialsReachedReason, "Experiment is failed")
+		c.Status().Update(context.TODO(), experiment)
+
+		// Get Suggestion
 		suggestion := &suggestionsv1beta1.Suggestion{}
 		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
 		return suggestion.IsSucceeded()
