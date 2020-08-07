@@ -40,7 +40,7 @@ func (g *General) GetOrCreateSuggestion(instance *experimentsv1beta1.Experiment,
 	err := g.Get(context.TODO(),
 		types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}, suggestion)
 	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Creating Suggestion", "namespace", instance.Namespace, "name", instance.Name, "requests", suggestionRequests)
+		logger.Info("Creating Suggestion", "namespace", instance.Namespace, "name", instance.Name, "Suggestion Requests", suggestionRequests)
 		if err := g.createSuggestion(instance, suggestionRequests); err != nil {
 			logger.Error(err, "CreateSuggestion failed", "instance", instance.Name)
 			return nil, err
@@ -74,10 +74,11 @@ func (g *General) createSuggestion(instance *experimentsv1beta1.Experiment, sugg
 		logger.Error(err, "Error in setting controller reference")
 		return err
 	}
-	logger.Info("Creating Suggestion", "namespace", instance.Namespace, "name", instance.Name)
+
 	if err := g.Create(context.TODO(), suggestion); err != nil {
 		return err
 	}
+	logger.Info("Suggestion created", "namespace", instance.Namespace, "name", instance.Name)
 	return nil
 }
 
