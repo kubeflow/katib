@@ -43,6 +43,7 @@ import (
 
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/trial/managerclient"
+	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	jobv1beta1 "github.com/kubeflow/katib/pkg/job/v1beta1"
 )
@@ -69,7 +70,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		scheme:        mgr.GetScheme(),
 		ManagerClient: managerclient.New(),
 		recorder:      mgr.GetRecorder(ControllerName),
-		collector:     NewTrialsCollector(mgr.GetCache(), metrics.Registry),
+		collector:     trialutil.NewTrialsCollector(mgr.GetCache(), metrics.Registry),
 	}
 	r.updateStatusHandler = r.updateStatus
 	return r
@@ -139,7 +140,7 @@ type ReconcileTrial struct {
 	// updateStatusHandler is defined for test purpose.
 	updateStatusHandler updateStatusFunc
 	// collector is a wrapper for experiment metrics.
-	collector *TrialsCollector
+	collector *trialutil.TrialsCollector
 }
 
 // Reconcile reads that state of the cluster for a Trial object and makes changes based on the state read

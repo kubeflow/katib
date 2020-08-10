@@ -48,6 +48,7 @@ func (k Kubeflow) GetDeployedJobStatus(
 		return nil, err
 	}
 	// Get the latest condition and set it to jobCondition.
+	// TODO (andreyvelich): We should also check condition status
 	if len(jobStatus.Conditions) > 0 {
 		lc := jobStatus.Conditions[len(jobStatus.Conditions)-1]
 		jobCondition.Type = lc.Type
