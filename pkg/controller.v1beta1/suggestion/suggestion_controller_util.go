@@ -11,13 +11,12 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-// TODO (andreyvelich): Setup logger with suggestion name/namespace here
-
-func (r *ReconcileSuggestion) reconcileDeployment(deploy *appsv1.Deployment) (*appsv1.Deployment, error) {
+func (r *ReconcileSuggestion) reconcileDeployment(deploy *appsv1.Deployment, suggestionNsName types.NamespacedName) (*appsv1.Deployment, error) {
+	logger := log.WithValues("Suggestion", suggestionNsName)
 	foundDeploy := &appsv1.Deployment{}
 	err := r.Get(context.TODO(), types.NamespacedName{Name: deploy.Name, Namespace: deploy.Namespace}, foundDeploy)
 	if err != nil && errors.IsNotFound(err) {
-		log.Info("Creating Deployment", "namespace", deploy.Namespace, "name", deploy.Name)
+		logger.Info("Creating Deployment", "name", deploy.Name)
 		err = r.Create(context.TODO(), deploy)
 		return nil, err
 	} else if err != nil {
@@ -26,11 +25,12 @@ func (r *ReconcileSuggestion) reconcileDeployment(deploy *appsv1.Deployment) (*a
 	return foundDeploy, nil
 }
 
-func (r *ReconcileSuggestion) reconcileService(service *corev1.Service) (*corev1.Service, error) {
+func (r *ReconcileSuggestion) reconcileService(service *corev1.Service, suggestionNsName types.NamespacedName) (*corev1.Service, error) {
+	logger := log.WithValues("Suggestion", suggestionNsName)
 	foundService := &corev1.Service{}
 	err := r.Get(context.TODO(), types.NamespacedName{Name: service.Name, Namespace: service.Namespace}, foundService)
 	if err != nil && errors.IsNotFound(err) {
-		log.Info("Creating Service", "namespace", service.Namespace, "name", service.Name)
+		logger.Info("Creating Service", "name", service.Name)
 		err = r.Create(context.TODO(), service)
 		return nil, err
 	} else if err != nil {
@@ -39,7 +39,12 @@ func (r *ReconcileSuggestion) reconcileService(service *corev1.Service) (*corev1
 	return foundService, nil
 }
 
-func (r *ReconcileSuggestion) reconcileVolume(pvc *corev1.PersistentVolumeClaim, pv *corev1.PersistentVolume) (*corev1.PersistentVolumeClaim, *corev1.PersistentVolume, error) {
+func (r *ReconcileSuggestion) reconcileVolume(
+	pvc *corev1.PersistentVolumeClaim,
+	pv *corev1.PersistentVolume,
+	suggestionNsName types.NamespacedName) (*corev1.PersistentVolumeClaim, *corev1.PersistentVolume, error) {
+	logger := log.WithValues("Suggestion", suggestionNsName)
+
 	foundPVC := &corev1.PersistentVolumeClaim{}
 	foundPV := &corev1.PersistentVolume{}
 
@@ -47,7 +52,7 @@ func (r *ReconcileSuggestion) reconcileVolume(pvc *corev1.PersistentVolumeClaim,
 	if pv != nil {
 		err := r.Get(context.TODO(), types.NamespacedName{Name: pv.Name}, foundPV)
 		if err != nil && errors.IsNotFound(err) {
-			log.Info("Creating Persistent Volume", "name", pv.Name)
+			logger.Info("Creating Persistent Volume", "name", pv.Name)
 			err = r.Create(context.TODO(), pv)
 			// Return only if Create was failed, otherwise try to find/create PVC
 			if err != nil {
@@ -61,7 +66,7 @@ func (r *ReconcileSuggestion) reconcileVolume(pvc *corev1.PersistentVolumeClaim,
 	// Try to find/create PVC
 	err := r.Get(context.TODO(), types.NamespacedName{Name: pvc.Name, Namespace: pvc.Namespace}, foundPVC)
 	if err != nil && errors.IsNotFound(err) {
-		log.Info("Creating Persistent Volume Claim", "namespace", pvc.Namespace, "name", pvc.Name)
+		logger.Info("Creating Persistent Volume Claim", "name", pvc.Name)
 		err = r.Create(context.TODO(), pvc)
 		return nil, nil, err
 	} else if err != nil {
@@ -70,7 +75,8 @@ func (r *ReconcileSuggestion) reconcileVolume(pvc *corev1.PersistentVolumeClaim,
 	return foundPVC, foundPV, nil
 }
 
-func (r *ReconcileSuggestion) deleteDeployment(instance *v1beta1.Suggestion) error {
+func (r *ReconcileSuggestion) deleteDeployment(instance *v1beta1.Suggestion, suggestionNsName types.NamespacedName) error {
+	logger := log.WithValues("Suggestion", suggestionNsName)
 	deploy, err := r.DesiredDeployment(instance)
 	if err != nil {
 		return err
@@ -83,7 +89,7 @@ func (r *ReconcileSuggestion) deleteDeployment(instance *v1beta1.Suggestion) err
 		}
 		return err
 	}
-	log.Info("Deleting Suggestion Deployment", "namespace", realDeploy.Namespace, "name", realDeploy.Name)
+	logger.Info("Deleting Suggestion Deployment", "name", realDeploy.Name)
 
 	err = r.Delete(context.TODO(), realDeploy)
 	if err != nil {
@@ -93,7 +99,8 @@ func (r *ReconcileSuggestion) deleteDeployment(instance *v1beta1.Suggestion) err
 	return nil
 }
 
-func (r *ReconcileSuggestion) deleteService(instance *v1beta1.Suggestion) error {
+func (r *ReconcileSuggestion) deleteService(instance *v1beta1.Suggestion, suggestionNsName types.NamespacedName) error {
+	logger := log.WithValues("Suggestion", suggestionNsName)
 	service, err := r.DesiredService(instance)
 	if err != nil {
 		return err
@@ -106,7 +113,7 @@ func (r *ReconcileSuggestion) deleteService(instance *v1beta1.Suggestion) error 
 		}
 		return err
 	}
-	log.Info("Deleting Suggestion Service", "namespace", realService.Namespace, "name", realService.Name)
+	logger.Info("Deleting Suggestion Service", "name", realService.Name)
 
 	err = r.Delete(context.TODO(), realService)
 	if err != nil {

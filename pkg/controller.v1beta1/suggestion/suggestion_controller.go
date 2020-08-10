@@ -145,11 +145,11 @@ func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Re
 	instance := oldS.DeepCopy()
 	// Suggestion will be succeeded if ResumePolicy = Never or ResumePolicy = FromVolume
 	if instance.IsSucceeded() {
-		err = r.deleteDeployment(instance)
+		err = r.deleteDeployment(instance, request.NamespacedName)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
-		err = r.deleteService(instance)
+		err = r.deleteService(instance, request.NamespacedName)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
@@ -188,7 +188,8 @@ func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Re
 
 // ReconcileSuggestion is the main reconcile loop for suggestion CR.
 func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.Suggestion) error {
-	logger := log.WithValues("Suggestion", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+	suggestionNsName := types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}
+	logger := log.WithValues("Suggestion", suggestionNsName)
 
 	// If ResumePolicy = FromVolume volume is reconciled for suggestion
 	if instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
@@ -198,7 +199,7 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 		}
 
 		// Reconcile PVC and PV
-		_, _, err = r.reconcileVolume(pvc, pv)
+		_, _, err = r.reconcileVolume(pvc, pv, suggestionNsName)
 		if err != nil {
 			return err
 		}
@@ -209,7 +210,7 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 	if err != nil {
 		return err
 	}
-	_, err = r.reconcileService(service)
+	_, err = r.reconcileService(service, suggestionNsName)
 	if err != nil {
 		return err
 	}
@@ -218,7 +219,7 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 	if err != nil {
 		return err
 	}
-	if foundDeploy, err := r.reconcileDeployment(deploy); err != nil {
+	if foundDeploy, err := r.reconcileDeployment(deploy, suggestionNsName); err != nil {
 		return err
 	} else {
 		if isReady := r.checkDeploymentReady(foundDeploy); isReady != true {

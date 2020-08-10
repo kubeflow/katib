@@ -458,10 +458,10 @@ func (r *ReconcileExperiment) ReconcileSuggestions(instance *experimentsv1beta1.
 	var assignments []suggestionsv1beta1.TrialAssignment
 	suggestionRequestsCount := currentCount + addCount
 
+	logger.Info("GetOrCreateSuggestion", "name", instance.Name, "Suggestion Requests", suggestionRequestsCount)
 	original, err := r.GetOrCreateSuggestion(instance, suggestionRequestsCount)
-	logger.Info("GetOrCreateSuggestion", "Instance name", instance.Name, "suggestionRequestsCount", suggestionRequestsCount)
 	if err != nil {
-		logger.Error(err, "GetOrCreateSuggestion failed", "instance", instance.Name, "suggestionRequestsCount", suggestionRequestsCount)
+		logger.Error(err, "GetOrCreateSuggestion failed", "name", instance.Name, "Suggestion Requests", suggestionRequestsCount)
 		return nil, err
 	} else {
 		if original != nil {

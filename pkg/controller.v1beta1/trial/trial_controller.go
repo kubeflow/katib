@@ -123,7 +123,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			log.Info("Job watch added successfully", "CRD Kind", gvk.Kind)
 		}
 	}
-	log.Info("Trial  controller created")
+	log.Info("Trial controller created")
 	return nil
 }
 
