@@ -19,19 +19,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
-	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
-
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
+	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
 	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	managerclientmock "github.com/kubeflow/katib/pkg/mock/v1beta1/trial/managerclient"
 	kubeflowcommonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 )
 
 const (
-	trialName    = "test-trial"
 	namespace    = "default"
+	trialName    = "test-trial"
 	tfJobName    = "test-tfjob"
 	batchJobName = "test-job"
 
