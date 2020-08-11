@@ -11,7 +11,7 @@ Python 2.7 and 3.4+
 ### pip install
 
 ```sh
-pip install kubeflow-katib
+pip install kubeflow-katib==0.0.2
 ```
 
 Then import package:
