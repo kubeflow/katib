@@ -128,7 +128,7 @@ func TestReconcile(t *testing.T) {
 	configMap := newKatibConfigMapInstance()
 
 	// Test 1 - Regural suggestion run
-	// Create the suggestion and expect the service, deployment, pvc and pv is created
+	// Create the suggestion
 	g.Expect(c.Create(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
 	// Create ConfigMap with suggestion data
 	g.Expect(c.Create(context.TODO(), configMap)).NotTo(gomega.HaveOccurred())
