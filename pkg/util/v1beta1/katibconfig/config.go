@@ -17,10 +17,13 @@ import (
 
 // SuggestionConfig is the JSON suggestion structure in Katib config
 type SuggestionConfig struct {
-	Image              string                      `json:"image"`
-	ImagePullPolicy    corev1.PullPolicy           `json:"imagePullPolicy"`
-	Resource           corev1.ResourceRequirements `json:"resources"`
-	ServiceAccountName string                      `json:"serviceAccountName"`
+	Image                     string                           `json:"image"`
+	ImagePullPolicy           corev1.PullPolicy                `json:"imagePullPolicy"`
+	Resource                  corev1.ResourceRequirements      `json:"resources"`
+	ServiceAccountName        string                           `json:"serviceAccountName"`
+	VolumeMountPath           string                           `json:"volumeMountPath"`
+	PersistentVolumeClaimSpec corev1.PersistentVolumeClaimSpec `json:"persistentVolumeClaimSpec"`
+	PersistentVolumeSpec      corev1.PersistentVolumeSpec      `json:"persistentVolumeSpec"`
 }
 
 // MetricsCollectorConfig is the JSON metrics collector structure in Katib config
@@ -74,6 +77,78 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 
 	// Set resource requirements for suggestion
 	suggestionConfigData.Resource = setResourceRequirements(suggestionConfigData.Resource)
+
+	// Set default suggestion container volume mount path
+	if suggestionConfigData.VolumeMountPath == "" {
+		suggestionConfigData.VolumeMountPath = consts.DefaultContainerSuggestionVolumeMountPath
+	}
+
+	// Get persistent volume claim spec from config
+	pvcSpec := suggestionConfigData.PersistentVolumeClaimSpec
+
+	// Set default storage class
+	defaultStorageClassName := consts.DefaultSuggestionStorageClassName
+	if pvcSpec.StorageClassName == nil {
+		pvcSpec.StorageClassName = &defaultStorageClassName
+	}
+
+	// Set default access modes
+	if len(pvcSpec.AccessModes) == 0 {
+		pvcSpec.AccessModes = []corev1.PersistentVolumeAccessMode{
+			consts.DefaultSuggestionVolumeAccessMode,
+		}
+	}
+
+	// Set default resources
+	defaultVolumeStorage, _ := resource.ParseQuantity(consts.DefaultSuggestionVolumeStorage)
+	if len(pvcSpec.Resources.Requests) == 0 {
+
+		pvcSpec.Resources.Requests = make(map[corev1.ResourceName]resource.Quantity)
+		pvcSpec.Resources.Requests[corev1.ResourceStorage] = defaultVolumeStorage
+	}
+
+	// Set pvc back for suggestion config
+	suggestionConfigData.PersistentVolumeClaimSpec = pvcSpec
+
+	// Get pv from config only if pvc storage class name = DefaultSuggestionStorageClassName
+	if *pvcSpec.StorageClassName == consts.DefaultSuggestionStorageClassName {
+		pvSpec := suggestionConfigData.PersistentVolumeSpec
+
+		// Set default storage class
+		pvSpec.StorageClassName = defaultStorageClassName
+
+		// Set default access modes
+		if len(pvSpec.AccessModes) == 0 {
+			pvSpec.AccessModes = []corev1.PersistentVolumeAccessMode{
+				consts.DefaultSuggestionVolumeAccessMode,
+			}
+		}
+
+		// Set default pv source.
+		// In composer we add name, algorithm and namespace to host path.
+		if pvSpec.PersistentVolumeSource == (corev1.PersistentVolumeSource{}) {
+			pvSpec.PersistentVolumeSource = corev1.PersistentVolumeSource{
+				HostPath: &corev1.HostPathVolumeSource{
+					Path: consts.DefaultSuggestionVolumeLocalPathPrefix,
+				},
+			}
+		}
+
+		// Set default local path if it is empty
+		if pvSpec.PersistentVolumeSource.HostPath != nil && pvSpec.PersistentVolumeSource.HostPath.Path == "" {
+			pvSpec.PersistentVolumeSource.HostPath.Path = consts.DefaultSuggestionVolumeLocalPathPrefix
+		}
+
+		// Set default capacity
+		if len(pvSpec.Capacity) == 0 {
+			pvSpec.Capacity = make(map[corev1.ResourceName]resource.Quantity)
+			pvSpec.Capacity[corev1.ResourceStorage] = defaultVolumeStorage
+		}
+
+		// Set pv back for suggestion config
+		suggestionConfigData.PersistentVolumeSpec = pvSpec
+
+	}
 
 	return suggestionConfigData, nil
 }

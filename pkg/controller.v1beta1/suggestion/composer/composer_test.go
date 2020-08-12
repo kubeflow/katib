@@ -33,6 +33,7 @@ import (
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
+	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
 )
 
 var (
@@ -130,13 +131,13 @@ func TestDesiredDeployment(t *testing.T) {
 	}{
 		{
 			suggestion:      newFakeSuggestion(),
-			configMap:       newFakeKatibConfig(),
+			configMap:       newFakeKatibConfig(newFakeSuggestionConfig()),
 			err:             true,
 			testDescription: "Set controller reference error",
 		},
 		{
 			suggestion:         newFakeSuggestion(),
-			configMap:          newFakeKatibConfig(),
+			configMap:          newFakeKatibConfig(newFakeSuggestionConfig()),
 			expectedDeployment: newFakeDeployment(),
 			err:                false,
 			testDescription:    "Desired Deployment valid run",
@@ -144,7 +145,7 @@ func TestDesiredDeployment(t *testing.T) {
 		{
 			suggestion: newFakeSuggestion(),
 			configMap: func() *corev1.ConfigMap {
-				cm := newFakeKatibConfig()
+				cm := newFakeKatibConfig(newFakeSuggestionConfig())
 				cm.Data["suggestion"] = strings.ReplaceAll(cm.Data["suggestion"], string(imagePullPolicy), "invalid")
 				return cm
 			}(),
@@ -159,12 +160,28 @@ func TestDesiredDeployment(t *testing.T) {
 		{
 			suggestion: newFakeSuggestion(),
 			configMap: func() *corev1.ConfigMap {
-				cm := newFakeKatibConfig()
+				cm := newFakeKatibConfig(newFakeSuggestionConfig())
 				cm.Data["suggestion"] = strings.ReplaceAll(cm.Data["suggestion"], cpu, "invalid")
 				return cm
 			}(),
 			err:             true,
-			testDescription: "Invalid CPU limit",
+			testDescription: "Get suggestion config error, invalid CPU limit",
+		},
+		{
+			suggestion: newFakeSuggestion(),
+			configMap: func() *corev1.ConfigMap {
+				sc := newFakeSuggestionConfig()
+				sc.VolumeMountPath = "/custom/container/path"
+				cm := newFakeKatibConfig(sc)
+				return cm
+			}(),
+			expectedDeployment: func() *appsv1.Deployment {
+				deploy := newFakeDeployment()
+				deploy.Spec.Template.Spec.Containers[0].VolumeMounts[0].MountPath = "/custom/container/path"
+				return deploy
+			}(),
+			err:             false,
+			testDescription: "Suggestion container with custom volume mount path",
 		},
 	}
 
@@ -304,10 +321,19 @@ func TestDesiredVolume(t *testing.T) {
 	mgr, err := manager.New(cfg, manager.Options{})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
+	stopMgr, mgrStopped := StartTestManager(mgr, g)
+	defer func() {
+		close(stopMgr)
+		mgrStopped.Wait()
+	}()
+
+	c := mgr.GetClient()
+
 	composer := New(mgr)
 
 	tcs := []struct {
 		suggestion      *suggestionsv1beta1.Suggestion
+		configMap       *corev1.ConfigMap
 		expectedPVC     *corev1.PersistentVolumeClaim
 		expectedPV      *corev1.PersistentVolume
 		err             bool
@@ -315,19 +341,132 @@ func TestDesiredVolume(t *testing.T) {
 	}{
 		{
 			suggestion:      newFakeSuggestion(),
+			configMap:       newFakeKatibConfig(newFakeSuggestionConfig()),
 			err:             true,
 			testDescription: "Set controller reference error",
 		},
 		{
 			suggestion:      newFakeSuggestion(),
+			err:             true,
+			testDescription: "Get suggestion config error, not found Katib config",
+		},
+		{
+			suggestion:      newFakeSuggestion(),
+			configMap:       newFakeKatibConfig(newFakeSuggestionConfig()),
 			expectedPVC:     newFakePVC(),
 			expectedPV:      newFakePV(),
 			err:             false,
-			testDescription: "Desired Volume valid run",
+			testDescription: "Desired Volume valid run with default pvc and pv",
+		},
+		{
+			suggestion: newFakeSuggestion(),
+			configMap: func() *corev1.ConfigMap {
+				sc := newFakeSuggestionConfig()
+				storageClass := "custom-storage-class"
+				volumeStorage, _ := resource.ParseQuantity("5Gi")
+
+				sc.PersistentVolumeClaimSpec = corev1.PersistentVolumeClaimSpec{
+					StorageClassName: &storageClass,
+					AccessModes: []corev1.PersistentVolumeAccessMode{
+						corev1.ReadWriteOnce,
+						corev1.ReadOnlyMany,
+					},
+					Resources: corev1.ResourceRequirements{
+						Requests: corev1.ResourceList{
+							corev1.ResourceStorage: volumeStorage,
+						},
+					},
+				}
+				cm := newFakeKatibConfig(sc)
+				return cm
+			}(),
+			expectedPVC: func() *corev1.PersistentVolumeClaim {
+				pvc := newFakePVC()
+				storageClass := "custom-storage-class"
+				volumeStorage, _ := resource.ParseQuantity("5Gi")
+
+				pvc.Spec.StorageClassName = &storageClass
+				pvc.Spec.AccessModes = append(pvc.Spec.AccessModes, corev1.ReadOnlyMany)
+				pvc.Spec.Resources.Requests[corev1.ResourceStorage] = volumeStorage
+				return pvc
+			}(),
+			expectedPV:      nil,
+			err:             false,
+			testDescription: "Custom PVC with not default storage class",
+		},
+		{
+			suggestion: newFakeSuggestion(),
+			configMap: func() *corev1.ConfigMap {
+				sc := newFakeSuggestionConfig()
+				mode := corev1.PersistentVolumeFilesystem
+				accessModes := []corev1.PersistentVolumeAccessMode{
+					corev1.ReadWriteOnce,
+					corev1.ReadOnlyMany,
+				}
+				volumeStorage, _ := resource.ParseQuantity("10Gi")
+
+				sc.PersistentVolumeClaimSpec = corev1.PersistentVolumeClaimSpec{
+					VolumeMode:  &mode,
+					AccessModes: accessModes,
+				}
+
+				sc.PersistentVolumeSpec = corev1.PersistentVolumeSpec{
+					VolumeMode:  &mode,
+					AccessModes: accessModes,
+					PersistentVolumeSource: corev1.PersistentVolumeSource{
+						GCEPersistentDisk: &corev1.GCEPersistentDiskVolumeSource{
+							PDName: "pd-name",
+							FSType: "fs-type",
+						},
+					},
+					Capacity: corev1.ResourceList{
+						corev1.ResourceStorage: volumeStorage,
+					},
+				}
+				cm := newFakeKatibConfig(sc)
+				return cm
+			}(),
+			expectedPVC: func() *corev1.PersistentVolumeClaim {
+				pvc := newFakePVC()
+				mode := corev1.PersistentVolumeFilesystem
+
+				pvc.Spec.VolumeMode = &mode
+				pvc.Spec.AccessModes = append(pvc.Spec.AccessModes, corev1.ReadOnlyMany)
+				return pvc
+			}(),
+			expectedPV: func() *corev1.PersistentVolume {
+				pv := newFakePV()
+				mode := corev1.PersistentVolumeFilesystem
+				volumeStorage, _ := resource.ParseQuantity("10Gi")
+
+				pv.Spec.VolumeMode = &mode
+				pv.Spec.AccessModes = append(pv.Spec.AccessModes, corev1.ReadOnlyMany)
+				pv.Spec.PersistentVolumeSource = corev1.PersistentVolumeSource{
+					GCEPersistentDisk: &corev1.GCEPersistentDiskVolumeSource{
+						PDName: "pd-name",
+						FSType: "fs-type",
+					},
+				}
+				pv.Spec.Capacity = corev1.ResourceList{
+					corev1.ResourceStorage: volumeStorage,
+				}
+				return pv
+			}(),
+			err:             false,
+			testDescription: "Custom PVC and PV with default storage class",
 		},
 	}
 
 	for idx, tc := range tcs {
+
+		if tc.configMap != nil {
+			// Expect that ConfigMap is created
+			g.Eventually(func() error {
+				// Create ConfigMap with Katib config
+				c.Create(context.TODO(), tc.configMap)
+				return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{})
+			}, timeout).ShouldNot(gomega.HaveOccurred())
+		}
 
 		// Get PVC and PV
 		var actualPVC *corev1.PersistentVolumeClaim
@@ -346,15 +485,35 @@ func TestDesiredVolume(t *testing.T) {
 
 		if !tc.err && err != nil {
 			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
+
 		} else if tc.err && err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
-		} else if !tc.err && (!metaEqual(tc.expectedPVC.ObjectMeta, actualPVC.ObjectMeta) || !metaEqual(tc.expectedPV.ObjectMeta, actualPV.ObjectMeta)) {
+
+		} else if !tc.err && ((tc.expectedPV == nil && actualPV != nil) || (tc.expectedPV != nil && actualPV == nil)) {
+			t.Errorf("Case: %v failed. \nExpected PV: %v\n Got %v", tc.testDescription, tc.expectedPV, actualPV)
+
+		} else if !tc.err && (!metaEqual(tc.expectedPVC.ObjectMeta, actualPVC.ObjectMeta) ||
+			(tc.expectedPV != nil && !metaEqual(tc.expectedPV.ObjectMeta, actualPV.ObjectMeta))) {
 			t.Errorf("Case: %v failed. \nExpected PVC metadata %v\n Got %v.\nExpected PV metadata %v\n Got %v",
 				tc.testDescription, tc.expectedPVC.ObjectMeta, actualPVC.ObjectMeta, tc.expectedPV.ObjectMeta, actualPV.ObjectMeta)
-		} else if !tc.err && (!equality.Semantic.DeepEqual(tc.expectedPVC.Spec, actualPVC.Spec) || !equality.Semantic.DeepEqual(tc.expectedPV.Spec, actualPV.Spec)) {
+
+		} else if !tc.err && (!equality.Semantic.DeepEqual(tc.expectedPVC.Spec, actualPVC.Spec) ||
+			(tc.expectedPV != nil && !equality.Semantic.DeepEqual(tc.expectedPV.Spec, actualPV.Spec))) {
 			t.Errorf("Case: %v failed. \nExpected PVC spec %v\n Got %v.\nExpected PV spec %v\n Got %v",
-				tc.testDescription, tc.expectedPVC.Spec, actualPVC.Spec, tc.expectedPV, actualPVC)
+				tc.testDescription, tc.expectedPVC.Spec, actualPVC.Spec, tc.expectedPV, actualPV)
+
 		}
+
+		if tc.configMap != nil {
+			// Expect that ConfigMap is deleted
+			g.Eventually(func() bool {
+				// Delete ConfigMap with Katib config
+				c.Delete(context.TODO(), tc.configMap)
+				return errors.IsNotFound(
+					c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{}))
+			}, timeout).Should(gomega.BeTrue())
+		}
+
 	}
 }
 
@@ -371,35 +530,34 @@ func metaEqual(expected, actual metav1.ObjectMeta) bool {
 		*expected.OwnerReferences[0].BlockOwnerDeletion == *actual.OwnerReferences[0].BlockOwnerDeletion
 }
 
-func newFakeKatibConfig() *corev1.ConfigMap {
+func newFakeSuggestionConfig() katibconfig.SuggestionConfig {
 	cpuQ, _ := resource.ParseQuantity(cpu)
 	memoryQ, _ := resource.ParseQuantity(memory)
 	diskQ, _ := resource.ParseQuantity(disk)
 
-	type suggestionConfigJSON struct {
-		Image              string                      `json:"image"`
-		ImagePullPolicy    corev1.PullPolicy           `json:"imagePullPolicy"`
-		Resource           corev1.ResourceRequirements `json:"resources"`
-		ServiceAccountName string                      `json:"serviceAccountName"`
-	}
-	jsonConfig := map[string]suggestionConfigJSON{
-		"random": {
-			Image:           image,
-			ImagePullPolicy: imagePullPolicy,
-			Resource: corev1.ResourceRequirements{
-				Limits: corev1.ResourceList{
-					corev1.ResourceCPU:              cpuQ,
-					corev1.ResourceMemory:           memoryQ,
-					corev1.ResourceEphemeralStorage: diskQ,
-				},
-				Requests: corev1.ResourceList{
-					corev1.ResourceCPU:              cpuQ,
-					corev1.ResourceMemory:           memoryQ,
-					corev1.ResourceEphemeralStorage: diskQ,
-				},
+	return katibconfig.SuggestionConfig{
+		Image:           image,
+		ImagePullPolicy: imagePullPolicy,
+		Resource: corev1.ResourceRequirements{
+			Limits: corev1.ResourceList{
+				corev1.ResourceCPU:              cpuQ,
+				corev1.ResourceMemory:           memoryQ,
+				corev1.ResourceEphemeralStorage: diskQ,
 			},
-			ServiceAccountName: serviceAccount,
+			Requests: corev1.ResourceList{
+				corev1.ResourceCPU:              cpuQ,
+				corev1.ResourceMemory:           memoryQ,
+				corev1.ResourceEphemeralStorage: diskQ,
+			},
 		},
+		ServiceAccountName: serviceAccount,
+	}
+}
+
+func newFakeKatibConfig(suggestionConfig katibconfig.SuggestionConfig) *corev1.ConfigMap {
+
+	jsonConfig := map[string]katibconfig.SuggestionConfig{
+		"random": suggestionConfig,
 	}
 
 	b, _ := json.Marshal(jsonConfig)
