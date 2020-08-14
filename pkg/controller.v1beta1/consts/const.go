@@ -22,6 +22,9 @@ const (
 	// ConfigEnableGRPCProbeInSuggestion is the config name which indicates
 	// if we should set GRPC probe in suggestion deployments.
 	ConfigEnableGRPCProbeInSuggestion = "enable-grpc-probe-in-suggestion"
+	// ConfigTrialResources is the config name which indicates
+	// resources list which can be used as trial template
+	ConfigTrialResources = "trial-resources"
 
 	// LabelExperimentName is the label of experiment name.
 	LabelExperimentName = "experiment"

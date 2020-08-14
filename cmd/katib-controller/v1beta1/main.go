@@ -30,6 +30,7 @@ import (
 	apis "github.com/kubeflow/katib/pkg/apis/controller"
 	controller "github.com/kubeflow/katib/pkg/controller.v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
+	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
 	webhook "github.com/kubeflow/katib/pkg/webhook/v1beta1"
 )
 
@@ -44,6 +45,7 @@ func main() {
 	var injectSecurityContext bool
 	var serviceName string
 	var enableGRPCProbeInSuggestion bool
+	var trialResources trialutil.GvkListFlag
 
 	flag.StringVar(&experimentSuggestionName, "experiment-suggestion-name",
 		"default", "The implementation of suggestion interface in experiment controller (default)")
@@ -53,6 +55,7 @@ func main() {
 	flag.BoolVar(&injectSecurityContext, "webhook-inject-securitycontext", false, "Inject the securityContext of container[0] in the sidecar")
 	flag.StringVar(&serviceName, "webhook-service-name", "katib-controller", "The service name which will be used in webhook")
 	flag.BoolVar(&enableGRPCProbeInSuggestion, "enable-grpc-probe-in-suggestion", true, "enable grpc probe in suggestions")
+	flag.Var(&trialResources, "trial-resources", "The list of resources that can be used as trial template, in the form: Kind.version.group (e.g. TFJob.v1.kubeflow.org)")
 
 	flag.Parse()
 
@@ -61,6 +64,7 @@ func main() {
 	viper.Set(consts.ConfigCertLocalFS, certLocalFS)
 	viper.Set(consts.ConfigInjectSecurityContext, injectSecurityContext)
 	viper.Set(consts.ConfigEnableGRPCProbeInSuggestion, enableGRPCProbeInSuggestion)
+	viper.Set(consts.ConfigTrialResources, trialResources)
 
 	log.Info("Config:",
 		consts.ConfigExperimentSuggestionName,
@@ -75,6 +79,8 @@ func main() {
 		viper.GetBool(consts.ConfigInjectSecurityContext),
 		consts.ConfigEnableGRPCProbeInSuggestion,
 		viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion),
+		"trial-resources",
+		viper.Get(consts.ConfigTrialResources),
 	)
 
 	// Get a config to talk to the apiserver
