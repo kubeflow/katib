@@ -21,16 +21,18 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
 def update_python_sdk(src, dest, versions=('v1alpha3', 'v1beta1')):
     # tiny transformers to refine generated codes
     rewrite_rules = [
-        lambda l: l.replace('import katib', 'from kubeflow import katib'),
+        lambda l: l.replace('import katib', 'import kubeflow.katib'),
         lambda l: l.replace('from katib', 'from kubeflow.katib'),
     ]
 
     src_dirs = [
+        os.path.join(src, 'katib'),
         os.path.join(src, 'katib', 'models'),
         os.path.join(src, 'test'),
         os.path.join(src, 'docs')
     ]
     dest_dirs = [
+        os.path.join(dest, 'kubeflow', 'katib'),
         os.path.join(dest, 'kubeflow', 'katib', 'models'),
         os.path.join(dest, 'test'),
         os.path.join(dest, 'docs')
@@ -39,14 +41,19 @@ def update_python_sdk(src, dest, versions=('v1alpha3', 'v1beta1')):
     for src_dir, dest_dir in zip(src_dirs, dest_dirs):
         # remove previous generated files explicitly, in case of deprecated instances
         for file in os.listdir(dest_dir):
+            path = os.path.join(dest_dir, file)
+            if not os.path.isfile(path):
+                continue
             for v in versions:
                 if v in file.lower():
-                    os.remove(os.path.join(dest_dir, file))
+                    os.remove(path)
                     break
         # fill latest generated files
         for file in os.listdir(src_dir):
             in_file = os.path.join(src_dir, file)
             out_file = os.path.join(dest_dir, file)
+            if not os.path.isfile(in_file):
+                continue
             _rewrite_helper(in_file, out_file, rewrite_rules)
     # clear working dictionary
     shutil.rmtree(src)

@@ -84,7 +84,7 @@ class V1beta1TrialParameterSpec(object):
     def name(self):
         """Gets the name of this V1beta1TrialParameterSpec.  # noqa: E501
 
-        Name of the parameter that must be replaced in Trial template  # noqa: E501
+        Name of the parameter that must be replaced in trial template  # noqa: E501
 
         :return: The name of this V1beta1TrialParameterSpec.  # noqa: E501
         :rtype: str
@@ -95,7 +95,7 @@ class V1beta1TrialParameterSpec(object):
     def name(self, name):
         """Sets the name of this V1beta1TrialParameterSpec.
 
-        Name of the parameter that must be replaced in Trial template  # noqa: E501
+        Name of the parameter that must be replaced in trial template  # noqa: E501
 
         :param name: The name of this V1beta1TrialParameterSpec.  # noqa: E501
         :type: str

@@ -15,7 +15,7 @@ from __future__ import absolute_import
 
 import unittest
 
-from kubeflow import katib
+import kubeflow.katib
 from kubeflow.katib.models.v1alpha3_metrics_collector_spec import V1alpha3MetricsCollectorSpec  # noqa: E501
 from kubeflow.katib.rest import ApiException
 

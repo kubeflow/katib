@@ -23,9 +23,9 @@ setuptools.setup(
   author="Kubeflow Authors",
   author_email='premnath.vel@gmail.com',
   license="Apache License Version 2.0",
-  url="https://github.com/kubeflow/katib/sdk/python",
-  description="Katib Python SDK",
-  long_description="Katib Python SDK",
+  url="https://github.com/kubeflow/katib/tree/master/sdk/python/v1alpha3",
+  description="Katib Python SDK for APIVersion v1alpha3",
+  long_description="Katib Python SDK for APIVersion v1alpha3",
   packages=setuptools.find_packages(
     include=("kubeflow*")),
   package_data={},

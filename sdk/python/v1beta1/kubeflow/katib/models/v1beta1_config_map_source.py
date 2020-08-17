@@ -61,7 +61,7 @@ class V1beta1ConfigMapSource(object):
     def config_map_name(self):
         """Gets the config_map_name of this V1beta1ConfigMapSource.  # noqa: E501
 
-        Name of config map where Trial template is located  # noqa: E501
+        Name of config map where trial template is located  # noqa: E501
 
         :return: The config_map_name of this V1beta1ConfigMapSource.  # noqa: E501
         :rtype: str
@@ -72,7 +72,7 @@ class V1beta1ConfigMapSource(object):
     def config_map_name(self, config_map_name):
         """Sets the config_map_name of this V1beta1ConfigMapSource.
 
-        Name of config map where Trial template is located  # noqa: E501
+        Name of config map where trial template is located  # noqa: E501
 
         :param config_map_name: The config_map_name of this V1beta1ConfigMapSource.  # noqa: E501
         :type: str
@@ -84,7 +84,7 @@ class V1beta1ConfigMapSource(object):
     def config_map_namespace(self):
         """Gets the config_map_namespace of this V1beta1ConfigMapSource.  # noqa: E501
 
-        Namespace of config map where Trial template is located  # noqa: E501
+        Namespace of config map where trial template is located  # noqa: E501
 
         :return: The config_map_namespace of this V1beta1ConfigMapSource.  # noqa: E501
         :rtype: str
@@ -95,7 +95,7 @@ class V1beta1ConfigMapSource(object):
     def config_map_namespace(self, config_map_namespace):
         """Sets the config_map_namespace of this V1beta1ConfigMapSource.
 
-        Namespace of config map where Trial template is located  # noqa: E501
+        Namespace of config map where trial template is located  # noqa: E501
 
         :param config_map_namespace: The config_map_namespace of this V1beta1ConfigMapSource.  # noqa: E501
         :type: str
@@ -107,7 +107,7 @@ class V1beta1ConfigMapSource(object):
     def template_path(self):
         """Gets the template_path of this V1beta1ConfigMapSource.  # noqa: E501
 
-        Path in config map where Trial template is located  # noqa: E501
+        Path in config map where trial template is located  # noqa: E501
 
         :return: The template_path of this V1beta1ConfigMapSource.  # noqa: E501
         :rtype: str
@@ -118,7 +118,7 @@ class V1beta1ConfigMapSource(object):
     def template_path(self, template_path):
         """Sets the template_path of this V1beta1ConfigMapSource.
 
-        Path in config map where Trial template is located  # noqa: E501
+        Path in config map where trial template is located  # noqa: E501
 
         :param template_path: The template_path of this V1beta1ConfigMapSource.  # noqa: E501
         :type: str

@@ -15,7 +15,7 @@ from __future__ import absolute_import
 
 import unittest
 
-from kubeflow import katib
+import kubeflow.katib
 from kubeflow.katib.models.v1alpha3_feasible_space import V1alpha3FeasibleSpace  # noqa: E501
 from kubeflow.katib.rest import ApiException
 

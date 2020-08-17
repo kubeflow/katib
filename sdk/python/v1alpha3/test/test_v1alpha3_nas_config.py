@@ -15,7 +15,7 @@ from __future__ import absolute_import
 
 import unittest
 
-from kubeflow import katib
+import kubeflow.katib
 from kubeflow.katib.models.v1alpha3_nas_config import V1alpha3NasConfig  # noqa: E501
 from kubeflow.katib.rest import ApiException
 

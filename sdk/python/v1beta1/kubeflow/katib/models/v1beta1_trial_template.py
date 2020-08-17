@@ -93,7 +93,7 @@ class V1beta1TrialTemplate(object):
     def retain(self):
         """Gets the retain of this V1beta1TrialTemplate.  # noqa: E501
 
-        Retain indicates that Trial resources must be not cleanup  # noqa: E501
+        Retain indicates that trial resources must be not cleanup  # noqa: E501
 
         :return: The retain of this V1beta1TrialTemplate.  # noqa: E501
         :rtype: bool
@@ -104,7 +104,7 @@ class V1beta1TrialTemplate(object):
     def retain(self, retain):
         """Sets the retain of this V1beta1TrialTemplate.
 
-        Retain indicates that Trial resources must be not cleanup  # noqa: E501
+        Retain indicates that trial resources must be not cleanup  # noqa: E501
 
         :param retain: The retain of this V1beta1TrialTemplate.  # noqa: E501
         :type: bool
@@ -116,7 +116,7 @@ class V1beta1TrialTemplate(object):
     def trial_parameters(self):
         """Gets the trial_parameters of this V1beta1TrialTemplate.  # noqa: E501
 
-        List of parameres that are used in Trial template  # noqa: E501
+        List of parameters that are used in trial template  # noqa: E501
 
         :return: The trial_parameters of this V1beta1TrialTemplate.  # noqa: E501
         :rtype: list[V1beta1TrialParameterSpec]
@@ -127,7 +127,7 @@ class V1beta1TrialTemplate(object):
     def trial_parameters(self, trial_parameters):
         """Sets the trial_parameters of this V1beta1TrialTemplate.
 
-        List of parameres that are used in Trial template  # noqa: E501
+        List of parameters that are used in trial template  # noqa: E501
 
         :param trial_parameters: The trial_parameters of this V1beta1TrialTemplate.  # noqa: E501
         :type: list[V1beta1TrialParameterSpec]
@@ -139,7 +139,7 @@ class V1beta1TrialTemplate(object):
     def trial_spec(self):
         """Gets the trial_spec of this V1beta1TrialTemplate.  # noqa: E501
 
-        TrialSpec represents Trial template in unstructured format  # noqa: E501
+        TrialSpec represents trial template in unstructured format  # noqa: E501
 
         :return: The trial_spec of this V1beta1TrialTemplate.  # noqa: E501
         :rtype: V1UnstructuredUnstructured
@@ -150,7 +150,7 @@ class V1beta1TrialTemplate(object):
     def trial_spec(self, trial_spec):
         """Sets the trial_spec of this V1beta1TrialTemplate.
 
-        TrialSpec represents Trial template in unstructured format  # noqa: E501
+        TrialSpec represents trial template in unstructured format  # noqa: E501
 
         :param trial_spec: The trial_spec of this V1beta1TrialTemplate.  # noqa: E501
         :type: V1UnstructuredUnstructured

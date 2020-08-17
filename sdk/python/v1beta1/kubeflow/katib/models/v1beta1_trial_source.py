@@ -82,7 +82,7 @@ class V1beta1TrialSource(object):
     def trial_spec(self):
         """Gets the trial_spec of this V1beta1TrialSource.  # noqa: E501
 
-        TrialSpec represents Trial template in unstructured format  # noqa: E501
+        TrialSpec represents trial template in unstructured format  # noqa: E501
 
         :return: The trial_spec of this V1beta1TrialSource.  # noqa: E501
         :rtype: V1UnstructuredUnstructured
@@ -93,7 +93,7 @@ class V1beta1TrialSource(object):
     def trial_spec(self, trial_spec):
         """Sets the trial_spec of this V1beta1TrialSource.
 
-        TrialSpec represents Trial template in unstructured format  # noqa: E501
+        TrialSpec represents trial template in unstructured format  # noqa: E501
 
         :param trial_spec: The trial_spec of this V1beta1TrialSource.  # noqa: E501
         :type: V1UnstructuredUnstructured

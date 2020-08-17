@@ -15,7 +15,7 @@ from __future__ import absolute_import
 
 import unittest
 
-from kubeflow import katib
+import kubeflow.katib
 from kubeflow.katib.models.v1beta1_trial_status import V1beta1TrialStatus  # noqa: E501
 from kubeflow.katib.rest import ApiException
 
