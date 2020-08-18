@@ -31,7 +31,7 @@ python setup.py install --user
 
 ## Getting Started
 
-Please follow the [samples](examples/bayesianoptimization-katib-sdk.ipynb) to create, update, delete and get hyperparamaters of  Katib Experiment.
+TODO: Add examples for v1beta1.
 
 ## Documentation for API Endpoints
 

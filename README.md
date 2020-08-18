@@ -398,15 +398,13 @@ You can access the Katib UI using this URL: ```http://localhost:8080/katib/```.
 
 ### Katib SDK
 
-Currently Katib SDK supports only v1alpha3.
+Katib supports Python SDK for v1beta1 and v1alpha3 version.
 
-* Install the SDK
-  ```
-  pip install kubeflow-katib
-  ```
-* Get the Katib SDK documents from [here](sdk/python/README.md).
+* See the [Katib v1beta1 SDK documentation](https://github.com/kubeflow/katib/tree/master/sdk/python/v1beta1).
 
-* Follow the [example here](sdk/python/examples/bayesianoptimization-katib-sdk.ipynb) to use the Katib SDK to create, delete and get Hyperparameter values of experiment.
+* See the [Katib v1alpha3 SDK documentation](https://github.com/kubeflow/katib/tree/master/sdk/python/v1alpha3).
+
+Run [`gen_sdk.sh`](https://github.com/kubeflow/katib/blob/master/hack/gen-python-sdk/gen_sdk.sh) to update SDK.
 
 ### Cleanups
 
