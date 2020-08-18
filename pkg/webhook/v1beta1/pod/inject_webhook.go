@@ -117,7 +117,7 @@ func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 	// Try to get Katib job kind and job name from mutating pod
 	jobKind, jobName, err := s.getKatibJob(object, ns)
 	if err != nil {
-		return false, err
+		return false, nil
 	}
 
 	trial := &trialsv1beta1.Trial{}
