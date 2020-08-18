@@ -55,6 +55,38 @@ def update_python_sdk(src, dest, versions=('v1alpha3', 'v1beta1')):
             if not os.path.isfile(in_file):
                 continue
             _rewrite_helper(in_file, out_file, rewrite_rules)
+
+    # update doc for API Endpoints and Models README.md
+    buffer = []
+    update_buffer = []
+    with open(os.path.join(src, 'README.md'), 'r') as src_f:
+        anchor = 0
+        for line in src_f.readlines():
+            if line.startswith('## Documentation For Models'):
+                if anchor == 0:
+                    anchor = 1
+            elif line.startswith('##') and anchor == 1:
+                anchor = 2
+            if anchor == 0:
+                continue
+            if anchor == 2:
+                break
+            update_buffer.append(line)
+    with open(os.path.join(dest, 'README.md'), 'r') as dest_f:
+        anchor = 0
+        for line in dest_f.readlines():
+            if line.startswith('## Documentation For Models'):
+                if anchor == 0:
+                    buffer.extend(update_buffer)
+                    anchor = 1
+            elif line.startswith('##') and anchor == 1:
+                anchor = 2
+            if anchor == 1:
+                continue
+            buffer.append(line)
+    with open(os.path.join(dest, 'README.md'), 'w') as dest_f:
+        dest_f.writelines(buffer)
+
     # clear working dictionary
     shutil.rmtree(src)
 
