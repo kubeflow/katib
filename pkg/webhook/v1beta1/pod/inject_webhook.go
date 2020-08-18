@@ -110,17 +110,16 @@ func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 	if err != nil {
 		return false, err
 	}
+
 	// Try to get Katib job kind and job name from mutating pod
 	jobKind, jobName, err := s.getKatibJob(object, ns)
 	if err != nil {
 		return false, nil
 	}
 
-	// jobName and Trial is equal
-	trialName := jobName
 	trial := &trialsv1beta1.Trial{}
-	err = s.client.Get(context.TODO(), apitypes.NamespacedName{Name: trialName, Namespace: ns}, trial)
-	if err != nil {
+	// jobName and Trial name is equal
+	if err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: jobName, Namespace: ns}, trial); err != nil {
 		return false, err
 	}
 
@@ -142,9 +141,11 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		return nil, err
 	}
 
+	// Try to get Katib job kind and job name from mutating pod
 	jobKind, jobName, _ := s.getKatibJob(object, namespace)
+
 	trial := &trialsv1beta1.Trial{}
-	// jobName and Trial is equal
+	// jobName and Trial name is equal
 	if err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: jobName, Namespace: namespace}, trial); err != nil {
 		return nil, err
 	}
