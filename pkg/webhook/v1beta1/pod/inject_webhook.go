@@ -118,7 +118,6 @@ func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 	if err != nil {
 		return false, nil
 	}
-<<<<<<< HEAD
 
 	trial := &trialsv1beta1.Trial{}
 	// jobName and Trial name is equal
@@ -137,20 +136,7 @@ func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 		if !isMasterRole(pod, jobKind) {
 			return false, nil
 		}
-=======
 
-	if !isMasterRole(pod, jobKind) {
-		return false, nil
-	}
-
-	// jobName and Trial is equal
-	trialName := jobName
-	trial := &trialsv1beta1.Trial{}
-	err = s.client.Get(context.TODO(), apitypes.NamespacedName{Name: trialName, Namespace: ns}, trial)
-	if err != nil {
-		return false, err
->>>>>>> Refactor get Katib job
-	}
 
 	if trial.Spec.MetricsCollector.Collector.Kind == common.NoneCollector {
 		return false, nil
