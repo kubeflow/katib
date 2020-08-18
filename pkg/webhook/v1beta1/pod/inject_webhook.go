@@ -116,10 +116,6 @@ func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 		return false, nil
 	}
 
-	if !isMasterRole(pod, jobKind) {
-		return false, nil
-	}
-
 	// jobName and Trial is equal
 	trialName := jobName
 	trial := &trialsv1beta1.Trial{}
@@ -127,6 +123,11 @@ func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 	if err != nil {
 		return false, err
 	}
+
+	if !isMasterRole(pod, jobKind) {
+		return false, nil
+	}
+
 	if trial.Spec.MetricsCollector.Collector.Kind == common.NoneCollector {
 		return false, nil
 	}
