@@ -9,8 +9,15 @@ import (
 
 	"path/filepath"
 
+<<<<<<< HEAD
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
+=======
+	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
+	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
+	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
+>>>>>>> Add primary container name
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,15 +35,15 @@ import (
 
 func TestWrapWorkerContainer(t *testing.T) {
 	testCases := []struct {
-		Pod           *v1.Pod
-		Namespace     string
-		JobKind       string
-		MetricsFile   string
-		PathKind      common.FileSystemKind
-		MC            common.MetricsCollectorSpec
-		Expected      *v1.Pod
-		ExpectedError error
-		Name          string
+		Pod         *v1.Pod
+		Namespace   string
+		JobKind     string
+		MetricsFile string
+		PathKind    common.FileSystemKind
+		Trial       *trialsv1beta1.Trial
+		Expected    *v1.Pod
+		Err         bool
+		Name        string
 	}{
 		{
 			Pod: &v1.Pod{
@@ -55,9 +62,13 @@ func TestWrapWorkerContainer(t *testing.T) {
 			JobKind:     "TFJob",
 			MetricsFile: "testfile",
 			PathKind:    common.FileKind,
-			MC: common.MetricsCollectorSpec{
-				Collector: &common.CollectorSpec{
-					Kind: common.StdOutCollector,
+			Trial: &trialsv1beta1.Trial{
+				Spec: trialsv1beta1.TrialSpec{
+					MetricsCollector: common.MetricsCollectorSpec{
+						Collector: &common.CollectorSpec{
+							Kind: common.StdOutCollector,
+						},
+					},
 				},
 			},
 			Expected: &v1.Pod{
@@ -75,45 +86,8 @@ func TestWrapWorkerContainer(t *testing.T) {
 					},
 				},
 			},
-			ExpectedError: nil,
-			Name:          "tensorflow container without sh -c",
-		},
-		{
-			Pod: &v1.Pod{
-				Spec: v1.PodSpec{
-					Containers: []v1.Container{
-						{
-							Name: "test",
-							Command: []string{
-								"python main.py",
-							},
-						},
-					},
-				},
-			},
-			Namespace:   "nohere",
-			JobKind:     "TFJob",
-			MetricsFile: "testfile",
-			PathKind:    common.FileKind,
-			MC: common.MetricsCollectorSpec{
-				Collector: &common.CollectorSpec{
-					Kind: common.StdOutCollector,
-				},
-			},
-			Expected: &v1.Pod{
-				Spec: v1.PodSpec{
-					Containers: []v1.Container{
-						{
-							Name: "test",
-							Command: []string{
-								"python main.py",
-							},
-						},
-					},
-				},
-			},
-			ExpectedError: nil,
-			Name:          "test container without sh -c",
+			Err:  false,
+			Name: "tensorflow container without sh -c",
 		},
 		{
 			Pod: &v1.Pod{
@@ -133,9 +107,13 @@ func TestWrapWorkerContainer(t *testing.T) {
 			JobKind:     "TFJob",
 			MetricsFile: "testfile",
 			PathKind:    common.FileKind,
-			MC: common.MetricsCollectorSpec{
-				Collector: &common.CollectorSpec{
-					Kind: common.StdOutCollector,
+			Trial: &trialsv1beta1.Trial{
+				Spec: trialsv1beta1.TrialSpec{
+					MetricsCollector: common.MetricsCollectorSpec{
+						Collector: &common.CollectorSpec{
+							Kind: common.StdOutCollector,
+						},
+					},
 				},
 			},
 			Expected: &v1.Pod{
@@ -153,22 +131,101 @@ func TestWrapWorkerContainer(t *testing.T) {
 					},
 				},
 			},
-			ExpectedError: nil,
-			Name:          "Tensorflow container with sh -c",
+			Err:  false,
+			Name: "tensorflow container with sh -c",
+		},
+		{
+			Pod: &v1.Pod{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Name: "primary-container",
+							Command: []string{
+								"sh", "-c",
+								"python main.py",
+							},
+						},
+						{
+							Name: "not-primary-container",
+							Command: []string{
+								"sh", "-c",
+								"python main.py",
+							},
+						},
+					},
+				},
+			},
+			MetricsFile: "testfile",
+			PathKind:    common.FileKind,
+			Trial: &trialsv1beta1.Trial{
+				Spec: trialsv1beta1.TrialSpec{
+					PrimaryContainerName: "primary-container",
+					MetricsCollector: common.MetricsCollectorSpec{
+						Collector: &common.CollectorSpec{
+							Kind: common.StdOutCollector,
+						},
+					},
+				},
+			},
+			Expected: &v1.Pod{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Name: "primary-container",
+							Command: []string{
+								"sh", "-c",
+							},
+							Args: []string{
+								"python main.py 1>testfile 2>&1 && echo completed > $$$$.pid",
+							},
+						},
+						{
+							Name: "not-primary-container",
+							Command: []string{
+								"sh", "-c",
+								"python main.py",
+							},
+						},
+					},
+				},
+			},
+			Err:  false,
+			Name: "Primary container name is set for training pod",
+		},
+		{
+			Pod: &v1.Pod{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Name: "not-primary-container",
+						},
+					},
+				},
+			},
+			PathKind: common.FileKind,
+			Trial: &trialsv1beta1.Trial{
+				Spec: trialsv1beta1.TrialSpec{
+					PrimaryContainerName: "primary-container",
+				},
+			},
+			Err:  true,
+			Name: "Training pod doesn't have primary container name",
 		},
 	}
 
 	for _, c := range testCases {
-		err := wrapWorkerContainer(c.Pod, c.Namespace, c.JobKind, c.MetricsFile, c.PathKind, c.MC)
-		if err != c.ExpectedError {
-			t.Errorf("Expected error %v, got %v", c.ExpectedError, err)
-		}
-		if err == nil {
-			if !equality.Semantic.DeepEqual(c.Pod.Spec.Containers, c.Expected.Spec.Containers) {
-				t.Errorf("Case %s: Expected pod %v, got %v",
+		err := wrapWorkerContainer(c.Pod, c.Namespace, c.JobKind, c.MetricsFile, c.PathKind, c.Trial)
+		if c.Err && err == nil {
+			t.Errorf("Case %s failed. Expected error, got nil", c.Name)
+		} else if !c.Err {
+			if err != nil {
+				t.Errorf("Case %s failed. Expected nil, got error: %v", c.Name, err)
+			} else if !equality.Semantic.DeepEqual(c.Pod.Spec.Containers, c.Expected.Spec.Containers) {
+				t.Errorf("Case %s failed. Expected pod: %v, got: %v",
 					c.Name, c.Expected.Spec.Containers, c.Pod.Spec.Containers)
 			}
 		}
+
 	}
 }
 

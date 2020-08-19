@@ -267,12 +267,18 @@
             "$ref": "#/definitions/v1beta1.ParameterAssignment"
           }
         },
+<<<<<<< HEAD
         "primaryPodLabels": {
           "description": "Label that determines if pod needs to be injected by Katib sidecar container",
           "type": "object",
           "additionalProperties": {
             "type": "string"
           }
+=======
+        "primaryContainerName": {
+          "description": "Name of training container where actual model training is running",
+          "type": "string"
+>>>>>>> Add primary container name
         },
         "retainRun": {
           "description": "Whether to retain the trial run object after completed.",
@@ -885,12 +891,18 @@
           "description": "ConfigMap spec represents a reference to ConfigMap",
           "$ref": "#/definitions/v1beta1.ConfigMapSource"
         },
+<<<<<<< HEAD
         "primaryPodLabels": {
           "description": "Labels that determines if pod needs to be injected by Katib sidecar container",
           "type": "object",
           "additionalProperties": {
             "type": "string"
           }
+=======
+        "primaryContainerName": {
+          "description": "Name of training container where actual model training is running",
+          "type": "string"
+>>>>>>> Add primary container name
         },
         "retain": {
           "description": "Retain indicates that trial resources must be not cleanup",

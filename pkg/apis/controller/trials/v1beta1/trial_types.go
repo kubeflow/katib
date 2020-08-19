@@ -40,8 +40,13 @@ type TrialSpec struct {
 	// Describes how metrics will be collected
 	MetricsCollector common.MetricsCollectorSpec `json:"metricsCollector,omitempty"`
 
+<<<<<<< HEAD
 	// Label that determines if pod needs to be injected by Katib sidecar container
 	PrimaryPodLabels map[string]string `json:"primaryPodLabels,omitempty"`
+=======
+	// Name of training container where actual model training is running
+	PrimaryContainerName string `json:"primaryContainerName,omitempty"`
+>>>>>>> Add primary container name
 }
 
 type TrialStatus struct {

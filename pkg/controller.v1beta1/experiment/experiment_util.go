@@ -53,8 +53,13 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1beta
 		trial.Spec.MetricsCollector = *expInstance.Spec.MetricsCollectorSpec
 	}
 
+<<<<<<< HEAD
 	if expInstance.Spec.TrialTemplate.TrialParameters != nil {
 		trial.Spec.PrimaryPodLabels = expInstance.Spec.TrialTemplate.PrimaryPodLabels
+=======
+	if expInstance.Spec.TrialTemplate.PrimaryContainerName != "" {
+		trial.Spec.PrimaryContainerName = expInstance.Spec.TrialTemplate.PrimaryContainerName
+>>>>>>> Add primary container name
 	}
 
 	if err := r.Create(context.TODO(), trial); err != nil {
