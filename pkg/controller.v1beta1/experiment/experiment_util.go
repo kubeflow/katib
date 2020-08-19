@@ -53,6 +53,10 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1beta
 		trial.Spec.MetricsCollector = *expInstance.Spec.MetricsCollectorSpec
 	}
 
+	if expInstance.Spec.TrialTemplate.TrialParameters != nil {
+		trial.Spec.PrimaryPodLabels = expInstance.Spec.TrialTemplate.PrimaryPodLabels
+	}
+
 	if err := r.Create(context.TODO(), trial); err != nil {
 		logger.Error(err, "Trial create error", "Trial name", trial.Name)
 		return err
