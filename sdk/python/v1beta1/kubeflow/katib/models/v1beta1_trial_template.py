@@ -36,6 +36,7 @@ class V1beta1TrialTemplate(object):
     """
     swagger_types = {
         'config_map': 'V1beta1ConfigMapSource',
+        'primary_pod_labels': 'dict(str, str)',
         'retain': 'bool',
         'trial_parameters': 'list[V1beta1TrialParameterSpec]',
         'trial_spec': 'V1UnstructuredUnstructured'
@@ -43,15 +44,17 @@ class V1beta1TrialTemplate(object):
 
     attribute_map = {
         'config_map': 'configMap',
+        'primary_pod_labels': 'primaryPodLabels',
         'retain': 'retain',
         'trial_parameters': 'trialParameters',
         'trial_spec': 'trialSpec'
     }
 
-    def __init__(self, config_map=None, retain=None, trial_parameters=None, trial_spec=None):  # noqa: E501
+    def __init__(self, config_map=None, primary_pod_labels=None, retain=None, trial_parameters=None, trial_spec=None):  # noqa: E501
         """V1beta1TrialTemplate - a model defined in Swagger"""  # noqa: E501
 
         self._config_map = None
+        self._primary_pod_labels = None
         self._retain = None
         self._trial_parameters = None
         self._trial_spec = None
@@ -59,6 +62,8 @@ class V1beta1TrialTemplate(object):
 
         if config_map is not None:
             self.config_map = config_map
+        if primary_pod_labels is not None:
+            self.primary_pod_labels = primary_pod_labels
         if retain is not None:
             self.retain = retain
         if trial_parameters is not None:
@@ -88,6 +93,29 @@ class V1beta1TrialTemplate(object):
         """
 
         self._config_map = config_map
+
+    @property
+    def primary_pod_labels(self):
+        """Gets the primary_pod_labels of this V1beta1TrialTemplate.  # noqa: E501
+
+        Labels that determines if pod needs to be injected by Katib sidecar container  # noqa: E501
+
+        :return: The primary_pod_labels of this V1beta1TrialTemplate.  # noqa: E501
+        :rtype: dict(str, str)
+        """
+        return self._primary_pod_labels
+
+    @primary_pod_labels.setter
+    def primary_pod_labels(self, primary_pod_labels):
+        """Sets the primary_pod_labels of this V1beta1TrialTemplate.
+
+        Labels that determines if pod needs to be injected by Katib sidecar container  # noqa: E501
+
+        :param primary_pod_labels: The primary_pod_labels of this V1beta1TrialTemplate.  # noqa: E501
+        :type: dict(str, str)
+        """
+
+        self._primary_pod_labels = primary_pod_labels
 
     @property
     def retain(self):
