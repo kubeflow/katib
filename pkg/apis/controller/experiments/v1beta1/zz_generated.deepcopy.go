@@ -431,6 +431,13 @@ func (in *TrialTemplate) DeepCopyInto(out *TrialTemplate) {
 		*out = make([]TrialParameterSpec, len(*in))
 		copy(*out, *in)
 	}
+	if in.PrimaryPodLabels != nil {
+		in, out := &in.PrimaryPodLabels, &out.PrimaryPodLabels
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 

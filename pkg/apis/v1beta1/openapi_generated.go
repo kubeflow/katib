@@ -1102,6 +1102,20 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								},
 							},
 						},
+						"primaryPodLabels": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Labels that determines if pod needs to be injected by Katib sidecar container",
+								Type:        []string{"object"},
+								AdditionalProperties: &spec.SchemaOrBool{
+									Schema: &spec.Schema{
+										SchemaProps: spec.SchemaProps{
+											Type:   []string{"string"},
+											Format: "",
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1246,12 +1260,13 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1.SuggestionSpec": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
-					Description: "SuggestionSpec defines the desired state of Suggestion",
+					Description: "SuggestionSpec defines the desired state of suggestion.",
 					Properties: map[string]spec.Schema{
 						"algorithmName": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"string"},
-								Format: "",
+								Description: "Name of the algorithm that suggestion is used.",
+								Type:        []string{"string"},
+								Format:      "",
 							},
 						},
 						"requests": {
@@ -1259,6 +1274,13 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								Description: "Number of suggestions requested",
 								Type:        []string{"integer"},
 								Format:      "int32",
+							},
+						},
+						"resumePolicy": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Describes resuming policy which usually take effect after experiment terminated. Default value is LongRunning.",
+								Type:        []string{"string"},
+								Format:      "",
 							},
 						},
 					},
@@ -1548,6 +1570,20 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 							SchemaProps: spec.SchemaProps{
 								Description: "Describes how metrics will be collected",
 								Ref:         ref("github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.MetricsCollectorSpec"),
+							},
+						},
+						"primaryPodLabels": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Label that determines if pod needs to be injected by Katib sidecar container",
+								Type:        []string{"object"},
+								AdditionalProperties: &spec.SchemaOrBool{
+									Schema: &spec.Schema{
+										SchemaProps: spec.SchemaProps{
+											Type:   []string{"string"},
+											Format: "",
+										},
+									},
+								},
 							},
 						},
 					},
