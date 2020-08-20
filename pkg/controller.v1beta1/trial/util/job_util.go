@@ -102,6 +102,8 @@ func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.
 		return trialJobStatus, nil
 	}
 
-	logger.Info("Deployed Job status is running")
+	if !trial.IsRunning() {
+		logger.Info("Deployed Job status is running")
+	}
 	return trialJobStatus, nil
 }

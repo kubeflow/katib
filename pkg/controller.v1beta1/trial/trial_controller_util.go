@@ -47,6 +47,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 	}
 
 	timeNow := metav1.Now()
+
 	if jobStatus.Condition == trialutil.JobSucceeded {
 		if isTrialObservationAvailable(instance) {
 			msg := "Trial has succeeded "
@@ -54,10 +55,10 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 
 			// Get message and reason from deployed job
 			if jobStatus.Message != "" {
-				msg = msg + ". Job message: " + jobStatus.Message
+				msg = fmt.Sprintf("%v. Job message: %v", msg, jobStatus.Message)
 			}
 			if jobStatus.Reason != "" {
-				reason = reason + ". Job reason: " + jobStatus.Reason
+				reason = fmt.Sprintf("%v. Job reason: %v", reason, jobStatus.Reason)
 			}
 
 			instance.MarkTrialStatusSucceeded(corev1.ConditionTrue, reason, msg)
@@ -73,10 +74,10 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 
 			// Get message and reason from deployed job
 			if jobStatus.Message != "" {
-				msg = msg + ". Job message: " + jobStatus.Message
+				msg = fmt.Sprintf("%v. Job message: %v", msg, jobStatus.Message)
 			}
 			if jobStatus.Reason != "" {
-				reason = reason + ". Job reason: " + jobStatus.Reason
+				reason = fmt.Sprintf("%v. Job reason: %v", reason, jobStatus.Reason)
 			}
 
 			instance.MarkTrialStatusSucceeded(corev1.ConditionFalse, reason, msg)
@@ -90,16 +91,20 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 
 		// Get message and reason from deployed job
 		if jobStatus.Message != "" {
-			msg = msg + ". Job message: " + jobStatus.Message
+			msg = fmt.Sprintf("%v. Job message: %v", msg, jobStatus.Message)
 		}
 		if jobStatus.Reason != "" {
-			reason = reason + ". Job reason: " + jobStatus.Reason
+			reason = fmt.Sprintf("%v. Job reason: %v", reason, jobStatus.Reason)
 		}
 
 		instance.MarkTrialStatusFailed(reason, msg)
 		instance.Status.CompletionTime = &timeNow
 
-		eventMsg := fmt.Sprintf("Job %s has failed. Job message: %s, reason: %v", deployedJobName, jobStatus.Message, jobStatus.Reason)
+		eventMsg := fmt.Sprintf("Job %s has failed", deployedJobName)
+		if jobStatus.Message != "" && jobStatus.Reason != "" {
+			eventMsg = fmt.Sprintf("%v. Job message: %s reason: %v", eventMsg, jobStatus.Message, jobStatus.Reason)
+		}
+
 		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobFailedReason, eventMsg)
 		r.collector.IncreaseTrialsFailedCount(instance.Namespace)
 	} else if jobStatus.Condition == trialutil.JobRunning {
