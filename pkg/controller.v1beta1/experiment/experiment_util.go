@@ -53,8 +53,13 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1beta
 		trial.Spec.MetricsCollector = *expInstance.Spec.MetricsCollectorSpec
 	}
 
-	if expInstance.Spec.TrialTemplate.TrialParameters != nil {
+	if expInstance.Spec.TrialTemplate.PrimaryPodLabels != nil {
 		trial.Spec.PrimaryPodLabels = expInstance.Spec.TrialTemplate.PrimaryPodLabels
+	}
+
+	if expInstance.Spec.TrialTemplate.SuccessCondition != "" && expInstance.Spec.TrialTemplate.FailureCondition != "" {
+		trial.Spec.SuccessCondition = expInstance.Spec.TrialTemplate.SuccessCondition
+		trial.Spec.FailureCondition = expInstance.Spec.TrialTemplate.FailureCondition
 	}
 
 	if err := r.Create(context.TODO(), trial); err != nil {

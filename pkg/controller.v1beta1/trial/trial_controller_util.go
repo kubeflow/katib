@@ -30,6 +30,7 @@ import (
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
+	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
 	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 )
 
@@ -37,7 +38,84 @@ const (
 	cleanMetricsFinalizer = "clean-metrics-in-db"
 )
 
-func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Trial, deployedJob *unstructured.Unstructured, jobCondition *commonv1.JobCondition) {
+// UpdateTrialStatusCondition updates Trial status from current deployed Job status
+func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Trial, deployedJobName string, jobStatus *trialutil.TrialJobStatus) {
+
+	// If deployedJobName is not set we don't need to update Trial status
+	if deployedJobName == "" {
+		return
+	}
+
+	timeNow := metav1.Now()
+	if jobStatus.Condition == trialutil.JobSucceeded {
+		if isTrialObservationAvailable(instance) {
+			msg := "Trial has succeeded "
+			reason := TrialSucceededReason
+
+			// Get message and reason from deployed job
+			if jobStatus.Message != "" {
+				msg = msg + ". Job message: " + jobStatus.Message
+			}
+			if jobStatus.Reason != "" {
+				reason = reason + ". Job reason: " + jobStatus.Reason
+			}
+
+			instance.MarkTrialStatusSucceeded(corev1.ConditionTrue, reason, msg)
+			instance.Status.CompletionTime = &timeNow
+
+			eventMsg := fmt.Sprintf("Job %s has succeeded", deployedJobName)
+			r.recorder.Eventf(instance, corev1.EventTypeNormal, JobSucceededReason, eventMsg)
+			r.collector.IncreaseTrialsSucceededCount(instance.Namespace)
+		} else {
+			// TODO (andreyvelich): Is is correct to mark succeeded status false when metrics are unavailable?
+			msg := "Metrics are not available"
+			reason := TrialMetricsUnavailableReason
+
+			// Get message and reason from deployed job
+			if jobStatus.Message != "" {
+				msg = msg + ". Job message: " + jobStatus.Message
+			}
+			if jobStatus.Reason != "" {
+				reason = reason + ". Job reason: " + jobStatus.Reason
+			}
+
+			instance.MarkTrialStatusSucceeded(corev1.ConditionFalse, reason, msg)
+
+			eventMsg := fmt.Sprintf("Metrics are not available for Job %s", deployedJobName)
+			r.recorder.Eventf(instance, corev1.EventTypeWarning, JobMetricsUnavailableReason, eventMsg)
+		}
+	} else if jobStatus.Condition == trialutil.JobFailed {
+		msg := "Trial has failed"
+		reason := TrialFailedReason
+
+		// Get message and reason from deployed job
+		if jobStatus.Message != "" {
+			msg = msg + ". Job message: " + jobStatus.Message
+		}
+		if jobStatus.Reason != "" {
+			reason = reason + ". Job reason: " + jobStatus.Reason
+		}
+
+		instance.MarkTrialStatusFailed(reason, msg)
+		instance.Status.CompletionTime = &timeNow
+
+		eventMsg := fmt.Sprintf("Job %s has failed. Job message: %s, reason: %v", deployedJobName, jobStatus.Message, jobStatus.Reason)
+		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobFailedReason, eventMsg)
+		r.collector.IncreaseTrialsFailedCount(instance.Namespace)
+	} else if jobStatus.Condition == trialutil.JobRunning {
+		msg := "Trial is running"
+		instance.MarkTrialStatusRunning(TrialRunningReason, msg)
+
+		eventMsg := fmt.Sprintf("Job %s is running", deployedJobName)
+		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobRunningReason, eventMsg)
+		// TODO(gaocegege): Should we maintain a TrialsRunningCount?
+	}
+	// else nothing to do
+	return
+}
+
+// TODO (andreyvelich): Can be deleted after custom CRD is implemented
+func (r *ReconcileTrial) UpdateTrialStatusConditionDeprecated(instance *trialsv1beta1.Trial, deployedJob *unstructured.Unstructured, jobCondition *commonv1.JobCondition) {
 	if jobCondition == nil || instance == nil || deployedJob == nil {
 		return
 	}
@@ -83,7 +161,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 	return
 }
 
-func (r *ReconcileTrial) UpdateTrialStatusObservation(instance *trialsv1beta1.Trial, deployedJob *unstructured.Unstructured) error {
+func (r *ReconcileTrial) UpdateTrialStatusObservation(instance *trialsv1beta1.Trial) error {
 	reply, err := r.GetTrialObservationLog(instance)
 	if err != nil {
 		log.Error(err, "Get trial observation log error")
