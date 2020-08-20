@@ -198,7 +198,7 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 				return reconcile.Result{}, err
 			}
 		}
-		// Check if max trials is reconfigured
+		// Check if experiment is restartable and max trials is reconfigured
 		// That means experiment is restarting
 		if (util.IsCompletedExperimentRestartable(instance) &&
 			instance.Spec.MaxTrialCount != nil &&
