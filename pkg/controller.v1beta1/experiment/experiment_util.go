@@ -60,6 +60,11 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1beta
 		trial.Spec.PrimaryContainerName = expInstance.Spec.TrialTemplate.PrimaryContainerName
 	}
 
+	if expInstance.Spec.TrialTemplate.SuccessCondition != "" && expInstance.Spec.TrialTemplate.FailureCondition != "" {
+		trial.Spec.SuccessCondition = expInstance.Spec.TrialTemplate.SuccessCondition
+		trial.Spec.FailureCondition = expInstance.Spec.TrialTemplate.FailureCondition
+	}
+
 	if err := r.Create(context.TODO(), trial); err != nil {
 		logger.Error(err, "Trial create error", "Trial name", trial.Name)
 		return err

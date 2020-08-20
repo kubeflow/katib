@@ -769,6 +769,30 @@
   version = "v1.3.2"
 
 [[projects]]
+  digest = "1:baf71421bf4efb43a22c6d9212d245a111c5e06caf90fe3eb5943c8fe7d273f3"
+  name = "github.com/tidwall/gjson"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "f042915ca17de35980544c91ab2c8ceb73b682f2"
+  version = "v1.6.0"
+
+[[projects]]
+  digest = "1:20d232e544cf67770287960b1a5e8bee6a58a86fd71f77dfad60a9d903b9f2ed"
+  name = "github.com/tidwall/match"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "33827db735fff6510490d69a8622612558a557ed"
+  version = "v1.0.1"
+
+[[projects]]
+  digest = "1:93e8c1535b3e4629b708db04d04e2d64ebd6f050712c05b49856b89ead0ce473"
+  name = "github.com/tidwall/pretty"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "b2475501f89994f7ea30b3c94ba86b49079961fe"
+  version = "v1.0.1"
+
+[[projects]]
   digest = "1:22f696cee54865fb8e9ff91df7b633f6b8f22037a8015253c6b6a71ca82219c7"
   name = "go.uber.org/atomic"
   packages = ["."]
@@ -1447,6 +1471,7 @@
     "github.com/onsi/gomega",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/spf13/viper",
+    "github.com/tidwall/gjson",
     "golang.org/x/net/context",
     "google.golang.org/genproto/googleapis/api/annotations",
     "google.golang.org/grpc",
