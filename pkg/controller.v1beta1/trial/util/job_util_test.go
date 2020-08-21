@@ -136,7 +136,7 @@ func newFakeTFJob() *tfv1.TFJob {
 				},
 			},
 			ReplicaStatuses: map[commonv1.ReplicaType]*commonv1.ReplicaStatus{
-				"master": &commonv1.ReplicaStatus{
+				"master": {
 					Active: int32(1),
 				},
 			},
