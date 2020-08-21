@@ -41,11 +41,6 @@ const (
 // UpdateTrialStatusCondition updates Trial status from current deployed Job status
 func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Trial, deployedJobName string, jobStatus *trialutil.TrialJobStatus) {
 
-	// If deployedJobName is not set we don't need to update Trial status
-	if deployedJobName == "" {
-		return
-	}
-
 	timeNow := metav1.Now()
 
 	if jobStatus.Condition == trialutil.JobSucceeded {
@@ -64,7 +59,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 			instance.MarkTrialStatusSucceeded(corev1.ConditionTrue, reason, msg)
 			instance.Status.CompletionTime = &timeNow
 
-			eventMsg := fmt.Sprintf("Job %s has succeeded", deployedJobName)
+			eventMsg := fmt.Sprintf("Job %v has succeeded", deployedJobName)
 			r.recorder.Eventf(instance, corev1.EventTypeNormal, JobSucceededReason, eventMsg)
 			r.collector.IncreaseTrialsSucceededCount(instance.Namespace)
 		} else {
@@ -82,7 +77,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 
 			instance.MarkTrialStatusSucceeded(corev1.ConditionFalse, reason, msg)
 
-			eventMsg := fmt.Sprintf("Metrics are not available for Job %s", deployedJobName)
+			eventMsg := fmt.Sprintf("Metrics are not available for Job %v", deployedJobName)
 			r.recorder.Eventf(instance, corev1.EventTypeWarning, JobMetricsUnavailableReason, eventMsg)
 		}
 	} else if jobStatus.Condition == trialutil.JobFailed {
@@ -100,9 +95,9 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 		instance.MarkTrialStatusFailed(reason, msg)
 		instance.Status.CompletionTime = &timeNow
 
-		eventMsg := fmt.Sprintf("Job %s has failed", deployedJobName)
-		if jobStatus.Message != "" && jobStatus.Reason != "" {
-			eventMsg = fmt.Sprintf("%v. Job message: %s reason: %v", eventMsg, jobStatus.Message, jobStatus.Reason)
+		eventMsg := fmt.Sprintf("Job %v has failed", deployedJobName)
+		if jobStatus.Message != "" || jobStatus.Reason != "" {
+			eventMsg = fmt.Sprintf("%v. Message: %v Reason: %v", eventMsg, jobStatus.Message, jobStatus.Reason)
 		}
 
 		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobFailedReason, eventMsg)
@@ -111,7 +106,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 		msg := "Trial is running"
 		instance.MarkTrialStatusRunning(TrialRunningReason, msg)
 
-		eventMsg := fmt.Sprintf("Job %s is running", deployedJobName)
+		eventMsg := fmt.Sprintf("Job %v is running", deployedJobName)
 		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobRunningReason, eventMsg)
 		// TODO(gaocegege): Should we maintain a TrialsRunningCount?
 	}
