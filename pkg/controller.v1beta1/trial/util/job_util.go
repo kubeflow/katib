@@ -16,7 +16,7 @@ import (
 // TrialJobStatus is the internal representation for deployed Job status
 type TrialJobStatus struct {
 	// Condition describes the state of the Job at a certain point.
-	// Condition can be either Running, Succeeded or Failed
+	// Can be either Running, Succeeded or Failed
 	Condition ConditionType `json:"condition,omitempty"`
 
 	// The reason received from Job's status, if it is possible
@@ -30,7 +30,7 @@ type TrialJobStatus struct {
 type ConditionType string
 
 const (
-	// JobRunning means that Job was deployed by trial.
+	// JobRunning means that Job was deployed by Trial.
 	// Job doesn't have succeeded or failed condition.
 	JobRunning ConditionType = "Running"
 	// JobSucceeded means that Job status satisfies Trial success condition
@@ -60,7 +60,7 @@ func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.
 	if failureJobCondition.IsObject() || (failureJobCondition.IsArray() && len(failureJobCondition.Array()) > 0) {
 		strCondition := failureJobCondition.String()
 
-		// If failureJobCondition is array we take first element
+		// If failureJobCondition is array we take first element to unmarshal in TrialJobStatus
 		if failureJobCondition.IsArray() {
 			strCondition = failureJobCondition.Array()[0].String()
 		}
@@ -99,13 +99,14 @@ func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.
 		return trialJobStatus, nil
 	}
 
-	// Set default Job condition is running when name is generated.
-	// Check if trial is not running and is not completed
+	// Set default Job condition is running when Job name is generated.
+	// Check if Trial is not running and is not completed
 	if !trial.IsRunning() && deployedJob.GetName() != "" && !trial.IsCompleted() {
 		trialJobStatus.Condition = JobRunning
 		logger.Info("Deployed Job status is running", "Job", deployedJob.GetName())
 		return trialJobStatus, nil
 	}
 
+	// Otherwise returns nil object and Trial status doesn't need updating
 	return nil, nil
 }
