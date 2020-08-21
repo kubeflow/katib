@@ -259,6 +259,10 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 			if err != nil {
 				logger.Error(err, "GetDeployedJobStatus error")
 			}
+			// Not needed to update status if jobStatus is nil
+			if jobStatus == nil {
+				return nil
+			}
 			// If Job is succeeded update Trial observation
 			if jobStatus.Condition == trialutil.JobSucceeded {
 				if err = r.UpdateTrialStatusObservation(instance); err != nil {

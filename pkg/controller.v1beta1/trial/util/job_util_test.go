@@ -20,8 +20,8 @@ const (
 
 func TestGetDeployedJobStatus(t *testing.T) {
 
-	successCondition := "status.conditions.#(type==\"Succeeded\")#|#(status=\"True\")#"
-	failureCondition := "status.conditions.#(type==\"Failed\")#|#(status=\"True\")#"
+	successCondition := "status.conditions.#(type==\"Succeeded\")#|#(status==\"True\")#"
+	failureCondition := "status.conditions.#(type==\"Failed\")#|#(status==\"True\")#"
 
 	tcs := []struct {
 		trial                  *trialsv1beta1.Trial

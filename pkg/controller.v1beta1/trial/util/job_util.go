@@ -47,10 +47,7 @@ var (
 func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.Unstructured) (*TrialJobStatus, error) {
 	logger := log.WithValues("Trial", types.NamespacedName{Name: trial.GetName(), Namespace: trial.GetNamespace()})
 
-	// Set default Job condition is running
-	trialJobStatus := &TrialJobStatus{
-		Condition: JobRunning,
-	}
+	trialJobStatus := &TrialJobStatus{}
 
 	// Marshal unstructured Job to JSON
 	// Deployed Job is valid JSON
@@ -102,8 +99,13 @@ func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.
 		return trialJobStatus, nil
 	}
 
-	if !trial.IsRunning() {
-		logger.Info("Deployed Job status is running")
+	// Set default Job condition is running when name is generated.
+	// Check if trial is not running and is not completed
+	if !trial.IsRunning() && deployedJob.GetName() != "" && !trial.IsCompleted() {
+		trialJobStatus.Condition = JobRunning
+		logger.Info("Deployed Job status is running", "Job", deployedJob.GetName())
+		return trialJobStatus, nil
 	}
-	return trialJobStatus, nil
+
+	return nil, nil
 }
