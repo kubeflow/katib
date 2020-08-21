@@ -250,5 +250,13 @@ func setResourceRequirements(configResource corev1.ResourceRequirements) corev1.
 		defaultDiskLimit, _ := resource.ParseQuantity(consts.DefaultDiskLimit)
 		configResource.Limits[corev1.ResourceEphemeralStorage] = defaultDiskLimit
 	}
+
+	// If user explicitly sets ephemeral-storage value to something negative, nuke it.
+	// This enables compability with the GKE nodepool autoscalers, which cannot scale
+	// pods which define ephemeral-storage resource constraints.
+	if diskLimit.Sign() == -1 && diskRequest.Sign() == -1 {
+		delete(configResource.Limits, corev1.ResourceEphemeralStorage)
+		delete(configResource.Requests, corev1.ResourceEphemeralStorage)
+	}	
 	return configResource
 }
