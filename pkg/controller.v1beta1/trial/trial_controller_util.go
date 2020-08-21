@@ -97,7 +97,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 
 		eventMsg := fmt.Sprintf("Job %v has failed", deployedJobName)
 		if jobStatus.Message != "" || jobStatus.Reason != "" {
-			eventMsg = fmt.Sprintf("%v. Message: %v Reason: %v", eventMsg, jobStatus.Message, jobStatus.Reason)
+			eventMsg = fmt.Sprintf("%v. %v %v", eventMsg, jobStatus.Message, jobStatus.Reason)
 		}
 
 		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobFailedReason, eventMsg)
