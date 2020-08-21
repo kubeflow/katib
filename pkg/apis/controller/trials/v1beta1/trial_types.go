@@ -44,13 +44,13 @@ type TrialSpec struct {
 	PrimaryPodLabels map[string]string `json:"primaryPodLabels,omitempty"`
 
 	// Condition when trial custom resource is succeeded.
-	// Condition must be in GSON format, ref https://github.com/tidwall/gjson.
-	// For example for BatchJob: status.conditions.#(type=="Complete")#|#(status="True")#
+	// Condition must be in GJSON format, ref https://github.com/tidwall/gjson.
+	// For example for BatchJob: status.conditions.#(type=="Complete")#|#(status=="True")#
 	SuccessCondition string `json:"successCondition,omitempty"`
 
 	// Condition when trial custom resource is failed.
-	// Condition must be in GSON format, ref https://github.com/tidwall/gjson.
-	// For example for BatchJob: status.conditions.#(type=="Failed")#|#(status="True")#
+	// Condition must be in GJSON format, ref https://github.com/tidwall/gjson.
+	// For example for BatchJob: status.conditions.#(type=="Failed")#|#(status=="True")#
 	FailureCondition string `json:"failureCondition,omitempty"`
 }
 
