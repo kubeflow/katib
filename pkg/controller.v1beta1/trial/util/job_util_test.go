@@ -7,6 +7,7 @@ import (
 	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
@@ -78,7 +79,7 @@ func TestGetDeployedJobStatus(t *testing.T) {
 			testDescription: "TFJob status is failed, reason and message must be returned",
 		},
 		{
-			trial:       newFakeTrial("status.replicaStatuses.master.[@this].#(active=\"1\")", failureCondition),
+			trial:       newFakeTrial("status.replicaStatuses.master.[@this].#(active==\"1\")", failureCondition),
 			deployedJob: newFakeDeployedJob(newFakeTFJob()),
 			expectedTrialJobStatus: func() *TrialJobStatus {
 				return &TrialJobStatus{
@@ -116,6 +117,9 @@ func newFakeTrial(successCondition, failureCondition string) *trialsv1beta1.Tria
 
 func newFakeTFJob() *tfv1.TFJob {
 	return &tfv1.TFJob{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "test-tfjob",
+		},
 		Status: commonv1.JobStatus{
 			Conditions: []commonv1.JobCondition{
 				{
