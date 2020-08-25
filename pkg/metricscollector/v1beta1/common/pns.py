@@ -1,7 +1,21 @@
 import os
 import psutil
+import sys
 import time
 import const
+
+
+def WaitMainProcesses(pool_interval, timout, wait_all, completed_marked_dir):
+    """
+    Hold metrics collector parser until required pids are finished
+    """
+
+    if sys.platform != "linux":
+        raise Exception("Platform '{}' unsupported".format(sys.platform))
+
+    pids, main_pid = GetMainProcesses(completed_marked_dir)
+
+    return WaitPIDs(pids, main_pid, pool_interval, timout, wait_all, completed_marked_dir)
 
 
 def GetMainProcesses(completed_marked_dir):
@@ -40,17 +54,19 @@ def GetMainProcesses(completed_marked_dir):
 
 def WaitPIDs(pids, main_pid, pool_interval, timout, wait_all, completed_marked_dir):
     """
-    WaitPIDs waits until all pids are finished.
+    Waits until all pids are finished.
     If waitAll == false WaitPIDs waits until main process is finished.
     """
     start = 0
+    # not_finished_pids contains pids that are not finished yet
     not_finished_pids = set(pids)
 
     if pool_interval <= 0:
         raise Exception("Poll interval seconds must be a positive integer")
 
     # Start main wait loop
-    while (timout <= 0 or start < timout) and len(pids) > 0:
+    # We should exit when timeout is out or not_finished_pids is empty
+    while (timout <= 0 or start < timout) and len(not_finished_pids) > 0:
         for pid in not_finished_pids:
             # If pid is completed /proc/<pid> dir doesn't exist
             path = "/proc/{}".format(pid)
@@ -81,12 +97,3 @@ def WaitPIDs(pids, main_pid, pool_interval, timout, wait_all, completed_marked_d
     # After main loop not_finished_pids set should be empty
     if not_finished_pids:
         raise Exception("Timed out waiting for pids to complete")
-
-
-def WaitMainProcesses(pool_interval, timout, wait_all, completed_marked_dir):
-    """
-    Hold metrics collector parser until required pids are finished
-    """
-
-    pids, main_pid = GetMainProcesses(completed_marked_dir)
-    return WaitPIDs(pids, main_pid, pool_interval, timout, wait_all, completed_marked_dir)

@@ -46,10 +46,6 @@ func WaitMainProcesses(opts WaitPidsOpts) error {
 	if err != nil {
 		return err
 	}
-	// If pids are empty nothing to wait
-	if len(pids) == 0 {
-		return nil
-	}
 
 	return WaitPIDs(pids, mainPid, opts)
 }
