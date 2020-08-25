@@ -54,6 +54,14 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
+  digest = "1:36d54915655a1d3d14d2fbb0854f588d5ed9ed8b7c6fd287fbaa52000615cd1f"
+  name = "github.com/StackExchange/wmi"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "cbe66965904dbe8a6cd589e2298e5d8b986bd7dd"
+  version = "1.1.0"
+
+[[projects]]
   branch = "master"
   digest = "1:c9335bca964be4fd1d245e44d798f106f191a4d7dfd0217228a8fd58f0e93606"
   name = "github.com/awalterschulze/gographviz"
@@ -190,6 +198,17 @@
   pruneopts = "NUT"
   revision = "7536572e8d55209135cd5e7ccf7fce43dca217ab"
   version = "v0.1.0"
+
+[[projects]]
+  digest = "1:022649cb675f044f3b7b6ab58c528dad7b11eee526ecd792a1b04ee4b0c692da"
+  name = "github.com/go-ole/go-ole"
+  packages = [
+    ".",
+    "oleutil",
+  ]
+  pruneopts = "NUT"
+  revision = "97b6244175ae18ea6eef668034fd6565847501c9"
+  version = "v1.2.4"
 
 [[projects]]
   digest = "1:260f7ebefc63024c8dfe2c9f1a2935a89fa4213637a1f522f592f80c001cc441"
@@ -716,6 +735,20 @@
   pruneopts = "NUT"
   revision = "2ea7272aa4c7de5c8a568dff504404e8dc49945d"
   version = "v1.2.1"
+
+[[projects]]
+  digest = "1:a3795b4e2d3bf4f6dcce18f1eeca71b670fce0216c9e1f7dbf4f3a96802e4560"
+  name = "github.com/shirou/gopsutil"
+  packages = [
+    "cpu",
+    "internal/common",
+    "mem",
+    "net",
+    "process",
+  ]
+  pruneopts = "NUT"
+  revision = "7e94bb8bcde053b6d6c98bda5145e9742c913c39"
+  version = "v2.20.7"
 
 [[projects]]
   digest = "1:90cf76d709ce9b057e7d75bd245bf7c1242d21ba4f908fb22c7a2a96d1dcc0ca"
@@ -1446,6 +1479,7 @@
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/prometheus/client_golang/prometheus",
+    "github.com/shirou/gopsutil/process",
     "github.com/spf13/viper",
     "golang.org/x/net/context",
     "google.golang.org/genproto/googleapis/api/annotations",
