@@ -10,7 +10,7 @@ def WaitMainProcesses(pool_interval, timout, wait_all, completed_marked_dir):
     Hold metrics collector parser until required pids are finished
     """
 
-    if sys.platform != "linux":
+    if not sys.platform.startswith('linux'):
         raise Exception("Platform '{}' unsupported".format(sys.platform))
 
     pids, main_pid = GetMainProcesses(completed_marked_dir)
@@ -37,8 +37,8 @@ def GetMainProcesses(completed_marked_dir):
         if pid == 1 or pid == this_pid or ppid != 0:
             continue
 
-        # Read the process command line
-        cmd_lind = proc.cmdline
+        # Read the process command line, join all cmdlines in one string
+        cmd_lind = " ".join(proc.cmdline())
 
         # By default main_pid is the first process.
         # Command line contains completed marker for the main pid
@@ -67,6 +67,7 @@ def WaitPIDs(pids, main_pid, pool_interval, timout, wait_all, completed_marked_d
     # Start main wait loop
     # We should exit when timeout is out or not_finished_pids is empty
     while (timout <= 0 or start < timout) and len(not_finished_pids) > 0:
+        finished_pids = set()
         for pid in not_finished_pids:
             # If pid is completed /proc/<pid> dir doesn't exist
             path = "/proc/{}".format(pid)
@@ -82,14 +83,17 @@ def WaitPIDs(pids, main_pid, pool_interval, timout, wait_all, completed_marked_d
                                 raise Exception(
                                     "Unable to find marker: {} in file: {} with contents: {} for pid: {}".format(
                                         const.TRAINING_COMPLETED, mark_file, contents, pid))
-                    # Remove main pid from set with pids
-                    not_finished_pids.remove(pid)
+                    # Add main pid to finished pids set
+                    finished_pids.add(pid)
                     # Exit loop if wait all is false because main pid is finished
                     if not wait_all:
                         return
                 # Remove not main pid from set with pids
                 else:
-                    not_finished_pids.remove(pid)
+                    finished_pids.add(pid)
+
+        # Update not finished pids set with finished_pids set
+        not_finished_pids = not_finished_pids - finished_pids
         # Sleep for pool_interval seconds before next attempt
         time.sleep(pool_interval)
         start = start + pool_interval
