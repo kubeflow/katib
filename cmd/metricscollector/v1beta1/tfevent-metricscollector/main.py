@@ -1,7 +1,8 @@
 import grpc
 import argparse
 import api_pb2
-from pns import WaitOtherMainProcesses
+from pns import WaitMainProcesses
+import const
 from tfevent_loader import MetricsCollector
 from logging import getLogger, StreamHandler, INFO
 
@@ -13,12 +14,16 @@ def parse_options():
         description='TF-Event MetricsCollector',
         add_help=True
     )
-    parser.add_argument("-s", "--manager_server_addr",
-                        type=str, default="katib-db-manager:6789")
+
+    parser.add_argument("-s", "--manager_server_addr", type=str, default="")
     parser.add_argument("-t", "--trial_name", type=str, default="")
-    parser.add_argument("-path", "--dir_path", type=str, default="/log")
+    parser.add_argument("-path", "--metrics_file_dir", type=str, default=const.DEFAULT_METRICS_FILE_DIR)
     parser.add_argument("-m", "--metric_names", type=str, default="")
     parser.add_argument("-f", "--metric_filters", type=str, default="")
+    parser.add_argument("-p", "--poll_interval", type=int, default=const.DEFAULT_POLL_INTERVAL)
+    parser.add_argument("-timeout", "--timeout", type=int, default=const.DEFAULT_TIMEOUT)
+    parser.add_argument("-w", "--wait_all", type=bool, default=const.DEFAULT_WAIT_ALL)
+
     opt = parser.parse_args()
     return opt
 
@@ -36,10 +41,14 @@ if __name__ == '__main__':
         raise Exception("Invalid katib manager service address: %s" %
                         opt.manager_server_addr)
 
-    WaitOtherMainProcesses(completed_marked_dir=opt.dir_path)
+    WaitMainProcesses(
+        pool_interval=opt.poll_interval,
+        timout=opt.timeout,
+        wait_all=opt.wait_all,
+        completed_marked_dir=opt.metrics_file_dir)
 
     mc = MetricsCollector(opt.metric_names.split(';'))
-    observation_log = mc.parse_file(opt.dir_path)
+    observation_log = mc.parse_file(opt.metrics_file_dir)
 
     channel = grpc.beta.implementations.insecure_channel(
         manager_server[0], int(manager_server[1]))

@@ -123,3 +123,7 @@ required = [
 [[constraint]]
   name = "github.com/tidwall/gjson"
   version = "1.6.0"
+
+[[constraint]]
+  name = "github.com/shirou/gopsutil"
+  version = "2.20.7"
