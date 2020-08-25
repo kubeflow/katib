@@ -56,7 +56,7 @@ import (
 var (
 	managerServiceAddr = flag.String("s", "", "Katib Manager service")
 	trialName          = flag.String("t", "", "Trial Name")
-	metricsFileName    = flag.String("path", "", "Metrics File Path")
+	metricsFilePath    = flag.String("path", "", "Metrics File Path")
 	metricNames        = flag.String("m", "", "Metric names")
 	metricFilters      = flag.String("f", "", "Metric filters")
 	pollInterval       = flag.Duration("p", common.DefaultPollInterval, "Poll interval between running processes check")
@@ -86,12 +86,12 @@ func main() {
 	flag.Parse()
 	klog.Infof("Trial Name: %s", *trialName)
 
-	go printMetricsFile(*metricsFileName)
+	go printMetricsFile(*metricsFilePath)
 	wopts := common.WaitPidsOpts{
 		PollInterval:           *pollInterval,
 		Timeout:                *timeout,
 		WaitAll:                *waitAll,
-		CompletedMarkedDirPath: filepath.Dir(*metricsFileName),
+		CompletedMarkedDirPath: filepath.Dir(*metricsFilePath),
 	}
 	if err := common.WaitMainProcesses(wopts); err != nil {
 		klog.Fatalf("Failed to wait for worker container: %v", err)
@@ -112,7 +112,7 @@ func main() {
 	if len(*metricFilters) != 0 {
 		filterList = strings.Split(*metricFilters, ";")
 	}
-	olog, err := filemc.CollectObservationLog(*metricsFileName, metricList, filterList)
+	olog, err := filemc.CollectObservationLog(*metricsFilePath, metricList, filterList)
 	if err != nil {
 		klog.Fatalf("Failed to collect logs: %v", err)
 	}
