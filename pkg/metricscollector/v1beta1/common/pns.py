@@ -88,7 +88,7 @@ def WaitPIDs(pids, main_pid, pool_interval, timout, wait_all, completed_marked_d
                     # Exit loop if wait all is false because main pid is finished
                     if not wait_all:
                         return
-                # Remove not main pid from set with pids
+                # Add not main pid to finished pids set
                 else:
                     finished_pids.add(pid)
 
@@ -98,6 +98,6 @@ def WaitPIDs(pids, main_pid, pool_interval, timout, wait_all, completed_marked_d
         time.sleep(pool_interval)
         start = start + pool_interval
 
-    # After main loop not_finished_pids set should be empty
+    # After main loop not finished pids set should be empty
     if not_finished_pids:
         raise Exception("Timed out waiting for pids to complete")
