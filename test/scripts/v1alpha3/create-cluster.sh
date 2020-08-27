@@ -34,7 +34,7 @@ gcloud --project ${PROJECT} beta container clusters create ${CLUSTER_NAME} \
     --zone ${ZONE} \
     --machine-type=n1-standard-8 \
     --num-nodes=6 \
-    --cluster-version 1.14
+    --cluster-version 1.16
 echo "Configuring kubectl"
 gcloud --project ${PROJECT} container clusters get-credentials ${CLUSTER_NAME} \
     --zone ${ZONE}
