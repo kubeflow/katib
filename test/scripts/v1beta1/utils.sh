@@ -7,14 +7,13 @@ _activate_service_account() {
 
   while [[ $_is_activated=false && $_count_attempts -le $_max_attempts ]]; do
     echo "Activating service-account"
-    gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS} && $_is_activated=true || count_attempts=$((count_attempts + 1))
+    gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS} && $_is_activated=true || _count_attempts=$((_count_attempts + 1))
 
     if [ $_is_activated=false ]; then
       echo "gcloud activate service account failed, restart"
       sleep 1
     fi
 
-    _count_attempts=$((_count_attempts + 1))
   done
 
   # If account was not activated exit the script
