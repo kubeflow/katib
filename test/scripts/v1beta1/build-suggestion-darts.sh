@@ -27,7 +27,7 @@ GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-suggestion-darts
 VERSION=$(git describe --tags --always --dirty)
 
 # Activate gcloud service account
-source utils.sh
+source test/scripts/v1beta1/utils.sh
 _activate_service_account
 
 echo "Copy source to GOPATH"
