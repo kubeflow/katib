@@ -26,8 +26,9 @@ PROJECT="${GCP_PROJECT}"
 GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-katib-controller
 VERSION=$(git describe --tags --always --dirty)
 
-echo "Activating service-account"
-gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+# Activate gcloud service account
+source test/scripts/v1alpha3/utils.sh
+_activate_service_account
 
 echo "Copy source to GOPATH"
 mkdir -p ${GO_DIR}
@@ -39,7 +40,6 @@ cd ${GO_DIR}
 cp cmd/katib-controller/v1alpha3/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha3/katib-controller:${VERSION} --project=${PROJECT}
 gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha3/katib-controller:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha3/katib-controller:latest --verbosity=info
-
 
 cd ${GO_DIR}
 cp cmd/metricscollector/v1alpha3/file-metricscollector/Dockerfile .

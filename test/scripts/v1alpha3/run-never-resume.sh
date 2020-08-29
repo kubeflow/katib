@@ -26,8 +26,9 @@ ZONE="${GCP_ZONE}"
 PROJECT="${GCP_PROJECT}"
 GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
 
-echo "Activating service-account"
-gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+# Activate gcloud service account
+source test/scripts/v1alpha3/utils.sh
+_activate_service_account
 
 echo "Configuring kubectl"
 
@@ -38,7 +39,7 @@ echo "PROJECT: ${GCP_PROJECT}"
 gcloud --project ${PROJECT} container clusters get-credentials ${CLUSTER_NAME} \
   --zone ${ZONE}
 kubectl config set-context $(kubectl config current-context) --namespace=default
-USER=`gcloud config get-value account`
+USER=$(gcloud config get-value account)
 
 echo "All Katib components are running."
 kubectl version

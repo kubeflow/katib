@@ -17,7 +17,6 @@
 # This shell script is used to build a cluster and create a namespace from our
 # argo workflow
 
-
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -27,8 +26,10 @@ ZONE="${GCP_ZONE}"
 PROJECT="${GCP_PROJECT}"
 NAMESPACE="${DEPLOY_NAMESPACE}"
 
-echo "Activating service-account"
-gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+# Activate gcloud service account
+source test/scripts/v1alpha3/utils.sh
+_activate_service_account
+
 echo "Creating GPU cluster"
 gcloud --project ${PROJECT} beta container clusters create ${CLUSTER_NAME} \
     --zone ${ZONE} \

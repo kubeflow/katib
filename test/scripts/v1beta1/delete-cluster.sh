@@ -25,7 +25,9 @@ CLUSTER_NAME="${CLUSTER_NAME}"
 ZONE="${GCP_ZONE}"
 PROJECT="${GCP_PROJECT}"
 
-echo "Activating service-account"
-gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+# Activate gcloud service account
+source test/scripts/v1beta1/utils.sh
+_activate_service_account
+
 echo "Tearing down the cluster"
 gcloud container clusters delete ${CLUSTER_NAME} --zone=${ZONE} --project=${PROJECT}

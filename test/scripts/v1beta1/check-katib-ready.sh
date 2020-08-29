@@ -30,8 +30,9 @@ VERSION=$(git describe --tags --always --dirty)
 KUBECTL_VERSION="v1.14.0"
 GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
 
-echo "Activating service-account"
-gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+# Activate gcloud service account
+source test/scripts/v1beta1/utils.sh
+_activate_service_account
 
 echo "Configuring kubectl"
 
