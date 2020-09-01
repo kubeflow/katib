@@ -28,22 +28,22 @@ spec:
         description: Learning rate for the training model
         reference: lr
       - name: trialName
-        description: Name of the current trial
+        description: Name of the current trial's job
         reference: ${trialSpec.Name}
       - name: trialNamespace
-        description: Namespace of the current trial
+        description: Namespace of the current trial's job
         reference: ${trialSpec.Namespace}
       - name: trialKind
-        description: Kind of the current trial
+        description: Kind of the current trial's job
         reference: ${trialSpec.Kind}
       - name: trialAPIVersion
-        description: API version of the current trial
+        description: API version of the current trial's job
         reference: ${trialSpec.APIVersion}
       - name: trialLabelCustom
-        description: Trial label with custom value
+        description: Trial's job label with custom value
         reference: ${trialSpec.Labels[custom-key]}
       - name: trialAnnotationCustom
-        description: Trial annotation with custom value
+        description: Trial's job annotation with custom value
         reference: ${trialSpec.Annotations[custom-key]}
     trialSpec:
       apiVersion: batch/v1
