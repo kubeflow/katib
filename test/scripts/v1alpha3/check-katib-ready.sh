@@ -49,7 +49,7 @@ kubectl config set-context $(kubectl config current-context) --namespace=default
 echo "Grant cluster-admin permissions to the current user ..."
 kubectl create clusterrolebinding cluster-admin-binding \
   --clusterrole=cluster-admin \
-  --user=$(gcloud config get-value core/account)
+  --user=kubeflow-testing@kubeflow-ci.iam.gserviceaccount.com
 
 #This is required. But I don't know why.
 # VERSION=${VERSION/%?/}
