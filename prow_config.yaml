@@ -45,7 +45,7 @@ workflows:
       - scripts/v1alpha3/*
       - vendor/*
     params:
-      registry: "gcr.io/kubeflow-ci"
+      registry: "gcr.io/automl-ci"
   - app_dir: kubeflow/katib/test/workflows
     component: workflows-v1alpha3
     name: e2e-v1alpha3
@@ -135,7 +135,7 @@ workflows:
       - scripts/v1beta1/*
       - vendor/*
     params:
-      registry: "gcr.io/kubeflow-ci"
+      registry: "gcr.io/automl-ci"
   - app_dir: kubeflow/katib/test/workflows
     component: workflows-v1beta1
     name: e2e-v1beta1
