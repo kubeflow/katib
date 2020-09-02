@@ -8,6 +8,7 @@ import (
 	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 	"github.com/onsi/gomega"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
@@ -22,6 +23,7 @@ import (
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
 	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	managerclientmock "github.com/kubeflow/katib/pkg/mock/v1beta1/trial/managerclient"
@@ -49,6 +51,22 @@ func TestAdd(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	mgr, err := manager.New(cfg, manager.Options{})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// Set fake trial resources
+	trialResources := trialutil.GvkListFlag{
+		{
+			Group:   "kubeflow.org",
+			Version: "v1",
+			Kind:    "TFJob",
+		},
+		{
+			Group:   "kubeflow.org",
+			Version: "v1",
+			Kind:    "MPIJob",
+		},
+	}
+
+	viper.Set(consts.ConfigTrialResources, trialResources)
 
 	// Test - Try to add Trial controller to the manager
 	g.Expect(Add(mgr)).NotTo(gomega.HaveOccurred())

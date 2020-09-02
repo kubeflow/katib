@@ -42,10 +42,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/trial/managerclient"
 	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	jobv1beta1 "github.com/kubeflow/katib/pkg/job/v1beta1"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -124,6 +126,35 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			log.Info("Job watch added successfully", "CRD Kind", gvk.Kind)
 		}
 	}
+
+	trialResources := viper.Get(consts.ConfigTrialResources)
+	if trialResources != nil {
+		// Cast interface to gvk slice object
+		gvkList := trialResources.(trialutil.GvkListFlag)
+
+		// Watch for changes in custom resources
+		for _, gvk := range gvkList {
+			unstructuredJob := &unstructured.Unstructured{}
+			unstructuredJob.SetGroupVersionKind(gvk)
+			err = c.Watch(
+				&source.Kind{Type: unstructuredJob},
+				&handler.EnqueueRequestForOwner{
+					IsController: true,
+					OwnerType:    &trialsv1beta1.Trial{},
+				})
+			if err != nil {
+				if meta.IsNoMatchError(err) {
+					log.Info("Job watch error. CRD might be missing. Please install CRD and restart katib-controller",
+						"CRD Group", gvk.Group, "CRD Version", gvk.Version, "CRD Kind", gvk.Kind)
+					continue
+				}
+				return err
+			}
+			log.Info("Job watch added successfully",
+				"CRD Group", gvk.Group, "CRD Version", gvk.Version, "CRD Kind", gvk.Kind)
+		}
+	}
+
 	log.Info("Trial controller created")
 	return nil
 }
