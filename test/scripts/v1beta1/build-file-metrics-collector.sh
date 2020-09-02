@@ -23,7 +23,7 @@ set -o pipefail
 export PATH=${GOPATH}/bin:/usr/local/go/bin:${PATH}
 REGISTRY="${GCP_REGISTRY}"
 PROJECT="${GCP_PROJECT}"
-GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-katib-controller
+GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-file-metrics-collector
 VERSION=$(git describe --tags --always --dirty)
 
 echo "Activating service-account"
@@ -37,6 +37,6 @@ cp -r vendor ${GO_DIR}/vendor
 
 cd ${GO_DIR}
 
-cp cmd/katib-controller/v1beta1/Dockerfile .
-gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1beta1/katib-controller:${VERSION} --project=${PROJECT}
-gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1beta1/katib-controller:${VERSION} ${REGISTRY}/${REPO_NAME}/v1beta1/katib-controller:latest --verbosity=info
+cp cmd/metricscollector/v1beta1/file-metricscollector/Dockerfile .
+gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1beta1/file-metrics-collector:${VERSION} --project=${PROJECT}
+gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1beta1/file-metrics-collector:${VERSION} ${REGISTRY}/${REPO_NAME}/v1beta1/file-metrics-collector:latest --verbosity=info
