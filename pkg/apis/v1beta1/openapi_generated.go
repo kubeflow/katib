@@ -1116,6 +1116,20 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								},
 							},
 						},
+						"successCondition": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Condition when trial custom resource is succeeded. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Complete\")#|#(status==\"True\")#",
+								Type:        []string{"string"},
+								Format:      "",
+							},
+						},
+						"failureCondition": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Condition when trial custom resource is failed. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Failed\")#|#(status==\"True\")#",
+								Type:        []string{"string"},
+								Format:      "",
+							},
+						},
 					},
 				},
 			},
@@ -1584,6 +1598,20 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 										},
 									},
 								},
+							},
+						},
+						"successCondition": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Condition when trial custom resource is succeeded. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Complete\")#|#(status==\"True\")#",
+								Type:        []string{"string"},
+								Format:      "",
+							},
+						},
+						"failureCondition": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Condition when trial custom resource is failed. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Failed\")#|#(status==\"True\")#",
+								Type:        []string{"string"},
+								Format:      "",
 							},
 						},
 					},

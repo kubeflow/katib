@@ -252,6 +252,10 @@
         "parameterAssignments"
       ],
       "properties": {
+        "failureCondition": {
+          "description": "Condition when trial custom resource is failed. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Failed\")#|#(status==\"True\")#",
+          "type": "string"
+        },
         "metricsCollector": {
           "description": "Describes how metrics will be collected",
           "$ref": "#/definitions/v1beta1.MetricsCollectorSpec"
@@ -281,6 +285,10 @@
         "runSpec": {
           "description": "Raw text for the trial run spec. This can be any generic Kubernetes runtime object. The trial operator should create the resource as written, and let the corresponding resource controller (e.g. tf-operator) handle the rest.",
           "$ref": "#/definitions/v1.unstructured.Unstructured"
+        },
+        "successCondition": {
+          "description": "Condition when trial custom resource is succeeded. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Complete\")#|#(status==\"True\")#",
+          "type": "string"
         }
       }
     },
@@ -885,6 +893,10 @@
           "description": "ConfigMap spec represents a reference to ConfigMap",
           "$ref": "#/definitions/v1beta1.ConfigMapSource"
         },
+        "failureCondition": {
+          "description": "Condition when trial custom resource is failed. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Failed\")#|#(status==\"True\")#",
+          "type": "string"
+        },
         "primaryPodLabels": {
           "description": "Labels that determines if pod needs to be injected by Katib sidecar container",
           "type": "object",
@@ -895,6 +907,10 @@
         "retain": {
           "description": "Retain indicates that trial resources must be not cleanup",
           "type": "boolean"
+        },
+        "successCondition": {
+          "description": "Condition when trial custom resource is succeeded. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Complete\")#|#(status==\"True\")#",
+          "type": "string"
         },
         "trialParameters": {
           "description": "List of parameters that are used in trial template",
