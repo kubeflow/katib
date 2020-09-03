@@ -33,8 +33,10 @@ const (
 	// JobRunning means that Job was deployed by Trial.
 	// Job doesn't have succeeded or failed condition.
 	JobRunning ConditionType = "Running"
+
 	// JobSucceeded means that Job status satisfies Trial success condition
 	JobSucceeded ConditionType = "Succeeded"
+
 	// JobFailed means that Job status satisfies Trial failure condition
 	JobFailed ConditionType = "Failed"
 )
@@ -93,7 +95,7 @@ func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.
 			return nil, fmt.Errorf("Unmarshal success condition to Trial Job status failed %v", err)
 		}
 
-		// Job condition is succeeded failed
+		// Job condition is succeeded
 		trialJobStatus.Condition = JobSucceeded
 		logger.Info("Deployed Job status is succeeded", "Job", deployedJob.GetName())
 		return trialJobStatus, nil
@@ -107,6 +109,6 @@ func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.
 		return trialJobStatus, nil
 	}
 
-	// Otherwise returns nil object and Trial status doesn't need updating
+	// Otherwise returns nil object and Trial status doesn't need to be updated
 	return nil, nil
 }
