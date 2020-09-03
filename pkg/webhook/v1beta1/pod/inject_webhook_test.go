@@ -1,17 +1,29 @@
 package pod
 
 import (
+	"context"
 	"reflect"
+	"sync"
 	"testing"
+	"time"
 
 	"path/filepath"
 
-	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
-	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
+	"github.com/onsi/gomega"
+	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
+
+	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
+	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
+	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 )
 
 func TestWrapWorkerContainer(t *testing.T) {
@@ -425,70 +437,258 @@ func TestGetSidecarContainerName(t *testing.T) {
 	}
 }
 
+func StartTestManager(mgr manager.Manager, g *gomega.GomegaWithT) (chan struct{}, *sync.WaitGroup) {
+	stop := make(chan struct{})
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		g.Expect(mgr.Start(stop)).NotTo(gomega.HaveOccurred())
+	}()
+	return stop, wg
+}
+
 func TestGetKatibJob(t *testing.T) {
+	// Start test k8s server
+	envTest := &envtest.Environment{
+		CRDDirectoryPaths: []string{
+			filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "katib-controller"),
+			filepath.Join("..", "..", "..", "..", "test", "unit", "v1beta1", "crds"),
+		},
+	}
+
+	cfg, err := envTest.Start()
+	if err != nil {
+		t.Error(err)
+	}
+
+	g := gomega.NewGomegaWithT(t)
+
+	mgr, err := manager.New(cfg, manager.Options{})
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	stopMgr, mgrStopped := StartTestManager(mgr, g)
+	defer func() {
+		close(stopMgr)
+		mgrStopped.Wait()
+	}()
+
+	c := mgr.GetClient()
+	si := NewSidecarInjector(c)
+
+	namespace := "default"
+	trialName := "trial-name"
+	podName := "pod-name"
+	deployName := "deploy-name"
+	tfJobName := "tfjob-name"
+	timeout := time.Second * 5
+
 	testCases := []struct {
-		Pod             v1.Pod
+		Pod             *v1.Pod
+		TFJob           *tfv1.TFJob
+		Deployment      *appsv1.Deployment
 		ExpectedJobKind string
 		ExpectedJobName string
 		Err             bool
-		Name            string
+		TestDescription string
 	}{
 		{
-			Pod: v1.Pod{
+			Pod: &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
+					Name:      podName,
+					Namespace: namespace,
 					OwnerReferences: []metav1.OwnerReference{
 						{
 							APIVersion: "kubeflow.org/v1",
-							Kind:       "PyTorchJob",
-							Name:       "OwnerName",
+							Kind:       "TFJob",
+							Name:       tfJobName + "-1",
 						},
 					},
 				},
 			},
-			ExpectedJobKind: "PyTorchJob",
-			ExpectedJobName: "OwnerName",
+			TFJob: &tfv1.TFJob{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      tfJobName + "-1",
+					Namespace: namespace,
+					OwnerReferences: []metav1.OwnerReference{
+						{
+							APIVersion: "kubeflow.org/v1beta1",
+							Kind:       "Trial",
+							Name:       trialName + "-1",
+							UID:        "test-uid",
+						},
+					},
+				},
+			},
+			ExpectedJobKind: "TFJob",
+			ExpectedJobName: tfJobName + "-1",
 			Err:             false,
-			Name:            "Valid Pod",
+			TestDescription: "Valid run with ownership sequence: Trial -> TFJob -> Pod",
 		},
 		{
-			Pod: v1.Pod{
+			Pod: &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
-					OwnerReferences: []metav1.OwnerReference{
-						{
-							APIVersion: "notkubeflow.org/v1",
-							Kind:       "PyTorchJob",
-							Name:       "OwnerName",
-						},
-					},
-				},
-			},
-			Err:  true,
-			Name: "Invalid APIVersion",
-		},
-		{
-			Pod: v1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
+					Name:      podName,
+					Namespace: namespace,
 					OwnerReferences: []metav1.OwnerReference{
 						{
 							APIVersion: "kubeflow.org/v1",
-							Kind:       "MXJob",
-							Name:       "OwnerName",
+							Kind:       "TFJob",
+							Name:       tfJobName + "-2",
+						},
+						{
+							APIVersion: "apps/v1",
+							Kind:       "Deployment",
+							Name:       deployName + "-2",
 						},
 					},
 				},
 			},
-			Err:  true,
-			Name: "Invalid Kind",
+			TFJob: &tfv1.TFJob{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      tfJobName + "-2",
+					Namespace: namespace,
+				},
+			},
+			Deployment: &appsv1.Deployment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      deployName + "-2",
+					Namespace: namespace,
+					OwnerReferences: []metav1.OwnerReference{
+						{
+							APIVersion: "kubeflow.org/v1beta1",
+							Kind:       "Trial",
+							Name:       trialName + "-2",
+							UID:        "test-uid",
+						},
+					},
+				},
+				Spec: appsv1.DeploymentSpec{
+					Selector: &metav1.LabelSelector{
+						MatchLabels: map[string]string{
+							"test-key": "test-value",
+						},
+					},
+					Template: v1.PodTemplateSpec{
+						ObjectMeta: metav1.ObjectMeta{
+							Labels: map[string]string{
+								"test-key": "test-value",
+							},
+						},
+						Spec: v1.PodSpec{
+							Containers: []v1.Container{
+								{
+									Name:  "test",
+									Image: "test",
+								},
+							},
+						},
+					},
+				},
+			},
+			ExpectedJobKind: "Deployment",
+			ExpectedJobName: deployName + "-2",
+			Err:             false,
+			TestDescription: "Valid run with ownership sequence: Trial -> Deployment -> Pod, TFJob -> Pod",
+		},
+		{
+			Pod: &v1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      podName,
+					Namespace: namespace,
+					OwnerReferences: []metav1.OwnerReference{
+						{
+							APIVersion: "kubeflow.org/v1",
+							Kind:       "TFJob",
+							Name:       tfJobName + "-3",
+						},
+					},
+				},
+			},
+			TFJob: &tfv1.TFJob{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      tfJobName + "-3",
+					Namespace: namespace,
+				},
+			},
+			Err:             true,
+			TestDescription: "Run for not Trial's pod with ownership sequence: TFJob -> Pod",
+		},
+		{
+			Pod: &v1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      podName,
+					Namespace: namespace,
+					OwnerReferences: []metav1.OwnerReference{
+						{
+							APIVersion: "kubeflow.org/v1",
+							Kind:       "TFJob",
+							Name:       tfJobName + "-4",
+						},
+					},
+				},
+			},
+			Err:             true,
+			TestDescription: "Run when Pod owns TFJob that doesn't exists",
+		},
+		{
+			Pod: &v1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      podName,
+					Namespace: namespace,
+					OwnerReferences: []metav1.OwnerReference{
+						{
+							APIVersion: "invalid/api/version",
+							Kind:       "TFJob",
+							Name:       tfJobName + "-4",
+						},
+					},
+				},
+			},
+			Err:             true,
+			TestDescription: "Run when Pod owns TFJob with invalid API version",
 		},
 	}
 
 	for _, tc := range testCases {
-		jobKind, jobName, err := getKatibJob(&tc.Pod)
+		// Create TFJob if it is needed
+		if tc.TFJob != nil {
+			tfJobUnstr, err := util.ConvertObjectToUnstructured(tc.TFJob)
+			gvk := schema.GroupVersionKind{
+				Group:   "kubeflow.org",
+				Version: "v1",
+				Kind:    "TFJob",
+			}
+			tfJobUnstr.SetGroupVersionKind(gvk)
+			if err != nil {
+				t.Errorf("ConvertObjectToUnstructured error %v", err)
+			}
+
+			g.Expect(c.Create(context.TODO(), tfJobUnstr)).NotTo(gomega.HaveOccurred())
+
+			// Wait that TFJob is created
+			g.Eventually(func() error {
+				return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: tc.TFJob.Name}, tfJobUnstr)
+			}, timeout).ShouldNot(gomega.HaveOccurred())
+		}
+
+		// Create Deployment if it is needed
+		if tc.Deployment != nil {
+			g.Expect(c.Create(context.TODO(), tc.Deployment)).NotTo(gomega.HaveOccurred())
+
+			// Wait that Deployment is created
+			g.Eventually(func() error {
+				return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: tc.Deployment.Name}, tc.Deployment)
+			}, timeout).ShouldNot(gomega.HaveOccurred())
+		}
+
+		object, _ := util.ConvertObjectToUnstructured(tc.Pod)
+		jobKind, jobName, err := si.getKatibJob(object, namespace)
 		if !tc.Err && err != nil {
-			t.Errorf("Case %v failed. Error %v", tc.Name, err)
+			t.Errorf("Case %v failed. Error %v", tc.TestDescription, err)
 		} else if !tc.Err && (tc.ExpectedJobKind != jobKind || tc.ExpectedJobName != jobName) {
 			t.Errorf("Case %v failed. Expected jobKind %v, got %v, Expected jobName %v, got %v",
-				tc.Name, tc.ExpectedJobKind, jobKind, tc.ExpectedJobName, jobName)
+				tc.TestDescription, tc.ExpectedJobKind, jobKind, tc.ExpectedJobName, jobName)
 		} else if tc.Err && err == nil {
 			t.Errorf("Expected error got nil")
 		}

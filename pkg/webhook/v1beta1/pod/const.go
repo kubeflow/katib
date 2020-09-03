@@ -23,6 +23,10 @@ import (
 const (
 	MasterRole = "master"
 	BatchJob   = "Job"
+	// TrialKind is the name of Trial kind
+	TrialKind = "Trial"
+	// TrialAPIVersion is the name of Trial API Version
+	TrialAPIVersion = "kubeflow.org/v1beta1"
 )
 
 var (
