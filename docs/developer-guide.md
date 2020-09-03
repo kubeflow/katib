@@ -4,10 +4,12 @@
 - [Developer Guide](#developer-guide)
   - [Requirements](#requirements)
   - [Build from source code](#build-from-source-code)
+  - [Modify controller apis](#modify-controller-apis)
   - [Workflow design](#workflow-design)
   - [Implement a new algorithm and use it in Katib](#implement-a-new-algorithm-and-use-it-in-katib)
   - [Create a new Trial kind](#create-a-new-trial-kind)
   - [Algorithm settings documentation](#algorithm-settings-documentation)
+  - [Katib UI documentation](#katib-ui-documentation)
   - [Design proposals](#design-proposals)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
@@ -48,6 +50,16 @@ You can undeploy Katib v1beta1 manifests from a k8s cluster as follows:
 
 ```bash
 make undeploy
+```
+
+## Modify controller apis
+
+If you want to modify Katib controller apis you have to
+generate deepcopy, clientset, listers, informers, open-api and python SDK with changed apis.
+You can update necessary files as follows:
+
+```bash
+make generate
 ```
 
 ## Workflow design
