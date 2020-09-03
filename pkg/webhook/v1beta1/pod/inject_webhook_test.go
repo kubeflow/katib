@@ -2,22 +2,15 @@ package pod
 
 import (
 	"context"
+	"path/filepath"
 	"reflect"
 	"sync"
 	"testing"
 	"time"
 
-	"path/filepath"
-
-<<<<<<< HEAD
+	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
-=======
-	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
-	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
-	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
->>>>>>> Add primary container name
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,10 +20,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
+	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
-	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 )
 
 func TestWrapWorkerContainer(t *testing.T) {

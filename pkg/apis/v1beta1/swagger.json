@@ -31,10 +31,7 @@
     },
     ".v1beta1.SuggestionCondition": {
       "description": "SuggestionCondition describes the state of the Suggestion at a certain point.",
-      "required": [
-        "type",
-        "status"
-      ],
+      "required": ["type", "status"],
       "properties": {
         "lastTransitionTime": {
           "description": "Last time the condition transitioned from one status to another.",
@@ -64,9 +61,7 @@
     },
     ".v1beta1.SuggestionList": {
       "description": "SuggestionList contains a list of Suggestion",
-      "required": [
-        "items"
-      ],
+      "required": ["items"],
       "properties": {
         "apiVersion": {
           "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
@@ -89,9 +84,7 @@
     },
     ".v1beta1.SuggestionSpec": {
       "description": "SuggestionSpec defines the desired state of suggestion.",
-      "required": [
-        "algorithmName"
-      ],
+      "required": ["algorithmName"],
       "properties": {
         "algorithmName": {
           "description": "Name of the algorithm that suggestion is used.",
@@ -191,10 +184,7 @@
     },
     ".v1beta1.TrialCondition": {
       "description": "TrialCondition describes the state of the trial at a certain point.",
-      "required": [
-        "type",
-        "status"
-      ],
+      "required": ["type", "status"],
       "properties": {
         "lastTransitionTime": {
           "description": "Last time the condition transitioned from one status to another.",
@@ -224,9 +214,7 @@
     },
     ".v1beta1.TrialList": {
       "description": "TrialList contains a list of Trials",
-      "required": [
-        "items"
-      ],
+      "required": ["items"],
       "properties": {
         "apiVersion": {
           "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
@@ -248,9 +236,7 @@
       }
     },
     ".v1beta1.TrialSpec": {
-      "required": [
-        "parameterAssignments"
-      ],
+      "required": ["parameterAssignments"],
       "properties": {
         "metricsCollector": {
           "description": "Describes how metrics will be collected",
@@ -267,18 +253,9 @@
             "$ref": "#/definitions/v1beta1.ParameterAssignment"
           }
         },
-<<<<<<< HEAD
-        "primaryPodLabels": {
-          "description": "Label that determines if pod needs to be injected by Katib sidecar container",
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-=======
         "primaryContainerName": {
           "description": "Name of training container where actual model training is running",
           "type": "string"
->>>>>>> Add primary container name
         },
         "retainRun": {
           "description": "Whether to retain the trial run object after completed.",
@@ -345,9 +322,7 @@
       }
     },
     "v1beta1.CollectorSpec": {
-      "required": [
-        "kind"
-      ],
+      "required": ["kind"],
       "properties": {
         "customCollector": {
           "description": "When kind is \"customCollector\", this field will be used",
@@ -386,9 +361,7 @@
       }
     },
     "v1beta1.EarlyStoppingSpec": {
-      "required": [
-        "earlyStoppingSettings"
-      ],
+      "required": ["earlyStoppingSettings"],
       "properties": {
         "earlyStoppingAlgorithmName": {
           "type": "string"
@@ -425,10 +398,7 @@
     },
     "v1beta1.ExperimentCondition": {
       "description": "ExperimentCondition describes the state of the experiment at a certain point.",
-      "required": [
-        "type",
-        "status"
-      ],
+      "required": ["type", "status"],
       "properties": {
         "lastTransitionTime": {
           "description": "Last time the condition transitioned from one status to another.",
@@ -458,9 +428,7 @@
     },
     "v1beta1.ExperimentList": {
       "description": "ExperimentList contains a list of Experiments",
-      "required": [
-        "items"
-      ],
+      "required": ["items"],
       "properties": {
         "apiVersion": {
           "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
@@ -764,9 +732,7 @@
       }
     },
     "v1beta1.Observation": {
-      "required": [
-        "metrics"
-      ],
+      "required": ["metrics"],
       "properties": {
         "metrics": {
           "description": "Key-value pairs for metric names and values",
@@ -793,10 +759,7 @@
     },
     "v1beta1.OptimalTrial": {
       "description": "OptimalTrial is the metrics and assignments of the best trial.",
-      "required": [
-        "bestTrialName",
-        "parameterAssignments"
-      ],
+      "required": ["bestTrialName", "parameterAssignments"],
       "properties": {
         "bestTrialName": {
           "description": "BestTrialName is the name of the best trial.",
@@ -891,18 +854,9 @@
           "description": "ConfigMap spec represents a reference to ConfigMap",
           "$ref": "#/definitions/v1beta1.ConfigMapSource"
         },
-<<<<<<< HEAD
-        "primaryPodLabels": {
-          "description": "Labels that determines if pod needs to be injected by Katib sidecar container",
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-=======
         "primaryContainerName": {
           "description": "Name of training container where actual model training is running",
           "type": "string"
->>>>>>> Add primary container name
         },
         "retain": {
           "description": "Retain indicates that trial resources must be not cleanup",
