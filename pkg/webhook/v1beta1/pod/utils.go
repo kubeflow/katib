@@ -28,36 +28,12 @@ import (
 	crv1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	katibmanagerv1beta1 "github.com/kubeflow/katib/pkg/common/v1beta1"
 	jobv1beta1 "github.com/kubeflow/katib/pkg/job/v1beta1"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
 )
-
-func getKatibJob(pod *v1.Pod) (string, string, error) {
-	for _, gvk := range jobv1beta1.SupportedJobList {
-		owners := pod.GetOwnerReferences()
-		for _, owner := range owners {
-			if isMatchGVK(owner, gvk) {
-				return owner.Kind, owner.Name, nil
-			}
-		}
-	}
-	return "", "", errors.New("The Pod doesn't belong to Katib Job")
-}
-
-func isMatchGVK(owner metav1.OwnerReference, gvk schema.GroupVersionKind) bool {
-	if owner.Kind != gvk.Kind {
-		return false
-	}
-	gv := gvk.Group + "/" + gvk.Version
-	if gv != owner.APIVersion {
-		return false
-	}
-	return true
-}
 
 func isPrimaryPod(podLabels, primaryLabels map[string]string) bool {
 

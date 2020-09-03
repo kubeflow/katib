@@ -23,11 +23,8 @@ import (
 
 	"github.com/spf13/viper"
 	v1 "k8s.io/api/core/v1"
-<<<<<<< HEAD
-=======
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
->>>>>>> Refactor get Katib job
 	apitypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -137,7 +134,7 @@ func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 		if !isMasterRole(pod, jobKind) {
 			return false, nil
 		}
-
+	}
 
 	if trial.Spec.MetricsCollector.Collector.Kind == common.NoneCollector {
 		return false, nil
