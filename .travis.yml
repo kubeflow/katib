@@ -15,6 +15,7 @@ jobs:
       script:
         - make check
         - make test
+      after_success:
         - goveralls -coverprofile=coverage.out
     - name: "Prettier frontend check"
       language: node_js
