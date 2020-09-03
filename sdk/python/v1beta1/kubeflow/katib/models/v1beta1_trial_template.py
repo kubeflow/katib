@@ -36,6 +36,7 @@ class V1beta1TrialTemplate(object):
     """
     swagger_types = {
         'config_map': 'V1beta1ConfigMapSource',
+        'primary_container_name': 'str',
         'primary_pod_labels': 'dict(str, str)',
         'retain': 'bool',
         'trial_parameters': 'list[V1beta1TrialParameterSpec]',
@@ -44,16 +45,18 @@ class V1beta1TrialTemplate(object):
 
     attribute_map = {
         'config_map': 'configMap',
+        'primary_container_name': 'primaryContainerName',
         'primary_pod_labels': 'primaryPodLabels',
         'retain': 'retain',
         'trial_parameters': 'trialParameters',
         'trial_spec': 'trialSpec'
     }
 
-    def __init__(self, config_map=None, primary_pod_labels=None, retain=None, trial_parameters=None, trial_spec=None):  # noqa: E501
+    def __init__(self, config_map=None, primary_container_name=None, primary_pod_labels=None, retain=None, trial_parameters=None, trial_spec=None):  # noqa: E501
         """V1beta1TrialTemplate - a model defined in Swagger"""  # noqa: E501
 
         self._config_map = None
+        self._primary_container_name = None
         self._primary_pod_labels = None
         self._retain = None
         self._trial_parameters = None
@@ -62,6 +65,8 @@ class V1beta1TrialTemplate(object):
 
         if config_map is not None:
             self.config_map = config_map
+        if primary_container_name is not None:
+            self.primary_container_name = primary_container_name
         if primary_pod_labels is not None:
             self.primary_pod_labels = primary_pod_labels
         if retain is not None:
@@ -93,6 +98,29 @@ class V1beta1TrialTemplate(object):
         """
 
         self._config_map = config_map
+
+    @property
+    def primary_container_name(self):
+        """Gets the primary_container_name of this V1beta1TrialTemplate.  # noqa: E501
+
+        Name of training container where actual model training is running  # noqa: E501
+
+        :return: The primary_container_name of this V1beta1TrialTemplate.  # noqa: E501
+        :rtype: str
+        """
+        return self._primary_container_name
+
+    @primary_container_name.setter
+    def primary_container_name(self, primary_container_name):
+        """Sets the primary_container_name of this V1beta1TrialTemplate.
+
+        Name of training container where actual model training is running  # noqa: E501
+
+        :param primary_container_name: The primary_container_name of this V1beta1TrialTemplate.  # noqa: E501
+        :type: str
+        """
+
+        self._primary_container_name = primary_container_name
 
     @property
     def primary_pod_labels(self):

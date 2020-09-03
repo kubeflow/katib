@@ -1102,6 +1102,20 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								},
 							},
 						},
+						"primaryPodLabels": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Labels that determines if pod needs to be injected by Katib sidecar container",
+								Type:        []string{"object"},
+								AdditionalProperties: &spec.SchemaOrBool{
+									Schema: &spec.Schema{
+										SchemaProps: spec.SchemaProps{
+											Type:   []string{"string"},
+											Format: "",
+										},
+									},
+								},
+							},
+						},
 						"primaryContainerName": {
 							SchemaProps: spec.SchemaProps{
 								Description: "Name of training container where actual model training is running",
@@ -1565,7 +1579,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								Ref:         ref("github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.MetricsCollectorSpec"),
 							},
 						},
-<<<<<<< HEAD
 						"primaryPodLabels": {
 							SchemaProps: spec.SchemaProps{
 								Description: "Label that determines if pod needs to be injected by Katib sidecar container",
@@ -1578,13 +1591,13 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 										},
 									},
 								},
-=======
+							},
+						},
 						"primaryContainerName": {
 							SchemaProps: spec.SchemaProps{
 								Description: "Name of training container where actual model training is running",
 								Type:        []string{"string"},
 								Format:      "",
->>>>>>> Add primary container name
 							},
 						},
 					},
