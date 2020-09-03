@@ -55,6 +55,20 @@ func isMatchGVK(owner metav1.OwnerReference, gvk schema.GroupVersionKind) bool {
 	return true
 }
 
+func isPrimaryPod(podLabels, primaryLabels map[string]string) bool {
+
+	for primaryKey, primaryValue := range primaryLabels {
+		if podValue, ok := podLabels[primaryKey]; ok {
+			if podValue != primaryValue {
+				return false
+			}
+		} else {
+			return false
+		}
+	}
+	return true
+}
+
 func isMasterRole(pod *v1.Pod, jobKind string) bool {
 	if labels, ok := jobv1beta1.JobRoleMap[jobKind]; ok {
 		if len(labels) == 0 {

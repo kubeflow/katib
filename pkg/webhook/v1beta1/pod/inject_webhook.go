@@ -25,7 +25,6 @@ import (
 
 	"github.com/spf13/viper"
 	v1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	apitypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -113,20 +112,26 @@ func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 	if err != nil {
 		return false, nil
 	}
-	if !isMasterRole(pod, jobKind) {
-		return false, nil
+
+	trial := &trialsv1beta1.Trial{}
+	// jobName and Trial name is equal
+	if err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: jobName, Namespace: ns}, trial); err != nil {
+		return false, err
 	}
 
-	trialName := jobName
-	trial := &trialsv1beta1.Trial{}
-	err = s.client.Get(context.TODO(), apitypes.NamespacedName{Name: trialName, Namespace: ns}, trial)
-	if err != nil {
-		if k8serrors.IsNotFound(err) {
+	// If PrimaryPodLabel is not set we mutate all pods which are related to Trial job
+	// Otherwise mutate pod only with appropriate labels
+	if trial.Spec.PrimaryPodLabels != nil {
+		if !isPrimaryPod(pod.Labels, trial.Spec.PrimaryPodLabels) {
 			return false, nil
-		} else {
-			return false, err
+		}
+	} else {
+		// TODO (andreyvelich): This can be deleted after switch to custom CRD
+		if !isMasterRole(pod, jobKind) {
+			return false, nil
 		}
 	}
+
 	if trial.Spec.MetricsCollector.Collector.Kind == common.NoneCollector {
 		return false, nil
 	}

@@ -32,29 +32,35 @@ class V1beta1SuggestionSpec(object):
     """
     swagger_types = {
         'algorithm_name': 'str',
-        'requests': 'int'
+        'requests': 'int',
+        'resume_policy': 'str'
     }
 
     attribute_map = {
         'algorithm_name': 'algorithmName',
-        'requests': 'requests'
+        'requests': 'requests',
+        'resume_policy': 'resumePolicy'
     }
 
-    def __init__(self, algorithm_name=None, requests=None):  # noqa: E501
+    def __init__(self, algorithm_name=None, requests=None, resume_policy=None):  # noqa: E501
         """V1beta1SuggestionSpec - a model defined in Swagger"""  # noqa: E501
 
         self._algorithm_name = None
         self._requests = None
+        self._resume_policy = None
         self.discriminator = None
 
         self.algorithm_name = algorithm_name
         if requests is not None:
             self.requests = requests
+        if resume_policy is not None:
+            self.resume_policy = resume_policy
 
     @property
     def algorithm_name(self):
         """Gets the algorithm_name of this V1beta1SuggestionSpec.  # noqa: E501
 
+        Name of the algorithm that suggestion is used.  # noqa: E501
 
         :return: The algorithm_name of this V1beta1SuggestionSpec.  # noqa: E501
         :rtype: str
@@ -65,6 +71,7 @@ class V1beta1SuggestionSpec(object):
     def algorithm_name(self, algorithm_name):
         """Sets the algorithm_name of this V1beta1SuggestionSpec.
 
+        Name of the algorithm that suggestion is used.  # noqa: E501
 
         :param algorithm_name: The algorithm_name of this V1beta1SuggestionSpec.  # noqa: E501
         :type: str
@@ -96,6 +103,29 @@ class V1beta1SuggestionSpec(object):
         """
 
         self._requests = requests
+
+    @property
+    def resume_policy(self):
+        """Gets the resume_policy of this V1beta1SuggestionSpec.  # noqa: E501
+
+        Describes resuming policy which usually take effect after experiment terminated. Default value is LongRunning.  # noqa: E501
+
+        :return: The resume_policy of this V1beta1SuggestionSpec.  # noqa: E501
+        :rtype: str
+        """
+        return self._resume_policy
+
+    @resume_policy.setter
+    def resume_policy(self, resume_policy):
+        """Sets the resume_policy of this V1beta1SuggestionSpec.
+
+        Describes resuming policy which usually take effect after experiment terminated. Default value is LongRunning.  # noqa: E501
+
+        :param resume_policy: The resume_policy of this V1beta1SuggestionSpec.  # noqa: E501
+        :type: str
+        """
+
+        self._resume_policy = resume_policy
 
     def to_dict(self):
         """Returns the model properties as a dict"""

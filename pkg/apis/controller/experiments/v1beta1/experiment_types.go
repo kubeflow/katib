@@ -207,6 +207,9 @@ type TrialTemplate struct {
 
 	// List of parameters that are used in trial template
 	TrialParameters []TrialParameterSpec `json:"trialParameters,omitempty"`
+
+	// Labels that determines if pod needs to be injected by Katib sidecar container
+	PrimaryPodLabels map[string]string `json:"primaryPodLabels,omitempty"`
 }
 
 // TrialSource represent the source for trial template

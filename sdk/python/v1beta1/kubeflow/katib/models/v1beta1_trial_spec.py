@@ -39,6 +39,7 @@ class V1beta1TrialSpec(object):
         'metrics_collector': 'V1beta1MetricsCollectorSpec',
         'objective': 'V1beta1ObjectiveSpec',
         'parameter_assignments': 'list[V1beta1ParameterAssignment]',
+        'primary_pod_labels': 'dict(str, str)',
         'retain_run': 'bool',
         'run_spec': 'V1UnstructuredUnstructured'
     }
@@ -47,16 +48,18 @@ class V1beta1TrialSpec(object):
         'metrics_collector': 'metricsCollector',
         'objective': 'objective',
         'parameter_assignments': 'parameterAssignments',
+        'primary_pod_labels': 'primaryPodLabels',
         'retain_run': 'retainRun',
         'run_spec': 'runSpec'
     }
 
-    def __init__(self, metrics_collector=None, objective=None, parameter_assignments=None, retain_run=None, run_spec=None):  # noqa: E501
+    def __init__(self, metrics_collector=None, objective=None, parameter_assignments=None, primary_pod_labels=None, retain_run=None, run_spec=None):  # noqa: E501
         """V1beta1TrialSpec - a model defined in Swagger"""  # noqa: E501
 
         self._metrics_collector = None
         self._objective = None
         self._parameter_assignments = None
+        self._primary_pod_labels = None
         self._retain_run = None
         self._run_spec = None
         self.discriminator = None
@@ -66,6 +69,8 @@ class V1beta1TrialSpec(object):
         if objective is not None:
             self.objective = objective
         self.parameter_assignments = parameter_assignments
+        if primary_pod_labels is not None:
+            self.primary_pod_labels = primary_pod_labels
         if retain_run is not None:
             self.retain_run = retain_run
         if run_spec is not None:
@@ -141,6 +146,29 @@ class V1beta1TrialSpec(object):
             raise ValueError("Invalid value for `parameter_assignments`, must not be `None`")  # noqa: E501
 
         self._parameter_assignments = parameter_assignments
+
+    @property
+    def primary_pod_labels(self):
+        """Gets the primary_pod_labels of this V1beta1TrialSpec.  # noqa: E501
+
+        Label that determines if pod needs to be injected by Katib sidecar container  # noqa: E501
+
+        :return: The primary_pod_labels of this V1beta1TrialSpec.  # noqa: E501
+        :rtype: dict(str, str)
+        """
+        return self._primary_pod_labels
+
+    @primary_pod_labels.setter
+    def primary_pod_labels(self, primary_pod_labels):
+        """Sets the primary_pod_labels of this V1beta1TrialSpec.
+
+        Label that determines if pod needs to be injected by Katib sidecar container  # noqa: E501
+
+        :param primary_pod_labels: The primary_pod_labels of this V1beta1TrialSpec.  # noqa: E501
+        :type: dict(str, str)
+        """
+
+        self._primary_pod_labels = primary_pod_labels
 
     @property
     def retain_run(self):

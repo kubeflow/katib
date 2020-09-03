@@ -121,6 +121,13 @@ func (in *TrialSpec) DeepCopyInto(out *TrialSpec) {
 		*out = (*in).DeepCopy()
 	}
 	in.MetricsCollector.DeepCopyInto(&out.MetricsCollector)
+	if in.PrimaryPodLabels != nil {
+		in, out := &in.PrimaryPodLabels, &out.PrimaryPodLabels
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 

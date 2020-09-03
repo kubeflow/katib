@@ -88,18 +88,23 @@
       }
     },
     ".v1beta1.SuggestionSpec": {
-      "description": "SuggestionSpec defines the desired state of Suggestion",
+      "description": "SuggestionSpec defines the desired state of suggestion.",
       "required": [
         "algorithmName"
       ],
       "properties": {
         "algorithmName": {
+          "description": "Name of the algorithm that suggestion is used.",
           "type": "string"
         },
         "requests": {
           "description": "Number of suggestions requested",
           "type": "integer",
           "format": "int32"
+        },
+        "resumePolicy": {
+          "description": "Describes resuming policy which usually take effect after experiment terminated. Default value is LongRunning.",
+          "type": "string"
         }
       }
     },
@@ -260,6 +265,13 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1beta1.ParameterAssignment"
+          }
+        },
+        "primaryPodLabels": {
+          "description": "Label that determines if pod needs to be injected by Katib sidecar container",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
           }
         },
         "retainRun": {
@@ -872,6 +884,13 @@
         "configMap": {
           "description": "ConfigMap spec represents a reference to ConfigMap",
           "$ref": "#/definitions/v1beta1.ConfigMapSource"
+        },
+        "primaryPodLabels": {
+          "description": "Labels that determines if pod needs to be injected by Katib sidecar container",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "retain": {
           "description": "Retain indicates that trial resources must be not cleanup",

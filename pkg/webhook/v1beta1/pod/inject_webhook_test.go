@@ -540,3 +540,54 @@ func TestIsMasterRole(t *testing.T) {
 		}
 	}
 }
+
+func TestIsPrimaryPod(t *testing.T) {
+	testCases := []struct {
+		podLabels        map[string]string
+		primaryPodLabels map[string]string
+		isPrimary        bool
+		testDescription  string
+	}{
+		{
+			podLabels: map[string]string{
+				"test-key-1": "test-value-1",
+				"test-key-2": "test-value-2",
+				"test-key-3": "test-value-3",
+			},
+			primaryPodLabels: map[string]string{
+				"test-key-1": "test-value-1",
+				"test-key-2": "test-value-2",
+			},
+			isPrimary:       true,
+			testDescription: "Pod contains all labels from primary pod labels",
+		},
+		{
+			podLabels: map[string]string{
+				"test-key-1": "test-value-1",
+			},
+			primaryPodLabels: map[string]string{
+				"test-key-1": "test-value-1",
+				"test-key-2": "test-value-2",
+			},
+			isPrimary:       false,
+			testDescription: "Pod doesn't contain primary label",
+		},
+		{
+			podLabels: map[string]string{
+				"test-key-1": "invalid",
+			},
+			primaryPodLabels: map[string]string{
+				"test-key-1": "test-value-1",
+			},
+			isPrimary:       false,
+			testDescription: "Pod contains label with incorrect value",
+		},
+	}
+
+	for _, tc := range testCases {
+		isPrimary := isPrimaryPod(tc.podLabels, tc.primaryPodLabels)
+		if isPrimary != tc.isPrimary {
+			t.Errorf("Case %v. Expected isPrimary %v, got %v", tc.testDescription, tc.isPrimary, isPrimary)
+		}
+	}
+}
