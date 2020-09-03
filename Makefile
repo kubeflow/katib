@@ -49,8 +49,8 @@ undeployv1alpha3:
 undeploy:
 	bash scripts/v1beta1/undeploy.sh
 
-# Generate deepcopy, clientset, listers, informers, open-api and python SDK for apis.
-# Run this if you update any existing controller apis.
+# Generate deepcopy, clientset, listers, informers, open-api and python SDK for APIs.
+# Run this if you update any existing controller APIs.
 generate:
 ifndef GOPATH
 	$(error GOPATH not defined, please define GOPATH. Run "go help gopath" to learn more about GOPATH)
