@@ -36,28 +36,33 @@ class V1beta1TrialSpec(object):
                             and the value is json key in definition.
     """
     swagger_types = {
+        'failure_condition': 'str',
         'metrics_collector': 'V1beta1MetricsCollectorSpec',
         'objective': 'V1beta1ObjectiveSpec',
         'parameter_assignments': 'list[V1beta1ParameterAssignment]',
         'primary_container_name': 'str',
         'primary_pod_labels': 'dict(str, str)',
         'retain_run': 'bool',
-        'run_spec': 'V1UnstructuredUnstructured'
+        'run_spec': 'V1UnstructuredUnstructured',
+        'success_condition': 'str'
     }
 
     attribute_map = {
+        'failure_condition': 'failureCondition',
         'metrics_collector': 'metricsCollector',
         'objective': 'objective',
         'parameter_assignments': 'parameterAssignments',
         'primary_container_name': 'primaryContainerName',
         'primary_pod_labels': 'primaryPodLabels',
         'retain_run': 'retainRun',
-        'run_spec': 'runSpec'
+        'run_spec': 'runSpec',
+        'success_condition': 'successCondition'
     }
 
-    def __init__(self, metrics_collector=None, objective=None, parameter_assignments=None, primary_container_name=None, primary_pod_labels=None, retain_run=None, run_spec=None):  # noqa: E501
+    def __init__(self, failure_condition=None, metrics_collector=None, objective=None, parameter_assignments=None, primary_container_name=None, primary_pod_labels=None, retain_run=None, run_spec=None, success_condition=None):  # noqa: E501
         """V1beta1TrialSpec - a model defined in Swagger"""  # noqa: E501
 
+        self._failure_condition = None
         self._metrics_collector = None
         self._objective = None
         self._parameter_assignments = None
@@ -65,8 +70,11 @@ class V1beta1TrialSpec(object):
         self._primary_pod_labels = None
         self._retain_run = None
         self._run_spec = None
+        self._success_condition = None
         self.discriminator = None
 
+        if failure_condition is not None:
+            self.failure_condition = failure_condition
         if metrics_collector is not None:
             self.metrics_collector = metrics_collector
         if objective is not None:
@@ -80,6 +88,31 @@ class V1beta1TrialSpec(object):
             self.retain_run = retain_run
         if run_spec is not None:
             self.run_spec = run_spec
+        if success_condition is not None:
+            self.success_condition = success_condition
+
+    @property
+    def failure_condition(self):
+        """Gets the failure_condition of this V1beta1TrialSpec.  # noqa: E501
+
+        Condition when trial custom resource is failed. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Failed\")#|#(status==\"True\")#  # noqa: E501
+
+        :return: The failure_condition of this V1beta1TrialSpec.  # noqa: E501
+        :rtype: str
+        """
+        return self._failure_condition
+
+    @failure_condition.setter
+    def failure_condition(self, failure_condition):
+        """Sets the failure_condition of this V1beta1TrialSpec.
+
+        Condition when trial custom resource is failed. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Failed\")#|#(status==\"True\")#  # noqa: E501
+
+        :param failure_condition: The failure_condition of this V1beta1TrialSpec.  # noqa: E501
+        :type: str
+        """
+
+        self._failure_condition = failure_condition
 
     @property
     def metrics_collector(self):
@@ -243,6 +276,29 @@ class V1beta1TrialSpec(object):
         """
 
         self._run_spec = run_spec
+
+    @property
+    def success_condition(self):
+        """Gets the success_condition of this V1beta1TrialSpec.  # noqa: E501
+
+        Condition when trial custom resource is succeeded. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Complete\")#|#(status==\"True\")#  # noqa: E501
+
+        :return: The success_condition of this V1beta1TrialSpec.  # noqa: E501
+        :rtype: str
+        """
+        return self._success_condition
+
+    @success_condition.setter
+    def success_condition(self, success_condition):
+        """Sets the success_condition of this V1beta1TrialSpec.
+
+        Condition when trial custom resource is succeeded. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Complete\")#|#(status==\"True\")#  # noqa: E501
+
+        :param success_condition: The success_condition of this V1beta1TrialSpec.  # noqa: E501
+        :type: str
+        """
+
+        self._success_condition = success_condition
 
     def to_dict(self):
         """Returns the model properties as a dict"""
