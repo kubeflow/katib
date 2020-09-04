@@ -23,7 +23,7 @@
 
   // default parameters.
   defaultParams:: {
-    project:: "kubeflow-ci",
+    project:: "automl-ci",
     zone:: "us-east1-d",
     // Default registry to use.
     //registry:: "gcr.io/" + $.defaultParams.project,
@@ -226,6 +226,14 @@
                   {
                     name: "build-katib-controller",
                     template: "build-katib-controller",
+                  },
+                  {
+                    name: "build-file-metrics-collector",
+                    template: "build-file-metrics-collector",
+                  },
+                  {
+                    name: "build-tfevent-metrics-collector",
+                    template: "build-tfevent-metrics-collector",
                   },
                   {
                     name: "build-suggestion-chocolate",
@@ -446,6 +454,12 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-katib-controller", testWorkerImage, [
               "test/scripts/v1beta1/build-katib-controller.sh",
             ]),  // build-katib-controller
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-file-metrics-collector", testWorkerImage, [
+              "test/scripts/v1beta1/build-file-metrics-collector.sh",
+            ]),  // build-file-metrics-collector
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-tfevent-metrics-collector", testWorkerImage, [
+              "test/scripts/v1beta1/build-tfevent-metrics-collector.sh",
+            ]),  // build-tfevent-metrics-collector
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperband", testWorkerImage, [
               "test/scripts/v1beta1/build-suggestion-hyperband.sh",
             ]),  // build-suggestion-hyperband
