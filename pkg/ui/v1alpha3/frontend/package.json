@@ -23,7 +23,7 @@
     "css-loader": "1.0.0",
     "d3": "^5.9.1",
     "d3-graphviz": "^2.6.1",
-    "dompurify": "^1.0.10",
+    "dompurify": "^2.0.15",
     "dotenv": "6.0.0",
     "dotenv-expand": "4.2.0",
     "eslint": "5.12.0",
