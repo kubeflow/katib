@@ -134,6 +134,7 @@ workflows:
       - manifests/v1beta1/*
       - scripts/v1beta1/*
       - vendor/*
+      - prow_config.yaml
     params:
       registry: "gcr.io/kubeflow-images-public"
   - app_dir: kubeflow/katib/test/workflows
