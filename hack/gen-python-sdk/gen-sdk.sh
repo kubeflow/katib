@@ -30,12 +30,11 @@ KATIB_VERSIONS=(v1alpha3 v1beta1)
 echo "Downloading the swagger-codegen JAR package ..."
 wget -O ${SWAGGER_CODEGEN_JAR} ${SWAGGER_JAR_URL}
 
-
 for VERSION in ${KATIB_VERSIONS[@]}; do
     echo "Generating Python SDK for Kubeflow Katib ${VERSION} ..."
     SWAGGER_FILE=${SWAGGER_CODEGEN_FILE/KATIB_VERSION/$VERSION}
     TMP_PATH=${TMP_CODEGEN_PATH/KATIB_VERSION/$VERSION}
-    java -jar ${SWAGGER_CODEGEN_JAR} generate -i ${SWAGGER_FILE} -l python -o ${TMP_PATH} -c ${SWAGGER_CODEGEN_CONF} -v
+    java -jar ${SWAGGER_CODEGEN_JAR} generate -i ${SWAGGER_FILE} -l python -o ${TMP_PATH} -c ${SWAGGER_CODEGEN_CONF}
 
     python ${POST_GEN_PYTHON_HANDLER} ${TMP_PATH} ${SDK_OUTPUT_PATH}/${VERSION}
 done

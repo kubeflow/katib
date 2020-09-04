@@ -15,19 +15,19 @@ ifndef HAS_DEP
 endif
 	dep ensure -v
 
-check: fmt vet lint
+check: depend generate fmt vet lint
 
-fmt: depend generate
+fmt:
 	hack/verify-gofmt.sh
 
-lint: depend generate
+lint:
 ifndef HAS_LINT
 	go get -u golang.org/x/lint/golint
 	echo "installing golint"
 endif
 	hack/verify-golint.sh
 
-vet: depend generate
+vet:
 	go vet ./pkg/... ./cmd/...
 
 update:
@@ -49,12 +49,14 @@ undeployv1alpha3:
 undeploy:
 	bash scripts/v1beta1/undeploy.sh
 
-# Generate code
+# Generate deepcopy, clientset, listers, informers, open-api and python SDK for APIs.
+# Run this if you update any existing controller APIs.
 generate:
 ifndef GOPATH
 	$(error GOPATH not defined, please define GOPATH. Run "go help gopath" to learn more about GOPATH)
 endif
 	go generate ./pkg/... ./cmd/...
+	hack/gen-python-sdk/gen-sdk.sh
 
 # Build images for Katib v1alpha3 components
 buildv1alpha3: depend generate

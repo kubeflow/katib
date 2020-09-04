@@ -404,7 +404,7 @@ Katib supports Python SDK for v1beta1 and v1alpha3 version.
 
 * See the [Katib v1alpha3 SDK documentation](https://github.com/kubeflow/katib/tree/master/sdk/python/v1alpha3).
 
-Run [`gen_sdk.sh`](https://github.com/kubeflow/katib/blob/master/hack/gen-python-sdk/gen_sdk.sh) to update SDK.
+Run [`gen-sdk.sh`](https://github.com/kubeflow/katib/blob/master/hack/gen-python-sdk/gen-sdk.sh) to update SDK.
 
 ### Cleanups
 
