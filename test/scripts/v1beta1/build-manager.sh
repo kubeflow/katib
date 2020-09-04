@@ -27,7 +27,7 @@ GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-db-manager
 VERSION=$(git describe --tags --always --dirty)
 
 echo "Activating service-account"
-gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS} --project=automl-ci
 
 echo "Copy source to GOPATH"
 mkdir -p ${GO_DIR}
