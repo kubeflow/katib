@@ -267,6 +267,10 @@
             "$ref": "#/definitions/v1beta1.ParameterAssignment"
           }
         },
+        "primaryContainerName": {
+          "description": "Name of training container where actual model training is running",
+          "type": "string"
+        },
         "primaryPodLabels": {
           "description": "Label that determines if pod needs to be injected by Katib sidecar container",
           "type": "object",
@@ -884,6 +888,10 @@
         "configMap": {
           "description": "ConfigMap spec represents a reference to ConfigMap",
           "$ref": "#/definitions/v1beta1.ConfigMapSource"
+        },
+        "primaryContainerName": {
+          "description": "Name of training container where actual model training is running",
+          "type": "string"
         },
         "primaryPodLabels": {
           "description": "Labels that determines if pod needs to be injected by Katib sidecar container",

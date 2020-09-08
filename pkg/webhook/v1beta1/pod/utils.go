@@ -30,6 +30,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
+	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	katibmanagerv1beta1 "github.com/kubeflow/katib/pkg/common/v1beta1"
 	jobv1beta1 "github.com/kubeflow/katib/pkg/job/v1beta1"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
@@ -177,16 +178,22 @@ func needWrapWorkerContainer(mc common.MetricsCollectorSpec) bool {
 func wrapWorkerContainer(
 	pod *v1.Pod, namespace, jobKind, metricsFile string,
 	pathKind common.FileSystemKind,
-	mc common.MetricsCollectorSpec) error {
+	trial *trialsv1beta1.Trial) error {
 	index := -1
 	for i, c := range pod.Spec.Containers {
-		jobProvider, err := jobv1beta1.New(jobKind)
-		if err != nil {
-			return err
-		}
-		if jobProvider.IsTrainingContainer(i, c) {
+		if trial.Spec.PrimaryContainerName != "" && c.Name == trial.Spec.PrimaryContainerName {
 			index = i
 			break
+			// TODO (andreyvelich): This can be deleted after switch to custom CRD
+		} else if trial.Spec.PrimaryContainerName == "" {
+			jobProvider, err := jobv1beta1.New(jobKind)
+			if err != nil {
+				return err
+			}
+			if jobProvider.IsTrainingContainer(i, c) {
+				index = i
+				break
+			}
 		}
 	}
 	if index >= 0 {
@@ -202,6 +209,7 @@ func wrapWorkerContainer(
 				args = args[2:]
 			}
 		}
+		mc := trial.Spec.MetricsCollector
 		if mc.Collector.Kind == common.StdOutCollector {
 			redirectStr := fmt.Sprintf("1>%s 2>&1", metricsFile)
 			args = append(args, redirectStr)
@@ -211,6 +219,9 @@ func wrapWorkerContainer(
 		c := &pod.Spec.Containers[index]
 		c.Command = command
 		c.Args = []string{argsStr}
+	} else {
+		return fmt.Errorf("Unable to find primary container %v in mutated pod containers %v",
+			trial.Spec.PrimaryContainerName, pod.Spec.Containers)
 	}
 	return nil
 }

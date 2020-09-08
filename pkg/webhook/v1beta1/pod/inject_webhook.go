@@ -174,11 +174,17 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		}
 	}
 	if needWrapWorkerContainer(trial.Spec.MetricsCollector) {
-		if err = wrapWorkerContainer(mutatedPod, namespace, jobKind, mountPath, pathKind, trial.Spec.MetricsCollector); err != nil {
+		if err = wrapWorkerContainer(mutatedPod, namespace, jobKind, mountPath, pathKind, trial); err != nil {
 			return nil, err
 		}
 	}
-	log.Info("Inject metrics collector sidecar container", "Pod Generate Name", mutatedPod.GenerateName, "Trial", jobName)
+
+	// For Job kind mutated pod has only generate name
+	if mutatedPod.Name != "" {
+		log.Info("Inject metrics collector sidecar container", "Pod Name", mutatedPod.Name, "Trial", jobName)
+	} else {
+		log.Info("Inject metrics collector sidecar container", "Pod Generate Name", mutatedPod.GenerateName, "Trial", jobName)
+	}
 	return mutatedPod, nil
 }
 

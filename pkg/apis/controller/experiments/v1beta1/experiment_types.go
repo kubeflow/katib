@@ -210,6 +210,9 @@ type TrialTemplate struct {
 
 	// Labels that determines if pod needs to be injected by Katib sidecar container
 	PrimaryPodLabels map[string]string `json:"primaryPodLabels,omitempty"`
+
+	// Name of training container where actual model training is running
+	PrimaryContainerName string `json:"primaryContainerName,omitempty"`
 }
 
 // TrialSource represent the source for trial template

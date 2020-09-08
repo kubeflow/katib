@@ -39,6 +39,7 @@ class V1beta1TrialSpec(object):
         'metrics_collector': 'V1beta1MetricsCollectorSpec',
         'objective': 'V1beta1ObjectiveSpec',
         'parameter_assignments': 'list[V1beta1ParameterAssignment]',
+        'primary_container_name': 'str',
         'primary_pod_labels': 'dict(str, str)',
         'retain_run': 'bool',
         'run_spec': 'V1UnstructuredUnstructured'
@@ -48,17 +49,19 @@ class V1beta1TrialSpec(object):
         'metrics_collector': 'metricsCollector',
         'objective': 'objective',
         'parameter_assignments': 'parameterAssignments',
+        'primary_container_name': 'primaryContainerName',
         'primary_pod_labels': 'primaryPodLabels',
         'retain_run': 'retainRun',
         'run_spec': 'runSpec'
     }
 
-    def __init__(self, metrics_collector=None, objective=None, parameter_assignments=None, primary_pod_labels=None, retain_run=None, run_spec=None):  # noqa: E501
+    def __init__(self, metrics_collector=None, objective=None, parameter_assignments=None, primary_container_name=None, primary_pod_labels=None, retain_run=None, run_spec=None):  # noqa: E501
         """V1beta1TrialSpec - a model defined in Swagger"""  # noqa: E501
 
         self._metrics_collector = None
         self._objective = None
         self._parameter_assignments = None
+        self._primary_container_name = None
         self._primary_pod_labels = None
         self._retain_run = None
         self._run_spec = None
@@ -69,6 +72,8 @@ class V1beta1TrialSpec(object):
         if objective is not None:
             self.objective = objective
         self.parameter_assignments = parameter_assignments
+        if primary_container_name is not None:
+            self.primary_container_name = primary_container_name
         if primary_pod_labels is not None:
             self.primary_pod_labels = primary_pod_labels
         if retain_run is not None:
@@ -146,6 +151,29 @@ class V1beta1TrialSpec(object):
             raise ValueError("Invalid value for `parameter_assignments`, must not be `None`")  # noqa: E501
 
         self._parameter_assignments = parameter_assignments
+
+    @property
+    def primary_container_name(self):
+        """Gets the primary_container_name of this V1beta1TrialSpec.  # noqa: E501
+
+        Name of training container where actual model training is running  # noqa: E501
+
+        :return: The primary_container_name of this V1beta1TrialSpec.  # noqa: E501
+        :rtype: str
+        """
+        return self._primary_container_name
+
+    @primary_container_name.setter
+    def primary_container_name(self, primary_container_name):
+        """Sets the primary_container_name of this V1beta1TrialSpec.
+
+        Name of training container where actual model training is running  # noqa: E501
+
+        :param primary_container_name: The primary_container_name of this V1beta1TrialSpec.  # noqa: E501
+        :type: str
+        """
+
+        self._primary_container_name = primary_container_name
 
     @property
     def primary_pod_labels(self):

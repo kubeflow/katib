@@ -1116,6 +1116,13 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								},
 							},
 						},
+						"primaryContainerName": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Name of training container where actual model training is running",
+								Type:        []string{"string"},
+								Format:      "",
+							},
+						},
 					},
 				},
 			},
@@ -1584,6 +1591,13 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 										},
 									},
 								},
+							},
+						},
+						"primaryContainerName": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Name of training container where actual model training is running",
+								Type:        []string{"string"},
+								Format:      "",
 							},
 						},
 					},
