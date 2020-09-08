@@ -254,32 +254,58 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 	// Job already exists
 	// TODO Can desired Spec differ from deployedSpec?
 	if deployedJob != nil {
-		kind := deployedJob.GetKind()
-		jobProvider, err := jobv1beta1.New(kind)
-		if err != nil {
-			logger.Error(err, "Failed to create the provider")
-			return err
-		}
-		// Currently jobCondition - part of commonv1 TF package for all jobs
-		jobCondition, err := jobProvider.GetDeployedJobStatus(deployedJob)
-		if err != nil {
-			logger.Error(err, "Get deployed status error")
-			return err
-		}
+		if instance.Spec.SuccessCondition != "" && instance.Spec.FailureCondition != "" {
+			jobStatus, err := trialutil.GetDeployedJobStatus(instance, deployedJob)
+			if err != nil {
+				logger.Error(err, "GetDeployedJobStatus error")
+			}
+			// Not needed to update status if jobStatus is nil
+			if jobStatus == nil {
+				return nil
+			}
+			// If Job is succeeded update Trial observation
+			if jobStatus.Condition == trialutil.JobSucceeded {
+				if err = r.UpdateTrialStatusObservation(instance); err != nil {
+					logger.Error(err, "Update trial status observation error")
+					return err
+				}
+			}
 
-		// Update trial observation when the job is succeeded.
-		if isJobSucceeded(jobCondition) {
-			if err = r.UpdateTrialStatusObservation(instance, deployedJob); err != nil {
-				logger.Error(err, "Update trial status observation error")
+			// Update Trial job status only
+			//    if job has succeeded and if observation field is available.
+			//    if job has failed
+			// This will ensure that trial is set to be complete only if metric is collected at least once
+			r.UpdateTrialStatusCondition(instance, deployedJob.GetName(), jobStatus)
+
+		} else {
+			// TODO (andreyvelich): This can be deleted after switch to custom CRD
+			kind := deployedJob.GetKind()
+			jobProvider, err := jobv1beta1.New(kind)
+			if err != nil {
+				logger.Error(err, "Failed to create the provider")
 				return err
 			}
-		}
+			// Currently jobCondition - part of commonv1 TF package for all jobs
+			jobCondition, err := jobProvider.GetDeployedJobStatus(deployedJob)
+			if err != nil {
+				logger.Error(err, "Get deployed status error")
+				return err
+			}
 
-		// Update Trial job status only
-		//    if job has succeeded and if observation field is available.
-		//    if job has failed
-		// This will ensure that trial is set to be complete only if metric is collected at least once
-		r.UpdateTrialStatusCondition(instance, deployedJob, jobCondition)
+			// Update trial observation when the job is succeeded.
+			if isJobSucceeded(jobCondition) {
+				if err = r.UpdateTrialStatusObservation(instance); err != nil {
+					logger.Error(err, "Update trial status observation error")
+					return err
+				}
+			}
+
+			// Update Trial job status only
+			//    if job has succeeded and if observation field is available.
+			//    if job has failed
+			// This will ensure that trial is set to be complete only if metric is collected at least once
+			r.UpdateTrialStatusConditionDeprecated(instance, deployedJob, jobCondition)
+		}
 
 	}
 	return nil
