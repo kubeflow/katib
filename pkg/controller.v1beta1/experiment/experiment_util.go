@@ -56,6 +56,7 @@ func (r *ReconcileExperiment) createTrialInstance(expInstance *experimentsv1beta
 	if expInstance.Spec.TrialTemplate.PrimaryPodLabels != nil {
 		trial.Spec.PrimaryPodLabels = expInstance.Spec.TrialTemplate.PrimaryPodLabels
 	}
+
 	if expInstance.Spec.TrialTemplate.PrimaryContainerName != "" {
 		trial.Spec.PrimaryContainerName = expInstance.Spec.TrialTemplate.PrimaryContainerName
 	}
