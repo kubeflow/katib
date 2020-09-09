@@ -21,16 +21,25 @@ import (
 )
 
 const (
+	// DefaultPollInterval is the default value for interval between running processes check
 	DefaultPollInterval = time.Second
-	DefaultTimeout      = 0
-	DefaultWaitAll      = false
-
-	MetricCollectorContainerName       = "metrics-collector"
-	MetricLoggerCollectorContainerName = "metrics-logger-and-collector"
-
+	// DefaultTimeout is the default value for timeout before invoke error during running processes check
+	// To run without timeout set value to 0
+	DefaultTimeout = 0
+	// DefaultWaitAll is the default value whether wait for all other main process of container exiting
+	DefaultWaitAll = true
+	// TrainingCompleted is the job finished marker in $$$$.pid file when main process is completed
 	TrainingCompleted = "completed"
 
+	// DefaultFilter is the default metrics collector filter to parse the metrics.
+	// Metrics must be printed this way
+	// loss=0.3
+	// accuracy=0.98
 	DefaultFilter = `([\w|-]+)\s*=\s*((-?\d+)(\.\d+)?)`
+
+	// TODO (andreyvelich): Do we need to maintain 2 names? Should we leave only 1?
+	MetricCollectorContainerName       = "metrics-collector"
+	MetricLoggerCollectorContainerName = "metrics-logger-and-collector"
 )
 
 var (

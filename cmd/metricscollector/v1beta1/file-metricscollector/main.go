@@ -54,14 +54,14 @@ import (
 )
 
 var (
-	metricsFileName = flag.String("path", "", "Metrics File Path")
-	trialName       = flag.String("t", "", "Trial Name")
-	managerService  = flag.String("s", "", "Katib Manager service")
-	metricNames     = flag.String("m", "", "Metric names")
-	filters         = flag.String("f", "", "Metric filters")
-	pollInterval    = flag.Duration("p", common.DefaultPollInterval, "Poll interval to check if main process of worker container exit")
-	timeout         = flag.Duration("timeout", common.DefaultTimeout, "Timeout to check if main process of worker container exit")
-	waitAll         = flag.Bool("w", common.DefaultWaitAll, "Whether wait for all other main process of container exiting")
+	managerServiceAddr = flag.String("s", "", "Katib Manager service")
+	trialName          = flag.String("t", "", "Trial Name")
+	metricsFilePath    = flag.String("path", "", "Metrics File Path")
+	metricNames        = flag.String("m", "", "Metric names")
+	metricFilters      = flag.String("f", "", "Metric filters")
+	pollInterval       = flag.Duration("p", common.DefaultPollInterval, "Poll interval between running processes check")
+	timeout            = flag.Duration("timeout", common.DefaultTimeout, "Timeout before invoke error during running processes check")
+	waitAll            = flag.Bool("w", common.DefaultWaitAll, "Whether wait for all other main process of container exiting")
 )
 
 func printMetricsFile(mFile string) {
@@ -86,18 +86,18 @@ func main() {
 	flag.Parse()
 	klog.Infof("Trial Name: %s", *trialName)
 
-	go printMetricsFile(*metricsFileName)
+	go printMetricsFile(*metricsFilePath)
 	wopts := common.WaitPidsOpts{
 		PollInterval:           *pollInterval,
 		Timeout:                *timeout,
 		WaitAll:                *waitAll,
-		CompletedMarkedDirPath: filepath.Dir(*metricsFileName),
+		CompletedMarkedDirPath: filepath.Dir(*metricsFilePath),
 	}
-	if err := common.Wait(wopts); err != nil {
+	if err := common.WaitMainProcesses(wopts); err != nil {
 		klog.Fatalf("Failed to wait for worker container: %v", err)
 	}
 
-	conn, err := grpc.Dial(*managerService, grpc.WithInsecure())
+	conn, err := grpc.Dial(*managerServiceAddr, grpc.WithInsecure())
 	if err != nil {
 		klog.Fatalf("could not connect: %v", err)
 	}
@@ -109,10 +109,10 @@ func main() {
 		metricList = strings.Split(*metricNames, ";")
 	}
 	var filterList []string
-	if len(*filters) != 0 {
-		filterList = strings.Split(*filters, ";")
+	if len(*metricFilters) != 0 {
+		filterList = strings.Split(*metricFilters, ";")
 	}
-	olog, err := filemc.CollectObservationLog(*metricsFileName, metricList, filterList)
+	olog, err := filemc.CollectObservationLog(*metricsFilePath, metricList, filterList)
 	if err != nil {
 		klog.Fatalf("Failed to collect logs: %v", err)
 	}
