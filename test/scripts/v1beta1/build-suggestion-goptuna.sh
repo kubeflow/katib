@@ -23,6 +23,14 @@ set -o pipefail
 export PATH=${GOPATH}/bin:/usr/local/go/bin:${PATH}
 REGISTRY="${GCP_REGISTRY}"
 PROJECT="${GCP_PROJECT}"
+
+# TODO (andreyvelich): Temporary solution - Build post-submit images in kubeflow-ci project to be able to push to kubeflow-images-public.
+# Later we should switch to apps-cd to publish images (https://github.com/kubeflow/testing/tree/master/apps-cd).
+KUBEFLOW_REG="gcr.io/kubeflow-images-public"
+if [[ ${REGISTRY} == ${KUBEFLOW_REG} ]]; then
+  PROJECT="kubeflow-ci"
+fi
+
 GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-suggestion-goptuna
 VERSION=$(git describe --tags --always --dirty)
 
