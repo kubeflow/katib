@@ -45,7 +45,6 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/trial/managerclient"
 	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	jobv1beta1 "github.com/kubeflow/katib/pkg/job/v1beta1"
 	"github.com/spf13/viper"
 )
@@ -319,11 +318,11 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 	gvk := schema.FromAPIVersionAndKind(apiVersion, kind)
 
 	// Add annotation to desired Job to disable istio sidecar
-	err = util.TrainingJobAnnotations(desiredJob)
-	if err != nil {
-		logger.Error(err, "TrainingJobAnnotations error")
-		return nil, err
-	}
+	// err = util.TrainingJobAnnotations(desiredJob)
+	// if err != nil {
+	// 	logger.Error(err, "TrainingJobAnnotations error")
+	// 	return nil, err
+	// }
 
 	deployedJob := &unstructured.Unstructured{}
 	deployedJob.SetGroupVersionKind(gvk)
@@ -333,15 +332,15 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 			if instance.IsCompleted() {
 				return nil, nil
 			}
-			jobProvider, err := jobv1beta1.New(desiredJob.GetKind())
-			if err != nil {
-				return nil, err
-			}
-			// mutate desiredJob according to provider
-			if err := jobProvider.MutateJob(instance, desiredJob); err != nil {
-				logger.Error(err, "Mutating desiredSpec of km.Training error")
-				return nil, err
-			}
+			// jobProvider, err := jobv1beta1.New(desiredJob.GetKind())
+			// if err != nil {
+			// 	return nil, err
+			// }
+			// // mutate desiredJob according to provider
+			// if err := jobProvider.MutateJob(instance, desiredJob); err != nil {
+			// 	logger.Error(err, "Mutating desiredSpec of km.Training error")
+			// 	return nil, err
+			// }
 			logger.Info("Creating Job", "kind", kind,
 				"name", desiredJob.GetName())
 			err = r.Create(context.TODO(), desiredJob)

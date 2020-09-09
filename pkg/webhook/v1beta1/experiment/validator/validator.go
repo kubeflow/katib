@@ -336,7 +336,8 @@ func (g *DefaultValidator) validateSupportedJob(runSpec *unstructured.Unstructur
 			return nil
 		}
 	}
-	return fmt.Errorf("Job type %v not supported", gvk)
+	return nil
+	// return fmt.Errorf("Job type %v not supported", gvk)
 }
 
 func validatePatchJob(runSpec *unstructured.Unstructured, job interface{}, jobType string) error {
