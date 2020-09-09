@@ -23,6 +23,14 @@ set -o pipefail
 export PATH=${GOPATH}/bin:/usr/local/go/bin:${PATH}
 REGISTRY="${GCP_REGISTRY}"
 PROJECT="${GCP_PROJECT}"
+
+# TODO (andreyvelich): Temporary solution - Build post-submit images in kubeflow-ci project to be able to push to kubeflow-images-public.
+# Later we should switch to apps-cd to publish images (https://github.com/kubeflow/testing/tree/master/apps-cd).
+KUBEFLOW_REG="gcr.io/kubeflow-images-public"
+if [[ ${REGISTRY} == ${KUBEFLOW_REG} ]]; then
+  PROJECT="kubeflow-ci"
+fi
+
 GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}-katib-controller
 VERSION=$(git describe --tags --always --dirty)
 
@@ -39,7 +47,6 @@ cd ${GO_DIR}
 cp cmd/katib-controller/v1alpha3/Dockerfile .
 gcloud builds submit . --tag=${REGISTRY}/${REPO_NAME}/v1alpha3/katib-controller:${VERSION} --project=${PROJECT}
 gcloud container images add-tag --quiet ${REGISTRY}/${REPO_NAME}/v1alpha3/katib-controller:${VERSION} ${REGISTRY}/${REPO_NAME}/v1alpha3/katib-controller:latest --verbosity=info
-
 
 cd ${GO_DIR}
 cp cmd/metricscollector/v1alpha3/file-metricscollector/Dockerfile .

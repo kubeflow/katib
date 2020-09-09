@@ -138,7 +138,7 @@ workflows:
       - vendor/*
       - prow_config.yaml
     params:
-      registry: "gcr.io/kubeflow-images-public"
+      registry: "gcr.io/automl-ci"
   - app_dir: kubeflow/katib/test/workflows
     component: workflows-v1beta1
     name: e2e-v1beta1
