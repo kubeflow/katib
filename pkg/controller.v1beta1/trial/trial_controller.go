@@ -19,6 +19,7 @@ package trial
 import (
 	"context"
 	"fmt"
+	"time"
 
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -45,6 +46,7 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/trial/managerclient"
 	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	jobv1beta1 "github.com/kubeflow/katib/pkg/job/v1beta1"
 	"github.com/spf13/viper"
 )
@@ -173,6 +175,12 @@ type ReconcileTrial struct {
 	collector *trialutil.TrialsCollector
 }
 
+// Map which contains number of requeuing for each trial if observation logs are not available
+// That is needed if Job is succeeded but metrics are not reported yet
+// Key = Trial name, value = requeue count
+var trialRequeueCount = make(map[string]int)
+var maxRequeueCount = 5
+
 // Reconcile reads that state of the cluster for a Trial object and makes changes based on the state read
 // and what is in the Trial.Spec
 // +kubebuilder:rbac:groups=trials.kubeflow.org,resources=trials,verbs=get;list;watch;create;update;patch;delete
@@ -227,6 +235,24 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 			logger.Info("Update trial instance status failed, reconciler requeued", "err", err)
 			return reconcile.Result{
 				Requeue: true,
+			}, nil
+		}
+	}
+
+	// Restart Reconcile for maxRequeueCount times
+	if instance.IsMetricsUnavailable() {
+
+		count, ok := trialRequeueCount[instance.GetName()]
+		if !ok {
+			trialRequeueCount[instance.GetName()] = 1
+		} else {
+			trialRequeueCount[instance.GetName()]++
+		}
+
+		if count <= maxRequeueCount {
+			logger.Info("Trial metrics are not available, reconciler requeued", "requeue count", maxRequeueCount)
+			return reconcile.Result{
+				RequeueAfter: time.Second * 5,
 			}, nil
 		}
 	}
@@ -318,11 +344,12 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 	gvk := schema.FromAPIVersionAndKind(apiVersion, kind)
 
 	// Add annotation to desired Job to disable istio sidecar
-	// err = util.TrainingJobAnnotations(desiredJob)
-	// if err != nil {
-	// 	logger.Error(err, "TrainingJobAnnotations error")
-	// 	return nil, err
-	// }
+	// TODO (andreyvelich): Can be removed after custom CRD implementation
+	err = util.TrainingJobAnnotations(desiredJob)
+	if err != nil {
+		logger.Error(err, "TrainingJobAnnotations error")
+		return nil, err
+	}
 
 	deployedJob := &unstructured.Unstructured{}
 	deployedJob.SetGroupVersionKind(gvk)
@@ -332,6 +359,9 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 			if instance.IsCompleted() {
 				return nil, nil
 			}
+
+			// TODO (andreyvelich): Mutate job needs to be refactored (ref: https://github.com/kubeflow/katib/issues/1320)
+			// Currently, commented since we don't do Mutate Job for SupportedJobList
 			// jobProvider, err := jobv1beta1.New(desiredJob.GetKind())
 			// if err != nil {
 			// 	return nil, err
@@ -341,6 +371,7 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 			// 	logger.Error(err, "Mutating desiredSpec of km.Training error")
 			// 	return nil, err
 			// }
+
 			logger.Info("Creating Job", "kind", kind,
 				"name", desiredJob.GetName())
 			err = r.Create(context.TODO(), desiredJob)

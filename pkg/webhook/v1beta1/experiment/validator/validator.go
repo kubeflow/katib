@@ -284,7 +284,7 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 
 	// Check if Job is supported
 	// Check if Job can be converted to Batch Job/TFJob/PyTorchJob
-	// Not default CRDs can be omitted later
+	// Other jobs are not validated
 	if err := g.validateSupportedJob(runSpec); err != nil {
 		return fmt.Errorf("Invalid spec.trialTemplate: %v", err)
 	}
@@ -337,7 +337,6 @@ func (g *DefaultValidator) validateSupportedJob(runSpec *unstructured.Unstructur
 		}
 	}
 	return nil
-	// return fmt.Errorf("Job type %v not supported", gvk)
 }
 
 func validatePatchJob(runSpec *unstructured.Unstructured, job interface{}, jobType string) error {

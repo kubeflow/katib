@@ -63,7 +63,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 			r.recorder.Eventf(instance, corev1.EventTypeNormal, JobSucceededReason, eventMsg)
 			r.collector.IncreaseTrialsSucceededCount(instance.Namespace)
 		} else {
-			// TODO (andreyvelich): Is is correct to mark succeeded status false when metrics are unavailable?
+			// TODO (andreyvelich): Is it correct to mark succeeded status false when metrics are unavailable?
 			msg := "Metrics are not available"
 			reason := TrialMetricsUnavailableReason
 

@@ -92,10 +92,10 @@ func NewDBInterface() (common.KatibDBInterface, error) {
 }
 
 func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta1.ObservationLog) error {
-	var mname, mvalue string
+	sqlQuery := "INSERT INTO observation_logs (trial_name, time, metric_name, value) VALUES "
+	values := []interface{}{}
+
 	for _, mlog := range observationLog.MetricLogs {
-		mname = mlog.Metric.Name
-		mvalue = mlog.Metric.Value
 		if mlog.TimeStamp == "" {
 			continue
 		}
@@ -104,22 +104,24 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta
 			return fmt.Errorf("Error parsing start time %s: %v", mlog.TimeStamp, err)
 		}
 		sqlTimeStr := t.UTC().Format(mysqlTimeFmt)
-		_, err = d.db.Exec(
-			`INSERT INTO observation_logs (
-				trial_name,
-				time,
-				metric_name,
-				value
-			) VALUES (?, ?, ?, ?)`,
-			trialName,
-			sqlTimeStr,
-			mname,
-			mvalue,
-		)
-		if err != nil {
-			return err
-		}
+
+		sqlQuery += "(?, ?, ?, ?),"
+		values = append(values, trialName, sqlTimeStr, mlog.Metric.Name, mlog.Metric.Value)
 	}
+	sqlQuery = sqlQuery[0 : len(sqlQuery)-1]
+
+	// Prepare the statement
+	stmt, err := d.db.Prepare(sqlQuery)
+	if err != nil {
+		return fmt.Errorf("Pepare SQL statement failed: %v", err)
+	}
+
+	// Execute INSERT
+	_, err = stmt.Exec(values...)
+	if err != nil {
+		return fmt.Errorf("Execute SQL INSERT failed: %v", err)
+	}
+
 	return nil
 }
 

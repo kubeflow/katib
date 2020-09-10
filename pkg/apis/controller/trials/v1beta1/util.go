@@ -83,6 +83,15 @@ func (trial *Trial) IsKilled() bool {
 	return hasCondition(trial, TrialKilled)
 }
 
+// IsMetricsUnavailable returns true if Trial metrics are not available
+func (trial *Trial) IsMetricsUnavailable() bool {
+	cond := getCondition(trial, TrialSucceeded)
+	if cond != nil && cond.Status == v1.ConditionFalse {
+		return true
+	}
+	return false
+}
+
 func (trial *Trial) IsCompleted() bool {
 	return trial.IsSucceeded() || trial.IsFailed() || trial.IsKilled()
 }
