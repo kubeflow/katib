@@ -13,7 +13,7 @@ spec:
     additionalMetricNames:
       - Train-accuracy
   algorithm:
-    algorithmName: random
+    algorithmName: invalid-algorithm # Invalid Algorithm to check that validation webhook is working
   parameters:
     - name: lr
       parameterType: double
@@ -45,7 +45,7 @@ spec:
         reference: optimizer
     trialSpec:
       apiVersion: batch/v1
-      kind: InvalidKind # Invalid Kind to check validation webhook
+      kind: Job
       spec:
         template:
           spec:
