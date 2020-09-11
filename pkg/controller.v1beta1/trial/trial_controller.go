@@ -232,7 +232,7 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 		//assuming that only status change
 		err = r.updateStatusHandler(instance)
 		if err != nil {
-			logger.Info("Update trial instance status failed, reconciler requeued", "err", err)
+			logger.Info("Update trial instance status failed, reconcile requeued", "err", err)
 			return reconcile.Result{
 				Requeue: true,
 			}, nil
@@ -245,14 +245,14 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 		count, ok := trialRequeueCount[instance.GetName()]
 		if !ok {
 			trialRequeueCount[instance.GetName()] = 1
+			logger.Info("Trial metrics are not available, reconcile requeued", "max requeue count", maxRequeueCount)
 		} else {
 			trialRequeueCount[instance.GetName()]++
 		}
 
 		if count <= maxRequeueCount {
-			logger.Info("Trial metrics are not available, reconciler requeued", "requeue count", maxRequeueCount)
 			return reconcile.Result{
-				RequeueAfter: time.Second * 5,
+				RequeueAfter: time.Second * 1,
 			}, nil
 		}
 	}

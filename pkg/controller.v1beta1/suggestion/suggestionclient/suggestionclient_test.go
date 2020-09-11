@@ -23,6 +23,7 @@ import (
 
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -630,6 +631,21 @@ func newFakeTrials() []trialsv1beta1.Trial {
 			},
 			Status: trialsv1beta1.TrialStatus{
 				Conditions: fakeConditions,
+			},
+		},
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "trial3-name",
+				Namespace: "namespace",
+			},
+			Status: trialsv1beta1.TrialStatus{
+				Conditions: []trialsv1beta1.TrialCondition{
+					{
+						Type:    trialsv1beta1.TrialSucceeded,
+						Status:  corev1.ConditionFalse,
+						Message: "Metrics are not available",
+					},
+				},
 			},
 		},
 	}

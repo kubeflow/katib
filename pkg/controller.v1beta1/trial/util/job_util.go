@@ -49,11 +49,6 @@ var (
 func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.Unstructured) (*TrialJobStatus, error) {
 	logger := log.WithValues("Trial", types.NamespacedName{Name: trial.GetName(), Namespace: trial.GetNamespace()})
 
-	// If Trial is in bellow conditions, not needed to get new Job status
-	if trial.IsSucceeded() || trial.IsFailed() || trial.IsMetricsUnavailable() {
-		return nil, nil
-	}
-
 	trialJobStatus := &TrialJobStatus{}
 
 	// Marshal unstructured Job to JSON
@@ -80,7 +75,10 @@ func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.
 
 		// Job condition is failed
 		trialJobStatus.Condition = JobFailed
-		logger.Info("Deployed Job status is failed", "Job", deployedJob.GetName())
+		// Log only for the first status update
+		if !trial.IsFailed() {
+			logger.Info("Deployed Job status is failed", "Job", deployedJob.GetName())
+		}
 		return trialJobStatus, nil
 	}
 
@@ -102,7 +100,10 @@ func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.
 
 		// Job condition is succeeded
 		trialJobStatus.Condition = JobSucceeded
-		logger.Info("Deployed Job status is succeeded", "Job", deployedJob.GetName())
+		// Log only for the first status update
+		if !trial.IsSucceeded() && !trial.IsMetricsUnavailable() {
+			logger.Info("Deployed Job status is succeeded", "Job", deployedJob.GetName())
+		}
 		return trialJobStatus, nil
 	}
 
