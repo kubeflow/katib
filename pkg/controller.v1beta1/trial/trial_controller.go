@@ -279,7 +279,7 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 	// Job already exists
 	// TODO Can desired Spec differ from deployedSpec?
 	if deployedJob != nil {
-		if instance.Spec.SuccessCondition != "" && instance.Spec.FailureCondition != "" {
+		if instance.Spec.SuccessCondition != "" && instance.Spec.FailureCondition != "" && !instance.IsCompleted() {
 			jobStatus, err := trialutil.GetDeployedJobStatus(instance, deployedJob)
 			if err != nil {
 				logger.Error(err, "GetDeployedJobStatus error")
@@ -302,7 +302,7 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 			// This will ensure that trial is set to be complete only if metric is collected at least once
 			r.UpdateTrialStatusCondition(instance, deployedJob.GetName(), jobStatus)
 
-		} else {
+		} else if instance.Spec.SuccessCondition == "" && instance.Spec.FailureCondition == "" {
 			// TODO (andreyvelich): This can be deleted after switch to custom CRD
 			kind := deployedJob.GetKind()
 			jobProvider, err := jobv1beta1.New(kind)
