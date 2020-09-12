@@ -32,7 +32,7 @@ The APIs for KatibClient are as following:
 
 | Name | Type | Description | Notes |
 | --- | --- | --- | --- |
-| experiment | [V1alpha3Experiment](V1alpha3Experiment.md) | experiment definition | Required |
+| experiment | [V1beta1Experiment](V1beta1Experiment.md) | experiment definition | Required |
 | namespace | str | Namespace for experiment deploying to. If the `namespace` is not defined, will align with experiment definition, or use current or default namespace if namespace is not specified in experiment definition. | Optional |
 
 
