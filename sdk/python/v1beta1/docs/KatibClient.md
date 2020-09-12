@@ -4,17 +4,12 @@
 
 User can load authentication and cluster information from kube-config file and stores them in kubernetes.client.configuration. Parameters are as following:
 
-| parameter            | Description                                                                |
-| -------------------- | -------------------------------------------------------------------------- |
-| config_file          | Location of kube-config file. Defaults to `~/.kube/config`.                |
-|                      | Defaults to `~/.kube/config`. Note that the config_file is needed          |
-|                      | if user wants to operate Katib SDK in another remote cluster,              |
-|                      | user must set `config_file` to load kube-config file explicitly            |
-|                      | e.g. `KatibClient(config_file="~/.kube/config")`                           |
-| context              | Set the active context. If is set to None,                                 |
-|                      | current_context from config file will be used.                             |
-| client_configuration | The kubernetes.client.Configuration to set config to.                      |
-| persist_config       | If True, config file will be updated when changed (e.g GCP token refresh). |
+| Parameter | Description |
+| --- | --- |
+| config_file | Location of kube-config file. Defaults to `~/.kube/config`. Note that the config_file is needed if user want to operate katib SDK in another remote cluster, user must set `config_file` to load kube-config file explicitly, e.g. `KatibClient(config_file="~/.kube/config")`. |
+| context | Set the active context. If is set to None, current_context from config file will be used. |
+| client_configuration | The kubernetes.client.Configuration to set configs to. |
+| persist_config | If True, config file will be updated when changed (e.g GCP token refresh). |
 
 The APIs for KatibClient are as following:
 
@@ -35,13 +30,11 @@ The APIs for KatibClient are as following:
 
 ### Parameters
 
-| Name       | Type                                        | Description                                                | Notes    |
-| ---------- | ------------------------------------------- | ---------------------------------------------------------- | -------- |
-| experiment | [V1alpha3Experiment](V1alpha3Experiment.md) | Experiment definition                                      | Required |
-| namespace  | str                                         | Namespace for Experiment deploying to.                     |
-|            |                                             | If the `namespace` is not defined, will align with         |          |
-|            |                                             | Experiment definition, or use current or default namespace |          |
-|            |                                             | if namespace is not specified in Experiment definition.    | Optional |
+| Name | Type | Description | Notes |
+| --- | --- | --- | --- |
+| experiment | [V1alpha3Experiment](V1alpha3Experiment.md) | experiment definition | Required |
+| namespace | str | Namespace for experiment deploying to. If the `namespace` is not defined, will align with experiment definition, or use current or default namespace if namespace is not specified in experiment definition. | Optional |
+
 
 ### Return type
 
@@ -55,10 +48,10 @@ Get Experiment in the specified namespace
 
 ### Parameters
 
-| Name      | Type | Description                                                                                | Notes    |
-| --------- | ---- | ------------------------------------------------------------------------------------------ | -------- |
-| name      | str  | Experiment name. If the `name` is not specified, will get all Experiment in the namespace. | Optional |
-| namespace | str  | Experiment namespace. Defaults to current or default namespace.                            | Optional |
+| Name | Type | Description | Notes |
+| --- | --- | --- | --- |
+| name | str | Experiment name. If the `name` is not specified, will get all experiments in the namespace. | Optional. |
+| namespace | str | Experiment's namespace. Defaults to current or default namespace. | Optional |
 
 ### Return type
 
