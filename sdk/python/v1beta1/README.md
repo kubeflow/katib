@@ -36,11 +36,11 @@ Our SDK is located in [`kubeflow-katib` PyPi package](https://pypi.org/project/k
 If you want to release new SDK version with updated API you have to ask anyone from
 [OWNERS](https://github.com/kubeflow/katib/blob/master/OWNERS) file to follow these steps:
 
-- Update version in [`setup.py`](https://github.com/kubeflow/katib/blob/master/sdk/python/v1beta1/setup.py#L22).
+- Update version in [`setup.py`](https://github.com/kubeflow/katib/blob/master/sdk/python/v1beta1/setup.py#L22)
 
-- Generate distributive packages: `python3 setup.py sdist bdist_wheel`.
+- Generate distributive packages: `python3 setup.py sdist bdist_wheel`
 
-- Upload package to PyPi: `twine upload dist/*`.
+- Upload package to PyPi: `twine upload dist/*`
 
 ## Getting Started
 
@@ -56,18 +56,18 @@ TODO: Add examples for v1beta1.
 | [KatibClient][client] | [list_experiments][list_e]            | List all Experiments with status                                         |
 | [KatibClient][client] | [get_experiment_status][get_status]   | Get Experiment status                                                    |
 | [KatibClient][client] | [is_experiment_succeeded](is_suc)     | Check if Experiment status is Succeeded                                  |
-| [KatibClient][client] | [list_trials](list_t)                 | List all trials of specified Experiment                                  |
+| [KatibClient][client] | [list_trials](list_t)                 | List all Trials of specified Experiment                                  |
 | [KatibClient][client] | [get_optimal_hyperparameters](opt_hp) | Get currentOptimalTrial with parameterAssignments of an Experiment       |
 
-[client]: (docs/KatibClient.md)
-[create]: (docs/KatibClient.md#create_experiment)
-[get_e]: (docs/KatibClient.md#get_experiment)
-[delete]: (docs/KatibClient.md#delete_experiment)
-[list_e]: (docs/KatibClient.md#list_experiments)
-[get_status]: (docs/KatibClient.md#get_experiment_status)
-[is_suc]: (docs/KatibClient.md#is_experiment_succeeded)
-[list_t]: (docs/KatibClient.md#list_trials)
-[opt_hp]: (docs/KatibClient.md#get_optimal_hyperparameters))
+[client]: docs/KatibClient.md
+[create]: docs/KatibClient.md#create_experiment
+[get_e]: docs/KatibClient.md#get_experiment
+[delete]: docs/KatibClient.md#delete_experiment
+[list_e]: docs/KatibClient.md#list_experiments
+[get_status]: docs/KatibClient.md#get_experiment_status
+[is_suc]: docs/KatibClient.md#is_experiment_succeeded
+[list_t]: docs/KatibClient.md#list_trials
+[opt_hp]: docs/KatibClient.md#get_optimal_hyperparameters
 
 ## Documentation For Models
 
