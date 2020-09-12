@@ -55,9 +55,9 @@ TODO: Add examples for v1beta1.
 | [KatibClient][client] | [delete_experiment][delete]           | Delete specified Experiment                                              |
 | [KatibClient][client] | [list_experiments][list_e]            | List all Experiments with status                                         |
 | [KatibClient][client] | [get_experiment_status][get_status]   | Get Experiment status                                                    |
-| [KatibClient][client] | [is_experiment_succeeded](is_suc)     | Check if Experiment status is Succeeded                                  |
-| [KatibClient][client] | [list_trials](list_t)                 | List all Trials of specified Experiment                                  |
-| [KatibClient][client] | [get_optimal_hyperparameters](opt_hp) | Get currentOptimalTrial with parameterAssignments of an Experiment       |
+| [KatibClient][client] | [is_experiment_succeeded][is_suc]     | Check if Experiment status is Succeeded                                  |
+| [KatibClient][client] | [list_trials][list_t]                 | List all Trials of specified Experiment                                  |
+| [KatibClient][client] | [get_optimal_hyperparameters][opt_hp] | Get currentOptimalTrial with parameterAssignments of an Experiment       |
 
 [client]: docs/KatibClient.md
 [create]: docs/KatibClient.md#create_experiment
