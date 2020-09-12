@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import multiprocessing
-import time
 
 from kubernetes import client, config
 
@@ -202,8 +201,8 @@ class KatibClient(object):
           %s\n" % e)
         except Exception as e:
             raise RuntimeError(
-                "There was a problem to get experiment {0} in namespace {1}. Exception: \
-          {2} ".format(name, namespace, e))
+                "There was a problem to get experiments in namespace {1}. Exception: \
+          {2} ".format(namespace, e))
         return result
 
     def get_experiment_status(self, name, namespace=None):
@@ -271,12 +270,12 @@ class KatibClient(object):
           {2} ".format(name, namespace, e))
         return result
 
-    def get_optimal_hyperparmeters(self, name=None, namespace=None):
+    def get_optimal_hyperparameters(self, name=None, namespace=None):
         """
-        Get status, currentOptimalTrial with paramaterAssignments
+        Get status, currentOptimalTrial with parameterAssignments
         :param name: existing experiment name
         :param namespace: defaults to current or default namespace
-        :return: dict with status, currentOptimalTrial with paramaterAssignments of an experiment
+        :return: dict with status, currentOptimalTrial with parameterAssignments of an experiment
         """
         if namespace is None:
             namespace = utils.get_default_target_namespace()
@@ -287,4 +286,3 @@ class KatibClient(object):
             "status", {}).get("currentOptimalTrial")
 
         return result
-
