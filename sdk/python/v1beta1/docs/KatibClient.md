@@ -50,7 +50,7 @@ Get Experiment in the specified namespace
 
 | Name | Type | Description | Notes |
 | --- | --- | --- | --- |
-| name | str | Experiment name. If the `name` is not specified, will get all experiments in the namespace. | Optional. |
+| name | str | Experiment name. If the `name` is not specified, will get all experiments in the namespace. | Optional |
 | namespace | str | Experiment's namespace. Defaults to current or default namespace. | Optional |
 
 ### Return type
