@@ -14,16 +14,14 @@
 
 import os
 
-# Katib K8S constants
-EXPERIMENT_GROUP = 'kubeflow.org'
-EXPERIMENT_KIND = 'experiment'
-EXPERIMENT_PLURAL = 'experiments'
-EXPERIMENT_VERSION = os.environ.get('EXPERIMENT_VERSION', 'v1beta1')
-EXPERIMENT_LOGLEVEL = os.environ.get('EXPERIMENT_LOGLEVEL', 'INFO').upper()
+# Global CRD version
+KATIB_VERSION = os.environ.get('EXPERIMENT_VERSION', 'v1beta1')
 
-TRIAL_KIND = 'trial'
+# Katib K8S constants
+KUBEFLOW_GROUP = 'kubeflow.org'
+EXPERIMENT_PLURAL = 'experiments'
+SUGGESTION_PLURAL = 'suggestions'
 TRIAL_PLURAL = 'trials'
-TRIAL_VERSION = os.environ.get('EXPERIMENT_VERSION', 'v1beta1')
 
 # How long to wait in seconds for requests to the ApiServer
 APISERVER_TIMEOUT = 120
