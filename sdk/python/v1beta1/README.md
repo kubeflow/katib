@@ -31,7 +31,7 @@ python setup.py install --user
 
 ## Getting Started
 
-TODO: Add examples for v1beta1.
+Please follow the [examples](examples) to learn more about Katib SDK.
 
 ## Documentation for API Endpoints
 
