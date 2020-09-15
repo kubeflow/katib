@@ -14,6 +14,16 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
             for rule in rules:
                 line = rule(line)
             lines.append(line)
+
+    # Add Katib client to init file
+    if (output_file == "sdk/python/v1beta1/kubeflow/katib/__init__.py" or
+            output_file == "sdk/python/v1alpha3/kubeflow/katib/__init__.py"):
+        lines.append("\n")
+        lines.append("# Import Katib API client")
+        lines.append("\n")
+        lines.append("from kubeflow.katib.api.katib_client import KatibClient")
+        lines.append("\n")
+
     with open(output_file, 'w') as f:
         f.writelines(lines)
 
