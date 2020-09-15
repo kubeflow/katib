@@ -46,7 +46,6 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/trial/managerclient"
 	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	jobv1beta1 "github.com/kubeflow/katib/pkg/job/v1beta1"
 	"github.com/spf13/viper"
 )
@@ -330,14 +329,6 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 	apiVersion := desiredJob.GetAPIVersion()
 	kind := desiredJob.GetKind()
 	gvk := schema.FromAPIVersionAndKind(apiVersion, kind)
-
-	// Add annotation to desired Job to disable istio sidecar
-	// TODO (andreyvelich): Can be removed after custom CRD implementation
-	err = util.TrainingJobAnnotations(desiredJob)
-	if err != nil {
-		logger.Error(err, "TrainingJobAnnotations error")
-		return nil, err
-	}
 
 	deployedJob := &unstructured.Unstructured{}
 	deployedJob.SetGroupVersionKind(gvk)
