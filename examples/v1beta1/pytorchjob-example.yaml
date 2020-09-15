@@ -1,7 +1,7 @@
 apiVersion: "kubeflow.org/v1beta1"
 kind: Experiment
 metadata:
-  namespace: kubeflow
+  namespace: anonymous
   name: pytorchjob-example
 spec:
   parallelTrialCount: 3
@@ -42,6 +42,9 @@ spec:
             replicas: 1
             restartPolicy: OnFailure
             template:
+              metadata:
+                annotations:
+                  sidecar.istio.io/inject: "false"
               spec:
                 containers:
                   - name: pytorch
@@ -56,6 +59,9 @@ spec:
             replicas: 2
             restartPolicy: OnFailure
             template:
+              metadata:
+                annotations:
+                  sidecar.istio.io/inject: "false"
               spec:
                 containers:
                   - name: pytorch
