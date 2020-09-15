@@ -14,6 +14,16 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
             for rule in rules:
                 line = rule(line)
             lines.append(line)
+
+    # Add Katib client to init file
+    if (output_file == "sdk/python/v1beta1/kubeflow/katib/__init__.py" or
+            output_file == "sdk/python/v1alpha3/kubeflow/katib/__init__.py"):
+        lines.append("\n")
+        lines.append("# Import Katib API client")
+        lines.append("\n")
+        lines.append("from kubeflow.katib.api.katib_client import KatibClient")
+        lines.append("\n")
+
     with open(output_file, 'w') as f:
         f.writelines(lines)
 
@@ -56,9 +66,11 @@ def update_python_sdk(src, dest, versions=('v1alpha3', 'v1beta1')):
                 continue
             _rewrite_helper(in_file, out_file, rewrite_rules)
 
-    # update doc for API Endpoints and Models README.md
+    # Update doc for Models README.md
     buffer = []
     update_buffer = []
+
+    # Get data from generated doc
     with open(os.path.join(src, 'README.md'), 'r') as src_f:
         anchor = 0
         for line in src_f.readlines():
@@ -71,7 +83,14 @@ def update_python_sdk(src, dest, versions=('v1alpha3', 'v1beta1')):
                 continue
             if anchor == 2:
                 break
+            # Remove leading space from the list
+            if len(line) > 0:
+                line = line.lstrip(" ")
             update_buffer.append(line)
+    # Remove latest redundant newline
+    update_buffer = update_buffer[:-1]
+
+    # Update README with new models
     with open(os.path.join(dest, 'README.md'), 'r') as dest_f:
         anchor = 0
         for line in dest_f.readlines():
@@ -87,7 +106,7 @@ def update_python_sdk(src, dest, versions=('v1alpha3', 'v1beta1')):
     with open(os.path.join(dest, 'README.md'), 'w') as dest_f:
         dest_f.writelines(buffer)
 
-    # clear working dictionary
+    # Clear working dictionary
     shutil.rmtree(src)
 
 

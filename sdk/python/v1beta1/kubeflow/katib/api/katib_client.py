@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import multiprocessing
-import time
 
 from kubernetes import client, config
 
@@ -68,8 +67,8 @@ class KatibClient(object):
             namespace = utils.set_katib_namespace(exp_object)
         try:
             outputs = self.api_instance.create_namespaced_custom_object(
-                constants.EXPERIMENT_GROUP,
-                constants.EXPERIMENT_VERSION,
+                constants.KUBEFLOW_GROUP,
+                constants.KATIB_VERSION,
                 namespace,
                 constants.EXPERIMENT_PLURAL,
                 exp_object)
@@ -81,11 +80,11 @@ class KatibClient(object):
         if self._is_ipython():
             if self.in_cluster:
                 import IPython
-                html = \
-                    ('Katib Experiment link <a href="/_/katib/#/katib/hp_monitor/%s/%s" target="_blank">here</a>'
-                     % (namespace, exp_object.metadata.name))
-                IPython.display.display(IPython.display.HTML(html))
-        self.in_cluster = None
+                IPython.display.display(IPython.display.HTML(
+                    'Katib Experiment {} '
+                    'link <a href="/_/katib/#/katib/hp_monitor/{}/{}" target="_blank">here</a>'.format(
+                        exp_object.metadata.name, namespace, exp_object.metadata.name)
+                ))
         return outputs
 
     def get_experiment(self, name=None, namespace=None):
@@ -100,8 +99,8 @@ class KatibClient(object):
 
         if name:
             thread = self.api_instance.get_namespaced_custom_object(
-                constants.EXPERIMENT_GROUP,
-                constants.EXPERIMENT_VERSION,
+                constants.KUBEFLOW_GROUP,
+                constants.KATIB_VERSION,
                 namespace,
                 constants.EXPERIMENT_PLURAL,
                 name,
@@ -123,8 +122,8 @@ class KatibClient(object):
 
         else:
             thread = self.api_instance.list_namespaced_custom_object(
-                constants.EXPERIMENT_GROUP,
-                constants.EXPERIMENT_VERSION,
+                constants.KUBEFLOW_GROUP,
+                constants.KATIB_VERSION,
                 namespace,
                 constants.EXPERIMENT_PLURAL,
                 async_req=True)
@@ -145,6 +144,65 @@ class KatibClient(object):
 
         return katibexp
 
+    def get_suggestion(self, name=None, namespace=None):
+        """
+        Get experiment's suggestion.
+        If name is empty returns all suggestion in requested namespace.
+        :param name: existing suggestion name optional
+        :param namespace: defaults to current or default namespace
+        :return: suggestion dict
+        """
+
+        if namespace is None:
+            namespace = utils.get_default_target_namespace()
+
+        if name:
+            thread = self.api_instance.get_namespaced_custom_object(
+                constants.KUBEFLOW_GROUP,
+                constants.KATIB_VERSION,
+                namespace,
+                constants.SUGGESTION_PLURAL,
+                name,
+                async_req=True)
+
+            katib_suggestion = None
+            try:
+                katib_suggestion = thread.get(constants.APISERVER_TIMEOUT)
+            except multiprocessing.TimeoutError:
+                raise RuntimeError("Timeout trying to get Katib suggestion")
+            except client.rest.ApiException as e:
+                raise RuntimeError(
+                    "Exception when calling CustomObjectsApi->get_namespaced_custom_object:\
+          %s\n" % e)
+            except Exception as e:
+                raise RuntimeError(
+                    "There was a problem to get suggestion {0} in namespace {1}. Exception: \
+          {2} ".format(name, namespace, e))
+
+        else:
+            thread = self.api_instance.list_namespaced_custom_object(
+                constants.KUBEFLOW_GROUP,
+                constants.KATIB_VERSION,
+                namespace,
+                constants.SUGGESTION_PLURAL,
+                async_req=True)
+
+            katib_suggestion = None
+            try:
+                katib_suggestion = thread.get(constants.APISERVER_TIMEOUT)
+            except multiprocessing.TimeoutError:
+                raise RuntimeError("Timeout trying to get Katib suggestion")
+            except client.rest.ApiException as e:
+                raise RuntimeError(
+                    "Exception when calling CustomObjectsApi->list_namespaced_custom_object:\
+          %s\n" % e)
+            except Exception as e:
+                raise RuntimeError(
+                    "There was a problem to get suggestions in namespace {0}. \
+          Exception: {1} ".format(namespace, e))
+
+        return katib_suggestion
+
     def delete_experiment(self, name, namespace=None):
         """
         Delete experiment
@@ -157,8 +215,8 @@ class KatibClient(object):
 
         try:
             return self.api_instance.delete_namespaced_custom_object(
-                constants.EXPERIMENT_GROUP,
-                constants.EXPERIMENT_VERSION,
+                constants.KUBEFLOW_GROUP,
+                constants.KATIB_VERSION,
                 namespace,
                 constants.EXPERIMENT_PLURAL,
                 name,
@@ -178,8 +236,8 @@ class KatibClient(object):
             namespace = utils.get_default_target_namespace()
 
         thread = self.api_instance.list_namespaced_custom_object(
-            constants.EXPERIMENT_GROUP,
-            constants.EXPERIMENT_VERSION,
+            constants.KUBEFLOW_GROUP,
+            constants.KATIB_VERSION,
             namespace=namespace,
             plural=constants.EXPERIMENT_PLURAL,
             async_req=True)
@@ -202,8 +260,8 @@ class KatibClient(object):
           %s\n" % e)
         except Exception as e:
             raise RuntimeError(
-                "There was a problem to get experiment {0} in namespace {1}. Exception: \
-          {2} ".format(name, namespace, e))
+                "There was a problem to get experiments in namespace {1}. Exception: \
+          {2} ".format(namespace, e))
         return result
 
     def get_experiment_status(self, name, namespace=None):
@@ -242,8 +300,8 @@ class KatibClient(object):
             namespace = utils.get_default_target_namespace()
 
         thread = self.api_instance.list_namespaced_custom_object(
-            constants.EXPERIMENT_GROUP,
-            constants.EXPERIMENT_VERSION,
+            constants.KUBEFLOW_GROUP,
+            constants.KATIB_VERSION,
             namespace=namespace,
             plural=constants.TRIAL_PLURAL,
             async_req=True)
@@ -271,12 +329,12 @@ class KatibClient(object):
           {2} ".format(name, namespace, e))
         return result
 
-    def get_optimal_hyperparmeters(self, name=None, namespace=None):
+    def get_optimal_hyperparameters(self, name=None, namespace=None):
         """
-        Get status, currentOptimalTrial with paramaterAssignments
+        Get status, currentOptimalTrial with parameterAssignments
         :param name: existing experiment name
         :param namespace: defaults to current or default namespace
-        :return: dict with status, currentOptimalTrial with paramaterAssignments of an experiment
+        :return: dict with status, currentOptimalTrial with parameterAssignments of an experiment
         """
         if namespace is None:
             namespace = utils.get_default_target_namespace()
@@ -287,4 +345,3 @@ class KatibClient(object):
             "status", {}).get("currentOptimalTrial")
 
         return result
-

@@ -59,3 +59,6 @@ from kubeflow.katib.models.v1alpha3_trial_list import V1alpha3TrialList
 from kubeflow.katib.models.v1alpha3_trial_spec import V1alpha3TrialSpec
 from kubeflow.katib.models.v1alpha3_trial_status import V1alpha3TrialStatus
 from kubeflow.katib.models.v1alpha3_trial_template import V1alpha3TrialTemplate
+
+# Import Katib API client
+from kubeflow.katib.api.katib_client import KatibClient

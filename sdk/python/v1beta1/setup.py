@@ -15,38 +15,38 @@
 import setuptools
 
 with open('requirements.txt') as f:
-  REQUIRES = f.readlines()
+    REQUIRES = f.readlines()
 
 setuptools.setup(
-  name='kubeflow-katib',
-  version='0.0.3',
-  author="Kubeflow Authors",
-  author_email='premnath.vel@gmail.com',
-  license="Apache License Version 2.0",
-  url="https://github.com/kubeflow/katib/tree/master/sdk/python/v1beta1",
-  description="Katib Python SDK for APIVersion v1beta1",
-  long_description="Katib Python SDK for APIVersion v1beta1",
-  packages=setuptools.find_packages(
-    include=("kubeflow*")),
-  package_data={},
-  include_package_data=False,
-  zip_safe=False,
-  classifiers=[
-    'Intended Audience :: Developers',
-    'Intended Audience :: Education',
-    'Intended Audience :: Science/Research',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.6',
-    'Programming Language :: Python :: 3.7',
-    "License :: OSI Approved :: Apache Software License",
-    "Operating System :: OS Independent",
-    'Topic :: Scientific/Engineering',
-    'Topic :: Scientific/Engineering :: Artificial Intelligence',
-    'Topic :: Software Development',
-    'Topic :: Software Development :: Libraries',
-    'Topic :: Software Development :: Libraries :: Python Modules',
-  ],
-  install_requires=REQUIRES
+    name='kubeflow-katib',
+    version='0.0.6',
+    author="Kubeflow Authors",
+    author_email='premnath.vel@gmail.com',
+    license="Apache License Version 2.0",
+    url="https://github.com/kubeflow/katib/tree/master/sdk/python/v1beta1",
+    description="Katib Python SDK for APIVersion v1beta1",
+    long_description="Katib Python SDK for APIVersion v1beta1",
+    packages=setuptools.find_packages(
+        include=("kubeflow*")),
+    package_data={},
+    include_package_data=False,
+    zip_safe=False,
+    classifiers=[
+        'Intended Audience :: Developers',
+        'Intended Audience :: Education',
+        'Intended Audience :: Science/Research',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: OS Independent",
+        'Topic :: Scientific/Engineering',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence',
+        'Topic :: Software Development',
+        'Topic :: Software Development :: Libraries',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ],
+    install_requires=REQUIRES
 )
