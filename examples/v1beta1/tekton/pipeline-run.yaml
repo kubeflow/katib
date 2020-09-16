@@ -1,9 +1,8 @@
-# This examples shows how you can use Tekton Pipelines in Katib.
-# PipelineRun shows how you can transfer parameters from one Task to another and run HP job.
+# This examples shows how you can use Tekton Pipelines in Katib, transfer parameters from one Task to another and run HP job.
 # It uses simple random algorithm and tunes only learning rate.
 # Pipelines contains 2 Tasks, first is data-preprocessing second is model-training.
-# First Task shows how you can prepare your training data (simply divide number of training examples) before running HP job.
-# Number of examples is transferred to the second Task.
+# First Task shows how you can prepare your training data (here: simply divide number of training examples) before running HP job.
+# Number of training examples is transferred to the second Task.
 # Second Task is the actual training which metrics collector sidecar is injected.
 # Note that for this example Tekton controller's nop image must be equal to StdOut metrics collector image.
 apiVersion: "kubeflow.org/v1beta1"
@@ -99,6 +98,5 @@ spec:
                     command:
                       - "python3"
                       - "/opt/mxnet-mnist/mnist.py"
-                      - "--batch-size=64"
                       - "--num-examples=$(params.num-examples)"
                       - "--lr=$(params.lr)"
