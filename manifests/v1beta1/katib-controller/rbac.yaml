@@ -73,6 +73,12 @@ rules:
       - mpijobs
     verbs:
       - "*"
+  - apiGroups:
+      - tekton.dev
+    resources:
+      - pipelineruns
+    verbs:
+      - "*"
 ---
 apiVersion: v1
 kind: ServiceAccount

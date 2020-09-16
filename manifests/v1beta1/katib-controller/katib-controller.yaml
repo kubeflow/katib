@@ -26,6 +26,7 @@ spec:
           args:
             - "--webhook-port=8443"
             - "--trial-resources=MPIJob.v1.kubeflow.org"
+            - "--trial-resources=PipelineRun.v1beta1.tekton.dev"
           ports:
             - containerPort: 8443
               name: webhook
