@@ -257,6 +257,6 @@ func setResourceRequirements(configResource corev1.ResourceRequirements) corev1.
 	if diskLimit.Sign() == -1 && diskRequest.Sign() == -1 {
 		delete(configResource.Limits, corev1.ResourceEphemeralStorage)
 		delete(configResource.Requests, corev1.ResourceEphemeralStorage)
-	}	
+	}
 	return configResource
 }

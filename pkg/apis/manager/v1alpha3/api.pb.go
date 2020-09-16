@@ -1032,10 +1032,12 @@ func (m *ValidateAlgorithmSettingsRequest) GetExperiment() *Experiment {
 type ValidateAlgorithmSettingsReply struct {
 }
 
-func (m *ValidateAlgorithmSettingsReply) Reset()                    { *m = ValidateAlgorithmSettingsReply{} }
-func (m *ValidateAlgorithmSettingsReply) String() string            { return proto.CompactTextString(m) }
-func (*ValidateAlgorithmSettingsReply) ProtoMessage()               {}
-func (*ValidateAlgorithmSettingsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{28} }
+func (m *ValidateAlgorithmSettingsReply) Reset()         { *m = ValidateAlgorithmSettingsReply{} }
+func (m *ValidateAlgorithmSettingsReply) String() string { return proto.CompactTextString(m) }
+func (*ValidateAlgorithmSettingsReply) ProtoMessage()    {}
+func (*ValidateAlgorithmSettingsReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{28}
+}
 
 func init() {
 	proto.RegisterType((*FeasibleSpace)(nil), "api.v1.alpha3.FeasibleSpace")
