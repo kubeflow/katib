@@ -1,0 +1,104 @@
+# This examples shows how you can use Tekton Pipelines in Katib.
+# PipelineRun shows how you can transfer parameters from one Task to another and run HP job.
+# It uses simple random algorithm and tunes only learning rate.
+# Pipelines contains 2 Tasks, first is data-preprocessing second is model-training.
+# First Task shows how you can prepare your training data (simply divide number of training examples) before running HP job.
+# Number of examples is transferred to the second Task.
+# Second Task is the actual training which metrics collector sidecar is injected.
+# Note that for this example Tekton controller's nop image must be equal to StdOut metrics collector image.
+apiVersion: "kubeflow.org/v1beta1"
+kind: Experiment
+metadata:
+  namespace: kubeflow
+  name: tekton-pipeline-run
+spec:
+  objective:
+    type: maximize
+    goal: 0.99
+    objectiveMetricName: Validation-accuracy
+    additionalMetricNames:
+      - Train-accuracy
+  algorithm:
+    algorithmName: random
+  parallelTrialCount: 2
+  maxTrialCount: 4
+  maxFailedTrialCount: 3
+  parameters:
+    - name: lr
+      parameterType: double
+      feasibleSpace:
+        min: "0.01"
+        max: "0.03"
+  trialTemplate:
+    retain: true
+    primaryPodLabels:
+      tekton.dev/pipelineTask: model-training
+    primaryContainerName: step-model-training
+    successCondition: status.conditions.#(type=="Succeeded")#|#(status=="True")#
+    failureCondition: status.conditions.#(type=="Succeeded")#|#(status=="False")#
+    trialParameters:
+      - name: learningRate
+        description: Learning rate for the training model
+        reference: lr
+    trialSpec:
+      apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      spec:
+        params:
+          - name: lr
+            value: ${trialParameters.learningRate}
+          - name: num-examples-init
+            value: "60000"
+        pipelineSpec:
+          params:
+            - name: lr
+              description: Learning rate for the training model
+            - name: num-examples-init
+              description: Initial value for number of training examples
+          tasks:
+            - name: data-preprocessing
+              params:
+                - name: num-examples-pre
+                  value: $(params.num-examples-init)
+              taskSpec:
+                metadata:
+                  annotations:
+                    sidecar.istio.io/inject: "false"
+                params:
+                  - name: num-examples-pre
+                    description: Number of training examples before optimization
+                results:
+                  - name: num-examples-post
+                    description: Number of training examples after optimization
+                steps:
+                  - name: num-examples-optimize
+                    image: python:alpine3.6
+                    command:
+                      - sh
+                      - -c
+                    args:
+                      - python3 -c "import random; print($(params.num-examples-pre)//random.randint(10,100),end='')" | tee $(results.num-examples-post.path)
+            - name: model-training
+              params:
+                - name: lr
+                  value: $(params.lr)
+                - name: num-examples
+                  value: $(tasks.data-preprocessing.results.num-examples-post)
+              taskSpec:
+                metadata:
+                  annotations:
+                    sidecar.istio.io/inject: "false"
+                params:
+                  - name: lr
+                    description: Learning rate for the training model
+                  - name: num-examples
+                    description: Number of training examples
+                steps:
+                  - name: model-training
+                    image: docker.io/kubeflowkatib/mxnet-mnist
+                    command:
+                      - "python3"
+                      - "/opt/mxnet-mnist/mnist.py"
+                      - "--batch-size=64"
+                      - "--num-examples=$(params.num-examples)"
+                      - "--lr=$(params.lr)"
