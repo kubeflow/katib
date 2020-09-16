@@ -19,7 +19,7 @@ jobs:
         - goveralls -coverprofile=coverage.out
     - name: "Prettier frontend check"
       language: node_js
-      node_js: "10.13.0"
+      node_js: "12.18.1"
       install:
         - npm install --global prettier@1.19.1
       script:
