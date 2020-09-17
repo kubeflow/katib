@@ -25,6 +25,7 @@ spec:
           command: ["./katib-controller"]
           args:
             - "--webhook-port=8443"
+            - "--trial-resources=MPIJob.v1.kubeflow.org"
           ports:
             - containerPort: 8443
               name: webhook

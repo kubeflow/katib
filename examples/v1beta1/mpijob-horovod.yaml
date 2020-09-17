@@ -1,0 +1,95 @@
+apiVersion: "kubeflow.org/v1beta1"
+kind: Experiment
+metadata:
+  namespace: kubeflow
+  name: mpi-horovod-mnist
+spec:
+  objective:
+    type: minimize
+    goal: 0.01
+    objectiveMetricName: loss
+  algorithm:
+    algorithmName: random
+  parallelTrialCount: 2
+  maxTrialCount: 6
+  maxFailedTrialCount: 3
+  parameters:
+    - name: lr
+      parameterType: double
+      feasibleSpace:
+        min: "0.001"
+        max: "0.003"
+    - name: num-steps
+      parameterType: int
+      feasibleSpace:
+        min: "50"
+        max: "150"
+        step: "10"
+  trialTemplate:
+    primaryPodLabels:
+      mpi-job-role: launcher
+    primaryContainerName: mpi-launcher
+    successCondition: status.conditions.#(type=="Succeeded")#|#(status=="True")#
+    failureCondition: status.conditions.#(type=="Failed")#|#(status=="True")#
+    trialParameters:
+      - name: learningRate
+        description: Learning rate for the training model
+        reference: lr
+      - name: numberSteps
+        description: Number of training steps
+        reference: num-steps
+    trialSpec:
+      apiVersion: kubeflow.org/v1
+      kind: MPIJob
+      spec:
+        slotsPerWorker: 1
+        cleanPodPolicy: Running
+        mpiReplicaSpecs:
+          Launcher:
+            replicas: 1
+            template:
+              spec:
+                containers:
+                  - image: docker.io/andreyvelichkevich/mpi-horovod
+                    name: mpi-launcher
+                    command:
+                      - mpirun
+                    args:
+                      - -np
+                      - "2"
+                      - --allow-run-as-root
+                      - -bind-to
+                      - none
+                      - -map-by
+                      - slot
+                      - -x
+                      - LD_LIBRARY_PATH
+                      - -x
+                      - PATH
+                      - -mca
+                      - pml
+                      - ob1
+                      - -mca
+                      - btl
+                      - ^openib
+                      - python
+                      - /examples/tensorflow_mnist.py
+                      - --lr
+                      - ${trialParameters.learningRate}
+                      - --num-steps
+                      - ${trialParameters.numberSteps}
+                    resources:
+                      limits:
+                        cpu: 500m
+                        memory: 2Gi
+          Worker:
+            replicas: 2
+            template:
+              spec:
+                containers:
+                  - image: docker.io/andreyvelichkevich/mpi-horovod
+                    name: mpi-worker
+                    resources:
+                      limits:
+                        cpu: 500m
+                        memory: 4Gi
