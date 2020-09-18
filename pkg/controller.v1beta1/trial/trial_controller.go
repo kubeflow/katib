@@ -58,6 +58,8 @@ const (
 
 var (
 	log = logf.Log.WithName(ControllerName)
+	// errMetricsNotReported is the error when Trial job is succeeded but metrics are not reported yet
+	errMetricsNotReported = fmt.Errorf("Metrics are not reported yet")
 )
 
 // Add creates a new Trial Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
@@ -175,12 +177,6 @@ type ReconcileTrial struct {
 	collector *trialutil.TrialsCollector
 }
 
-// Map which contains number of requeuing for each trial if observation logs are not available
-// That is needed if Job is succeeded but metrics are not reported yet
-// Key = Trial name, value = requeue count
-var trialRequeueCount = make(map[string]int)
-var maxRequeueCount = 5
-
 // Reconcile reads that state of the cluster for a Trial object and makes changes based on the state read
 // and what is in the Trial.Spec
 // +kubebuilder:rbac:groups=trials.kubeflow.org,resources=trials,verbs=get;list;watch;create;update;patch;delete
@@ -220,6 +216,11 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 	} else {
 		err := r.reconcileTrial(instance)
 		if err != nil {
+			if err == errMetricsNotReported {
+				return reconcile.Result{
+					RequeueAfter: time.Second * 1,
+				}, nil
+			}
 			logger.Error(err, "Reconcile trial error")
 			r.recorder.Eventf(instance,
 				corev1.EventTypeWarning, ReconcileFailedReason,
@@ -235,24 +236,6 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 			logger.Info("Update trial instance status failed, reconcile requeued", "err", err)
 			return reconcile.Result{
 				Requeue: true,
-			}, nil
-		}
-	}
-
-	// Restart Reconcile for maxRequeueCount times
-	if instance.IsMetricsUnavailable() {
-
-		count, ok := trialRequeueCount[instance.GetName()]
-		if !ok {
-			trialRequeueCount[instance.GetName()] = 1
-			logger.Info("Trial metrics are not available, reconcile requeued", "max requeue count", maxRequeueCount)
-		} else {
-			trialRequeueCount[instance.GetName()]++
-		}
-
-		if count <= maxRequeueCount {
-			return reconcile.Result{
-				RequeueAfter: time.Second * 1,
 			}, nil
 		}
 	}
@@ -294,6 +277,11 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 					logger.Error(err, "Update trial status observation error")
 					return err
 				}
+			}
+			// If observation is empty metrics collector doesn't finish
+			if jobStatus.Condition == trialutil.JobSucceeded && instance.Status.Observation == nil {
+				logger.Info("Trial job is succeeded but metrics are not reported, reconcile requeued")
+				return errMetricsNotReported
 			}
 
 			// Update Trial job status only

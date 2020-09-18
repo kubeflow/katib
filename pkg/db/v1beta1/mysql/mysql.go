@@ -92,6 +92,9 @@ func NewDBInterface() (common.KatibDBInterface, error) {
 }
 
 func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta1.ObservationLog) error {
+	fmt.Println("--------------------------")
+	fmt.Println(trialName)
+	fmt.Println(observationLog)
 	sqlQuery := "INSERT INTO observation_logs (trial_name, time, metric_name, value) VALUES "
 	values := []interface{}{}
 
