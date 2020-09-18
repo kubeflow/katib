@@ -32,6 +32,9 @@ type ExperimentSpec struct {
 	// Describes the suggestion algorithm.
 	Algorithm *common.AlgorithmSpec `json:"algorithm,omitempty"`
 
+	// Describes the early stopping algorithm.
+	EarlyStopping *common.EarlyStoppingSpec `json:"earlyStopping,omitempty"`
+
 	// Template for each run of the trial.
 	TrialTemplate *TrialTemplate `json:"trialTemplate,omitempty"`
 
@@ -52,9 +55,6 @@ type ExperimentSpec struct {
 
 	// Describes resuming policy which usually take effect after experiment terminated.
 	ResumePolicy ResumePolicyType `json:"resumePolicy,omitempty"`
-
-	// TODO - Other fields, exact format is TBD. Will add these back during implementation.
-	// - Early stopping
 }
 
 type ExperimentStatus struct {

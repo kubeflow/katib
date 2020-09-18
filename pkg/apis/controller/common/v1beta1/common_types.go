@@ -24,7 +24,6 @@ type AlgorithmSpec struct {
 	AlgorithmName string `json:"algorithmName,omitempty"`
 	// Key-value pairs representing settings for suggestion algorithms.
 	AlgorithmSettings []AlgorithmSetting `json:"algorithmSettings,omitempty"`
-	EarlyStopping     *EarlyStoppingSpec `json:"earlyStopping,omitempty"`
 }
 
 type AlgorithmSetting struct {
@@ -32,16 +31,35 @@ type AlgorithmSetting struct {
 	Value string `json:"value,omitempty"`
 }
 
+// EarlyStoppingSpec describes early stopping algorithm
 // +k8s:deepcopy-gen=true
 type EarlyStoppingSpec struct {
-	EarlyStoppingAlgorithmName string                 `json:"earlyStoppingAlgorithmName,omitempty"`
-	EarlyStoppingSettings      []EarlyStoppingSetting `json:"earlyStoppingSettings"`
+	// Early stopping algorithm name
+	EarlyStoppingAlgorithmName string `json:"earlyStoppingAlgorithmName,omitempty"`
+
+	// Key-value pairs representing settings for early stopping algorithm.
+	EarlyStoppingSettings []EarlyStoppingSetting `json:"earlyStoppingSettings,omitempty"`
 }
 
+// EarlyStoppingSetting represents key-value pair for early stopping setting
 type EarlyStoppingSetting struct {
 	Name  string `json:"name,omitempty"`
 	Value string `json:"value,omitempty"`
 }
+
+type EarlyStoppingRule struct {
+	Name       string         `json:"name,omitempty"`
+	Value      string         `json:"value,omitempty"`
+	Comparison ComparisonType `json:"comparison,omitempty"`
+}
+
+type ComparisonType string
+
+const (
+	Equal   ComparisonType = "equal"
+	Less    ComparisonType = "less"
+	Greater ComparisonType = "greater"
+)
 
 // +k8s:deepcopy-gen=true
 type ObjectiveSpec struct {
