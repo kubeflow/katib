@@ -53,7 +53,7 @@ spec:
                   sidecar.istio.io/inject: "false"
               spec:
                 containers:
-                  - image: docker.io/kubeflowkatib/horovod-mnist
+                  - image: docker.io/kubeflow/mpi-horovod-mnist
                     name: mpi-launcher
                     command:
                       - mpirun
@@ -93,7 +93,7 @@ spec:
                   sidecar.istio.io/inject: "false"
               spec:
                 containers:
-                  - image: docker.io/kubeflowkatib/horovod-mnist
+                  - image: docker.io/kubeflow/mpi-horovod-mnist
                     name: mpi-worker
                     resources:
                       limits:

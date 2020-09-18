@@ -393,5 +393,5 @@ docker.io/inaccel/jupyter:lab
 - MPI operator horovod mnist example, [source](https://github.com/kubeflow/mpi-operator/tree/master/examples/horovod).
 
 ```
-docker.io/kubeflowkatib/horovod-mnist
+docker.io/kubeflow/mpi-horovod-mnist
 ```
