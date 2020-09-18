@@ -44,11 +44,56 @@
         }
       }
     },
+    "beta1ComparisonType": {
+      "type": "string",
+      "enum": [
+        "EQUAL",
+        "LESS",
+        "GREATER"
+      ],
+      "default": "EQUAL"
+    },
     "beta1DeleteObservationLogReply": {
       "type": "object"
     },
+    "beta1EarlyStoppingRule": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "comparison": {
+          "$ref": "#/definitions/beta1ComparisonType"
+        }
+      }
+    },
     "beta1EarlyStoppingSpec": {
       "type": "object"
+    },
+    "beta1GetEarlyStoppingRulesReply": {
+      "type": "object",
+      "properties": {
+        "early_stopping_rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/beta1GetEarlyStoppingRulesReplyEarlyStoppingRules"
+          }
+        }
+      }
+    },
+    "beta1GetEarlyStoppingRulesReplyEarlyStoppingRules": {
+      "type": "object",
+      "properties": {
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/beta1EarlyStoppingRule"
+          }
+        }
+      }
     },
     "beta1GetObservationLogReply": {
       "type": "object",
@@ -69,6 +114,23 @@
         },
         "algorithm": {
           "$ref": "#/definitions/beta1AlgorithmSpec"
+        },
+        "early_stopping_rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/beta1GetSuggestionsReplyEarlyStoppingRules"
+          }
+        }
+      }
+    },
+    "beta1GetSuggestionsReplyEarlyStoppingRules": {
+      "type": "object",
+      "properties": {
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/beta1EarlyStoppingRule"
+          }
         }
       }
     },
@@ -128,6 +190,9 @@
       }
     },
     "beta1ReportObservationLogReply": {
+      "type": "object"
+    },
+    "beta1SetTrialStatusReply": {
       "type": "object"
     },
     "beta1ValidateAlgorithmSettingsReply": {

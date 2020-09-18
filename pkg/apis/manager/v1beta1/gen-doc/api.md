@@ -8,14 +8,19 @@
     - [AlgorithmSpec](#api.v1.beta1.AlgorithmSpec)
     - [DeleteObservationLogReply](#api.v1.beta1.DeleteObservationLogReply)
     - [DeleteObservationLogRequest](#api.v1.beta1.DeleteObservationLogRequest)
+    - [EarlyStoppingRule](#api.v1.beta1.EarlyStoppingRule)
     - [EarlyStoppingSpec](#api.v1.beta1.EarlyStoppingSpec)
     - [Experiment](#api.v1.beta1.Experiment)
     - [ExperimentSpec](#api.v1.beta1.ExperimentSpec)
     - [ExperimentSpec.ParameterSpecs](#api.v1.beta1.ExperimentSpec.ParameterSpecs)
     - [FeasibleSpace](#api.v1.beta1.FeasibleSpace)
+    - [GetEarlyStoppingRulesReply](#api.v1.beta1.GetEarlyStoppingRulesReply)
+    - [GetEarlyStoppingRulesReply.EarlyStoppingRules](#api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules)
+    - [GetEarlyStoppingRulesRequest](#api.v1.beta1.GetEarlyStoppingRulesRequest)
     - [GetObservationLogReply](#api.v1.beta1.GetObservationLogReply)
     - [GetObservationLogRequest](#api.v1.beta1.GetObservationLogRequest)
     - [GetSuggestionsReply](#api.v1.beta1.GetSuggestionsReply)
+    - [GetSuggestionsReply.EarlyStoppingRules](#api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules)
     - [GetSuggestionsReply.ParameterAssignments](#api.v1.beta1.GetSuggestionsReply.ParameterAssignments)
     - [GetSuggestionsRequest](#api.v1.beta1.GetSuggestionsRequest)
     - [GraphConfig](#api.v1.beta1.GraphConfig)
@@ -32,6 +37,8 @@
     - [ParameterSpec](#api.v1.beta1.ParameterSpec)
     - [ReportObservationLogReply](#api.v1.beta1.ReportObservationLogReply)
     - [ReportObservationLogRequest](#api.v1.beta1.ReportObservationLogRequest)
+    - [SetTrialStatusReply](#api.v1.beta1.SetTrialStatusReply)
+    - [SetTrialStatusRequest](#api.v1.beta1.SetTrialStatusRequest)
     - [Trial](#api.v1.beta1.Trial)
     - [TrialSpec](#api.v1.beta1.TrialSpec)
     - [TrialSpec.ParameterAssignments](#api.v1.beta1.TrialSpec.ParameterAssignments)
@@ -39,6 +46,7 @@
     - [ValidateAlgorithmSettingsReply](#api.v1.beta1.ValidateAlgorithmSettingsReply)
     - [ValidateAlgorithmSettingsRequest](#api.v1.beta1.ValidateAlgorithmSettingsRequest)
   
+    - [ComparisonType](#api.v1.beta1.ComparisonType)
     - [ObjectiveType](#api.v1.beta1.ObjectiveType)
     - [ParameterType](#api.v1.beta1.ParameterType)
     - [TrialStatus.TrialConditionType](#api.v1.beta1.TrialStatus.TrialConditionType)
@@ -110,6 +118,23 @@ Katib GRPC API v1beta1
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | trial_name | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="api.v1.beta1.EarlyStoppingRule"></a>
+
+### EarlyStoppingRule
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| name | [string](#string) |  |  |
+| value | [string](#string) |  |  |
+| comparison | [ComparisonType](#api.v1.beta1.ComparisonType) |  |  |
 
 
 
@@ -201,6 +226,52 @@ Discrete and Categorical type use List.
 
 
 
+<a name="api.v1.beta1.GetEarlyStoppingRulesReply"></a>
+
+### GetEarlyStoppingRulesReply
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| early_stopping_rules | [GetEarlyStoppingRulesReply.EarlyStoppingRules](#api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules) | repeated |  |
+
+
+
+
+
+
+<a name="api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules"></a>
+
+### GetEarlyStoppingRulesReply.EarlyStoppingRules
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| rules | [EarlyStoppingRule](#api.v1.beta1.EarlyStoppingRule) | repeated |  |
+
+
+
+
+
+
+<a name="api.v1.beta1.GetEarlyStoppingRulesRequest"></a>
+
+### GetEarlyStoppingRulesRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| experiment | [Experiment](#api.v1.beta1.Experiment) |  |  |
+| trials | [Trial](#api.v1.beta1.Trial) | repeated |  |
+
+
+
+
+
+
 <a name="api.v1.beta1.GetObservationLogReply"></a>
 
 ### GetObservationLogReply
@@ -244,6 +315,22 @@ Discrete and Categorical type use List.
 | ----- | ---- | ----- | ----------- |
 | parameter_assignments | [GetSuggestionsReply.ParameterAssignments](#api.v1.beta1.GetSuggestionsReply.ParameterAssignments) | repeated |  |
 | algorithm | [AlgorithmSpec](#api.v1.beta1.AlgorithmSpec) |  |  |
+| early_stopping_rules | [GetSuggestionsReply.EarlyStoppingRules](#api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules) | repeated |  |
+
+
+
+
+
+
+<a name="api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules"></a>
+
+### GetSuggestionsReply.EarlyStoppingRules
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| rules | [EarlyStoppingRule](#api.v1.beta1.EarlyStoppingRule) | repeated |  |
 
 
 
@@ -501,6 +588,26 @@ Katib will create each Hyper parameter from this config.
 
 
 
+<a name="api.v1.beta1.SetTrialStatusReply"></a>
+
+### SetTrialStatusReply
+
+
+
+
+
+
+
+<a name="api.v1.beta1.SetTrialStatusRequest"></a>
+
+### SetTrialStatusRequest
+TODO (andreyvelich): Add request &#43; reply
+
+
+
+
+
+
 <a name="api.v1.beta1.Trial"></a>
 
 ### Trial
@@ -597,6 +704,19 @@ Return INVALID_ARGUMENT Error if Algorithm Settings are not Valid
  
 
 
+<a name="api.v1.beta1.ComparisonType"></a>
+
+### ComparisonType
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| EQUAL | 0 |  |
+| LESS | 1 |  |
+| GREATER | 2 |  |
+
+
+
 <a name="api.v1.beta1.ObjectiveType"></a>
 
 ### ObjectiveType
@@ -660,16 +780,18 @@ DBManager service defines APIs to manage Katib database.
 <a name="api.v1.beta1.EarlyStopping"></a>
 
 ### EarlyStopping
-TODO: This feature is not yet fully implemented.
+EarlyStopping service defines APIs to manage Katib early stopping techniques
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
+| GetEarlyStoppingRules | [GetEarlyStoppingRulesRequest](#api.v1.beta1.GetEarlyStoppingRulesRequest) | [GetEarlyStoppingRulesReply](#api.v1.beta1.GetEarlyStoppingRulesReply) |  |
+| SetTrialStatus | [SetTrialStatusRequest](#api.v1.beta1.SetTrialStatusRequest) | [SetTrialStatusReply](#api.v1.beta1.SetTrialStatusReply) |  |
 
 
 <a name="api.v1.beta1.Suggestion"></a>
 
 ### Suggestion
-Suggestion service defines APIs to manage Katib Suggestion objects.
+Suggestion service defines APIs to manage Katib Suggestion algorithm.
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|

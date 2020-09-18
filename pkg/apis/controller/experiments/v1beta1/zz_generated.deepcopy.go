@@ -139,6 +139,11 @@ func (in *ExperimentSpec) DeepCopyInto(out *ExperimentSpec) {
 		*out = new(commonv1beta1.AlgorithmSpec)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.EarlyStopping != nil {
+		in, out := &in.EarlyStopping, &out.EarlyStopping
+		*out = new(commonv1beta1.EarlyStoppingSpec)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.TrialTemplate != nil {
 		in, out := &in.TrialTemplate, &out.TrialTemplate
 		*out = new(TrialTemplate)
