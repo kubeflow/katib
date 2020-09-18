@@ -29,6 +29,10 @@ type TrialSpec struct {
 	// Key-value pairs for hyperparameters and assignment values.
 	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments"`
 
+	// Rules for early stopping techniques
+	// Contains rule name, value and comparison type
+	EarlyStoppingRules []common.EarlyStoppingRule `json:"earlyStoppingRules,omitempty"`
+
 	// Raw text for the trial run spec. This can be any generic Kubernetes
 	// runtime object. The trial operator should create the resource as written,
 	// and let the corresponding resource controller (e.g. tf-operator) handle

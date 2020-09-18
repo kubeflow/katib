@@ -47,17 +47,25 @@ type EarlyStoppingSetting struct {
 	Value string `json:"value,omitempty"`
 }
 
+// EarlyStoppingRule represents each rule for early stopping
 type EarlyStoppingRule struct {
-	Name       string         `json:"name,omitempty"`
-	Value      string         `json:"value,omitempty"`
+	// Name contains metric name for the rule
+	Name string `json:"name,omitempty"`
+	// Value contains metric value for the rule
+	Value string `json:"value,omitempty"`
+	// Comparison defines correlation between name and value
 	Comparison ComparisonType `json:"comparison,omitempty"`
 }
 
+// ComparisonType is the type of comparison, one of equal, less or greater
 type ComparisonType string
 
 const (
-	Equal   ComparisonType = "equal"
-	Less    ComparisonType = "less"
+	// Equal means that metric value = early stopping rule value
+	Equal ComparisonType = "equal"
+	// Less means that metric value < early stopping rule value
+	Less ComparisonType = "less"
+	// Greater means that metric value > early stopping rule value
 	Greater ComparisonType = "greater"
 )
 

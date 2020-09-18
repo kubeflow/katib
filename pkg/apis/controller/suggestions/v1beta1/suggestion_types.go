@@ -79,8 +79,8 @@ type TrialAssignment struct {
 	//Name of the suggestion
 	Name string `json:"name,omitempty"`
 
-	// Parameters for early stopping techniques
-	// Contains parameter name, value and comparison type
+	// Rules for early stopping techniques
+	// Contains rule name, value and comparison type
 	EarlyStoppingRules []common.EarlyStoppingRule `json:"earlyStoppingRules,omitempty"`
 }
 

@@ -195,6 +195,10 @@
                 </li>
               
                 <li>
+                  <a href="#api.v1.beta1.EarlyStoppingRule"><span class="badge">M</span>EarlyStoppingRule</a>
+                </li>
+              
+                <li>
                   <a href="#api.v1.beta1.EarlyStoppingSpec"><span class="badge">M</span>EarlyStoppingSpec</a>
                 </li>
               
@@ -215,6 +219,18 @@
                 </li>
               
                 <li>
+                  <a href="#api.v1.beta1.GetEarlyStoppingRulesReply"><span class="badge">M</span>GetEarlyStoppingRulesReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules"><span class="badge">M</span>GetEarlyStoppingRulesReply.EarlyStoppingRules</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.beta1.GetEarlyStoppingRulesRequest"><span class="badge">M</span>GetEarlyStoppingRulesRequest</a>
+                </li>
+              
+                <li>
                   <a href="#api.v1.beta1.GetObservationLogReply"><span class="badge">M</span>GetObservationLogReply</a>
                 </li>
               
@@ -224,6 +240,10 @@
               
                 <li>
                   <a href="#api.v1.beta1.GetSuggestionsReply"><span class="badge">M</span>GetSuggestionsReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules"><span class="badge">M</span>GetSuggestionsReply.EarlyStoppingRules</a>
                 </li>
               
                 <li>
@@ -291,6 +311,14 @@
                 </li>
               
                 <li>
+                  <a href="#api.v1.beta1.SetTrialStatusReply"><span class="badge">M</span>SetTrialStatusReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.beta1.SetTrialStatusRequest"><span class="badge">M</span>SetTrialStatusRequest</a>
+                </li>
+              
+                <li>
                   <a href="#api.v1.beta1.Trial"><span class="badge">M</span>Trial</a>
                 </li>
               
@@ -314,6 +342,10 @@
                   <a href="#api.v1.beta1.ValidateAlgorithmSettingsRequest"><span class="badge">M</span>ValidateAlgorithmSettingsRequest</a>
                 </li>
               
+              
+                <li>
+                  <a href="#api.v1.beta1.ComparisonType"><span class="badge">E</span>ComparisonType</a>
+                </li>
               
                 <li>
                   <a href="#api.v1.beta1.ObjectiveType"><span class="badge">E</span>ObjectiveType</a>
@@ -445,6 +477,44 @@
                 <tr>
                   <td>trial_name</td>
                   <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.EarlyStoppingRule">EarlyStoppingRule</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>comparison</td>
+                  <td><a href="#api.v1.beta1.ComparisonType">ComparisonType</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
@@ -636,6 +706,85 @@
 
         
       
+        <h3 id="api.v1.beta1.GetEarlyStoppingRulesReply">GetEarlyStoppingRulesReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>early_stopping_rules</td>
+                  <td><a href="#api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules">GetEarlyStoppingRulesReply.EarlyStoppingRules</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules">GetEarlyStoppingRulesReply.EarlyStoppingRules</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>rules</td>
+                  <td><a href="#api.v1.beta1.EarlyStoppingRule">EarlyStoppingRule</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.GetEarlyStoppingRulesRequest">GetEarlyStoppingRulesRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment</td>
+                  <td><a href="#api.v1.beta1.Experiment">Experiment</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>trials</td>
+                  <td><a href="#api.v1.beta1.Trial">Trial</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
         <h3 id="api.v1.beta1.GetObservationLogReply">GetObservationLogReply</h3>
         <p></p>
 
@@ -726,6 +875,37 @@
                   <td>algorithm</td>
                   <td><a href="#api.v1.beta1.AlgorithmSpec">AlgorithmSpec</a></td>
                   <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>early_stopping_rules</td>
+                  <td><a href="#api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules">GetSuggestionsReply.EarlyStoppingRules</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules">GetSuggestionsReply.EarlyStoppingRules</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>rules</td>
+                  <td><a href="#api.v1.beta1.EarlyStoppingRule">EarlyStoppingRule</a></td>
+                  <td>repeated</td>
                   <td><p> </p></td>
                 </tr>
               
@@ -1208,6 +1388,20 @@
 
         
       
+        <h3 id="api.v1.beta1.SetTrialStatusReply">SetTrialStatusReply</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="api.v1.beta1.SetTrialStatusRequest">SetTrialStatusRequest</h3>
+        <p>TODO (andreyvelich): Add request + reply</p>
+
+        
+
+        
+      
         <h3 id="api.v1.beta1.Trial">Trial</h3>
         <p></p>
 
@@ -1400,6 +1594,35 @@
       
 
       
+        <h3 id="api.v1.beta1.ComparisonType">ComparisonType</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>EQUAL</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>LESS</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>GREATER</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
         <h3 id="api.v1.beta1.ObjectiveType">ObjectiveType</h3>
         <p>Direction of optimization. Minimize or Maximize.</p>
         <table class="enum-table">
@@ -1558,19 +1781,33 @@ You can see accuracy curve or other metric logs on UI.</p></td>
 
         
         <h3 id="api.v1.beta1.EarlyStopping">EarlyStopping</h3>
-        <p>TODO: This feature is not yet fully implemented.</p>
+        <p>EarlyStopping service defines APIs to manage Katib early stopping techniques</p>
         <table class="enum-table">
           <thead>
             <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
           </thead>
           <tbody>
             
+              <tr>
+                <td>GetEarlyStoppingRules</td>
+                <td><a href="#api.v1.beta1.GetEarlyStoppingRulesRequest">GetEarlyStoppingRulesRequest</a></td>
+                <td><a href="#api.v1.beta1.GetEarlyStoppingRulesReply">GetEarlyStoppingRulesReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>SetTrialStatus</td>
+                <td><a href="#api.v1.beta1.SetTrialStatusRequest">SetTrialStatusRequest</a></td>
+                <td><a href="#api.v1.beta1.SetTrialStatusReply">SetTrialStatusReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
           </tbody>
         </table>
 
         
         <h3 id="api.v1.beta1.Suggestion">Suggestion</h3>
-        <p>Suggestion service defines APIs to manage Katib Suggestion objects.</p>
+        <p>Suggestion service defines APIs to manage Katib Suggestion algorithm.</p>
         <table class="enum-table">
           <thead>
             <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>

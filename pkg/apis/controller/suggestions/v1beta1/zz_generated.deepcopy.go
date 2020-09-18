@@ -174,6 +174,11 @@ func (in *TrialAssignment) DeepCopyInto(out *TrialAssignment) {
 		*out = make([]commonv1beta1.ParameterAssignment, len(*in))
 		copy(*out, *in)
 	}
+	if in.EarlyStoppingRules != nil {
+		in, out := &in.EarlyStoppingRules, &out.EarlyStoppingRules
+		*out = make([]commonv1beta1.EarlyStoppingRule, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 
