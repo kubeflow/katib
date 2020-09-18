@@ -38,9 +38,6 @@
           "items": {
             "$ref": "#/definitions/beta1AlgorithmSetting"
           }
-        },
-        "early_stopping_spec": {
-          "$ref": "#/definitions/beta1EarlyStoppingSpec"
         }
       }
     },
@@ -69,9 +66,6 @@
           "$ref": "#/definitions/beta1ComparisonType"
         }
       }
-    },
-    "beta1EarlyStoppingSpec": {
-      "type": "object"
     },
     "beta1GetEarlyStoppingRulesReply": {
       "type": "object",
