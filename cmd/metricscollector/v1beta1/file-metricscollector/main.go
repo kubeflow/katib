@@ -42,11 +42,8 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
-	"time"
 
-	"github.com/hpcloud/tail"
 	"google.golang.org/grpc"
 	"k8s.io/klog"
 
@@ -78,37 +75,34 @@ func printMetricsFile(mFile string) {
 		}
 	}
 
-	t, _ := tail.TailFile(mFile, tail.Config{Follow: true})
-	proces, err := common.GetOtherMainProcesses()
-	if err != nil {
-		klog.Error(err)
-	}
-	klog.Infof("PROCESS IS %v", proces)
-	for line := range t.Lines {
-		klog.Info(line.Text)
-		text := line.Text
-		var epoch string
-		if strings.Index(text, "Epoch") != -1 {
-			epoch = text[strings.Index(text, "Epoch")+6 : strings.Index(text, "Epoch")+7]
-		}
-		epochFl, err := strconv.ParseFloat(epoch, 64)
-		if err != nil {
-			klog.Error(err)
-		}
-		klog.Infof("Float epoch %v", epochFl)
-		if epochFl > 100 {
-			klog.Info("----------START KILLING PROCCEESS-----------")
-			time.Sleep(10 * time.Second)
-			mainProc, err := os.FindProcess(proces[1])
-			if err != nil {
-				klog.Error(err)
-			}
-			klog.Infof("----------_KILL PROCCECC-------------- %v", mainProc)
-			// Kill the process
-			mainProc.Kill()
-		}
+	// t, _ := tail.TailFile(mFile, tail.Config{Follow: true})
+	// proces, err := common.GetOtherMainProcesses()
+	// if err != nil {
+	// 	klog.Error(err)
+	// }
+	// for line := range t.Lines {
+	// 	klog.Info(line.Text)
+	// 	text := line.Text
+	// 	var epoch string
+	// 	if strings.Index(text, "Epoch") != -1 {
+	// 		epoch = text[strings.Index(text, "Epoch")+6 : strings.Index(text, "Epoch")+7]
+	// 	}
+	// 	epochFl, err := strconv.ParseFloat(epoch, 64)
+	// 	if err != nil {
+	// 		klog.Error(err)
+	// 	}
+	// 	klog.Infof("Float epoch %v", epochFl)
+	// 	if epochFl > 100 {
+	// 		time.Sleep(10 * time.Second)
+	// 		mainProc, err := os.FindProcess(proces[1])
+	// 		if err != nil {
+	// 			klog.Error(err)
+	// 		}
+	// 		// Kill the process
+	// 		mainProc.Kill()
+	// 	}
 
-	}
+	// }
 
 }
 
