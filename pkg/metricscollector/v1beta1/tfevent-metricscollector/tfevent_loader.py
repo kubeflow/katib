@@ -13,14 +13,6 @@ import const
 
 
 class TFEventFileParser:
-    def __init__(self):
-        self.logger = getLogger(__name__)
-        handler = StreamHandler()
-        handler.setLevel(INFO)
-        self.logger.setLevel(INFO)
-        self.logger.addHandler(handler)
-        self.logger.propagate = False
-
     def find_all_files(self, directory):
         for root, dirs, files in os.walk(directory):
             yield root
@@ -45,27 +37,6 @@ class TFEventFileParser:
                             )
                         )
                         metric_logs.append(ml)
-        # Metrics logs must contain at least one objective metric value
-        # Objective metric is located at first index
-        is_objective_metric_reported = False
-        for ml in metric_logs:
-            if ml.metric.name == metrics[0]:
-                is_objective_metric_reported = True
-                break
-        # If objective metrics were not reported, insert unavailable value in the DB
-        if not is_objective_metric_reported:
-            metric_logs = [
-                api_pb2.MetricLog(
-                    time_stamp=rfc3339.rfc3339(datetime.datetime.now()),
-                    metric=api_pb2.Metric(
-                        name=metrics[0],
-                        value=const.UNAVAILABLE_METRIC_VALUE
-                    )
-                )
-            ]
-            self.logger.Info("Objective metric {} is not found in training logs, {} value is reported",
-                             metrics[0], const.UNAVAILABLE_METRIC_VALUE)
-
         return metric_logs
 
 
@@ -91,4 +62,26 @@ class MetricsCollector:
             except Exception as e:
                 self.logger.warning("Unexpected error: " + str(e))
                 continue
+
+        # Metrics logs must contain at least one objective metric value
+        # Objective metric is located at first index
+        is_objective_metric_reported = False
+        for ml in mls:
+            if ml.metric.name == self.metrics[0]:
+                is_objective_metric_reported = True
+                break
+        # If objective metrics were not reported, insert unavailable value in the DB
+        if not is_objective_metric_reported:
+            mls = [
+                api_pb2.MetricLog(
+                    time_stamp=rfc3339.rfc3339(datetime.now()),
+                    metric=api_pb2.Metric(
+                        name=self.metrics[0],
+                        value=const.UNAVAILABLE_METRIC_VALUE
+                    )
+                )
+            ]
+            self.logger.info("Objective metric {} is not found in training logs, {} value is reported".format(
+                self.metrics[0], const.UNAVAILABLE_METRIC_VALUE))
+
         return api_pb2.ObservationLog(metric_logs=mls)
