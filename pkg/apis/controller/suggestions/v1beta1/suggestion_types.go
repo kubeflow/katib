@@ -29,8 +29,13 @@ import (
 type SuggestionSpec struct {
 	// Name of the algorithm that suggestion is used.
 	AlgorithmName string `json:"algorithmName"`
+
+	// Early stopping algorithm name that Suggestion's Experiment is used
+	EarlyStoppingAlgorithmName string `json:"earlyStoppingAlgorithmName,omitempty"`
+
 	// Number of suggestions requested
 	Requests int32 `json:"requests,omitempty"`
+
 	// Describes resuming policy which usually take effect after experiment terminated.
 	// Default value is LongRunning.
 	ResumePolicy experiment.ResumePolicyType `json:"resumePolicy,omitempty"`
@@ -68,11 +73,15 @@ type SuggestionStatus struct {
 
 // TrialAssignment is the assignment for one trial.
 type TrialAssignment struct {
-	// Suggestion results
+	// Suggestion results with Trial parameters
 	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments,omitempty"`
 
 	//Name of the suggestion
 	Name string `json:"name,omitempty"`
+
+	// Parameters for early stopping techniques
+	// Contains parameter name, value and comparison type
+	EarlyStoppingRules []common.EarlyStoppingRule `json:"earlyStoppingRules,omitempty"`
 }
 
 // SuggestionCondition describes the state of the Suggestion at a certain point.
