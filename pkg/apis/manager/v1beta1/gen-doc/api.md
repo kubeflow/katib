@@ -9,7 +9,6 @@
     - [DeleteObservationLogReply](#api.v1.beta1.DeleteObservationLogReply)
     - [DeleteObservationLogRequest](#api.v1.beta1.DeleteObservationLogRequest)
     - [EarlyStoppingRule](#api.v1.beta1.EarlyStoppingRule)
-    - [EarlyStoppingSpec](#api.v1.beta1.EarlyStoppingSpec)
     - [Experiment](#api.v1.beta1.Experiment)
     - [ExperimentSpec](#api.v1.beta1.ExperimentSpec)
     - [ExperimentSpec.ParameterSpecs](#api.v1.beta1.ExperimentSpec.ParameterSpecs)
@@ -92,7 +91,6 @@ Katib GRPC API v1beta1
 | ----- | ---- | ----- | ----------- |
 | algorithm_name | [string](#string) |  |  |
 | algorithm_settings | [AlgorithmSetting](#api.v1.beta1.AlgorithmSetting) | repeated |  |
-| early_stopping_spec | [EarlyStoppingSpec](#api.v1.beta1.EarlyStoppingSpec) |  |  |
 
 
 
@@ -135,16 +133,6 @@ Katib GRPC API v1beta1
 | name | [string](#string) |  |  |
 | value | [string](#string) |  |  |
 | comparison | [ComparisonType](#api.v1.beta1.ComparisonType) |  |  |
-
-
-
-
-
-
-<a name="api.v1.beta1.EarlyStoppingSpec"></a>
-
-### EarlyStoppingSpec
-TODO: This feature is not yet fully implemented.
 
 
 
