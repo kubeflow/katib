@@ -53,12 +53,9 @@ const (
 	// DefaultEarlyStoppingPort is the default port of early stopping service.
 	DefaultEarlyStoppingPort = 6788
 
-	// DefaultGRPCServiceSuggestion is the default suggestion service name,
+	// DefaultGRPCService is the default suggestion service name,
 	// which is used to run healthz check using grpc probe.
-	DefaultGRPCServiceSuggestion = "manager.v1beta1.Suggestion"
-	// DefaultGRPCServiceEarlyStopping is the default early stopping service name,
-	// which is used to run healthz check using grpc probe.
-	DefaultGRPCServiceEarlyStopping = "manager.v1beta1.EarlyStopping"
+	DefaultGRPCService = "manager.v1beta1.Suggestion"
 
 	// DefaultGRPCRetryAttempts is the the maximum number of retries for gRPC calls
 	DefaultGRPCRetryAttempts = 10

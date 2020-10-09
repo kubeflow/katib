@@ -669,7 +669,7 @@ func newFakeContainers() []corev1.Container {
 						Command: []string{
 							defaultGRPCHealthCheckProbe,
 							fmt.Sprintf("-addr=:%d", consts.DefaultSuggestionPort),
-							fmt.Sprintf("-service=%s", consts.DefaultGRPCServiceSuggestion),
+							fmt.Sprintf("-service=%s", consts.DefaultGRPCService),
 						},
 					},
 				},
@@ -682,7 +682,7 @@ func newFakeContainers() []corev1.Container {
 						Command: []string{
 							defaultGRPCHealthCheckProbe,
 							fmt.Sprintf("-addr=:%d", consts.DefaultSuggestionPort),
-							fmt.Sprintf("-service=%s", consts.DefaultGRPCServiceSuggestion),
+							fmt.Sprintf("-service=%s", consts.DefaultGRPCService),
 						},
 					},
 				},

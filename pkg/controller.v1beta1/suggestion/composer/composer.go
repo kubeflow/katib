@@ -177,7 +177,7 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion, suggestion
 					Command: []string{
 						defaultGRPCHealthCheckProbe,
 						fmt.Sprintf("-addr=:%d", consts.DefaultSuggestionPort),
-						fmt.Sprintf("-service=%s", consts.DefaultGRPCServiceSuggestion),
+						fmt.Sprintf("-service=%s", consts.DefaultGRPCService),
 					},
 				},
 			},
@@ -190,7 +190,7 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion, suggestion
 					Command: []string{
 						defaultGRPCHealthCheckProbe,
 						fmt.Sprintf("-addr=:%d", consts.DefaultSuggestionPort),
-						fmt.Sprintf("-service=%s", consts.DefaultGRPCServiceSuggestion),
+						fmt.Sprintf("-service=%s", consts.DefaultGRPCService),
 					},
 				},
 			},
