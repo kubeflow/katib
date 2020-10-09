@@ -273,12 +273,6 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 
 			klog.Infof("Trial status is successfully updated")
 
-			// Update ".pid" file with "completed" line.
-			// Which means that training is finished
-			err = ioutil.WriteFile(markFile, []byte(common.TrainingCompleted), 0)
-			if err != nil {
-				klog.Fatalf("Write to file %v error: %v", markFile, err)
-			}
 		}
 	}
 }
