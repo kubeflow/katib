@@ -62,11 +62,11 @@ type ComparisonType string
 
 const (
 	// Equal means that metric value = early stopping rule value
-	Equal ComparisonType = "equal"
+	ComparisonTypeEqual ComparisonType = "equal"
 	// Less means that metric value < early stopping rule value
-	Less ComparisonType = "less"
+	ComparisonTypeLess ComparisonType = "less"
 	// Greater means that metric value > early stopping rule value
-	Greater ComparisonType = "greater"
+	ComparisonTypeGreater ComparisonType = "greater"
 )
 
 // +k8s:deepcopy-gen=true

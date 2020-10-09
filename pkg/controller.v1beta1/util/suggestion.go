@@ -7,31 +7,45 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
-// GetAlgorithmDeploymentName returns name for the suggestion's deployment
-func GetAlgorithmDeploymentName(s *suggestionsv1beta1.Suggestion) string {
+// GetSuggestionDeploymentName returns name for the suggestion's deployment
+func GetSuggestionDeploymentName(s *suggestionsv1beta1.Suggestion) string {
 	return s.Name + "-" + s.Spec.AlgorithmName
 }
 
-// GetAlgorithmServiceName returns name for the suggestion's service
-func GetAlgorithmServiceName(s *suggestionsv1beta1.Suggestion) string {
+// GetSuggestionServiceName returns name for the suggestion's service
+func GetSuggestionServiceName(s *suggestionsv1beta1.Suggestion) string {
 	return s.Name + "-" + s.Spec.AlgorithmName
 }
 
-// GetAlgorithmPersistentVolumeName returns name for the suggestion's PV
-func GetAlgorithmPersistentVolumeName(s *suggestionsv1beta1.Suggestion) string {
+// GetSuggestionPersistentVolumeName returns name for the suggestion's PV
+func GetSuggestionPersistentVolumeName(s *suggestionsv1beta1.Suggestion) string {
 	return s.Name + "-" + s.Spec.AlgorithmName + "-" + s.Namespace
 }
 
-// GetAlgorithmPersistentVolumeClaimName returns name for the suggestion's PVC
-func GetAlgorithmPersistentVolumeClaimName(s *suggestionsv1beta1.Suggestion) string {
+// GetSuggestionPersistentVolumeClaimName returns name for the suggestion's PVC
+func GetSuggestionPersistentVolumeClaimName(s *suggestionsv1beta1.Suggestion) string {
+	return s.Name + "-" + s.Spec.AlgorithmName
+}
+
+// GetSuggestionRBACName returns name for the suggestion's ServiceAccount, Role and RoleBinding
+func GetSuggestionRBACName(s *suggestionsv1beta1.Suggestion) string {
 	return s.Name + "-" + s.Spec.AlgorithmName
 }
 
 // GetAlgorithmEndpoint returns the endpoint of the algorithm service.
 func GetAlgorithmEndpoint(s *suggestionsv1beta1.Suggestion) string {
-	serviceName := GetAlgorithmServiceName(s)
+	serviceName := GetSuggestionServiceName(s)
 	return fmt.Sprintf("%s.%s:%d",
 		serviceName,
 		s.Namespace,
 		consts.DefaultSuggestionPort)
+}
+
+// GetEarlyStoppingEndpoint returns the endpoint of the early stopping service.
+func GetEarlyStoppingEndpoint(s *suggestionsv1beta1.Suggestion) string {
+	serviceName := GetSuggestionServiceName(s)
+	return fmt.Sprintf("%s.%s:%d",
+		serviceName,
+		s.Namespace,
+		consts.DefaultEarlyStoppingPort)
 }

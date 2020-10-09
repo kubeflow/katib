@@ -94,6 +94,9 @@ type ExperimentStatus struct {
 	// List of trial names which have been killed.
 	KilledTrialList []string `json:"killedTrialList,omitempty"`
 
+	// List of trial names which have been early stopped.
+	EarlyStoppedTrialList []string `json:"earlyStoppedTrialList,omitempty"`
+
 	// Trials is the total number of trials owned by the experiment.
 	Trials int32 `json:"trials,omitempty"`
 
@@ -111,6 +114,9 @@ type ExperimentStatus struct {
 
 	// How many trials are currently running.
 	TrialsRunning int32 `json:"trialsRunning,omitempty"`
+
+	// How many trials are currently early stopped.
+	TrialsEarlyStopped int32 `json:"trialsEarlyStopped,omitempty"`
 }
 
 // OptimalTrial is the metrics and assignments of the best trial.

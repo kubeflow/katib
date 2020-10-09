@@ -44,11 +44,12 @@
     "beta1ComparisonType": {
       "type": "string",
       "enum": [
+        "UNKNOWN_COMPARISON",
         "EQUAL",
         "LESS",
         "GREATER"
       ],
-      "default": "EQUAL"
+      "default": "UNKNOWN_COMPARISON"
     },
     "beta1DeleteObservationLogReply": {
       "type": "object"
@@ -71,17 +72,6 @@
       "type": "object",
       "properties": {
         "early_stopping_rules": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/beta1GetEarlyStoppingRulesReplyEarlyStoppingRules"
-          }
-        }
-      }
-    },
-    "beta1GetEarlyStoppingRulesReplyEarlyStoppingRules": {
-      "type": "object",
-      "properties": {
-        "rules": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/beta1EarlyStoppingRule"
@@ -110,17 +100,6 @@
           "$ref": "#/definitions/beta1AlgorithmSpec"
         },
         "early_stopping_rules": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/beta1GetSuggestionsReplyEarlyStoppingRules"
-          }
-        }
-      }
-    },
-    "beta1GetSuggestionsReplyEarlyStoppingRules": {
-      "type": "object",
-      "properties": {
-        "rules": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/beta1EarlyStoppingRule"

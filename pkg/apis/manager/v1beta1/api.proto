@@ -102,10 +102,22 @@ message AlgorithmSetting {
     string value = 2;
 }
 
-
 message AlgorithmSpec {
     string algorithm_name = 1;
     repeated AlgorithmSetting algorithm_settings = 2;
+}
+
+/**
+ * Early stopping algorithm specification
+ */
+ message EarlyStoppingSpec {
+    string early_stopping_algorithm_name = 1;
+    repeated EarlyStoppingSetting early_stopping_settings = 2;
+}
+
+message EarlyStoppingSetting {
+    string name = 1;
+    string value = 2;
 }
 
 /**
@@ -162,6 +174,7 @@ message ExperimentSpec {
     int32 parallel_trial_count = 6;
     int32 max_trial_count = 7;
     NasConfig nas_config = 8;
+    EarlyStoppingSpec early_stopping = 9;
 }
 
 message Experiment {
@@ -213,7 +226,8 @@ message TrialStatus {
         SUCCEEDED = 2;
         KILLED = 3;
         FAILED = 4;
-        UNKNOWN = 5;
+        EARLYSTOPPED = 5;
+        UNKNOWN = 6;
     }
     string start_time = 1; /// RFC3339 format
     string completion_time = 2; /// RFC3339 format
@@ -265,10 +279,7 @@ message GetSuggestionsReply {
     }
     repeated ParameterAssignments parameter_assignments = 1;
     AlgorithmSpec algorithm = 2;
-    message EarlyStoppingRules{
-        repeated EarlyStoppingRule rules = 1;
-    }
-    repeated EarlyStoppingRules early_stopping_rules = 3;
+    repeated EarlyStoppingRule early_stopping_rules = 3;
 }
 
 message ValidateAlgorithmSettingsRequest {
@@ -287,10 +298,7 @@ message GetEarlyStoppingRulesRequest {
 }
 
 message GetEarlyStoppingRulesReply {
-    message EarlyStoppingRules{
-        repeated EarlyStoppingRule rules = 1;
-    }
-    repeated EarlyStoppingRules early_stopping_rules = 1;
+    repeated EarlyStoppingRule early_stopping_rules = 1;
 }
 
 
@@ -301,15 +309,15 @@ message EarlyStoppingRule {
 }
 
  enum ComparisonType {
-    EQUAL = 0;
-    LESS = 1;
-    GREATER = 2; 
+     UNKNOWN_COMPARISON = 0; // Unknown comparison, not used
+     EQUAL = 1; // Equal comparison, e.g. accuracy = 0.7
+     LESS = 2; // Less comparison, e.g. accuracy < 0.7
+     GREATER = 3; // Greater comparison, e.g. accuracy > 0.7
 }
 
-// TODO (andreyvelich): Add request + reply
 message SetTrialStatusRequest {
+    string trial_name = 1;
 }
 
 message SetTrialStatusReply {
 }
-

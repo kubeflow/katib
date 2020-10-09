@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='api.proto',
   package='api.v1.beta1',
   syntax='proto3',
-  serialized_pb=_b('\n\tapi.proto\x12\x0c\x61pi.v1.beta1\x1a\x1cgoogle/api/annotations.proto\"E\n\rFeasibleSpace\x12\x0b\n\x03max\x18\x01 \x01(\t\x12\x0b\n\x03min\x18\x02 \x01(\t\x12\x0c\n\x04list\x18\x03 \x03(\t\x12\x0c\n\x04step\x18\x04 \x01(\t\"\x87\x01\n\rParameterSpec\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x33\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x1b.api.v1.beta1.ParameterType\x12\x33\n\x0e\x66\x65\x61sible_space\x18\x03 \x01(\x0b\x32\x1b.api.v1.beta1.FeasibleSpace\"\x88\x01\n\rObjectiveSpec\x12)\n\x04type\x18\x01 \x01(\x0e\x32\x1b.api.v1.beta1.ObjectiveType\x12\x0c\n\x04goal\x18\x02 \x01(\x01\x12\x1d\n\x15objective_metric_name\x18\x03 \x01(\t\x12\x1f\n\x17\x61\x64\x64itional_metric_names\x18\x04 \x03(\t\"/\n\x10\x41lgorithmSetting\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"c\n\rAlgorithmSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x01 \x01(\t\x12:\n\x12\x61lgorithm_settings\x18\x02 \x03(\x0b\x32\x1e.api.v1.beta1.AlgorithmSetting\"\xae\x01\n\tNasConfig\x12/\n\x0cgraph_config\x18\x01 \x01(\x0b\x32\x19.api.v1.beta1.GraphConfig\x12\x36\n\noperations\x18\x02 \x01(\x0b\x32\".api.v1.beta1.NasConfig.Operations\x1a\x38\n\nOperations\x12*\n\toperation\x18\x01 \x03(\x0b\x32\x17.api.v1.beta1.Operation\"L\n\x0bGraphConfig\x12\x12\n\nnum_layers\x18\x01 \x01(\x05\x12\x13\n\x0binput_sizes\x18\x02 \x03(\x05\x12\x14\n\x0coutput_sizes\x18\x03 \x03(\x05\"\xa7\x01\n\tOperation\x12\x16\n\x0eoperation_type\x18\x01 \x01(\t\x12?\n\x0fparameter_specs\x18\x02 \x01(\x0b\x32&.api.v1.beta1.Operation.ParameterSpecs\x1a\x41\n\x0eParameterSpecs\x12/\n\nparameters\x18\x01 \x03(\x0b\x32\x1b.api.v1.beta1.ParameterSpec\"\x95\x03\n\x0e\x45xperimentSpec\x12\x44\n\x0fparameter_specs\x18\x01 \x01(\x0b\x32+.api.v1.beta1.ExperimentSpec.ParameterSpecs\x12.\n\tobjective\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.ObjectiveSpec\x12.\n\talgorithm\x18\x03 \x01(\x0b\x32\x1b.api.v1.beta1.AlgorithmSpec\x12\x16\n\x0etrial_template\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x12\x1c\n\x14parallel_trial_count\x18\x06 \x01(\x05\x12\x17\n\x0fmax_trial_count\x18\x07 \x01(\x05\x12+\n\nnas_config\x18\x08 \x01(\x0b\x32\x17.api.v1.beta1.NasConfig\x1a\x41\n\x0eParameterSpecs\x12/\n\nparameters\x18\x01 \x03(\x0b\x32\x1b.api.v1.beta1.ParameterSpec\"F\n\nExperiment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12*\n\x04spec\x18\x02 \x01(\x0b\x32\x1c.api.v1.beta1.ExperimentSpec\"2\n\x13ParameterAssignment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"%\n\x06Metric\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"E\n\tMetricLog\x12\x12\n\ntime_stamp\x18\x01 \x01(\t\x12$\n\x06metric\x18\x02 \x01(\x0b\x32\x14.api.v1.beta1.Metric\"4\n\x0bObservation\x12%\n\x07metrics\x18\x01 \x03(\x0b\x32\x14.api.v1.beta1.Metric\">\n\x0eObservationLog\x12,\n\x0bmetric_logs\x18\x01 \x03(\x0b\x32\x17.api.v1.beta1.MetricLog\"\xa3\x02\n\tTrialSpec\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12.\n\tobjective\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.ObjectiveSpec\x12K\n\x15parameter_assignments\x18\x03 \x01(\x0b\x32,.api.v1.beta1.TrialSpec.ParameterAssignments\x12\x10\n\x08run_spec\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x1aN\n\x14ParameterAssignments\x12\x36\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32!.api.v1.beta1.ParameterAssignment\"\x8f\x02\n\x0bTrialStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12?\n\tcondition\x18\x03 \x01(\x0e\x32,.api.v1.beta1.TrialStatus.TrialConditionType\x12.\n\x0bobservation\x18\x04 \x01(\x0b\x32\x19.api.v1.beta1.Observation\"b\n\x12TrialConditionType\x12\x0b\n\x07\x43REATED\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tSUCCEEDED\x10\x02\x12\n\n\x06KILLED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x12\x0b\n\x07UNKNOWN\x10\x05\"g\n\x05Trial\x12\x0c\n\x04name\x18\x01 \x01(\t\x12%\n\x04spec\x18\x02 \x01(\x0b\x32\x17.api.v1.beta1.TrialSpec\x12)\n\x06status\x18\x03 \x01(\x0b\x32\x19.api.v1.beta1.TrialStatus\"h\n\x1bReportObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x35\n\x0fobservation_log\x18\x02 \x01(\x0b\x32\x1c.api.v1.beta1.ObservationLog\"\x1b\n\x19ReportObservationLogReply\"1\n\x1b\x44\x65leteObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x1b\n\x19\x44\x65leteObservationLogReply\"i\n\x18GetObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x13\n\x0bmetric_name\x18\x02 \x01(\t\x12\x12\n\nstart_time\x18\x03 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\t\"O\n\x16GetObservationLogReply\x12\x35\n\x0fobservation_log\x18\x01 \x01(\x0b\x32\x1c.api.v1.beta1.ObservationLog\"\x82\x01\n\x15GetSuggestionsRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\x12#\n\x06trials\x18\x02 \x03(\x0b\x32\x13.api.v1.beta1.Trial\x12\x16\n\x0erequest_number\x18\x03 \x01(\x05\"\x86\x03\n\x13GetSuggestionsReply\x12U\n\x15parameter_assignments\x18\x01 \x03(\x0b\x32\x36.api.v1.beta1.GetSuggestionsReply.ParameterAssignments\x12.\n\talgorithm\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.AlgorithmSpec\x12R\n\x14\x65\x61rly_stopping_rules\x18\x03 \x03(\x0b\x32\x34.api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules\x1aN\n\x14ParameterAssignments\x12\x36\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32!.api.v1.beta1.ParameterAssignment\x1a\x44\n\x12\x45\x61rlyStoppingRules\x12.\n\x05rules\x18\x01 \x03(\x0b\x32\x1f.api.v1.beta1.EarlyStoppingRule\"P\n ValidateAlgorithmSettingsRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\" \n\x1eValidateAlgorithmSettingsReply\"q\n\x1cGetEarlyStoppingRulesRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\x12#\n\x06trials\x18\x02 \x03(\x0b\x32\x13.api.v1.beta1.Trial\"\xbd\x01\n\x1aGetEarlyStoppingRulesReply\x12Y\n\x14\x65\x61rly_stopping_rules\x18\x01 \x03(\x0b\x32;.api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules\x1a\x44\n\x12\x45\x61rlyStoppingRules\x12.\n\x05rules\x18\x01 \x03(\x0b\x32\x1f.api.v1.beta1.EarlyStoppingRule\"b\n\x11\x45\x61rlyStoppingRule\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\x12\x30\n\ncomparison\x18\x03 \x01(\x0e\x32\x1c.api.v1.beta1.ComparisonType\"\x17\n\x15SetTrialStatusRequest\"\x15\n\x13SetTrialStatusReply*U\n\rParameterType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\n\n\x06\x44OUBLE\x10\x01\x12\x07\n\x03INT\x10\x02\x12\x0c\n\x08\x44ISCRETE\x10\x03\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x04*8\n\rObjectiveType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0c\n\x08MINIMIZE\x10\x01\x12\x0c\n\x08MAXIMIZE\x10\x02*2\n\x0e\x43omparisonType\x12\t\n\x05\x45QUAL\x10\x00\x12\x08\n\x04LESS\x10\x01\x12\x0b\n\x07GREATER\x10\x02\x32\xc6\x02\n\tDBManager\x12j\n\x14ReportObservationLog\x12).api.v1.beta1.ReportObservationLogRequest\x1a\'.api.v1.beta1.ReportObservationLogReply\x12\x61\n\x11GetObservationLog\x12&.api.v1.beta1.GetObservationLogRequest\x1a$.api.v1.beta1.GetObservationLogReply\x12j\n\x14\x44\x65leteObservationLog\x12).api.v1.beta1.DeleteObservationLogRequest\x1a\'.api.v1.beta1.DeleteObservationLogReply2\xe1\x01\n\nSuggestion\x12X\n\x0eGetSuggestions\x12#.api.v1.beta1.GetSuggestionsRequest\x1a!.api.v1.beta1.GetSuggestionsReply\x12y\n\x19ValidateAlgorithmSettings\x12..api.v1.beta1.ValidateAlgorithmSettingsRequest\x1a,.api.v1.beta1.ValidateAlgorithmSettingsReply2\xd8\x01\n\rEarlyStopping\x12m\n\x15GetEarlyStoppingRules\x12*.api.v1.beta1.GetEarlyStoppingRulesRequest\x1a(.api.v1.beta1.GetEarlyStoppingRulesReply\x12X\n\x0eSetTrialStatus\x12#.api.v1.beta1.SetTrialStatusRequest\x1a!.api.v1.beta1.SetTrialStatusReplyb\x06proto3')
+  serialized_pb=_b('\n\tapi.proto\x12\x0c\x61pi.v1.beta1\x1a\x1cgoogle/api/annotations.proto\"E\n\rFeasibleSpace\x12\x0b\n\x03max\x18\x01 \x01(\t\x12\x0b\n\x03min\x18\x02 \x01(\t\x12\x0c\n\x04list\x18\x03 \x03(\t\x12\x0c\n\x04step\x18\x04 \x01(\t\"\x87\x01\n\rParameterSpec\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x33\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x1b.api.v1.beta1.ParameterType\x12\x33\n\x0e\x66\x65\x61sible_space\x18\x03 \x01(\x0b\x32\x1b.api.v1.beta1.FeasibleSpace\"\x88\x01\n\rObjectiveSpec\x12)\n\x04type\x18\x01 \x01(\x0e\x32\x1b.api.v1.beta1.ObjectiveType\x12\x0c\n\x04goal\x18\x02 \x01(\x01\x12\x1d\n\x15objective_metric_name\x18\x03 \x01(\t\x12\x1f\n\x17\x61\x64\x64itional_metric_names\x18\x04 \x03(\t\"/\n\x10\x41lgorithmSetting\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"c\n\rAlgorithmSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x01 \x01(\t\x12:\n\x12\x61lgorithm_settings\x18\x02 \x03(\x0b\x32\x1e.api.v1.beta1.AlgorithmSetting\"\x7f\n\x11\x45\x61rlyStoppingSpec\x12%\n\x1d\x65\x61rly_stopping_algorithm_name\x18\x01 \x01(\t\x12\x43\n\x17\x65\x61rly_stopping_settings\x18\x02 \x03(\x0b\x32\".api.v1.beta1.EarlyStoppingSetting\"3\n\x14\x45\x61rlyStoppingSetting\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\xae\x01\n\tNasConfig\x12/\n\x0cgraph_config\x18\x01 \x01(\x0b\x32\x19.api.v1.beta1.GraphConfig\x12\x36\n\noperations\x18\x02 \x01(\x0b\x32\".api.v1.beta1.NasConfig.Operations\x1a\x38\n\nOperations\x12*\n\toperation\x18\x01 \x03(\x0b\x32\x17.api.v1.beta1.Operation\"L\n\x0bGraphConfig\x12\x12\n\nnum_layers\x18\x01 \x01(\x05\x12\x13\n\x0binput_sizes\x18\x02 \x03(\x05\x12\x14\n\x0coutput_sizes\x18\x03 \x03(\x05\"\xa7\x01\n\tOperation\x12\x16\n\x0eoperation_type\x18\x01 \x01(\t\x12?\n\x0fparameter_specs\x18\x02 \x01(\x0b\x32&.api.v1.beta1.Operation.ParameterSpecs\x1a\x41\n\x0eParameterSpecs\x12/\n\nparameters\x18\x01 \x03(\x0b\x32\x1b.api.v1.beta1.ParameterSpec\"\xce\x03\n\x0e\x45xperimentSpec\x12\x44\n\x0fparameter_specs\x18\x01 \x01(\x0b\x32+.api.v1.beta1.ExperimentSpec.ParameterSpecs\x12.\n\tobjective\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.ObjectiveSpec\x12.\n\talgorithm\x18\x03 \x01(\x0b\x32\x1b.api.v1.beta1.AlgorithmSpec\x12\x16\n\x0etrial_template\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x12\x1c\n\x14parallel_trial_count\x18\x06 \x01(\x05\x12\x17\n\x0fmax_trial_count\x18\x07 \x01(\x05\x12+\n\nnas_config\x18\x08 \x01(\x0b\x32\x17.api.v1.beta1.NasConfig\x12\x37\n\x0e\x65\x61rly_stopping\x18\t \x01(\x0b\x32\x1f.api.v1.beta1.EarlyStoppingSpec\x1a\x41\n\x0eParameterSpecs\x12/\n\nparameters\x18\x01 \x03(\x0b\x32\x1b.api.v1.beta1.ParameterSpec\"F\n\nExperiment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12*\n\x04spec\x18\x02 \x01(\x0b\x32\x1c.api.v1.beta1.ExperimentSpec\"2\n\x13ParameterAssignment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"%\n\x06Metric\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"E\n\tMetricLog\x12\x12\n\ntime_stamp\x18\x01 \x01(\t\x12$\n\x06metric\x18\x02 \x01(\x0b\x32\x14.api.v1.beta1.Metric\"4\n\x0bObservation\x12%\n\x07metrics\x18\x01 \x03(\x0b\x32\x14.api.v1.beta1.Metric\">\n\x0eObservationLog\x12,\n\x0bmetric_logs\x18\x01 \x03(\x0b\x32\x17.api.v1.beta1.MetricLog\"\xa3\x02\n\tTrialSpec\x12\x17\n\x0f\x65xperiment_name\x18\x01 \x01(\t\x12.\n\tobjective\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.ObjectiveSpec\x12K\n\x15parameter_assignments\x18\x03 \x01(\x0b\x32,.api.v1.beta1.TrialSpec.ParameterAssignments\x12\x10\n\x08run_spec\x18\x04 \x01(\t\x12\x1e\n\x16metrics_collector_spec\x18\x05 \x01(\t\x1aN\n\x14ParameterAssignments\x12\x36\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32!.api.v1.beta1.ParameterAssignment\"\xa1\x02\n\x0bTrialStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12?\n\tcondition\x18\x03 \x01(\x0e\x32,.api.v1.beta1.TrialStatus.TrialConditionType\x12.\n\x0bobservation\x18\x04 \x01(\x0b\x32\x19.api.v1.beta1.Observation\"t\n\x12TrialConditionType\x12\x0b\n\x07\x43REATED\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tSUCCEEDED\x10\x02\x12\n\n\x06KILLED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x12\x10\n\x0c\x45\x41RLYSTOPPED\x10\x05\x12\x0b\n\x07UNKNOWN\x10\x06\"g\n\x05Trial\x12\x0c\n\x04name\x18\x01 \x01(\t\x12%\n\x04spec\x18\x02 \x01(\x0b\x32\x17.api.v1.beta1.TrialSpec\x12)\n\x06status\x18\x03 \x01(\x0b\x32\x19.api.v1.beta1.TrialStatus\"h\n\x1bReportObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x35\n\x0fobservation_log\x18\x02 \x01(\x0b\x32\x1c.api.v1.beta1.ObservationLog\"\x1b\n\x19ReportObservationLogReply\"1\n\x1b\x44\x65leteObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x1b\n\x19\x44\x65leteObservationLogReply\"i\n\x18GetObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x13\n\x0bmetric_name\x18\x02 \x01(\t\x12\x12\n\nstart_time\x18\x03 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\t\"O\n\x16GetObservationLogReply\x12\x35\n\x0fobservation_log\x18\x01 \x01(\x0b\x32\x1c.api.v1.beta1.ObservationLog\"\x82\x01\n\x15GetSuggestionsRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\x12#\n\x06trials\x18\x02 \x03(\x0b\x32\x13.api.v1.beta1.Trial\x12\x16\n\x0erequest_number\x18\x03 \x01(\x05\"\xab\x02\n\x13GetSuggestionsReply\x12U\n\x15parameter_assignments\x18\x01 \x03(\x0b\x32\x36.api.v1.beta1.GetSuggestionsReply.ParameterAssignments\x12.\n\talgorithm\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.AlgorithmSpec\x12=\n\x14\x65\x61rly_stopping_rules\x18\x03 \x03(\x0b\x32\x1f.api.v1.beta1.EarlyStoppingRule\x1aN\n\x14ParameterAssignments\x12\x36\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32!.api.v1.beta1.ParameterAssignment\"P\n ValidateAlgorithmSettingsRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\" \n\x1eValidateAlgorithmSettingsReply\"q\n\x1cGetEarlyStoppingRulesRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\x12#\n\x06trials\x18\x02 \x03(\x0b\x32\x13.api.v1.beta1.Trial\"[\n\x1aGetEarlyStoppingRulesReply\x12=\n\x14\x65\x61rly_stopping_rules\x18\x01 \x03(\x0b\x32\x1f.api.v1.beta1.EarlyStoppingRule\"b\n\x11\x45\x61rlyStoppingRule\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\x12\x30\n\ncomparison\x18\x03 \x01(\x0e\x32\x1c.api.v1.beta1.ComparisonType\"+\n\x15SetTrialStatusRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x15\n\x13SetTrialStatusReply*U\n\rParameterType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\n\n\x06\x44OUBLE\x10\x01\x12\x07\n\x03INT\x10\x02\x12\x0c\n\x08\x44ISCRETE\x10\x03\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x04*8\n\rObjectiveType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0c\n\x08MINIMIZE\x10\x01\x12\x0c\n\x08MAXIMIZE\x10\x02*J\n\x0e\x43omparisonType\x12\x16\n\x12UNKNOWN_COMPARISON\x10\x00\x12\t\n\x05\x45QUAL\x10\x01\x12\x08\n\x04LESS\x10\x02\x12\x0b\n\x07GREATER\x10\x03\x32\xc6\x02\n\tDBManager\x12j\n\x14ReportObservationLog\x12).api.v1.beta1.ReportObservationLogRequest\x1a\'.api.v1.beta1.ReportObservationLogReply\x12\x61\n\x11GetObservationLog\x12&.api.v1.beta1.GetObservationLogRequest\x1a$.api.v1.beta1.GetObservationLogReply\x12j\n\x14\x44\x65leteObservationLog\x12).api.v1.beta1.DeleteObservationLogRequest\x1a\'.api.v1.beta1.DeleteObservationLogReply2\xe1\x01\n\nSuggestion\x12X\n\x0eGetSuggestions\x12#.api.v1.beta1.GetSuggestionsRequest\x1a!.api.v1.beta1.GetSuggestionsReply\x12y\n\x19ValidateAlgorithmSettings\x12..api.v1.beta1.ValidateAlgorithmSettingsRequest\x1a,.api.v1.beta1.ValidateAlgorithmSettingsReply2\xd8\x01\n\rEarlyStopping\x12m\n\x15GetEarlyStoppingRules\x12*.api.v1.beta1.GetEarlyStoppingRulesRequest\x1a(.api.v1.beta1.GetEarlyStoppingRulesReply\x12X\n\x0eSetTrialStatus\x12#.api.v1.beta1.SetTrialStatusRequest\x1a!.api.v1.beta1.SetTrialStatusReplyb\x06proto3')
   ,
   dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,])
 
@@ -54,8 +54,8 @@ _PARAMETERTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=3913,
-  serialized_end=3998,
+  serialized_start=4000,
+  serialized_end=4085,
 )
 _sym_db.RegisterEnumDescriptor(_PARAMETERTYPE)
 
@@ -81,8 +81,8 @@ _OBJECTIVETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=4000,
-  serialized_end=4056,
+  serialized_start=4087,
+  serialized_end=4143,
 )
 _sym_db.RegisterEnumDescriptor(_OBJECTIVETYPE)
 
@@ -94,22 +94,26 @@ _COMPARISONTYPE = _descriptor.EnumDescriptor(
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='EQUAL', index=0, number=0,
+      name='UNKNOWN_COMPARISON', index=0, number=0,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='LESS', index=1, number=1,
+      name='EQUAL', index=1, number=1,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GREATER', index=2, number=2,
+      name='LESS', index=2, number=2,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GREATER', index=3, number=3,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=4058,
-  serialized_end=4108,
+  serialized_start=4145,
+  serialized_end=4219,
 )
 _sym_db.RegisterEnumDescriptor(_COMPARISONTYPE)
 
@@ -122,9 +126,10 @@ CATEGORICAL = 4
 UNKNOWN = 0
 MINIMIZE = 1
 MAXIMIZE = 2
-EQUAL = 0
-LESS = 1
-GREATER = 2
+UNKNOWN_COMPARISON = 0
+EQUAL = 1
+LESS = 2
+GREATER = 3
 
 
 _TRIALSTATUS_TRIALCONDITIONTYPE = _descriptor.EnumDescriptor(
@@ -154,14 +159,18 @@ _TRIALSTATUS_TRIALCONDITIONTYPE = _descriptor.EnumDescriptor(
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='UNKNOWN', index=5, number=5,
+      name='EARLYSTOPPED', index=5, number=5,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='UNKNOWN', index=6, number=6,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=2208,
-  serialized_end=2306,
+  serialized_start=2447,
+  serialized_end=2563,
 )
 _sym_db.RegisterEnumDescriptor(_TRIALSTATUS_TRIALCONDITIONTYPE)
 
@@ -391,6 +400,82 @@ _ALGORITHMSPEC = _descriptor.Descriptor(
 )
 
 
+_EARLYSTOPPINGSPEC = _descriptor.Descriptor(
+  name='EarlyStoppingSpec',
+  full_name='api.v1.beta1.EarlyStoppingSpec',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='early_stopping_algorithm_name', full_name='api.v1.beta1.EarlyStoppingSpec.early_stopping_algorithm_name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='early_stopping_settings', full_name='api.v1.beta1.EarlyStoppingSpec.early_stopping_settings', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=555,
+  serialized_end=682,
+)
+
+
+_EARLYSTOPPINGSETTING = _descriptor.Descriptor(
+  name='EarlyStoppingSetting',
+  full_name='api.v1.beta1.EarlyStoppingSetting',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='name', full_name='api.v1.beta1.EarlyStoppingSetting.name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='api.v1.beta1.EarlyStoppingSetting.value', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=684,
+  serialized_end=735,
+)
+
+
 _NASCONFIG_OPERATIONS = _descriptor.Descriptor(
   name='Operations',
   full_name='api.v1.beta1.NasConfig.Operations',
@@ -417,8 +502,8 @@ _NASCONFIG_OPERATIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=674,
-  serialized_end=730,
+  serialized_start=856,
+  serialized_end=912,
 )
 
 _NASCONFIG = _descriptor.Descriptor(
@@ -454,8 +539,8 @@ _NASCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=556,
-  serialized_end=730,
+  serialized_start=738,
+  serialized_end=912,
 )
 
 
@@ -499,8 +584,8 @@ _GRAPHCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=732,
-  serialized_end=808,
+  serialized_start=914,
+  serialized_end=990,
 )
 
 
@@ -530,8 +615,8 @@ _OPERATION_PARAMETERSPECS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=913,
-  serialized_end=978,
+  serialized_start=1095,
+  serialized_end=1160,
 )
 
 _OPERATION = _descriptor.Descriptor(
@@ -567,8 +652,8 @@ _OPERATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=811,
-  serialized_end=978,
+  serialized_start=993,
+  serialized_end=1160,
 )
 
 
@@ -598,8 +683,8 @@ _EXPERIMENTSPEC_PARAMETERSPECS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=913,
-  serialized_end=978,
+  serialized_start=1095,
+  serialized_end=1160,
 )
 
 _EXPERIMENTSPEC = _descriptor.Descriptor(
@@ -665,6 +750,13 @@ _EXPERIMENTSPEC = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='early_stopping', full_name='api.v1.beta1.ExperimentSpec.early_stopping', index=8,
+      number=9, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -677,8 +769,8 @@ _EXPERIMENTSPEC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=981,
-  serialized_end=1386,
+  serialized_start=1163,
+  serialized_end=1625,
 )
 
 
@@ -715,8 +807,8 @@ _EXPERIMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1388,
-  serialized_end=1458,
+  serialized_start=1627,
+  serialized_end=1697,
 )
 
 
@@ -753,8 +845,8 @@ _PARAMETERASSIGNMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1460,
-  serialized_end=1510,
+  serialized_start=1699,
+  serialized_end=1749,
 )
 
 
@@ -791,8 +883,8 @@ _METRIC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1512,
-  serialized_end=1549,
+  serialized_start=1751,
+  serialized_end=1788,
 )
 
 
@@ -829,8 +921,8 @@ _METRICLOG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1551,
-  serialized_end=1620,
+  serialized_start=1790,
+  serialized_end=1859,
 )
 
 
@@ -860,8 +952,8 @@ _OBSERVATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1622,
-  serialized_end=1674,
+  serialized_start=1861,
+  serialized_end=1913,
 )
 
 
@@ -891,8 +983,8 @@ _OBSERVATIONLOG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1676,
-  serialized_end=1738,
+  serialized_start=1915,
+  serialized_end=1977,
 )
 
 
@@ -922,8 +1014,8 @@ _TRIALSPEC_PARAMETERASSIGNMENTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1954,
-  serialized_end=2032,
+  serialized_start=2193,
+  serialized_end=2271,
 )
 
 _TRIALSPEC = _descriptor.Descriptor(
@@ -980,8 +1072,8 @@ _TRIALSPEC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1741,
-  serialized_end=2032,
+  serialized_start=1980,
+  serialized_end=2271,
 )
 
 
@@ -1033,8 +1125,8 @@ _TRIALSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2035,
-  serialized_end=2306,
+  serialized_start=2274,
+  serialized_end=2563,
 )
 
 
@@ -1078,8 +1170,8 @@ _TRIAL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2308,
-  serialized_end=2411,
+  serialized_start=2565,
+  serialized_end=2668,
 )
 
 
@@ -1116,8 +1208,8 @@ _REPORTOBSERVATIONLOGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2413,
-  serialized_end=2517,
+  serialized_start=2670,
+  serialized_end=2774,
 )
 
 
@@ -1140,8 +1232,8 @@ _REPORTOBSERVATIONLOGREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2519,
-  serialized_end=2546,
+  serialized_start=2776,
+  serialized_end=2803,
 )
 
 
@@ -1171,8 +1263,8 @@ _DELETEOBSERVATIONLOGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2548,
-  serialized_end=2597,
+  serialized_start=2805,
+  serialized_end=2854,
 )
 
 
@@ -1195,8 +1287,8 @@ _DELETEOBSERVATIONLOGREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2599,
-  serialized_end=2626,
+  serialized_start=2856,
+  serialized_end=2883,
 )
 
 
@@ -1247,8 +1339,8 @@ _GETOBSERVATIONLOGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2628,
-  serialized_end=2733,
+  serialized_start=2885,
+  serialized_end=2990,
 )
 
 
@@ -1278,8 +1370,8 @@ _GETOBSERVATIONLOGREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2735,
-  serialized_end=2814,
+  serialized_start=2992,
+  serialized_end=3071,
 )
 
 
@@ -1323,8 +1415,8 @@ _GETSUGGESTIONSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2817,
-  serialized_end=2947,
+  serialized_start=3074,
+  serialized_end=3204,
 )
 
 
@@ -1354,38 +1446,8 @@ _GETSUGGESTIONSREPLY_PARAMETERASSIGNMENTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1954,
-  serialized_end=2032,
-)
-
-_GETSUGGESTIONSREPLY_EARLYSTOPPINGRULES = _descriptor.Descriptor(
-  name='EarlyStoppingRules',
-  full_name='api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='rules', full_name='api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules.rules', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3272,
-  serialized_end=3340,
+  serialized_start=2193,
+  serialized_end=2271,
 )
 
 _GETSUGGESTIONSREPLY = _descriptor.Descriptor(
@@ -1419,7 +1481,7 @@ _GETSUGGESTIONSREPLY = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_GETSUGGESTIONSREPLY_PARAMETERASSIGNMENTS, _GETSUGGESTIONSREPLY_EARLYSTOPPINGRULES, ],
+  nested_types=[_GETSUGGESTIONSREPLY_PARAMETERASSIGNMENTS, ],
   enum_types=[
   ],
   options=None,
@@ -1428,8 +1490,8 @@ _GETSUGGESTIONSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2950,
-  serialized_end=3340,
+  serialized_start=3207,
+  serialized_end=3506,
 )
 
 
@@ -1459,8 +1521,8 @@ _VALIDATEALGORITHMSETTINGSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3342,
-  serialized_end=3422,
+  serialized_start=3508,
+  serialized_end=3588,
 )
 
 
@@ -1483,8 +1545,8 @@ _VALIDATEALGORITHMSETTINGSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3424,
-  serialized_end=3456,
+  serialized_start=3590,
+  serialized_end=3622,
 )
 
 
@@ -1521,40 +1583,10 @@ _GETEARLYSTOPPINGRULESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3458,
-  serialized_end=3571,
+  serialized_start=3624,
+  serialized_end=3737,
 )
 
-
-_GETEARLYSTOPPINGRULESREPLY_EARLYSTOPPINGRULES = _descriptor.Descriptor(
-  name='EarlyStoppingRules',
-  full_name='api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='rules', full_name='api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules.rules', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3272,
-  serialized_end=3340,
-)
 
 _GETEARLYSTOPPINGRULESREPLY = _descriptor.Descriptor(
   name='GetEarlyStoppingRulesReply',
@@ -1573,7 +1605,7 @@ _GETEARLYSTOPPINGRULESREPLY = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_GETEARLYSTOPPINGRULESREPLY_EARLYSTOPPINGRULES, ],
+  nested_types=[],
   enum_types=[
   ],
   options=None,
@@ -1582,8 +1614,8 @@ _GETEARLYSTOPPINGRULESREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3574,
-  serialized_end=3763,
+  serialized_start=3739,
+  serialized_end=3830,
 )
 
 
@@ -1627,8 +1659,8 @@ _EARLYSTOPPINGRULE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3765,
-  serialized_end=3863,
+  serialized_start=3832,
+  serialized_end=3930,
 )
 
 
@@ -1639,6 +1671,13 @@ _SETTRIALSTATUSREQUEST = _descriptor.Descriptor(
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
+    _descriptor.FieldDescriptor(
+      name='trial_name', full_name='api.v1.beta1.SetTrialStatusRequest.trial_name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -1651,8 +1690,8 @@ _SETTRIALSTATUSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3865,
-  serialized_end=3888,
+  serialized_start=3932,
+  serialized_end=3975,
 )
 
 
@@ -1675,14 +1714,15 @@ _SETTRIALSTATUSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3890,
-  serialized_end=3911,
+  serialized_start=3977,
+  serialized_end=3998,
 )
 
 _PARAMETERSPEC.fields_by_name['parameter_type'].enum_type = _PARAMETERTYPE
 _PARAMETERSPEC.fields_by_name['feasible_space'].message_type = _FEASIBLESPACE
 _OBJECTIVESPEC.fields_by_name['type'].enum_type = _OBJECTIVETYPE
 _ALGORITHMSPEC.fields_by_name['algorithm_settings'].message_type = _ALGORITHMSETTING
+_EARLYSTOPPINGSPEC.fields_by_name['early_stopping_settings'].message_type = _EARLYSTOPPINGSETTING
 _NASCONFIG_OPERATIONS.fields_by_name['operation'].message_type = _OPERATION
 _NASCONFIG_OPERATIONS.containing_type = _NASCONFIG
 _NASCONFIG.fields_by_name['graph_config'].message_type = _GRAPHCONFIG
@@ -1696,6 +1736,7 @@ _EXPERIMENTSPEC.fields_by_name['parameter_specs'].message_type = _EXPERIMENTSPEC
 _EXPERIMENTSPEC.fields_by_name['objective'].message_type = _OBJECTIVESPEC
 _EXPERIMENTSPEC.fields_by_name['algorithm'].message_type = _ALGORITHMSPEC
 _EXPERIMENTSPEC.fields_by_name['nas_config'].message_type = _NASCONFIG
+_EXPERIMENTSPEC.fields_by_name['early_stopping'].message_type = _EARLYSTOPPINGSPEC
 _EXPERIMENT.fields_by_name['spec'].message_type = _EXPERIMENTSPEC
 _METRICLOG.fields_by_name['metric'].message_type = _METRIC
 _OBSERVATION.fields_by_name['metrics'].message_type = _METRIC
@@ -1715,23 +1756,21 @@ _GETSUGGESTIONSREQUEST.fields_by_name['experiment'].message_type = _EXPERIMENT
 _GETSUGGESTIONSREQUEST.fields_by_name['trials'].message_type = _TRIAL
 _GETSUGGESTIONSREPLY_PARAMETERASSIGNMENTS.fields_by_name['assignments'].message_type = _PARAMETERASSIGNMENT
 _GETSUGGESTIONSREPLY_PARAMETERASSIGNMENTS.containing_type = _GETSUGGESTIONSREPLY
-_GETSUGGESTIONSREPLY_EARLYSTOPPINGRULES.fields_by_name['rules'].message_type = _EARLYSTOPPINGRULE
-_GETSUGGESTIONSREPLY_EARLYSTOPPINGRULES.containing_type = _GETSUGGESTIONSREPLY
 _GETSUGGESTIONSREPLY.fields_by_name['parameter_assignments'].message_type = _GETSUGGESTIONSREPLY_PARAMETERASSIGNMENTS
 _GETSUGGESTIONSREPLY.fields_by_name['algorithm'].message_type = _ALGORITHMSPEC
-_GETSUGGESTIONSREPLY.fields_by_name['early_stopping_rules'].message_type = _GETSUGGESTIONSREPLY_EARLYSTOPPINGRULES
+_GETSUGGESTIONSREPLY.fields_by_name['early_stopping_rules'].message_type = _EARLYSTOPPINGRULE
 _VALIDATEALGORITHMSETTINGSREQUEST.fields_by_name['experiment'].message_type = _EXPERIMENT
 _GETEARLYSTOPPINGRULESREQUEST.fields_by_name['experiment'].message_type = _EXPERIMENT
 _GETEARLYSTOPPINGRULESREQUEST.fields_by_name['trials'].message_type = _TRIAL
-_GETEARLYSTOPPINGRULESREPLY_EARLYSTOPPINGRULES.fields_by_name['rules'].message_type = _EARLYSTOPPINGRULE
-_GETEARLYSTOPPINGRULESREPLY_EARLYSTOPPINGRULES.containing_type = _GETEARLYSTOPPINGRULESREPLY
-_GETEARLYSTOPPINGRULESREPLY.fields_by_name['early_stopping_rules'].message_type = _GETEARLYSTOPPINGRULESREPLY_EARLYSTOPPINGRULES
+_GETEARLYSTOPPINGRULESREPLY.fields_by_name['early_stopping_rules'].message_type = _EARLYSTOPPINGRULE
 _EARLYSTOPPINGRULE.fields_by_name['comparison'].enum_type = _COMPARISONTYPE
 DESCRIPTOR.message_types_by_name['FeasibleSpace'] = _FEASIBLESPACE
 DESCRIPTOR.message_types_by_name['ParameterSpec'] = _PARAMETERSPEC
 DESCRIPTOR.message_types_by_name['ObjectiveSpec'] = _OBJECTIVESPEC
 DESCRIPTOR.message_types_by_name['AlgorithmSetting'] = _ALGORITHMSETTING
 DESCRIPTOR.message_types_by_name['AlgorithmSpec'] = _ALGORITHMSPEC
+DESCRIPTOR.message_types_by_name['EarlyStoppingSpec'] = _EARLYSTOPPINGSPEC
+DESCRIPTOR.message_types_by_name['EarlyStoppingSetting'] = _EARLYSTOPPINGSETTING
 DESCRIPTOR.message_types_by_name['NasConfig'] = _NASCONFIG
 DESCRIPTOR.message_types_by_name['GraphConfig'] = _GRAPHCONFIG
 DESCRIPTOR.message_types_by_name['Operation'] = _OPERATION
@@ -1799,6 +1838,20 @@ AlgorithmSpec = _reflection.GeneratedProtocolMessageType('AlgorithmSpec', (_mess
   # @@protoc_insertion_point(class_scope:api.v1.beta1.AlgorithmSpec)
   ))
 _sym_db.RegisterMessage(AlgorithmSpec)
+
+EarlyStoppingSpec = _reflection.GeneratedProtocolMessageType('EarlyStoppingSpec', (_message.Message,), dict(
+  DESCRIPTOR = _EARLYSTOPPINGSPEC,
+  __module__ = 'api_pb2'
+  # @@protoc_insertion_point(class_scope:api.v1.beta1.EarlyStoppingSpec)
+  ))
+_sym_db.RegisterMessage(EarlyStoppingSpec)
+
+EarlyStoppingSetting = _reflection.GeneratedProtocolMessageType('EarlyStoppingSetting', (_message.Message,), dict(
+  DESCRIPTOR = _EARLYSTOPPINGSETTING,
+  __module__ = 'api_pb2'
+  # @@protoc_insertion_point(class_scope:api.v1.beta1.EarlyStoppingSetting)
+  ))
+_sym_db.RegisterMessage(EarlyStoppingSetting)
 
 NasConfig = _reflection.GeneratedProtocolMessageType('NasConfig', (_message.Message,), dict(
 
@@ -1980,20 +2033,12 @@ GetSuggestionsReply = _reflection.GeneratedProtocolMessageType('GetSuggestionsRe
     # @@protoc_insertion_point(class_scope:api.v1.beta1.GetSuggestionsReply.ParameterAssignments)
     ))
   ,
-
-  EarlyStoppingRules = _reflection.GeneratedProtocolMessageType('EarlyStoppingRules', (_message.Message,), dict(
-    DESCRIPTOR = _GETSUGGESTIONSREPLY_EARLYSTOPPINGRULES,
-    __module__ = 'api_pb2'
-    # @@protoc_insertion_point(class_scope:api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules)
-    ))
-  ,
   DESCRIPTOR = _GETSUGGESTIONSREPLY,
   __module__ = 'api_pb2'
   # @@protoc_insertion_point(class_scope:api.v1.beta1.GetSuggestionsReply)
   ))
 _sym_db.RegisterMessage(GetSuggestionsReply)
 _sym_db.RegisterMessage(GetSuggestionsReply.ParameterAssignments)
-_sym_db.RegisterMessage(GetSuggestionsReply.EarlyStoppingRules)
 
 ValidateAlgorithmSettingsRequest = _reflection.GeneratedProtocolMessageType('ValidateAlgorithmSettingsRequest', (_message.Message,), dict(
   DESCRIPTOR = _VALIDATEALGORITHMSETTINGSREQUEST,
@@ -2017,19 +2062,11 @@ GetEarlyStoppingRulesRequest = _reflection.GeneratedProtocolMessageType('GetEarl
 _sym_db.RegisterMessage(GetEarlyStoppingRulesRequest)
 
 GetEarlyStoppingRulesReply = _reflection.GeneratedProtocolMessageType('GetEarlyStoppingRulesReply', (_message.Message,), dict(
-
-  EarlyStoppingRules = _reflection.GeneratedProtocolMessageType('EarlyStoppingRules', (_message.Message,), dict(
-    DESCRIPTOR = _GETEARLYSTOPPINGRULESREPLY_EARLYSTOPPINGRULES,
-    __module__ = 'api_pb2'
-    # @@protoc_insertion_point(class_scope:api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules)
-    ))
-  ,
   DESCRIPTOR = _GETEARLYSTOPPINGRULESREPLY,
   __module__ = 'api_pb2'
   # @@protoc_insertion_point(class_scope:api.v1.beta1.GetEarlyStoppingRulesReply)
   ))
 _sym_db.RegisterMessage(GetEarlyStoppingRulesReply)
-_sym_db.RegisterMessage(GetEarlyStoppingRulesReply.EarlyStoppingRules)
 
 EarlyStoppingRule = _reflection.GeneratedProtocolMessageType('EarlyStoppingRule', (_message.Message,), dict(
   DESCRIPTOR = _EARLYSTOPPINGRULE,
@@ -2060,8 +2097,8 @@ _DBMANAGER = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=4111,
-  serialized_end=4437,
+  serialized_start=4222,
+  serialized_end=4548,
   methods=[
   _descriptor.MethodDescriptor(
     name='ReportObservationLog',
@@ -2102,8 +2139,8 @@ _SUGGESTION = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=1,
   options=None,
-  serialized_start=4440,
-  serialized_end=4665,
+  serialized_start=4551,
+  serialized_end=4776,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetSuggestions',
@@ -2135,8 +2172,8 @@ _EARLYSTOPPING = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=2,
   options=None,
-  serialized_start=4668,
-  serialized_end=4884,
+  serialized_start=4779,
+  serialized_end=4995,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetEarlyStoppingRules',

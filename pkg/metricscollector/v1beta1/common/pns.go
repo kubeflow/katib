@@ -129,10 +129,17 @@ func WaitPIDs(pids map[int]bool, mainPid int, opts WaitPidsOpts) error {
 						if opts.CompletedMarkedDirPath != "" {
 							markFile := filepath.Join(opts.CompletedMarkedDirPath, fmt.Sprintf("%d.pid", pid))
 							// Read file with "completed" marker
-							if contents, err := ioutil.ReadFile(markFile); err != nil {
-								return fmt.Errorf("Unable to read file %v for pid %v, error: %v", markFile, pid, err)
-								// Check if file contains "completed" marker
-							} else if strings.TrimSpace(string(contents)) != TrainingCompleted {
+							contents, err := ioutil.ReadFile(markFile)
+							if err != nil {
+								return fmt.Errorf("Training container is failed. Unable to read file %v for pid %v, error: %v", markFile, pid, err)
+							}
+							// Check if file contains "early stopped" marker
+							// In that case process is not completed
+							if strings.TrimSpace(string(contents)) == TrainingEarlyStopped {
+								continue
+							}
+							// Check if file contains "completed" marker
+							if strings.TrimSpace(string(contents)) != TrainingCompleted {
 								return fmt.Errorf("Unable to find marker: %v in file: %v with contents: %v for pid: %v",
 									TrainingCompleted, markFile, string(contents), pid)
 							}

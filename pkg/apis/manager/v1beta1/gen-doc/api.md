@@ -9,17 +9,17 @@
     - [DeleteObservationLogReply](#api.v1.beta1.DeleteObservationLogReply)
     - [DeleteObservationLogRequest](#api.v1.beta1.DeleteObservationLogRequest)
     - [EarlyStoppingRule](#api.v1.beta1.EarlyStoppingRule)
+    - [EarlyStoppingSetting](#api.v1.beta1.EarlyStoppingSetting)
+    - [EarlyStoppingSpec](#api.v1.beta1.EarlyStoppingSpec)
     - [Experiment](#api.v1.beta1.Experiment)
     - [ExperimentSpec](#api.v1.beta1.ExperimentSpec)
     - [ExperimentSpec.ParameterSpecs](#api.v1.beta1.ExperimentSpec.ParameterSpecs)
     - [FeasibleSpace](#api.v1.beta1.FeasibleSpace)
     - [GetEarlyStoppingRulesReply](#api.v1.beta1.GetEarlyStoppingRulesReply)
-    - [GetEarlyStoppingRulesReply.EarlyStoppingRules](#api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules)
     - [GetEarlyStoppingRulesRequest](#api.v1.beta1.GetEarlyStoppingRulesRequest)
     - [GetObservationLogReply](#api.v1.beta1.GetObservationLogReply)
     - [GetObservationLogRequest](#api.v1.beta1.GetObservationLogRequest)
     - [GetSuggestionsReply](#api.v1.beta1.GetSuggestionsReply)
-    - [GetSuggestionsReply.EarlyStoppingRules](#api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules)
     - [GetSuggestionsReply.ParameterAssignments](#api.v1.beta1.GetSuggestionsReply.ParameterAssignments)
     - [GetSuggestionsRequest](#api.v1.beta1.GetSuggestionsRequest)
     - [GraphConfig](#api.v1.beta1.GraphConfig)
@@ -139,6 +139,38 @@ Katib GRPC API v1beta1
 
 
 
+<a name="api.v1.beta1.EarlyStoppingSetting"></a>
+
+### EarlyStoppingSetting
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| name | [string](#string) |  |  |
+| value | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="api.v1.beta1.EarlyStoppingSpec"></a>
+
+### EarlyStoppingSpec
+Early stopping algorithm specification
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| early_stopping_algorithm_name | [string](#string) |  |  |
+| early_stopping_settings | [EarlyStoppingSetting](#api.v1.beta1.EarlyStoppingSetting) | repeated |  |
+
+
+
+
+
+
 <a name="api.v1.beta1.Experiment"></a>
 
 ### Experiment
@@ -173,6 +205,7 @@ It is assumed that objective function f(x) does not change in the course of a Ex
 | parallel_trial_count | [int32](#int32) |  |  |
 | max_trial_count | [int32](#int32) |  |  |
 | nas_config | [NasConfig](#api.v1.beta1.NasConfig) |  |  |
+| early_stopping | [EarlyStoppingSpec](#api.v1.beta1.EarlyStoppingSpec) |  |  |
 
 
 
@@ -222,22 +255,7 @@ Discrete and Categorical type use List.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| early_stopping_rules | [GetEarlyStoppingRulesReply.EarlyStoppingRules](#api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules) | repeated |  |
-
-
-
-
-
-
-<a name="api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules"></a>
-
-### GetEarlyStoppingRulesReply.EarlyStoppingRules
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| rules | [EarlyStoppingRule](#api.v1.beta1.EarlyStoppingRule) | repeated |  |
+| early_stopping_rules | [EarlyStoppingRule](#api.v1.beta1.EarlyStoppingRule) | repeated |  |
 
 
 
@@ -303,22 +321,7 @@ Discrete and Categorical type use List.
 | ----- | ---- | ----- | ----------- |
 | parameter_assignments | [GetSuggestionsReply.ParameterAssignments](#api.v1.beta1.GetSuggestionsReply.ParameterAssignments) | repeated |  |
 | algorithm | [AlgorithmSpec](#api.v1.beta1.AlgorithmSpec) |  |  |
-| early_stopping_rules | [GetSuggestionsReply.EarlyStoppingRules](#api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules) | repeated |  |
-
-
-
-
-
-
-<a name="api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules"></a>
-
-### GetSuggestionsReply.EarlyStoppingRules
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| rules | [EarlyStoppingRule](#api.v1.beta1.EarlyStoppingRule) | repeated |  |
+| early_stopping_rules | [EarlyStoppingRule](#api.v1.beta1.EarlyStoppingRule) | repeated |  |
 
 
 
@@ -589,7 +592,12 @@ Katib will create each Hyper parameter from this config.
 <a name="api.v1.beta1.SetTrialStatusRequest"></a>
 
 ### SetTrialStatusRequest
-TODO (andreyvelich): Add request &#43; reply
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| trial_name | [string](#string) |  |  |
 
 
 
@@ -699,9 +707,10 @@ Return INVALID_ARGUMENT Error if Algorithm Settings are not Valid
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
-| EQUAL | 0 |  |
-| LESS | 1 |  |
-| GREATER | 2 |  |
+| UNKNOWN_COMPARISON | 0 | Unknown comparison, not used |
+| EQUAL | 1 | Equal comparison, e.g. accuracy = 0.7 |
+| LESS | 2 | Less comparison, e.g. accuracy &lt; 0.7 |
+| GREATER | 3 | Greater comparison, e.g. accuracy &gt; 0.7 |
 
 
 
@@ -745,7 +754,8 @@ Types of value for HyperParameter.
 | SUCCEEDED | 2 |  |
 | KILLED | 3 |  |
 | FAILED | 4 |  |
-| UNKNOWN | 5 |  |
+| EARLYSTOPPED | 5 |  |
+| UNKNOWN | 6 |  |
 
 
  

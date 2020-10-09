@@ -45,24 +45,26 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 
 	if jobStatus.Condition == trialutil.JobSucceeded {
 		if isTrialObservationAvailable(instance) && !instance.IsSucceeded() {
-			msg := "Trial has succeeded "
-			reason := TrialSucceededReason
+			if !instance.IsEarlyStopped() {
+				msg := "Trial has succeeded"
+				reason := TrialSucceededReason
 
-			// Get message and reason from deployed job
-			if jobStatus.Message != "" {
-				msg = fmt.Sprintf("%v. Job message: %v", msg, jobStatus.Message)
+				// Get message and reason from deployed job
+				if jobStatus.Message != "" {
+					msg = fmt.Sprintf("%v. Job message: %v", msg, jobStatus.Message)
+				}
+				if jobStatus.Reason != "" {
+					reason = fmt.Sprintf("%v. Job reason: %v", reason, jobStatus.Reason)
+				}
+
+				logger.Info("Trial status changed to Succeeded")
+				instance.MarkTrialStatusSucceeded(corev1.ConditionTrue, reason, msg)
+				instance.Status.CompletionTime = &timeNow
+
+				eventMsg := fmt.Sprintf("Job %v has succeeded", deployedJobName)
+				r.recorder.Eventf(instance, corev1.EventTypeNormal, JobSucceededReason, eventMsg)
+				r.collector.IncreaseTrialsSucceededCount(instance.Namespace)
 			}
-			if jobStatus.Reason != "" {
-				reason = fmt.Sprintf("%v. Job reason: %v", reason, jobStatus.Reason)
-			}
-
-			logger.Info("Trial status changed to Succeeded")
-			instance.MarkTrialStatusSucceeded(corev1.ConditionTrue, reason, msg)
-			instance.Status.CompletionTime = &timeNow
-
-			eventMsg := fmt.Sprintf("Job %v has succeeded", deployedJobName)
-			r.recorder.Eventf(instance, corev1.EventTypeNormal, JobSucceededReason, eventMsg)
-			r.collector.IncreaseTrialsSucceededCount(instance.Namespace)
 		} else if !instance.IsMetricsUnavailable() {
 			// TODO (andreyvelich): Is it correct to mark succeeded status false when metrics are unavailable?
 			// Ref issue to add new condition: https://github.com/kubeflow/katib/issues/1343
@@ -83,7 +85,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 			eventMsg := fmt.Sprintf("Metrics are not available for Job %v", deployedJobName)
 			r.recorder.Eventf(instance, corev1.EventTypeWarning, JobMetricsUnavailableReason, eventMsg)
 		}
-	} else if jobStatus.Condition == trialutil.JobFailed && !instance.IsFailed() {
+	} else if jobStatus.Condition == trialutil.JobFailed && !instance.IsFailed() && !instance.IsEarlyStopped() {
 		msg := "Trial has failed"
 		reason := TrialFailedReason
 
@@ -106,7 +108,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobFailedReason, eventMsg)
 		r.collector.IncreaseTrialsFailedCount(instance.Namespace)
 		logger.Info("Trial status changed to Failed")
-	} else if jobStatus.Condition == trialutil.JobRunning && !instance.IsRunning() {
+	} else if jobStatus.Condition == trialutil.JobRunning && !instance.IsRunning() && !instance.IsEarlyStopped() {
 		msg := "Trial is running"
 		instance.MarkTrialStatusRunning(TrialRunningReason, msg)
 

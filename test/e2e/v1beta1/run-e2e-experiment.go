@@ -291,7 +291,7 @@ func verifySuggestion(kclient katibclient.Client, exp *experimentsv1beta1.Experi
 		}
 
 		// Suggestion service should be deleted.
-		serviceName := controllerUtil.GetAlgorithmServiceName(sug)
+		serviceName := controllerUtil.GetSuggestionServiceName(sug)
 		namespacedName := types.NamespacedName{Name: serviceName, Namespace: sug.Namespace}
 		err = kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.Service{})
 		if errors.IsNotFound(err) {
@@ -301,7 +301,7 @@ func verifySuggestion(kclient katibclient.Client, exp *experimentsv1beta1.Experi
 		}
 
 		// Suggestion deployment should be deleted.
-		deploymentName := controllerUtil.GetAlgorithmDeploymentName(sug)
+		deploymentName := controllerUtil.GetSuggestionDeploymentName(sug)
 		namespacedName = types.NamespacedName{Name: deploymentName, Namespace: sug.Namespace}
 		err = kclient.GetClient().Get(context.TODO(), namespacedName, &appsv1.Deployment{})
 		if errors.IsNotFound(err) {
@@ -312,14 +312,14 @@ func verifySuggestion(kclient katibclient.Client, exp *experimentsv1beta1.Experi
 
 		// PV and PVC should not be deleted for Suggestion with resume policy FromVolume.
 		if exp.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
-			pvcName := controllerUtil.GetAlgorithmPersistentVolumeClaimName(sug)
+			pvcName := controllerUtil.GetSuggestionPersistentVolumeClaimName(sug)
 			namespacedName = types.NamespacedName{Name: pvcName, Namespace: sug.Namespace}
 			err = kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.PersistentVolumeClaim{})
 			if errors.IsNotFound(err) {
 				return fmt.Errorf("Suggestion PVC: %v is not alive while ResumePolicy = %v", pvcName, exp.Spec.ResumePolicy)
 			}
 
-			pvName := controllerUtil.GetAlgorithmPersistentVolumeName(sug)
+			pvName := controllerUtil.GetSuggestionPersistentVolumeName(sug)
 			namespacedName = types.NamespacedName{Name: pvName}
 			err = kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.PersistentVolume{})
 			if errors.IsNotFound(err) {

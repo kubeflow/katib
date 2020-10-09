@@ -28,8 +28,11 @@ const (
 	DefaultTimeout = 0
 	// DefaultWaitAll is the default value whether wait for all other main process of container exiting
 	DefaultWaitAll = true
-	// TrainingCompleted is the job finished marker in $$$$.pid file when main process is completed
+	// TrainingCompleted is the job finished marker in $$$$.pid file when main training process is completed
 	TrainingCompleted = "completed"
+
+	// TrainingEarlyStopped is the job finished marker in $$$$.pid file when main training process is early stopped
+	TrainingEarlyStopped = "early-stopped"
 
 	// DefaultFilter is the default metrics collector filter to parse the metrics.
 	// Metrics must be printed this way
