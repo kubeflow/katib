@@ -175,28 +175,28 @@ func main() {
 			log.Fatalf("Suggestion is still running while ResumePolicy = %v", exp.Spec.ResumePolicy)
 		}
 
-		namespacedName := types.NamespacedName{Name: controllerUtil.GetAlgorithmServiceName(sug), Namespace: sug.Namespace}
+		namespacedName := types.NamespacedName{Name: controllerUtil.GetSuggestionServiceName(sug), Namespace: sug.Namespace}
 		err := kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.Service{})
 		if err == nil || !errors.IsNotFound(err) {
 			log.Fatalf("Suggestion service is still alive while ResumePolicy = %v", exp.Spec.ResumePolicy)
 		}
-		log.Printf("Suggestion service %v has been deleted", controllerUtil.GetAlgorithmServiceName(sug))
+		log.Printf("Suggestion service %v has been deleted", controllerUtil.GetSuggestionServiceName(sug))
 
-		namespacedName = types.NamespacedName{Name: controllerUtil.GetAlgorithmDeploymentName(sug), Namespace: sug.Namespace}
+		namespacedName = types.NamespacedName{Name: controllerUtil.GetSuggestionDeploymentName(sug), Namespace: sug.Namespace}
 		err = kclient.GetClient().Get(context.TODO(), namespacedName, &appsv1.Deployment{})
 		if err == nil || !errors.IsNotFound(err) {
 			log.Fatalf("Suggestion deployment is still alive while ResumePolicy = %v", exp.Spec.ResumePolicy)
 		}
-		log.Printf("Suggestion deployment %v has been deleted", controllerUtil.GetAlgorithmDeploymentName(sug))
+		log.Printf("Suggestion deployment %v has been deleted", controllerUtil.GetSuggestionDeploymentName(sug))
 
 		if exp.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
-			namespacedName = types.NamespacedName{Name: controllerUtil.GetAlgorithmPersistentVolumeClaimName(sug), Namespace: sug.Namespace}
+			namespacedName = types.NamespacedName{Name: controllerUtil.GetSuggestionPersistentVolumeClaimName(sug), Namespace: sug.Namespace}
 			err = kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.PersistentVolumeClaim{})
 			if err != nil {
 				log.Fatalf("Suggestion persistent volume claim is not alive while ResumePolicy = %v, error: %v", experimentsv1beta1.FromVolume, err)
 			}
 
-			namespacedName = types.NamespacedName{Name: controllerUtil.GetAlgorithmPersistentVolumeName(sug)}
+			namespacedName = types.NamespacedName{Name: controllerUtil.GetSuggestionPersistentVolumeClaimName(sug)}
 			err = kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.PersistentVolume{})
 			if err != nil {
 				log.Fatalf("Suggestion persistent volume is not alive while ResumePolicy = %v, error: %v", experimentsv1beta1.FromVolume, err)

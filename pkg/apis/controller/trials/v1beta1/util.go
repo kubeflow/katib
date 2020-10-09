@@ -93,7 +93,11 @@ func (trial *Trial) IsMetricsUnavailable() bool {
 }
 
 func (trial *Trial) IsCompleted() bool {
-	return trial.IsSucceeded() || trial.IsFailed() || trial.IsKilled()
+	return trial.IsSucceeded() || trial.IsFailed() || trial.IsKilled() || trial.IsEarlyStopped()
+}
+
+func (trial *Trial) IsEarlyStopped() bool {
+	return hasCondition(trial, TrialEarlyStopped)
 }
 
 func (trial *Trial) GetLastConditionType() (TrialConditionType, error) {

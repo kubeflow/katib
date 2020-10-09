@@ -9,6 +9,10 @@ import (
 )
 
 const (
+
+	// PluralTrial is the plural for Trial object
+	PluralTrial = "trials"
+
 	// ConfigExperimentSuggestionName is the config name of the
 	// suggestion client implementation in experiment controller.
 	ConfigExperimentSuggestionName = "experiment-suggestion-name"
@@ -33,18 +37,28 @@ const (
 	// LabelDeploymentName is the label of deployment name.
 	LabelDeploymentName = "deployment"
 
-	// ContainerSuggestion is the container name in Suggestion.
+	// ContainerSuggestion is the container name to run suggestion service.
 	ContainerSuggestion = "suggestion"
+	// ContainerEarlyStopping is the container name to run early-stopping service.
+	ContainerEarlyStopping = "early-stopping"
 	// ContainerSuggestionVolumeName is the volume name that mounted on suggestion container
 	ContainerSuggestionVolumeName = "suggestion-volume"
 
+	// DefaultSuggestionPortName is the default port name of suggestion service.
+	DefaultSuggestionPortName = "suggestion-api"
 	// DefaultSuggestionPort is the default port of suggestion service.
 	DefaultSuggestionPort = 6789
-	// DefaultSuggestionPortName is the default port name of suggestion service.
-	DefaultSuggestionPortName = "katib-api"
-	// DefaultGRPCService is the default service name in Suggestion,
+	// DefaultEarlyStoppingPortName is the default port name of early stopping service.
+	DefaultEarlyStoppingPortName = "earlystop-api"
+	// DefaultEarlyStoppingPort is the default port of early stopping service.
+	DefaultEarlyStoppingPort = 6788
+
+	// DefaultGRPCServiceSuggestion is the default suggestion service name,
 	// which is used to run healthz check using grpc probe.
-	DefaultGRPCService = "manager.v1beta1.Suggestion"
+	DefaultGRPCServiceSuggestion = "manager.v1beta1.Suggestion"
+	// DefaultGRPCServiceEarlyStopping is the default early stopping service name,
+	// which is used to run healthz check using grpc probe.
+	DefaultGRPCServiceEarlyStopping = "manager.v1beta1.EarlyStopping"
 
 	// DefaultGRPCRetryAttempts is the the maximum number of retries for gRPC calls
 	DefaultGRPCRetryAttempts = 10

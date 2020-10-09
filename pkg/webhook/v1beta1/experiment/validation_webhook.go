@@ -111,7 +111,7 @@ func (v *experimentValidator) Handle(ctx context.Context, req types.Request) typ
 		}
 
 		// Get PV name from Suggestion
-		PVName := util.GetAlgorithmPersistentVolumeName(suggestion)
+		PVName := util.GetSuggestionPersistentVolumeName(suggestion)
 		err := v.client.Get(context.TODO(), ktypes.NamespacedName{Name: PVName}, &v1.PersistentVolume{})
 		if !errors.IsNotFound(err) {
 			returnError := fmt.Errorf("Cannot create the Experiment: %v in namespace: %v, PV: %v is not deleted", inst.Name, inst.Namespace, PVName)

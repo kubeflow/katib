@@ -70,6 +70,10 @@ func (g *General) createSuggestion(instance *experimentsv1beta1.Experiment, sugg
 		},
 	}
 
+	if instance.Spec.EarlyStopping != nil {
+		suggestion.Spec.EarlyStoppingAlgorithmName = instance.Spec.EarlyStopping.EarlyStoppingAlgorithmName
+	}
+
 	if err := controllerutil.SetControllerReference(instance, suggestion, g.scheme); err != nil {
 		logger.Error(err, "Error in setting controller reference")
 		return err

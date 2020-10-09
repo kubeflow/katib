@@ -57,7 +57,7 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 	var bestTrialValue float64
 	sts := &instance.Status
 	sts.Trials = 0
-	sts.RunningTrialList, sts.PendingTrialList, sts.FailedTrialList, sts.SucceededTrialList, sts.KilledTrialList = nil, nil, nil, nil, nil
+	sts.RunningTrialList, sts.PendingTrialList, sts.FailedTrialList, sts.SucceededTrialList, sts.KilledTrialList, sts.EarlyStoppedTrialList = nil, nil, nil, nil, nil, nil
 	bestTrialIndex := -1
 	isObjectiveGoalReached := false
 	var objectiveValueGoal float64
@@ -74,6 +74,8 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 			sts.FailedTrialList = append(sts.FailedTrialList, trial.Name)
 		} else if trial.IsSucceeded() {
 			sts.SucceededTrialList = append(sts.SucceededTrialList, trial.Name)
+		} else if trial.IsEarlyStopped() {
+			sts.EarlyStoppedTrialList = append(sts.EarlyStoppedTrialList, trial.Name)
 		} else if trial.IsRunning() {
 			sts.RunningTrialList = append(sts.RunningTrialList, trial.Name)
 		} else {
@@ -122,6 +124,7 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 	sts.TrialsSucceeded = int32(len(sts.SucceededTrialList))
 	sts.TrialsFailed = int32(len(sts.FailedTrialList))
 	sts.TrialsKilled = int32(len(sts.KilledTrialList))
+	sts.TrialsEarlyStopped = int32(len(sts.EarlyStoppedTrialList))
 
 	// if best trial is set
 	if bestTrialIndex != -1 {

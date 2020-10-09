@@ -27,7 +27,7 @@ func CollectObservationLog(fileName string, metrics []string, filters []string) 
 
 func parseLogs(logs []string, metrics []string, filters []string) (*v1beta1.ObservationLog, error) {
 	olog := &v1beta1.ObservationLog{}
-	metricRegList := getFilterRegexpList(filters)
+	metricRegList := GetFilterRegexpList(filters)
 	mlogs := make([]*v1beta1.MetricLog, 0, len(logs))
 
 	for _, logline := range logs {
@@ -107,7 +107,8 @@ func parseLogs(logs []string, metrics []string, filters []string) (*v1beta1.Obse
 	return olog, nil
 }
 
-func getFilterRegexpList(filters []string) []*regexp.Regexp {
+// GetFilterRegexpList returns Regexp array from filters string array
+func GetFilterRegexpList(filters []string) []*regexp.Regexp {
 	regexpList := make([]*regexp.Regexp, 0, len(filters))
 	if len(filters) == 0 {
 		filters = append(filters, common.DefaultFilter)

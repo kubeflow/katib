@@ -199,6 +199,14 @@
                 </li>
               
                 <li>
+                  <a href="#api.v1.beta1.EarlyStoppingSetting"><span class="badge">M</span>EarlyStoppingSetting</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.beta1.EarlyStoppingSpec"><span class="badge">M</span>EarlyStoppingSpec</a>
+                </li>
+              
+                <li>
                   <a href="#api.v1.beta1.Experiment"><span class="badge">M</span>Experiment</a>
                 </li>
               
@@ -219,10 +227,6 @@
                 </li>
               
                 <li>
-                  <a href="#api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules"><span class="badge">M</span>GetEarlyStoppingRulesReply.EarlyStoppingRules</a>
-                </li>
-              
-                <li>
                   <a href="#api.v1.beta1.GetEarlyStoppingRulesRequest"><span class="badge">M</span>GetEarlyStoppingRulesRequest</a>
                 </li>
               
@@ -236,10 +240,6 @@
               
                 <li>
                   <a href="#api.v1.beta1.GetSuggestionsReply"><span class="badge">M</span>GetSuggestionsReply</a>
-                </li>
-              
-                <li>
-                  <a href="#api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules"><span class="badge">M</span>GetSuggestionsReply.EarlyStoppingRules</a>
                 </li>
               
                 <li>
@@ -515,6 +515,68 @@
 
         
       
+        <h3 id="api.v1.beta1.EarlyStoppingSetting">EarlyStoppingSetting</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.EarlyStoppingSpec">EarlyStoppingSpec</h3>
+        <p>Early stopping algorithm specification</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>early_stopping_algorithm_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>early_stopping_settings</td>
+                  <td><a href="#api.v1.beta1.EarlyStoppingSetting">EarlyStoppingSetting</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
         <h3 id="api.v1.beta1.Experiment">Experiment</h3>
         <p></p>
 
@@ -612,6 +674,13 @@
                   <td><p> </p></td>
                 </tr>
               
+                <tr>
+                  <td>early_stopping</td>
+                  <td><a href="#api.v1.beta1.EarlyStoppingSpec">EarlyStoppingSpec</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
             </tbody>
           </table>
 
@@ -700,30 +769,6 @@
               
                 <tr>
                   <td>early_stopping_rules</td>
-                  <td><a href="#api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules">GetEarlyStoppingRulesReply.EarlyStoppingRules</a></td>
-                  <td>repeated</td>
-                  <td><p> </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-
-          
-
-        
-      
-        <h3 id="api.v1.beta1.GetEarlyStoppingRulesReply.EarlyStoppingRules">GetEarlyStoppingRulesReply.EarlyStoppingRules</h3>
-        <p></p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>rules</td>
                   <td><a href="#api.v1.beta1.EarlyStoppingRule">EarlyStoppingRule</a></td>
                   <td>repeated</td>
                   <td><p> </p></td>
@@ -862,30 +907,6 @@
               
                 <tr>
                   <td>early_stopping_rules</td>
-                  <td><a href="#api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules">GetSuggestionsReply.EarlyStoppingRules</a></td>
-                  <td>repeated</td>
-                  <td><p> </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-
-          
-
-        
-      
-        <h3 id="api.v1.beta1.GetSuggestionsReply.EarlyStoppingRules">GetSuggestionsReply.EarlyStoppingRules</h3>
-        <p></p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>rules</td>
                   <td><a href="#api.v1.beta1.EarlyStoppingRule">EarlyStoppingRule</a></td>
                   <td>repeated</td>
                   <td><p> </p></td>
@@ -1378,9 +1399,26 @@
         
       
         <h3 id="api.v1.beta1.SetTrialStatusRequest">SetTrialStatusRequest</h3>
-        <p>TODO (andreyvelich): Add request + reply</p>
+        <p></p>
 
         
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trial_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
 
         
       
@@ -1585,21 +1623,27 @@
           <tbody>
             
               <tr>
-                <td>EQUAL</td>
+                <td>UNKNOWN_COMPARISON</td>
                 <td>0</td>
-                <td><p></p></td>
+                <td><p>Unknown comparison, not used</p></td>
+              </tr>
+            
+              <tr>
+                <td>EQUAL</td>
+                <td>1</td>
+                <td><p>Equal comparison, e.g. accuracy = 0.7</p></td>
               </tr>
             
               <tr>
                 <td>LESS</td>
-                <td>1</td>
-                <td><p></p></td>
+                <td>2</td>
+                <td><p>Less comparison, e.g. accuracy &lt; 0.7</p></td>
               </tr>
             
               <tr>
                 <td>GREATER</td>
-                <td>2</td>
-                <td><p></p></td>
+                <td>3</td>
+                <td><p>Greater comparison, e.g. accuracy &gt; 0.7</p></td>
               </tr>
             
           </tbody>
@@ -1714,8 +1758,14 @@
               </tr>
             
               <tr>
-                <td>UNKNOWN</td>
+                <td>EARLYSTOPPED</td>
                 <td>5</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>UNKNOWN</td>
+                <td>6</td>
                 <td><p></p></td>
               </tr>
             

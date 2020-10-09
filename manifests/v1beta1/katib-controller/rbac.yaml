@@ -72,6 +72,11 @@ rules:
       - pytorchjobs
     verbs:
       - "*"
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - roles
+      - rolebindings
 ---
 apiVersion: v1
 kind: ServiceAccount

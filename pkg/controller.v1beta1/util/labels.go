@@ -12,7 +12,7 @@ func SuggestionLabels(instance *suggestionsv1beta1.Suggestion) map[string]string
 	for k, v := range instance.Labels {
 		res[k] = v
 	}
-	res[consts.LabelDeploymentName] = GetAlgorithmDeploymentName(instance)
+	res[consts.LabelDeploymentName] = GetSuggestionDeploymentName(instance)
 	res[consts.LabelExperimentName] = instance.Name
 	res[consts.LabelSuggestionName] = instance.Name
 
