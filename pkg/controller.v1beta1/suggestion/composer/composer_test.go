@@ -17,6 +17,7 @@ import (
 	"github.com/spf13/viper"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -32,6 +33,7 @@ import (
 	apis "github.com/kubeflow/katib/pkg/apis/controller"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
+	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
 )
@@ -40,9 +42,10 @@ var (
 	cfg     *rest.Config
 	timeout = time.Second * 40
 
-	suggestionName      = "test-suggestion"
-	suggestionAlgorithm = "random"
-	suggestionLabels    = map[string]string{
+	suggestionName          = "test-suggestion"
+	suggestionAlgorithm     = "random"
+	suggestionEarlyStopping = "median-stop"
+	suggestionLabels        = map[string]string{
 		"custom-label": "test",
 	}
 	suggestionAnnotations = map[string]string{
@@ -183,6 +186,22 @@ func TestDesiredDeployment(t *testing.T) {
 			err:             false,
 			testDescription: "Suggestion container with custom volume mount path",
 		},
+		{
+			suggestion: newFakeSuggestion(),
+			configMap: func() *corev1.ConfigMap {
+				sc := newFakeSuggestionConfig()
+				sc.ServiceAccountName = ""
+				cm := newFakeKatibConfig(sc)
+				return cm
+			}(),
+			expectedDeployment: func() *appsv1.Deployment {
+				deploy := newFakeDeployment()
+				deploy.Spec.Template.Spec.ServiceAccountName = suggestionName + "-" + suggestionAlgorithm
+				return deploy
+			}(),
+			err:             false,
+			testDescription: "Desired Deployment valid run with default serviceAccount",
+		},
 	}
 
 	viper.Set(consts.ConfigEnableGRPCProbeInSuggestion, true)
@@ -233,7 +252,6 @@ func TestDesiredDeployment(t *testing.T) {
 }
 
 func TestDesiredService(t *testing.T) {
-
 	g := gomega.NewGomegaWithT(t)
 
 	mgr, err := manager.New(cfg, manager.Options{})
@@ -261,6 +279,10 @@ func TestDesiredService(t *testing.T) {
 				{
 					Name: consts.DefaultSuggestionPortName,
 					Port: consts.DefaultSuggestionPort,
+				},
+				{
+					Name: consts.DefaultEarlyStoppingPortName,
+					Port: consts.DefaultEarlyStoppingPort,
 				},
 			},
 			Type: corev1.ServiceTypeClusterIP,
@@ -513,7 +535,127 @@ func TestDesiredVolume(t *testing.T) {
 					c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{}))
 			}, timeout).Should(gomega.BeTrue())
 		}
+	}
+}
 
+func TestDesiredRBAC(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	mgr, err := manager.New(cfg, manager.Options{})
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	composer := New(mgr)
+
+	expectedServiceAccount := &corev1.ServiceAccount{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      suggestionName + "-" + suggestionAlgorithm,
+			Namespace: namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion:         "kubeflow.org/v1beta1",
+					Kind:               "Suggestion",
+					Name:               suggestionName,
+					Controller:         &refFlag,
+					BlockOwnerDeletion: &refFlag,
+				},
+			},
+		},
+	}
+
+	expectedRole := &rbacv1.Role{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      suggestionName + "-" + suggestionAlgorithm,
+			Namespace: namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion:         "kubeflow.org/v1beta1",
+					Kind:               "Suggestion",
+					Name:               suggestionName,
+					Controller:         &refFlag,
+					BlockOwnerDeletion: &refFlag,
+				},
+			},
+		},
+		Rules: []rbacv1.PolicyRule{
+			{
+				APIGroups: []string{
+					trialsv1beta1.Group,
+				},
+				Resources: []string{
+					consts.PluralTrial,
+					fmt.Sprintf("%v/status", consts.PluralTrial),
+				},
+				Verbs: []string{
+					rbacv1.VerbAll,
+				},
+			},
+		},
+	}
+
+	expectedRoleBinding := &rbacv1.RoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      suggestionName + "-" + suggestionAlgorithm,
+			Namespace: namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion:         "kubeflow.org/v1beta1",
+					Kind:               "Suggestion",
+					Name:               suggestionName,
+					Controller:         &refFlag,
+					BlockOwnerDeletion: &refFlag,
+				},
+			},
+		},
+		Subjects: []rbacv1.Subject{
+			{
+				Kind:      rbacv1.ServiceAccountKind,
+				Name:      suggestionName + "-" + suggestionAlgorithm,
+				Namespace: namespace,
+			},
+		},
+		RoleRef: rbacv1.RoleRef{
+			APIGroup: rbacv1.GroupName,
+			Kind:     "Role",
+			Name:     suggestionName + "-" + suggestionAlgorithm,
+		},
+	}
+
+	tcs := []struct {
+		suggestion             *suggestionsv1beta1.Suggestion
+		expectedServiceAccount *corev1.ServiceAccount
+		expectedRole           *rbacv1.Role
+		expectedRoleBinding    *rbacv1.RoleBinding
+		err                    bool
+		testDescription        string
+	}{
+		{
+			suggestion:             newFakeSuggestion(),
+			expectedServiceAccount: expectedServiceAccount,
+			expectedRole:           expectedRole,
+			expectedRoleBinding:    expectedRoleBinding,
+			err:                    false,
+			testDescription:        "Desired RBAC valid run",
+		},
+	}
+
+	for _, tc := range tcs {
+
+		actualServiceAccount, actualRole, actualRoleBinding, err := composer.DesiredRBAC(tc.suggestion)
+
+		if !tc.err && err != nil {
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
+		} else if tc.err && err == nil {
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
+		} else if !tc.err &&
+			(!equality.Semantic.DeepEqual(tc.expectedServiceAccount, actualServiceAccount) ||
+				!equality.Semantic.DeepEqual(tc.expectedRole, actualRole) ||
+				!equality.Semantic.DeepEqual(tc.expectedRoleBinding, actualRoleBinding)) {
+			t.Errorf("Case: %v failed. \nExpected SA %v\n Got %v.\nExpected Role %v\n Got %v.\nExpected RoleBinding %v\n Got %v",
+				tc.testDescription,
+				tc.expectedServiceAccount.ObjectMeta, actualServiceAccount.ObjectMeta,
+				tc.expectedRole.ObjectMeta, actualRole.ObjectMeta,
+				tc.expectedRoleBinding.ObjectMeta, actualRoleBinding.ObjectMeta)
+		}
 	}
 }
 
@@ -582,9 +724,10 @@ func newFakeSuggestion() *suggestionsv1beta1.Suggestion {
 			Annotations: suggestionAnnotations,
 		},
 		Spec: suggestionsv1beta1.SuggestionSpec{
-			Requests:      1,
-			AlgorithmName: suggestionAlgorithm,
-			ResumePolicy:  experimentsv1beta1.FromVolume,
+			Requests:                   1,
+			AlgorithmName:              suggestionAlgorithm,
+			EarlyStoppingAlgorithmName: suggestionEarlyStopping,
+			ResumePolicy:               experimentsv1beta1.FromVolume,
 		},
 	}
 }
@@ -694,6 +837,29 @@ func newFakeContainers() []corev1.Container {
 				{
 					Name:      consts.ContainerSuggestionVolumeName,
 					MountPath: consts.DefaultContainerSuggestionVolumeMountPath,
+				},
+			},
+		},
+		{
+			Name:            consts.ContainerEarlyStopping,
+			Image:           "docker.io/andreyvelichkevich/earlystopping-median",
+			ImagePullPolicy: corev1.PullAlways,
+			Ports: []corev1.ContainerPort{
+				{
+					Name:          consts.DefaultEarlyStoppingPortName,
+					ContainerPort: consts.DefaultEarlyStoppingPort,
+				},
+			},
+			Resources: corev1.ResourceRequirements{
+				Limits: corev1.ResourceList{
+					corev1.ResourceCPU:              cpuQ,
+					corev1.ResourceMemory:           memoryQ,
+					corev1.ResourceEphemeralStorage: diskQ,
+				},
+				Requests: corev1.ResourceList{
+					corev1.ResourceCPU:              cpuQ,
+					corev1.ResourceMemory:           memoryQ,
+					corev1.ResourceEphemeralStorage: diskQ,
 				},
 			},
 		},

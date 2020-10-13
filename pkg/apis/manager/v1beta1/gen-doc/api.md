@@ -51,7 +51,6 @@
     - [TrialStatus.TrialConditionType](#api.v1.beta1.TrialStatus.TrialConditionType)
   
     - [DBManager](#api.v1.beta1.DBManager)
-    - [EarlyStopping](#api.v1.beta1.EarlyStopping)
     - [Suggestion](#api.v1.beta1.Suggestion)
   
 - [Scalar Value Types](#scalar-value-types)
@@ -775,26 +774,17 @@ DBManager service defines APIs to manage Katib database.
 | DeleteObservationLog | [DeleteObservationLogRequest](#api.v1.beta1.DeleteObservationLogRequest) | [DeleteObservationLogReply](#api.v1.beta1.DeleteObservationLogReply) | Delete all log of Observations for a Trial. |
 
 
-<a name="api.v1.beta1.EarlyStopping"></a>
-
-### EarlyStopping
-EarlyStopping service defines APIs to manage Katib early stopping techniques
-
-| Method Name | Request Type | Response Type | Description |
-| ----------- | ------------ | ------------- | ------------|
-| GetEarlyStoppingRules | [GetEarlyStoppingRulesRequest](#api.v1.beta1.GetEarlyStoppingRulesRequest) | [GetEarlyStoppingRulesReply](#api.v1.beta1.GetEarlyStoppingRulesReply) |  |
-| SetTrialStatus | [SetTrialStatusRequest](#api.v1.beta1.SetTrialStatusRequest) | [SetTrialStatusReply](#api.v1.beta1.SetTrialStatusReply) |  |
-
-
 <a name="api.v1.beta1.Suggestion"></a>
 
 ### Suggestion
-Suggestion service defines APIs to manage Katib Suggestion algorithm.
+Suggestion service defines APIs to manage Katib Suggestion AutoML algorithms and early stopping techniques
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
 | GetSuggestions | [GetSuggestionsRequest](#api.v1.beta1.GetSuggestionsRequest) | [GetSuggestionsReply](#api.v1.beta1.GetSuggestionsReply) |  |
 | ValidateAlgorithmSettings | [ValidateAlgorithmSettingsRequest](#api.v1.beta1.ValidateAlgorithmSettingsRequest) | [ValidateAlgorithmSettingsReply](#api.v1.beta1.ValidateAlgorithmSettingsReply) |  |
+| GetEarlyStoppingRules | [GetEarlyStoppingRulesRequest](#api.v1.beta1.GetEarlyStoppingRulesRequest) | [GetEarlyStoppingRulesReply](#api.v1.beta1.GetEarlyStoppingRulesReply) |  |
+| SetTrialStatus | [SetTrialStatusRequest](#api.v1.beta1.SetTrialStatusRequest) | [SetTrialStatusReply](#api.v1.beta1.SetTrialStatusReply) |  |
 
  
 

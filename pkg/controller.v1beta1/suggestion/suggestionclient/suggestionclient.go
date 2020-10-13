@@ -31,9 +31,6 @@ var (
 	getRPCClientSuggestion = func(conn *grpc.ClientConn) suggestionapi.SuggestionClient {
 		return suggestionapi.NewSuggestionClient(conn)
 	}
-	getRPCClientEarlyStopping = func(conn *grpc.ClientConn) suggestionapi.EarlyStoppingClient {
-		return suggestionapi.NewEarlyStoppingClient(conn)
-	}
 )
 
 // SuggestionClient is the interface to communicate with algorithm services.
@@ -108,7 +105,7 @@ func (g *General) SyncAssignments(
 		}
 		defer connEarlyStopping.Close()
 
-		rpcClient := getRPCClientEarlyStopping(connEarlyStopping)
+		rpcClient := getRPCClientSuggestion(connEarlyStopping)
 		ctx, cancelEarlyStopping := context.WithTimeout(context.Background(), timeout)
 		defer cancelEarlyStopping()
 
@@ -361,21 +358,6 @@ func convertTrialStatusTime(time *metav1.Time) string {
 		return time.Format(timeFormat)
 	}
 	return ""
-}
-
-// ComposeTrialsTemplate composes trials with raw template from the GRPC response.
-// TODO (andreyvelich): Do we need it ?
-func (g *General) ComposeTrialsTemplate(ts []*suggestionapi.Trial) []trialsv1beta1.Trial {
-	res := make([]trialsv1beta1.Trial, 0)
-	for _, t := range ts {
-		res = append(res, trialsv1beta1.Trial{
-			Spec: trialsv1beta1.TrialSpec{
-				ParameterAssignments: composeParameterAssignments(
-					t.Spec.ParameterAssignments.Assignments),
-			},
-		})
-	}
-	return res
 }
 
 func composeParameterAssignments(pas []*suggestionapi.ParameterAssignment) []commonapiv1beta1.ParameterAssignment {

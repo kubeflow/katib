@@ -15,17 +15,28 @@ KATIB_VERSION = "v1beta1"
 TRIAL_PLURAL = "trials"
 APISERVER_TIMEOUT = 120
 
+DEFAULT_NAMESPACE = "default"
 
-class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
+
+class MedianStopService(api_pb2_grpc.SuggestionServicer):
 
     def __init__(self):
         super(MedianStopService, self).__init__()
         # Assume that Trial namespace = Suggestion namespace
-        with open('/var/run/secrets/kubernetes.io/serviceaccount/namespace', 'r') as f:
-            self.namespace = f.readline()
+        try:
+            with open('/var/run/secrets/kubernetes.io/serviceaccount/namespace', 'r') as f:
+                self.namespace = f.readline()
+                # Set config and api instance for k8s client
+                config.load_incluster_config()
+        # This is used when service is not running in k8s, e.g. for unit tests.
+        except Exception as e:
+            logger.info("{}. Service is not running in Kubernetes Pod, \"{}\" namespace is used".format(
+                e, DEFAULT_NAMESPACE
+            ))
+            self.namespace = DEFAULT_NAMESPACE
+            # Set config and api instance for k8s client
+            config.load_kube_config()
 
-        # Set config and api instance for k8s client
-        config.load_incluster_config()
         self.api_instance = client.CustomObjectsApi()
 
     def GetEarlyStoppingRules(self, request, context):

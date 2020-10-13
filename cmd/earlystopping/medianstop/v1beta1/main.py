@@ -11,7 +11,7 @@ DEFAULT_PORT = "0.0.0.0:6788"
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     service = MedianStopService()
-    api_pb2_grpc.add_EarlyStoppingServicer_to_server(service, server)
+    api_pb2_grpc.add_SuggestionServicer_to_server(service, server)
 
     server.add_insecure_port(DEFAULT_PORT)
     print("Listening...")
