@@ -8,6 +8,7 @@ import (
 	"time"
 
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
 	"k8s.io/klog"
 )
@@ -31,14 +32,14 @@ func parseLogs(logs []string, metrics []string, filters []string) (*v1beta1.Obse
 
 	for _, logline := range logs {
 		// skip line which doesn't contain any metrics keywords, avoiding unnecessary pattern match
-		isObjLine := false
+		isMetricLine := false
 		for _, m := range metrics {
 			if strings.Contains(logline, m) {
-				isObjLine = true
+				isMetricLine = true
 				break
 			}
 		}
-		if !isObjLine {
+		if !isMetricLine {
 			continue
 		}
 
@@ -78,7 +79,31 @@ func parseLogs(logs []string, metrics []string, filters []string) (*v1beta1.Obse
 			}
 		}
 	}
-	olog.MetricLogs = mlogs
+	// Metrics logs must contain at least one objective metric value
+	// Objective metric is located at first index
+	isObjectiveMetricReported := false
+	for _, mLog := range mlogs {
+		if mLog.Metric.Name == metrics[0] {
+			isObjectiveMetricReported = true
+			break
+		}
+	}
+	// If objective metrics were not reported, insert unavailable value in the DB
+	if !isObjectiveMetricReported {
+		olog.MetricLogs = []*v1beta1.MetricLog{
+			{
+				TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
+				Metric: &v1beta1.Metric{
+					Name:  metrics[0],
+					Value: consts.UnavailableMetricValue,
+				},
+			},
+		}
+		klog.Infof("Objective metric %v is not found in training logs, %v value is reported", metrics[0], consts.UnavailableMetricValue)
+	} else {
+		olog.MetricLogs = mlogs
+	}
+
 	return olog, nil
 }
 

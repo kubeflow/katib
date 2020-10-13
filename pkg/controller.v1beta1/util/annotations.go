@@ -16,8 +16,6 @@ limitations under the License.
 package util
 
 import (
-	"fmt"
-
 	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -25,7 +23,6 @@ import (
 
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
-	jobv1beta1 "github.com/kubeflow/katib/pkg/job/v1beta1"
 	pytorchv1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1"
 	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 )
@@ -102,13 +99,8 @@ func TrainingJobAnnotations(desiredJob *unstructured.Unstructured) error {
 		}
 		return nil
 	default:
-		// Annotation appending of custom job can be done in Provider.MutateJob.
-		if _, ok := jobv1beta1.SupportedJobList[kind]; ok {
-			return nil
-		}
-		return fmt.Errorf("Invalid Katib Training Job kind %v", kind)
+		return nil
 	}
-
 }
 
 func appendAnnotation(annotations map[string]string, newAnnotationName string, newAnnotationValue string) map[string]string {

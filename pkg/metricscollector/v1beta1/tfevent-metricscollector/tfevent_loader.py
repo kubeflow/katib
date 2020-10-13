@@ -4,6 +4,7 @@ from datetime import datetime
 import rfc3339
 import api_pb2
 from logging import getLogger, StreamHandler, INFO
+import const
 
 # TFEventFileParser parses tfevent files and returns an ObservationLog of the metrics specified.
 # When the event file is under a directory(e.g. test dir), please specify "{{dirname}}/{{metrics name}}"
@@ -61,4 +62,26 @@ class MetricsCollector:
             except Exception as e:
                 self.logger.warning("Unexpected error: " + str(e))
                 continue
+
+        # Metrics logs must contain at least one objective metric value
+        # Objective metric is located at first index
+        is_objective_metric_reported = False
+        for ml in mls:
+            if ml.metric.name == self.metrics[0]:
+                is_objective_metric_reported = True
+                break
+        # If objective metrics were not reported, insert unavailable value in the DB
+        if not is_objective_metric_reported:
+            mls = [
+                api_pb2.MetricLog(
+                    time_stamp=rfc3339.rfc3339(datetime.now()),
+                    metric=api_pb2.Metric(
+                        name=self.metrics[0],
+                        value=const.UNAVAILABLE_METRIC_VALUE
+                    )
+                )
+            ]
+            self.logger.info("Objective metric {} is not found in training logs, {} value is reported".format(
+                self.metrics[0], const.UNAVAILABLE_METRIC_VALUE))
+
         return api_pb2.ObservationLog(metric_logs=mls)

@@ -8,3 +8,7 @@ DEFAULT_WAIT_ALL = True
 DEFAULT_METRICS_FILE_DIR = "/log"
 # Job finished marker in $$$$.pid file when main process is completed
 TRAINING_COMPLETED = "completed"
+
+# UnavailableMetricValue is the value in the DB
+# when metrics collector can't parse objective metric from the training logs.
+UNAVAILABLE_METRIC_VALUE = "unavailable"

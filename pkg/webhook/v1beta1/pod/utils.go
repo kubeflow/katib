@@ -236,7 +236,7 @@ func getMarkCompletedCommand(mountPath string, pathKind common.FileSystemKind) s
 	return fmt.Sprintf("echo %s > %s", mccommon.TrainingCompleted, pidFile)
 }
 
-func mutateVolume(pod *v1.Pod, jobKind, mountPath, sidecarContainerName string, pathKind common.FileSystemKind) error {
+func mutateVolume(pod *v1.Pod, jobKind, mountPath, sidecarContainerName, primaryContainerName string, pathKind common.FileSystemKind) error {
 	metricsVol := v1.Volume{
 		Name: common.MetricsVolume,
 		VolumeSource: v1.VolumeSource{
@@ -257,11 +257,16 @@ func mutateVolume(pod *v1.Pod, jobKind, mountPath, sidecarContainerName string, 
 		if c.Name == sidecarContainerName {
 			shouldMount = true
 		} else {
-			jobProvider, err := jobv1beta1.New(jobKind)
-			if err != nil {
-				return err
+			if primaryContainerName != "" && c.Name == primaryContainerName {
+				shouldMount = true
+				// TODO (andreyvelich): This can be deleted after switch to custom CRD
+			} else if primaryContainerName == "" {
+				jobProvider, err := jobv1beta1.New(jobKind)
+				if err != nil {
+					return err
+				}
+				shouldMount = jobProvider.IsTrainingContainer(i, c)
 			}
-			shouldMount = jobProvider.IsTrainingContainer(i, c)
 		}
 		if shouldMount {
 			indexList = append(indexList, i)

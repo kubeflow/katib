@@ -24,6 +24,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
@@ -40,11 +41,12 @@ const (
 
 // UpdateTrialStatusCondition updates Trial status from current deployed Job status
 func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Trial, deployedJobName string, jobStatus *trialutil.TrialJobStatus) {
+	logger := log.WithValues("Trial", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 
 	timeNow := metav1.Now()
 
 	if jobStatus.Condition == trialutil.JobSucceeded {
-		if isTrialObservationAvailable(instance) {
+		if isTrialObservationAvailable(instance) && !instance.IsSucceeded() {
 			msg := "Trial has succeeded "
 			reason := TrialSucceededReason
 
@@ -56,14 +58,16 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 				reason = fmt.Sprintf("%v. Job reason: %v", reason, jobStatus.Reason)
 			}
 
+			logger.Info("Trial status changed to Succeeded")
 			instance.MarkTrialStatusSucceeded(corev1.ConditionTrue, reason, msg)
 			instance.Status.CompletionTime = &timeNow
 
 			eventMsg := fmt.Sprintf("Job %v has succeeded", deployedJobName)
 			r.recorder.Eventf(instance, corev1.EventTypeNormal, JobSucceededReason, eventMsg)
 			r.collector.IncreaseTrialsSucceededCount(instance.Namespace)
-		} else {
-			// TODO (andreyvelich): Is is correct to mark succeeded status false when metrics are unavailable?
+		} else if !instance.IsMetricsUnavailable() {
+			// TODO (andreyvelich): Is it correct to mark succeeded status false when metrics are unavailable?
+			// Ref issue to add new condition: https://github.com/kubeflow/katib/issues/1343
 			msg := "Metrics are not available"
 			reason := TrialMetricsUnavailableReason
 
@@ -75,12 +79,13 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 				reason = fmt.Sprintf("%v. Job reason: %v", reason, jobStatus.Reason)
 			}
 
+			logger.Info("Trial status changed to Metrics Unavailable")
 			instance.MarkTrialStatusSucceeded(corev1.ConditionFalse, reason, msg)
 
 			eventMsg := fmt.Sprintf("Metrics are not available for Job %v", deployedJobName)
 			r.recorder.Eventf(instance, corev1.EventTypeWarning, JobMetricsUnavailableReason, eventMsg)
 		}
-	} else if jobStatus.Condition == trialutil.JobFailed {
+	} else if jobStatus.Condition == trialutil.JobFailed && !instance.IsFailed() {
 		msg := "Trial has failed"
 		reason := TrialFailedReason
 
@@ -102,12 +107,14 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 
 		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobFailedReason, eventMsg)
 		r.collector.IncreaseTrialsFailedCount(instance.Namespace)
-	} else if jobStatus.Condition == trialutil.JobRunning {
+		logger.Info("Trial status changed to Failed")
+	} else if jobStatus.Condition == trialutil.JobRunning && !instance.IsRunning() {
 		msg := "Trial is running"
 		instance.MarkTrialStatusRunning(TrialRunningReason, msg)
 
 		eventMsg := fmt.Sprintf("Job %v is running", deployedJobName)
 		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobRunningReason, eventMsg)
+		logger.Info("Trial status changed to Running")
 		// TODO(gaocegege): Should we maintain a TrialsRunningCount?
 	}
 	// else nothing to do
@@ -168,7 +175,7 @@ func (r *ReconcileTrial) UpdateTrialStatusObservation(instance *trialsv1beta1.Tr
 		return err
 	}
 	metricStrategies := instance.Spec.Objective.MetricStrategies
-	if reply.ObservationLog != nil {
+	if len(reply.ObservationLog.MetricLogs) != 0 {
 		observation, err := getMetrics(reply.ObservationLog.MetricLogs, metricStrategies)
 		if err != nil {
 			log.Error(err, "Get metrics from logs error")
@@ -203,9 +210,6 @@ func (r *ReconcileTrial) updateFinalizers(instance *trialsv1beta1.Trial, finaliz
 }
 
 func isTrialObservationAvailable(instance *trialsv1beta1.Trial) bool {
-	if instance == nil {
-		return false
-	}
 	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
 	if instance.Status.Observation != nil && instance.Status.Observation.Metrics != nil {
 		for _, metric := range instance.Status.Observation.Metrics {

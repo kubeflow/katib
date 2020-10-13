@@ -355,9 +355,9 @@ spec:
 	emptyAPIVersionJob.TypeMeta.APIVersion = ""
 	emptyAPIVersionStr := convertBatchJobToString(emptyAPIVersionJob)
 
-	invalidJobType := newFakeBatchJob()
-	invalidJobType.TypeMeta.Kind = "InvalidKind"
-	invalidJobTypeStr := convertBatchJobToString(invalidJobType)
+	customJobType := newFakeBatchJob()
+	customJobType.TypeMeta.Kind = "CustomKind"
+	customJobTypeStr := convertBatchJobToString(customJobType)
 
 	emptyConfigMap := p.EXPECT().GetTrialTemplate(gomock.Any()).Return("", errors.New(string(metav1.StatusReasonNotFound)))
 
@@ -371,7 +371,7 @@ spec:
 	invalidParameterTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(invalidParameterJobStr, nil)
 	notEmptyMetadataTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(notEmptyMetadataStr, nil)
 	emptyAPIVersionTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(emptyAPIVersionStr, nil)
-	invalidJobTypeTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(invalidJobTypeStr, nil)
+	customJobTypeTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(customJobTypeStr, nil)
 
 	gomock.InOrder(
 		emptyConfigMap,
@@ -384,7 +384,7 @@ spec:
 		invalidParameterTemplate,
 		notEmptyMetadataTemplate,
 		emptyAPIVersionTemplate,
-		invalidJobTypeTemplate,
+		customJobTypeTemplate,
 	)
 
 	tcs := []struct {
@@ -550,15 +550,15 @@ spec:
 			Err:             true,
 			testDescription: "Trial template doesn't contain APIVersion or Kind",
 		},
-		// Trial Template has invalid Kind
-		// invalidJobTypeTemplate case
+		// Trial Template has custom Kind
+		// customJobTypeTemplate case
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				return i
 			}(),
-			Err:             true,
-			testDescription: "Trial template has invalid Kind",
+			Err:             false,
+			testDescription: "Trial template has custom Kind",
 		},
 	}
 	for _, tc := range tcs {

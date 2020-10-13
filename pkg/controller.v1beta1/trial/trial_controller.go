@@ -19,6 +19,7 @@ package trial
 import (
 	"context"
 	"fmt"
+	"time"
 
 	batchv1beta "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -57,6 +58,8 @@ const (
 
 var (
 	log = logf.Log.WithName(ControllerName)
+	// errMetricsNotReported is the error when Trial job is succeeded but metrics are not reported yet
+	errMetricsNotReported = fmt.Errorf("Metrics are not reported yet")
 )
 
 // Add creates a new Trial Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
@@ -213,6 +216,11 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 	} else {
 		err := r.reconcileTrial(instance)
 		if err != nil {
+			if err == errMetricsNotReported {
+				return reconcile.Result{
+					RequeueAfter: time.Second * 1,
+				}, nil
+			}
 			logger.Error(err, "Reconcile trial error")
 			r.recorder.Eventf(instance,
 				corev1.EventTypeWarning, ReconcileFailedReason,
@@ -225,7 +233,7 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 		//assuming that only status change
 		err = r.updateStatusHandler(instance)
 		if err != nil {
-			logger.Info("Update trial instance status failed, reconciler requeued", "err", err)
+			logger.Info("Update trial instance status failed, reconcile requeued", "err", err)
 			return reconcile.Result{
 				Requeue: true,
 			}, nil
@@ -254,7 +262,7 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 	// Job already exists
 	// TODO Can desired Spec differ from deployedSpec?
 	if deployedJob != nil {
-		if instance.Spec.SuccessCondition != "" && instance.Spec.FailureCondition != "" {
+		if instance.Spec.SuccessCondition != "" && instance.Spec.FailureCondition != "" && !instance.IsCompleted() {
 			jobStatus, err := trialutil.GetDeployedJobStatus(instance, deployedJob)
 			if err != nil {
 				logger.Error(err, "GetDeployedJobStatus error")
@@ -270,6 +278,11 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 					return err
 				}
 			}
+			// If observation is empty metrics collector doesn't finish
+			if jobStatus.Condition == trialutil.JobSucceeded && instance.Status.Observation == nil {
+				logger.Info("Trial job is succeeded but metrics are not reported, reconcile requeued")
+				return errMetricsNotReported
+			}
 
 			// Update Trial job status only
 			//    if job has succeeded and if observation field is available.
@@ -277,7 +290,7 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 			// This will ensure that trial is set to be complete only if metric is collected at least once
 			r.UpdateTrialStatusCondition(instance, deployedJob.GetName(), jobStatus)
 
-		} else {
+		} else if instance.Spec.SuccessCondition == "" && instance.Spec.FailureCondition == "" {
 			// TODO (andreyvelich): This can be deleted after switch to custom CRD
 			kind := deployedJob.GetKind()
 			jobProvider, err := jobv1beta1.New(kind)
@@ -319,6 +332,7 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 	gvk := schema.FromAPIVersionAndKind(apiVersion, kind)
 
 	// Add annotation to desired Job to disable istio sidecar
+	// TODO (andreyvelich): Can be removed after custom CRD implementation
 	err = util.TrainingJobAnnotations(desiredJob)
 	if err != nil {
 		logger.Error(err, "TrainingJobAnnotations error")
@@ -333,15 +347,19 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 			if instance.IsCompleted() {
 				return nil, nil
 			}
-			jobProvider, err := jobv1beta1.New(desiredJob.GetKind())
-			if err != nil {
-				return nil, err
-			}
-			// mutate desiredJob according to provider
-			if err := jobProvider.MutateJob(instance, desiredJob); err != nil {
-				logger.Error(err, "Mutating desiredSpec of km.Training error")
-				return nil, err
-			}
+
+			// TODO (andreyvelich): Mutate job needs to be refactored (ref: https://github.com/kubeflow/katib/issues/1320)
+			// Currently, commented since we don't do Mutate Job for SupportedJobList
+			// jobProvider, err := jobv1beta1.New(desiredJob.GetKind())
+			// if err != nil {
+			// 	return nil, err
+			// }
+			// // mutate desiredJob according to provider
+			// if err := jobProvider.MutateJob(instance, desiredJob); err != nil {
+			// 	logger.Error(err, "Mutating desiredSpec of km.Training error")
+			// 	return nil, err
+			// }
+
 			logger.Info("Creating Job", "kind", kind,
 				"name", desiredJob.GetName())
 			err = r.Create(context.TODO(), desiredJob)

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/types"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
@@ -47,7 +46,6 @@ var (
 
 // GetDeployedJobStatus returns internal representation for deployed Job status.
 func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.Unstructured) (*TrialJobStatus, error) {
-	logger := log.WithValues("Trial", types.NamespacedName{Name: trial.GetName(), Namespace: trial.GetNamespace()})
 
 	trialJobStatus := &TrialJobStatus{}
 
@@ -75,7 +73,6 @@ func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.
 
 		// Job condition is failed
 		trialJobStatus.Condition = JobFailed
-		logger.Info("Deployed Job status is failed", "Job", deployedJob.GetName())
 		return trialJobStatus, nil
 	}
 
@@ -97,15 +94,13 @@ func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.
 
 		// Job condition is succeeded
 		trialJobStatus.Condition = JobSucceeded
-		logger.Info("Deployed Job status is succeeded", "Job", deployedJob.GetName())
 		return trialJobStatus, nil
 	}
 
 	// Set default Job condition is running when Job name is generated.
-	// Check if Trial is not running and is not completed
-	if !trial.IsRunning() && deployedJob.GetName() != "" && !trial.IsCompleted() {
+	// Check if Trial is not running
+	if !trial.IsRunning() && deployedJob.GetName() != "" {
 		trialJobStatus.Condition = JobRunning
-		logger.Info("Deployed Job status is running", "Job", deployedJob.GetName())
 		return trialJobStatus, nil
 	}
 

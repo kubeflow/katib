@@ -147,6 +147,7 @@ const (
 	TrialTemplateMetaKeyOfLabels      = "Labels"
 
 	// UnavailableMetricValue is the value when metric was not reported or metric value can't be converted to float64
+	// This value is recorded in to DB when metrics collector can't parse objective metric from the training logs.
 	UnavailableMetricValue = "unavailable"
 )
 

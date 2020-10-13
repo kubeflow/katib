@@ -398,6 +398,7 @@ func TestMutateVolume(t *testing.T) {
 		JobKind              string
 		MountPath            string
 		SidecarContainerName string
+		PrimaryContainerName string
 		PathKind             common.FileSystemKind
 		Err                  bool
 	}{
@@ -433,6 +434,12 @@ func TestMutateVolume(t *testing.T) {
 					},
 					{
 						Name: "metrics-collector",
+						VolumeMounts: []v1.VolumeMount{
+							{
+								Name:      common.MetricsVolume,
+								MountPath: filepath.Dir(common.DefaultFilePath),
+							},
+						},
 					},
 				},
 				Volumes: []v1.Volume{
@@ -447,7 +454,8 @@ func TestMutateVolume(t *testing.T) {
 		},
 		JobKind:              "Job",
 		MountPath:            common.DefaultFilePath,
-		SidecarContainerName: "train-job",
+		SidecarContainerName: "metrics-collector",
+		PrimaryContainerName: "train-job",
 		PathKind:             common.FileKind,
 	}
 
@@ -456,6 +464,7 @@ func TestMutateVolume(t *testing.T) {
 		tc.JobKind,
 		tc.MountPath,
 		tc.SidecarContainerName,
+		tc.PrimaryContainerName,
 		tc.PathKind)
 	if err != nil {
 		t.Errorf("mutateVolume failed: %v", err)

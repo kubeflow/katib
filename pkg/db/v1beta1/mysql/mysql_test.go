@@ -60,37 +60,22 @@ func TestRegisterObservationLog(t *testing.T) {
 					Value: "0.5",
 				},
 			},
-			{
-				TimeStamp: "2016-12-31T20:02:05.123456Z",
-				Metric: &api_pb.Metric{
-					Name:  "precision",
-					Value: "88.7",
-				},
-			},
-			{
-				TimeStamp: "2016-12-31T20:02:05.123456Z",
-				Metric: &api_pb.Metric{
-					Name:  "recall",
-					Value: "89.2",
-				},
-			},
 		},
 	}
-	for _, m := range obsLog.MetricLogs {
-		mock.ExpectExec(
-			`INSERT INTO observation_logs \(
-				trial_name,
-				time,
-				metric_name,
-				value
-			\)`,
-		).WithArgs(
-			"test1_trial1",
-			"2016-12-31 20:02:05.123456",
-			m.Metric.Name,
-			m.Metric.Value,
-		).WillReturnResult(sqlmock.NewResult(1, 1))
-	}
+	mock.ExpectPrepare("INSERT")
+	mock.ExpectExec(
+		"INSERT",
+	).WithArgs(
+		"test1_trial1",
+		"2016-12-31 20:02:05.123456",
+		"f1_score",
+		"88.95",
+		"test1_trial1",
+		"2016-12-31 20:02:05.123456",
+		"loss",
+		"0.5",
+	).WillReturnResult(sqlmock.NewResult(1, 1))
+
 	err := dbInterface.RegisterObservationLog("test1_trial1", obsLog)
 	if err != nil {
 		t.Errorf("RegisterExperiment failed: %v", err)
