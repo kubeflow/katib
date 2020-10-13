@@ -77,7 +77,7 @@ func (flag *stopRulesFlag) Set(value string) error {
 		return fmt.Errorf("Invalid Early Stopping rule: %v", value)
 	}
 
-	// For each stop rule this order 1 - metric name, 2 - metric value, 3 - comparison type
+	// For each stop rule this order: 1 - metric name, 2 - metric value, 3 - comparison type
 	stopRule := commonv1beta1.EarlyStoppingRule{
 		Name:       stopRuleParsed[0],
 		Value:      stopRuleParsed[1],
@@ -253,13 +253,13 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 				}
 			}
 
-			// Create connection for Early Stopping service
+			// Create connection and client for Early Stopping service
 			conn, err := grpc.Dial(*earlyStopServiceAddr, grpc.WithInsecure())
 			if err != nil {
 				klog.Fatalf("Could not connect to Early Stopping service, error: %v", err)
 			}
 			defer conn.Close()
-			c := api.NewSuggestionClient(conn)
+			c := api.NewEarlyStoppingClient(conn)
 
 			setTrialStatusReq := &api.SetTrialStatusRequest{
 				TrialName: *trialName,

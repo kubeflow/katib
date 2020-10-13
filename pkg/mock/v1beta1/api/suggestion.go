@@ -35,26 +35,6 @@ func (m *MockSuggestionClient) EXPECT() *MockSuggestionClientMockRecorder {
 	return m.recorder
 }
 
-// GetEarlyStoppingRules mocks base method.
-func (m *MockSuggestionClient) GetEarlyStoppingRules(arg0 context.Context, arg1 *api_v1_beta1.GetEarlyStoppingRulesRequest, arg2 ...grpc.CallOption) (*api_v1_beta1.GetEarlyStoppingRulesReply, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0, arg1}
-	for _, a := range arg2 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetEarlyStoppingRules", varargs...)
-	ret0, _ := ret[0].(*api_v1_beta1.GetEarlyStoppingRulesReply)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetEarlyStoppingRules indicates an expected call of GetEarlyStoppingRules.
-func (mr *MockSuggestionClientMockRecorder) GetEarlyStoppingRules(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEarlyStoppingRules", reflect.TypeOf((*MockSuggestionClient)(nil).GetEarlyStoppingRules), varargs...)
-}
-
 // GetSuggestions mocks base method.
 func (m *MockSuggestionClient) GetSuggestions(arg0 context.Context, arg1 *api_v1_beta1.GetSuggestionsRequest, arg2 ...grpc.CallOption) (*api_v1_beta1.GetSuggestionsReply, error) {
 	m.ctrl.T.Helper()
@@ -73,26 +53,6 @@ func (mr *MockSuggestionClientMockRecorder) GetSuggestions(arg0, arg1 interface{
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuggestions", reflect.TypeOf((*MockSuggestionClient)(nil).GetSuggestions), varargs...)
-}
-
-// SetTrialStatus mocks base method.
-func (m *MockSuggestionClient) SetTrialStatus(arg0 context.Context, arg1 *api_v1_beta1.SetTrialStatusRequest, arg2 ...grpc.CallOption) (*api_v1_beta1.SetTrialStatusReply, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0, arg1}
-	for _, a := range arg2 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "SetTrialStatus", varargs...)
-	ret0, _ := ret[0].(*api_v1_beta1.SetTrialStatusReply)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SetTrialStatus indicates an expected call of SetTrialStatus.
-func (mr *MockSuggestionClientMockRecorder) SetTrialStatus(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetTrialStatus", reflect.TypeOf((*MockSuggestionClient)(nil).SetTrialStatus), varargs...)
 }
 
 // ValidateAlgorithmSettings mocks base method.

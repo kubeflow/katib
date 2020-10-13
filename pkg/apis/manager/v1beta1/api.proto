@@ -31,11 +31,17 @@ service DBManager {
 }
 
 /**
- * Suggestion service defines APIs to manage Katib Suggestion AutoML algorithms and early stopping techniques
+ * Suggestion service defines APIs to manage Katib Suggestion HP or NAS algorithms
  */
 service Suggestion {
     rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply);
     rpc ValidateAlgorithmSettings(ValidateAlgorithmSettingsRequest) returns (ValidateAlgorithmSettingsReply);
+}
+
+/**
+* EarlyStopping service defines APIs to manage Katib Early Stopping algorithms
+*/
+service EarlyStopping {
     rpc GetEarlyStoppingRules(GetEarlyStoppingRulesRequest) returns (GetEarlyStoppingRulesReply);
     rpc SetTrialStatus(SetTrialStatusRequest) returns (SetTrialStatusReply);
 }

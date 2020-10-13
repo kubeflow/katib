@@ -18,7 +18,7 @@ APISERVER_TIMEOUT = 120
 DEFAULT_NAMESPACE = "default"
 
 
-class MedianStopService(api_pb2_grpc.SuggestionServicer):
+class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
 
     def __init__(self):
         super(MedianStopService, self).__init__()

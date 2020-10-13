@@ -38,6 +38,8 @@ mockgen -package mock -destination pkg/mock/v1alpha3/experiment/suggestion/sugge
 
 echo "Generating v1beta1 Suggestion RPC Client..."
 mockgen -package mock -destination pkg/mock/v1beta1/api/suggestion.go github.com/kubeflow/katib/pkg/apis/manager/v1beta1 SuggestionClient
+echo "Generating v1beta1 EarlyStopping RPC Client..."
+mockgen -package mock -destination pkg/mock/v1beta1/api/earlystopping.go github.com/kubeflow/katib/pkg/apis/manager/v1beta1 EarlyStoppingClient
 echo "Generating v1beta1 KatibDBInterface..."
 mockgen -package mock -destination pkg/mock/v1beta1/db/db.go github.com/kubeflow/katib/pkg/db/v1beta1/common KatibDBInterface
 echo "Generating v1beta1 Generator..."

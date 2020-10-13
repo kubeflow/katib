@@ -25,11 +25,16 @@ import (
 )
 
 var (
-	log                    = logf.Log.WithName("suggestion-client")
-	timeout                = 60 * time.Second
-	timeFormat             = "2006-01-02T15:04:05Z"
+	log        = logf.Log.WithName("suggestion-client")
+	timeout    = 60 * time.Second
+	timeFormat = "2006-01-02T15:04:05Z"
+
 	getRPCClientSuggestion = func(conn *grpc.ClientConn) suggestionapi.SuggestionClient {
 		return suggestionapi.NewSuggestionClient(conn)
+	}
+
+	getRPCClientEarlyStopping = func(conn *grpc.ClientConn) suggestionapi.EarlyStoppingClient {
+		return suggestionapi.NewEarlyStoppingClient(conn)
 	}
 )
 
@@ -69,7 +74,8 @@ func (g *General) SyncAssignments(
 	}
 	defer connSuggestion.Close()
 
-	rpcClient := getRPCClientSuggestion(connSuggestion)
+	// Create client for Suggestion service
+	rpcClientSuggestion := getRPCClientSuggestion(connSuggestion)
 	ctx, cancelSuggestion := context.WithTimeout(context.Background(), timeout)
 	defer cancelSuggestion()
 
@@ -84,7 +90,8 @@ func (g *General) SyncAssignments(
 		RequestNumber: int32(requestNum),
 	}
 
-	responseSuggestion, err := rpcClient.GetSuggestions(ctx, request)
+	// Get new suggestions
+	responseSuggestion, err := rpcClientSuggestion.GetSuggestions(ctx, request)
 	if err != nil {
 		return err
 	}
@@ -105,7 +112,8 @@ func (g *General) SyncAssignments(
 		}
 		defer connEarlyStopping.Close()
 
-		rpcClient := getRPCClientSuggestion(connEarlyStopping)
+		// Create client for EarlyStopping service
+		rpcClientEarlyStopping := getRPCClientEarlyStopping(connEarlyStopping)
 		ctx, cancelEarlyStopping := context.WithTimeout(context.Background(), timeout)
 		defer cancelEarlyStopping()
 
@@ -114,7 +122,8 @@ func (g *General) SyncAssignments(
 			Trials:     g.ConvertTrials(ts),
 		}
 
-		responseEarlyStopping, err := rpcClient.GetEarlyStoppingRules(ctx, request)
+		// Get new early stopping rules
+		responseEarlyStopping, err := rpcClientEarlyStopping.GetEarlyStoppingRules(ctx, request)
 		if err != nil {
 			return err
 		}

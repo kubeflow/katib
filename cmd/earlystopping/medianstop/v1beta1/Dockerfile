@@ -20,6 +20,3 @@ RUN chgrp -R 0 ${TARGET_DIR} \
 ENV PYTHONPATH ${TARGET_DIR}:${TARGET_DIR}/pkg/apis/manager/v1beta1/python
 
 ENTRYPOINT ["python", "main.py"]
-
-
-
