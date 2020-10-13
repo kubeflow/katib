@@ -29,3 +29,6 @@ pip install -r cmd/suggestion/nas/enas/v1beta1/requirements.txt
 pip install -r cmd/suggestion/hyperband/v1beta1/requirements.txt
 pip install -r cmd/suggestion/nas/darts/v1beta1/requirements.txt
 pytest -s ./test/suggestion/v1beta1
+
+pip install -r cmd/earlystopping/medianstop/v1beta1/requirements.txt
+pytest -s ./test/earlystopping/v1beta1

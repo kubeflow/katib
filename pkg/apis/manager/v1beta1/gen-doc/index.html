@@ -362,10 +362,6 @@
                 </li>
               
                 <li>
-                  <a href="#api.v1.beta1.EarlyStopping"><span class="badge">S</span>EarlyStopping</a>
-                </li>
-              
-                <li>
                   <a href="#api.v1.beta1.Suggestion"><span class="badge">S</span>Suggestion</a>
                 </li>
               
@@ -1812,34 +1808,8 @@ You can see accuracy curve or other metric logs on UI.</p></td>
         </table>
 
         
-        <h3 id="api.v1.beta1.EarlyStopping">EarlyStopping</h3>
-        <p>EarlyStopping service defines APIs to manage Katib early stopping techniques</p>
-        <table class="enum-table">
-          <thead>
-            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
-          </thead>
-          <tbody>
-            
-              <tr>
-                <td>GetEarlyStoppingRules</td>
-                <td><a href="#api.v1.beta1.GetEarlyStoppingRulesRequest">GetEarlyStoppingRulesRequest</a></td>
-                <td><a href="#api.v1.beta1.GetEarlyStoppingRulesReply">GetEarlyStoppingRulesReply</a></td>
-                <td><p></p></td>
-              </tr>
-            
-              <tr>
-                <td>SetTrialStatus</td>
-                <td><a href="#api.v1.beta1.SetTrialStatusRequest">SetTrialStatusRequest</a></td>
-                <td><a href="#api.v1.beta1.SetTrialStatusReply">SetTrialStatusReply</a></td>
-                <td><p></p></td>
-              </tr>
-            
-          </tbody>
-        </table>
-
-        
         <h3 id="api.v1.beta1.Suggestion">Suggestion</h3>
-        <p>Suggestion service defines APIs to manage Katib Suggestion algorithm.</p>
+        <p>Suggestion service defines APIs to manage Katib Suggestion AutoML algorithms and early stopping techniques</p>
         <table class="enum-table">
           <thead>
             <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
@@ -1857,6 +1827,20 @@ You can see accuracy curve or other metric logs on UI.</p></td>
                 <td>ValidateAlgorithmSettings</td>
                 <td><a href="#api.v1.beta1.ValidateAlgorithmSettingsRequest">ValidateAlgorithmSettingsRequest</a></td>
                 <td><a href="#api.v1.beta1.ValidateAlgorithmSettingsReply">ValidateAlgorithmSettingsReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>GetEarlyStoppingRules</td>
+                <td><a href="#api.v1.beta1.GetEarlyStoppingRulesRequest">GetEarlyStoppingRulesRequest</a></td>
+                <td><a href="#api.v1.beta1.GetEarlyStoppingRulesReply">GetEarlyStoppingRulesReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>SetTrialStatus</td>
+                <td><a href="#api.v1.beta1.SetTrialStatusRequest">SetTrialStatusRequest</a></td>
+                <td><a href="#api.v1.beta1.SetTrialStatusReply">SetTrialStatusReply</a></td>
                 <td><p></p></td>
               </tr>
             

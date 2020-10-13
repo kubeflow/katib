@@ -259,7 +259,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 				klog.Fatalf("Could not connect to Early Stopping service, error: %v", err)
 			}
 			defer conn.Close()
-			c := api.NewEarlyStoppingClient(conn)
+			c := api.NewSuggestionClient(conn)
 
 			setTrialStatusReq := &api.SetTrialStatusRequest{
 				TrialName: *trialName,
