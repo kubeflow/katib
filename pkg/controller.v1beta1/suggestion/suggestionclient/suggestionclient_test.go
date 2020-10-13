@@ -56,10 +56,15 @@ func TestSyncAssignments(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	rpcClientSuggestion := suggestionapimock.NewMockSuggestionClient(mockCtrl)
+	rpcClientEarlyStopping := suggestionapimock.NewMockEarlyStoppingClient(mockCtrl)
 
 	getRPCClientSuggestion = func(conn *grpc.ClientConn) suggestionapi.SuggestionClient {
 		return rpcClientSuggestion
 	}
+	getRPCClientEarlyStopping = func(conn *grpc.ClientConn) suggestionapi.EarlyStoppingClient {
+		return rpcClientEarlyStopping
+	}
+
 	suggestionClient := New()
 
 	expectedRequestSuggestion := newFakeRequest()
@@ -125,7 +130,7 @@ func TestSyncAssignments(t *testing.T) {
 	}
 
 	validRunGetSuggestions := rpcClientSuggestion.EXPECT().GetSuggestions(gomock.Any(), k8sMatcher{expectedRequestSuggestion}).Return(getSuggestionReply, nil)
-	validRunGetEarlyStopRules := rpcClientSuggestion.EXPECT().GetEarlyStoppingRules(gomock.Any(), k8sMatcher{expectedRequestEarlyStopping}).Return(getEarlyStoppingRulesReply, nil)
+	validRunGetEarlyStopRules := rpcClientEarlyStopping.EXPECT().GetEarlyStoppingRules(gomock.Any(), k8sMatcher{expectedRequestEarlyStopping}).Return(getEarlyStoppingRulesReply, nil)
 	getSuggestionsFail := rpcClientSuggestion.EXPECT().GetSuggestions(gomock.Any(), gomock.Any()).Return(nil, errors.New("Suggestion service connection error"))
 
 	invalidAssignmentsCount := rpcClientSuggestion.EXPECT().GetSuggestions(gomock.Any(), gomock.Any()).Return(
@@ -143,7 +148,7 @@ func TestSyncAssignments(t *testing.T) {
 		}, nil)
 
 	validRunGetSuggestions2 := rpcClientSuggestion.EXPECT().GetSuggestions(gomock.Any(), k8sMatcher{expectedRequestSuggestion}).Return(getSuggestionReply, nil)
-	getEarlyStopRulesFail := rpcClientSuggestion.EXPECT().GetEarlyStoppingRules(gomock.Any(), gomock.Any()).Return(nil, errors.New("Suggestion service connection error"))
+	getEarlyStopRulesFail := rpcClientEarlyStopping.EXPECT().GetEarlyStoppingRules(gomock.Any(), gomock.Any()).Return(nil, errors.New("Suggestion service connection error"))
 
 	gomock.InOrder(
 		validRunGetSuggestions,
