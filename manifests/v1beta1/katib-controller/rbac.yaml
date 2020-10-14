@@ -77,6 +77,8 @@ rules:
     resources:
       - roles
       - rolebindings
+    verbs:
+      - "*"
 ---
 apiVersion: v1
 kind: ServiceAccount
