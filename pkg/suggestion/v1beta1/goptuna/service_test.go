@@ -96,7 +96,6 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 									Value: "10",
 								},
 							},
-							EarlyStoppingSpec: nil,
 						},
 						Objective: &api_v1_beta1.ObjectiveSpec{
 							Type:                  api_v1_beta1.ObjectiveType_MINIMIZE,
@@ -124,7 +123,6 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 									Value: "10",
 								},
 							},
-							EarlyStoppingSpec: nil,
 						},
 						Objective: &api_v1_beta1.ObjectiveSpec{
 							Type:                  api_v1_beta1.ObjectiveType_MINIMIZE,
