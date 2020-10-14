@@ -47,9 +47,9 @@ gcloud --project ${PROJECT} container clusters get-credentials ${CLUSTER_NAME} \
 kubectl config set-context $(kubectl config current-context) --namespace=default
 
 echo "Grant cluster-admin permissions to the current user ..."
-kubectl create clusterrolebinding cluster-admin-binding \
-  --clusterrole=cluster-admin \
-  --user=$(gcloud config get-value core/account)
+# kubectl create clusterrolebinding cluster-admin-binding \
+#   --clusterrole=cluster-admin \
+#   --user=$(gcloud config get-value core/account)
 
 #This is required. But I don't know why.
 # VERSION=${VERSION/%?/}
