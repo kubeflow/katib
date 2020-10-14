@@ -196,7 +196,7 @@ func main() {
 				log.Fatalf("Suggestion persistent volume claim is not alive while ResumePolicy = %v, error: %v", experimentsv1beta1.FromVolume, err)
 			}
 
-			namespacedName = types.NamespacedName{Name: controllerUtil.GetSuggestionPersistentVolumeClaimName(sug)}
+			namespacedName = types.NamespacedName{Name: controllerUtil.GetSuggestionPersistentVolumeName(sug)}
 			err = kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.PersistentVolume{})
 			if err != nil {
 				log.Fatalf("Suggestion persistent volume is not alive while ResumePolicy = %v, error: %v", experimentsv1beta1.FromVolume, err)
