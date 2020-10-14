@@ -3,6 +3,7 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**early_stopping_rules** | [**list[V1beta1EarlyStoppingRule]**](V1beta1EarlyStoppingRule.md) | Rules for early stopping techniques Contains rule name, value and comparison type | [optional] 
 **failure_condition** | **str** | Condition when trial custom resource is failed. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type&#x3D;&#x3D;\&quot;Failed\&quot;)#|#(status&#x3D;&#x3D;\&quot;True\&quot;)# | [optional] 
 **metrics_collector** | [**V1beta1MetricsCollectorSpec**](V1beta1MetricsCollectorSpec.md) | Describes how metrics will be collected | [optional] 
 **objective** | [**V1beta1ObjectiveSpec**](V1beta1ObjectiveSpec.md) | Describes the objective of the experiment. | [optional] 

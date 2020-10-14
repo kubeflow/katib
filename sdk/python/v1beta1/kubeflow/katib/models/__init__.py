@@ -19,6 +19,7 @@ from kubeflow.katib.models.v1beta1_algorithm_setting import V1beta1AlgorithmSett
 from kubeflow.katib.models.v1beta1_algorithm_spec import V1beta1AlgorithmSpec
 from kubeflow.katib.models.v1beta1_collector_spec import V1beta1CollectorSpec
 from kubeflow.katib.models.v1beta1_config_map_source import V1beta1ConfigMapSource
+from kubeflow.katib.models.v1beta1_early_stopping_rule import V1beta1EarlyStoppingRule
 from kubeflow.katib.models.v1beta1_early_stopping_setting import V1beta1EarlyStoppingSetting
 from kubeflow.katib.models.v1beta1_early_stopping_spec import V1beta1EarlyStoppingSpec
 from kubeflow.katib.models.v1beta1_experiment import V1beta1Experiment

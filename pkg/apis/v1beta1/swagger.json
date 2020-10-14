@@ -97,6 +97,10 @@
           "description": "Name of the algorithm that suggestion is used.",
           "type": "string"
         },
+        "earlyStoppingAlgorithmName": {
+          "description": "Early stopping algorithm name that Suggestion's Experiment is used",
+          "type": "string"
+        },
         "requests": {
           "description": "Number of suggestions requested",
           "type": "integer",
@@ -176,12 +180,19 @@
     ".v1beta1.TrialAssignment": {
       "description": "TrialAssignment is the assignment for one trial.",
       "properties": {
+        "earlyStoppingRules": {
+          "description": "Rules for early stopping techniques Contains rule name, value and comparison type",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1beta1.EarlyStoppingRule"
+          }
+        },
         "name": {
           "description": "Name of the suggestion",
           "type": "string"
         },
         "parameterAssignments": {
-          "description": "Suggestion results",
+          "description": "Suggestion results with Trial parameters",
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1beta1.ParameterAssignment"
@@ -252,6 +263,13 @@
         "parameterAssignments"
       ],
       "properties": {
+        "earlyStoppingRules": {
+          "description": "Rules for early stopping techniques Contains rule name, value and comparison type",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1beta1.EarlyStoppingRule"
+          }
+        },
         "failureCondition": {
           "description": "Condition when trial custom resource is failed. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Failed\")#|#(status==\"True\")#",
           "type": "string"
@@ -344,9 +362,6 @@
           "items": {
             "$ref": "#/definitions/v1beta1.AlgorithmSetting"
           }
-        },
-        "earlyStopping": {
-          "$ref": "#/definitions/v1beta1.EarlyStoppingSpec"
         }
       }
     },
@@ -381,7 +396,25 @@
         }
       }
     },
+    "v1beta1.EarlyStoppingRule": {
+      "description": "EarlyStoppingRule represents each rule for early stopping",
+      "properties": {
+        "comparison": {
+          "description": "Comparison defines correlation between name and value",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name contains metric name for the rule",
+          "type": "string"
+        },
+        "value": {
+          "description": "Value contains metric value for the rule",
+          "type": "string"
+        }
+      }
+    },
     "v1beta1.EarlyStoppingSetting": {
+      "description": "EarlyStoppingSetting represents key-value pair for early stopping setting",
       "properties": {
         "name": {
           "type": "string"
@@ -392,14 +425,14 @@
       }
     },
     "v1beta1.EarlyStoppingSpec": {
-      "required": [
-        "earlyStoppingSettings"
-      ],
+      "description": "EarlyStoppingSpec describes early stopping algorithm",
       "properties": {
         "earlyStoppingAlgorithmName": {
+          "description": "Early stopping algorithm name",
           "type": "string"
         },
         "earlyStoppingSettings": {
+          "description": "Key-value pairs representing settings for early stopping algorithm.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1beta1.EarlyStoppingSetting"
@@ -493,6 +526,10 @@
           "description": "Describes the suggestion algorithm.",
           "$ref": "#/definitions/v1beta1.AlgorithmSpec"
         },
+        "earlyStopping": {
+          "description": "Describes the early stopping algorithm.",
+          "$ref": "#/definitions/v1beta1.EarlyStoppingSpec"
+        },
         "maxFailedTrialCount": {
           "description": "Max failed trials to mark experiment as failed.",
           "type": "integer",
@@ -553,6 +590,13 @@
           "description": "Current optimal trial parameters and observations.",
           "$ref": "#/definitions/v1beta1.OptimalTrial"
         },
+        "earlyStoppedTrialList": {
+          "description": "List of trial names which have been early stopped.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "failedTrialList": {
           "description": "List of trial names which have already failed.",
           "type": "array",
@@ -598,6 +642,11 @@
         },
         "trials": {
           "description": "Trials is the total number of trials owned by the experiment.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "trialsEarlyStopped": {
+          "description": "How many trials are currently early stopped.",
           "type": "integer",
           "format": "int32"
         },

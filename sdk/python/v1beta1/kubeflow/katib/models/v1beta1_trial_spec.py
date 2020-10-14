@@ -17,6 +17,7 @@ import re  # noqa: F401
 import six
 
 from kubeflow.katib.models.v1_unstructured_unstructured import V1UnstructuredUnstructured  # noqa: F401,E501
+from kubeflow.katib.models.v1beta1_early_stopping_rule import V1beta1EarlyStoppingRule  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_metrics_collector_spec import V1beta1MetricsCollectorSpec  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_objective_spec import V1beta1ObjectiveSpec  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_parameter_assignment import V1beta1ParameterAssignment  # noqa: F401,E501
@@ -36,6 +37,7 @@ class V1beta1TrialSpec(object):
                             and the value is json key in definition.
     """
     swagger_types = {
+        'early_stopping_rules': 'list[V1beta1EarlyStoppingRule]',
         'failure_condition': 'str',
         'metrics_collector': 'V1beta1MetricsCollectorSpec',
         'objective': 'V1beta1ObjectiveSpec',
@@ -48,6 +50,7 @@ class V1beta1TrialSpec(object):
     }
 
     attribute_map = {
+        'early_stopping_rules': 'earlyStoppingRules',
         'failure_condition': 'failureCondition',
         'metrics_collector': 'metricsCollector',
         'objective': 'objective',
@@ -59,9 +62,10 @@ class V1beta1TrialSpec(object):
         'success_condition': 'successCondition'
     }
 
-    def __init__(self, failure_condition=None, metrics_collector=None, objective=None, parameter_assignments=None, primary_container_name=None, primary_pod_labels=None, retain_run=None, run_spec=None, success_condition=None):  # noqa: E501
+    def __init__(self, early_stopping_rules=None, failure_condition=None, metrics_collector=None, objective=None, parameter_assignments=None, primary_container_name=None, primary_pod_labels=None, retain_run=None, run_spec=None, success_condition=None):  # noqa: E501
         """V1beta1TrialSpec - a model defined in Swagger"""  # noqa: E501
 
+        self._early_stopping_rules = None
         self._failure_condition = None
         self._metrics_collector = None
         self._objective = None
@@ -73,6 +77,8 @@ class V1beta1TrialSpec(object):
         self._success_condition = None
         self.discriminator = None
 
+        if early_stopping_rules is not None:
+            self.early_stopping_rules = early_stopping_rules
         if failure_condition is not None:
             self.failure_condition = failure_condition
         if metrics_collector is not None:
@@ -90,6 +96,29 @@ class V1beta1TrialSpec(object):
             self.run_spec = run_spec
         if success_condition is not None:
             self.success_condition = success_condition
+
+    @property
+    def early_stopping_rules(self):
+        """Gets the early_stopping_rules of this V1beta1TrialSpec.  # noqa: E501
+
+        Rules for early stopping techniques Contains rule name, value and comparison type  # noqa: E501
+
+        :return: The early_stopping_rules of this V1beta1TrialSpec.  # noqa: E501
+        :rtype: list[V1beta1EarlyStoppingRule]
+        """
+        return self._early_stopping_rules
+
+    @early_stopping_rules.setter
+    def early_stopping_rules(self, early_stopping_rules):
+        """Sets the early_stopping_rules of this V1beta1TrialSpec.
+
+        Rules for early stopping techniques Contains rule name, value and comparison type  # noqa: E501
+
+        :param early_stopping_rules: The early_stopping_rules of this V1beta1TrialSpec.  # noqa: E501
+        :type: list[V1beta1EarlyStoppingRule]
+        """
+
+        self._early_stopping_rules = early_stopping_rules
 
     @property
     def failure_condition(self):

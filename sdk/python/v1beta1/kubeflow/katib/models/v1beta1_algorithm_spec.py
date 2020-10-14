@@ -17,7 +17,6 @@ import re  # noqa: F401
 import six
 
 from kubeflow.katib.models.v1beta1_algorithm_setting import V1beta1AlgorithmSetting  # noqa: F401,E501
-from kubeflow.katib.models.v1beta1_early_stopping_spec import V1beta1EarlyStoppingSpec  # noqa: F401,E501
 
 
 class V1beta1AlgorithmSpec(object):
@@ -35,30 +34,25 @@ class V1beta1AlgorithmSpec(object):
     """
     swagger_types = {
         'algorithm_name': 'str',
-        'algorithm_settings': 'list[V1beta1AlgorithmSetting]',
-        'early_stopping': 'V1beta1EarlyStoppingSpec'
+        'algorithm_settings': 'list[V1beta1AlgorithmSetting]'
     }
 
     attribute_map = {
         'algorithm_name': 'algorithmName',
-        'algorithm_settings': 'algorithmSettings',
-        'early_stopping': 'earlyStopping'
+        'algorithm_settings': 'algorithmSettings'
     }
 
-    def __init__(self, algorithm_name=None, algorithm_settings=None, early_stopping=None):  # noqa: E501
+    def __init__(self, algorithm_name=None, algorithm_settings=None):  # noqa: E501
         """V1beta1AlgorithmSpec - a model defined in Swagger"""  # noqa: E501
 
         self._algorithm_name = None
         self._algorithm_settings = None
-        self._early_stopping = None
         self.discriminator = None
 
         if algorithm_name is not None:
             self.algorithm_name = algorithm_name
         if algorithm_settings is not None:
             self.algorithm_settings = algorithm_settings
-        if early_stopping is not None:
-            self.early_stopping = early_stopping
 
     @property
     def algorithm_name(self):
@@ -103,27 +97,6 @@ class V1beta1AlgorithmSpec(object):
         """
 
         self._algorithm_settings = algorithm_settings
-
-    @property
-    def early_stopping(self):
-        """Gets the early_stopping of this V1beta1AlgorithmSpec.  # noqa: E501
-
-
-        :return: The early_stopping of this V1beta1AlgorithmSpec.  # noqa: E501
-        :rtype: V1beta1EarlyStoppingSpec
-        """
-        return self._early_stopping
-
-    @early_stopping.setter
-    def early_stopping(self, early_stopping):
-        """Sets the early_stopping of this V1beta1AlgorithmSpec.
-
-
-        :param early_stopping: The early_stopping of this V1beta1AlgorithmSpec.  # noqa: E501
-        :type: V1beta1EarlyStoppingSpec
-        """
-
-        self._early_stopping = early_stopping
 
     def to_dict(self):
         """Returns the model properties as a dict"""

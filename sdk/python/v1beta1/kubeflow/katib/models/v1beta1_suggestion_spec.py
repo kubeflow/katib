@@ -32,25 +32,30 @@ class V1beta1SuggestionSpec(object):
     """
     swagger_types = {
         'algorithm_name': 'str',
+        'early_stopping_algorithm_name': 'str',
         'requests': 'int',
         'resume_policy': 'str'
     }
 
     attribute_map = {
         'algorithm_name': 'algorithmName',
+        'early_stopping_algorithm_name': 'earlyStoppingAlgorithmName',
         'requests': 'requests',
         'resume_policy': 'resumePolicy'
     }
 
-    def __init__(self, algorithm_name=None, requests=None, resume_policy=None):  # noqa: E501
+    def __init__(self, algorithm_name=None, early_stopping_algorithm_name=None, requests=None, resume_policy=None):  # noqa: E501
         """V1beta1SuggestionSpec - a model defined in Swagger"""  # noqa: E501
 
         self._algorithm_name = None
+        self._early_stopping_algorithm_name = None
         self._requests = None
         self._resume_policy = None
         self.discriminator = None
 
         self.algorithm_name = algorithm_name
+        if early_stopping_algorithm_name is not None:
+            self.early_stopping_algorithm_name = early_stopping_algorithm_name
         if requests is not None:
             self.requests = requests
         if resume_policy is not None:
@@ -80,6 +85,29 @@ class V1beta1SuggestionSpec(object):
             raise ValueError("Invalid value for `algorithm_name`, must not be `None`")  # noqa: E501
 
         self._algorithm_name = algorithm_name
+
+    @property
+    def early_stopping_algorithm_name(self):
+        """Gets the early_stopping_algorithm_name of this V1beta1SuggestionSpec.  # noqa: E501
+
+        Early stopping algorithm name that Suggestion's Experiment is used  # noqa: E501
+
+        :return: The early_stopping_algorithm_name of this V1beta1SuggestionSpec.  # noqa: E501
+        :rtype: str
+        """
+        return self._early_stopping_algorithm_name
+
+    @early_stopping_algorithm_name.setter
+    def early_stopping_algorithm_name(self, early_stopping_algorithm_name):
+        """Sets the early_stopping_algorithm_name of this V1beta1SuggestionSpec.
+
+        Early stopping algorithm name that Suggestion's Experiment is used  # noqa: E501
+
+        :param early_stopping_algorithm_name: The early_stopping_algorithm_name of this V1beta1SuggestionSpec.  # noqa: E501
+        :type: str
+        """
+
+        self._early_stopping_algorithm_name = early_stopping_algorithm_name
 
     @property
     def requests(self):
