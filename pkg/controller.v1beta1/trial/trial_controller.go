@@ -260,9 +260,10 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 	}
 
 	// Job already exists
-	// TODO Can desired Spec differ from deployedSpec?
 	if deployedJob != nil {
-		if instance.Spec.SuccessCondition != "" && instance.Spec.FailureCondition != "" && !instance.IsCompleted() {
+		// If Trial is EarlyStopped we need to verify/update observation logs
+		if instance.Spec.SuccessCondition != "" && instance.Spec.FailureCondition != "" &&
+			(!instance.IsCompleted() || instance.IsEarlyStopped()) {
 			jobStatus, err := trialutil.GetDeployedJobStatus(instance, deployedJob)
 			if err != nil {
 				logger.Error(err, "GetDeployedJobStatus error")
@@ -272,13 +273,15 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 				return nil
 			}
 			// If Job is succeeded update Trial observation
-			if jobStatus.Condition == trialutil.JobSucceeded {
+			// If status is EarlyStopped update Trial observation
+			if jobStatus.Condition == trialutil.JobSucceeded || instance.IsEarlyStopped() {
 				if err = r.UpdateTrialStatusObservation(instance); err != nil {
 					logger.Error(err, "Update trial status observation error")
 					return err
 				}
 			}
-			// If observation is empty metrics collector doesn't finish
+			// If observation is empty metrics collector doesn't finish.
+			// For early stopping metrics collector are reported logs before Trial status is changed to EarlyStopped
 			if jobStatus.Condition == trialutil.JobSucceeded && instance.Status.Observation == nil {
 				logger.Info("Trial job is succeeded but metrics are not reported, reconcile requeued")
 				return errMetricsNotReported
