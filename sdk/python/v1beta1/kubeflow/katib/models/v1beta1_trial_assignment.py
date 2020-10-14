@@ -16,6 +16,7 @@ import re  # noqa: F401
 
 import six
 
+from kubeflow.katib.models.v1beta1_early_stopping_rule import V1beta1EarlyStoppingRule  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_parameter_assignment import V1beta1ParameterAssignment  # noqa: F401,E501
 
 
@@ -33,26 +34,54 @@ class V1beta1TrialAssignment(object):
                             and the value is json key in definition.
     """
     swagger_types = {
+        'early_stopping_rules': 'list[V1beta1EarlyStoppingRule]',
         'name': 'str',
         'parameter_assignments': 'list[V1beta1ParameterAssignment]'
     }
 
     attribute_map = {
+        'early_stopping_rules': 'earlyStoppingRules',
         'name': 'name',
         'parameter_assignments': 'parameterAssignments'
     }
 
-    def __init__(self, name=None, parameter_assignments=None):  # noqa: E501
+    def __init__(self, early_stopping_rules=None, name=None, parameter_assignments=None):  # noqa: E501
         """V1beta1TrialAssignment - a model defined in Swagger"""  # noqa: E501
 
+        self._early_stopping_rules = None
         self._name = None
         self._parameter_assignments = None
         self.discriminator = None
 
+        if early_stopping_rules is not None:
+            self.early_stopping_rules = early_stopping_rules
         if name is not None:
             self.name = name
         if parameter_assignments is not None:
             self.parameter_assignments = parameter_assignments
+
+    @property
+    def early_stopping_rules(self):
+        """Gets the early_stopping_rules of this V1beta1TrialAssignment.  # noqa: E501
+
+        Rules for early stopping techniques Contains rule name, value and comparison type  # noqa: E501
+
+        :return: The early_stopping_rules of this V1beta1TrialAssignment.  # noqa: E501
+        :rtype: list[V1beta1EarlyStoppingRule]
+        """
+        return self._early_stopping_rules
+
+    @early_stopping_rules.setter
+    def early_stopping_rules(self, early_stopping_rules):
+        """Sets the early_stopping_rules of this V1beta1TrialAssignment.
+
+        Rules for early stopping techniques Contains rule name, value and comparison type  # noqa: E501
+
+        :param early_stopping_rules: The early_stopping_rules of this V1beta1TrialAssignment.  # noqa: E501
+        :type: list[V1beta1EarlyStoppingRule]
+        """
+
+        self._early_stopping_rules = early_stopping_rules
 
     @property
     def name(self):
@@ -81,7 +110,7 @@ class V1beta1TrialAssignment(object):
     def parameter_assignments(self):
         """Gets the parameter_assignments of this V1beta1TrialAssignment.  # noqa: E501
 
-        Suggestion results  # noqa: E501
+        Suggestion results with Trial parameters  # noqa: E501
 
         :return: The parameter_assignments of this V1beta1TrialAssignment.  # noqa: E501
         :rtype: list[V1beta1ParameterAssignment]
@@ -92,7 +121,7 @@ class V1beta1TrialAssignment(object):
     def parameter_assignments(self, parameter_assignments):
         """Sets the parameter_assignments of this V1beta1TrialAssignment.
 
-        Suggestion results  # noqa: E501
+        Suggestion results with Trial parameters  # noqa: E501
 
         :param parameter_assignments: The parameter_assignments of this V1beta1TrialAssignment.  # noqa: E501
         :type: list[V1beta1ParameterAssignment]

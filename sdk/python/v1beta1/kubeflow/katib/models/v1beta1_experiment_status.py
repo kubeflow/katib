@@ -38,6 +38,7 @@ class V1beta1ExperimentStatus(object):
         'completion_time': 'V1Time',
         'conditions': 'list[V1beta1ExperimentCondition]',
         'current_optimal_trial': 'V1beta1OptimalTrial',
+        'early_stopped_trial_list': 'list[str]',
         'failed_trial_list': 'list[str]',
         'killed_trial_list': 'list[str]',
         'last_reconcile_time': 'V1Time',
@@ -46,6 +47,7 @@ class V1beta1ExperimentStatus(object):
         'start_time': 'V1Time',
         'succeeded_trial_list': 'list[str]',
         'trials': 'int',
+        'trials_early_stopped': 'int',
         'trials_failed': 'int',
         'trials_killed': 'int',
         'trials_pending': 'int',
@@ -57,6 +59,7 @@ class V1beta1ExperimentStatus(object):
         'completion_time': 'completionTime',
         'conditions': 'conditions',
         'current_optimal_trial': 'currentOptimalTrial',
+        'early_stopped_trial_list': 'earlyStoppedTrialList',
         'failed_trial_list': 'failedTrialList',
         'killed_trial_list': 'killedTrialList',
         'last_reconcile_time': 'lastReconcileTime',
@@ -65,6 +68,7 @@ class V1beta1ExperimentStatus(object):
         'start_time': 'startTime',
         'succeeded_trial_list': 'succeededTrialList',
         'trials': 'trials',
+        'trials_early_stopped': 'trialsEarlyStopped',
         'trials_failed': 'trialsFailed',
         'trials_killed': 'trialsKilled',
         'trials_pending': 'trialsPending',
@@ -72,12 +76,13 @@ class V1beta1ExperimentStatus(object):
         'trials_succeeded': 'trialsSucceeded'
     }
 
-    def __init__(self, completion_time=None, conditions=None, current_optimal_trial=None, failed_trial_list=None, killed_trial_list=None, last_reconcile_time=None, pending_trial_list=None, running_trial_list=None, start_time=None, succeeded_trial_list=None, trials=None, trials_failed=None, trials_killed=None, trials_pending=None, trials_running=None, trials_succeeded=None):  # noqa: E501
+    def __init__(self, completion_time=None, conditions=None, current_optimal_trial=None, early_stopped_trial_list=None, failed_trial_list=None, killed_trial_list=None, last_reconcile_time=None, pending_trial_list=None, running_trial_list=None, start_time=None, succeeded_trial_list=None, trials=None, trials_early_stopped=None, trials_failed=None, trials_killed=None, trials_pending=None, trials_running=None, trials_succeeded=None):  # noqa: E501
         """V1beta1ExperimentStatus - a model defined in Swagger"""  # noqa: E501
 
         self._completion_time = None
         self._conditions = None
         self._current_optimal_trial = None
+        self._early_stopped_trial_list = None
         self._failed_trial_list = None
         self._killed_trial_list = None
         self._last_reconcile_time = None
@@ -86,6 +91,7 @@ class V1beta1ExperimentStatus(object):
         self._start_time = None
         self._succeeded_trial_list = None
         self._trials = None
+        self._trials_early_stopped = None
         self._trials_failed = None
         self._trials_killed = None
         self._trials_pending = None
@@ -99,6 +105,8 @@ class V1beta1ExperimentStatus(object):
             self.conditions = conditions
         if current_optimal_trial is not None:
             self.current_optimal_trial = current_optimal_trial
+        if early_stopped_trial_list is not None:
+            self.early_stopped_trial_list = early_stopped_trial_list
         if failed_trial_list is not None:
             self.failed_trial_list = failed_trial_list
         if killed_trial_list is not None:
@@ -115,6 +123,8 @@ class V1beta1ExperimentStatus(object):
             self.succeeded_trial_list = succeeded_trial_list
         if trials is not None:
             self.trials = trials
+        if trials_early_stopped is not None:
+            self.trials_early_stopped = trials_early_stopped
         if trials_failed is not None:
             self.trials_failed = trials_failed
         if trials_killed is not None:
@@ -194,6 +204,29 @@ class V1beta1ExperimentStatus(object):
         """
 
         self._current_optimal_trial = current_optimal_trial
+
+    @property
+    def early_stopped_trial_list(self):
+        """Gets the early_stopped_trial_list of this V1beta1ExperimentStatus.  # noqa: E501
+
+        List of trial names which have been early stopped.  # noqa: E501
+
+        :return: The early_stopped_trial_list of this V1beta1ExperimentStatus.  # noqa: E501
+        :rtype: list[str]
+        """
+        return self._early_stopped_trial_list
+
+    @early_stopped_trial_list.setter
+    def early_stopped_trial_list(self, early_stopped_trial_list):
+        """Sets the early_stopped_trial_list of this V1beta1ExperimentStatus.
+
+        List of trial names which have been early stopped.  # noqa: E501
+
+        :param early_stopped_trial_list: The early_stopped_trial_list of this V1beta1ExperimentStatus.  # noqa: E501
+        :type: list[str]
+        """
+
+        self._early_stopped_trial_list = early_stopped_trial_list
 
     @property
     def failed_trial_list(self):
@@ -378,6 +411,29 @@ class V1beta1ExperimentStatus(object):
         """
 
         self._trials = trials
+
+    @property
+    def trials_early_stopped(self):
+        """Gets the trials_early_stopped of this V1beta1ExperimentStatus.  # noqa: E501
+
+        How many trials are currently early stopped.  # noqa: E501
+
+        :return: The trials_early_stopped of this V1beta1ExperimentStatus.  # noqa: E501
+        :rtype: int
+        """
+        return self._trials_early_stopped
+
+    @trials_early_stopped.setter
+    def trials_early_stopped(self, trials_early_stopped):
+        """Sets the trials_early_stopped of this V1beta1ExperimentStatus.
+
+        How many trials are currently early stopped.  # noqa: E501
+
+        :param trials_early_stopped: The trials_early_stopped of this V1beta1ExperimentStatus.  # noqa: E501
+        :type: int
+        """
+
+        self._trials_early_stopped = trials_early_stopped
 
     @property
     def trials_failed(self):

@@ -235,6 +235,11 @@ func (in *ExperimentStatus) DeepCopyInto(out *ExperimentStatus) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.EarlyStoppedTrialList != nil {
+		in, out := &in.EarlyStoppedTrialList, &out.EarlyStoppedTrialList
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 

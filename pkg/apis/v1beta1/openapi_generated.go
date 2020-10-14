@@ -72,16 +72,11 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								},
 							},
 						},
-						"earlyStopping": {
-							SchemaProps: spec.SchemaProps{
-								Ref: ref("github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingSpec"),
-							},
-						},
 					},
 				},
 			},
 			Dependencies: []string{
-				"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.AlgorithmSetting", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingSpec"},
+				"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.AlgorithmSetting"},
 		},
 		"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.CollectorSpec": {
 			Schema: spec.Schema{
@@ -106,9 +101,41 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 			Dependencies: []string{
 				"k8s.io/api/core/v1.Container"},
 		},
+		"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingRule": {
+			Schema: spec.Schema{
+				SchemaProps: spec.SchemaProps{
+					Description: "EarlyStoppingRule represents each rule for early stopping",
+					Properties: map[string]spec.Schema{
+						"name": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Name contains metric name for the rule",
+								Type:        []string{"string"},
+								Format:      "",
+							},
+						},
+						"value": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Value contains metric value for the rule",
+								Type:        []string{"string"},
+								Format:      "",
+							},
+						},
+						"comparison": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Comparison defines correlation between name and value",
+								Type:        []string{"string"},
+								Format:      "",
+							},
+						},
+					},
+				},
+			},
+			Dependencies: []string{},
+		},
 		"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingSetting": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
+					Description: "EarlyStoppingSetting represents key-value pair for early stopping setting",
 					Properties: map[string]spec.Schema{
 						"name": {
 							SchemaProps: spec.SchemaProps{
@@ -130,16 +157,19 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingSpec": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
+					Description: "EarlyStoppingSpec describes early stopping algorithm",
 					Properties: map[string]spec.Schema{
 						"earlyStoppingAlgorithmName": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"string"},
-								Format: "",
+								Description: "Early stopping algorithm name",
+								Type:        []string{"string"},
+								Format:      "",
 							},
 						},
 						"earlyStoppingSettings": {
 							SchemaProps: spec.SchemaProps{
-								Type: []string{"array"},
+								Description: "Key-value pairs representing settings for early stopping algorithm.",
+								Type:        []string{"array"},
 								Items: &spec.SchemaOrArray{
 									Schema: &spec.Schema{
 										SchemaProps: spec.SchemaProps{
@@ -150,7 +180,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 							},
 						},
 					},
-					Required: []string{"earlyStoppingSettings"},
 				},
 			},
 			Dependencies: []string{
@@ -597,6 +626,12 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								Ref:         ref("github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.AlgorithmSpec"),
 							},
 						},
+						"earlyStopping": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Describes the early stopping algorithm.",
+								Ref:         ref("github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingSpec"),
+							},
+						},
 						"trialTemplate": {
 							SchemaProps: spec.SchemaProps{
 								Description: "Template for each run of the trial.",
@@ -646,7 +681,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 				},
 			},
 			Dependencies: []string{
-				"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.AlgorithmSpec", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.MetricsCollectorSpec", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.ObjectiveSpec", "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.NasConfig", "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.ParameterSpec", "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.TrialTemplate"},
+				"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.AlgorithmSpec", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingSpec", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.MetricsCollectorSpec", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.ObjectiveSpec", "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.NasConfig", "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.ParameterSpec", "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.TrialTemplate"},
 		},
 		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.ExperimentStatus": {
 			Schema: spec.Schema{
@@ -759,6 +794,20 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								},
 							},
 						},
+						"earlyStoppedTrialList": {
+							SchemaProps: spec.SchemaProps{
+								Description: "List of trial names which have been early stopped.",
+								Type:        []string{"array"},
+								Items: &spec.SchemaOrArray{
+									Schema: &spec.Schema{
+										SchemaProps: spec.SchemaProps{
+											Type:   []string{"string"},
+											Format: "",
+										},
+									},
+								},
+							},
+						},
 						"trials": {
 							SchemaProps: spec.SchemaProps{
 								Description: "Trials is the total number of trials owned by the experiment.",
@@ -797,6 +846,13 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 						"trialsRunning": {
 							SchemaProps: spec.SchemaProps{
 								Description: "How many trials are currently running.",
+								Type:        []string{"integer"},
+								Format:      "int32",
+							},
+						},
+						"trialsEarlyStopped": {
+							SchemaProps: spec.SchemaProps{
+								Description: "How many trials are currently early stopped.",
 								Type:        []string{"integer"},
 								Format:      "int32",
 							},
@@ -1290,6 +1346,13 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								Format:      "",
 							},
 						},
+						"earlyStoppingAlgorithmName": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Early stopping algorithm name that Suggestion's Experiment is used",
+								Type:        []string{"string"},
+								Format:      "",
+							},
+						},
 						"requests": {
 							SchemaProps: spec.SchemaProps{
 								Description: "Number of suggestions requested",
@@ -1392,7 +1455,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 					Properties: map[string]spec.Schema{
 						"parameterAssignments": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Suggestion results",
+								Description: "Suggestion results with Trial parameters",
 								Type:        []string{"array"},
 								Items: &spec.SchemaOrArray{
 									Schema: &spec.Schema{
@@ -1410,11 +1473,24 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								Format:      "",
 							},
 						},
+						"earlyStoppingRules": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Rules for early stopping techniques Contains rule name, value and comparison type",
+								Type:        []string{"array"},
+								Items: &spec.SchemaOrArray{
+									Schema: &spec.Schema{
+										SchemaProps: spec.SchemaProps{
+											Ref: ref("github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingRule"),
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
 			Dependencies: []string{
-				"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.ParameterAssignment"},
+				"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingRule", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.ParameterAssignment"},
 		},
 		"github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1.Trial": {
 			Schema: spec.Schema{
@@ -1574,6 +1650,19 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								},
 							},
 						},
+						"earlyStoppingRules": {
+							SchemaProps: spec.SchemaProps{
+								Description: "Rules for early stopping techniques Contains rule name, value and comparison type",
+								Type:        []string{"array"},
+								Items: &spec.SchemaOrArray{
+									Schema: &spec.Schema{
+										SchemaProps: spec.SchemaProps{
+											Ref: ref("github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingRule"),
+										},
+									},
+								},
+							},
+						},
 						"runSpec": {
 							SchemaProps: spec.SchemaProps{
 								Description: "Raw text for the trial run spec. This can be any generic Kubernetes runtime object. The trial operator should create the resource as written, and let the corresponding resource controller (e.g. tf-operator) handle the rest.",
@@ -1633,7 +1722,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 				},
 			},
 			Dependencies: []string{
-				"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.MetricsCollectorSpec", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.ObjectiveSpec", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.ParameterAssignment", "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"},
+				"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingRule", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.MetricsCollectorSpec", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.ObjectiveSpec", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.ParameterAssignment", "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"},
 		},
 		"github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1.TrialStatus": {
 			Schema: spec.Schema{

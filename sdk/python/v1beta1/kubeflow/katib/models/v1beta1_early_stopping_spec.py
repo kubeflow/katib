@@ -51,12 +51,14 @@ class V1beta1EarlyStoppingSpec(object):
 
         if early_stopping_algorithm_name is not None:
             self.early_stopping_algorithm_name = early_stopping_algorithm_name
-        self.early_stopping_settings = early_stopping_settings
+        if early_stopping_settings is not None:
+            self.early_stopping_settings = early_stopping_settings
 
     @property
     def early_stopping_algorithm_name(self):
         """Gets the early_stopping_algorithm_name of this V1beta1EarlyStoppingSpec.  # noqa: E501
 
+        Early stopping algorithm name  # noqa: E501
 
         :return: The early_stopping_algorithm_name of this V1beta1EarlyStoppingSpec.  # noqa: E501
         :rtype: str
@@ -67,6 +69,7 @@ class V1beta1EarlyStoppingSpec(object):
     def early_stopping_algorithm_name(self, early_stopping_algorithm_name):
         """Sets the early_stopping_algorithm_name of this V1beta1EarlyStoppingSpec.
 
+        Early stopping algorithm name  # noqa: E501
 
         :param early_stopping_algorithm_name: The early_stopping_algorithm_name of this V1beta1EarlyStoppingSpec.  # noqa: E501
         :type: str
@@ -78,6 +81,7 @@ class V1beta1EarlyStoppingSpec(object):
     def early_stopping_settings(self):
         """Gets the early_stopping_settings of this V1beta1EarlyStoppingSpec.  # noqa: E501
 
+        Key-value pairs representing settings for early stopping algorithm.  # noqa: E501
 
         :return: The early_stopping_settings of this V1beta1EarlyStoppingSpec.  # noqa: E501
         :rtype: list[V1beta1EarlyStoppingSetting]
@@ -88,12 +92,11 @@ class V1beta1EarlyStoppingSpec(object):
     def early_stopping_settings(self, early_stopping_settings):
         """Sets the early_stopping_settings of this V1beta1EarlyStoppingSpec.
 
+        Key-value pairs representing settings for early stopping algorithm.  # noqa: E501
 
         :param early_stopping_settings: The early_stopping_settings of this V1beta1EarlyStoppingSpec.  # noqa: E501
         :type: list[V1beta1EarlyStoppingSetting]
         """
-        if early_stopping_settings is None:
-            raise ValueError("Invalid value for `early_stopping_settings`, must not be `None`")  # noqa: E501
 
         self._early_stopping_settings = early_stopping_settings
 

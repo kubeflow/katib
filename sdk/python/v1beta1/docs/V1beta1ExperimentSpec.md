@@ -4,6 +4,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **algorithm** | [**V1beta1AlgorithmSpec**](V1beta1AlgorithmSpec.md) | Describes the suggestion algorithm. | [optional] 
+**early_stopping** | [**V1beta1EarlyStoppingSpec**](V1beta1EarlyStoppingSpec.md) | Describes the early stopping algorithm. | [optional] 
 **max_failed_trial_count** | **int** | Max failed trials to mark experiment as failed. | [optional] 
 **max_trial_count** | **int** | Max completed trials to mark experiment as succeeded | [optional] 
 **metrics_collector_spec** | [**V1beta1MetricsCollectorSpec**](V1beta1MetricsCollectorSpec.md) | Describes the specification of the metrics collector | [optional] 
