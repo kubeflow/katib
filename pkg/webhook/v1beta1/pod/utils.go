@@ -170,11 +170,11 @@ func wrapWorkerContainer(trial *trialsv1beta1.Trial, pod *v1.Pod, namespace,
 			metricsFileDir = filepath.Dir(metricsFile)
 		}
 
-		// Add condition when process is killed if early stopping is set
+		// If early stopping is set add appropriate command
 		if trial.Spec.EarlyStoppingRules != nil {
 			args = append(args, "||", getEarlyStoppingCommand(metricsFileDir, pathKind))
 		}
-		// Add completed command for run without early stopping
+		// Add completed command to run without early stopping
 		args = append(args, "&&", getMarkCompletedCommand(metricsFileDir, pathKind))
 
 		argsStr := strings.Join(args, " ")
@@ -190,7 +190,8 @@ func wrapWorkerContainer(trial *trialsv1beta1.Trial, pod *v1.Pod, namespace,
 
 func getEarlyStoppingCommand(metricsFileDir string, pathKind common.FileSystemKind) string {
 
-	// In shell condition file can be recivied with $$.pid name
+	// $$$$ is process id in shell
+	// In condition: [ $(head -n $$.pid) ], process id can be received with $$
 	pidFile := filepath.Join(metricsFileDir, "$$$$.pid")
 	pidFileCondition := filepath.Join(metricsFileDir, "$$.pid")
 
@@ -204,7 +205,7 @@ func getEarlyStoppingCommand(metricsFileDir string, pathKind common.FileSystemKi
 }
 
 func getMarkCompletedCommand(metricsFileDir string, pathKind common.FileSystemKind) string {
-	// $$ is process id in shell
+	// $$$$ is process id in shell
 	pidFile := filepath.Join(metricsFileDir, "$$$$.pid")
 	return fmt.Sprintf("echo %s > %s", mccommon.TrainingCompleted, pidFile)
 }

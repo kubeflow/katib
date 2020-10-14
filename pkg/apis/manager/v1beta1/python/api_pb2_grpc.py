@@ -90,7 +90,7 @@ def add_DBManagerServicer_to_server(servicer, server):
 
 class SuggestionStub(object):
   """*
-  Suggestion service defines APIs to manage Katib Suggestion HP or NAS algorithms
+  Suggestion service defines APIs to manage Katib Suggestion from HP or NAS algorithms
   """
 
   def __init__(self, channel):
@@ -113,7 +113,7 @@ class SuggestionStub(object):
 
 class SuggestionServicer(object):
   """*
-  Suggestion service defines APIs to manage Katib Suggestion HP or NAS algorithms
+  Suggestion service defines APIs to manage Katib Suggestion from HP or NAS algorithms
   """
 
   def GetSuggestions(self, request, context):

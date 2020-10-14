@@ -43,11 +43,18 @@ func (k8s k8sMatcher) String() string {
 	return fmt.Sprintf("is equal to %v", k8s.x)
 }
 
-func TestGetRPCClient(t *testing.T) {
+func TestGetRPCClientSuggestion(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	fakeConn := &grpc.ClientConn{}
 	actualClient := getRPCClientSuggestion(fakeConn)
 	g.Expect(actualClient).To(gomega.Equal(suggestionapi.NewSuggestionClient(fakeConn)))
+}
+
+func TestGetRPCClientEarlyStopping(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	fakeConn := &grpc.ClientConn{}
+	actualClient := getRPCClientEarlyStopping(fakeConn)
+	g.Expect(actualClient).To(gomega.Equal(suggestionapi.NewEarlyStoppingClient(fakeConn)))
 }
 
 func TestSyncAssignments(t *testing.T) {
@@ -201,8 +208,7 @@ func TestSyncAssignments(t *testing.T) {
 			Err:             true,
 			TestDescription: "ParameterAssignments from response != request number",
 		},
-		// getEarlyStopRulesFail case
-		// validRunGetSuggestions executes first
+		// validRunGetSuggestions2 + getEarlyStopRulesFail case
 		{
 			Experiment:      newFakeExperiment(),
 			Suggestion:      newFakeSuggestion(),

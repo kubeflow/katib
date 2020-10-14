@@ -51,8 +51,8 @@ spec:
       - name: learningRate
         description: Learning rate for the training model
         reference: lr
-      - name: numEpochs
-        description: Learning rate for the training model
+      - name: numberEpochs
+        description: Number of epochs to train the model
         reference: num-epochs
     trialSpec:
       apiVersion: batch/v1
@@ -71,5 +71,5 @@ spec:
                   - "/opt/mxnet-mnist/mnist.py"
                   - "--batch-size=64"
                   - "--lr=${trialParameters.learningRate}"
-                  - "--num-epochs=${trialParameters.numEpochs}"
+                  - "--num-epochs=${trialParameters.numberEpochs}"
             restartPolicy: Never

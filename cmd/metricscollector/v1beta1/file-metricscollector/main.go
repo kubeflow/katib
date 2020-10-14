@@ -179,7 +179,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 					klog.Fatalf("Unable to parse value %v to float for metric %v", metricValue, metricName)
 				}
 
-				// stopRules contains array of EarlyStoppingRule that has not been reached yet.
+				// stopRules contains array of EarlyStoppingRules that has not been reached yet.
 				// After rule is reached we delete appropriate element from the array
 				for idx, rule := range stopRules {
 					if metricName != rule.Name {
@@ -191,7 +191,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 					}
 
 					// Metric value can be equal, less or greater than stop rule
-					// Delete suitable rule stop the array
+					// Delete suitable stop rule from the array
 					if rule.Comparison == commonv1beta1.ComparisonTypeEqual && metricValue == ruleValue {
 						stopRules = deleteStopRule(stopRules, idx)
 					} else if rule.Comparison == commonv1beta1.ComparisonTypeLess && metricValue < ruleValue {
@@ -199,12 +199,11 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 					} else if rule.Comparison == commonv1beta1.ComparisonTypeGreater && metricValue > ruleValue {
 						stopRules = deleteStopRule(stopRules, idx)
 					}
-					break
 				}
 			}
 		}
 
-		// If stop rules is empty, training container is early stopped
+		// If stopRules array is empty, Trial is early stopped
 		if len(stopRules) == 0 {
 			klog.Info("Training container is early stopped")
 			isEarlyStopped = true
@@ -265,7 +264,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 				TrialName: *trialName,
 			}
 
-			// Send to request to change Trial status to early stopped
+			// Send request to change Trial status to early stopped
 			_, err = c.SetTrialStatus(context.Background(), setTrialStatusReq)
 			if err != nil {
 				klog.Fatalf("Set Trial status error: %v", err)
@@ -279,7 +278,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 
 func deleteStopRule(stopRules []commonv1beta1.EarlyStoppingRule, idx int) []commonv1beta1.EarlyStoppingRule {
 	if idx >= len(stopRules) {
-		klog.Infof("Index %v out of range stop rules %v", idx, stopRules)
+		klog.Fatalf("Index %v out of range stopRules: %v", idx, stopRules)
 	}
 	stopRules[idx] = stopRules[len(stopRules)-1]
 	stopRules[len(stopRules)-1] = commonv1beta1.EarlyStoppingRule{}

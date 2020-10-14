@@ -133,7 +133,7 @@ func WaitPIDs(pids map[int]bool, mainPid int, opts WaitPidsOpts) error {
 							if err != nil {
 								return fmt.Errorf("Training container is failed. Unable to read file %v for pid %v, error: %v", markFile, pid, err)
 							}
-							// Check if file contains "early stopped" marker
+							// Check if file contains "early-stopped" marker
 							// In that case process is not completed
 							if strings.TrimSpace(string(contents)) == TrainingEarlyStopped {
 								continue

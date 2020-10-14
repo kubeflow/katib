@@ -32,7 +32,7 @@ func GetSuggestionRBACName(s *suggestionsv1beta1.Suggestion) string {
 	return s.Name + "-" + s.Spec.AlgorithmName
 }
 
-// GetAlgorithmEndpoint returns the endpoint of the algorithm service.
+// GetAlgorithmEndpoint returns the endpoint of the Suggestion service with HP or NAS algorithm
 func GetAlgorithmEndpoint(s *suggestionsv1beta1.Suggestion) string {
 	serviceName := GetSuggestionServiceName(s)
 	return fmt.Sprintf("%s.%s:%d",
@@ -41,7 +41,7 @@ func GetAlgorithmEndpoint(s *suggestionsv1beta1.Suggestion) string {
 		consts.DefaultSuggestionPort)
 }
 
-// GetEarlyStoppingEndpoint returns the endpoint of the early stopping service.
+// GetEarlyStoppingEndpoint returns the endpoint of the EarlyStopping service
 func GetEarlyStoppingEndpoint(s *suggestionsv1beta1.Suggestion) string {
 	serviceName := GetSuggestionServiceName(s)
 	return fmt.Sprintf("%s.%s:%d",

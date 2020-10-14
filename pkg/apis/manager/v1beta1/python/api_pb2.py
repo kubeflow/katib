@@ -2294,7 +2294,7 @@ try:
 
   class SuggestionStub(object):
     """*
-    Suggestion service defines APIs to manage Katib Suggestion HP or NAS algorithms
+    Suggestion service defines APIs to manage Katib Suggestion from HP or NAS algorithms
     """
 
     def __init__(self, channel):
@@ -2317,7 +2317,7 @@ try:
 
   class SuggestionServicer(object):
     """*
-    Suggestion service defines APIs to manage Katib Suggestion HP or NAS algorithms
+    Suggestion service defines APIs to manage Katib Suggestion from HP or NAS algorithms
     """
 
     def GetSuggestions(self, request, context):
@@ -2532,7 +2532,7 @@ try:
     file not marked beta) for all further purposes. This class was generated
     only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
     """*
-    Suggestion service defines APIs to manage Katib Suggestion HP or NAS algorithms
+    Suggestion service defines APIs to manage Katib Suggestion from HP or NAS algorithms
     """
     def GetSuggestions(self, request, context):
       # missing associated documentation comment in .proto file
@@ -2551,7 +2551,7 @@ try:
     file not marked beta) for all further purposes. This class was generated
     only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
     """*
-    Suggestion service defines APIs to manage Katib Suggestion HP or NAS algorithms
+    Suggestion service defines APIs to manage Katib Suggestion from HP or NAS algorithms
     """
     def GetSuggestions(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
       # missing associated documentation comment in .proto file
