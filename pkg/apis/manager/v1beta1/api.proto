@@ -31,7 +31,7 @@ service DBManager {
 }
 
 /**
- * Suggestion service defines APIs to manage Katib Suggestion HP or NAS algorithms
+ * Suggestion service defines APIs to manage Katib Suggestion from HP or NAS algorithms
  */
 service Suggestion {
     rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply);
@@ -301,18 +301,17 @@ message GetEarlyStoppingRulesReply {
     repeated EarlyStoppingRule early_stopping_rules = 1;
 }
 
-
 message EarlyStoppingRule {
     string name = 1;
     string value = 2;
     ComparisonType comparison = 3;
 }
 
- enum ComparisonType {
-     UNKNOWN_COMPARISON = 0; // Unknown comparison, not used
-     EQUAL = 1; // Equal comparison, e.g. accuracy = 0.7
-     LESS = 2; // Less comparison, e.g. accuracy < 0.7
-     GREATER = 3; // Greater comparison, e.g. accuracy > 0.7
+enum ComparisonType {
+    UNKNOWN_COMPARISON = 0; // Unknown comparison, not used
+    EQUAL = 1; // Equal comparison, e.g. accuracy = 0.7
+    LESS = 2; // Less comparison, e.g. accuracy < 0.7
+    GREATER = 3; // Greater comparison, e.g. accuracy > 0.7
 }
 
 message SetTrialStatusRequest {

@@ -41,7 +41,7 @@ const (
 	ExperimentKilledReason               = "ExperimentKilled"
 )
 
-// UpdateExperimentStatus checks if objective goal is reached and update Experiment status from current Trials
+// UpdateExperimentStatus checks if objective goal is reached and updates Experiment status from current Trials
 func UpdateExperimentStatus(collector *ExperimentsCollector, instance *experimentsv1beta1.Experiment, trials *trialsv1beta1.TrialList) error {
 
 	isObjectiveGoalReached := updateTrialsSummary(instance, trials)

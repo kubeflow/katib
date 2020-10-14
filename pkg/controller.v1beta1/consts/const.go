@@ -37,20 +37,20 @@ const (
 	// LabelDeploymentName is the label of deployment name.
 	LabelDeploymentName = "deployment"
 
-	// ContainerSuggestion is the container name to run suggestion service.
+	// ContainerSuggestion is the container name to run Suggestion service.
 	ContainerSuggestion = "suggestion"
-	// ContainerEarlyStopping is the container name to run early-stopping service.
+	// ContainerEarlyStopping is the container name to run EarlyStopping service.
 	ContainerEarlyStopping = "early-stopping"
 	// ContainerSuggestionVolumeName is the volume name that mounted on suggestion container
 	ContainerSuggestionVolumeName = "suggestion-volume"
 
-	// DefaultSuggestionPortName is the default port name of suggestion service.
+	// DefaultSuggestionPortName is the default port name of Suggestion service.
 	DefaultSuggestionPortName = "suggestion-api"
-	// DefaultSuggestionPort is the default port of suggestion service.
+	// DefaultSuggestionPort is the default port of Suggestion service.
 	DefaultSuggestionPort = 6789
-	// DefaultEarlyStoppingPortName is the default port name of early stopping service.
+	// DefaultEarlyStoppingPortName is the default port name of EarlyStopping service.
 	DefaultEarlyStoppingPortName = "earlystop-api"
-	// DefaultEarlyStoppingPort is the default port of early stopping service.
+	// DefaultEarlyStoppingPort is the default port of EarlyStopping service.
 	DefaultEarlyStoppingPort = 6788
 
 	// DefaultGRPCService is the default suggestion service name,

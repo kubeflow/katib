@@ -789,7 +789,7 @@ EarlyStopping service defines APIs to manage Katib Early Stopping algorithms
 <a name="api.v1.beta1.Suggestion"></a>
 
 ### Suggestion
-Suggestion service defines APIs to manage Katib Suggestion HP or NAS algorithms
+Suggestion service defines APIs to manage Katib Suggestion from HP or NAS algorithms
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|

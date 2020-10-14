@@ -646,15 +646,14 @@ func TestDesiredRBAC(t *testing.T) {
 			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
 		} else if tc.err && err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
-		} else if !tc.err &&
-			(!equality.Semantic.DeepEqual(tc.expectedServiceAccount, actualServiceAccount) ||
-				!equality.Semantic.DeepEqual(tc.expectedRole, actualRole) ||
-				!equality.Semantic.DeepEqual(tc.expectedRoleBinding, actualRoleBinding)) {
+		} else if !tc.err && (!equality.Semantic.DeepEqual(tc.expectedServiceAccount, actualServiceAccount) ||
+			!equality.Semantic.DeepEqual(tc.expectedRole, actualRole) ||
+			!equality.Semantic.DeepEqual(tc.expectedRoleBinding, actualRoleBinding)) {
 			t.Errorf("Case: %v failed. \nExpected SA %v\n Got %v.\nExpected Role %v\n Got %v.\nExpected RoleBinding %v\n Got %v",
 				tc.testDescription,
-				tc.expectedServiceAccount.ObjectMeta, actualServiceAccount.ObjectMeta,
-				tc.expectedRole.ObjectMeta, actualRole.ObjectMeta,
-				tc.expectedRoleBinding.ObjectMeta, actualRoleBinding.ObjectMeta)
+				tc.expectedServiceAccount, actualServiceAccount,
+				tc.expectedRole, actualRole,
+				tc.expectedRoleBinding, actualRoleBinding)
 		}
 	}
 }

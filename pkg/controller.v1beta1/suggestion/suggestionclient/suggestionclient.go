@@ -55,8 +55,8 @@ func New() SuggestionClient {
 	return &General{}
 }
 
-// SyncAssignments syncs assignments from algorithm suggestion service.
-// If early stopping is not nil, we call GetEarlyStoppingRules after GetSuggestions
+// SyncAssignments syncs assignments from Suggestion and EarlyStopping service.
+// If early stopping is set, we call GetEarlyStoppingRules after GetSuggestions
 func (g *General) SyncAssignments(
 	instance *suggestionsv1beta1.Suggestion,
 	e *experimentsv1beta1.Experiment,
@@ -84,18 +84,19 @@ func (g *General) SyncAssignments(
 	appendAlgorithmSettingsFromSuggestion(filledE,
 		instance.Status.AlgorithmSettings)
 
-	request := &suggestionapi.GetSuggestionsRequest{
+	requestSuggestion := &suggestionapi.GetSuggestionsRequest{
 		Experiment:    g.ConvertExperiment(filledE),
 		Trials:        g.ConvertTrials(ts),
 		RequestNumber: int32(requestNum),
 	}
 
 	// Get new suggestions
-	responseSuggestion, err := rpcClientSuggestion.GetSuggestions(ctx, request)
+	responseSuggestion, err := rpcClientSuggestion.GetSuggestions(ctx, requestSuggestion)
 	if err != nil {
 		return err
 	}
-	logger.V(0).Info("Getting suggestions", "endpoint", endpoint, "response", responseSuggestion, "request", request)
+	logger.Info("Getting suggestions", "endpoint", endpoint, "response", responseSuggestion,
+		"request", requestSuggestion)
 	if len(responseSuggestion.ParameterAssignments) != requestNum {
 		err := fmt.Errorf("The response contains unexpected trials")
 		logger.Error(err, "The response contains unexpected trials", "requestNum", requestNum, "response", responseSuggestion)
@@ -103,7 +104,7 @@ func (g *General) SyncAssignments(
 	}
 
 	earlyStoppingRules := []commonapiv1beta1.EarlyStoppingRule{}
-	// If early stopping is not nil, call it after GetSuggestions
+	// If early stopping is set, call GetEarlyStoppingRules after GetSuggestions
 	if instance.Spec.EarlyStoppingAlgorithmName != "" {
 		endpoint = util.GetEarlyStoppingEndpoint(instance)
 		connEarlyStopping, err := grpc.Dial(endpoint, grpc.WithInsecure())
@@ -117,18 +118,18 @@ func (g *General) SyncAssignments(
 		ctx, cancelEarlyStopping := context.WithTimeout(context.Background(), timeout)
 		defer cancelEarlyStopping()
 
-		request := &suggestionapi.GetEarlyStoppingRulesRequest{
+		requestEarlyStopping := &suggestionapi.GetEarlyStoppingRulesRequest{
 			Experiment: g.ConvertExperiment(filledE),
 			Trials:     g.ConvertTrials(ts),
 		}
 
 		// Get new early stopping rules
-		responseEarlyStopping, err := rpcClientEarlyStopping.GetEarlyStoppingRules(ctx, request)
+		responseEarlyStopping, err := rpcClientEarlyStopping.GetEarlyStoppingRules(ctx, requestEarlyStopping)
 		if err != nil {
 			return err
 		}
 
-		logger.Info("Getting Early Stopping rules", "endpoint", endpoint, "response", responseEarlyStopping)
+		logger.Info("Getting early stopping rules", "endpoint", endpoint, "response", responseEarlyStopping)
 
 		for _, rule := range responseEarlyStopping.EarlyStoppingRules {
 			earlyStoppingRules = append(earlyStoppingRules,

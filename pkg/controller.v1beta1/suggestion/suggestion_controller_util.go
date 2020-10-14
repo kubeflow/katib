@@ -124,7 +124,6 @@ func (r *ReconcileSuggestion) reconcileRBAC(
 	} else if err != nil {
 		return err
 	}
-
 	return nil
 }
 
