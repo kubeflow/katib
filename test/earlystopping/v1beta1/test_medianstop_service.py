@@ -10,7 +10,7 @@ from pkg.earlystopping.v1beta1.medianstop.service import MedianStopService
 class TestMedianStop(unittest.TestCase):
     def setUp(self):
         servicers = {
-            api_pb2.DESCRIPTOR.services_by_name['Suggestion']: MedianStopService(
+            api_pb2.DESCRIPTOR.services_by_name['EarlyStopping']: MedianStopService(
             )
         }
 
@@ -40,7 +40,7 @@ class TestMedianStop(unittest.TestCase):
 
         get_earlystopping_rules = self.test_server.invoke_unary_unary(
             method_descriptor=(api_pb2.DESCRIPTOR
-                               .services_by_name['Suggestion']
+                               .services_by_name['EarlyStopping']
                                .methods_by_name['GetEarlyStoppingRules']),
             invocation_metadata={},
             request=request, timeout=1)
