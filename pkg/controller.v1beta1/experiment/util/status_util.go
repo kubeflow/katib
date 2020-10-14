@@ -40,6 +40,7 @@ const (
 	ExperimentFailedReason               = "ExperimentFailed"
 )
 
+// UpdateExperimentStatus checks if objective goal is reached and update Experiment status from current Trials
 func UpdateExperimentStatus(collector *ExperimentsCollector, instance *experimentsv1beta1.Experiment, trials *trialsv1beta1.TrialList) error {
 
 	isObjectiveGoalReached := updateTrialsSummary(instance, trials)
@@ -179,7 +180,7 @@ func getObjectiveMetricValue(trial trialsv1beta1.Trial) string {
 // UpdateExperimentStatusCondition updates the experiment status.
 func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *experimentsv1beta1.Experiment, isObjectiveGoalReached bool, getSuggestionDone bool) {
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	completedTrialsCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled
+	completedTrialsCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled + instance.Status.TrialsEarlyStopped
 	failedTrialsCount := instance.Status.TrialsFailed
 	activeTrialsCount := instance.Status.TrialsPending + instance.Status.TrialsRunning
 	now := metav1.Now()
