@@ -37,7 +37,7 @@ const (
 	tfJobName       = "test-tfjob"
 	batchJobName    = "test-job"
 	objectiveMetric = "accuracy"
-	timeout         = time.Second * 5
+	timeout         = time.Second * 40
 )
 
 var trialKey = types.NamespacedName{Name: trialName, Namespace: namespace}
@@ -53,8 +53,8 @@ func TestAdd(t *testing.T) {
 	mgr, err := manager.New(cfg, manager.Options{})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	// Set fake trial resources.
-	// TFJob is installed, MPIJob is missed to test error message.
+	// Set Trial resources.
+	// TFJob controller is installed, MPIJob controller is missed.
 	trialResources := trialutil.GvkListFlag{
 		{
 			Group:   "kubeflow.org",
@@ -130,7 +130,7 @@ func TestReconcileTFJob(t *testing.T) {
 	}()
 
 	// Empty result for GetTrialObservationLog.
-	// If objective metrics are not parsed metrics collector reports "unavailable" value to DB.
+	// If objective metrics are not parsed, metrics collector reports "unavailable" value to DB.
 	observationLog := &api_pb.GetObservationLogReply{
 		ObservationLog: &api_pb.ObservationLog{
 			MetricLogs: []*api_pb.MetricLog{
@@ -435,6 +435,8 @@ func TestGetObjectiveMetricValue(t *testing.T) {
 }
 
 func newFakeTrialTFJob() *trialsv1beta1.Trial {
+	primaryContainer := "tensorflow"
+
 	tfJob := &tfv1.TFJob{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "kubeflow.org/v1",
@@ -453,7 +455,7 @@ func newFakeTrialTFJob() *trialsv1beta1.Trial {
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{
 								{
-									Name:  "tensorflow",
+									Name:  primaryContainer,
 									Image: "gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0",
 									Command: []string{
 										"python",
@@ -474,7 +476,7 @@ func newFakeTrialTFJob() *trialsv1beta1.Trial {
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{
 								{
-									Name:  "tensorflow",
+									Name:  primaryContainer,
 									Image: "gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0",
 									Command: []string{
 										"python",
@@ -500,7 +502,7 @@ func newFakeTrialTFJob() *trialsv1beta1.Trial {
 		},
 		Spec: trialsv1beta1.TrialSpec{
 			PrimaryPodLabels:     experimentsv1beta1.DefaultKubeflowJobPrimaryPodLabels,
-			PrimaryContainerName: "tensorflow",
+			PrimaryContainerName: primaryContainer,
 			SuccessCondition:     experimentsv1beta1.DefaultKubeflowJobSuccessCondition,
 			FailureCondition:     experimentsv1beta1.DefaultKubeflowJobFailureCondition,
 			Objective: &commonv1beta1.ObjectiveSpec{
@@ -518,6 +520,8 @@ func newFakeTrialTFJob() *trialsv1beta1.Trial {
 }
 
 func newFakeTrialBatchJob() *trialsv1beta1.Trial {
+	primaryContainer := "training-container"
+
 	job := &batchv1.Job{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "batch/v1",
@@ -532,7 +536,7 @@ func newFakeTrialBatchJob() *trialsv1beta1.Trial {
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:  "training-container",
+							Name:  primaryContainer,
 							Image: "docker.io/kubeflowkatib/mxnet-mnist",
 							Command: []string{
 								"python3",
@@ -555,7 +559,7 @@ func newFakeTrialBatchJob() *trialsv1beta1.Trial {
 			Namespace: namespace,
 		},
 		Spec: trialsv1beta1.TrialSpec{
-			PrimaryContainerName: "training-container",
+			PrimaryContainerName: primaryContainer,
 			SuccessCondition:     experimentsv1beta1.DefaultJobSuccessCondition,
 			FailureCondition:     experimentsv1beta1.DefaultJobFailureCondition,
 			Objective: &commonv1beta1.ObjectiveSpec{
