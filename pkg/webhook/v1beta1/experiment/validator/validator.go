@@ -323,7 +323,7 @@ func (g *DefaultValidator) validateTrialJob(runSpec *unstructured.Unstructured) 
 		tfJob := &tfv1.TFJob{}
 		err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &tfJob)
 		if err != nil {
-			return fmt.Errorf("Unable to convert spec.TrialTemplate to %v: %v", gvk.Kind, err)
+			return fmt.Errorf("Unable to convert spec.TrialTemplate: %v to %v: %v", runSpec.Object, gvk.Kind, err)
 		}
 		err = validatePatchJob(runSpec, tfJob, gvk.Kind)
 		if err != nil {
@@ -333,7 +333,7 @@ func (g *DefaultValidator) validateTrialJob(runSpec *unstructured.Unstructured) 
 		pyTorchJob := &pytorchv1.PyTorchJob{}
 		err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &pyTorchJob)
 		if err != nil {
-			return fmt.Errorf("Unable to convert spec.TrialTemplate to %v: %v", gvk.Kind, err)
+			return fmt.Errorf("Unable to convert spec.TrialTemplate: %v to %v: %v", runSpec.Object, gvk.Kind, err)
 		}
 		err = validatePatchJob(runSpec, pyTorchJob, gvk.Kind)
 		if err != nil {

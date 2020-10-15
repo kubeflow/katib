@@ -140,7 +140,7 @@ func TestWrapWorkerContainer(t *testing.T) {
 			},
 			PathKind:        common.FileKind,
 			Err:             true,
-			TestDescription: "Training pod doesn't have primary container name",
+			TestDescription: "Training pod doesn't have primary container",
 		},
 	}
 

@@ -16,32 +16,32 @@ limitations under the License.
 package v1beta1
 
 const (
-	// DefaultTrialParallelCount is the default value of spec.parallelTrialCount
+	// DefaultTrialParallelCount is the default value of spec.parallelTrialCount.
 	DefaultTrialParallelCount = 3
 
-	// DefaultTrialConfigMapName is the default value of spec.trialTemplate.configMapName for Trial template
+	// DefaultTrialConfigMapName is the default value of spec.trialTemplate.configMapName for Trial template.
 	DefaultTrialConfigMapName = "trial-template"
 
-	// DefaultTrialTemplatePath is the default value of spec.trialTemplate.TemplatePath
+	// DefaultTrialTemplatePath is the default value of spec.trialTemplate.TemplatePath.
 	DefaultTrialTemplatePath = "defaultTrialTemplate.yaml"
 
-	// DefaultResumePolicy is the default value of spec.resumePolicy
+	// DefaultResumePolicy is the default value of spec.resumePolicy.
 	DefaultResumePolicy = LongRunning
 
-	// DefaultJobSuccessCondition is the default value of spec.trialTemplate.successCondition for Job
+	// DefaultJobSuccessCondition is the default value of spec.trialTemplate.successCondition for Job.
 	DefaultJobSuccessCondition = "status.conditions.#(type==\"Complete\")#|#(status==\"True\")#"
 
-	// DefaultJobFailureCondition is the default value of spec.trialTemplate.failureCondition for Job
+	// DefaultJobFailureCondition is the default value of spec.trialTemplate.failureCondition for Job.
 	DefaultJobFailureCondition = "status.conditions.#(type==\"Failed\")#|#(status==\"True\")#"
 
-	// DefaultKubeflowJobSuccessCondition is the default value of spec.trialTemplate.successCondition for Kubeflow Job
+	// DefaultKubeflowJobSuccessCondition is the default value of spec.trialTemplate.successCondition for Kubeflow Job.
 	DefaultKubeflowJobSuccessCondition = "status.conditions.#(type==\"Succeeded\")#|#(status==\"True\")#"
 
-	// DefaultKubeflowJobFailureCondition is the default value of spec.trialTemplate.failureCondition for Kubeflow Job
+	// DefaultKubeflowJobFailureCondition is the default value of spec.trialTemplate.failureCondition for Kubeflow Job.
 	DefaultKubeflowJobFailureCondition = "status.conditions.#(type==\"Failed\")#|#(status==\"True\")#"
 )
 
 var (
-	// DefaultKubeflowJobPrimaryPodLabels is the default value of spec.trialTemplate.primaryPodLabels for Kubeflow Job
+	// DefaultKubeflowJobPrimaryPodLabels is the default value of spec.trialTemplate.primaryPodLabels for Kubeflow Job.
 	DefaultKubeflowJobPrimaryPodLabels = map[string]string{"job-role": "master"}
 )

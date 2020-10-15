@@ -33,9 +33,10 @@ import (
 )
 
 const (
-	experimentName = "test-experiment"
-	trialName      = "test-trial"
-	namespace      = "default"
+	experimentName   = "test-experiment"
+	trialName        = "test-trial"
+	namespace        = "default"
+	primaryContainer = "tensorflow"
 
 	timeout = time.Second * 40
 )
@@ -372,7 +373,7 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{
 								{
-									Name:  "tensorflow",
+									Name:  primaryContainer,
 									Image: "gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0",
 									Command: []string{
 										"python",
@@ -416,7 +417,7 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 			ResumePolicy: experimentsv1beta1.NeverResume,
 			TrialTemplate: &experimentsv1beta1.TrialTemplate{
 				PrimaryPodLabels:     experimentsv1beta1.DefaultKubeflowJobPrimaryPodLabels,
-				PrimaryContainerName: "tensorflow",
+				PrimaryContainerName: primaryContainer,
 				SuccessCondition:     experimentsv1beta1.DefaultKubeflowJobSuccessCondition,
 				FailureCondition:     experimentsv1beta1.DefaultKubeflowJobFailureCondition,
 				TrialParameters: []experimentsv1beta1.TrialParameterSpec{
@@ -513,7 +514,7 @@ func newFakeTFJob() *tfv1.TFJob {
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{
 								{
-									Name:  "tensorflow",
+									Name:  primaryContainer,
 									Image: "gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0",
 									Command: []string{
 										"python",
