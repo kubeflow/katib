@@ -23,7 +23,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -32,7 +31,6 @@ import (
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
-	commonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 )
 
 const (
@@ -121,53 +119,6 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 	return
 }
 
-// TODO (andreyvelich): Can be deleted after custom CRD is implemented
-func (r *ReconcileTrial) UpdateTrialStatusConditionDeprecated(instance *trialsv1beta1.Trial, deployedJob *unstructured.Unstructured, jobCondition *commonv1.JobCondition) {
-	if jobCondition == nil || instance == nil || deployedJob == nil {
-		return
-	}
-	now := metav1.Now()
-	jobConditionType := (*jobCondition).Type
-	if jobConditionType == commonv1.JobSucceeded {
-		if isTrialObservationAvailable(instance) {
-			msg := "Trial has succeeded"
-			instance.MarkTrialStatusSucceeded(corev1.ConditionTrue, TrialSucceededReason, msg)
-			instance.Status.CompletionTime = &now
-
-			eventMsg := fmt.Sprintf("Job %s has succeeded", deployedJob.GetName())
-			r.recorder.Eventf(instance, corev1.EventTypeNormal, JobSucceededReason, eventMsg)
-			r.collector.IncreaseTrialsSucceededCount(instance.Namespace)
-		} else {
-			// TODO (andreyvelich): Is is correct to mark succeeded status false when metrics are unavailable?
-			msg := "Metrics are not available"
-			instance.MarkTrialStatusSucceeded(corev1.ConditionFalse, TrialMetricsUnavailableReason, msg)
-
-			eventMsg := fmt.Sprintf("Metrics are not available for Job %s", deployedJob.GetName())
-			r.recorder.Eventf(instance, corev1.EventTypeWarning, JobMetricsUnavailableReason, eventMsg)
-		}
-	} else if jobConditionType == commonv1.JobFailed {
-		msg := "Trial has failed"
-		instance.MarkTrialStatusFailed(TrialFailedReason, msg)
-		instance.Status.CompletionTime = &now
-
-		jobConditionMessage := (*jobCondition).Message
-		eventMsg := fmt.Sprintf("Job %s has failed: %s", deployedJob.GetName(), jobConditionMessage)
-		r.recorder.Eventf(instance, corev1.EventTypeNormal, JobFailedReason, eventMsg)
-		r.collector.IncreaseTrialsFailedCount(instance.Namespace)
-	} else if jobConditionType == commonv1.JobRunning {
-		msg := "Trial is running"
-		instance.MarkTrialStatusRunning(TrialRunningReason, msg)
-		jobConditionMessage := (*jobCondition).Message
-		eventMsg := fmt.Sprintf("Job %s is running: %s",
-			deployedJob.GetName(), jobConditionMessage)
-		r.recorder.Eventf(instance, corev1.EventTypeNormal,
-			JobRunningReason, eventMsg)
-		// TODO(gaocegege): Should we maintain a TrialsRunningCount?
-	}
-	// else nothing to do
-	return
-}
-
 func (r *ReconcileTrial) UpdateTrialStatusObservation(instance *trialsv1beta1.Trial) error {
 	reply, err := r.GetTrialObservationLog(instance)
 	if err != nil {
@@ -218,18 +169,6 @@ func isTrialObservationAvailable(instance *trialsv1beta1.Trial) bool {
 			}
 		}
 	}
-	return false
-}
-
-func isJobSucceeded(jobCondition *commonv1.JobCondition) bool {
-	if jobCondition == nil {
-		return false
-	}
-	jobConditionType := (*jobCondition).Type
-	if jobConditionType == commonv1.JobSucceeded {
-		return true
-	}
-
 	return false
 }
 

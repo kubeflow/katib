@@ -12,9 +12,7 @@ const (
 	SuggestionDeploymentReady    = "DeploymentReady"
 	SuggestionDeploymentNotReady = "DeploymentNotReady"
 	SuggestionRunningReason      = "SuggestionRunning"
-	SuggestionSucceededReason    = "SuggestionSucceeded"
 	SuggestionFailedReason       = "SuggestionFailed"
-	SuggestionKilledReason       = "SuggestionKilled"
 )
 
 func (r *ReconcileSuggestion) updateStatus(s *suggestionsv1beta1.Suggestion, oldS *suggestionsv1beta1.Suggestion) error {

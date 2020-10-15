@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"time"
 
-	batchv1beta "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -47,7 +46,6 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/trial/managerclient"
 	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
-	jobv1beta1 "github.com/kubeflow/katib/pkg/job/v1beta1"
 	"github.com/spf13/viper"
 )
 
@@ -90,44 +88,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for changes to Trial
+	// Watch for changes in Trial
 	err = c.Watch(&source.Kind{Type: &trialsv1beta1.Trial{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		log.Error(err, "Trial watch error")
 		return err
-	}
-
-	// Watch for changes to Cronjob
-	err = c.Watch(
-		&source.Kind{Type: &batchv1beta.CronJob{}},
-		&handler.EnqueueRequestForOwner{
-			IsController: true,
-			OwnerType:    &trialsv1beta1.Trial{},
-		})
-
-	if err != nil {
-		log.Error(err, "CronJob watch error")
-		return err
-	}
-
-	for _, gvk := range jobv1beta1.SupportedJobList {
-		unstructuredJob := &unstructured.Unstructured{}
-		unstructuredJob.SetGroupVersionKind(gvk)
-		err = c.Watch(
-			&source.Kind{Type: unstructuredJob},
-			&handler.EnqueueRequestForOwner{
-				IsController: true,
-				OwnerType:    &trialsv1beta1.Trial{},
-			})
-		if err != nil {
-			if meta.IsNoMatchError(err) {
-				log.Info("Job watch error. CRD might be missing. Please install CRD and restart katib-controller", "CRD Kind", gvk.Kind)
-				continue
-			}
-			return err
-		} else {
-			log.Info("Job watch added successfully", "CRD Kind", gvk.Kind)
-		}
 	}
 
 	trialResources := viper.Get(consts.ConfigTrialResources)
@@ -157,7 +122,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				"CRD Group", gvk.Group, "CRD Version", gvk.Version, "CRD Kind", gvk.Kind)
 		}
 	}
-
 	log.Info("Trial controller created")
 	return nil
 }
@@ -223,7 +187,7 @@ func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result,
 			}
 			logger.Error(err, "Reconcile trial error")
 			r.recorder.Eventf(instance,
-				corev1.EventTypeWarning, ReconcileFailedReason,
+				corev1.EventTypeWarning, consts.ReconcileErrorReason,
 				"Failed to reconcile: %v", err)
 			return reconcile.Result{}, err
 		}
@@ -261,65 +225,36 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 
 	// Job already exists
 	// TODO Can desired Spec differ from deployedSpec?
-	if deployedJob != nil {
-		if instance.Spec.SuccessCondition != "" && instance.Spec.FailureCondition != "" && !instance.IsCompleted() {
-			jobStatus, err := trialutil.GetDeployedJobStatus(instance, deployedJob)
-			if err != nil {
-				logger.Error(err, "GetDeployedJobStatus error")
-			}
-			// Not needed to update status if jobStatus is nil
-			if jobStatus == nil {
-				return nil
-			}
-			// If Job is succeeded update Trial observation
-			if jobStatus.Condition == trialutil.JobSucceeded {
-				if err = r.UpdateTrialStatusObservation(instance); err != nil {
-					logger.Error(err, "Update trial status observation error")
-					return err
-				}
-			}
-			// If observation is empty metrics collector doesn't finish
-			if jobStatus.Condition == trialutil.JobSucceeded && instance.Status.Observation == nil {
-				logger.Info("Trial job is succeeded but metrics are not reported, reconcile requeued")
-				return errMetricsNotReported
-			}
-
-			// Update Trial job status only
-			//    if job has succeeded and if observation field is available.
-			//    if job has failed
-			// This will ensure that trial is set to be complete only if metric is collected at least once
-			r.UpdateTrialStatusCondition(instance, deployedJob.GetName(), jobStatus)
-
-		} else if instance.Spec.SuccessCondition == "" && instance.Spec.FailureCondition == "" {
-			// TODO (andreyvelich): This can be deleted after switch to custom CRD
-			kind := deployedJob.GetKind()
-			jobProvider, err := jobv1beta1.New(kind)
-			if err != nil {
-				logger.Error(err, "Failed to create the provider")
-				return err
-			}
-			// Currently jobCondition - part of commonv1 TF package for all jobs
-			jobCondition, err := jobProvider.GetDeployedJobStatus(deployedJob)
-			if err != nil {
-				logger.Error(err, "Get deployed status error")
-				return err
-			}
-
-			// Update trial observation when the job is succeeded.
-			if isJobSucceeded(jobCondition) {
-				if err = r.UpdateTrialStatusObservation(instance); err != nil {
-					logger.Error(err, "Update trial status observation error")
-					return err
-				}
-			}
-
-			// Update Trial job status only
-			//    if job has succeeded and if observation field is available.
-			//    if job has failed
-			// This will ensure that trial is set to be complete only if metric is collected at least once
-			r.UpdateTrialStatusConditionDeprecated(instance, deployedJob, jobCondition)
+	if deployedJob != nil && !instance.IsCompleted() {
+		jobStatus, err := trialutil.GetDeployedJobStatus(instance, deployedJob)
+		if err != nil {
+			logger.Error(err, "GetDeployedJobStatus error")
 		}
 
+		// Not needed to update status if jobStatus is nil
+		if jobStatus == nil {
+			return nil
+		}
+
+		// If Job is succeeded update Trial observation
+		if jobStatus.Condition == trialutil.JobSucceeded {
+			if err = r.UpdateTrialStatusObservation(instance); err != nil {
+				logger.Error(err, "Update trial status observation error")
+				return err
+			}
+		}
+
+		// If observation is empty metrics collector doesn't finish
+		if jobStatus.Condition == trialutil.JobSucceeded && instance.Status.Observation == nil {
+			logger.Info("Trial job is succeeded but metrics are not reported, reconcile requeued")
+			return errMetricsNotReported
+		}
+
+		// Update Trial job status only
+		//    if job has succeeded and if observation field is available.
+		//    if job has failed
+		// This will ensure that trial is set to be complete only if metric is collected at least once
+		r.UpdateTrialStatusCondition(instance, deployedJob.GetName(), jobStatus)
 	}
 	return nil
 }
@@ -349,7 +284,7 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 			}
 
 			// TODO (andreyvelich): Mutate job needs to be refactored (ref: https://github.com/kubeflow/katib/issues/1320)
-			// Currently, commented since we don't do Mutate Job for SupportedJobList
+			// Currently, commented since we don't implement it
 			// jobProvider, err := jobv1beta1.New(desiredJob.GetKind())
 			// if err != nil {
 			// 	return nil, err
@@ -367,6 +302,10 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 				logger.Error(err, "Create job error")
 				return nil, err
 			}
+			// We should assign desiredJob to deployedJob to update Trial status
+			// properly on the first reconcile run.
+			deployedJob = desiredJob
+
 			eventMsg := fmt.Sprintf("Job %s has been created", desiredJob.GetName())
 			r.recorder.Eventf(instance, corev1.EventTypeNormal, JobCreatedReason, eventMsg)
 		} else {

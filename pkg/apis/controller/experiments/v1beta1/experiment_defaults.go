@@ -127,6 +127,30 @@ func (e *Experiment) setDefaultTrialTemplate() {
 			},
 		}
 	}
+
+	// Set default values for Job, TFJob and PyTorchJob if TrialSpec is not nil
+	if t.TrialSource.TrialSpec != nil {
+		jobKind := t.TrialSource.TrialSpec.GetKind()
+		if jobKind == consts.JobKindJob {
+			if t.SuccessCondition == "" {
+				t.SuccessCondition = DefaultJobSuccessCondition
+			}
+			if t.FailureCondition == "" {
+				t.FailureCondition = DefaultJobFailureCondition
+			}
+		} else if jobKind == consts.JobKindTF || jobKind == consts.JobKindPyTorch {
+			if t.SuccessCondition == "" {
+				t.SuccessCondition = DefaultKubeflowJobSuccessCondition
+			}
+			if t.FailureCondition == "" {
+				t.FailureCondition = DefaultKubeflowJobFailureCondition
+			}
+			// For Kubeflow Job also set default PrimaryPodLabels
+			if len(t.PrimaryPodLabels) == 0 {
+				t.PrimaryPodLabels = DefaultKubeflowJobPrimaryPodLabels
+			}
+		}
+	}
 	e.Spec.TrialTemplate = t
 }
 

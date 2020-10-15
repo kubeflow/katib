@@ -8,6 +8,13 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/onsi/gomega"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
@@ -15,17 +22,8 @@ import (
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	suggestionapi "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
-	suggestionapimock "github.com/kubeflow/katib/pkg/mock/v1beta1/api"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
-	"github.com/onsi/gomega"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/equality"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	suggestionapimock "github.com/kubeflow/katib/pkg/mock/v1beta1/api"
 )
 
 type k8sMatcher struct {

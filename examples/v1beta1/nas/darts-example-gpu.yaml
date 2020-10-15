@@ -57,6 +57,7 @@ spec:
                 - "3"
       - operationType: skip_connection
   trialTemplate:
+    primaryContainerName: training-container
     trialParameters:
       - name: algorithmSettings
         description: Algorithm settings of DARTS Experiment

@@ -17,7 +17,6 @@ limitations under the License.
 package pod
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -32,7 +31,6 @@ import (
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	katibmanagerv1beta1 "github.com/kubeflow/katib/pkg/common/v1beta1"
-	jobv1beta1 "github.com/kubeflow/katib/pkg/job/v1beta1"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
 )
 
@@ -48,32 +46,6 @@ func isPrimaryPod(podLabels, primaryLabels map[string]string) bool {
 		}
 	}
 	return true
-}
-
-func isMasterRole(pod *v1.Pod, jobKind string) bool {
-	if labels, ok := jobv1beta1.JobRoleMap[jobKind]; ok {
-		if len(labels) == 0 {
-			return true
-		}
-		for _, label := range labels {
-			if v, err := getLabel(pod, label); err == nil {
-				if v == MasterRole {
-					return true
-				}
-			}
-		}
-	}
-	return false
-}
-
-func getLabel(pod *v1.Pod, targetLabel string) (string, error) {
-	labels := pod.Labels
-	for k, v := range labels {
-		if k == targetLabel {
-			return v, nil
-		}
-	}
-	return "", errors.New("Label " + targetLabel + " not found.")
 }
 
 func getRemoteImage(pod *v1.Pod, namespace string, containerIndex int) (crv1.Image, error) {
@@ -175,25 +147,14 @@ func needWrapWorkerContainer(mc common.MetricsCollectorSpec) bool {
 	return false
 }
 
-func wrapWorkerContainer(
-	pod *v1.Pod, namespace, jobKind, metricsFile string,
-	pathKind common.FileSystemKind,
-	trial *trialsv1beta1.Trial) error {
+func wrapWorkerContainer(trial *trialsv1beta1.Trial, pod *v1.Pod, namespace,
+	metricsFile string, pathKind common.FileSystemKind) error {
+	// Search for primary container.
 	index := -1
 	for i, c := range pod.Spec.Containers {
-		if trial.Spec.PrimaryContainerName != "" && c.Name == trial.Spec.PrimaryContainerName {
+		if c.Name == trial.Spec.PrimaryContainerName {
 			index = i
 			break
-			// TODO (andreyvelich): This can be deleted after switch to custom CRD
-		} else if trial.Spec.PrimaryContainerName == "" {
-			jobProvider, err := jobv1beta1.New(jobKind)
-			if err != nil {
-				return err
-			}
-			if jobProvider.IsTrainingContainer(i, c) {
-				index = i
-				break
-			}
 		}
 	}
 	if index >= 0 {
@@ -236,7 +197,7 @@ func getMarkCompletedCommand(mountPath string, pathKind common.FileSystemKind) s
 	return fmt.Sprintf("echo %s > %s", mccommon.TrainingCompleted, pidFile)
 }
 
-func mutateVolume(pod *v1.Pod, jobKind, mountPath, sidecarContainerName, primaryContainerName string, pathKind common.FileSystemKind) error {
+func mutateVolume(pod *v1.Pod, mountPath, sidecarContainerName, primaryContainerName string, pathKind common.FileSystemKind) error {
 	metricsVol := v1.Volume{
 		Name: common.MetricsVolume,
 		VolumeSource: v1.VolumeSource{
@@ -251,27 +212,19 @@ func mutateVolume(pod *v1.Pod, jobKind, mountPath, sidecarContainerName, primary
 		Name:      metricsVol.Name,
 		MountPath: dir,
 	}
+
 	indexList := []int{}
 	for i, c := range pod.Spec.Containers {
 		shouldMount := false
-		if c.Name == sidecarContainerName {
+		// We should mount volume only on sidecar and primary containers
+		if c.Name == sidecarContainerName || c.Name == primaryContainerName {
 			shouldMount = true
-		} else {
-			if primaryContainerName != "" && c.Name == primaryContainerName {
-				shouldMount = true
-				// TODO (andreyvelich): This can be deleted after switch to custom CRD
-			} else if primaryContainerName == "" {
-				jobProvider, err := jobv1beta1.New(jobKind)
-				if err != nil {
-					return err
-				}
-				shouldMount = jobProvider.IsTrainingContainer(i, c)
-			}
 		}
 		if shouldMount {
 			indexList = append(indexList, i)
 		}
 	}
+
 	for _, i := range indexList {
 		c := &pod.Spec.Containers[i]
 		if c.VolumeMounts == nil {

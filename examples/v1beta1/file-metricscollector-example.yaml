@@ -39,6 +39,7 @@ spec:
         min: "0.3"
         max: "0.7"
   trialTemplate:
+    primaryContainerName: training-container
     trialParameters:
       - name: learningRate
         description: Learning rate for the training model
