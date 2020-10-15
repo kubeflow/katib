@@ -123,6 +123,7 @@ spec:
               max: "3"
               step: "1"
   trialTemplate:
+    primaryContainerName: training-container
     trialParameters:
       - name: neuralNetworkArchitecture
         description: NN architecture contains operations ID on each NN layer and skip connections between layers

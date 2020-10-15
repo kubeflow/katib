@@ -32,6 +32,7 @@ spec:
         min: "100"
         max: "200"
   trialTemplate:
+    primaryContainerName: tensorflow
     trialParameters:
       - name: learningRate
         description: Learning rate for the training model
