@@ -14,7 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This shell script is used to create a EKS cluster.
+# This shell script is used to run Katib Experiment.
+# Input parameter - path to Experiment yaml.
 
 set -o errexit
 set -o nounset
@@ -22,18 +23,25 @@ set -o pipefail
 
 CLUSTER_NAME="${CLUSTER_NAME}"
 AWS_REGION="${AWS_REGION}"
+EXPERIMENT_FILE=$1
 
-echo "Starting to create EKS cluster"
+# GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
 
-eksctl create cluster \
-    --name ${CLUSTER_NAME} \
-    --version 1.17 \
-    --region ${AWS_REGION} \
-    --zones us-west-2a,us-west-2b,us-west-2c \
-    --nodegroup-name linux-nodes \
-    --node-type m5.xlarge \
-    --nodes 2 \
-    --nodes-min 1 \
-    --nodes-max 3
+echo "Configuring kubeconfig.."
+aws eks update-kubeconfig --region=${REGION} --name=${CLUSTER_NAME}
 
-echo "Successfully create EKS cluster ${CLUSTER_NAME}"
+echo "Katib deployments"
+kubectl -n kubeflow get deploy
+echo "Katib services"
+kubectl -n kubeflow get svc
+echo "Katib pods"
+kubectl -n kubeflow get pod
+echo "Katib persistent volume claims "
+kubectl get pvc -n kubeflow
+
+# cd ${GO_DIR}/test/e2e/v1beta1
+
+echo "Running Experiment from ${EXPERIMENT_FILE} file"
+go run ./test/scripts/v1beta1/run-e2e-experiment ${EXPERIMENT_FILE}
+
+exit 0

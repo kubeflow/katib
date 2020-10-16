@@ -23,17 +23,17 @@
 
   // default parameters.
   defaultParams:: {
-    project:: "automl-ci",
-    zone:: "us-east1-d",
-    // Default registry to use.
-    //registry:: "gcr.io/" + $.defaultParams.project,
+    // project:: "automl-ci",
+    // zone:: "us-east1-d",
+    // // Default registry to use.
+    // //registry:: "gcr.io/" + $.defaultParams.project,
 
-    // The image tag to use.
-    // Defaults to a value based on the name.
-    versionTag:: null,
+    // // The image tag to use.
+    // // Defaults to a value based on the name.
+    // versionTag:: null,
 
-    // The name of the secret containing GCP credentials.
-    gcpCredentialsSecretName:: "kubeflow-testing-credentials",
+    // // The name of the secret containing GCP credentials.
+    // gcpCredentialsSecretName:: "kubeflow-testing-credentials",
   },
 
   // overrides is a dictionary of parameters to provide in addition to defaults.
@@ -44,39 +44,35 @@
 
       // mountPath is the directory where the volume to store the test data
       // should be mounted.
-      local mountPath = "/mnt/" + "test-data-volume";
+      local mountPath = "/mnt/test-data-volume";
       // testDir is the root directory for all data for a particular test run.
-      local testDir = mountPath + "/" + name;
+      // local testDir = mountPath + "/" + name;
       // outputDir is the directory to sync to GCS to contain the output for this job.
-      local outputDir = testDir + "/output";
-      local artifactsDir = outputDir + "/artifacts";
-      local goDir = testDir + "/go";
+      // local outputDir = testDir + "/output";
+      // local artifactsDir = outputDir + "/artifacts";
+      // local goDir = testDir + "/go";
       // Source directory where all repos should be checked out
-      local srcRootDir = testDir + "/src";
+
+      local goDir = mountPath + "/" + name + "/go";
+      local srcRootDir = goDir + "/src";
       // The directory containing the kubeflow/katib repo
       local srcDir = srcRootDir + "/kubeflow/katib";
       // The directory containing the kubeflow/manifests repo;
       local manifestsDir = srcRootDir + "/kubeflow/manifests";
-      local testWorkerImage = "gcr.io/kubeflow-ci/test-worker:v20190802-c6f9140-e3b0c4";
+      local testWorkerImage = "348134392524.dkr.ecr.us-west-2.amazonaws.com/aws-kubeflow-ci/test-worker:0.1";
+      local kanikoExecutorImage = "gcr.io/kaniko-project/executor:v1.0.0";
       local pythonImage = "python:3.6-jessie";
       // The name of the NFS volume claim to use for test files.
-      // local nfsVolumeClaim = "kubeflow-testing";
       local nfsVolumeClaim = "nfs-external";
       // The name to use for the volume to use to contain test data.
       local dataVolume = "kubeflow-test-volume";
-      local versionTag = if params.versionTag != null then
-        params.versionTag
-        else name;
 
-      // The namespace on the cluster we spin up to deploy into.
-      local deployNamespace = "kubeflow";
+      // TODO (andreyvelich): Do we need it ?
       // The directory within the kubeflow_testing submodule containing
       // py scripts to use.
       local k8sPy = srcDir;
       local kubeflowPy = srcRootDir + "/kubeflow/testing/py";
 
-      local project = params.project;
-      // GKE cluster to use
       // We need to truncate the cluster to no more than 40 characters because
       // cluster names can be a max of 40 characters.
       // We expect the suffix of the cluster name to be unique salt.
@@ -84,13 +80,11 @@
       // and if we cut the prefix we might end up starting with "-" or other invalid
       // character for first character.
       local cluster =
-        if std.length(name) > 40 then
-          "z" + std.substr(name, std.length(name) - 39, 39)
+        if std.length(name) > 80 then
+          std.substr(name, std.length(name) - 79, 79)
         else
           name;
-      local zone = params.zone;
       local registry = params.registry;
-      local chart = srcDir + "/katib-chart";
       {
         // Build an Argo template to execute a particular command.
         // step_name: Name for the template
@@ -125,24 +119,8 @@
                 value: cluster,
               },
               {
-                name: "GCP_ZONE",
-                value: zone,
-              },
-              {
-                name: "GCP_PROJECT",
-                value: project,
-              },
-              {
-                name: "GCP_REGISTRY",
-                value: registry,
-              },
-              {
-                name: "DEPLOY_NAMESPACE",
-                value: deployNamespace,
-              },
-              {
-                name: "GOOGLE_APPLICATION_CREDENTIALS",
-                value: "/secret/gcp-credentials/key.json",
+                name: "AWS_REGION",
+                value: "us-west-2",
               },
               {
                 name: "GIT_TOKEN",
@@ -164,8 +142,12 @@
                 mountPath: "/secret/github-token",
               },
               {
-                name: "gcp-credentials",
-                mountPath: "/secret/gcp-credentials",
+                name: "aws-secret",
+                mountPath: "/root/.aws/",
+              },
+              {
+                name: "docker-config",
+                mountPath: "/kaniko/.docker/",
               },
             ],
           },
@@ -188,15 +170,21 @@
               },
             },
             {
-              name: "gcp-credentials",
-              secret: {
-                secretName: params.gcpCredentialsSecretName,
-              },
-            },
-            {
               name: dataVolume,
               persistentVolumeClaim: {
                 claimName: nfsVolumeClaim,
+              },
+            },
+            {
+              name: "docker-config",
+              configMap: {
+                name: "docker-config",
+              },
+            },
+            {
+              name: "aws-secret",
+              secret: {
+                secretName: "aws-secret",
               },
             },
           ],  // volumes
@@ -215,73 +203,74 @@
                     name: "python-tests",
                     template: "python-tests",
                   },
-                  {
-                    name: "build-suggestion-enas",
-                    template: "build-suggestion-enas",
-                  },
-                  {
-                    name: "build-manager",
-                    template: "build-manager",
-                  },
+                  // {
+                  //   name: "build-suggestion-enas",
+                  //   template: "build-suggestion-enas",
+                  // },
+                  // {
+                  //   name: "build-manager",
+                  //   template: "build-manager",
+                  // },
                   {
                     name: "build-katib-controller",
                     template: "build-katib-controller",
                   },
+                  // {
+                  //   name: "build-file-metrics-collector",
+                  //   template: "build-file-metrics-collector",
+                  // },
+                  // {
+                  //   name: "build-tfevent-metrics-collector",
+                  //   template: "build-tfevent-metrics-collector",
+                  // },
+                  // {
+                  //   name: "build-suggestion-chocolate",
+                  //   template: "build-suggestion-chocolate",
+                  // },
+                  // {
+                  //   name: "build-suggestion-hyperband",
+                  //   template: "build-suggestion-hyperband",
+                  // },
+                  // {
+                  //   name: "build-suggestion-hyperopt",
+                  //   template: "build-suggestion-hyperopt",
+                  // },
+                  // {
+                  //   name: "build-suggestion-skopt",
+                  //   template: "build-suggestion-skopt",
+                  // },
+                  // {
+                  //   name: "build-suggestion-goptuna",
+                  //   template: "build-suggestion-goptuna",
+                  // },
+                  // {
+                  //   name: "build-suggestion-darts",
+                  //   template: "build-suggestion-darts",
+                  // },
+                  // {
+                  //   name: "build-earlystopping-median",
+                  //   template: "build-earlystopping-median",
+                  // },
+                  // {
+                  //   name: "build-ui",
+                  //   template: "build-ui",
+                  // },
+                  // Temporarily disable py symplink
+                  // {
+                  //   name: "create-pr-symlink",
+                  //   template: "create-pr-symlink",
+                  // },
+                ],
+                [
                   {
-                    name: "build-file-metrics-collector",
-                    template: "build-file-metrics-collector",
-                  },
-                  {
-                    name: "build-tfevent-metrics-collector",
-                    template: "build-tfevent-metrics-collector",
-                  },
-                  {
-                    name: "build-suggestion-chocolate",
-                    template: "build-suggestion-chocolate",
-                  },
-                  {
-                    name: "build-suggestion-hyperband",
-                    template: "build-suggestion-hyperband",
-                  },
-                  {
-                    name: "build-suggestion-hyperopt",
-                    template: "build-suggestion-hyperopt",
-                  },
-                  {
-                    name: "build-suggestion-skopt",
-                    template: "build-suggestion-skopt",
-                  },
-                  {
-                    name: "build-suggestion-goptuna",
-                    template: "build-suggestion-goptuna",
-                  },
-                  {
-                    name: "build-suggestion-darts",
-                    template: "build-suggestion-darts",
-                  },
-                  {
-                    name: "build-earlystopping-median",
-                    template: "build-earlystopping-median",
-                  },
-                  {
-                    name: "build-ui",
-                    template: "build-ui",
-                  },
-                  {
-                    name: "create-pr-symlink",
-                    template: "create-pr-symlink",
+                    name: "create-cluster",
+                    template: "create-cluster",
                   },
                 ],
                 [
                   {
-                    name: "setup-cluster",
-                    template: "setup-cluster",
-                  },
-                ],
-                [
-                  {
-                    name: "check-katib-ready",
-                    template: "check-katib-ready",
+                    name: "setup-katib",
+                    template: "setup-katib",
                   },
                 ],
                 [
@@ -289,58 +278,58 @@
                     name: "run-random-e2e-tests",
                     template: "run-random-e2e-tests",
                   },
-                  {
-                    name: "run-grid-e2e-tests",
-                    template: "run-grid-e2e-tests",
-                  },
-                  {
-                    name: "run-file-metricscollector-e2e-tests",
-                    template: "run-file-metricscollector-e2e-tests",
-                  },
-                  {
-                    name: "run-custom-metricscollector-e2e-tests",
-                    template: "run-custom-metricscollector-e2e-tests",
-                  },
-                  {
-                    name: "run-bayesian-e2e-tests",
-                    template: "run-bayesian-e2e-tests",
-                  },
-                  {
-                    name: "run-enas-e2e-tests",
-                    template: "run-enas-e2e-tests",
-                  },
-                  {
-                    name: "run-hyperband-e2e-tests",
-                    template: "run-hyperband-e2e-tests",
-                  },
-                  {
-                    name: "run-tpe-e2e-tests",
-                    template: "run-tpe-e2e-tests",
-                  },
-                  {
-                    name: "run-tfjob-e2e-tests",
-                    template: "run-tfjob-e2e-tests",
-                  },
-                  {
-                    name: "run-pytorchjob-e2e-tests",
-                    template: "run-pytorchjob-e2e-tests",
-                  },
-                  {
-                    name: "run-cmaes-e2e-tests",
-                    template: "run-cmaes-e2e-tests",
-                  },
-                  {
-                    name: "run-never-resume-e2e-tests",
-                    template: "run-never-resume-e2e-tests",
-                  },
-                  {
-                    name: "run-darts-e2e-tests",
-                    template: "run-darts-e2e-tests",
-                  },
-                  {
-                    name: "run-from-volume-e2e-tests",
-                    template: "run-from-volume-e2e-tests",
-                  },
+                  // {
+                  //   name: "run-grid-e2e-tests",
+                  //   template: "run-grid-e2e-tests",
+                  // },
+                  // {
+                  //   name: "run-file-metricscollector-e2e-tests",
+                  //   template: "run-file-metricscollector-e2e-tests",
+                  // },
+                  // {
+                  //   name: "run-custom-metricscollector-e2e-tests",
+                  //   template: "run-custom-metricscollector-e2e-tests",
+                  // },
+                  // {
+                  //   name: "run-bayesian-e2e-tests",
+                  //   template: "run-bayesian-e2e-tests",
+                  // },
+                  // {
+                  //   name: "run-enas-e2e-tests",
+                  //   template: "run-enas-e2e-tests",
+                  // },
+                  // {
+                  //   name: "run-hyperband-e2e-tests",
+                  //   template: "run-hyperband-e2e-tests",
+                  // },
+                  // {
+                  //   name: "run-tpe-e2e-tests",
+                  //   template: "run-tpe-e2e-tests",
+                  // },
+                  // {
+                  //   name: "run-tfjob-e2e-tests",
+                  //   template: "run-tfjob-e2e-tests",
+                  // },
+                  // {
+                  //   name: "run-pytorchjob-e2e-tests",
+                  //   template: "run-pytorchjob-e2e-tests",
+                  // },
+                  // {
+                  //   name: "run-cmaes-e2e-tests",
+                  //   template: "run-cmaes-e2e-tests",
+                  // },
+                  // {
+                  //   name: "run-never-resume-e2e-tests",
+                  //   template: "run-never-resume-e2e-tests",
+                  // },
+                  // {
+                  //   name: "run-darts-e2e-tests",
+                  //   template: "run-darts-e2e-tests",
+                  // },
+                  // {
+                  //   name: "run-from-volume-e2e-tests",
+                  //   template: "run-from-volume-e2e-tests",
+                  // },
                 ],
               ],
             },
@@ -348,14 +337,14 @@
               name: "exit-handler",
               steps: [
                 [{
-                  name: "teardown-cluster",
-                  template: "teardown-cluster",
+                  name: "delete-cluster",
+                  template: "delete-cluster",
 
                 }],
-                [{
-                  name: "copy-artifacts",
-                  template: "copy-artifacts",
-                }],
+                // [{
+                //   name: "copy-artifacts",
+                //   template: "copy-artifacts",
+                // }],
               ],
             },
             {
@@ -378,17 +367,17 @@
                 ],
               },
             },  // checkout
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("setup-cluster",testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-cluster",testWorkerImage, [
               "test/scripts/v1beta1/create-cluster.sh",
             ]),  // setup cluster
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("python-tests", pythonImage, [
               "test/scripts/v1beta1/python-tests.sh",
             ]),  // run python tests
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("check-katib-ready", testWorkerImage, [
-              "test/scripts/v1beta1/check-katib-ready.sh",
-            ]),  // check katib readiness
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("setup-katib", testWorkerImage, [
+              "test/scripts/v1beta1/setup-katib.sh",
+            ]),  // check katib readiness and deploy it
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-random-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-suggestion-random.sh",
+              "test/scripts/v1beta1/run-e2e-experiment.sh examples/v1beta1/random-example.yaml",
             ]),  // run random algorithm
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tpe-e2e-tests", testWorkerImage, [
               "test/scripts/v1beta1/run-suggestion-tpe.sh",
@@ -429,31 +418,35 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-from-volume-e2e-tests", testWorkerImage, [
               "test/scripts/v1beta1/run-from-volume.sh",
             ]),  // run resume from volume suggestion test
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
-              "python",
-              "-m",
-              "kubeflow.testing.prow_artifacts",
-              "--artifacts_dir=" + outputDir,
-              "create_pr_symlink",
-              "--bucket=" + bucket,
-            ]),  // create-pr-symlink
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("teardown-cluster",testWorkerImage, [
+            // $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
+            //   "python",
+            //   "-m",
+            //   "kubeflow.testing.prow_artifacts",
+            //   "--artifacts_dir=" + outputDir,
+            //   "create_pr_symlink",
+            //   "--bucket=" + bucket,
+            // ]),  // create-pr-symlink
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("delete-cluster",testWorkerImage, [
               "test/scripts/v1beta1/delete-cluster.sh",
              ]),  // teardown cluster
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("copy-artifacts", testWorkerImage, [
-              "python",
-              "-m",
-              "kubeflow.testing.prow_artifacts",
-              "--artifacts_dir=" + outputDir,
-              "copy_artifacts",
-              "--bucket=" + bucket,
-            ]),  // copy-artifacts
+            // $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("copy-artifacts", testWorkerImage, [
+            //   "python",
+            //   "-m",
+            //   "kubeflow.testing.prow_artifacts",
+            //   "--artifacts_dir=" + outputDir,
+            //   "copy_artifacts",
+            //   "--bucket=" + bucket,
+            // ]),  // copy-artifacts
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-katib-controller", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + srcDir + "/cmd/katib-controller/v1beta1/Dockerfile",
+              "--context=dir://" + srcDir,
+              "--destination=" + "527798164940.dkr.ecr.us-west-2.amazonaws.com/katib/v1beta1/katib-controller:$(PULL_BASE_SHA)",
+              // need to add volume mounts and extra env.
+            ]),  // build-katib-controller
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
               "test/scripts/v1beta1/build-manager.sh",
             ]),  // build-manager
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-katib-controller", testWorkerImage, [
-              "test/scripts/v1beta1/build-katib-controller.sh",
-            ]),  // build-katib-controller
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-file-metrics-collector", testWorkerImage, [
               "test/scripts/v1beta1/build-file-metrics-collector.sh",
             ]),  // build-file-metrics-collector

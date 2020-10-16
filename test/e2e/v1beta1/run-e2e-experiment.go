@@ -7,7 +7,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -52,19 +54,25 @@ func main() {
 		log.Fatal("Experiment name is missing")
 	}
 	expName := os.Args[1]
-	b, err := ioutil.ReadFile(expName)
+	byteExp, err := ioutil.ReadFile(expName)
 	if err != nil {
 		log.Fatal("Error in reading file ", err)
 	}
+
+	// Replace batch size to number of epochs for faster execution.
+	strExp := strings.Replace(string(byteExp), "--batch-size=64", "--num-epochs=2", -1)
+
 	exp := &experimentsv1beta1.Experiment{}
-	buf := bytes.NewBufferString(string(b))
+	buf := bytes.NewBufferString(strExp)
 	if err = k8syaml.NewYAMLOrJSONDecoder(buf, 1024).Decode(exp); err != nil {
 		log.Fatal("Yaml decode error ", err)
 	}
+
 	kclient, err := katibclient.NewClient(client.Options{})
 	if err != nil {
 		log.Fatal("NewClient for Katib failed: ", err)
 	}
+
 	if exp.Spec.Algorithm.AlgorithmName != "hyperband" && exp.Spec.Algorithm.AlgorithmName != "darts" {
 		// Hyperband will validate the parallel trial count,
 		// thus we should not change it.
@@ -86,7 +94,7 @@ func main() {
 		}
 		log.Printf("Waiting for Experiment %s to finish.", exp.Name)
 		log.Printf(`Experiment %s's trials: %d trials, %d pending trials,
-%d running trials, %d killed trials, %d succeeded trials, %d failed trials.`,
+	%d running trials, %d killed trials, %d succeeded trials, %d failed trials.`,
 			exp.Name,
 			exp.Status.Trials, exp.Status.TrialsPending, exp.Status.TrialsRunning,
 			exp.Status.TrialsKilled, exp.Status.TrialsSucceeded, exp.Status.TrialsFailed)
@@ -187,5 +195,24 @@ func main() {
 		}
 	}
 
-	log.Printf("Experiment has recorded best current Optimal Trial %v", exp.Status.CurrentOptimalTrial)
+	log.Printf("Experiment has recorded best current Optimal Trial %v\n", exp.Status.CurrentOptimalTrial)
+
+	out, err := exec.Command("kubectl", "describe", "suggestion", exp.Name, "-n", exp.Namespace).Output()
+	if err != nil {
+		log.Fatalf("Execute \"kubectl describe suggestion\" failed: %v", err)
+	}
+	fmt.Println(string(out))
+
+	out, err = exec.Command("kubectl", "describe", "experiment", exp.Name, "-n", exp.Namespace).Output()
+	if err != nil {
+		log.Fatalf("Execute \"kubectl describe experiment\" failed: %v", err)
+	}
+	fmt.Println(string(out))
+
+	log.Printf("Deleting Experiment: %v\n", exp.Name)
+	err = kclient.DeleteRuntimeObject(exp)
+	if err != nil {
+		log.Fatalf("Unable to delete Experiment: %v, error: %v", exp.Name, err)
+	}
+
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018 The Kubernetes Authors.
+# Copyright 2020 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,51 +14,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This shell script is used to build a cluster and create a namespace from our
-# argo workflow
+# This shell script is used to setup Katib deployment
 
 set -o errexit
 set -o nounset
 set -o pipefail
 
 CLUSTER_NAME="${CLUSTER_NAME}"
-ZONE="${GCP_ZONE}"
-PROJECT="${GCP_PROJECT}"
-NAMESPACE="${DEPLOY_NAMESPACE}"
-REGISTRY="${GCP_REGISTRY}"
-VERSION=$(git describe --tags --always --dirty)
-KUBECTL_VERSION="v1.14.0"
-GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
+AWS_REGION="${AWS_REGION}"
+ECR_REGISTRY="${ECR_REGISTRY}"
+VERSION="${PULL_BASE_SHA}"
+# GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
 
-echo "Activating service-account"
-gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
-
-echo "Configuring kubectl"
-
+echo "Start to install Katib"
 echo "CLUSTER_NAME: ${CLUSTER_NAME}"
-echo "ZONE: ${GCP_ZONE}"
-echo "PROJECT: ${GCP_PROJECT}"
+echo "AWS_REGION: ${AWS_REGION}"
+echo "ECR_REGISTRY: ${ECR_REGISTRY}"
+echo "VERSION: ${PULL_BASE_SHA}"
 
-# The kubectl need to be upgraded to 1.14.0 to avoid dismatch issue.
-wget -q -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl
-chmod a+x /usr/local/bin/kubectl
-gcloud --project ${PROJECT} container clusters get-credentials ${CLUSTER_NAME} \
-  --zone ${ZONE}
-kubectl config set-context $(kubectl config current-context) --namespace=default
+echo "Configuring kubeconfig.."
+aws eks update-kubeconfig --region=${AWS_REGION} --name=${CLUSTER_NAME}
 
-echo "Grant cluster-admin permissions to the current user ..."
-kubectl create clusterrolebinding cluster-admin-binding \
-  --clusterrole=cluster-admin \
-  --user=$(gcloud config get-value core/account)
-
-#This is required. But I don't know why.
-# VERSION=${VERSION/%?/}
-
-echo "Install Katib "
-echo "REGISTRY ${REGISTRY}"
-echo "REPO_NAME ${REPO_NAME}"
-echo "VERSION ${VERSION}"
-
+# Update images with current pull base sha.
+echo "Updating Katib images with current PR SHA: ${VERSION}"
 # Katib controller
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1beta1\/katib-controller@image: ${REGISTRY}\/${REPO_NAME}\/v1beta1\/katib-controller:${VERSION}@" manifests/v1beta1/katib-controller/katib-controller.yaml
 
@@ -83,9 +61,9 @@ sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-darts@${
 
 cat manifests/v1beta1/katib-controller/katib-config.yaml
 
-mkdir -p ${GO_DIR}
-cp -r . ${GO_DIR}/
-cp -r pkg/apis/manager/v1beta1/python/* ${GO_DIR}/test/e2e/v1beta1
+# mkdir -p ${GO_DIR}
+# cp -r . ${GO_DIR}/
+# cp -r pkg/apis/manager/v1beta1/python/* ${GO_DIR}/test/e2e/v1beta1
 
 echo "Deploying tf-operator crds from kubeflow/manifests master"
 cd "${MANIFESTS_DIR}/tf-training/tf-job-crds/base"
@@ -95,17 +73,11 @@ echo "Deploying pytorch-operator crds from kubeflow/manifests master"
 cd "${MANIFESTS_DIR}/pytorch-job/pytorch-job-crds/base"
 kustomize build . | kubectl apply -f -
 
-cd ${GO_DIR}
-./scripts/v1beta1/deploy.sh
+# cd ${GO_DIR}
+echo "Deploying Katib"
+make deploy
 
-echo "Deploying tf-operator from kubeflow/manifests master"
-cd "${MANIFESTS_DIR}/tf-training/tf-job-operator/base"
-kustomize build . | kubectl apply -n kubeflow -f - --validate=false
-
-echo "Deploying pytorch-operator from kubeflow/manifests master"
-cd "${MANIFESTS_DIR}/pytorch-job/pytorch-operator/base/"
-kustomize build . | kubectl apply -n kubeflow -f - --validate=false
-
+# Wait until all Katib pods is running.
 TIMEOUT=120
 PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
 until kubectl get pods -n kubeflow | grep Running | [[ $(wc -l) -eq $PODNUM ]]; do
@@ -130,28 +102,20 @@ kubectl -n kubeflow get svc
 echo "Katib pods"
 kubectl -n kubeflow get pod
 
-cd ${GO_DIR}/test/e2e/v1beta1
+# cd ${GO_DIR}/test/e2e/v1beta1
+# echo "Building run-e2e-experiment for e2e test cases"
+# go build -o run-e2e-experiment ./run-e2e-experiment.go
+# go build -o resume-e2e-experiment ./resume-e2e-experiment.go
 
-echo "Building run-e2e-experiment for e2e test cases"
-go build -o run-e2e-experiment ./run-e2e-experiment.go
-go build -o resume-e2e-experiment ./resume-e2e-experiment.go
-
+# Check that Katib is working with 2 Experiments.
 kubectl apply -f valid-experiment.yaml
 kubectl delete -f valid-experiment.yaml
+
 set +o errexit
 kubectl apply -f invalid-experiment.yaml
 if [ $? -ne 1 ]; then
   echo "Failed to create invalid-experiment: return code $?"
   exit 1
 fi
-set -o errexit
-kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-db-manager | sed -e "s@pods\/@@") 6789:6789 &
-echo "kubectl port-forward start"
-sleep 5
-TIMEOUT=120
-until curl localhost:6789 || [ $TIMEOUT -eq 0 ]; do
-  sleep 5
-  TIMEOUT=$((TIMEOUT - 1))
-done
 
 exit 0
