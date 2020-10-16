@@ -444,7 +444,7 @@
                 env: [
                   {
                     name: "CLUSTER_NAME",
-                    value: clusterName,
+                    value: cluster,
                   }
                 ],
                 image: testWorkerImage,
