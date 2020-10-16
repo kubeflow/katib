@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This shell script is used to setup Katib deployment
+# This shell script is used to setup Katib deployment.
 
 set -o errexit
 set -o nounset
@@ -24,7 +24,6 @@ CLUSTER_NAME="${CLUSTER_NAME}"
 AWS_REGION="${AWS_REGION}"
 ECR_REGISTRY="${ECR_REGISTRY}"
 VERSION="${PULL_BASE_SHA}"
-# GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
 
 echo "Start to install Katib"
 echo "CLUSTER_NAME: ${CLUSTER_NAME}"
@@ -61,10 +60,6 @@ sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-darts@${
 
 cat manifests/v1beta1/katib-controller/katib-config.yaml
 
-# mkdir -p ${GO_DIR}
-# cp -r . ${GO_DIR}/
-# cp -r pkg/apis/manager/v1beta1/python/* ${GO_DIR}/test/e2e/v1beta1
-
 echo "Deploying tf-operator crds from kubeflow/manifests master"
 cd "${MANIFESTS_DIR}/tf-training/tf-job-crds/base"
 kustomize build . | kubectl apply -f -
@@ -73,7 +68,6 @@ echo "Deploying pytorch-operator crds from kubeflow/manifests master"
 cd "${MANIFESTS_DIR}/pytorch-job/pytorch-job-crds/base"
 kustomize build . | kubectl apply -f -
 
-# cd ${GO_DIR}
 echo "Deploying Katib"
 make deploy
 
@@ -102,11 +96,6 @@ kubectl -n kubeflow get svc
 echo "Katib pods"
 kubectl -n kubeflow get pod
 
-# cd ${GO_DIR}/test/e2e/v1beta1
-# echo "Building run-e2e-experiment for e2e test cases"
-# go build -o run-e2e-experiment ./run-e2e-experiment.go
-# go build -o resume-e2e-experiment ./resume-e2e-experiment.go
-
 # Check that Katib is working with 2 Experiments.
 kubectl apply -f valid-experiment.yaml
 kubectl delete -f valid-experiment.yaml
@@ -117,5 +106,14 @@ if [ $? -ne 1 ]; then
   echo "Failed to create invalid-experiment: return code $?"
   exit 1
 fi
+
+# Create a link to Go directory
+# That is required to run e2e test
+
+GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
+
+echo "Create symlink to GOPATH to run e2e tests"
+mkdir -p $GO_DIR
+ln -s ${PWD} ${GO_DIR}
 
 exit 0

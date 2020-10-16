@@ -41,37 +41,34 @@
     // Workflow to run the e2e test.
     e2e(prow_env, bucket):
       local params = $.defaultParams + overrides;
+      local registry = params.registry;
 
-      // mountPath is the directory where the volume to store the test data
-      // should be mounted.
+      // mountPath is the directory where the volume to store the test data should be mounted.
       local mountPath = "/mnt/test-data-volume";
       // testDir is the root directory for all data for a particular test run.
-      // local testDir = mountPath + "/" + name;
-      // outputDir is the directory to sync to GCS to contain the output for this job.
-      // local outputDir = testDir + "/output";
-      // local artifactsDir = outputDir + "/artifacts";
-      // local goDir = testDir + "/go";
-      // Source directory where all repos should be checked out
-
-      local goDir = mountPath + "/" + name + "/go";
-      local srcRootDir = goDir + "/src";
-      // The directory containing the kubeflow/katib repo
-      local srcDir = srcRootDir + "/kubeflow/katib";
-      // The directory containing the kubeflow/manifests repo;
+      local testDir = mountPath + "/" + name;
+      // srcRootDir is the directory where all repos should be checked out.
+      local srcRootDir = testDir + "/src";
+      // goDir is the directory to run Go e2e tests.
+      local goDir = testDir + "/go";
+      // katibDir is the directory containing the kubeflow/katib repo.
+      local katibDir = srcRootDir + "/kubeflow/katib";
+      // manifestsDir is the directory containing the kubeflow/manifests repo.
       local manifestsDir = srcRootDir + "/kubeflow/manifests";
+      // kubeflowTestingPy is the directory within the kubeflow_testing submodule containing py scripts to use.
+      local kubeflowTestingPy = srcRootDir + "/kubeflow/testing/py";
+
+      // testWorkerImage is the main worker image to execute workflow.
       local testWorkerImage = "527798164940.dkr.ecr.us-west-2.amazonaws.com/aws-kubeflow-ci/test-worker:latest";
+      // kanikoExecutorImage is the image for Kaniko to build Katib images.
       local kanikoExecutorImage = "gcr.io/kaniko-project/executor:v1.0.0";
+      // pythonImage is the image to run Katib Python unit test.
       local pythonImage = "python:3.6-jessie";
+
       // The name of the NFS volume claim to use for test files.
       local nfsVolumeClaim = "nfs-external";
       // The name to use for the volume to use to contain test data.
       local dataVolume = "kubeflow-test-volume";
-
-      // TODO (andreyvelich): Do we need it ?
-      // The directory within the kubeflow_testing submodule containing
-      // py scripts to use.
-      local k8sPy = srcDir;
-      local kubeflowPy = srcRootDir + "/kubeflow/testing/py";
 
       // We need to truncate the cluster to no more than 40 characters because
       // cluster names can be a max of 40 characters.
@@ -84,7 +81,6 @@
           std.substr(name, std.length(name) - 79, 79)
         else
           name;
-      local registry = params.registry;
       {
         // Build an Argo template to execute a particular command.
         // step_name: Name for the template
@@ -98,12 +94,12 @@
           container: {
             command: command,
             image: image,
-            workingDir: srcDir,
+            workingDir: katibDir,
             env: [
               {
                 // Add the source directories to the python path.
                 name: "PYTHONPATH",
-                value: k8sPy + ":" + kubeflowPy,
+                value: katibDir + ":" + kubeflowTestingPy,
               },
               {
                 name: "MANIFESTS_DIR",
@@ -439,8 +435,8 @@
             // ]),  // copy-artifacts
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-katib-controller", kanikoExecutorImage, [
               "/kaniko/executor",
-              "--dockerfile=" + srcDir + "/cmd/katib-controller/v1beta1/Dockerfile",
-              "--context=dir://" + srcDir,
+              "--dockerfile=" + katibDir + "/cmd/katib-controller/v1beta1/Dockerfile",
+              "--context=dir://" + katibDir,
               "--destination=" + "527798164940.dkr.ecr.us-west-2.amazonaws.com/katib/v1beta1/katib-controller:$(PULL_BASE_SHA)",
               // need to add volume mounts and extra env.
             ]),  // build-katib-controller
