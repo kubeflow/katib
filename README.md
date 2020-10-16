@@ -248,13 +248,13 @@ tf-job-operator-796b4747d8-4fh82    1/1     Running   0          21m
 After deploy everything, you can run examples to verify the installation.
 Examples bellow are for v1beta1 version.
 
-This is example for TF operator:
+This is an example for TF operator:
 
 ```
 kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1beta1/tfjob-example.yaml
 ```
 
-This is example for PyTorch operator:
+This is an example for PyTorch operator:
 
 ```
 kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1beta1/pytorchjob-example.yaml
