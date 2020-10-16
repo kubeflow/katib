@@ -50,6 +50,7 @@
       // srcRootDir is the directory where all repos should be checked out.
       local srcRootDir = testDir + "/src";
       // goDir is the directory to run Go e2e tests.
+      // local goDir = testDir + "/go";
       local goDir = testDir + "/go";
       // katibDir is the directory containing the kubeflow/katib repo.
       local katibDir = srcRootDir + "/kubeflow/katib";
@@ -363,9 +364,21 @@
                 ],
               },
             },  // checkout
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-cluster",testWorkerImage, [
-              "test/scripts/v1beta1/create-cluster.sh",
-            ]),  // setup cluster
+            {
+              name: "create-cluster",
+              container: {
+                command: [
+                  "/usr/local/bin/create-eks-cluster.sh"
+                ],
+                env: [
+                  {
+                    name: "CLUSTER_NAME",
+                    value: clusterName,
+                  }
+                ],
+                image: testWorkerImage,
+              },
+            },  // create-cluster
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("python-tests", pythonImage, [
               "test/scripts/v1beta1/python-tests.sh",
             ]),  // run python tests
@@ -422,9 +435,21 @@
             //   "create_pr_symlink",
             //   "--bucket=" + bucket,
             // ]),  // create-pr-symlink
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("delete-cluster",testWorkerImage, [
-              "test/scripts/v1beta1/delete-cluster.sh",
-             ]),  // teardown cluster
+            {
+              name: "delete-cluster",
+              container: {
+                command: [
+                  "/usr/local/bin/delete-eks-cluster.sh"
+                ],
+                env: [
+                  {
+                    name: "CLUSTER_NAME",
+                    value: clusterName,
+                  }
+                ],
+                image: testWorkerImage,
+              },
+            },  // delete-cluster
             // $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("copy-artifacts", testWorkerImage, [
             //   "python",
             //   "-m",
