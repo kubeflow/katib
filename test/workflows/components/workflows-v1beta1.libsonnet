@@ -59,7 +59,7 @@
       local srcDir = srcRootDir + "/kubeflow/katib";
       // The directory containing the kubeflow/manifests repo;
       local manifestsDir = srcRootDir + "/kubeflow/manifests";
-      local testWorkerImage = "348134392524.dkr.ecr.us-west-2.amazonaws.com/aws-kubeflow-ci/test-worker:0.1";
+      local testWorkerImage = "527798164940.dkr.ecr.us-west-2.amazonaws.com/aws-kubeflow-ci/test-worker:latest";
       local kanikoExecutorImage = "gcr.io/kaniko-project/executor:v1.0.0";
       local pythonImage = "python:3.6-jessie";
       // The name of the NFS volume claim to use for test files.
