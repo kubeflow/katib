@@ -384,8 +384,14 @@ gcr.io/kubeflow-ci/pytorch-dist-mnist-test
 gcr.io/kubeflow-ci/tf-mnist-with-summaries
 ```
 
-- FPGA XGBoost Parameter Tuning example, [source](https://github.com/inaccel/jupyter/blob/master/lab/dot/XGBoost/parameter-tuning.py)
+- FPGA XGBoost Parameter Tuning example, [source](https://github.com/inaccel/jupyter/blob/master/lab/dot/XGBoost/parameter-tuning.py).
 
 ```
 docker.io/inaccel/jupyter:lab
+```
+
+- MPI operator horovod mnist example, [source](https://github.com/kubeflow/mpi-operator/tree/master/examples/horovod).
+
+```
+docker.io/kubeflow/mpi-horovod-mnist
 ```
