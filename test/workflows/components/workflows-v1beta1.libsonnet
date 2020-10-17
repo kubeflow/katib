@@ -51,7 +51,8 @@
       local srcRootDir = testDir + "/src";
       // goDir is the directory to run Go e2e tests.
       // local goDir = testDir + "/go";
-      local goDir = testDir + "/go";
+      // TODO (andreyvelich): Test when GOPATH = testDir
+      local goDir = testDir;
       // katibDir is the directory containing the kubeflow/katib repo.
       local katibDir = srcRootDir + "/kubeflow/katib";
       // manifestsDir is the directory containing the kubeflow/manifests repo.
