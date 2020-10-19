@@ -23,17 +23,6 @@
 
   // default parameters.
   defaultParams:: {
-    // project:: "automl-ci",
-    // zone:: "us-east1-d",
-    // // Default registry to use.
-    // //registry:: "gcr.io/" + $.defaultParams.project,
-
-    // // The image tag to use.
-    // // Defaults to a value based on the name.
-    // versionTag:: null,
-
-    // // The name of the secret containing GCP credentials.
-    // gcpCredentialsSecretName:: "kubeflow-testing-credentials",
   },
 
   // overrides is a dictionary of parameters to provide in addition to defaults.
@@ -89,6 +78,7 @@
         // command: List to pass as the container command.
         buildTemplate(step_name, image, command):: {
           name: step_name,
+          activeDeadlineSeconds: 2100,
           retryStrategy: {
             limit: 3,
             retryPolicy: "Always",
@@ -119,6 +109,24 @@
               {
                 name: "AWS_REGION",
                 value: "us-west-2",
+              },
+              {
+                name: "AWS_ACCESS_KEY_ID",
+                valueFrom: {
+                  secretKeyRef: {
+                    name: "aws-credentials",
+                    key: "AWS_ACCESS_KEY_ID",
+                  },
+                },
+              },
+              {
+                name: "AWS_SECRET_ACCESS_KEY",
+                valueFrom: {
+                  secretKeyRef: {
+                    name: "aws-credentials",
+                    key: "AWS_SECRET_ACCESS_KEY",
+                  },
+                },
               },
               {
                 name: "GIT_TOKEN",
