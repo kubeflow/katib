@@ -205,73 +205,74 @@
               name: "e2e",
               steps: [
                 [
-                  {
-                    name: "checkout",
-                    template: "checkout",
-                  },
+                  [
+                    {
+                      name: "checkout",
+                      template: "checkout",
+                    },
+                  ],
+                  [
+                    {
+                      name: "python-tests",
+                      template: "python-tests",
+                    },
+                    {
+                      name: "build-katib-controller",
+                      template: "build-katib-controller",
+                    },
+                    {
+                      name: "build-db-manager",
+                      template: "build-db-manager",
+                    },
+                    {
+                      name: "build-ui",
+                      template: "build-ui",
+                    },
+                    {
+                      name: "build-file-metrics-collector",
+                      template: "build-file-metrics-collector",
+                    },
+                    {
+                      name: "build-tfevent-metrics-collector",
+                      template: "build-tfevent-metrics-collector",
+                    },
+                    {
+                      name: "build-suggestion-hyperopt",
+                      template: "build-suggestion-hyperopt",
+                    },
+                    {
+                      name: "build-suggestion-chocolate",
+                      template: "build-suggestion-chocolate",
+                    },
+                    {
+                      name: "build-suggestion-skopt",
+                      template: "build-suggestion-skopt",
+                    },
+                    {
+                      name: "build-suggestion-hyperband",
+                      template: "build-suggestion-hyperband",
+                    },
+                    {
+                      name: "build-suggestion-goptuna",
+                      template: "build-suggestion-goptuna",
+                    },
+                    {
+                      name: "build-suggestion-enas",
+                      template: "build-suggestion-enas",
+                    },
+                    {
+                      name: "build-suggestion-darts",
+                      template: "build-suggestion-darts",
+                    },
+                  ],
                 ],
                 [
-                  {
-                    name: "python-tests",
-                    template: "python-tests",
-                  },
-                  {
-                    name: "build-katib-controller",
-                    template: "build-katib-controller",
-                  },
-                  {
-                    name: "build-db-manager",
-                    template: "build-db-manager",
-                  },
-                  {
-                    name: "build-ui",
-                    template: "build-ui",
-                  },
-                  {
-                    name: "build-file-metrics-collector",
-                    template: "build-file-metrics-collector",
-                  },
-                  {
-                    name: "build-tfevent-metrics-collector",
-                    template: "build-tfevent-metrics-collector",
-                  },
-                  {
-                    name: "build-suggestion-hyperopt",
-                    template: "build-suggestion-hyperopt",
-                  },
-                  {
-                    name: "build-suggestion-chocolate",
-                    template: "build-suggestion-chocolate",
-                  },
-                  {
-                    name: "build-suggestion-skopt",
-                    template: "build-suggestion-skopt",
-                  },
-                  {
-                    name: "build-suggestion-hyperband",
-                    template: "build-suggestion-hyperband",
-                  },
-                  {
-                    name: "build-suggestion-goptuna",
-                    template: "build-suggestion-goptuna",
-                  },
-                  {
-                    name: "build-suggestion-enas",
-                    template: "build-suggestion-enas",
-                  },
-                  {
-                    name: "build-suggestion-darts",
-                    template: "build-suggestion-darts",
-                  },
-                  {
-                    name: "create-cluster",
-                    template: "create-cluster",
-                  },
-                  // Temporarily disable py symplink
-                  // {
-                  //   name: "create-pr-symlink",
-                  //   template: "create-pr-symlink",
-                  // },
+                  [
+                    {
+                      name: "create-cluster",
+                      template: "create-cluster",
+                    },
+                  ],
                 ],
                 [
                   {
@@ -456,6 +457,7 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-random-e2e-tests", testWorkerImage, [
               "test/scripts/v1beta1/run-e2e-experiment.sh examples/v1beta1/random-example.yaml",
             ]),  // run random algorithm
+            // Temporarily disable py symplink
             // $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
             //   "python",
             //   "-m",

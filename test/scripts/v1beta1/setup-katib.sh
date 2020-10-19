@@ -70,8 +70,7 @@ kustomize build . | kubectl apply -f -
 
 echo "Deploying Katib"
 cd "${GOPATH}/src/kubeflow/katib"
-ls -a
-./scripts/v1beta1/deploy.sh
+make deploy
 
 # Wait until all Katib pods is running.
 TIMEOUT=120
@@ -99,11 +98,11 @@ echo "Katib pods"
 kubectl -n kubeflow get pod
 
 # Check that Katib is working with 2 Experiments.
-kubectl apply -f valid-experiment.yaml
-kubectl delete -f valid-experiment.yaml
+kubectl apply -f test/e2e/v1beta1/valid-experiment.yaml
+kubectl delete -f test/e2e/v1beta1/valid-experiment.yaml
 
 set +o errexit
-kubectl apply -f invalid-experiment.yaml
+kubectl apply -f test/e2e/v1beta1/invalid-experiment.yaml
 if [ $? -ne 1 ]; then
   echo "Failed to create invalid-experiment: return code $?"
   exit 1
