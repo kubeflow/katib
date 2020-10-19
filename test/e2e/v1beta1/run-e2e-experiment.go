@@ -65,6 +65,18 @@ func main() {
 
 	log.Println(scheme.Scheme.KnownTypes(gv))
 
+	ns, err := kclient.GetNamespaceList()
+	log.Println(err)
+	for _, n := range ns.Items {
+		log.Println(n.Name)
+	}
+
+	expList, err2 := kclient.GetExperimentList()
+	log.Println(err2)
+	for _, e := range expList.Items {
+		log.Println(e)
+	}
+
 	var maxTrials int32 = 3
 	var parallelTrials int32 = 2
 	if exp.Spec.Algorithm.AlgorithmName != "hyperband" && exp.Spec.Algorithm.AlgorithmName != "darts" {
