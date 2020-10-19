@@ -69,7 +69,7 @@ cd "${MANIFESTS_DIR}/pytorch-job/pytorch-job-crds/base"
 kustomize build . | kubectl apply -f -
 
 echo "Deploying Katib"
-cd "${GOPATH}/src"
+cd "${GOPATH}/src/kubeflow/katib"
 ls -a
 ./scripts/v1beta1/deploy.sh
 

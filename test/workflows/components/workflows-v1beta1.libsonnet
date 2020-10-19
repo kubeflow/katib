@@ -204,10 +204,12 @@
             {
               name: "e2e",
               steps: [
-                [{
-                  name: "checkout",
-                  template: "checkout",
-                }],
+                [
+                  {
+                    name: "checkout",
+                    template: "checkout",
+                  },
+                ],
                 [
                   {
                     name: "python-tests",
@@ -261,17 +263,15 @@
                     name: "build-suggestion-darts",
                     template: "build-suggestion-darts",
                   },
+                  {
+                    name: "create-cluster",
+                    template: "create-cluster",
+                  },
                   // Temporarily disable py symplink
                   // {
                   //   name: "create-pr-symlink",
                   //   template: "create-pr-symlink",
                   // },
-                ],
-                [
-                  {
-                    name: "create-cluster",
-                    template: "create-cluster",
-                  },
                 ],
                 [
                   {
