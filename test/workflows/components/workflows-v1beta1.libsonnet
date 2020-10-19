@@ -82,6 +82,11 @@
           retryStrategy: {
             limit: 3,
             retryPolicy: "Always",
+            backoff: {
+              duration: 1,
+              factor: 2,
+              maxDuration: "1m",
+            },
           },
           container: {
             command: command,
