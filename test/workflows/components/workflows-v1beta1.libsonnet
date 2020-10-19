@@ -369,36 +369,12 @@
                 ],
               },
             }, // checkout
-            {
-              name: "create-cluster",
-              container: {
-                command: [
-                  "/usr/local/bin/create-eks-cluster.sh"
-                ],
-                env: [
-                  {
-                    name: "CLUSTER_NAME",
-                    value: cluster,
-                  }
-                ],
-                image: testWorkerImage,
-              },
-            },  // create-cluster
-            {
-              name: "delete-cluster",
-              container: {
-                command: [
-                  "/usr/local/bin/delete-eks-cluster.sh"
-                ],
-                env: [
-                  {
-                    name: "CLUSTER_NAME",
-                    value: cluster,
-                  }
-                ],
-                image: testWorkerImage,
-              },
-            },  // delete-cluster
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-cluster", testWorkerImage, [
+              "/usr/local/bin/create-eks-cluster.sh",
+            ]),  // Create cluster
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("delete-cluster", testWorkerImage, [
+              "/usr/local/bin/delete-eks-cluster.sh",
+            ]),  // Delete cluster
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("python-tests", pythonImage, [
               "test/scripts/v1beta1/python-tests.sh",
             ]),  // run python tests
