@@ -25,10 +25,10 @@ CLUSTER_NAME="${CLUSTER_NAME}"
 AWS_REGION="${AWS_REGION}"
 EXPERIMENT_FILE=$1
 
-GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
+# GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
 
 echo "Configuring kubeconfig.."
-aws eks update-kubeconfig --region=${REGION} --name=${CLUSTER_NAME}
+aws eks update-kubeconfig --region=${AWS_REGION} --name=${CLUSTER_NAME}
 
 echo "Katib deployments"
 kubectl -n kubeflow get deploy
