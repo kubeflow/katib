@@ -213,58 +213,54 @@
                     name: "python-tests",
                     template: "python-tests",
                   },
-                  // {
-                  //   name: "build-suggestion-enas",
-                  //   template: "build-suggestion-enas",
-                  // },
-                  // {
-                  //   name: "build-manager",
-                  //   template: "build-manager",
-                  // },
                   {
                     name: "build-katib-controller",
                     template: "build-katib-controller",
                   },
-                  // {
-                  //   name: "build-file-metrics-collector",
-                  //   template: "build-file-metrics-collector",
-                  // },
-                  // {
-                  //   name: "build-tfevent-metrics-collector",
-                  //   template: "build-tfevent-metrics-collector",
-                  // },
-                  // {
-                  //   name: "build-suggestion-chocolate",
-                  //   template: "build-suggestion-chocolate",
-                  // },
-                  // {
-                  //   name: "build-suggestion-hyperband",
-                  //   template: "build-suggestion-hyperband",
-                  // },
-                  // {
-                  //   name: "build-suggestion-hyperopt",
-                  //   template: "build-suggestion-hyperopt",
-                  // },
-                  // {
-                  //   name: "build-suggestion-skopt",
-                  //   template: "build-suggestion-skopt",
-                  // },
-                  // {
-                  //   name: "build-suggestion-goptuna",
-                  //   template: "build-suggestion-goptuna",
-                  // },
-                  // {
-                  //   name: "build-suggestion-darts",
-                  //   template: "build-suggestion-darts",
-                  // },
-                  // {
-                  //   name: "build-earlystopping-median",
-                  //   template: "build-earlystopping-median",
-                  // },
-                  // {
-                  //   name: "build-ui",
-                  //   template: "build-ui",
-                  // },
+                  {
+                    name: "build-db-manager",
+                    template: "build-db-manager",
+                  },
+                  {
+                    name: "build-ui",
+                    template: "build-ui",
+                  },
+                  {
+                    name: "build-file-metrics-collector",
+                    template: "build-file-metrics-collector",
+                  },
+                  {
+                    name: "build-tfevent-metrics-collector",
+                    template: "build-tfevent-metrics-collector",
+                  },
+                  {
+                    name: "build-suggestion-hyperopt",
+                    template: "build-suggestion-hyperopt",
+                  },
+                  {
+                    name: "build-suggestion-chocolate",
+                    template: "build-suggestion-chocolate",
+                  },
+                  {
+                    name: "build-suggestion-skopt",
+                    template: "build-suggestion-skopt",
+                  },
+                  {
+                    name: "build-suggestion-hyperband",
+                    template: "build-suggestion-hyperband",
+                  },
+                  {
+                    name: "build-suggestion-goptuna",
+                    template: "build-suggestion-goptuna",
+                  },
+                  {
+                    name: "build-suggestion-enas",
+                    template: "build-suggestion-enas",
+                  },
+                  {
+                    name: "build-suggestion-darts",
+                    template: "build-suggestion-darts",
+                  },
                   // Temporarily disable py symplink
                   // {
                   //   name: "create-pr-symlink",
@@ -351,10 +347,6 @@
                   template: "delete-cluster",
 
                 }],
-                // [{
-                //   name: "copy-artifacts",
-                //   template: "copy-artifacts",
-                // }],
               ],
             },
             {
@@ -376,7 +368,7 @@
                   },
                 ],
               },
-            },  // checkout
+            }, // checkout
             {
               name: "create-cluster",
               container: {
@@ -392,62 +384,6 @@
                 image: testWorkerImage,
               },
             },  // create-cluster
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("python-tests", pythonImage, [
-              "test/scripts/v1beta1/python-tests.sh",
-            ]),  // run python tests
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("setup-katib", testWorkerImage, [
-              "test/scripts/v1beta1/setup-katib.sh",
-            ]),  // check katib readiness and deploy it
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-random-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-e2e-experiment.sh examples/v1beta1/random-example.yaml",
-            ]),  // run random algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tpe-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-suggestion-tpe.sh",
-            ]),  // run tpe algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tfjob-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-tfjob.sh",
-            ]),  // run tfjob
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-pytorchjob-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-pytorchjob.sh",
-            ]),  // run pytorchjob
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-hyperband-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-suggestion-hyperband.sh",
-            ]),  // run hyperband algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-grid-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-suggestion-grid.sh",
-            ]),  // run grid algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-enas-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-suggestion-enas.sh",
-            ]),  // run enas algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-bayesian-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-suggestion-bayesian.sh",
-            ]),  // run bayesian algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-file-metricscollector-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-file-metricscollector.sh",
-            ]),  // run file metrics collector test
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-custom-metricscollector-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-custom-metricscollector.sh",
-            ]),  // run custom metrics collector test
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-cmaes-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-suggestion-cmaes.sh",
-            ]),  // run cmaes algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-never-resume-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-never-resume.sh",
-            ]),  // run never resume suggestion test
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-darts-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-suggestion-darts.sh",
-            ]),  // run darts algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-from-volume-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-from-volume.sh",
-            ]),  // run resume from volume suggestion test
-            // $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
-            //   "python",
-            //   "-m",
-            //   "kubeflow.testing.prow_artifacts",
-            //   "--artifacts_dir=" + outputDir,
-            //   "create_pr_symlink",
-            //   "--bucket=" + bucket,
-            // ]),  // create-pr-symlink
             {
               name: "delete-cluster",
               container: {
@@ -463,6 +399,95 @@
                 image: testWorkerImage,
               },
             },  // delete-cluster
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("python-tests", pythonImage, [
+              "test/scripts/v1beta1/python-tests.sh",
+            ]),  // run python tests
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-katib-controller", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/cmd/katib-controller/v1beta1/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/katib-controller:$(PULL_BASE_SHA)",
+            ]),  // build katib-controller
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-db-manager", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/cmd/db-manager/v1beta1/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/katib-db-manager:$(PULL_BASE_SHA)",
+            ]),  // build katib-db-manager
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-ui", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/cmd/ui/v1beta1/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/katib-ui:$(PULL_BASE_SHA)",
+            ]),  // build katib-ui
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-file-metrics-collector", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/cmd/metricscollector/v1beta1/file-metricscollector/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/file-metrics-collector:$(PULL_BASE_SHA)",
+            ]),  // build file metrics collector
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-tfevent-metrics-collector", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/cmd/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/tfevent-metrics-collector:$(PULL_BASE_SHA)",
+            ]),  // build file metrics collector
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperopt", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/cmd/suggestion/hyperopt/v1beta1/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/suggestion-hyperopt:$(PULL_BASE_SHA)",
+            ]),  // build suggestion hyperopt
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-chocolate", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/cmd/suggestion/chocolate/v1beta1/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/suggestion-chocolate:$(PULL_BASE_SHA)",
+            ]),  // build suggestion chocolate
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-skopt", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/cmd/suggestion/skopt/v1beta1/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/suggestion-skopt:$(PULL_BASE_SHA)",
+            ]),  // build suggestion skopt
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperband", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/cmd/suggestion/hyperband/v1beta1/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/suggestion-hyperband:$(PULL_BASE_SHA)",
+            ]),  // build suggestion hyperband
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-goptuna", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/cmd/suggestion/goptuna/v1beta1/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/suggestion-goptuna:$(PULL_BASE_SHA)",
+            ]),  // build suggestion goptuna
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-enas", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/cmd/suggestion/enas/v1beta1/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/suggestion-enas:$(PULL_BASE_SHA)",
+            ]),  // build suggestion enas
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-darts", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/cmd/suggestion/darts/v1beta1/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/suggestion-darts:$(PULL_BASE_SHA)",
+            ]),  // build suggestion darts
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("setup-katib", testWorkerImage, [
+              "test/scripts/v1beta1/setup-katib.sh",
+            ]),  // check katib readiness and deploy it
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-random-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-e2e-experiment.sh examples/v1beta1/random-example.yaml",
+            ]),  // run random algorithm
+            // $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
+            //   "python",
+            //   "-m",
+            //   "kubeflow.testing.prow_artifacts",
+            //   "--artifacts_dir=" + outputDir,
+            //   "create_pr_symlink",
+            //   "--bucket=" + bucket,
+            // ]),  // create-pr-symlink
             // $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("copy-artifacts", testWorkerImage, [
             //   "python",
             //   "-m",
@@ -471,49 +496,6 @@
             //   "copy_artifacts",
             //   "--bucket=" + bucket,
             // ]),  // copy-artifacts
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-katib-controller", kanikoExecutorImage, [
-              "/kaniko/executor",
-              "--dockerfile=" + katibDir + "/cmd/katib-controller/v1beta1/Dockerfile",
-              "--context=dir://" + katibDir,
-              "--destination=" + registry + "/katib/v1beta1/katib-controller:$(PULL_BASE_SHA)",
-              // need to add volume mounts and extra env.
-            ]),  // build-katib-controller
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
-              "test/scripts/v1beta1/build-manager.sh",
-            ]),  // build-manager
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-file-metrics-collector", testWorkerImage, [
-              "test/scripts/v1beta1/build-file-metrics-collector.sh",
-            ]),  // build-file-metrics-collector
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-tfevent-metrics-collector", testWorkerImage, [
-              "test/scripts/v1beta1/build-tfevent-metrics-collector.sh",
-            ]),  // build-tfevent-metrics-collector
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperband", testWorkerImage, [
-              "test/scripts/v1beta1/build-suggestion-hyperband.sh",
-            ]),  // build-suggestion-hyperband
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperopt", testWorkerImage, [
-              "test/scripts/v1beta1/build-suggestion-hyperopt.sh",
-            ]),  // build-suggestion-hyperopt
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-skopt", testWorkerImage, [
-              "test/scripts/v1beta1/build-suggestion-skopt.sh",
-            ]),  // build-suggestion-skopt
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-chocolate", testWorkerImage, [
-              "test/scripts/v1beta1/build-suggestion-chocolate.sh",
-            ]),  // build-suggestion-chocolate
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-enas", testWorkerImage, [
-              "test/scripts/v1beta1/build-suggestion-enas.sh",
-            ]),  // build-suggestion-enas
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-goptuna", testWorkerImage, [
-              "test/scripts/v1beta1/build-suggestion-goptuna.sh",
-            ]),  // build-suggestion-goptuna
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-darts", testWorkerImage, [
-              "test/scripts/v1beta1/build-suggestion-darts.sh",
-            ]),  // build-suggestion-darts
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-earlystopping-median", testWorkerImage, [
-              "test/scripts/v1beta1/build-earlystopping-median.sh",
-            ]),  // build-earlystopping-median
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-ui", testWorkerImage, [
-              "test/scripts/v1beta1/build-ui.sh",
-            ]),  // build-ui
           ],  // templates
         },
       },  // e2e
