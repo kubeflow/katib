@@ -43,11 +43,11 @@
       // TODO (andreyvelich): Test when GOPATH = testDir
       local goDir = testDir;
       // katibDir is the directory containing the kubeflow/katib repo.
-      local katibDir = srcRootDir + "/kubeflow/katib";
+      local katibDir = srcRootDir + "github.com/kubeflow/katib";
       // manifestsDir is the directory containing the kubeflow/manifests repo.
-      local manifestsDir = srcRootDir + "/kubeflow/manifests";
+      local manifestsDir = srcRootDir + "github.com/kubeflow/manifests";
       // kubeflowTestingPy is the directory within the kubeflow_testing submodule containing py scripts to use.
-      local kubeflowTestingPy = srcRootDir + "/kubeflow/testing/py";
+      local kubeflowTestingPy = srcRootDir + "github.com/kubeflow/testing/py";
 
       // testWorkerImage is the main worker image to execute workflow.
       local testWorkerImage = "527798164940.dkr.ecr.us-west-2.amazonaws.com/aws-kubeflow-ci/test-worker:latest";
