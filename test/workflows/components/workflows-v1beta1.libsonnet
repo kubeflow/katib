@@ -110,24 +110,10 @@
                 name: "AWS_REGION",
                 value: "us-west-2",
               },
-              // {
-              //   name: "AWS_ACCESS_KEY_ID",
-              //   valueFrom: {
-              //     secretKeyRef: {
-              //       name: "aws-credentials",
-              //       key: "AWS_ACCESS_KEY_ID",
-              //     },
-              //   },
-              // },
-              // {
-              //   name: "AWS_SECRET_ACCESS_KEY",
-              //   valueFrom: {
-              //     secretKeyRef: {
-              //       name: "aws-credentials",
-              //       key: "AWS_SECRET_ACCESS_KEY",
-              //     },
-              //   },
-              // },
+              {
+                name: "ECR_REGISTRY",
+                value: registry,
+              },
               {
                 name: "GIT_TOKEN",
                 valueFrom: {
@@ -471,7 +457,7 @@
               "/kaniko/executor",
               "--dockerfile=" + katibDir + "/cmd/katib-controller/v1beta1/Dockerfile",
               "--context=dir://" + katibDir,
-              "--destination=" + "527798164940.dkr.ecr.us-west-2.amazonaws.com/katib/v1beta1/katib-controller:$(PULL_BASE_SHA)",
+              "--destination=" + registry + "/katib/v1beta1/katib-controller:$(PULL_BASE_SHA)",
               // need to add volume mounts and extra env.
             ]),  // build-katib-controller
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [

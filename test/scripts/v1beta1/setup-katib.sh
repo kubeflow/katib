@@ -37,26 +37,26 @@ aws eks update-kubeconfig --region=${AWS_REGION} --name=${CLUSTER_NAME}
 # Update images with current pull base sha.
 echo "Updating Katib images with current PR SHA: ${VERSION}"
 # Katib controller
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1beta1\/katib-controller@image: ${REGISTRY}\/${REPO_NAME}\/v1beta1\/katib-controller:${VERSION}@" manifests/v1beta1/katib-controller/katib-controller.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1beta1\/katib-controller@image: ${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/katib-controller:${VERSION}@" manifests/v1beta1/katib-controller/katib-controller.yaml
 
 # Metrics collector
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/file-metrics-collector@${REGISTRY}\/${REPO_NAME}\/v1beta1\/file-metrics-collector:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/tfevent-metrics-collector@${REGISTRY}\/${REPO_NAME}\/v1beta1\/tfevent-metrics-collector:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/file-metrics-collector@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/file-metrics-collector:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/tfevent-metrics-collector@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/tfevent-metrics-collector:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
 
 # Katib DB manager
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1beta1\/katib-db-manager@image: ${REGISTRY}\/${REPO_NAME}\/v1beta1\/katib-db-manager:${VERSION}@" manifests/v1beta1/db-manager/deployment.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1beta1\/katib-db-manager@image: ${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/katib-db-manager:${VERSION}@" manifests/v1beta1/db-manager/deployment.yaml
 
 # UI
-sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1beta1\/katib-ui@image: ${REGISTRY}\/${REPO_NAME}\/v1beta1\/katib-ui:${VERSION}@" manifests/v1beta1/ui/deployment.yaml
+sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1beta1\/katib-ui@image: ${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/katib-ui:${VERSION}@" manifests/v1beta1/ui/deployment.yaml
 
 # Suggestion algorithms
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-enas@${REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-enas@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-hyperband@${REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-hyperband@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-chocolate@${REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-chocolate@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-hyperopt@${REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-hyperopt@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-skopt@${REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-skopt@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-goptuna@${REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-goptuna@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-darts@${REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-darts@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-enas@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-enas@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-hyperband@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-hyperband@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-chocolate@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-chocolate@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-hyperopt@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-hyperopt@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-skopt@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-skopt@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-goptuna@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-goptuna@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-darts@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-darts@" manifests/v1beta1/katib-controller/katib-config.yaml
 
 cat manifests/v1beta1/katib-controller/katib-config.yaml
 
