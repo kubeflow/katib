@@ -449,7 +449,8 @@
               "test/scripts/v1beta1/setup-katib.sh",
             ]),  // check katib readiness and deploy it
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-random-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-e2e-experiment.sh examples/v1beta1/random-example.yaml",
+              "test/scripts/v1beta1/run-e2e-experiment.sh",
+              "examples/v1beta1/random-example.yaml",
             ]),  // run random algorithm
             // $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
             //   "python",
