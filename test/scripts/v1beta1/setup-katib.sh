@@ -69,7 +69,8 @@ cd "${MANIFESTS_DIR}/pytorch-job/pytorch-job-crds/base"
 kustomize build . | kubectl apply -f -
 
 echo "Deploying Katib"
-./scripts/v1beta1/deploy.sh
+cd "${GOPATH}/src"
+make deploy
 
 # Wait until all Katib pods is running.
 TIMEOUT=120
