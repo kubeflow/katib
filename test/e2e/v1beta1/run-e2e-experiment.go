@@ -17,8 +17,10 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -56,6 +58,12 @@ func main() {
 	if err != nil {
 		log.Fatal("Create NewClient for Katib failed: ", err)
 	}
+	gv := schema.GroupVersion{
+		Group:   "kubeflow.org",
+		Version: "v1beta1",
+	}
+
+	log.Println(scheme.Scheme.KnownTypes(gv))
 
 	var maxTrials int32 = 3
 	var parallelTrials int32 = 2
