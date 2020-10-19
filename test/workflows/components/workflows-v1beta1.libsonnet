@@ -440,13 +440,13 @@
             ]),  // build suggestion goptuna
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-enas", kanikoExecutorImage, [
               "/kaniko/executor",
-              "--dockerfile=" + katibDir + "/cmd/suggestion/enas/v1beta1/Dockerfile",
+              "--dockerfile=" + katibDir + "/cmd/suggestion/nas/enas/v1beta1/Dockerfile",
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/suggestion-enas:$(PULL_BASE_SHA)",
             ]),  // build suggestion enas
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-darts", kanikoExecutorImage, [
               "/kaniko/executor",
-              "--dockerfile=" + katibDir + "/cmd/suggestion/darts/v1beta1/Dockerfile",
+              "--dockerfile=" + katibDir + "/cmd/suggestion/nas/darts/v1beta1/Dockerfile",
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/suggestion-darts:$(PULL_BASE_SHA)",
             ]),  // build suggestion darts
