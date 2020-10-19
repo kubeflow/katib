@@ -25,8 +25,6 @@ CLUSTER_NAME="${CLUSTER_NAME}"
 AWS_REGION="${AWS_REGION}"
 EXPERIMENT_FILE=$1
 
-# GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
-
 echo "Configuring kubeconfig.."
 aws eks update-kubeconfig --region=${AWS_REGION} --name=${CLUSTER_NAME}
 
@@ -40,6 +38,6 @@ echo "Katib persistent volume claims "
 kubectl get pvc -n kubeflow
 
 echo "Running Experiment from ${EXPERIMENT_FILE} file"
-go run ./test/scripts/v1beta1/run-e2e-experiment ${EXPERIMENT_FILE}
+go run ./test/e2e/v1beta1/run-e2e-experiment.go ${EXPERIMENT_FILE}
 
 exit 0
