@@ -70,7 +70,8 @@ kustomize build . | kubectl apply -f -
 
 echo "Deploying Katib"
 cd "${GOPATH}/src"
-make deploy
+ls -a
+./scripts/v1beta1/deploy.sh
 
 # Wait until all Katib pods is running.
 TIMEOUT=120
