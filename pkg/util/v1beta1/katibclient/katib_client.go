@@ -17,9 +17,11 @@ package katibclient
 
 import (
 	"context"
+	"log"
 
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -69,6 +71,12 @@ func NewClient(options client.Options) (Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	gv := schema.GroupVersion{
+		Group:   "kubeflow.org",
+		Version: "v1beta1",
+	}
+	log.Println(scheme.Scheme.KnownTypes(gv))
+
 	return &KatibClient{
 		client: cl,
 	}, nil
