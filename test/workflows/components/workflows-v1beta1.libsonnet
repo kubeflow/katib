@@ -37,17 +37,17 @@
       // testDir is the root directory for all data for a particular test run.
       local testDir = mountPath + "/" + name;
       // srcRootDir is the directory where all repos should be checked out.
-      local srcRootDir = testDir + "/src";
+      local srcRootDir = testDir + "/src/github.com";
       // goDir is the directory to run Go e2e tests.
       // local goDir = testDir + "/go";
       // TODO (andreyvelich): Test when GOPATH = testDir
       local goDir = testDir;
       // katibDir is the directory containing the kubeflow/katib repo.
-      local katibDir = srcRootDir + "github.com/kubeflow/katib";
+      local katibDir = srcRootDir + "/kubeflow/katib";
       // manifestsDir is the directory containing the kubeflow/manifests repo.
-      local manifestsDir = srcRootDir + "github.com/kubeflow/manifests";
+      local manifestsDir = srcRootDir + "/kubeflow/manifests";
       // kubeflowTestingPy is the directory within the kubeflow_testing submodule containing py scripts to use.
-      local kubeflowTestingPy = srcRootDir + "github.com/kubeflow/testing/py";
+      local kubeflowTestingPy = srcRootDir + "/kubeflow/testing/py";
 
       // testWorkerImage is the main worker image to execute workflow.
       local testWorkerImage = "527798164940.dkr.ecr.us-west-2.amazonaws.com/aws-kubeflow-ci/test-worker:latest";
