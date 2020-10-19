@@ -50,13 +50,13 @@ sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1beta1\/katib-db-man
 sed -i -e "s@image: gcr.io\/kubeflow-images-public\/katib\/v1beta1\/katib-ui@image: ${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/katib-ui:${VERSION}@" manifests/v1beta1/ui/deployment.yaml
 
 # Suggestion algorithms
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-enas@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-enas@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-hyperband@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-hyperband@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-chocolate@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-chocolate@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-hyperopt@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-hyperopt@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-skopt@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-skopt@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-goptuna@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-goptuna@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-darts@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-darts@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-enas@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-enas:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-hyperband@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-hyperband:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-chocolate@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-chocolate:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-hyperopt@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-hyperopt:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-skopt@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-skopt:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-goptuna@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-goptuna:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-darts@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-darts:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
 
 cat manifests/v1beta1/katib-controller/katib-config.yaml
 
@@ -69,7 +69,7 @@ cd "${MANIFESTS_DIR}/pytorch-job/pytorch-job-crds/base"
 kustomize build . | kubectl apply -f -
 
 echo "Deploying Katib"
-make deploy
+./scripts/v1beta1/deploy.sh
 
 # Wait until all Katib pods is running.
 TIMEOUT=120

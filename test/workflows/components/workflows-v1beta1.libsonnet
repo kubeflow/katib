@@ -169,7 +169,6 @@
           name: name,
           namespace: namespace,
         },
-        // TODO(jlewi): Use OnExit to run cleanup steps.
         spec: {
           entrypoint: "e2e",
           volumes: [
@@ -185,6 +184,7 @@
                 claimName: nfsVolumeClaim,
               },
             },
+            // Attach aws-secret and docker-config for Kaniko build
             {
               name: "docker-config",
               configMap: {
@@ -464,14 +464,6 @@
             //   "create_pr_symlink",
             //   "--bucket=" + bucket,
             // ]),  // create-pr-symlink
-            // $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("copy-artifacts", testWorkerImage, [
-            //   "python",
-            //   "-m",
-            //   "kubeflow.testing.prow_artifacts",
-            //   "--artifacts_dir=" + outputDir,
-            //   "copy_artifacts",
-            //   "--bucket=" + bucket,
-            // ]),  // copy-artifacts
           ],  // templates
         },
       },  // e2e
