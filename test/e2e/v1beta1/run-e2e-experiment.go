@@ -16,6 +16,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -34,7 +35,7 @@ func main() {
 	expPath := os.Args[1]
 	byteExp, err := ioutil.ReadFile(expPath)
 	if err != nil {
-		log.Fatal("Error in reading file ", err)
+		log.Fatalf("Error in reading file: %v", err)
 	}
 
 	// Replace batch size to number of epochs for faster execution.
@@ -44,6 +45,11 @@ func main() {
 	buf := bytes.NewBufferString(strExp)
 	if err := k8syaml.NewYAMLOrJSONDecoder(buf, 1024).Decode(exp); err != nil {
 		log.Fatal("Yaml decode error ", err)
+	}
+
+	exp.TypeMeta = metav1.TypeMeta{
+		APIVersion: "kubeflow.org/v1beta1",
+		Kind:       "Experiment",
 	}
 
 	kclient, err := katibclient.NewClient(client.Options{})
