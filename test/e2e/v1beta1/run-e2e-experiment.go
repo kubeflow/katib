@@ -16,11 +16,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
-	"k8s.io/client-go/kubernetes/scheme"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // For GCP testing
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
@@ -48,21 +46,12 @@ func main() {
 		log.Fatal("Yaml decode error ", err)
 	}
 
-	exp.TypeMeta = metav1.TypeMeta{
-		APIVersion: "kubeflow.org/v1beta1",
-		Kind:       "Experiment",
-	}
-
+	err = os.Setenv("KUBECONFIG", "/root/.kube/config")
+	log.Println(err)
 	kclient, err := katibclient.NewClient(client.Options{})
 	if err != nil {
 		log.Fatal("Create NewClient for Katib failed: ", err)
 	}
-	gv := schema.GroupVersion{
-		Group:   "kubeflow.org",
-		Version: "v1beta1",
-	}
-
-	log.Println(scheme.Scheme.KnownTypes(gv))
 
 	ns, err := kclient.GetNamespaceList()
 	log.Println(err)

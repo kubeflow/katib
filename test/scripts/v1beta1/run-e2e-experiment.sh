@@ -40,11 +40,7 @@ echo "Available CRDs"
 kubectl get crd
 kubectl describe crd experiments.kubeflow.org
 
-kubectl create -f ${EXPERIMENT_FILE}
-kubectl get experiment -n kubeflow
 echo "Running Experiment from ${EXPERIMENT_FILE} file"
-go build -o run-e2e-experiment ./test/e2e/v1beta1/run-e2e-experiment.go
-./run-e2e-experiment ${EXPERIMENT_FILE}
-# go run ./test/e2e/v1beta1/run-e2e-experiment.go ${EXPERIMENT_FILE}
+go run ./test/e2e/v1beta1/run-e2e-experiment.go ${EXPERIMENT_FILE}
 
 exit 0
