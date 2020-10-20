@@ -490,7 +490,7 @@
               "test/scripts/v1beta1/run-e2e-experiment.sh",
               "examples/v1beta1/pytorchjob-example.yaml",
             ]),  // run PyTorchJob example
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-file-metricscollecto-e2e-tests", testWorkerImage, [
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-file-metricscollector-e2e-tests", testWorkerImage, [
               "test/scripts/v1beta1/run-e2e-experiment.sh",
               "examples/v1beta1/file-metricscollector-example.yaml",
             ]),  // run file metrics collector example
