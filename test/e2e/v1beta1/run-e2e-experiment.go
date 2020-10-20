@@ -60,6 +60,7 @@ func main() {
 
 	var maxTrials int32 = 2
 	var parallelTrials int32 = 1
+	// For random example we test 2 parallel execution.
 	if exp.Name == "random-example" {
 		maxTrials = 3
 		parallelTrials = 2
@@ -67,7 +68,7 @@ func main() {
 	if exp.Spec.Algorithm.AlgorithmName != "hyperband" && exp.Spec.Algorithm.AlgorithmName != "darts" {
 		// Hyperband will validate the parallel trial count,
 		// thus we should not change it.
-		// Not necessary to test parallel Trials for Darts
+		// Not necessary to test parallel Trials for Darts.
 		exp.Spec.MaxTrialCount = &maxTrials
 		exp.Spec.ParallelTrialCount = &parallelTrials
 	}
@@ -77,10 +78,10 @@ func main() {
 		log.Fatalf("CreateRuntimeObject failed: %v", err)
 	}
 
-	// Wait until Experiment is finished
+	// Wait until Experiment is finished.
 	exp, err = waitExperimentFinish(kclient, exp)
 	if err != nil {
-		// Delete experiment in case of error
+		// Delete Experiment in case of error.
 		log.Printf("Deleting Experiment %v\n", exp.Name)
 		if kclient.DeleteRuntimeObject(exp) != nil {
 			log.Fatalf("Unable to delete Experiment %v, error: %v", exp.Name, err)
@@ -88,7 +89,7 @@ func main() {
 		log.Fatalf("Wait Experiment finish failed: %v", err)
 	}
 
-	// For random example and from volume we restart Experiment
+	// For random example and from volume we restart Experiment.
 	if exp.Name == "random-example" || exp.Name == "from-volume-resume" {
 		// Increase parallel Trials and max Trials counts.
 		parallelTrials++
@@ -100,7 +101,7 @@ func main() {
 		err := kclient.UpdateRuntimeObject(exp)
 		if err != nil {
 			log.Fatalf("UpdateRuntimeObject failed: %v", err)
-			// Delete experiment in case of error
+			// Delete Experiment in case of error.
 			log.Printf("Deleting Experiment %v\n", exp.Name)
 			if kclient.DeleteRuntimeObject(exp) != nil {
 				log.Fatalf("Unable to delete Experiment %v, error: %v", exp.Name, err)
@@ -117,7 +118,7 @@ func main() {
 			exp, err = kclient.GetExperiment(exp.Name, exp.Namespace)
 			if err != nil {
 				log.Fatalf("Get Experiment error: %v", err)
-				// Delete experiment in case of error
+				// Delete Experiment in case of error
 				log.Printf("Deleting Experiment %v\n", exp.Name)
 				if kclient.DeleteRuntimeObject(exp) != nil {
 					log.Fatalf("Unable to delete Experiment %v, error: %v", exp.Name, err)
@@ -131,7 +132,7 @@ func main() {
 		}
 		if !exp.IsRestarting() {
 			log.Fatalf("Unable to restart Experiment %v", exp.Name)
-			// Delete experiment in case of error
+			// Delete experiment in case of error.
 			log.Printf("Deleting Experiment %v\n", exp.Name)
 			if kclient.DeleteRuntimeObject(exp) != nil {
 				log.Fatalf("Unable to delete Experiment %v, error: %v", exp.Name, err)
@@ -152,7 +153,7 @@ func main() {
 	// Verify Experiment results
 	err = verifyExperimentResults(kclient, exp)
 	if err != nil {
-		// Delete experiment in case of error
+		// Delete Experiment in case of error
 		log.Printf("Deleting Experiment %v\n", exp.Name)
 		if kclient.DeleteRuntimeObject(exp) != nil {
 			log.Fatalf("Unable to delete Experiment %v, error: %v", exp.Name, err)
@@ -163,7 +164,7 @@ func main() {
 	// Print results.
 	err = printResults(exp)
 	if err != nil {
-		// Delete experiment in case of error.
+		// Delete Experiment in case of error.
 		log.Printf("Deleting Experiment %v\n", exp.Name)
 		if kclient.DeleteRuntimeObject(exp) != nil {
 			log.Fatalf("Unable to delete Experiment %v, error: %v", exp.Name, err)
@@ -282,14 +283,14 @@ func verifySuggestion(kclient katibclient.Client, exp *experimentsv1beta1.Experi
 		return fmt.Errorf("Suggestion is succeeded while ResumePolicy = %v", experimentsv1beta1.LongRunning)
 	}
 
-	// Verify Suggestion with resume policy Never and FromVolume
+	// Verify Suggestion with resume policy Never and FromVolume.
 	if exp.Spec.ResumePolicy == experimentsv1beta1.NeverResume || exp.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
 		// When Suggestion has resume policy Never or FromVolume, it should be not running.
 		if sug.IsRunning() {
 			return fmt.Errorf("Suggestion is still running while ResumePolicy = %v", exp.Spec.ResumePolicy)
 		}
 
-		// Suggestion service should be deleted
+		// Suggestion service should be deleted.
 		serviceName := controllerUtil.GetAlgorithmServiceName(sug)
 		namespacedName := types.NamespacedName{Name: serviceName, Namespace: sug.Namespace}
 		err = kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.Service{})
@@ -299,7 +300,7 @@ func verifySuggestion(kclient katibclient.Client, exp *experimentsv1beta1.Experi
 			return fmt.Errorf("Suggestion service: %v is still alive while ResumePolicy = %v", serviceName, exp.Spec.ResumePolicy)
 		}
 
-		// Suggestion deployment should be deleted
+		// Suggestion deployment should be deleted.
 		deploymentName := controllerUtil.GetAlgorithmDeploymentName(sug)
 		namespacedName = types.NamespacedName{Name: deploymentName, Namespace: sug.Namespace}
 		err = kclient.GetClient().Get(context.TODO(), namespacedName, &appsv1.Deployment{})
@@ -309,7 +310,7 @@ func verifySuggestion(kclient katibclient.Client, exp *experimentsv1beta1.Experi
 			return fmt.Errorf("Suggestion deployment: %v is still alive while ResumePolicy = %v", deploymentName, exp.Spec.ResumePolicy)
 		}
 
-		// PV and PVC should not be deleted for Suggestion with resume policy FromVolume
+		// PV and PVC should not be deleted for Suggestion with resume policy FromVolume.
 		if exp.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
 			pvcName := controllerUtil.GetAlgorithmPersistentVolumeClaimName(sug)
 			namespacedName = types.NamespacedName{Name: pvcName, Namespace: sug.Namespace}
@@ -332,7 +333,7 @@ func verifySuggestion(kclient katibclient.Client, exp *experimentsv1beta1.Experi
 func printResults(exp *experimentsv1beta1.Experiment) error {
 	log.Printf("Experiment has recorded best current Optimal Trial %v\n\n", exp.Status.CurrentOptimalTrial)
 
-	// Describe Experiment.
+	// Describe the Experiment.
 	cmd := exec.Command("kubectl", "describe", "experiment", exp.Name, "-n", exp.Namespace)
 	out, err := cmd.Output()
 	if err != nil {
@@ -341,7 +342,7 @@ func printResults(exp *experimentsv1beta1.Experiment) error {
 	log.Println(cmd.String())
 	log.Printf("\n%v\n\n", string(out))
 
-	// Describe Suggestion.
+	// Describe the Suggestion.
 	cmd = exec.Command("kubectl", "describe", "suggestion", exp.Name, "-n", exp.Namespace)
 	out, err = cmd.Output()
 	if err != nil {

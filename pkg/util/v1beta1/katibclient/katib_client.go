@@ -17,7 +17,6 @@ package katibclient
 
 import (
 	"context"
-	"fmt"
 
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -63,7 +62,6 @@ func NewClient(options client.Options) (Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(cfg.Host)
 	experimentsv1beta1.AddToScheme(scheme.Scheme)
 	trialsv1beta1.AddToScheme(scheme.Scheme)
 	suggestionsv1beta1.AddToScheme(scheme.Scheme)
