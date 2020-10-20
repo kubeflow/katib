@@ -108,12 +108,4 @@ if [ $? -ne 1 ]; then
   exit 1
 fi
 
-# Create a link to Go directory
-# That is required to run e2e test
-# TODO (andreyvelich): Test without setting new folder
-# GO_DIR=${GOPATH}/src/github.com/${REPO_OWNER}/${REPO_NAME}
-# echo "Create symlink to GOPATH to run e2e tests"
-# mkdir -p $GO_DIR
-# ln -s ${PWD} ${GO_DIR}
-
 exit 0

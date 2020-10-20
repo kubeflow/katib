@@ -28,8 +28,15 @@ import (
 )
 
 func main() {
+	// For AWS we should point KUBECONFIG env to correct folder.
+	err := os.Setenv("KUBECONFIG", "/root/.kube/config")
+	if err != nil {
+		log.Fatalf("Unable to set KUBECONFIG env variable, error: %v", err)
+	}
+
+	// First argument should be Experiment yaml path.
 	if len(os.Args) != 2 {
-		log.Fatal("Experiment name is missing")
+		log.Fatal("Path to Experiment yaml is missing")
 	}
 	expPath := os.Args[1]
 	byteExp, err := ioutil.ReadFile(expPath)
@@ -46,23 +53,9 @@ func main() {
 		log.Fatal("Yaml decode error ", err)
 	}
 
-	err = os.Setenv("KUBECONFIG", "/root/.kube/config")
-	log.Println(err)
 	kclient, err := katibclient.NewClient(client.Options{})
 	if err != nil {
 		log.Fatal("Create NewClient for Katib failed: ", err)
-	}
-
-	ns, err := kclient.GetNamespaceList()
-	log.Println(err)
-	for _, n := range ns.Items {
-		log.Println(n.Name)
-	}
-
-	expList, err2 := kclient.GetExperimentList()
-	log.Println(err2)
-	for _, e := range expList.Items {
-		log.Println(e)
 	}
 
 	var maxTrials int32 = 3

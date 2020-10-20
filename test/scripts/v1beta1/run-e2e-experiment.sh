@@ -38,7 +38,6 @@ echo "Katib persistent volume claims"
 kubectl get pvc -n kubeflow
 echo "Available CRDs"
 kubectl get crd
-kubectl describe crd experiments.kubeflow.org
 
 echo "Running Experiment from ${EXPERIMENT_FILE} file"
 go run ./test/e2e/v1beta1/run-e2e-experiment.go ${EXPERIMENT_FILE}

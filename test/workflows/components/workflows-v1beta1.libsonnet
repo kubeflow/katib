@@ -36,12 +36,13 @@
       local mountPath = "/mnt/test-data-volume";
       // testDir is the root directory for all data for a particular test run.
       local testDir = mountPath + "/" + name;
+      // goDir is the directory to run Go e2e tests.
+      // Since Katib repo is located under /src/github.com/kubeflow/katib, we can set GOPATH = testDir.
+      // In fact, we don't need to create additional folder to execute Go e2e test.
+      local goDir = testDir;
+
       // srcRootDir is the directory where all repos should be checked out.
       local srcRootDir = testDir + "/src/github.com";
-      // goDir is the directory to run Go e2e tests.
-      // local goDir = testDir + "/go";
-      // TODO (andreyvelich): Test when GOPATH = testDir
-      local goDir = testDir;
       // katibDir is the directory containing the kubeflow/katib repo.
       local katibDir = srcRootDir + "/kubeflow/katib";
       // manifestsDir is the directory containing the kubeflow/manifests repo.
@@ -284,58 +285,54 @@
                     name: "run-random-e2e-tests",
                     template: "run-random-e2e-tests",
                   },
-                  // {
-                  //   name: "run-grid-e2e-tests",
-                  //   template: "run-grid-e2e-tests",
-                  // },
-                  // {
-                  //   name: "run-file-metricscollector-e2e-tests",
-                  //   template: "run-file-metricscollector-e2e-tests",
-                  // },
-                  // {
-                  //   name: "run-custom-metricscollector-e2e-tests",
-                  //   template: "run-custom-metricscollector-e2e-tests",
-                  // },
-                  // {
-                  //   name: "run-bayesian-e2e-tests",
-                  //   template: "run-bayesian-e2e-tests",
-                  // },
-                  // {
-                  //   name: "run-enas-e2e-tests",
-                  //   template: "run-enas-e2e-tests",
-                  // },
-                  // {
-                  //   name: "run-hyperband-e2e-tests",
-                  //   template: "run-hyperband-e2e-tests",
-                  // },
-                  // {
-                  //   name: "run-tpe-e2e-tests",
-                  //   template: "run-tpe-e2e-tests",
-                  // },
-                  // {
-                  //   name: "run-tfjob-e2e-tests",
-                  //   template: "run-tfjob-e2e-tests",
-                  // },
-                  // {
-                  //   name: "run-pytorchjob-e2e-tests",
-                  //   template: "run-pytorchjob-e2e-tests",
-                  // },
-                  // {
-                  //   name: "run-cmaes-e2e-tests",
-                  //   template: "run-cmaes-e2e-tests",
-                  // },
-                  // {
-                  //   name: "run-never-resume-e2e-tests",
-                  //   template: "run-never-resume-e2e-tests",
-                  // },
-                  // {
-                  //   name: "run-darts-e2e-tests",
-                  //   template: "run-darts-e2e-tests",
-                  // },
-                  // {
-                  //   name: "run-from-volume-e2e-tests",
-                  //   template: "run-from-volume-e2e-tests",
-                  // },
+                  {
+                    name: "run-tpe-e2e-tests",
+                    template: "run-tpe-e2e-tests",
+                  },
+                  {
+                    name: "run-grid-e2e-tests",
+                    template: "run-grid-e2e-tests",
+                  },
+                  {
+                    name: "run-bayesian-e2e-tests",
+                    template: "run-bayesian-e2e-tests",
+                  },
+                  {
+                    name: "run-hyperband-e2e-tests",
+                    template: "run-hyperband-e2e-tests",
+                  },
+                  {
+                    name: "run-cmaes-e2e-tests",
+                    template: "run-cmaes-e2e-tests",
+                  },
+                  {
+                    name: "run-enas-e2e-tests",
+                    template: "run-enas-e2e-tests",
+                  },
+                  {
+                    name: "run-darts-e2e-tests",
+                    template: "run-darts-e2e-tests",
+                  },
+                  {
+                    name: "run-tfjob-e2e-tests",
+                    template: "run-tfjob-e2e-tests",
+                  },
+                  {
+                    name: "run-pytorchjob-e2e-tests",
+                    template: "run-pytorchjob-e2e-tests",
+                  },
+                  {
+                    name: "run-file-metricscollector-e2e-tests",
+                    template: "run-file-metricscollector-e2e-tests",
+                  },
+                  {
+                    name: "run-never-resume-e2e-tests",
+                    template: "run-never-resume-e2e-tests",
+                  },
+                  {
+                    name: "run-from-volume-e2e-tests",
+                    template: "run-from-volume-e2e-tests",
+                  },
                 ],
               ],
             },
@@ -407,7 +404,7 @@
               "--dockerfile=" + katibDir + "/cmd/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile",
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/tfevent-metrics-collector:$(PULL_BASE_SHA)",
-            ]),  // build file metrics collector
+            ]),  // build tfevent metrics collector
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperopt", kanikoExecutorImage, [
               "/kaniko/executor",
               "--dockerfile=" + katibDir + "/cmd/suggestion/hyperopt/v1beta1/Dockerfile",
@@ -452,11 +449,59 @@
             ]),  // build suggestion darts
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("setup-katib", testWorkerImage, [
               "test/scripts/v1beta1/setup-katib.sh",
-            ]),  // check katib readiness and deploy it
+            ]),  // check Katib readiness and deploy it
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-random-e2e-tests", testWorkerImage, [
               "test/scripts/v1beta1/run-e2e-experiment.sh",
               "examples/v1beta1/random-example.yaml",
             ]),  // run random algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tpe-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-e2e-experiment.sh",
+              "examples/v1beta1/tpe-example.yaml",
+            ]),  // run TPE algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-grid-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-e2e-experiment.sh",
+              "examples/v1beta1/grid-example.yaml",
+            ]),  // run grid algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-bayesian-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-e2e-experiment.sh",
+              "examples/v1beta1/bayesianoptimization-example.yaml",
+            ]),  // run BO algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-hyperband-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-e2e-experiment.sh",
+              "examples/v1beta1/hyperband-example.yaml",
+            ]),  // run hyperband algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-cmaes-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-e2e-experiment.sh",
+              "examples/v1beta1/cmaes-example.yaml",
+            ]),  // run CMA-ES algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-enas-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-e2e-experiment.sh",
+              "examples/v1beta1/nas/enas-example-cpu.yaml",
+            ]),  // run ENAS algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-darts-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-e2e-experiment.sh",
+              "examples/v1beta1/nas/darts-example-cpu.yaml",
+            ]),  // run DARTS algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tfjob-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-e2e-experiment.sh",
+              "examples/v1beta1/tfjob-example.yaml",
+            ]),  // run TFJob example
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-pytorchjob-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-e2e-experiment.sh",
+              "examples/v1beta1/pytorchjob-example.yaml",
+            ]),  // run PyTorchJob example
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-file-metricscollecto-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-e2e-experiment.sh",
+              "examples/v1beta1/file-metricscollector-example.yaml",
+            ]),  // run file metrics collector example
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-never-resume-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-e2e-experiment.sh",
+              "examples/v1beta1/resume-experiment/never-resume.yaml",
+            ]),  // run never resume example
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-from-volume-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-e2e-experiment.sh",
+              "examples/v1beta1/resume-experiment/from-volume-resume.yaml",
+            ]),  // run from volume resume example
             // $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
             //   "python",
             //   "-m",
