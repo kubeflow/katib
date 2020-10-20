@@ -60,12 +60,16 @@ sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-darts@${
 
 cat manifests/v1beta1/katib-controller/katib-config.yaml
 
-echo "Deploying tf-operator crds from kubeflow/manifests master"
+echo "Deploying tf-operator from kubeflow/manifests master"
 cd "${MANIFESTS_DIR}/tf-training/tf-job-crds/base"
 kustomize build . | kubectl apply -f -
+cd "${MANIFESTS_DIR}/tf-training/tf-job-operator/base"
+kustomize build . | kubectl apply -f -
 
-echo "Deploying pytorch-operator crds from kubeflow/manifests master"
+echo "Deploying pytorch-operator from kubeflow/manifests master"
 cd "${MANIFESTS_DIR}/pytorch-job/pytorch-job-crds/base"
+kustomize build . | kubectl apply -f -
+cd "${MANIFESTS_DIR}/pytorch-job/pytorch-operator/base/"
 kustomize build . | kubectl apply -f -
 
 echo "Deploying Katib"
