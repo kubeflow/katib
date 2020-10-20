@@ -60,6 +60,9 @@ sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-darts@${
 
 cat manifests/v1beta1/katib-controller/katib-config.yaml
 
+echo "Creating Kubeflow namespace"
+kubectl create namespace kubeflow
+
 echo "Deploying tf-operator from kubeflow/manifests master"
 cd "${MANIFESTS_DIR}/tf-training/tf-job-crds/base"
 kustomize build . | kubectl apply -f -
