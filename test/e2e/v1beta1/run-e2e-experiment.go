@@ -58,8 +58,12 @@ func main() {
 		log.Fatal("Create NewClient for Katib failed: ", err)
 	}
 
-	var maxTrials int32 = 3
-	var parallelTrials int32 = 2
+	var maxTrials int32 = 2
+	var parallelTrials int32 = 1
+	if exp.Name == "random-example" {
+		maxTrials = 3
+		parallelTrials = 2
+	}
 	if exp.Spec.Algorithm.AlgorithmName != "hyperband" && exp.Spec.Algorithm.AlgorithmName != "darts" {
 		// Hyperband will validate the parallel trial count,
 		// thus we should not change it.
@@ -181,7 +185,7 @@ func waitExperimentFinish(kclient katibclient.Client, exp *experimentsv1beta1.Ex
 	for endTime := time.Now().Add(timeout); time.Now().Before(endTime); {
 		exp, err := kclient.GetExperiment(exp.Name, exp.Namespace)
 		if err != nil {
-			return nil, fmt.Errorf("Get Experiment error: %v", err)
+			return exp, fmt.Errorf("Get Experiment error: %v", err)
 		}
 
 		log.Printf("Waiting for Experiment %s to finish", exp.Name)
@@ -194,14 +198,14 @@ func waitExperimentFinish(kclient katibclient.Client, exp *experimentsv1beta1.Ex
 		if exp.IsCompleted() {
 			log.Printf("Experiment %v is finished", exp.Name)
 			if exp.IsFailed() {
-				return nil, fmt.Errorf("Experiment %v is failed", exp.Name)
+				return exp, fmt.Errorf("Experiment %v is failed", exp.Name)
 			}
 			// Print latest condition message.
 			log.Printf("%v\n\n", exp.Status.Conditions[len(exp.Status.Conditions)-1].Message)
 			// Print Suggestion conditions.
 			suggestion, err := kclient.GetSuggestion(exp.Name, exp.Namespace)
 			if err != nil {
-				return nil, fmt.Errorf("Get Suggestion error: %v", err)
+				return exp, fmt.Errorf("Get Suggestion error: %v", err)
 			}
 			log.Printf("Suggestion %v. Conditions: %v", suggestion.Name, suggestion.Status.Conditions)
 			log.Printf("Suggestion %v. Suggestions: %v\n\n", suggestion.Name, suggestion.Status.Suggestions)
@@ -213,7 +217,7 @@ func waitExperimentFinish(kclient katibclient.Client, exp *experimentsv1beta1.Ex
 	}
 
 	// If loop is end, Experiment is not finished.
-	return nil, fmt.Errorf("Experiment run timed out")
+	return exp, fmt.Errorf("Experiment run timed out")
 }
 
 func verifyExperimentResults(kclient katibclient.Client, exp *experimentsv1beta1.Experiment) error {
