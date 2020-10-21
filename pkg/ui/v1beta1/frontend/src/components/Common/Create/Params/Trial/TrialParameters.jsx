@@ -8,7 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 
-import { editTrialParameters } from '../../../../../actions/generalActions';
+import { changeTrialParameters } from '../../../../../actions/generalActions';
 import { GENERAL_MODULE } from '../../../../../constants/constants';
 
 const useStyles = makeStyles({
@@ -36,21 +36,21 @@ const TrialParameters = props => {
     let param = props.trialParameters[index];
     let reference = param.reference;
     let description = param.description;
-    props.editTrialParameters(index, event.target.value, reference, description);
+    props.changeTrialParameters(index, event.target.value, reference, description);
   };
 
   const onReferenceChange = index => event => {
     let param = props.trialParameters[index];
     let name = param.name;
     let description = param.description;
-    props.editTrialParameters(index, name, event.target.value, description);
+    props.changeTrialParameters(index, name, event.target.value, description);
   };
 
   const onDescriptionChange = index => event => {
     let param = props.trialParameters[index];
     let name = param.name;
     let reference = param.reference;
-    props.editTrialParameters(index, name, reference, event.target.value);
+    props.changeTrialParameters(index, name, reference, event.target.value);
   };
 
   return (
@@ -121,4 +121,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps, { editTrialParameters })(TrialParameters);
+export default connect(mapStateToProps, { changeTrialParameters })(TrialParameters);

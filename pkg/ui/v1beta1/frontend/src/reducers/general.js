@@ -5,6 +5,8 @@ import * as hpMonitorActions from '../actions/hpMonitorActions';
 import * as nasMonitorActions from '../actions/nasMonitorActions';
 import * as templateActions from '../actions/templateActions';
 
+import { TEMPLATE_SOURCE_CONFIG_MAP, TEMPLATE_SOURCE_YAML } from '../constants/constants';
+
 const initialState = {
   menuOpen: false,
   snackOpen: false,
@@ -30,6 +32,37 @@ const initialState = {
   suggestion: {},
   dialogSuggestionOpen: false,
 
+  trialTemplateSourceList: [TEMPLATE_SOURCE_CONFIG_MAP, TEMPLATE_SOURCE_YAML],
+  trialTemplateSource: 'ConfigMap',
+  primaryPodLabels: [],
+  trialTemplateSpec: [
+    {
+      name: 'PrimaryContainerName',
+      value: 'training-container',
+      description: 'Name of training container where actual model training is running',
+    },
+    {
+      name: 'SuccessCondition',
+      value: 'status.conditions.#(type=="Complete")#|#(status=="True")#',
+      description: `Condition when Trial custom resource is succeeded.
+      Default value for k8s BatchJob: status.conditions.#(type=="Complete")#|#(status=="True")#.
+      Default value for Kubeflow Job (TFJob, PyTorchJob): status.conditions.#(type=="Succeeded")#|#(status=="True")#.`,
+    },
+    {
+      name: 'FailureCondition',
+      value: 'status.conditions.#(type=="Failed")#|#(status=="True")#',
+      description: `Condition when Trial custom resource is failed.
+      Default value for k8s BatchJob: status.conditions.#(type=="Failed")#|#(status=="True")#.
+      Default value for Kubeflow Job (TFJob, PyTorchJob): status.conditions.#(type=="Failed")#|#(status=="True")#.`,
+    },
+    {
+      name: 'Retain',
+      value: 'false',
+      description:
+        'Retain indicates that Trial resources must be not cleanup. Default value: false',
+    },
+  ],
+  trialTemplateYAML: '',
   trialTemplatesData: [],
 
   configMapNamespaceIndex: -1,
@@ -43,7 +76,33 @@ const initialState = {
   mcURISchemesList: ['HTTP', 'HTTPS'],
 };
 
-const templateParameterRegex = '\\{trialParameters\\..+?\\}';
+// filterValue finds index from array where name == key.
+const filterValue = (obj, key) => {
+  return obj.findIndex(p => p.name === key);
+};
+
+// getTrialParameters returns Trial parameters for the given YAML.
+// It parses only Trial parameters names from the YAML.
+const getTrialParameters = YAML => {
+  const templateParameterRegex = '\\{trialParameters\\..+?\\}';
+
+  let trialParameters = [];
+  let trialParameterNames = [];
+  let matchStr = [...YAML.matchAll(templateParameterRegex)];
+
+  matchStr.forEach(param => {
+    let newParameter = param[0].slice(param[0].indexOf('.') + 1, param[0].indexOf('}'));
+    if (!trialParameterNames.includes(newParameter)) {
+      trialParameterNames.push(newParameter);
+      trialParameters.push({
+        name: newParameter,
+        reference: '',
+        description: '',
+      });
+    }
+  });
+  return trialParameters;
+};
 
 const generalReducer = (state = initialState, action) => {
   switch (action.type) {
@@ -178,6 +237,7 @@ const generalReducer = (state = initialState, action) => {
         dialogExperimentOpen: false,
         dialogSuggestionOpen: false,
       };
+    // Experiment Trial Template actions.
     case templateActions.FETCH_TRIAL_TEMPLATES_SUCCESS:
       var trialTemplatesData = action.trialTemplatesData;
 
@@ -193,24 +253,10 @@ const generalReducer = (state = initialState, action) => {
         configMapNamespaceIndex = 0;
         configMapNameIndex = 0;
         configMapPathIndex = 0;
-        // Get Parameter names from ConfigMap for Trial parameters
-        var yaml = trialTemplatesData[0].ConfigMaps[0].Templates[0].Yaml;
-        var trialParameterNames = [];
 
-        var matchStr = [...yaml.matchAll(templateParameterRegex)];
-        matchStr.forEach(param => {
-          let newParameter = param[0].slice(param[0].indexOf('.') + 1, param[0].indexOf('}'));
-          if (!trialParameterNames.includes(newParameter)) {
-            trialParameterNames.push(newParameter);
-            trialParameters.push({
-              name: newParameter,
-              reference: '',
-              description: '',
-            });
-          }
-        });
+        // Get Trial parameters names from the ConfigMap template YAML
+        trialParameters = getTrialParameters(trialTemplatesData[0].ConfigMaps[0].Templates[0].Yaml);
       }
-
       return {
         ...state,
         trialTemplatesData: trialTemplatesData,
@@ -218,6 +264,42 @@ const generalReducer = (state = initialState, action) => {
         configMapNameIndex: configMapNameIndex,
         configMapPathIndex: configMapPathIndex,
         trialParameters: trialParameters,
+      };
+    case actions.CHANGE_TRIAL_TEMPLATE_SOURCE:
+      return {
+        ...state,
+        trialTemplateSource: action.source,
+        trialTemplateYAML: '',
+        trialParameters: [],
+      };
+    case actions.ADD_PRIMARY_POD_LABEL:
+      var newLabels = state.primaryPodLabels.slice();
+      newLabels.push({ key: '', value: '' });
+      return {
+        ...state,
+        primaryPodLabels: newLabels,
+      };
+    case actions.CHANGE_PRIMARY_POD_LABEL:
+      newLabels = state.primaryPodLabels.slice();
+      newLabels[action.index][action.fieldName] = action.value;
+      return {
+        ...state,
+        primaryPodLabels: newLabels,
+      };
+    case actions.DELETE_PRIMARY_POD_LABEL:
+      newLabels = state.primaryPodLabels.slice();
+      newLabels.splice(action.index, 1);
+      return {
+        ...state,
+        primaryPodLabels: newLabels,
+      };
+    case actions.CHANGE_TRIAL_TEMPLATE_SPEC:
+      let newTrialTemplateSpec = state.trialTemplateSpec.slice();
+      let index = filterValue(newTrialTemplateSpec, action.name);
+      newTrialTemplateSpec[index].value = action.value;
+      return {
+        ...state,
+        trialTemplateSpec: newTrialTemplateSpec,
       };
     case actions.FILTER_TEMPLATES_EXPERIMENT:
       let newNamespaceIndex = 0;
@@ -235,32 +317,17 @@ const generalReducer = (state = initialState, action) => {
         newPathIndex = action.configMapPathIndex;
       }
 
-      // Get Parameter names from ConfigMap for Trial parameters
-      // Change only if any ConfigMap information has been changed
+      // Get Parameter names from ConfigMap for Trial parameters.
+      // Change only if any ConfigMap information has been changed.
       trialParameters = state.trialParameters.slice();
       if (
         newNamespaceIndex !== state.configMapNamespaceIndex ||
         newNameIndex !== state.configMapNameIndex ||
         newPathIndex !== state.configMapPathIndex
       ) {
-        trialTemplatesData = state.trialTemplatesData;
-        yaml =
-          trialTemplatesData[newNamespaceIndex].ConfigMaps[newNameIndex].Templates[newPathIndex]
-            .Yaml;
-        trialParameterNames = [];
-        trialParameters = [];
-        matchStr = [...yaml.matchAll(templateParameterRegex)];
-        matchStr.forEach(param => {
-          let newParameter = param[0].slice(param[0].indexOf('.') + 1, param[0].indexOf('}'));
-          if (!trialParameterNames.includes(newParameter)) {
-            trialParameterNames.push(newParameter);
-            trialParameters.push({
-              name: newParameter,
-              reference: '',
-              description: '',
-            });
-          }
-        });
+        // Get Trial parameters from the YAML.
+        let configMap = state.trialTemplatesData[newNamespaceIndex].ConfigMaps[newNameIndex];
+        trialParameters = getTrialParameters(configMap.Templates[newPathIndex].Yaml);
       }
       return {
         ...state,
@@ -269,13 +336,15 @@ const generalReducer = (state = initialState, action) => {
         configMapPathIndex: newPathIndex,
         trialParameters: trialParameters,
       };
-    case actions.VALIDATION_ERROR:
+    case actions.CHANGE_TRIAL_TEMPLATE_YAML:
+      // Get Trial parameters from the YAML.
+      trialParameters = getTrialParameters(action.templateYAML);
       return {
         ...state,
-        snackOpen: true,
-        snackText: action.message,
+        trialTemplateYAML: action.templateYAML,
+        trialParameters: trialParameters,
       };
-    case actions.EDIT_TRIAL_PARAMETERS:
+    case actions.CHANGE_TRIAL_PARAMETERS:
       let newParams = state.trialParameters.slice();
       newParams[action.index].name = action.name;
       newParams[action.index].reference = action.reference;
@@ -384,6 +453,12 @@ const generalReducer = (state = initialState, action) => {
         ...state,
         snackOpen: true,
         snackText: 'Delete Template failed: ' + action.error,
+      };
+    case actions.VALIDATION_ERROR:
+      return {
+        ...state,
+        snackOpen: true,
+        snackText: action.message,
       };
     default:
       return state;

@@ -525,7 +525,7 @@ class MetricsCollectorSpec extends React.Component {
                 <Tooltip title={'Yaml structure for the custom metrics collector container'}>
                   <HelpOutlineIcon className={classes.help} color={'primary'} />
                 </Tooltip>
-                {'Yaml for the Custom Container'}
+                {'YAML for the Custom Container'}
               </Typography>
             </Grid>
             <Grid item xs={6}>

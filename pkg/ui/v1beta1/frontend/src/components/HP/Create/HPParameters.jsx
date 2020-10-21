@@ -192,14 +192,57 @@ const HPParameters = props => {
 
     data.spec.metricsCollectorSpec = newMCSpec;
 
-    data.spec.trialTemplate = {
-      configMap: {
-        configMapNamespace: props.templateConfigMapNamespace,
-        configMapName: props.templateConfigMapName,
-        templatePath: props.templateConfigMapPath,
-      },
-      trialParameters: props.trialParameters,
-    };
+    // Add Trial template.
+    // Add Trial specification.
+    data.spec.trialTemplate = {};
+    deCapitalizeFirstLetterAndAppend(props.trialTemplateSpec, data.spec.trialTemplate);
+    console.log(data.spec.trialTemplate.retain);
+    if (data.spec.trialTemplate.retain === 'true') {
+      data.spec.trialTemplate.retain = true;
+    } else if (data.spec.trialTemplate.retain === 'false') {
+      data.spec.trialTemplate.retain = false;
+    } else {
+      props.validationError('Trial template retain parameter must be true or false!');
+      return;
+    }
+
+    // Remove empty items from PrimaryPodLabels array.
+    let filteredPrimaryLabels = props.primaryPodLabels.filter(function(label) {
+      return label.key.trim() !== '' && label.value.trim() !== '';
+    });
+
+    // If array is not empty add PrimaryPodLabels.
+    if (filteredPrimaryLabels.length > 0) {
+      data.spec.trialTemplate.primaryPodLabels = {};
+      filteredPrimaryLabels.forEach(
+        label => (data.spec.trialTemplate.primaryPodLabels[label.key] = label.value),
+      );
+    }
+
+    // Add Trial Source.
+    if (
+      props.trialTemplateSource === constants.TEMPLATE_SOURCE_YAML &&
+      props.trialTemplateYAML !== ''
+    ) {
+      // Try to parse template YAML to JSON.
+      try {
+        let trialTemplateJSON = jsyaml.load(props.trialTemplateYAML);
+        data.spec.trialTemplate.trialSource = trialTemplateJSON;
+      } catch {
+        props.validationError('Trial Template is not valid YAML!');
+        return;
+      }
+      // Otherwise assign ConfigMap.
+    } else {
+      data.spec.trialTemplate = {
+        configMap: {
+          configMapNamespace: props.templateConfigMapNamespace,
+          configMapName: props.templateConfigMapName,
+          templatePath: props.templateConfigMapPath,
+        },
+      };
+    }
+    data.spec.trialTemplate.trialParameters = props.trialParameters;
 
     props.submitHPJob(data);
   };
@@ -264,9 +307,13 @@ const mapStateToProps = state => {
     algorithmName: state[constants.HP_CREATE_MODULE].algorithmName,
     algorithmSettings: state[constants.HP_CREATE_MODULE].algorithmSettings,
     parameters: state[constants.HP_CREATE_MODULE].parameters,
+    primaryPodLabels: state[constants.GENERAL_MODULE].primaryPodLabels,
+    trialTemplateSpec: state[constants.GENERAL_MODULE].trialTemplateSpec,
+    trialTemplateSource: state[constants.GENERAL_MODULE].trialTemplateSource,
     templateConfigMapNamespace: templateCMNamespace,
     templateConfigMapName: templateCMName,
     templateConfigMapPath: templateCMPath,
+    trialTemplateYAML: state[constants.GENERAL_MODULE].trialTemplateYAML,
     trialParameters: state[constants.GENERAL_MODULE].trialParameters,
     mcSpec: state[constants.HP_CREATE_MODULE].mcSpec,
     mcCustomContainerYaml: state[constants.HP_CREATE_MODULE].mcCustomContainerYaml,

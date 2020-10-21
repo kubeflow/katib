@@ -31,3 +31,6 @@ export const HP_MONITOR_MODULE = 'hpMonitor';
 export const NAS_CREATE_MODULE = 'nasCreate';
 export const NAS_MONITOR_MODULE = 'nasMonitor';
 export const TEMPLATE_MODULE = 'template';
+
+export const TEMPLATE_SOURCE_CONFIG_MAP = 'ConfigMap';
+export const TEMPLATE_SOURCE_YAML = 'YAML';
