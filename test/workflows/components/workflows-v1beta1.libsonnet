@@ -177,6 +177,8 @@
         },
         spec: {
           entrypoint: "e2e",
+          // Cleanup workflow after 10 seconds.
+          ttlSecondsAfterFinished: 10,
           volumes: [
             {
               name: "github-token",
