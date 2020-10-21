@@ -196,7 +196,6 @@ const HPParameters = props => {
     // Add Trial specification.
     data.spec.trialTemplate = {};
     deCapitalizeFirstLetterAndAppend(props.trialTemplateSpec, data.spec.trialTemplate);
-    console.log(data.spec.trialTemplate.retain);
     if (data.spec.trialTemplate.retain === 'true') {
       data.spec.trialTemplate.retain = true;
     } else if (data.spec.trialTemplate.retain === 'false') {
@@ -227,22 +226,24 @@ const HPParameters = props => {
       // Try to parse template YAML to JSON.
       try {
         let trialTemplateJSON = jsyaml.load(props.trialTemplateYAML);
-        data.spec.trialTemplate.trialSource = trialTemplateJSON;
+        data.spec.trialTemplate.trialSpec = trialTemplateJSON;
       } catch {
         props.validationError('Trial Template is not valid YAML!');
         return;
       }
       // Otherwise assign ConfigMap.
     } else {
-      data.spec.trialTemplate = {
-        configMap: {
-          configMapNamespace: props.templateConfigMapNamespace,
-          configMapName: props.templateConfigMapName,
-          templatePath: props.templateConfigMapPath,
-        },
+      data.spec.trialTemplate.configMap = {
+        configMapNamespace: props.templateConfigMapNamespace,
+        configMapName: props.templateConfigMapName,
+        templatePath: props.templateConfigMapPath,
       };
     }
-    data.spec.trialTemplate.trialParameters = props.trialParameters;
+
+    // Add Trial parameters if it is not empty.
+    if (props.trialParameters.length > 0) {
+      data.spec.trialTemplate.trialParameters = props.trialParameters;
+    }
 
     props.submitHPJob(data);
   };
