@@ -79,7 +79,7 @@
         // command: List to pass as the container command.
         buildTemplate(step_name, image, command):: {
           name: step_name,
-          activeDeadlineSeconds: 2100,
+          activeDeadlineSeconds: 2400,
           retryStrategy: {
             limit: 3,
             retryPolicy: "Always",
