@@ -322,6 +322,7 @@ const mapStateToProps = state => {
     inputSize: state[constants.NAS_CREATE_MODULE].inputSize,
     outputSize: state[constants.NAS_CREATE_MODULE].outputSize,
     operations: state[constants.NAS_CREATE_MODULE].operations,
+    primaryPodLabels: state[constants.GENERAL_MODULE].primaryPodLabels,
     trialTemplateSpec: state[constants.GENERAL_MODULE].trialTemplateSpec,
     trialTemplateSource: state[constants.GENERAL_MODULE].trialTemplateSource,
     templateConfigMapNamespace: templateCMNamespace,
