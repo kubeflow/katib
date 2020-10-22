@@ -28,7 +28,7 @@ const styles = theme => ({
   },
   submit: {
     textAlign: 'center',
-    marginTop: 20,
+    margin: 20,
   },
 });
 
@@ -101,9 +101,7 @@ const NASParameters = props => {
     deCapitalizeFirstLetterAndAppend(props.objective, data.spec.objective);
 
     // Add additional metrics.
-    data.spec.objective.additionalMetricNames = props.additionalMetricNames.map(
-      (metrics, i) => metrics.value,
-    );
+    data.spec.objective.additionalMetricNames = props.additionalMetricNames;
 
     // Add metric strategies.
     data.spec.objective.metricStrategies = props.metricStrategies.map(metric => ({

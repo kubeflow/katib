@@ -53,7 +53,7 @@ const initialState = {
   metricStrategiesList: ['min', 'max', 'latest'],
   metricStrategies: [
     {
-      name: 'Validation-accuracy',
+      name: 'Validation-Accuracy',
       strategy: 'max',
     },
   ],
