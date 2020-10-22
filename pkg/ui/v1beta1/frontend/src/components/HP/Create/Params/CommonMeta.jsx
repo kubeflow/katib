@@ -14,8 +14,6 @@ import { GENERAL_MODULE, HP_CREATE_MODULE } from '../../../../constants/constant
 
 const styles = () => ({
   textField: {
-    marginLeft: 4,
-    marginRight: 4,
     width: '100%',
   },
   help: {

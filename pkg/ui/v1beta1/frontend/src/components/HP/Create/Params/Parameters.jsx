@@ -31,21 +31,13 @@ import { HP_CREATE_MODULE } from '../../../../constants/constants';
 
 const useStyles = makeStyles({
   textField: {
-    marginLeft: 4,
-    marginRight: 4,
     width: '80%',
-  },
-  help: {
-    padding: 4 / 2,
-    verticalAlign: 'middle',
-    marginRight: 5,
   },
   parameter: {
     padding: 2,
     marginBottom: 10,
   },
   formControl: {
-    margin: 4,
     width: '100%',
   },
   selectEmpty: {
@@ -54,9 +46,6 @@ const useStyles = makeStyles({
   group: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-  },
-  divider: {
-    margin: 5,
   },
   addButton: {
     margin: 10,

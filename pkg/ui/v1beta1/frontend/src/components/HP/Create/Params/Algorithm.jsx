@@ -26,8 +26,6 @@ import { HP_CREATE_MODULE } from '../../../../constants/constants';
 
 const useStyles = makeStyles({
   textField: {
-    marginLeft: 4,
-    marginRight: 4,
     width: '80%',
   },
   help: {
@@ -45,7 +43,6 @@ const useStyles = makeStyles({
     verticalAlign: 'middle !important',
   },
   formControl: {
-    margin: 4,
     width: '100%',
   },
   addButton: {
@@ -98,7 +95,6 @@ const Algorithm = props => {
                 value={props.algorithmName}
                 onChange={onAlgorithmNameChange}
                 label="Algorithm Name"
-                className={classes.select}
               >
                 {props.allAlgorithms.map((algorithm, i) => {
                   return (

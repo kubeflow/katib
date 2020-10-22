@@ -28,38 +28,13 @@ const styles = theme => ({
   },
   submit: {
     textAlign: 'center',
-    marginTop: 10,
-  },
-  textField: {
-    marginLeft: 4,
-    marginRight: 4,
-    width: '100%',
-  },
-  help: {
-    padding: 4 / 2,
-    verticalAlign: 'middle',
-  },
-  section: {
-    padding: 4,
-  },
-  parameter: {
-    padding: 2,
-  },
-  formControl: {
-    margin: 4,
-    width: '100%',
-  },
-  selectEmpty: {
-    marginTop: 10,
-  },
-  button: {
-    margin: 10,
+    margin: 20,
   },
 });
 
-const SectionInTypography = (name, classes) => {
+const SectionInTypography = name => {
   return (
-    <div className={classes.section}>
+    <div>
       <Grid container>
         <Grid item xs={12} sm={12}>
           <Typography variant="h6">{name}</Typography>
@@ -107,16 +82,31 @@ const addParameter = (source, destination) => {
 const HPParameters = props => {
   const submitJob = () => {
     let data = {};
+
+    // Add metadata.
     data.metadata = {};
     deCapitalizeFirstLetterAndAppend(props.commonParametersMetadata, data.metadata);
+
+    // Add common parameters.
     data.spec = {};
     deCapitalizeFirstLetterAndAppend(props.commonParametersSpec, data.spec);
+
+    // Add objective.
     data.spec.objective = {};
     deCapitalizeFirstLetterAndAppend(props.objective, data.spec.objective);
+
+    // Add additional metrics.
     data.spec.objective.additionalMetricNames = props.additionalMetricNames.map(
       (metrics, i) => metrics.value,
     );
 
+    // Add metric strategies.
+    data.spec.objective.metricStrategies = props.metricStrategies.map(metric => ({
+      name: metric.name,
+      value: metric.strategy,
+    }));
+
+    // Add algorithm.
     data.spec.algorithm = {};
     data.spec.algorithm.algorithmName = props.algorithmName;
     data.spec.algorithm.algorithmSettings = [];
@@ -209,30 +199,25 @@ const HPParameters = props => {
   return (
     <div className={classes.root}>
       {/* Common Metadata */}
-      {SectionInTypography('Metadata', classes)}
+      {SectionInTypography('Metadata')}
       <br />
       <CommonParametersMeta />
-      {SectionInTypography('Common Parameters', classes)}
+      {SectionInTypography('Common Parameters')}
       <CommonParametersSpec />
-      {SectionInTypography('Objective', classes)}
+      {SectionInTypography('Objective')}
       <Objective />
-      {SectionInTypography('Algorithm', classes)}
+      {SectionInTypography('Algorithm')}
       <Algorithm />
 
-      {SectionInTypography('Parameters', classes)}
+      {SectionInTypography('Parameters')}
       <Parameters />
-      {SectionInTypography('Metrics Collector Spec', classes)}
+      {SectionInTypography('Metrics Collector Spec')}
       <MetricsCollectorSpec jobType={constants.EXPERIMENT_TYPE_HP} />
-      {SectionInTypography('Trial Template Spec', classes)}
+      {SectionInTypography('Trial Template Spec')}
       <TrialTemplate />
 
       <div className={classes.submit}>
-        <Button
-          variant="contained"
-          color={'primary'}
-          className={classes.button}
-          onClick={submitJob}
-        >
+        <Button variant="contained" color={'primary'} onClick={submitJob}>
           Deploy
         </Button>
       </div>
@@ -261,6 +246,7 @@ const mapStateToProps = state => {
     commonParametersSpec: state[constants.HP_CREATE_MODULE].commonParametersSpec,
     objective: state[constants.HP_CREATE_MODULE].objective,
     additionalMetricNames: state[constants.HP_CREATE_MODULE].additionalMetricNames,
+    metricStrategies: state[constants.HP_CREATE_MODULE].metricStrategies,
     algorithmName: state[constants.HP_CREATE_MODULE].algorithmName,
     algorithmSettings: state[constants.HP_CREATE_MODULE].algorithmSettings,
     parameters: state[constants.HP_CREATE_MODULE].parameters,
