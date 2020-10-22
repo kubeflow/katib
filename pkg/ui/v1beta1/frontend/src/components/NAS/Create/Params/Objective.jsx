@@ -47,6 +47,9 @@ const useStyles = makeStyles({
   selectBox: {
     width: 150,
   },
+  checkBox: {
+    textAlign: 'center',
+  },
 });
 
 const Objective = props => {
@@ -169,7 +172,7 @@ const Objective = props => {
         </Grid>
       </Grid>
       <Grid container alignItems={'center'} className={classes.parameter}>
-        <Grid item xs={12} sm={2}>
+        <Grid item sm={2}>
           <Typography variant={'subtitle1'}>
             <Tooltip title={'Strategy for extracting metrics to calculate objective'}>
               <HelpOutlineIcon className={classes.help} color={'primary'} />
@@ -177,9 +180,8 @@ const Objective = props => {
             MetricStrategies (optional)
           </Typography>
         </Grid>
-        <Grid item xs={12} sm={1}>
+        <Grid item sm={1} className={classes.checkBox}>
           <FormControlLabel
-            className={classes.checkBox}
             control={
               <Checkbox
                 checked={checkedSetStrategies}
@@ -191,7 +193,7 @@ const Objective = props => {
           />
         </Grid>
         {checkedSetStrategies && (
-          <Grid item xs={12} sm={9}>
+          <Grid item sm={9}>
             {props.metricStrategies.map((metric, mIndex) => {
               return (
                 <Grid container key={mIndex} className={classes.parameter}>
