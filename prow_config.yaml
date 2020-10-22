@@ -47,6 +47,7 @@ workflows:
       - prow_config.yaml
     params:
       registry: 527798164940.dkr.ecr.us-west-2.amazonaws.com
+  # TODO (andreyvelich): Disable until AWS release infra is ready.
   # - app_dir: kubeflow/katib/test/workflows
   #   component: workflows-v1beta1
   #   name: e2e-v1beta1

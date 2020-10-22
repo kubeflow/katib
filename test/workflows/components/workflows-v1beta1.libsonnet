@@ -75,10 +75,11 @@
           name;
       {
         // Build an Argo template to execute a particular command.
-        // step_name: Name for the template
+        // step_name: Name for the template.
         // command: List to pass as the container command.
         buildTemplate(step_name, image, command):: {
           name: step_name,
+          // Each container can be alive for 40 minutes.
           activeDeadlineSeconds: 2400,
           retryStrategy: {
             limit: 3,
@@ -504,6 +505,7 @@
               "test/scripts/v1beta1/run-e2e-experiment.sh",
               "examples/v1beta1/resume-experiment/from-volume-resume.yaml",
             ]),  // run from volume resume example
+            // TODO (andreyvelich): Temporary disable pr-symlink
             // $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
             //   "python",
             //   "-m",
