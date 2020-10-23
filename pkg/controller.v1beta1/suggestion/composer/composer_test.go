@@ -42,10 +42,10 @@ var (
 	cfg     *rest.Config
 	timeout = time.Second * 40
 
-	suggestionName          = "test-suggestion"
-	suggestionAlgorithm     = "random"
-	suggestionEarlyStopping = "median-stop"
-	suggestionLabels        = map[string]string{
+	suggestionName         = "test-suggestion"
+	suggestionAlgorithm    = "random"
+	earlyStoppingAlgorithm = "median-stop"
+	suggestionLabels       = map[string]string{
 		"custom-label": "test",
 	}
 	suggestionAnnotations = map[string]string{
@@ -134,13 +134,13 @@ func TestDesiredDeployment(t *testing.T) {
 	}{
 		{
 			suggestion:      newFakeSuggestion(),
-			configMap:       newFakeKatibConfig(newFakeSuggestionConfig()),
+			configMap:       newFakeKatibConfig(newFakeSuggestionConfig(), newFakeEarlyStoppingConfig()),
 			err:             true,
 			testDescription: "Set controller reference error",
 		},
 		{
 			suggestion:         newFakeSuggestion(),
-			configMap:          newFakeKatibConfig(newFakeSuggestionConfig()),
+			configMap:          newFakeKatibConfig(newFakeSuggestionConfig(), newFakeEarlyStoppingConfig()),
 			expectedDeployment: newFakeDeployment(),
 			err:                false,
 			testDescription:    "Desired Deployment valid run",
@@ -148,7 +148,7 @@ func TestDesiredDeployment(t *testing.T) {
 		{
 			suggestion: newFakeSuggestion(),
 			configMap: func() *corev1.ConfigMap {
-				cm := newFakeKatibConfig(newFakeSuggestionConfig())
+				cm := newFakeKatibConfig(newFakeSuggestionConfig(), newFakeEarlyStoppingConfig())
 				cm.Data["suggestion"] = strings.ReplaceAll(cm.Data["suggestion"], string(imagePullPolicy), "invalid")
 				return cm
 			}(),
@@ -163,7 +163,7 @@ func TestDesiredDeployment(t *testing.T) {
 		{
 			suggestion: newFakeSuggestion(),
 			configMap: func() *corev1.ConfigMap {
-				cm := newFakeKatibConfig(newFakeSuggestionConfig())
+				cm := newFakeKatibConfig(newFakeSuggestionConfig(), newFakeEarlyStoppingConfig())
 				cm.Data["suggestion"] = strings.ReplaceAll(cm.Data["suggestion"], cpu, "invalid")
 				return cm
 			}(),
@@ -175,7 +175,7 @@ func TestDesiredDeployment(t *testing.T) {
 			configMap: func() *corev1.ConfigMap {
 				sc := newFakeSuggestionConfig()
 				sc.VolumeMountPath = "/custom/container/path"
-				cm := newFakeKatibConfig(sc)
+				cm := newFakeKatibConfig(sc, newFakeEarlyStoppingConfig())
 				return cm
 			}(),
 			expectedDeployment: func() *appsv1.Deployment {
@@ -191,7 +191,7 @@ func TestDesiredDeployment(t *testing.T) {
 			configMap: func() *corev1.ConfigMap {
 				sc := newFakeSuggestionConfig()
 				sc.ServiceAccountName = ""
-				cm := newFakeKatibConfig(sc)
+				cm := newFakeKatibConfig(sc, newFakeEarlyStoppingConfig())
 				return cm
 			}(),
 			expectedDeployment: func() *appsv1.Deployment {
@@ -201,6 +201,17 @@ func TestDesiredDeployment(t *testing.T) {
 			}(),
 			err:             false,
 			testDescription: "Desired Deployment valid run with default serviceAccount",
+		},
+		{
+			suggestion: newFakeSuggestion(),
+			configMap: func() *corev1.ConfigMap {
+				esC := newFakeEarlyStoppingConfig()
+				esC.Image = ""
+				cm := newFakeKatibConfig(newFakeSuggestionConfig(), esC)
+				return cm
+			}(),
+			err:             true,
+			testDescription: "Get early stopping config error, image is missed",
 		},
 	}
 
@@ -363,7 +374,7 @@ func TestDesiredVolume(t *testing.T) {
 	}{
 		{
 			suggestion:      newFakeSuggestion(),
-			configMap:       newFakeKatibConfig(newFakeSuggestionConfig()),
+			configMap:       newFakeKatibConfig(newFakeSuggestionConfig(), newFakeEarlyStoppingConfig()),
 			err:             true,
 			testDescription: "Set controller reference error",
 		},
@@ -374,7 +385,7 @@ func TestDesiredVolume(t *testing.T) {
 		},
 		{
 			suggestion:      newFakeSuggestion(),
-			configMap:       newFakeKatibConfig(newFakeSuggestionConfig()),
+			configMap:       newFakeKatibConfig(newFakeSuggestionConfig(), newFakeEarlyStoppingConfig()),
 			expectedPVC:     newFakePVC(),
 			expectedPV:      newFakePV(),
 			err:             false,
@@ -399,7 +410,7 @@ func TestDesiredVolume(t *testing.T) {
 						},
 					},
 				}
-				cm := newFakeKatibConfig(sc)
+				cm := newFakeKatibConfig(sc, newFakeEarlyStoppingConfig())
 				return cm
 			}(),
 			expectedPVC: func() *corev1.PersistentVolumeClaim {
@@ -445,7 +456,7 @@ func TestDesiredVolume(t *testing.T) {
 						corev1.ResourceStorage: volumeStorage,
 					},
 				}
-				cm := newFakeKatibConfig(sc)
+				cm := newFakeKatibConfig(sc, newFakeEarlyStoppingConfig())
 				return cm
 			}(),
 			expectedPVC: func() *corev1.PersistentVolumeClaim {
@@ -523,7 +534,6 @@ func TestDesiredVolume(t *testing.T) {
 			(tc.expectedPV != nil && !equality.Semantic.DeepEqual(tc.expectedPV.Spec, actualPV.Spec))) {
 			t.Errorf("Case: %v failed. \nExpected PVC spec %v\n Got %v.\nExpected PV spec %v\n Got %v",
 				tc.testDescription, tc.expectedPVC.Spec, actualPVC.Spec, tc.expectedPV, actualPV)
-
 		}
 
 		if tc.configMap != nil {
@@ -695,13 +705,26 @@ func newFakeSuggestionConfig() katibconfig.SuggestionConfig {
 	}
 }
 
-func newFakeKatibConfig(suggestionConfig katibconfig.SuggestionConfig) *corev1.ConfigMap {
+func newFakeEarlyStoppingConfig() katibconfig.EarlyStoppingConfig {
+	return katibconfig.EarlyStoppingConfig{
+		Image:           image,
+		ImagePullPolicy: imagePullPolicy,
+	}
+}
 
-	jsonConfig := map[string]katibconfig.SuggestionConfig{
-		"random": suggestionConfig,
+func newFakeKatibConfig(suggestionConfig katibconfig.SuggestionConfig, earlyStoppingConfig katibconfig.EarlyStoppingConfig) *corev1.ConfigMap {
+
+	jsonConfigSuggestion := map[string]katibconfig.SuggestionConfig{
+		suggestionAlgorithm: suggestionConfig,
 	}
 
-	b, _ := json.Marshal(jsonConfig)
+	bSuggestion, _ := json.Marshal(jsonConfigSuggestion)
+
+	jsonConfigEarlyStopping := map[string]katibconfig.EarlyStoppingConfig{
+		earlyStoppingAlgorithm: earlyStoppingConfig,
+	}
+
+	bEarlyStopping, _ := json.Marshal(jsonConfigEarlyStopping)
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -709,7 +732,8 @@ func newFakeKatibConfig(suggestionConfig katibconfig.SuggestionConfig) *corev1.C
 			Namespace: namespace,
 		},
 		Data: map[string]string{
-			"suggestion": string(b),
+			consts.LabelSuggestionTag:    string(bSuggestion),
+			consts.LabelEarlyStoppingTag: string(bEarlyStopping),
 		},
 	}
 }
@@ -725,7 +749,7 @@ func newFakeSuggestion() *suggestionsv1beta1.Suggestion {
 		Spec: suggestionsv1beta1.SuggestionSpec{
 			Requests:                   1,
 			AlgorithmName:              suggestionAlgorithm,
-			EarlyStoppingAlgorithmName: suggestionEarlyStopping,
+			EarlyStoppingAlgorithmName: earlyStoppingAlgorithm,
 			ResumePolicy:               experimentsv1beta1.FromVolume,
 		},
 	}
@@ -841,24 +865,12 @@ func newFakeContainers() []corev1.Container {
 		},
 		{
 			Name:            consts.ContainerEarlyStopping,
-			Image:           "docker.io/andreyvelichkevich/earlystopping-median",
-			ImagePullPolicy: corev1.PullAlways,
+			Image:           image,
+			ImagePullPolicy: imagePullPolicy,
 			Ports: []corev1.ContainerPort{
 				{
 					Name:          consts.DefaultEarlyStoppingPortName,
 					ContainerPort: consts.DefaultEarlyStoppingPort,
-				},
-			},
-			Resources: corev1.ResourceRequirements{
-				Limits: corev1.ResourceList{
-					corev1.ResourceCPU:              cpuQ,
-					corev1.ResourceMemory:           memoryQ,
-					corev1.ResourceEphemeralStorage: diskQ,
-				},
-				Requests: corev1.ResourceList{
-					corev1.ResourceCPU:              cpuQ,
-					corev1.ResourceMemory:           memoryQ,
-					corev1.ResourceEphemeralStorage: diskQ,
 				},
 			},
 		},
