@@ -1,0 +1,3 @@
+# This file configures the workflows to trigger in our Prow jobs.
+# see kubeflow/testing/py/run_e2e_workflow.py
+workflows:
