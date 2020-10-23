@@ -1,3 +1,10 @@
 # This file configures the workflows to trigger in our Prow jobs.
 # see kubeflow/testing/py/run_e2e_workflow.py
 workflows:
+  - app_dir: kubeflow/katib/test/workflows
+    component: workflows-v1alpha3
+    name: e2e-v1alpha3
+    job_types:
+      - presubmit
+    include_dirs:
+      - pkg/apis/controller/common/v1alpha3/*
