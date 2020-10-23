@@ -64,6 +64,15 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 		return nil, err
 	}
 
+	// If early stopping is used, get the config data.
+	earlyStoppingConfigData := katibconfig.EarlyStoppingConfig{}
+	if s.Spec.EarlyStoppingAlgorithmName != "" {
+		earlyStoppingConfigData, err = katibconfig.GetEarlyStoppingConfigData(s.Spec.EarlyStoppingAlgorithmName, g.Client)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	d := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        util.GetSuggestionDeploymentName(s),
@@ -81,7 +90,7 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 					Annotations: util.SuggestionAnnotations(s),
 				},
 				Spec: corev1.PodSpec{
-					Containers: g.desiredContainers(s, suggestionConfigData),
+					Containers: g.desiredContainers(s, suggestionConfigData, earlyStoppingConfigData),
 				},
 			},
 		},
@@ -157,7 +166,9 @@ func (g *General) DesiredService(s *suggestionsv1beta1.Suggestion) (*corev1.Serv
 	return service, nil
 }
 
-func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion, suggestionConfigData katibconfig.SuggestionConfig) []corev1.Container {
+func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
+	suggestionConfigData katibconfig.SuggestionConfig,
+	earlyStoppingConfigData katibconfig.EarlyStoppingConfig) []corev1.Container {
 
 	containers := []corev1.Container{}
 	suggestionContainer := corev1.Container{
@@ -215,20 +226,17 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion, suggestion
 	}
 	containers = append(containers, suggestionContainer)
 
-	// TODO (andreyvelich): Take parameters from the config
 	if s.Spec.EarlyStoppingAlgorithmName != "" {
 		earlyStoppingContainer := corev1.Container{
 			Name:            consts.ContainerEarlyStopping,
-			Image:           "docker.io/andreyvelichkevich/earlystopping-median",
-			ImagePullPolicy: "Always",
+			Image:           earlyStoppingConfigData.Image,
+			ImagePullPolicy: earlyStoppingConfigData.ImagePullPolicy,
 			Ports: []corev1.ContainerPort{
 				{
 					Name:          consts.DefaultEarlyStoppingPortName,
 					ContainerPort: consts.DefaultEarlyStoppingPort,
 				},
 			},
-			// TODO (andreyvelich): Change to Early Stopping
-			Resources: suggestionConfigData.Resource,
 		}
 
 		containers = append(containers, earlyStoppingContainer)
