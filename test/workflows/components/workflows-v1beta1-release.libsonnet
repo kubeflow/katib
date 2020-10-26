@@ -23,7 +23,7 @@
 
   // default parameters.
   defaultParams:: {
-    project:: "automl-ci",
+    project:: "kubeflow-ci",
     zone:: "us-east1-d",
     // Default registry to use.
     //registry:: "gcr.io/" + $.defaultParams.project,
@@ -212,10 +212,6 @@
                 }],
                 [
                   {
-                    name: "python-tests",
-                    template: "python-tests",
-                  },
-                  {
                     name: "build-suggestion-enas",
                     template: "build-suggestion-enas",
                   },
@@ -226,6 +222,14 @@
                   {
                     name: "build-katib-controller",
                     template: "build-katib-controller",
+                  },
+                  {
+                    name: "build-file-metrics-collector",
+                    template: "build-file-metrics-collector",
+                  },
+                  {
+                    name: "build-tfevent-metrics-collector",
+                    template: "build-tfevent-metrics-collector",
                   },
                   {
                     name: "build-suggestion-chocolate",
@@ -252,10 +256,6 @@
                     template: "build-suggestion-darts",
                   },
                   {
-                    name: "build-earlystopping-median",
-                    template: "build-earlystopping-median",
-                  },
-                  {
                     name: "build-ui",
                     template: "build-ui",
                   },
@@ -264,78 +264,11 @@
                     template: "create-pr-symlink",
                   },
                 ],
-                [
-                  {
-                    name: "setup-cluster",
-                    template: "setup-cluster",
-                  },
-                ],
-                [
-                  {
-                    name: "check-katib-ready",
-                    template: "check-katib-ready",
-                  },
-                ],
-                [
-                  {
-                    name: "run-random-e2e-tests",
-                    template: "run-random-e2e-tests",
-                  },
-                  {
-                    name: "run-grid-e2e-tests",
-                    template: "run-grid-e2e-tests",
-                  },
-                  {
-                    name: "run-file-metricscollector-e2e-tests",
-                    template: "run-file-metricscollector-e2e-tests",
-                  },
-                  {
-                    name: "run-custom-metricscollector-e2e-tests",
-                    template: "run-custom-metricscollector-e2e-tests",
-                  },
-                  {
-                    name: "run-bayesian-e2e-tests",
-                    template: "run-bayesian-e2e-tests",
-                  },
-                  {
-                    name: "run-enas-e2e-tests",
-                    template: "run-enas-e2e-tests",
-                  },
-                  {
-                    name: "run-hyperband-e2e-tests",
-                    template: "run-hyperband-e2e-tests",
-                  },
-                  {
-                    name: "run-tpe-e2e-tests",
-                    template: "run-tpe-e2e-tests",
-                  },
-                  {
-                    name: "run-tfjob-e2e-tests",
-                    template: "run-tfjob-e2e-tests",
-                  },
-                  {
-                    name: "run-pytorchjob-e2e-tests",
-                    template: "run-pytorchjob-e2e-tests",
-                  },
-                  {
-                    name: "run-cmaes-e2e-tests",
-                    template: "run-cmaes-e2e-tests",
-                  },
-                  {
-                    name: "run-never-resume-e2e-tests",
-                    template: "run-never-resume-e2e-tests",
-                  },
-                ],
               ],
             },
             {
               name: "exit-handler",
               steps: [
-                [{
-                  name: "teardown-cluster",
-                  template: "teardown-cluster",
-
-                }],
                 [{
                   name: "copy-artifacts",
                   template: "copy-artifacts",
@@ -362,51 +295,6 @@
                 ],
               },
             },  // checkout
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("setup-cluster",testWorkerImage, [
-              "test/scripts/v1alpha3/create-cluster.sh",
-            ]),  // setup cluster
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("python-tests", pythonImage, [
-              "test/scripts/v1alpha3/python-tests.sh",
-            ]),  // run python tests
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("check-katib-ready", testWorkerImage, [
-              "test/scripts/v1alpha3/check-katib-ready.sh",
-            ]),  // check katib readiness
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-random-e2e-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-suggestion-random.sh",
-            ]),  // run random algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tpe-e2e-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-suggestion-tpe.sh",
-            ]),  // run tpe algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tfjob-e2e-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-tfjob.sh",
-            ]),  // run tfjob
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-pytorchjob-e2e-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-pytorchjob.sh",
-            ]),  // run pytorchjob
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-hyperband-e2e-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-suggestion-hyperband.sh",
-            ]),  // run hyperband algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-grid-e2e-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-suggestion-grid.sh",
-            ]),  // run grid algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-enas-e2e-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-suggestion-enas.sh",
-            ]),  // run enas algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-bayesian-e2e-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-suggestion-bayesian.sh",
-            ]),  // run bayesian algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-file-metricscollector-e2e-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-file-metricscollector.sh",
-            ]),  // run file metrics collector test
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-custom-metricscollector-e2e-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-custom-metricscollector.sh",
-            ]),  // run custom metrics collector test
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-cmaes-e2e-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-suggestion-cmaes.sh",
-            ]),  // run cmaes algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-never-resume-e2e-tests", testWorkerImage, [
-              "test/scripts/v1alpha3/run-never-resume.sh",
-            ]),  // run never resume suggestion test
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
               "python",
               "-m",
@@ -415,9 +303,6 @@
               "create_pr_symlink",
               "--bucket=" + bucket,
             ]),  // create-pr-symlink
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("teardown-cluster",testWorkerImage, [
-              "test/scripts/v1alpha3/delete-cluster.sh",
-             ]),  // teardown cluster
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("copy-artifacts", testWorkerImage, [
               "python",
               "-m",
@@ -427,37 +312,40 @@
               "--bucket=" + bucket,
             ]),  // copy-artifacts
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-manager", testWorkerImage, [
-              "test/scripts/v1alpha3/build-manager.sh",
+              "test/scripts/v1beta1/build-manager.sh",
             ]),  // build-manager
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-katib-controller", testWorkerImage, [
-              "test/scripts/v1alpha3/build-katib-controller.sh",
+              "test/scripts/v1beta1/build-katib-controller.sh",
             ]),  // build-katib-controller
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-file-metrics-collector", testWorkerImage, [
+              "test/scripts/v1beta1/build-file-metrics-collector.sh",
+            ]),  // build-file-metrics-collector
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-tfevent-metrics-collector", testWorkerImage, [
+              "test/scripts/v1beta1/build-tfevent-metrics-collector.sh",
+            ]),  // build-tfevent-metrics-collector
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperband", testWorkerImage, [
-              "test/scripts/v1alpha3/build-suggestion-hyperband.sh",
+              "test/scripts/v1beta1/build-suggestion-hyperband.sh",
             ]),  // build-suggestion-hyperband
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperopt", testWorkerImage, [
-              "test/scripts/v1alpha3/build-suggestion-hyperopt.sh",
+              "test/scripts/v1beta1/build-suggestion-hyperopt.sh",
             ]),  // build-suggestion-hyperopt
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-skopt", testWorkerImage, [
-              "test/scripts/v1alpha3/build-suggestion-skopt.sh",
+              "test/scripts/v1beta1/build-suggestion-skopt.sh",
             ]),  // build-suggestion-skopt
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-chocolate", testWorkerImage, [
-              "test/scripts/v1alpha3/build-suggestion-chocolate.sh",
+              "test/scripts/v1beta1/build-suggestion-chocolate.sh",
             ]),  // build-suggestion-chocolate
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-enas", testWorkerImage, [
-              "test/scripts/v1alpha3/build-suggestion-enas.sh",
+              "test/scripts/v1beta1/build-suggestion-enas.sh",
             ]),  // build-suggestion-enas
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-goptuna", testWorkerImage, [
-              "test/scripts/v1alpha3/build-suggestion-goptuna.sh",
+              "test/scripts/v1beta1/build-suggestion-goptuna.sh",
             ]),  // build-suggestion-goptuna
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-darts", testWorkerImage, [
-              "test/scripts/v1alpha3/build-suggestion-darts.sh",
+              "test/scripts/v1beta1/build-suggestion-darts.sh",
             ]),  // build-suggestion-darts
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-earlystopping-median", testWorkerImage, [
-              "test/scripts/v1alpha3/build-earlystopping-median.sh",
-            ]),  // build-earlystopping-median
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-ui", testWorkerImage, [
-              "test/scripts/v1alpha3/build-ui.sh",
+              "test/scripts/v1beta1/build-ui.sh",
             ]),  // build-ui
           ],  // templates
         },
