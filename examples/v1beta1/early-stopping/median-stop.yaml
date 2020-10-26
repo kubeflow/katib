@@ -42,11 +42,7 @@ spec:
         max: "10"
   trialTemplate:
     retain: true
-    primaryPodLabels:
-      "pod-role": "primary"
     primaryContainerName: training-container
-    successCondition: status.conditions.#(type=="Complete")#|#(status=="True")#
-    failureCondition: status.conditions.#(type=="Failed")#|#(status=="True")#
     trialParameters:
       - name: learningRate
         description: Learning rate for the training model
@@ -59,9 +55,6 @@ spec:
       kind: Job
       spec:
         template:
-          metadata:
-            labels:
-              "pod-role": "primary"
           spec:
             containers:
               - name: training-container
