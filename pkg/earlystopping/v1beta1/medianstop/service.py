@@ -22,11 +22,11 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
 
     def __init__(self):
         super(MedianStopService, self).__init__()
-        # Assume that Trial namespace = Suggestion namespace
+        # Assume that Trial namespace = Suggestion namespace.
         try:
             with open('/var/run/secrets/kubernetes.io/serviceaccount/namespace', 'r') as f:
                 self.namespace = f.readline()
-                # Set config and api instance for k8s client
+                # Set config and api instance for k8s client.
                 config.load_incluster_config()
         # This is used when service is not running in k8s, e.g. for unit tests.
         except Exception as e:
@@ -34,7 +34,7 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
                 e, DEFAULT_NAMESPACE
             ))
             self.namespace = DEFAULT_NAMESPACE
-            # Set config and api instance for k8s client
+            # Set config and api instance for k8s client.
             config.load_kube_config()
 
         self.api_instance = client.CustomObjectsApi()
