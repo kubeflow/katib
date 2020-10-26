@@ -16,8 +16,8 @@ spec:
   earlyStopping:
     earlyStoppingAlgorithmName: medianstop
     earlyStoppingSettings:
-      - name: min_samples_required
-        value: "5"
+      - name: min_trials_required
+        value: "3"
   metricsCollectorSpec:
     collector:
       kind: StdOut
