@@ -2,20 +2,21 @@ package manifest
 
 import (
 	"errors"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"math"
 	"reflect"
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
-	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
-	katibclientmock "github.com/kubeflow/katib/pkg/mock/v1beta1/util/katibclient"
 	batchv1 "k8s.io/api/batch/v1"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
+	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
+	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
+	katibclientmock "github.com/kubeflow/katib/pkg/mock/v1beta1/util/katibclient"
 )
 
 func TestGetRunSpecWithHP(t *testing.T) {

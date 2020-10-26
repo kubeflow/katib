@@ -12,7 +12,6 @@ import (
 
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
-
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
 )
 

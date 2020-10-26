@@ -2,6 +2,7 @@ package pod
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 	"reflect"
 	"sync"
@@ -20,30 +21,50 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
+	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
 )
 
 func TestWrapWorkerContainer(t *testing.T) {
+	primaryContainer := "tensorflow"
+	trial := &trialsv1beta1.Trial{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "trial-name",
+			Namespace: "trial-namespace",
+		},
+		Spec: trialsv1beta1.TrialSpec{
+			MetricsCollector: common.MetricsCollectorSpec{
+				Collector: &common.CollectorSpec{
+					Kind: common.StdOutCollector,
+				},
+			},
+			PrimaryContainerName: primaryContainer,
+			PrimaryPodLabels:     experimentsv1beta1.DefaultKubeflowJobPrimaryPodLabels,
+			SuccessCondition:     experimentsv1beta1.DefaultKubeflowJobSuccessCondition,
+			FailureCondition:     experimentsv1beta1.DefaultKubeflowJobFailureCondition,
+		},
+	}
+
+	metricsFile := "metric.log"
+
 	testCases := []struct {
-		Pod         *v1.Pod
-		Namespace   string
-		JobKind     string
-		MetricsFile string
-		PathKind    common.FileSystemKind
-		Trial       *trialsv1beta1.Trial
-		Expected    *v1.Pod
-		Err         bool
-		Name        string
+		Trial           *trialsv1beta1.Trial
+		Pod             *v1.Pod
+		MetricsFile     string
+		PathKind        common.FileSystemKind
+		ExpectedPod     *v1.Pod
+		Err             bool
+		TestDescription string
 	}{
 		{
+			Trial: trial,
 			Pod: &v1.Pod{
 				Spec: v1.PodSpec{
 					Containers: []v1.Container{
 						{
-							Name: "tensorflow",
+							Name: primaryContainer,
 							Command: []string{
 								"python main.py",
 							},
@@ -51,43 +72,33 @@ func TestWrapWorkerContainer(t *testing.T) {
 					},
 				},
 			},
-			Namespace:   "nohere",
-			JobKind:     "TFJob",
-			MetricsFile: "testfile",
+			MetricsFile: metricsFile,
 			PathKind:    common.FileKind,
-			Trial: &trialsv1beta1.Trial{
-				Spec: trialsv1beta1.TrialSpec{
-					MetricsCollector: common.MetricsCollectorSpec{
-						Collector: &common.CollectorSpec{
-							Kind: common.StdOutCollector,
-						},
-					},
-				},
-			},
-			Expected: &v1.Pod{
+			ExpectedPod: &v1.Pod{
 				Spec: v1.PodSpec{
 					Containers: []v1.Container{
 						{
-							Name: "tensorflow",
+							Name: primaryContainer,
 							Command: []string{
 								"sh", "-c",
 							},
 							Args: []string{
-								"python main.py 1>testfile 2>&1 && echo completed > $$$$.pid",
+								fmt.Sprintf("python main.py 1>%v 2>&1 && echo completed > $$$$.pid", metricsFile),
 							},
 						},
 					},
 				},
 			},
-			Err:  false,
-			Name: "tensorflow container without sh -c",
+			Err:             false,
+			TestDescription: "Tensorflow container without sh -c",
 		},
 		{
+			Trial: trial,
 			Pod: &v1.Pod{
 				Spec: v1.PodSpec{
 					Containers: []v1.Container{
 						{
-							Name: "tensorflow",
+							Name: primaryContainer,
 							Command: []string{
 								"sh", "-c",
 								"python main.py",
@@ -96,96 +107,28 @@ func TestWrapWorkerContainer(t *testing.T) {
 					},
 				},
 			},
-			Namespace:   "nohere",
-			JobKind:     "TFJob",
-			MetricsFile: "testfile",
+			MetricsFile: metricsFile,
 			PathKind:    common.FileKind,
-			Trial: &trialsv1beta1.Trial{
-				Spec: trialsv1beta1.TrialSpec{
-					MetricsCollector: common.MetricsCollectorSpec{
-						Collector: &common.CollectorSpec{
-							Kind: common.StdOutCollector,
-						},
-					},
-				},
-			},
-			Expected: &v1.Pod{
+			ExpectedPod: &v1.Pod{
 				Spec: v1.PodSpec{
 					Containers: []v1.Container{
 						{
-							Name: "tensorflow",
+							Name: primaryContainer,
 							Command: []string{
 								"sh", "-c",
 							},
 							Args: []string{
-								"python main.py 1>testfile 2>&1 && echo completed > $$$$.pid",
+								fmt.Sprintf("python main.py 1>%v 2>&1 && echo completed > $$$$.pid", metricsFile),
 							},
 						},
 					},
 				},
 			},
-			Err:  false,
-			Name: "tensorflow container with sh -c",
+			Err:             false,
+			TestDescription: "Tensorflow container with sh -c",
 		},
 		{
-			Pod: &v1.Pod{
-				Spec: v1.PodSpec{
-					Containers: []v1.Container{
-						{
-							Name: "primary-container",
-							Command: []string{
-								"sh", "-c",
-								"python main.py",
-							},
-						},
-						{
-							Name: "not-primary-container",
-							Command: []string{
-								"sh", "-c",
-								"python main.py",
-							},
-						},
-					},
-				},
-			},
-			MetricsFile: "testfile",
-			PathKind:    common.FileKind,
-			Trial: &trialsv1beta1.Trial{
-				Spec: trialsv1beta1.TrialSpec{
-					PrimaryContainerName: "primary-container",
-					MetricsCollector: common.MetricsCollectorSpec{
-						Collector: &common.CollectorSpec{
-							Kind: common.StdOutCollector,
-						},
-					},
-				},
-			},
-			Expected: &v1.Pod{
-				Spec: v1.PodSpec{
-					Containers: []v1.Container{
-						{
-							Name: "primary-container",
-							Command: []string{
-								"sh", "-c",
-							},
-							Args: []string{
-								"python main.py 1>testfile 2>&1 && echo completed > $$$$.pid",
-							},
-						},
-						{
-							Name: "not-primary-container",
-							Command: []string{
-								"sh", "-c",
-								"python main.py",
-							},
-						},
-					},
-				},
-			},
-			Err:  false,
-			Name: "Primary container name is set for training pod",
-		},
-		{
+			Trial: trial,
 			Pod: &v1.Pod{
 				Spec: v1.PodSpec{
 					Containers: []v1.Container{
@@ -195,30 +138,24 @@ func TestWrapWorkerContainer(t *testing.T) {
 					},
 				},
 			},
-			PathKind: common.FileKind,
-			Trial: &trialsv1beta1.Trial{
-				Spec: trialsv1beta1.TrialSpec{
-					PrimaryContainerName: "primary-container",
-				},
-			},
-			Err:  true,
-			Name: "Training pod doesn't have primary container name",
+			PathKind:        common.FileKind,
+			Err:             true,
+			TestDescription: "Training pod doesn't have primary container",
 		},
 	}
 
 	for _, c := range testCases {
-		err := wrapWorkerContainer(c.Pod, c.Namespace, c.JobKind, c.MetricsFile, c.PathKind, c.Trial)
+		err := wrapWorkerContainer(c.Trial, c.Pod, c.Trial.Namespace, c.MetricsFile, c.PathKind)
 		if c.Err && err == nil {
-			t.Errorf("Case %s failed. Expected error, got nil", c.Name)
+			t.Errorf("Case %s failed. Expected error, got nil", c.TestDescription)
 		} else if !c.Err {
 			if err != nil {
-				t.Errorf("Case %s failed. Expected nil, got error: %v", c.Name, err)
-			} else if !equality.Semantic.DeepEqual(c.Pod.Spec.Containers, c.Expected.Spec.Containers) {
+				t.Errorf("Case %s failed. Expected nil, got error: %v", c.TestDescription, err)
+			} else if !equality.Semantic.DeepEqual(c.Pod.Spec.Containers, c.ExpectedPod.Spec.Containers) {
 				t.Errorf("Case %s failed. Expected pod: %v, got: %v",
-					c.Name, c.Expected.Spec.Containers, c.Pod.Spec.Containers)
+					c.TestDescription, c.ExpectedPod.Spec.Containers, c.Pod.Spec.Containers)
 			}
 		}
-
 	}
 }
 
@@ -227,6 +164,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 	testMetricName := "accuracy"
 	katibDBAddress := "katib-db-manager.kubeflow:6789"
 	testPath := "/test/path"
+
 	testCases := []struct {
 		TrialName    string
 		MetricName   string
@@ -452,7 +390,6 @@ func TestMutateVolume(t *testing.T) {
 				},
 			},
 		},
-		JobKind:              "Job",
 		MountPath:            common.DefaultFilePath,
 		SidecarContainerName: "metrics-collector",
 		PrimaryContainerName: "train-job",
@@ -461,7 +398,6 @@ func TestMutateVolume(t *testing.T) {
 
 	err := mutateVolume(
 		&tc.Pod,
-		tc.JobKind,
 		tc.MountPath,
 		tc.SidecarContainerName,
 		tc.PrimaryContainerName,
@@ -750,52 +686,6 @@ func TestGetKatibJob(t *testing.T) {
 				tc.TestDescription, tc.ExpectedJobKind, jobKind, tc.ExpectedJobName, jobName)
 		} else if tc.Err && err == nil {
 			t.Errorf("Expected error got nil")
-		}
-	}
-}
-
-func TestIsMasterRole(t *testing.T) {
-	masterRoleLabel := make(map[string]string)
-	masterRoleLabel[consts.JobRole] = MasterRole
-	invalidLabel := make(map[string]string)
-	invalidLabel["invalid-label"] = "invalid"
-	testCases := []struct {
-		Pod      v1.Pod
-		JobKind  string
-		IsMaster bool
-		Name     string
-	}{
-		{
-			JobKind:  "Job",
-			IsMaster: true,
-			Name:     "Kubernetes Batch Job Pod",
-		},
-		{
-			Pod: v1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: masterRoleLabel,
-				},
-			},
-			JobKind:  "PyTorchJob",
-			IsMaster: true,
-			Name:     "Pytorch Master Pod",
-		},
-		{
-			Pod: v1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: invalidLabel,
-				},
-			},
-			JobKind:  "PyTorchJob",
-			IsMaster: false,
-			Name:     "Pytorch Pod with invalid label",
-		},
-	}
-
-	for _, tc := range testCases {
-		isMaster := isMasterRole(&tc.Pod, tc.JobKind)
-		if isMaster != tc.IsMaster {
-			t.Errorf("Case %v. Expected isMaster %v, got %v", tc.Name, tc.IsMaster, isMaster)
 		}
 	}
 }

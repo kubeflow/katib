@@ -110,11 +110,6 @@ const (
 	// JobKindPyTorch is the kind of PyTorchJob.
 	JobKindPyTorch = "PyTorchJob"
 
-	// built-in JobRoles
-	JobRole        = "job-role"
-	JobRoleTF      = "tf-job-role"
-	JobRolePyTorch = "pytorch-job-role"
-
 	// AnnotationIstioSidecarInjectName is the annotation of Istio Sidecar
 	AnnotationIstioSidecarInjectName = "sidecar.istio.io/inject"
 

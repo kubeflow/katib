@@ -24,7 +24,6 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/manifest"
 	experimentutil "github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/util"
 	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
-	jobv1beta1 "github.com/kubeflow/katib/pkg/job/v1beta1"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
 )
 
@@ -201,6 +200,16 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 
 	trialTemplate := instance.Spec.TrialTemplate
 
+	// Check if PrimaryContainerName is set
+	if trialTemplate.PrimaryContainerName == "" {
+		return fmt.Errorf("spec.trialTemplate.primaryContainerName must be specified")
+	}
+
+	// Check if SuccessCondition and FailureCondition is set
+	if trialTemplate.SuccessCondition == "" || trialTemplate.FailureCondition == "" {
+		return fmt.Errorf("spec.trialTemplate.successCondition and spec.trialTemplate.failureCondition must be specified")
+	}
+
 	// Check if trialParameters exists
 	if trialTemplate.TrialParameters == nil {
 		return fmt.Errorf("spec.trialTemplate.trialParameters must be specified")
@@ -282,60 +291,57 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 		return fmt.Errorf("APIVersion and Kind in spec.trialTemplate must be specified")
 	}
 
-	// Check if Job is supported
 	// Check if Job can be converted to Batch Job/TFJob/PyTorchJob
-	// Other jobs are not validated
-	if err := g.validateSupportedJob(runSpec); err != nil {
+	// Other CRDs are not validated
+	if err := g.validateTrialJob(runSpec); err != nil {
 		return fmt.Errorf("Invalid spec.trialTemplate: %v", err)
 	}
 
 	return nil
 }
 
-func (g *DefaultValidator) validateSupportedJob(runSpec *unstructured.Unstructured) error {
+func (g *DefaultValidator) validateTrialJob(runSpec *unstructured.Unstructured) error {
 	gvk := runSpec.GroupVersionKind()
-	supportedJobs := jobv1beta1.SupportedJobList
-	for _, sJob := range supportedJobs {
-		if gvk == sJob {
-			switch gvk.Kind {
-			case consts.JobKindJob:
-				batchJob := batchv1.Job{}
 
-				// Validate that RunSpec can be converted to Batch Job
-				err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &batchJob)
-				if err != nil {
-					return fmt.Errorf("Unable to convert spec.TrialTemplate: %v to %v: %v", runSpec.Object, gvk.Kind, err)
-				}
+	// Validate only Job, TFJob and PyTorchJob
+	switch gvk.Kind {
+	case consts.JobKindJob:
+		batchJob := batchv1.Job{}
 
-				err = validatePatchJob(runSpec, batchJob, gvk.Kind)
-				if err != nil {
-					return err
-				}
-			case consts.JobKindTF:
-				tfJob := &tfv1.TFJob{}
-				err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &tfJob)
-				if err != nil {
-					return fmt.Errorf("Unable to convert spec.TrialTemplate to %v: %v", gvk.Kind, err)
-				}
-				err = validatePatchJob(runSpec, tfJob, gvk.Kind)
-				if err != nil {
-					return err
-				}
-			case consts.JobKindPyTorch:
-				pytorchJob := &pytorchv1.PyTorchJob{}
-				err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &pytorchJob)
-				if err != nil {
-					return fmt.Errorf("Unable to convert spec.TrialTemplate to %v: %v", gvk.Kind, err)
-				}
-				err = validatePatchJob(runSpec, pytorchJob, gvk.Kind)
-				if err != nil {
-					return err
-				}
-
-			}
-			return nil
+		// Validate that RunSpec can be converted to Batch Job
+		err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &batchJob)
+		if err != nil {
+			return fmt.Errorf("Unable to convert spec.TrialTemplate: %v to %v: %v", runSpec.Object, gvk.Kind, err)
 		}
+
+		// Try to patch runSpec to Batch Job
+		err = validatePatchJob(runSpec, batchJob, gvk.Kind)
+		if err != nil {
+			return err
+		}
+	case consts.JobKindTF:
+		tfJob := &tfv1.TFJob{}
+		err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &tfJob)
+		if err != nil {
+			return fmt.Errorf("Unable to convert spec.TrialTemplate: %v to %v: %v", runSpec.Object, gvk.Kind, err)
+		}
+		err = validatePatchJob(runSpec, tfJob, gvk.Kind)
+		if err != nil {
+			return err
+		}
+	case consts.JobKindPyTorch:
+		pyTorchJob := &pytorchv1.PyTorchJob{}
+		err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &pyTorchJob)
+		if err != nil {
+			return fmt.Errorf("Unable to convert spec.TrialTemplate: %v to %v: %v", runSpec.Object, gvk.Kind, err)
+		}
+		err = validatePatchJob(runSpec, pyTorchJob, gvk.Kind)
+		if err != nil {
+			return err
+		}
+
 	}
+
 	return nil
 }
 

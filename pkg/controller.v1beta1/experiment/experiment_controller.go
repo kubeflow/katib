@@ -240,7 +240,7 @@ func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Re
 		if err != nil {
 			logger.Error(err, "Reconcile experiment error")
 			r.recorder.Eventf(instance,
-				corev1.EventTypeWarning, ReconcileFailedReason,
+				corev1.EventTypeWarning, consts.ReconcileErrorReason,
 				"Failed to reconcile: %v", err)
 			return reconcile.Result{}, err
 		}

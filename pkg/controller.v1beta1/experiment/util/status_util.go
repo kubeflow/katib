@@ -38,7 +38,6 @@ const (
 	ExperimentMaxTrialsReachedReason     = "ExperimentMaxTrialsReached"
 	ExperimentSuggestionEndReachedReason = "ExperimentSuggestionEndReached"
 	ExperimentFailedReason               = "ExperimentFailed"
-	ExperimentKilledReason               = "ExperimentKilled"
 )
 
 func UpdateExperimentStatus(collector *ExperimentsCollector, instance *experimentsv1beta1.Experiment, trials *trialsv1beta1.TrialList) error {

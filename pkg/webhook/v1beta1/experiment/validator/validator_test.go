@@ -560,7 +560,28 @@ spec:
 			Err:             false,
 			testDescription: "Trial template has custom Kind",
 		},
+		// Trial Template doesn't have PrimaryContainerName
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.PrimaryContainerName = ""
+				return i
+			}(),
+			Err:             true,
+			testDescription: "Trial template doesn't have PrimaryContainerName",
+		},
+		// Trial Template doesn't have SuccessCondition
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.SuccessCondition = ""
+				return i
+			}(),
+			Err:             true,
+			testDescription: "Trial template doesn't have SuccessCondition",
+		},
 	}
+
 	for _, tc := range tcs {
 		err := g.(*DefaultValidator).validateTrialTemplate(tc.Instance)
 		if !tc.Err && err != nil {
@@ -571,7 +592,7 @@ spec:
 	}
 }
 
-func TestValidateSupportedJob(t *testing.T) {
+func TestValidateTrialJob(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -729,7 +750,7 @@ spec:
 	}
 
 	for _, tc := range tcs {
-		err := g.(*DefaultValidator).validateSupportedJob(tc.RunSpec)
+		err := g.(*DefaultValidator).validateTrialJob(tc.RunSpec)
 		if !tc.Err && err != nil {
 			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
 		} else if tc.Err && err == nil {
@@ -1117,6 +1138,9 @@ func newFakeTrialTemplate(trialJob interface{}, trialParameters []experimentsv1b
 	}
 
 	return &experimentsv1beta1.TrialTemplate{
+		PrimaryContainerName: "training-container",
+		SuccessCondition:     experimentsv1beta1.DefaultKubeflowJobSuccessCondition,
+		FailureCondition:     experimentsv1beta1.DefaultKubeflowJobFailureCondition,
 		TrialSource: experimentsv1beta1.TrialSource{
 			TrialSpec: trialSpec,
 		},

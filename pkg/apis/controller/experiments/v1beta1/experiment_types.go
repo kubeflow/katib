@@ -208,7 +208,8 @@ type TrialTemplate struct {
 	// List of parameters that are used in trial template
 	TrialParameters []TrialParameterSpec `json:"trialParameters,omitempty"`
 
-	// Labels that determines if pod needs to be injected by Katib sidecar container
+	// Labels that determines if pod needs to be injected by Katib sidecar container.
+	// If PrimaryPodLabels is omitted, metrics collector wraps all Trial's pods.
 	PrimaryPodLabels map[string]string `json:"primaryPodLabels,omitempty"`
 
 	// Name of training container where actual model training is running

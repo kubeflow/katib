@@ -111,14 +111,14 @@ func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 		return false, err
 	}
 
-	// Try to get Katib job kind and job name from mutating pod
-	jobKind, jobName, err := s.getKatibJob(object, ns)
+	// Try to get Katib Job name from mutating pod
+	_, jobName, err := s.getKatibJob(object, ns)
 	if err != nil {
 		return false, nil
 	}
 
 	trial := &trialsv1beta1.Trial{}
-	// jobName and Trial name is equal
+	// Job name and Trial name is equal
 	if err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: jobName, Namespace: ns}, trial); err != nil {
 		return false, err
 	}
@@ -127,11 +127,6 @@ func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 	// Otherwise mutate pod only with appropriate labels
 	if trial.Spec.PrimaryPodLabels != nil {
 		if !isPrimaryPod(pod.Labels, trial.Spec.PrimaryPodLabels) {
-			return false, nil
-		}
-	} else {
-		// TODO (andreyvelich): This can be deleted after switch to custom CRD
-		if !isMasterRole(pod, jobKind) {
 			return false, nil
 		}
 	}
@@ -151,7 +146,7 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	}
 
 	// Try to get Katib job kind and job name from mutating pod
-	jobKind, jobName, _ := s.getKatibJob(object, namespace)
+	_, jobName, _ := s.getKatibJob(object, namespace)
 
 	trial := &trialsv1beta1.Trial{}
 	// jobName and Trial name is equal
@@ -169,12 +164,12 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 
 	mountPath, pathKind := getMountPath(trial.Spec.MetricsCollector)
 	if mountPath != "" {
-		if err = mutateVolume(mutatedPod, jobKind, mountPath, injectContainer.Name, trial.Spec.PrimaryContainerName, pathKind); err != nil {
+		if err = mutateVolume(mutatedPod, mountPath, injectContainer.Name, trial.Spec.PrimaryContainerName, pathKind); err != nil {
 			return nil, err
 		}
 	}
 	if needWrapWorkerContainer(trial.Spec.MetricsCollector) {
-		if err = wrapWorkerContainer(mutatedPod, namespace, jobKind, mountPath, pathKind, trial); err != nil {
+		if err = wrapWorkerContainer(trial, mutatedPod, namespace, mountPath, pathKind); err != nil {
 			return nil, err
 		}
 	}

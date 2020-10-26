@@ -1,19 +1,20 @@
 package trial
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
+	kubeflowcommonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 	"github.com/onsi/gomega"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
-
-	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -21,22 +22,22 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
+	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
 	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	managerclientmock "github.com/kubeflow/katib/pkg/mock/v1beta1/trial/managerclient"
-	kubeflowcommonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
 )
 
 const (
-	namespace    = "default"
-	trialName    = "test-trial"
-	tfJobName    = "test-tfjob"
-	batchJobName = "test-job"
-
-	timeout = time.Second * 40
+	namespace       = "default"
+	trialName       = "test-trial"
+	tfJobName       = "test-tfjob"
+	batchJobName    = "test-job"
+	objectiveMetric = "accuracy"
+	timeout         = time.Second * 40
 )
 
 var trialKey = types.NamespacedName{Name: trialName, Namespace: namespace}
@@ -52,7 +53,8 @@ func TestAdd(t *testing.T) {
 	mgr, err := manager.New(cfg, manager.Options{})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	// Set fake trial resources
+	// Set Trial resources.
+	// TFJob controller is installed, MPIJob controller is missed.
 	trialResources := trialutil.GvkListFlag{
 		{
 			Group:   "kubeflow.org",
@@ -106,6 +108,18 @@ func TestReconcileTFJob(t *testing.T) {
 	}
 
 	recFn := SetupTestReconcile(r)
+
+	// Set TFJob resource
+	trialResources := trialutil.GvkListFlag{
+		{
+			Group:   "kubeflow.org",
+			Version: "v1",
+			Kind:    "TFJob",
+		},
+	}
+
+	viper.Set(consts.ConfigTrialResources, trialResources)
+
 	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
 
 	stopMgr, mgrStopped := StartTestManager(mgr, g)
@@ -115,10 +129,19 @@ func TestReconcileTFJob(t *testing.T) {
 		mgrStopped.Wait()
 	}()
 
-	// Empty result for GetTrialObservationLog
+	// Empty result for GetTrialObservationLog.
+	// If objective metrics are not parsed, metrics collector reports "unavailable" value to DB.
 	observationLog := &api_pb.GetObservationLogReply{
 		ObservationLog: &api_pb.ObservationLog{
-			MetricLogs: []*api_pb.MetricLog{},
+			MetricLogs: []*api_pb.MetricLog{
+				{
+					Metric: &api_pb.Metric{
+						Name:  objectiveMetric,
+						Value: consts.UnavailableMetricValue,
+					},
+					TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
+				},
+			},
 		},
 	}
 
@@ -126,7 +149,7 @@ func TestReconcileTFJob(t *testing.T) {
 	mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil).AnyTimes()
 
 	// Test - Regural Trial run with TFJob
-	trial := newFakeTrial(newFakeTFJob())
+	trial := newFakeTrialTFJob()
 	tfJob := &tfv1.TFJob{}
 
 	// Create the Trial
@@ -146,6 +169,8 @@ func TestReconcileTFJob(t *testing.T) {
 	// Manually update TFJob status to succeeded
 	// Expect that Trial succeeded status is false with metrics unavailable reason
 	// Metrics unavailable because GetTrialObservationLog returns nil
+	SucceededReason := "TFJob succeeded test reason"
+	SucceededMessage := "TFJob succeeded test message"
 	g.Eventually(func() bool {
 		c.Get(context.TODO(), tfJobKey, tfJob)
 		tfJob.Status = kubeflowcommonv1.JobStatus{
@@ -153,8 +178,8 @@ func TestReconcileTFJob(t *testing.T) {
 				{
 					Type:    kubeflowcommonv1.JobSucceeded,
 					Status:  corev1.ConditionTrue,
-					Message: "TFJob succeeded test message",
-					Reason:  "TFJob succeeded test reason",
+					Message: SucceededMessage,
+					Reason:  SucceededReason,
 				},
 			},
 		}
@@ -164,7 +189,9 @@ func TestReconcileTFJob(t *testing.T) {
 		c.Get(context.TODO(), trialKey, trial)
 		isConditionCorrect := false
 		for _, cond := range trial.Status.Conditions {
-			if cond.Type == trialsv1beta1.TrialSucceeded && cond.Status == corev1.ConditionFalse && cond.Reason == TrialMetricsUnavailableReason {
+			if cond.Type == trialsv1beta1.TrialSucceeded && cond.Status == corev1.ConditionFalse &&
+				cond.Reason == fmt.Sprintf("%v. Job reason: %v", TrialMetricsUnavailableReason, SucceededReason) &&
+				cond.Message == fmt.Sprintf("Metrics are not available. Job message: %v", SucceededMessage) {
 				isConditionCorrect = true
 			}
 		}
@@ -215,6 +242,16 @@ func TestReconcileBatchJob(t *testing.T) {
 	}
 
 	recFn := SetupTestReconcile(r)
+	// Set Job resource
+	trialResources := trialutil.GvkListFlag{
+		{
+			Group:   "batch",
+			Version: "v1",
+			Kind:    "Job",
+		},
+	}
+
+	viper.Set(consts.ConfigTrialResources, trialResources)
 	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
 
 	stopMgr, mgrStopped := StartTestManager(mgr, g)
@@ -231,14 +268,14 @@ func TestReconcileBatchJob(t *testing.T) {
 				{
 					TimeStamp: "2020-08-10T14:47:38+08:00",
 					Metric: &api_pb.Metric{
-						Name:  "accuracy",
+						Name:  objectiveMetric,
 						Value: "0.99",
 					},
 				},
 				{
 					TimeStamp: "2020-08-10T14:50:38+08:00",
 					Metric: &api_pb.Metric{
-						Name:  "accuracy",
+						Name:  objectiveMetric,
 						Value: "0.11",
 					},
 				},
@@ -250,7 +287,7 @@ func TestReconcileBatchJob(t *testing.T) {
 	mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil).AnyTimes()
 
 	// Test 1 - Regural Trial run with BatchJob
-	trial := newFakeTrial(newFakeBatchJob())
+	trial := newFakeTrialBatchJob()
 	batchJob := &batchv1.Job{}
 
 	// Create the Trial
@@ -311,11 +348,11 @@ func TestReconcileBatchJob(t *testing.T) {
 	g.Expect(c.Status().Update(context.TODO(), batchJob)).NotTo(gomega.HaveOccurred())
 
 	// Create the Trial
-	trial = newFakeTrial(newFakeBatchJob())
+	trial = newFakeTrialBatchJob()
 	g.Expect(c.Create(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
 
 	// Expect that Trial status is succeeded and metrics are properly populated
-	// Metrics available because GetTrialObservationLog returns something
+	// Metrics available because GetTrialObservationLog returns values
 	g.Eventually(func() bool {
 		c.Get(context.TODO(), trialKey, trial)
 		return trial.IsSucceeded() &&
@@ -349,13 +386,13 @@ func TestGetObjectiveMetricValue(t *testing.T) {
 		{TimeStamp: "2020-04-13T14:47:41+08:00", Metric: &api_pb.Metric{Name: "error", Value: "0.06"}},
 		{TimeStamp: "2020-04-13T14:47:41+08:00", Metric: &api_pb.Metric{Name: "error", Value: "0.07"}},
 		{TimeStamp: "2020-04-12T14:47:42+08:00", Metric: &api_pb.Metric{Name: "error", Value: "0.1"}},
-		{TimeStamp: "2020-04-13T14:47:38+08:00", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.7"}},
-		{TimeStamp: "2020-04-13T14:47:39+08:00", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.71"}},
-		{TimeStamp: "2020-04-13T14:47:40+08:00", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.72"}},
-		{TimeStamp: "2020-04-13T14:47:41+08:00", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.68"}},
-		{TimeStamp: "2020-04-13T14:47:41+08:00", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.69"}},
-		{TimeStamp: "2020-04-13T14:47:41+08:00", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.67"}},
-		{TimeStamp: "2020-04-12T14:47:42+08:00", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.6"}},
+		{TimeStamp: "2020-04-13T14:47:38+08:00", Metric: &api_pb.Metric{Name: objectiveMetric, Value: "0.7"}},
+		{TimeStamp: "2020-04-13T14:47:39+08:00", Metric: &api_pb.Metric{Name: objectiveMetric, Value: "0.71"}},
+		{TimeStamp: "2020-04-13T14:47:40+08:00", Metric: &api_pb.Metric{Name: objectiveMetric, Value: "0.72"}},
+		{TimeStamp: "2020-04-13T14:47:41+08:00", Metric: &api_pb.Metric{Name: objectiveMetric, Value: "0.68"}},
+		{TimeStamp: "2020-04-13T14:47:41+08:00", Metric: &api_pb.Metric{Name: objectiveMetric, Value: "0.69"}},
+		{TimeStamp: "2020-04-13T14:47:41+08:00", Metric: &api_pb.Metric{Name: objectiveMetric, Value: "0.67"}},
+		{TimeStamp: "2020-04-12T14:47:42+08:00", Metric: &api_pb.Metric{Name: objectiveMetric, Value: "0.6"}},
 	}
 
 	getMetricsFromLogs := func(strategies []commonv1beta1.MetricStrategy) (*commonv1beta1.Metric, *commonv1beta1.Metric, error) {
@@ -367,7 +404,7 @@ func TestGetObjectiveMetricValue(t *testing.T) {
 		for index, metric := range observation.Metrics {
 			if metric.Name == "error" {
 				errMetric = &observation.Metrics[index]
-			} else if metric.Name == "accuracy" {
+			} else if metric.Name == objectiveMetric {
 				accMetric = &observation.Metrics[index]
 			}
 		}
@@ -376,7 +413,7 @@ func TestGetObjectiveMetricValue(t *testing.T) {
 
 	metricStrategies := []commonv1beta1.MetricStrategy{
 		{Name: "error", Value: commonv1beta1.ExtractByMin},
-		{Name: "accuracy", Value: commonv1beta1.ExtractByMax},
+		{Name: objectiveMetric, Value: commonv1beta1.ExtractByMax},
 	}
 	errMetric, accMetric, err := getMetricsFromLogs(metricStrategies)
 	g.Expect(err).ShouldNot(gomega.HaveOccurred())
@@ -391,14 +428,16 @@ func TestGetObjectiveMetricValue(t *testing.T) {
 		// Add one other metric to test correct parsing
 		{TimeStamp: "2020-08-10T14:47:42+08:00", Metric: &api_pb.Metric{Name: "not-accuracy", Value: "1.15"}},
 		// Add metric with invalid timestamp
-		{TimeStamp: "2020-08-10T14:47:42", Metric: &api_pb.Metric{Name: "accuracy", Value: "0.77"}},
+		{TimeStamp: "2020-08-10T14:47:42", Metric: &api_pb.Metric{Name: objectiveMetric, Value: "0.77"}},
 	}
 	_, err = getMetrics(invalidLogs, metricStrategies)
 	g.Expect(err).To(gomega.HaveOccurred())
 }
 
-func newFakeTFJob() *tfv1.TFJob {
-	return &tfv1.TFJob{
+func newFakeTrialTFJob() *trialsv1beta1.Trial {
+	primaryContainer := "tensorflow"
+
+	tfJob := &tfv1.TFJob{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "kubeflow.org/v1",
 			Kind:       "TFJob",
@@ -416,7 +455,7 @@ func newFakeTFJob() *tfv1.TFJob {
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{
 								{
-									Name:  "tensorflow",
+									Name:  primaryContainer,
 									Image: "gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0",
 									Command: []string{
 										"python",
@@ -437,7 +476,7 @@ func newFakeTFJob() *tfv1.TFJob {
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{
 								{
-									Name:  "tensorflow",
+									Name:  primaryContainer,
 									Image: "gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0",
 									Command: []string{
 										"python",
@@ -454,10 +493,36 @@ func newFakeTFJob() *tfv1.TFJob {
 			},
 		},
 	}
+	runSpec, _ := util.ConvertObjectToUnstructured(tfJob)
+
+	return &trialsv1beta1.Trial{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      trialName,
+			Namespace: namespace,
+		},
+		Spec: trialsv1beta1.TrialSpec{
+			PrimaryPodLabels:     experimentsv1beta1.DefaultKubeflowJobPrimaryPodLabels,
+			PrimaryContainerName: primaryContainer,
+			SuccessCondition:     experimentsv1beta1.DefaultKubeflowJobSuccessCondition,
+			FailureCondition:     experimentsv1beta1.DefaultKubeflowJobFailureCondition,
+			Objective: &commonv1beta1.ObjectiveSpec{
+				ObjectiveMetricName: objectiveMetric,
+				MetricStrategies: []commonv1beta1.MetricStrategy{
+					{
+						Name:  objectiveMetric,
+						Value: commonv1beta1.ExtractByMax,
+					},
+				},
+			},
+			RunSpec: runSpec,
+		},
+	}
 }
 
-func newFakeBatchJob() *batchv1.Job {
-	return &batchv1.Job{
+func newFakeTrialBatchJob() *trialsv1beta1.Trial {
+	primaryContainer := "training-container"
+
+	job := &batchv1.Job{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "batch/v1",
 			Kind:       "Job",
@@ -471,7 +536,7 @@ func newFakeBatchJob() *batchv1.Job {
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:  "training-container",
+							Name:  primaryContainer,
 							Image: "docker.io/kubeflowkatib/mxnet-mnist",
 							Command: []string{
 								"python3",
@@ -486,23 +551,22 @@ func newFakeBatchJob() *batchv1.Job {
 			},
 		},
 	}
-}
+	runSpec, _ := util.ConvertObjectToUnstructured(job)
 
-func newFakeTrial(runObject interface{}) *trialsv1beta1.Trial {
-
-	runSpec, _ := util.ConvertObjectToUnstructured(runObject)
-
-	t := &trialsv1beta1.Trial{
+	return &trialsv1beta1.Trial{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      trialName,
 			Namespace: namespace,
 		},
 		Spec: trialsv1beta1.TrialSpec{
+			PrimaryContainerName: primaryContainer,
+			SuccessCondition:     experimentsv1beta1.DefaultJobSuccessCondition,
+			FailureCondition:     experimentsv1beta1.DefaultJobFailureCondition,
 			Objective: &commonv1beta1.ObjectiveSpec{
-				ObjectiveMetricName: "accuracy",
+				ObjectiveMetricName: objectiveMetric,
 				MetricStrategies: []commonv1beta1.MetricStrategy{
 					{
-						Name:  "accuracy",
+						Name:  objectiveMetric,
 						Value: commonv1beta1.ExtractByMax,
 					},
 				},
@@ -510,5 +574,4 @@ func newFakeTrial(runObject interface{}) *trialsv1beta1.Trial {
 			RunSpec: runSpec,
 		},
 	}
-	return t
 }
