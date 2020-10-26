@@ -319,7 +319,8 @@ func verifySuggestion(kclient katibclient.Client, exp *experimentsv1beta1.Experi
 				return fmt.Errorf("Suggestion PVC: %v is not alive while ResumePolicy = %v", pvcName, exp.Spec.ResumePolicy)
 			}
 
-			namespacedName = types.NamespacedName{Name: controllerUtil.GetSuggestionPersistentVolumeName(sug)}
+			pvName := controllerUtil.GetSuggestionPersistentVolumeName(sug)
+			namespacedName = types.NamespacedName{Name: pvName}
 			err = kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.PersistentVolume{})
 			if errors.IsNotFound(err) {
 				return fmt.Errorf("Suggestion PV: %v is not alive while ResumePolicy = %v", pvName, experimentsv1beta1.FromVolume)
