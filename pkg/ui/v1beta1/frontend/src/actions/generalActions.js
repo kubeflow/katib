@@ -91,36 +91,6 @@ export const closeDialogSuggestion = () => ({
   type: CLOSE_DIALOG_SUGGESTION,
 });
 
-export const FILTER_TEMPLATES_EXPERIMENT = 'FILTER_TEMPLATES_EXPERIMENT';
-
-export const filterTemplatesExperiment = (
-  configMapNamespaceIndex,
-  configMapNameIndex,
-  configMapPathIndex,
-) => ({
-  type: FILTER_TEMPLATES_EXPERIMENT,
-  configMapNamespaceIndex,
-  configMapNameIndex,
-  configMapPathIndex,
-});
-
-export const VALIDATION_ERROR = 'VALIDATION_ERROR';
-
-export const validationError = message => ({
-  type: VALIDATION_ERROR,
-  message,
-});
-
-export const EDIT_TRIAL_PARAMETERS = 'EDIT_TRIAL_PARAMETERS';
-
-export const editTrialParameters = (index, name, reference, description) => ({
-  type: EDIT_TRIAL_PARAMETERS,
-  index,
-  name,
-  reference,
-  description,
-});
-
 export const FETCH_EXPERIMENTS_REQUEST = 'FETCH_EXPERIMENTS_REQUEST';
 export const FETCH_EXPERIMENTS_SUCCESS = 'FETCH_EXPERIMENTS_SUCCESS';
 export const FETCH_EXPERIMENTS_FAILURE = 'FETCH_EXPERIMENTS_FAILURE';
@@ -143,4 +113,78 @@ export const changeStatus = (filter, checked) => ({
   type: CHANGE_STATUS,
   filter,
   checked,
+});
+
+export const CHANGE_TRIAL_TEMPLATE_SOURCE = 'CHANGE_TRIAL_TEMPLATE_SOURCE';
+
+export const changeTrialTemplateSource = source => ({
+  type: CHANGE_TRIAL_TEMPLATE_SOURCE,
+  source,
+});
+
+export const ADD_PRIMARY_POD_LABEL = 'ADD_PRIMARY_POD_LABEL';
+
+export const addPrimaryPodLabel = () => ({
+  type: ADD_PRIMARY_POD_LABEL,
+});
+
+export const CHANGE_PRIMARY_POD_LABEL = 'CHANGE_PRIMARY_POD_LABEL';
+
+export const changePrimaryPodLabel = (fieldName, index, value) => ({
+  type: CHANGE_PRIMARY_POD_LABEL,
+  fieldName,
+  index,
+  value,
+});
+
+export const DELETE_PRIMARY_POD_LABEL = 'DELETE_PRIMARY_POD_LABEL';
+
+export const deletePrimaryPodLabel = index => ({
+  type: DELETE_PRIMARY_POD_LABEL,
+  index,
+});
+
+export const CHANGE_TRIAL_TEMPLATE_SPEC = 'CHANGE_TRIAL_TEMPLATE_SPEC';
+
+export const changeTrialTemplateSpec = (name, value) => ({
+  type: CHANGE_TRIAL_TEMPLATE_SPEC,
+  name,
+  value,
+});
+
+export const FILTER_TEMPLATES_EXPERIMENT = 'FILTER_TEMPLATES_EXPERIMENT';
+
+export const filterTemplatesExperiment = (
+  configMapNamespaceIndex,
+  configMapNameIndex,
+  configMapPathIndex,
+) => ({
+  type: FILTER_TEMPLATES_EXPERIMENT,
+  configMapNamespaceIndex,
+  configMapNameIndex,
+  configMapPathIndex,
+});
+
+export const CHANGE_TRIAL_TEMPLATE_YAML = 'CHANGE_TRIAL_TEMPLATE_YAML';
+
+export const changeTrialTemplateYAML = templateYAML => ({
+  type: CHANGE_TRIAL_TEMPLATE_YAML,
+  templateYAML,
+});
+
+export const CHANGE_TRIAL_PARAMETERS = 'CHANGE_TRIAL_PARAMETERS';
+
+export const changeTrialParameters = (index, name, reference, description) => ({
+  type: CHANGE_TRIAL_PARAMETERS,
+  index,
+  name,
+  reference,
+  description,
+});
+
+export const VALIDATION_ERROR = 'VALIDATION_ERROR';
+
+export const validationError = message => ({
+  type: VALIDATION_ERROR,
+  message,
 });

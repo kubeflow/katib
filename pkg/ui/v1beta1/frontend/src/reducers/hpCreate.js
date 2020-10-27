@@ -109,6 +109,7 @@ const initialState = {
   mcCustomContainerYaml: '',
 };
 
+// filterValue finds index from array where name == key.
 const filterValue = (obj, key) => {
   return obj.findIndex(p => p.name === key);
 };
