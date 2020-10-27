@@ -18,6 +18,8 @@ spec:
     algorithmSettings:
       - name: min_trials_required
         value: "3"
+      - name: start_step
+        value: "5"
   metricsCollectorSpec:
     collector:
       kind: StdOut

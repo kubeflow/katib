@@ -80,7 +80,7 @@ func (g *General) SyncAssignments(
 	defer cancelSuggestion()
 
 	// Overwrite Experiment algorithm settings from the Suggestion status before the gRPC request.
-	// Original algorithm settings are located in Suggestion.Spec.Algorithm.AlgorithmSettings
+	// Original algorithm settings are located in Suggestion.Spec.Algorithm.AlgorithmSettings.
 	filledE := e.DeepCopy()
 	appendAlgorithmSettingsFromSuggestion(filledE,
 		instance.Status.AlgorithmSettings)
@@ -257,6 +257,7 @@ func (g *General) ConvertExperiment(e *experimentsv1beta1.Experiment) *suggestio
 func (g *General) ConvertTrials(ts []trialsv1beta1.Trial) []*suggestionapi.Trial {
 	trialsRes := make([]*suggestionapi.Trial, 0)
 	for _, t := range ts {
+		// Skip Trials with unavailable metrics.
 		if t.IsMetricsUnavailable() {
 			continue
 		}

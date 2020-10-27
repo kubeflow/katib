@@ -2,6 +2,7 @@ import logging
 from kubernetes import client, config
 import multiprocessing
 from datetime import datetime
+import grpc
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.apis.manager.v1beta1.python import api_pb2_grpc
@@ -22,6 +23,11 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
 
     def __init__(self):
         super(MedianStopService, self).__init__()
+        self.is_first_run = True
+        # Default settings
+        self.min_trials_required = 3
+        self.start_step = 4
+
         # Assume that Trial namespace = Suggestion namespace.
         try:
             with open('/var/run/secrets/kubernetes.io/serviceaccount/namespace', 'r') as f:
@@ -41,6 +47,28 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
 
     def GetEarlyStoppingRules(self, request, context):
         logger.info("Get new early stopping rules")
+
+        # Get early stopping settings and required Experiment spec for the first call.
+        if self.is_first_run:
+            self.getEarlyStoppingSettings(request.experiment.spec.algorithm.algorithm_settings)
+            logger.info("Median stopping settings. min_trials_required: {}, start_step: {}".format(
+                self.min_trials_required, self.start_step))
+
+            self.objective_type = request.experiment.spec.objective.type
+            self.objective_metric = request.experiment.spec.objective.objective_metric_name
+            self.algorithm_name = request.experiment.spec.algorithm.algorithm_name
+
+        # Get completed Trials
+        channel = grpc.beta.implementations.insecure_channel(db_manager_server[0], int(db_manager_server[1]))
+        with api_pb2.beta_create_DBManager_stub(channel) as client:
+            logger.info("In " + opt.trial_name + " " +
+                        str(len(observation_log.metric_logs)) + " metrics will be reported.")
+            client.ReportObservationLog(api_pb2.ReportObservationLogRequest(
+                trial_name=opt.trial_name,
+                observation_log=observation_log
+            ), timeout=timeout_in_seconds)
+
+        logger.info(request.trials)
         rules = []
         rules.append(
             api_pb2.EarlyStoppingRule(
@@ -62,8 +90,14 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
             early_stopping_rules=rules
         )
 
+    def getEarlyStoppingSettings(self, early_stopping_settings):
+        for setting in early_stopping_settings:
+            if setting.name == "min_trials_required":
+                self.min_trials_required = setting.value
+            elif setting.name == "start_step":
+                self.start_step = setting.value
+
     def SetTrialStatus(self, request, context):
-        logger.info(request)
         trial_name = request.trial_name
 
         logger.info("Update status for Trial {}".format(trial_name))

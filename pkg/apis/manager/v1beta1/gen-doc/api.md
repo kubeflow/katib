@@ -174,13 +174,13 @@ Early stopping algorithm specification.
 <a name="api.v1.beta1.Experiment"></a>
 
 ### Experiment
-
+Structure for a single Experiment.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| name | [string](#string) |  | Name of Experiment. This is unique in DB. |
-| spec | [ExperimentSpec](#api.v1.beta1.ExperimentSpec) |  |  |
+| name | [string](#string) |  | Name for the Experiment. |
+| spec | [ExperimentSpec](#api.v1.beta1.ExperimentSpec) |  | Experiment specification. |
 
 
 
@@ -190,20 +190,20 @@ Early stopping algorithm specification.
 <a name="api.v1.beta1.ExperimentSpec"></a>
 
 ### ExperimentSpec
-Spec of a Experiment. Experiment represents a single optimization run over a feasible space. 
+Specification of an Experiment. Experiment represents a single optimization run over a feasible space. 
 Each Experiment contains a configuration describing the feasible space, as well as a set of Trials.
-It is assumed that objective function f(x) does not change in the course of a Experiment.
+It is assumed that objective function f(x) does not change in the course of an Experiment.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | parameter_specs | [ExperimentSpec.ParameterSpecs](#api.v1.beta1.ExperimentSpec.ParameterSpecs) |  |  |
-| objective | [ObjectiveSpec](#api.v1.beta1.ObjectiveSpec) |  |  |
-| algorithm | [AlgorithmSpec](#api.v1.beta1.AlgorithmSpec) |  |  |
-| parallel_trial_count | [int32](#int32) |  |  |
-| max_trial_count | [int32](#int32) |  |  |
-| nas_config | [NasConfig](#api.v1.beta1.NasConfig) |  |  |
-| early_stopping | [EarlyStoppingSpec](#api.v1.beta1.EarlyStoppingSpec) |  |  |
+| objective | [ObjectiveSpec](#api.v1.beta1.ObjectiveSpec) |  | Objective specification for the Experiment. |
+| algorithm | [AlgorithmSpec](#api.v1.beta1.AlgorithmSpec) |  | HP or NAS algorithm specification for the Experiment. |
+| early_stopping | [EarlyStoppingSpec](#api.v1.beta1.EarlyStoppingSpec) |  | Early stopping specification for the Experiment. |
+| parallel_trial_count | [int32](#int32) |  | How many Trials can be processed in parallel. |
+| max_trial_count | [int32](#int32) |  | Max completed Trials to mark Experiment as succeeded. |
+| nas_config | [NasConfig](#api.v1.beta1.NasConfig) |  | NAS configuration for the Experiment. |
 
 
 
@@ -213,7 +213,7 @@ It is assumed that objective function f(x) does not change in the course of a Ex
 <a name="api.v1.beta1.ExperimentSpec.ParameterSpecs"></a>
 
 ### ExperimentSpec.ParameterSpecs
-List of ParameterSpec
+List of ParameterSpec.
 
 
 | Field | Type | Label | Description |
@@ -441,15 +441,15 @@ NasConfig contains a config of NAS job
 <a name="api.v1.beta1.ObjectiveSpec"></a>
 
 ### ObjectiveSpec
-
+Objective specification.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| type | [ObjectiveType](#api.v1.beta1.ObjectiveType) |  |  |
-| goal | [double](#double) |  |  |
-| objective_metric_name | [string](#string) |  |  |
-| additional_metric_names | [string](#string) | repeated | This can be empty if we only care about the objective metric. |
+| type | [ObjectiveType](#api.v1.beta1.ObjectiveType) |  | Type of optimization. |
+| goal | [double](#double) |  | Goal of optimization, can be empty. |
+| objective_metric_name | [string](#string) |  | Primary metric name for the optimization. |
+| additional_metric_names | [string](#string) | repeated | List of additional metrics to record from Trial. This can be empty if we only care about the objective metric. |
 
 
 
@@ -536,7 +536,7 @@ List of ParameterSpec
 <a name="api.v1.beta1.ParameterSpec"></a>
 
 ### ParameterSpec
-Config for a Hyper parameter.
+Config for a hyperparameter.
 Katib will create each Hyper parameter from this config.
 
 
@@ -605,14 +605,14 @@ Katib will create each Hyper parameter from this config.
 <a name="api.v1.beta1.Trial"></a>
 
 ### Trial
-
+Structure for a single Trial.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| name | [string](#string) |  |  |
-| spec | [TrialSpec](#api.v1.beta1.TrialSpec) |  |  |
-| status | [TrialStatus](#api.v1.beta1.TrialStatus) |  |  |
+| name | [string](#string) |  | Name for the Trial. |
+| spec | [TrialSpec](#api.v1.beta1.TrialSpec) |  | Trial specification. |
+| status | [TrialStatus](#api.v1.beta1.TrialStatus) |  | Trial status. |
 
 
 
@@ -622,16 +622,13 @@ Katib will create each Hyper parameter from this config.
 <a name="api.v1.beta1.TrialSpec"></a>
 
 ### TrialSpec
-
+Specification of a Trial. It represents Trial&#39;s parameter assignments and objective.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| experiment_name | [string](#string) |  |  |
-| objective | [ObjectiveSpec](#api.v1.beta1.ObjectiveSpec) |  |  |
-| parameter_assignments | [TrialSpec.ParameterAssignments](#api.v1.beta1.TrialSpec.ParameterAssignments) |  |  |
-| run_spec | [string](#string) |  |  |
-| metrics_collector_spec | [string](#string) |  |  |
+| objective | [ObjectiveSpec](#api.v1.beta1.ObjectiveSpec) |  | Objective specification for the Trial. |
+| parameter_assignments | [TrialSpec.ParameterAssignments](#api.v1.beta1.TrialSpec.ParameterAssignments) |  | List of assignments generated for the Trial. |
 
 
 
@@ -656,15 +653,15 @@ List of ParameterAssignment
 <a name="api.v1.beta1.TrialStatus"></a>
 
 ### TrialStatus
-
+Current Trial status. It contains Trial&#39;s latest condition, start time, completion time, observation.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| start_time | [string](#string) |  | RFC3339 format |
-| completion_time | [string](#string) |  | RFC3339 format |
-| condition | [TrialStatus.TrialConditionType](#api.v1.beta1.TrialStatus.TrialConditionType) |  |  |
-| observation | [Observation](#api.v1.beta1.Observation) |  | The best observation in logs. |
+| start_time | [string](#string) |  | Trial start time in RFC3339 format |
+| completion_time | [string](#string) |  | Trial completion time in RFC3339 format |
+| condition | [TrialStatus.TrialConditionType](#api.v1.beta1.TrialStatus.TrialConditionType) |  | Trial current condition. It is equal to the latest Trial CR condition. |
+| observation | [Observation](#api.v1.beta1.Observation) |  | The best Trial observation in logs. |
 
 
 
@@ -743,7 +740,8 @@ Types of value for HyperParameter.
 <a name="api.v1.beta1.TrialStatus.TrialConditionType"></a>
 
 ### TrialStatus.TrialConditionType
-
+Trial can be in one of 6 conditions.
+TODO (andreyvelich): Remove unused conditions.
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
