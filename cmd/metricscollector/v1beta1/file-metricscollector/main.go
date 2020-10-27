@@ -241,13 +241,14 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 			// Report metrics to DB
 			reportMetrics(filters)
 
-			// Wait until main proccess is completed
+			// Wait until main proccess is completed.
 			timeout := 60 * time.Second
 			endTime := time.Now().Add(timeout)
 			isProcRunning := true
 			for isProcRunning && time.Now().Before(endTime) {
 				isProcRunning, err = mainProc.IsRunning()
-				if err != nil {
+				// Ignore "no such file error". It means that process is complete.
+				if err != nil && !os.IsNotExist(err) {
 					klog.Fatalf("Check process status for main PID: %v failed: %v", mainProcPid, err)
 				}
 			}
