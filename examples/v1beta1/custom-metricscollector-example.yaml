@@ -4,8 +4,6 @@ apiVersion: "kubeflow.org/v1beta1"
 kind: Experiment
 metadata:
   namespace: kubeflow
-  labels:
-    controller-tools.k8s.io: "1.0"
   name: custom-metricscollector-example
 spec:
   objective:

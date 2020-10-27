@@ -2,8 +2,6 @@
 apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
-  labels:
-    controller-tools.k8s.io: "1.0"
   name: xgb-svhn-fpga
   namespace: kubeflow
 spec:
