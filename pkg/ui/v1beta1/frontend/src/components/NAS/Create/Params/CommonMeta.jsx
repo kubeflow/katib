@@ -14,8 +14,6 @@ import { GENERAL_MODULE, NAS_CREATE_MODULE } from '../../../../constants/constan
 
 const styles = () => ({
   textField: {
-    marginLeft: 4,
-    marginRight: 4,
     width: '100%',
   },
   help: {

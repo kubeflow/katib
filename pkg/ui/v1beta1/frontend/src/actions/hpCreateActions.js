@@ -49,6 +49,14 @@ export const editMetrics = (index, value) => ({
   value,
 });
 
+export const CHANGE_METRIC_STRATEGY_HP = 'CHANGE_METRIC_STRATEGY_HP';
+
+export const metricStrategyChange = (index, strategy) => ({
+  type: CHANGE_METRIC_STRATEGY_HP,
+  index,
+  strategy,
+});
+
 export const CHANGE_ALGORITHM_NAME_HP = 'CHANGE_ALGORITHM_NAME_HP';
 
 export const changeAlgorithmName = algorithmName => ({

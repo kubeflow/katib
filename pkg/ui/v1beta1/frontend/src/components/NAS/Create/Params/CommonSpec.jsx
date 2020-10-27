@@ -14,8 +14,6 @@ import { NAS_CREATE_MODULE } from '../../../../constants/constants';
 
 const useStyles = makeStyles({
   textField: {
-    marginLeft: 4,
-    marginRight: 4,
     width: '100%',
   },
   help: {

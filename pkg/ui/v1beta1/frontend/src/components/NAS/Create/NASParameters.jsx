@@ -28,38 +28,13 @@ const styles = theme => ({
   },
   submit: {
     textAlign: 'center',
-    marginTop: 10,
-  },
-  textField: {
-    marginLeft: 4,
-    marginRight: 4,
-    width: '100%',
-  },
-  help: {
-    padding: 4 / 2,
-    verticalAlign: 'middle',
-  },
-  section: {
-    padding: 4,
-  },
-  parameter: {
-    padding: 2,
-  },
-  formControl: {
-    margin: 4,
-    width: '100%',
-  },
-  selectEmpty: {
-    marginTop: 10,
-  },
-  addButton: {
-    margin: 10,
+    margin: 20,
   },
 });
 
-const SectionInTypography = (name, classes) => {
+const SectionInTypography = name => {
   return (
-    <div className={classes.section}>
+    <div>
       <Grid container>
         <Grid item xs={12} sm={12}>
           <Typography variant="h6">{name}</Typography>
@@ -113,18 +88,28 @@ const NASParameters = props => {
   const submitNASJob = () => {
     let data = {};
 
+    // Add metadata.
     data.metadata = {};
     deCapitalizeFirstLetterAndAppend(props.commonParametersMetadata, data.metadata);
 
+    // Add common parameters.
     data.spec = {};
     deCapitalizeFirstLetterAndAppend(props.commonParametersSpec, data.spec);
 
+    // Add objective.
     data.spec.objective = {};
     deCapitalizeFirstLetterAndAppend(props.objective, data.spec.objective);
-    data.spec.objective.additionalMetricNames = props.additionalMetricNames.map(
-      (metrics, i) => metrics.value,
-    );
 
+    // Add additional metrics.
+    data.spec.objective.additionalMetricNames = props.additionalMetricNames;
+
+    // Add metric strategies.
+    data.spec.objective.metricStrategies = props.metricStrategies.map(metric => ({
+      name: metric.name,
+      value: metric.strategy,
+    }));
+
+    // Add algorithm.
     data.spec.algorithm = {};
     data.spec.algorithm.algorithmName = props.algorithmName;
     data.spec.algorithm.algorithmSettings = [];
@@ -267,27 +252,22 @@ const NASParameters = props => {
   return (
     <div className={classes.root}>
       {/* Common Metadata */}
-      {SectionInTypography('Metadata', classes)}
+      {SectionInTypography('Metadata')}
       <CommonParametersMeta />
-      {SectionInTypography('Common Parameters', classes)}
+      {SectionInTypography('Common Parameters')}
       <CommonParametersSpec />
-      {SectionInTypography('Objective', classes)}
+      {SectionInTypography('Objective')}
       <Objective />
-      {SectionInTypography('Algorithm', classes)}
+      {SectionInTypography('Algorithm')}
       <Algorithm />
-      {SectionInTypography('NAS Config', classes)}
+      {SectionInTypography('NAS Config')}
       <NASConfig />
-      {SectionInTypography('Metrics Collector Spec', classes)}
+      {SectionInTypography('Metrics Collector Spec')}
       <MetricsCollectorSpec jobType={constants.EXPERIMENT_TYPE_NAS} />
-      {SectionInTypography('Trial Template Spec', classes)}
+      {SectionInTypography('Trial Template Spec')}
       <TrialTemplate />
       <div className={classes.submit}>
-        <Button
-          variant="contained"
-          color={'primary'}
-          className={classes.button}
-          onClick={submitNASJob}
-        >
+        <Button variant="contained" color={'primary'} onClick={submitNASJob}>
           Deploy
         </Button>
       </div>
@@ -318,6 +298,7 @@ const mapStateToProps = state => {
     additionalMetricNames: state[constants.NAS_CREATE_MODULE].additionalMetricNames,
     algorithmName: state[constants.NAS_CREATE_MODULE].algorithmName,
     algorithmSettings: state[constants.NAS_CREATE_MODULE].algorithmSettings,
+    metricStrategies: state[constants.NAS_CREATE_MODULE].metricStrategies,
     numLayers: state[constants.NAS_CREATE_MODULE].numLayers,
     inputSize: state[constants.NAS_CREATE_MODULE].inputSize,
     outputSize: state[constants.NAS_CREATE_MODULE].outputSize,

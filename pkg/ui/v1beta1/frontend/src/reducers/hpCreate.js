@@ -50,9 +50,16 @@ const initialState = {
       description: 'Name for the objective metric',
     },
   ],
-  additionalMetricNames: [
+  additionalMetricNames: ['Train-accuracy'],
+  metricStrategiesList: ['min', 'max', 'latest'],
+  metricStrategies: [
     {
-      value: 'Train-accuracy',
+      name: 'Validation-accuracy',
+      strategy: 'max',
+    },
+    {
+      name: 'Train-accuracy',
+      strategy: 'max',
     },
   ],
   algorithmName: 'random',
@@ -114,6 +121,38 @@ const filterValue = (obj, key) => {
   return obj.findIndex(p => p.name === key);
 };
 
+// setMetricStrategies sets metric strategies from objective and additional metrics
+const setMetricStrategies = (objective, additionalMetricNames) => {
+  let metricStrategies = [];
+  // Objective metric - 2 index.
+  // Objective type can't be empty.
+  if (objective[2].value.trim() !== '') {
+    // Set strategy from objective type.
+    // Strategy == Objective Type by default.
+    let strategy;
+    if (objective[0].value === 'minimize') {
+      strategy = 'min';
+    } else {
+      strategy = 'max';
+    }
+    metricStrategies.push({
+      name: objective[2].value,
+      strategy: strategy,
+    });
+
+    // Add not empty additional metrics.
+    additionalMetricNames.forEach(metric => {
+      if (metric.trim() !== '') {
+        metricStrategies.push({
+          name: metric,
+          strategy: strategy,
+        });
+      }
+    });
+  }
+  return metricStrategies;
+};
+
 const hpCreateReducer = (state = initialState, action) => {
   switch (action.type) {
     case actions.CHANGE_YAML_HP:
@@ -138,18 +177,19 @@ const hpCreateReducer = (state = initialState, action) => {
         commonParametersSpec: spec,
       };
     case actions.CHANGE_OBJECTIVE_HP:
-      let obj = state.objective.slice();
-      index = filterValue(obj, action.name);
-      obj[index].value = action.value;
+      let newObjective = state.objective.slice();
+      index = filterValue(newObjective, action.name);
+      newObjective[index].value = action.value;
+      // Set new metric strategies.
+      var newMetricStrategies = setMetricStrategies(newObjective, state.additionalMetricNames);
       return {
         ...state,
-        objective: obj,
+        objective: newObjective,
+        metricStrategies: newMetricStrategies,
       };
     case actions.ADD_METRICS_HP:
       var additionalMetricNames = state.additionalMetricNames.slice();
-      additionalMetricNames.push({
-        value: '',
-      });
+      additionalMetricNames.push('');
       return {
         ...state,
         additionalMetricNames: additionalMetricNames,
@@ -157,16 +197,29 @@ const hpCreateReducer = (state = initialState, action) => {
     case actions.DELETE_METRICS_HP:
       additionalMetricNames = state.additionalMetricNames.slice();
       additionalMetricNames.splice(action.index, 1);
+      // Set new metric strategies.
+      newMetricStrategies = setMetricStrategies(state.objective, additionalMetricNames);
       return {
         ...state,
         additionalMetricNames: additionalMetricNames,
+        metricStrategies: newMetricStrategies,
       };
     case actions.EDIT_METRICS_HP:
       additionalMetricNames = state.additionalMetricNames.slice();
-      additionalMetricNames[action.index].value = action.value;
+      additionalMetricNames[action.index] = action.value;
+      // Set new metric strategies.
+      newMetricStrategies = setMetricStrategies(state.objective, additionalMetricNames);
       return {
         ...state,
         additionalMetricNames: additionalMetricNames,
+        metricStrategies: newMetricStrategies,
+      };
+    case actions.CHANGE_METRIC_STRATEGY_HP:
+      newMetricStrategies = state.metricStrategies.slice();
+      newMetricStrategies[action.index].strategy = action.strategy;
+      return {
+        ...state,
+        metricStrategies: newMetricStrategies,
       };
     case actions.CHANGE_ALGORITHM_NAME_HP:
       return {

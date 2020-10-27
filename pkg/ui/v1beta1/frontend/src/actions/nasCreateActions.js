@@ -50,6 +50,14 @@ export const editMetrics = (index, value) => ({
   value,
 });
 
+export const CHANGE_METRIC_STRATEGY_NAS = 'CHANGE_METRIC_STRATEGY_NAS';
+
+export const metricStrategyChange = (index, strategy) => ({
+  type: CHANGE_METRIC_STRATEGY_NAS,
+  index,
+  strategy,
+});
+
 export const CHANGE_ALGORITHM_NAME_NAS = 'CHANGE_ALGORITHM_NAME_NAS';
 
 export const changeAlgorithmName = algorithmName => ({
