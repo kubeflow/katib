@@ -6,31 +6,37 @@ const initialState = {
     {
       name: 'Name',
       value: 'enas-example',
-      description: 'A name of an experiment',
+      description: 'A name of an Experiment',
     },
     {
       name: 'Namespace',
       value: 'kubeflow',
-      description: 'Namespace to deploy an experiment',
+      description: 'Namespace to deploy an Experiment',
     },
   ],
   commonParametersSpec: [
     {
       name: 'ParallelTrialCount',
       value: '3',
-      description: 'How many trials can be processed in parallel',
+      description: 'How many Trials can be processed in parallel',
     },
     {
       name: 'MaxTrialCount',
       value: '12',
-      description: 'Max completed trials to mark experiment as succeeded',
+      description: 'Max completed Trials to mark Experiment as succeeded',
     },
     {
       name: 'MaxFailedTrialCount',
       value: '3',
-      description: 'Max failed trials to mark experiment as failed',
+      description: 'Max failed Trials to mark Experiment as failed',
+    },
+    {
+      name: 'ResumePolicy',
+      value: 'LongRunning',
+      description: 'Resume policy describes how the Experiment should be restarted',
     },
   ],
+  allResumePolicyTypes: ['Never', 'LongRunning', 'FromVolume'],
   allObjectiveTypes: ['minimize', 'maximize'],
   objective: [
     {
@@ -58,7 +64,7 @@ const initialState = {
     },
   ],
   algorithmName: 'enas',
-  allAlgorithms: ['enas'],
+  allAlgorithms: ['enas', 'darts'],
   algorithmSettings: [
     {
       name: 'controller_hidden_size',
