@@ -61,7 +61,7 @@ class V1beta1EarlyStoppingRule(object):
     def comparison(self):
         """Gets the comparison of this V1beta1EarlyStoppingRule.  # noqa: E501
 
-        Comparison defines correlation between name and value  # noqa: E501
+        Comparison defines correlation between name and value.  # noqa: E501
 
         :return: The comparison of this V1beta1EarlyStoppingRule.  # noqa: E501
         :rtype: str
@@ -72,7 +72,7 @@ class V1beta1EarlyStoppingRule(object):
     def comparison(self, comparison):
         """Sets the comparison of this V1beta1EarlyStoppingRule.
 
-        Comparison defines correlation between name and value  # noqa: E501
+        Comparison defines correlation between name and value.  # noqa: E501
 
         :param comparison: The comparison of this V1beta1EarlyStoppingRule.  # noqa: E501
         :type: str
@@ -84,7 +84,7 @@ class V1beta1EarlyStoppingRule(object):
     def name(self):
         """Gets the name of this V1beta1EarlyStoppingRule.  # noqa: E501
 
-        Name contains metric name for the rule  # noqa: E501
+        Name contains metric name for the rule.  # noqa: E501
 
         :return: The name of this V1beta1EarlyStoppingRule.  # noqa: E501
         :rtype: str
@@ -95,7 +95,7 @@ class V1beta1EarlyStoppingRule(object):
     def name(self, name):
         """Sets the name of this V1beta1EarlyStoppingRule.
 
-        Name contains metric name for the rule  # noqa: E501
+        Name contains metric name for the rule.  # noqa: E501
 
         :param name: The name of this V1beta1EarlyStoppingRule.  # noqa: E501
         :type: str
@@ -107,7 +107,7 @@ class V1beta1EarlyStoppingRule(object):
     def value(self):
         """Gets the value of this V1beta1EarlyStoppingRule.  # noqa: E501
 
-        Value contains metric value for the rule  # noqa: E501
+        Value contains metric value for the rule.  # noqa: E501
 
         :return: The value of this V1beta1EarlyStoppingRule.  # noqa: E501
         :rtype: str
@@ -118,7 +118,7 @@ class V1beta1EarlyStoppingRule(object):
     def value(self, value):
         """Sets the value of this V1beta1EarlyStoppingRule.
 
-        Value contains metric value for the rule  # noqa: E501
+        Value contains metric value for the rule.  # noqa: E501
 
         :param value: The value of this V1beta1EarlyStoppingRule.  # noqa: E501
         :type: str

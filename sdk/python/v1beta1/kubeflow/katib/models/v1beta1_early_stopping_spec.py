@@ -33,72 +33,72 @@ class V1beta1EarlyStoppingSpec(object):
                             and the value is json key in definition.
     """
     swagger_types = {
-        'early_stopping_algorithm_name': 'str',
-        'early_stopping_settings': 'list[V1beta1EarlyStoppingSetting]'
+        'algorithm_name': 'str',
+        'algorithm_settings': 'list[V1beta1EarlyStoppingSetting]'
     }
 
     attribute_map = {
-        'early_stopping_algorithm_name': 'earlyStoppingAlgorithmName',
-        'early_stopping_settings': 'earlyStoppingSettings'
+        'algorithm_name': 'algorithmName',
+        'algorithm_settings': 'algorithmSettings'
     }
 
-    def __init__(self, early_stopping_algorithm_name=None, early_stopping_settings=None):  # noqa: E501
+    def __init__(self, algorithm_name=None, algorithm_settings=None):  # noqa: E501
         """V1beta1EarlyStoppingSpec - a model defined in Swagger"""  # noqa: E501
 
-        self._early_stopping_algorithm_name = None
-        self._early_stopping_settings = None
+        self._algorithm_name = None
+        self._algorithm_settings = None
         self.discriminator = None
 
-        if early_stopping_algorithm_name is not None:
-            self.early_stopping_algorithm_name = early_stopping_algorithm_name
-        if early_stopping_settings is not None:
-            self.early_stopping_settings = early_stopping_settings
+        if algorithm_name is not None:
+            self.algorithm_name = algorithm_name
+        if algorithm_settings is not None:
+            self.algorithm_settings = algorithm_settings
 
     @property
-    def early_stopping_algorithm_name(self):
-        """Gets the early_stopping_algorithm_name of this V1beta1EarlyStoppingSpec.  # noqa: E501
+    def algorithm_name(self):
+        """Gets the algorithm_name of this V1beta1EarlyStoppingSpec.  # noqa: E501
 
-        Early stopping algorithm name  # noqa: E501
+        Early stopping algorithm name.  # noqa: E501
 
-        :return: The early_stopping_algorithm_name of this V1beta1EarlyStoppingSpec.  # noqa: E501
+        :return: The algorithm_name of this V1beta1EarlyStoppingSpec.  # noqa: E501
         :rtype: str
         """
-        return self._early_stopping_algorithm_name
+        return self._algorithm_name
 
-    @early_stopping_algorithm_name.setter
-    def early_stopping_algorithm_name(self, early_stopping_algorithm_name):
-        """Sets the early_stopping_algorithm_name of this V1beta1EarlyStoppingSpec.
+    @algorithm_name.setter
+    def algorithm_name(self, algorithm_name):
+        """Sets the algorithm_name of this V1beta1EarlyStoppingSpec.
 
-        Early stopping algorithm name  # noqa: E501
+        Early stopping algorithm name.  # noqa: E501
 
-        :param early_stopping_algorithm_name: The early_stopping_algorithm_name of this V1beta1EarlyStoppingSpec.  # noqa: E501
+        :param algorithm_name: The algorithm_name of this V1beta1EarlyStoppingSpec.  # noqa: E501
         :type: str
         """
 
-        self._early_stopping_algorithm_name = early_stopping_algorithm_name
+        self._algorithm_name = algorithm_name
 
     @property
-    def early_stopping_settings(self):
-        """Gets the early_stopping_settings of this V1beta1EarlyStoppingSpec.  # noqa: E501
+    def algorithm_settings(self):
+        """Gets the algorithm_settings of this V1beta1EarlyStoppingSpec.  # noqa: E501
 
         Key-value pairs representing settings for early stopping algorithm.  # noqa: E501
 
-        :return: The early_stopping_settings of this V1beta1EarlyStoppingSpec.  # noqa: E501
+        :return: The algorithm_settings of this V1beta1EarlyStoppingSpec.  # noqa: E501
         :rtype: list[V1beta1EarlyStoppingSetting]
         """
-        return self._early_stopping_settings
+        return self._algorithm_settings
 
-    @early_stopping_settings.setter
-    def early_stopping_settings(self, early_stopping_settings):
-        """Sets the early_stopping_settings of this V1beta1EarlyStoppingSpec.
+    @algorithm_settings.setter
+    def algorithm_settings(self, algorithm_settings):
+        """Sets the algorithm_settings of this V1beta1EarlyStoppingSpec.
 
         Key-value pairs representing settings for early stopping algorithm.  # noqa: E501
 
-        :param early_stopping_settings: The early_stopping_settings of this V1beta1EarlyStoppingSpec.  # noqa: E501
+        :param algorithm_settings: The algorithm_settings of this V1beta1EarlyStoppingSpec.  # noqa: E501
         :type: list[V1beta1EarlyStoppingSetting]
         """
 
-        self._early_stopping_settings = early_stopping_settings
+        self._algorithm_settings = algorithm_settings
 
     def to_dict(self):
         """Returns the model properties as a dict"""

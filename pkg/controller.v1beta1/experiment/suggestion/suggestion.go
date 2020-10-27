@@ -64,14 +64,14 @@ func (g *General) createSuggestion(instance *experimentsv1beta1.Experiment, sugg
 			Annotations: instance.Annotations,
 		},
 		Spec: suggestionsv1beta1.SuggestionSpec{
-			AlgorithmName: instance.Spec.Algorithm.AlgorithmName,
-			Requests:      suggestionRequests,
-			ResumePolicy:  instance.Spec.ResumePolicy,
+			Algorithm:    instance.Spec.Algorithm.DeepCopy(),
+			Requests:     suggestionRequests,
+			ResumePolicy: instance.Spec.ResumePolicy,
 		},
 	}
 
 	if instance.Spec.EarlyStopping != nil {
-		suggestion.Spec.EarlyStoppingAlgorithmName = instance.Spec.EarlyStopping.EarlyStoppingAlgorithmName
+		suggestion.Spec.EarlyStopping = instance.Spec.EarlyStopping.DeepCopy()
 	}
 
 	if err := controllerutil.SetControllerReference(instance, suggestion, g.scheme); err != nil {

@@ -22,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
+// TrialSpec is the specification of a Trial.
 type TrialSpec struct {
 	// Describes the objective of the experiment.
 	Objective *common.ObjectiveSpec `json:"objective,omitempty"`
@@ -61,6 +62,7 @@ type TrialSpec struct {
 	FailureCondition string `json:"failureCondition,omitempty"`
 }
 
+// TrialStatus is the current status of a Trial.
 type TrialStatus struct {
 	// Represents time when the Trial was acknowledged by the Trial controller.
 	// It is not guaranteed to be set in happens-before order across separate operations.

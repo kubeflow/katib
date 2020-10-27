@@ -73,7 +73,7 @@ class V1beta1ObjectiveSpec(object):
     def additional_metric_names(self):
         """Gets the additional_metric_names of this V1beta1ObjectiveSpec.  # noqa: E501
 
-        This can be empty if we only care about the objective metric. Note: If we adopt a push instead of pull mechanism, this can be omitted completely.  # noqa: E501
+        AdditionalMetricNames represents metrics that should be collected from Trials. This can be empty if we only care about the objective metric. Note: If we adopt a push instead of pull mechanism, this can be omitted completely.  # noqa: E501
 
         :return: The additional_metric_names of this V1beta1ObjectiveSpec.  # noqa: E501
         :rtype: list[str]
@@ -84,7 +84,7 @@ class V1beta1ObjectiveSpec(object):
     def additional_metric_names(self, additional_metric_names):
         """Sets the additional_metric_names of this V1beta1ObjectiveSpec.
 
-        This can be empty if we only care about the objective metric. Note: If we adopt a push instead of pull mechanism, this can be omitted completely.  # noqa: E501
+        AdditionalMetricNames represents metrics that should be collected from Trials. This can be empty if we only care about the objective metric. Note: If we adopt a push instead of pull mechanism, this can be omitted completely.  # noqa: E501
 
         :param additional_metric_names: The additional_metric_names of this V1beta1ObjectiveSpec.  # noqa: E501
         :type: list[str]
@@ -96,6 +96,7 @@ class V1beta1ObjectiveSpec(object):
     def goal(self):
         """Gets the goal of this V1beta1ObjectiveSpec.  # noqa: E501
 
+        Goal is the Experiment's objective goal that should be reached. In case of empty goal, Experiment is running until MaxTrialCount = TrialsSucceeded.  # noqa: E501
 
         :return: The goal of this V1beta1ObjectiveSpec.  # noqa: E501
         :rtype: float
@@ -106,6 +107,7 @@ class V1beta1ObjectiveSpec(object):
     def goal(self, goal):
         """Sets the goal of this V1beta1ObjectiveSpec.
 
+        Goal is the Experiment's objective goal that should be reached. In case of empty goal, Experiment is running until MaxTrialCount = TrialsSucceeded.  # noqa: E501
 
         :param goal: The goal of this V1beta1ObjectiveSpec.  # noqa: E501
         :type: float
@@ -117,7 +119,7 @@ class V1beta1ObjectiveSpec(object):
     def metric_strategies(self):
         """Gets the metric_strategies of this V1beta1ObjectiveSpec.  # noqa: E501
 
-        This field is allowed to missing, experiment defaulter (webhook) will fill it.  # noqa: E501
+        MetricStrategies defines various rules (min, max or latest) to extract metrics values. This field is allowed to missing, experiment defaulter (webhook) will fill it.  # noqa: E501
 
         :return: The metric_strategies of this V1beta1ObjectiveSpec.  # noqa: E501
         :rtype: list[V1beta1MetricStrategy]
@@ -128,7 +130,7 @@ class V1beta1ObjectiveSpec(object):
     def metric_strategies(self, metric_strategies):
         """Sets the metric_strategies of this V1beta1ObjectiveSpec.
 
-        This field is allowed to missing, experiment defaulter (webhook) will fill it.  # noqa: E501
+        MetricStrategies defines various rules (min, max or latest) to extract metrics values. This field is allowed to missing, experiment defaulter (webhook) will fill it.  # noqa: E501
 
         :param metric_strategies: The metric_strategies of this V1beta1ObjectiveSpec.  # noqa: E501
         :type: list[V1beta1MetricStrategy]
@@ -140,6 +142,7 @@ class V1beta1ObjectiveSpec(object):
     def objective_metric_name(self):
         """Gets the objective_metric_name of this V1beta1ObjectiveSpec.  # noqa: E501
 
+        ObjectiveMetricName represents primary Experiment's metric to optimize.  # noqa: E501
 
         :return: The objective_metric_name of this V1beta1ObjectiveSpec.  # noqa: E501
         :rtype: str
@@ -150,6 +153,7 @@ class V1beta1ObjectiveSpec(object):
     def objective_metric_name(self, objective_metric_name):
         """Sets the objective_metric_name of this V1beta1ObjectiveSpec.
 
+        ObjectiveMetricName represents primary Experiment's metric to optimize.  # noqa: E501
 
         :param objective_metric_name: The objective_metric_name of this V1beta1ObjectiveSpec.  # noqa: E501
         :type: str
@@ -161,6 +165,7 @@ class V1beta1ObjectiveSpec(object):
     def type(self):
         """Gets the type of this V1beta1ObjectiveSpec.  # noqa: E501
 
+        Type for Experiment optimization.  # noqa: E501
 
         :return: The type of this V1beta1ObjectiveSpec.  # noqa: E501
         :rtype: str
@@ -171,6 +176,7 @@ class V1beta1ObjectiveSpec(object):
     def type(self, type):
         """Sets the type of this V1beta1ObjectiveSpec.
 
+        Type for Experiment optimization.  # noqa: E501
 
         :param type: The type of this V1beta1ObjectiveSpec.  # noqa: E501
         :type: str

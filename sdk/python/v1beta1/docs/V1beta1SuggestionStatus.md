@@ -3,7 +3,7 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**algorithm_settings** | [**list[V1beta1AlgorithmSetting]**](V1beta1AlgorithmSetting.md) | Algorithmsettings set by the algorithm services. | [optional] 
+**algorithm_settings** | [**list[V1beta1AlgorithmSetting]**](V1beta1AlgorithmSetting.md) | AlgorithmSettings defines HP or NAS algorithm settings which suggestion service returns. This can be empty if settings haven&#39;t been changed. | [optional] 
 **completion_time** | [**V1Time**](V1Time.md) | Represents time when the Suggestion was completed. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC. | [optional] 
 **conditions** | [**list[V1beta1SuggestionCondition]**](V1beta1SuggestionCondition.md) | List of observed runtime conditions for this Suggestion. | [optional] 
 **last_reconcile_time** | [**V1Time**](V1Time.md) | Represents last time when the Suggestion was reconciled. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC. | [optional] 

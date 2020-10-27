@@ -31,17 +31,20 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.AlgorithmSetting": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
+					Description: "AlgorithmSetting represents key-value pair for HP or NAS algorithm settings.",
 					Properties: map[string]spec.Schema{
 						"name": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"string"},
-								Format: "",
+								Description: "Name is setting name.",
+								Type:        []string{"string"},
+								Format:      "",
 							},
 						},
 						"value": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"string"},
-								Format: "",
+								Description: "Value is the setting value.",
+								Type:        []string{"string"},
+								Format:      "",
 							},
 						},
 					},
@@ -52,11 +55,13 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.AlgorithmSpec": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
+					Description: "AlgorithmSpec is the specification for a HP or NAS algorithm.",
 					Properties: map[string]spec.Schema{
 						"algorithmName": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"string"},
-								Format: "",
+								Description: "HP or NAS algorithm name.",
+								Type:        []string{"string"},
+								Format:      "",
 							},
 						},
 						"algorithmSettings": {
@@ -108,21 +113,21 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 					Properties: map[string]spec.Schema{
 						"name": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Name contains metric name for the rule",
+								Description: "Name contains metric name for the rule.",
 								Type:        []string{"string"},
 								Format:      "",
 							},
 						},
 						"value": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Value contains metric value for the rule",
+								Description: "Value contains metric value for the rule.",
 								Type:        []string{"string"},
 								Format:      "",
 							},
 						},
 						"comparison": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Comparison defines correlation between name and value",
+								Description: "Comparison defines correlation between name and value.",
 								Type:        []string{"string"},
 								Format:      "",
 							},
@@ -135,18 +140,20 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingSetting": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
-					Description: "EarlyStoppingSetting represents key-value pair for early stopping setting",
+					Description: "EarlyStoppingSetting represents key-value pair for early stopping algorithm settings.",
 					Properties: map[string]spec.Schema{
 						"name": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"string"},
-								Format: "",
+								Description: "Name is the setting name.",
+								Type:        []string{"string"},
+								Format:      "",
 							},
 						},
 						"value": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"string"},
-								Format: "",
+								Description: "Value is the setting value.",
+								Type:        []string{"string"},
+								Format:      "",
 							},
 						},
 					},
@@ -157,16 +164,16 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingSpec": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
-					Description: "EarlyStoppingSpec describes early stopping algorithm",
+					Description: "EarlyStoppingSpec is the specification for a early stopping algorithm.",
 					Properties: map[string]spec.Schema{
-						"earlyStoppingAlgorithmName": {
+						"algorithmName": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Early stopping algorithm name",
+								Description: "Early stopping algorithm name.",
 								Type:        []string{"string"},
 								Format:      "",
 							},
 						},
-						"earlyStoppingSettings": {
+						"algorithmSettings": {
 							SchemaProps: spec.SchemaProps{
 								Description: "Key-value pairs representing settings for early stopping algorithm.",
 								Type:        []string{"array"},
@@ -306,28 +313,32 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.ObjectiveSpec": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
+					Description: "ObjectiveSpec represents Experiment's objective specification.",
 					Properties: map[string]spec.Schema{
 						"type": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"string"},
-								Format: "",
+								Description: "Type for Experiment optimization.",
+								Type:        []string{"string"},
+								Format:      "",
 							},
 						},
 						"goal": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"number"},
-								Format: "double",
+								Description: "Goal is the Experiment's objective goal that should be reached. In case of empty goal, Experiment is running until MaxTrialCount = TrialsSucceeded.",
+								Type:        []string{"number"},
+								Format:      "double",
 							},
 						},
 						"objectiveMetricName": {
 							SchemaProps: spec.SchemaProps{
-								Type:   []string{"string"},
-								Format: "",
+								Description: "ObjectiveMetricName represents primary Experiment's metric to optimize.",
+								Type:        []string{"string"},
+								Format:      "",
 							},
 						},
 						"additionalMetricNames": {
 							SchemaProps: spec.SchemaProps{
-								Description: "This can be empty if we only care about the objective metric. Note: If we adopt a push instead of pull mechanism, this can be omitted completely.",
+								Description: "AdditionalMetricNames represents metrics that should be collected from Trials. This can be empty if we only care about the objective metric. Note: If we adopt a push instead of pull mechanism, this can be omitted completely.",
 								Type:        []string{"array"},
 								Items: &spec.SchemaOrArray{
 									Schema: &spec.Schema{
@@ -341,7 +352,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 						},
 						"metricStrategies": {
 							SchemaProps: spec.SchemaProps{
-								Description: "This field is allowed to missing, experiment defaulter (webhook) will fill it.",
+								Description: "MetricStrategies defines various rules (min, max or latest) to extract metrics values. This field is allowed to missing, experiment defaulter (webhook) will fill it.",
 								Type:        []string{"array"},
 								Items: &spec.SchemaOrArray{
 									Schema: &spec.Schema{
@@ -600,6 +611,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.ExperimentSpec": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
+					Description: "ExperimentSpec is the specification of an Experiment.",
 					Properties: map[string]spec.Schema{
 						"parameters": {
 							SchemaProps: spec.SchemaProps{
@@ -686,6 +698,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1.ExperimentStatus": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
+					Description: "ExperimentStatus is the current status of an Experiment.",
 					Properties: map[string]spec.Schema{
 						"startTime": {
 							SchemaProps: spec.SchemaProps{
@@ -1160,7 +1173,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 						},
 						"primaryPodLabels": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Labels that determines if pod needs to be injected by Katib sidecar container",
+								Description: "Labels that determines if pod needs to be injected by Katib sidecar container. If PrimaryPodLabels is omitted, metrics collector wraps all Trial's pods.",
 								Type:        []string{"object"},
 								AdditionalProperties: &spec.SchemaOrBool{
 									Schema: &spec.Schema{
@@ -1337,50 +1350,49 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1.SuggestionSpec": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
-					Description: "SuggestionSpec defines the desired state of suggestion.",
+					Description: "SuggestionSpec is the specification of a Suggestion.",
 					Properties: map[string]spec.Schema{
-						"algorithmName": {
+						"algorithm": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Name of the algorithm that suggestion is used.",
-								Type:        []string{"string"},
-								Format:      "",
+								Description: "Algorithm describes HP or NAS algorithm that suggestion is used.",
+								Ref:         ref("github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.AlgorithmSpec"),
 							},
 						},
-						"earlyStoppingAlgorithmName": {
+						"earlyStopping": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Early stopping algorithm name that Suggestion's Experiment is used",
-								Type:        []string{"string"},
-								Format:      "",
+								Description: "EarlyStopping describes early stopping algorithm that suggestion is used.",
+								Ref:         ref("github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingSpec"),
 							},
 						},
 						"requests": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Number of suggestions requested",
+								Description: "Number of suggestions requested.",
 								Type:        []string{"integer"},
 								Format:      "int32",
 							},
 						},
 						"resumePolicy": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Describes resuming policy which usually take effect after experiment terminated. Default value is LongRunning.",
+								Description: "ResumePolicy describes resuming policy which usually take effect after experiment terminated. Default value is LongRunning.",
 								Type:        []string{"string"},
 								Format:      "",
 							},
 						},
 					},
-					Required: []string{"algorithmName"},
+					Required: []string{"algorithm"},
 				},
 			},
-			Dependencies: []string{},
+			Dependencies: []string{
+				"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.AlgorithmSpec", "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingSpec"},
 		},
 		"github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1.SuggestionStatus": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
-					Description: "SuggestionStatus defines the observed state of Suggestion",
+					Description: "SuggestionStatus is the current status of a Suggestion.",
 					Properties: map[string]spec.Schema{
 						"algorithmSettings": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Algorithmsettings set by the algorithm services.",
+								Description: "AlgorithmSettings defines HP or NAS algorithm settings which suggestion service returns. This can be empty if settings haven't been changed.",
 								Type:        []string{"array"},
 								Items: &spec.SchemaOrArray{
 									Schema: &spec.Schema{
@@ -1630,6 +1642,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1.TrialSpec": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
+					Description: "TrialSpec is the specification of a Trial.",
 					Properties: map[string]spec.Schema{
 						"objective": {
 							SchemaProps: spec.SchemaProps{
@@ -1727,6 +1740,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1.TrialStatus": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
+					Description: "TrialStatus is the current status of a Trial.",
 					Properties: map[string]spec.Schema{
 						"startTime": {
 							SchemaProps: spec.SchemaProps{

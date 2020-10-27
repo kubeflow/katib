@@ -266,7 +266,9 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 			Namespace: testNamespace,
 		},
 		Spec: suggestionsv1beta1.SuggestionSpec{
-			AlgorithmName: testAlgorithm,
+			Algorithm: &common.AlgorithmSpec{
+				AlgorithmName: testAlgorithm,
+			},
 		},
 	}
 

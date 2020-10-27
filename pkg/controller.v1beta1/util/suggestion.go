@@ -9,27 +9,27 @@ import (
 
 // GetSuggestionDeploymentName returns name for the suggestion's deployment
 func GetSuggestionDeploymentName(s *suggestionsv1beta1.Suggestion) string {
-	return s.Name + "-" + s.Spec.AlgorithmName
+	return s.Name + "-" + s.Spec.Algorithm.AlgorithmName
 }
 
 // GetSuggestionServiceName returns name for the suggestion's service
 func GetSuggestionServiceName(s *suggestionsv1beta1.Suggestion) string {
-	return s.Name + "-" + s.Spec.AlgorithmName
+	return s.Name + "-" + s.Spec.Algorithm.AlgorithmName
 }
 
 // GetSuggestionPersistentVolumeName returns name for the suggestion's PV
 func GetSuggestionPersistentVolumeName(s *suggestionsv1beta1.Suggestion) string {
-	return s.Name + "-" + s.Spec.AlgorithmName + "-" + s.Namespace
+	return s.Name + "-" + s.Spec.Algorithm.AlgorithmName + "-" + s.Namespace
 }
 
 // GetSuggestionPersistentVolumeClaimName returns name for the suggestion's PVC
 func GetSuggestionPersistentVolumeClaimName(s *suggestionsv1beta1.Suggestion) string {
-	return s.Name + "-" + s.Spec.AlgorithmName
+	return s.Name + "-" + s.Spec.Algorithm.AlgorithmName
 }
 
 // GetSuggestionRBACName returns name for the suggestion's ServiceAccount, Role and RoleBinding
 func GetSuggestionRBACName(s *suggestionsv1beta1.Suggestion) string {
-	return s.Name + "-" + s.Spec.AlgorithmName
+	return s.Name + "-" + s.Spec.Algorithm.AlgorithmName
 }
 
 // GetAlgorithmEndpoint returns the endpoint of the Suggestion service with HP or NAS algorithm

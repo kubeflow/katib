@@ -17,7 +17,6 @@ import (
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
-
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
@@ -59,15 +58,15 @@ func New(mgr manager.Manager) Composer {
 // DesiredDeployment returns desired deployment for suggestion
 func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.Deployment, error) {
 
-	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.AlgorithmName, g.Client)
+	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.Algorithm.AlgorithmName, g.Client)
 	if err != nil {
 		return nil, err
 	}
 
 	// If early stopping is used, get the config data.
 	earlyStoppingConfigData := katibconfig.EarlyStoppingConfig{}
-	if s.Spec.EarlyStoppingAlgorithmName != "" {
-		earlyStoppingConfigData, err = katibconfig.GetEarlyStoppingConfigData(s.Spec.EarlyStoppingAlgorithmName, g.Client)
+	if s.Spec.EarlyStopping != nil && s.Spec.EarlyStopping.AlgorithmName != "" {
+		earlyStoppingConfigData, err = katibconfig.GetEarlyStoppingConfigData(s.Spec.EarlyStopping.AlgorithmName, g.Client)
 		if err != nil {
 			return nil, err
 		}
@@ -119,7 +118,7 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 	// TODO (andreyvelich): Document that custom service account
 	// should not be equal "<suggestion-name>-<suggestion-algorithm>".
 	// For custom service account user should manually add appropriate Role to change Trial status.
-	if s.Spec.EarlyStoppingAlgorithmName != "" && suggestionConfigData.ServiceAccountName == "" {
+	if s.Spec.EarlyStopping != nil && s.Spec.EarlyStopping.AlgorithmName != "" && suggestionConfigData.ServiceAccountName == "" {
 		d.Spec.Template.Spec.ServiceAccountName = util.GetSuggestionRBACName(s)
 	}
 
@@ -138,7 +137,7 @@ func (g *General) DesiredService(s *suggestionsv1beta1.Suggestion) (*corev1.Serv
 			Port: consts.DefaultSuggestionPort,
 		},
 	}
-	if s.Spec.EarlyStoppingAlgorithmName != "" {
+	if s.Spec.EarlyStopping != nil && s.Spec.EarlyStopping.AlgorithmName != "" {
 		earlyStoppingPort := corev1.ServicePort{
 			Name: consts.DefaultEarlyStoppingPortName,
 			Port: consts.DefaultEarlyStoppingPort,
@@ -226,7 +225,7 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 	}
 	containers = append(containers, suggestionContainer)
 
-	if s.Spec.EarlyStoppingAlgorithmName != "" {
+	if s.Spec.EarlyStopping != nil && s.Spec.EarlyStopping.AlgorithmName != "" {
 		earlyStoppingContainer := corev1.Container{
 			Name:            consts.ContainerEarlyStopping,
 			Image:           earlyStoppingConfigData.Image,
@@ -248,7 +247,7 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 // If StorageClassName != DefaultSuggestionStorageClassName returns only PVC.
 func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.PersistentVolumeClaim, *corev1.PersistentVolume, error) {
 
-	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.AlgorithmName, g.Client)
+	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.Algorithm.AlgorithmName, g.Client)
 	if err != nil {
 		return nil, nil, err
 	}

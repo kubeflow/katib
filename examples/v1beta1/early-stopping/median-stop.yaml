@@ -14,8 +14,8 @@ spec:
   algorithm:
     algorithmName: random
   earlyStopping:
-    earlyStoppingAlgorithmName: medianstop
-    earlyStoppingSettings:
+    algorithmName: medianstop
+    algorithmSettings:
       - name: min_trials_required
         value: "3"
   metricsCollectorSpec:

@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
+	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/manifest"
@@ -106,7 +107,9 @@ func (v *experimentValidator) Handle(ctx context.Context, req types.Request) typ
 				Namespace: inst.Namespace,
 			},
 			Spec: suggestionsv1beta1.SuggestionSpec{
-				AlgorithmName: inst.Spec.Algorithm.AlgorithmName,
+				Algorithm: &commonv1beta1.AlgorithmSpec{
+					AlgorithmName: inst.Spec.Algorithm.AlgorithmName,
+				},
 			},
 		}
 

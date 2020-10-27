@@ -79,7 +79,8 @@ func (g *General) SyncAssignments(
 	ctx, cancelSuggestion := context.WithTimeout(context.Background(), timeout)
 	defer cancelSuggestion()
 
-	// Algorithm settings in suggestion will overwrite the settings in experiment.
+	// Overwrite Experiment algorithm settings from the Suggestion status before the gRPC request.
+	// Original algorithm settings are located in Suggestion.Spec.Algorithm.AlgorithmSettings
 	filledE := e.DeepCopy()
 	appendAlgorithmSettingsFromSuggestion(filledE,
 		instance.Status.AlgorithmSettings)
@@ -104,8 +105,8 @@ func (g *General) SyncAssignments(
 	}
 
 	earlyStoppingRules := []commonapiv1beta1.EarlyStoppingRule{}
-	// If early stopping is set, call GetEarlyStoppingRules after GetSuggestions
-	if instance.Spec.EarlyStoppingAlgorithmName != "" {
+	// If early stopping is set, call GetEarlyStoppingRules after GetSuggestions.
+	if instance.Spec.EarlyStopping != nil && instance.Spec.EarlyStopping.AlgorithmName != "" {
 		endpoint = util.GetEarlyStoppingEndpoint(instance)
 		connEarlyStopping, err := grpc.Dial(endpoint, grpc.WithInsecure())
 		if err != nil {
@@ -245,8 +246,8 @@ func (g *General) ConvertExperiment(e *experimentsv1beta1.Experiment) *suggestio
 	// Set early stopping if it is needed
 	if e.Spec.EarlyStopping != nil {
 		res.Spec.EarlyStopping = &suggestionapi.EarlyStoppingSpec{
-			EarlyStoppingAlgorithmName: e.Spec.EarlyStopping.EarlyStoppingAlgorithmName,
-			EarlyStoppingSettings:      convertEarlyStoppingSettings(e.Spec.EarlyStopping.EarlyStoppingSettings),
+			AlgorithmName:     e.Spec.EarlyStopping.AlgorithmName,
+			AlgorithmSettings: convertEarlyStoppingSettings(e.Spec.EarlyStopping.AlgorithmSettings),
 		}
 	}
 	return res

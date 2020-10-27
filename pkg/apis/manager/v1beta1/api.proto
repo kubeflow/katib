@@ -97,24 +97,34 @@ message ObjectiveSpec{
     /// This can be empty if we only care about the objective metric.
 }
 
-message AlgorithmSetting {
-    string name = 1;
-    string value = 2;
-}
 
+/**
+ * HP or NAS algorithm specification.
+ */
 message AlgorithmSpec {
     string algorithm_name = 1;
     repeated AlgorithmSetting algorithm_settings = 2;
 }
 
 /**
- * Early stopping algorithm specification
+ * HP or NAS algorithm settings.
  */
- message EarlyStoppingSpec {
-    string early_stopping_algorithm_name = 1;
-    repeated EarlyStoppingSetting early_stopping_settings = 2;
+ message AlgorithmSetting {
+    string name = 1;
+    string value = 2;
 }
 
+/**
+ * Early stopping algorithm specification.
+ */
+ message EarlyStoppingSpec {
+    string algorithm_name = 1;
+    repeated EarlyStoppingSetting algorithm_settings = 2;
+}
+
+/**
+ * Early stopping algorithm settings.
+ */
 message EarlyStoppingSetting {
     string name = 1;
     string value = 2;

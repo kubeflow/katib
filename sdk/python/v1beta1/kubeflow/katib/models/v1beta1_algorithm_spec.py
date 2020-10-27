@@ -58,6 +58,7 @@ class V1beta1AlgorithmSpec(object):
     def algorithm_name(self):
         """Gets the algorithm_name of this V1beta1AlgorithmSpec.  # noqa: E501
 
+        HP or NAS algorithm name.  # noqa: E501
 
         :return: The algorithm_name of this V1beta1AlgorithmSpec.  # noqa: E501
         :rtype: str
@@ -68,6 +69,7 @@ class V1beta1AlgorithmSpec(object):
     def algorithm_name(self, algorithm_name):
         """Sets the algorithm_name of this V1beta1AlgorithmSpec.
 
+        HP or NAS algorithm name.  # noqa: E501
 
         :param algorithm_name: The algorithm_name of this V1beta1AlgorithmSpec.  # noqa: E501
         :type: str

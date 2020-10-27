@@ -27,10 +27,10 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	apis "github.com/kubeflow/katib/pkg/apis/controller"
+	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
@@ -747,10 +747,14 @@ func newFakeSuggestion() *suggestionsv1beta1.Suggestion {
 			Annotations: suggestionAnnotations,
 		},
 		Spec: suggestionsv1beta1.SuggestionSpec{
-			Requests:                   1,
-			AlgorithmName:              suggestionAlgorithm,
-			EarlyStoppingAlgorithmName: earlyStoppingAlgorithm,
-			ResumePolicy:               experimentsv1beta1.FromVolume,
+			Requests: 1,
+			Algorithm: &commonv1beta1.AlgorithmSpec{
+				AlgorithmName: suggestionAlgorithm,
+			},
+			EarlyStopping: &commonv1beta1.EarlyStoppingSpec{
+				AlgorithmName: earlyStoppingAlgorithm,
+			},
+			ResumePolicy: experimentsv1beta1.FromVolume,
 		},
 	}
 }

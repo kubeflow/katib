@@ -25,7 +25,8 @@
         "value": {
           "type": "string"
         }
-      }
+      },
+      "description": "*\nHP or NAS algorithm settings."
     },
     "beta1AlgorithmSpec": {
       "type": "object",
@@ -39,7 +40,8 @@
             "$ref": "#/definitions/beta1AlgorithmSetting"
           }
         }
-      }
+      },
+      "description": "*\nHP or NAS algorithm specification."
     },
     "beta1ComparisonType": {
       "type": "string",

@@ -110,7 +110,7 @@ func TestSyncAssignments(t *testing.T) {
 		Algorithm: &suggestionapi.AlgorithmSpec{
 			AlgorithmSettings: []*suggestionapi.AlgorithmSetting{
 				{
-					Name:  "overridded-name",
+					Name:  "overridden-name",
 					Value: "suggestion-value",
 				},
 				{
@@ -242,7 +242,7 @@ func TestValidateAlgorithmSettings(t *testing.T) {
 	}
 	expectedRequest.Experiment.Spec.Algorithm.AlgorithmSettings = []*suggestionapi.AlgorithmSetting{
 		{
-			Name:  "overridded-name",
+			Name:  "overridden-name",
 			Value: "value",
 		},
 	}
@@ -613,14 +613,14 @@ func newFakeExperiment() *experimentsv1beta1.Experiment {
 				AlgorithmName: algorithmName,
 				AlgorithmSettings: []commonv1beta1.AlgorithmSetting{
 					{
-						Name:  "overridded-name",
+						Name:  "overridden-name",
 						Value: "value",
 					},
 				},
 			},
 			EarlyStopping: &commonapiv1beta1.EarlyStoppingSpec{
-				EarlyStoppingAlgorithmName: earlyStoppingAlgorithmName,
-				EarlyStoppingSettings: []commonapiv1beta1.EarlyStoppingSetting{
+				AlgorithmName: earlyStoppingAlgorithmName,
+				AlgorithmSettings: []commonapiv1beta1.EarlyStoppingSetting{
 					{
 						Name:  "setting-name",
 						Value: "value",
@@ -654,16 +654,32 @@ func newFakeSuggestion() *suggestionsv1beta1.Suggestion {
 			Namespace: "namespace",
 		},
 		Spec: suggestionsv1beta1.SuggestionSpec{
-			AlgorithmName:              algorithmName,
-			Requests:                   6,
-			EarlyStoppingAlgorithmName: earlyStoppingAlgorithmName,
+			Algorithm: &commonv1beta1.AlgorithmSpec{
+				AlgorithmName: algorithmName,
+				AlgorithmSettings: []commonv1beta1.AlgorithmSetting{
+					{
+						Name:  "overridden-name",
+						Value: "value",
+					},
+				},
+			},
+			EarlyStopping: &commonapiv1beta1.EarlyStoppingSpec{
+				AlgorithmName: earlyStoppingAlgorithmName,
+				AlgorithmSettings: []commonapiv1beta1.EarlyStoppingSetting{
+					{
+						Name:  "setting-name",
+						Value: "value",
+					},
+				},
+			},
+			Requests: 6,
 		},
 		Status: suggestionsv1beta1.SuggestionStatus{
 			SuggestionCount: 4,
 			AlgorithmSettings: []commonv1beta1.AlgorithmSetting{
 				{
-					Name:  "overridded-name",
-					Value: "overridded-value",
+					Name:  "overridden-name",
+					Value: "overridden-value",
 				},
 				{
 					Name:  "new-setting",
@@ -783,8 +799,8 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 					AlgorithmName: algorithmName,
 					AlgorithmSettings: []*suggestionapi.AlgorithmSetting{
 						{
-							Name:  "overridded-name",
-							Value: "overridded-value",
+							Name:  "overridden-name",
+							Value: "overridden-value",
 						},
 						{
 							Name:  "new-setting",
@@ -793,8 +809,8 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 					},
 				},
 				EarlyStopping: &suggestionapi.EarlyStoppingSpec{
-					EarlyStoppingAlgorithmName: earlyStoppingAlgorithmName,
-					EarlyStoppingSettings: []*suggestionapi.EarlyStoppingSetting{
+					AlgorithmName: earlyStoppingAlgorithmName,
+					AlgorithmSettings: []*suggestionapi.EarlyStoppingSetting{
 						{
 							Name:  "setting-name",
 							Value: "value",

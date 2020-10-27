@@ -22,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
+// ExperimentSpec is the specification of an Experiment.
 type ExperimentSpec struct {
 	// List of hyperparameter configurations.
 	Parameters []ParameterSpec `json:"parameters,omitempty"`
@@ -57,6 +58,7 @@ type ExperimentSpec struct {
 	ResumePolicy ResumePolicyType `json:"resumePolicy,omitempty"`
 }
 
+// ExperimentStatus is the current status of an Experiment.
 type ExperimentStatus struct {
 	// Represents time when the Experiment was acknowledged by the Experiment controller.
 	// It is not guaranteed to be set in happens-before order across separate operations.
@@ -130,8 +132,8 @@ type OptimalTrial struct {
 	Observation common.Observation `json:"observation,omitempty"`
 }
 
-// +k8s:deepcopy-gen=true
 // ExperimentCondition describes the state of the experiment at a certain point.
+// +k8s:deepcopy-gen=true
 type ExperimentCondition struct {
 	// Type of experiment condition.
 	Type ExperimentConditionType `json:"type"`

@@ -68,7 +68,7 @@ Katib GRPC API v1beta1
 <a name="api.v1.beta1.AlgorithmSetting"></a>
 
 ### AlgorithmSetting
-
+HP or NAS algorithm settings.
 
 
 | Field | Type | Label | Description |
@@ -84,7 +84,7 @@ Katib GRPC API v1beta1
 <a name="api.v1.beta1.AlgorithmSpec"></a>
 
 ### AlgorithmSpec
-
+HP or NAS algorithm specification.
 
 
 | Field | Type | Label | Description |
@@ -142,7 +142,7 @@ Katib GRPC API v1beta1
 <a name="api.v1.beta1.EarlyStoppingSetting"></a>
 
 ### EarlyStoppingSetting
-
+Early stopping algorithm settings.
 
 
 | Field | Type | Label | Description |
@@ -158,13 +158,13 @@ Katib GRPC API v1beta1
 <a name="api.v1.beta1.EarlyStoppingSpec"></a>
 
 ### EarlyStoppingSpec
-Early stopping algorithm specification
+Early stopping algorithm specification.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| early_stopping_algorithm_name | [string](#string) |  |  |
-| early_stopping_settings | [EarlyStoppingSetting](#api.v1.beta1.EarlyStoppingSetting) | repeated |  |
+| algorithm_name | [string](#string) |  |  |
+| algorithm_settings | [EarlyStoppingSetting](#api.v1.beta1.EarlyStoppingSetting) | repeated |  |
 
 
 
