@@ -19,7 +19,7 @@ class TestMedianStop(unittest.TestCase):
 
     def test_get_earlystopping_rules(self):
 
-        # TODO (andreyvelich): Add more informative tests
+        # TODO (andreyvelich): Add more informative tests.
         trials = [
             api_pb2.Trial(
                 name="test-asfjh",
@@ -36,6 +36,7 @@ class TestMedianStop(unittest.TestCase):
         request = api_pb2.GetEarlyStoppingRulesRequest(
             experiment=experiment,
             trials=trials,
+            db_manager_address="katib-db-manager.kubeflow:6789"
         )
 
         get_earlystopping_rules = self.test_server.invoke_unary_unary(
@@ -47,9 +48,7 @@ class TestMedianStop(unittest.TestCase):
 
         response, metadata, code, details = get_earlystopping_rules.termination()
 
-        print(response)
-        # TODO (andreyvelich): Add tests.
-        # self.assertEqual(code, grpc.StatusCode.OK)
+        self.assertEqual(code, grpc.StatusCode.OK)
 
 
 if __name__ == '__main__':
