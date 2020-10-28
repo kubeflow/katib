@@ -109,7 +109,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.EarlyStoppingRule": {
 			Schema: spec.Schema{
 				SchemaProps: spec.SchemaProps{
-					Description: "EarlyStoppingRule represents each rule for early stopping",
+					Description: "EarlyStoppingRule represents each rule for early stopping.",
 					Properties: map[string]spec.Schema{
 						"name": {
 							SchemaProps: spec.SchemaProps{
@@ -130,6 +130,13 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 								Description: "Comparison defines correlation between name and value.",
 								Type:        []string{"string"},
 								Format:      "",
+							},
+						},
+						"startStep": {
+							SchemaProps: spec.SchemaProps{
+								Description: "StartStep defines quantity of intermediate results that should be received before applying the rule. If start step is empty, rule is applied from the first recorded metric.",
+								Type:        []string{"integer"},
+								Format:      "int32",
 							},
 						},
 					},
@@ -1392,7 +1399,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 					Properties: map[string]spec.Schema{
 						"algorithmSettings": {
 							SchemaProps: spec.SchemaProps{
-								Description: "AlgorithmSettings defines HP or NAS algorithm settings which suggestion service returns. This can be empty if settings haven't been changed.",
+								Description: "AlgorithmSettings defines HP or NAS algorithm settings which suggestion gRPC service returns. These settings overwrites Experiment's settings before the gRPC request. It can be empty if settings haven't been changed.",
 								Type:        []string{"array"},
 								Items: &spec.SchemaOrArray{
 									Schema: &spec.Schema{
@@ -1665,7 +1672,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 						},
 						"earlyStoppingRules": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Rules for early stopping techniques Contains rule name, value and comparison type",
+								Description: "Rules for early stopping techniques. Each rule should be met to early stopped Trial.",
 								Type:        []string{"array"},
 								Items: &spec.SchemaOrArray{
 									Schema: &spec.Schema{

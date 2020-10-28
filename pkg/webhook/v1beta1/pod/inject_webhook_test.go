@@ -256,7 +256,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 	testPath := "/test/path"
 
 	earlyStoppingRules := []string{
-		"accuracy;0.6;less",
+		"accuracy;0.6;less;5",
 		"loss;2;greater",
 	}
 
@@ -274,7 +274,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 
 	testCases := []struct {
 		Trial              *trialsv1beta1.Trial
-		MetricName         string
+		MetricNames        string
 		MCSpec             common.MetricsCollectorSpec
 		EarlyStoppingRules []string
 		ExpectedArgs       []string
@@ -287,7 +287,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					Name: testTrialName,
 				},
 			},
-			MetricName: testMetricName,
+			MetricNames: testMetricName,
 			MCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
 					Kind: common.StdOutCollector,
@@ -307,7 +307,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					Name: testTrialName,
 				},
 			},
-			MetricName: testMetricName,
+			MetricNames: testMetricName,
 			MCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
 					Kind: common.FileCollector,
@@ -339,7 +339,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					Name: testTrialName,
 				},
 			},
-			MetricName: testMetricName,
+			MetricNames: testMetricName,
 			MCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
 					Kind: common.TfEventCollector,
@@ -364,7 +364,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					Name: testTrialName,
 				},
 			},
-			MetricName: testMetricName,
+			MetricNames: testMetricName,
 			MCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
 					Kind: common.CustomCollector,
@@ -383,7 +383,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					Name: testTrialName,
 				},
 			},
-			MetricName: testMetricName,
+			MetricNames: testMetricName,
 			MCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
 					Kind: common.CustomCollector,
@@ -408,7 +408,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					Name: testTrialName,
 				},
 			},
-			MetricName: testMetricName,
+			MetricNames: testMetricName,
 			MCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
 					Kind: common.PrometheusMetricCollector,
@@ -431,7 +431,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					},
 				},
 			},
-			MetricName: testMetricName,
+			MetricNames: testMetricName,
 			MCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
 					Kind: common.StdOutCollector,
@@ -477,7 +477,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 	}, timeout).ShouldNot(gomega.HaveOccurred())
 
 	for _, tc := range testCases {
-		args, err := si.getMetricsCollectorArgs(tc.Trial, tc.MetricName, tc.MCSpec, tc.EarlyStoppingRules)
+		args, err := si.getMetricsCollectorArgs(tc.Trial, tc.MetricNames, tc.MCSpec, tc.EarlyStoppingRules)
 
 		if !tc.Err && err != nil {
 			t.Errorf("Case: %v failed. Expected nil, got %v", tc.Name, err)

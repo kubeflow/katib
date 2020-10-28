@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -191,21 +192,21 @@ func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1beta1.Tria
 	if mc.Collector.Kind == common.CustomCollector {
 		return mc.Collector.CustomCollector, nil
 	}
-	metricName := trial.Spec.Objective.ObjectiveMetricName
+	metricNames := trial.Spec.Objective.ObjectiveMetricName
 	for _, v := range trial.Spec.Objective.AdditionalMetricNames {
-		metricName += ";"
-		metricName += v
+		metricNames += ";"
+		metricNames += v
 	}
 
-	// Convert rules to flag value with name;value;comparison order.
-	// E.g. accuracy;0.8;less
+	// Convert rules to flag value with name;value;comparison;startStep order, e.g. accuracy;0.8;less;4.
+	// If start step is empty, we apply rule from the first recorded metrics and flag is equal accuracy;0.8;less;0.
 	earlyStoppingRules := []string{}
 	for _, rule := range trial.Spec.EarlyStoppingRules {
-		newRule := rule.Name + ";" + rule.Value + ";" + string(rule.Comparison)
+		newRule := rule.Name + ";" + rule.Value + ";" + string(rule.Comparison) + ";" + strconv.Itoa(rule.StartStep)
 		earlyStoppingRules = append(earlyStoppingRules, newRule)
 	}
 
-	args, err := s.getMetricsCollectorArgs(trial, metricName, mc, earlyStoppingRules)
+	args, err := s.getMetricsCollectorArgs(trial, metricNames, mc, earlyStoppingRules)
 	if err != nil {
 		return nil, err
 	}
@@ -287,8 +288,8 @@ func (s *sidecarInjector) getKatibJob(object *unstructured.Unstructured, namespa
 	return jobKind, jobName, nil
 }
 
-func (s *sidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, metricName string, mc common.MetricsCollectorSpec, esRules []string) ([]string, error) {
-	args := []string{"-t", trial.Name, "-m", metricName, "-s-db", katibmanagerv1beta1.GetDBManagerAddr()}
+func (s *sidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, metricNames string, mc common.MetricsCollectorSpec, esRules []string) ([]string, error) {
+	args := []string{"-t", trial.Name, "-m", metricNames, "-o-type", string(trial.Spec.Objective.Type), "-s-db", katibmanagerv1beta1.GetDBManagerAddr()}
 	if mountPath, _ := getMountPath(mc); mountPath != "" {
 		args = append(args, "-path", mountPath)
 	}

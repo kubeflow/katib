@@ -116,7 +116,7 @@
       "description": "SuggestionStatus is the current status of a Suggestion.",
       "properties": {
         "algorithmSettings": {
-          "description": "AlgorithmSettings defines HP or NAS algorithm settings which suggestion service returns. This can be empty if settings haven't been changed.",
+          "description": "AlgorithmSettings defines HP or NAS algorithm settings which suggestion gRPC service returns. These settings overwrites Experiment's settings before the gRPC request. It can be empty if settings haven't been changed.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1beta1.AlgorithmSetting"
@@ -265,7 +265,7 @@
       ],
       "properties": {
         "earlyStoppingRules": {
-          "description": "Rules for early stopping techniques Contains rule name, value and comparison type",
+          "description": "Rules for early stopping techniques. Each rule should be met to early stopped Trial.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1beta1.EarlyStoppingRule"
@@ -404,7 +404,7 @@
       }
     },
     "v1beta1.EarlyStoppingRule": {
-      "description": "EarlyStoppingRule represents each rule for early stopping",
+      "description": "EarlyStoppingRule represents each rule for early stopping.",
       "properties": {
         "comparison": {
           "description": "Comparison defines correlation between name and value.",
@@ -413,6 +413,11 @@
         "name": {
           "description": "Name contains metric name for the rule.",
           "type": "string"
+        },
+        "startStep": {
+          "description": "StartStep defines quantity of intermediate results that should be received before applying the rule. If start step is empty, rule is applied from the first recorded metric.",
+          "type": "integer",
+          "format": "int32"
         },
         "value": {
           "description": "Value contains metric value for the rule.",

@@ -316,16 +316,23 @@ message ValidateAlgorithmSettingsReply {
 message GetEarlyStoppingRulesRequest {
     Experiment experiment = 1;
     repeated Trial trials = 2; 
+    string db_manager_address = 3;
 }
 
 message GetEarlyStoppingRulesReply {
     repeated EarlyStoppingRule early_stopping_rules = 1;
 }
 
+/**
+ * EarlyStoppingRule represents single early stopping rule.
+ */
 message EarlyStoppingRule {
-    string name = 1;
-    string value = 2;
-    ComparisonType comparison = 3;
+    string name = 1; // Name of the rule. Usually, metric name.
+    string value = 2; // Value of the metric.
+    ComparisonType comparison = 3; // Correlation between name and value, one of equal, less or greater
+    // Defines quantity of intermediate results that should be received before applying the rule.
+    // If start step is empty, rule is applied from the first recorded metric.
+    int32 start_step = 4; 
 }
 
 enum ComparisonType {

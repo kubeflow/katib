@@ -30,7 +30,7 @@ const HPJobPlot = props => {
         let flag = 'number';
         let values = [];
         for (let j = 0; j < data.length; j++) {
-          if (data[j][1] === 'Succeeded') {
+          if (data[j][1] === 'Succeeded' || data[j][1] === 'EarlyStopped') {
             isShowPlot = true;
             let number = Number(data[j][i]);
             if (isNaN(number)) {

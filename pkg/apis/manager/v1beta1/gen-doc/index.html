@@ -478,7 +478,7 @@
         
       
         <h3 id="api.v1.beta1.EarlyStoppingRule">EarlyStoppingRule</h3>
-        <p></p>
+        <p>EarlyStoppingRule represents single early stopping rule.</p>
 
         
           <table class="field-table">
@@ -491,21 +491,29 @@
                   <td>name</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Name of the rule. Usually, metric name. </p></td>
                 </tr>
               
                 <tr>
                   <td>value</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Value of the metric. </p></td>
                 </tr>
               
                 <tr>
                   <td>comparison</td>
                   <td><a href="#api.v1.beta1.ComparisonType">ComparisonType</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Correlation between name and value, one of equal, less or greater </p></td>
+                </tr>
+              
+                <tr>
+                  <td>start_step</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Defines quantity of intermediate results that should be received before applying the rule.
+If start step is empty, rule is applied from the first recorded metric. </p></td>
                 </tr>
               
             </tbody>
@@ -788,6 +796,13 @@
                   <td>trials</td>
                   <td><a href="#api.v1.beta1.Trial">Trial</a></td>
                   <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>db_manager_address</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
                   <td><p> </p></td>
                 </tr>
               

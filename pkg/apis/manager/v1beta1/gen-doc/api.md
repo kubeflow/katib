@@ -125,14 +125,15 @@ HP or NAS algorithm specification.
 <a name="api.v1.beta1.EarlyStoppingRule"></a>
 
 ### EarlyStoppingRule
-
+EarlyStoppingRule represents single early stopping rule.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| name | [string](#string) |  |  |
-| value | [string](#string) |  |  |
-| comparison | [ComparisonType](#api.v1.beta1.ComparisonType) |  |  |
+| name | [string](#string) |  | Name of the rule. Usually, metric name. |
+| value | [string](#string) |  | Value of the metric. |
+| comparison | [ComparisonType](#api.v1.beta1.ComparisonType) |  | Correlation between name and value, one of equal, less or greater |
+| start_step | [int32](#int32) |  | Defines quantity of intermediate results that should be received before applying the rule. If start step is empty, rule is applied from the first recorded metric. |
 
 
 
@@ -270,6 +271,7 @@ Discrete and Categorical type use List.
 | ----- | ---- | ----- | ----------- |
 | experiment | [Experiment](#api.v1.beta1.Experiment) |  |  |
 | trials | [Trial](#api.v1.beta1.Trial) | repeated |  |
+| db_manager_address | [string](#string) |  |  |
 
 
 

@@ -57,7 +57,7 @@ type EarlyStoppingSetting struct {
 	Value string `json:"value,omitempty"`
 }
 
-// EarlyStoppingRule represents each rule for early stopping
+// EarlyStoppingRule represents each rule for early stopping.
 type EarlyStoppingRule struct {
 	// Name contains metric name for the rule.
 	Name string `json:"name,omitempty"`
@@ -67,6 +67,11 @@ type EarlyStoppingRule struct {
 
 	// Comparison defines correlation between name and value.
 	Comparison ComparisonType `json:"comparison,omitempty"`
+
+	// StartStep defines quantity of intermediate results
+	// that should be received before applying the rule.
+	// If start step is empty, rule is applied from the first recorded metric.
+	StartStep int `json:"startStep,omitempty"`
 }
 
 // ComparisonType is the type of comparison, one of equal, less or greater.

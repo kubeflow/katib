@@ -67,21 +67,30 @@ func (flag *stopRulesFlag) String() string {
 		stopRuleStrings = append(stopRuleStrings, r.Name)
 		stopRuleStrings = append(stopRuleStrings, r.Value)
 		stopRuleStrings = append(stopRuleStrings, string(r.Comparison))
+		stopRuleStrings = append(stopRuleStrings, strconv.Itoa(r.StartStep))
 	}
 	return strings.Join(stopRuleStrings, ";")
 }
 
 func (flag *stopRulesFlag) Set(value string) error {
 	stopRuleParsed := strings.Split(value, ";")
-	if len(stopRuleParsed) != 3 {
+	if len(stopRuleParsed) != 4 {
 		return fmt.Errorf("Invalid Early Stopping rule: %v", value)
 	}
 
-	// For each stop rule this order: 1 - metric name, 2 - metric value, 3 - comparison type
+	// Get int start step.
+	startStep, err := strconv.Atoi(stopRuleParsed[3])
+	if err != nil {
+		klog.Fatalf("Parse start step: %v to int error: %v", stopRuleParsed[3], err)
+	}
+
+	// For each stop rule this order: 1 - metric name, 2 - metric value, 3 - comparison type, 4 - start step.
+	// Start step is equal to 0, if it's not defined.
 	stopRule := commonv1beta1.EarlyStoppingRule{
 		Name:       stopRuleParsed[0],
 		Value:      stopRuleParsed[1],
 		Comparison: commonv1beta1.ComparisonType(stopRuleParsed[2]),
+		StartStep:  startStep,
 	}
 
 	*flag = append(*flag, stopRule)
@@ -94,6 +103,7 @@ var (
 	trialName            = flag.String("t", "", "Trial Name")
 	metricsFilePath      = flag.String("path", "", "Metrics File Path")
 	metricNames          = flag.String("m", "", "Metric names")
+	objectiveType        = flag.String("o-type", "", "Objective type")
 	metricFilters        = flag.String("f", "", "Metric filters")
 	pollInterval         = flag.Duration("p", common.DefaultPollInterval, "Poll interval between running processes check")
 	timeout              = flag.Duration("timeout", common.DefaultTimeout, "Timeout before invoke error during running processes check")
@@ -117,10 +127,10 @@ func checkMetricFile(mFile string) {
 
 func printMetricsFile(mFile string) {
 
-	// Check that metric file exists
+	// Check that metric file exists.
 	checkMetricFile(mFile)
 
-	// Print lines from metrics file
+	// Print lines from metrics file.
 	t, _ := tail.TailFile(mFile, tail.Config{Follow: true})
 	for line := range t.Lines {
 		klog.Info(line.Text)
@@ -129,10 +139,27 @@ func printMetricsFile(mFile string) {
 
 func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 
-	// Check that metric file exists
+	// metricStartStep is the dict where key = metric name, value = start step.
+	// We should apply early stopping rule only if metric is reported at least "start_step" times.
+	metricStartStep := make(map[string]int)
+	for _, stopRule := range stopRules {
+		if stopRule.StartStep != 0 {
+			metricStartStep[stopRule.Name] = stopRule.StartStep
+		}
+	}
+
+	// First metric is objective in metricNames array.
+	objMetric := strings.Split(*metricNames, ";")[0]
+	objType := commonv1beta1.ObjectiveType(*objectiveType)
+	// For objective metric we calculate best optimal value from the recorded metrics.
+	// This is workaround for Median Stop algorithm.
+	// TODO (andreyvelich): Think about it, maybe define latest, max or min strategy type in stop-rule as well ?
+	var optimalObjValue *float64
+
+	// Check that metric file exists.
 	checkMetricFile(mFile)
 
-	// Get Main proccess
+	// Get Main proccess.
 	_, mainProcPid, err := common.GetMainProcesses(mFile)
 	if err != nil {
 		klog.Fatalf("GetMainProcesses failed: %v", err)
@@ -142,17 +169,17 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 		klog.Fatalf("Failed to create new Process from pid %v, error: %v", mainProcPid, err)
 	}
 
-	// Get list of regural expressions from filters
+	// Get list of regural expressions from filters.
 	metricRegList := filemc.GetFilterRegexpList(filters)
 
-	// Start watch log lines
+	// Start watch log lines.
 	t, _ := tail.TailFile(mFile, tail.Config{Follow: true})
 	for line := range t.Lines {
 		logText := line.Text
 		// Print log line
 		klog.Info(logText)
 
-		// Check if log line contains metric from stop rules
+		// Check if log line contains metric from stop rules.
 		isRuleLine := false
 		for _, rule := range stopRules {
 			if strings.Contains(logText, rule.Name) {
@@ -160,12 +187,12 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 				break
 			}
 		}
-		// If log line doesn't contain appropriate metric, continue track file
+		// If log line doesn't contain appropriate metric, continue track file.
 		if !isRuleLine {
 			continue
 		}
 
-		// If log line contains appropriate metric, find all submatches from metric filters
+		// If log line contains appropriate metric, find all submatches from metric filters.
 		for _, metricReg := range metricRegList {
 			matchStrings := metricReg.FindAllStringSubmatch(logText, -1)
 			for _, subMatchList := range matchStrings {
@@ -180,18 +207,41 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 				}
 
 				// stopRules contains array of EarlyStoppingRules that has not been reached yet.
-				// After rule is reached we delete appropriate element from the array
+				// After rule is reached we delete appropriate element from the array.
 				for idx, rule := range stopRules {
 					if metricName != rule.Name {
 						continue
 					}
+
+					// Calculate optimalObjValue.
+					if metricName == objMetric {
+						if optimalObjValue == nil {
+							optimalObjValue = &metricValue
+						} else if objType == commonv1beta1.ObjectiveTypeMaximize && metricValue > *optimalObjValue {
+							optimalObjValue = &metricValue
+						} else if objType == commonv1beta1.ObjectiveTypeMinimize && metricValue < *optimalObjValue {
+							optimalObjValue = &metricValue
+						}
+						// Assign best optimal value to metric value
+						metricValue = *optimalObjValue
+					}
+
+					// Reduce steps if appropriate metric is reported.
+					// Once rest steps are empty we apply early stopping rule.
+					if restSteps, ok := metricStartStep[metricName]; ok {
+						metricStartStep[metricName]--
+						if restSteps != 0 {
+							continue
+						}
+					}
+
 					ruleValue, err := strconv.ParseFloat(rule.Value, 64)
 					if err != nil {
 						klog.Fatalf("Unable to parse value %v to float for rule metric %v", rule.Value, rule.Name)
 					}
 
-					// Metric value can be equal, less or greater than stop rule
-					// Delete suitable stop rule from the array
+					// Metric value can be equal, less or greater than stop rule.
+					// Delete suitable stop rule from the array.
 					if rule.Comparison == commonv1beta1.ComparisonTypeEqual && metricValue == ruleValue {
 						stopRules = deleteStopRule(stopRules, idx)
 					} else if rule.Comparison == commonv1beta1.ComparisonTypeLess && metricValue < ruleValue {
@@ -203,13 +253,13 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 			}
 		}
 
-		// If stopRules array is empty, Trial is early stopped
+		// If stopRules array is empty, Trial is early stopped.
 		if len(stopRules) == 0 {
 			klog.Info("Training container is early stopped")
 			isEarlyStopped = true
 
 			// Create ".pid" file with "early-stopped" line.
-			// Which means that training is early stopped and Trial status is updated
+			// Which means that training is early stopped and Trial status is updated.
 			markFile := filepath.Join(filepath.Dir(mFile), fmt.Sprintf("%d.pid", mainProcPid))
 			_, err := os.Create(markFile)
 			if err != nil {
@@ -227,18 +277,18 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 				klog.Fatalf("Get children proceses for main PID: %v failed: %v", mainProcPid, err)
 			}
 
-			// TODO (andreyvelich): Currently support only single child process
+			// TODO (andreyvelich): Currently support only single child process.
 			if len(childProc) != 1 {
 				klog.Fatalf("Multiple children processes are not supported. Children processes: %v", childProc)
 			}
 
-			// Terminate the child process
+			// Terminate the child process.
 			err = childProc[0].Terminate()
 			if err != nil {
 				klog.Fatalf("Unable to terminate child process %v, error: %v", childProc[0], err)
 			}
 
-			// Report metrics to DB
+			// Report metrics to DB.
 			reportMetrics(filters)
 
 			// Wait until main proccess is completed.
@@ -253,7 +303,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 				}
 			}
 
-			// Create connection and client for Early Stopping service
+			// Create connection and client for Early Stopping service.
 			conn, err := grpc.Dial(*earlyStopServiceAddr, grpc.WithInsecure())
 			if err != nil {
 				klog.Fatalf("Could not connect to Early Stopping service, error: %v", err)
@@ -265,7 +315,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 				TrialName: *trialName,
 			}
 
-			// Send request to change Trial status to early stopped
+			// Send request to change Trial status to early stopped.
 			_, err = c.SetTrialStatus(context.Background(), setTrialStatusReq)
 			if err != nil {
 				klog.Fatalf("Set Trial status error: %v", err)
@@ -296,7 +346,7 @@ func main() {
 		filters = strings.Split(*metricFilters, ";")
 	}
 
-	// If stop rule is set we need to parse metrics during run
+	// If stop rule is set we need to parse metrics during run.
 	if len(stopRules) != 0 {
 		go watchMetricsFile(*metricsFilePath, stopRules, filters)
 	} else {
@@ -313,7 +363,7 @@ func main() {
 		klog.Fatalf("Failed to wait for worker container: %v", err)
 	}
 
-	// If training was not early stopped, report the metrics
+	// If training was not early stopped, report the metrics.
 	if !isEarlyStopped {
 		reportMetrics(filters)
 	}

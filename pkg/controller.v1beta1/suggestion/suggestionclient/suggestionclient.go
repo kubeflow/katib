@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	utilrand "k8s.io/apimachinery/pkg/util/rand"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -19,9 +20,9 @@ import (
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	suggestionapi "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
+	katibmanagerv1beta1 "github.com/kubeflow/katib/pkg/common/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var (
@@ -120,8 +121,9 @@ func (g *General) SyncAssignments(
 		defer cancelEarlyStopping()
 
 		requestEarlyStopping := &suggestionapi.GetEarlyStoppingRulesRequest{
-			Experiment: g.ConvertExperiment(filledE),
-			Trials:     g.ConvertTrials(ts),
+			Experiment:       g.ConvertExperiment(filledE),
+			Trials:           g.ConvertTrials(ts),
+			DbManagerAddress: katibmanagerv1beta1.GetDBManagerAddr(),
 		}
 
 		// Get new early stopping rules
@@ -138,6 +140,7 @@ func (g *General) SyncAssignments(
 					Name:       rule.Name,
 					Value:      rule.Value,
 					Comparison: convertComparison(rule.Comparison),
+					StartStep:  int(rule.StartStep),
 				},
 			)
 		}

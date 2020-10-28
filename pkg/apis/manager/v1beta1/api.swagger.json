@@ -67,8 +67,14 @@
         },
         "comparison": {
           "$ref": "#/definitions/beta1ComparisonType"
+        },
+        "start_step": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Defines quantity of intermediate results that should be received before applying the rule.\nIf start step is empty, rule is applied from the first recorded metric."
         }
-      }
+      },
+      "description": "*\nEarlyStoppingRule represents single early stopping rule."
     },
     "beta1GetEarlyStoppingRulesReply": {
       "type": "object",

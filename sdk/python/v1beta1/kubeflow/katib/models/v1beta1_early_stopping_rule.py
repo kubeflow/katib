@@ -33,20 +33,23 @@ class V1beta1EarlyStoppingRule(object):
     swagger_types = {
         'comparison': 'str',
         'name': 'str',
+        'start_step': 'int',
         'value': 'str'
     }
 
     attribute_map = {
         'comparison': 'comparison',
         'name': 'name',
+        'start_step': 'startStep',
         'value': 'value'
     }
 
-    def __init__(self, comparison=None, name=None, value=None):  # noqa: E501
+    def __init__(self, comparison=None, name=None, start_step=None, value=None):  # noqa: E501
         """V1beta1EarlyStoppingRule - a model defined in Swagger"""  # noqa: E501
 
         self._comparison = None
         self._name = None
+        self._start_step = None
         self._value = None
         self.discriminator = None
 
@@ -54,6 +57,8 @@ class V1beta1EarlyStoppingRule(object):
             self.comparison = comparison
         if name is not None:
             self.name = name
+        if start_step is not None:
+            self.start_step = start_step
         if value is not None:
             self.value = value
 
@@ -102,6 +107,29 @@ class V1beta1EarlyStoppingRule(object):
         """
 
         self._name = name
+
+    @property
+    def start_step(self):
+        """Gets the start_step of this V1beta1EarlyStoppingRule.  # noqa: E501
+
+        StartStep defines quantity of intermediate results that should be received before applying the rule. If start step is empty, rule is applied from the first recorded metric.  # noqa: E501
+
+        :return: The start_step of this V1beta1EarlyStoppingRule.  # noqa: E501
+        :rtype: int
+        """
+        return self._start_step
+
+    @start_step.setter
+    def start_step(self, start_step):
+        """Sets the start_step of this V1beta1EarlyStoppingRule.
+
+        StartStep defines quantity of intermediate results that should be received before applying the rule. If start step is empty, rule is applied from the first recorded metric.  # noqa: E501
+
+        :param start_step: The start_step of this V1beta1EarlyStoppingRule.  # noqa: E501
+        :type: int
+        """
+
+        self._start_step = start_step
 
     @property
     def value(self):
