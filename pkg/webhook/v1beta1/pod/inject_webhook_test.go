@@ -249,6 +249,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 	testSuggestionName := "test-suggestion"
 	testNamespace := "kubeflow"
 	testAlgorithm := "random"
+	testObjective := common.ObjectiveTypeMaximize
 	testMetricName := "accuracy"
 	katibDBAddress := fmt.Sprintf("katib-db-manager.%v:%v", testNamespace, consts.DefaultSuggestionPort)
 	katibEarlyStopAddress := fmt.Sprintf("%v-%v.%v:%v", testSuggestionName, testAlgorithm, testNamespace, consts.DefaultEarlyStoppingPort)
@@ -272,6 +273,21 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 		},
 	}
 
+	testTrial := &trialsv1beta1.Trial{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      testTrialName,
+			Namespace: testNamespace,
+			Labels: map[string]string{
+				consts.LabelExperimentName: testSuggestionName,
+			},
+		},
+		Spec: trialsv1beta1.TrialSpec{
+			Objective: &common.ObjectiveSpec{
+				Type: testObjective,
+			},
+		},
+	}
+
 	testCases := []struct {
 		Trial              *trialsv1beta1.Trial
 		MetricNames        string
@@ -282,11 +298,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 		Err                bool
 	}{
 		{
-			Trial: &trialsv1beta1.Trial{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: testTrialName,
-				},
-			},
+			Trial:       testTrial,
 			MetricNames: testMetricName,
 			MCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
@@ -296,17 +308,14 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
+				"-o-type", string(testObjective),
 				"-s-db", katibDBAddress,
 				"-path", common.DefaultFilePath,
 			},
 			Name: "StdOut MC",
 		},
 		{
-			Trial: &trialsv1beta1.Trial{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: testTrialName,
-				},
-			},
+			Trial:       testTrial,
 			MetricNames: testMetricName,
 			MCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
@@ -327,6 +336,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
+				"-o-type", string(testObjective),
 				"-s-db", katibDBAddress,
 				"-path", testPath,
 				"-f", "{mn1: ([a-b]), mv1: [0-9]};{mn2: ([a-b]), mv2: ([0-9])}",
@@ -334,11 +344,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 			Name: "File MC with Filter",
 		},
 		{
-			Trial: &trialsv1beta1.Trial{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: testTrialName,
-				},
-			},
+			Trial:       testTrial,
 			MetricNames: testMetricName,
 			MCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
@@ -353,17 +359,14 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
+				"-o-type", string(testObjective),
 				"-s-db", katibDBAddress,
 				"-path", testPath,
 			},
 			Name: "Tf Event MC",
 		},
 		{
-			Trial: &trialsv1beta1.Trial{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: testTrialName,
-				},
-			},
+			Trial:       testTrial,
 			MetricNames: testMetricName,
 			MCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
@@ -373,16 +376,13 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
+				"-o-type", string(testObjective),
 				"-s-db", katibDBAddress,
 			},
 			Name: "Custom MC without Path",
 		},
 		{
-			Trial: &trialsv1beta1.Trial{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: testTrialName,
-				},
-			},
+			Trial:       testTrial,
 			MetricNames: testMetricName,
 			MCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
@@ -397,17 +397,14 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
+				"-o-type", string(testObjective),
 				"-s-db", katibDBAddress,
 				"-path", testPath,
 			},
 			Name: "Custom MC with Path",
 		},
 		{
-			Trial: &trialsv1beta1.Trial{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: testTrialName,
-				},
-			},
+			Trial:       testTrial,
 			MetricNames: testMetricName,
 			MCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
@@ -417,20 +414,13 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
+				"-o-type", string(testObjective),
 				"-s-db", katibDBAddress,
 			},
 			Name: "Prometheus MC without Path",
 		},
 		{
-			Trial: &trialsv1beta1.Trial{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      testTrialName,
-					Namespace: testNamespace,
-					Labels: map[string]string{
-						consts.LabelExperimentName: testSuggestionName,
-					},
-				},
-			},
+			Trial:       testTrial,
 			MetricNames: testMetricName,
 			MCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
@@ -441,6 +431,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
+				"-o-type", string(testObjective),
 				"-s-db", katibDBAddress,
 				"-path", common.DefaultFilePath,
 				"-stop-rule", earlyStoppingRules[0],
@@ -450,14 +441,11 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 			Name: "Trial with EarlyStopping rules",
 		},
 		{
-			Trial: &trialsv1beta1.Trial{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: testTrialName,
-					Labels: map[string]string{
-						consts.LabelExperimentName: "invalid-name",
-					},
-				},
-			},
+			Trial: func() *trialsv1beta1.Trial {
+				trial := testTrial.DeepCopy()
+				trial.ObjectMeta.Labels[consts.LabelExperimentName] = "invalid-name"
+				return trial
+			}(),
 			MCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
 					Kind: common.StdOutCollector,
