@@ -76,8 +76,9 @@ func TestSyncAssignments(t *testing.T) {
 
 	expectedRequestSuggestion := newFakeRequest()
 	expectedRequestEarlyStopping := &suggestionapi.GetEarlyStoppingRulesRequest{
-		Experiment: newFakeRequest().Experiment,
-		Trials:     newFakeRequest().Trials,
+		Experiment:       newFakeRequest().Experiment,
+		Trials:           newFakeRequest().Trials,
+		DbManagerAddress: fmt.Sprintf("katib-db-manager.kubeflow:%v", consts.DefaultSuggestionPort),
 	}
 
 	getSuggestionReply := &suggestionapi.GetSuggestionsReply{
@@ -127,6 +128,7 @@ func TestSyncAssignments(t *testing.T) {
 				Name:       "accuracy",
 				Value:      "0.7",
 				Comparison: suggestionapi.ComparisonType_LESS,
+				StartStep:  4,
 			},
 			{
 				Name:       "epoch",

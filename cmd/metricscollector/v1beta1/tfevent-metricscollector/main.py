@@ -15,10 +15,12 @@ def parse_options():
         add_help=True
     )
 
+    # TODO (andreyvelich): Add early stopping flags.
     parser.add_argument("-s-db", "--db_manager_server_addr", type=str, default="")
     parser.add_argument("-t", "--trial_name", type=str, default="")
     parser.add_argument("-path", "--metrics_file_dir", type=str, default=const.DEFAULT_METRICS_FILE_DIR)
     parser.add_argument("-m", "--metric_names", type=str, default="")
+    parser.add_argument("-o-type", "--objective_type", type=str, default="")
     parser.add_argument("-f", "--metric_filters", type=str, default="")
     parser.add_argument("-p", "--poll_interval", type=int, default=const.DEFAULT_POLL_INTERVAL)
     parser.add_argument("-timeout", "--timeout", type=int, default=const.DEFAULT_TIMEOUT)
