@@ -45,8 +45,9 @@ const styles = theme => ({
   failed: {
     color: theme.colors.failed,
   },
+  // TODO (andreyvelich): Add to theme.
   earlyStopped: {
-    color: '#ffd633',
+    color: '#e69500',
   },
 });
 

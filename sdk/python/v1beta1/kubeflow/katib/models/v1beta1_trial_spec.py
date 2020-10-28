@@ -101,7 +101,7 @@ class V1beta1TrialSpec(object):
     def early_stopping_rules(self):
         """Gets the early_stopping_rules of this V1beta1TrialSpec.  # noqa: E501
 
-        Rules for early stopping techniques. Each rule should be met to early stopped Trial.  # noqa: E501
+        Rules for early stopping techniques. Each rule should be met to early stop Trial.  # noqa: E501
 
         :return: The early_stopping_rules of this V1beta1TrialSpec.  # noqa: E501
         :rtype: list[V1beta1EarlyStoppingRule]
@@ -112,7 +112,7 @@ class V1beta1TrialSpec(object):
     def early_stopping_rules(self, early_stopping_rules):
         """Sets the early_stopping_rules of this V1beta1TrialSpec.
 
-        Rules for early stopping techniques. Each rule should be met to early stopped Trial.  # noqa: E501
+        Rules for early stopping techniques. Each rule should be met to early stop Trial.  # noqa: E501
 
         :param early_stopping_rules: The early_stopping_rules of this V1beta1TrialSpec.  # noqa: E501
         :type: list[V1beta1EarlyStoppingRule]

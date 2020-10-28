@@ -265,7 +265,7 @@
       ],
       "properties": {
         "earlyStoppingRules": {
-          "description": "Rules for early stopping techniques. Each rule should be met to early stopped Trial.",
+          "description": "Rules for early stopping techniques. Each rule should be met to early stop Trial.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1beta1.EarlyStoppingRule"

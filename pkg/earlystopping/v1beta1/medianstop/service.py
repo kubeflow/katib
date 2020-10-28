@@ -29,8 +29,8 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
         # Default settings
         self.min_trials_required = 3
         self.start_step = 4
-        # trials_avg_history is the dict with succeeded Trials where
-        # key = Trial name, value = average value for start_step reported metrics.
+        # trials_avg_history is the dict with succeeded Trials history where
+        # key = Trial name, value = average value for "start_step" reported metrics.
         self.trials_avg_history = {}
 
         # Assume that Trial namespace = Suggestion namespace.
@@ -110,7 +110,7 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
                     ), timeout=APISERVER_TIMEOUT)
 
                 # Get only first start_step metrics.
-                # Since metrics are collected consistently, we slice top start_step metrics.
+                # Since metrics are collected consistently and ordered by time, we slice top start_step metrics.
                 first_x_logs = get_log_response.observation_log.metric_logs[:self.start_step]
                 metric_sum = 0
                 for log in first_x_logs:

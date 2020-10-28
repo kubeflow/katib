@@ -1672,7 +1672,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 						},
 						"earlyStoppingRules": {
 							SchemaProps: spec.SchemaProps{
-								Description: "Rules for early stopping techniques. Each rule should be met to early stopped Trial.",
+								Description: "Rules for early stopping techniques. Each rule should be met to early stop Trial.",
 								Type:        []string{"array"},
 								Items: &spec.SchemaOrArray{
 									Schema: &spec.Schema{

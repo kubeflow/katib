@@ -222,7 +222,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 						} else if objType == commonv1beta1.ObjectiveTypeMinimize && metricValue < *optimalObjValue {
 							optimalObjValue = &metricValue
 						}
-						// Assign best optimal value to metric value
+						// Assign best optimal value to metric value.
 						metricValue = *optimalObjValue
 					}
 
@@ -241,7 +241,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 					}
 
 					// Metric value can be equal, less or greater than stop rule.
-					// Delete suitable stop rule from the array.
+					// Deleting suitable stop rule from the array.
 					if rule.Comparison == commonv1beta1.ComparisonTypeEqual && metricValue == ruleValue {
 						stopRules = deleteStopRule(stopRules, idx)
 					} else if rule.Comparison == commonv1beta1.ComparisonTypeLess && metricValue < ruleValue {

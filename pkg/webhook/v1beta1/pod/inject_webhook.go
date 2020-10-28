@@ -199,7 +199,7 @@ func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1beta1.Tria
 	}
 
 	// Convert rules to flag value with name;value;comparison;startStep order, e.g. accuracy;0.8;less;4.
-	// If start step is empty, we apply rule from the first recorded metrics and flag is equal accuracy;0.8;less;0.
+	// If start step is empty, we apply rule from the first recorded metrics and flag is equal to accuracy;0.8;less;0.
 	earlyStoppingRules := []string{}
 	for _, rule := range trial.Spec.EarlyStoppingRules {
 		newRule := rule.Name + ";" + rule.Value + ";" + string(rule.Comparison) + ";" + strconv.Itoa(rule.StartStep)

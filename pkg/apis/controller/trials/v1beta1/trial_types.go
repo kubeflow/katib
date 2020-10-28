@@ -31,7 +31,7 @@ type TrialSpec struct {
 	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments"`
 
 	// Rules for early stopping techniques.
-	// Each rule should be met to early stopped Trial.
+	// Each rule should be met to early stop Trial.
 	EarlyStoppingRules []common.EarlyStoppingRule `json:"earlyStoppingRules,omitempty"`
 
 	// Raw text for the trial run spec. This can be any generic Kubernetes
