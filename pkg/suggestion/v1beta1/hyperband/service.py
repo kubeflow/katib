@@ -172,7 +172,6 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 parameter_config.discrete_info,
                 parameter_config.categorical_info)
             trial_spec = api_pb2.TrialSpec()
-            trial_spec.experiment_name = experiment.name
             for hp in suggestion:
                 if hp['name'] == param.resource_name:
                     hp['value'] = str(r)
