@@ -96,40 +96,9 @@ func (e *Experiment) setDefaultObjective() {
 
 func (e *Experiment) setDefaultTrialTemplate() {
 	t := e.Spec.TrialTemplate
-	if t == nil {
-		t = &TrialTemplate{
-			Retain: true,
-		}
-	}
-	if t.TrialSource.TrialSpec == nil && t.TrialSource.ConfigMap == nil && t.TrialParameters == nil {
-		t.TrialSource = TrialSource{
-			ConfigMap: &ConfigMapSource{
-				ConfigMapNamespace: consts.DefaultKatibNamespace,
-				ConfigMapName:      DefaultTrialConfigMapName,
-				TemplatePath:       DefaultTrialTemplatePath,
-			},
-		}
-		t.TrialParameters = []TrialParameterSpec{
-			{
-				Name:        "learningRate",
-				Description: "Learning rate for the training model",
-				Reference:   "lr",
-			},
-			{
-				Name:        "numberLayers",
-				Description: "Number of training model layers",
-				Reference:   "num-layers",
-			},
-			{
-				Name:        "optimizer",
-				Description: "Training model optimizer (sdg, adam or ftrl)",
-				Reference:   "optimizer",
-			},
-		}
-	}
 
 	// Set default values for Job, TFJob and PyTorchJob if TrialSpec is not nil
-	if t.TrialSource.TrialSpec != nil {
+	if t != nil && t.TrialSource.TrialSpec != nil {
 		jobKind := t.TrialSource.TrialSpec.GetKind()
 		if jobKind == consts.JobKindJob {
 			if t.SuccessCondition == "" {

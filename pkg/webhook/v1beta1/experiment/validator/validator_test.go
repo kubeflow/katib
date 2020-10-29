@@ -211,11 +211,11 @@ func TestValidateExperiment(t *testing.T) {
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
-				i.Spec.TrialTemplate.TrialParameters[0].Name = "Invalid"
+				i.Spec.TrialTemplate = nil
 				return i
 			}(),
 			Err:             true,
-			testDescription: "Invalid Trial parameter name",
+			testDescription: "Trial template is nil",
 		},
 		{
 			Instance: func() *experimentsv1beta1.Experiment {

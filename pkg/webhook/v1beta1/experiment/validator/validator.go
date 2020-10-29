@@ -200,6 +200,10 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 
 	trialTemplate := instance.Spec.TrialTemplate
 
+	if trialTemplate == nil {
+		return fmt.Errorf("spec.trialTemplate must be specified")
+	}
+
 	// Check if PrimaryContainerName is set
 	if trialTemplate.PrimaryContainerName == "" {
 		return fmt.Errorf("spec.trialTemplate.primaryContainerName must be specified")

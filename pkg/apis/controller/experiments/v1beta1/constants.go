@@ -19,12 +19,6 @@ const (
 	// DefaultTrialParallelCount is the default value of spec.parallelTrialCount.
 	DefaultTrialParallelCount = 3
 
-	// DefaultTrialConfigMapName is the default value of spec.trialTemplate.configMapName for Trial template.
-	DefaultTrialConfigMapName = "trial-template"
-
-	// DefaultTrialTemplatePath is the default value of spec.trialTemplate.TemplatePath.
-	DefaultTrialTemplatePath = "defaultTrialTemplate.yaml"
-
 	// DefaultResumePolicy is the default value of spec.resumePolicy.
 	DefaultResumePolicy = LongRunning
 
