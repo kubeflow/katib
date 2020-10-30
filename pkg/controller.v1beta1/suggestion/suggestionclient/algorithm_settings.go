@@ -7,9 +7,8 @@ import (
 	suggestionapi "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 )
 
-// appendAlgorithmSettingsFromSuggestion appends the algorithm settings
-// in suggestion to Experiment.
-// Algorithm settings in suggestion will overwrite the settings in experiment.
+// appendAlgorithmSettingsFromSuggestion appends the algorithm settings from Suggestion status to Experiment.
+// Algorithm settings in Suggestion status will overwrite the settings in Experiment.
 func appendAlgorithmSettingsFromSuggestion(experiment *experimentsv1beta1.Experiment, algoSettingsInSuggestion []common.AlgorithmSetting) {
 	algoSettingsInExperiment := experiment.Spec.Algorithm
 	for _, setting := range algoSettingsInSuggestion {

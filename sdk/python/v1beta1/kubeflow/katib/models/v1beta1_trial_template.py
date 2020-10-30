@@ -159,7 +159,7 @@ class V1beta1TrialTemplate(object):
     def primary_pod_labels(self):
         """Gets the primary_pod_labels of this V1beta1TrialTemplate.  # noqa: E501
 
-        Labels that determines if pod needs to be injected by Katib sidecar container  # noqa: E501
+        Labels that determines if pod needs to be injected by Katib sidecar container. If PrimaryPodLabels is omitted, metrics collector wraps all Trial's pods.  # noqa: E501
 
         :return: The primary_pod_labels of this V1beta1TrialTemplate.  # noqa: E501
         :rtype: dict(str, str)
@@ -170,7 +170,7 @@ class V1beta1TrialTemplate(object):
     def primary_pod_labels(self, primary_pod_labels):
         """Sets the primary_pod_labels of this V1beta1TrialTemplate.
 
-        Labels that determines if pod needs to be injected by Katib sidecar container  # noqa: E501
+        Labels that determines if pod needs to be injected by Katib sidecar container. If PrimaryPodLabels is omitted, metrics collector wraps all Trial's pods.  # noqa: E501
 
         :param primary_pod_labels: The primary_pod_labels of this V1beta1TrialTemplate.  # noqa: E501
         :type: dict(str, str)

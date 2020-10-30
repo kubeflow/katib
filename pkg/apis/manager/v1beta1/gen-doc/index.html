@@ -195,6 +195,14 @@
                 </li>
               
                 <li>
+                  <a href="#api.v1.beta1.EarlyStoppingRule"><span class="badge">M</span>EarlyStoppingRule</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.beta1.EarlyStoppingSetting"><span class="badge">M</span>EarlyStoppingSetting</a>
+                </li>
+              
+                <li>
                   <a href="#api.v1.beta1.EarlyStoppingSpec"><span class="badge">M</span>EarlyStoppingSpec</a>
                 </li>
               
@@ -212,6 +220,14 @@
               
                 <li>
                   <a href="#api.v1.beta1.FeasibleSpace"><span class="badge">M</span>FeasibleSpace</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.beta1.GetEarlyStoppingRulesReply"><span class="badge">M</span>GetEarlyStoppingRulesReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.beta1.GetEarlyStoppingRulesRequest"><span class="badge">M</span>GetEarlyStoppingRulesRequest</a>
                 </li>
               
                 <li>
@@ -291,6 +307,14 @@
                 </li>
               
                 <li>
+                  <a href="#api.v1.beta1.SetTrialStatusReply"><span class="badge">M</span>SetTrialStatusReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.beta1.SetTrialStatusRequest"><span class="badge">M</span>SetTrialStatusRequest</a>
+                </li>
+              
+                <li>
                   <a href="#api.v1.beta1.Trial"><span class="badge">M</span>Trial</a>
                 </li>
               
@@ -314,6 +338,10 @@
                   <a href="#api.v1.beta1.ValidateAlgorithmSettingsRequest"><span class="badge">M</span>ValidateAlgorithmSettingsRequest</a>
                 </li>
               
+              
+                <li>
+                  <a href="#api.v1.beta1.ComparisonType"><span class="badge">E</span>ComparisonType</a>
+                </li>
               
                 <li>
                   <a href="#api.v1.beta1.ObjectiveType"><span class="badge">E</span>ObjectiveType</a>
@@ -357,7 +385,7 @@
 
       
         <h3 id="api.v1.beta1.AlgorithmSetting">AlgorithmSetting</h3>
-        <p></p>
+        <p>HP or NAS algorithm settings.</p>
 
         
           <table class="field-table">
@@ -388,7 +416,7 @@
         
       
         <h3 id="api.v1.beta1.AlgorithmSpec">AlgorithmSpec</h3>
-        <p></p>
+        <p>HP or NAS algorithm specification.</p>
 
         
           <table class="field-table">
@@ -408,13 +436,6 @@
                   <td>algorithm_settings</td>
                   <td><a href="#api.v1.beta1.AlgorithmSetting">AlgorithmSetting</a></td>
                   <td>repeated</td>
-                  <td><p> </p></td>
-                </tr>
-              
-                <tr>
-                  <td>early_stopping_spec</td>
-                  <td><a href="#api.v1.beta1.EarlyStoppingSpec">EarlyStoppingSpec</a></td>
-                  <td></td>
                   <td><p> </p></td>
                 </tr>
               
@@ -456,15 +477,8 @@
 
         
       
-        <h3 id="api.v1.beta1.EarlyStoppingSpec">EarlyStoppingSpec</h3>
-        <p>TODO: This feature is not yet fully implemented.</p>
-
-        
-
-        
-      
-        <h3 id="api.v1.beta1.Experiment">Experiment</h3>
-        <p></p>
+        <h3 id="api.v1.beta1.EarlyStoppingRule">EarlyStoppingRule</h3>
+        <p>EarlyStoppingRule represents single early stopping rule.</p>
 
         
           <table class="field-table">
@@ -477,12 +491,58 @@
                   <td>name</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p>Name of Experiment. This is unique in DB. </p></td>
+                  <td><p>Name of the rule. Usually, metric name. </p></td>
                 </tr>
               
                 <tr>
-                  <td>spec</td>
-                  <td><a href="#api.v1.beta1.ExperimentSpec">ExperimentSpec</a></td>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Value of the metric. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>comparison</td>
+                  <td><a href="#api.v1.beta1.ComparisonType">ComparisonType</a></td>
+                  <td></td>
+                  <td><p>Correlation between name and value, one of equal, less or greater </p></td>
+                </tr>
+              
+                <tr>
+                  <td>start_step</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Defines quantity of intermediate results that should be received before applying the rule.
+If start step is empty, rule is applied from the first recorded metric. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.EarlyStoppingSetting">EarlyStoppingSetting</h3>
+        <p>Early stopping algorithm settings.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
@@ -494,8 +554,70 @@
 
         
       
+        <h3 id="api.v1.beta1.EarlyStoppingSpec">EarlyStoppingSpec</h3>
+        <p>Early stopping algorithm specification.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>algorithm_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>algorithm_settings</td>
+                  <td><a href="#api.v1.beta1.EarlyStoppingSetting">EarlyStoppingSetting</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.Experiment">Experiment</h3>
+        <p>Structure for a single Experiment.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name for the Experiment. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>spec</td>
+                  <td><a href="#api.v1.beta1.ExperimentSpec">ExperimentSpec</a></td>
+                  <td></td>
+                  <td><p>Experiment specification. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
         <h3 id="api.v1.beta1.ExperimentSpec">ExperimentSpec</h3>
-        <p>Spec of a Experiment. Experiment represents a single optimization run over a feasible space. </p><p>Each Experiment contains a configuration describing the feasible space, as well as a set of Trials.</p><p>It is assumed that objective function f(x) does not change in the course of a Experiment.</p>
+        <p>Specification of an Experiment. Experiment represents a single optimization run over a feasible space. </p><p>Each Experiment contains a configuration describing the feasible space, as well as a set of Trials.</p><p>It is assumed that objective function f(x) does not change in the course of an Experiment.</p>
 
         
           <table class="field-table">
@@ -515,49 +637,42 @@
                   <td>objective</td>
                   <td><a href="#api.v1.beta1.ObjectiveSpec">ObjectiveSpec</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Objective specification for the Experiment. </p></td>
                 </tr>
               
                 <tr>
                   <td>algorithm</td>
                   <td><a href="#api.v1.beta1.AlgorithmSpec">AlgorithmSpec</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>HP or NAS algorithm specification for the Experiment. </p></td>
                 </tr>
               
                 <tr>
-                  <td>trial_template</td>
-                  <td><a href="#string">string</a></td>
+                  <td>early_stopping</td>
+                  <td><a href="#api.v1.beta1.EarlyStoppingSpec">EarlyStoppingSpec</a></td>
                   <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-                <tr>
-                  <td>metrics_collector_spec</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
+                  <td><p>Early stopping specification for the Experiment. </p></td>
                 </tr>
               
                 <tr>
                   <td>parallel_trial_count</td>
                   <td><a href="#int32">int32</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>How many Trials can be processed in parallel. </p></td>
                 </tr>
               
                 <tr>
                   <td>max_trial_count</td>
                   <td><a href="#int32">int32</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Max completed Trials to mark Experiment as succeeded. </p></td>
                 </tr>
               
                 <tr>
                   <td>nas_config</td>
                   <td><a href="#api.v1.beta1.NasConfig">NasConfig</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>NAS configuration for the Experiment. </p></td>
                 </tr>
               
             </tbody>
@@ -568,7 +683,7 @@
         
       
         <h3 id="api.v1.beta1.ExperimentSpec.ParameterSpecs">ExperimentSpec.ParameterSpecs</h3>
-        <p>List of ParameterSpec</p>
+        <p>List of ParameterSpec.</p>
 
         
           <table class="field-table">
@@ -627,6 +742,68 @@
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>Step for double or int parameter </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.GetEarlyStoppingRulesReply">GetEarlyStoppingRulesReply</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>early_stopping_rules</td>
+                  <td><a href="#api.v1.beta1.EarlyStoppingRule">EarlyStoppingRule</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.GetEarlyStoppingRulesRequest">GetEarlyStoppingRulesRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>experiment</td>
+                  <td><a href="#api.v1.beta1.Experiment">Experiment</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>trials</td>
+                  <td><a href="#api.v1.beta1.Trial">Trial</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>db_manager_address</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
                 </tr>
               
             </tbody>
@@ -726,6 +903,13 @@
                   <td>algorithm</td>
                   <td><a href="#api.v1.beta1.AlgorithmSpec">AlgorithmSpec</a></td>
                   <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>early_stopping_rules</td>
+                  <td><a href="#api.v1.beta1.EarlyStoppingRule">EarlyStoppingRule</a></td>
+                  <td>repeated</td>
                   <td><p> </p></td>
                 </tr>
               
@@ -954,7 +1138,7 @@
         
       
         <h3 id="api.v1.beta1.ObjectiveSpec">ObjectiveSpec</h3>
-        <p></p>
+        <p>Objective specification.</p>
 
         
           <table class="field-table">
@@ -967,28 +1151,29 @@
                   <td>type</td>
                   <td><a href="#api.v1.beta1.ObjectiveType">ObjectiveType</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Type of optimization. </p></td>
                 </tr>
               
                 <tr>
                   <td>goal</td>
                   <td><a href="#double">double</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Goal of optimization, can be empty. </p></td>
                 </tr>
               
                 <tr>
                   <td>objective_metric_name</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Primary metric name for the optimization. </p></td>
                 </tr>
               
                 <tr>
                   <td>additional_metric_names</td>
                   <td><a href="#string">string</a></td>
                   <td>repeated</td>
-                  <td><p>This can be empty if we only care about the objective metric. </p></td>
+                  <td><p>List of additional metrics to record from Trial.
+This can be empty if we only care about the objective metric. </p></td>
                 </tr>
               
             </tbody>
@@ -1133,7 +1318,7 @@
         
       
         <h3 id="api.v1.beta1.ParameterSpec">ParameterSpec</h3>
-        <p>Config for a Hyper parameter.</p><p>Katib will create each Hyper parameter from this config.</p>
+        <p>Config for a hyperparameter.</p><p>Katib will create each Hyper parameter from this config.</p>
 
         
           <table class="field-table">
@@ -1208,8 +1393,39 @@
 
         
       
-        <h3 id="api.v1.beta1.Trial">Trial</h3>
+        <h3 id="api.v1.beta1.SetTrialStatusReply">SetTrialStatusReply</h3>
         <p></p>
+
+        
+
+        
+      
+        <h3 id="api.v1.beta1.SetTrialStatusRequest">SetTrialStatusRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trial_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.Trial">Trial</h3>
+        <p>Structure for a single Trial.</p>
 
         
           <table class="field-table">
@@ -1222,21 +1438,21 @@
                   <td>name</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Name for the Trial. </p></td>
                 </tr>
               
                 <tr>
                   <td>spec</td>
                   <td><a href="#api.v1.beta1.TrialSpec">TrialSpec</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Trial specification. </p></td>
                 </tr>
               
                 <tr>
                   <td>status</td>
                   <td><a href="#api.v1.beta1.TrialStatus">TrialStatus</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Trial status. </p></td>
                 </tr>
               
             </tbody>
@@ -1247,7 +1463,7 @@
         
       
         <h3 id="api.v1.beta1.TrialSpec">TrialSpec</h3>
-        <p></p>
+        <p>Specification of a Trial. It represents Trial's parameter assignments and objective.</p>
 
         
           <table class="field-table">
@@ -1257,38 +1473,17 @@
             <tbody>
               
                 <tr>
-                  <td>experiment_name</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-                <tr>
                   <td>objective</td>
                   <td><a href="#api.v1.beta1.ObjectiveSpec">ObjectiveSpec</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Objective specification for the Trial. </p></td>
                 </tr>
               
                 <tr>
                   <td>parameter_assignments</td>
                   <td><a href="#api.v1.beta1.TrialSpec.ParameterAssignments">TrialSpec.ParameterAssignments</a></td>
                   <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-                <tr>
-                  <td>run_spec</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-                <tr>
-                  <td>metrics_collector_spec</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
+                  <td><p>List of assignments generated for the Trial. </p></td>
                 </tr>
               
             </tbody>
@@ -1323,7 +1518,7 @@
         
       
         <h3 id="api.v1.beta1.TrialStatus">TrialStatus</h3>
-        <p></p>
+        <p>Current Trial status. It contains Trial's latest condition, start time, completion time, observation.</p>
 
         
           <table class="field-table">
@@ -1336,28 +1531,28 @@
                   <td>start_time</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p>RFC3339 format </p></td>
+                  <td><p>Trial start time in RFC3339 format </p></td>
                 </tr>
               
                 <tr>
                   <td>completion_time</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p>RFC3339 format </p></td>
+                  <td><p>Trial completion time in RFC3339 format </p></td>
                 </tr>
               
                 <tr>
                   <td>condition</td>
                   <td><a href="#api.v1.beta1.TrialStatus.TrialConditionType">TrialStatus.TrialConditionType</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Trial current condition. It is equal to the latest Trial CR condition. </p></td>
                 </tr>
               
                 <tr>
                   <td>observation</td>
                   <td><a href="#api.v1.beta1.Observation">Observation</a></td>
                   <td></td>
-                  <td><p>The best observation in logs. </p></td>
+                  <td><p>The best Trial observation in logs. </p></td>
                 </tr>
               
             </tbody>
@@ -1399,6 +1594,41 @@
         
       
 
+      
+        <h3 id="api.v1.beta1.ComparisonType">ComparisonType</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>UNKNOWN_COMPARISON</td>
+                <td>0</td>
+                <td><p>Unknown comparison, not used</p></td>
+              </tr>
+            
+              <tr>
+                <td>EQUAL</td>
+                <td>1</td>
+                <td><p>Equal comparison, e.g. accuracy = 0.7</p></td>
+              </tr>
+            
+              <tr>
+                <td>LESS</td>
+                <td>2</td>
+                <td><p>Less comparison, e.g. accuracy &lt; 0.7</p></td>
+              </tr>
+            
+              <tr>
+                <td>GREATER</td>
+                <td>3</td>
+                <td><p>Greater comparison, e.g. accuracy &gt; 0.7</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
       
         <h3 id="api.v1.beta1.ObjectiveType">ObjectiveType</h3>
         <p>Direction of optimization. Minimize or Maximize.</p>
@@ -1471,7 +1701,7 @@
         </table>
       
         <h3 id="api.v1.beta1.TrialStatus.TrialConditionType">TrialStatus.TrialConditionType</h3>
-        <p></p>
+        <p>Trial can be in one of 6 conditions.</p><p>TODO (andreyvelich): Remove unused conditions.</p>
         <table class="enum-table">
           <thead>
             <tr><td>Name</td><td>Number</td><td>Description</td></tr>
@@ -1509,8 +1739,14 @@
               </tr>
             
               <tr>
-                <td>UNKNOWN</td>
+                <td>EARLYSTOPPED</td>
                 <td>5</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>UNKNOWN</td>
+                <td>6</td>
                 <td><p></p></td>
               </tr>
             
@@ -1558,19 +1794,33 @@ You can see accuracy curve or other metric logs on UI.</p></td>
 
         
         <h3 id="api.v1.beta1.EarlyStopping">EarlyStopping</h3>
-        <p>TODO: This feature is not yet fully implemented.</p>
+        <p>EarlyStopping service defines APIs to manage Katib Early Stopping algorithms</p>
         <table class="enum-table">
           <thead>
             <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
           </thead>
           <tbody>
             
+              <tr>
+                <td>GetEarlyStoppingRules</td>
+                <td><a href="#api.v1.beta1.GetEarlyStoppingRulesRequest">GetEarlyStoppingRulesRequest</a></td>
+                <td><a href="#api.v1.beta1.GetEarlyStoppingRulesReply">GetEarlyStoppingRulesReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>SetTrialStatus</td>
+                <td><a href="#api.v1.beta1.SetTrialStatusRequest">SetTrialStatusRequest</a></td>
+                <td><a href="#api.v1.beta1.SetTrialStatusReply">SetTrialStatusReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
           </tbody>
         </table>
 
         
         <h3 id="api.v1.beta1.Suggestion">Suggestion</h3>
-        <p>Suggestion service defines APIs to manage Katib Suggestion objects.</p>
+        <p>Suggestion service defines APIs to manage Katib Suggestion from HP or NAS algorithms</p>
         <table class="enum-table">
           <thead>
             <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>

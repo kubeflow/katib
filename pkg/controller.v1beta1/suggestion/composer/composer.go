@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/viper"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -15,7 +16,7 @@ import (
 
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
-
+	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
@@ -39,6 +40,7 @@ type Composer interface {
 	DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.Deployment, error)
 	DesiredService(s *suggestionsv1beta1.Suggestion) (*corev1.Service, error)
 	DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.PersistentVolumeClaim, *corev1.PersistentVolume, error)
+	DesiredRBAC(s *suggestionsv1beta1.Suggestion) (*corev1.ServiceAccount, *rbacv1.Role, *rbacv1.RoleBinding, error)
 	CreateComposer(mgr manager.Manager) Composer
 }
 
@@ -56,14 +58,23 @@ func New(mgr manager.Manager) Composer {
 // DesiredDeployment returns desired deployment for suggestion
 func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.Deployment, error) {
 
-	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.AlgorithmName, g.Client)
+	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.Algorithm.AlgorithmName, g.Client)
 	if err != nil {
 		return nil, err
 	}
 
+	// If early stopping is used, get the config data.
+	earlyStoppingConfigData := katibconfig.EarlyStoppingConfig{}
+	if s.Spec.EarlyStopping != nil && s.Spec.EarlyStopping.AlgorithmName != "" {
+		earlyStoppingConfigData, err = katibconfig.GetEarlyStoppingConfigData(s.Spec.EarlyStopping.AlgorithmName, g.Client)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	d := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        util.GetAlgorithmDeploymentName(s),
+			Name:        util.GetSuggestionDeploymentName(s),
 			Namespace:   s.Namespace,
 			Labels:      s.Labels,
 			Annotations: s.Annotations,
@@ -78,9 +89,7 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 					Annotations: util.SuggestionAnnotations(s),
 				},
 				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						*g.desiredContainer(s, suggestionConfigData),
-					},
+					Containers: g.desiredContainers(s, suggestionConfigData, earlyStoppingConfigData),
 				},
 			},
 		},
@@ -98,11 +107,19 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 				Name: consts.ContainerSuggestionVolumeName,
 				VolumeSource: corev1.VolumeSource{
 					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-						ClaimName: util.GetAlgorithmPersistentVolumeClaimName(s),
+						ClaimName: util.GetSuggestionPersistentVolumeClaimName(s),
 					},
 				},
 			},
 		}
+	}
+
+	// Attach service account if early stopping is used
+	// TODO (andreyvelich): Document that custom service account
+	// should not be equal "<suggestion-name>-<suggestion-algorithm>".
+	// For custom service account user should manually add appropriate Role to change Trial status.
+	if s.Spec.EarlyStopping != nil && s.Spec.EarlyStopping.AlgorithmName != "" && suggestionConfigData.ServiceAccountName == "" {
+		d.Spec.Template.Spec.ServiceAccountName = util.GetSuggestionRBACName(s)
 	}
 
 	if err := controllerutil.SetControllerReference(s, d, g.scheme); err != nil {
@@ -120,10 +137,17 @@ func (g *General) DesiredService(s *suggestionsv1beta1.Suggestion) (*corev1.Serv
 			Port: consts.DefaultSuggestionPort,
 		},
 	}
+	if s.Spec.EarlyStopping != nil && s.Spec.EarlyStopping.AlgorithmName != "" {
+		earlyStoppingPort := corev1.ServicePort{
+			Name: consts.DefaultEarlyStoppingPortName,
+			Port: consts.DefaultEarlyStoppingPort,
+		}
+		ports = append(ports, earlyStoppingPort)
+	}
 
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      util.GetAlgorithmServiceName(s),
+			Name:      util.GetSuggestionServiceName(s),
 			Namespace: s.Namespace,
 		},
 		Spec: corev1.ServiceSpec{
@@ -141,9 +165,12 @@ func (g *General) DesiredService(s *suggestionsv1beta1.Suggestion) (*corev1.Serv
 	return service, nil
 }
 
-func (g *General) desiredContainer(s *suggestionsv1beta1.Suggestion, suggestionConfigData katibconfig.SuggestionConfig) *corev1.Container {
+func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
+	suggestionConfigData katibconfig.SuggestionConfig,
+	earlyStoppingConfigData katibconfig.EarlyStoppingConfig) []corev1.Container {
 
-	c := &corev1.Container{
+	containers := []corev1.Container{}
+	suggestionContainer := corev1.Container{
 		Name:            consts.ContainerSuggestion,
 		Image:           suggestionConfigData.Image,
 		ImagePullPolicy: suggestionConfigData.ImagePullPolicy,
@@ -157,7 +184,7 @@ func (g *General) desiredContainer(s *suggestionsv1beta1.Suggestion, suggestionC
 	}
 
 	if viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion) {
-		c.ReadinessProbe = &corev1.Probe{
+		suggestionContainer.ReadinessProbe = &corev1.Probe{
 			Handler: corev1.Handler{
 				Exec: &corev1.ExecAction{
 					Command: []string{
@@ -170,7 +197,7 @@ func (g *General) desiredContainer(s *suggestionsv1beta1.Suggestion, suggestionC
 			InitialDelaySeconds: defaultInitialDelaySeconds,
 			PeriodSeconds:       defaultPeriodForReady,
 		}
-		c.LivenessProbe = &corev1.Probe{
+		suggestionContainer.LivenessProbe = &corev1.Probe{
 			Handler: corev1.Handler{
 				Exec: &corev1.ExecAction{
 					Command: []string{
@@ -189,30 +216,47 @@ func (g *General) desiredContainer(s *suggestionsv1beta1.Suggestion, suggestionC
 
 	// Attach volume mounts to the suggestion container if ResumePolicy = FromVolume
 	if s.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
-		c.VolumeMounts = []corev1.VolumeMount{
+		suggestionContainer.VolumeMounts = []corev1.VolumeMount{
 			{
 				Name:      consts.ContainerSuggestionVolumeName,
 				MountPath: suggestionConfigData.VolumeMountPath,
 			},
 		}
 	}
-	return c
+	containers = append(containers, suggestionContainer)
+
+	if s.Spec.EarlyStopping != nil && s.Spec.EarlyStopping.AlgorithmName != "" {
+		earlyStoppingContainer := corev1.Container{
+			Name:            consts.ContainerEarlyStopping,
+			Image:           earlyStoppingConfigData.Image,
+			ImagePullPolicy: earlyStoppingConfigData.ImagePullPolicy,
+			Ports: []corev1.ContainerPort{
+				{
+					Name:          consts.DefaultEarlyStoppingPortName,
+					ContainerPort: consts.DefaultEarlyStoppingPort,
+				},
+			},
+		}
+
+		containers = append(containers, earlyStoppingContainer)
+	}
+	return containers
 }
 
 // DesiredVolume returns desired PVC and PV for suggestion.
 // If StorageClassName != DefaultSuggestionStorageClassName returns only PVC.
 func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.PersistentVolumeClaim, *corev1.PersistentVolume, error) {
 
-	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.AlgorithmName, g.Client)
+	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.Algorithm.AlgorithmName, g.Client)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	persistentVolumeName := util.GetAlgorithmPersistentVolumeName(s)
+	persistentVolumeName := util.GetSuggestionPersistentVolumeName(s)
 
 	pvc := &corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      util.GetAlgorithmPersistentVolumeClaimName(s),
+			Name:      util.GetSuggestionPersistentVolumeClaimName(s),
 			Namespace: s.Namespace,
 		},
 		Spec: suggestionConfigData.PersistentVolumeClaimSpec,
@@ -253,6 +297,75 @@ func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.Persi
 	return pvc, pv, nil
 }
 
+// DesiredRBAC returns desired ServiceAccount, Role and RoleBinding for the Suggestion
+func (g *General) DesiredRBAC(s *suggestionsv1beta1.Suggestion) (*corev1.ServiceAccount, *rbacv1.Role, *rbacv1.RoleBinding, error) {
+
+	serviceAccount := &corev1.ServiceAccount{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      util.GetSuggestionRBACName(s),
+			Namespace: s.Namespace,
+		},
+	}
+
+	// Add owner reference to the ServiceAccount so that it could be GC after the suggestion is deleted
+	if err := controllerutil.SetControllerReference(s, serviceAccount, g.scheme); err != nil {
+		return nil, nil, nil, err
+	}
+
+	role := &rbacv1.Role{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      util.GetSuggestionRBACName(s),
+			Namespace: s.Namespace,
+		},
+		Rules: []rbacv1.PolicyRule{
+			{
+				APIGroups: []string{
+					trialsv1beta1.Group,
+				},
+				Resources: []string{
+					consts.PluralTrial,
+					fmt.Sprintf("%v/status", consts.PluralTrial),
+				},
+				Verbs: []string{
+					rbacv1.VerbAll,
+				},
+			},
+		},
+	}
+
+	// Add owner reference to the Role so that it could be GC after the suggestion is deleted
+	if err := controllerutil.SetControllerReference(s, role, g.scheme); err != nil {
+		return nil, nil, nil, err
+	}
+
+	roleBinding := &rbacv1.RoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      util.GetSuggestionRBACName(s),
+			Namespace: s.Namespace,
+		},
+		Subjects: []rbacv1.Subject{
+			{
+				Kind:      rbacv1.ServiceAccountKind,
+				Name:      util.GetSuggestionRBACName(s),
+				Namespace: s.Namespace,
+			},
+		},
+		RoleRef: rbacv1.RoleRef{
+			APIGroup: rbacv1.GroupName,
+			Kind:     "Role",
+			Name:     util.GetSuggestionRBACName(s),
+		},
+	}
+
+	// Add owner reference to the RoleBinding so that it could be GC after the suggestion is deleted
+	if err := controllerutil.SetControllerReference(s, roleBinding, g.scheme); err != nil {
+		return nil, nil, nil, err
+	}
+
+	return serviceAccount, role, roleBinding, nil
+}
+
+// CreateComposer create instance of composer interface with given manager
 func (g *General) CreateComposer(mgr manager.Manager) Composer {
 	return &General{mgr.GetScheme(), mgr.GetClient()}
 }

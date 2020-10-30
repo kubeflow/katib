@@ -79,6 +79,13 @@ rules:
       - pipelineruns
     verbs:
       - "*"
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - roles
+      - rolebindings
+    verbs:
+      - "*"
 ---
 apiVersion: v1
 kind: ServiceAccount

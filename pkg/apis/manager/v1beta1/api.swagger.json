@@ -25,7 +25,8 @@
         "value": {
           "type": "string"
         }
-      }
+      },
+      "description": "*\nHP or NAS algorithm settings."
     },
     "beta1AlgorithmSpec": {
       "type": "object",
@@ -38,17 +39,53 @@
           "items": {
             "$ref": "#/definitions/beta1AlgorithmSetting"
           }
-        },
-        "early_stopping_spec": {
-          "$ref": "#/definitions/beta1EarlyStoppingSpec"
         }
-      }
+      },
+      "description": "*\nHP or NAS algorithm specification."
+    },
+    "beta1ComparisonType": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN_COMPARISON",
+        "EQUAL",
+        "LESS",
+        "GREATER"
+      ],
+      "default": "UNKNOWN_COMPARISON"
     },
     "beta1DeleteObservationLogReply": {
       "type": "object"
     },
-    "beta1EarlyStoppingSpec": {
-      "type": "object"
+    "beta1EarlyStoppingRule": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "comparison": {
+          "$ref": "#/definitions/beta1ComparisonType"
+        },
+        "start_step": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Defines quantity of intermediate results that should be received before applying the rule.\nIf start step is empty, rule is applied from the first recorded metric."
+        }
+      },
+      "description": "*\nEarlyStoppingRule represents single early stopping rule."
+    },
+    "beta1GetEarlyStoppingRulesReply": {
+      "type": "object",
+      "properties": {
+        "early_stopping_rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/beta1EarlyStoppingRule"
+          }
+        }
+      }
     },
     "beta1GetObservationLogReply": {
       "type": "object",
@@ -69,6 +106,12 @@
         },
         "algorithm": {
           "$ref": "#/definitions/beta1AlgorithmSpec"
+        },
+        "early_stopping_rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/beta1EarlyStoppingRule"
+          }
         }
       }
     },
@@ -128,6 +171,9 @@
       }
     },
     "beta1ReportObservationLogReply": {
+      "type": "object"
+    },
+    "beta1SetTrialStatusReply": {
       "type": "object"
     },
     "beta1ValidateAlgorithmSettingsReply": {

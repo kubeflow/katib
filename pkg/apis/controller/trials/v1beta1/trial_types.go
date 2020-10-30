@@ -22,12 +22,17 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
+// TrialSpec is the specification of a Trial.
 type TrialSpec struct {
 	// Describes the objective of the experiment.
 	Objective *common.ObjectiveSpec `json:"objective,omitempty"`
 
 	// Key-value pairs for hyperparameters and assignment values.
 	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments"`
+
+	// Rules for early stopping techniques.
+	// Each rule should be met to early stop Trial.
+	EarlyStoppingRules []common.EarlyStoppingRule `json:"earlyStoppingRules,omitempty"`
 
 	// Raw text for the trial run spec. This can be any generic Kubernetes
 	// runtime object. The trial operator should create the resource as written,
@@ -57,6 +62,7 @@ type TrialSpec struct {
 	FailureCondition string `json:"failureCondition,omitempty"`
 }
 
+// TrialStatus is the current status of a Trial.
 type TrialStatus struct {
 	// Represents time when the Trial was acknowledged by the Trial controller.
 	// It is not guaranteed to be set in happens-before order across separate operations.
@@ -106,11 +112,12 @@ type TrialCondition struct {
 type TrialConditionType string
 
 const (
-	TrialCreated   TrialConditionType = "Created"
-	TrialRunning   TrialConditionType = "Running"
-	TrialSucceeded TrialConditionType = "Succeeded"
-	TrialKilled    TrialConditionType = "Killed"
-	TrialFailed    TrialConditionType = "Failed"
+	TrialCreated      TrialConditionType = "Created"
+	TrialRunning      TrialConditionType = "Running"
+	TrialSucceeded    TrialConditionType = "Succeeded"
+	TrialKilled       TrialConditionType = "Killed"
+	TrialFailed       TrialConditionType = "Failed"
+	TrialEarlyStopped TrialConditionType = "EarlyStopped"
 )
 
 // +genclient

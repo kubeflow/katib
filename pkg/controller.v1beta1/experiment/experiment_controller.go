@@ -293,7 +293,7 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1beta1.Exper
 
 	parallelCount := *instance.Spec.ParallelTrialCount
 	activeCount := instance.Status.TrialsPending + instance.Status.TrialsRunning
-	completedCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled
+	completedCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled + instance.Status.TrialsEarlyStopped
 
 	if activeCount > parallelCount {
 		deleteCount := activeCount - parallelCount

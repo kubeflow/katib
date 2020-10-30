@@ -56,6 +56,7 @@ class V1beta1EarlyStoppingSetting(object):
     def name(self):
         """Gets the name of this V1beta1EarlyStoppingSetting.  # noqa: E501
 
+        Name is the setting name.  # noqa: E501
 
         :return: The name of this V1beta1EarlyStoppingSetting.  # noqa: E501
         :rtype: str
@@ -66,6 +67,7 @@ class V1beta1EarlyStoppingSetting(object):
     def name(self, name):
         """Sets the name of this V1beta1EarlyStoppingSetting.
 
+        Name is the setting name.  # noqa: E501
 
         :param name: The name of this V1beta1EarlyStoppingSetting.  # noqa: E501
         :type: str
@@ -77,6 +79,7 @@ class V1beta1EarlyStoppingSetting(object):
     def value(self):
         """Gets the value of this V1beta1EarlyStoppingSetting.  # noqa: E501
 
+        Value is the setting value.  # noqa: E501
 
         :return: The value of this V1beta1EarlyStoppingSetting.  # noqa: E501
         :rtype: str
@@ -87,6 +90,7 @@ class V1beta1EarlyStoppingSetting(object):
     def value(self, value):
         """Sets the value of this V1beta1EarlyStoppingSetting.
 
+        Value is the setting value.  # noqa: E501
 
         :param value: The value of this V1beta1EarlyStoppingSetting.  # noqa: E501
         :type: str

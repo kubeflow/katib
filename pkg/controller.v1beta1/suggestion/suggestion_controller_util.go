@@ -3,12 +3,13 @@ package suggestion
 import (
 	"context"
 
-	"github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+
+	"github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 )
 
 func (r *ReconcileSuggestion) reconcileDeployment(deploy *appsv1.Deployment, suggestionNsName types.NamespacedName) (*appsv1.Deployment, error) {
@@ -73,6 +74,57 @@ func (r *ReconcileSuggestion) reconcileVolume(
 		return nil, nil, err
 	}
 	return foundPVC, foundPV, nil
+}
+
+func (r *ReconcileSuggestion) reconcileRBAC(
+	sa *corev1.ServiceAccount,
+	role *rbacv1.Role,
+	roleBinding *rbacv1.RoleBinding,
+	suggestionNsName types.NamespacedName) error {
+
+	logger := log.WithValues("Suggestion", suggestionNsName)
+
+	foundSA := &corev1.ServiceAccount{}
+	foundRole := &rbacv1.Role{}
+	foundRoleBinding := &rbacv1.RoleBinding{}
+
+	// Try to find/create ServiceAccount
+	err := r.Get(context.TODO(), types.NamespacedName{Name: sa.Name, Namespace: sa.Namespace}, foundSA)
+	if err != nil && errors.IsNotFound(err) {
+		logger.Info("Creating Service Account", "name", sa.Name)
+		err = r.Create(context.TODO(), sa)
+		// Return only if Create was failed, otherwise try to find/create Role and RoleBinding
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
+	}
+
+	// Try to find/create Role
+	err = r.Get(context.TODO(), types.NamespacedName{Name: role.Name, Namespace: role.Namespace}, foundRole)
+	if err != nil && errors.IsNotFound(err) {
+		logger.Info("Creating Role", "name", role.Name)
+		err = r.Create(context.TODO(), role)
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
+	}
+
+	// Try to find/create RoleBinding
+	err = r.Get(context.TODO(), types.NamespacedName{Name: roleBinding.Name, Namespace: roleBinding.Namespace}, foundRoleBinding)
+	if err != nil && errors.IsNotFound(err) {
+		logger.Info("Creating Role Binding", "name", roleBinding.Name)
+		err = r.Create(context.TODO(), roleBinding)
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *ReconcileSuggestion) deleteDeployment(instance *v1beta1.Suggestion, suggestionNsName types.NamespacedName) error {

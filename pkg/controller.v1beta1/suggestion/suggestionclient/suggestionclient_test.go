@@ -26,6 +26,11 @@ import (
 	suggestionapimock "github.com/kubeflow/katib/pkg/mock/v1beta1/api"
 )
 
+const (
+	algorithmName              = "algorithm-name"
+	earlyStoppingAlgorithmName = "early-stopping-name"
+)
+
 type k8sMatcher struct {
 	x interface{}
 }
@@ -38,29 +43,43 @@ func (k8s k8sMatcher) String() string {
 	return fmt.Sprintf("is equal to %v", k8s.x)
 }
 
-func TestGetRPCClient(t *testing.T) {
+func TestGetRPCClientSuggestion(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	fakeConn := &grpc.ClientConn{}
-	actualClient := getRPCClient(fakeConn)
+	actualClient := getRPCClientSuggestion(fakeConn)
 	g.Expect(actualClient).To(gomega.Equal(suggestionapi.NewSuggestionClient(fakeConn)))
+}
+
+func TestGetRPCClientEarlyStopping(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	fakeConn := &grpc.ClientConn{}
+	actualClient := getRPCClientEarlyStopping(fakeConn)
+	g.Expect(actualClient).To(gomega.Equal(suggestionapi.NewEarlyStoppingClient(fakeConn)))
 }
 
 func TestSyncAssignments(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	rpcClient := suggestionapimock.NewMockSuggestionClient(mockCtrl)
 
-	getRPCClient = func(conn *grpc.ClientConn) suggestionapi.SuggestionClient {
-		return rpcClient
+	rpcClientSuggestion := suggestionapimock.NewMockSuggestionClient(mockCtrl)
+	rpcClientEarlyStopping := suggestionapimock.NewMockEarlyStoppingClient(mockCtrl)
+
+	getRPCClientSuggestion = func(conn *grpc.ClientConn) suggestionapi.SuggestionClient {
+		return rpcClientSuggestion
 	}
+	getRPCClientEarlyStopping = func(conn *grpc.ClientConn) suggestionapi.EarlyStoppingClient {
+		return rpcClientEarlyStopping
+	}
+
 	suggestionClient := New()
 
-	experiment := newFakeExperiment()
-	suggestion := newFakeSuggestion()
-	trials := newFakeTrials()
-
-	expectedRequest := newFakeRequest()
+	expectedRequestSuggestion := newFakeRequest()
+	expectedRequestEarlyStopping := &suggestionapi.GetEarlyStoppingRulesRequest{
+		Experiment:       newFakeRequest().Experiment,
+		Trials:           newFakeRequest().Trials,
+		DbManagerAddress: fmt.Sprintf("katib-db-manager.kubeflow:%v", consts.DefaultSuggestionPort),
+	}
 
 	getSuggestionReply := &suggestionapi.GetSuggestionsReply{
 		ParameterAssignments: []*suggestionapi.GetSuggestionsReply_ParameterAssignments{
@@ -92,7 +111,7 @@ func TestSyncAssignments(t *testing.T) {
 		Algorithm: &suggestionapi.AlgorithmSpec{
 			AlgorithmSettings: []*suggestionapi.AlgorithmSetting{
 				{
-					Name:  "overridded-name",
+					Name:  "overridden-name",
 					Value: "suggestion-value",
 				},
 				{
@@ -103,11 +122,27 @@ func TestSyncAssignments(t *testing.T) {
 		},
 	}
 
-	validRun := rpcClient.EXPECT().GetSuggestions(gomock.Any(), k8sMatcher{expectedRequest}).Return(getSuggestionReply, nil)
+	getEarlyStoppingRulesReply := &suggestionapi.GetEarlyStoppingRulesReply{
+		EarlyStoppingRules: []*suggestionapi.EarlyStoppingRule{
+			{
+				Name:       "accuracy",
+				Value:      "0.7",
+				Comparison: suggestionapi.ComparisonType_LESS,
+				StartStep:  4,
+			},
+			{
+				Name:       "epoch",
+				Value:      "10",
+				Comparison: suggestionapi.ComparisonType_EQUAL,
+			},
+		},
+	}
 
-	getSuggestionsFail := rpcClient.EXPECT().GetSuggestions(gomock.Any(), gomock.Any()).Return(nil, errors.New("Suggestion service connection error"))
+	validRunGetSuggestions := rpcClientSuggestion.EXPECT().GetSuggestions(gomock.Any(), k8sMatcher{expectedRequestSuggestion}).Return(getSuggestionReply, nil)
+	validRunGetEarlyStopRules := rpcClientEarlyStopping.EXPECT().GetEarlyStoppingRules(gomock.Any(), k8sMatcher{expectedRequestEarlyStopping}).Return(getEarlyStoppingRulesReply, nil)
+	getSuggestionsFail := rpcClientSuggestion.EXPECT().GetSuggestions(gomock.Any(), gomock.Any()).Return(nil, errors.New("Suggestion service connection error"))
 
-	invalidAssignmentsCount := rpcClient.EXPECT().GetSuggestions(gomock.Any(), gomock.Any()).Return(
+	invalidAssignmentsCount := rpcClientSuggestion.EXPECT().GetSuggestions(gomock.Any(), gomock.Any()).Return(
 		&suggestionapi.GetSuggestionsReply{
 			ParameterAssignments: []*suggestionapi.GetSuggestionsReply_ParameterAssignments{
 				{
@@ -121,10 +156,16 @@ func TestSyncAssignments(t *testing.T) {
 			},
 		}, nil)
 
+	validRunGetSuggestions2 := rpcClientSuggestion.EXPECT().GetSuggestions(gomock.Any(), k8sMatcher{expectedRequestSuggestion}).Return(getSuggestionReply, nil)
+	getEarlyStopRulesFail := rpcClientEarlyStopping.EXPECT().GetEarlyStoppingRules(gomock.Any(), gomock.Any()).Return(nil, errors.New("Suggestion service connection error"))
+
 	gomock.InOrder(
-		validRun,
+		validRunGetSuggestions,
+		validRunGetEarlyStopRules,
 		getSuggestionsFail,
 		invalidAssignmentsCount,
+		validRunGetSuggestions2,
+		getEarlyStopRulesFail,
 	)
 
 	tcs := []struct {
@@ -135,11 +176,11 @@ func TestSyncAssignments(t *testing.T) {
 		TestDescription string
 	}{
 		// Experiment contains HP and NAS config just for the test purpose
-		// validRun case
+		// validRunGetSuggestions + validRunGetEarlyStopRules case
 		{
-			Experiment:      experiment,
-			Suggestion:      suggestion,
-			Trials:          trials,
+			Experiment:      newFakeExperiment(),
+			Suggestion:      newFakeSuggestion(),
+			Trials:          newFakeTrials(),
 			Err:             false,
 			TestDescription: "SyncAssignments valid run",
 		},
@@ -155,19 +196,27 @@ func TestSyncAssignments(t *testing.T) {
 		},
 		// getSuggestionsFail case
 		{
-			Experiment:      experiment,
-			Suggestion:      suggestion,
-			Trials:          trials,
+			Experiment:      newFakeExperiment(),
+			Suggestion:      newFakeSuggestion(),
+			Trials:          newFakeTrials(),
 			Err:             true,
 			TestDescription: "Unable to execute GetSuggestions",
 		},
 		// invalidAssignmentsCount case
 		{
-			Experiment:      experiment,
-			Suggestion:      suggestion,
-			Trials:          trials,
+			Experiment:      newFakeExperiment(),
+			Suggestion:      newFakeSuggestion(),
+			Trials:          newFakeTrials(),
 			Err:             true,
 			TestDescription: "ParameterAssignments from response != request number",
+		},
+		// validRunGetSuggestions2 + getEarlyStopRulesFail case
+		{
+			Experiment:      newFakeExperiment(),
+			Suggestion:      newFakeSuggestion(),
+			Trials:          newFakeTrials(),
+			Err:             true,
+			TestDescription: "Unable to execute GetEarlyStoppingRules",
 		},
 	}
 	for _, tc := range tcs {
@@ -184,10 +233,10 @@ func TestValidateAlgorithmSettings(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	rpcClient := suggestionapimock.NewMockSuggestionClient(mockCtrl)
+	rpcClientSuggestion := suggestionapimock.NewMockSuggestionClient(mockCtrl)
 
-	getRPCClient = func(conn *grpc.ClientConn) suggestionapi.SuggestionClient {
-		return rpcClient
+	getRPCClientSuggestion = func(conn *grpc.ClientConn) suggestionapi.SuggestionClient {
+		return rpcClientSuggestion
 	}
 
 	expectedRequest := &suggestionapi.ValidateAlgorithmSettingsRequest{
@@ -195,18 +244,18 @@ func TestValidateAlgorithmSettings(t *testing.T) {
 	}
 	expectedRequest.Experiment.Spec.Algorithm.AlgorithmSettings = []*suggestionapi.AlgorithmSetting{
 		{
-			Name:  "overridded-name",
+			Name:  "overridden-name",
 			Value: "value",
 		},
 	}
 
-	validRun := rpcClient.EXPECT().ValidateAlgorithmSettings(gomock.Any(), k8sMatcher{expectedRequest}, gomock.Any()).Return(nil, nil)
+	validRun := rpcClientSuggestion.EXPECT().ValidateAlgorithmSettings(gomock.Any(), k8sMatcher{expectedRequest}, gomock.Any()).Return(nil, nil)
 
-	invalidExperiment := rpcClient.EXPECT().ValidateAlgorithmSettings(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil,
+	invalidExperiment := rpcClientSuggestion.EXPECT().ValidateAlgorithmSettings(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil,
 		status.Error(codes.InvalidArgument, "Invalid experiment parameter"))
-	connectionError := rpcClient.EXPECT().ValidateAlgorithmSettings(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil,
+	connectionError := rpcClientSuggestion.EXPECT().ValidateAlgorithmSettings(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil,
 		status.Error(codes.Unavailable, "Unable to connect"))
-	unimplementedMethod := rpcClient.EXPECT().ValidateAlgorithmSettings(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil,
+	unimplementedMethod := rpcClientSuggestion.EXPECT().ValidateAlgorithmSettings(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil,
 		status.Error(codes.Unimplemented, "Method not implemented"))
 
 	suggestionClient := New()
@@ -296,6 +345,11 @@ func TestConvertTrialConditionType(t *testing.T) {
 			InCondition:       trialsv1beta1.TrialFailed,
 			ExpectedCondition: suggestionapi.TrialStatus_FAILED,
 			TestDescription:   "Convert failed Trial condition",
+		},
+		{
+			InCondition:       trialsv1beta1.TrialEarlyStopped,
+			ExpectedCondition: suggestionapi.TrialStatus_EARLYSTOPPED,
+			TestDescription:   "Convert early stopped Trial condition",
 		},
 		{
 			InCondition:       "Unknown",
@@ -435,6 +489,41 @@ func TestConvertTrialObservation(t *testing.T) {
 	}
 }
 
+func TestConvertComparison(t *testing.T) {
+	tcs := []struct {
+		InComparison       suggestionapi.ComparisonType
+		ExpectedComparison commonapiv1beta1.ComparisonType
+		TestDescription    string
+	}{
+		{
+			InComparison:       suggestionapi.ComparisonType_EQUAL,
+			ExpectedComparison: commonapiv1beta1.ComparisonTypeEqual,
+			TestDescription:    "Convert equal comparison type",
+		},
+		{
+			InComparison:       suggestionapi.ComparisonType_LESS,
+			ExpectedComparison: commonapiv1beta1.ComparisonTypeLess,
+			TestDescription:    "Convert less comparison type",
+		},
+		{
+			InComparison:       suggestionapi.ComparisonType_GREATER,
+			ExpectedComparison: commonapiv1beta1.ComparisonTypeGreater,
+			TestDescription:    "Convert greater comparison type",
+		},
+		{
+			InComparison:       suggestionapi.ComparisonType_UNKNOWN_COMPARISON,
+			ExpectedComparison: commonapiv1beta1.ComparisonTypeEqual,
+			TestDescription:    "Convert unknown comparison type",
+		},
+	}
+	for _, tc := range tcs {
+		actualComparison := convertComparison(tc.InComparison)
+		if actualComparison != tc.ExpectedComparison {
+			t.Errorf("Case: %v failed. Expected comparison type %v, got %v", tc.TestDescription, tc.ExpectedComparison, actualComparison)
+		}
+	}
+}
+
 func newFakeStrategies() []commonv1beta1.MetricStrategy {
 	return []commonv1beta1.MetricStrategy{
 		{Name: "error", Value: commonv1beta1.ExtractByMin},
@@ -523,10 +612,19 @@ func newFakeExperiment() *experimentsv1beta1.Experiment {
 			ParallelTrialCount: &testInt,
 			MaxTrialCount:      &testInt,
 			Algorithm: &commonv1beta1.AlgorithmSpec{
-				AlgorithmName: "algorithm-name",
+				AlgorithmName: algorithmName,
 				AlgorithmSettings: []commonv1beta1.AlgorithmSetting{
 					{
-						Name:  "overridded-name",
+						Name:  "overridden-name",
+						Value: "value",
+					},
+				},
+			},
+			EarlyStopping: &commonapiv1beta1.EarlyStoppingSpec{
+				AlgorithmName: earlyStoppingAlgorithmName,
+				AlgorithmSettings: []commonapiv1beta1.EarlyStoppingSetting{
+					{
+						Name:  "setting-name",
 						Value: "value",
 					},
 				},
@@ -558,15 +656,32 @@ func newFakeSuggestion() *suggestionsv1beta1.Suggestion {
 			Namespace: "namespace",
 		},
 		Spec: suggestionsv1beta1.SuggestionSpec{
-			AlgorithmName: "algorithm-name",
-			Requests:      6,
+			Algorithm: &commonv1beta1.AlgorithmSpec{
+				AlgorithmName: algorithmName,
+				AlgorithmSettings: []commonv1beta1.AlgorithmSetting{
+					{
+						Name:  "overridden-name",
+						Value: "value",
+					},
+				},
+			},
+			EarlyStopping: &commonapiv1beta1.EarlyStoppingSpec{
+				AlgorithmName: earlyStoppingAlgorithmName,
+				AlgorithmSettings: []commonapiv1beta1.EarlyStoppingSetting{
+					{
+						Name:  "setting-name",
+						Value: "value",
+					},
+				},
+			},
+			Requests: 6,
 		},
 		Status: suggestionsv1beta1.SuggestionStatus{
 			SuggestionCount: 4,
 			AlgorithmSettings: []commonv1beta1.AlgorithmSetting{
 				{
-					Name:  "overridded-name",
-					Value: "overridded-value",
+					Name:  "overridden-name",
+					Value: "overridden-value",
 				},
 				{
 					Name:  "new-setting",
@@ -683,14 +798,23 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 			Name: "experiment-name",
 			Spec: &suggestionapi.ExperimentSpec{
 				Algorithm: &suggestionapi.AlgorithmSpec{
-					AlgorithmName: "algorithm-name",
+					AlgorithmName: algorithmName,
 					AlgorithmSettings: []*suggestionapi.AlgorithmSetting{
 						{
-							Name:  "overridded-name",
-							Value: "overridded-value",
+							Name:  "overridden-name",
+							Value: "overridden-value",
 						},
 						{
 							Name:  "new-setting",
+							Value: "value",
+						},
+					},
+				},
+				EarlyStopping: &suggestionapi.EarlyStoppingSpec{
+					AlgorithmName: earlyStoppingAlgorithmName,
+					AlgorithmSettings: []*suggestionapi.EarlyStoppingSetting{
+						{
+							Name:  "setting-name",
 							Value: "value",
 						},
 					},

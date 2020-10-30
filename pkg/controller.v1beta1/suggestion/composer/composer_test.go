@@ -17,6 +17,7 @@ import (
 	"github.com/spf13/viper"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -26,12 +27,13 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	apis "github.com/kubeflow/katib/pkg/apis/controller"
+	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
+	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
 )
@@ -40,9 +42,10 @@ var (
 	cfg     *rest.Config
 	timeout = time.Second * 40
 
-	suggestionName      = "test-suggestion"
-	suggestionAlgorithm = "random"
-	suggestionLabels    = map[string]string{
+	suggestionName         = "test-suggestion"
+	suggestionAlgorithm    = "random"
+	earlyStoppingAlgorithm = "median-stop"
+	suggestionLabels       = map[string]string{
 		"custom-label": "test",
 	}
 	suggestionAnnotations = map[string]string{
@@ -131,13 +134,13 @@ func TestDesiredDeployment(t *testing.T) {
 	}{
 		{
 			suggestion:      newFakeSuggestion(),
-			configMap:       newFakeKatibConfig(newFakeSuggestionConfig()),
+			configMap:       newFakeKatibConfig(newFakeSuggestionConfig(), newFakeEarlyStoppingConfig()),
 			err:             true,
 			testDescription: "Set controller reference error",
 		},
 		{
 			suggestion:         newFakeSuggestion(),
-			configMap:          newFakeKatibConfig(newFakeSuggestionConfig()),
+			configMap:          newFakeKatibConfig(newFakeSuggestionConfig(), newFakeEarlyStoppingConfig()),
 			expectedDeployment: newFakeDeployment(),
 			err:                false,
 			testDescription:    "Desired Deployment valid run",
@@ -145,7 +148,7 @@ func TestDesiredDeployment(t *testing.T) {
 		{
 			suggestion: newFakeSuggestion(),
 			configMap: func() *corev1.ConfigMap {
-				cm := newFakeKatibConfig(newFakeSuggestionConfig())
+				cm := newFakeKatibConfig(newFakeSuggestionConfig(), newFakeEarlyStoppingConfig())
 				cm.Data["suggestion"] = strings.ReplaceAll(cm.Data["suggestion"], string(imagePullPolicy), "invalid")
 				return cm
 			}(),
@@ -160,7 +163,7 @@ func TestDesiredDeployment(t *testing.T) {
 		{
 			suggestion: newFakeSuggestion(),
 			configMap: func() *corev1.ConfigMap {
-				cm := newFakeKatibConfig(newFakeSuggestionConfig())
+				cm := newFakeKatibConfig(newFakeSuggestionConfig(), newFakeEarlyStoppingConfig())
 				cm.Data["suggestion"] = strings.ReplaceAll(cm.Data["suggestion"], cpu, "invalid")
 				return cm
 			}(),
@@ -172,7 +175,7 @@ func TestDesiredDeployment(t *testing.T) {
 			configMap: func() *corev1.ConfigMap {
 				sc := newFakeSuggestionConfig()
 				sc.VolumeMountPath = "/custom/container/path"
-				cm := newFakeKatibConfig(sc)
+				cm := newFakeKatibConfig(sc, newFakeEarlyStoppingConfig())
 				return cm
 			}(),
 			expectedDeployment: func() *appsv1.Deployment {
@@ -182,6 +185,33 @@ func TestDesiredDeployment(t *testing.T) {
 			}(),
 			err:             false,
 			testDescription: "Suggestion container with custom volume mount path",
+		},
+		{
+			suggestion: newFakeSuggestion(),
+			configMap: func() *corev1.ConfigMap {
+				sc := newFakeSuggestionConfig()
+				sc.ServiceAccountName = ""
+				cm := newFakeKatibConfig(sc, newFakeEarlyStoppingConfig())
+				return cm
+			}(),
+			expectedDeployment: func() *appsv1.Deployment {
+				deploy := newFakeDeployment()
+				deploy.Spec.Template.Spec.ServiceAccountName = suggestionName + "-" + suggestionAlgorithm
+				return deploy
+			}(),
+			err:             false,
+			testDescription: "Desired Deployment valid run with default serviceAccount",
+		},
+		{
+			suggestion: newFakeSuggestion(),
+			configMap: func() *corev1.ConfigMap {
+				esC := newFakeEarlyStoppingConfig()
+				esC.Image = ""
+				cm := newFakeKatibConfig(newFakeSuggestionConfig(), esC)
+				return cm
+			}(),
+			err:             true,
+			testDescription: "Get early stopping config error, image is missed",
 		},
 	}
 
@@ -233,7 +263,6 @@ func TestDesiredDeployment(t *testing.T) {
 }
 
 func TestDesiredService(t *testing.T) {
-
 	g := gomega.NewGomegaWithT(t)
 
 	mgr, err := manager.New(cfg, manager.Options{})
@@ -261,6 +290,10 @@ func TestDesiredService(t *testing.T) {
 				{
 					Name: consts.DefaultSuggestionPortName,
 					Port: consts.DefaultSuggestionPort,
+				},
+				{
+					Name: consts.DefaultEarlyStoppingPortName,
+					Port: consts.DefaultEarlyStoppingPort,
 				},
 			},
 			Type: corev1.ServiceTypeClusterIP,
@@ -341,7 +374,7 @@ func TestDesiredVolume(t *testing.T) {
 	}{
 		{
 			suggestion:      newFakeSuggestion(),
-			configMap:       newFakeKatibConfig(newFakeSuggestionConfig()),
+			configMap:       newFakeKatibConfig(newFakeSuggestionConfig(), newFakeEarlyStoppingConfig()),
 			err:             true,
 			testDescription: "Set controller reference error",
 		},
@@ -352,7 +385,7 @@ func TestDesiredVolume(t *testing.T) {
 		},
 		{
 			suggestion:      newFakeSuggestion(),
-			configMap:       newFakeKatibConfig(newFakeSuggestionConfig()),
+			configMap:       newFakeKatibConfig(newFakeSuggestionConfig(), newFakeEarlyStoppingConfig()),
 			expectedPVC:     newFakePVC(),
 			expectedPV:      newFakePV(),
 			err:             false,
@@ -377,7 +410,7 @@ func TestDesiredVolume(t *testing.T) {
 						},
 					},
 				}
-				cm := newFakeKatibConfig(sc)
+				cm := newFakeKatibConfig(sc, newFakeEarlyStoppingConfig())
 				return cm
 			}(),
 			expectedPVC: func() *corev1.PersistentVolumeClaim {
@@ -423,7 +456,7 @@ func TestDesiredVolume(t *testing.T) {
 						corev1.ResourceStorage: volumeStorage,
 					},
 				}
-				cm := newFakeKatibConfig(sc)
+				cm := newFakeKatibConfig(sc, newFakeEarlyStoppingConfig())
 				return cm
 			}(),
 			expectedPVC: func() *corev1.PersistentVolumeClaim {
@@ -501,7 +534,6 @@ func TestDesiredVolume(t *testing.T) {
 			(tc.expectedPV != nil && !equality.Semantic.DeepEqual(tc.expectedPV.Spec, actualPV.Spec))) {
 			t.Errorf("Case: %v failed. \nExpected PVC spec %v\n Got %v.\nExpected PV spec %v\n Got %v",
 				tc.testDescription, tc.expectedPVC.Spec, actualPVC.Spec, tc.expectedPV, actualPV)
-
 		}
 
 		if tc.configMap != nil {
@@ -513,7 +545,126 @@ func TestDesiredVolume(t *testing.T) {
 					c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{}))
 			}, timeout).Should(gomega.BeTrue())
 		}
+	}
+}
 
+func TestDesiredRBAC(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	mgr, err := manager.New(cfg, manager.Options{})
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	composer := New(mgr)
+
+	expectedServiceAccount := &corev1.ServiceAccount{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      suggestionName + "-" + suggestionAlgorithm,
+			Namespace: namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion:         "kubeflow.org/v1beta1",
+					Kind:               "Suggestion",
+					Name:               suggestionName,
+					Controller:         &refFlag,
+					BlockOwnerDeletion: &refFlag,
+				},
+			},
+		},
+	}
+
+	expectedRole := &rbacv1.Role{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      suggestionName + "-" + suggestionAlgorithm,
+			Namespace: namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion:         "kubeflow.org/v1beta1",
+					Kind:               "Suggestion",
+					Name:               suggestionName,
+					Controller:         &refFlag,
+					BlockOwnerDeletion: &refFlag,
+				},
+			},
+		},
+		Rules: []rbacv1.PolicyRule{
+			{
+				APIGroups: []string{
+					trialsv1beta1.Group,
+				},
+				Resources: []string{
+					consts.PluralTrial,
+					fmt.Sprintf("%v/status", consts.PluralTrial),
+				},
+				Verbs: []string{
+					rbacv1.VerbAll,
+				},
+			},
+		},
+	}
+
+	expectedRoleBinding := &rbacv1.RoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      suggestionName + "-" + suggestionAlgorithm,
+			Namespace: namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion:         "kubeflow.org/v1beta1",
+					Kind:               "Suggestion",
+					Name:               suggestionName,
+					Controller:         &refFlag,
+					BlockOwnerDeletion: &refFlag,
+				},
+			},
+		},
+		Subjects: []rbacv1.Subject{
+			{
+				Kind:      rbacv1.ServiceAccountKind,
+				Name:      suggestionName + "-" + suggestionAlgorithm,
+				Namespace: namespace,
+			},
+		},
+		RoleRef: rbacv1.RoleRef{
+			APIGroup: rbacv1.GroupName,
+			Kind:     "Role",
+			Name:     suggestionName + "-" + suggestionAlgorithm,
+		},
+	}
+
+	tcs := []struct {
+		suggestion             *suggestionsv1beta1.Suggestion
+		expectedServiceAccount *corev1.ServiceAccount
+		expectedRole           *rbacv1.Role
+		expectedRoleBinding    *rbacv1.RoleBinding
+		err                    bool
+		testDescription        string
+	}{
+		{
+			suggestion:             newFakeSuggestion(),
+			expectedServiceAccount: expectedServiceAccount,
+			expectedRole:           expectedRole,
+			expectedRoleBinding:    expectedRoleBinding,
+			err:                    false,
+			testDescription:        "Desired RBAC valid run",
+		},
+	}
+
+	for _, tc := range tcs {
+
+		actualServiceAccount, actualRole, actualRoleBinding, err := composer.DesiredRBAC(tc.suggestion)
+
+		if !tc.err && err != nil {
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
+		} else if tc.err && err == nil {
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
+		} else if !tc.err && (!equality.Semantic.DeepEqual(tc.expectedServiceAccount, actualServiceAccount) ||
+			!equality.Semantic.DeepEqual(tc.expectedRole, actualRole) ||
+			!equality.Semantic.DeepEqual(tc.expectedRoleBinding, actualRoleBinding)) {
+			t.Errorf("Case: %v failed. \nExpected SA %v\n Got %v.\nExpected Role %v\n Got %v.\nExpected RoleBinding %v\n Got %v",
+				tc.testDescription,
+				tc.expectedServiceAccount, actualServiceAccount,
+				tc.expectedRole, actualRole,
+				tc.expectedRoleBinding, actualRoleBinding)
+		}
 	}
 }
 
@@ -554,13 +705,26 @@ func newFakeSuggestionConfig() katibconfig.SuggestionConfig {
 	}
 }
 
-func newFakeKatibConfig(suggestionConfig katibconfig.SuggestionConfig) *corev1.ConfigMap {
+func newFakeEarlyStoppingConfig() katibconfig.EarlyStoppingConfig {
+	return katibconfig.EarlyStoppingConfig{
+		Image:           image,
+		ImagePullPolicy: imagePullPolicy,
+	}
+}
 
-	jsonConfig := map[string]katibconfig.SuggestionConfig{
-		"random": suggestionConfig,
+func newFakeKatibConfig(suggestionConfig katibconfig.SuggestionConfig, earlyStoppingConfig katibconfig.EarlyStoppingConfig) *corev1.ConfigMap {
+
+	jsonConfigSuggestion := map[string]katibconfig.SuggestionConfig{
+		suggestionAlgorithm: suggestionConfig,
 	}
 
-	b, _ := json.Marshal(jsonConfig)
+	bSuggestion, _ := json.Marshal(jsonConfigSuggestion)
+
+	jsonConfigEarlyStopping := map[string]katibconfig.EarlyStoppingConfig{
+		earlyStoppingAlgorithm: earlyStoppingConfig,
+	}
+
+	bEarlyStopping, _ := json.Marshal(jsonConfigEarlyStopping)
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -568,7 +732,8 @@ func newFakeKatibConfig(suggestionConfig katibconfig.SuggestionConfig) *corev1.C
 			Namespace: namespace,
 		},
 		Data: map[string]string{
-			"suggestion": string(b),
+			consts.LabelSuggestionTag:    string(bSuggestion),
+			consts.LabelEarlyStoppingTag: string(bEarlyStopping),
 		},
 	}
 }
@@ -582,9 +747,14 @@ func newFakeSuggestion() *suggestionsv1beta1.Suggestion {
 			Annotations: suggestionAnnotations,
 		},
 		Spec: suggestionsv1beta1.SuggestionSpec{
-			Requests:      1,
-			AlgorithmName: suggestionAlgorithm,
-			ResumePolicy:  experimentsv1beta1.FromVolume,
+			Requests: 1,
+			Algorithm: &commonv1beta1.AlgorithmSpec{
+				AlgorithmName: suggestionAlgorithm,
+			},
+			EarlyStopping: &commonv1beta1.EarlyStoppingSpec{
+				AlgorithmName: earlyStoppingAlgorithm,
+			},
+			ResumePolicy: experimentsv1beta1.FromVolume,
 		},
 	}
 }
@@ -694,6 +864,17 @@ func newFakeContainers() []corev1.Container {
 				{
 					Name:      consts.ContainerSuggestionVolumeName,
 					MountPath: consts.DefaultContainerSuggestionVolumeMountPath,
+				},
+			},
+		},
+		{
+			Name:            consts.ContainerEarlyStopping,
+			Image:           image,
+			ImagePullPolicy: imagePullPolicy,
+			Ports: []corev1.ContainerPort{
+				{
+					Name:          consts.DefaultEarlyStoppingPortName,
+					ContainerPort: consts.DefaultEarlyStoppingPort,
 				},
 			},
 		},

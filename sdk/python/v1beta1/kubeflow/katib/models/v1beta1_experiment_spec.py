@@ -17,6 +17,7 @@ import re  # noqa: F401
 import six
 
 from kubeflow.katib.models.v1beta1_algorithm_spec import V1beta1AlgorithmSpec  # noqa: F401,E501
+from kubeflow.katib.models.v1beta1_early_stopping_spec import V1beta1EarlyStoppingSpec  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_metrics_collector_spec import V1beta1MetricsCollectorSpec  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_nas_config import V1beta1NasConfig  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_objective_spec import V1beta1ObjectiveSpec  # noqa: F401,E501
@@ -39,6 +40,7 @@ class V1beta1ExperimentSpec(object):
     """
     swagger_types = {
         'algorithm': 'V1beta1AlgorithmSpec',
+        'early_stopping': 'V1beta1EarlyStoppingSpec',
         'max_failed_trial_count': 'int',
         'max_trial_count': 'int',
         'metrics_collector_spec': 'V1beta1MetricsCollectorSpec',
@@ -52,6 +54,7 @@ class V1beta1ExperimentSpec(object):
 
     attribute_map = {
         'algorithm': 'algorithm',
+        'early_stopping': 'earlyStopping',
         'max_failed_trial_count': 'maxFailedTrialCount',
         'max_trial_count': 'maxTrialCount',
         'metrics_collector_spec': 'metricsCollectorSpec',
@@ -63,10 +66,11 @@ class V1beta1ExperimentSpec(object):
         'trial_template': 'trialTemplate'
     }
 
-    def __init__(self, algorithm=None, max_failed_trial_count=None, max_trial_count=None, metrics_collector_spec=None, nas_config=None, objective=None, parallel_trial_count=None, parameters=None, resume_policy=None, trial_template=None):  # noqa: E501
+    def __init__(self, algorithm=None, early_stopping=None, max_failed_trial_count=None, max_trial_count=None, metrics_collector_spec=None, nas_config=None, objective=None, parallel_trial_count=None, parameters=None, resume_policy=None, trial_template=None):  # noqa: E501
         """V1beta1ExperimentSpec - a model defined in Swagger"""  # noqa: E501
 
         self._algorithm = None
+        self._early_stopping = None
         self._max_failed_trial_count = None
         self._max_trial_count = None
         self._metrics_collector_spec = None
@@ -80,6 +84,8 @@ class V1beta1ExperimentSpec(object):
 
         if algorithm is not None:
             self.algorithm = algorithm
+        if early_stopping is not None:
+            self.early_stopping = early_stopping
         if max_failed_trial_count is not None:
             self.max_failed_trial_count = max_failed_trial_count
         if max_trial_count is not None:
@@ -121,6 +127,29 @@ class V1beta1ExperimentSpec(object):
         """
 
         self._algorithm = algorithm
+
+    @property
+    def early_stopping(self):
+        """Gets the early_stopping of this V1beta1ExperimentSpec.  # noqa: E501
+
+        Describes the early stopping algorithm.  # noqa: E501
+
+        :return: The early_stopping of this V1beta1ExperimentSpec.  # noqa: E501
+        :rtype: V1beta1EarlyStoppingSpec
+        """
+        return self._early_stopping
+
+    @early_stopping.setter
+    def early_stopping(self, early_stopping):
+        """Sets the early_stopping of this V1beta1ExperimentSpec.
+
+        Describes the early stopping algorithm.  # noqa: E501
+
+        :param early_stopping: The early_stopping of this V1beta1ExperimentSpec.  # noqa: E501
+        :type: V1beta1EarlyStoppingSpec
+        """
+
+        self._early_stopping = early_stopping
 
     @property
     def max_failed_trial_count(self):

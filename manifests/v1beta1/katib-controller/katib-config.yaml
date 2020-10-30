@@ -54,3 +54,10 @@ data:
         "image": "gcr.io/kubeflow-images-public/katib/v1beta1/suggestion-darts"
       }
     }
+  early-stopping: |-
+    {
+      "medianstop": {
+        "image": "docker.io/andreyvelichkevich/earlystopping-median",
+        "imagePullPolicy": "Always"
+      }
+    }

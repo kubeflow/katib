@@ -9,10 +9,7 @@ import (
 	"strings"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
-
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
-	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 )
 
@@ -57,13 +54,6 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	log.Printf("Got Trial List")
 
 	for _, t := range trialList.Items {
-		succeeded := false
-		for _, condition := range t.Status.Conditions {
-			if condition.Type == trialsv1beta1.TrialSucceeded &&
-				condition.Status == corev1.ConditionTrue {
-				succeeded = true
-			}
-		}
 		var lastTrialCondition string
 
 		// Take only the latest condition
@@ -73,7 +63,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 
 		trialResText := make([]string, len(metricsList)+len(paramList))
 
-		if succeeded {
+		if t.IsSucceeded() || t.IsEarlyStopped() {
 			obsLogResp, err := c.GetObservationLog(
 				context.Background(),
 				&api_pb_v1beta1.GetObservationLogRequest{

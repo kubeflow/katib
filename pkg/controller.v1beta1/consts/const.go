@@ -9,6 +9,10 @@ import (
 )
 
 const (
+
+	// PluralTrial is the plural for Trial object
+	PluralTrial = "trials"
+
 	// ConfigExperimentSuggestionName is the config name of the
 	// suggestion client implementation in experiment controller.
 	ConfigExperimentSuggestionName = "experiment-suggestion-name"
@@ -33,16 +37,23 @@ const (
 	// LabelDeploymentName is the label of deployment name.
 	LabelDeploymentName = "deployment"
 
-	// ContainerSuggestion is the container name in Suggestion.
+	// ContainerSuggestion is the container name to run Suggestion service.
 	ContainerSuggestion = "suggestion"
+	// ContainerEarlyStopping is the container name to run EarlyStopping service.
+	ContainerEarlyStopping = "early-stopping"
 	// ContainerSuggestionVolumeName is the volume name that mounted on suggestion container
 	ContainerSuggestionVolumeName = "suggestion-volume"
 
-	// DefaultSuggestionPort is the default port of suggestion service.
+	// DefaultSuggestionPortName is the default port name of Suggestion service.
+	DefaultSuggestionPortName = "suggestion-api"
+	// DefaultSuggestionPort is the default port of Suggestion service.
 	DefaultSuggestionPort = 6789
-	// DefaultSuggestionPortName is the default port name of suggestion service.
-	DefaultSuggestionPortName = "katib-api"
-	// DefaultGRPCService is the default service name in Suggestion,
+	// DefaultEarlyStoppingPortName is the default port name of EarlyStopping service.
+	DefaultEarlyStoppingPortName = "earlystop-api"
+	// DefaultEarlyStoppingPort is the default port of EarlyStopping service.
+	DefaultEarlyStoppingPort = 6788
+
+	// DefaultGRPCService is the default suggestion service name,
 	// which is used to run healthz check using grpc probe.
 	DefaultGRPCService = "manager.v1beta1.Suggestion"
 
@@ -65,10 +76,12 @@ const (
 
 	// KatibConfigMapName is the configmap name which includes Katib's configuration.
 	KatibConfigMapName = "katib-config"
-	// LabelSuggestionTag is the name of suggestion config in configmap.
+	// LabelSuggestionTag is the name of suggestion config in Katib configmap.
 	LabelSuggestionTag = "suggestion"
-	// LabelMetricsCollectorSidecar is the name of metrics collector config in configmap.
+	// LabelMetricsCollectorSidecar is the name of metrics collector config in Katib configmap.
 	LabelMetricsCollectorSidecar = "metrics-collector-sidecar"
+	// LabelEarlyStoppingTag is the name of early stopping config in Katib configmap.
+	LabelEarlyStoppingTag = "early-stopping"
 	// DefaultImagePullPolicy is the default value for image pull policy.
 	DefaultImagePullPolicy = corev1.PullIfNotPresent
 	// DefaultCPULimit is the default value for CPU limit.

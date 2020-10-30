@@ -116,6 +116,11 @@ func (in *TrialSpec) DeepCopyInto(out *TrialSpec) {
 		*out = make([]commonv1beta1.ParameterAssignment, len(*in))
 		copy(*out, *in)
 	}
+	if in.EarlyStoppingRules != nil {
+		in, out := &in.EarlyStoppingRules, &out.EarlyStoppingRules
+		*out = make([]commonv1beta1.EarlyStoppingRule, len(*in))
+		copy(*out, *in)
+	}
 	if in.RunSpec != nil {
 		in, out := &in.RunSpec, &out.RunSpec
 		*out = (*in).DeepCopy()

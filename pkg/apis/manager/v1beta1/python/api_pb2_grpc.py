@@ -90,7 +90,7 @@ def add_DBManagerServicer_to_server(servicer, server):
 
 class SuggestionStub(object):
   """*
-  Suggestion service defines APIs to manage Katib Suggestion objects.
+  Suggestion service defines APIs to manage Katib Suggestion from HP or NAS algorithms
   """
 
   def __init__(self, channel):
@@ -113,7 +113,7 @@ class SuggestionStub(object):
 
 class SuggestionServicer(object):
   """*
-  Suggestion service defines APIs to manage Katib Suggestion objects.
+  Suggestion service defines APIs to manage Katib Suggestion from HP or NAS algorithms
   """
 
   def GetSuggestions(self, request, context):
@@ -150,7 +150,8 @@ def add_SuggestionServicer_to_server(servicer, server):
 
 
 class EarlyStoppingStub(object):
-  """TODO: This feature is not yet fully implemented.
+  """*
+  EarlyStopping service defines APIs to manage Katib Early Stopping algorithms
   """
 
   def __init__(self, channel):
@@ -159,15 +160,50 @@ class EarlyStoppingStub(object):
     Args:
       channel: A grpc.Channel.
     """
+    self.GetEarlyStoppingRules = channel.unary_unary(
+        '/api.v1.beta1.EarlyStopping/GetEarlyStoppingRules',
+        request_serializer=api__pb2.GetEarlyStoppingRulesRequest.SerializeToString,
+        response_deserializer=api__pb2.GetEarlyStoppingRulesReply.FromString,
+        )
+    self.SetTrialStatus = channel.unary_unary(
+        '/api.v1.beta1.EarlyStopping/SetTrialStatus',
+        request_serializer=api__pb2.SetTrialStatusRequest.SerializeToString,
+        response_deserializer=api__pb2.SetTrialStatusReply.FromString,
+        )
 
 
 class EarlyStoppingServicer(object):
-  """TODO: This feature is not yet fully implemented.
+  """*
+  EarlyStopping service defines APIs to manage Katib Early Stopping algorithms
   """
+
+  def GetEarlyStoppingRules(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def SetTrialStatus(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
 
 
 def add_EarlyStoppingServicer_to_server(servicer, server):
   rpc_method_handlers = {
+      'GetEarlyStoppingRules': grpc.unary_unary_rpc_method_handler(
+          servicer.GetEarlyStoppingRules,
+          request_deserializer=api__pb2.GetEarlyStoppingRulesRequest.FromString,
+          response_serializer=api__pb2.GetEarlyStoppingRulesReply.SerializeToString,
+      ),
+      'SetTrialStatus': grpc.unary_unary_rpc_method_handler(
+          servicer.SetTrialStatus,
+          request_deserializer=api__pb2.SetTrialStatusRequest.FromString,
+          response_serializer=api__pb2.SetTrialStatusReply.SerializeToString,
+      ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
       'api.v1.beta1.EarlyStopping', rpc_method_handlers)

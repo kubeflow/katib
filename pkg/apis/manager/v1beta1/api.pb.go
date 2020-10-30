@@ -8,35 +8,41 @@ It is generated from these files:
 	api.proto
 
 It has these top-level messages:
-	FeasibleSpace
+	Experiment
+	ExperimentSpec
 	ParameterSpec
+	FeasibleSpace
 	ObjectiveSpec
+	AlgorithmSpec
 	AlgorithmSetting
 	EarlyStoppingSpec
-	AlgorithmSpec
+	EarlyStoppingSetting
 	NasConfig
 	GraphConfig
 	Operation
-	ExperimentSpec
-	Experiment
-	ParameterAssignment
-	Metric
-	MetricLog
-	Observation
-	ObservationLog
-	TrialSpec
-	TrialStatus
 	Trial
+	TrialSpec
+	ParameterAssignment
+	TrialStatus
+	Observation
+	Metric
 	ReportObservationLogRequest
 	ReportObservationLogReply
-	DeleteObservationLogRequest
-	DeleteObservationLogReply
+	ObservationLog
+	MetricLog
 	GetObservationLogRequest
 	GetObservationLogReply
+	DeleteObservationLogRequest
+	DeleteObservationLogReply
 	GetSuggestionsRequest
 	GetSuggestionsReply
 	ValidateAlgorithmSettingsRequest
 	ValidateAlgorithmSettingsReply
+	GetEarlyStoppingRulesRequest
+	GetEarlyStoppingRulesReply
+	EarlyStoppingRule
+	SetTrialStatusRequest
+	SetTrialStatusReply
 */
 package api_v1_beta1
 
@@ -119,15 +125,45 @@ func (x ObjectiveType) String() string {
 }
 func (ObjectiveType) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
+type ComparisonType int32
+
+const (
+	ComparisonType_UNKNOWN_COMPARISON ComparisonType = 0
+	ComparisonType_EQUAL              ComparisonType = 1
+	ComparisonType_LESS               ComparisonType = 2
+	ComparisonType_GREATER            ComparisonType = 3
+)
+
+var ComparisonType_name = map[int32]string{
+	0: "UNKNOWN_COMPARISON",
+	1: "EQUAL",
+	2: "LESS",
+	3: "GREATER",
+}
+var ComparisonType_value = map[string]int32{
+	"UNKNOWN_COMPARISON": 0,
+	"EQUAL":              1,
+	"LESS":               2,
+	"GREATER":            3,
+}
+
+func (x ComparisonType) String() string {
+	return proto.EnumName(ComparisonType_name, int32(x))
+}
+func (ComparisonType) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+
+// Trial can be in one of 6 conditions.
+// TODO (andreyvelich): Remove unused conditions.
 type TrialStatus_TrialConditionType int32
 
 const (
-	TrialStatus_CREATED   TrialStatus_TrialConditionType = 0
-	TrialStatus_RUNNING   TrialStatus_TrialConditionType = 1
-	TrialStatus_SUCCEEDED TrialStatus_TrialConditionType = 2
-	TrialStatus_KILLED    TrialStatus_TrialConditionType = 3
-	TrialStatus_FAILED    TrialStatus_TrialConditionType = 4
-	TrialStatus_UNKNOWN   TrialStatus_TrialConditionType = 5
+	TrialStatus_CREATED      TrialStatus_TrialConditionType = 0
+	TrialStatus_RUNNING      TrialStatus_TrialConditionType = 1
+	TrialStatus_SUCCEEDED    TrialStatus_TrialConditionType = 2
+	TrialStatus_KILLED       TrialStatus_TrialConditionType = 3
+	TrialStatus_FAILED       TrialStatus_TrialConditionType = 4
+	TrialStatus_EARLYSTOPPED TrialStatus_TrialConditionType = 5
+	TrialStatus_UNKNOWN      TrialStatus_TrialConditionType = 6
 )
 
 var TrialStatus_TrialConditionType_name = map[int32]string{
@@ -136,22 +172,173 @@ var TrialStatus_TrialConditionType_name = map[int32]string{
 	2: "SUCCEEDED",
 	3: "KILLED",
 	4: "FAILED",
-	5: "UNKNOWN",
+	5: "EARLYSTOPPED",
+	6: "UNKNOWN",
 }
 var TrialStatus_TrialConditionType_value = map[string]int32{
-	"CREATED":   0,
-	"RUNNING":   1,
-	"SUCCEEDED": 2,
-	"KILLED":    3,
-	"FAILED":    4,
-	"UNKNOWN":   5,
+	"CREATED":      0,
+	"RUNNING":      1,
+	"SUCCEEDED":    2,
+	"KILLED":       3,
+	"FAILED":       4,
+	"EARLYSTOPPED": 5,
+	"UNKNOWN":      6,
 }
 
 func (x TrialStatus_TrialConditionType) String() string {
 	return proto.EnumName(TrialStatus_TrialConditionType_name, int32(x))
 }
 func (TrialStatus_TrialConditionType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{17, 0}
+	return fileDescriptor0, []int{15, 0}
+}
+
+// *
+// Structure for a single Experiment.
+type Experiment struct {
+	Name string          `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Spec *ExperimentSpec `protobuf:"bytes,2,opt,name=spec" json:"spec,omitempty"`
+}
+
+func (m *Experiment) Reset()                    { *m = Experiment{} }
+func (m *Experiment) String() string            { return proto.CompactTextString(m) }
+func (*Experiment) ProtoMessage()               {}
+func (*Experiment) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+
+func (m *Experiment) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *Experiment) GetSpec() *ExperimentSpec {
+	if m != nil {
+		return m.Spec
+	}
+	return nil
+}
+
+// *
+// Specification of an Experiment. Experiment represents a single optimization run over a feasible space.
+// Each Experiment contains a configuration describing the feasible space, as well as a set of Trials.
+// It is assumed that objective function f(x) does not change in the course of an Experiment.
+type ExperimentSpec struct {
+	ParameterSpecs     *ExperimentSpec_ParameterSpecs `protobuf:"bytes,1,opt,name=parameter_specs,json=parameterSpecs" json:"parameter_specs,omitempty"`
+	Objective          *ObjectiveSpec                 `protobuf:"bytes,2,opt,name=objective" json:"objective,omitempty"`
+	Algorithm          *AlgorithmSpec                 `protobuf:"bytes,3,opt,name=algorithm" json:"algorithm,omitempty"`
+	EarlyStopping      *EarlyStoppingSpec             `protobuf:"bytes,4,opt,name=early_stopping,json=earlyStopping" json:"early_stopping,omitempty"`
+	ParallelTrialCount int32                          `protobuf:"varint,5,opt,name=parallel_trial_count,json=parallelTrialCount" json:"parallel_trial_count,omitempty"`
+	MaxTrialCount      int32                          `protobuf:"varint,6,opt,name=max_trial_count,json=maxTrialCount" json:"max_trial_count,omitempty"`
+	NasConfig          *NasConfig                     `protobuf:"bytes,7,opt,name=nas_config,json=nasConfig" json:"nas_config,omitempty"`
+}
+
+func (m *ExperimentSpec) Reset()                    { *m = ExperimentSpec{} }
+func (m *ExperimentSpec) String() string            { return proto.CompactTextString(m) }
+func (*ExperimentSpec) ProtoMessage()               {}
+func (*ExperimentSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+func (m *ExperimentSpec) GetParameterSpecs() *ExperimentSpec_ParameterSpecs {
+	if m != nil {
+		return m.ParameterSpecs
+	}
+	return nil
+}
+
+func (m *ExperimentSpec) GetObjective() *ObjectiveSpec {
+	if m != nil {
+		return m.Objective
+	}
+	return nil
+}
+
+func (m *ExperimentSpec) GetAlgorithm() *AlgorithmSpec {
+	if m != nil {
+		return m.Algorithm
+	}
+	return nil
+}
+
+func (m *ExperimentSpec) GetEarlyStopping() *EarlyStoppingSpec {
+	if m != nil {
+		return m.EarlyStopping
+	}
+	return nil
+}
+
+func (m *ExperimentSpec) GetParallelTrialCount() int32 {
+	if m != nil {
+		return m.ParallelTrialCount
+	}
+	return 0
+}
+
+func (m *ExperimentSpec) GetMaxTrialCount() int32 {
+	if m != nil {
+		return m.MaxTrialCount
+	}
+	return 0
+}
+
+func (m *ExperimentSpec) GetNasConfig() *NasConfig {
+	if m != nil {
+		return m.NasConfig
+	}
+	return nil
+}
+
+// *
+// List of ParameterSpec.
+type ExperimentSpec_ParameterSpecs struct {
+	Parameters []*ParameterSpec `protobuf:"bytes,1,rep,name=parameters" json:"parameters,omitempty"`
+}
+
+func (m *ExperimentSpec_ParameterSpecs) Reset()         { *m = ExperimentSpec_ParameterSpecs{} }
+func (m *ExperimentSpec_ParameterSpecs) String() string { return proto.CompactTextString(m) }
+func (*ExperimentSpec_ParameterSpecs) ProtoMessage()    {}
+func (*ExperimentSpec_ParameterSpecs) Descriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{1, 0}
+}
+
+func (m *ExperimentSpec_ParameterSpecs) GetParameters() []*ParameterSpec {
+	if m != nil {
+		return m.Parameters
+	}
+	return nil
+}
+
+// *
+// Config for a hyperparameter.
+// Katib will create each Hyper parameter from this config.
+type ParameterSpec struct {
+	Name          string         `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	ParameterType ParameterType  `protobuf:"varint,2,opt,name=parameter_type,json=parameterType,enum=api.v1.beta1.ParameterType" json:"parameter_type,omitempty"`
+	FeasibleSpace *FeasibleSpace `protobuf:"bytes,3,opt,name=feasible_space,json=feasibleSpace" json:"feasible_space,omitempty"`
+}
+
+func (m *ParameterSpec) Reset()                    { *m = ParameterSpec{} }
+func (m *ParameterSpec) String() string            { return proto.CompactTextString(m) }
+func (*ParameterSpec) ProtoMessage()               {}
+func (*ParameterSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+
+func (m *ParameterSpec) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *ParameterSpec) GetParameterType() ParameterType {
+	if m != nil {
+		return m.ParameterType
+	}
+	return ParameterType_UNKNOWN_TYPE
+}
+
+func (m *ParameterSpec) GetFeasibleSpace() *FeasibleSpace {
+	if m != nil {
+		return m.FeasibleSpace
+	}
+	return nil
 }
 
 // *
@@ -168,7 +355,7 @@ type FeasibleSpace struct {
 func (m *FeasibleSpace) Reset()                    { *m = FeasibleSpace{} }
 func (m *FeasibleSpace) String() string            { return proto.CompactTextString(m) }
 func (*FeasibleSpace) ProtoMessage()               {}
-func (*FeasibleSpace) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+func (*FeasibleSpace) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
 
 func (m *FeasibleSpace) GetMax() string {
 	if m != nil {
@@ -199,51 +386,20 @@ func (m *FeasibleSpace) GetStep() string {
 }
 
 // *
-// Config for a Hyper parameter.
-// Katib will create each Hyper parameter from this config.
-type ParameterSpec struct {
-	Name          string         `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	ParameterType ParameterType  `protobuf:"varint,2,opt,name=parameter_type,json=parameterType,enum=api.v1.beta1.ParameterType" json:"parameter_type,omitempty"`
-	FeasibleSpace *FeasibleSpace `protobuf:"bytes,3,opt,name=feasible_space,json=feasibleSpace" json:"feasible_space,omitempty"`
-}
-
-func (m *ParameterSpec) Reset()                    { *m = ParameterSpec{} }
-func (m *ParameterSpec) String() string            { return proto.CompactTextString(m) }
-func (*ParameterSpec) ProtoMessage()               {}
-func (*ParameterSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
-
-func (m *ParameterSpec) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-func (m *ParameterSpec) GetParameterType() ParameterType {
-	if m != nil {
-		return m.ParameterType
-	}
-	return ParameterType_UNKNOWN_TYPE
-}
-
-func (m *ParameterSpec) GetFeasibleSpace() *FeasibleSpace {
-	if m != nil {
-		return m.FeasibleSpace
-	}
-	return nil
-}
-
+// Objective specification.
 type ObjectiveSpec struct {
-	Type                  ObjectiveType `protobuf:"varint,1,opt,name=type,enum=api.v1.beta1.ObjectiveType" json:"type,omitempty"`
-	Goal                  float64       `protobuf:"fixed64,2,opt,name=goal" json:"goal,omitempty"`
-	ObjectiveMetricName   string        `protobuf:"bytes,3,opt,name=objective_metric_name,json=objectiveMetricName" json:"objective_metric_name,omitempty"`
-	AdditionalMetricNames []string      `protobuf:"bytes,4,rep,name=additional_metric_names,json=additionalMetricNames" json:"additional_metric_names,omitempty"`
+	Type                ObjectiveType `protobuf:"varint,1,opt,name=type,enum=api.v1.beta1.ObjectiveType" json:"type,omitempty"`
+	Goal                float64       `protobuf:"fixed64,2,opt,name=goal" json:"goal,omitempty"`
+	ObjectiveMetricName string        `protobuf:"bytes,3,opt,name=objective_metric_name,json=objectiveMetricName" json:"objective_metric_name,omitempty"`
+	// List of additional metrics to record from Trial.
+	// This can be empty if we only care about the objective metric.
+	AdditionalMetricNames []string `protobuf:"bytes,4,rep,name=additional_metric_names,json=additionalMetricNames" json:"additional_metric_names,omitempty"`
 }
 
 func (m *ObjectiveSpec) Reset()                    { *m = ObjectiveSpec{} }
 func (m *ObjectiveSpec) String() string            { return proto.CompactTextString(m) }
 func (*ObjectiveSpec) ProtoMessage()               {}
-func (*ObjectiveSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+func (*ObjectiveSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
 func (m *ObjectiveSpec) GetType() ObjectiveType {
 	if m != nil {
@@ -273,42 +429,11 @@ func (m *ObjectiveSpec) GetAdditionalMetricNames() []string {
 	return nil
 }
 
-type AlgorithmSetting struct {
-	Name  string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
-}
-
-func (m *AlgorithmSetting) Reset()                    { *m = AlgorithmSetting{} }
-func (m *AlgorithmSetting) String() string            { return proto.CompactTextString(m) }
-func (*AlgorithmSetting) ProtoMessage()               {}
-func (*AlgorithmSetting) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
-
-func (m *AlgorithmSetting) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-func (m *AlgorithmSetting) GetValue() string {
-	if m != nil {
-		return m.Value
-	}
-	return ""
-}
-
-type EarlyStoppingSpec struct {
-}
-
-func (m *EarlyStoppingSpec) Reset()                    { *m = EarlyStoppingSpec{} }
-func (m *EarlyStoppingSpec) String() string            { return proto.CompactTextString(m) }
-func (*EarlyStoppingSpec) ProtoMessage()               {}
-func (*EarlyStoppingSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
-
+// *
+// HP or NAS algorithm specification.
 type AlgorithmSpec struct {
 	AlgorithmName     string              `protobuf:"bytes,1,opt,name=algorithm_name,json=algorithmName" json:"algorithm_name,omitempty"`
 	AlgorithmSettings []*AlgorithmSetting `protobuf:"bytes,2,rep,name=algorithm_settings,json=algorithmSettings" json:"algorithm_settings,omitempty"`
-	EarlyStoppingSpec *EarlyStoppingSpec  `protobuf:"bytes,3,opt,name=early_stopping_spec,json=earlyStoppingSpec" json:"early_stopping_spec,omitempty"`
 }
 
 func (m *AlgorithmSpec) Reset()                    { *m = AlgorithmSpec{} }
@@ -330,11 +455,82 @@ func (m *AlgorithmSpec) GetAlgorithmSettings() []*AlgorithmSetting {
 	return nil
 }
 
-func (m *AlgorithmSpec) GetEarlyStoppingSpec() *EarlyStoppingSpec {
+// *
+// HP or NAS algorithm settings.
+type AlgorithmSetting struct {
+	Name  string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
+}
+
+func (m *AlgorithmSetting) Reset()                    { *m = AlgorithmSetting{} }
+func (m *AlgorithmSetting) String() string            { return proto.CompactTextString(m) }
+func (*AlgorithmSetting) ProtoMessage()               {}
+func (*AlgorithmSetting) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+
+func (m *AlgorithmSetting) GetName() string {
 	if m != nil {
-		return m.EarlyStoppingSpec
+		return m.Name
+	}
+	return ""
+}
+
+func (m *AlgorithmSetting) GetValue() string {
+	if m != nil {
+		return m.Value
+	}
+	return ""
+}
+
+// *
+// Early stopping algorithm specification.
+type EarlyStoppingSpec struct {
+	AlgorithmName     string                  `protobuf:"bytes,1,opt,name=algorithm_name,json=algorithmName" json:"algorithm_name,omitempty"`
+	AlgorithmSettings []*EarlyStoppingSetting `protobuf:"bytes,2,rep,name=algorithm_settings,json=algorithmSettings" json:"algorithm_settings,omitempty"`
+}
+
+func (m *EarlyStoppingSpec) Reset()                    { *m = EarlyStoppingSpec{} }
+func (m *EarlyStoppingSpec) String() string            { return proto.CompactTextString(m) }
+func (*EarlyStoppingSpec) ProtoMessage()               {}
+func (*EarlyStoppingSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+
+func (m *EarlyStoppingSpec) GetAlgorithmName() string {
+	if m != nil {
+		return m.AlgorithmName
+	}
+	return ""
+}
+
+func (m *EarlyStoppingSpec) GetAlgorithmSettings() []*EarlyStoppingSetting {
+	if m != nil {
+		return m.AlgorithmSettings
 	}
 	return nil
+}
+
+// *
+// Early stopping algorithm settings.
+type EarlyStoppingSetting struct {
+	Name  string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
+}
+
+func (m *EarlyStoppingSetting) Reset()                    { *m = EarlyStoppingSetting{} }
+func (m *EarlyStoppingSetting) String() string            { return proto.CompactTextString(m) }
+func (*EarlyStoppingSetting) ProtoMessage()               {}
+func (*EarlyStoppingSetting) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+
+func (m *EarlyStoppingSetting) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *EarlyStoppingSetting) GetValue() string {
+	if m != nil {
+		return m.Value
+	}
+	return ""
 }
 
 // *
@@ -347,7 +543,7 @@ type NasConfig struct {
 func (m *NasConfig) Reset()                    { *m = NasConfig{} }
 func (m *NasConfig) String() string            { return proto.CompactTextString(m) }
 func (*NasConfig) ProtoMessage()               {}
-func (*NasConfig) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+func (*NasConfig) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
 
 func (m *NasConfig) GetGraphConfig() *GraphConfig {
 	if m != nil {
@@ -370,7 +566,7 @@ type NasConfig_Operations struct {
 func (m *NasConfig_Operations) Reset()                    { *m = NasConfig_Operations{} }
 func (m *NasConfig_Operations) String() string            { return proto.CompactTextString(m) }
 func (*NasConfig_Operations) ProtoMessage()               {}
-func (*NasConfig_Operations) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6, 0} }
+func (*NasConfig_Operations) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9, 0} }
 
 func (m *NasConfig_Operations) GetOperation() []*Operation {
 	if m != nil {
@@ -390,7 +586,7 @@ type GraphConfig struct {
 func (m *GraphConfig) Reset()                    { *m = GraphConfig{} }
 func (m *GraphConfig) String() string            { return proto.CompactTextString(m) }
 func (*GraphConfig) ProtoMessage()               {}
-func (*GraphConfig) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+func (*GraphConfig) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
 
 func (m *GraphConfig) GetNumLayers() int32 {
 	if m != nil {
@@ -423,7 +619,7 @@ type Operation struct {
 func (m *Operation) Reset()                    { *m = Operation{} }
 func (m *Operation) String() string            { return proto.CompactTextString(m) }
 func (*Operation) ProtoMessage()               {}
-func (*Operation) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+func (*Operation) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
 
 func (m *Operation) GetOperationType() string {
 	if m != nil {
@@ -448,7 +644,7 @@ type Operation_ParameterSpecs struct {
 func (m *Operation_ParameterSpecs) Reset()                    { *m = Operation_ParameterSpecs{} }
 func (m *Operation_ParameterSpecs) String() string            { return proto.CompactTextString(m) }
 func (*Operation_ParameterSpecs) ProtoMessage()               {}
-func (*Operation_ParameterSpecs) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8, 0} }
+func (*Operation_ParameterSpecs) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11, 0} }
 
 func (m *Operation_ParameterSpecs) GetParameters() []*ParameterSpec {
 	if m != nil {
@@ -458,248 +654,50 @@ func (m *Operation_ParameterSpecs) GetParameters() []*ParameterSpec {
 }
 
 // *
-// Spec of a Experiment. Experiment represents a single optimization run over a feasible space.
-// Each Experiment contains a configuration describing the feasible space, as well as a set of Trials.
-// It is assumed that objective function f(x) does not change in the course of a Experiment.
-type ExperimentSpec struct {
-	ParameterSpecs       *ExperimentSpec_ParameterSpecs `protobuf:"bytes,1,opt,name=parameter_specs,json=parameterSpecs" json:"parameter_specs,omitempty"`
-	Objective            *ObjectiveSpec                 `protobuf:"bytes,2,opt,name=objective" json:"objective,omitempty"`
-	Algorithm            *AlgorithmSpec                 `protobuf:"bytes,3,opt,name=algorithm" json:"algorithm,omitempty"`
-	TrialTemplate        string                         `protobuf:"bytes,4,opt,name=trial_template,json=trialTemplate" json:"trial_template,omitempty"`
-	MetricsCollectorSpec string                         `protobuf:"bytes,5,opt,name=metrics_collector_spec,json=metricsCollectorSpec" json:"metrics_collector_spec,omitempty"`
-	ParallelTrialCount   int32                          `protobuf:"varint,6,opt,name=parallel_trial_count,json=parallelTrialCount" json:"parallel_trial_count,omitempty"`
-	MaxTrialCount        int32                          `protobuf:"varint,7,opt,name=max_trial_count,json=maxTrialCount" json:"max_trial_count,omitempty"`
-	NasConfig            *NasConfig                     `protobuf:"bytes,8,opt,name=nas_config,json=nasConfig" json:"nas_config,omitempty"`
+// Structure for a single Trial.
+type Trial struct {
+	Name   string       `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Spec   *TrialSpec   `protobuf:"bytes,2,opt,name=spec" json:"spec,omitempty"`
+	Status *TrialStatus `protobuf:"bytes,3,opt,name=status" json:"status,omitempty"`
 }
 
-func (m *ExperimentSpec) Reset()                    { *m = ExperimentSpec{} }
-func (m *ExperimentSpec) String() string            { return proto.CompactTextString(m) }
-func (*ExperimentSpec) ProtoMessage()               {}
-func (*ExperimentSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
+func (m *Trial) Reset()                    { *m = Trial{} }
+func (m *Trial) String() string            { return proto.CompactTextString(m) }
+func (*Trial) ProtoMessage()               {}
+func (*Trial) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
 
-func (m *ExperimentSpec) GetParameterSpecs() *ExperimentSpec_ParameterSpecs {
-	if m != nil {
-		return m.ParameterSpecs
-	}
-	return nil
-}
-
-func (m *ExperimentSpec) GetObjective() *ObjectiveSpec {
-	if m != nil {
-		return m.Objective
-	}
-	return nil
-}
-
-func (m *ExperimentSpec) GetAlgorithm() *AlgorithmSpec {
-	if m != nil {
-		return m.Algorithm
-	}
-	return nil
-}
-
-func (m *ExperimentSpec) GetTrialTemplate() string {
-	if m != nil {
-		return m.TrialTemplate
-	}
-	return ""
-}
-
-func (m *ExperimentSpec) GetMetricsCollectorSpec() string {
-	if m != nil {
-		return m.MetricsCollectorSpec
-	}
-	return ""
-}
-
-func (m *ExperimentSpec) GetParallelTrialCount() int32 {
-	if m != nil {
-		return m.ParallelTrialCount
-	}
-	return 0
-}
-
-func (m *ExperimentSpec) GetMaxTrialCount() int32 {
-	if m != nil {
-		return m.MaxTrialCount
-	}
-	return 0
-}
-
-func (m *ExperimentSpec) GetNasConfig() *NasConfig {
-	if m != nil {
-		return m.NasConfig
-	}
-	return nil
-}
-
-// *
-// List of ParameterSpec
-type ExperimentSpec_ParameterSpecs struct {
-	Parameters []*ParameterSpec `protobuf:"bytes,1,rep,name=parameters" json:"parameters,omitempty"`
-}
-
-func (m *ExperimentSpec_ParameterSpecs) Reset()         { *m = ExperimentSpec_ParameterSpecs{} }
-func (m *ExperimentSpec_ParameterSpecs) String() string { return proto.CompactTextString(m) }
-func (*ExperimentSpec_ParameterSpecs) ProtoMessage()    {}
-func (*ExperimentSpec_ParameterSpecs) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{9, 0}
-}
-
-func (m *ExperimentSpec_ParameterSpecs) GetParameters() []*ParameterSpec {
-	if m != nil {
-		return m.Parameters
-	}
-	return nil
-}
-
-type Experiment struct {
-	Name string          `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	Spec *ExperimentSpec `protobuf:"bytes,2,opt,name=spec" json:"spec,omitempty"`
-}
-
-func (m *Experiment) Reset()                    { *m = Experiment{} }
-func (m *Experiment) String() string            { return proto.CompactTextString(m) }
-func (*Experiment) ProtoMessage()               {}
-func (*Experiment) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
-
-func (m *Experiment) GetName() string {
+func (m *Trial) GetName() string {
 	if m != nil {
 		return m.Name
 	}
 	return ""
 }
 
-func (m *Experiment) GetSpec() *ExperimentSpec {
+func (m *Trial) GetSpec() *TrialSpec {
 	if m != nil {
 		return m.Spec
 	}
 	return nil
 }
 
-type ParameterAssignment struct {
-	Name  string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
-}
-
-func (m *ParameterAssignment) Reset()                    { *m = ParameterAssignment{} }
-func (m *ParameterAssignment) String() string            { return proto.CompactTextString(m) }
-func (*ParameterAssignment) ProtoMessage()               {}
-func (*ParameterAssignment) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
-
-func (m *ParameterAssignment) GetName() string {
+func (m *Trial) GetStatus() *TrialStatus {
 	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-func (m *ParameterAssignment) GetValue() string {
-	if m != nil {
-		return m.Value
-	}
-	return ""
-}
-
-type Metric struct {
-	Name  string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
-}
-
-func (m *Metric) Reset()                    { *m = Metric{} }
-func (m *Metric) String() string            { return proto.CompactTextString(m) }
-func (*Metric) ProtoMessage()               {}
-func (*Metric) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
-
-func (m *Metric) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-func (m *Metric) GetValue() string {
-	if m != nil {
-		return m.Value
-	}
-	return ""
-}
-
-type MetricLog struct {
-	TimeStamp string  `protobuf:"bytes,1,opt,name=time_stamp,json=timeStamp" json:"time_stamp,omitempty"`
-	Metric    *Metric `protobuf:"bytes,2,opt,name=metric" json:"metric,omitempty"`
-}
-
-func (m *MetricLog) Reset()                    { *m = MetricLog{} }
-func (m *MetricLog) String() string            { return proto.CompactTextString(m) }
-func (*MetricLog) ProtoMessage()               {}
-func (*MetricLog) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
-
-func (m *MetricLog) GetTimeStamp() string {
-	if m != nil {
-		return m.TimeStamp
-	}
-	return ""
-}
-
-func (m *MetricLog) GetMetric() *Metric {
-	if m != nil {
-		return m.Metric
+		return m.Status
 	}
 	return nil
 }
 
-type Observation struct {
-	Metrics []*Metric `protobuf:"bytes,1,rep,name=metrics" json:"metrics,omitempty"`
-}
-
-func (m *Observation) Reset()                    { *m = Observation{} }
-func (m *Observation) String() string            { return proto.CompactTextString(m) }
-func (*Observation) ProtoMessage()               {}
-func (*Observation) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
-
-func (m *Observation) GetMetrics() []*Metric {
-	if m != nil {
-		return m.Metrics
-	}
-	return nil
-}
-
-type ObservationLog struct {
-	MetricLogs []*MetricLog `protobuf:"bytes,1,rep,name=metric_logs,json=metricLogs" json:"metric_logs,omitempty"`
-}
-
-func (m *ObservationLog) Reset()                    { *m = ObservationLog{} }
-func (m *ObservationLog) String() string            { return proto.CompactTextString(m) }
-func (*ObservationLog) ProtoMessage()               {}
-func (*ObservationLog) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
-
-func (m *ObservationLog) GetMetricLogs() []*MetricLog {
-	if m != nil {
-		return m.MetricLogs
-	}
-	return nil
-}
-
+// *
+// Specification of a Trial. It represents Trial's parameter assignments and objective.
 type TrialSpec struct {
-	ExperimentName       string                          `protobuf:"bytes,1,opt,name=experiment_name,json=experimentName" json:"experiment_name,omitempty"`
 	Objective            *ObjectiveSpec                  `protobuf:"bytes,2,opt,name=objective" json:"objective,omitempty"`
 	ParameterAssignments *TrialSpec_ParameterAssignments `protobuf:"bytes,3,opt,name=parameter_assignments,json=parameterAssignments" json:"parameter_assignments,omitempty"`
-	RunSpec              string                          `protobuf:"bytes,4,opt,name=run_spec,json=runSpec" json:"run_spec,omitempty"`
-	MetricsCollectorSpec string                          `protobuf:"bytes,5,opt,name=metrics_collector_spec,json=metricsCollectorSpec" json:"metrics_collector_spec,omitempty"`
 }
 
 func (m *TrialSpec) Reset()                    { *m = TrialSpec{} }
 func (m *TrialSpec) String() string            { return proto.CompactTextString(m) }
 func (*TrialSpec) ProtoMessage()               {}
-func (*TrialSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
-
-func (m *TrialSpec) GetExperimentName() string {
-	if m != nil {
-		return m.ExperimentName
-	}
-	return ""
-}
+func (*TrialSpec) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
 
 func (m *TrialSpec) GetObjective() *ObjectiveSpec {
 	if m != nil {
@@ -715,20 +713,6 @@ func (m *TrialSpec) GetParameterAssignments() *TrialSpec_ParameterAssignments {
 	return nil
 }
 
-func (m *TrialSpec) GetRunSpec() string {
-	if m != nil {
-		return m.RunSpec
-	}
-	return ""
-}
-
-func (m *TrialSpec) GetMetricsCollectorSpec() string {
-	if m != nil {
-		return m.MetricsCollectorSpec
-	}
-	return ""
-}
-
 // *
 // List of ParameterAssignment
 type TrialSpec_ParameterAssignments struct {
@@ -739,7 +723,7 @@ func (m *TrialSpec_ParameterAssignments) Reset()         { *m = TrialSpec_Parame
 func (m *TrialSpec_ParameterAssignments) String() string { return proto.CompactTextString(m) }
 func (*TrialSpec_ParameterAssignments) ProtoMessage()    {}
 func (*TrialSpec_ParameterAssignments) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{16, 0}
+	return fileDescriptor0, []int{13, 0}
 }
 
 func (m *TrialSpec_ParameterAssignments) GetAssignments() []*ParameterAssignment {
@@ -749,6 +733,32 @@ func (m *TrialSpec_ParameterAssignments) GetAssignments() []*ParameterAssignment
 	return nil
 }
 
+type ParameterAssignment struct {
+	Name  string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
+}
+
+func (m *ParameterAssignment) Reset()                    { *m = ParameterAssignment{} }
+func (m *ParameterAssignment) String() string            { return proto.CompactTextString(m) }
+func (*ParameterAssignment) ProtoMessage()               {}
+func (*ParameterAssignment) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
+
+func (m *ParameterAssignment) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *ParameterAssignment) GetValue() string {
+	if m != nil {
+		return m.Value
+	}
+	return ""
+}
+
+// *
+// Current Trial status. It contains Trial's latest condition, start time, completion time, observation.
 type TrialStatus struct {
 	StartTime      string                         `protobuf:"bytes,1,opt,name=start_time,json=startTime" json:"start_time,omitempty"`
 	CompletionTime string                         `protobuf:"bytes,2,opt,name=completion_time,json=completionTime" json:"completion_time,omitempty"`
@@ -759,7 +769,7 @@ type TrialStatus struct {
 func (m *TrialStatus) Reset()                    { *m = TrialStatus{} }
 func (m *TrialStatus) String() string            { return proto.CompactTextString(m) }
 func (*TrialStatus) ProtoMessage()               {}
-func (*TrialStatus) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
+func (*TrialStatus) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
 
 func (m *TrialStatus) GetStartTime() string {
 	if m != nil {
@@ -789,36 +799,44 @@ func (m *TrialStatus) GetObservation() *Observation {
 	return nil
 }
 
-type Trial struct {
-	Name   string       `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	Spec   *TrialSpec   `protobuf:"bytes,2,opt,name=spec" json:"spec,omitempty"`
-	Status *TrialStatus `protobuf:"bytes,3,opt,name=status" json:"status,omitempty"`
+type Observation struct {
+	Metrics []*Metric `protobuf:"bytes,1,rep,name=metrics" json:"metrics,omitempty"`
 }
 
-func (m *Trial) Reset()                    { *m = Trial{} }
-func (m *Trial) String() string            { return proto.CompactTextString(m) }
-func (*Trial) ProtoMessage()               {}
-func (*Trial) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
+func (m *Observation) Reset()                    { *m = Observation{} }
+func (m *Observation) String() string            { return proto.CompactTextString(m) }
+func (*Observation) ProtoMessage()               {}
+func (*Observation) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
 
-func (m *Trial) GetName() string {
+func (m *Observation) GetMetrics() []*Metric {
+	if m != nil {
+		return m.Metrics
+	}
+	return nil
+}
+
+type Metric struct {
+	Name  string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
+}
+
+func (m *Metric) Reset()                    { *m = Metric{} }
+func (m *Metric) String() string            { return proto.CompactTextString(m) }
+func (*Metric) ProtoMessage()               {}
+func (*Metric) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
+
+func (m *Metric) GetName() string {
 	if m != nil {
 		return m.Name
 	}
 	return ""
 }
 
-func (m *Trial) GetSpec() *TrialSpec {
+func (m *Metric) GetValue() string {
 	if m != nil {
-		return m.Spec
+		return m.Value
 	}
-	return nil
-}
-
-func (m *Trial) GetStatus() *TrialStatus {
-	if m != nil {
-		return m.Status
-	}
-	return nil
+	return ""
 }
 
 type ReportObservationLogRequest struct {
@@ -829,7 +847,7 @@ type ReportObservationLogRequest struct {
 func (m *ReportObservationLogRequest) Reset()                    { *m = ReportObservationLogRequest{} }
 func (m *ReportObservationLogRequest) String() string            { return proto.CompactTextString(m) }
 func (*ReportObservationLogRequest) ProtoMessage()               {}
-func (*ReportObservationLogRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
+func (*ReportObservationLogRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
 
 func (m *ReportObservationLogRequest) GetTrialName() string {
 	if m != nil {
@@ -851,31 +869,47 @@ type ReportObservationLogReply struct {
 func (m *ReportObservationLogReply) Reset()                    { *m = ReportObservationLogReply{} }
 func (m *ReportObservationLogReply) String() string            { return proto.CompactTextString(m) }
 func (*ReportObservationLogReply) ProtoMessage()               {}
-func (*ReportObservationLogReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{20} }
+func (*ReportObservationLogReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
 
-type DeleteObservationLogRequest struct {
-	TrialName string `protobuf:"bytes,1,opt,name=trial_name,json=trialName" json:"trial_name,omitempty"`
+type ObservationLog struct {
+	MetricLogs []*MetricLog `protobuf:"bytes,1,rep,name=metric_logs,json=metricLogs" json:"metric_logs,omitempty"`
 }
 
-func (m *DeleteObservationLogRequest) Reset()                    { *m = DeleteObservationLogRequest{} }
-func (m *DeleteObservationLogRequest) String() string            { return proto.CompactTextString(m) }
-func (*DeleteObservationLogRequest) ProtoMessage()               {}
-func (*DeleteObservationLogRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{21} }
+func (m *ObservationLog) Reset()                    { *m = ObservationLog{} }
+func (m *ObservationLog) String() string            { return proto.CompactTextString(m) }
+func (*ObservationLog) ProtoMessage()               {}
+func (*ObservationLog) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{20} }
 
-func (m *DeleteObservationLogRequest) GetTrialName() string {
+func (m *ObservationLog) GetMetricLogs() []*MetricLog {
 	if m != nil {
-		return m.TrialName
+		return m.MetricLogs
+	}
+	return nil
+}
+
+type MetricLog struct {
+	TimeStamp string  `protobuf:"bytes,1,opt,name=time_stamp,json=timeStamp" json:"time_stamp,omitempty"`
+	Metric    *Metric `protobuf:"bytes,2,opt,name=metric" json:"metric,omitempty"`
+}
+
+func (m *MetricLog) Reset()                    { *m = MetricLog{} }
+func (m *MetricLog) String() string            { return proto.CompactTextString(m) }
+func (*MetricLog) ProtoMessage()               {}
+func (*MetricLog) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{21} }
+
+func (m *MetricLog) GetTimeStamp() string {
+	if m != nil {
+		return m.TimeStamp
 	}
 	return ""
 }
 
-type DeleteObservationLogReply struct {
+func (m *MetricLog) GetMetric() *Metric {
+	if m != nil {
+		return m.Metric
+	}
+	return nil
 }
-
-func (m *DeleteObservationLogReply) Reset()                    { *m = DeleteObservationLogReply{} }
-func (m *DeleteObservationLogReply) String() string            { return proto.CompactTextString(m) }
-func (*DeleteObservationLogReply) ProtoMessage()               {}
-func (*DeleteObservationLogReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{22} }
 
 type GetObservationLogRequest struct {
 	TrialName  string `protobuf:"bytes,1,opt,name=trial_name,json=trialName" json:"trial_name,omitempty"`
@@ -887,7 +921,7 @@ type GetObservationLogRequest struct {
 func (m *GetObservationLogRequest) Reset()                    { *m = GetObservationLogRequest{} }
 func (m *GetObservationLogRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetObservationLogRequest) ProtoMessage()               {}
-func (*GetObservationLogRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{23} }
+func (*GetObservationLogRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{22} }
 
 func (m *GetObservationLogRequest) GetTrialName() string {
 	if m != nil {
@@ -924,7 +958,7 @@ type GetObservationLogReply struct {
 func (m *GetObservationLogReply) Reset()                    { *m = GetObservationLogReply{} }
 func (m *GetObservationLogReply) String() string            { return proto.CompactTextString(m) }
 func (*GetObservationLogReply) ProtoMessage()               {}
-func (*GetObservationLogReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{24} }
+func (*GetObservationLogReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{23} }
 
 func (m *GetObservationLogReply) GetObservationLog() *ObservationLog {
 	if m != nil {
@@ -932,6 +966,30 @@ func (m *GetObservationLogReply) GetObservationLog() *ObservationLog {
 	}
 	return nil
 }
+
+type DeleteObservationLogRequest struct {
+	TrialName string `protobuf:"bytes,1,opt,name=trial_name,json=trialName" json:"trial_name,omitempty"`
+}
+
+func (m *DeleteObservationLogRequest) Reset()                    { *m = DeleteObservationLogRequest{} }
+func (m *DeleteObservationLogRequest) String() string            { return proto.CompactTextString(m) }
+func (*DeleteObservationLogRequest) ProtoMessage()               {}
+func (*DeleteObservationLogRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{24} }
+
+func (m *DeleteObservationLogRequest) GetTrialName() string {
+	if m != nil {
+		return m.TrialName
+	}
+	return ""
+}
+
+type DeleteObservationLogReply struct {
+}
+
+func (m *DeleteObservationLogReply) Reset()                    { *m = DeleteObservationLogReply{} }
+func (m *DeleteObservationLogReply) String() string            { return proto.CompactTextString(m) }
+func (*DeleteObservationLogReply) ProtoMessage()               {}
+func (*DeleteObservationLogReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{25} }
 
 type GetSuggestionsRequest struct {
 	Experiment    *Experiment `protobuf:"bytes,1,opt,name=experiment" json:"experiment,omitempty"`
@@ -942,7 +1000,7 @@ type GetSuggestionsRequest struct {
 func (m *GetSuggestionsRequest) Reset()                    { *m = GetSuggestionsRequest{} }
 func (m *GetSuggestionsRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetSuggestionsRequest) ProtoMessage()               {}
-func (*GetSuggestionsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{25} }
+func (*GetSuggestionsRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{26} }
 
 func (m *GetSuggestionsRequest) GetExperiment() *Experiment {
 	if m != nil {
@@ -968,12 +1026,13 @@ func (m *GetSuggestionsRequest) GetRequestNumber() int32 {
 type GetSuggestionsReply struct {
 	ParameterAssignments []*GetSuggestionsReply_ParameterAssignments `protobuf:"bytes,1,rep,name=parameter_assignments,json=parameterAssignments" json:"parameter_assignments,omitempty"`
 	Algorithm            *AlgorithmSpec                              `protobuf:"bytes,2,opt,name=algorithm" json:"algorithm,omitempty"`
+	EarlyStoppingRules   []*EarlyStoppingRule                        `protobuf:"bytes,3,rep,name=early_stopping_rules,json=earlyStoppingRules" json:"early_stopping_rules,omitempty"`
 }
 
 func (m *GetSuggestionsReply) Reset()                    { *m = GetSuggestionsReply{} }
 func (m *GetSuggestionsReply) String() string            { return proto.CompactTextString(m) }
 func (*GetSuggestionsReply) ProtoMessage()               {}
-func (*GetSuggestionsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{26} }
+func (*GetSuggestionsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{27} }
 
 func (m *GetSuggestionsReply) GetParameterAssignments() []*GetSuggestionsReply_ParameterAssignments {
 	if m != nil {
@@ -989,6 +1048,13 @@ func (m *GetSuggestionsReply) GetAlgorithm() *AlgorithmSpec {
 	return nil
 }
 
+func (m *GetSuggestionsReply) GetEarlyStoppingRules() []*EarlyStoppingRule {
+	if m != nil {
+		return m.EarlyStoppingRules
+	}
+	return nil
+}
+
 type GetSuggestionsReply_ParameterAssignments struct {
 	Assignments []*ParameterAssignment `protobuf:"bytes,1,rep,name=assignments" json:"assignments,omitempty"`
 }
@@ -999,7 +1065,7 @@ func (m *GetSuggestionsReply_ParameterAssignments) Reset() {
 func (m *GetSuggestionsReply_ParameterAssignments) String() string { return proto.CompactTextString(m) }
 func (*GetSuggestionsReply_ParameterAssignments) ProtoMessage()    {}
 func (*GetSuggestionsReply_ParameterAssignments) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{26, 0}
+	return fileDescriptor0, []int{27, 0}
 }
 
 func (m *GetSuggestionsReply_ParameterAssignments) GetAssignments() []*ParameterAssignment {
@@ -1017,7 +1083,7 @@ func (m *ValidateAlgorithmSettingsRequest) Reset()         { *m = ValidateAlgori
 func (m *ValidateAlgorithmSettingsRequest) String() string { return proto.CompactTextString(m) }
 func (*ValidateAlgorithmSettingsRequest) ProtoMessage()    {}
 func (*ValidateAlgorithmSettingsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{27}
+	return fileDescriptor0, []int{28}
 }
 
 func (m *ValidateAlgorithmSettingsRequest) GetExperiment() *Experiment {
@@ -1035,45 +1101,168 @@ type ValidateAlgorithmSettingsReply struct {
 func (m *ValidateAlgorithmSettingsReply) Reset()                    { *m = ValidateAlgorithmSettingsReply{} }
 func (m *ValidateAlgorithmSettingsReply) String() string            { return proto.CompactTextString(m) }
 func (*ValidateAlgorithmSettingsReply) ProtoMessage()               {}
-func (*ValidateAlgorithmSettingsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{28} }
+func (*ValidateAlgorithmSettingsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{29} }
+
+type GetEarlyStoppingRulesRequest struct {
+	Experiment       *Experiment `protobuf:"bytes,1,opt,name=experiment" json:"experiment,omitempty"`
+	Trials           []*Trial    `protobuf:"bytes,2,rep,name=trials" json:"trials,omitempty"`
+	DbManagerAddress string      `protobuf:"bytes,3,opt,name=db_manager_address,json=dbManagerAddress" json:"db_manager_address,omitempty"`
+}
+
+func (m *GetEarlyStoppingRulesRequest) Reset()                    { *m = GetEarlyStoppingRulesRequest{} }
+func (m *GetEarlyStoppingRulesRequest) String() string            { return proto.CompactTextString(m) }
+func (*GetEarlyStoppingRulesRequest) ProtoMessage()               {}
+func (*GetEarlyStoppingRulesRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{30} }
+
+func (m *GetEarlyStoppingRulesRequest) GetExperiment() *Experiment {
+	if m != nil {
+		return m.Experiment
+	}
+	return nil
+}
+
+func (m *GetEarlyStoppingRulesRequest) GetTrials() []*Trial {
+	if m != nil {
+		return m.Trials
+	}
+	return nil
+}
+
+func (m *GetEarlyStoppingRulesRequest) GetDbManagerAddress() string {
+	if m != nil {
+		return m.DbManagerAddress
+	}
+	return ""
+}
+
+type GetEarlyStoppingRulesReply struct {
+	EarlyStoppingRules []*EarlyStoppingRule `protobuf:"bytes,1,rep,name=early_stopping_rules,json=earlyStoppingRules" json:"early_stopping_rules,omitempty"`
+}
+
+func (m *GetEarlyStoppingRulesReply) Reset()                    { *m = GetEarlyStoppingRulesReply{} }
+func (m *GetEarlyStoppingRulesReply) String() string            { return proto.CompactTextString(m) }
+func (*GetEarlyStoppingRulesReply) ProtoMessage()               {}
+func (*GetEarlyStoppingRulesReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{31} }
+
+func (m *GetEarlyStoppingRulesReply) GetEarlyStoppingRules() []*EarlyStoppingRule {
+	if m != nil {
+		return m.EarlyStoppingRules
+	}
+	return nil
+}
+
+// *
+// EarlyStoppingRule represents single early stopping rule.
+type EarlyStoppingRule struct {
+	Name       string         `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Value      string         `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
+	Comparison ComparisonType `protobuf:"varint,3,opt,name=comparison,enum=api.v1.beta1.ComparisonType" json:"comparison,omitempty"`
+	// Defines quantity of intermediate results that should be received before applying the rule.
+	// If start step is empty, rule is applied from the first recorded metric.
+	StartStep int32 `protobuf:"varint,4,opt,name=start_step,json=startStep" json:"start_step,omitempty"`
+}
+
+func (m *EarlyStoppingRule) Reset()                    { *m = EarlyStoppingRule{} }
+func (m *EarlyStoppingRule) String() string            { return proto.CompactTextString(m) }
+func (*EarlyStoppingRule) ProtoMessage()               {}
+func (*EarlyStoppingRule) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{32} }
+
+func (m *EarlyStoppingRule) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *EarlyStoppingRule) GetValue() string {
+	if m != nil {
+		return m.Value
+	}
+	return ""
+}
+
+func (m *EarlyStoppingRule) GetComparison() ComparisonType {
+	if m != nil {
+		return m.Comparison
+	}
+	return ComparisonType_UNKNOWN_COMPARISON
+}
+
+func (m *EarlyStoppingRule) GetStartStep() int32 {
+	if m != nil {
+		return m.StartStep
+	}
+	return 0
+}
+
+type SetTrialStatusRequest struct {
+	TrialName string `protobuf:"bytes,1,opt,name=trial_name,json=trialName" json:"trial_name,omitempty"`
+}
+
+func (m *SetTrialStatusRequest) Reset()                    { *m = SetTrialStatusRequest{} }
+func (m *SetTrialStatusRequest) String() string            { return proto.CompactTextString(m) }
+func (*SetTrialStatusRequest) ProtoMessage()               {}
+func (*SetTrialStatusRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{33} }
+
+func (m *SetTrialStatusRequest) GetTrialName() string {
+	if m != nil {
+		return m.TrialName
+	}
+	return ""
+}
+
+type SetTrialStatusReply struct {
+}
+
+func (m *SetTrialStatusReply) Reset()                    { *m = SetTrialStatusReply{} }
+func (m *SetTrialStatusReply) String() string            { return proto.CompactTextString(m) }
+func (*SetTrialStatusReply) ProtoMessage()               {}
+func (*SetTrialStatusReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{34} }
 
 func init() {
-	proto.RegisterType((*FeasibleSpace)(nil), "api.v1.beta1.FeasibleSpace")
+	proto.RegisterType((*Experiment)(nil), "api.v1.beta1.Experiment")
+	proto.RegisterType((*ExperimentSpec)(nil), "api.v1.beta1.ExperimentSpec")
+	proto.RegisterType((*ExperimentSpec_ParameterSpecs)(nil), "api.v1.beta1.ExperimentSpec.ParameterSpecs")
 	proto.RegisterType((*ParameterSpec)(nil), "api.v1.beta1.ParameterSpec")
+	proto.RegisterType((*FeasibleSpace)(nil), "api.v1.beta1.FeasibleSpace")
 	proto.RegisterType((*ObjectiveSpec)(nil), "api.v1.beta1.ObjectiveSpec")
+	proto.RegisterType((*AlgorithmSpec)(nil), "api.v1.beta1.AlgorithmSpec")
 	proto.RegisterType((*AlgorithmSetting)(nil), "api.v1.beta1.AlgorithmSetting")
 	proto.RegisterType((*EarlyStoppingSpec)(nil), "api.v1.beta1.EarlyStoppingSpec")
-	proto.RegisterType((*AlgorithmSpec)(nil), "api.v1.beta1.AlgorithmSpec")
+	proto.RegisterType((*EarlyStoppingSetting)(nil), "api.v1.beta1.EarlyStoppingSetting")
 	proto.RegisterType((*NasConfig)(nil), "api.v1.beta1.NasConfig")
 	proto.RegisterType((*NasConfig_Operations)(nil), "api.v1.beta1.NasConfig.Operations")
 	proto.RegisterType((*GraphConfig)(nil), "api.v1.beta1.GraphConfig")
 	proto.RegisterType((*Operation)(nil), "api.v1.beta1.Operation")
 	proto.RegisterType((*Operation_ParameterSpecs)(nil), "api.v1.beta1.Operation.ParameterSpecs")
-	proto.RegisterType((*ExperimentSpec)(nil), "api.v1.beta1.ExperimentSpec")
-	proto.RegisterType((*ExperimentSpec_ParameterSpecs)(nil), "api.v1.beta1.ExperimentSpec.ParameterSpecs")
-	proto.RegisterType((*Experiment)(nil), "api.v1.beta1.Experiment")
-	proto.RegisterType((*ParameterAssignment)(nil), "api.v1.beta1.ParameterAssignment")
-	proto.RegisterType((*Metric)(nil), "api.v1.beta1.Metric")
-	proto.RegisterType((*MetricLog)(nil), "api.v1.beta1.MetricLog")
-	proto.RegisterType((*Observation)(nil), "api.v1.beta1.Observation")
-	proto.RegisterType((*ObservationLog)(nil), "api.v1.beta1.ObservationLog")
+	proto.RegisterType((*Trial)(nil), "api.v1.beta1.Trial")
 	proto.RegisterType((*TrialSpec)(nil), "api.v1.beta1.TrialSpec")
 	proto.RegisterType((*TrialSpec_ParameterAssignments)(nil), "api.v1.beta1.TrialSpec.ParameterAssignments")
+	proto.RegisterType((*ParameterAssignment)(nil), "api.v1.beta1.ParameterAssignment")
 	proto.RegisterType((*TrialStatus)(nil), "api.v1.beta1.TrialStatus")
-	proto.RegisterType((*Trial)(nil), "api.v1.beta1.Trial")
+	proto.RegisterType((*Observation)(nil), "api.v1.beta1.Observation")
+	proto.RegisterType((*Metric)(nil), "api.v1.beta1.Metric")
 	proto.RegisterType((*ReportObservationLogRequest)(nil), "api.v1.beta1.ReportObservationLogRequest")
 	proto.RegisterType((*ReportObservationLogReply)(nil), "api.v1.beta1.ReportObservationLogReply")
-	proto.RegisterType((*DeleteObservationLogRequest)(nil), "api.v1.beta1.DeleteObservationLogRequest")
-	proto.RegisterType((*DeleteObservationLogReply)(nil), "api.v1.beta1.DeleteObservationLogReply")
+	proto.RegisterType((*ObservationLog)(nil), "api.v1.beta1.ObservationLog")
+	proto.RegisterType((*MetricLog)(nil), "api.v1.beta1.MetricLog")
 	proto.RegisterType((*GetObservationLogRequest)(nil), "api.v1.beta1.GetObservationLogRequest")
 	proto.RegisterType((*GetObservationLogReply)(nil), "api.v1.beta1.GetObservationLogReply")
+	proto.RegisterType((*DeleteObservationLogRequest)(nil), "api.v1.beta1.DeleteObservationLogRequest")
+	proto.RegisterType((*DeleteObservationLogReply)(nil), "api.v1.beta1.DeleteObservationLogReply")
 	proto.RegisterType((*GetSuggestionsRequest)(nil), "api.v1.beta1.GetSuggestionsRequest")
 	proto.RegisterType((*GetSuggestionsReply)(nil), "api.v1.beta1.GetSuggestionsReply")
 	proto.RegisterType((*GetSuggestionsReply_ParameterAssignments)(nil), "api.v1.beta1.GetSuggestionsReply.ParameterAssignments")
 	proto.RegisterType((*ValidateAlgorithmSettingsRequest)(nil), "api.v1.beta1.ValidateAlgorithmSettingsRequest")
 	proto.RegisterType((*ValidateAlgorithmSettingsReply)(nil), "api.v1.beta1.ValidateAlgorithmSettingsReply")
+	proto.RegisterType((*GetEarlyStoppingRulesRequest)(nil), "api.v1.beta1.GetEarlyStoppingRulesRequest")
+	proto.RegisterType((*GetEarlyStoppingRulesReply)(nil), "api.v1.beta1.GetEarlyStoppingRulesReply")
+	proto.RegisterType((*EarlyStoppingRule)(nil), "api.v1.beta1.EarlyStoppingRule")
+	proto.RegisterType((*SetTrialStatusRequest)(nil), "api.v1.beta1.SetTrialStatusRequest")
+	proto.RegisterType((*SetTrialStatusReply)(nil), "api.v1.beta1.SetTrialStatusReply")
 	proto.RegisterEnum("api.v1.beta1.ParameterType", ParameterType_name, ParameterType_value)
 	proto.RegisterEnum("api.v1.beta1.ObjectiveType", ObjectiveType_name, ObjectiveType_value)
+	proto.RegisterEnum("api.v1.beta1.ComparisonType", ComparisonType_name, ComparisonType_value)
 	proto.RegisterEnum("api.v1.beta1.TrialStatus_TrialConditionType", TrialStatus_TrialConditionType_name, TrialStatus_TrialConditionType_value)
 }
 
@@ -1333,6 +1522,8 @@ var _Suggestion_serviceDesc = grpc.ServiceDesc{
 // Client API for EarlyStopping service
 
 type EarlyStoppingClient interface {
+	GetEarlyStoppingRules(ctx context.Context, in *GetEarlyStoppingRulesRequest, opts ...grpc.CallOption) (*GetEarlyStoppingRulesReply, error)
+	SetTrialStatus(ctx context.Context, in *SetTrialStatusRequest, opts ...grpc.CallOption) (*SetTrialStatusReply, error)
 }
 
 type earlyStoppingClient struct {
@@ -1343,128 +1534,203 @@ func NewEarlyStoppingClient(cc *grpc.ClientConn) EarlyStoppingClient {
 	return &earlyStoppingClient{cc}
 }
 
+func (c *earlyStoppingClient) GetEarlyStoppingRules(ctx context.Context, in *GetEarlyStoppingRulesRequest, opts ...grpc.CallOption) (*GetEarlyStoppingRulesReply, error) {
+	out := new(GetEarlyStoppingRulesReply)
+	err := grpc.Invoke(ctx, "/api.v1.beta1.EarlyStopping/GetEarlyStoppingRules", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *earlyStoppingClient) SetTrialStatus(ctx context.Context, in *SetTrialStatusRequest, opts ...grpc.CallOption) (*SetTrialStatusReply, error) {
+	out := new(SetTrialStatusReply)
+	err := grpc.Invoke(ctx, "/api.v1.beta1.EarlyStopping/SetTrialStatus", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for EarlyStopping service
 
 type EarlyStoppingServer interface {
+	GetEarlyStoppingRules(context.Context, *GetEarlyStoppingRulesRequest) (*GetEarlyStoppingRulesReply, error)
+	SetTrialStatus(context.Context, *SetTrialStatusRequest) (*SetTrialStatusReply, error)
 }
 
 func RegisterEarlyStoppingServer(s *grpc.Server, srv EarlyStoppingServer) {
 	s.RegisterService(&_EarlyStopping_serviceDesc, srv)
 }
 
+func _EarlyStopping_GetEarlyStoppingRules_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEarlyStoppingRulesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EarlyStoppingServer).GetEarlyStoppingRules(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.beta1.EarlyStopping/GetEarlyStoppingRules",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EarlyStoppingServer).GetEarlyStoppingRules(ctx, req.(*GetEarlyStoppingRulesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _EarlyStopping_SetTrialStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetTrialStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EarlyStoppingServer).SetTrialStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.v1.beta1.EarlyStopping/SetTrialStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EarlyStoppingServer).SetTrialStatus(ctx, req.(*SetTrialStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _EarlyStopping_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "api.v1.beta1.EarlyStopping",
 	HandlerType: (*EarlyStoppingServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams:     []grpc.StreamDesc{},
-	Metadata:    "api.proto",
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetEarlyStoppingRules",
+			Handler:    _EarlyStopping_GetEarlyStoppingRules_Handler,
+		},
+		{
+			MethodName: "SetTrialStatus",
+			Handler:    _EarlyStopping_SetTrialStatus_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "api.proto",
 }
 
 func init() { proto.RegisterFile("api.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 1647 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x58, 0xcd, 0x92, 0x1b, 0x49,
-	0x11, 0x76, 0x4b, 0xf3, 0xe3, 0x4e, 0x8d, 0x34, 0x72, 0x8d, 0xbc, 0xd6, 0x8c, 0x97, 0xf5, 0xb8,
-	0x01, 0xaf, 0x59, 0x3b, 0xe4, 0xb5, 0x00, 0x87, 0x89, 0x35, 0x41, 0x8c, 0x25, 0xed, 0x84, 0x76,
-	0x67, 0xa4, 0x8d, 0x92, 0x06, 0x0c, 0x4b, 0x44, 0x47, 0x8d, 0xa6, 0xac, 0x6d, 0xd3, 0x7f, 0x74,
-	0x95, 0x1c, 0x16, 0x5c, 0x88, 0xe0, 0x15, 0x38, 0xed, 0x9d, 0x13, 0x2f, 0x41, 0x70, 0xe0, 0x01,
-	0x38, 0x70, 0xe7, 0x4d, 0x88, 0xca, 0x6a, 0xf5, 0x8f, 0xd4, 0x1a, 0xaf, 0xc7, 0x70, 0xab, 0xca,
-	0xfc, 0x32, 0x2b, 0x33, 0x2b, 0xf3, 0xeb, 0x92, 0xc0, 0x64, 0xa1, 0xd3, 0x0a, 0xa3, 0x40, 0x06,
-	0x64, 0x47, 0x2d, 0x5f, 0x3f, 0x6e, 0x9d, 0x73, 0xc9, 0x1e, 0x1f, 0x7c, 0x38, 0x0d, 0x82, 0xa9,
-	0xcb, 0x1f, 0xb1, 0xd0, 0x79, 0xc4, 0x7c, 0x3f, 0x90, 0x4c, 0x3a, 0x81, 0x2f, 0x34, 0xd6, 0xfa,
-	0x1a, 0xaa, 0x9f, 0x73, 0x26, 0x9c, 0x73, 0x97, 0x8f, 0x42, 0x36, 0xe1, 0xa4, 0x0e, 0x65, 0x8f,
-	0xbd, 0x69, 0x1a, 0x87, 0xc6, 0x7d, 0x93, 0xaa, 0x25, 0x4a, 0x1c, 0xbf, 0x59, 0x8a, 0x25, 0x8e,
-	0x4f, 0x08, 0x6c, 0xb8, 0x8e, 0x90, 0xcd, 0xf2, 0x61, 0xf9, 0xbe, 0x49, 0x71, 0xad, 0x64, 0x42,
-	0xf2, 0xb0, 0xb9, 0x81, 0x30, 0x5c, 0x5b, 0x7f, 0x33, 0xa0, 0xfa, 0x15, 0x8b, 0x98, 0xc7, 0x25,
-	0x8f, 0x46, 0x21, 0x9f, 0x28, 0x94, 0xcf, 0x3c, 0x1e, 0xbb, 0xc7, 0x35, 0x79, 0x0e, 0xb5, 0x70,
-	0x01, 0xb2, 0xe5, 0x3c, 0xe4, 0x78, 0x54, 0xad, 0x7d, 0xbb, 0x95, 0xcd, 0xa3, 0x95, 0x38, 0x1a,
-	0xcf, 0x43, 0x4e, 0xab, 0x61, 0x76, 0xab, 0x7c, 0xbc, 0x8c, 0xd3, 0xb0, 0x85, 0xca, 0xa3, 0x59,
-	0x3e, 0x34, 0xee, 0x57, 0x96, 0x7d, 0xe4, 0x52, 0xa5, 0xd5, 0x97, 0xd9, 0xad, 0xf5, 0x77, 0x03,
-	0xaa, 0xc3, 0xf3, 0x57, 0x7c, 0x22, 0x9d, 0xd7, 0x1c, 0xa3, 0x7d, 0x04, 0x1b, 0x18, 0x8f, 0x51,
-	0x14, 0x4f, 0x02, 0xc5, 0x78, 0x10, 0xa8, 0xd2, 0x9b, 0x06, 0xcc, 0xc5, 0x04, 0x0c, 0x8a, 0x6b,
-	0xd2, 0x86, 0x9b, 0xc1, 0x02, 0x6a, 0x7b, 0x5c, 0x46, 0xce, 0xc4, 0xc6, 0x1a, 0x94, 0xb1, 0x06,
-	0x7b, 0x89, 0xf2, 0x14, 0x75, 0x03, 0x55, 0x92, 0x27, 0x70, 0x8b, 0x5d, 0x5c, 0x38, 0xea, 0xa2,
-	0x98, 0x9b, 0x35, 0x12, 0xcd, 0x0d, 0xac, 0xf9, 0xcd, 0x54, 0x9d, 0x9a, 0x09, 0xeb, 0x19, 0xd4,
-	0x8f, 0xdc, 0x69, 0x10, 0x39, 0xf2, 0x1b, 0x6f, 0xc4, 0xa5, 0x74, 0xfc, 0x69, 0x61, 0xc9, 0x1b,
-	0xb0, 0xf9, 0x9a, 0xb9, 0x33, 0x1e, 0x5f, 0xaa, 0xde, 0x58, 0x7b, 0x70, 0xa3, 0xc7, 0x22, 0x77,
-	0x3e, 0x92, 0x41, 0x18, 0x3a, 0xfe, 0x54, 0xd5, 0xc0, 0xfa, 0xb7, 0x01, 0xd5, 0xd4, 0xa7, 0xaa,
-	0xca, 0x0f, 0xa1, 0xc6, 0x16, 0x02, 0x3b, 0xe3, 0xba, 0x9a, 0x48, 0x31, 0x87, 0x53, 0x20, 0x29,
-	0x4c, 0xe8, 0x60, 0x44, 0xb3, 0x74, 0x58, 0xbe, 0x5f, 0x69, 0x7f, 0x94, 0x2f, 0xe5, 0x72, 0xcc,
-	0xf4, 0x06, 0x5b, 0x92, 0x08, 0x32, 0x84, 0x3d, 0xae, 0x82, 0xb3, 0x45, 0x1c, 0x9d, 0x2d, 0x42,
-	0x3e, 0x89, 0xaf, 0xf9, 0x4e, 0xde, 0xdf, 0x4a, 0x16, 0xf4, 0x06, 0x5f, 0x49, 0xec, 0x5f, 0x06,
-	0x98, 0x03, 0x26, 0x3a, 0x81, 0xff, 0xd2, 0x99, 0x92, 0x67, 0xb0, 0x33, 0x8d, 0x58, 0xf8, 0x8d,
-	0x3d, 0xc1, 0x3d, 0xa6, 0x54, 0x69, 0xef, 0xe7, 0xfd, 0x1e, 0x2b, 0x84, 0x36, 0xa0, 0x95, 0x69,
-	0xba, 0x21, 0xcf, 0x01, 0x82, 0x90, 0x47, 0x7a, 0xb2, 0xb0, 0xa8, 0x95, 0xb6, 0x95, 0xb7, 0x4d,
-	0x8e, 0x6a, 0x0d, 0x13, 0x24, 0xcd, 0x58, 0x1d, 0x74, 0x00, 0x52, 0x0d, 0xf9, 0x29, 0x98, 0x89,
-	0xae, 0x69, 0x60, 0xd1, 0x6e, 0x2d, 0xf5, 0xdf, 0x42, 0x4d, 0x53, 0xa4, 0x15, 0x42, 0x25, 0x13,
-	0x24, 0xf9, 0x1e, 0x80, 0x3f, 0xf3, 0x6c, 0x97, 0xcd, 0x79, 0x24, 0x30, 0xa7, 0x4d, 0x6a, 0xfa,
-	0x33, 0xef, 0x04, 0x05, 0xe4, 0x0e, 0x54, 0x1c, 0x3f, 0x9c, 0x49, 0x5b, 0x38, 0x7f, 0xe0, 0xfa,
-	0x6e, 0x36, 0x29, 0xa0, 0x68, 0xa4, 0x24, 0xe4, 0x2e, 0xec, 0x04, 0x33, 0x99, 0x22, 0xca, 0x88,
-	0xa8, 0x68, 0x19, 0x42, 0xb0, 0x8c, 0x49, 0x28, 0xaa, 0x37, 0x92, 0x60, 0xec, 0x64, 0x76, 0x4c,
-	0x5a, 0x4d, 0xa4, 0x38, 0xae, 0x43, 0xd8, 0x4d, 0x47, 0x5e, 0xdd, 0xe3, 0xa2, 0x68, 0xf7, 0xd6,
-	0xe4, 0xd8, 0xca, 0xd1, 0x88, 0xa0, 0x29, 0x63, 0xe0, 0xfe, 0xe0, 0x14, 0x6a, 0x79, 0x04, 0xf9,
-	0x0c, 0x20, 0xc1, 0x88, 0xb8, 0x82, 0xeb, 0x18, 0x05, 0x5b, 0x24, 0x03, 0xb7, 0xbe, 0xdd, 0x80,
-	0x5a, 0xef, 0x4d, 0xc8, 0x23, 0xc7, 0xe3, 0xbe, 0xc4, 0xae, 0x1f, 0xaf, 0x86, 0xac, 0x7b, 0xe4,
-	0xc1, 0x52, 0xef, 0xe5, 0xcc, 0xde, 0x12, 0x37, 0xf9, 0x19, 0x98, 0xc9, 0xfc, 0xc7, 0x25, 0x58,
-	0x47, 0x33, 0x18, 0x64, 0x8a, 0x56, 0xa6, 0xc9, 0x94, 0x14, 0xb3, 0x5d, 0x6e, 0x6c, 0x69, 0x8a,
-	0x56, 0xb7, 0x24, 0x23, 0x87, 0xb9, 0xb6, 0xe4, 0x5e, 0xe8, 0x32, 0xc9, 0x63, 0xd6, 0xae, 0xa2,
-	0x74, 0x1c, 0x0b, 0xc9, 0x4f, 0xe0, 0x03, 0x4d, 0x3d, 0xc2, 0x9e, 0x04, 0xae, 0xcb, 0x27, 0x32,
-	0xd0, 0xa9, 0x37, 0x37, 0x11, 0xde, 0x88, 0xb5, 0x9d, 0x85, 0x12, 0x0b, 0xf5, 0x29, 0x34, 0x54,
-	0x92, 0xae, 0xcb, 0x5d, 0x5b, 0x9f, 0x32, 0x09, 0x66, 0xbe, 0x6c, 0x6e, 0x61, 0xf7, 0x91, 0x85,
-	0x6e, 0xac, 0x54, 0x1d, 0xa5, 0x21, 0xf7, 0x60, 0xd7, 0x63, 0x6f, 0x72, 0xe0, 0x6d, 0x04, 0x57,
-	0x3d, 0xf6, 0x26, 0x83, 0x7b, 0x02, 0xe0, 0x33, 0xb1, 0x98, 0xd0, 0xeb, 0x98, 0xf2, 0xad, 0x35,
-	0x53, 0x46, 0x4d, 0x7f, 0xb1, 0xfc, 0x5f, 0x37, 0x07, 0x05, 0x48, 0x2f, 0xb9, 0x90, 0x5e, 0x3f,
-	0x85, 0x0d, 0x2c, 0x93, 0xbe, 0xd0, 0x0f, 0x2f, 0x6b, 0x10, 0x8a, 0x48, 0xeb, 0x17, 0xb0, 0x97,
-	0x1c, 0x78, 0x24, 0x84, 0x33, 0xf5, 0xd7, 0x3a, 0x2f, 0xe6, 0xee, 0x36, 0x6c, 0xe9, 0x0f, 0xc1,
-	0x3b, 0xd8, 0xbc, 0x00, 0x53, 0xdb, 0x9c, 0x04, 0x48, 0x15, 0xd2, 0xf1, 0xb8, 0x2d, 0x24, 0xf3,
-	0xc2, 0xd8, 0xd8, 0x54, 0x92, 0x91, 0x12, 0x90, 0x87, 0xb0, 0xa5, 0x6f, 0x3b, 0x4e, 0xaa, 0x91,
-	0x4f, 0x4a, 0xfb, 0xa1, 0x31, 0xc6, 0xfa, 0x39, 0x54, 0x86, 0xe7, 0x82, 0x47, 0xaf, 0x35, 0x2b,
-	0xb4, 0x60, 0x3b, 0x6e, 0x95, 0xb8, 0xd6, 0xc5, 0xd6, 0x0b, 0x90, 0xf5, 0x05, 0xd4, 0x32, 0xe6,
-	0x2a, 0xba, 0xa7, 0x50, 0x89, 0xbf, 0x82, 0x6e, 0x30, 0x15, 0xc5, 0x84, 0x98, 0xe4, 0x42, 0xc1,
-	0x5b, 0x2c, 0x85, 0xf5, 0xa7, 0x32, 0x98, 0xd8, 0x43, 0xd8, 0x9c, 0x1f, 0xc3, 0x2e, 0x4f, 0xea,
-	0x9f, 0xfd, 0x78, 0xd5, 0x52, 0x31, 0x7e, 0xbd, 0xde, 0x63, 0x30, 0x19, 0xdc, 0x4c, 0x99, 0x82,
-	0x25, 0x97, 0x29, 0xe2, 0x21, 0x7d, 0x98, 0x77, 0x93, 0xc4, 0xd6, 0x2a, 0x68, 0x00, 0x41, 0x1b,
-	0x61, 0x81, 0x94, 0xec, 0xc3, 0xf5, 0x68, 0xe6, 0xeb, 0x59, 0xd4, 0xa3, 0xbb, 0x1d, 0xcd, 0x7c,
-	0xcc, 0xf0, 0x4a, 0x43, 0x7b, 0xf0, 0x35, 0x34, 0x8a, 0x8e, 0x27, 0x1d, 0xa8, 0x64, 0x33, 0xd0,
-	0x75, 0xbf, 0xbb, 0x66, 0x52, 0x52, 0x43, 0x9a, 0xb5, 0xb2, 0xfe, 0x51, 0x82, 0x8a, 0x4e, 0x53,
-	0x32, 0x39, 0x13, 0xaa, 0xd5, 0x84, 0x64, 0x91, 0xb4, 0x55, 0x7b, 0x2d, 0x5a, 0x0d, 0x25, 0x63,
-	0xc7, 0xe3, 0xea, 0x8e, 0x26, 0x81, 0x17, 0xba, 0x5c, 0x7f, 0x44, 0x14, 0x46, 0xb7, 0x6d, 0x2d,
-	0x15, 0x23, 0xf0, 0x0b, 0x30, 0x27, 0x81, 0xaf, 0xdf, 0x41, 0x58, 0xdc, 0x5a, 0x71, 0x71, 0xf1,
-	0xd4, 0x56, 0x4c, 0x24, 0x31, 0x1e, 0x1f, 0x6d, 0xa9, 0x39, 0xf9, 0x0c, 0x2a, 0x41, 0xda, 0x72,
-	0x58, 0xd4, 0x95, 0xcf, 0x7f, 0xa6, 0x27, 0x69, 0x16, 0x6d, 0x9d, 0x03, 0x59, 0xf5, 0x4e, 0x2a,
-	0xb0, 0xdd, 0xa1, 0xbd, 0xa3, 0x71, 0xaf, 0x5b, 0xbf, 0xa6, 0x36, 0xf4, 0x6c, 0x30, 0xe8, 0x0f,
-	0x8e, 0xeb, 0x06, 0xa9, 0x82, 0x39, 0x3a, 0xeb, 0x74, 0x7a, 0xbd, 0x6e, 0xaf, 0x5b, 0x2f, 0x11,
-	0x80, 0xad, 0x2f, 0xfb, 0x27, 0x27, 0xbd, 0x6e, 0xbd, 0xac, 0xd6, 0x9f, 0x1f, 0xf5, 0xd5, 0x7a,
-	0x43, 0xd9, 0x9c, 0x0d, 0xbe, 0x1c, 0x0c, 0x7f, 0x35, 0xa8, 0x6f, 0x5a, 0x7f, 0x84, 0x4d, 0x3c,
-	0xa3, 0x70, 0xbe, 0x1f, 0xe4, 0x08, 0xe7, 0xd6, 0x9a, 0x0e, 0xd3, 0x5c, 0x43, 0x1e, 0xc3, 0x96,
-	0xc0, 0x92, 0xc4, 0x0d, 0xb9, 0xbf, 0xb6, 0x66, 0x34, 0x06, 0x5a, 0x7f, 0x36, 0xe0, 0x36, 0xe5,
-	0x61, 0x10, 0xc9, 0xfc, 0x5c, 0x52, 0xfe, 0xfb, 0x19, 0x17, 0x12, 0xc9, 0x03, 0xd9, 0x3b, 0x13,
-	0x99, 0x89, 0x12, 0x1c, 0xa6, 0x1e, 0xec, 0x66, 0xca, 0xa5, 0x46, 0xb8, 0x98, 0x1a, 0x97, 0x9c,
-	0xd7, 0x82, 0xdc, 0xde, 0xba, 0x0d, 0xfb, 0xc5, 0x41, 0x84, 0xee, 0xdc, 0x7a, 0x06, 0xb7, 0xbb,
-	0xdc, 0xe5, 0x92, 0x5f, 0x25, 0x42, 0xe5, 0xba, 0xd8, 0x5a, 0xb9, 0xfe, 0x8b, 0x01, 0xcd, 0x63,
-	0x7e, 0xb5, 0xd4, 0xef, 0x24, 0xc4, 0x85, 0x7a, 0xdd, 0xc8, 0x31, 0x3f, 0x21, 0x20, 0x3f, 0x0c,
-	0xe5, 0xe5, 0x61, 0xd8, 0x87, 0xeb, 0xdc, 0xbf, 0xd0, 0xca, 0x78, 0xd2, 0xb9, 0x7f, 0xa1, 0x54,
-	0x96, 0x0d, 0x1f, 0x14, 0x44, 0x15, 0xba, 0xf3, 0xa2, 0x7a, 0x1b, 0x57, 0xa8, 0xf7, 0x5f, 0x0d,
-	0xb8, 0x79, 0xcc, 0xe5, 0x68, 0x36, 0x9d, 0x72, 0xa1, 0x1f, 0xac, 0x71, 0xd2, 0x4f, 0x01, 0x52,
-	0xbe, 0x8c, 0x7d, 0x37, 0xd7, 0x7d, 0xe6, 0x68, 0x06, 0x4b, 0x1e, 0xc0, 0x16, 0x16, 0x67, 0xf1,
-	0x4b, 0x60, 0xaf, 0xa0, 0xf9, 0x68, 0x0c, 0x51, 0xef, 0x94, 0x48, 0x9f, 0x68, 0xfb, 0x33, 0xef,
-	0x9c, 0x47, 0x58, 0x9f, 0x4d, 0x5a, 0x8d, 0xa5, 0x03, 0x14, 0x5a, 0xdf, 0x96, 0x60, 0x6f, 0x39,
-	0x4e, 0x55, 0x86, 0xdf, 0xad, 0x23, 0x62, 0x4d, 0x63, 0x4f, 0x96, 0x1e, 0xf7, 0xab, 0x1e, 0xde,
-	0x85, 0x92, 0x73, 0xcf, 0xb1, 0xd2, 0xbb, 0x3c, 0xc7, 0xfe, 0xbf, 0xe4, 0xfb, 0x5b, 0x38, 0xfc,
-	0x25, 0x73, 0x9d, 0x0b, 0x26, 0xf9, 0xf2, 0xcf, 0xac, 0xf7, 0xbf, 0x4e, 0xeb, 0x10, 0x3e, 0xba,
-	0xc4, 0x7b, 0xe8, 0xce, 0x3f, 0x39, 0xcb, 0xfc, 0x05, 0x80, 0xb4, 0x58, 0x87, 0x9d, 0x98, 0xd5,
-	0xec, 0xf1, 0xaf, 0xbf, 0xea, 0xd5, 0xaf, 0x29, 0xce, 0xeb, 0x0e, 0xcf, 0x9e, 0x9f, 0xf4, 0xea,
-	0x06, 0xd9, 0x86, 0x72, 0x7f, 0x30, 0xae, 0x97, 0xc8, 0x0e, 0x5c, 0xef, 0xf6, 0x47, 0x1d, 0xda,
-	0x1b, 0xf7, 0xea, 0x65, 0xb2, 0x0b, 0x95, 0xce, 0xd1, 0xb8, 0x77, 0x3c, 0xa4, 0xfd, 0xce, 0xd1,
-	0x49, 0x7d, 0xe3, 0x93, 0xa7, 0x99, 0xdf, 0xea, 0x0b, 0xb6, 0x5d, 0x90, 0xe5, 0x35, 0x65, 0x7c,
-	0xda, 0x1f, 0xf4, 0x4f, 0xfb, 0xbf, 0x51, 0x3e, 0xd5, 0xee, 0xe8, 0x85, 0xde, 0x95, 0xda, 0xff,
-	0x2c, 0x81, 0xd9, 0x7d, 0x7e, 0xca, 0x7c, 0x36, 0xe5, 0x11, 0x79, 0x05, 0x8d, 0x22, 0x4e, 0x21,
-	0x3f, 0xca, 0xa7, 0x7f, 0x09, 0xf9, 0x1d, 0x7c, 0xfc, 0x5d, 0xa0, 0xaa, 0x1f, 0x19, 0xdc, 0x58,
-	0x19, 0x58, 0x72, 0x6f, 0xa5, 0x0b, 0x8b, 0x4f, 0xf9, 0xc1, 0x5b, 0x71, 0xea, 0x88, 0x57, 0xd0,
-	0x28, 0xe2, 0xb1, 0xe5, 0x74, 0x2e, 0x61, 0xca, 0xe5, 0x74, 0xd6, 0xd2, 0x62, 0xfb, 0x3f, 0x06,
-	0x40, 0x3a, 0x31, 0xe4, 0x05, 0xd4, 0xf2, 0x23, 0x44, 0xbe, 0x7f, 0xf9, 0x80, 0xe9, 0xe3, 0xee,
-	0xbe, 0x75, 0x0a, 0xc9, 0x1c, 0xf6, 0xd7, 0x36, 0x19, 0x69, 0xe5, 0xed, 0xdf, 0xd6, 0xeb, 0x07,
-	0x0f, 0xbf, 0x33, 0x5e, 0xe5, 0xb8, 0x0b, 0xd5, 0xdc, 0x9f, 0x09, 0xe7, 0x5b, 0xf8, 0xb7, 0xd9,
-	0x8f, 0xff, 0x1b, 0x00, 0x00, 0xff, 0xff, 0x01, 0x58, 0xa0, 0xd5, 0x6f, 0x13, 0x00, 0x00,
+	// 1805 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x58, 0x4f, 0x73, 0x1b, 0x49,
+	0x15, 0xcf, 0xe8, 0x8f, 0x9d, 0x79, 0xb2, 0xe4, 0x49, 0x5b, 0xde, 0x95, 0x9d, 0xb0, 0x71, 0x06,
+	0xc8, 0x86, 0x24, 0xa5, 0x6c, 0x4c, 0x91, 0x0a, 0xb5, 0xa1, 0x40, 0x91, 0x26, 0x2e, 0x65, 0x65,
+	0xc9, 0x69, 0xc9, 0x90, 0x65, 0xa9, 0x9a, 0x6a, 0x4b, 0x9d, 0xd9, 0x09, 0xf3, 0x8f, 0x99, 0x56,
+	0x2a, 0x86, 0x23, 0xb5, 0xdc, 0xb8, 0x71, 0xe2, 0xce, 0x89, 0x23, 0x5f, 0x80, 0x13, 0x1f, 0x80,
+	0xe2, 0xc0, 0x95, 0x0f, 0xc0, 0x77, 0xa0, 0xba, 0x67, 0x34, 0xff, 0x34, 0x52, 0xec, 0x04, 0xb8,
+	0x4d, 0xbf, 0xf7, 0x7b, 0xdd, 0xef, 0xbd, 0x7e, 0xff, 0x7a, 0x40, 0x26, 0x9e, 0xd9, 0xf6, 0x7c,
+	0x97, 0xb9, 0x68, 0x8b, 0x7f, 0xbe, 0x79, 0xd8, 0x3e, 0xa3, 0x8c, 0x3c, 0xdc, 0xbf, 0x61, 0xb8,
+	0xae, 0x61, 0xd1, 0x07, 0xc4, 0x33, 0x1f, 0x10, 0xc7, 0x71, 0x19, 0x61, 0xa6, 0xeb, 0x04, 0x21,
+	0x56, 0xc5, 0x00, 0xda, 0x5b, 0x8f, 0xfa, 0xa6, 0x4d, 0x1d, 0x86, 0x10, 0x54, 0x1c, 0x62, 0xd3,
+	0x96, 0x74, 0x20, 0xdd, 0x91, 0xb1, 0xf8, 0x46, 0x9f, 0x41, 0x25, 0xf0, 0xe8, 0xb4, 0x55, 0x3a,
+	0x90, 0xee, 0xd4, 0x0e, 0x6f, 0xb4, 0xd3, 0x9b, 0xb7, 0x13, 0xd9, 0xb1, 0x47, 0xa7, 0x58, 0x20,
+	0xd5, 0x6f, 0x2a, 0xd0, 0xc8, 0x32, 0xd0, 0x04, 0xb6, 0x3d, 0xe2, 0x13, 0x9b, 0x32, 0xea, 0xeb,
+	0x1c, 0x14, 0x88, 0x33, 0x6a, 0x87, 0xf7, 0xd6, 0xed, 0xd7, 0x3e, 0x59, 0xc8, 0xf0, 0x55, 0x80,
+	0x1b, 0x5e, 0x66, 0x8d, 0x7e, 0x08, 0xb2, 0x7b, 0xf6, 0x9a, 0x4e, 0x99, 0xf9, 0x86, 0x46, 0xfa,
+	0x5d, 0xcf, 0xee, 0x37, 0x5a, 0xb0, 0x85, 0x7a, 0x09, 0x9a, 0x8b, 0x12, 0xcb, 0x70, 0x7d, 0x93,
+	0x7d, 0x6d, 0xb7, 0xca, 0x45, 0xa2, 0x9d, 0x05, 0x3b, 0x14, 0x8d, 0xd1, 0xe8, 0x19, 0x34, 0x28,
+	0xf1, 0xad, 0x73, 0x3d, 0x60, 0xae, 0xe7, 0x99, 0x8e, 0xd1, 0xaa, 0x08, 0xf9, 0x9b, 0x39, 0x53,
+	0x38, 0x66, 0x1c, 0x41, 0xc4, 0x1e, 0x75, 0x9a, 0x26, 0xa1, 0xcf, 0xa0, 0xc9, 0xed, 0xb1, 0x2c,
+	0x6a, 0xe9, 0xcc, 0x37, 0x89, 0xa5, 0x4f, 0xdd, 0xb9, 0xc3, 0x5a, 0xd5, 0x03, 0xe9, 0x4e, 0x15,
+	0xa3, 0x05, 0x6f, 0xc2, 0x59, 0x5d, 0xce, 0x41, 0xb7, 0x61, 0xdb, 0x26, 0x6f, 0x33, 0xe0, 0x0d,
+	0x01, 0xae, 0xdb, 0xe4, 0x6d, 0x0a, 0xf7, 0x08, 0xc0, 0x21, 0x81, 0x3e, 0x75, 0x9d, 0x57, 0xa6,
+	0xd1, 0xda, 0x14, 0xda, 0x7d, 0x9c, 0xd5, 0x6e, 0x48, 0x82, 0xae, 0x60, 0x63, 0xd9, 0x59, 0x7c,
+	0xee, 0x1f, 0x43, 0x23, 0xeb, 0x71, 0xf4, 0x39, 0x40, 0xec, 0x73, 0x7e, 0x65, 0xe5, 0x65, 0x3f,
+	0x65, 0x24, 0x70, 0x0a, 0xae, 0xfe, 0x59, 0x82, 0x7a, 0x86, 0x5b, 0x18, 0x5f, 0x4f, 0x21, 0xb9,
+	0x56, 0x9d, 0x9d, 0x7b, 0xe1, 0x4d, 0x36, 0x56, 0x1e, 0x33, 0x39, 0xf7, 0x28, 0xae, 0x7b, 0xe9,
+	0x25, 0xdf, 0xe3, 0x15, 0x25, 0x81, 0x79, 0x66, 0x51, 0x3d, 0xf0, 0xc8, 0x94, 0x16, 0x5f, 0xe9,
+	0xb3, 0x08, 0x33, 0xe6, 0x10, 0x5c, 0x7f, 0x95, 0x5e, 0xaa, 0x5f, 0x41, 0x3d, 0xc3, 0x47, 0x0a,
+	0x94, 0x6d, 0xf2, 0x36, 0xd2, 0x95, 0x7f, 0x0a, 0x8a, 0xe9, 0x08, 0xfd, 0x38, 0xc5, 0x74, 0xb8,
+	0x41, 0x96, 0x19, 0xb0, 0x56, 0xf9, 0xa0, 0xcc, 0x0d, 0xe2, 0xdf, 0x9c, 0x16, 0x30, 0xea, 0x89,
+	0xa8, 0x90, 0xb1, 0xf8, 0x56, 0xff, 0x2a, 0x41, 0x3d, 0x13, 0x8b, 0xe8, 0x01, 0x54, 0x84, 0xb1,
+	0x52, 0x91, 0xb1, 0x31, 0x54, 0x18, 0x2b, 0x80, 0x7c, 0x5b, 0xc3, 0x25, 0x96, 0x38, 0x5d, 0xc2,
+	0xe2, 0x1b, 0x1d, 0xc2, 0x6e, 0x1c, 0xd2, 0xba, 0x4d, 0x99, 0x6f, 0x4e, 0x75, 0xe1, 0xe0, 0xb2,
+	0x38, 0x7b, 0x27, 0x66, 0x1e, 0x0b, 0xde, 0x90, 0xfb, 0xfb, 0x11, 0x7c, 0x4c, 0x66, 0x33, 0x93,
+	0x17, 0x01, 0x62, 0xa5, 0x85, 0x82, 0x56, 0x45, 0x58, 0xb1, 0x9b, 0xb0, 0x13, 0xb1, 0x40, 0xfd,
+	0x46, 0x82, 0x7a, 0x26, 0x27, 0xd0, 0x77, 0xa1, 0x11, 0x67, 0x85, 0x9e, 0xba, 0xd7, 0x7a, 0x4c,
+	0x15, 0x07, 0x1e, 0x03, 0x4a, 0x60, 0x01, 0x65, 0xcc, 0x74, 0x8c, 0xa0, 0x55, 0x12, 0xb1, 0xf4,
+	0xc9, 0xaa, 0x9c, 0x0b, 0x61, 0xf8, 0x1a, 0xc9, 0x51, 0x02, 0xf5, 0x09, 0x28, 0x79, 0x58, 0x61,
+	0x5c, 0x35, 0xa1, 0xfa, 0x86, 0x58, 0x73, 0x1a, 0x5d, 0x57, 0xb8, 0x50, 0x7f, 0x2f, 0xc1, 0xb5,
+	0xa5, 0xcc, 0xbc, 0xa8, 0x25, 0x2f, 0xd6, 0x58, 0xa2, 0xae, 0xcb, 0xfe, 0xd5, 0xd6, 0xfc, 0x04,
+	0x9a, 0x45, 0xd0, 0x4b, 0x58, 0xf4, 0x77, 0x09, 0xe4, 0x38, 0x9b, 0xd1, 0x13, 0xd8, 0x32, 0x7c,
+	0xe2, 0x7d, 0xbd, 0x48, 0xfe, 0xb0, 0xca, 0xee, 0x65, 0x95, 0x3b, 0xe2, 0x88, 0x28, 0xfd, 0x6b,
+	0x46, 0xb2, 0x40, 0x4f, 0x01, 0x5c, 0x8f, 0xfa, 0x61, 0x87, 0x88, 0x2a, 0xaa, 0xba, 0xa2, 0x70,
+	0xb4, 0x47, 0x31, 0x12, 0xa7, 0xa4, 0xf6, 0xbb, 0x00, 0x09, 0x07, 0xfd, 0x00, 0xe4, 0x98, 0x17,
+	0xd5, 0x8f, 0x5c, 0x25, 0x8a, 0xc1, 0x38, 0x41, 0xaa, 0x1e, 0xd4, 0x52, 0x4a, 0xa2, 0x6f, 0x01,
+	0x38, 0x73, 0x5b, 0xb7, 0xc8, 0x79, 0x58, 0x86, 0x78, 0xcd, 0x93, 0x9d, 0xb9, 0x3d, 0x10, 0x04,
+	0x74, 0x13, 0x6a, 0xa6, 0xe3, 0xcd, 0x99, 0x1e, 0x98, 0xbf, 0xa6, 0xe1, 0x85, 0x54, 0x31, 0x08,
+	0xd2, 0x98, 0x53, 0xd0, 0x2d, 0xd8, 0x72, 0xe7, 0x2c, 0x41, 0x94, 0x05, 0xa2, 0x16, 0xd2, 0x04,
+	0x44, 0xb8, 0x31, 0x56, 0x85, 0x07, 0x44, 0xac, 0x8c, 0x1e, 0xe7, 0xa9, 0x8c, 0xeb, 0x31, 0x55,
+	0xd4, 0x9d, 0xd1, 0x72, 0x5b, 0x0b, 0x9d, 0x76, 0x7b, 0x85, 0x8d, 0xef, 0xe8, 0x68, 0xff, 0xed,
+	0x0a, 0xfc, 0x1b, 0xa8, 0x8a, 0xb6, 0x50, 0x18, 0x4e, 0xf7, 0x32, 0x8d, 0x3d, 0x77, 0x2b, 0x42,
+	0x2c, 0xe9, 0xe9, 0xe8, 0x21, 0x6c, 0x04, 0x8c, 0xb0, 0x79, 0x10, 0x55, 0xd6, 0xbd, 0x22, 0xb8,
+	0x00, 0xe0, 0x08, 0xa8, 0xfe, 0xae, 0x04, 0x72, 0xbc, 0xcd, 0x87, 0xf4, 0x6a, 0x02, 0xbb, 0x89,
+	0x97, 0x49, 0x10, 0x98, 0x86, 0xc3, 0x27, 0x84, 0x85, 0x2a, 0xf7, 0x57, 0x68, 0x9e, 0xf8, 0xa5,
+	0x93, 0xc8, 0xe0, 0xa6, 0x57, 0x40, 0xdd, 0xff, 0x0a, 0x9a, 0x45, 0x68, 0xd4, 0x85, 0x5a, 0xfa,
+	0xc0, 0xd0, 0xfd, 0xb7, 0x56, 0xb8, 0x3f, 0x11, 0xc4, 0x69, 0x29, 0xf5, 0xc7, 0xb0, 0x53, 0x80,
+	0xb9, 0x44, 0x8a, 0xff, 0xa3, 0x04, 0xb5, 0x94, 0x87, 0x79, 0x3a, 0x04, 0x8c, 0xf8, 0x4c, 0x67,
+	0x66, 0x2c, 0x2f, 0x0b, 0xca, 0xc4, 0xb4, 0x29, 0xfa, 0x14, 0xb6, 0xa7, 0xae, 0xed, 0x59, 0x34,
+	0x8c, 0x5e, 0x8e, 0x09, 0xb7, 0x6b, 0x24, 0x64, 0x01, 0x7c, 0x0e, 0xf2, 0xd4, 0x75, 0xc2, 0x62,
+	0x2f, 0x9c, 0xd9, 0x28, 0x76, 0xa6, 0x38, 0xb5, 0x1d, 0x0d, 0x18, 0x11, 0x5e, 0x74, 0xa6, 0x44,
+	0x1c, 0x7d, 0x0e, 0x35, 0xf7, 0x2c, 0xa0, 0xfe, 0x9b, 0x30, 0xd5, 0x2b, 0x45, 0x51, 0x32, 0x4a,
+	0x00, 0x38, 0x8d, 0x56, 0x19, 0xa0, 0xe5, 0xdd, 0x51, 0x0d, 0x36, 0xbb, 0x58, 0xeb, 0x4c, 0xb4,
+	0x9e, 0x72, 0x85, 0x2f, 0xf0, 0xe9, 0x70, 0xd8, 0x1f, 0x1e, 0x29, 0x12, 0xaa, 0x83, 0x3c, 0x3e,
+	0xed, 0x76, 0x35, 0xad, 0xa7, 0xf5, 0x94, 0x12, 0x02, 0xd8, 0xf8, 0xa2, 0x3f, 0x18, 0x68, 0x3d,
+	0xa5, 0xcc, 0xbf, 0x9f, 0x75, 0xfa, 0xfc, 0xbb, 0x82, 0x14, 0xd8, 0xd2, 0x3a, 0x78, 0xf0, 0xe5,
+	0x78, 0x32, 0x3a, 0x39, 0xd1, 0x7a, 0x4a, 0x95, 0xef, 0x72, 0x3a, 0xfc, 0x62, 0x38, 0xfa, 0xd9,
+	0x50, 0xd9, 0x50, 0x7f, 0x04, 0xb5, 0x94, 0x46, 0xa8, 0x0d, 0x9b, 0x61, 0x37, 0x5c, 0xdc, 0x73,
+	0x33, 0xab, 0x7d, 0xd8, 0x0c, 0xf1, 0x02, 0xa4, 0x1e, 0xc2, 0x46, 0x48, 0xba, 0xc4, 0x4d, 0xfe,
+	0x56, 0x82, 0xeb, 0x98, 0x7a, 0xae, 0xcf, 0x52, 0x27, 0x0f, 0x5c, 0x03, 0xd3, 0x5f, 0xcd, 0x69,
+	0xc0, 0xf8, 0xcd, 0x86, 0xd3, 0x5d, 0x6a, 0x3f, 0x59, 0x50, 0x44, 0x03, 0xd2, 0x60, 0x3b, 0xe5,
+	0x36, 0xdd, 0x72, 0x8d, 0xe2, 0xb1, 0x3c, 0xb7, 0x79, 0xc3, 0xcd, 0xac, 0xd5, 0xeb, 0xb0, 0x57,
+	0xac, 0x84, 0x67, 0x9d, 0xab, 0xcf, 0xa1, 0x91, 0x25, 0xa3, 0xc7, 0x50, 0x8b, 0xc6, 0x04, 0xcb,
+	0x35, 0x82, 0xe2, 0x2a, 0x1e, 0x7a, 0x82, 0x6f, 0x02, 0xf6, 0xe2, 0x33, 0x50, 0x5f, 0x82, 0x1c,
+	0x33, 0x84, 0x6d, 0xa6, 0x4d, 0xf5, 0x80, 0x11, 0xdb, 0x8b, 0x6d, 0x33, 0x6d, 0x3a, 0xe6, 0x04,
+	0x74, 0x1f, 0x36, 0x42, 0xc9, 0xc8, 0xa4, 0x62, 0xef, 0x47, 0x18, 0xf5, 0x0f, 0x12, 0xb4, 0x8e,
+	0xe8, 0xfb, 0x79, 0xf1, 0x66, 0x6c, 0x8f, 0xe0, 0x87, 0x17, 0x14, 0xa9, 0x2d, 0x00, 0xd9, 0xfc,
+	0x2a, 0xe7, 0xf3, 0x6b, 0x0f, 0xae, 0x52, 0x67, 0x16, 0x32, 0xc3, 0x21, 0x6f, 0x93, 0x3a, 0x33,
+	0xce, 0x52, 0x75, 0xf8, 0xa8, 0x40, 0x2b, 0xcf, 0x3a, 0x2f, 0xba, 0x3a, 0xe9, 0x3d, 0xae, 0xee,
+	0x09, 0x5c, 0xef, 0x51, 0x8b, 0x32, 0xfa, 0x3e, 0x96, 0xf3, 0x8b, 0x2f, 0x96, 0xe6, 0x17, 0xff,
+	0x27, 0x09, 0x76, 0x8f, 0x28, 0x1b, 0xcf, 0x0d, 0x83, 0x06, 0x61, 0x5f, 0x8f, 0x76, 0x7d, 0x0c,
+	0x40, 0xe3, 0x87, 0x59, 0xa4, 0x76, 0x6b, 0xd5, 0xc3, 0x0d, 0xa7, 0xb0, 0xe8, 0x1e, 0x6c, 0x88,
+	0xd3, 0x17, 0x53, 0xd2, 0x4e, 0x41, 0x79, 0xc1, 0x11, 0x84, 0x37, 0x5d, 0x3f, 0x3c, 0x51, 0x77,
+	0xe6, 0xf6, 0x19, 0xf5, 0x85, 0xeb, 0xab, 0xb8, 0x1e, 0x51, 0x87, 0x82, 0xa8, 0xfe, 0xbb, 0x04,
+	0x3b, 0x79, 0x3d, 0xb9, 0x87, 0x7f, 0xb9, 0xaa, 0x4d, 0x84, 0x01, 0xfb, 0x28, 0x37, 0x03, 0x2d,
+	0xef, 0x70, 0x89, 0x86, 0x91, 0x7d, 0x3f, 0x96, 0x2e, 0xf5, 0x7e, 0x7c, 0x01, 0xcd, 0xec, 0xfb,
+	0x51, 0xf7, 0xe7, 0x56, 0x34, 0x94, 0xac, 0x7f, 0x45, 0xe2, 0xb9, 0x45, 0x31, 0xa2, 0x79, 0xd2,
+	0xff, 0xb8, 0x7d, 0xfd, 0x02, 0x0e, 0x7e, 0x4a, 0x2c, 0x73, 0x46, 0x18, 0xcd, 0x0f, 0xde, 0x1f,
+	0x1e, 0x21, 0xea, 0x01, 0x7c, 0xb2, 0x66, 0x77, 0x1e, 0x97, 0x7f, 0x91, 0xe0, 0xc6, 0x11, 0x65,
+	0x4b, 0x9e, 0xf8, 0x7f, 0x87, 0xe7, 0x7d, 0x40, 0xb3, 0x33, 0xdd, 0x26, 0x0e, 0x31, 0x78, 0x80,
+	0xcd, 0x66, 0x3e, 0x0d, 0x82, 0xa8, 0x3a, 0x28, 0xb3, 0xb3, 0xe3, 0x90, 0xd1, 0x09, 0xe9, 0xaa,
+	0x0b, 0xfb, 0x2b, 0x94, 0xe6, 0xb1, 0xba, 0x2a, 0x06, 0xa4, 0xf7, 0x8e, 0x01, 0xf5, 0x8f, 0xf9,
+	0x97, 0x0d, 0x27, 0x5f, 0xbc, 0x35, 0xa1, 0x27, 0x00, 0x7c, 0x3c, 0x20, 0xbe, 0x19, 0xc4, 0xd3,
+	0x40, 0xae, 0x36, 0x75, 0x63, 0xbe, 0xe8, 0xfe, 0x29, 0x7c, 0x52, 0x32, 0xe3, 0xa7, 0x6f, 0x35,
+	0x2a, 0x99, 0x63, 0xfe, 0xfe, 0x7d, 0x04, 0xbb, 0x63, 0xca, 0xd2, 0x53, 0xe2, 0xc5, 0x0a, 0xd6,
+	0x2e, 0xec, 0xe4, 0xe5, 0x3c, 0xeb, 0xfc, 0xee, 0x69, 0xea, 0xc7, 0x82, 0x18, 0x15, 0x14, 0xd8,
+	0x8a, 0xfa, 0xba, 0x3e, 0xf9, 0xf2, 0x44, 0x53, 0xae, 0xf0, 0x39, 0xa0, 0x37, 0x3a, 0x7d, 0x3a,
+	0xd0, 0x14, 0x09, 0x6d, 0x42, 0xb9, 0x3f, 0x9c, 0x28, 0x25, 0xb4, 0x05, 0x57, 0x7b, 0xfd, 0x71,
+	0x17, 0x6b, 0x13, 0x4d, 0x29, 0xa3, 0x6d, 0xa8, 0x75, 0x3b, 0x13, 0xed, 0x68, 0x84, 0xfb, 0xdd,
+	0xce, 0x40, 0xa9, 0xdc, 0x7d, 0x9c, 0x7a, 0xa4, 0x2f, 0x26, 0x90, 0xc5, 0xb8, 0x70, 0x85, 0x0b,
+	0x1f, 0xf7, 0x87, 0xfd, 0xe3, 0xfe, 0xcf, 0xf9, 0x9e, 0x7c, 0xd5, 0x79, 0x19, 0xae, 0x4a, 0x77,
+	0x9f, 0x43, 0x23, 0xeb, 0x1c, 0xf4, 0x11, 0xa0, 0x85, 0x46, 0xdd, 0xd1, 0xf1, 0x49, 0x07, 0xf7,
+	0xc7, 0x23, 0xbe, 0x8b, 0x0c, 0x55, 0xed, 0xc5, 0x69, 0x67, 0xa0, 0x48, 0xe8, 0x2a, 0x54, 0x06,
+	0xda, 0x78, 0xac, 0x94, 0xf8, 0x39, 0x47, 0x62, 0xd2, 0xc1, 0x4a, 0xf9, 0xf0, 0x6f, 0x25, 0x90,
+	0x7b, 0x4f, 0xa3, 0x70, 0x42, 0xaf, 0xa1, 0x59, 0xd4, 0xab, 0xd1, 0xf7, 0xb2, 0x57, 0xb3, 0x66,
+	0xa8, 0xd8, 0xff, 0xf4, 0x22, 0x50, 0x1e, 0x95, 0x04, 0xae, 0x2d, 0x75, 0x2f, 0x74, 0x7b, 0xa9,
+	0x6e, 0x16, 0x9f, 0xf2, 0x9d, 0x77, 0xe2, 0xf8, 0x11, 0xaf, 0xa1, 0x59, 0xd4, 0x81, 0xf2, 0xe6,
+	0xac, 0xe9, 0x71, 0x79, 0x73, 0x56, 0x36, 0xb4, 0xc3, 0x7f, 0x49, 0x00, 0x49, 0x8d, 0x47, 0x2f,
+	0xa1, 0x91, 0x2d, 0xfa, 0xe8, 0xdb, 0xeb, 0x5b, 0x42, 0x78, 0xdc, 0xad, 0x77, 0xf6, 0x0d, 0x74,
+	0x0e, 0x7b, 0x2b, 0x6b, 0x18, 0x6a, 0x67, 0xe5, 0xdf, 0x55, 0x4a, 0xf7, 0xef, 0x5f, 0x18, 0xcf,
+	0x6d, 0xfc, 0xa7, 0x04, 0xf5, 0x4c, 0xd6, 0x23, 0x5b, 0x74, 0xf1, 0xe5, 0xc2, 0x83, 0xee, 0x2e,
+	0x19, 0xb2, 0xb2, 0xa4, 0xee, 0xdf, 0xb9, 0x10, 0x96, 0xdb, 0xfe, 0x12, 0x1a, 0xd9, 0x0c, 0xcd,
+	0x7b, 0xb5, 0x30, 0xef, 0xf3, 0x5e, 0x2d, 0x48, 0xf2, 0xb3, 0x0d, 0xf1, 0x87, 0xfa, 0xfb, 0xff,
+	0x09, 0x00, 0x00, 0xff, 0xff, 0x6c, 0x55, 0xdf, 0x98, 0xda, 0x16, 0x00, 0x00,
 }

@@ -45,6 +45,10 @@ const styles = theme => ({
   failed: {
     color: theme.colors.failed,
   },
+  // TODO (andreyvelich): Add to theme.
+  earlyStopped: {
+    color: '#e69500',
+  },
 });
 
 class HPJobTable extends React.Component {
@@ -141,7 +145,7 @@ class HPJobTable extends React.Component {
                   .map((row, idx) => (
                     <TableRow key={idx}>
                       {row.map((element, index) => {
-                        if (index === 0 && row[1] === 'Succeeded') {
+                        if (index === 0 && (row[1] === 'Succeeded' || row[1] === 'EarlyStopped')) {
                           return (
                             <TableCell
                               className={classes.trialName}
@@ -181,6 +185,12 @@ class HPJobTable extends React.Component {
                           } else if (element === 'Failed') {
                             return (
                               <TableCell className={classes.failed} key={index}>
+                                {element}
+                              </TableCell>
+                            );
+                          } else if (element === 'EarlyStopped') {
+                            return (
+                              <TableCell className={classes.earlyStopped} key={index}>
                                 {element}
                               </TableCell>
                             );

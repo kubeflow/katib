@@ -31,15 +31,58 @@ service DBManager {
 }
 
 /**
- * Suggestion service defines APIs to manage Katib Suggestion objects.
+ * Suggestion service defines APIs to manage Katib Suggestion from HP or NAS algorithms
  */
 service Suggestion {
     rpc GetSuggestions(GetSuggestionsRequest) returns (GetSuggestionsReply);
     rpc ValidateAlgorithmSettings(ValidateAlgorithmSettingsRequest) returns (ValidateAlgorithmSettingsReply);
 }
 
+/**
+ * EarlyStopping service defines APIs to manage Katib Early Stopping algorithms
+ */
 service EarlyStopping {
-//TODO: This feature is not yet fully implemented.
+    rpc GetEarlyStoppingRules(GetEarlyStoppingRulesRequest) returns (GetEarlyStoppingRulesReply);
+    rpc SetTrialStatus(SetTrialStatusRequest) returns (SetTrialStatusReply);
+}
+
+/**
+ * Structure for a single Experiment.
+ */
+message Experiment {
+    string name = 1; // Name for the Experiment.
+    ExperimentSpec spec = 2; // Experiment specification.
+}
+
+/**
+ * Specification of an Experiment. Experiment represents a single optimization run over a feasible space. 
+ * Each Experiment contains a configuration describing the feasible space, as well as a set of Trials.
+ * It is assumed that objective function f(x) does not change in the course of an Experiment.
+ */
+message ExperimentSpec {
+    /** 
+    * List of ParameterSpec.
+    */
+    message ParameterSpecs {
+        repeated ParameterSpec parameters = 1;
+    }
+    ParameterSpecs parameter_specs = 1;
+    ObjectiveSpec objective = 2; // Objective specification for the Experiment.
+    AlgorithmSpec algorithm = 3; // HP or NAS algorithm specification for the Experiment.
+    EarlyStoppingSpec early_stopping = 4; // Early stopping specification for the Experiment.
+    int32 parallel_trial_count = 5; // How many Trials can be processed in parallel.
+    int32 max_trial_count = 6; // Max completed Trials to mark Experiment as succeeded.
+    NasConfig nas_config = 7; // NAS configuration for the Experiment.
+}
+
+/**
+ * Config for a hyperparameter.
+ * Katib will create each Hyper parameter from this config.
+ */
+message ParameterSpec {
+    string name = 1; /// Name of the parameter.
+    ParameterType parameter_type = 2; /// Type of the parameter.
+    FeasibleSpace feasible_space = 3; /// FeasibleSpace for the parameter.
 }
 
 /**
@@ -52,7 +95,6 @@ enum ParameterType {
     DISCRETE = 3; /// Discrete number type. Use "List" as float.
     CATEGORICAL = 4; /// Categorical type. Use "List" as string.
 }
-
 
 /**
  * Feasible space for optimization.
@@ -67,13 +109,15 @@ message FeasibleSpace {
 }
 
 /**
- * Config for a Hyper parameter.
- * Katib will create each Hyper parameter from this config.
+ * Objective specification.
  */
-message ParameterSpec {
-    string name = 1; /// Name of the parameter.
-    ParameterType parameter_type = 2; /// Type of the parameter.
-    FeasibleSpace feasible_space = 3; /// FeasibleSpace for the parameter.
+message ObjectiveSpec {
+    ObjectiveType type = 1; // Type of optimization.
+    double goal = 2; // Goal of optimization, can be empty.
+    string objective_metric_name = 3; // Primary metric name for the optimization.
+    // List of additional metrics to record from Trial.
+    // This can be empty if we only care about the objective metric.
+    repeated string additional_metric_names = 4;     
 }
 
 /**
@@ -85,33 +129,42 @@ enum ObjectiveType {
     MAXIMIZE = 2; /// Maximize
 }
 
-message ObjectiveSpec{
-    ObjectiveType type = 1;
-    double goal = 2;
-    string objective_metric_name = 3;
-    repeated string additional_metric_names = 4; 
-    /// This can be empty if we only care about the objective metric.
+/**
+ * HP or NAS algorithm specification.
+ */
+message AlgorithmSpec {
+    string algorithm_name = 1;
+    repeated AlgorithmSetting algorithm_settings = 2;
 }
 
+/**
+ * HP or NAS algorithm settings.
+ */
 message AlgorithmSetting {
     string name = 1;
     string value = 2;
 }
 
+/**
+ * Early stopping algorithm specification.
+ */
 message EarlyStoppingSpec {
-//TODO: This feature is not yet fully implemented.
+    string algorithm_name = 1;
+    repeated EarlyStoppingSetting algorithm_settings = 2;
 }
 
-message AlgorithmSpec {
-    string algorithm_name = 1;
-    repeated AlgorithmSetting algorithm_settings = 2;
-    EarlyStoppingSpec early_stopping_spec = 3;
+/**
+ * Early stopping algorithm settings.
+ */
+message EarlyStoppingSetting {
+    string name = 1;
+    string value = 2;
 }
 
 /**
  * NasConfig contains a config of NAS job
  */
- message NasConfig {
+message NasConfig {
     GraphConfig graph_config = 1; /// Config of DAG
     message Operations {
         repeated Operation operation = 1;
@@ -122,7 +175,7 @@ message AlgorithmSpec {
 /**
  * GraphConfig contains a config of DAG
  */
- message GraphConfig {
+message GraphConfig {
     int32 num_layers = 1; /// Number of layers
     repeated int32 input_sizes = 2; /// Dimensions of input size
     repeated int32 output_sizes = 3; /// Dimensions of output size
@@ -131,42 +184,38 @@ message AlgorithmSpec {
 /**
  * Config for operations in DAG
  */
- message Operation {
-     string operation_type = 1; /// Type of operation in DAG
-      /** 
+message Operation {
+    string operation_type = 1; /// Type of operation in DAG
+    /** 
      * List of ParameterSpec
      */
-     message ParameterSpecs {
+    message ParameterSpecs {
         repeated ParameterSpec parameters = 1; 
     }
     ParameterSpecs parameter_specs = 2;
 }
 
 /**
- * Spec of a Experiment. Experiment represents a single optimization run over a feasible space. 
- * Each Experiment contains a configuration describing the feasible space, as well as a set of Trials.
- * It is assumed that objective function f(x) does not change in the course of a Experiment.
+ * Structure for a single Trial.
  */
-message ExperimentSpec {
-     /** 
-     * List of ParameterSpec
-     */
-    message ParameterSpecs {
-        repeated ParameterSpec parameters = 1; 
-    }
-    ParameterSpecs parameter_specs = 1;
-    ObjectiveSpec objective = 2; 
-    AlgorithmSpec algorithm = 3;
-    string trial_template = 4;
-    string metrics_collector_spec = 5;
-    int32 parallel_trial_count = 6;
-    int32 max_trial_count = 7;
-    NasConfig nas_config = 8;
-}
+message Trial {
+    string name = 1; // Name for the Trial.
+    TrialSpec spec = 2; // Trial specification.
+    TrialStatus status = 3; // Trial status.
+ }
 
-message Experiment {
-    string name = 1; /// Name of Experiment. This is unique in DB.
-    ExperimentSpec spec = 2;
+/**
+ * Specification of a Trial. It represents Trial's parameter assignments and objective.
+ */
+message TrialSpec {
+    /** 
+    * List of ParameterAssignment
+    */
+    message ParameterAssignments {
+        repeated ParameterAssignment assignments = 1;
+    }
+    ObjectiveSpec objective = 2; // Objective specification for the Trial.
+    ParameterAssignments parameter_assignments = 3; // List of assignments generated for the Trial.
 }
 
 message ParameterAssignment {
@@ -174,57 +223,34 @@ message ParameterAssignment {
     string value = 2;
 }
 
-message Metric {
-    string name = 1;
-    string value = 2;
-}
-
-message MetricLog {
-    string time_stamp = 1; /// RFC3339 format
-    Metric metric = 2;
-}
-
-message Observation {
-    repeated Metric metrics = 1;
-}
-
-message ObservationLog {
-    repeated MetricLog metric_logs = 1;
-}
-
-message TrialSpec {
-     /** 
-     * List of ParameterAssignment
-     */
-    message ParameterAssignments{
-        repeated ParameterAssignment assignments = 1;
-    }
-    string experiment_name = 1;
-    ObjectiveSpec objective = 2;
-    ParameterAssignments parameter_assignments = 3;
-    string run_spec = 4;
-    string metrics_collector_spec = 5;
-}
-
+/**
+ * Current Trial status. It contains Trial's latest condition, start time, completion time, observation.
+ */
 message TrialStatus {
+    // Trial can be in one of 6 conditions.
+    // TODO (andreyvelich): Remove unused conditions.
     enum TrialConditionType {
         CREATED = 0;
         RUNNING = 1;
         SUCCEEDED = 2;
         KILLED = 3;
         FAILED = 4;
-        UNKNOWN = 5;
+        EARLYSTOPPED = 5;
+        UNKNOWN = 6;
     }
-    string start_time = 1; /// RFC3339 format
-    string completion_time = 2; /// RFC3339 format
-    TrialConditionType condition = 3;
-    Observation observation = 4; /// The best observation in logs.
+    string start_time = 1; // Trial start time in RFC3339 format
+    string completion_time = 2; // Trial completion time in RFC3339 format
+    TrialConditionType condition = 3; // Trial current condition. It is equal to the latest Trial CR condition.
+    Observation observation = 4; // The best Trial observation in logs.
 }
 
-message Trial {
+message Observation {
+    repeated Metric metrics = 1;
+}
+
+message Metric {
     string name = 1;
-    TrialSpec spec = 2;
-    TrialStatus status = 3;
+    string value = 2;
 }
 
 message ReportObservationLogRequest {
@@ -235,11 +261,13 @@ message ReportObservationLogRequest {
 message ReportObservationLogReply {
 }
 
-message DeleteObservationLogRequest {
-    string trial_name = 1;
+message ObservationLog {
+    repeated MetricLog metric_logs = 1;
 }
 
-message DeleteObservationLogReply {
+message MetricLog {
+    string time_stamp = 1; /// RFC3339 format
+    Metric metric = 2;
 }
 
 message GetObservationLogRequest {
@@ -253,6 +281,13 @@ message GetObservationLogReply {
     ObservationLog observation_log = 1;
 }
 
+message DeleteObservationLogRequest {
+    string trial_name = 1;
+}
+
+message DeleteObservationLogReply {
+}
+
 message GetSuggestionsRequest {
     Experiment experiment = 1;
     repeated Trial trials = 2; // all completed trials owned by the experiment.
@@ -260,11 +295,12 @@ message GetSuggestionsRequest {
 }
 
 message GetSuggestionsReply {
-    message ParameterAssignments{
+    message ParameterAssignments {
         repeated ParameterAssignment assignments = 1;
     }
     repeated ParameterAssignments parameter_assignments = 1;
     AlgorithmSpec algorithm = 2;
+    repeated EarlyStoppingRule early_stopping_rules = 3;
 }
 
 message ValidateAlgorithmSettingsRequest {
@@ -275,4 +311,40 @@ message ValidateAlgorithmSettingsRequest {
  * Return INVALID_ARGUMENT Error if Algorithm Settings are not Valid
  */
 message ValidateAlgorithmSettingsReply {
+}
+
+message GetEarlyStoppingRulesRequest {
+    Experiment experiment = 1;
+    repeated Trial trials = 2; 
+    string db_manager_address = 3;
+}
+
+message GetEarlyStoppingRulesReply {
+    repeated EarlyStoppingRule early_stopping_rules = 1;
+}
+
+/**
+ * EarlyStoppingRule represents single early stopping rule.
+ */
+message EarlyStoppingRule {
+    string name = 1; // Name of the rule. Usually, metric name.
+    string value = 2; // Value of the metric.
+    ComparisonType comparison = 3; // Correlation between name and value, one of equal, less or greater
+    // Defines quantity of intermediate results that should be received before applying the rule.
+    // If start step is empty, rule is applied from the first recorded metric.
+    int32 start_step = 4; 
+}
+
+enum ComparisonType {
+    UNKNOWN_COMPARISON = 0; // Unknown comparison, not used
+    EQUAL = 1; // Equal comparison, e.g. accuracy = 0.7
+    LESS = 2; // Less comparison, e.g. accuracy < 0.7
+    GREATER = 3; // Greater comparison, e.g. accuracy > 0.7
+}
+
+message SetTrialStatusRequest {
+    string trial_name = 1;
+}
+
+message SetTrialStatusReply {
 }

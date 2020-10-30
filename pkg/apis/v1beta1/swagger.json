@@ -88,31 +88,35 @@
       }
     },
     ".v1beta1.SuggestionSpec": {
-      "description": "SuggestionSpec defines the desired state of suggestion.",
+      "description": "SuggestionSpec is the specification of a Suggestion.",
       "required": [
-        "algorithmName"
+        "algorithm"
       ],
       "properties": {
-        "algorithmName": {
-          "description": "Name of the algorithm that suggestion is used.",
-          "type": "string"
+        "algorithm": {
+          "description": "Algorithm describes HP or NAS algorithm that suggestion is used.",
+          "$ref": "#/definitions/v1beta1.AlgorithmSpec"
+        },
+        "earlyStopping": {
+          "description": "EarlyStopping describes early stopping algorithm that suggestion is used.",
+          "$ref": "#/definitions/v1beta1.EarlyStoppingSpec"
         },
         "requests": {
-          "description": "Number of suggestions requested",
+          "description": "Number of suggestions requested.",
           "type": "integer",
           "format": "int32"
         },
         "resumePolicy": {
-          "description": "Describes resuming policy which usually take effect after experiment terminated. Default value is LongRunning.",
+          "description": "ResumePolicy describes resuming policy which usually take effect after experiment terminated. Default value is LongRunning.",
           "type": "string"
         }
       }
     },
     ".v1beta1.SuggestionStatus": {
-      "description": "SuggestionStatus defines the observed state of Suggestion",
+      "description": "SuggestionStatus is the current status of a Suggestion.",
       "properties": {
         "algorithmSettings": {
-          "description": "Algorithmsettings set by the algorithm services.",
+          "description": "AlgorithmSettings defines HP or NAS algorithm settings which suggestion gRPC service returns. These settings overwrites Experiment's settings before the gRPC request. It can be empty if settings haven't been changed.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1beta1.AlgorithmSetting"
@@ -176,12 +180,19 @@
     ".v1beta1.TrialAssignment": {
       "description": "TrialAssignment is the assignment for one trial.",
       "properties": {
+        "earlyStoppingRules": {
+          "description": "Rules for early stopping techniques Contains rule name, value and comparison type",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1beta1.EarlyStoppingRule"
+          }
+        },
         "name": {
           "description": "Name of the suggestion",
           "type": "string"
         },
         "parameterAssignments": {
-          "description": "Suggestion results",
+          "description": "Suggestion results with Trial parameters",
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1beta1.ParameterAssignment"
@@ -248,10 +259,18 @@
       }
     },
     ".v1beta1.TrialSpec": {
+      "description": "TrialSpec is the specification of a Trial.",
       "required": [
         "parameterAssignments"
       ],
       "properties": {
+        "earlyStoppingRules": {
+          "description": "Rules for early stopping techniques. Each rule should be met to early stop Trial.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1beta1.EarlyStoppingRule"
+          }
+        },
         "failureCondition": {
           "description": "Condition when trial custom resource is failed. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Failed\")#|#(status==\"True\")#",
           "type": "string"
@@ -297,6 +316,7 @@
       }
     },
     ".v1beta1.TrialStatus": {
+      "description": "TrialStatus is the current status of a Trial.",
       "properties": {
         "completionTime": {
           "description": "Represents time when the Trial was completed. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC",
@@ -324,18 +344,23 @@
       }
     },
     "v1beta1.AlgorithmSetting": {
+      "description": "AlgorithmSetting represents key-value pair for HP or NAS algorithm settings.",
       "properties": {
         "name": {
+          "description": "Name is setting name.",
           "type": "string"
         },
         "value": {
+          "description": "Value is the setting value.",
           "type": "string"
         }
       }
     },
     "v1beta1.AlgorithmSpec": {
+      "description": "AlgorithmSpec is the specification for a HP or NAS algorithm.",
       "properties": {
         "algorithmName": {
+          "description": "HP or NAS algorithm name.",
           "type": "string"
         },
         "algorithmSettings": {
@@ -344,9 +369,6 @@
           "items": {
             "$ref": "#/definitions/v1beta1.AlgorithmSetting"
           }
-        },
-        "earlyStopping": {
-          "$ref": "#/definitions/v1beta1.EarlyStoppingSpec"
         }
       }
     },
@@ -381,25 +403,50 @@
         }
       }
     },
+    "v1beta1.EarlyStoppingRule": {
+      "description": "EarlyStoppingRule represents each rule for early stopping.",
+      "properties": {
+        "comparison": {
+          "description": "Comparison defines correlation between name and value.",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name contains metric name for the rule.",
+          "type": "string"
+        },
+        "startStep": {
+          "description": "StartStep defines quantity of intermediate results that should be received before applying the rule. If start step is empty, rule is applied from the first recorded metric.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "value": {
+          "description": "Value contains metric value for the rule.",
+          "type": "string"
+        }
+      }
+    },
     "v1beta1.EarlyStoppingSetting": {
+      "description": "EarlyStoppingSetting represents key-value pair for early stopping algorithm settings.",
       "properties": {
         "name": {
+          "description": "Name is the setting name.",
           "type": "string"
         },
         "value": {
+          "description": "Value is the setting value.",
           "type": "string"
         }
       }
     },
     "v1beta1.EarlyStoppingSpec": {
-      "required": [
-        "earlyStoppingSettings"
-      ],
+      "description": "EarlyStoppingSpec is the specification for a early stopping algorithm.",
       "properties": {
-        "earlyStoppingAlgorithmName": {
+        "algorithmName": {
+          "description": "Early stopping algorithm name.",
           "type": "string"
         },
-        "earlyStoppingSettings": {
+        "algorithmSettings": {
+          "description": "Key-value pairs representing settings for early stopping algorithm.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1beta1.EarlyStoppingSetting"
@@ -488,10 +535,15 @@
       }
     },
     "v1beta1.ExperimentSpec": {
+      "description": "ExperimentSpec is the specification of an Experiment.",
       "properties": {
         "algorithm": {
           "description": "Describes the suggestion algorithm.",
           "$ref": "#/definitions/v1beta1.AlgorithmSpec"
+        },
+        "earlyStopping": {
+          "description": "Describes the early stopping algorithm.",
+          "$ref": "#/definitions/v1beta1.EarlyStoppingSpec"
         },
         "maxFailedTrialCount": {
           "description": "Max failed trials to mark experiment as failed.",
@@ -537,6 +589,7 @@
       }
     },
     "v1beta1.ExperimentStatus": {
+      "description": "ExperimentStatus is the current status of an Experiment.",
       "properties": {
         "completionTime": {
           "description": "Represents time when the Experiment was completed. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.",
@@ -552,6 +605,13 @@
         "currentOptimalTrial": {
           "description": "Current optimal trial parameters and observations.",
           "$ref": "#/definitions/v1beta1.OptimalTrial"
+        },
+        "earlyStoppedTrialList": {
+          "description": "List of trial names which have been early stopped.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "failedTrialList": {
           "description": "List of trial names which have already failed.",
@@ -598,6 +658,11 @@
         },
         "trials": {
           "description": "Trials is the total number of trials owned by the experiment.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "trialsEarlyStopped": {
+          "description": "How many trials are currently early stopped.",
           "type": "integer",
           "format": "int32"
         },
@@ -742,29 +807,33 @@
       }
     },
     "v1beta1.ObjectiveSpec": {
+      "description": "ObjectiveSpec represents Experiment's objective specification.",
       "properties": {
         "additionalMetricNames": {
-          "description": "This can be empty if we only care about the objective metric. Note: If we adopt a push instead of pull mechanism, this can be omitted completely.",
+          "description": "AdditionalMetricNames represents metrics that should be collected from Trials. This can be empty if we only care about the objective metric. Note: If we adopt a push instead of pull mechanism, this can be omitted completely.",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
         "goal": {
+          "description": "Goal is the Experiment's objective goal that should be reached. In case of empty goal, Experiment is running until MaxTrialCount = TrialsSucceeded.",
           "type": "number",
           "format": "double"
         },
         "metricStrategies": {
-          "description": "This field is allowed to missing, experiment defaulter (webhook) will fill it.",
+          "description": "MetricStrategies defines various rules (min, max or latest) to extract metrics values. This field is allowed to missing, experiment defaulter (webhook) will fill it.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1beta1.MetricStrategy"
           }
         },
         "objectiveMetricName": {
+          "description": "ObjectiveMetricName represents primary Experiment's metric to optimize.",
           "type": "string"
         },
         "type": {
+          "description": "Type for Experiment optimization.",
           "type": "string"
         }
       }
@@ -906,7 +975,7 @@
           "type": "string"
         },
         "primaryPodLabels": {
-          "description": "Labels that determines if pod needs to be injected by Katib sidecar container",
+          "description": "Labels that determines if pod needs to be injected by Katib sidecar container. If PrimaryPodLabels is omitted, metrics collector wraps all Trial's pods.",
           "type": "object",
           "additionalProperties": {
             "type": "string"

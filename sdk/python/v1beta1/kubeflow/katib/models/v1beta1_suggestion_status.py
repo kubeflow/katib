@@ -86,7 +86,7 @@ class V1beta1SuggestionStatus(object):
     def algorithm_settings(self):
         """Gets the algorithm_settings of this V1beta1SuggestionStatus.  # noqa: E501
 
-        Algorithmsettings set by the algorithm services.  # noqa: E501
+        AlgorithmSettings defines HP or NAS algorithm settings which suggestion gRPC service returns. These settings overwrites Experiment's settings before the gRPC request. It can be empty if settings haven't been changed.  # noqa: E501
 
         :return: The algorithm_settings of this V1beta1SuggestionStatus.  # noqa: E501
         :rtype: list[V1beta1AlgorithmSetting]
@@ -97,7 +97,7 @@ class V1beta1SuggestionStatus(object):
     def algorithm_settings(self, algorithm_settings):
         """Sets the algorithm_settings of this V1beta1SuggestionStatus.
 
-        Algorithmsettings set by the algorithm services.  # noqa: E501
+        AlgorithmSettings defines HP or NAS algorithm settings which suggestion gRPC service returns. These settings overwrites Experiment's settings before the gRPC request. It can be empty if settings haven't been changed.  # noqa: E501
 
         :param algorithm_settings: The algorithm_settings of this V1beta1SuggestionStatus.  # noqa: E501
         :type: list[V1beta1AlgorithmSetting]

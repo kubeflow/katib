@@ -22,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
+// ExperimentSpec is the specification of an Experiment.
 type ExperimentSpec struct {
 	// List of hyperparameter configurations.
 	Parameters []ParameterSpec `json:"parameters,omitempty"`
@@ -31,6 +32,9 @@ type ExperimentSpec struct {
 
 	// Describes the suggestion algorithm.
 	Algorithm *common.AlgorithmSpec `json:"algorithm,omitempty"`
+
+	// Describes the early stopping algorithm.
+	EarlyStopping *common.EarlyStoppingSpec `json:"earlyStopping,omitempty"`
 
 	// Template for each run of the trial.
 	TrialTemplate *TrialTemplate `json:"trialTemplate,omitempty"`
@@ -52,11 +56,9 @@ type ExperimentSpec struct {
 
 	// Describes resuming policy which usually take effect after experiment terminated.
 	ResumePolicy ResumePolicyType `json:"resumePolicy,omitempty"`
-
-	// TODO - Other fields, exact format is TBD. Will add these back during implementation.
-	// - Early stopping
 }
 
+// ExperimentStatus is the current status of an Experiment.
 type ExperimentStatus struct {
 	// Represents time when the Experiment was acknowledged by the Experiment controller.
 	// It is not guaranteed to be set in happens-before order across separate operations.
@@ -94,6 +96,9 @@ type ExperimentStatus struct {
 	// List of trial names which have been killed.
 	KilledTrialList []string `json:"killedTrialList,omitempty"`
 
+	// List of trial names which have been early stopped.
+	EarlyStoppedTrialList []string `json:"earlyStoppedTrialList,omitempty"`
+
 	// Trials is the total number of trials owned by the experiment.
 	Trials int32 `json:"trials,omitempty"`
 
@@ -111,6 +116,9 @@ type ExperimentStatus struct {
 
 	// How many trials are currently running.
 	TrialsRunning int32 `json:"trialsRunning,omitempty"`
+
+	// How many trials are currently early stopped.
+	TrialsEarlyStopped int32 `json:"trialsEarlyStopped,omitempty"`
 }
 
 // OptimalTrial is the metrics and assignments of the best trial.
@@ -124,8 +132,8 @@ type OptimalTrial struct {
 	Observation common.Observation `json:"observation,omitempty"`
 }
 
-// +k8s:deepcopy-gen=true
 // ExperimentCondition describes the state of the experiment at a certain point.
+// +k8s:deepcopy-gen=true
 type ExperimentCondition struct {
 	// Type of experiment condition.
 	Type ExperimentConditionType `json:"type"`

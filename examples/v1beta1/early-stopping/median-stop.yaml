@@ -1,0 +1,70 @@
+# This is example with median stopping early stopping rule.
+# It has bad feasible space for learning rate to show more early stopped Trials.
+apiVersion: "kubeflow.org/v1beta1"
+kind: Experiment
+metadata:
+  namespace: kubeflow
+  name: median-stop
+spec:
+  objective:
+    type: maximize
+    goal: 0.99
+    objectiveMetricName: Validation-accuracy
+    additionalMetricNames:
+      - Train-accuracy
+  algorithm:
+    algorithmName: random
+  earlyStopping:
+    algorithmName: medianstop
+    algorithmSettings:
+      - name: min_trials_required
+        value: "3"
+      - name: start_step
+        value: "5"
+  metricsCollectorSpec:
+    collector:
+      kind: StdOut
+    source:
+      filter:
+        metricsFormat:
+          - ([\w|-]+)\s*=\s*((-?\d+)(\.\d+)?)
+  parallelTrialCount: 2
+  maxTrialCount: 15
+  maxFailedTrialCount: 3
+  parameters:
+    - name: lr
+      parameterType: double
+      feasibleSpace:
+        min: "0.01"
+        max: "0.5"
+    - name: num-epochs
+      parameterType: int
+      feasibleSpace:
+        min: "7"
+        max: "8"
+  trialTemplate:
+    retain: true
+    primaryContainerName: training-container
+    trialParameters:
+      - name: learningRate
+        description: Learning rate for the training model
+        reference: lr
+      - name: numberEpochs
+        description: Number of epochs to train the model
+        reference: num-epochs
+    trialSpec:
+      apiVersion: batch/v1
+      kind: Job
+      spec:
+        template:
+          spec:
+            containers:
+              - name: training-container
+                image: docker.io/kubeflowkatib/mxnet-mnist
+                command:
+                  - "python3"
+                  - "/opt/mxnet-mnist/mnist.py"
+                  - "--batch-size=64"
+                  - "--lr=${trialParameters.learningRate}"
+                  - "--num-epochs=${trialParameters.numberEpochs}"
+            restartPolicy: Never

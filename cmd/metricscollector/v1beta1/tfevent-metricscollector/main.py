@@ -15,10 +15,12 @@ def parse_options():
         add_help=True
     )
 
-    parser.add_argument("-s", "--manager_server_addr", type=str, default="")
+    # TODO (andreyvelich): Add early stopping flags.
+    parser.add_argument("-s-db", "--db_manager_server_addr", type=str, default="")
     parser.add_argument("-t", "--trial_name", type=str, default="")
     parser.add_argument("-path", "--metrics_file_dir", type=str, default=const.DEFAULT_METRICS_FILE_DIR)
     parser.add_argument("-m", "--metric_names", type=str, default="")
+    parser.add_argument("-o-type", "--objective_type", type=str, default="")
     parser.add_argument("-f", "--metric_filters", type=str, default="")
     parser.add_argument("-p", "--poll_interval", type=int, default=const.DEFAULT_POLL_INTERVAL)
     parser.add_argument("-timeout", "--timeout", type=int, default=const.DEFAULT_TIMEOUT)
@@ -36,10 +38,10 @@ if __name__ == '__main__':
     logger.addHandler(handler)
     logger.propagate = False
     opt = parse_options()
-    manager_server = opt.manager_server_addr.split(':')
-    if len(manager_server) != 2:
-        raise Exception("Invalid katib manager service address: %s" %
-                        opt.manager_server_addr)
+    db_manager_server = opt.db_manager_server_addr.split(':')
+    if len(db_manager_server) != 2:
+        raise Exception("Invalid Katib DB manager service address: %s" %
+                        opt.db_manager_server_addr)
 
     WaitMainProcesses(
         pool_interval=opt.poll_interval,
@@ -51,7 +53,7 @@ if __name__ == '__main__':
     observation_log = mc.parse_file(opt.metrics_file_dir)
 
     channel = grpc.beta.implementations.insecure_channel(
-        manager_server[0], int(manager_server[1]))
+        db_manager_server[0], int(db_manager_server[1]))
 
     with api_pb2.beta_create_DBManager_stub(channel) as client:
         logger.info("In " + opt.trial_name + " " +

@@ -20,6 +20,8 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/spf13/viper"
 	v1 "k8s.io/api/core/v1"
@@ -34,7 +36,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
+	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
+	katibmanagerv1beta1 "github.com/kubeflow/katib/pkg/common/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
@@ -188,17 +192,31 @@ func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1beta1.Tria
 	if mc.Collector.Kind == common.CustomCollector {
 		return mc.Collector.CustomCollector, nil
 	}
-	metricName := trial.Spec.Objective.ObjectiveMetricName
+	metricNames := trial.Spec.Objective.ObjectiveMetricName
 	for _, v := range trial.Spec.Objective.AdditionalMetricNames {
-		metricName += ";"
-		metricName += v
+		metricNames += ";"
+		metricNames += v
 	}
+
+	// Convert rules to flag value with name;value;comparison;startStep order, e.g. accuracy;0.8;less;4.
+	// If start step is empty, we apply rule from the first recorded metrics and flag is equal to accuracy;0.8;less;0.
+	earlyStoppingRules := []string{}
+	for _, rule := range trial.Spec.EarlyStoppingRules {
+		newRule := rule.Name + ";" + rule.Value + ";" + string(rule.Comparison) + ";" + strconv.Itoa(rule.StartStep)
+		earlyStoppingRules = append(earlyStoppingRules, newRule)
+	}
+
+	args, err := s.getMetricsCollectorArgs(trial, metricNames, mc, earlyStoppingRules)
+	if err != nil {
+		return nil, err
+	}
+
+	sidecarContainerName := getSidecarContainerName(trial.Spec.MetricsCollector.Collector.Kind)
+
 	metricsCollectorConfigData, err := katibconfig.GetMetricsCollectorConfigData(mc.Collector.Kind, s.client)
 	if err != nil {
 		return nil, err
 	}
-	args := getMetricsCollectorArgs(trial.Name, metricName, mc)
-	sidecarContainerName := getSidecarContainerName(trial.Spec.MetricsCollector.Collector.Kind)
 
 	injectContainer := v1.Container{
 		Name:            sidecarContainerName,
@@ -268,4 +286,32 @@ func (s *sidecarInjector) getKatibJob(object *unstructured.Unstructured, namespa
 	}
 
 	return jobKind, jobName, nil
+}
+
+func (s *sidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, metricNames string, mc common.MetricsCollectorSpec, esRules []string) ([]string, error) {
+	args := []string{"-t", trial.Name, "-m", metricNames, "-o-type", string(trial.Spec.Objective.Type), "-s-db", katibmanagerv1beta1.GetDBManagerAddr()}
+	if mountPath, _ := getMountPath(mc); mountPath != "" {
+		args = append(args, "-path", mountPath)
+	}
+	if mc.Source != nil && mc.Source.Filter != nil && len(mc.Source.Filter.MetricsFormat) > 0 {
+		args = append(args, "-f", strings.Join(mc.Source.Filter.MetricsFormat, ";"))
+	}
+	// Add stop rules and service endpoint for Early Stopping
+	if len(esRules) > 0 {
+		for _, rule := range esRules {
+			args = append(args, "-stop-rule", rule)
+		}
+		// Suggestion name == Experiment name
+		// Suggestion namespace == Trial namespace
+		// Get suggestion to set early stopping service endpoint
+		suggestionName := trial.ObjectMeta.Labels[consts.LabelExperimentName]
+		suggestion := &suggestionsv1beta1.Suggestion{}
+		err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: suggestionName, Namespace: trial.Namespace}, suggestion)
+		if err != nil {
+			return nil, err
+		}
+		args = append(args, "-s-earlystop", util.GetEarlyStoppingEndpoint(suggestion))
+	}
+
+	return args, nil
 }

@@ -25,20 +25,27 @@ import (
 	experiment "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 )
 
-// SuggestionSpec defines the desired state of suggestion.
+// SuggestionSpec is the specification of a Suggestion.
 type SuggestionSpec struct {
-	// Name of the algorithm that suggestion is used.
-	AlgorithmName string `json:"algorithmName"`
-	// Number of suggestions requested
+	// Algorithm describes HP or NAS algorithm that suggestion is used.
+	Algorithm *common.AlgorithmSpec `json:"algorithm"`
+
+	// EarlyStopping describes early stopping algorithm that suggestion is used.
+	EarlyStopping *common.EarlyStoppingSpec `json:"earlyStopping,omitempty"`
+
+	// Number of suggestions requested.
 	Requests int32 `json:"requests,omitempty"`
-	// Describes resuming policy which usually take effect after experiment terminated.
+
+	// ResumePolicy describes resuming policy which usually take effect after experiment terminated.
 	// Default value is LongRunning.
 	ResumePolicy experiment.ResumePolicyType `json:"resumePolicy,omitempty"`
 }
 
-// SuggestionStatus defines the observed state of Suggestion
+// SuggestionStatus is the current status of a Suggestion.
 type SuggestionStatus struct {
-	// Algorithmsettings set by the algorithm services.
+	// AlgorithmSettings defines HP or NAS algorithm settings which suggestion gRPC service returns.
+	// These settings overwrites Experiment's settings before the gRPC request.
+	// It can be empty if settings haven't been changed.
 	AlgorithmSettings []common.AlgorithmSetting `json:"algorithmSettings,omitempty"`
 
 	// Number of suggestion results
@@ -68,11 +75,15 @@ type SuggestionStatus struct {
 
 // TrialAssignment is the assignment for one trial.
 type TrialAssignment struct {
-	// Suggestion results
+	// Suggestion results with Trial parameters
 	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments,omitempty"`
 
 	//Name of the suggestion
 	Name string `json:"name,omitempty"`
+
+	// Rules for early stopping techniques
+	// Contains rule name, value and comparison type
+	EarlyStoppingRules []common.EarlyStoppingRule `json:"earlyStoppingRules,omitempty"`
 }
 
 // SuggestionCondition describes the state of the Suggestion at a certain point.

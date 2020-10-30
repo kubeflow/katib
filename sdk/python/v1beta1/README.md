@@ -75,6 +75,7 @@ Please follow the [examples](examples) to learn more about Katib SDK.
 - [V1beta1AlgorithmSpec](docs/V1beta1AlgorithmSpec.md)
 - [V1beta1CollectorSpec](docs/V1beta1CollectorSpec.md)
 - [V1beta1ConfigMapSource](docs/V1beta1ConfigMapSource.md)
+- [V1beta1EarlyStoppingRule](docs/V1beta1EarlyStoppingRule.md)
 - [V1beta1EarlyStoppingSetting](docs/V1beta1EarlyStoppingSetting.md)
 - [V1beta1EarlyStoppingSpec](docs/V1beta1EarlyStoppingSpec.md)
 - [V1beta1Experiment](docs/V1beta1Experiment.md)

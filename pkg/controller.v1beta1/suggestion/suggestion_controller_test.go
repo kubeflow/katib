@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
+	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
@@ -101,9 +102,11 @@ func TestReconcile(t *testing.T) {
 			Namespace: namespace,
 		},
 		Spec: suggestionsv1beta1.SuggestionSpec{
-			Requests:      1,
-			AlgorithmName: "random",
-			ResumePolicy:  experimentsv1beta1.FromVolume,
+			Requests: 1,
+			Algorithm: &commonv1beta1.AlgorithmSpec{
+				AlgorithmName: "random",
+			},
+			ResumePolicy: experimentsv1beta1.FromVolume,
 		},
 	}
 

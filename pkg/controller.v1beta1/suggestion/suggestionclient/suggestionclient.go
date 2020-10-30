@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	utilrand "k8s.io/apimachinery/pkg/util/rand"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -19,17 +20,22 @@ import (
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	suggestionapi "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
+	katibmanagerv1beta1 "github.com/kubeflow/katib/pkg/common/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var (
-	log          = logf.Log.WithName("suggestion-client")
-	timeout      = 60 * time.Second
-	timeFormat   = "2006-01-02T15:04:05Z"
-	getRPCClient = func(conn *grpc.ClientConn) suggestionapi.SuggestionClient {
+	log        = logf.Log.WithName("suggestion-client")
+	timeout    = 60 * time.Second
+	timeFormat = "2006-01-02T15:04:05Z"
+
+	getRPCClientSuggestion = func(conn *grpc.ClientConn) suggestionapi.SuggestionClient {
 		return suggestionapi.NewSuggestionClient(conn)
+	}
+
+	getRPCClientEarlyStopping = func(conn *grpc.ClientConn) suggestionapi.EarlyStoppingClient {
+		return suggestionapi.NewEarlyStoppingClient(conn)
 	}
 )
 
@@ -50,7 +56,8 @@ func New() SuggestionClient {
 	return &General{}
 }
 
-// SyncAssignments syncs assignments from algorithm services.
+// SyncAssignments syncs assignments from Suggestion and EarlyStopping service.
+// If early stopping is set, we call GetEarlyStoppingRules after GetSuggestions
 func (g *General) SyncAssignments(
 	instance *suggestionsv1beta1.Suggestion,
 	e *experimentsv1beta1.Experiment,
@@ -62,48 +69,95 @@ func (g *General) SyncAssignments(
 	}
 
 	endpoint := util.GetAlgorithmEndpoint(instance)
-	conn, err := grpc.Dial(endpoint, grpc.WithInsecure())
+	connSuggestion, err := grpc.Dial(endpoint, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
+	defer connSuggestion.Close()
 
-	rpcClient := getRPCClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
+	// Create client for Suggestion service
+	rpcClientSuggestion := getRPCClientSuggestion(connSuggestion)
+	ctx, cancelSuggestion := context.WithTimeout(context.Background(), timeout)
+	defer cancelSuggestion()
 
-	// Algorithm settings in suggestion will overwrite the settings in experiment.
+	// Overwrite Experiment algorithm settings from the Suggestion status before the gRPC request.
+	// Original algorithm settings are located in Suggestion.Spec.Algorithm.AlgorithmSettings.
 	filledE := e.DeepCopy()
 	appendAlgorithmSettingsFromSuggestion(filledE,
 		instance.Status.AlgorithmSettings)
 
-	request := &suggestionapi.GetSuggestionsRequest{
+	requestSuggestion := &suggestionapi.GetSuggestionsRequest{
 		Experiment:    g.ConvertExperiment(filledE),
 		Trials:        g.ConvertTrials(ts),
 		RequestNumber: int32(requestNum),
 	}
 
-	response, err := rpcClient.GetSuggestions(ctx, request)
+	// Get new suggestions
+	responseSuggestion, err := rpcClientSuggestion.GetSuggestions(ctx, requestSuggestion)
 	if err != nil {
 		return err
 	}
-	logger.V(0).Info("Getting suggestions", "endpoint", endpoint, "response", response, "request", request)
-	if len(response.ParameterAssignments) != requestNum {
+	logger.Info("Getting suggestions", "endpoint", endpoint, "response", responseSuggestion,
+		"request", requestSuggestion)
+	if len(responseSuggestion.ParameterAssignments) != requestNum {
 		err := fmt.Errorf("The response contains unexpected trials")
-		logger.Error(err, "The response contains unexpected trials", "requestNum", requestNum, "response", response)
+		logger.Error(err, "The response contains unexpected trials", "requestNum", requestNum, "response", responseSuggestion)
 		return err
 	}
-	for _, t := range response.ParameterAssignments {
+
+	earlyStoppingRules := []commonapiv1beta1.EarlyStoppingRule{}
+	// If early stopping is set, call GetEarlyStoppingRules after GetSuggestions.
+	if instance.Spec.EarlyStopping != nil && instance.Spec.EarlyStopping.AlgorithmName != "" {
+		endpoint = util.GetEarlyStoppingEndpoint(instance)
+		connEarlyStopping, err := grpc.Dial(endpoint, grpc.WithInsecure())
+		if err != nil {
+			return err
+		}
+		defer connEarlyStopping.Close()
+
+		// Create client for EarlyStopping service
+		rpcClientEarlyStopping := getRPCClientEarlyStopping(connEarlyStopping)
+		ctx, cancelEarlyStopping := context.WithTimeout(context.Background(), timeout)
+		defer cancelEarlyStopping()
+
+		requestEarlyStopping := &suggestionapi.GetEarlyStoppingRulesRequest{
+			Experiment:       g.ConvertExperiment(filledE),
+			Trials:           g.ConvertTrials(ts),
+			DbManagerAddress: katibmanagerv1beta1.GetDBManagerAddr(),
+		}
+
+		// Get new early stopping rules
+		responseEarlyStopping, err := rpcClientEarlyStopping.GetEarlyStoppingRules(ctx, requestEarlyStopping)
+		if err != nil {
+			return err
+		}
+
+		logger.Info("Getting early stopping rules", "endpoint", endpoint, "response", responseEarlyStopping)
+
+		for _, rule := range responseEarlyStopping.EarlyStoppingRules {
+			earlyStoppingRules = append(earlyStoppingRules,
+				commonapiv1beta1.EarlyStoppingRule{
+					Name:       rule.Name,
+					Value:      rule.Value,
+					Comparison: convertComparison(rule.Comparison),
+					StartStep:  int(rule.StartStep),
+				},
+			)
+		}
+	}
+
+	for _, t := range responseSuggestion.ParameterAssignments {
 		instance.Status.Suggestions = append(instance.Status.Suggestions,
 			suggestionsv1beta1.TrialAssignment{
 				Name:                 fmt.Sprintf("%s-%s", instance.Name, utilrand.String(8)),
 				ParameterAssignments: composeParameterAssignments(t.Assignments),
+				EarlyStoppingRules:   earlyStoppingRules,
 			})
 	}
 	instance.Status.SuggestionCount = int32(len(instance.Status.Suggestions))
 
-	if response.Algorithm != nil {
-		updateAlgorithmSettings(instance, response.Algorithm)
+	if responseSuggestion.Algorithm != nil {
+		updateAlgorithmSettings(instance, responseSuggestion.Algorithm)
 	}
 	return nil
 }
@@ -126,7 +180,7 @@ func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1beta1.Suggest
 	}
 	defer conn.Close()
 
-	rpcClient := getRPCClient(conn)
+	rpcClient := getRPCClientSuggestion(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
@@ -192,6 +246,13 @@ func (g *General) ConvertExperiment(e *experimentsv1beta1.Experiment) *suggestio
 	if e.Spec.MaxTrialCount != nil {
 		res.Spec.MaxTrialCount = *e.Spec.MaxTrialCount
 	}
+	// Set early stopping if it is needed
+	if e.Spec.EarlyStopping != nil {
+		res.Spec.EarlyStopping = &suggestionapi.EarlyStoppingSpec{
+			AlgorithmName:     e.Spec.EarlyStopping.AlgorithmName,
+			AlgorithmSettings: convertEarlyStoppingSettings(e.Spec.EarlyStopping.AlgorithmSettings),
+		}
+	}
 	return res
 }
 
@@ -199,6 +260,7 @@ func (g *General) ConvertExperiment(e *experimentsv1beta1.Experiment) *suggestio
 func (g *General) ConvertTrials(ts []trialsv1beta1.Trial) []*suggestionapi.Trial {
 	trialsRes := make([]*suggestionapi.Trial, 0)
 	for _, t := range ts {
+		// Skip Trials with unavailable metrics.
 		if t.IsMetricsUnavailable() {
 			continue
 		}
@@ -261,6 +323,8 @@ func convertTrialConditionType(conditionType trialsv1beta1.TrialConditionType) s
 		return suggestionapi.TrialStatus_KILLED
 	case trialsv1beta1.TrialFailed:
 		return suggestionapi.TrialStatus_FAILED
+	case trialsv1beta1.TrialEarlyStopped:
+		return suggestionapi.TrialStatus_EARLYSTOPPED
 	default:
 		return suggestionapi.TrialStatus_UNKNOWN
 	}
@@ -311,21 +375,6 @@ func convertTrialStatusTime(time *metav1.Time) string {
 	return ""
 }
 
-// ComposeTrialsTemplate composes trials with raw template from the GRPC response.
-// TODO (andreyvelich): Do we need it ?
-func (g *General) ComposeTrialsTemplate(ts []*suggestionapi.Trial) []trialsv1beta1.Trial {
-	res := make([]trialsv1beta1.Trial, 0)
-	for _, t := range ts {
-		res = append(res, trialsv1beta1.Trial{
-			Spec: trialsv1beta1.TrialSpec{
-				ParameterAssignments: composeParameterAssignments(
-					t.Spec.ParameterAssignments.Assignments),
-			},
-		})
-	}
-	return res
-}
-
 func composeParameterAssignments(pas []*suggestionapi.ParameterAssignment) []commonapiv1beta1.ParameterAssignment {
 	res := make([]commonapiv1beta1.ParameterAssignment, 0)
 	for _, pa := range pas {
@@ -352,6 +401,17 @@ func convertAlgorithmSettings(as []commonapiv1beta1.AlgorithmSetting) []*suggest
 	res := make([]*suggestionapi.AlgorithmSetting, 0)
 	for _, s := range as {
 		res = append(res, &suggestionapi.AlgorithmSetting{
+			Name:  s.Name,
+			Value: s.Value,
+		})
+	}
+	return res
+}
+
+func convertEarlyStoppingSettings(es []commonapiv1beta1.EarlyStoppingSetting) []*suggestionapi.EarlyStoppingSetting {
+	res := make([]*suggestionapi.EarlyStoppingSetting, 0)
+	for _, s := range es {
+		res = append(res, &suggestionapi.EarlyStoppingSetting{
 			Name:  s.Name,
 			Value: s.Value,
 		})
@@ -394,4 +454,17 @@ func convertFeasibleSpace(fs experimentsv1beta1.FeasibleSpace) *suggestionapi.Fe
 		Step: fs.Step,
 	}
 	return res
+}
+
+func convertComparison(comparison suggestionapi.ComparisonType) commonapiv1beta1.ComparisonType {
+	switch comparison {
+	case suggestionapi.ComparisonType_EQUAL:
+		return commonapiv1beta1.ComparisonTypeEqual
+	case suggestionapi.ComparisonType_LESS:
+		return commonapiv1beta1.ComparisonTypeLess
+	case suggestionapi.ComparisonType_GREATER:
+		return commonapiv1beta1.ComparisonTypeGreater
+	default:
+		return commonapiv1beta1.ComparisonTypeEqual
+	}
 }

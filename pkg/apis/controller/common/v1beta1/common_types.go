@@ -19,42 +19,99 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
+// AlgorithmSpec is the specification for a HP or NAS algorithm.
 // +k8s:deepcopy-gen=true
 type AlgorithmSpec struct {
+	// HP or NAS algorithm name.
 	AlgorithmName string `json:"algorithmName,omitempty"`
+
 	// Key-value pairs representing settings for suggestion algorithms.
 	AlgorithmSettings []AlgorithmSetting `json:"algorithmSettings,omitempty"`
-	EarlyStopping     *EarlyStoppingSpec `json:"earlyStopping,omitempty"`
 }
 
+// AlgorithmSetting represents key-value pair for HP or NAS algorithm settings.
 type AlgorithmSetting struct {
-	Name  string `json:"name,omitempty"`
+	// Name is setting name.
+	Name string `json:"name,omitempty"`
+
+	// Value is the setting value.
 	Value string `json:"value,omitempty"`
 }
 
+// EarlyStoppingSpec is the specification for a early stopping algorithm.
 // +k8s:deepcopy-gen=true
 type EarlyStoppingSpec struct {
-	EarlyStoppingAlgorithmName string                 `json:"earlyStoppingAlgorithmName,omitempty"`
-	EarlyStoppingSettings      []EarlyStoppingSetting `json:"earlyStoppingSettings"`
+	// Early stopping algorithm name.
+	AlgorithmName string `json:"algorithmName,omitempty"`
+
+	// Key-value pairs representing settings for early stopping algorithm.
+	AlgorithmSettings []EarlyStoppingSetting `json:"algorithmSettings,omitempty"`
 }
 
+// EarlyStoppingSetting represents key-value pair for early stopping algorithm settings.
 type EarlyStoppingSetting struct {
-	Name  string `json:"name,omitempty"`
+	// Name is the setting name.
+	Name string `json:"name,omitempty"`
+
+	// Value is the setting value.
 	Value string `json:"value,omitempty"`
 }
 
+// EarlyStoppingRule represents each rule for early stopping.
+type EarlyStoppingRule struct {
+	// Name contains metric name for the rule.
+	Name string `json:"name,omitempty"`
+
+	// Value contains metric value for the rule.
+	Value string `json:"value,omitempty"`
+
+	// Comparison defines correlation between name and value.
+	Comparison ComparisonType `json:"comparison,omitempty"`
+
+	// StartStep defines quantity of intermediate results
+	// that should be received before applying the rule.
+	// If start step is empty, rule is applied from the first recorded metric.
+	StartStep int `json:"startStep,omitempty"`
+}
+
+// ComparisonType is the type of comparison, one of equal, less or greater.
+type ComparisonType string
+
+const (
+	// ComparisonTypeEqual means that metric value = early stopping rule value.
+	ComparisonTypeEqual ComparisonType = "equal"
+
+	// ComparisonTypeLess means that metric value < early stopping rule value.
+	ComparisonTypeLess ComparisonType = "less"
+
+	// ComparisonTypeGreater means that metric value > early stopping rule value.
+	ComparisonTypeGreater ComparisonType = "greater"
+)
+
+// ObjectiveSpec represents Experiment's objective specification.
 // +k8s:deepcopy-gen=true
 type ObjectiveSpec struct {
-	Type                ObjectiveType `json:"type,omitempty"`
-	Goal                *float64      `json:"goal,omitempty"`
-	ObjectiveMetricName string        `json:"objectiveMetricName,omitempty"`
+	// Type for Experiment optimization.
+	Type ObjectiveType `json:"type,omitempty"`
+
+	// Goal is the Experiment's objective goal that should be reached.
+	// In case of empty goal, Experiment is running until MaxTrialCount = TrialsSucceeded.
+	Goal *float64 `json:"goal,omitempty"`
+
+	// ObjectiveMetricName represents primary Experiment's metric to optimize.
+	ObjectiveMetricName string `json:"objectiveMetricName,omitempty"`
+
+	// AdditionalMetricNames represents metrics that should be collected from Trials.
 	// This can be empty if we only care about the objective metric.
 	// Note: If we adopt a push instead of pull mechanism, this can be omitted completely.
 	AdditionalMetricNames []string `json:"additionalMetricNames,omitempty"`
+
+	// MetricStrategies defines various rules (min, max or latest) to extract metrics values.
 	// This field is allowed to missing, experiment defaulter (webhook) will fill it.
 	MetricStrategies []MetricStrategy `json:"metricStrategies,omitempty"`
 }
 
+// ObjectiveType is the type of Experiment optimization, one of minimize or maximize.
 type ObjectiveType string
 
 const (

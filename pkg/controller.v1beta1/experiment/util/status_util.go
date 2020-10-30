@@ -40,6 +40,7 @@ const (
 	ExperimentFailedReason               = "ExperimentFailed"
 )
 
+// UpdateExperimentStatus checks if objective goal is reached and updates Experiment status from current Trials
 func UpdateExperimentStatus(collector *ExperimentsCollector, instance *experimentsv1beta1.Experiment, trials *trialsv1beta1.TrialList) error {
 
 	isObjectiveGoalReached := updateTrialsSummary(instance, trials)
@@ -56,7 +57,7 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 	var bestTrialValue float64
 	sts := &instance.Status
 	sts.Trials = 0
-	sts.RunningTrialList, sts.PendingTrialList, sts.FailedTrialList, sts.SucceededTrialList, sts.KilledTrialList = nil, nil, nil, nil, nil
+	sts.RunningTrialList, sts.PendingTrialList, sts.FailedTrialList, sts.SucceededTrialList, sts.KilledTrialList, sts.EarlyStoppedTrialList = nil, nil, nil, nil, nil, nil
 	bestTrialIndex := -1
 	isObjectiveGoalReached := false
 	var objectiveValueGoal float64
@@ -73,6 +74,8 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 			sts.FailedTrialList = append(sts.FailedTrialList, trial.Name)
 		} else if trial.IsSucceeded() {
 			sts.SucceededTrialList = append(sts.SucceededTrialList, trial.Name)
+		} else if trial.IsEarlyStopped() {
+			sts.EarlyStoppedTrialList = append(sts.EarlyStoppedTrialList, trial.Name)
 		} else if trial.IsRunning() {
 			sts.RunningTrialList = append(sts.RunningTrialList, trial.Name)
 		} else {
@@ -121,6 +124,7 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 	sts.TrialsSucceeded = int32(len(sts.SucceededTrialList))
 	sts.TrialsFailed = int32(len(sts.FailedTrialList))
 	sts.TrialsKilled = int32(len(sts.KilledTrialList))
+	sts.TrialsEarlyStopped = int32(len(sts.EarlyStoppedTrialList))
 
 	// if best trial is set
 	if bestTrialIndex != -1 {
@@ -176,7 +180,7 @@ func getObjectiveMetricValue(trial trialsv1beta1.Trial) string {
 // UpdateExperimentStatusCondition updates the experiment status.
 func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *experimentsv1beta1.Experiment, isObjectiveGoalReached bool, getSuggestionDone bool) {
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	completedTrialsCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled
+	completedTrialsCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled + instance.Status.TrialsEarlyStopped
 	failedTrialsCount := instance.Status.TrialsFailed
 	activeTrialsCount := instance.Status.TrialsPending + instance.Status.TrialsRunning
 	now := metav1.Now()

@@ -15,7 +15,7 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
-// SuggestionConfig is the JSON suggestion structure in Katib config
+// SuggestionConfig is the JSON suggestion structure in Katib config.
 type SuggestionConfig struct {
 	Image                     string                           `json:"image"`
 	ImagePullPolicy           corev1.PullPolicy                `json:"imagePullPolicy"`
@@ -26,14 +26,20 @@ type SuggestionConfig struct {
 	PersistentVolumeSpec      corev1.PersistentVolumeSpec      `json:"persistentVolumeSpec"`
 }
 
-// MetricsCollectorConfig is the JSON metrics collector structure in Katib config
+// MetricsCollectorConfig is the JSON metrics collector structure in Katib config.
 type MetricsCollectorConfig struct {
 	Image           string                      `json:"image"`
 	ImagePullPolicy corev1.PullPolicy           `json:"imagePullPolicy"`
 	Resource        corev1.ResourceRequirements `json:"resources"`
 }
 
-// GetSuggestionConfigData gets the config data for the given algorithm name.
+// EarlyStoppingConfig is the JSON early stopping structure in Katib config.
+type EarlyStoppingConfig struct {
+	Image           string            `json:"image"`
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
+}
+
+// GetSuggestionConfigData gets the config data for the given suggestion algorithm name.
 func GetSuggestionConfigData(algorithmName string, client client.Client) (SuggestionConfig, error) {
 	configMap := &corev1.ConfigMap{}
 	suggestionConfigData := SuggestionConfig{}
@@ -151,6 +157,51 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 	}
 
 	return suggestionConfigData, nil
+}
+
+// GetEarlyStoppingConfigData gets the config data for the given early stopping algorithm name.
+func GetEarlyStoppingConfigData(algorithmName string, client client.Client) (EarlyStoppingConfig, error) {
+	configMap := &corev1.ConfigMap{}
+	earlyStoppingConfigData := EarlyStoppingConfig{}
+	err := client.Get(
+		context.TODO(),
+		apitypes.NamespacedName{Name: consts.KatibConfigMapName, Namespace: consts.DefaultKatibNamespace},
+		configMap)
+	if err != nil {
+		return EarlyStoppingConfig{}, err
+	}
+
+	// Try to find early stopping data in config map.
+	config, ok := configMap.Data[consts.LabelEarlyStoppingTag]
+	if !ok {
+		return EarlyStoppingConfig{}, errors.New("Failed to find early stopping config in ConfigMap: " + consts.KatibConfigMapName)
+	}
+
+	// Parse early stopping data to map where key = algorithm name, value = EarlyStoppingConfig.
+	earlyStoppingsConfig := map[string]EarlyStoppingConfig{}
+	if err := json.Unmarshal([]byte(config), &earlyStoppingsConfig); err != nil {
+		return EarlyStoppingConfig{}, err
+	}
+
+	// Try to find EarlyStoppingConfig for the algorithm.
+	earlyStoppingConfigData, ok = earlyStoppingsConfig[algorithmName]
+	if !ok {
+		return EarlyStoppingConfig{}, errors.New("Failed to find early stopping config for algorithm: " + algorithmName + " in ConfigMap: " + consts.KatibConfigMapName)
+	}
+
+	// Get image from config.
+	image := earlyStoppingConfigData.Image
+	if strings.TrimSpace(image) == "" {
+		return EarlyStoppingConfig{}, errors.New("Required value for image configuration of algorithm name: " + algorithmName)
+	}
+
+	// Get Image Pull Policy.
+	imagePullPolicy := earlyStoppingConfigData.ImagePullPolicy
+	if imagePullPolicy != corev1.PullAlways && imagePullPolicy != corev1.PullIfNotPresent && imagePullPolicy != corev1.PullNever {
+		earlyStoppingConfigData.ImagePullPolicy = consts.DefaultImagePullPolicy
+	}
+
+	return earlyStoppingConfigData, nil
 }
 
 // GetMetricsCollectorConfigData gets the config data for the given collector kind.

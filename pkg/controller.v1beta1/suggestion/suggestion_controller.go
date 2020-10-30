@@ -219,6 +219,24 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 	if err != nil {
 		return err
 	}
+
+	// If early stopping is used, create RBAC.
+	// ServiceAccount name should be equal <suggestion-name>-<suggestion-algorithm>
+	if instance.Spec.EarlyStopping != nil && instance.Spec.EarlyStopping.AlgorithmName != "" &&
+		deploy.Spec.Template.Spec.ServiceAccountName == util.GetSuggestionRBACName(instance) {
+
+		serviceAccount, role, roleBinding, err := r.DesiredRBAC(instance)
+		if err != nil {
+			return err
+		}
+
+		// Reconcile ServiceAccount, Role and RoleBinding
+		err = r.reconcileRBAC(serviceAccount, role, roleBinding, suggestionNsName)
+		if err != nil {
+			return err
+		}
+	}
+
 	if foundDeploy, err := r.reconcileDeployment(deploy, suggestionNsName); err != nil {
 		return err
 	} else {
