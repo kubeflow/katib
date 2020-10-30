@@ -58,6 +58,9 @@ sed -i -e "s@docker.io/kubeflowkatib\/suggestion-skopt@${ECR_REGISTRY}\/${REPO_N
 sed -i -e "s@docker.io/kubeflowkatib\/suggestion-goptuna@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-goptuna:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
 sed -i -e "s@docker.io/kubeflowkatib\/suggestion-darts@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-darts:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
 
+# Early stopping
+sed -i -e "s@docker.io/kubeflowkatib\/earlystopping-medianstop@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/earlystopping-medianstop:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
+
 cat manifests/v1beta1/katib-controller/katib-config.yaml
 
 echo "Creating Kubeflow namespace"
