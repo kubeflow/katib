@@ -98,7 +98,7 @@ docker push ${REGISTRY}/earlystopping-medianstop:${TAG}
 docker push ${REGISTRY}/earlystopping-medianstop:latest
 
 # Training container images
-echo -e "\nPushing training container images...\n"
+echo -e "\nPushing training container images..."
 
 echo -e "\nPushing mxnet mnist training container example...\n"
 docker push ${REGISTRY}/mxnet-mnist:${TAG}
