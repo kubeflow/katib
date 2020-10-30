@@ -7,13 +7,13 @@ data:
   metrics-collector-sidecar: |-
     {
       "StdOut": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1beta1/file-metrics-collector"
+        "image": "docker.io/kubeflowkatib/file-metrics-collector"
       },
       "File": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1beta1/file-metrics-collector"
+        "image": "docker.io/kubeflowkatib/file-metrics-collector"
       },
       "TensorFlowEvent": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1beta1/tfevent-metrics-collector",
+        "image": "docker.io/kubeflowkatib/tfevent-metrics-collector",
         "resources": {
           "limits": {
             "memory": "1Gi"
@@ -24,22 +24,22 @@ data:
   suggestion: |-
     {
       "random": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1beta1/suggestion-hyperopt"
+        "image": "docker.io/kubeflowkatib/suggestion-hyperopt"
       },
       "grid": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1beta1/suggestion-chocolate"
+        "image": "docker.io/kubeflowkatib/suggestion-chocolate"
       },
       "hyperband": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1beta1/suggestion-hyperband"
+        "image": "docker.io/kubeflowkatib/suggestion-hyperband"
       },
       "bayesianoptimization": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1beta1/suggestion-skopt"
+        "image": "docker.io/kubeflowkatib/suggestion-skopt"
       },
       "tpe": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1beta1/suggestion-hyperopt"
+        "image": "docker.io/kubeflowkatib/suggestion-hyperopt"
       },
       "enas": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1beta1/suggestion-enas",
+        "image": "docker.io/kubeflowkatib/suggestion-enas",
         "imagePullPolicy": "Always",
         "resources": {
           "limits": {
@@ -48,16 +48,16 @@ data:
         }
       },
       "cmaes": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1beta1/suggestion-goptuna"
+        "image": "docker.io/kubeflowkatib/suggestion-goptuna"
       },
       "darts": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1beta1/suggestion-darts"
+        "image": "docker.io/kubeflowkatib/suggestion-darts"
       }
     }
   early-stopping: |-
     {
       "medianstop": {
-        "image": "docker.io/andreyvelichkevich/earlystopping-median",
+        "image": "docker.io/kubeflowkatib/earlystopping-medianstop,
         "imagePullPolicy": "Always"
       }
     }

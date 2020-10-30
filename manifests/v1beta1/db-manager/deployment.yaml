@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: katib-db-manager
-          image: gcr.io/kubeflow-images-public/katib/v1beta1/katib-db-manager
+          image: docker.io/kubeflowkatib/katib-db-manager
           imagePullPolicy: IfNotPresent
           env:
             - name: DB_NAME
