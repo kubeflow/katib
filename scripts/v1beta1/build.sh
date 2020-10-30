@@ -125,7 +125,7 @@ echo -e "\nBuilding Keras CIFAR-10 CNN training container example for ENAS with 
 (cd examples/v1beta1/nas/enas-cnn-cifar10 && docker build -t ${REGISTRY}/enas-cnn-cifar10-gpu:${TAG} -t ${REGISTRY}/enas-cnn-cifar10-gpu:latest -f Dockerfile.gpu .)
 
 echo -e "\nBuilding Keras CIFAR-10 CNN training container example for ENAS with CPU support...\n"
-(cd examples/v1beta1/nas/enas-cnn-cifar10 && docker build -t ${REGISTRY}/enas-cnn-cifar10-gpu:${TAG} -t ${REGISTRY}/enas-cnn-cifar10-gpu:latest -f Dockerfile.cpu .)
+(cd examples/v1beta1/nas/enas-cnn-cifar10 && docker build -t ${REGISTRY}/enas-cnn-cifar10-cpu:${TAG} -t ${REGISTRY}/enas-cnn-cifar10-cpu:latest -f Dockerfile.cpu .)
 
 echo -e "\nBuilding PyTorch CIFAR-10 CNN training container example for DARTS...\n"
 (cd examples/v1beta1/nas/darts-cnn-cifar10 && docker build -t ${REGISTRY}/darts-cnn-cifar10:${TAG} -t ${REGISTRY}/darts-cnn-cifar10:latest -f Dockerfile .)
