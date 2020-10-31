@@ -115,7 +115,7 @@ class HPJobTable extends React.Component {
 
     return (
       <Paper className={classes.root}>
-        {this.props.data.length > 1 && (
+        {this.props.data.length >= 1 && (
           <div>
             <Table className={classes.table}>
               <TableHead>

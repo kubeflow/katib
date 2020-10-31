@@ -14,7 +14,10 @@ import Objective from './Params/Objective';
 import TrialTemplate from '../../Common/Create/Params/Trial/TrialTemplate';
 import Parameters from './Params/Parameters';
 import Algorithm from './Params/Algorithm';
+import EarlyStopping from '../../Common/Create/Params/EarlyStopping';
 import MetricsCollectorSpec from '../../Common/Create/Params/MetricsCollector';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 
 import { submitHPJob } from '../../../actions/hpCreateActions';
 
@@ -109,6 +112,14 @@ const HPParameters = props => {
     data.spec.algorithm.algorithmName = props.algorithmName;
     data.spec.algorithm.algorithmSettings = [];
     addAlgorithmSettings(props.algorithmSettings, data.spec.algorithm.algorithmSettings);
+
+    // Add early stopping if selected.
+    if (checkedSetEarlyStopping) {
+      data.spec.earlyStopping = {};
+      data.spec.earlyStopping.algorithmName = props.earlyStoppingAlgorithm;
+      data.spec.earlyStopping.algorithmSettings = [];
+      addAlgorithmSettings(props.earlyStoppingSettings, data.spec.earlyStopping.algorithmSettings);
+    }
 
     data.spec.parameters = [];
     addParameter(props.parameters, data.spec.parameters);
@@ -238,6 +249,12 @@ const HPParameters = props => {
 
   const { classes } = props;
 
+  const [checkedSetEarlyStopping, setCheckedSetEarlyStopping] = React.useState(false);
+
+  const onCheckBoxChange = event => {
+    setCheckedSetEarlyStopping(event.target.checked);
+  };
+
   return (
     <div className={classes.root}>
       {/* Common Metadata */}
@@ -250,6 +267,25 @@ const HPParameters = props => {
       <Objective />
       {SectionInTypography('Algorithm')}
       <Algorithm />
+
+      <Grid container spacing={3}>
+        <Grid item>
+          <Typography variant="h6">Early Stopping (Optional)</Typography>
+        </Grid>
+        <Grid item>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={checkedSetEarlyStopping}
+                onChange={onCheckBoxChange}
+                color="primary"
+              />
+            }
+            label="Set"
+          />
+        </Grid>
+      </Grid>
+      {checkedSetEarlyStopping && <EarlyStopping />}
 
       {SectionInTypography('Parameters')}
       <Parameters />
@@ -290,6 +326,8 @@ const mapStateToProps = state => {
     additionalMetricNames: state[constants.HP_CREATE_MODULE].additionalMetricNames,
     metricStrategies: state[constants.HP_CREATE_MODULE].metricStrategies,
     algorithmName: state[constants.HP_CREATE_MODULE].algorithmName,
+    earlyStoppingAlgorithm: state[constants.GENERAL_MODULE].earlyStoppingAlgorithm,
+    earlyStoppingSettings: state[constants.GENERAL_MODULE].earlyStoppingSettings,
     algorithmSettings: state[constants.HP_CREATE_MODULE].algorithmSettings,
     parameters: state[constants.HP_CREATE_MODULE].parameters,
     primaryPodLabels: state[constants.GENERAL_MODULE].primaryPodLabels,

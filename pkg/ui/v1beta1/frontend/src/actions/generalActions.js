@@ -115,6 +115,35 @@ export const changeStatus = (filter, checked) => ({
   checked,
 });
 
+export const CHANGE_EARLY_STOPPING_ALGORITHM = 'CHANGE_EARLY_STOPPING_ALGORITHM';
+
+export const changeEarlyStoppingAlgorithm = algorithmName => ({
+  type: CHANGE_EARLY_STOPPING_ALGORITHM,
+  algorithmName,
+});
+
+export const ADD_EARLY_STOPPING_SETTING = 'ADD_EARLY_STOPPING_SETTING';
+
+export const addEarlyStoppingSetting = () => ({
+  type: ADD_EARLY_STOPPING_SETTING,
+});
+
+export const CHANGE_EARLY_STOPPING_SETTING = 'CHANGE_EARLY_STOPPING_SETTING';
+
+export const changeEarlyStoppingSetting = (index, field, value) => ({
+  type: CHANGE_EARLY_STOPPING_SETTING,
+  index,
+  field,
+  value,
+});
+
+export const DELETE_EARLY_STOPPING_SETTING = 'DELETE_EARLY_STOPPING_SETTING';
+
+export const deleteEarlyStoppingSetting = index => ({
+  type: DELETE_EARLY_STOPPING_SETTING,
+  index,
+});
+
 export const CHANGE_TRIAL_TEMPLATE_SOURCE = 'CHANGE_TRIAL_TEMPLATE_SOURCE';
 
 export const changeTrialTemplateSource = source => ({
