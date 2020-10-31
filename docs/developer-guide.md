@@ -37,7 +37,7 @@ see the following user guides:
 Check source code as follows:
 
 ```bash
-make build
+make build REGISTRY=<image-registry> TAG=<image-tag>
 ```
 
 You can deploy Katib v1beta1 manifests into a k8s cluster as follows:

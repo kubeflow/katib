@@ -1,9 +1,6 @@
 HAS_DEP := $(shell command -v dep;)
 HAS_LINT := $(shell command -v golint;)
 
-PREFIX ?= katib
-CMD_PREFIX ?= cmd
-
 # Run tests
 .PHONY: test
 test:
@@ -64,7 +61,10 @@ buildv1alpha3: depend generate
 
 # Build images for Katib v1beta1 components
 build: depend generate
-	bash scripts/v1beta1/build.sh
+ifeq ($(and $(REGISTRY),$(TAG)),)
+	$(error REGISTRY and TAG must be set. Usage make build REGISTRY=<registry> TAG=<TAG>)
+endif
+	bash scripts/v1beta1/build.sh -r $(REGISTRY) -t $(TAG)
 
 # Prettier UI format check for Katib v1alpha3
 prettier-check-v1alpha3:
