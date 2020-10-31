@@ -57,7 +57,7 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
         if self.is_first_run:
             self.is_first_run = False
             # Get early stopping settings.
-            self.getEarlyStoppingSettings(request.experiment.spec.algorithm.algorithm_settings)
+            self.getEarlyStoppingSettings(request.experiment.spec.early_stopping.algorithm_settings)
             logger.info("Median stopping settings are: min_trials_required: {}, start_step: {}".format(
                 self.min_trials_required, self.start_step))
 
@@ -93,9 +93,9 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
     def getEarlyStoppingSettings(self, early_stopping_settings):
         for setting in early_stopping_settings:
             if setting.name == "min_trials_required":
-                self.min_trials_required = setting.value
+                self.min_trials_required = int(setting.value)
             elif setting.name == "start_step":
-                self.start_step = setting.value
+                self.start_step = int(setting.value)
 
     def getMedianValue(self, trials):
         for trial in trials:
