@@ -32,6 +32,10 @@ const initialState = {
   suggestion: {},
   dialogSuggestionOpen: false,
 
+  earlyStoppingAlgorithm: 'medianstop',
+  allEarlyStoppingAlgorithms: ['medianstop'],
+  earlyStoppingSettings: [],
+
   trialTemplateSourceList: [TEMPLATE_SOURCE_CONFIG_MAP, TEMPLATE_SOURCE_YAML],
   trialTemplateSource: 'ConfigMap',
   primaryPodLabels: [],
@@ -236,6 +240,34 @@ const generalReducer = (state = initialState, action) => {
         ...state,
         dialogExperimentOpen: false,
         dialogSuggestionOpen: false,
+      };
+    // Experiment early stopping actions.
+    case actions.CHANGE_EARLY_STOPPING_ALGORITHM:
+      return {
+        ...state,
+        earlyStoppingAlgorithm: action.algorithmName,
+      };
+    case actions.ADD_EARLY_STOPPING_SETTING:
+      var earlyStoppingSettings = state.earlyStoppingSettings.slice();
+      let setting = { name: '', value: '' };
+      earlyStoppingSettings.push(setting);
+      return {
+        ...state,
+        earlyStoppingSettings: earlyStoppingSettings,
+      };
+    case actions.CHANGE_EARLY_STOPPING_SETTING:
+      earlyStoppingSettings = state.earlyStoppingSettings.slice();
+      earlyStoppingSettings[action.index][action.field] = action.value;
+      return {
+        ...state,
+        earlyStoppingSettings: earlyStoppingSettings,
+      };
+    case actions.DELETE_EARLY_STOPPING_SETTING:
+      earlyStoppingSettings = state.earlyStoppingSettings.slice();
+      earlyStoppingSettings.splice(action.index, 1);
+      return {
+        ...state,
+        earlyStoppingSettings: earlyStoppingSettings,
       };
     // Experiment Trial Template actions.
     case templateActions.FETCH_TRIAL_TEMPLATES_SUCCESS:
