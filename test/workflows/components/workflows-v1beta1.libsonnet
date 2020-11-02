@@ -522,7 +522,7 @@
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-medianstop-e2e-tests", testWorkerImage, [
               "test/scripts/v1beta1/run-e2e-experiment.sh",
               "examples/v1beta1/early-stopping/median-stop.yaml",
-            ]),  // run from volume resume example
+            ]),  // run median stopping example
             // TODO (andreyvelich): Temporary disable pr-symlink
             // $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
             //   "python",
