@@ -57,7 +57,7 @@ data:
   early-stopping: |-
     {
       "medianstop": {
-        "image": "docker.io/kubeflowkatib/earlystopping-medianstop,
+        "image": "docker.io/kubeflowkatib/earlystopping-medianstop",
         "imagePullPolicy": "Always"
       }
     }
