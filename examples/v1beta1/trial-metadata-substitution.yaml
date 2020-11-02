@@ -59,7 +59,7 @@ spec:
           spec:
             containers:
               - name: training-container
-                image: docker.io/kubeflowkatib/mxnet-mnist
+                image: docker.io/kubeflowkatib/mxnet-mnist:v1beta1-e294a90
                 command:
                   - "python3"
                   - "/opt/mxnet-mnist/mnist.py"
