@@ -1,0 +1,53 @@
+apiVersion: kubeflow.org/v1beta1
+kind: Experiment
+metadata:
+  namespace: kubeflow
+  name: trial-configmap-source
+spec:
+  objective:
+    type: maximize
+    goal: 0.99
+    objectiveMetricName: Validation-accuracy
+    additionalMetricNames:
+      - Train-accuracy
+  algorithm:
+    algorithmName: cmaes
+  parallelTrialCount: 2
+  maxTrialCount: 10
+  maxFailedTrialCount: 3
+  parameters:
+    - name: lr
+      parameterType: double
+      feasibleSpace:
+        min: "0.01"
+        max: "0.03"
+    - name: num-layers
+      parameterType: int
+      feasibleSpace:
+        min: "2"
+        max: "5"
+    - name: optimizer
+      parameterType: categorical
+      feasibleSpace:
+        list:
+          - sgd
+          - adam
+          - ftrl
+  trialTemplate:
+    primaryContainerName: training-container
+    successCondition: status.conditions.#(type=="Complete")#|#(status=="True")#
+    failureCondition: status.conditions.#(type=="Failed")#|#(status=="True")#
+    trialParameters:
+      - name: learningRate
+        description: Learning rate for the training model
+        reference: lr
+      - name: numberLayers
+        description: Number of training model layers
+        reference: num-layers
+      - name: optimizer
+        description: Training model optimizer (sdg, adam or ftrl)
+        reference: optimizer
+    configMap:
+      configMapName: trial-template
+      configMapNamespace: kubeflow
+      templatePath: defaultTrialTemplate.yaml
