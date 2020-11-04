@@ -19,7 +19,7 @@
 
 set -e
 
-COMMIT=$(git rev-parse --short HEAD)
+COMMIT=$(git rev-parse --short=7 HEAD)
 REGISTRY="docker.io/kubeflowkatib"
 VERSION="v1beta1"
 TAG=${VERSION}-${COMMIT}

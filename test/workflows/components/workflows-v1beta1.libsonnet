@@ -178,8 +178,8 @@
         },
         spec: {
           entrypoint: "e2e",
-          // Cleanup workflow after 5 hours.
-          ttlSecondsAfterFinished: 18000,
+          // Cleanup workflow after 5 days.
+          ttlSecondsAfterFinished: 432000,
           volumes: [
             {
               name: "github-token",
@@ -273,6 +273,10 @@
                     template: "build-suggestion-darts",
                   },
                   {
+                    name: "build-earlystopping-medianstop",
+                    template: "build-earlystopping-medianstop",
+                  },
+                  {
                     name: "create-cluster",
                     template: "create-cluster",
                   },
@@ -335,6 +339,10 @@
                   {
                     name: "run-from-volume-e2e-tests",
                     template: "run-from-volume-e2e-tests",
+                  },
+                  {
+                    name: "run-medianstop-e2e-tests",
+                    template: "run-medianstop-e2e-tests",
                   },
                 ],
               ],
@@ -450,6 +458,12 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/suggestion-darts:$(PULL_BASE_SHA)",
             ]),  // build suggestion darts
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-earlystopping-medianstop", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/cmd/earlystopping/medianstop/v1beta1/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/earlystopping-medianstop:$(PULL_BASE_SHA)",
+            ]),  // build early stopping median stop
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("setup-katib", testWorkerImage, [
               "test/scripts/v1beta1/setup-katib.sh",
             ]),  // check Katib readiness and deploy it
@@ -505,6 +519,10 @@
               "test/scripts/v1beta1/run-e2e-experiment.sh",
               "examples/v1beta1/resume-experiment/from-volume-resume.yaml",
             ]),  // run from volume resume example
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-medianstop-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-e2e-experiment.sh",
+              "examples/v1beta1/early-stopping/median-stop.yaml",
+            ]),  // run median stopping example
             // TODO (andreyvelich): Temporary disable pr-symlink
             // $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("create-pr-symlink", testWorkerImage, [
             //   "python",

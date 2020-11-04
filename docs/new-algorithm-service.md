@@ -95,10 +95,10 @@ Update the [katib-config](../manifests/v1beta1/katib-controller/katib-config.yam
   suggestion: |-
     {
       "tpe": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1beta1/suggestion-hyperopt"
+        "image": "docker.io/kubeflowkatib/suggestion-hyperopt"
       },
       "random": {
-        "image": "gcr.io/kubeflow-images-public/katib/v1beta1/suggestion-hyperopt"
+        "image": "docker.io/kubeflowkatib/suggestion-hyperopt"
       },
       "<new-algorithm-name>": {
         "image": "image built in the previous stage"
@@ -152,7 +152,7 @@ To add a e2e test for the new algorithm, in [test/scripts/v1beta1](../test/scrip
 3. Update [`check-katib-ready.sh`](../test/scripts/v1beta1/check-katib-ready.sh) script to modify `katib-config.yaml` with the new test suggestion image name. We use `gcr.io/automl-ci` registry to run presubmit tests. For example (Replace `<name>` with the new suggestion name):
 
 ```
-sed -i -e "s@gcr.io\/kubeflow-images-public\/katib\/v1beta1\/suggestion-<name>@${REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-<name>@" manifests/v1beta1/katib-controller/katib-config.yaml
+sed -i -e "s@docker.io\/kubeflowkatib\/suggestion-<name>@${REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-<name>@" manifests/v1beta1/katib-controller/katib-config.yaml
 ```
 
 4. Create a new script `run-suggestion-xxx.sh` to run new suggestion. Below is an example (Replace `<name>` with the new algorithm name):

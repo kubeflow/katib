@@ -12,13 +12,13 @@ To avoid this problem, set `nop` image to metrics collector sidecar image.
 
 For example, if you are using
 [StdOut](https://www.kubeflow.org/docs/components/hyperparameter-tuning/experiment/#metrics-collector) metrics collector,
-`nop` image must be equal to `gcr.io/kubeflow-images-public/katib/v1beta1/file-metrics-collector`.
+`nop` image must be equal to `docker.io/kubeflowkatib/file-metrics-collector`.
 
 After deploying Tekton on your cluster, run bellow command to modify `nop` image:
 
 ```bash
 kubectl patch deploy tekton-pipelines-controller -n tekton-pipelines --type='json' \
-  -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args/9", "value": "gcr.io/kubeflow-images-public/katib/v1beta1/file-metrics-collector"}]'
+  -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args/9", "value": "docker.io/kubeflowkatib/file-metrics-collector"}]'
 ```
 
 Check that Tekton controller's pod was restarted:
@@ -36,5 +36,5 @@ Check that `nop` image was modified:
 ```bash
 $ kubectl get pod <tekton-controller-pod-name> -n tekton-pipelines -o yaml | grep katib/v1beta1/file-metrics-collector
 
-   - gcr.io/kubeflow-images-public/katib/v1beta1/file-metrics-collector
+   - docker.io/kubeflowkatib/file-metrics-collector
 ```

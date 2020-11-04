@@ -51,7 +51,11 @@ const SectionInTypography = name => {
 // probably get render into a function
 const deCapitalizeFirstLetterAndAppend = (source, destination) => {
   source.map((parameter, i) => {
-    let value = Number(parameter.value);
+    let value = NaN;
+    // Try to get Number from parameter value if it is not empty
+    if (parameter.value !== '') {
+      value = Number(parameter.value);
+    }
     let name = parameter.name.charAt(0).toLowerCase() + parameter.name.slice(1);
     return (destination[name] = isNaN(value) ? parameter.value : value);
   });
