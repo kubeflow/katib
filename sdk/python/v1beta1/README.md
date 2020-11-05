@@ -36,11 +36,17 @@ Our SDK is located in [`kubeflow-katib` PyPi package](https://pypi.org/project/k
 If you want to release new SDK version with updated API you have to ask anyone from
 [OWNERS](https://github.com/kubeflow/katib/blob/master/OWNERS) file to follow these steps:
 
+- Go to SDK directory: `cd sdk/python/v1beta1`
+
 - Update version in [`setup.py`](https://github.com/kubeflow/katib/blob/master/sdk/python/v1beta1/setup.py#L22)
 
 - Generate distributive packages: `python3 setup.py sdist bdist_wheel`
 
 - Upload package to PyPi: `twine upload dist/*`
+
+- Remove created directories: `rm -r dist/ build/`
+
+- Submit PR to with updated version
 
 ## Getting Started
 
