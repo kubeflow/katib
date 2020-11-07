@@ -70,6 +70,7 @@ func (s *sidecarInjector) Handle(ctx context.Context, req types.Request) types.R
 	// Check whether the pod need to be mutated
 	needMutate, err := s.MutationRequired(pod, namespace)
 	if err != nil {
+		log.Info("Unable to run MutationRequired", "Error", err)
 		return admission.ErrorResponse(http.StatusInternalServerError, err)
 	} else {
 		if !needMutate {
