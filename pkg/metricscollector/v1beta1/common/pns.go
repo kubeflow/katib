@@ -69,14 +69,14 @@ func GetMainProcesses(completedMarkedDirPath string) (map[int]bool, int, error) 
 			return nil, 0, fmt.Errorf("Failed to create new Process from pid %v, error: %v", pid, err)
 		}
 
-		// Get parent process
-		ppid, err := proc.Ppid()
+		// Get process uids
+		pidUids, err := proc.Uids()
 		if err != nil {
-			return nil, 0, fmt.Errorf("Unable to get parent pid for pid: %v, error: %v", ppid, err)
+			return nil, 0, fmt.Errorf("Unable to get uids for pid: %v, error: %v", pidUids, err)
 		}
 
-		// Ignore the pause container, our own pid, and non-root processes (parent pid != 0)
-		if pid == 1 || pid == int32(thisPID) || ppid != 0 {
+		// Ignore the pause container, our own pid, and non-root processes (first pid user id != 0)
+		if pid == 1 || pid == int32(thisPID) || pidUids[0] != 0 {
 			continue
 		}
 
