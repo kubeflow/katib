@@ -21,13 +21,6 @@ spec:
         value: "3"
       - name: start_step
         value: "5"
-  metricsCollectorSpec:
-    collector:
-      kind: StdOut
-    source:
-      filter:
-        metricsFormat:
-          - ([\w|-]+)\s*=\s*((-?\d+)(\.\d+)?)
   parallelTrialCount: 2
   maxTrialCount: 15
   maxFailedTrialCount: 3

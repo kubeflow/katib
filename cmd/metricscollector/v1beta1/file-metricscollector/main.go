@@ -228,9 +228,9 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 
 					// Reduce steps if appropriate metric is reported.
 					// Once rest steps are empty we apply early stopping rule.
-					if restSteps, ok := metricStartStep[metricName]; ok {
+					if _, ok := metricStartStep[metricName]; ok {
 						metricStartStep[metricName]--
-						if restSteps != 0 {
+						if metricStartStep[metricName] != 0 {
 							continue
 						}
 					}
