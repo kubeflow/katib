@@ -7,7 +7,6 @@
   - [Modify controller APIs](#modify-controller-apis)
   - [Workflow design](#workflow-design)
   - [Implement a new algorithm and use it in Katib](#implement-a-new-algorithm-and-use-it-in-katib)
-  - [Create a new Trial kind](#create-a-new-trial-kind)
   - [Algorithm settings documentation](#algorithm-settings-documentation)
   - [Katib UI documentation](#katib-ui-documentation)
   - [Design proposals](#design-proposals)
@@ -69,10 +68,6 @@ Please see [workflow-design.md](./workflow-design.md).
 ## Implement a new algorithm and use it in Katib
 
 Please see [new-algorithm-service.md](./new-algorithm-service.md).
-
-## Create a new Trial kind
-
-Please see [new-trial-kind.md](./new-trial-kind.md).
 
 ## Algorithm settings documentation
 
