@@ -418,7 +418,7 @@ Please see [Quick Start Guide](./docs/quick-start.md).
 
 ## Who are using Katib?
 
-Please see [adopters.md](./docs/community/adopters.md).
+Please see [ADOPTERS.md](ADOPTERS.md).
 
 ## CONTRIBUTING
 
