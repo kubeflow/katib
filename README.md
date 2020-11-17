@@ -69,7 +69,7 @@ Katib stands for `secretary` in Arabic.
 For a detailed description of the concepts in Katib and AutoML, check the
 [Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/overview/).
 
-Katib has the concepts of `Experiment`, `Trial`, `Worker Job` and `Suggestion`.
+Katib has the concepts of `Experiment`, `Suggestion`, `Trial` and `Worker Job`.
 
 ### Experiment
 
@@ -111,17 +111,17 @@ its objective value.
 The `Worker Job` can be any type of Kubernetes resource or
 [Kubernetes CRD](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/).
 Follow the [`Trial` template guide](https://www.kubeflow.org/docs/components/katib/trial-template/#custom-resource)
-to check how to support your own Kubernetes resource in Katib.
+to support your own Kubernetes resource in Katib.
 
 Katib has these CRD examples in upstream:
 
 - [Kubernetes `Job`](https://kubernetes.io/docs/concepts/workloads/controllers/job/)
 
-- [Kubeflow `TFJob`](/docs/components/training/tftraining/)
+- [Kubeflow `TFJob`](https://www.kubeflow.org/docs/components/training/tftraining/)
 
-- [Kubeflow `PyTorchJob`](/docs/components/training/pytorch/)
+- [Kubeflow `PyTorchJob`](https://www.kubeflow.org/docs/components/training/pytorch/)
 
-- [Kubeflow `MPIJob`](/docs/components/training/mpi)
+- [Kubeflow `MPIJob`](https://www.kubeflow.org/docs/components/training/mpi/)
 
 - [Tekton `Pipeline`](https://github.com/tektoncd/pipeline)
 
@@ -154,10 +154,10 @@ on Kubernetes as a deployment. Each component communicates with others via GRPC
 and the API is defined at `pkg/apis/manager/v1beta1/api.proto`.
 
 - Katib main components:
-  - katib-db-manager: GRPC API server of Katib which is the DB Interface.
-  - katib-mysql: Data storage backend of Katib using mysql.
-  - katib-ui: User interface of Katib.
-  - katib-controller: Controller for Katib CRDs in Kubernetes.
+  - `katib-db-manager` - the GRPC API server of Katib which is the DB Interface.
+  - `katib-mysql` - the data storage backend of Katib using mysql.
+  - `katib-ui` - the user interface of Katib.
+  - `katib-controller` - the controller for the Katib CRDs in Kubernetes.
 
 ## Web UI
 
@@ -277,8 +277,8 @@ Check the
 how to monitor your `Experiment` status.
 
 You can view your results in Katib UI.
-Access Katib UI via Kubeflow dashboard if you have used standard installation
-or port-forward the `katib-ui` service if you have installed manually.
+If you used standard installation, access the Katib UI via Kubeflow dashboard.
+Otherwise, port-forward the `katib-ui`:
 
 ```
 kubectl -n kubeflow port-forward svc/katib-ui 8080:80
@@ -288,7 +288,7 @@ You can access the Katib UI using this URL: `http://localhost:8080/katib/`.
 
 ### Katib SDK
 
-Katib supports Python SDK for v1beta1 version.
+Katib supports Python SDK:
 
 - Check the [Katib v1beta1 SDK documentation](https://github.com/kubeflow/katib/tree/master/sdk/python/v1beta1).
 
@@ -299,12 +299,13 @@ Run `make generate` to update Katib SDK.
 To delete installed TF and PyTorch operator run `kubectl delete -f`
 on the respective folders.
 
-To delete Katib for v1beta1 version run `make undeploy`.
+To delete Katib run `make undeploy`.
 
 ## Quick Start
 
 Please follow the
-[Getting Started guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#katib-setup)
+[Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/hyperparameter/#examples)
+to submit your first Katib experiment.
 
 ## Who are using Katib?
 

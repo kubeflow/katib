@@ -313,7 +313,7 @@ spec:
     kind: Job
     metadata:
       name: random-example-2fpnqfv8
-      namespace: anonymous
+      namespace: kubeflow
     spec:
       template:
         spec:
@@ -365,9 +365,10 @@ status:
 
 ## What happens after an `Experiment` CR is created
 
-When user creates an `Experiment` CR, Katib controllers using `Experiment`
-controller, `Suggestion` controller and `Trial` controller is working together
-to achieve hyperparameters tuning for user's Machine learning model.
+When user creates an `Experiment` CR, Katib `Experiment` controller,
+`Suggestion` controller and `Trial` controller is working together to achieve
+hyperparameters tuning for user's Machine learning model. The Experiment
+workflow looks as follows:
 
 <center>
 <img width="100%" alt="image" src="images/katib-workflow.png">
@@ -398,11 +399,11 @@ to achieve hyperparameters tuning for user's Machine learning model.
    Kubernetes Pods.
 
 1. Katib Pod mutating webhook is called to inject the metrics collector sidecar
-   container to the candidate Pod.
+   container to the candidate Pods.
 
-1. During the ML model container runs, the metrics collector container in
-   the same Pod tries to collect metrics from it and persists them
-   to the Katib DB backend.
+1. During the ML model container runs, the metrics collector container
+   collects metrics from the injected pod and persists metrics to the Katib
+   DB backend.
 
 1. When the ML model training ends, the `Trial` controller updates status
    of the corresponding `Trial` CR.
