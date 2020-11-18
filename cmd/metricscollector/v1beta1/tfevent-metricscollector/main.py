@@ -38,13 +38,7 @@ if __name__ == '__main__':
     logger.addHandler(handler)
     logger.propagate = False
     opt = parse_options()
-    try:
-        wait_all_processes = bool(opt.wait_all_processes)
-    except:
-        logger.error(
-            "Cannot parse {} to bool, defaulting to waitAllProcesses={}".format(opt.wait_all_processes,
-                                                                                const.DEFAULT_WAIT_ALL))
-        wait_all_processes = bool(const.DEFAULT_WAIT_ALL)
+    wait_all_processes = opt.wait_all_processes.lower() != "false"
     db_manager_server = opt.db_manager_server_addr.split(':')
     if len(db_manager_server) != 2:
         raise Exception("Invalid Katib DB manager service address: %s" %
