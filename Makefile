@@ -30,17 +30,9 @@ vet:
 update:
 	hack/update-gofmt.sh
 
-# Deploy Katib v1alpha3 manifests into a k8s cluster
-deployv1alpha3:
-	bash scripts/v1alpha3/deploy.sh
-
 # Deploy Katib v1beta1 manifests into a k8s cluster
 deploy:
 	bash scripts/v1beta1/deploy.sh
-
-# Undeploy Katib v1alpha3 manifests from a k8s cluster
-undeployv1alpha3:
-	bash scripts/v1alpha3/undeploy.sh
 
 # Undeploy Katib v1beta1 manifests from a k8s cluster
 undeploy:
@@ -55,20 +47,12 @@ endif
 	go generate ./pkg/... ./cmd/...
 	hack/gen-python-sdk/gen-sdk.sh
 
-# Build images for Katib v1alpha3 components
-buildv1alpha3: depend generate
-	bash scripts/v1alpha3/build.sh
-
 # Build images for Katib v1beta1 components
 build: depend generate
 ifeq ($(and $(REGISTRY),$(TAG)),)
 	$(error REGISTRY and TAG must be set. Usage make build REGISTRY=<registry> TAG=<TAG>)
 endif
 	bash scripts/v1beta1/build.sh -r $(REGISTRY) -t $(TAG)
-
-# Prettier UI format check for Katib v1alpha3
-prettier-check-v1alpha3:
-	npm run format:check --prefix pkg/ui/v1alpha3/frontend
 
 # Prettier UI format check for Katib v1beta1
 prettier-check:

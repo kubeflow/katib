@@ -51,8 +51,8 @@ ADD ./${SUGGESTION_DIR}/ ${TARGET_DIR}/${SUGGESTION_DIR}/
 WORKDIR  ${TARGET_DIR}/${SUGGESTION_DIR}
 
 RUN chgrp -R 0 ${TARGET_DIR} \
-  && chmod -R g+rwX ${TARGET_DIR}
+    && chmod -R g+rwX ${TARGET_DIR}
 
-ENV PYTHONPATH ${TARGET_DIR}:${TARGET_DIR}/pkg/apis/manager/v1alpha3/python:${TARGET_DIR}/pkg/apis/manager/health/python
+ENV PYTHONPATH ${TARGET_DIR}:${TARGET_DIR}/pkg/apis/manager/v1beta1/python:${TARGET_DIR}/pkg/apis/manager/health/python
 
 ENTRYPOINT ["python", "main.py"]

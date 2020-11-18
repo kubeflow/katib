@@ -1,11 +1,8 @@
 required = [
     "github.com/emicklei/go-restful",
-    "github.com/onsi/ginkgo", # for test framework
-    "github.com/onsi/gomega", # for test matchers
     "k8s.io/client-go/plugin/pkg/client/auth/gcp", # for development against gcp
     "k8s.io/code-generator/cmd/deepcopy-gen", # for deepcopy generation
     "k8s.io/code-generator/cmd/openapi-gen", # for openapi generation
-    "sigs.k8s.io/controller-tools/cmd/controller-gen", # for crd/rbac generation
     "sigs.k8s.io/controller-runtime/pkg/client/config",
     "sigs.k8s.io/controller-runtime/pkg/controller",
     "sigs.k8s.io/controller-runtime/pkg/handler",
@@ -72,19 +69,6 @@ required = [
 [[override]]
   name = "k8s.io/client-go"
   version = "kubernetes-1.12.9"
-
-[[override]]
-  name = "k8s.io/apiextensions-apiserver"
-  version = "kubernetes-1.12.9"
-
-[[override]]
-  name = "k8s.io/kubernetes"
-  version = "v1.13.3"
-
-[[override]]
-  name = "gopkg.in/fsnotify.v1"
-  source = "https://github.com/fsnotify/fsnotify.git"
-  version="v1.4.7"
 
 [[constraint]]
   name = "github.com/kubeflow/tf-operator"

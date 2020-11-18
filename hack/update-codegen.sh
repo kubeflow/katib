@@ -22,11 +22,11 @@ if [[ -z "${GOPATH:-}" ]]; then
     export GOPATH=$(go env GOPATH)
 fi
 
-VERSION_LIST=(v1alpha3 v1beta1)
+VERSION_LIST=(v1beta1)
 PROJECT_ROOT=${GOPATH}/src/github.com/kubeflow/katib
 
 modules=(experiments suggestions trials common)
-versions=(v1alpha3 v1beta1)
+versions=(v1beta1)
 versionStr=$(printf ",%s" "${versions[@]}")
 GROUP_VERSIONS=$(printf "%s:${versionStr:1} " "${modules[@]}")
 

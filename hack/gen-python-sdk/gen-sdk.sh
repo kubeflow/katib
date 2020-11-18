@@ -25,7 +25,7 @@ SWAGGER_CODEGEN_FILE="pkg/apis/KATIB_VERSION/swagger.json"
 TMP_CODEGEN_PATH="sdk/tmp/KATIB_VERSION"
 SDK_OUTPUT_PATH="sdk/python"
 POST_GEN_PYTHON_HANDLER="hack/gen-python-sdk/post_gen.py"
-KATIB_VERSIONS=(v1alpha3 v1beta1)
+KATIB_VERSIONS=(v1beta1)
 
 echo "Downloading the swagger-codegen JAR package ..."
 wget -O ${SWAGGER_CODEGEN_JAR} ${SWAGGER_JAR_URL}

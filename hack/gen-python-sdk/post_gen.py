@@ -16,8 +16,7 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
             lines.append(line)
 
     # Add Katib client to init file
-    if (output_file == "sdk/python/v1beta1/kubeflow/katib/__init__.py" or
-            output_file == "sdk/python/v1alpha3/kubeflow/katib/__init__.py"):
+    if (output_file == "sdk/python/v1beta1/kubeflow/katib/__init__.py"):
         lines.append("\n")
         lines.append("# Import Katib API client")
         lines.append("\n")
@@ -28,7 +27,7 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
         f.writelines(lines)
 
 
-def update_python_sdk(src, dest, versions=('v1alpha3', 'v1beta1')):
+def update_python_sdk(src, dest, versions=('v1beta1')):
     # tiny transformers to refine generated codes
     rewrite_rules = [
         lambda l: l.replace('import katib', 'import kubeflow.katib'),
