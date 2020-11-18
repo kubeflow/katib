@@ -204,15 +204,15 @@ func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1beta1.Tria
 		newRule := rule.Name + ";" + rule.Value + ";" + string(rule.Comparison) + ";" + strconv.Itoa(rule.StartStep)
 		earlyStoppingRules = append(earlyStoppingRules, newRule)
 	}
+	metricsCollectorConfigData, err := katibconfig.GetMetricsCollectorConfigData(mc.Collector.Kind, s.client)
 
-	args, err := s.getMetricsCollectorArgs(trial, metricNames, mc, earlyStoppingRules)
+	args, err := s.getMetricsCollectorArgs(trial, metricNames, mc, metricsCollectorConfigData, earlyStoppingRules)
 	if err != nil {
 		return nil, err
 	}
 
 	sidecarContainerName := getSidecarContainerName(trial.Spec.MetricsCollector.Collector.Kind)
 
-	metricsCollectorConfigData, err := katibconfig.GetMetricsCollectorConfigData(mc.Collector.Kind, s.client)
 	if err != nil {
 		return nil, err
 	}
@@ -287,13 +287,16 @@ func (s *sidecarInjector) getKatibJob(object *unstructured.Unstructured, namespa
 	return jobKind, jobName, nil
 }
 
-func (s *sidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, metricNames string, mc common.MetricsCollectorSpec, esRules []string) ([]string, error) {
+func (s *sidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, metricNames string, mc common.MetricsCollectorSpec, metricsCollectorConfigData katibconfig.MetricsCollectorConfig, esRules []string) ([]string, error) {
 	args := []string{"-t", trial.Name, "-m", metricNames, "-o-type", string(trial.Spec.Objective.Type), "-s-db", katibmanagerv1beta1.GetDBManagerAddr()}
 	if mountPath, _ := getMountPath(mc); mountPath != "" {
 		args = append(args, "-path", mountPath)
 	}
 	if mc.Source != nil && mc.Source.Filter != nil && len(mc.Source.Filter.MetricsFormat) > 0 {
 		args = append(args, "-f", strings.Join(mc.Source.Filter.MetricsFormat, ";"))
+	}
+	if metricsCollectorConfigData.WaitAllProcesses != "" {
+		args = append(args, "-w", metricsCollectorConfigData.WaitAllProcesses)
 	}
 	// Add stop rules and service endpoint for Early Stopping
 	if len(esRules) > 0 {

@@ -107,7 +107,7 @@ var (
 	metricFilters        = flag.String("f", "", "Metric filters")
 	pollInterval         = flag.Duration("p", common.DefaultPollInterval, "Poll interval between running processes check")
 	timeout              = flag.Duration("timeout", common.DefaultTimeout, "Timeout before invoke error during running processes check")
-	waitAll              = flag.Bool("w", common.DefaultWaitAll, "Whether wait for all other main process of container exiting")
+	waitAllProcesses     = flag.String("w", common.DefaultWaitAllProcesses, "Whether wait for all other main process of container exiting")
 	stopRules            stopRulesFlag
 	isEarlyStopped       = false
 )
@@ -353,10 +353,16 @@ func main() {
 		go printMetricsFile(*metricsFilePath)
 	}
 
+	waitAll, err := strconv.ParseBool(*waitAllProcesses)
+	if err != nil {
+		klog.Errorf("Cannot parse %s to bool, defaulting to waitAllProcesses=%s", *waitAllProcesses, common.DefaultWaitAllProcesses)
+		waitAll, _ = strconv.ParseBool(common.DefaultWaitAllProcesses)
+	}
+
 	wopts := common.WaitPidsOpts{
 		PollInterval:           *pollInterval,
 		Timeout:                *timeout,
-		WaitAll:                *waitAll,
+		WaitAll:                waitAll,
 		CompletedMarkedDirPath: filepath.Dir(*metricsFilePath),
 	}
 	if err := common.WaitMainProcesses(wopts); err != nil {

@@ -27,7 +27,7 @@ const (
 	// To run without timeout set value to 0
 	DefaultTimeout = 0
 	// DefaultWaitAll is the default value whether wait for all other main process of container exiting
-	DefaultWaitAll = true
+	DefaultWaitAllProcesses = "true"
 	// TrainingCompleted is the job finished marker in $$$$.pid file when main training process is completed
 	TrainingCompleted = "completed"
 

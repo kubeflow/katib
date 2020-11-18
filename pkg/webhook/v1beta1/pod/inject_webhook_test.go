@@ -3,6 +3,7 @@ package pod
 import (
 	"context"
 	"fmt"
+	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
 	"path/filepath"
 	"reflect"
 	"sync"
@@ -293,6 +294,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 		MetricNames        string
 		MCSpec             common.MetricsCollectorSpec
 		EarlyStoppingRules []string
+		KatibConfig        katibconfig.MetricsCollectorConfig
 		ExpectedArgs       []string
 		Name               string
 		Err                bool
@@ -305,12 +307,16 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					Kind: common.StdOutCollector,
 				},
 			},
+			KatibConfig: katibconfig.MetricsCollectorConfig{
+				WaitAllProcesses: "false",
+			},
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
 				"-o-type", string(testObjective),
 				"-s-db", katibDBAddress,
 				"-path", common.DefaultFilePath,
+				"-w", "false",
 			},
 			Name: "StdOut MC",
 		},
@@ -333,6 +339,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					},
 				},
 			},
+			KatibConfig: katibconfig.MetricsCollectorConfig{},
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
@@ -356,6 +363,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					},
 				},
 			},
+			KatibConfig: katibconfig.MetricsCollectorConfig{},
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
@@ -373,6 +381,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					Kind: common.CustomCollector,
 				},
 			},
+			KatibConfig: katibconfig.MetricsCollectorConfig{},
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
@@ -394,6 +403,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					},
 				},
 			},
+			KatibConfig: katibconfig.MetricsCollectorConfig{},
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
@@ -411,6 +421,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					Kind: common.PrometheusMetricCollector,
 				},
 			},
+			KatibConfig: katibconfig.MetricsCollectorConfig{},
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
@@ -428,6 +439,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				},
 			},
 			EarlyStoppingRules: earlyStoppingRules,
+			KatibConfig:        katibconfig.MetricsCollectorConfig{},
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
@@ -452,6 +464,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				},
 			},
 			EarlyStoppingRules: earlyStoppingRules,
+			KatibConfig:        katibconfig.MetricsCollectorConfig{},
 			Name:               "Trial with invalid Experiment label name. Suggestion is not created",
 			Err:                true,
 		},
@@ -465,7 +478,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 	}, timeout).ShouldNot(gomega.HaveOccurred())
 
 	for _, tc := range testCases {
-		args, err := si.getMetricsCollectorArgs(tc.Trial, tc.MetricNames, tc.MCSpec, tc.EarlyStoppingRules)
+		args, err := si.getMetricsCollectorArgs(tc.Trial, tc.MetricNames, tc.MCSpec, tc.KatibConfig, tc.EarlyStoppingRules)
 
 		if !tc.Err && err != nil {
 			t.Errorf("Case: %v failed. Expected nil, got %v", tc.Name, err)
