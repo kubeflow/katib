@@ -38,7 +38,7 @@ if __name__ == '__main__':
     logger.addHandler(handler)
     logger.propagate = False
     opt = parse_options()
-    wait_all_processes = opt.wait_all_processes.lower() != "false"
+    wait_all_processes = opt.wait_all_processes.lower() == "true"
     db_manager_server = opt.db_manager_server_addr.split(':')
     if len(db_manager_server) != 2:
         raise Exception("Invalid Katib DB manager service address: %s" %

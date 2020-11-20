@@ -353,11 +353,7 @@ func main() {
 		go printMetricsFile(*metricsFilePath)
 	}
 
-	waitAll, err := strconv.ParseBool(*waitAllProcesses)
-	if err != nil {
-		klog.Errorf("Cannot parse %s to bool, defaulting to waitAllProcesses=%s", *waitAllProcesses, common.DefaultWaitAllProcesses)
-		waitAll, _ = strconv.ParseBool(common.DefaultWaitAllProcesses)
-	}
+	waitAll, _ := strconv.ParseBool(*waitAllProcesses)
 
 	wopts := common.WaitPidsOpts{
 		PollInterval:           *pollInterval,

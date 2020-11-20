@@ -295,8 +295,8 @@ func (s *sidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, me
 	if mc.Source != nil && mc.Source.Filter != nil && len(mc.Source.Filter.MetricsFormat) > 0 {
 		args = append(args, "-f", strings.Join(mc.Source.Filter.MetricsFormat, ";"))
 	}
-	if metricsCollectorConfigData.WaitAllProcesses != "" {
-		args = append(args, "-w", metricsCollectorConfigData.WaitAllProcesses)
+	if metricsCollectorConfigData.WaitAllProcesses != nil {
+		args = append(args, "-w", strconv.FormatBool(*metricsCollectorConfigData.WaitAllProcesses))
 	}
 	// Add stop rules and service endpoint for Early Stopping
 	if len(esRules) > 0 {

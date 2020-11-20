@@ -29,9 +29,9 @@ type SuggestionConfig struct {
 // MetricsCollectorConfig is the JSON metrics collector structure in Katib config.
 type MetricsCollectorConfig struct {
 	Image            string                      `json:"image"`
-	ImagePullPolicy  corev1.PullPolicy           `json:"imagePullPolicy"`
-	Resource         corev1.ResourceRequirements `json:"resources"`
-	WaitAllProcesses string                      `json:"waitAllProcesses"`
+	ImagePullPolicy  corev1.PullPolicy           `json:"imagePullPolicy,omitempty"`
+	Resource         corev1.ResourceRequirements `json:"resources,omitempty"`
+	WaitAllProcesses *bool                       `json:"waitAllProcesses,omitempty"`
 }
 
 // EarlyStoppingConfig is the JSON early stopping structure in Katib config.

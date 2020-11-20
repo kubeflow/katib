@@ -254,7 +254,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 	testMetricName := "accuracy"
 	katibDBAddress := fmt.Sprintf("katib-db-manager.%v:%v", testNamespace, consts.DefaultSuggestionPort)
 	katibEarlyStopAddress := fmt.Sprintf("%v-%v.%v:%v", testSuggestionName, testAlgorithm, testNamespace, consts.DefaultEarlyStoppingPort)
-
+	waitAllProcessesValue := false
 	testPath := "/test/path"
 
 	earlyStoppingRules := []string{
@@ -308,7 +308,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				},
 			},
 			KatibConfig: katibconfig.MetricsCollectorConfig{
-				WaitAllProcesses: "false",
+				WaitAllProcesses: &waitAllProcessesValue,
 			},
 			ExpectedArgs: []string{
 				"-t", testTrialName,
