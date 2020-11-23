@@ -18,12 +18,12 @@ import (
 // SuggestionConfig is the JSON suggestion structure in Katib config.
 type SuggestionConfig struct {
 	Image                     string                           `json:"image"`
-	ImagePullPolicy           corev1.PullPolicy                `json:"imagePullPolicy"`
-	Resource                  corev1.ResourceRequirements      `json:"resources"`
-	ServiceAccountName        string                           `json:"serviceAccountName"`
-	VolumeMountPath           string                           `json:"volumeMountPath"`
-	PersistentVolumeClaimSpec corev1.PersistentVolumeClaimSpec `json:"persistentVolumeClaimSpec"`
-	PersistentVolumeSpec      corev1.PersistentVolumeSpec      `json:"persistentVolumeSpec"`
+	ImagePullPolicy           corev1.PullPolicy                `json:"imagePullPolicy,omitempty"`
+	Resource                  corev1.ResourceRequirements      `json:"resources,omitempty"`
+	ServiceAccountName        string                           `json:"serviceAccountName,omitempty"`
+	VolumeMountPath           string                           `json:"volumeMountPath,omitempty"`
+	PersistentVolumeClaimSpec corev1.PersistentVolumeClaimSpec `json:"persistentVolumeClaimSpec,omitempty"`
+	PersistentVolumeSpec      corev1.PersistentVolumeSpec      `json:"persistentVolumeSpec,omitempty"`
 }
 
 // MetricsCollectorConfig is the JSON metrics collector structure in Katib config.
@@ -37,7 +37,7 @@ type MetricsCollectorConfig struct {
 // EarlyStoppingConfig is the JSON early stopping structure in Katib config.
 type EarlyStoppingConfig struct {
 	Image           string            `json:"image"`
-	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
 }
 
 // GetSuggestionConfigData gets the config data for the given suggestion algorithm name.
