@@ -12,6 +12,8 @@ spec:
     matchLabels:
       app: katib
       component: mysql
+  strategy:
+    type: Recreate
   template:
     metadata:
       name: katib-mysql
