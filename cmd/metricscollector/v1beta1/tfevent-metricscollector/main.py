@@ -24,7 +24,7 @@ def parse_options():
     parser.add_argument("-f", "--metric_filters", type=str, default="")
     parser.add_argument("-p", "--poll_interval", type=int, default=const.DEFAULT_POLL_INTERVAL)
     parser.add_argument("-timeout", "--timeout", type=int, default=const.DEFAULT_TIMEOUT)
-    parser.add_argument("-w", "--wait_all_processes", type=str, default=const.DEFAULT_WAIT_ALL)
+    parser.add_argument("-w", "--wait_all_processes", type=str, default=const.DEFAULT_WAIT_ALL_PROCESSES)
 
     opt = parser.parse_args()
     return opt
