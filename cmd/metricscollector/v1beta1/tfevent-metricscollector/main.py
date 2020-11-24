@@ -24,7 +24,7 @@ def parse_options():
     parser.add_argument("-f", "--metric_filters", type=str, default="")
     parser.add_argument("-p", "--poll_interval", type=int, default=const.DEFAULT_POLL_INTERVAL)
     parser.add_argument("-timeout", "--timeout", type=int, default=const.DEFAULT_TIMEOUT)
-    parser.add_argument("-w", "--wait_all", type=bool, default=const.DEFAULT_WAIT_ALL)
+    parser.add_argument("-w", "--wait_all_processes", type=str, default=const.DEFAULT_WAIT_ALL_PROCESSES)
 
     opt = parser.parse_args()
     return opt
@@ -38,6 +38,7 @@ if __name__ == '__main__':
     logger.addHandler(handler)
     logger.propagate = False
     opt = parse_options()
+    wait_all_processes = opt.wait_all_processes.lower() == "true"
     db_manager_server = opt.db_manager_server_addr.split(':')
     if len(db_manager_server) != 2:
         raise Exception("Invalid Katib DB manager service address: %s" %
@@ -46,7 +47,7 @@ if __name__ == '__main__':
     WaitMainProcesses(
         pool_interval=opt.poll_interval,
         timout=opt.timeout,
-        wait_all=opt.wait_all,
+        wait_all=wait_all_processes,
         completed_marked_dir=opt.metrics_file_dir)
 
     mc = MetricsCollector(opt.metric_names.split(';'))
