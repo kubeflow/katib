@@ -32,10 +32,14 @@ import (
 	"github.com/kubeflow/katib/pkg/webhook/v1beta1/pod"
 )
 
-func AddToManager(m manager.Manager, port int32, serviceName string) error {
+func AddToManager(m manager.Manager, port int32, webhookInstaller bool, serviceName string) error {
 	so := webhook.ServerOptions{
 		CertDir: "/tmp/cert",
-		BootstrapOptions: &webhook.BootstrapOptions{
+		Port:    port,
+	}
+
+	if webhookInstaller {
+		so.BootstrapOptions = &webhook.BootstrapOptions{
 			Service: &webhook.Service{
 				Namespace: consts.DefaultKatibNamespace,
 				Name:      serviceName,
@@ -45,14 +49,15 @@ func AddToManager(m manager.Manager, port int32, serviceName string) error {
 			},
 			ValidatingWebhookConfigName: "katib-validating-webhook-config",
 			MutatingWebhookConfigName:   "katib-mutating-webhook-config",
-		},
-		Port: port,
+		}
+	} else {
+		so.DisableWebhookConfigInstaller = &webhookInstaller
 	}
 
 	// Decide if we should use local file system.
 	// If not, we set a secret in BootstrapOptions.
 	usingFS := viper.GetBool(consts.ConfigCertLocalFS)
-	if !usingFS {
+	if webhookInstaller && !usingFS {
 		so.BootstrapOptions.Secret = &types.NamespacedName{
 			Namespace: consts.DefaultKatibNamespace,
 			Name:      serviceName,
