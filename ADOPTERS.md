@@ -9,6 +9,7 @@ Please keep the list in alphabetical order.
 | [Ant Group](https://www.antgroup.com/) |[@ohmystack](https://github.com/ohmystack) | Automatic training in Ant Group internal AI Platform |
 | [babylon health](https://www.babylonhealth.com/) |[@jeremievallee](https://github.com/jeremievallee) | Hyperparameter tuning for AIR internal AI Platform |
 | [caicloud](https://caicloud.io/) |[@gaocegege](https://github.com/gaocegege) | Hyperparameter tuning in Caicloud Cloud-Native AI Platform |
+| [canonical](https://ubuntu.com/) |[@RFMVasconcelos](https://github.com/rfmvasconcelos) | Hyperparameter tuning for customer projects in Defense and Fintech |
 | [cisco](https://cisco.com/) |[@ramdootp](https://github.com/ramdootp) | Hyperparameter tuning for conversational AI interface using Rasa |
 | [cubonacci](https://www.cubonacci.com) |[@janvdvegt](https://github.com/janvdvegt) | Hyperparameter tuning within the Cubonacci machine learning platform |
 | [karrot](https://uk.karrotmarket.com/) |[@muik](https://github.com/muik) | Hyperparameter tuning in Karrot ML Platform |
