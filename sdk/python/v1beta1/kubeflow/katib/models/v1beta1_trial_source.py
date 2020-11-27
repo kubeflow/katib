@@ -34,7 +34,7 @@ class V1beta1TrialSource(object):
     """
     swagger_types = {
         'config_map': 'V1beta1ConfigMapSource',
-        'trial_spec': 'dict()'
+        'trial_spec': 'object'
     }
 
     attribute_map = {
@@ -84,7 +84,7 @@ class V1beta1TrialSource(object):
         TrialSpec represents trial template in unstructured format  # noqa: E501
 
         :return: The trial_spec of this V1beta1TrialSource.  # noqa: E501
-        :rtype: dict()
+        :rtype: object
         """
         return self._trial_spec
 
@@ -95,7 +95,7 @@ class V1beta1TrialSource(object):
         TrialSpec represents trial template in unstructured format  # noqa: E501
 
         :param trial_spec: The trial_spec of this V1beta1TrialSource.  # noqa: E501
-        :type: dict()
+        :type: object
         """
 
         self._trial_spec = trial_spec

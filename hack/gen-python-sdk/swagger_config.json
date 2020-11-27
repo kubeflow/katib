@@ -10,6 +10,6 @@
   },
   "typeMappings": {
     "V1Time": "datetime",
-    "V1UnstructuredUnstructured": "dict()"
+    "V1UnstructuredUnstructured": "object"
   }
 }

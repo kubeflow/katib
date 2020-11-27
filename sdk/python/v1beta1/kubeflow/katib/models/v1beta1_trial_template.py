@@ -41,7 +41,7 @@ class V1beta1TrialTemplate(object):
         'retain': 'bool',
         'success_condition': 'str',
         'trial_parameters': 'list[V1beta1TrialParameterSpec]',
-        'trial_spec': 'dict()'
+        'trial_spec': 'object'
     }
 
     attribute_map = {
@@ -253,7 +253,7 @@ class V1beta1TrialTemplate(object):
         TrialSpec represents trial template in unstructured format  # noqa: E501
 
         :return: The trial_spec of this V1beta1TrialTemplate.  # noqa: E501
-        :rtype: dict()
+        :rtype: object
         """
         return self._trial_spec
 
@@ -264,7 +264,7 @@ class V1beta1TrialTemplate(object):
         TrialSpec represents trial template in unstructured format  # noqa: E501
 
         :param trial_spec: The trial_spec of this V1beta1TrialTemplate.  # noqa: E501
-        :type: dict()
+        :type: object
         """
 
         self._trial_spec = trial_spec

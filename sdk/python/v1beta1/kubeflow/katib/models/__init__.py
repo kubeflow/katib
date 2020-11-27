@@ -56,3 +56,9 @@ from kubeflow.katib.models.v1beta1_trial_source import V1beta1TrialSource
 from kubeflow.katib.models.v1beta1_trial_spec import V1beta1TrialSpec
 from kubeflow.katib.models.v1beta1_trial_status import V1beta1TrialStatus
 from kubeflow.katib.models.v1beta1_trial_template import V1beta1TrialTemplate
+
+# Import Kubernetes models.
+from kubernetes.client import V1ObjectMeta
+from kubernetes.client import V1ListMeta
+from kubernetes.client import V1Container
+from kubernetes.client import V1HTTPGetAction

@@ -44,7 +44,7 @@ class V1beta1TrialSpec(object):
         'primary_container_name': 'str',
         'primary_pod_labels': 'dict(str, str)',
         'retain_run': 'bool',
-        'run_spec': 'dict()',
+        'run_spec': 'object',
         'success_condition': 'str'
     }
 
@@ -289,7 +289,7 @@ class V1beta1TrialSpec(object):
         Raw text for the trial run spec. This can be any generic Kubernetes runtime object. The trial operator should create the resource as written, and let the corresponding resource controller (e.g. tf-operator) handle the rest.  # noqa: E501
 
         :return: The run_spec of this V1beta1TrialSpec.  # noqa: E501
-        :rtype: dict()
+        :rtype: object
         """
         return self._run_spec
 
@@ -300,7 +300,7 @@ class V1beta1TrialSpec(object):
         Raw text for the trial run spec. This can be any generic Kubernetes runtime object. The trial operator should create the resource as written, and let the corresponding resource controller (e.g. tf-operator) handle the rest.  # noqa: E501
 
         :param run_spec: The run_spec of this V1beta1TrialSpec.  # noqa: E501
-        :type: dict()
+        :type: object
         """
 
         self._run_spec = run_spec

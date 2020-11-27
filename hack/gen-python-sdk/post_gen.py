@@ -23,13 +23,20 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
             if not any(l in line for l in IGNORE_LINES):
                 lines.append(line)
 
-    # Add Katib client to init file
+    # Add Katib client to init file.
     if (output_file == "sdk/python/v1beta1/kubeflow/katib/__init__.py"):
         lines.append("\n")
-        lines.append("# Import Katib API client")
+        lines.append("# Import Katib API client.\n")
+        lines.append("from kubeflow.katib.api.katib_client import KatibClient\n")
+
+    # Add Kubernetes models to proper deserialization of Katib models.
+    if (output_file == "sdk/python/v1beta1/kubeflow/katib/models/__init__.py"):
         lines.append("\n")
-        lines.append("from kubeflow.katib.api.katib_client import KatibClient")
-        lines.append("\n")
+        lines.append("# Import Kubernetes models.\n")
+        lines.append("from kubernetes.client import V1ObjectMeta\n")
+        lines.append("from kubernetes.client import V1ListMeta\n")
+        lines.append("from kubernetes.client import V1Container\n")
+        lines.append("from kubernetes.client import V1HTTPGetAction\n")
 
     with open(output_file, 'w') as f:
         f.writelines(lines)
@@ -41,9 +48,11 @@ def update_python_sdk(src, dest, versions=('v1beta1')):
         # Models rules.
         lambda l: l.replace('import katib', 'import kubeflow.katib'),
         lambda l: l.replace('from katib', 'from kubeflow.katib'),
+        # For the api_client.py.
+        lambda l: l.replace('klass = getattr(katib.models, klass)', 'klass = getattr(kubeflow.katib.models, klass)'),
         # Doc rules.
         lambda l: l.replace('[**datetime**](V1Time.md)', '**datetime**'),
-        lambda l: l.replace('[**dict()**](V1UnstructuredUnstructured.md)', '**dict()**'),
+        lambda l: l.replace('[**object**](V1UnstructuredUnstructured.md)', '**object**'),
 
         lambda l: l.replace('[**V1Container**](V1Container.md)',
                             '[**V1Container**](https://github.com/kubernetes-client/'
@@ -60,7 +69,6 @@ def update_python_sdk(src, dest, versions=('v1beta1')):
         lambda l: l.replace('[**V1HTTPGetAction**](V1HTTPGetAction.md)',
                             '[**V1HTTPGetAction**](https://github.com/kubernetes-client/'
                             'python/blob/master/kubernetes/docs/V1HTTPGetAction.md)')
-
     ]
 
     src_dirs = [
