@@ -1,17 +1,28 @@
 # How Katib v1beta1 tunes hyperparameter automatically in a Kubernetes native way
 
-See the following guides in the Kubeflow documentation:
+Follow the Kubeflow documentation guides:
 
-* [Concepts](https://www.kubeflow.org/docs/components/hyperparameter-tuning/overview/) 
+- [Concepts](https://www.kubeflow.org/docs/components/katib/overview/)
   in Katib, hyperparameter tuning, and neural architecture search.
-* [Getting started with Katib](https://kubeflow.org/docs/components/hyperparameter-tuning/hyperparameter/).
-* Detailed guide to [configuring and running a Katib 
-  experiment](https://kubeflow.org/docs/components/hyperparameter-tuning/experiment/).
+- [Getting started with Katib](https://kubeflow.org/docs/components/katib/hyperparameter/).
+- Detailed guide to
+  [configuring and running a Katib `Experiment`](https://kubeflow.org/docs/components/katib/experiment/).
 
 ## Example and Illustration
 
-After install Katib v1beta1, you can run `kubectl apply -f katib/examples/v1beta1/random-example.yaml` to try the first example of Katib.
-Then you can get the new `Experiment` as below. Katib concepts will be introduced based on this example.
+After install Katib v1beta1, you can run
+`kubectl apply -f katib/examples/v1beta1/random-example.yaml` to try the first
+example of Katib.
+
+### Experiment
+
+When you want to tune hyperparameters for your machine learning model before
+training it further, you just need to create an `Experiment` CR. To
+learn what fields are included in the `Experiment.spec`, follow
+the detailed guide to
+[configuring and running a Katib `Experiment`](https://kubeflow.org/docs/components/katib/experiment/).
+Then you can get the new `Experiment` as below.
+Katib concepts are introduced based on this example.
 
 ```yaml
 $ kubectl get experiment random-example -n kubeflow -o yaml
@@ -63,6 +74,9 @@ spec:
     parameterType: categorical
   resumePolicy: LongRunning
   trialTemplate:
+    failureCondition: status.conditions.#(type=="Failed")#|#(status=="True")#
+    primaryContainerName: training-container
+    successCondition: status.conditions.#(type=="Complete")#|#(status=="True")#
     trialParameters:
     - description: Learning rate for the training model
       name: learningRate
@@ -87,136 +101,75 @@ spec:
               - --lr=${trialParameters.learningRate}
               - --num-layers=${trialParameters.numberLayers}
               - --optimizer=${trialParameters.optimizer}
-              image: docker.io/kubeflowkatib/mxnet-mnist
+              image: docker.io/kubeflowkatib/mxnet-mnist:v1beta1-e294a90
               name: training-container
             restartPolicy: Never
 status:
-  ...
-```
-#### Experiment
-
-When you want to tune hyperparameters for your machine learning model before 
-training it further, you just need to create an `Experiment` CR like above. To
-learn what fields are included in the `Experiment.spec`, see
-the detailed guide to [configuring and running a Katib 
-experiment](https://kubeflow.org/docs/components/hyperparameter-tuning/experiment/).
-
-#### Trial
-
-For each set of hyperparameters, Katib will internally generate a `Trial` CR with the hyperparameters key-value pairs, job manifest string with parameters instantiated and some other fields like below. `Trial` CR is used for internal logic control, and end user can even ignore it.
-
-```yaml
-$ kubectl get trial -n kubeflow
-
-NAME                      TYPE        STATUS   AGE
-random-example-58tbx6xc   Succeeded   True     14m
-random-example-5nkb2gz2   Succeeded   True     21m
-random-example-88bdbkzr   Succeeded   True     20m
-random-example-9tgjl9nt   Succeeded   True     17m
-random-example-dqzjb2r9   Succeeded   True     19m
-random-example-gjfdgxxn   Succeeded   True     20m
-random-example-nhrx8tb8   Succeeded   True     15m
-random-example-nkv76z8z   Succeeded   True     18m
-random-example-pcnmzl76   Succeeded   True     21m
-random-example-spmk57dw   Succeeded   True     14m
-random-example-tvxz667x   Succeeded   True     16m
-random-example-xpw8wnjc   Succeeded   True     21m
-
-$ kubectl get trial random-example-gjfdgxxn -o yaml -n kubeflow
-
-apiVersion: kubeflow.org/v1beta1
-kind: Trial
-metadata:
-  ...
-  name: random-example-gjfdgxxn
-  namespace: kubeflow
-  ownerReferences:
-  - apiVersion: kubeflow.org/v1beta1
-    blockOwnerDeletion: true
-    controller: true
-    kind: Experiment
-    name: random-example
-    uid: 34349cb7-c6af-11ea-90dd-42010a9a0020
-  ...
-spec:
-  metricsCollector:
-    collector:
-      kind: StdOut
-  objective:
-    additionalMetricNames:
-    - Train-accuracy
-    goal: 0.99
-    metricStrategies:
-    - name: Validation-accuracy
-      value: max
-    - name: Train-accuracy
-      value: max
-    objectiveMetricName: Validation-accuracy
-    type: maximize
-  parameterAssignments:
-  - name: lr
-    value: "0.012171302435678337"
-  - name: num-layers
-    value: "3"
-  - name: optimizer
-    value: adam
-  runSpec:
-    apiVersion: batch/v1
-    kind: Job
-    metadata:
-      name: random-example-gjfdgxxn
-      namespace: kubeflow
-    spec:
-      template:
-        spec:
-          containers:
-          - command:
-            - python3
-            - /opt/mxnet-mnist/mnist.py
-            - --batch-size=64
-            - --lr=0.012171302435678337
-            - --num-layers=3
-            - --optimizer=adam
-            image: docker.io/kubeflowkatib/mxnet-mnist
-            name: training-container
-          restartPolicy: Never
-status:
-  completionTime: "2020-07-15T15:29:00Z"
+  completionTime: "2020-11-16T20:13:02Z"
   conditions:
-  - lastTransitionTime: "2020-07-15T15:25:16Z"
-    lastUpdateTime: "2020-07-15T15:25:16Z"
-    message: Trial is created
-    reason: TrialCreated
+  - lastTransitionTime: "2020-11-16T20:00:15Z"
+    lastUpdateTime: "2020-11-16T20:00:15Z"
+    message: Experiment is created
+    reason: ExperimentCreated
     status: "True"
     type: Created
-  - lastTransitionTime: "2020-07-15T15:29:00Z"
-    lastUpdateTime: "2020-07-15T15:29:00Z"
-    message: Trial is running
-    reason: TrialRunning
+  - lastTransitionTime: "2020-11-16T20:13:02Z"
+    lastUpdateTime: "2020-11-16T20:13:02Z"
+    message: Experiment is running
+    reason: ExperimentRunning
     status: "False"
     type: Running
-  - lastTransitionTime: "2020-07-15T15:29:00Z"
-    lastUpdateTime: "2020-07-15T15:29:00Z"
-    message: Trial has succeeded
-    reason: TrialSucceeded
+  - lastTransitionTime: "2020-11-16T20:13:02Z"
+    lastUpdateTime: "2020-11-16T20:13:02Z"
+    message: Experiment has succeeded because max trial count has reached
+    reason: ExperimentMaxTrialsReached
     status: "True"
     type: Succeeded
-  observation:
-    metrics:
-    - latest: "0.959594"
-      max: "0.960490"
-      min: "0.940585"
-      name: Validation-accuracy
-    - latest: "0.959022"
-      max: "0.959188"
-      min: "0.921658"
-      name: Train-accuracy
-  startTime: "2020-07-15T15:25:16Z"
+  currentOptimalTrial:
+    bestTrialName: random-example-gnz5nccf
+    observation:
+      metrics:
+      - latest: "0.979299"
+        max: "0.979299"
+        min: "0.955115"
+        name: Validation-accuracy
+      - latest: "0.993503"
+        max: "0.993503"
+        min: "0.912413"
+        name: Train-accuracy
+    parameterAssignments:
+    - name: lr
+      value: "0.01874909352953323"
+    - name: num-layers
+      value: "5"
+    - name: optimizer
+      value: sgd
+  startTime: "2020-11-16T20:00:15Z"
+  succeededTrialList:
+  - random-example-2fpnqfv8
+  - random-example-2s9vfb9s
+  - random-example-5hxm45x4
+  - random-example-8xmpj4gv
+  - random-example-b6gnl4cs
+  - random-example-ftm2v84q
+  - random-example-gnz5nccf
+  - random-example-p74tn9gk
+  - random-example-q6jrlshx
+  - random-example-tkk46c4x
+  - random-example-w5qgblgk
+  - random-example-xcnrpx4x
+  trials: 12
+  trialsSucceeded: 12
 ```
 
-#### Suggestion
+### Suggestion
 
-Katib will internally create a `Suggestion` CR for each `Experiment` CR. `Suggestion` CR includes the hyperparameter algorithm name by `algorithmName` field and how many sets of hyperparameter Katib asks to be generated by `requests` field. The CR also traces all already generated sets of hyperparameter in `status.suggestions`. Same as `Trial`, `Suggestion` CR is used for internal logic control and end user can even ignore it.
+Katib internally creates a `Suggestion` CR for each `Experiment` CR. The
+`Suggestion` CR includes the hyperparameter algorithm name by `algorithmName`
+field and how many sets of hyperparameter Katib asks to be generated by
+`requests` field. The `Suggestion` also traces all already generated sets of
+hyperparameter in `status.suggestions`. The `Suggestion` CR is used for internal
+logic control and end user can even ignore it.
 
 ```yaml
 $ kubectl get suggestion random-example -n kubeflow -o yaml
@@ -233,58 +186,231 @@ metadata:
     controller: true
     kind: Experiment
     name: random-example
-    uid: 34349cb7-c6af-11ea-90dd-42010a9a0020
+    uid: 302e79ae-8659-4679-9e2d-461209619883
   ...
 spec:
-  algorithmName: random
+  algorithm:
+    algorithmName: random
   requests: 12
+  resumePolicy: LongRunning
 status:
+  conditions:
+  - lastTransitionTime: "2020-11-16T20:00:15Z"
+    lastUpdateTime: "2020-11-16T20:00:15Z"
+    message: Suggestion is created
+    reason: SuggestionCreated
+    status: "True"
+    type: Created
+  - lastTransitionTime: "2020-11-16T20:00:36Z"
+    lastUpdateTime: "2020-11-16T20:00:36Z"
+    message: Deployment is ready
+    reason: DeploymentReady
+    status: "True"
+    type: DeploymentReady
+  - lastTransitionTime: "2020-11-16T20:00:38Z"
+    lastUpdateTime: "2020-11-16T20:00:38Z"
+    message: Suggestion is running
+    reason: SuggestionRunning
+    status: "True"
+    type: Running
+  startTime: "2020-11-16T20:00:15Z"
   suggestionCount: 12
   suggestions:
   ...
-  - name: random-example-gjfdgxxn
+  - name: random-example-2fpnqfv8
     parameterAssignments:
     - name: lr
-      value: "0.012171302435678337"
-    - name: num-layers
-      value: "3"
-    - name: optimizer
-      value: adam
-  - name: random-example-88bdbkzr
-    parameterAssignments:
-    - name: lr
-      value: "0.013408352284328112"
+      value: "0.021135228357807213"
     - name: num-layers
       value: "4"
     - name: optimizer
-      value: ftrl
-  - name: random-example-dqzjb2r9
+      value: sgd
+  - name: random-example-xcnrpx4x
     parameterAssignments:
     - name: lr
-      value: "0.028873905258692753"
+      value: "0.02414696373094622"
     - name: num-layers
       value: "3"
     - name: optimizer
       value: adam
+  - name: random-example-8xmpj4gv
+    parameterAssignments:
+    - name: lr
+      value: "0.02471053882990492"
+    - name: num-layers
+      value: "4"
+    - name: optimizer
+      value: sgd
   ...
 ```
 
-## What happens after an `Experiment` CR created
+### Trial
 
-When a user created an `Experiment` CR, Katib controllers including experiment controller, trial controller and suggestion controller will work together to achieve hyperparameters tuning for user Machine learning model.
+For each set of hyperparameters, Katib internally generates a `Trial` CR
+with the hyperparameters key-value pairs, `Worker Job` run specification with
+parameters instantiated and some other fields like below. The `Trial` CR
+is used for internal logic control and end user can even ignore it.
+
+```yaml
+$ kubectl get trial -n kubeflow
+
+NAME                      TYPE        STATUS   AGE
+random-example-2fpnqfv8   Succeeded   True     10m
+random-example-2s9vfb9s   Succeeded   True     8m15s
+random-example-5hxm45x4   Succeeded   True     17m
+random-example-8xmpj4gv   Succeeded   True     8m44s
+random-example-b6gnl4cs   Succeeded   True     12m
+random-example-ftm2v84q   Succeeded   True     17m
+random-example-gnz5nccf   Succeeded   True     14m
+random-example-p74tn9gk   Succeeded   True     11m
+random-example-q6jrlshx   Succeeded   True     17m
+random-example-tkk46c4x   Succeeded   True     12m
+random-example-w5qgblgk   Succeeded   True     12m
+random-example-xcnrpx4x   Succeeded   True     10m
+
+$ kubectl get trial random-example-2fpnqfv8 -o yaml -n kubeflow
+
+apiVersion: kubeflow.org/v1beta1
+kind: Trial
+metadata:
+  ...
+  name: random-example-2fpnqfv8
+  namespace: kubeflow
+  ownerReferences:
+  - apiVersion: kubeflow.org/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Experiment
+    name: random-example
+    uid: 302e79ae-8659-4679-9e2d-461209619883
+  ...
+spec:
+  failureCondition: status.conditions.#(type=="Failed")#|#(status=="True")#
+  metricsCollector:
+    collector:
+      kind: StdOut
+  objective:
+    additionalMetricNames:
+    - Train-accuracy
+    goal: 0.99
+    metricStrategies:
+    - name: Validation-accuracy
+      value: max
+    - name: Train-accuracy
+      value: max
+    objectiveMetricName: Validation-accuracy
+    type: maximize
+  parameterAssignments:
+  - name: lr
+    value: "0.021135228357807213"
+  - name: num-layers
+    value: "4"
+  - name: optimizer
+    value: sgd
+  primaryContainerName: training-container
+  runSpec:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: random-example-2fpnqfv8
+      namespace: kubeflow
+    spec:
+      template:
+        spec:
+          containers:
+          - command:
+            - python3
+            - /opt/mxnet-mnist/mnist.py
+            - --batch-size=64
+            - --lr=0.021135228357807213
+            - --num-layers=4
+            - --optimizer=sgd
+            image: docker.io/kubeflowkatib/mxnet-mnist:v1beta1-e294a90
+            name: training-container
+          restartPolicy: Never
+  successCondition: status.conditions.#(type=="Complete")#|#(status=="True")#
+status:
+  completionTime: "2020-11-16T20:09:33Z"
+  conditions:
+  - lastTransitionTime: "2020-11-16T20:07:48Z"
+    lastUpdateTime: "2020-11-16T20:07:48Z"
+    message: Trial is created
+    reason: TrialCreated
+    status: "True"
+    type: Created
+  - lastTransitionTime: "2020-11-16T20:09:33Z"
+    lastUpdateTime: "2020-11-16T20:09:33Z"
+    message: Trial is running
+    reason: TrialRunning
+    status: "False"
+    type: Running
+  - lastTransitionTime: "2020-11-16T20:09:33Z"
+    lastUpdateTime: "2020-11-16T20:09:33Z"
+    message: Trial has succeeded
+    reason: TrialSucceeded
+    status: "True"
+    type: Succeeded
+  observation:
+    metrics:
+    - latest: "0.977309"
+      max: "0.978105"
+      min: "0.958002"
+      name: Validation-accuracy
+    - latest: "0.993820"
+      max: "0.993820"
+      min: "0.916611"
+      name: Train-accuracy
+  startTime: "2020-11-16T20:07:48Z"
+```
+
+## What happens after an `Experiment` CR is created
+
+When user creates an `Experiment` CR, Katib `Experiment` controller,
+`Suggestion` controller and `Trial` controller is working together to achieve
+hyperparameters tuning for user's Machine learning model. The Experiment
+workflow looks as follows:
+
 <center>
 <img width="100%" alt="image" src="images/katib-workflow.png">
 </center>
 
-1. A `Experiment` CR is submitted to Kubernetes API server, Katib experiment mutating and validating webhook will be called to set default value for the `Experiment` CR and validate the CR separately.
-2. Experiment controller creates a `Suggestion` CR.
-3. Suggestion controller creates the algorithm deployment and service based on the new `Suggestion` CR.
-4. When Suggestion controller verifies that the algorithm service is ready, it calls the service to generate `spec.request - len(status.suggestions)` sets of hyperparamters and append them into `status.suggestions`
-5. Experiment controller finds that `Suggestion` CR had been updated, then generate each `Trial` for each new hyperparamters set. 
-6. Trial controller generates job based on `trialSpec` manifest with the new hyperparamters set.
-7. Related job controller (Kubernetes batch Job, Kubeflow PyTorchJob or Kubeflow TFJob) generates Pods.
-8. Katib Pod mutating webhook is called to inject metrics collector sidecar container to the candidate Pod.
-9. During the ML model container runs, metrics collector container in the same Pod tries to collect metrics from it and persists them into Katib DB backend.
-10. When the ML model Job ends, Trial controller will update status of the corresponding `Trial` CR.
-11. When a `Trial` CR goes to end, Experiment controller will increase `request` field of corresponding 
-`Suggestion` CR if it is needed, then everything goes to `step 4` again. Of course, if `Trial` CRs meet one of `end` condition (exceeds `maxTrialCount`, `maxFailedTrialCount` or `goal`), Experiment controller will take everything done.
+1. The `Experiment` CR is submitted to the Kubernetes API server. Katib
+   `Experiment` mutating and validating webhook is called to set the default
+   values for the `Experiment` CR and validate the CR separately.
+
+1. The `Experiment` controller creates the `Suggestion` CR.
+
+1. The `Suggestion` controller creates the algorithm deployment and service
+   based on the new `Suggestion` CR.
+
+1. When the `Suggestion` controller verifies that the algorithm service is
+   ready, it calls the service to generate
+   `spec.request - len(status.suggestions)` sets of hyperparamters and append
+   them into `status.suggestions`.
+
+1. The `Experiment` controller finds that `Suggestion` CR had been updated and
+   generates each `Trial` for the each new hyperparamters set.
+
+1. The `Trial` controller generates `Worker Job` based on the `runSpec`
+   from the `Trial` CR with the new hyperparamters set.
+
+1. The related job controller
+   (Kubernetes batch Job, Kubeflow TFJob, Tekton Pipeline, etc.) generates
+   Kubernetes Pods.
+
+1. Katib Pod mutating webhook is called to inject the metrics collector sidecar
+   container to the candidate Pods.
+
+1. During the ML model container runs, the metrics collector container
+   collects metrics from the injected pod and persists metrics to the Katib
+   DB backend.
+
+1. When the ML model training ends, the `Trial` controller updates status
+   of the corresponding `Trial` CR.
+
+1. When the `Trial` CR goes to end, the `Experiment` controller increases
+   `request` field of the corresponding `Suggestion` CR if it is needed,
+   then everything goes to `step 4` again.
+   Of course, if the `Trial` CRs meet one of `end` condition
+   (exceeds `maxTrialCount`, `maxFailedTrialCount` or `goal`),
+   the `Experiment` controller takes everything done.
