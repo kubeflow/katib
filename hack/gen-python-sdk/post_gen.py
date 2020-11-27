@@ -2,6 +2,11 @@ import os
 import shutil
 import sys
 
+IGNORE_LINES = [
+    "from kubeflow.katib.models.v1_unstructured_unstructured import V1UnstructuredUnstructured",
+    "from kubeflow.katib.models.v1_time import V1Time"
+]
+
 
 def _rewrite_helper(input_file, output_file, rewrite_rules):
     rules = rewrite_rules or []
@@ -11,9 +16,12 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
             line = f.readline()
             if not line:
                 break
+            # Apply rewrite rules to the line.
             for rule in rules:
                 line = rule(line)
-            lines.append(line)
+            # Remove ignored lines.
+            if not any(l in line for l in IGNORE_LINES):
+                lines.append(line)
 
     # Add Katib client to init file
     if (output_file == "sdk/python/v1beta1/kubeflow/katib/__init__.py"):
@@ -30,8 +38,29 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
 def update_python_sdk(src, dest, versions=('v1beta1')):
     # tiny transformers to refine generated codes
     rewrite_rules = [
+        # Models rules.
         lambda l: l.replace('import katib', 'import kubeflow.katib'),
         lambda l: l.replace('from katib', 'from kubeflow.katib'),
+        # Doc rules.
+        lambda l: l.replace('[**datetime**](V1Time.md)', '**datetime**'),
+        lambda l: l.replace('[**dict()**](V1UnstructuredUnstructured.md)', '**dict()**'),
+
+        lambda l: l.replace('[**V1Container**](V1Container.md)',
+                            '[**V1Container**](https://github.com/kubernetes-client/'
+                            'python/blob/master/kubernetes/docs/V1Container.md)'),
+
+        lambda l: l.replace('[**V1ObjectMeta**](V1ObjectMeta.md)',
+                            '[**V1ObjectMeta**](https://github.com/kubernetes-client/'
+                            'python/blob/master/kubernetes/docs/V1ObjectMeta.md)'),
+
+        lambda l: l.replace('[**V1ListMeta**](V1ListMeta.md)',
+                            '[**V1ListMeta**](https://github.com/kubernetes-client/'
+                            'python/blob/master/kubernetes/docs/V1ListMeta.md)'),
+
+        lambda l: l.replace('[**V1HTTPGetAction**](V1HTTPGetAction.md)',
+                            '[**V1HTTPGetAction**](https://github.com/kubernetes-client/'
+                            'python/blob/master/kubernetes/docs/V1HTTPGetAction.md)')
+
     ]
 
     src_dirs = [
@@ -48,10 +77,11 @@ def update_python_sdk(src, dest, versions=('v1beta1')):
     ]
 
     for src_dir, dest_dir in zip(src_dirs, dest_dirs):
-        # remove previous generated files explicitly, in case of deprecated instances
+        # Remove previous generated files explicitly, in case of deprecated instances.
         for file in os.listdir(dest_dir):
             path = os.path.join(dest_dir, file)
-            if not os.path.isfile(path):
+            # We should not remove KatibClient doc.
+            if not os.path.isfile(path) or "/docs/KatibClient.md" in path:
                 continue
             for v in versions:
                 if v in file.lower():

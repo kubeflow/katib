@@ -16,7 +16,6 @@ import re  # noqa: F401
 
 import six
 
-from kubeflow.katib.models.v1_unstructured_unstructured import V1UnstructuredUnstructured  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_config_map_source import V1beta1ConfigMapSource  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_trial_parameter_spec import V1beta1TrialParameterSpec  # noqa: F401,E501
 
@@ -42,7 +41,7 @@ class V1beta1TrialTemplate(object):
         'retain': 'bool',
         'success_condition': 'str',
         'trial_parameters': 'list[V1beta1TrialParameterSpec]',
-        'trial_spec': 'V1UnstructuredUnstructured'
+        'trial_spec': 'dict()'
     }
 
     attribute_map = {
@@ -254,7 +253,7 @@ class V1beta1TrialTemplate(object):
         TrialSpec represents trial template in unstructured format  # noqa: E501
 
         :return: The trial_spec of this V1beta1TrialTemplate.  # noqa: E501
-        :rtype: V1UnstructuredUnstructured
+        :rtype: dict()
         """
         return self._trial_spec
 
@@ -265,7 +264,7 @@ class V1beta1TrialTemplate(object):
         TrialSpec represents trial template in unstructured format  # noqa: E501
 
         :param trial_spec: The trial_spec of this V1beta1TrialTemplate.  # noqa: E501
-        :type: V1UnstructuredUnstructured
+        :type: dict()
         """
 
         self._trial_spec = trial_spec

@@ -16,7 +16,6 @@ import re  # noqa: F401
 
 import six
 
-from kubeflow.katib.models.v1_time import V1Time  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_experiment_condition import V1beta1ExperimentCondition  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_optimal_trial import V1beta1OptimalTrial  # noqa: F401,E501
 
@@ -35,16 +34,16 @@ class V1beta1ExperimentStatus(object):
                             and the value is json key in definition.
     """
     swagger_types = {
-        'completion_time': 'V1Time',
+        'completion_time': 'datetime',
         'conditions': 'list[V1beta1ExperimentCondition]',
         'current_optimal_trial': 'V1beta1OptimalTrial',
         'early_stopped_trial_list': 'list[str]',
         'failed_trial_list': 'list[str]',
         'killed_trial_list': 'list[str]',
-        'last_reconcile_time': 'V1Time',
+        'last_reconcile_time': 'datetime',
         'pending_trial_list': 'list[str]',
         'running_trial_list': 'list[str]',
-        'start_time': 'V1Time',
+        'start_time': 'datetime',
         'succeeded_trial_list': 'list[str]',
         'trials': 'int',
         'trials_early_stopped': 'int',
@@ -143,7 +142,7 @@ class V1beta1ExperimentStatus(object):
         Represents time when the Experiment was completed. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.  # noqa: E501
 
         :return: The completion_time of this V1beta1ExperimentStatus.  # noqa: E501
-        :rtype: V1Time
+        :rtype: datetime
         """
         return self._completion_time
 
@@ -154,7 +153,7 @@ class V1beta1ExperimentStatus(object):
         Represents time when the Experiment was completed. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.  # noqa: E501
 
         :param completion_time: The completion_time of this V1beta1ExperimentStatus.  # noqa: E501
-        :type: V1Time
+        :type: datetime
         """
 
         self._completion_time = completion_time
@@ -281,7 +280,7 @@ class V1beta1ExperimentStatus(object):
         Represents last time when the Experiment was reconciled. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.  # noqa: E501
 
         :return: The last_reconcile_time of this V1beta1ExperimentStatus.  # noqa: E501
-        :rtype: V1Time
+        :rtype: datetime
         """
         return self._last_reconcile_time
 
@@ -292,7 +291,7 @@ class V1beta1ExperimentStatus(object):
         Represents last time when the Experiment was reconciled. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.  # noqa: E501
 
         :param last_reconcile_time: The last_reconcile_time of this V1beta1ExperimentStatus.  # noqa: E501
-        :type: V1Time
+        :type: datetime
         """
 
         self._last_reconcile_time = last_reconcile_time
@@ -350,7 +349,7 @@ class V1beta1ExperimentStatus(object):
         Represents time when the Experiment was acknowledged by the Experiment controller. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.  # noqa: E501
 
         :return: The start_time of this V1beta1ExperimentStatus.  # noqa: E501
-        :rtype: V1Time
+        :rtype: datetime
         """
         return self._start_time
 
@@ -361,7 +360,7 @@ class V1beta1ExperimentStatus(object):
         Represents time when the Experiment was acknowledged by the Experiment controller. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.  # noqa: E501
 
         :param start_time: The start_time of this V1beta1ExperimentStatus.  # noqa: E501
-        :type: V1Time
+        :type: datetime
         """
 
         self._start_time = start_time

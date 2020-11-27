@@ -16,7 +16,6 @@ import re  # noqa: F401
 
 import six
 
-from kubeflow.katib.models.v1_unstructured_unstructured import V1UnstructuredUnstructured  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_early_stopping_rule import V1beta1EarlyStoppingRule  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_metrics_collector_spec import V1beta1MetricsCollectorSpec  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_objective_spec import V1beta1ObjectiveSpec  # noqa: F401,E501
@@ -45,7 +44,7 @@ class V1beta1TrialSpec(object):
         'primary_container_name': 'str',
         'primary_pod_labels': 'dict(str, str)',
         'retain_run': 'bool',
-        'run_spec': 'V1UnstructuredUnstructured',
+        'run_spec': 'dict()',
         'success_condition': 'str'
     }
 
@@ -290,7 +289,7 @@ class V1beta1TrialSpec(object):
         Raw text for the trial run spec. This can be any generic Kubernetes runtime object. The trial operator should create the resource as written, and let the corresponding resource controller (e.g. tf-operator) handle the rest.  # noqa: E501
 
         :return: The run_spec of this V1beta1TrialSpec.  # noqa: E501
-        :rtype: V1UnstructuredUnstructured
+        :rtype: dict()
         """
         return self._run_spec
 
@@ -301,7 +300,7 @@ class V1beta1TrialSpec(object):
         Raw text for the trial run spec. This can be any generic Kubernetes runtime object. The trial operator should create the resource as written, and let the corresponding resource controller (e.g. tf-operator) handle the rest.  # noqa: E501
 
         :param run_spec: The run_spec of this V1beta1TrialSpec.  # noqa: E501
-        :type: V1UnstructuredUnstructured
+        :type: dict()
         """
 
         self._run_spec = run_spec
