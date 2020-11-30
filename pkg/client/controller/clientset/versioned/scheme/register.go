@@ -18,13 +18,9 @@ limitations under the License.
 package scheme
 
 import (
-	commonv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/common/v1alpha3"
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
-	experimentv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1alpha3"
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
-	suggestionv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1alpha3"
 	suggestionv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
-	trialv1alpha3 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1alpha3"
 	trialv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
@@ -37,13 +33,9 @@ var Scheme = runtime.NewScheme()
 var Codecs = serializer.NewCodecFactory(Scheme)
 var ParameterCodec = runtime.NewParameterCodec(Scheme)
 var localSchemeBuilder = runtime.SchemeBuilder{
-	commonv1alpha3.AddToScheme,
 	commonv1beta1.AddToScheme,
-	experimentv1alpha3.AddToScheme,
 	experimentv1beta1.AddToScheme,
-	suggestionv1alpha3.AddToScheme,
 	suggestionv1beta1.AddToScheme,
-	trialv1alpha3.AddToScheme,
 	trialv1beta1.AddToScheme,
 }
 

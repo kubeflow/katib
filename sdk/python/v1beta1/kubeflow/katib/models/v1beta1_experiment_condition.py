@@ -16,7 +16,6 @@ import re  # noqa: F401
 
 import six
 
-from kubeflow.katib.models.v1_time import V1Time  # noqa: F401,E501
 
 
 class V1beta1ExperimentCondition(object):
@@ -33,8 +32,8 @@ class V1beta1ExperimentCondition(object):
                             and the value is json key in definition.
     """
     swagger_types = {
-        'last_transition_time': 'V1Time',
-        'last_update_time': 'V1Time',
+        'last_transition_time': 'datetime',
+        'last_update_time': 'datetime',
         'message': 'str',
         'reason': 'str',
         'status': 'str',
@@ -79,7 +78,7 @@ class V1beta1ExperimentCondition(object):
         Last time the condition transitioned from one status to another.  # noqa: E501
 
         :return: The last_transition_time of this V1beta1ExperimentCondition.  # noqa: E501
-        :rtype: V1Time
+        :rtype: datetime
         """
         return self._last_transition_time
 
@@ -90,7 +89,7 @@ class V1beta1ExperimentCondition(object):
         Last time the condition transitioned from one status to another.  # noqa: E501
 
         :param last_transition_time: The last_transition_time of this V1beta1ExperimentCondition.  # noqa: E501
-        :type: V1Time
+        :type: datetime
         """
 
         self._last_transition_time = last_transition_time
@@ -102,7 +101,7 @@ class V1beta1ExperimentCondition(object):
         The last time this condition was updated.  # noqa: E501
 
         :return: The last_update_time of this V1beta1ExperimentCondition.  # noqa: E501
-        :rtype: V1Time
+        :rtype: datetime
         """
         return self._last_update_time
 
@@ -113,7 +112,7 @@ class V1beta1ExperimentCondition(object):
         The last time this condition was updated.  # noqa: E501
 
         :param last_update_time: The last_update_time of this V1beta1ExperimentCondition.  # noqa: E501
-        :type: V1Time
+        :type: datetime
         """
 
         self._last_update_time = last_update_time

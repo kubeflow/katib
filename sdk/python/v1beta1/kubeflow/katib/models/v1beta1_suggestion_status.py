@@ -16,7 +16,6 @@ import re  # noqa: F401
 
 import six
 
-from kubeflow.katib.models.v1_time import V1Time  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_algorithm_setting import V1beta1AlgorithmSetting  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_suggestion_condition import V1beta1SuggestionCondition  # noqa: F401,E501
 from kubeflow.katib.models.v1beta1_trial_assignment import V1beta1TrialAssignment  # noqa: F401,E501
@@ -37,10 +36,10 @@ class V1beta1SuggestionStatus(object):
     """
     swagger_types = {
         'algorithm_settings': 'list[V1beta1AlgorithmSetting]',
-        'completion_time': 'V1Time',
+        'completion_time': 'datetime',
         'conditions': 'list[V1beta1SuggestionCondition]',
-        'last_reconcile_time': 'V1Time',
-        'start_time': 'V1Time',
+        'last_reconcile_time': 'datetime',
+        'start_time': 'datetime',
         'suggestion_count': 'int',
         'suggestions': 'list[V1beta1TrialAssignment]'
     }
@@ -112,7 +111,7 @@ class V1beta1SuggestionStatus(object):
         Represents time when the Suggestion was completed. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.  # noqa: E501
 
         :return: The completion_time of this V1beta1SuggestionStatus.  # noqa: E501
-        :rtype: V1Time
+        :rtype: datetime
         """
         return self._completion_time
 
@@ -123,7 +122,7 @@ class V1beta1SuggestionStatus(object):
         Represents time when the Suggestion was completed. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.  # noqa: E501
 
         :param completion_time: The completion_time of this V1beta1SuggestionStatus.  # noqa: E501
-        :type: V1Time
+        :type: datetime
         """
 
         self._completion_time = completion_time
@@ -158,7 +157,7 @@ class V1beta1SuggestionStatus(object):
         Represents last time when the Suggestion was reconciled. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.  # noqa: E501
 
         :return: The last_reconcile_time of this V1beta1SuggestionStatus.  # noqa: E501
-        :rtype: V1Time
+        :rtype: datetime
         """
         return self._last_reconcile_time
 
@@ -169,7 +168,7 @@ class V1beta1SuggestionStatus(object):
         Represents last time when the Suggestion was reconciled. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.  # noqa: E501
 
         :param last_reconcile_time: The last_reconcile_time of this V1beta1SuggestionStatus.  # noqa: E501
-        :type: V1Time
+        :type: datetime
         """
 
         self._last_reconcile_time = last_reconcile_time
@@ -181,7 +180,7 @@ class V1beta1SuggestionStatus(object):
         Represents time when the Suggestion was acknowledged by the Suggestion controller. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.  # noqa: E501
 
         :return: The start_time of this V1beta1SuggestionStatus.  # noqa: E501
-        :rtype: V1Time
+        :rtype: datetime
         """
         return self._start_time
 
@@ -192,7 +191,7 @@ class V1beta1SuggestionStatus(object):
         Represents time when the Suggestion was acknowledged by the Suggestion controller. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.  # noqa: E501
 
         :param start_time: The start_time of this V1beta1SuggestionStatus.  # noqa: E501
-        :type: V1Time
+        :type: datetime
         """
 
         self._start_time = start_time

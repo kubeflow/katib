@@ -1,11 +1,15 @@
 {
-  "packageName" : "katib",
-  "projectName" : "katib",
+  "packageName": "katib",
+  "projectName": "katib",
   "packageVersion": "0.1",
   "importMappings": {
     "V1Container": "from kubernetes.client import V1Container",
     "V1ListMeta": "from kubernetes.client import V1ListMeta",
     "V1ObjectMeta": "from kubernetes.client import V1ObjectMeta",
     "V1HTTPGetAction": "from kubernetes.client import V1HTTPGetAction"
+  },
+  "typeMappings": {
+    "V1Time": "datetime",
+    "V1UnstructuredUnstructured": "object"
   }
 }

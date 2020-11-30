@@ -23,5 +23,4 @@ jobs:
       install:
         - npm install --global prettier@1.19.1
       script:
-        - make prettier-check-v1alpha3
         - make prettier-check

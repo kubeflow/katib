@@ -19,20 +19,12 @@ package fake
 
 import (
 	clientset "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned"
-	commonv1alpha3 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/common/v1alpha3"
-	fakecommonv1alpha3 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/common/v1alpha3/fake"
 	commonv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/common/v1beta1"
 	fakecommonv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/common/v1beta1/fake"
-	experimentv1alpha3 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/experiments/v1alpha3"
-	fakeexperimentv1alpha3 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/experiments/v1alpha3/fake"
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/experiments/v1beta1"
 	fakeexperimentv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/experiments/v1beta1/fake"
-	suggestionv1alpha3 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/suggestions/v1alpha3"
-	fakesuggestionv1alpha3 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/suggestions/v1alpha3/fake"
 	suggestionv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/suggestions/v1beta1"
 	fakesuggestionv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/suggestions/v1beta1/fake"
-	trialv1alpha3 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/trials/v1alpha3"
-	faketrialv1alpha3 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/trials/v1alpha3/fake"
 	trialv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/trials/v1beta1"
 	faketrialv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/trials/v1beta1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -84,11 +76,6 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 
 var _ clientset.Interface = &Clientset{}
 
-// CommonV1alpha3 retrieves the CommonV1alpha3Client
-func (c *Clientset) CommonV1alpha3() commonv1alpha3.CommonV1alpha3Interface {
-	return &fakecommonv1alpha3.FakeCommonV1alpha3{Fake: &c.Fake}
-}
-
 // CommonV1beta1 retrieves the CommonV1beta1Client
 func (c *Clientset) CommonV1beta1() commonv1beta1.CommonV1beta1Interface {
 	return &fakecommonv1beta1.FakeCommonV1beta1{Fake: &c.Fake}
@@ -97,11 +84,6 @@ func (c *Clientset) CommonV1beta1() commonv1beta1.CommonV1beta1Interface {
 // Common retrieves the CommonV1beta1Client
 func (c *Clientset) Common() commonv1beta1.CommonV1beta1Interface {
 	return &fakecommonv1beta1.FakeCommonV1beta1{Fake: &c.Fake}
-}
-
-// ExperimentV1alpha3 retrieves the ExperimentV1alpha3Client
-func (c *Clientset) ExperimentV1alpha3() experimentv1alpha3.ExperimentV1alpha3Interface {
-	return &fakeexperimentv1alpha3.FakeExperimentV1alpha3{Fake: &c.Fake}
 }
 
 // ExperimentV1beta1 retrieves the ExperimentV1beta1Client
@@ -114,11 +96,6 @@ func (c *Clientset) Experiment() experimentv1beta1.ExperimentV1beta1Interface {
 	return &fakeexperimentv1beta1.FakeExperimentV1beta1{Fake: &c.Fake}
 }
 
-// SuggestionV1alpha3 retrieves the SuggestionV1alpha3Client
-func (c *Clientset) SuggestionV1alpha3() suggestionv1alpha3.SuggestionV1alpha3Interface {
-	return &fakesuggestionv1alpha3.FakeSuggestionV1alpha3{Fake: &c.Fake}
-}
-
 // SuggestionV1beta1 retrieves the SuggestionV1beta1Client
 func (c *Clientset) SuggestionV1beta1() suggestionv1beta1.SuggestionV1beta1Interface {
 	return &fakesuggestionv1beta1.FakeSuggestionV1beta1{Fake: &c.Fake}
@@ -127,11 +104,6 @@ func (c *Clientset) SuggestionV1beta1() suggestionv1beta1.SuggestionV1beta1Inter
 // Suggestion retrieves the SuggestionV1beta1Client
 func (c *Clientset) Suggestion() suggestionv1beta1.SuggestionV1beta1Interface {
 	return &fakesuggestionv1beta1.FakeSuggestionV1beta1{Fake: &c.Fake}
-}
-
-// TrialV1alpha3 retrieves the TrialV1alpha3Client
-func (c *Clientset) TrialV1alpha3() trialv1alpha3.TrialV1alpha3Interface {
-	return &faketrialv1alpha3.FakeTrialV1alpha3{Fake: &c.Fake}
 }
 
 // TrialV1beta1 retrieves the TrialV1beta1Client

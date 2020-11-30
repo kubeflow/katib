@@ -20,7 +20,6 @@ import (
 	"strings"
 
 	"github.com/go-openapi/spec"
-	"github.com/kubeflow/katib/pkg/apis/v1alpha3"
 	"github.com/kubeflow/katib/pkg/apis/v1beta1"
 	"k8s.io/klog"
 	"k8s.io/kube-openapi/pkg/common"
@@ -41,9 +40,7 @@ func main() {
 
 	katibVersion := os.Args[2]
 	oAPIDefs := make(map[string]common.OpenAPIDefinition)
-	if katibVersion == "v1alpha3" {
-		oAPIDefs = v1alpha3.GetOpenAPIDefinitions(refCallback)
-	} else if katibVersion == "v1beta1" {
+	if katibVersion == "v1beta1" {
 		oAPIDefs = v1beta1.GetOpenAPIDefinitions(refCallback)
 	} else {
 		klog.Fatalf("Katib version %v is not supported", katibVersion)

@@ -2,8 +2,6 @@
 .gitignore
 docs
 examples
-!examples/v1alpha3/nas
-!examples/v1beta1/nas
 manifests
 pkg/ui/*/frontend/node_modules
 pkg/ui/*/frontend/build
