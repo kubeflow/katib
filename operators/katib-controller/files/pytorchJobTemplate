@@ -1,0 +1,32 @@
+apiVersion: "kubeflow.org/v1"
+kind: PyTorchJob
+spec:
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: pytorch
+              image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
+              imagePullPolicy: Always
+              command:
+                - "python"
+                - "/var/mnist.py"
+                - "--lr=${trialParameters.learningRate}"
+                - "--momentum=${trialParameters.momentum}"
+    Worker:
+      replicas: 2
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: pytorch
+              image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
+              imagePullPolicy: Always
+              command:
+                - "python"
+                - "/var/mnist.py"
+                - "--lr=${trialParameters.learningRate}"
+                - "--momentum=${trialParameters.momentum}"

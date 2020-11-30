@@ -1,0 +1,8 @@
+bundle: kubernetes
+applications:
+  katib-controller: { charm: katib-controller,            scale: 1, annotations: { gui-x:   '0', gui-y:    '0' } }
+  katib-db:         { charm: cs:~charmed-osm/mariadb-k8s, scale: 1, annotations: { gui-x:   '0', gui-y:  '300' }, options: { database: katib } }
+  katib-manager:    { charm: katib-manager,               scale: 1, annotations: { gui-x: '300', gui-y:    '0' } }
+  katib-ui:         { charm: katib-ui,                    scale: 1, annotations: { gui-x: '300', gui-y:  '300' } }
+relations:
+- [katib-manager, katib-db]
