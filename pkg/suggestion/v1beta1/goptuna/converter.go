@@ -1,7 +1,7 @@
 package suggestion_goptuna_v1beta1
 
 import (
-	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -81,10 +81,6 @@ func toGoptunaSampler(algorithm *api_v1_beta1.AlgorithmSpec) (goptuna.Sampler, g
 func toGoptunaSearchSpace(parameters []*api_v1_beta1.ParameterSpec) (map[string]interface{}, error) {
 	searchSpace := make(map[string]interface{}, len(parameters))
 	for _, p := range parameters {
-		if p.ParameterType == api_v1_beta1.ParameterType_UNKNOWN_TYPE {
-			return nil, errors.New("invalid parameter type")
-		}
-
 		if p.ParameterType == api_v1_beta1.ParameterType_DOUBLE {
 			high, err := strconv.ParseFloat(p.GetFeasibleSpace().GetMax(), 64)
 			if err != nil {
@@ -152,7 +148,7 @@ func toGoptunaSearchSpace(parameters []*api_v1_beta1.ParameterSpec) (map[string]
 				Choices: choices,
 			}
 		} else {
-			return nil, errors.New("unsupported parameter type")
+			return nil, fmt.Errorf("Unsupported parameter type: %v", p.ParameterType)
 		}
 	}
 	return searchSpace, nil
@@ -165,12 +161,12 @@ func toGoptunaState(condition api_v1_beta1.TrialStatus_TrialConditionType) (gopt
 		return goptuna.TrialStateRunning, nil
 	} else if condition == api_v1_beta1.TrialStatus_SUCCEEDED {
 		return goptuna.TrialStateComplete, nil
-	} else if condition == api_v1_beta1.TrialStatus_KILLED {
-		return goptuna.TrialStateFail, nil
 	} else if condition == api_v1_beta1.TrialStatus_FAILED {
 		return goptuna.TrialStateFail, nil
+	} else if condition == api_v1_beta1.TrialStatus_EARLYSTOPPED {
+		return goptuna.TrialStatePruned, nil
 	}
-	return goptuna.TrialStateFail, errors.New("unexpected trial condition")
+	return goptuna.TrialStateFail, fmt.Errorf("Unexpected Trial condition: %v", condition)
 }
 
 func getFinalMetric(objectMetricName string, trial *api_v1_beta1.Trial) (float64, error) {
@@ -185,7 +181,7 @@ func getFinalMetric(objectMetricName string, trial *api_v1_beta1.Trial) (float64
 		}
 		return v, nil
 	}
-	return 0, errors.New("no objective metrics")
+	return 0, fmt.Errorf("No objective metric in Trial %v", trial)
 }
 
 func toGoptunaTrials(
@@ -308,7 +304,7 @@ func toGoptunaParams(
 				}
 			}
 			if internalRepr == -1.0 {
-				return nil, nil, errors.New("invalid categorical value")
+				return nil, nil, fmt.Errorf("Invalid categorical value: %v", internalRepr)
 			}
 			internalParams[name] = internalRepr
 			externalParams[name] = valueStr
