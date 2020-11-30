@@ -1,4 +1,4 @@
-name: katib-manager
+name: katib-db-manager
 display-name: Katib DB Manager
 summary: A Kubernetes-native project for automated machine learning (AutoML)
 description: |
@@ -15,11 +15,11 @@ resources:
     type: oci-image
     description: Backing OCI image
     auto-fetch: true
-    upstream-source: docker.io/kubeflowkatib/katib-db-manager:v1beta1-7104018
+    upstream-source: docker.io/kubeflowkatib/katib-db-manager:v1beta1-a96ff59
 requires:
   mysql:
     interface: mysql
 provides:
-  katib-manager:
+  katib-db-manager:
     interface: http
 min-juju-version: 2.8.6

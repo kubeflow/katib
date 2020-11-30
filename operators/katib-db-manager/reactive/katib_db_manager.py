@@ -46,7 +46,7 @@ def start_charm():
             "version": 3,
             "containers": [
                 {
-                    "name": "katib-manager",
+                    "name": "katib-db-manager",
                     "command": ["./katib-db-manager"],
                     "imageDetails": {
                         "imagePath": image_info.registry_path,
@@ -80,27 +80,6 @@ def start_charm():
                     },
                 }
             ],
-        },
-        k8s_resources={
-            "kubernetesResources": {
-                "services": [
-                    {
-                        "name": "katib-db-manager",
-                        "spec": {
-                            "ports": [
-                                {
-                                    "name": "api",
-                                    "port": port,
-                                    "protocol": "TCP",
-                                    "targetPort": port,
-                                }
-                            ],
-                            "selector": {"juju-app": "katib-manager"},
-                            "type": "ClusterIP",
-                        },
-                    }
-                ]
-            }
         },
     )
 

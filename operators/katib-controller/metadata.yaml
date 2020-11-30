@@ -15,7 +15,7 @@ resources:
     type: oci-image
     description: Backing OCI image
     auto-fetch: true
-    upstream-source: docker.io/kubeflowkatib/katib-controller:v1beta1-7104018
+    upstream-source: docker.io/kubeflowkatib/katib-controller:v1beta1-a96ff59
 provides:
   katib-controller:
     interface: http

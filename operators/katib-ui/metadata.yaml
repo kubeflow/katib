@@ -15,7 +15,7 @@ resources:
     type: oci-image
     description: Backing OCI image
     auto-fetch: true
-    upstream-source: docker.io/kubeflowkatib/katib-ui:v1beta1-7104018
+    upstream-source: docker.io/kubeflowkatib/katib-ui:v1beta1-a96ff59
 requires:
   service-mesh:
     interface: service-mesh

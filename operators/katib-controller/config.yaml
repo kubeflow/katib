@@ -6,4 +6,4 @@ options:
   metrics-port:
     type: int
     default: 8080
-    description: Webhook port
+    description: Metrics port

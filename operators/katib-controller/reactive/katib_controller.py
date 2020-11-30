@@ -239,10 +239,8 @@ def start_charm():
                     "name": "katib-controller",
                     "command": ["./katib-controller"],
                     "args": [
-                        "-webhook-port",
+                        "--webhook-port",
                         str(config["webhook-port"]),
-                        "-logtostderr",
-                        "-v=4",
                         "--trial-resources=Job.v1.batch",
                         "--trial-resources=TFJob.v1.kubeflow.org",
                         "--trial-resources=PyTorchJob.v1.kubeflow.org",
@@ -296,7 +294,7 @@ def start_charm():
                                 "rules": [
                                     {
                                         "apiGroups": ["kubeflow.org"],
-                                        "apiVersions": ["v1alpha3"],
+                                        "apiVersions": ["v1beta1"],
                                         "operations": ["CREATE", "UPDATE"],
                                         "resources": ["experiments"],
                                         "scope": "*",
@@ -347,7 +345,7 @@ def start_charm():
                                 "rules": [
                                     {
                                         "apiGroups": ["kubeflow.org"],
-                                        "apiVersions": ["v1alpha3"],
+                                        "apiVersions": ["v1beta1"],
                                         "operations": ["CREATE", "UPDATE"],
                                         "resources": ["experiments"],
                                         "scope": "*",
@@ -371,7 +369,7 @@ def start_charm():
             },
             "configMaps": {
                 "katib-config": {
-                    f: Path(f"files/{f}").read_text()
+                    f: Path(f"files/{f}.json").read_text()
                     for f in (
                         "metrics-collector-sidecar",
                         "suggestion",
@@ -379,11 +377,11 @@ def start_charm():
                     )
                 },
                 "trial-template": {
-                    f: Path(f"files/{f}").read_text()
-                    for f in (
-                        "defaultTrialTemplate.yaml",
-                        "enasCPUTemplate",
-                        "pytorchJobTemplate",
+                    f + suffix: Path(f"files/{f}.yaml").read_text()
+                    for f, suffix in (
+                        ("defaultTrialTemplate", ".yaml"),
+                        ("enasCPUTemplate", ""),
+                        ("pytorchJobTemplate", ""),
                     )
                 },
             },
