@@ -1,7 +1,7 @@
 package suggestion_goptuna_v1beta1
 
 import (
-	"errors"
+	"fmt"
 	"reflect"
 	"strconv"
 
@@ -107,5 +107,5 @@ func findGoptunaTrialIDByParam(study *goptuna.Study, trialMapping map[string]int
 			return trials[i].ID, nil
 		}
 	}
-	return -1, errors.New("same trial parameter is not found")
+	return -1, fmt.Errorf("Same parameter is not found for Trial: %v", ktrial)
 }
