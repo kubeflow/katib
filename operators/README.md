@@ -24,4 +24,10 @@ You can also install each application individually, like this:
 
 where `<application>` is one of `katib-controller`, `katib-ui`, or `katib-db-manager`.
 
-> Note: As a default, when you `juju deploy` an application or the full Katib bundle, you will deploy the latest released version of Katib, even if unreleased updates are already available. If you would like to try the latest available charm run `juju deploy foo --channel=stable/edge`.
+** Note **: As a default, when you `juju deploy` an application or the full Katib
+bundle, you will deploy the latest pushed commit of Katib, even if unreleased updates are
+already available in the Kubeflow manifests. If you would like to try the latest
+available charm run:
+
+
+    juju deploy foo --channel=edge
