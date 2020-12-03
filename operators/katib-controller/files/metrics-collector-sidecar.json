@@ -1,0 +1,16 @@
+{
+  "StdOut": {
+    "image": "docker.io/kubeflowkatib/file-metrics-collector"
+  },
+  "File": {
+    "image": "docker.io/kubeflowkatib/file-metrics-collector"
+  },
+  "TensorFlowEvent": {
+    "image": "docker.io/kubeflowkatib/tfevent-metrics-collector",
+    "resources": {
+      "limits": {
+        "memory": "1Gi"
+      }
+    }
+  }
+}
