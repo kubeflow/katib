@@ -1,8 +1,8 @@
 approvers:
-    - gaocegege
-    - hougangliu
-    - johnugeorge
-    - andreyvelich
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
 reviewers:
-    - sperlingxx
-    - c-bata
+  - c-bata
+  - sperlingxx
