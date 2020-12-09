@@ -21,6 +21,6 @@ jobs:
       language: node_js
       node_js: "12.18.1"
       install:
-        - npm install --global prettier@1.19.1
+        - npm install --global prettier@2.2.0
       script:
         - make prettier-check

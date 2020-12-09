@@ -65,7 +65,7 @@ class AddDialog extends React.Component {
     let newConfigMapNamespace = event.target.value;
     let newConfigMapName = '';
 
-    let namespaceIndex = templateData.findIndex(function(trialTemplate, i) {
+    let namespaceIndex = templateData.findIndex(function (trialTemplate, i) {
       return trialTemplate.ConfigMapNamespace === newConfigMapNamespace;
     });
 
@@ -292,13 +292,13 @@ class AddDialog extends React.Component {
 const mapStateToProps = state => {
   let templatesData = state[TEMPLATE_MODULE].trialTemplatesData;
 
-  let nsIndex = templatesData.findIndex(function(trialTemplate, i) {
+  let nsIndex = templatesData.findIndex(function (trialTemplate, i) {
     return trialTemplate.ConfigMapNamespace === state[TEMPLATE_MODULE].updatedConfigMapNamespace;
   });
 
   let cmIndex = -1;
   if (nsIndex !== -1) {
-    cmIndex = templatesData[nsIndex].ConfigMaps.findIndex(function(configMap, i) {
+    cmIndex = templatesData[nsIndex].ConfigMaps.findIndex(function (configMap, i) {
       return configMap.ConfigMapName === state[TEMPLATE_MODULE].updatedConfigMapName;
     });
   }

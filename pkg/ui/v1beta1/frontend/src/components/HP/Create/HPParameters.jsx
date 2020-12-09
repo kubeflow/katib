@@ -209,7 +209,7 @@ const HPParameters = props => {
     }
 
     // Remove empty items from PrimaryPodLabels array.
-    let filteredPrimaryLabels = props.primaryPodLabels.filter(function(label) {
+    let filteredPrimaryLabels = props.primaryPodLabels.filter(function (label) {
       return label.key.trim() !== '' && label.value.trim() !== '';
     });
 

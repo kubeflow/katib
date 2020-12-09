@@ -7,7 +7,7 @@ import * as nasMonitorActions from '../actions/nasMonitorActions';
 import * as nasCreateActions from '../actions/nasCreateActions';
 import * as generalActions from '../actions/generalActions';
 
-export const submitYaml = function*() {
+export const submitYaml = function* () {
   while (true) {
     const action = yield take(generalActions.SUBMIT_YAML_REQUEST);
     try {
@@ -51,7 +51,7 @@ export const submitYaml = function*() {
   }
 };
 
-const goSubmitYaml = function*(yaml) {
+const goSubmitYaml = function* (yaml) {
   try {
     const data = {
       yaml,
@@ -66,7 +66,7 @@ const goSubmitYaml = function*(yaml) {
   }
 };
 
-export const deleteExperiment = function*() {
+export const deleteExperiment = function* () {
   while (true) {
     const action = yield take(generalActions.DELETE_EXPERIMENT_REQUEST);
     try {
@@ -101,7 +101,7 @@ export const deleteExperiment = function*() {
   }
 };
 
-const goDeleteExperiment = function*(name, namespace) {
+const goDeleteExperiment = function* (name, namespace) {
   try {
     const result = yield call(
       axios.get,
@@ -115,7 +115,7 @@ const goDeleteExperiment = function*(name, namespace) {
   }
 };
 
-export const submitHPJob = function*() {
+export const submitHPJob = function* () {
   while (true) {
     const action = yield take(hpCreateActions.SUBMIT_HP_JOB_REQUEST);
     try {
@@ -138,7 +138,7 @@ export const submitHPJob = function*() {
   }
 };
 
-const goSubmitHPJob = function*(postData) {
+const goSubmitHPJob = function* (postData) {
   try {
     const data = {
       postData,
@@ -153,7 +153,7 @@ const goSubmitHPJob = function*(postData) {
   }
 };
 
-export const fetchExperiments = function*() {
+export const fetchExperiments = function* () {
   while (true) {
     yield take(generalActions.FETCH_EXPERIMENTS_REQUEST);
     try {
@@ -184,7 +184,7 @@ export const fetchExperiments = function*() {
   }
 };
 
-const goFetchExperiments = function*() {
+const goFetchExperiments = function* () {
   try {
     const result = yield call(axios.get, '/katib/fetch_experiments/');
     return result;
@@ -195,7 +195,7 @@ const goFetchExperiments = function*() {
   }
 };
 
-export const fetchExperiment = function*() {
+export const fetchExperiment = function* () {
   while (true) {
     const action = yield take(generalActions.FETCH_EXPERIMENT_REQUEST);
     try {
@@ -218,7 +218,7 @@ export const fetchExperiment = function*() {
   }
 };
 
-const goFetchExperiment = function*(name, namespace) {
+const goFetchExperiment = function* (name, namespace) {
   try {
     const result = yield call(
       axios.get,
@@ -232,7 +232,7 @@ const goFetchExperiment = function*(name, namespace) {
   }
 };
 
-export const fetchSuggestion = function*() {
+export const fetchSuggestion = function* () {
   while (true) {
     const action = yield take(generalActions.FETCH_SUGGESTION_REQUEST);
     try {
@@ -255,7 +255,7 @@ export const fetchSuggestion = function*() {
   }
 };
 
-const goFetchSuggestion = function*(name, namespace) {
+const goFetchSuggestion = function* (name, namespace) {
   try {
     const result = yield call(
       axios.get,
@@ -269,7 +269,7 @@ const goFetchSuggestion = function*(name, namespace) {
   }
 };
 
-export const fetchHPJobInfo = function*() {
+export const fetchHPJobInfo = function* () {
   while (true) {
     const action = yield take(hpMonitorActions.FETCH_HP_JOB_INFO_REQUEST);
     try {
@@ -293,7 +293,7 @@ export const fetchHPJobInfo = function*() {
   }
 };
 
-const goFetchHPJobInfo = function*(name, namespace) {
+const goFetchHPJobInfo = function* (name, namespace) {
   try {
     const result = yield call(
       axios.get,
@@ -307,7 +307,7 @@ const goFetchHPJobInfo = function*(name, namespace) {
   }
 };
 
-export const fetchHPJobTrialInfo = function*() {
+export const fetchHPJobTrialInfo = function* () {
   while (true) {
     const action = yield take(hpMonitorActions.FETCH_HP_JOB_TRIAL_INFO_REQUEST);
     try {
@@ -332,7 +332,7 @@ export const fetchHPJobTrialInfo = function*() {
   }
 };
 
-const gofetchHPJobTrialInfo = function*(trialName, namespace) {
+const gofetchHPJobTrialInfo = function* (trialName, namespace) {
   try {
     const result = yield call(
       axios.get,
@@ -346,7 +346,7 @@ const gofetchHPJobTrialInfo = function*(trialName, namespace) {
   }
 };
 
-export const submitNASJob = function*() {
+export const submitNASJob = function* () {
   while (true) {
     const action = yield take(nasCreateActions.SUBMIT_NAS_JOB_REQUEST);
     try {
@@ -369,7 +369,7 @@ export const submitNASJob = function*() {
   }
 };
 
-const goSubmitNASJob = function*(postData) {
+const goSubmitNASJob = function* (postData) {
   try {
     const data = {
       postData,
@@ -384,7 +384,7 @@ const goSubmitNASJob = function*(postData) {
   }
 };
 
-export const fetchNASJobInfo = function*() {
+export const fetchNASJobInfo = function* () {
   while (true) {
     const action = yield take(nasMonitorActions.FETCH_NAS_JOB_INFO_REQUEST);
     try {
@@ -415,7 +415,7 @@ export const fetchNASJobInfo = function*() {
   }
 };
 
-const goFetchNASJobInfo = function*(experimentName, namespace) {
+const goFetchNASJobInfo = function* (experimentName, namespace) {
   try {
     const result = yield call(
       axios.get,
@@ -429,7 +429,7 @@ const goFetchNASJobInfo = function*(experimentName, namespace) {
   }
 };
 
-export const fetchTrialTemplates = function*() {
+export const fetchTrialTemplates = function* () {
   while (true) {
     yield take(templateActions.FETCH_TRIAL_TEMPLATES_REQUEST);
     try {
@@ -452,7 +452,7 @@ export const fetchTrialTemplates = function*() {
   }
 };
 
-const goFetchTrialTemplates = function*(namespace) {
+const goFetchTrialTemplates = function* (namespace) {
   try {
     const result = yield call(axios.get, `/katib/fetch_trial_templates`);
     return result;
@@ -463,7 +463,7 @@ const goFetchTrialTemplates = function*(namespace) {
   }
 };
 
-export const addTemplate = function*() {
+export const addTemplate = function* () {
   while (true) {
     const action = yield take(templateActions.ADD_TEMPLATE_REQUEST);
     try {
@@ -493,7 +493,7 @@ export const addTemplate = function*() {
   }
 };
 
-const goAddTemplate = function*(
+const goAddTemplate = function* (
   updatedConfigMapNamespace,
   updatedConfigMapName,
   updatedConfigMapPath,
@@ -516,7 +516,7 @@ const goAddTemplate = function*(
   }
 };
 
-export const editTemplate = function*() {
+export const editTemplate = function* () {
   while (true) {
     const action = yield take(templateActions.EDIT_TEMPLATE_REQUEST);
     try {
@@ -547,7 +547,7 @@ export const editTemplate = function*() {
   }
 };
 
-const goEditTemplate = function*(
+const goEditTemplate = function* (
   updatedConfigMapNamespace,
   updatedConfigMapName,
   configMapPath,
@@ -572,7 +572,7 @@ const goEditTemplate = function*(
   }
 };
 
-export const deleteTemplate = function*() {
+export const deleteTemplate = function* () {
   while (true) {
     const action = yield take(templateActions.DELETE_TEMPLATE_REQUEST);
     try {
@@ -601,7 +601,7 @@ export const deleteTemplate = function*() {
   }
 };
 
-const goDeleteTemplate = function*(
+const goDeleteTemplate = function* (
   updatedConfigMapNamespace,
   updatedConfigMapName,
   updatedConfigMapPath,
@@ -622,7 +622,7 @@ const goDeleteTemplate = function*(
   }
 };
 
-export const fetchNamespaces = function*() {
+export const fetchNamespaces = function* () {
   while (true) {
     yield take(generalActions.FETCH_NAMESPACES_REQUEST);
     try {
@@ -647,7 +647,7 @@ export const fetchNamespaces = function*() {
   }
 };
 
-const goFetchNamespaces = function*() {
+const goFetchNamespaces = function* () {
   try {
     const result = yield call(axios.get, '/katib/fetch_namespaces');
     return result;

@@ -48,7 +48,7 @@ class TrialConfigMap extends React.Component {
   }
 
   onTemplateConfigMapNamespaceChange = event => {
-    let nsIndex = this.props.trialTemplatesData.findIndex(function(trialTemplate, i) {
+    let nsIndex = this.props.trialTemplatesData.findIndex(function (trialTemplate, i) {
       return trialTemplate.ConfigMapNamespace === event.target.value;
     });
 
@@ -61,7 +61,7 @@ class TrialConfigMap extends React.Component {
 
   onTemplateConfigMapNameChange = event => {
     let namespacedData = this.props.trialTemplatesData[this.props.configMapNamespaceIndex];
-    let nameIndex = namespacedData.ConfigMaps.findIndex(function(configMap, i) {
+    let nameIndex = namespacedData.ConfigMaps.findIndex(function (configMap, i) {
       return configMap.ConfigMapName === event.target.value;
     });
 
@@ -76,7 +76,7 @@ class TrialConfigMap extends React.Component {
     let namespacedData = this.props.trialTemplatesData[this.props.configMapNamespaceIndex];
     let namedConfigMap = namespacedData.ConfigMaps[this.props.configMapNameIndex];
 
-    let pathIndex = namedConfigMap.Templates.findIndex(function(template, i) {
+    let pathIndex = namedConfigMap.Templates.findIndex(function (template, i) {
       return template.Path === event.target.value;
     });
 
