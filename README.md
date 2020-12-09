@@ -1,5 +1,5 @@
 <h1 align="center">
-    <img src="./docs/images/Katib_Logo.png" alt="logo" width="200">
+    <img src="./docs/images/logo-title.png" alt="logo" width="200">
   <br>
 </h1>
 
