@@ -8,8 +8,8 @@ import const
 
 # TFEventFileParser parses tfevent files and returns an ObservationLog of the metrics specified.
 # When the event file is under a directory(e.g. test dir), please specify "{{dirname}}/{{metrics name}}"
-# For example, in the TensorFlow official tutorial for mnist with summary (https://github.com/tensorflow/tensorflow/blob/master/tensorflow/examples/tutorials/mnist/mnist_with_summaries.py),
-# the "accuracy" metric is saved under "train" and "test" directories. So in Katib, please specify name of metrics as "train/accuracy" and "test/accuracy".
+# For example, in the kubeflow tf-operator tutorial for mnist with summary (https://github.com/kubeflow/tf-operator/blob/master/examples/v1/mnist_with_summaries/mnist_with_summaries.py),
+# the "accuracy" metric is saved under "train" and "test" directories. So in the Metrics Collector specification, please specify name of "train" or "test" directory. Check TFJob example for more information: https://github.com/kubeflow/katib/blob/master/examples/v1beta1/tfjob-example.yaml#L16-L22
 
 
 class TFEventFileParser:
