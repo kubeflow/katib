@@ -1,0 +1,405 @@
+updates:
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: examples/v1beta1/file-metrics-collector
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: examples/v1beta1/mxnet-mnist
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: examples/v1beta1/nas/enas-cnn-cifar10
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: examples/v1beta1/nas/darts-cnn-cifar10
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/katib-controller/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/ui/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/suggestion/hyperband/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/suggestion/skopt/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/suggestion/chocolate/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/suggestion/hyperopt/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/suggestion/nas/darts/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/suggestion/nas/enas/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/suggestion/goptuna/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/earlystopping/medianstop/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/db-manager/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/metricscollector/v1beta1/file-metricscollector
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/metricscollector/v1beta1/tfevent-metricscollector
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: pkg/apis/manager/v1beta1/gen-doc
+  open-pull-requests-limit: 10
+  package-ecosystem: docker
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: pkg/ui/v1beta1/frontend
+  open-pull-requests-limit: 10
+  package-ecosystem: npm
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: sdk/python/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: pip
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/suggestion/hyperband/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: pip
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/suggestion/skopt/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: pip
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/suggestion/chocolate/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: pip
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/suggestion/hyperopt/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: pip
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/suggestion/nas/darts/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: pip
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/suggestion/nas/enas/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: pip
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/earlystopping/medianstop/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: pip
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: cmd/metricscollector/v1beta1/tfevent-metricscollector
+  open-pull-requests-limit: 10
+  package-ecosystem: pip
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: test/suggestion/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: pip
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: test/e2e/v1beta1
+  open-pull-requests-limit: 10
+  package-ecosystem: pip
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+- assignees:
+  - andreyvelich
+  - gaocegege
+  - hougangliu
+  - johnugeorge
+  directory: vendor
+  open-pull-requests-limit: 10
+  package-ecosystem: gomod
+  reviewers:
+  - c-bata
+  - sperlingxx
+  schedule:
+    interval: daily
+version: 2
