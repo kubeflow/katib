@@ -80,13 +80,13 @@
         buildTemplate(step_name, image, command):: {
           name: step_name,
           // Each container can be alive for 40 minutes.
-          activeDeadlineSeconds: 2400,
+          activeDeadlineSeconds: "2400",
           retryStrategy: {
-            limit: 3,
+            limit: "3",
             retryPolicy: "Always",
             backoff: {
-              duration: 1,
-              factor: 2,
+              duration: "1",
+              factor: "2",
               maxDuration: "1m",
             },
           },
@@ -179,7 +179,7 @@
         spec: {
           entrypoint: "e2e",
           // Cleanup workflow after 5 days.
-          ttlSecondsAfterFinished: 432000,
+          ttlSecondsAfterFinished: "432000",
           volumes: [
             {
               name: "github-token",
