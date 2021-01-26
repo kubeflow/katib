@@ -47,4 +47,4 @@ workflows:
       - vendor/*
       - prow_config.yaml
     params:
-      registry: 527798164940.dkr.ecr.us-west-2.amazonaws.com
+      registry: 809251082950.dkr.ecr.us-west-2.amazonaws.com
