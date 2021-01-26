@@ -46,5 +46,6 @@ workflows:
       - scripts/v1beta1/*
       - vendor/*
       - prow_config.yaml
+      - Makefile
     params:
-      registry: 809251082950.dkr.ecr.us-west-2.amazonaws.com
+      registry: 527798164940.dkr.ecr.us-west-2.amazonaws.com
