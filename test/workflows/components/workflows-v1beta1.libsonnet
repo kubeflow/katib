@@ -51,7 +51,7 @@
       local kubeflowTestingPy = srcRootDir + "/kubeflow/testing/py";
 
       // testWorkerImage is the main worker image to execute workflow.
-      local testWorkerImage = "527798164940.dkr.ecr.us-west-2.amazonaws.com/aws-kubeflow-ci/test-worker:latest";
+      local testWorkerImage = "public.ecr.aws/j1r0q0g6/kubeflow-testing:latest";
       // kanikoExecutorImage is the image for Kaniko to build Katib images.
       local kanikoExecutorImage = "gcr.io/kaniko-project/executor:v1.0.0";
       // pythonImage is the image to run Katib Python unit test.
@@ -80,13 +80,12 @@
         buildTemplate(step_name, image, command):: {
           name: step_name,
           // Each container can be alive for 40 minutes.
-          activeDeadlineSeconds: 2400,
           retryStrategy: {
-            limit: 3,
+            limit: "3",
             retryPolicy: "Always",
             backoff: {
-              duration: 1,
-              factor: 2,
+              duration: "1",
+              factor: "2",
               maxDuration: "1m",
             },
           },
@@ -178,8 +177,6 @@
         },
         spec: {
           entrypoint: "e2e",
-          // Cleanup workflow after 5 days.
-          ttlSecondsAfterFinished: 432000,
           volumes: [
             {
               name: "github-token",
