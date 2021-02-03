@@ -30,16 +30,17 @@ func (k *KatibUIHandler) getExperiments(namespace []string) ([]ExperimentView, e
 			log.Printf("GetLastConditionType failed: %v", err)
 			return nil, err
 		}
-		newExperiment := ExperimentView{
-			Name:      experiment.Name,
-			Namespace: experiment.Namespace,
-			Status:    string(experimentLastCondition),
+		tp := ExperimentTypeHP
+		if experiment.Spec.NasConfig != nil {
+			tp = ExperimentTypeNAS
 		}
 
-		if experiment.Spec.NasConfig == nil {
-			newExperiment.Type = ExperimentTypeHP
-		} else {
-			newExperiment.Type = ExperimentTypeNAS
+		newExperiment := ExperimentView{
+			experiment.Name,
+			experiment.Namespace,
+			tp,
+			string(experimentLastCondition),
+			experiment.Status,
 		}
 
 		experiments = append(experiments, newExperiment)
