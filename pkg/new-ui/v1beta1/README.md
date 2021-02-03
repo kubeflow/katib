@@ -1,17 +1,17 @@
 # Katib User Interface
 
-This is the source code for the Katib UI. Current version of Katib UI is v1beta1. On the official Kubeflow website [here](https://www.kubeflow.org/docs/components/hyperparameter-tuning/experiment/#running-the-experiment-from-the-katib-ui) you can find information how to use Katib UI.
-We are using [React](https://reactjs.org/) framework to create frontend and Go as a backend.
+This is the source code for the Katib UI. Current version of Katib UI is v1beta1. On the official Kubeflow website [here](https://www.kubeflow.org/docs/components/katib/experiment/#running-the-experiment-from-the-katib-ui) you can find information how to use Katib UI.
+We are using [Angular](https://angular.io/) framework to create frontend and Go as a backend.
 
-We are using [Material UI](https://material-ui.com/) to design frontend. Try to use Material UI components to implement new Katib UI features.
+We are using [Material UI](https://material.angular.io/) to design frontend. Try to use Material UI components to implement new Katib UI features.
 
 ## Folder structure
 
-1. You can find `Dockerfile` and `main.go` - file to serve the UI under [cmd/ui/v1beta1](https://github.com/kubeflow/katib/tree/master/cmd/ui/v1beta1).
+1. You can find `Dockerfile` and `main.go` - file to serve the UI under `cmd/new-ui/v1beta1`
 
-1. You can find Go backend under [pkg/ui/v1beta1](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1).
+1. You can find Go backend under `pkg/new-ui/v1beta1`
 
-1. You can find React frontend under [pkg/ui/v1beta1/frontend](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1/frontend).
+1. You can find Angular frontend under `pkg/new-ui/v1beta1/frontend`
 
 ## Requirements
 
@@ -24,50 +24,74 @@ To make changes to the UI you need to install:
 ## Development
 
 While development you have different ways to run Katib UI.
+1. Build and serve only the frontend. The dev server will also be proxying requests to the backend
+2. Build the frontend and serve it via the backend locally
 
-### First time
+### Serve only the frontend
 
-1. Clone the repository.
+You can run a webpack dev server that only exposes the frontend files, which can be useful for testing only the UI of the app. There's also a `proxy.conf.json` file which configures the dev server to send the backend requests to port `8000`.
 
-1. Go to `/frontend` folder.
+In order to build the UI locally, and expose it with a webpack dev server you will need to:
+1. Create a module from the [common library](https://github.com/kubeflow/kubeflow/tree/master/components/crud-web-apps/common/frontend/kubeflow-common-lib)
+2. Install the node modules of the app and also link the common-library module
 
-1. Run `npm install` to install all dependencies.
 
-It creates `/frontend/node_modules` folder with all dependencies from [`package.json`](https://github.com/kubeflow/katib/blob/master/pkg/ui/v1beta1/frontend/package.json). If you want to add new package, run `npm install <package>@<version>`. That should update `/frontend/package.json` and `/frontend/package-lock.json` with the new dependency.
 
-### Start frontend server
+You can build the common library with:
+```bash
+cd /tmp && git clone https://github.com/kubeflow/kubeflow.git \
+  && cd kubeflow \
+  && git checkout a349284 \
+  && cd components/crud-web-apps/common/frontend/kubeflow-common-lib
 
-If you want to edit only frontend without connection to the backend, you can start frontend server in your local environment. For it, run `npm run start` under `/frontend` folder. You can access the UI using this URL: `http://localhost:3000/`.
+# build the common library module
+npm i
+npm run build
 
-### Serve UI frontend and backend
+# link the module to your npm packages
+# depending on where you npm stores the global packages you
+# might need to use sudo
+npm link dist/kubeflow
+```
 
-You can serve Katib UI locally. To make it you need to follow these steps:
+And then build and run the UI locally, on `localhost:4200`, with:
+```bash
+# If you've already cloned the repo then skip this step and just
+# navigate to the pkg/new-ui/v1beta1/frontend dir
+cd /tmp && git clone https://github.com/kubeflow/katib.git \
+  && cd katib/pkg/new-ui/v1beta1/frontend
 
-1. Run `npm run build` under `/frontend` folder. It creates `/frontend/build` directory with optimized production build.
+npm i
+npm link kubeflow
+npm run start
+```
 
-   If your `node` memory limit is not enough to build the frontend, you may see this error while building: `FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory`. To fix it, you can try to increase `node` memory limit. For that, change [`build`](https://github.com/kubeflow/katib/blob/master/pkg/ui/v1beta1/frontend/package.json#L28) script to `react-scripts --max_old_space_size=4096 build` to increase `node` memory up to 4 Gb.
+### Serve the UI  from the backend
 
+This is the recommended way to test the web app e2e. In order to build the UI and serve it via the backend, locally, you will need to:
+
+1. Build the UI locally. You can follow the steps from the previous section, but instead of running `npm run start` you will need to run `npm run build:watch`. This will start a process that will be watching the source code and building the frontend artifacts under `frontend/dist/static` folder.
 1. Run `kubectl port-forward svc/katib-db-manager 6789 -n kubeflow` to expose `katib-db-manager` service for external access. You can use [different ways](https://kubernetes.io/docs/tasks/access-application-cluster/) to get external address for Kubernetes service. After exposing service, you should be able to receive information by running `wget <external-ip>:<service-port>`. In case of port-forwarding above, you have to run `wget localhost:6789`.
 
-1. Go to `cmd/ui/v1beta1`.
+1. Go to `cmd/new-ui/v1beta1`.
 
 1. Run `main.go` file with appropriate flags, where:
 
-   - `--build-dir` - builded frontend directory.
+   - `--build-dir` - directory with the frontend artifacts.
    - `--port` - port to access Katib UI.
    - `--db-manager-address` - Katib DB manager external IP and port address.
 
-   For example, if you clone Katib repository to `/home` folder and use port-forwarding to expose `katib-db-manager`, run this command:
+   For example, if you use port-forwarding to expose `katib-db-manager`, run this command:
 
    ```
-   go run main.go --build-dir=/home/katib/pkg/ui/v1beta1/frontend/build --port=8080 --db-manager-address=localhost:6789
+   go run main.go --build-dir=../../../pkg/new-ui/v1beta1/frontend/dist --port=8080 --db-manager-address=localhost:6789
    ```
 
 After that, you can access the UI using this URL: `http://localhost:8080/katib/`.
 
 ## Production
 
-To run Katib UI in Production, after all changes in frontend and backend, you need to create an image for the UI. Under `/katib` directory run this: `docker build . -f cmd/ui/v1beta1/Dockerfile -t <name of your image>` to build the image. If Docker resources are not enough to build the frontend, you get `node` out of memory error. You can try to increase Docker resources or modify `package.json` as detailed [above](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1#serve-ui-frontend-and-backend) at step 1.
+To run Katib UI in Production, after all changes in frontend and backend, you need to create an image for the UI. Under `/katib` directory run this: `docker build . -f cmd/new-ui/v1beta1/Dockerfile -t <name of your image>` to build the image. If Docker resources are not enough to build the frontend, you get `node` out of memory error. You can try to increase Docker resources or modify `package.json` as detailed [above](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1#serve-ui-frontend-and-backend) at step 1.
 
 After that, you can modify UI [deployment](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/ui/deployment.yaml#L24) with your new image. Then, follow [these steps](https://www.kubeflow.org/docs/components/hyperparameter-tuning/hyperparameter/#accessing-the-katib-ui) to access Katib UI.
 
@@ -96,3 +120,4 @@ Before submitting PR check and format your code. To check your code run `npm run
 If all files formatted you can submit the PR.
 
 If you don't want to format some code, [here](https://prettier.io/docs/en/ignore.html) is an instruction how to disable Prettier.
+

@@ -6,6 +6,7 @@
     "format": "prettier --write './**/*.{ts,html,css}'",
     "start": "npm run copyLibAssets && ng serve --proxy-config proxy.conf.json",
     "build": "npm run copyLibAssets && ng build --base-href /katib/",
+    "build:watch": "npm run copyLibAssets && ng build --base-href /katib/ --deploy-url /katib/static/ --watch --outputPath dist/static",
     "build:prod": "npm run copyLibAssets && ng build --prod --base-href /katib/ --deploy-url /katib/static/",
     "copyLibAssets": "cp ./node_modules/kubeflow/assets/* ./src/assets/",
     "test": "ng test",
