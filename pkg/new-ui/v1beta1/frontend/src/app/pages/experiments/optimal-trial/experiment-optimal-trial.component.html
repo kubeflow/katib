@@ -1,0 +1,37 @@
+<ng-container *ngIf="metrics.length === 0">
+  No succeeded trial yet
+</ng-container>
+
+<ng-container *ngIf="metrics.length > 0">
+  <div class="flex" [libPopover]="optimalRunPopover">
+    <div class="metric-key">{{ metrics[0].name }}:</div>
+
+    <div>{{ metrics[0].value }}</div>
+  </div>
+</ng-container>
+
+<ng-template #optimalRunPopover>
+  <!--optimal metrics-->
+  <div class="popover-title">Metrics</div>
+  <lib-details-list-item
+    *ngFor="let metric of metrics; trackBy: trackByParamFn"
+    [key]="metric.name"
+    [bottomDivider]="false"
+    keyMinWidth="140px"
+  >
+    {{ metric.value }}
+  </lib-details-list-item>
+
+  <mat-divider></mat-divider>
+
+  <!--optimal parameters-->
+  <div class="popover-title">Parameters</div>
+  <lib-details-list-item
+    *ngFor="let param of params; trackBy: trackByParamFn"
+    [key]="param.name"
+    [bottomDivider]="false"
+    keyMinWidth="140px"
+  >
+    {{ param.value }}
+  </lib-details-list-item>
+</ng-template>

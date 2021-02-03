@@ -1,0 +1,43 @@
+<lib-details-list-item key="Name">
+  {{ experimentName }}
+</lib-details-list-item>
+
+<lib-details-list-item key="Status" [icon]="statusIcon">
+  {{ status }}
+</lib-details-list-item>
+
+<lib-details-list-item key="Best trial">
+  {{ bestTrialName }}
+</lib-details-list-item>
+
+<lib-details-list-item [chipsList]="parameters" key="Best trial's params">
+  <span *ngIf="parameters.length === 0">No optimal trial yet</span>
+</lib-details-list-item>
+
+<lib-details-list-item
+  [chipsList]="bestTrialPerformance"
+  key="Best trial performance"
+>
+</lib-details-list-item>
+
+<lib-details-list-item key="User defined goal">
+  {{ userGoal }}
+</lib-details-list-item>
+
+<lib-details-list-item key="Running trials">
+  {{ runningTrials }}
+</lib-details-list-item>
+
+<lib-details-list-item key="Failed trials">
+  {{ failedTrials }}
+</lib-details-list-item>
+
+<lib-details-list-item key="Succeeded trials">
+  {{ succeededTrials }}
+</lib-details-list-item>
+
+<lib-conditions-table
+  *ngIf="experiment"
+  [conditions]="experiment.status.conditions"
+  title="Experiment Conditions"
+></lib-conditions-table>

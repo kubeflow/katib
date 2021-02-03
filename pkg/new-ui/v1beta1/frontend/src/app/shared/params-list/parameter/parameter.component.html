@@ -1,0 +1,74 @@
+<div class="params-row">
+  <div class="param-name truncate" [matTooltip]="name">{{ name }}</div>
+  <div class="param-type">{{ type }}</div>
+
+  <ng-container *ngIf="isListValue; else minMaxStepTpl">
+    <div class="param-value" [libPopover]="listPopoverTpl">
+      <div class="truncate">
+        {{ listStr }}
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #minMaxStepTpl>
+    <div class="param-value truncate" [libPopover]="minMaxPopoverTpl">
+      {{ min }} &le; <em>{{ name }}</em> &le; {{ max }}{{ stepSign }}{{ step }}
+    </div>
+  </ng-template>
+
+  <!--input action buttons-->
+  <button mat-icon-button matTooltip="Edit parameter">
+    <mat-icon (click)="editParam()">edit</mat-icon>
+  </button>
+
+  <button
+    mat-icon-button
+    (click)="delete.emit(true)"
+    matTooltip="Remove parameter"
+  >
+    <mat-icon>delete</mat-icon>
+  </button>
+
+  <!--min-max popover-->
+  <ng-template #minMaxPopoverTpl>
+    <div class="popover-title">Feasible Space</div>
+    <mat-divider></mat-divider>
+
+    <lib-details-list-item key="Min" keyMinWidth="80px" [bottomDivider]="false">
+      {{ min }}
+    </lib-details-list-item>
+
+    <lib-details-list-item key="Max" keyMinWidth="80px" [bottomDivider]="false">
+      {{ max }}
+    </lib-details-list-item>
+
+    <lib-details-list-item
+      *ngIf="step"
+      key="Step"
+      keyMinWidth="80px"
+      [bottomDivider]="false"
+    >
+      {{ step }}
+    </lib-details-list-item>
+  </ng-template>
+
+  <!--list popover-->
+  <ng-template #listPopoverTpl>
+    <lib-details-list-item
+      key="Specified values"
+      keyMinWidth="130px"
+      [bottomDivider]="false"
+    >
+      <div
+        [ngClass]="{
+          'popover-list-wrapper': listValue.length > 5,
+          flex: listValue.length <= 5
+        }"
+      >
+        <span *ngFor="let item of listValue" class="popover-list-item">
+          {{ item }}
+        </span>
+      </div>
+    </lib-details-list-item>
+  </ng-template>
+</div>

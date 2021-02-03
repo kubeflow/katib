@@ -1,0 +1,15 @@
+.margin-bottom {
+  margin-bottom: 12px;
+}
+
+.two-inputs {
+  display: flex;
+
+  .mat-form-field:nth-child(2) {
+    margin-left: 12px;
+  }
+}
+
+[ace-editor] {
+  height: 350px;
+}

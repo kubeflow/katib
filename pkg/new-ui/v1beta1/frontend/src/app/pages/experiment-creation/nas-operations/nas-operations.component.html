@@ -1,0 +1,35 @@
+<div class="lib-step-wrapper">
+  <div>
+    <button
+      mat-stroked-button
+      color="primary"
+      (click)="addCtrl()"
+      class="add-btn"
+    >
+      <mat-icon>add</mat-icon>Add operation
+    </button>
+
+    <div class="flex-column">
+      <ng-container *ngFor="let ctrl of formArray.controls; let i = index">
+        <mat-divider class="divider"></mat-divider>
+
+        <app-nas-operation
+          [formGroup]="ctrl"
+          (removeCtrl)="removeCtrl(i)"
+        ></app-nas-operation>
+      </ng-container>
+    </div>
+  </div>
+
+  <!--step info-->
+  <div class="lib-step-info-wrapper">
+    <lib-step-info header="Neural Architecture Search Operations">
+      The graph config that defines structure for a directed acyclic graph of
+      the neural network. You can also check the low-level Golang API
+      <a
+        href="https://github.com/kubeflow/katib/blob/master/pkg/apis/controller/experiments/v1beta1/experiment_types.go#L301-L306"
+        >here</a
+      >.
+    </lib-step-info>
+  </div>
+</div>

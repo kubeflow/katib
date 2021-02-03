@@ -1,0 +1,96 @@
+<form [formGroup]="formGroup" class="lib-step-wrapper">
+  <div class="flex-column">
+    <mat-form-field appearance="outline" class="fit-content">
+      <mat-label>Primary Container Name</mat-label>
+      <input formControlName="containerName" matInput />
+    </mat-form-field>
+
+    <app-list-key-value
+      [formArray]="formGroup.get('podLabels')"
+      addButtonText="Add Pod Label"
+      keyLabel="Label Name"
+      valueLabel="Label Value"
+    ></app-list-key-value>
+
+    <lib-advanced-options>
+      <mat-form-field appearance="outline" class="wide">
+        <mat-label>Success Condition</mat-label>
+        <input formControlName="successCond" matInput />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="wide">
+        <mat-label>Failure Condition</mat-label>
+        <input formControlName="failureCond" matInput />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="fit-content">
+        <mat-label>Retain</mat-label>
+        <mat-select formControlName="retain">
+          <mat-option value="false">False</mat-option>
+          <mat-option value="true">True</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </lib-advanced-options>
+
+    <mat-divider class="margin-bottom"></mat-divider>
+
+    <mat-form-field appearance="outline" class="fit-content">
+      <mat-label>Source Type</mat-label>
+      <mat-select formControlName="type">
+        <mat-option value="configmap">ConfigMap</mat-option>
+        <mat-option value="yaml">YAML</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <ng-container *ngIf="formGroup.get('type').value === 'configmap'">
+      <mat-form-field appearance="outline" class="fit-content">
+        <mat-label>ConfigMap Namespace</mat-label>
+        <mat-select formControlName="cmNamespace">
+          <mat-option
+            *ngFor="let tpl of templates"
+            [value]="tpl.ConfigMapNamespace"
+            >{{ tpl.ConfigMapNamespace }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+
+      <div class="two-inputs">
+        <mat-form-field appearance="outline" class="fit-content">
+          <mat-label>ConfigMap Name</mat-label>
+          <mat-select formControlName="cmName">
+            <mat-option
+              *ngFor="let cm of configmaps"
+              [value]="cm.ConfigMapName"
+            >
+              {{ cm.ConfigMapName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="fit-content">
+          <mat-label>ConfigMap Path</mat-label>
+          <mat-select formControlName="cmTrialPath">
+            <mat-option *ngFor="let p of paths" [value]="p">
+              {{ p }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </ng-container>
+
+    <div
+      ace-editor
+      [(text)]="yaml"
+      [readOnly]="formGroup.get('type').value === 'configmap'"
+      theme="xcode"
+      mode="yaml"
+    ></div>
+  </div>
+
+  <div class="lib-step-info-wrapper">
+    <lib-step-info header="Define the Trial's YAML">
+      You can either use a predefined YAML from a ConfigMap or write your
+      own.
+    </lib-step-info>
+  </div>
+</form>

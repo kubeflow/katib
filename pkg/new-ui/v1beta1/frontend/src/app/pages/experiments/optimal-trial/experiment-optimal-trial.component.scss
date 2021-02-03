@@ -1,0 +1,12 @@
+.metric-key {
+  font-weight: 500;
+  margin-right: 0.2rem;
+}
+
+.popover-title {
+  color: rgba(0, 0, 0, 0.66);
+
+  &:last-of-type {
+    margin-top: 0.8rem;
+  }
+}

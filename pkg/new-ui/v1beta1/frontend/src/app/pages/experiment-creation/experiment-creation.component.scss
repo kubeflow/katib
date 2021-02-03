@@ -1,0 +1,21 @@
+.form-body {
+  max-width: 600px;
+}
+
+.step-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.step-wrapper {
+  display: flex;
+
+  > .step-info-wrapper {
+    margin-left: auto;
+    width: 30%;
+  }
+
+  > .step-content {
+    max-width: 600px;
+  }
+}
