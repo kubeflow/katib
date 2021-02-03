@@ -13,6 +13,8 @@ import (
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 )
 
+const kfpRunIDAnnotation = "kubeflow-kale.org/kfp-run-uuid"
+
 func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	experimentName := r.URL.Query()["experimentName"][0]
@@ -53,7 +55,16 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	}
 	log.Printf("Got Trial List")
 
+	foundPipelineUID := false
 	for _, t := range trialList.Items {
+		runUid, ok := t.GetAnnotations()[kfpRunIDAnnotation]
+		if !ok {
+			log.Printf("Trial %s has no pipeline run.", t.Name)
+			runUid = ""
+		} else {
+			foundPipelineUID = true
+		}
+
 		var lastTrialCondition string
 
 		// Take only the latest condition
@@ -96,6 +107,9 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 			trialResText[paramList[trialParam.Name]] = trialParam.Value
 		}
 		resultText += "\n" + t.Name + "," + lastTrialCondition + "," + strings.Join(trialResText, ",")
+		if foundPipelineUID {
+			resultText += "," + runUid
+		}
 	}
 	log.Printf("Logs parsed, results:\n %v", resultText)
 	response, err := json.Marshal(resultText)
