@@ -51,6 +51,7 @@ def start_charm():
         {
             "version": 2,
             "serviceAccount": {
+                "global": True,
                 "rules": [
                     {
                         "apiGroups": [""],
