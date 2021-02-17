@@ -18,9 +18,29 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+echo "Generate deepcopy, clientset, listers, informers for the APIs"
+
 if [[ -z "${GOPATH:-}" ]]; then
     export GOPATH=$(go env GOPATH)
 fi
+
+# TODO (andreyvelich): Temporarily solution to fix "go install: no install location for directory" error
+# We should update the Kubernetes dependencies with controller-runtime to remove this
+export GOBIN=$GOPATH/bin
+
+# Grab code-generator version from go.sum
+CODEGEN_VERSION=$(cd ../../.. && grep 'k8s.io/code-generator' go.sum | awk '{print $2}' | sed 's/\/go.mod//g' | head -1)
+CODEGEN_PKG=$(echo $(go env GOPATH)"/pkg/mod/k8s.io/code-generator@${CODEGEN_VERSION}")
+
+if [[ ! -d ${CODEGEN_PKG} ]]; then
+    echo "${CODEGEN_PKG} is missing. Please run 'go mod download'."
+    exit 0
+fi
+
+echo ">> Using ${CODEGEN_PKG} for the code generator"
+
+# Ensure we can execute.
+chmod +x ${CODEGEN_PKG}/generate-groups.sh
 
 VERSION_LIST=(v1beta1)
 PROJECT_ROOT=${GOPATH}/src/github.com/kubeflow/katib
@@ -31,7 +51,7 @@ versionStr=$(printf ",%s" "${versions[@]}")
 GROUP_VERSIONS=$(printf "%s:${versionStr:1} " "${modules[@]}")
 
 echo "Generating clients for ${GROUP_VERSIONS} ..."
-${PROJECT_ROOT}/vendor/k8s.io/code-generator/generate-groups.sh \
+${CODEGEN_PKG}/generate-groups.sh \
     all \
     github.com/kubeflow/katib/pkg/client/controller \
     github.com/kubeflow/katib/pkg/apis/controller \

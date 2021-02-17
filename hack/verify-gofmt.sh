@@ -22,7 +22,7 @@ if ! which gofmt >/dev/null; then
   exit 1
 fi
 
-diff=$(find . -name "*.go" | grep -v "\/vendor\/" | grep -v "\.pb\.go$" | xargs gofmt -s -d 2>&1)
+diff=$(find . -name "*.go" | grep -v "\.pb\.go$" | xargs gofmt -s -d 2>&1)
 if [[ -n "${diff}" ]]; then
   echo "${diff}"
   echo

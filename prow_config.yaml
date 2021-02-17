@@ -44,7 +44,6 @@ workflows:
       - test/workflows/*
       - manifests/v1beta1/*
       - scripts/v1beta1/*
-      - vendor/*
       - prow_config.yaml
       - Makefile
     params:

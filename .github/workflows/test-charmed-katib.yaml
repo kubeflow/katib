@@ -10,74 +10,75 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out repo
-      uses: actions/checkout@v2
+      - name: Check out repo
+        uses: actions/checkout@v2
 
-    - uses: balchua/microk8s-actions@v0.2.2
-      with:
-        channel: '1.19/stable'
-        addons: '["dns", "storage", "rbac"]'
+      - uses: balchua/microk8s-actions@v0.2.2
+        with:
+          channel: "1.19/stable"
+          addons: '["dns", "storage", "rbac"]'
 
-    - name: Install dependencies
-      run: |
-        set -eux
-        sudo snap install charm --classic
-        sudo snap install juju --classic
-        sudo snap install juju-helpers --classic
-        sudo snap install juju-wait --classic
-        sudo apt update
+      - name: Install dependencies
+        run: |
+          set -eux
+          sudo snap install charm --classic
+          sudo snap install juju --classic
+          sudo snap install juju-helpers --classic
+          sudo snap install juju-wait --classic
+          sudo apt update
 
-    - name: Build Docker images
-      run: |
-        set -eux
-        for image in katib-ui katib-controller katib-db-manager; do
-          docker build . \
-              -t docker.io/kubeflowkatib/$image:latest \
-              -f cmd/katib-controller/v1beta1/Dockerfile
-          docker save docker.io/kubeflowkatib/$image > $image.tar
-          microk8s ctr image import $image.tar
-        done
+      - name: Build Docker images
+        run: |
+          set -eux
+          images=("katib-controller" "katib-ui" "katib-db-manager")
+          folders=("katib-controller" "ui" "db-manager")
+          for idx in {0..2}; do
+            docker build . \
+                -t docker.io/kubeflowkatib/${images[$idx]}:latest \
+                -f cmd/${folders[$idx]}/v1beta1/Dockerfile
+            docker save docker.io/kubeflowkatib/${images[$idx]} > ${images[$idx]}.tar
+            microk8s ctr image import ${images[$idx]}.tar
+          done
 
-    - name: Deploy Katib
-      run: |
-        set -eux
-        cd operators/
-        git clone git://git.launchpad.net/canonical-osm
-        cp -r canonical-osm/charms/interfaces/juju-relation-mysql mysql
-        sg microk8s -c 'juju bootstrap microk8s uk8s'
-        juju add-model katib
-        juju bundle deploy -b bundle-edge.yaml --build
-        juju wait -wvt 300
+      - name: Deploy Katib
+        run: |
+          set -eux
+          cd operators/
+          git clone git://git.launchpad.net/canonical-osm
+          cp -r canonical-osm/charms/interfaces/juju-relation-mysql mysql
+          sg microk8s -c 'juju bootstrap microk8s uk8s'
+          juju add-model katib
+          juju bundle deploy -b bundle-edge.yaml --build
+          juju wait -wvt 300
 
-    - name: Test Katib
-      run: |
-        set -eux
-        kubectl run \
-            --rm \
-            -i \
-            --restart=Never \
-            --image=ubuntu \
-            katib-check \
-            -- \
-            bash -c "apt update && apt install -y curl && curl -f http://katib-ui.katib.svc.cluster.local:8080/katib/"
+      - name: Test Katib
+        run: |
+          set -eux
+          kubectl run \
+              --rm \
+              -i \
+              --restart=Never \
+              --image=ubuntu \
+              katib-check \
+              -- \
+              bash -c "apt update && apt install -y curl && curl -f http://katib-ui.katib.svc.cluster.local:8080/katib/"
 
+      - name: Get pod statuses
+        run: kubectl get all -A
+        if: failure()
 
-    - name: Get pod statuses
-      run: kubectl get all -A
-      if: failure()
+      - name: Get juju status
+        run: juju status
+        if: failure()
 
-    - name: Get juju status
-      run: juju status
-      if: failure()
+      - name: Get katib-controller logs
+        run: kubectl logs --tail 100 -nkatib -ljuju-app=katib-controller
+        if: failure()
 
-    - name: Get katib-controller logs
-      run: kubectl logs --tail 100 -nkatib -ljuju-app=katib-controller
-      if: failure()
+      - name: Get katib-ui logs
+        run: kubectl logs --tail 100 -nkatib -ljuju-app=katib-ui
+        if: failure()
 
-    - name: Get katib-ui logs
-      run: kubectl logs --tail 100 -nkatib -ljuju-app=katib-ui
-      if: failure()
-
-    - name: Get katib-manager logs
-      run: kubectl logs --tail 100 -nkatib -ljuju-app=katib-manager
-      if: failure()
+      - name: Get katib-manager logs
+        run: kubectl logs --tail 100 -nkatib -ljuju-app=katib-manager
+        if: failure()

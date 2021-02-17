@@ -2,7 +2,7 @@ jobs:
   include:
     - name: "Go unit tests, gofmt, golint and coveralls"
       language: go
-      go: "1.14.2"
+      go: "1.15.8"
       go_import_path: github.com/kubeflow/katib
       install:
         - curl -L -O "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.7/kubebuilder_1.0.7_linux_amd64.tar.gz"

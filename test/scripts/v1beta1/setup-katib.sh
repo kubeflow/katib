@@ -118,4 +118,8 @@ if [ $? -ne 1 ]; then
   exit 1
 fi
 
+# Build the binary for e2e test
+echo "Building run-e2e-experiment for e2e test cases"
+go build -o run-e2e-experiment test/e2e/v1beta1/run-e2e-experiment.go
+
 exit 0

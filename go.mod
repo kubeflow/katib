@@ -1,0 +1,113 @@
+module github.com/kubeflow/katib
+
+go 1.15
+
+require (
+	cloud.google.com/go v0.37.4
+	github.com/Azure/azure-sdk-for-go v33.2.0+incompatible
+	github.com/Azure/go-autorest v14.2.0+incompatible
+	github.com/Azure/go-autorest/autorest v0.11.18 // indirect
+	github.com/Azure/go-autorest/autorest/to v0.4.0 // indirect
+	github.com/Azure/go-autorest/autorest/validation v0.3.1 // indirect
+	github.com/PuerkitoBio/purell v1.1.0
+	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578
+	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d
+	github.com/awalterschulze/gographviz v2.0.1+incompatible
+	github.com/aws/aws-sdk-go v1.25.26
+	github.com/beorn7/perks v1.0.1
+	github.com/c-bata/goptuna v0.5.1
+	github.com/davecgh/go-spew v1.1.1
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/emicklei/go-restful v2.9.0+incompatible
+	github.com/fsnotify/fsnotify v1.4.7
+	github.com/ghodss/yaml v1.0.0
+	github.com/go-logr/logr v0.1.0
+	github.com/go-logr/zapr v0.1.0
+	github.com/go-ole/go-ole v1.2.4
+	github.com/go-openapi/jsonpointer v0.18.0
+	github.com/go-openapi/jsonreference v0.18.0
+	github.com/go-openapi/spec v0.18.0
+	github.com/go-openapi/swag v0.18.0
+	github.com/go-sql-driver/mysql v1.4.1
+	github.com/gogo/protobuf v1.2.1
+	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
+	github.com/golang/groupcache v0.0.0-20190129154638-5b532d6fd5ef
+	github.com/golang/mock v1.4.3
+	github.com/golang/protobuf v1.3.2
+	github.com/google/btree v1.0.0
+	github.com/google/go-containerregistry v0.0.0-20190320210540-8d4083db9aa0
+	github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf
+	github.com/google/uuid v1.1.1
+	github.com/googleapis/gnostic v0.2.0
+	github.com/gregjones/httpcache v0.0.0-20190212212710-3befbb6ad0cc
+	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
+	github.com/grpc-ecosystem/grpc-gateway v1.5.0
+	github.com/hashicorp/golang-lru v0.5.0
+	github.com/hashicorp/hcl v1.0.0
+	github.com/hpcloud/tail v1.0.1-0.20180514194441-a1dbeea552b7
+	github.com/imdario/mergo v0.3.7
+	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
+	github.com/json-iterator/go v1.1.6
+	github.com/kubeflow/pytorch-operator v1.0.0-rc.1.0.20191010031852-6097519829be
+	github.com/kubeflow/tf-operator v1.0.0-rc.0.0.20190916040037-5adee6f30c86
+	github.com/magiconair/properties v1.8.1
+	github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329
+	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a
+	github.com/matttproud/golang_protobuf_extensions v1.0.1
+	github.com/mitchellh/mapstructure v1.1.2
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
+	github.com/modern-go/reflect2 v1.0.1
+	github.com/onsi/ginkgo v1.7.0
+	github.com/onsi/gomega v1.4.3
+	github.com/pborman/uuid v0.0.0-20180906182336-adf5a7427709
+	github.com/pelletier/go-toml v1.4.0
+	github.com/petar/GoLLRB v0.0.0-20130427215148-53be0d36a84c
+	github.com/peterbourgon/diskv v2.0.1+incompatible
+	github.com/prometheus/client_golang v1.0.0
+	github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4
+	github.com/prometheus/common v0.6.0
+	github.com/prometheus/procfs v0.0.3
+	github.com/shirou/gopsutil v2.20.7+incompatible
+	github.com/spf13/afero v1.2.2
+	github.com/spf13/cast v1.3.0
+	github.com/spf13/jwalterweatherman v1.1.0
+	github.com/spf13/pflag v1.0.3
+	github.com/spf13/viper v1.3.2
+	github.com/tidwall/gjson v1.6.0
+	github.com/tidwall/match v1.0.1
+	github.com/tidwall/pretty v1.0.1
+	go.uber.org/atomic v1.4.0
+	go.uber.org/multierr v1.1.0
+	go.uber.org/zap v1.10.0
+	golang.org/x/build v0.0.0-20190111050920-041ab4dc3f9d // indirect
+	golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0
+	golang.org/x/net v0.0.0-20190613194153-d28f0bde5980
+	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421
+	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
+	golang.org/x/sys v0.0.0-20190422165155-953cdadca894
+	golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2
+	golang.org/x/time v0.0.0-20181108054448-85acf8d2951c
+	golang.org/x/tools v0.0.0-20190425150028-36563e24a262
+	gonum.org/v1/gonum v0.7.0
+	google.golang.org/appengine v1.4.0
+	google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55
+	google.golang.org/grpc v1.19.0
+	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
+	gopkg.in/fsnotify/fsnotify.v1 v1.4.7 // indirect
+	gopkg.in/inf.v0 v0.9.1
+	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7
+	gopkg.in/yaml.v2 v2.2.2
+	k8s.io/api v0.0.0-20190528110122-9ad12a4af326
+	k8s.io/apiextensions-apiserver v0.0.0-20181126155829-0cd23ebeb688
+	k8s.io/apimachinery v0.0.0-20190221084156-01f179d85dbc
+	k8s.io/client-go v0.0.0-20190528110200-4f3abb12cae2
+	k8s.io/code-generator v0.0.0-20181128191024-b1289fc74931
+	k8s.io/gengo v0.0.0-20190128074634-0689ccc1d7d6
+	k8s.io/klog v0.3.0
+	k8s.io/kube-openapi v0.0.0-20180509051136-39cb288412c4
+	k8s.io/kubernetes v1.13.3
+	k8s.io/utils v0.0.0-20190907131718-3d4f5b7dea0b
+	sigs.k8s.io/controller-runtime v0.1.9
+	sigs.k8s.io/testing_frameworks v0.1.1
+	sigs.k8s.io/yaml v1.1.0
+)

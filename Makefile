@@ -1,4 +1,3 @@
-HAS_DEP := $(shell command -v dep;)
 HAS_LINT := $(shell command -v golint;)
 
 # Run tests
@@ -6,13 +5,7 @@ HAS_LINT := $(shell command -v golint;)
 test:
 	go test ./pkg/... ./cmd/... -coverprofile coverage.out
 
-depend:
-ifndef HAS_DEP
-	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-endif
-	dep ensure -v
-
-check: depend generate fmt vet lint
+check: generate fmt vet lint
 
 fmt:
 	hack/verify-gofmt.sh
@@ -48,7 +41,7 @@ endif
 	hack/gen-python-sdk/gen-sdk.sh
 
 # Build images for Katib v1beta1 components
-build: depend generate
+build: generate
 ifeq ($(and $(REGISTRY),$(TAG)),)
 	$(error REGISTRY and TAG must be set. Usage make build REGISTRY=<registry> TAG=<TAG>)
 endif

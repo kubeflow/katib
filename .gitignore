@@ -68,3 +68,6 @@ $RECYCLE.BIN/
 /katib-controller
 /katib-db-manager
 /katib-ui
+
+## Vendor dir
+vendor
