@@ -17,7 +17,7 @@ var (
 )
 
 func init() {
-	port = flag.String("port", "80", "The port to listen to for incoming HTTP connections")
+	port = flag.String("port", "8080", "The port to listen to for incoming HTTP connections")
 	host = flag.String("host", "0.0.0.0", "The host to listen to for incoming HTTP connections")
 	buildDir = flag.String("build-dir", "/app/build", "The dir of frontend")
 	dbManagerAddr = flag.String("db-manager-address", common_v1beta1.GetDBManagerAddr(), "The address of Katib DB manager")
