@@ -40,6 +40,6 @@ echo "Available CRDs"
 kubectl get crd
 
 echo "Running Experiment from ${EXPERIMENT_FILE} file"
-go run ./test/e2e/v1beta1/run-e2e-experiment.go ${EXPERIMENT_FILE}
+./run-e2e-experiment ${EXPERIMENT_FILE}
 
 exit 0

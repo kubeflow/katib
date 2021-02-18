@@ -27,8 +27,7 @@ see the following user guides:
 
 ## Requirements
 
-- [Go](https://golang.org/)
-- [Dep](https://golang.github.io/dep/)
+- [Go](https://golang.org/) (1.13 or later)
 - [Docker](https://docs.docker.com/) (17.05 or later.)
 
 ## Build from source code
