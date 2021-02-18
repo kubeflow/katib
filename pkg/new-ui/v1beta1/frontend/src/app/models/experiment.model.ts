@@ -31,9 +31,9 @@ interface ExperimentCurrentOptimalTrial {
 }
 
 export interface Experiment {
-  Name: string;
-  Namespace: string;
-  Status: string;
+  name: string;
+  namespace: string;
+  status: string;
   startTime: string;
   conditions: ExperimentCondition[];
   currentOptimalTrial: ExperimentCurrentOptimalTrial;

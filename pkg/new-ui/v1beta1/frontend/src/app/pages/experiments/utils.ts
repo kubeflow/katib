@@ -6,22 +6,22 @@ export function parseStatus(exp: Experiment): Status {
   const statusCol = {
     phase: STATUS_TYPE.ERROR,
     state: '',
-    message: exp.Status,
+    message: exp.status,
   };
 
-  if (exp.Status === StatusEnum.SUCCEEDED) {
+  if (exp.status === StatusEnum.SUCCEEDED) {
     statusCol.phase = STATUS_TYPE.READY;
   }
 
-  if (exp.Status === StatusEnum.FAILED) {
+  if (exp.status === StatusEnum.FAILED) {
     statusCol.phase = STATUS_TYPE.WARNING;
   }
 
-  if (exp.Status === StatusEnum.CREATED) {
+  if (exp.status === StatusEnum.CREATED) {
     statusCol.phase = STATUS_TYPE.UNAVAILABLE;
   }
 
-  if (exp.Status === StatusEnum.RUNNING) {
+  if (exp.status === StatusEnum.RUNNING) {
     statusCol.phase = STATUS_TYPE.UNAVAILABLE;
   }
 

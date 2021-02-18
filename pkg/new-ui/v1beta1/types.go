@@ -36,10 +36,10 @@ type Option struct {
 }
 
 type ExperimentView struct {
-	Name      string
-	Namespace string
-	Type      string
-	Status    string
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	Type      string `json:"type"`
+	Status    string `json:"status"`
 	v1beta1experiment.ExperimentStatus
 }
 

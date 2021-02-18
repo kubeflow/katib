@@ -34,7 +34,7 @@ export const experimentsTableConfig: TableConfig = {
       matHeaderCellDef: 'Name',
       matColumnDef: 'name',
       value: new PropertyValue({
-        field: 'Name',
+        field: 'name',
         isLink: true,
       }),
     },

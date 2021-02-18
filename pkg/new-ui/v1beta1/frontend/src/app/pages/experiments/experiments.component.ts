@@ -65,7 +65,7 @@ export class ExperimentsComponent implements OnInit, OnDestroy {
   }
 
   trackByFn(index: number, experiment: Experiment) {
-    return `${experiment.Name}/${experiment.Namespace}`;
+    return `${experiment.name}/${experiment.namespace}`;
   }
 
   reactToAction(a: ActionEvent) {
@@ -75,10 +75,10 @@ export class ExperimentsComponent implements OnInit, OnDestroy {
         this.router.navigate(['/new']);
         break;
       case 'name:link':
-        this.router.navigate([`/experiment/${exp.Name}`]);
+        this.router.navigate([`/experiment/${exp.name}`]);
         break;
       case 'delete':
-        this.onDeleteExperiment(exp.Name);
+        this.onDeleteExperiment(exp.name);
         break;
     }
   }
@@ -126,7 +126,7 @@ export class ExperimentsComponent implements OnInit, OnDestroy {
         this.backend.getExperiments().subscribe(experiments => {
           // the backend should have proper namespace isolation
           experiments = experiments.filter(
-            experiment => experiment.Namespace === this.currNamespace,
+            experiment => experiment.namespace === this.currNamespace,
           );
 
           if (isEqual(this.experiments, experiments)) {
