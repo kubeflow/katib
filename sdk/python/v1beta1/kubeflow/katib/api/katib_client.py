@@ -357,8 +357,7 @@ class KatibClient(object):
                     if status == "Succeeded":
                         output["name"] = i.get("metadata", {}).get("name")
                         output["hyperparams"] = i.get("spec", {}).get("parameterAssignments", [])
-                        output["metrics"] = (
-                            # FIXME: Support additional parameters
+                        output["metrics"] = (                            
                             i.get("status", {})
                             .get("observation", {})
                             .get("metrics", [])
