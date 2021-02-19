@@ -50,46 +50,48 @@ func (e *Experiment) setDefaultResumePolicy() {
 
 func (e *Experiment) setDefaultObjective() {
 	obj := e.Spec.Objective
-	if obj.MetricStrategies == nil {
-		obj.MetricStrategies = make([]common.MetricStrategy, 0)
-	}
-	objectiveHasDefault := false
-	metricsWithDefault := make(map[string]int)
-	for _, strategy := range obj.MetricStrategies {
-		if strategy.Name == obj.ObjectiveMetricName {
-			objectiveHasDefault = true
-			continue
+	if obj != nil {
+		if obj.MetricStrategies == nil {
+			obj.MetricStrategies = make([]common.MetricStrategy, 0)
 		}
-		metricsWithDefault[strategy.Name] = 1
-	}
-
-	// set default strategy of objective according to ObjectiveType
-	if !objectiveHasDefault {
-		var strategy common.MetricStrategy
-		switch e.Spec.Objective.Type {
-		case common.ObjectiveTypeMinimize:
-			strategy = common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByMin}
-		case common.ObjectiveTypeMaximize:
-			strategy = common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByMax}
-		default:
-			strategy = common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByLatest}
+		objectiveHasDefault := false
+		metricsWithDefault := make(map[string]int)
+		for _, strategy := range obj.MetricStrategies {
+			if strategy.Name == obj.ObjectiveMetricName {
+				objectiveHasDefault = true
+				continue
+			}
+			metricsWithDefault[strategy.Name] = 1
 		}
-		obj.MetricStrategies = append(obj.MetricStrategies, strategy)
-	}
 
-	// set default strategy of additional metrics to ExtractByLatest
-	for _, metricName := range obj.AdditionalMetricNames {
-		if _, ok := metricsWithDefault[metricName]; !ok {
+		// Set default strategy of objective according to ObjectiveType.
+		if !objectiveHasDefault {
 			var strategy common.MetricStrategy
 			switch e.Spec.Objective.Type {
 			case common.ObjectiveTypeMinimize:
-				strategy = common.MetricStrategy{Name: metricName, Value: common.ExtractByMin}
+				strategy = common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByMin}
 			case common.ObjectiveTypeMaximize:
-				strategy = common.MetricStrategy{Name: metricName, Value: common.ExtractByMax}
+				strategy = common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByMax}
 			default:
-				strategy = common.MetricStrategy{Name: metricName, Value: common.ExtractByLatest}
+				strategy = common.MetricStrategy{Name: obj.ObjectiveMetricName, Value: common.ExtractByLatest}
 			}
 			obj.MetricStrategies = append(obj.MetricStrategies, strategy)
+		}
+
+		// Set default strategy of additional metrics to ExtractByLatest.
+		for _, metricName := range obj.AdditionalMetricNames {
+			if _, ok := metricsWithDefault[metricName]; !ok {
+				var strategy common.MetricStrategy
+				switch e.Spec.Objective.Type {
+				case common.ObjectiveTypeMinimize:
+					strategy = common.MetricStrategy{Name: metricName, Value: common.ExtractByMin}
+				case common.ObjectiveTypeMaximize:
+					strategy = common.MetricStrategy{Name: metricName, Value: common.ExtractByMax}
+				default:
+					strategy = common.MetricStrategy{Name: metricName, Value: common.ExtractByLatest}
+				}
+				obj.MetricStrategies = append(obj.MetricStrategies, strategy)
+			}
 		}
 	}
 }
