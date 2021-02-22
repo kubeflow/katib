@@ -310,7 +310,7 @@ to submit your first Katib experiment.
 ## Community
 
 We are always growing our community and invite new users and AutoML enthusiasts
-to contribute to the Katib project. The following links provides information
+to contribute to the Katib project. The following links provide information
 about getting involved in the community:
 
 - If you use Katib, please update [the adopters list](ADOPTERS.md).
