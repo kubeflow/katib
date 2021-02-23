@@ -30,7 +30,7 @@ RUN npm ci
 COPY ./pkg/new-ui/v1beta1/frontend/ .
 COPY --from=frontend-kubeflow-lib /src/dist/kubeflow/ ./node_modules/kubeflow/
 
-RUN npm run build:prod -- --output-path=./dist/default
+RUN npm run build:prod
 
 # --- Build the backend ---
 FROM golang:alpine AS go-build
@@ -49,8 +49,7 @@ RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
 FROM alpine:3.7
 WORKDIR /app
 COPY --from=go-build /go/src/github.com/kubeflow/katib/cmd/new-ui/katib-ui /app/
-COPY --from=frontend /src/dist/default /app/build/
-COPY --from=frontend /src/dist/default /app/build/static/
+COPY --from=frontend /src/dist/static /app/build/static/
 
 USER 1000
 ENTRYPOINT ["./katib-ui"]
