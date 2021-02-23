@@ -352,17 +352,17 @@ class KatibClient(object):
             result = []
             for i in katibtrial.get("items"):
                 output = {}
-                if i.get("metadata", {}).get("ownerReferences")[0].get("name") == name:                    
-                    output["status"] = i.get("status", {}).get(
-                    "conditions", [])[-1].get("type")
-                    output["name"] = i.get("metadata", {}).get("name")
-                    output["hyperparameters"] = i.get("spec", {}).get("parameterAssignments", [])
-                    output["metrics"] = (                            
-                        i.get("status", {})
-                        .get("observation", {})
-                        .get("metrics", [])
-                    )
-                    result.append(output)
+                if i.get("metadata", {}).get("ownerReferences")[0].get("name") == name:
+                    status = i.get("status", {}).get("conditions", [])[-1].get("type")
+                    if status == "Succeeded":
+                        output["name"] = i.get("metadata", {}).get("name")
+                        output["hyperparameters"] = i.get("spec", {}).get("parameterAssignments", [])
+                        output["metrics"] = (
+                            i.get("status", {})
+                            .get("observation", {})
+                            .get("metrics", [])
+                        )
+                        result.append(output)
         except multiprocessing.TimeoutError:
             raise RuntimeError("Timeout trying to getkatib experiment.")
         except client.rest.ApiException as e:
