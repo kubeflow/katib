@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "format": "prettier --write './**/*.{ts,html,css}'",
     "start": "npm run copyLibAssets && ng serve --proxy-config proxy.conf.json",
     "build:watch": "npm run copyLibAssets && ng build --base-href /katib/ --deploy-url /katib/static/ --outputPath dist/static --watch",
     "build:prod": "npm run copyLibAssets && ng build --base-href /katib/ --deploy-url /katib/static/  --outputPath dist/static --prod",
