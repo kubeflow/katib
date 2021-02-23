@@ -97,7 +97,7 @@ After that, you can modify UI [deployment](https://github.com/kubeflow/katib/blo
 
 ## Code style
 
-To make frontend code consistent and easy to review we use [Prettier](https://prettier.io/). You can find Prettier config [here](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1/frontend/.prettierrc.yaml).
+To make frontend code consistent and easy to review we use [Prettier](https://prettier.io/). You can find Prettier config [here](https://github.com/kubeflow/katib/tree/master/pkg/new-ui/v1beta1/frontend/.prettierrc.yaml).
 Check [here](https://prettier.io/docs/en/install.html), how to install Prettier CLI to check and format your code.
 
 ### IDE integration
