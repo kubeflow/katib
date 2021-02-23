@@ -14,7 +14,7 @@ export const GridSettings: AlgorithmSetting[] = [];
 
 export const RandomSearchSettings: AlgorithmSetting[] = [
   {
-    name: 'random_state ',
+    name: 'random_state',
     value: 'None',
     type: AlgorithmSettingType.STRING,
   },
