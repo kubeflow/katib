@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"path/filepath"
 
 	"github.com/ghodss/yaml"
 	"google.golang.org/grpc"
@@ -24,6 +25,20 @@ func NewKatibUIHandler(dbManagerAddr string) *KatibUIHandler {
 	return &KatibUIHandler{
 		katibClient:   kclient,
 		dbManagerAddr: dbManagerAddr,
+	}
+}
+
+// ServeIndex will return index.html for any non-API URL
+func (k *KatibUIHandler) ServeIndex(buildDir string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fp := filepath.Join(buildDir, "static/index.html")
+		log.Printf("Sending file %s for url: %s", fp, r.URL)
+
+		// never cache index.html
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0")
+
+		// return the contents of index.html
+		http.ServeFile(w, r, fp)
 	}
 }
 
