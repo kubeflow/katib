@@ -91,7 +91,7 @@ After that, you can access the UI using this URL: `http://localhost:8080/katib/`
 
 ## Production
 
-To run Katib UI in Production, after all changes in frontend and backend, you need to create an image for the UI. Under `/katib` directory run this: `docker build . -f cmd/new-ui/v1beta1/Dockerfile -t <name of your image>` to build the image. If Docker resources are not enough to build the frontend, you get `node` out of memory error. You can try to increase Docker resources or modify `package.json` as detailed [above](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1#serve-ui-frontend-and-backend) at step 1.
+To run Katib UI in Production, after all changes in frontend and backend, you need to create an image for the UI. Under `/katib` directory run this: `docker build . -f cmd/new-ui/v1beta1/Dockerfile -t <name of your image>` to build the image.
 
 After that, you can modify UI [deployment](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/ui/deployment.yaml#L24) with your new image. Then, follow [these steps](https://www.kubeflow.org/docs/components/hyperparameter-tuning/hyperparameter/#accessing-the-katib-ui) to access Katib UI.
 
@@ -120,4 +120,3 @@ Before submitting PR check and format your code. To check your code run `npm run
 If all files formatted you can submit the PR.
 
 If you don't want to format some code, [here](https://prettier.io/docs/en/ignore.html) is an instruction how to disable Prettier.
-
