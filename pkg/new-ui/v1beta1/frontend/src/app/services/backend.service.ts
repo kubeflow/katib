@@ -90,7 +90,7 @@ export class KWABackendService extends BackendService {
   }
 
   createExperiment(exp: ExperimentK8s): Observable<any> {
-    const url = `/katib/submit_hp_job/`;
+    const url = `/katib/create_experiment/`;
 
     return this.http
       .post(url, { postData: exp })

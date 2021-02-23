@@ -52,63 +52,45 @@ func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1beta1.DBMa
 	return conn, c
 }
 
-func (k *KatibUIHandler) SubmitYamlJob(w http.ResponseWriter, r *http.Request) {
+func (k *KatibUIHandler) CreateExperiment(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	var data map[string]interface{}
 
 	json.NewDecoder(r.Body).Decode(&data)
-
-	job := experimentv1beta1.Experiment{}
-	if yamlContent, ok := data["yaml"].(string); ok {
-		err := yaml.Unmarshal([]byte(yamlContent), &job)
-		if err != nil {
-			log.Printf("Unmarshal YAML content failed: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		err = k.katibClient.CreateRuntimeObject(&job)
-		if err != nil {
-			log.Printf("CreateRuntimeObject from YAML failed: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	dataJSON, ok := data["postData"]
+	if !ok {
+		msg := "Couldn't load the 'postData' field of the request's data"
+		log.Printf(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
 	}
 
-}
-
-func (k *KatibUIHandler) SubmitParamsJob(w http.ResponseWriter, r *http.Request) {
-	//enableCors(&w)
-	var data map[string]interface{}
-
-	json.NewDecoder(r.Body).Decode(&data)
-	if data, ok := data["postData"]; ok {
-		jsonbody, err := json.Marshal(data)
-		if err != nil {
-			log.Printf("Marshal data for experiment failed: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		job := experimentv1beta1.Experiment{}
-		if err := json.Unmarshal(jsonbody, &job); err != nil {
-			log.Printf("Unmarshal experiment failed: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		dataMap := data.(map[string]interface{})
-		job.TypeMeta = metav1.TypeMeta{
-			APIVersion: "kubeflow.org/v1beta1",
-			Kind:       "Experiment",
-		}
-		job.ObjectMeta = metav1.ObjectMeta{
-			Name:      dataMap["metadata"].(map[string]interface{})["name"].(string),
-			Namespace: dataMap["metadata"].(map[string]interface{})["namespace"].(string),
-		}
-		err = k.katibClient.CreateRuntimeObject(&job)
-		if err != nil {
-			log.Printf("CreateRuntimeObject from parameters failed: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	jsonbody, err := json.Marshal(dataJSON)
+	if err != nil {
+		log.Printf("Marshal data for experiment failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	job := experimentv1beta1.Experiment{}
+	if err := json.Unmarshal(jsonbody, &job); err != nil {
+		log.Printf("Unmarshal experiment failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	dataMap := dataJSON.(map[string]interface{})
+	job.TypeMeta = metav1.TypeMeta{
+		APIVersion: "kubeflow.org/v1beta1",
+		Kind:       "Experiment",
+	}
+	job.ObjectMeta = metav1.ObjectMeta{
+		Name:      dataMap["metadata"].(map[string]interface{})["name"].(string),
+		Namespace: dataMap["metadata"].(map[string]interface{})["namespace"].(string),
+	}
+	err = k.katibClient.CreateRuntimeObject(&job)
+	if err != nil {
+		log.Printf("CreateRuntimeObject from parameters failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 

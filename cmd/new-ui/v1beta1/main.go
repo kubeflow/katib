@@ -34,9 +34,7 @@ func main() {
 
 	http.HandleFunc("/katib/fetch_experiments/", kuh.FetchAllExperiments)
 
-	http.HandleFunc("/katib/submit_yaml/", kuh.SubmitYamlJob)
-	http.HandleFunc("/katib/submit_hp_job/", kuh.SubmitParamsJob)
-	http.HandleFunc("/katib/submit_nas_job/", kuh.SubmitParamsJob)
+	http.HandleFunc("/katib/create_experiment/", kuh.CreateExperiment)
 
 	http.HandleFunc("/katib/delete_experiment/", kuh.DeleteExperiment)
 
