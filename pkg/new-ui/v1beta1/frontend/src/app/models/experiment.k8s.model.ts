@@ -4,6 +4,9 @@ import { V1Container } from '@kubernetes/client-node';
 /*
  * K8s object definitions
  */
+export const EXPERIMENT_KIND = 'Experiment';
+export const EXPERIMENT_APIVERSION = 'kubeflow.org/v1beta1';
+
 export interface ExperimentK8s extends K8sObject {
   spec?: ExperimentSpec;
   status?: ExperimentStatus;

@@ -10,6 +10,8 @@ import {
   ExperimentK8s,
   ExperimentSpec,
   FeasibleSpaceMinMax,
+  EXPERIMENT_APIVERSION,
+  EXPERIMENT_KIND,
 } from 'src/app/models/experiment.k8s.model';
 import { KWABackendService } from 'src/app/services/backend.service';
 import { NamespaceService, SnackType, SnackBarService } from 'kubeflow';
@@ -79,8 +81,8 @@ export class ExperimentCreationComponent implements OnInit {
     );
 
     return {
-      apiVersion: 'kubeflow.org/v1beta1',
-      kind: 'Experiment',
+      apiVersion: EXPERIMENT_APIVERSION,
+      kind: EXPERIMENT_KIND,
       metadata,
       spec,
     };
