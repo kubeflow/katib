@@ -13,7 +13,7 @@ Katib is a Kubernetes-native project for automated machine learning (AutoML).
 Katib supports
 [Hyperparameter Tuning](https://en.wikipedia.org/wiki/Hyperparameter_optimization),
 [Early Stopping](https://en.wikipedia.org/wiki/Early_stopping) and
-[Neural Architecture Search](https://en.wikipedia.org/wiki/Neural_architecture_search)
+[Neural Architecture Search](https://en.wikipedia.org/wiki/Neural_architecture_search).
 
 Katib is the project which is agnostic to machine learning (ML) frameworks.
 It can tune hyperparameters of applications written in any language of the
@@ -46,8 +46,8 @@ MXNet, PyTorch, XGBoost, and others.
   - [Katib SDK](#katib-sdk)
   - [Cleanups](#cleanups)
 - [Quick Start](#quick-start)
-- [Who are using Katib?](#who-are-using-katib)
-- [CONTRIBUTING](#contributing)
+- [Community](#community)
+- [Contributing](#contributing)
 - [Citation](#citation)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -307,11 +307,28 @@ Please follow the
 [Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/hyperparameter/#examples)
 to submit your first Katib experiment.
 
-## Who are using Katib?
+## Community
 
-Please see [ADOPTERS.md](ADOPTERS.md).
+We are always growing our community and invite new users and AutoML enthusiasts
+to contribute to the Katib project. The following links provide information
+about getting involved in the community:
 
-## CONTRIBUTING
+- If you use Katib, please update [the adopters list](ADOPTERS.md).
+
+- Subscribe
+  [to the calendar](https://calendar.google.com/calendar/u/0/r?cid=ZDQ5bnNpZWZzbmZna2Y5MW8wdThoMmpoazRAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ)
+  to attend the AutoML WG community meeting.
+
+- Check
+  [the AutoML WG meeting notes](https://docs.google.com/document/d/1MChKfzrKAeFRtYqypFbMXL6ZIc_OgijjkvbqmwRV-64/edit).
+
+- Join
+  [the AutoML WG Slack channel](https://kubeflow.slack.com/archives/C018PMV53NW).
+
+- Learn more about Katib in
+  [the presentations and demos list](./docs/presentations.md).
+
+## Contributing
 
 Please feel free to test the system!
 [developer-guide.md](./docs/developer-guide.md) is a good starting point
