@@ -329,6 +329,52 @@ class KatibClient(object):
           {2} ".format(name, namespace, e))
         return result
 
+    def get_success_trial_details(self, name=None, namespace=None):
+        """
+        Get trial details that succeeded for an experiment
+        :param name: existing experiment name
+        :param namespace: defaults to current or default namespace
+        :return: trials name with hyperparameters and metrics
+        """
+        if namespace is None:
+            namespace = utils.get_default_target_namespace()
+
+        thread = self.api_instance.list_namespaced_custom_object(
+            constants.KUBEFLOW_GROUP,
+            constants.KATIB_VERSION,
+            namespace=namespace,
+            plural=constants.TRIAL_PLURAL,
+            async_req=True)
+
+        katibtrial = None
+        try:
+            katibtrial = thread.get(constants.APISERVER_TIMEOUT)
+            result = []
+            for i in katibtrial.get("items"):
+                output = {}
+                if i.get("metadata", {}).get("ownerReferences")[0].get("name") == name:
+                    status = i.get("status", {}).get("conditions", [])[-1].get("type")
+                    if status == "Succeeded":
+                        output["name"] = i.get("metadata", {}).get("name")
+                        output["hyperparameters"] = i.get("spec", {}).get("parameterAssignments", [])
+                        output["metrics"] = (
+                            i.get("status", {})
+                            .get("observation", {})
+                            .get("metrics", [])
+                        )
+                        result.append(output)
+        except multiprocessing.TimeoutError:
+            raise RuntimeError("Timeout trying to getkatib experiment.")
+        except client.rest.ApiException as e:
+            raise RuntimeError(
+                "Exception when calling CustomObjectsApi->get_namespaced_custom_object:\
+          %s\n" % e)
+        except Exception as e:
+            raise RuntimeError(
+                "There was a problem to get experiment {0} in namespace {1}. Exception: \
+          {2} ".format(name, namespace, e))
+        return result
+
     def get_optimal_hyperparameters(self, name=None, namespace=None):
         """
         Get status, currentOptimalTrial with parameterAssignments
