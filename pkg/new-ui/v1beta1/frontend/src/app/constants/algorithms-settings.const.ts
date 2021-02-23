@@ -20,7 +20,7 @@ export const RandomSearchSettings: AlgorithmSetting[] = [
   },
 ];
 
-export const BaysianOptimisationSettings: AlgorithmSetting[] = [
+export const BayesianOptimizationSettings: AlgorithmSetting[] = [
   {
     name: 'base_estimator',
     value: 'GP',
@@ -198,7 +198,7 @@ export const AlgorithmSettingsMap: { [key: string]: AlgorithmSetting[] } = {
   [AlgorithmsEnum.GRID]: GridSettings,
   [AlgorithmsEnum.RANDOM]: RandomSearchSettings,
   [AlgorithmsEnum.HYPERBAND]: HyperbandSettings,
-  [AlgorithmsEnum.BAYESIAN_OPTIMIZATION]: BaysianOptimisationSettings,
+  [AlgorithmsEnum.BAYESIAN_OPTIMIZATION]: BayesianOptimizationSettings,
   [AlgorithmsEnum.TPE]: TPESettings,
   [AlgorithmsEnum.CMAES]: CMAESSettings,
   [AlgorithmsEnum.ENAS]: ENASSettings,
