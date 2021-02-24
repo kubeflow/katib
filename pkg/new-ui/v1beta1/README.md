@@ -70,7 +70,11 @@ npm run start
 
 This is the recommended way to test the web app e2e. In order to build the UI and serve it via the backend, locally, you will need to:
 
-1. Build the UI locally. You can follow the steps from the previous section, but instead of running `npm run start` you will need to run `npm run build:watch`. This will start a process that will be watching the source code and building the frontend artifacts under `frontend/dist/static` folder.
+1. Build the UI locally. You have to follow the steps from the previous section, but instead of running `npm run start` you need to run `npm run build:prod`. It builds the frontend artifacts under `frontend/dist/static` folder.
+    
+    Moreover, you are able to run `npm run build:watch` instead of `npm run build:prod`. In that case, it starts a process which is watching the source code changes and building the frontend artifacts under `frontend/dist/static` folder.
+
+    Learn more about Angular scripts in the [official guide](https://angular.io/cli/build).
 1. Run `kubectl port-forward svc/katib-db-manager 6789 -n kubeflow` to expose `katib-db-manager` service for external access. You can use [different ways](https://kubernetes.io/docs/tasks/access-application-cluster/) to get external address for Kubernetes service. After exposing service, you should be able to receive information by running `wget <external-ip>:<service-port>`. In case of port-forwarding above, you have to run `wget localhost:6789`.
 
 1. Go to `cmd/new-ui/v1beta1`.
