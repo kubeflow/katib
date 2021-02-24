@@ -18,7 +18,7 @@ export interface ExperimentSpec {
   maxFailedTrialCount?: number;
   objective?: ObjectiveSpec;
   algorithm?: AlgorithmSpec;
-  parameters?: ParametersSpec[];
+  parameters?: ParameterSpec[];
   metricsCollectorSpec?: MetricsCollectorSpec;
   trialTemplate?: TrialTemplateSpec;
 }
@@ -57,7 +57,7 @@ export interface FeasibleSpaceList {
   list: string[];
 }
 
-interface ParametersSpec {
+interface ParameterSpec {
   name: string;
   parameterType: ParameterType;
   feasibleSpace: FeasibleSpaceMinMax | FeasibleSpaceList;
