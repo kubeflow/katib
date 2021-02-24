@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 
 	"google.golang.org/grpc"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -76,15 +75,7 @@ func (k *KatibUIHandler) CreateExperiment(w http.ResponseWriter, r *http.Request
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	dataMap := dataJSON.(map[string]interface{})
-	job.TypeMeta = metav1.TypeMeta{
-		APIVersion: "kubeflow.org/v1beta1",
-		Kind:       "Experiment",
-	}
-	job.ObjectMeta = metav1.ObjectMeta{
-		Name:      dataMap["metadata"].(map[string]interface{})["name"].(string),
-		Namespace: dataMap["metadata"].(map[string]interface{})["namespace"].(string),
-	}
+
 	err = k.katibClient.CreateRuntimeObject(&job)
 	if err != nil {
 		log.Printf("CreateRuntimeObject from parameters failed: %v", err)
