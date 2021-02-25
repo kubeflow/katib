@@ -15,8 +15,8 @@ export class FormNasOperationsComponent {
   addCtrl() {
     this.formArray.push(
       createNasOperationGroup({
-        type: '',
-        params: [],
+        operationType: '',
+        parameters: [],
       }),
     );
   }

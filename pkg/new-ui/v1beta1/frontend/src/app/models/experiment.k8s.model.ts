@@ -21,6 +21,7 @@ export interface ExperimentSpec {
   parameters?: ParameterSpec[];
   metricsCollectorSpec?: MetricsCollectorSpec;
   trialTemplate?: TrialTemplateSpec;
+  nasConfig?: NasConfig;
 }
 
 export interface ObjectiveSpec {
@@ -57,13 +58,31 @@ export interface FeasibleSpaceList {
   list: string[];
 }
 
-interface ParameterSpec {
+export interface ParameterSpec {
   name: string;
   parameterType: ParameterType;
-  feasibleSpace: FeasibleSpaceMinMax | FeasibleSpaceList;
+  feasibleSpace: FeasibleSpace;
 }
 
+export type FeasibleSpace = FeasibleSpaceMinMax | FeasibleSpaceList;
+
 export type ParameterType = 'int' | 'double' | 'discrete' | 'categorical';
+
+export interface NasConfig {
+  graphConfig?: GraphConfig;
+  operations?: NasOperation[];
+}
+
+export interface GraphConfig {
+  numLayers?: number;
+  inputSizes?: number[];
+  outputSizes?: number[];
+}
+
+export interface NasOperation {
+  operationType: string;
+  parameters: ParameterSpec[];
+}
 
 export interface MetricsCollectorSpec {
   source?: SourceSpec;

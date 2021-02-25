@@ -2,6 +2,10 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AddParamModalComponent } from '../add-modal/add-modal.component';
+import {
+  FeasibleSpaceMinMax,
+  ParameterType,
+} from 'src/app/models/experiment.k8s.model';
 
 @Component({
   selector: 'app-shared-parameter',
@@ -21,39 +25,43 @@ export class ParameterComponent implements OnInit {
       return false;
     }
 
-    return Array.isArray(this.paramCtrl.get('value').value);
+    return this.type === 'discrete' || this.type === 'categorical';
   }
 
-  get name() {
+  get name(): string {
     return this.paramCtrl.get('name').value;
   }
 
-  get type() {
-    return this.paramCtrl.get('type').value;
+  get type(): ParameterType {
+    return this.paramCtrl.get('parameterType').value;
   }
 
   get min() {
-    return this.paramCtrl.get('value').value.min;
+    return this.paramCtrl.get('feasibleSpace').value.min;
   }
 
   get max() {
-    return this.paramCtrl.get('value').value.max;
+    return this.paramCtrl.get('feasibleSpace').value.max;
   }
 
   get step() {
-    return this.paramCtrl.get('value').value.step;
+    return this.paramCtrl.get('feasibleSpace').value.step;
   }
 
   get stepSign() {
-    if (this.step >= 0) {
+    if (this.step > 0) {
       return ', +';
+    }
+
+    if (this.step < 0) {
+      return ', ';
     }
 
     return '';
   }
 
   get listValue(): any[] {
-    return this.paramCtrl.get('value').value;
+    return this.paramCtrl.get('feasibleSpace').value.list;
   }
 
   get listStr() {
@@ -68,9 +76,13 @@ export class ParameterComponent implements OnInit {
         sub.unsubscribe();
 
         if (group) {
-          this.paramCtrl.get('type').setValue(group.get('type').value);
           this.paramCtrl.get('name').setValue(group.get('name').value);
-          this.paramCtrl.get('value').setValue(group.get('value').value);
+          this.paramCtrl
+            .get('parameterType')
+            .setValue(group.get('parameterType').value);
+          this.paramCtrl
+            .get('feasibleSpace')
+            .setValue(group.get('feasibleSpace').value);
         }
       });
   }

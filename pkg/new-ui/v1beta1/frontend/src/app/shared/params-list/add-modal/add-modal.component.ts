@@ -2,7 +2,12 @@ import { Component, OnInit, OnDestroy, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { createParameterGroup } from '../../utils';
+import { createParameterGroup, createFeasibleSpaceGroup } from '../../utils';
+import {
+  FeasibleSpace,
+  FeasibleSpaceMinMax,
+  FeasibleSpaceList,
+} from 'src/app/models/experiment.k8s.model';
 
 @Component({
   selector: 'app-add-param-modal',
@@ -16,17 +21,8 @@ export class AddParamModalComponent implements OnInit, OnDestroy {
   subs = new Subscription();
 
   get isList(): boolean {
-    const tp = this.formGroup.get('type').value;
+    const tp = this.formGroup.get('parameterType').value;
     return tp === 'discrete' || tp === 'categorical';
-  }
-
-  get inputStep(): number {
-    const tp = this.formGroup.get('type').value;
-    if (tp === 'int') {
-      return 1;
-    }
-
-    return 0.01;
   }
 
   constructor(
@@ -39,25 +35,22 @@ export class AddParamModalComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subs.add(
-      this.formGroup.get('type').valueChanges.subscribe(type => {
+      this.formGroup.get('parameterType').valueChanges.subscribe(type => {
+        let fsMinMax: FeasibleSpaceMinMax = { min: '1', max: '64', step: '' };
+        let fsList: FeasibleSpaceList = { list: [] };
+        let fs: FeasibleSpace;
+
+        fs = fsMinMax;
         if (this.isList) {
-          this.formGroup.removeControl('value');
-          this.formGroup.addControl(
-            'value',
-            new FormArray([], Validators.required),
-          );
-          return;
+          fs = fsList;
         }
 
-        this.formGroup.removeControl('value');
+        this.formGroup.removeControl('feasibleSpace');
         this.formGroup.addControl(
-          'value',
-          new FormGroup({
-            min: new FormControl('1', Validators.required),
-            max: new FormControl('64', Validators.required),
-            step: new FormControl('', []),
-          }),
+          'feasibleSpace',
+          createFeasibleSpaceGroup(type, fs),
         );
+        return;
       }),
     );
   }

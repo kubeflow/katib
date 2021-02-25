@@ -13,7 +13,7 @@
     <!--type-->
     <mat-form-field appearance="outline">
       <mat-label>Type</mat-label>
-      <mat-select formControlName="type">
+      <mat-select formControlName="parameterType">
         <mat-option value="int">Integer</mat-option>
         <mat-option value="double">Double</mat-option>
         <mat-option value="discrete">Discrete</mat-option>
@@ -24,7 +24,7 @@
     <!--value inputs-->
     <ng-container *ngIf="!isList; else listVal">
       <!--range-->
-      <div class="range-wrapper " [formGroup]="formGroup.get('value')">
+      <div class="range-wrapper " [formGroup]="formGroup.get('feasibleSpace')">
         <mat-form-field appearance="outline">
           <mat-label>Min</mat-label>
           <input matInput formControlName="min" />
@@ -47,7 +47,7 @@
       <app-shared-list-input
         header="List of values"
         valueLabel="Value"
-        [formArray]="formGroup.get('value')"
+        [formArray]="formGroup.get('feasibleSpace').get('list')"
       ></app-shared-list-input>
     </ng-template>
   </div>

@@ -1,5 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { FormArray } from '@angular/forms';
+import {
+  ParameterSpec,
+  FeasibleSpaceList,
+  FeasibleSpaceMinMax,
+} from 'src/app/models/experiment.k8s.model';
 
 @Component({
   selector: 'app-form-hyper-parameters',
@@ -12,7 +17,7 @@ export class FormHyperParametersComponent {
   constructor() {}
 
   get combinations() {
-    const params = this.hyperParamsArray.value;
+    const params = this.hyperParamsArray.value as ParameterSpec[];
     if (!params.length) {
       return 0;
     }
@@ -20,14 +25,34 @@ export class FormHyperParametersComponent {
     let confs = 1;
     let currentConfs = 0;
     for (const param of params) {
-      if (Array.isArray(param.value)) {
-        currentConfs = param.value.length;
+      if (
+        param.parameterType === 'discrete' ||
+        param.parameterType === 'categorical'
+      ) {
+        currentConfs = (param.feasibleSpace as FeasibleSpaceList).list.length;
       } else {
-        const min = param.value.min;
-        const max = param.value.max;
-        const step = param.value.step;
+        const fs = param.feasibleSpace as FeasibleSpaceMinMax;
 
-        currentConfs = Math.ceil((max - min) / step) + 1;
+        const min = fs.min;
+        const max = fs.max;
+        const step = fs.step;
+
+        // don't calculate the combinations is step is omitted
+        if (step === '') {
+          return null;
+        }
+
+        try {
+          parseFloat(min);
+          parseFloat(max);
+          parseFloat(step);
+        } catch (e) {
+          console.log('Could not convert min/max/step to number');
+          return null;
+        }
+
+        currentConfs =
+          Math.ceil((parseFloat(max) - parseFloat(min)) / parseFloat(step)) + 1;
       }
 
       if (currentConfs === 0) {

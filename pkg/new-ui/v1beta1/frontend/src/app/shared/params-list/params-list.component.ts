@@ -8,6 +8,7 @@ import {
 } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AddParamModalComponent } from './add-modal/add-modal.component';
+import { createParameterGroup } from '../utils';
 
 @Component({
   selector: 'app-shared-params-list',
@@ -26,14 +27,14 @@ export class ParamsListComponent implements OnInit {
   }
 
   addParam() {
-    const newParamGroup = new FormGroup({
-      name: new FormControl('', Validators.required),
-      type: new FormControl('int'),
-      value: new FormGroup({
-        min: new FormControl('1', Validators.required),
-        max: new FormControl('64', Validators.required),
-        step: new FormControl('', []),
-      }),
+    const newParamGroup = createParameterGroup({
+      name: '',
+      parameterType: 'int',
+      feasibleSpace: {
+        min: '1',
+        max: '64',
+        step: '1',
+      },
     });
 
     const sub = this.dialog

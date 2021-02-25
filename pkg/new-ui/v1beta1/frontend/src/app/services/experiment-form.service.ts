@@ -13,7 +13,12 @@ import { createParameterGroup, createNasOperationGroup } from '../shared/utils';
 import { CollectorKind } from '../pages/experiment-creation/metrics-collector/types';
 import { K8sObject, SnackBarService, SnackType } from 'kubeflow';
 import { dump, load } from 'js-yaml';
-import { ObjectiveSpec, AlgorithmSpec } from '../models/experiment.k8s.model';
+import {
+  ObjectiveSpec,
+  AlgorithmSpec,
+  ParameterSpec,
+  FeasibleSpaceMinMax,
+} from '../models/experiment.k8s.model';
 
 @Injectable()
 export class ExperimentFormService {
@@ -61,8 +66,8 @@ export class ExperimentFormService {
     return this.builder.array([
       createParameterGroup({
         name: 'lr',
-        type: 'double',
-        value: {
+        parameterType: 'double',
+        feasibleSpace: {
           min: '0.01',
           max: '0.03',
           step: '0.01',
@@ -70,8 +75,8 @@ export class ExperimentFormService {
       }),
       createParameterGroup({
         name: 'num-layers',
-        type: 'int',
-        value: {
+        parameterType: 'int',
+        feasibleSpace: {
           min: '1',
           max: '64',
           step: '1',
@@ -79,8 +84,8 @@ export class ExperimentFormService {
       }),
       createParameterGroup({
         name: 'optimizer',
-        type: 'categorical',
-        value: ['sgd', 'adams', 'ftrl'],
+        parameterType: 'categorical',
+        feasibleSpace: { list: ['sgd', 'adams', 'ftrl'] },
       }),
     ]);
   }
@@ -96,85 +101,85 @@ export class ExperimentFormService {
   createNasOperationsForm() {
     return this.builder.array([
       createNasOperationGroup({
-        type: 'convolution',
-        params: [
+        operationType: 'convolution',
+        parameters: [
           {
             name: 'filter_size',
-            type: 'categorical',
-            value: [3, 5, 7],
+            parameterType: 'categorical',
+            feasibleSpace: { list: ['3', '5', '7'] },
           },
           {
             name: 'num_filter',
-            type: 'categorical',
-            value: [32, 48, 64],
+            parameterType: 'categorical',
+            feasibleSpace: { list: ['32', '48', '64'] },
           },
           {
             name: 'stride',
-            type: 'categorical',
-            value: [1, 2],
+            parameterType: 'categorical',
+            feasibleSpace: { list: ['1', '2'] },
           },
         ],
       }),
 
       createNasOperationGroup({
-        type: 'separable_convolution',
-        params: [
+        operationType: 'separable_convolution',
+        parameters: [
           {
             name: 'filter_size',
-            type: 'categorical',
-            value: [3, 5, 7],
+            parameterType: 'categorical',
+            feasibleSpace: { list: ['3', '5', '7'] },
           },
           {
             name: 'num_filter',
-            type: 'categorical',
-            value: [32, 48, 64],
+            parameterType: 'categorical',
+            feasibleSpace: { list: ['32', '48', '64'] },
           },
           {
             name: 'stride',
-            type: 'categorical',
-            value: [1, 2],
+            parameterType: 'categorical',
+            feasibleSpace: { list: ['1', '2'] },
           },
           {
             name: 'depth_multiplier',
-            type: 'categorical',
-            value: [1, 2],
+            parameterType: 'categorical',
+            feasibleSpace: { list: ['1', '2'] },
           },
         ],
       }),
 
       createNasOperationGroup({
-        type: 'depthwise_convolution',
-        params: [
+        operationType: 'depthwise_convolution',
+        parameters: [
           {
             name: 'filter_size',
-            type: 'categorical',
-            value: [3, 5, 7],
+            parameterType: 'categorical',
+            feasibleSpace: { list: ['3', '5', '7'] },
           },
           {
             name: 'num_filter',
-            type: 'categorical',
-            value: [32, 48, 64],
+            parameterType: 'categorical',
+            feasibleSpace: { list: ['32', '48', '64'] },
           },
           {
             name: 'depth_multiplier',
-            type: 'categorical',
-            value: [1, 2],
+            parameterType: 'categorical',
+            feasibleSpace: { list: ['1', '2'] },
           },
         ],
       }),
 
       createNasOperationGroup({
-        type: 'reduction',
-        params: [
+        operationType: 'reduction',
+        parameters: [
           {
             name: 'reduction_type',
-            type: 'categorical',
-            value: ['max_pooling', 'avg_pooling'],
+            parameterType: 'categorical',
+            feasibleSpace: { list: ['max_pooling', 'avg_pooling'] },
           },
           {
             name: 'pool_size',
-            type: 'int',
-            value: {
+            parameterType: 'int',
+            feasibleSpace: {
               min: '2',
               max: '3',
               step: '1',
@@ -285,32 +290,22 @@ export class ExperimentFormService {
     };
   }
 
-  hyperParamsFromCtrl(params: FormArray): any {
-    return params.controls.map(paramCtrl => {
-      let feasibleSpace: any = {};
-      const type = paramCtrl.get('type').value;
-
-      if (type === 'int' || type === 'double') {
-        feasibleSpace = {
-          min: paramCtrl.get('value').value.min,
-          max: paramCtrl.get('value').value.max,
-          step: paramCtrl.get('value').value.step,
-        };
-
-        if (feasibleSpace.step === '') {
-          delete feasibleSpace.step;
-        }
-      } else {
-        feasibleSpace = {
-          list: paramCtrl.get('value').value,
-        };
+  hyperParamsFromCtrl(paramsArray: FormArray): any {
+    const params = paramsArray.value as ParameterSpec[];
+    return params.map(param => {
+      // we should omit the step in case it was not defined
+      if (
+        param.parameterType === 'discrete' ||
+        param.parameterType === 'categorical'
+      ) {
+        return param;
       }
 
-      return {
-        name: paramCtrl.get('name').value,
-        parameterType: paramCtrl.get('type').value,
-        feasibleSpace,
-      };
+      if ((param.feasibleSpace as FeasibleSpaceMinMax).step === '') {
+        delete (param.feasibleSpace as FeasibleSpaceMinMax).step;
+      }
+
+      return param;
     });
   }
 

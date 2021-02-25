@@ -1,39 +1,58 @@
 import lowerCase from 'lodash-es/lowerCase';
-import { ParameterSpec } from '../shared/params-list/types';
 import { FormControl, FormGroup, Validators, FormArray } from '@angular/forms';
-import { NasOperation } from '../pages/experiment-creation/nas-operations/types';
+import {
+  ParameterSpec,
+  FeasibleSpaceMinMax,
+  FeasibleSpaceList,
+  NasOperation,
+  FeasibleSpace,
+  ParameterType,
+} from '../models/experiment.k8s.model';
 
 export function createNasOperationGroup(op: NasOperation): FormGroup {
-  const array = op.params.map(param => createParameterGroup(param));
+  const array = op.parameters.map(param => createParameterGroup(param));
 
   return new FormGroup({
-    type: new FormControl(op.type, Validators.required),
-    params: new FormArray(array),
+    operationType: new FormControl(op.operationType, Validators.required),
+    parameters: new FormArray(array),
+  });
+}
+
+export function createFeasibleSpaceGroup(
+  parameterType: ParameterType,
+  feasibleSpace: FeasibleSpace,
+) {
+  let fs: FeasibleSpace;
+
+  // min-max-step
+  if (parameterType === 'int' || parameterType === 'double') {
+    fs = feasibleSpace as FeasibleSpaceMinMax;
+
+    return new FormGroup({
+      min: new FormControl(fs.min, Validators.required),
+      max: new FormControl(fs.max, Validators.required),
+      step: new FormControl(fs.step, []),
+    });
+  }
+
+  // list values
+  fs = feasibleSpace as FeasibleSpaceList;
+
+  const ctrls = fs.list.map(v => new FormControl(v, Validators.required));
+  return new FormGroup({
+    list: new FormArray(ctrls, Validators.required),
   });
 }
 
 export function createParameterGroup(param: ParameterSpec): FormGroup {
-  const paramForm = new FormGroup({
+  return new FormGroup({
     name: new FormControl(param.name, Validators.required),
-    type: new FormControl(param.type, Validators.required),
+    parameterType: new FormControl(param.parameterType, Validators.required),
+    feasibleSpace: createFeasibleSpaceGroup(
+      param.parameterType,
+      param.feasibleSpace,
+    ),
   });
-
-  if (Array.isArray(param.value)) {
-    const ctrls = param.value.map(v => new FormControl(v, Validators.required));
-    paramForm.addControl('value', new FormArray(ctrls, Validators.required));
-    return paramForm;
-  }
-
-  paramForm.addControl(
-    'value',
-    new FormGroup({
-      min: new FormControl(param.value.min, Validators.required),
-      max: new FormControl(param.value.max, Validators.required),
-      step: new FormControl(param.value.step, []),
-    }),
-  );
-
-  return paramForm;
 }
 
 /*
