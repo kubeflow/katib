@@ -1,13 +1,27 @@
+# Build the Katib DB manager.
 FROM golang:alpine AS build-env
-# The GOPATH in the image is /go.
-ADD . /go/src/github.com/kubeflow/katib
-WORKDIR /go/src/github.com/kubeflow/katib/cmd/db-manager
-RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
-    apk --update add git gcc musl-dev && \
-    go build -o katib-db-manager ./v1beta1; \
+
+WORKDIR /go/src/github.com/kubeflow/katib
+
+# Download packages.
+COPY go.mod .
+COPY go.sum .
+RUN go mod download -x
+
+# Copy sources.
+COPY cmd/ cmd/
+COPY pkg/ pkg/
+
+# Build the binary.
+RUN if [ "$(uname -m)" = "ppc64le" ]; then \
+    CGO_ENABLED=0 GOOS=linux GOARCH=ppc64le go build -a -o katib-db-manager ./cmd/db-manager/v1beta1; \
+    elif [ "$(uname -m)" = "aarch64" ]; then \
+    CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o katib-db-manager ./cmd/db-manager/v1beta1; \
     else \
-    go build -o katib-db-manager ./v1beta1; \
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o katib-db-manager ./cmd/db-manager/v1beta1; \
     fi
+
+# Add GRPC health probe.
 RUN GRPC_HEALTH_PROBE_VERSION=v0.3.1 && \
     if [ "$(uname -m)" = "ppc64le" ]; then \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-ppc64le; \
@@ -18,9 +32,10 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.1 && \
     fi && \
     chmod +x /bin/grpc_health_probe
 
+# Copy the db-manager into a thin image.
 FROM alpine:3.7
 WORKDIR /app
 COPY --from=build-env /bin/grpc_health_probe /bin/
-COPY --from=build-env /go/src/github.com/kubeflow/katib/cmd/db-manager/katib-db-manager /app/
+COPY --from=build-env /go/src/github.com/kubeflow/katib/katib-db-manager /app/
 ENTRYPOINT ["./katib-db-manager"]
 CMD ["-w", "kubernetes"]

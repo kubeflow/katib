@@ -14,6 +14,4 @@ RUN chmod +x /app/cert-generator.sh
 
 WORKDIR /app
 
-USER 1000
-
 ENTRYPOINT ["sh", "./cert-generator.sh"]
