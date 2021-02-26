@@ -55,6 +55,11 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	}
 	log.Printf("Got Trial List")
 
+	// append a column for the Pipeline UID associated with the Trial
+	if havePipelineUID(trialList.Items) {
+		resultText += ",KFP Run"
+	}
+
 	foundPipelineUID := false
 	for _, t := range trialList.Items {
 		runUid, ok := t.GetAnnotations()[kfpRunIDAnnotation]

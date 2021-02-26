@@ -11,6 +11,7 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 
 	gographviz "github.com/awalterschulze/gographviz"
+	trialv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -56,6 +57,17 @@ func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Headers", allowedHeaders)
 	(*w).Header().Set("Access-Control-Expose-Headers", "Access-Control-*")
 	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
+}
+
+func havePipelineUID(trials []trialv1beta1.Trial) bool {
+	for _, t := range trials {
+		_, ok := t.GetAnnotations()[kfpRunIDAnnotation]
+		if ok {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (k *KatibUIHandler) getTrialTemplatesViewList() ([]TrialTemplatesDataView, error) {
