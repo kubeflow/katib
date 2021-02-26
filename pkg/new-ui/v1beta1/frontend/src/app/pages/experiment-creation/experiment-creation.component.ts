@@ -33,7 +33,6 @@ export class ExperimentCreationComponent implements OnInit {
   nasOperationsForm: FormArray;
   metricsForm: FormGroup;
   trialTemplateForm: FormGroup;
-  yamlTemplateForm: FormControl;
 
   constructor(
     private formSvc: ExperimentFormService,
@@ -54,7 +53,6 @@ export class ExperimentCreationComponent implements OnInit {
     this.nasOperationsForm = this.formSvc.createNasOperationsForm();
     this.metricsForm = this.formSvc.createMetricsForm();
     this.trialTemplateForm = this.formSvc.createTrialTemplateForm();
-    this.yamlTemplateForm = this.formSvc.createYamlTemplateForm();
   }
 
   /**
@@ -66,13 +64,24 @@ export class ExperimentCreationComponent implements OnInit {
 
     metadata.name = this.metadataForm.value.name;
 
-    spec.maxTrialCount = this.trialThresholdsForm.value.maxTrialCount;
-    spec.parallelTrialCount = this.trialThresholdsForm.value.parallelTrialCount;
-    spec.maxFailedTrialCount = this.trialThresholdsForm.value.maxFailedTrialCount;
+    const thresholds = this.trialThresholdsForm.value;
+    spec.maxTrialCount = thresholds.maxTrialCount;
+    spec.parallelTrialCount = thresholds.parallelTrialCount;
+    spec.maxFailedTrialCount = thresholds.maxFailedTrialCount;
 
     spec.objective = this.formSvc.objectiveFromCtrl(this.objectiveForm);
     spec.algorithm = this.formSvc.algorithmFromCtrl(this.algorithmForm);
-    spec.parameters = this.formSvc.hyperParamsFromCtrl(this.hyperParamsArray);
+
+    const algoType = this.algorithmForm.value.type;
+    if (algoType === 'hp') {
+      spec.parameters = this.formSvc.hyperParamsFromCtrl(this.hyperParamsArray);
+    } else if (algoType === 'nas') {
+      spec.nasConfig = {
+        graphConfig: this.nasGraphForm.value,
+        operations: this.formSvc.nasOpsFromCtrl(this.nasOperationsForm),
+      };
+    }
+
     spec.metricsCollectorSpec = this.formSvc.metricsCollectorFromCtrl(
       this.metricsForm,
     );

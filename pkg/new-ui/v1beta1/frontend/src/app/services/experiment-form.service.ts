@@ -18,6 +18,8 @@ import {
   AlgorithmSpec,
   ParameterSpec,
   FeasibleSpaceMinMax,
+  GraphConfig,
+  NasOperation,
 } from '../models/experiment.k8s.model';
 
 @Injectable()
@@ -27,14 +29,14 @@ export class ExperimentFormService {
   /*
    * functions for creating the Form Controls
    */
-  createMetadataForm(namespace) {
+  createMetadataForm(namespace): FormGroup {
     return this.builder.group({
       name: 'random-experiment',
       namespace,
     });
   }
 
-  createTrialThresholdForm() {
+  createTrialThresholdForm(): FormGroup {
     return this.builder.group({
       parallelTrialCount: 3,
       maxTrialCount: 12,
@@ -42,7 +44,7 @@ export class ExperimentFormService {
     });
   }
 
-  createObjectiveForm() {
+  createObjectiveForm(): FormGroup {
     return this.builder.group({
       type: 'maximize',
       goal: 0.99,
@@ -54,7 +56,7 @@ export class ExperimentFormService {
     });
   }
 
-  createAlgorithmObjectiveForm() {
+  createAlgorithmObjectiveForm(): FormGroup {
     return this.builder.group({
       type: 'hp',
       algorithm: AlgorithmsEnum.RANDOM,
@@ -62,7 +64,7 @@ export class ExperimentFormService {
     });
   }
 
-  createHyperParametersForm() {
+  createHyperParametersForm(): FormArray {
     return this.builder.array([
       createParameterGroup({
         name: 'lr',
@@ -90,7 +92,7 @@ export class ExperimentFormService {
     ]);
   }
 
-  createNasGraphForm() {
+  createNasGraphForm(): FormGroup {
     return this.builder.group({
       layers: 8,
       inputSizes: this.builder.array([32, 32, 3]),
@@ -98,7 +100,7 @@ export class ExperimentFormService {
     });
   }
 
-  createNasOperationsForm() {
+  createNasOperationsForm(): FormArray {
     return this.builder.array([
       createNasOperationGroup({
         operationType: 'convolution',
@@ -190,7 +192,7 @@ export class ExperimentFormService {
     ]);
   }
 
-  createMetricsForm() {
+  createMetricsForm(): FormGroup {
     return this.builder.group({
       kind: CollectorKind.STDOUT,
       metricsFile: '/var/log/katib/metrics.log',
@@ -205,7 +207,7 @@ export class ExperimentFormService {
     });
   }
 
-  createTrialTemplateForm() {
+  createTrialTemplateForm(): FormGroup {
     return this.builder.group({
       type: 'configmap',
       podLabels: this.builder.array([]),
@@ -220,24 +222,30 @@ export class ExperimentFormService {
     });
   }
 
+  /**
+   * helpers for parsing the form controls
+   */
+  parseParam(parameter: ParameterSpec): ParameterSpec {
+    // we should omit the step in case it was not defined
+    const param = JSON.parse(JSON.stringify(parameter));
+
+    if (
+      param.parameterType === 'discrete' ||
+      param.parameterType === 'categorical'
+    ) {
+      return param;
+    }
+
+    if ((param.feasibleSpace as FeasibleSpaceMinMax).step === '') {
+      delete (param.feasibleSpace as FeasibleSpaceMinMax).step;
+    }
+
+    return param;
+  }
+
   /*
    * YAML helpers for moving between FormControls and actual YAML strings
    */
-  createYamlTemplateForm(): FormControl {
-    const k8sObj = {
-      apiVersion: 'kubeflow.org/v1beta1',
-      kind: 'Experiment',
-      metadata: {
-        name: '',
-        namespace: '',
-      },
-      spec: {},
-      status: {},
-    };
-
-    return new FormControl(k8sObj, []);
-  }
-
   metadataFromCtrl(group: FormGroup): any {
     return {
       name: group.get('name').value,
@@ -293,19 +301,16 @@ export class ExperimentFormService {
   hyperParamsFromCtrl(paramsArray: FormArray): any {
     const params = paramsArray.value as ParameterSpec[];
     return params.map(param => {
-      // we should omit the step in case it was not defined
-      if (
-        param.parameterType === 'discrete' ||
-        param.parameterType === 'categorical'
-      ) {
-        return param;
-      }
+      return this.parseParam(param);
+    });
+  }
 
-      if ((param.feasibleSpace as FeasibleSpaceMinMax).step === '') {
-        delete (param.feasibleSpace as FeasibleSpaceMinMax).step;
-      }
+  nasOpsFromCtrl(operations: FormArray): NasOperation[] {
+    const ops: NasOperation[] = operations.value;
 
-      return param;
+    return ops.map(op => {
+      op.parameters = op.parameters.map(param => this.parseParam(param));
+      return op;
     });
   }
 
