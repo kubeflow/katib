@@ -88,7 +88,7 @@ PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
 until kubectl get pods -n kubeflow | grep Running | [[ $(wc -l) -eq $PODNUM ]]; do
   echo Pod Status $(kubectl get pods -n kubeflow | grep "1/1" | wc -l)/$PODNUM
   echo $(kubectl get pods -n kubeflow)
-  echo kubectl describe "$(kubectl get pods -n kubeflow -o name | grep katib-controller)" -n kubeflow
+  echo $(kubectl logs "$(kubectl get pods -n kubeflow -o name | grep katib-controller)" -n kubeflow -c cert-generator)
   sleep 10
   TIMEOUT=$((TIMEOUT - 1))
   if [[ $TIMEOUT -eq 0 ]]; then
