@@ -101,6 +101,17 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 		// Watch for changes in custom resources
 		for _, gvk := range gvkList {
+			// Check if CRD is installed on the cluster.
+			_, err := mgr.GetRESTMapper().RESTMapping(gvk.GroupKind(), gvk.Version)
+			if err != nil {
+				if meta.IsNoMatchError(err) {
+					log.Info("Job watch error. CRD might be missing. Please install CRD and restart katib-controller",
+						"CRD Group", gvk.Group, "CRD Version", gvk.Version, "CRD Kind", gvk.Kind)
+					continue
+				}
+				return err
+			}
+			// Watch for the CRD changes.
 			unstructuredJob := &unstructured.Unstructured{}
 			unstructuredJob.SetGroupVersionKind(gvk)
 			err = c.Watch(
@@ -110,11 +121,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 					OwnerType:    &trialsv1beta1.Trial{},
 				})
 			if err != nil {
-				if meta.IsNoMatchError(err) {
-					log.Info("Job watch error. CRD might be missing. Please install CRD and restart katib-controller",
-						"CRD Group", gvk.Group, "CRD Version", gvk.Version, "CRD Kind", gvk.Kind)
-					continue
-				}
 				return err
 			}
 			log.Info("Job watch added successfully",
