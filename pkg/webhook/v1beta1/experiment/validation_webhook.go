@@ -50,6 +50,7 @@ type ExperimentValidator struct {
 func NewExperimentValidator(c client.Client) *ExperimentValidator {
 	p := manifest.New(c)
 	return &ExperimentValidator{
+		client:    c,
 		Validator: validator.New(p),
 	}
 }
@@ -80,10 +81,6 @@ func (v *ExperimentValidator) Handle(ctx context.Context, req admission.Request)
 
 	// After metrics collector sidecar injection in Job level done, delete validation for namespace labels
 	ns := &v1.Namespace{}
-	fmt.Println("-------------------------")
-	fmt.Println(req.AdmissionRequest.Namespace)
-	fmt.Println("-----------------")
-	fmt.Println(v.client)
 	if err := v.client.Get(context.TODO(), types.NamespacedName{Name: req.AdmissionRequest.Namespace}, ns); err != nil {
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
