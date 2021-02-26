@@ -33,6 +33,8 @@ echo "VERSION: ${PULL_BASE_SHA}"
 
 echo "Configuring kubeconfig.."
 aws eks update-kubeconfig --region=${AWS_REGION} --name=${CLUSTER_NAME}
+kubectl version
+kubectl cluster-info
 
 # Update images with current pull base sha.
 echo "Updating Katib images with current PR SHA: ${VERSION}"
@@ -99,8 +101,6 @@ until kubectl get pods -n kubeflow | grep Running | [[ $(wc -l) -eq $PODNUM ]]; 
 done
 
 echo "All Katib components are running."
-kubectl version
-kubectl cluster-info
 echo "Katib deployments"
 kubectl -n kubeflow get deploy
 echo "Katib services"
