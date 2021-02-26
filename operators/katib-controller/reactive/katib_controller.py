@@ -288,10 +288,10 @@ def start_charm():
                 ],
                 "mutatingWebhookConfigurations": [
                     {
-                        "name": "katib.kubeflow.org",
+                        "name": "katib-mutating-webhook-config",
                         "webhooks": [
                             {
-                                "name": "defaulter.experiment.katib.kubeflow.org",
+                                "name": "mutating.experiment.katib.kubeflow.org",
                                 "rules": [
                                     {
                                         "apiGroups": ["kubeflow.org"],
@@ -301,19 +301,19 @@ def start_charm():
                                         "scope": "*",
                                     }
                                 ],
-                                "sideEffects:": "None",
+                                "failurePolicy": "Fail",
                                 "clientConfig": {
                                     "service": {
                                         "name": hookenv.service_name(),
                                         "namespace": namespace,
-                                        "path": "/mutate-experiment",
+                                        "path": "/mutate-experiments",
                                         "port": config["webhook-port"],
                                     },
                                     "caBundle": ca_bundle,
                                 },
                             },
                             {
-                                "name": "mutator.pod.katib.kubeflow.org",
+                                "name": "mutating.pod.katib.kubeflow.org",
                                 "rules": [
                                     {
                                         "apiGroups": [""],
@@ -323,12 +323,12 @@ def start_charm():
                                         "scope": "*",
                                     }
                                 ],
-                                "sideEffects:": "None",
+                                "failurePolicy": "Ignore",
                                 "clientConfig": {
                                     "service": {
                                         "name": hookenv.service_name(),
                                         "namespace": namespace,
-                                        "path": "/mutate-pod",
+                                        "path": "/mutate-pods",
                                         "port": config["webhook-port"],
                                     },
                                     "caBundle": ca_bundle,
@@ -339,10 +339,10 @@ def start_charm():
                 ],
                 "validatingWebhookConfigurations": [
                     {
-                        "name": "katib.kubeflow.org",
+                        "name": "katib-validating-webhook-config",
                         "webhooks": [
                             {
-                                "name": "validator.experiment.katib.kubeflow.org",
+                                "name": "validating.experiment.katib.kubeflow.org",
                                 "rules": [
                                     {
                                         "apiGroups": ["kubeflow.org"],
@@ -352,12 +352,13 @@ def start_charm():
                                         "scope": "*",
                                     }
                                 ],
-                                "sideEffects": "None",
+                                "failurePolicy": "Fail",
+                                "sideEffects": "Unknown",
                                 "clientConfig": {
                                     "service": {
                                         "name": hookenv.service_name(),
                                         "namespace": namespace,
-                                        "path": "/validate-experiment",
+                                        "path": "/validate-experiments",
                                         "port": config["webhook-port"],
                                     },
                                     "caBundle": ca_bundle,
