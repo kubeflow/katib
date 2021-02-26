@@ -53,4 +53,4 @@ spec:
         - name: cert
           secret:
             defaultMode: 420
-            secretName: katib-controller
+            secretName: katib-webhook-cert

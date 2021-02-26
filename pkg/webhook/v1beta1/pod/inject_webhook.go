@@ -45,7 +45,7 @@ import (
 
 var log = logf.Log.WithName("injector-webhook")
 
-// SidecarInjector that inject metrics collect sidecar to the primary pod.
+// SidecarInjector injects metrics collect sidecar to the primary pod.
 type SidecarInjector struct {
 	client  client.Client
 	decoder *admission.Decoder

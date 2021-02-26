@@ -9,7 +9,7 @@ namespace="kubeflow"
 fullServiceDomain="${service}.${namespace}.svc"
 
 # Fully qualified name of the CSR object.
-csr="certificatesigningrequests.v1beta1.certificates.k8s.io"
+csr="certificatesigningrequests.v1.certificates.k8s.io"
 
 if [ ! -x "$(command -v openssl)" ]; then
   echo "ERROR: openssl not found"
@@ -53,7 +53,7 @@ fi
 # Create server cert/key CSR and send it to k8s api.
 set -e
 cat <<EOF | kubectl create --validate=false -f -
-apiVersion: certificates.k8s.io/v1beta1
+apiVersion: certificates.k8s.io/v1
 kind: CertificateSigningRequest
 metadata:
   name: ${csrName}
@@ -61,6 +61,7 @@ spec:
   groups:
   - system:authenticated
   request: $(base64 <"${tmpdir}/server.csr" | tr -d '\n')
+  signerName: kubernetes.io/kube-apiserver-client
   usages:
   - digital signature
   - key encipherment

@@ -25,7 +25,7 @@ import (
 	"github.com/kubeflow/katib/pkg/webhook/v1beta1/pod"
 )
 
-func AddToManager(mgr manager.Manager, port int, serviceName string) error {
+func AddToManager(mgr manager.Manager, port int) error {
 
 	// Create a webhook server.
 	hookServer := &webhook.Server{

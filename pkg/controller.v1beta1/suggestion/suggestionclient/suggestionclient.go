@@ -25,9 +25,9 @@ import (
 )
 
 var (
+	log        = logf.Log.WithName("suggestion-client")
 	timeout    = 60 * time.Second
 	timeFormat = "2006-01-02T15:04:05Z"
-	log        = logf.Log.WithName("suggestion-client")
 
 	getRPCClientSuggestion = func(conn *grpc.ClientConn) suggestionapi.SuggestionClient {
 		return suggestionapi.NewSuggestionClient(conn)

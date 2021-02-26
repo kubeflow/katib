@@ -4,6 +4,7 @@ metadata:
   name: katib.kubeflow.org
 webhooks:
   - name: validator.experiment.katib.kubeflow.org
+    sideEffects: None
     # TODO (andreyvelich): Migrate to v1 ?
     admissionReviewVersions:
       - v1beta1
@@ -13,7 +14,6 @@ webhooks:
         name: katib-controller
         namespace: kubeflow
         path: /validate-experiment
-        port: 443
     rules:
       - apiGroups:
           - kubeflow.org
@@ -31,6 +31,7 @@ metadata:
   name: katib.kubeflow.org
 webhooks:
   - name: defaulter.experiment.katib.kubeflow.org
+    sideEffects: None
     admissionReviewVersions:
       - v1beta1
     clientConfig:
@@ -39,7 +40,6 @@ webhooks:
         name: katib-controller
         namespace: kubeflow
         path: /mutate-experiment
-        port: 443
     rules:
       - apiGroups:
           - kubeflow.org
@@ -51,6 +51,7 @@ webhooks:
         resources:
           - experiments
   - name: mutator.pod.katib.kubeflow.org
+    sideEffects: None
     admissionReviewVersions:
       - v1beta1
     clientConfig:
@@ -59,7 +60,6 @@ webhooks:
         name: katib-controller
         namespace: kubeflow
         path: /mutate-pod
-        port: 443
     namespaceSelector:
       matchLabels:
         katib-metricscollector-injection: enabled

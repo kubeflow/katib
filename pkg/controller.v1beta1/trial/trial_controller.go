@@ -71,7 +71,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		Client:        mgr.GetClient(),
 		scheme:        mgr.GetScheme(),
 		ManagerClient: managerclient.New(),
-		recorder:      mgr.GetEventRecorderFor(ControllerName), // TODO (andreyvelich): Verify this
+		recorder:      mgr.GetEventRecorderFor(ControllerName),
 		collector:     trialutil.NewTrialsCollector(mgr.GetCache(), metrics.Registry),
 	}
 	r.updateStatusHandler = r.updateStatus

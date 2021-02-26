@@ -42,27 +42,27 @@ func main() {
 	var experimentSuggestionName string
 	var metricsAddr string
 	var webhookPort int
-	var certLocalFS bool
 	var injectSecurityContext bool
-	var serviceName string
 	var enableGRPCProbeInSuggestion bool
 	var trialResources trialutil.GvkListFlag
 
 	flag.StringVar(&experimentSuggestionName, "experiment-suggestion-name",
 		"default", "The implementation of suggestion interface in experiment controller (default)")
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
-	flag.IntVar(&webhookPort, "webhook-port", 8443, "The port number to be used for admission webhook server.")
-	flag.BoolVar(&certLocalFS, "cert-localfs", false, "Store the webhook cert in local file system")
 	flag.BoolVar(&injectSecurityContext, "webhook-inject-securitycontext", false, "Inject the securityContext of container[0] in the sidecar")
-	flag.StringVar(&serviceName, "webhook-service-name", "katib-controller", "The service name which will be used in webhook")
 	flag.BoolVar(&enableGRPCProbeInSuggestion, "enable-grpc-probe-in-suggestion", true, "enable grpc probe in suggestions")
 	flag.Var(&trialResources, "trial-resources", "The list of resources that can be used as trial template, in the form: Kind.version.group (e.g. TFJob.v1.kubeflow.org)")
+	flag.IntVar(&webhookPort, "webhook-port", 8443, "The port number to be used for admission webhook server.")
+
+	// TODO (andreyvelich): Currently it is not possible to set different webhook service name.
+	// flag.StringVar(&serviceName, "webhook-service-name", "katib-controller", "The service name which will be used in webhook")
+	// TODO (andreyvelich): Currently is is not possible to store webhook cert in the local file system.
+	// flag.BoolVar(&certLocalFS, "cert-localfs", false, "Store the webhook cert in local file system")
 
 	flag.Parse()
 
 	// Set the config in viper.
 	viper.Set(consts.ConfigExperimentSuggestionName, experimentSuggestionName)
-	viper.Set(consts.ConfigCertLocalFS, certLocalFS)
 	viper.Set(consts.ConfigInjectSecurityContext, injectSecurityContext)
 	viper.Set(consts.ConfigEnableGRPCProbeInSuggestion, enableGRPCProbeInSuggestion)
 	viper.Set(consts.ConfigTrialResources, trialResources)
@@ -70,8 +70,6 @@ func main() {
 	log.Info("Config:",
 		consts.ConfigExperimentSuggestionName,
 		viper.GetString(consts.ConfigExperimentSuggestionName),
-		consts.ConfigCertLocalFS,
-		viper.GetBool(consts.ConfigCertLocalFS),
 		"webhook-port",
 		webhookPort,
 		"metrics-addr",
@@ -109,22 +107,22 @@ func main() {
 	}
 
 	// Setup all Controllers
-	log.Info("Setting up controller")
+	log.Info("Setting up controller.")
 	if err := controller.AddToManager(mgr); err != nil {
-		log.Error(err, "unable to register controllers to the manager")
+		log.Error(err, "Unable to register controllers to the manager")
 		os.Exit(1)
 	}
 
-	log.Info("Setting up webhooks")
-	if err := webhook.AddToManager(mgr, webhookPort, serviceName); err != nil {
-		log.Error(err, "unable to register webhooks to the manager")
+	log.Info("Setting up webhooks.")
+	if err := webhook.AddToManager(mgr, webhookPort); err != nil {
+		log.Error(err, "Unable to register webhooks to the manager")
 		os.Exit(1)
 	}
 
 	// Start the Cmd
 	log.Info("Starting the Cmd.")
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-		log.Error(err, "unable to run the manager")
+		log.Error(err, "Unable to run the manager")
 		os.Exit(1)
 	}
 }
