@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { CollectorKind } from './types';
+import { CollectorKind } from 'src/app/enumerations/metrics-collector';
 
 @Component({
   selector: 'app-form-metrics-collector',

@@ -10,7 +10,6 @@ import { ObjectiveTypeEnum } from '../enumerations/objective-type.enum';
 import { AlgorithmsEnum } from '../enumerations/algorithms.enum';
 import { BehaviorSubject } from 'rxjs';
 import { createParameterGroup, createNasOperationGroup } from '../shared/utils';
-import { CollectorKind } from '../pages/experiment-creation/metrics-collector/types';
 import { K8sObject, SnackBarService, SnackType } from 'kubeflow';
 import { dump, load } from 'js-yaml';
 import {
@@ -21,6 +20,7 @@ import {
   GraphConfig,
   NasOperation,
 } from '../models/experiment.k8s.model';
+import { CollectorKind } from '../enumerations/metrics-collector';
 
 @Injectable()
 export class ExperimentFormService {
