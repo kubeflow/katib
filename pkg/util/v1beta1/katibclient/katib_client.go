@@ -122,8 +122,6 @@ func (k *KatibClient) GetTrialList(name string, namespace ...string) (*trialsv1b
 	ns := getNamespace(namespace...)
 	trialList := &trialsv1beta1.TrialList{}
 	labels := map[string]string{consts.LabelExperimentName: name}
-	// listOpt := &client.ListOptions{}
-	// listOpt.MatchingLabels(labels).InNamespace(ns)
 
 	if err := k.client.List(context.Background(), trialList, client.InNamespace(ns), client.MatchingLabels(labels)); err != nil {
 		return trialList, err
@@ -158,8 +156,6 @@ func (k *KatibClient) GetTrialTemplates(namespace ...string) (*apiv1.ConfigMapLi
 	templatesConfigMapList := &apiv1.ConfigMapList{}
 
 	templateLabel := map[string]string{consts.LabelTrialTemplateConfigMapName: consts.LabelTrialTemplateConfigMapValue}
-	// listOpt := &client.ListOptions{}
-	// listOpt.MatchingLabels(templateLabel).InNamespace(ns)
 
 	err := k.client.List(context.TODO(), templatesConfigMapList, client.InNamespace(ns), client.MatchingLabels(templateLabel))
 

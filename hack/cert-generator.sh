@@ -2,14 +2,14 @@
 
 set -e
 
-# Fully qualified name of the CSR object.
-csr="certificatesigningrequests.v1beta1.certificates.k8s.io"
-
 service="katib-controller"
 webhook="katib.kubeflow.org"
 secret="katib-webhook-cert"
 namespace="kubeflow"
 fullServiceDomain="${service}.${namespace}.svc"
+
+# Fully qualified name of the CSR object.
+csr="certificatesigningrequests.v1beta1.certificates.k8s.io"
 
 if [ ! -x "$(command -v openssl)" ]; then
   echo "ERROR: openssl not found"

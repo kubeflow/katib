@@ -265,8 +265,6 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1beta1.E
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	trials := &trialsv1beta1.TrialList{}
 	labels := map[string]string{consts.LabelExperimentName: instance.Name}
-	// lo := &client.ListOptions{}
-	// lo.MatchingLabels(labels).InNamespace(instance.Namespace)
 
 	if err := r.List(context.TODO(), trials, client.InNamespace(instance.Namespace), client.MatchingLabels(labels)); err != nil {
 		logger.Error(err, "Trial List error")

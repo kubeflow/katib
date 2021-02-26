@@ -8,14 +8,6 @@ import (
 	"strconv"
 	"strings"
 
-	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
-	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/manifest"
-	experimentutil "github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/util"
-	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
-	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
-
 	// pytorchv1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1"
 	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 	jsonPatch "github.com/mattbaird/jsonpatch"
@@ -25,6 +17,14 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+
+	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
+	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/manifest"
+	experimentutil "github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/util"
+	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
+	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
 )
 
 var log = logf.Log.WithName("experiment-validating-webhook")
