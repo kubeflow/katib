@@ -21,6 +21,7 @@ spec:
       initContainers:
         - name: cert-generator
           image: docker.io/kubeflowkatib/cert-generator
+          imagePullPolicy: Always
       containers:
         - name: katib-controller
           image: docker.io/kubeflowkatib/katib-controller

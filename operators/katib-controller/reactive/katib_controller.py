@@ -288,10 +288,10 @@ def start_charm():
                 ],
                 "mutatingWebhookConfigurations": [
                     {
-                        "name": "katib-mutating-webhook-config",
+                        "name": "katib.kubeflow.org",
                         "webhooks": [
                             {
-                                "name": "mutating.experiment.katib.kubeflow.org",
+                                "name": "defaulter.experiment.katib.kubeflow.org",
                                 "rules": [
                                     {
                                         "apiGroups": ["kubeflow.org"],
@@ -301,7 +301,7 @@ def start_charm():
                                         "scope": "*",
                                     }
                                 ],
-                                "failurePolicy": "Fail",
+                                "sideEffects:": "None",
                                 "clientConfig": {
                                     "service": {
                                         "name": hookenv.service_name(),
@@ -313,7 +313,7 @@ def start_charm():
                                 },
                             },
                             {
-                                "name": "mutating.pod.katib.kubeflow.org",
+                                "name": "mutator.pod.katib.kubeflow.org",
                                 "rules": [
                                     {
                                         "apiGroups": [""],
@@ -323,7 +323,7 @@ def start_charm():
                                         "scope": "*",
                                     }
                                 ],
-                                "failurePolicy": "Ignore",
+                                "sideEffects:": "None",
                                 "clientConfig": {
                                     "service": {
                                         "name": hookenv.service_name(),
@@ -339,10 +339,10 @@ def start_charm():
                 ],
                 "validatingWebhookConfigurations": [
                     {
-                        "name": "katib-validating-webhook-config",
+                        "name": "katib.kubeflow.org",
                         "webhooks": [
                             {
-                                "name": "validating.experiment.katib.kubeflow.org",
+                                "name": "validator.experiment.katib.kubeflow.org",
                                 "rules": [
                                     {
                                         "apiGroups": ["kubeflow.org"],
@@ -352,8 +352,7 @@ def start_charm():
                                         "scope": "*",
                                     }
                                 ],
-                                "failurePolicy": "Fail",
-                                "sideEffects": "Unknown",
+                                "sideEffects": "None",
                                 "clientConfig": {
                                     "service": {
                                         "name": hookenv.service_name(),

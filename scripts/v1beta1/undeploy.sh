@@ -34,7 +34,6 @@ kubectl delete -f manifests/v1beta1/db-manager
 kubectl delete -f manifests/v1beta1/mysql-db
 kubectl delete -f manifests/v1beta1/ui
 kubectl delete -f manifests/v1beta1/pv
+kubectl delete -f manifests/v1beta1/webhooks
 kubectl delete -f manifests/v1beta1
-kubectl get mutatingwebhookconfigurations katib-mutating-webhook-config && kubectl delete mutatingwebhookconfigurations katib-mutating-webhook-config
-kubectl get validatingwebhookconfigurations katib-validating-webhook-config && kubectl delete validatingwebhookconfigurations katib-validating-webhook-config
 cd - >/dev/null

@@ -22,12 +22,11 @@ set -o xtrace
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
 cd ${SCRIPT_ROOT}
-kubectl get validatingwebhookconfigurations katib-validating-webhook-config && kubectl delete validatingwebhookconfigurations katib-validating-webhook-config
-kubectl get mutatingwebhookconfigurations katib-mutating-webhook-config && kubectl delete mutatingwebhookconfigurations katib-mutating-webhook-config
 kubectl apply -f manifests/v1beta1
 kubectl apply -f manifests/v1beta1/katib-controller
 kubectl apply -f manifests/v1beta1/db-manager
 kubectl apply -f manifests/v1beta1/pv
 kubectl apply -f manifests/v1beta1/mysql-db
 kubectl apply -f manifests/v1beta1/ui
+kubectl apply -f manifests/v1beta1/webhooks
 cd - >/dev/null
