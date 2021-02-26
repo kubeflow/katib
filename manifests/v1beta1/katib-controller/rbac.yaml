@@ -87,6 +87,13 @@ rules:
       - rolebindings
     verbs:
       - "*"
+  - apiGroups:
+      - certificates.k8s.io
+    resources:
+      - certificatesigningrequests
+      - certificatesigningrequests/approval
+    verbs:
+      - "*"
 ---
 apiVersion: v1
 kind: ServiceAccount

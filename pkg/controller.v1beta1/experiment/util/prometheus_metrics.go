@@ -108,7 +108,7 @@ func (c *ExperimentsCollector) collect() {
 		err           error
 	)
 	expLists := &v1beta1.ExperimentList{}
-	if err = c.store.List(context.TODO(), nil, expLists); err != nil {
+	if err = c.store.List(context.TODO(), expLists); err != nil {
 		return
 	}
 

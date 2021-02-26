@@ -46,7 +46,7 @@ func NewSimpleClientset(objects ...runtime.Object) *Clientset {
 		}
 	}
 
-	cs := &Clientset{}
+	cs := &Clientset{tracker: o}
 	cs.discovery = &fakediscovery.FakeDiscovery{Fake: &cs.Fake}
 	cs.AddReactor("*", "*", testing.ObjectReaction(o))
 	cs.AddWatchReactor("*", func(action testing.Action) (handled bool, ret watch.Interface, err error) {
@@ -68,10 +68,15 @@ func NewSimpleClientset(objects ...runtime.Object) *Clientset {
 type Clientset struct {
 	testing.Fake
 	discovery *fakediscovery.FakeDiscovery
+	tracker   testing.ObjectTracker
 }
 
 func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 	return c.discovery
+}
+
+func (c *Clientset) Tracker() testing.ObjectTracker {
+	return c.tracker
 }
 
 var _ clientset.Interface = &Clientset{}
@@ -81,18 +86,8 @@ func (c *Clientset) CommonV1beta1() commonv1beta1.CommonV1beta1Interface {
 	return &fakecommonv1beta1.FakeCommonV1beta1{Fake: &c.Fake}
 }
 
-// Common retrieves the CommonV1beta1Client
-func (c *Clientset) Common() commonv1beta1.CommonV1beta1Interface {
-	return &fakecommonv1beta1.FakeCommonV1beta1{Fake: &c.Fake}
-}
-
 // ExperimentV1beta1 retrieves the ExperimentV1beta1Client
 func (c *Clientset) ExperimentV1beta1() experimentv1beta1.ExperimentV1beta1Interface {
-	return &fakeexperimentv1beta1.FakeExperimentV1beta1{Fake: &c.Fake}
-}
-
-// Experiment retrieves the ExperimentV1beta1Client
-func (c *Clientset) Experiment() experimentv1beta1.ExperimentV1beta1Interface {
 	return &fakeexperimentv1beta1.FakeExperimentV1beta1{Fake: &c.Fake}
 }
 
@@ -101,17 +96,7 @@ func (c *Clientset) SuggestionV1beta1() suggestionv1beta1.SuggestionV1beta1Inter
 	return &fakesuggestionv1beta1.FakeSuggestionV1beta1{Fake: &c.Fake}
 }
 
-// Suggestion retrieves the SuggestionV1beta1Client
-func (c *Clientset) Suggestion() suggestionv1beta1.SuggestionV1beta1Interface {
-	return &fakesuggestionv1beta1.FakeSuggestionV1beta1{Fake: &c.Fake}
-}
-
 // TrialV1beta1 retrieves the TrialV1beta1Client
 func (c *Clientset) TrialV1beta1() trialv1beta1.TrialV1beta1Interface {
-	return &faketrialv1beta1.FakeTrialV1beta1{Fake: &c.Fake}
-}
-
-// Trial retrieves the TrialV1beta1Client
-func (c *Clientset) Trial() trialv1beta1.TrialV1beta1Interface {
 	return &faketrialv1beta1.FakeTrialV1beta1{Fake: &c.Fake}
 }

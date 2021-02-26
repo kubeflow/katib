@@ -33,10 +33,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -68,7 +68,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	r := &ReconcileExperiment{
 		Client:   mgr.GetClient(),
 		scheme:   mgr.GetScheme(),
-		recorder: mgr.GetRecorder(ControllerName),
+		recorder: mgr.GetEventRecorderFor(ControllerName),
 	}
 	imp := viper.GetString(consts.ConfigExperimentSuggestionName)
 	r.Suggestion = newSuggestion(imp, mgr.GetScheme(), mgr.GetClient())
@@ -167,11 +167,11 @@ type ReconcileExperiment struct {
 // and what is in the Experiment.Spec
 // +kubebuilder:rbac:groups=experiments.kubeflow.org,resources=experiments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=experiments.kubeflow.org,resources=experiments/status,verbs=get;update;patch
-func (r *ReconcileExperiment) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileExperiment) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the Experiment instance
 	logger := log.WithValues("Experiment", request.NamespacedName)
 	original := &experimentsv1beta1.Experiment{}
-	err := r.Get(context.TODO(), request.NamespacedName, original)
+	err := r.Get(ctx, request.NamespacedName, original)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Object not found, return.  Created objects are automatically garbage collected.
@@ -265,10 +265,10 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1beta1.E
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	trials := &trialsv1beta1.TrialList{}
 	labels := map[string]string{consts.LabelExperimentName: instance.Name}
-	lo := &client.ListOptions{}
-	lo.MatchingLabels(labels).InNamespace(instance.Namespace)
+	// lo := &client.ListOptions{}
+	// lo.MatchingLabels(labels).InNamespace(instance.Namespace)
 
-	if err := r.List(context.TODO(), lo, trials); err != nil {
+	if err := r.List(context.TODO(), trials, client.InNamespace(instance.Namespace), client.MatchingLabels(labels)); err != nil {
 		logger.Error(err, "Trial List error")
 		return err
 	}

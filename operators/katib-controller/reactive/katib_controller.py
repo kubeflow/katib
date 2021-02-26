@@ -306,7 +306,7 @@ def start_charm():
                                     "service": {
                                         "name": hookenv.service_name(),
                                         "namespace": namespace,
-                                        "path": "/mutate-experiments",
+                                        "path": "/mutate-experiment",
                                         "port": config["webhook-port"],
                                     },
                                     "caBundle": ca_bundle,
@@ -328,7 +328,7 @@ def start_charm():
                                     "service": {
                                         "name": hookenv.service_name(),
                                         "namespace": namespace,
-                                        "path": "/mutate-pods",
+                                        "path": "/mutate-pod",
                                         "port": config["webhook-port"],
                                     },
                                     "caBundle": ca_bundle,
@@ -358,7 +358,7 @@ def start_charm():
                                     "service": {
                                         "name": hookenv.service_name(),
                                         "namespace": namespace,
-                                        "path": "/validate-experiments",
+                                        "path": "/validate-experiment",
                                         "port": config["webhook-port"],
                                     },
                                     "caBundle": ca_bundle,

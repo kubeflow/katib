@@ -74,7 +74,7 @@ func (in *SuggestionCondition) DeepCopy() *SuggestionCondition {
 func (in *SuggestionList) DeepCopyInto(out *SuggestionList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]Suggestion, len(*in))

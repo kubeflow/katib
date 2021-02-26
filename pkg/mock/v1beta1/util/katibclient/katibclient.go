@@ -10,7 +10,6 @@ import (
 	v1beta10 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	v1beta11 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	v1 "k8s.io/api/core/v1"
-	runtime "k8s.io/apimachinery/pkg/runtime"
 	reflect "reflect"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -39,7 +38,7 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // CreateRuntimeObject mocks base method.
-func (m *MockClient) CreateRuntimeObject(arg0 runtime.Object) error {
+func (m *MockClient) CreateRuntimeObject(arg0 client.Object) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateRuntimeObject", arg0)
 	ret0, _ := ret[0].(error)
@@ -53,7 +52,7 @@ func (mr *MockClientMockRecorder) CreateRuntimeObject(arg0 interface{}) *gomock.
 }
 
 // DeleteRuntimeObject mocks base method.
-func (m *MockClient) DeleteRuntimeObject(arg0 runtime.Object) error {
+func (m *MockClient) DeleteRuntimeObject(arg0 client.Object) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteRuntimeObject", arg0)
 	ret0, _ := ret[0].(error)
@@ -246,7 +245,7 @@ func (mr *MockClientMockRecorder) InjectClient(arg0 interface{}) *gomock.Call {
 }
 
 // UpdateRuntimeObject mocks base method.
-func (m *MockClient) UpdateRuntimeObject(arg0 runtime.Object) error {
+func (m *MockClient) UpdateRuntimeObject(arg0 client.Object) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateRuntimeObject", arg0)
 	ret0, _ := ret[0].(error)

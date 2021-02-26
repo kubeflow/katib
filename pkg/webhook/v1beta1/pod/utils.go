@@ -17,6 +17,7 @@ limitations under the License.
 package pod
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -58,11 +59,12 @@ func getRemoteImage(pod *v1.Pod, namespace string, containerIndex int) (crv1.Ima
 	for _, s := range pod.Spec.ImagePullSecrets {
 		imagePullSecrets = append(imagePullSecrets, s.Name)
 	}
-	kc, err := k8schain.NewInCluster(k8schain.Options{
-		Namespace:          namespace,
-		ServiceAccountName: pod.Spec.ServiceAccountName,
-		ImagePullSecrets:   imagePullSecrets,
-	})
+	kc, err := k8schain.NewInCluster(context.TODO(),
+		k8schain.Options{
+			Namespace:          namespace,
+			ServiceAccountName: pod.Spec.ServiceAccountName,
+			ImagePullSecrets:   imagePullSecrets,
+		})
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create k8schain: %v", err)
 	}

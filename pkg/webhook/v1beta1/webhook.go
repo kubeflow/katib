@@ -16,103 +16,32 @@ limitations under the License.
 package webhook
 
 import (
-	"github.com/spf13/viper"
-	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
+	"fmt"
+
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
-	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/builder"
 
-	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
-	"github.com/kubeflow/katib/pkg/webhook/v1beta1/common"
 	"github.com/kubeflow/katib/pkg/webhook/v1beta1/experiment"
 	"github.com/kubeflow/katib/pkg/webhook/v1beta1/pod"
 )
 
-func AddToManager(m manager.Manager, port int32, serviceName string) error {
-	so := webhook.ServerOptions{
+func AddToManager(mgr manager.Manager, port int, serviceName string) error {
+
+	// Create a webhook server.
+	hookServer := &webhook.Server{
+		Port:    port,
 		CertDir: "/tmp/cert",
-		BootstrapOptions: &webhook.BootstrapOptions{
-			Service: &webhook.Service{
-				Namespace: consts.DefaultKatibNamespace,
-				Name:      serviceName,
-				Selectors: map[string]string{
-					"app": serviceName,
-				},
-			},
-			ValidatingWebhookConfigName: "katib-validating-webhook-config",
-			MutatingWebhookConfigName:   "katib-mutating-webhook-config",
-		},
-		Port: port,
+	}
+	if err := mgr.Add(hookServer); err != nil {
+		return fmt.Errorf("Add webhook server to the manager failed: %v", err)
 	}
 
-	// Decide if we should use local file system.
-	// If not, we set a secret in BootstrapOptions.
-	usingFS := viper.GetBool(consts.ConfigCertLocalFS)
-	if !usingFS {
-		so.BootstrapOptions.Secret = &types.NamespacedName{
-			Namespace: consts.DefaultKatibNamespace,
-			Name:      serviceName,
-		}
-	}
-	server, err := webhook.NewServer("katib-admission-server", m, so)
-	if err != nil {
-		return err
-	}
+	experimentValidator := experiment.NewExperimentValidator(mgr.GetClient())
+	experimentDefaulter := experiment.NewExperimentDefaulter(mgr.GetClient())
+	sidecarInjector := pod.NewSidecarInjector(mgr.GetClient())
 
-	if err := register(m, server); err != nil {
-		return err
-	}
-
+	hookServer.Register("/validate-experiment", &webhook.Admission{Handler: experimentValidator})
+	hookServer.Register("/mutate-experiment", &webhook.Admission{Handler: experimentDefaulter})
+	hookServer.Register("/mutate-pod", &webhook.Admission{Handler: sidecarInjector})
 	return nil
-}
-
-func register(manager manager.Manager, server *webhook.Server) error {
-	mutatingWebhook, err := builder.NewWebhookBuilder().
-		FailurePolicy(admissionregistrationv1beta1.Fail).
-		Name("mutating.experiment.katib.kubeflow.org").
-		Mutating().
-		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
-		WithManager(manager).
-		ForType(&experimentsv1beta1.Experiment{}).
-		Handlers(experiment.NewExperimentDefaulter(manager.GetClient())).
-		Build()
-	if err != nil {
-		return err
-	}
-	validatingWebhook, err := builder.NewWebhookBuilder().
-		FailurePolicy(admissionregistrationv1beta1.Fail).
-		Name("validating.experiment.katib.kubeflow.org").
-		Validating().
-		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
-		WithManager(manager).
-		ForType(&experimentsv1beta1.Experiment{}).
-		Handlers(experiment.NewExperimentValidator(manager.GetClient())).
-		Build()
-	if err != nil {
-		return err
-	}
-	nsSelector := &metav1.LabelSelector{
-		MatchLabels: map[string]string{
-			common.KatibMetricsCollectorInjection: common.KatibMetricsCollectorInjectionEnabled,
-		},
-	}
-	injectWebhook, err := builder.NewWebhookBuilder().
-		FailurePolicy(admissionregistrationv1beta1.Fail).
-		Name("mutating.pod.katib.kubeflow.org").
-		NamespaceSelector(nsSelector).
-		Mutating().
-		Operations(admissionregistrationv1beta1.Create).
-		WithManager(manager).
-		ForType(&v1.Pod{}).
-		Handlers(pod.NewSidecarInjector(manager.GetClient())).
-		FailurePolicy(admissionregistrationv1beta1.Ignore).
-		Build()
-	if err != nil {
-		return err
-	}
-	return server.Register(mutatingWebhook, validatingWebhook, injectWebhook)
 }

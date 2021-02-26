@@ -18,6 +18,7 @@ package pod
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
@@ -30,10 +31,8 @@ import (
 	apitypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
-	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
@@ -46,32 +45,47 @@ import (
 
 var log = logf.Log.WithName("injector-webhook")
 
-// sidecarInjector that inject metrics collect sidecar into master pod
-type sidecarInjector struct {
+// SidecarInjector that inject metrics collect sidecar to the primary pod.
+type SidecarInjector struct {
 	client  client.Client
-	decoder types.Decoder
+	decoder *admission.Decoder
 
 	// injectSecurityContext indicates if we should inject the security
 	// context into the metrics collector sidecar.
 	injectSecurityContext bool
 }
 
-var _ admission.Handler = &sidecarInjector{}
+// NewSidecarInjector returns a new sidecar injector with the given client.
+func NewSidecarInjector(c client.Client) *SidecarInjector {
+	return &SidecarInjector{
+		injectSecurityContext: viper.GetBool(consts.ConfigInjectSecurityContext),
+		client:                c,
+	}
+}
 
-func (s *sidecarInjector) Handle(ctx context.Context, req types.Request) types.Response {
+// SidecarInjector implements admission.DecoderInjector.
+// A decoder will be automatically injected.
+
+// InjectDecoder injects the decoder.
+func (s *SidecarInjector) InjectDecoder(d *admission.Decoder) error {
+	s.decoder = d
+	return nil
+}
+
+func (s *SidecarInjector) Handle(ctx context.Context, req admission.Request) admission.Response {
 	// Get the namespace from req since the namespace in the pod is empty.
 	namespace := req.AdmissionRequest.Namespace
 	pod := &v1.Pod{}
 	err := s.decoder.Decode(req, pod)
 	if err != nil {
-		return admission.ErrorResponse(http.StatusBadRequest, err)
+		return admission.Errored(http.StatusBadRequest, err)
 	}
 
 	// Check whether the pod need to be mutated
 	needMutate, err := s.MutationRequired(pod, namespace)
 	if err != nil {
 		log.Info("Unable to run MutationRequired", "Error", err)
-		return admission.ErrorResponse(http.StatusInternalServerError, err)
+		return admission.Errored(http.StatusInternalServerError, err)
 	} else if !needMutate {
 		return admission.ValidationResponse(true, "")
 	}
@@ -80,35 +94,18 @@ func (s *sidecarInjector) Handle(ctx context.Context, req types.Request) types.R
 	mutatedPod, err := s.Mutate(pod, namespace)
 	if err != nil {
 		log.Error(err, "Failed to inject metrics collector")
-		return admission.ErrorResponse(http.StatusBadRequest, err)
+		return admission.Errored(http.StatusBadRequest, err)
 	}
 
-	return admission.PatchResponse(pod, mutatedPod)
-}
-
-var _ inject.Client = &sidecarInjector{}
-
-func (s *sidecarInjector) InjectClient(c client.Client) error {
-	s.client = c
-	return nil
-}
-
-var _ inject.Decoder = &sidecarInjector{}
-
-func (s *sidecarInjector) InjectDecoder(d types.Decoder) error {
-	s.decoder = d
-	return nil
-}
-
-// NewSidecarInjector returns a new sidecar injector.
-func NewSidecarInjector(c client.Client) *sidecarInjector {
-	return &sidecarInjector{
-		injectSecurityContext: viper.GetBool(consts.ConfigInjectSecurityContext),
-		client:                c,
+	marshaledPod, err := json.Marshal(mutatedPod)
+	if err != nil {
+		return admission.Errored(http.StatusInternalServerError, err)
 	}
+
+	return admission.PatchResponseFromRaw(req.AdmissionRequest.Object.Raw, marshaledPod)
 }
 
-func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error) {
+func (s *SidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error) {
 	object, err := util.ConvertObjectToUnstructured(pod)
 	if err != nil {
 		return false, err
@@ -140,7 +137,7 @@ func (s *sidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 	return true, nil
 }
 
-func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error) {
+func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error) {
 	mutatedPod := pod.DeepCopy()
 
 	object, err := util.ConvertObjectToUnstructured(pod)
@@ -186,7 +183,7 @@ func (s *sidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	return mutatedPod, nil
 }
 
-func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1beta1.Trial, originalPod *v1.Pod) (*v1.Container, error) {
+func (s *SidecarInjector) getMetricsCollectorContainer(trial *trialsv1beta1.Trial, originalPod *v1.Pod) (*v1.Container, error) {
 	mc := trial.Spec.MetricsCollector
 	if mc.Collector.Kind == common.CustomCollector {
 		return mc.Collector.CustomCollector, nil
@@ -236,7 +233,7 @@ func (s *sidecarInjector) getMetricsCollectorContainer(trial *trialsv1beta1.Tria
 	return &injectContainer, nil
 }
 
-func (s *sidecarInjector) getKatibJob(object *unstructured.Unstructured, namespace string) (string, string, error) {
+func (s *SidecarInjector) getKatibJob(object *unstructured.Unstructured, namespace string) (string, string, error) {
 	owners := object.GetOwnerReferences()
 	// jobKind and jobName points to the object kind and name that Trial is created
 	jobKind := ""
@@ -287,7 +284,7 @@ func (s *sidecarInjector) getKatibJob(object *unstructured.Unstructured, namespa
 	return jobKind, jobName, nil
 }
 
-func (s *sidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, metricNames string, mc common.MetricsCollectorSpec, metricsCollectorConfigData katibconfig.MetricsCollectorConfig, esRules []string) ([]string, error) {
+func (s *SidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, metricNames string, mc common.MetricsCollectorSpec, metricsCollectorConfigData katibconfig.MetricsCollectorConfig, esRules []string) ([]string, error) {
 	args := []string{"-t", trial.Name, "-m", metricNames, "-o-type", string(trial.Spec.Objective.Type), "-s-db", katibmanagerv1beta1.GetDBManagerAddr()}
 	if mountPath, _ := getMountPath(mc); mountPath != "" {
 		args = append(args, "-path", mountPath)

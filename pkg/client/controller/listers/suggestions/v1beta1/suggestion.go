@@ -25,8 +25,10 @@ import (
 )
 
 // SuggestionLister helps list Suggestions.
+// All objects returned here must be treated as read-only.
 type SuggestionLister interface {
 	// List lists all Suggestions in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1beta1.Suggestion, err error)
 	// Suggestions returns an object that can list and get Suggestions.
 	Suggestions(namespace string) SuggestionNamespaceLister
@@ -57,10 +59,13 @@ func (s *suggestionLister) Suggestions(namespace string) SuggestionNamespaceList
 }
 
 // SuggestionNamespaceLister helps list and get Suggestions.
+// All objects returned here must be treated as read-only.
 type SuggestionNamespaceLister interface {
 	// List lists all Suggestions in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1beta1.Suggestion, err error)
 	// Get retrieves the Suggestion from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1beta1.Suggestion, error)
 	SuggestionNamespaceListerExpansion
 }

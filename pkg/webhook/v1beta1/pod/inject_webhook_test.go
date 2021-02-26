@@ -3,7 +3,6 @@ package pod
 import (
 	"context"
 	"fmt"
-	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
 	"path/filepath"
 	"reflect"
 	"sync"
@@ -13,6 +12,7 @@ import (
 	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,6 +30,7 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
+	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
 )
 
 var (
@@ -234,13 +235,15 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 
 	g := gomega.NewGomegaWithT(t)
 
-	mgr, err := manager.New(cfg, manager.Options{})
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	stopMgr, mgrStopped := StartTestManager(mgr, g)
-	defer func() {
-		close(stopMgr)
-		mgrStopped.Wait()
+	// Start test manager.
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		g.Expect(mgr.Start(context.TODO())).NotTo(gomega.HaveOccurred())
 	}()
 
 	c := mgr.GetClient()
@@ -256,6 +259,14 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 	katibEarlyStopAddress := fmt.Sprintf("%v-%v.%v:%v", testSuggestionName, testAlgorithm, testNamespace, consts.DefaultEarlyStoppingPort)
 	waitAllProcessesValue := false
 	testPath := "/test/path"
+
+	// Create kubeflow namespace.
+	kubeflowNS := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: testNamespace,
+		},
+	}
+	g.Expect(c.Create(context.TODO(), kubeflowNS)).NotTo(gomega.HaveOccurred())
 
 	earlyStoppingRules := []string{
 		"accuracy;0.6;less;5",
@@ -624,17 +635,6 @@ func TestGetSidecarContainerName(t *testing.T) {
 	}
 }
 
-func StartTestManager(mgr manager.Manager, g *gomega.GomegaWithT) (chan struct{}, *sync.WaitGroup) {
-	stop := make(chan struct{})
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		g.Expect(mgr.Start(stop)).NotTo(gomega.HaveOccurred())
-	}()
-	return stop, wg
-}
-
 func TestGetKatibJob(t *testing.T) {
 	// Start test k8s server
 	envTest := &envtest.Environment{
@@ -652,13 +652,15 @@ func TestGetKatibJob(t *testing.T) {
 
 	g := gomega.NewGomegaWithT(t)
 
-	mgr, err := manager.New(cfg, manager.Options{})
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	stopMgr, mgrStopped := StartTestManager(mgr, g)
-	defer func() {
-		close(stopMgr)
-		mgrStopped.Wait()
+	// Start test manager.
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		g.Expect(mgr.Start(context.TODO())).NotTo(gomega.HaveOccurred())
 	}()
 
 	c := mgr.GetClient()

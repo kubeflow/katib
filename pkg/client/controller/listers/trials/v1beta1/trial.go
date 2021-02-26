@@ -25,8 +25,10 @@ import (
 )
 
 // TrialLister helps list Trials.
+// All objects returned here must be treated as read-only.
 type TrialLister interface {
 	// List lists all Trials in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1beta1.Trial, err error)
 	// Trials returns an object that can list and get Trials.
 	Trials(namespace string) TrialNamespaceLister
@@ -57,10 +59,13 @@ func (s *trialLister) Trials(namespace string) TrialNamespaceLister {
 }
 
 // TrialNamespaceLister helps list and get Trials.
+// All objects returned here must be treated as read-only.
 type TrialNamespaceLister interface {
 	// List lists all Trials in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1beta1.Trial, err error)
 	// Get retrieves the Trial from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1beta1.Trial, error)
 	TrialNamespaceListerExpansion
 }

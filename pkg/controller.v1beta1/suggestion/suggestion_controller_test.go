@@ -18,6 +18,7 @@ package suggestion
 
 import (
 	"encoding/json"
+	"sync"
 	"testing"
 	"time"
 
@@ -29,8 +30,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -44,18 +46,19 @@ import (
 const (
 	suggestionName  = "test-suggestion"
 	resourceName    = "test-suggestion-random"
-	namespace       = "default"
+	namespace       = "kubeflow"
 	suggestionImage = "test-image"
+	katibConfigName = "katib-config"
 	timeout         = time.Second * 40
 )
 
 func init() {
-	logf.SetLogger(logf.ZapLogger(true))
+	logf.SetLogger(zap.New())
 }
 
 func TestAdd(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
-	mgr, err := manager.New(cfg, manager.Options{})
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	// Test - Try to add suggestion controller to the manager
@@ -71,7 +74,7 @@ func TestReconcile(t *testing.T) {
 
 	// Setup the Manager and Controller.  Wrap the Controller Reconcile function so it writes each request to a
 	// channel when it is finished.
-	mgr, err := manager.New(cfg, manager.Options{})
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	c := mgr.GetClient()
 
@@ -80,17 +83,18 @@ func TestReconcile(t *testing.T) {
 		scheme:           mgr.GetScheme(),
 		SuggestionClient: mockSuggestionClient,
 		Composer:         composer.New(mgr),
-		recorder:         mgr.GetRecorder(ControllerName),
+		recorder:         mgr.GetEventRecorderFor(ControllerName),
 	}
 
 	recFn := SetupTestReconcile(r)
 	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
 
-	stopMgr, mgrStopped := StartTestManager(mgr, g)
-
-	defer func() {
-		close(stopMgr)
-		mgrStopped.Wait()
+	// Start test manager.
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		g.Expect(mgr.Start(context.TODO())).NotTo(gomega.HaveOccurred())
 	}()
 
 	mockSuggestionClient.EXPECT().ValidateAlgorithmSettings(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
@@ -129,11 +133,18 @@ func TestReconcile(t *testing.T) {
 
 	configMap := newKatibConfigMapInstance()
 
+	// Create kubeflow namespace.
+	kubeflowNS := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: namespace,
+		},
+	}
+	g.Expect(c.Create(context.TODO(), kubeflowNS)).NotTo(gomega.HaveOccurred())
 	// Test 1 - Regural suggestion run
+	// Create ConfigMap with suggestion data.
+	g.Expect(c.Create(context.TODO(), configMap)).NotTo(gomega.HaveOccurred())
 	// Create the suggestion
 	g.Expect(c.Create(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
-	// Create ConfigMap with suggestion data
-	g.Expect(c.Create(context.TODO(), configMap)).NotTo(gomega.HaveOccurred())
 	// Create experiment
 	g.Expect(c.Create(context.TODO(), experiment)).NotTo(gomega.HaveOccurred())
 	// Create trial
@@ -251,8 +262,8 @@ func newKatibConfigMapInstance() *corev1.ConfigMap {
 	b, _ := json.Marshal(suggestionConfig)
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "katib-config",
-			Namespace: "kubeflow",
+			Name:      katibConfigName,
+			Namespace: namespace,
 		},
 		Data: map[string]string{
 			"suggestion": string(b),

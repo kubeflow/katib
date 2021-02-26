@@ -18,6 +18,8 @@ limitations under the License.
 package fake
 
 import (
+	"context"
+
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -38,7 +40,7 @@ var experimentsResource = schema.GroupVersionResource{Group: "experiment.kubeflo
 var experimentsKind = schema.GroupVersionKind{Group: "experiment.kubeflow.org", Version: "v1beta1", Kind: "Experiment"}
 
 // Get takes name of the experiment, and returns the corresponding experiment object, and an error if there is any.
-func (c *FakeExperiments) Get(name string, options v1.GetOptions) (result *v1beta1.Experiment, err error) {
+func (c *FakeExperiments) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.Experiment, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(experimentsResource, c.ns, name), &v1beta1.Experiment{})
 
@@ -49,7 +51,7 @@ func (c *FakeExperiments) Get(name string, options v1.GetOptions) (result *v1bet
 }
 
 // List takes label and field selectors, and returns the list of Experiments that match those selectors.
-func (c *FakeExperiments) List(opts v1.ListOptions) (result *v1beta1.ExperimentList, err error) {
+func (c *FakeExperiments) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.ExperimentList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(experimentsResource, experimentsKind, c.ns, opts), &v1beta1.ExperimentList{})
 
@@ -71,14 +73,14 @@ func (c *FakeExperiments) List(opts v1.ListOptions) (result *v1beta1.ExperimentL
 }
 
 // Watch returns a watch.Interface that watches the requested experiments.
-func (c *FakeExperiments) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeExperiments) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(experimentsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a experiment and creates it.  Returns the server's representation of the experiment, and an error, if there is any.
-func (c *FakeExperiments) Create(experiment *v1beta1.Experiment) (result *v1beta1.Experiment, err error) {
+func (c *FakeExperiments) Create(ctx context.Context, experiment *v1beta1.Experiment, opts v1.CreateOptions) (result *v1beta1.Experiment, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(experimentsResource, c.ns, experiment), &v1beta1.Experiment{})
 
@@ -89,7 +91,7 @@ func (c *FakeExperiments) Create(experiment *v1beta1.Experiment) (result *v1beta
 }
 
 // Update takes the representation of a experiment and updates it. Returns the server's representation of the experiment, and an error, if there is any.
-func (c *FakeExperiments) Update(experiment *v1beta1.Experiment) (result *v1beta1.Experiment, err error) {
+func (c *FakeExperiments) Update(ctx context.Context, experiment *v1beta1.Experiment, opts v1.UpdateOptions) (result *v1beta1.Experiment, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(experimentsResource, c.ns, experiment), &v1beta1.Experiment{})
 
@@ -101,7 +103,7 @@ func (c *FakeExperiments) Update(experiment *v1beta1.Experiment) (result *v1beta
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeExperiments) UpdateStatus(experiment *v1beta1.Experiment) (*v1beta1.Experiment, error) {
+func (c *FakeExperiments) UpdateStatus(ctx context.Context, experiment *v1beta1.Experiment, opts v1.UpdateOptions) (*v1beta1.Experiment, error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateSubresourceAction(experimentsResource, "status", c.ns, experiment), &v1beta1.Experiment{})
 
@@ -112,7 +114,7 @@ func (c *FakeExperiments) UpdateStatus(experiment *v1beta1.Experiment) (*v1beta1
 }
 
 // Delete takes name of the experiment and deletes it. Returns an error if one occurs.
-func (c *FakeExperiments) Delete(name string, options *v1.DeleteOptions) error {
+func (c *FakeExperiments) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
 		Invokes(testing.NewDeleteAction(experimentsResource, c.ns, name), &v1beta1.Experiment{})
 
@@ -120,17 +122,17 @@ func (c *FakeExperiments) Delete(name string, options *v1.DeleteOptions) error {
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeExperiments) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(experimentsResource, c.ns, listOptions)
+func (c *FakeExperiments) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(experimentsResource, c.ns, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1beta1.ExperimentList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched experiment.
-func (c *FakeExperiments) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.Experiment, err error) {
+func (c *FakeExperiments) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Experiment, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(experimentsResource, c.ns, name, data, subresources...), &v1beta1.Experiment{})
+		Invokes(testing.NewPatchSubresourceAction(experimentsResource, c.ns, name, pt, data, subresources...), &v1beta1.Experiment{})
 
 	if obj == nil {
 		return nil, err

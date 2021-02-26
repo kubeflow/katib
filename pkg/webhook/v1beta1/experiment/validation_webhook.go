@@ -26,11 +26,9 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ktypes "k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
-	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -41,40 +39,53 @@ import (
 	"github.com/kubeflow/katib/pkg/webhook/v1beta1/experiment/validator"
 )
 
-// experimentValidator validates Pods
-type experimentValidator struct {
-	admission.Handler
+// ExperimentValidator validates Experiments.
+type ExperimentValidator struct {
 	client  client.Client
-	decoder types.Decoder
+	decoder *admission.Decoder
 	validator.Validator
 }
 
-func NewExperimentValidator(c client.Client) *experimentValidator {
+// NewExperimentValidator returns a new Experiment validator with the given client.
+func NewExperimentValidator(c client.Client) *ExperimentValidator {
 	p := manifest.New(c)
-	return &experimentValidator{
+	return &ExperimentValidator{
 		Validator: validator.New(p),
 	}
 }
 
-func (v *experimentValidator) Handle(ctx context.Context, req types.Request) types.Response {
+// ExperimentValidator implements inject.Decoder.
+// A decoder will be automatically injected.
+
+// InjectDecoder injects the decoder.
+func (v *ExperimentValidator) InjectDecoder(d *admission.Decoder) error {
+	v.decoder = d
+	return nil
+}
+
+func (v *ExperimentValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
 	inst := &experimentsv1beta1.Experiment{}
 	var oldInst *experimentsv1beta1.Experiment
 	err := v.decoder.Decode(req, inst)
 	if err != nil {
-		return admission.ErrorResponse(http.StatusBadRequest, err)
+		return admission.Errored(http.StatusBadRequest, err)
 	}
 	if len(req.AdmissionRequest.OldObject.Raw) > 0 {
 		oldDecoder := json.NewDecoder(bytes.NewBuffer(req.AdmissionRequest.OldObject.Raw))
 		oldInst = &experimentsv1beta1.Experiment{}
 		if err := oldDecoder.Decode(&oldInst); err != nil {
-			return admission.ErrorResponse(http.StatusBadRequest, fmt.Errorf("cannot decode incoming old object: %v", err))
+			return admission.Errored(http.StatusBadRequest, fmt.Errorf("Cannot decode incoming old object: %v", err))
 		}
 	}
 
 	// After metrics collector sidecar injection in Job level done, delete validation for namespace labels
 	ns := &v1.Namespace{}
-	if err := v.client.Get(context.TODO(), ktypes.NamespacedName{Name: req.AdmissionRequest.Namespace}, ns); err != nil {
-		return admission.ErrorResponse(http.StatusInternalServerError, err)
+	fmt.Println("-------------------------")
+	fmt.Println(req.AdmissionRequest.Namespace)
+	fmt.Println("-----------------")
+	fmt.Println(v.client)
+	if err := v.client.Get(context.TODO(), types.NamespacedName{Name: req.AdmissionRequest.Namespace}, ns); err != nil {
+		return admission.Errored(http.StatusInternalServerError, err)
 	}
 	validNS := true
 	if ns.Labels == nil {
@@ -87,12 +98,12 @@ func (v *experimentValidator) Handle(ctx context.Context, req types.Request) typ
 	if !validNS {
 		err = fmt.Errorf("Cannot create the Experiment %q in namespace %q: the namespace lacks label \"%s: %s\"",
 			inst.Name, req.AdmissionRequest.Namespace, common.KatibMetricsCollectorInjection, common.KatibMetricsCollectorInjectionEnabled)
-		return admission.ErrorResponse(http.StatusBadRequest, err)
+		return admission.Errored(http.StatusBadRequest, err)
 	}
 
 	err = v.ValidateExperiment(inst, oldInst)
 	if err != nil {
-		return admission.ErrorResponse(http.StatusBadRequest, err)
+		return admission.Errored(http.StatusBadRequest, err)
 	}
 
 	// By default we create PV with cluster local host path for each experiment with ResumePolicy = FromVolume.
@@ -115,36 +126,15 @@ func (v *experimentValidator) Handle(ctx context.Context, req types.Request) typ
 
 		// Get PV name from Suggestion
 		PVName := util.GetSuggestionPersistentVolumeName(suggestion)
-		err := v.client.Get(context.TODO(), ktypes.NamespacedName{Name: PVName}, &v1.PersistentVolume{})
+		err := v.client.Get(context.TODO(), types.NamespacedName{Name: PVName}, &v1.PersistentVolume{})
 		if !errors.IsNotFound(err) {
 			returnError := fmt.Errorf("Cannot create the Experiment: %v in namespace: %v, PV: %v is not deleted", inst.Name, inst.Namespace, PVName)
 			if err != nil {
 				returnError = fmt.Errorf("Cannot create the Experiment: %v in namespace: %v, error: %v", inst.Name, inst.Namespace, err)
 			}
-			return admission.ErrorResponse(http.StatusBadRequest, returnError)
+			return admission.Errored(http.StatusBadRequest, returnError)
 		}
 	}
 
 	return admission.ValidationResponse(true, "")
-}
-
-// experimentValidator implements inject.Client.
-// A client will be automatically injected.
-var _ inject.Client = &experimentValidator{}
-
-// InjectClient injects the client.
-func (v *experimentValidator) InjectClient(c client.Client) error {
-	v.client = c
-	v.Validator.InjectClient(c)
-	return nil
-}
-
-// experimentValidator implements inject.Decoder.
-// A decoder will be automatically injected.
-var _ inject.Decoder = &experimentValidator{}
-
-// InjectDecoder injects the decoder.
-func (v *experimentValidator) InjectDecoder(d types.Decoder) error {
-	v.decoder = d
-	return nil
 }

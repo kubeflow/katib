@@ -11,8 +11,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
@@ -286,12 +286,6 @@ func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.Persi
 			pv.Spec.PersistentVolumeSource.HostPath.Path == consts.DefaultSuggestionVolumeLocalPathPrefix {
 			pv.Spec.PersistentVolumeSource.HostPath.Path = pv.Spec.PersistentVolumeSource.HostPath.Path + persistentVolumeName
 		}
-
-		// Add owner reference to the pv so that it could be GC after the suggestion is deleted
-		if err := controllerutil.SetControllerReference(s, pv, g.scheme); err != nil {
-			return nil, nil, err
-		}
-
 	}
 
 	return pvc, pv, nil

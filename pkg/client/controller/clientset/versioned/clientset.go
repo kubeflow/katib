@@ -18,6 +18,8 @@ limitations under the License.
 package versioned
 
 import (
+	"fmt"
+
 	commonv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/common/v1beta1"
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/experiments/v1beta1"
 	suggestionv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/suggestions/v1beta1"
@@ -30,17 +32,9 @@ import (
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	CommonV1beta1() commonv1beta1.CommonV1beta1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Common() commonv1beta1.CommonV1beta1Interface
 	ExperimentV1beta1() experimentv1beta1.ExperimentV1beta1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Experiment() experimentv1beta1.ExperimentV1beta1Interface
 	SuggestionV1beta1() suggestionv1beta1.SuggestionV1beta1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Suggestion() suggestionv1beta1.SuggestionV1beta1Interface
 	TrialV1beta1() trialv1beta1.TrialV1beta1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Trial() trialv1beta1.TrialV1beta1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -58,20 +52,8 @@ func (c *Clientset) CommonV1beta1() commonv1beta1.CommonV1beta1Interface {
 	return c.commonV1beta1
 }
 
-// Deprecated: Common retrieves the default version of CommonClient.
-// Please explicitly pick a version.
-func (c *Clientset) Common() commonv1beta1.CommonV1beta1Interface {
-	return c.commonV1beta1
-}
-
 // ExperimentV1beta1 retrieves the ExperimentV1beta1Client
 func (c *Clientset) ExperimentV1beta1() experimentv1beta1.ExperimentV1beta1Interface {
-	return c.experimentV1beta1
-}
-
-// Deprecated: Experiment retrieves the default version of ExperimentClient.
-// Please explicitly pick a version.
-func (c *Clientset) Experiment() experimentv1beta1.ExperimentV1beta1Interface {
 	return c.experimentV1beta1
 }
 
@@ -80,20 +62,8 @@ func (c *Clientset) SuggestionV1beta1() suggestionv1beta1.SuggestionV1beta1Inter
 	return c.suggestionV1beta1
 }
 
-// Deprecated: Suggestion retrieves the default version of SuggestionClient.
-// Please explicitly pick a version.
-func (c *Clientset) Suggestion() suggestionv1beta1.SuggestionV1beta1Interface {
-	return c.suggestionV1beta1
-}
-
 // TrialV1beta1 retrieves the TrialV1beta1Client
 func (c *Clientset) TrialV1beta1() trialv1beta1.TrialV1beta1Interface {
-	return c.trialV1beta1
-}
-
-// Deprecated: Trial retrieves the default version of TrialClient.
-// Please explicitly pick a version.
-func (c *Clientset) Trial() trialv1beta1.TrialV1beta1Interface {
 	return c.trialV1beta1
 }
 
@@ -106,9 +76,14 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 }
 
 // NewForConfig creates a new Clientset for the given config.
+// If config's RateLimiter is not set and QPS and Burst are acceptable,
+// NewForConfig will generate a rate-limiter in configShallowCopy.
 func NewForConfig(c *rest.Config) (*Clientset, error) {
 	configShallowCopy := *c
 	if configShallowCopy.RateLimiter == nil && configShallowCopy.QPS > 0 {
+		if configShallowCopy.Burst <= 0 {
+			return nil, fmt.Errorf("burst is required to be greater than 0 when RateLimiter is not set and QPS is set to greater than 0")
+		}
 		configShallowCopy.RateLimiter = flowcontrol.NewTokenBucketRateLimiter(configShallowCopy.QPS, configShallowCopy.Burst)
 	}
 	var cs Clientset

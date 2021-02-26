@@ -6,14 +6,13 @@ import (
 	"time"
 
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	utilrand "k8s.io/apimachinery/pkg/util/rand"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -26,9 +25,9 @@ import (
 )
 
 var (
-	log        = logf.Log.WithName("suggestion-client")
 	timeout    = 60 * time.Second
 	timeFormat = "2006-01-02T15:04:05Z"
+	log        = logf.Log.WithName("suggestion-client")
 
 	getRPCClientSuggestion = func(conn *grpc.ClientConn) suggestionapi.SuggestionClient {
 		return suggestionapi.NewSuggestionClient(conn)

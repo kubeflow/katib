@@ -18,6 +18,9 @@ spec:
         prometheus.io/scrape: "true"
     spec:
       serviceAccountName: katib-controller
+      initContainers:
+        - name: cert-generator
+          image: docker.io/kubeflowkatib/cert-generator
       containers:
         - name: katib-controller
           image: docker.io/kubeflowkatib/katib-controller

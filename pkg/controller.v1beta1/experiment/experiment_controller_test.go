@@ -3,10 +3,13 @@ package experiment
 import (
 	"context"
 	"fmt"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
+	commonv1 "github.com/kubeflow/common/pkg/apis/common/v1"
+	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 	"github.com/onsi/gomega"
 	"github.com/prometheus/client_golang/prometheus"
 	corev1 "k8s.io/api/core/v1"
@@ -16,8 +19,9 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -28,8 +32,6 @@ import (
 	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1beta1/experiment/manifest"
 	suggestionmock "github.com/kubeflow/katib/pkg/mock/v1beta1/experiment/suggestion"
-	kubeflowcommonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
-	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 )
 
 const (
@@ -42,7 +44,7 @@ const (
 )
 
 func init() {
-	logf.SetLogger(logf.ZapLogger(true))
+	logf.SetLogger(zap.New())
 }
 
 type statusMatcher struct {
@@ -73,7 +75,7 @@ func (statusM statusMatcher) String() string {
 
 func TestAdd(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
-	mgr, err := manager.New(cfg, manager.Options{})
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	// Test - Try to add experiment controller to the manager
@@ -93,7 +95,7 @@ func TestReconcile(t *testing.T) {
 
 	// Setup the Manager and Controller.  Wrap the Controller Reconcile function so it writes each request to a
 	// channel when it is finished.
-	mgr, err := manager.New(cfg, manager.Options{})
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	c := mgr.GetClient()
 
@@ -103,7 +105,7 @@ func TestReconcile(t *testing.T) {
 		Suggestion: mockSuggestion,
 		Generator:  mockGenerator,
 		collector:  experimentUtil.NewExpsCollector(mgr.GetCache(), prometheus.NewRegistry()),
-		recorder:   mgr.GetRecorder(ControllerName),
+		recorder:   mgr.GetEventRecorderFor(ControllerName),
 	}
 	r.updateStatusHandler = func(instance *experimentsv1beta1.Experiment) error {
 		var err error = errors.NewBadRequest("fake-error")
@@ -120,11 +122,12 @@ func TestReconcile(t *testing.T) {
 	recFn := SetupTestReconcile(r)
 	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
 
-	stopMgr, mgrStopped := StartTestManager(mgr, g)
-
-	defer func() {
-		close(stopMgr)
-		mgrStopped.Wait()
+	// Start test manager.
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		g.Expect(mgr.Start(context.TODO())).NotTo(gomega.HaveOccurred())
 	}()
 
 	returnedTFJob := newFakeTFJob()
@@ -249,7 +252,7 @@ func TestReconcile(t *testing.T) {
 		label := labels.Set{
 			consts.LabelExperimentName: experimentName,
 		}
-		c.List(context.TODO(), &client.ListOptions{LabelSelector: label.AsSelector()}, trials)
+		c.List(context.TODO(), trials, &client.ListOptions{LabelSelector: label.AsSelector()})
 		return len(trials.Items)
 	}, timeout).Should(gomega.Equal(2))
 
@@ -365,10 +368,10 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 			Kind:       "TFJob",
 		},
 		Spec: tfv1.TFJobSpec{
-			TFReplicaSpecs: map[tfv1.TFReplicaType]*kubeflowcommonv1.ReplicaSpec{
+			TFReplicaSpecs: map[commonv1.ReplicaType]*commonv1.ReplicaSpec{
 				tfv1.TFReplicaTypePS: {
 					Replicas:      func() *int32 { i := int32(1); return &i }(),
-					RestartPolicy: kubeflowcommonv1.RestartPolicyOnFailure,
+					RestartPolicy: commonv1.RestartPolicyOnFailure,
 					Template: v1.PodTemplateSpec{
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{
@@ -506,10 +509,10 @@ func newFakeTFJob() *tfv1.TFJob {
 			Namespace: "trial-namespace",
 		},
 		Spec: tfv1.TFJobSpec{
-			TFReplicaSpecs: map[tfv1.TFReplicaType]*kubeflowcommonv1.ReplicaSpec{
+			TFReplicaSpecs: map[commonv1.ReplicaType]*commonv1.ReplicaSpec{
 				tfv1.TFReplicaTypePS: {
 					Replicas:      func() *int32 { i := int32(1); return &i }(),
-					RestartPolicy: kubeflowcommonv1.RestartPolicyOnFailure,
+					RestartPolicy: commonv1.RestartPolicyOnFailure,
 					Template: v1.PodTemplateSpec{
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{

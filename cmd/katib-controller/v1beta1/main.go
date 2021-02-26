@@ -23,9 +23,10 @@ import (
 	"github.com/spf13/viper"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
+	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	apis "github.com/kubeflow/katib/pkg/apis/controller"
 	controller "github.com/kubeflow/katib/pkg/controller.v1beta1"
@@ -35,7 +36,7 @@ import (
 )
 
 func main() {
-	logf.SetLogger(logf.ZapLogger(false))
+	logf.SetLogger(zap.New())
 	log := logf.Log.WithName("entrypoint")
 
 	var experimentSuggestionName string
@@ -115,7 +116,7 @@ func main() {
 	}
 
 	log.Info("Setting up webhooks")
-	if err := webhook.AddToManager(mgr, int32(webhookPort), serviceName); err != nil {
+	if err := webhook.AddToManager(mgr, webhookPort, serviceName); err != nil {
 		log.Error(err, "unable to register webhooks to the manager")
 		os.Exit(1)
 	}

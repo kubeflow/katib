@@ -12,9 +12,7 @@ limitations under the License.
 
 package apis
 
-import (
-	"github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
-)
+import v1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 
 func init() {
 	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back

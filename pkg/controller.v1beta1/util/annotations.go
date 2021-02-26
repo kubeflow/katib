@@ -16,7 +16,7 @@ limitations under the License.
 package util
 
 import (
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"

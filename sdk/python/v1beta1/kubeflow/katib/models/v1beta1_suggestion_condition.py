@@ -49,7 +49,7 @@ class V1beta1SuggestionCondition(object):
         'type': 'type'
     }
 
-    def __init__(self, last_transition_time=None, last_update_time=None, message=None, reason=None, status=None, type=None):  # noqa: E501
+    def __init__(self, last_transition_time=None, last_update_time=None, message=None, reason=None, status='', type=''):  # noqa: E501
         """V1beta1SuggestionCondition - a model defined in Swagger"""  # noqa: E501
 
         self._last_transition_time = None

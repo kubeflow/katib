@@ -124,6 +124,12 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 		// Set default storage class
 		pvSpec.StorageClassName = defaultStorageClassName
 
+		// Set PersistentVolumeReclaimPolicy to "Delete" to automatically delete PV once PVC is deleted.
+		// Kubernetes doesn't allow to specify ownerReferences for the cluster-scoped
+		// resources (which PV is) with namespace-scoped owner (which Suggestion is).
+		// TODO (andreyvelich): We should document this.
+		pvSpec.PersistentVolumeReclaimPolicy = corev1.PersistentVolumeReclaimDelete
+
 		// Set default access modes
 		if len(pvSpec.AccessModes) == 0 {
 			pvSpec.AccessModes = []corev1.PersistentVolumeAccessMode{

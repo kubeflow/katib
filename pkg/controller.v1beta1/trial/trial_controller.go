@@ -36,10 +36,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
@@ -71,7 +71,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		Client:        mgr.GetClient(),
 		scheme:        mgr.GetScheme(),
 		ManagerClient: managerclient.New(),
-		recorder:      mgr.GetRecorder(ControllerName),
+		recorder:      mgr.GetEventRecorderFor(ControllerName), // TODO (andreyvelich): Verify this
 		collector:     trialutil.NewTrialsCollector(mgr.GetCache(), metrics.Registry),
 	}
 	r.updateStatusHandler = r.updateStatus
@@ -144,11 +144,11 @@ type ReconcileTrial struct {
 // and what is in the Trial.Spec
 // +kubebuilder:rbac:groups=trials.kubeflow.org,resources=trials,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=trials.kubeflow.org,resources=trials/status,verbs=get;update;patch
-func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileTrial) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the Trial instance
 	logger := log.WithValues("Trial", request.NamespacedName)
 	original := &trialsv1beta1.Trial{}
-	err := r.Get(context.TODO(), request.NamespacedName, original)
+	err := r.Get(ctx, request.NamespacedName, original)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Object not found, return.  Created objects are automatically garbage collected.
