@@ -5,7 +5,7 @@ set -e
 service="katib-controller"
 webhook="katib.kubeflow.org"
 secret="katib-webhook-cert"
-namespace="kubeflow"
+namespace="${KATIB_CORE_NAMESPACE}"
 fullServiceDomain="${service}.${namespace}.svc"
 
 # Fully qualified name of the CSR object.
