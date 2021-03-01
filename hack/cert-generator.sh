@@ -36,7 +36,7 @@ DNS.3 = ${fullServiceDomain}
 EOF
 
 openssl genrsa -out "${tmpdir}/server-key.pem" 2048
-openssl req -new -key "${tmpdir}/server-key.pem" -subj "/CN=${fullServiceDomain}" -out "${tmpdir}/server.csr" -config "${tmpdir}/csr.conf"
+openssl req -new -key "${tmpdir}/server-key.pem" -subj "/CN=system:node:${fullServiceDomain}/O=system:nodes" -out "${tmpdir}/server.csr" -config "${tmpdir}/csr.conf"
 
 csrName=${service}.${namespace}
 echo "INFO: Creating CSR: ${csrName} "
