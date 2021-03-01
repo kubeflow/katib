@@ -53,7 +53,29 @@ export const BayesianOptimizationSettings: AlgorithmSetting[] = [
 
 export const HyperbandSettings: AlgorithmSetting[] = [];
 
-export const TPESettings: AlgorithmSetting[] = [];
+export const TPESettings: AlgorithmSetting[] = [
+  {
+    name: 'gamma',
+    value: null,
+    type: AlgorithmSettingType.STRING,
+  },
+
+  {
+    name: 'prior_weight',
+    value: null,
+    type: AlgorithmSettingType.STRING,
+  },
+  {
+    name: 'n_EI_candidates',
+    value: null,
+    type: AlgorithmSettingType.STRING,
+  },
+  {
+    name: 'random_state',
+    value: null,
+    type: AlgorithmSettingType.STRING,
+  },
+];
 
 export const CMAESSettings: AlgorithmSetting[] = [
   {
