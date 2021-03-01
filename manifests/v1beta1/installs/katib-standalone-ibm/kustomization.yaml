@@ -3,7 +3,7 @@ kind: Kustomization
 bases:
   - ../katib-standalone
 patchesStrategicMerge:
-  - ../../katib-controller/overlays/ibm-storage-config/katib-mysql-deployment.yaml
+  - katib-mysql-deployment.yaml
 images:
   - name: mysql
     newTag: "5.6"
