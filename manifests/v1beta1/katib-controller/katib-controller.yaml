@@ -22,6 +22,11 @@ spec:
         - name: cert-generator
           image: docker.io/kubeflowkatib/cert-generator
           imagePullPolicy: Always
+          env:
+            - name: KATIB_CORE_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace          
       containers:
         - name: katib-controller
           image: docker.io/kubeflowkatib/katib-controller
