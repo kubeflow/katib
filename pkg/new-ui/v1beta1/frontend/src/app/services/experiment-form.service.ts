@@ -19,6 +19,7 @@ import {
   FeasibleSpaceMinMax,
   GraphConfig,
   NasOperation,
+  AlgorithmSetting,
 } from '../models/experiment.k8s.model';
 import { CollectorKind } from '../enumerations/metrics-collector';
 
@@ -290,11 +291,18 @@ export class ExperimentFormService {
   }
 
   algorithmFromCtrl(group: FormGroup): AlgorithmSpec {
+    const settings: AlgorithmSetting[] = [];
+    group.get('algorithmSettings').value.forEach(setting => {
+      if (setting.value === null) {
+        return;
+      }
+
+      settings.push({ name: setting.name, value: `${setting.value}` });
+    });
+
     return {
       algorithmName: group.get('algorithm').value,
-      algorithmSettings: group.get('algorithmSettings').value.map(setting => {
-        return { name: setting.name, value: `${setting.value}` };
-      }),
+      algorithmSettings: settings,
     };
   }
 

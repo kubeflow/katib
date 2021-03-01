@@ -58,7 +58,7 @@ export const TPESettings: AlgorithmSetting[] = [];
 export const CMAESSettings: AlgorithmSetting[] = [
   {
     name: 'random_state',
-    value: 'None',
+    value: null,
     type: AlgorithmSettingType.STRING,
   },
   {

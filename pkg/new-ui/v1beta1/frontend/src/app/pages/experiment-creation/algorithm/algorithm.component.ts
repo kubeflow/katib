@@ -73,7 +73,7 @@ export class FormAlgorithmComponent implements OnInit, OnDestroy {
     this.algorithmSettings.push(
       new FormGroup({
         name: new FormControl(name, Validators.required),
-        value: new FormControl(value, Validators.required),
+        value: new FormControl(value, []),
         type: new FormControl(type, Validators.required),
         values: new FormControl(values, Validators.required),
       }),
