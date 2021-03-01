@@ -5,5 +5,4 @@ export enum CollectorKind {
   PROMETHEUS = 'PrometheusMetric',
   CUSTOM = 'Custom',
   NONE = 'None',
-  VOLUME = 'metrics-volume',
 }
