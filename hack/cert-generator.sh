@@ -3,13 +3,17 @@
 set -e
 
 service="katib-controller"
-webhook="katib.kubeflow.org"
-secret="katib-webhook-cert"
 namespace=${KATIB_CORE_NAMESPACE}
-fullServiceDomain="${service}.${namespace}.svc"
+full_service_domain="${service}.${namespace}.svc"
+
+job_name="katib-cert-generator"
+secret="katib-webhook-cert"
+webhook="katib.kubeflow.org"
 
 # Fully qualified name of the CSR object.
 csr="certificatesigningrequests.v1beta1.certificates.k8s.io"
+# CSR name.
+csr_name=${service}.${namespace}
 
 if [ ! -x "$(command -v openssl)" ]; then
   echo "ERROR: openssl not found"
@@ -32,31 +36,29 @@ subjectAltName = @alt_names
 [alt_names]
 DNS.1 = ${service}
 DNS.2 = ${service}.${namespace}
-DNS.3 = ${fullServiceDomain}
+DNS.3 = ${full_service_domain}
 EOF
 
 openssl genrsa -out "${tmpdir}/server-key.pem" 2048
-openssl req -new -key "${tmpdir}/server-key.pem" -subj "/CN=system:node:${fullServiceDomain}/O=system:nodes" -out "${tmpdir}/server.csr" -config "${tmpdir}/csr.conf"
-
-csrName=${service}.${namespace}
-echo "INFO: Creating CSR: ${csrName} "
+openssl req -new -key "${tmpdir}/server-key.pem" -subj "/CN=system:node:${full_service_domain}/O=system:nodes" -out "${tmpdir}/server.csr" -config "${tmpdir}/csr.conf"
 
 # Clean-up any previously created CSR for our service.
-# Ignore errors.
 set +e
-if kubectl get "${csr}/${csrName}"; then
-  if kubectl delete "${csr}/${csrName}"; then
+if kubectl get "${csr}/${csr_name}"; then
+  if kubectl delete "${csr}/${csr_name}"; then
     echo "WARN: Previous CSR was found and removed."
   fi
 fi
 
 # Create server cert/key CSR and send it to k8s api.
 set -e
-cat <<EOF | kubectl create --validate=false -f -
+echo "INFO: Creating CSR: ${csr_name}"
+
+cat <<EOF | kubectl create -f -
 apiVersion: certificates.k8s.io/v1beta1
 kind: CertificateSigningRequest
 metadata:
-  name: ${csrName}
+  name: ${csr_name}
 spec:
   groups:
   - system:authenticated
@@ -69,24 +71,23 @@ spec:
 EOF
 
 # Verify that CSR has been created.
-# Ignore errors.
 set +e
 while true; do
-  if kubectl get "${csr}/${csrName}"; then
+  if kubectl get "${csr}/${csr_name}"; then
     break
   fi
 done
 
 # Approve and fetch the signed certificate.
 set -e
-kubectl certificate approve "${csr}/${csrName}"
+kubectl certificate approve "${csr}/${csr_name}"
 
 # Verify that certificate has been signed.
 set +e
 i=1
 while [ "$i" -ne 20 ]; do
-  serverCert=$(kubectl get "${csr}/${csrName}" -o jsonpath='{.status.certificate}')
-  if [ "${serverCert}" != '' ]; then
+  server_cert=$(kubectl get "${csr}/${csr_name}" -o jsonpath='{.status.certificate}')
+  if [ "${server_cert}" != '' ]; then
     break
   fi
   sleep 3
@@ -94,31 +95,45 @@ while [ "$i" -ne 20 ]; do
 done
 
 set -e
-if [ "${serverCert}" = '' ]; then
-  echo "ERROR: After approving csr ${csrName}, the signed certificate did not appear on the resource. Giving up after 1 minute." >&2
+if [ "${server_cert}" = '' ]; then
+  echo "ERROR: After approving csr ${csr_name}, the signed certificate did not appear on the resource. Giving up after 1 minute."
   exit 1
 fi
 
-echo "${serverCert}" | openssl base64 -d -A -out "${tmpdir}/server-cert.pem"
+echo "${server_cert}" | openssl base64 -d -A -out "${tmpdir}/server-cert.pem"
 
 # Clean-up any previously created secret.
-# Ignore errors.
 set +e
 if kubectl get secret ${secret} -n ${namespace}; then
   if kubectl delete secret ${secret} -n ${namespace}; then
     echo "WARN: Previous secret was found and removed."
   fi
 fi
-# Create the secret with CA cert and server cert/key.
-kubectl create secret tls "${secret}" \
-  --key="${tmpdir}/server-key.pem" \
-  --cert="${tmpdir}/server-cert.pem" \
-  --dry-run -o yaml |
-  kubectl -n "${namespace}" apply -f -
 
-caBundle=$(base64 </run/secrets/kubernetes.io/serviceaccount/ca.crt | tr -d '\n')
-echo "INFO: Encoded CA:"
-echo -e "${caBundle} \n"
+# Get cert generator Job UID.
+set -e
+job_uid=$(kubectl get job ${job_name} -n ${namespace} -o jsonpath='{.metadata.uid}')
+
+# Create secret with CA cert and server cert/key.
+# Add ownerReferences to clean-up secret with cert generator Job.
+echo "INFO: Creating Secret: ${secret}"
+cat <<EOF | kubectl create -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ${secret}
+  namespace: ${namespace}
+  ownerReferences:
+    - apiVersion: batch/v1
+      kind: Job
+      controller: true
+      name: ${job_name}
+      uid: ${job_uid}
+type: kubernetes.io/tls
+data:
+  tls.key: $(base64 <"${tmpdir}/server-key.pem" | tr -d '\n')
+  tls.crt: $(base64 <"${tmpdir}/server-cert.pem" | tr -d '\n')
+EOF
 
 patch_webhook() {
   set +e
@@ -128,7 +143,7 @@ patch_webhook() {
   caBundle=$4
 
   i=0
-  while [[ $i -lt 5 ]]; do
+  while [[ $i -ne 5 ]]; do
     echo "INFO: Trying to patch ${kind} adding the caBundle."
     if kubectl patch ${kind} ${webhook} --type='json' -p "[{'op': 'replace', 'path': '${path}', 'value':'${caBundle}'}]"; then
       break
@@ -142,6 +157,10 @@ patch_webhook() {
     exit 1
   fi
 }
+
+caBundle=$(base64 </run/secrets/kubernetes.io/serviceaccount/ca.crt | tr -d '\n')
+echo "INFO: Encoded CA:"
+echo -e "${caBundle} \n"
 
 # Patch the webhook to add the caBundle.
 patch_webhook "ValidatingWebhookConfiguration" ${webhook} "/webhooks/0/clientConfig/caBundle" ${caBundle}
