@@ -12,4 +12,5 @@ Please keep the list in alphabetical order.
 | [canonical](https://ubuntu.com/) |[@RFMVasconcelos](https://github.com/rfmvasconcelos) | Hyperparameter tuning for customer projects in Defense and Fintech |
 | [cisco](https://cisco.com/) |[@ramdootp](https://github.com/ramdootp) | Hyperparameter tuning for conversational AI interface using Rasa |
 | [cubonacci](https://www.cubonacci.com) |[@janvdvegt](https://github.com/janvdvegt) | Hyperparameter tuning within the Cubonacci machine learning platform |
+| [fuzhi](http://www.fuzhi.ai/) | [@planck0591](https://github.com/planck0591) | Experiment and Trial in autoML Platform |
 | [karrot](https://uk.karrotmarket.com/) |[@muik](https://github.com/muik) | Hyperparameter tuning in Karrot ML Platform |
