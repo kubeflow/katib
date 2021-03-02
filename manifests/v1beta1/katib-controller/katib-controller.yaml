@@ -26,7 +26,7 @@ spec:
             - name: KATIB_CORE_NAMESPACE
               valueFrom:
                 fieldRef:
-                  fieldPath: metadata.namespace          
+                  fieldPath: metadata.namespace
       containers:
         - name: katib-controller
           image: docker.io/kubeflowkatib/katib-controller
