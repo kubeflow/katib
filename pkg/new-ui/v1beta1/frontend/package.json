@@ -35,7 +35,7 @@
     "d3-shape": "^2.0.0",
     "date-fns": "1.29.0",
     "js-yaml": "^4.0.0",
-    "lodash-es": "4.17.11",
+    "lodash-es": "4.17.14",
     "material-icons": "^0.3.1",
     "ng2-ace-editor": "^0.3.9",
     "ngx-json-viewer": "^2.4.0",
