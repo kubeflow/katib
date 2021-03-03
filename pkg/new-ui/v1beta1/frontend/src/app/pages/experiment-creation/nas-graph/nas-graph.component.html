@@ -1,0 +1,32 @@
+<div class="lib-step-wrapper" [formGroup]="formGroup">
+  <div class="flex-column">
+    <mat-form-field appearance="outline">
+      <mat-label>Number of Layers</mat-label>
+      <input formControlName="layers" matInput type="number" step="1" min="1" />
+    </mat-form-field>
+
+    <app-shared-list-input
+      header="Input Sizes"
+      valueLabel="Dimensions of Input Size"
+      [formArray]="formGroup.get('inputSizes')"
+    ></app-shared-list-input>
+
+    <app-shared-list-input
+      header="Output Sizes"
+      valueLabel="Dimensions of Output Size"
+      [formArray]="formGroup.get('outputSizes')"
+    ></app-shared-list-input>
+  </div>
+
+  <!--step info-->
+  <div class="lib-step-info-wrapper">
+    <lib-step-info header="Neural Architecture Search Graph">
+      The graph config that defines structure for a directed acyclic graph of
+      the neural network. You can also check the low-level Golang API
+      <a
+        href="https://github.com/kubeflow/katib/blob/master/pkg/apis/controller/experiments/v1beta1/experiment_types.go#L301-L306"
+        >here</a
+      >.
+    </lib-step-info>
+  </div>
+</div>

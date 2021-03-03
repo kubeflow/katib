@@ -1,0 +1,78 @@
+<form [formGroup]="objectiveForm" class="lib-step-wrapper">
+  <div class="flex-column">
+    <mat-form-field appearance="outline" class="fit-content">
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="type">
+        <mat-option
+          *ngFor="let type of objectiveTypes | keyvalue"
+          [value]="type.key"
+          >{{ type.value }}</mat-option
+        >
+      </mat-select>
+    </mat-form-field>
+
+    <div class="two-inputs">
+      <mat-form-field appearance="outline">
+        <mat-label>Metric</mat-label>
+        <input formControlName="metricName" matInput />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Goal</mat-label>
+        <input formControlName="goal" matInput type="number" step="0.01" />
+      </mat-form-field>
+    </div>
+
+    <app-shared-list-input
+      header="Additional metrics"
+      valueLabel="Additional metrics name"
+      addValueText="Additional metric"
+      [requiredValue]="false"
+      [formArray]="objectiveForm.get('additionalMetricNames')"
+    ></app-shared-list-input>
+
+    <mat-checkbox formControlName="setStrategies">
+      Set metric strategies
+    </mat-checkbox>
+
+    <ng-container *ngIf="objectiveForm.get('setStrategies').value">
+      <mat-form-field appearance="outline">
+        <mat-label>
+          Strategy for: {{ objectiveForm.get('metricName').value }}
+        </mat-label>
+        <mat-select [formControl]="objectiveForm.get('metricStrategy')">
+          <mat-option value="max">Max</mat-option>
+          <mat-option value="min">Min</mat-option>
+          <mat-option value="latest">Latest</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <ng-container *ngFor="let strategy of strategiesArray.controls">
+        <mat-form-field appearance="outline">
+          <mat-label>Strategy for: {{ strategy.value.metric }}</mat-label>
+          <mat-select [formControl]="strategy.get('strategy')">
+            <mat-option value="max">Max</mat-option>
+            <mat-option value="min">Min</mat-option>
+            <mat-option value="latest">Latest</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </ng-container>
+    </ng-container>
+  </div>
+
+  <!--Step Info-->
+  <div class="lib-step-info-wrapper">
+    <lib-step-info header="Objective">
+      Katib will use the <em>Objective's metric</em> to monitor the performance
+      of the model. It will create Trials until either the goal is reached or
+      the Controller has run the maximum defined number of Trials.
+    </lib-step-info>
+
+    <lib-step-info header="Omitting the Goal">
+      You can run the Experiment without specifying the <em>goal</em>. In that
+      case, Katib runs the Experiment until the corresponding successful Trials
+      reach maximum number of allowed Trials. This number is defined in the the
+      <em>Trial Thresholds</em> section above.
+    </lib-step-info>
+  </div>
+</form>

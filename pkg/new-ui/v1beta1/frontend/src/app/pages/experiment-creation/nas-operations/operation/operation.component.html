@@ -1,0 +1,19 @@
+<div class="flex-column" [formGroup]="formGroup">
+  <mat-form-field appearance="outline">
+    <mat-label>Operation Type</mat-label>
+    <input formControlName="operationType" matInput />
+    <button
+      mat-icon-button
+      matSuffix
+      (click)="removeCtrl.emit(true)"
+      matTooltip="Remove operation"
+      color="primary"
+    >
+      <mat-icon>delete</mat-icon>
+    </button>
+  </mat-form-field>
+
+  <app-shared-params-list
+    [paramsArray]="formGroup?.get('parameters')"
+  ></app-shared-params-list>
+</div>

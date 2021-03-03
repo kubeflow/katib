@@ -1,0 +1,64 @@
+<table [dataSource]="data" class="wide" mat-table>
+  <!--- Note that these columns can be defined in any order.
+        The actual rendered columns are set as a property on the row definition" -->
+
+  <!-- Position Column -->
+  <ng-container
+    *ngFor="let column of displayedColumns; let i = index"
+    [matColumnDef]="column"
+  >
+    <th mat-header-cell *matHeaderCellDef>
+      {{ column === 'Kfp run' ? '' : column }}
+    </th>
+    <td
+      *matCellDef="let element"
+      [ngClass]="{ cell: column === 'Trial name' }"
+      mat-cell
+    >
+      <span
+        *ngIf="
+          column !== 'Trial name' && column !== 'Status' && column !== 'Kfp run'
+        "
+        >{{ element[i] }}
+      </span>
+
+      <span
+        (click)="openTrialModal(element[i])"
+        *ngIf="column === 'Trial name'"
+        class="name"
+        >{{ element[i] }}
+      </span>
+
+      <div *ngIf="column === 'Kfp run'" class="svg-color">
+        <mat-icon
+          (click)="goToKfpRun(element[i])"
+          [matTooltipDisabled]="!!element[i]"
+          [ngClass]="{ 'icon-disable': !element[i] }"
+          class="icon"
+          matTooltip="No KFP run"
+          svgIcon="pipeline-centered"
+        ></mat-icon>
+      </div>
+
+      <span
+        *ngIf="column === 'Status'"
+        [ngClass]="{
+          green: element[i] === 'Succeeded',
+          red: element[i] === 'Failed'
+        }"
+        >{{ element[i] }}</span
+      >
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr
+    (mouseleave)="handleMouseLeave()"
+    (mouseover)="handleMouseOver(row)"
+    *matRowDef="let row; let i = index; columns: displayedColumns"
+    [ngClass]="{ 'best-trail-row': bestTrialIndex === i }"
+    mat-row
+  >
+    >
+  </tr>
+</table>

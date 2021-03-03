@@ -1,0 +1,21 @@
+<button
+  mat-stroked-button
+  color="primary"
+  class="new-param-btn"
+  (click)="addParam()"
+>
+  <mat-icon>add</mat-icon>Add parameter
+</button>
+
+<div class="header-row">
+  <div class="header-name mat-hint">Name</div>
+  <div class="header-type mat-hint">Type</div>
+  <div class="header-value mat-hint">Domain</div>
+</div>
+
+<ng-container *ngFor="let param of paramsArray.controls; let i = index">
+  <app-shared-parameter
+    [paramCtrl]="param"
+    (delete)="removeParam(i)"
+  ></app-shared-parameter>
+</ng-container>

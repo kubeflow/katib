@@ -1,0 +1,30 @@
+:host {
+  display: block;
+}
+
+.header-row {
+  padding-left: 16px;
+  margin-bottom: 8px;
+  display: flex;
+}
+
+.header-name {
+  width: 90px;
+}
+
+.header-type {
+  width: 90px;
+}
+
+.header-value {
+  width: 55%;
+}
+
+.new-param-btn {
+  margin-top: 12px;
+  margin-bottom: 12px;
+
+  mat-icon {
+    margin-bottom: 2px;
+  }
+}

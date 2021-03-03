@@ -5,3 +5,5 @@ examples
 manifests
 pkg/ui/*/frontend/node_modules
 pkg/ui/*/frontend/build
+pkg/new-ui/*/frontend/node_modules
+pkg/new-ui/*/frontend/build

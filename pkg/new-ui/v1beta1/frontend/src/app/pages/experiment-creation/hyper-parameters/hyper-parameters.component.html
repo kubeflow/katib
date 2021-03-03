@@ -1,0 +1,16 @@
+<div *ngIf="combinations">
+  There are {{ combinations }} different combinations from these Hyper
+  Parameters.
+</div>
+
+<div class="lib-step-wrapper">
+  <app-shared-params-list
+    [paramsArray]="hyperParamsArray"
+  ></app-shared-params-list>
+
+  <lib-step-info header="Hyper Parameters">
+    The <em>Hyper Parameters</em> will be used to construct the optimization
+    search space. Katib will be generating <em>Trials</em> to test different
+    combinations of these parameters in order to find the optimal set.
+  </lib-step-info>
+</div>

@@ -1,0 +1,66 @@
+<h1 mat-dialog-title>Add new parameter</h1>
+
+<div mat-dialog-content [formGroup]="formGroup">
+  <div class="flex-column">
+    Configure the new parameter that will be added to the list.
+
+    <!--name-->
+    <mat-form-field appearance="outline" class="margin-top">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" />
+    </mat-form-field>
+
+    <!--type-->
+    <mat-form-field appearance="outline">
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="parameterType">
+        <mat-option value="int">Integer</mat-option>
+        <mat-option value="double">Double</mat-option>
+        <mat-option value="discrete">Discrete</mat-option>
+        <mat-option value="categorical">Categorical</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!--value inputs-->
+    <ng-container *ngIf="!isList; else listVal">
+      <!--range-->
+      <div class="range-wrapper " [formGroup]="formGroup.get('feasibleSpace')">
+        <mat-form-field appearance="outline">
+          <mat-label>Min</mat-label>
+          <input matInput formControlName="min" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Max</mat-label>
+          <input matInput formControlName="max" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Step (optional)</mat-label>
+          <input matInput formControlName="step" />
+        </mat-form-field>
+      </div>
+    </ng-container>
+
+    <!--list-->
+    <ng-template #listVal>
+      <app-shared-list-input
+        header="List of values"
+        valueLabel="Value"
+        [formArray]="formGroup.get('feasibleSpace').get('list')"
+      ></app-shared-list-input>
+    </ng-template>
+  </div>
+</div>
+
+<div mat-dialog-actions>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="save()"
+    [disabled]="formGroup.invalid"
+  >
+    SAVE
+  </button>
+  <button mat-button cdkFocusInitial (click)="cancel()">CANCEL</button>
+</div>

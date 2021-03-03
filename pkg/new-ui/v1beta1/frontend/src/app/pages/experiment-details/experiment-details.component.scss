@@ -1,0 +1,13 @@
+.panel {
+  margin: 16px 0;
+  display: block;
+}
+
+.graph {
+  margin: 16px 0;
+}
+
+// https://github.com/angular/components/issues/9592
+.tab-height-fix {
+  min-height: calc(100vh - 600px - 52px);
+}

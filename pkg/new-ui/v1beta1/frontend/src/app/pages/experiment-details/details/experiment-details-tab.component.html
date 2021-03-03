@@ -1,0 +1,52 @@
+<lib-heading-row heading="Objective"> </lib-heading-row>
+
+<lib-details-list-item key="Name">
+  {{ experiment?.spec?.objective.objectiveMetricName }}
+</lib-details-list-item>
+
+<lib-details-list-item key="Type">
+  {{ experiment?.spec?.objective.type }}
+</lib-details-list-item>
+
+<lib-details-list-item key="Goal">
+  {{ experiment?.spec?.objective.goal }}
+</lib-details-list-item>
+
+<lib-details-list-item key="Additional metrics">
+  {{ objectiveAdditionalMetrics }}
+</lib-details-list-item>
+
+<lib-heading-row heading="Trials"> </lib-heading-row>
+
+<lib-details-list-item key="Max failed trials">
+  {{ experiment?.spec?.maxFailedTrialCount }}
+</lib-details-list-item>
+
+<lib-details-list-item key="Max trials">
+  {{ experiment?.spec?.maxTrialCount }}
+</lib-details-list-item>
+
+<lib-details-list-item key="Parallel trials">
+  {{ experiment?.spec?.parallelTrialCount }}
+</lib-details-list-item>
+
+<lib-heading-row heading="Parameters"> </lib-heading-row>
+
+<lib-details-list-item
+  *ngFor="let parameter of parameters"
+  [chipsList]="parameter.chips"
+  [key]="parameter.key"
+>
+</lib-details-list-item>
+
+<lib-heading-row heading="Algorithm"> </lib-heading-row>
+
+<lib-details-list-item key="Name">
+  {{ experiment?.spec?.algorithm.algorithmName }}
+</lib-details-list-item>
+
+<lib-heading-row heading="Metrics collector"> </lib-heading-row>
+
+<lib-details-list-item key="Collector type">
+  {{ experiment?.spec?.metricsCollectorSpec.collector.kind }}
+</lib-details-list-item>

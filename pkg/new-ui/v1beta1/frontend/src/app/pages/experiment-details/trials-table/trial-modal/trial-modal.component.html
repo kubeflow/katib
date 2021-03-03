@@ -1,0 +1,31 @@
+<div class="modal">
+  <div class="title">
+    <span class="experiment-title">Trial name: {{ trialName }}</span>
+  </div>
+
+  <div *ngIf="dataLoaded; else loading">
+    <ngx-charts-line-chart
+      [animations]="animations"
+      [curve]="curve"
+      [legendTitle]="legendTitle"
+      [legend]="legend"
+      [results]="chartData"
+      [showXAxisLabel]="showXAxisLabel"
+      [showYAxisLabel]="showYAxisLabel"
+      [xAxisTickFormatting]="xAxisFormat"
+      [timeline]="timeline"
+      [view]="view"
+      [xAxisLabel]="xAxisLabel"
+      [xAxis]="xAxis"
+      [yAxisLabel]="yAxisLabel"
+      [yAxis]="yAxis"
+      [yScaleMax]="yScaleMax"
+      [yScaleMin]="yScaleMin"
+    >
+    </ngx-charts-line-chart>
+  </div>
+
+  <ng-template #loading>
+    <div class="loader"><mat-spinner></mat-spinner></div>
+  </ng-template>
+</div>

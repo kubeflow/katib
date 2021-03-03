@@ -1,0 +1,15 @@
+/* You can add global styles to this file, and also import other style files */
+@import '~kubeflow/styles.scss';
+
+body {
+  background-color: white;
+  margin: 0;
+}
+
+.two-inputs {
+  display: flex;
+
+  .mat-form-field:nth-child(2) {
+    margin-left: 12px;
+  }
+}

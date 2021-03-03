@@ -1,0 +1,23 @@
+.margin-top {
+  margin-top: 12px;
+}
+
+.value-type {
+  display: flex;
+
+  * {
+    margin: 0 8px;
+  }
+}
+
+.range-wrapper {
+  display: flex;
+
+  > * {
+    width: 130px;
+  }
+
+  > *:nth-child(2) {
+    margin: 0 12px;
+  }
+}

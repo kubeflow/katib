@@ -1,0 +1,65 @@
+:host {
+  display: block;
+  min-height: 550px;
+}
+
+.cell {
+  width: 300px;
+}
+
+.name {
+  cursor: pointer;
+
+  &:hover {
+    color: #1e88e5;
+    text-decoration: underline;
+  }
+}
+
+.green {
+  color: green;
+}
+
+.red {
+  color: red;
+}
+
+.icon {
+  cursor: pointer;
+
+  &-disable {
+    cursor: default;
+    opacity: 0.5;
+  }
+}
+
+td.mat-cell:not(:first-of-type) {
+  padding: 2px 28px 2px 0;
+}
+
+td.mat-cell:first-of-type {
+  padding: 2px 28px 2px 24px;
+}
+
+.mat-row:hover {
+  background-color: #f3f3f3;
+}
+
+.svg-color {
+  color: #1e88e5;
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 16px;
+}
+
+::ng-deep :host svg {
+  fill: currentColor;
+}
+
+.best-trail-row {
+  background-color: #ffffcd;
+
+  &:hover {
+    background-color: #ffff98;
+  }
+}

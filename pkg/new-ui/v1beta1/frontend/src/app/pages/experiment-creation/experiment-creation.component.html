@@ -1,0 +1,112 @@
+<div class="lib-content-wrapper">
+  <div class="lib-flex-layout-column">
+    <lib-title-actions-toolbar
+      [backButton]="true"
+      (back)="returnToExperiments()"
+      title="Create an Experiment"
+    >
+    </lib-title-actions-toolbar>
+
+    <div class="page-padding lib-flex-grow lib-overflow-auto">
+      <mat-vertical-stepper [linear]="false" #stepper>
+        <!--Metadata-->
+        <mat-step [stepControl]="metadataForm">
+          <form [formGroup]="metadataForm">
+            <ng-template matStepLabel>Metadata</ng-template>
+
+            <app-form-metadata [metadataForm]="metadataForm">
+            </app-form-metadata>
+          </form>
+        </mat-step>
+
+        <mat-step [stepControl]="trialThresholdsForm">
+          <form [formGroup]="trialThresholdsForm">
+            <ng-template matStepLabel>Trial Thresholds</ng-template>
+
+            <app-form-trial-thresholds
+              [formGroup]="trialThresholdsForm"
+            ></app-form-trial-thresholds>
+          </form>
+        </mat-step>
+
+        <mat-step [stepControl]="objectiveForm">
+          <form [formGroup]="objectiveForm">
+            <ng-template matStepLabel>Objective</ng-template>
+
+            <app-form-objective
+              [objectiveForm]="objectiveForm"
+            ></app-form-objective>
+          </form>
+        </mat-step>
+
+        <mat-step [stepControl]="algorithmForm">
+          <form [formGroup]="algorithmForm">
+            <ng-template matStepLabel>Search Algorithm</ng-template>
+
+            <app-form-algorithm
+              [algorithmForm]="algorithmForm"
+            ></app-form-algorithm>
+          </form>
+        </mat-step>
+
+        <!--Parameters-->
+        <ng-container *ngIf="algorithmForm.value.type === 'hp'; else nasConfig">
+          <mat-step [stepControl]="hyperParamsArray">
+            <form [formGroup]="hyperParamsArray">
+              <ng-template matStepLabel>Hyper Parameters</ng-template>
+
+              <app-form-hyper-parameters [hyperParamsArray]="hyperParamsArray">
+              </app-form-hyper-parameters>
+            </form>
+          </mat-step>
+        </ng-container>
+
+        <!--NAS-->
+        <ng-template #nasConfig>
+          <mat-step [stepControl]="algorithmForm">
+            <ng-template matStepLabel>Neural Architecture Graph</ng-template>
+
+            <app-form-nas-graph [formGroup]="nasGraphForm"></app-form-nas-graph>
+          </mat-step>
+
+          <mat-step [stepControl]="algorithmForm">
+            <ng-template matStepLabel>
+              Neural Architecture Operations
+            </ng-template>
+
+            <app-form-nas-operations [formArray]="nasOperationsForm">
+            </app-form-nas-operations>
+          </mat-step>
+        </ng-template>
+
+        <!--Metrics Collector-->
+        <mat-step [stepControl]="metricsForm">
+          <form [formGroup]="metricsForm">
+            <ng-template matStepLabel>Metrics Collector</ng-template>
+
+            <app-form-metrics-collector [formGroup]="metricsForm">
+            </app-form-metrics-collector>
+          </form>
+        </mat-step>
+
+        <!--Trial Spec-->
+        <mat-step [stepControl]="trialTemplateForm">
+          <form [formGroup]="trialTemplateForm">
+            <ng-template matStepLabel>Trial Template</ng-template>
+
+            <app-form-trial-template
+              [formGroup]="trialTemplateForm"
+            ></app-form-trial-template>
+          </form>
+        </mat-step>
+      </mat-vertical-stepper>
+    </div>
+
+    <lib-submit-bar
+      class="footer"
+      (create)="create()"
+      (cancel)="returnToExperiments()"
+      (yaml)="showYAML()"
+    ></lib-submit-bar>
+  </div>
+</div>

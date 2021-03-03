@@ -1,0 +1,42 @@
+:host {
+  display: block;
+  border: #0000001f solid 1px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  width: 440px;
+  padding: 8px 8px 8px 16px;
+}
+
+.params-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+}
+
+.param-name {
+  width: 25%;
+}
+
+.param-type {
+  width: 25%;
+}
+
+.param-value {
+  width: 50%;
+  overflow: hidden;
+}
+
+// popovers
+.popover-title {
+  color: rgba(0, 0, 0, 0.66);
+  margin-bottom: 8px;
+}
+
+.popover-list-wrapper {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.popover-list-item {
+  margin: 0 3px;
+}

@@ -1,0 +1,44 @@
+<form [formGroup]="formGroup">
+  <div class="lib-step-wrapper">
+    <div class="flex-column step-content">
+      <mat-form-field appearance="outline">
+        <mat-label>Parallel Trials</mat-label>
+        <input
+          formControlName="parallelTrialCount"
+          matInput
+          type="number"
+          min="1"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Max Trials</mat-label>
+        <input formControlName="maxTrialCount" matInput type="number" min="1" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Max failed Trials</mat-label>
+        <input
+          formControlName="maxFailedTrialCount"
+          matInput
+          type="number"
+          min="1"
+        />
+      </mat-form-field>
+    </div>
+
+    <div class="lib-step-info-wrapper">
+      <lib-step-info header="Max Trials">
+        The number of maximum Trials to run. If this value is omitted, your
+        Experiment will be running until the objective goal is reached or the
+        Experiment reaches a maximum number of failed Trials.
+      </lib-step-info>
+
+      <lib-step-info header="Max failed Trials">
+        The maximum number of failed Trials before Katib should stop the
+        Experiment. In case the failed Trials exceed this number then the
+        Experiment will be marked as Failed.
+      </lib-step-info>
+    </div>
+  </div>
+</form>

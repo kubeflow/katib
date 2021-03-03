@@ -1,0 +1,22 @@
+<h3 *ngIf="header">{{ header }}</h3>
+
+<button mat-stroked-button color="primary" (click)="addCtrl()" class="add-btn">
+  <mat-icon>add</mat-icon>{{ addValueText }}
+</button>
+
+<div class="flex-column">
+  <ng-container *ngFor="let ctrl of formArray.controls; let i = index">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ valueLabel }}</mat-label>
+      <input [formControl]="ctrl" matInput />
+      <button
+        mat-icon-button
+        matSuffix
+        (click)="removeCtrl(i)"
+        matTooltip="Remove value from the list"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+    </mat-form-field>
+  </ng-container>
+</div>
