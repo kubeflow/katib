@@ -88,7 +88,7 @@ make deploy
 TIMEOUT=120
 PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
 # 1 Pod for the cert-generator Job
-PODNUM=PODNUM+1
+PODNUM=$((PODNUM + 1))
 until kubectl get pods -n kubeflow | grep -E 'Running|Completed' | [[ $(wc -l) -eq $PODNUM ]]; do
   echo Pod Status $(kubectl get pods -n kubeflow | grep "1/1" | wc -l)/$PODNUM
   sleep 10
