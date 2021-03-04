@@ -46,7 +46,6 @@ spec:
                 containers:
                   - name: pytorch
                     image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
-                    imagePullPolicy: Always
                     command:
                       - "python"
                       - "/var/mnist.py"
@@ -60,7 +59,6 @@ spec:
                 containers:
                   - name: pytorch
                     image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
-                    imagePullPolicy: Always
                     command:
                       - "python"
                       - "/var/mnist.py"
