@@ -2,7 +2,7 @@ name: Charmed Katib
 
 on:
   - push
-  # - pull_request TODO (andreyvelich): Actions don't work currently.
+  - pull_request
 
 jobs:
   build:
