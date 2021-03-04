@@ -321,14 +321,17 @@
                     name: "run-tfjob-e2e-tests",
                     template: "run-tfjob-e2e-tests",
                   },
-                  {
-                    name: "run-pytorchjob-e2e-tests",
-                    template: "run-pytorchjob-e2e-tests",
-                  },
-                  {
-                    name: "run-file-metricscollector-e2e-tests",
-                    template: "run-file-metricscollector-e2e-tests",
-                  },
+                  // TODO (andreyvelich): PyTorch training container doesn't work
+                  // because of this: https://github.com/pytorch/vision/issues/1938
+                  // TorchVision can't download MNIST.
+                  // {
+                  //   name: "run-pytorchjob-e2e-tests",
+                  //   template: "run-pytorchjob-e2e-tests",
+                  // },
+                  // {
+                  //   name: "run-file-metricscollector-e2e-tests",
+                  //   template: "run-file-metricscollector-e2e-tests",
+                  // },
                   {
                     name: "run-never-resume-e2e-tests",
                     template: "run-never-resume-e2e-tests",
