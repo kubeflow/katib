@@ -2,11 +2,12 @@ package trial
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
-	kubeflowcommonv1 "github.com/kubeflow/tf-operator/pkg/apis/common/v1"
+	commonv1 "github.com/kubeflow/common/pkg/apis/common/v1"
 	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 	"github.com/onsi/gomega"
 	"github.com/prometheus/client_golang/prometheus"
@@ -18,8 +19,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -45,12 +47,12 @@ var tfJobKey = types.NamespacedName{Name: tfJobName, Namespace: namespace}
 var batchJobKey = types.NamespacedName{Name: batchJobName, Namespace: namespace}
 
 func init() {
-	logf.SetLogger(logf.ZapLogger(true))
+	logf.SetLogger(zap.New())
 }
 
 func TestAdd(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
-	mgr, err := manager.New(cfg, manager.Options{})
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	// Set Trial resources.
@@ -83,7 +85,7 @@ func TestReconcileTFJob(t *testing.T) {
 
 	// Setup the Manager and Controller. Wrap the Controller Reconcile function so it writes each request to a
 	// channel when it is finished.
-	mgr, err := manager.New(cfg, manager.Options{})
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	c := mgr.GetClient()
 
@@ -91,7 +93,7 @@ func TestReconcileTFJob(t *testing.T) {
 		Client:        mgr.GetClient(),
 		scheme:        mgr.GetScheme(),
 		ManagerClient: mockManagerClient,
-		recorder:      mgr.GetRecorder(ControllerName),
+		recorder:      mgr.GetEventRecorderFor(ControllerName),
 		collector:     trialutil.NewTrialsCollector(mgr.GetCache(), prometheus.NewRegistry()),
 	}
 
@@ -122,11 +124,12 @@ func TestReconcileTFJob(t *testing.T) {
 
 	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
 
-	stopMgr, mgrStopped := StartTestManager(mgr, g)
-
-	defer func() {
-		close(stopMgr)
-		mgrStopped.Wait()
+	// Start test manager.
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		g.Expect(mgr.Start(context.TODO())).NotTo(gomega.HaveOccurred())
 	}()
 
 	// Empty result for GetTrialObservationLog.
@@ -173,10 +176,10 @@ func TestReconcileTFJob(t *testing.T) {
 	SucceededMessage := "TFJob succeeded test message"
 	g.Eventually(func() bool {
 		c.Get(context.TODO(), tfJobKey, tfJob)
-		tfJob.Status = kubeflowcommonv1.JobStatus{
-			Conditions: []kubeflowcommonv1.JobCondition{
+		tfJob.Status = commonv1.JobStatus{
+			Conditions: []commonv1.JobCondition{
 				{
-					Type:    kubeflowcommonv1.JobSucceeded,
+					Type:    commonv1.JobSucceeded,
 					Status:  corev1.ConditionTrue,
 					Message: SucceededMessage,
 					Reason:  SucceededReason,
@@ -217,7 +220,7 @@ func TestReconcileBatchJob(t *testing.T) {
 
 	// Setup the Manager and Controller. Wrap the Controller Reconcile function so it writes each request to a
 	// channel when it is finished.
-	mgr, err := manager.New(cfg, manager.Options{})
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	c := mgr.GetClient()
 
@@ -225,7 +228,7 @@ func TestReconcileBatchJob(t *testing.T) {
 		Client:        mgr.GetClient(),
 		scheme:        mgr.GetScheme(),
 		ManagerClient: mockManagerClient,
-		recorder:      mgr.GetRecorder(ControllerName),
+		recorder:      mgr.GetEventRecorderFor(ControllerName),
 		collector:     trialutil.NewTrialsCollector(mgr.GetCache(), prometheus.NewRegistry()),
 	}
 
@@ -254,11 +257,12 @@ func TestReconcileBatchJob(t *testing.T) {
 	viper.Set(consts.ConfigTrialResources, trialResources)
 	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
 
-	stopMgr, mgrStopped := StartTestManager(mgr, g)
-
-	defer func() {
-		close(stopMgr)
-		mgrStopped.Wait()
+	// Start test manager.
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		g.Expect(mgr.Start(context.TODO())).NotTo(gomega.HaveOccurred())
 	}()
 
 	// Result for GetTrialObservationLog
@@ -447,10 +451,10 @@ func newFakeTrialTFJob() *trialsv1beta1.Trial {
 			Namespace: namespace,
 		},
 		Spec: tfv1.TFJobSpec{
-			TFReplicaSpecs: map[tfv1.TFReplicaType]*kubeflowcommonv1.ReplicaSpec{
+			TFReplicaSpecs: map[commonv1.ReplicaType]*commonv1.ReplicaSpec{
 				tfv1.TFReplicaTypePS: {
 					Replicas:      func() *int32 { i := int32(2); return &i }(),
-					RestartPolicy: kubeflowcommonv1.RestartPolicyNever,
+					RestartPolicy: commonv1.RestartPolicyNever,
 					Template: v1.PodTemplateSpec{
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{
@@ -471,7 +475,7 @@ func newFakeTrialTFJob() *trialsv1beta1.Trial {
 				},
 				tfv1.TFReplicaTypeWorker: {
 					Replicas:      func() *int32 { i := int32(4); return &i }(),
-					RestartPolicy: kubeflowcommonv1.RestartPolicyNever,
+					RestartPolicy: commonv1.RestartPolicyNever,
 					Template: v1.PodTemplateSpec{
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{

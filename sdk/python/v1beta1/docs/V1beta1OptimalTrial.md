@@ -3,7 +3,7 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**best_trial_name** | **str** | BestTrialName is the name of the best trial. | 
+**best_trial_name** | **str** | BestTrialName is the name of the best trial. | [default to '']
 **observation** | [**V1beta1Observation**](V1beta1Observation.md) | Observation for this trial | [optional] 
 **parameter_assignments** | [**list[V1beta1ParameterAssignment]**](V1beta1ParameterAssignment.md) | Key-value pairs for hyperparameters and assignment values. | 
 

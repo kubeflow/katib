@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	pytorchv1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1"
+	// pytorchv1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1"
 	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 	jsonPatch "github.com/mattbaird/jsonpatch"
 	batchv1 "k8s.io/api/batch/v1"
@@ -16,7 +16,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -333,16 +333,17 @@ func (g *DefaultValidator) validateTrialJob(runSpec *unstructured.Unstructured) 
 		if err != nil {
 			return err
 		}
-	case consts.JobKindPyTorch:
-		pyTorchJob := &pytorchv1.PyTorchJob{}
-		err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &pyTorchJob)
-		if err != nil {
-			return fmt.Errorf("Unable to convert spec.TrialTemplate: %v to %v: %v", runSpec.Object, gvk.Kind, err)
-		}
-		err = validatePatchJob(runSpec, pyTorchJob, gvk.Kind)
-		if err != nil {
-			return err
-		}
+		// TODO (andreyvelich): Need to fix this or remove.
+		// case consts.JobKindPyTorch:
+		// 	pyTorchJob := &pytorchv1.PyTorchJob{}
+		// 	err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &pyTorchJob)
+		// 	if err != nil {
+		// 		return fmt.Errorf("Unable to convert spec.TrialTemplate: %v to %v: %v", runSpec.Object, gvk.Kind, err)
+		// 	}
+		// 	err = validatePatchJob(runSpec, pyTorchJob, gvk.Kind)
+		// 	if err != nil {
+		// 		return err
+		// 	}
 
 	}
 

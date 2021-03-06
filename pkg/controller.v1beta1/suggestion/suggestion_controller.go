@@ -30,9 +30,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -63,7 +63,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		SuggestionClient: suggestionclient.New(),
 		scheme:           mgr.GetScheme(),
 		Composer:         composer.New(mgr),
-		recorder:         mgr.GetRecorder(ControllerName),
+		recorder:         mgr.GetEventRecorderFor(ControllerName),
 	}
 }
 
@@ -129,11 +129,11 @@ type ReconcileSuggestion struct {
 // +kubebuilder:rbac:groups=apps,resources=deployments/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=katib.kubeflow.org,resources=suggestions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=katib.kubeflow.org,resources=suggestions/status,verbs=get;update;patch
-func (r *ReconcileSuggestion) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileSuggestion) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	logger := log.WithValues("Suggestion", request.NamespacedName)
 	// Fetch the Suggestion instance
 	oldS := &suggestionsv1beta1.Suggestion{}
-	err := r.Get(context.TODO(), request.NamespacedName, oldS)
+	err := r.Get(ctx, request.NamespacedName, oldS)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// For additional cleanup logic use finalizers.
@@ -261,8 +261,7 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 		return err
 	}
 
-	if err := r.List(context.TODO(),
-		client.MatchingLabels(util.TrialLabels(experiment)), trials); err != nil {
+	if err := r.List(context.TODO(), trials, client.MatchingLabels(util.TrialLabels(experiment))); err != nil {
 		return err
 	}
 	// TODO (andreyvelich): Do we want to run ValidateAlgorithmSettings when Experiment is restarting?

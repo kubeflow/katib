@@ -45,7 +45,7 @@ class V1beta1OptimalTrial(object):
         'parameter_assignments': 'parameterAssignments'
     }
 
-    def __init__(self, best_trial_name=None, observation=None, parameter_assignments=None):  # noqa: E501
+    def __init__(self, best_trial_name='', observation=None, parameter_assignments=None):  # noqa: E501
         """V1beta1OptimalTrial - a model defined in Swagger"""  # noqa: E501
 
         self._best_trial_name = None

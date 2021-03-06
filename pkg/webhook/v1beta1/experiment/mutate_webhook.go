@@ -18,53 +18,51 @@ package experiment
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
-	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 )
 
-// experimentDefaulter that sets default fields in experiment
-type experimentDefaulter struct {
+// ExperimentDefaulter sets the Experiment default values.
+type ExperimentDefaulter struct {
 	client  client.Client
-	decoder types.Decoder
+	decoder *admission.Decoder
 }
 
-var _ admission.Handler = &experimentDefaulter{}
-
-func (e *experimentDefaulter) Handle(ctx context.Context, req types.Request) types.Response {
-	inst := &experimentsv1beta1.Experiment{}
-	err := e.decoder.Decode(req, inst)
-	if err != nil {
-		return admission.ErrorResponse(http.StatusBadRequest, err)
+// NewExperimentDefaulter returns a new Experiment defaulter with the given client.
+func NewExperimentDefaulter(c client.Client) *ExperimentDefaulter {
+	return &ExperimentDefaulter{
+		client: c,
 	}
-
-	copy := inst.DeepCopy()
-	copy.SetDefault()
-
-	return admission.PatchResponse(inst, copy)
 }
 
-var _ inject.Client = &experimentDefaulter{}
+// ExperimentDefaulter implements admission.DecoderInjector.
+// A decoder will be automatically injected.
 
-func (e *experimentDefaulter) InjectClient(c client.Client) error {
-	e.client = c
-	return nil
-}
-
-var _ inject.Decoder = &experimentDefaulter{}
-
-func (e *experimentDefaulter) InjectDecoder(d types.Decoder) error {
+// InjectDecoder injects the decoder.
+func (e *ExperimentDefaulter) InjectDecoder(d *admission.Decoder) error {
 	e.decoder = d
 	return nil
 }
 
-func NewExperimentDefaulter(c client.Client) *experimentDefaulter {
-	return &experimentDefaulter{
-		client: c,
+func (e *ExperimentDefaulter) Handle(ctx context.Context, req admission.Request) admission.Response {
+	exp := &experimentsv1beta1.Experiment{}
+	err := e.decoder.Decode(req, exp)
+	if err != nil {
+		return admission.Errored(http.StatusBadRequest, err)
 	}
+
+	expDefault := exp.DeepCopy()
+	expDefault.SetDefault()
+
+	marshaledExperiment, err := json.Marshal(expDefault)
+	if err != nil {
+		return admission.Errored(http.StatusInternalServerError, err)
+	}
+
+	return admission.PatchResponseFromRaw(req.AdmissionRequest.Object.Raw, marshaledExperiment)
 }

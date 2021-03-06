@@ -19,7 +19,6 @@ import (
 	"context"
 
 	apiv1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -42,9 +41,9 @@ type Client interface {
 	GetTrialTemplates(namespace ...string) (*apiv1.ConfigMapList, error)
 	GetSuggestion(name string, namespace ...string) (*suggestionsv1beta1.Suggestion, error)
 	GetNamespaceList() (*apiv1.NamespaceList, error)
-	CreateRuntimeObject(object runtime.Object) error
-	DeleteRuntimeObject(object runtime.Object) error
-	UpdateRuntimeObject(object runtime.Object) error
+	CreateRuntimeObject(object client.Object) error
+	DeleteRuntimeObject(object client.Object) error
+	UpdateRuntimeObject(object client.Object) error
 }
 
 type KatibClient struct {
@@ -87,7 +86,7 @@ func (k *KatibClient) GetExperimentList(namespace ...string) (*experimentsv1beta
 	expList := &experimentsv1beta1.ExperimentList{}
 	listOpt := client.InNamespace(ns)
 
-	if err := k.client.List(context.Background(), listOpt, expList); err != nil {
+	if err := k.client.List(context.Background(), expList, listOpt); err != nil {
 		return expList, err
 	}
 	return expList, nil
@@ -123,10 +122,8 @@ func (k *KatibClient) GetTrialList(name string, namespace ...string) (*trialsv1b
 	ns := getNamespace(namespace...)
 	trialList := &trialsv1beta1.TrialList{}
 	labels := map[string]string{consts.LabelExperimentName: name}
-	listOpt := &client.ListOptions{}
-	listOpt.MatchingLabels(labels).InNamespace(ns)
 
-	if err := k.client.List(context.Background(), listOpt, trialList); err != nil {
+	if err := k.client.List(context.Background(), trialList, client.InNamespace(ns), client.MatchingLabels(labels)); err != nil {
 		return trialList, err
 	}
 	return trialList, nil
@@ -159,10 +156,8 @@ func (k *KatibClient) GetTrialTemplates(namespace ...string) (*apiv1.ConfigMapLi
 	templatesConfigMapList := &apiv1.ConfigMapList{}
 
 	templateLabel := map[string]string{consts.LabelTrialTemplateConfigMapName: consts.LabelTrialTemplateConfigMapValue}
-	listOpt := &client.ListOptions{}
-	listOpt.MatchingLabels(templateLabel).InNamespace(ns)
 
-	err := k.client.List(context.TODO(), listOpt, templatesConfigMapList)
+	err := k.client.List(context.TODO(), templatesConfigMapList, client.InNamespace(ns), client.MatchingLabels(templateLabel))
 
 	if err != nil {
 		return nil, err
@@ -182,16 +177,15 @@ func getNamespace(namespace ...string) string {
 func (k *KatibClient) GetNamespaceList() (*apiv1.NamespaceList, error) {
 
 	namespaceList := &apiv1.NamespaceList{}
-	listOpt := &client.ListOptions{}
 
-	if err := k.client.List(context.TODO(), listOpt, namespaceList); err != nil {
+	if err := k.client.List(context.TODO(), namespaceList); err != nil {
 		return namespaceList, err
 	}
 	return namespaceList, nil
 }
 
-//CreateRuntimeObject creates the given runtime object in Kubernetes cluster
-func (k *KatibClient) CreateRuntimeObject(object runtime.Object) error {
+// CreateRuntimeObject creates the given runtime object in Kubernetes cluster.
+func (k *KatibClient) CreateRuntimeObject(object client.Object) error {
 
 	if err := k.client.Create(context.Background(), object); err != nil {
 		return err
@@ -199,8 +193,8 @@ func (k *KatibClient) CreateRuntimeObject(object runtime.Object) error {
 	return nil
 }
 
-//DeleteRuntimeObject deletes the given runtime object in Kubernetes cluster
-func (k *KatibClient) DeleteRuntimeObject(object runtime.Object) error {
+// DeleteRuntimeObject deletes the given runtime object in Kubernetes cluster.
+func (k *KatibClient) DeleteRuntimeObject(object client.Object) error {
 
 	if err := k.client.Delete(context.Background(), object); err != nil {
 		return err
@@ -208,8 +202,8 @@ func (k *KatibClient) DeleteRuntimeObject(object runtime.Object) error {
 	return nil
 }
 
-// UpdateRuntimeObject updates the given runtime object in Kubernetes cluster
-func (k *KatibClient) UpdateRuntimeObject(object runtime.Object) error {
+// UpdateRuntimeObject updates the given runtime object in Kubernetes cluster.
+func (k *KatibClient) UpdateRuntimeObject(object client.Object) error {
 
 	if err := k.client.Update(context.Background(), object); err != nil {
 		return err

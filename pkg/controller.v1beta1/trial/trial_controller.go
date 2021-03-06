@@ -36,10 +36,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
@@ -71,7 +71,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		Client:        mgr.GetClient(),
 		scheme:        mgr.GetScheme(),
 		ManagerClient: managerclient.New(),
-		recorder:      mgr.GetRecorder(ControllerName),
+		recorder:      mgr.GetEventRecorderFor(ControllerName),
 		collector:     trialutil.NewTrialsCollector(mgr.GetCache(), metrics.Registry),
 	}
 	r.updateStatusHandler = r.updateStatus
@@ -101,6 +101,17 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 		// Watch for changes in custom resources
 		for _, gvk := range gvkList {
+			// Check if CRD is installed on the cluster.
+			_, err := mgr.GetRESTMapper().RESTMapping(gvk.GroupKind(), gvk.Version)
+			if err != nil {
+				if meta.IsNoMatchError(err) {
+					log.Info("Job watch error. CRD might be missing. Please install CRD and restart katib-controller",
+						"CRD Group", gvk.Group, "CRD Version", gvk.Version, "CRD Kind", gvk.Kind)
+					continue
+				}
+				return err
+			}
+			// Watch for the CRD changes.
 			unstructuredJob := &unstructured.Unstructured{}
 			unstructuredJob.SetGroupVersionKind(gvk)
 			err = c.Watch(
@@ -110,11 +121,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 					OwnerType:    &trialsv1beta1.Trial{},
 				})
 			if err != nil {
-				if meta.IsNoMatchError(err) {
-					log.Info("Job watch error. CRD might be missing. Please install CRD and restart katib-controller",
-						"CRD Group", gvk.Group, "CRD Version", gvk.Version, "CRD Kind", gvk.Kind)
-					continue
-				}
 				return err
 			}
 			log.Info("Job watch added successfully",
@@ -144,11 +150,11 @@ type ReconcileTrial struct {
 // and what is in the Trial.Spec
 // +kubebuilder:rbac:groups=trials.kubeflow.org,resources=trials,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=trials.kubeflow.org,resources=trials/status,verbs=get;update;patch
-func (r *ReconcileTrial) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileTrial) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the Trial instance
 	logger := log.WithValues("Trial", request.NamespacedName)
 	original := &trialsv1beta1.Trial{}
-	err := r.Get(context.TODO(), request.NamespacedName, original)
+	err := r.Get(ctx, request.NamespacedName, original)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Object not found, return.  Created objects are automatically garbage collected.

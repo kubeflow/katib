@@ -78,6 +78,9 @@ else
     docker build -t ${REGISTRY}/tfevent-metrics-collector:${TAG} -t ${REGISTRY}/tfevent-metrics-collector:latest -f ${CMD_PREFIX}/metricscollector/${VERSION}/tfevent-metricscollector/Dockerfile .
 fi
 
+echo -e "\nBuilding Katib cert generator image...\n"
+docker build -t ${REGISTRY}/cert-generator:${TAG} -t ${REGISTRY}/cert-generator:latest -f ${CMD_PREFIX}/cert-generator/${VERSION}/Dockerfile .
+
 # Suggestion images
 echo -e "\nBuilding suggestion images..."
 

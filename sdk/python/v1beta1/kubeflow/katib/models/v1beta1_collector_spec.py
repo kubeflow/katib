@@ -42,7 +42,7 @@ class V1beta1CollectorSpec(object):
         'kind': 'kind'
     }
 
-    def __init__(self, custom_collector=None, kind=None):  # noqa: E501
+    def __init__(self, custom_collector=None, kind=''):  # noqa: E501
         """V1beta1CollectorSpec - a model defined in Swagger"""  # noqa: E501
 
         self._custom_collector = None

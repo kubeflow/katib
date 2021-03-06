@@ -98,32 +98,29 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func StartTestManager(mgr manager.Manager, g *gomega.GomegaWithT) (chan struct{}, *sync.WaitGroup) {
-	stop := make(chan struct{})
+func TestDesiredDeployment(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// Start test manager.
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		g.Expect(mgr.Start(stop)).NotTo(gomega.HaveOccurred())
-	}()
-	return stop, wg
-}
-
-func TestDesiredDeployment(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
-
-	mgr, err := manager.New(cfg, manager.Options{})
-	g.Expect(err).NotTo(gomega.HaveOccurred())
-
-	stopMgr, mgrStopped := StartTestManager(mgr, g)
-	defer func() {
-		close(stopMgr)
-		mgrStopped.Wait()
+		g.Expect(mgr.Start(context.TODO())).NotTo(gomega.HaveOccurred())
 	}()
 
 	c := mgr.GetClient()
-
 	composer := New(mgr)
+	// Create kubeflow namespace.
+	kubeflowNS := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: namespace,
+		},
+	}
+	g.Expect(c.Create(context.TODO(), kubeflowNS)).NotTo(gomega.HaveOccurred())
 
 	tcs := []struct {
 		suggestion         *suggestionsv1beta1.Suggestion
@@ -265,7 +262,7 @@ func TestDesiredDeployment(t *testing.T) {
 func TestDesiredService(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	mgr, err := manager.New(cfg, manager.Options{})
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	composer := New(mgr)
@@ -351,17 +348,18 @@ func TestDesiredVolume(t *testing.T) {
 
 	g := gomega.NewGomegaWithT(t)
 
-	mgr, err := manager.New(cfg, manager.Options{})
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	stopMgr, mgrStopped := StartTestManager(mgr, g)
-	defer func() {
-		close(stopMgr)
-		mgrStopped.Wait()
+	// Start test manager.
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		g.Expect(mgr.Start(context.TODO())).NotTo(gomega.HaveOccurred())
 	}()
 
 	c := mgr.GetClient()
-
 	composer := New(mgr)
 
 	tcs := []struct {
@@ -551,7 +549,7 @@ func TestDesiredVolume(t *testing.T) {
 func TestDesiredRBAC(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	mgr, err := manager.New(cfg, manager.Options{})
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	composer := New(mgr)
@@ -673,12 +671,13 @@ func metaEqual(expected, actual metav1.ObjectMeta) bool {
 		expected.Namespace == actual.Namespace &&
 		reflect.DeepEqual(expected.Labels, actual.Labels) &&
 		reflect.DeepEqual(expected.Annotations, actual.Annotations) &&
-		len(actual.OwnerReferences) > 0 &&
-		expected.OwnerReferences[0].APIVersion == actual.OwnerReferences[0].APIVersion &&
-		expected.OwnerReferences[0].Kind == actual.OwnerReferences[0].Kind &&
-		expected.OwnerReferences[0].Name == actual.OwnerReferences[0].Name &&
-		*expected.OwnerReferences[0].Controller == *actual.OwnerReferences[0].Controller &&
-		*expected.OwnerReferences[0].BlockOwnerDeletion == *actual.OwnerReferences[0].BlockOwnerDeletion
+		(len(actual.OwnerReferences) > 0 &&
+			expected.OwnerReferences[0].APIVersion == actual.OwnerReferences[0].APIVersion &&
+			expected.OwnerReferences[0].Kind == actual.OwnerReferences[0].Kind &&
+			expected.OwnerReferences[0].Name == actual.OwnerReferences[0].Name &&
+			*expected.OwnerReferences[0].Controller == *actual.OwnerReferences[0].Controller &&
+			*expected.OwnerReferences[0].BlockOwnerDeletion == *actual.OwnerReferences[0].BlockOwnerDeletion ||
+			len(actual.OwnerReferences) == 0)
 }
 
 func newFakeSuggestionConfig() katibconfig.SuggestionConfig {
@@ -923,18 +922,10 @@ func newFakePV() *corev1.PersistentVolume {
 			Labels: map[string]string{
 				"type": "local",
 			},
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion:         "kubeflow.org/v1beta1",
-					Kind:               "Suggestion",
-					Name:               suggestionName,
-					Controller:         &refFlag,
-					BlockOwnerDeletion: &refFlag,
-				},
-			},
 		},
 		Spec: corev1.PersistentVolumeSpec{
-			StorageClassName: storageClassName,
+			StorageClassName:              storageClassName,
+			PersistentVolumeReclaimPolicy: corev1.PersistentVolumeReclaimDelete,
 			AccessModes: []corev1.PersistentVolumeAccessMode{
 				consts.DefaultSuggestionVolumeAccessMode,
 			},

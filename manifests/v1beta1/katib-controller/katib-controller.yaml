@@ -21,7 +21,7 @@ spec:
       containers:
         - name: katib-controller
           image: docker.io/kubeflowkatib/katib-controller
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           command: ["./katib-controller"]
           args:
             - "--webhook-port=8443"
@@ -50,4 +50,4 @@ spec:
         - name: cert
           secret:
             defaultMode: 420
-            secretName: katib-controller
+            secretName: katib-webhook-cert

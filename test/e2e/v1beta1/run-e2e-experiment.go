@@ -290,6 +290,10 @@ func verifySuggestion(kclient katibclient.Client, exp *experimentsv1beta1.Experi
 			return fmt.Errorf("Suggestion is still running while ResumePolicy = %v", exp.Spec.ResumePolicy)
 		}
 
+		// Give some controller some time to delete Suggestion resources
+		// TODO (andreyvelich): Think about better way to handle this.
+		time.Sleep(10 * time.Second)
+
 		// Suggestion service should be deleted.
 		serviceName := controllerUtil.GetSuggestionServiceName(sug)
 		namespacedName := types.NamespacedName{Name: serviceName, Namespace: sug.Namespace}
@@ -297,7 +301,7 @@ func verifySuggestion(kclient katibclient.Client, exp *experimentsv1beta1.Experi
 		if errors.IsNotFound(err) {
 			log.Printf("Suggestion service %v has been deleted", serviceName)
 		} else {
-			return fmt.Errorf("Suggestion service: %v is still alive while ResumePolicy = %v", serviceName, exp.Spec.ResumePolicy)
+			return fmt.Errorf("Suggestion service: %v is still alive while ResumePolicy: %v, error: %v", serviceName, exp.Spec.ResumePolicy, err)
 		}
 
 		// Suggestion deployment should be deleted.
@@ -307,7 +311,7 @@ func verifySuggestion(kclient katibclient.Client, exp *experimentsv1beta1.Experi
 		if errors.IsNotFound(err) {
 			log.Printf("Suggestion deployment %v has been deleted", deploymentName)
 		} else {
-			return fmt.Errorf("Suggestion deployment: %v is still alive while ResumePolicy = %v", deploymentName, exp.Spec.ResumePolicy)
+			return fmt.Errorf("Suggestion deployment: %v is still alive while ResumePolicy: %v, error: %v", deploymentName, exp.Spec.ResumePolicy, err)
 		}
 
 		// PV and PVC should not be deleted for Suggestion with resume policy FromVolume.
@@ -316,14 +320,14 @@ func verifySuggestion(kclient katibclient.Client, exp *experimentsv1beta1.Experi
 			namespacedName = types.NamespacedName{Name: pvcName, Namespace: sug.Namespace}
 			err = kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.PersistentVolumeClaim{})
 			if errors.IsNotFound(err) {
-				return fmt.Errorf("Suggestion PVC: %v is not alive while ResumePolicy = %v", pvcName, exp.Spec.ResumePolicy)
+				return fmt.Errorf("Suggestion PVC: %v is not alive while ResumePolicy: %v", pvcName, exp.Spec.ResumePolicy)
 			}
 
 			pvName := controllerUtil.GetSuggestionPersistentVolumeName(sug)
 			namespacedName = types.NamespacedName{Name: pvName}
 			err = kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.PersistentVolume{})
 			if errors.IsNotFound(err) {
-				return fmt.Errorf("Suggestion PV: %v is not alive while ResumePolicy = %v", pvName, experimentsv1beta1.FromVolume)
+				return fmt.Errorf("Suggestion PV: %v is not alive while ResumePolicy: %v", pvName, experimentsv1beta1.FromVolume)
 			}
 		}
 	}

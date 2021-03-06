@@ -33,6 +33,8 @@ echo "VERSION: ${PULL_BASE_SHA}"
 
 echo "Configuring kubeconfig.."
 aws eks update-kubeconfig --region=${AWS_REGION} --name=${CLUSTER_NAME}
+kubectl version
+kubectl cluster-info
 
 # Update images with current pull base sha.
 echo "Updating Katib images with current PR SHA: ${VERSION}"
@@ -85,9 +87,10 @@ make deploy
 # Wait until all Katib pods is running.
 TIMEOUT=120
 PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
-until kubectl get pods -n kubeflow | grep Running | [[ $(wc -l) -eq $PODNUM ]]; do
+# 1 Pod for the cert-generator Job
+PODNUM=$((PODNUM + 1))
+until kubectl get pods -n kubeflow | grep -E 'Running|Completed' | [[ $(wc -l) -eq $PODNUM ]]; do
   echo Pod Status $(kubectl get pods -n kubeflow | grep "1/1" | wc -l)/$PODNUM
-
   sleep 10
   TIMEOUT=$((TIMEOUT - 1))
   if [[ $TIMEOUT -eq 0 ]]; then
@@ -98,8 +101,6 @@ until kubectl get pods -n kubeflow | grep Running | [[ $(wc -l) -eq $PODNUM ]]; 
 done
 
 echo "All Katib components are running."
-kubectl version
-kubectl cluster-info
 echo "Katib deployments"
 kubectl -n kubeflow get deploy
 echo "Katib services"

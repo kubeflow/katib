@@ -9,7 +9,6 @@ rules:
       - configmaps
       - serviceaccounts
       - services
-      - secrets
       - events
       - namespaces
       - persistentvolumes
@@ -44,13 +43,6 @@ rules:
     verbs:
       - create
       - get
-  - apiGroups:
-      - admissionregistration.k8s.io
-    resources:
-      - validatingwebhookconfigurations
-      - mutatingwebhookconfigurations
-    verbs:
-      - "*"
   - apiGroups:
       - kubeflow.org
     resources:

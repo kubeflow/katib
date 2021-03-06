@@ -18,6 +18,9 @@ limitations under the License.
 package v1beta1
 
 import (
+	"context"
+	"time"
+
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	scheme "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -34,15 +37,15 @@ type SuggestionsGetter interface {
 
 // SuggestionInterface has methods to work with Suggestion resources.
 type SuggestionInterface interface {
-	Create(*v1beta1.Suggestion) (*v1beta1.Suggestion, error)
-	Update(*v1beta1.Suggestion) (*v1beta1.Suggestion, error)
-	UpdateStatus(*v1beta1.Suggestion) (*v1beta1.Suggestion, error)
-	Delete(name string, options *v1.DeleteOptions) error
-	DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
-	Get(name string, options v1.GetOptions) (*v1beta1.Suggestion, error)
-	List(opts v1.ListOptions) (*v1beta1.SuggestionList, error)
-	Watch(opts v1.ListOptions) (watch.Interface, error)
-	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.Suggestion, err error)
+	Create(ctx context.Context, suggestion *v1beta1.Suggestion, opts v1.CreateOptions) (*v1beta1.Suggestion, error)
+	Update(ctx context.Context, suggestion *v1beta1.Suggestion, opts v1.UpdateOptions) (*v1beta1.Suggestion, error)
+	UpdateStatus(ctx context.Context, suggestion *v1beta1.Suggestion, opts v1.UpdateOptions) (*v1beta1.Suggestion, error)
+	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
+	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
+	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1beta1.Suggestion, error)
+	List(ctx context.Context, opts v1.ListOptions) (*v1beta1.SuggestionList, error)
+	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
+	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Suggestion, err error)
 	SuggestionExpansion
 }
 
@@ -61,113 +64,131 @@ func newSuggestions(c *SuggestionV1beta1Client, namespace string) *suggestions {
 }
 
 // Get takes name of the suggestion, and returns the corresponding suggestion object, and an error if there is any.
-func (c *suggestions) Get(name string, options v1.GetOptions) (result *v1beta1.Suggestion, err error) {
+func (c *suggestions) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.Suggestion, err error) {
 	result = &v1beta1.Suggestion{}
 	err = c.client.Get().
 		Namespace(c.ns).
 		Resource("suggestions").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // List takes label and field selectors, and returns the list of Suggestions that match those selectors.
-func (c *suggestions) List(opts v1.ListOptions) (result *v1beta1.SuggestionList, err error) {
+func (c *suggestions) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.SuggestionList, err error) {
+	var timeout time.Duration
+	if opts.TimeoutSeconds != nil {
+		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
+	}
 	result = &v1beta1.SuggestionList{}
 	err = c.client.Get().
 		Namespace(c.ns).
 		Resource("suggestions").
 		VersionedParams(&opts, scheme.ParameterCodec).
-		Do().
+		Timeout(timeout).
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Watch returns a watch.Interface that watches the requested suggestions.
-func (c *suggestions) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *suggestions) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
+	var timeout time.Duration
+	if opts.TimeoutSeconds != nil {
+		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
+	}
 	opts.Watch = true
 	return c.client.Get().
 		Namespace(c.ns).
 		Resource("suggestions").
 		VersionedParams(&opts, scheme.ParameterCodec).
-		Watch()
+		Timeout(timeout).
+		Watch(ctx)
 }
 
 // Create takes the representation of a suggestion and creates it.  Returns the server's representation of the suggestion, and an error, if there is any.
-func (c *suggestions) Create(suggestion *v1beta1.Suggestion) (result *v1beta1.Suggestion, err error) {
+func (c *suggestions) Create(ctx context.Context, suggestion *v1beta1.Suggestion, opts v1.CreateOptions) (result *v1beta1.Suggestion, err error) {
 	result = &v1beta1.Suggestion{}
 	err = c.client.Post().
 		Namespace(c.ns).
 		Resource("suggestions").
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(suggestion).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Update takes the representation of a suggestion and updates it. Returns the server's representation of the suggestion, and an error, if there is any.
-func (c *suggestions) Update(suggestion *v1beta1.Suggestion) (result *v1beta1.Suggestion, err error) {
+func (c *suggestions) Update(ctx context.Context, suggestion *v1beta1.Suggestion, opts v1.UpdateOptions) (result *v1beta1.Suggestion, err error) {
 	result = &v1beta1.Suggestion{}
 	err = c.client.Put().
 		Namespace(c.ns).
 		Resource("suggestions").
 		Name(suggestion.Name).
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(suggestion).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-
-func (c *suggestions) UpdateStatus(suggestion *v1beta1.Suggestion) (result *v1beta1.Suggestion, err error) {
+func (c *suggestions) UpdateStatus(ctx context.Context, suggestion *v1beta1.Suggestion, opts v1.UpdateOptions) (result *v1beta1.Suggestion, err error) {
 	result = &v1beta1.Suggestion{}
 	err = c.client.Put().
 		Namespace(c.ns).
 		Resource("suggestions").
 		Name(suggestion.Name).
 		SubResource("status").
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(suggestion).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Delete takes name of the suggestion and deletes it. Returns an error if one occurs.
-func (c *suggestions) Delete(name string, options *v1.DeleteOptions) error {
+func (c *suggestions) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("suggestions").
 		Name(name).
-		Body(options).
-		Do().
+		Body(&opts).
+		Do(ctx).
 		Error()
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *suggestions) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
+func (c *suggestions) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	var timeout time.Duration
+	if listOpts.TimeoutSeconds != nil {
+		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
+	}
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("suggestions").
-		VersionedParams(&listOptions, scheme.ParameterCodec).
-		Body(options).
-		Do().
+		VersionedParams(&listOpts, scheme.ParameterCodec).
+		Timeout(timeout).
+		Body(&opts).
+		Do(ctx).
 		Error()
 }
 
 // Patch applies the patch and returns the patched suggestion.
-func (c *suggestions) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.Suggestion, err error) {
+func (c *suggestions) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Suggestion, err error) {
 	result = &v1beta1.Suggestion{}
 	err = c.client.Patch(pt).
 		Namespace(c.ns).
 		Resource("suggestions").
-		SubResource(subresources...).
 		Name(name).
+		SubResource(subresources...).
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(data).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }

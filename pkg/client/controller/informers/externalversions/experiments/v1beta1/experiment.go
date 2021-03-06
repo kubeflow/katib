@@ -18,6 +18,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	"context"
 	time "time"
 
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -60,13 +61,13 @@ func NewFilteredExperimentInformer(client versioned.Interface, namespace string,
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ExperimentV1beta1().Experiments(namespace).List(options)
+				return client.ExperimentV1beta1().Experiments(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ExperimentV1beta1().Experiments(namespace).Watch(options)
+				return client.ExperimentV1beta1().Experiments(namespace).Watch(context.TODO(), options)
 			},
 		},
 		&experimentsv1beta1.Experiment{},

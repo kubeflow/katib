@@ -24,6 +24,7 @@ workflows:
       - pkg/ui/v1beta1/*
       - pkg/util/v1beta1/*
       - pkg/webhook/v1beta1/*
+      - cmd/cert-generator/v1beta1/*
       - cmd/db-manager/v1beta1/*
       - cmd/katib-controller/v1beta1/*
       - cmd/metricscollector/v1beta1/*
@@ -36,6 +37,7 @@ workflows:
       - cmd/suggestion/goptuna/v1beta1/*
       - cmd/ui/v1beta1/*
       - examples/v1beta1/*
+      - hack/*
       - sdk/python/v1beta1/*
       - test/e2e/v1beta1/*
       - test/scripts/v1beta1/*

@@ -18,6 +18,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	"context"
 	time "time"
 
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
@@ -60,13 +61,13 @@ func NewFilteredTrialInformer(client versioned.Interface, namespace string, resy
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.TrialV1beta1().Trials(namespace).List(options)
+				return client.TrialV1beta1().Trials(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.TrialV1beta1().Trials(namespace).Watch(options)
+				return client.TrialV1beta1().Trials(namespace).Watch(context.TODO(), options)
 			},
 		},
 		&trialsv1beta1.Trial{},
