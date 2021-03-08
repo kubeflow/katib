@@ -1,6 +1,6 @@
 FROM mxnet/python:latest_cpu_native_py3
 
-ADD . /opt/mxnet-mnist
+ADD examples/v1beta1/mxnet-mnist /opt/mxnet-mnist
 WORKDIR /opt/mxnet-mnist
 
 RUN chgrp -R 0 /opt/mxnet-mnist \

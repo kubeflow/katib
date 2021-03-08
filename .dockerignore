@@ -1,7 +1,6 @@
 .git
 .gitignore
 docs
-examples
 manifests
 pkg/ui/*/frontend/node_modules
 pkg/ui/*/frontend/build

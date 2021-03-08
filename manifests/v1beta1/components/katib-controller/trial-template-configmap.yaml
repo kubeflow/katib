@@ -52,11 +52,13 @@ data:
             spec:
               containers:
                 - name: pytorch
-                  image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
+                  # TODO (andreyvelich): Add tag to the image.
+                  image: docker.io/kubeflowkatib/pytorch-mnist
                   imagePullPolicy: Always
                   command:
-                    - "python"
-                    - "/var/mnist.py"
+                    - "python3"
+                    - "/opt/pytorch-mnist/mnist.py"
+                    - "--epochs=1"
                     - "--lr=${trialParameters.learningRate}"
                     - "--momentum=${trialParameters.momentum}"
         Worker:
@@ -66,10 +68,12 @@ data:
             spec:
               containers:
                 - name: pytorch
-                  image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
+                  # TODO (andreyvelich): Add tag to the image.
+                  image: docker.io/kubeflowkatib/pytorch-mnist
                   imagePullPolicy: Always
                   command:
-                    - "python"
-                    - "/var/mnist.py"
+                    - "python3"
+                    - "/opt/pytorch-mnist/mnist.py"
+                    - "--epochs=1"
                     - "--lr=${trialParameters.learningRate}"
                     - "--momentum=${trialParameters.momentum}"

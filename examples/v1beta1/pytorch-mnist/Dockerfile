@@ -1,13 +1,14 @@
 FROM pytorch/pytorch:1.0-cuda10.0-cudnn7-runtime
 
-RUN mkdir -p /katib /opt/mnist/src
+ADD examples/v1beta1/pytorch-mnist /opt/pytorch-mnist
+WORKDIR /opt/pytorch-mnist
 
-WORKDIR /opt/mnist/src
-ADD mnist.py /opt/mnist/src
+# Add folder for the logs.
+RUN mkdir /katib
 
-RUN chgrp -R 0 /opt/mnist \
-  && chmod -R g+rwX /opt/mnist \
+RUN chgrp -R 0 /opt/pytorch-mnist \
+  && chmod -R g+rwX /opt/pytorch-mnist \
   && chgrp -R 0 /katib \
   && chmod -R g+rwX /katib
 
-ENTRYPOINT ["python", "/opt/mnist/src/mnist.py"]
+ENTRYPOINT ["python3", "/opt/pytorch-mnist/mnist.py"]

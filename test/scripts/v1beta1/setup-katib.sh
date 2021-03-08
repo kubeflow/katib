@@ -65,6 +65,26 @@ sed -i -e "s@docker.io/kubeflowkatib\/earlystopping-medianstop@${ECR_REGISTRY}\/
 
 cat manifests/v1beta1/katib-controller/katib-config.yaml
 
+# Update Trial images in examples.
+# MXNet mnist example.
+sed -i -e "s@docker.io/kubeflowkatib\/mxnet-mnist:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-mxnet-mnist:${VERSION}@" examples/v1beta1/*.yaml
+sed -i -e "s@docker.io/kubeflowkatib\/mxnet-mnist:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-mxnet-mnist:${VERSION}@" examples/v1beta1/early-stopping/*.yaml
+sed -i -e "s@docker.io/kubeflowkatib\/mxnet-mnist:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-mxnet-mnist:${VERSION}@" examples/v1beta1/resume-experiment/*.yaml
+# PyTorch mnist.
+sed -i -e "s@docker.io/kubeflowkatib\/pytorch-mnist:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-pytorch-mnist:${VERSION}@" examples/v1beta1/*.yaml
+# ENAS CNN with CPU.
+sed -i -e "s@docker.io/kubeflowkatib\/trial-enas-cnn-cifar10-cpu:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-enas-cnn-cifar10-cpu:${VERSION}@" examples/v1beta1/nas/*.yaml
+# Darts CNN.
+sed -i -e "s@docker.io/kubeflowkatib\/trial-darts-cnn-cifar10:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-darts-cnn-cifar10:${VERSION}@" examples/v1beta1/nas/*.yaml
+
+# TODO (andreyvelich): For testing
+cat examples/v1beta1/random-example.yaml
+cat examples/v1beta1/early-stopping/median.stop.yaml
+cat examples/v1beta1/grid-example.yaml
+cat examples/v1beta1/pytorch-example.yaml
+cat examples/v1beta1/nas/darts-example-cpu.yaml
+cat examples/v1beta1/nas/enas-example-cpu.yaml
+
 echo "Creating Kubeflow namespace"
 kubectl create namespace kubeflow
 

@@ -464,6 +464,36 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/earlystopping-medianstop:$(PULL_BASE_SHA)",
             ]),  // build early stopping median stop
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-trial-mxnet-mnist", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/examples/v1beta1/mxnet-mnist/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/trial-mxnet-mnist:$(PULL_BASE_SHA)",
+            ]),  // build Trial mxnet mnist
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-trial-pytorch-mnist", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/examples/v1beta1/pytorch-mnist/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/trial-pytorch-mnist:$(PULL_BASE_SHA)",
+            ]),  // build Trial PyTorch mnist
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-trial-enas-cnn-cifar10-gpu", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/examples/v1beta1/nas/enas-cnn-cifar10/Dockerfile.gpu",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/trial-enas-cnn-cifar10-gpu:$(PULL_BASE_SHA)",
+            ]),  // build Trial enas cnn cifar10 with GPU support
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-trial-enas-cnn-cifar10-cpu", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/examples/v1beta1/nas/enas-cnn-cifar10/Dockerfile.cpu",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/trial-enas-cnn-cifar10-cpu:$(PULL_BASE_SHA)",
+            ]),  // build Trial enas cnn cifar10 with CPU support
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-trial-darts-cnn-cifar10", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/examples/v1beta1/nas/darts-cnn-cifar10/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/trial-darts-cnn-cifar10:$(PULL_BASE_SHA)",
+            ]),  // build Trial darts cnn cifar10
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("setup-katib", testWorkerImage, [
               "test/scripts/v1beta1/setup-katib.sh",
             ]),  // check Katib readiness and deploy it

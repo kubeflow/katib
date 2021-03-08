@@ -20,7 +20,7 @@
 set -e
 
 COMMIT=$(git rev-parse --short=7 HEAD)
-REGISTRY="docker.io/kubeflowkatib"
+REGISTRY="docker.io/andreyvelichkevich"
 VERSION="v1beta1"
 TAG=${VERSION}-${COMMIT}
 
