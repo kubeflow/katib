@@ -2,7 +2,7 @@ name: Charmed Katib
 
 on:
   - push
-  # - pull_request # TODO (andreyvelich): Actions should be fixed in: https://github.com/kubeflow/katib/issues/1453
+  - pull_request
 
 jobs:
   build:
@@ -15,7 +15,7 @@ jobs:
 
       - uses: balchua/microk8s-actions@v0.2.2
         with:
-          channel: "1.19/stable"
+          channel: "1.20/stable"
           addons: '["dns", "storage", "rbac"]'
 
       - name: Install dependencies
