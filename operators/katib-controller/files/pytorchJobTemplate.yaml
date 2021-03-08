@@ -15,6 +15,7 @@ spec:
               command:
                 - "python3"
                 - "/opt/pytorch-mnist/mnist.py"
+                - "--epochs=1"
                 - "--lr=${trialParameters.learningRate}"
                 - "--momentum=${trialParameters.momentum}"
     Worker:

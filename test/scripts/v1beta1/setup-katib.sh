@@ -79,9 +79,9 @@ sed -i -e "s@docker.io/kubeflowkatib\/trial-darts-cnn-cifar10:.*@${ECR_REGISTRY}
 
 # TODO (andreyvelich): For testing
 cat examples/v1beta1/random-example.yaml
-cat examples/v1beta1/early-stopping/median.stop.yaml
+cat examples/v1beta1/early-stopping/median-stop.yaml
 cat examples/v1beta1/grid-example.yaml
-cat examples/v1beta1/pytorch-example.yaml
+cat examples/v1beta1/pytorchjob-example.yaml
 cat examples/v1beta1/nas/darts-example-cpu.yaml
 cat examples/v1beta1/nas/enas-example-cpu.yaml
 

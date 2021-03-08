@@ -111,7 +111,7 @@ def main():
                             default=dist.Backend.GLOO)
     args = parser.parse_args()
 
-    # Use this format (%Y-%m-%dT%H:%M:%SZ) to record timestamp of the metrics
+    # Use this format (%Y-%m-%dT%H:%M:%SZ) to record timestamp of the metrics.
     # If log_path is empty print log to StdOut, otherwise print log to the file.
     if args.log_path == "":
         logging.basicConfig(
