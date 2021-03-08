@@ -122,7 +122,7 @@ echo -e "\nBuilding mxnet mnist training container example...\n"
 (cd examples/${VERSION}/mxnet-mnist && docker build -t ${REGISTRY}/mxnet-mnist:${TAG} -t ${REGISTRY}/mxnet-mnist:latest -f Dockerfile .)
 
 echo -e "\nBuilding PyTorch mnist training container example...\n"
-(cd examples/${VERSION}/file-metrics-collector && docker build -t ${REGISTRY}/pytorch-mnist:${TAG} -t ${REGISTRY}/pytorch-mnist:latest -f Dockerfile .)
+(cd examples/${VERSION}/pytorch-mnist && docker build -t ${REGISTRY}/pytorch-mnist:${TAG} -t ${REGISTRY}/pytorch-mnist:latest -f Dockerfile .)
 
 echo -e "\nBuilding Keras CIFAR-10 CNN training container example for ENAS with GPU support...\n"
 (cd examples/${VERSION}/nas/enas-cnn-cifar10 && docker build -t ${REGISTRY}/enas-cnn-cifar10-gpu:${TAG} -t ${REGISTRY}/enas-cnn-cifar10-gpu:latest -f Dockerfile.gpu .)

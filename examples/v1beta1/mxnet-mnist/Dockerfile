@@ -1,11 +1,4 @@
-FROM ubuntu:16.04
-
-RUN apt-get update && \
-    apt-get install -y wget python3-dev gcc && \
-    wget https://bootstrap.pypa.io/get-pip.py && \
-    python3 get-pip.py
-
-RUN pip3 install mxnet
+FROM mxnet/python:latest_cpu_native_py3
 
 ADD . /opt/mxnet-mnist
 WORKDIR /opt/mxnet-mnist

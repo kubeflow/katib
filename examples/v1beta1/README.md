@@ -348,7 +348,8 @@ It will stop port-forward process and delete minikube cluster.
 docker.io/kubeflowkatib/mxnet-mnist
 ```
 
-- Pytorch mnist example with saving metrics to the file, [source](https://github.com/kubeflow/katib/blob/master/examples/v1beta1/file-metrics-collector/mnist.py).
+- Pytorch mnist example with saving metrics to the file or print them to the StdOut,
+  [source](https://github.com/kubeflow/katib/blob/master/examples/v1beta1/pytorch-mnist/mnist.py).
 
 ```
 docker.io/kubeflowkatib/pytorch-mnist
@@ -372,13 +373,8 @@ docker.io/kubeflowkatib/enas-cnn-cifar10-cpu
 docker.io/kubeflowkatib/darts-cnn-cifar10
 ```
 
-- Pytorch operator mnist example, [source](https://github.com/kubeflow/pytorch-operator/blob/master/examples/mnist/mnist.py).
-
-```
-gcr.io/kubeflow-ci/pytorch-dist-mnist-test
-```
-
-- Tf operator mnist example, [source](https://github.com/kubeflow/tf-operator/blob/master/examples/v1/mnist_with_summaries/mnist_with_summaries.py).
+- TF operator mnist example with writing summary data,
+  [source](https://github.com/kubeflow/tf-operator/blob/master/examples/v1/mnist_with_summaries/mnist_with_summaries.py).
 
 ```
 gcr.io/kubeflow-ci/tf-mnist-with-summaries
