@@ -65,15 +65,16 @@ sed -i -e "s@docker.io/kubeflowkatib\/earlystopping-medianstop@${ECR_REGISTRY}\/
 
 cat manifests/v1beta1/katib-controller/katib-config.yaml
 
-# Update Trial images in examples.
-# MXNet mnist example.
-find ./examples -regex ".*\.yaml" -exec sed -i -e "s@docker.io/kubeflowkatib\/mxnet-mnist:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-mxnet-mnist:${VERSION}@" {} \;
-# PyTorch mnist.
-sed -i -e "s@docker.io/kubeflowkatib\/pytorch-mnist:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-pytorch-mnist:${VERSION}@" examples/v1beta1/*.yaml
-# ENAS CNN with CPU.
-sed -i -e "s@docker.io/kubeflowkatib\/trial-enas-cnn-cifar10-cpu:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-enas-cnn-cifar10-cpu:${VERSION}@" examples/v1beta1/nas/*.yaml
-# Darts CNN.
-sed -i -e "s@docker.io/kubeflowkatib\/trial-darts-cnn-cifar10:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-darts-cnn-cifar10:${VERSION}@" examples/v1beta1/nas/*.yaml
+# Update Trial template images in the examples.
+./scripts/v1beta1/update-trial-images.sh -p "${ECR_REGISTRY}/${REPO_NAME}/v1beta1/trial-" -t ${VERSION}
+# # MXNet mnist example.
+# find ./examples -regex ".*\.yaml" -exec sed -i -e "s@docker.io/kubeflowkatib\/mxnet-mnist:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-mxnet-mnist:${VERSION}@" {} \;
+# # PyTorch mnist.
+# sed -i -e "s@docker.io/kubeflowkatib\/pytorch-mnist:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-pytorch-mnist:${VERSION}@" examples/v1beta1/*.yaml
+# # ENAS CNN with CPU.
+# sed -i -e "s@docker.io/kubeflowkatib\/trial-enas-cnn-cifar10-cpu:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-enas-cnn-cifar10-cpu:${VERSION}@" examples/v1beta1/nas/*.yaml
+# # Darts CNN.
+# sed -i -e "s@docker.io/kubeflowkatib\/trial-darts-cnn-cifar10:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-darts-cnn-cifar10:${VERSION}@" examples/v1beta1/nas/*.yaml
 
 # TODO (andreyvelich): For testing
 cat examples/v1beta1/random-example.yaml

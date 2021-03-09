@@ -274,6 +274,26 @@
                     template: "build-earlystopping-medianstop",
                   },
                   {
+                    name: "build-trial-mxnet-mnist",
+                    template: "build-trial-mxnet-mnist",
+                  },
+                  {
+                    name: "build-trial-pytorch-mnist",
+                    template: "build-trial-pytorch-mnist",
+                  },
+                  {
+                    name: "build-trial-enas-cnn-cifar10-gpu",
+                    template: "build-trial-enas-cnn-cifar10-gpu",
+                  },
+                  {
+                    name: "build-trial-enas-cnn-cifar10-cpu",
+                    template: "build-trial-enas-cnn-cifar10-cpu",
+                  },
+                  {
+                    name: "build-trial-darts-cnn-cifar10",
+                    template: "build-trial-darts-cnn-cifar10",
+                  },
+                  {
                     name: "create-cluster",
                     template: "create-cluster",
                   },
