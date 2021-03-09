@@ -1,0 +1,20 @@
+<div class="two-inputs">
+  <mat-form-field appearance="outline">
+    <mat-label>Name</mat-label>
+    <input [formControl]="formGroup.get('name')" matInput readonly />
+    <mat-icon matSuffix [libPopover]="desc">info</mat-icon>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Reference</mat-label>
+    <input [formControl]="formGroup.get('reference')" matInput />
+    <mat-hint>Parameter to substitute with</mat-hint>
+  </mat-form-field>
+</div>
+
+<ng-template #desc>
+  <mat-form-field appearance="outline" class="desc-input">
+    <mat-label>Description</mat-label>
+    <textarea [formControl]="formGroup.get('description')" matInput></textarea>
+  </mat-form-field>
+</ng-template>

@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, FormArray, FormControl, Validators } from '@angular/forms';
 import { KWABackendService } from 'src/app/services/backend.service';
 import {
   TrialTemplateResponse,
@@ -90,6 +90,39 @@ export class FormTrialTemplateComponent implements OnInit, OnDestroy {
         this.yaml = t.Yaml;
       }),
     );
+  }
+
+  private getTrialParameters(yaml: string) {
+    const params = yaml.match(/\${trialParameters.*}/g);
+    if (params === null) {
+      return [];
+    }
+
+    const parsedParams = [];
+    for (const param of params) {
+      let parsedParam = param;
+      parsedParam = parsedParam.replace('${trialParameters.', '');
+      parsedParam = parsedParam.substring(0, parsedParam.length - 1);
+      parsedParams.push(parsedParam);
+    }
+
+    return parsedParams;
+  }
+
+  recalculateTrialParameters(yaml: string) {
+    const params = this.getTrialParameters(yaml);
+
+    const arrayCtrl = this.formGroup.get('trialParameters') as FormArray;
+    arrayCtrl.clear();
+    for (const param of params) {
+      arrayCtrl.push(
+        new FormGroup({
+          name: new FormControl(param, Validators.required),
+          reference: new FormControl('', []),
+          description: new FormControl('', []),
+        }),
+      );
+    }
   }
 
   ngOnDestroy() {

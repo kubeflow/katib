@@ -82,9 +82,17 @@
       ace-editor
       [(text)]="yaml"
       [readOnly]="formGroup.get('type').value === 'configmap'"
+      (textChange)="recalculateTrialParameters($event)"
       theme="xcode"
       mode="yaml"
     ></div>
+
+    <mat-divider class="margin-bottom margin-top"></mat-divider>
+
+    <app-trial-parameter
+      *ngFor="let ctrl of formGroup.get('trialParameters').controls"
+      [formGroup]="ctrl"
+    ></app-trial-parameter>
   </div>
 
   <div class="lib-step-info-wrapper">

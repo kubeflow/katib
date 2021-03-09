@@ -220,6 +220,7 @@ export class ExperimentFormService {
       cmName: '',
       cmTrialPath: '',
       yaml: '',
+      trialParameters: this.builder.array([]),
     });
   }
 
@@ -390,6 +391,8 @@ export class ExperimentFormService {
         label => (trialTemplate.primaryPodLabels[label.key] = label.value),
       );
     }
+
+    trialTemplate.trialParameters = formValue.trialParameters;
 
     if (formValue.type === 'yaml') {
       try {
