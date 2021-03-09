@@ -5,10 +5,11 @@ import { FormModule } from 'kubeflow';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatRadioModule } from '@angular/material/radio';
+import { FormAlgorithmSettingComponent } from './setting/setting.component';
 
 @NgModule({
-  declarations: [FormAlgorithmComponent],
+  declarations: [FormAlgorithmComponent, FormAlgorithmSettingComponent],
   imports: [CommonModule, FormModule, MatIconModule, MatRadioModule],
-  exports: [FormAlgorithmComponent],
+  exports: [FormAlgorithmComponent, FormAlgorithmSettingComponent],
 })
 export class FormAlgorithmModule {}

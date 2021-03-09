@@ -19,7 +19,6 @@ import {
 export class FormAlgorithmComponent implements OnInit, OnDestroy {
   algorithmSettings: FormArray;
   algorithms: { [key: string]: string } = AlgorithmNames;
-  disableAddButton: boolean;
   algorithmHasSettings = false;
 
   private subscriptions: Subscription = new Subscription();
