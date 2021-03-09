@@ -46,8 +46,6 @@ echo "Updating Trial template images..."
 echo "Image prefix: ${IMAGE_PREFIX}"
 echo "Image tag: ${TAG}"
 
-exit 1
-
 # Base prefix for the Trial template images.
 BASE_IMAGE_PREFIX="docker.io/kubeflowkatib/"
 
