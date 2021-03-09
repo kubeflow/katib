@@ -57,18 +57,19 @@ ENAS_CPU="enas-cnn-cifar10-cpu"
 DARTS="darts-cnn-cifar10"
 
 # MXNet mnist.
-find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${MXNET_MNIST}:.*@${IMAGE_PREFIX}${MXNET_MNIST}:${TAG}@" {} \;
-
-# PyTorch mnist.
-find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${PYTORCH_MNIST}:.*@${IMAGE_PREFIX}${PYTORCH_MNIST}:${TAG}@" {} \;
-
-# ENAS cifar-10 GPU.
-find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${ENAS_GPU}:.*@${IMAGE_PREFIX}${ENAS_GPU}:${TAG}@" {} \;
-
-# ENAS cifar-10 CPU.
-find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${ENAS_CPU}:.*@${IMAGE_PREFIX}${ENAS_CPU}:${TAG}@" {} \;
-
-# DARTS cifar-10.
-find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${DARTS}:.*@${IMAGE_PREFIX}${DARTS}:${TAG}@" {} \;
+# For MacOS we should set -i '' to avoid temp files from sed.
+if [[ $(uname) == "Darwin" ]]; then
+  find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${MXNET_MNIST}:.*@${IMAGE_PREFIX}${MXNET_MNIST}:${TAG}@" {} \;
+  find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${PYTORCH_MNIST}:.*@${IMAGE_PREFIX}${PYTORCH_MNIST}:${TAG}@" {} \;
+  find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${ENAS_GPU}:.*@${IMAGE_PREFIX}${ENAS_GPU}:${TAG}@" {} \;
+  find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${ENAS_CPU}:.*@${IMAGE_PREFIX}${ENAS_CPU}:${TAG}@" {} \;
+  find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${DARTS}:.*@${IMAGE_PREFIX}${DARTS}:${TAG}@" {} \;
+else
+  find ./ -regex ".*\.yaml" -exec sed -i -e "s@${BASE_IMAGE_PREFIX}${MXNET_MNIST}:.*@${IMAGE_PREFIX}${MXNET_MNIST}:${TAG}@" {} \;
+  find ./ -regex ".*\.yaml" -exec sed -i -e "s@${BASE_IMAGE_PREFIX}${PYTORCH_MNIST}:.*@${IMAGE_PREFIX}${PYTORCH_MNIST}:${TAG}@" {} \;
+  find ./ -regex ".*\.yaml" -exec sed -i -e "s@${BASE_IMAGE_PREFIX}${ENAS_GPU}:.*@${IMAGE_PREFIX}${ENAS_GPU}:${TAG}@" {} \;
+  find ./ -regex ".*\.yaml" -exec sed -i -e "s@${BASE_IMAGE_PREFIX}${ENAS_CPU}:.*@${IMAGE_PREFIX}${ENAS_CPU}:${TAG}@" {} \;
+  find ./ -regex ".*\.yaml" -exec sed -i -e "s@${BASE_IMAGE_PREFIX}${DARTS}:.*@${IMAGE_PREFIX}${DARTS}:${TAG}@" {} \;
+fi
 
 echo "Trial template images has been updated"
