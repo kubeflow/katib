@@ -114,9 +114,7 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 		}
 	}
 
-	// Attach service account if early stopping is used
-	// TODO (andreyvelich): Document that custom service account
-	// should not be equal "<suggestion-name>-<suggestion-algorithm>".
+	// Attach ServiceAccount if early stopping is used.
 	// For custom service account user should manually add appropriate Role to change Trial status.
 	if s.Spec.EarlyStopping != nil && s.Spec.EarlyStopping.AlgorithmName != "" && suggestionConfigData.ServiceAccountName == "" {
 		d.Spec.Template.Spec.ServiceAccountName = util.GetSuggestionRBACName(s)

@@ -221,7 +221,8 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 	}
 
 	// If early stopping is used, create RBAC.
-	// ServiceAccount name should be equal <suggestion-name>-<suggestion-algorithm>
+	// If controller should reconcile RBAC,
+	// ServiceAccount name must be equal to <suggestion-name>-<suggestion-algorithm>
 	if instance.Spec.EarlyStopping != nil && instance.Spec.EarlyStopping.AlgorithmName != "" &&
 		deploy.Spec.Template.Spec.ServiceAccountName == util.GetSuggestionRBACName(instance) {
 
