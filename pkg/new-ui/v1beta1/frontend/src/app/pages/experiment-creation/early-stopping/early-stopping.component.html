@@ -1,0 +1,44 @@
+<div class="lib-step-wrapper">
+  <form [formGroup]="formGroup" class="flex-column step-content">
+    <mat-form-field appearance="outline" class="wide">
+      <mat-label>Algorithm</mat-label>
+      <mat-select formControlName="algorithmName">
+        <mat-option
+          *ngFor="let algo of algorithms | keyvalue"
+          [value]="algo.key"
+        >
+          {{ algo.value }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!--Algorithm configuration parameters-->
+    <lib-advanced-options
+      *ngIf="algorithmHasSettings"
+      text="Algorithm settings"
+    >
+      <div class="flex-column">
+        <app-algorithm-setting
+          *ngFor="let setting of algorithmSettings.controls; let i = index"
+          [setting]="setting"
+        ></app-algorithm-setting>
+      </div>
+    </lib-advanced-options>
+  </form>
+
+  <!--step info-->
+  <div class="lib-step-info-wrapper">
+    <lib-step-info header="Early Stopping">
+      Early stopping allows you to avoid overfitting when you train your model
+      during Katib Experiments. You can read the
+      <a
+        href="https://www.kubeflow.org/docs/components/katib/early-stopping/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        official docs</a
+      >
+      for more information.
+    </lib-step-info>
+  </div>
+</div>

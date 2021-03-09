@@ -49,8 +49,18 @@
           </form>
         </mat-step>
 
-        <!--Parameters-->
         <ng-container *ngIf="algorithmForm.value.type === 'hp'; else nasConfig">
+          <!--Early Stopping-->
+          <mat-step [stepControl]="hyperParamsArray">
+            <form [formGroup]="hyperParamsArray">
+              <ng-template matStepLabel>Early Stopping</ng-template>
+
+              <app-form-early-stopping [formGroup]="earlyStoppingForm">
+              </app-form-early-stopping>
+            </form>
+          </mat-step>
+
+          <!--Parameters-->
           <mat-step [stepControl]="hyperParamsArray">
             <form [formGroup]="hyperParamsArray">
               <ng-template matStepLabel>Hyper Parameters</ng-template>

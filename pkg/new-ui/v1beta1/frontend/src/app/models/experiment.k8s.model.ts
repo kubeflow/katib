@@ -18,6 +18,7 @@ export interface ExperimentSpec {
   maxFailedTrialCount?: number;
   objective?: ObjectiveSpec;
   algorithm?: AlgorithmSpec;
+  earlyStopping?: AlgorithmSpec;
   parameters?: ParameterSpec[];
   metricsCollectorSpec?: MetricsCollectorSpec;
   trialTemplate?: TrialTemplateSpec;

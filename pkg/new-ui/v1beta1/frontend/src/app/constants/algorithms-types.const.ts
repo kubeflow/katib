@@ -1,4 +1,7 @@
-import { AlgorithmsEnum } from '../enumerations/algorithms.enum';
+import {
+  AlgorithmsEnum,
+  EarlyStoppingAlgorithmsEnum,
+} from '../enumerations/algorithms.enum';
 
 export const AlgorithmNames = {
   [AlgorithmsEnum.GRID]: 'Grid',
@@ -12,4 +15,9 @@ export const AlgorithmNames = {
 export const NasAlgorithmNames = {
   [AlgorithmsEnum.ENAS]: 'Efficient Neural Architecture Search',
   [AlgorithmsEnum.DARTS]: 'Differentiable Architecture Search',
+};
+
+export const EarlyStoppingAlgorithmNames = {
+  [EarlyStoppingAlgorithmsEnum.NONE]: 'None',
+  [EarlyStoppingAlgorithmsEnum.MEDIAN]: 'Median Stopping Rule',
 };

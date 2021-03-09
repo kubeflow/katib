@@ -17,6 +17,7 @@ import { FormNasOperationsModule } from './nas-operations/nas-operations.module'
 import { FormMetricsCollectorModule } from './metrics-collector/metrics-collector.module';
 import { FormTrialTemplateModule } from './trial-template/trial-template.module';
 import { YamlModalModule } from './yaml-modal/yaml-modal.module';
+import { FormEarlyStoppingModule } from './early-stopping/early-stopping.module';
 
 @NgModule({
   declarations: [ExperimentCreationComponent],
@@ -30,6 +31,7 @@ import { YamlModalModule } from './yaml-modal/yaml-modal.module';
     FormTrialThresholdsModule,
     FormObjectiveModule,
     FormAlgorithmModule,
+    FormEarlyStoppingModule,
     FormHyperParametersModule,
     FormNasGraphModule,
     FormNasOperationsModule,

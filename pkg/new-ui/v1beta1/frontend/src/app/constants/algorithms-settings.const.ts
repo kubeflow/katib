@@ -1,6 +1,7 @@
 import {
   AlgorithmsEnum,
   AlgorithmSettingType,
+  EarlyStoppingAlgorithmsEnum,
 } from '../enumerations/algorithms.enum';
 
 export interface AlgorithmSetting {
@@ -215,6 +216,24 @@ export const DartsSettings: AlgorithmSetting[] = [
     type: AlgorithmSettingType.INTEGER,
   },
 ];
+
+export const EarlyStoppingSettings: AlgorithmSetting[] = [
+  {
+    name: 'min_trials_required',
+    value: 3,
+    type: AlgorithmSettingType.INTEGER,
+  },
+  {
+    name: 'start_step',
+    value: 4,
+    type: AlgorithmSettingType.INTEGER,
+  },
+];
+
+export const EarlyStoppingSettingsMap: { [key: string]: AlgorithmSetting[] } = {
+  [EarlyStoppingAlgorithmsEnum.NONE]: [],
+  [EarlyStoppingAlgorithmsEnum.MEDIAN]: EarlyStoppingSettings,
+};
 
 export const AlgorithmSettingsMap: { [key: string]: AlgorithmSetting[] } = {
   [AlgorithmsEnum.GRID]: GridSettings,

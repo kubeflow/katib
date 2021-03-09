@@ -7,7 +7,10 @@ import {
 } from '@angular/forms';
 import { Injectable } from '@angular/core';
 import { ObjectiveTypeEnum } from '../enumerations/objective-type.enum';
-import { AlgorithmsEnum } from '../enumerations/algorithms.enum';
+import {
+  AlgorithmsEnum,
+  EarlyStoppingAlgorithmsEnum,
+} from '../enumerations/algorithms.enum';
 import { BehaviorSubject } from 'rxjs';
 import { createParameterGroup, createNasOperationGroup } from '../shared/utils';
 import { K8sObject, SnackBarService, SnackType } from 'kubeflow';
@@ -61,6 +64,13 @@ export class ExperimentFormService {
     return this.builder.group({
       type: 'hp',
       algorithm: AlgorithmsEnum.RANDOM,
+      algorithmSettings: this.builder.array([]),
+    });
+  }
+
+  createEarlyStoppingForm(): FormGroup {
+    return this.builder.group({
+      algorithmName: EarlyStoppingAlgorithmsEnum.NONE,
       algorithmSettings: this.builder.array([]),
     });
   }
@@ -303,6 +313,22 @@ export class ExperimentFormService {
 
     return {
       algorithmName: group.get('algorithm').value,
+      algorithmSettings: settings,
+    };
+  }
+
+  earlyStoppingFromCtrl(group: FormGroup): AlgorithmSpec {
+    const settings: AlgorithmSetting[] = [];
+    group.get('algorithmSettings').value.forEach(setting => {
+      if (setting.value === null) {
+        return;
+      }
+
+      settings.push({ name: setting.name, value: `${setting.value}` });
+    });
+
+    return {
+      algorithmName: group.get('algorithmName').value,
       algorithmSettings: settings,
     };
   }
