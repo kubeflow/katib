@@ -16,6 +16,8 @@
 
 # This script is used to update images and tags in the Trial templates for all Katib examples and manifests.
 # Run ./scripts/v1beta1/update-trial-template-tags.sh -p <image-prefix> -t <image-tag> to execute it.
+# For example, to update images tags to the latest:
+# ./scripts/v1beta1/update-trial-template-tags.sh -p docker.io/kubeflowkatib/ -t latest
 
 usage() {
   echo "Usage: $0 [-p <IMAGE_PREFIX> -t <TAG>]" 1>&2

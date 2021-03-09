@@ -68,14 +68,6 @@ cat manifests/v1beta1/katib-controller/katib-config.yaml
 # Update Trial template images in the examples.
 ./scripts/v1beta1/update-trial-images.sh -p "${ECR_REGISTRY}/${REPO_NAME}/v1beta1/trial-" -t ${VERSION}
 
-# TODO (andreyvelich): For testing
-cat examples/v1beta1/random-example.yaml
-cat examples/v1beta1/early-stopping/median-stop.yaml
-cat examples/v1beta1/grid-example.yaml
-cat examples/v1beta1/pytorchjob-example.yaml
-cat examples/v1beta1/nas/darts-example-cpu.yaml
-cat examples/v1beta1/nas/enas-example-cpu.yaml
-
 echo "Creating Kubeflow namespace"
 kubectl create namespace kubeflow
 
