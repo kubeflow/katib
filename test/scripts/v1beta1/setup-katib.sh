@@ -51,6 +51,9 @@ sed -i -e "s@image: docker.io/kubeflowkatib\/katib-db-manager@image: ${ECR_REGIS
 # UI
 sed -i -e "s@image: docker.io/kubeflowkatib\/katib-ui@image: ${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/katib-ui:${VERSION}@" manifests/v1beta1/ui/deployment.yaml
 
+# Cert generator
+sed -i -e "s@image: docker.io/kubeflowkatib\/cert-generator@image: ${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/cert-generator:${VERSION}@" manifests/v1beta1/webhooks/cert-generator-job.yaml
+
 # Suggestion algorithms
 sed -i -e "s@docker.io/kubeflowkatib\/suggestion-enas@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-enas:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
 sed -i -e "s@docker.io/kubeflowkatib\/suggestion-hyperband@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-hyperband:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml

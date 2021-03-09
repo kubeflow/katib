@@ -66,6 +66,9 @@ docker build -t ${REGISTRY}/katib-db-manager:${TAG} -t ${REGISTRY}/katib-db-mana
 echo -e "\nBuilding Katib UI image...\n"
 docker build -t ${REGISTRY}/katib-ui:${TAG} -t ${REGISTRY}/katib-ui:latest -f ${CMD_PREFIX}/ui/${VERSION}/Dockerfile .
 
+echo -e "\nBuilding Katib cert generator image...\n"
+docker build -t ${REGISTRY}/cert-generator:${TAG} -t ${REGISTRY}/cert-generator:latest -f ${CMD_PREFIX}/cert-generator/${VERSION}/Dockerfile .
+
 echo -e "\nBuilding file metrics collector image...\n"
 docker build -t ${REGISTRY}/file-metrics-collector:${TAG} -t ${REGISTRY}/file-metrics-collector:latest -f ${CMD_PREFIX}/metricscollector/${VERSION}/file-metricscollector/Dockerfile .
 
@@ -77,9 +80,6 @@ elif [ $MACHINE_ARCH == "ppc64le" ]; then
 else
     docker build -t ${REGISTRY}/tfevent-metrics-collector:${TAG} -t ${REGISTRY}/tfevent-metrics-collector:latest -f ${CMD_PREFIX}/metricscollector/${VERSION}/tfevent-metricscollector/Dockerfile .
 fi
-
-echo -e "\nBuilding Katib cert generator image...\n"
-docker build -t ${REGISTRY}/cert-generator:${TAG} -t ${REGISTRY}/cert-generator:latest -f ${CMD_PREFIX}/cert-generator/${VERSION}/Dockerfile .
 
 # Suggestion images
 echo -e "\nBuilding suggestion images..."
