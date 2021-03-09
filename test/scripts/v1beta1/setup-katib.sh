@@ -67,9 +67,7 @@ cat manifests/v1beta1/katib-controller/katib-config.yaml
 
 # Update Trial images in examples.
 # MXNet mnist example.
-sed -i -e "s@docker.io/kubeflowkatib\/mxnet-mnist:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-mxnet-mnist:${VERSION}@" examples/v1beta1/*.yaml
-sed -i -e "s@docker.io/kubeflowkatib\/mxnet-mnist:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-mxnet-mnist:${VERSION}@" examples/v1beta1/early-stopping/*.yaml
-sed -i -e "s@docker.io/kubeflowkatib\/mxnet-mnist:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-mxnet-mnist:${VERSION}@" examples/v1beta1/resume-experiment/*.yaml
+find ./examples -regex ".*\.yaml" -exec sed -i -e "s@docker.io/kubeflowkatib\/mxnet-mnist:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-mxnet-mnist:${VERSION}@" {} \;
 # PyTorch mnist.
 sed -i -e "s@docker.io/kubeflowkatib\/pytorch-mnist:.*@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/trial-pytorch-mnist:${VERSION}@" examples/v1beta1/*.yaml
 # ENAS CNN with CPU.
