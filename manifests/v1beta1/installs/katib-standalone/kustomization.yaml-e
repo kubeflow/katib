@@ -74,9 +74,6 @@ patchesStrategicMerge:
           "random": {
             "image": "docker.io/kubeflowkatib/suggestion-hyperopt:latest"
           },
-          "tpe": {
-            "image": "docker.io/kubeflowkatib/suggestion-hyperopt:latest"
-          },
           "grid": {
             "image": "docker.io/kubeflowkatib/suggestion-chocolate:latest"
           },
@@ -86,8 +83,8 @@ patchesStrategicMerge:
           "bayesianoptimization": {
             "image": "docker.io/kubeflowkatib/suggestion-skopt:latest"
           },
-          "cmaes": {
-            "image": "docker.io/kubeflowkatib/suggestion-goptuna:latest"
+          "tpe": {
+            "image": "docker.io/kubeflowkatib/suggestion-hyperopt:latest"
           },
           "enas": {
             "image": "docker.io/kubeflowkatib/suggestion-enas:latest",
@@ -96,6 +93,9 @@ patchesStrategicMerge:
                 "memory": "200Mi"
               }
             }
+          },
+          "cmaes": {
+            "image": "docker.io/kubeflowkatib/suggestion-goptuna:latest"
           },
           "darts": {
             "image": "docker.io/kubeflowkatib/suggestion-darts:latest"
