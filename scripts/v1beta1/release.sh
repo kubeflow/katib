@@ -51,6 +51,10 @@ echo -e "\nPushing Katib UI image...\n"
 docker push ${REGISTRY}/katib-ui:${TAG}
 docker push ${REGISTRY}/katib-ui:latest
 
+echo -e "\nPushing Katib cert generator image...\n"
+docker push ${REGISTRY}/cert-generator:${TAG}
+docker push ${REGISTRY}/cert-generator:latest
+
 echo -e "\nPushing file metrics collector image...\n"
 docker push ${REGISTRY}/file-metrics-collector:${TAG}
 docker push ${REGISTRY}/file-metrics-collector:latest
@@ -58,10 +62,6 @@ docker push ${REGISTRY}/file-metrics-collector:latest
 echo -e "\nPushing TF Event metrics collector image...\n"
 docker push ${REGISTRY}/tfevent-metrics-collector:${TAG}
 docker push ${REGISTRY}/tfevent-metrics-collector:latest
-
-echo -e "\nPushing Katib cert generator image...\n"
-docker push ${REGISTRY}/cert-generator:${TAG}
-docker push ${REGISTRY}/cert-generator:latest
 
 # Suggestion images
 echo -e "\nPushing suggestion images..."
