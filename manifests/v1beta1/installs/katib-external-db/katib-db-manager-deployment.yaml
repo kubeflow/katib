@@ -8,8 +8,6 @@ spec:
       containers:
         - name: katib-db-manager
           env:
-            - name: DB_NAME
-              value: mysql
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
@@ -20,18 +18,18 @@ spec:
                 secretKeyRef:
                   name: katib-mysql-secrets
                   key: DB_PASSWORD
-            - name: KATIB_MYSQL_DB_DATABASE
+            - name: DB_NAME
               valueFrom:
                 secretKeyRef:
                   name: katib-mysql-secrets
-                  key: KATIB_MYSQL_DB_DATABASE
-            - name: KATIB_MYSQL_DB_HOST
+                  key: DB_NAME
+            - name: DB_HOST
               valueFrom:
                 secretKeyRef:
                   name: katib-mysql-secrets
-                  key: KATIB_MYSQL_DB_HOST
-            - name: KATIB_MYSQL_DB_PORT
+                  key: DB_HOST
+            - name: DB_PORT
               valueFrom:
                 secretKeyRef:
                   name: katib-mysql-secrets
-                  key: KATIB_MYSQL_DB_PORT
+                  key: DB_PORT

@@ -34,8 +34,10 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		fmt.Printf("error NewWithSQLConn: %v\n", err)
 	}
-	mock.ExpectExec("CREATE TABLE IF NOT EXISTS observation_logs").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec("CREATE TABLE IF NOT EXISTS observation_logs").WillReturnResult(sqlmock.NewResult(1, 1))
 	dbInterface.DBInit()
+	mock.ExpectExec("SELECT 1").
+		WillReturnResult(sqlmock.NewResult(1, 1))
 	err = dbInterface.SelectOne()
 	if err != nil {
 		fmt.Printf("error `SELECT 1` probing: %v\n", err)
@@ -123,10 +125,10 @@ func TestDeleteObservationLog(t *testing.T) {
 }
 
 func TestGetDbName(t *testing.T) {
-	dbName := "root:@tcp(katib-mysql:3306)/katib?timeout=5s"
-
-	if getDbName() != dbName {
-		t.Errorf("getDbName returns wrong value %v", getDbName())
+	dsn := "root@tcp(katib-mysql:3306)/katib?timeout=5s&maxAllowedPacket=0"
+	dataSourceName, _ := initDB()
+	if dataSourceName != dsn {
+		t.Errorf("initDB returns wrong value %v", dataSourceName)
 	}
 
 }

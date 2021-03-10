@@ -55,12 +55,11 @@ def start_charm():
                     },
                     "ports": [{"name": "api", "containerPort": port}],
                     "envConfig": {
-                        "DB_NAME": "mysql",
+                        "DB_NAME": "katib",
                         "DB_USER": "root",
                         "DB_PASSWORD": mysql.root_password(),
-                        "KATIB_MYSQL_DB_HOST": mysql.host(),
-                        "KATIB_MYSQL_DB_PORT": mysql.port(),
-                        "KATIB_MYSQL_DB_DATABASE": "katib",
+                        "DB_HOST": mysql.host(),
+                        "DB_PORT": mysql.port(),
                     },
                     "kubernetes": {
                         "readinessProbe": {

@@ -3,13 +3,14 @@ package mysql
 import (
 	crand "crypto/rand"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"math/rand"
 	"os"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 	"k8s.io/klog"
 
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
@@ -18,9 +19,7 @@ import (
 )
 
 const (
-	dbDriver = "mysql"
-	//dbNameTmpl   = "root:%s@tcp(%s:%s)/%s?timeout=5s"
-	dbNameTmpl   = "%s:%s@tcp(%s:%s)/%s?timeout=5s"
+	dbDriver     = "mysql"
 	mysqlTimeFmt = "2006-01-02 15:04:05.999999"
 
 	connectInterval = 5 * time.Second
@@ -31,19 +30,73 @@ type dbConn struct {
 	db *sql.DB
 }
 
-func getDbName() string {
-	dbPassEnvName := common.DBPasswordEnvName
-	dbPass := os.Getenv(dbPassEnvName)
+func CreateMySQLConfig(user, password string, mysqlServiceHost string,
+	mysqlServicePort string, dbName string, mysqlExtraParams map[string]string) *mysql.Config {
+
+	params := map[string]string{}
+
+	for k, v := range mysqlExtraParams {
+		params[k] = v
+	}
+
+	return &mysql.Config{
+		User:                 user,
+		Passwd:               password,
+		Net:                  "tcp",
+		Addr:                 fmt.Sprintf("%s:%s", mysqlServiceHost, mysqlServicePort),
+		Params:               params,
+		DBName:               dbName,
+		AllowNativePasswords: true,
+		Timeout:              connectInterval,
+	}
+}
+
+func initDB() (string, error) {
+	dbPass := os.Getenv(common.DBPasswordEnvName)
 	dbUser := env.GetEnvOrDefault(
 		common.DBUserEnvName, common.DefaultMySQLUser)
 	dbHost := env.GetEnvOrDefault(
-		common.MySQLDBHostEnvName, common.DefaultMySQLHost)
+		common.DBHostEnvName, common.DefaultMySQLHost)
 	dbPort := env.GetEnvOrDefault(
-		common.MySQLDBPortEnvName, common.DefaultMySQLPort)
-	dbName := env.GetEnvOrDefault(common.MySQLDatabase,
+		common.DBPortEnvName, common.DefaultMySQLPort)
+	dbName := env.GetEnvOrDefault(common.DBNameEnvName,
 		common.DefaultMySQLDatabase)
+	dbExtraParamsStr := env.GetEnvOrDefault(common.DBExtraParamsEnvName,
+		common.DefaultMySQLExtraParams)
 
-	return fmt.Sprintf(dbNameTmpl, dbUser, dbPass, dbHost, dbPort, dbName)
+	dbExtraParams := make(map[string]string)
+	err := json.Unmarshal([]byte(dbExtraParamsStr), &dbExtraParams)
+	if err != nil {
+		klog.Errorf("Failed to get dbExtraParams. Error: %v", err)
+	}
+
+	if dbPass != "" {
+		mysqlConfig := CreateMySQLConfig(dbUser, dbPass, dbHost, dbPort, "", dbExtraParams)
+
+		ticker := time.NewTicker(connectInterval)
+		defer ticker.Stop()
+
+		timeoutC := time.After(connectTimeout)
+		for {
+			select {
+			case <-ticker.C:
+				if db, err := sql.Open(dbDriver, mysqlConfig.FormatDSN()); err == nil {
+					if _, err = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", dbName)); err == nil {
+						mysqlConfig.DBName = dbName
+						return mysqlConfig.FormatDSN(), nil
+					}
+					return "", fmt.Errorf("Creation of Katib db '%s' failed: %v", dbName, err)
+				} else {
+					klog.Errorf("Open sql connection failed: %v", err)
+				}
+			case <-timeoutC:
+				return "", fmt.Errorf("Timeout waiting for DB conn successfully opened")
+			}
+		}
+	} else {
+		mysqlConfig := CreateMySQLConfig(dbUser, dbPass, dbHost, dbPort, dbName, dbExtraParams)
+		return mysqlConfig.FormatDSN(), nil
+	}
 }
 
 func openSQLConn(driverName string, dataSourceName string, interval time.Duration,
@@ -84,7 +137,11 @@ func NewWithSQLConn(db *sql.DB) (common.KatibDBInterface, error) {
 }
 
 func NewDBInterface() (common.KatibDBInterface, error) {
-	db, err := openSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
+	dataSourceName, err := initDB()
+	if err != nil {
+		return nil, fmt.Errorf("DB init failed: %v", err)
+	}
+	db, err := openSQLConn(dbDriver, dataSourceName, connectInterval, connectTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("DB open failed: %v", err)
 	}

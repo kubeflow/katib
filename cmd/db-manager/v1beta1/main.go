@@ -73,12 +73,12 @@ func (s *server) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*
 func main() {
 	flag.Parse()
 	var err error
-	dbNameEnvName := common.DBNameEnvName
-	dbName := os.Getenv(dbNameEnvName)
-	if dbName == "" {
-		klog.Fatal("DB_NAME env is not set. Exiting")
+	dbPasswordEnvName := common.DBPasswordEnvName
+	dbPassword := os.Getenv(dbPasswordEnvName)
+	if dbPassword == "" {
+		klog.Fatal("DB_PASSWORD env is not set or empty. Exiting")
 	}
-	dbIf, err = db.NewKatibDBInterface(dbName)
+	dbIf, err = db.NewKatibDBInterface()
 	if err != nil {
 		klog.Fatalf("Failed to open db connection: %v", err)
 	}
