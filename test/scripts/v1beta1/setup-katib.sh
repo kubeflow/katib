@@ -37,7 +37,7 @@ kubectl version
 kubectl cluster-info
 
 # Update images with current pull base sha.
-echo "Updating Katib images with current PR SHA: ${VERSION}"
+echo "Updating Katib images with the current PR SHA: ${VERSION}"
 FILE_PATH="manifests/v1beta1/installs/katib-standalone/kustomization.yaml"
 
 # Change tag to all images in kustomization file.
@@ -46,20 +46,20 @@ sed -i -e "s@latest@${VERSION}@" ${FILE_PATH}
 # Change Katib controller image.
 sed -i -e "s@newName: docker.io/kubeflowkatib/katib-controller@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/katib-controller@" ${FILE_PATH}
 
-# Katib DB manager
+# Change Katib DB manager image.
 sed -i -e "s@newName: docker.io/kubeflowkatib/katib-db-manager@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/katib-db-manager@" ${FILE_PATH}
 
-# UI
+# Change Katib UI image.
 sed -i -e "s@newName: docker.io/kubeflowkatib/katib-ui@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/katib-ui@" ${FILE_PATH}
 
-# Cert generator
+# Change Katib cert generator image.
 sed -i -e "s@newName: docker.io/kubeflowkatib/cert-generator@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/cert-generator@" ${FILE_PATH}
 
-# Metrics collector
+# Change Katib metrics collector images.
 sed -i -e "s@docker.io/kubeflowkatib/file-metrics-collector@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/file-metrics-collector@" ${FILE_PATH}
 sed -i -e "s@docker.io/kubeflowkatib/tfevent-metrics-collector@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/tfevent-metrics-collector@" ${FILE_PATH}
 
-# Suggestion algorithms
+# Change Katib Suggestion images.
 sed -i -e "s@docker.io/kubeflowkatib/suggestion-hyperopt@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-hyperopt@" ${FILE_PATH}
 sed -i -e "s@docker.io/kubeflowkatib/suggestion-chocolate@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-chocolate@" ${FILE_PATH}
 sed -i -e "s@docker.io/kubeflowkatib/suggestion-hyperband@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-hyperband@" ${FILE_PATH}
@@ -68,9 +68,10 @@ sed -i -e "s@docker.io/kubeflowkatib/suggestion-goptuna@${ECR_REGISTRY}/${REPO_N
 sed -i -e "s@docker.io/kubeflowkatib/suggestion-enas@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-enas@" ${FILE_PATH}
 sed -i -e "s@docker.io/kubeflowkatib/suggestion-darts@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-darts@" ${FILE_PATH}
 
-# Early stopping
+# Change Katib Early Stopping images.
 sed -i -e "s@docker.io/kubeflowkatib/earlystopping-medianstop@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/earlystopping-medianstop@" ${FILE_PATH}
 
+echo "Katib images have been updated"
 cat ${FILE_PATH}
 
 # Update Trial template images in the examples.

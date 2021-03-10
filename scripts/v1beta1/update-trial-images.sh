@@ -74,4 +74,4 @@ else
   find ./ -regex ".*\.yaml" -exec sed -i -e "s@${BASE_IMAGE_PREFIX}${DARTS}:.*@${IMAGE_PREFIX}${DARTS}:${TAG}@" {} \;
 fi
 
-echo "Trial template images has been updated"
+echo "Trial template images have been updated"
