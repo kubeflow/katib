@@ -81,17 +81,19 @@ class HyperoptService(
         )
 ```
 
-### Make the algorithm a GRPC server
+### Make a GRPC server for the algorithm
 
 Create a package under [cmd/suggestion](../cmd/suggestion). Then create the main function and Dockerfile. The new GRPC server should serve in port 6789.
 
-Here is an example: [cmd/suggestion/hyperopt](../cmd/suggestion/hyperopt). Then build the Docker image.
+Here is an example: [cmd/suggestion/hyperopt](../cmd/suggestion/hyperopt).
+Then build the Docker image.
 
 ### Use the algorithm in Katib.
 
-Update the [katib-config](../manifests/v1beta1/katib-controller/katib-config.yaml), add a new object:
+Update the [Katib config](../manifests/v1beta1/katib-controller/katib-config.yaml)
+with the new algorithm entity:
 
-```json
+```diff
   suggestion: |-
     {
       "tpe": {
@@ -100,15 +102,19 @@ Update the [katib-config](../manifests/v1beta1/katib-controller/katib-config.yam
       "random": {
         "image": "docker.io/kubeflowkatib/suggestion-hyperopt"
       },
-      "<new-algorithm-name>": {
-        "image": "image built in the previous stage"
-      }
++     "<new-algorithm-name>": {
++       "image": "image built in the previous stage"
++     }
     }
 ```
 
+Learn more about Katib config in the
+[Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/katib-config/)
+
 ### Contribute the algorithm to Katib
 
-If you want to contribute the algorithm to Katib, you could add unit test or e2e test for it in CI and submit a PR.
+If you want to contribute the algorithm to Katib, you could add unit test and/or
+e2e test for it in the CI and submit a PR.
 
 #### Unit Test
 
@@ -138,27 +144,26 @@ if __name__ == '__main__':
     unittest.main()
 ```
 
-You can setup the GRPC server using `grpc_testing`, then define you own test cases.
+You can setup the GRPC server using `grpc_testing`, then define your own test cases.
 
 #### E2E Test (Optional)
 
 E2e tests help Katib verify that the algorithm works well.
-To add a e2e test for the new algorithm, in
-[test/scripts/v1beta1](../test/scripts/v1beta1) you need to
+Follow bellow steps to add your algorithm (Suggestion) to the Katib CI
 (replace `<name>` with your Suggestion name):
 
-1. Submit a PR to add new registry to the AWS
+1. Submit a PR to add a new registry to the AWS
    [ECR registry list](https://github.com/kubeflow/testing/blob/master/aws/IaC/CDK/test-infra/config/static_config/ECR_Resources.py#L18).
    Registry name should follow the pattern: `katib/v1beta1/suggestion-<name>`
 
-1. Create a new Experiment YAML file in the [examples/v1beta1](../examples/v1beta1)
+1. Create a new Experiment YAML in the [examples/v1beta1](../examples/v1beta1)
    with the new algorithm.
 
 1. Update [`setup-katib.sh`](../test/scripts/v1beta1/setup-katib.sh)
    script to modify `katib-config.yaml` with the new test Suggestion image name.
    For example:
 
-   ```
+   ```sh
    sed -i -e "s@docker.io/kubeflowkatib\/suggestion-<name>@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-<name>:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
    ```
 
