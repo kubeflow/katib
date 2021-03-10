@@ -152,8 +152,8 @@ E2e tests help Katib verify that the algorithm works well.
 Follow bellow steps to add your algorithm (Suggestion) to the Katib CI
 (replace `<name>` with your Suggestion name):
 
-1. Submit a PR to add a new registry to the AWS
-   [ECR registry list](https://github.com/kubeflow/testing/blob/master/aws/IaC/CDK/test-infra/config/static_config/ECR_Resources.py#L18).
+1. Submit a PR to add a new ECR private registry to the AWS
+   [`ECR_Private_Registry_List`](https://github.com/kubeflow/testing/blob/master/aws/IaC/CDK/test-infra/config/static_config/ECR_Resources.py#L18).
    Registry name should follow the pattern: `katib/v1beta1/suggestion-<name>`
 
 1. Create a new Experiment YAML in the [examples/v1beta1](../examples/v1beta1)
