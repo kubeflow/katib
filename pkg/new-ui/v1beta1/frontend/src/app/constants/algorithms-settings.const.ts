@@ -16,7 +16,7 @@ export const GridSettings: AlgorithmSetting[] = [];
 export const RandomSearchSettings: AlgorithmSetting[] = [
   {
     name: 'random_state',
-    value: 'None',
+    value: null,
     type: AlgorithmSettingType.STRING,
   },
 ];
@@ -47,7 +47,7 @@ export const BayesianOptimizationSettings: AlgorithmSetting[] = [
   },
   {
     name: 'random_state',
-    value: 'None',
+    value: null,
     type: AlgorithmSettingType.INTEGER,
   },
 ];
