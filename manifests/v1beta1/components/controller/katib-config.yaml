@@ -26,6 +26,9 @@ data:
       "random": {
         "image": "docker.io/kubeflowkatib/suggestion-hyperopt"
       },
+      "tpe": {
+        "image": "docker.io/kubeflowkatib/suggestion-hyperopt"
+      },
       "grid": {
         "image": "docker.io/kubeflowkatib/suggestion-chocolate"
       },
@@ -35,8 +38,8 @@ data:
       "bayesianoptimization": {
         "image": "docker.io/kubeflowkatib/suggestion-skopt"
       },
-      "tpe": {
-        "image": "docker.io/kubeflowkatib/suggestion-hyperopt"
+      "cmaes": {
+        "image": "docker.io/kubeflowkatib/suggestion-goptuna"
       },
       "enas": {
         "image": "docker.io/kubeflowkatib/suggestion-enas",
@@ -45,9 +48,6 @@ data:
             "memory": "200Mi"
           }
         }
-      },
-      "cmaes": {
-        "image": "docker.io/kubeflowkatib/suggestion-goptuna"
       },
       "darts": {
         "image": "docker.io/kubeflowkatib/suggestion-darts"
