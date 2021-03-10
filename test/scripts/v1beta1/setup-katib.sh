@@ -68,6 +68,9 @@ sed -i -e "s@docker.io/kubeflowkatib\/earlystopping-medianstop@${ECR_REGISTRY}\/
 
 cat manifests/v1beta1/katib-controller/katib-config.yaml
 
+# Update Trial template images in the examples.
+./scripts/v1beta1/update-trial-images.sh -p "${ECR_REGISTRY}/${REPO_NAME}/v1beta1/trial-" -t ${VERSION}
+
 echo "Creating Kubeflow namespace"
 kubectl create namespace kubeflow
 

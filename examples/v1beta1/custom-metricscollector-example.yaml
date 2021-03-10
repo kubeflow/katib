@@ -66,12 +66,14 @@ spec:
           spec:
             containers:
               - name: training-container
-                image: docker.io/kubeflowkatib/pytorch-mnist:v1beta1-e294a90
+                # TODO (andreyvelich): Add tag to the image.
+                image: docker.io/kubeflowkatib/pytorch-mnist:latest
                 imagePullPolicy: Always
                 command:
-                  - "python"
-                  - "/opt/mnist/src/mnist.py"
+                  - "python3"
+                  - "/opt/pytorch-mnist/mnist.py"
                   - "--epochs=1"
+                  - "--log-path=/katib/mnist.log"
                   - "--lr=${trialParameters.learningRate}"
                   - "--momentum=${trialParameters.momentum}"
             restartPolicy: Never

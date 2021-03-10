@@ -8,9 +8,9 @@ spec:
   maxTrialCount: 12
   maxFailedTrialCount: 3
   objective:
-    type: maximize
-    goal: 0.99
-    objectiveMetricName: accuracy
+    type: minimize
+    goal: 0.001
+    objectiveMetricName: loss
   algorithm:
     algorithmName: random
   parameters:
@@ -45,11 +45,13 @@ spec:
               spec:
                 containers:
                   - name: pytorch
-                    image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
+                    # TODO (andreyvelich): Add tag to the image.
+                    image: docker.io/kubeflowkatib/pytorch-mnist:latest
                     imagePullPolicy: Always
                     command:
-                      - "python"
-                      - "/var/mnist.py"
+                      - "python3"
+                      - "/opt/pytorch-mnist/mnist.py"
+                      - "--epochs=1"
                       - "--lr=${trialParameters.learningRate}"
                       - "--momentum=${trialParameters.momentum}"
           Worker:
@@ -59,10 +61,12 @@ spec:
               spec:
                 containers:
                   - name: pytorch
-                    image: gcr.io/kubeflow-ci/pytorch-dist-mnist-test:v1.0
+                    # TODO (andreyvelich): Add tag to the image.
+                    image: docker.io/kubeflowkatib/pytorch-mnist:latest
                     imagePullPolicy: Always
                     command:
-                      - "python"
-                      - "/var/mnist.py"
+                      - "python3"
+                      - "/opt/pytorch-mnist/mnist.py"
+                      - "--epochs=1"
                       - "--lr=${trialParameters.learningRate}"
                       - "--momentum=${trialParameters.momentum}"

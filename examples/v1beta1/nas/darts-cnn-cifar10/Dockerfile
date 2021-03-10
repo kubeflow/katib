@@ -4,8 +4,7 @@ FROM pytorch/pytorch:1.0-cuda${cuda_version}-cudnn${cudnn_version}-runtime
 
 ENV TARGET_DIR /opt/nas/darts-cnn-cifar10
 
-
-ADD . ${TARGET_DIR}
+ADD examples/v1beta1/nas/darts-cnn-cifar10 ${TARGET_DIR}
 WORKDIR  ${TARGET_DIR}
 
 RUN chgrp -R 0 ${TARGET_DIR} \
