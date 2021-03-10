@@ -60,7 +60,6 @@ spec:
             containers:
               - name: training-container
                 image: docker.io/kubeflowkatib/darts-cnn-cifar10:v1beta1-c6c9172
-                imagePullPolicy: Always
                 command:
                   - python3
                   - run_trial.py

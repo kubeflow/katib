@@ -54,7 +54,6 @@ spec:
             containers:
               - name: training-container
                 image: docker.io/kubeflowkatib/pytorch-mnist:v1beta1-c6c9172
-                imagePullPolicy: Always
                 command:
                   - "python3"
                   - "/opt/pytorch-mnist/mnist.py"
