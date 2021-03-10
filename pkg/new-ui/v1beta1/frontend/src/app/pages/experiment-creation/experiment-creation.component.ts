@@ -71,6 +71,7 @@ export class ExperimentCreationComponent implements OnInit {
     spec.maxTrialCount = thresholds.maxTrialCount;
     spec.parallelTrialCount = thresholds.parallelTrialCount;
     spec.maxFailedTrialCount = thresholds.maxFailedTrialCount;
+    spec.resumePolicy = thresholds.resumePolicy;
 
     spec.objective = this.formSvc.objectiveFromCtrl(this.objectiveForm);
     spec.algorithm = this.formSvc.algorithmFromCtrl(this.algorithmForm);
