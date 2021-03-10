@@ -120,11 +120,6 @@ kubectl -n kubeflow get svc
 echo "Katib pods"
 kubectl -n kubeflow get pod
 
-# TODO (andreyvelich): For testing.
-kubectl describe deploy katib-controller -n kubeflow
-kubectl describe cm katib-config -n kubeflow
-kubectl describe deploy katib-db-manager -n kubeflow
-
 # Check that Katib is working with 2 Experiments.
 kubectl apply -f test/e2e/v1beta1/valid-experiment.yaml
 kubectl delete -f test/e2e/v1beta1/valid-experiment.yaml
