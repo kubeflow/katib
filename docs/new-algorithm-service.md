@@ -91,6 +91,7 @@ Then build the Docker image.
 ### Use the algorithm in Katib.
 
 Update the [Katib config](../manifests/v1beta1/components/controller/katib-config.yaml)
+and [Katib config patch](../manifests/v1beta1/installs/katib-standalone/katib-config-patch.yaml)
 with the new algorithm entity:
 
 ```diff
