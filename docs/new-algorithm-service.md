@@ -90,7 +90,7 @@ Then build the Docker image.
 
 ### Use the algorithm in Katib.
 
-Update the [Katib config](../manifests/v1beta1/katib-controller/katib-config.yaml)
+Update the [Katib config](../manifests/v1beta1/components/controller/katib-config.yaml)
 with the new algorithm entity:
 
 ```diff
@@ -164,7 +164,7 @@ Follow bellow steps to add your algorithm (Suggestion) to the Katib CI
    For example:
 
    ```sh
-   sed -i -e "s@docker.io/kubeflowkatib\/suggestion-<name>@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-<name>:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
+   sed -i -e "s@docker.io/kubeflowkatib/suggestion-<name>@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-<name>@" ${FILE_PATH}
    ```
 
 1. Add a new two steps in the CI workflow
