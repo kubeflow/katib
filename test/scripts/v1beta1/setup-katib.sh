@@ -42,7 +42,7 @@ KUSTOMIZE_PATH="manifests/v1beta1/installs/katib-standalone/kustomization.yaml"
 CONFIG_PATCH="manifests/v1beta1/installs/katib-standalone/katib-config-patch.yaml"
 
 # Change tag to all images in kustomization file.
-sed -i -e "s@latest@${VERSION}@" ${FILE_PATH}
+sed -i -e "s@latest@${VERSION}@" ${KUSTOMIZE_PATH}
 
 # Change Katib controller image.
 sed -i -e "s@newName: docker.io/kubeflowkatib/katib-controller@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/katib-controller@" ${KUSTOMIZE_PATH}
@@ -73,7 +73,7 @@ sed -i -e "s@docker.io/kubeflowkatib/suggestion-darts@${ECR_REGISTRY}/${REPO_NAM
 sed -i -e "s@docker.io/kubeflowkatib/earlystopping-medianstop@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/earlystopping-medianstop@" ${CONFIG_PATCH}
 
 echo "Katib images have been updated"
-cat ${FILE_PATH}
+cat ${KUSTOMIZE_PATH}
 cat ${CONFIG_PATCH}
 
 # Update Trial template images in the examples.
