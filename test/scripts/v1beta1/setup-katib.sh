@@ -57,8 +57,8 @@ sed -i -e "s@newName: docker.io/kubeflowkatib/katib-ui@newName: ${ECR_REGISTRY}/
 sed -i -e "s@newName: docker.io/kubeflowkatib/cert-generator@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/cert-generator@" ${KUSTOMIZE_PATH}
 
 # Change Katib metrics collector images.
-sed -i -e "s@docker.io/kubeflowkatib/file-metrics-collector@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/file-metrics-collector@" ${KUSTOMIZE_PATH}
-sed -i -e "s@docker.io/kubeflowkatib/tfevent-metrics-collector@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/tfevent-metrics-collector@" ${KUSTOMIZE_PATH}
+sed -i -e "s@docker.io/kubeflowkatib/file-metrics-collector@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/file-metrics-collector@" ${CONFIG_PATCH}
+sed -i -e "s@docker.io/kubeflowkatib/tfevent-metrics-collector@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/tfevent-metrics-collector@" ${CONFIG_PATCH}
 
 # Change Katib Suggestion images.
 sed -i -e "s@docker.io/kubeflowkatib/suggestion-hyperopt@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-hyperopt@" ${CONFIG_PATCH}
