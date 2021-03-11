@@ -25,7 +25,82 @@ resources:
   - ../../components/webhook/cert-generator.yaml
   - ../../components/webhook/rbac.yaml
   - ../../components/webhook/webhooks.yaml
+images:
+  - name: docker.io/kubeflowkatib/katib-controller
+    newTag: latest
+    newName: docker.io/kubeflowkatib/katib-controller
+  - name: docker.io/kubeflowkatib/katib-db-manager
+    newTag: latest
+    newName: docker.io/kubeflowkatib/katib-db-manager
+  - name: docker.io/kubeflowkatib/katib-ui
+    newTag: latest
+    newName: docker.io/kubeflowkatib/katib-ui
+  - name: docker.io/kubeflowkatib/cert-generator
+    newTag: latest
+    newName: docker.io/kubeflowkatib/cert-generator
 patchesStrategicMerge:
+  - |-
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: katib-config
+      namespace: kubeflow
+    data:
+      metrics-collector-sidecar: |-
+        {
+          "StdOut": {
+            "image": "docker.io/kubeflowkatib/file-metrics-collector:latest"
+          },
+          "File": {
+            "image": "docker.io/kubeflowkatib/file-metrics-collector:latest"
+          },
+          "TensorFlowEvent": {
+            "image": "docker.io/kubeflowkatib/tfevent-metrics-collector:latest",
+            "resources": {
+              "limits": {
+                "memory": "1Gi"
+              }
+            }
+          }
+        }
+      suggestion: |-
+        {
+          "random": {
+            "image": "docker.io/kubeflowkatib/suggestion-hyperopt:latest"
+          },
+          "tpe": {
+            "image": "docker.io/kubeflowkatib/suggestion-hyperopt:latest"
+          },
+          "grid": {
+            "image": "docker.io/kubeflowkatib/suggestion-chocolate:latest"
+          },
+          "hyperband": {
+            "image": "docker.io/kubeflowkatib/suggestion-hyperband:latest"
+          },
+          "bayesianoptimization": {
+            "image": "docker.io/kubeflowkatib/suggestion-skopt:latest"
+          },
+          "cmaes": {
+            "image": "docker.io/kubeflowkatib/suggestion-goptuna:latest"
+          },
+          "enas": {
+            "image": "docker.io/kubeflowkatib/suggestion-enas:latest",
+            "resources": {
+              "limits": {
+                "memory": "200Mi"
+              }
+            }
+          },
+          "darts": {
+            "image": "docker.io/kubeflowkatib/suggestion-darts:latest"
+          }
+        }
+      early-stopping: |-
+        {
+          "medianstop": {
+            "image": "docker.io/kubeflowkatib/earlystopping-medianstop:latest"
+          }
+        }
   - db-manager-patch.yaml
 # Modify katib-mysql-secrets with parameters for the DB.
 secretGenerator:

@@ -18,7 +18,6 @@ resources:
   # Katib DB mysql.
   - ../../components/mysql/mysql.yaml
   - ../../components/mysql/service.yaml
-  - ../../components/mysql/pv.yaml
   - ../../components/mysql/pvc.yaml
   - ../../components/mysql/secret.yaml
   # Katib UI.
