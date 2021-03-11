@@ -41,8 +41,9 @@ echo "Updating Katib images with the current PR SHA: ${VERSION}"
 KUSTOMIZE_PATH="manifests/v1beta1/installs/katib-standalone/kustomization.yaml"
 CONFIG_PATCH="manifests/v1beta1/installs/katib-standalone/katib-config-patch.yaml"
 
-# Change tag to all images in kustomization file.
+# Change tag to all images in kustomization and katib-config patch files.
 sed -i -e "s@latest@${VERSION}@" ${KUSTOMIZE_PATH}
+sed -i -e "s@latest@${VERSION}@" ${CONFIG_PATCH}
 
 # Change Katib controller image.
 sed -i -e "s@newName: docker.io/kubeflowkatib/katib-controller@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/katib-controller@" ${KUSTOMIZE_PATH}
