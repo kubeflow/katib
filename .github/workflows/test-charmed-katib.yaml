@@ -5,6 +5,25 @@ on:
   - pull_request
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get install python3-setuptools
+        sudo pip3 install black flake8
+
+    - name: Check black
+      run: black --check operators
+
+    - name: Check flake8
+      run: cd operators && flake8
+
   build:
     name: Test
     runs-on: ubuntu-latest
@@ -25,7 +44,7 @@ jobs:
           sudo snap install juju --classic
           sudo snap install juju-helpers --classic
           sudo snap install juju-wait --classic
-          sudo apt update
+          sudo pip3 install charmcraft
 
       - name: Build Docker images
         run: |
@@ -47,21 +66,14 @@ jobs:
           git clone git://git.launchpad.net/canonical-osm
           cp -r canonical-osm/charms/interfaces/juju-relation-mysql mysql
           sg microk8s -c 'juju bootstrap microk8s uk8s'
-          juju add-model katib
+          juju add-model kubeflow
           juju bundle deploy -b bundle-edge.yaml --build
           juju wait -wvt 300
 
       - name: Test Katib
         run: |
           set -eux
-          kubectl run \
-              --rm \
-              -i \
-              --restart=Never \
-              --image=ubuntu \
-              katib-check \
-              -- \
-              bash -c "apt update && apt install -y curl && curl -f http://katib-ui.katib.svc.cluster.local:8080/katib/"
+          kubectl apply -f examples/v1beta1/random-example.yaml
 
       - name: Get pod statuses
         run: kubectl get all -A
@@ -71,14 +83,26 @@ jobs:
         run: juju status
         if: failure()
 
-      - name: Get katib-controller logs
-        run: kubectl logs --tail 100 -nkatib -ljuju-app=katib-controller
+      - name: Get katib-controller workload logs
+        run: kubectl logs --tail 100 -nkubeflow -ljuju-app=katib-controller
         if: failure()
 
-      - name: Get katib-ui logs
-        run: kubectl logs --tail 100 -nkatib -ljuju-app=katib-ui
+      - name: Get katib-controller operator logs
+        run: kubectl logs --tail 100 -nkubeflow -ljuju-operator=katib-controller
         if: failure()
 
-      - name: Get katib-manager logs
-        run: kubectl logs --tail 100 -nkatib -ljuju-app=katib-manager
+      - name: Get katib-ui workload logs
+        run: kubectl logs --tail 100 -nkubeflow -ljuju-app=katib-ui
+        if: failure()
+
+      - name: Get katib-ui operator logs
+        run: kubectl logs --tail 100 -nkubeflow -ljuju-operator=katib-ui
+        if: failure()
+
+      - name: Get katib-db-manager workload logs
+        run: kubectl logs --tail 100 -nkubeflow -ljuju-app=katib-db-manager
+        if: failure()
+
+      - name: Get katib-db-manager operator logs
+        run: kubectl logs --tail 100 -nkubeflow -ljuju-operator=katib-db-manager
         if: failure()

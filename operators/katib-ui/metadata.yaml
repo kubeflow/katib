@@ -8,7 +8,9 @@ description: |
   hyperparameters of applications written in any language of the users’ choice and natively
   supports many ML frameworks, such as TensorFlow, MXNet, PyTorch, XGBoost, and others.
 tags: [ai, bigdata, katib, kubeflow, machine-learning, hyperparameter]
-maintainers: [Kenneth Koski <kenneth.koski@canonical.com>]
+maintainers:
+  - Dominik Fleischmann <dominik.fleischmann@canonical.com>
+  - Kenneth Koski <kenneth.koski@canonical.com>
 series: [kubernetes]
 resources:
   oci-image:
