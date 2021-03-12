@@ -30,6 +30,7 @@ see the following user guides:
 
 - [Go](https://golang.org/) (1.13 or later)
 - [Docker](https://docs.docker.com/) (17.05 or later.)
+- [kustomize](https://kustomize.io/) (3.2 or later)
 
 ## Build from source code
 
@@ -65,16 +66,16 @@ make generate
 
 Below is a list of command-line flags accepted by Katib controller:
 
-| Name                            | Type                        | Default             | Description                                                                                                             |
-| ------------------------------- | --------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| cert-localfs                    | bool                        | false               | Store the webhook cert in local file system                                                                             |
-| enable-grpc-probe-in-suggestion | bool                        | true                | Enable grpc probe in suggestions                                                                                        |
-| experiment-suggestion-name      | string                      | "default"           | The implementation of suggestion interface in experiment controller                                                     |
-| metrics-addr                    | string                      | ":8080"             | The address the metric endpoint binds to                                                                                |
-| trial-resources                 | []schema.GroupVersionKind   | null                | The list of resources that can be used as trial template, in the form: Kind.version.group (e.g. TFJob.v1.kubeflow.org)  |
-| webhook-inject-securitycontext  | bool                        | false               | Inject the securityContext of container[0] in the sidecar                                                               |
-| webhook-port                    | int                         | 8443                | The port number to be used for admission webhook server                                                                 |
-| webhook-service-name            | string                      | "katib-controller"  | The service name which will be used in webhook                                                                          |
+| Name                            | Type                      | Default            | Description                                                                                                            |
+| ------------------------------- | ------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| cert-localfs                    | bool                      | false              | Store the webhook cert in local file system                                                                            |
+| enable-grpc-probe-in-suggestion | bool                      | true               | Enable grpc probe in suggestions                                                                                       |
+| experiment-suggestion-name      | string                    | "default"          | The implementation of suggestion interface in experiment controller                                                    |
+| metrics-addr                    | string                    | ":8080"            | The address the metric endpoint binds to                                                                               |
+| trial-resources                 | []schema.GroupVersionKind | null               | The list of resources that can be used as trial template, in the form: Kind.version.group (e.g. TFJob.v1.kubeflow.org) |
+| webhook-inject-securitycontext  | bool                      | false              | Inject the securityContext of container[0] in the sidecar                                                              |
+| webhook-port                    | int                       | 8443               | The port number to be used for admission webhook server                                                                |
+| webhook-service-name            | string                    | "katib-controller" | The service name which will be used in webhook                                                                         |
 
 ## Workflow design
 

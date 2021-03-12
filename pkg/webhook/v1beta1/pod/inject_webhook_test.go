@@ -222,7 +222,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 	// Start test k8s server
 	envTest := &envtest.Environment{
 		CRDDirectoryPaths: []string{
-			filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "katib-controller"),
+			filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "components", "crd"),
 			filepath.Join("..", "..", "..", "..", "test", "unit", "v1beta1", "crds"),
 		},
 	}
@@ -639,7 +639,7 @@ func TestGetKatibJob(t *testing.T) {
 	// Start test k8s server
 	envTest := &envtest.Environment{
 		CRDDirectoryPaths: []string{
-			filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "katib-controller"),
+			filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "components", "crd"),
 			filepath.Join("..", "..", "..", "..", "test", "unit", "v1beta1", "crds"),
 		},
 	}

@@ -202,7 +202,7 @@ kubectl create namespace kubeflow
 Clone Kubeflow manifest repository:
 
 ```
-git clone git@github.com:kubeflow/manifests.git
+git clone -b v1.2-branch git@github.com:kubeflow/manifests.git
 Set `MANIFESTS_DIR` to the cloned folder.
 export MANIFESTS_DIR=<cloned-folder>
 ```
@@ -231,7 +231,8 @@ kustomize build . | kubectl apply -f -
 
 ### Katib
 
-Finally, you can install Katib:
+Note that your [kustomize](https://kustomize.io/) version should be >= 3.2.
+To install Katib run:
 
 ```
 git clone git@github.com:kubeflow/katib.git

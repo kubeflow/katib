@@ -24,6 +24,7 @@ To make changes to the UI you need to install:
 ## Development
 
 While development you have different ways to run Katib UI.
+
 1. Build and serve only the frontend. The dev server will also be proxying requests to the backend
 2. Build the frontend and serve it via the backend locally
 
@@ -32,12 +33,12 @@ While development you have different ways to run Katib UI.
 You can run a webpack dev server that only exposes the frontend files, which can be useful for testing only the UI of the app. There's also a `proxy.conf.json` file which configures the dev server to send the backend requests to port `8000`.
 
 In order to build the UI locally, and expose it with a webpack dev server you will need to:
+
 1. Create a module from the [common library](https://github.com/kubeflow/kubeflow/tree/master/components/crud-web-apps/common/frontend/kubeflow-common-lib)
 2. Install the node modules of the app and also link the common-library module
 
-
-
 You can build the common library with:
+
 ```bash
 cd /tmp && git clone https://github.com/kubeflow/kubeflow.git \
   && cd kubeflow \
@@ -55,6 +56,7 @@ npm link dist/kubeflow
 ```
 
 And then build and run the UI locally, on `localhost:4200`, with:
+
 ```bash
 # If you've already cloned the repo then skip this step and just
 # navigate to the pkg/new-ui/v1beta1/frontend dir
@@ -66,15 +68,16 @@ npm link kubeflow
 npm run start
 ```
 
-### Serve the UI  from the backend
+### Serve the UI from the backend
 
 This is the recommended way to test the web app e2e. In order to build the UI and serve it via the backend, locally, you will need to:
 
 1. Build the UI locally. You have to follow the steps from the previous section, but instead of running `npm run start` you need to run `npm run build:prod`. It builds the frontend artifacts under `frontend/dist/static` folder.
-    
-    Moreover, you are able to run `npm run build:watch` instead of `npm run build:prod`. In that case, it starts a process which is watching the source code changes and building the frontend artifacts under `frontend/dist/static` folder.
 
-    Learn more about Angular scripts in the [official guide](https://angular.io/cli/build).
+   Moreover, you are able to run `npm run build:watch` instead of `npm run build:prod`. In that case, it starts a process which is watching the source code changes and building the frontend artifacts under `frontend/dist/static` folder.
+
+   Learn more about Angular scripts in the [official guide](https://angular.io/cli/build).
+
 1. Run `kubectl port-forward svc/katib-db-manager 6789 -n kubeflow` to expose `katib-db-manager` service for external access. You can use [different ways](https://kubernetes.io/docs/tasks/access-application-cluster/) to get external address for Kubernetes service. After exposing service, you should be able to receive information by running `wget <external-ip>:<service-port>`. In case of port-forwarding above, you have to run `wget localhost:6789`.
 
 1. Go to `cmd/new-ui/v1beta1`.
@@ -97,7 +100,7 @@ After that, you can access the UI using this URL: `http://localhost:8080/katib/`
 
 To run Katib UI in Production, after all changes in frontend and backend, you need to create an image for the UI. Under `/katib` directory run this: `docker build . -f cmd/new-ui/v1beta1/Dockerfile -t <name of your image>` to build the image.
 
-After that, you can modify UI [deployment](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/ui/deployment.yaml#L24) with your new image. Then, follow [these steps](https://www.kubeflow.org/docs/components/katib/hyperparameter/#accessing-the-katib-ui) to access Katib UI.
+After that, you can modify UI [deployment](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/components/ui/ui.yaml#L21) with your new image. Then, follow [these steps](https://www.kubeflow.org/docs/components/katib/hyperparameter/#accessing-the-katib-ui) to access Katib UI.
 
 ## Code style
 

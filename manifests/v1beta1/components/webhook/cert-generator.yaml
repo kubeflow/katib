@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: katib-cert-generator
+  namespace: kubeflow
+spec:
+  template:
+    spec:
+      serviceAccountName: katib-cert-generator
+      containers:
+        - name: cert-generator
+          image: docker.io/kubeflowkatib/cert-generator
+          imagePullPolicy: Always
+          env:
+            - name: KATIB_CORE_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+      restartPolicy: Never
+  backoffLimit: 4

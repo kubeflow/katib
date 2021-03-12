@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2019 The Kubeflow Authors.
+# Copyright 2021 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,26 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -o nounset
-set -o pipefail
 set -o xtrace
 
-# Delete CR first
-experiments=$(kubectl get experiments --all-namespaces | awk '{if (NR>1) {print $1"/"$2}}')
-for s in $experiments; do
-  ns=$(echo $s | cut -d "/" -f 1)
-  exp=$(echo $s | cut -d "/" -f 2)
-  kubectl delete experiments $exp -n $ns
-done
+# Delete all Katib Experiment in all namespaces.
+kubectl delete experiment --all --all-namespaces
+sleep 10
 
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
 cd ${SCRIPT_ROOT}
-kubectl delete -f manifests/v1beta1/katib-controller
-kubectl delete -f manifests/v1beta1/db-manager
-kubectl delete -f manifests/v1beta1/mysql-db
-kubectl delete -f manifests/v1beta1/ui
-kubectl delete -f manifests/v1beta1/pv
-kubectl delete -f manifests/v1beta1/webhooks
-kubectl delete -f manifests/v1beta1
-cd - >/dev/null
+kustomize build manifests/v1beta1/installs/katib-standalone --load_restrictor none | kubectl delete -f -

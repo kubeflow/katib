@@ -37,36 +37,45 @@ kubectl version
 kubectl cluster-info
 
 # Update images with current pull base sha.
-echo "Updating Katib images with current PR SHA: ${VERSION}"
-# Katib controller
-sed -i -e "s@image: docker.io/kubeflowkatib\/katib-controller@image: ${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/katib-controller:${VERSION}@" manifests/v1beta1/katib-controller/katib-controller.yaml
+echo "Updating Katib images with the current PR SHA: ${VERSION}"
+KUSTOMIZE_PATH="manifests/v1beta1/installs/katib-standalone/kustomization.yaml"
+CONFIG_PATCH="manifests/v1beta1/installs/katib-standalone/katib-config-patch.yaml"
 
-# Metrics collector
-sed -i -e "s@docker.io/kubeflowkatib\/file-metrics-collector@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/file-metrics-collector:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@docker.io/kubeflowkatib\/tfevent-metrics-collector@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/tfevent-metrics-collector:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
+# Change tag to all images in kustomization and katib-config patch files.
+sed -i -e "s@latest@${VERSION}@" ${KUSTOMIZE_PATH}
+sed -i -e "s@latest@${VERSION}@" ${CONFIG_PATCH}
 
-# Katib DB manager
-sed -i -e "s@image: docker.io/kubeflowkatib\/katib-db-manager@image: ${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/katib-db-manager:${VERSION}@" manifests/v1beta1/db-manager/deployment.yaml
+# Change Katib controller image.
+sed -i -e "s@newName: docker.io/kubeflowkatib/katib-controller@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/katib-controller@" ${KUSTOMIZE_PATH}
 
-# UI
-sed -i -e "s@image: docker.io/kubeflowkatib\/katib-ui@image: ${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/katib-ui:${VERSION}@" manifests/v1beta1/ui/deployment.yaml
+# Change Katib DB manager image.
+sed -i -e "s@newName: docker.io/kubeflowkatib/katib-db-manager@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/katib-db-manager@" ${KUSTOMIZE_PATH}
 
-# Cert generator
-sed -i -e "s@image: docker.io/kubeflowkatib\/cert-generator@image: ${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/cert-generator:${VERSION}@" manifests/v1beta1/webhooks/cert-generator-job.yaml
+# Change Katib UI image.
+sed -i -e "s@newName: docker.io/kubeflowkatib/katib-ui@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/katib-ui@" ${KUSTOMIZE_PATH}
 
-# Suggestion algorithms
-sed -i -e "s@docker.io/kubeflowkatib\/suggestion-enas@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-enas:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@docker.io/kubeflowkatib\/suggestion-hyperband@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-hyperband:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@docker.io/kubeflowkatib\/suggestion-chocolate@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-chocolate:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@docker.io/kubeflowkatib\/suggestion-hyperopt@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-hyperopt:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@docker.io/kubeflowkatib\/suggestion-skopt@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-skopt:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@docker.io/kubeflowkatib\/suggestion-goptuna@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-goptuna:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
-sed -i -e "s@docker.io/kubeflowkatib\/suggestion-darts@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/suggestion-darts:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
+# Change Katib cert generator image.
+sed -i -e "s@newName: docker.io/kubeflowkatib/cert-generator@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/cert-generator@" ${KUSTOMIZE_PATH}
 
-# Early stopping
-sed -i -e "s@docker.io/kubeflowkatib\/earlystopping-medianstop@${ECR_REGISTRY}\/${REPO_NAME}\/v1beta1\/earlystopping-medianstop:${VERSION}@" manifests/v1beta1/katib-controller/katib-config.yaml
+# Change Katib metrics collector images.
+sed -i -e "s@docker.io/kubeflowkatib/file-metrics-collector@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/file-metrics-collector@" ${CONFIG_PATCH}
+sed -i -e "s@docker.io/kubeflowkatib/tfevent-metrics-collector@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/tfevent-metrics-collector@" ${CONFIG_PATCH}
 
-cat manifests/v1beta1/katib-controller/katib-config.yaml
+# Change Katib Suggestion images.
+sed -i -e "s@docker.io/kubeflowkatib/suggestion-hyperopt@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-hyperopt@" ${CONFIG_PATCH}
+sed -i -e "s@docker.io/kubeflowkatib/suggestion-chocolate@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-chocolate@" ${CONFIG_PATCH}
+sed -i -e "s@docker.io/kubeflowkatib/suggestion-hyperband@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-hyperband@" ${CONFIG_PATCH}
+sed -i -e "s@docker.io/kubeflowkatib/suggestion-skopt@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-skopt@" ${CONFIG_PATCH}
+sed -i -e "s@docker.io/kubeflowkatib/suggestion-goptuna@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-goptuna@" ${CONFIG_PATCH}
+sed -i -e "s@docker.io/kubeflowkatib/suggestion-enas@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-enas@" ${CONFIG_PATCH}
+sed -i -e "s@docker.io/kubeflowkatib/suggestion-darts@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-darts@" ${CONFIG_PATCH}
+
+# Change Katib Early Stopping images.
+sed -i -e "s@docker.io/kubeflowkatib/earlystopping-medianstop@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/earlystopping-medianstop@" ${CONFIG_PATCH}
+
+echo "Katib images have been updated"
+cat ${KUSTOMIZE_PATH}
+cat ${CONFIG_PATCH}
 
 # Update Trial template images in the examples.
 ./scripts/v1beta1/update-trial-images.sh -p "${ECR_REGISTRY}/${REPO_NAME}/v1beta1/trial-" -t ${VERSION}

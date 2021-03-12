@@ -23,11 +23,11 @@ vet:
 update:
 	hack/update-gofmt.sh
 
-# Deploy Katib v1beta1 manifests into a k8s cluster
+# Deploy Katib v1beta1 manifests using Kustomize into a k8s cluster.
 deploy:
 	bash scripts/v1beta1/deploy.sh
 
-# Undeploy Katib v1beta1 manifests from a k8s cluster
+# Undeploy Katib v1beta1 manifests using Kustomize from a k8s cluster
 undeploy:
 	bash scripts/v1beta1/undeploy.sh
 

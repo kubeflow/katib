@@ -43,7 +43,7 @@ func TestMain(m *testing.M) {
 		ControlPlaneStartTimeout: controlPlaneStartTimeout,
 		ControlPlaneStopTimeout:  controlPlaneStopTimeout,
 		CRDDirectoryPaths: []string{
-			filepath.Join("..", "..", "..", "manifests", "v1beta1", "katib-controller"),
+			filepath.Join("..", "..", "..", "manifests", "v1beta1", "components", "crd"),
 			filepath.Join("..", "..", "..", "test", "unit", "v1beta1", "crds"),
 		},
 	}

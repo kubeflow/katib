@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2020 The Kubeflow Authors.
+# Copyright 2021 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,19 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -o errexit
-set -o nounset
-set -o pipefail
 set -o xtrace
 
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
 cd ${SCRIPT_ROOT}
-kubectl apply -f manifests/v1beta1
-kubectl apply -f manifests/v1beta1/katib-controller
-kubectl apply -f manifests/v1beta1/db-manager
-kubectl apply -f manifests/v1beta1/pv
-kubectl apply -f manifests/v1beta1/mysql-db
-kubectl apply -f manifests/v1beta1/ui
-kubectl apply -f manifests/v1beta1/webhooks
-cd - >/dev/null
+kustomize build manifests/v1beta1/installs/katib-standalone --load_restrictor none | kubectl apply -f -

@@ -83,7 +83,7 @@ func TestMain(m *testing.M) {
 	// Start test k8s server
 	t := &envtest.Environment{
 		CRDDirectoryPaths: []string{
-			filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "katib-controller"),
+			filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "components", "crd"),
 		},
 	}
 	apis.AddToScheme(scheme.Scheme)

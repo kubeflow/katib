@@ -9,8 +9,7 @@ spec:
         spec:
           containers:
             - name: pytorch
-              # TODO (andreyvelich): Add tag to the image.
-              image: docker.io/kubeflowkatib/pytorch-mnist:latest
+              image: docker.io/kubeflowkatib/pytorch-mnist:v1beta1-c6c9172
               imagePullPolicy: Always
               command:
                 - "python3"
@@ -25,8 +24,7 @@ spec:
         spec:
           containers:
             - name: pytorch
-              # TODO (andreyvelich): Add tag to the image.
-              image: docker.io/kubeflowkatib/pytorch-mnist:latest
+              image: docker.io/kubeflowkatib/pytorch-mnist:v1beta1-c6c9172
               imagePullPolicy: Always
               command:
                 - "python3"
