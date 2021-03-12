@@ -90,7 +90,7 @@
     <mat-divider class="margin-bottom margin-top"></mat-divider>
 
     <app-trial-parameter
-      *ngFor="let ctrl of formGroup.get('trialParameters').controls"
+      *ngFor="let ctrl of trialParameters.controls"
       [formGroup]="ctrl"
     ></app-trial-parameter>
   </div>

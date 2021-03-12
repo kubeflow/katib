@@ -18,6 +18,7 @@ export class FormTrialTemplateComponent implements OnInit, OnDestroy {
   public templates: ConfigMapResponse[] = [];
   public configmaps: ConfigMapBody[] = [];
   public paths: string[] = [];
+  public trialParameters: FormArray;
   private selectedConfigMap: ConfigMapBody;
   private subs = new Subscription();
   private yamlPrv = '';
@@ -123,6 +124,8 @@ export class FormTrialTemplateComponent implements OnInit, OnDestroy {
         }),
       );
     }
+
+    this.trialParameters = arrayCtrl;
   }
 
   ngOnDestroy() {
