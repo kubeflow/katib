@@ -2,7 +2,7 @@ name: Charmed Katib
 
 on:
   - push
-  # - pull_request TODO (andreyvelich): Disabled until fix this: https://github.com/kubeflow/katib/issues/1453
+  - pull_request
 
 jobs:
   lint:
