@@ -165,7 +165,7 @@ Follow bellow steps to add your algorithm (Suggestion) to the Katib CI
    For example:
 
    ```sh
-   sed -i -e "s@docker.io/kubeflowkatib/suggestion-<name>@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-<name>@" ${FILE_PATH}
+   sed -i -e "s@docker.io/kubeflowkatib/suggestion-<name>@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-<name>@" ${CONFIG_PATCH}
    ```
 
 1. Add a new two steps in the CI workflow
