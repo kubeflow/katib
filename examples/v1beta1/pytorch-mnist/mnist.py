@@ -11,12 +11,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-# To fix this issue: https://github.com/pytorch/vision/issues/1938.
-from six.moves import urllib
-opener = urllib.request.build_opener()
-opener.addheaders = [("User-agent", "Mozilla/5.0")]
-urllib.request.install_opener(opener)
-
 WORLD_SIZE = int(os.environ.get("WORLD_SIZE", 1))
 
 
@@ -138,18 +132,22 @@ def main():
         dist.init_process_group(backend=args.backend)
 
     kwargs = {"num_workers": 1, "pin_memory": True} if use_cuda else {}
+
     train_loader = torch.utils.data.DataLoader(
-        datasets.MNIST("../data", train=True, download=True,
-                       transform=transforms.Compose([
-                           transforms.ToTensor(),
-                           transforms.Normalize((0.1307,), (0.3081,))
-                       ])),
+        datasets.FashionMNIST("./data",
+                              train=True,
+                              download=True,
+                              transform=transforms.Compose([
+                                  transforms.ToTensor()
+                              ])),
         batch_size=args.batch_size, shuffle=True, **kwargs)
+
     test_loader = torch.utils.data.DataLoader(
-        datasets.MNIST("../data", train=False, transform=transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
-        ])),
+        datasets.FashionMNIST("./data",
+                              train=False,
+                              transform=transforms.Compose([
+                                  transforms.ToTensor()
+                              ])),
         batch_size=args.test_batch_size, shuffle=False, **kwargs)
 
     model = Net().to(device)
