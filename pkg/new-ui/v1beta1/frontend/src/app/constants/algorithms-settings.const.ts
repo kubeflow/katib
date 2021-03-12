@@ -1,6 +1,7 @@
 import {
   AlgorithmsEnum,
   AlgorithmSettingType,
+  EarlyStoppingAlgorithmsEnum,
 } from '../enumerations/algorithms.enum';
 
 export interface AlgorithmSetting {
@@ -15,7 +16,7 @@ export const GridSettings: AlgorithmSetting[] = [];
 export const RandomSearchSettings: AlgorithmSetting[] = [
   {
     name: 'random_state',
-    value: 'None',
+    value: null,
     type: AlgorithmSettingType.STRING,
   },
 ];
@@ -46,7 +47,7 @@ export const BayesianOptimizationSettings: AlgorithmSetting[] = [
   },
   {
     name: 'random_state',
-    value: 'None',
+    value: null,
     type: AlgorithmSettingType.INTEGER,
   },
 ];
@@ -215,6 +216,24 @@ export const DartsSettings: AlgorithmSetting[] = [
     type: AlgorithmSettingType.INTEGER,
   },
 ];
+
+export const EarlyStoppingSettings: AlgorithmSetting[] = [
+  {
+    name: 'min_trials_required',
+    value: 3,
+    type: AlgorithmSettingType.INTEGER,
+  },
+  {
+    name: 'start_step',
+    value: 4,
+    type: AlgorithmSettingType.INTEGER,
+  },
+];
+
+export const EarlyStoppingSettingsMap: { [key: string]: AlgorithmSetting[] } = {
+  [EarlyStoppingAlgorithmsEnum.NONE]: [],
+  [EarlyStoppingAlgorithmsEnum.MEDIAN]: EarlyStoppingSettings,
+};
 
 export const AlgorithmSettingsMap: { [key: string]: AlgorithmSetting[] } = {
   [AlgorithmsEnum.GRID]: GridSettings,

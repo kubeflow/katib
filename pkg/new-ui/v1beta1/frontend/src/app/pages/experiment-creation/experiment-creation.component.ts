@@ -17,6 +17,7 @@ import { KWABackendService } from 'src/app/services/backend.service';
 import { NamespaceService, SnackType, SnackBarService } from 'kubeflow';
 import { pipe } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { EarlyStoppingAlgorithmsEnum } from 'src/app/enumerations/algorithms.enum';
 
 @Component({
   selector: 'app-experiment-creation',
@@ -28,6 +29,7 @@ export class ExperimentCreationComponent implements OnInit {
   trialThresholdsForm: FormGroup;
   objectiveForm: FormGroup;
   algorithmForm: FormGroup;
+  earlyStoppingForm: FormGroup;
   hyperParamsArray: FormArray;
   nasGraphForm: FormGroup;
   nasOperationsForm: FormArray;
@@ -48,6 +50,7 @@ export class ExperimentCreationComponent implements OnInit {
     this.trialThresholdsForm = this.formSvc.createTrialThresholdForm();
     this.objectiveForm = this.formSvc.createObjectiveForm();
     this.algorithmForm = this.formSvc.createAlgorithmObjectiveForm();
+    this.earlyStoppingForm = this.formSvc.createEarlyStoppingForm();
     this.hyperParamsArray = this.formSvc.createHyperParametersForm();
     this.nasGraphForm = this.formSvc.createNasGraphForm();
     this.nasOperationsForm = this.formSvc.createNasOperationsForm();
@@ -68,6 +71,7 @@ export class ExperimentCreationComponent implements OnInit {
     spec.maxTrialCount = thresholds.maxTrialCount;
     spec.parallelTrialCount = thresholds.parallelTrialCount;
     spec.maxFailedTrialCount = thresholds.maxFailedTrialCount;
+    spec.resumePolicy = thresholds.resumePolicy;
 
     spec.objective = this.formSvc.objectiveFromCtrl(this.objectiveForm);
     spec.algorithm = this.formSvc.algorithmFromCtrl(this.algorithmForm);
@@ -80,6 +84,13 @@ export class ExperimentCreationComponent implements OnInit {
         graphConfig: this.nasGraphForm.value,
         operations: this.formSvc.nasOpsFromCtrl(this.nasOperationsForm),
       };
+    }
+
+    const earlyStoppingAlgo = this.earlyStoppingForm.value.algorithmName;
+    if (earlyStoppingAlgo !== EarlyStoppingAlgorithmsEnum.NONE) {
+      spec.earlyStopping = this.formSvc.earlyStoppingFromCtrl(
+        this.earlyStoppingForm,
+      );
     }
 
     spec.metricsCollectorSpec = this.formSvc.metricsCollectorFromCtrl(

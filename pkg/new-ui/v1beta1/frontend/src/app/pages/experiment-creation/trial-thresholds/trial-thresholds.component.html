@@ -25,6 +25,15 @@
           min="1"
         />
       </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Resume Policy</mat-label>
+        <mat-select formControlName="resumePolicy">
+          <mat-option value="Never">Never</mat-option>
+          <mat-option value="LongRunning">Long Running</mat-option>
+          <mat-option value="FromVolume">From Volume</mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
 
     <div class="lib-step-info-wrapper">

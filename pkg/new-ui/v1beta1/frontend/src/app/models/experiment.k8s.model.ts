@@ -16,13 +16,17 @@ export interface ExperimentSpec {
   parallelTrialCount?: number;
   maxTrialCount?: number;
   maxFailedTrialCount?: number;
+  resumePolicy?: ResumePolicyType;
   objective?: ObjectiveSpec;
   algorithm?: AlgorithmSpec;
+  earlyStopping?: AlgorithmSpec;
   parameters?: ParameterSpec[];
   metricsCollectorSpec?: MetricsCollectorSpec;
   trialTemplate?: TrialTemplateSpec;
   nasConfig?: NasConfig;
 }
+
+export type ResumePolicyType = 'Never' | 'LongRunning' | 'FromVolume';
 
 export interface ObjectiveSpec {
   type: ObjectiveType;

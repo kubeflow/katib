@@ -19,7 +19,6 @@ import {
 export class FormAlgorithmComponent implements OnInit, OnDestroy {
   algorithmSettings: FormArray;
   algorithms: { [key: string]: string } = AlgorithmNames;
-  disableAddButton: boolean;
   algorithmHasSettings = false;
 
   private subscriptions: Subscription = new Subscription();
@@ -32,20 +31,12 @@ export class FormAlgorithmComponent implements OnInit, OnDestroy {
       'algorithmSettings',
     ) as FormArray;
 
+    // set the list of algorithm settings once the form loads
+    this.setAlgorithmSettings(this.algorithmForm.value.algorithm);
+
     this.subscriptions.add(
       this.algorithmForm.get('algorithm').valueChanges.subscribe(algo => {
-        this.algorithmSettings.clear();
-        this.algorithmHasSettings = AlgorithmSettingsMap[algo].length !== 0;
-
-        // create the settings
-        for (const setting of AlgorithmSettingsMap[algo]) {
-          this.addSetting(
-            setting.name,
-            setting.value,
-            setting.type,
-            setting.values,
-          );
-        }
+        this.setAlgorithmSettings(algo);
       }),
     );
 
@@ -64,6 +55,21 @@ export class FormAlgorithmComponent implements OnInit, OnDestroy {
   }
 
   // form helpers
+  setAlgorithmSettings(algo: string) {
+    this.algorithmSettings.clear();
+    this.algorithmHasSettings = AlgorithmSettingsMap[algo].length !== 0;
+
+    // create the settings
+    for (const setting of AlgorithmSettingsMap[algo]) {
+      this.addSetting(
+        setting.name,
+        setting.value,
+        setting.type,
+        setting.values,
+      );
+    }
+  }
+
   addSetting(
     name: string,
     value: any,

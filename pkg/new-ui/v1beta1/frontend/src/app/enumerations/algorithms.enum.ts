@@ -9,6 +9,11 @@ export enum AlgorithmsEnum {
   DARTS = 'darts',
 }
 
+export enum EarlyStoppingAlgorithmsEnum {
+  NONE = 'none',
+  MEDIAN = 'medianstop',
+}
+
 export enum AlgorithmSettingType {
   STRING = 'string',
   INTEGER = 'integer',

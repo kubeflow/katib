@@ -1,0 +1,34 @@
+<div [formGroup]="setting">
+  <mat-form-field appearance="outline">
+    <mat-label>{{ setting.get('name').value }}</mat-label>
+
+    <ng-container *ngIf="!setting.get('values').value; else listParam">
+      <ng-container
+        *ngIf="setting.get('type').value !== 'integer'; else intParam"
+      >
+        <input [formControl]="setting.get('value')" matInput />
+      </ng-container>
+    </ng-container>
+
+    <!--input templates-->
+    <ng-template #intParam>
+      <input
+        [formControl]="setting.get('value')"
+        type="number"
+        step="1"
+        matInput
+      />
+    </ng-template>
+
+    <ng-template #listParam>
+      <mat-select [formControl]="setting.get('value')">
+        <mat-option
+          *ngFor="let param_value of setting.get('values').value"
+          [value]="param_value"
+        >
+          {{ param_value }}
+        </mat-option>
+      </mat-select>
+    </ng-template>
+  </mat-form-field>
+</div>
