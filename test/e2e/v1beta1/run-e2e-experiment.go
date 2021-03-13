@@ -285,14 +285,15 @@ func verifySuggestion(kclient katibclient.Client, exp *experimentsv1beta1.Experi
 
 	// Verify Suggestion with resume policy Never and FromVolume.
 	if exp.Spec.ResumePolicy == experimentsv1beta1.NeverResume || exp.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
+
+		// Give controller time to delete Suggestion resources and change Suggestion status.
+		// TODO (andreyvelich): Think about better way to handle this.
+		time.Sleep(10 * time.Second)
+
 		// When Suggestion has resume policy Never or FromVolume, it should be not running.
 		if sug.IsRunning() {
 			return fmt.Errorf("Suggestion is still running while ResumePolicy = %v", exp.Spec.ResumePolicy)
 		}
-
-		// Give some controller some time to delete Suggestion resources
-		// TODO (andreyvelich): Think about better way to handle this.
-		time.Sleep(10 * time.Second)
 
 		// Suggestion service should be deleted.
 		serviceName := controllerUtil.GetSuggestionServiceName(sug)
