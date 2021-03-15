@@ -14,6 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This script is used to release Katib project.
+# Run ./scripts/v1beta1/release.sh -b <BRANCH> -t <TAG> to execute it.
+# For example: ./scripts/v1beta1/release.sh -b release-0.3 -t v0.3.0
+# You must follow this format, Branch: release-X.Y, Tag: vX.Y.Z.
+
 set -e
 
 usage() {
@@ -43,9 +48,9 @@ if [[ -z "$BRANCH" || -z "$TAG" ]]; then
   exit 1
 fi
 
-# Clone Katib repo to temp dir.
+# Clone Katib repo to the temp dir.
 temp_dir=$(mktemp -d)
-git clone "git@github.com:andreyvelich/test-argocd.git" ${temp_dir}""
+git clone "git@github.com:kubeflow/katib.git" ${temp_dir}
 cd $temp_dir
 
 # Check if tag exists.
@@ -87,8 +92,8 @@ git commit -a -m "Katib official release ${TAG}"
 # Create new tag.
 git tag ${TAG}
 
-# Publish images to the registry with 2 tags: ${TAG} and v1beta1-<commit-sha>.
-# ---------------------------------
+# Publish images to the registry with 2 tags: ${TAG} and v1beta1-<commit-sha>
+make release-tag TAG=${TAG}
 
 read -p "Do you want to push Katib ${TAG} version to upstream? [y|n] "
 if [ "$REPLY" != "y" ]; then

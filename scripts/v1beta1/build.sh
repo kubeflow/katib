@@ -15,8 +15,8 @@
 # limitations under the License.
 
 # This script is used to build all Katib images.
-# It adds release tag and commit tag to the images.
-# Commit tag format: v1beta1-<COMMIT-SHA>.
+# It adds commit tag and release tag to the images.
+# Commit tag format must be: v1beta1-<COMMIT-SHA>.
 # Run ./scripts/v1beta1/build.sh <IMAGE_REGISTRY> <COMMIT_TAG> <RELEASE_TAG> to execute it.
 
 set -e
@@ -119,3 +119,5 @@ docker build -t ${REGISTRY}/enas-cnn-cifar10-cpu:${COMMIT_TAG} -t ${REGISTRY}/en
 
 echo -e "\nBuilding PyTorch CIFAR-10 CNN training container example for DARTS...\n"
 docker build -t ${REGISTRY}/darts-cnn-cifar10:${COMMIT_TAG} -t ${REGISTRY}/darts-cnn-cifar10:${RELEASE_TAG} -f examples/${VERSION}/nas/darts-cnn-cifar10/Dockerfile .
+
+echo -e "\nAll Katib images have been built successfully!\n"

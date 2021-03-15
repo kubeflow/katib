@@ -1,4 +1,5 @@
 HAS_LINT := $(shell command -v golint;)
+COMMIT := $(shell git rev-parse --short=7 HEAD)
 
 # Run tests
 .PHONY: test
@@ -40,13 +41,24 @@ endif
 	go generate ./pkg/... ./cmd/...
 	hack/gen-python-sdk/gen-sdk.sh
 
-# Build images for Katib v1beta1 components
-build: generate
+# Build images for the Katib v1beta1 components.
+build:
 ifeq ($(and $(REGISTRY),$(COMMIT_TAG),$(RELEASE_TAG)),)
-	$(error REGISTRY, COMMIT_TAG and RELEASE_TAG must be set. Usage make build REGISTRY=<registry> COMMIT_TAG=<commit-tag> RELEASE_TAG=<release-tag>)
+	$(error REGISTRY, COMMIT_TAG and RELEASE_TAG must be set. Usage: make build REGISTRY=<registry> COMMIT_TAG=<commit-tag> RELEASE_TAG=<release-tag>)
 endif
 	bash scripts/v1beta1/build.sh $(REGISTRY) $(COMMIT_TAG) $(RELEASE_TAG)
 
-# Prettier UI format check for Katib v1beta1
+# Build and push Katib images from the latest master commit.
+release-latest:
+	bash scripts/v1beta1/push.sh docker.io/andreyvelichkevich v1beta1-$(COMMIT) latest
+
+# Build and push Katib images from the given tag and commit.
+release-tag:
+ifeq ($(TAG),)
+	$(error TAG must be set. Usage: make release-tag TAG=<release-tag>)
+endif
+	bash scripts/v1beta1/push.sh docker.io/andreyvelichkevich v1beta1-$(COMMIT) $(TAG)
+
+# Prettier UI format check for Katib v1beta1.
 prettier-check:
 	npm run format:check --prefix pkg/ui/v1beta1/frontend
