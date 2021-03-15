@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2020 The Kubeflow Authors.
+# Copyright 2021 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,114 +14,89 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This script is used to release all Katib images in docker.io/kubeflowkatib registry
-# It adds "v1beta1-<commit-SHA>" and "latest" tag to them.
-
 set -e
 
-COMMIT=$(git rev-parse --short=7 HEAD)
-REGISTRY="docker.io/kubeflowkatib"
-VERSION="v1beta1"
-TAG=${VERSION}-${COMMIT}
+usage() {
+  echo "Usage: $0 [-b <BRANCH>] [-t <TAG>]" 1>&2
+  echo "You must follow this format, Branch: release-X.Y, Tag: vX.Y.Z"
+  exit 1
+}
 
-echo "Releasing images for Katib ${VERSION}..."
-echo "Commit SHA: ${COMMIT}"
-echo "Image registry: ${REGISTRY}"
-echo -e "Image tag: ${TAG}\n"
+while getopts ":b::t:" opt; do
+  case $opt in
+  b)
+    BRANCH=${OPTARG}
+    ;;
+  t)
+    TAG=${OPTARG}
+    ;;
+  *)
+    usage
+    ;;
+  esac
+done
 
-SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
-cd ${SCRIPT_ROOT}
+if [[ -z "$BRANCH" || -z "$TAG" ]]; then
+  echo "Branch and Tag must be set"
+  echo "Usage: $0 [-b <BRANCH>] [-t <TAG>]" 1>&2
+  echo "You must follow this format, Branch: release-X.Y, Tag: vX.Y.Z"
+  exit 1
+fi
 
-# Building the images
-make build REGISTRY=${REGISTRY} TAG=${TAG}
+# Clone Katib repo to temp dir.
+temp_dir=$(mktemp -d)
+git clone "git@github.com:andreyvelich/test-argocd.git" ${temp_dir}""
+cd $temp_dir
 
-# Releasing the images
-echo -e "\nAll Katib images have been successfully built\n"
+# Check if tag exists.
+if [[ ! -z $(git tag --list ${TAG}) ]]; then
+  echo "Tag: ${TAG} exists. Release can't be published"
+  exit 1
+fi
 
-# Katib core images
-echo -e "\nPushing Katib controller image...\n"
-docker push ${REGISTRY}/katib-controller:${TAG}
-docker push ${REGISTRY}/katib-controller:latest
+echo -e "\nCreating new release. Branch: ${BRANCH}, TAG: ${TAG}\n"
 
-echo -e "\nPushing Katib DB manager image...\n"
-docker push ${REGISTRY}/katib-db-manager:${TAG}
-docker push ${REGISTRY}/katib-db-manager:latest
+# Create or use the branch.
+if [[ -z $(git branch -r -l origin/${BRANCH}) ]]; then
+  echo "Branch: ${BRANCH} does not exist. Creating a new minor release"
+  git checkout -b ${BRANCH}
+else
+  echo "Branch: ${BRANCH} exists. Creating a new patch release"
+  git checkout ${BRANCH}
+  read -p "Did you cherry pick all commits from the master to the ${BRANCH} branch? [y|n] "
+  if [ "$REPLY" != "y" ]; then
+    exit 1
+  fi
+fi
 
-echo -e "\nPushing Katib UI image...\n"
-docker push ${REGISTRY}/katib-ui:${TAG}
-docker push ${REGISTRY}/katib-ui:latest
+# Change Katib image tags to the release ${TAG}.
+# Get current image tag.
+current_tag=$(cat ./manifests/v1beta1/installs/katib-standalone/kustomization.yaml | grep -m 1 "newTag:" | awk '{print $2}')
+echo -e "\nUpdating Katib image tags from ${current_tag} to ${TAG}"
 
-echo -e "\nPushing Katib cert generator image...\n"
-docker push ${REGISTRY}/cert-generator:${TAG}
-docker push ${REGISTRY}/cert-generator:latest
+# For MacOS we should set -i '' to avoid temp files from sed.
+if [[ $(uname) == "Darwin" ]]; then
+  find ./manifests/v1beta1/installs -regex ".*\.yaml" -exec sed -i '' -e "s@${current_tag}@${TAG}@" {} \;
+else
+  find ./manifests/v1beta1/installs -regex ".*\.yaml" -exec sed -i -e "s@${current_tag}@${TAG}@" {} \;
+fi
+echo -e "Katib images have been updated\n"
 
-echo -e "\nPushing file metrics collector image...\n"
-docker push ${REGISTRY}/file-metrics-collector:${TAG}
-docker push ${REGISTRY}/file-metrics-collector:latest
+git commit -a -m "Katib official release ${TAG}"
 
-echo -e "\nPushing TF Event metrics collector image...\n"
-docker push ${REGISTRY}/tfevent-metrics-collector:${TAG}
-docker push ${REGISTRY}/tfevent-metrics-collector:latest
+# Create new tag.
+git tag ${TAG}
 
-# Suggestion images
-echo -e "\nPushing suggestion images..."
+# Publish images to the registry with 2 tags: ${TAG} and v1beta1-<commit-sha>.
+# ---------------------------------
 
-echo -e "\nPushing hyperopt suggestion...\n"
-docker push ${REGISTRY}/suggestion-hyperopt:${TAG}
-docker push ${REGISTRY}/suggestion-hyperopt:latest
+read -p "Do you want to push Katib ${TAG} version to upstream? [y|n] "
+if [ "$REPLY" != "y" ]; then
+  exit 1
+fi
 
-echo -e "\nPushing chocolate suggestion...\n"
-docker push ${REGISTRY}/suggestion-chocolate:${TAG}
-docker push ${REGISTRY}/suggestion-chocolate:latest
+# Push a new Branch and Tag.
+git push -u origin ${BRANCH}
+git push -u origin ${TAG}
 
-echo -e "\nPushing hyperband suggestion...\n"
-docker push ${REGISTRY}/suggestion-hyperband:${TAG}
-docker push ${REGISTRY}/suggestion-hyperband:latest
-
-echo -e "\nPushing skopt suggestion...\n"
-docker push ${REGISTRY}/suggestion-skopt:${TAG}
-docker push ${REGISTRY}/suggestion-skopt:latest
-
-echo -e "\nPushing goptuna suggestion...\n"
-docker push ${REGISTRY}/suggestion-goptuna:${TAG}
-docker push ${REGISTRY}/suggestion-goptuna:latest
-
-echo -e "\nPushing ENAS suggestion...\n"
-docker push ${REGISTRY}/suggestion-enas:${TAG}
-docker push ${REGISTRY}/suggestion-enas:latest
-
-echo -e "\nPushing DARTS suggestion...\n"
-docker push ${REGISTRY}/suggestion-darts:${TAG}
-docker push ${REGISTRY}/suggestion-darts:latest
-
-# Early stopping images
-echo -e "\nPushing early stopping images...\n"
-
-echo -e "\nPushing median stopping rule...\n"
-docker push ${REGISTRY}/earlystopping-medianstop:${TAG}
-docker push ${REGISTRY}/earlystopping-medianstop:latest
-
-# Training container images
-echo -e "\nPushing training container images..."
-
-echo -e "\nPushing mxnet mnist training container example...\n"
-docker push ${REGISTRY}/mxnet-mnist:${TAG}
-docker push ${REGISTRY}/mxnet-mnist:latest
-
-echo -e "\nPushing PyTorch mnist training container example...\n"
-docker push ${REGISTRY}/pytorch-mnist:${TAG}
-docker push ${REGISTRY}/pytorch-mnist:latest
-
-echo -e "\nPushing Keras CIFAR-10 CNN training container example for ENAS with GPU support...\n"
-docker push ${REGISTRY}/enas-cnn-cifar10-gpu:${TAG}
-docker push ${REGISTRY}/enas-cnn-cifar10-gpu:latest
-
-echo -e "\nPushing Keras CIFAR-10 CNN training container example for ENAS with CPU support...\n"
-docker push ${REGISTRY}/enas-cnn-cifar10-cpu:${TAG}
-docker push ${REGISTRY}/enas-cnn-cifar10-cpu:latest
-
-echo -e "\nPushing PyTorch CIFAR-10 CNN training container example for DARTS...\n"
-docker push ${REGISTRY}/darts-cnn-cifar10:${TAG}
-docker push ${REGISTRY}/darts-cnn-cifar10:latest
-
-echo -e "\nKatib ${VERSION} for commit SHA: ${COMMIT} has been released successfully!"
+echo -e "\nKatib ${TAG} has been released"

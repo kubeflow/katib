@@ -42,10 +42,10 @@ endif
 
 # Build images for Katib v1beta1 components
 build: generate
-ifeq ($(and $(REGISTRY),$(TAG)),)
-	$(error REGISTRY and TAG must be set. Usage make build REGISTRY=<registry> TAG=<TAG>)
+ifeq ($(and $(REGISTRY),$(COMMIT_TAG),$(RELEASE_TAG)),)
+	$(error REGISTRY, COMMIT_TAG and RELEASE_TAG must be set. Usage make build REGISTRY=<registry> COMMIT_TAG=<commit-tag> RELEASE_TAG=<release-tag>)
 endif
-	bash scripts/v1beta1/build.sh -r $(REGISTRY) -t $(TAG)
+	bash scripts/v1beta1/build.sh $(REGISTRY) $(COMMIT_TAG) $(RELEASE_TAG)
 
 # Prettier UI format check for Katib v1beta1
 prettier-check:
