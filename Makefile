@@ -49,15 +49,22 @@ endif
 	bash scripts/v1beta1/build.sh $(REGISTRY) $(COMMIT_TAG) $(RELEASE_TAG)
 
 # Build and push Katib images from the latest master commit.
-release-latest:
+push-latest:
 	bash scripts/v1beta1/push.sh docker.io/andreyvelichkevich v1beta1-$(COMMIT) latest
 
-# Build and push Katib images from the given tag and commit.
-release-tag:
+# Build and push Katib images for the given tag.
+push-tag:
 ifeq ($(TAG),)
-	$(error TAG must be set. Usage: make release-tag TAG=<release-tag>)
+	$(error TAG must be set. Usage: make push-tag TAG=<release-tag>)
 endif
 	bash scripts/v1beta1/push.sh docker.io/andreyvelichkevich v1beta1-$(COMMIT) $(TAG)
+
+# Release new version of Katib.
+release:
+ifeq ($(and $(BRANCH),$(TAG)),)
+	$(error BRANCH and TAG must be set. Usage: make release BRANCH=<branch> TAG=<tag>)
+endif
+	bash scripts/v1beta1/release.sh $(BRANCH) $(TAG)
 
 # Prettier UI format check for Katib v1beta1.
 prettier-check:

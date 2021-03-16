@@ -15,35 +15,26 @@
 # limitations under the License.
 
 # This script is used to release Katib project.
-# Run ./scripts/v1beta1/release.sh -b <BRANCH> -t <TAG> to execute it.
-# For example: ./scripts/v1beta1/release.sh -b release-0.3 -t v0.3.0
+# Run ./scripts/v1beta1/release.sh <BRANCH> <TAG> to execute it.
+# For example: ./scripts/v1beta1/release.sh release-0.3 v0.3.0
 # You must follow this format, Branch: release-X.Y, Tag: vX.Y.Z.
 
 set -e
 
-usage() {
-  echo "Usage: $0 [-b <BRANCH>] [-t <TAG>]" 1>&2
-  echo "You must follow this format, Branch: release-X.Y, Tag: vX.Y.Z"
-  exit 1
-}
-
-while getopts ":b::t:" opt; do
-  case $opt in
-  b)
-    BRANCH=${OPTARG}
-    ;;
-  t)
-    TAG=${OPTARG}
-    ;;
-  *)
-    usage
-    ;;
-  esac
-done
+BRANCH=$1
+TAG=$2
 
 if [[ -z "$BRANCH" || -z "$TAG" ]]; then
   echo "Branch and Tag must be set"
-  echo "Usage: $0 [-b <BRANCH>] [-t <TAG>]" 1>&2
+  echo "Usage: $0 <BRANCH> <TAG>" 1>&2
+  echo "You must follow this format, Branch: release-X.Y, Tag: vX.Y.Z"
+  exit 1
+fi
+
+# Check that Branch and Tag is in correct format.
+if [[ ! "$BRANCH" =~ release-[0-9]+\.[0-9]+ || ! "$TAG" =~ v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+  echo "Branch or Tag format is invalid"
+  echo "Usage: $0 <BRANCH> <TAG>" 1>&2
   echo "You must follow this format, Branch: release-X.Y, Tag: vX.Y.Z"
   exit 1
 fi
@@ -59,7 +50,7 @@ if [[ ! -z $(git tag --list ${TAG}) ]]; then
   exit 1
 fi
 
-echo -e "\nCreating new release. Branch: ${BRANCH}, TAG: ${TAG}\n"
+echo -e "\nCreating a new release. Branch: ${BRANCH}, TAG: ${TAG}\n"
 
 # Create or use the branch.
 if [[ -z $(git branch -r -l origin/${BRANCH}) ]]; then
@@ -74,32 +65,55 @@ else
   fi
 fi
 
+# ------------------ Change image tag ------------------
 # Change Katib image tags to the release ${TAG}.
 # Get current image tag.
-current_tag=$(cat ./manifests/v1beta1/installs/katib-standalone/kustomization.yaml | grep -m 1 "newTag:" | awk '{print $2}')
-echo -e "\nUpdating Katib image tags from ${current_tag} to ${TAG}"
-
+echo -e "\nUpdating Katib image tags to ${TAG}\n"
 # For MacOS we should set -i '' to avoid temp files from sed.
 if [[ $(uname) == "Darwin" ]]; then
-  find ./manifests/v1beta1/installs -regex ".*\.yaml" -exec sed -i '' -e "s@${current_tag}@${TAG}@" {} \;
+  find ./manifests/v1beta1/installs -regex ".*\.yaml" -exec sed -i '' -e "s@newTag: .*@newTag: ${TAG}@" {} \;
 else
-  find ./manifests/v1beta1/installs -regex ".*\.yaml" -exec sed -i -e "s@${current_tag}@${TAG}@" {} \;
+  find ./manifests/v1beta1/installs -regex ".*\.yaml" -exec sed -i -e "s@newTag: .*@newTag: ${TAG}@" {} \;
 fi
 echo -e "Katib images have been updated\n"
 
-git commit -a -m "Katib official release ${TAG}"
+# ------------------ Publish Katib SDK ------------------
+# Remove first "v" from the Katib version for the SDK version.
+sdk_version=${TAG:1}
+echo -e "Publishing Katib Python SDK, version: ${sdk_version}\n"
+# Run generate script.
+make generate
 
+# Change version in setup.py
+cd sdk/python/v1beta1
+if [[ $(uname) == "Darwin" ]]; then
+  sed -i '' -e "s@version='.*'@version='${sdk_version}'@" setup.py
+else
+  sed -i -e "s@version='.*'@version='${sdk_version}'@" setup.py
+fi
+# Generate SDK and upload new version to PyPi.
+python3 setup.py sdist bdist_wheel
+twine upload dist/*
+rm -r dist/ build/
+cd ../../..
+echo -e "Katib Python SDK ${SDK_VERSION} has been published\n"
+
+# ------------------ Commit changes ------------------
+git commit -a -m "Katib official release ${TAG}"
 # Create new tag.
 git tag ${TAG}
 
+# ------------------ Publish Katib images ------------------
 # Publish images to the registry with 2 tags: ${TAG} and v1beta1-<commit-sha>
-make release-tag TAG=${TAG}
+echo -e "Publishing Katib images\n"
+make push-tag TAG=${TAG}
+echo -e "Katib images has been published\n"
 
-read -p "Do you want to push Katib ${TAG} version to upstream? [y|n] "
+# ------------------ Push to upstream ------------------
+read -p "Do you want to push Katib ${TAG} version to the upstream? [y|n] "
 if [ "$REPLY" != "y" ]; then
   exit 1
 fi
-
 # Push a new Branch and Tag.
 git push -u origin ${BRANCH}
 git push -u origin ${TAG}
