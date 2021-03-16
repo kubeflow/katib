@@ -37,13 +37,7 @@ see the following user guides:
 Check source code as follows:
 
 ```bash
-make build REGISTRY=<image-registry> COMMIT_TAG=<commit-tag> RELEASE_TAG=<release-tag>
-```
-
-If you want to add only `latest` tag to your images, run:
-
-```bash
-make build REGISTRY=<image-registry> COMMIT_TAG=latest RELEASE_TAG=latest
+make build REGISTRY=<image-registry> TAG=<image-tag>
 ```
 
 You can deploy Katib v1beta1 manifests into a k8s cluster as follows:

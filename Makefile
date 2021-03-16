@@ -1,5 +1,6 @@
 HAS_LINT := $(shell command -v golint;)
-COMMIT := $(shell git rev-parse --short=7 HEAD)
+COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
+KATIB_REGISTRY := docker.io/kubeflowkatib
 
 # Run tests
 .PHONY: test
@@ -43,21 +44,27 @@ endif
 
 # Build images for the Katib v1beta1 components.
 build: generate
-ifeq ($(and $(REGISTRY),$(COMMIT_TAG),$(RELEASE_TAG)),)
-	$(error REGISTRY, COMMIT_TAG and RELEASE_TAG must be set. Usage: make build REGISTRY=<registry> COMMIT_TAG=<commit-tag> RELEASE_TAG=<release-tag>)
+ifeq ($(and $(REGISTRY),$(TAG)),)
+	$(error REGISTRY, TAG must be set. $(REGISTRY) $(TAG) Usage: make build REGISTRY=<registry> TAG=<tag>)
 endif
-	bash scripts/v1beta1/build.sh $(REGISTRY) $(COMMIT_TAG) $(RELEASE_TAG)
+	bash scripts/v1beta1/build.sh $(REGISTRY) $(TAG)
 
 # Build and push Katib images from the latest master commit.
-push-latest:
-	bash scripts/v1beta1/push.sh docker.io/kubeflowkatib v1beta1-$(COMMIT) latest
+push-latest: generate
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) latest
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(COMMIT)
+	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) latest
+	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(COMMIT)
 
 # Build and push Katib images for the given tag.
-push-tag:
+push-tag: generate
 ifeq ($(TAG),)
 	$(error TAG must be set. Usage: make push-tag TAG=<release-tag>)
 endif
-	bash scripts/v1beta1/push.sh docker.io/kubeflowkatib v1beta1-$(COMMIT) $(TAG)
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(TAG)
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(COMMIT)
+	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(TAG)
+	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(COMMIT)
 
 # Release a new version of Katib.
 release:
