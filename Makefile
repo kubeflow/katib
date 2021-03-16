@@ -42,7 +42,7 @@ endif
 	hack/gen-python-sdk/gen-sdk.sh
 
 # Build images for the Katib v1beta1 components.
-build:
+build: generate
 ifeq ($(and $(REGISTRY),$(COMMIT_TAG),$(RELEASE_TAG)),)
 	$(error REGISTRY, COMMIT_TAG and RELEASE_TAG must be set. Usage: make build REGISTRY=<registry> COMMIT_TAG=<commit-tag> RELEASE_TAG=<release-tag>)
 endif
@@ -50,16 +50,16 @@ endif
 
 # Build and push Katib images from the latest master commit.
 push-latest:
-	bash scripts/v1beta1/push.sh docker.io/andreyvelichkevich v1beta1-$(COMMIT) latest
+	bash scripts/v1beta1/push.sh docker.io/kubeflowkatib v1beta1-$(COMMIT) latest
 
 # Build and push Katib images for the given tag.
 push-tag:
 ifeq ($(TAG),)
 	$(error TAG must be set. Usage: make push-tag TAG=<release-tag>)
 endif
-	bash scripts/v1beta1/push.sh docker.io/andreyvelichkevich v1beta1-$(COMMIT) $(TAG)
+	bash scripts/v1beta1/push.sh docker.io/kubeflowkatib v1beta1-$(COMMIT) $(TAG)
 
-# Release new version of Katib.
+# Release a new version of Katib.
 release:
 ifeq ($(and $(BRANCH),$(TAG)),)
 	$(error BRANCH and TAG must be set. Usage: make release BRANCH=<branch> TAG=<tag>)

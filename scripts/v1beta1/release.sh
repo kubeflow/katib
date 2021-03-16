@@ -16,7 +16,7 @@
 
 # This script is used to release Katib project.
 # Run ./scripts/v1beta1/release.sh <BRANCH> <TAG> to execute it.
-# For example: ./scripts/v1beta1/release.sh release-0.3 v0.3.0
+# For example: ./scripts/v1beta1/release.sh release-0.11 v0.11.1
 # You must follow this format, Branch: release-X.Y, Tag: vX.Y.Z.
 
 set -e
@@ -50,7 +50,7 @@ if [[ ! -z $(git tag --list ${TAG}) ]]; then
   exit 1
 fi
 
-echo -e "\nCreating a new release. Branch: ${BRANCH}, TAG: ${TAG}\n"
+echo -e "\nCreating a new release. Branch: ${BRANCH}, Tag: ${TAG}\n"
 
 # Create or use the branch.
 if [[ -z $(git branch -r -l origin/${BRANCH}) ]]; then
@@ -66,8 +66,7 @@ else
 fi
 
 # ------------------ Change image tag ------------------
-# Change Katib image tags to the release ${TAG}.
-# Get current image tag.
+# Change Katib image tags to the new release tag.
 echo -e "\nUpdating Katib image tags to ${TAG}\n"
 # For MacOS we should set -i '' to avoid temp files from sed.
 if [[ $(uname) == "Darwin" ]]; then
@@ -78,7 +77,7 @@ fi
 echo -e "Katib images have been updated\n"
 
 # ------------------ Publish Katib SDK ------------------
-# Remove first "v" from the Katib version for the SDK version.
+# Remove first "v" from the Katib release version for the SDK version.
 sdk_version=${TAG:1}
 echo -e "Publishing Katib Python SDK, version: ${sdk_version}\n"
 # Run generate script.
@@ -100,14 +99,14 @@ echo -e "Katib Python SDK ${SDK_VERSION} has been published\n"
 
 # ------------------ Commit changes ------------------
 git commit -a -m "Katib official release ${TAG}"
-# Create new tag.
+# Create a new tag.
 git tag ${TAG}
 
 # ------------------ Publish Katib images ------------------
 # Publish images to the registry with 2 tags: ${TAG} and v1beta1-<commit-sha>
 echo -e "Publishing Katib images\n"
 make push-tag TAG=${TAG}
-echo -e "Katib images has been published\n"
+echo -e "Katib images have been published\n"
 
 # ------------------ Push to upstream ------------------
 read -p "Do you want to push Katib ${TAG} version to the upstream? [y|n] "
