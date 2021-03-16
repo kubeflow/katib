@@ -45,7 +45,7 @@ endif
 # Build images for the Katib v1beta1 components.
 build: generate
 ifeq ($(and $(REGISTRY),$(TAG)),)
-	$(error REGISTRY, TAG must be set. $(REGISTRY) $(TAG) Usage: make build REGISTRY=<registry> TAG=<tag>)
+	$(error REGISTRY and TAG must be set. Usage: make build REGISTRY=<registry> TAG=<tag>)
 endif
 	bash scripts/v1beta1/build.sh $(REGISTRY) $(TAG)
 
