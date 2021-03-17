@@ -1,6 +1,6 @@
 # Katib User Interface
 
-This is the source code for the Katib UI. Current version of Katib UI is v1beta1. On the official Kubeflow website [here](https://www.kubeflow.org/docs/components/hyperparameter-tuning/experiment/#running-the-experiment-from-the-katib-ui) you can find information how to use Katib UI.
+This is the source code for the Katib UI. Current version of Katib UI is v1beta1. On the official Kubeflow website [here](https://www.kubeflow.org/docs/components/katib/experiment/#running-the-experiment-from-the-katib-ui) you can find information how to use Katib UI.
 We are using [React](https://reactjs.org/) framework to create frontend and Go as a backend.
 
 We are using [Material UI](https://material-ui.com/) to design frontend. Try to use Material UI components to implement new Katib UI features.
@@ -69,7 +69,7 @@ After that, you can access the UI using this URL: `http://localhost:8080/katib/`
 
 To run Katib UI in Production, after all changes in frontend and backend, you need to create an image for the UI. Under `/katib` directory run this: `docker build . -f cmd/ui/v1beta1/Dockerfile -t <name of your image>` to build the image. If Docker resources are not enough to build the frontend, you get `node` out of memory error. You can try to increase Docker resources or modify `package.json` as detailed [above](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1#serve-ui-frontend-and-backend) at step 1.
 
-After that, you can modify UI [deployment](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/components/ui/ui.yaml#L21) with your new image. Then, follow [these steps](https://www.kubeflow.org/docs/components/hyperparameter-tuning/hyperparameter/#accessing-the-katib-ui) to access Katib UI.
+After that, you can modify UI [deployment](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/components/ui/ui.yaml#L21) with your new image. Then, follow [these steps](https://www.kubeflow.org/docs/components/katib/hyperparameter/#accessing-the-katib-ui) to access Katib UI.
 
 ## Code style
 

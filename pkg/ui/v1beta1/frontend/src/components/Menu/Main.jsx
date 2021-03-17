@@ -65,7 +65,7 @@ const Main = props => {
       <Typography variant={'h6'}>
         For usage instructions, see the{' '}
         <a
-          href="https://www.kubeflow.org/docs/components/hyperparameter-tuning/"
+          href="https://www.kubeflow.org/docs/components/katib/"
           target="_blank"
           rel="noopener noreferrer"
           className={classes.link}

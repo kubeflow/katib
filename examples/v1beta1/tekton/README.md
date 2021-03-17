@@ -11,7 +11,7 @@ is completed. Metrics collector should not be stopped after training container i
 To avoid this problem, set `nop` image to metrics collector sidecar image.
 
 For example, if you are using
-[StdOut](https://www.kubeflow.org/docs/components/hyperparameter-tuning/experiment/#metrics-collector) metrics collector,
+[StdOut](https://www.kubeflow.org/docs/components/katib/experiment/#metrics-collector) metrics collector,
 `nop` image must be equal to `docker.io/kubeflowkatib/file-metrics-collector`.
 
 After deploying Tekton on your cluster, run bellow command to modify `nop` image:
