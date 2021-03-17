@@ -234,6 +234,10 @@
                     template: "build-ui",
                   },
                   {
+                    name: "build-new-ui",
+                    template: "build-new-ui",
+                  },
+                  {
                     name: "build-cert-generator",
                     template: "build-cert-generator",
                   },
@@ -425,6 +429,13 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/katib-ui:$(PULL_BASE_SHA)",
             ]),  // build katib-ui
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-new-ui", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/cmd/new-ui/v1beta1/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--no-push",
+              "--destination=" + "temp-registry/new-ui",
+            ]),  // build new katib-ui
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-cert-generator", kanikoExecutorImage, [
               "/kaniko/executor",
               "--dockerfile=" + katibDir + "/cmd/cert-generator/v1beta1/Dockerfile",

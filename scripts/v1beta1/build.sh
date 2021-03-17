@@ -49,6 +49,9 @@ docker build -t ${REGISTRY}/katib-db-manager:${TAG} -f ${CMD_PREFIX}/db-manager/
 echo -e "\nBuilding Katib UI image...\n"
 docker build -t ${REGISTRY}/katib-ui:${TAG} -f ${CMD_PREFIX}/ui/${VERSION}/Dockerfile .
 
+echo -e "\nBuilding Katib new UI image...\n"
+docker build -t ${REGISTRY}/katib-new-ui:${TAG} -f ${CMD_PREFIX}/new-ui/${VERSION}/Dockerfile .
+
 echo -e "\nBuilding Katib cert generator image...\n"
 docker build -t ${REGISTRY}/cert-generator:${TAG} -f ${CMD_PREFIX}/cert-generator/${VERSION}/Dockerfile .
 
