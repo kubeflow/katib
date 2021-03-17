@@ -1,4 +1,6 @@
 HAS_LINT := $(shell command -v golint;)
+COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
+KATIB_REGISTRY := docker.io/kubeflowkatib
 
 # Run tests
 .PHONY: test
@@ -40,13 +42,37 @@ endif
 	go generate ./pkg/... ./cmd/...
 	hack/gen-python-sdk/gen-sdk.sh
 
-# Build images for Katib v1beta1 components
+# Build images for the Katib v1beta1 components.
 build: generate
 ifeq ($(and $(REGISTRY),$(TAG)),)
-	$(error REGISTRY and TAG must be set. Usage make build REGISTRY=<registry> TAG=<TAG>)
+	$(error REGISTRY and TAG must be set. Usage: make build REGISTRY=<registry> TAG=<tag>)
 endif
-	bash scripts/v1beta1/build.sh -r $(REGISTRY) -t $(TAG)
+	bash scripts/v1beta1/build.sh $(REGISTRY) $(TAG)
 
-# Prettier UI format check for Katib v1beta1
+# Build and push Katib images from the latest master commit.
+push-latest: generate
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) latest
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(COMMIT)
+	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) latest
+	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(COMMIT)
+
+# Build and push Katib images for the given tag.
+push-tag: generate
+ifeq ($(TAG),)
+	$(error TAG must be set. Usage: make push-tag TAG=<release-tag>)
+endif
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(TAG)
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(COMMIT)
+	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(TAG)
+	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(COMMIT)
+
+# Release a new version of Katib.
+release:
+ifeq ($(and $(BRANCH),$(TAG)),)
+	$(error BRANCH and TAG must be set. Usage: make release BRANCH=<branch> TAG=<tag>)
+endif
+	bash scripts/v1beta1/release.sh $(BRANCH) $(TAG)
+
+# Prettier UI format check for Katib v1beta1.
 prettier-check:
 	npm run format:check --prefix pkg/ui/v1beta1/frontend
