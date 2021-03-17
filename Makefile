@@ -1,6 +1,6 @@
 HAS_LINT := $(shell command -v golint;)
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
-KATIB_REGISTRY := docker.io/andreyvelichkevich
+KATIB_REGISTRY := docker.io/kubeflowkatib
 
 # Run tests
 .PHONY: test
