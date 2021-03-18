@@ -1,4 +1,4 @@
-# Copyright 2019 The Kubeflow Authors.
+# Copyright 2021 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,15 +21,16 @@ from kubeflow.katib.utils import utils
 
 class KatibClient(object):
 
-    def __init__(self, config_file=None, context=None,  # pylint: disable=too-many-arguments
+    def __init__(self, config_file=None, context=None,
                  client_configuration=None, persist_config=True):
+        """KatibClient constructor.
+
+        :param config_file: Name of the kube-config file. Defaults to ~/.kube/config.
+        :param context: Set the active context. Defaults to current_context from the kube-config.
+        :param client_configuration: The kubernetes.client.Configuration to set configs to.
+        :param persist_config: If True, config file will be updated when changed.
         """
-        katibclient constructor
-        :param config_file: kubeconfig file, defaults to ~/.kube/config
-        :param context: kubernetes context
-        :param client_configuration: kubernetes configuration object
-        :param persist_config:
-        """
+
         self.in_cluster = None
         if config_file or not utils.is_running_in_k8s():
             config.load_kube_config(
@@ -56,11 +57,14 @@ class KatibClient(object):
         return True
 
     def create_experiment(self, exp_object, namespace=None):
-        """
-        Create the katib experiment
-        :param exp_object: experiment object
-        :param namespace: defaults to current or default namespace
-        :return: created experiment dict
+        """Create the Katib Experiment.
+
+        :param exp_object: Experiment object.
+        :param namespace: Experiment namespace.
+        If the namespace is None, it takes namespace from the Experiment or "default".
+
+        :return: Created Experiment.
+        :rtype: dict
         """
 
         if namespace is None:
@@ -87,12 +91,20 @@ class KatibClient(object):
                 ))
         return outputs
 
+    # TODO (andreyvelich): Get Experiment should always return one Experiment.
+    # Use list_experiments to return Experiment list.
+    # That function should return Experiment object.
     def get_experiment(self, name=None, namespace=None):
-        """
-        Get single experiment or all experiment
-        :param name: existing experiment name optional
-        :param namespace: defaults to current or default namespace
-        :return: experiment dict
+        """Get the Katib Experiment.
+
+        :param name: Experiment name.
+        If the name is None returns all Experiments in the namespace.
+        :param namespace: Experiment namespace.
+        If the namespace is `None`, it takes namespace from the Experiment object or "default".
+
+
+        :return: Experiment object.
+        :rtype: dict
         """
         if namespace is None:
             namespace = utils.get_default_target_namespace()
@@ -145,12 +157,15 @@ class KatibClient(object):
         return katibexp
 
     def get_suggestion(self, name=None, namespace=None):
-        """
-        Get experiment's suggestion.
-        If name is empty returns all suggestion in requested namespace.
-        :param name: existing suggestion name optional
-        :param namespace: defaults to current or default namespace
-        :return: suggestion dict
+        """Get the Katib Suggestion.
+
+        :param name: Suggestion name.
+        If the name is None returns all Suggestion in the namespace.
+        :param namespace: Suggestion namespace.
+        If the namespace is None, it takes namespace from the Suggestion object or "default".
+
+        :return: Suggestion object.
+        :rtype: dict
         """
 
         if namespace is None:
@@ -204,11 +219,14 @@ class KatibClient(object):
         return katib_suggestion
 
     def delete_experiment(self, name, namespace=None):
-        """
-        Delete experiment
-        :param name: experiment name required
-        :param namespace: defaults to current or default namespace
-        :return: status dict
+        """Delete the Katib Experiment.
+
+        :param name: Experiment name.
+        :param namespace: Experiment namespace.
+        If the namespace is None, it takes namespace from the Experiment object or "default".
+
+        :return: Deleted Experiment object.
+        :rtype: dict
         """
         if namespace is None:
             namespace = utils.get_default_target_namespace()
@@ -227,10 +245,13 @@ class KatibClient(object):
          %s\n" % e)
 
     def list_experiments(self, namespace=None):
-        """
-        List all experiments
-        :param namespace: defaults to current or default namespace
-        :return: list of experiment name with status as list
+        """List all Katib Experiments.
+
+        :param namespace: Experiments namespace.
+        If the namespace is None, it takes "default" namespace.
+
+        :return: List of Experiment names with the statuses.
+        :rtype: list[dict]
         """
         if namespace is None:
             namespace = utils.get_default_target_namespace()
@@ -265,11 +286,14 @@ class KatibClient(object):
         return result
 
     def get_experiment_status(self, name, namespace=None):
-        """Returns experiment status, such as Running, Failed or Succeeded.
-        Args:
-          :param name: An experiment name. required
-          :param namespace: defaults to current or default namespace.
-          :return: status str
+        """Get the Experiment current status.
+
+        :param name: Experiment name.
+        :param namespace: Experiment namespace.
+        If the namespace is None, it takes "default" namespace.
+
+        :return: Current Experiment status.
+        :rtype: str
         """
         if namespace is None:
             namespace = utils.get_default_target_namespace()
@@ -279,22 +303,28 @@ class KatibClient(object):
         return last_condition.get("type", "")
 
     def is_experiment_succeeded(self, name, namespace=None):
-        """Returns true if experiment succeeded; false otherwise.
-        Args:
-          :param name: An experiment name. required
-          :param namespace: defaults to current or default namespace. optional
-          :return: status bool
+        """Check if Experiment has succeeded.
+
+        :param name: Experiment name.
+        :param namespace: Experiment namespace.
+        If the namespace is None, it takes "default" namespace.
+
+        :return: Whether Experiment has succeeded or not.
+        :rtype: bool
         """
         experiment_status = self.get_experiment_status(
             name, namespace=namespace)
         return experiment_status.lower() == "succeeded"
 
     def list_trials(self, name=None, namespace=None):
-        """
-        Get trials of an experiment
-        :param name: existing experiment name
-        :param namespace: defaults to current or default namespace
-        :return: trials name with status as list
+        """List all Experiment's Trials.
+
+        :param name: Experiment name.
+        :param namespace: Experiments namespace.
+        If the namespace is None, it takes "default" namespace.
+
+        :return: List of Trial names with the statuses.
+        :rtype: list[dict]
         """
         if namespace is None:
             namespace = utils.get_default_target_namespace()
@@ -330,11 +360,14 @@ class KatibClient(object):
         return result
 
     def get_success_trial_details(self, name=None, namespace=None):
-        """
-        Get trial details that succeeded for an experiment
-        :param name: existing experiment name
-        :param namespace: defaults to current or default namespace
-        :return: trials name with hyperparameters and metrics
+        """Get the Trial details that have succeeded for an Experiment.
+
+        :param name: Experiment name.
+        :param namespace: Experiment namespace.
+        If the namespace is None, it takes namespace from the Experiment or "default".
+
+        :return: Trial names with the hyperparameters and metrics.
+        :type: list[dict]
         """
         if namespace is None:
             namespace = utils.get_default_target_namespace()
@@ -376,11 +409,13 @@ class KatibClient(object):
         return result
 
     def get_optimal_hyperparameters(self, name=None, namespace=None):
-        """
-        Get status, currentOptimalTrial with parameterAssignments
-        :param name: existing experiment name
-        :param namespace: defaults to current or default namespace
-        :return: dict with status, currentOptimalTrial with parameterAssignments of an experiment
+        """Get the current optimal Trial from the Experiment.
+
+        :param name: Experiment name.
+        :param namespace: Experiment namespace.
+
+        :return: Current optimal Trial for the Experiment.
+        :rtype: dict
         """
         if namespace is None:
             namespace = utils.get_default_target_namespace()
