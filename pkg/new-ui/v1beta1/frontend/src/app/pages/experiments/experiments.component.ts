@@ -17,6 +17,7 @@ import {
   NamespaceService,
   TemplateValue,
   ActionEvent,
+  DashboardState,
 } from 'kubeflow';
 
 import { KWABackendService } from 'src/app/services/backend.service';
@@ -36,6 +37,7 @@ export class ExperimentsComponent implements OnInit, OnDestroy {
   currNamespace: string;
   config = experimentsTableConfig;
   env = environment;
+  dashboardDisconnectedState = DashboardState.Disconnected;
 
   private subs = new Subscription();
   private poller: ExponentialBackoff;
@@ -43,8 +45,8 @@ export class ExperimentsComponent implements OnInit, OnDestroy {
   constructor(
     private backend: KWABackendService,
     private confirmDialog: ConfirmDialogService,
-    private namespaceService: NamespaceService,
     private router: Router,
+    public ns: NamespaceService,
   ) {}
 
   ngOnInit() {
@@ -52,7 +54,7 @@ export class ExperimentsComponent implements OnInit, OnDestroy {
 
     // Reset the poller whenever the selected namespace changes
     this.subs.add(
-      this.namespaceService.getSelectedNamespace().subscribe(nameSpace => {
+      this.ns.getSelectedNamespace().subscribe(nameSpace => {
         this.currNamespace = nameSpace;
         this.poller.reset();
       }),
