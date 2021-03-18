@@ -185,10 +185,10 @@ missing functionalities are the ability to edit the TrialTemplate ConfigMaps.
 
 While this UI is not ready to replace the current one we would like to
 encourage users to also give it a try and provide us with feedback. To try it
-out you only need to replace the image of the `katib-ui` deployment with
-```
-docker.io/kubeflowkatib/katib-new-ui
-```
+out the user has to update the Katib UI image `newName` with the new registry
+`docker.io/kubeflowkatib/katib-new-ui` in the [Kustomize](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/installs/katib-standalone/kustomization.yaml#L43)
+manifests.
+
 ![newkatibui](./docs/images/katib-new-ui.png)
 
 ## GRPC API documentation
