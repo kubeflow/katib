@@ -172,6 +172,25 @@ to generate a similar UI. Follow the
 to access the Katib UI.
 ![katibui](./docs/images/katib-ui.png)
 
+### New UI
+
+During 1.3 we've worked on a new iteration of the UI, which is rewritten in
+Angular and is utilizing the common code of the other Kubeflow [dashboards](https://github.com/kubeflow/kubeflow/tree/master/components/crud-web-apps).
+While this UI is not yet on par with the current default one, we are actively
+working to get it up to speed and provide all the existing functionalities.
+
+The users are currently able to list, delete and create Experiments in their
+cluster via this new UI as well as inspect the owned Trials. One important
+missing functionalities are the ability to edit the TrialTemplate ConfigMaps.
+
+While this UI is not ready to replace the current one we would like to
+encourage users to also give it a try and provide us with feedback. To try it
+out you only need to replace the image of the `katib-ui` deployment with
+```
+docker.io/kubeflowkatib/katib-new-ui
+```
+![newkatibui](./docs/images/katib-new-ui.png)
+
 ## GRPC API documentation
 
 Check the [Katib v1beta1 API reference docs](https://www.kubeflow.org/docs/reference/katib/v1beta1/katib/).
