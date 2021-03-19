@@ -130,8 +130,9 @@ func main() {
 			}
 			time.Sleep(1 * time.Second)
 		}
-		if !exp.IsRestarting() {
-			log.Fatalf("Unable to restart Experiment %v", exp.Name)
+		// Check if Experiment is not restarting and is not running.
+		if !exp.IsRestarting() && !exp.IsRunning() {
+			log.Fatalf("Unable to restart Experiment %v, Experiment conditions: %v", exp.Name, exp.Status.Conditions)
 			// Delete experiment in case of error.
 			log.Printf("Deleting Experiment %v\n", exp.Name)
 			if kclient.DeleteRuntimeObject(exp) != nil {

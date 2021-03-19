@@ -30,27 +30,17 @@ python setup.py install --user
 
 (or `sudo python setup.py install` to install the package for all users)
 
-### Upload new version to PyPi
+### Publish new SDK version to PyPi
 
 Our SDK is located in [`kubeflow-katib` PyPi package](https://pypi.org/project/kubeflow-katib/).
-If you want to release new SDK version with updated API you have to ask anyone from
-[OWNERS](https://github.com/kubeflow/katib/blob/master/OWNERS) file to follow these steps:
-
-- Go to the SDK directory: `cd sdk/python/v1beta1`
-
-- Update version in [`setup.py`](https://github.com/kubeflow/katib/blob/master/sdk/python/v1beta1/setup.py#L22)
-
-- Generate distributive packages: `python3 setup.py sdist bdist_wheel`
-
-- Upload package to PyPi: `twine upload dist/*`
-
-- Remove created directories: `rm -r dist/ build/`
-
-- Submit PR with updated version
+Katib Python SDK is published as part of the Katib patch releases.
+You can check the release process [here](../../../scripts/v1beta1/release.sh).
+For each Katib patch release, we upload a new SDK version to the PyPi.
+The SDK version is equal to the Katib version.
 
 ## Getting Started
 
-Please follow the [examples](examples) to learn more about Katib SDK.
+Please follow the [examples](../../../examples/v1beta1/sdk) to learn more about Katib SDK.
 
 ## Documentation for API Endpoints
 
