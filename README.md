@@ -37,6 +37,7 @@ MXNet, PyTorch, XGBoost, and others.
     - [Neural Architecture Search](#neural-architecture-search)
 - [Components in Katib](#components-in-katib)
 - [Web UI](#web-ui)
+  - [New UI](#new-ui)
 - [GRPC API documentation](#grpc-api-documentation)
 - [Installation](#installation)
   - [TF operator](#tf-operator)
@@ -171,6 +172,25 @@ to generate a similar UI. Follow the
 [Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/hyperparameter/#katib-ui)
 to access the Katib UI.
 ![katibui](./docs/images/katib-ui.png)
+
+### New UI
+
+During 1.3 we've worked on a new iteration of the UI, which is rewritten in
+Angular and is utilizing the common code of the other Kubeflow [dashboards](https://github.com/kubeflow/kubeflow/tree/master/components/crud-web-apps).
+While this UI is not yet on par with the current default one, we are actively
+working to get it up to speed and provide all the existing functionalities.
+
+The users are currently able to list, delete and create Experiments in their
+cluster via this new UI as well as inspect the owned Trials. One important
+missing functionalities are the ability to edit the TrialTemplate ConfigMaps.
+
+While this UI is not ready to replace the current one we would like to
+encourage users to also give it a try and provide us with feedback. To try it
+out the user has to update the Katib UI image `newName` with the new registry
+`docker.io/kubeflowkatib/katib-new-ui` in the [Kustomize](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/installs/katib-standalone/kustomization.yaml#L43)
+manifests.
+
+![newkatibui](./docs/images/katib-new-ui.png)
 
 ## GRPC API documentation
 
