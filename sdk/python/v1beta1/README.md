@@ -54,25 +54,29 @@ Please follow the [examples](examples) to learn more about Katib SDK.
 
 ## Documentation for API Endpoints
 
-| Class                 | Method                                | Description                                                              |
-| --------------------- | ------------------------------------- | ------------------------------------------------------------------------ |
-| [KatibClient][client] | [create_experiment][create]           | Create Katib Experiment                                                  |
-| [KatibClient][client] | [get_experiment][get_e]               | Get or watch the specified Experiment or all Experiment in the namespace |
-| [KatibClient][client] | [delete_experiment][delete]           | Delete specified Experiment                                              |
-| [KatibClient][client] | [list_experiments][list_e]            | List all Experiments with status                                         |
-| [KatibClient][client] | [get_experiment_status][get_status]   | Get Experiment status                                                    |
-| [KatibClient][client] | [is_experiment_succeeded][is_suc]     | Check if Experiment status is Succeeded                                  |
-| [KatibClient][client] | [list_trials][list_t]                 | List all Trials of specified Experiment                                  |
-| [KatibClient][client] | [get_optimal_hyperparameters][opt_hp] | Get currentOptimalTrial with parameterAssignments of an Experiment       |
+| Class                 | Method                                 | Description                                                 |
+| --------------------- | -------------------------------------- | ----------------------------------------------------------- |
+| [KatibClient][client] | [create_experiment][create]            | Create the Katib Experiment                                 |
+| [KatibClient][client] | [get_experiment][get_e]                | Get the Katib Experiment                                    |
+| [KatibClient][client] | [get_suggestion][get_s]                | Get the Katib Suggestion                                    |
+| [KatibClient][client] | [delete_experiment][delete]            | Delete the Katib Experiment                                 |
+| [KatibClient][client] | [list_experiments][list_e]             | List all Katib Experiments                                  |
+| [KatibClient][client] | [get_experiment_status][get_status]    | Get the Experiment current status                           |
+| [KatibClient][client] | [is_experiment_succeeded][is_suc]      | Check if Experiment has succeeded                           |
+| [KatibClient][client] | [list_trials][list_t]                  | List all Experiment's Trials                                |
+| [KatibClient][client] | [get_success_trial_details][get_suc_t] | Get the Trial details that have succeeded for an Experiment |
+| [KatibClient][client] | [get_optimal_hyperparameters][opt_hp]  | Get the current optimal Trial from the Experiment           |
 
 [client]: docs/KatibClient.md
 [create]: docs/KatibClient.md#create_experiment
 [get_e]: docs/KatibClient.md#get_experiment
+[get_s]: docs/KatibClient.md#get_suggestion
 [delete]: docs/KatibClient.md#delete_experiment
 [list_e]: docs/KatibClient.md#list_experiments
 [get_status]: docs/KatibClient.md#get_experiment_status
 [is_suc]: docs/KatibClient.md#is_experiment_succeeded
 [list_t]: docs/KatibClient.md#list_trials
+[get_suc_t]: docs/KatibClient.md#get_success_trial_details
 [opt_hp]: docs/KatibClient.md#get_optimal_hyperparameters
 
 ## Documentation For Models
