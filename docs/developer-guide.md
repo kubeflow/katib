@@ -8,6 +8,7 @@
   - [Controller Flags](#controller-flags)
   - [Workflow design](#workflow-design)
   - [Katib admission webhooks](#katib-admission-webhooks)
+    - [Katib cert generator](#katib-cert-generator)
   - [Implement a new algorithm and use it in Katib](#implement-a-new-algorithm-and-use-it-in-katib)
   - [Algorithm settings documentation](#algorithm-settings-documentation)
   - [Katib UI documentation](#katib-ui-documentation)
@@ -90,15 +91,15 @@ Katib uses three [Kubernetes admission webhooks](https://kubernetes.io/docs/refe
 
 1. `validator.experiment.katib.kubeflow.org` -
    [Validating admission webhook](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#validatingadmissionwebhook)
-   to validate Katib Experiment before the creation.
+   to validate the Katib Experiment before the creation.
 
 1. `defaulter.experiment.katib.kubeflow.org` -
    [Mutating admission webhook](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook)
-   to set [default values](../pkg/apis/controller/experiments/v1beta1/experiment_defaults.go)
+   to set the [default values](../pkg/apis/controller/experiments/v1beta1/experiment_defaults.go)
    in the Katib Experiment before the creation.
 
 1. `mutator.pod.katib.kubeflow.org` - Mutating admission webhook to inject the metrics
-   collector sidecar container to the training pod. Learn more about Katib's
+   collector sidecar container to the training pod. Learn more about the Katib's
    metrics collector in the
    [Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/experiment/#metrics-collector).
 
@@ -107,7 +108,9 @@ You can find the YAMLs for the Katib webhooks
 
 **Note:** If you are using a private Kubernetes cluster, you have to allow traffic
 via `TCP:8443` by specifying the firewall rule and you have to update the master
-plane CIDR source range.
+plane CIDR source range to use the Katib webhooks
+
+### Katib cert generator
 
 Katib uses custom `cert-generator` [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/)
 to generate certificates for the webhooks.
@@ -125,7 +128,7 @@ Once Katib is deployed in the Kubernetes cluster, the `cert-generator` Job follo
   controller Deployment spawns the Pod, since controller has `katib-webhook-cert`
   secret volume.
 
-- Patch the webhooks with the CA bundle.
+- Patch the webhooks with the `CABundle`.
 
 You can find the `cert-generator` source code [here](../hack/cert-generator.sh)
 
