@@ -48,7 +48,7 @@ MXNet, PyTorch, XGBoost, and others.
   - [Cleanups](#cleanups)
 - [Quick Start](#quick-start)
 - [Community](#community)
-  - [Blog post](#blog-post)
+  - [Blog posts](#blog-posts)
 - [Contributing](#contributing)
 - [Citation](#citation)
 
@@ -350,7 +350,7 @@ about getting involved in the community:
 - Learn more about Katib in
   [the presentations and demos list](./docs/presentations.md).
 
-### Blog post
+### Blog posts
 
 - [Kubeflow Katib: Scalable, Portable and Cloud Native System for AutoML](https://blog.kubeflow.org/katib/)
   (by Andrey Velichkevich)
