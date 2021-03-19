@@ -42,7 +42,7 @@ You can build the common library with:
 ```bash
 cd /tmp && git clone https://github.com/kubeflow/kubeflow.git \
   && cd kubeflow \
-  && git checkout a349284 \
+  && git checkout 24bcb8e \
   && cd components/crud-web-apps/common/frontend/kubeflow-common-lib
 
 # build the common library module

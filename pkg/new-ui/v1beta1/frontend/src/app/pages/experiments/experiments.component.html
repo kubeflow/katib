@@ -1,5 +1,5 @@
 <lib-namespace-select
-  *ngIf="!env.production"
+  *ngIf="(ns.dashboardConnected$ | async) === dashboardDisconnectedState"
   namespacesUrl="/katib/fetch_namespaces"
 ></lib-namespace-select>
 
