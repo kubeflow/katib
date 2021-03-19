@@ -52,4 +52,4 @@ ${CODEGEN_PKG}/generate-groups.sh \
     github.com/kubeflow/katib/pkg/client/controller \
     github.com/kubeflow/katib/pkg/apis/controller \
     "${GROUP_VERSIONS}" \
-    --go-header-file ${PROJECT_ROOT}/hack/boilerplate.go.txt
+    --go-header-file ${PROJECT_ROOT}/hack/boilerplate/boilerplate.go.txt

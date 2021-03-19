@@ -47,7 +47,7 @@ for VERSION in ${VERSION_LIST[@]}; do
 
   echo "Generating OpenAPI specification for ${VERSION} ..."
   go run ${CODEGEN_PKG}/cmd/openapi-gen/main.go \
-    --go-header-file ${PROJECT_ROOT}/hack/boilerplate.go.txt \
+    --go-header-file ${PROJECT_ROOT}/hack/boilerplate/boilerplate.go.txt \
     --input-dirs github.com/kubeflow/katib/pkg/apis/controller/common/${VERSION},github.com/kubeflow/katib/pkg/apis/controller/experiments/${VERSION},github.com/kubeflow/katib/pkg/apis/controller/suggestions/${VERSION},github.com/kubeflow/katib/pkg/apis/controller/trials/${VERSION} \
     --output-package github.com/kubeflow/katib/pkg/apis/${VERSION} \
     $@
