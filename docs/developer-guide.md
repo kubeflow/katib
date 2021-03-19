@@ -7,6 +7,7 @@
   - [Modify controller APIs](#modify-controller-apis)
   - [Controller Flags](#controller-flags)
   - [Workflow design](#workflow-design)
+  - [Katib admission webhooks](#katib-admission-webhooks)
   - [Implement a new algorithm and use it in Katib](#implement-a-new-algorithm-and-use-it-in-katib)
   - [Algorithm settings documentation](#algorithm-settings-documentation)
   - [Katib UI documentation](#katib-ui-documentation)
@@ -40,6 +41,10 @@ Check source code as follows:
 make build REGISTRY=<image-registry> TAG=<image-tag>
 ```
 
+To use your custom images for the Katib component, modify
+[Kustomization file](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/installs/katib-standalone/kustomization.yaml)
+and [Katib config patch](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/installs/katib-standalone/katib-config-patch.yaml)
+
 You can deploy Katib v1beta1 manifests into a k8s cluster as follows:
 
 ```bash
@@ -54,9 +59,9 @@ make undeploy
 
 ## Modify controller APIs
 
-If you want to modify Katib controller APIs you have to
-generate deepcopy, clientset, listers, informers, open-api and python SDK with changed APIs.
-You can update necessary files as follows:
+If you want to modify Katib controller APIs, you have to
+generate deepcopy, clientset, listers, informers, open-api and Python SDK with the changed APIs.
+You can update the necessary files as follows:
 
 ```bash
 make generate
@@ -78,6 +83,51 @@ Below is a list of command-line flags accepted by Katib controller:
 ## Workflow design
 
 Please see [workflow-design.md](./workflow-design.md).
+
+## Katib admission webhooks
+
+Katib uses three [Kubernetes admission webhooks](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/).
+
+1. `validator.experiment.katib.kubeflow.org` -
+   [Validating admission webhook](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#validatingadmissionwebhook)
+   to validate Katib Experiment before the creation.
+
+1. `defaulter.experiment.katib.kubeflow.org` -
+   [Mutating admission webhook](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook)
+   to set [default values](../pkg/apis/controller/experiments/v1beta1/experiment_defaults.go)
+   in the Katib Experiment before the creation.
+
+1. `mutator.pod.katib.kubeflow.org` - Mutating admission webhook to inject the metrics
+   collector sidecar container to the training pod. Learn more about Katib's
+   metrics collector in the
+   [Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/experiment/#metrics-collector).
+
+You can find the YAMLs for the Katib webhooks
+[here](../manifests/v1beta1/components/webhook/webhooks.yaml).
+
+**Note:** If you are using a private Kubernetes cluster, you have to allow traffic
+via `TCP:8443` by specifying the firewall rule and you have to update the master
+plane CIDR source range.
+
+Katib uses custom `cert-generator` [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/)
+to generate certificates for the webhooks.
+
+Once Katib is deployed in the Kubernetes cluster, the `cert-generator` Job follows these steps:
+
+- Generate a certificate using [`openssl`](https://www.openssl.org/).
+
+- Create a Kubernetes [Certificate Signing Request](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/)
+  to approve and sign the certificate.
+
+- Create a Kubernetes Secret with the signed certificate. Secret has
+  the `katib-webhook-cert` name and `cert-generator` Job's `ownerReference` to
+  clean-up resources once Katib is uninstalled. Once Secret is created, Katib
+  controller Deployment spawns the Pod, since controller has `katib-webhook-cert`
+  secret volume.
+
+- Patch the webhooks with the CA bundle.
+
+You can find the `cert-generator` source code [here](../hack/cert-generator.sh)
 
 ## Implement a new algorithm and use it in Katib
 
