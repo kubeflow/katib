@@ -29,10 +29,11 @@ done
 
 # Generate boilerplate for the Python files
 # in ./pkg ./cmd ./hack and ./test
-# Exclude gRPC manager from the search
+# Exclude gRPC manager and __init__.py files from the search.
 find_python_files=$(
   find ./cmd ./pkg ./hack ./test -name "*.py" \
-    ! -path "./pkg/apis/manager/*"
+    ! -path "./pkg/apis/manager/*" \
+    ! -path "*__init__.py"
 )
 
 for i in ${find_python_files}; do
