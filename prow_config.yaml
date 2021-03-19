@@ -18,23 +18,26 @@ workflows:
       - pkg/common/v1beta1/*
       - pkg/controller.v1beta1/*
       - pkg/db/v1beta1/*
-      - pkg/job/v1beta1/*
+      - pkg/earlystopping/v1beta1/*
       - pkg/metricscollector/v1beta1/*
+      - pkg/new-ui/v1beta1/*
       - pkg/suggestion/v1beta1/*
       - pkg/ui/v1beta1/*
       - pkg/util/v1beta1/*
       - pkg/webhook/v1beta1/*
       - cmd/cert-generator/v1beta1/*
       - cmd/db-manager/v1beta1/*
+      - cmd/earlystopping/medianstop/v1beta1/*
       - cmd/katib-controller/v1beta1/*
       - cmd/metricscollector/v1beta1/*
+      - cmd/new-ui/v1beta1/*
       - cmd/suggestion/chocolate/v1beta1/*
+      - cmd/suggestion/goptuna/v1beta1/*
       - cmd/suggestion/hyperband/v1beta1/*
       - cmd/suggestion/hyperopt/v1beta1/*
-      - cmd/suggestion/nas/enas/v1beta1/*
       - cmd/suggestion/nas/darts/v1beta1/*
+      - cmd/suggestion/nas/enas/v1beta1/*
       - cmd/suggestion/skopt/v1beta1/*
-      - cmd/suggestion/goptuna/v1beta1/*
       - cmd/ui/v1beta1/*
       - examples/v1beta1/*
       - hack/*
