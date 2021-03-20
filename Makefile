@@ -76,3 +76,7 @@ endif
 # Prettier UI format check for Katib v1beta1.
 prettier-check:
 	npm run format:check --prefix pkg/ui/v1beta1/frontend
+
+# Update boilerplate for the source code.
+update-boilerplate:
+	./hack/boilerplate/update-boilerplate.sh

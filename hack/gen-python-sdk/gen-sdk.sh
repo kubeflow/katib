@@ -29,7 +29,6 @@ KATIB_VERSIONS=(v1beta1)
 
 echo "Downloading the swagger-codegen JAR package ..."
 wget -O ${SWAGGER_CODEGEN_JAR} ${SWAGGER_JAR_URL}
-exit 1
 
 for VERSION in ${KATIB_VERSIONS[@]}; do
     echo "Generating Python SDK for Kubeflow Katib ${VERSION} ..."
