@@ -1,4 +1,4 @@
-# Copyright 2019 kubeflow.org.
+# Copyright 2021 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,22 +14,23 @@
 
 import os
 
+
 def is_running_in_k8s():
-  return os.path.isdir('/var/run/secrets/kubernetes.io/')
+    return os.path.isdir('/var/run/secrets/kubernetes.io/')
 
 
 def get_current_k8s_namespace():
-  with open('/var/run/secrets/kubernetes.io/serviceaccount/namespace', 'r') as f:
-    return f.readline()
+    with open('/var/run/secrets/kubernetes.io/serviceaccount/namespace', 'r') as f:
+        return f.readline()
 
 
 def get_default_target_namespace():
-  if not is_running_in_k8s():
-    return 'default'
-  return get_current_k8s_namespace()
+    if not is_running_in_k8s():
+        return 'default'
+    return get_current_k8s_namespace()
 
 
 def set_katib_namespace(katib):
-  katib_namespace = katib.metadata.namespace
-  namespace = katib_namespace or get_default_target_namespace()
-  return namespace
+    katib_namespace = katib.metadata.namespace
+    namespace = katib_namespace or get_default_target_namespace()
+    return namespace
