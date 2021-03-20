@@ -17,7 +17,6 @@
 # This script is used to update or add the boilerplate.
 
 # ------------------ Go files ------------------
-# Check dirs: in  ./cmd ./pkg ./hack and ./test
 # Exclude client, gRPC manager, swagger, deepcopy and mock dirs from the search.
 find_go_files=$(
   find ./cmd ./pkg ./hack ./test -name "*.go" \
@@ -38,11 +37,11 @@ for i in ${find_go_files}; do
     echo "Add the new boilerplate to $i"
     cat $i >$i.tmp
   fi
+  # Add the new boilerplate to the file.
   cat ./hack/boilerplate/boilerplate.go.txt $i.tmp >$i && rm $i.tmp
 done
 
 # ------------------ Python files ------------------
-# Check dirs: ./pkg ./cmd ./hack and ./test
 # Exclude gRPC manager and __init__.py files from the search.
 find_python_files=$(
   find ./cmd ./pkg ./hack ./test -name "*.py" \
@@ -60,18 +59,16 @@ for i in ${find_python_files}; do
     echo "Add the new boilerplate to $i"
     cat $i >$i.tmp
   fi
-  # Add new boilerplate to the file.
+  # Add the new boilerplate to the file.
   cat ./hack/boilerplate/boilerplate.py.txt $i.tmp >$i && rm $i.tmp
 done
 
-# ------------------ Shell scripts ------------------
-# Check dirs: ./pkg ./hack ./scripts and ./test
-# Exclude gRPC manager and __init__.py files from the search.
+# ------------------ Shell files ------------------
 find_shell_files=$(find ./pkg ./hack ./scripts ./test -name "*.sh")
 
 for i in ${find_shell_files}; do
   # If the 3rd line starts with "# Copyright" remove the boilerplate.
-  # In the shell scripts we don't remove the first line.
+  # In the shell files we don't remove the first line.
   if [[ $(sed -n 3p $i) =~ "# Copyright" ]]; then
     echo "Remove the current boilerplate and add the new boilerplate to $i"
     sed -e "2,15d" $i >$i.tmp
@@ -80,6 +77,6 @@ for i in ${find_shell_files}; do
     echo "Add the new boilerplate to $i"
     cat $i >$i.tmp
   fi
-  # Add new boilerplate to the file with the first line.
+  # Add the new boilerplate to the file with the first line.
   (head -2 $i.tmp && cat ./hack/boilerplate/boilerplate.sh.txt && tail -n +3 $i.tmp) >$i && rm $i.tmp
 done
