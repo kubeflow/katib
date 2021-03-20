@@ -17,7 +17,7 @@
 # This script is used to update or add the boilerplate.
 
 # ------------------ Go files ------------------
-# Exclude client, gRPC manager, swagger, deepcopy and mock dirs from the search.
+# Exclude client, gRPC manager, swagger, deepcopy and mock from the search.
 find_go_files=$(
   find ./cmd ./pkg ./hack ./test -name "*.go" \
     ! -path "./pkg/client/*" \
@@ -28,11 +28,11 @@ find_go_files=$(
 )
 
 for i in ${find_go_files}; do
-  # If the 2nd line starts with "Copyright" remove the current boilerplate.
+  # If the 2nd line starts with "Copyright", remove the current boilerplate.
   if [[ $(sed -n 2p $i) =~ "Copyright" ]]; then
     echo "Remove the current boilerplate and add the new boilerplate to $i"
     tail -n +17 $i >$i.tmp
-  # Otherwise, add the new boilerplate to the file.
+  # Otherwise, copy the whole file.
   else
     echo "Add the new boilerplate to $i"
     cat $i >$i.tmp
@@ -50,11 +50,11 @@ find_python_files=$(
 )
 
 for i in ${find_python_files}; do
-  # If the 1st line starts with "# Copyright" remove the boilerplate.
+  # If the 1st line starts with "# Copyright", remove the boilerplate.
   if [[ $(sed -n 1p $i) =~ "# Copyright" ]]; then
     echo "Remove the current boilerplate and add the new boilerplate to $i"
     tail -n +15 $i >$i.tmp
-  # Otherwise, add the new boilerplate to the file.
+  # Otherwise, copy the whole file.
   else
     echo "Add the new boilerplate to $i"
     cat $i >$i.tmp
@@ -67,16 +67,16 @@ done
 find_shell_files=$(find ./pkg ./hack ./scripts ./test -name "*.sh")
 
 for i in ${find_shell_files}; do
-  # If the 3rd line starts with "# Copyright" remove the boilerplate.
-  # In the shell files we don't remove the first line.
+  # If the 3rd line starts with "# Copyright", remove the boilerplate.
+  # In the shell files we should save the first line.
   if [[ $(sed -n 3p $i) =~ "# Copyright" ]]; then
     echo "Remove the current boilerplate and add the new boilerplate to $i"
     sed -e "2,15d" $i >$i.tmp
-  # Otherwise, add the new boilerplate to the file.
+  # Otherwise, copy the whole file.
   else
     echo "Add the new boilerplate to $i"
     cat $i >$i.tmp
   fi
-  # Add the new boilerplate to the file with the first line.
+  # Add the new boilerplate to the file.
   (head -2 $i.tmp && cat ./hack/boilerplate/boilerplate.sh.txt && tail -n +3 $i.tmp) >$i && rm $i.tmp
 done
