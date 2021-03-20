@@ -5,8 +5,6 @@ syntax = "proto3";
 
 package api.v1.beta1;
 
-import "google/api/annotations.proto";
-
 /**
  * DBManager service defines APIs to manage Katib database.
  */
