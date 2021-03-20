@@ -1,9 +1,23 @@
 #!/bin/bash
 
-# This script is used to update or add the boilerplate in Go and Python files.
+# Copyright 2021 The Kubeflow Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-# Generate boilerplate for the Go files
-# in  ./cmd ./pkg ./hack and ./test dirs
+# This script is used to update or add the boilerplate.
+
+# ------------------ Go files ------------------
+# Check dirs: in  ./cmd ./pkg ./hack and ./test
 # Exclude client, gRPC manager, swagger, deepcopy and mock dirs from the search.
 find_go_files=$(
   find ./cmd ./pkg ./hack ./test -name "*.go" \
@@ -18,17 +32,17 @@ for i in ${find_go_files}; do
   # If the 2nd line starts with "Copyright" remove the current boilerplate.
   if [[ $(sed -n 2p $i) =~ "Copyright" ]]; then
     echo "Remove the current boilerplate and add the new boilerplate to $i"
-    tail -n +17 $i >$i.temp
+    tail -n +17 $i >$i.tmp
   # Otherwise, add the new boilerplate to the file.
   else
     echo "Add the new boilerplate to $i"
-    cat $i >$i.temp
+    cat $i >$i.tmp
   fi
-  cat ./hack/boilerplate/boilerplate.go.txt $i.temp >$i && rm $i.temp
+  cat ./hack/boilerplate/boilerplate.go.txt $i.tmp >$i && rm $i.tmp
 done
 
-# Generate boilerplate for the Python files
-# in ./pkg ./cmd ./hack and ./test
+# ------------------ Python files ------------------
+# Check dirs: ./pkg ./cmd ./hack and ./test
 # Exclude gRPC manager and __init__.py files from the search.
 find_python_files=$(
   find ./cmd ./pkg ./hack ./test -name "*.py" \
@@ -40,12 +54,32 @@ for i in ${find_python_files}; do
   # If the 1st line starts with "# Copyright" remove the boilerplate.
   if [[ $(sed -n 1p $i) =~ "# Copyright" ]]; then
     echo "Remove the current boilerplate and add the new boilerplate to $i"
-    tail -n +15 $i >$i.temp
+    tail -n +15 $i >$i.tmp
   # Otherwise, add the new boilerplate to the file.
   else
     echo "Add the new boilerplate to $i"
-    cat $i >$i.temp
+    cat $i >$i.tmp
   fi
   # Add new boilerplate to the file.
-  cat ./hack/boilerplate/boilerplate.python.txt $i.temp >$i && rm $i.temp
+  cat ./hack/boilerplate/boilerplate.py.txt $i.tmp >$i && rm $i.tmp
+done
+
+# ------------------ Shell scripts ------------------
+# Check dirs: ./pkg ./hack ./scripts and ./test
+# Exclude gRPC manager and __init__.py files from the search.
+find_shell_files=$(find ./pkg ./hack ./scripts ./test -name "*.sh")
+
+for i in ${find_shell_files}; do
+  # If the 3rd line starts with "# Copyright" remove the boilerplate.
+  # In the shell scripts we don't remove the first line.
+  if [[ $(sed -n 3p $i) =~ "# Copyright" ]]; then
+    echo "Remove the current boilerplate and add the new boilerplate to $i"
+    sed -e "2,15d" $i >$i.tmp
+  # Otherwise, add the new boilerplate to the file.
+  else
+    echo "Add the new boilerplate to $i"
+    cat $i >$i.tmp
+  fi
+  # Add new boilerplate to the file with the first line.
+  (head -2 $i.tmp && cat ./hack/boilerplate/boilerplate.sh.txt && tail -n +3 $i.tmp) >$i && rm $i.tmp
 done
