@@ -70,9 +70,15 @@ fi
 echo -e "\nUpdating Katib image tags to ${TAG}\n"
 # For MacOS we should set -i '' to avoid temp files from sed.
 if [[ $(uname) == "Darwin" ]]; then
-  find ./manifests/v1beta1/installs -regex ".*\.yaml" -exec sed -i '' -e "s@newTag: .*@newTag: ${TAG}@" {} \;
+  sed -i '' -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-external-db/kustomization.yaml
+  sed -i '' -e "s@:[^[:space:]].*\"@:${TAG}\"@" ./manifests/v1beta1/installs/katib-standalone/katib-config-patch.yaml
+  sed -i '' -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-standalone/kustomization.yaml
+  sed -i '' -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-with-kubeflow/kustomization.yaml
 else
-  find ./manifests/v1beta1/installs -regex ".*\.yaml" -exec sed -i -e "s@newTag: .*@newTag: ${TAG}@" {} \;
+  sed -i -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-external-db/kustomization.yaml
+  sed -i -e "s@:[^[:space:]].*\"@:${TAG}\"@" ./manifests/v1beta1/installs/katib-standalone/katib-config-patch.yaml
+  sed -i -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-standalone/kustomization.yaml
+  sed -i -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-with-kubeflow/kustomization.yaml
 fi
 echo -e "Katib images have been updated\n"
 
@@ -95,7 +101,7 @@ python3 setup.py sdist bdist_wheel
 twine upload dist/*
 rm -r dist/ build/
 cd ../../..
-echo -e "Katib Python SDK ${SDK_VERSION} has been published\n"
+echo -e "\nKatib Python SDK ${sdk_version} has been published\n"
 
 # ------------------ Commit changes ------------------
 git commit -a -m "Katib official release ${TAG}"
@@ -104,7 +110,7 @@ git tag ${TAG}
 
 # ------------------ Publish Katib images ------------------
 # Publish images to the registry with 2 tags: ${TAG} and v1beta1-<commit-sha>
-echo -e "Publishing Katib images\n"
+echo -e "\nPublishing Katib images\n"
 make push-tag TAG=${TAG}
 echo -e "Katib images have been published\n"
 
