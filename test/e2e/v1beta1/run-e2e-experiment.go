@@ -128,7 +128,7 @@ func main() {
 			exp.Name, maxTrials, parallelTrials)
 
 		// Wait until Experiment is restarted.
-		timeout := 10 * time.Second
+		timeout := 60 * time.Second
 		endTime := time.Now().Add(timeout)
 		for time.Now().Before(endTime) {
 			exp, err = kclient.GetExperiment(exp.Name, exp.Namespace)
