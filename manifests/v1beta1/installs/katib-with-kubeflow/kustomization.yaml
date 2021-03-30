@@ -32,7 +32,8 @@ images:
     newName: docker.io/kubeflowkatib/cert-generator
 
 patchesStrategicMerge:
-  - ../katib-standalone/katib-config-patch.yaml
+  - katib-config-patch.yaml
+  - remove-pv-patch.yaml
 
 patchesJson6902:
   - path: patches/mysql-pvc.yaml
@@ -51,5 +52,7 @@ vars:
     kind: Deployment
     name: katib-ui
 
+commonLabels:
+  app.kubernetes.io/component: katib
 configurations:
   - params.yaml
