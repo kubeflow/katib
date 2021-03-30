@@ -45,8 +45,18 @@ images:
   - name: docker.io/kubeflowkatib/cert-generator
     newTag: latest
     newName: docker.io/kubeflowkatib/cert-generator
+
 patchesStrategicMerge:
   - ../katib-standalone/katib-config-patch.yaml
+
+patchesJson6902:
+  - path: patches/mysql-pvc.yaml
+    target:
+      version: v1
+      name: katib-mysql
+      kind: PersistentVolumeClaim
+      namespace: kubeflow
+
 commonLabels:
   app.kubernetes.io/component: katib
 
