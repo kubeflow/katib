@@ -3,31 +3,17 @@ kind: Kustomization
 namespace: kubeflow
 resources:
   # Katib controller.
-  - ../../components/controller/controller.yaml
-  - ../../components/controller/service.yaml
-  - ../../components/controller/rbac.yaml
-  - ../../components/controller/katib-config.yaml
-  - ../../components/controller/trial-templates.yaml
+  - ../../components/controller/
   # Katib CRDs.
-  - ../../components/crd/experiment.yaml
-  - ../../components/crd/suggestion.yaml
-  - ../../components/crd/trial.yaml
+  - ../../components/crd/
   # Katib DB manager.
-  - ../../components/db-manager/db-manager.yaml
-  - ../../components/db-manager/service.yaml
+  - ../../components/db-manager/
   # Katib DB mysql.
-  - ../../components/mysql/mysql.yaml
-  - ../../components/mysql/service.yaml
-  - ../../components/mysql/pvc.yaml
-  - ../../components/mysql/secret.yaml
+  - ../../components/mysql/
   # Katib UI.
-  - ../../components/ui/ui.yaml
-  - ../../components/ui/service.yaml
-  - ../../components/ui/rbac.yaml
+  - ../../components/ui/
   # Katib webhooks.
-  - ../../components/webhook/cert-generator.yaml
-  - ../../components/webhook/rbac.yaml
-  - ../../components/webhook/webhooks.yaml
+  - ../../components/webhook/
   # Kubeflow Katib components.
   - kubeflow-katib-roles.yaml
   - ui-virtual-service.yaml
