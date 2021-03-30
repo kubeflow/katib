@@ -49,5 +49,15 @@ patchesStrategicMerge:
   - ../katib-standalone/katib-config-patch.yaml
 commonLabels:
   app.kubernetes.io/component: katib
+
+vars:
+- fieldref:
+    fieldPath: metadata.namespace
+  name: KATIB_UI_NAMESPACE
+  objref:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: katib-ui
+
 configurations:
   - params.yaml
