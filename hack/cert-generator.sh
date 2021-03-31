@@ -68,7 +68,9 @@ fi
 set -e
 echo "INFO: Creating CSR: ${csr_name}"
 
-cat <<EOF | kubectl create -f -
+# signerName is not supported in Kubernetes <= 1.17
+# See: https://github.com/kubeflow/katib/issues/1500
+cat <<EOF | kubectl create --validate=false -f -
 apiVersion: certificates.k8s.io/v1beta1
 kind: CertificateSigningRequest
 metadata:
