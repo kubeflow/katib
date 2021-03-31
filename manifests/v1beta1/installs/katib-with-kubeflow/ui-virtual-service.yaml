@@ -15,6 +15,6 @@ spec:
         uri: /katib/
       route:
         - destination:
-            host: katib-ui.$(katib-ui-namespace).svc.$(clusterDomain)
+            host: katib-ui.$(KATIB_UI_NAMESPACE).svc.cluster.local
             port:
               number: 80
