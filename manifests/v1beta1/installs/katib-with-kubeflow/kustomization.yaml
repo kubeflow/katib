@@ -29,7 +29,6 @@ resources:
   - ../../components/webhook/rbac.yaml
   - ../../components/webhook/webhooks.yaml
   # Kubeflow Katib components.
-  - katib-application.yaml
   - kubeflow-katib-roles.yaml
   - ui-virtual-service.yaml
 images:
@@ -56,9 +55,6 @@ patchesJson6902:
       name: katib-mysql
       kind: PersistentVolumeClaim
       namespace: kubeflow
-
-commonLabels:
-  app.kubernetes.io/component: katib
 
 vars:
 - fieldref:
