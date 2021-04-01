@@ -199,7 +199,7 @@ func main() {
 
 func waitExperimentFinish(kclient katibclient.Client, exp *experimentsv1beta1.Experiment) (*experimentsv1beta1.Experiment, error) {
 	// Experiment should be completed before the timeout.
-	timeout := 30 * time.Minute
+	timeout := 50 * time.Minute
 	for endTime := time.Now().Add(timeout); time.Now().Before(endTime); {
 		exp, err := kclient.GetExperiment(exp.Name, exp.Namespace)
 		if err != nil {
