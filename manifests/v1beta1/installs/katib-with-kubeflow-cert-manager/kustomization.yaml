@@ -29,7 +29,6 @@ resources:
   # Cert-manager certificate for webhooks
   - certificate.yaml
   # Kubeflow Katib components.
-  - ../katib-with-kubeflow/katib-application.yaml
   - ../katib-with-kubeflow/kubeflow-katib-roles.yaml
   - ../katib-with-kubeflow/ui-virtual-service.yaml
 images:
@@ -57,9 +56,6 @@ patchesJson6902:
       name: katib-mysql
       kind: PersistentVolumeClaim
       namespace: kubeflow
-
-commonLabels:
-  app.kubernetes.io/component: katib
 
 vars:
 - fieldref:
