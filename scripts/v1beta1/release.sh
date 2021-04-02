@@ -74,11 +74,13 @@ if [[ $(uname) == "Darwin" ]]; then
   sed -i '' -e "s@:[^[:space:]].*\"@:${TAG}\"@" ./manifests/v1beta1/installs/katib-standalone/katib-config-patch.yaml
   sed -i '' -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-standalone/kustomization.yaml
   sed -i '' -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-with-kubeflow/kustomization.yaml
+  sed -i '' -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-with-kubeflow-cert-manager/kustomization.yaml
 else
   sed -i -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-external-db/kustomization.yaml
   sed -i -e "s@:[^[:space:]].*\"@:${TAG}\"@" ./manifests/v1beta1/installs/katib-standalone/katib-config-patch.yaml
   sed -i -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-standalone/kustomization.yaml
   sed -i -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-with-kubeflow/kustomization.yaml
+  sed -i -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-with-kubeflow-cert-manager/kustomization.yaml
 fi
 echo -e "Katib images have been updated\n"
 
