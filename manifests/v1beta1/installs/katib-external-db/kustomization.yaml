@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: kubeflow
 resources:
   # Namespace.
-  - namespace.yaml
+  - ../../components/namespace
   # Katib controller.
   - ../../components/controller/
   # Katib CRDs.
