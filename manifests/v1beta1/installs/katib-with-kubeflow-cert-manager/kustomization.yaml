@@ -1,0 +1,56 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kubeflow
+resources:
+  - ../katib-with-kubeflow
+  # Cert-manager certificate for webhooks
+  - certificate.yaml
+images:
+  - name: docker.io/kubeflowkatib/katib-controller
+    newTag: latest
+    newName: docker.io/kubeflowkatib/katib-controller
+  - name: docker.io/kubeflowkatib/katib-db-manager
+    newTag: latest
+    newName: docker.io/kubeflowkatib/katib-db-manager
+  - name: docker.io/kubeflowkatib/katib-ui
+    newTag: latest
+    newName: docker.io/kubeflowkatib/katib-ui
+  - name: docker.io/kubeflowkatib/cert-generator
+    newTag: latest
+    newName: docker.io/kubeflowkatib/cert-generator
+
+patchesStrategicMerge:
+  - patches/katib-cert-injection.yaml
+  - |-
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: katib-cert-generator
+      namespace: kubeflow
+    $patch: delete
+vars:
+- fieldref:
+    fieldPath: metadata.namespace
+  name: KATIB_NAMESPACE
+  objref:
+    apiVersion: v1
+    kind: Service
+    name: katib-controller
+- fieldref:
+    fieldPath: metadata.name
+  name: KATIB_SERVICE_NAME
+  objref:
+    apiVersion: v1
+    kind: Service
+    name: katib-controller
+- name: KATIB_CERT_NAME
+  objref:
+      kind: Certificate
+      group: cert-manager.io
+      version: v1alpha2
+      name: katib-webhook-cert
+  fieldref:
+    fieldpath: metadata.name
+
+configurations:
+  - params.yaml
