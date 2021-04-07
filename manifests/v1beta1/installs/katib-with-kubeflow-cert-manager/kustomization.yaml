@@ -21,6 +21,13 @@ images:
 
 patchesStrategicMerge:
   - patches/katib-cert-injection.yaml
+  - |-
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: katib-cert-generator
+      namespace: kubeflow
+    $patch: delete
 
 vars:
 - fieldref:
