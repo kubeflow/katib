@@ -29,5 +29,3 @@ images:
   - name: docker.io/kubeflowkatib/cert-generator
     newTag: latest
     newName: docker.io/kubeflowkatib/cert-generator
-patchesStrategicMerge:
-  - katib-config-patch.yaml
