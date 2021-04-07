@@ -32,7 +32,7 @@ images:
     newName: docker.io/kubeflowkatib/cert-generator
 
 patchesStrategicMerge:
-  - remove-pv-patch.yaml
+  - patches/remove-pv-patch.yaml
 
 patchesJson6902:
   - path: patches/mysql-pvc.yaml
