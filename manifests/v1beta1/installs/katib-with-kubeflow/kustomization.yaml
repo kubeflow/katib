@@ -32,7 +32,6 @@ images:
     newName: docker.io/kubeflowkatib/cert-generator
 
 patchesStrategicMerge:
-  - katib-config-patch.yaml
   - remove-pv-patch.yaml
 
 patchesJson6902:
