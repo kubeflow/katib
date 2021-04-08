@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
+        with:
+          path: /home/runner/go/src/github.com/${{ github.repository }}
 
       - name: Set up Go 1.15.8
         uses: actions/setup-go@v2
