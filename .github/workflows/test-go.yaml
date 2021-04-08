@@ -17,13 +17,10 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.15.8
-        run: make check
-
-      - name: Run Go check
-        run: make check
 
       - name: Run Go test
-        run: make test
-
-      - name: Create Coveralls Report
-        run: goveralls -coverprofile=coverage.out
+        run: |
+          export GOPATH=/home/runner/go
+          make check
+          make test
+          goveralls -coverprofile=coverage.out
