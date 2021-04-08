@@ -10,19 +10,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out code
-      uses: actions/checkout@v2
+      - name: Check out code
+        uses: actions/checkout@v2
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get install python3-setuptools
-        sudo pip3 install black flake8
+      - name: Install dependencies
+        run: |
+          sudo apt-get install python3-setuptools
+          sudo pip3 install black flake8
 
-    - name: Check black
-      run: black --check operators
+      - name: Check black
+        run: black --check operators
 
-    - name: Check flake8
-      run: cd operators && flake8
+      - name: Check flake8
+        run: cd operators && flake8
 
   build:
     name: Test
