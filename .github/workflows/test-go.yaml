@@ -21,6 +21,7 @@ jobs:
       - name: Run Go test
         run: |
           export GOPATH=/home/runner/go
+          go mod download
           make check
           make test
           goveralls -coverprofile=coverage.out
