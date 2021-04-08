@@ -21,6 +21,10 @@ jobs:
       - name: Run Go test
         run: |
           export GOPATH=/home/runner/go
+          ls -A
+          ls -A hack/
+          ls -a hack/boilerplate/
+          pwd
           go mod download
           make check
           make test
