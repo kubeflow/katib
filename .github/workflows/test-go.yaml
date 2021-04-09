@@ -37,5 +37,7 @@ jobs:
           make check
           make test
 
-          go get github.com/mattn/goveralls
-          goveralls -coverprofile=coverage.out
+      - name: Coveralls report
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
