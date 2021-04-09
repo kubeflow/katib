@@ -41,3 +41,7 @@ jobs:
         uses: shogo82148/actions-goveralls@v1
         with:
           path-to-profile: coverage.out
+          working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
+        run: |
+          ls -A
+          pwd
