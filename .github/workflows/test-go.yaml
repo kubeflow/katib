@@ -9,16 +9,16 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     env:
-      GOPATH: ${{ github.workspace }}
+      GOPATH: ${{ github.workspace }}/go
     defaults:
       run:
-        working-directory: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
+        working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
 
     steps:
       - name: Check out code
         uses: actions/checkout@v2
         with:
-          path: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
+          path: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
 
       - name: Set up Go 1.15.8
         uses: actions/setup-go@v2
