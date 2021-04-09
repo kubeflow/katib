@@ -38,6 +38,6 @@ jobs:
           make test
 
       - name: Coveralls report
-        uses: coverallsapp/github-action@master
+        uses: shogo82148/actions-goveralls@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-profile: coverage.out
