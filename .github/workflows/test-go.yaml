@@ -8,12 +8,17 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    env:
+      GOPATH: ${{ github.workspace }}
+    defaults:
+      run:
+        working-directory: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
 
     steps:
       - name: Check out code
         uses: actions/checkout@v2
         with:
-          path: /home/runner/go/src/github.com/${{ github.repository }}
+          path: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
 
       - name: Set up Go 1.15.8
         uses: actions/setup-go@v2
@@ -22,7 +27,7 @@ jobs:
 
       - name: Run Go test
         run: |
-          export GOPATH=/home/runner/go
+          echo $GOPATH
           ls -A
           ls -A hack/
           ls -a hack/boilerplate/
