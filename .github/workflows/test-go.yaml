@@ -42,6 +42,3 @@ jobs:
         with:
           path-to-profile: coverage.out
           working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
-        run: |
-          ls -A
-          pwd
