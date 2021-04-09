@@ -27,7 +27,7 @@ jobs:
 
       - name: Run Go test
         run: |
-          go mod download -x
+          go mod download
 
           curl -L -O "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.7/kubebuilder_1.0.7_linux_amd64.tar.gz"
           tar -zxvf kubebuilder_1.0.7_linux_amd64.tar.gz
@@ -36,4 +36,6 @@ jobs:
 
           make check
           make test
+
+          go get github.com/mattn/goveralls
           goveralls -coverprofile=coverage.out
