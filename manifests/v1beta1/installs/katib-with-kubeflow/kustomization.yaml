@@ -43,7 +43,5 @@ vars:
     kind: Deployment
     name: katib-ui
 
-commonLabels:
-  app.kubernetes.io/component: katib
 configurations:
   - params.yaml
