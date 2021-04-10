@@ -2,38 +2,28 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: kubeflow
 resources:
-  # Katib controller.
-  - ../../components/controller/
-  # Katib CRDs.
-  - ../../components/crd/
-  # Katib DB manager.
-  - ../../components/db-manager/
-  # Katib DB mysql.
-  - ../../components/mysql/
-  # Katib UI.
-  - ../../components/ui/
-  # Katib webhooks.
-  - ../../components/webhook/
+  - ../katib-cert-manager
   # Kubeflow Katib components.
   - kubeflow-katib-roles.yaml
   - ui-virtual-service.yaml
 images:
   - name: docker.io/kubeflowkatib/katib-controller
-    newTag: latest
     newName: docker.io/kubeflowkatib/katib-controller
+    newTag: latest
   - name: docker.io/kubeflowkatib/katib-db-manager
-    newTag: latest
     newName: docker.io/kubeflowkatib/katib-db-manager
+    newTag: latest
   - name: docker.io/kubeflowkatib/katib-ui
-    newTag: latest
     newName: docker.io/kubeflowkatib/katib-ui
-  - name: docker.io/kubeflowkatib/cert-generator
     newTag: latest
-    newName: docker.io/kubeflowkatib/cert-generator
-
 patchesStrategicMerge:
-  - remove-pv-patch.yaml
-
+  - patches/remove-pv-patch.yaml
+  - |-
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: kubeflow
+    $patch: delete
 patchesJson6902:
   - path: patches/mysql-pvc.yaml
     target:
@@ -41,15 +31,14 @@ patchesJson6902:
       name: katib-mysql
       kind: PersistentVolumeClaim
       namespace: kubeflow
-
 vars:
-  - fieldref:
-      fieldPath: metadata.namespace
-    name: KATIB_UI_NAMESPACE
-    objref:
-      apiVersion: apps/v1
-      kind: Deployment
-      name: katib-ui
+- fieldref:
+    fieldPath: metadata.namespace
+  name: KATIB_UI_NAMESPACE
+  objref:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: katib-ui
 
 commonLabels:
   app.kubernetes.io/component: katib
