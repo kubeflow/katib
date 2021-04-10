@@ -1,0 +1,24 @@
+name: Frontend Test
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 12.18.1
+
+      - name: Run Node test
+        run: |
+          npm install --global prettier@2.2.0
+          make prettier-check
