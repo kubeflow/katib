@@ -28,6 +28,25 @@ patchesStrategicMerge:
       name: katib-cert-generator
       namespace: kubeflow
     $patch: delete
+  - |-
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      name: katib-cert-generator
+    $patch: delete
+  - |-
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: katib-cert-generator
+      namespace: kubeflow
+    $patch: delete
+  - |-
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    metadata:
+      name: katib-cert-generator
+    $patch: delete
 
 vars:
 - fieldref:
