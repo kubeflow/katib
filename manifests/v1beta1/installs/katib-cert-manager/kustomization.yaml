@@ -15,9 +15,6 @@ images:
   - name: docker.io/kubeflowkatib/katib-ui
     newName: docker.io/kubeflowkatib/katib-ui
     newTag: latest
-  - name: docker.io/kubeflowkatib/cert-generator
-    newName: docker.io/kubeflowkatib/cert-generator
-    newTag: latest
 
 patchesStrategicMerge:
   - patches/katib-cert-injection.yaml
