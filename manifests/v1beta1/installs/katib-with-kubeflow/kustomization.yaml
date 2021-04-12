@@ -16,6 +16,7 @@ images:
   - name: docker.io/kubeflowkatib/katib-ui
     newName: docker.io/kubeflowkatib/katib-ui
     newTag: latest
+
 patchesStrategicMerge:
   - patches/remove-pv-patch.yaml
   - |-
@@ -31,6 +32,7 @@ patchesJson6902:
       name: katib-mysql
       kind: PersistentVolumeClaim
       namespace: kubeflow
+
 vars:
 - fieldref:
     fieldPath: metadata.namespace
@@ -40,7 +42,5 @@ vars:
     kind: Deployment
     name: katib-ui
 
-commonLabels:
-  app.kubernetes.io/component: katib
 configurations:
   - params.yaml
