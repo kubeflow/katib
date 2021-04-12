@@ -2,7 +2,20 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: kubeflow
 resources:
-  - ../katib-standalone
+  # Namespace.
+  - ../../components/namespace
+  # Katib controller.
+  - ../../components/controller/
+  # Katib CRDs.
+  - ../../components/crd/
+  # Katib DB manager.
+  - ../../components/db-manager/
+  # Katib DB mysql.
+  - ../../components/mysql/
+  # Katib UI.
+  - ../../components/ui/
+  # Katib webhooks.
+  - ../../components/webhook/
   # Cert-manager certificate for webhooks
   - certificate.yaml
 images:
@@ -18,32 +31,6 @@ images:
 
 patchesStrategicMerge:
   - patches/katib-cert-injection.yaml
-  - |-
-    apiVersion: batch/v1
-    kind: Job
-    metadata:
-      name: katib-cert-generator
-      namespace: kubeflow
-    $patch: delete
-  - |-
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: ClusterRole
-    metadata:
-      name: katib-cert-generator
-    $patch: delete
-  - |-
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: katib-cert-generator
-      namespace: kubeflow
-    $patch: delete
-  - |-
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: ClusterRoleBinding
-    metadata:
-      name: katib-cert-generator
-    $patch: delete
 
 vars:
 - fieldref:

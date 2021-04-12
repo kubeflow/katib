@@ -18,13 +18,7 @@ images:
     newTag: latest
 
 patchesStrategicMerge:
-  - patches/remove-pv-patch.yaml
-  - |-
-    apiVersion: v1
-    kind: Namespace
-    metadata:
-      name: kubeflow
-    $patch: delete
+  - patches/remove-resources-patch.yaml
 
 patchesJson6902:
   - path: patches/mysql-pvc.yaml

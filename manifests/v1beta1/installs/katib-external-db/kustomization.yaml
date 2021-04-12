@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: kubeflow
 resources:
   # Namespace.
-  - ../../components/namespace
+  - ../../components/namespace/
   # Katib controller.
   - ../../components/controller/
   # Katib CRDs.
@@ -12,6 +12,8 @@ resources:
   - ../../components/db-manager/
   # Katib UI.
   - ../../components/ui/
+  # Katib Cert Generator
+  - ../../components/cert-generator/
   # Katib webhooks.
   - ../../components/webhook/
 images:
