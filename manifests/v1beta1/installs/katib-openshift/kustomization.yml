@@ -47,7 +47,7 @@ patchesJson6902:
       version: v1
       kind: Service
       name: katib-controller
-    path: patch-service-serving-cert.yaml
+    path: patches/service-serving-cert.yaml
   # Annotate WebhookConfigurations to delegate `caBundle` population to OpenShift service controller
   # https://docs.openshift.com/container-platform/4.6/security/certificates/service-serving-certificate.html#add-service-certificate-mutating-webhook_service-serving-certificate
   - target:
@@ -55,17 +55,17 @@ patchesJson6902:
       version: v1
       kind: ValidatingWebhookConfiguration
       name: katib.kubeflow.org
-    path: patch-webhook-inject-cabundle.yaml
+    path: patches/webhook-inject-cabundle.yaml
   - target:
       group: admissionregistration.k8s.io
       version: v1
       kind: MutatingWebhookConfiguration
       name: katib.kubeflow.org
-    path: patch-webhook-inject-cabundle.yaml
+    path: patches/webhook-inject-cabundle.yaml
   # Remove PVC's storageClassName to provision it with the default StorageClass by default
   - target:
       group: ""
       version: v1
       kind: PersistentVolumeClaim
       name: katib-mysql
-    path: patch-pvc-unset-storageClass.yaml
+    path: patches/pvc-unset-storageClass.yaml
