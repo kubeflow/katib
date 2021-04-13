@@ -39,7 +39,7 @@ kubectl cluster-info
 # Update images with current pull base sha.
 echo "Updating Katib images with the current PR SHA: ${VERSION}"
 KUSTOMIZE_PATH="manifests/v1beta1/installs/katib-standalone/kustomization.yaml"
-CONFIG_PATCH="manifests/v1beta1/installs/katib-standalone/katib-config-patch.yaml"
+CONFIG_PATCH="manifests/v1beta1/components/controller/katib-config.yaml"
 
 # Change tag to all images in kustomization and katib-config patch files.
 sed -i -e "s@newTag: .*@newTag: ${VERSION}@" ${KUSTOMIZE_PATH}
