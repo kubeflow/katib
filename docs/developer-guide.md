@@ -32,7 +32,7 @@ see the following user guides:
 
 - [Go](https://golang.org/) (1.13 or later)
 - [Docker](https://docs.docker.com/) (17.05 or later.)
-- [kustomize](https://kustomize.io/) (3.2 or later)
+- [kustomize](https://kustomize.io/) (4.0 or later)
 
 ## Build from source code
 
