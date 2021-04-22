@@ -12,6 +12,9 @@ spec:
       - Train-accuracy
   algorithm:
     algorithmName: cmaes
+    algorithmSettings:
+      - name: "restart_strategy"
+        value: "ipop"
   parallelTrialCount: 3
   maxTrialCount: 12
   maxFailedTrialCount: 3

@@ -52,6 +52,16 @@ func toGoptunaSampler(algorithm *api_v1_beta1.AlgorithmSpec) (goptuna.Sampler, g
 					return nil, nil, err
 				}
 				opts = append(opts, cmaes.SamplerOptionInitialSigma(sigma))
+			} else if s.Name == "restart_strategy" {
+				if s.Value == "ipop" {
+					// The argument is multiplier of population size before each restart and basically 2 is recommended.
+					// According to the paper, it reveal similar performance for factors between 2 and 3.
+					opts = append(opts, cmaes.SamplerOptionIPop(2))
+				} else if s.Value == "bipop" {
+					opts = append(opts, cmaes.SamplerOptionBIPop(2))
+				} else if s.Value != "none" {
+					return nil, nil, fmt.Errorf("invalid restart_strategy: '%s'", s.Value)
+				}
 			}
 		}
 		return nil, cmaes.NewSampler(opts...), nil
