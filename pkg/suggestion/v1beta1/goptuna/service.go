@@ -31,6 +31,7 @@ const (
 	AlgorithmCMAES  = "cmaes"
 	AlgorithmTPE    = "tpe"
 	AlgorithmRandom = "random"
+	AlgorithmSobol  = "sobol"
 
 	defaultStudyName = "Katib"
 )
@@ -178,7 +179,7 @@ func (s *SuggestionService) ValidateAlgorithmSettings(
 	}
 
 	algorithmName := req.GetExperiment().GetSpec().GetAlgorithm().GetAlgorithmName()
-	if algorithmName != AlgorithmRandom && algorithmName != AlgorithmCMAES && algorithmName != AlgorithmTPE {
+	if algorithmName != AlgorithmRandom && algorithmName != AlgorithmCMAES && algorithmName != AlgorithmTPE && algorithmName != AlgorithmSobol {
 		return nil, status.Error(codes.InvalidArgument, "unsupported algorithm")
 	}
 
