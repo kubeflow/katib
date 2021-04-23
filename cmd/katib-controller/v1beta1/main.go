@@ -105,7 +105,7 @@ func main() {
 
 	// Setup Scheme for all resources
 	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "unable add APIs to scheme")
+		log.Error(err, "Unable to add APIs to scheme")
 		os.Exit(1)
 	}
 
