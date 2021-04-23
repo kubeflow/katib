@@ -52,6 +52,16 @@ func toGoptunaSampler(algorithm *api_v1_beta1.AlgorithmSpec) (goptuna.Sampler, g
 					return nil, nil, err
 				}
 				opts = append(opts, cmaes.SamplerOptionInitialSigma(sigma))
+			} else if s.Name == "restart_strategy" {
+				if s.Value == "ipop" {
+					// The argument is multiplier of population size before each restart and basically 2 is recommended.
+					// According to the paper, it reveal similar performance for factors between 2 and 3.
+					opts = append(opts, cmaes.SamplerOptionIPop(2))
+				} else if s.Value == "bipop" {
+					opts = append(opts, cmaes.SamplerOptionBIPop(2))
+				} else if s.Value != "none" {
+					return nil, nil, fmt.Errorf("invalid restart_strategy: '%s'", s.Value)
+				}
 			}
 		}
 		return nil, cmaes.NewSampler(opts...), nil
@@ -80,17 +90,17 @@ func toGoptunaSampler(algorithm *api_v1_beta1.AlgorithmSpec) (goptuna.Sampler, g
 		}
 		return tpe.NewSampler(opts...), nil, nil
 	} else {
-		opts := make([]goptuna.RandomSearchSamplerOption, 0, len(algorithm.GetAlgorithmSettings()))
+		opts := make([]goptuna.RandomSamplerOption, 0, len(algorithm.GetAlgorithmSettings()))
 		for _, s := range algorithm.GetAlgorithmSettings() {
 			if s.Name == "random_state" {
 				seed, err := strconv.Atoi(s.Value)
 				if err != nil {
 					return nil, nil, err
 				}
-				opts = append(opts, goptuna.RandomSearchSamplerOptionSeed(int64(seed)))
+				opts = append(opts, goptuna.RandomSamplerOptionSeed(int64(seed)))
 			}
 		}
-		return goptuna.NewRandomSearchSampler(opts...), nil, nil
+		return goptuna.NewRandomSampler(opts...), nil, nil
 	}
 }
 
@@ -343,7 +353,7 @@ func createStudyAndSearchSpace(
 	}
 
 	studyOpts := make([]goptuna.StudyOption, 0, 5)
-	studyOpts = append(studyOpts, goptuna.StudyOptionSetDirection(direction))
+	studyOpts = append(studyOpts, goptuna.StudyOptionDirection(direction))
 	studyOpts = append(studyOpts, goptuna.StudyOptionDefineSearchSpace(searchSpace))
 	studyOpts = append(studyOpts, goptuna.StudyOptionLogger(nil))
 	if independentSampler != nil {

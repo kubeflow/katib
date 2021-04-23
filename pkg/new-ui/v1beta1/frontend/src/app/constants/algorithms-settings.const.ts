@@ -89,6 +89,12 @@ export const CMAESSettings: AlgorithmSetting[] = [
     value: 0.001,
     type: AlgorithmSettingType.FLOAT,
   },
+  {
+    name: 'restart_strategy',
+    value: 'none',
+    values: ['none', 'ipop', 'bipop'],
+    type: AlgorithmSettingType.STRING,
+  },
 ];
 
 export const ENASSettings: AlgorithmSetting[] = [
