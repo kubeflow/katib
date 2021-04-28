@@ -13,7 +13,7 @@
 ### UI
 
 - Migrate to the new Katib UI [Project 1](https://github.com/kubeflow/katib/projects/1)
-- Hyperparameters visualization with fANOVA algorithm
+- Hyperparameter importances visualization with fANOVA algorithm
 
 ## Enhancements
 
