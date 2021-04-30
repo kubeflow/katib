@@ -33,28 +33,28 @@ patchesStrategicMerge:
   - patches/katib-cert-injection.yaml
 
 vars:
-- fieldref:
-    fieldPath: metadata.namespace
-  name: KATIB_NAMESPACE
-  objref:
-    apiVersion: v1
-    kind: Service
-    name: katib-controller
-- fieldref:
-    fieldPath: metadata.name
-  name: KATIB_SERVICE_NAME
-  objref:
-    apiVersion: v1
-    kind: Service
-    name: katib-controller
-- name: KATIB_CERT_NAME
-  objref:
+  - fieldref:
+      fieldPath: metadata.namespace
+    name: KATIB_NAMESPACE
+    objref:
+      apiVersion: v1
+      kind: Service
+      name: katib-controller
+  - fieldref:
+      fieldPath: metadata.name
+    name: KATIB_SERVICE_NAME
+    objref:
+      apiVersion: v1
+      kind: Service
+      name: katib-controller
+  - name: KATIB_CERT_NAME
+    objref:
       kind: Certificate
       group: cert-manager.io
       version: v1alpha2
       name: katib-webhook-cert
-  fieldref:
-    fieldpath: metadata.name
+    fieldref:
+      fieldpath: metadata.name
 
 configurations:
   - params.yaml

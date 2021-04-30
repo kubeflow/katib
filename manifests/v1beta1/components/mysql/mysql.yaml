@@ -45,18 +45,24 @@ spec:
                 - "/bin/bash"
                 - "-c"
                 - "mysql -D ${MYSQL_DATABASE} -u root -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'"
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 1
+            periodSeconds: 2
+            failureThreshold: 10
           livenessProbe:
             exec:
               command:
                 - "/bin/bash"
                 - "-c"
                 - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
+            periodSeconds: 2
+            failureThreshold: 10
+          startupProbe:
+            exec:
+              command:
+                - "/bin/bash"
+                - "-c"
+                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
+            periodSeconds: 15
+            failureThreshold: 60
           volumeMounts:
             - name: katib-mysql
               mountPath: /var/lib/mysql
