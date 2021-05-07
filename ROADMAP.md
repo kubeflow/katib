@@ -1,3 +1,31 @@
+# Katib 2021 Roadmap
+
+## New Features
+
+### AutoML
+
+- Support Population Based Training [#1382](https://github.com/kubeflow/katib/issues/1382)
+- Support [ASHA](https://arxiv.org/pdf/1810.05934.pdf)
+- Support Auto Model Compression [#460](https://github.com/kubeflow/katib/issues/460)
+- Support Auto Feature Engineering [#475](https://github.com/kubeflow/katib/issues/475)
+- Various CRDs for HP, NAS and other AutoML techniques.
+
+### UI
+
+- Migrate to the new Katib UI [Project 1](https://github.com/kubeflow/katib/projects/1)
+- Hyperparameter importances visualization with fANOVA algorithm
+
+## Enhancements
+
+- Finish AWS CI/CD migration
+- Support various parameter distribution [#1207](https://github.com/kubeflow/katib/issues/1207)
+- Finish validation for Algorithms [#1126](https://github.com/kubeflow/katib/issues/1126)
+- Refactor Hyperband [#1389](https://github.com/kubeflow/katib/issues/1389)
+- Support multiple CRD version with conversion webhook
+- MLMD integration with Katib Experiments
+
+# History
+
 # Katib 2020 Roadmap
 
 ## New Features
