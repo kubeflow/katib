@@ -41,6 +41,9 @@ data:
       "cmaes": {
         "image": "docker.io/kubeflowkatib/suggestion-goptuna:latest"
       },
+      "sobol": {
+        "image": "docker.io/kubeflowkatib/suggestion-goptuna:latest"
+      },
       "enas": {
         "image": "docker.io/kubeflowkatib/suggestion-enas:latest",
         "resources": {

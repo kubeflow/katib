@@ -23,6 +23,7 @@ import (
 
 	"github.com/c-bata/goptuna"
 	"github.com/c-bata/goptuna/cmaes"
+	"github.com/c-bata/goptuna/sobol"
 	"github.com/c-bata/goptuna/tpe"
 	api_v1_beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 )
@@ -89,6 +90,8 @@ func toGoptunaSampler(algorithm *api_v1_beta1.AlgorithmSpec) (goptuna.Sampler, g
 			}
 		}
 		return tpe.NewSampler(opts...), nil, nil
+	} else if name == AlgorithmSobol {
+		return nil, sobol.NewSampler(), nil
 	} else {
 		opts := make([]goptuna.RandomSamplerOption, 0, len(algorithm.GetAlgorithmSettings()))
 		for _, s := range algorithm.GetAlgorithmSettings() {

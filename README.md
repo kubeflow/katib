@@ -143,6 +143,7 @@ to know more about each algorithm.
 - [Hyperband](https://arxiv.org/pdf/1603.06560.pdf)
 - [Bayesian Optimization](https://arxiv.org/pdf/1012.2599.pdf)
 - [Covariance Matrix Adaptation Evolution Strategy (CMA-ES)](https://arxiv.org/abs/1604.00772)
+- [Sobol's Quasirandom Sequence](https://dl.acm.org/doi/10.1145/641876.641879)
 
 #### Neural Architecture Search
 

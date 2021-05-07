@@ -5,6 +5,7 @@ export enum AlgorithmsEnum {
   BAYESIAN_OPTIMIZATION = 'bayesianoptimization',
   TPE = 'tpe',
   CMAES = 'cmaes',
+  SOBOL = 'sobol',
   ENAS = 'enas',
   DARTS = 'darts',
 }

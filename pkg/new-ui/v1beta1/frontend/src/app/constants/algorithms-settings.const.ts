@@ -97,6 +97,8 @@ export const CMAESSettings: AlgorithmSetting[] = [
   },
 ];
 
+export const SOBOLSettings: AlgorithmSetting[] = [];
+
 export const ENASSettings: AlgorithmSetting[] = [
   {
     name: 'controller_hidden_size',
@@ -248,6 +250,7 @@ export const AlgorithmSettingsMap: { [key: string]: AlgorithmSetting[] } = {
   [AlgorithmsEnum.BAYESIAN_OPTIMIZATION]: BayesianOptimizationSettings,
   [AlgorithmsEnum.TPE]: TPESettings,
   [AlgorithmsEnum.CMAES]: CMAESSettings,
+  [AlgorithmsEnum.SOBOL]: SOBOLSettings,
   [AlgorithmsEnum.ENAS]: ENASSettings,
   [AlgorithmsEnum.DARTS]: DartsSettings,
 };

@@ -21,6 +21,8 @@ Table of Contents
          * [BOHB](#bohb)
          * [TPE](#tpe)
          * [SMAC](#smac)
+         * [CMA-ES](#cma-es)
+         * [Sobol](#sobol)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
@@ -395,3 +397,7 @@ We can use [SMAC3](https://github.com/automl/SMAC3) to run SMAC.
 ### CMA-ES
 
 We can use [goptuna](https://github.com/c-bata/goptuna) to run CMA-ES.
+
+### Sobol
+
+We can use [goptuna](https://github.com/c-bata/goptuna) to run Sobol.
