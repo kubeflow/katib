@@ -1,4 +1,3 @@
----
 - op: "add"
   path: "/metadata/annotations"
   value:

@@ -30,7 +30,7 @@ images:
     newName: docker.io/kubeflowkatib/cert-generator
     newTag: latest
 patchesStrategicMerge:
-  - db-manager-patch.yaml
+  - patches/db-manager.yaml
 # Modify katib-mysql-secrets with parameters for the DB.
 secretGenerator:
   - name: katib-mysql-secrets

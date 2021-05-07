@@ -19,4 +19,4 @@ set -o xtrace
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
 
 cd ${SCRIPT_ROOT}
-kustomize build manifests/v1beta1/installs/katib-standalone --load_restrictor none | kubectl apply -f -
+kustomize build manifests/v1beta1/installs/katib-standalone | kubectl apply -f -

@@ -2,16 +2,11 @@
 #  - No Job is spawned to generate TLS key for `katib-controller` Service
 #  - Instead, the Service and WebhookConfigurations linked to it are annotated
 #    for OpenShift service controller to handle TLS certification.
-#  - PersistentVolumeClaim has empty `.spec.storageClassName` to allow dynamic
-#    provisioning with default StorageClass
 #
 # Requires OpenShift version: 4.4+
-#  
-# Note: PersistentVolume should not be created, as OpenShift installations typically
-# have PVC dynamic provisioning configured or need some extra administrative effort
-# to provision a PV manually.
+#
 # To achieve this, run:
-# 
+#
 # `kustomize build ./manifests/v1beta1/installs/katib-openshift | oc apply -f - -l type!=local`
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -51,6 +46,7 @@ patchesJson6902:
       version: v1
       kind: Service
       name: katib-controller
+      namespace: kubeflow
     path: patches/service-serving-cert.yaml
   # Annotate WebhookConfigurations to delegate `caBundle` population to OpenShift service controller
   # https://docs.openshift.com/container-platform/4.6/security/certificates/service-serving-certificate.html#add-service-certificate-mutating-webhook_service-serving-certificate
@@ -66,10 +62,3 @@ patchesJson6902:
       kind: MutatingWebhookConfiguration
       name: katib.kubeflow.org
     path: patches/webhook-inject-cabundle.yaml
-  # Remove PVC's storageClassName to provision it with the default StorageClass by default
-  - target:
-      group: ""
-      version: v1
-      kind: PersistentVolumeClaim
-      name: katib-mysql
-    path: patches/pvc-unset-storageClass.yaml

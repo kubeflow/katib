@@ -1,5 +1,3 @@
----
 - op: "add"
-  path: "/metadata/annotations"
-  value:
-    service.beta.openshift.io/serving-cert-secret-name: katib-webhook-cert
+  path: "/metadata/annotations/service.beta.openshift.io~1serving-cert-secret-name"
+  value: katib-webhook-cert

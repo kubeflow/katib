@@ -18,24 +18,16 @@ images:
     newTag: latest
 
 patchesStrategicMerge:
-  - patches/remove-resources-patch.yaml
-
-patchesJson6902:
-  - path: patches/mysql-pvc.yaml
-    target:
-      version: v1
-      name: katib-mysql
-      kind: PersistentVolumeClaim
-      namespace: kubeflow
+  - patches/remove-namespace.yaml
 
 vars:
-- fieldref:
-    fieldPath: metadata.namespace
-  name: KATIB_UI_NAMESPACE
-  objref:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: katib-ui
+  - fieldref:
+      fieldPath: metadata.namespace
+    name: KATIB_UI_NAMESPACE
+    objref:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: katib-ui
 
 configurations:
   - params.yaml
