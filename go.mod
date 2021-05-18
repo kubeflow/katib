@@ -26,7 +26,6 @@ require (
 	github.com/spf13/viper v1.7.0
 	github.com/tidwall/gjson v1.6.0
 	golang.org/x/net v0.0.0-20210224082022-3d97a244fca7
-	google.golang.org/genproto v0.0.0-20201110150050-8816d57aaa9a
 	google.golang.org/grpc v1.32.0
 	gopkg.in/fsnotify/fsnotify.v1 v1.4.7 // indirect
 	k8s.io/api v0.20.4
