@@ -68,6 +68,16 @@ func TestValidateExperiment(t *testing.T) {
 		oldInstance     *experimentsv1beta1.Experiment
 		testDescription string
 	}{
+		// Name
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Name = "1234-test"
+				return i
+			}(),
+			Err:             true,
+			testDescription: "Name is invalid",
+		},
 		//Objective
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
