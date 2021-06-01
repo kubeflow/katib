@@ -67,6 +67,15 @@ func (g *DefaultValidator) InjectClient(c client.Client) {
 // ValidateExperiment validates experiment for the given instance.
 // oldInst is specified when experiment is edited.
 func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1beta1.Experiment) error {
+	namingConvention, _ := regexp.Compile("^[a-z]([-a-z0-9]*[a-z0-9])?")
+	if !namingConvention.MatchString(instance.Name) {
+		msg :="Name must consist of lower case alphanumeric characters or '-'," +
+			" start with an alphabetic character, and end with an alphanumeric character" +
+			" (e.g. 'my-name', or 'abc-123', regex used for validation is '[a-z]([-a-z0-9]*[a-z0-9])?)'"
+
+		return fmt.Errorf(msg)
+	}
+
 	if instance.Spec.MaxFailedTrialCount != nil && *instance.Spec.MaxFailedTrialCount < 0 {
 		return fmt.Errorf("spec.maxFailedTrialCount should not be less than 0")
 	}
