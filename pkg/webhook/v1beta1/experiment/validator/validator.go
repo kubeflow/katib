@@ -168,7 +168,7 @@ func (g *DefaultValidator) validateAlgorithm(ag *commonapiv1beta1.AlgorithmSpec)
 	}
 
 	if _, err := g.GetSuggestionConfigData(ag.AlgorithmName); err != nil {
-		return fmt.Errorf("Don't support algorithm %s: %v.", ag.AlgorithmName, err)
+		return fmt.Errorf("unable to get Suggestion config data for algorithm %s: %v.", ag.AlgorithmName, err)
 	}
 
 	return nil
