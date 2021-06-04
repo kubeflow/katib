@@ -259,7 +259,7 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 }
 
 // DesiredVolume returns desired PVC and PV for Suggestion.
-// If PV doesn't exist in Katib config return null for PV.
+// If PV doesn't exist in Katib config return nil for PV.
 func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.PersistentVolumeClaim, *corev1.PersistentVolume, error) {
 
 	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.Algorithm.AlgorithmName, g.Client)

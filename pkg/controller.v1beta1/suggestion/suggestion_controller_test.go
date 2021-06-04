@@ -164,11 +164,6 @@ func TestReconcile(t *testing.T) {
 		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, &corev1.Service{})
 	}, timeout).Should(gomega.Succeed())
 
-	// Expect that PV with appropriate name is created
-	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Name: resourceName + "-" + namespace}, &corev1.PersistentVolume{})
-	}, timeout).Should(gomega.Succeed())
-
 	// Expect that PVC with appropriate name is created
 	g.Eventually(func() error {
 		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, &corev1.PersistentVolumeClaim{})
