@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/resource"
 	apitypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -40,6 +41,7 @@ type SuggestionConfig struct {
 	VolumeMountPath           string                           `json:"volumeMountPath,omitempty"`
 	PersistentVolumeClaimSpec corev1.PersistentVolumeClaimSpec `json:"persistentVolumeClaimSpec,omitempty"`
 	PersistentVolumeSpec      corev1.PersistentVolumeSpec      `json:"persistentVolumeSpec,omitempty"`
+	PersistentVolumeLabels    map[string]string                `json:"persistentVolumeLabels,omitempty"`
 }
 
 // MetricsCollectorConfig is the JSON metrics collector structure in Katib config.
@@ -71,7 +73,7 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 	// Try to find suggestion data in config map
 	config, ok := configMap.Data[consts.LabelSuggestionTag]
 	if !ok {
-		return SuggestionConfig{}, errors.New("Failed to find suggestions config in ConfigMap: " + consts.KatibConfigMapName)
+		return SuggestionConfig{}, errors.New("failed to find suggestions config in ConfigMap: " + consts.KatibConfigMapName)
 	}
 
 	// Parse suggestion data to map where key = algorithm name, value = SuggestionConfig
@@ -83,13 +85,13 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 	// Try to find SuggestionConfig for the algorithm
 	suggestionConfigData, ok = suggestionsConfig[algorithmName]
 	if !ok {
-		return SuggestionConfig{}, errors.New("Failed to find suggestion config for algorithm: " + algorithmName + " in ConfigMap: " + consts.KatibConfigMapName)
+		return SuggestionConfig{}, errors.New("failed to find suggestion config for algorithm: " + algorithmName + " in ConfigMap: " + consts.KatibConfigMapName)
 	}
 
 	// Get image from config
 	image := suggestionConfigData.Image
 	if strings.TrimSpace(image) == "" {
-		return SuggestionConfig{}, errors.New("Required value for image configuration of algorithm name: " + algorithmName)
+		return SuggestionConfig{}, errors.New("required value for image configuration of algorithm name: " + algorithmName)
 	}
 
 	// Get Image Pull Policy
@@ -109,12 +111,6 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 	// Get persistent volume claim spec from config
 	pvcSpec := suggestionConfigData.PersistentVolumeClaimSpec
 
-	// Set default storage class
-	defaultStorageClassName := consts.DefaultSuggestionStorageClassName
-	if pvcSpec.StorageClassName == nil {
-		pvcSpec.StorageClassName = &defaultStorageClassName
-	}
-
 	// Set default access modes
 	if len(pvcSpec.AccessModes) == 0 {
 		pvcSpec.AccessModes = []corev1.PersistentVolumeAccessMode{
@@ -130,51 +126,16 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 		pvcSpec.Resources.Requests[corev1.ResourceStorage] = defaultVolumeStorage
 	}
 
-	// Set pvc back for suggestion config
+	// Set PVC back for suggestion config.
 	suggestionConfigData.PersistentVolumeClaimSpec = pvcSpec
 
-	// Get pv from config only if pvc storage class name = DefaultSuggestionStorageClassName
-	if *pvcSpec.StorageClassName == consts.DefaultSuggestionStorageClassName {
-		pvSpec := suggestionConfigData.PersistentVolumeSpec
-
-		// Set default storage class
-		pvSpec.StorageClassName = defaultStorageClassName
+	// Get PV from config only if it exists.
+	if !equality.Semantic.DeepEqual(suggestionConfigData.PersistentVolumeSpec, corev1.PersistentVolumeSpec{}) {
 
 		// Set PersistentVolumeReclaimPolicy to "Delete" to automatically delete PV once PVC is deleted.
 		// Kubernetes doesn't allow to specify ownerReferences for the cluster-scoped
 		// resources (which PV is) with namespace-scoped owner (which Suggestion is).
-		pvSpec.PersistentVolumeReclaimPolicy = corev1.PersistentVolumeReclaimDelete
-
-		// Set default access modes
-		if len(pvSpec.AccessModes) == 0 {
-			pvSpec.AccessModes = []corev1.PersistentVolumeAccessMode{
-				consts.DefaultSuggestionVolumeAccessMode,
-			}
-		}
-
-		// Set default pv source.
-		// In composer we add name, algorithm and namespace to host path.
-		if pvSpec.PersistentVolumeSource == (corev1.PersistentVolumeSource{}) {
-			pvSpec.PersistentVolumeSource = corev1.PersistentVolumeSource{
-				HostPath: &corev1.HostPathVolumeSource{
-					Path: consts.DefaultSuggestionVolumeLocalPathPrefix,
-				},
-			}
-		}
-
-		// Set default local path if it is empty
-		if pvSpec.PersistentVolumeSource.HostPath != nil && pvSpec.PersistentVolumeSource.HostPath.Path == "" {
-			pvSpec.PersistentVolumeSource.HostPath.Path = consts.DefaultSuggestionVolumeLocalPathPrefix
-		}
-
-		// Set default capacity
-		if len(pvSpec.Capacity) == 0 {
-			pvSpec.Capacity = make(map[corev1.ResourceName]resource.Quantity)
-			pvSpec.Capacity[corev1.ResourceStorage] = defaultVolumeStorage
-		}
-
-		// Set pv back for suggestion config
-		suggestionConfigData.PersistentVolumeSpec = pvSpec
+		suggestionConfigData.PersistentVolumeSpec.PersistentVolumeReclaimPolicy = corev1.PersistentVolumeReclaimDelete
 
 	}
 
@@ -196,7 +157,7 @@ func GetEarlyStoppingConfigData(algorithmName string, client client.Client) (Ear
 	// Try to find early stopping data in config map.
 	config, ok := configMap.Data[consts.LabelEarlyStoppingTag]
 	if !ok {
-		return EarlyStoppingConfig{}, errors.New("Failed to find early stopping config in ConfigMap: " + consts.KatibConfigMapName)
+		return EarlyStoppingConfig{}, errors.New("failed to find early stopping config in ConfigMap: " + consts.KatibConfigMapName)
 	}
 
 	// Parse early stopping data to map where key = algorithm name, value = EarlyStoppingConfig.
@@ -208,13 +169,13 @@ func GetEarlyStoppingConfigData(algorithmName string, client client.Client) (Ear
 	// Try to find EarlyStoppingConfig for the algorithm.
 	earlyStoppingConfigData, ok = earlyStoppingsConfig[algorithmName]
 	if !ok {
-		return EarlyStoppingConfig{}, errors.New("Failed to find early stopping config for algorithm: " + algorithmName + " in ConfigMap: " + consts.KatibConfigMapName)
+		return EarlyStoppingConfig{}, errors.New("failed to find early stopping config for algorithm: " + algorithmName + " in ConfigMap: " + consts.KatibConfigMapName)
 	}
 
 	// Get image from config.
 	image := earlyStoppingConfigData.Image
 	if strings.TrimSpace(image) == "" {
-		return EarlyStoppingConfig{}, errors.New("Required value for image configuration of algorithm name: " + algorithmName)
+		return EarlyStoppingConfig{}, errors.New("required value for image configuration of algorithm name: " + algorithmName)
 	}
 
 	// Get Image Pull Policy.
@@ -241,7 +202,7 @@ func GetMetricsCollectorConfigData(cKind common.CollectorKind, client client.Cli
 	// Try to find metrics collector data in config map
 	config, ok := configMap.Data[consts.LabelMetricsCollectorSidecar]
 	if !ok {
-		return MetricsCollectorConfig{}, errors.New("Failed to find metrics collector config in ConfigMap: " + consts.KatibConfigMapName)
+		return MetricsCollectorConfig{}, errors.New("failed to find metrics collector config in ConfigMap: " + consts.KatibConfigMapName)
 	}
 	// Parse metrics collector data to map where key = collector kind, value = MetricsCollectorConfig
 	kind := string(cKind)
@@ -253,13 +214,13 @@ func GetMetricsCollectorConfigData(cKind common.CollectorKind, client client.Cli
 	// Try to find MetricsCollectorConfig for the collector kind
 	metricsCollectorConfigData, ok = mcsConfig[kind]
 	if !ok {
-		return MetricsCollectorConfig{}, errors.New("Failed to find metrics collector config for kind: " + kind + " in ConfigMap: " + consts.KatibConfigMapName)
+		return MetricsCollectorConfig{}, errors.New("failed to find metrics collector config for kind: " + kind + " in ConfigMap: " + consts.KatibConfigMapName)
 	}
 
 	// Get image from config
 	image := metricsCollectorConfigData.Image
 	if strings.TrimSpace(image) == "" {
-		return MetricsCollectorConfig{}, errors.New("Required value for image configuration of metrics collector kind: " + kind)
+		return MetricsCollectorConfig{}, errors.New("required value for image configuration of metrics collector kind: " + kind)
 	}
 
 	// Get Image Pull Policy

@@ -109,9 +109,8 @@ func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1be
 		oldInst.Spec.MaxTrialCount = instance.Spec.MaxTrialCount
 		oldInst.Spec.ParallelTrialCount = instance.Spec.ParallelTrialCount
 		if !equality.Semantic.DeepEqual(instance.Spec, oldInst.Spec) {
-			return fmt.Errorf("Only spec.parallelTrialCount, spec.maxTrialCount and spec.maxFailedTrialCount are editable")
+			return fmt.Errorf("only spec.parallelTrialCount, spec.maxTrialCount and spec.maxFailedTrialCount are editable")
 		}
-		return nil
 	}
 	if err := g.validateObjective(instance.Spec.Objective); err != nil {
 		return err

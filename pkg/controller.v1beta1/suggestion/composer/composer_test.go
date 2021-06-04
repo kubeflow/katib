@@ -92,7 +92,8 @@ var (
 
 	refFlag bool = true
 
-	storageClassName = consts.DefaultSuggestionStorageClassName
+	storageClassName = "test-storage-class"
+	pvLabels         = map[string]string{"type": "local"}
 )
 
 func TestMain(m *testing.M) {
@@ -401,106 +402,36 @@ func TestDesiredVolume(t *testing.T) {
 			suggestion:      newFakeSuggestion(),
 			configMap:       newFakeKatibConfig(newFakeSuggestionConfig(), newFakeEarlyStoppingConfig()),
 			expectedPVC:     newFakePVC(),
-			expectedPV:      newFakePV(),
-			err:             false,
-			testDescription: "Desired Volume valid run with default pvc and pv",
-		},
-		{
-			suggestion: newFakeSuggestion(),
-			configMap: func() *corev1.ConfigMap {
-				sc := newFakeSuggestionConfig()
-				storageClass := "custom-storage-class"
-				volumeStorage, _ := resource.ParseQuantity("5Gi")
-
-				sc.PersistentVolumeClaimSpec = corev1.PersistentVolumeClaimSpec{
-					StorageClassName: &storageClass,
-					AccessModes: []corev1.PersistentVolumeAccessMode{
-						corev1.ReadWriteOnce,
-						corev1.ReadOnlyMany,
-					},
-					Resources: corev1.ResourceRequirements{
-						Requests: corev1.ResourceList{
-							corev1.ResourceStorage: volumeStorage,
-						},
-					},
-				}
-				cm := newFakeKatibConfig(sc, newFakeEarlyStoppingConfig())
-				return cm
-			}(),
-			expectedPVC: func() *corev1.PersistentVolumeClaim {
-				pvc := newFakePVC()
-				storageClass := "custom-storage-class"
-				volumeStorage, _ := resource.ParseQuantity("5Gi")
-
-				pvc.Spec.StorageClassName = &storageClass
-				pvc.Spec.AccessModes = append(pvc.Spec.AccessModes, corev1.ReadOnlyMany)
-				pvc.Spec.Resources.Requests[corev1.ResourceStorage] = volumeStorage
-				return pvc
-			}(),
 			expectedPV:      nil,
 			err:             false,
-			testDescription: "Custom PVC with not default storage class",
+			testDescription: "Desired Volume valid run with default PVC",
 		},
 		{
 			suggestion: newFakeSuggestion(),
 			configMap: func() *corev1.ConfigMap {
 				sc := newFakeSuggestionConfig()
-				mode := corev1.PersistentVolumeFilesystem
-				accessModes := []corev1.PersistentVolumeAccessMode{
-					corev1.ReadWriteOnce,
-					corev1.ReadOnlyMany,
-				}
-				volumeStorage, _ := resource.ParseQuantity("10Gi")
 
-				sc.PersistentVolumeClaimSpec = corev1.PersistentVolumeClaimSpec{
-					VolumeMode:  &mode,
-					AccessModes: accessModes,
-				}
+				sc.PersistentVolumeClaimSpec = newFakePVC().Spec
 
-				sc.PersistentVolumeSpec = corev1.PersistentVolumeSpec{
-					VolumeMode:  &mode,
-					AccessModes: accessModes,
-					PersistentVolumeSource: corev1.PersistentVolumeSource{
-						GCEPersistentDisk: &corev1.GCEPersistentDiskVolumeSource{
-							PDName: "pd-name",
-							FSType: "fs-type",
-						},
-					},
-					Capacity: corev1.ResourceList{
-						corev1.ResourceStorage: volumeStorage,
-					},
-				}
+				// Change StorageClass and volume storage.
+				sc.PersistentVolumeClaimSpec.StorageClassName = &storageClassName
+
+				sc.PersistentVolumeSpec = newFakePV().Spec
+				// This policy will be changed to "Delete".
+				sc.PersistentVolumeSpec.PersistentVolumeReclaimPolicy = corev1.PersistentVolumeReclaimRetain
+				sc.PersistentVolumeLabels = pvLabels
+
 				cm := newFakeKatibConfig(sc, newFakeEarlyStoppingConfig())
 				return cm
 			}(),
 			expectedPVC: func() *corev1.PersistentVolumeClaim {
 				pvc := newFakePVC()
-				mode := corev1.PersistentVolumeFilesystem
-
-				pvc.Spec.VolumeMode = &mode
-				pvc.Spec.AccessModes = append(pvc.Spec.AccessModes, corev1.ReadOnlyMany)
+				pvc.Spec.StorageClassName = &storageClassName
 				return pvc
 			}(),
-			expectedPV: func() *corev1.PersistentVolume {
-				pv := newFakePV()
-				mode := corev1.PersistentVolumeFilesystem
-				volumeStorage, _ := resource.ParseQuantity("10Gi")
-
-				pv.Spec.VolumeMode = &mode
-				pv.Spec.AccessModes = append(pv.Spec.AccessModes, corev1.ReadOnlyMany)
-				pv.Spec.PersistentVolumeSource = corev1.PersistentVolumeSource{
-					GCEPersistentDisk: &corev1.GCEPersistentDiskVolumeSource{
-						PDName: "pd-name",
-						FSType: "fs-type",
-					},
-				}
-				pv.Spec.Capacity = corev1.ResourceList{
-					corev1.ResourceStorage: volumeStorage,
-				}
-				return pv
-			}(),
+			expectedPV:      newFakePV(),
 			err:             false,
-			testDescription: "Custom PVC and PV with default storage class",
+			testDescription: "Custom PVC and PV",
 		},
 	}
 
@@ -915,7 +846,6 @@ func newFakePVC() *corev1.PersistentVolumeClaim {
 			},
 		},
 		Spec: corev1.PersistentVolumeClaimSpec{
-			StorageClassName: &storageClassName,
 			AccessModes: []corev1.PersistentVolumeAccessMode{
 				consts.DefaultSuggestionVolumeAccessMode,
 			},
@@ -934,10 +864,8 @@ func newFakePV() *corev1.PersistentVolume {
 
 	return &corev1.PersistentVolume{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: pvName,
-			Labels: map[string]string{
-				"type": "local",
-			},
+			Name:   pvName,
+			Labels: pvLabels,
 		},
 		Spec: corev1.PersistentVolumeSpec{
 			StorageClassName:              storageClassName,
@@ -947,7 +875,7 @@ func newFakePV() *corev1.PersistentVolume {
 			},
 			PersistentVolumeSource: corev1.PersistentVolumeSource{
 				HostPath: &corev1.HostPathVolumeSource{
-					Path: consts.DefaultSuggestionVolumeLocalPathPrefix + pvName,
+					Path: "tmp/katib/suggestion" + pvName,
 				},
 			},
 			Capacity: corev1.ResourceList{
