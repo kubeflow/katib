@@ -332,20 +332,13 @@ func verifySuggestion(kclient katibclient.Client, exp *experimentsv1beta1.Experi
 			return fmt.Errorf("Suggestion deployment: %v is still alive while ResumePolicy: %v, error: %v", deploymentName, exp.Spec.ResumePolicy, err)
 		}
 
-		// PV and PVC should not be deleted for Suggestion with resume policy FromVolume.
+		// PVC should not be deleted for Suggestion with resume policy FromVolume.
 		if exp.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
 			pvcName := controllerUtil.GetSuggestionPersistentVolumeClaimName(sug)
 			namespacedName = types.NamespacedName{Name: pvcName, Namespace: sug.Namespace}
 			err = kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.PersistentVolumeClaim{})
 			if errors.IsNotFound(err) {
-				return fmt.Errorf("Suggestion PVC: %v is not alive while ResumePolicy: %v", pvcName, exp.Spec.ResumePolicy)
-			}
-
-			pvName := controllerUtil.GetSuggestionPersistentVolumeName(sug)
-			namespacedName = types.NamespacedName{Name: pvName}
-			err = kclient.GetClient().Get(context.TODO(), namespacedName, &corev1.PersistentVolume{})
-			if errors.IsNotFound(err) {
-				return fmt.Errorf("Suggestion PV: %v is not alive while ResumePolicy: %v", pvName, experimentsv1beta1.FromVolume)
+				return fmt.Errorf("suggestion PVC: %v is not alive while ResumePolicy: %v", pvcName, exp.Spec.ResumePolicy)
 			}
 		}
 	}

@@ -119,18 +119,11 @@ const (
 	// DefaultContainerSuggestionVolumeMountPath is the default mount path in suggestion container
 	DefaultContainerSuggestionVolumeMountPath = "/opt/katib/data"
 
-	// DefaultSuggestionStorageClassName is the default value for suggestion's volume storage class name
-	DefaultSuggestionStorageClassName = "katib-suggestion"
-
 	// DefaultSuggestionVolumeStorage is the default value for suggestion's volume storage
 	DefaultSuggestionVolumeStorage = "1Gi"
 
 	// DefaultSuggestionVolumeAccessMode is the default value for suggestion's volume access mode
 	DefaultSuggestionVolumeAccessMode = corev1.ReadWriteOnce
-
-	// DefaultSuggestionVolumeLocalPathPrefix is the default cluster local path prefix for suggestion volume
-	// Full default local path = /tmp/katib/suggestions/<suggestion-name>-<suggestion-algorithm>-<suggestion-namespace>
-	DefaultSuggestionVolumeLocalPathPrefix = "/tmp/katib/suggestions/"
 
 	// ReconcileErrorReason is the reason when there is a reconcile error.
 	ReconcileErrorReason = "ReconcileError"

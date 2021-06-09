@@ -65,13 +65,13 @@ func (r *ReconcileSuggestion) reconcileVolume(
 	foundPVC := &corev1.PersistentVolumeClaim{}
 	foundPV := &corev1.PersistentVolume{}
 
-	// Try to find/create PV, if PV has to be created
+	// Try to find/create PV, if PV has to be created.
 	if pv != nil {
 		err := r.Get(context.TODO(), types.NamespacedName{Name: pv.Name}, foundPV)
 		if err != nil && errors.IsNotFound(err) {
 			logger.Info("Creating Persistent Volume", "name", pv.Name)
 			err = r.Create(context.TODO(), pv)
-			// Return only if Create was failed, otherwise try to find/create PVC
+			// Return only if Create was failed, otherwise try to find/create PVC.
 			if err != nil {
 				return nil, nil, err
 			}
@@ -80,7 +80,7 @@ func (r *ReconcileSuggestion) reconcileVolume(
 		}
 	}
 
-	// Try to find/create PVC
+	// Try to find/create PVC.
 	err := r.Get(context.TODO(), types.NamespacedName{Name: pvc.Name, Namespace: pvc.Namespace}, foundPVC)
 	if err != nil && errors.IsNotFound(err) {
 		logger.Info("Creating Persistent Volume Claim", "name", pvc.Name)

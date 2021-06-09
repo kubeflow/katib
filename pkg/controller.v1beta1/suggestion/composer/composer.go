@@ -23,6 +23,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -257,16 +258,14 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 	return containers
 }
 
-// DesiredVolume returns desired PVC and PV for suggestion.
-// If StorageClassName != DefaultSuggestionStorageClassName returns only PVC.
+// DesiredVolume returns desired PVC and PV for Suggestion.
+// If PV doesn't exist in Katib config return nil for PV.
 func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.PersistentVolumeClaim, *corev1.PersistentVolume, error) {
 
 	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(s.Spec.Algorithm.AlgorithmName, g.Client)
 	if err != nil {
 		return nil, nil, err
 	}
-
-	persistentVolumeName := util.GetSuggestionPersistentVolumeName(s)
 
 	pvc := &corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
@@ -282,24 +281,19 @@ func (g *General) DesiredVolume(s *suggestionsv1beta1.Suggestion) (*corev1.Persi
 	}
 
 	var pv *corev1.PersistentVolume
-	// Create PV with local hostPath by default
-	if *pvc.Spec.StorageClassName == consts.DefaultSuggestionStorageClassName {
-		localLabel := map[string]string{"type": "local"}
+	// Create PV if Katib config contains it.
+	if !equality.Semantic.DeepEqual(suggestionConfigData.PersistentVolumeSpec, corev1.PersistentVolumeSpec{}) {
+
+		persistentVolumeName := util.GetSuggestionPersistentVolumeName(s)
 
 		pv = &corev1.PersistentVolume{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:   persistentVolumeName,
-				Labels: localLabel,
+				Labels: suggestionConfigData.PersistentVolumeLabels,
 			},
 			Spec: suggestionConfigData.PersistentVolumeSpec,
 		}
 
-		// If default host path is specified attach pv name to the path.
-		// Full default local path = DefaultSuggestionVolumeLocalPathPrefix<suggestion-name>-<suggestion-algorithm>-<suggestion-namespace>
-		if pv.Spec.PersistentVolumeSource.HostPath != nil &&
-			pv.Spec.PersistentVolumeSource.HostPath.Path == consts.DefaultSuggestionVolumeLocalPathPrefix {
-			pv.Spec.PersistentVolumeSource.HostPath.Path = pv.Spec.PersistentVolumeSource.HostPath.Path + persistentVolumeName
-		}
 	}
 
 	return pvc, pv, nil
