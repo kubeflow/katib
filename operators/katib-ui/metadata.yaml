@@ -19,8 +19,10 @@ resources:
     auto-fetch: true
     upstream-source: docker.io/kubeflowkatib/katib-ui:v1beta1-a96ff59
 requires:
-  service-mesh:
-    interface: service-mesh
+  ingress:
+    interface: ingress
+    schema: https://raw.githubusercontent.com/canonical/operator-schemas/master/ingress.yaml
+    versions: [v1]
 provides:
   katib-ui:
     interface: http

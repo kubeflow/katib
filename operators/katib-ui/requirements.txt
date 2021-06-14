@@ -1,2 +1,3 @@
-ops==1.0.1
-git+git://github.com/juju-solutions/resource-oci-image.git#egg=oci_image
+ops==1.2.0
+oci-image==1.0.0
+serialized-data-interface==0.2.2

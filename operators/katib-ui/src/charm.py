@@ -2,11 +2,15 @@
 
 import logging
 
+from oci_image import OCIImageResource, OCIImageResourceError
 from ops.charm import CharmBase
 from ops.main import main
-from ops.model import ActiveStatus, MaintenanceStatus
-
-from oci_image import OCIImageResource, OCIImageResourceError
+from ops.model import ActiveStatus, BlockedStatus, MaintenanceStatus, WaitingStatus
+from serialized_data_interface import (
+    NoCompatibleVersions,
+    NoVersionsListed,
+    get_interfaces,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +26,34 @@ class Operator(CharmBase):
             self.model.unit.status = ActiveStatus()
             return
 
+        try:
+            self.interfaces = get_interfaces(self)
+        except NoVersionsListed as err:
+            self.model.unit.status = WaitingStatus(str(err))
+            return
+        except NoCompatibleVersions as err:
+            self.model.unit.status = BlockedStatus(str(err))
+            return
+        else:
+            self.model.unit.status = ActiveStatus()
+
         self.image = OCIImageResource(self, "oci-image")
         self.framework.observe(self.on.install, self.set_pod_spec)
         self.framework.observe(self.on.upgrade_charm, self.set_pod_spec)
+        self.framework.observe(
+            self.on["ingress"].relation_changed,
+            self.configure_ingress,
+        )
+
+    def configure_ingress(self, event):
+        if self.interfaces["ingress"]:
+            self.interfaces["ingress"].send_data(
+                {
+                    "prefix": "/katib/",
+                    "service": self.model.app.name,
+                    "port": self.model.config["port"],
+                }
+            )
 
     def set_pod_spec(self, event):
         self.model.unit.status = MaintenanceStatus("Setting pod spec")
