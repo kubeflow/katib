@@ -62,6 +62,6 @@ available charm run:
 
 ### 6. (optional) Relate the Katib bundle with your Kubeflow
 
-If you aim to use Katib within an existing Kubeflow deploymemnt in order to use it within the Kubeflow dashboard, you will have to integrate `katib-ui` to `istio-pilot` with the following command:
+If you aim to use Katib within an existing Kubeflow deployment in order to use it within the Kubeflow dashboard, you will have to integrate `katib-ui` to `istio-pilot` with the following command:
 
     juju relate istio-pilot katib-ui
