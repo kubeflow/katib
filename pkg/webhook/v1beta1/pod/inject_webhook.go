@@ -20,6 +20,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	trialcontroller "github.com/kubeflow/katib/pkg/controller.v1beta1/trial"
 	"net/http"
 	"strconv"
 	"strings"
@@ -93,6 +95,7 @@ func (s *SidecarInjector) Handle(ctx context.Context, req admission.Request) adm
 	// Do mutation
 	mutatedPod, err := s.Mutate(pod, namespace)
 	if err != nil {
+
 		log.Error(err, "Failed to inject metrics collector")
 		return admission.Errored(http.StatusBadRequest, err)
 	}
@@ -170,6 +173,14 @@ func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	}
 	if needWrapWorkerContainer(trial.Spec.MetricsCollector) {
 		if err = wrapWorkerContainer(trial, mutatedPod, namespace, mountPath, pathKind); err != nil {
+			msg := fmt.Sprintf("Unable to find primary container %v in mutated pod containers %v",
+				trial.Spec.PrimaryContainerName, pod.Spec.Containers)
+			trial.MarkTrialStatusFailed(trialcontroller.TrialFailedReason, msg)
+
+			if err := s.client.Status().Update(context.TODO(), trial); err != nil {
+				log.Error(err, fmt.Sprintf("Failed to update status of trial %v", trial.Name))
+				return nil, err
+			}
 			return nil, err
 		}
 	}
