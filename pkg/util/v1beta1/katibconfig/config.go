@@ -285,6 +285,18 @@ func setResourceRequirements(configResource corev1.ResourceRequirements) corev1.
 		configResource.Limits[corev1.ResourceEphemeralStorage] = defaultDiskLimit
 	}
 
+	// If user explicitly sets CPU value to -1, nuke it.
+	if cpuLimit.Sign() == -1 && cpuRequest.Sign() == -1 {
+		delete(configResource.Limits, corev1.ResourceCPU)
+		delete(configResource.Requests, corev1.ResourceCPU)
+	}
+
+	// If user explicitly sets Memory value to -1, nuke it.
+	if memLimit.Sign() == -1 && memRequest.Sign() == -1 {
+		delete(configResource.Limits, corev1.ResourceMemory)
+		delete(configResource.Requests, corev1.ResourceMemory)
+	}
+
 	// If user explicitly sets ephemeral-storage value to something negative, nuke it.
 	// This enables compability with the GKE nodepool autoscalers, which cannot scale
 	// pods which define ephemeral-storage resource constraints.
