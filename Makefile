@@ -33,14 +33,19 @@ deploy:
 undeploy:
 	bash scripts/v1beta1/undeploy.sh
 
-# Generate deepcopy, clientset, listers, informers, open-api and python SDK for APIs.
 # Run this if you update any existing controller APIs.
+# 1. Genereate deepcopy, clientset, listers, informers for the APIs (hack/update-codegen.sh)
+# 2. Generate open-api for the APIs (hack/update-openapigen)
+# 3. Generate Python SDK for Katib (hack/gen-python-sdk/gen-sdk.sh)
+# 4. Generate gRPC manager APIs (pkg/apis/manager/v1beta1/build.sh and pkg/apis/manager/health/build.sh)
 generate:
 ifndef GOPATH
 	$(error GOPATH not defined, please define GOPATH. Run "go help gopath" to learn more about GOPATH)
 endif
 	go generate ./pkg/... ./cmd/...
 	hack/gen-python-sdk/gen-sdk.sh
+	cd ./pkg/apis/manager/v1beta1 && ./build.sh
+	cd ./pkg/apis/manager/health && ./build.sh
 
 # Build images for the Katib v1beta1 components.
 build: generate
