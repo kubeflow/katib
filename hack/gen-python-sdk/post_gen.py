@@ -84,16 +84,17 @@ def update_python_sdk(src, dest, versions=('v1beta1')):
                             'python/blob/master/kubernetes/docs/V1HTTPGetAction.md)')
     ]
 
+    # TODO (andreyvelich): Currently test can't be generated properly.
     src_dirs = [
         os.path.join(src, 'katib'),
         os.path.join(src, 'katib', 'models'),
-        os.path.join(src, 'test'),
+        # os.path.join(src, 'test'),
         os.path.join(src, 'docs')
     ]
     dest_dirs = [
         os.path.join(dest, 'kubeflow', 'katib'),
         os.path.join(dest, 'kubeflow', 'katib', 'models'),
-        os.path.join(dest, 'test'),
+        # os.path.join(dest, 'test'),
         os.path.join(dest, 'docs')
     ]
 
