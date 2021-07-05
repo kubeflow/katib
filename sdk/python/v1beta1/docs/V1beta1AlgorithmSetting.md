@@ -1,5 +1,6 @@
 # V1beta1AlgorithmSetting
 
+AlgorithmSetting represents key-value pair for HP or NAS algorithm settings.
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

@@ -1,5 +1,6 @@
 # V1beta1GraphConfig
 
+GraphConfig contains a config of DAG
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

@@ -1,5 +1,6 @@
 # V1beta1NasConfig
 
+NasConfig contains config for NAS job
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
