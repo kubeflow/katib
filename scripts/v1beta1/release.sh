@@ -88,15 +88,12 @@ fi
 echo -e "Katib images have been updated\n"
 
 # ------------------ Publish Katib SDK ------------------
+# Remove first "v" for the SDK version.
+sdk_version=${TAG:1}
 # Check if this is pre-release.
-if [[ ${TAG} == *"-rc."* ]]; then
-  # Remove first "v" for the SDK version.
-  sdk_version=${TAG:1}
+if [[ ${sdk_version} == *"-rc."* ]]; then
   # Replace "-rc." with "rc" for the SDK version.
   sdk_version=$(sed "s@-rc.@rc@" <<<${sdk_version})
-else
-  # Remove first "v" for the SDK version.
-  sdk_version=${TAG:1}
 fi
 echo -e "Publishing Katib Python SDK, version: ${sdk_version}\n"
 # Run generate script.
