@@ -281,18 +281,6 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 				return nil, nil
 			}
 
-			// TODO (andreyvelich): Mutate job needs to be refactored (ref: https://github.com/kubeflow/katib/issues/1320)
-			// Currently, commented since we don't implement it
-			// jobProvider, err := jobv1beta1.New(desiredJob.GetKind())
-			// if err != nil {
-			// 	return nil, err
-			// }
-			// // mutate desiredJob according to provider
-			// if err := jobProvider.MutateJob(instance, desiredJob); err != nil {
-			// 	logger.Error(err, "Mutating desiredSpec of km.Training error")
-			// 	return nil, err
-			// }
-
 			logger.Info("Creating Job", "kind", kind,
 				"name", desiredJob.GetName())
 			err = r.Create(context.TODO(), desiredJob)
