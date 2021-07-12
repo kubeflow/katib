@@ -16,7 +16,8 @@
 
 # This script is used to release Katib project.
 # Run ./scripts/v1beta1/release.sh <BRANCH> <TAG> to execute it.
-# For example: ./scripts/v1beta1/release.sh release-0.11 v0.11.1
+# For example: ./scripts/v1beta1/release.sh release-0.11 v0.11.1 or
+# ./scripts/v1beta1/release.sh release-0.11 v0.11.0-rc.0
 # You must follow this format, Branch: release-X.Y, Tag: vX.Y.Z.
 
 set -e
@@ -27,15 +28,15 @@ TAG=$2
 if [[ -z "$BRANCH" || -z "$TAG" ]]; then
   echo "Branch and Tag must be set"
   echo "Usage: $0 <BRANCH> <TAG>" 1>&2
-  echo "You must follow this format, Branch: release-X.Y, Tag: vX.Y.Z"
+  echo "You must follow this format, Branch: release-X.Y, Tag: vX.Y.Z or Tag: vX.Y.Z-rc.N"
   exit 1
 fi
 
 # Check that Branch and Tag is in correct format.
-if [[ ! "$BRANCH" =~ release-[0-9]+\.[0-9]+ || ! "$TAG" =~ v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+if [[ ! "$BRANCH" =~ release-[0-9]+\.[0-9]+ || ! "$TAG" =~ v[0-9]+\.[0-9]+\.([0-9]+$|[0-9]+-rc\.[0-9]+$) ]]; then
   echo "Branch or Tag format is invalid"
   echo "Usage: $0 <BRANCH> <TAG>" 1>&2
-  echo "You must follow this format, Branch: release-X.Y, Tag: vX.Y.Z"
+  echo "You must follow this format, Branch: release-X.Y, Tag: vX.Y.Z or Tag: vX.Y.Z-rc.N"
   exit 1
 fi
 
@@ -87,8 +88,13 @@ fi
 echo -e "Katib images have been updated\n"
 
 # ------------------ Publish Katib SDK ------------------
-# Remove first "v" from the Katib release version for the SDK version.
+# Remove first "v" for the SDK version.
 sdk_version=${TAG:1}
+# Check if this is pre-release.
+if [[ ${sdk_version} == *"-rc."* ]]; then
+  # Replace "-rc." with "rc" for the SDK version.
+  sdk_version=$(sed "s@-rc.@rc@" <<<${sdk_version})
+fi
 echo -e "Publishing Katib Python SDK, version: ${sdk_version}\n"
 # Run generate script.
 make generate
