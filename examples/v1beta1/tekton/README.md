@@ -34,7 +34,7 @@ tekton-pipelines-webhook-7f9888f9b-7d6mr       1/1     Running   0          12h
 Check that `nop` image was modified:
 
 ```bash
-$ kubectl get pod <tekton-controller-pod-name> -n tekton-pipelines -o yaml | grep katib/v1beta1/file-metrics-collector
+$ kubectl get $(kubectl get pods -o name -n tekton-pipelines | grep tekton-pipelines-controller) -n tekton-pipelines -o yaml | grep katib
 
    - docker.io/kubeflowkatib/file-metrics-collector
 ```
