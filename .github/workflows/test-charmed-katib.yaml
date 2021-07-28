@@ -40,11 +40,13 @@ jobs:
       - name: Install dependencies
         run: |
           set -eux
+          sudo apt update
+          sudo apt install -y python3-pip
           sudo snap install charm --classic
           sudo snap install juju --classic
           sudo snap install juju-helpers --classic
           sudo snap install juju-wait --classic
-          sudo snap install charmcraft --classic
+          sudo pip3 install charmcraft==1.0.0
 
       - name: Build Docker images
         run: |
