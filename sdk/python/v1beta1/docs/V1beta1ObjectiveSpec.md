@@ -1,5 +1,6 @@
 # V1beta1ObjectiveSpec
 
+ObjectiveSpec represents Experiment's objective specification.
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

@@ -1,5 +1,6 @@
 # V1beta1TrialParameterSpec
 
+TrialParameterSpec describes parameters that must be replaced in trial template
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

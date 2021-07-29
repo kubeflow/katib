@@ -1,5 +1,6 @@
 # V1beta1ExperimentList
 
+ExperimentList contains a list of Experiments
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

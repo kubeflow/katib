@@ -1,5 +1,6 @@
 # V1beta1SuggestionList
 
+SuggestionList contains a list of Suggestion
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

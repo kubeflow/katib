@@ -1,5 +1,6 @@
 # V1beta1Suggestion
 
+Suggestion represents the structure of a Suggestion resource.
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

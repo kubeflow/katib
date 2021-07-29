@@ -1,5 +1,6 @@
 # V1beta1Trial
 
+Represents the structure of a Trial resource.
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

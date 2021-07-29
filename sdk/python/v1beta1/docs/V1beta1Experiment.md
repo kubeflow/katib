@@ -1,5 +1,6 @@
 # V1beta1Experiment
 
+Structure of the Experiment custom resource.
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

@@ -1,5 +1,6 @@
 # V1beta1EarlyStoppingSpec
 
+EarlyStoppingSpec is the specification for a early stopping algorithm.
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

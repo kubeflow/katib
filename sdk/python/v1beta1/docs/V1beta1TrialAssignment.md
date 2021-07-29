@@ -1,5 +1,6 @@
 # V1beta1TrialAssignment
 
+TrialAssignment is the assignment for one trial.
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

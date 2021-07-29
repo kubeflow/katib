@@ -1,5 +1,6 @@
 # V1beta1EarlyStoppingSetting
 
+EarlyStoppingSetting represents key-value pair for early stopping algorithm settings.
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

@@ -1,5 +1,6 @@
 # V1beta1AlgorithmSpec
 
+AlgorithmSpec is the specification for a HP or NAS algorithm.
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

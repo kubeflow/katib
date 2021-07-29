@@ -7,6 +7,9 @@ __pycache__/
 build/
 *.charm
 
+# SDK generator JAR file
+hack/gen-python-sdk/openapi-generator-cli.jar
+
 # Project specific ignore files
 *.swp
 bin

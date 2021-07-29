@@ -1,13 +1,14 @@
 # V1beta1SuggestionStatus
 
+SuggestionStatus is the current status of a Suggestion.
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **algorithm_settings** | [**list[V1beta1AlgorithmSetting]**](V1beta1AlgorithmSetting.md) | AlgorithmSettings defines HP or NAS algorithm settings which suggestion gRPC service returns. These settings overwrites Experiment&#39;s settings before the gRPC request. It can be empty if settings haven&#39;t been changed. | [optional] 
-**completion_time** | **datetime** | Represents time when the Suggestion was completed. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC. | [optional] 
+**completion_time** | **datetime** |  | [optional] 
 **conditions** | [**list[V1beta1SuggestionCondition]**](V1beta1SuggestionCondition.md) | List of observed runtime conditions for this Suggestion. | [optional] 
-**last_reconcile_time** | **datetime** | Represents last time when the Suggestion was reconciled. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC. | [optional] 
-**start_time** | **datetime** | Represents time when the Suggestion was acknowledged by the Suggestion controller. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC. | [optional] 
+**last_reconcile_time** | **datetime** |  | [optional] 
+**start_time** | **datetime** |  | [optional] 
 **suggestion_count** | **int** | Number of suggestion results | [optional] 
 **suggestions** | [**list[V1beta1TrialAssignment]**](V1beta1TrialAssignment.md) | Suggestion results | [optional] 
 

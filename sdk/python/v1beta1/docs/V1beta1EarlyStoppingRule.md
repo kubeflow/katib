@@ -1,5 +1,6 @@
 # V1beta1EarlyStoppingRule
 
+EarlyStoppingRule represents each rule for early stopping.
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

@@ -1,5 +1,6 @@
 # V1beta1ConfigMapSource
 
+ConfigMapSource references the config map where trial template is located
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

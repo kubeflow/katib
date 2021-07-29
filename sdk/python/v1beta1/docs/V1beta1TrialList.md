@@ -1,5 +1,6 @@
 # V1beta1TrialList
 
+TrialList contains a list of Trials
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
