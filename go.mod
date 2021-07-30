@@ -32,3 +32,5 @@ require (
 	k8s.io/kube-openapi v0.0.0-20210216185858-15cd8face8d6
 	sigs.k8s.io/controller-runtime v0.8.2
 )
+
+replace k8s.io/code-generator => k8s.io/code-generator v0.20.4
