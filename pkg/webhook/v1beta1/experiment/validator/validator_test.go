@@ -654,59 +654,6 @@ spec:
 		t.Errorf("ConvertStringToUnstructured failed: %v", err)
 	}
 
-	invalidFieldTFJob := `apiVersion: kubeflow.org/v1
-kind: TFJob
-spec:
-  tfReplicaSpecs:
-    Worker: InvalidWorker`
-
-	invalidFieldTFJobUnstr, err := util.ConvertStringToUnstructured(invalidFieldTFJob)
-	if err != nil {
-		t.Errorf("ConvertStringToUnstructured failed: %v", err)
-	}
-
-	invalidStructureTFJob := `apiVersion: kubeflow.org/v1
-kind: TFJob
-spec:
-  tfReplicaSpecs:
-    Worker:
-      replicas: 2
-    InvalidWorker:
-      InvalidContainer:
-        - Name: invalidName1`
-
-	invalidStructureTFJobUnstr, err := util.ConvertStringToUnstructured(invalidStructureTFJob)
-	if err != nil {
-		t.Errorf("ConvertStringToUnstructured failed: %v", err)
-	}
-
-	// 	invalidFieldPyTorchJob := `apiVersion: kubeflow.org/v1
-	// kind: PyTorchJob
-	// spec:
-	//   pytorchReplicaSpecs:
-	//     Master: InvalidMaster`
-
-	// 	invalidFieldPyTorchJobUnstr, err := util.ConvertStringToUnstructured(invalidFieldPyTorchJob)
-	// 	if err != nil {
-	// 		t.Errorf("ConvertStringToUnstructured failed: %v", err)
-	// 	}
-
-	// 	invalidStructurePyTorchJob := `apiVersion: kubeflow.org/v1
-	// kind: PyTorchJob
-	// spec:
-	//   pytorchReplicaSpecs:
-	//     Master:
-	//       template:
-	//         spec:
-	//           containers:
-	//             - name: pytorch
-	//             - invalidName: invalidName`
-
-	// invalidStructurePyTorchJobUnstr, err := util.ConvertStringToUnstructured(invalidStructurePyTorchJob)
-	// if err != nil {
-	// 	t.Errorf("ConvertStringToUnstructured failed: %v", err)
-	// }
-
 	notDefaultResourceBatchJob := `apiVersion: batch/v1
 kind: Job
 spec:
@@ -744,30 +691,6 @@ spec:
 			Err:             true,
 			testDescription: "Trial template has invalid Batch Job structure",
 		},
-		// Invalid Field TF Job
-		{
-			RunSpec:         invalidFieldTFJobUnstr,
-			Err:             true,
-			testDescription: "Trial template has invalid TF Job parameter",
-		},
-		// Invalid Structure TF Job
-		{
-			RunSpec:         invalidStructureTFJobUnstr,
-			Err:             true,
-			testDescription: "Trial template has invalid TF Job structure",
-		},
-		// Invalid Field PyTorch Job
-		// {
-		// 	RunSpec:         invalidFieldPyTorchJobUnstr,
-		// 	Err:             true,
-		// 	testDescription: "Trial template has invalid PyTorch Job parameter",
-		// },
-		// // Invalid Structure PyTorch Job
-		// {
-		// 	RunSpec:         invalidStructurePyTorchJobUnstr,
-		// 	Err:             true,
-		// 	testDescription: "Trial template has invalid PyTorch Job structure",
-		// },
 		// Valid case with not default Kubernetes resource (nvidia.com/gpu: 1)
 		{
 			RunSpec:         notDefaultResourceBatchUnstr,

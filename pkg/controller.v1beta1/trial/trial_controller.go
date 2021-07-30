@@ -56,7 +56,7 @@ const (
 var (
 	log = logf.Log.WithName(ControllerName)
 	// errMetricsNotReported is the error when Trial job is succeeded but metrics are not reported yet
-	errMetricsNotReported = fmt.Errorf("Metrics are not reported yet")
+	errMetricsNotReported = fmt.Errorf("metrics are not reported yet")
 )
 
 // Add creates a new Trial Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
@@ -230,7 +230,9 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 
 	// Job already exists.
 	// If Trial is EarlyStopped we need to verify/update observation logs.
-	if deployedJob != nil && (!instance.IsCompleted() || instance.IsEarlyStopped()) {
+	// TODO (andreyvelich): We can include "MetricsUnavailable" condition to "Complete".
+	// In that case, Trial's job will be deleted even if metrics are not available.
+	if deployedJob != nil && ((!instance.IsCompleted() && !instance.IsMetricsUnavailable()) || instance.IsEarlyStopped()) {
 		jobStatus, err := trialutil.GetDeployedJobStatus(instance, deployedJob)
 		if err != nil {
 			logger.Error(err, "GetDeployedJobStatus error")

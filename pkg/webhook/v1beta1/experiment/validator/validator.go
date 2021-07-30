@@ -24,8 +24,6 @@ import (
 	"strconv"
 	"strings"
 
-	// pytorchv1 "github.com/kubeflow/pytorch-operator/pkg/apis/pytorch/v1"
-	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 	jsonPatch "github.com/mattbaird/jsonpatch"
 	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -131,7 +129,7 @@ func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1be
 	}
 
 	if len(instance.Spec.Parameters) > 0 && instance.Spec.NasConfig != nil {
-		return fmt.Errorf("Only one of spec.parameters and spec.nasConfig can be specified")
+		return fmt.Errorf("only one of spec.parameters and spec.nasConfig can be specified")
 	}
 
 	if len(instance.Spec.Parameters) > 0 {
@@ -148,27 +146,27 @@ func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1be
 
 func (g *DefaultValidator) validateObjective(obj *commonapiv1beta1.ObjectiveSpec) error {
 	if obj == nil {
-		return fmt.Errorf("No spec.objective specified.")
+		return fmt.Errorf("no spec.objective specified")
 	}
 	if obj.Type != commonapiv1beta1.ObjectiveTypeMinimize && obj.Type != commonapiv1beta1.ObjectiveTypeMaximize {
-		return fmt.Errorf("spec.objective.type must be %s or %s.", commonapiv1beta1.ObjectiveTypeMinimize, commonapiv1beta1.ObjectiveTypeMaximize)
+		return fmt.Errorf("spec.objective.type must be %s or %s", commonapiv1beta1.ObjectiveTypeMinimize, commonapiv1beta1.ObjectiveTypeMaximize)
 	}
 	if obj.ObjectiveMetricName == "" {
-		return fmt.Errorf("No spec.objective.objectiveMetricName specified.")
+		return fmt.Errorf("no spec.objective.objectiveMetricName specified")
 	}
 	return nil
 }
 
 func (g *DefaultValidator) validateAlgorithm(ag *commonapiv1beta1.AlgorithmSpec) error {
 	if ag == nil {
-		return fmt.Errorf("No spec.algorithm specified.")
+		return fmt.Errorf("no spec.algorithm specified")
 	}
 	if ag.AlgorithmName == "" {
-		return fmt.Errorf("No spec.algorithm.name specified.")
+		return fmt.Errorf("no spec.algorithm.name specified")
 	}
 
 	if _, err := g.GetSuggestionConfigData(ag.AlgorithmName); err != nil {
-		return fmt.Errorf("unable to get Suggestion config data for algorithm %s: %v.", ag.AlgorithmName, err)
+		return fmt.Errorf("unable to get Suggestion config data for algorithm %s: %v", ag.AlgorithmName, err)
 	}
 
 	return nil
@@ -250,7 +248,7 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 
 	// Check if trialSpec and configMap doesn't exist together
 	if trialTemplate.TrialSource.TrialSpec != nil && trialTemplate.TrialSource.ConfigMap != nil {
-		return fmt.Errorf("Only one of spec.trialTemplate.trialSpec or spec.trialTemplate.configMap can be specified")
+		return fmt.Errorf("only one of spec.trialTemplate.trialSpec or spec.trialTemplate.configMap can be specified")
 	}
 
 	// Check if configMap parameters are specified
@@ -258,13 +256,13 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 		(trialTemplate.TrialSource.ConfigMap.ConfigMapName == "" ||
 			trialTemplate.TrialSource.ConfigMap.ConfigMapNamespace == "" ||
 			trialTemplate.TrialSource.ConfigMap.TemplatePath == "") {
-		return fmt.Errorf("For spec.trialTemplate.configMap .configMapName and .configMapNamespace and .templatePath must be specified")
+		return fmt.Errorf("for spec.trialTemplate.configMap .configMapName and .configMapNamespace and .templatePath must be specified")
 	}
 
 	// Check if Trial template can be parsed to string
 	trialTemplateStr, err := g.GetTrialTemplate(instance)
 	if err != nil {
-		return fmt.Errorf("Unable to parse spec.trialTemplate: %v", err)
+		return fmt.Errorf("unable to parse spec.trialTemplate: %v", err)
 	}
 
 	trialParametersNames := make(map[string]bool)
@@ -273,24 +271,24 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 	for _, parameter := range trialTemplate.TrialParameters {
 		// Check if all trialParameters contain name and reference. Or name contains invalid character
 		if parameter.Name == "" || parameter.Reference == "" ||
-			strings.Index(parameter.Name, "{") != -1 || strings.Index(parameter.Name, "}") != -1 {
-			return fmt.Errorf("Invalid spec.trialTemplate.trialParameters: %v", parameter)
+			strings.Contains(parameter.Name, "{") || strings.Contains(parameter.Name, "}") {
+			return fmt.Errorf("invalid spec.trialTemplate.trialParameters: %v", parameter)
 		}
 
 		// Check if parameter names are not duplicated
 		if _, ok := trialParametersNames[parameter.Name]; ok {
-			return fmt.Errorf("Parameter name %v can't be duplicated in spec.trialTemplate.trialParameters: %v", parameter.Name, trialTemplate.TrialParameters)
+			return fmt.Errorf("parameter name %v can't be duplicated in spec.trialTemplate.trialParameters: %v", parameter.Name, trialTemplate.TrialParameters)
 		}
 		// Check if parameter references are not duplicated
 		if _, ok := trialParametersRefs[parameter.Reference]; ok {
-			return fmt.Errorf("Parameter reference %v can't be duplicated in spec.trialTemplate.trialParameters: %v", parameter.Reference, trialTemplate.TrialParameters)
+			return fmt.Errorf("parameter reference %v can't be duplicated in spec.trialTemplate.trialParameters: %v", parameter.Reference, trialTemplate.TrialParameters)
 		}
 		trialParametersNames[parameter.Name] = true
 		trialParametersRefs[parameter.Reference] = true
 
 		// Check if trialParameters contains all substitution for Trial template
-		if strings.Index(trialTemplateStr, fmt.Sprintf(consts.TrialTemplateParamReplaceFormat, parameter.Name)) == -1 {
-			return fmt.Errorf("Parameter name: %v in spec.trialParameters not found in spec.trialTemplate: %v", parameter.Name, trialTemplateStr)
+		if !strings.Contains(trialTemplateStr, fmt.Sprintf(consts.TrialTemplateParamReplaceFormat, parameter.Name)) {
+			return fmt.Errorf("parameter name: %v in spec.trialParameters not found in spec.trialTemplate: %v", parameter.Name, trialTemplateStr)
 		}
 
 		trialTemplateStr = strings.Replace(trialTemplateStr, fmt.Sprintf(consts.TrialTemplateParamReplaceFormat, parameter.Name), "test-value", -1)
@@ -300,13 +298,13 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 	substitutionRegex := regexp.MustCompile(consts.TrialTemplateParamReplaceFormatRegex)
 	notReplacedParams := substitutionRegex.FindAllString(trialTemplateStr, -1)
 	if len(notReplacedParams) != 0 {
-		return fmt.Errorf("Parameters: %v in spec.trialTemplate not found in spec.trialParameters: %v", notReplacedParams, trialTemplate.TrialParameters)
+		return fmt.Errorf("parameters: %v in spec.trialTemplate not found in spec.trialParameters: %v", notReplacedParams, trialTemplate.TrialParameters)
 	}
 
 	// Check if Trial template can be converted to unstructured
 	runSpec, err := util.ConvertStringToUnstructured(trialTemplateStr)
 	if err != nil {
-		return fmt.Errorf("Unable to convert spec.trialTemplate: %v to unstructured", trialTemplateStr)
+		return fmt.Errorf("unable to convert spec.trialTemplate: %v to unstructured", trialTemplateStr)
 	}
 
 	// Check if metadata.name and metatdata.namespace is omittied
@@ -322,7 +320,7 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 	// Check if Job can be converted to Batch Job/TFJob/PyTorchJob
 	// Other CRDs are not validated
 	if err := g.validateTrialJob(runSpec); err != nil {
-		return fmt.Errorf("Invalid spec.trialTemplate: %v", err)
+		return fmt.Errorf("invalid spec.trialTemplate: %v", err)
 	}
 
 	return nil
@@ -339,36 +337,15 @@ func (g *DefaultValidator) validateTrialJob(runSpec *unstructured.Unstructured) 
 		// Validate that RunSpec can be converted to Batch Job
 		err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &batchJob)
 		if err != nil {
-			return fmt.Errorf("Unable to convert spec.TrialTemplate: %v to %v: %v", runSpec.Object, gvk.Kind, err)
+			return fmt.Errorf("unable to convert spec.TrialTemplate: %v to %v: %v", runSpec.Object, gvk.Kind, err)
 		}
 
 		// Try to patch runSpec to Batch Job
+		// TODO (andreyvelich): Do we want to remove it completely ?
 		err = validatePatchJob(runSpec, batchJob, gvk.Kind)
 		if err != nil {
 			return err
 		}
-	case consts.JobKindTF:
-		tfJob := &tfv1.TFJob{}
-		err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &tfJob)
-		if err != nil {
-			return fmt.Errorf("Unable to convert spec.TrialTemplate: %v to %v: %v", runSpec.Object, gvk.Kind, err)
-		}
-		err = validatePatchJob(runSpec, tfJob, gvk.Kind)
-		if err != nil {
-			return err
-		}
-		// TODO (andreyvelich): Need to fix this or remove.
-		// case consts.JobKindPyTorch:
-		// 	pyTorchJob := &pytorchv1.PyTorchJob{}
-		// 	err := runtime.DefaultUnstructuredConverter.FromUnstructured(runSpec.Object, &pyTorchJob)
-		// 	if err != nil {
-		// 		return fmt.Errorf("Unable to convert spec.TrialTemplate: %v to %v: %v", runSpec.Object, gvk.Kind, err)
-		// 	}
-		// 	err = validatePatchJob(runSpec, pyTorchJob, gvk.Kind)
-		// 	if err != nil {
-		// 		return err
-		// 	}
-
 	}
 
 	return nil
@@ -385,7 +362,7 @@ func validatePatchJob(runSpec *unstructured.Unstructured, job interface{}, jobTy
 	// Create Patch on tranformed Job (e.g: Job, TFJob) using unstructured JSON
 	runSpecPatchOperations, err := jsonPatch.CreatePatch(runSpecAfter, runSpecBefore)
 	if err != nil {
-		return fmt.Errorf("Create patch error: %v", err)
+		return fmt.Errorf("create patch error: %v", err)
 	}
 
 	for _, operation := range runSpecPatchOperations {
@@ -393,7 +370,7 @@ func validatePatchJob(runSpec *unstructured.Unstructured, job interface{}, jobTy
 		// We can't validate /resources/limits/ because CRDs can have custom k8s resources using defice plugin
 		// ref https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/
 		if operation.Operation != "remove" && !strings.Contains(operation.Path, "/resources/limits/") && !strings.Contains(operation.Path, "/resources/requests/") {
-			return fmt.Errorf("Unable to convert: %v - %v to %v, converted template: %v", operation.Path, operation.Value, jobType, string(runSpecAfter))
+			return fmt.Errorf("unable to convert: %v - %v to %v, converted template: %v", operation.Path, operation.Value, jobType, string(runSpecAfter))
 		}
 	}
 
@@ -419,24 +396,24 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1beta1.Exp
 	case commonapiv1beta1.FileCollector:
 		if mcSpec.Source == nil || mcSpec.Source.FileSystemPath == nil ||
 			mcSpec.Source.FileSystemPath.Kind != commonapiv1beta1.FileKind || !filepath.IsAbs(mcSpec.Source.FileSystemPath.Path) {
-			return fmt.Errorf("File path where metrics file exists is required by .spec.metricsCollectorSpec.source.fileSystemPath.path")
+			return fmt.Errorf("file path where metrics file exists is required by .spec.metricsCollectorSpec.source.fileSystemPath.path")
 		}
 	case commonapiv1beta1.TfEventCollector:
 		if mcSpec.Source == nil || mcSpec.Source.FileSystemPath == nil ||
 			mcSpec.Source.FileSystemPath.Kind != commonapiv1beta1.DirectoryKind || !filepath.IsAbs(mcSpec.Source.FileSystemPath.Path) {
-			return fmt.Errorf("Directory path where tensorflow event files exist is required by .spec.metricsCollectorSpec.source.fileSystemPath.path")
+			return fmt.Errorf("directory path where tensorflow event files exist is required by .spec.metricsCollectorSpec.source.fileSystemPath.path")
 		}
 	case commonapiv1beta1.PrometheusMetricCollector:
 		i, err := strconv.Atoi(mcSpec.Source.HttpGet.Port.String())
 		if err != nil || i <= 0 {
-			return fmt.Errorf(".spec.metricsCollectorSpec.source.httpGet.port must be a positive integer value for metrics collector kind: %v.", mcKind)
+			return fmt.Errorf(".spec.metricsCollectorSpec.source.httpGet.port must be a positive integer value for metrics collector kind: %v", mcKind)
 		}
 		if !strings.HasPrefix(mcSpec.Source.HttpGet.Path, "/") {
-			return fmt.Errorf(".spec.metricsCollectorSpec.source.httpGet.path is invalid for metrics collector kind: %v.", mcKind)
+			return fmt.Errorf(".spec.metricsCollectorSpec.source.httpGet.path is invalid for metrics collector kind: %v", mcKind)
 		}
 	case commonapiv1beta1.CustomCollector:
 		if mcSpec.Collector.CustomCollector == nil {
-			return fmt.Errorf(".spec.metricsCollectorSpec.collector.customCollector is required for metrics collector kind: %v.", mcKind)
+			return fmt.Errorf(".spec.metricsCollectorSpec.collector.customCollector is required for metrics collector kind: %v", mcKind)
 		}
 		if mcSpec.Source.FileSystemPath != nil {
 			if !filepath.IsAbs(mcSpec.Source.FileSystemPath.Path) || (mcSpec.Source.FileSystemPath.Kind != commonapiv1beta1.DirectoryKind &&
@@ -445,17 +422,17 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1beta1.Exp
 			}
 		}
 	default:
-		return fmt.Errorf("Invalid metrics collector kind: %v.", mcKind)
+		return fmt.Errorf("invalid metrics collector kind: %v", mcKind)
 	}
 	if mcSpec.Source != nil && mcSpec.Source.Filter != nil && len(mcSpec.Source.Filter.MetricsFormat) > 0 {
 		// the filter regular expression must have two top subexpressions, the first matched one will be taken as metric name, the second one as metric value
 		mustTwoBracket, _ := regexp.Compile(`.*\(.*\).*\(.*\).*`)
 		for _, mFormat := range mcSpec.Source.Filter.MetricsFormat {
 			if _, err := regexp.Compile(mFormat); err != nil {
-				return fmt.Errorf("Invalid %q in .spec.metricsCollectorSpec.source.filter: %v.", mFormat, err)
+				return fmt.Errorf("invalid %q in .spec.metricsCollectorSpec.source.filter: %v", mFormat, err)
 			} else {
 				if !mustTwoBracket.MatchString(mFormat) {
-					return fmt.Errorf("Invalid %q in .spec.metricsCollectorSpec.source.filter: two top subexpressions are required", mFormat)
+					return fmt.Errorf("invalid %q in .spec.metricsCollectorSpec.source.filter: two top subexpressions are required", mFormat)
 				}
 			}
 		}

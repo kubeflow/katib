@@ -22,7 +22,6 @@ import (
 
 	"github.com/tidwall/gjson"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
@@ -56,10 +55,6 @@ const (
 	JobFailed ConditionType = "Failed"
 )
 
-var (
-	log = logf.Log.WithName("job-util")
-)
-
 // GetDeployedJobStatus returns internal representation for deployed Job status.
 func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.Unstructured) (*TrialJobStatus, error) {
 
@@ -84,7 +79,7 @@ func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.
 		// Unmarshal condition to Trial Job representation to get message and reason if it exists
 		err := json.Unmarshal([]byte(strCondition), &trialJobStatus)
 		if err != nil {
-			return nil, fmt.Errorf("Unmarshal failure condition to Trial Job status failed %v", err)
+			return nil, fmt.Errorf("unmarshal failure condition to Trial Job status failed %v", err)
 		}
 
 		// Job condition is failed
@@ -105,7 +100,7 @@ func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.
 
 		err := json.Unmarshal([]byte(strCondition), &trialJobStatus)
 		if err != nil {
-			return nil, fmt.Errorf("Unmarshal success condition to Trial Job status failed %v", err)
+			return nil, fmt.Errorf("unmarshal success condition to Trial Job status failed %v", err)
 		}
 
 		// Job condition is succeeded
