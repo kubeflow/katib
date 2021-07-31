@@ -14,6 +14,8 @@
 
 import logging
 
+import grpc
+
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.apis.manager.v1beta1.python import api_pb2_grpc
 from pkg.suggestion.v1beta1.internal.search_space import HyperParameterSearchSpace
@@ -38,8 +40,6 @@ class SkoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         """
         algorithm_name, config = OptimizerConfiguration.convertAlgorithmSpec(
             request.experiment.spec.algorithm)
-        if algorithm_name != "bayesianoptimization":
-            raise Exception("Failed to create the algorithm: {}".format(algorithm_name))
 
         if self.is_first_run:
             search_space = HyperParameterSearchSpace.convert(request.experiment)
@@ -58,6 +58,15 @@ class SkoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             parameter_assignments=Assignment.generate(new_trials)
         )
 
+    def ValidateAlgorithmSettings(self, request, context):
+        is_valid, message = OptimizerConfiguration.validate_algorithm_spec(
+            request.experiment.spec.algorithm)
+        if not is_valid:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details(message)
+            logger.error(message)
+        return api_pb2.ValidateAlgorithmSettingsReply()
+
 
 class OptimizerConfiguration(object):
     def __init__(self, base_estimator="GP",
@@ -71,8 +80,8 @@ class OptimizerConfiguration(object):
         self.acq_optimizer = acq_optimizer
         self.random_state = random_state
 
-    @staticmethod
-    def convertAlgorithmSpec(algorithm_spec):
+    @classmethod
+    def convertAlgorithmSpec(cls, algorithm_spec):
         optimizer = OptimizerConfiguration()
         for s in algorithm_spec.algorithm_settings:
             if s.name == "base_estimator":
@@ -86,3 +95,38 @@ class OptimizerConfiguration(object):
             elif s.name == "random_state":
                 optimizer.random_state = int(s.value)
         return algorithm_spec.algorithm_name, optimizer
+
+    @classmethod
+    def validate_algorithm_spec(cls, algorithm_spec):
+        algo_name = algorithm_spec.algorithm_name
+
+        if algo_name == "bayesianoptimization":
+            return cls._validate_bayesianoptimization_setting(algorithm_spec.algorithm_settings)
+        else:
+            return False, "unknown algorithm name {}".format(algo_name)
+
+    @classmethod
+    def _validate_bayesianoptimization_setting(cls, algorithm_settings):
+        for s in algorithm_settings:
+            try:
+                if s.name == "base_estimator":
+                    if s.value not in ["GP", "RF", "ET", "GBRT"]:
+                        return False, f"base_estimator {s.value} is not supported in katib"
+                elif s.name == "n_initial_points":
+                    if not (int(s.value) >= 0):
+                        return False, "n_initial_points should be great or equal than zero"
+                elif s.name == "acq_func":
+                    if s.value not in ["gp_hedge", "LCB", "EI", "PI", "EIps", "PIps"]:
+                        return False, f"acq_func {s.value} is not supported in katib"
+                elif s.name == "acq_optimizer":
+                    if s.value not in ["auto", "sampling", "lbfgs"]:
+                        return False, f"acq_optimizer {s.value} is not supported in katib"
+                elif s.name == "random_state":
+                    if not (int(s.value) >= 0):
+                        return False, "random_state should be great or equal than zero"
+                else:
+                    return False, f"unknown setting {s.name} for algorithm bayesianoptimization"
+            except Exception as e:
+                return False, f"failed to validate {s.name}({s.value}): {e}"
+
+        return True, ""
