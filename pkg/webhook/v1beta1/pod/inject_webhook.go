@@ -29,7 +29,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	apitypes "k8s.io/apimachinery/pkg/types"
-	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -160,7 +159,8 @@ func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	}
 	mutatedPod.Spec.Containers = append(mutatedPod.Spec.Containers, *injectContainer)
 
-	mutatedPod.Spec.ShareProcessNamespace = pointer.BoolPtr(true)
+	isShareProcessNamespace := true
+	mutatedPod.Spec.ShareProcessNamespace = &isShareProcessNamespace
 
 	mountPath, pathKind := getMountPath(trial.Spec.MetricsCollector)
 	if mountPath != "" {

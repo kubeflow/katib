@@ -24,12 +24,10 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	commonv1 "github.com/kubeflow/common/pkg/apis/common/v1"
-	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 	"github.com/onsi/gomega"
 	"github.com/prometheus/client_golang/prometheus"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -54,7 +52,7 @@ const (
 	experimentName   = "test-experiment"
 	trialName        = "test-trial"
 	namespace        = "default"
-	primaryContainer = "tensorflow"
+	primaryContainer = "training-container"
 
 	timeout = time.Second * 40
 )
@@ -146,9 +144,9 @@ func TestReconcile(t *testing.T) {
 		g.Expect(mgr.Start(context.TODO())).NotTo(gomega.HaveOccurred())
 	}()
 
-	returnedTFJob := newFakeTFJob()
+	returnedBatchJob := newFakeBatchJob()
 
-	returnedUnstructured, err := util.ConvertObjectToUnstructured(returnedTFJob)
+	returnedUnstructured, err := util.ConvertObjectToUnstructured(returnedBatchJob)
 	if err != nil {
 		t.Errorf("ConvertObjectToUnstructured failed: %v", err)
 	}
@@ -378,33 +376,27 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 	var parallelCount int32 = 2
 	var goal float64 = 99.9
 
-	trialTemplateJob := &tfv1.TFJob{
+	trialTemplateJob := &batchv1.Job{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: "kubeflow.org/v1",
-			Kind:       "TFJob",
+			APIVersion: "batch/v1",
+			Kind:       "Job",
 		},
-		Spec: tfv1.TFJobSpec{
-			TFReplicaSpecs: map[commonv1.ReplicaType]*commonv1.ReplicaSpec{
-				tfv1.TFReplicaTypePS: {
-					Replicas:      func() *int32 { i := int32(1); return &i }(),
-					RestartPolicy: commonv1.RestartPolicyOnFailure,
-					Template: v1.PodTemplateSpec{
-						Spec: v1.PodSpec{
-							Containers: []v1.Container{
-								{
-									Name:  primaryContainer,
-									Image: "gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0",
-									Command: []string{
-										"python",
-										"/var/tf_mnist/mnist_with_summaries.py",
-										"--log_dir=/train/metrics",
-										"--lr=${trialParameters.learningRate}",
-										"--num-layers=${trialParameters.numberLayers}",
-									},
-								},
+		Spec: batchv1.JobSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  primaryContainer,
+							Image: "docker.io/kubeflowkatib/mxnet-mnist",
+							Command: []string{
+								"python3",
+								"/opt/mxnet-mnist/mnist.py",
+								"--lr=${trialParameters.learningRate}",
+								"--num-layers=${trialParameters.numberLayers}",
 							},
 						},
 					},
+					RestartPolicy: corev1.RestartPolicyNever,
 				},
 			},
 		},
@@ -514,35 +506,28 @@ func newFakeSuggestion() *suggestionsv1beta1.Suggestion {
 	}
 }
 
-func newFakeTFJob() *tfv1.TFJob {
-	return &tfv1.TFJob{
+func newFakeBatchJob() *batchv1.Job {
+	return &batchv1.Job{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: "kubeflow.org/v1",
-			Kind:       "TFJob",
+			APIVersion: "batch/v1",
+			Kind:       "Job",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "trial-name",
 			Namespace: "trial-namespace",
 		},
-		Spec: tfv1.TFJobSpec{
-			TFReplicaSpecs: map[commonv1.ReplicaType]*commonv1.ReplicaSpec{
-				tfv1.TFReplicaTypePS: {
-					Replicas:      func() *int32 { i := int32(1); return &i }(),
-					RestartPolicy: commonv1.RestartPolicyOnFailure,
-					Template: v1.PodTemplateSpec{
-						Spec: v1.PodSpec{
-							Containers: []v1.Container{
-								{
-									Name:  primaryContainer,
-									Image: "gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0",
-									Command: []string{
-										"python",
-										"/var/tf_mnist/mnist_with_summaries.py",
-										"--log_dir=/train/metrics",
-										"--lr=0.01",
-										"--num-layers=5",
-									},
-								},
+		Spec: batchv1.JobSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  primaryContainer,
+							Image: "docker.io/kubeflowkatib/mxnet-mnist",
+							Command: []string{
+								"python3",
+								"/opt/mxnet-mnist/mnist.py",
+								"--lr=0.01",
+								"--num-layers=5",
 							},
 						},
 					},

@@ -20,8 +20,7 @@ import (
 	"reflect"
 	"testing"
 
-	commonv1 "github.com/kubeflow/common/pkg/apis/common/v1"
-	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -37,7 +36,7 @@ const (
 
 func TestGetDeployedJobStatus(t *testing.T) {
 
-	successCondition := "status.conditions.#(type==\"Succeeded\")#|#(status==\"True\")#"
+	successCondition := "status.conditions.#(type==\"Complete\")#|#(status==\"True\")#"
 	failureCondition := "status.conditions.#(type==\"Failed\")#|#(status==\"True\")#"
 
 	tcs := []struct {
@@ -50,10 +49,10 @@ func TestGetDeployedJobStatus(t *testing.T) {
 		{
 			trial: newFakeTrial(successCondition, failureCondition),
 			deployedJob: func() *unstructured.Unstructured {
-				tfJob := newFakeTFJob()
-				tfJob.Status.Conditions[0].Status = corev1.ConditionFalse
-				tfJob.Status.Conditions[1].Status = corev1.ConditionFalse
-				return newFakeDeployedJob(tfJob)
+				job := newFakeJob()
+				job.Status.Conditions[0].Status = corev1.ConditionFalse
+				job.Status.Conditions[1].Status = corev1.ConditionFalse
+				return newFakeDeployedJob(job)
 			}(),
 			expectedTrialJobStatus: func() *TrialJobStatus {
 				return &TrialJobStatus{
@@ -61,11 +60,11 @@ func TestGetDeployedJobStatus(t *testing.T) {
 				}
 			}(),
 			err:             false,
-			testDescription: "TFJob status is running",
+			testDescription: "Job status is running",
 		},
 		{
 			trial:       newFakeTrial(successCondition, failureCondition),
-			deployedJob: newFakeDeployedJob(newFakeTFJob()),
+			deployedJob: newFakeDeployedJob(newFakeJob()),
 			expectedTrialJobStatus: func() *TrialJobStatus {
 				return &TrialJobStatus{
 					Condition: JobSucceeded,
@@ -74,15 +73,15 @@ func TestGetDeployedJobStatus(t *testing.T) {
 				}
 			}(),
 			err:             false,
-			testDescription: "TFJob status is succeeded, reason and message must be returned",
+			testDescription: "Job status is succeeded, reason and message must be returned",
 		},
 		{
 			trial: newFakeTrial(successCondition, failureCondition),
 			deployedJob: func() *unstructured.Unstructured {
-				tfJob := newFakeTFJob()
-				tfJob.Status.Conditions[0].Status = corev1.ConditionTrue
-				tfJob.Status.Conditions[1].Status = corev1.ConditionFalse
-				return newFakeDeployedJob(tfJob)
+				job := newFakeJob()
+				job.Status.Conditions[0].Status = corev1.ConditionTrue
+				job.Status.Conditions[1].Status = corev1.ConditionFalse
+				return newFakeDeployedJob(job)
 			}(),
 			expectedTrialJobStatus: func() *TrialJobStatus {
 				return &TrialJobStatus{
@@ -92,18 +91,18 @@ func TestGetDeployedJobStatus(t *testing.T) {
 				}
 			}(),
 			err:             false,
-			testDescription: "TFJob status is failed, reason and message must be returned",
+			testDescription: "Job status is failed, reason and message must be returned",
 		},
 		{
-			trial:       newFakeTrial("status.replicaStatuses.master.[@this].#(active==\"1\")", failureCondition),
-			deployedJob: newFakeDeployedJob(newFakeTFJob()),
+			trial:       newFakeTrial("status.[@this].#(succeeded==1)", failureCondition),
+			deployedJob: newFakeDeployedJob(newFakeJob()),
 			expectedTrialJobStatus: func() *TrialJobStatus {
 				return &TrialJobStatus{
 					Condition: JobSucceeded,
 				}
 			}(),
 			err:             false,
-			testDescription: "TFJob status is succeeded because active = 1 in replica statuses",
+			testDescription: "Job status is succeeded because status.succeeded = 1",
 		},
 	}
 
@@ -131,31 +130,27 @@ func newFakeTrial(successCondition, failureCondition string) *trialsv1beta1.Tria
 	}
 }
 
-func newFakeTFJob() *tfv1.TFJob {
-	return &tfv1.TFJob{
+func newFakeJob() *batchv1.Job {
+	return &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-tfjob",
+			Name: "test-job",
 		},
-		Status: commonv1.JobStatus{
-			Conditions: []commonv1.JobCondition{
+		Status: batchv1.JobStatus{
+			Conditions: []batchv1.JobCondition{
 				{
-					Type:    commonv1.JobFailed,
+					Type:    batchv1.JobFailed,
 					Status:  corev1.ConditionFalse,
 					Reason:  testReason,
 					Message: testMessage,
 				},
 				{
-					Type:    commonv1.JobSucceeded,
+					Type:    batchv1.JobComplete,
 					Status:  corev1.ConditionTrue,
 					Reason:  testReason,
 					Message: testMessage,
 				},
 			},
-			ReplicaStatuses: map[commonv1.ReplicaType]*commonv1.ReplicaStatus{
-				"master": {
-					Active: int32(1),
-				},
-			},
+			Succeeded: 1,
 		},
 	}
 }

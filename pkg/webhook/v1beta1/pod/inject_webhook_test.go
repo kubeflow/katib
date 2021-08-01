@@ -25,9 +25,9 @@ import (
 	"testing"
 	"time"
 
-	tfv1 "github.com/kubeflow/tf-operator/pkg/apis/tensorflow/v1"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -686,11 +686,11 @@ func TestGetKatibJob(t *testing.T) {
 	trialName := "trial-name"
 	podName := "pod-name"
 	deployName := "deploy-name"
-	tfJobName := "tfjob-name"
+	jobName := "job-name"
 
 	testCases := []struct {
 		Pod             *v1.Pod
-		TFJob           *tfv1.TFJob
+		Job             *batchv1.Job
 		Deployment      *appsv1.Deployment
 		ExpectedJobKind string
 		ExpectedJobName string
@@ -704,16 +704,16 @@ func TestGetKatibJob(t *testing.T) {
 					Namespace: namespace,
 					OwnerReferences: []metav1.OwnerReference{
 						{
-							APIVersion: "kubeflow.org/v1",
-							Kind:       "TFJob",
-							Name:       tfJobName + "-1",
+							APIVersion: "batch/v1",
+							Kind:       "Job",
+							Name:       jobName + "-1",
 						},
 					},
 				},
 			},
-			TFJob: &tfv1.TFJob{
+			Job: &batchv1.Job{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      tfJobName + "-1",
+					Name:      jobName + "-1",
 					Namespace: namespace,
 					OwnerReferences: []metav1.OwnerReference{
 						{
@@ -724,11 +724,24 @@ func TestGetKatibJob(t *testing.T) {
 						},
 					},
 				},
+				Spec: batchv1.JobSpec{
+					Template: v1.PodTemplateSpec{
+						Spec: v1.PodSpec{
+							RestartPolicy: v1.RestartPolicyNever,
+							Containers: []v1.Container{
+								{
+									Name:  "test",
+									Image: "test",
+								},
+							},
+						},
+					},
+				},
 			},
-			ExpectedJobKind: "TFJob",
-			ExpectedJobName: tfJobName + "-1",
+			ExpectedJobKind: "Job",
+			ExpectedJobName: jobName + "-1",
 			Err:             false,
-			TestDescription: "Valid run with ownership sequence: Trial -> TFJob -> Pod",
+			TestDescription: "Valid run with ownership sequence: Trial -> Job -> Pod",
 		},
 		{
 			Pod: &v1.Pod{
@@ -737,9 +750,9 @@ func TestGetKatibJob(t *testing.T) {
 					Namespace: namespace,
 					OwnerReferences: []metav1.OwnerReference{
 						{
-							APIVersion: "kubeflow.org/v1",
-							Kind:       "TFJob",
-							Name:       tfJobName + "-2",
+							APIVersion: "batch/v1",
+							Kind:       "Job",
+							Name:       jobName + "-2",
 						},
 						{
 							APIVersion: "apps/v1",
@@ -749,10 +762,23 @@ func TestGetKatibJob(t *testing.T) {
 					},
 				},
 			},
-			TFJob: &tfv1.TFJob{
+			Job: &batchv1.Job{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      tfJobName + "-2",
+					Name:      jobName + "-2",
 					Namespace: namespace,
+				},
+				Spec: batchv1.JobSpec{
+					Template: v1.PodTemplateSpec{
+						Spec: v1.PodSpec{
+							RestartPolicy: v1.RestartPolicyNever,
+							Containers: []v1.Container{
+								{
+									Name:  "test",
+									Image: "test",
+								},
+							},
+						},
+					},
 				},
 			},
 			Deployment: &appsv1.Deployment{
@@ -794,7 +820,7 @@ func TestGetKatibJob(t *testing.T) {
 			ExpectedJobKind: "Deployment",
 			ExpectedJobName: deployName + "-2",
 			Err:             false,
-			TestDescription: "Valid run with ownership sequence: Trial -> Deployment -> Pod, TFJob -> Pod",
+			TestDescription: "Valid run with ownership sequence: Trial -> Deployment -> Pod, Job -> Pod",
 		},
 		{
 			Pod: &v1.Pod{
@@ -803,21 +829,34 @@ func TestGetKatibJob(t *testing.T) {
 					Namespace: namespace,
 					OwnerReferences: []metav1.OwnerReference{
 						{
-							APIVersion: "kubeflow.org/v1",
-							Kind:       "TFJob",
-							Name:       tfJobName + "-3",
+							APIVersion: "batch/v1",
+							Kind:       "Job",
+							Name:       jobName + "-3",
 						},
 					},
 				},
 			},
-			TFJob: &tfv1.TFJob{
+			Job: &batchv1.Job{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      tfJobName + "-3",
+					Name:      jobName + "-3",
 					Namespace: namespace,
+				},
+				Spec: batchv1.JobSpec{
+					Template: v1.PodTemplateSpec{
+						Spec: v1.PodSpec{
+							RestartPolicy: v1.RestartPolicyNever,
+							Containers: []v1.Container{
+								{
+									Name:  "test",
+									Image: "test",
+								},
+							},
+						},
+					},
 				},
 			},
 			Err:             true,
-			TestDescription: "Run for not Trial's pod with ownership sequence: TFJob -> Pod",
+			TestDescription: "Run for not Trial's pod with ownership sequence: Job -> Pod",
 		},
 		{
 			Pod: &v1.Pod{
@@ -826,15 +865,15 @@ func TestGetKatibJob(t *testing.T) {
 					Namespace: namespace,
 					OwnerReferences: []metav1.OwnerReference{
 						{
-							APIVersion: "kubeflow.org/v1",
-							Kind:       "TFJob",
-							Name:       tfJobName + "-4",
+							APIVersion: "batch/v1",
+							Kind:       "Job",
+							Name:       jobName + "-4",
 						},
 					},
 				},
 			},
 			Err:             true,
-			TestDescription: "Run when Pod owns TFJob that doesn't exists",
+			TestDescription: "Run when Pod owns Job that doesn't exists",
 		},
 		{
 			Pod: &v1.Pod{
@@ -844,36 +883,36 @@ func TestGetKatibJob(t *testing.T) {
 					OwnerReferences: []metav1.OwnerReference{
 						{
 							APIVersion: "invalid/api/version",
-							Kind:       "TFJob",
-							Name:       tfJobName + "-4",
+							Kind:       "Job",
+							Name:       jobName + "-4",
 						},
 					},
 				},
 			},
 			Err:             true,
-			TestDescription: "Run when Pod owns TFJob with invalid API version",
+			TestDescription: "Run when Pod owns Job with invalid API version",
 		},
 	}
 
 	for _, tc := range testCases {
-		// Create TFJob if it is needed
-		if tc.TFJob != nil {
-			tfJobUnstr, err := util.ConvertObjectToUnstructured(tc.TFJob)
+		// Create Job if it is needed
+		if tc.Job != nil {
+			jobUnstr, err := util.ConvertObjectToUnstructured(tc.Job)
 			gvk := schema.GroupVersionKind{
-				Group:   "kubeflow.org",
+				Group:   "batch",
 				Version: "v1",
-				Kind:    "TFJob",
+				Kind:    "Job",
 			}
-			tfJobUnstr.SetGroupVersionKind(gvk)
+			jobUnstr.SetGroupVersionKind(gvk)
 			if err != nil {
 				t.Errorf("ConvertObjectToUnstructured error %v", err)
 			}
 
-			g.Expect(c.Create(context.TODO(), tfJobUnstr)).NotTo(gomega.HaveOccurred())
+			g.Expect(c.Create(context.TODO(), jobUnstr)).NotTo(gomega.HaveOccurred())
 
-			// Wait that TFJob is created
+			// Wait that Job is created
 			g.Eventually(func() error {
-				return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: tc.TFJob.Name}, tfJobUnstr)
+				return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: tc.Job.Name}, jobUnstr)
 			}, timeout).ShouldNot(gomega.HaveOccurred())
 		}
 
