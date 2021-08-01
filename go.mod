@@ -21,7 +21,7 @@ require (
 	github.com/prometheus/client_golang v1.9.0
 	github.com/shirou/gopsutil v2.20.7+incompatible
 	github.com/spf13/viper v1.7.0
-	github.com/tidwall/gjson v1.6.0
+	github.com/tidwall/gjson v1.6.5
 	golang.org/x/net v0.0.0-20210224082022-3d97a244fca7
 	google.golang.org/grpc v1.32.0
 	gopkg.in/fsnotify/fsnotify.v1 v1.4.7 // indirect
