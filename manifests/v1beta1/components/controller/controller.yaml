@@ -30,6 +30,8 @@ spec:
             - "--trial-resources=TFJob.v1.kubeflow.org"
             - "--trial-resources=PyTorchJob.v1.kubeflow.org"
             - "--trial-resources=MPIJob.v1.kubeflow.org"
+            # TODO (andreyvelich): Change to v1.kubeflow.org once all-in-one operator is finished.
+            - "--trial-resources=XGBoostJob.v1.xgboostjob.kubeflow.org"
             - "--trial-resources=PipelineRun.v1beta1.tekton.dev"
           ports:
             - containerPort: 8443
