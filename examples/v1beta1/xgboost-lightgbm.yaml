@@ -1,0 +1,124 @@
+apiVersion: kubeflow.org/v1beta1
+kind: Experiment
+metadata:
+  namespace: kubeflow
+  name: xgboost-lightgbm
+spec:
+  objective:
+    type: maximize
+    goal: 0.99
+    objectiveMetricName: valid_1 auc
+    additionalMetricNames:
+      - valid_1 binary_logloss
+      - training auc
+      - training binary_logloss
+  metricsCollectorSpec:
+    source:
+      filter:
+        metricsFormat:
+          - "(\\w+\\s\\w+)\\s:\\s((-?\\d+)(\\.\\d+)?)"
+  algorithm:
+    algorithmName: random
+  parallelTrialCount: 2
+  maxTrialCount: 6
+  maxFailedTrialCount: 3
+  parameters:
+    - name: lr
+      parameterType: double
+      feasibleSpace:
+        min: "0.01"
+        max: "0.1"
+    - name: num-leaves
+      parameterType: int
+      feasibleSpace:
+        min: "50"
+        max: "60"
+        step: "1"
+  trialTemplate:
+    retain: True
+    primaryPodLabels:
+      job-role: master
+    primaryContainerName: xgboostjob
+    successCondition: status.conditions.#(type=="Succeeded")#|#(status=="True")#
+    failureCondition: status.conditions.#(type=="Failed")#|#(status=="True")#
+    trialParameters:
+      - name: learningRate
+        description: Learning rate for the training model
+        reference: lr
+      - name: numberLeaves
+        description: Number of leaves for one tree
+        reference: num-leaves
+    trialSpec:
+      # TODO (andreyvelich): Change to kubeflow.org/v1 once all-in-one operator is finished.
+      apiVersion: xgboostjob.kubeflow.org/v1
+      kind: XGBoostJob
+      spec:
+        xgbReplicaSpecs:
+          Master:
+            replicas: 1
+            restartPolicy: Never
+            template:
+              spec:
+                containers:
+                  - name: xgboostjob
+                    image: docker.io/kubeflowkatib/xgboost-lightgbm
+                    ports:
+                      - containerPort: 9991
+                        name: xgboostjob-port
+                    imagePullPolicy: Always
+                    args:
+                      - --job_type=Train
+                      - --metric=binary_logloss,auc
+                      - --learning_rate=${trialParameters.learningRate}
+                      - --num_leaves=${trialParameters.numberLeaves}
+                      - --num_trees=100
+                      - --boosting_type=gbdt
+                      - --objective=binary
+                      - --metric_freq=1
+                      - --is_training_metric=true
+                      - --max_bin=255
+                      - --data=data/binary.train
+                      - --valid_data=data/binary.test
+                      - --tree_learner=feature
+                      - --feature_fraction=0.8
+                      - --bagging_freq=5
+                      - --bagging_fraction=0.8
+                      - --min_data_in_leaf=50
+                      - --min_sum_hessian_in_leaf=50
+                      - --is_enable_sparse=true
+                      - --use_two_round_loading=false
+                      - --is_save_binary_file=false
+          Worker:
+            replicas: 2
+            restartPolicy: ExitCode
+            template:
+              spec:
+                containers:
+                  - name: xgboostjob
+                    image: docker.io/kubeflowkatib/xgboost-lightgbm
+                    ports:
+                      - containerPort: 9991
+                        name: xgboostjob-port
+                    imagePullPolicy: Always
+                    args:
+                      - --job_type=Train
+                      - --metric=binary_logloss,auc
+                      - --learning_rate=${trialParameters.learningRate}
+                      - --num_leaves=${trialParameters.numberLeaves}
+                      - --num_trees=100
+                      - --boosting_type=gbdt
+                      - --objective=binary
+                      - --metric_freq=1
+                      - --is_training_metric=true
+                      - --max_bin=255
+                      - --data=data/binary.train
+                      - --valid_data=data/binary.test
+                      - --tree_learner=feature
+                      - --feature_fraction=0.8
+                      - --bagging_freq=5
+                      - --bagging_fraction=0.8
+                      - --min_data_in_leaf=50
+                      - --min_sum_hessian_in_leaf=50
+                      - --is_enable_sparse=true
+                      - --use_two_round_loading=false
+                      - --is_save_binary_file=false

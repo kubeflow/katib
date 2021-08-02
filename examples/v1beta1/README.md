@@ -391,3 +391,9 @@ docker.io/inaccel/jupyter:lab
 ```
 docker.io/kubeflow/mpi-horovod-mnist
 ```
+
+- XGBoost operator LightGBM dist example, [source](https://github.com/kubeflow/xgboost-operator/tree/master/config/samples/lightgbm-dist).
+
+```
+docker.io/kubeflowkatib/xgboost-lightgbm
+```
