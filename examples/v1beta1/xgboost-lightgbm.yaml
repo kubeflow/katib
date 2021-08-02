@@ -35,7 +35,6 @@ spec:
         max: "60"
         step: "1"
   trialTemplate:
-    retain: True
     primaryPodLabels:
       job-role: master
     primaryContainerName: xgboostjob
@@ -61,7 +60,7 @@ spec:
               spec:
                 containers:
                   - name: xgboostjob
-                    image: docker.io/kubeflowkatib/xgboost-lightgbm
+                    image: docker.io/kubeflowkatib/xgboost-lightgbm:1.0
                     ports:
                       - containerPort: 9991
                         name: xgboostjob-port
@@ -95,7 +94,7 @@ spec:
               spec:
                 containers:
                   - name: xgboostjob
-                    image: docker.io/kubeflowkatib/xgboost-lightgbm
+                    image: docker.io/kubeflowkatib/xgboost-lightgbm:1.0
                     ports:
                       - containerPort: 9991
                         name: xgboostjob-port
