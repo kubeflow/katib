@@ -1,0 +1,4 @@
+grpcio==1.23.0
+protobuf==3.9.1
+googleapis-common-protos==1.6.0
+optuna>=2.8.0
