@@ -1,5 +1,5 @@
 # This example shows how you can use Argo Workflows in Katib, transfer parameters from one Step to another and run HP job.
-# It uses simple random algorithm and tunes only learning rate.
+# It uses a simple random algorithm and tunes only learning rate.
 # Workflow contains 2 Steps, first is data-preprocessing second is model-training.
 # First Step shows how you can prepare your training data (here: simply divide number of training examples) before running HP job.
 # Number of training examples is transferred to the second Step.

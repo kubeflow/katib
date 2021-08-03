@@ -30,7 +30,7 @@ After that, run below command to enable
 kubectl patch namespace argo -p '{"metadata":{"labels":{"katib-metricscollector-injection":"enabled"}}}'
 ```
 
-**Note:** Argo Workflows is using `docker` as a
+**Note:** Argo Workflows are using `docker` as a
 [default container runtime executor](https://argoproj.github.io/argo-workflows/workflow-executors/#workflow-executors).
 Since Katib is using Metrics Collector sidecar container and Argo Workflows controller
 should not kill sidecar containers, you have to modify this

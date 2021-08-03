@@ -129,6 +129,8 @@ Katib has these CRD examples in upstream:
 
 - [Tekton `Pipeline`](https://github.com/tektoncd/pipeline)
 
+- [Argo `Workflows`](https://github.com/argoproj/argo-workflows)
+
 Thus, Katib supports multiple frameworks with the help of different job kinds.
 
 ### Search Algorithms
