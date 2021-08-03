@@ -33,7 +33,7 @@ class Architect():
         gradients = torch.autograd.grad(loss, self.model.getWeights())
 
         # Do virtual step (Update gradient)
-        # Bellow opeartions do not need gradient tracking
+        # Below opeartions do not need gradient tracking
         with torch.no_grad():
             # dict key is not the value, but the pointer. So original network weight have to
             # be iterated also.

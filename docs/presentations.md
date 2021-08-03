@@ -1,6 +1,6 @@
 # Katib Presentations and Demos
 
-Bellow are the list of Katib presentations and demos. If you want to add your
+Below are the list of Katib presentations and demos. If you want to add your
 presentation or demo in this list please send a pull request. Please keep the
 list in reverse chronological order.
 

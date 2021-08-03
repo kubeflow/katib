@@ -14,7 +14,7 @@ For example, if you are using
 [StdOut](https://www.kubeflow.org/docs/components/katib/experiment/#metrics-collector) metrics collector,
 `nop` image must be equal to `docker.io/kubeflowkatib/file-metrics-collector`.
 
-After deploying Tekton on your cluster, run bellow command to modify `nop` image:
+After deploying Tekton on your cluster, run below command to modify `nop` image:
 
 ```bash
 kubectl patch deploy tekton-pipelines-controller -n tekton-pipelines --type='json' \
