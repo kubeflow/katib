@@ -69,6 +69,12 @@ rules:
       - taskruns
     verbs:
       - "*"
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflows
+    verbs:
+      - "*"
 ---
 apiVersion: v1
 kind: ServiceAccount

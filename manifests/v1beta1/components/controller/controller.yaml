@@ -33,6 +33,7 @@ spec:
             # TODO (andreyvelich): Change to v1.kubeflow.org once all-in-one operator is finished.
             - "--trial-resources=XGBoostJob.v1.xgboostjob.kubeflow.org"
             - "--trial-resources=PipelineRun.v1beta1.tekton.dev"
+            - "--trial-resources=Workflow.v1alpha1.argoproj.io"
           ports:
             - containerPort: 8443
               name: webhook

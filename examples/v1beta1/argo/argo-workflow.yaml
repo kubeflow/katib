@@ -1,0 +1,83 @@
+# This example shows how you can use Argo Workflows in Katib, transfer parameters from one Step to another and run HP job.
+# It uses simple random algorithm and tunes only learning rate.
+# Workflow contains 2 Steps, first is data-preprocessing second is model-training.
+# First Step shows how you can prepare your training data (here: simply divide number of training examples) before running HP job.
+# Number of training examples is transferred to the second Step.
+# Second Step is the actual training which metrics collector sidecar is injected.
+# Note that for this example Argo Container Runtime Executor must be "emissary".
+apiVersion: kubeflow.org/v1beta1
+kind: Experiment
+metadata:
+  namespace: argo
+  name: katib-argo-workflow
+spec:
+  objective:
+    type: maximize
+    goal: 0.99
+    objectiveMetricName: Validation-accuracy
+    additionalMetricNames:
+      - Train-accuracy
+  algorithm:
+    algorithmName: random
+  parallelTrialCount: 2
+  maxTrialCount: 5
+  maxFailedTrialCount: 1
+  parameters:
+    - name: lr
+      parameterType: double
+      feasibleSpace:
+        min: "0.01"
+        max: "0.03"
+  trialTemplate:
+    retain: true
+    primaryPodLabels:
+      katib.kubeflow.org/model-training: "true"
+    primaryContainerName: main
+    successCondition: status.[@this].#(phase=="Succeeded")#
+    failureCondition: status.[@this].#(phase=="Failed")#
+    trialParameters:
+      - name: learningRate
+        description: Learning rate for the training model
+        reference: lr
+    trialSpec:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Workflow
+      spec:
+        serviceAccountName: argo
+        entrypoint: hp-workflow
+        templates:
+          - name: hp-workflow
+            steps:
+              - - name: data-preprocessing
+                  template: gen-num-examples
+              - - name: model-training
+                  template: model-training
+                  arguments:
+                    parameters:
+                      - name: num-examples
+                        value: "{{steps.data-preprocessing.outputs.result}}"
+
+          - name: gen-num-examples
+            script:
+              image: python:alpine3.6
+              command:
+                - python
+              source: |
+                import random
+                print(60000//random.randint(10, 100))
+
+          - name: model-training
+            metadata:
+              labels:
+                katib.kubeflow.org/model-training: "true"
+            inputs:
+              parameters:
+                - name: num-examples
+            container:
+              name: model-training
+              image: docker.io/kubeflowkatib/mxnet-mnist:v1beta1-45c5727
+              command:
+                - "python3"
+                - "/opt/mxnet-mnist/mnist.py"
+                - "--lr=${trialParameters.learningRate}"
+                - "--num-examples={{inputs.parameters.num-examples}}"
