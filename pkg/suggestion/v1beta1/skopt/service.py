@@ -18,11 +18,10 @@ import grpc
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.apis.manager.v1beta1.python import api_pb2_grpc
+from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
 from pkg.suggestion.v1beta1.internal.search_space import HyperParameterSearchSpace
 from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment
 from pkg.suggestion.v1beta1.skopt.base_service import BaseSkoptService
-from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
-
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ class SkoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         """
         Main function to provide suggestion.
         """
-        algorithm_name, config = OptimizerConfiguration.convertAlgorithmSpec(
+        algorithm_name, config = OptimizerConfiguration.convert_algorithm_spec(
             request.experiment.spec.algorithm)
 
         if self.is_first_run:
@@ -80,8 +79,8 @@ class OptimizerConfiguration(object):
         self.acq_optimizer = acq_optimizer
         self.random_state = random_state
 
-    @classmethod
-    def convertAlgorithmSpec(cls, algorithm_spec):
+    @staticmethod
+    def convert_algorithm_spec(algorithm_spec):
         optimizer = OptimizerConfiguration()
         for s in algorithm_spec.algorithm_settings:
             if s.name == "base_estimator":
@@ -111,22 +110,23 @@ class OptimizerConfiguration(object):
             try:
                 if s.name == "base_estimator":
                     if s.value not in ["GP", "RF", "ET", "GBRT"]:
-                        return False, f"base_estimator {s.value} is not supported in katib"
+                        return False, "base_estimator {} is not supported in Bayesian optimization".format(s.value)
                 elif s.name == "n_initial_points":
                     if not (int(s.value) >= 0):
                         return False, "n_initial_points should be great or equal than zero"
                 elif s.name == "acq_func":
                     if s.value not in ["gp_hedge", "LCB", "EI", "PI", "EIps", "PIps"]:
-                        return False, f"acq_func {s.value} is not supported in katib"
+                        return False, "acq_func {} is not supported in Bayesian optimization".format(s.value)
                 elif s.name == "acq_optimizer":
                     if s.value not in ["auto", "sampling", "lbfgs"]:
-                        return False, f"acq_optimizer {s.value} is not supported in katib"
+                        return False, "acq_optimizer {} is not supported in Bayesian optimization".format(s.value)
                 elif s.name == "random_state":
                     if not (int(s.value) >= 0):
                         return False, "random_state should be great or equal than zero"
                 else:
-                    return False, f"unknown setting {s.name} for algorithm bayesianoptimization"
+                    return False, "unknown setting {} for algorithm bayesianoptimization".format(s.name)
             except Exception as e:
-                return False, f"failed to validate {s.name}({s.value}): {e}"
+                return False, "failed to validate {name}({value}): {exception}".format(name=s.name, value=s.value,
+                                                                                       exception=e)
 
         return True, ""

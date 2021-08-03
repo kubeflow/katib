@@ -246,7 +246,9 @@ class TestSkopt(unittest.TestCase):
         wrong_algorithm_setting = experiment_spec[0].algorithm.algorithm_settings[0]
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details,
-                         f'{wrong_algorithm_setting.name} {wrong_algorithm_setting.value} is not supported in katib')
+                         "{name} {value} is not supported in Bayesian optimization".format(
+                             name=wrong_algorithm_setting.name,
+                             value=wrong_algorithm_setting.value))
 
         # wrong n_initial_points
         experiment_spec[0] = api_pb2.ExperimentSpec(
@@ -258,7 +260,7 @@ class TestSkopt(unittest.TestCase):
         _, _, code, details = call_validate()
         wrong_algorithm_setting = experiment_spec[0].algorithm.algorithm_settings[0]
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
-        self.assertEqual(details, f'{wrong_algorithm_setting.name} should be great or equal than zero')
+        self.assertEqual(details, "{name} should be great or equal than zero".format(name=wrong_algorithm_setting.name))
 
         # unknown acq_func
         experiment_spec[0] = api_pb2.ExperimentSpec(
@@ -271,7 +273,10 @@ class TestSkopt(unittest.TestCase):
         wrong_algorithm_setting = experiment_spec[0].algorithm.algorithm_settings[0]
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details,
-                         f'{wrong_algorithm_setting.name} {wrong_algorithm_setting.value} is not supported in katib')
+                         "{name} {value} is not supported in Bayesian optimization".format(
+                             name=wrong_algorithm_setting.name,
+                             value=wrong_algorithm_setting.value
+                         ))
 
         # unknown acq_optimizer
         experiment_spec[0] = api_pb2.ExperimentSpec(
@@ -284,7 +289,10 @@ class TestSkopt(unittest.TestCase):
         wrong_algorithm_setting = experiment_spec[0].algorithm.algorithm_settings[0]
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details,
-                         f'{wrong_algorithm_setting.name} {wrong_algorithm_setting.value} is not supported in katib')
+                         "{name} {value} is not supported in Bayesian optimization".format(
+                             name=wrong_algorithm_setting.name,
+                             value=wrong_algorithm_setting.value
+                         ))
 
         # wrong random_state
         experiment_spec[0] = api_pb2.ExperimentSpec(
@@ -296,7 +304,7 @@ class TestSkopt(unittest.TestCase):
         _, _, code, details = call_validate()
         wrong_algorithm_setting = experiment_spec[0].algorithm.algorithm_settings[0]
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
-        self.assertEqual(details, f'{wrong_algorithm_setting.name} should be great or equal than zero')
+        self.assertEqual(details, "{name} should be great or equal than zero".format(name=wrong_algorithm_setting.name))
 
 
 if __name__ == '__main__':
