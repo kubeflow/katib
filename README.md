@@ -127,7 +127,7 @@ Katib has these CRD examples in upstream:
 
 - [Kubeflow `XGBoostJob`](https://github.com/kubeflow/xgboost-operator)
 
-- [Tekton `Pipeline`](./examples/v1beta1/tekton)
+- [Tekton `Pipelines`](./examples/v1beta1/tekton)
 
 - [Argo `Workflows`](./examples/v1beta1/argo)
 

@@ -1,4 +1,4 @@
-# Katib Examples with Tekton Integration
+# Katib Examples with Tekton Pipelines Integration
 
 Here you can find examples of using Katib with [Tekton](https://github.com/tektoncd/pipeline).
 
@@ -25,7 +25,7 @@ tekton-pipelines-webhook-79d8f4f9bc-qmk97      1/1     Running   0          50s
 **Note:** You must modify Tekton [`nop`](https://github.com/tektoncd/pipeline/tree/master/cmd/nop)
 image to run Tekton Pipelines. `Nop` image is used to stop sidecar containers after main container
 is completed. Since Katib is using Metrics Collector sidecar container
-and Tekton Pipelines controller should not kill sidecar containers, you have to
+and Tekton Pipelines Controller should not kill sidecar containers, you have to
 set this `nop` image to Metrics Collector image.
 
 For example, if you are using
@@ -39,7 +39,7 @@ kubectl patch deploy tekton-pipelines-controller -n tekton-pipelines --type='jso
   -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args/9", "value": "docker.io/kubeflowkatib/file-metrics-collector"}]'
 ```
 
-Check that Tekton Controller's pod was restarted:
+Check that Tekton Pipelines Controller's pod was restarted:
 
 ```bash
 $ kubectl get pods -n tekton-pipelines
