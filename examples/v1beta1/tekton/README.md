@@ -24,11 +24,12 @@ tekton-pipelines-webhook-79d8f4f9bc-qmk97      1/1     Running   0          50s
 
 **Note:** You must modify Tekton [`nop`](https://github.com/tektoncd/pipeline/tree/master/cmd/nop)
 image to run Tekton Pipelines. `Nop` image is used to stop sidecar containers after main container
-is completed. Metrics collector should not be stopped after training container is finished.
-To avoid this problem, set `nop` image to metrics collector sidecar image.
+is completed. Since Katib is using Metrics Collector sidecar container
+and Tekton Pipelines controller should not kill sidecar containers, you have to
+set this `nop` image to Metrics Collector image.
 
 For example, if you are using
-[StdOut](https://www.kubeflow.org/docs/components/katib/experiment/#metrics-collector) metrics collector,
+[StdOut](https://www.kubeflow.org/docs/components/katib/experiment/#metrics-collector) Metrics Collector,
 `nop` image must be equal to `docker.io/kubeflowkatib/file-metrics-collector`.
 
 Run the following command to modify the `nop` image:
