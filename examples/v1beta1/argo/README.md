@@ -2,9 +2,11 @@
 
 Here you can find examples of using Katib with [Argo Workflows](https://github.com/argoproj/argo-workflows).
 
-**Note:** You have to install `Argo >= v3.1` to use it in Katib Experiments.
+**Note:** You have to install `Argo >= v3.1.3` to use it in Katib Experiments.
 
 ## Installation
+
+### Argo Workflow
 
 To deploy Argo Workflows `v3.1.3`, run the following commands:
 
@@ -49,4 +51,49 @@ Verify that `containerRuntimeExecutor` has been modified:
 $ kubectl get ConfigMap -n argo workflow-controller-configmap -o yaml | grep containerRuntimeExecutor
 
   containerRuntimeExecutor: emissary
+```
+
+### Katib Controller
+
+To run Argo Workflow within Katib Trials you have to update Katib
+[ClusterRole's rules](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/components/controller/rbac.yaml#L5)
+with appropriate permission:
+
+```yaml
+- apiGroups:
+    - argoproj.io
+  resources:
+    - workflows
+  verbs:
+    - "*"
+```
+
+Run the following command to update Katib ClusterRole:
+
+```bash
+kubectl patch ClusterRole katib-controller -n kubeflow --type=json \
+  -p='[{"op": "add", "path": "/rules/-", "value": {"apiGroups":["argoproj.io"],"resources":["workflows"],"verbs":["*"]}}]'
+```
+
+In addition to that, you have to modify Katib
+[Controller args](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/components/controller/controller.yaml#L27)
+with the new flag `--trial-resources`.
+
+Run the following command to update Katib Controller args:
+
+```bash
+kubectl patch Deployment katib-controller -n kubeflow --type=json \
+  -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--trial-resources=Workflow.v1alpha1.argoproj.io"}]'
+```
+
+After these changes, check logs from Katib controller to verify Argo Workflow integration:
+
+```bash
+kubectl logs $(kubectl get pods -n kubeflow -o name | grep katib-controller) -n kubeflow
+```
+
+Expected output:
+
+```shell
+{"level":"info","ts":1628032648.6285546,"logger":"trial-controller","msg":"Job watch added successfully","CRD Group":"argoproj.io","CRD Version":"v1alpha1","CRD Kind":"Workflow"}
 ```
