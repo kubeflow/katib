@@ -127,9 +127,9 @@ Katib has these CRD examples in upstream:
 
 - [Kubeflow `XGBoostJob`](https://github.com/kubeflow/xgboost-operator)
 
-- [Tekton `Pipeline`](https://github.com/tektoncd/pipeline)
+- [Tekton `Pipeline`](./examples/v1beta1/tekton)
 
-- [Argo `Workflows`](https://github.com/argoproj/argo-workflows)
+- [Argo `Workflows`](./examples/v1beta1/argo)
 
 Thus, Katib supports multiple frameworks with the help of different job kinds.
 

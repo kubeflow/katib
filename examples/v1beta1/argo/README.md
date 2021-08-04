@@ -57,7 +57,7 @@ $ kubectl get ConfigMap -n argo workflow-controller-configmap -o yaml | grep con
 
 To run Argo Workflow within Katib Trials you have to update Katib
 [ClusterRole's rules](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/components/controller/rbac.yaml#L5)
-with appropriate permission:
+with the appropriate permission:
 
 ```yaml
 - apiGroups:
@@ -86,14 +86,28 @@ kubectl patch Deployment katib-controller -n kubeflow --type=json \
   -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--trial-resources=Workflow.v1alpha1.argoproj.io"}]'
 ```
 
-After these changes, check logs from Katib controller to verify Argo Workflow integration:
+Check that Katib Controller's pod was restarted:
 
 ```bash
-kubectl logs $(kubectl get pods -n kubeflow -o name | grep katib-controller) -n kubeflow
+$ kubectl get pods -n kubeflow
+
+NAME                                         READY   STATUS      RESTARTS   AGE
+katib-cert-generator-hnv6q                   0/1     Completed   0          6m12s
+katib-controller-784994d449-9bgj9            1/1     Running     0          28s
+katib-db-manager-78697c7bd4-ck7l8            1/1     Running     0          6m13s
+katib-mysql-854cdb87c4-krcm9                 1/1     Running     0          6m13s
+katib-ui-57b9d7f6dd-cv6gn                    1/1     Running     0          6m13s
 ```
 
-Expected output:
+Check logs from Katib Controller to verify Argo Workflow integration:
 
-```shell
+```bash
+$ kubectl logs $(kubectl get pods -n kubeflow -o name | grep katib-controller) -n kubeflow | grep '"CRD Kind":"Workflow"'
+
 {"level":"info","ts":1628032648.6285546,"logger":"trial-controller","msg":"Job watch added successfully","CRD Group":"argoproj.io","CRD Version":"v1alpha1","CRD Kind":"Workflow"}
 ```
+
+If you ran the above steps successfully, you should be able to run Argo Workflow examples.
+
+Learn more about using custom Kubernetes resource as a Trial template in the
+[official Kubeflow guides](https://www.kubeflow.org/docs/components/katib/trial-template/#use-custom-kubernetes-resource-as-a-trial-template)
