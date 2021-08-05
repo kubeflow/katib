@@ -62,13 +62,6 @@ rules:
       - xgboostjobs
     verbs:
       - "*"
-  - apiGroups:
-      - tekton.dev
-    resources:
-      - pipelineruns
-      - taskruns
-    verbs:
-      - "*"
 ---
 apiVersion: v1
 kind: ServiceAccount

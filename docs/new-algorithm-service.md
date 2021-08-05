@@ -150,7 +150,7 @@ You can setup the GRPC server using `grpc_testing`, then define your own test ca
 #### E2E Test (Optional)
 
 E2e tests help Katib verify that the algorithm works well.
-Follow bellow steps to add your algorithm (Suggestion) to the Katib CI
+Follow below steps to add your algorithm (Suggestion) to the Katib CI
 (replace `<name>` with your Suggestion name):
 
 1. Submit a PR to add a new ECR private registry to the AWS
