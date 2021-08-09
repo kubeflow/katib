@@ -21,6 +21,10 @@ spec:
           jsonPath: .metadata.creationTimestamp
       subresources:
         status: {}
+      schema:
+        openAPIV3Schema:
+          type: object
+          x-kubernetes-preserve-unknown-fields: true
   names:
     kind: Experiment
     singular: experiment
