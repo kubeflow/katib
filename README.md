@@ -130,7 +130,7 @@ and the API is defined at `pkg/apis/manager/v1beta1/api.proto`.
   - `katib-ui` - the user interface of Katib.
   - `katib-controller` - the controller for the Katib CRDs in Kubernetes.
 
-### Web UI
+## Web UI
 
 Katib provides a Web UI.
 During 1.3 we've worked on a new iteration of the UI, which is rewritten in
