@@ -268,7 +268,7 @@ class TestSkopt(unittest.TestCase):
                     api_pb2.AlgorithmSetting(name="acq_func", value="unknown")]
             )
         )
-        wrong_algorithm_setting = experiment_spec[0].algorithm.algorithm_settings[0]
+        wrong_algorithm_setting = experiment_spec.algorithm.algorithm_settings[0]
 
         _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
@@ -286,7 +286,7 @@ class TestSkopt(unittest.TestCase):
                     api_pb2.AlgorithmSetting(name="acq_optimizer", value="unknown")]
             )
         )
-        wrong_algorithm_setting = experiment_spec[0].algorithm.algorithm_settings[0]
+        wrong_algorithm_setting = experiment_spec.algorithm.algorithm_settings[0]
 
         _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
