@@ -26,7 +26,7 @@ import utils
 class TestHyperopt(unittest.TestCase):
     def setUp(self):
         servicers = {
-            api_pb2.DESCRIPTOR.services_by_name['Suggestion']: HyperoptService(
+            api_pb2.DESCRIPTOR.services_by_name["Suggestion"]: HyperoptService(
             )
         }
 
@@ -191,8 +191,8 @@ class TestHyperopt(unittest.TestCase):
 
         get_suggestion = self.test_server.invoke_unary_unary(
             method_descriptor=(api_pb2.DESCRIPTOR
-                               .services_by_name['Suggestion']
-                               .methods_by_name['GetSuggestions']),
+                               .services_by_name["Suggestion"]
+                               .methods_by_name["GetSuggestions"]),
             invocation_metadata={},
             request=request, timeout=1)
 
@@ -202,7 +202,7 @@ class TestHyperopt(unittest.TestCase):
         self.assertEqual(2, len(response.parameter_assignments))
 
     def test_validate_algorithm_settings(self):
-        # valid cases
+        # Valid cases.
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
@@ -230,16 +230,19 @@ class TestHyperopt(unittest.TestCase):
         _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.OK)
 
-        # invalid cases
+        # Invalid cases.
+        # Unknown algorithm name.
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="unknown"
             )
         )
+
         _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
-        self.assertEqual(details, 'unknown algorithm name unknown')
+        self.assertEqual(details, "unknown algorithm name unknown")
 
+        # Unknown algorithm setting name.
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="random",
@@ -248,10 +251,12 @@ class TestHyperopt(unittest.TestCase):
                 ]
             )
         )
+
         _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
-        self.assertEqual(details, 'unknown setting unknown_conf for algorithm random')
+        self.assertEqual(details, "unknown setting unknown_conf for algorithm random")
 
+        # Invalid gamma value.
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
@@ -260,10 +265,12 @@ class TestHyperopt(unittest.TestCase):
                 ]
             )
         )
+
         _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
-        self.assertEqual(details, 'gamma should be in the range of (0, 1)')
+        self.assertEqual(details, "gamma should be in the range of (0, 1)")
 
+        # Invalid n_EI_candidates value.
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
@@ -272,10 +279,12 @@ class TestHyperopt(unittest.TestCase):
                 ]
             )
         )
+
         _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
-        self.assertEqual(details, 'n_EI_candidates should be great than zero')
+        self.assertEqual(details, "n_EI_candidates should be great than zero")
 
+        # Invalid random_state value.
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
@@ -284,10 +293,12 @@ class TestHyperopt(unittest.TestCase):
                 ]
             )
         )
+
         _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
-        self.assertEqual(details, 'random_state should be great or equal than zero')
+        self.assertEqual(details, "random_state should be great or equal than zero")
 
+        # Invalid prior_weight value.
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="tpe",
@@ -296,10 +307,11 @@ class TestHyperopt(unittest.TestCase):
                 ]
             )
         )
+
         _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
-        self.assertTrue(details.startswith('failed to validate prior_weight(aaa)'))
+        self.assertTrue(details.startswith("failed to validate prior_weight(aaa)"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

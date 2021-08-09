@@ -184,7 +184,7 @@ class TestChocolate(unittest.TestCase):
         self.assertEqual(2, len(response.parameter_assignments))
 
     def test_validate_algorithm_settings(self):
-        # Valid case
+        # Valid case.
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="grid",
@@ -224,8 +224,8 @@ class TestChocolate(unittest.TestCase):
         _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.OK)
 
-        # Invalid cases
-        # Empty step
+        # Invalid cases.
+        # Empty step.
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="grid",
@@ -246,7 +246,7 @@ class TestChocolate(unittest.TestCase):
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details, 'Param: param-1 step is nil')
 
-        # Max trial count > search space combinations
+        # Max trial count > search space combinations.
         experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="grid",
