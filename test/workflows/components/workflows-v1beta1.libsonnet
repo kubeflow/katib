@@ -421,7 +421,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/katib-db-manager:$(PULL_BASE_SHA)",
               "--cache=true",
-              "--cache-repo=" + registry + "/katib/v1beta1/katib-controller",
+              "--cache-repo=" + registry + "/katib/v1beta1/katib-db-manager",
             ]),  // build katib-db-manager
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-ui", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -430,6 +430,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/katib-ui:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/katib-ui",
             ]),  // build katib-ui
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-cert-generator", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -437,6 +438,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/cert-generator:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/cert-generator",
             ]),  // build cert generator
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-file-metrics-collector", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -444,6 +446,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/file-metrics-collector:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/file-metrics-collector",
             ]),  // build file metrics collector
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-tfevent-metrics-collector", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -451,6 +454,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/tfevent-metrics-collector:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/tfevent-metrics-collector",
             ]),  // build tfevent metrics collector
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperopt", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -458,6 +462,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/suggestion-hyperopt:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/suggestion-hyperopt",
             ]),  // build suggestion hyperopt
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-chocolate", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -465,6 +470,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/suggestion-chocolate:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/suggestion-chocolate",
             ]),  // build suggestion chocolate
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-skopt", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -472,6 +478,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/suggestion-skopt:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/suggestion-skopt",
             ]),  // build suggestion skopt
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperband", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -479,6 +486,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/suggestion-hyperband:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/suggestion-hyperband",
             ]),  // build suggestion hyperband
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-goptuna", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -486,6 +494,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/suggestion-goptuna:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/suggestion-goptuna",
             ]),  // build suggestion goptuna
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-enas", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -493,6 +502,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/suggestion-enas:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/suggestion-enas",
             ]),  // build suggestion enas
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-darts", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -500,6 +510,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/suggestion-darts:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/suggestion-darts",
             ]),  // build suggestion darts
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-earlystopping-medianstop", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -507,6 +518,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/earlystopping-medianstop:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/earlystopping-medianstop",
             ]),  // build early stopping median stop
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-trial-mxnet-mnist", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -514,6 +526,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/trial-mxnet-mnist:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/trial-mxnet-mnist",
             ]),  // build Trial mxnet mnist
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-trial-pytorch-mnist", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -521,6 +534,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/trial-pytorch-mnist:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/trial-pytorch-mnist",
             ]),  // build Trial PyTorch mnist
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-trial-enas-cnn-cifar10-gpu", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -528,6 +542,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/trial-enas-cnn-cifar10-gpu:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/trial-enas-cnn-cifar10-gpu",
             ]),  // build Trial enas cnn cifar10 with GPU support
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-trial-enas-cnn-cifar10-cpu", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -535,6 +550,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/trial-enas-cnn-cifar10-cpu:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/trial-enas-cnn-cifar10-cpu",
             ]),  // build Trial enas cnn cifar10 with CPU support
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-trial-darts-cnn-cifar10", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -542,6 +558,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/trial-darts-cnn-cifar10:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/trial-darts-cnn-cifar10",
             ]),  // build Trial darts cnn cifar10
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("setup-katib", testWorkerImage, [
               "test/scripts/v1beta1/setup-katib.sh",
