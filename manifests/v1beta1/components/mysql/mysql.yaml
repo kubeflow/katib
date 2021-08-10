@@ -3,20 +3,19 @@ kind: Deployment
 metadata:
   name: katib-mysql
   namespace: kubeflow
-  # TODO (andreyvelich): Modify labels to follow k8s guidelines.
   labels:
-    app: katib-mysql
+    katib.kubeflow.org/component: mysql
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: katib-mysql
+      katib.kubeflow.org/component: mysql
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: katib-mysql
+        katib.kubeflow.org/component: mysql
       annotations:
         sidecar.istio.io/inject: "false"
     spec:

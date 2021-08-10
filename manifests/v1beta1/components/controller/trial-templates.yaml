@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: trial-template
+  name: trial-templates
   namespace: kubeflow
   labels:
-    app: katib-trial-templates
+    katib.kubeflow.org/component: trial-templates
 data:
   defaultTrialTemplate.yaml: |-
     apiVersion: batch/v1

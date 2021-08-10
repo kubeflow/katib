@@ -4,7 +4,7 @@ metadata:
   name: katib-ui
   namespace: kubeflow
   labels:
-    app: katib-ui
+    katib.kubeflow.org/component: ui
 spec:
   type: ClusterIP
   ports:
@@ -13,4 +13,4 @@ spec:
       name: ui
       targetPort: 8080
   selector:
-    app: katib-ui
+    katib.kubeflow.org/component: ui

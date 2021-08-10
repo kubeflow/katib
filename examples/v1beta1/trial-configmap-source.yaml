@@ -48,6 +48,6 @@ spec:
         description: Training model optimizer (sdg, adam or ftrl)
         reference: optimizer
     configMap:
-      configMapName: trial-template
+      configMapName: trial-templates
       configMapNamespace: kubeflow
       templatePath: defaultTrialTemplate.yaml
