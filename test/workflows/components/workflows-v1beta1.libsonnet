@@ -413,6 +413,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/katib-controller:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/katib-controller",
             ]),  // build katib-controller
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-db-manager", kanikoExecutorImage, [
               "/kaniko/executor",
@@ -420,6 +421,7 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/katib-db-manager:$(PULL_BASE_SHA)",
               "--cache=true",
+              "--cache-repo=" + registry + "/katib/v1beta1/katib-controller",
             ]),  // build katib-db-manager
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-ui", kanikoExecutorImage, [
               "/kaniko/executor",
