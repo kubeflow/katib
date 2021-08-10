@@ -54,9 +54,6 @@ sed -i -e "s@newName: docker.io/kubeflowkatib/katib-db-manager@newName: ${ECR_RE
 # Change Katib UI image.
 sed -i -e "s@newName: docker.io/kubeflowkatib/katib-ui@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/katib-ui@" ${KUSTOMIZE_PATH}
 
-# Change new Katib UI image.
-sed -i -e "s@newName: docker.io/kubeflowkatib/katib-new-ui@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/katib-new-ui@" ${KUSTOMIZE_PATH}
-
 # Change Katib cert generator image.
 sed -i -e "s@newName: docker.io/kubeflowkatib/cert-generator@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/cert-generator@" ${KUSTOMIZE_PATH}
 

@@ -145,7 +145,7 @@ to monitor the current progress.
 ![katibui](./docs/images/katib-ui.png)
 
 To use the old Katib UI you can update the Katib image `newName` with the previous
-registry `docker.io/kubeflowkatib/katib-ui` in the [Kustomize](./manifests/v1beta1/installs/katib-standalone/kustomization.yaml#L29)
+image tag `docker.io/kubeflowkatib/katib-ui:v0.11.1` in the [Kustomize](./manifests/v1beta1/installs/katib-standalone/kustomization.yaml#L29)
 manifests.
 
 ## GRPC API documentation

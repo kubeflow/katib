@@ -25,8 +25,8 @@ images:
   - name: docker.io/kubeflowkatib/katib-db-manager
     newName: docker.io/kubeflowkatib/katib-db-manager
     newTag: latest
-  - name: docker.io/kubeflowkatib/katib-new-ui
-    newName: docker.io/kubeflowkatib/katib-new-ui
+  - name: docker.io/kubeflowkatib/katib-ui
+    newName: docker.io/kubeflowkatib/katib-ui
     newTag: latest
   - name: docker.io/kubeflowkatib/cert-generator
     newName: docker.io/kubeflowkatib/cert-generator
