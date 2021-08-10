@@ -5,7 +5,7 @@ KATIB_REGISTRY := docker.io/kubeflowkatib
 # Run tests
 .PHONY: test
 test:
-	go test ./pkg/... ./cmd/... -coverprofile coverage.out
+	go test ./pkg/... ./cmd/... -count=1 -coverprofile coverage.out
 
 check: generate fmt vet lint
 
