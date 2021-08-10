@@ -234,10 +234,6 @@
                     template: "build-ui",
                   },
                   {
-                    name: "build-new-ui",
-                    template: "build-new-ui",
-                  },
-                  {
                     name: "build-cert-generator",
                     template: "build-cert-generator",
                   },
@@ -425,17 +421,11 @@
             ]),  // build katib-db-manager
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-ui", kanikoExecutorImage, [
               "/kaniko/executor",
-              "--dockerfile=" + katibDir + "/cmd/ui/v1beta1/Dockerfile",
+              // TODO (andreyvelich): Switch to katibDir + "/cmd/ui/v1beta1/Dockerfile" once old UI is deprecated.
+              "--dockerfile=" + katibDir + "/cmd/new-ui/v1beta1/Dockerfile",
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/katib-ui:$(PULL_BASE_SHA)",
             ]),  // build katib-ui
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-new-ui", kanikoExecutorImage, [
-              "/kaniko/executor",
-              "--dockerfile=" + katibDir + "/cmd/new-ui/v1beta1/Dockerfile",
-              "--context=dir://" + katibDir,
-              "--no-push",
-              "--destination=" + "temp-registry/new-ui",
-            ]),  // build new katib-ui
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-cert-generator", kanikoExecutorImage, [
               "/kaniko/executor",
               "--dockerfile=" + katibDir + "/cmd/cert-generator/v1beta1/Dockerfile",
