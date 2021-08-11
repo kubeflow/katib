@@ -3,18 +3,17 @@ kind: Deployment
 metadata:
   name: katib-ui
   namespace: kubeflow
-  # TODO (andreyvelich): Modify labels to follow k8s guidelines.
   labels:
-    app: katib-ui
+    katib.kubeflow.org/component: ui
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: katib-ui
+      katib.kubeflow.org/component: ui
   template:
     metadata:
       labels:
-        app: katib-ui
+        katib.kubeflow.org/component: ui
       annotations:
         sidecar.istio.io/inject: "false"
     spec:

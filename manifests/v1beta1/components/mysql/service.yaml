@@ -4,7 +4,7 @@ metadata:
   name: katib-mysql
   namespace: kubeflow
   labels:
-    app: katib-mysql
+    katib.kubeflow.org/component: mysql
 spec:
   type: ClusterIP
   ports:
@@ -12,4 +12,4 @@ spec:
       protocol: TCP
       name: dbapi
   selector:
-    app: katib-mysql
+    katib.kubeflow.org/component: mysql

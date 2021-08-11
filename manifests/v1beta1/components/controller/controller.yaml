@@ -3,18 +3,17 @@ kind: Deployment
 metadata:
   name: katib-controller
   namespace: kubeflow
-  # TODO (andreyvelich): Modify labels to follow k8s guidelines.
   labels:
-    app: katib-controller
+    katib.kubeflow.org/component: controller
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: katib-controller
+      katib.kubeflow.org/component: controller
   template:
     metadata:
       labels:
-        app: katib-controller
+        katib.kubeflow.org/component: controller
       annotations:
         prometheus.io/scrape: "true"
         sidecar.istio.io/inject: "false"

@@ -142,9 +142,9 @@ const (
 	AnnotationIstioSidecarInjectValue = "false"
 
 	// LabelTrialTemplateConfigMapName is the label name for the Trial templates configMap
-	LabelTrialTemplateConfigMapName = "app"
+	LabelTrialTemplateConfigMapName = "katib.kubeflow.org/component"
 	// LabelTrialTemplateConfigMapValue is the label value for the Trial templates configMap
-	LabelTrialTemplateConfigMapValue = "katib-trial-templates"
+	LabelTrialTemplateConfigMapValue = "trial-templates"
 
 	// TrialTemplateParamReplaceFormat is the format to make substitution in Trial template from Names in TrialParameters
 	// E.g if Name = learningRate, according value in Trial template must be ${trialParameters.learningRate}

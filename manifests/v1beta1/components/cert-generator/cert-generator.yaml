@@ -3,6 +3,8 @@ kind: Job
 metadata:
   name: katib-cert-generator
   namespace: kubeflow
+  labels:
+    katib.kubeflow.org/component: cert-generator
 spec:
   template:
     metadata:
