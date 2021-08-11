@@ -68,7 +68,7 @@ func GetMainProcesses(completedMarkedDirPath string) (map[int]bool, int, error) 
 		// Create process object from pid
 		proc, err := psutil.NewProcess(pid)
 		if err != nil {
-			klog.Info("Skip Process with pid: %v, error: %v", pid, err)
+			klog.Infof("Skip Process with pid: %v, error: %v", pid, err)
 			continue
 		}
 
