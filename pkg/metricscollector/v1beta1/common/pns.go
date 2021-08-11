@@ -91,10 +91,12 @@ func GetMainProcesses(completedMarkedDirPath string) (map[int]bool, int, error) 
 			continue
 		}
 
-		// Command line contains completed marker for the main pid.
+		// By default mainPid is the first process.
+		// In addition to that, command line contains completed marker for the main pid
 		// For example: echo completed > /var/log/katib/$$$$.pid
 		// completedMarkedDirPath is the directory for completed marker, e.g. /var/log/katib
-		if strings.Contains(cmdline, fmt.Sprintf("echo %s > %s", TrainingCompleted, completedMarkedDirPath)) {
+		if mainPid == 0 ||
+			strings.Contains(cmdline, fmt.Sprintf("echo %s > %s", TrainingCompleted, completedMarkedDirPath)) {
 			mainPid = int(pid)
 		}
 

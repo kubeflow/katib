@@ -54,10 +54,11 @@ def GetMainProcesses(completed_marked_dir):
         # Read the process command line, join all cmdlines in one string
         cmd_lind = " ".join(proc.cmdline())
 
-        # Command line contains completed marker for the main pid.
+        # By default main_pid is the first process.
+        # In addition to that, command line contains completed marker for the main pid.
         # For example: echo completed > /var/log/katib/$$$$.pid
         # completed_marked_dir is the directory for completed marker, e.g. /var/log/katib
-        if "echo {} > {}".format(const.TRAINING_COMPLETED, completed_marked_dir) in cmd_lind:
+        if main_pid == 0 or ("echo {} > {}".format(const.TRAINING_COMPLETED, completed_marked_dir) in cmd_lind):
             main_pid = pid
 
         pids.add(pid)
