@@ -68,14 +68,15 @@ func GetMainProcesses(completedMarkedDirPath string) (map[int]bool, int, error) 
 		// Create process object from pid
 		proc, err := psutil.NewProcess(pid)
 		if err != nil {
-			klog.Infof("Skip Process with pid: %v, error: %v", pid, err)
+			klog.Infof("Unable to create new process from pid: %v, error: %v. Continue to next pid", pid, err)
 			continue
 		}
 
 		// Get parent process
 		ppid, err := proc.Ppid()
 		if err != nil {
-			return nil, 0, fmt.Errorf("unable to get parent pid for pid: %v, error: %v", ppid, err)
+			klog.Infof("Unable to get parent process for pid: %v, error: %v. Continue to next pid", pid, err)
+			continue
 		}
 
 		// Ignore the pause container, our own pid, and non-root processes (parent pid != 0)
@@ -86,7 +87,8 @@ func GetMainProcesses(completedMarkedDirPath string) (map[int]bool, int, error) 
 		// Read the process command line
 		cmdline, err := proc.Cmdline()
 		if err != nil {
-			return nil, 0, fmt.Errorf("unable to get cmdline from pid %v, error: %v", pid, err)
+			klog.Infof("Unable to get cmdline from pid: %v, error: %v. Continue to next pid", pid, err)
+			continue
 		}
 
 		// Command line contains completed marker for the main pid.
