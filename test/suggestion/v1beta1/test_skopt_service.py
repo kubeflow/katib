@@ -20,11 +20,13 @@ import grpc_testing
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.suggestion.v1beta1.skopt.service import SkoptService
 
+import utils
+
 
 class TestSkopt(unittest.TestCase):
     def setUp(self):
         servicers = {
-            api_pb2.DESCRIPTOR.services_by_name['Suggestion']: SkoptService(
+            api_pb2.DESCRIPTOR.services_by_name["Suggestion"]: SkoptService(
             )
         }
 
@@ -177,8 +179,8 @@ class TestSkopt(unittest.TestCase):
 
         get_suggestion = self.test_server.invoke_unary_unary(
             method_descriptor=(api_pb2.DESCRIPTOR
-                .services_by_name['Suggestion']
-                .methods_by_name['GetSuggestions']),
+                               .services_by_name["Suggestion"]
+                               .methods_by_name["GetSuggestions"]),
             invocation_metadata={},
             request=request, timeout=1)
 
@@ -188,89 +190,87 @@ class TestSkopt(unittest.TestCase):
         self.assertEqual(2, len(response.parameter_assignments))
 
     def test_validate_algorithm_settings(self):
-        experiment_spec = [None]
-
-        def call_validate():
-            experiment = api_pb2.Experiment(name="test", spec=experiment_spec[0])
-            request = api_pb2.ValidateAlgorithmSettingsRequest(experiment=experiment)
-
-            validate_algorithm_settings = self.test_server.invoke_unary_unary(
-                method_descriptor=(api_pb2.DESCRIPTOR
-                    .services_by_name['Suggestion']
-                    .methods_by_name['ValidateAlgorithmSettings']),
-                invocation_metadata={},
-                request=request, timeout=1)
-
-            return validate_algorithm_settings.termination()
-
-        # valid cases
-        algorithm_spec = api_pb2.AlgorithmSpec(
-            algorithm_name="bayesianoptimization",
-            algorithm_settings=[
-                api_pb2.AlgorithmSetting(
-                    name="random_state",
-                    value="10"
-                )
-            ],
+        # Valid cases.
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="bayesianoptimization",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="random_state",
+                        value="10"
+                    )
+                ],
+            )
         )
-        experiment_spec[0] = api_pb2.ExperimentSpec(algorithm=algorithm_spec)
-        self.assertEqual(call_validate()[2], grpc.StatusCode.OK)
 
-        # invalid cases
-        # unknown algorithm name
-        experiment_spec[0] = api_pb2.ExperimentSpec(
-            algorithm=api_pb2.AlgorithmSpec(algorithm_name="unknown"))
-        _, _, code, details = call_validate()
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        self.assertEqual(code, grpc.StatusCode.OK)
+
+        # Invalid cases.
+        # Unknown algorithm name.
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(algorithm_name="unknown")
+        )
+
+        _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
-        self.assertEqual(details, 'unknown algorithm name unknown')
+        self.assertEqual(details, "unknown algorithm name unknown")
 
-        # unknown config name
-        experiment_spec[0] = api_pb2.ExperimentSpec(
+        # Unknown config name.
+        experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="bayesianoptimization",
                 algorithm_settings=[
                     api_pb2.AlgorithmSetting(name="unknown_conf", value="1111")]
-            ))
-        _, _, code, details = call_validate()
-        self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
-        self.assertEqual(details, 'unknown setting unknown_conf for algorithm bayesianoptimization')
+            )
+        )
 
-        # unknown base_estimator
-        experiment_spec[0] = api_pb2.ExperimentSpec(
+        _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
+        self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
+        self.assertEqual(details, "unknown setting unknown_conf for algorithm bayesianoptimization")
+
+        # Unknown base_estimator
+        experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="bayesianoptimization",
                 algorithm_settings=[
                     api_pb2.AlgorithmSetting(name="base_estimator", value="unknown estimator")]
-            ))
-        _, _, code, details = call_validate()
-        wrong_algorithm_setting = experiment_spec[0].algorithm.algorithm_settings[0]
+            )
+        )
+        wrong_algorithm_setting = experiment_spec.algorithm.algorithm_settings[0]
+
+        _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details,
                          "{name} {value} is not supported in Bayesian optimization".format(
                              name=wrong_algorithm_setting.name,
                              value=wrong_algorithm_setting.value))
 
-        # wrong n_initial_points
-        experiment_spec[0] = api_pb2.ExperimentSpec(
+        # Wrong n_initial_points
+        experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="bayesianoptimization",
                 algorithm_settings=[
                     api_pb2.AlgorithmSetting(name="n_initial_points", value="-1")]
-            ))
-        _, _, code, details = call_validate()
-        wrong_algorithm_setting = experiment_spec[0].algorithm.algorithm_settings[0]
+            )
+        )
+        wrong_algorithm_setting = experiment_spec.algorithm.algorithm_settings[0]
+
+        _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details, "{name} should be great or equal than zero".format(name=wrong_algorithm_setting.name))
 
-        # unknown acq_func
-        experiment_spec[0] = api_pb2.ExperimentSpec(
+        # Unknown acq_func
+        experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="bayesianoptimization",
                 algorithm_settings=[
                     api_pb2.AlgorithmSetting(name="acq_func", value="unknown")]
-            ))
-        _, _, code, details = call_validate()
-        wrong_algorithm_setting = experiment_spec[0].algorithm.algorithm_settings[0]
+            )
+        )
+        wrong_algorithm_setting = experiment_spec.algorithm.algorithm_settings[0]
+
+        _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details,
                          "{name} {value} is not supported in Bayesian optimization".format(
@@ -278,15 +278,17 @@ class TestSkopt(unittest.TestCase):
                              value=wrong_algorithm_setting.value
                          ))
 
-        # unknown acq_optimizer
-        experiment_spec[0] = api_pb2.ExperimentSpec(
+        # Unknown acq_optimizer
+        experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="bayesianoptimization",
                 algorithm_settings=[
                     api_pb2.AlgorithmSetting(name="acq_optimizer", value="unknown")]
-            ))
-        _, _, code, details = call_validate()
-        wrong_algorithm_setting = experiment_spec[0].algorithm.algorithm_settings[0]
+            )
+        )
+        wrong_algorithm_setting = experiment_spec.algorithm.algorithm_settings[0]
+
+        _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details,
                          "{name} {value} is not supported in Bayesian optimization".format(
@@ -294,18 +296,20 @@ class TestSkopt(unittest.TestCase):
                              value=wrong_algorithm_setting.value
                          ))
 
-        # wrong random_state
-        experiment_spec[0] = api_pb2.ExperimentSpec(
+        # Wrong random_state
+        experiment_spec = api_pb2.ExperimentSpec(
             algorithm=api_pb2.AlgorithmSpec(
                 algorithm_name="bayesianoptimization",
                 algorithm_settings=[
                     api_pb2.AlgorithmSetting(name="random_state", value="-1")]
-            ))
-        _, _, code, details = call_validate()
-        wrong_algorithm_setting = experiment_spec[0].algorithm.algorithm_settings[0]
+            )
+        )
+        wrong_algorithm_setting = experiment_spec.algorithm.algorithm_settings[0]
+
+        _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details, "{name} should be great or equal than zero".format(name=wrong_algorithm_setting.name))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -18,11 +18,14 @@ import grpc
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.apis.manager.v1beta1.python import api_pb2_grpc
 
-from pkg.suggestion.v1beta1.internal.constant import DOUBLE
+from pkg.suggestion.v1beta1.internal.constant import INTEGER, DOUBLE, CATEGORICAL, DISCRETE
 from pkg.suggestion.v1beta1.internal.search_space import HyperParameterSearchSpace
 from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment
 from pkg.suggestion.v1beta1.chocolate.base_service import BaseChocolateService
 from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
+
+import numpy as np
+import itertools
 
 logger = logging.getLogger(__name__)
 
@@ -38,11 +41,32 @@ class ChocolateService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         if algorithm_name == "grid":
             search_space = HyperParameterSearchSpace.convert(
                 request.experiment)
+            available_space = {}
             for param in search_space.params:
-                if param.type == DOUBLE:
+                if param.type == INTEGER:
+                    available_space[param.name] = range(int(param.min), int(param.max)+1, int(param.step))
+
+                elif param.type == DOUBLE:
                     if param.step == "" or param.step is None:
                         return self._set_validate_context_error(
-                            context, "param {} step is nil".format(param.name))
+                            context, "Param: {} step is nil".format(param.name))
+                    double_list = np.arange(float(param.min), float(param.max)+float(param.step), float(param.step))
+                    if double_list[-1] > float(param.max):
+                        double_list = double_list[:-1]
+                    available_space[param.name] = double_list
+
+                elif param.type == CATEGORICAL or param.type == DISCRETE:
+                    available_space[param.name] = param.list
+
+            num_combinations = len(list(itertools.product(*available_space.values())))
+            max_trial_count = request.experiment.spec.max_trial_count
+
+            if max_trial_count > num_combinations:
+                return self._set_validate_context_error(
+                    context, "Max Trial Count: {} > all possible search space combinations: {}".format(
+                        max_trial_count, num_combinations)
+                )
+
         return api_pb2.ValidateAlgorithmSettingsReply()
 
     def GetSuggestions(self, request, context):
