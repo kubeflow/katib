@@ -20,42 +20,6 @@ It can tune hyperparameters of applications written in any language of the
 users’ choice and natively supports many ML frameworks, such as TensorFlow,
 MXNet, PyTorch, XGBoost, and others.
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-# Table of Contents
-
-- [Getting Started](#getting-started)
-- [Name](#name)
-- [Concepts in Katib](#concepts-in-katib)
-  - [Experiment](#experiment)
-  - [Suggestion](#suggestion)
-  - [Trial](#trial)
-  - [Worker Job](#worker-job)
-  - [Search Algorithms](#search-algorithms)
-    - [Hyperparameter Tuning](#hyperparameter-tuning)
-    - [Neural Architecture Search](#neural-architecture-search)
-- [Components in Katib](#components-in-katib)
-- [Web UI](#web-ui)
-  - [New UI](#new-ui)
-- [GRPC API documentation](#grpc-api-documentation)
-- [Installation](#installation)
-  - [TF operator](#tf-operator)
-  - [PyTorch operator](#pytorch-operator)
-  - [Katib](#katib)
-  - [Running examples](#running-examples)
-  - [Katib SDK](#katib-sdk)
-  - [Cleanups](#cleanups)
-- [Quick Start](#quick-start)
-- [Community](#community)
-  - [Blog posts](#blog-posts)
-- [Contributing](#contributing)
-- [Citation](#citation)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-Created by [doctoc](https://github.com/thlorenz/doctoc).
-
 ## Getting Started
 
 Follow the
@@ -169,34 +133,20 @@ and the API is defined at `pkg/apis/manager/v1beta1/api.proto`.
 ## Web UI
 
 Katib provides a Web UI.
-You can visualize general trend of Hyper parameter space and
-each training history. You can use
-[random-example](https://github.com/kubeflow/katib/blob/master/examples/v1beta1/random-example.yaml)
-or
-[other examples](https://github.com/kubeflow/katib/blob/master/examples/v1beta1)
-to generate a similar UI. Follow the
-[Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/hyperparameter/#katib-ui)
-to access the Katib UI.
-![katibui](./docs/images/katib-ui.png)
-
-### New UI
-
 During 1.3 we've worked on a new iteration of the UI, which is rewritten in
 Angular and is utilizing the common code of the other Kubeflow [dashboards](https://github.com/kubeflow/kubeflow/tree/master/components/crud-web-apps).
-While this UI is not yet on par with the current default one, we are actively
-working to get it up to speed and provide all the existing functionalities.
 
 The users are currently able to list, delete and create Experiments in their
 cluster via this new UI as well as inspect the owned Trials. One important
-missing functionalities are the ability to edit the TrialTemplate ConfigMaps.
+missing functionalities are the ability to edit the Trial templates ConfigMaps
+and view Neural Architecture Search models. Check [this Project](https://github.com/kubeflow/katib/projects/1)
+to monitor the current progress.
 
-While this UI is not ready to replace the current one we would like to
-encourage users to also give it a try and provide us with feedback. To try it
-out the user has to update the Katib UI image `newName` with the new registry
-`docker.io/kubeflowkatib/katib-new-ui` in the [Kustomize](https://github.com/kubeflow/katib/blob/54854c1bb/manifests/v1beta1/installs/katib-standalone/kustomization.yaml#L29)
+![katibui](./docs/images/katib-ui.png)
+
+To use the old Katib UI you can update the Katib image `newName` with the previous
+image tag `docker.io/kubeflowkatib/katib-ui:v0.11.1` in the [Kustomize](./manifests/v1beta1/installs/katib-standalone/kustomization.yaml#L29)
 manifests.
-
-![newkatibui](./docs/images/katib-new-ui.png)
 
 ## GRPC API documentation
 
