@@ -26,6 +26,7 @@ import (
 	"time"
 
 	psutil "github.com/shirou/gopsutil/process"
+	"k8s.io/klog"
 )
 
 // WaitPidsOpts is the input options for metrics collector
@@ -40,7 +41,7 @@ type WaitPidsOpts struct {
 func WaitMainProcesses(opts WaitPidsOpts) error {
 
 	if runtime.GOOS != "linux" {
-		return fmt.Errorf("Platform '%s' unsupported", runtime.GOOS)
+		return fmt.Errorf("platform '%s' unsupported", runtime.GOOS)
 	}
 
 	pids, mainPid, err := GetMainProcesses(opts.CompletedMarkedDirPath)
@@ -59,7 +60,7 @@ func GetMainProcesses(completedMarkedDirPath string) (map[int]bool, int, error) 
 	mainPid := 0
 
 	if err != nil {
-		return nil, 0, fmt.Errorf("Failed to list processes: %v", err)
+		return nil, 0, fmt.Errorf("failed to list processes: %v", err)
 	}
 
 	thisPID := os.Getpid()
@@ -67,13 +68,15 @@ func GetMainProcesses(completedMarkedDirPath string) (map[int]bool, int, error) 
 		// Create process object from pid
 		proc, err := psutil.NewProcess(pid)
 		if err != nil {
-			return nil, 0, fmt.Errorf("Failed to create new Process from pid %v, error: %v", pid, err)
+			klog.Infof("Unable to create new process from pid: %v, error: %v. Continue to next pid", pid, err)
+			continue
 		}
 
 		// Get parent process
 		ppid, err := proc.Ppid()
 		if err != nil {
-			return nil, 0, fmt.Errorf("Unable to get parent pid for pid: %v, error: %v", ppid, err)
+			klog.Infof("Unable to get parent process for pid: %v, error: %v. Continue to next pid", pid, err)
+			continue
 		}
 
 		// Ignore the pause container, our own pid, and non-root processes (parent pid != 0)
@@ -84,11 +87,12 @@ func GetMainProcesses(completedMarkedDirPath string) (map[int]bool, int, error) 
 		// Read the process command line
 		cmdline, err := proc.Cmdline()
 		if err != nil {
-			return nil, 0, fmt.Errorf("Unable to get cmdline from pid %v, error: %v", pid, err)
+			klog.Infof("Unable to get cmdline from pid: %v, error: %v. Continue to next pid", pid, err)
+			continue
 		}
 
 		// By default mainPid is the first process.
-		// Command line contains completed marker for the main pid
+		// In addition to that, command line contains completed marker for the main pid
 		// For example: echo completed > /var/log/katib/$$$$.pid
 		// completedMarkedDirPath is the directory for completed marker, e.g. /var/log/katib
 		if mainPid == 0 ||
@@ -97,6 +101,11 @@ func GetMainProcesses(completedMarkedDirPath string) (map[int]bool, int, error) 
 		}
 
 		pids[int(pid)] = true
+	}
+
+	// If mainPid has not been found, return an error.
+	if mainPid == 0 {
+		return nil, 0, fmt.Errorf("unable to find main pid from the process list %v", allPids)
 	}
 
 	return pids, mainPid, nil
@@ -132,7 +141,7 @@ func WaitPIDs(pids map[int]bool, mainPid int, opts WaitPidsOpts) error {
 							// Read file with "completed" marker
 							contents, err := ioutil.ReadFile(markFile)
 							if err != nil {
-								return fmt.Errorf("Training container is failed. Unable to read file %v for pid %v, error: %v", markFile, pid, err)
+								return fmt.Errorf("training container is failed. Unable to read file %v for pid %v, error: %v", markFile, pid, err)
 							}
 							// Check if file contains "early-stopped" marker
 							// In that case process is not completed
@@ -141,7 +150,7 @@ func WaitPIDs(pids map[int]bool, mainPid int, opts WaitPidsOpts) error {
 							}
 							// Check if file contains "completed" marker
 							if strings.TrimSpace(string(contents)) != TrainingCompleted {
-								return fmt.Errorf("Unable to find marker: %v in file: %v with contents: %v for pid: %v",
+								return fmt.Errorf("unable to find marker: %v in file: %v with contents: %v for pid: %v",
 									TrainingCompleted, markFile, string(contents), pid)
 							}
 						}
@@ -157,7 +166,7 @@ func WaitPIDs(pids map[int]bool, mainPid int, opts WaitPidsOpts) error {
 					}
 					// We should receive only not exist error when we check /proc/<pid> dir
 				} else {
-					return fmt.Errorf("Fail to check process info: %v", err)
+					return fmt.Errorf("fail to check process info: %v", err)
 				}
 			}
 		}
@@ -167,7 +176,7 @@ func WaitPIDs(pids map[int]bool, mainPid int, opts WaitPidsOpts) error {
 
 	// After main loop notFinishedPids map should be empty
 	if len(notFinishedPids) != 0 {
-		return fmt.Errorf("Timed out waiting for pids to complete")
+		return fmt.Errorf("timed out waiting for pids to complete")
 	}
 	return nil
 }
