@@ -5,8 +5,7 @@ ENV SUGGESTION_DIR cmd/suggestion/optuna/v1beta1
 
 RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
     apt-get -y update && \
-    apt-get -y install gfortran libopenblas-dev liblapack-dev && \
-    pip install cython; \
+    apt-get -y install gfortran libopenblas-dev liblapack-dev; \
     fi
 
 RUN GRPC_HEALTH_PROBE_VERSION=v0.3.1 && \
