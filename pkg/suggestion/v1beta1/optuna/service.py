@@ -157,7 +157,7 @@ class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         assignments_str = [str(a) for a in assignments]
         return ",".join(assignments_str)
 
-    def _get_optuna_serch_space(self):
+    def _get_optuna_search_space(self):
         search_space = {}
         for param in self.search_space.params:
             if param.type == INTEGER:
