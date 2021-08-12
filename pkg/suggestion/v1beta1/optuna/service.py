@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from collections import defaultdict
-import logging
 import threading
 
 import optuna
@@ -24,8 +23,6 @@ from pkg.suggestion.v1beta1.internal.constant import INTEGER, DOUBLE, CATEGORICA
 from pkg.suggestion.v1beta1.internal.search_space import HyperParameterSearchSpace
 from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment
 from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
-
-
 
 
 class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
@@ -47,16 +44,15 @@ class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 self.search_space = HyperParameterSearchSpace.convert(request.experiment)
                 self.study = self._create_study(request.experiment.spec.algorithm, self.search_space)
 
-        trials = Trial.convert(request.trials)
+            trials = Trial.convert(request.trials)
 
-        with self.lock:
             if len(trials) != 0:
                 self._tell(trials)
             list_of_assignments = self._ask(request.request_number)
 
-        return api_pb2.GetSuggestionsReply(
-            parameter_assignments=Assignment.generate(list_of_assignments)
-        )
+            return api_pb2.GetSuggestionsReply(
+                parameter_assignments=Assignment.generate(list_of_assignments)
+            )
 
     def _create_study(self, algorithm_spec, search_space):
         sampler = self._create_sampler(algorithm_spec)
