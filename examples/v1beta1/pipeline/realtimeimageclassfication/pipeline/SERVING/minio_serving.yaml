@@ -1,0 +1,22 @@
+apiVersion: serving.kubeflow.org/v1alpha2
+kind: InferenceService
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: kfserving-vision-realtime
+  namespace: <NAMESPACE>
+  annotations:
+    sidecar.istio.io/inject: "false"
+spec:
+  default:
+    predictor:
+      minReplicas: 1
+      custom:
+        container:
+          name: kfserving-container
+          image: gcr.io/<PROJECT_ID>/kubeflow/serving:v1
+          env:
+            - name: STORAGE_URI
+              value: "gs://<BUCKET>/imageclassfication/model"
+          imagePullPolicy: Always
+  
