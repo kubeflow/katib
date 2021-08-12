@@ -1,0 +1,6 @@
+tensorflow==2.5.0
+tensorflow-datasets==2.1.0
+google-cloud-storage==1.26.0
+pyyaml
+h5py 
+dill
