@@ -6,6 +6,7 @@ list in reverse chronological order.
 
 | Presentation or Demo title | Presenters | Date |
 | --- | --- | --- |
+| [AutoML and Training WG Summit July 2021](https://youtube.com/playlist?list=PL2gwy7BdKoGd9HQBCz1iC7vyFVN7Wa9N2) | Kubeflow Community | 2021-07-16 |
 | [MLREPA 2021: MLOps and AutoML in Cloud-Native Way with Kubeflow and Katib](https://youtu.be/33VJ6KNBBvU) | Andrey Velichkevich | 2021-04-25 |
 | [KF Community: A Tour of Katib's new UI for Kubeflow 1.3](https://youtu.be/1DtjB_boWcQ) | Kimonas Sotirchos | 2021-03-30 |
 | [KF Community: New UI for Kubeflow components](https://youtu.be/OKqx3IS2_G4) | Stefano Fioravanzo | 2020-12-08 |

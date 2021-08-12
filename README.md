@@ -310,6 +310,10 @@ about getting involved in the community:
 - [Kubeflow Katib: Scalable, Portable and Cloud Native System for AutoML](https://blog.kubeflow.org/katib/)
   (by Andrey Velichkevich)
 
+### Events
+
+- [AutoML and Training WG Summit. 16th of July 2021](https://docs.google.com/document/d/1vGluSPHmAqEr8k9Dmm82RcQ-MVnqbYYSfnjMGB-aPuo/edit?usp=sharing)
+
 ## Contributing
 
 Please feel free to test the system!
