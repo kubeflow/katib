@@ -26,7 +26,6 @@ from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment
 from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
 
 
-logger = logging.getLogger(__name__)
 
 
 class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
