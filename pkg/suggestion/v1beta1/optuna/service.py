@@ -147,7 +147,7 @@ class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                     # A new trial object is created and reported using study.add_trial() with the assignments and the search space.
                     optuna_trial = optuna.create_trial(
                         params={a.name:self._get_casted_assignment_value(a) for a in trial.assignments},
-                        distributions=self._get_optuna_serch_space(),
+                        distributions=self._get_optuna_search_space(),
                         value=value,
                     )
                     self.study.add_trial(optuna_trial)
