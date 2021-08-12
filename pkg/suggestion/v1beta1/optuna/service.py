@@ -118,7 +118,7 @@ class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
     def _ask(self, request_number):
         list_of_assignments = []
         for _ in range(request_number):
-            optuna_trial = self.study.ask(fixed_distributions=self._get_optuna_serch_space())
+            optuna_trial = self.study.ask(fixed_distributions=self._get_optuna_search_space())
 
             assignments = [Assignment(k,v) for k,v in optuna_trial.params.items()]
             list_of_assignments.append(assignments)
