@@ -50,11 +50,11 @@ const (
 	ConfigTrialResources = "trial-resources"
 
 	// LabelExperimentName is the label of experiment name.
-	LabelExperimentName = "experiment"
+	LabelExperimentName = "katib.kubeflow.org/experiment"
 	// LabelSuggestionName is the label of suggestion name.
-	LabelSuggestionName = "suggestion"
+	LabelSuggestionName = "katib.kubeflow.org/suggestion"
 	// LabelDeploymentName is the label of deployment name.
-	LabelDeploymentName = "deployment"
+	LabelDeploymentName = "katib.kubeflow.org/deployment"
 
 	// ContainerSuggestion is the container name to run Suggestion service.
 	ContainerSuggestion = "suggestion"
