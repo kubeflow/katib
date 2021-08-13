@@ -1,6 +1,6 @@
 # Kubeflow AutoML and Training Summit 2021
 
-![](logo.png)
+
 
 
 ##
