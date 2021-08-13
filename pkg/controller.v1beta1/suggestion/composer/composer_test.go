@@ -69,10 +69,10 @@ var (
 	}
 
 	deploymentLabels = map[string]string{
-		"custom-label": "test",
-		"deployment":   suggestionName + "-" + suggestionAlgorithm,
-		"experiment":   suggestionName,
-		"suggestion":   suggestionName,
+		"custom-label":             "test",
+		consts.LabelDeploymentName: suggestionName + "-" + suggestionAlgorithm,
+		consts.LabelExperimentName: suggestionName,
+		consts.LabelSuggestionName: suggestionName,
 	}
 
 	podAnnotations = map[string]string{
