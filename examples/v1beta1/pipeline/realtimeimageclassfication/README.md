@@ -1,4 +1,4 @@
-# Kubeflow AutoML and Training Summit 2021
+# Kubeflow Real time image classification with AutoML katib
 
 
 
