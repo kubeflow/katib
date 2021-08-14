@@ -2,7 +2,7 @@ apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: xgboost-lightgbm
+  name: xgboostjob-lightgbm
 spec:
   objective:
     type: maximize
@@ -35,11 +35,7 @@ spec:
         max: "60"
         step: "1"
   trialTemplate:
-    primaryPodLabels:
-      job-role: master
-    primaryContainerName: xgboostjob
-    successCondition: status.conditions.#(type=="Succeeded")#|#(status=="True")#
-    failureCondition: status.conditions.#(type=="Failed")#|#(status=="True")#
+    primaryContainerName: xgboost
     trialParameters:
       - name: learningRate
         description: Learning rate for the training model
@@ -48,8 +44,7 @@ spec:
         description: Number of leaves for one tree
         reference: num-leaves
     trialSpec:
-      # TODO (andreyvelich): Change to kubeflow.org/v1 once all-in-one operator is finished.
-      apiVersion: xgboostjob.kubeflow.org/v1
+      apiVersion: kubeflow.org/v1
       kind: XGBoostJob
       spec:
         xgbReplicaSpecs:
@@ -59,11 +54,11 @@ spec:
             template:
               spec:
                 containers:
-                  - name: xgboostjob
+                  - name: xgboost
                     image: docker.io/kubeflowkatib/xgboost-lightgbm:1.0
                     ports:
                       - containerPort: 9991
-                        name: xgboostjob-port
+                        name: xgboost-port
                     imagePullPolicy: Always
                     args:
                       - --job_type=Train
@@ -93,11 +88,11 @@ spec:
             template:
               spec:
                 containers:
-                  - name: xgboostjob
+                  - name: xgboost
                     image: docker.io/kubeflowkatib/xgboost-lightgbm:1.0
                     ports:
                       - containerPort: 9991
-                        name: xgboostjob-port
+                        name: xgboost-port
                     imagePullPolicy: Always
                     args:
                       - --job_type=Train

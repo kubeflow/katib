@@ -96,7 +96,7 @@ func (e *Experiment) setDefaultObjective() {
 func (e *Experiment) setDefaultTrialTemplate() {
 	t := e.Spec.TrialTemplate
 
-	// Set default values for Job, TFJob and PyTorchJob if TrialSpec is not nil
+	// Set default values for Job and Kubeflow Training Job if TrialSpec is not nil
 	if t != nil && t.TrialSource.TrialSpec != nil {
 		jobKind := t.TrialSource.TrialSpec.GetKind()
 		if jobKind == consts.JobKindJob {
@@ -106,7 +106,7 @@ func (e *Experiment) setDefaultTrialTemplate() {
 			if t.FailureCondition == "" {
 				t.FailureCondition = DefaultJobFailureCondition
 			}
-		} else if jobKind == consts.JobKindTF || jobKind == consts.JobKindPyTorch {
+		} else if jobKind == consts.JobKindTF || jobKind == consts.JobKindPyTorch || jobKind == consts.JobKindXGBoost {
 			if t.SuccessCondition == "" {
 				t.SuccessCondition = DefaultKubeflowJobSuccessCondition
 			}

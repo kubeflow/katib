@@ -134,6 +134,8 @@ const (
 	JobKindTF = "TFJob"
 	// JobKindPyTorch is the kind of PyTorchJob.
 	JobKindPyTorch = "PyTorchJob"
+	// JobKindXGBoost is the kind of XGBoostJob.
+	JobKindXGBoost = "XGBoostJob"
 
 	// AnnotationIstioSidecarInjectName is the annotation of Istio Sidecar
 	AnnotationIstioSidecarInjectName = "sidecar.istio.io/inject"
