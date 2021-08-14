@@ -141,7 +141,7 @@ class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
     def _get_assignments_key(self, assignments):
         assignments = sorted(assignments, key=lambda a: a.name)
-        assignments_str = [str(a) for a in assignments]
+        assignments_str = [f"{a.name}:{a.value}" for a in assignments]
         return ",".join(assignments_str)
 
     def _get_optuna_search_space(self):
