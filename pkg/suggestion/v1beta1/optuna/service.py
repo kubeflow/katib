@@ -134,19 +134,10 @@ class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 optuna_trial_numbers = self.assignments_to_optuna_number[assignments_key]
 
                 if len(optuna_trial_numbers) != 0:
-                    # The trial has been suggested by the Optuna study.
-                    # The objective value is reported using study.tell() with the corresponding trial number.
                     trial_number = optuna_trial_numbers.pop(0)
                     self.study.tell(trial_number, value)
                 else:
-                    # The trial has not been suggested by the Optuna study.
-                    # A new trial object is created and reported using study.add_trial() with the assignments and the search space.
-                    optuna_trial = optuna.create_trial(
-                        params={a.name:self._get_casted_assignment_value(a) for a in trial.assignments},
-                        distributions=self._get_optuna_search_space(),
-                        value=value,
-                    )
-                    self.study.add_trial(optuna_trial)
+                    raise ValueError("An unknown trial has been passed in the GetSuggestion request.")
 
     def _get_assignments_key(self, assignments):
         assignments = sorted(assignments, key=lambda a: a.name)

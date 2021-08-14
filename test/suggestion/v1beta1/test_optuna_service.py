@@ -14,7 +14,6 @@
 
 import grpc
 import grpc_testing
-import unittest
 
 import pytest
 
@@ -43,107 +42,14 @@ class TestOptuna:
         ],
     )
     def test_get_suggestion(self, algorithm_name, algorithm_settings):
-        trials = [
-            api_pb2.Trial(
-                name="test-asfjh",
-                spec=api_pb2.TrialSpec(
-                    objective=api_pb2.ObjectiveSpec(
-                        type=api_pb2.MAXIMIZE,
-                        objective_metric_name="metric-2",
-                        goal=0.9
-                    ),
-                    parameter_assignments=api_pb2.TrialSpec.ParameterAssignments(
-                        assignments=[
-                            api_pb2.ParameterAssignment(
-                                name="param-1",
-                                value="2",
-                            ),
-                            api_pb2.ParameterAssignment(
-                                name="param-2",
-                                value="cat1",
-                            ),
-                            api_pb2.ParameterAssignment(
-                                name="param-3",
-                                value="2",
-                            ),
-                            api_pb2.ParameterAssignment(
-                                name="param-4",
-                                value="3.44",
-                            )
-                        ]
-                    )
-                ),
-                status=api_pb2.TrialStatus(
-                    condition=api_pb2.TrialStatus.TrialConditionType.SUCCEEDED,
-                    observation=api_pb2.Observation(
-                        metrics=[
-                            api_pb2.Metric(
-                                name="metric-1",
-                                value="435"
-                            ),
-                            api_pb2.Metric(
-                                name="metric-2",
-                                value="5643"
-                            ),
-                        ]
-                    )
-                )
-            ),
-            api_pb2.Trial(
-                name="test-234hs",
-                spec=api_pb2.TrialSpec(
-                    objective=api_pb2.ObjectiveSpec(
-                        type=api_pb2.MAXIMIZE,
-                        objective_metric_name="metric-2",
-                        goal=0.9
-                    ),
-                    parameter_assignments=api_pb2.TrialSpec.ParameterAssignments(
-                        assignments=[
-                            api_pb2.ParameterAssignment(
-                                name="param-1",
-                                value="3",
-                            ),
-                            api_pb2.ParameterAssignment(
-                                name="param-2",
-                                value="cat2",
-                            ),
-                            api_pb2.ParameterAssignment(
-                                name="param-3",
-                                value="6",
-                            ),
-                            api_pb2.ParameterAssignment(
-                                name="param-4",
-                                value="4.44",
-                            )
-                        ]
-                    )
-                ),
-                status=api_pb2.TrialStatus(
-                    condition=api_pb2.TrialStatus.TrialConditionType.SUCCEEDED,
-                    observation=api_pb2.Observation(
-                        metrics=[
-                            api_pb2.Metric(
-                                name="metric-1",
-                                value="123"
-                            ),
-                            api_pb2.Metric(
-                                name="metric-2",
-                                value="3028"
-                            ),
-                        ]
-                    )
-                )
-            )
-        ]
         experiment = api_pb2.Experiment(
             name="test",
             spec=api_pb2.ExperimentSpec(
-
                 algorithm=api_pb2.AlgorithmSpec(
                     algorithm_name=algorithm_name,
                     algorithm_settings = [
                         api_pb2.AlgorithmSetting(
-                            name=name, 
+                            name=name,
                             value=value
                         ) for name, value in algorithm_settings.items()
                     ],
@@ -183,6 +89,84 @@ class TestOptuna:
             )
         )
 
+        # Run the first suggestion with no previous trials in the request
+        request = api_pb2.GetSuggestionsRequest(
+            experiment=experiment,
+            trials=[],
+            request_number=2,
+        )
+
+        get_suggestion = self.test_server.invoke_unary_unary(
+            method_descriptor=(api_pb2.DESCRIPTOR
+                               .services_by_name['Suggestion']
+                               .methods_by_name['GetSuggestions']),
+            invocation_metadata={},
+            request=request, timeout=1)
+
+        response, metadata, code, details = get_suggestion.termination()
+        assert code == grpc.StatusCode.OK
+        assert 2 == len(response.parameter_assignments)
+
+        # Run the second suggestion with trials whose parameters are assigned in the first request
+        trials = [
+            api_pb2.Trial(
+                name="test-asfjh",
+                spec=api_pb2.TrialSpec(
+                    objective=api_pb2.ObjectiveSpec(
+                        type=api_pb2.MAXIMIZE,
+                        objective_metric_name="metric-2",
+                        goal=0.9
+                    ),
+                    parameter_assignments=api_pb2.TrialSpec.ParameterAssignments(
+                        assignments=response.parameter_assignments[0].assignments
+                    )
+                ),
+                status=api_pb2.TrialStatus(
+                    condition=api_pb2.TrialStatus.TrialConditionType.SUCCEEDED,
+                    observation=api_pb2.Observation(
+                        metrics=[
+                            api_pb2.Metric(
+                                name="metric-1",
+                                value="435"
+                            ),
+                            api_pb2.Metric(
+                                name="metric-2",
+                                value="5643"
+                            ),
+                        ]
+                    )
+                )
+            ),
+            api_pb2.Trial(
+                name="test-234hs",
+                spec=api_pb2.TrialSpec(
+                    objective=api_pb2.ObjectiveSpec(
+                        type=api_pb2.MAXIMIZE,
+                        objective_metric_name="metric-2",
+                        goal=0.9
+                    ),
+                    parameter_assignments=api_pb2.TrialSpec.ParameterAssignments(
+                        assignments=response.parameter_assignments[1].assignments
+                    )
+                ),
+                status=api_pb2.TrialStatus(
+                    condition=api_pb2.TrialStatus.TrialConditionType.SUCCEEDED,
+                    observation=api_pb2.Observation(
+                        metrics=[
+                            api_pb2.Metric(
+                                name="metric-1",
+                                value="123"
+                            ),
+                            api_pb2.Metric(
+                                name="metric-2",
+                                value="3028"
+                            ),
+                        ]
+                    )
+                )
+            )
+        ]
+
         request = api_pb2.GetSuggestionsRequest(
             experiment=experiment,
             trials=trials,
@@ -202,4 +186,4 @@ class TestOptuna:
 
 
 if __name__ == '__main__':
-    unittest.main()
+    pytest.main()
