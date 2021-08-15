@@ -58,7 +58,7 @@ spec:
                     image: docker.io/kubeflowkatib/xgboost-lightgbm:1.0
                     ports:
                       - containerPort: 9991
-                        name: xgboost-port
+                        name: xgboostjob-port
                     imagePullPolicy: Always
                     args:
                       - --job_type=Train
@@ -92,7 +92,7 @@ spec:
                     image: docker.io/kubeflowkatib/xgboost-lightgbm:1.0
                     ports:
                       - containerPort: 9991
-                        name: xgboost-port
+                        name: xgboostjob-port
                     imagePullPolicy: Always
                     args:
                       - --job_type=Train
