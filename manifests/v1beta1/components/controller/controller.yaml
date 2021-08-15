@@ -29,8 +29,7 @@ spec:
             - "--trial-resources=TFJob.v1.kubeflow.org"
             - "--trial-resources=PyTorchJob.v1.kubeflow.org"
             - "--trial-resources=MPIJob.v1.kubeflow.org"
-            # TODO (andreyvelich): Change to v1.kubeflow.org once all-in-one operator is finished.
-            - "--trial-resources=XGBoostJob.v1.xgboostjob.kubeflow.org"
+            - "--trial-resources=XGBoostJob.v1.kubeflow.org"
           ports:
             - containerPort: 8443
               name: webhook

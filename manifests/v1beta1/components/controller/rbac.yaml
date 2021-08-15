@@ -53,12 +53,6 @@ rules:
       - tfjobs
       - pytorchjobs
       - mpijobs
-    verbs:
-      - "*"
-  # TODO (andreyvelich): Move to "apiGroup: kubeflow.org" once all-in-one operator is finished.
-  - apiGroups:
-      - xgboostjob.kubeflow.org
-    resources:
       - xgboostjobs
     verbs:
       - "*"
