@@ -4,6 +4,7 @@ export enum AlgorithmsEnum {
   HYPERBAND = 'hyperband',
   BAYESIAN_OPTIMIZATION = 'bayesianoptimization',
   TPE = 'tpe',
+  MULTIVARIATE_TPE = 'multivariate-tpe',
   CMAES = 'cmaes',
   SOBOL = 'sobol',
   ENAS = 'enas',
