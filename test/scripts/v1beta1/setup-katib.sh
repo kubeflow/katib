@@ -67,6 +67,7 @@ sed -i -e "s@docker.io/kubeflowkatib/suggestion-chocolate@${ECR_REGISTRY}/${REPO
 sed -i -e "s@docker.io/kubeflowkatib/suggestion-hyperband@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-hyperband@" ${CONFIG_PATCH}
 sed -i -e "s@docker.io/kubeflowkatib/suggestion-skopt@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-skopt@" ${CONFIG_PATCH}
 sed -i -e "s@docker.io/kubeflowkatib/suggestion-goptuna@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-goptuna@" ${CONFIG_PATCH}
+sed -i -e "s@docker.io/kubeflowkatib/suggestion-optuna@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-optuna@" ${CONFIG_PATCH}
 sed -i -e "s@docker.io/kubeflowkatib/suggestion-enas@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-enas@" ${CONFIG_PATCH}
 sed -i -e "s@docker.io/kubeflowkatib/suggestion-darts@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-darts@" ${CONFIG_PATCH}
 

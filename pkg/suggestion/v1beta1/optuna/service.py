@@ -64,7 +64,7 @@ class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
     def _create_sampler(self, algorithm_spec):
         name = algorithm_spec.algorithm_name
-        settings = {s.name:s.value for s in algorithm_spec.algorithm_settings}
+        settings = {s.name: s.value for s in algorithm_spec.algorithm_settings}
 
         if name == "tpe" or name == "multivariate-tpe":
             kwargs = {}
@@ -117,7 +117,7 @@ class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         for _ in range(request_number):
             optuna_trial = self.study.ask(fixed_distributions=self._get_optuna_search_space())
 
-            assignments = [Assignment(k,v) for k,v in optuna_trial.params.items()]
+            assignments = [Assignment(k, v) for k, v in optuna_trial.params.items()]
             list_of_assignments.append(assignments)
 
             assignments_key = self._get_assignments_key(assignments)

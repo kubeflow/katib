@@ -33,6 +33,7 @@ workflows:
       - cmd/new-ui/v1beta1/*
       - cmd/suggestion/chocolate/v1beta1/*
       - cmd/suggestion/goptuna/v1beta1/*
+      - cmd/suggestion/optuna/v1beta1/*
       - cmd/suggestion/hyperband/v1beta1/*
       - cmd/suggestion/hyperopt/v1beta1/*
       - cmd/suggestion/nas/darts/v1beta1/*

@@ -266,6 +266,10 @@
                     template: "build-suggestion-goptuna",
                   },
                   {
+                    name: "build-suggestion-optuna",
+                    template: "build-suggestion-optuna",
+                  },
+                  {
                     name: "build-suggestion-enas",
                     template: "build-suggestion-enas",
                   },
@@ -332,6 +336,10 @@
                   {
                     name: "run-cmaes-e2e-tests",
                     template: "run-cmaes-e2e-tests",
+                  },
+                  {
+                    name: "run-multivariate-tpe-e2e-tests",
+                    template: "run-multivariate-tpe-e2e-tests",
                   },
                   {
                     name: "run-enas-e2e-tests",
@@ -474,6 +482,12 @@
               "--context=dir://" + katibDir,
               "--destination=" + registry + "/katib/v1beta1/suggestion-goptuna:$(PULL_BASE_SHA)",
             ]),  // build suggestion goptuna
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-optuna", kanikoExecutorImage, [
+              "/kaniko/executor",
+              "--dockerfile=" + katibDir + "/cmd/suggestion/optuna/v1beta1/Dockerfile",
+              "--context=dir://" + katibDir,
+              "--destination=" + registry + "/katib/v1beta1/suggestion-optuna:$(PULL_BASE_SHA)",
+            ]),  // build suggestion optuna
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-enas", kanikoExecutorImage, [
               "/kaniko/executor",
               "--dockerfile=" + katibDir + "/cmd/suggestion/nas/enas/v1beta1/Dockerfile",
@@ -549,6 +563,10 @@
               "test/scripts/v1beta1/run-e2e-experiment.sh",
               "examples/v1beta1/cmaes-example.yaml",
             ]),  // run CMA-ES algorithm
+            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-multivariate-tpe-e2e-tests", testWorkerImage, [
+              "test/scripts/v1beta1/run-e2e-experiment.sh",
+              "examples/v1beta1/multivariate-tpe-example.yaml",
+            ]),  // run Multivariate TPE algorithm
             $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-enas-e2e-tests", testWorkerImage, [
               "test/scripts/v1beta1/run-e2e-experiment.sh",
               "examples/v1beta1/nas/enas-example-cpu.yaml",
