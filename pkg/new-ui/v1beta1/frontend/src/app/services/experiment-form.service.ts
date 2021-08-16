@@ -1,26 +1,17 @@
-import {
-  FormBuilder,
-  Validators,
-  FormGroup,
-  FormArray,
-  FormControl,
-} from '@angular/forms';
+import { FormBuilder, Validators, FormGroup, FormArray } from '@angular/forms';
 import { Injectable } from '@angular/core';
-import { ObjectiveTypeEnum } from '../enumerations/objective-type.enum';
 import {
   AlgorithmsEnum,
   EarlyStoppingAlgorithmsEnum,
 } from '../enumerations/algorithms.enum';
-import { BehaviorSubject } from 'rxjs';
 import { createParameterGroup, createNasOperationGroup } from '../shared/utils';
-import { K8sObject, SnackBarService, SnackType } from 'kubeflow';
-import { dump, load } from 'js-yaml';
+import { SnackBarService, SnackType } from 'kubeflow';
+import { load } from 'js-yaml';
 import {
   ObjectiveSpec,
   AlgorithmSpec,
   ParameterSpec,
   FeasibleSpaceMinMax,
-  GraphConfig,
   NasOperation,
   AlgorithmSetting,
 } from '../models/experiment.k8s.model';
@@ -53,9 +44,9 @@ export class ExperimentFormService {
     return this.builder.group({
       type: 'maximize',
       goal: 0.99,
-      metricName: 'accuracy',
+      metricName: 'Validation-accuracy',
       metricStrategy: 'max',
-      additionalMetricNames: this.builder.array(['train-accuracy']),
+      additionalMetricNames: this.builder.array(['Train-accuracy']),
       metricStrategies: this.builder.array([]),
       setStrategies: this.builder.control(false),
     });
@@ -99,7 +90,7 @@ export class ExperimentFormService {
       createParameterGroup({
         name: 'optimizer',
         parameterType: 'categorical',
-        feasibleSpace: { list: ['sgd', 'adams', 'ftrl'] },
+        feasibleSpace: { list: ['sgd', 'adam', 'ftrl'] },
       }),
     ]);
   }
