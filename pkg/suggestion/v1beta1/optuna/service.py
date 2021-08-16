@@ -79,6 +79,7 @@ class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                     raise ValueError("Unknown name for {}: {}".format(name, k))
 
             kwargs["multivariate"] = name == "multivariate-tpe"
+            kwargs["constant_liar"] = True
 
             sampler = optuna.samplers.TPESampler(**kwargs)
 
