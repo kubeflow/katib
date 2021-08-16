@@ -25,6 +25,7 @@ pip install -r test/suggestion/v1beta1/test_requirements.txt
 pip install -r cmd/suggestion/chocolate/v1beta1/requirements.txt
 pip install -r cmd/suggestion/hyperopt/v1beta1/requirements.txt
 pip install -r cmd/suggestion/skopt/v1beta1/requirements.txt
+pip install -r cmd/suggestion/optuna/v1beta1/requirements.txt
 pip install -r cmd/suggestion/nas/enas/v1beta1/requirements.txt
 pip install -r cmd/suggestion/hyperband/v1beta1/requirements.txt
 pip install -r cmd/suggestion/nas/darts/v1beta1/requirements.txt

@@ -83,6 +83,9 @@ docker build -t ${REGISTRY}/suggestion-skopt:${TAG} -f ${CMD_PREFIX}/suggestion/
 echo -e "\nBuilding goptuna suggestion...\n"
 docker build -t ${REGISTRY}/suggestion-goptuna:${TAG} -f ${CMD_PREFIX}/suggestion/goptuna/${VERSION}/Dockerfile .
 
+echo -e "\nBuilding optuna suggestion...\n"
+docker build -t ${REGISTRY}/suggestion-optuna:${TAG} -f ${CMD_PREFIX}/suggestion/optuna/${VERSION}/Dockerfile .
+
 echo -e "\nBuilding ENAS suggestion...\n"
 if [ $MACHINE_ARCH == "aarch64" ]; then
     docker build -t ${REGISTRY}/suggestion-enas:${TAG} -f ${CMD_PREFIX}/suggestion/nas/enas/${VERSION}/Dockerfile.aarch64 .
