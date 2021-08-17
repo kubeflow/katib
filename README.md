@@ -107,6 +107,7 @@ to know more about each algorithm.
 
 - [Random Search](https://en.wikipedia.org/wiki/Hyperparameter_optimization#Random_search)
 - [Tree of Parzen Estimators (TPE)](https://papers.nips.cc/paper/4443-algorithms-for-hyper-parameter-optimization.pdf)
+- [Multivariate TPE](https://tech.preferred.jp/en/blog/multivariate-tpe-makes-optuna-even-more-powerful/)
 - [Grid Search](https://en.wikipedia.org/wiki/Hyperparameter_optimization#Grid_search)
 - [Hyperband](https://arxiv.org/pdf/1603.06560.pdf)
 - [Bayesian Optimization](https://arxiv.org/pdf/1012.2599.pdf)

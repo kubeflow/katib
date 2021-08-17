@@ -71,6 +71,9 @@ docker push ${REGISTRY}/suggestion-skopt:${TAG}
 echo -e "\nPushing goptuna suggestion...\n"
 docker push ${REGISTRY}/suggestion-goptuna:${TAG}
 
+echo -e "\nPushing optuna suggestion...\n"
+docker push ${REGISTRY}/suggestion-optuna:${TAG}
+
 echo -e "\nPushing ENAS suggestion...\n"
 docker push ${REGISTRY}/suggestion-enas:${TAG}
 

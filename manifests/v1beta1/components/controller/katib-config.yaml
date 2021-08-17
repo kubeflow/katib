@@ -44,6 +44,9 @@ data:
       "sobol": {
         "image": "docker.io/kubeflowkatib/suggestion-goptuna:latest"
       },
+      "multivariate-tpe": {
+        "image": "docker.io/kubeflowkatib/suggestion-optuna:latest"
+      },
       "enas": {
         "image": "docker.io/kubeflowkatib/suggestion-enas:latest",
         "resources": {
