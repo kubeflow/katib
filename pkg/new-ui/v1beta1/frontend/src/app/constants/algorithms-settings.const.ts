@@ -78,6 +78,8 @@ export const TPESettings: AlgorithmSetting[] = [
   },
 ];
 
+export const MultivariateTPESettings: AlgorithmSetting[] = [];
+
 export const CMAESSettings: AlgorithmSetting[] = [
   {
     name: 'random_state',
@@ -249,6 +251,7 @@ export const AlgorithmSettingsMap: { [key: string]: AlgorithmSetting[] } = {
   [AlgorithmsEnum.HYPERBAND]: HyperbandSettings,
   [AlgorithmsEnum.BAYESIAN_OPTIMIZATION]: BayesianOptimizationSettings,
   [AlgorithmsEnum.TPE]: TPESettings,
+  [AlgorithmsEnum.MULTIVARIATE_TPE]: MultivariateTPESettings,
   [AlgorithmsEnum.CMAES]: CMAESSettings,
   [AlgorithmsEnum.SOBOL]: SOBOLSettings,
   [AlgorithmsEnum.ENAS]: ENASSettings,

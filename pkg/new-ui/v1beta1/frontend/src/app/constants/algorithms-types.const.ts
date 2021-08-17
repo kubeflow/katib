@@ -9,6 +9,7 @@ export const AlgorithmNames = {
   [AlgorithmsEnum.HYPERBAND]: 'Hyperband',
   [AlgorithmsEnum.BAYESIAN_OPTIMIZATION]: 'Bayesian Optimization',
   [AlgorithmsEnum.TPE]: 'Tree of Parzen Estimators',
+  [AlgorithmsEnum.MULTIVARIATE_TPE]: 'Multivariate Tree of Parzen Estimators',
   [AlgorithmsEnum.CMAES]: 'Covariance Matrix Adaptation: Evolution Strategy',
   [AlgorithmsEnum.SOBOL]: 'Sobol Quasirandom Sequence',
 };
