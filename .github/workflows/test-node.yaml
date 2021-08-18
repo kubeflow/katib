@@ -20,5 +20,5 @@ jobs:
 
       - name: Run Node test
         run: |
-          npm install --global prettier@2.3.2
+          cd pkg/new-ui/v1beta1/frontend && npm install prettier
           make prettier-check
