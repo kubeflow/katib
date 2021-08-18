@@ -20,5 +20,6 @@ jobs:
 
       - name: Run Node test
         run: |
-          cd pkg/new-ui/v1beta1/frontend && npm install prettier
+          version=$(cd pkg/new-ui/v1beta1/frontend && node -p "require('prettier/package.json').version")
+          npm install --global prettier@${version}
           make prettier-check
