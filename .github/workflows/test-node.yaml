@@ -20,5 +20,5 @@ jobs:
 
       - name: Run Node test
         run: |
-          npm install --global prettier@2.2.0
+          npm install --global prettier@2.3.2
           make prettier-check
