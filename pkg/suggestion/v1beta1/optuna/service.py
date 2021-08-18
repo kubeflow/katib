@@ -69,9 +69,9 @@ class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         if name == "tpe" or name == "multivariate-tpe":
             kwargs = {}
             for k, v in settings.items():
-                if k == "startup_trials":
+                if k == "n_startup_trials":
                     kwargs["n_startup_trials"] = int(v)
-                elif k == "ei_candidates":
+                elif k == "n_ei_candidates":
                     kwargs["n_ei_candidates"] = int(v)
                 elif k == "random_state":
                     kwargs["seed"] = int(v)

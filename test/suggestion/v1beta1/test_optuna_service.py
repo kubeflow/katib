@@ -33,10 +33,10 @@ class TestOptuna:
             servicers, grpc_testing.strict_real_time())
 
     @pytest.mark.parametrize(
-        ["algorithm_name", "algorithm_settings"], 
+        ["algorithm_name", "algorithm_settings"],
         [
-            ["tpe", {"startup_trials": "20", "ei_candidates": "10", "random_state": "71"}], 
-            ["multivariate-tpe", {"startup_trials": "20", "ei_candidates": "10", "random_state": "71"}], 
+            ["tpe", {"n_startup_trials": "20", "n_ei_candidates": "10", "random_state": "71"}],
+            ["multivariate-tpe", {"n_startup_trials": "20", "n_ei_candidates": "10", "random_state": "71"}],
             ["cmaes", {"restart_strategy": "ipop", "sigma": "2", "random_state": "71"}],
             ["random", {"random_state": "71"}],
         ],
@@ -47,7 +47,7 @@ class TestOptuna:
             spec=api_pb2.ExperimentSpec(
                 algorithm=api_pb2.AlgorithmSpec(
                     algorithm_name=algorithm_name,
-                    algorithm_settings = [
+                    algorithm_settings=[
                         api_pb2.AlgorithmSetting(
                             name=name,
                             value=value

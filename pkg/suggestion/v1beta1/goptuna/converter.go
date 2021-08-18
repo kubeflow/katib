@@ -75,13 +75,13 @@ func toGoptunaSampler(algorithm *api_v1_beta1.AlgorithmSpec) (goptuna.Sampler, g
 					return nil, nil, err
 				}
 				opts = append(opts, tpe.SamplerOptionSeed(int64(seed)))
-			} else if s.Name == "startup_trials" {
+			} else if s.Name == "n_startup_trials" {
 				n, err := strconv.Atoi(s.Value)
 				if err != nil {
 					return nil, nil, err
 				}
 				opts = append(opts, tpe.SamplerOptionNumberOfStartupTrials(n))
-			} else if s.Name == "ei_candidates" {
+			} else if s.Name == "n_ei_candidates" {
 				n, err := strconv.Atoi(s.Value)
 				if err != nil {
 					return nil, nil, err
