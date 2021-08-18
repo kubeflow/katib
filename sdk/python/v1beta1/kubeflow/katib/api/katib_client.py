@@ -245,11 +245,13 @@ class KatibClient(object):
                 "Exception when calling CustomObjectsApi->delete_namespaced_custom_object:\
          %s\n" % e)
 
-    def list_experiments(self, namespace=None):
+    def list_experiments(self, namespace=None, in_short=False):
         """List all Katib Experiments.
 
         :param namespace: Experiments namespace.
         If the namespace is None, it takes "default" namespace.
+        :param in_short: List Experiments in summary or not
+        If the in_short is True, it will shows only name and status of each Experiments.
 
         :return: List of Experiment names with the statuses.
         :rtype: list[dict]
@@ -268,12 +270,15 @@ class KatibClient(object):
         try:
             katibexp = thread.get(constants.APISERVER_TIMEOUT)
             result = []
-            for i in katibexp.get("items"):
-                output = {}
-                output["name"] = i.get("metadata", {}).get("name")
-                output["status"] = i.get("status", {}).get(
-                    "conditions", [])[-1].get("type")
-                result.append(output)
+            if in_short:
+                for i in katibexp.get("items"):
+                    output = {}
+                    output["name"] = i.get("metadata", {}).get("name")
+                    output["status"] = i.get("status", {}).get(
+                        "conditions", [])[-1].get("type")
+                    result.append(output)
+            else:
+                result = katibexp.get("items")
         except multiprocessing.TimeoutError:
             raise RuntimeError("Timeout trying to get katib experiment.")
         except client.rest.ApiException as e:
@@ -282,8 +287,8 @@ class KatibClient(object):
           %s\n" % e)
         except Exception as e:
             raise RuntimeError(
-                "There was a problem to get experiments in namespace {1}. Exception: \
-          {2} ".format(namespace, e))
+                "There was a problem to get experiments in namespace {0}. Exception: \
+          {1} ".format(namespace, e))
         return result
 
     def get_experiment_status(self, name, namespace=None):
@@ -317,12 +322,14 @@ class KatibClient(object):
             name, namespace=namespace)
         return experiment_status.lower() == "succeeded"
 
-    def list_trials(self, name=None, namespace=None):
+    def list_trials(self, name=None, namespace=None, in_short=False):
         """List all Experiment's Trials.
 
         :param name: Experiment name.
         :param namespace: Experiments namespace.
         If the namespace is None, it takes "default" namespace.
+        :param in_short: List Trials in summary or not
+        If the in_short is True, it will shows only name and status of each Trials.
 
         :return: List of Trial names with the statuses.
         :rtype: list[dict]
@@ -341,13 +348,16 @@ class KatibClient(object):
         try:
             katibtrial = thread.get(constants.APISERVER_TIMEOUT)
             result = []
-            for i in katibtrial.get("items"):
-                output = {}
-                if i.get("metadata", {}).get("ownerReferences")[0].get("name") == name:
-                    output["name"] = i.get("metadata", {}).get("name")
-                    output["status"] = i.get("status", {}).get(
-                        "conditions", [])[-1].get("type")
-                    result.append(output)
+            if in_short:
+                for i in katibtrial.get("items"):
+                    output = {}
+                    if i.get("metadata", {}).get("ownerReferences")[0].get("name") == name:
+                        output["name"] = i.get("metadata", {}).get("name")
+                        output["status"] = i.get("status", {}).get(
+                            "conditions", [])[-1].get("type")
+                        result.append(output)
+            else:
+                result = katibtrial.get("items")
         except multiprocessing.TimeoutError:
             raise RuntimeError("Timeout trying to getkatib experiment.")
         except client.rest.ApiException as e:
