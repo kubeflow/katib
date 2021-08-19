@@ -61,9 +61,9 @@ export class KWABackendService extends BackendService {
 
     return this.http
       .get(url)
-      .pipe(catchError(error => this.parseError(error))) as Observable<
-      K8sObject
-    >;
+      .pipe(
+        catchError(error => this.parseError(error)),
+      ) as Observable<K8sObject>;
   }
 
   deleteExperiment(name: string, namespace: string): Observable<ExperimentK8s> {
@@ -71,9 +71,9 @@ export class KWABackendService extends BackendService {
 
     return this.http
       .delete(url)
-      .pipe(catchError(error => this.handleError(error))) as Observable<
-      ExperimentK8s
-    >;
+      .pipe(
+        catchError(error => this.handleError(error)),
+      ) as Observable<ExperimentK8s>;
   }
 
   getTrial(name: string, namespace: string): Observable<any> {
