@@ -14,10 +14,11 @@
 
 import multiprocessing
 
-from kubernetes import client, config
-
+from kubeflow.katib import V1beta1Experiment
+from kubeflow.katib import V1beta1Trial
 from kubeflow.katib.constants import constants
 from kubeflow.katib.utils import utils
+from kubernetes import client, config
 
 
 class KatibClient(object):
@@ -245,16 +246,14 @@ class KatibClient(object):
                 "Exception when calling CustomObjectsApi->delete_namespaced_custom_object:\
          %s\n" % e)
 
-    def list_experiments(self, namespace=None, in_short=False):
+    def list_experiments(self, namespace=None):
         """List all Katib Experiments.
 
         :param namespace: Experiments namespace.
         If the namespace is None, it takes "default" namespace.
-        :param in_short: List Experiments in summary or not
-        If the in_short is True, it will shows only name and status of each Experiments.
 
-        :return: List of Experiment names with the statuses.
-        :rtype: list[dict]
+        :return: List of Experiment objects.
+        :rtype: list[V1beta1Experiment]
         """
         if namespace is None:
             namespace = utils.get_default_target_namespace()
@@ -269,16 +268,17 @@ class KatibClient(object):
         katibexp = None
         try:
             katibexp = thread.get(constants.APISERVER_TIMEOUT)
-            result = []
-            if in_short:
-                for i in katibexp.get("items"):
-                    output = {}
-                    output["name"] = i.get("metadata", {}).get("name")
-                    output["status"] = i.get("status", {}).get(
-                        "conditions", [])[-1].get("type")
-                    result.append(output)
-            else:
-                result = katibexp.get("items")
+            result = [
+                V1beta1Experiment(
+                    api_version=item.get("apiVersion"),
+                    kind=item.get("kind"),
+                    metadata=item.get("metadata"),
+                    spec=item.get("spec"),
+                    status=item.get("status")
+                )
+                for item in katibexp.get("items")
+            ]
+
         except multiprocessing.TimeoutError:
             raise RuntimeError("Timeout trying to get katib experiment.")
         except client.rest.ApiException as e:
@@ -322,17 +322,15 @@ class KatibClient(object):
             name, namespace=namespace)
         return experiment_status.lower() == "succeeded"
 
-    def list_trials(self, name=None, namespace=None, in_short=False):
+    def list_trials(self, name=None, namespace=None):
         """List all Experiment's Trials.
 
         :param name: Experiment name.
         :param namespace: Experiments namespace.
         If the namespace is None, it takes "default" namespace.
-        :param in_short: List Trials in summary or not
-        If the in_short is True, it will shows only name and status of each Trials.
 
-        :return: List of Trial names with the statuses.
-        :rtype: list[dict]
+        :return: List of Trial objects
+        :rtype: list[V1beta1Trial]
         """
         if namespace is None:
             namespace = utils.get_default_target_namespace()
@@ -347,17 +345,16 @@ class KatibClient(object):
         katibtrial = None
         try:
             katibtrial = thread.get(constants.APISERVER_TIMEOUT)
-            result = []
-            if in_short:
-                for i in katibtrial.get("items"):
-                    output = {}
-                    if i.get("metadata", {}).get("ownerReferences")[0].get("name") == name:
-                        output["name"] = i.get("metadata", {}).get("name")
-                        output["status"] = i.get("status", {}).get(
-                            "conditions", [])[-1].get("type")
-                        result.append(output)
-            else:
-                result = katibtrial.get("items")
+            result = [
+                V1beta1Trial(
+                    api_version=item.get("apiVersion"),
+                    kind=item.get("kind"),
+                    metadata=item.get("metadata"),
+                    spec=item.get("spec"),
+                    status=item.get("status")
+                )
+                for item in katibtrial.get("items")
+            ]
         except multiprocessing.TimeoutError:
             raise RuntimeError("Timeout trying to getkatib experiment.")
         except client.rest.ApiException as e:
