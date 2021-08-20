@@ -11,7 +11,7 @@
 # Note: To run this example, your Kubernetes cluster should run MPIJob operator.
 # Follow this guide to install MPIJob on your cluster: https://www.kubeflow.org/docs/components/training/mpi/
 
-# Note: You have to install kfp>=1.6.5 SDK and kubeflow-katib>=0.10.1 SDK to run this example.
+# Note: You have to install kfp>=1.1.1 and kubeflow-katib>=0.10.1 SDK to run this example.
 
 import kfp
 import kfp.dsl as dsl
