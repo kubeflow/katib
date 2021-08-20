@@ -50,12 +50,12 @@ Follow these steps before creating Kubeflow Notebook to give the access to Pipel
 
 ## List of Examples
 
-The following Pipelines are deployed from Kubeflow Notebook.
+The following Pipelines are deployed from Kubeflow Notebook:
 
 - [Kubeflow e2e mnist](kubeflow-e2e-mnist.ipynb)
 
 - [Early Stopping](early-stopping.ipynb)
 
-The following Pipelines have to be compiled and uploaded to Kubeflow Pipelines UI.
+The following Pipelines have to be compiled and uploaded to Kubeflow Pipelines UI:
 
 - [MPIJob Horovod](mpi-job-horovod.py)
