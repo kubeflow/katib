@@ -7,7 +7,7 @@ Katib version >= 0.10 and Kubeflow Pipelines >= 1.6 to perform these examples.
 You can find the Katib Component source code for Kubeflow Pipelines
 [here](https://github.com/kubeflow/pipelines/tree/master/components/kubeflow/katib-launcher).
 
-## Multi-user Kubeflow Pipelines setup
+## Multi-user Pipelines Setup
 
 These Pipelines run in multi-user mode and your Kubeflow Notebook must have
 the appropriate `PodDefault` with `pipelines.kubeflow.org` audience.
@@ -50,4 +50,16 @@ Follow these steps before creating Kubeflow Notebook to give the access to Pipel
 
 ## List of Examples
 
-Here is the list.
+The following Pipelines are deployed from Kubeflow Notebook.
+
+- [Kubeflow e2e mnist](kubeflow-e2e-mnist.ipynb)
+
+  In this example you will create e2e Kubeflow Pipeline to perform hyperparameter
+  tuning using Katib, distributive training using
+  [TFJob](https://github.com/kubeflow/tf-operator) and serving using
+  [KFServing](https://github.com/kubeflow/kfserving).
+
+- [Early Stopping](early-stopping.ipynb)
+
+  In this example you will create Kubeflow Pipeline with Katib component to
+  use hyperparameter tuning and
