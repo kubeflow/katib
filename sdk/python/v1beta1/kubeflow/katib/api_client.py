@@ -12,6 +12,8 @@ from __future__ import absolute_import
 
 import atexit
 import datetime
+
+import kubernetes
 from dateutil.parser import parse
 import json
 import mimetypes
@@ -22,6 +24,7 @@ import tempfile
 
 # python 2 and python 3 compatibility library
 import six
+from kubeflow.katib.rest import RESTResponse
 from six.moves.urllib.parse import quote
 
 from kubeflow.katib.configuration import Configuration
@@ -266,6 +269,7 @@ class ApiClient(object):
 
         :return: deserialized object.
         """
+        assert isinstance(response, RESTResponse)
         # handle file downloading
         # save response body into a tmp file and return the instance
         if response_type == "file":
@@ -278,6 +282,18 @@ class ApiClient(object):
             data = response.data
 
         return self.__deserialize(data, response_type)
+
+    def deserialize_data(self, data, data_type):
+        """Deserializes data into an object.
+
+        :param data: object to be deserialized.
+        :param data_type: class literal for
+            deserialized object, or string of class name.
+
+        :return: deserialized object.
+        """
+        assert isinstance(data, (dict, list, str))
+        return self.__deserialize(data, data_type)
 
     def __deserialize(self, data, klass):
         """Deserializes dict, list, str into an object.
@@ -304,8 +320,12 @@ class ApiClient(object):
             # convert str to class
             if klass in self.NATIVE_TYPES_MAPPING:
                 klass = self.NATIVE_TYPES_MAPPING[klass]
-            else:
+            elif klass in dir(kubeflow.katib.models):
                 klass = getattr(kubeflow.katib.models, klass)
+            elif klass in dir(kubernetes.client.models):
+                klass = getattr(kubernetes.client.models, klass)
+            else:
+                raise ValueError(f"type: {klass} is not supported to deserialized")
 
         if klass in self.PRIMITIVE_TYPES:
             return self.__deserialize_primitive(data, klass)
