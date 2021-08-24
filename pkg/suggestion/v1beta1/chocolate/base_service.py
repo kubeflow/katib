@@ -103,12 +103,12 @@ class BaseChocolateService(object):
             raise Exception(
                 '"Failed to create Chocolate optimizer for the algorithm: {}'.format(algorithm_name))
 
-    def getSuggestions(self, trials, request_number):
+    def getSuggestions(self, trials, request_number, total_request_number):
         """
         Get the new suggested trials with chocolate algorithm.
         """
         logger.info("-" * 100 + "\n")
-        logger.info("New GetSuggestions call\n")
+        logger.info("New GetSuggestions call with total requested {} and currently requesting {} \n".format(total_request_number, request_number))
         for _, trial in enumerate(trials):
             if trial.name not in self.recorded_trials_names:
                 loss_for_choco = float(trial.target_metric.value)
@@ -157,9 +157,25 @@ class BaseChocolateService(object):
                     logger.info("New record in sqlite DB is updated")
                     logger.info("{}\n".format(
                         self.created_trials[new_trial_loss_idx]))
+        # Assuming that created_trials are already populated
+        # TODO: Handle Restart of algorithm pod
+        logger.info("{} Trials created in DB".format(len(self.created_trials)))
+        if total_request_number != len(self.created_trials) + request_number:
+            logger.info("Mismatch in generated trials with k8s suggestions trials")
+        new_actual_requested_no = total_request_number - len(self.created_trials)
+        prev_generated_no = request_number - new_actual_requested_no
+        logger.info("In this call, New {} Trials will be generated, {} Trials will be reused from previously generated".format(new_actual_requested_no, prev_generated_no))
 
         list_of_assignments = []
-        for i in range(request_number):
+        if prev_generated_no > 0:
+            for params in self.created_trials[-prev_generated_no:]:
+                if DB_FIELD_TRIAL_NAME in params:
+                    logger.error("Trial already updated in selected assignment {}".format(params))
+                new_assignment = BaseChocolateService.convert(
+                        self.search_space, params)
+                list_of_assignments.append(new_assignment)
+
+        for i in range(new_actual_requested_no):
             try:
                 token, chocolate_params = self.chocolate_optimizer.next()
                 new_assignment = BaseChocolateService.convert(
@@ -182,7 +198,7 @@ class BaseChocolateService(object):
 
         if len(list_of_assignments) > 0:
             logger.info(
-                "GetSuggestions returns {} new Trials\n\n".format(request_number))
+                "GetSuggestions returns {} Trials from requested {} Trials\n\n".format(len(list_of_assignments),request_number))
 
         return list_of_assignments
 
