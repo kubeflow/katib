@@ -169,6 +169,7 @@ class TestChocolate(unittest.TestCase):
             experiment=experiment,
             trials=trials,
             request_number=2,
+            total_request_number=2,
         )
 
         get_suggestion = self.test_server.invoke_unary_unary(
