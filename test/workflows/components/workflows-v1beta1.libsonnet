@@ -341,6 +341,8 @@
                     name: "run-multivariate-tpe-e2e-tests",
                     template: "run-multivariate-tpe-e2e-tests",
                   },
+                ],
+                [
                   {
                     name: "run-enas-e2e-tests",
                     template: "run-enas-e2e-tests",
