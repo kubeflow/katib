@@ -91,7 +91,7 @@ Follow these steps to cut a new Katib release:
      `Katib official release vX.Y.Z`
 
 1. If the new branch was created, submit a PR to allow tests on the `release-X.Y` branch
-   (e.g. [`#965`](https://github.com/kubeflow/testing/pull/965))
+   (e.g. [`#965`](https://github.com/kubeflow/testing/pull/965)).
 
 1. Submit a PR to update the SDK version on the `master` branch to the latest release.
    (e.g. [`0.12.0rc0`](TODO: ADD LINK))
@@ -102,14 +102,16 @@ Follow these steps to cut a new Katib release:
    python docs/release/changelog.py --token=<github-token> --range=<previous-release>..<current-release>
    ```
 
-   If you are creating the **first pre-release** or the **minor** Katib release (`X.Y`), your
-   `previous-release` is equal to the last release on `release-X.Y-1` branch.
+   If you are creating the **first minor pre-release** or the **minor** release (`X.Y`), your
+   `previous-release` is equal to the latest release on the `release-X.Y-1` branch.
+
    For example: `--range=v0.11.1..v0.12.0`.
 
-   Otherwise, your `previous-release` is equal to the last release on `release-X.Y` branch.
+   Otherwise, your `previous-release` is equal to the latest release on the `release-X.Y` branch.
+
    For example: `--range=v0.12.0-rc.0..v0.12.0-rc.1`
 
    Group PRs in the Changelog into Features, Bug fixes, Documentation, etc.
-   Check example: [v0.11.0](https://github.com/kubeflow/katib/releases/tag/v0.11.0)
+   Check this example: [v0.11.0](https://github.com/kubeflow/katib/releases/tag/v0.11.0)
 
 1. If it is not a pre-release, draft [a new GitHub Release](https://github.com/kubeflow/katib/releases/new).
