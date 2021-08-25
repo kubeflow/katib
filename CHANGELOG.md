@@ -1,5 +1,49 @@
 # Changelog
 
+## [v0.10.0](https://github.com/kubeflow/katib/tree/v0.10.0) (2020-11-07)
+
+## New Features
+
+### Core Features
+
+- The new Trial template design ([#1208](https://github.com/kubeflow/katib/issues/1208) by [@andreyvelich](https://github.com/andreyvelich))
+- Support custom Kubernetes CRD in the Trial template ([#1214](https://github.com/kubeflow/katib/issues/1214) by [@andreyvelich](https://github.com/andreyvelich))
+  - Add example for the [Tekton `Pipeline`](https://github.com/tektoncd/pipeline) ([#1339](https://github.com/kubeflow/katib/pull/1339) by [@andreyvelich](https://github.com/andreyvelich))
+  - Add example for the [Kubeflow `MPIJob`](https://github.com/kubeflow/mpi-operator) ([#1342](https://github.com/kubeflow/katib/pull/1342) by [@andreyvelich](https://github.com/andreyvelich))
+- Support early stopping with the Median Stopping Rule ([#1344](https://github.com/kubeflow/katib/pull/1344) by [@andreyvelich](https://github.com/andreyvelich))
+- Resume Experiment from the volume ([#1275](https://github.com/kubeflow/katib/pull/1275) by [@andreyvelich](https://github.com/andreyvelich))
+  - Support volume settings in the Katib config ([#1291](https://github.com/kubeflow/katib/pull/1291) by [@andreyvelich](https://github.com/andreyvelich))
+- Extract the Experiment metrics in multiple ways ([#1140](https://github.com/kubeflow/katib/pull/1140) by [@sperlingxx](https://github.com/sperlingxx))
+- Update the Python SDK for the v1beta1 version ([#1252](https://github.com/kubeflow/katib/pull/1252) by [@sperlingxx](https://github.com/sperlingxx))
+
+### UI Features and Enhancements
+
+- Show the Trial parameters on the submit Experiment page ([#1224](https://github.com/kubeflow/katib/pull/1224) by [@andreyvelich](https://github.com/andreyvelich))
+- Enable to set the Trial template YAML from the submit Experiment page ([#1363](https://github.com/kubeflow/katib/pull/1363) by [@andreyvelich](https://github.com/andreyvelich))
+- Optimise the Katib UI image ([#1232](https://github.com/kubeflow/katib/pull/1232) by [@andreyvelich](https://github.com/andreyvelich))
+- Enable sorting in the Trial list table ([#1251](https://github.com/kubeflow/katib/pull/1251) by [@andreyvelich](https://github.com/andreyvelich))
+- Add pages to the Trial list table ([#1262](https://github.com/kubeflow/katib/pull/1262) by [@andreyvelich](https://github.com/andreyvelich))
+- Use the V4 version for the Material UI ([#1254](https://github.com/kubeflow/katib/pull/1254) by [@andreyvelich](https://github.com/andreyvelich))
+- Automatically delete an empty ConfigMap with Trial templates ([#1260](https://github.com/kubeflow/katib/pull/1260) by [@andreyvelich](https://github.com/andreyvelich))
+- Create a ConfigMap with Trial templates ([#1265](https://github.com/kubeflow/katib/pull/1265) by [@andreyvelich](https://github.com/andreyvelich))
+- Support metrics strategies on the submit Experiment page ([#1364](https://github.com/kubeflow/katib/pull/1364) by [@andreyvelich](https://github.com/andreyvelich))
+- Add the resume policy to the submit Experiment page ([#1362](https://github.com/kubeflow/katib/pull/1362) by [@andreyvelich](https://github.com/andreyvelich))
+- Enable to create an early stopping Experiment from the submit Experiment page ([#1373](https://github.com/kubeflow/katib/pull/1373) by [@andreyvelich](https://github.com/andreyvelich))
+
+## Bug fixes
+
+- Check the Trials count before deleting it ([#1223](https://github.com/kubeflow/katib/pull/1223) by [@gaocegege](https://github.com/gaocegege))
+- Check that Trials are deleted ([#1288](https://github.com/kubeflow/katib/pull/1288) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix the out of range error in the Hyperopt suggestion ([#1315](https://github.com/kubeflow/katib/pull/1315) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix the pod ownership to inject the metrics collector ([#1303](https://github.com/kubeflow/katib/pull/1303) by [@andreyvelich](https://github.com/andreyvelich))
+
+## Misc
+
+- Switch the test infra to the AWS ([#1356](https://github.com/kubeflow/katib/pull/1356) by [@andreyvelich](https://github.com/andreyvelich))
+- Use the `docker.io/kubeflowkatib` registry to release images ([#1372](https://github.com/kubeflow/katib/pull/1372) by [@andreyvelich](https://github.com/andreyvelich))
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.9.0...v0.10.0)
+
 ## [v0.9.0](https://github.com/kubeflow/katib/tree/v0.9.0) (2020-06-10)
 
 ## Features and Bug Fixes
