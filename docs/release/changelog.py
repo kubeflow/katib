@@ -23,7 +23,7 @@ comparison = github_repo.compare(previous_release, current_release)
 commits = comparison.commits
 
 # The latest commit contains the release date.
-release_date = str(commits[-1].author.created_at).split(" ")[0]
+release_date = str(commits[-1].commit.author.date).split(" ")[0]
 release_url = "https://github.com/{}/tree/{}".format(REPO_NAME, current_release)
 
 # Get all PRs in reverse chronological order from the commits.
@@ -31,7 +31,7 @@ pr_list = ""
 for commit in reversed(commits):
     # Only add commits with PRs.
     for pr in commit.get_pulls():
-        new_pr = "- {title} ([{id}]({pr_link}) by [@{user_id}]({user_url}))\n".format(
+        new_pr = "- {title} ([#{id}]({pr_link}) by [@{user_id}]({user_url}))\n".format(
             title=pr.title,
             id=pr.number,
             pr_link=pr.html_url,
@@ -58,3 +58,7 @@ with open(CHANGELOG_FILE, "r+") as f:
     f.seek(0)
     lines = lines[0:0] + change_log + lines[1:]
     f.writelines(lines)
+
+print("Changelog has been updated\n")
+print("Group PRs in the Changelog into Features, Bug fixes, Documentation, etc.\n")
+print("After that, submit a PR with the updated Changelog")

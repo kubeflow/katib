@@ -114,4 +114,6 @@ Follow these steps to cut a new Katib release:
    Group PRs in the Changelog into Features, Bug fixes, Documentation, etc.
    Check this example: [v0.11.0](https://github.com/kubeflow/katib/releases/tag/v0.11.0)
 
+   Finally, submit a PR with updated Changelog.
+
 1. If it is not a pre-release, draft [a new GitHub Release](https://github.com/kubeflow/katib/releases/new).
