@@ -2,6 +2,7 @@ from github import Github
 import argparse
 
 REPO_NAME = "kubeflow/katib"
+CHANGELOG_FILE = "CHANGELOG.md"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--token", type=str, help="GitHub Access Token")
@@ -10,25 +11,50 @@ args = parser.parse_args()
 
 if args.token is None:
     raise Exception("GitHub Token must be set")
-
 try:
-    changes_from = args.range.split("..")[0]
-    change_to = args.range.split("..")[1]
+    previous_release = args.range.split("..")[0]
+    current_release = args.range.split("..")[1]
 except Exception:
     raise Exception("Release range must be set in this format: v0.11.0..v0.12.0")
 
-
+# Get list of commits from the range.
 github_repo = Github(args.token).get_repo(REPO_NAME)
-commits = github_repo.compare(changes_from, change_to).commits
+comparison = github_repo.compare(previous_release, current_release)
+commits = comparison.commits
 
-# for commit in commits:
-#     # Only add commits with PRs.
-#     for pr in commit.get_pulls():
-#         print(pr.title)
-#         print(pr.id)
-#         print(pr.html_url)
+# The latest commit contains the release date.
+release_date = str(commits[-1].author.created_at).split(" ")[0]
+release_url = "https://github.com/{}/tree/{}".format(REPO_NAME, current_release)
 
+# Get all PRs in reverse chronological order from the commits.
+pr_list = ""
+for commit in reversed(commits):
+    # Only add commits with PRs.
+    for pr in commit.get_pulls():
+        new_pr = "- {title} ([{id}]({pr_link}) by [@{user_id}]({user_url}))\n".format(
+            title=pr.title,
+            id=pr.number,
+            pr_link=pr.html_url,
+            user_id=pr.user.login,
+            user_url=pr.user.html_url
+        )
+        pr_list += new_pr
 
-f = open("./../CHANGELOG.md", "a")
-f.write("Data")
-f.close()
+change_log = [
+    "# Changelog"
+    "\n\n",
+    "## [{}]({}) ({})".format(current_release, release_url, release_date),
+    "\n\n",
+    "## TODO: Group PRs into Features, Bug fixes, Documentation. " +
+    "Check example: [v0.11.0](https://github.com/kubeflow/katib/releases/tag/v0.11.0)",
+    "\n\n",
+    pr_list,
+    "\n"
+    "[Full Changelog]({})\n".format(comparison.html_url)]
+
+# Update Changelog with the new changes.
+with open(CHANGELOG_FILE, "r+") as f:
+    lines = f.readlines()
+    f.seek(0)
+    lines = lines[0:0] + change_log + lines[1:]
+    f.writelines(lines)
