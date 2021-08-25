@@ -104,16 +104,14 @@ Follow these steps to cut a new Katib release:
 
    If you are creating the **first minor pre-release** or the **minor** release (`X.Y`), your
    `previous-release` is equal to the latest release on the `release-X.Y-1` branch.
-
    For example: `--range=v0.11.1..v0.12.0`
 
    Otherwise, your `previous-release` is equal to the latest release on the `release-X.Y` branch.
-
    For example: `--range=v0.12.0-rc.0..v0.12.0-rc.1`
 
    Group PRs in the Changelog into Features, Bug fixes, Documentation, etc.
    Check this example: [v0.11.0](https://github.com/kubeflow/katib/releases/tag/v0.11.0)
 
-   Finally, submit a PR with updated Changelog.
+   Finally, submit a PR with the updated Changelog.
 
 1. If it is not a pre-release, draft [a new GitHub Release](https://github.com/kubeflow/katib/releases/new).
