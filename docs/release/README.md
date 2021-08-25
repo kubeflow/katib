@@ -94,7 +94,7 @@ Follow these steps to cut a new Katib release:
    (e.g. [`#965`](https://github.com/kubeflow/testing/pull/965)).
 
 1. Submit a PR to update the SDK version on the `master` branch to the latest release.
-   (e.g. [`0.12.0rc0`](TODO: ADD LINK))
+   (e.g. [`#1640`](https://github.com/kubeflow/katib/pull/1640)).
 
 1. Update the Changelog by running:
 
