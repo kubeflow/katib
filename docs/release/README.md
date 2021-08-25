@@ -93,6 +93,19 @@ Follow these steps to cut a new Katib release:
 1. Submit a PR to update SDK version on the `master` branch to the latest release.
    (e.g. [`0.12.0rc0`](TODO: ADD LINK))
 
-1.
+1. Update the [Changelog](./../../CHANGELOG.md) by running:
+
+   ```
+   python docs/release/changelog.py --token=<github-token> --range=<previous-release>..<current-release>
+   ```
+
+   If you are creating the **first** pre-release or the **minor** Katib release (`X.Y`), your
+   `previous-release` is equal to `vX.Y-1.Z`.
+
+   Otherwise, your `previous-release` is equal to `vX.Y.Z-1` or `vX.Y.Z-rc.N-1`.
+
+   Group PRs in Changelog into Features, Bug fixes, Documentation, etc.
+   Check example: [v0.11.0](https://github.com/kubeflow/katib/releases/tag/v0.11.0)
+
 1. If it is not a pre-release, draft [a new GitHub Release](https://github.com/kubeflow/katib/releases/new)
    using (e.g. [Katib v0.11.0](https://github.com/kubeflow/katib/releases/tag/v0.11.0)).

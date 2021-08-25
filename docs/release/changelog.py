@@ -45,7 +45,7 @@ change_log = [
     "\n\n",
     "## [{}]({}) ({})".format(current_release, release_url, release_date),
     "\n\n",
-    "## TODO: Group PRs into Features, Bug fixes, Documentation. " +
+    "## TODO: Group PRs into Features, Bug fixes, Documentation, etc. " +
     "Check example: [v0.11.0](https://github.com/kubeflow/katib/releases/tag/v0.11.0)",
     "\n\n",
     pr_list,
