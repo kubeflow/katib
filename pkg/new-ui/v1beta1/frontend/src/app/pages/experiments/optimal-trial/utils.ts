@@ -22,9 +22,8 @@ export function parseOptimalMetric(exp: Experiment): KeyValuePair[] {
       : numberToExponential(Number(metric.latest), 6);
 
     const name =
-      lowerCase(metric.name)
-        .charAt(0)
-        .toUpperCase() + lowerCase(metric.name).slice(1);
+      lowerCase(metric.name).charAt(0).toUpperCase() +
+      lowerCase(metric.name).slice(1);
 
     return { name, value };
   });
@@ -45,9 +44,8 @@ export function parseOptimalParameters(exp: Experiment): KeyValuePair[] {
       : numberToExponential(+param.value, 6);
 
     const name =
-      lowerCase(param.name)
-        .charAt(0)
-        .toUpperCase() + lowerCase(param.name).slice(1);
+      lowerCase(param.name).charAt(0).toUpperCase() +
+      lowerCase(param.name).slice(1);
 
     return { name, value };
   });

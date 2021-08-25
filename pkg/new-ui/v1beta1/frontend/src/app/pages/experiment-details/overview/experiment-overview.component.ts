@@ -77,9 +77,10 @@ export class ExperimentOverviewComponent implements OnChanges {
       : 0;
   }
 
-  private generateExperimentStatus(
-    experiment: ExperimentK8s,
-  ): { status: string; statusIcon: string } {
+  private generateExperimentStatus(experiment: ExperimentK8s): {
+    status: string;
+    statusIcon: string;
+  } {
     const succeededCondition = getCondition(experiment, StatusEnum.SUCCEEDED);
 
     if (succeededCondition && succeededCondition.status === 'True') {
@@ -123,14 +124,15 @@ export class ExperimentOverviewComponent implements OnChanges {
       return;
     }
 
-    const parameters = experiment.status.currentOptimalTrial.parameterAssignments.map(
-      param =>
-        `${param.name}: ${
-          !isNaN(+param.value)
-            ? numberToExponential(+param.value, 6)
-            : param.value
-        }`,
-    );
+    const parameters =
+      experiment.status.currentOptimalTrial.parameterAssignments.map(
+        param =>
+          `${param.name}: ${
+            !isNaN(+param.value)
+              ? numberToExponential(+param.value, 6)
+              : param.value
+          }`,
+      );
 
     for (const c of parameters) {
       const chip: ChipDescriptor = { value: c, color: 'primary' };
@@ -146,14 +148,15 @@ export class ExperimentOverviewComponent implements OnChanges {
       return [];
     }
 
-    const metrics = experiment.status.currentOptimalTrial.observation.metrics.map(
-      metric =>
-        `${metric.name}:  ${
-          !isNaN(+metric.latest)
-            ? numberToExponential(+metric.latest, 6)
-            : metric.latest
-        }`,
-    );
+    const metrics =
+      experiment.status.currentOptimalTrial.observation.metrics.map(
+        metric =>
+          `${metric.name}:  ${
+            !isNaN(+metric.latest)
+              ? numberToExponential(+metric.latest, 6)
+              : metric.latest
+          }`,
+      );
 
     return metrics.map(m => {
       return { value: m, color: 'primary', tooltip: 'Latest value' };
