@@ -2,8 +2,6 @@
 
 ## [0.2](https://github.com/kubeflow/katib/tree/0.2) (2018-08-20)
 
-## TODO: Group PRs into Features, Bug fixes, Documentation, etc. For example: [v0.11.0](https://github.com/kubeflow/katib/releases/tag/v0.11.0)
-
 ## Features
 
 - pin mxnet/python image version ([#139](https://github.com/kubeflow/katib/pull/139) by [@mayankjuneja](https://github.com/mayankjuneja))
