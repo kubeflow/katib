@@ -5,12 +5,12 @@
 ## Bug fixes
 
 - Fix Katib manifest for Kubeflow 1.3 ([#1503](https://github.com/kubeflow/katib/pull/1503) by [@yanniszark](https://github.com/yanniszark))
-- Fix Katib release script (https://github.com/kubeflow/katib/pull/1510 by [@andreyvelich](https://github.com/andreyvelich))
+- Fix Katib release script ([#1510](https://github.com/kubeflow/katib/pull/1510) by [@andreyvelich](https://github.com/andreyvelich))
 
 ## Enhancements
 
-- Remove Application CR (https://github.com/kubeflow/katib/pull/1509 by [@yanniszark](https://github.com/yanniszark))
-- Modify Katib manifest to support newer Kustomize version (https://github.com/kubeflow/katib/pull/1515 by [@DavidSpek](https://github.com/DavidSpek))
+- Remove Application CR ([#1509](https://github.com/kubeflow/katib/pull/1509) by [@yanniszark](https://github.com/yanniszark))
+- Modify Katib manifest to support newer Kustomize version ([#1515](https://github.com/kubeflow/katib/pull/1515) by [@DavidSpek](https://github.com/DavidSpek))
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.11.0...v0.11.1)
 
