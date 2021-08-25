@@ -1,5 +1,39 @@
 # Changelog
 
+## [v0.10.1](https://github.com/kubeflow/katib/tree/v0.10.1) (2021-03-02)
+
+## Features and Bug Fixes
+
+- add adopter ([#1451](https://github.com/kubeflow/katib/pull/1451) by [@Planck0591](https://github.com/Planck0591))
+- Add katib controller flags to developers guide ([#1449](https://github.com/kubeflow/katib/pull/1449) by [@annajung](https://github.com/annajung))
+- Enhance katib client by adding get_success_trial_details() ([#1442](https://github.com/kubeflow/katib/pull/1442) by [@Adarsh2910](https://github.com/Adarsh2910))
+- Add Katib presentations and community information ([#1446](https://github.com/kubeflow/katib/pull/1446) by [@andreyvelich](https://github.com/andreyvelich))
+- Verify nil objective in Experiment defaults ([#1445](https://github.com/kubeflow/katib/pull/1445) by [@andreyvelich](https://github.com/andreyvelich))
+- Migrate to Go modules ([#1438](https://github.com/kubeflow/katib/pull/1438) by [@andreyvelich](https://github.com/andreyvelich))
+- Change roles to clusterroles for operators ([#1426](https://github.com/kubeflow/katib/pull/1426) by [@DomFleischmann](https://github.com/DomFleischmann))
+- Migrate katib to new test-infra ([#1423](https://github.com/kubeflow/katib/pull/1423) by [@PatrickXYS](https://github.com/PatrickXYS))
+- Add SVG logo traced from bitmap logo ([#1414](https://github.com/kubeflow/katib/pull/1414) by [@knkski](https://github.com/knkski))
+- Invalid example url ([#1417](https://github.com/kubeflow/katib/pull/1417) by [@zuston](https://github.com/zuston))
+- Fix SDK examples for 0.10 version ([#1402](https://github.com/kubeflow/katib/pull/1402) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Github Actions CI for charm operators ([#1407](https://github.com/kubeflow/katib/pull/1407) by [@knkski](https://github.com/knkski))
+- Add Juju install commands to operators README ([#1411](https://github.com/kubeflow/katib/pull/1411) by [@RFMVasconcelos](https://github.com/RFMVasconcelos))
+- Fix indentation in the OWNERS file ([#1408](https://github.com/kubeflow/katib/pull/1408) by [@andreyvelich](https://github.com/andreyvelich))
+- Bump Prettier to 2.2.0 for the Katib UI ([#1409](https://github.com/kubeflow/katib/pull/1409) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Katib Bundle for Juju ([#1403](https://github.com/kubeflow/katib/pull/1403) by [@knkski](https://github.com/knkski))
+- Remove duecredit pkg from the Suggestions ([#1406](https://github.com/kubeflow/katib/pull/1406) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix Early Stopped Trials in Goptuna Suggestion ([#1404](https://github.com/kubeflow/katib/pull/1404) by [@andreyvelich](https://github.com/andreyvelich))
+- Remove v1alpha3 version ([#1396](https://github.com/kubeflow/katib/pull/1396) by [@andreyvelich](https://github.com/andreyvelich))
+- Update docs for Katib 0.10 ([#1392](https://github.com/kubeflow/katib/pull/1392) by [@andreyvelich](https://github.com/andreyvelich))
+- Adding to ADOPTERS.md ([#1401](https://github.com/kubeflow/katib/pull/1401) by [@RFMVasconcelos](https://github.com/RFMVasconcelos))
+- Feature/waitallprocesses config ([#1394](https://github.com/kubeflow/katib/pull/1394) by [@robbertvdg](https://github.com/robbertvdg))
+- Add recreate strategy to MySQL deployment ([#1393](https://github.com/kubeflow/katib/pull/1393) by [@andreyvelich](https://github.com/andreyvelich))
+- Move Adopters file ([#1391](https://github.com/kubeflow/katib/pull/1391) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Stale config to close inactivity issues ([#1390](https://github.com/kubeflow/katib/pull/1390) by [@andreyvelich](https://github.com/andreyvelich))
+- Remove new Trial kind doc ([#1388](https://github.com/kubeflow/katib/pull/1388) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix compare step for the early stopping ([#1386](https://github.com/kubeflow/katib/pull/1386) by [@andreyvelich](https://github.com/andreyvelich))
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.10.0...v0.10.1)
+
 ## [v0.10.0](https://github.com/kubeflow/katib/tree/v0.10.0) (2020-11-07)
 
 ## New Features
