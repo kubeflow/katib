@@ -105,7 +105,7 @@ Follow these steps to cut a new Katib release:
    If you are creating the **first minor pre-release** or the **minor** release (`X.Y`), your
    `previous-release` is equal to the latest release on the `release-X.Y-1` branch.
 
-   For example: `--range=v0.11.1..v0.12.0`.
+   For example: `--range=v0.11.1..v0.12.0`
 
    Otherwise, your `previous-release` is equal to the latest release on the `release-X.Y` branch.
 
