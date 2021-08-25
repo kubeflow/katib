@@ -28,9 +28,15 @@ release_url = "https://github.com/{}/tree/{}".format(REPO_NAME, current_release)
 
 # Get all PRs in reverse chronological order from the commits.
 pr_list = ""
+pr_set = set()
 for commit in reversed(commits):
     # Only add commits with PRs.
     for pr in commit.get_pulls():
+        # Each PR is added only one time to the list.
+        if pr.number in pr_set:
+            continue
+        pr_set.add(pr.number)
+
         new_pr = "- {title} ([#{id}]({pr_link}) by [@{user_id}]({user_url}))\n".format(
             title=pr.title,
             id=pr.number,
