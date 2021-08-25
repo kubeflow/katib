@@ -1,59 +1,73 @@
 # Changelog
 
+## [v0.11.1](https://github.com/kubeflow/katib/tree/v0.11.1) (2021-06-09)
+
+## Bug fixes
+
+- Fix Katib manifest for Kubeflow 1.3 ([#1503](https://github.com/kubeflow/katib/pull/1503) by [@yanniszark](https://github.com/yanniszark))
+- Fix Katib release script (https://github.com/kubeflow/katib/pull/1510 by [@andreyvelich](https://github.com/andreyvelich))
+
+## Enhancements
+
+- Remove Application CR (https://github.com/kubeflow/katib/pull/1509 by [@yanniszark](https://github.com/yanniszark))
+- Modify Katib manifest to support newer Kustomize version (https://github.com/kubeflow/katib/pull/1515 by [@DavidSpek](https://github.com/DavidSpek))
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.11.0...v0.11.1)
+
 ## [v0.11.0](https://github.com/kubeflow/katib/tree/v0.11.0) (2021-03-22)
 
 ## New Features
 
 ### Core Features
 
-- Disable dynamic Webhook creation (https://github.com/kubeflow/katib/pull/1450 by [@andreyvelich](https://github.com/andreyvelich))
-- Add the `waitAllProcesses` flag to the Katib config (https://github.com/kubeflow/katib/pull/1394 by [@robbertvdg](https://github.com/robbertvdg))
-- Migrate Katib to Go modules (https://github.com/kubeflow/katib/pull/1438 by [@andreyvelich](https://github.com/andreyvelich))
-- Update Katib SDK with the `get_success_trial_details` API (https://github.com/kubeflow/katib/pull/1442 by [@Adarsh2910](https://github.com/Adarsh2910))
-- Add release process script (https://github.com/kubeflow/katib/pull/1473 by [@andreyvelich](https://github.com/andreyvelich))
-- Refactor the Katib installation using Kustomize (https://github.com/kubeflow/katib/pull/1464 by [@andreyvelich](https://github.com/andreyvelich))
+- Disable dynamic Webhook creation ([#1450](https://github.com/kubeflow/katib/pull/1450) by [@andreyvelich](https://github.com/andreyvelich))
+- Add the `waitAllProcesses` flag to the Katib config ([#1394](https://github.com/kubeflow/katib/pull/1394) by [@robbertvdg](https://github.com/robbertvdg))
+- Migrate Katib to Go modules ([#1438](https://github.com/kubeflow/katib/pull/1438) by [@andreyvelich](https://github.com/andreyvelich))
+- Update Katib SDK with the `get_success_trial_details` API ([#1442](https://github.com/kubeflow/katib/pull/1442) by [@Adarsh2910](https://github.com/Adarsh2910))
+- Add release process script ([#1473](https://github.com/kubeflow/katib/pull/1473) by [@andreyvelich](https://github.com/andreyvelich))
+- Refactor the Katib installation using Kustomize ([#1464](https://github.com/kubeflow/katib/pull/1464) by [@andreyvelich](https://github.com/andreyvelich))
 
 ### UI Features and Enhancements
 
-- First step for the Katib new UI implementation (https://github.com/kubeflow/katib/pull/1427 by [@kimwnasptd](https://github.com/kimwnasptd))
-- Add missing fields to the Katib new UI (https://github.com/kubeflow/katib/pull/1463 by [@kimwnasptd](https://github.com/kimwnasptd))
-- Add instructions to install the new Katib UI (https://github.com/kubeflow/katib/pull/1476 by [@kimwnasptd](https://github.com/kimwnasptd))
+- First step for the Katib new UI implementation ([#1427](https://github.com/kubeflow/katib/pull/1427) by [@kimwnasptd](https://github.com/kimwnasptd))
+- Add missing fields to the Katib new UI ([#1463](https://github.com/kubeflow/katib/pull/1463) by [@kimwnasptd](https://github.com/kimwnasptd))
+- Add instructions to install the new Katib UI ([#1476](https://github.com/kubeflow/katib/pull/1476) by [@kimwnasptd](https://github.com/kimwnasptd))
 
 ### Katib Juju operator
 
-- Add Juju operator support for Katib (https://github.com/kubeflow/katib/pull/1403 by [@knkski](https://github.com/knkski))
-- Add GitHub Actions for the Juju operator (https://github.com/kubeflow/katib/pull/1407 by [@knkski](https://github.com/knkski))
-- Add install docs for the Juju operator (https://github.com/kubeflow/katib/pull/1411 by [@RFMVasconcelos](https://github.com/RFMVasconcelos))
-- Modify ClusterRoles for the Juju operator (https://github.com/kubeflow/katib/pull/1426 by [@DomFleischmann](https://github.com/DomFleischmann))
-- Update the Juju operator with the new Katib Webhooks (https://github.com/kubeflow/katib/pull/1465 by [@knkski](https://github.com/knkski))
+- Add Juju operator support for Katib ([#1403](https://github.com/kubeflow/katib/pull/1403) by [@knkski](https://github.com/knkski))
+- Add GitHub Actions for the Juju operator ([#1407](https://github.com/kubeflow/katib/pull/1407) by [@knkski](https://github.com/knkski))
+- Add install docs for the Juju operator ([#1411](https://github.com/kubeflow/katib/pull/1411) by [@RFMVasconcelos](https://github.com/RFMVasconcelos))
+- Modify ClusterRoles for the Juju operator ([#1426](https://github.com/kubeflow/katib/pull/1426) by [@DomFleischmann](https://github.com/DomFleischmann))
+- Update the Juju operator with the new Katib Webhooks ([#1465](https://github.com/kubeflow/katib/pull/1465) by [@knkski](https://github.com/knkski))
 
 ## Bug fixes
 
-- Fix compare step for Early Stopping (https://github.com/kubeflow/katib/pull/1386 by [@andreyvelich](https://github.com/andreyvelich))
-- Fix Early Stopping in the Goptuna Suggestion (https://github.com/kubeflow/katib/pull/1404 by [@andreyvelich](https://github.com/andreyvelich))
-- Fix SDK examples to work with the Katib 0.10 (https://github.com/kubeflow/katib/pull/1402 by [@andreyvelich](https://github.com/andreyvelich))
-- Fix links in the TFEvent Metrics Collector (https://github.com/kubeflow/katib/pull/1417 by [@zuston](https://github.com/zuston))
-- Fix the gRPC build script (https://github.com/kubeflow/katib/pull/1492 by [@andreyvelich](https://github.com/andreyvelich))
+- Fix compare step for Early Stopping ([#1386](https://github.com/kubeflow/katib/pull/1386) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix Early Stopping in the Goptuna Suggestion ([#1404](https://github.com/kubeflow/katib/pull/1404) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix SDK examples to work with the Katib 0.10 ([#1402](https://github.com/kubeflow/katib/pull/1402) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix links in the TFEvent Metrics Collector ([#1417](https://github.com/kubeflow/katib/pull/1417) by [@zuston](https://github.com/zuston))
+- Fix the gRPC build script ([#1492](https://github.com/kubeflow/katib/pull/1492) by [@andreyvelich](https://github.com/andreyvelich))
 
 ## Documentation
 
-- Modify docs for the Katib 0.10 (https://github.com/kubeflow/katib/pull/1392 by [@andreyvelich](https://github.com/andreyvelich))
-- Add Katib presentation list (https://github.com/kubeflow/katib/pull/1446 by [@andreyvelich](https://github.com/andreyvelich))
-- Add Canonical to the Katib Adopters (https://github.com/kubeflow/katib/pull/1401 by [@RFMVasconcelos](https://github.com/RFMVasconcelos))
-- Update developer guide with the Katib controller flags (https://github.com/kubeflow/katib/pull/1449 by [@annajung](https://github.com/annajung))
-- Add Fuzhi to the Katib Adopters (https://github.com/kubeflow/katib/pull/1451 by [@Planck0591](https://github.com/Planck0591))
-- Fix Katib broken links to the Kubeflow guides (https://github.com/kubeflow/katib/pull/1477 by [@theofpa](https://github.com/theofpa))
-- Add the Katib Webhook docs (https://github.com/kubeflow/katib/pull/1486 by [@andreyvelich](https://github.com/andreyvelich))
+- Modify docs for the Katib 0.10 ([#1392](https://github.com/kubeflow/katib/pull/1392) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Katib presentation list ([#1446](https://github.com/kubeflow/katib/pull/1446) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Canonical to the Katib Adopters ([#1401](https://github.com/kubeflow/katib/pull/1401) by [@RFMVasconcelos](https://github.com/RFMVasconcelos))
+- Update developer guide with the Katib controller flags ([#1449](https://github.com/kubeflow/katib/pull/1449) by [@annajung](https://github.com/annajung))
+- Add Fuzhi to the Katib Adopters ([#1451](https://github.com/kubeflow/katib/pull/1451) by [@Planck0591](https://github.com/Planck0591))
+- Fix Katib broken links to the Kubeflow guides ([#1477](https://github.com/kubeflow/katib/pull/1477) by [@theofpa](https://github.com/theofpa))
+- Add the Katib Webhook docs ([#1486](https://github.com/kubeflow/katib/pull/1486) by [@andreyvelich](https://github.com/andreyvelich))
 
 ## Misc
 
-- Add recreate strategy for the MySQL deployment (https://github.com/kubeflow/katib/pull/1393 by [@andreyvelich](https://github.com/andreyvelich))
-- Modify worker image for the Katib AWS CI/CD (https://github.com/kubeflow/katib/pull/1423 by [@PatrickXYS](https://github.com/PatrickXYS))
-- Add the SVG logo for Katib (https://github.com/kubeflow/katib/pull/1414 by [@knkski](https://github.com/knkski))
-- Verify empty Objective in the Experiment defaults (https://github.com/kubeflow/katib/pull/1445 by [@andreyvelich](https://github.com/andreyvelich))
-- Move the Katib manifests upstream (https://github.com/kubeflow/katib/pull/1432 by [@yanniszark](https://github.com/yanniszark))
-- Build the Trial images in the Katib CI (https://github.com/kubeflow/katib/pull/1457 by [@andreyvelich](https://github.com/andreyvelich))
-- Add script to update the boilerplates (https://github.com/kubeflow/katib/pull/1491 by [@andreyvelich](https://github.com/andreyvelich))
+- Add recreate strategy for the MySQL deployment ([#1393](https://github.com/kubeflow/katib/pull/1393) by [@andreyvelich](https://github.com/andreyvelich))
+- Modify worker image for the Katib AWS CI/CD ([#1423](https://github.com/kubeflow/katib/pull/1423) by [@PatrickXYS](https://github.com/PatrickXYS))
+- Add the SVG logo for Katib ([#1414](https://github.com/kubeflow/katib/pull/1414) by [@knkski](https://github.com/knkski))
+- Verify empty Objective in the Experiment defaults ([#1445](https://github.com/kubeflow/katib/pull/1445) by [@andreyvelich](https://github.com/andreyvelich))
+- Move the Katib manifests upstream ([#1432](https://github.com/kubeflow/katib/pull/1432) by [@yanniszark](https://github.com/yanniszark))
+- Build the Trial images in the Katib CI ([#1457](https://github.com/kubeflow/katib/pull/1457) by [@andreyvelich](https://github.com/andreyvelich))
+- Add script to update the boilerplates ([#1491](https://github.com/kubeflow/katib/pull/1491) by [@andreyvelich](https://github.com/andreyvelich))
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.10.1...v0.11.0)
 
