@@ -81,7 +81,7 @@ Follow these steps to cut a new Katib release:
 
    - Create the new branch: `release-X.Y`, if it doesn't exist.
 
-   - Create the new tag: `vX.Y.Z`.
+   - Create the new tag: `vX.Y.Z` from the release branch: `release-X.Y`.
 
    - Publish Katib images with the tag: `vX.Y.Z` and update manifests.
 
