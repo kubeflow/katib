@@ -67,10 +67,7 @@ export class TrialsGraphComponent implements OnChanges {
         return;
       }
 
-      this.graph
-        .dimensions({})
-        .data([])
-        .render();
+      this.graph.dimensions({}).data([]).render();
 
       const dimensions = this.buildDimensions(this.data);
       this.graph

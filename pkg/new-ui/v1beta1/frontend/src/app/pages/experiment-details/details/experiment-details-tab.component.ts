@@ -52,7 +52,8 @@ export class ExperimentDetailsTabComponent implements OnChanges {
 
     return parameters.map(parameter => {
       const feasibleSpaceList = parameter.feasibleSpace as FeasibleSpaceList;
-      const feasibleSpaceMinMax = parameter.feasibleSpace as FeasibleSpaceMinMax;
+      const feasibleSpaceMinMax =
+        parameter.feasibleSpace as FeasibleSpaceMinMax;
 
       const chips: ChipDescriptor[] = [
         {

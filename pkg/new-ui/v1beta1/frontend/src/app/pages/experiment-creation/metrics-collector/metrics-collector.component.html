@@ -18,14 +18,14 @@
 
     <ng-container [ngSwitch]="formGroup.get('kind').value">
       <ng-container *ngSwitchCase="kind.FILE">
-        <mat-form-field appearance="outline" class="step-content ">
+        <mat-form-field appearance="outline" class="step-content">
           <mat-label>Metrics file</mat-label>
           <input formControlName="metricsFile" matInput />
         </mat-form-field>
       </ng-container>
 
       <ng-container *ngSwitchCase="kind.TFEVENT">
-        <mat-form-field appearance="outline" class="step-content ">
+        <mat-form-field appearance="outline" class="step-content">
           <mat-label>TensorFlow Events Directory</mat-label>
           <input formControlName="tfDir" matInput />
         </mat-form-field>
