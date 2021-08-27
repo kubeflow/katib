@@ -102,9 +102,10 @@ func (g *General) SyncAssignments(
 		instance.Status.AlgorithmSettings)
 
 	requestSuggestion := &suggestionapi.GetSuggestionsRequest{
-		Experiment:    g.ConvertExperiment(filledE),
-		Trials:        g.ConvertTrials(ts),
-		RequestNumber: int32(requestNum),
+		Experiment:         g.ConvertExperiment(filledE),
+		Trials:             g.ConvertTrials(ts),
+		RequestNumber:      int32(requestNum),
+		TotalRequestNumber: int32(instance.Spec.Requests),
 	}
 
 	// Get new suggestions
@@ -112,11 +113,10 @@ func (g *General) SyncAssignments(
 	if err != nil {
 		return err
 	}
-	logger.Info("Getting suggestions", "endpoint", endpoint, "response", responseSuggestion,
-		"request", requestSuggestion)
+	logger.Info("Getting suggestions", "endpoint", endpoint, "Number of request parameters", requestNum, "Number of response parameters", len(responseSuggestion.ParameterAssignments))
 	if len(responseSuggestion.ParameterAssignments) != requestNum {
 		err := fmt.Errorf("The response contains unexpected trials")
-		logger.Error(err, "The response contains unexpected trials", "requestNum", requestNum, "response", responseSuggestion)
+		logger.Error(err, "The response contains unexpected trials")
 		return err
 	}
 

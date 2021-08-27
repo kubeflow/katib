@@ -354,6 +354,7 @@ Discrete and Categorical type use List.
 | experiment | [Experiment](#api.v1.beta1.Experiment) |  |  |
 | trials | [Trial](#api.v1.beta1.Trial) | repeated | all completed trials owned by the experiment. |
 | request_number | [int32](#int32) |  | The number of Suggestion you request at one time. When you set 3 to request_number, you can get three Suggestions at one time. |
+| total_request_number | [int32](#int32) |  | The number of Suggestions requested till now |
 
 
 
