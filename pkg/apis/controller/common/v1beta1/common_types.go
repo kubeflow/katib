@@ -150,7 +150,7 @@ type Metric struct {
 // +k8s:deepcopy-gen=true
 type Observation struct {
 	// Key-value pairs for metric names and values
-	Metrics []Metric `json:"metrics"`
+	Metrics []Metric `json:"metrics,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true
@@ -220,7 +220,7 @@ const (
 
 // +k8s:deepcopy-gen=true
 type CollectorSpec struct {
-	Kind CollectorKind `json:"kind"`
+	Kind CollectorKind `json:"kind,omitempty"`
 	// When kind is "customCollector", this field will be used
 	CustomCollector *v1.Container `json:"customCollector,omitempty"`
 }

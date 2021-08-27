@@ -29,7 +29,7 @@ type TrialSpec struct {
 	Objective *common.ObjectiveSpec `json:"objective,omitempty"`
 
 	// Key-value pairs for hyperparameters and assignment values.
-	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments"`
+	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments,omitempty"`
 
 	// Rules for early stopping techniques.
 	// Each rule should be met to early stop Trial.
