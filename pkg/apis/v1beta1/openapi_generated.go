@@ -144,9 +144,8 @@ func schema_apis_controller_common_v1beta1_CollectorSpec(ref common.ReferenceCal
 				Properties: map[string]spec.Schema{
 					"kind": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 					"customCollector": {
@@ -156,7 +155,6 @@ func schema_apis_controller_common_v1beta1_CollectorSpec(ref common.ReferenceCal
 						},
 					},
 				},
-				Required: []string{"kind"},
 			},
 		},
 		Dependencies: []string{
@@ -489,7 +487,6 @@ func schema_apis_controller_common_v1beta1_Observation(ref common.ReferenceCallb
 						},
 					},
 				},
-				Required: []string{"metrics"},
 			},
 		},
 		Dependencies: []string{
@@ -1197,7 +1194,6 @@ func schema_apis_controller_experiments_v1beta1_OptimalTrial(ref common.Referenc
 					"bestTrialName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "BestTrialName is the name of the best trial.",
-							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1224,7 +1220,6 @@ func schema_apis_controller_experiments_v1beta1_OptimalTrial(ref common.Referenc
 						},
 					},
 				},
-				Required: []string{"bestTrialName", "parameterAssignments"},
 			},
 		},
 		Dependencies: []string{
@@ -1600,7 +1595,6 @@ func schema_apis_controller_suggestions_v1beta1_SuggestionSpec(ref common.Refere
 						},
 					},
 				},
-				Required: []string{"algorithm"},
 			},
 		},
 		Dependencies: []string{
@@ -1995,7 +1989,6 @@ func schema_apis_controller_trials_v1beta1_TrialSpec(ref common.ReferenceCallbac
 						},
 					},
 				},
-				Required: []string{"parameterAssignments"},
 			},
 		},
 		Dependencies: []string{

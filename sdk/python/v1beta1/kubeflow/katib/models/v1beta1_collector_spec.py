@@ -42,7 +42,7 @@ class V1beta1CollectorSpec(object):
         'kind': 'kind'
     }
 
-    def __init__(self, custom_collector=None, kind='', local_vars_configuration=None):  # noqa: E501
+    def __init__(self, custom_collector=None, kind=None, local_vars_configuration=None):  # noqa: E501
         """V1beta1CollectorSpec - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -54,7 +54,8 @@ class V1beta1CollectorSpec(object):
 
         if custom_collector is not None:
             self.custom_collector = custom_collector
-        self.kind = kind
+        if kind is not None:
+            self.kind = kind
 
     @property
     def custom_collector(self):
@@ -95,8 +96,6 @@ class V1beta1CollectorSpec(object):
         :param kind: The kind of this V1beta1CollectorSpec.  # noqa: E501
         :type: str
         """
-        if self.local_vars_configuration.client_side_validation and kind is None:  # noqa: E501
-            raise ValueError("Invalid value for `kind`, must not be `None`")  # noqa: E501
 
         self._kind = kind
 

@@ -28,7 +28,7 @@ import (
 // SuggestionSpec is the specification of a Suggestion.
 type SuggestionSpec struct {
 	// Algorithm describes HP or NAS algorithm that suggestion is used.
-	Algorithm *common.AlgorithmSpec `json:"algorithm"`
+	Algorithm *common.AlgorithmSpec `json:"algorithm,omitempty"`
 
 	// EarlyStopping describes early stopping algorithm that suggestion is used.
 	EarlyStopping *common.EarlyStoppingSpec `json:"earlyStopping,omitempty"`

@@ -84,7 +84,8 @@ class V1beta1TrialSpec(object):
             self.metrics_collector = metrics_collector
         if objective is not None:
             self.objective = objective
-        self.parameter_assignments = parameter_assignments
+        if parameter_assignments is not None:
+            self.parameter_assignments = parameter_assignments
         if primary_container_name is not None:
             self.primary_container_name = primary_container_name
         if primary_pod_labels is not None:
@@ -204,8 +205,6 @@ class V1beta1TrialSpec(object):
         :param parameter_assignments: The parameter_assignments of this V1beta1TrialSpec.  # noqa: E501
         :type: list[V1beta1ParameterAssignment]
         """
-        if self.local_vars_configuration.client_side_validation and parameter_assignments is None:  # noqa: E501
-            raise ValueError("Invalid value for `parameter_assignments`, must not be `None`")  # noqa: E501
 
         self._parameter_assignments = parameter_assignments
 

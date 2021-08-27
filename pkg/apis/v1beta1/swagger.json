@@ -102,9 +102,6 @@
     ".v1beta1.SuggestionSpec": {
       "description": "SuggestionSpec is the specification of a Suggestion.",
       "type": "object",
-      "required": [
-        "algorithm"
-      ],
       "properties": {
         "algorithm": {
           "description": "Algorithm describes HP or NAS algorithm that suggestion is used.",
@@ -293,9 +290,6 @@
     ".v1beta1.TrialSpec": {
       "description": "TrialSpec is the specification of a Trial.",
       "type": "object",
-      "required": [
-        "parameterAssignments"
-      ],
       "properties": {
         "earlyStoppingRules": {
           "description": "Rules for early stopping techniques. Each rule should be met to early stop Trial.",
@@ -416,17 +410,13 @@
     },
     "v1beta1.CollectorSpec": {
       "type": "object",
-      "required": [
-        "kind"
-      ],
       "properties": {
         "customCollector": {
           "description": "When kind is \"customCollector\", this field will be used",
           "$ref": "#/definitions/v1.Container"
         },
         "kind": {
-          "type": "string",
-          "default": ""
+          "type": "string"
         }
       }
     },
@@ -929,9 +919,6 @@
     },
     "v1beta1.Observation": {
       "type": "object",
-      "required": [
-        "metrics"
-      ],
       "properties": {
         "metrics": {
           "description": "Key-value pairs for metric names and values",
@@ -962,15 +949,10 @@
     "v1beta1.OptimalTrial": {
       "description": "OptimalTrial is the metrics and assignments of the best trial.",
       "type": "object",
-      "required": [
-        "bestTrialName",
-        "parameterAssignments"
-      ],
       "properties": {
         "bestTrialName": {
           "description": "BestTrialName is the name of the best trial.",
-          "type": "string",
-          "default": ""
+          "type": "string"
         },
         "observation": {
           "description": "Observation for this trial",
