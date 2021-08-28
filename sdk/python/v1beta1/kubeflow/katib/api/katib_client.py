@@ -16,6 +16,7 @@ import multiprocessing
 
 from kubeflow.katib import V1beta1Experiment
 from kubeflow.katib import V1beta1Trial
+from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
 from kubeflow.katib.utils import utils
 from kubernetes import client, config
@@ -46,7 +47,7 @@ class KatibClient(object):
             self.in_cluster = True
 
         self.api_instance = client.CustomObjectsApi()
-        self.deserializer = utils.Deserializer()
+        self.api_client = ApiClient()
 
     def _is_ipython(self):
         """Returns whether we are running in notebook."""
@@ -270,7 +271,7 @@ class KatibClient(object):
         try:
             katibexp = thread.get(constants.APISERVER_TIMEOUT)
             result = [
-                self.deserializer.deserialize(item, V1beta1Experiment)
+                self.api_client.deserialize(utils.FakeResponse(item), V1beta1Experiment)
                 for item in katibexp.get("items")
             ]
 
@@ -341,7 +342,7 @@ class KatibClient(object):
         try:
             katibtrial = thread.get(constants.APISERVER_TIMEOUT)
             result = [
-                self.deserializer.deserialize(item, V1beta1Trial)
+                self.api_client.deserialize(utils.FakeResponse(item), V1beta1Trial)
                 for item in katibtrial.get("items")
             ]
         except multiprocessing.TimeoutError:
