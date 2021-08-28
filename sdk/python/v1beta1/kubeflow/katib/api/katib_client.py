@@ -14,7 +14,7 @@
 
 import multiprocessing
 
-from kubeflow.katib import V1beta1Experiment, api_client
+from kubeflow.katib import V1beta1Experiment
 from kubeflow.katib import V1beta1Trial
 from kubeflow.katib.constants import constants
 from kubeflow.katib.utils import utils
