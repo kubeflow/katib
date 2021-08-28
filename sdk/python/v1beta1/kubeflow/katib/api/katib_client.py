@@ -46,7 +46,7 @@ class KatibClient(object):
             self.in_cluster = True
 
         self.api_instance = client.CustomObjectsApi()
-        self.katib_api_client = api_client.ApiClient()
+        self.deserializer = utils.Deserializer()
 
     def _is_ipython(self):
         """Returns whether we are running in notebook."""
@@ -270,7 +270,7 @@ class KatibClient(object):
         try:
             katibexp = thread.get(constants.APISERVER_TIMEOUT)
             result = [
-                self.katib_api_client.deserialize_data(item, V1beta1Experiment)
+                self.deserializer.deserialize(item, V1beta1Experiment)
                 for item in katibexp.get("items")
             ]
 
@@ -341,7 +341,7 @@ class KatibClient(object):
         try:
             katibtrial = thread.get(constants.APISERVER_TIMEOUT)
             result = [
-                self.katib_api_client.deserialize_data(item, V1beta1Trial)
+                self.deserializer.deserialize(item, V1beta1Trial)
                 for item in katibtrial.get("items")
             ]
         except multiprocessing.TimeoutError:
