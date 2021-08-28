@@ -19,7 +19,6 @@ import os
 import re
 
 import kubeflow.katib.models
-import kubernetes.client.models
 # python 2 and python 3 compatibility library
 import six
 from dateutil.parser import parse
@@ -102,8 +101,6 @@ class Deserializer:
                 klass = self.NATIVE_TYPES_MAPPING[klass]
             elif klass in dir(kubeflow.katib.models):
                 klass = getattr(kubeflow.katib.models, klass)
-            elif klass in dir(kubernetes.client.models):
-                klass = getattr(kubernetes.client.models, klass)
             else:
                 raise ValueError(f"type: {klass} is not supported to deserialized")
 
