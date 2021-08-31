@@ -61,3 +61,5 @@ from kubernetes.client import V1ObjectMeta
 from kubernetes.client import V1ListMeta
 from kubernetes.client import V1Container
 from kubernetes.client import V1HTTPGetAction
+from kubernetes.client import V1ManagedFieldsEntry
+from kubernetes.client import V1OwnerReference

@@ -14,10 +14,12 @@
 
 import multiprocessing
 
-from kubernetes import client, config
-
+from kubeflow.katib import V1beta1Experiment
+from kubeflow.katib import V1beta1Trial
+from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
 from kubeflow.katib.utils import utils
+from kubernetes import client, config
 
 
 class KatibClient(object):
@@ -45,6 +47,7 @@ class KatibClient(object):
             self.in_cluster = True
 
         self.api_instance = client.CustomObjectsApi()
+        self.api_client = ApiClient()
 
     def _is_ipython(self):
         """Returns whether we are running in notebook."""
@@ -251,8 +254,8 @@ class KatibClient(object):
         :param namespace: Experiments namespace.
         If the namespace is None, it takes "default" namespace.
 
-        :return: List of Experiment names with the statuses.
-        :rtype: list[dict]
+        :return: List of Experiment objects.
+        :rtype: list[V1beta1Experiment]
         """
         if namespace is None:
             namespace = utils.get_default_target_namespace()
@@ -267,13 +270,11 @@ class KatibClient(object):
         katibexp = None
         try:
             katibexp = thread.get(constants.APISERVER_TIMEOUT)
-            result = []
-            for i in katibexp.get("items"):
-                output = {}
-                output["name"] = i.get("metadata", {}).get("name")
-                output["status"] = i.get("status", {}).get(
-                    "conditions", [])[-1].get("type")
-                result.append(output)
+            result = [
+                self.api_client.deserialize(utils.FakeResponse(item), V1beta1Experiment)
+                for item in katibexp.get("items")
+            ]
+
         except multiprocessing.TimeoutError:
             raise RuntimeError("Timeout trying to get katib experiment.")
         except client.rest.ApiException as e:
@@ -282,8 +283,8 @@ class KatibClient(object):
           %s\n" % e)
         except Exception as e:
             raise RuntimeError(
-                "There was a problem to get experiments in namespace {1}. Exception: \
-          {2} ".format(namespace, e))
+                "There was a problem to get experiments in namespace {0}. Exception: \
+          {1} ".format(namespace, e))
         return result
 
     def get_experiment_status(self, name, namespace=None):
@@ -324,8 +325,8 @@ class KatibClient(object):
         :param namespace: Experiments namespace.
         If the namespace is None, it takes "default" namespace.
 
-        :return: List of Trial names with the statuses.
-        :rtype: list[dict]
+        :return: List of Trial objects
+        :rtype: list[V1beta1Trial]
         """
         if namespace is None:
             namespace = utils.get_default_target_namespace()
@@ -340,14 +341,10 @@ class KatibClient(object):
         katibtrial = None
         try:
             katibtrial = thread.get(constants.APISERVER_TIMEOUT)
-            result = []
-            for i in katibtrial.get("items"):
-                output = {}
-                if i.get("metadata", {}).get("ownerReferences")[0].get("name") == name:
-                    output["name"] = i.get("metadata", {}).get("name")
-                    output["status"] = i.get("status", {}).get(
-                        "conditions", [])[-1].get("type")
-                    result.append(output)
+            result = [
+                self.api_client.deserialize(utils.FakeResponse(item), V1beta1Trial)
+                for item in katibtrial.get("items")
+            ]
         except multiprocessing.TimeoutError:
             raise RuntimeError("Timeout trying to getkatib experiment.")
         except client.rest.ApiException as e:
