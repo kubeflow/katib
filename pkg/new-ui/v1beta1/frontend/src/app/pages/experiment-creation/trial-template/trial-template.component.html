@@ -37,7 +37,13 @@
     <mat-form-field appearance="outline" class="fit-content">
       <mat-label>Source Type</mat-label>
       <mat-select formControlName="type">
-        <mat-option value="configmap">ConfigMap</mat-option>
+        <mat-option
+          [disabled]="!templates.length"
+          [matTooltip]="!templates.length ? 'No TrialTemplates found' : ''"
+          value="configmap"
+        >
+          ConfigMap
+        </mat-option>
         <mat-option value="yaml">YAML</mat-option>
       </mat-select>
     </mat-form-field>
@@ -90,7 +96,7 @@
     <mat-divider class="margin-bottom margin-top"></mat-divider>
 
     <app-trial-parameter
-      *ngFor="let ctrl of trialParameters.controls"
+      *ngFor="let ctrl of trialParameters?.controls"
       [formGroup]="ctrl"
     ></app-trial-parameter>
   </div>
