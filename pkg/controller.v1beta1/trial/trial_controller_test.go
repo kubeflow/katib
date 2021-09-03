@@ -51,7 +51,7 @@ const (
 	trialName       = "test-trial"
 	batchJobName    = "test-job"
 	objectiveMetric = "accuracy"
-	timeout         = time.Second * 40
+	timeout         = time.Second * 80
 )
 
 var trialKey = types.NamespacedName{Name: trialName, Namespace: namespace}
