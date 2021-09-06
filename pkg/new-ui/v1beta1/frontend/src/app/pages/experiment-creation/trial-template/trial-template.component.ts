@@ -18,7 +18,7 @@ export class FormTrialTemplateComponent implements OnInit, OnDestroy {
   public templates: ConfigMapResponse[] = [];
   public configmaps: ConfigMapBody[] = [];
   public paths: string[] = [];
-  public trialParameters: FormArray;
+  public trialParameters = new FormArray([]);
   private selectedConfigMap: ConfigMapBody;
   private subs = new Subscription();
   private yamlPrv = '';
@@ -53,6 +53,12 @@ export class FormTrialTemplateComponent implements OnInit, OnDestroy {
       this.backend.getTrialTemplates('').subscribe(templates => {
         this.templates = templates.Data;
         this.formGroup.get('cmNamespace').setValue('kubeflow');
+
+        // Use the ConfigMap option if the TrialTemplates were successfully
+        // fetched
+        if (this.templates && this.templates.length) {
+          this.formGroup.get('type').setValue('configmap');
+        }
       }),
     );
 

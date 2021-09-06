@@ -212,7 +212,7 @@ export class ExperimentFormService {
 
   createTrialTemplateForm(): FormGroup {
     return this.builder.group({
-      type: 'configmap',
+      type: 'yaml',
       podLabels: this.builder.array([]),
       containerName: 'training-container',
       successCond: 'status.conditions.#(type=="Complete")#|#(status=="True")#',
