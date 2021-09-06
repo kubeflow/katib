@@ -22,6 +22,16 @@ SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
 
 cd ${SCRIPT_ROOT}
 
+# Grab mockgen version from go.mod
+MOCKGEN_VERSION=$(grep 'github.com/golang/mock' go.mod | awk '{print $2}')
+
+if [[ ! $(mockgen -version) == ${MOCKGEN_VERSION} ]]; then
+  echo "You must use ${MOCKGEN_VERSION} mockgen version to run this script"
+  echo "To install mockgen follow this doc: https://github.com/golang/mock/tree/master#installation"
+  echo "Run 'mockgen -version' to check the installed version"
+  exit 1
+fi
+
 echo "Generating v1beta1 Suggestion RPC Client..."
 mockgen -package mock -destination pkg/mock/v1beta1/api/suggestion.go github.com/kubeflow/katib/pkg/apis/manager/v1beta1 SuggestionClient
 echo "Generating v1beta1 EarlyStopping RPC Client..."

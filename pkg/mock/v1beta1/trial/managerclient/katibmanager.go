@@ -5,10 +5,11 @@
 package mock
 
 import (
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	api_v1_beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
-	reflect "reflect"
 )
 
 // MockManagerClient is a mock of ManagerClient interface.
