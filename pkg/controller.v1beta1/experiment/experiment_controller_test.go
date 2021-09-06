@@ -54,7 +54,7 @@ const (
 	namespace        = "default"
 	primaryContainer = "training-container"
 
-	timeout = time.Second * 40
+	timeout = time.Second * 80
 )
 
 func init() {
