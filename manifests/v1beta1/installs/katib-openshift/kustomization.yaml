@@ -30,13 +30,13 @@ resources:
 images:
   - name: docker.io/kubeflowkatib/katib-controller
     newName: docker.io/kubeflowkatib/katib-controller
-    newTag: v0.12.0-rc.0
+    newTag: v0.12.0-rc.1
   - name: docker.io/kubeflowkatib/katib-db-manager
     newName: docker.io/kubeflowkatib/katib-db-manager
-    newTag: v0.12.0-rc.0
+    newTag: v0.12.0-rc.1
   - name: docker.io/kubeflowkatib/katib-ui
     newName: docker.io/kubeflowkatib/katib-ui
-    newTag: v0.12.0-rc.0
+    newTag: v0.12.0-rc.1
 
 patchesJson6902:
   # Annotate Service to delegate TLS-secret generation to OpenShift service controller
