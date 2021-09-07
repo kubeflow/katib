@@ -25,28 +25,6 @@ rules:
     verbs:
       - get
       - patch
-  - apiGroups:
-      - certificates.k8s.io
-    resources:
-      - certificatesigningrequests
-    verbs:
-      - get
-      - create
-      - delete
-  - apiGroups:
-      - certificates.k8s.io
-    resources:
-      - certificatesigningrequests/approval
-    verbs:
-      - update
-  - apiGroups:
-      - certificates.k8s.io
-    resources:
-      - signers
-    resourceNames:
-      - kubernetes.io/*
-    verbs:
-      - approve
 ---
 apiVersion: v1
 kind: ServiceAccount

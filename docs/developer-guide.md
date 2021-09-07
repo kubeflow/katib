@@ -101,10 +101,9 @@ to generate certificates for the webhooks.
 
 Once Katib is deployed in the Kubernetes cluster, the `cert-generator` Job follows these steps:
 
-- Generate a certificate using [`openssl`](https://www.openssl.org/).
+- Generate the self-signed CA certificate and private key.
 
-- Create a Kubernetes [Certificate Signing Request](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/)
-  to approve and sign the certificate.
+- Generate public certificate and private key signed with the key generated in the previous step.
 
 - Create a Kubernetes Secret with the signed certificate. Secret has
   the `katib-webhook-cert` name and `cert-generator` Job's `ownerReference` to
@@ -115,7 +114,7 @@ Once Katib is deployed in the Kubernetes cluster, the `cert-generator` Job follo
 
 - Patch the webhooks with the `CABundle`.
 
-You can find the `cert-generator` source code [here](../hack/cert-generator.sh).
+You can find the `cert-generator` source code [here](../cmd/cert-generator/v1beta1).
 
 ## Implement a new algorithm and use it in Katib
 

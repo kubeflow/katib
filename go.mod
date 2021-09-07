@@ -11,7 +11,7 @@ require (
 	github.com/go-openapi/spec v0.19.3
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/mock v1.6.0
-	github.com/golang/protobuf v1.4.3
+	github.com/golang/protobuf v1.5.2
 	github.com/google/go-containerregistry v0.4.1-0.20210128200529-19c2b639fab1
 	github.com/google/go-containerregistry/pkg/authn/k8schain v0.0.0-20210224013640-6928f6d356ab
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
@@ -20,16 +20,18 @@ require (
 	github.com/onsi/gomega v1.10.3
 	github.com/prometheus/client_golang v1.9.0
 	github.com/shirou/gopsutil v2.20.7+incompatible
-	github.com/spf13/viper v1.7.0
+	github.com/spf13/cobra v1.2.1
+	github.com/spf13/viper v1.8.1
 	github.com/tidwall/gjson v1.6.0
 	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4
-	google.golang.org/grpc v1.32.0
+	google.golang.org/grpc v1.38.0
 	gopkg.in/fsnotify/fsnotify.v1 v1.4.7 // indirect
 	k8s.io/api v0.20.4
 	k8s.io/apimachinery v0.20.4
 	k8s.io/client-go v0.20.4
 	k8s.io/klog v1.0.0
 	k8s.io/kube-openapi v0.0.0-20210216185858-15cd8face8d6
+	k8s.io/utils v0.0.0-20210707171843-4b05e18ac7d9
 	sigs.k8s.io/controller-runtime v0.8.2
 )
 
