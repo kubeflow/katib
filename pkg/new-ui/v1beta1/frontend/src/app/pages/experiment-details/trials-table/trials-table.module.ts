@@ -21,7 +21,6 @@ import { TrialModalComponent } from './trial-modal/trial-modal.component';
     NgxChartsModule,
     MatTooltipModule,
   ],
-  entryComponents: [TrialModalComponent],
   exports: [TrialsTableComponent],
 })
 export class TrialsTableModule {}

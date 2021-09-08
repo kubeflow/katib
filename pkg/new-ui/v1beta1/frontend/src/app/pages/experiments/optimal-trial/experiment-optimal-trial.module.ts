@@ -7,6 +7,5 @@ import { MatDividerModule } from '@angular/material/divider';
 @NgModule({
   declarations: [ExperimentOptimalTrialComponent],
   imports: [CommonModule, PopoverModule, DetailsListModule, MatDividerModule],
-  entryComponents: [ExperimentOptimalTrialComponent],
 })
 export class ExperimentOptimalTrialModule {}
