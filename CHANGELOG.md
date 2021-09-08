@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.12.0-rc.1](https://github.com/kubeflow/katib/tree/v0.12.0-rc.1) (2021-09-07)
+
+## Bug Fixes
+
+- Fix UI for handling missing params ([#1657](https://github.com/kubeflow/katib/pull/1657) by [@kimwnasptd](https://github.com/kimwnasptd))
+- Reconcile semantics for Suggestion Algorithms ([#1644](https://github.com/kubeflow/katib/pull/1644) by [@johnugeorge](https://github.com/johnugeorge))
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.12.0-rc.0...v0.12.0-rc.1)
+
 ## [v0.12.0-rc.0](https://github.com/kubeflow/katib/tree/v0.12.0-rc.0) (2021-08-19)
 
 ## New Features
