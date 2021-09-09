@@ -26,7 +26,7 @@ type Client struct {
 	KubeClient client.Client
 }
 
-func (c *Client) getKubeClient() (client.Client, error){
+func (c *Client) getKubeClient() (client.Client, error) {
 	if c.KubeClient == nil {
 		var err error
 		if c.KubeClient, err = client.New(config.GetConfigOrDie(), client.Options{Scheme: scheme.Scheme}); err != nil {

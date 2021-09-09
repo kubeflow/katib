@@ -20,6 +20,7 @@ import (
 	"context"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
 func (c *Client) CreateResources(ctx context.Context, obj client.Object) error {
 	kubeClient, err := c.getKubeClient()
 	if err != nil {

@@ -17,7 +17,7 @@ limitations under the License.
 package consts
 
 const (
-	CAName = "katib-ca"
+	CAName  = "katib-ca"
 	Service = "katib-controller"
 	JobName = "katib-cert-generator"
 	Secret  = "katib-webhook-cert"

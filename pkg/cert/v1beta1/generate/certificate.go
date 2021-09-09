@@ -24,10 +24,10 @@ import (
 )
 
 type certificates struct {
-	certPem   []byte
-	keyPem    []byte
-	cert *x509.Certificate
-	key *rsa.PrivateKey
+	certPem []byte
+	keyPem  []byte
+	cert    *x509.Certificate
+	key     *rsa.PrivateKey
 }
 
 func (c *certificates) encode(rawKey, rawDer []byte) error {

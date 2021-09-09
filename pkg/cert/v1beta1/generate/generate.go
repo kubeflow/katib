@@ -39,18 +39,18 @@ import (
 )
 
 type generateOptions struct {
-	namespace string
+	namespace         string
 	fullServiceDomain string
 }
 
 func NewGenerateCmd(kubeClient *kube.Client) *cobra.Command {
 	o := &generateOptions{}
 	cmd := &cobra.Command{
-		Use:   "generate",
-		Short: "generate server cert for webhook",
-		Long: "generate server cert for webhook",
+		Use:          "generate",
+		Short:        "generate server cert for webhook",
+		Long:         "generate server cert for webhook",
 		SilenceUsage: true,
-		RunE: func(cmd *cobra.Command, args []string) error{
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := o.run(context.TODO(), kubeClient); err != nil {
 				return err
 			}
@@ -62,7 +62,7 @@ func NewGenerateCmd(kubeClient *kube.Client) *cobra.Command {
 	return cmd
 }
 
-func (o *generateOptions) run (ctx context.Context, kubeClient *kube.Client) error {
+func (o *generateOptions) run(ctx context.Context, kubeClient *kube.Client) error {
 	o.fullServiceDomain = strings.Join([]string{consts.Service, o.namespace, "svc"}, ".")
 
 	caKeyPair := &certificates{}
@@ -169,7 +169,7 @@ func (o *generateOptions) createWebhookCertSecret(ctx context.Context, kubeClien
 	jobUID := certGeneratorJob.UID
 	webhookCertSecret := &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
-			Kind: "Secret",
+			Kind:       "Secret",
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -223,7 +223,7 @@ func (o *generateOptions) injectCert(ctx context.Context, kubeClient *kube.Clien
 	newValidatingConf.Webhooks[0].ClientConfig.CABundle = caKeypair.certPem
 
 	klog.Info("Trying to patch ValidatingWebhookConfiguration adding the caBundle.")
-	for i:=0; i<=5; i++ {
+	for i := 0; i <= 5; i++ {
 		err := kubeClient.PatchResources(ctx, newValidatingConf, client.MergeFrom(validatingConf))
 		switch {
 		case err == nil:
@@ -246,7 +246,7 @@ func (o *generateOptions) injectCert(ctx context.Context, kubeClient *kube.Clien
 	newMutatingConf.Webhooks[1].ClientConfig.CABundle = caKeypair.certPem
 
 	klog.Info("Trying to patch MutatingWebhookConfiguration adding the caBundle.")
-	for i:=0; i<=5; i++ {
+	for i := 0; i <= 5; i++ {
 		err := kubeClient.PatchResources(ctx, newMutatingConf, client.MergeFrom(mutatingConf))
 		switch {
 		case err == nil:

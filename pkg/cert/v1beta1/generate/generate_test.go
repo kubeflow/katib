@@ -38,18 +38,18 @@ func TestGenerate(t *testing.T) {
 	testGeneratorJob := &batchv1.Job{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "batch/v1",
-			Kind: "Job",
+			Kind:       "Job",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: consts.JobName,
+			Name:      consts.JobName,
 			Namespace: testNamespace,
-			UID: "test",
+			UID:       "test",
 		},
 	}
 	testValidatingWebhook := &admissionregistration.ValidatingWebhookConfiguration{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "admissionregistration.k8s.io/v1",
-			Kind: "ValidatingWebhookConfiguration",
+			Kind:       "ValidatingWebhookConfiguration",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "katib.kubeflow.org",
@@ -66,7 +66,7 @@ func TestGenerate(t *testing.T) {
 	testMutatingWebhook := &admissionregistration.MutatingWebhookConfiguration{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "admissionregistration.k8s.io/v1",
-			Kind: "MutatingWebhookConfiguration",
+			Kind:       "MutatingWebhookConfiguration",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "katib.kubeflow.org",
@@ -89,7 +89,7 @@ func TestGenerate(t *testing.T) {
 
 	oldWebhookCertSecret := &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
-			Kind: "Secret",
+			Kind:       "Secret",
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -99,12 +99,12 @@ func TestGenerate(t *testing.T) {
 	}
 
 	tests := []struct {
-		name string
+		name      string
 		wantError bool
-		objects []client.Object
+		objects   []client.Object
 	}{
 		{
-			name: "generate successfully",
+			name:      "generate successfully",
 			wantError: false,
 			objects: []client.Object{
 				testGeneratorJob,
@@ -113,7 +113,7 @@ func TestGenerate(t *testing.T) {
 			},
 		},
 		{
-			name: "old secret exists",
+			name:      "old secret exists",
 			wantError: false,
 			objects: []client.Object{
 				testGeneratorJob,
@@ -123,7 +123,7 @@ func TestGenerate(t *testing.T) {
 			},
 		},
 		{
-			name: "missing katib-cert-generator job",
+			name:      "missing katib-cert-generator job",
 			wantError: true,
 			objects: []client.Object{
 				testValidatingWebhook,
@@ -131,7 +131,7 @@ func TestGenerate(t *testing.T) {
 			},
 		},
 		{
-			name: "missing validatingWebhookConfiguration",
+			name:      "missing validatingWebhookConfiguration",
 			wantError: true,
 			objects: []client.Object{
 				testGeneratorJob,
@@ -139,7 +139,7 @@ func TestGenerate(t *testing.T) {
 			},
 		},
 		{
-			name: "missing mutatingWebhookConfiguration",
+			name:      "missing mutatingWebhookConfiguration",
 			wantError: true,
 			objects: []client.Object{
 				testGeneratorJob,

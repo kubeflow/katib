@@ -26,7 +26,7 @@ func NewKatibCertGeneratorCmd(kubeClient *kube.Client) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   "katib-cert-generator",
 		Short: "katib-cert-generator",
-		Long: "katib-cert-generator",
+		Long:  "katib-cert-generator",
 	}
 	cmd.AddCommand(generate.NewGenerateCmd(kubeClient))
 	return cmd, nil
