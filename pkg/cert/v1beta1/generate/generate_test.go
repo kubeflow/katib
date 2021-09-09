@@ -148,7 +148,6 @@ func TestGenerate(t *testing.T) {
 		},
 	}
 
-	t.Helper()
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			if err := executeGeneratorCommand(test.objects, testNamespace); (err != nil) != test.wantError {
