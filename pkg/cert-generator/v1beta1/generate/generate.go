@@ -22,7 +22,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"github.com/kubeflow/katib/pkg/cert/v1beta1/consts"
+	"github.com/kubeflow/katib/pkg/cert-generator/v1beta1/consts"
 	"github.com/spf13/cobra"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	batchv1 "k8s.io/api/batch/v1"

@@ -17,7 +17,7 @@ limitations under the License.
 package generate
 
 import (
-	"github.com/kubeflow/katib/pkg/cert/v1beta1/consts"
+	"github.com/kubeflow/katib/pkg/cert-generator/v1beta1/consts"
 	admissionregistration "k8s.io/api/admissionregistration/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
