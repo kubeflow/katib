@@ -17,7 +17,7 @@ limitations under the License.
 package main
 
 import (
-	"github.com/kubeflow/katib/pkg/cert/v1beta1"
+	"github.com/kubeflow/katib/pkg/cert-generator/v1beta1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/klog"
 	"os"

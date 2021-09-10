@@ -17,7 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
-	"github.com/kubeflow/katib/pkg/cert/v1beta1/generate"
+	"github.com/kubeflow/katib/pkg/cert-generator/v1beta1/generate"
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
