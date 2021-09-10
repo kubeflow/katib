@@ -17,11 +17,10 @@ limitations under the License.
 package consts
 
 const (
-	CAName  = "katib-ca"
-	Service = "katib-controller"
-	JobName = "katib-cert-generator"
-	Secret  = "katib-webhook-cert"
-	Webhook = "katib.kubeflow.org"
+	CAName           = "katib-ca"
+	Service          = "katib-controller"
+	JobName          = "katib-cert-generator"
+	Secret           = "katib-webhook-cert"
+	Webhook          = "katib.kubeflow.org"
+	MaxTryPatchCount = 5
 )
-
-const MaxTryPatchCount = 5
