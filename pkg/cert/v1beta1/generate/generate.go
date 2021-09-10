@@ -213,7 +213,7 @@ func (o *generateOptions) createWebhookCertSecret(ctx context.Context, kubeClien
 	return nil
 }
 
-// patchWebhookConfiguration apply patch to ValidatingWebhookConfiguration and MutatingWebhookConfiguration
+// injectCert apply patch to ValidatingWebhookConfiguration and MutatingWebhookConfiguration
 func (o *generateOptions) injectCert(ctx context.Context, kubeClient *kube.Client, caKeypair *certificates) error {
 	validatingConf := &admissionregistrationv1.ValidatingWebhookConfiguration{}
 	if err := kubeClient.GetResources(ctx, client.ObjectKey{Name: consts.Webhook}, validatingConf); err != nil {
