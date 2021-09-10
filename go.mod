@@ -31,7 +31,6 @@ require (
 	k8s.io/client-go v0.20.4
 	k8s.io/klog v1.0.0
 	k8s.io/kube-openapi v0.0.0-20210216185858-15cd8face8d6
-	k8s.io/utils v0.0.0-20210707171843-4b05e18ac7d9
 	sigs.k8s.io/controller-runtime v0.8.2
 )
 

@@ -30,7 +30,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog"
-	"k8s.io/utils/pointer"
 	"math/big"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
@@ -165,6 +164,7 @@ func (o *generateOptions) createWebhookCertSecret(ctx context.Context, kubeClien
 
 	// Create secret with CA cert and server cert/key.
 	// Add ownerReferences to clean-up secret with cert generator Job.
+	isController := true
 	jobUID := certGeneratorJob.UID
 	webhookCertSecret := &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
@@ -178,7 +178,7 @@ func (o *generateOptions) createWebhookCertSecret(ctx context.Context, kubeClien
 				{
 					APIVersion: "batch/v1",
 					Kind:       "Job",
-					Controller: pointer.BoolPtr(true),
+					Controller: &isController,
 					Name:       consts.JobName,
 					UID:        jobUID,
 				},
