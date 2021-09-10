@@ -18,17 +18,24 @@ package main
 
 import (
 	"github.com/kubeflow/katib/pkg/cert/v1beta1"
-	"github.com/kubeflow/katib/pkg/cert/v1beta1/kube"
+	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/klog"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 func main() {
-	kubeClient := &kube.Client{}
+	kubeClient, err := client.New(config.GetConfigOrDie(), client.Options{Scheme: scheme.Scheme})
+	if err != nil {
+		klog.Fatalf("Failed to create kube client.")
+	}
+
 	cmd, err := v1beta1.NewKatibCertGeneratorCmd(kubeClient)
 	if err != nil {
 		klog.Fatalf("Failed to generate cert: %v", err)
 	}
+
 	if err = cmd.Execute(); err != nil {
 		os.Exit(1)
 	}

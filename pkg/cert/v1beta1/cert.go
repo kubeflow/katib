@@ -18,11 +18,11 @@ package v1beta1
 
 import (
 	"github.com/kubeflow/katib/pkg/cert/v1beta1/generate"
-	"github.com/kubeflow/katib/pkg/cert/v1beta1/kube"
 	"github.com/spf13/cobra"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func NewKatibCertGeneratorCmd(kubeClient *kube.Client) (*cobra.Command, error) {
+func NewKatibCertGeneratorCmd(kubeClient client.Client) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   "katib-cert-generator",
 		Short: "katib-cert-generator",

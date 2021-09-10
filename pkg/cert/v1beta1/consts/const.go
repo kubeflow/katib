@@ -23,3 +23,5 @@ const (
 	Secret  = "katib-webhook-cert"
 	Webhook = "katib.kubeflow.org"
 )
+
+const MaxTryPatchCount = 5

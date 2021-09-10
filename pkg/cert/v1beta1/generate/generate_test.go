@@ -18,7 +18,6 @@ package generate
 
 import (
 	"github.com/kubeflow/katib/pkg/cert/v1beta1/consts"
-	"github.com/kubeflow/katib/pkg/cert/v1beta1/kube"
 	admissionregistration "k8s.io/api/admissionregistration/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -165,9 +164,7 @@ func executeGeneratorCommand(kubeResources []client.Object, namespace string) er
 			fakeClientBuilder.WithObjects(r)
 		}
 	}
-
-	c := &kube.Client{KubeClient: fakeClientBuilder.Build()}
-	cmd := NewGenerateCmd(c)
+	cmd := NewGenerateCmd(fakeClientBuilder.Build())
 	if err := cmd.Flags().Set("namespace", namespace); err != nil {
 		log.Fatal(err)
 	}

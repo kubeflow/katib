@@ -23,7 +23,6 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"github.com/kubeflow/katib/pkg/cert/v1beta1/consts"
-	"github.com/kubeflow/katib/pkg/cert/v1beta1/kube"
 	"github.com/spf13/cobra"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -43,7 +42,7 @@ type generateOptions struct {
 	fullServiceDomain string
 }
 
-func NewGenerateCmd(kubeClient *kube.Client) *cobra.Command {
+func NewGenerateCmd(kubeClient client.Client) *cobra.Command {
 	o := &generateOptions{}
 	cmd := &cobra.Command{
 		Use:          "generate",
@@ -62,7 +61,7 @@ func NewGenerateCmd(kubeClient *kube.Client) *cobra.Command {
 	return cmd
 }
 
-func (o *generateOptions) run(ctx context.Context, kubeClient *kube.Client) error {
+func (o *generateOptions) run(ctx context.Context, kubeClient client.Client) error {
 	o.fullServiceDomain = strings.Join([]string{consts.Service, o.namespace, "svc"}, ".")
 
 	caKeyPair := &certificates{}
@@ -157,10 +156,10 @@ func (o *generateOptions) createCert(caKeyPair *certificates, keyPair *certifica
 }
 
 // createWebhookCertSecret create Secret embedded ca.key, ca.crt, tls.key and tls.cert
-func (o *generateOptions) createWebhookCertSecret(ctx context.Context, kubeClient *kube.Client, caKeyPair *certificates, keyPair *certificates) error {
+func (o *generateOptions) createWebhookCertSecret(ctx context.Context, kubeClient client.Client, caKeyPair *certificates, keyPair *certificates) error {
 
 	certGeneratorJob := &batchv1.Job{}
-	if err := kubeClient.GetResources(ctx, client.ObjectKey{Namespace: o.namespace, Name: consts.JobName}, certGeneratorJob); err != nil {
+	if err := kubeClient.Get(ctx, client.ObjectKey{Namespace: o.namespace, Name: consts.JobName}, certGeneratorJob); err != nil {
 		return err
 	}
 
@@ -195,40 +194,40 @@ func (o *generateOptions) createWebhookCertSecret(ctx context.Context, kubeClien
 	}
 
 	oldSecret := &corev1.Secret{}
-	err := kubeClient.GetResources(ctx, client.ObjectKey{Namespace: o.namespace, Name: consts.Secret}, oldSecret)
+	err := kubeClient.Get(ctx, client.ObjectKey{Namespace: o.namespace, Name: consts.Secret}, oldSecret)
 	switch {
 	case err != nil && !k8serrors.IsNotFound(err):
 		return err
 	case err == nil:
 		klog.Warning("Previous secret was found and removed.")
-		if err = kubeClient.DeleteResources(ctx, oldSecret); err != nil {
+		if err = kubeClient.Delete(ctx, oldSecret); err != nil {
 			return err
 		}
 	}
 
 	klog.Infof("Creating Secret: %s", consts.Secret)
-	if err = kubeClient.CreateResources(ctx, webhookCertSecret); err != nil {
+	if err = kubeClient.Create(ctx, webhookCertSecret); err != nil {
 		return err
 	}
 	return nil
 }
 
 // injectCert apply patch to ValidatingWebhookConfiguration and MutatingWebhookConfiguration
-func (o *generateOptions) injectCert(ctx context.Context, kubeClient *kube.Client, caKeypair *certificates) error {
+func (o *generateOptions) injectCert(ctx context.Context, kubeClient client.Client, caKeypair *certificates) error {
 	validatingConf := &admissionregistrationv1.ValidatingWebhookConfiguration{}
-	if err := kubeClient.GetResources(ctx, client.ObjectKey{Name: consts.Webhook}, validatingConf); err != nil {
+	if err := kubeClient.Get(ctx, client.ObjectKey{Name: consts.Webhook}, validatingConf); err != nil {
 		return err
 	}
 	newValidatingConf := validatingConf.DeepCopy()
 	newValidatingConf.Webhooks[0].ClientConfig.CABundle = caKeypair.certPem
 
 	klog.Info("Trying to patch ValidatingWebhookConfiguration adding the caBundle.")
-	for i := 0; i <= 5; i++ {
-		err := kubeClient.PatchResources(ctx, newValidatingConf, client.MergeFrom(validatingConf))
+	for i := 0; i <= consts.MaxTryPatchCount; i++ {
+		err := kubeClient.Patch(ctx, newValidatingConf, client.MergeFrom(validatingConf))
 		switch {
 		case err == nil:
 			break
-		case i == 5 && err != nil:
+		case i == consts.MaxTryPatchCount && err != nil:
 			klog.Errorf("Unable to patch ValidatingWebhookConfiguration %s", consts.Webhook)
 			return err
 		default:
@@ -238,7 +237,7 @@ func (o *generateOptions) injectCert(ctx context.Context, kubeClient *kube.Clien
 	}
 
 	mutatingConf := &admissionregistrationv1.MutatingWebhookConfiguration{}
-	if err := kubeClient.GetResources(ctx, client.ObjectKey{Name: consts.Webhook}, mutatingConf); err != nil {
+	if err := kubeClient.Get(ctx, client.ObjectKey{Name: consts.Webhook}, mutatingConf); err != nil {
 		return err
 	}
 	newMutatingConf := mutatingConf.DeepCopy()
@@ -246,12 +245,12 @@ func (o *generateOptions) injectCert(ctx context.Context, kubeClient *kube.Clien
 	newMutatingConf.Webhooks[1].ClientConfig.CABundle = caKeypair.certPem
 
 	klog.Info("Trying to patch MutatingWebhookConfiguration adding the caBundle.")
-	for i := 0; i <= 5; i++ {
-		err := kubeClient.PatchResources(ctx, newMutatingConf, client.MergeFrom(mutatingConf))
+	for i := 0; i <= consts.MaxTryPatchCount; i++ {
+		err := kubeClient.Patch(ctx, newMutatingConf, client.MergeFrom(mutatingConf))
 		switch {
 		case err == nil:
 			break
-		case i == 5 && err != nil:
+		case i == consts.MaxTryPatchCount && err != nil:
 			klog.Errorf("Unable to patch MutatingWebhookConfiguration %s", consts.Webhook)
 			return err
 		default:
