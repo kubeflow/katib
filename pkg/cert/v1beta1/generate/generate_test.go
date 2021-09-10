@@ -23,7 +23,6 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 	"log"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -151,7 +150,7 @@ func TestGenerate(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			if err := executeGeneratorCommand(test.objects, testNamespace); (err != nil) != test.wantError {
-				t.Errorf("expected error, got '%v'\n", err)
+				t.Errorf("wantError: %v, got: '%v'\n", test.wantError, err)
 			}
 		})
 	}
@@ -159,11 +158,8 @@ func TestGenerate(t *testing.T) {
 }
 
 func executeGeneratorCommand(kubeResources []client.Object, namespace string) error {
-	scm := runtime.NewScheme()
-	if err := scheme.AddToScheme(scm); err != nil {
-		log.Fatal(err)
-	}
-	fakeClientBuilder := fake.NewClientBuilder().WithScheme(scm)
+
+	fakeClientBuilder := fake.NewClientBuilder().WithScheme(scheme.Scheme)
 	if len(kubeResources) > 0 {
 		for _, r := range kubeResources {
 			fakeClientBuilder.WithObjects(r)
