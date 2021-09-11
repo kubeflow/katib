@@ -103,7 +103,7 @@ func TestGenerate(t *testing.T) {
 		objects         []client.Object
 	}{
 		{
-			testDescription: "generate successfully",
+			testDescription: "Generate successfully",
 			err:             false,
 			objects: []client.Object{
 				testGeneratorJob,
@@ -112,7 +112,7 @@ func TestGenerate(t *testing.T) {
 			},
 		},
 		{
-			testDescription: "old secret exists",
+			testDescription: "There is old Secret, katib-webhook-cert",
 			err:             false,
 			objects: []client.Object{
 				testGeneratorJob,
@@ -122,7 +122,7 @@ func TestGenerate(t *testing.T) {
 			},
 		},
 		{
-			testDescription: "missing katib-cert-generator job",
+			testDescription: "There is not Job, katib-cert-generator",
 			err:             true,
 			objects: []client.Object{
 				testValidatingWebhook,
@@ -130,7 +130,7 @@ func TestGenerate(t *testing.T) {
 			},
 		},
 		{
-			testDescription: "missing validatingWebhookConfiguration",
+			testDescription: "There is not ValidatingWebhookConfiguration",
 			err:             true,
 			objects: []client.Object{
 				testGeneratorJob,
@@ -138,7 +138,7 @@ func TestGenerate(t *testing.T) {
 			},
 		},
 		{
-			testDescription: "missing mutatingWebhookConfiguration",
+			testDescription: "There is not MutatingWebhookConfiguration",
 			err:             true,
 			objects: []client.Object{
 				testGeneratorJob,

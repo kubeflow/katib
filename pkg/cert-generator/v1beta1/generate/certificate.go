@@ -23,6 +23,7 @@ import (
 	"encoding/pem"
 )
 
+// certificates contains all certificates for katib-webhook-cert.
 type certificates struct {
 	certPem []byte
 	keyPem  []byte
@@ -30,6 +31,7 @@ type certificates struct {
 	key     *rsa.PrivateKey
 }
 
+// encode creates PEM key and convert DER to CRT.
 func encode(rawKey *rsa.PrivateKey, der []byte) (*certificates, error) {
 	keyPem := &bytes.Buffer{}
 	if err := pem.Encode(keyPem, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(rawKey)}); err != nil {

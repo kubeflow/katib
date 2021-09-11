@@ -36,11 +36,13 @@ import (
 	"time"
 )
 
+// generateOptions contains values for all certificates.
 type generateOptions struct {
 	namespace         string
 	fullServiceDomain string
 }
 
+// NewGenerateCmd setup `generate` subcommand.
 func NewGenerateCmd(kubeClient client.Client) *cobra.Command {
 	o := &generateOptions{}
 	cmd := &cobra.Command{
@@ -60,6 +62,7 @@ func NewGenerateCmd(kubeClient client.Client) *cobra.Command {
 	return cmd
 }
 
+// run is main function for `generate` subcommand.
 func (o *generateOptions) run(ctx context.Context, kubeClient client.Client) error {
 	o.fullServiceDomain = strings.Join([]string{consts.Service, o.namespace, "svc"}, ".")
 
@@ -82,6 +85,7 @@ func (o *generateOptions) run(ctx context.Context, kubeClient client.Client) err
 	return nil
 }
 
+// createCACert creates the self-signed CA certificate and private key.
 func (o *generateOptions) createCACert() (*certificates, error) {
 	now := time.Now()
 	template := &x509.Certificate{
@@ -114,6 +118,7 @@ func (o *generateOptions) createCACert() (*certificates, error) {
 	return encode(rawKey, der)
 }
 
+// createCert creates public certificate and private key signed with self-signed CA certificate and private key.
 func (o *generateOptions) createCert(caKeyPair *certificates) (*certificates, error) {
 	now := time.Now()
 	template := &x509.Certificate{
@@ -147,7 +152,7 @@ func (o *generateOptions) createCert(caKeyPair *certificates) (*certificates, er
 	return encode(rawKey, der)
 }
 
-// createWebhookCertSecret create Secret embedded ca.key, ca.crt, tls.key and tls.cert
+// createWebhookCertSecret creates Secret embedded ca.key, ca.crt, tls.key and tls.crt.
 func (o *generateOptions) createWebhookCertSecret(ctx context.Context, kubeClient client.Client, caKeyPair *certificates, keyPair *certificates) error {
 
 	certGeneratorJob := &batchv1.Job{}
@@ -205,7 +210,7 @@ func (o *generateOptions) createWebhookCertSecret(ctx context.Context, kubeClien
 	return nil
 }
 
-// injectCert apply patch to ValidatingWebhookConfiguration and MutatingWebhookConfiguration
+// injectCert applies patch to ValidatingWebhookConfiguration and MutatingWebhookConfiguration.
 func (o *generateOptions) injectCert(ctx context.Context, kubeClient client.Client, caKeypair *certificates) error {
 	validatingConf := &admissionregistrationv1.ValidatingWebhookConfiguration{}
 	if err := kubeClient.Get(ctx, client.ObjectKey{Name: consts.Webhook}, validatingConf); err != nil {
