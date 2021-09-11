@@ -8,7 +8,6 @@ webhooks:
     failurePolicy: Ignore
     admissionReviewVersions:
       - v1
-      - v1beta1
     clientConfig:
       caBundle: Cg==
       service:
@@ -36,7 +35,6 @@ webhooks:
     failurePolicy: Ignore
     admissionReviewVersions:
       - v1
-      - v1beta1
     clientConfig:
       caBundle: Cg==
       service:
@@ -58,7 +56,6 @@ webhooks:
     failurePolicy: Ignore
     admissionReviewVersions:
       - v1
-      - v1beta1
     clientConfig:
       caBundle: Cg==
       service:
