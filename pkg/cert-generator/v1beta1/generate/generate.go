@@ -222,18 +222,9 @@ func (o *generateOptions) injectCert(ctx context.Context, kubeClient client.Clie
 	newValidatingConf.Webhooks[0].ClientConfig.CABundle = caKeypair.certPem
 
 	klog.Info("Trying to patch ValidatingWebhookConfiguration adding the caBundle.")
-	for i := 0; i <= consts.MaxTryPatchCount; i++ {
-		err := kubeClient.Patch(ctx, newValidatingConf, client.MergeFrom(validatingConf))
-		switch {
-		case err == nil:
-			break
-		case i == consts.MaxTryPatchCount && err != nil:
-			klog.Errorf("Unable to patch ValidatingWebhookConfiguration %s", consts.Webhook)
-			return err
-		default:
-			klog.Warning("Webhook are not patched. Retrying in 5s...")
-			time.Sleep(time.Second * 5)
-		}
+	if err := kubeClient.Patch(ctx, newValidatingConf, client.MergeFrom(validatingConf)); err != nil {
+		klog.Errorf("Unable to patch ValidatingWebhookConfiguration %s", consts.Webhook)
+		return err
 	}
 
 	mutatingConf := &admissionregistrationv1.MutatingWebhookConfiguration{}
@@ -245,18 +236,10 @@ func (o *generateOptions) injectCert(ctx context.Context, kubeClient client.Clie
 	newMutatingConf.Webhooks[1].ClientConfig.CABundle = caKeypair.certPem
 
 	klog.Info("Trying to patch MutatingWebhookConfiguration adding the caBundle.")
-	for i := 0; i <= consts.MaxTryPatchCount; i++ {
-		err := kubeClient.Patch(ctx, newMutatingConf, client.MergeFrom(mutatingConf))
-		switch {
-		case err == nil:
-			break
-		case i == consts.MaxTryPatchCount && err != nil:
-			klog.Errorf("Unable to patch MutatingWebhookConfiguration %s", consts.Webhook)
-			return err
-		default:
-			klog.Warning("Webhook are not patched. Retrying in 5s...")
-			time.Sleep(time.Second * 5)
-		}
+	if err := kubeClient.Patch(ctx, newMutatingConf, client.MergeFrom(mutatingConf)); err != nil {
+		klog.Errorf("Unable to patch MutatingWebhookConfiguration %s", consts.Webhook)
+		return err
 	}
+
 	return nil
 }
