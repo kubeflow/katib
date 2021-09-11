@@ -30,17 +30,26 @@ type certificates struct {
 	key     *rsa.PrivateKey
 }
 
-func (c *certificates) encode(rawKey, rawDer []byte) error {
-	key := &bytes.Buffer{}
-	if err := pem.Encode(key, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: rawKey}); err != nil {
-		return err
+func encode(rawKey *rsa.PrivateKey, der []byte) (*certificates, error) {
+	keyPem := &bytes.Buffer{}
+	if err := pem.Encode(keyPem, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(rawKey)}); err != nil {
+		return nil, err
 	}
-	c.keyPem = key.Bytes()
 
-	cert := &bytes.Buffer{}
-	if err := pem.Encode(cert, &pem.Block{Type: "CERTIFICATE", Bytes: rawDer}); err != nil {
-		return err
+	certPem := &bytes.Buffer{}
+	if err := pem.Encode(certPem, &pem.Block{Type: "CERTIFICATE", Bytes: der}); err != nil {
+		return nil, err
 	}
-	c.certPem = cert.Bytes()
-	return nil
+
+	cert, err := x509.ParseCertificate(der)
+	if err != nil {
+		return nil, err
+	}
+
+	return &certificates{
+		certPem: certPem.Bytes(),
+		keyPem:  keyPem.Bytes(),
+		cert:    cert,
+		key:     rawKey,
+	}, nil
 }

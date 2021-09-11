@@ -63,26 +63,26 @@ func NewGenerateCmd(kubeClient client.Client) *cobra.Command {
 func (o *generateOptions) run(ctx context.Context, kubeClient client.Client) error {
 	o.fullServiceDomain = strings.Join([]string{consts.Service, o.namespace, "svc"}, ".")
 
-	caKeyPair := &certificates{}
-	if err := o.createCACert(caKeyPair); err != nil {
+	caKeyPair, err := o.createCACert()
+	if err != nil {
 		return err
 	}
-	keyPair := &certificates{}
-	if err := o.createCert(caKeyPair, keyPair); err != nil {
+	keyPair, err := o.createCert(caKeyPair)
+	if err != nil {
 		return err
 	}
 
-	if err := o.createWebhookCertSecret(ctx, kubeClient, caKeyPair, keyPair); err != nil {
+	if err = o.createWebhookCertSecret(ctx, kubeClient, caKeyPair, keyPair); err != nil {
 		return err
 	}
-	if err := o.injectCert(ctx, kubeClient, caKeyPair); err != nil {
+	if err = o.injectCert(ctx, kubeClient, caKeyPair); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (o *generateOptions) createCACert(caKeyPair *certificates) error {
+func (o *generateOptions) createCACert() (*certificates, error) {
 	now := time.Now()
 	template := &x509.Certificate{
 		SerialNumber: big.NewInt(0),
@@ -100,26 +100,21 @@ func (o *generateOptions) createCACert(caKeyPair *certificates) error {
 		IsCA:                  true,
 	}
 
-	var err error
-	caKeyPair.key, err = rsa.GenerateKey(rand.Reader, 2048)
+	klog.Info("Generating the self-signed CA certificate and private key.")
+	rawKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	der, err := x509.CreateCertificate(rand.Reader, template, template, caKeyPair.key.Public(), caKeyPair.key)
+
+	der, err := x509.CreateCertificate(rand.Reader, template, template, rawKey.Public(), rawKey)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if err = caKeyPair.encode(x509.MarshalPKCS1PrivateKey(caKeyPair.key), der); err != nil {
-		return err
-	}
-	if caKeyPair.cert, err = x509.ParseCertificate(der); err != nil {
-		return err
-	}
-	klog.Info("Generate the self-signed CA certificate and private key.")
-	return nil
+
+	return encode(rawKey, der)
 }
 
-func (o *generateOptions) createCert(caKeyPair *certificates, keyPair *certificates) error {
+func (o *generateOptions) createCert(caKeyPair *certificates) (*certificates, error) {
 	now := time.Now()
 	template := &x509.Certificate{
 		SerialNumber: big.NewInt(1),
@@ -138,20 +133,18 @@ func (o *generateOptions) createCert(caKeyPair *certificates, keyPair *certifica
 		BasicConstraintsValid: false,
 	}
 
-	var err error
-	keyPair.key, err = rsa.GenerateKey(rand.Reader, 2048)
+	klog.Info("Generating public certificate and private key signed with self-singed CA cert and private key.")
+	rawKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	der, err := x509.CreateCertificate(rand.Reader, template, caKeyPair.cert, keyPair.key.Public(), caKeyPair.key)
+
+	der, err := x509.CreateCertificate(rand.Reader, template, caKeyPair.cert, rawKey.Public(), caKeyPair.key)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if err = keyPair.encode(x509.MarshalPKCS1PrivateKey(keyPair.key), der); err != nil {
-		return err
-	}
-	klog.Info("Generate public certificate and private key signed with self-singed CA cert and private key.")
-	return nil
+
+	return encode(rawKey, der)
 }
 
 // createWebhookCertSecret create Secret embedded ca.key, ca.crt, tls.key and tls.cert
