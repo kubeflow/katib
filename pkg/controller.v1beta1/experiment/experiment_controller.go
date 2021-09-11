@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/spf13/viper"
@@ -354,18 +355,23 @@ func (r *ReconcileExperiment) createTrials(instance *experimentsv1beta1.Experime
 		return err
 	}
 	var trialNames []string
+	var errStrings []string
 	for _, trial := range trials {
 		if err = r.createTrialInstance(instance, &trial); err != nil {
 			logger.Error(err, "Create trial instance error", "trial", trial)
+			errStrings = append(errStrings, err.Error())
 			continue
 		}
 		trialNames = append(trialNames, trial.Name)
+	}
+	// Failed to reconcile all trials
+	if len(trialNames) == 0 && len(errStrings) != 0 {
+		return fmt.Errorf(strings.Join(errStrings, "\n"))
 	}
 	// Print created Trial names
 	if len(trialNames) != 0 {
 		logger.Info("Created Trials", "trialNames", trialNames)
 	}
-
 	return nil
 }
 
