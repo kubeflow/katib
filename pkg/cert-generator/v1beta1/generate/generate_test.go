@@ -26,6 +26,7 @@ import (
 	"log"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"strings"
 	"testing"
 )
 
@@ -50,11 +51,11 @@ func TestGenerate(t *testing.T) {
 			Kind:       "ValidatingWebhookConfiguration",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "katib.kubeflow.org",
+			Name: consts.Webhook,
 		},
 		Webhooks: []admissionregistration.ValidatingWebhook{
 			{
-				Name: "validator.experiment.katib.kubeflow.org",
+				Name: strings.Join([]string{"validator.experiment", consts.Webhook}, "."),
 				ClientConfig: admissionregistration.WebhookClientConfig{
 					CABundle: []byte("CG=="),
 				},
@@ -67,19 +68,19 @@ func TestGenerate(t *testing.T) {
 			Kind:       "MutatingWebhookConfiguration",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "katib.kubeflow.org",
+			Name: consts.Webhook,
 		},
 		Webhooks: []admissionregistration.MutatingWebhook{
 			{
-				Name: "defaulter.experiment.katib.kubeflow.org",
+				Name: strings.Join([]string{"defaulter.experiment", consts.Webhook}, "."),
 				ClientConfig: admissionregistration.WebhookClientConfig{
 					CABundle: []byte("CG=="),
 				},
 			},
 			{
-				Name: "mutator.pod.katib.kubeflow.org",
+				Name: strings.Join([]string{"mutator.pod", consts.Webhook}, "."),
 				ClientConfig: admissionregistration.WebhookClientConfig{
-					CABundle: []byte("CG"),
+					CABundle: []byte("CG=="),
 				},
 			},
 		},

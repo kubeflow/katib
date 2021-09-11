@@ -88,7 +88,7 @@ func (o *generateOptions) createCACert(caKeyPair *certificates) error {
 		SerialNumber: big.NewInt(0),
 		Subject: pkix.Name{
 			CommonName:   consts.CAName,
-			Organization: []string{"katib"},
+			Organization: []string{consts.Katib},
 		},
 		DNSNames: []string{
 			consts.CAName,

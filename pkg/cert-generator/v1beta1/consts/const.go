@@ -22,5 +22,6 @@ const (
 	JobName          = "katib-cert-generator"
 	Secret           = "katib-webhook-cert"
 	Webhook          = "katib.kubeflow.org"
+	Katib            = "katib"
 	MaxTryPatchCount = 5
 )
