@@ -98,13 +98,13 @@ func TestGenerate(t *testing.T) {
 	}
 
 	tests := []struct {
-		name      string
-		wantError bool
-		objects   []client.Object
+		testDescription string
+		err             bool
+		objects         []client.Object
 	}{
 		{
-			name:      "generate successfully",
-			wantError: false,
+			testDescription: "generate successfully",
+			err:             false,
 			objects: []client.Object{
 				testGeneratorJob,
 				testValidatingWebhook,
@@ -112,8 +112,8 @@ func TestGenerate(t *testing.T) {
 			},
 		},
 		{
-			name:      "old secret exists",
-			wantError: false,
+			testDescription: "old secret exists",
+			err:             false,
 			objects: []client.Object{
 				testGeneratorJob,
 				testValidatingWebhook,
@@ -122,24 +122,24 @@ func TestGenerate(t *testing.T) {
 			},
 		},
 		{
-			name:      "missing katib-cert-generator job",
-			wantError: true,
+			testDescription: "missing katib-cert-generator job",
+			err:             true,
 			objects: []client.Object{
 				testValidatingWebhook,
 				testMutatingWebhook,
 			},
 		},
 		{
-			name:      "missing validatingWebhookConfiguration",
-			wantError: true,
+			testDescription: "missing validatingWebhookConfiguration",
+			err:             true,
 			objects: []client.Object{
 				testGeneratorJob,
 				testMutatingWebhook,
 			},
 		},
 		{
-			name:      "missing mutatingWebhookConfiguration",
-			wantError: true,
+			testDescription: "missing mutatingWebhookConfiguration",
+			err:             true,
 			objects: []client.Object{
 				testGeneratorJob,
 				testValidatingWebhook,
@@ -148,9 +148,9 @@ func TestGenerate(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			if err := executeGeneratorCommand(test.objects, testNamespace); (err != nil) != test.wantError {
-				t.Errorf("wantError: %v, got: '%v'\n", test.wantError, err)
+		t.Run(test.testDescription, func(t *testing.T) {
+			if err := executeGeneratorCommand(test.objects, testNamespace); (err != nil) != test.err {
+				t.Errorf("expected error: %v, got: '%v'\n", test.err, err)
 			}
 		})
 	}
