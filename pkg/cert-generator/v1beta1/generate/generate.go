@@ -42,7 +42,7 @@ type generateOptions struct {
 	fullServiceDomain string
 }
 
-// NewGenerateCmd setup `generate` subcommand.
+// NewGenerateCmd sets up `generate` subcommand.
 func NewGenerateCmd(kubeClient client.Client) *cobra.Command {
 	o := &generateOptions{}
 	cmd := &cobra.Command{

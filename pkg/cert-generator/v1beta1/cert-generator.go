@@ -23,7 +23,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// NewKatibCertGeneratorCmd setup `katib-cert-generator` command.
+// NewKatibCertGeneratorCmd sets up `katib-cert-generator` command.
 func NewKatibCertGeneratorCmd(kubeClient client.Client) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   consts.JobName,
