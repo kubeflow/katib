@@ -20,90 +20,74 @@ It can tune hyperparameters of applications written in any language of the
 users’ choice and natively supports many ML frameworks, such as TensorFlow,
 MXNet, PyTorch, XGBoost, and others.
 
-## Getting Started
-
-Follow the
-[getting-started guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/)
-on the Kubeflow website.
-
-## Name
+Katib can perform training jobs using any Kubernetes
+[Custom Resources](https://www.kubeflow.org/docs/components/katib/trial-template/)
+with out of the box support for [Kubeflow Training Operators](https://github.com/kubeflow/tf-operator),
+[Argo Workflows](https://github.com/argoproj/argo-workflows), [Tekton Pipelines](https://github.com/tektoncd/pipeline)
+and many more.
 
 Katib stands for `secretary` in Arabic.
 
-## Concepts in Katib
+# Installation
 
-For a detailed description of the concepts in Katib and AutoML, check the
-[Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/overview/).
+## Prerequisites
 
-Katib has the concepts of `Experiment`, `Suggestion`, `Trial` and `Worker Job`.
+- Kubernetes >= 1.17
+- `kubectl` >= 1.21
 
-### Experiment
+## Latest Version
 
-An `Experiment` represents a single optimization run over a feasible space.
-Each `Experiment` contains a configuration:
+Install Katib with the single command:
 
-1. **Objective**: What you want to optimize.
-2. **Search Space**: Constraints for configurations describing the feasible space.
-3. **Search Algorithm**: How to find the optimal configurations.
+```
+kubectl apply -k "github.com/kubeflow/katib.git/manifests/installs/katib-standalone?ref=master"
+```
 
-Katib `Experiment` is defined as a CRD. Check the detailed guide to
-[configuring and running a Katib `Experiment`](https://kubeflow.org/docs/components/katib/experiment/)
-in the Kubeflow docs.
+## Release Version
 
-### Suggestion
+For the specific release (for example `v0.11.0`) run this command:
 
-A `Suggestion` is a set of hyperparameter values that the hyperparameter tuning
-process has proposed. Katib creates a `Trial` to evaluate
-the suggested set of values.
+```
+kubectl apply -k "github.com/kubeflow/katib.git/manifests/installs/katib-standalone?ref=v0.11.0"
+```
 
-Katib `Suggestion` is defined as a CRD.
+Learn more about various Katib installs in the
+[Kubeflow guides](https://www.kubeflow.org/docs/components/katib/hyperparameter/#katib-setup)
 
-### Trial
-
-A `Trial` is one iteration of the hyperparameter tuning process.
-A `Trial` corresponds to one worker job instance with a list of parameter
-assignments. The list of parameter assignments corresponds to a `Suggestion`.
-
-Each `Experiment` runs several `Trials`. The `Experiment` runs the `Trials` until
-it reaches either the objective or the configured maximum number of `Trials`.
-
-Katib `Trial` is defined as a CRD.
-
-### Worker Job
-
-The `Worker Job` is the process that runs to evaluate a `Trial` and calculate
-its objective value.
-
-The `Worker Job` can be any type of Kubernetes resource or
-[Kubernetes CRD](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/).
-Follow the [`Trial` template guide](https://www.kubeflow.org/docs/components/katib/trial-template/#custom-resource)
-to support your own Kubernetes resource in Katib.
-
-Katib has these CRD examples in upstream:
-
-- [Kubernetes `Job`](https://kubernetes.io/docs/concepts/workloads/controllers/job/)
-
-- [Kubeflow `TFJob`](https://www.kubeflow.org/docs/components/training/tftraining/)
-
-- [Kubeflow `PyTorchJob`](https://www.kubeflow.org/docs/components/training/pytorch/)
-
-- [Kubeflow `MPIJob`](https://www.kubeflow.org/docs/components/training/mpi/)
-
-- [Kubeflow `XGBoostJob`](https://github.com/kubeflow/xgboost-operator)
-
-- [Tekton `Pipelines`](./examples/v1beta1/tekton)
-
-- [Argo `Workflows`](./examples/v1beta1/argo)
-
-Thus, Katib supports multiple frameworks with the help of different job kinds.
-
-### Search Algorithms
+# Search Algorithms
 
 Katib currently supports several search algorithms. Follow the
 [Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/experiment/#search-algorithms-in-detail)
 to know more about each algorithm.
 
-#### Hyperparameter Tuning
+<table>
+  <tbody>
+    <tr align="center">
+      <td>
+        <b>Hyperparameter Tuning</b>
+      </td>
+      <td>
+        <b>Neural Architecture Search</b>
+      </td>
+      <td>
+        <b>Early Stopping</b>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <b>Random Search</b>
+      </td>
+      <td>
+        <b>ENAS</b>
+      </td>
+      <td>
+        <b>MedianStop</b>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+## Hyperparameter Tuning
 
 - [Random Search](https://en.wikipedia.org/wiki/Hyperparameter_optimization#Random_search)
 - [Tree of Parzen Estimators (TPE)](https://papers.nips.cc/paper/4443-algorithms-for-hyper-parameter-optimization.pdf)
@@ -114,7 +98,7 @@ to know more about each algorithm.
 - [Covariance Matrix Adaptation Evolution Strategy (CMA-ES)](https://arxiv.org/abs/1604.00772)
 - [Sobol's Quasirandom Sequence](https://dl.acm.org/doi/10.1145/641876.641879)
 
-#### Neural Architecture Search
+## Neural Architecture Search
 
 - [Efficient Neural Architecture Search (ENAS)](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1beta1/nas/enas)
 - [Differentiable Architecture Search (DARTS)](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1beta1/nas/darts)
