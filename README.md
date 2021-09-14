@@ -92,15 +92,25 @@ to know more about each algorithm.
       <td>
         <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">DARTS</a>
       </td>
+      <td>
+      </td>
     </tr>
     <tr align="center">
       <td>
         <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">Bayesian Optimization</a>
       </td>
+      <td>
+      </td>
+      <td>
+      </td>
     </tr>
     <tr align="center">
       <td>
         <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">TPE</a>
+      </td>
+      <td>
+      </td>
+      <td>
       </td>
     </tr>
   </tbody>
