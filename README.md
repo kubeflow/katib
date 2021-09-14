@@ -17,8 +17,9 @@ Katib supports
 
 Katib is the project which is agnostic to machine learning (ML) frameworks.
 It can tune hyperparameters of applications written in any language of the
-users’ choice and natively supports many ML frameworks, such as TensorFlow,
-MXNet, PyTorch, XGBoost, and others.
+users’ choice and natively supports many ML frameworks, such as
+[TensorFlow](https://www.tensorflow.org/), [Apache MXNet](https://mxnet.apache.org/),
+[PyTorch](https://pytorch.org/), [XGBoost](https://xgboost.readthedocs.io/en/latest/), and others.
 
 Katib can perform training jobs using any Kubernetes
 [Custom Resources](https://www.kubeflow.org/docs/components/katib/trial-template/)
@@ -75,13 +76,31 @@ to know more about each algorithm.
     </tr>
     <tr align="center">
       <td>
-        <b>Random Search</b>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">Random Search</a>
       </td>
       <td>
-        <b>ENAS</b>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">ENAS</a>
       </td>
       <td>
-        <b>MedianStop</b>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">Median Stop</a>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">Grid Search</a>
+      </td>
+      <td>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">DARTS</a>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">Bayesian Optimization</a>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">TPE</a>
       </td>
     </tr>
   </tbody>
