@@ -12,8 +12,6 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: katib-cert-generator
-      securityContext:
-        runAsNonRoot: true
       containers:
         - name: cert-generator
           image: docker.io/kubeflowkatib/cert-generator
