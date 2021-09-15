@@ -141,7 +141,7 @@ service in Katib.
 For the latest Katib version run this command:
 
 ```
-kubectl apply -k "github.com/kubeflow/katib.git/manifests/installs/katib-standalone?ref=master"
+kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib-standalone?ref=master"
 ```
 
 ## Release Version
@@ -149,7 +149,7 @@ kubectl apply -k "github.com/kubeflow/katib.git/manifests/installs/katib-standal
 For the specific Katib release (for example `v0.11.0`) run this command:
 
 ```
-kubectl apply -k "github.com/kubeflow/katib.git/manifests/installs/katib-standalone?ref=v0.11.0"
+kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib-standalone?ref=v0.11.0"
 ```
 
 Learn more about various Katib installs in the
