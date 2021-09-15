@@ -57,7 +57,7 @@ Learn more about various Katib installs in the
 
 # Search Algorithms
 
-Katib currently supports several search algorithms. Follow the
+Katib supports several search algorithms. Follow the
 [Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/experiment/#search-algorithms-in-detail)
 to know more about each algorithm.
 
@@ -79,34 +79,70 @@ to know more about each algorithm.
         <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">Random Search</a>
       </td>
       <td>
-        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">ENAS</a>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#neural-architecture-search-based-on-enas">ENAS</a>
       </td>
       <td>
-        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">Median Stop</a>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
-        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">Grid Search</a>
-      </td>
-      <td>
-        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">DARTS</a>
-      </td>
-      <td>
+        <a href="https://www.kubeflow.org/docs/components/katib/early-stopping/#median-stopping-rule">Median Stop</a>
       </td>
     </tr>
     <tr align="center">
       <td>
-        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">Bayesian Optimization</a>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#grid-search">Grid Search</a>
       </td>
       <td>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#differentiable-architecture-search-darts">DARTS</a>
       </td>
       <td>
       </td>
     </tr>
     <tr align="center">
       <td>
-        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#random-search">TPE</a>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#bayesian-optimization">Bayesian Optimization</a>
+      </td>
+      <td>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#tree-of-parzen-estimators-tpe">TPE</a>
+      </td>
+      <td>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#multivariate-tpe">Multivariate TPE</a>
+      </td>
+      <td>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#covariance-matrix-adaptation-evolution-strategy-cma-es">CMA-ES</a>
+      </td>
+      <td>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#sobols-quasirandom-sequence">Sobol's Quasirandom Sequence</a>
+      </td>
+      <td>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#hyperband">HyperBand</a>
       </td>
       <td>
       </td>
@@ -116,195 +152,29 @@ to know more about each algorithm.
   </tbody>
 </table>
 
-## Hyperparameter Tuning
+Follow [this guide](/docs/new-algorithm-service.md) to implement your custom algorithm
+service in Katib.
 
-- [Random Search](https://en.wikipedia.org/wiki/Hyperparameter_optimization#Random_search)
-- [Tree of Parzen Estimators (TPE)](https://papers.nips.cc/paper/4443-algorithms-for-hyper-parameter-optimization.pdf)
-- [Multivariate TPE](https://tech.preferred.jp/en/blog/multivariate-tpe-makes-optuna-even-more-powerful/)
-- [Grid Search](https://en.wikipedia.org/wiki/Hyperparameter_optimization#Grid_search)
-- [Hyperband](https://arxiv.org/pdf/1603.06560.pdf)
-- [Bayesian Optimization](https://arxiv.org/pdf/1012.2599.pdf)
-- [Covariance Matrix Adaptation Evolution Strategy (CMA-ES)](https://arxiv.org/abs/1604.00772)
-- [Sobol's Quasirandom Sequence](https://dl.acm.org/doi/10.1145/641876.641879)
+# Documentation
 
-## Neural Architecture Search
+Run your first Katib Experiment in the
+[getting started guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#example-using-random-algorithm).
 
-- [Efficient Neural Architecture Search (ENAS)](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1beta1/nas/enas)
-- [Differentiable Architecture Search (DARTS)](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1beta1/nas/darts)
+Learn about Katib concepts in the
+[Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/overview/#katib-concepts).
 
-## Components in Katib
+Know more about various Katib interfaces in the
+[introduction guide](https://www.kubeflow.org/docs/components/katib/overview/#katib-interfaces).
 
-Katib consists of several components as shown below. Each component is running
-on Kubernetes as a deployment. Each component communicates with others via GRPC
-and the API is defined at `pkg/apis/manager/v1beta1/api.proto`.
+TODO (andreyvelich): Add Katib components section from the website.
 
-- Katib main components:
-  - `katib-db-manager` - the GRPC API server of Katib which is the DB Interface.
-  - `katib-mysql` - the data storage backend of Katib using mysql.
-  - `katib-ui` - the user interface of Katib.
-  - `katib-controller` - the controller for the Katib CRDs in Kubernetes.
+Learn more about Katib in the [presentations and demos list](./docs/presentations.md).
 
-## Web UI
-
-Katib provides a Web UI.
-During 1.3 we've worked on a new iteration of the UI, which is rewritten in
-Angular and is utilizing the common code of the other Kubeflow [dashboards](https://github.com/kubeflow/kubeflow/tree/master/components/crud-web-apps).
-
-The users are currently able to list, delete and create Experiments in their
-cluster via this new UI as well as inspect the owned Trials. One important
-missing functionalities are the ability to edit the Trial templates ConfigMaps
-and view Neural Architecture Search models. Check [this Project](https://github.com/kubeflow/katib/projects/1)
-to monitor the current progress.
-
-![katibui](./docs/images/katib-ui.png)
-
-To use the old Katib UI you can update the Katib image `newName` with the previous
-image tag `docker.io/kubeflowkatib/katib-ui:v0.11.1` in the [Kustomize](./manifests/v1beta1/installs/katib-standalone/kustomization.yaml#L29)
-manifests.
-
-## GRPC API documentation
-
-Check the [Katib v1beta1 API reference docs](https://www.kubeflow.org/docs/reference/katib/v1beta1/katib/).
-
-## Installation
-
-For standard installation of Katib with support for all job operators,
-install Kubeflow.
-Follow the documentation:
-
-- [Kubeflow installation guide](https://www.kubeflow.org/docs/started/getting-started/)
-- [Kubeflow Katib guides](https://www.kubeflow.org/docs/components/katib/).
-
-If you install Katib with other Kubeflow components,
-you can't submit Katib jobs in Kubeflow namespace. Check the
-[Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/hyperparameter/#example-using-random-algorithm)
-to know more about it.
-
-Alternatively, if you want to install Katib manually with TF and PyTorch
-operators support, follow these steps:
-
-Create Kubeflow namespace:
-
-```
-kubectl create namespace kubeflow
-```
-
-Clone Kubeflow manifest repository:
-
-```
-git clone -b v1.2-branch git@github.com:kubeflow/manifests.git
-Set `MANIFESTS_DIR` to the cloned folder.
-export MANIFESTS_DIR=<cloned-folder>
-```
-
-### TF operator
-
-For installing TF operator, run the following:
-
-```
-cd "${MANIFESTS_DIR}/tf-training/tf-job-crds/base"
-kustomize build . | kubectl apply -f -
-cd "${MANIFESTS_DIR}/tf-training/tf-job-operator/base"
-kustomize build . | kubectl apply -f -
-```
-
-### PyTorch operator
-
-For installing PyTorch operator, run the following:
-
-```
-cd "${MANIFESTS_DIR}/pytorch-job/pytorch-job-crds/base"
-kustomize build . | kubectl apply -f -
-cd "${MANIFESTS_DIR}/pytorch-job/pytorch-operator/base/"
-kustomize build . | kubectl apply -f -
-```
-
-### Katib
-
-Note that your [kustomize](https://kustomize.io/) version should be >= 3.2.
-To install Katib run:
-
-```
-git clone git@github.com:kubeflow/katib.git
-make deploy
-```
-
-Check if all components are running successfully:
-
-```
-kubectl get pods -n kubeflow
-```
-
-Expected output:
-
-```
-NAME                                READY   STATUS    RESTARTS   AGE
-katib-controller-858d6cc48c-df9jc   1/1     Running   1          20m
-katib-db-manager-7966fbdf9b-w2tn8   1/1     Running   0          20m
-katib-mysql-7f8bc6956f-898f9        1/1     Running   0          20m
-katib-ui-7cf9f967bf-nm72p           1/1     Running   0          20m
-pytorch-operator-55f966b548-9gq9v   1/1     Running   0          20m
-tf-job-operator-796b4747d8-4fh82    1/1     Running   0          21m
-```
-
-### Running examples
-
-After deploy everything, you can run examples to verify the installation.
-
-This is an example for TF operator:
-
-```
-kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1beta1/tfjob-example.yaml
-```
-
-This is an example for PyTorch operator:
-
-```
-kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1beta1/pytorchjob-example.yaml
-```
-
-Check the
-[Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/hyperparameter/#example-using-random-algorithm)
-how to monitor your `Experiment` status.
-
-You can view your results in Katib UI.
-If you used standard installation, access the Katib UI via Kubeflow dashboard.
-Otherwise, port-forward the `katib-ui`:
-
-```
-kubectl -n kubeflow port-forward svc/katib-ui 8080:80
-```
-
-You can access the Katib UI using this URL: `http://localhost:8080/katib/`.
-
-### Katib SDK
-
-Katib supports Python SDK:
-
-- Check the [Katib v1beta1 SDK documentation](https://github.com/kubeflow/katib/tree/master/sdk/python/v1beta1).
-
-Run `make generate` to update Katib SDK.
-
-### Cleanups
-
-To delete installed TF and PyTorch operator run `kubectl delete -f`
-on the respective folders.
-
-To delete Katib run `make undeploy`.
-
-## Quick Start
-
-Please follow the
-[Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/hyperparameter/#examples)
-to submit your first Katib experiment.
-
-## Community
+# Community
 
 We are always growing our community and invite new users and AutoML enthusiasts
 to contribute to the Katib project. The following links provide information
 about getting involved in the community:
-
-- If you use Katib, please update [the adopters list](ADOPTERS.md).
 
 - Subscribe
   [to the calendar](https://calendar.google.com/calendar/u/0/r?cid=ZDQ5bnNpZWZzbmZna2Y5MW8wdThoMmpoazRAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ)
@@ -313,26 +183,22 @@ about getting involved in the community:
 - Check
   [the AutoML WG meeting notes](https://docs.google.com/document/d/1MChKfzrKAeFRtYqypFbMXL6ZIc_OgijjkvbqmwRV-64/edit).
 
-- Join
-  [the AutoML WG Slack channel](https://kubeflow.slack.com/archives/C018PMV53NW).
-
-- Learn more about Katib in
-  [the presentations and demos list](./docs/presentations.md).
-
-### Blog posts
-
-- [Kubeflow Katib: Scalable, Portable and Cloud Native System for AutoML](https://blog.kubeflow.org/katib/)
-  (by Andrey Velichkevich)
-
-### Events
-
-- [AutoML and Training WG Summit. 16th of July 2021](https://docs.google.com/document/d/1vGluSPHmAqEr8k9Dmm82RcQ-MVnqbYYSfnjMGB-aPuo/edit?usp=sharing)
+- If you use Katib, please update [the adopters list](ADOPTERS.md).
 
 ## Contributing
 
 Please feel free to test the system!
 [developer-guide.md](./docs/developer-guide.md) is a good starting point
 for developers.
+
+## Blog posts
+
+- [Kubeflow Katib: Scalable, Portable and Cloud Native System for AutoML](https://blog.kubeflow.org/katib/)
+  (by Andrey Velichkevich)
+
+## Events
+
+- [AutoML and Training WG Summit. 16th of July 2021](https://docs.google.com/document/d/1vGluSPHmAqEr8k9Dmm82RcQ-MVnqbYYSfnjMGB-aPuo/edit?usp=sharing)
 
 ## Citation
 
