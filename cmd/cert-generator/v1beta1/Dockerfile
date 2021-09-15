@@ -1,13 +1,29 @@
-FROM alpine:3.12.4
+# Build the Katib Cert Generatoe.
+FROM golang:alpine AS build-env
 
-ARG KUBECTL_VERSION="v1.19.3"
+WORKDIR /go/src/github.com/kubeflow/katib
 
-RUN apk add --update openssl
-RUN wget https://storage.googleapis.com/kubernetes-release/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl \
-  && chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+# Download packages.
+COPY go.mod .
+COPY go.sum .
+RUN go mod download -x
 
-COPY ./hack/cert-generator.sh /app/cert-generator.sh
-RUN chmod +x /app/cert-generator.sh
+# Copy sources.
+COPY cmd/ cmd/
+COPY pkg/ pkg/
 
+# Build the binary.
+RUN if [ "$(uname -m)" = "ppc64le" ]; then \
+    CGO_ENABLED=0 GOOS=linux GOARCH=ppc64le go build -a -o katib-cert-generator ./cmd/cert-generator/v1beta1; \
+    elif [ "$(uname -m)" = "aarch64" ]; then \
+    CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o katib-cert-generator ./cmd/cert-generator/v1beta1; \
+    else \
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o katib-cert-generator ./cmd/cert-generator/v1beta1; \
+    fi
+
+# Copy the cert-generator into a thin image.
+FROM gcr.io/distroless/static:nonroot
 WORKDIR /app
-ENTRYPOINT ["sh", "./cert-generator.sh"]
+COPY --from=build-env /go/src/github.com/kubeflow/katib/katib-cert-generator /app/
+USER 65532:65532
+ENTRYPOINT ["./katib-cert-generator"]
