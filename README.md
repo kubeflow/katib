@@ -29,32 +29,6 @@ and many more.
 
 Katib stands for `secretary` in Arabic.
 
-# Installation
-
-## Prerequisites
-
-- Kubernetes >= 1.17
-- `kubectl` >= 1.21
-
-## Latest Version
-
-Install Katib with the single command:
-
-```
-kubectl apply -k "github.com/kubeflow/katib.git/manifests/installs/katib-standalone?ref=master"
-```
-
-## Release Version
-
-For the specific release (for example `v0.11.0`) run this command:
-
-```
-kubectl apply -k "github.com/kubeflow/katib.git/manifests/installs/katib-standalone?ref=v0.11.0"
-```
-
-Learn more about various Katib installs in the
-[Kubeflow guides](https://www.kubeflow.org/docs/components/katib/hyperparameter/#katib-setup)
-
 # Search Algorithms
 
 Katib supports several search algorithms. Follow the
@@ -154,6 +128,32 @@ to know more about each algorithm.
 
 Follow [this guide](/docs/new-algorithm-service.md) to implement your custom algorithm
 service in Katib.
+
+# Installation
+
+## Prerequisites
+
+- Kubernetes >= 1.17
+- `kubectl` >= 1.21
+
+## Latest Version
+
+For the latest Katib version run this command:
+
+```
+kubectl apply -k "github.com/kubeflow/katib.git/manifests/installs/katib-standalone?ref=master"
+```
+
+## Release Version
+
+For the specific Katib release (for example `v0.11.0`) run this command:
+
+```
+kubectl apply -k "github.com/kubeflow/katib.git/manifests/installs/katib-standalone?ref=v0.11.0"
+```
+
+Learn more about various Katib installs in the
+[Kubeflow guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#katib-setup).
 
 # Documentation
 
