@@ -146,29 +146,44 @@ kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib
 
 ## Release Version
 
-For the specific Katib release (for example `v0.11.0`) run this command:
+For the specific Katib release (for example `v0.11.1`) run this command:
 
 ```
-kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib-standalone?ref=v0.11.0"
+kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib-standalone?ref=v0.11.1"
 ```
 
 Learn more about various Katib installs in the
 [Kubeflow guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#katib-setup).
 
+Make sure that all Katib components are running:
+
+```
+$ kubectl get pods -n kubeflow
+
+NAME                                READY   STATUS      RESTARTS   AGE
+katib-cert-generator-rw95w          0/1     Completed   0          35s
+katib-controller-566595bdd8-hbxgf   1/1     Running     0          36s
+katib-db-manager-57cd769cdb-4g99m   1/1     Running     0          36s
+katib-mysql-7894994f88-5d4s5        1/1     Running     0          36s
+katib-ui-5767cfccdc-pwg2x           1/1     Running     0          36s
+```
+
+For the Katib Experiments check the [complete examples list](examples).
+
 # Documentation
 
-Run your first Katib Experiment in the
-[getting started guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#example-using-random-algorithm).
+- Run your first Katib Experiment in the
+  [getting started guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#example-using-random-algorithm).
 
-Learn about Katib concepts in the
-[Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/overview/#katib-concepts).
+- Learn about Katib concepts in the
+  [Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/overview/#katib-concepts).
 
-Know more about various Katib interfaces in the
-[introduction guide](https://www.kubeflow.org/docs/components/katib/overview/#katib-interfaces).
+- Know more about various Katib interfaces in the
+  [introduction guide](https://www.kubeflow.org/docs/components/katib/overview/#katib-interfaces).
 
-TODO (andreyvelich): Add Katib components section from the website.
+- TODO (andreyvelich): Add Katib components section from the website.
 
-Learn more about Katib in the [presentations and demos list](./docs/presentations.md).
+- Learn more about Katib in the [presentations and demos list](./docs/presentations.md).
 
 # Community
 
