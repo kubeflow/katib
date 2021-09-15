@@ -133,6 +133,8 @@ service in Katib.
 
 ## Prerequisites
 
+This is the minimal requirements to install Katib:
+
 - Kubernetes >= 1.17
 - `kubectl` >= 1.21
 
@@ -191,20 +193,19 @@ We are always growing our community and invite new users and AutoML enthusiasts
 to contribute to the Katib project. The following links provide information
 about getting involved in the community:
 
-- Subscribe
-  [to the calendar](https://calendar.google.com/calendar/u/0/r?cid=ZDQ5bnNpZWZzbmZna2Y5MW8wdThoMmpoazRAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ)
-  to attend the AutoML WG community meeting.
+- Subscribe to the
+  [AutoML calendar](https://calendar.google.com/calendar/u/0/r?cid=ZDQ5bnNpZWZzbmZna2Y5MW8wdThoMmpoazRAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ)
+  to attend Working Group bi-weekly community meetings.
 
-- Check
-  [the AutoML WG meeting notes](https://docs.google.com/document/d/1MChKfzrKAeFRtYqypFbMXL6ZIc_OgijjkvbqmwRV-64/edit).
+- Check the
+  [AutoML and Training Working Group meeting notes](https://docs.google.com/document/d/1MChKfzrKAeFRtYqypFbMXL6ZIc_OgijjkvbqmwRV-64/edit).
 
 - If you use Katib, please update [the adopters list](ADOPTERS.md).
 
 ## Contributing
 
-Please feel free to test the system!
-[developer-guide.md](./docs/developer-guide.md) is a good starting point
-for developers.
+Please feel free to test the system! [Developer guide](./docs/developer-guide.md)
+is a good starting point for our developers.
 
 ## Blog posts
 
