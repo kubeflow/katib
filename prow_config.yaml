@@ -15,6 +15,7 @@ workflows:
       - pkg/apis/manager/health/*
       - pkg/apis/manager/v1beta1/*
       - pkg/apis/v1beta1/*
+      - pkg/cert-generator/v1beta1/*
       - pkg/common/v1beta1/*
       - pkg/controller.v1beta1/*
       - pkg/db/v1beta1/*
