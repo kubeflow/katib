@@ -131,6 +131,10 @@ service in Katib.
 
 # Installation
 
+For the various Katib installs check the
+[Kubeflow guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#katib-setup).
+Follow the next steps to install Katib standalone.
+
 ## Prerequisites
 
 This is the minimal requirements to install Katib:
@@ -153,9 +157,6 @@ For the specific Katib release (for example `v0.11.1`) run this command:
 ```
 kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib-standalone?ref=v0.11.1"
 ```
-
-Learn more about various Katib installs in the
-[Kubeflow guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#katib-setup).
 
 Make sure that all Katib components are running:
 
