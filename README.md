@@ -29,11 +29,13 @@ and many more.
 
 Katib stands for `secretary` in Arabic.
 
-# Search Algorithms
+# Search Algorithms and Frameworks
 
 Katib supports several search algorithms. Follow the
 [Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/experiment/#search-algorithms-in-detail)
-to know more about each algorithm.
+to know more about each algorithm and check the
+[Suggestion service guide](/docs/new-algorithm-service.md) to implement your
+custom algorithm.
 
 <table>
   <tbody>
@@ -126,8 +128,42 @@ to know more about each algorithm.
   </tbody>
 </table>
 
-Follow [this guide](/docs/new-algorithm-service.md) to implement your custom algorithm
-service in Katib.
+To perform above algorithms Katib supports the following frameworks.
+
+<table>
+  <tbody>
+    <tr align="center">
+      <td>
+        <b>Framework Name</b>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <a href="https://github.com/AIworx-Labs/chocolate">Chocolate</a>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <a href="https://github.com/c-bata/goptuna">Goptuna</a>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <a href="https://github.com/hyperopt/hyperopt">Hyperopt</a>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <a href="https://github.com/optuna/optuna">Optuna</a>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <a href="https://github.com/scikit-optimize/scikit-optimize">Scikit Optimize</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 # Installation
 
