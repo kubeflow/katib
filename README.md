@@ -128,42 +128,13 @@ custom algorithm.
   </tbody>
 </table>
 
-To perform above algorithms Katib supports the following frameworks.
+To perform above algorithms Katib supports the following frameworks:
 
-<table>
-  <tbody>
-    <tr align="center">
-      <td>
-        <b>Framework Name</b>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
-        <a href="https://github.com/AIworx-Labs/chocolate">Chocolate</a>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
-        <a href="https://github.com/c-bata/goptuna">Goptuna</a>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
-        <a href="https://github.com/hyperopt/hyperopt">Hyperopt</a>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
-        <a href="https://github.com/optuna/optuna">Optuna</a>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
-        <a href="https://github.com/scikit-optimize/scikit-optimize">Scikit Optimize</a>
-      </td>
-    </tr>
-  </tbody>
-</table>
+- [Chocolate](https://github.com/AIworx-Labs/chocolate)
+- [Goptuna](https://github.com/c-bata/goptuna)
+- [Hyperopt](https://github.com/hyperopt/hyperopt)
+- [Optuna](https://github.com/optuna/optuna)
+- [Scikit Optimize](https://github.com/scikit-optimize/scikit-optimize)
 
 # Installation
 
