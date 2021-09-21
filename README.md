@@ -29,7 +29,7 @@ and many more.
 
 Katib stands for `secretary` in Arabic.
 
-# Search Algorithms and Frameworks
+# Search Algorithms
 
 Katib supports several search algorithms. Follow the
 [Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/experiment/#search-algorithms-in-detail)
