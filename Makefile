@@ -1,4 +1,4 @@
-HAS_LINT := $(shell command -v golint;)
+HAS_LINT := $(shell command -v golangci-lint;)
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
 
@@ -14,10 +14,10 @@ fmt:
 
 lint:
 ifndef HAS_LINT
-	go get -u golang.org/x/lint/golint
-	echo "installing golint"
+	go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+	echo "installing golangci-lint"
 endif
-	hack/verify-golint.sh
+	hack/verify-golangci-lint.sh
 
 vet:
 	go vet ./pkg/... ./cmd/...
