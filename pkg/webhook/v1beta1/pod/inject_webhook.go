@@ -271,7 +271,7 @@ func (s *SidecarInjector) getKatibJob(object *unstructured.Unstructured, namespa
 			}
 			// Recursively search for Trial ownership in nested object
 			jobKind, jobName, err = s.getKatibJob(nestedJob, namespace)
-			if err != nil {
+			if err != nil && jobKind != "" {
 				return "", "", err
 			}
 			i++
