@@ -22,8 +22,6 @@ import (
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
 )
 
-//const maxMsgSize = 1<<31 - 1
-
 var (
 	// namespace      = "default"
 
