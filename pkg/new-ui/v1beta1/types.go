@@ -23,7 +23,6 @@ import (
 )
 
 var (
-
 	TrialTemplateLabel = map[string]string{
 		consts.LabelTrialTemplateConfigMapName: consts.LabelTrialTemplateConfigMapValue}
 )
