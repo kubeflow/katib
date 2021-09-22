@@ -192,7 +192,7 @@ For the Katib Experiments check the [complete examples list](examples).
   [guide](https://www.kubeflow.org/docs/components/katib/overview/#katib-interfaces).
 
 - Learn about Katib **Components** in this
-  [guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#katib-components)
+  [guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#katib-components).
 
 - Know more about Katib in the [presentations and demos list](./docs/presentations.md).
 
