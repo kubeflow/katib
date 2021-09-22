@@ -185,15 +185,16 @@ For the Katib Experiments check the [complete examples list](examples).
 - Run your first Katib Experiment in the
   [getting started guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#example-using-random-algorithm).
 
-- Learn about Katib concepts in the
-  [Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/overview/#katib-concepts).
+- Learn about Katib **Concepts** in this
+  [guide](https://www.kubeflow.org/docs/components/katib/overview/#katib-concepts).
 
-- Know more about various Katib interfaces in the
-  [introduction guide](https://www.kubeflow.org/docs/components/katib/overview/#katib-interfaces).
+- Learn about Katib **Interfaces** in this
+  [guide](https://www.kubeflow.org/docs/components/katib/overview/#katib-interfaces).
 
-- TODO (andreyvelich): Add Katib components section from the website.
+- Learn about Katib **Components** in this
+  [guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#katib-components)
 
-- Learn more about Katib in the [presentations and demos list](./docs/presentations.md).
+- Know more about Katib in the [presentations and demos list](./docs/presentations.md).
 
 # Community
 
