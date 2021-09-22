@@ -24,5 +24,5 @@ if ! which golangci-lint >/dev/null; then
 	exit 1
 fi
 
-echo 'running golangci-lint'
+echo 'Running golangci-lint'
 golangci-lint run --timeout 5m
