@@ -1,9 +1,10 @@
 # This file configures the workflows to trigger in our Prow jobs.
-# see kubeflow/testing/py/run_e2e_workflow.py
+# See https://github.com/kubeflow/testing/blob/master/py/kubeflow/testing/run_e2e_workflow.py.
+python_paths:
+  - kubeflow/katib/test/e2e/v1beta1
 workflows:
-  - app_dir: kubeflow/katib/test/workflows
-    component: workflows-v1beta1
-    name: e2e-v1beta1
+  - name: e2e-v1beta1
+    py_func: argo_workflow.create_workflow
     job_types:
       - presubmit
     include_dirs:
@@ -52,5 +53,5 @@ workflows:
       - scripts/v1beta1/*
       - prow_config.yaml
       - Makefile
-    params:
+    kwargs:
       registry: 809251082950.dkr.ecr.us-west-2.amazonaws.com
