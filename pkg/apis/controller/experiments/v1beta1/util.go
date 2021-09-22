@@ -23,10 +23,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const (
-	cleanDataFinalizer = "clean-data-in-db"
-)
-
 func getCondition(exp *Experiment, condType ExperimentConditionType) *ExperimentCondition {
 	if exp.Status.Conditions != nil {
 		for _, condition := range exp.Status.Conditions {

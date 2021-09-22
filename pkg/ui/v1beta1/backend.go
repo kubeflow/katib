@@ -54,10 +54,13 @@ func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1beta1.DBMa
 }
 
 func (k *KatibUIHandler) SubmitYamlJob(w http.ResponseWriter, r *http.Request) {
-	//enableCors(&w)
 	var data map[string]interface{}
 
-	json.NewDecoder(r.Body).Decode(&data)
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		log.Printf("Failed to decode body: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	job := experimentv1beta1.Experiment{}
 	if yamlContent, ok := data["yaml"].(string); ok {
@@ -81,7 +84,11 @@ func (k *KatibUIHandler) SubmitParamsJob(w http.ResponseWriter, r *http.Request)
 	//enableCors(&w)
 	var data map[string]interface{}
 
-	json.NewDecoder(r.Body).Decode(&data)
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		log.Printf("Failed to decode body: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	if data, ok := data["postData"]; ok {
 		jsonbody, err := json.Marshal(data)
 		if err != nil {
@@ -131,7 +138,11 @@ func (k *KatibUIHandler) FetchAllExperiments(w http.ResponseWriter, r *http.Requ
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write(response)
+	if _, err = w.Write(response); err != nil {
+		log.Printf("Write experiments failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request) {
@@ -183,7 +194,9 @@ func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write(response)
+	if _, err = w.Write(response); err != nil {
+		panic(err)
+	}
 }
 
 // FetchTrialTemplates gets all trial templates in all namespaces
@@ -205,13 +218,21 @@ func (k *KatibUIHandler) FetchTrialTemplates(w http.ResponseWriter, r *http.Requ
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write(response)
+	if _, err = w.Write(response); err != nil {
+		log.Printf("Write templates failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 //AddTemplate adds template to ConfigMap
 func (k *KatibUIHandler) AddTemplate(w http.ResponseWriter, r *http.Request) {
 	var data map[string]interface{}
-	json.NewDecoder(r.Body).Decode(&data)
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		log.Printf("Failed to decode body: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	updatedConfigMapNamespace := data["updatedConfigMapNamespace"].(string)
 	updatedConfigMapName := data["updatedConfigMapName"].(string)
@@ -234,7 +255,11 @@ func (k *KatibUIHandler) AddTemplate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write(response)
+	if _, err = w.Write(response); err != nil {
+		log.Printf("Write failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 }
 
@@ -242,7 +267,11 @@ func (k *KatibUIHandler) AddTemplate(w http.ResponseWriter, r *http.Request) {
 func (k *KatibUIHandler) EditTemplate(w http.ResponseWriter, r *http.Request) {
 
 	var data map[string]interface{}
-	json.NewDecoder(r.Body).Decode(&data)
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		log.Printf("Failed to decode body: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	updatedConfigMapNamespace := data["updatedConfigMapNamespace"].(string)
 	updatedConfigMapName := data["updatedConfigMapName"].(string)
@@ -266,14 +295,22 @@ func (k *KatibUIHandler) EditTemplate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write(response)
+	if _, err = w.Write(response); err != nil {
+		log.Printf("Write failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // DeleteTemplate deletes template in ConfigMap
 func (k *KatibUIHandler) DeleteTemplate(w http.ResponseWriter, r *http.Request) {
 
 	var data map[string]interface{}
-	json.NewDecoder(r.Body).Decode(&data)
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		log.Printf("Failed to decode body: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	updatedConfigMapNamespace := data["updatedConfigMapNamespace"].(string)
 	updatedConfigMapName := data["updatedConfigMapName"].(string)
@@ -296,7 +333,11 @@ func (k *KatibUIHandler) DeleteTemplate(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write(response)
+	if _, err = w.Write(response); err != nil {
+		log.Printf("Write failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (k *KatibUIHandler) FetchNamespaces(w http.ResponseWriter, r *http.Request) {
@@ -315,7 +356,11 @@ func (k *KatibUIHandler) FetchNamespaces(w http.ResponseWriter, r *http.Request)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write(response)
+	if _, err = w.Write(response); err != nil {
+		log.Printf("Write namespaces failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // FetchExperiment gets experiment in specific namespace.
@@ -335,7 +380,11 @@ func (k *KatibUIHandler) FetchExperiment(w http.ResponseWriter, r *http.Request)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write(response)
+	if _, err = w.Write(response); err != nil {
+		log.Printf("Write Experiment failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // FetchSuggestion gets suggestion in specific namespace
@@ -356,5 +405,9 @@ func (k *KatibUIHandler) FetchSuggestion(w http.ResponseWriter, r *http.Request)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write(response)
+	if _, err = w.Write(response); err != nil {
+		log.Printf("Write Suggestion failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

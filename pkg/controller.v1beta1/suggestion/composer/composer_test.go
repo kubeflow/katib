@@ -103,15 +103,19 @@ func TestMain(m *testing.M) {
 			filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "components", "crd"),
 		},
 	}
-	apis.AddToScheme(scheme.Scheme)
-
 	var err error
+	if err = apis.AddToScheme(scheme.Scheme); err != nil {
+		stdlog.Fatal(err)
+	}
+
 	if cfg, err = t.Start(); err != nil {
 		stdlog.Fatal(err)
 	}
 
 	code := m.Run()
-	t.Stop()
+	if err = t.Stop(); err != nil {
+		stdlog.Fatal(err)
+	}
 	os.Exit(code)
 }
 
@@ -441,7 +445,9 @@ func TestDesiredVolume(t *testing.T) {
 			// Expect that ConfigMap is created
 			g.Eventually(func() error {
 				// Create ConfigMap with Katib config
-				c.Create(context.TODO(), tc.configMap)
+				if err = c.Create(context.TODO(), tc.configMap); err != nil {
+					return err
+				}
 				return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{})
 			}, timeout).ShouldNot(gomega.HaveOccurred())
 		}
@@ -485,7 +491,9 @@ func TestDesiredVolume(t *testing.T) {
 			// Expect that ConfigMap is deleted
 			g.Eventually(func() bool {
 				// Delete ConfigMap with Katib config
-				c.Delete(context.TODO(), tc.configMap)
+				if err = c.Delete(context.TODO(), tc.configMap); err != nil {
+					return false
+				}
 				return errors.IsNotFound(
 					c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{}))
 			}, timeout).Should(gomega.BeTrue())

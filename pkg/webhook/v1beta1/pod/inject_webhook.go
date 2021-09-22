@@ -202,6 +202,9 @@ func (s *SidecarInjector) getMetricsCollectorContainer(trial *trialsv1beta1.Tria
 		earlyStoppingRules = append(earlyStoppingRules, newRule)
 	}
 	metricsCollectorConfigData, err := katibconfig.GetMetricsCollectorConfigData(mc.Collector.Kind, s.client)
+	if err != nil {
+		return nil, err
+	}
 
 	args, err := s.getMetricsCollectorArgs(trial, metricNames, mc, metricsCollectorConfigData, earlyStoppingRules)
 	if err != nil {
@@ -209,10 +212,6 @@ func (s *SidecarInjector) getMetricsCollectorContainer(trial *trialsv1beta1.Tria
 	}
 
 	sidecarContainerName := getSidecarContainerName(trial.Spec.MetricsCollector.Collector.Kind)
-
-	if err != nil {
-		return nil, err
-	}
 
 	injectContainer := v1.Container{
 		Name:            sidecarContainerName,
@@ -272,6 +271,9 @@ func (s *SidecarInjector) getKatibJob(object *unstructured.Unstructured, namespa
 			}
 			// Recursively search for Trial ownership in nested object
 			jobKind, jobName, err = s.getKatibJob(nestedJob, namespace)
+			if err != nil {
+				return "", "", err
+			}
 			i++
 		}
 	}

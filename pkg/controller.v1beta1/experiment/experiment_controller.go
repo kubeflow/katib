@@ -278,7 +278,7 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1beta1.E
 	}
 	reconcileRequired := !instance.IsCompleted()
 	if reconcileRequired {
-		r.ReconcileTrials(instance, trials.Items)
+		return r.ReconcileTrials(instance, trials.Items)
 	}
 
 	return nil

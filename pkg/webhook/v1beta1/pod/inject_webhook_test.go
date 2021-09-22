@@ -241,7 +241,9 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 			filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "components", "crd"),
 		},
 	}
-	apis.AddToScheme(scheme.Scheme)
+	if err := apis.AddToScheme(scheme.Scheme); err != nil {
+		t.Error(err)
+	}
 
 	cfg, err := envTest.Start()
 	if err != nil {
@@ -657,7 +659,9 @@ func TestGetKatibJob(t *testing.T) {
 			filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "components", "crd"),
 		},
 	}
-	apis.AddToScheme(scheme.Scheme)
+	if err := apis.AddToScheme(scheme.Scheme); err != nil {
+		t.Error(err)
+	}
 
 	cfg, err := envTest.Start()
 	if err != nil {

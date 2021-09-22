@@ -21,11 +21,10 @@ import (
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
 )
 
-const maxMsgSize = 1<<31 - 1
+//const maxMsgSize = 1<<31 - 1
 
 var (
 	// namespace      = "default"
-	allowedHeaders = "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, X-CSRF-Token"
 
 	TrialTemplateLabel = map[string]string{
 		consts.LabelTrialTemplateConfigMapName: consts.LabelTrialTemplateConfigMapValue}
