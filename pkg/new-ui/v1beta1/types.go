@@ -23,7 +23,6 @@ import (
 )
 
 var (
-	// namespace      = "default"
 
 	TrialTemplateLabel = map[string]string{
 		consts.LabelTrialTemplateConfigMapName: consts.LabelTrialTemplateConfigMapValue}
