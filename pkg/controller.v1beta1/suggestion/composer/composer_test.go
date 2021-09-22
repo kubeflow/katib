@@ -442,12 +442,11 @@ func TestDesiredVolume(t *testing.T) {
 	for idx, tc := range tcs {
 
 		if tc.configMap != nil {
+			// Create ConfigMap with Katib config
+			g.Expect(c.Create(context.TODO(), tc.configMap)).NotTo(gomega.HaveOccurred())
+
 			// Expect that ConfigMap is created
 			g.Eventually(func() error {
-				// Create ConfigMap with Katib config
-				if err = c.Create(context.TODO(), tc.configMap); err != nil {
-					return err
-				}
 				return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{})
 			}, timeout).ShouldNot(gomega.HaveOccurred())
 		}
@@ -488,12 +487,10 @@ func TestDesiredVolume(t *testing.T) {
 		}
 
 		if tc.configMap != nil {
+			// Delete ConfigMap with Katib config
+			g.Expect(c.Delete(context.TODO(), tc.configMap)).NotTo(gomega.HaveOccurred())
 			// Expect that ConfigMap is deleted
 			g.Eventually(func() bool {
-				// Delete ConfigMap with Katib config
-				if err = c.Delete(context.TODO(), tc.configMap); err != nil {
-					return false
-				}
 				return errors.IsNotFound(
 					c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{}))
 			}, timeout).Should(gomega.BeTrue())

@@ -229,14 +229,13 @@ func TestReconcileBatchJob(t *testing.T) {
 		return trial.IsFailed()
 	}, timeout).Should(gomega.BeTrue())
 
+	// Delete the Trial
+	g.Expect(c.Delete(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
+
 	// Expect that Trial is deleted
 	// BatchJob can't be deleted because GC doesn't work in envtest and BatchJob stuck in termination phase.
 	// Ref: https://book.kubebuilder.io/reference/testing/envtest.html#testing-considerations.
 	g.Eventually(func() bool {
-		// Delete the Trial
-		if err = c.Delete(context.TODO(), trial); err != nil {
-			return false
-		}
 		return errors.IsNotFound(c.Get(context.TODO(), trialKey, &trialsv1beta1.Trial{}))
 	}, timeout).Should(gomega.BeTrue())
 
@@ -274,12 +273,11 @@ func TestReconcileBatchJob(t *testing.T) {
 			trial.Status.Observation.Metrics[0].Latest == "0.11"
 	}, timeout).Should(gomega.BeTrue())
 
+	// Delete the Trial
+	g.Expect(c.Delete(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
+
 	// Expect that Trial is deleted
 	g.Eventually(func() bool {
-		// Delete the Trial
-		if err = c.Delete(context.TODO(), trial); err != nil {
-			return false
-		}
 		return errors.IsNotFound(c.Get(context.TODO(), trialKey, &trialsv1beta1.Trial{}))
 	}, timeout).Should(gomega.BeTrue())
 
@@ -305,12 +303,11 @@ func TestReconcileBatchJob(t *testing.T) {
 		return isConditionCorrect
 	}, timeout).Should(gomega.BeTrue())
 
+	// Delete the Trial
+	g.Expect(c.Delete(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
+
 	// Expect that Trial is deleted
 	g.Eventually(func() bool {
-		// Delete the Trial
-		if err = c.Delete(context.TODO(), trial); err != nil {
-			return false
-		}
 		return errors.IsNotFound(c.Get(context.TODO(), trialKey, &trialsv1beta1.Trial{}))
 	}, timeout).Should(gomega.BeTrue())
 

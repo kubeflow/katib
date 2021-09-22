@@ -210,12 +210,11 @@ func TestReconcile(t *testing.T) {
 			errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, &corev1.Service{}))
 	}, timeout).Should(gomega.BeTrue())
 
+	// Delete the suggestion
+	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+
 	// Expect that suggestion is deleted
 	g.Eventually(func() bool {
-		// Delete the suggestion
-		if err = c.Delete(context.TODO(), instance); err != nil {
-			return false
-		}
 		return errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, &suggestionsv1beta1.Suggestion{}))
 	}, timeout).Should(gomega.BeTrue())
 

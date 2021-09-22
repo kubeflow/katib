@@ -323,12 +323,11 @@ func TestReconcile(t *testing.T) {
 		return suggestion.IsSucceeded()
 	}, timeout).Should(gomega.BeTrue())
 
+	// Delete the suggestion
+	g.Expect(c.Delete(context.TODO(), suggestionRestartNo)).NotTo(gomega.HaveOccurred())
+
 	// Expect that suggestion with ResumePolicy = NeverResume is deleted
 	g.Eventually(func() bool {
-		// Delete the suggestion
-		if err = c.Delete(context.TODO(), suggestionRestartNo); err != nil {
-			return false
-		}
 		return errors.IsNotFound(c.Get(context.TODO(),
 			types.NamespacedName{Namespace: namespace, Name: experimentName}, &suggestionsv1beta1.Suggestion{}))
 	}, timeout).Should(gomega.BeTrue())
@@ -379,22 +378,20 @@ func TestReconcile(t *testing.T) {
 		return experiment.IsRestarting() && !experiment.IsSucceeded() && !experiment.IsFailed()
 	}, timeout).Should(gomega.BeTrue())
 
+	// Delete the suggestion
+	g.Expect(c.Delete(context.TODO(), suggestionRestartYes)).NotTo(gomega.HaveOccurred())
+
 	// Expect that suggestion with ResumePolicy = FromVolume is deleted
 	g.Eventually(func() bool {
-		// Delete the suggestion
-		if err = c.Delete(context.TODO(), suggestionRestartYes); err != nil {
-			return false
-		}
 		return errors.IsNotFound(c.Get(context.TODO(),
 			types.NamespacedName{Namespace: namespace, Name: experimentName}, &suggestionsv1beta1.Suggestion{}))
 	}, timeout).Should(gomega.BeTrue())
 
+	// Delete the experiment
+	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+
 	// Expect that experiment is deleted
 	g.Eventually(func() bool {
-		// Delete the experiment
-		if err = c.Delete(context.TODO(), instance); err != nil {
-			return false
-		}
 		return errors.IsNotFound(c.Get(context.TODO(),
 			types.NamespacedName{Namespace: namespace, Name: experimentName}, &experimentsv1beta1.Experiment{}))
 	}, timeout).Should(gomega.BeTrue())
