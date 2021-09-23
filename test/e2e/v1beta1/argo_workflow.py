@@ -213,7 +213,9 @@ class WorkflowBuilder(object):
         }
 
         # Add prow env to the task template.
-        task_template = argo_build_util.add_prow_env(task_template)
+        prow_env_dict = argo_build_util.get_prow_dict()
+        for k, v in prow_env_dict.items():
+            task_template["container"]["env"].append({"name": k, "value": v})
 
         return task_template
 
