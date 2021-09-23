@@ -331,7 +331,7 @@ def create_workflow(name, namespace, **kwargs):
                 "/kaniko/executor",
                 "--dockerfile={}/{}".format(builder.katib_dir, dockerfile),
                 "--context=dir:/" + builder.katib_dir,
-                "--destination={}/katib/v1beta1/{}:$(PULL_BASE_SHA)".format(ecr_registry, image)
+                "--destination={}/katib/v1beta1/{}:$(PULL_PULL_SHA)".format(ecr_registry, image)
             ]
         )
         argo_build_util.add_task_to_dag(workflow, ENTRYPOINT, build_image, [checkout["name"]])
@@ -366,7 +366,7 @@ def create_workflow(name, namespace, **kwargs):
     depends = [setup_katib["name"]]
     tmp_depends = []
     for index, (experiment, location) in enumerate(KATIB_EXPERIMENTS.items()):
-        # We run only X number of Experiments in the same time.
+        # We run only X number of Experiments at the same time.
         if (index+1) % PARALLEL_EXECUTION == 0:
             depends, tmp_depends = tmp_depends, []
         run_experiment = builder.create_task_template(
