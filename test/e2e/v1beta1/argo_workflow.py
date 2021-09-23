@@ -76,15 +76,15 @@ KATIB_EXPERIMENTS = {
     "hyperband":                "examples/v1beta1/hyperband-example.yaml",
     "enas":                     "examples/v1beta1/nas/enas-example-cpu.yaml",
     "darts":                    "examples/v1beta1/nas/darts-example-cpu.yaml",
-    "tfjob":                    "examples/v1beta1/tfjob-example.yaml",
     "pytorchjob":               "examples/v1beta1/pytorchjob-example.yaml",
+    "tfjob":                    "examples/v1beta1/tfjob-example.yaml",
     "file-metricscollector":    "examples/v1beta1/file-metricscollector-example.yaml",
     "never-resume":             "examples/v1beta1/resume-experiment/never-resume.yaml",
     "from-volume-resume":       "examples/v1beta1/resume-experiment/from-volume-resume.yaml",
     "median-stop":              "examples/v1beta1/early-stopping/median-stop.yaml"
 }
 # How many Experiments are running in parallel.
-PARALLEL_EXECUTION = 8
+PARALLEL_EXECUTION = 5
 
 
 class WorkflowBuilder(object):
@@ -365,11 +365,8 @@ def create_workflow(name, namespace, **kwargs):
     depends = [setup_katib["name"]]
     tmp_depends = []
     for index, (experiment, location) in enumerate(KATIB_EXPERIMENTS.items()):
-        # We run only X number of Experiments at the same time.
-        if (index+1) % PARALLEL_EXECUTION == 0:
-            depends, tmp_depends = tmp_depends, []
         run_experiment = builder.create_task_template(
-            task_name="run-experiment-"+experiment,
+            task_name="run-e2e-experiment-"+experiment,
             exec_image=IMAGE_WORKER,
             command=[
                 "test/e2e/v1beta1/scripts/run-e2e-experiment.sh",
@@ -378,5 +375,8 @@ def create_workflow(name, namespace, **kwargs):
         )
         argo_build_util.add_task_to_dag(workflow, ENTRYPOINT, run_experiment, depends)
         tmp_depends.append(run_experiment["name"])
+        # We run only X number of Experiments at the same time. index starts with 0
+        if (index+1) % PARALLEL_EXECUTION == 0:
+            depends, tmp_depends = tmp_depends, []
 
     return workflow

@@ -36,7 +36,7 @@ aws eks update-kubeconfig --region=${AWS_REGION} --name=${CLUSTER_NAME}
 kubectl version
 kubectl cluster-info
 
-# Update images with current pull pull sha.
+# Update images with current pull sha.
 echo "Updating Katib images with the current PR SHA: ${VERSION}"
 KUSTOMIZE_PATH="manifests/v1beta1/installs/katib-standalone/kustomization.yaml"
 CONFIG_PATCH="manifests/v1beta1/components/controller/katib-config.yaml"
