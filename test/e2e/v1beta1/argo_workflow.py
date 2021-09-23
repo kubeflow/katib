@@ -171,8 +171,8 @@ class WorkflowBuilder(object):
             }
         ]
 
-        # Container volumes.
-        volumes = [
+        # Container volume mounts.
+        volume_mounts = [
             {
                 "name": VOLUME_TEST_DATA,
                 "mountPath": MOUNT_PATH
@@ -208,7 +208,7 @@ class WorkflowBuilder(object):
                 "image": exec_image,
                 "workingDir": self.katib_dir,
                 "env": env,
-                "volumes": volumes,
+                "volumeMounts": volume_mounts,
             }
         }
 
@@ -301,6 +301,16 @@ def create_workflow(name, namespace, **kwargs):
     # Build initial structure for the Workflow.
     workflow = builder.create_init_workflow()
 
+    # Delete AWS Cluster in the exit handler step.
+    delete_cluster = builder.create_task_template(
+        task_name="delete-cluster",
+        exec_image=IMAGE_WORKER,
+        command=[
+            "/usr/local/bin/delete-eks-cluster.sh",
+        ]
+    )
+    argo_build_util.add_task_to_dag(workflow, EXIT_HANDLER, delete_cluster, [])
+
     # Step 1. Checkout GitHub repositories.
     checkout = builder.create_task_template(
         task_name="checkout",
@@ -320,7 +330,7 @@ def create_workflow(name, namespace, **kwargs):
             command=[
                 "/kaniko/executor",
                 "--dockerfile={}/{}".format(builder.katib_dir, dockerfile),
-                "--context=dir://" + builder.katib_dir,
+                "--context=dir:/" + builder.katib_dir,
                 "--destination={}/katib/v1beta1/{}:$(PULL_BASE_SHA)".format(ecr_registry, image)
             ]
         )
@@ -369,15 +379,5 @@ def create_workflow(name, namespace, **kwargs):
         )
         argo_build_util.add_task_to_dag(workflow, ENTRYPOINT, run_experiment, depends)
         tmp_depends.append(run_experiment["name"])
-
-    # Step 5. Delete AWS cluster.
-    delete_cluster = builder.create_task_template(
-        task_name="delete-cluster",
-        exec_image=IMAGE_WORKER,
-        command=[
-            "/usr/local/bin/delete-eks-cluster.sh",
-        ]
-    )
-    argo_build_util.add_task_to_dag(workflow, EXIT_HANDLER, delete_cluster, [])
 
     return workflow
