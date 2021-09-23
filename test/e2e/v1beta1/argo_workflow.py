@@ -312,7 +312,23 @@ def create_workflow(name, namespace, **kwargs):
     )
     argo_build_util.add_task_to_dag(workflow, ENTRYPOINT, checkout, [])
 
-    # Step 2.1 Create AWS cluster.
+    # Step 2.1 Build all Katib images.
+    for image, dockerfile in KATIB_IMAGES.items():
+        build_image = builder.create_task_template(
+            task_name="build-"+image,
+            exec_image=IMAGE_KANIKO,
+            command=[
+                "/kaniko/executor",
+                "--dockerfile={}/{}".format(builder.katib_dir, dockerfile),
+                "--context=dir://" + builder.katib_dir,
+                "--destination={}/katib/v1beta1/{}:$(PULL_BASE_SHA)".format(ecr_registry, image)
+            ]
+        )
+        argo_build_util.add_task_to_dag(workflow, ENTRYPOINT, build_image, [checkout["name"]])
+
+    return workflow
+
+    # Step 2.2 Create AWS cluster.
     create_cluster = builder.create_task_template(
         task_name="create-cluster",
         exec_image=IMAGE_WORKER,
@@ -321,20 +337,6 @@ def create_workflow(name, namespace, **kwargs):
         ]
     )
     argo_build_util.add_task_to_dag(workflow, ENTRYPOINT, create_cluster, [checkout["name"]])
-
-    # Step 2.2 Build all Katib images.
-    for image, dockerfile in KATIB_IMAGES.items():
-        build_image = builder.create_task_template(
-            task_name="build-"+image,
-            exec_image=IMAGE_KANIKO,
-            command=[
-                "/kaniko/executor",
-                "--dockerfile={}/{}".format(builder.katib_dir, dockerfile),
-                "--context=dir:/" + builder.katib_dir,
-                "--destination={}/katib/v1beta1/{}:$(PULL_BASE_SHA)".format(ecr_registry, image)
-            ]
-        )
-        argo_build_util.add_task_to_dag(workflow, ENTRYPOINT, build_image, [checkout["name"]])
 
     # Step 3. Setup Katib on AWS cluster.
     setup_katib = builder.create_task_template(
