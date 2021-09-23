@@ -330,7 +330,7 @@ def create_workflow(name, namespace, **kwargs):
             command=[
                 "/kaniko/executor",
                 "--dockerfile={}/{}".format(builder.katib_dir, dockerfile),
-                "--context=dir:/" + builder.katib_dir,
+                "--context=dir://" + builder.katib_dir,
                 "--destination={}/katib/v1beta1/{}:$(PULL_PULL_SHA)".format(ecr_registry, image)
             ]
         )
