@@ -336,8 +336,6 @@ def create_workflow(name, namespace, **kwargs):
         )
         argo_build_util.add_task_to_dag(workflow, ENTRYPOINT, build_image, [checkout["name"]])
 
-    return workflow
-
     # Step 2.2 Create AWS cluster.
     create_cluster = builder.create_task_template(
         task_name="create-cluster",
