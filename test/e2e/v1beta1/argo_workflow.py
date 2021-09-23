@@ -285,11 +285,11 @@ class WorkflowBuilder(object):
 def create_workflow(name, namespace, **kwargs):
     """Main function which returns Argo Workflow.
 
-    : param name: Argo Workflow name.
-    : param namespace: Argo Workflow namespace.
-    : param kwargs: Argo Workflow additional arguments.
+    :param name: Argo Workflow name.
+    :param namespace: Argo Workflow namespace.
+    :param kwargs: Argo Workflow additional arguments.
 
-    : return: Created Argo Workflow.
+    :return: Created Argo Workflow.
     """
 
     test_dir = MOUNT_PATH + "/" + name
@@ -339,7 +339,7 @@ def create_workflow(name, namespace, **kwargs):
         task_name="setup-katib",
         exec_image=IMAGE_WORKER,
         command=[
-            "test/scripts/v1beta1/setup-katib.sh"
+            "test/e2e/v1beta1/scripts/setup-katib.sh"
         ]
     )
 
@@ -359,7 +359,7 @@ def create_workflow(name, namespace, **kwargs):
             task_name="run-experiment-"+experiment,
             exec_image=IMAGE_WORKER,
             command=[
-                "test/scripts/v1beta1/run-e2e-experiment.sh",
+                "test/e2e/v1beta1/scripts/run-e2e-experiment.sh",
                 location
             ]
         )
