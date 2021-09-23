@@ -323,6 +323,7 @@ def create_workflow(name, namespace, **kwargs):
     argo_build_util.add_task_to_dag(workflow, ENTRYPOINT, checkout, [])
 
     # Step 2.1 Build all Katib images.
+    depends = []
     for image, dockerfile in KATIB_IMAGES.items():
         build_image = builder.create_task_template(
             task_name="build-"+image,
@@ -335,6 +336,7 @@ def create_workflow(name, namespace, **kwargs):
             ]
         )
         argo_build_util.add_task_to_dag(workflow, ENTRYPOINT, build_image, [checkout["name"]])
+        depends.append(build_image["name"])
 
     # Step 2.2 Create AWS cluster.
     create_cluster = builder.create_task_template(
@@ -345,6 +347,7 @@ def create_workflow(name, namespace, **kwargs):
         ]
     )
     argo_build_util.add_task_to_dag(workflow, ENTRYPOINT, create_cluster, [checkout["name"]])
+    depends.append(create_cluster["name"])
 
     # Step 3. Setup Katib on AWS cluster.
     setup_katib = builder.create_task_template(
@@ -356,8 +359,6 @@ def create_workflow(name, namespace, **kwargs):
     )
 
     # Installing Katib after cluster is created and images are built.
-    depends = ["build-{}".format(image) for image in KATIB_IMAGES]
-    depends.append(create_cluster["name"])
     argo_build_util.add_task_to_dag(workflow, ENTRYPOINT, setup_katib, depends)
 
     # Step 4. Run Katib Experiments.
