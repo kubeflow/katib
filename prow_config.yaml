@@ -46,9 +46,6 @@ workflows:
       - hack/*
       - sdk/python/v1beta1/*
       - test/e2e/v1beta1/*
-      - test/scripts/v1beta1/*
-      - test/suggestion/v1beta1/*
-      - test/workflows/*
       - manifests/v1beta1/*
       - scripts/v1beta1/*
       - prow_config.yaml
