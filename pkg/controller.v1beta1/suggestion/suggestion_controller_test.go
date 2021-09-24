@@ -267,11 +267,11 @@ func TestReconcile(t *testing.T) {
 		AlgorithmName: "median-stop",
 		AlgorithmSettings: []commonv1beta1.EarlyStoppingSetting{
 			{
-				Name: "min_trials_required",
+				Name:  "min_trials_required",
 				Value: "3",
 			},
 			{
-				Name: "start_step",
+				Name:  "start_step",
 				Value: "5",
 			},
 		},
@@ -287,7 +287,7 @@ func TestReconcile(t *testing.T) {
 		return len(suggestionDeploy.Spec.Template.Spec.Containers) > 0 &&
 			suggestionDeploy.Spec.Template.Spec.Containers[0].Image == suggestionImage
 	}, timeout).Should(gomega.BeTrue())
-	
+
 	rbacName := util.GetSuggestionRBACName(instance)
 
 	// Expect that serviceAccount with appropriate name is created
