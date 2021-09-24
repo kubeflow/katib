@@ -35,7 +35,7 @@ jobs:
 
       - name: Run Python test
         run: |
-          export PYTHONPATH=$(pwd)/pkg/apis/manager/v1beta1/python:$(pwd)/pkg/apis/manager/health/python
+          export PYTHONPATH=$(pwd):$(pwd)/pkg/apis/manager/v1beta1/python:$(pwd)/pkg/apis/manager/health/python
           echo $PYTHONPATH
           pytest ./test/unit/v1beta1/suggestion
           pytest ./test/unit/v1beta1/earlystopping
