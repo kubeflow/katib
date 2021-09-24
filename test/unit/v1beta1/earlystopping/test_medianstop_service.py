@@ -60,7 +60,7 @@ class TestMedianStop(unittest.TestCase):
             invocation_metadata={},
             request=request, timeout=1)
 
-        response, metadata, code, details = get_earlystopping_rules.termination()
+        _, _, code, _ = get_earlystopping_rules.termination()
 
         self.assertEqual(code, grpc.StatusCode.OK)
 

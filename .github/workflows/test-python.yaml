@@ -1,0 +1,39 @@
+name: Python Test
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+
+      - name: Install Packages
+        run: |
+          pip install grpcio-testing==1.40.0
+          pip install pytest==5.1.2
+
+          pip install -r cmd/suggestion/chocolate/v1beta1/requirements.txt
+          pip install -r cmd/suggestion/hyperopt/v1beta1/requirements.txt
+          pip install -r cmd/suggestion/skopt/v1beta1/requirements.txt
+          pip install -r cmd/suggestion/optuna/v1beta1/requirements.txt
+          pip install -r cmd/suggestion/nas/enas/v1beta1/requirements.txt
+          pip install -r cmd/suggestion/hyperband/v1beta1/requirements.txt
+          pip install -r cmd/suggestion/nas/darts/v1beta1/requirements.txt
+
+          pip install -r cmd/earlystopping/medianstop/v1beta1/requirements.txt
+
+      - name: Run Python test
+        run: |
+          pytest ./test/unit/v1beta1/suggestion
+          pytest ./test/unit/v1beta1/earlystopping
