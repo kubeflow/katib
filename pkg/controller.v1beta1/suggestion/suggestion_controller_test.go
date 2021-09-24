@@ -154,7 +154,9 @@ func TestReconcile(t *testing.T) {
 
 	// Expect that deployment with appropriate name and image is created
 	g.Eventually(func() bool {
-		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, suggestionDeploy)
+		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, suggestionDeploy); err != nil {
+			return false
+		}
 		return len(suggestionDeploy.Spec.Template.Spec.Containers) > 0 &&
 			suggestionDeploy.Spec.Template.Spec.Containers[0].Image == suggestionImage
 	}, timeout).Should(gomega.BeTrue())
@@ -184,7 +186,9 @@ func TestReconcile(t *testing.T) {
 	// Expect that suggestion status is running
 	suggestion := &suggestionsv1beta1.Suggestion{}
 	g.Eventually(func() bool {
-		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, suggestion)
+		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, suggestion); err != nil {
+			return false
+		}
 		return suggestion.IsRunning()
 	}, timeout).Should(gomega.BeTrue())
 
@@ -194,7 +198,9 @@ func TestReconcile(t *testing.T) {
 
 	// Expect that suggestion status is succeeded, is not running and deployment is not ready
 	g.Eventually(func() bool {
-		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, suggestion)
+		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, suggestion); err != nil {
+			return false
+		}
 		return !suggestion.IsRunning() && !suggestion.IsDeploymentReady() && suggestion.IsSucceeded()
 	}, timeout).Should(gomega.BeTrue())
 
@@ -204,10 +210,11 @@ func TestReconcile(t *testing.T) {
 			errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, &corev1.Service{}))
 	}, timeout).Should(gomega.BeTrue())
 
+	// Delete the suggestion
+	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+
 	// Expect that suggestion is deleted
 	g.Eventually(func() bool {
-		// Delete the suggestion
-		c.Delete(context.TODO(), instance)
 		return errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, &suggestionsv1beta1.Suggestion{}))
 	}, timeout).Should(gomega.BeTrue())
 

@@ -36,6 +36,9 @@ func CollectObservationLog(fileName string, metrics []string, filters []string) 
 	}
 	defer file.Close()
 	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
 	logs := string(content)
 	olog, err := parseLogs(strings.Split(logs, "\n"), metrics, filters)
 	return olog, err

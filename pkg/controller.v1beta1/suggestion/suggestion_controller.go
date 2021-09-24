@@ -241,7 +241,7 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 	if foundDeploy, err := r.reconcileDeployment(deploy, suggestionNsName); err != nil {
 		return err
 	} else {
-		if isReady := r.checkDeploymentReady(foundDeploy); isReady != true {
+		if !r.checkDeploymentReady(foundDeploy) {
 			// deployment is not ready yet
 			msg := "Deployment is not ready"
 			instance.MarkSuggestionStatusDeploymentReady(corev1.ConditionFalse, SuggestionDeploymentNotReady, msg)

@@ -28,16 +28,8 @@ import (
 	"github.com/kubeflow/katib/pkg/db/v1beta1/common"
 )
 
-var dbInterface, mysqlInterface common.KatibDBInterface
+var dbInterface common.KatibDBInterface
 var mock sqlmock.Sqlmock
-
-var observationLogsColumns = []string{
-	"trial_name",
-	"id",
-	"time",
-	"metric_name",
-	"value",
-}
 
 func TestMain(m *testing.M) {
 	db, sm, err := sqlmock.New()

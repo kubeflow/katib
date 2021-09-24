@@ -62,9 +62,15 @@ func NewClient(options client.Options) (Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	experimentsv1beta1.AddToScheme(scheme.Scheme)
-	trialsv1beta1.AddToScheme(scheme.Scheme)
-	suggestionsv1beta1.AddToScheme(scheme.Scheme)
+	if err = experimentsv1beta1.AddToScheme(scheme.Scheme); err != nil {
+		return nil, err
+	}
+	if err = trialsv1beta1.AddToScheme(scheme.Scheme); err != nil {
+		return nil, err
+	}
+	if err = suggestionsv1beta1.AddToScheme(scheme.Scheme); err != nil {
+		return nil, err
+	}
 	cl, err := client.New(cfg, options)
 	if err != nil {
 		return nil, err

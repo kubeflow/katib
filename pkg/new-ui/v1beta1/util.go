@@ -19,7 +19,6 @@ package v1beta1
 import (
 	"encoding/json"
 	"log"
-	"net/http"
 	"sort"
 	"strconv"
 	"strings"
@@ -64,15 +63,6 @@ func (k *KatibUIHandler) getExperiments(namespace []string) ([]ExperimentView, e
 	}
 
 	return experiments, nil
-}
-
-func enableCors(w *http.ResponseWriter) {
-	(*w).Header().Set("Content-Type", "text/html; charset=utf-8")
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-	(*w).Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
-	(*w).Header().Set("Access-Control-Allow-Headers", allowedHeaders)
-	(*w).Header().Set("Access-Control-Expose-Headers", "Access-Control-*")
-	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
 }
 
 func havePipelineUID(trials []trialv1beta1.Trial) bool {
@@ -281,23 +271,43 @@ func generateNNImage(architecture string, decoder string) string {
 	if err := gographviz.Analyse(graphAst, graph); err != nil {
 		panic(err)
 	}
-	graph.AddNode("G", "0", map[string]string{"label": strconv.Quote("Input")})
+	if err = graph.AddNode("G", "0", map[string]string{"label": strconv.Quote("Input")}); err != nil {
+		panic(err)
+	}
 	var i int
 	for i = 0; i < len(architectureInt); i++ {
-		graph.AddNode("G", strconv.Itoa(i+1), map[string]string{"label": getNodeString(decoderParsed.Embedding[architectureInt[i][0]])})
-		graph.AddEdge(strconv.Itoa(i), strconv.Itoa(i+1), true, nil)
+		if err = graph.AddNode("G", strconv.Itoa(i+1), map[string]string{"label": getNodeString(decoderParsed.Embedding[architectureInt[i][0]])}); err != nil {
+			panic(err)
+		}
+		if err = graph.AddEdge(strconv.Itoa(i), strconv.Itoa(i+1), true, nil); err != nil {
+			panic(err)
+		}
 		for j := 1; j < i+1; j++ {
 			if architectureInt[i][j] == 1 {
-				graph.AddEdge(strconv.Itoa(j-1), strconv.Itoa(i+1), true, nil)
+				if err = graph.AddEdge(strconv.Itoa(j-1), strconv.Itoa(i+1), true, nil); err != nil {
+					panic(err)
+				}
 			}
 		}
 	}
-	graph.AddNode("G", strconv.Itoa(i+1), map[string]string{"label": strconv.Quote("GlobalAvgPool")})
-	graph.AddEdge(strconv.Itoa(i), strconv.Itoa(i+1), true, nil)
-	graph.AddNode("G", strconv.Itoa(i+2), map[string]string{"label": strconv.Quote("FullConnect\nSoftmax")})
-	graph.AddEdge(strconv.Itoa(i+1), strconv.Itoa(i+2), true, nil)
-	graph.AddNode("G", strconv.Itoa(i+3), map[string]string{"label": strconv.Quote("Output")})
-	graph.AddEdge(strconv.Itoa(i+2), strconv.Itoa(i+3), true, nil)
+	if err = graph.AddNode("G", strconv.Itoa(i+1), map[string]string{"label": strconv.Quote("GlobalAvgPool")}); err != nil {
+		panic(err)
+	}
+	if err = graph.AddEdge(strconv.Itoa(i), strconv.Itoa(i+1), true, nil); err != nil {
+		panic(err)
+	}
+	if err = graph.AddNode("G", strconv.Itoa(i+2), map[string]string{"label": strconv.Quote("FullConnect\nSoftmax")}); err != nil {
+		panic(err)
+	}
+	if err = graph.AddEdge(strconv.Itoa(i+1), strconv.Itoa(i+2), true, nil); err != nil {
+		panic(err)
+	}
+	if err = graph.AddNode("G", strconv.Itoa(i+3), map[string]string{"label": strconv.Quote("Output")}); err != nil {
+		panic(err)
+	}
+	if err = graph.AddEdge(strconv.Itoa(i+2), strconv.Itoa(i+3), true, nil); err != nil {
+		panic(err)
+	}
 	s := graph.String()
 	return s
 }

@@ -200,14 +200,14 @@ const (
 	StdOutCollector CollectorKind = "StdOut"
 
 	FileCollector   CollectorKind = "File"
-	DefaultFilePath               = "/var/log/katib/metrics.log"
+	DefaultFilePath string        = "/var/log/katib/metrics.log"
 
 	TfEventCollector              CollectorKind = "TensorFlowEvent"
-	DefaultTensorflowEventDirPath               = "/var/log/katib/tfevent/"
+	DefaultTensorflowEventDirPath string        = "/var/log/katib/tfevent/"
 
 	PrometheusMetricCollector CollectorKind = "PrometheusMetric"
-	DefaultPrometheusPath                   = "/metrics"
-	DefaultPrometheusPort                   = 8080
+	DefaultPrometheusPath     string        = "/metrics"
+	DefaultPrometheusPort     int           = 8080
 
 	CustomCollector CollectorKind = "Custom"
 

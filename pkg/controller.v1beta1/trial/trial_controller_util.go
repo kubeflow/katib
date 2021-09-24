@@ -119,7 +119,6 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 		// TODO(gaocegege): Should we maintain a TrialsRunningCount?
 	}
 	// else nothing to do
-	return
 }
 
 func (r *ReconcileTrial) UpdateTrialStatusObservation(instance *trialsv1beta1.Trial) error {
@@ -214,7 +213,7 @@ func getMetrics(metricLogs []*api_pb.MetricLog, strategies []commonv1beta1.Metri
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse timestamps %s: %e", metricLog.TimeStamp, err)
 		}
-		timestamp, _ := timestamps[metricLog.Metric.Name]
+		timestamp := timestamps[metricLog.Metric.Name]
 		if timestamp == nil || !timestamp.After(currentTime) {
 			timestamps[metricLog.Metric.Name] = &currentTime
 			metric.Latest = strValue

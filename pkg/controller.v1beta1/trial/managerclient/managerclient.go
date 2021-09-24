@@ -70,9 +70,7 @@ func (d *DefaultClient) GetTrialObservationLog(
 		if reply.ObservationLog == nil || reply.ObservationLog.MetricLogs == nil {
 			continue
 		}
-		for _, log := range reply.ObservationLog.MetricLogs {
-			metricLogs = append(metricLogs, log)
-		}
+		metricLogs = append(metricLogs, reply.ObservationLog.MetricLogs...)
 	}
 	reply.ObservationLog.MetricLogs = metricLogs
 
