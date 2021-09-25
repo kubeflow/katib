@@ -306,13 +306,13 @@ func newKatibConfigMapInstance() *corev1.ConfigMap {
 	bSuggestionConfig, _ := json.Marshal(suggestionConfig)
 
 	// Create early stopping config
-	jsonConfigEarlyStopping := map[string]katibconfig.EarlyStoppingConfig{
+	earlyStoppingConfig := map[string]katibconfig.EarlyStoppingConfig{
 		"median-stop": {
 			Image:           "test-image",
 			ImagePullPolicy: corev1.PullAlways,
 		},
 	}
-	bEarlyStopping, _ := json.Marshal(jsonConfigEarlyStopping)
+	bEarlyStoppingConfig, _ := json.Marshal(earlyStoppingConfig)
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -321,7 +321,7 @@ func newKatibConfigMapInstance() *corev1.ConfigMap {
 		},
 		Data: map[string]string{
 			consts.LabelSuggestionTag:    string(bSuggestionConfig),
-			consts.LabelEarlyStoppingTag: string(bEarlyStopping),
+			consts.LabelEarlyStoppingTag: string(bEarlyStoppingConfig),
 		},
 	}
 }
