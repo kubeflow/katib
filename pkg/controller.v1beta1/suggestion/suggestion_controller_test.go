@@ -132,7 +132,7 @@ func TestReconcile(t *testing.T) {
 	}
 	g.Expect(c.Create(context.TODO(), kubeflowNS)).NotTo(gomega.HaveOccurred())
 	// Test 1 - Regural suggestion run
-	// Create ConfigMap with suggestion data.
+	// Create ConfigMap with suggestion and early stopping data.
 	g.Expect(c.Create(context.TODO(), configMap)).NotTo(gomega.HaveOccurred())
 	// Create the suggestion
 	g.Expect(c.Create(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
@@ -160,6 +160,26 @@ func TestReconcile(t *testing.T) {
 	// Expect that PVC with appropriate name is created
 	g.Eventually(func() error {
 		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, &corev1.PersistentVolumeClaim{})
+	}, timeout).Should(gomega.Succeed())
+
+	rbacName := util.GetSuggestionRBACName(instance)
+
+	// Expect that serviceAccount with appropriate name is created
+	suggestionServiceAccount := &corev1.ServiceAccount{}
+	g.Eventually(func() error {
+		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: rbacName}, suggestionServiceAccount)
+	}, timeout).Should(gomega.Succeed())
+
+	// Expect that Role with appropriate name is created
+	suggestionRole := &rbacv1.Role{}
+	g.Eventually(func() error {
+		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: rbacName}, suggestionRole)
+	}, timeout).Should(gomega.Succeed())
+
+	// Expect that RoleBinding with appropriate name is created
+	suggestionRoleBinding := &rbacv1.RoleBinding{}
+	g.Eventually(func() error {
+		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: rbacName}, suggestionRoleBinding)
 	}, timeout).Should(gomega.Succeed())
 
 	// Manually change ready deployment status
@@ -246,24 +266,10 @@ func TestReconcile(t *testing.T) {
 	// Test 4 - Update status condition for empty experiment
 	g.Expect(r.updateStatusCondition(&suggestionsv1beta1.Suggestion{}, oldS)).To(gomega.HaveOccurred())
 
-	// test 5 - Early Stopping Suggestion run
-	// Create early stopping config
-	jsonConfigEarlyStopping := map[string]katibconfig.EarlyStoppingConfig{
-		"median-stop": {
-			Image:           "test-image",
-			ImagePullPolicy: corev1.PullAlways,
-		},
-	}
-	bEarlyStopping, err := json.Marshal(jsonConfigEarlyStopping)
-	g.Expect(err).NotTo(gomega.HaveOccurred())
+}
 
-	// Add early stopping config to Katib config
-	configMap.Data[consts.LabelEarlyStoppingTag] = string(bEarlyStopping)
-	g.Expect(c.Update(context.TODO(), configMap)).NotTo(gomega.HaveOccurred())
-
-	// Create the suggestion
-	instance = newFakeInstance()
-	instance.Spec.EarlyStopping = &commonv1beta1.EarlyStoppingSpec{
+func newFakeInstance() *suggestionsv1beta1.Suggestion {
+	earlyStoppingSpec := &commonv1beta1.EarlyStoppingSpec{
 		AlgorithmName: "median-stop",
 		AlgorithmSettings: []commonv1beta1.EarlyStoppingSetting{
 			{
@@ -276,41 +282,6 @@ func TestReconcile(t *testing.T) {
 			},
 		},
 	}
-	g.Expect(c.Create(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
-
-	// Expect that deployment with appropriate name and image is created
-	suggestionDeploy = &appsv1.Deployment{}
-	g.Eventually(func() bool {
-		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, suggestionDeploy); err != nil {
-			return false
-		}
-		return len(suggestionDeploy.Spec.Template.Spec.Containers) > 0 &&
-			suggestionDeploy.Spec.Template.Spec.Containers[0].Image == suggestionImage
-	}, timeout).Should(gomega.BeTrue())
-
-	rbacName := util.GetSuggestionRBACName(instance)
-
-	// Expect that serviceAccount with appropriate name is created
-	suggestionServiceAccount := &corev1.ServiceAccount{}
-	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: rbacName}, suggestionServiceAccount)
-	}, timeout).Should(gomega.Succeed())
-
-	// Expect that Role with appropriate name is created
-	suggestionRole := &rbacv1.Role{}
-	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: rbacName}, suggestionRole)
-	}, timeout).Should(gomega.Succeed())
-
-	// Expect that RoleBinding with appropriate name is created
-	suggestionRoleBinding := &rbacv1.RoleBinding{}
-	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: rbacName}, suggestionRoleBinding)
-	}, timeout).Should(gomega.Succeed())
-
-}
-
-func newFakeInstance() *suggestionsv1beta1.Suggestion {
 	return &suggestionsv1beta1.Suggestion{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      suggestionName,
@@ -321,23 +292,36 @@ func newFakeInstance() *suggestionsv1beta1.Suggestion {
 			Algorithm: &commonv1beta1.AlgorithmSpec{
 				AlgorithmName: "random",
 			},
-			ResumePolicy: experimentsv1beta1.FromVolume,
+			ResumePolicy:  experimentsv1beta1.FromVolume,
+			EarlyStopping: earlyStoppingSpec,
 		},
 	}
 }
 
 func newKatibConfigMapInstance() *corev1.ConfigMap {
+	// Create suggestion config
 	suggestionConfig := map[string]map[string]string{
 		"random": {"image": suggestionImage},
 	}
-	b, _ := json.Marshal(suggestionConfig)
+	bSuggestionConfig, _ := json.Marshal(suggestionConfig)
+
+	// Create early stopping config
+	jsonConfigEarlyStopping := map[string]katibconfig.EarlyStoppingConfig{
+		"median-stop": {
+			Image:           "test-image",
+			ImagePullPolicy: corev1.PullAlways,
+		},
+	}
+	bEarlyStopping, _ := json.Marshal(jsonConfigEarlyStopping)
+
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      katibConfigName,
 			Namespace: namespace,
 		},
 		Data: map[string]string{
-			"suggestion": string(b),
+			consts.LabelSuggestionTag:    string(bSuggestionConfig),
+			consts.LabelEarlyStoppingTag: string(bEarlyStopping),
 		},
 	}
 }
