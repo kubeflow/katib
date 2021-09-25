@@ -131,7 +131,7 @@ func TestReconcile(t *testing.T) {
 		},
 	}
 	g.Expect(c.Create(context.TODO(), kubeflowNS)).NotTo(gomega.HaveOccurred())
-	// Test 1 - Regural suggestion run
+	// Test 1 - Early stopping suggestion run
 	// Create ConfigMap with suggestion and early stopping data.
 	g.Expect(c.Create(context.TODO(), configMap)).NotTo(gomega.HaveOccurred())
 	// Create the suggestion
