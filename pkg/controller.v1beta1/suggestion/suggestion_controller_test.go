@@ -19,9 +19,6 @@ package suggestion
 import (
 	"context"
 	"encoding/json"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
-	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
-	rbacv1 "k8s.io/api/rbac/v1"
 	"sync"
 	"testing"
 	"time"
@@ -30,6 +27,7 @@ import (
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -43,7 +41,9 @@ import (
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/suggestion/composer"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	suggestionclientmock "github.com/kubeflow/katib/pkg/mock/v1beta1/suggestion/suggestionclient"
+	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
 )
 
 const (
