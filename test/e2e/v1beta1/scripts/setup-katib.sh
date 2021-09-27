@@ -23,20 +23,20 @@ set -o pipefail
 CLUSTER_NAME="${CLUSTER_NAME}"
 AWS_REGION="${AWS_REGION}"
 ECR_REGISTRY="${ECR_REGISTRY}"
-VERSION="${PULL_BASE_SHA}"
+VERSION="${PULL_PULL_SHA}"
 
 echo "Start to install Katib"
 echo "CLUSTER_NAME: ${CLUSTER_NAME}"
 echo "AWS_REGION: ${AWS_REGION}"
 echo "ECR_REGISTRY: ${ECR_REGISTRY}"
-echo "VERSION: ${PULL_BASE_SHA}"
+echo "VERSION: ${PULL_PULL_SHA}"
 
 echo "Configuring kubeconfig.."
 aws eks update-kubeconfig --region=${AWS_REGION} --name=${CLUSTER_NAME}
 kubectl version
 kubectl cluster-info
 
-# Update images with current pull base sha.
+# Update images with current pull sha.
 echo "Updating Katib images with the current PR SHA: ${VERSION}"
 KUSTOMIZE_PATH="manifests/v1beta1/installs/katib-standalone/kustomization.yaml"
 CONFIG_PATCH="manifests/v1beta1/components/controller/katib-config.yaml"

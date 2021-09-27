@@ -16,6 +16,8 @@
 
 # This shell script is used to run the python tests in the argo workflow
 
+# TODO (andreyvelich): Remove this script once https://github.com/kubeflow/katib/issues/1601 is done.
+
 set -o errexit
 set -o nounset
 set -o pipefail
