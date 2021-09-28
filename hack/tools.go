@@ -1,4 +1,4 @@
-// +build tools
+//go:build tools
 
 /*
 Copyright 2021 The Kubeflow Authors.
