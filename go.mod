@@ -7,7 +7,7 @@ require (
 	github.com/awalterschulze/gographviz v2.0.3+incompatible
 	github.com/c-bata/goptuna v0.8.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/go-openapi/spec v0.19.3
+	github.com/go-openapi/spec v0.19.5
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.2
@@ -27,8 +27,9 @@ require (
 	k8s.io/api v0.20.4
 	k8s.io/apimachinery v0.20.4
 	k8s.io/client-go v0.20.4
+	k8s.io/code-generator v0.20.4
 	k8s.io/klog v1.0.0
-	k8s.io/kube-openapi v0.0.0-20210915024840-94424faaec1f
+	k8s.io/kube-openapi v0.0.0-20210113233702-8566a335510f
 	sigs.k8s.io/controller-runtime v0.8.2
 )
 
@@ -101,11 +102,13 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.17.0 // indirect
 	golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0 // indirect
+	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/oauth2 v0.0.0-20210402161424-2e8d93401602 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
 	golang.org/x/text v0.3.5 // indirect
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e // indirect
+	golang.org/x/tools v0.1.2 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.1.0 // indirect
 	gonum.org/v1/gonum v0.8.2 // indirect
@@ -120,11 +123,10 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	k8s.io/apiextensions-apiserver v0.20.1 // indirect
 	k8s.io/component-base v0.20.2 // indirect
-	k8s.io/klog/v2 v2.5.0 // indirect
+	k8s.io/gengo v0.0.0-20201214224949-b6c5ce23f027 // indirect
+	k8s.io/klog/v2 v2.8.0 // indirect
 	k8s.io/legacy-cloud-providers v0.19.7 // indirect
-	k8s.io/utils v0.0.0-20210802155522-efc7438f0176 // indirect
-	sigs.k8s.io/structured-merge-diff/v4 v4.0.2 // indirect
+	k8s.io/utils v0.0.0-20210111153108-fddb29f9d009 // indirect
+	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
-
-replace k8s.io/code-generator => k8s.io/code-generator v0.20.4
