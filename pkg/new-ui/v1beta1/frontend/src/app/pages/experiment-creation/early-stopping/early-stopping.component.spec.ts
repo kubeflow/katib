@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { EarlyStoppingComponent } from './early-stopping.component';
 
@@ -6,7 +6,7 @@ describe('EarlyStoppingComponent', () => {
   let component: EarlyStoppingComponent;
   let fixture: ComponentFixture<EarlyStoppingComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ EarlyStoppingComponent ]
     })
