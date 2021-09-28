@@ -15,6 +15,7 @@
 import grpc
 import grpc_testing
 import unittest
+from unittest.mock import patch
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 
@@ -23,6 +24,11 @@ from pkg.earlystopping.v1beta1.medianstop.service import MedianStopService
 
 class TestMedianStop(unittest.TestCase):
     def setUp(self):
+        # Mock load Kubernetes config.
+        patcher = patch('pkg.earlystopping.v1beta1.medianstop.service.config.load_kube_config')
+        self.mock_sum = patcher.start()
+        self.addCleanup(patcher.stop)
+
         servicers = {
             api_pb2.DESCRIPTOR.services_by_name['EarlyStopping']: MedianStopService(
             )
@@ -60,7 +66,7 @@ class TestMedianStop(unittest.TestCase):
             invocation_metadata={},
             request=request, timeout=1)
 
-        response, metadata, code, details = get_earlystopping_rules.termination()
+        _, _, code, _ = get_earlystopping_rules.termination()
 
         self.assertEqual(code, grpc.StatusCode.OK)
 
