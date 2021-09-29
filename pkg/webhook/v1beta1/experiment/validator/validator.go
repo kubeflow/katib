@@ -317,7 +317,7 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 		return fmt.Errorf("APIVersion and Kind in spec.trialTemplate must be specified")
 	}
 
-	// Check if Job can be converted to Batch Job/TFJob/PyTorchJob
+	// Check if Job can be converted to Batch Job
 	// Other CRDs are not validated
 	if err := g.validateTrialJob(runSpec); err != nil {
 		return fmt.Errorf("invalid spec.trialTemplate: %v", err)
@@ -329,7 +329,7 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 func (g *DefaultValidator) validateTrialJob(runSpec *unstructured.Unstructured) error {
 	gvk := runSpec.GroupVersionKind()
 
-	// Validate only Job, TFJob and PyTorchJob
+	// Validate only Job
 	switch gvk.Kind {
 	case consts.JobKindJob:
 		batchJob := batchv1.Job{}
@@ -359,7 +359,7 @@ func validatePatchJob(runSpec *unstructured.Unstructured, job interface{}, jobTy
 	// Not necessary to check error job must be valid JSON
 	runSpecAfter, _ := json.Marshal(job)
 
-	// Create Patch on tranformed Job (e.g: Job, TFJob) using unstructured JSON
+	// Create Patch on tranformed Job (e.g: Job) using unstructured JSON
 	runSpecPatchOperations, err := jsonPatch.CreatePatch(runSpecAfter, runSpecBefore)
 	if err != nil {
 		return fmt.Errorf("create patch error: %v", err)

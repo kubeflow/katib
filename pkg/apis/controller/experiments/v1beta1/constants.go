@@ -29,14 +29,22 @@ const (
 	// DefaultJobFailureCondition is the default value of spec.trialTemplate.failureCondition for Job.
 	DefaultJobFailureCondition = "status.conditions.#(type==\"Failed\")#|#(status==\"True\")#"
 
-	// DefaultKubeflowJobSuccessCondition is the default value of spec.trialTemplate.successCondition for Kubeflow Job.
+	// DefaultKubeflowJobSuccessCondition is the default value of spec.trialTemplate.successCondition for Kubeflow Training Job.
 	DefaultKubeflowJobSuccessCondition = "status.conditions.#(type==\"Succeeded\")#|#(status==\"True\")#"
 
-	// DefaultKubeflowJobFailureCondition is the default value of spec.trialTemplate.failureCondition for Kubeflow Job.
+	// DefaultKubeflowJobFailureCondition is the default value of spec.trialTemplate.failureCondition for Kubeflow Training Job.
 	DefaultKubeflowJobFailureCondition = "status.conditions.#(type==\"Failed\")#|#(status==\"True\")#"
 )
 
 var (
-	// DefaultKubeflowJobPrimaryPodLabels is the default value of spec.trialTemplate.primaryPodLabels for Kubeflow Job.
+	// DefaultKubeflowJobPrimaryPodLabels is the default value of spec.trialTemplate.primaryPodLabels for Kubeflow Training Job.
 	DefaultKubeflowJobPrimaryPodLabels = map[string]string{"job-role": "master"}
+
+	// KubeflowJobKinds is the list of Kubeflow Training Job kinds.
+	KubeflowJobKinds = map[string]bool{
+		"TFJob":      true,
+		"PyTorchJob": true,
+		"XGBoostJob": true,
+		"MXJob":      true,
+	}
 )

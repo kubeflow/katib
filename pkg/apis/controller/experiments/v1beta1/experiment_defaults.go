@@ -106,7 +106,7 @@ func (e *Experiment) setDefaultTrialTemplate() {
 			if t.FailureCondition == "" {
 				t.FailureCondition = DefaultJobFailureCondition
 			}
-		} else if jobKind == consts.JobKindTF || jobKind == consts.JobKindPyTorch || jobKind == consts.JobKindXGBoost {
+		} else if _, ok := KubeflowJobKinds[jobKind]; ok {
 			if t.SuccessCondition == "" {
 				t.SuccessCondition = DefaultKubeflowJobSuccessCondition
 			}
