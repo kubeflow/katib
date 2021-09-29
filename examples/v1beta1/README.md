@@ -14,16 +14,8 @@ A Minikube cluster and Katib components will be deployed! You can check them wit
 
 Then, start port-forward for katib UI `8080 -> UI`.
 
-kubectl v1.10~:
-
 ```
 $ kubectl -n kubeflow port-forward svc/katib-ui 8080:80
-```
-
-kubectl ~v1.9:
-
-```
-& kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-ui | sed -e "s@pods\/@@") 8080:80
 ```
 
 ## Create Experiment
@@ -52,7 +44,7 @@ $ kubectl apply -f bayesianoptimization-example.yaml
 $ kubectl apply -f hyperband-example.yaml
 ```
 
-#### Run trial evaluation job by [PyTorchJob](https://github.com/kubeflow/pytorch-operator)
+#### Run trial evaluation job by [PyTorchJob](https://github.com/kubeflow/tf-operator)
 
 ```
 $ kubectl apply -f pytorchjob-example.yaml
