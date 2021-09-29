@@ -116,6 +116,9 @@ func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1be
 	if err := g.validateAlgorithm(instance.Spec.Algorithm); err != nil {
 		return err
 	}
+	if err := g.validateEarlyStopping(instance.Spec.EarlyStopping); err != nil {
+		return err
+	}
 	if err := g.validateResumePolicy(instance.Spec.ResumePolicy); err != nil {
 		return err
 	}
@@ -167,6 +170,21 @@ func (g *DefaultValidator) validateAlgorithm(ag *commonapiv1beta1.AlgorithmSpec)
 
 	if _, err := g.GetSuggestionConfigData(ag.AlgorithmName); err != nil {
 		return fmt.Errorf("unable to get Suggestion config data for algorithm %s: %v", ag.AlgorithmName, err)
+	}
+
+	return nil
+}
+
+func (g *DefaultValidator) validateEarlyStopping(es *commonapiv1beta1.EarlyStoppingSpec) error {
+	if es == nil {
+		return nil
+	}
+	if es.AlgorithmName == "" {
+		return fmt.Errorf("no spec.earlyStopping.algorithm.algorithmName specified")
+	}
+
+	if _, err := g.GetEarlyStoppingConfigData(es); err != nil {
+		return fmt.Errorf("unable to get EarlyStopping config data for algorithm %s: %v", es.AlgorithmName, err)
 	}
 
 	return nil
