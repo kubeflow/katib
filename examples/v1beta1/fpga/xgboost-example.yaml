@@ -49,6 +49,12 @@ spec:
       kind: Job
       spec:
         template:
+          metadata:
+            labels:
+              inaccel/fpga: enabled
+            annotations:
+              inaccel/cli: |
+                bitstream install --mode others https://store.inaccel.com/artifactory/bitstreams/xilinx/aws-vu9p-f1/shell-v04261818_201920.2/aws/com/inaccel/xgboost/0.1/2exact
           spec:
             containers:
               - name: training-container
@@ -60,7 +66,6 @@ spec:
                   - "--name=SVHN"
                   - "--test-size=0.35"
                   - "--tree-method=fpga_exact"
-                  - "--bitstream=https://store.inaccel.com/artifactory/bitstreams/xilinx/aws-vu9p-f1/dynamic_5.0/com/inaccel/xgboost/0.1/2exact"
                   - "--max-depth=10"
                   - "--alpha=${trialParameters.alpha}"
                   - "--eta=${trialParameters.eta}"
