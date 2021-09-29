@@ -43,7 +43,7 @@ spec:
               spec:
                 containers:
                   - name: mxnet
-                    image: bytepsimage/mxnet
+                    image: docker.io/bytepsimage/mxnet
                     command: ["bpslaunch"]
           Server:
             replicas: 1
@@ -52,7 +52,7 @@ spec:
               spec:
                 containers:
                   - name: mxnet
-                    image: bytepsimage/mxnet
+                    image: docker.io/bytepsimage/mxnet
                     command: ["bpslaunch"]
           Worker:
             replicas: 1
@@ -61,7 +61,7 @@ spec:
               spec:
                 containers:
                   - name: mxnet
-                    image: bytepsimage/mxnet
+                    image: docker.io/bytepsimage/mxnet
                     command: ["bpslaunch"]
                     args:
                       [
