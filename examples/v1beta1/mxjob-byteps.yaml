@@ -69,9 +69,8 @@ spec:
                         "/usr/local/byteps/example/mxnet/train_imagenet_byteps.py",
                         "--benchmark",
                         "1",
-                        "--batch-size=32",
                         "--lr=${trialParameters.learningRate}",
-                        "--num-examples=10000",
+                        "--num-examples=1000",
                         "--num-epochs=4",
                       ]
                     volumeMounts:
