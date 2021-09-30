@@ -1,8 +1,8 @@
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: bayesianoptimization-example
+  name: tpe
 spec:
   objective:
     type: maximize
@@ -11,10 +11,7 @@ spec:
     additionalMetricNames:
       - Train-accuracy
   algorithm:
-    algorithmName: bayesianoptimization
-    algorithmSettings:
-      - name: "random_state"
-        value: "10"
+    algorithmName: tpe
   parallelTrialCount: 3
   maxTrialCount: 12
   maxFailedTrialCount: 3

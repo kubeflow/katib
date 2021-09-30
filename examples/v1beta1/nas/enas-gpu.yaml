@@ -4,12 +4,11 @@
 # In practice, setting up a limited search space with more common operations is more likely to get better performance.
 # For example, Efficient Neural Architecture Search via Parameter Sharing (https://arxiv.org/abs/1802.03268)
 # uses only 6 operations, 3x3/5x5 convolution, 3x3/5x5 separable_convolution and 3x3 max_pooling/avg_pooling
-
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: enas-example-gpu
+  name: enas-gpu
 spec:
   parallelTrialCount: 3
   maxTrialCount: 12

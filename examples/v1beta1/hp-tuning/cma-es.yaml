@@ -1,8 +1,8 @@
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: random-example
+  name: cmaes
 spec:
   objective:
     type: maximize
@@ -11,7 +11,10 @@ spec:
     additionalMetricNames:
       - Train-accuracy
   algorithm:
-    algorithmName: random
+    algorithmName: cmaes
+    algorithmSettings:
+      - name: "restart_strategy"
+        value: "ipop"
   parallelTrialCount: 3
   maxTrialCount: 12
   maxFailedTrialCount: 3

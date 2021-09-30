@@ -1,8 +1,8 @@
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: multivariate-tpe-example
+  name: metrics-collection-strategy
 spec:
   objective:
     type: maximize
@@ -10,8 +10,13 @@ spec:
     objectiveMetricName: Validation-accuracy
     additionalMetricNames:
       - Train-accuracy
+    metricStrategies:
+      - name: Train-accuracy
+        value: "latest"
+      - name: Validation-accuracy
+        value: "max"
   algorithm:
-    algorithmName: multivariate-tpe
+    algorithmName: tpe
   parallelTrialCount: 3
   maxTrialCount: 12
   maxFailedTrialCount: 3
@@ -62,4 +67,3 @@ spec:
                   - "--num-layers=${trialParameters.numberLayers}"
                   - "--optimizer=${trialParameters.optimizer}"
             restartPolicy: Never
-

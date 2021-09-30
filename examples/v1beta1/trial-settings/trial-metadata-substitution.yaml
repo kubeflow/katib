@@ -1,5 +1,5 @@
 # This example shows how you can use trial metadata in template substitution
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow

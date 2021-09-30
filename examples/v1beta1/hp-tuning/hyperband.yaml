@@ -1,8 +1,8 @@
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: hyperband-example
+  name: hyperband
 spec:
   parallelTrialCount: 9
   maxTrialCount: 9

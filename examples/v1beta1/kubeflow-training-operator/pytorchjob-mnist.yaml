@@ -1,8 +1,8 @@
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: pytorchjob-example
+  name: pytorchjob-mnist
 spec:
   parallelTrialCount: 3
   maxTrialCount: 12
@@ -34,7 +34,7 @@ spec:
         description: Momentum for the training model
         reference: momentum
     trialSpec:
-      apiVersion: "kubeflow.org/v1"
+      apiVersion: kubeflow.org/v1
       kind: PyTorchJob
       spec:
         pytorchReplicaSpecs:

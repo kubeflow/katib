@@ -76,8 +76,8 @@ func main() {
 
 	var maxTrials int32 = 2
 	var parallelTrials int32 = 1
-	// For random example we test 2 parallel execution.
-	if exp.Name == "random-example" {
+	// For random we test 2 parallel execution.
+	if exp.Name == "random" {
 		maxTrials = 3
 		parallelTrials = 2
 	}
@@ -106,7 +106,7 @@ func main() {
 	}
 
 	// For random example and from volume we restart Experiment.
-	if exp.Name == "random-example" || exp.Name == "from-volume-resume" {
+	if exp.Name == "random" || exp.Name == "from-volume-resume" {
 		// Increase parallel Trials and max Trials counts.
 		parallelTrials++
 		maxTrials += parallelTrials + 1

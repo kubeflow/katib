@@ -1,8 +1,8 @@
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: darts-example-gpu
+  name: darts-gpu
 spec:
   parallelTrialCount: 1
   maxTrialCount: 1

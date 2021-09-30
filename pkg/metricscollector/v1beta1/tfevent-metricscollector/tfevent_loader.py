@@ -12,6 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# TFEventFileParser parses tfevent files and returns an ObservationLog of the metrics specified.
+# When the event file is under a directory(e.g. test dir), please specify "{{dirname}}/{{metrics name}}"
+# For example, in the Kubeflow tf-operator tutorial for mnist with summary:
+# https://github.com/kubeflow/tf-operator/blob/master/examples/tensorflow/mnist_with_summaries/mnist_with_summaries.py.
+# The "accuracy" metric is saved under "train" and "test" directories.
+# So in the Metrics Collector specification, please specify name of "train" or "test" directory.
+# Check TFJob example for more information:
+# https://github.com/kubeflow/katib/blob/master/examples/v1beta1/kubeflow-training-operator/tfjob-mnist-with-summaries.yaml#L16-L22
+
+
 import tensorflow as tf
 import os
 from datetime import datetime
@@ -19,11 +29,6 @@ import rfc3339
 import api_pb2
 from logging import getLogger, StreamHandler, INFO
 import const
-
-# TFEventFileParser parses tfevent files and returns an ObservationLog of the metrics specified.
-# When the event file is under a directory(e.g. test dir), please specify "{{dirname}}/{{metrics name}}"
-# For example, in the kubeflow tf-operator tutorial for mnist with summary (https://github.com/kubeflow/tf-operator/blob/master/examples/v1/mnist_with_summaries/mnist_with_summaries.py),
-# the "accuracy" metric is saved under "train" and "test" directories. So in the Metrics Collector specification, please specify name of "train" or "test" directory. Check TFJob example for more information: https://github.com/kubeflow/katib/blob/master/examples/v1beta1/tfjob-example.yaml#L16-L22
 
 
 class TFEventFileParser:

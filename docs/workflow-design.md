@@ -1,4 +1,4 @@
-# How Katib v1beta1 tunes hyperparameter automatically in a Kubernetes native way
+# How Katib v1beta1 tunes hyperparameters automatically in a Kubernetes native way
 
 Follow the Kubeflow documentation guides:
 
@@ -10,9 +10,11 @@ Follow the Kubeflow documentation guides:
 
 ## Example and Illustration
 
-After install Katib v1beta1, you can run
-`kubectl apply -f katib/examples/v1beta1/random-example.yaml` to try the first
-example of Katib.
+After install Katib v1beta1, you can try the first Katib Experiment:
+
+```
+kubectl apply -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1beta1/hp-tuning/random.yaml
+```
 
 ### Experiment
 
@@ -25,13 +27,13 @@ Then you can get the new `Experiment` as below.
 Katib concepts are introduced based on this example.
 
 ```yaml
-$ kubectl get experiment random-example -n kubeflow -o yaml
+$ kubectl get experiment random -n kubeflow -o yaml
 
 apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   ...
-  name: random-example
+  name: random
   namespace: kubeflow
   ...
 spec:
@@ -101,63 +103,63 @@ spec:
               - --lr=${trialParameters.learningRate}
               - --num-layers=${trialParameters.numberLayers}
               - --optimizer=${trialParameters.optimizer}
-              image: docker.io/kubeflowkatib/mxnet-mnist:v1beta1-e294a90
+              image: docker.io/kubeflowkatib/mxnet-mnist:v1beta1-45c5727
               name: training-container
             restartPolicy: Never
 status:
-  completionTime: "2020-11-16T20:13:02Z"
+  completionTime: "2021-10-01T21:47:35Z"
   conditions:
-  - lastTransitionTime: "2020-11-16T20:00:15Z"
-    lastUpdateTime: "2020-11-16T20:00:15Z"
+  - lastTransitionTime: "2021-10-01T21:27:46Z"
+    lastUpdateTime: "2021-10-01T21:27:46Z"
     message: Experiment is created
     reason: ExperimentCreated
     status: "True"
     type: Created
-  - lastTransitionTime: "2020-11-16T20:13:02Z"
-    lastUpdateTime: "2020-11-16T20:13:02Z"
+  - lastTransitionTime: "2021-10-01T21:47:35Z"
+    lastUpdateTime: "2021-10-01T21:47:35Z"
     message: Experiment is running
     reason: ExperimentRunning
     status: "False"
     type: Running
-  - lastTransitionTime: "2020-11-16T20:13:02Z"
-    lastUpdateTime: "2020-11-16T20:13:02Z"
+  - lastTransitionTime: "2021-10-01T21:47:35Z"
+    lastUpdateTime: "2021-10-01T21:47:35Z"
     message: Experiment has succeeded because max trial count has reached
     reason: ExperimentMaxTrialsReached
     status: "True"
     type: Succeeded
   currentOptimalTrial:
-    bestTrialName: random-example-gnz5nccf
+    bestTrialName: random-gh8psfcz
     observation:
       metrics:
-      - latest: "0.979299"
+      - latest: "0.977707"
         max: "0.979299"
-        min: "0.955115"
+        min: "0.955215"
         name: Validation-accuracy
-      - latest: "0.993503"
-        max: "0.993503"
-        min: "0.912413"
+      - latest: "0.993570"
+        max: "0.993570"
+        min: "0.907932"
         name: Train-accuracy
     parameterAssignments:
     - name: lr
-      value: "0.01874909352953323"
+      value: "0.014431754535687558"
     - name: num-layers
-      value: "5"
+      value: "3"
     - name: optimizer
       value: sgd
-  startTime: "2020-11-16T20:00:15Z"
+  startTime: "2021-10-01T21:27:46Z"
   succeededTrialList:
-  - random-example-2fpnqfv8
-  - random-example-2s9vfb9s
-  - random-example-5hxm45x4
-  - random-example-8xmpj4gv
-  - random-example-b6gnl4cs
-  - random-example-ftm2v84q
-  - random-example-gnz5nccf
-  - random-example-p74tn9gk
-  - random-example-q6jrlshx
-  - random-example-tkk46c4x
-  - random-example-w5qgblgk
-  - random-example-xcnrpx4x
+  - random-ghvj6q8z
+  - random-4z4kqr5l
+  - random-8ssrzrzr
+  - random-gw7xtn84
+  - random-zlldw6v9
+  - random-9jx47rsk
+  - random-rzx6zcwb
+  - random-46rqvb9k
+  - random-nd8d2lmc
+  - random-gw7wzdw2
+  - random-hq2fghf6
+  - random-gh8psfcz
   trials: 12
   trialsSucceeded: 12
 ```
@@ -172,21 +174,21 @@ hyperparameter in `status.suggestions`. The `Suggestion` CR is used for internal
 logic control and end user can even ignore it.
 
 ```yaml
-$ kubectl get suggestion random-example -n kubeflow -o yaml
+$ kubectl get suggestion random -n kubeflow -o yaml
 
 apiVersion: kubeflow.org/v1beta1
 kind: Suggestion
 metadata:
   ...
-  name: random-example
+  name: random
   namespace: kubeflow
   ownerReferences:
   - apiVersion: kubeflow.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: Experiment
-    name: random-example
-    uid: 302e79ae-8659-4679-9e2d-461209619883
+    name: random
+    uid: 355b05f5-6951-47b2-85f6-d0b9b8be5a64
   ...
 spec:
   algorithm:
@@ -195,52 +197,52 @@ spec:
   resumePolicy: LongRunning
 status:
   conditions:
-  - lastTransitionTime: "2020-11-16T20:00:15Z"
-    lastUpdateTime: "2020-11-16T20:00:15Z"
+  - lastTransitionTime: "2021-10-01T21:27:46Z"
+    lastUpdateTime: "2021-10-01T21:27:46Z"
     message: Suggestion is created
     reason: SuggestionCreated
     status: "True"
     type: Created
-  - lastTransitionTime: "2020-11-16T20:00:36Z"
-    lastUpdateTime: "2020-11-16T20:00:36Z"
+  - lastTransitionTime: "2021-10-01T21:28:56Z"
+    lastUpdateTime: "2021-10-01T21:28:56Z"
     message: Deployment is ready
     reason: DeploymentReady
     status: "True"
     type: DeploymentReady
-  - lastTransitionTime: "2020-11-16T20:00:38Z"
-    lastUpdateTime: "2020-11-16T20:00:38Z"
+  - lastTransitionTime: "2021-10-01T21:28:57Z"
+    lastUpdateTime: "2021-10-01T21:28:57Z"
     message: Suggestion is running
     reason: SuggestionRunning
     status: "True"
     type: Running
-  startTime: "2020-11-16T20:00:15Z"
+  startTime: "2021-10-01T21:27:46Z"
   suggestionCount: 12
   suggestions:
   ...
-  - name: random-example-2fpnqfv8
+  - name: random-gw7wzdw2
     parameterAssignments:
     - name: lr
-      value: "0.021135228357807213"
+      value: "0.020202241839540558"
     - name: num-layers
       value: "4"
     - name: optimizer
-      value: sgd
-  - name: random-example-xcnrpx4x
+      value: adam
+  - name: random-hq2fghf6
     parameterAssignments:
     - name: lr
-      value: "0.02414696373094622"
+      value: "0.01841281609693181"
     - name: num-layers
       value: "3"
     - name: optimizer
-      value: adam
-  - name: random-example-8xmpj4gv
+      value: sgd
+  - name: random-8ssrzrzr
     parameterAssignments:
     - name: lr
-      value: "0.02471053882990492"
+      value: "0.021473410597867483"
     - name: num-layers
-      value: "4"
+      value: "2"
     - name: optimizer
-      value: sgd
+      value: adam
   ...
 ```
 
@@ -254,35 +256,40 @@ is used for internal logic control and end user can even ignore it.
 ```yaml
 $ kubectl get trial -n kubeflow
 
-NAME                      TYPE        STATUS   AGE
-random-example-2fpnqfv8   Succeeded   True     10m
-random-example-2s9vfb9s   Succeeded   True     8m15s
-random-example-5hxm45x4   Succeeded   True     17m
-random-example-8xmpj4gv   Succeeded   True     8m44s
-random-example-b6gnl4cs   Succeeded   True     12m
-random-example-ftm2v84q   Succeeded   True     17m
-random-example-gnz5nccf   Succeeded   True     14m
-random-example-p74tn9gk   Succeeded   True     11m
-random-example-q6jrlshx   Succeeded   True     17m
-random-example-tkk46c4x   Succeeded   True     12m
-random-example-w5qgblgk   Succeeded   True     12m
-random-example-xcnrpx4x   Succeeded   True     10m
+NAME              TYPE        STATUS   AGE
+random-46rqvb9k   Succeeded   True     20m
+random-4z4kqr5l   Succeeded   True     23m
+random-8ssrzrzr   Succeeded   True     14m
+random-9jx47rsk   Succeeded   True     23m
+random-gh8psfcz   Succeeded   True     8m15s
+random-ghvj6q8z   Succeeded   True     23m
+random-gw7wzdw2   Succeeded   True     17m
+random-gw7xtn84   Succeeded   True     12m
+random-hq2fghf6   Succeeded   True     17m
+random-nd8d2lmc   Succeeded   True     17m
+random-rzx6zcwb   Succeeded   True     20m
+random-zlldw6v9   Succeeded   True     11m
 
-$ kubectl get trial random-example-2fpnqfv8 -o yaml -n kubeflow
+$ kubectl get trial random-gw7wzdw2 -o yaml -n kubeflow
 
 apiVersion: kubeflow.org/v1beta1
 kind: Trial
 metadata:
-  ...
-  name: random-example-2fpnqfv8
+  creationTimestamp: "2021-10-01T21:35:18Z"
+  finalizers:
+  - clean-metrics-in-db
+  generation: 1
+  labels:
+    katib.kubeflow.org/experiment: random
+  name: random-gw7wzdw2
   namespace: kubeflow
   ownerReferences:
   - apiVersion: kubeflow.org/v1beta1
     blockOwnerDeletion: true
     controller: true
     kind: Experiment
-    name: random-example
-    uid: 302e79ae-8659-4679-9e2d-461209619883
+    name: random
+    uid: 355b05f5-6951-47b2-85f6-d0b9b8be5a64
   ...
 spec:
   failureCondition: status.conditions.#(type=="Failed")#|#(status=="True")#
@@ -302,17 +309,17 @@ spec:
     type: maximize
   parameterAssignments:
   - name: lr
-    value: "0.021135228357807213"
+    value: "0.020202241839540558"
   - name: num-layers
     value: "4"
   - name: optimizer
-    value: sgd
+    value: adam
   primaryContainerName: training-container
   runSpec:
     apiVersion: batch/v1
     kind: Job
     metadata:
-      name: random-example-2fpnqfv8
+      name: random-gw7wzdw2
       namespace: kubeflow
     spec:
       template:
@@ -322,45 +329,45 @@ spec:
             - python3
             - /opt/mxnet-mnist/mnist.py
             - --batch-size=64
-            - --lr=0.021135228357807213
+            - --lr=0.020202241839540558
             - --num-layers=4
-            - --optimizer=sgd
-            image: docker.io/kubeflowkatib/mxnet-mnist:v1beta1-e294a90
+            - --optimizer=adam
+            image: docker.io/kubeflowkatib/mxnet-mnist:v1beta1-45c5727
             name: training-container
           restartPolicy: Never
   successCondition: status.conditions.#(type=="Complete")#|#(status=="True")#
 status:
-  completionTime: "2020-11-16T20:09:33Z"
+  completionTime: "2021-10-01T21:40:59Z"
   conditions:
-  - lastTransitionTime: "2020-11-16T20:07:48Z"
-    lastUpdateTime: "2020-11-16T20:07:48Z"
+  - lastTransitionTime: "2021-10-01T21:35:18Z"
+    lastUpdateTime: "2021-10-01T21:35:18Z"
     message: Trial is created
     reason: TrialCreated
     status: "True"
     type: Created
-  - lastTransitionTime: "2020-11-16T20:09:33Z"
-    lastUpdateTime: "2020-11-16T20:09:33Z"
+  - lastTransitionTime: "2021-10-01T21:40:59Z"
+    lastUpdateTime: "2021-10-01T21:40:59Z"
     message: Trial is running
     reason: TrialRunning
     status: "False"
     type: Running
-  - lastTransitionTime: "2020-11-16T20:09:33Z"
-    lastUpdateTime: "2020-11-16T20:09:33Z"
+  - lastTransitionTime: "2021-10-01T21:40:59Z"
+    lastUpdateTime: "2021-10-01T21:40:59Z"
     message: Trial has succeeded
     reason: TrialSucceeded
     status: "True"
     type: Succeeded
   observation:
     metrics:
-    - latest: "0.977309"
-      max: "0.978105"
-      min: "0.958002"
+    - latest: "0.949542"
+      max: "0.949542"
+      min: "0.938396"
       name: Validation-accuracy
-    - latest: "0.993820"
-      max: "0.993820"
-      min: "0.916611"
+    - latest: "0.943164"
+      max: "0.944463"
+      min: "0.911081"
       name: Train-accuracy
-  startTime: "2020-11-16T20:07:48Z"
+  startTime: "2021-10-01T21:35:18Z"
 ```
 
 ## What happens after an `Experiment` CR is created

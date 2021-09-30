@@ -1,8 +1,8 @@
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: tpe-example
+  name: multivariate-tpe
 spec:
   objective:
     type: maximize
@@ -11,7 +11,7 @@ spec:
     additionalMetricNames:
       - Train-accuracy
   algorithm:
-    algorithmName: tpe
+    algorithmName: multivariate-tpe
   parallelTrialCount: 3
   maxTrialCount: 12
   maxFailedTrialCount: 3

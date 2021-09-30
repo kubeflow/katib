@@ -1,8 +1,8 @@
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: grid-example
+  name: random
 spec:
   objective:
     type: maximize
@@ -11,7 +11,7 @@ spec:
     additionalMetricNames:
       - Train-accuracy
   algorithm:
-    algorithmName: grid
+    algorithmName: random
   parallelTrialCount: 3
   maxTrialCount: 12
   maxFailedTrialCount: 3
@@ -19,9 +19,8 @@ spec:
     - name: lr
       parameterType: double
       feasibleSpace:
-        min: "0.001"
-        max: "0.01"
-        step: "0.001"
+        min: "0.01"
+        max: "0.03"
     - name: num-layers
       parameterType: int
       feasibleSpace:

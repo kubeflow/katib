@@ -1,8 +1,8 @@
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: file-metricscollector-example
+  name: file-metrics-collector
 spec:
   objective:
     type: maximize

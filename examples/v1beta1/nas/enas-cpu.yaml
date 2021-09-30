@@ -7,12 +7,11 @@
 
 # It uses only 1 layer of CNN and 1 train epoch to show CPU support and it has very bad results.
 # In practice, if you increase number of layers, training process on CPU will take more time.
-
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: enas-example-cpu
+  name: enas-cpu
 spec:
   parallelTrialCount: 2
   maxTrialCount: 3

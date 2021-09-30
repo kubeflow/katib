@@ -1,8 +1,8 @@
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: cmaes-example
+  name: bayesian-optimization
 spec:
   objective:
     type: maximize
@@ -11,10 +11,10 @@ spec:
     additionalMetricNames:
       - Train-accuracy
   algorithm:
-    algorithmName: cmaes
+    algorithmName: bayesianoptimization
     algorithmSettings:
-      - name: "restart_strategy"
-        value: "ipop"
+      - name: "random_state"
+        value: "10"
   parallelTrialCount: 3
   maxTrialCount: 12
   maxFailedTrialCount: 3
