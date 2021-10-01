@@ -242,7 +242,7 @@ func TestGetEarlyStoppingConfigData(t *testing.T) {
 
 func TestGetMetricsCollectorConfigData(t *testing.T) {
 	const (
-		invalidCollectorKind commonv1beta1.CollectorKind = "invalid-collector-kind"
+		invalidCollectorKind commonv1beta1.CollectorKind = "invalidCollector"
 		testCollectorKind    commonv1beta1.CollectorKind = "testCollector"
 	)
 
