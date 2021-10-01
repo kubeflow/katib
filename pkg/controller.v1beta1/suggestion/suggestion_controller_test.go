@@ -300,8 +300,10 @@ func newFakeInstance() *suggestionsv1beta1.Suggestion {
 
 func newKatibConfigMapInstance() *corev1.ConfigMap {
 	// Create suggestion config
-	suggestionConfig := map[string]map[string]string{
-		"random": {"image": suggestionImage},
+	suggestionConfig := map[string]katibconfig.SuggestionConfig{
+		"random": {
+			Image: suggestionName,
+		},
 	}
 	bSuggestionConfig, _ := json.Marshal(suggestionConfig)
 

@@ -242,7 +242,7 @@ func generateNNImage(architecture string, decoder string) string {
 		Embeding is a map: int to Parameter
 		Parameter has id, type, Option
 
-		Beforehand substite all ' to " and wrap the string in `
+		Beforehand substitute all ' to " and wrap the string in `
 	*/
 
 	replacedDecoder := strings.Replace(decoder, `'`, `"`, -1)

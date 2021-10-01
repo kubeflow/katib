@@ -359,7 +359,7 @@ func validatePatchJob(runSpec *unstructured.Unstructured, job interface{}, jobTy
 	// Not necessary to check error job must be valid JSON
 	runSpecAfter, _ := json.Marshal(job)
 
-	// Create Patch on tranformed Job (e.g: Job) using unstructured JSON
+	// Create Patch on transformed Job (e.g: Job) using unstructured JSON
 	runSpecPatchOperations, err := jsonPatch.CreatePatch(runSpecAfter, runSpecBefore)
 	if err != nil {
 		return fmt.Errorf("create patch error: %v", err)
