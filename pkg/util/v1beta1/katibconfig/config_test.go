@@ -348,7 +348,6 @@ func TestGetMetricsCollectorConfigData(t *testing.T) {
 				t.Errorf("want error: %v, actual: %v", tt.err, err)
 			} else if tt.expected != nil {
 				if !reflect.DeepEqual(actual, *tt.expected) {
-					//t.Errorf("%p, %p", &actual, tt.expected)
 					t.Errorf("Generated MetricsCollectorConfig is invalid.\n\nactual:\n%v\n\nexpected:\n%v\n\n", actual, *tt.expected)
 				}
 			}
