@@ -36,7 +36,7 @@ katib-ui-5767cfccdc-nt6mz           1/1     Running     0          67s
 
 ## Run Katib Experiment
 
-You can use various [Katib interfaces](https://master.kubeflow.org/docs/components/katib/overview/#katib-interfaces)
+You can use various [Katib interfaces](https://www.kubeflow.org/docs/components/katib/overview/#katib-interfaces)
 to run your first Katib Experiment.
 
 For example, create Hyperparameter Tuning Katib Experiment with

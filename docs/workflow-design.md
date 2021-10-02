@@ -392,14 +392,14 @@ workflow looks as follows:
 
 1. When the `Suggestion` controller verifies that the algorithm service is
    ready, it calls the service to generate
-   `spec.request - len(status.suggestions)` sets of hyperparamters and append
+   `spec.request - len(status.suggestions)` sets of hyperparameters and append
    them into `status.suggestions`.
 
 1. The `Experiment` controller finds that `Suggestion` CR had been updated and
-   generates each `Trial` for the each new hyperparamters set.
+   generates each `Trial` for the each new hyperparameters set.
 
 1. The `Trial` controller generates `Worker Job` based on the `runSpec`
-   from the `Trial` CR with the new hyperparamters set.
+   from the `Trial` CR with the new hyperparameters set.
 
 1. The related job controller
    (Kubernetes batch Job, Kubeflow TFJob, Tekton Pipeline, etc.) generates

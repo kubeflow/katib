@@ -6,12 +6,12 @@ Machine Learning (AutoML) tasks. To know more about Katib follow the
 
 This directory contains examples of Katib Experiments in action. To install Katib on your
 Kubernetes cluster check the
-[setup guide](https://master.kubeflow.org/docs/components/katib/hyperparameter/#katib-setup).
-You can use various [Katib interfaces](https://master.kubeflow.org/docs/components/katib/overview/#katib-interfaces)
+[setup guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#katib-setup).
+You can use various [Katib interfaces](https://www.kubeflow.org/docs/components/katib/overview/#katib-interfaces)
 to run these examples.
 
 For a complete description of the Katib Experiment specification follow the
-[configuration guide](https://master.kubeflow.org/docs/components/katib/experiment/#configuration-spec)
+[configuration guide](https://www.kubeflow.org/docs/components/katib/experiment/#configuration-spec)
 
 ## Local Cluster Example
 
