@@ -27,19 +27,18 @@ func TestGetSuggestionConfigData(t *testing.T) {
 	const testAlgorithmName = "test-suggestion"
 
 	tests := []struct {
-		testDescription          string
-		katibConfigMapSuggestion *SuggestionConfig
-		expected                 *SuggestionConfig
-		inputAlgorithmName       string
-		err                      bool
-		nonExistentSuggestion    bool
+		testDescription    string
+		katibConfig        *katibConfig
+		expected           *SuggestionConfig
+		inputAlgorithmName string
+		err                bool
 	}{
 		{
 			testDescription: "All parameters correctly are specified",
-			katibConfigMapSuggestion: func() *SuggestionConfig {
-				c := newFakeSuggestionConfig()
-				c.ImagePullPolicy = corev1.PullAlways
-				return c
+			katibConfig: func() *katibConfig {
+				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
+				kc.suggestion[testAlgorithmName].ImagePullPolicy = corev1.PullAlways
+				return kc
 			}(),
 			expected: func() *SuggestionConfig {
 				c := newFakeSuggestionConfig()
@@ -50,32 +49,37 @@ func TestGetSuggestionConfigData(t *testing.T) {
 			err:                false,
 		},
 		{
-			testDescription:       fmt.Sprintf("There is not %s field in katib-config configMap", consts.LabelSuggestionTag),
-			err:                   true,
-			nonExistentSuggestion: true,
+			testDescription: "There is not katib-config.",
+			katibConfig:     nil,
+			err:             true,
 		},
 		{
-			testDescription:          "There is not the AlgorithmName",
-			katibConfigMapSuggestion: newFakeSuggestionConfig(),
-			inputAlgorithmName:       "invalid-algorithm-name",
-			err:                      true,
+			testDescription: fmt.Sprintf("There is not %s field in katib-config configMap", consts.LabelSuggestionTag),
+			katibConfig:     &katibConfig{},
+			err:             true,
+		},
+		{
+			testDescription:    "There is not the AlgorithmName",
+			katibConfig:        &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}},
+			inputAlgorithmName: "invalid-algorithm-name",
+			err:                true,
 		},
 		{
 			testDescription: "Image filed is empty in katib-config configMap",
-			katibConfigMapSuggestion: func() *SuggestionConfig {
-				c := newFakeSuggestionConfig()
-				c.Image = ""
-				return c
+			katibConfig: func() *katibConfig {
+				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
+				kc.suggestion[testAlgorithmName].Image = ""
+				return kc
 			}(),
 			inputAlgorithmName: testAlgorithmName,
 			err:                true,
 		},
 		{
 			testDescription: fmt.Sprintf("GetSuggestionConfigData sets %s to imagePullPolicy", consts.DefaultImagePullPolicy),
-			katibConfigMapSuggestion: func() *SuggestionConfig {
-				c := newFakeSuggestionConfig()
-				c.ImagePullPolicy = ""
-				return c
+			katibConfig: func() *katibConfig {
+				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
+				kc.suggestion[testAlgorithmName].ImagePullPolicy = ""
+				return kc
 			}(),
 			expected:           newFakeSuggestionConfig(),
 			inputAlgorithmName: testAlgorithmName,
@@ -83,10 +87,10 @@ func TestGetSuggestionConfigData(t *testing.T) {
 		},
 		{
 			testDescription: "GetSuggestionConfigData sets resource.requests and resource.limits for the suggestion service",
-			katibConfigMapSuggestion: func() *SuggestionConfig {
-				c := newFakeSuggestionConfig()
-				c.Resource = corev1.ResourceRequirements{}
-				return c
+			katibConfig: func() *katibConfig {
+				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
+				kc.suggestion[testAlgorithmName].Resource = corev1.ResourceRequirements{}
+				return kc
 			}(),
 			expected:           newFakeSuggestionConfig(),
 			inputAlgorithmName: testAlgorithmName,
@@ -94,10 +98,10 @@ func TestGetSuggestionConfigData(t *testing.T) {
 		},
 		{
 			testDescription: fmt.Sprintf("GetSuggestionConfigData sets %s to volumeMountPath", consts.DefaultContainerSuggestionVolumeMountPath),
-			katibConfigMapSuggestion: func() *SuggestionConfig {
-				c := newFakeSuggestionConfig()
-				c.VolumeMountPath = ""
-				return c
+			katibConfig: func() *katibConfig {
+				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
+				kc.suggestion[testAlgorithmName].VolumeMountPath = ""
+				return kc
 			}(),
 			expected:           newFakeSuggestionConfig(),
 			inputAlgorithmName: testAlgorithmName,
@@ -105,10 +109,10 @@ func TestGetSuggestionConfigData(t *testing.T) {
 		},
 		{
 			testDescription: "GetSuggestionConfigData sets accessMode and resource.requests for PVC",
-			katibConfigMapSuggestion: func() *SuggestionConfig {
-				c := newFakeSuggestionConfig()
-				c.PersistentVolumeClaimSpec = corev1.PersistentVolumeClaimSpec{}
-				return c
+			katibConfig: func() *katibConfig {
+				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
+				kc.suggestion[testAlgorithmName].PersistentVolumeClaimSpec = corev1.PersistentVolumeClaimSpec{}
+				return kc
 			}(),
 			expected:           newFakeSuggestionConfig(),
 			inputAlgorithmName: testAlgorithmName,
@@ -116,10 +120,10 @@ func TestGetSuggestionConfigData(t *testing.T) {
 		},
 		{
 			testDescription: fmt.Sprintf("GetSuggestionConfigData does not set %s to persistentVolumeReclaimPolicy", corev1.PersistentVolumeReclaimDelete),
-			katibConfigMapSuggestion: func() *SuggestionConfig {
-				c := newFakeSuggestionConfig()
-				c.PersistentVolumeSpec = corev1.PersistentVolumeSpec{}
-				return c
+			katibConfig: func() *katibConfig {
+				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
+				kc.suggestion[testAlgorithmName].PersistentVolumeSpec = corev1.PersistentVolumeSpec{}
+				return kc
 			}(),
 			expected: func() *SuggestionConfig {
 				c := newFakeSuggestionConfig()
@@ -133,17 +137,8 @@ func TestGetSuggestionConfigData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.testDescription, func(t *testing.T) {
-			// prepare test
-			config := &katibConfig{}
-			if !tt.nonExistentSuggestion {
-				config.suggestion = map[string]*SuggestionConfig{
-					testAlgorithmName: tt.katibConfigMapSuggestion,
-				}
-			}
-			c := newFakeKubeClient(newFakeKatibConfigMap(config))
-
-			// start test
-			actual, err := GetSuggestionConfigData(tt.inputAlgorithmName, c)
+			fakeKubeClient := newFakeKubeClient(newFakeKatibConfigMap(tt.katibConfig))
+			actual, err := GetSuggestionConfigData(tt.inputAlgorithmName, fakeKubeClient)
 			if (err != nil) != tt.err {
 				t.Errorf("want error: %v, actual: %v", tt.err, err)
 			} else if tt.expected != nil {
@@ -160,19 +155,18 @@ func TestGetEarlyStoppingConfigData(t *testing.T) {
 	const testAlgorithmName = "test-early-stopping"
 
 	tests := []struct {
-		testDescription             string
-		katibConfigMapEarlyStopping *EarlyStoppingConfig
-		expected                    *EarlyStoppingConfig
-		inputAlgorithmName          string
-		err                         bool
-		nonExistentEarlyStopping    bool
+		testDescription    string
+		katibConfig        *katibConfig
+		expected           *EarlyStoppingConfig
+		inputAlgorithmName string
+		err                bool
 	}{
 		{
 			testDescription: "All parameters correctly are specified",
-			katibConfigMapEarlyStopping: func() *EarlyStoppingConfig {
-				c := newFakeEarlyStoppingConfig()
-				c.ImagePullPolicy = corev1.PullIfNotPresent
-				return c
+			katibConfig: func() *katibConfig {
+				kc := &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testAlgorithmName: newFakeEarlyStoppingConfig()}}
+				kc.earlyStopping[testAlgorithmName].ImagePullPolicy = corev1.PullIfNotPresent
+				return kc
 			}(),
 			expected: func() *EarlyStoppingConfig {
 				c := newFakeEarlyStoppingConfig()
@@ -183,32 +177,37 @@ func TestGetEarlyStoppingConfigData(t *testing.T) {
 			err:                false,
 		},
 		{
-			testDescription:          fmt.Sprintf("There is not %s field in katib-config configMap", consts.LabelEarlyStoppingTag),
-			err:                      true,
-			nonExistentEarlyStopping: true,
+			testDescription: "There is not katib-config.",
+			katibConfig:     nil,
+			err:             true,
 		},
 		{
-			testDescription:             "There is not the AlgorithmName",
-			katibConfigMapEarlyStopping: newFakeEarlyStoppingConfig(),
-			inputAlgorithmName:          "invalid-algorithm-name",
-			err:                         true,
+			testDescription: fmt.Sprintf("There is not %s field in katib-config configMap", consts.LabelEarlyStoppingTag),
+			katibConfig:     &katibConfig{},
+			err:             true,
+		},
+		{
+			testDescription:    "There is not the AlgorithmName",
+			katibConfig:        &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testAlgorithmName: newFakeEarlyStoppingConfig()}},
+			inputAlgorithmName: "invalid-algorithm-name",
+			err:                true,
 		},
 		{
 			testDescription: "Image filed is empty in katib-config configMap",
-			katibConfigMapEarlyStopping: func() *EarlyStoppingConfig {
-				c := newFakeEarlyStoppingConfig()
-				c.Image = ""
-				return c
+			katibConfig: func() *katibConfig {
+				kc := &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testAlgorithmName: newFakeEarlyStoppingConfig()}}
+				kc.earlyStopping[testAlgorithmName].Image = ""
+				return kc
 			}(),
 			inputAlgorithmName: testAlgorithmName,
 			err:                true,
 		},
 		{
 			testDescription: fmt.Sprintf("GetEarlyStoppingConfigData sets %s to imagePullPolicy", consts.DefaultImagePullPolicy),
-			katibConfigMapEarlyStopping: func() *EarlyStoppingConfig {
-				c := newFakeEarlyStoppingConfig()
-				c.ImagePullPolicy = ""
-				return c
+			katibConfig: func() *katibConfig {
+				kc := &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testAlgorithmName: newFakeEarlyStoppingConfig()}}
+				kc.earlyStopping[testAlgorithmName].ImagePullPolicy = ""
+				return kc
 			}(),
 			expected:           newFakeEarlyStoppingConfig(),
 			inputAlgorithmName: testAlgorithmName,
@@ -218,17 +217,8 @@ func TestGetEarlyStoppingConfigData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.testDescription, func(t *testing.T) {
-			// prepare test
-			config := &katibConfig{}
-			if !tt.nonExistentEarlyStopping {
-				config.earlyStopping = map[string]*EarlyStoppingConfig{
-					testAlgorithmName: tt.katibConfigMapEarlyStopping,
-				}
-			}
-			c := newFakeKubeClient(newFakeKatibConfigMap(config))
-
-			// start test
-			actual, err := GetEarlyStoppingConfigData(tt.inputAlgorithmName, c)
+			fakeKubeClient := newFakeKubeClient(newFakeKatibConfigMap(tt.katibConfig))
+			actual, err := GetEarlyStoppingConfigData(tt.inputAlgorithmName, fakeKubeClient)
 			if (err != nil) != tt.err {
 				t.Errorf("want error: %v, actual: %v", tt.err, err)
 			} else if tt.expected != nil {
@@ -254,19 +244,18 @@ func TestGetMetricsCollectorConfigData(t *testing.T) {
 	}
 
 	tests := []struct {
-		testDescription                string
-		katibConfigMapMetricsCollector *MetricsCollectorConfig
-		expected                       *MetricsCollectorConfig
-		inputCollectorKind             commonv1beta1.CollectorKind
-		err                            bool
-		nonExistentMetricsCollector    bool
+		testDescription    string
+		katibConfig        *katibConfig
+		expected           *MetricsCollectorConfig
+		inputCollectorKind commonv1beta1.CollectorKind
+		err                bool
 	}{
 		{
 			testDescription: "All parameters correctly are specified",
-			katibConfigMapMetricsCollector: func() *MetricsCollectorConfig {
-				c := newFakeMetricsCollectorConfig()
-				c.ImagePullPolicy = corev1.PullNever
-				return c
+			katibConfig: func() *katibConfig {
+				kc := &katibConfig{metricsCollector: map[commonv1beta1.CollectorKind]*MetricsCollectorConfig{testCollectorKind: newFakeMetricsCollectorConfig()}}
+				kc.metricsCollector[testCollectorKind].ImagePullPolicy = corev1.PullNever
+				return kc
 			}(),
 			expected: func() *MetricsCollectorConfig {
 				c := newFakeMetricsCollectorConfig()
@@ -277,32 +266,37 @@ func TestGetMetricsCollectorConfigData(t *testing.T) {
 			err:                false,
 		},
 		{
-			testDescription:             fmt.Sprintf("There is not %s field in katib-config configMap", consts.LabelMetricsCollectorSidecar),
-			err:                         true,
-			nonExistentMetricsCollector: true,
+			testDescription: "There is not katib-config.",
+			katibConfig:     nil,
+			err:             true,
 		},
 		{
-			testDescription:                "There is not the cKind",
-			katibConfigMapMetricsCollector: newFakeMetricsCollectorConfig(),
-			inputCollectorKind:             invalidCollectorKind,
-			err:                            true,
+			testDescription: fmt.Sprintf("There is not %s field in katib-config configMap", consts.LabelMetricsCollectorSidecar),
+			katibConfig:     &katibConfig{},
+			err:             true,
+		},
+		{
+			testDescription:    "There is not the cKind",
+			katibConfig:        &katibConfig{metricsCollector: map[commonv1beta1.CollectorKind]*MetricsCollectorConfig{testCollectorKind: newFakeMetricsCollectorConfig()}},
+			inputCollectorKind: invalidCollectorKind,
+			err:                true,
 		},
 		{
 			testDescription: "Image filed is empty in katib-config configMap",
-			katibConfigMapMetricsCollector: func() *MetricsCollectorConfig {
-				c := newFakeMetricsCollectorConfig()
-				c.Image = ""
-				return c
+			katibConfig: func() *katibConfig {
+				kc := &katibConfig{metricsCollector: map[commonv1beta1.CollectorKind]*MetricsCollectorConfig{testCollectorKind: newFakeMetricsCollectorConfig()}}
+				kc.metricsCollector[testCollectorKind].Image = ""
+				return kc
 			}(),
 			inputCollectorKind: testCollectorKind,
 			err:                true,
 		},
 		{
 			testDescription: fmt.Sprintf("GetMetricsConfigData sets %s to imagePullPolicy", consts.DefaultImagePullPolicy),
-			katibConfigMapMetricsCollector: func() *MetricsCollectorConfig {
-				c := newFakeMetricsCollectorConfig()
-				c.ImagePullPolicy = ""
-				return c
+			katibConfig: func() *katibConfig {
+				kc := &katibConfig{metricsCollector: map[commonv1beta1.CollectorKind]*MetricsCollectorConfig{testCollectorKind: newFakeMetricsCollectorConfig()}}
+				kc.metricsCollector[testCollectorKind].ImagePullPolicy = ""
+				return kc
 			}(),
 			expected:           newFakeMetricsCollectorConfig(),
 			inputCollectorKind: testCollectorKind,
@@ -310,13 +304,13 @@ func TestGetMetricsCollectorConfigData(t *testing.T) {
 		},
 		{
 			testDescription: "GetMetricsConfigData nukes resource.requests and resource.limits for the metrics collector",
-			katibConfigMapMetricsCollector: func() *MetricsCollectorConfig {
-				c := newFakeMetricsCollectorConfig()
-				c.Resource = corev1.ResourceRequirements{
+			katibConfig: func() *katibConfig {
+				kc := &katibConfig{metricsCollector: map[commonv1beta1.CollectorKind]*MetricsCollectorConfig{testCollectorKind: newFakeMetricsCollectorConfig()}}
+				kc.metricsCollector[testCollectorKind].Resource = corev1.ResourceRequirements{
 					Requests: nukeResourceRequirements,
 					Limits:   nukeResourceRequirements,
 				}
-				return c
+				return kc
 			}(),
 			expected: func() *MetricsCollectorConfig {
 				c := newFakeMetricsCollectorConfig()
@@ -333,17 +327,8 @@ func TestGetMetricsCollectorConfigData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.testDescription, func(t *testing.T) {
-			// prepare test
-			config := &katibConfig{}
-			if !tt.nonExistentMetricsCollector {
-				config.metricsCollector = map[commonv1beta1.CollectorKind]*MetricsCollectorConfig{
-					testCollectorKind: tt.katibConfigMapMetricsCollector,
-				}
-			}
-			c := newFakeKubeClient(newFakeKatibConfigMap(config))
-
-			// start test
-			actual, err := GetMetricsCollectorConfigData(tt.inputCollectorKind, c)
+			fakeKubeClient := newFakeKubeClient(newFakeKatibConfigMap(tt.katibConfig))
+			actual, err := GetMetricsCollectorConfigData(tt.inputCollectorKind, fakeKubeClient)
 			if (err != nil) != tt.err {
 				t.Errorf("want error: %v, actual: %v", tt.err, err)
 			} else if tt.expected != nil {
@@ -364,6 +349,10 @@ func newFakeKubeClient(katibConfigMap *corev1.ConfigMap) client.Client {
 }
 
 func newFakeKatibConfigMap(config *katibConfig) *corev1.ConfigMap {
+
+	if config == nil {
+		return nil
+	}
 
 	data := map[string]string{}
 	if config.suggestion != nil {
