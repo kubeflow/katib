@@ -349,7 +349,6 @@ func newFakeKubeClient(katibConfigMap *corev1.ConfigMap) client.Client {
 }
 
 func newFakeKatibConfigMap(config *katibConfig) *corev1.ConfigMap {
-
 	if config == nil {
 		return nil
 	}
