@@ -44,7 +44,7 @@ echo -e "\nKind cluster has been created\n"
 kubectl config use-context kind-kind
 
 # Step 3. Wait until Kubernetes Nodes will be ready.
-TIMEOUT=50s
+TIMEOUT=30m
 kubectl wait --for=condition=ready --timeout=${TIMEOUT} node kind-control-plane
 
 kubectl get nodes
