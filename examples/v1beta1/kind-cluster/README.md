@@ -91,22 +91,10 @@ You can get the best hyperparameters with the following command ([`jq`](https://
 must be installed):
 
 ```json
-$ kubectl get experiment random -n kubeflow -o json | jq -r ".status.currentOptimalTrial.parameterAssignments"
-
-[
-  {
-    "name": "lr",
-    "value": "0.027749569935245154"
-  },
-  {
-    "name": "num-layers",
-    "value": "2"
-  },
-  {
-    "name": "optimizer",
-    "value": "sgd"
-  }
-]
+$ kubectl get experiment random -n kubeflow -o jsonpath='{range .status.currentOptimalTrial.parameterAssignments[*]}{.name}: {.value}{"\n"}{end}'
+lr: 0.028162244250364066
+num-layers: 5
+optimizer: sgd
 ```
 
 To view created Experiment in Katib UI, follow
