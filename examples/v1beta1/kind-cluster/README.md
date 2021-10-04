@@ -89,7 +89,7 @@ random-z9wqm7xh   Running     True     5m21s
 
 You can get the best hyperparameters with the following command:
 
-```json
+```
 $ kubectl get experiment random -n kubeflow -o jsonpath='{range .status.currentOptimalTrial.parameterAssignments[*]}{.name}: {.value}{"\n"}{end}'
 
 lr: 0.028162244250364066
