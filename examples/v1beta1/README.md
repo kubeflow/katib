@@ -138,4 +138,4 @@ in Katib check [this directory](./tekton).
 ## FPGA Support in Katib Experiments
 
 You can run Katib Experiments on [FPGA](https://en.wikipedia.org/wiki/Field-programmable_gate_array)
-based instance. For more information check [these examples](./fpga).
+based instances. For more information check [these examples](./fpga).
