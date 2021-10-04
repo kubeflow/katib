@@ -323,7 +323,7 @@ The following table shows images for training containers which are used in the
         FPGA XGBoost with parameter tuning
       </td>
       <td>
-        <a href="https://github.com/inaccel/jupyter/blob/8939209cc7958d07947055945dc99e0ce3c3c4ba/lab/Dockerfile">Dockerfile</a>
+        <a href="https://github.com/inaccel/jupyter/blob/master/lab/Dockerfile">Dockerfile</a>
       </td>
     </tr>
     <tr align="center">
