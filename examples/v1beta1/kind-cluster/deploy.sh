@@ -15,6 +15,7 @@
 # limitations under the License.
 
 # This script is used to deploy Kind cluster with Katib standalone components.
+set -e
 
 # Verify that appropriate tools are installed.
 if [[ ! $(which docker) ]]; then
@@ -35,24 +36,16 @@ if [[ ! $(which kubectl) ]]; then
   exit 1
 fi
 
-# Step 1. Create Kind cluster.
-kind create cluster
+# Step 1. Create Kind cluster with Kubernetes v1.21.1
+kind create cluster --image kindest/node:v1.21.1
 echo -e "\nKind cluster has been created\n"
 
 # Step 2. Set context for kubectl
 kubectl config use-context kind-kind
 
 # Step 3. Wait until Kubernetes Nodes will be ready.
-TIMEOUT=50
-while [[ ! -z $(kubectl get nodes | grep NotReady) ]]; do
-  sleep 2
-  TIMEOUT=$((TIMEOUT - 2))
-  if [[ ${TIMEOUT} -eq 0 ]]; then
-    echo "Unable to get Ready status for Kubernetes Nodes" >&2
-    kubectl get nodes
-    exit 1
-  fi
-done
+TIMEOUT=50s
+kubectl wait --for=condition=ready --timeout=${TIMEOUT} node kind-control-plane
 
 kubectl get nodes
 
@@ -61,19 +54,7 @@ echo -e "\nDeploying Katib components\n"
 kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib-standalone?ref=master"
 
 # Wait until all Katib pods are running.
-TIMEOUT=50
-# Katib components pods from deployments and 1 from Katib cert-generator.
-POD_COUNT=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
-POD_COUNT=$((POD_COUNT + 1))
-until kubectl get pods -n kubeflow | grep -E 'Running|Completed' | [[ $(wc -l) -eq ${POD_COUNT} ]]; do
-  sleep 2
-  TIMEOUT=$((TIMEOUT - 2))
-  if [[ $TIMEOUT -eq 0 ]]; then
-    echo "Unable to install Katib components" >&2
-    kubectl get pods -n kubeflow
-    exit 1
-  fi
-done
+kubectl wait --for=condition=ready --timeout=${TIMEOUT} -l "katib.kubeflow.org/component in (controller,db-manager,mysql,ui)" -n kubeflow pod
 
 echo -e "\nKatib has been deployed"
 kubectl get pods -n kubeflow
