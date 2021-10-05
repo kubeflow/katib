@@ -290,7 +290,7 @@ The following table shows images for training containers which are used in the
         Tensorflow MNIST example with saving metrics in the summaries
       </td>
       <td>
-        <a href="https://github.com/kubeflow/tf-operator/blob/2712f5667ec78f17d22288630f8719f0c08990ba/examples/tensorflow/mnist_with_summaries/Dockerfile">Dockerfile</a>
+        <a href="https://github.com/kubeflow/training-operator/blob/2712f5667ec78f17d22288630f8719f0c08990ba/examples/tensorflow/mnist_with_summaries/Dockerfile">Dockerfile</a>
       </td>
     </tr>
     <tr align="center">

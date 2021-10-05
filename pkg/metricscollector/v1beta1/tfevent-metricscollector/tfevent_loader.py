@@ -14,8 +14,8 @@
 
 # TFEventFileParser parses tfevent files and returns an ObservationLog of the metrics specified.
 # When the event file is under a directory(e.g. test dir), please specify "{{dirname}}/{{metrics name}}"
-# For example, in the Kubeflow tf-operator tutorial for mnist with summary:
-# https://github.com/kubeflow/tf-operator/blob/master/examples/tensorflow/mnist_with_summaries/mnist_with_summaries.py.
+# For example, in the Kubeflow Training Operator TFJob tutorial for mnist with summary:
+# https://github.com/kubeflow/training-operator/blob/master/examples/tensorflow/mnist_with_summaries/mnist_with_summaries.py.
 # The "accuracy" metric is saved under "train" and "test" directories.
 # So in the Metrics Collector specification, please specify name of "train" or "test" directory.
 # Check TFJob example for more information:

@@ -37,7 +37,7 @@ type TrialSpec struct {
 
 	// Raw text for the trial run spec. This can be any generic Kubernetes
 	// runtime object. The trial operator should create the resource as written,
-	// and let the corresponding resource controller (e.g. tf-operator) handle
+	// and let the corresponding resource controller (e.g. Kubeflow Training Operator) handle
 	// the rest.
 	RunSpec *unstructured.Unstructured `json:"runSpec,omitempty"`
 	// Whether to retain the trial run object after completed.

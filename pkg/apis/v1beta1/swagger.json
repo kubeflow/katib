@@ -337,7 +337,7 @@
           "type": "boolean"
         },
         "runSpec": {
-          "description": "Raw text for the trial run spec. This can be any generic Kubernetes runtime object. The trial operator should create the resource as written, and let the corresponding resource controller (e.g. tf-operator) handle the rest.",
+          "description": "Raw text for the trial run spec. This can be any generic Kubernetes runtime object. The trial operator should create the resource as written, and let the corresponding resource controller (e.g. Kubeflow Training Operator) handle the rest.",
           "$ref": "#/definitions/v1.unstructured.Unstructured"
         },
         "successCondition": {

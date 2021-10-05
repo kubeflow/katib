@@ -106,7 +106,7 @@ Check the following examples for Trial training containers:
 
 ## Katib with Kubeflow Training Operator
 
-Katib has out of the box support for the [Kubeflow Training Operators](https://github.com/kubeflow/tf-operator) to
+Katib has out of the box support for the [Kubeflow Training Operators](https://github.com/kubeflow/training-operator) to
 perform Trial's [Worker job](https://www.kubeflow.org/docs/components/katib/overview/#trial).
 Check the following examples for the various distributed operators:
 
