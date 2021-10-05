@@ -6,4 +6,4 @@ train the model.
 
 Katib uses this training container in some Experiments, for instance in the
 [file Metrics Collector example](../../metrics-collector/file-metrics-collector.yaml#L55-L64)
-or in the [PyTorchJob example](../../kubeflow-training-operator/pytorchjob-mnist.yaml#46-L54).
+or in the [PyTorchJob example](../../kubeflow-training-operator/pytorchjob-mnist.yaml#L47-L54).

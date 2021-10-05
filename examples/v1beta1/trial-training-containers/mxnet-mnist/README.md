@@ -8,4 +8,4 @@ If you want to read more about this example, visit the official
 GitHub repository.
 
 Katib uses this training container in some Experiments, for instance in the
-[random search](../../hp-tuning/random.yaml#L55-L64)
+[random search](../../hp-tuning/random.yaml#L55-L64).
