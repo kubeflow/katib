@@ -104,6 +104,10 @@ Check the following images for the Trial containers:
 
 - [PyTorch MNIST](./trial-images/pytorch-mnist)
 
+- [ENAS Keras CNN CIFAR-10](./trial-images/enas-cnn-cifar10)
+
+- [DARTS PyTorch CNN CIFAR-10](./trial-images/darts-cnn-cifar10)
+
 ## Katib with Kubeflow Training Operator
 
 Katib has out of the box support for the [Kubeflow Training Operators](https://github.com/kubeflow/training-operator) to
