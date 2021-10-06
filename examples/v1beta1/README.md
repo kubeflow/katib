@@ -96,13 +96,13 @@ Check the following examples:
 
 - [Trial with Metadata Substitution](./trial-template/trial-metadata-substitution.yaml)
 
-## TODO (andreyvelich) Discuss about this name. Trial Training Containers
+## Trial Images
 
-Check the following examples for Trial training containers:
+Check the following images for the Trial containers:
 
-- [MXNet MNIST](./trial-training-containers/mxnet-mnist)
+- [MXNet MNIST](./trial-images/mxnet-mnist)
 
-- [PyTorch MNIST](./trial-training-containers/pytorch-mnist)
+- [PyTorch MNIST](./trial-images/pytorch-mnist)
 
 ## Katib with Kubeflow Training Operator
 

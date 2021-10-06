@@ -49,7 +49,7 @@ kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/exampl
 
 This example uses a MXNet neural network to train an image classification model
 using the MNIST dataset. You can check the training container source code
-[here](../trial-training-containers/mxnet-mnist).
+[here](../trial-images/mxnet-mnist).
 The Experiment runs twelve training jobs (Trials) and tunes the following hyperparameters:
 
 - Learning Rate (`lr`).

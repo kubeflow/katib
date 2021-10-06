@@ -268,7 +268,7 @@ The following table shows images for training containers which are used in the
         MXNet MNIST example with collecting metrics time
       </td>
       <td>
-        <a href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/trial-training-containers/mxnet-mnist/Dockerfile">Dockerfile</a>
+        <a href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/trial-images/mxnet-mnist/Dockerfile">Dockerfile</a>
       </td>
     </tr>
     <tr align="center">
@@ -279,7 +279,7 @@ The following table shows images for training containers which are used in the
         PyTorch MNIST example with printing metrics to the file or StdOut
       </td>
       <td>
-        <a href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/trial-training-containers/pytorch-mnist/Dockerfile">Dockerfile</a>
+        <a href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/trial-images/pytorch-mnist/Dockerfile">Dockerfile</a>
       </td>
     </tr>
     <tr align="center">
