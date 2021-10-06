@@ -86,15 +86,15 @@ to know more about it. In this directory you can find the following examples:
 
 - [Metrics Collection Strategy](./metrics-collector/metrics-collection-strategy.yaml)
 
-## TODO (andreyvelich) Discuss about this name. Trial Settings
+## Trial Template
 
 You can specify different settings for your Trial template. To know more about it
 follow [this guide](https://www.kubeflow.org/docs/components/katib/trial-template/#use-trial-template-to-submit-experiment).
 Check the following examples:
 
-- [Trial with ConfigMap Source](./trial-settings/trial-configmap-source.yaml)
+- [Trial with ConfigMap Source](./trial-template/trial-configmap-source.yaml)
 
-- [Trial with Metadata Substitution](./trial-settings/trial-metadata-substitution.yaml)
+- [Trial with Metadata Substitution](./trial-template/trial-metadata-substitution.yaml)
 
 ## TODO (andreyvelich) Discuss about this name. Trial Training Containers
 
