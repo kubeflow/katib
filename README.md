@@ -23,7 +23,7 @@ users’ choice and natively supports many ML frameworks, such as
 
 Katib can perform training jobs using any Kubernetes
 [Custom Resources](https://www.kubeflow.org/docs/components/katib/trial-template/)
-with out of the box support for [Kubeflow Training Operators](https://github.com/kubeflow/tf-operator),
+with out of the box support for [Kubeflow Training Operator](https://github.com/kubeflow/training-operator),
 [Argo Workflows](https://github.com/argoproj/argo-workflows), [Tekton Pipelines](https://github.com/tektoncd/pipeline)
 and many more.
 
