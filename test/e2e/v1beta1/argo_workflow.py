@@ -59,9 +59,9 @@ KATIB_IMAGES = {
     "earlystopping-medianstop":     "cmd/earlystopping/medianstop/v1beta1/Dockerfile",
     "trial-mxnet-mnist":            "examples/v1beta1/trial-images/mxnet-mnist/Dockerfile",
     "trial-pytorch-mnist":          "examples/v1beta1/trial-images/pytorch-mnist/Dockerfile",
-    "trial-enas-cnn-cifar10-gpu":   "examples/v1beta1/nas/enas-cnn-cifar10/Dockerfile.gpu",
-    "trial-enas-cnn-cifar10-cpu":   "examples/v1beta1/nas/enas-cnn-cifar10/Dockerfile.cpu",
-    "trial-darts-cnn-cifar10":      "examples/v1beta1/nas/darts-cnn-cifar10/Dockerfile",
+    "trial-enas-cnn-cifar10-gpu":   "examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.gpu",
+    "trial-enas-cnn-cifar10-cpu":   "examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.cpu",
+    "trial-darts-cnn-cifar10":      "examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile",
 }
 
 # Dict with Katib Experiments to run during the test.

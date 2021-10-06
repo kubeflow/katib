@@ -14,7 +14,7 @@ To support DARTS in current Katib functionality the implementation follows this 
 
 2. Suggestion returns algorithm settings, number of layers and set of primitives to Katib Controller
 
-3. Katib controller starts [DARTS training container](../../../../../examples/v1beta1/nas/darts-cnn-cifar10)
+3. Katib controller starts [DARTS training container](../../../../../examples/v1beta1/trial-images/darts-cnn-cifar10)
    with appropriate settings and all possible operations.
 
 4. Training container runs DARTS algorithm.

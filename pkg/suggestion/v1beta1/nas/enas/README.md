@@ -1,4 +1,4 @@
-# About the Efficient Neural Architecture Search
+# About the Efficient Neural Architecture Search (ENAS)
 
 The algorithm follows the idea proposed in _Efficient Neural Architecture Search via Parameter Sharing_ by Hieu Pham, Melody Y. Guan, Barret Zoph, Quoc V. Le and Jeff Dean (https://arxiv.org/abs/1802.03268) and _Neural Architecture Search with Reinforcement Learning_ by Barret Zoph and Quoc V. Le (https://arxiv.org/abs/1611.01578).
 

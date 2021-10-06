@@ -1,8 +1,8 @@
 FROM tensorflow/tensorflow:1.15.4-gpu-py3
 
-ENV TARGET_DIR /opt/nas/enas-cnn-cifar10
+ENV TARGET_DIR /opt/enas-cnn-cifar10
 
-ADD examples/v1beta1/nas/enas-cnn-cifar10 ${TARGET_DIR}
+ADD examples/v1beta1/trial-images/enas-cnn-cifar10 ${TARGET_DIR}
 WORKDIR  ${TARGET_DIR}
 
 RUN pip3 install --upgrade pip
