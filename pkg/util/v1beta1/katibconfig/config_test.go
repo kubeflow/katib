@@ -38,11 +38,13 @@ func TestGetSuggestionConfigData(t *testing.T) {
 			katibConfig: func() *katibConfig {
 				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
 				kc.suggestion[testAlgorithmName].ImagePullPolicy = corev1.PullAlways
+				kc.suggestion[testAlgorithmName].Resource = *newFakeCustomResourceRequirements()
 				return kc
 			}(),
 			expected: func() *SuggestionConfig {
 				c := newFakeSuggestionConfig()
 				c.ImagePullPolicy = corev1.PullAlways
+				c.Resource = *newFakeCustomResourceRequirements()
 				return c
 			}(),
 			inputAlgorithmName: testAlgorithmName,
@@ -427,6 +429,29 @@ func setFakeResourceRequirements() *corev1.ResourceRequirements {
 	defaultCPULimit, _ := resource.ParseQuantity(consts.DefaultCPULimit)
 	defaultMemoryLimit, _ := resource.ParseQuantity(consts.DefaultMemLimit)
 	defaultEphemeralStorageLimit, _ := resource.ParseQuantity(consts.DefaultDiskLimit)
+
+	return &corev1.ResourceRequirements{
+		Requests: map[corev1.ResourceName]resource.Quantity{
+			corev1.ResourceCPU:              defaultCPURequest,
+			corev1.ResourceMemory:           defaultMemoryRequest,
+			corev1.ResourceEphemeralStorage: defaultEphemeralStorageRequest,
+		},
+		Limits: map[corev1.ResourceName]resource.Quantity{
+			corev1.ResourceCPU:              defaultCPULimit,
+			corev1.ResourceMemory:           defaultMemoryLimit,
+			corev1.ResourceEphemeralStorage: defaultEphemeralStorageLimit,
+		},
+	}
+}
+
+func newFakeCustomResourceRequirements() *corev1.ResourceRequirements {
+	defaultCPURequest, _ := resource.ParseQuantity("25m")
+	defaultMemoryRequest, _ := resource.ParseQuantity("200Mi")
+	defaultEphemeralStorageRequest, _ := resource.ParseQuantity("550Mi")
+
+	defaultCPULimit, _ := resource.ParseQuantity("250m")
+	defaultMemoryLimit, _ := resource.ParseQuantity("2Gi")
+	defaultEphemeralStorageLimit, _ := resource.ParseQuantity("15Gi")
 
 	return &corev1.ResourceRequirements{
 		Requests: map[corev1.ResourceName]resource.Quantity{
