@@ -445,24 +445,24 @@ func setFakeResourceRequirements() *corev1.ResourceRequirements {
 }
 
 func newFakeCustomResourceRequirements() *corev1.ResourceRequirements {
-	defaultCPURequest, _ := resource.ParseQuantity("25m")
-	defaultMemoryRequest, _ := resource.ParseQuantity("200Mi")
-	defaultEphemeralStorageRequest, _ := resource.ParseQuantity("550Mi")
+	customCPURequest, _ := resource.ParseQuantity("25m")
+	customMemoryRequest, _ := resource.ParseQuantity("200Mi")
+	customEphemeralStorageRequest, _ := resource.ParseQuantity("550Mi")
 
-	defaultCPULimit, _ := resource.ParseQuantity("250m")
-	defaultMemoryLimit, _ := resource.ParseQuantity("2Gi")
-	defaultEphemeralStorageLimit, _ := resource.ParseQuantity("15Gi")
+	customCPULimit, _ := resource.ParseQuantity("250m")
+	customMemoryLimit, _ := resource.ParseQuantity("2Gi")
+	customEphemeralStorageLimit, _ := resource.ParseQuantity("15Gi")
 
 	return &corev1.ResourceRequirements{
 		Requests: map[corev1.ResourceName]resource.Quantity{
-			corev1.ResourceCPU:              defaultCPURequest,
-			corev1.ResourceMemory:           defaultMemoryRequest,
-			corev1.ResourceEphemeralStorage: defaultEphemeralStorageRequest,
+			corev1.ResourceCPU:              customCPURequest,
+			corev1.ResourceMemory:           customMemoryRequest,
+			corev1.ResourceEphemeralStorage: customEphemeralStorageRequest,
 		},
 		Limits: map[corev1.ResourceName]resource.Quantity{
-			corev1.ResourceCPU:              defaultCPULimit,
-			corev1.ResourceMemory:           defaultMemoryLimit,
-			corev1.ResourceEphemeralStorage: defaultEphemeralStorageLimit,
+			corev1.ResourceCPU:              customCPULimit,
+			corev1.ResourceMemory:           customMemoryLimit,
+			corev1.ResourceEphemeralStorage: customEphemeralStorageLimit,
 		},
 	}
 }
