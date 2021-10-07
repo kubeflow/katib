@@ -118,11 +118,11 @@ class BaseSkoptService(object):
 
         return_trial_list = []
 
-        for i in range(request_number):
-            skopt_suggested = self.skopt_optimizer.ask()
-            logger.info("New suggested parameters for Trial: {}".format(skopt_suggested))
+        skopt_suggested = self.skopt_optimizer.ask(n_points = request_number)
+        for suggestion in skopt_suggested:
+            logger.info("New suggested parameters for Trial: {}".format(suggestion))
             return_trial_list.append(
-                BaseSkoptService.convert(self.search_space, skopt_suggested))
+                BaseSkoptService.convert(self.search_space, suggestion))
 
         logger.info("GetSuggestions return {} new Trials\n\n".format(request_number))
         return return_trial_list
