@@ -1,11 +1,8 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AddParamModalComponent } from '../add-modal/add-modal.component';
-import {
-  FeasibleSpaceMinMax,
-  ParameterType,
-} from 'src/app/models/experiment.k8s.model';
+import { ParameterType } from 'src/app/models/experiment.k8s.model';
 
 @Component({
   selector: 'app-shared-parameter',
@@ -13,7 +10,7 @@ import {
   styleUrls: ['./parameter.component.scss'],
 })
 export class ParameterComponent implements OnInit {
-  @Input() paramCtrl: AbstractControl;
+  @Input() paramFormGroup: FormGroup;
   @Output() delete = new EventEmitter<boolean>();
 
   constructor(private dialog: MatDialog) {}
@@ -21,7 +18,7 @@ export class ParameterComponent implements OnInit {
   ngOnInit() {}
 
   get isListValue() {
-    if (!this.paramCtrl) {
+    if (!this.paramFormGroup) {
       return false;
     }
 
@@ -29,23 +26,23 @@ export class ParameterComponent implements OnInit {
   }
 
   get name(): string {
-    return this.paramCtrl.get('name').value;
+    return this.paramFormGroup.get('name').value;
   }
 
   get type(): ParameterType {
-    return this.paramCtrl.get('parameterType').value;
+    return this.paramFormGroup.get('parameterType').value;
   }
 
   get min() {
-    return this.paramCtrl.get('feasibleSpace').value.min;
+    return this.paramFormGroup.get('feasibleSpace').value.min;
   }
 
   get max() {
-    return this.paramCtrl.get('feasibleSpace').value.max;
+    return this.paramFormGroup.get('feasibleSpace').value.max;
   }
 
   get step() {
-    return this.paramCtrl.get('feasibleSpace').value.step;
+    return this.paramFormGroup.get('feasibleSpace').value.step;
   }
 
   get stepSign() {
@@ -61,7 +58,7 @@ export class ParameterComponent implements OnInit {
   }
 
   get listValue(): any[] {
-    return this.paramCtrl.get('feasibleSpace').value.list;
+    return this.paramFormGroup.get('feasibleSpace').value.list;
   }
 
   get listStr() {
@@ -70,19 +67,20 @@ export class ParameterComponent implements OnInit {
 
   editParam() {
     const sub = this.dialog
-      .open(AddParamModalComponent, { data: this.paramCtrl })
+      .open(AddParamModalComponent, { data: this.paramFormGroup })
       .afterClosed()
       .subscribe(group => {
         sub.unsubscribe();
 
         if (group) {
-          this.paramCtrl.get('name').setValue(group.get('name').value);
-          this.paramCtrl
+          this.paramFormGroup.get('name').setValue(group.get('name').value);
+          this.paramFormGroup
             .get('parameterType')
             .setValue(group.get('parameterType').value);
-          this.paramCtrl
-            .get('feasibleSpace')
-            .setValue(group.get('feasibleSpace').value);
+          this.paramFormGroup.setControl(
+            'feasibleSpace',
+            group.get('feasibleSpace'),
+          );
         }
       });
   }
