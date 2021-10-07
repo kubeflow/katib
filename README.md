@@ -178,7 +178,7 @@ katib-mysql-7894994f88-5d4s5        1/1     Running     0          36s
 katib-ui-5767cfccdc-pwg2x           1/1     Running     0          36s
 ```
 
-For the Katib Experiments check the [complete examples list](examples).
+For the Katib Experiments check the [complete examples list](./examples/v1beta1).
 
 # Documentation
 

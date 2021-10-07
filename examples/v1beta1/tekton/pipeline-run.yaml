@@ -5,7 +5,7 @@
 # Number of training examples is transferred to the second Task.
 # Second Task is the actual training which metrics collector sidecar is injected.
 # Note that for this example Tekton controller's nop image must be equal to StdOut metrics collector image.
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow

@@ -1,6 +1,6 @@
 # This is example with median stopping early stopping rule.
 # It has bad feasible space for learning rate to show more early stopped Trials.
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow

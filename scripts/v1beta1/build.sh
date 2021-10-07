@@ -106,10 +106,10 @@ docker build -t ${REGISTRY}/earlystopping-medianstop:${TAG} -f ${CMD_PREFIX}/ear
 echo -e "\nBuilding training container images..."
 
 echo -e "\nBuilding mxnet mnist training container example...\n"
-docker build -t ${REGISTRY}/mxnet-mnist:${TAG} -f examples/${VERSION}/mxnet-mnist/Dockerfile .
+docker build -t ${REGISTRY}/mxnet-mnist:${TAG} -f examples/${VERSION}/trial-images/mxnet-mnist/Dockerfile .
 
 echo -e "\nBuilding PyTorch mnist training container example...\n"
-docker build -t ${REGISTRY}/pytorch-mnist:${TAG} -f examples/${VERSION}/pytorch-mnist/Dockerfile .
+docker build -t ${REGISTRY}/pytorch-mnist:${TAG} -f examples/${VERSION}/trial-images/pytorch-mnist/Dockerfile .
 
 echo -e "\nBuilding Keras CIFAR-10 CNN training container example for ENAS with GPU support...\n"
 docker build -t ${REGISTRY}/enas-cnn-cifar10-gpu:${TAG} -f examples/${VERSION}/nas/enas-cnn-cifar10/Dockerfile.gpu .

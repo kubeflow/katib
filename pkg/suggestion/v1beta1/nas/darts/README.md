@@ -10,18 +10,18 @@ The algorithm addresses the scalability challenge of architecture search by form
 
 To support DARTS in current Katib functionality the implementation follows this way:
 
-1. DARTS Suggestion service creates set of primitive operations from the Experiment search space. For example: `['separable_convolution_3x3', 'dilated_convolution_3x3', 'dilated_convolution_5x5', 'avg_pooling_3x3', 'max_pooling_3x3', 'skip_connection']`.
+1. [DARTS Suggestion service](./) creates set of primitive operations from the Experiment search space. For example: `['separable_convolution_3x3', 'dilated_convolution_3x3', 'dilated_convolution_5x5', 'avg_pooling_3x3', 'max_pooling_3x3', 'skip_connection']`.
 
 2. Suggestion returns algorithm settings, number of layers and set of primitives to Katib Controller
 
-3. Katib controller starts training container with appropriate settings and all possible operations.
+3. Katib controller starts [DARTS training container](../../../../../examples/v1beta1/trial-images/darts-cnn-cifar10)
+   with appropriate settings and all possible operations.
 
 4. Training container runs DARTS algorithm.
 
 5. Metrics collector saves Best Genotype from the training container log.
 
-Experiment example you can find [here](https://github.com/kubeflow/katib/blob/master/examples/v1beta1/nas/darts-example-gpu.yaml).
-You can find DARTS Suggestion service source code [here](https://github.com/kubeflow/katib/tree/master/pkg/suggestion/v1beta1/nas/darts) and DARTS training container implementation [here](https://github.com/kubeflow/katib/tree/master/examples/v1beta1/nas/darts-cnn-cifar10).
+DARTS Experiment example you can find [here](../../../../../examples/v1beta1/nas/darts-gpu.yaml).
 
 ### Best Genotype representation
 

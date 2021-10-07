@@ -1934,7 +1934,7 @@ func schema_apis_controller_trials_v1beta1_TrialSpec(ref common.ReferenceCallbac
 					},
 					"runSpec": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Raw text for the trial run spec. This can be any generic Kubernetes runtime object. The trial operator should create the resource as written, and let the corresponding resource controller (e.g. tf-operator) handle the rest.",
+							Description: "Raw text for the trial run spec. This can be any generic Kubernetes runtime object. The trial operator should create the resource as written, and let the corresponding resource controller (e.g. Kubeflow Training Operator) handle the rest.",
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"),
 						},
 					},
