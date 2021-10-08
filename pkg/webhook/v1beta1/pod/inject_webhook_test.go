@@ -67,9 +67,8 @@ func TestWrapWorkerContainer(t *testing.T) {
 				},
 			},
 			PrimaryContainerName: primaryContainer,
-			PrimaryPodLabels:     experimentsv1beta1.DefaultKubeflowJobPrimaryPodLabels,
-			SuccessCondition:     experimentsv1beta1.DefaultKubeflowJobSuccessCondition,
-			FailureCondition:     experimentsv1beta1.DefaultKubeflowJobFailureCondition,
+			SuccessCondition:     experimentsv1beta1.DefaultJobSuccessCondition,
+			FailureCondition:     experimentsv1beta1.DefaultJobFailureCondition,
 		},
 	}
 

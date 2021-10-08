@@ -54,6 +54,7 @@ rules:
       - pytorchjobs
       - mpijobs
       - xgboostjobs
+      - mxjobs
     verbs:
       - "*"
 ---

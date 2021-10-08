@@ -1089,8 +1089,8 @@ func newFakeTrialTemplate(trialJob interface{}, trialParameters []experimentsv1b
 
 	return &experimentsv1beta1.TrialTemplate{
 		PrimaryContainerName: "training-container",
-		SuccessCondition:     experimentsv1beta1.DefaultKubeflowJobSuccessCondition,
-		FailureCondition:     experimentsv1beta1.DefaultKubeflowJobFailureCondition,
+		SuccessCondition:     experimentsv1beta1.DefaultJobSuccessCondition,
+		FailureCondition:     experimentsv1beta1.DefaultJobFailureCondition,
 		TrialSource: experimentsv1beta1.TrialSource{
 			TrialSpec: trialSpec,
 		},

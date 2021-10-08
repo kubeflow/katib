@@ -458,10 +458,9 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 			},
 			ResumePolicy: experimentsv1beta1.NeverResume,
 			TrialTemplate: &experimentsv1beta1.TrialTemplate{
-				PrimaryPodLabels:     experimentsv1beta1.DefaultKubeflowJobPrimaryPodLabels,
 				PrimaryContainerName: primaryContainer,
-				SuccessCondition:     experimentsv1beta1.DefaultKubeflowJobSuccessCondition,
-				FailureCondition:     experimentsv1beta1.DefaultKubeflowJobFailureCondition,
+				SuccessCondition:     experimentsv1beta1.DefaultJobSuccessCondition,
+				FailureCondition:     experimentsv1beta1.DefaultJobFailureCondition,
 				TrialParameters: []experimentsv1beta1.TrialParameterSpec{
 					{
 						Name:        "learningRate",
